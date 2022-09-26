@@ -9,9 +9,13 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@tanstack/react-query": "^4.6.1",
     "antd": "^4.23.2",
+    "axios": "^0.27.2",
     "knex": "^2.3.0",
     "next": "12.3.1",
+    "next-auth": "^4.12.0",
+    "next-connect": "^0.13.0",
     "next-plugin-antd-less": "^1.8.0",
     "objection": "^3.0.1",
     "pg": "^8.8.0",
