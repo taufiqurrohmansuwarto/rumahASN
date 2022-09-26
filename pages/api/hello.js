@@ -1,5 +1,7 @@
-// Next.js API route support: https://nextjs.org/docs/api-routes/introduction
+import { createRouter } from "next-connect";
 
-export default function handler(req, res) {
-  res.status(200).json({ name: 'John Doe' })
-}
+const router = createRouter();
+
+router.get();
+
+export default router.handler({});

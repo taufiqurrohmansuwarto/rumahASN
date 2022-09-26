@@ -1,7 +1,43 @@
 /** @type {import('next').NextConfig} */
 const withAntdLess = require("next-plugin-antd-less");
 
+const isProd = process.env.NODE_ENV === "production";
+
+function getBasePath() {
+  var basePath = "";
+
+  if (isProd && process.env.BASE_PATH) {
+    if (process.env.BASE_PATH.startsWith("/")) {
+      basePath = process.env.BASE_PATH;
+    } else {
+      basePath = "/" + process.env.BASE_PATH;
+    }
+  }
+
+  return basePath;
+}
+
+const hashOnlyIdent = (context, _, exportName) =>
+  loaderUtils
+    .getHashDigest(
+      Buffer.from(
+        `filePath:${path
+          .relative(context.rootContext, context.resourcePath)
+          .replace(/\\+/g, "/")}#className:${exportName}`
+      ),
+      "md4",
+      "base64",
+      6
+    )
+    .replace(/^(-?\d|--)/, "_$1");
+
 module.exports = withAntdLess({
+  experimental: {},
+  poweredByHeader: false,
+  basePath: "/helpdesk",
+  publicRuntimeConfig: {
+    basePath: getBasePath(),
+  },
   modifyVars: { "@primary-color": "#04f" }, // optional
   lessVarsFilePath: "./src/styles/variables.less", // optional
   lessVarsFilePathAppendToEndOfContent: false, // optional
@@ -28,7 +64,26 @@ module.exports = withAntdLess({
 
   // Other Config Here...
 
-  webpack(config) {
+  webpack(config, { buildId, dev, isServer, defaultLoaders, webpack }) {
+    const rules = config.module.rules
+      .find((rule) => typeof rule.oneOf === "object")
+      .oneOf.filter((rule) => Array.isArray(rule.use));
+
+    if (isProd)
+      rules.forEach((rule) => {
+        rule.use.forEach((moduleLoader) => {
+          if (
+            moduleLoader.loader?.includes("css-loader") &&
+            !moduleLoader.loader?.includes("postcss-loader")
+          )
+            moduleLoader.options.modules.getLocalIdent = hashOnlyIdent;
+
+          // earlier below statements were sufficient:
+          // delete moduleLoader.options.modules.getLocalIdent;
+          // moduleLoader.options.modules.localIdentName = '[hash:base64:6]';
+        });
+      });
+
     return config;
   },
 });
