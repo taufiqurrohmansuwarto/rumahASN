@@ -1,9 +1,13 @@
-import { Button } from "antd";
+import { Input } from "antd";
+import Layout from "../src/components/Layout";
+import PageContainer from "../src/components/PageContainer";
 
 export default function Home() {
   return (
-    <>
-      <Button>Hello world</Button>
-    </>
+    <Layout>
+      <PageContainer title="Hello world" subTitle="tes">
+        <Input />
+      </PageContainer>
+    </Layout>
   );
 }
