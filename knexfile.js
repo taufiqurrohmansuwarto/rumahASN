@@ -4,6 +4,8 @@
  * @type { Object.<string, import("knex").Knex.Config> }
  */
 
+require("dotenv").config();
+
 const connection = {
   database: process.env.DATABASE,
   user: process.env.USER,

@@ -49,20 +49,6 @@ function Layout({ children }) {
           width: "331px",
         },
       ]}
-      avatarProps={{
-        src: "https://gw.alipayobjects.com/zos/antfincdn/efFD%24IOql2/weixintupian_20170331104822.jpg",
-        shape: "circlel",
-        size: "small",
-        title: (
-          <div
-            style={{
-              color: "#dfdfdf",
-            }}
-          >
-            七妮妮
-          </div>
-        ),
-      }}
       actionsRender={(props) => {
         if (props.isMobile) return [];
         return [];
