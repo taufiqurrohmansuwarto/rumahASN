@@ -1,0 +1,48 @@
+status (usulan, dikerjakan, diberhentikan, selesai)
+id
+name
+color
+
+
+categories (siasn, dll)
+id
+name
+color
+
+priorities (low, middle, urgent)
+id
+name
+color
+
+ticket_it ()
+id
+subject
+content
+html
+status_id
+priority_id
+user_id
+worker (id)
+category_id
+created_at
+update_at
+completed_at
+
+ticket_it_comments()
+id
+content
+user_id
+ticket_id
+created_at
+updated_at
+content
+html
+
+
+
+
+
+
+
+
+
