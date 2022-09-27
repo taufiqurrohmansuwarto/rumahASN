@@ -4,11 +4,14 @@ import {
   QueryClientProvider,
 } from "@tanstack/react-query";
 import { useState } from "react";
-import { SessionProvider } from "next-auth/react";
+import { SessionProvider, useSession } from "next-auth/react";
 import { ConfigProvider } from "antd";
 import id from "antd/lib/locale/id_ID";
 
+// check user role and organization start with 123
 function Auth({ children, roles }) {
+  const { data, status } = useSession();
+
   return <>{children}</>;
 }
 
