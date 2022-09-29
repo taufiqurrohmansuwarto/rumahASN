@@ -31,7 +31,7 @@ const upsertUser = async (currentUser) => {
       role,
       image,
       id: currentUserId,
-      custom_id: currentUserId,
+      custom_id: currentUser?.id,
       username,
       employee_number,
       email,
