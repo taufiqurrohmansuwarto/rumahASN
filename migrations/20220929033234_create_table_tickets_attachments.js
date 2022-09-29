@@ -16,7 +16,7 @@ exports.up = function (knex) {
   });
 };
 
-/**
+/*</void>*
  * @param { import("knex").Knex } knex
  * @returns { Promise<void> }
  */
