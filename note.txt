@@ -30,7 +30,6 @@ completed_at
 
 ticket_it_comments()
 id
-content
 user_id
 ticket_id
 created_at
