@@ -5,8 +5,12 @@ const ability = (user) => {
     // there is 3 roles: admin, agent, user
     if (user.role === "admin") {
       can("manage", "all");
-    } else {
-      can("read", "all");
+    } else if (user.role === "agent") {
+      can("manage", "tickets");
+      can("manage", "feeds");
+    } else if (user.role === "user") {
+      can("manage", "feeds");
+      can("manage", "tickets");
     }
   });
 };

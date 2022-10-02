@@ -1,23 +1,17 @@
-import { Button, Input } from "antd";
-import { signIn, signOut, useSession } from "next-auth/react";
-import Layout from "../src/components/Layout";
-import PageContainer from "../src/components/PageContainer";
+import { signIn, useSession } from "next-auth/react";
+import { useRouter } from "next/router";
 
 export default function Home() {
-  const handleSignin = () => {
-    signIn("user");
-  };
+  const router = useRouter();
 
-  const { data } = useSession();
+  const { status, data } = useSession({
+    required: true,
+    onUnauthenticated: () => signIn(),
+  });
 
-  return (
-    <Layout>
-      <PageContainer title="Hello world" subTitle="tes">
-        <Input />
-        {JSON.stringify(data)}
-        <Button onClick={handleSignin}>Hello</Button>
-        <Button onClick={signOut}>Logout</Button>
-      </PageContainer>
-    </Layout>
-  );
+  if (status === "authenticated") {
+    router.push("/feeds");
+  }
+
+  return null;
 }

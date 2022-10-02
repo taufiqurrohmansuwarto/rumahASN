@@ -7,12 +7,25 @@ import { useState } from "react";
 import { SessionProvider, useSession } from "next-auth/react";
 import { ConfigProvider } from "antd";
 import id from "antd/lib/locale/id_ID";
+import ability from "../utils/ability";
 
 // check user role and organization start with 123
-function Auth({ children, roles }) {
+function Auth({ children, action, subject }) {
   const { data, status } = useSession();
 
-  return <>{children}</>;
+  if (status === "loading") {
+    return <div>loading..</div>;
+  } else {
+    if (!data?.user) return <div>Not Authorized</div>;
+    const userAbility = ability(data?.user);
+    const isAllowed = userAbility.can(action, subject);
+
+    if (isAllowed) {
+      return children;
+    } else {
+      return <div>Not Authorized</div>;
+    }
+  }
 }
 
 function MyApp({ Component, pageProps: { session, ...pageProps } }) {

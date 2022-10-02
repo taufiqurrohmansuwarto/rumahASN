@@ -54,7 +54,7 @@ const upsertUser = async (currentUser) => {
 export default NextAuth({
   providers: [
     {
-      name: "user",
+      name: "USER",
       id: "helpdesk-user",
       type: "oauth",
       wellKnown: userWellknown,
