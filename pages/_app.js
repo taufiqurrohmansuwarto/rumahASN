@@ -17,7 +17,8 @@ function Auth({ children, action, subject }) {
     return <div>loading..</div>;
   } else {
     if (!data?.user) return <div>Not Authorized</div>;
-    const userAbility = ability(data?.user);
+    const role = data?.current_role;
+    const userAbility = ability(role);
     const isAllowed = userAbility.can(action, subject);
 
     if (isAllowed) {
@@ -42,7 +43,12 @@ function MyApp({ Component, pageProps: { session, ...pageProps } }) {
         <ConfigProvider locale={id}>
           <Hydrate>
             {Component.Auth ? (
-              <Auth>{getLayout(<Component {...pageProps} />)}</Auth>
+              <Auth
+                subject={Component?.Auth?.subject}
+                action={Component?.Auth?.action}
+              >
+                {getLayout(<Component {...pageProps} />)}
+              </Auth>
             ) : (
               <Component {...pageProps} />
             )}

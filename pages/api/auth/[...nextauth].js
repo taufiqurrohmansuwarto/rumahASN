@@ -41,11 +41,12 @@ const upsertUser = async (currentUser) => {
       last_login: new Date(),
     };
 
-    await User.query()
+    const result = await User.query()
       .insert(data)
       .onConflict("custom_id")
       .merge(data)
       .returning("*");
+    return result;
   } catch (error) {
     console.log(error);
   }
@@ -85,8 +86,11 @@ export default NextAuth({
           organization_id: profile.organization_id || null,
         };
 
-        await upsertUser(currentUser);
-        return currentUser;
+        const result = await upsertUser(currentUser);
+
+        const data = { ...currentUser, current_role: result?.current_role };
+
+        return data;
       },
     },
   ],
@@ -105,6 +109,7 @@ export default NextAuth({
       session.user.group = token?.group;
       session.user.employee_number = token?.employee_number;
       session.user.organization_id = token?.organization_id;
+      session.current_role = token?.current_role;
 
       const check = Date.now() < new Date(token?.expires * 1000);
 
@@ -115,13 +120,13 @@ export default NextAuth({
     async jwt({ token, account, isNewUser, profile, user }) {
       if (account) {
         token.accessToken = account?.access_token;
-
         token.expires = profile.exp;
         token.id = account?.providerAccountId;
         token.role = profile?.role;
         token.group = profile?.group;
         token.employee_number = profile?.employee_number;
         token.organization_id = profile?.organization_id;
+        token.current_role = user?.current_role;
       }
 
       return token;
