@@ -109,6 +109,7 @@ export default NextAuth({
       session.user.group = token?.group;
       session.user.employee_number = token?.employee_number;
       session.user.organization_id = token?.organization_id;
+      session.user.name = token?.username;
       session.current_role = token?.current_role;
 
       const check = Date.now() < new Date(token?.expires * 1000);
@@ -121,6 +122,7 @@ export default NextAuth({
       if (account) {
         token.accessToken = account?.access_token;
         token.expires = profile.exp;
+        token.username = profile?.name;
         token.id = account?.providerAccountId;
         token.role = profile?.role;
         token.group = profile?.group;

@@ -8,6 +8,7 @@ import { SessionProvider, useSession } from "next-auth/react";
 import { ConfigProvider } from "antd";
 import id from "antd/lib/locale/id_ID";
 import ability from "../utils/ability";
+import "antd/dist/antd.css";
 
 // check user role and organization start with 123
 function Auth({ children, action, subject }) {
