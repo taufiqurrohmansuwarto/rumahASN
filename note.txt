@@ -41,7 +41,17 @@ html
 
 
 
+requirements
 
+user : 
+- user dapat membuat tickets 
+- user (pembuat tiket) dapat menghapus ticket ketika status tiket masih belum diapa-apakan
+- user (pembuat tiket) dapat mengupdate ticket ketika status tiket masih belum diapa-apkan
+- user (pembuat tiket) dapat memberikan rating setetlah status tiket sudah selesai
+- user (siapapun) dapat memberikan komentar ke tiket
 
+admin
+- crud kategori
+- crud 
 
 
