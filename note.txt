@@ -45,13 +45,26 @@ requirements
 
 user : 
 - user dapat membuat tickets 
+- user (pembuat tiket) dapat mencari tiket berdasarkan tanggal/kategori dan kode tiket dengan paging 
 - user (pembuat tiket) dapat menghapus ticket ketika status tiket masih belum diapa-apakan
 - user (pembuat tiket) dapat mengupdate ticket ketika status tiket masih belum diapa-apkan
 - user (pembuat tiket) dapat memberikan rating setetlah status tiket sudah selesai
-- user (siapapun) dapat memberikan komentar ke tiket
+- user (siapapun) dapat memberikan komentar ke tiket yang sudah selesai
 
 admin
-- crud kategori
-- crud 
+- extend user
+- crud kategori, priorities, status
+- menambah role untuk user
+- dashboard
+- mendownload daftar tiket per kategori/tanggal berupa excel
+- dapat memilih agent untuk pengerjaan 
+- dapat melihat semua tiket dengan filter status/kategori/tanggal
+
+agent
+- extend user
+- agent dapat merubah status dari tikcet menjadi dikerjakan / selesai
+- agent dapat memfilter tiket pekerjaan sesuai dengan pilihan agentnya 
+
+
 
 
