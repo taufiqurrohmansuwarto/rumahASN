@@ -64,7 +64,24 @@ agent
 - extend user
 - agent dapat merubah status dari tikcet menjadi dikerjakan / selesai
 - agent dapat memfilter tiket pekerjaan sesuai dengan pilihan agentnya 
+- agent dapat menambahkan/mengupdate/dan menghapus agent lain untuk menyelesaikan masalah
+- agent dapat menambahkan/mengupdate/dan menghapus file dan komentar untuk tiket yang sudah di eksekusi
 
 
 
+tambahan database
 
+- tickets_agents
+ticket_id
+user_id
+role
+
+
+- tickets_comments
+ticket_id
+user_id
+role [agent, user]
+comment_html
+comment_text
+created_at
+updated_at
