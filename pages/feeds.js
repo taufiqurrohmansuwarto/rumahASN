@@ -6,8 +6,8 @@ function Feeds() {
   const { data, status } = useSession();
   return (
     <div>
+      <p>tempat orang2 komentar</p>
       {JSON.stringify(data?.user)}
-
       <Button onClick={() => signOut()}>Logout</Button>
     </div>
   );

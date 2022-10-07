@@ -82,3 +82,5 @@ comment_html
 comment_text
 created_at
 updated_at
+
+**tambah pengumuman sesuatu lah

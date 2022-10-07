@@ -18,8 +18,13 @@ function Auth({ children, action, subject }) {
     return <div>loading..</div>;
   } else {
     if (!data?.user) return <div>Not Authorized</div>;
-    const role = data?.current_role;
-    const userAbility = ability(role);
+    const user = {
+      id: data?.user?.id,
+      current_role: data?.current_role,
+      organization: data?.user?.organization_id,
+    };
+
+    const userAbility = ability(user);
     const isAllowed = userAbility.can(action, subject);
 
     if (isAllowed) {

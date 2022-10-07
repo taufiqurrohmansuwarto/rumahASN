@@ -1,8 +1,9 @@
-import { SmileOutlined } from "@ant-design/icons";
 import { useSession } from "next-auth/react";
 import dynamic from "next/dynamic";
+import Link from "next/link";
 import { useRouter } from "next/router";
 import React from "react";
+import { userRoutes } from "../routes";
 import PageContainer from "./PageContainer";
 
 const ProLayout = dynamic(
@@ -12,8 +13,13 @@ const ProLayout = dynamic(
   }
 );
 
-const routes = {
-  routes: [{ path: "/feeds", name: "test", icon: <SmileOutlined /> }],
+// when click menu, it will redirect to the page
+const menuItemRender = (options, element) => {
+  return (
+    <Link href={`${options.path}`}>
+      <a>{element}</a>
+    </Link>
+  );
 };
 
 function Layout({ children }) {
@@ -29,7 +35,8 @@ function Layout({ children }) {
         size: "default",
         title: data?.user?.name,
       }}
-      route={routes}
+      menuItemRender={menuItemRender}
+      route={userRoutes}
       loading={status === "loading"}
     >
       <PageContainer>{children}</PageContainer>

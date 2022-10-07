@@ -1,7 +1,7 @@
 import { defineAbility } from "@casl/ability";
 
 const ability = (user) => {
-  const { role } = user;
+  const { current_role: role, id: userId } = user;
   return defineAbility((can, cannot) => {
     // there is 3 roles: admin, agent, user
     if (role === "admin") {
@@ -10,12 +10,7 @@ const ability = (user) => {
       can("manage", "Tickets");
       can("manage", "Feeds");
     } else if (role === "user") {
-      can(
-        "manage",
-        "Tickets",
-        { user_id: req.user.userId },
-        { status: "open" }
-      );
+      can("manage", "Tickets", { user_id: userId }, { status: "open" });
       can("manage", "Feeds");
     }
   });
