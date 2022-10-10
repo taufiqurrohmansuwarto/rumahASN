@@ -1,6 +1,7 @@
 import { Button } from "antd";
 import { useRouter } from "next/router";
 import Layout from "../../src/components/Layout";
+import PageContainer from "../../src/components/PageContainer";
 
 const Tickets = () => {
   const router = useRouter();
@@ -10,11 +11,11 @@ const Tickets = () => {
   };
 
   return (
-    <div>
+    <PageContainer>
       <h1>ticket</h1>
       <Button onClick={createTicket}>Create</Button>
       <p>list tikect/ada fitlernya</p>
-    </div>
+    </PageContainer>
   );
 };
 
