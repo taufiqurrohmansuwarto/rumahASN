@@ -1,8 +1,16 @@
+import { nanoid } from "nanoid";
+
 const { Model } = require("objection");
 const knex = require("../db");
 Model.knex(knex);
 
 class Tickets extends Model {
+  // add ticket number using nanoid in beforeinsert
+
+  $beforeInsert() {
+    this.ticket_number = nanoid(5);
+  }
+
   static get tableName() {
     return "tickets";
   }

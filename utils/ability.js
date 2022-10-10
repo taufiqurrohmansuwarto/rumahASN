@@ -1,9 +1,8 @@
 import { defineAbility } from "@casl/ability";
 
 const ability = (user) => {
-  const { current_role: role, id: userId, organization_id } = user;
-  // check if organization_id first string is 123
-  const bkd = organization_id?.startsWith("123");
+  const { current_role: role, id: userId, organization } = user;
+  const bkd = organization?.startsWith("123");
 
   return defineAbility((can, cannot) => {
     // there is 3 roles: admin, agent, user
@@ -13,7 +12,7 @@ const ability = (user) => {
       can("manage", "Tickets");
       can("manage", "Feeds");
     } else if (role === "user") {
-      can("manage", "Tickets", { user_id: userId }, { status: "open" });
+      can("manage", "Tickets");
       can("manage", "Feeds");
     }
   });

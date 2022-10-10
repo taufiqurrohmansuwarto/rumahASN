@@ -1,19 +1,15 @@
 import { Button } from "antd";
 import { signOut, useSession } from "next-auth/react";
 import Layout from "../src/components/Layout";
-import { Can } from "../src/context/Can";
+import PageContainer from "../src/components/PageContainer";
 
 function Feeds() {
   const { data, status } = useSession();
   return (
-    <div>
+    <PageContainer>
       <p>tempat orang2 komentar</p>
-      {JSON.stringify(data)}
-      <Can I="create" a="Todo">
-        <Button onClick={() => signOut()}>Sign Out</Button>
-      </Can>
       <Button onClick={() => signOut()}>Logout</Button>
-    </div>
+    </PageContainer>
   );
 }
 

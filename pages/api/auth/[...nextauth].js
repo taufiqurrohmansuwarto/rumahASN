@@ -11,6 +11,25 @@ const userSecret = process.env.USER_SECRET;
 const userWellknown = process.env.USER_WELLKNOWN;
 const userScope = process.env.USER_SCOPE;
 
+// automate fucking update current_role user
+
+const updateUser = async (id) => {
+  try {
+    const currentUser = await User.query().findById(id);
+    const bkd = currentUser?.organization_id?.startsWith("123");
+    const role = currentUser?.current_role;
+
+    if (bkd && role === "user") {
+      await User.query().findById(id).patch({ current_role: "agent" });
+      return User.query().findById(id);
+    } else {
+      return currentUser;
+    }
+  } catch (error) {
+    console.log(error);
+  }
+};
+
 const upsertUser = async (currentUser) => {
   try {
     const [from, currentUserId] = currentUser?.id?.split("|");
@@ -90,7 +109,9 @@ export default NextAuth({
 
         const data = { ...currentUser, current_role: result?.current_role };
 
-        return data;
+        const last = await updateUser(currentUser?.id);
+
+        return { ...data, ...last };
       },
     },
   ],

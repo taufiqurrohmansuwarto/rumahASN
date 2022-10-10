@@ -15,7 +15,7 @@ class User extends Model {
   static get relationMappings() {
     const Role = require("./roles.model");
     return {
-      current_role: {
+      roles: {
         relation: Model.BelongsToOneRelation,
         modelClass: Role,
         join: {

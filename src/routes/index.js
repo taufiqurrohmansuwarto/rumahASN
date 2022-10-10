@@ -1,4 +1,9 @@
-import { SmileOutlined, HomeOutlined, FileOutlined } from "@ant-design/icons";
+import {
+  SmileOutlined,
+  DashboardFilled,
+  HomeOutlined,
+  FileOutlined,
+} from "@ant-design/icons";
 
 export const userRoutes = {
   routes: [
@@ -15,7 +20,14 @@ export const userRoutes = {
 
 export const adminRoutes = {
   routes: [
-    { path: "/tickets", name: "test", icon: <SmileOutlined /> },
-    { path: "/feeds", name: "test", icon: <SmileOutlined /> },
+    { path: "/admin/dashboard", name: "Dashboard", icon: <DashboardFilled /> },
+    { path: "/admin/status", name: "Status", icon: <DashboardFilled /> },
+  ],
+};
+
+export const agentRoutes = {
+  routes: [
+    { path: "/agent/dashboard", name: "Dashboard", icon: <DashboardFilled /> },
+    { path: "/agent/status", name: "Status", icon: <DashboardFilled /> },
   ],
 };

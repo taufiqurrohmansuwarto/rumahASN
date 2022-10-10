@@ -4,7 +4,7 @@ import {
   QueryClientProvider,
 } from "@tanstack/react-query";
 import { useState } from "react";
-import { SessionProvider, useSession } from "next-auth/react";
+import { SessionProvider, signIn, useSession } from "next-auth/react";
 import { ConfigProvider } from "antd";
 import id from "antd/lib/locale/id_ID";
 import ability from "../utils/ability";
@@ -13,7 +13,10 @@ import { AbilityContext } from "../src/context/Can";
 
 // check user role and organization start with 123
 function Auth({ children, action, subject }) {
-  const { data, status } = useSession();
+  const { data, status } = useSession({
+    required: true,
+    onUnauthenticated: () => signIn(),
+  });
 
   if (status === "loading") {
     return <div>loading..</div>;
@@ -34,8 +37,6 @@ function Auth({ children, action, subject }) {
           {children}
         </AbilityContext.Provider>
       );
-    } else {
-      return <div>Not Authorized</div>;
     }
   }
 }
