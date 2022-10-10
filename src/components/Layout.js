@@ -67,31 +67,32 @@ function Layout({ children, active }) {
   const { data, status } = useSession();
   const router = useRouter();
 
+  const token = {
+    colorBgAppListIconHover: "rgba(0,0,0,0.06)",
+    colorTextAppListIconHover: "rgba(255,255,255,0.95)",
+    colorTextAppListIcon: "rgba(255,255,255,0.85)",
+    sider: {
+      colorBgCollapsedButton: "#fff",
+      colorTextCollapsedButtonHover: "rgba(0,0,0,0.65)",
+      colorTextCollapsedButton: "rgba(0,0,0,0.45)",
+      colorMenuBackground: "#004FD9",
+      colorBgMenuItemCollapsedHover: "rgba(0,0,0,0.06)",
+      colorBgMenuItemCollapsedSelected: "rgba(0,0,0,0.15)",
+      colorMenuItemDivider: "rgba(255,255,255,0.15)",
+      colorBgMenuItemHover: "rgba(0,0,0,0.06)",
+      colorBgMenuItemSelected: "rgba(0,0,0,0.15)",
+      colorTextMenuSelected: "#fff",
+      colorTextMenu: "rgba(255,255,255,0.75)",
+      colorTextMenuSecondary: "rgba(255,255,255,0.65)",
+      colorTextMenuTitle: "rgba(255,255,255,0.95)",
+      colorTextMenuActive: "rgba(255,255,255,0.95)",
+      colorTextSubMenuSelected: "#fff",
+    },
+  };
+
   return (
     <ProLayout
       selectedKeys={[active ? active : router.pathname]}
-      token={{
-        colorBgAppListIconHover: "rgba(0,0,0,0.06)",
-        colorTextAppListIconHover: "rgba(255,255,255,0.95)",
-        colorTextAppListIcon: "rgba(255,255,255,0.85)",
-        sider: {
-          colorBgCollapsedButton: "#fff",
-          colorTextCollapsedButtonHover: "rgba(0,0,0,0.65)",
-          colorTextCollapsedButton: "rgba(0,0,0,0.45)",
-          colorMenuBackground: "#004FD9",
-          colorBgMenuItemCollapsedHover: "rgba(0,0,0,0.06)",
-          colorBgMenuItemCollapsedSelected: "rgba(0,0,0,0.15)",
-          colorMenuItemDivider: "rgba(255,255,255,0.15)",
-          colorBgMenuItemHover: "rgba(0,0,0,0.06)",
-          colorBgMenuItemSelected: "rgba(0,0,0,0.15)",
-          colorTextMenuSelected: "#fff",
-          colorTextMenu: "rgba(255,255,255,0.75)",
-          colorTextMenuSecondary: "rgba(255,255,255,0.65)",
-          colorTextMenuTitle: "rgba(255,255,255,0.95)",
-          colorTextMenuActive: "rgba(255,255,255,0.95)",
-          colorTextSubMenuSelected: "#fff",
-        },
-      }}
       title="Testing"
       avatarProps={{
         src: data?.user?.image,

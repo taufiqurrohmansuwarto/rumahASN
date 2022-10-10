@@ -4,13 +4,13 @@ import PageContainer from "../../src/components/PageContainer";
 const Dashboard = () => {
   return (
     <PageContainer>
-      <div>dashboard</div>
+      <div>User Management</div>
     </PageContainer>
   );
 };
 
 Dashboard.getLayout = function getLayout(page) {
-  return <AdminLayout active="/admin/dashboard">{page}</AdminLayout>;
+  return <AdminLayout>{page}</AdminLayout>;
 };
 
 Dashboard.Auth = {

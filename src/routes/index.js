@@ -1,8 +1,12 @@
 import {
+  CarOutlined,
   SmileOutlined,
   DashboardFilled,
   HomeOutlined,
   FileOutlined,
+  SnippetsOutlined,
+  BookOutlined,
+  UserOutlined,
 } from "@ant-design/icons";
 
 export const userRoutes = {
@@ -21,13 +25,42 @@ export const userRoutes = {
 export const adminRoutes = {
   routes: [
     { path: "/admin/dashboard", name: "Dashboard", icon: <DashboardFilled /> },
-    { path: "/admin/status", name: "Status", icon: <DashboardFilled /> },
+
+    {
+      path: "/admin/users-management",
+      name: "User Management",
+      icon: <UserOutlined />,
+    },
+    {
+      path: "/admin/apps-management",
+      name: "App Management",
+      icon: <CarOutlined />,
+    },
+    {
+      path: "/admin/ref",
+      name: "Referensi",
+      icon: <BookOutlined />,
+      routes: [
+        {
+          path: "/admin/ref/status",
+          name: "Status",
+        },
+        {
+          path: "/admin/ref/priorities",
+          name: "Prioritas",
+        },
+        {
+          path: "/admin/ref/categories",
+          name: "Kategori",
+        },
+      ],
+    },
   ],
 };
 
 export const agentRoutes = {
   routes: [
     { path: "/agent/dashboard", name: "Dashboard", icon: <DashboardFilled /> },
-    { path: "/agent/status", name: "Status", icon: <DashboardFilled /> },
+    { path: "/agent/tickets", name: "Tickets", icon: <SnippetsOutlined /> },
   ],
 };

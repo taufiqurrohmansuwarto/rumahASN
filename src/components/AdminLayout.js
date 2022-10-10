@@ -28,7 +28,19 @@ function AdminLayout({ children, active }) {
   return (
     <ProLayout
       selectedKeys={[active ? active : router.pathname]}
-      title="Testing"
+      title="Admin"
+      location={{
+        pathname: router.pathname,
+      }}
+      menuHeaderRender={(logo, title) => (
+        <Link href="/">
+          <a>
+            {logo}
+            {title}
+          </a>
+        </Link>
+      )}
+      menu={{ defaultOpenAll: true }}
       avatarProps={{
         src: data?.user?.image,
         size: "default",
