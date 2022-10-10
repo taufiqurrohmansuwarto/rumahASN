@@ -11,10 +11,8 @@ const Tickets = () => {
   };
 
   return (
-    <PageContainer>
-      <h1>ticket</h1>
-      <Button onClick={createTicket}>Create</Button>
-      <p>list tikect/ada fitlernya</p>
+    <PageContainer title="Tiket" subTitle="Daftar Tiket">
+      <Button onClick={createTicket}>Buat</Button>
     </PageContainer>
   );
 };

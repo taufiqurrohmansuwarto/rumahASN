@@ -5,9 +5,9 @@ import PageContainer from "../src/components/PageContainer";
 
 function Feeds() {
   const { data, status } = useSession();
+
   return (
-    <PageContainer>
-      <p>tempat orang2 komentar</p>
+    <PageContainer title="Beranda" subTitle="Feeds">
       <Button onClick={() => signOut()}>Logout</Button>
     </PageContainer>
   );
