@@ -1,6 +1,6 @@
+import axios from "axios";
 import { getSession } from "next-auth/react";
 const User = require("../models/users.model");
-import axios from "axios";
 
 const auth = async (req, res, next) => {
   try {
@@ -10,12 +10,14 @@ const auth = async (req, res, next) => {
       const customId = data?.user?.id;
 
       const result = await User.query().where("custom_id", customId).first();
-      req.user = {
+      const currentUser = {
         ...data?.user,
         userId: parseInt(userId),
         customId,
         current_role: result?.current_role,
       };
+
+      req.user = currentUser;
 
       req.fetcher = axios.create({
         baseURL: process.env.APIGATEWAY_URL,

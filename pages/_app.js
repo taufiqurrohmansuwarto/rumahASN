@@ -9,6 +9,7 @@ import { ConfigProvider } from "antd";
 import id from "antd/lib/locale/id_ID";
 import ability from "../utils/ability";
 import "antd/dist/antd.css";
+import { AbilityContext } from "../src/context/Can";
 
 // check user role and organization start with 123
 function Auth({ children, action, subject }) {
@@ -20,7 +21,7 @@ function Auth({ children, action, subject }) {
     if (!data?.user) return <div>Not Authorized</div>;
     const user = {
       id: data?.user?.id,
-      current_role: data?.current_role,
+      current_role: data?.user?.current_role,
       organization: data?.user?.organization_id,
     };
 
@@ -28,7 +29,11 @@ function Auth({ children, action, subject }) {
     const isAllowed = userAbility.can(action, subject);
 
     if (isAllowed) {
-      return children;
+      return (
+        <AbilityContext.Provider value={ability(user)}>
+          {children}
+        </AbilityContext.Provider>
+      );
     } else {
       return <div>Not Authorized</div>;
     }
