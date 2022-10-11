@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { Avatar, Button, Card, Table } from "antd";
+import { Avatar, Button, Card, Input, Table } from "antd";
 import { useState } from "react";
 import { getUsers } from "../../services";
 import AdminLayout from "../../src/components/AdminLayout";
@@ -36,20 +36,32 @@ const columns = [
 ];
 
 const Dashboard = () => {
-  const { data, isLoading } = useQuery(["users"], () => getUsers());
   const [query, setQuery] = useState({
     page: 1,
     limit: 10,
     search: "",
-    sort: "username",
-    order: "asc",
   });
+
+  const { data, isLoading } = useQuery(["users"], () => getUsers(query));
+  const [visible, setVisible] = useState(false);
 
   return (
     <PageContainer>
       <div>{JSON.stringify(data)}</div>
       <Card>
         <Table
+          title={() => (
+            <Input.Search
+              value={query?.search}
+              onChange={(e) => {
+                setQuery({
+                  ...query,
+                  search: e?.target?.value,
+                });
+              }}
+            />
+          )}
+          rowKey={(row) => row?.custom_id}
           dataSource={data?.data}
           columns={columns}
           loading={isLoading}

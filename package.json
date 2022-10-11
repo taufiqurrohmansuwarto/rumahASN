@@ -29,6 +29,7 @@
     "next-plugin-antd-less": "^1.8.0",
     "objection": "^3.0.1",
     "pg": "^8.8.0",
+    "query-string": "^7.1.1",
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "react-rte": "^0.16.5"

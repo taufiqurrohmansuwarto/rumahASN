@@ -1,4 +1,5 @@
 import axios from "axios";
+import queryString from "query-string";
 
 const api = axios.create({
   baseURL: "/helpdesk/api",
@@ -26,8 +27,14 @@ export const getStatus = async () => {
 };
 
 // users
-export const getUsers = async () => {
-  return await api.get("/users").then((res) => res.data);
+export const getUsers = async (query) => {
+  // change query to querystring
+  const qs = queryString.stringify(query, {
+    skipNull: true,
+    skipEmptyString: true,
+  });
+
+  return await api.get(`/users?${qs}`).then((res) => res.data);
 };
 
 export const updateUsers = async (id, data) => {

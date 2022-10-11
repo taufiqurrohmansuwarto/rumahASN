@@ -4,9 +4,17 @@ module.exports.index = async (req, res) => {
   try {
     const page = req.query.page || 1;
     const limit = req.query.limit || 50;
+    const search = req.query.search || "";
     // should be pagination and searching
     const users = await User.query()
       .where("organization_id", "ilike", "123%")
+      .andWhere((builder) => {
+        if (search) {
+          builder
+            .where("username", "ilike", `%${search}%`)
+            .orWhere("employee_number", "ilike", `%${search}%`);
+        }
+      })
       .page(page - 1, limit);
 
     res.json({ data: users?.results, total: users.total });
