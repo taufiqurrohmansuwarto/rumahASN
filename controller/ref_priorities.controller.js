@@ -34,6 +34,16 @@ module.exports.update = async (req, res) => {
   }
 };
 
+module.exports.create = async (req, res) => {
+  try {
+    const result = await Priorities.query().insert(req.body);
+    res.json(result);
+  } catch (error) {
+    console.log(error);
+    res.status(400).json(error);
+  }
+};
+
 module.exports.remove = async (req, res) => {
   try {
     const { id } = req.query;

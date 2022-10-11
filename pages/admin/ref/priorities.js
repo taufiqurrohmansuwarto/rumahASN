@@ -1,10 +1,14 @@
+import { useQuery } from "@tanstack/react-query";
+import { getPriorities } from "../../../services";
+
 const { default: AdminLayout } = require("../../../src/components/AdminLayout");
 const {
   default: PageContainer,
 } = require("../../../src/components/PageContainer");
 
 const Priorities = () => {
-  return <PageContainer>Prioritias</PageContainer>;
+  const { data, isLoading } = useQuery(["priorities"], () => getPriorities());
+  return <PageContainer>{JSON.stringify(data)}</PageContainer>;
 };
 
 Priorities.getLayout = function getLayout(page) {

@@ -11,6 +11,16 @@ module.exports.index = async (req, res) => {
   }
 };
 
+module.exports.create = async (req, res) => {
+  try {
+    const result = await Categories.query().insert(req.body);
+    res.json(result);
+  } catch (error) {
+    console.log(error);
+    res.status(400).json(error);
+  }
+};
+
 module.exports.detail = async (req, res) => {
   try {
     const { id } = req.query;
