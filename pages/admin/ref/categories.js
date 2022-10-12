@@ -19,6 +19,9 @@ const CreateForm = () => {
         <Input />
       </Form.Item>
       <FormTree />
+      <Form.Item label="Description" name="description">
+        <Input.TextArea />
+      </Form.Item>
     </Form>
   );
 };
