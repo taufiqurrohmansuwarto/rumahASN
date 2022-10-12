@@ -15,7 +15,7 @@ export const createStatus = async (data) => {
 };
 
 export const updateStatus = async ({ id, data }) => {
-  return await api.put(`/ref/status/${id}`, data).then((res) => res.data);
+  return await api.patch(`/ref/status/${id}`, data).then((res) => res.data);
 };
 
 export const deleteStatus = async (id) => {

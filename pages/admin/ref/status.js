@@ -75,7 +75,7 @@ const UpdateStatus = ({ open, onCancel, data }) => {
   const { mutate: update, isLoading } = useMutation(
     (data) => updateStatus(data),
     {
-      onsSettled: () => {
+      onSettled: () => {
         queryClient.invalidateQueries(["status"]);
       },
       onSuccess: () => {
@@ -88,8 +88,8 @@ const UpdateStatus = ({ open, onCancel, data }) => {
   const handleUpdate = async () => {
     try {
       const result = await form.validateFields();
-      const data = { id: data?.id, name: result?.name };
-      update(data);
+      const dataSend = { id: data?.id, data: { name: result?.name } };
+      update(dataSend);
     } catch (error) {
       console.log(error);
     }
