@@ -14,7 +14,7 @@ export const createStatus = async (data) => {
   return await api.post("/ref/status", data).then((res) => res.data);
 };
 
-export const updateStatus = async (id, data) => {
+export const updateStatus = async ({ id, data }) => {
   return await api.put(`/ref/status/${id}`, data).then((res) => res.data);
 };
 
