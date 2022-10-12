@@ -74,3 +74,9 @@ export const deleteCategory = async (id) => {
 export const getCategories = async () => {
   return await api.get("/ref/categories").then((res) => res.data);
 };
+
+// data tree
+
+export const getTreeOrganization = async () => {
+  return await api.get("/data/departments").then((res) => res?.data);
+};
