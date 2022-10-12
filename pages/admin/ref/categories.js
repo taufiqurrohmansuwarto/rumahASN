@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
-import { Input, Form, TreeSelect } from "antd";
+import { Input, Form, TreeSelect, Modal, Button } from "antd";
+import { useState } from "react";
 import { getCategories, getTreeOrganization } from "../../../services";
 
 const { default: AdminLayout } = require("../../../src/components/AdminLayout");
@@ -7,22 +8,24 @@ const {
   default: PageContainer,
 } = require("../../../src/components/PageContainer");
 
-const CreateForm = () => {
+const CreateForm = ({ open, handleCancel }) => {
   const [form] = Form.useForm();
   return (
-    <Form form={form}>
-      <Form.Item
-        label="Nama"
-        name="name"
-        rules={[{ required: true, message: "Nama tidak boleh kosong" }]}
-      >
-        <Input />
-      </Form.Item>
-      <FormTree />
-      <Form.Item label="Description" name="description">
-        <Input.TextArea />
-      </Form.Item>
-    </Form>
+    <Modal>
+      <Form form={form}>
+        <Form.Item
+          label="Nama"
+          name="name"
+          rules={[{ required: true, message: "Nama tidak boleh kosong" }]}
+        >
+          <Input />
+        </Form.Item>
+        <FormTree />
+        <Form.Item label="Deskripsi" name="description">
+          <Input.TextArea />
+        </Form.Item>
+      </Form>
+    </Modal>
   );
 };
 
@@ -62,10 +65,18 @@ const FormTree = () => {
 
 const Categories = () => {
   const { data, isLoading } = useQuery(["categories"], () => getCategories());
+  const [createModal, setCreateModal] = useState(false);
+  const [updateModal, setUpdateModal] = useState(false);
+
+  const openCreateModal = () => setCreateModal(true);
+  const openUpdateModal = () => setUpdateModal(true);
+  const handleCancelCreateModal = () => setCreateModal(false);
+  const handleCancelUpdateModal = () => setUpdateModal(false);
 
   return (
     <PageContainer>
-      <CreateForm />
+      <Button onClick={openCreateModal}>Create</Button>
+      <CreateForm open={createModal} />
     </PageContainer>
   );
 };
