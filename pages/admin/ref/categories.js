@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Input, Form, TreeSelect, Modal, Button } from "antd";
+import { Input, Form, TreeSelect, Modal, Button, Table, Space } from "antd";
 import { useState } from "react";
 import {
   createCategory,
@@ -12,16 +12,25 @@ const {
   default: PageContainer,
 } = require("../../../src/components/PageContainer");
 
+// create random generate color
+const randomColor = () => {
+  return "#" + Math.floor(Math.random() * 16777215).toString(16);
+};
+
 const CreateForm = ({ open, handleCancel }) => {
   const [form] = Form.useForm();
 
   const queryClient = useQueryClient();
 
-  const { mutate: add, isLoading } = useMutation(
+  const { mutate: add, isLoading: confirmLoading } = useMutation(
     (data) => createCategory(data),
     {
       onSettled: () => {
         queryClient.invalidateQueries(["categories"]);
+        handleCancel();
+      },
+      onError: (error) => {
+        console.error(error);
       },
     }
   );
@@ -29,14 +38,29 @@ const CreateForm = ({ open, handleCancel }) => {
   const handleOk = async () => {
     try {
       const result = await form.validateFields();
-      console.log(result);
+      const data = {
+        description: result.description,
+        name: result?.name,
+        kode_satuan_kerja: result?.organization?.value,
+        satuan_kerja: result?.organization,
+        color: randomColor(),
+      };
+
+      add(data);
     } catch (error) {
       console.log(error);
     }
   };
 
   return (
-    <Modal centered width={800} open={open} onCancel={handleCancel}>
+    <Modal
+      onOk={handleOk}
+      confirmLoading={confirmLoading}
+      centered
+      width={800}
+      open={open}
+      onCancel={handleCancel}
+    >
       <Form layout="vertical" form={form}>
         <FormTree />
         <Form.Item
@@ -66,7 +90,7 @@ const FormTree = () => {
         <>
           <Form.Item
             label="Struktur Organisasi"
-            name="organization_id"
+            name="organization"
             rules={[
               {
                 required: true,
@@ -99,10 +123,57 @@ const Categories = () => {
   const handleCancelCreateModal = () => setCreateModal(false);
   const handleCancelUpdateModal = () => setUpdateModal(false);
 
+  const columns = [
+    {
+      title: "Nama",
+      dataIndex: "name",
+      key: "name",
+    },
+    {
+      title: "Deskripsi",
+      dataIndex: "description",
+      key: "description",
+    },
+    {
+      title: "Warna",
+      key: "color",
+      render: (text, record) => {
+        return (
+          <div
+            style={{ backgroundColor: record.color, width: 50, height: 50 }}
+          ></div>
+        );
+      },
+    },
+    {
+      title: "Bidang/Perangkat Daerah",
+      key: "satuan_kerja",
+      render: (text, record) => {
+        return record.satuan_kerja.label;
+      },
+    },
+    {
+      title: "Aksi",
+      key: "action",
+      render: (text, record) => (
+        <Space>
+          <a></a>
+        </Space>
+      ),
+    },
+  ];
+
   return (
     <PageContainer>
       <Button onClick={openCreateModal}>Create</Button>
-      <CreateForm open={createModal} />
+      <Table
+        columns={columns}
+        pagination={false}
+        rowKey={(row) => row?.id}
+        dataSource={data}
+        loading={isLoading}
+      />
+      <CreateForm open={createModal} handleCancel={handleCancelCreateModal} />
     </PageContainer>
   );
 };
