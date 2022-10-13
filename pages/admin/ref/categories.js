@@ -10,6 +10,7 @@ import {
   Divider,
   Popconfirm,
   Card,
+  message,
 } from "antd";
 import { useEffect, useState } from "react";
 import {
@@ -41,20 +42,23 @@ const UpdateForm = ({ open, onCancel, data }) => {
       onCancel();
     },
     onError: (error) => {
-      console.error(error);
+      console.log(error);
     },
   });
 
   const handleOk = async () => {
     try {
       const result = await form.validateFields();
-      const dataSend = {
-        ...result,
-        satuan_kerja: result?.organization,
-        kode_satuan_kerja: result?.organization?.value,
-      };
 
-      const send = { id: data?.id, data: dataSend };
+      const send = {
+        id: data?.id,
+        data: {
+          satuan_kerja: result?.organization,
+          name: result?.name,
+          kode_satuan_kerja: result?.organization?.value,
+          description: result?.description,
+        },
+      };
       update(send);
     } catch (error) {
       console.log(error);

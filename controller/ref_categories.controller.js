@@ -36,6 +36,7 @@ module.exports.detail = async (req, res) => {
 module.exports.update = async (req, res) => {
   try {
     const { id } = req.query;
+
     await Categories.query().findById(id).patch(req.body);
     res.json({ code: 200, message: "success" });
   } catch (error) {

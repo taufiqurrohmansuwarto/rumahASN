@@ -64,7 +64,7 @@ export const createCategory = async (data) => {
 };
 
 export const updateCategory = async ({ id, data }) => {
-  return await api.put(`/ref/categories/${id}`, data).then((res) => res.data);
+  return await api.patch(`/ref/categories/${id}`, data).then((res) => res.data);
 };
 
 export const deleteCategory = async (id) => {
