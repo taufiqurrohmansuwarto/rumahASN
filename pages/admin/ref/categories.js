@@ -1,8 +1,19 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Input, Form, TreeSelect, Modal, Button, Table, Space } from "antd";
+import {
+  Input,
+  Form,
+  TreeSelect,
+  Modal,
+  Button,
+  Table,
+  Space,
+  Divider,
+  Popconfirm,
+} from "antd";
 import { useState } from "react";
 import {
   createCategory,
+  deleteCategory,
   getCategories,
   getTreeOrganization,
 } from "../../../services";
@@ -123,6 +134,20 @@ const Categories = () => {
   const handleCancelCreateModal = () => setCreateModal(false);
   const handleCancelUpdateModal = () => setUpdateModal(false);
 
+  const queryClient = useQueryClient();
+  const { mutate: hapus } = useMutation((id) => deleteCategory(id), {
+    onSettled: () => {
+      queryClient.invalidateQueries(["categories"]);
+    },
+    onError: (error) => {
+      console.error(error);
+    },
+  });
+
+  const handleDelete = (id) => {
+    hapus(id);
+  };
+
   const columns = [
     {
       title: "Nama",
@@ -133,17 +158,6 @@ const Categories = () => {
       title: "Deskripsi",
       dataIndex: "description",
       key: "description",
-    },
-    {
-      title: "Warna",
-      key: "color",
-      render: (text, record) => {
-        return (
-          <div
-            style={{ backgroundColor: record.color, width: 50, height: 50 }}
-          ></div>
-        );
-      },
     },
     {
       title: "Bidang/Perangkat Daerah",
@@ -157,7 +171,11 @@ const Categories = () => {
       key: "action",
       render: (text, record) => (
         <Space>
-          <a></a>
+          <a onClick={openUpdateModal}>Edit</a>
+          <Divider type="vertical" />
+          <Popconfirm title="Apakah anda ingin menghapus data?">
+            <a onClick={() => handleDelete(record?.id)}>Hapus</a>
+          </Popconfirm>
         </Space>
       ),
     },
