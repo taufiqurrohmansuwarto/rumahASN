@@ -3,7 +3,7 @@ const Categories = require("../models/categories.model.js");
 module.exports.index = async (req, res) => {
   try {
     // ga usah dipaging aja ya
-    const result = await Categories.query();
+    const result = await Categories.query().orderBy("id", "desc");
     res.json(result);
   } catch (error) {
     console.log(error);
