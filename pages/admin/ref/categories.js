@@ -1,7 +1,11 @@
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Input, Form, TreeSelect, Modal, Button } from "antd";
 import { useState } from "react";
-import { getCategories, getTreeOrganization } from "../../../services";
+import {
+  createCategory,
+  getCategories,
+  getTreeOrganization,
+} from "../../../services";
 
 const { default: AdminLayout } = require("../../../src/components/AdminLayout");
 const {
@@ -10,9 +14,31 @@ const {
 
 const CreateForm = ({ open, handleCancel }) => {
   const [form] = Form.useForm();
+
+  const queryClient = useQueryClient();
+
+  const { mutate: add, isLoading } = useMutation(
+    (data) => createCategory(data),
+    {
+      onSettled: () => {
+        queryClient.invalidateQueries(["categories"]);
+      },
+    }
+  );
+
+  const handleOk = async () => {
+    try {
+      const result = await form.validateFields();
+      console.log(result);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   return (
-    <Modal>
-      <Form form={form}>
+    <Modal centered width={800} open={open} onCancel={handleCancel}>
+      <Form layout="vertical" form={form}>
+        <FormTree />
         <Form.Item
           label="Nama"
           name="name"
@@ -20,7 +46,6 @@ const CreateForm = ({ open, handleCancel }) => {
         >
           <Input />
         </Form.Item>
-        <FormTree />
         <Form.Item label="Deskripsi" name="description">
           <Input.TextArea />
         </Form.Item>
@@ -50,6 +75,7 @@ const FormTree = () => {
             ]}
           >
             <TreeSelect
+              labelInValue
               treeNodeFilterProp="label"
               treeData={dataTree}
               showSearch
