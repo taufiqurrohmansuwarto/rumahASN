@@ -46,6 +46,8 @@ const Priorities = () => {
     <PageContainer>
       <Card>
         <Table dataSource={data} loading={isLoading} />
+        <CreateForm open={openCreate} />
+        <UpdateForm />
       </Card>
     </PageContainer>
   );
