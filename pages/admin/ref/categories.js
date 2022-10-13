@@ -9,8 +9,9 @@ import {
   Space,
   Divider,
   Popconfirm,
+  Card,
 } from "antd";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   createCategory,
   deleteCategory,
@@ -26,6 +27,20 @@ const {
 // create random generate color
 const randomColor = () => {
   return "#" + Math.floor(Math.random() * 16777215).toString(16);
+};
+
+const UpdateForm = ({ open, onCancel, data }) => {
+  const [form] = Form.useForm();
+
+  useEffect(() => {
+    form.setFieldsValue(data);
+  }, [data, form]);
+
+  return (
+    <Modal open={open} onCancel={onCancel}>
+      <div>Hello world</div>
+    </Modal>
+  );
 };
 
 const CreateForm = ({ open, handleCancel }) => {
@@ -173,8 +188,11 @@ const Categories = () => {
         <Space>
           <a onClick={openUpdateModal}>Edit</a>
           <Divider type="vertical" />
-          <Popconfirm title="Apakah anda ingin menghapus data?">
-            <a onClick={() => handleDelete(record?.id)}>Hapus</a>
+          <Popconfirm
+            onConfirm={() => handleDelete(record?.id)}
+            title="Apakah anda ingin menghapus data?"
+          >
+            <a>Hapus</a>
           </Popconfirm>
         </Space>
       ),
@@ -183,15 +201,18 @@ const Categories = () => {
 
   return (
     <PageContainer>
-      <Button onClick={openCreateModal}>Create</Button>
-      <Table
-        columns={columns}
-        pagination={false}
-        rowKey={(row) => row?.id}
-        dataSource={data}
-        loading={isLoading}
-      />
-      <CreateForm open={createModal} handleCancel={handleCancelCreateModal} />
+      <Card>
+        <Button onClick={openCreateModal}>Create</Button>
+        <Table
+          columns={columns}
+          pagination={false}
+          rowKey={(row) => row?.id}
+          dataSource={data}
+          loading={isLoading}
+        />
+        <CreateForm open={createModal} handleCancel={handleCancelCreateModal} />
+        <UpdateForm open={updateModal} onCancel={handleCancelUpdateModal} />
+      </Card>
     </PageContainer>
   );
 };
