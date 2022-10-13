@@ -17,6 +17,7 @@ import {
   deleteCategory,
   getCategories,
   getTreeOrganization,
+  updateCategory,
 } from "../../../services";
 
 const { default: AdminLayout } = require("../../../src/components/AdminLayout");
@@ -32,13 +33,58 @@ const randomColor = () => {
 const UpdateForm = ({ open, onCancel, data }) => {
   const [form] = Form.useForm();
 
+  const queryClient = useQueryClient();
+
+  const { mutate: update } = useMutation((data) => updateCategory(data), {
+    onSettled: () => {
+      queryClient.invalidateQueries(["categories"]);
+      onCancel();
+    },
+    onError: (error) => {
+      console.error(error);
+    },
+  });
+
+  const handleOk = async () => {
+    try {
+      const result = await form.validateFields();
+      const dataSend = {
+        ...result,
+        satuan_kerja: result?.organization,
+        kode_satuan_kerja: result?.organization?.value,
+      };
+
+      const send = { id: data?.id, data: dataSend };
+      update(send);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   useEffect(() => {
-    form.setFieldsValue(data);
+    form.setFieldsValue({
+      ...data,
+      organization: data?.satuan_kerja,
+    });
   }, [data, form]);
 
   return (
-    <Modal open={open} onCancel={onCancel}>
-      <div>Hello world</div>
+    <Modal
+      onOk={handleOk}
+      width={700}
+      title="Update Kategori"
+      open={open}
+      onCancel={onCancel}
+    >
+      <Form layout="vertical" form={form}>
+        <Form.Item name="name" label="Nama">
+          <Input />
+        </Form.Item>
+        <FormTree />
+        <Form.Item name="description" lable="Deskripsi">
+          <Input.TextArea />
+        </Form.Item>
+      </Form>
     </Modal>
   );
 };
@@ -145,9 +191,15 @@ const Categories = () => {
   const [updateModal, setUpdateModal] = useState(false);
 
   const openCreateModal = () => setCreateModal(true);
-  const openUpdateModal = () => setUpdateModal(true);
   const handleCancelCreateModal = () => setCreateModal(false);
   const handleCancelUpdateModal = () => setUpdateModal(false);
+
+  const [dataUpdate, setDataUpdate] = useState(null);
+
+  const openUpdateModal = (data) => {
+    setUpdateModal(true);
+    setDataUpdate(data);
+  };
 
   const queryClient = useQueryClient();
   const { mutate: hapus } = useMutation((id) => deleteCategory(id), {
@@ -186,7 +238,13 @@ const Categories = () => {
       key: "action",
       render: (text, record) => (
         <Space>
-          <a onClick={openUpdateModal}>Edit</a>
+          <a
+            onClick={() => {
+              openUpdateModal(record);
+            }}
+          >
+            Edit
+          </a>
           <Divider type="vertical" />
           <Popconfirm
             onConfirm={() => handleDelete(record?.id)}
@@ -211,7 +269,11 @@ const Categories = () => {
           loading={isLoading}
         />
         <CreateForm open={createModal} handleCancel={handleCancelCreateModal} />
-        <UpdateForm open={updateModal} onCancel={handleCancelUpdateModal} />
+        <UpdateForm
+          open={updateModal}
+          data={dataUpdate}
+          onCancel={handleCancelUpdateModal}
+        />
       </Card>
     </PageContainer>
   );

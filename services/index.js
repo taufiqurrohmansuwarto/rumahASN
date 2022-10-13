@@ -63,7 +63,7 @@ export const createCategory = async (data) => {
   return await api.post("/ref/categories", data).then((res) => res.data);
 };
 
-export const updateCategory = async (id, data) => {
+export const updateCategory = async ({ id, data }) => {
   return await api.put(`/ref/categories/${id}`, data).then((res) => res.data);
 };
 
