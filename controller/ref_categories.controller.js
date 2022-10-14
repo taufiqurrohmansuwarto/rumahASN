@@ -13,7 +13,11 @@ module.exports.index = async (req, res) => {
 
 module.exports.create = async (req, res) => {
   try {
-    const result = await Categories.query().insert(req.body);
+    const { userId } = req;
+    const result = await Categories.query().insert({
+      ...req.body,
+      created_by: userId,
+    });
     res.json({ code: 200, message: "success", data: result });
   } catch (error) {
     console.log(error);
@@ -36,8 +40,15 @@ module.exports.detail = async (req, res) => {
 module.exports.update = async (req, res) => {
   try {
     const { id } = req.query;
+    const { userId } = req;
 
-    await Categories.query().findById(id).patch(req.body);
+    await Categories.query()
+      .findById(id)
+      .patch({
+        ...req.body,
+        updated_by: userId,
+        updated_at: new Date(),
+      });
     res.json({ code: 200, message: "success" });
   } catch (error) {
     console.log(error);

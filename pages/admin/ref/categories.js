@@ -78,6 +78,7 @@ const UpdateForm = ({ open, onCancel, data }) => {
       width={700}
       title="Update Kategori"
       open={open}
+      destroyOnClose
       onCancel={onCancel}
     >
       <Form layout="vertical" form={form}>
