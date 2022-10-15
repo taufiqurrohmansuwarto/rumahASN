@@ -239,6 +239,18 @@ const Categories = () => {
       },
     },
     {
+      title: "Dibuat pada",
+      dataIndex: "created_at",
+      key: "created_at",
+    },
+    {
+      title: "Dibuat oleh",
+      key: "created_by",
+      render: (text, record) => {
+        return record.createdBy.username;
+      },
+    },
+    {
       title: "Aksi",
       key: "action",
       render: (text, record) => (

@@ -12,6 +12,14 @@ class User extends Model {
     return "custom_id";
   }
 
+  static get modifiers() {
+    return {
+      simpleSelect(query) {
+        query.select("custom_id", "username");
+      },
+    };
+  }
+
   static get relationMappings() {
     const Role = require("./roles.model");
     return {

@@ -3,7 +3,9 @@ const Categories = require("../models/categories.model.js");
 module.exports.index = async (req, res) => {
   try {
     // ga usah dipaging aja ya
-    const result = await Categories.query().orderBy("id", "desc");
+    const result = await Categories.query()
+      .withGraphFetched("[createdBy(simpleSelect)]")
+      .orderBy("id", "desc");
     res.json(result);
   } catch (error) {
     console.log(error);
@@ -13,7 +15,7 @@ module.exports.index = async (req, res) => {
 
 module.exports.create = async (req, res) => {
   try {
-    const { userId } = req;
+    const { customId: userId } = req?.user;
     const result = await Categories.query().insert({
       ...req.body,
       created_by: userId,
@@ -40,7 +42,7 @@ module.exports.detail = async (req, res) => {
 module.exports.update = async (req, res) => {
   try {
     const { id } = req.query;
-    const { userId } = req;
+    const { customId: userId } = req?.user;
 
     await Categories.query()
       .findById(id)

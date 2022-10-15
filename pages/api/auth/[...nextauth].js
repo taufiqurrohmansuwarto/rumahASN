@@ -110,8 +110,8 @@ export default NextAuth({
         const data = { ...currentUser, current_role: result?.current_role };
 
         const last = await updateUser(currentUser?.id);
-
-        return { ...data, ...last };
+        const lastData = { ...data, ...last, id: last?.custom_id };
+        return lastData;
       },
     },
   ],

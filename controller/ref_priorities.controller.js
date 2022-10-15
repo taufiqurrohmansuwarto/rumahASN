@@ -26,7 +26,9 @@ module.exports.detail = async (req, res) => {
 module.exports.update = async (req, res) => {
   try {
     const { id } = req.query;
-    await Priorities.query().findById(id).patch(req.body);
+    await Priorities.query()
+      .findById(id)
+      .patch({ ...req?.body, updated_at: new Date() });
     res.json({ code: 200, message: "success" });
   } catch (error) {
     console.log(error);
@@ -36,7 +38,11 @@ module.exports.update = async (req, res) => {
 
 module.exports.create = async (req, res) => {
   try {
-    const result = await Priorities.query().insert(req.body);
+    const { customId: userId } = req?.user;
+    const result = await Priorities.query().insert({
+      ...req.body,
+      created_by: userId,
+    });
     res.json(result);
   } catch (error) {
     console.log(error);

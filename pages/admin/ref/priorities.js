@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { Card, Modal, Table } from "antd";
+import { Card, Button, Modal, Table } from "antd";
 import { useState } from "react";
 import { getPriorities } from "../../../services";
 
@@ -30,7 +30,7 @@ const Priorities = () => {
 
   // wow fucking amazing
   const [openCreate, setOpenCreate] = useState(false);
-  const [openUpdate, setOpenUpdate] = useState(falsel);
+  const [openUpdate, setOpenUpdate] = useState(false);
   const [selectedData, setSelectedData] = useState(null);
 
   const cancelCreate = () => setOpenCreate(false);
@@ -45,9 +45,12 @@ const Priorities = () => {
   return (
     <PageContainer>
       <Card>
+        <Button>
+          <div onClick={openCreateModal}>Create</div>
+        </Button>
         <Table dataSource={data} loading={isLoading} />
-        <CreateForm open={openCreate} />
-        <UpdateForm />
+        <CreateForm open={openCreate} onCancel={cancelCreate} />
+        <UpdateForm open={openUpdate} onCancel={cancelUpdate} />
       </Card>
     </PageContainer>
   );
