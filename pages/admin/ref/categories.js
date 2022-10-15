@@ -1,3 +1,4 @@
+import { PlusOutlined } from "@ant-design/icons";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Input,
@@ -134,6 +135,7 @@ const CreateForm = ({ open, handleCancel }) => {
       onOk={handleOk}
       confirmLoading={confirmLoading}
       centered
+      title="Tambah Kategori"
       width={800}
       open={open}
       onCancel={handleCancel}
@@ -277,7 +279,14 @@ const Categories = () => {
   return (
     <PageContainer>
       <Card>
-        <Button onClick={openCreateModal}>Create</Button>
+        <Button
+          style={{ marginBottom: 16 }}
+          icon={<PlusOutlined />}
+          type="primary"
+          onClick={openCreateModal}
+        >
+          Tambah
+        </Button>
         <Table
           columns={columns}
           pagination={false}

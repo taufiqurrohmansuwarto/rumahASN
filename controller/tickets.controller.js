@@ -3,29 +3,15 @@ const Tickets = require("../models/tickets.model");
 module.exports.index = async (req, res) => {
   const { current_role } = req?.user;
   try {
-    // maximum limit of tickets to show is 25
-    const limit = req.query.limit > 25 ? 25 : req.query.limit;
-    const search = req.query.search || "";
-    const page = req.query.page;
-
-    const result = await Tickets.query()
-      .where((builder) => {
-        if (current_role === "admin") {
-          builder.where("status", "open");
-        } else {
-          builder.where("status", "open").andWhere("user_id", req.user.userId);
-        }
-
-        if (search) {
-          builder
-            .where("title", "ilike", `%${search}%`)
-            .orWhere("description", "ilike", `%${search}%`)
-            .orWhere("content", "ilike", `%${search}%`);
-        }
-      })
-      .page(page, limit);
-
-    res.json(result);
+    if (current_role === "admin") {
+      const result = await Tickets.query().orderBy("id", "desc");
+      res.json(result);
+    } else if (current_role === "user") {
+      const result = await Tickets.query()
+        .where("user_id", req.user.userId)
+        .orderBy("id", "desc");
+      res.json(result);
+    }
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

@@ -1,6 +1,8 @@
+import { PlusOutlined } from "@ant-design/icons";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Button,
+  Card,
   Divider,
   Form,
   Input,
@@ -51,6 +53,7 @@ const CreateStatus = ({ open, onCancel }) => {
     <Modal
       destroyOnClose
       onOk={onFinish}
+      centered
       title="Buat Referensi Status"
       open={open}
       onCancel={onCancel}
@@ -182,20 +185,29 @@ const Status = () => {
 
   return (
     <PageContainer>
-      <Button onClick={handleCreateOpen}>Buat</Button>
-      <Table
-        loading={isLoading}
-        dataSource={data}
-        columns={columns}
-        rowKey={(row) => row?.id}
-        pagination={false}
-      />
-      <CreateStatus onCancel={onCancelCreate} open={visibleCreate} />
-      <UpdateStatus
-        open={visibleUpdate}
-        data={dataUpdate}
-        onCancel={onCancelUpdate}
-      />
+      <Card>
+        <Button
+          style={{ marginBottom: 16 }}
+          onClick={handleCreateOpen}
+          type="primary"
+          icon={<PlusOutlined />}
+        >
+          Buat
+        </Button>
+        <Table
+          loading={isLoading}
+          dataSource={data}
+          columns={columns}
+          rowKey={(row) => row?.id}
+          pagination={false}
+        />
+        <CreateStatus onCancel={onCancelCreate} open={visibleCreate} />
+        <UpdateStatus
+          open={visibleUpdate}
+          data={dataUpdate}
+          onCancel={onCancelUpdate}
+        />
+      </Card>
     </PageContainer>
   );
 };
