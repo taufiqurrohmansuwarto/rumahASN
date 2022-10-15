@@ -1,8 +1,8 @@
 import { createRouter } from "next-connect";
-import { remove } from "../../../../controller/ref_categories.controller";
 import {
   detail,
   update,
+  remove,
 } from "../../../../controller/ref_priorities.controller";
 import auth from "../../../../middleware/auth.middleware";
 

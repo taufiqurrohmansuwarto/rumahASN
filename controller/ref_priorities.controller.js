@@ -3,7 +3,9 @@ const Priorities = require("../models/priorities.model");
 module.exports.index = async (req, res) => {
   try {
     // ga usah dipaging aja ya
-    const result = await Priorities.query();
+    const result = await Priorities.query()
+      .withGraphFetched("[createdBy(simpleSelect)]")
+      .orderBy("id", "desc");
     res.json(result);
   } catch (error) {
     console.log(error);
@@ -53,6 +55,7 @@ module.exports.create = async (req, res) => {
 module.exports.remove = async (req, res) => {
   try {
     const { id } = req.query;
+    console.log(id);
     await Priorities.query().deleteById(id);
     res.json({ code: 200, message: "success" });
   } catch (error) {

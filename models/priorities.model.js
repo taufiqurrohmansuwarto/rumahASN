@@ -6,6 +6,22 @@ class Priorities extends Model {
   static get tableName() {
     return "priorities";
   }
+
+  // relation with user
+  static get relationMappings() {
+    const Users = require("./users.model");
+
+    return {
+      createdBy: {
+        relation: Model.BelongsToOneRelation,
+        modelClass: Users,
+        join: {
+          from: "priorities.created_by",
+          to: "users.custom_id",
+        },
+      },
+    };
+  }
 }
 
 module.exports = Priorities;

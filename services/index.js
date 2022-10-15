@@ -46,8 +46,9 @@ export const createPriority = async (data) => {
   return await api.post("/ref/priorities", data).then((res) => res.data);
 };
 
-export const updatePriority = async (id, data) => {
-  return await api.put(`/ref/priorities/${id}`, data).then((res) => res.data);
+export const updatePriority = async ({ id, data }) => {
+  console.log(id, data);
+  return await api.patch(`/ref/priorities/${id}`, data).then((res) => res.data);
 };
 
 export const deletePriority = async (id) => {
