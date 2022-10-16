@@ -1,5 +1,4 @@
-import { nanoid } from "nanoid";
-
+const { nanoid } = require("nanoid");
 const { Model } = require("objection");
 const knex = require("../db");
 Model.knex(knex);
@@ -49,4 +48,4 @@ class Tickets extends Model {
   }
 }
 
-export default Tickets;
+module.exports = Tickets;

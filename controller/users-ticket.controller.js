@@ -1,16 +1,16 @@
-const { default: Tickets } = require("../models/tickets.model");
+const Tickets = require("../models/tickets.model");
 
 const index = async (req, res) => {
   try {
     const { customId } = req?.user;
 
     //     search, page, limit
-    const search = req?.query?.search;
+    const search = req?.query?.search || "";
     const page = req?.query?.page || 1;
     const limit = req?.query?.limit || 10;
 
     const result = await Tickets.query()
-      .where("user_id", customId)
+      .where("requester", customId)
       .andWhere((builder) => {
         if (search) {
           builder
@@ -22,9 +22,9 @@ const index = async (req, res) => {
       .page(page - 1, limit);
 
     res.json({
-      data: result,
-      total: result.total,
-      meta: { page, limit, sort, order },
+      results: result?.results,
+      total: result?.total,
+      page: page,
     });
   } catch (error) {
     console.log(error);
