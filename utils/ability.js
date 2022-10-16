@@ -10,6 +10,8 @@ const ability = (user) => {
 
   return defineAbility((can, cannot) => {
     // there is 3 roles: admin, agent, user
+
+    // use extends
     if (admin) {
       can("manage", "all");
       can("read", "DashboardAdmin");

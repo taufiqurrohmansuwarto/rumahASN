@@ -1,23 +1,106 @@
-import dynamic from "next/dynamic";
-import { useState } from "react";
+import { SendOutlined } from "@ant-design/icons";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import {
+  Button,
+  Card,
+  Form,
+  Input,
+  message,
+  Radio,
+  Select,
+  Skeleton,
+} from "antd";
+import { useRouter } from "next/router";
+import { getCategories, getPriorities, getStatus } from "../../services";
+import { createTickets } from "../../services/users.services";
 import Layout from "../../src/components/Layout";
 import PageContainer from "../../src/components/PageContainer";
 
-const Editor = dynamic(() => import("../../src/components/Editor"), {
-  ssr: false,
-});
-
 const CreateTicket = () => {
-  const [value, setValue] = useState();
+  const [form] = Form.useForm();
+  const router = useRouter();
 
-  const onChange = (value) => {
-    setValue(value);
+  const { mutate: create } = useMutation((data) => createTickets(data), {
+    onSuccess: () => {
+      message.success("Berhasil membuat tiket");
+      router.push("/tickets");
+    },
+    onError: () => {
+      message.error("Gagal membuat tiket");
+    },
+  });
+
+  const { data: dataCategories, isLoading: isLoadingCategories } = useQuery(
+    ["categories"],
+    () => getCategories()
+  );
+
+  const { data: dataStatus, isLoading: isLoadingStatus } = useQuery(
+    ["status"],
+    () => getStatus()
+  );
+
+  const { data: dataPriorities, isLoading: isLoadingPriorities } = useQuery(
+    ["priorities"],
+    () => getPriorities()
+  );
+
+  const handleFinish = (value) => {
+    create(value);
   };
-
   return (
-    <PageContainer>
-      <h1>Create Ticket</h1>
-      <Editor onChange={onChange} />
+    <PageContainer
+      onBack={() => router.push("/tickets")}
+      title="Create ticket"
+      subTitle="Tiket"
+    >
+      <Card title="Buat Ticket">
+        <Skeleton
+          loading={
+            isLoadingCategories || isLoadingStatus || isLoadingPriorities
+          }
+        >
+          <Form onFinish={handleFinish} form={form} layout="vertical">
+            <Form.Item name="title" label="Title">
+              <Input />
+            </Form.Item>
+            <Form.Item name="content" label="Content">
+              <Input.TextArea />
+            </Form.Item>
+            <Form.Item name="category_id" label="Kategori">
+              <Select showSearch optionFilterProp="name">
+                {dataCategories?.map((category) => (
+                  <Select.Option
+                    key={category.id}
+                    name={category?.name}
+                    value={category.id}
+                  >
+                    {category.name}
+                  </Select.Option>
+                ))}
+              </Select>
+            </Form.Item>
+            <Form.Item name="priority_id" label="Prioritas">
+              <Radio.Group>
+                {dataPriorities?.map((priority) => (
+                  <Radio.Button
+                    key={priority.id}
+                    name={priority?.name}
+                    value={priority.id}
+                  >
+                    {priority.name}
+                  </Radio.Button>
+                ))}
+              </Radio.Group>
+            </Form.Item>
+            <Form.Item>
+              <Button htmlType="submit" icon={<SendOutlined />}>
+                Kirim
+              </Button>
+            </Form.Item>
+          </Form>
+        </Skeleton>
+      </Card>
     </PageContainer>
   );
 };
