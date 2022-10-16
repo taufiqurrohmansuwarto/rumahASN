@@ -7,7 +7,7 @@ const index = async (req, res) => {
     //     search, page, limit
     const search = req?.query?.search || "";
     const page = req?.query?.page || 1;
-    const limit = req?.query?.limit || 10;
+    const limit = req?.query?.limit || 50;
 
     const result = await Tickets.query()
       .where("requester", customId)
@@ -67,6 +67,13 @@ const remove = async (req, res) => {
   try {
     const { customId } = req?.user;
     const { id } = req?.query;
+    await Tickets.query()
+      .delete()
+      .where("requester", customId)
+      .andWhere("id", id);
+
+    res.json({ code: 200, message: "success" });
+    //       should include status
   } catch (error) {
     console.log(error);
     res.status(400).json({ code: 400, message: "Internal Server Error" });

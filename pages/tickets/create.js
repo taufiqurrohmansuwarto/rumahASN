@@ -32,17 +32,26 @@ const CreateTicket = () => {
 
   const { data: dataCategories, isLoading: isLoadingCategories } = useQuery(
     ["categories"],
-    () => getCategories()
+    () => getCategories(),
+    {
+      refetchOnWindowFocus: false,
+    }
   );
 
   const { data: dataStatus, isLoading: isLoadingStatus } = useQuery(
     ["status"],
-    () => getStatus()
+    () => getStatus(),
+    {
+      refetchOnWindowFocus: false,
+    }
   );
 
   const { data: dataPriorities, isLoading: isLoadingPriorities } = useQuery(
     ["priorities"],
-    () => getPriorities()
+    () => getPriorities(),
+    {
+      refetchOnWindowFocus: false,
+    }
   );
 
   const handleFinish = (value) => {

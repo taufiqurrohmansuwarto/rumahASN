@@ -1,4 +1,5 @@
 const { nanoid } = require("nanoid");
+const uuid = require("uuid");
 const { Model } = require("objection");
 const knex = require("../db");
 Model.knex(knex);
@@ -8,6 +9,7 @@ class Tickets extends Model {
 
   $beforeInsert() {
     this.ticket_number = nanoid(5);
+    this.id = uuid.v4();
   }
 
   static get tableName() {
