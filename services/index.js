@@ -81,3 +81,24 @@ export const getCategories = async () => {
 export const getTreeOrganization = async () => {
   return await api.get("/data/departments").then((res) => res?.data);
 };
+
+// comments
+export const getComments = async () => {
+  return await api.get("/comments").then((res) => res.data);
+};
+
+export const createComment = async (data) => {
+  return await api.post("/comments", data).then((res) => res.data);
+};
+
+export const updateComments = async ({ id, data }) => {
+  return await api.patch(`/comments/${id}`, data).then((res) => res.data);
+};
+
+export const deleteComments = async (id) => {
+  return await api.delete(`/comments/${id}`).then((res) => res.data);
+};
+
+export const detailComments = async (id) => {
+  return await api.get(`/comments/${id}`).then((res) => res.data);
+};

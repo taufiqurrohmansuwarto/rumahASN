@@ -1,9 +1,9 @@
 import { Button } from "antd";
 import { signOut, useSession } from "next-auth/react";
-import Layout from "../src/components/Layout";
-import PageContainer from "../src/components/PageContainer";
+import Layout from "../../src/components/Layout";
+import PageContainer from "../../src/components/PageContainer";
 
-function Feeds() {
+function FeedDetail() {
   const { data, status } = useSession();
 
   return (
@@ -13,13 +13,13 @@ function Feeds() {
   );
 }
 
-Feeds.Auth = {
+FeedDetail.Auth = {
   action: "manage",
   subject: "Feeds",
 };
 
-Feeds.getLayout = function getLayout(page) {
+FeedDetail.getLayout = function getLayout(page) {
   return <Layout>{page}</Layout>;
 };
 
-export default Feeds;
+export default FeedDetail;

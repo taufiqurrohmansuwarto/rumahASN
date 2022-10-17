@@ -1,13 +1,11 @@
 const { Model } = require("objection");
-const knex = require("../config/db");
-
+const knex = require("../db");
 Model.knex(knex);
 
 class Comments extends Model {
   static get tableName() {
     return "comments";
   }
-  static get relationMappings() {}
 }
 
 module.exports = Comments;
