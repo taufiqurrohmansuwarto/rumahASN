@@ -1,17 +1,30 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Button, Form, Input } from "antd";
-import { useState } from "react";
+import { Button, Form, Input, message } from "antd";
 import { createComment, getComments } from "../../services";
 
 const CreateComments = () => {
   const queryClient = useQueryClient();
   const [form] = Form.useForm();
 
-  const { mutate: create } = useMutation((data) => createComment(data), {});
+  const { mutate: create, isLoading } = useMutation(
+    (data) => createComment(data),
+    {
+      onSettled: () => {
+        queryClient.invalidateQueries(["comments"]);
+      },
+      onSuccess: () => {
+        message.success("Berhasil membuat komentar");
+        form.resetFields();
+      },
+      onError: () => {
+        message.error("Gagal membuat komentar");
+      },
+    }
+  );
 
   const handleCreate = async (values) => {
     try {
-      console.log(values);
+      create(values);
     } catch (error) {
       console.log(error);
     }
@@ -25,7 +38,9 @@ const CreateComments = () => {
           <Input.TextArea />
         </Form.Item>
         <Form.Item>
-          <Button htmlType="submit">Submit</Button>
+          <Button loading={isLoading} htmlType="submit">
+            Submit
+          </Button>
         </Form.Item>
       </Form>
     </div>

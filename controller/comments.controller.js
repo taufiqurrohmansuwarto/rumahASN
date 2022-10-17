@@ -7,6 +7,7 @@ const index = async (req, res) => {
     const limit = req.query.limit || 50;
     const result = await Comments.query()
       .page(page - 1, limit)
+      .withGraphFetched("[user(simpleSelect)]")
       .orderBy("created_at", "desc");
 
     res.json(result);
