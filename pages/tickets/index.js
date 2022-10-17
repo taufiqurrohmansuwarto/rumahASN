@@ -1,5 +1,6 @@
+import { PlusOutlined } from "@ant-design/icons";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Button, Divider, message, Popconfirm, Space, Table } from "antd";
+import { Card, Button, Divider, message, Popconfirm, Space, Table } from "antd";
 import { useRouter } from "next/router";
 import { useState } from "react";
 import { deleteTicket, getAllTickets } from "../../services/users.services";
@@ -74,26 +75,37 @@ const Tickets = () => {
 
   return (
     <PageContainer title="Tiket" subTitle="Daftar Tiket">
-      <Button onClick={createTicket}>Buat</Button>
-      <Table
-        pagination={{
-          total: data?.total,
-          defaultCurrent: 1,
-          defaultPageSize: 50,
-          showTotal: (total, range) =>
-            `${range[0]}-${range[1]} dari ${total} tiket`,
-          onChange: (page, limit) => {
-            setQuery({
-              page,
-              limit,
-            });
-          },
-        }}
-        columns={columns}
-        rowKey={(row) => row?.id}
-        loading={isLoading}
-        dataSource={data?.results}
-      />
+      <Card>
+        <Button
+          icon={<PlusOutlined />}
+          type="primary"
+          style={{
+            marginBottom: 16,
+          }}
+          onClick={createTicket}
+        >
+          Buat
+        </Button>
+        <Table
+          pagination={{
+            total: data?.total,
+            defaultCurrent: 1,
+            defaultPageSize: 50,
+            showTotal: (total, range) =>
+              `${range[0]}-${range[1]} dari ${total} tiket`,
+            onChange: (page, limit) => {
+              setQuery({
+                page,
+                limit,
+              });
+            },
+          }}
+          columns={columns}
+          rowKey={(row) => row?.id}
+          loading={isLoading}
+          dataSource={data?.results}
+        />
+      </Card>
     </PageContainer>
   );
 };

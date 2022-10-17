@@ -249,7 +249,7 @@ const Categories = () => {
       title: "Dibuat oleh",
       key: "created_by",
       render: (text, record) => {
-        return record.createdBy.username;
+        return record?.createdBy?.username;
       },
     },
     {
