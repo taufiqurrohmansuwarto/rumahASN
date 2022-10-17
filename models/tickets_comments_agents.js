@@ -3,10 +3,10 @@ const knex = require("../db");
 
 Model.knex(knex);
 
-class TicketsComments extends Model {
+class TicketsCommentsAgents extends Model {
   static get tableName() {
-    return "tickets_comments";
+    return "tickets_comments_agents";
   }
 }
 
-module.exports = TicketsComments;
+module.exports = TicketsCommentsAgents;

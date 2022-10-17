@@ -4,9 +4,8 @@ const knex = require("../db");
 Model.knex(knex);
 
 class Status extends Model {
-  // insert id with default uuid
-  $beforeInsert() {
-    this.id = uuidv4();
+  static get idColumn() {
+    return "name";
   }
 
   static get tableName() {
