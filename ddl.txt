@@ -1,0 +1,279 @@
+create table if not exists knex_migrations
+(
+    id             serial
+        primary key,
+    name           varchar(255),
+    batch          integer,
+    migration_time timestamp with time zone
+);
+
+alter table knex_migrations
+    owner to postgres;
+
+create table if not exists knex_migrations_lock
+(
+    index     serial
+        primary key,
+    is_locked integer
+);
+
+alter table knex_migrations_lock
+    owner to postgres;
+
+create table if not exists roles
+(
+    name       varchar(255)                                       not null
+        primary key,
+    created_at timestamp with time zone default CURRENT_TIMESTAMP not null
+);
+
+alter table roles
+    owner to postgres;
+
+create table if not exists users
+(
+    custom_id       varchar(255) not null
+        primary key,
+    username        varchar(255),
+    image           varchar(255),
+    id              varchar(255),
+    "from"          varchar(255),
+    role            varchar(255),
+    "group"         varchar(255),
+    employee_number varchar(255),
+    birthdate       date,
+    last_login      timestamp with time zone,
+    email           varchar(255),
+    organization_id varchar(255),
+    "current_role"  varchar(255) default 'user'::character varying
+        constraint users_current_role_foreign
+            references roles
+);
+
+alter table users
+    owner to postgres;
+
+create table if not exists status
+(
+    name       varchar(100) not null
+        primary key,
+    created_at timestamp default now(),
+    updated_at timestamp default now(),
+    created_by varchar(255)
+        references users
+);
+
+alter table status
+    owner to postgres;
+
+create table if not exists priorities
+(
+    name       varchar(255) not null
+        constraint priorities_pk
+            primary key,
+    color      varchar(255) not null,
+    created_at timestamp with time zone default CURRENT_TIMESTAMP,
+    updated_at timestamp with time zone default CURRENT_TIMESTAMP,
+    created_by varchar(255)
+        constraint priorities_created_by_foreign
+            references users
+);
+
+alter table priorities
+    owner to postgres;
+
+create table if not exists categories
+(
+    id                serial
+        primary key,
+    name              varchar(255) not null,
+    color             varchar(255) not null,
+    kode_satuan_kerja varchar(255),
+    satuan_kerja      jsonb,
+    description       text,
+    created_at        timestamp with time zone default CURRENT_TIMESTAMP,
+    updated_at        timestamp with time zone default CURRENT_TIMESTAMP,
+    created_by        varchar(255)
+        constraint categories_created_by_foreign
+            references users,
+    updated_by        varchar(255)
+        constraint categories_updated_by_foreign
+            references users
+);
+
+alter table categories
+    owner to postgres;
+
+create table if not exists permissions
+(
+    id         serial
+        primary key,
+    action     varchar(255)                                       not null,
+    subject    varchar(255)                                       not null,
+    conditions json,
+    created_at timestamp with time zone default CURRENT_TIMESTAMP not null
+);
+
+alter table permissions
+    owner to postgres;
+
+create table if not exists users_permissions
+(
+    id            serial
+        primary key,
+    role_id       varchar(255)                                       not null
+        constraint users_permissions_role_id_foreign
+            references roles,
+    permission_id integer                                            not null
+        constraint users_permissions_permission_id_foreign
+            references permissions,
+    created_at    timestamp with time zone default CURRENT_TIMESTAMP not null
+);
+
+alter table users_permissions
+    owner to postgres;
+
+create table if not exists tickets
+(
+    id                uuid                                               not null
+        primary key,
+    title             varchar(255),
+    description       varchar(255),
+    content           text,
+    html              text,
+    ticket_number     text,
+    assignee          varchar(255),
+    requester         varchar(255),
+    created_at        timestamp with time zone default CURRENT_TIMESTAMP not null,
+    updated_at        timestamp with time zone default CURRENT_TIMESTAMP not null,
+    start_work_at     timestamp with time zone,
+    completed_at      timestamp with time zone,
+    assignee_json     jsonb,
+    requester_json    jsonb,
+    file_url          varchar(255),
+    finished_at       timestamp,
+    chooser           varchar(255),
+    chooser_picked_at timestamp,
+    status_code       varchar(255)
+        references status,
+    category_id       integer
+        references categories,
+    priority_code     varchar(255)
+        references priorities
+);
+
+alter table tickets
+    owner to postgres;
+
+create table if not exists tickets_comments_agents
+(
+    id         uuid                                               not null
+        constraint tickets_comments_pkey
+            primary key,
+    ticket_id  uuid
+        constraint tickets_comments_ticket_id_foreign
+            references tickets,
+    user_id    varchar(255),
+    comment    text,
+    html       text,
+    created_at timestamp with time zone default CURRENT_TIMESTAMP not null
+);
+
+alter table tickets_comments_agents
+    owner to postgres;
+
+create table if not exists tickets_attachments
+(
+    id         uuid                                               not null
+        primary key,
+    ticket_id  uuid
+        constraint tickets_attachments_ticket_id_foreign
+            references tickets,
+    file_name  varchar(255),
+    file_path  varchar(255),
+    file_type  varchar(255),
+    file_size  varchar(255),
+    file_url   varchar(255),
+    created_at timestamp with time zone default CURRENT_TIMESTAMP not null
+);
+
+alter table tickets_attachments
+    owner to postgres;
+
+create table if not exists notifications
+(
+    id         serial
+        primary key,
+    type       varchar(255) not null,
+    title      varchar(255) not null,
+    content    varchar(255) not null,
+    "from"     varchar(255) not null
+        constraint notifications_from_foreign
+            references users,
+    "to"       varchar(255)
+        constraint notifications_to_foreign
+            references users,
+    read_at    timestamp with time zone,
+    created_at timestamp with time zone default CURRENT_TIMESTAMP
+);
+
+alter table notifications
+    owner to postgres;
+
+create table if not exists tickets_comments_customers
+(
+    id          integer                  default nextval('tickets_comments_customers_agents_id_seq'::regclass) not null
+        constraint tickets_comments_customers_agents_pkey
+            primary key,
+    ticket_id   uuid
+        constraint tickets_comments_customers_agents_ticket_id_foreign
+            references tickets,
+    customer_id varchar(255)
+        constraint tickets_comments_customers_agents_customer_id_foreign
+            references users,
+    agent_id    varchar(255)
+        constraint tickets_comments_customers_agents_agent_id_foreign
+            references users,
+    comment     varchar(255),
+    created_at  timestamp with time zone default CURRENT_TIMESTAMP                                             not null,
+    updated_at  timestamp with time zone default CURRENT_TIMESTAMP                                             not null
+);
+
+alter table tickets_comments_customers
+    owner to postgres;
+
+create table if not exists tickets_agents_helper
+(
+    user_custom_id varchar(255)                                       not null
+        constraint tickets_agents_helper_user_custom_id_foreign
+            references users,
+    ticket_id      uuid                                               not null
+        constraint tickets_agents_helper_ticket_id_foreign
+            references tickets,
+    created_at     timestamp with time zone default CURRENT_TIMESTAMP not null,
+    updated_at     timestamp with time zone default CURRENT_TIMESTAMP not null,
+    primary key (user_custom_id, ticket_id)
+);
+
+alter table tickets_agents_helper
+    owner to postgres;
+
+create table if not exists comments
+(
+    id             serial
+        primary key,
+    comment        text,
+    user_custom_id varchar(255)
+        constraint comments_user_custom_id_foreign
+            references users,
+    comment_id     integer
+        constraint comments_comment_id_foreign
+            references comments,
+    created_at     timestamp with time zone default CURRENT_TIMESTAMP not null,
+    updated_at     timestamp with time zone default CURRENT_TIMESTAMP not null,
+    deleted_at     timestamp with time zone
+);
+
+alter table comments
+    owner to postgres;
+

@@ -7,6 +7,10 @@ class TicketsAgentsHelper extends Model {
   static get tableName() {
     return "tickets_agents_helper";
   }
+
+  static get idColumn() {
+    return ["ticket_id", "user_custom_id"];
+  }
 }
 
 module.exports = TicketsAgentsHelper;

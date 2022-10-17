@@ -7,6 +7,10 @@ class Priorities extends Model {
     return "priorities";
   }
 
+  static get idColumn() {
+    return "name";
+  }
+
   // relation with user
   static get relationMappings() {
     const Users = require("./users.model");
