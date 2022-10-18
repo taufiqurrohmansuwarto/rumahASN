@@ -30,7 +30,6 @@ module.exports.create = async (req, res) => {
 module.exports.detail = async (req, res) => {
   try {
     const { id } = req.query;
-
     const result = await Categories.query().findById(id);
     res.json(result);
   } catch (error) {

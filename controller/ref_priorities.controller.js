@@ -5,7 +5,7 @@ module.exports.index = async (req, res) => {
     // ga usah dipaging aja ya
     const result = await Priorities.query()
       .withGraphFetched("[createdBy(simpleSelect)]")
-      .orderBy("id", "desc");
+      .orderBy("created_at", "desc");
     res.json(result);
   } catch (error) {
     console.log(error);

@@ -70,10 +70,10 @@ const CreateTicket = () => {
           }
         >
           <Form onFinish={handleFinish} form={form} layout="vertical">
-            <Form.Item name="title" label="Title">
+            <Form.Item name="title" label="Judul">
               <Input />
             </Form.Item>
-            <Form.Item name="content" label="Content">
+            <Form.Item name="content" label="Deskripsi">
               <Input.TextArea />
             </Form.Item>
             <Form.Item name="category_id" label="Kategori">
@@ -93,9 +93,9 @@ const CreateTicket = () => {
               <Radio.Group>
                 {dataPriorities?.map((priority) => (
                   <Radio.Button
-                    key={priority.id}
+                    key={priority.name}
                     name={priority?.name}
-                    value={priority.id}
+                    value={priority.name}
                   >
                     {priority.name}
                   </Radio.Button>
@@ -103,7 +103,7 @@ const CreateTicket = () => {
               </Radio.Group>
             </Form.Item>
             <Form.Item>
-              <Button htmlType="submit" icon={<SendOutlined />}>
+              <Button type="primary" htmlType="submit" icon={<SendOutlined />}>
                 Kirim
               </Button>
             </Form.Item>
