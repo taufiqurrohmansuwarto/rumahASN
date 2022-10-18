@@ -3,10 +3,9 @@
  * @returns { Promise<void> }
  */
 exports.up = function (knex) {
-  return knex.schema.createTable("roles", function (table) {
-    table.string("name").primary();
-    table.datetime("created_at").notNullable().defaultTo(knex.fn.now());
-  });
+  return knex.schema.raw(
+    "ALTER TABLE comments RENAME COLUMN comment TO message"
+  );
 };
 
 /**
@@ -14,5 +13,7 @@ exports.up = function (knex) {
  * @returns { Promise<void> }
  */
 exports.down = function (knex) {
-  return knex.schema.dropTable("roles");
+  return knex.schema.raw(
+    "ALTER TABLE comments RENAME COLUMN message TO comment"
+  );
 };

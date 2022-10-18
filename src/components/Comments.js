@@ -37,13 +37,19 @@ const CreateComments = ({ user }) => {
 
       <Comment
         avatar={user?.image}
+        author={user?.name}
         content={
           <Form onFinish={handleCreate} form={form}>
             <Form.Item name="comment">
               <Input.TextArea rows={4} />
             </Form.Item>
             <Form.Item>
-              <Button type="primary" loading={isLoading} htmlType="submit">
+              <Button
+                disabled={isLoading}
+                type="primary"
+                loading={isLoading}
+                htmlType="submit"
+              >
                 Tambahkan Komentar
               </Button>
             </Form.Item>
