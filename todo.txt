@@ -1,0 +1,2 @@
+1. buat list tikcet untuk admin dengan status diajukan kemudian insert pegawaian untuk menjadi agent dan remove / update
+2. agent mengerjakan
