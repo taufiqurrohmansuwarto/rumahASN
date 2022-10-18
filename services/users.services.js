@@ -21,3 +21,7 @@ export const createTickets = async (data) => {
 export const deleteTicket = async (id) => {
   return await api.delete(`/tickets/${id}`).then((res) => res.data);
 };
+
+export const detailTicket = async (id) => {
+  return await api.get(`/tickets/${id}`).then((res) => res.data);
+};

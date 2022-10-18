@@ -1,6 +1,7 @@
 import { PlusOutlined } from "@ant-design/icons";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Card, Button, Divider, message, Popconfirm, Space, Table } from "antd";
+import Link from "next/link";
 import { useRouter } from "next/router";
 import { useState } from "react";
 import { deleteTicket, getAllTickets } from "../../services/users.services";
@@ -46,14 +47,17 @@ const Tickets = () => {
       key: "title",
       dataIndex: "title",
     },
-    { title: "Deskripsi", key: "description", dataIndex: "description" },
+    { title: "Deskripsi", key: "content", dataIndex: "content" },
+    { title: "Status", key: "status_code", dataIndex: "status_code" },
     {
       title: "Aksi",
       key: "aksi",
       render: (text, record) => {
         return (
           <Space>
-            <a>Detail</a>
+            <Link href={`/tickets/${record?.id}/detail`}>
+              <a>Detail</a>
+            </Link>
             <Divider type="vertical" />
             <a>Update</a>
             <Divider type="vertical" />

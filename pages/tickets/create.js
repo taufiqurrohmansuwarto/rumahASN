@@ -89,7 +89,7 @@ const CreateTicket = () => {
                 ))}
               </Select>
             </Form.Item>
-            <Form.Item name="priority_id" label="Prioritas">
+            <Form.Item name="priority_code" label="Prioritas">
               <Radio.Group>
                 {dataPriorities?.map((priority) => (
                   <Radio.Button

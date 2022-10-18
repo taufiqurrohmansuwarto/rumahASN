@@ -2,6 +2,7 @@ import { defineAbility } from "@casl/ability";
 
 const ability = (user) => {
   const { current_role: role, id: userId, organization } = user;
+  // harusnya ditambahkan kalau dia berasal dari master
   const bkd = organization?.startsWith("123");
 
   const admin = role === "admin" && bkd;

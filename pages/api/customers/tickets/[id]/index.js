@@ -1,12 +1,12 @@
 const { createRouter } = require("next-connect");
 const {
-  index,
-  update,
+  detail,
   remove,
-} = require("../../../../../../controller/users-ticket.controller");
-const { default: auth } = require("../../../../middleware/auth.middleware");
+  update,
+} = require("../../../../../controller/users-ticket.controller");
+const { default: auth } = require("../../../../../middleware/auth.middleware");
 
 const router = createRouter();
-router.use(auth).get(index).patch(update).delete(remove);
+router.use(auth).get(detail).patch(update).delete(remove);
 
 module.exports = router.handler({});

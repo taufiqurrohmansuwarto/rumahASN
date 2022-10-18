@@ -35,6 +35,13 @@ const index = async (req, res) => {
 const detail = async (req, res) => {
   try {
     const { customId } = req?.user;
+    const { id } = req?.query;
+
+    const result = await Tickets.query()
+      .where("requester", customId)
+      .andWhere("id", id)
+      .first();
+    res.json(result);
   } catch (error) {
     console.log(error);
     res.status(400).json({ code: 400, message: "Internal Server Error" });
@@ -45,7 +52,7 @@ const create = async (req, res) => {
   try {
     const { customId } = req?.user;
     const { body } = req;
-    const data = { ...body, requester: customId };
+    const data = { ...body, requester: customId, status_code: "DIAJUKAN" };
 
     const result = await Tickets.query().insert(data).returning("*");
     res.status(201).json(result);
@@ -70,10 +77,9 @@ const remove = async (req, res) => {
     await Tickets.query()
       .delete()
       .where("requester", customId)
-      .andWhere("id", id);
-
+      .andWhere("id", id)
+      .andWhereNot("status_code", "SELESAI");
     res.json({ code: 200, message: "success" });
-    //       should include status
   } catch (error) {
     console.log(error);
     res.status(400).json({ code: 400, message: "Internal Server Error" });
@@ -85,4 +91,5 @@ module.exports = {
   create,
   update,
   remove,
+  detail,
 };
