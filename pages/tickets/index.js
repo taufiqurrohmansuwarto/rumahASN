@@ -88,7 +88,7 @@ const Tickets = () => {
           }}
           onClick={createTicket}
         >
-          Buat
+          Tiket
         </Button>
         <Table
           pagination={{

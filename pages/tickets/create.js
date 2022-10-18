@@ -76,7 +76,11 @@ const CreateTicket = () => {
             <Form.Item name="content" label="Deskripsi">
               <Input.TextArea />
             </Form.Item>
-            <Form.Item name="category_id" label="Kategori">
+            <Form.Item
+              help="Pastikan kategori yang anda pilih sesuai, ini akan membantu kami memilah"
+              name="category_id"
+              label="Kategori"
+            >
               <Select showSearch optionFilterProp="name">
                 {dataCategories?.map((category) => (
                   <Select.Option

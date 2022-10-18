@@ -32,6 +32,17 @@ export const adminRoutes = {
       icon: <UserOutlined />,
     },
     {
+      path: "/admin/tickets",
+      name: "Ticket Management",
+      icon: <BookOutlined />,
+      routes: [
+        { path: "/admin/tickets/all", name: "Semua Tiket" },
+        { path: "/admin/tickets/diajukan", name: "Tiket Diajukan" },
+        { path: "/admin/tickets/dikerjakan", name: "Tiket Dikerjakan" },
+        { path: "/admin/tickets/selesai", name: "Tiket Selesai" },
+      ],
+    },
+    {
       path: "/admin/apps-management",
       name: "App Management",
       icon: <CarOutlined />,
