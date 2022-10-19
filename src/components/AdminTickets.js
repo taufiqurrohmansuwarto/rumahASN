@@ -40,6 +40,7 @@ const AdminTickets = ({ status = "all" }) => {
   return (
     <Table
       dataSource={data?.results}
+      loading={isLoading}
       rowKey={(row) => row?.id}
       pagination={{
         current: query.page,
