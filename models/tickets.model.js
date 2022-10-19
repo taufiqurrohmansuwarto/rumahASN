@@ -21,7 +21,33 @@ class Tickets extends Model {
     const Status = require("./status.model");
     const Priorities = require("./priorities.model");
 
+    const User = require("../models/users.model");
+
     return {
+      agent: {
+        relation: Model.BelongsToOneRelation,
+        modelClass: User,
+        join: {
+          from: "tickets.assignee",
+          to: "users.custom_id",
+        },
+      },
+      customer: {
+        relation: Model.BelongsToOneRelation,
+        modelClass: User,
+        join: {
+          from: "tickets.requester",
+          to: "users.custom_id",
+        },
+      },
+      admin: {
+        relation: Model.BelongsToOneRelation,
+        modelClass: User,
+        join: {
+          from: "tickets.chooser",
+          to: "users.custom_id",
+        },
+      },
       categories: {
         relation: Model.BelongsToOneRelation,
         modelClass: Categories,
@@ -34,16 +60,16 @@ class Tickets extends Model {
         relation: Model.BelongsToOneRelation,
         modelClass: Status,
         join: {
-          from: "tickets.status_id",
-          to: "status.id",
+          from: "tickets.status_codek",
+          to: "status.name",
         },
       },
       priorities: {
         relation: Model.BelongsToOneRelation,
         modelClass: Priorities,
         join: {
-          from: "tickets.priority_id",
-          to: "priorities.id",
+          from: "tickets.priority_code",
+          to: "priorities.name",
         },
       },
     };

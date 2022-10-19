@@ -1,24 +1,49 @@
-import { useMutation, useQuery } from "@tanstack/react-query";
-import { Form, Button, Modal, Select, Space, Avatar } from "antd";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { Form, Button, Modal, Select, Space, Avatar, message } from "antd";
 import React, { useState } from "react";
-import { listAgents } from "../../services/admin.services";
+import {
+  listAgents,
+  assignAgents,
+  detailTicket,
+} from "../../services/admin.services";
 
-const ModalPicker = ({ open, cancelModal, agents }) => {
+const ModalPicker = ({ open, cancelModal, agents, ticketId }) => {
   const [form] = Form.useForm();
-  const { mutate: assignAgents, isLoading } = useMutation((data) =>
-    assignAgents(data)
+  const queryClient = useQueryClient();
+
+  const { mutate: assign, isLoading } = useMutation(
+    (data) => assignAgents(data),
+    {
+      onSuccess: () => {
+        message.success("Berhasil assign agent");
+        cancelModal();
+      },
+      onSettled: () => {
+        queryClient.invalidateQueries(["admin-tickets", ticketId]);
+      },
+      onError: () => {
+        message.error("Gagal assign agent");
+      },
+    }
   );
 
   const handleOk = async () => {
     try {
       const result = await form.validateFields();
-      console.log(result);
+      const data = {
+        id: ticketId,
+        data: {
+          assignee: result.assignee,
+        },
+      };
+      assign(data);
     } catch (error) {}
   };
 
   return (
     <Modal
       onOk={handleOk}
+      confirmLoading={isLoading}
       centered
       width={700}
       title="Pilih Agent"
@@ -26,7 +51,11 @@ const ModalPicker = ({ open, cancelModal, agents }) => {
       onCancel={cancelModal}
     >
       <Form form={form}>
-        <Form.Item label="Agent" name="agent_id">
+        <Form.Item
+          label="Agent"
+          name="assignee"
+          rules={[{ required: true, message: "Tidak boleh kosong" }]}
+        >
           <Select showSearch optionFilterProp="name">
             {agents?.map((agent) => (
               <Select.Option
@@ -56,6 +85,14 @@ function AdminAssignAgent({ id }) {
     }
   );
 
+  const { data, isLoading } = useQuery(
+    ["admin-tickets", id],
+    () => detailTicket(id),
+    {
+      refetchOnWindowFocus: false,
+    }
+  );
+
   const [openModal, setOpenModal] = useState();
   const cancelModal = () => setOpenModal(false);
 
@@ -63,8 +100,18 @@ function AdminAssignAgent({ id }) {
 
   return (
     <div>
-      <Button onClick={handleOpen}>Assign Agent</Button>
-      <ModalPicker agents={agents} open={openModal} cancelModal={cancelModal} />
+      {JSON.stringify(data)}
+      {data?.status_code === "DIAJUKAN" ? (
+        <Button onClick={handleOpen}>Assign Agent</Button>
+      ) : (
+        <div>hello</div>
+      )}
+      <ModalPicker
+        ticketId={id}
+        agents={agents}
+        open={openModal}
+        cancelModal={cancelModal}
+      />
     </div>
   );
 }

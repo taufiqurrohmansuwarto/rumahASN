@@ -3,7 +3,11 @@ const Tickets = require("../models/tickets.model");
 const detail = async (req, res) => {
   try {
     const { id } = req?.query;
-    const result = await Tickets.query().findById(id);
+    const result = await Tickets.query()
+      .findById(id)
+      .withGraphFetched(
+        "[status, priorities, categories, agent(simpleSelect), customer(simpleSelect), admin(simpleSelect)]"
+      );
     res.json(result);
   } catch (error) {
     console.log(error);
@@ -22,9 +26,9 @@ const addAgents = async (req, res) => {
         chooser: customId,
         chooser_picked_at: new Date(),
         assignee: body?.assignee,
-        assignee_json: body?.assignee_json,
       })
-      .where("id", id);
+      .where("id", id)
+      .andWhere("status_code", "DIAJUKAN");
 
     res.json({ code: 200, message: "success" });
   } catch (error) {
@@ -43,7 +47,8 @@ const removeAgents = async (req, res) => {
         assignee: null,
         assignee_json: null,
       })
-      .where("id", id);
+      .where("id", id)
+      .andWhere("status_code", "DIAJUKAN");
     res.json({ code: 200, message: "success" });
   } catch (error) {
     console.log(error);

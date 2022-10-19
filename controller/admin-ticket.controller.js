@@ -9,17 +9,10 @@ const index = async (req, res) => {
     const page = req?.query?.page || 1;
     const limit = req?.query?.limit || 50;
 
-    let statusId;
-
-    if (status) {
-      const result = await Status.query().where("name", status).first();
-      statusId = result?.id;
-    }
-
     const result = await Tickets.query()
       .where((builder) => {
         if (status !== "all") {
-          builder.where("status_id", statusId);
+          builder.where("status_code", status);
         }
       })
       .page(page - 1, limit)

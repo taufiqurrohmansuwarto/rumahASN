@@ -10,19 +10,10 @@ const {
 
 const SemuaTicket = () => {
   const router = useRouter();
-  const { data, isLoading } = useQuery(
-    ["admin-tickets", router.query.id],
-    () => detailTicket(router.query.id),
-    {
-      enabled: !!router.query.id,
-    }
-  );
 
   return (
     <PageContainer>
-      {JSON.stringify(data)}
-
-      <AdminAssignAgent />
+      <AdminAssignAgent id={router?.query?.id} />
     </PageContainer>
   );
 };
