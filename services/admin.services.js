@@ -15,4 +15,9 @@ export const getAllTickets = async (query) => {
     )
     .then((res) => res?.data);
 };
+
+export const detailTicket = (id) => {
+  return api.get(`/tickets/${id}`).then((res) => res?.data);
+};
+
 export const pickAgents = async () => {};

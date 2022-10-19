@@ -1,4 +1,5 @@
 import AdminLayout from "../../../src/components/AdminLayout";
+import AdminTickets from "../../../src/components/AdminTickets";
 
 const {
   default: PageContainer,
@@ -7,7 +8,7 @@ const {
 const SudahDikerjakan = () => {
   return (
     <PageContainer>
-      <div>hello world</div>
+      <AdminTickets status="DIKERJAKAN" />
     </PageContainer>
   );
 };

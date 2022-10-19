@@ -1,30 +1,14 @@
-import { Query, useQuery } from "@tanstack/react-query";
-import { useState } from "react";
-import { getAllTickets } from "../../../services/admin.services";
 import AdminLayout from "../../../src/components/AdminLayout";
+import AdminTickets from "../../../src/components/AdminTickets";
 
 const {
   default: PageContainer,
 } = require("../../../src/components/PageContainer");
 
 const BelumDikerjakan = () => {
-  const [query, setQuery] = useState({
-    page: 1,
-    limit: 10,
-    status: "DIAJUKAN",
-  });
-
-  const { data, isLoading } = useQuery(
-    ["admin-tickets", query],
-    () => getAllTickets(query),
-    {
-      enabled: !!query,
-    }
-  );
-
   return (
     <PageContainer>
-      <div>{JSON.stringify(data)}</div>
+      <AdminTickets status="DIAJUKAN" />
     </PageContainer>
   );
 };

@@ -36,10 +36,13 @@ export const adminRoutes = {
       name: "Ticket Management",
       icon: <BookOutlined />,
       routes: [
-        { path: "/admin/tickets/all", name: "Semua Tiket" },
-        { path: "/admin/tickets/diajukan", name: "Tiket Diajukan" },
-        { path: "/admin/tickets/dikerjakan", name: "Tiket Dikerjakan" },
-        { path: "/admin/tickets/selesai", name: "Tiket Selesai" },
+        { path: "/admin/tickets-managements/semua", name: "Semua Tiket" },
+        { path: "/admin/tickets-managements/diajukan", name: "Tiket Diajukan" },
+        {
+          path: "/admin/tickets-managements/dikerjakan",
+          name: "Tiket Dikerjakan",
+        },
+        { path: "/admin/tickets-managements/selesai", name: "Tiket Selesai" },
       ],
     },
     {

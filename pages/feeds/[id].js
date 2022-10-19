@@ -5,6 +5,7 @@ import { useRouter } from "next/router";
 import { createComment, detailComments } from "../../services";
 import Layout from "../../src/components/Layout";
 import PageContainer from "../../src/components/PageContainer";
+import { fromNow } from "../../utils";
 
 const CreateComment = ({ user, commentId }) => {
   const queryClient = useQueryClient();
@@ -66,6 +67,7 @@ const MainComment = ({ message, user, comments, currentUser, commentId }) => {
       <CreateComment user={currentUser} commentId={commentId} />
       {comments?.map((comment) => (
         <Comment
+          datetime={fromNow(comment?.created_at)}
           key={comment.id}
           author={comment.user?.username}
           avatar={comment.user?.image}
@@ -93,13 +95,12 @@ function FeedDetail() {
     <PageContainer title="Beranda" subTitle="Feeds">
       <Button onClick={() => signOut()}>Logout</Button>
       <MainComment
-        message={dataComment?.comment}
+        message={dataComment?.message}
         currentUser={data?.user}
         commentId={router?.query?.id}
         user={dataComment?.user}
         comments={dataComment?.comments}
       />
-      {JSON.stringify(dataComment)}
     </PageContainer>
   );
 }

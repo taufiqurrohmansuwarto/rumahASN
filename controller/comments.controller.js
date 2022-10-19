@@ -12,7 +12,7 @@ const index = async (req, res) => {
         "comments.*",
         Comments.relatedQuery("comments").count().as("comment_count")
       )
-      .whereNot("comment_id", null)
+      .where("comment_id", null)
       .page(page - 1, limit)
       .withGraphFetched("[user(simpleSelect)]")
       .orderBy("created_at", "desc");
