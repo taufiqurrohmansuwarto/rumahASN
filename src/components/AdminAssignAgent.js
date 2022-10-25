@@ -28,16 +28,15 @@ const ModalPicker = ({ open, cancelModal, agents, ticketId }) => {
   );
 
   const handleOk = async () => {
-    try {
-      const result = await form.validateFields();
-      const data = {
-        id: ticketId,
-        data: {
-          assignee: result.assignee,
-        },
-      };
-      assign(data);
-    } catch (error) {}
+    const result = await form.validateFields();
+    const data = {
+      id: ticketId,
+      data: {
+        assignee: result.assignee,
+      },
+    };
+
+    // assign(data);
   };
 
   return (
@@ -100,11 +99,10 @@ function AdminAssignAgent({ id }) {
 
   return (
     <div>
-      {JSON.stringify(data)}
-      {data?.status_code === "DIAJUKAN" ? (
+      {data?.assignee === null ? (
         <Button onClick={handleOpen}>Assign Agent</Button>
       ) : (
-        <div>hello</div>
+        <div>{data?.agent?.username} belum di approve</div>
       )}
       <ModalPicker
         ticketId={id}
