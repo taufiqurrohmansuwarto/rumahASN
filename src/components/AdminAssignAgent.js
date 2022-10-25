@@ -35,8 +35,7 @@ const ModalPicker = ({ open, cancelModal, agents, ticketId }) => {
         assignee: result.assignee,
       },
     };
-
-    // assign(data);
+    assign(data);
   };
 
   return (

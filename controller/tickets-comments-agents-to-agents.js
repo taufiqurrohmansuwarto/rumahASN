@@ -9,15 +9,16 @@ const index = async (req, res) => {
     // hanya boleh mengambil id
     const currentTicket = await Ticktes.query()
       .where("id", id)
-      .andWhere("requester", customId)
-      .andWhere("status", "DIKERJAKAN")
+      /**!fix this motherfucker */
+      // .andWhere("requester", customId)
+      // .andWhere("status", "DIKERJAKAN")
       .first();
 
     if (!currentTicket) {
       res.status(404).json({ code: 404, message: "Ticket not found" });
     } else {
       const result = await TicketsCommentsAgents.query()
-        .where("id", currentTicket?.id)
+        .where("ticket_id", currentTicket?.id)
         .orderBy("created_at", "desc");
       res.json(result);
     }
@@ -66,8 +67,14 @@ const update = async (req, res) => {
 const create = async (req, res) => {
   const { id } = req?.query;
   const { customId } = req?.user;
+
+  await TicketsCommentsAgents.query().insert({
+    ...req?.body,
+    ticket_id: id,
+    user_id: customId,
+  });
+
   try {
-    error;
   } catch (error) {
     console.log(error);
     res.status(400).json({ code: 400, message: "Internal Server Error" });
@@ -76,6 +83,8 @@ const create = async (req, res) => {
 
 const detail = async (req, res) => {
   try {
+    const { id } = req?.query;
+    const { customId } = req?.user;
   } catch (error) {
     console.log(error);
     res.status(400).json({ code: 400, message: "Internal Server Error" });

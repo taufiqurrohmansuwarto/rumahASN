@@ -28,6 +28,7 @@ export const hapusKerjakanTicket = (id) => {
   return api.delete(`/tickets/${id}`).then((res) => res?.data);
 };
 
+// akhiri pekerjaan
 export const akhiriPekerjaanSelesai = (id) => {
   return api.patch(`/tickets/${id}/status`).then((res) => res?.data);
 };
