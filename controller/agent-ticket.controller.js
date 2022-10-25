@@ -95,11 +95,11 @@ const akhiriPekerjaanSelesai = async (req, res) => {
   try {
     const { customId } = req?.user;
     const { id } = req.query;
-    const { body } = req;
+
     await Tickets.query()
       .update({
         status_code: "SELESAI",
-        ...body,
+        assignee_reason: req?.body?.assignee_reason,
       })
       .where("id", id)
       .andWhere("assignee", customId)
@@ -115,7 +115,15 @@ const akhiriPekerjaanDitolak = async (req, res) => {
   try {
     const { customId } = req?.user;
     const { id } = req?.query;
-    await Tickets.query().update({});
+    await Tickets.query()
+      .update({
+        status_code: "DITOLAK",
+        assignee_reason: req?.body?.assignee_reason,
+      })
+      .where("id", id)
+      .andWhere("assignee", customId)
+      .andWhere("status_code", "DIKERJAKAN");
+    res.json({ code: 200, message: "success" });
   } catch (error) {
     console.log(error);
     res.status(400).json({ code: 400, message: "Internal Server Error" });
