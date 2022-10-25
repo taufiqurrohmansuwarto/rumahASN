@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Table, Card, Button, Modal, message } from "antd";
+import Link from "next/link";
 import { useState } from "react";
 import {
   getAllTickets,
@@ -54,6 +55,17 @@ const Tickets = () => {
       key: "aksi",
       render: (text, record) => {
         return <Tombol record={record} />;
+      },
+    },
+    {
+      title: "Detail",
+      key: "detail",
+      render: (text, record) => {
+        return (
+          <Link href={`/agent/tickets/${record?.id}/detail`}>
+            <a>Detail</a>
+          </Link>
+        );
       },
     },
   ];

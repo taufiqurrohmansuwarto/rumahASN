@@ -35,3 +35,65 @@ export const akhiriPekerjaanSelesai = (id) => {
 export const akhirPekerjaanTidakSelesai = (id) => {
   return api.delete(`/tickets/${id}/status`).then((res) => res?.data);
 };
+
+// for agent to agents message
+export const messagesAgents = async (id) => {
+  return await api
+    .get(`/tickets/${id}/comments-agents`)
+    .then((res) => res.data);
+};
+
+export const createMessagesAgents = async ({ id, data }) => {
+  return await api
+    .post(`/tickets/${id}/comments-agents`, data)
+    .then((res) => res.data);
+};
+
+export const deleteMessagesAgents = async ({ id, ticketId }) => {
+  return await api
+    .delete(`/tickets/${ticketId}/coments-agents/${id}`)
+    .then((res) => res.data);
+};
+
+export const detailMessagesAgents = async ({ id, ticketId }) => {
+  return await api
+    .get(`/tickets/${ticketId}/comments-agents/${id}`)
+    .then((res) => res.data);
+};
+
+export const updateMessagesAgents = async ({ id, ticketId, data }) => {
+  return await api
+    .patch(`/tickets/${ticketId}/comments-agents/${id}`, data)
+    .then((res) => res.data);
+};
+
+// for agent to customer message
+export const messagesCustomers = async (id) => {
+  return await api
+    .get(`/tickets/${id}/comments-customers`)
+    .then((res) => res.data);
+};
+
+export const createMessagesCustomers = async ({ id, data }) => {
+  return await api
+    .post(`/tickets/${id}/comments-customers`, data)
+    .then((res) => res.data);
+};
+
+export const deleteMessagesCustomers = async ({ id, ticketId }) => {
+  return await api
+    .delete(`/tickets/${ticketId}/comments-customers/${id}`)
+    .then((res) => res.data);
+};
+
+export const detailMessagesCustomers = async ({ id, ticketId }) => {
+  return await api
+    .get(`/tickets/${ticketId}/comments-customers/${id}`)
+    .then((res) => res.data);
+};
+
+export const updateMessagesCustomers = async ({ id, ticketId, data }) => {
+  return await api
+    .patch(`/tickets/${ticketId}/comments-customers/${id}`, data)
+    .then((res) => res.data);
+};

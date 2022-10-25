@@ -3,7 +3,7 @@ import { useRouter } from "next/router";
 import AgentLayout from "../../../../src/components/AgentLayout";
 import PageContainer from "../../../../src/components/PageContainer";
 
-const TicketsDetails = () => {
+const TicketsDetail = () => {
   const router = useRouter();
   return (
     <PageContainer
@@ -18,13 +18,13 @@ const TicketsDetails = () => {
   );
 };
 
-TicketsDetails.getLayout = (page) => {
+TicketsDetail.getLayout = (page) => {
   return <AgentLayout active="/agent/tickets">{page}</AgentLayout>;
 };
 
-TicketsDetails.Auth = {
+TicketsDetail.Auth = {
   action: "read",
   subject: "DashboardAgent",
 };
 
-export default TicketsDetails;
+export default TicketsDetail;

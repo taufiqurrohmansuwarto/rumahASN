@@ -3,6 +3,6 @@ import auth from "../../../../../../middleware/auth.middleware";
 
 const router = createRouter();
 
-router.use(auth).post().get();
+router.use(auth).get().delete().patch();
 
 export default router.handler();

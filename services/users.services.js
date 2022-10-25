@@ -25,3 +25,10 @@ export const deleteTicket = async (id) => {
 export const detailTicket = async (id) => {
   return await api.get(`/tickets/${id}`).then((res) => res.data);
 };
+
+// messages customers to agents
+export const messagesCustomers = async (id) => {
+  return await api
+    .get(`/tickets/${id}/comments-customers`)
+    .then((res) => res.data);
+};
