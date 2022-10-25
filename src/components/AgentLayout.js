@@ -29,8 +29,8 @@ function AgentLayout({ children, active }) {
     <ProLayout
       selectedKeys={[active ? active : router.pathname]}
       title="Agent"
-      layout="mix"
-      splitMenus={true}
+      // layout="mix"
+      // splitMenus={true}
       location={{
         pathname: router.pathname,
       }}

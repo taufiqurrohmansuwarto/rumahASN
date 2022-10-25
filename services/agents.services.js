@@ -27,3 +27,11 @@ export const kerjakanTicket = (id) => {
 export const hapusKerjakanTicket = (id) => {
   return api.delete(`/tickets/${id}`).then((res) => res?.data);
 };
+
+export const akhiriPekerjaanSelesai = (id) => {
+  return api.patch(`/tickets/${id}/status`).then((res) => res?.data);
+};
+
+export const akhirPekerjaanTidakSelesai = (id) => {
+  return api.delete(`/tickets/${id}/status`).then((res) => res?.data);
+};
