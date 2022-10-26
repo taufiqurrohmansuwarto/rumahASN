@@ -217,6 +217,7 @@ const TicketsDetails = () => {
       onBack={() => router.back()}
     >
       <Card
+        title="Chats Agents"
         loading={
           status === "loading" || status === "unauthenticated" || isLoading
         }
