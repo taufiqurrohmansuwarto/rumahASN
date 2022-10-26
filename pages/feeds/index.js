@@ -1,5 +1,7 @@
 import { Button } from "antd";
 import { signOut, useSession } from "next-auth/react";
+import BannerBKD from "../../src/components/BannerBKD";
+import BeritaBKD from "../../src/components/BeritaBKD";
 import Comments from "../../src/components/Comments";
 import Layout from "../../src/components/Layout";
 import PageContainer from "../../src/components/PageContainer";
@@ -10,6 +12,8 @@ function Feeds() {
   return (
     <PageContainer title="Beranda" subTitle="Feeds">
       <Button onClick={() => signOut()}>Logout</Button>
+      {/* <BeritaBKD /> */}
+      <BannerBKD />
       <Comments />
     </PageContainer>
   );

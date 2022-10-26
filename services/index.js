@@ -102,3 +102,13 @@ export const deleteComments = async (id) => {
 export const detailComments = async (id) => {
   return await api.get(`/comments/${id}`).then((res) => res.data);
 };
+
+// list berita dan banner
+
+export const dataListBerita = async () => {
+  return await api.get("/berita").then((res) => res?.data);
+};
+
+export const dataListBanner = async () => {
+  return await api.get("/banner").then((res) => res?.data);
+};
