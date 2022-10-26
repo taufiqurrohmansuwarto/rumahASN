@@ -50,3 +50,10 @@ export const createCommentCustomers = async ({ id, data }) => {
     .post(`/tickets/${id}/comments-customers`, data)
     .then((res) => res?.data);
 };
+
+// give fucking feedback
+export const sendFeedbackData = async ({ id, data }) => {
+  return await api
+    .patch(`/tickets/${id}/feedback`, data)
+    .then((res) => res?.data);
+};

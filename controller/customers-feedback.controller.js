@@ -18,6 +18,7 @@ const addFeedback = async (req, res) => {
         .update({
           stars: body.stars,
           requester_comment: body.requester_comment,
+          has_feedback: true,
         })
         .where("id", id)
         .andWhere("requester", customid)

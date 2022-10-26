@@ -3,6 +3,7 @@ import Layout from "../../../src/components/Layout";
 import PageContainer from "../../../src/components/PageContainer";
 import { useQuery } from "@tanstack/react-query";
 import { detailTicket } from "../../../services/users.services";
+import ButtonFeedback from "../../../src/components/ButtonFeedback";
 
 const DetailTicket = () => {
   const router = useRouter();
@@ -20,6 +21,9 @@ const DetailTicket = () => {
     <PageContainer title="Detail Tiket" onBack={() => router.back()}>
       <h1>Detail Ticket {id}</h1>
       {JSON.stringify(data)}
+      <div>
+        <ButtonFeedback id={id} />
+      </div>
     </PageContainer>
   );
 };
