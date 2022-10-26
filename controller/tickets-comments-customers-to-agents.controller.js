@@ -1,4 +1,4 @@
-const TicketsCommentsCustomers = require("../models/tickets-comments-customers.model");
+const TicketsCommentsCustomers = require("../models/tickets_comments_customers.model");
 const Tickets = require("../models/tickets.model");
 
 const index = async (req, res) => {
@@ -12,8 +12,9 @@ const index = async (req, res) => {
     if (currentTicket) {
       const result = await TicketsCommentsCustomers.query()
         .where("ticket_id", id)
-        .andWhere("user_id", customId)
-        .first();
+        .withGraphFetched("[user(simpleSelect)]")
+        .orderBy("created_at", "desc")
+        .andWhere("user_id", customId);
 
       res.json(result);
     } else {
@@ -76,11 +77,31 @@ const create = async (req, res) => {
     const { customId } = req?.user;
     const { id } = req?.query;
 
-    await TicketsCommentsCustomers.query().insert({
-      ticket_id: id,
-      user_id: customId,
-      comment: req.body.comment,
-    });
+    const currentTicket = await Tickets.query().findById(id);
+
+    if (currentTicket) {
+      let role;
+      const assignee = currentTicket?.assignee;
+      const chooser = currentTicket?.chooser;
+      const requester = currentTicket?.requet;
+
+      if (assignee === customId) {
+        role = "Agent";
+      } else if (chooser === customId) {
+        role = "Admin";
+      } else if (requester === customId) {
+        role = "Requester";
+      }
+
+      await TicketsCommentsCustomers.query().insert({
+        ticket_id: id,
+        user_id: customId,
+        comment: req.body.comment,
+        role,
+      });
+    } else {
+      res.status(404).json({ code: 404, message: "Ticket not found" });
+    }
 
     res.json({ code: 200, message: "success" });
   } catch (error) {

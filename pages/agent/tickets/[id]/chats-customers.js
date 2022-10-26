@@ -1,23 +1,23 @@
-import { useQueryClient, useQuery, useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
-  Input,
+  Button,
   Card,
   Comment,
   Form,
-  Button,
-  message,
+  Input,
   List,
-  Space,
+  message,
   Popconfirm,
+  Space,
 } from "antd";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import {
-  createMessagesAgents,
-  deleteMessagesAgents,
-  messagesAgents,
-  updateMessagesAgents,
+  createMessagesCustomers,
+  deleteMessagesCustomers,
+  messagesCustomers,
+  updateMessagesCustomers,
 } from "../../../../services/agents.services";
 import AgentLayout from "../../../../src/components/AgentLayout";
 import PageContainer from "../../../../src/components/PageContainer";
@@ -27,10 +27,13 @@ const CreateComments = ({ user, ticketId }) => {
   const queryClient = useQueryClient();
 
   const { mutate: create, isLoading } = useMutation(
-    (data) => createMessagesAgents(data),
+    (data) => createMessagesCustomers(data),
     {
       onSettled: () =>
-        queryClient.invalidateQueries(["messages-agents-to-agents", ticketId]),
+        queryClient.invalidateQueries([
+          "messages-agents-to-customers",
+          ticketId,
+        ]),
       onSuccess: () => {
         form.resetFields();
         message.success("Berhasil mengirim pesan");
@@ -99,12 +102,18 @@ const CommentsList = ({ data, currentUserId, ticketId }) => {
   };
 
   const { mutateAsync: hapus, isLoading: isLoadingHapus } = useMutation(
-    (data) => deleteMessagesAgents(data),
+    (data) => deleteMessagesCustomers(data),
     {
       onSettled: () =>
-        queryClient.invalidateQueries(["messages-agents-to-agents", ticketId]),
+        queryClient.invalidateQueries([
+          "messages-agents-to-customers",
+          ticketId,
+        ]),
       onSuccess: () => {
-        queryClient.invalidateQueries(["messages-agents-to-agents", ticketId]);
+        queryClient.invalidateQueries([
+          "messages-agents-to-customers",
+          ticketId,
+        ]);
         message.success("Berhasil menghapus pesan");
       },
       onError: () => message.error("Gagal menghapus pesan"),
@@ -112,12 +121,18 @@ const CommentsList = ({ data, currentUserId, ticketId }) => {
   );
 
   const { mutate: update, isLoading: isLoadingUpdate } = useMutation(
-    (data) => updateMessagesAgents(data),
+    (data) => updateMessagesCustomers(data),
     {
       onSettled: () =>
-        queryClient.invalidateQueries(["messages-agents-to-agents", ticketId]),
+        queryClient.invalidateQueries([
+          "messages-agents-to-customers",
+          ticketId,
+        ]),
       onSuccess: () => {
-        queryClient.invalidateQueries(["messages-agents-to-agents", ticketId]);
+        queryClient.invalidateQueries([
+          "messages-agents-to-customers",
+          ticketId,
+        ]);
         message.success("Berhasil mengubah pesan");
         form.resetFields();
         setSelected(null);
@@ -201,13 +216,13 @@ const CommentsList = ({ data, currentUserId, ticketId }) => {
   );
 };
 
-const TicketsDetails = () => {
+const AgentsChatsCustomers = () => {
   const router = useRouter();
   const { data: dataUser, status } = useSession();
 
   const { data, isLoading } = useQuery(
-    ["messages-agents-to-agents", router?.query?.id],
-    () => messagesAgents(router?.query?.id)
+    ["messages-agents-to-customers", router?.query?.id],
+    () => messagesCustomers(router?.query?.id)
   );
 
   return (
@@ -233,13 +248,13 @@ const TicketsDetails = () => {
   );
 };
 
-TicketsDetails.getLayout = (page) => {
+AgentsChatsCustomers.getLayout = (page) => {
   return <AgentLayout active="/agent/tickets">{page}</AgentLayout>;
 };
 
-TicketsDetails.Auth = {
+AgentsChatsCustomers.Auth = {
   action: "read",
   subject: "DashboardAgent",
 };
 
-export default TicketsDetails;
+export default AgentsChatsCustomers;
