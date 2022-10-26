@@ -8,6 +8,10 @@ class Notifications extends Model {
     return "notifications";
   }
 
+  static get idColumn() {
+    return "id";
+  }
+
   //    relation with users table
   static get relationMappings() {
     const User = require("./users.model");
@@ -33,4 +37,4 @@ class Notifications extends Model {
   }
 }
 
-export default Notifications;
+module.exports = Notifications;

@@ -1,5 +1,5 @@
 import { useQueryClient, useQuery, useMutation } from "@tanstack/react-query";
-import { Input, Card, Comment, Form, Button } from "antd";
+import { Input, Card, Comment, Form, Button, message } from "antd";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import {
@@ -18,14 +18,18 @@ const CreateComments = ({ user, ticketId }) => {
     {
       onSettled: () =>
         queryClient.invalidateQueries(["messages-agents-to-agents", ticketId]),
+      onSuccess: () => {
+        form.resetFields();
+        message.success("Berhasil mengirim pesan");
+      },
+      onError: () => message.error("Gagal mengirim pesan"),
     }
   );
 
   const handleCreate = async (values) => {
     try {
-      console.log(values);
-      // create(values);
-      // form.resetFields();
+      const data = { id: ticketId, message: values?.comment };
+      create(data);
     } catch (error) {
       console.log(error);
     }
@@ -37,11 +41,16 @@ const CreateComments = ({ user, ticketId }) => {
       avatar={user?.image}
       content={
         <Form onFinish={handleCreate} form={form}>
-          <Form.Item name="message">
+          <Form.Item name="comment">
             <Input.TextArea rows={4} />
           </Form.Item>
           <Form.Item>
-            <Button htmlType="submit" type="primary" onClick={() => {}}>
+            <Button
+              loading={isLoading}
+              htmlType="submit"
+              type="primary"
+              onClick={() => {}}
+            >
               Submit
             </Button>
           </Form.Item>

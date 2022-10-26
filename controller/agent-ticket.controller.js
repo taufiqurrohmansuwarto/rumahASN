@@ -1,4 +1,5 @@
 const Tickets = require("../models/tickets.model");
+const Notifications = require("../models/notifications.model");
 
 const index = async (req, res) => {
   try {
@@ -75,6 +76,29 @@ const kerjakanTicket = async (req, res) => {
       .andWhere("assignee", customId)
       .andWhere("status_code", "DIAJUKAN");
 
+    // find first who is assigne and the admin
+    const result = Tickets.query().findById(id);
+    const assignee = result?.assignee;
+    const chooser = result?.chooser;
+
+    const dataInsert = [
+      {
+        from: customId,
+        to: assignee,
+        created_at: new Date(),
+        title: "Perubahan status ticket",
+        content: "Permasalahan anda berubah statusnya menjadi dikerjakan",
+      },
+      {
+        from: customId,
+        to: chooser,
+        created_at: new Date(),
+        title: "Perubahan status ticket",
+        content: "Agent sudah mengerjakana",
+      },
+    ];
+
+    await Notifications.query().insert(dataInsert);
     res.status(200).json({ code: 200, message: "success", data });
   } catch (error) {
     console.log(error);

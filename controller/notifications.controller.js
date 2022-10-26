@@ -3,6 +3,10 @@ const Notifications = require("../models/notifications.model");
 const index = async (req, res) => {
   try {
     const { customId } = req?.user;
+    const result = await Notifications.query()
+      .where("to", customId)
+      .orderBy("created_at", "desc");
+    res.json(result);
   } catch (error) {
     console.log(error);
     res.status(400).json({ code: 400, message: "Internal Server Error" });
