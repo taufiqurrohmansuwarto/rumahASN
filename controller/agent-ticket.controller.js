@@ -74,6 +74,7 @@ const kerjakanTicket = async (req, res) => {
       .where("id", id)
       .andWhere("assignee", customId)
       .andWhere("status_code", "DIAJUKAN");
+
     res.status(200).json({ code: 200, message: "success", data });
   } catch (error) {
     console.log(error);
