@@ -6,12 +6,13 @@ const customerDashboard = async (req, res) => {
 
     // its must be filter by query
 
-    // count all tickets
-
+    // aggregate by status_code
     const result = await Ticket.query()
       .count()
+      .select("status_code")
       .where("requester", customId)
       .groupBy("status_code");
+
     res.json(result);
   } catch (error) {
     console.log(error);
@@ -22,6 +23,13 @@ const customerDashboard = async (req, res) => {
 const agentDashboard = async (req, res) => {
   try {
     const { customId } = req?.user;
+    const result = await Ticket.query()
+      .count()
+      .select("status_code")
+      .where("requester", customId)
+      .groupBy("status_code");
+
+    res.json(result);
   } catch (error) {
     console.log(error);
     res.status(400).json({ code: 400, message: "Internal Server Error" });
@@ -31,6 +39,13 @@ const agentDashboard = async (req, res) => {
 const adminDashboard = async (req, res) => {
   try {
     const { customId } = req?.user;
+    const result = await Ticket.query()
+      .count()
+      .select("status_code")
+      .where("requester", customId)
+      .groupBy("status_code");
+
+    res.json(result);
   } catch (error) {
     console.log(error);
     res.status(400).json({ code: 400, message: "Internal Server Error" });
