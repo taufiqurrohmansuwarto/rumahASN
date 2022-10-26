@@ -3,14 +3,14 @@ const Tickets = require("../models/tickets.model");
 const addFeedback = async (req, res) => {
   try {
     const { id } = req?.query;
-    const { customid } = req?.user;
+    const { customId } = req?.user;
     const { body } = req;
 
     // check first
     const currentTicket = await Tickets.query()
       .where("id", id)
-      .andWhere("requester", customid)
-      .andWhere("status", "SELESAI")
+      .andWhere("requester", customId)
+      .andWhere("status_code", "SELESAI")
       .first();
 
     if (currentTicket) {
@@ -21,8 +21,9 @@ const addFeedback = async (req, res) => {
           has_feedback: true,
         })
         .where("id", id)
-        .andWhere("requester", customid)
-        .andWhere("status", "SELESAI")
+        .andWhere("requester", customId)
+        .andWhere("status_code", "SELESAI")
+        // .andWhere("has_feedback", false)
         .first();
 
       res.status(200).json({ code: 200, message: "success" });
