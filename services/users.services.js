@@ -27,8 +27,26 @@ export const detailTicket = async (id) => {
 };
 
 // messages customers to agents
-export const messagesCustomers = async (id) => {
+export const getCommentCustomers = async (id) => {
   return await api
     .get(`/tickets/${id}/comments-customers`)
     .then((res) => res.data);
+};
+
+export const removeCommentCustomers = async ({ id, ticketId }) => {
+  return await api
+    .delete(`/tickets/${ticketId}/comments-customers/${id}`)
+    .then((res) => res?.data);
+};
+
+export const updateCommentCustomers = async ({ id, ticketId, data }) => {
+  return await api
+    .patch(`/tickets/${ticketId}/comments-customers/${id}`, data)
+    .then((res) => res?.data);
+};
+
+export const createCommentCustomers = async ({ id, data }) => {
+  return await api
+    .post(`/tickets/${id}/comments-customers`, data)
+    .then((res) => res?.data);
 };
