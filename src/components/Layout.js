@@ -1,4 +1,8 @@
-import { UserOutlined, UserSwitchOutlined } from "@ant-design/icons";
+import {
+  LogoutOutlined,
+  UserOutlined,
+  UserSwitchOutlined,
+} from "@ant-design/icons";
 import { uniqBy } from "lodash";
 import { useSession } from "next-auth/react";
 import dynamic from "next/dynamic";
@@ -6,6 +10,7 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import React from "react";
 import { userRoutes } from "../routes";
+import SignoutButton from "./SignoutButton";
 
 const ProLayout = dynamic(
   () => import("@ant-design/pro-layout").then((mod) => mod.ProLayout),
@@ -98,6 +103,11 @@ function Layout({ children, active }) {
         src: data?.user?.image,
         size: "default",
         title: data?.user?.name,
+        shape: "circle",
+      }}
+      defaultCollapsed={true}
+      actionsRender={() => {
+        return [<SignoutButton key="signout" />];
       }}
       menu={{
         request: async () => {
