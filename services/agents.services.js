@@ -52,7 +52,7 @@ export const createMessagesAgents = async ({ id, data }) => {
 
 export const deleteMessagesAgents = async ({ id, ticketId }) => {
   return await api
-    .delete(`/tickets/${ticketId}/coments-agents/${id}`)
+    .delete(`/tickets/${ticketId}/comments-agents/${id}`)
     .then((res) => res.data);
 };
 

@@ -19,6 +19,7 @@ const index = async (req, res) => {
     } else {
       const result = await TicketsCommentsAgents.query()
         .where("ticket_id", currentTicket?.id)
+        .withGraphFetched("[user(simpleSelect)]")
         .orderBy("created_at", "desc");
       res.json(result);
     }
@@ -29,22 +30,24 @@ const index = async (req, res) => {
 };
 
 const remove = async (req, res) => {
-  const { id } = req?.query;
+  const { id, commentAgentId } = req?.query;
   const { customId } = req?.user;
 
   try {
-    //   always check first
     const currentTicket = await Ticktes.query()
       .where("id", id)
-      .andWhere("requester", customId)
-      .andWhere("status", "DIKERJAKAN")
+      // .andWhere("requester", customId)
+      // .andWhere("status", "DIKERJAKAN")
       .first();
 
     if (currentTicket) {
-      const result = await TicketsCommentsAgents.query()
+      await TicketsCommentsAgents.query()
         .delete()
-        .where("ticket_id", id);
-      res.json(result);
+        .where("ticket_id", id)
+        .andWhere("id", commentAgentId)
+        .andWhere("user_id", customId);
+
+      res.json({ code: 200, message: "success" });
     } else {
       res.status(404).json({ code: 404, message: "Ticket not found" });
     }
@@ -55,9 +58,18 @@ const remove = async (req, res) => {
 };
 
 const update = async (req, res) => {
-  const { id } = req?.query;
+  const { id, commentAgentId } = req?.query;
   const { customId } = req?.user;
+
   try {
+    // must be validation
+    await TicketsCommentsAgents.query()
+      .update(req?.body)
+      .where("ticket_id", id)
+      .andWhere("id", commentAgentId)
+      .andWhere("user_id", customId);
+
+    res.json({ code: 200, message: "success" });
   } catch (error) {
     console.log(error);
     res.status(400).json({ code: 400, message: "Internal Server Error" });
@@ -65,16 +77,20 @@ const update = async (req, res) => {
 };
 
 const create = async (req, res) => {
-  const { id } = req?.query;
-  const { customId } = req?.user;
-
-  await TicketsCommentsAgents.query().insert({
-    ...req?.body,
-    ticket_id: id,
-    user_id: customId,
-  });
-
   try {
+    const { id } = req?.query;
+    const { customId } = req?.user;
+
+    const result = await TicketsCommentsAgents.query()
+      .insert({
+        ...req?.body,
+        ticket_id: id,
+        user_id: customId,
+      })
+      .returning("*")
+      .first();
+
+    res.json({ code: 200, message: "success", data: result });
   } catch (error) {
     console.log(error);
     res.status(400).json({ code: 400, message: "Internal Server Error" });
