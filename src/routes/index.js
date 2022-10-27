@@ -12,7 +12,29 @@ import {
 export const userRoutes = {
   routes: [
     { path: "/feeds", name: "Beranda", icon: <HomeOutlined /> },
-    { path: "/tickets", name: "Tiket", icon: <FileOutlined /> },
+    {
+      path: "/tickets",
+      name: "Tiket",
+      icon: <FileOutlined />,
+      routes: [
+        {
+          path: "/tickets/semua",
+          name: "Semua Tiket",
+        },
+        {
+          path: "/tickets/diajukan",
+          name: "Tiket diajukan",
+        },
+        {
+          path: "/tickets/dikerjakan",
+          name: "Tiket dikerjakan",
+        },
+        {
+          path: "/tickets/selesai",
+          name: "Tiket selesai",
+        },
+      ],
+    },
     {
       path: "/tickets/create",
       name: "Buat Ticket",

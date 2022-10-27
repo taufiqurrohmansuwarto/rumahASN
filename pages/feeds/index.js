@@ -11,10 +11,9 @@ function Feeds() {
 
   return (
     <PageContainer title="Beranda" subTitle="Feeds">
-      <Button onClick={() => signOut()}>Logout</Button>
       {/* <BeritaBKD /> */}
       <BannerBKD />
-      <Comments />
+      {/* <Comments /> */}
     </PageContainer>
   );
 }

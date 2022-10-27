@@ -4,6 +4,8 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import React from "react";
 import { adminRoutes } from "../routes";
+import Notifications from "./Notifications";
+import SignoutButton from "./SignoutButton";
 
 const ProLayout = dynamic(
   () => import("@ant-design/pro-layout").then((mod) => mod.ProLayout),
@@ -31,6 +33,12 @@ function AdminLayout({ children, active }) {
       title="Admin"
       location={{
         pathname: router.pathname,
+      }}
+      actionsRender={() => {
+        return [
+          <Notifications key="notifications" />,
+          <SignoutButton key="signout" />,
+        ];
       }}
       menuHeaderRender={(logo, title) => (
         <Link href="/">

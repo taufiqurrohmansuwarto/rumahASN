@@ -4,6 +4,8 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import React from "react";
 import { agentRoutes } from "../routes";
+import Notifications from "./Notifications";
+import SignoutButton from "./SignoutButton";
 
 const ProLayout = dynamic(
   () => import("@ant-design/pro-layout").then((mod) => mod.ProLayout),
@@ -29,6 +31,12 @@ function AgentLayout({ children, active }) {
     <ProLayout
       selectedKeys={[active ? active : router.pathname]}
       title="Agent"
+      actionsRender={() => {
+        return [
+          <Notifications key="notifications" />,
+          <SignoutButton key="signout" />,
+        ];
+      }}
       // layout="mix"
       // splitMenus={true}
       location={{

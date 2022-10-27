@@ -1,4 +1,5 @@
 import NextAuth from "next-auth/next";
+import GoogleProvider from "next-auth/providers/google";
 const User = require("../../../models/users.model");
 
 const operatorId = process.env.OPERATOR_ID;
@@ -11,6 +12,9 @@ const userSecret = process.env.USER_SECRET;
 const userWellknown = process.env.USER_WELLKNOWN;
 const userScope = process.env.USER_SCOPE;
 
+const googleClientId = process.env.GOOGLE_CLIENT_ID;
+const googleClientSecret = process.env.GOOGLE_CLIENT_SECRET;
+
 // automate fucking update current_role user
 
 const updateUser = async (id) => {
@@ -18,8 +22,9 @@ const updateUser = async (id) => {
     const currentUser = await User.query().findById(id);
     const bkd = currentUser?.organization_id?.startsWith("123");
     const role = currentUser?.current_role;
+    const group = currentUser?.grop;
 
-    if (bkd && role === "user") {
+    if (bkd && role === "user" && group === "MASTER") {
       await User.query().findById(id).patch({ current_role: "agent" });
       return User.query().findById(id);
     } else {
@@ -73,8 +78,34 @@ const upsertUser = async (currentUser) => {
 
 export default NextAuth({
   providers: [
+    GoogleProvider({
+      clientId: googleClientId,
+      clientSecret: googleClientSecret,
+      profile: async (profile) => {
+        const currentUser = {
+          id: profile.sub,
+          username: profile.name,
+          image: profile.picture,
+          email: profile.email,
+          role: "USER",
+          group: "GOOGLE",
+          employee_number: profile.employee_number || "",
+          birthdate: profile.birthdate || null,
+          email: profile.email || null,
+          organization_id: profile.organization_id || null,
+        };
+
+        const result = await upsertUser(currentUser);
+
+        const data = { ...currentUser, current_role: result?.current_role };
+
+        const last = await updateUser(currentUser?.id);
+        const lastData = { ...data, ...last, id: last?.custom_id };
+        return lastData;
+      },
+    }),
     {
-      name: "USER",
+      name: "SIMASTER",
       id: "helpdesk-user",
       type: "oauth",
       wellKnown: userWellknown,
