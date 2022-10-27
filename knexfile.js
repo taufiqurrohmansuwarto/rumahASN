@@ -8,7 +8,7 @@ require("dotenv").config();
 
 const connection = {
   database: process.env.DATABASE,
-  user: process.env.USER,
+  user: process.env.USER_DB,
   password: process.env.PASSWORD,
 };
 
