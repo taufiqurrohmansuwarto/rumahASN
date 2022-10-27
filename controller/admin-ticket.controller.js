@@ -1,6 +1,5 @@
 // just look and view
 
-const Status = require("../models/status.model");
 const Tickets = require("../models/tickets.model");
 
 const index = async (req, res) => {

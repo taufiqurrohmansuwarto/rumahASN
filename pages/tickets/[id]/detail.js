@@ -4,6 +4,7 @@ import PageContainer from "../../../src/components/PageContainer";
 import { useQuery } from "@tanstack/react-query";
 import { detailTicket } from "../../../services/users.services";
 import ButtonFeedback from "../../../src/components/ButtonFeedback";
+import ActiveLayout from "../../../src/components/ActiveLayout";
 
 const DetailTicket = () => {
   const router = useRouter();
@@ -18,13 +19,12 @@ const DetailTicket = () => {
   );
 
   return (
-    <PageContainer title="Detail Tiket" onBack={() => router.back()}>
-      <h1>Detail Ticket {id}</h1>
+    <ActiveLayout active="detail" id={id} role="requester">
       {JSON.stringify(data)}
       <div>
         <ButtonFeedback id={id} />
       </div>
-    </PageContainer>
+    </ActiveLayout>
   );
 };
 

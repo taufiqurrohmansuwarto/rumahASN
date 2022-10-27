@@ -82,7 +82,6 @@ const kerjakanTicket = async (req, res) => {
       .andWhere("assignee", customId)
       .first();
 
-    console.log(result);
     const assignee = result?.assignee;
     const chooser = result?.chooser;
 

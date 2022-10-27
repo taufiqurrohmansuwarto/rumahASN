@@ -12,6 +12,7 @@ const Tickets = () => {
   const [query, setQuery] = useState({
     page: 1,
     limit: 50,
+    status: "SELESAI",
   });
 
   const queryClient = useQueryClient();
@@ -58,15 +59,6 @@ const Tickets = () => {
             <Link href={`/tickets/${record?.id}/detail`}>
               <a>Detail</a>
             </Link>
-            <Divider type="vertical" />
-            <a>Update</a>
-            <Divider type="vertical" />
-            <Popconfirm
-              onConfirm={() => handleRemove(record?.id)}
-              title="Apakah anda yakin ingin menghapus?"
-            >
-              <a>Hapus</a>
-            </Popconfirm>
           </Space>
         );
       },

@@ -10,6 +10,7 @@ import PageContainer from "../../src/components/PageContainer";
 
 const Tickets = () => {
   const [query, setQuery] = useState({
+    status: "DIAJUKAN",
     page: 1,
     limit: 50,
   });

@@ -8,6 +8,7 @@ const index = async (req, res) => {
     const search = req?.query?.search || "";
     const page = req?.query?.page || 1;
     const limit = req?.query?.limit || 50;
+    const status = req?.query?.status || "all";
 
     const result = await Tickets.query()
       .where("requester", customId)
@@ -16,6 +17,9 @@ const index = async (req, res) => {
           builder
             .where("title", "ilike", `%${search}%`)
             .orWhere("description", "ilike", `%${search}%`);
+        }
+        if (status !== "all") {
+          builder.where("status_code", status);
         }
       })
       .orderBy("created_at", "desc")
