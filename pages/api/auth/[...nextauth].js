@@ -22,9 +22,11 @@ const updateUser = async (id) => {
     const currentUser = await User.query().findById(id);
     const bkd = currentUser?.organization_id?.startsWith("123");
     const role = currentUser?.current_role;
-    const group = currentUser?.grop;
+    const group = currentUser?.group;
 
-    if (bkd && role === "user" && group === "MASTER") {
+    const isBKDEmployee = bkd && role === "user" && group === "MASTER";
+
+    if (isBKDEmployee) {
       await User.query().findById(id).patch({ current_role: "agent" });
       return User.query().findById(id);
     } else {
