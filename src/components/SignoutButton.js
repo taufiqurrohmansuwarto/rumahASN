@@ -1,6 +1,5 @@
 import { LogoutOutlined } from "@ant-design/icons";
-import { Modal } from "antd";
-import Tooltip from "antd/es/tooltip";
+import { Modal, Tooltip } from "antd";
 import { signOut } from "next-auth/react";
 
 function SignoutButton() {
