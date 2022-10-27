@@ -10,6 +10,7 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import React from "react";
 import { userRoutes } from "../routes";
+import Notifications from "./Notifications";
 import SignoutButton from "./SignoutButton";
 
 const ProLayout = dynamic(
@@ -107,7 +108,10 @@ function Layout({ children, active }) {
       }}
       defaultCollapsed={true}
       actionsRender={() => {
-        return [<SignoutButton key="signout" />];
+        return [
+          <Notifications key="notifications" />,
+          <SignoutButton key="signout" />,
+        ];
       }}
       menu={{
         request: async () => {

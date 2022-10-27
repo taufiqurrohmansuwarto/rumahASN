@@ -112,3 +112,7 @@ export const dataListBerita = async () => {
 export const dataListBanner = async () => {
   return await api.get("/banner").then((res) => res?.data);
 };
+
+export const listNotifications = async () => {
+  return await api.get("/notifications").then((res) => res?.data);
+};

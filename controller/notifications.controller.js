@@ -2,9 +2,20 @@ const Notifications = require("../models/notifications.model");
 
 const index = async (req, res) => {
   try {
-    const { customId } = req?.user;
+    const { customId, current_role } = req?.user;
+
+    let findRole;
+    if (current_role === "user") {
+      findRole = ["requester"];
+    } else if (current_role === "agent") {
+      findRole = ["assignee", "requester"];
+    } else if (current_role === "admin") {
+      findRole = ["admin", "assignee", "requester"];
+    }
+
     const result = await Notifications.query()
       .where("to", customId)
+      .andWhere("role", "in", findRole)
       .orderBy("created_at", "desc");
     res.json(result);
   } catch (error) {
