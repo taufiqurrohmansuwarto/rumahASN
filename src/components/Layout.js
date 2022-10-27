@@ -122,6 +122,7 @@ function Layout({ children, active }) {
             console.log(e);
           }
         },
+        defaultOpenAll: true,
       }}
       menuItemRender={menuItemRender}
       loading={status === "loading"}

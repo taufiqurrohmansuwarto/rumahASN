@@ -42,6 +42,9 @@ function AgentLayout({ children, active }) {
       location={{
         pathname: router.pathname,
       }}
+      menu={{
+        defaultOpenAll: true,
+      }}
       menuHeaderRender={(logo, title) => (
         <Link href="/">
           <a>

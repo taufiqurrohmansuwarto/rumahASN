@@ -77,11 +77,12 @@ const kerjakanTicket = async (req, res) => {
       .andWhere("status_code", "DIAJUKAN");
 
     // find first who is assigne and the admin
-    const result = Tickets.query()
+    const result = await Tickets.query()
       .where("id", id)
       .andWhere("assignee", customId)
       .first();
 
+    console.log(result);
     const assignee = result?.assignee;
     const chooser = result?.chooser;
 

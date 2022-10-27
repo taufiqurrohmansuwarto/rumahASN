@@ -19,19 +19,19 @@ export const userRoutes = {
       routes: [
         {
           path: "/tickets/semua",
-          name: "Semua Tiket",
+          name: "Semua",
         },
         {
           path: "/tickets/diajukan",
-          name: "Tiket diajukan",
+          name: "Diajukan",
         },
         {
           path: "/tickets/dikerjakan",
-          name: "Tiket dikerjakan",
+          name: "Dikerjakan",
         },
         {
           path: "/tickets/selesai",
-          name: "Tiket selesai",
+          name: "Selesai",
         },
       ],
     },
@@ -58,13 +58,13 @@ export const adminRoutes = {
       name: "Ticket Management",
       icon: <BookOutlined />,
       routes: [
-        { path: "/admin/tickets-managements/semua", name: "Semua Tiket" },
-        { path: "/admin/tickets-managements/diajukan", name: "Tiket Diajukan" },
+        { path: "/admin/tickets-managements/semua", name: "Semua" },
+        { path: "/admin/tickets-managements/diajukan", name: "Diajukan" },
         {
           path: "/admin/tickets-managements/dikerjakan",
-          name: "Tiket Dikerjakan",
+          name: "Dikerjakan",
         },
-        { path: "/admin/tickets-managements/selesai", name: "Tiket Selesai" },
+        { path: "/admin/tickets-managements/selesai", name: "Selesai" },
       ],
     },
     {
@@ -97,6 +97,16 @@ export const adminRoutes = {
 export const agentRoutes = {
   routes: [
     { path: "/agent/dashboard", name: "Dashboard", icon: <DashboardFilled /> },
-    { path: "/agent/tickets", name: "Tickets", icon: <SnippetsOutlined /> },
+    {
+      path: "/agent/tickets",
+      name: "Tickets",
+      icon: <SnippetsOutlined />,
+      routes: [
+        { path: "/agens/tickets/semua", name: "Semua" },
+        { path: "/agens/tickets/diajukan", name: "Diajukan" },
+        { path: "/agens/tickets/dikerjakan", name: "Dikerjakan" },
+        { path: "/agens/tickets/selesai", name: "Selesai" },
+      ],
+    },
   ],
 };
