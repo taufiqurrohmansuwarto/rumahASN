@@ -34,6 +34,7 @@ const addFeedback = async (req, res) => {
         type: "feedback",
         title: "Feedback",
         content: "Memberikan feedback",
+        role: "agent",
       });
 
       res.status(200).json({ code: 200, message: "success" });

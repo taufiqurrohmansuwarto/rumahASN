@@ -113,6 +113,12 @@ export const dataListBanner = async () => {
   return await api.get("/banner").then((res) => res?.data);
 };
 
-export const listNotifications = async () => {
-  return await api.get("/notifications").then((res) => res?.data);
+export const listNotifications = async (simbol = "no") => {
+  return await api
+    .get(`/notifications?symbol=${simbol}`)
+    .then((res) => res?.data);
+};
+
+export const clearChatsNotificatoins = async () => {
+  return await api.put("/notifications").then((res) => res?.data);
 };

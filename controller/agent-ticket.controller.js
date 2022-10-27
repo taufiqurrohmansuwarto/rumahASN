@@ -77,7 +77,11 @@ const kerjakanTicket = async (req, res) => {
       .andWhere("status_code", "DIAJUKAN");
 
     // find first who is assigne and the admin
-    const result = Tickets.query().findById(id);
+    const result = Tickets.query()
+      .where("id", id)
+      .andWhere("assignee", customId)
+      .first();
+
     const assignee = result?.assignee;
     const chooser = result?.chooser;
 
@@ -89,6 +93,8 @@ const kerjakanTicket = async (req, res) => {
         title: "Perubahan status ticket",
         content: "Permasalahan anda berubah statusnya menjadi dikerjakan",
         role: "requester",
+        type: "ticket_status_change",
+        type_id: id,
       },
       {
         from: customId,
@@ -97,6 +103,8 @@ const kerjakanTicket = async (req, res) => {
         title: "Perubahan status ticket",
         content: "Agent sudah mengerjakan",
         role: "admin",
+        type: "ticket_status_change",
+        type_id: id,
       },
     ];
 

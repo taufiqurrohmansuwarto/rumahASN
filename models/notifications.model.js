@@ -16,24 +16,7 @@ class Notifications extends Model {
   static get relationMappings() {
     const User = require("./users.model");
 
-    return {
-      from: {
-        relation: Model.BelongsToOneRelation,
-        modelClass: User,
-        join: {
-          from: "notifications.from",
-          to: "users.custom_id",
-        },
-      },
-      to: {
-        relation: Model.BelongsToOneRelation,
-        modelClass: User,
-        join: {
-          from: "notifications.to",
-          to: "users.custom_id",
-        },
-      },
-    };
+    return {};
   }
 }
 

@@ -31,14 +31,14 @@ const changeRoutes = (user) => {
     if (admin) {
       userRoutes.routes.push(
         {
-          path: "/admin/dashboard",
-          name: "Admin",
-          icon: <UserOutlined />,
-        },
-        {
           path: "/agent/dashboard",
           name: "Agent",
           icon: <UserSwitchOutlined />,
+        },
+        {
+          path: "/admin/dashboard",
+          name: "Admin",
+          icon: <UserOutlined />,
         }
       );
 
