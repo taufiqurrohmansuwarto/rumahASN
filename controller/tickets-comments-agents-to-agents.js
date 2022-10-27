@@ -1,5 +1,7 @@
 const TicketsCommentsAgents = require("../models/tickets_comments_agents.model");
 const Ticktes = require("../models/tickets.model");
+const Notifications = require("../models/notifications.model");
+const TicketAgentHelper = require("../models/tickets_agents_helper.model");
 
 const index = async (req, res) => {
   try {
@@ -89,6 +91,23 @@ const create = async (req, res) => {
       })
       .returning("*")
       .first();
+
+    // get fucking notifications
+    // check first in ticket agents helper
+    const listHelper = await TicketAgentHelper.query().where("ticket_id", id);
+
+    if (listHelper.length > 0) {
+      const listHelperId = listHelper.map((item) => ({
+        to: item?.user_custom_id,
+        from: customId,
+        title: "Komentar Baru",
+        content: "Telah ada komentar baru pada tiket anda",
+        type: "chats_agents_to_agents",
+        type_id: id,
+        role: "agent",
+      }));
+      await Notifications.query().insert(listHelperId);
+    }
 
     res.json({ code: 200, message: "success", data: result });
   } catch (error) {

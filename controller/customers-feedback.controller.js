@@ -1,4 +1,5 @@
 const Tickets = require("../models/tickets.model");
+const Notifications = require("../models/notifications.model");
 
 const addFeedback = async (req, res) => {
   try {
@@ -25,6 +26,15 @@ const addFeedback = async (req, res) => {
         .andWhere("status_code", "SELESAI")
         // .andWhere("has_feedback", false)
         .first();
+
+      await Notifications.query().insert({
+        to: currentTicket.assignee,
+        from: customId,
+        type_id: id,
+        type: "feedback",
+        title: "Feedback",
+        content: "Memberikan feedback",
+      });
 
       res.status(200).json({ code: 200, message: "success" });
     } else {

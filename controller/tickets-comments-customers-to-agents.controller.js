@@ -1,5 +1,6 @@
 const TicketsCommentsCustomers = require("../models/tickets_comments_customers.model");
 const Tickets = require("../models/tickets.model");
+const Notifications = require("../models/notifications.model");
 
 const index = async (req, res) => {
   try {
@@ -79,18 +80,19 @@ const create = async (req, res) => {
 
     const currentTicket = await Tickets.query().findById(id);
 
+    // if current ticket status is not selesai dont do ever fucking this
     if (currentTicket) {
       let role;
       const assignee = currentTicket?.assignee;
       const chooser = currentTicket?.chooser;
-      const requester = currentTicket?.requet;
+      const requester = currentTicket?.requester;
 
       if (assignee === customId) {
-        role = "Agent";
+        role = "assignee";
       } else if (chooser === customId) {
-        role = "Admin";
+        role = "admin";
       } else if (requester === customId) {
-        role = "Requester";
+        role = "requester";
       }
 
       await TicketsCommentsCustomers.query().insert({
@@ -99,11 +101,34 @@ const create = async (req, res) => {
         comment: req.body.comment,
         role,
       });
+
+      // add notifications here
+      if (role === "requester") {
+        await Notifications.query().insert({
+          to: assignee,
+          from: customId,
+          type_id: id,
+          type: "chats_customer_to_agent",
+          content: "Mengomentari tiket anda",
+          title: "Komentar",
+          role: "agent",
+        });
+      } else if (role === "assignee") {
+        await Notifications.query().insert({
+          to: requester,
+          from: customId,
+          type_id: id,
+          type: "chats_agent_to_customer",
+          content: "Mengomentari tiket anda",
+          title: "Komentar",
+          role: "requester",
+        });
+      }
+
+      res.json({ code: 200, message: "success" });
     } else {
       res.status(404).json({ code: 404, message: "Ticket not found" });
     }
-
-    res.json({ code: 200, message: "success" });
   } catch (error) {
     console.log(error);
     res.status(400).json({ code: 400, message: "Internal Server Error" });

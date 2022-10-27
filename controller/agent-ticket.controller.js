@@ -88,13 +88,15 @@ const kerjakanTicket = async (req, res) => {
         created_at: new Date(),
         title: "Perubahan status ticket",
         content: "Permasalahan anda berubah statusnya menjadi dikerjakan",
+        role: "requester",
       },
       {
         from: customId,
         to: chooser,
         created_at: new Date(),
         title: "Perubahan status ticket",
-        content: "Agent sudah mengerjakana",
+        content: "Agent sudah mengerjakan",
+        role: "admin",
       },
     ];
 
@@ -121,6 +123,8 @@ const akhiriPekerjaanSelesai = async (req, res) => {
     const { customId } = req?.user;
     const { id } = req.query;
 
+    const currentTicket = await Tickets.query().findById(id);
+
     await Tickets.query()
       .update({
         status_code: "SELESAI",
@@ -129,6 +133,32 @@ const akhiriPekerjaanSelesai = async (req, res) => {
       .where("id", id)
       .andWhere("assignee", customId)
       .andWhere("status_code", "DIKERJAKAN");
+
+    // create notifications here
+
+    const requester = currentTicket?.requester;
+    const admin = currentTicket?.chooser;
+
+    await Notifications.query().insert({
+      from: customId,
+      to: requester,
+      title: "Penyelesaian ticket",
+      content: 'Ticket anda telah selesai, silahkan cek di menu "Tiket Saya"',
+      role: "requester",
+      type: "ticket_done",
+      type_id: id,
+    });
+
+    await Notifications.query().insert({
+      from: customId,
+      to: admin,
+      title: "Penyelesaian ticket",
+      content: "Ticket telah selesai, silahkan cek ticket",
+      role: "admin",
+      type: "ticket_done",
+      type_id: id,
+    });
+
     res.status(200).json({ code: 200, message: "success" });
   } catch (error) {
     console.log(error);
