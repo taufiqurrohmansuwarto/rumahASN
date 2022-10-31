@@ -10,6 +10,7 @@ import id from "antd/lib/locale/id_ID";
 import ability from "../utils/ability";
 import "antd/dist/antd.css";
 import { AbilityContext } from "../src/context/Can";
+import { MantineProvider } from "@mantine/core";
 
 // check user role and organization start with 123
 function Auth({ children, action, subject }) {
@@ -53,18 +54,20 @@ function MyApp({ Component, pageProps: { session, ...pageProps } }) {
     >
       <QueryClientProvider client={queryClient}>
         <ConfigProvider locale={id}>
-          <Hydrate>
-            {Component.Auth ? (
-              <Auth
-                subject={Component?.Auth?.subject}
-                action={Component?.Auth?.action}
-              >
-                {getLayout(<Component {...pageProps} />)}
-              </Auth>
-            ) : (
-              <Component {...pageProps} />
-            )}
-          </Hydrate>
+          <MantineProvider>
+            <Hydrate>
+              {Component.Auth ? (
+                <Auth
+                  subject={Component?.Auth?.subject}
+                  action={Component?.Auth?.action}
+                >
+                  {getLayout(<Component {...pageProps} />)}
+                </Auth>
+              ) : (
+                <Component {...pageProps} />
+              )}
+            </Hydrate>
+          </MantineProvider>
         </ConfigProvider>
       </QueryClientProvider>
     </SessionProvider>
