@@ -79,6 +79,9 @@ const upsertUser = async (currentUser) => {
 };
 
 export default NextAuth({
+  pages: {
+    signIn: "/helpdesk/signin",
+  },
   providers: [
     GoogleProvider({
       clientId: googleClientId,

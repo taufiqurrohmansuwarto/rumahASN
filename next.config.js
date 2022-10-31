@@ -33,6 +33,10 @@ const hashOnlyIdent = (context, _, exportName) =>
 
 module.exports = withAntdLess({
   experimental: {},
+  images: {
+    domains: ["siasn.bkd.jatimprov.go.id"],
+    formats: ["image/webp"],
+  },
   poweredByHeader: false,
   basePath: "/helpdesk",
   publicRuntimeConfig: {
