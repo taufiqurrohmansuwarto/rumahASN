@@ -49,7 +49,6 @@ const Tickets = () => {
       dataIndex: "title",
     },
     { title: "Deskripsi", key: "content", dataIndex: "content" },
-    { title: "Status", key: "status_code", dataIndex: "status_code" },
     {
       title: "Aksi",
       key: "aksi",

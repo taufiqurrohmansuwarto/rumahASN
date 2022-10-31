@@ -57,7 +57,7 @@ function ButtonFeedback({ id }) {
 
   return (
     <div>
-      <Button onClick={handleShowModal}>Add Feedback</Button>
+      <Button onClick={handleShowModal}>Tambahkan Feebback</Button>
       <FeedbackModal visible={visible} id={id} onClose={handleCloseModal} />
     </div>
   );

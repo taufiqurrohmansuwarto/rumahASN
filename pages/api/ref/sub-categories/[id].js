@@ -7,6 +7,6 @@ import { detail } from "../../../../controller/ref_status.controller";
 import auth from "../../../../middleware/auth.middleware";
 const router = createRouter();
 
-router.use(auth).get(detail).patch(update).remove(remove);
+router.use(auth).get(detail).patch(update).delete(remove);
 
 export default router.handler();

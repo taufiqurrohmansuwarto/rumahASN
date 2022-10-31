@@ -16,11 +16,14 @@ import {
 import { useEffect, useState } from "react";
 import {
   createPriority,
+  createSubCategory,
   deletePriority,
+  deleteSubCategory,
   getCategories,
   getPriorities,
   subCategories,
   updatePriority,
+  updateSubCategory,
 } from "../../../services";
 
 const { default: AdminLayout } = require("../../../src/components/AdminLayout");
@@ -73,9 +76,9 @@ const CreateForm = ({ open, onCancel, categories }) => {
 
   const queryClient = useQueryClient();
 
-  const { mutate: create } = useMutation((data) => createPriority(data), {
+  const { mutate: create } = useMutation((data) => createSubCategory(data), {
     onSettled: () => {
-      queryClient.invalidateQueries(["priorities"]);
+      queryClient.invalidateQueries(["sub-categories"]);
       onCancel();
     },
   });
@@ -107,6 +110,7 @@ const CreateForm = ({ open, onCancel, categories }) => {
         >
           <Input />
         </Form.Item>
+
         <Form.Item
           rules={[{ required: true, message: "Warna tidak boleh kosong" }]}
           name="category_id"
@@ -123,6 +127,9 @@ const CreateForm = ({ open, onCancel, categories }) => {
               </Select.Option>
             ))}
           </Select>
+        </Form.Item>
+        <Form.Item label="Deskripsi" name="description">
+          <Input.TextArea />
         </Form.Item>
       </Form>
     </Modal>
@@ -157,10 +164,10 @@ const SubCategories = () => {
   };
 
   const { mutate: update, isLoading: updateLoading } = useMutation(
-    (data) => updatePriority(data),
+    (data) => updateSubCategory(data),
     {
       onSettled: () => {
-        queryClient.invalidateQueries(["priorities"]);
+        queryClient.invalidateQueries(["sub-categories"]);
       },
       onSuccess: () => {
         message.success("Berhasil mengupdate data");
@@ -174,9 +181,9 @@ const SubCategories = () => {
 
   const queryClient = useQueryClient();
 
-  const { mutate: hapus } = useMutation((id) => deletePriority(id), {
+  const { mutate: hapus } = useMutation((id) => deleteSubCategory(id), {
     onSettled: () => {
-      queryClient.invalidateQueries(["priorities"]);
+      queryClient.invalidateQueries(["sub-categories"]);
       message.success("Berhasil menghapus data");
     },
     onError: (error) => {
@@ -233,7 +240,7 @@ const SubCategories = () => {
 
   return (
     <PageContainer>
-      <Card>
+      <Card loading={isLoading || isLoadingCategory}>
         <Button
           type="primary"
           icon={<FileAddOutlined />}

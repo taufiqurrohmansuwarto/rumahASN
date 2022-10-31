@@ -3,7 +3,13 @@ import { useRouter } from "next/router";
 import React from "react";
 import PageContainer from "./PageContainer";
 
-function ActiveLayout({ children, active = "detail", role, id }) {
+function ActiveLayout({
+  children,
+  active = "detail",
+  role,
+  id,
+  loading = false,
+}) {
   const agenTabs = [
     { key: "detail", tab: "Detail Ticket", icon: <DotChartOutlined /> },
     { key: "comments-customers-to-agents", tab: "Chats to Agent" },
@@ -13,7 +19,8 @@ function ActiveLayout({ children, active = "detail", role, id }) {
 
   return (
     <PageContainer
-      //   content="Tiket"
+      content="Tiket"
+      loading={loading}
       tabList={agenTabs}
       tabActiveKey={active}
       onTabChange={(e) => {

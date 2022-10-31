@@ -47,7 +47,6 @@ const Dashboard = () => {
 
   return (
     <PageContainer>
-      <div>{JSON.stringify(data)}</div>
       <Card>
         <Table
           title={() => (
