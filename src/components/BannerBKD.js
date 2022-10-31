@@ -6,10 +6,11 @@ function BannerBKD() {
   const { data, isLoading } = useQuery(["banner"], () => dataListBanner());
 
   const contentStyle = {
-    color: "#fff",
-    lineHeight: "160px",
-    textAlign: "center",
+    // color: "#fff",
+    // lineHeight: "160px",
+    // textAlign: "center",
     background: "#364d79",
+    // height: 400,
   };
 
   return (

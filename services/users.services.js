@@ -57,3 +57,7 @@ export const sendFeedbackData = async ({ id, data }) => {
     .patch(`/tickets/${id}/feedback`, data)
     .then((res) => res?.data);
 };
+
+export const customerDashboard = async () => {
+  return await api.get("/dashboard").then((res) => res.data);
+};

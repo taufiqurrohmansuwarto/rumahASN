@@ -1,19 +1,13 @@
-import { Button } from "antd";
-import { signOut, useSession } from "next-auth/react";
 import BannerBKD from "../../src/components/BannerBKD";
-import BeritaBKD from "../../src/components/BeritaBKD";
-import Comments from "../../src/components/Comments";
+import CustomerDashboard from "../../src/components/CustomerDashboard";
 import Layout from "../../src/components/Layout";
 import PageContainer from "../../src/components/PageContainer";
 
 function Feeds() {
-  const { data, status } = useSession();
-
   return (
     <PageContainer title="Beranda" subTitle="Feeds">
-      {/* <BeritaBKD /> */}
       <BannerBKD />
-      {/* <Comments /> */}
+      <CustomerDashboard />
     </PageContainer>
   );
 }
