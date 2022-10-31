@@ -2,7 +2,9 @@ const SubCategories = require("../models/sub-categories.model");
 
 const index = async (req, res) => {
   try {
-    const result = await SubCategories.query();
+    const result = await SubCategories.query().withGraphFetched(
+      "[category, created_by]"
+    );
     res.json(result);
   } catch (error) {
     console.log(error);

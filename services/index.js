@@ -47,7 +47,6 @@ export const createPriority = async (data) => {
 };
 
 export const updatePriority = async ({ id, data }) => {
-  console.log(id, data);
   return await api.patch(`/ref/priorities/${id}`, data).then((res) => res.data);
 };
 
@@ -76,8 +75,26 @@ export const getCategories = async () => {
   return await api.get("/ref/categories").then((res) => res.data);
 };
 
-// data tree
+// subcategories
+export const subCategories = async () => {
+  return await api.get("/ref/sub-categories").then((res) => res.data);
+};
 
+export const createSubCategory = async (data) => {
+  return await api.post("/ref/sub-categories", data).then((res) => res.data);
+};
+
+export const updateSubCategory = async ({ id, data }) => {
+  return await api
+    .patch(`/ref/sub-categories/${id}`, data)
+    .then((res) => res.data);
+};
+
+export const deleteSubCategory = async (id) => {
+  return await api.delete(`/ref/sub-categories/${id}`).then((res) => res.data);
+};
+
+// data tree
 export const getTreeOrganization = async () => {
   return await api.get("/data/departments").then((res) => res?.data);
 };
