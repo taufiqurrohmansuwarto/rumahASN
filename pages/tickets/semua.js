@@ -7,6 +7,7 @@ import { useState } from "react";
 import { deleteTicket, getAllTickets } from "../../services/users.services";
 import Layout from "../../src/components/Layout";
 import PageContainer from "../../src/components/PageContainer";
+import { formatDate } from "../../utils";
 
 const Tickets = () => {
   const [query, setQuery] = useState({
@@ -49,6 +50,13 @@ const Tickets = () => {
       dataIndex: "title",
     },
     { title: "Deskripsi", key: "content", dataIndex: "content" },
+    {
+      title: "Tanggal dibuat",
+      key: "created_at",
+      render: (text, record) => {
+        return formatDate(record.created_at);
+      },
+    },
     { title: "Status", key: "status_code", dataIndex: "status_code" },
     {
       title: "Aksi",

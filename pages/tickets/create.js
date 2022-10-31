@@ -23,7 +23,7 @@ const CreateTicket = () => {
   const { mutate: create } = useMutation((data) => createTickets(data), {
     onSuccess: () => {
       message.success("Berhasil membuat tiket");
-      router.push("/tickets");
+      router.push("/tickets/semua");
     },
     onError: () => {
       message.error("Gagal membuat tiket");

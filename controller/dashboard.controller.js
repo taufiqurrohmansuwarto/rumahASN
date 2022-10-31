@@ -14,13 +14,14 @@ from (select status_code, count(status_code)
     `,
     [userId]
   );
+
   return result?.rows;
 };
 
 const customerDashboard = async (req, res) => {
   try {
     const { customId } = req?.user;
-    const count = await aggregateCount(customId);
+    const count = await aggregateCount(`${customId}`);
     res.json(count);
   } catch (error) {
     console.log(error);
