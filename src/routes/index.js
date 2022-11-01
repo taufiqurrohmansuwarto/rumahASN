@@ -7,6 +7,7 @@ import {
   SnippetsOutlined,
   BookOutlined,
   UserOutlined,
+  QuestionCircleOutlined,
 } from "@ant-design/icons";
 
 export const userRoutes = {
@@ -40,6 +41,11 @@ export const userRoutes = {
       name: "Buat Ticket",
       icon: <SmileOutlined />,
       hideInMenu: true,
+    },
+    {
+      path: "/faq",
+      name: "FAQ",
+      icon: <QuestionCircleOutlined />,
     },
   ],
 };
