@@ -1,8 +1,4 @@
-import {
-  LogoutOutlined,
-  UserOutlined,
-  UserSwitchOutlined,
-} from "@ant-design/icons";
+import { UserOutlined, UserSwitchOutlined } from "@ant-design/icons";
 import { uniqBy } from "lodash";
 import { useSession } from "next-auth/react";
 import dynamic from "next/dynamic";
