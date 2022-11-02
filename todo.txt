@@ -1,15 +1,9 @@
+sore ini
 
-1. notifications
+1. knex migrate faq 
 
-notification terjadi ketika
-1. agent mengerjakan
-   notif ke : admin dan customer
-2. chat ke customer ke agent / sebaliknya
-   notif ke : customer dan agent yang menerima chat
-3. chat ke agent ke agent
-   notif ke : agent yang menerima chat
-4. agent menyelesaikan pekerjaan
-   notif ke : admin dan customer
-5. customer memberikan rating
-   notif ke : agent
+table faq
+id name description created_at updated_at user_custom_id
+id faq_id answer question created_at updated_at user_custom_id
 
+create controller faq, dan sub_faq

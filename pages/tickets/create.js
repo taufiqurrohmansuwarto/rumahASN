@@ -76,7 +76,7 @@ const CreateTicket = () => {
             <Form.Item name="content" label="Deskripsi">
               <Input.TextArea />
             </Form.Item>
-            <Form.Item
+            {/* <Form.Item
               help="Pastikan kategori yang anda pilih sesuai, ini akan membantu kami memilah"
               name="category_id"
               label="Kategori"
@@ -105,7 +105,7 @@ const CreateTicket = () => {
                   </Radio.Button>
                 ))}
               </Radio.Group>
-            </Form.Item>
+            </Form.Item> */}
             <Form.Item>
               <Button type="primary" htmlType="submit" icon={<SendOutlined />}>
                 Kirim

@@ -1,6 +1,6 @@
 import { Alert } from "@mantine/core";
 import { useMutation } from "@tanstack/react-query";
-import { Button, Result, Form, Modal, Input, Select } from "antd";
+import { Button, Result, Form, Modal, Input, Select, Popconfirm } from "antd";
 import { useState } from "react";
 import { deleteTicket } from "../../services/users.services";
 
@@ -78,7 +78,9 @@ function StatusTicketDiajukan({ data }) {
         <Button key="rubah" type="primary">
           Update
         </Button>,
-        <Button key="hapus">Hapus</Button>,
+        <Popconfirm title="Hello world" key="hapus">
+          <Button>test</Button>
+        </Popconfirm>,
       ]}
     >
       <div>Ini untuk deskripsi tiket</div>
