@@ -1,6 +1,15 @@
 import axios from "axios";
 import { getSession } from "next-auth/react";
 const User = require("../models/users.model");
+const Minio = require("minio");
+
+const mc = new Minio.Client({
+  port: process.env.MINIO_PORT,
+  useSSL: true,
+  accessKey: process.env.MINIO_ACCESS_KEY,
+  secretKey: process.env.MINIO_SECRET_KEY,
+  endPoint: process.env.MINIO_ENDPOINT,
+});
 
 const auth = async (req, res, next) => {
   try {
@@ -26,6 +35,7 @@ const auth = async (req, res, next) => {
         },
       });
 
+      req.mc = mc;
       next();
     } else {
       res.status(401).json({ code: 401, message: "Unauthorized" });
