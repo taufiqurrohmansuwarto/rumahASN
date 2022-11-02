@@ -99,6 +99,14 @@ export const adminRoutes = {
           path: "/admin/ref/sub-categories",
           name: "Sub Kategori",
         },
+        {
+          path: "/admin/ref/faq",
+          name: "FAQ",
+        },
+        {
+          path: "/admin/ref/sub-faq",
+          name: "Sub FAQ",
+        },
       ],
     },
   ],
