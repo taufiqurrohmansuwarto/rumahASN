@@ -1,14 +1,15 @@
-const { nanoid } = require("nanoid");
 const uuid = require("uuid");
 const { Model } = require("objection");
 const knex = require("../db");
+const { customAlphabet } = require("nanoid");
 Model.knex(knex);
 
 class Tickets extends Model {
   // add ticket number using nanoid in beforeinsert
 
   $beforeInsert() {
-    this.ticket_number = nanoid(5);
+    const nanoid = customAlphabet("1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZ", 5);
+    this.ticket_number = nanoid();
     this.id = uuid.v4();
   }
 

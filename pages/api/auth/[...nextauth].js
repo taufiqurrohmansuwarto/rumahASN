@@ -7,6 +7,11 @@ const operatorSecret = process.env.OPERATOR_SECRET;
 const operatorWellknown = process.env.OPERATOR_WELLKNOWN;
 const operatorScope = process.env.OPERATOR_SCOPE;
 
+const pttpkId = process.env.PTTPK_ID;
+const pttpkSecret = process.env.PTTPK_SECRET;
+const pttpkWellknown = process.env.PTTPK_WELLKNOWN;
+const pttpkScope = process.env.PTTPK_SCOPE;
+
 const userId = process.env.USER_ID;
 const userSecret = process.env.USER_SECRET;
 const userWellknown = process.env.USER_WELLKNOWN;
@@ -20,13 +25,17 @@ const googleClientSecret = process.env.GOOGLE_CLIENT_SECRET;
 const updateUser = async (id) => {
   try {
     const currentUser = await User.query().findById(id);
+
     const bkd = currentUser?.organization_id?.startsWith("123");
     const role = currentUser?.current_role;
     const group = currentUser?.group;
 
-    const isBKDEmployee = bkd && role === "user" && group === "MASTER";
+    const pttpkBkd = currentUser?.organization_id?.startsWith("134");
 
-    if (isBKDEmployee) {
+    const isBKDEmployee = bkd && role === "user" && group === "MASTER";
+    const isBKDEmployeePttpk = pttpkBkd && role === "user" && group === "PTTPK";
+
+    if (isBKDEmployee || isBKDEmployeePttpk) {
       await User.query().findById(id).patch({ current_role: "agent" });
       return User.query().findById(id);
     } else {
@@ -109,6 +118,47 @@ export default NextAuth({
         return lastData;
       },
     }),
+    {
+      name: "PTTPK",
+      id: "helpdesk-pttpk",
+      type: "oauth",
+      wellKnown: pttpkWellknown,
+      clientId: pttpkId,
+      clientSecret: pttpkSecret,
+      authorization: {
+        params: {
+          scope: pttpkScope,
+          prompt: "login",
+        },
+      },
+      httpOptions: {
+        timeout: 40000,
+      },
+      idToken: true,
+      checks: ["pkce", "state"],
+      profile: async (profile) => {
+        const currentUser = {
+          id: profile.sub,
+          username: profile.name,
+          image: profile.picture,
+          email: profile.email,
+          role: profile.role,
+          group: profile.group,
+          employee_number: profile.employee_number || "",
+          birthdate: profile.birthdate || null,
+          email: profile.email || null,
+          organization_id: profile.organization_id || null,
+        };
+
+        const result = await upsertUser(currentUser);
+
+        const data = { ...currentUser, current_role: result?.current_role };
+
+        const last = await updateUser(currentUser?.id);
+        const lastData = { ...data, ...last, id: last?.custom_id };
+        return lastData;
+      },
+    },
     {
       name: "SIMASTER",
       id: "helpdesk-user",

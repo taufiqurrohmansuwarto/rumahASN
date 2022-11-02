@@ -14,7 +14,7 @@ export default function SignIn({ providers }) {
       <LoginFormPage
         backgroundImageUrl="https://siasn.bkd.jatimprov.go.id:9000/public/doodle-new.png"
         logo="https://siasn.bkd.jatimprov.go.id:9000/public/logobkd.jpg"
-        title="Github"
+        title="BKD Jatim"
         subTitle="Helpdesk"
         activityConfig={{
           style: {

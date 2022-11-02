@@ -4,7 +4,7 @@ const User = require("../models/users.model");
 const Minio = require("minio");
 
 const mc = new Minio.Client({
-  port: process.env.MINIO_PORT,
+  port: parseInt(process.env.MINIO_PORT),
   useSSL: true,
   accessKey: process.env.MINIO_ACCESS_KEY,
   secretKey: process.env.MINIO_SECRET_KEY,
