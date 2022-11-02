@@ -50,6 +50,7 @@ const Tickets = () => {
       dataIndex: "title",
     },
     { title: "Deskripsi", key: "content", dataIndex: "content" },
+    { title: "Nomer Tiket", key: "ticket_number", dataIndex: "ticket_number" },
     {
       title: "Tanggal dibuat",
       key: "created_at",

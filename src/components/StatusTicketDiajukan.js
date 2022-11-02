@@ -1,6 +1,16 @@
 import { Alert } from "@mantine/core";
-import { useMutation } from "@tanstack/react-query";
-import { Button, Result, Form, Modal, Input, Select, Popconfirm } from "antd";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import {
+  Button,
+  Result,
+  Form,
+  Modal,
+  Input,
+  Select,
+  Popconfirm,
+  message,
+} from "antd";
+import { useRouter } from "next/router";
 import { useState } from "react";
 import { deleteTicket } from "../../services/users.services";
 
@@ -64,10 +74,27 @@ function StatusTicketDiajukan({ data }) {
   const handleCancel = () => setVisible(false);
   const handleOpen = () => setVisible(true);
 
-  const { mutate: hapus } = useMutation((id) => deleteTicket(id), {});
+  const queryClient = useQueryClient();
+  const router = useRouter();
 
-  const handleHapus = (id) => {
-    hapus(id);
+  const backToSemua = () => router?.push("/tickets/semua");
+
+  const { mutate: hapus, isLoading: loadingHapus } = useMutation(
+    (id) => deleteTicket(id),
+    {
+      onSettled: () => queryClient.invalidateQueries(["tickets", data?.id]),
+      onError: () => {
+        message.error("Gagal menghapus ticket");
+      },
+      onSuccess: () => {
+        queryClient.invalidateQueries(["tickets", data?.id]);
+        backToSemua();
+      },
+    }
+  );
+
+  const handleHapus = () => {
+    hapus(data?.id);
   };
 
   return (
@@ -78,8 +105,12 @@ function StatusTicketDiajukan({ data }) {
         <Button key="rubah" type="primary">
           Update
         </Button>,
-        <Popconfirm title="Hello world" key="hapus">
-          <Button>test</Button>
+        <Popconfirm
+          title="Apakah kamu yakin ingin menghapus tiketmu?"
+          key="hapus"
+          onConfirm={handleHapus}
+        >
+          <Button loading={loadingHapus}>Hapus</Button>
         </Popconfirm>,
       ]}
     >

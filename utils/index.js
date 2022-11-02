@@ -13,3 +13,8 @@ export const fromNow = (date) => {
 export const resizeImage = (text) => {
   return text.replace(/<img/g, '<img style="width: 30%; height: 30%"');
 };
+
+// convert html to text
+export const removeHtmlTags = (text) => {
+  return text.replace(/<[^>]*>?/gm, "");
+};
