@@ -84,3 +84,8 @@ created_at
 updated_at
 
 **tambah pengumuman sesuatu lah
+
+tell me story
+
+- user membuat tiket
+

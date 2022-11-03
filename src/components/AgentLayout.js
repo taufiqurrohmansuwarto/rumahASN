@@ -65,6 +65,7 @@ function AgentLayout({ children, active }) {
         size: "default",
         title: data?.user?.name,
       }}
+      collapsed
       menuItemRender={menuItemRender}
       route={agentRoutes}
       loading={status === "loading"}

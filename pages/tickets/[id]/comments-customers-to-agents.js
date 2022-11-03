@@ -3,7 +3,7 @@ import { Result, Skeleton } from "antd";
 import { useRouter } from "next/router";
 import { detailTicket } from "../../../services/users.services";
 import ActiveLayout from "../../../src/components/ActiveLayout";
-import ChatAgentToCustomer from "../../../src/components/ChatAgentToCustomer";
+import ChatCustomerToAgent from "../../../src/components/ChatCustomerToAgent";
 import Layout from "../../../src/components/Layout";
 
 const LockedChat = () => {
@@ -31,7 +31,7 @@ const DetailTicket = () => {
         {data?.status_code === "DIAJUKAN" ? (
           <LockedChat />
         ) : (
-          <ChatAgentToCustomer id={id} />
+          <ChatCustomerToAgent id={id} />
         )}
       </Skeleton>
     </ActiveLayout>
