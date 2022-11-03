@@ -15,34 +15,32 @@ import { useState } from "react";
 import { deleteTicket, updateTicket } from "../../services/users.services";
 import TimelinePekerjaan from "./TimelinePekerjaan";
 
-const ModalUpdate = ({ visible, onCancel, onCreate, data }) => {
+const ModalUpdate = ({ visible, onCancel, update, data, loadingUpdate }) => {
   const [form] = Form.useForm();
+
+  const handleOk = async () => {
+    const values = await form.validateFields();
+    const currentData = { id: data?.id, data: values };
+    update(currentData);
+    onCancel();
+  };
+
   return (
     <Modal
       visible={visible}
       title="Update Ticket"
+      confirmLoading={loadingUpdate}
+      centered
       okText="Update"
       cancelText="Cancel"
       onCancel={onCancel}
-      onOk={() => {
-        form
-          .validateFields()
-          .then((values) => {
-            form.resetFields();
-            onCreate(values);
-          })
-          .catch((info) => {
-            console.log("Validate Failed:", info);
-          });
-      }}
+      onOk={handleOk}
     >
       <Form
         form={form}
         layout="vertical"
         name="form_in_modal"
-        initialValues={{
-          modifier: "public",
-        }}
+        initialValues={{ title: data?.title, content: data?.content }}
       >
         <Form.Item
           name="title"
@@ -56,14 +54,8 @@ const ModalUpdate = ({ visible, onCancel, onCreate, data }) => {
         >
           <Input />
         </Form.Item>
-        <Form.Item name="description" label="Description">
-          <Input type="textarea" />
-        </Form.Item>
-        <Form.Item name="status" label="Status">
-          <Select>
-            <Select.Option value="open">Open</Select.Option>
-            <Select.Option value="open">Open</Select.Option>
-          </Select>
+        <Form.Item name="content" label="Description">
+          <Input.TextArea rows={10} />
         </Form.Item>
       </Form>
     </Modal>
@@ -94,7 +86,7 @@ function StatusTicketDiajukan({ data }) {
     }
   );
 
-  const { mutate: update, isLoading: isLoadingUpdate } = useMutation(
+  const { mutate: update, isLoading: loadingUpdate } = useMutation(
     (data) => updateTicket(data),
     {
       onSettled: () => queryClient.invalidateQueries(["tickets", data?.id]),
@@ -102,14 +94,11 @@ function StatusTicketDiajukan({ data }) {
         message.error("Gagal mengupdate ticket");
       },
       onSuccess: () => {
+        message.success("Berhasil mengupdate ticket");
         queryClient.invalidateQueries(["tickets", data?.id]);
       },
     }
   );
-
-  const handleUpdate = (data) => {
-    update(data);
-  };
 
   const handleHapus = () => {
     hapus(data?.id);
@@ -120,7 +109,7 @@ function StatusTicketDiajukan({ data }) {
       title="Tiket sedang dicarikan agent"
       subTitle="Status tiketmu masih dicarikan agent ya... Mohon bersabar"
       extra={[
-        <Button key="rubah" type="primary">
+        <Button key="rubah" type="primary" onClick={handleOpen}>
           Update
         </Button>,
         <Popconfirm
@@ -139,6 +128,13 @@ function StatusTicketDiajukan({ data }) {
           <TimelinePekerjaan data={data} />
         </div>
       </Alert>
+      <ModalUpdate
+        data={data}
+        update={update}
+        loadingUpdate={loadingUpdate}
+        visible={visible}
+        onCancel={handleCancel}
+      />
     </Result>
   );
 }
