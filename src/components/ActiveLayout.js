@@ -6,13 +6,19 @@ import PageContainer from "./PageContainer";
 function ActiveLayout({
   children,
   active = "detail",
-  role,
+  role = "requester",
   id,
   loading = false,
 }) {
-  const agenTabs = [
+  const customerTabs = [
     { key: "detail", tab: "Detail Ticket", icon: <DotChartOutlined /> },
     { key: "comments-customers-to-agents", tab: "Chats to Agent" },
+  ];
+
+  const agentTabs = [
+    { key: "detail", tab: "Detail Ticket", icon: <DotChartOutlined /> },
+    { key: "chats-customers", tab: "Chats to Customers" },
+    { key: "chats-agents", tab: "Chats to Agent" },
   ];
 
   const router = useRouter();
@@ -22,7 +28,7 @@ function ActiveLayout({
       content="Detail Tiket"
       onBack={() => router.push("/tickets/semua")}
       loading={loading}
-      tabList={agenTabs}
+      tabList={role === "requester" ? customerTabs : agentTabs}
       tabActiveKey={active}
       onTabChange={(e) => {
         let path = "";

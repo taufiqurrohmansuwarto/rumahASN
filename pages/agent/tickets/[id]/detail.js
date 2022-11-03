@@ -6,6 +6,8 @@ import {
   akhirPekerjaanTidakSelesai,
   detailTicket,
 } from "../../../../services/agents.services";
+import ActiveLayout from "../../../../src/components/ActiveLayout";
+import AgentKerjakan from "../../../../src/components/AgentKerjakan";
 import AgentLayout from "../../../../src/components/AgentLayout";
 import PageContainer from "../../../../src/components/PageContainer";
 
@@ -60,21 +62,21 @@ const TicketsDetail = () => {
   };
 
   return (
-    <PageContainer
-      title="Ticket"
-      subTitle="Details"
-      onBack={() => router.back()}
-    >
-      <Card loading={isLoading}>
+    <ActiveLayout role="agent" id={router?.query?.id}>
+      <Card loading={isLoading} title="Detail Ticket">
         <p>{JSON.stringify(data)}</p>
-        <Space>
-          <Button danger type="primary" onClick={handleAkhiriSelesai}>
-            Akhiri Selesai
-          </Button>
-          <Button onClick={handleAkhiriTolak}>Akhiri Tolak</Button>
-        </Space>
+        {data?.status_code === "DIAJUKAN" && data?.chooser ? (
+          <AgentKerjakan data={data} />
+        ) : (
+          <Space>
+            <Button danger type="primary" onClick={handleAkhiriSelesai}>
+              Akhiri Selesai
+            </Button>
+            <Button onClick={handleAkhiriTolak}>Akhiri Tolak</Button>
+          </Space>
+        )}
       </Card>
-    </PageContainer>
+    </ActiveLayout>
   );
 };
 

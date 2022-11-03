@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Table, Card, Button, Modal, message } from "antd";
+import { Table, Card, Button, Modal, message, Space, Tag } from "antd";
 import Link from "next/link";
 import { useState } from "react";
 import {
@@ -8,6 +8,7 @@ import {
 } from "../../../services/agents.services";
 import AgentLayout from "../../../src/components/AgentLayout";
 import PageContainer from "../../../src/components/PageContainer";
+import { colorTag, formatDate } from "../../../utils";
 
 const Tombol = ({ record }) => {
   const queryClient = useQueryClient();
@@ -45,26 +46,38 @@ const Tombol = ({ record }) => {
 const Tickets = () => {
   const columns = [
     {
-      title: "Ticket ID",
-      dataIndex: "id",
-      key: "id",
+      title: "Judul",
+      key: "title",
+      dataIndex: "title",
     },
-    { title: "Status", dataIndex: "status_code", key: "status_code" },
+    { title: "Deskripsi", key: "content", dataIndex: "content" },
+    { title: "Nomer Tiket", key: "ticket_number", dataIndex: "ticket_number" },
+    {
+      title: "Tanggal dibuat",
+      key: "created_at",
+      render: (text, record) => {
+        return formatDate(record.created_at);
+      },
+    },
+    {
+      title: "Status",
+      key: "status_code",
+      render: (text, record) => {
+        return (
+          <Tag color={colorTag(record?.status_code)}>{record?.status_code}</Tag>
+        );
+      },
+    },
     {
       title: "Aksi",
       key: "aksi",
       render: (text, record) => {
-        return <Tombol record={record} />;
-      },
-    },
-    {
-      title: "Detail",
-      key: "detail",
-      render: (text, record) => {
         return (
-          <Link href={`/agent/tickets/${record?.id}/detail`}>
-            <a>Detail</a>
-          </Link>
+          <Space>
+            <Link href={`/agent/tickets/${record?.id}/detail`}>
+              <a>Detail</a>
+            </Link>
+          </Space>
         );
       },
     },
@@ -84,8 +97,7 @@ const Tickets = () => {
 
   return (
     <PageContainer title="Ticket" subTitle="Agent">
-      <Card>
-        {JSON.stringify(data)}
+      <Card title="Daftar tiket">
         <Table
           rowKey={(row) => row?.id}
           loading={isLoading}

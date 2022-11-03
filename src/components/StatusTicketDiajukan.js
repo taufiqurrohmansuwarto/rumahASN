@@ -1,4 +1,4 @@
-import { Alert, Text, Title } from "@mantine/core";
+import { Alert, Divider, Text, Title } from "@mantine/core";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   Button,
@@ -121,7 +121,7 @@ function StatusTicketDiajukan({ data }) {
         </Popconfirm>,
       ]}
     >
-      <Alert>
+      <Alert title="Detail Tiket">
         <Title>{data?.title}</Title>
         <Text>{data?.content}</Text>
         <div style={{ marginTop: 10 }}>

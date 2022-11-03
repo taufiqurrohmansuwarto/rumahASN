@@ -7,6 +7,7 @@ import { useState } from "react";
 import { deleteTicket, getAllTickets } from "../../services/users.services";
 import Layout from "../../src/components/Layout";
 import PageContainer from "../../src/components/PageContainer";
+import { formatDate } from "../../utils";
 
 const Tickets = () => {
   const [query, setQuery] = useState({
@@ -38,10 +39,6 @@ const Tickets = () => {
     }
   );
 
-  const handleRemove = (id) => {
-    hapus(id);
-  };
-
   const columns = [
     {
       title: "Judul",
@@ -49,6 +46,14 @@ const Tickets = () => {
       dataIndex: "title",
     },
     { title: "Deskripsi", key: "content", dataIndex: "content" },
+    { title: "Nomer Tiket", key: "ticket_number", dataIndex: "ticket_number" },
+    {
+      title: "Tanggal dibuat",
+      key: "created_at",
+      render: (text, record) => {
+        return formatDate(record.created_at);
+      },
+    },
     {
       title: "Aksi",
       key: "aksi",

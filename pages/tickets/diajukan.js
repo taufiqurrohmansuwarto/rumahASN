@@ -7,6 +7,7 @@ import { useState } from "react";
 import { deleteTicket, getAllTickets } from "../../services/users.services";
 import Layout from "../../src/components/Layout";
 import PageContainer from "../../src/components/PageContainer";
+import { formatDate } from "../../utils";
 
 const Tickets = () => {
   const [query, setQuery] = useState({
@@ -49,6 +50,15 @@ const Tickets = () => {
       dataIndex: "title",
     },
     { title: "Deskripsi", key: "content", dataIndex: "content" },
+    { title: "Nomer Tiket", key: "ticket_number", dataIndex: "ticket_number" },
+    {
+      title: "Tanggal dibuat",
+      key: "created_at",
+      render: (text, record) => {
+        return formatDate(record.created_at);
+      },
+    },
+
     {
       title: "Aksi",
       key: "aksi",
@@ -58,15 +68,6 @@ const Tickets = () => {
             <Link href={`/tickets/${record?.id}/detail`}>
               <a>Detail</a>
             </Link>
-            <Divider type="vertical" />
-            <a>Update</a>
-            <Divider type="vertical" />
-            <Popconfirm
-              onConfirm={() => handleRemove(record?.id)}
-              title="Apakah anda yakin ingin menghapus?"
-            >
-              <a>Hapus</a>
-            </Popconfirm>
           </Space>
         );
       },

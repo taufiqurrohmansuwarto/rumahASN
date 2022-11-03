@@ -1,20 +1,15 @@
 const { Model } = require("objection");
 const knex = require("../db");
-const { v4: uuidv4 } = require("uuid");
 
 Model.knex(knex);
 
-class TicketsCommentsAgents extends Model {
+class TickestCommentsCustomers extends Model {
   static get tableName() {
-    return "tickets_comments_agents";
+    return "tickets_comments_customers";
   }
 
   static get idcolumn() {
     return "id";
-  }
-
-  $beforeInsert() {
-    this.id = uuidv4();
   }
 
   static get relationMappings() {
@@ -25,7 +20,7 @@ class TicketsCommentsAgents extends Model {
         relation: Model.BelongsToOneRelation,
         modelClass: user,
         join: {
-          from: "tickets_comments_agents.user_id",
+          from: "tickets_comments_customers.user_id",
           to: "users.custom_id",
         },
       },
@@ -33,4 +28,4 @@ class TicketsCommentsAgents extends Model {
   }
 }
 
-module.exports = TicketsCommentsAgents;
+module.exports = TickestCommentsCustomers;

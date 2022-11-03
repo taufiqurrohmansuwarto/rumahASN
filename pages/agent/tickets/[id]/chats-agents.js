@@ -19,6 +19,7 @@ import {
   messagesAgents,
   updateMessagesAgents,
 } from "../../../../services/agents.services";
+import ActiveLayout from "../../../../src/components/ActiveLayout";
 import AgentLayout from "../../../../src/components/AgentLayout";
 import PageContainer from "../../../../src/components/PageContainer";
 
@@ -211,11 +212,7 @@ const TicketsDetails = () => {
   );
 
   return (
-    <PageContainer
-      title="Ticket"
-      subTitle="Details"
-      onBack={() => router.back()}
-    >
+    <ActiveLayout active="chats-agents" role="agent" id={router?.query?.id}>
       <Card
         title="Chats Agents"
         loading={
@@ -229,7 +226,7 @@ const TicketsDetails = () => {
           currentUserId={dataUser?.user?.id}
         />
       </Card>
-    </PageContainer>
+    </ActiveLayout>
   );
 };
 

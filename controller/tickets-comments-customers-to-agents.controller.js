@@ -14,8 +14,7 @@ const index = async (req, res) => {
       const result = await TicketsCommentsCustomers.query()
         .where("ticket_id", id)
         .withGraphFetched("[user(simpleSelect)]")
-        .orderBy("created_at", "desc")
-        .andWhere("user_id", customId);
+        .orderBy("created_at", "desc");
 
       res.json(result);
     } else {

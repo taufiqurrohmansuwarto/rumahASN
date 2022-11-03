@@ -19,8 +19,8 @@ import {
   messagesCustomers,
   updateMessagesCustomers,
 } from "../../../../services/agents.services";
+import ActiveLayout from "../../../../src/components/ActiveLayout";
 import AgentLayout from "../../../../src/components/AgentLayout";
-import PageContainer from "../../../../src/components/PageContainer";
 
 const CreateComments = ({ user, ticketId }) => {
   const [form] = Form.useForm();
@@ -222,15 +222,14 @@ const AgentsChatsCustomers = () => {
 
   const { data, isLoading } = useQuery(
     ["messages-agents-to-customers", router?.query?.id],
-    () => messagesCustomers(router?.query?.id)
+    () => messagesCustomers(router?.query?.id),
+    {
+      refetchInterval: 1000,
+    }
   );
 
   return (
-    <PageContainer
-      title="Ticket"
-      subTitle="Details"
-      onBack={() => router.back()}
-    >
+    <ActiveLayout id={router?.query?.id} role="agent" active="chats-customers">
       <Card
         title="Chats Customers"
         loading={
@@ -244,7 +243,7 @@ const AgentsChatsCustomers = () => {
           currentUserId={dataUser?.user?.id}
         />
       </Card>
-    </PageContainer>
+    </ActiveLayout>
   );
 };
 
