@@ -9,7 +9,6 @@ import {
 import ActiveLayout from "../../../../src/components/ActiveLayout";
 import AgentKerjakan from "../../../../src/components/AgentKerjakan";
 import AgentLayout from "../../../../src/components/AgentLayout";
-import PageContainer from "../../../../src/components/PageContainer";
 
 const TicketsDetail = () => {
   const router = useRouter();

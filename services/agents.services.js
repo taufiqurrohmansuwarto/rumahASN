@@ -16,6 +16,10 @@ export const getAllTickets = (query) => {
     .then((res) => res?.data);
 };
 
+export const detailTicket = (id) => {
+  return api.get(`/tickets/${id}`).then((res) => res?.data);
+};
+
 export const updatePropertyTicket = ({ id, data }) => {
   return api.patch(`/tickets/${id}/properties`, data).then((res) => res?.data);
 };
