@@ -11,7 +11,7 @@ const AgentsChatsCustomers = () => {
   const router = useRouter();
   const { data, isLoading } = useQuery(
     ["agent-tickets", router?.query?.id],
-    () => detailTicket()
+    () => detailTicket(router?.query?.id)
   );
 
   return (
