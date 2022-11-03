@@ -15,7 +15,7 @@ export default function SignIn({ providers }) {
         backgroundImageUrl="https://siasn.bkd.jatimprov.go.id:9000/public/doodle-new.png"
         logo="https://siasn.bkd.jatimprov.go.id:9000/public/logobkd.jpg"
         title="BKD Jatim"
-        subTitle="Helpdesk"
+        subTitle="Helpdesk Sistem Informasi"
         activityConfig={{
           style: {
             boxShadow: "0px 0px 8px rgba(0, 0, 0, 0.2)",

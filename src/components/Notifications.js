@@ -8,7 +8,9 @@ function Notifications() {
   const { data, isLoading } = useQuery(
     ["notifications-total"],
     () => listNotifications("yes"),
-    {}
+    {
+      refetchInterval: 1000,
+    }
   );
   const router = useRouter();
 

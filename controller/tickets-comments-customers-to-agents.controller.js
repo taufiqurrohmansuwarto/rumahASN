@@ -30,7 +30,7 @@ const index = async (req, res) => {
 const remove = async (req, res) => {
   try {
     const { customId } = req?.user;
-    const { id, commentCustomerId } = req?.query;
+    const { id, commentId } = req?.query;
 
     const currentTicket = await Tickets.query().findById(id);
 
@@ -38,7 +38,7 @@ const remove = async (req, res) => {
       await TicketsCommentsCustomers.query()
         .delete()
         .where("ticket_id", id)
-        .andWhere("id", commentCustomerId)
+        .andWhere("id", commentId)
         .andWhere("user_id", customId);
       res.json({ code: 200, message: "success" });
     } else {
@@ -53,14 +53,14 @@ const remove = async (req, res) => {
 const update = async (req, res) => {
   try {
     const { customId } = req?.user;
-    const { id, commentCustomerId } = req?.query;
+    const { id, commentId } = req?.query;
 
     const currentTicket = await Tickets.query().findById(id);
 
     if (currentTicket) {
       await TicketsCommentsCustomers.query()
         .update(req.body)
-        .where("id", commentCustomerId)
+        .where("id", commentId)
         .andWhere("user_id", customId)
         .andWhere("ticket_id", id);
       res.json({ code: 200, message: "success" });
