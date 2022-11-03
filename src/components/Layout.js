@@ -95,7 +95,7 @@ function Layout({ children, active }) {
   return (
     <ProLayout
       selectedKeys={[active ? active : router.pathname]}
-      title="SIASN Helpdesk BKD"
+      title="testing"
       avatarProps={{
         src: data?.user?.image,
         size: "default",

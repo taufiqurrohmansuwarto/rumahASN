@@ -19,7 +19,8 @@ function ActiveLayout({
 
   return (
     <PageContainer
-      content="Tiket"
+      content="Detail Tiket"
+      onBack={() => router.push("/tickets/semua")}
       loading={loading}
       tabList={agenTabs}
       tabActiveKey={active}

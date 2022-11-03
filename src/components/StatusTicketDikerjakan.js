@@ -1,5 +1,8 @@
+import { Alert as AlertMantineCore, Text, Title } from "@mantine/core";
+import { IconAlertOctagon } from "@tabler/icons";
 import { Button, Result } from "antd";
 import { useRouter } from "next/router";
+import TimelinePekerjaan from "./TimelinePekerjaan";
 
 function StatusTicketDikerjakan({ data }) {
   const router = useRouter();
@@ -16,8 +19,17 @@ function StatusTicketDikerjakan({ data }) {
         </Button>
       }
     >
-      <div>Ini untuk deskripsi tiket</div>
-      <div>{JSON.stringify(data)}</div>
+      <AlertMantineCore
+        icon={<IconAlertOctagon />}
+        title="Dah.. tiketmu sedang dikerjakan"
+        color="green"
+      >
+        <Title>{data?.title}</Title>
+        <Text>{data?.content}</Text>
+        <div style={{ marginTop: 10 }}>
+          <TimelinePekerjaan data={data} />
+        </div>
+      </AlertMantineCore>
     </Result>
   );
 }

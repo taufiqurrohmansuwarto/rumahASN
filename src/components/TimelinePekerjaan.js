@@ -22,7 +22,7 @@ function TimelinePekerjaan({ data }) {
         {data?.status_code === "DIKERJAKAN" ? (
           <>
             <Text color="dimmed" size="sm">
-              Status tiket mu dikerjakan
+              Status tiket mu dikerjakan oleh {data?.agent?.username}
             </Text>
             <Text size="xs" mt={4}>
               {fromNow(data?.start_work_at)}
