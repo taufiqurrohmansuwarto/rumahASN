@@ -1,4 +1,4 @@
-import { Alert } from "@mantine/core";
+import { Alert, Text, Title } from "@mantine/core";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   Button,
@@ -12,7 +12,8 @@ import {
 } from "antd";
 import { useRouter } from "next/router";
 import { useState } from "react";
-import { deleteTicket } from "../../services/users.services";
+import { deleteTicket, updateTicket } from "../../services/users.services";
+import TimelinePekerjaan from "./TimelinePekerjaan";
 
 const ModalUpdate = ({ visible, onCancel, onCreate, data }) => {
   const [form] = Form.useForm();
@@ -93,6 +94,23 @@ function StatusTicketDiajukan({ data }) {
     }
   );
 
+  const { mutate: update, isLoading: isLoadingUpdate } = useMutation(
+    (data) => updateTicket(data),
+    {
+      onSettled: () => queryClient.invalidateQueries(["tickets", data?.id]),
+      onError: () => {
+        message.error("Gagal mengupdate ticket");
+      },
+      onSuccess: () => {
+        queryClient.invalidateQueries(["tickets", data?.id]);
+      },
+    }
+  );
+
+  const handleUpdate = (data) => {
+    update(data);
+  };
+
   const handleHapus = () => {
     hapus(data?.id);
   };
@@ -114,8 +132,13 @@ function StatusTicketDiajukan({ data }) {
         </Popconfirm>,
       ]}
     >
-      <div>Ini untuk deskripsi tiket</div>
-      <Alert>{JSON.stringify(data)}</Alert>
+      <Alert>
+        <Title>{data?.title}</Title>
+        <Text>{data?.content}</Text>
+        <div style={{ marginTop: 10 }}>
+          <TimelinePekerjaan data={data} />
+        </div>
+      </Alert>
     </Result>
   );
 }

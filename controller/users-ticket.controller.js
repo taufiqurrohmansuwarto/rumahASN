@@ -70,6 +70,11 @@ const update = async (req, res) => {
   try {
     const { customId } = req?.user;
     const { id } = req?.query;
+    await Tickets.query()
+      .update(req?.body)
+      .where("id", id)
+      .andWhere("requester", customId);
+    res.json({ code: 200, message: "success" });
   } catch (error) {
     console.log(error);
     res.status(400).json({ code: 400, message: "Internal Server Error" });

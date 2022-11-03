@@ -120,6 +120,7 @@ function Layout({ children, active }) {
         },
         defaultOpenAll: true,
       }}
+      collapsed
       menuItemRender={menuItemRender}
       loading={status === "loading"}
     >

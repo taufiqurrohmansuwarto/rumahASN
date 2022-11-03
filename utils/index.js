@@ -18,3 +18,26 @@ export const resizeImage = (text) => {
 export const removeHtmlTags = (text) => {
   return text.replace(/<[^>]*>?/gm, "");
 };
+
+export const colorTag = (tag) => {
+  switch (tag) {
+    case "DIAJUKAN":
+      return "yellow";
+    case "DIKERJAKAN":
+      return "blue";
+    case "SELESAI":
+      return "green";
+    default:
+      return "red";
+  }
+};
+
+export const setActivePekerjaan = (data) => {
+  if (data?.created_at && data?.start_work_at && data?.completed_at) {
+    return 2;
+  } else if (data?.created_at && data?.start_work_at) {
+    return 1;
+  } else {
+    return 0;
+  }
+};

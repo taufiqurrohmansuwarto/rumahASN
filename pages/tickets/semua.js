@@ -1,13 +1,22 @@
 import { PlusOutlined } from "@ant-design/icons";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Card, Button, Divider, message, Popconfirm, Space, Table } from "antd";
+import {
+  Card,
+  Button,
+  Divider,
+  message,
+  Popconfirm,
+  Space,
+  Table,
+  Tag,
+} from "antd";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { useState } from "react";
 import { deleteTicket, getAllTickets } from "../../services/users.services";
 import Layout from "../../src/components/Layout";
 import PageContainer from "../../src/components/PageContainer";
-import { formatDate } from "../../utils";
+import { colorTag, formatDate } from "../../utils";
 
 const Tickets = () => {
   const [query, setQuery] = useState({
@@ -58,7 +67,15 @@ const Tickets = () => {
         return formatDate(record.created_at);
       },
     },
-    { title: "Status", key: "status_code", dataIndex: "status_code" },
+    {
+      title: "Status",
+      key: "status_code",
+      render: (text, record) => {
+        return (
+          <Tag color={colorTag(record?.status_code)}>{record?.status_code}</Tag>
+        );
+      },
+    },
     {
       title: "Aksi",
       key: "aksi",

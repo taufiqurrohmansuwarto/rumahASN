@@ -22,6 +22,10 @@ export const deleteTicket = async (id) => {
   return await api.delete(`/tickets/${id}`).then((res) => res.data);
 };
 
+export const updateTicket = async ({ id, data }) => {
+  return await api.patch(`/tickets/${id}`, data).then((res) => res.data);
+};
+
 export const detailTicket = async (id) => {
   return await api.get(`/tickets/${id}`).then((res) => res.data);
 };

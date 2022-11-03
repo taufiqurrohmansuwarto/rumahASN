@@ -54,7 +54,7 @@ function MyApp({ Component, pageProps: { session, ...pageProps } }) {
     >
       <QueryClientProvider client={queryClient}>
         <ConfigProvider locale={id}>
-          <MantineProvider>
+          <MantineProvider withGlobalStyles withNormalizeCSS>
             <Hydrate>
               {Component.Auth ? (
                 <Auth
