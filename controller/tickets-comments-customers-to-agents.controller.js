@@ -59,7 +59,7 @@ const update = async (req, res) => {
 
     if (currentTicket) {
       await TicketsCommentsCustomers.query()
-        .update(req.body)
+        .patch(req.body)
         .where("id", commentId)
         .andWhere("user_id", customId)
         .andWhere("ticket_id", id);
