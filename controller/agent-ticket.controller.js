@@ -51,12 +51,16 @@ const detail = async (req, res) => {
 
 const update = async (req, res) => {
   try {
+    const { id } = req?.query;
+    await Tickets.query().patch(req?.body).where("id", id);
+    res.json({ code: 200, message: "success" });
   } catch (error) {
     console.log(error);
     res.status(400).json({ code: 400, message: "Internal Server Error" });
   }
 };
 
+// tidak usah diremove
 const remove = async (req, res) => {
   try {
   } catch (error) {
