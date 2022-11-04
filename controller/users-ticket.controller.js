@@ -73,7 +73,7 @@ const update = async (req, res) => {
     const { customId } = req?.user;
     const { id } = req?.query;
     await Tickets.query()
-      .patch(req?.body)
+      .patch({ ...req?.body, updated_at: new Date() })
       .where("id", id)
       .andWhere("requester", customId);
     res.json({ code: 200, message: "success" });

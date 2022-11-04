@@ -1,5 +1,3 @@
-// ini digunakan untuk memindah prioritas dan subkategori setiap tiket oleh agent
-
 import { Button, Form, message, Modal, Radio, Select, Skeleton } from "antd";
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";

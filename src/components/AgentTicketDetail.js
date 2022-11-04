@@ -14,13 +14,17 @@ const SelesaiModal = ({ open, onCancel, data }) => {
     (data) => akhiriPekerjaanSelesai(data),
     {
       onSettled: () =>
-        queryClient.invalidateQueries(["agent-tickets", dat?.id]),
+        queryClient.invalidateQueries(["agent-tickets", data?.id]),
       onSuccess: () => {
         message.success("Berhasil mengakhiri pekerjaan");
         queryClient.invalidateQueries(["agent-tickets", data?.id]);
         onCancel();
       },
-      onError: () => message.error("Gagal mengakhiri pekerjaan"),
+      onError: (data) => {
+        const { message: messageError } = data?.response?.data;
+        message.error(`Gagal mengakhiri pekerjaan, ${messageError}`);
+        onCancel();
+      },
     }
   );
 

@@ -1,24 +1,25 @@
 import { Text, Timeline } from "@mantine/core";
 import {
+  IconCircleCheck,
+  IconCirclePlus,
   IconGitBranch,
-  IconGitCommit,
-  IconGitPullRequest,
+  IconUserCircle,
 } from "@tabler/icons";
 import { formatDate, setActivePekerjaan } from "../../utils";
 
 function TimelinePekerjaan({ data }) {
   return (
     <Timeline active={setActivePekerjaan(data)} bulletSize={24} lineWidth={2}>
-      <Timeline.Item bullet={<IconGitBranch size={12} />} title="Diajukan">
+      <Timeline.Item bullet={<IconCirclePlus size={18} />} title="Diajukan">
         <Text color="dimmed" size="sm">
-          Status tiket diajukan oleh {data?.customer?.name}
+          Status tiket diajukan oleh {data?.customer?.username}
         </Text>
         <Text size="xs" mt={4}>
           {formatDate(data?.created_at)}
         </Text>
       </Timeline.Item>
 
-      <Timeline.Item bullet={<IconGitCommit size={12} />} title="Dikerjakan">
+      <Timeline.Item bullet={<IconUserCircle size={18} />} title="Dikerjakan">
         {data?.status_code === "DIKERJAKAN" ||
         data?.status_code === "SELESAI" ? (
           <>
@@ -37,7 +38,7 @@ function TimelinePekerjaan({ data }) {
       </Timeline.Item>
       <Timeline.Item
         title="Selesai"
-        bullet={<IconGitPullRequest size={12} />}
+        bullet={<IconCircleCheck size={26} />}
         lineVariant="dashed"
       >
         {data?.status_code === "SELESAI" ? (

@@ -22,7 +22,8 @@ const index = async (req, res) => {
           builder.where("kode_ticket", kode_ticket);
         }
       })
-      .page(page - 1, limit);
+      .page(page - 1, limit)
+      .orderBy("updated_at", "desc");
 
     res.json({ data: result?.results, page, total: result.total, limit });
   } catch (error) {
@@ -52,7 +53,9 @@ const detail = async (req, res) => {
 const update = async (req, res) => {
   try {
     const { id } = req?.query;
-    await Tickets.query().patch(req?.body).where("id", id);
+    await Tickets.query()
+      .patch({ ...req?.body, updated_at: new Date() })
+      .where("id", id);
     res.json({ code: 200, message: "success" });
   } catch (error) {
     console.log(error);
@@ -78,6 +81,7 @@ const kerjakanTicket = async (req, res) => {
       .patch({
         status_code: "DIKERJAKAN",
         start_work_at: new Date(),
+        updated_at: new Date(),
       })
       .where("id", id)
       .andWhere("assignee", customId)
@@ -140,42 +144,45 @@ const akhiriPekerjaanSelesai = async (req, res) => {
 
     const currentTicket = await Tickets.query().findById(id);
 
-    await Tickets.query()
-      .patch({
-        status_code: "SELESAI",
-        assignee_reason: req?.body?.assignee_reason,
-        completed_at: new Date(),
-      })
-      .where("id", id)
-      .andWhere("assignee", customId)
-      .andWhere("status_code", "DIKERJAKAN");
+    if (currentTicket?.status_code === "SELESAI") {
+      res.status(400).json({ code: 400, message: "Ticket sudah selesai" });
+    } else {
+      await Tickets.query()
+        .patch({
+          status_code: "SELESAI",
+          assignee_reason: req?.body?.assignee_reason,
+          completed_at: new Date(),
+          updated_at: new Date(),
+        })
+        .where("id", id)
+        .andWhere("assignee", customId);
 
-    // create notifications here
+      // create notifications here
+      const requester = currentTicket?.requester;
+      const admin = currentTicket?.chooser;
 
-    const requester = currentTicket?.requester;
-    const admin = currentTicket?.chooser;
+      await Notifications.query().insert({
+        from: customId,
+        to: requester,
+        title: "Penyelesaian ticket",
+        content: 'Ticket anda telah selesai, silahkan cek di menu "Tiket Saya"',
+        role: "requester",
+        type: "ticket_done",
+        type_id: id,
+      });
 
-    await Notifications.query().insert({
-      from: customId,
-      to: requester,
-      title: "Penyelesaian ticket",
-      content: 'Ticket anda telah selesai, silahkan cek di menu "Tiket Saya"',
-      role: "requester",
-      type: "ticket_done",
-      type_id: id,
-    });
+      await Notifications.query().insert({
+        from: customId,
+        to: admin,
+        title: "Penyelesaian ticket",
+        content: "Ticket telah selesai, silahkan cek ticket",
+        role: "admin",
+        type: "ticket_done",
+        type_id: id,
+      });
 
-    await Notifications.query().insert({
-      from: customId,
-      to: admin,
-      title: "Penyelesaian ticket",
-      content: "Ticket telah selesai, silahkan cek ticket",
-      role: "admin",
-      type: "ticket_done",
-      type_id: id,
-    });
-
-    res.status(200).json({ code: 200, message: "success" });
+      res.status(200).json({ code: 200, message: "success" });
+    }
   } catch (error) {
     console.log(error);
     res.status(400).json({ code: 400, message: "Internal Server Error" });

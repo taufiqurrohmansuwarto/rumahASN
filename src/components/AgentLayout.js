@@ -23,14 +23,14 @@ const menuItemRender = (options, element) => {
   );
 };
 
-function AgentLayout({ children, active }) {
+function AgentLayout({ children, active, title = "Agent" }) {
   const { data, status } = useSession();
   const router = useRouter();
 
   return (
     <ProLayout
       selectedKeys={[active ? active : router.pathname]}
-      title="Agent"
+      title={title}
       actionsRender={() => {
         return [
           <Notifications key="notifications" />,

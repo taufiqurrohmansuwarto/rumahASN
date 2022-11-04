@@ -19,7 +19,7 @@ import {
   messagesCustomers,
   updateMessagesCustomers,
 } from "../../services/agents.services";
-import { createCommentCustomers } from "../../services/users.services";
+import { fromNow } from "../../utils";
 
 const CreateComments = ({ user, ticketId }) => {
   const [form] = Form.useForm();
@@ -84,7 +84,7 @@ const CreateComments = ({ user, ticketId }) => {
   );
 };
 
-const CommentsList = ({ data, currentUserId, ticketId }) => {
+const CommentsList = ({ data, currentUserId, ticketId, status }) => {
   const queryClient = useQueryClient();
 
   const [form] = Form.useForm();
@@ -158,7 +158,9 @@ const CommentsList = ({ data, currentUserId, ticketId }) => {
     update(data);
   };
 
-  const ActionsUser = ({ item }) => {
+  const ActionsUser = ({ item, status }) => {
+    if (status === "SELESAI") return null;
+
     if (item?.user_id === currentUserId) {
       return (
         <Space>
@@ -185,7 +187,7 @@ const CommentsList = ({ data, currentUserId, ticketId }) => {
           actions={
             selected === item?.id
               ? null
-              : [<ActionsUser key="test" item={item} />]
+              : [<ActionsUser status={status} key="test" item={item} />]
           }
           content={
             data?.status_code === "SELESAI" ? null : (
@@ -215,7 +217,7 @@ const CommentsList = ({ data, currentUserId, ticketId }) => {
             )
           }
           author={item?.user?.username}
-          datetime={item?.created_at}
+          datetime={fromNow(item?.created_at)}
           avatar={item?.user?.image}
         />
       )}
@@ -223,7 +225,7 @@ const CommentsList = ({ data, currentUserId, ticketId }) => {
   );
 };
 
-function ChatCustomerToAgent({ id }) {
+function ChatCustomerToAgent({ id, detailticket }) {
   const { data: userData, status } = useSession();
   const { data, isLoading } = useQuery(
     ["messages-agents-to-customers", id],
@@ -236,9 +238,16 @@ function ChatCustomerToAgent({ id }) {
   return (
     <Skeleton loading={isLoading || status === "loading"}>
       <Card title="Chat">
-        <CreateComments ticketId={id} user={userData?.user} />
+        {detailticket?.status_code !== "SELESAI" && (
+          <CreateComments
+            status={detailticket?.status_code}
+            ticketId={id}
+            user={userData?.user}
+          />
+        )}
         <CommentsList
           data={data}
+          status={detailticket?.status_code}
           currentUserId={userData?.user?.id}
           ticketId={id}
         />

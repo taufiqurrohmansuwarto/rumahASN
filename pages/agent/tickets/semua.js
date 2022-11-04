@@ -60,6 +60,13 @@ const Tickets = () => {
       },
     },
     {
+      title: "Tanggal update",
+      key: "updated_at",
+      render: (text, record) => {
+        return formatDate(record.updated_at);
+      },
+    },
+    {
       title: "Status",
       key: "status_code",
       render: (text, record) => {

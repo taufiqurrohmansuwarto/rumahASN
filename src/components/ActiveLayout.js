@@ -16,16 +16,15 @@ function ActiveLayout({
   ];
 
   const agentTabs = [
-    { key: "detail", tab: "Detail Ticket", icon: <DotChartOutlined /> },
-    { key: "chats-customers", tab: "Chats to Customers" },
-    { key: "chats-agents", tab: "Chats to Agent" },
+    { key: "detail", tab: "Detil Tiket", icon: <DotChartOutlined /> },
+    { key: "chats-customers", tab: "Chat ke user" },
+    { key: "chats-agents", tab: "Chat ke Agent" },
   ];
 
   const router = useRouter();
 
   return (
     <PageContainer
-      content="Detail Tiket"
       onBack={() => router.push("/tickets/semua")}
       loading={loading}
       tabList={role === "requester" ? customerTabs : agentTabs}
