@@ -16,7 +16,7 @@ const addFeedback = async (req, res) => {
 
     if (currentTicket) {
       await Tickets.query()
-        .update({
+        .patch({
           stars: body.stars,
           requester_comment: body.requester_comment,
           has_feedback: true,

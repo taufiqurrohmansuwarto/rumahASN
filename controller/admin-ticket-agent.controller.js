@@ -22,7 +22,7 @@ const addAgents = async (req, res) => {
     const { customId } = req?.user;
 
     await Tickets.query()
-      .update({
+      .patch({
         chooser: customId,
         chooser_picked_at: new Date(),
         assignee: body?.assignee,
@@ -41,7 +41,7 @@ const removeAgents = async (req, res) => {
   try {
     const { id } = req?.query;
     await Tickets.query()
-      .update({
+      .patch({
         chooser: null,
         chooser_picked_at: null,
         assignee: null,

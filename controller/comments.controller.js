@@ -47,7 +47,7 @@ const update = async (req, res) => {
     const { body } = req;
 
     await Comments.query()
-      .update(body)
+      .patch(body)
       .where("id", id)
       .andWhere("user_custom_id", customId);
     res.json({ code: 200, message: "success" });

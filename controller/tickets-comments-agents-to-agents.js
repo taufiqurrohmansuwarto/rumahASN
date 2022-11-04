@@ -66,7 +66,7 @@ const update = async (req, res) => {
   try {
     // must be validation
     await TicketsCommentsAgents.query()
-      .update(req?.body)
+      .patch(req?.body)
       .where("ticket_id", id)
       .andWhere("id", commentAgentId)
       .andWhere("user_id", customId);

@@ -2,6 +2,7 @@ import { Paper, Stack, Text, Space as SpaceMantine } from "@mantine/core";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button, message, Modal, Space, Form, Input } from "antd";
 import React, { useState } from "react";
+import { akhiriPekerjaanSelesai } from "../../services/agents.services";
 import TicketProperties from "./TicketProperties";
 import TimelinePekerjaan from "./TimelinePekerjaan";
 
@@ -9,21 +10,46 @@ const SelesaiModal = ({ open, onCancel, data }) => {
   const [form] = Form.useForm();
   const queryClient = useQueryClient();
 
+  const { mutate: akhirPekerjaan, isLoading: isLoadingPekerjaan } = useMutation(
+    (data) => akhiriPekerjaanSelesai(data),
+    {
+      onSettled: () =>
+        queryClient.invalidateQueries(["agent-tickets", dat?.id]),
+      onSuccess: () => {
+        message.success("Berhasil mengakhiri pekerjaan");
+        queryClient.invalidateQueries(["agent-tickets", data?.id]);
+        onCancel();
+      },
+      onError: () => message.error("Gagal mengakhiri pekerjaan"),
+    }
+  );
+
   const handleOk = async () => {
     const result = await form.validateFields();
-    console.log(result);
+    const currentData = {
+      id: data?.id,
+      data: {
+        ...result,
+      },
+    };
+    akhirPekerjaan(currentData);
   };
 
   return (
     <Modal
       onOk={handleOk}
       title="Selesaikan Pekerjaan"
+      confirmLoading={isLoadingPekerjaan}
       open={open}
       onCancel={onCancel}
     >
       <Form form={form}>
-        <Form.Item name="assignee_reason" label="Solusi">
-          <Input.TextArea />
+        <Form.Item
+          rules={[{ required: true, message: "Tidak boleh kosong" }]}
+          name="assignee_reason"
+          label="Solusi"
+        >
+          <Input.TextArea rows={5} />
         </Form.Item>
       </Form>
     </Modal>
@@ -49,29 +75,6 @@ function AgentTicketDetail({ data }) {
 
   const handleCancel = () => setOpen(false);
   const handleOpen = () => setOpen(true);
-
-  const queryClient = useQueryClient();
-
-  const { mutateAsync: akhiriSelesai } = useMutation(
-    (id) => akhiriPekerjaanSelesai(id),
-    {
-      onSettled: () =>
-        queryClient.invalidateQueries(["agent-tickets", router?.query?.id]),
-      onSuccess: () => message.success("Berhasil mengakhiri pekerjaan"),
-      onError: () => message.error("Gagal mengakhiri pekerjaan"),
-    }
-  );
-
-  const handleAkhiriSelesai = () => {
-    Modal.confirm({
-      title: "Akhiri pekerjaan",
-      content:
-        "Apakah anda yakin ingin mengakhiri pekerjaan ini dengan status selesai?",
-      onOk: async () => {
-        await akhiriSelesai(router?.query?.id);
-      },
-    });
-  };
 
   return (
     <Paper withBorder p="lg" radius="md" shadow="md">

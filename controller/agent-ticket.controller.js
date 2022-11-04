@@ -75,7 +75,7 @@ const kerjakanTicket = async (req, res) => {
     const { id } = req.query;
 
     const data = await Tickets.query()
-      .update({
+      .patch({
         status_code: "DIKERJAKAN",
         start_work_at: new Date(),
       })
@@ -141,10 +141,10 @@ const akhiriPekerjaanSelesai = async (req, res) => {
     const currentTicket = await Tickets.query().findById(id);
 
     await Tickets.query()
-      .update({
+      .patch({
         status_code: "SELESAI",
         assignee_reason: req?.body?.assignee_reason,
-        end_work_at: new Date(),
+        completed_at: new Date(),
       })
       .where("id", id)
       .andWhere("assignee", customId)
@@ -187,7 +187,7 @@ const akhiriPekerjaanDitolak = async (req, res) => {
     const { customId } = req?.user;
     const { id } = req?.query;
     await Tickets.query()
-      .update({
+      .patch({
         status_code: "DITOLAK",
         assignee_reason: req?.body?.assignee_reason,
       })

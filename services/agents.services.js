@@ -33,8 +33,8 @@ export const hapusKerjakanTicket = (id) => {
 };
 
 // akhiri pekerjaan
-export const akhiriPekerjaanSelesai = (id) => {
-  return api.patch(`/tickets/${id}/status`).then((res) => res?.data);
+export const akhiriPekerjaanSelesai = ({ id, data }) => {
+  return api.patch(`/tickets/${id}/status`, data).then((res) => res?.data);
 };
 
 export const akhirPekerjaanTidakSelesai = (id) => {

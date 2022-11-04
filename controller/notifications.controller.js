@@ -51,7 +51,7 @@ const clearChats = async (req, res) => {
       findRole = ["admin", "agent", "requester"];
     }
     await Notifications.query()
-      .update({ read_at: new Date() })
+      .patch({ read_at: new Date() })
       .where("to", customId)
       .andWhere("role", "in", findRole)
       .andWhere("read_at", null);
