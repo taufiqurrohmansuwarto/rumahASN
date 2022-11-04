@@ -21,10 +21,18 @@ class Tickets extends Model {
     const Categories = require("./categories.model");
     const Status = require("./status.model");
     const Priorities = require("./priorities.model");
-
     const User = require("../models/users.model");
+    const SubCategories = require("../models/sub-categories.model");
 
     return {
+      sub_category: {
+        relation: Model.BelongsToOneRelation,
+        modelClass: SubCategories,
+        join: {
+          from: "tickets.sub_category_id",
+          to: "sub_categories.id",
+        },
+      },
       agent: {
         relation: Model.BelongsToOneRelation,
         modelClass: User,

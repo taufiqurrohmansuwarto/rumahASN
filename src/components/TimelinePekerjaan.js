@@ -4,7 +4,7 @@ import {
   IconGitCommit,
   IconGitPullRequest,
 } from "@tabler/icons";
-import { fromNow, setActivePekerjaan } from "../../utils";
+import { formatDate, fromNow, setActivePekerjaan } from "../../utils";
 
 function TimelinePekerjaan({ data }) {
   return (
@@ -14,7 +14,7 @@ function TimelinePekerjaan({ data }) {
           Status tiket mu diajukan
         </Text>
         <Text size="xs" mt={4}>
-          {fromNow(data?.created_at)}
+          {formatDate(data?.created_at)}
         </Text>
       </Timeline.Item>
 
@@ -25,7 +25,7 @@ function TimelinePekerjaan({ data }) {
               Status tiket mu dikerjakan oleh {data?.agent?.username}
             </Text>
             <Text size="xs" mt={4}>
-              {fromNow(data?.start_work_at)}
+              {formatDate(data?.start_work_at)}
             </Text>
           </>
         ) : (
@@ -45,7 +45,7 @@ function TimelinePekerjaan({ data }) {
               Status tiket mu selesai
             </Text>
             <Text size="xs" mt={4}>
-              {fromNow(data?.completed_at)}
+              {formatDate(data?.completed_at)}
             </Text>
           </>
         ) : (

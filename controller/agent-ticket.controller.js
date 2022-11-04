@@ -39,7 +39,7 @@ const detail = async (req, res) => {
       .where("id", id)
       .andWhere("assignee", customId)
       .withGraphFetched(
-        "[agent(simpleSelect), customer(simpleSelect), admin(simpleSelect)]"
+        "[agent(simpleSelect), customer(simpleSelect), admin(simpleSelect), sub_category]"
       )
       .first();
     res.json(result);
@@ -144,6 +144,7 @@ const akhiriPekerjaanSelesai = async (req, res) => {
       .update({
         status_code: "SELESAI",
         assignee_reason: req?.body?.assignee_reason,
+        end_work_at: new Date(),
       })
       .where("id", id)
       .andWhere("assignee", customId)

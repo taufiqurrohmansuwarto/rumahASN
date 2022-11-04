@@ -14,6 +14,7 @@ const FormProperty = ({ open, onCancel, data, priorities, subCategories }) => {
     {
       onSuccess: () => {
         onCancel();
+        queryClient.invalidateQueries(["agent-tickets", data?.id]);
         message.success("Berhasil memperbarui property tiket");
       },
     }

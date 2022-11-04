@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Button, Card, message, Modal, Space } from "antd";
+import { Button, Card, message, Modal, Skeleton, Space } from "antd";
 import { useRouter } from "next/router";
 import {
   akhiriPekerjaanSelesai,
@@ -9,6 +9,7 @@ import {
 import ActiveLayout from "../../../../src/components/ActiveLayout";
 import AgentKerjakan from "../../../../src/components/AgentKerjakan";
 import AgentLayout from "../../../../src/components/AgentLayout";
+import AgentTicketDetail from "../../../../src/components/AgentTicketDetail";
 
 const TicketsDetail = () => {
   const router = useRouter();
@@ -62,19 +63,13 @@ const TicketsDetail = () => {
 
   return (
     <ActiveLayout role="agent" id={router?.query?.id}>
-      <Card loading={isLoading} title="Detail Ticket">
-        <p>{JSON.stringify(data)}</p>
+      <Skeleton loading={isLoading}>
         {data?.status_code === "DIAJUKAN" && data?.chooser ? (
           <AgentKerjakan data={data} />
         ) : (
-          <Space>
-            <Button danger type="primary" onClick={handleAkhiriSelesai}>
-              Akhiri Selesai
-            </Button>
-            <Button onClick={handleAkhiriTolak}>Akhiri Tolak</Button>
-          </Space>
+          <AgentTicketDetail data={data} />
         )}
-      </Card>
+      </Skeleton>
     </ActiveLayout>
   );
 };

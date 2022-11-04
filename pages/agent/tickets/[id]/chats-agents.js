@@ -218,14 +218,7 @@ const TicketsDetails = () => {
         loading={
           status === "loading" || status === "unauthenticated" || isLoading
         }
-      >
-        <CreateComments user={dataUser?.user} ticketId={router?.query?.id} />
-        <CommentsList
-          ticketId={router?.query?.id}
-          data={data}
-          currentUserId={dataUser?.user?.id}
-        />
-      </Card>
+      ></Card>
     </ActiveLayout>
   );
 };
