@@ -1,25 +1,24 @@
 import { PlusOutlined } from "@ant-design/icons";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
-  Input,
-  Form,
-  TreeSelect,
-  Modal,
   Button,
-  Table,
-  Space,
-  Divider,
-  Popconfirm,
   Card,
-  message,
+  Divider,
+  Form,
+  Input,
+  Modal,
+  Popconfirm,
+  Space,
+  Table,
+  TreeSelect,
 } from "antd";
 import { useEffect, useState } from "react";
 import {
-  createCategory,
-  deleteCategory,
-  getCategories,
+  createFaq,
+  deleteFaq,
+  getFaqs,
   getTreeOrganization,
-  updateCategory,
+  updateFaq,
 } from "../../../services";
 
 const { default: AdminLayout } = require("../../../src/components/AdminLayout");
@@ -37,7 +36,7 @@ const UpdateForm = ({ open, onCancel, data }) => {
 
   const queryClient = useQueryClient();
 
-  const { mutate: update } = useMutation((data) => updateCategory(data), {
+  const { mutate: update } = useMutation((data) => updateFaq(data), {
     onSettled: () => {
       queryClient.invalidateQueries(["categories"]);
       onCancel();
@@ -101,7 +100,7 @@ const CreateForm = ({ open, handleCancel }) => {
   const queryClient = useQueryClient();
 
   const { mutate: add, isLoading: confirmLoading } = useMutation(
-    (data) => createCategory(data),
+    (data) => createFaq(data),
     {
       onSettled: () => {
         queryClient.invalidateQueries(["categories"]);
@@ -193,7 +192,7 @@ const FormTree = () => {
 };
 
 const Categories = () => {
-  const { data, isLoading } = useQuery(["categories"], () => getCategories());
+  const { data, isLoading } = useQuery(["faqs"], () => getFaqs());
   const [createModal, setCreateModal] = useState(false);
   const [updateModal, setUpdateModal] = useState(false);
 
@@ -209,9 +208,9 @@ const Categories = () => {
   };
 
   const queryClient = useQueryClient();
-  const { mutate: hapus } = useMutation((id) => deleteCategory(id), {
+  const { mutate: hapus } = useMutation((id) => deleteFaq(id), {
     onSettled: () => {
-      queryClient.invalidateQueries(["categories"]);
+      queryClient.invalidateQueries(["faqs"]);
     },
     onError: (error) => {
       console.error(error);
@@ -234,14 +233,7 @@ const Categories = () => {
       key: "description",
     },
     {
-      title: "Bidang/Perangkat Daerah",
-      key: "satuan_kerja",
-      render: (text, record) => {
-        return record.satuan_kerja.label;
-      },
-    },
-    {
-      title: "Dibuat pada",
+      title: "Tgl. dibuat",
       dataIndex: "created_at",
       key: "created_at",
     },

@@ -139,3 +139,36 @@ export const listNotifications = async (simbol = "no") => {
 export const clearChatsNotificatoins = async () => {
   return await api.put("/notifications").then((res) => res?.data);
 };
+
+// faq and sub faq
+export const getFaqs = async () => {
+  return await api.get("/ref/faqs").then((res) => res?.data);
+};
+
+export const createFaq = async (data) => {
+  return await api.post("/ref/faqs", data).then((res) => res?.data);
+};
+
+export const updateFaq = async ({ id, data }) => {
+  return await api.patch(`/ref/faqs/${id}`, data).then((res) => res?.data);
+};
+
+export const deleteFaq = async (id) => {
+  return await api.delete(`/ref/faqs/${id}`).then((res) => res?.data);
+};
+
+export const getSubFaqs = async () => {
+  return await api.get("/ref/sub-faqs").then((res) => res?.data);
+};
+
+export const createSubFaq = async (data) => {
+  return await api.post("/ref/sub-faqs", data).then((res) => res?.data);
+};
+
+export const updateSubFaq = async ({ id, data }) => {
+  return await api.patch(`/ref/sub-faqs/${id}`, data).then((res) => res?.data);
+};
+
+export const deleteSubFaq = async (id) => {
+  return await api.delete(`/ref/sub-faqs/${id}`).then((res) => res?.data);
+};
