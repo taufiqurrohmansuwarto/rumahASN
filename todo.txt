@@ -1,9 +1,2 @@
-sore ini
 
-1. knex migrate faq 
-
-table faq
-id name description created_at updated_at user_custom_id
-id faq_id answer question created_at updated_at user_custom_id
-
-create controller faq, dan sub_faq
+1. hari ini ui untuk faq dan sub faq

@@ -6,57 +6,54 @@ import {
   Divider,
   Form,
   Input,
+  message,
   Modal,
   Popconfirm,
   Space,
   Table,
-  TreeSelect,
 } from "antd";
 import { useEffect, useState } from "react";
-import {
-  createFaq,
-  deleteFaq,
-  getFaqs,
-  getTreeOrganization,
-  updateFaq,
-} from "../../../services";
+import { createFaq, deleteFaq, getFaqs, updateFaq } from "../../../services";
+import { formatDate } from "../../../utils";
 
 const { default: AdminLayout } = require("../../../src/components/AdminLayout");
 const {
   default: PageContainer,
 } = require("../../../src/components/PageContainer");
 
-// create random generate color
-const randomColor = () => {
-  return "#" + Math.floor(Math.random() * 16777215).toString(16);
-};
-
 const UpdateForm = ({ open, onCancel, data }) => {
   const [form] = Form.useForm();
 
   const queryClient = useQueryClient();
 
+  useEffect(() => {
+    form.setFieldsValue({
+      name: data?.name,
+      description: data?.description,
+    });
+  }, [data, form]);
+
   const { mutate: update } = useMutation((data) => updateFaq(data), {
     onSettled: () => {
-      queryClient.invalidateQueries(["categories"]);
+      queryClient.invalidateQueries(["faqs"]);
       onCancel();
     },
     onError: (error) => {
       console.log(error);
     },
+    onSuccess: () => {
+      message.success("Berhasil mengubah FAQ");
+    },
   });
 
   const handleOk = async () => {
     try {
-      const result = await form.validateFields();
-
+      const { name, description } = await form.validateFields();
       const send = {
         id: data?.id,
         data: {
-          satuan_kerja: result?.organization,
-          name: result?.name,
-          kode_satuan_kerja: result?.organization?.value,
-          description: result?.description,
+          name,
+          description,
         },
       };
       update(send);
@@ -65,27 +62,26 @@ const UpdateForm = ({ open, onCancel, data }) => {
     }
   };
 
-  useEffect(() => {
-    form.setFieldsValue({
-      ...data,
-      organization: data?.satuan_kerja,
-    });
-  }, [data, form]);
-
   return (
     <Modal
       onOk={handleOk}
       width={700}
       title="Update Kategori"
-      open={open}
       destroyOnClose
+      open={open}
       onCancel={onCancel}
     >
-      <Form layout="vertical" form={form}>
+      <Form
+        initialValues={{
+          name: data?.name,
+          description: data?.description,
+        }}
+        layout="vertical"
+        form={form}
+      >
         <Form.Item name="name" label="Nama">
           <Input />
         </Form.Item>
-        <FormTree />
         <Form.Item name="description" lable="Deskripsi">
           <Input.TextArea />
         </Form.Item>
@@ -103,8 +99,11 @@ const CreateForm = ({ open, handleCancel }) => {
     (data) => createFaq(data),
     {
       onSettled: () => {
-        queryClient.invalidateQueries(["categories"]);
+        queryClient.invalidateQueries(["faqs"]);
         handleCancel();
+      },
+      onSuccess: () => {
+        message.success("Berhasil menambahkan FAQ");
       },
       onError: (error) => {
         console.error(error);
@@ -118,9 +117,6 @@ const CreateForm = ({ open, handleCancel }) => {
       const data = {
         description: result.description,
         name: result?.name,
-        kode_satuan_kerja: result?.organization?.value,
-        satuan_kerja: result?.organization,
-        color: randomColor(),
       };
 
       add(data);
@@ -131,6 +127,7 @@ const CreateForm = ({ open, handleCancel }) => {
 
   return (
     <Modal
+      destroyOnClose
       onOk={handleOk}
       confirmLoading={confirmLoading}
       centered
@@ -139,8 +136,7 @@ const CreateForm = ({ open, handleCancel }) => {
       open={open}
       onCancel={handleCancel}
     >
-      <Form layout="vertical" form={form}>
-        <FormTree />
+      <Form klayout="vertical" form={form}>
         <Form.Item
           label="Nama"
           name="name"
@@ -153,41 +149,6 @@ const CreateForm = ({ open, handleCancel }) => {
         </Form.Item>
       </Form>
     </Modal>
-  );
-};
-
-// create form component for data tree
-const FormTree = () => {
-  const { data: dataTree, isLoading: isLoadingDataTree } = useQuery(
-    ["organization-tree"],
-    () => getTreeOrganization()
-  );
-  return (
-    <>
-      {dataTree && (
-        <>
-          <Form.Item
-            label="Struktur Organisasi"
-            name="organization"
-            rules={[
-              {
-                required: true,
-                message: "Struktur Organisasi tidak boleh kosong",
-              },
-            ]}
-          >
-            <TreeSelect
-              labelInValue
-              treeNodeFilterProp="label"
-              treeData={dataTree}
-              showSearch
-              placeholder="Pilih Struktur Organisasi"
-              treeDefaultExpandAll
-            />
-          </Form.Item>
-        </>
-      )}
-    </>
   );
 };
 
@@ -234,20 +195,20 @@ const Categories = () => {
     },
     {
       title: "Tgl. dibuat",
-      dataIndex: "created_at",
       key: "created_at",
+      render: (_, row) => formatDate(row.created_at),
     },
     {
       title: "Dibuat oleh",
       key: "created_by",
-      render: (text, record) => {
-        return record?.createdBy?.username;
+      render: (_, record) => {
+        return record?.created_by?.username;
       },
     },
     {
       title: "Aksi",
       key: "action",
-      render: (text, record) => (
+      render: (_, record) => (
         <Space>
           <a
             onClick={() => {

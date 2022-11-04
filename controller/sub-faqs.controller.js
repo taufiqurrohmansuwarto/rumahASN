@@ -11,7 +11,11 @@ const index = async (req, res) => {
 const update = async (req, res) => {
   try {
     const { id } = req?.query;
-    await SubFaqs.query().patchAndFetchById(id, req.body);
+    const { customId } = req?.user;
+    await SubFaqs.query().patchAndFetchById(id, {
+      ...req?.body,
+      user_id: customId,
+    });
     res.json({ code: 200, message: "success" });
   } catch (error) {
     console.log(error);
@@ -43,7 +47,8 @@ const detail = async (req, res) => {
 
 const create = async (req, res) => {
   try {
-    await SubFaqs.query().insert(req.body);
+    const { customId } = req?.user;
+    await SubFaqs.query().insert({ ...req?.body, user_id: customId });
     res.json({ code: 200, message: "success" });
   } catch (error) {
     console.log(error);
