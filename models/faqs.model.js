@@ -14,6 +14,7 @@ class Faqs extends Model {
 
   static get relationMappings() {
     const user = require("../models/users.model");
+    const subFaqs = require("../models/sub-faqs.model");
 
     return {
       created_by: {
@@ -22,6 +23,14 @@ class Faqs extends Model {
         join: {
           from: "faqs.user_id",
           to: "users.custom_id",
+        },
+      },
+      sub_faq: {
+        relation: Model.HasManyRelation,
+        modelClass: subFaqs,
+        join: {
+          from: "faqs.id",
+          to: "sub_faqs.faq_id",
         },
       },
     };
