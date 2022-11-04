@@ -1,6 +1,10 @@
+const SubFaqs = require("../models/sub-faqs.model");
+
 const index = async (req, res) => {
   try {
-    const result = await SubFaqs.query();
+    const result = await SubFaqs.query()
+      .withGraphFetched("[created_by(simpleSelect), faq]")
+      .orderBy("created_at", "desc");
     res.json(result);
   } catch (error) {
     console.log(error);

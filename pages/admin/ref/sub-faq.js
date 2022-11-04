@@ -1,45 +1,41 @@
 import { PlusOutlined } from "@ant-design/icons";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
-  Input,
-  Form,
-  TreeSelect,
-  Modal,
   Button,
-  Table,
-  Space,
-  Divider,
-  Popconfirm,
   Card,
+  Divider,
+  Form,
+  Input,
   message,
+  Modal,
+  Popconfirm,
+  Select,
+  Space,
+  Table,
 } from "antd";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import {
-  createCategory,
-  deleteCategory,
-  getCategories,
-  getTreeOrganization,
-  updateCategory,
+  createSubFaq,
+  deleteSubFaq,
+  getFaqs,
+  getSubFaqs,
+  updateSubFaq,
 } from "../../../services";
+import { formatDate } from "../../../utils";
 
 const { default: AdminLayout } = require("../../../src/components/AdminLayout");
 const {
   default: PageContainer,
 } = require("../../../src/components/PageContainer");
 
-// create random generate color
-const randomColor = () => {
-  return "#" + Math.floor(Math.random() * 16777215).toString(16);
-};
-
 const UpdateForm = ({ open, onCancel, data }) => {
   const [form] = Form.useForm();
 
   const queryClient = useQueryClient();
 
-  const { mutate: update } = useMutation((data) => updateCategory(data), {
+  const { mutate: update } = useMutation((data) => updateSubFaq(data), {
     onSettled: () => {
-      queryClient.invalidateQueries(["categories"]);
+      queryClient.invalidateQueries(["sub-faqs"]);
       onCancel();
     },
     onError: (error) => {
@@ -54,10 +50,7 @@ const UpdateForm = ({ open, onCancel, data }) => {
       const send = {
         id: data?.id,
         data: {
-          satuan_kerja: result?.organization,
-          name: result?.name,
-          kode_satuan_kerja: result?.organization?.value,
-          description: result?.description,
+          ...result,
         },
       };
       update(send);
@@ -65,13 +58,6 @@ const UpdateForm = ({ open, onCancel, data }) => {
       console.log(error);
     }
   };
-
-  useEffect(() => {
-    form.setFieldsValue({
-      ...data,
-      organization: data?.satuan_kerja,
-    });
-  }, [data, form]);
 
   return (
     <Modal
@@ -86,7 +72,6 @@ const UpdateForm = ({ open, onCancel, data }) => {
         <Form.Item name="name" label="Nama">
           <Input />
         </Form.Item>
-        <FormTree />
         <Form.Item name="description" lable="Deskripsi">
           <Input.TextArea />
         </Form.Item>
@@ -95,36 +80,30 @@ const UpdateForm = ({ open, onCancel, data }) => {
   );
 };
 
-const CreateForm = ({ open, handleCancel }) => {
+const CreateForm = ({ open, handleCancel, faqs }) => {
   const [form] = Form.useForm();
 
   const queryClient = useQueryClient();
 
   const { mutate: add, isLoading: confirmLoading } = useMutation(
-    (data) => createCategory(data),
+    (data) => createSubFaq(data),
     {
-      onSettled: () => {
-        queryClient.invalidateQueries(["categories"]);
+      onSuccess: () => {
+        queryClient.invalidateQueries(["sub-faqs"]);
+        message.success("Berhasil menambahkan sub FAQ");
         handleCancel();
       },
       onError: (error) => {
         console.error(error);
       },
+      onSettled: () => queryClient.invalidateQueries(["sub-faqs"]),
     }
   );
 
   const handleOk = async () => {
     try {
       const result = await form.validateFields();
-      const data = {
-        description: result.description,
-        name: result?.name,
-        kode_satuan_kerja: result?.organization?.value,
-        satuan_kerja: result?.organization,
-        color: randomColor(),
-      };
-
-      add(data);
+      add(result);
     } catch (error) {
       console.log(error);
     }
@@ -135,21 +114,25 @@ const CreateForm = ({ open, handleCancel }) => {
       onOk={handleOk}
       confirmLoading={confirmLoading}
       centered
-      title="Tambah Kategori"
+      title="Tambah Sub FAQ"
       width={800}
       open={open}
       onCancel={handleCancel}
     >
       <Form layout="vertical" form={form}>
-        <FormTree />
-        <Form.Item
-          label="Nama"
-          name="name"
-          rules={[{ required: true, message: "Nama tidak boleh kosong" }]}
-        >
-          <Input />
+        <Form.Item label="FAQ" name="faq_id">
+          <Select>
+            {faqs?.map((faq) => (
+              <Select.Option key={faq?.id} value={faq?.id}>
+                {faq?.name}
+              </Select.Option>
+            ))}
+          </Select>
         </Form.Item>
-        <Form.Item label="Deskripsi" name="description">
+        <Form.Item label="Pertanyaan" name="question">
+          <Input.TextArea />
+        </Form.Item>
+        <Form.Item label="Jawaban" name="answer">
           <Input.TextArea />
         </Form.Item>
       </Form>
@@ -157,45 +140,14 @@ const CreateForm = ({ open, handleCancel }) => {
   );
 };
 
-// create form component for data tree
-const FormTree = () => {
-  const { data: dataTree, isLoading: isLoadingDataTree } = useQuery(
-    ["organization-tree"],
-    () => getTreeOrganization()
-  );
-  return (
-    <>
-      {dataTree && (
-        <>
-          <Form.Item
-            label="Struktur Organisasi"
-            name="organization"
-            rules={[
-              {
-                required: true,
-                message: "Struktur Organisasi tidak boleh kosong",
-              },
-            ]}
-          >
-            <TreeSelect
-              labelInValue
-              treeNodeFilterProp="label"
-              treeData={dataTree}
-              showSearch
-              placeholder="Pilih Struktur Organisasi"
-              treeDefaultExpandAll
-            />
-          </Form.Item>
-        </>
-      )}
-    </>
-  );
-};
-
 const Categories = () => {
-  const { data, isLoading } = useQuery(["categories"], () => getCategories());
+  const { data, isLoading } = useQuery(["sub-faqs"], () => getSubFaqs());
   const [createModal, setCreateModal] = useState(false);
   const [updateModal, setUpdateModal] = useState(false);
+
+  const { data: dataFaqs, isLoading: isLoadingFaqs } = useQuery(["faqs"], () =>
+    getFaqs()
+  );
 
   const openCreateModal = () => setCreateModal(true);
   const handleCancelCreateModal = () => setCreateModal(false);
@@ -209,9 +161,10 @@ const Categories = () => {
   };
 
   const queryClient = useQueryClient();
-  const { mutate: hapus } = useMutation((id) => deleteCategory(id), {
+
+  const { mutate: hapus } = useMutation((id) => deleteSubFaq(id), {
     onSettled: () => {
-      queryClient.invalidateQueries(["categories"]);
+      queryClient.invalidateQueries(["sub-faqs"]);
     },
     onError: (error) => {
       console.error(error);
@@ -224,33 +177,32 @@ const Categories = () => {
 
   const columns = [
     {
-      title: "Nama",
-      dataIndex: "name",
-      key: "name",
+      title: "FAQ",
+      key: "faq",
+      render: (_, row) => row?.faq?.name,
     },
     {
-      title: "Deskripsi",
-      dataIndex: "description",
-      key: "description",
+      title: "Pertanyaan",
+      dataIndex: "question",
+      key: "question",
     },
     {
-      title: "Bidang/Perangkat Daerah",
-      key: "satuan_kerja",
-      render: (text, record) => {
-        return record.satuan_kerja.label;
-      },
+      title: "Jawaban",
+      dataIndex: "answer",
+      key: "answer",
     },
-    {
-      title: "Dibuat pada",
-      dataIndex: "created_at",
-      key: "created_at",
-    },
+
     {
       title: "Dibuat oleh",
       key: "created_by",
       render: (text, record) => {
-        return record?.createdBy?.username;
+        return record?.created_by?.username;
       },
+    },
+    {
+      title: "Dibuat pada",
+      key: "created_at",
+      render: (_, row) => formatDate(row?.created_at),
     },
     {
       title: "Aksi",
@@ -294,10 +246,16 @@ const Categories = () => {
           dataSource={data}
           loading={isLoading}
         />
-        <CreateForm open={createModal} handleCancel={handleCancelCreateModal} />
+        <CreateForm
+          faqs={dataFaqs}
+          open={createModal}
+          handleCancel={handleCancelCreateModal}
+        />
+
         <UpdateForm
           open={updateModal}
           data={dataUpdate}
+          faqs={dataFaqs}
           onCancel={handleCancelUpdateModal}
         />
       </Card>
