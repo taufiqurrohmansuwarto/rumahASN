@@ -4,14 +4,14 @@ import {
   IconGitCommit,
   IconGitPullRequest,
 } from "@tabler/icons";
-import { formatDate, fromNow, setActivePekerjaan } from "../../utils";
+import { formatDate, setActivePekerjaan } from "../../utils";
 
 function TimelinePekerjaan({ data }) {
   return (
     <Timeline active={setActivePekerjaan(data)} bulletSize={24} lineWidth={2}>
       <Timeline.Item bullet={<IconGitBranch size={12} />} title="Diajukan">
         <Text color="dimmed" size="sm">
-          Status tiket mu diajukan
+          Status tiket diajukan oleh {data?.customer?.name}
         </Text>
         <Text size="xs" mt={4}>
           {formatDate(data?.created_at)}
@@ -19,7 +19,8 @@ function TimelinePekerjaan({ data }) {
       </Timeline.Item>
 
       <Timeline.Item bullet={<IconGitCommit size={12} />} title="Dikerjakan">
-        {data?.status_code === "DIKERJAKAN" ? (
+        {data?.status_code === "DIKERJAKAN" ||
+        data?.status_code === "SELESAI" ? (
           <>
             <Text color="dimmed" size="sm">
               Status tiket mu dikerjakan oleh {data?.agent?.username}
@@ -42,7 +43,7 @@ function TimelinePekerjaan({ data }) {
         {data?.status_code === "SELESAI" ? (
           <>
             <Text color="dimmed" size="sm">
-              Status tiket mu selesai
+              Status tiket diselesaikan oleh {data?.agent?.username}
             </Text>
             <Text size="xs" mt={4}>
               {formatDate(data?.completed_at)}

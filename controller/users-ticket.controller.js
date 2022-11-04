@@ -44,7 +44,9 @@ const detail = async (req, res) => {
     const result = await Tickets.query()
       .where("requester", customId)
       .andWhere("id", id)
-      .withGraphFetched("[agent(simpleSelect), admin(simpleSelect)]")
+      .withGraphFetched(
+        "[agent(simpleSelect), admin(simpleSelect), customer(simpleSelect)]"
+      )
       .first();
     res.json(result);
   } catch (error) {
