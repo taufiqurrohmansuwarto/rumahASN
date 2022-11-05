@@ -1,24 +1,32 @@
-import { SendOutlined } from "@ant-design/icons";
-import { useMutation, useQuery } from "@tanstack/react-query";
-import {
-  Button,
-  Card,
-  Form,
-  Input,
-  message,
-  Radio,
-  Select,
-  Skeleton,
-} from "antd";
+import { Alert, Grid, Text } from "@mantine/core";
+import { IconAlertCircle } from "@tabler/icons";
+import { useMutation } from "@tanstack/react-query";
+import { Button, Card, Form, Input, message } from "antd";
 import { useRouter } from "next/router";
-import { getCategories, getPriorities, getStatus } from "../../services";
+import { useCallback } from "react";
+import { uploadImage } from "../../services";
 import { createTickets } from "../../services/users.services";
 import Layout from "../../src/components/Layout";
 import PageContainer from "../../src/components/PageContainer";
+import RichTextEditor from "../../src/components/RichTextEditor";
+import { resizeImageTag } from "../../utils";
 
 const CreateTicket = () => {
   const [form] = Form.useForm();
   const router = useRouter();
+
+  const handleImageUpload = useCallback(
+    (file) =>
+      new Promise((resolve, reject) => {
+        const formData = new FormData();
+        formData.append("image", file);
+
+        uploadImage(formData)
+          .then((res) => resolve(res.data))
+          .catch(() => reject(new Error("Upload failed")));
+      }),
+    []
+  );
 
   const { mutate: create } = useMutation((data) => createTickets(data), {
     onSuccess: () => {
@@ -30,90 +38,67 @@ const CreateTicket = () => {
     },
   });
 
-  const { data: dataCategories, isLoading: isLoadingCategories } = useQuery(
-    ["categories"],
-    () => getCategories(),
-    {
-      refetchOnWindowFocus: false,
-    }
-  );
-
-  const { data: dataStatus, isLoading: isLoadingStatus } = useQuery(
-    ["status"],
-    () => getStatus(),
-    {
-      refetchOnWindowFocus: false,
-    }
-  );
-
-  const { data: dataPriorities, isLoading: isLoadingPriorities } = useQuery(
-    ["priorities"],
-    () => getPriorities(),
-    {
-      refetchOnWindowFocus: false,
-    }
-  );
-
   const handleFinish = (value) => {
-    create(value);
+    const { title, content } = value;
+    if (title && content) {
+      // create(value);
+      const data = {
+        title,
+        content: resizeImageTag(content),
+      };
+
+      console.log(data);
+    }
   };
+
   return (
     <PageContainer
       onBack={() => router.push("/tickets")}
-      title="Create ticket"
-      subTitle="Tiket"
+      title="Helpdesk"
+      subTitle="Buat Tiket Baru"
     >
-      <Card title="Buat Ticket">
-        <Skeleton
-          loading={
-            isLoadingCategories || isLoadingStatus || isLoadingPriorities
-          }
-        >
-          <Form onFinish={handleFinish} form={form} layout="vertical">
-            <Form.Item name="title" label="Judul">
-              <Input />
-            </Form.Item>
-            <Form.Item name="content" label="Deskripsi">
-              <Input.TextArea />
-            </Form.Item>
-            {/* <Form.Item
-              help="Pastikan kategori yang anda pilih sesuai, ini akan membantu kami memilah"
-              name="category_id"
-              label="Kategori"
+      <Grid justify="center">
+        <Grid.Col span={8}>
+          <Card title="Buat Ticket">
+            <Alert
+              icon={<IconAlertCircle />}
+              color="yellow"
+              title="Perhatian"
+              mb={8}
             >
-              <Select showSearch optionFilterProp="name">
-                {dataCategories?.map((category) => (
-                  <Select.Option
-                    key={category.id}
-                    name={category?.name}
-                    value={category.id}
-                  >
-                    {category.name}
-                  </Select.Option>
-                ))}
-              </Select>
-            </Form.Item>
-            <Form.Item name="priority_code" label="Prioritas">
-              <Radio.Group>
-                {dataPriorities?.map((priority) => (
-                  <Radio.Button
-                    key={priority.name}
-                    name={priority?.name}
-                    value={priority.name}
-                  >
-                    {priority.name}
-                  </Radio.Button>
-                ))}
-              </Radio.Group>
-            </Form.Item> */}
-            <Form.Item>
-              <Button type="primary" htmlType="submit" icon={<SendOutlined />}>
-                Kirim
-              </Button>
-            </Form.Item>
-          </Form>
-        </Skeleton>
-      </Card>
+              <Text>
+                Buatlah deskripsi dengan baik dan jelas serta gunakan tata
+                bahasa yang baik, agar kami dapat membantu anda dengan cepat.
+                Gunakan gambar atau link file sebagai bukti error di bagian
+                deskripsi jika ada untuk mempermudah kami dalam menyelesaikan
+                masalah anda. Terima Kasih.
+              </Text>
+            </Alert>
+            <Form onFinish={handleFinish} form={form} layout="vertical">
+              <Form.Item
+                rules={[
+                  { required: true, message: "Judul tidak boleh kosong" },
+                ]}
+                name="title"
+                label="Judul"
+              >
+                <Input />
+              </Form.Item>
+              <Form.Item required name="content" label="Deskripsi">
+                <RichTextEditor
+                  onImageUpload={handleImageUpload}
+                  style={{ minHeight: 300 }}
+                />
+              </Form.Item>
+              <Form.Item>
+                <Button type="primary" htmlType="submit">
+                  Kirim
+                </Button>
+              </Form.Item>
+            </Form>
+          </Card>
+        </Grid.Col>
+      </Grid>
     </PageContainer>
   );
 };

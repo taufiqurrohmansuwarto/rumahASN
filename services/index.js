@@ -9,6 +9,14 @@ export const createTickets = async (data) => {
   return await api.post("/tickets", data);
 };
 
+export const uploadImage = async (data) => {
+  return api.post("/upload", data, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
+};
+
 // just for admin only
 export const createStatus = async (data) => {
   return await api.post("/ref/status", data).then((res) => res.data);

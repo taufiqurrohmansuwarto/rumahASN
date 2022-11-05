@@ -1,8 +1,30 @@
 import moment from "moment";
+import axios from "axios";
 
 // change date format to DD-MM-YYYY
 export const formatDate = (date) => {
   return moment(date).format("DD-MM-YYYY HH:mm:ss");
+};
+
+export const uploadFileMinio = (mc, fileBuffer, filename, size, mimetype) => {
+  return new Promise((resolve, reject) => {
+    mc.putObject(
+      "public",
+      `${filename}`,
+      fileBuffer,
+      size,
+      // cant be metadata add some username and department?
+      { "Content-Type": mimetype },
+      function (err, info) {
+        if (err) {
+          reject(err);
+          console.log(error);
+        } else {
+          resolve(info);
+        }
+      }
+    );
+  });
 };
 
 // calculate time difference between two dates
@@ -36,9 +58,9 @@ export const fromNow = (date) => {
   return moment(date).fromNow();
 };
 
-// add image height and width from image tag and scale to 0.3
-export const resizeImage = (text) => {
-  return text.replace(/<img/g, '<img style="width: 30%; height: 30%"');
+// add image height and width from image tag and scale to 0.3 and add breakline after image with <br />
+export const resizeImageTag = (text) => {
+  return text.replace(/<img/g, '<img style="width: 30%; height: 30%" /><br />');
 };
 
 // convert html to text
