@@ -46,7 +46,9 @@ const remove = async (req, res) => {
 const detail = async (req, res) => {
   try {
     const { id } = req?.query;
-    const result = await Faqs.query().findById(id);
+    const result = await Faqs.query()
+      .findById(id)
+      .withGraphFetched("[sub_faq]");
     res.json(result);
   } catch (error) {
     console.log(error);

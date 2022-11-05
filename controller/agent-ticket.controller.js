@@ -23,7 +23,8 @@ const index = async (req, res) => {
         }
       })
       .page(page - 1, limit)
-      .orderBy("updated_at", "desc");
+      .orderBy("updated_at", "desc")
+      .withGraphFetched("[customer(simpleSelect) ]");
 
     res.json({ data: result?.results, page, total: result.total, limit });
   } catch (error) {

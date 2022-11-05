@@ -1,5 +1,15 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Table, Card, Button, Modal, message, Space, Tag } from "antd";
+import {
+  Table,
+  Card,
+  Button,
+  Modal,
+  message,
+  Space,
+  Tag,
+  Avatar,
+  Tooltip,
+} from "antd";
 import Link from "next/link";
 import { useState } from "react";
 import {
@@ -46,6 +56,15 @@ const Tombol = ({ record }) => {
 const Tickets = () => {
   const columns = [
     {
+      title: "Oleh",
+      key: "oleh",
+      render: (_, record) => (
+        <Tooltip title={record?.customer?.username}>
+          <Avatar src={record?.customer?.image} />
+        </Tooltip>
+      ),
+    },
+    {
       title: "Judul",
       key: "title",
       dataIndex: "title",
@@ -53,14 +72,14 @@ const Tickets = () => {
     { title: "Deskripsi", key: "content", dataIndex: "content" },
     { title: "Nomer Tiket", key: "ticket_number", dataIndex: "ticket_number" },
     {
-      title: "Tanggal dibuat",
+      title: "Tgl. dibuat",
       key: "created_at",
       render: (text, record) => {
         return formatDate(record.created_at);
       },
     },
     {
-      title: "Tanggal update",
+      title: "Tgl. update",
       key: "updated_at",
       render: (text, record) => {
         return formatDate(record.updated_at);

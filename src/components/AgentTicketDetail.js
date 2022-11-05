@@ -1,8 +1,9 @@
-import { Paper, Stack, Text, Space as SpaceMantine } from "@mantine/core";
+import { Paper, Space as SpaceMantine, Stack, Text } from "@mantine/core";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Button, message, Modal, Space, Form, Input } from "antd";
+import { Button, Form, Input, message, Modal, Space } from "antd";
 import React, { useState } from "react";
 import { akhiriPekerjaanSelesai } from "../../services/agents.services";
+import DurasiPenyelesaian from "./DurasiPenyelesaian";
 import TicketProperties from "./TicketProperties";
 import TimelinePekerjaan from "./TimelinePekerjaan";
 
@@ -98,6 +99,7 @@ function AgentTicketDetail({ data }) {
           <TicketProperties data={data} />
         </Space>
         <SelesaiModal data={data} open={open} onCancel={handleCancel} />
+        <DurasiPenyelesaian data={data} />
       </Stack>
     </Paper>
   );

@@ -5,6 +5,33 @@ export const formatDate = (date) => {
   return moment(date).format("DD-MM-YYYY HH:mm:ss");
 };
 
+// calculate time difference between two dates
+
+export const timeDifference = (date1, date2) => {
+  const diff = moment(date1).diff(moment(date2));
+  const duration = moment.duration(diff);
+  const hours = duration.asHours();
+  const minutes = duration.asMinutes();
+  const seconds = duration.asSeconds();
+  const days = duration.asDays();
+  const months = duration.asMonths();
+  const years = duration.asYears();
+
+  if (years >= 1) {
+    return `${Math.floor(years)} tahun`;
+  } else if (months >= 1) {
+    return `${Math.floor(months)} bulan`;
+  } else if (days >= 1) {
+    return `${Math.floor(days)} hari`;
+  } else if (hours >= 1) {
+    return `${Math.floor(hours)} jam`;
+  } else if (minutes >= 1) {
+    return;
+  } else if (seconds >= 1) {
+    return `${Math.floor(seconds)} detik`;
+  }
+};
+
 export const fromNow = (date) => {
   return moment(date).fromNow();
 };

@@ -25,7 +25,7 @@ function ActiveLayout({
 
   return (
     <PageContainer
-      onBack={() => router.push("/tickets/semua")}
+      onBack={() => router.push(`/${role}/tickets/semua`)}
       loading={loading}
       tabList={role === "requester" ? customerTabs : agentTabs}
       tabActiveKey={active}
