@@ -145,6 +145,10 @@ export const getFaqs = async () => {
   return await api.get("/ref/faqs").then((res) => res?.data);
 };
 
+export const getFaq = async (id) => {
+  return await api.get(`/ref/faqs/${id}`).then((res) => res?.data);
+};
+
 export const createFaq = async (data) => {
   return await api.post("/ref/faqs", data).then((res) => res?.data);
 };

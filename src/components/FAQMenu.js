@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Menu } from "antd";
 import React from "react";
 import { getFaq } from "../../services";
+import FAQDetail from "./FAQDetail";
 
 function FAQMenu({ data }) {
   const [current, setCurrent] = React.useState(null);
@@ -29,7 +30,9 @@ function FAQMenu({ data }) {
           })}
         </Menu>
       </Grid.Col>
-      <Grid.Col>{JSON.stringify(dataFaq)}</Grid.Col>
+      <Grid.Col span={10}>
+        {dataFaq && <FAQDetail data={dataFaq?.sub_faq} />}
+      </Grid.Col>
     </Grid>
   );
 }

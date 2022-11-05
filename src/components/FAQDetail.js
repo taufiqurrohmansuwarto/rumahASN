@@ -7,6 +7,7 @@ import {
   Container,
   Title,
 } from "@mantine/core";
+import { toString } from "lodash";
 import image from "../../public/faq.svg";
 
 const useStyles = createStyles((theme) => ({
@@ -34,8 +35,9 @@ const useStyles = createStyles((theme) => ({
 const placeholder =
   "It can’t help but hear a pin drop from over half a mile away, so it lives deep in the mountains where there aren’t many people or Pokémon.";
 
-const FAQDetail = () => {
+const FAQDetail = ({ data, loading }) => {
   const { classes } = useStyles();
+
   return (
     <div className={classes.wrapper}>
       <Container size="lg">
@@ -48,45 +50,20 @@ const FAQDetail = () => {
               Frequently Asked Questions
             </Title>
 
-            <Accordion
-              chevronPosition="right"
-              defaultValue="reset-password"
-              variant="separated"
-            >
-              <Accordion.Item className={classes.item} value="reset-password">
-                <Accordion.Control>
-                  How can I reset my password?
-                </Accordion.Control>
-                <Accordion.Panel>{placeholder}</Accordion.Panel>
-              </Accordion.Item>
-
-              <Accordion.Item className={classes.item} value="another-account">
-                <Accordion.Control>
-                  Can I create more that one account?
-                </Accordion.Control>
-                <Accordion.Panel>{placeholder}</Accordion.Panel>
-              </Accordion.Item>
-
-              <Accordion.Item className={classes.item} value="newsletter">
-                <Accordion.Control>
-                  How can I subscribe to monthly newsletter?
-                </Accordion.Control>
-                <Accordion.Panel>{placeholder}</Accordion.Panel>
-              </Accordion.Item>
-
-              <Accordion.Item className={classes.item} value="credit-card">
-                <Accordion.Control>
-                  Do you store credit card information securely?
-                </Accordion.Control>
-                <Accordion.Panel>{placeholder}</Accordion.Panel>
-              </Accordion.Item>
-
-              <Accordion.Item className={classes.item} value="payment">
-                <Accordion.Control>
-                  What payment systems to you work with?
-                </Accordion.Control>
-                <Accordion.Panel>{placeholder}</Accordion.Panel>
-              </Accordion.Item>
+            <Accordion chevronPosition="right" variant="separated">
+              {data?.map((item) => {
+                return (
+                  <div key={item?.id}>
+                    <Accordion.Item
+                      className={classes.item}
+                      value={`${item?.id}`}
+                    >
+                      <Accordion.Control>{item?.question}</Accordion.Control>
+                      <Accordion.Panel>{item?.answer}</Accordion.Panel>
+                    </Accordion.Item>
+                  </div>
+                );
+              })}
             </Accordion>
           </Col>
         </Grid>
