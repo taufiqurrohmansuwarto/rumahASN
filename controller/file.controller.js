@@ -7,12 +7,8 @@ const URL_FILE = "https://siasn.bkd.jatimprov.go.id:9000/public";
 
 const upload = async (req, res) => {
   const { buffer, originalname, size, mimetype } = req?.file;
-  const extFile = path.extname(originalname);
   const id = crypto.randomBytes(20).toString("hex");
-  const currentFilename = `${id}_${originalname}${extFile}`;
-
-  //   compress imaeg
-
+  const currentFilename = `${id}_${originalname}`;
   const bufferCompress = await sharp(buffer).resize(300).toBuffer();
 
   try {

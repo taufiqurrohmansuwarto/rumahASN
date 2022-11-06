@@ -41,13 +41,12 @@ const CreateTicket = () => {
   const handleFinish = (value) => {
     const { title, content } = value;
     if (title && content) {
-      // create(value);
       const data = {
         title,
-        content: resizeImageTag(content),
+        content,
       };
 
-      console.log(data);
+      create(data);
     }
   };
 
