@@ -8,14 +8,22 @@ const index = async (req, res) => {
     const page = req?.query?.page || 1;
     const limit = req?.query?.limit || 50;
 
+    const search = req?.query?.search || "";
+
     const result = await Tickets.query()
       .where((builder) => {
         if (status !== "all") {
           builder.where("status_code", status);
         }
+        if (search) {
+          builder
+            .where("title", "ilike", `%${search}%`)
+            .orWhere("ticket_number", "ilike", `%${search}%`);
+        }
       })
+      .withGraphFetched("[customer(simpleSelect)]")
       .page(page - 1, limit)
-      .orderBy("created_at", "desc");
+      .orderBy("updated_at", "desc");
 
     res.json({
       results: result?.results,
@@ -27,6 +35,7 @@ const index = async (req, res) => {
     res.status(400).json({ code: 400, message: "Internal Server Error" });
   }
 };
+
 const detail = async (req, res) => {
   try {
     const result = await Tickets.query().findById(req?.query?.id);
