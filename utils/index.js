@@ -90,3 +90,30 @@ export const setActivePekerjaan = (data) => {
     return 0;
   }
 };
+
+export const notificationText = ({ type, role, type_id }) => {
+  let currentRole = "";
+  let currentType = "";
+
+  if (role === "requester") {
+    currentRole = "/tickets";
+  } else if (role === "admin") {
+    currentRole = "/admin/tickets";
+  } else if (role === "agent") {
+    currentRole = "/agent/tickets";
+  }
+
+  if (type === "feedback") {
+    currentType = "/detail";
+  } else if (type === "ticket_done") {
+    currentType = "/detail";
+  } else if (type === "ticket_status_change") {
+    currentType = "/detail";
+  } else if (type === "chats_customer_to_agent") {
+    currentType = "/chats-customers";
+  } else if (type === "chats_agent_to_customer") {
+    currentType = "/chats-to-agents";
+  }
+
+  return `${currentRole}/${type_id}${currentType}`;
+};

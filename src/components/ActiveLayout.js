@@ -12,7 +12,7 @@ function ActiveLayout({
 }) {
   const customerTabs = [
     { key: "detail", tab: "Detail Ticket", icon: <DotChartOutlined /> },
-    { key: "comments-customers-to-agents", tab: "Chats to Agent" },
+    { key: "chats-to-agents", tab: "Chats to Agent" },
   ];
 
   const agentTabs = [
@@ -25,7 +25,7 @@ function ActiveLayout({
 
   return (
     <PageContainer
-      onBack={() => router.push(`/${role}/tickets/semua`)}
+      // onBack={() => router.push(`/${role}/tickets/semua`)}
       loading={loading}
       tabList={role === "requester" ? customerTabs : agentTabs}
       tabActiveKey={active}

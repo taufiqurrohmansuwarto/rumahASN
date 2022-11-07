@@ -22,11 +22,7 @@ const DetailTicket = () => {
   const { data, isLoading } = useQuery(["tickets", id], () => detailTicket(id));
 
   return (
-    <ActiveLayout
-      id={id}
-      active="comments-customers-to-agents"
-      role="requester"
-    >
+    <ActiveLayout id={id} active="chats-to-agents" role="requester">
       <Skeleton loading={isLoading}>
         {data?.status_code === "DIAJUKAN" ? (
           <LockedChat />
