@@ -9,7 +9,7 @@ const index = async (req, res) => {
 
     // buat filter
     const status = req?.query?.status || "SEMUA";
-    const kode_ticket = req?.query?.kode_tiket;
+    const search = req?.query?.search || "";
 
     const result = await Tickets.query()
       .withGraphFetched("[]")
@@ -18,8 +18,10 @@ const index = async (req, res) => {
         if (status !== "SEMUA") {
           builder.where("status_code", status);
         }
-        if (kode_ticket) {
-          builder.where("kode_ticket", kode_ticket);
+        if (search) {
+          builder
+            .where("title", "ilike", `%${search}%`)
+            .orWhere("ticket_number", "ilike", `%${search}%`);
         }
       })
       .page(page - 1, limit)

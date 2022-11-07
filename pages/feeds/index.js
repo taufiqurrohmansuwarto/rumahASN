@@ -1,15 +1,8 @@
-import CustomerDashboard from "../../src/components/CustomerDashboard";
-import Greeting from "../../src/components/Greeting";
 import Layout from "../../src/components/Layout";
 import PageContainer from "../../src/components/PageContainer";
 
 function Feeds() {
-  return (
-    <PageContainer title="Beranda" subTitle="Feeds">
-      <Greeting />
-      <CustomerDashboard />
-    </PageContainer>
-  );
+  return <PageContainer title="Beranda" subTitle="Feeds"></PageContainer>;
 }
 
 Feeds.Auth = {
