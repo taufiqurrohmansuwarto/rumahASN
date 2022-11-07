@@ -16,7 +16,7 @@ const index = async (req, res) => {
         if (search) {
           builder
             .where("title", "ilike", `%${search}%`)
-            .orWhere("description", "ilike", `%${search}%`);
+            .orWhere("ticket_number", "ilike", `%${search}%`);
         }
         if (status !== "all") {
           builder.where("status_code", status);
