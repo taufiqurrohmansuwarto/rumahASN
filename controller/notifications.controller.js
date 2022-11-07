@@ -20,6 +20,7 @@ const index = async (req, res) => {
       const result = await Notifications.query()
         .where("to", customId)
         .andWhere("role", "in", findRole)
+        .withGraphFetched("[from_user(simpleSelect) ]")
         .page(page - 1, limit)
         .orderBy("created_at", "desc");
       res.json(result);

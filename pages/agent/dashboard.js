@@ -1,5 +1,4 @@
 import { Skeleton } from "antd";
-import SkeletonNode from "antd/lib/skeleton/Node";
 import { useSession } from "next-auth/react";
 import AgentLayout from "../../src/components/AgentLayout";
 import DashboardsAgents from "../../src/components/Dashboards/DashboardsAgents";

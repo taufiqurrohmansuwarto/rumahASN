@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Button, message } from "antd";
 import { clearChatsNotificatoins, listNotifications } from "../services";
 import Layout from "../src/components/Layout";
+import ListNotifications from "../src/components/ListNotifications";
 import PageContainer from "../src/components/PageContainer";
 
 function NotificationsPage() {
@@ -30,7 +31,8 @@ function NotificationsPage() {
   return (
     <PageContainer title="Notification" content="Notifikasi tiket">
       <Button onClick={handleClearNotif}>Hapus Notifikasi</Button>
-      <div>{JSON.stringify(data)}</div>
+      {/* <div>{JSON.stringify(data)}</div> */}
+      <ListNotifications data={data?.results} loading={isLoading} />
     </PageContainer>
   );
 }

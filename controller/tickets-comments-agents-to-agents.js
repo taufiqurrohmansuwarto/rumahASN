@@ -101,7 +101,7 @@ const create = async (req, res) => {
         to: item?.user_custom_id,
         from: customId,
         title: "Komentar Baru",
-        content: "Telah ada komentar baru pada tiket anda",
+        content: "Mengomentari pada tiket anda",
         type: "chats_agents_to_agents",
         type_id: id,
         role: "agent",
