@@ -1,5 +1,4 @@
 import moment from "moment";
-import axios from "axios";
 
 // change date format to DD-MM-YYYY
 export const formatDate = (date) => {
@@ -60,7 +59,10 @@ export const fromNow = (date) => {
 
 // add image height and width from image tag and scale to 0.3 and add breakline after image with <br />
 export const resizeImageTag = (text) => {
-  return text.replace(/<img/g, '<img style="width: 30%; height: 30%" /><br />');
+  return text.replace(
+    /<img/g,
+    '<br/><img style="width: 30%; height: 30%" /><br />'
+  );
 };
 
 // convert html to text

@@ -9,6 +9,7 @@ import { createTickets } from "../../services/users.services";
 import Layout from "../../src/components/Layout";
 import PageContainer from "../../src/components/PageContainer";
 import RichTextEditor from "../../src/components/RichTextEditor";
+import { resizeImageTag } from "../../utils";
 
 const CreateTicket = () => {
   const [form] = Form.useForm();
@@ -42,7 +43,7 @@ const CreateTicket = () => {
     if (title && content) {
       const data = {
         title,
-        content,
+        content: resizeImageTag(content),
       };
 
       create(data);

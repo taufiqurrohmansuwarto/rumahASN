@@ -1,4 +1,3 @@
-const path = require("path");
 const crypto = require("crypto");
 const { uploadFileMinio } = require("../utils");
 const sharp = require("sharp");
@@ -9,7 +8,7 @@ const upload = async (req, res) => {
   const { buffer, originalname, size, mimetype } = req?.file;
   const id = crypto.randomBytes(20).toString("hex");
   const currentFilename = `${id}_${originalname}`;
-  const bufferCompress = await sharp(buffer).resize(300).toBuffer();
+  const bufferCompress = await sharp(buffer).resize(700).toBuffer();
 
   try {
     await uploadFileMinio(

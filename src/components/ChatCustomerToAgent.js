@@ -4,7 +4,6 @@ import {
   Card,
   Comment,
   Form,
-  Input,
   List,
   message,
   Popconfirm,
@@ -12,18 +11,33 @@ import {
   Space,
 } from "antd";
 import { useSession } from "next-auth/react";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
+import { uploadImage } from "../../services";
 import {
   createMessagesCustomers,
   deleteMessagesCustomers,
   messagesCustomers,
   updateMessagesCustomers,
 } from "../../services/agents.services";
-import { fromNow } from "../../utils";
+import { fromNow, resizeImageTag } from "../../utils";
+import RichTextEditor from "./RichTextEditor";
 
 const CreateComments = ({ user, ticketId }) => {
   const [form] = Form.useForm();
   const queryClient = useQueryClient();
+
+  const handleImageUpload = useCallback(
+    (file) =>
+      new Promise((resolve, reject) => {
+        const formData = new FormData();
+        formData.append("image", file);
+
+        uploadImage(formData)
+          .then((res) => resolve(res.data))
+          .catch(() => reject(new Error("Upload failed")));
+      }),
+    []
+  );
 
   const { mutate: create, isLoading } = useMutation(
     (data) => createMessagesCustomers(data),
@@ -50,7 +64,7 @@ const CreateComments = ({ user, ticketId }) => {
       const data = {
         id: ticketId,
         data: {
-          comment: values?.comment,
+          comment: resizeImageTag(values.comment),
         },
       };
       create(data);
@@ -66,7 +80,10 @@ const CreateComments = ({ user, ticketId }) => {
       content={
         <Form onFinish={handleCreate} form={form}>
           <Form.Item name="comment">
-            <Input.TextArea rows={4} />
+            <RichTextEditor
+              style={{ minHeight: 300 }}
+              onImageUpload={handleImageUpload}
+            />
           </Form.Item>
           <Form.Item>
             <Button
@@ -90,12 +107,25 @@ const CommentsList = ({ data, currentUserId, ticketId, status }) => {
   const [form] = Form.useForm();
   const [selected, setSelected] = useState(null);
 
+  const handleImageUpload = useCallback(
+    (file) =>
+      new Promise((resolve, reject) => {
+        const formData = new FormData();
+        formData.append("image", file);
+
+        uploadImage(formData)
+          .then((res) => resolve(res.data))
+          .catch(() => reject(new Error("Upload failed")));
+      }),
+    []
+  );
+
   useEffect(() => {}, [form]);
 
   const changeSelected = (id, comment) => {
     setSelected(id);
     form.setFieldsValue({
-      comment: comment,
+      comment: resizeImageTag(comment),
     });
   };
 
@@ -195,7 +225,10 @@ const CommentsList = ({ data, currentUserId, ticketId, status }) => {
                 {selected === item?.id ? (
                   <Form form={form} onFinish={handleUpdate}>
                     <Form.Item name="comment">
-                      <Input.TextArea rows={4} />
+                      <RichTextEditor
+                        style={{ minHeight: 300 }}
+                        onImageUpload={handleImageUpload}
+                      />
                     </Form.Item>
                     <Space>
                       <Form.Item>
@@ -211,7 +244,7 @@ const CommentsList = ({ data, currentUserId, ticketId, status }) => {
                     </Space>
                   </Form>
                 ) : (
-                  item?.comment
+                  <div dangerouslySetInnerHTML={{ __html: item?.comment }} />
                 )}
               </>
             )

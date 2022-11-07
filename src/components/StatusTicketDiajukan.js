@@ -5,6 +5,7 @@ import { useRouter } from "next/router";
 import { useCallback, useState } from "react";
 import { uploadImage } from "../../services";
 import { deleteTicket, updateTicket } from "../../services/users.services";
+import { resizeImageTag } from "../../utils";
 import RichTextEditor from "./RichTextEditor";
 import TimelinePekerjaan from "./TimelinePekerjaan";
 
@@ -13,7 +14,13 @@ const ModalUpdate = ({ visible, onCancel, update, data, loadingUpdate }) => {
 
   const handleOk = async () => {
     const values = await form.validateFields();
-    const currentData = { id: data?.id, data: values };
+    const currentData = {
+      id: data?.id,
+      data: {
+        title: values?.title,
+        content: resizeImageTag(values?.content),
+      },
+    };
     update(currentData);
     onCancel();
   };
