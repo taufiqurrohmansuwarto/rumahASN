@@ -12,7 +12,7 @@ function ActiveLayout({
 }) {
   const customerTabs = [
     { key: "detail", tab: "Detail Ticket", icon: <DotChartOutlined /> },
-    { key: "chats-to-agents", tab: "Chats to Agent" },
+    { key: "chats-to-agents", tab: "Chat to Agent" },
   ];
 
   const agentTabs = [

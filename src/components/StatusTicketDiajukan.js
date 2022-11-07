@@ -1,18 +1,11 @@
-import { Alert, Divider, Text, Title } from "@mantine/core";
+import { Alert, Text, Title } from "@mantine/core";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import {
-  Button,
-  Result,
-  Form,
-  Modal,
-  Input,
-  Select,
-  Popconfirm,
-  message,
-} from "antd";
+import { Button, Form, Input, message, Modal, Popconfirm, Result } from "antd";
 import { useRouter } from "next/router";
-import { useState } from "react";
+import { useCallback, useState } from "react";
+import { uploadImage } from "../../services";
 import { deleteTicket, updateTicket } from "../../services/users.services";
+import RichTextEditor from "./RichTextEditor";
 import TimelinePekerjaan from "./TimelinePekerjaan";
 
 const ModalUpdate = ({ visible, onCancel, update, data, loadingUpdate }) => {
@@ -25,12 +18,26 @@ const ModalUpdate = ({ visible, onCancel, update, data, loadingUpdate }) => {
     onCancel();
   };
 
+  const handleImageUpload = useCallback(
+    (file) =>
+      new Promise((resolve, reject) => {
+        const formData = new FormData();
+        formData.append("image", file);
+
+        uploadImage(formData)
+          .then((res) => resolve(res.data))
+          .catch(() => reject(new Error("Upload failed")));
+      }),
+    []
+  );
+
   return (
     <Modal
       visible={visible}
       title="Update Ticket"
       confirmLoading={loadingUpdate}
       centered
+      width={800}
       okText="Update"
       cancelText="Cancel"
       onCancel={onCancel}
@@ -44,7 +51,7 @@ const ModalUpdate = ({ visible, onCancel, update, data, loadingUpdate }) => {
       >
         <Form.Item
           name="title"
-          label="Title"
+          label="Judul"
           rules={[
             {
               required: true,
@@ -54,8 +61,15 @@ const ModalUpdate = ({ visible, onCancel, update, data, loadingUpdate }) => {
         >
           <Input />
         </Form.Item>
-        <Form.Item name="content" label="Description">
-          <Input.TextArea rows={10} />
+        <Form.Item
+          name="content"
+          label="Deskripsi"
+          rules={[{ required: true, message: "Deskripsi harus diisi" }]}
+        >
+          <RichTextEditor
+            onImageUpload={handleImageUpload}
+            style={{ minHeight: 300 }}
+          />
         </Form.Item>
       </Form>
     </Modal>
@@ -123,7 +137,9 @@ function StatusTicketDiajukan({ data }) {
     >
       <Alert title="Detail Tiket">
         <Title>{data?.title}</Title>
-        <Text>{data?.content}</Text>
+        <Text>
+          <div dangerouslySetInnerHTML={{ __html: data?.content }} />
+        </Text>
         <div style={{ marginTop: 10 }}>
           <TimelinePekerjaan data={data} />
         </div>

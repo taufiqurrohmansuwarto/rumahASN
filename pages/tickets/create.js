@@ -9,7 +9,6 @@ import { createTickets } from "../../services/users.services";
 import Layout from "../../src/components/Layout";
 import PageContainer from "../../src/components/PageContainer";
 import RichTextEditor from "../../src/components/RichTextEditor";
-import { resizeImageTag } from "../../utils";
 
 const CreateTicket = () => {
   const [form] = Form.useForm();
@@ -52,7 +51,7 @@ const CreateTicket = () => {
 
   return (
     <PageContainer
-      onBack={() => router.push("/tickets")}
+      onBack={() => router.push("/tickets/semua")}
       title="Helpdesk"
       subTitle="Buat Tiket Baru"
     >

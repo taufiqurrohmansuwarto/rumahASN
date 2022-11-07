@@ -20,9 +20,10 @@ const changeRoutes = (user) => {
   return new Promise((resolve, reject) => {
     const role = user?.current_role;
     const bkd = user?.organization_id?.startsWith("123");
+    const pttBkd = user?.organization_id?.startsWith("134");
 
-    const admin = role === "admin" && bkd;
-    const agent = role === "agent" && bkd;
+    const admin = (role === "admin" && bkd) || (role === "admin" && pttBkd);
+    const agent = (role === "agent" && bkd) || (role === "agent" && pttBkd);
 
     if (admin) {
       userRoutes.routes.push(
@@ -120,7 +121,6 @@ function Layout({ children, active }) {
         },
         defaultOpenAll: true,
       }}
-      collapsed
       menuItemRender={menuItemRender}
       loading={status === "loading"}
     >

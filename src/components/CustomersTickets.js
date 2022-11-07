@@ -1,6 +1,6 @@
 import { PlusOutlined } from "@ant-design/icons";
 import { useQuery } from "@tanstack/react-query";
-import { Button, Card, Input, Space, Table, Tag } from "antd";
+import { Button, Card, Input, Space, Table, Tag, Tooltip } from "antd";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { useState } from "react";
@@ -43,10 +43,17 @@ const CustomersTickets = ({ status = "all" }) => {
       render: (_, record) => <Tag color="black">{record?.ticket_number}</Tag>,
     },
     {
-      title: "Tanggal dibuat",
+      title: "Tgl. dibuat",
       key: "created_at",
       render: (_, record) => {
         return formatDate(record.created_at);
+      },
+    },
+    {
+      title: "Tgl. diupdate",
+      key: "created_at",
+      render: (_, record) => {
+        return formatDate(record.updated_at);
       },
     },
     {
@@ -80,16 +87,18 @@ const CustomersTickets = ({ status = "all" }) => {
   return (
     <PageContainer title="Tiket" subTitle="Daftar Tiket">
       <Card>
-        <Button
-          icon={<PlusOutlined />}
-          type="primary"
-          style={{
-            marginBottom: 16,
-          }}
-          onClick={createTicket}
-        >
-          Tiket
-        </Button>
+        <Tooltip title="Buat tiket baru">
+          <Button
+            icon={<PlusOutlined />}
+            type="primary"
+            style={{
+              marginBottom: 16,
+            }}
+            onClick={createTicket}
+          >
+            Tiket
+          </Button>
+        </Tooltip>
         <Table
           title={() => (
             <Input.Search style={{ width: 300 }} onChange={handleSearch} />

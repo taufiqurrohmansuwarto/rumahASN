@@ -11,6 +11,7 @@ import ability from "../utils/ability";
 import "antd/dist/antd.css";
 import { AbilityContext } from "../src/context/Can";
 import { MantineProvider } from "@mantine/core";
+import Loading from "../src/components/Loading";
 
 // check user role and organization start with 123
 function Auth({ children, action, subject }) {
@@ -20,7 +21,7 @@ function Auth({ children, action, subject }) {
   });
 
   if (status === "loading") {
-    return <div>loading..</div>;
+    return <Loading />;
   } else {
     if (!data?.user) return <div>Not Authorized</div>;
     const user = {

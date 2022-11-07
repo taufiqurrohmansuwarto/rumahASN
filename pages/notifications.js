@@ -1,3 +1,4 @@
+import { Stack } from "@mantine/core";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Button, message } from "antd";
 import { clearChatsNotificatoins, listNotifications } from "../services";
@@ -30,9 +31,10 @@ function NotificationsPage() {
 
   return (
     <PageContainer title="Notification" content="Notifikasi tiket">
-      <Button onClick={handleClearNotif}>Hapus Notifikasi</Button>
-      {/* <div>{JSON.stringify(data)}</div> */}
-      <ListNotifications data={data?.results} loading={isLoading} />
+      <Stack>
+        <Button onClick={handleClearNotif}>Hapus Notifikasi</Button>
+        <ListNotifications data={data?.results} loading={isLoading} />
+      </Stack>
     </PageContainer>
   );
 }
