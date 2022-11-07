@@ -102,3 +102,7 @@ export const updateMessagesCustomers = async ({ id, ticketId, data }) => {
     .patch(`/tickets/${ticketId}/comments-customers/${id}`, data)
     .then((res) => res.data);
 };
+
+export const dashboardAgents = async () => {
+  return await api.get("/dashboard").then((res) => res.data);
+};
