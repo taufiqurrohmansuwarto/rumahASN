@@ -1,4 +1,4 @@
-import { Paper, Text, Title } from "@mantine/core";
+import { Paper, Stack, Text, Title } from "@mantine/core";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button, Form, Input, message, Modal, Popconfirm, Result } from "antd";
 import { useRouter } from "next/router";
@@ -6,6 +6,7 @@ import { useCallback, useState } from "react";
 import { uploadImage } from "../../services";
 import { deleteTicket, updateTicket } from "../../services/users.services";
 import { resizeImageTag } from "../../utils";
+import { DetailTicket } from "./DetailTicket";
 import RichTextEditor from "./RichTextEditor";
 import TimelinePekerjaan from "./TimelinePekerjaan";
 
@@ -142,15 +143,14 @@ function StatusTicketDiajukan({ data }) {
         </Popconfirm>,
       ]}
     >
-      <Paper shadow="lg" p="lg" withBorder radius="lg">
-        <Title>{data?.title}</Title>
-        <Text>
-          <div dangerouslySetInnerHTML={{ __html: data?.content }} />
-        </Text>
-        <div style={{ marginTop: 10 }}>
-          <TimelinePekerjaan data={data} />
-        </div>
-      </Paper>
+      <Stack>
+        <DetailTicket data={data} />
+        <Paper shadow="lg" p="lg" withBorder radius="lg">
+          <div style={{ marginTop: 10 }}>
+            <TimelinePekerjaan data={data} />
+          </div>
+        </Paper>
+      </Stack>
       <ModalUpdate
         data={data}
         update={update}
