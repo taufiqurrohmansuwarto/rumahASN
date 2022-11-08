@@ -1,9 +1,8 @@
 import { createRouter } from "next-connect";
+import { adminReportController } from "../../controller/report.controller";
 
 const router = createRouter();
 
-router.get(async (req, res) => {
-  res.json({ message: "Hello World!" });
-});
+router.get(adminReportController);
 
 export default router.handler({});

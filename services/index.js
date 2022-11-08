@@ -184,3 +184,9 @@ export const updateSubFaq = async ({ id, data }) => {
 export const deleteSubFaq = async (id) => {
   return await api.delete(`/ref/sub-faqs/${id}`).then((res) => res?.data);
 };
+
+// fucking toogle admin and agent
+
+export const toggleAdminAgent = async (id) => {
+  return await api.patch(`/users/${id}`).then((res) => res?.data);
+};

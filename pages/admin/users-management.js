@@ -1,57 +1,102 @@
-import { useQuery } from "@tanstack/react-query";
-import { Avatar, Button, Card, Input, Table } from "antd";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { Avatar, Button, Card, Input, message, Popconfirm, Table } from "antd";
 import { useState } from "react";
-import { getUsers } from "../../services";
+import { getUsers, toggleAdminAgent } from "../../services";
 import AdminLayout from "../../src/components/AdminLayout";
 import PageContainer from "../../src/components/PageContainer";
-
-const columns = [
-  {
-    title: "Foto",
-    key: "foto",
-    render: (text, record) => {
-      return <Avatar alt="foto profil" src={record?.image} />;
-    },
-  },
-  {
-    title: "Username",
-    dataIndex: "username",
-    key: "username",
-  },
-  {
-    title: "NIP",
-    dataIndex: "employee_number",
-    key: "employee_number",
-  },
-  {
-    title: "Role",
-    dataIndex: "current_role",
-    key: "current_role",
-  },
-  {
-    title: "Aksi",
-    key: "aksi",
-    render: (text, record) => <Button>Rubah</Button>,
-  },
-];
+import { formatDate } from "../../utils";
 
 const Dashboard = () => {
   const [query, setQuery] = useState({
     page: 1,
-    limit: 10,
-    search: "",
+    limit: 50,
   });
 
-  const { data, isLoading } = useQuery(["users"], () => getUsers(query));
-  const [visible, setVisible] = useState(false);
+  const { data, isLoading } = useQuery(
+    ["users", query],
+    () => getUsers(query),
+    {
+      enabled: !!query,
+    }
+  );
+
+  const queryClient = useQueryClient();
+
+  const { mutate: toggle, isLoading: isLoadingToggle } = useMutation(
+    (data) => toggleAdminAgent(data),
+    {
+      onSuccess: () => {
+        message.success("Berhasil mengubah role");
+        queryClient.invalidateQueries(["users"]);
+      },
+      onError: () => {
+        message.error("Gagal mengubah role");
+      },
+      onSettled: () => queryClient.invalidateQueries(["users"]),
+    }
+  );
+
+  const handleToggle = (id) => {
+    toggle(id);
+  };
+
+  const columns = [
+    {
+      title: "Foto",
+      key: "foto",
+      render: (text, record) => {
+        return <Avatar alt="foto profil" src={record?.image} />;
+      },
+    },
+    {
+      title: "Username",
+      dataIndex: "username",
+      key: "username",
+    },
+    {
+      title: "NIP",
+      dataIndex: "employee_number",
+      key: "employee_number",
+    },
+    {
+      title: "Dari",
+      dataIndex: "from",
+      key: "from",
+    },
+    {
+      title: "Role",
+      dataIndex: "current_role",
+      key: "current_role",
+    },
+    {
+      title: "Last Login",
+      key: "last_login",
+      render: (_, record) => <div>{formatDate(record)}</div>,
+    },
+    {
+      title: "Aksi",
+      key: "aksi",
+      render: (_, record) => (
+        <Popconfirm
+          onConfirm={() => handleToggle(record?.custom_id)}
+          title={`${record?.username} akan dirubah menjadi ${
+            record?.current_role === "agent" ? "Admin" : "Agent"
+          }. Apakah anda yakin?`}
+        >
+          <a>Toggle Role</a>
+        </Popconfirm>
+      ),
+    },
+  ];
 
   return (
     <PageContainer>
       <Card>
         <Table
+          size="small"
           title={() => (
             <Input.Search
-              value={query?.search}
+              style={{ width: 300 }}
               onChange={(e) => {
                 setQuery({
                   ...query,

@@ -5,14 +5,14 @@ module.exports.index = async (req, res) => {
     const page = req.query.page || 1;
     const limit = req.query.limit || 50;
     const search = req.query.search || "";
-    // should be pagination and searching
+
+    // ini hanya pns yang dapat berubah menjadi admin
     const users = await User.query()
-      .where("organization_id", "ilike", "123%")
-      .andWhere((builder) => {
+      .where("from", "=", "master")
+      .andWhereNot("custom_id", req?.user?.customId)
+      .where((builder) => {
         if (search) {
-          builder
-            .where("username", "ilike", `%${search}%`)
-            .orWhere("employee_number", "ilike", `%${search}%`);
+          builder.where("username", "ilike", `%${search}%`);
         }
       })
       .page(page - 1, limit);
@@ -27,7 +27,15 @@ module.exports.index = async (req, res) => {
 module.exports.patch = async (req, res) => {
   try {
     const { id } = req.query;
-    await User.query().findById(id).patch(req.body);
+
+    const currentUser = await User.query().findById(id);
+
+    await User.query()
+      .patch({
+        current_role: currentUser?.current_role === "admin" ? "agent" : "admin",
+      })
+      .where("custom_id", id);
+
     res.json({ code: 200, message: "success" });
   } catch (error) {
     console.log(error);

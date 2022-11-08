@@ -22,6 +22,8 @@ const changeRoutes = (user) => {
     const bkd = user?.organization_id?.startsWith("123");
     const pttBkd = user?.organization_id?.startsWith("134");
 
+    console.log(role);
+
     const admin = (role === "admin" && bkd) || (role === "admin" && pttBkd);
     const agent = (role === "agent" && bkd) || (role === "agent" && pttBkd);
 
