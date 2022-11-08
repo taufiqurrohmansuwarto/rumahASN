@@ -31,6 +31,8 @@ const remove = async (req, res) => {
     const { customId } = req?.user;
     const { id, commentId } = req?.query;
 
+    console.log({ id, commentId });
+
     const currentTicket = await Tickets.query().findById(id);
 
     if (currentTicket) {

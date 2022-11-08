@@ -1,5 +1,7 @@
+import { Paper } from "@mantine/core";
 import { Avatar, Button, Rate, Result, Space } from "antd";
 import ButtonFeedback from "./ButtonFeedback";
+import TimelinePekerjaan from "./TimelinePekerjaan";
 
 const Feedback = ({ data }) => {
   if (!data?.has_feedback) {
@@ -25,10 +27,9 @@ function StatusTicketSelesai({ data }) {
       subTitle={<Subtitle data={data} />}
       extra={[<Feedback data={data} key="feedback" />]}
     >
-      <Space>
-        <Avatar src={data?.agent?.image} />
-        <Avatar src={data?.admin?.image} />
-      </Space>
+      <Paper shadow="md" withBorder p="lg" radius="lg">
+        <TimelinePekerjaan data={data} />
+      </Paper>
     </Result>
   );
 }

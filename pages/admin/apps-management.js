@@ -4,7 +4,7 @@ import PageContainer from "../../src/components/PageContainer";
 const Dashboard = () => {
   return (
     <PageContainer>
-      <div>User Management</div>
+      <div>Features is on going</div>
     </PageContainer>
   );
 };

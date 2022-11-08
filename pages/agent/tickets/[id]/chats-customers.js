@@ -3,7 +3,7 @@ import { useRouter } from "next/router";
 import { detailTicket } from "../../../../services/agents.services";
 import ActiveLayout from "../../../../src/components/ActiveLayout";
 import AgentLayout from "../../../../src/components/AgentLayout";
-import ChatCustomerToAgent from "../../../../src/components/ChatCustomerToAgent";
+import ChatsAgentToCustomer from "../../../../src/components/ChatsAgentToCustomer";
 
 const AgentsChatsCustomers = () => {
   const router = useRouter();
@@ -19,7 +19,7 @@ const AgentsChatsCustomers = () => {
       role="agent"
       active="chats-customers"
     >
-      <ChatCustomerToAgent detailticket={data} id={router?.query?.id} />
+      <ChatsAgentToCustomer detailticket={data} id={router?.query?.id} />
     </ActiveLayout>
   );
 };

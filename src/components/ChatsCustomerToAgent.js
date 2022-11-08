@@ -14,12 +14,12 @@ import { useSession } from "next-auth/react";
 import { useCallback, useEffect, useState } from "react";
 import { uploadImage } from "../../services";
 import {
-  createMessagesCustomers,
-  deleteMessagesCustomers,
-  messagesCustomers,
-  updateMessagesCustomers,
-} from "../../services/agents.services";
-import { fromNow, resizeImageTag } from "../../utils";
+  createCommentCustomers,
+  getCommentCustomers,
+  removeCommentCustomers,
+  updateCommentCustomers,
+} from "../../services/users.services";
+import { resizeImageTag } from "../../utils";
 import RichTextEditor from "./RichTextEditor";
 
 const CreateComments = ({ user, ticketId }) => {
@@ -40,17 +40,17 @@ const CreateComments = ({ user, ticketId }) => {
   );
 
   const { mutate: create, isLoading } = useMutation(
-    (data) => createMessagesCustomers(data),
+    (data) => createCommentCustomers(data),
     {
       onSettled: () =>
         queryClient.invalidateQueries([
-          "messages-agents-to-customers",
+          "messages-customers-to-agents",
           ticketId,
         ]),
       onSuccess: () => {
         form.resetFields();
         queryClient.invalidateQueries([
-          "messages-agents-to-customers",
+          "messages-customers-to-agents",
           ticketId,
         ]);
         message.success("Berhasil mengirim pesan");
@@ -64,7 +64,7 @@ const CreateComments = ({ user, ticketId }) => {
       const data = {
         id: ticketId,
         data: {
-          comment: resizeImageTag(values.comment),
+          comment: resizeImageTag(values?.comment),
         },
       };
       create(data);
@@ -81,8 +81,8 @@ const CreateComments = ({ user, ticketId }) => {
         <Form onFinish={handleCreate} form={form}>
           <Form.Item name="comment">
             <RichTextEditor
-              style={{ minHeight: 300 }}
               onImageUpload={handleImageUpload}
+              style={{ minHeight: 300 }}
             />
           </Form.Item>
           <Form.Item>
@@ -135,16 +135,16 @@ const CommentsList = ({ data, currentUserId, ticketId, status }) => {
   };
 
   const { mutateAsync: hapus, isLoading: isLoadingHapus } = useMutation(
-    (data) => deleteMessagesCustomers(data),
+    (data) => removeCommentCustomers(data),
     {
       onSettled: () =>
         queryClient.invalidateQueries([
-          "messages-agents-to-customers",
+          "messages-customers-to-agents",
           ticketId,
         ]),
       onSuccess: () => {
         queryClient.invalidateQueries([
-          "messages-agents-to-customers",
+          "messages-customers-to-agents",
           ticketId,
         ]);
         message.success("Berhasil menghapus pesan");
@@ -154,16 +154,16 @@ const CommentsList = ({ data, currentUserId, ticketId, status }) => {
   );
 
   const { mutate: update, isLoading: isLoadingUpdate } = useMutation(
-    (data) => updateMessagesCustomers(data),
+    (data) => updateCommentCustomers(data),
     {
       onSettled: () =>
         queryClient.invalidateQueries([
-          "messages-agents-to-customers",
+          "messages-customers-to-agents",
           ticketId,
         ]),
       onSuccess: () => {
         queryClient.invalidateQueries([
-          "messages-agents-to-customers",
+          "messages-customers-to-agents",
           ticketId,
         ]);
         message.success("Berhasil mengubah pesan");
@@ -226,8 +226,8 @@ const CommentsList = ({ data, currentUserId, ticketId, status }) => {
                   <Form form={form} onFinish={handleUpdate}>
                     <Form.Item name="comment">
                       <RichTextEditor
-                        style={{ minHeight: 300 }}
                         onImageUpload={handleImageUpload}
+                        style={{ minHeight: 300 }}
                       />
                     </Form.Item>
                     <Space>
@@ -250,7 +250,7 @@ const CommentsList = ({ data, currentUserId, ticketId, status }) => {
             )
           }
           author={item?.user?.username}
-          datetime={fromNow(item?.created_at)}
+          datetime={item?.created_at}
           avatar={item?.user?.image}
         />
       )}
@@ -258,11 +258,11 @@ const CommentsList = ({ data, currentUserId, ticketId, status }) => {
   );
 };
 
-function ChatCustomerToAgent({ id, detailticket }) {
+function ChatsCustomerToAgent({ id, detailTicket }) {
   const { data: userData, status } = useSession();
   const { data, isLoading } = useQuery(
-    ["messages-agents-to-customers", id],
-    () => messagesCustomers(id),
+    ["messages-customers-to-agents", id],
+    () => getCommentCustomers(id),
     {
       refetchInterval: 1000,
     }
@@ -271,16 +271,16 @@ function ChatCustomerToAgent({ id, detailticket }) {
   return (
     <Skeleton loading={isLoading || status === "loading"}>
       <Card title="Chat">
-        {detailticket?.status_code !== "SELESAI" && (
+        {detailTicket?.status_code !== "SELESAI" && (
           <CreateComments
-            status={detailticket?.status_code}
             ticketId={id}
+            status={detailTicket?.status}
             user={userData?.user}
           />
         )}
         <CommentsList
           data={data}
-          status={detailticket?.status_code}
+          status={detailTicket?.status}
           currentUserId={userData?.user?.id}
           ticketId={id}
         />
@@ -289,4 +289,4 @@ function ChatCustomerToAgent({ id, detailticket }) {
   );
 }
 
-export default ChatCustomerToAgent;
+export default ChatsCustomerToAgent;
