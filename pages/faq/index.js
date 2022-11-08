@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+import { Card } from "antd";
 import { getFaqs } from "../../services";
 import FAQMenu from "../../src/components/FAQMenu";
 import Layout from "../../src/components/Layout";
@@ -13,7 +14,12 @@ function Feeds() {
       title="F.A.Q"
       subTitle="Frequently Ask Question"
     >
-      <FAQMenu data={data} />
+      <Card
+        title="Pertanyaan yang sering diajukan"
+        style={{ minHeight: "80vh" }}
+      >
+        <FAQMenu data={data} />
+      </Card>
     </PageContainer>
   );
 }
