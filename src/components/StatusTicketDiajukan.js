@@ -1,4 +1,4 @@
-import { Alert, Text, Title } from "@mantine/core";
+import { Paper, Text, Title } from "@mantine/core";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button, Form, Input, message, Modal, Popconfirm, Result } from "antd";
 import { useRouter } from "next/router";
@@ -142,7 +142,7 @@ function StatusTicketDiajukan({ data }) {
         </Popconfirm>,
       ]}
     >
-      <Alert title="Detail Tiket">
+      <Paper shadow="lg" p="lg" withBorder radius="lg">
         <Title>{data?.title}</Title>
         <Text>
           <div dangerouslySetInnerHTML={{ __html: data?.content }} />
@@ -150,7 +150,7 @@ function StatusTicketDiajukan({ data }) {
         <div style={{ marginTop: 10 }}>
           <TimelinePekerjaan data={data} />
         </div>
-      </Alert>
+      </Paper>
       <ModalUpdate
         data={data}
         update={update}

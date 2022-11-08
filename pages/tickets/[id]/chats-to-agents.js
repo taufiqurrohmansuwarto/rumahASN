@@ -27,7 +27,9 @@ const DetailTicket = () => {
         {data?.status_code === "DIAJUKAN" ? (
           <LockedChat />
         ) : (
-          <ChatsCustomerToAgent detailTicket={data} id={id} />
+          <div>
+            <ChatsCustomerToAgent detailTicket={data} id={id} />
+          </div>
         )}
       </Skeleton>
     </ActiveLayout>

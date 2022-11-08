@@ -199,7 +199,7 @@ const CommentsList = ({ data, currentUserId, ticketId, status }) => {
             title="Apakah anda yakin ingin menghapus?"
             onConfirm={async () => await handleHapus(item?.id)}
           >
-            <a>Hapus</a>
+            <a>{status}</a>
           </Popconfirm>
         </Space>
       );
@@ -274,13 +274,13 @@ function ChatsCustomerToAgent({ id, detailTicket }) {
         {detailTicket?.status_code !== "SELESAI" && (
           <CreateComments
             ticketId={id}
-            status={detailTicket?.status}
+            status={detailTicket?.status_code}
             user={userData?.user}
           />
         )}
         <CommentsList
           data={data}
-          status={detailTicket?.status}
+          status={detailTicket?.status_code}
           currentUserId={userData?.user?.id}
           ticketId={id}
         />
