@@ -1,17 +1,17 @@
+import { MantineProvider } from "@mantine/core";
 import {
   Hydrate,
   QueryClient,
   QueryClientProvider,
 } from "@tanstack/react-query";
-import { useState } from "react";
-import { SessionProvider, signIn, useSession } from "next-auth/react";
 import { ConfigProvider } from "antd";
-import id from "antd/lib/locale/id_ID";
-import ability from "../utils/ability";
 import "antd/dist/antd.css";
-import { AbilityContext } from "../src/context/Can";
-import { MantineProvider } from "@mantine/core";
+import id from "antd/lib/locale/id_ID";
+import { SessionProvider, signIn, useSession } from "next-auth/react";
+import { useState } from "react";
 import Loading from "../src/components/Loading";
+import { AbilityContext } from "../src/context/Can";
+import ability from "../utils/ability";
 
 // check user role and organization start with 123
 function Auth({ children, action, subject }) {

@@ -26,9 +26,7 @@ function StatusTicketDikerjakan({ data }) {
       >
         <Title>{data?.title}</Title>
         <Text>{data?.content}</Text>
-        <div style={{ marginTop: 10 }}>
-          <TimelinePekerjaan data={data} />
-        </div>
+        <TimelinePekerjaan data={data} />
       </AlertMantineCore>
     </Result>
   );

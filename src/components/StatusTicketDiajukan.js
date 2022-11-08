@@ -145,11 +145,7 @@ function StatusTicketDiajukan({ data }) {
     >
       <Stack>
         <DetailTicket data={data} />
-        <Paper shadow="lg" p="lg" withBorder radius="lg">
-          <div style={{ marginTop: 10 }}>
-            <TimelinePekerjaan data={data} />
-          </div>
-        </Paper>
+        <TimelinePekerjaan data={data} />
       </Stack>
       <ModalUpdate
         data={data}

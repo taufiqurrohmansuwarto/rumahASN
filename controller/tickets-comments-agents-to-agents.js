@@ -11,6 +11,7 @@ const index = async (req, res) => {
     // hanya boleh mengambil id
     const currentTicket = await Ticktes.query()
       .where("id", id)
+      .withGraphFetched("[user(simpleSelect).[roles]]")
       /**!fix this motherfucker */
       // .andWhere("requester", customId)
       // .andWhere("status", "DIKERJAKAN")

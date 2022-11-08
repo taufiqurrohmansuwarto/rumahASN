@@ -27,9 +27,7 @@ function StatusTicketSelesai({ data }) {
       subTitle={<Subtitle data={data} />}
       extra={[<Feedback data={data} key="feedback" />]}
     >
-      <Paper shadow="md" withBorder p="lg" radius="lg">
-        <TimelinePekerjaan data={data} />
-      </Paper>
+      <TimelinePekerjaan data={data} />
     </Result>
   );
 }
