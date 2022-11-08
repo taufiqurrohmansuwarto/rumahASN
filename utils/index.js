@@ -57,12 +57,9 @@ export const fromNow = (date) => {
   return moment(date).fromNow();
 };
 
-// add image height and width from image tag and scale to 0.3 and add breakline after image with <br />
+// add break line before and after image tag
 export const resizeImageTag = (text) => {
-  return text.replace(
-    /<img/g,
-    '<br/><img style="width: 30%; height: 30%" /><br />'
-  );
+  return text.replace(/<img/g, "<br><img").replace(/\/>/g, "/><br>");
 };
 
 // convert html to text
@@ -118,4 +115,17 @@ export const notificationText = ({ type, role, type_id }) => {
   }
 
   return `${currentRole}/${type_id}${currentType}`;
+};
+
+export const statusTicket = (status) => {
+  switch (status) {
+    case "DIAJUKAN":
+      return "info";
+    case "DIKERJAKAN":
+      return "warning";
+    case "SELESAI":
+      return "success";
+    default:
+      return "error";
+  }
 };

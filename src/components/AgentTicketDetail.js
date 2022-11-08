@@ -1,8 +1,11 @@
 import { Paper, Space as SpaceMantine, Stack, Text } from "@mantine/core";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Button, Form, Input, message, Modal, Space } from "antd";
+import { Button, Form, Input, message, Modal, Result, Space } from "antd";
+import { capitalize, lowerCase } from "lodash";
 import React, { useState } from "react";
 import { akhiriPekerjaanSelesai } from "../../services/agents.services";
+import { statusTicket } from "../../utils";
+import { DetailTicket } from "./DetailTicket";
 import DurasiPenyelesaian from "./DurasiPenyelesaian";
 import TicketProperties from "./TicketProperties";
 import TimelinePekerjaan from "./TimelinePekerjaan";
@@ -82,26 +85,30 @@ function AgentTicketDetail({ data }) {
   const handleOpen = () => setOpen(true);
 
   return (
-    <Paper withBorder p="lg" radius="md" shadow="md">
+    <Result
+      title={`Status Tiket ${capitalize(data?.status_code)}!`}
+      subTitle={`Tiket dengan nomor ${data?.ticket_number} telah ${lowerCase(
+        data?.status_code
+      )}`}
+      status={statusTicket(data?.status_code)}
+      extra={[
+        <Button key="open" danger onClick={handleOpen}>
+          Selesai
+        </Button>,
+        <TicketProperties key="ubah" data={data} />,
+      ]}
+    >
       <Stack>
-        <Text size="md" weight={500}>
-          {data?.title}
-        </Text>
-        <Text color="dimmed" size="xs">
-          {data?.content}
-        </Text>
-        <TimelinePekerjaan data={data} />
-        <PropertiTicket data={data} />
-        <Space>
-          <Button danger onClick={handleOpen}>
-            Selesai
-          </Button>
-          <TicketProperties data={data} />
-        </Space>
-        <SelesaiModal data={data} open={open} onCancel={handleCancel} />
-        <DurasiPenyelesaian data={data} />
+        <DetailTicket data={data} />
+        <Stack>
+          <TimelinePekerjaan data={data} />
+          <PropertiTicket data={data} />
+          <Space></Space>
+          <SelesaiModal data={data} open={open} onCancel={handleCancel} />
+          <DurasiPenyelesaian data={data} />
+        </Stack>
       </Stack>
-    </Paper>
+    </Result>
   );
 }
 

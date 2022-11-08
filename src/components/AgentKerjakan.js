@@ -1,7 +1,9 @@
-import { Alert, Title, Text, Button } from "@mantine/core";
+import { Stack } from "@mantine/core";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { message } from "antd";
+import { Button, message, Popconfirm, Result } from "antd";
 import { kerjakanTicket } from "../../services/agents.services";
+import { DetailTicket } from "./DetailTicket";
+import TimelinePekerjaan from "./TimelinePekerjaan";
 
 function AgentKerjakan({ data }) {
   const queryClient = useQueryClient();
@@ -22,12 +24,24 @@ function AgentKerjakan({ data }) {
   const handleKerjakan = () => kerjakan(data?.id);
 
   return (
-    <Alert title="Hehehe">
-      {data?.admin?.username} memberikan tiket ini untuk anda kerjakan
-      <Title>{data?.title}</Title>
-      <Text>{data?.content}</Text>
-      <Button onClick={handleKerjakan}>Kerjakan</Button>
-    </Alert>
+    <Result
+      title="Pengerjaan Ticket"
+      subTitle={`${data?.admin?.username} telah memilih anda untuk mengerjakan tiket`}
+      extra={[
+        <Popconfirm
+          key="kerjakan"
+          title="Yakin ingin mengerjakan?"
+          onConfirm={handleKerjakan}
+        >
+          <Button type="primary">Kerjakan</Button>
+        </Popconfirm>,
+      ]}
+    >
+      <Stack>
+        <DetailTicket data={data} />
+        <TimelinePekerjaan data={data} />
+      </Stack>
+    </Result>
   );
 }
 

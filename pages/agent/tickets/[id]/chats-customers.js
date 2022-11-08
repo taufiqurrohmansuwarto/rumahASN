@@ -26,7 +26,7 @@ const AgentsChatsCustomers = () => {
 
 AgentsChatsCustomers.getLayout = (page) => {
   return (
-    <AgentLayout title="Chat users" active="/agent/tickets">
+    <AgentLayout title="Agent" active="/agent/tickets">
       {page}
     </AgentLayout>
   );
