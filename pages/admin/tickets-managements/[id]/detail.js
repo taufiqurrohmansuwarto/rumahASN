@@ -27,9 +27,7 @@ const SemuaTicket = () => {
       <AdminAssignAgent id={router?.query?.id} />
       <Stack>
         <DetailTicket data={data} />
-        <Paper shadow="lg" p="lg" radius="lg">
-          <TimelinePekerjaan data={data} />
-        </Paper>
+        <TimelinePekerjaan data={data} />
       </Stack>
     </PageContainer>
   );
