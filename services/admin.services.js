@@ -32,3 +32,7 @@ export const assignAgents = async ({ id, data }) => {
 export const removeAgents = async (id) => {
   return api.delete(`/ticket-agents/${id}`).then((res) => res?.data);
 };
+
+export const adminDashboard = async () => {
+  return api.get(`/dashboard`).then((res) => res?.data);
+};

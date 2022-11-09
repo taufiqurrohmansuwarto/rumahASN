@@ -103,7 +103,6 @@ function AgentTicketDetail({ data }) {
         <Stack>
           <TimelinePekerjaan data={data} />
           <PropertiTicket data={data} />
-          <Space></Space>
           <SelesaiModal data={data} open={open} onCancel={handleCancel} />
           <DurasiPenyelesaian data={data} />
         </Stack>

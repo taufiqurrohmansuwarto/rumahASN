@@ -3,14 +3,14 @@ import React from "react";
 
 function CustomerAdminAgent({ data }) {
   return (
-    <Paper p="lg" shadow="lg" radius="lg">
+    <Paper p="lg" shadow="lg" radius="md">
       <Stack>
         {data?.customer !== null ? (
           <Group>
             <Avatar radius="xl" src={data?.customer?.image} size="sm" />
             <div>
               <Text color="dimmed" size="sm">
-                Customer
+                Pembuat tiket
               </Text>
               <Text size="xs">{data?.customer?.username}</Text>
             </div>
@@ -22,7 +22,7 @@ function CustomerAdminAgent({ data }) {
               <Avatar radius="xl" src={data?.admin?.image} size="sm" />
               <div>
                 <Text color="dimmed" size="sm">
-                  Chooser
+                  Pemilih Agent
                 </Text>
                 <Text size="xs">{data?.admin?.username}</Text>
               </div>

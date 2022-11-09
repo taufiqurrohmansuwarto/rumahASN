@@ -86,7 +86,7 @@ const CustomersTickets = ({ status = "all" }) => {
 
   return (
     <PageContainer title="Tiket" subTitle="Daftar Tiket">
-      <Card>
+      <Card title="Customer Ticket">
         <Tooltip title="Buat tiket baru">
           <Button
             icon={<PlusOutlined />}

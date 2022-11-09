@@ -52,9 +52,17 @@ from (select status_code, count(status_code)
 
 const adminDashboard = async (req, res) => {
   try {
-    const { customId } = req?.user;
-    const result = await aggregateCount(customId);
-    res.json(result);
+    const result = await knex.raw(
+      `
+      select status.name, coalesce(t.count, 0) as count
+from (select status_code, count(status_code)
+      from tickets
+      group by 1) as t
+         right join status on t.status_code = status.name
+      `
+    );
+
+    res.json(result?.rows);
   } catch (error) {
     console.log(error);
     res.status(400).json({ code: 400, message: "Internal Server Error" });

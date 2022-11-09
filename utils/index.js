@@ -1,3 +1,9 @@
+import {
+  IconFileAlert,
+  IconFileCheck,
+  IconFileDots,
+  IconFileOff,
+} from "@tabler/icons";
 import moment from "moment";
 
 // change date format to DD-MM-YYYY
@@ -129,3 +135,10 @@ export const statusTicket = (status) => {
       return "error";
   }
 };
+
+export const listDataDashboard = [
+  { name: "DIAJUKAN", color: "yellow", icon: IconFileDots },
+  { name: "DIKERJAKAN", color: "blue", icon: IconFileAlert },
+  { name: "SELESAI", color: "green", icon: IconFileCheck },
+  { name: "DITOLAK", color: "red", icon: IconFileOff },
+];

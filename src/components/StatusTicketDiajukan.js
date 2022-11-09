@@ -6,6 +6,7 @@ import { useCallback, useState } from "react";
 import { uploadImage } from "../../services";
 import { deleteTicket, updateTicket } from "../../services/users.services";
 import { resizeImageTag } from "../../utils";
+import CustomerAdminAgent from "./CustomerAdminAgent";
 import { DetailTicket } from "./DetailTicket";
 import RichTextEditor from "./RichTextEditor";
 import TimelinePekerjaan from "./TimelinePekerjaan";
@@ -63,7 +64,7 @@ const ModalUpdate = ({ visible, onCancel, update, data, loadingUpdate }) => {
           rules={[
             {
               required: true,
-              message: "Please input the title of collection!",
+              message: "Judul harus diisi",
             },
           ]}
         >
@@ -144,6 +145,7 @@ function StatusTicketDiajukan({ data }) {
       ]}
     >
       <Stack>
+        <CustomerAdminAgent data={data} />
         <DetailTicket data={data} />
         <TimelinePekerjaan data={data} />
       </Stack>
