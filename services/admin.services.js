@@ -29,6 +29,6 @@ export const assignAgents = async ({ id, data }) => {
   return api.patch(`/ticket-agents/${id}`, data).then((res) => res?.data);
 };
 
-export const removeAgents = async ({ id }) => {
+export const removeAgents = async (id) => {
   return api.delete(`/ticket-agents/${id}`).then((res) => res?.data);
 };

@@ -5,6 +5,7 @@ import {
   listAgents,
   assignAgents,
   detailTicket,
+  removeAgents,
 } from "../../services/admin.services";
 
 const ModalPicker = ({ open, cancelModal, agents, ticketId }) => {
@@ -74,6 +75,60 @@ const ModalPicker = ({ open, cancelModal, agents, ticketId }) => {
   );
 };
 
+const Tombol = ({ data, openModalAgent }) => {
+  const queryClient = useQueryClient();
+
+  const { mutate: removeAgent, isLoading } = useMutation(
+    (data) => removeAgents(data),
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries(["admin-tickets", data?.id]);
+        message.success("Berhasil remove agent");
+      },
+      onSettled: () => {
+        queryClient.invalidateQueries(["admin-tickets", data?.id]);
+      },
+      onError: () => {
+        message.error("Gagal remove agent");
+      },
+    }
+  );
+
+  const handleRemove = () => {
+    Modal.confirm({
+      title: "Apakah anda yakin?",
+      content: "Anda akan menghapus agent dari tiket ini",
+      onOk: () => {
+        removeAgent(data?.id);
+      },
+    });
+  };
+
+  if (data?.assignee === null) {
+    return (
+      <Button type="primary" onClick={openModalAgent}>
+        Pilih Agent Untuk menyelesaikan
+      </Button>
+    );
+  }
+
+  if (data?.assinee !== null && data?.status_code === "DIAJUKAN") {
+    return (
+      <Button danger type="primary" onClick={handleRemove}>
+        Hapus Agent
+      </Button>
+    );
+  }
+
+  if (data?.assignee !== null && data?.status_code === "DIKERJAKAN") {
+    return <div>{data?.assignee?.username} sedang mengerjakan tiket ini</div>;
+  }
+
+  if (data?.assignee !== null && data?.status_code === "SELESAI") {
+    return <div>{data?.assignee?.username} telah menyelesaikan tiket ini</div>;
+  }
+};
+
 function AdminAssignAgent({ id }) {
   const { data: agents, isLoading: isLoadingAgents } = useQuery(
     ["agents"],
@@ -98,11 +153,7 @@ function AdminAssignAgent({ id }) {
 
   return (
     <div>
-      {data?.assignee === null ? (
-        <Button onClick={handleOpen}>Assign Agent</Button>
-      ) : (
-        <div>{data?.agent?.username} belum di approve</div>
-      )}
+      <Tombol data={data} openModalAgent={handleOpen} />
       <ModalPicker
         ticketId={id}
         agents={agents}

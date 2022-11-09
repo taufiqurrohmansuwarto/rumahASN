@@ -25,7 +25,15 @@ function ActiveLayout({
 
   return (
     <PageContainer
-      // onBack={() => router.push(`/${role}/tickets/semua`)}
+      onBack={() => {
+        if (role === "requester") {
+          router.push("/tickets/semua");
+        } else if (role === "agent") {
+          router.push("/agent/tickets/semua");
+        } else if (role === "admin") {
+          router.push("/admin/tickets/semua");
+        }
+      }}
       loading={loading}
       tabList={role === "requester" ? customerTabs : agentTabs}
       tabActiveKey={active}

@@ -6,7 +6,7 @@ function TimelinePekerjaan({ data }) {
   return (
     <Paper radius="lg" shadow="lg" p="lg">
       <Stack>
-        <Text weight={800}>{data?.ticket_number}</Text>
+        <Text weight={800}>Nomer : {data?.ticket_number}</Text>
         <Timeline
           active={setActivePekerjaan(data)}
           bulletSize={24}

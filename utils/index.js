@@ -17,7 +17,7 @@ export const uploadFileMinio = (mc, fileBuffer, filename, size, mimetype) => {
       function (err, info) {
         if (err) {
           reject(err);
-          console.log(error);
+          console.log(err);
         } else {
           resolve(info);
         }

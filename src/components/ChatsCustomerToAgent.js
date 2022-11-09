@@ -19,7 +19,7 @@ import {
   removeCommentCustomers,
   updateCommentCustomers,
 } from "../../services/users.services";
-import { resizeImageTag } from "../../utils";
+import { fromNow, resizeImageTag } from "../../utils";
 import RichTextEditor from "./RichTextEditor";
 
 const CreateComments = ({ user, ticketId }) => {
@@ -199,7 +199,7 @@ const CommentsList = ({ data, currentUserId, ticketId, status }) => {
             title="Apakah anda yakin ingin menghapus?"
             onConfirm={async () => await handleHapus(item?.id)}
           >
-            <a>{status}</a>
+            <a>hapus</a>
           </Popconfirm>
         </Space>
       );
@@ -250,7 +250,7 @@ const CommentsList = ({ data, currentUserId, ticketId, status }) => {
             )
           }
           author={item?.user?.username}
-          datetime={item?.created_at}
+          datetime={fromNow(item?.created_at)}
           avatar={item?.user?.image}
         />
       )}

@@ -1,7 +1,9 @@
-import { Alert as AlertMantineCore, Text, Title } from "@mantine/core";
+import { Alert as AlertMantineCore, Stack, Text, Title } from "@mantine/core";
 import { IconAlertOctagon } from "@tabler/icons";
 import { Button, Result } from "antd";
 import { useRouter } from "next/router";
+import CustomerAdminAgent from "./CustomerAdminAgent";
+import { DetailTicket } from "./DetailTicket";
 import TimelinePekerjaan from "./TimelinePekerjaan";
 
 function StatusTicketDikerjakan({ data }) {
@@ -19,15 +21,11 @@ function StatusTicketDikerjakan({ data }) {
         </Button>
       }
     >
-      <AlertMantineCore
-        icon={<IconAlertOctagon />}
-        title="Dah.. tiketmu sedang dikerjakan"
-        color="green"
-      >
-        <Title>{data?.title}</Title>
-        <Text>{data?.content}</Text>
+      <Stack>
+        <DetailTicket data={data} />
         <TimelinePekerjaan data={data} />
-      </AlertMantineCore>
+        <CustomerAdminAgent data={data} />
+      </Stack>
     </Result>
   );
 }
