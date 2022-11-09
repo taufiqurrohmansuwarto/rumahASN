@@ -155,6 +155,7 @@ const akhiriPekerjaanSelesai = async (req, res) => {
           status_code: "SELESAI",
           assignee_reason: req?.body?.assignee_reason,
           completed_at: new Date(),
+          finished_at: new Date(),
           updated_at: new Date(),
         })
         .where("id", id)

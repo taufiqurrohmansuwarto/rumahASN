@@ -42,3 +42,15 @@ module.exports.patch = async (req, res) => {
     res.status(500).json({ message: "Internal Server Error", code: 500 });
   }
 };
+
+module.exports.detail = async (req, res) => {
+  try {
+    const { id } = req?.query;
+    const currentUser = await User.query().findById(id);
+
+    res.json(currentUser);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Internal Server Error", code: 500 });
+  }
+};

@@ -1,4 +1,4 @@
-import { Alert, Stack, Text } from "@mantine/core";
+import { Alert, Button, Stack, Text } from "@mantine/core";
 import { useQuery } from "@tanstack/react-query";
 import { useSession } from "next-auth/react";
 import { adminDashboard } from "../../services/admin.services";
@@ -16,8 +16,17 @@ const Dashboard = () => {
   return (
     <PageContainer loading={isLoading || status === "loading"}>
       <Stack>
-        <Alert>
-          <Text>Halo Admin, {userData?.user?.name}</Text>
+        <Alert title="Perhatian">
+          <Text mb={10}>Halo Admin, {userData?.user?.name}</Text>
+
+          <Button
+            component="a"
+            href="/helpdesk/api/admins/reports"
+            variant="filled"
+            color="green"
+          >
+            Simple Report
+          </Button>
         </Alert>
         <StatsGrid data={data} />
       </Stack>

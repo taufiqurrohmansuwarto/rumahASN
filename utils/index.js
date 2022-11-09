@@ -142,3 +142,12 @@ export const listDataDashboard = [
   { name: "SELESAI", color: "green", icon: IconFileCheck },
   { name: "DITOLAK", color: "red", icon: IconFileOff },
 ];
+
+// if undefined return empty string
+export const checkUndefined = (data) => {
+  if (data === undefined || data === null) {
+    return "";
+  } else {
+    return data;
+  }
+};

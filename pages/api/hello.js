@@ -1,8 +1,8 @@
 import { createRouter } from "next-connect";
-import { adminReportController } from "../../controller/report.controller";
+import { excelReport } from "../../controller/report.controller";
 
 const router = createRouter();
 
-router.get(adminReportController);
+router.get(excelReport);
 
 export default router.handler({});

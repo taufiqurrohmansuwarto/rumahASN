@@ -4,6 +4,6 @@ import auth from "../../../middleware/auth.middleware";
 
 const router = createRouter();
 
-router.use(auth).patch(patch);
+router.use(auth).patch(patch).get();
 
 export default router.handler();

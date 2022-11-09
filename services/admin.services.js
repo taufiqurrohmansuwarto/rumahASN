@@ -36,3 +36,7 @@ export const removeAgents = async (id) => {
 export const adminDashboard = async () => {
   return api.get(`/dashboard`).then((res) => res?.data);
 };
+
+export const excelReport = async (req, res) => {
+  return api.get(`/reports`).then((res) => res?.data);
+};
