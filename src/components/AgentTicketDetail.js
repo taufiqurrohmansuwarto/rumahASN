@@ -1,13 +1,12 @@
-import { Paper, Space as SpaceMantine, Stack, Text } from "@mantine/core";
+import { Stack } from "@mantine/core";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Button, Form, Input, message, Modal, Result, Space } from "antd";
+import { Button, Form, Input, message, Modal, Result } from "antd";
 import { capitalize, lowerCase } from "lodash";
 import React, { useState } from "react";
 import { akhiriPekerjaanSelesai } from "../../services/agents.services";
 import { statusTicket } from "../../utils";
 import CustomerAdminAgent from "./CustomerAdminAgent";
 import { DetailTicket } from "./DetailTicket";
-import DurasiPenyelesaian from "./DurasiPenyelesaian";
 import TicketProperties from "./TicketProperties";
 import TimelinePekerjaan from "./TimelinePekerjaan";
 
@@ -65,20 +64,6 @@ const SelesaiModal = ({ open, onCancel, data }) => {
   );
 };
 
-const PropertiTicket = ({ data }) => {
-  return (
-    <div>
-      <Text size="md" weight={500} color="dimmed">
-        Sub Kategori : {data?.sub_category?.name}
-      </Text>
-      <SpaceMantine />
-      <Text size="xs" weight={500}>
-        Prioritas : {data?.priority_code}
-      </Text>
-    </div>
-  );
-};
-
 function AgentTicketDetail({ data }) {
   const [open, setOpen] = useState(false);
 
@@ -104,9 +89,7 @@ function AgentTicketDetail({ data }) {
         <Stack>
           <TimelinePekerjaan data={data} />
           <CustomerAdminAgent data={data} />
-          <PropertiTicket data={data} />
           <SelesaiModal data={data} open={open} onCancel={handleCancel} />
-          <DurasiPenyelesaian data={data} />
         </Stack>
       </Stack>
     </Result>
