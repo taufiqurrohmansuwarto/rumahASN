@@ -5,6 +5,7 @@ import { capitalize, lowerCase } from "lodash";
 import React, { useState } from "react";
 import { akhiriPekerjaanSelesai } from "../../services/agents.services";
 import { statusTicket } from "../../utils";
+import CustomerAdminAgent from "./CustomerAdminAgent";
 import { DetailTicket } from "./DetailTicket";
 import DurasiPenyelesaian from "./DurasiPenyelesaian";
 import TicketProperties from "./TicketProperties";
@@ -102,6 +103,7 @@ function AgentTicketDetail({ data }) {
         <DetailTicket data={data} />
         <Stack>
           <TimelinePekerjaan data={data} />
+          <CustomerAdminAgent data={data} />
           <PropertiTicket data={data} />
           <SelesaiModal data={data} open={open} onCancel={handleCancel} />
           <DurasiPenyelesaian data={data} />
