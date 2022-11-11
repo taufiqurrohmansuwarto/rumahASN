@@ -1,2 +1,5 @@
+untuk dashboard admin
 
-1. hari ini ui untuk faq dan sub faq
+1. data grafik permasalahan per minggu bisa digeser sesuai tanggal atau scroll kanan kiri mother fucker 
+2. data grafik permasalahan per kategori
+3. data grafik berapa banyak penyelesain

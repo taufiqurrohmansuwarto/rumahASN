@@ -4,16 +4,13 @@ import { Result } from "antd";
 import { lowerCase } from "lodash";
 import { useRouter } from "next/router";
 import { detailTicket } from "../../../../services/admin.services";
+import ActiveLayout from "../../../../src/components/ActiveLayout";
 import AdminAssignAgent from "../../../../src/components/AdminAssignAgent";
 import AdminLayout from "../../../../src/components/AdminLayout";
 import CustomerAdminAgent from "../../../../src/components/CustomerAdminAgent";
 import { DetailTicket } from "../../../../src/components/DetailTicket";
 import TimelinePekerjaan from "../../../../src/components/TimelinePekerjaan";
 import { statusTicket } from "../../../../utils";
-
-const {
-  default: PageContainer,
-} = require("../../../../src/components/PageContainer");
 
 const Tombol = ({ data }) => {
   if (data?.status_code === "DIAJUKAN") {
@@ -33,7 +30,7 @@ const SemuaTicket = () => {
   );
 
   return (
-    <PageContainer loading={isLoading}>
+    <ActiveLayout loading={isLoading} role="admin" id={router?.query?.id}>
       <Result
         status={statusTicket(data?.status_code)}
         title={`Status tiket ${lowerCase(data?.status_code)}`}
@@ -46,7 +43,7 @@ const SemuaTicket = () => {
           <CustomerAdminAgent data={data} />
         </Stack>
       </Result>
-    </PageContainer>
+    </ActiveLayout>
   );
 };
 

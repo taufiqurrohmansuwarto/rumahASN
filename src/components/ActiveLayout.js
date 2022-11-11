@@ -21,7 +21,26 @@ function ActiveLayout({
     { key: "chats-agents", tab: "Chat ke Agent" },
   ];
 
+  const adminTabs = [
+    { key: "detail", tab: "Detil Tiket", icon: <DotChartOutlined /> },
+    { key: "chats-customers", tab: "Chat Customer" },
+    { key: "chats-agents", tab: "Chat Agent" },
+  ];
+
   const router = useRouter();
+
+  const tabList = (role) => {
+    switch (role) {
+      case "requester":
+        return customerTabs;
+      case "agent":
+        return agentTabs;
+      case "admin":
+        return adminTabs;
+      default:
+        return customerTabs;
+    }
+  };
 
   return (
     <PageContainer
@@ -35,7 +54,7 @@ function ActiveLayout({
         }
       }}
       loading={loading}
-      tabList={role === "requester" ? customerTabs : agentTabs}
+      tabList={tabList(role)}
       tabActiveKey={active}
       onTabChange={(e) => {
         let path = "";
@@ -44,7 +63,7 @@ function ActiveLayout({
         } else if (role === "agent") {
           path = `/agent/tickets/${id}/${e}`;
         } else if (role === "admin") {
-          path = `/admin/tickets/${id}/${e}`;
+          path = `/admin/tickets-managements/${id}/${e}`;
         }
         router.push(path);
       }}

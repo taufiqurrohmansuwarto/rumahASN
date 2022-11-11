@@ -5,19 +5,27 @@ module.exports.index = async (req, res) => {
     const page = req.query.page || 1;
     const limit = req.query.limit || 50;
     const search = req.query.search || "";
+    const type = req?.query?.type || "normal";
 
     // ini hanya pns yang dapat berubah menjadi admin
-    const users = await User.query()
-      .where("from", "=", "master")
-      .andWhereNot("custom_id", req?.user?.customId)
-      .where((builder) => {
-        if (search) {
-          builder.where("username", "ilike", `%${search}%`);
-        }
-      })
-      .page(page - 1, limit);
 
-    res.json({ data: users?.results, total: users.total });
+    if (type === "normal") {
+      const users = await User.query()
+        .where("from", "=", "master")
+        .andWhereNot("custom_id", req?.user?.customId)
+        .where((builder) => {
+          if (search) {
+            builder.where("username", "ilike", `%${search}%`);
+          }
+        })
+        .page(page - 1, limit);
+
+      res.json({ data: users?.results, total: users.total });
+    }
+    if (type === "check_online") {
+      const onlineUsers = await User.query().where("is_online", true);
+      res.json(onlineUsers);
+    }
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: "Internal Server Error", code: 500 });
