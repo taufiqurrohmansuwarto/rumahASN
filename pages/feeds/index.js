@@ -1,6 +1,7 @@
-import { Alert, Stack, Text } from "@mantine/core";
+import { Alert, Button, Stack, Text } from "@mantine/core";
 import { useQuery } from "@tanstack/react-query";
 import { useSession } from "next-auth/react";
+import { useRouter } from "next/router";
 import { customerDashboard } from "../../services/users.services";
 import Layout from "../../src/components/Layout";
 import PageContainer from "../../src/components/PageContainer";
@@ -13,6 +14,12 @@ function Feeds() {
 
   const { data: userData, status } = useSession();
 
+  const router = useRouter();
+
+  const gotoCreate = () => {
+    router.push("/tickets/create");
+  };
+
   return (
     <PageContainer
       loading={isLoading || status === "loading"}
@@ -21,7 +28,12 @@ function Feeds() {
     >
       <Stack>
         <Alert title="Perhatian">
-          <Text>Halo, {userData?.user?.name}</Text>
+          <Text>
+            Halo, {userData?.user?.name}. Apa ada yang ingin kamu tanyakan?
+          </Text>
+          <Button onClick={gotoCreate} mt={4}>
+            Buat Pertanyaan Sekarang
+          </Button>
         </Alert>
         <StatsGrid data={data} />
       </Stack>

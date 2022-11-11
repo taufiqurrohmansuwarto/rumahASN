@@ -1,5 +1,8 @@
 untuk dashboard admin
 
-1. data grafik permasalahan per minggu bisa digeser sesuai tanggal atau scroll kanan kiri mother fucker 
-2. data grafik permasalahan per kategori
-3. data grafik berapa banyak penyelesain
+1. data grafik permasalahan per satuan waktu
+2. data grafik permasalahan per kategori per satuan waktu
+3. data grafik berapa banyak penyelesain per satuan waktu
+
+untuk dashboard agent
+1. data grafik penyelesaian per satuan waktu
