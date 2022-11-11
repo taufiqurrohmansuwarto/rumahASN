@@ -21,6 +21,13 @@ const googleClientId = process.env.GOOGLE_CLIENT_ID;
 const googleClientSecret = process.env.GOOGLE_CLIENT_SECRET;
 
 // automate fucking update current_role user
+const setOffline = async (id) => {
+  await User.query().findById(id).patch({ is_online: false });
+};
+
+const setOnline = async (id) => {
+  await User.query().findById(id).patch({ is_online: true });
+};
 
 const updateUser = async (id) => {
   try {
@@ -201,6 +208,16 @@ export default NextAuth({
       },
     },
   ],
+  events: {
+    signOut: async ({ token }) => {
+      const { sub } = token;
+      await setOffline(sub);
+    },
+    signIn: async ({ user, account, isNewUser, profile }) => {
+      const { id } = user;
+      await setOnline(id);
+    },
+  },
   callbacks: {
     redirect: async (url, baseUrl) => {
       const urlCallback = `${url?.baseUrl}${process.env.BASE_PATH}`;
