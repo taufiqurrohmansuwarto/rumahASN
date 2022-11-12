@@ -83,7 +83,7 @@ const AdminTickets = ({ status = "all" }) => {
   };
 
   return (
-    <Card>
+    <Card title="Daftar Tiket Admin">
       <Table
         title={() => (
           <Input.Search style={{ width: 300 }} onChange={handleSearch} />
