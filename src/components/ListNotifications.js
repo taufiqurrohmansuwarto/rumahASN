@@ -1,7 +1,7 @@
 import { Card, Col, List, Row, Space, Tag } from "antd";
 import { useRouter } from "next/router";
 import React from "react";
-import { notificationText } from "../../utils";
+import { formatDate, notificationText } from "../../utils";
 
 const Title = ({ title, read_at }) => {
   return (
@@ -33,7 +33,9 @@ function ListNotifications({ data, loading }) {
           >
             <List.Item.Meta
               title={<Title read_at={item?.read_at} title={item?.title} />}
-              description={`${item?.from_user?.username} ${item?.content}`}
+              description={`${item?.from_user?.username} ${
+                item?.content
+              } pada ${formatDate(item?.created_at)}`}
             />
           </List.Item>
         ))}
