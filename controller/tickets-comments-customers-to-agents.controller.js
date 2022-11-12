@@ -81,52 +81,58 @@ const create = async (req, res) => {
 
     // if current ticket status is not selesai dont do ever fucking this
     if (currentTicket) {
-      let role;
-      const assignee = currentTicket?.assignee;
-      const chooser = currentTicket?.chooser;
-      const requester = currentTicket?.requester;
+      if (currentTicket.status_code === "SELESAI") {
+        res.status(400).json({ code: 400, message: "Tiket sudah selesai" });
+      } else {
+        let role;
+        const assignee = currentTicket?.assignee;
+        const chooser = currentTicket?.chooser;
+        const requester = currentTicket?.requester;
 
-      if (assignee === customId) {
-        role = "assignee";
-      } else if (chooser === customId) {
-        role = "admin";
-      } else if (requester === customId) {
-        role = "requester";
-      }
+        if (assignee === customId) {
+          role = "assignee";
+        } else if (chooser === customId) {
+          role = "admin";
+        } else if (requester === customId) {
+          role = "requester";
+        }
 
-      await TicketsCommentsCustomers.query().insert({
-        ticket_id: id,
-        user_id: customId,
-        comment: req.body.comment,
-        role,
-      });
-
-      // add notifications here
-      if (role === "requester") {
-        await Notifications.query().insert({
-          to: assignee,
-          from: customId,
-          type_id: id,
-          type: "chats_customer_to_agent",
-          content: "Mengomentari tiket anda",
-          title: "Komentar",
-          role: "agent",
+        await TicketsCommentsCustomers.query().insert({
+          ticket_id: id,
+          user_id: customId,
+          comment: req.body.comment,
+          role,
         });
-      } else if (role === "assignee") {
-        await Notifications.query().insert({
-          to: requester,
-          from: customId,
-          type_id: id,
-          type: "chats_agent_to_customer",
-          content: "Mengomentari tiket anda",
-          title: "Komentar",
-          role: "requester",
-        });
-      }
 
-      res.json({ code: 200, message: "success" });
+        // add notifications here
+        if (role === "requester") {
+          await Notifications.query().insert({
+            to: assignee,
+            from: customId,
+            type_id: id,
+            type: "chats_customer_to_agent",
+            content: "Mengomentari tiket anda",
+            title: "Komentar",
+            role: "agent",
+          });
+        } else if (role === "assignee") {
+          await Notifications.query().insert({
+            to: requester,
+            from: customId,
+            type_id: id,
+            type: "chats_agent_to_customer",
+            content: "Mengomentari tiket anda",
+            title: "Komentar",
+            role: "requester",
+          });
+        }
+
+        res.json({ code: 200, message: "success" });
+      }
     } else {
-      res.status(404).json({ code: 404, message: "Ticket not found" });
+      res
+        .status(404)
+        .json({ code: 404, message: "Tiket sudah dihapus oleh user" });
     }
   } catch (error) {
     console.log(error);

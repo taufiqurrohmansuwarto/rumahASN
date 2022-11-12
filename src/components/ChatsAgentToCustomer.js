@@ -55,7 +55,9 @@ const CreateComments = ({ user, ticketId }) => {
         ]);
         message.success("Berhasil mengirim pesan");
       },
-      onError: () => message.error("Gagal mengirim pesan"),
+      onError: (error) => {
+        message.error(error?.response?.data?.message);
+      },
     }
   );
 
