@@ -103,7 +103,7 @@ export const notificationText = ({ type, role, type_id }) => {
   if (role === "requester") {
     currentRole = "/tickets";
   } else if (role === "admin") {
-    currentRole = "/admin/tickets";
+    currentRole = "/admin/tickets-managements";
   } else if (role === "agent") {
     currentRole = "/agent/tickets";
   }
