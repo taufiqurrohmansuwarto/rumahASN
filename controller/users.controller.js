@@ -11,7 +11,13 @@ module.exports.index = async (req, res) => {
 
     if (type === "normal") {
       const users = await User.query()
+
         .where("from", "=", "master")
+        .andWhere((builder) => {
+          builder
+            .where("current_role", "agent")
+            .orWhere("current_role", "admin");
+        })
         .andWhereNot("custom_id", req?.user?.customId)
         .where((builder) => {
           if (search) {

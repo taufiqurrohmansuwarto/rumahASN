@@ -50,7 +50,7 @@ function ActiveLayout({
         } else if (role === "agent") {
           router.push("/agent/tickets/semua");
         } else if (role === "admin") {
-          router.push("/admin/tickets/semua");
+          router.push("/admin/tickets-managements/semua");
         }
       }}
       loading={loading}
