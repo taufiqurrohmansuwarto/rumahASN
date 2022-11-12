@@ -1,4 +1,5 @@
-import { Stack } from "@mantine/core";
+import { Alert, Stack } from "@mantine/core";
+import { IconAlertCircle } from "@tabler/icons";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button, Form, Input, message, Modal, Result } from "antd";
 import { capitalize, lowerCase } from "lodash";
@@ -47,10 +48,21 @@ const SelesaiModal = ({ open, onCancel, data }) => {
     <Modal
       onOk={handleOk}
       title="Selesaikan Pekerjaan"
+      centered
+      width={800}
       confirmLoading={isLoadingPekerjaan}
       open={open}
       onCancel={onCancel}
     >
+      <Alert
+        color="yellow"
+        mb={10}
+        title="Perhatian"
+        icon={<IconAlertCircle size={16} />}
+      >
+        Jangan lupa bro! ubah properti tiketnya biar kedata lebih mudah. Terdata
+        sama dengan lu membantu semua problem terdefinisi supaya tepat sasaran.
+      </Alert>
       <Form form={form}>
         <Form.Item
           rules={[{ required: true, message: "Tidak boleh kosong" }]}

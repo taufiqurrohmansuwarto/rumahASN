@@ -3,8 +3,8 @@ const {
   addAgents,
   removeAgents,
   detail,
-} = require("../../../../controller/admin-ticket-agent.controller");
-const { default: auth } = require("../../../../middleware/auth.middleware");
+} = require("../../../../../controller/admin-ticket-agent.controller");
+const { default: auth } = require("../../../../../middleware/auth.middleware");
 
 const router = createRouter();
 // patch for add assigne

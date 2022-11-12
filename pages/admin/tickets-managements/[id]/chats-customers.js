@@ -3,6 +3,7 @@ import { useRouter } from "next/router";
 import { detailTicket } from "../../../../services/admin.services";
 import ActiveLayout from "../../../../src/components/ActiveLayout";
 import AdminLayout from "../../../../src/components/AdminLayout";
+import ChatAgentToCustomerAdmin from "../../../../src/components/ChatAgentToCustomerAdmin";
 
 const AdminsChatsCustomers = () => {
   const router = useRouter();
@@ -22,7 +23,7 @@ const AdminsChatsCustomers = () => {
       id={router?.query?.id}
       role="admin"
     >
-      <div>Rencana ini merupakan list chat antara agent dan customers</div>
+      <ChatAgentToCustomerAdmin id={id} />
     </ActiveLayout>
   );
 };

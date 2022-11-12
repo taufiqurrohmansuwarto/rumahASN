@@ -37,6 +37,10 @@ export const adminDashboard = async () => {
   return api.get(`/dashboard`).then((res) => res?.data);
 };
 
-export const excelReport = async (req, res) => {
+export const excelReport = async () => {
   return api.get(`/reports`).then((res) => res?.data);
+};
+
+export const commentsCustomersToAgents = async (id) => {
+  return api.get(`/tickets/${id}/comments-customers`).then((res) => res?.data);
 };

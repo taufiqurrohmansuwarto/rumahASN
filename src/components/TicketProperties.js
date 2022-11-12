@@ -38,7 +38,9 @@ const FormProperty = ({ open, onCancel, data, priorities, subCategories }) => {
       open={open}
       confirmLoading={isLoading}
       onCancel={onCancel}
-      title="Update Tiket Properti"
+      centered
+      width={700}
+      title="Update Properti Tiket"
     >
       <Form name="test" initialValues={data} layout="vertical" form={form}>
         <Form.Item
