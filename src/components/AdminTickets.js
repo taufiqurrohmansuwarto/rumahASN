@@ -93,6 +93,9 @@ const AdminTickets = ({ status = "all" }) => {
         loading={isLoading}
         rowKey={(row) => row?.id}
         pagination={{
+          total: data?.total,
+          showTotal: (total, range) =>
+            `${range[0]}-${range[1]} dari ${total} tiket`,
           current: query.page,
           pageSize: query.limit,
           onChange: (page, limit) => {
