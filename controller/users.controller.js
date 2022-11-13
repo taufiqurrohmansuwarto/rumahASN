@@ -8,11 +8,11 @@ module.exports.index = async (req, res) => {
     const type = req?.query?.type || "normal";
 
     // ini hanya pns yang dapat berubah menjadi admin
-
     if (type === "normal") {
       const users = await User.query()
-
-        .where("from", "=", "master")
+        .where((builder) => {
+          builder.where("from", "master").orWhere("from", "pttpk");
+        })
         .andWhere((builder) => {
           builder
             .where("current_role", "agent")

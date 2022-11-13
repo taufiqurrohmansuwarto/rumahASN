@@ -33,7 +33,6 @@ export const uploadFileMinio = (mc, fileBuffer, filename, size, mimetype) => {
 };
 
 // calculate time difference between two dates
-
 export const timeDifference = (date1, date2) => {
   const diff = moment(date1).diff(moment(date2));
   const duration = moment.duration(diff);

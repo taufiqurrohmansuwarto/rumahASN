@@ -1,5 +1,6 @@
 const Tickets = require("../models/tickets.model");
 const Notifications = require("../models/notifications.model");
+const { sendMail } = require("./mailer.controller");
 
 const index = async (req, res) => {
   try {
@@ -94,7 +95,10 @@ const kerjakanTicket = async (req, res) => {
     const result = await Tickets.query()
       .where("id", id)
       .andWhere("assignee", customId)
-      .first();
+      .first()
+      .withGraphFetched(
+        "[customer(simpleSelect), admin(simpleSelect), agent(simpleSelect)]"
+      );
 
     const assignee = result?.assignee;
     const chooser = result?.chooser;
@@ -123,6 +127,8 @@ const kerjakanTicket = async (req, res) => {
     ];
 
     await Notifications.query().insert(dataInsert);
+    const message = `Halo, ${result?.customer?.username}! Ticket dengan nomor ${result?.ticket_number} telah dikerjakan oleh ${result?.agent?.username}.`;
+    await sendMail(result?.requester, message, "Perubahan status ticket");
     res.status(200).json({ code: 200, message: "success", data });
   } catch (error) {
     console.log(error);
