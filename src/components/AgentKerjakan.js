@@ -33,7 +33,9 @@ function AgentKerjakan({ data }) {
           title="Yakin ingin mengerjakan?"
           onConfirm={handleKerjakan}
         >
-          <Button type="primary">Kerjakan</Button>
+          <Button type="primary" loading={isLoading}>
+            Kerjakan
+          </Button>
         </Popconfirm>,
       ]}
     >

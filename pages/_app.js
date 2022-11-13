@@ -54,8 +54,8 @@ function MyApp({ Component, pageProps: { session, ...pageProps } }) {
       basePath="/helpdesk/api/auth"
     >
       <QueryClientProvider client={queryClient}>
-        <ConfigProvider locale={id}>
-          <MantineProvider withGlobalStyles withNormalizeCSS>
+        <MantineProvider withGlobalStyles withNormalizeCSS>
+          <ConfigProvider locale={id}>
             <Hydrate>
               {Component.Auth ? (
                 <Auth
@@ -68,8 +68,8 @@ function MyApp({ Component, pageProps: { session, ...pageProps } }) {
                 <Component {...pageProps} />
               )}
             </Hydrate>
-          </MantineProvider>
-        </ConfigProvider>
+          </ConfigProvider>
+        </MantineProvider>
       </QueryClientProvider>
     </SessionProvider>
   );

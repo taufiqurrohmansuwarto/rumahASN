@@ -127,7 +127,7 @@ const kerjakanTicket = async (req, res) => {
     ];
 
     await Notifications.query().insert(dataInsert);
-    const message = `Halo, ${result?.customer?.username}! Ticket dengan nomor ${result?.ticket_number} telah dikerjakan oleh ${result?.agent?.username}.`;
+    const message = `Halo, ${result?.customer?.username}! Ticket dengan nomor ${result?.ticket_number} telah dikerjakan oleh ${result?.agent?.username}. Segera check di aplikasi siasn.bkd.jatimprov.go.id/helpdesk kami ya...`;
     await sendMail(result?.requester, message, "Perubahan status ticket");
     res.status(200).json({ code: 200, message: "success", data });
   } catch (error) {
