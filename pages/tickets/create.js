@@ -66,11 +66,13 @@ const CreateTicket = () => {
               mb={8}
             >
               <Text>
-                Buatlah deskripsi dengan baik dan jelas serta gunakan tata
+                Jika Anda pegawai Pemerintah Provinsi Jawa Timur, gunakan akun
+                E-Master dan PTTPK untuk mempermudah kami dalam menangani tiket
+                Anda. Buatlah deskripsi dengan baik dan jelas serta gunakan tata
                 bahasa yang baik, agar kami dapat membantu anda dengan cepat.
-                Gunakan gambar atau link file sebagai bukti error di bagian
-                deskripsi jika ada untuk mempermudah kami dalam menyelesaikan
-                masalah anda. Terima Kasih.
+                Gunakan gambar atau link file sebagai bukti di bagian deskripsi
+                jika ada untuk mempermudah kami dalam menyelesaikan masalah
+                anda. Terima Kasih.
               </Text>
             </Alert>
             <Form onFinish={handleFinish} form={form} layout="vertical">

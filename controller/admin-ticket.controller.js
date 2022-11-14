@@ -21,7 +21,7 @@ const index = async (req, res) => {
             .orWhere("ticket_number", "ilike", `%${search}%`);
         }
       })
-      .withGraphFetched("[customer(simpleSelect)]")
+      .withGraphFetched("[customer(simpleSelect), agent(simpleSelect)]")
       .page(page - 1, limit)
       .orderBy("updated_at", "desc");
 

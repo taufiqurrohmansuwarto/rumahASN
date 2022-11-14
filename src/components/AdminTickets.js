@@ -45,6 +45,23 @@ const columns = [
     },
   },
   {
+    title: "Agent",
+    key: "agent",
+    render: (_, record) => {
+      return (
+        <>
+          {record?.agent ? (
+            <Tooltip title={record?.agent?.username}>
+              <Avatar shape="square" src={record?.agent?.image} />
+            </Tooltip>
+          ) : (
+            <div>belum ada agent</div>
+          )}
+        </>
+      );
+    },
+  },
+  {
     title: "Aksi",
     key: "aksi",
     render: (_, row) => {

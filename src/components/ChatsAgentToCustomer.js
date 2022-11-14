@@ -1,3 +1,4 @@
+import { Stack } from "@mantine/core";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Button,
@@ -20,6 +21,8 @@ import {
   updateMessagesCustomers,
 } from "../../services/agents.services";
 import { fromNow, resizeImageTag } from "../../utils";
+import { DetailTicket } from "./DetailTicket";
+import DetailTiketChat from "./DetailTickets/DetailTiketChat";
 import RichTextEditor from "./RichTextEditor";
 
 const CreateComments = ({ user, ticketId }) => {
@@ -272,21 +275,24 @@ function ChatsAgentToCustomer({ id, detailticket }) {
 
   return (
     <Skeleton loading={isLoading || status === "loading"}>
-      <Card title="Chat">
-        {detailticket?.status_code !== "SELESAI" && (
-          <CreateComments
+      <Stack>
+        <DetailTiketChat data={detailticket} />
+        <Card title="Chat">
+          {detailticket?.status_code !== "SELESAI" && (
+            <CreateComments
+              status={detailticket?.status_code}
+              ticketId={id}
+              user={userData?.user}
+            />
+          )}
+          <CommentsList
+            data={data}
             status={detailticket?.status_code}
+            currentUserId={userData?.user?.id}
             ticketId={id}
-            user={userData?.user}
           />
-        )}
-        <CommentsList
-          data={data}
-          status={detailticket?.status_code}
-          currentUserId={userData?.user?.id}
-          ticketId={id}
-        />
-      </Card>
+        </Card>
+      </Stack>
     </Skeleton>
   );
 }
