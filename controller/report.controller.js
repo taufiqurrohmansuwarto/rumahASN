@@ -18,6 +18,8 @@ const excelReport = async (req, res) => {
         deskripsi: convert(r?.content, {
           wordwrap: 130,
         }),
+        berasal_dari: checkUndefined(r?.customer?.group),
+        employee_number: checkUndefined(r?.customer?.employee_number),
         pembuat: r?.customer?.username,
         tgl_dibuat: formatDate(r?.created_at),
         admin: checkUndefined(r?.admin?.username),

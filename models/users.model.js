@@ -15,7 +15,14 @@ class User extends Model {
   static get modifiers() {
     return {
       simpleSelect(query) {
-        query.select("custom_id", "username", "image", "is_online");
+        query.select(
+          "custom_id",
+          "username",
+          "image",
+          "is_online",
+          "group",
+          "employee_number"
+        );
       },
     };
   }
