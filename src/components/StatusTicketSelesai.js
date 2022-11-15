@@ -1,6 +1,8 @@
-import { Paper } from "@mantine/core";
+import { Paper, Stack } from "@mantine/core";
 import { Avatar, Button, Rate, Result, Space } from "antd";
 import ButtonFeedback from "./ButtonFeedback";
+import CustomerAdminAgent from "./CustomerAdminAgent";
+import { DetailTicket } from "./DetailTicket";
 import TimelinePekerjaan from "./TimelinePekerjaan";
 
 const Feedback = ({ data }) => {
@@ -27,7 +29,11 @@ function StatusTicketSelesai({ data }) {
       subTitle={<Subtitle data={data} />}
       extra={[<Feedback data={data} key="feedback" />]}
     >
-      <TimelinePekerjaan data={data} />
+      <Stack>
+        <DetailTicket data={data} />
+        <TimelinePekerjaan data={data} />
+        <CustomerAdminAgent data={data} />
+      </Stack>
     </Result>
   );
 }
