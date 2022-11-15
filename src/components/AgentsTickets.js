@@ -88,6 +88,7 @@ const AgentsTickets = ({ status = "SEMUA", title = "SEMUA" }) => {
                 onChange={(e) => {
                   setQuery({
                     ...query,
+                    page: 1,
                     search: e.target.value,
                   });
                 }}
@@ -105,9 +106,12 @@ const AgentsTickets = ({ status = "SEMUA", title = "SEMUA" }) => {
             current: query.page,
             showTotal: (total, range) =>
               `${range[0]}-${range[1]} of ${total} items`,
-            onChange: (page) => {
-              // pagination
-              console.log(page);
+            onChange: (page, limit) => {
+              setQuery({
+                ...query,
+                page,
+                limit,
+              });
             },
           }}
         />

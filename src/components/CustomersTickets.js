@@ -27,6 +27,7 @@ const CustomersTickets = ({ status = "all" }) => {
   const handleSearch = (e) => {
     setQuery({
       ...query,
+      page: 1,
       search: e.target.value,
     });
   };
@@ -110,7 +111,11 @@ const CustomersTickets = ({ status = "all" }) => {
             showTotal: (total, range) =>
               `${range[0]}-${range[1]} dari ${total} tiket`,
             onChange: (page, limit) => {
-              console.log(page, limit);
+              setQuery({
+                ...query,
+                page,
+                limit,
+              });
             },
           }}
           columns={columns}

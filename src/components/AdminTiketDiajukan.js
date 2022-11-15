@@ -1,5 +1,16 @@
 import { useQuery } from "@tanstack/react-query";
-import { Tag, Avatar, Card, Divider, Input, Space, Table, Tooltip } from "antd";
+import {
+  Tag,
+  Avatar,
+  Card,
+  Divider,
+  Input,
+  Space,
+  Table,
+  Tooltip,
+  Button,
+  Modal,
+} from "antd";
 import Link from "next/link";
 import { useState } from "react";
 import { getAllTickets } from "../../services/admin.services";
@@ -71,18 +82,36 @@ const columns = [
             <a>Detail</a>
           </Link>
           <Divider />
+          <a>Sub Kategori</a>
         </Space>
       );
     },
   },
 ];
 
-const AdminTickets = ({ status = "all" }) => {
+const ModalPickAgent = ({ open, onCancel, selected }) => {
+  return (
+    <Modal open={open} onCancel={onCancel} title="Modal Pick Agent">
+      <div>{JSON.stringify(selected)}</div>
+    </Modal>
+  );
+};
+
+const AdminTIketDiajukan = () => {
   const [query, setQuery] = useState({
     page: 1,
     limit: 50,
-    status: status,
+    status: "DIAJUKAN",
   });
+
+  const [selected, setSelected] = useState([]);
+  const [open, setOpen] = useState(false);
+
+  const onCancel = () => setOpen(false);
+
+  const onSelectChange = (newSelectedKeys) => {
+    setSelected(newSelectedKeys);
+  };
 
   const { data, isLoading } = useQuery(
     ["tickets-admins", query],
@@ -95,17 +124,30 @@ const AdminTickets = ({ status = "all" }) => {
   const handleSearch = (e) => {
     setQuery({
       ...query,
-      page: 1,
       search: e.target.value,
     });
   };
 
   return (
     <Card title="Daftar Tiket Admin">
+      <ModalPickAgent open={open} onCancel={onCancel} selected={selected} />
       <Table
         title={() => (
-          <Input.Search style={{ width: 300 }} onChange={handleSearch} />
+          <div style={{ marginBottom: 10 }}>
+            <Space>
+              <Input.Search style={{ width: 300 }} onChange={handleSearch} />
+              {selected.length > 0 && (
+                <Button type="primary" onClick={() => setOpen(true)}>
+                  {selected.length} Tiket dipilih untuk set agent
+                </Button>
+              )}
+            </Space>
+          </div>
         )}
+        rowSelection={{
+          selectedRowKeys: selected,
+          onChange: onSelectChange,
+        }}
         size="small"
         dataSource={data?.results}
         loading={isLoading}
@@ -130,4 +172,4 @@ const AdminTickets = ({ status = "all" }) => {
   );
 };
 
-export default AdminTickets;
+export default AdminTIketDiajukan;
