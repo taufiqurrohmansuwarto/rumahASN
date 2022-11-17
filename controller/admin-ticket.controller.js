@@ -21,7 +21,9 @@ const index = async (req, res) => {
             .orWhere("ticket_number", "ilike", `%${search}%`);
         }
       })
-      .withGraphFetched("[customer(simpleSelect), agent(simpleSelect)]")
+      .withGraphFetched(
+        "[customer(simpleSelect), agent(simpleSelect), sub_category.[category], priorities]"
+      )
       .page(page - 1, limit)
       .orderBy("updated_at", "desc");
 
@@ -46,7 +48,29 @@ const detail = async (req, res) => {
   }
 };
 
+const update = async (req, res) => {
+  try {
+    const body = req?.body;
+    const { id } = req?.query;
+
+    await Tickets.query()
+      .patch({ ...body })
+      .where("id", id);
+
+    console.log(body);
+    const hasil = await Tickets.query().findById(id);
+    res.json({
+      code: 200,
+      message: "success",
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(400).json({ code: 400, message: "Internal Server Error" });
+  }
+};
+
 module.exports = {
   index,
   detail,
+  update,
 };

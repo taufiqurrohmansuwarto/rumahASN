@@ -5,6 +5,12 @@ const api = axios.create({
   baseURL: "/helpdesk/api/admins",
 });
 
+export const updateKategories = async ({ id, data }) => {
+  return await api
+    .patch(`/tickets/${id}/properties`, data)
+    .then((res) => res?.data);
+};
+
 export const getAllTickets = async (query) => {
   return api
     .get(
