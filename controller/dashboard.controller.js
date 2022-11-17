@@ -4,6 +4,18 @@ const knex = Status.knex();
 const { raw } = require("objection");
 const moment = require("moment");
 
+const aggregateBySubCategories = async () => {
+  const result = await knex.raw(
+    `select sc.name, count(tickets.sub_category_id)
+from tickets
+         left join sub_categories sc on sc.id = tickets.sub_category_id
+group by 1
+order by 2 desc`
+  );
+
+  return result?.rows;
+};
+
 const queryLast7Days = async () => {
   const result = await knex.raw(
     `select d.date, count(tickets.id)
@@ -117,6 +129,10 @@ from (select status_code, count(status_code)
       }
 
       // query for last 7 days
+    } else if (type === "aggregateSubCategories") {
+      const result = await aggregateBySubCategories();
+
+      res.json(result);
     }
   } catch (error) {
     console.log(error);

@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useSession } from "next-auth/react";
 import { adminDashboard } from "../../services/admin.services";
 import AdminLayout from "../../src/components/AdminLayout";
+import AggregateSubCategories from "../../src/components/Dashboards/AggregateSubCategories";
 import PlotAdminTickets from "../../src/components/Dashboards/PlotAdminTickets";
 import PageContainer from "../../src/components/PageContainer";
 import { StatsGrid } from "../../src/components/StatsGrid";
@@ -31,6 +32,7 @@ const Dashboard = () => {
         </Alert>
         <StatsGrid data={data} />
         <PlotAdminTickets />
+        <AggregateSubCategories />
       </Stack>
     </PageContainer>
   );

@@ -58,7 +58,6 @@ const update = async (req, res) => {
       .where("id", id);
 
     console.log(body);
-    const hasil = await Tickets.query().findById(id);
     res.json({
       code: 200,
       message: "success",
