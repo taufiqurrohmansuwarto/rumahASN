@@ -2,6 +2,23 @@ const Status = require("../models/status.model");
 const Tickets = require("../models/tickets.model");
 const knex = Status.knex();
 const { raw } = require("objection");
+const moment = require("moment");
+
+const queryLast7Days = async () => {
+  const result = await knex.raw(
+    `select d.date, count(tickets.id)
+from (select date::date
+      from generate_series(
+                       date_trunc('day', now()) - interval '7 days',
+                       date_trunc('day', now()),
+                       '1 day'
+               ) as date) d
+         left outer join tickets on d.date = tickets.created_at::date
+group by d.date order by d.date`
+  );
+
+  return result?.rows;
+};
 
 const requesterCount = async (userId) => {
   const result = await knex.raw(
@@ -71,18 +88,36 @@ from (select status_code, count(status_code)
 };
 
 const adminDashboard = async (req, res) => {
+  const type = req?.query?.type || "standard";
+
   try {
-    const result = await knex.raw(
-      `
+    if (type === "standard") {
+      const result = await knex.raw(
+        `
       select status.name, coalesce(t.count, 0) as count
 from (select status_code, count(status_code)
       from tickets
       group by 1) as t
          right join status on t.status_code = status.name
       `
-    );
+      );
 
-    res.json(result?.rows);
+      res.json(result?.rows);
+    } else if (type === "last7Days") {
+      const result = await queryLast7Days();
+
+      if (result?.length) {
+        const hasil = result?.map((item) => ({
+          date: moment(item?.date).format("DD-MM-YYYY"),
+          count: parseInt(item?.count, 10),
+        }));
+        res.json(hasil);
+      } else {
+        res.json(result);
+      }
+
+      // query for last 7 days
+    }
   } catch (error) {
     console.log(error);
     res.status(400).json({ code: 400, message: "Internal Server Error" });
