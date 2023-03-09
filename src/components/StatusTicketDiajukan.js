@@ -1,6 +1,16 @@
 import { Paper, Stack, Text, Title } from "@mantine/core";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Button, Form, Input, message, Modal, Popconfirm, Result } from "antd";
+import {
+  Button,
+  Col,
+  Form,
+  Input,
+  message,
+  Modal,
+  Popconfirm,
+  Result,
+  Row,
+} from "antd";
 import { useRouter } from "next/router";
 import { useCallback, useState } from "react";
 import { uploadImage } from "../../services";
@@ -128,35 +138,41 @@ function StatusTicketDiajukan({ data }) {
   };
 
   return (
-    <Result
-      title="Tiket sedang dicarikan agent"
-      subTitle="Status tiketmu masih dicarikan agent ya... Mohon bersabar"
-      extra={[
-        <Button key="rubah" type="primary" onClick={handleOpen}>
-          Update
-        </Button>,
-        <Popconfirm
-          title="Apakah kamu yakin ingin menghapus tiketmu?"
-          key="hapus"
-          onConfirm={handleHapus}
-        >
-          <Button loading={loadingHapus}>Hapus</Button>
-        </Popconfirm>,
-      ]}
-    >
-      <Stack>
-        <CustomerAdminAgent data={data} />
-        <DetailTicket data={data} />
+    <Row gutter={[16, 32]}>
+      <Col span={18}>
+        <Stack>
+          {/* <CustomerAdminAgent data={data} /> */}
+          <DetailTicket data={data} />
+        </Stack>
+
+        {/* <Result
+          title="Tiket sedang dicarikan agent"
+          subTitle="Status tiketmu masih dicarikan agent ya... Mohon menunggu"
+          extra={[
+            <Button key="rubah" type="primary" onClick={handleOpen}>
+              Update
+            </Button>,
+            <Popconfirm
+              title="Apakah kamu yakin ingin menghapus tiketmu?"
+              key="hapus"
+              onConfirm={handleHapus}
+            >
+              <Button loading={loadingHapus}>Hapus</Button>
+            </Popconfirm>,
+          ]}
+        ></Result> */}
+        <ModalUpdate
+          data={data}
+          update={update}
+          loadingUpdate={loadingUpdate}
+          visible={visible}
+          onCancel={handleCancel}
+        />
+      </Col>
+      <Col span={6}>
         <TimelinePekerjaan data={data} />
-      </Stack>
-      <ModalUpdate
-        data={data}
-        update={update}
-        loadingUpdate={loadingUpdate}
-        visible={visible}
-        onCancel={handleCancel}
-      />
-    </Result>
+      </Col>
+    </Row>
   );
 }
 

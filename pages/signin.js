@@ -4,6 +4,7 @@ import { Button, Col, Divider, Row, Space, Typography } from "antd";
 import { getProviders, signIn } from "next-auth/react";
 import Head from "next/head";
 import Image from "next/image";
+import GoogleButton from "react-google-button";
 
 const SignIn = ({ providers }) => {
   return (
@@ -18,22 +19,23 @@ const SignIn = ({ providers }) => {
             Great customer service starts with providing the right help, to the
             right person, at the right time.
           </Blockquote>
-          <Space>
+          <GoogleButton
+            label="Masuk dengan Google"
+            onClick={() => signIn("google")}
+          />
+          <Divider plain>atau punya akun Pegawai Provinsi Jawa Timur?</Divider>
+          <Space wrap>
             {Object?.values(providers).map((provider) => (
-              <div key={provider.name}>
-                <Button
-                  icon={
-                    provider?.id === "google" ? (
-                      <GoogleOutlined />
-                    ) : (
-                      <LoginOutlined />
-                    )
-                  }
-                  type="primary"
-                  onClick={() => signIn(provider.id)}
-                >
-                  Masuk dengan {provider.name}
-                </Button>
+              <div key={provider.id}>
+                {provider?.id !== "google" && (
+                  <Button
+                    icon={<LoginOutlined />}
+                    type="primary"
+                    onClick={() => signIn(provider.id)}
+                  >
+                    Masuk dengan akun {provider.name}
+                  </Button>
+                )}
               </div>
             ))}
           </Space>
@@ -59,7 +61,9 @@ const SignIn = ({ providers }) => {
             </Space>
           </div>
           <Space direction="vertical" size="small">
-            <span>&#169; 2023 BKD Provinsi Jawa Timur</span>
+            <Typography.Text type="secondary">
+              &#169; 2023 BKD Provinsi Jawa Timur
+            </Typography.Text>
           </Space>
         </Col>
         <Col span={6}>

@@ -67,7 +67,7 @@ const CreateTicket = () => {
             >
               <Text>
                 Jika Anda pegawai Pemerintah Provinsi Jawa Timur, gunakan akun
-                E-Master dan PTTPK untuk mempermudah kami dalam menangani tiket
+                SIMASTER dan PTTPK untuk mempermudah kami dalam menangani tiket
                 Anda. Buatlah deskripsi dengan baik dan jelas serta gunakan tata
                 bahasa yang baik, agar kami dapat membantu anda dengan cepat.
                 Gunakan gambar atau link file sebagai bukti di bagian deskripsi

@@ -10,3 +10,5 @@ untuk dashboard agent
 1. tambahkan pertanyaan dan deskripsi pada chats 
 2. tammbahkan siapa yang mengerjakan pada table admin
 3. tambahkan selection pada table
+
+1. tambahkan halaman berita penting

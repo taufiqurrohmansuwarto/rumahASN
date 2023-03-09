@@ -4,7 +4,7 @@ import { formatDate, setActivePekerjaan } from "../../utils";
 
 function TimelinePekerjaan({ data }) {
   return (
-    <Paper radius="md" shadow="lg" p="lg">
+    <Paper radius="md" p="lg">
       <Stack>
         <Text weight={800}>Nomer : {data?.ticket_number}</Text>
         <Timeline
