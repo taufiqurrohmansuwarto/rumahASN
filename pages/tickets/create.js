@@ -58,7 +58,7 @@ const CreateTicket = () => {
     >
       <Grid justify="center">
         <Grid.Col span={8}>
-          <Card title="Buat Ticket">
+          <Card title="Buat Tiket">
             <Alert
               icon={<IconAlertCircle />}
               color="yellow"
@@ -71,7 +71,7 @@ const CreateTicket = () => {
                 Anda. Buatlah deskripsi dengan baik dan jelas serta gunakan tata
                 bahasa yang baik, agar kami dapat membantu anda dengan cepat.
                 Gunakan gambar atau link file sebagai bukti di bagian deskripsi
-                jika ada untuk mempermudah kami dalam menyelesaikan masalah
+                jika ada, untuk mempermudah kami dalam menyelesaikan masalah
                 anda. Terima Kasih.
               </Text>
             </Alert>

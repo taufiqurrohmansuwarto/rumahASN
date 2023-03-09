@@ -42,7 +42,7 @@ module.exports = withAntdLess({
   publicRuntimeConfig: {
     basePath: getBasePath(),
   },
-  modifyVars: { "@primary-color": "#04f" }, // optional
+  modifyVars: { "@primary-color": "#52c41a" }, // optional
   lessVarsFilePath: "./src/styles/variables.less", // optional
   lessVarsFilePathAppendToEndOfContent: false, // optional
   // optional https://github.com/webpack-contrib/css-loader#object

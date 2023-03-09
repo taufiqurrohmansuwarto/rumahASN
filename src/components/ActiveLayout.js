@@ -11,13 +11,13 @@ function ActiveLayout({
   loading = false,
 }) {
   const customerTabs = [
-    { key: "detail", tab: "Detail Ticket", icon: <DotChartOutlined /> },
-    { key: "chats-to-agents", tab: "Chat to Agent" },
+    { key: "detail", tab: "Detail Tiket", icon: <DotChartOutlined /> },
+    { key: "chats-to-agents", tab: "Kirim Pesan ke Agent" },
   ];
 
   const agentTabs = [
     { key: "detail", tab: "Detil Tiket", icon: <DotChartOutlined /> },
-    { key: "chats-customers", tab: "Chat ke user" },
+    { key: "chats-customers", tab: "Chat ke penanya" },
     { key: "chats-agents", tab: "Chat ke Agent" },
   ];
 

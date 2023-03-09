@@ -21,6 +21,7 @@ const CustomersTickets = ({ status = "all" }) => {
     () => getAllTickets(query),
     {
       enabled: !!query,
+      keepPreviousData: true,
     }
   );
 
@@ -87,7 +88,7 @@ const CustomersTickets = ({ status = "all" }) => {
 
   return (
     <PageContainer title="Tiket" subTitle="Daftar Tiket">
-      <Card title="Customer Ticket">
+      <Card title="Tiket Pengguna">
         <Tooltip title="Buat tiket baru">
           <Button
             icon={<PlusOutlined />}
@@ -106,6 +107,7 @@ const CustomersTickets = ({ status = "all" }) => {
           )}
           pagination={{
             total: data?.total,
+            position: ["bottomRight", "topRight"],
             defaultCurrent: query?.page,
             defaultPageSize: 50,
             showTotal: (total, range) =>

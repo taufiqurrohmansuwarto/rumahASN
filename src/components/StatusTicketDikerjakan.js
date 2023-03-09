@@ -1,5 +1,4 @@
-import { Alert as AlertMantineCore, Stack, Text, Title } from "@mantine/core";
-import { IconAlertOctagon } from "@tabler/icons";
+import { Stack } from "@mantine/core";
 import { Button, Result } from "antd";
 import { useRouter } from "next/router";
 import CustomerAdminAgent from "./CustomerAdminAgent";
@@ -14,7 +13,7 @@ function StatusTicketDikerjakan({ data }) {
   return (
     <Result
       title="Tiket mu sudah dicarikan agent"
-      subTitle="ini agentnya kamu bisa langsung chat dengan agent ya apabila ada pertanyaan..."
+      subTitle="Agentnya bisa langsung chat kamu di sini..."
       extra={
         <Button key="chat" onClick={gotoChat}>
           Langsung Chat

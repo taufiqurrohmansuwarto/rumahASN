@@ -1,82 +1,88 @@
-import { GoogleOutlined } from "@ant-design/icons";
-import { Button, Space } from "antd";
+import { GoogleOutlined, LoginOutlined } from "@ant-design/icons";
+import { Blockquote } from "@mantine/core";
+import { Button, Col, Divider, Row, Space, Typography } from "antd";
 import { getProviders, signIn } from "next-auth/react";
-import LoginFormPage from "../src/components/LoginForm";
+import Head from "next/head";
+import Image from "next/image";
 
-export default function SignIn({ providers }) {
+const SignIn = ({ providers }) => {
   return (
-    <div
-      style={{
-        backgroundColor: "white",
-        height: "100vh",
-      }}
-    >
-      <LoginFormPage
-        backgroundImageUrl="https://siasn.bkd.jatimprov.go.id:9000/public/doodle-new.png"
-        logo="https://siasn.bkd.jatimprov.go.id:9000/public/logobkd.jpg"
-        title="Helpdesk BKD Jatim"
-        subTitle="MySAPK - SIASN - SIMASTER"
-        activityConfig={{
-          style: {
-            boxShadow: "0px 0px 8px rgba(0, 0, 0, 0.2)",
-            color: "#fff",
-            borderRadius: 8,
-            backgroundColor: "#1677FF",
-          },
-          title: "Badan Kepegawaian Daerah",
-          subTitle: "Provinsi Jawa Timur",
-
-          action: (
-            <Button
-              size="large"
-              style={{
-                borderRadius: 20,
-                background: "#fff",
-                color: "#1677FF",
-                width: 120,
-              }}
-            >
-              Website
-            </Button>
-          ),
-        }}
-        actions={
+    <>
+      <Head>
+        <title>BKD Helpdesk</title>
+      </Head>
+      <Row style={{ minHeight: "100vh" }} align="middle" justify="center">
+        <Col span={8}>
+          <Typography.Title>BKD Helpdesk</Typography.Title>
+          <Blockquote cite="- Scoot Bellsky">
+            Great customer service starts with providing the right help, to the
+            right person, at the right time.
+          </Blockquote>
+          <Space>
+            {Object?.values(providers).map((provider) => (
+              <div key={provider.name}>
+                <Button
+                  icon={
+                    provider?.id === "google" ? (
+                      <GoogleOutlined />
+                    ) : (
+                      <LoginOutlined />
+                    )
+                  }
+                  type="primary"
+                  onClick={() => signIn(provider.id)}
+                >
+                  Masuk dengan {provider.name}
+                </Button>
+              </div>
+            ))}
+          </Space>
+          <Divider />
           <div
             style={{
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-              flexDirection: "column",
+              marginBottom: 10,
             }}
           >
-            <Space direction="vertical" align="center">
-              {Object.values(providers).map((provider) => (
-                <div key={provider.name}>
-                  <Button
-                    type="primary"
-                    icon={provider?.id === "google" ? <GoogleOutlined /> : null}
-                    onClick={() => signIn(provider.id)}
-                  >
-                    Masuk menggunakan {provider.name}
-                  </Button>
-                </div>
-              ))}
+            <Space size="small">
+              <Image
+                alt="pemprov"
+                src="https://siasn.bkd.jatimprov.go.id:9000/public/pemprov.png"
+                width={15}
+                height={20}
+              />
+              <Image
+                alt="logobkd"
+                src="https://siasn.bkd.jatimprov.go.id:9000/public/logobkd.jpg"
+                width={30}
+                height={40}
+              />
             </Space>
           </div>
-        }
-        submitter={{
-          render: () => null,
-        }}
-      ></LoginFormPage>
-    </div>
+          <Space direction="vertical" size="small">
+            <span>&#169; 2023 BKD Provinsi Jawa Timur</span>
+          </Space>
+        </Col>
+        <Col span={6}>
+          <Image
+            alt="Mountains"
+            src="https://siasn.bkd.jatimprov.go.id:9000/public/desktop.png"
+            width={550}
+            height={400}
+          />
+        </Col>
+      </Row>
+    </>
   );
-}
+};
 
 export async function getServerSideProps() {
   const providers = await getProviders();
+
   return {
     props: {
       providers,
     },
   };
 }
+
+export default SignIn;
