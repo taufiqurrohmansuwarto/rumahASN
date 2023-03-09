@@ -32,6 +32,22 @@ group by d.date order by d.date`
   return result?.rows;
 };
 
+const queryLastMonth = async () => {
+  const result = await knex.raw(
+    `select d.date, count(tickets.id)
+from (select date::date
+      from generate_series(
+                       date_trunc('day', now()) - interval '30 days',
+                       date_trunc('day', now()),
+                       '1 day'
+               ) as date) d
+         left outer join tickets on d.date = tickets.created_at::date
+group by d.date order by d.date`
+  );
+
+  return result?.rows;
+};
+
 const requesterCount = async (userId) => {
   const result = await knex.raw(
     `
@@ -124,6 +140,16 @@ from (select status_code, count(status_code)
           count: parseInt(item?.count, 10),
         }));
         res.json(hasil);
+      } else if (type === "lastMonth") {
+        const result = await queryLastMonth();
+
+        if (result?.length) {
+          const hasil = result?.map((item) => ({
+            date: moment(item?.date).format("DD-MM-YYYY"),
+            count: parseInt(item?.count, 10),
+          }));
+          res.json(hasil);
+        }
       } else {
         res.json(result);
       }

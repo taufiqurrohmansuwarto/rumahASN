@@ -6,7 +6,7 @@ const index = async (req, res) => {
   try {
     const status = req?.query?.status || "all";
     const page = req?.query?.page || 1;
-    const limit = req?.query?.limit || 50;
+    const limit = req?.query?.limit || 25;
 
     const search = req?.query?.search || "";
 

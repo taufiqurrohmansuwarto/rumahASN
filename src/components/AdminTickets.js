@@ -107,6 +107,7 @@ const AdminTickets = ({ status = "all" }) => {
     () => subCategories(),
     {
       refetchOnWindowFocus: false,
+      keepPreviousData: true,
     }
   );
 
@@ -231,6 +232,7 @@ const AdminTickets = ({ status = "all" }) => {
     () => getAllTickets(query),
     {
       enabled: !!query,
+      keepPreviousData: true,
     }
   );
 
@@ -253,6 +255,7 @@ const AdminTickets = ({ status = "all" }) => {
         loading={isLoading}
         rowKey={(row) => row?.id}
         pagination={{
+          position: ["bottomRight", "topRight"],
           total: data?.total,
           showTotal: (total, range) =>
             `${range[0]}-${range[1]} dari ${total} tiket`,

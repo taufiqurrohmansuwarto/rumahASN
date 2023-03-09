@@ -65,9 +65,9 @@ const SignIn = ({ providers }) => {
         <Col span={6}>
           <Image
             alt="Mountains"
-            src="https://siasn.bkd.jatimprov.go.id:9000/public/desktop.png"
+            src="https://siasn.bkd.jatimprov.go.id:9000/public/helpdesk-title.png"
             width={550}
-            height={400}
+            height={600}
           />
         </Col>
       </Row>
