@@ -26,6 +26,24 @@ const upload = async (req, res) => {
   }
 };
 
+const uploadsMultipleFiles = async (req, res) => {
+  const { buffer, originalname, size, mimetype } = req?.file;
+  const id = crypto.randomBytes(20).toString("hex");
+  const currentFilename = `${id}_${originalname}`;
+
+  console.log(currentFilename);
+
+  try {
+    await uploadFileMinio(req.mc, buffer, currentFilename, size, mimetype);
+    const result = `${URL_FILE}/${currentFilename}`;
+    res.json(result);
+  } catch (error) {
+    console.log(error);
+    res.status(400).json({ code: 400, message: "Internal Server Error" });
+  }
+};
+
 module.exports = {
   upload,
+  uploadsMultipleFiles,
 };

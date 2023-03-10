@@ -1,4 +1,5 @@
 import { MantineProvider } from "@mantine/core";
+import { ThemeProvider } from "@primer/react";
 import {
   Hydrate,
   QueryClient,
@@ -55,20 +56,22 @@ function MyApp({ Component, pageProps: { session, ...pageProps } }) {
     >
       <QueryClientProvider client={queryClient}>
         <MantineProvider withGlobalStyles withNormalizeCSS>
-          <ConfigProvider locale={id}>
-            <Hydrate>
-              {Component.Auth ? (
-                <Auth
-                  subject={Component?.Auth?.subject}
-                  action={Component?.Auth?.action}
-                >
-                  {getLayout(<Component {...pageProps} />)}
-                </Auth>
-              ) : (
-                <Component {...pageProps} />
-              )}
-            </Hydrate>
-          </ConfigProvider>
+          <ThemeProvider colorMode="auto" preventSSRMismatch>
+            <ConfigProvider locale={id}>
+              <Hydrate>
+                {Component.Auth ? (
+                  <Auth
+                    subject={Component?.Auth?.subject}
+                    action={Component?.Auth?.action}
+                  >
+                    {getLayout(<Component {...pageProps} />)}
+                  </Auth>
+                ) : (
+                  <Component {...pageProps} />
+                )}
+              </Hydrate>
+            </ConfigProvider>
+          </ThemeProvider>
         </MantineProvider>
       </QueryClientProvider>
     </SessionProvider>

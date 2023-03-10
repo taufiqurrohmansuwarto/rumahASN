@@ -3,13 +3,17 @@ import { getSession } from "next-auth/react";
 const User = require("../models/users.model");
 const Minio = require("minio");
 
-const mc = new Minio.Client({
+const minioConfig = {
   port: parseInt(process.env.MINIO_PORT),
   useSSL: true,
   accessKey: process.env.MINIO_ACCESS_KEY,
   secretKey: process.env.MINIO_SECRET_KEY,
   endPoint: process.env.MINIO_ENDPOINT,
-});
+};
+
+console.log(minioConfig);
+
+const mc = new Minio.Client(minioConfig);
 
 const auth = async (req, res, next) => {
   try {

@@ -17,6 +17,14 @@ export const uploadImage = async (data) => {
   });
 };
 
+export const uploadFiles = async (data) => {
+  return api.post("/uploads", data, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
+};
+
 // just for admin only
 export const createStatus = async (data) => {
   return await api.post("/ref/status", data).then((res) => res.data);
