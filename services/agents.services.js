@@ -106,3 +106,24 @@ export const updateMessagesCustomers = async ({ id, ticketId, data }) => {
 export const dashboardAgents = async () => {
   return await api.get("/dashboard").then((res) => res.data);
 };
+
+// saved replies
+export const savedReplies = async (req, res) => {
+  return await api.get("/saved-replies").then((res) => res.data);
+};
+
+export const createSavedReplies = async (data) => {
+  return await api.post("/saved-replies", data).then((res) => res.data);
+};
+
+export const deleteSavedReplies = async (id) => {
+  return await api.delete(`/saved-replies/${id}`).then((res) => res.data);
+};
+
+export const detailSavedReplies = async (id) => {
+  return await api.get(`/saved-replies/${id}`).then((res) => res.data);
+};
+
+export const updateSavedReplies = async ({ id, data }) => {
+  return await api.patch(`/saved-replies/${id}`, data).then((res) => res.data);
+};

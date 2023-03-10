@@ -8,6 +8,7 @@ import {
   BookOutlined,
   UserOutlined,
   QuestionCircleOutlined,
+  SettingOutlined,
 } from "@ant-design/icons";
 
 export const userRoutes = {
@@ -124,6 +125,15 @@ export const agentRoutes = {
         { path: "/agent/tickets/diajukan", name: "Diajukan" },
         { path: "/agent/tickets/dikerjakan", name: "Dikerjakan" },
         { path: "/agent/tickets/selesai", name: "Selesai" },
+      ],
+    },
+    {
+      path: "/agent/settings",
+      name: "Settings",
+      icon: <SettingOutlined />,
+      routes: [
+        { path: "/agent/settings/profile", name: "Profile" },
+        { path: "/agent/settings/saved-replies", name: "Saved Replies" },
       ],
     },
   ],
