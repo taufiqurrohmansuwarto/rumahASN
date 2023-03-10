@@ -1,0 +1,59 @@
+const markdownIt = require('markdown-it');
+const knex = require('knex')({
+  client: 'mysql',
+  connection: {
+    host: 'localhost',
+    user: 'your_database_user',
+    password: 'your_database_password',
+    database: 'your_database_name'
+  }
+});
+
+// Initialize the markdown parser
+const md = new markdownIt();
+
+// Define the regular expression to match mentions
+const mentionRegex = /@([a-zA-Z0-9_]+)/g;
+
+// Define the function to handle mentions
+async function handleMention(match, username, postId) {
+  // Look up the user in the database by their username
+  const user = await knex('users').where('username', username).first();
+  
+  if (user) {
+    // If the user exists, store the mention in the database
+    await knex('mentions').insert({
+      user_id: user.id,
+      post_id: postId,
+      created_at: new Date()
+    });
+  }
+}
+
+// Define the function to parse markdown content for mentions
+async function parseMarkdownForMentions(content, postId) {
+  let mentionMatches = content.matchAll(mentionRegex);
+  
+  // For each mention found, handle it
+  for (let match of mentionMatches) {
+    await handleMention(match, match[1], postId);
+  }
+}
+
+// Example usage: parse markdown content for mentions and store them in the database
+const postId = 1;
+const content = `
+# My post title
+
+This is my post content mentioning @john.doe.
+
+Here's another mention: @jane_doe
+`;
+
+md.render(content, async function (err, result) {
+  if (err) {
+    console.error(err);
+  } else {
+    await parseMarkdownForMentions(result, postId);
+  }
+});

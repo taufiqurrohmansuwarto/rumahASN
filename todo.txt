@@ -12,3 +12,8 @@ untuk dashboard agent
 3. tambahkan selection pada table
 
 1. tambahkan halaman berita penting
+2. informasi
+   - assignee
+   - labels
+   - status
+   - divider
