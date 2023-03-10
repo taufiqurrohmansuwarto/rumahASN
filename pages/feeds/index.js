@@ -9,6 +9,7 @@ import { StatsGrid } from "../../src/components/StatsGrid";
 import { MarkdownEditor } from "@primer/react/drafts";
 import { useState } from "react";
 import { uploadFiles } from "../../services";
+import DetailTicket from "../../src/components/Ticket/DetailTicket";
 
 function Feeds() {
   const { data, isLoading } = useQuery(["dashboard"], () =>
@@ -128,6 +129,7 @@ function Feeds() {
           <MarkdownEditor.Label>Penggunaan</MarkdownEditor.Label>
         </MarkdownEditor>
         <StatsGrid data={data} />
+        <DetailTicket />
       </Stack>
     </PageContainer>
   );
