@@ -8,12 +8,15 @@ import PageContainer from "../../src/components/PageContainer";
 import { StatsGrid } from "../../src/components/StatsGrid";
 import { MarkdownEditor } from "@primer/react/drafts";
 import { useState } from "react";
-import { uploadFiles } from "../../services";
+import { parseMarkdown, uploadFiles } from "../../services";
 import DetailTicket from "../../src/components/Ticket/DetailTicket";
+import { Box, TextInput } from "@primer/react";
 
 function Feeds() {
   const { data, isLoading } = useQuery(["dashboard"], () =>
-    customerDashboard()
+    customerDashboard(), {
+       refetchOnWindowFocus: false  
+    }
   );
 
   const { data: userData, status } = useSession();
@@ -22,16 +25,18 @@ function Feeds() {
 
   const [value, setValue] = useState("");
 
+  
+
   const uploadFile = async (file) => {
     try {
-      console.log(file);
       const formData = new FormData();
       formData.append("file", file);
       const result = await uploadFiles(formData);
       console.log(result?.data);
 
+      console.log(file)
       return {
-        url: `https://example.com/${encodeURIComponent(file.name)}`,
+        url: result?.data,
         file,
       };
     } catch (error) {
@@ -92,9 +97,10 @@ function Feeds() {
   ];
 
   const renderMarkdown = async (markdown) => {
-    console.log(markdown);
+    const result =await parseMarkdown(markdown);
+    console.log(result)
     // In production code, this would make a query to some external API endpoint to render
-    return "Rendered Markdown.";
+    return result?.html;
   };
 
   const gotoCreate = () => {
@@ -116,7 +122,9 @@ function Feeds() {
             Buat Pertanyaan Sekarang
           </Button>
         </Alert>
-        <MarkdownEditor
+        <Box>
+            <TextInput/>
+          <MarkdownEditor
           onRenderPreview={renderMarkdown}
           onUploadFile={uploadFile}
           emojiSuggestions={emojis}
@@ -128,6 +136,9 @@ function Feeds() {
         >
           <MarkdownEditor.Label>Penggunaan</MarkdownEditor.Label>
         </MarkdownEditor>
+          
+        </Box>
+        
         <StatsGrid data={data} />
         <DetailTicket />
       </Stack>

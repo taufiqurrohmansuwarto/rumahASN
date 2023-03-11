@@ -198,3 +198,8 @@ export const deleteSubFaq = async (id) => {
 export const toggleAdminAgent = async (id) => {
   return await api.patch(`/users/${id}`).then((res) => res?.data);
 };
+
+export const parseMarkdown = async (data) => {
+  
+  return await api.post("/markdown", {text : data}).then((res) => res?.data);
+}
