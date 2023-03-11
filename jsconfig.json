@@ -7,6 +7,7 @@
       "@/middleware/*": ["middleware/*"],
       "@/models/*": ["models/*"],
       "@/services/*": ["services/*"],
+      "@/utils/*": ["utils/*"],
     }
   }
 }

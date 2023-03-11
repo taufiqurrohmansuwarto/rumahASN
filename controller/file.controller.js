@@ -27,11 +27,10 @@ const upload = async (req, res) => {
 };
 
 const uploadsMultipleFiles = async (req, res) => {
-  const { buffer, originalname, size, mimetype } = req?.file;
+  const { buffer, size, mimetype } = req?.file;
   const id = crypto.randomBytes(20).toString("hex");
-  const currentFilename = `${id}_${originalname}`;
-
-  console.log(currentFilename);
+  const getFormat = mimetype.split("/");
+  const currentFilename = `${id}.${getFormat[1]}`;
 
   try {
     await uploadFileMinio(req.mc, buffer, currentFilename, size, mimetype);
