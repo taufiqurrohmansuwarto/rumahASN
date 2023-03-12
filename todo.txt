@@ -1,19 +1,6 @@
-untuk dashboard admin
-
-1. data grafik permasalahan per satuan waktu
-2. data grafik permasalahan per kategori per satuan waktu
-3. data grafik berapa banyak penyelesain per satuan waktu
-
-untuk dashboard agent
-1. data grafik penyelesaian per satuan waktu
-
-1. tambahkan pertanyaan dan deskripsi pada chats 
-2. tammbahkan siapa yang mengerjakan pada table admin
-3. tambahkan selection pada table
-
-1. tambahkan halaman berita penting
-2. informasi
-   - assignee
-   - labels
-   - status
-   - divider
+create api
+- subscribe dan unsubscribe (all)
+- reactions dan unreactions (all)
+- lock conversation and unlock
+- public and unpublic
+- pin and unpinned
