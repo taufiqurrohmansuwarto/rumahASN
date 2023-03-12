@@ -1,6 +1,10 @@
 import { MarkdownEditor } from "@primer/react/drafts";
+import { useState } from "react";
 
 const NewTicket = () => {
+
+    const [value, setValue] = useState('')
+
     return (
         <MarkdownEditor
           onRenderPreview={renderMarkdown}

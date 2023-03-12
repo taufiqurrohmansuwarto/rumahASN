@@ -98,8 +98,41 @@ const remove = async (req, res) => {
   }
 };
 
+// user hanya bisa melihat tiket yang sudah dipublish dan statusnya sudah selesai
+const publishedTickets = async (req, res) => {
+  try {
+    const page = req?.query?.page || 1;
+    const limit = req?.query?.limit || 25;
+    const search = req?.query?.search || "";
+
+
+    const result = await Tickets.query()
+      .andWhere("status_code", "SELESAI")
+      .andWhere((builder) => {
+        if (search) {
+          builder
+
+            .where("title", "ilike", `%${search}%`)
+        }
+      })
+      .andWhere("is_published", true)
+      .orderBy("created_at", "desc")
+      .page(page - 1, limit);
+
+    res.json({
+      results: result?.results,
+      total: result?.total,
+      page: page,
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(400).json({ code: 400, message: "Internal Server Error" })
+  }
+}
+
 module.exports = {
   index,
+  publishedTickets,
   create,
   update,
   remove,
