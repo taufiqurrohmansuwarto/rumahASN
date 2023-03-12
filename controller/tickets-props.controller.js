@@ -4,6 +4,36 @@ const TicketsReactions = require('../models/tickets_reactions.model');
 const { insertTicketHistory } = require('@/utils/tickets-utilities');
 
 
+const publishedTickets = async (req, res) => {
+    try {
+        const page = req?.query?.page || 1;
+        const limit = req?.query?.limit || 25;
+        const search = req?.query?.search || '';
+
+        const result = await Ticket.query()
+            .where({ is_published: true, status: 'SELESAI' })
+            .andWhere((builder) => {
+                if (search) {
+                    builder
+                        .where('title', 'ilike', `%${search}%`)
+                }
+            })
+            .orderBy('created_at', 'desc')
+            .page(parseInt(page) - 1, parseInt(limit))
+            .withGraphFetch('[sub_category, agent, customer, admin, categories, status, priorities, comments]');
+
+        res.json({
+            results: result?.results,
+            total: result?.total,
+            page: page,
+        })
+    } catch (error) {
+        console.log(error)
+        res.status(500).json({ message: 'Something went wrong, please try again later.' })
+    }
+}
+
+
 const subscribe = async (req, res) => {
     try {
         const { id } = req?.query;
@@ -66,7 +96,7 @@ const pinned = async (req, res) => {
 }
 
 
-const unPinned = async (req, res) => { 
+const unPinned = async (req, res) => {
     try {
         const { id } = req?.query;
         const { user: { customId: user_id } } = req;
@@ -88,7 +118,7 @@ const unPinned = async (req, res) => {
     }
 }
 
-const reactions = async (req, res) => { 
+const reactions = async (req, res) => {
     try {
         const { id } = req?.query;
         const { user: { customId: user_id } } = req;
@@ -112,7 +142,7 @@ const reactions = async (req, res) => {
     }
 }
 
-const unReactions = async (req, res) => { 
+const unReactions = async (req, res) => {
     try {
         const { id } = req?.query;
         const { user: { customId: user_id } } = req;
@@ -132,7 +162,7 @@ const unReactions = async (req, res) => {
     }
 }
 
-const lockConversation = async (req, res) => { 
+const lockConversation = async (req, res) => {
     try {
         const { id } = req?.query;
         const { user: { customId: user_id } } = req;
@@ -152,7 +182,7 @@ const lockConversation = async (req, res) => {
         res.status(500).json({ message: 'Something went wrong, please try again later.' })
     }
 }
-const unLockConversation = async (req, res) => { 
+const unLockConversation = async (req, res) => {
     try {
         const { id } = req?.query;
         const { user: { customId: user_id } } = req;
@@ -173,7 +203,7 @@ const unLockConversation = async (req, res) => {
     }
 }
 
-const publish = async (req, res) => { 
+const publish = async (req, res) => {
     try {
         const { id } = req?.query;
         const { user: { customId: user_id } } = req;
@@ -193,7 +223,7 @@ const publish = async (req, res) => {
         res.status(500).json({ message: 'Something went wrong, please try again later.' })
     }
 }
-const unPublish = async (req, res) => { 
+const unPublish = async (req, res) => {
     try {
         const { id } = req?.query;
         const { user: { customId: user_id } } = req;
@@ -224,5 +254,6 @@ module.exports = {
     lockConversation,
     unLockConversation,
     publish,
-    unPublish
+    unPublish,
+    publishedTickets
 }

@@ -2,6 +2,8 @@ const uuid = require("uuid");
 const { Model } = require("objection");
 const knex = require("../db");
 const { customAlphabet } = require("nanoid");
+
+
 Model.knex(knex);
 
 class Tickets extends Model {
@@ -23,8 +25,17 @@ class Tickets extends Model {
     const Priorities = require("./priorities.model");
     const User = require("../models/users.model");
     const SubCategories = require("../models/sub-categories.model");
+    const Comments = require('../models/tickets_comments_customers.model');
 
     return {
+      comments: {
+        relation: Model.HasManyRelation,
+        modelClass: Comments,
+        join: {
+          from: "tickets.id",
+          to: "tickets_comments_customers.ticket_id",
+        }
+      },
       sub_category: {
         relation: Model.BelongsToOneRelation,
         modelClass: SubCategories,
