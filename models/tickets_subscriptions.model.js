@@ -2,7 +2,7 @@ const { Model } = require("objection");
 
 class TicketSubcriptions extends Model {
     static get tableName() {
-        return 'tickets_reactions';
+        return 'tickets_subscriptions';
     }
 }
 
