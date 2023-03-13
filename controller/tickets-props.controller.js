@@ -47,6 +47,7 @@ const detailPublishTickets = async (req, res) => {
 
     const result = await Ticket.query()
       .where({ is_published: true, id })
+      .select("*", Ticket.relatedQuery("comments").count().as("comments_count"))
       .withGraphFetched(
         "[customer(simpleSelect), comments.[user(simpleSelect)], histories.[user(simpleSelect)]]"
       )

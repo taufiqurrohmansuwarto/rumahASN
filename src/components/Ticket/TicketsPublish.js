@@ -25,7 +25,6 @@ function TicketsPublish() {
 
   return (
     <div>
-      {JSON.stringify(data)}
       <List
         dataSource={data?.results}
         loading={isLoading}

@@ -116,14 +116,6 @@ function Feeds() {
     >
       <Stack>
         <TicketsPublish />
-        <Alert title="Perhatian">
-          <Text>
-            Halo, {userData?.user?.name}. Apa ada yang ingin kamu tanyakan?
-          </Text>
-          <Button onClick={gotoCreate} mt={4}>
-            Buat Pertanyaan Sekarang
-          </Button>
-        </Alert>
         <Box>
           <TextInput />
           <MarkdownEditor
