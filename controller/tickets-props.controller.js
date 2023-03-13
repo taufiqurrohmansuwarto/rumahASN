@@ -2,14 +2,10 @@ const Ticket = require("../models/tickets.model");
 const TicketsSubscriptions = require("../models/tickets_subscriptions.model");
 const TicketsReactions = require("../models/tickets_reactions.model");
 const TicketHistories = require("../models/tickets_histories.model");
-const TicketsComments = require("../models/tickets_comments_customers.model");
-const { insertTicketHistory } = require("@/utils/tickets-utilities");
+const Comments = require("../models/tickets_comments_customers.model");
 
-// create comments
-const allComments = async (req, res) => {};
-const detailComment = async (req, res) => {};
-const createComment = async (req, res) => {};
-const updateComment = async (req, res) => {};
+const { insertTicketHistory } = require("@/utils/tickets-utilities");
+const { serializeComments, serializeHistories } = require("@/utils/parsing");
 
 const publishedTickets = async (req, res) => {
   try {
@@ -53,15 +49,30 @@ const detailPublishTickets = async (req, res) => {
       .withGraphFetched("[customer(simpleSelect) ]")
       .first();
 
+    const comments = await Comments.query()
+      .where({ ticket_id: id })
+      .withGraphFetched("user(simpleSelect)")
+      .orderBy("created_at", "asc");
+
     const histories = await TicketHistories.query()
-      .where("ticket_id", id)
-      .withGraphFetched(["user"]);
+      .where({ ticket_id: id })
+      .withGraphFetched("user(simpleSelect)");
 
-    const comments = await TicketHistories.query()
-      .where("ticket_id", id)
-      .withGraphFetched(["user"]);
+    const dataAddition = [
+      ...serializeComments(comments),
+      ...serializeHistories(histories),
+    ].sort((a, b) => {
+      return new Date(a.created_at) - new Date(b.created_at);
+    });
 
-    res.json(result);
+    const data = {
+      ...result,
+      data: dataAddition,
+    };
+
+    console.log(data);
+
+    res.json(data);
   } catch (error) {
     console.log(error);
     res
@@ -318,7 +329,51 @@ const unPublish = async (req, res) => {
   }
 };
 
+// comments crud
+const createComments = async (req, res) => {
+  try {
+    const { id: ticket_id } = req?.query;
+    const { customId: user_id } = req?.user;
+
+    const comment = req?.body?.comment;
+
+    const data = {
+      comment,
+      user_id,
+      ticket_id,
+    };
+
+    await Comments.query().insert(data);
+    res.json({ message: "Comment added successfully." });
+  } catch (error) {
+    console.log(error);
+    res
+      .status(500)
+      .json({ message: "Something went wrong, please try again later." });
+  }
+};
+
+const removeComments = async (req, res) => {
+  try {
+    const { id } = req?.query;
+    const {
+      customId: { userId },
+    } = req?.user;
+  } catch (error) {
+    console.log(error);
+    res
+      .status(500)
+      .json({ message: "Something went wrong, please try again later." });
+  }
+};
+
+const updateComments = async (req, res) => {
+  try {
+  } catch (error) {}
+};
+
 module.exports = {
+  createComments,
   subscribe,
   unsubscribe,
   pinned,
