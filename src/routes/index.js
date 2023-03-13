@@ -1,14 +1,14 @@
 import {
+  BookOutlined,
   CarOutlined,
-  SmileOutlined,
   DashboardFilled,
   HomeOutlined,
-  FileOutlined,
-  SnippetsOutlined,
-  BookOutlined,
-  UserOutlined,
+  MailOutlined,
   QuestionCircleOutlined,
   SettingOutlined,
+  SmileOutlined,
+  SnippetsOutlined,
+  UserOutlined,
 } from "@ant-design/icons";
 
 export const userRoutes = {
@@ -16,8 +16,8 @@ export const userRoutes = {
     { path: "/feeds", name: "Beranda", icon: <HomeOutlined /> },
     {
       path: "/tickets",
-      name: "Tiket",
-      icon: <FileOutlined />,
+      name: "My Tiket",
+      icon: <MailOutlined />,
       routes: [
         {
           path: "/tickets/semua",

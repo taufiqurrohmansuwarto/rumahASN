@@ -88,6 +88,7 @@ const upsertUser = async (currentUser) => {
       .onConflict("custom_id")
       .merge(data)
       .returning("*");
+
     return result;
   } catch (error) {
     console.log(error);

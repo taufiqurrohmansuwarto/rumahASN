@@ -1,4 +1,4 @@
-const Ticket = require("../models/ticket.model");
+const Ticket = require("../models/tickets.model");
 const TicketsSubscriptions = require("../models/tickets_subscriptions.model");
 const TicketsReactions = require("../models/tickets_reactions.model");
 const { insertTicketHistory } = require("@/utils/tickets-utilities");
@@ -16,23 +16,43 @@ const publishedTickets = async (req, res) => {
     const search = req?.query?.search || "";
 
     const result = await Ticket.query()
-      .where({ is_published: true, status: "SELESAI" })
+      .where({ is_published: true })
+      .withGraphFetched("[customer(simpleSelect)]")
       .andWhere((builder) => {
         if (search) {
           builder.where("title", "ilike", `%${search}%`);
         }
       })
+      .select("*", Ticket.relatedQuery("comments").count().as("comments_count"))
+      //   with count of comments
       .orderBy("created_at", "desc")
-      .page(parseInt(page) - 1, parseInt(limit))
-      .withGraphFetch(
-        "[sub_category, agent, customer, admin, categories, status, priorities, comments]"
-      );
+      .page(parseInt(page) - 1, parseInt(limit));
 
     res.json({
       results: result?.results,
       total: result?.total,
       page: page,
     });
+  } catch (error) {
+    console.log(error);
+    res
+      .status(500)
+      .json({ message: "Something went wrong, please try again later." });
+  }
+};
+
+const detailPublishTickets = async (req, res) => {
+  try {
+    const { id } = req?.query;
+
+    const result = await Ticket.query()
+      .where({ is_published: true, id })
+      .withGraphFetched(
+        "[customer(simpleSelect), comments.[user(simpleSelect)], histories.[user(simpleSelect)]]"
+      )
+      .first();
+
+    res.json(result);
   } catch (error) {
     console.log(error);
     res
@@ -301,4 +321,5 @@ module.exports = {
   publish,
   unPublish,
   publishedTickets,
+  detailPublishTickets,
 };

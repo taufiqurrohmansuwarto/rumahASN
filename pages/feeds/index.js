@@ -11,11 +11,14 @@ import { useState } from "react";
 import { parseMarkdown, uploadFiles } from "../../services";
 import DetailTicket from "../../src/components/Ticket/DetailTicket";
 import { Box, TextInput } from "@primer/react";
+import TicketsPublish from "@/components/Ticket/TicketsPublish";
 
 function Feeds() {
-  const { data, isLoading } = useQuery(["dashboard"], () =>
-    customerDashboard(), {
-       refetchOnWindowFocus: false  
+  const { data, isLoading } = useQuery(
+    ["dashboard"],
+    () => customerDashboard(),
+    {
+      refetchOnWindowFocus: false,
     }
   );
 
@@ -25,8 +28,6 @@ function Feeds() {
 
   const [value, setValue] = useState("");
 
-  
-
   const uploadFile = async (file) => {
     try {
       const formData = new FormData();
@@ -34,7 +35,7 @@ function Feeds() {
       const result = await uploadFiles(formData);
       console.log(result?.data);
 
-      console.log(file)
+      console.log(file);
       return {
         url: result?.data,
         file,
@@ -97,8 +98,8 @@ function Feeds() {
   ];
 
   const renderMarkdown = async (markdown) => {
-    const result =await parseMarkdown(markdown);
-    console.log(result)
+    const result = await parseMarkdown(markdown);
+    console.log(result);
     // In production code, this would make a query to some external API endpoint to render
     return result?.html;
   };
@@ -114,6 +115,7 @@ function Feeds() {
       subTitle="Dashboard"
     >
       <Stack>
+        <TicketsPublish />
         <Alert title="Perhatian">
           <Text>
             Halo, {userData?.user?.name}. Apa ada yang ingin kamu tanyakan?
@@ -123,22 +125,21 @@ function Feeds() {
           </Button>
         </Alert>
         <Box>
-            <TextInput/>
+          <TextInput />
           <MarkdownEditor
-          onRenderPreview={renderMarkdown}
-          onUploadFile={uploadFile}
-          emojiSuggestions={emojis}
-          referenceSuggestions={references}
-          mentionSuggestions={mentionables}
-          savedReplies={savedReplies}
-          value={value}
-          onChange={setValue}
-        >
-          <MarkdownEditor.Label>Penggunaan</MarkdownEditor.Label>
-        </MarkdownEditor>
-          
+            onRenderPreview={renderMarkdown}
+            onUploadFile={uploadFile}
+            emojiSuggestions={emojis}
+            referenceSuggestions={references}
+            mentionSuggestions={mentionables}
+            savedReplies={savedReplies}
+            value={value}
+            onChange={setValue}
+          >
+            <MarkdownEditor.Label>Penggunaan</MarkdownEditor.Label>
+          </MarkdownEditor>
         </Box>
-        
+
         <StatsGrid data={data} />
         <DetailTicket />
       </Stack>

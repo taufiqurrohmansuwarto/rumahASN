@@ -200,6 +200,15 @@ export const toggleAdminAgent = async (id) => {
 };
 
 export const parseMarkdown = async (data) => {
-  
-  return await api.post("/markdown", {text : data}).then((res) => res?.data);
-}
+  return await api.post("/markdown", { text: data }).then((res) => res?.data);
+};
+
+// publish tickets
+export const publishTickets = async () => {
+  return await api.get(`/tickets`).then((res) => res?.data);
+};
+
+// detail publish tickets
+export const detailPublishTickets = async (id) => {
+  return await api.get(`/tickets/${id}`).then((res) => res?.data);
+};
