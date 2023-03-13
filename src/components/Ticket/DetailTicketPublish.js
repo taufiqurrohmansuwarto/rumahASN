@@ -1,6 +1,7 @@
-import { detailPublishTickets } from "@/services/index";
+import { createCommentCustomer, detailPublishTickets } from "@/services/index";
 import { formatDateFromNow } from "@/utils/client-utils";
 import { formatDate } from "@/utils/index";
+import { StyledOcticon, Timeline } from "@primer/react";
 import {
   BellOutlined,
   CheckCircleOutlined,
@@ -8,7 +9,7 @@ import {
   LockOutlined,
   PushpinOutlined,
 } from "@ant-design/icons";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Col,
   Row,
@@ -27,7 +28,27 @@ const CommentDescription = ({ item }) => {
   return <Comment content={item?.content} />;
 };
 
-const CommentTicket = ({ item }) => {};
+const CommentTicket = ({ item }) => {
+  return (
+    <Comment
+      style={{
+        border: "1px solid #cecece",
+        padding: 10,
+        borderRadius: 10,
+        marginTop: 10,
+        marginBottom: 10,
+      }}
+      author={item?.user?.username}
+      datetime={
+        <Tooltip title={formatDate(item?.created_at)}>
+          <span>{formatDateFromNow(item?.created_at)}</span>
+        </Tooltip>
+      }
+      avatar={<Avatar src={item?.user?.image} />}
+      content={<div dangerouslySetInnerHTML={{ __html: item?.comment }} />}
+    />
+  );
+};
 
 const SideRight = ({ item }) => {
   return (
@@ -104,47 +125,113 @@ const TicketTitle = ({ item }) => {
 
 // start header
 const DetailTicketPublish = ({ id }) => {
+  const queryClient = useQueryClient();
+
   const { data, isLoading } = useQuery(
     ["publish-ticket", id],
     () => detailPublishTickets(id),
     {}
   );
 
-  const [value, setValue] = useState();
+  const { mutate: createComment, isLoading: isLoadingCreate } = useMutation(
+    (data) => createCommentCustomer(data),
+    {
+      onSettled: () => queryClient.invalidateQueries(["publish-ticket", id]),
+      onSuccess: () => {
+        queryClient.invalidateQueries(["publish-ticket", id]);
+        setValue("");
+      },
+    }
+  );
+
+  const handleSubmit = () => {
+    const data = {
+      id,
+      data: {
+        comment: value,
+      },
+    };
+    createComment(data);
+  };
+
+  const [value, setValue] = useState("");
 
   return (
-    <div>
-      <Row gutter={[8, 16]}>
-        <Col span={24}>
-          <TicketTitle item={data} />
-        </Col>
-      </Row>
-      <Row gutter={[16, 32]}>
-        <Col span={18}>
-          <Comment
-            style={{
-              border: "1px solid #cecece",
-              padding: 10,
-              borderRadius: 10,
-            }}
-            author={data?.customer?.username}
-            datetime={
-              <Tooltip title={formatDate(data?.created_at)}>
-                <span>{formatDateFromNow(data?.created_at)}</span>
-              </Tooltip>
-            }
-            avatar={<Avatar src={data?.customer?.image} />}
-            content={
-              <div dangerouslySetInnerHTML={{ __html: data?.content }} />
-            }
-          />
-          <NewTicket value={value} setValue={setValue} />
-        </Col>
-        <Col span={6}>
-          <SideRight />
-        </Col>
-      </Row>
-    </div>
+    <Row justify="center">
+      <Col span={18}>
+        <Row gutter={[8, 16]}>
+          <Col span={24}>
+            <TicketTitle item={data} />
+          </Col>
+        </Row>
+        <Row gutter={[16, 32]}>
+          <Col span={18}>
+            <Comment
+              style={{
+                border: "1px solid #cecece",
+                padding: 10,
+                borderRadius: 10,
+              }}
+              author={data?.customer?.username}
+              datetime={
+                <Tooltip title={formatDate(data?.created_at)}>
+                  <span>{formatDateFromNow(data?.created_at)}</span>
+                </Tooltip>
+              }
+              avatar={<Avatar src={data?.customer?.image} />}
+              content={
+                <div dangerouslySetInnerHTML={{ __html: data?.content }} />
+              }
+            />
+            {/* create vertical line */}
+            {data?.data?.map((item, index) => {
+              return (
+                <div key={item?.id}>
+                  {item?.type === "comment" ? (
+                    <CommentTicket item={item} />
+                  ) : (
+                    <Timeline>
+                      <Timeline.Item>
+                        <Timeline.Badge
+                          sx={{ bg: "danger.emphasis" }}
+                        ></Timeline.Badge>
+                        <Timeline.Body>
+                          Background used when closed events occur
+                        </Timeline.Body>
+                      </Timeline.Item>
+                      <Timeline.Item>
+                        <Timeline.Badge
+                          sx={{ bg: "danger.emphasis" }}
+                        ></Timeline.Badge>
+                        <Timeline.Body>
+                          Background when opened or passed events occur
+                        </Timeline.Body>
+                      </Timeline.Item>
+                      <Timeline.Item>
+                        <Timeline.Badge
+                          sx={{ bg: "danger.emphasis" }}
+                        ></Timeline.Badge>
+                        <Timeline.Body>
+                          Background used when pull requests are merged
+                        </Timeline.Body>
+                      </Timeline.Item>
+                    </Timeline>
+                  )}
+                </div>
+              );
+            })}
+            <NewTicket
+              submitMessage={handleSubmit}
+              value={value}
+              setValue={setValue}
+            />
+          </Col>
+          <Col span={6}>
+            <SideRight />
+          </Col>
+        </Row>
+      </Col>
+    </Row>
   );
 };
 

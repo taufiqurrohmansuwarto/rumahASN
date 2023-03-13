@@ -212,3 +212,11 @@ export const publishTickets = async () => {
 export const detailPublishTickets = async (id) => {
   return await api.get(`/tickets/${id}`).then((res) => res?.data);
 };
+
+// comments
+export const createCommentCustomer = async ({ id, data }) => {
+  console.log(data);
+  return await api
+    .post(`/tickets/${id}/comments`, data)
+    .then((res) => res?.data);
+};
