@@ -1,6 +1,8 @@
 const Ticket = require("../models/tickets.model");
 const TicketsSubscriptions = require("../models/tickets_subscriptions.model");
 const TicketsReactions = require("../models/tickets_reactions.model");
+const TicketHistories = require("../models/tickets_histories.model");
+const TicketsComments = require("../models/tickets_comments_customers.model");
 const { insertTicketHistory } = require("@/utils/tickets-utilities");
 
 // create comments
@@ -48,10 +50,16 @@ const detailPublishTickets = async (req, res) => {
     const result = await Ticket.query()
       .where({ is_published: true, id })
       .select("*", Ticket.relatedQuery("comments").count().as("comments_count"))
-      .withGraphFetched(
-        "[customer(simpleSelect), comments.[user(simpleSelect)], histories.[user(simpleSelect)]]"
-      )
+      .withGraphFetched("[customer(simpleSelect) ]")
       .first();
+
+    const histories = await TicketHistories.query()
+      .where("ticket_id", id)
+      .withGraphFetched(["user"]);
+
+    const comments = await TicketHistories.query()
+      .where("ticket_id", id)
+      .withGraphFetched(["user"]);
 
     res.json(result);
   } catch (error) {
