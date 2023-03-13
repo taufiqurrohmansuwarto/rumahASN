@@ -105,30 +105,29 @@ const publishedTickets = async (req, res) => {
     const limit = req?.query?.limit || 25;
     const search = req?.query?.search || "";
 
-
     const result = await Tickets.query()
       .andWhere("status_code", "SELESAI")
       .andWhere((builder) => {
         if (search) {
-          builder
-
-            .where("title", "ilike", `%${search}%`)
+          builder.where("title", "ilike", `%${search}%`);
         }
       })
       .andWhere("is_published", true)
       .orderBy("created_at", "desc")
       .page(page - 1, limit);
 
-    res.json({
+    const data = {
       results: result?.results,
       total: result?.total,
       page: page,
-    });
+    };
+
+    res.json(data);
   } catch (error) {
     console.log(error);
-    res.status(400).json({ code: 400, message: "Internal Server Error" })
+    res.status(400).json({ code: 400, message: "Internal Server Error" });
   }
-}
+};
 
 module.exports = {
   index,
