@@ -70,8 +70,6 @@ const detailPublishTickets = async (req, res) => {
       data: dataAddition,
     };
 
-    console.log(data);
-
     res.json(data);
   } catch (error) {
     console.log(error);

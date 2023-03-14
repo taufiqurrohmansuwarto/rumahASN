@@ -1,7 +1,7 @@
 import { createCommentCustomer, detailPublishTickets } from "@/services/index";
 import { formatDateFromNow } from "@/utils/client-utils";
 import { formatDate } from "@/utils/index";
-import { StyledOcticon, Timeline } from "@primer/react";
+import { CustomerTicket } from "@/utils/subject-model";
 import {
   BellOutlined,
   CheckCircleOutlined,
@@ -11,17 +11,19 @@ import {
 } from "@ant-design/icons";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
-  Col,
-  Row,
-  Typography,
-  Divider,
-  Comment,
+  Avatar,
   Button,
+  Col,
+  Comment,
+  Divider,
+  Row,
+  Skeleton,
   Space,
   Tooltip,
-  Avatar,
+  Typography,
 } from "antd";
 import { useState } from "react";
+import { Can } from "src/context/Can";
 import NewTicket from "./NewTicket";
 
 const CommentDescription = ({ item }) => {
@@ -54,13 +56,25 @@ const SideRight = ({ item }) => {
   return (
     <Row>
       <Col span={24}>
-        <Typography.Text style={{ fontSize: 12 }}>Agent</Typography.Text>
+        <Space direction="vertical">
+          <Typography.Text type="secondary" style={{ fontSize: 12 }}>
+            Agent
+          </Typography.Text>
+          <Typography.Text style={{ fontSize: 13 }}>
+            {item?.assignee ? "Belum ada" : item?.assignee?.username}
+          </Typography.Text>
+        </Space>
         <Divider />
       </Col>
       <Col span={24}>
-        <Typography.Text style={{ fontSize: 12 }}>
-          Pemilih Agent
-        </Typography.Text>
+        <Space direction="vertical">
+          <Typography.Text type="secondary" style={{ fontSize: 12 }}>
+            Pemilih Agent
+          </Typography.Text>
+          <Typography.Text style={{ fontSize: 13 }}>
+            {item?.chooser ? "Belum ada" : item?.assignee?.username}
+          </Typography.Text>
+        </Space>
         <Divider />
       </Col>
       <Col span={24}>
@@ -76,36 +90,38 @@ const SideRight = ({ item }) => {
         </Typography.Text>
         <Divider />
       </Col>
-      <Col span={24}>
-        <div>
-          <Space>
-            <CheckCircleOutlined />
-            <Typography.Text style={{ fontSize: 12 }}>
-              Publikasi
-            </Typography.Text>
-          </Space>
-        </div>
-        <div>
-          <Space>
-            <LockOutlined />
-            <Typography.Text style={{ fontSize: 12 }}>
-              Kunci Percapakan
-            </Typography.Text>
-          </Space>
-        </div>
-        <div>
-          <Space>
-            <PushpinOutlined />
-            <Typography.Text style={{ fontSize: 12 }}>Pin</Typography.Text>
-          </Space>
-        </div>
-        <div>
-          <Space>
-            <DeleteOutlined />
-            <Typography.Text style={{ fontSize: 12 }}>Hapus</Typography.Text>
-          </Space>
-        </div>
-      </Col>
+      <Can I="update" on={new CustomerTicket(item)}>
+        <Col span={24}>
+          <div>
+            <Space>
+              <CheckCircleOutlined />
+              <Typography.Text style={{ fontSize: 12 }}>
+                Publikasi
+              </Typography.Text>
+            </Space>
+          </div>
+          <div>
+            <Space>
+              <LockOutlined />
+              <Typography.Text style={{ fontSize: 12 }}>
+                Kunci Percapakan
+              </Typography.Text>
+            </Space>
+          </div>
+          <div>
+            <Space>
+              <PushpinOutlined />
+              <Typography.Text style={{ fontSize: 12 }}>Pin</Typography.Text>
+            </Space>
+          </div>
+          <div>
+            <Space>
+              <DeleteOutlined />
+              <Typography.Text style={{ fontSize: 12 }}>Hapus</Typography.Text>
+            </Space>
+          </div>
+        </Col>
+      </Can>
     </Row>
   );
 };
@@ -158,79 +174,56 @@ const DetailTicketPublish = ({ id }) => {
 
   return (
     <Row justify="center">
-      <Col span={18}>
-        <Row gutter={[8, 16]}>
-          <Col span={24}>
-            <TicketTitle item={data} />
-          </Col>
-        </Row>
-        <Row gutter={[16, 32]}>
-          <Col span={18}>
-            <Comment
-              style={{
-                border: "1px solid #cecece",
-                padding: 10,
-                borderRadius: 10,
-              }}
-              author={data?.customer?.username}
-              datetime={
-                <Tooltip title={formatDate(data?.created_at)}>
-                  <span>{formatDateFromNow(data?.created_at)}</span>
-                </Tooltip>
-              }
-              avatar={<Avatar src={data?.customer?.image} />}
-              content={
-                <div dangerouslySetInnerHTML={{ __html: data?.content }} />
-              }
-            />
-            {/* create vertical line */}
-            {data?.data?.map((item, index) => {
-              return (
-                <div key={item?.id}>
-                  {item?.type === "comment" ? (
-                    <CommentTicket item={item} />
-                  ) : (
-                    <Timeline>
-                      <Timeline.Item>
-                        <Timeline.Badge
-                          sx={{ bg: "danger.emphasis" }}
-                        ></Timeline.Badge>
-                        <Timeline.Body>
-                          Background used when closed events occur
-                        </Timeline.Body>
-                      </Timeline.Item>
-                      <Timeline.Item>
-                        <Timeline.Badge
-                          sx={{ bg: "danger.emphasis" }}
-                        ></Timeline.Badge>
-                        <Timeline.Body>
-                          Background when opened or passed events occur
-                        </Timeline.Body>
-                      </Timeline.Item>
-                      <Timeline.Item>
-                        <Timeline.Badge
-                          sx={{ bg: "danger.emphasis" }}
-                        ></Timeline.Badge>
-                        <Timeline.Body>
-                          Background used when pull requests are merged
-                        </Timeline.Body>
-                      </Timeline.Item>
-                    </Timeline>
-                  )}
-                </div>
-              );
-            })}
-            <NewTicket
-              submitMessage={handleSubmit}
-              value={value}
-              setValue={setValue}
-            />
-          </Col>
-          <Col span={6}>
-            <SideRight />
-          </Col>
-        </Row>
-      </Col>
+      <Skeleton loading={isLoading}>
+        <Col span={18}>
+          <Row gutter={[8, 16]}>
+            <Col span={24}>
+              <TicketTitle item={data} />
+            </Col>
+          </Row>
+          <Row gutter={[16, 32]}>
+            <Col span={18}>
+              <Comment
+                style={{
+                  border: "1px solid #cecece",
+                  padding: 10,
+                  borderRadius: 10,
+                }}
+                author={data?.customer?.username}
+                datetime={
+                  <Tooltip title={formatDate(data?.created_at)}>
+                    <span>{formatDateFromNow(data?.created_at)}</span>
+                  </Tooltip>
+                }
+                avatar={<Avatar src={data?.customer?.image} />}
+                content={
+                  <div dangerouslySetInnerHTML={{ __html: data?.content }} />
+                }
+              />
+              {/* create vertical line */}
+              {data?.data?.map((item, index) => {
+                return (
+                  <div key={item?.id}>
+                    {item?.type === "comment" ? (
+                      <CommentTicket item={item} />
+                    ) : (
+                      <></>
+                    )}
+                  </div>
+                );
+              })}
+              <NewTicket
+                submitMessage={handleSubmit}
+                value={value}
+                setValue={setValue}
+              />
+            </Col>
+            <Col span={6}>
+              <SideRight item={data} />
+            </Col>
+          </Row>
+        </Col>
+      </Skeleton>
     </Row>
   );
 };
