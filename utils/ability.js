@@ -18,6 +18,7 @@ const ability = (user) => {
       can("manage", "all");
       can("read", "DashboardAdmin");
     } else if (agent) {
+      can("update", "CustomerTicket", { assignee: userId });
       can("manage", "Tickets");
       can("manage", "Feeds");
       can("read", "DashboardAgent");
