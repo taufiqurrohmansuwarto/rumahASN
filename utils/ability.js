@@ -16,13 +16,16 @@ const ability = (user) => {
     // use extends
     if (admin) {
       can("manage", "all");
+      can("manage", "Comment", { user_id: userId });
       can("read", "DashboardAdmin");
     } else if (agent) {
+      can("manage", "Comment", { user_id: userId });
       can("update", "CustomerTicket", { assignee: userId });
       can("manage", "Tickets");
       can("manage", "Feeds");
       can("read", "DashboardAgent");
     } else if (userRole) {
+      can("manage", "Comment", { user_id: userId });
       can("manage", "Tickets");
       can("manage", "Feeds");
     }

@@ -1,7 +1,7 @@
 import { createCommentCustomer, detailPublishTickets } from "@/services/index";
 import { formatDateFromNow } from "@/utils/client-utils";
 import { formatDate } from "@/utils/index";
-import { CustomerTicket } from "@/utils/subject-model";
+import { CustomerTicket, Comment as UserComment } from "@/utils/subject-model";
 import {
   BellOutlined,
   CheckCircleOutlined,
@@ -11,8 +11,11 @@ import {
 } from "@ant-design/icons";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
+  Affix,
   Avatar,
+  BackTop,
   Button,
+  Card,
   Col,
   Comment,
   Divider,
@@ -40,6 +43,14 @@ const CommentTicket = ({ item }) => {
         marginTop: 10,
         marginBottom: 10,
       }}
+      actions={[
+        <Can key="edit" I="update" on={new UserComment(item)}>
+          <span>Edit</span>
+        </Can>,
+        <Can key="hapus" I="update" on={new UserComment(item)}>
+          <span>Hapus</span>
+        </Can>,
+      ]}
       author={item?.user?.username}
       datetime={
         <Tooltip title={formatDate(item?.created_at)}>
@@ -128,14 +139,16 @@ const SideRight = ({ item }) => {
 
 const TicketTitle = ({ item }) => {
   return (
-    <>
-      <Typography.Title level={4}>{item?.title}</Typography.Title>
-      <Typography.Text style={{ fontSize: 12 }} type="secondary">
-        {item?.customer?.username} membuat tiket pada{" "}
-        {formatDateFromNow(item?.created_at)}
-      </Typography.Text>
+    <div>
+      <Card>
+        <Typography.Title level={4}>{item?.title}</Typography.Title>
+        <Typography.Text style={{ fontSize: 12 }} type="secondary">
+          {item?.customer?.username} membuat tiket pada{" "}
+          {formatDateFromNow(item?.created_at)}
+        </Typography.Text>
+      </Card>
       <Divider />
-    </>
+    </div>
   );
 };
 
@@ -175,10 +188,13 @@ const DetailTicketPublish = ({ id }) => {
   return (
     <Row justify="center">
       <Skeleton loading={isLoading}>
+        <BackTop />
         <Col span={18}>
           <Row gutter={[8, 16]}>
             <Col span={24}>
-              <TicketTitle item={data} />
+              <Affix>
+                <TicketTitle item={data} />
+              </Affix>
             </Col>
           </Row>
           <Row gutter={[16, 32]}>
