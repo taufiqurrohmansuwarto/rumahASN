@@ -358,14 +358,21 @@ const removeComments = async (req, res) => {
     const { id, commentId } = req?.query;
     const { customId: userId, role } = req?.user;
 
+    const currentComment = await Comments.query().findOne({
+      id: commentId,
+    });
+
     if (role === "ADMIN") {
       await Comments.query().delete().where({ id: commentId, ticket_id: id });
-      await insertTicketHistory(
-        id,
-        userId,
-        "comment_deleted",
-        "Admin menghapus komentar orang lain"
-      );
+
+      if (currentComment.user_id !== userId) {
+        await insertTicketHistory(
+          id,
+          userId,
+          "comment_deleted",
+          "Admin menghapus komentar orang lain"
+        );
+      }
     } else {
       await Comments.query()
         .delete()
@@ -386,19 +393,24 @@ const updateComments = async (req, res) => {
     const { customId: userId, role } = req?.user;
     const { comment } = req?.body;
 
+    const currentComment = await Comments.query().findOne({
+      id: commentId,
+    });
+
     if (role === "ADMIN") {
       await Comments.query()
         .patch({
           comment,
         })
         .patch({ id: commentId, ticket_id: id });
-
-      await insertTicketHistory(
-        id,
-        userId,
-        "comment_updated",
-        "Admin mengubah komentar orang lain"
-      );
+      if (currentComment.user_id !== userId) {
+        await insertTicketHistory(
+          id,
+          userId,
+          "comment_updated",
+          "Admin mengubah komentar orang lain"
+        );
+      }
     } else {
       await Comments.query()
         .patch({
