@@ -35,6 +35,13 @@ import {
 import { useRouter } from "next/router";
 import { useState } from "react";
 import { Can } from "src/context/Can";
+import LockConversation from "../TicketProps/LockConversation";
+import Pin from "../TicketProps/Pin";
+import Publish from "../TicketProps/Publish";
+import RemoveTicket from "../TicketProps/Remove";
+import UnlockConversation from "../TicketProps/UnlockConversation";
+import UnpinTicket from "../TicketProps/UnPin";
+import Unpublish from "../TicketProps/UnPublish";
 import NewTicket from "./NewTicket";
 
 const CommentDescription = ({ item }) => {
@@ -188,34 +195,18 @@ const SideRight = ({ item }) => {
       </Col>
       <Can I="update" on={new CustomerTicket(item)}>
         <Col span={24}>
-          <div>
-            <Space>
-              <CheckCircleOutlined />
-              <Typography.Text style={{ fontSize: 12 }}>
-                Publikasi
-              </Typography.Text>
-            </Space>
-          </div>
-          <div>
-            <Space>
-              <LockOutlined />
-              <Typography.Text style={{ fontSize: 12 }}>
-                Kunci Percapakan
-              </Typography.Text>
-            </Space>
-          </div>
-          <div>
-            <Space>
-              <PushpinOutlined />
-              <Typography.Text style={{ fontSize: 12 }}>Pin</Typography.Text>
-            </Space>
-          </div>
-          <div>
-            <Space>
-              <DeleteOutlined />
-              <Typography.Text style={{ fontSize: 12 }}>Hapus</Typography.Text>
-            </Space>
-          </div>
+          {item?.is_published ? (
+            <Unpublish id={item?.id} />
+          ) : (
+            <Publish id={item?.id} />
+          )}
+          {item?.is_locked ? (
+            <UnlockConversation id={item?.id} />
+          ) : (
+            <LockConversation id={id} />
+          )}
+          {item?.is_pinned ? <Pin id={id} /> : <UnpinTicket id={id} />}
+          <RemoveTicket />
         </Col>
       </Can>
     </Row>
