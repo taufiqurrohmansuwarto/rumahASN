@@ -1,4 +1,9 @@
-import { createCommentCustomer, detailPublishTickets } from "@/services/index";
+import {
+  createCommentCustomer,
+  detailPublishTickets,
+  hapusCommentCustomer,
+  updateCommentCustomer,
+} from "@/services/index";
 import { formatDateFromNow } from "@/utils/client-utils";
 import { formatDate } from "@/utils/index";
 import { CustomerTicket, Comment as UserComment } from "@/utils/subject-model";
@@ -19,12 +24,14 @@ import {
   Col,
   Comment,
   Divider,
+  Popconfirm,
   Row,
   Skeleton,
   Space,
   Tooltip,
   Typography,
 } from "antd";
+import { useRouter } from "next/router";
 import { useState } from "react";
 import { Can } from "src/context/Can";
 import NewTicket from "./NewTicket";
@@ -34,6 +41,51 @@ const CommentDescription = ({ item }) => {
 };
 
 const CommentTicket = ({ item }) => {
+  const queryClient = useQueryClient();
+  const [comment, setComment] = useState(null);
+  const [id, setId] = useState(null);
+
+  const router = useRouter();
+
+  const { mutate: hapus, isLoading: isLoadingHapus } = useMutation(
+    (data) => hapusCommentCustomer(data),
+    {
+      onsucces: () => {
+        queryClient.invalidateQueries(["publish-tickets", router.query?.id]);
+      },
+    }
+  );
+
+  const { mutate: edit, isLoading: isLoadingEdit } = useMutation(
+    (data) => updateCommentCustomer(data),
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries(["publish-tickets", router.query?.id]);
+      },
+    }
+  );
+
+  const handleHapus = () => {
+    const data = {
+      ticketId: router.query?.id,
+      commentId: item?.id,
+    };
+
+    hapus(data);
+  };
+
+  const handleUpdate = () => {
+    const data = {
+      ticketId: router.query?.id,
+      commentId: item?.id,
+      data: {
+        comment,
+      },
+    };
+
+    edit(data);
+  };
+
   return (
     <Comment
       style={{
@@ -48,7 +100,9 @@ const CommentTicket = ({ item }) => {
           <span>Edit</span>
         </Can>,
         <Can key="hapus" I="update" on={new UserComment(item)}>
-          <span>Hapus</span>
+          <Popconfirm title="Apakah kamu yakin ingin menghapus?">
+            <span>Hapus</span>
+          </Popconfirm>
         </Can>,
       ]}
       author={item?.user?.username}
