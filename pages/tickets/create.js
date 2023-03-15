@@ -28,15 +28,19 @@ const CreateTicket = () => {
     []
   );
 
-  const { mutate: create } = useMutation((data) => createTickets(data), {
-    onSuccess: () => {
-      message.success("Berhasil membuat tiket");
-      router.push("/tickets/semua");
-    },
-    onError: () => {
-      message.error("Gagal membuat tiket");
-    },
-  });
+  const { mutate: create, isLoading } = useMutation(
+    (data) => createTickets(data),
+    {
+      retry: false,
+      onSuccess: () => {
+        message.success("Berhasil membuat tiket");
+        router.push("/tickets/semua");
+      },
+      onError: () => {
+        message.error("Gagal membuat tiket");
+      },
+    }
+  );
 
   const handleFinish = (value) => {
     const { title, content } = value;
@@ -46,7 +50,9 @@ const CreateTicket = () => {
         content: resizeImageTag(content),
       };
 
-      create(data);
+      if (!isLoading) {
+        create(data);
+      }
     }
   };
 
