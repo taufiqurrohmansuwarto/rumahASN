@@ -3,7 +3,13 @@ import { MarkdownEditor } from "@primer/react/drafts";
 import { Avatar, Col, Divider, Row } from "antd";
 import { useSession } from "next-auth/react";
 
-const NewTicket = ({ value, setValue, submitMessage }) => {
+const NewTicket = ({
+  value,
+  setValue,
+  submitMessage,
+  withCancel = false,
+  handleCancel,
+}) => {
   const { data, status } = useSession();
 
   const uploadFile = async (file) => {
@@ -39,9 +45,15 @@ const NewTicket = ({ value, setValue, submitMessage }) => {
             onChange={setValue}
           >
             <MarkdownEditor.Actions>
-              <MarkdownEditor.ActionButton variant="danger" size="medium">
-                Cancel
-              </MarkdownEditor.ActionButton>
+              {withCancel && (
+                <MarkdownEditor.ActionButton
+                  variant="danger"
+                  size="medium"
+                  onClick={handleCancel}
+                >
+                  Cancel
+                </MarkdownEditor.ActionButton>
+              )}
               <MarkdownEditor.ActionButton
                 disabled={!value}
                 variant="primary"

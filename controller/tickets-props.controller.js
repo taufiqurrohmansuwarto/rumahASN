@@ -418,6 +418,7 @@ const updateComments = async (req, res) => {
         })
         .where({ id: commentId, ticket_id: id, user_id: userId });
     }
+    res.status(200).json({ message: "Comment updated successfully." });
   } catch (error) {
     console.log(error);
     res

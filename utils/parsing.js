@@ -13,7 +13,8 @@ const extractHashtags = (text) => {
 };
 
 const renderImage = (href, title, text) => {
-  const img = `<img src="${href}" title="${text}" alt="${text}" class="my-image"/>`;
+  // resize image scale 0.5 using inline style
+  const img = `<img src="${href}" title="${text}" alt="${text}" style="width: 70%;"/>`;
   return img;
 };
 
@@ -88,8 +89,9 @@ const serializeComments = (comments) => {
     return comments.map((comment) => {
       return {
         ...comment,
-        id: `comment-${comment.id}`,
+        custom_id: `comment-${comment.id}`,
         comment: parseMarkdown(comment.comment),
+        commentMarkdown: comment.comment,
         status: null,
         type: "comment",
       };
@@ -104,7 +106,8 @@ const serializeHistories = (histories) => {
     return histories.map((history) => {
       return {
         ...history,
-        id: `history-${history.id}`,
+        custom_id: `history-${history.id}`,
+        commentMarkdown: null,
         role: null,
         type: "history",
       };

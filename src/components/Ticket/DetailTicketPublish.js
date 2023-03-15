@@ -30,6 +30,7 @@ import {
   Space,
   Tooltip,
   Typography,
+  message,
 } from "antd";
 import { useRouter } from "next/router";
 import { useState } from "react";
@@ -45,22 +46,36 @@ const CommentTicket = ({ item }) => {
   const [comment, setComment] = useState(null);
   const [id, setId] = useState(null);
 
+  const handleAccEdit = () => {
+    setId(item?.id);
+    setComment(item?.commentMarkdown);
+  };
+
+  const handleCancelEdit = () => {
+    setId(null);
+  };
+
   const router = useRouter();
 
   const { mutate: hapus, isLoading: isLoadingHapus } = useMutation(
     (data) => hapusCommentCustomer(data),
     {
-      onsucces: () => {
-        queryClient.invalidateQueries(["publish-tickets", router.query?.id]);
+      onSuccess: () => {
+        const id = router.query?.id;
+        queryClient.invalidateQueries(["publish-ticket", id]);
+        message.success("Berhasil menghapus komentar");
       },
     }
   );
 
-  const { mutate: edit, isLoading: isLoadingEdit } = useMutation(
+  const { mutate: editData, isLoading: isLoadingEdit } = useMutation(
     (data) => updateCommentCustomer(data),
     {
       onSuccess: () => {
-        queryClient.invalidateQueries(["publish-tickets", router.query?.id]);
+        const id = router.query?.id;
+        queryClient.invalidateQueries(["publish-ticket", id]);
+        setId(null);
+        setComment(null);
       },
     }
   );
@@ -74,7 +89,7 @@ const CommentTicket = ({ item }) => {
     hapus(data);
   };
 
-  const handleUpdate = () => {
+  const handleUpdate = async () => {
     const data = {
       ticketId: router.query?.id,
       commentId: item?.id,
@@ -83,40 +98,52 @@ const CommentTicket = ({ item }) => {
       },
     };
 
-    edit(data);
+    editData(data);
   };
 
   return (
-    <Comment
-      style={{
-        border: "1px solid #cecece",
-        padding: 10,
-        borderRadius: 10,
-        marginTop: 10,
-        marginBottom: 10,
-      }}
-      actions={[
-        <Can key="edit" I="update" on={new UserComment(item)}>
-          <span>Edit</span>
-        </Can>,
-        <Can key="hapus" I="update" on={new UserComment(item)}>
-          <Popconfirm
-            onConfirm={handleHapus}
-            title="Apakah kamu yakin ingin menghapus?"
-          >
-            <span>Hapus</span>
-          </Popconfirm>
-        </Can>,
-      ]}
-      author={item?.user?.username}
-      datetime={
-        <Tooltip title={formatDate(item?.created_at)}>
-          <span>{formatDateFromNow(item?.created_at)}</span>
-        </Tooltip>
-      }
-      avatar={<Avatar src={item?.user?.image} />}
-      content={<div dangerouslySetInnerHTML={{ __html: item?.comment }} />}
-    />
+    <>
+      {item?.id === id ? (
+        <NewTicket
+          handleCancel={handleCancelEdit}
+          setValue={setComment}
+          value={comment}
+          submitMessage={handleUpdate}
+          withCancel={true}
+        />
+      ) : (
+        <Comment
+          style={{
+            border: "1px solid #cecece",
+            padding: 10,
+            borderRadius: 10,
+            marginTop: 10,
+            marginBottom: 10,
+          }}
+          actions={[
+            <Can key="edit" I="update" on={new UserComment(item)}>
+              <span onClick={handleAccEdit}>Edit</span>
+            </Can>,
+            <Can key="hapus" I="update" on={new UserComment(item)}>
+              <Popconfirm
+                onConfirm={handleHapus}
+                title="Apakah kamu yakin ingin menghapus?"
+              >
+                <span>Hapus</span>
+              </Popconfirm>
+            </Can>,
+          ]}
+          author={item?.user?.username}
+          datetime={
+            <Tooltip title={formatDate(item?.created_at)}>
+              <span>{formatDateFromNow(item?.created_at)}</span>
+            </Tooltip>
+          }
+          avatar={<Avatar src={item?.user?.image} />}
+          content={<div dangerouslySetInnerHTML={{ __html: item?.comment }} />}
+        />
+      )}
+    </>
   );
 };
 
@@ -276,7 +303,7 @@ const DetailTicketPublish = ({ id }) => {
               {/* create vertical line */}
               {data?.data?.map((item, index) => {
                 return (
-                  <div key={item?.id}>
+                  <div key={item?.custom_id}>
                     {item?.type === "comment" ? (
                       <CommentTicket item={item} />
                     ) : (
