@@ -21,10 +21,20 @@ const ability = (user) => {
     } else if (agent) {
       can("manage", "Comment", { user_id: userId });
       can("update", "CustomerTicket", { assignee: userId });
+      cannot(
+        "create",
+        "Comment",
+        ({ customerTicket }) => customerTicket.is_locked
+      );
+
       can("manage", "Tickets");
       can("manage", "Feeds");
       can("read", "DashboardAgent");
     } else if (userRole) {
+      can("manage", "Comment", { user_id: userId });
+      cannot("create", "Comment", ({ is_locked }) => is_locked);
+      can("update", "CustomerTicket", { assignee: userId });
+
       can("manage", "Comment", { user_id: userId });
       can("manage", "Tickets");
       can("manage", "Feeds");

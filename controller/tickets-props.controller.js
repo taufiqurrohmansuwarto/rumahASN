@@ -356,14 +356,15 @@ const createComments = async (req, res) => {
 const removeComments = async (req, res) => {
   try {
     const { id, commentId } = req?.query;
-    const { customId: userId, role } = req?.user;
+    const { customId: userId, current_role: role } = req?.user;
 
     const currentComment = await Comments.query().findOne({
       id: commentId,
     });
 
-    if (role === "ADMIN") {
+    if (role === "admin") {
       await Comments.query().delete().where({ id: commentId, ticket_id: id });
+      console.log(commentId, id);
 
       if (currentComment.user_id !== userId) {
         await insertTicketHistory(
@@ -390,14 +391,14 @@ const removeComments = async (req, res) => {
 const updateComments = async (req, res) => {
   try {
     const { id, commentId } = req?.query;
-    const { customId: userId, role } = req?.user;
+    const { customId: userId, current_role: role } = req?.user;
     const { comment } = req?.body;
 
     const currentComment = await Comments.query().findOne({
       id: commentId,
     });
 
-    if (role === "ADMIN") {
+    if (role === "admin") {
       await Comments.query()
         .patch({
           comment,
