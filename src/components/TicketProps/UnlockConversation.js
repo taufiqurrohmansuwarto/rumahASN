@@ -1,5 +1,5 @@
-import { removeTicket, unlockConversation } from "@/services/index";
-import { LockOutlined } from "@ant-design/icons";
+import { unlockConversation } from "@/services/index";
+import { UnlockOutlined } from "@ant-design/icons";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Space, Typography } from "antd";
 
@@ -21,7 +21,7 @@ function UnlockConversation({ id }) {
 
   return (
     <Space onClick={handleSubmit}>
-      <LockOutlined />
+      <UnlockOutlined />
       <Typography.Text style={{ fontSize: 12 }}>
         Unlock Conversation
       </Typography.Text>
