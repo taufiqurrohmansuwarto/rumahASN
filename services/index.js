@@ -240,3 +240,26 @@ export const lockConversation = (id) => {
 export const unlockConversation = (id) => {
   return api.delete(`/tickets/${id}/lock`);
 };
+
+// publish and unpublish
+export const publish = (id) => {
+  return api.put(`/tickets/${id}/publish`);
+};
+
+export const unpublish = (id) => {
+  return api.delete(`/tickets/${id}/publish`);
+};
+
+// pin and unpin
+export const pin = (id) => {
+  return api.put(`/tickets/${id}/pin`);
+};
+
+export const unpin = (id) => {
+  return api.delete(`/tickets/${id}/pin`);
+};
+
+// remove service
+export const removeTicket = (id) => {
+  return api.delete(`/tickets/${id}`);
+};
