@@ -86,7 +86,7 @@ const subscribe = async (req, res) => {
       user: { customId: user_id },
     } = req;
 
-    const ticket = await Ticket.findOne({ where: { id } });
+    const ticket = await Ticket.query().findOne({ where: { id } });
     if (!ticket) {
       res.status(404).json({ message: "Ticket not found." });
     } else {
@@ -109,7 +109,7 @@ const unsubscribe = async (req, res) => {
   const {
     user: { customId: user_id },
   } = req;
-  const ticket = await Ticket.findOne({ where: { id } });
+  const ticket = await Ticket.query().findOne({ where: { id } });
 
   if (!ticket) {
     res.status(404).json({ message: "Ticket not found." });
@@ -127,7 +127,7 @@ const pinned = async (req, res) => {
     user: { customId: user_id },
   } = req;
 
-  const ticket = await Ticket.findOne({ where: { id } });
+  const ticket = await Ticket.query().findOne({ where: { id } });
 
   // max 3 pinned tickets
   const pinnedTickets = await Ticket.query().where({ is_pin: true });
@@ -152,7 +152,7 @@ const unPinned = async (req, res) => {
       user: { customId: user_id },
     } = req;
 
-    const ticket = await Ticket.findOne({ where: { id } });
+    const ticket = await Ticket.query().findOne({ where: { id } });
 
     if (!ticket) {
       res.status(404).json({ message: "Ticket not found." });
@@ -177,7 +177,7 @@ const reactions = async (req, res) => {
       user: { customId: user_id },
     } = req;
 
-    const ticket = await Ticket.findOne({ where: { id } });
+    const ticket = await Ticket.query().findOne({ where: { id } });
 
     if (!ticket) {
       res.status(404).json({ message: "Ticket not found." });
@@ -205,7 +205,7 @@ const unReactions = async (req, res) => {
       user: { customId: user_id },
     } = req;
 
-    const ticket = await Ticket.findOne({ where: { id } });
+    const ticket = await Ticket.query().findOne({ where: { id } });
 
     if (!ticket) {
       res.status(404).json({ message: "Ticket not found." });
@@ -231,7 +231,7 @@ const lockConversation = async (req, res) => {
       user: { customId: user_id },
     } = req;
 
-    const ticket = await Ticket.findOne({ where: { id } });
+    const ticket = await Ticket.query().findOne({ where: { id } });
 
     if (!ticket) {
       res.status(404).json({ message: "Ticket not found." });
@@ -256,7 +256,7 @@ const unLockConversation = async (req, res) => {
       user: { customId: user_id },
     } = req;
 
-    const ticket = await Ticket.findOne({ where: { id } });
+    const ticket = await Ticket.query().findOne({ where: { id } });
 
     if (!ticket) {
       res.status(404).json({ message: "Ticket not found." });
@@ -281,7 +281,7 @@ const publish = async (req, res) => {
       user: { customId: user_id },
     } = req;
 
-    const ticket = await Ticket.findOne({ where: { id } });
+    const ticket = await Ticket.query().findOne({ where: { id } });
 
     if (!ticket) {
       res.status(404).json({ message: "Ticket not found." });
@@ -306,7 +306,7 @@ const unPublish = async (req, res) => {
       user: { customId: user_id },
     } = req;
 
-    const ticket = await Ticket.findOne({ where: { id } });
+    const ticket = await Ticket.query().findOne({ where: { id } });
 
     if (!ticket) {
       res.status(404).json({ message: "Ticket not found." });

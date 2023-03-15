@@ -1,7 +1,9 @@
 import { pin } from "@/services/index";
 import { PushpinOutlined } from "@ant-design/icons";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Space, Typography } from "antd";
+import { Modal, Row, Space, Typography } from "antd";
+
+const { confirm } = Modal;
 
 function Pin({ id }) {
   const queryClient = useQueryClient();
@@ -13,14 +15,28 @@ function Pin({ id }) {
   });
 
   const handleSubmit = () => {
-    mutate(id);
+    //     mutate(id);
+    confirm({
+      title: "Apakah Anda yakin ingin mem-pin tiket ini?",
+      width: 800,
+      centered: true,
+      content:
+        "Tiket yang sudah dipin akan muncul di halaman utama. Maksimal 3 tiket yang dapat dipin",
+      onOk: () => {
+        // mutate(id)
+      },
+    });
   };
 
   return (
-    <Space onClick={handleSubmit}>
-      <PushpinOutlined />
-      <Typography.Text style={{ fontSize: 12 }}>Pin Tiket</Typography.Text>
-    </Space>
+    <Row>
+      <Space>
+        <PushpinOutlined />
+        <Typography.Link style={{ fontSize: 12 }} onClick={handleSubmit}>
+          Pin Tiket
+        </Typography.Link>
+      </Space>
+    </Row>
   );
 }
 

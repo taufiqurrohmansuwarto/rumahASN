@@ -1,7 +1,7 @@
 import { publishTickets } from "@/services/index";
 import { ReadOutlined } from "@ant-design/icons";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Space, Typography } from "antd";
+import { Space, Typography, Row } from "antd";
 
 function Publish({ id }) {
   const queryClient = useQueryClient();
@@ -17,10 +17,14 @@ function Publish({ id }) {
   };
 
   return (
-    <Space onClick={handleSubmit}>
-      <ReadOutlined />
-      <Typography.Text style={{ fontSize: 12 }}>Publish Ticket</Typography.Text>
-    </Space>
+    <Row>
+      <Space onClick={handleSubmit}>
+        <ReadOutlined />
+        <Typography.Link style={{ fontSize: 12 }}>
+          Publish Ticket
+        </Typography.Link>
+      </Space>
+    </Row>
   );
 }
 
