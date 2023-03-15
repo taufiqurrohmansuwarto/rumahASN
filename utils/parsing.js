@@ -52,6 +52,16 @@ const renderListItem = function (text, task) {
   }
 };
 
+const link = function (href, title, text) {
+  // add http if not present in href example : bkd.jatimprov.go.id => http://bkd.jatimprov.go.id
+  const regex = /^(http|https):\/\//;
+  if (!regex.test(href)) {
+    href = "https://" + href;
+  }
+
+  return `<a href="${href}" title="${text}" target="_blank" rel="noopener noreferrer">${text}</a>`;
+};
+
 const renderer = {
   text(string) {
     return renderText(string);
@@ -61,6 +71,9 @@ const renderer = {
   },
   lisitem(text, task) {
     return renderListItem(text, task);
+  },
+  link(href, title, text) {
+    return link(href, title, text);
   },
 };
 
