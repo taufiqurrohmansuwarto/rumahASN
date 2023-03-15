@@ -1,7 +1,9 @@
 import { unpin } from "@/services/index";
 import { ExclamationOutlined } from "@ant-design/icons";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Space, Typography } from "antd";
+import { Space, Typography, Row, Modal } from "antd";
+
+const { confirm } = Modal;
 
 function UnpinTicket({ id }) {
   const queryClient = useQueryClient();
@@ -13,14 +15,27 @@ function UnpinTicket({ id }) {
   });
 
   const handleSubmit = () => {
-    mutate(id);
+    confirm({
+      title: "Apakah Anda yakin ingin membatalkan pin tiket ini?",
+      content:
+        "Tiket yang sudah dibatalkan pin tidak akan muncul di halaman utama",
+      onOk: () => {
+        // mutate(id);
+      },
+      centered: true,
+      width: 800,
+    });
   };
 
   return (
-    <Space onClick={handleSubmit}>
-      <ExclamationOutlined />
-      <Typography.Text style={{ fontSize: 12 }}>Pin Tiket</Typography.Text>
-    </Space>
+    <Row>
+      <Space>
+        <ExclamationOutlined />
+        <Typography.Link style={{ fontSize: 12 }} onClick={handleSubmit}>
+          Pin Tiket
+        </Typography.Link>
+      </Space>
+    </Row>
   );
 }
 

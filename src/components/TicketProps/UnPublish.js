@@ -1,8 +1,9 @@
 import { unpublish } from "@/services/index";
 import { CloseSquareOutlined } from "@ant-design/icons";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Space, Typography } from "antd";
+import { Modal, Row, Space, Typography } from "antd";
 
+const { confirm } = Modal;
 function Unpublish({ id }) {
   const queryClient = useQueryClient();
 
@@ -13,16 +14,27 @@ function Unpublish({ id }) {
   });
 
   const handleSubmit = () => {
-    mutate(id);
+    confirm({
+      onOk: () => {
+        // mutate(id);
+      },
+      width: 800,
+      centered: true,
+      title: "Batal Publikasi Tiket",
+      content:
+        "Apakah anda yakin ingin membatalkan publikasi tiket ini?. Tiket yang dibatalkan tidak akan bisa diakses secara publik oleh pengguna dan kembali ke agent.",
+    });
   };
 
   return (
-    <Space onClick={handleSubmit}>
-      <CloseSquareOutlined />
-      <Typography.Text style={{ fontSize: 12 }}>
-        Unpublish Ticket
-      </Typography.Text>
-    </Space>
+    <Row>
+      <Space>
+        <CloseSquareOutlined />
+        <Typography.Link style={{ fontSize: 12 }} onClick={handleSubmit}>
+          Batal Publikasi Tiket
+        </Typography.Link>
+      </Space>
+    </Row>
   );
 }
 

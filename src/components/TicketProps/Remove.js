@@ -1,7 +1,9 @@
 import { removeTicket } from "@/services/index";
 import { DeleteOutlined } from "@ant-design/icons";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Space, Typography } from "antd";
+import { Row, Space, Typography, Modal } from "antd";
+
+const { confirm } = Modal;
 
 function RemoveTicket({ id }) {
   const queryClient = useQueryClient();
@@ -13,14 +15,26 @@ function RemoveTicket({ id }) {
   });
 
   const handleSubmit = () => {
-    mutate(id);
+    confirm({
+      title: "Apakah Anda yakin ingin menghapus tiket ini?",
+      content: "Tiket yang sudah dihapus tidak dapat dikembalikan",
+      onOk: () => {
+        // mutate(id);
+      },
+      centered: true,
+      width: 800,
+    });
   };
 
   return (
-    <Space onClick={handleSubmit}>
-      <DeleteOutlined />
-      <Typography.Text style={{ fontSize: 12 }}>Pin Tiket</Typography.Text>
-    </Space>
+    <Row>
+      <Space>
+        <DeleteOutlined />
+        <Typography.Link onClick={handleSubmit} style={{ fontSize: 12 }}>
+          Hapus
+        </Typography.Link>
+      </Space>
+    </Row>
   );
 }
 

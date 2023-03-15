@@ -203,9 +203,13 @@ const SideRight = ({ item }) => {
           {item?.is_locked ? (
             <UnlockConversation id={item?.id} />
           ) : (
-            <LockConversation id={id} />
+            <LockConversation id={item?.id} />
           )}
-          {item?.is_pinned ? <Pin id={id} /> : <UnpinTicket id={id} />}
+          {item?.is_pinned ? (
+            <UnpinTicket id={item?.id} />
+          ) : (
+            <Pin id={item?.id} />
+          )}
           <RemoveTicket />
         </Col>
       </Can>
