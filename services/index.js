@@ -231,3 +231,12 @@ export const updateCommentCustomer = async ({ ticketId, commentId, data }) => {
     .patch(`/tickets/${ticketId}/comments/${commentId}`, data)
     .then((res) => res?.data);
 };
+
+// lock and unlock conversation
+export const lockConversation = (id) => {
+  return api.put(`/tickets/${id}/lock`);
+};
+
+export const unlockConversation = (id) => {
+  return api.delete(`/tickets/${id}/lock`);
+};

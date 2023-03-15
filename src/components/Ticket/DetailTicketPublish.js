@@ -76,6 +76,7 @@ const CommentTicket = ({ item }) => {
         queryClient.invalidateQueries(["publish-ticket", id]);
         setId(null);
         setComment(null);
+        message.success("Berhasil mengubah komentar");
       },
     }
   );
@@ -272,57 +273,65 @@ const DetailTicketPublish = ({ id }) => {
   return (
     <Row justify="center">
       <Skeleton loading={isLoading}>
-        <BackTop />
-        <Col span={18}>
-          <Row gutter={[8, 16]}>
-            <Col span={24}>
-              <Affix>
-                <TicketTitle item={data} />
-              </Affix>
-            </Col>
-          </Row>
-          <Row gutter={[16, 32]}>
+        {data && (
+          <>
+            <BackTop />
             <Col span={18}>
-              <Comment
-                style={{
-                  border: "1px solid #cecece",
-                  padding: 10,
-                  borderRadius: 10,
-                }}
-                author={data?.customer?.username}
-                datetime={
-                  <Tooltip title={formatDate(data?.created_at)}>
-                    <span>{formatDateFromNow(data?.created_at)}</span>
-                  </Tooltip>
-                }
-                avatar={<Avatar src={data?.customer?.image} />}
-                content={
-                  <div dangerouslySetInnerHTML={{ __html: data?.content }} />
-                }
-              />
-              {/* create vertical line */}
-              {data?.data?.map((item, index) => {
-                return (
-                  <div key={item?.custom_id}>
-                    {item?.type === "comment" ? (
-                      <CommentTicket item={item} />
-                    ) : (
-                      <></>
-                    )}
-                  </div>
-                );
-              })}
-              <NewTicket
-                submitMessage={handleSubmit}
-                value={value}
-                setValue={setValue}
-              />
+              <Row gutter={[8, 16]}>
+                <Col span={24}>
+                  <Affix>
+                    <TicketTitle item={data} />
+                  </Affix>
+                </Col>
+              </Row>
+              <Row gutter={[16, 32]}>
+                <Col span={18}>
+                  <Comment
+                    style={{
+                      border: "1px solid #cecece",
+                      padding: 10,
+                      borderRadius: 10,
+                    }}
+                    author={data?.customer?.username}
+                    datetime={
+                      <Tooltip title={formatDate(data?.created_at)}>
+                        <span>{formatDateFromNow(data?.created_at)}</span>
+                      </Tooltip>
+                    }
+                    avatar={<Avatar src={data?.customer?.image} />}
+                    content={
+                      <div
+                        dangerouslySetInnerHTML={{ __html: data?.content }}
+                      />
+                    }
+                  />
+                  {/* create vertical line */}
+                  {data?.data?.map((item, index) => {
+                    return (
+                      <div key={item?.custom_id}>
+                        {item?.type === "comment" ? (
+                          <CommentTicket item={item} />
+                        ) : (
+                          <></>
+                        )}
+                      </div>
+                    );
+                  })}
+                  <Can I="create" a="Comment">
+                    <NewTicket
+                      submitMessage={handleSubmit}
+                      value={value}
+                      setValue={setValue}
+                    />
+                  </Can>
+                </Col>
+                <Col span={6}>
+                  <SideRight item={data} />
+                </Col>
+              </Row>
             </Col>
-            <Col span={6}>
-              <SideRight item={data} />
-            </Col>
-          </Row>
-        </Col>
+          </>
+        )}
       </Skeleton>
     </Row>
   );
