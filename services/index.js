@@ -215,8 +215,19 @@ export const detailPublishTickets = async (id) => {
 
 // comments
 export const createCommentCustomer = async ({ id, data }) => {
-  console.log(data);
   return await api
     .post(`/tickets/${id}/comments`, data)
+    .then((res) => res?.data);
+};
+
+export const hapusCommentCustomer = async ({ ticketId, commentId }) => {
+  return await api
+    .delete(`/tickets/${ticketId}/comments/${commentId}`)
+    .then((res) => res?.data);
+};
+
+export const updateCommentCustomer = async ({ ticketId, commentId, data }) => {
+  return await api
+    .patch(`/tickets/${ticketId}/comments/${commentId}`, data)
     .then((res) => res?.data);
 };

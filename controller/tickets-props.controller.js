@@ -248,6 +248,7 @@ const lockConversation = async (req, res) => {
       .json({ message: "Something went wrong, please try again later." });
   }
 };
+
 const unLockConversation = async (req, res) => {
   try {
     const { id } = req?.query;
@@ -297,6 +298,7 @@ const publish = async (req, res) => {
       .json({ message: "Something went wrong, please try again later." });
   }
 };
+
 const unPublish = async (req, res) => {
   try {
     const { id } = req?.query;
@@ -353,10 +355,23 @@ const createComments = async (req, res) => {
 
 const removeComments = async (req, res) => {
   try {
-    const { id } = req?.query;
-    const {
-      customId: { userId },
-    } = req?.user;
+    const { id, commentId } = req?.query;
+    const { customId: userId, role } = req?.user;
+
+    if (role === "ADMIN") {
+      await Comments.query().delete().where({ id: commentId, ticket_id: id });
+      await insertTicketHistory(
+        id,
+        userId,
+        "comment_deleted",
+        "Admin menghapus komentar orang lain"
+      );
+    } else {
+      await Comments.query()
+        .delete()
+        .where({ id: commentId, ticket_id: id, user_id: userId });
+    }
+    res.status(200).json({ message: "Comment deleted successfully." });
   } catch (error) {
     console.log(error);
     res
@@ -367,11 +382,42 @@ const removeComments = async (req, res) => {
 
 const updateComments = async (req, res) => {
   try {
-  } catch (error) {}
+    const { id, commentId } = req?.query;
+    const { customId: userId, role } = req?.user;
+    const { comment } = req?.body;
+
+    if (role === "ADMIN") {
+      await Comments.query()
+        .patch({
+          comment,
+        })
+        .patch({ id: commentId, ticket_id: id });
+
+      await insertTicketHistory(
+        id,
+        userId,
+        "comment_updated",
+        "Admin mengubah komentar orang lain"
+      );
+    } else {
+      await Comments.query()
+        .patch({
+          comment,
+        })
+        .where({ id: commentId, ticket_id: id, user_id: userId });
+    }
+  } catch (error) {
+    console.log(error);
+    res
+      .status(500)
+      .json({ message: "Something went wrong, please try again later." });
+  }
 };
 
 module.exports = {
   createComments,
+  removeComments,
+  updateComments,
   subscribe,
   unsubscribe,
   pinned,
