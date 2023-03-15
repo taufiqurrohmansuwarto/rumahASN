@@ -100,7 +100,10 @@ const CommentTicket = ({ item }) => {
           <span>Edit</span>
         </Can>,
         <Can key="hapus" I="update" on={new UserComment(item)}>
-          <Popconfirm title="Apakah kamu yakin ingin menghapus?">
+          <Popconfirm
+            onConfirm={handleHapus}
+            title="Apakah kamu yakin ingin menghapus?"
+          >
             <span>Hapus</span>
           </Popconfirm>
         </Can>,
