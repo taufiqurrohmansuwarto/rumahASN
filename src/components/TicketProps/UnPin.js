@@ -1,5 +1,5 @@
 import { unpin } from "@/services/index";
-import { LockOutlined } from "@ant-design/icons";
+import { ExclamationOutlined } from "@ant-design/icons";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Space, Typography } from "antd";
 
@@ -18,7 +18,7 @@ function UnpinTicket({ id }) {
 
   return (
     <Space onClick={handleSubmit}>
-      <LockOutlined />
+      <ExclamationOutlined />
       <Typography.Text style={{ fontSize: 12 }}>Pin Tiket</Typography.Text>
     </Space>
   );

@@ -1,5 +1,5 @@
 import { publishTickets } from "@/services/index";
-import { LockOutlined } from "@ant-design/icons";
+import { ReadOutlined } from "@ant-design/icons";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Space, Typography } from "antd";
 
@@ -18,7 +18,7 @@ function Publish({ id }) {
 
   return (
     <Space onClick={handleSubmit}>
-      <LockOutlined />
+      <ReadOutlined />
       <Typography.Text style={{ fontSize: 12 }}>Publish Ticket</Typography.Text>
     </Space>
   );

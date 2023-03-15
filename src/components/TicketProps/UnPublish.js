@@ -1,5 +1,5 @@
 import { unpublish } from "@/services/index";
-import { LockOutlined } from "@ant-design/icons";
+import { CloseSquareOutlined } from "@ant-design/icons";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Space, Typography } from "antd";
 
@@ -18,7 +18,7 @@ function Unpublish({ id }) {
 
   return (
     <Space onClick={handleSubmit}>
-      <LockOutlined />
+      <CloseSquareOutlined />
       <Typography.Text style={{ fontSize: 12 }}>
         Unpublish Ticket
       </Typography.Text>
