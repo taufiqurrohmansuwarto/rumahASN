@@ -22,5 +22,7 @@ notifikasi :
 1. ketika ada seseorang yang berkomentar pada tiketnya
 2. melakukan reaction pada tiketnya
 
+upgrade ke ant design v5?
+
 untuk rolenya nanti dulu
 
