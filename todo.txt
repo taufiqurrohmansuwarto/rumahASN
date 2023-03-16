@@ -4,3 +4,23 @@ create api
 - lock conversation and unlock
 - public and unpublic
 - pin and unpinned
+
+
+create table activities
+id, ticket_id, jenis, konten, tanggal dan waktu
+
+event terjadi ketika
+lebih ke arah riwayat
+
+1. user membuat tiket
+2. melakukan like
+3. membuka / melihat tiket
+4. berlangganan
+
+
+notifikasi : 
+1. ketika ada seseorang yang berkomentar pada tiketnya
+2. melakukan reaction pada tiketnya
+
+untuk rolenya nanti dulu
+
