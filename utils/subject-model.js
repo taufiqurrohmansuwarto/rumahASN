@@ -1,4 +1,8 @@
 export class CustomerTicket {
+  static get modelName() {
+    return "CustomerTicket";
+  }
+
   constructor({
     id,
     title,
@@ -25,6 +29,10 @@ export class CustomerTicket {
 }
 
 export class Comment {
+  static get modelName() {
+    return "Comment";
+  }
+
   constructor({ id, ticket_id, comment, user_id }) {
     this.id = id;
     this.ticket_id = ticket_id;
