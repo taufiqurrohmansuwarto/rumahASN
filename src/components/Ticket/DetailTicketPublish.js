@@ -197,8 +197,13 @@ const SideRight = ({ item }) => {
       </Col>
       <Col span={24}>
         <Space direction="vertical">
-          <Typography.Text style={{ fontSize: 12 }}>Notifikasi</Typography.Text>
-          <Button icon={<BellOutlined />}>Langganan</Button>
+          <Typography.Text style={{ fontSize: 12 }} type="secondary">
+            Notifikasi
+          </Typography.Text>
+          <Button icon={<BellOutlined />}>Berlangganan</Button>
+          <Typography.Text style={{ fontSize: 12 }}>
+            Kamu akan menerima notifikasi jika ada komentar baru
+          </Typography.Text>
         </Space>
         <Divider />
       </Col>
@@ -242,7 +247,6 @@ const TicketTitle = ({ item }) => {
           {formatDateFromNow(item?.created_at)}
         </Typography.Text>
       </Card>
-      <Divider />
     </div>
   );
 };
@@ -292,6 +296,7 @@ const DetailTicketPublish = ({ id }) => {
                   <Affix>
                     <TicketTitle item={data} />
                   </Affix>
+                  <Divider />
                 </Col>
               </Row>
               <Row gutter={[16, 32]}>
