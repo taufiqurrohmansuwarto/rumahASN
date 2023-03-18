@@ -8,6 +8,7 @@
       "@/models/*": ["models/*"],
       "@/services/*": ["services/*"],
       "@/utils/*": ["utils/*"],
+      "@/context/*" : ["context/*"],
     }
   }
 }

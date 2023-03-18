@@ -1,3 +1,4 @@
+import { definitions } from "@/utils/client-utils";
 import { MantineProvider } from "@mantine/core";
 import { ThemeProvider } from "@primer/react";
 import {
@@ -8,6 +9,7 @@ import {
 import { ConfigProvider } from "antd";
 import "antd/dist/antd.css";
 import id from "antd/lib/locale/id_ID";
+import { RBACProvider } from "context/RBACContext";
 import { SessionProvider, signIn, useSession } from "next-auth/react";
 import { useState } from "react";
 import Loading from "../src/components/Loading";
@@ -29,18 +31,25 @@ function Auth({ children, action, subject }) {
       id: data?.user?.id,
       current_role: data?.user?.current_role,
       organization: data?.user?.organization_id,
+      roles: [data?.user?.current_role],
     };
 
-    const userAbility = ability(user);
-    const isAllowed = userAbility.can(action, subject);
+    // const userAbility = ability(user);
+    // const isAllowed = userAbility.can(action, subject);
 
-    if (isAllowed) {
-      return (
-        <AbilityContext.Provider value={ability(user)}>
-          {children}
-        </AbilityContext.Provider>
-      );
-    }
+    // if (isAllowed) {
+    //   return (
+    //     <AbilityContext.Provider value={ability(user)}>
+    //       {children}
+    //     </AbilityContext.Provider>
+    //   );
+    // }
+
+    return (
+      <RBACProvider user={user} definitions={definitions}>
+        {children}
+      </RBACProvider>
+    );
   }
 }
 
