@@ -461,7 +461,61 @@ const removeTicket = async (req, res) => {
   }
 };
 
+const markAsAnswer = async (req, res) => {
+  try {
+    const { id, commentId } = req?.query;
+    const {
+      user: { customId: user_id },
+    } = req;
+
+    await Comments.query()
+      .patch({ is_answer: true })
+      .where({ id: commentId, ticket_id: id });
+    await insertTicketHistory(
+      id,
+      user_id,
+      "marked_as_answer",
+      "Ticket marked as answer"
+    );
+    res.status(200).json({ message: "Ticket marked as answer successfully." });
+  } catch (error) {
+    console.log(error);
+    res
+      .status(500)
+      .json({ message: "Something went wrong, please try again later." });
+  }
+};
+
+const unMarkAsAnswer = async (req, res) => {
+  try {
+    const { id, commentId } = req?.query;
+    const {
+      user: { customId: user_id },
+    } = req;
+
+    await Comments.query()
+      .patch({ is_answer: false })
+      .where({ id: commentId, ticket_id: id });
+    await insertTicketHistory(
+      id,
+      user_id,
+      "unmarked_as_answer",
+      "Ticket unmarked as answer"
+    );
+    res
+      .status(200)
+      .json({ message: "Ticket unmarked as answer successfully." });
+  } catch (error) {
+    console.log(error);
+    res
+      .status(500)
+      .json({ message: "Something went wrong, please try again later." });
+  }
+};
+
 module.exports = {
+  markAsAnswer,
+  unMarkAsAnswer,
   removeTicket,
   createComments,
   removeComments,

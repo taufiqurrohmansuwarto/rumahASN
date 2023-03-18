@@ -1,4 +1,4 @@
-import { NotificationOutlined } from "@ant-design/icons";
+import { BellOutlined } from "@ant-design/icons";
 import { useQuery } from "@tanstack/react-query";
 import { Badge, Tooltip } from "antd";
 import { useRouter } from "next/router";
@@ -19,13 +19,13 @@ function Notifications() {
   };
 
   return (
-    <div onClick={changePageNotification}>
-      <Tooltip title="Notifikasi">
-        <Badge count={isLoading ? null : data?.count} size="small">
-          <NotificationOutlined />
-        </Badge>
-      </Tooltip>
-    </div>
+    <Badge
+      onClick={changePageNotification}
+      count={isLoading ? null : data?.count}
+      size="default"
+    >
+      <BellOutlined />
+    </Badge>
   );
 }
 

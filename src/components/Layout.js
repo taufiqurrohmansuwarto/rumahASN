@@ -1,16 +1,43 @@
-import { UserOutlined, UserSwitchOutlined } from "@ant-design/icons";
+import {
+  BellOutlined,
+  GithubOutlined,
+  InfoCircleOutlined,
+  LogoutOutlined,
+  NotificationOutlined,
+  QuestionCircleOutlined,
+  SettingOutlined,
+  UserOutlined,
+  UserSwitchOutlined,
+} from "@ant-design/icons";
+import { Menu, Dropdown } from "antd";
 import { uniqBy } from "lodash";
-import { useSession } from "next-auth/react";
+import { signOut, useSession } from "next-auth/react";
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import React from "react";
 import { userRoutes } from "../routes";
 import Notifications from "./Notifications";
-import SignoutButton from "./SignoutButton";
+
+const menu = (
+  <Menu
+    items={[
+      {
+        key: "1",
+        label: "Notifikasi",
+        icon: <NotificationOutlined />,
+      },
+      {
+        key: "2",
+        label: "Keluar",
+
+        icon: <LogoutOutlined />,
+      },
+    ]}
+  />
+);
 
 const ProLayout = dynamic(
-  () => import("@ant-design/pro-layout").then((mod) => mod.ProLayout),
+  () => import("@ant-design/pro-components").then((mod) => mod?.ProLayout),
   {
     ssr: false,
   }
@@ -70,46 +97,62 @@ function Layout({ children, active }) {
   const { data, status } = useSession();
   const router = useRouter();
 
-  const token = {
-    colorBgAppListIconHover: "rgba(0,0,0,0.06)",
-    colorTextAppListIconHover: "rgba(255,255,255,0.95)",
-    colorTextAppListIcon: "rgba(255,255,255,0.85)",
-    sider: {
-      colorBgCollapsedButton: "#fff",
-      colorTextCollapsedButtonHover: "rgba(0,0,0,0.65)",
-      colorTextCollapsedButton: "rgba(0,0,0,0.45)",
-      colorMenuBackground: "#004FD9",
-      colorBgMenuItemCollapsedHover: "rgba(0,0,0,0.06)",
-      colorBgMenuItemCollapsedSelected: "rgba(0,0,0,0.15)",
-      colorMenuItemDivider: "rgba(255,255,255,0.15)",
-      colorBgMenuItemHover: "rgba(0,0,0,0.06)",
-      colorBgMenuItemSelected: "rgba(0,0,0,0.15)",
-      colorTextMenuSelected: "#fff",
-      colorTextMenu: "rgba(255,255,255,0.75)",
-      colorTextMenuSecondary: "rgba(255,255,255,0.65)",
-      colorTextMenuTitle: "rgba(255,255,255,0.95)",
-      colorTextMenuActive: "rgba(255,255,255,0.95)",
-      colorTextSubMenuSelected: "#fff",
-    },
-  };
-
   return (
     <ProLayout
+      theme="light"
       selectedKeys={[active ? active : router.pathname]}
-      title="Helpdesk"
+      title="BKD Helpdesk"
+      menuFooterRender={(props) => {
+        if (props?.collapsed) return undefined;
+        return (
+          <div
+            style={{
+              textAlign: "center",
+              paddingBlockStart: 12,
+            }}
+          >
+            <div>© 2023 BKD Helpdesk</div>
+            <div>by BKD Provinsi Jawa Timur</div>
+          </div>
+        );
+      }}
+      actionsRender={(props) => {
+        // if (props.isMobile) return [];
+        return [<Notifications key="Notifications" />];
+      }}
       avatarProps={{
         src: data?.user?.image,
-        size: "default",
+        size: "small",
         title: data?.user?.name,
-        shape: "circle",
+        render: (props, dom) => {
+          return (
+            <Dropdown
+              menu={{
+                onClick: (e) => {
+                  if (e.key === "logout") {
+                    signOut();
+                  }
+                },
+                items: [
+                  {
+                    key: "setting",
+                    icon: <SettingOutlined />,
+                    label: "Pengaturan",
+                  },
+                  {
+                    key: "logout",
+                    icon: <LogoutOutlined />,
+                    label: "Keluar",
+                  },
+                ],
+              }}
+            >
+              {dom}
+            </Dropdown>
+          );
+        },
       }}
-      defaultCollapsed={true}
-      actionsRender={() => {
-        return [
-          <Notifications key="notifications" />,
-          <SignoutButton key="signout" />,
-        ];
-      }}
+      // defaultCollapsed={true}
       menu={{
         request: async () => {
           try {
@@ -122,6 +165,7 @@ function Layout({ children, active }) {
         defaultOpenAll: true,
       }}
       menuItemRender={menuItemRender}
+      layout="mix"
       loading={status === "loading"}
     >
       {children}
