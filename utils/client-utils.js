@@ -12,3 +12,55 @@ export const formatDateLL = (data) => {
   //  return Sep, 24 2021
   return moment(data).format("DD, MMM YYYY", { locale: "id" });
 };
+
+const allUser = ["admin", "agent", "user"];
+const noAdmin = ["agent", "user"];
+const noUser = ["admin", "agent"];
+
+const user = ["user"];
+const agent = ["agent"];
+
+export const definitions = {
+  permissions: {
+    "create-ticket": {
+      roles: allUser,
+      displayName: "Create Ticket",
+      description: "To create new ticket",
+    },
+    "update-own-comment": {
+      roles: allUser,
+      displayName: "Create Own Comment",
+      description: "To create own comment",
+      attributeCheck: {
+        checkFunction: (attributes) =>
+          attributes?.user?.id === attributes?.user_id,
+        requiredRoles: noAdmin,
+      },
+    },
+    "update-feedback": {
+      roles: allUser,
+      displayName: "Update Feedback",
+      description: "To update feedback",
+      attributeCheck: {
+        checkFunction: (attributes) =>
+          attributes?.user?.id === attributes?.user_id,
+        requiredRoles: user,
+      },
+    },
+    "see-feedback": {
+      roles: user,
+      displayName: "See Feedback",
+      description: "To see feedback",
+    },
+    "remove-own-comment": {
+      roles: allUser,
+      displayName: "Remove Own Comment",
+      description: "To remove own comment",
+      attributeCheck: {
+        checkFunction: (attributes) =>
+          attributes?.user?.id === attributes?.comment?.user_id,
+        requiredRoles: noAdmin,
+      },
+    },
+  },
+};

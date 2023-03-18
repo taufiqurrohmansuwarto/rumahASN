@@ -1,3 +1,4 @@
+import RestrictedContent from "@/components/RestrictedContent";
 import TicketsPublish from "@/components/Ticket/TicketsPublish";
 import { Stack } from "@mantine/core";
 import { useQuery } from "@tanstack/react-query";
@@ -24,7 +25,7 @@ function Feeds() {
     >
       <Stack>
         <TicketsPublish />
-
+        <RestrictedContent name="see-feedback">hello world</RestrictedContent>
         <StatsGrid data={data} />
         <DetailTicket />
       </Stack>
