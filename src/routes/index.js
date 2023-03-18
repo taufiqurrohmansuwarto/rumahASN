@@ -16,7 +16,7 @@ export const userRoutes = {
     { path: "/feeds", name: "Beranda", icon: <HomeOutlined /> },
     {
       path: "/tickets",
-      name: "My Tiket",
+      name: "Tiket saya",
       icon: <MailOutlined />,
       routes: [
         {

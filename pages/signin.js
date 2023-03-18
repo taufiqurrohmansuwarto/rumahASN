@@ -12,8 +12,20 @@ const SignIn = ({ providers }) => {
       <Head>
         <title>BKD Helpdesk</title>
       </Head>
-      <Row style={{ minHeight: "100vh" }} align="middle" justify="center">
-        <Col span={8}>
+      <Row
+        style={{ minHeight: "100vh", padding: 16 }}
+        align="middle"
+        justify="center"
+      >
+        <Col md={6} xs={24}>
+          <Image
+            alt="Mountains"
+            src="https://siasn.bkd.jatimprov.go.id:9000/public/helpdesk-title.png"
+            width={550}
+            height={600}
+          />
+        </Col>
+        <Col md={8} xs={24}>
           <Typography.Title>BKD Helpdesk</Typography.Title>
           <Blockquote cite="- Scoot Bellsky">
             Great customer service starts with providing the right help, to the
@@ -65,14 +77,6 @@ const SignIn = ({ providers }) => {
               &#169; 2023 BKD Provinsi Jawa Timur
             </Typography.Text>
           </Space>
-        </Col>
-        <Col span={6}>
-          <Image
-            alt="Mountains"
-            src="https://siasn.bkd.jatimprov.go.id:9000/public/helpdesk-title.png"
-            width={550}
-            height={600}
-          />
         </Col>
       </Row>
     </>

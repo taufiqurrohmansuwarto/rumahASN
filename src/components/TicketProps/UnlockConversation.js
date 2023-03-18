@@ -37,7 +37,7 @@ function UnlockConversation({ id }) {
       <Space>
         <UnlockOutlined />
         <Typography.Link onClick={handleSubmit} style={{ fontSize: 12 }}>
-          Unlock Conversation
+          Buka Percakapan
         </Typography.Link>
       </Space>
     </Row>
