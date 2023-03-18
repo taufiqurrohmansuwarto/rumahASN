@@ -31,6 +31,7 @@ import {
   Tooltip,
   Typography,
   message,
+  Tag,
 } from "antd";
 import { useRouter } from "next/router";
 import { useState } from "react";
@@ -115,6 +116,7 @@ const CommentTicket = ({ item }) => {
         <NewTicket
           handleCancel={handleCancelEdit}
           setValue={setComment}
+          loadingSubmit={isLoadingEdit}
           value={comment}
           submitMessage={handleUpdate}
           withCancel={true}
@@ -158,6 +160,19 @@ const CommentTicket = ({ item }) => {
 const SideRight = ({ item }) => {
   return (
     <Row>
+      <Col span={24}>
+        <Space direction="vertical">
+          <Typography.Text type="secondary" style={{ fontSize: 12 }}>
+            Nomer Tiket
+          </Typography.Text>
+          <Tag>
+            <Typography.Text style={{ fontSize: 13 }}>
+              {item?.ticket_number}
+            </Typography.Text>
+          </Tag>
+        </Space>
+        <Divider />
+      </Col>
       <Col span={24}>
         <Space direction="vertical">
           <Typography.Text type="secondary" style={{ fontSize: 12 }}>
@@ -300,7 +315,6 @@ const DetailTicketPublish = ({ id }) => {
                       />
                     }
                   />
-                  {/* create vertical line */}
                   {data?.data?.map((item, index) => {
                     return (
                       <div key={item?.custom_id}>
@@ -317,6 +331,7 @@ const DetailTicketPublish = ({ id }) => {
                       submitMessage={handleSubmit}
                       value={value}
                       setValue={setValue}
+                      loadingSubmit={isLoadingCreate}
                     />
                   </Can>
                 </Col>

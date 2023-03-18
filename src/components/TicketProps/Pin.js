@@ -1,17 +1,19 @@
 import { pin } from "@/services/index";
 import { PushpinOutlined } from "@ant-design/icons";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Modal, Row, Space, Typography } from "antd";
+import { message, Modal, Row, Space, Typography } from "antd";
 
 const { confirm } = Modal;
 
 function Pin({ id }) {
   const queryClient = useQueryClient();
 
-  const { mutate, isLoading } = useMutation((data) => pin(data), {
+  const { mutateAsync, isLoading } = useMutation((data) => pin(data), {
     onSuccess: () => {
       queryClient.invalidateQueries(["publish-ticket", id]);
+      message.success("Tiket berhasil dipin");
     },
+    onError: () => message.error("Tiket gagal dipin"),
   });
 
   const handleSubmit = () => {
@@ -22,8 +24,8 @@ function Pin({ id }) {
       centered: true,
       content:
         "Tiket yang sudah dipin akan muncul di halaman utama. Maksimal 3 tiket yang dapat dipin",
-      onOk: () => {
-        // mutate(id)
+      onOk: async () => {
+        mutateAsync(id);
       },
     });
   };

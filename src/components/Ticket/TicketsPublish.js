@@ -1,5 +1,5 @@
 import { publishTickets } from "@/services/index";
-import { formatDateFromNow } from "@/utils/client-utils";
+import { formatDateFromNow, formatDateLL } from "@/utils/client-utils";
 import { MessageOutlined } from "@ant-design/icons";
 import { useQuery } from "@tanstack/react-query";
 import { Avatar, List, Space, Typography } from "antd";
@@ -34,11 +34,10 @@ function TicketsPublish() {
               title={<TitleLink item={item} />}
               description={
                 <div>
-                  dibuat tanggal {formatDateFromNow(item?.customer?.created_at)}{" "}
-                  oleh {item?.customer?.username}
+                  Ditanyakan tanggal {formatDateLL(item?.created_at)} oleh{" "}
+                  {item?.customer?.username}
                 </div>
               }
-              avatar={<Avatar src={item?.customer?.image} />}
             />
             {/* create comment icon with total */}
             <Space size="small">

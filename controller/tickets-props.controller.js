@@ -130,7 +130,7 @@ const pinned = async (req, res) => {
   const ticket = await Ticket.query().findById(id);
 
   // max 3 pinned tickets
-  const pinnedTickets = await Ticket.query().where({ is_pin: true });
+  const pinnedTickets = await Ticket.query().where({ is_pinned: true });
   if (!ticket) {
     res.status(404).json({ message: "Ticket not found." });
   } else {
@@ -363,16 +363,21 @@ const removeComments = async (req, res) => {
     });
 
     if (role === "admin") {
-      await Comments.query().delete().where({ id: commentId, ticket_id: id });
-      console.log(commentId, id);
-
       if (currentComment.user_id !== userId) {
+        await Comments.query()
+          .patch({ comment: "_Komentar dihapus oleh admin_" })
+          .where({ id: commentId, ticket_id: id });
+
         await insertTicketHistory(
           id,
           userId,
           "comment_deleted",
           "Admin menghapus komentar orang lain"
         );
+      } else {
+        await Comments.query()
+          .delete()
+          .where({ id: commentId, ticket_id: id, user_id: userId });
       }
     } else {
       await Comments.query()
@@ -399,18 +404,24 @@ const updateComments = async (req, res) => {
     });
 
     if (role === "admin") {
-      await Comments.query()
-        .patch({
-          comment,
-        })
-        .patch({ id: commentId, ticket_id: id });
       if (currentComment.user_id !== userId) {
+        await Comments.query()
+          .patch({
+            comment,
+          })
+          .where({ id: commentId, ticket_id: id });
         await insertTicketHistory(
           id,
           userId,
           "comment_updated",
           "Admin mengubah komentar orang lain"
         );
+      } else {
+        await Comments.query()
+          .patch({
+            comment,
+          })
+          .where({ id: commentId, ticket_id: id, user_id: userId });
       }
     } else {
       await Comments.query()
