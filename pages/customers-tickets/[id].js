@@ -4,11 +4,7 @@ import { useRouter } from "next/router";
 
 const DetailTicketCustomers = () => {
   const router = useRouter();
-  return (
-    <div>
-      <DetailTicketPublish id={router?.query?.id} />
-    </div>
-  );
+  return <DetailTicketPublish id={router?.query?.id} />;
 };
 
 // add layout

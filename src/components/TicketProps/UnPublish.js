@@ -7,7 +7,7 @@ const { confirm } = Modal;
 function Unpublish({ id }) {
   const queryClient = useQueryClient();
 
-  const { mutate, isLoading } = useMutation((data) => unpublish(data), {
+  const { mutateAsync } = useMutation((data) => unpublish(data), {
     onSuccess: () => {
       queryClient.invalidateQueries(["publish-ticket", id]);
     },
@@ -15,8 +15,8 @@ function Unpublish({ id }) {
 
   const handleSubmit = () => {
     confirm({
-      onOk: () => {
-        // mutate(id);
+      onOk: async () => {
+        await mutateAsync(id);
       },
       width: 800,
       centered: true,

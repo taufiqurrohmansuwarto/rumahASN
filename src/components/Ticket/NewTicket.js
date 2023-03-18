@@ -7,6 +7,7 @@ const NewTicket = ({
   value,
   setValue,
   submitMessage,
+  loadingSubmit,
   withCancel = false,
   handleCancel,
 }) => {
@@ -55,7 +56,7 @@ const NewTicket = ({
                 </MarkdownEditor.ActionButton>
               )}
               <MarkdownEditor.ActionButton
-                disabled={!value}
+                disabled={!value || loadingSubmit}
                 variant="primary"
                 size="medium"
                 onClick={submitMessage}
