@@ -53,6 +53,18 @@ const renderListItem = function (text, task) {
   }
 };
 
+const blockquote = function (quote) {
+  return (
+    `<blockquote style="color: #666;
+    padding-left: 3em;
+    margin-bottom: 1em;
+    margin-top: 1em;
+    border-left: 0.5em #eee solid">` +
+    quote +
+    "</blockquote>"
+  );
+};
+
 const link = function (href, title, text) {
   // add http if not present in href example : bkd.jatimprov.go.id => http://bkd.jatimprov.go.id
   const regex = /^(http|https):\/\//;
@@ -75,6 +87,9 @@ const renderer = {
   },
   link(href, title, text) {
     return link(href, title, text);
+  },
+  blockquote(quote) {
+    return blockquote(quote);
   },
 };
 
