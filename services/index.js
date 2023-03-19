@@ -271,3 +271,11 @@ export const markAnswerTicket = (id, commentId) => {
 export const unmarkAnswerTicket = (id, commentId) => {
   return api.delete(`/tickets/${id}/comments/${commentId}/mark-answer`);
 };
+
+export const subscribeTicket = (id) => {
+  return api.put(`/tickets/${id}/subscribe`);
+};
+
+export const unsubscribeTicket = (id) => {
+  return api.delete(`/tickets/${id}/subscribe`);
+};

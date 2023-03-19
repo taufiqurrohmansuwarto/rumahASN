@@ -27,14 +27,41 @@ export const definitions = {
       displayName: "Create Ticket",
       description: "To create new ticket",
     },
-    "update-own-comment": {
+    "edit-comment": {
       roles: allUser,
       displayName: "Create Own Comment",
       description: "To create own comment",
       attributeCheck: {
-        checkFunction: (attributes) =>
-          attributes?.user?.id === attributes?.user_id,
+        checkFunction: (attributes) => {
+          return attributes?.user?.id === attributes?.comment?.user_id;
+        },
         requiredRoles: noAdmin,
+      },
+    },
+    "remove-comment": {
+      roles: allUser,
+      displayName: "Remove Own Comment",
+      description: "To remove own comment",
+      attributeCheck: {
+        checkFunction: (attributes) =>
+          attributes?.user?.id === attributes?.comment?.user_id,
+        requiredRoles: noAdmin,
+      },
+    },
+    "create-comment": {
+      roles: allUser,
+      displayName: "Create Own Comment",
+      description: "To create own comment",
+    },
+    "options-ticket": {
+      roles: ["admin", "agent"],
+      displayName: "Options Ticket",
+      description: "To see options ticket",
+      attributeCheck: {
+        checkFunction: (attributes) => {
+          return attributes?.user?.id === attributes?.ticket?.assignee;
+        },
+        requiredRoles: ["agent"],
       },
     },
     "update-feedback": {
@@ -51,16 +78,6 @@ export const definitions = {
       roles: user,
       displayName: "See Feedback",
       description: "To see feedback",
-    },
-    "remove-own-comment": {
-      roles: allUser,
-      displayName: "Remove Own Comment",
-      description: "To remove own comment",
-      attributeCheck: {
-        checkFunction: (attributes) =>
-          attributes?.user?.id === attributes?.comment?.user_id,
-        requiredRoles: noAdmin,
-      },
     },
   },
 };

@@ -6,43 +6,38 @@ import {
 } from "@/services/index";
 import { formatDateFromNow } from "@/utils/client-utils";
 import { formatDate } from "@/utils/index";
-import { CustomerTicket, Comment as UserComment } from "@/utils/subject-model";
-import {
-  BellOutlined,
-  CheckCircleOutlined,
-  DeleteOutlined,
-  LockOutlined,
-  PushpinOutlined,
-} from "@ant-design/icons";
+import { LockOutlined } from "@ant-design/icons";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Affix,
   Avatar,
   BackTop,
-  Button,
   Card,
   Col,
   Comment,
   Divider,
+  message,
   Popconfirm,
   Row,
   Skeleton,
   Space,
+  Tag,
+  Timeline,
   Tooltip,
   Typography,
-  message,
-  Tag,
 } from "antd";
 import { useRouter } from "next/router";
 import { useState } from "react";
-import { Can } from "src/context/Can";
+import RestrictedContent from "../RestrictedContent";
 import LockConversation from "../TicketProps/LockConversation";
 import Pin from "../TicketProps/Pin";
 import Publish from "../TicketProps/Publish";
 import RemoveTicket from "../TicketProps/Remove";
+import Subscribe from "../TicketProps/Subscribe";
 import UnlockConversation from "../TicketProps/UnlockConversation";
 import UnpinTicket from "../TicketProps/UnPin";
 import Unpublish from "../TicketProps/UnPublish";
+import Unsubscribe from "../TicketProps/Unsubscribe";
 import NewTicket from "./NewTicket";
 
 const CommentDescription = ({ item }) => {
@@ -122,36 +117,63 @@ const CommentTicket = ({ item }) => {
           withCancel={true}
         />
       ) : (
-        <Comment
-          style={{
-            border: "1px solid #cecece",
-            padding: 10,
-            borderRadius: 10,
-            marginTop: 10,
-            marginBottom: 10,
-          }}
-          actions={[
-            <Can key="edit" I="update" on={new UserComment(item)}>
-              <span onClick={handleAccEdit}>Edit</span>
-            </Can>,
-            <Can key="hapus" I="update" on={new UserComment(item)}>
-              <Popconfirm
-                onConfirm={handleHapus}
-                title="Apakah kamu yakin ingin menghapus?"
+        <div>
+          <Comment
+            style={{
+              border: "1px solid #cecece",
+              padding: 10,
+              borderRadius: 10,
+              marginTop: 10,
+              marginBottom: 10,
+            }}
+            actions={[
+              <RestrictedContent
+                key="edit-comment"
+                attributes={{ comment: item }}
+                name="edit-comment"
               >
-                <span>Hapus</span>
-              </Popconfirm>
-            </Can>,
-          ]}
-          author={item?.user?.username}
-          datetime={
-            <Tooltip title={formatDate(item?.created_at)}>
-              <span>{formatDateFromNow(item?.created_at)}</span>
-            </Tooltip>
-          }
-          avatar={<Avatar src={item?.user?.image} />}
-          content={<div dangerouslySetInnerHTML={{ __html: item?.comment }} />}
-        />
+                <span onClick={handleAccEdit}>Edit</span>
+              </RestrictedContent>,
+              <RestrictedContent
+                key="remove-comment"
+                name="remove-comment"
+                attributes={{ comment: item }}
+              >
+                <Popconfirm
+                  onConfirm={handleHapus}
+                  title="Apakah kamu yakin ingin menghapus?"
+                >
+                  <span>Hapus</span>
+                </Popconfirm>
+              </RestrictedContent>,
+            ]}
+            author={item?.user?.username}
+            datetime={
+              <Tooltip title={formatDate(item?.created_at)}>
+                <span>{formatDateFromNow(item?.created_at)}</span>
+              </Tooltip>
+            }
+            avatar={<Avatar src={item?.user?.image} />}
+            content={
+              <div dangerouslySetInnerHTML={{ __html: item?.comment }} />
+            }
+          />
+          {item?.timelineItems?.length > 0 && (
+            <Timeline>
+              {item?.timelineItems?.map((timeline) => (
+                <Timeline.Item dot={<LockOutlined />} key={timeline.custom_id}>
+                  <Space>
+                    <Avatar size="small" src={timeline?.user?.image} />
+                    <Typography.Text type="secondary" style={{ fontSize: 11 }}>
+                      {timeline?.user?.username} {timeline?.comment}{" "}
+                      {formatDateFromNow(timeline?.created_at)}
+                    </Typography.Text>
+                  </Space>
+                </Timeline.Item>
+              ))}
+            </Timeline>
+          )}
+        </div>
       )}
     </>
   );
@@ -196,24 +218,32 @@ const SideRight = ({ item }) => {
         <Divider />
       </Col>
       <Col span={24}>
+        {item?.is_subscribe ? (
+          <Unsubscribe id={item?.id} />
+        ) : (
+          <Subscribe id={item?.id} />
+        )}
+      </Col>
+      <Divider />
+      <Col span={24}>
         <Space direction="vertical">
-          <Typography.Text style={{ fontSize: 12 }} type="secondary">
-            Notifikasi
-          </Typography.Text>
-          <Button icon={<BellOutlined />}>Berlangganan</Button>
           <Typography.Text style={{ fontSize: 12 }}>
-            Kamu akan menerima notifikasi jika ada komentar baru
+            {item?.participants?.length}{" "}
+            {item?.participants?.length > 1 ? "Peserta" : "Peserta"}
           </Typography.Text>
+          {item?.participants?.length > 0 && (
+            <Avatar.Group>
+              {item?.participants?.map((item) => (
+                <Tooltip title={item?.username} key={item?.custom_id}>
+                  <Avatar src={item?.image} />
+                </Tooltip>
+              ))}
+            </Avatar.Group>
+          )}
         </Space>
         <Divider />
       </Col>
-      <Col span={24}>
-        <Typography.Text style={{ fontSize: 12 }}>
-          3 Partisipants
-        </Typography.Text>
-        <Divider />
-      </Col>
-      <Can I="update" on={new CustomerTicket(item)}>
+      <RestrictedContent name="options-ticket" attributes={{ ticket: item }}>
         <Col span={24}>
           {item?.is_published ? (
             <Unpublish id={item?.id} />
@@ -232,7 +262,7 @@ const SideRight = ({ item }) => {
           )}
           <RemoveTicket />
         </Col>
-      </Can>
+      </RestrictedContent>
     </Row>
   );
 };
@@ -293,7 +323,7 @@ const DetailTicketPublish = ({ id }) => {
             <Col span={18}>
               <Row gutter={[8, 16]}>
                 <Col span={24}>
-                  <Affix>
+                  <Affix offsetTop={40}>
                     <TicketTitle item={data} />
                   </Affix>
                   <Divider />
@@ -331,14 +361,14 @@ const DetailTicketPublish = ({ id }) => {
                       </div>
                     );
                   })}
-                  <Can I="create" a="Comment">
+                  <RestrictedContent name="create-comment">
                     <NewTicket
                       submitMessage={handleSubmit}
                       value={value}
                       setValue={setValue}
                       loadingSubmit={isLoadingCreate}
                     />
-                  </Can>
+                  </RestrictedContent>
                 </Col>
                 <Col span={6}>
                   <SideRight item={data} />

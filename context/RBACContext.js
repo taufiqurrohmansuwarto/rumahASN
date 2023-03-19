@@ -15,9 +15,14 @@ export const RBACProvider = ({ user, definitions, children }) => {
     if (permission.attributeCheck) {
       const { checkFunction, requiredRoles } = permission.attributeCheck;
 
-      if (requiredRoles.some((role) => !user.roles.includes(role))) {
+      if (requiredRoles.some((role) => user.roles.includes(role))) {
         return checkFunction({ ...attributes, user });
       }
+    }
+
+    if (permission.modelCheck) {
+      const { checkFunction } = permission.modelCheck;
+      return checkFunction({ ...attributes });
     }
 
     return true;

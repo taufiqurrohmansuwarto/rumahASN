@@ -117,7 +117,47 @@ const serializeHistories = (histories) => {
   }
 };
 
+const sortByTimestamp = (a, b) => {
+  if (a.created_at < b.created_at) return -1;
+  if (a.created_at > b.created_at) return 1;
+  return 0;
+};
+
+const serializeData = (data) => {
+  const serializedData = [];
+
+  for (let i = 0; i < data.length; i++) {
+    if (data[i].type === "comment") {
+      const timelineItems = [];
+
+      for (let j = i + 1; j < data.length; j++) {
+        if (data[j].type === "history") {
+          timelineItems.push(data[j]);
+        } else if (data[j].type === "comment") {
+          break;
+        }
+      }
+
+      serializedData.push({
+        ...data[i],
+        timelineItems,
+      });
+    } else if (data[i].type === "history" && i === 0) {
+      serializedData.push({
+        type: "comment",
+        id: null,
+        author: null,
+        content: null,
+        timelineItems: [data[i]],
+      });
+    }
+  }
+
+  return serializedData;
+};
+
 module.exports = {
+  serializeData,
   extractMentions,
   extractHashtags,
   parseMarkdown,
