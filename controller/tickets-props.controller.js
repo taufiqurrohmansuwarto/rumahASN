@@ -3,9 +3,15 @@ const TicketsSubscriptions = require("../models/tickets_subscriptions.model");
 const TicketsReactions = require("../models/tickets_reactions.model");
 const TicketHistories = require("../models/tickets_histories.model");
 const Comments = require("../models/tickets_comments_customers.model");
+const Subscriptions = require("../models/tickets_subscriptions.model");
 
 const { insertTicketHistory } = require("@/utils/tickets-utilities");
-const { serializeComments, serializeHistories } = require("@/utils/parsing");
+const {
+  serializeComments,
+  serializeHistories,
+  serializeData,
+} = require("@/utils/parsing");
+const { uniqBy } = require("lodash");
 
 const publishedTickets = async (req, res) => {
   try {
@@ -54,9 +60,16 @@ const detailPublishTickets = async (req, res) => {
       .withGraphFetched("user(simpleSelect)")
       .orderBy("created_at", "asc");
 
+    const isSubscribe = await Subscriptions.query().where({
+      ticket_id: id,
+      user_id: req?.user?.customId,
+    });
+
     const histories = await TicketHistories.query()
       .where({ ticket_id: id })
       .withGraphFetched("user(simpleSelect)");
+
+    const participants = uniqBy(comments, "user_id").map((item) => item?.user);
 
     const dataAddition = [
       ...serializeComments(comments),
@@ -67,7 +80,9 @@ const detailPublishTickets = async (req, res) => {
 
     const data = {
       ...result,
-      data: dataAddition,
+      data: serializeData(dataAddition),
+      is_subscribe: isSubscribe.length > 0,
+      participants,
     };
 
     res.json(data);
@@ -138,7 +153,12 @@ const pinned = async (req, res) => {
       res.status(400).json({ message: "You can only pin 3 tickets." });
     } else {
       await Ticket.query().patch({ is_pinned: true }).where({ id });
-      await insertTicketHistory(id, user_id, "pinned", "Ticket pinned");
+      await insertTicketHistory(
+        id,
+        user_id,
+        "pinned",
+        "menandai tiket ini sebagai penting"
+      );
       // should be added to the ticket history
       res.status(200).json({ message: "Ticket pinned successfully." });
     }
@@ -158,7 +178,12 @@ const unPinned = async (req, res) => {
       res.status(404).json({ message: "Ticket not found." });
     } else {
       await Ticket.query().patch({ is_pinned: false }).where({ id });
-      await insertTicketHistory(id, user_id, "unpinned", "Ticket unpinned");
+      await insertTicketHistory(
+        id,
+        user_id,
+        "unpinned",
+        "menghapus tanda penting pada tiket ini"
+      );
       // should be added to the ticket history
       res.status(200).json({ message: "Ticket unpinned successfully." });
     }
@@ -237,7 +262,12 @@ const lockConversation = async (req, res) => {
       res.status(404).json({ message: "Ticket not found." });
     } else {
       await Ticket.query().patch({ is_locked: true }).where({ id });
-      await insertTicketHistory(id, user_id, "locked", "Ticket locked");
+      await insertTicketHistory(
+        id,
+        user_id,
+        "locked",
+        "Mengunci dan membatasi tanggapan dari pengguna lain"
+      );
       // should be added to the ticket history
       res.status(200).json({ message: "Ticket locked successfully." });
     }
@@ -262,7 +292,12 @@ const unLockConversation = async (req, res) => {
       res.status(404).json({ message: "Ticket not found." });
     } else {
       await Ticket.query().patch({ is_locked: false }).where({ id });
-      await insertTicketHistory(id, user_id, "unlocked", "Ticket unlocked");
+      await insertTicketHistory(
+        id,
+        user_id,
+        "unlocked",
+        "Membuka kembali tanggapan dari pengguna lain"
+      );
       // should be added to the ticket history
       res.status(200).json({ message: "Ticket unlocked successfully." });
     }

@@ -34,7 +34,7 @@ function UnpinTicket({ id }) {
       <Space>
         <ExclamationOutlined />
         <Typography.Link style={{ fontSize: 12 }} onClick={handleSubmit}>
-          Pin Tiket
+          Unpin Tiket
         </Typography.Link>
       </Space>
     </Row>
