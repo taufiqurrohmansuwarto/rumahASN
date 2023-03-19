@@ -1,24 +1,51 @@
 import { SettingOutlined } from "@ant-design/icons";
 import { useState } from "react";
-import { Modal } from "antd";
+import { Form, Modal, Select } from "antd";
+import { useQuery } from "@tanstack/react-query";
+import { refAgents } from "@/services/index";
 
-const AssigneeModal = ({ open, onCancel, onOk }) => {
+const AssigneeModal = ({ open, onCancel, onOk, agents }) => {
+  const [form] = Form.useForm();
+
   return (
     <Modal
       title="Pilih Penerima Tugas"
       centered
+      destroyOnClose
       open={open}
       onCancel={onCancel}
       onOk={onOk}
     >
-      <div>Assignee Modal</div>
+      <Form form={form}>
+        <Form.Item>
+          <Select>
+            {agents?.map((agent) => (
+              <Select.Option key={agent.custom_id} value={agent.custom_id}>
+                {agent.username}
+              </Select.Option>
+            ))}
+          </Select>
+        </Form.Item>
+      </Form>
     </Modal>
   );
 };
 
 function ChangeAssignee({ id, userId }) {
+  const { data: agents, isLoading: isLoadingAgents } = useQuery(
+    ["refs-agents"],
+    () => refAgents(),
+    {
+      refetchOnWindowFocus: false,
+    }
+  );
+
   const [open, setOpen] = useState(false);
-  const handleShowModal = () => setOpen(true);
+  const handleShowModal = () => {
+    if (isLoadingAgents) return;
+    setOpen(true);
+  };
+
   const handleCancelModal = () => setOpen(false);
   const handleOkModal = () => {};
 
@@ -34,6 +61,7 @@ function ChangeAssignee({ id, userId }) {
       <AssigneeModal
         userId={userId}
         open={open}
+        agents={agents}
         onCancel={handleCancelModal}
         onOk={handleOkModal}
       />

@@ -279,3 +279,20 @@ export const subscribeTicket = (id) => {
 export const unsubscribeTicket = (id) => {
   return api.delete(`/tickets/${id}/subscribe`);
 };
+
+// references
+export const refAgents = () => {
+  return api.get("/references/agents").then((res) => res?.data);
+};
+
+export const refCategories = () => {
+  return api.get("/references/categories").then((res) => res?.data);
+};
+
+export const refPriorities = () => {
+  return api.get("/references/priorities").then((res) => res?.data);
+};
+
+export const refStatus = () => {
+  return api.get("/references/status").then((res) => res?.data);
+};
