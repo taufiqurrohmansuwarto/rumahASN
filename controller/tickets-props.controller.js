@@ -53,7 +53,7 @@ const detailPublishTickets = async (req, res) => {
       .where({ is_published: true, id })
       .select("*", Ticket.relatedQuery("comments").count().as("comments_count"))
       .withGraphFetched(
-        "[customer(simpleSelect), agent(simpleSelect), admin(simpleSelect)]"
+        "[customer(simpleSelect), agent(simpleSelect), admin(simpleSelect), sub_category.[category]]"
       )
       .first();
 
@@ -433,40 +433,20 @@ const removeComments = async (req, res) => {
 const updateComments = async (req, res) => {
   try {
     const { id, commentId } = req?.query;
-    const { customId: userId, current_role: role } = req?.user;
+    const { customId: userId } = req?.user;
     const { comment } = req?.body;
 
-    const currentComment = await Comments.query().findOne({
-      id: commentId,
-    });
-
-    if (role === "admin") {
-      if (currentComment.user_id !== userId) {
-        await Comments.query()
-          .patch({
-            comment,
-          })
-          .where({ id: commentId, ticket_id: id });
-        await insertTicketHistory(
-          id,
-          userId,
-          "comment_updated",
-          "Admin mengubah komentar orang lain"
-        );
-      } else {
-        await Comments.query()
-          .patch({
-            comment,
-          })
-          .where({ id: commentId, ticket_id: id, user_id: userId });
-      }
-    } else {
-      await Comments.query()
-        .patch({
-          comment,
-        })
-        .where({ id: commentId, ticket_id: id, user_id: userId });
-    }
+    await Comments.query()
+      .patch({
+        comment,
+        is_edited: true,
+        updated_at: new Date(),
+      })
+      .where({
+        id: commentId,
+        ticket_id: id,
+        user_id: userId,
+      });
     res.status(200).json({ message: "Comment updated successfully." });
   } catch (error) {
     console.log(error);
@@ -551,7 +531,17 @@ const unMarkAsAnswer = async (req, res) => {
   }
 };
 
+// todo : add reactions
+const editTicket = async (req, res) => {};
+const changePriorityAndSubCategory = async (req, res) => {};
+const changeAgent = async (req, res) => {};
+const changeStatus = async (req, res) => {};
+
 module.exports = {
+  changePriorityAndSubCategory,
+  changeAgent,
+  changeStatus,
+  editTicket,
   markAsAnswer,
   unMarkAsAnswer,
   removeTicket,

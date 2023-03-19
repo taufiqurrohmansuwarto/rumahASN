@@ -6,9 +6,13 @@ import {
   unmarkAnswerTicket,
   updateCommentCustomer,
 } from "@/services/index";
-import { formatDateFromNow } from "@/utils/client-utils";
+import {
+  formatDateFromNow,
+  setColorPrioritas,
+  setColorStatus,
+} from "@/utils/client-utils";
 import { formatDate } from "@/utils/index";
-import { LockOutlined } from "@ant-design/icons";
+import { LockOutlined, SettingOutlined } from "@ant-design/icons";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Affix,
@@ -32,6 +36,9 @@ import {
 import { useRouter } from "next/router";
 import { useState } from "react";
 import RestrictedContent from "../RestrictedContent";
+import ChangeSubCategory from "../TicketProps/ChageSubCategory";
+import ChangeAssignee from "../TicketProps/ChangeAssignee";
+import ChangeStatus from "../TicketProps/ChangeStatus";
 import LockConversation from "../TicketProps/LockConversation";
 import Pin from "../TicketProps/Pin";
 import Publish from "../TicketProps/Publish";
@@ -199,7 +206,14 @@ const CommentTicket = ({ item, agent, customer, admin }) => {
             author={item?.user?.username}
             datetime={
               <Tooltip title={formatDate(item?.created_at)}>
-                <span>{formatDateFromNow(item?.created_at)}</span>
+                <Space>
+                  <span>
+                    {item?.is_edited
+                      ? formatDateFromNow(item?.updated_at)
+                      : formatDateFromNow(item?.created_at)}
+                  </span>
+                  {item?.is_edited && <span>&#8226; diedit</span>}
+                </Space>
               </Tooltip>
             }
             avatar={<Avatar src={item?.user?.image} />}
@@ -233,36 +247,79 @@ const SideRight = ({ item }) => {
     <Row>
       <Col span={24}>
         <Space direction="vertical">
-          <Typography.Text type="secondary" style={{ fontSize: 12 }}>
-            Nomer Tiket
-          </Typography.Text>
-          <Tag>
-            <Typography.Text style={{ fontSize: 13 }}>
-              {item?.ticket_number}
+          <Space align="start">
+            <Typography.Text type="secondary" style={{ fontSize: 12 }}>
+              Kategori dan Prioritas
             </Typography.Text>
+            <ChangeSubCategory />
+          </Space>
+          <Space>
+            <Typography.Text style={{ fontSize: 13 }}>
+              {item?.sub_category_id
+                ? item?.sub_category?.category?.name
+                : "Tidak ada"}
+            </Typography.Text>
+            {item?.priority_code && (
+              <Tag color={setColorPrioritas(item?.priority_code)}>
+                {item?.priority_code}
+              </Tag>
+            )}
+          </Space>
+        </Space>
+        <Divider />
+      </Col>
+      <Col span={24}>
+        <Space direction="vertical">
+          <Space align="start">
+            <Typography.Text type="secondary" style={{ fontSize: 12 }}>
+              Status
+            </Typography.Text>
+            <ChangeStatus />
+          </Space>
+          <Tag color={setColorStatus(item?.status_code)}>
+            {item?.status_code}
           </Tag>
         </Space>
         <Divider />
       </Col>
       <Col span={24}>
         <Space direction="vertical">
-          <Typography.Text type="secondary" style={{ fontSize: 12 }}>
-            Penerima Tugas
-          </Typography.Text>
-          <Typography.Text style={{ fontSize: 13 }}>
-            {item?.assignee ? "Belum ada" : item?.assignee?.username}
-          </Typography.Text>
+          <Space>
+            <Typography.Text type="secondary" style={{ fontSize: 12 }}>
+              Penerima Tugas
+            </Typography.Text>
+            <ChangeAssignee id={item?.id} userId={item?.assignee} />
+          </Space>
+          {!item?.assignee ? (
+            <Typography.Text style={{ fontSize: 13 }}>
+              Belum Ada
+            </Typography.Text>
+          ) : (
+            <Space>
+              <Tooltip title={item?.agent?.username}>
+                <Avatar size="small" src={item?.agent?.image} />
+              </Tooltip>
+            </Space>
+          )}
         </Space>
         <Divider />
       </Col>
       <Col span={24}>
         <Space direction="vertical">
           <Typography.Text type="secondary" style={{ fontSize: 12 }}>
-            Pemilih Agent
+            Pemilih Penerima Tugas
           </Typography.Text>
-          <Typography.Text style={{ fontSize: 13 }}>
-            {item?.chooser ? "Belum ada" : item?.assignee?.username}
-          </Typography.Text>
+          {!item?.chooser ? (
+            <Typography.Text style={{ fontSize: 13 }}>
+              Belum Ada
+            </Typography.Text>
+          ) : (
+            <Space>
+              <Tooltip title={item?.admin?.username}>
+                <Avatar size="small" src={item?.admin?.image} />
+              </Tooltip>
+            </Space>
+          )}
         </Space>
         <Divider />
       </Col>
@@ -410,7 +467,10 @@ const DetailTicketPublish = ({ id }) => {
                       />
                     );
                   })}
-                  <RestrictedContent name="create-comment">
+                  <RestrictedContent
+                    name="create-comment"
+                    attributes={{ ticket: data }}
+                  >
                     <Divider />
                     <NewTicket
                       submitMessage={handleSubmit}

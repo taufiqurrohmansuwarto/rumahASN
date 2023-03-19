@@ -35,7 +35,7 @@ export const definitions = {
         checkFunction: (attributes) => {
           return attributes?.user?.id === attributes?.comment?.user_id;
         },
-        requiredRoles: noAdmin,
+        requiredRoles: allUser,
       },
     },
     "remove-comment": {
@@ -52,6 +52,18 @@ export const definitions = {
       roles: allUser,
       displayName: "Create Own Comment",
       description: "To create own comment",
+      modelCheck: {
+        model: "ticket",
+        checkFunction: (model, attributes) => {
+          if (model === "ticket") {
+            return (
+              attributes?.ticket?.is_published && !attributes?.ticket?.is_locked
+            );
+          }
+          return true;
+        },
+        requiredRoles: noAdmin,
+      },
     },
     "mark-answer": {
       roles: noUser,
@@ -90,5 +102,56 @@ export const definitions = {
       displayName: "See Feedback",
       description: "To see feedback",
     },
+    "change-priority-kategory": {
+      roles: noUser,
+      displayName: "Change Priority Kategory",
+      description: "To change priority kategory",
+      attributeCheck: {
+        checkFunction: (attributes) => {
+          return attributes?.user?.id === attributes?.ticket?.assignee;
+        },
+        requiredRoles: ["agent"],
+      },
+    },
+    "change-status": {
+      roles: noUser,
+      displayName: "Change Status",
+      description: "To change status",
+      attributeCheck: {
+        checkFunction: (attributes) => {
+          return attributes?.user?.id === attributes?.ticket?.assignee;
+        },
+        requiredRoles: ["agent"],
+      },
+    },
+    "change-agent": {
+      roles: ["admin"],
+      displayName: "to change agent",
+      description: "To change agent",
+    },
   },
+};
+
+export const setColorStatus = (status) => {
+  if (status === "DIAJUKAN") {
+    return "#FFC107";
+  } else if (status === "SELESAI") {
+    return "#00FF00";
+  } else if (status === "DIKERJAKAN") {
+    return "#0000FF";
+  } else {
+    return "#000";
+  }
+};
+
+export const setColorPrioritas = (prioritas) => {
+  if (prioritas === "RENDAH") {
+    return "#00FF00";
+  } else if (prioritas === "SEDANG") {
+    return "#FFC107";
+  } else if (prioritas === "TINGGI") {
+    return "#FF0000";
+  } else {
+    return "#000";
+  }
 };
