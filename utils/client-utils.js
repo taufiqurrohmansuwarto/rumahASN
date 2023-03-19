@@ -53,6 +53,17 @@ export const definitions = {
       displayName: "Create Own Comment",
       description: "To create own comment",
     },
+    "mark-answer": {
+      roles: noUser,
+      displayName: "Mark Answer",
+      description: "To mark answer",
+      attributeCheck: {
+        checkFunction: (attributes) => {
+          return attributes?.user?.id === attributes?.agent?.custom_id;
+        },
+        requiredRoles: agent,
+      },
+    },
     "options-ticket": {
       roles: ["admin", "agent"],
       displayName: "Options Ticket",

@@ -1,6 +1,6 @@
 import { parseMarkdown, uploadFiles } from "@/services/index";
 import { MarkdownEditor } from "@primer/react/drafts";
-import { Avatar, Col, Divider, Row } from "antd";
+import { Avatar, Col, Row } from "antd";
 import { useSession } from "next-auth/react";
 
 const NewTicket = ({
@@ -33,7 +33,6 @@ const NewTicket = ({
 
   return (
     <>
-      <Divider />
       <Row>
         <Col span={1}>
           <Avatar src={data?.user?.image} />

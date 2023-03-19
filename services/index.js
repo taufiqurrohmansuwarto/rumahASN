@@ -264,11 +264,11 @@ export const removeTicket = (id) => {
   return api.delete(`/tickets/${id}`);
 };
 
-export const markAnswerTicket = (id, commentId) => {
+export const markAnswerTicket = ({ id, commentId }) => {
   return api.put(`/tickets/${id}/comments/${commentId}/mark-answer`);
 };
 
-export const unmarkAnswerTicket = (id, commentId) => {
+export const unmarkAnswerTicket = ({ id, commentId }) => {
   return api.delete(`/tickets/${id}/comments/${commentId}/mark-answer`);
 };
 

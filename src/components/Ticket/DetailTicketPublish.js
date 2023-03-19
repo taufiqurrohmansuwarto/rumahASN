@@ -2,6 +2,8 @@ import {
   createCommentCustomer,
   detailPublishTickets,
   hapusCommentCustomer,
+  markAnswerTicket,
+  unmarkAnswerTicket,
   updateCommentCustomer,
 } from "@/services/index";
 import { formatDateFromNow } from "@/utils/client-utils";
@@ -10,6 +12,7 @@ import { LockOutlined } from "@ant-design/icons";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Affix,
+  Anchor,
   Avatar,
   BackTop,
   Card,
@@ -40,11 +43,7 @@ import Unpublish from "../TicketProps/UnPublish";
 import Unsubscribe from "../TicketProps/Unsubscribe";
 import NewTicket from "./NewTicket";
 
-const CommentDescription = ({ item }) => {
-  return <Comment content={item?.content} />;
-};
-
-const CommentTicket = ({ item }) => {
+const CommentTicket = ({ item, agent, customer, admin }) => {
   const queryClient = useQueryClient();
   const [comment, setComment] = useState(null);
   const [id, setId] = useState(null);
@@ -84,6 +83,44 @@ const CommentTicket = ({ item }) => {
     }
   );
 
+  const { mutate: markAnswer, isLoading: isLoadingMarkAnswer } = useMutation(
+    (data) => markAnswerTicket(data),
+    {
+      onSuccess: () => {
+        const id = router.query?.id;
+        queryClient.invalidateQueries(["publish-ticket", id]);
+        message.success("Berhasil menandai jawaban");
+      },
+      onError: () => message.error("Gagal menandai jawaban"),
+    }
+  );
+
+  const { mutate: unmarkAnswer, isLoading: isLoadingUnmarkAnswer } =
+    useMutation((data) => unmarkAnswerTicket(data), {
+      onSuccess: () => {
+        const id = router.query?.id;
+        queryClient.invalidateQueries(["publish-ticket", id]);
+        message.success("Berhasil membatalkan tanda jawaban");
+      },
+      onError: () => message.error("Gagal membatalkan tanda jawaban"),
+    });
+
+  const handleMarkAnswer = () => {
+    const data = {
+      id: router.query?.id,
+      commentId: item?.id,
+    };
+    markAnswer(data);
+  };
+
+  const handleUnmarkAnswer = () => {
+    const data = {
+      id: router.query?.id,
+      commentId: item?.id,
+    };
+    unmarkAnswer(data);
+  };
+
   const handleHapus = () => {
     const data = {
       ticketId: router.query?.id,
@@ -117,10 +154,11 @@ const CommentTicket = ({ item }) => {
           withCancel={true}
         />
       ) : (
-        <div>
+        <>
           <Comment
             style={{
-              border: "1px solid #cecece",
+              border: "1px solid",
+              borderColor: item?.is_answer ? "#52c41a" : "#d9d9d9",
               padding: 10,
               borderRadius: 10,
               marginTop: 10,
@@ -145,6 +183,17 @@ const CommentTicket = ({ item }) => {
                 >
                   <span>Hapus</span>
                 </Popconfirm>
+              </RestrictedContent>,
+              <RestrictedContent
+                key="mark-answer"
+                name="mark-answer"
+                attributes={{ agent }}
+              >
+                {item?.is_answer ? (
+                  <span onClick={handleUnmarkAnswer}>Hapus Tanda Jawaban</span>
+                ) : (
+                  <span onClick={handleMarkAnswer}>Tandai Sebagai Jawaban</span>
+                )}
               </RestrictedContent>,
             ]}
             author={item?.user?.username}
@@ -173,7 +222,7 @@ const CommentTicket = ({ item }) => {
               ))}
             </Timeline>
           )}
-        </div>
+        </>
       )}
     </>
   );
@@ -198,7 +247,7 @@ const SideRight = ({ item }) => {
       <Col span={24}>
         <Space direction="vertical">
           <Typography.Text type="secondary" style={{ fontSize: 12 }}>
-            Agent
+            Penerima Tugas
           </Typography.Text>
           <Typography.Text style={{ fontSize: 13 }}>
             {item?.assignee ? "Belum ada" : item?.assignee?.username}
@@ -352,16 +401,17 @@ const DetailTicketPublish = ({ id }) => {
                   />
                   {data?.data?.map((item, index) => {
                     return (
-                      <div key={item?.custom_id}>
-                        {item?.type === "comment" ? (
-                          <CommentTicket item={item} />
-                        ) : (
-                          <></>
-                        )}
-                      </div>
+                      <CommentTicket
+                        key={item?.custom_id}
+                        customer={data?.customer}
+                        agent={data?.agent}
+                        admin={data?.admin}
+                        item={item}
+                      />
                     );
                   })}
                   <RestrictedContent name="create-comment">
+                    <Divider />
                     <NewTicket
                       submitMessage={handleSubmit}
                       value={value}

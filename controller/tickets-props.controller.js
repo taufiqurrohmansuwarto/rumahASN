@@ -52,7 +52,9 @@ const detailPublishTickets = async (req, res) => {
     const result = await Ticket.query()
       .where({ is_published: true, id })
       .select("*", Ticket.relatedQuery("comments").count().as("comments_count"))
-      .withGraphFetched("[customer(simpleSelect) ]")
+      .withGraphFetched(
+        "[customer(simpleSelect), agent(simpleSelect), admin(simpleSelect)]"
+      )
       .first();
 
     const comments = await Comments.query()
@@ -503,6 +505,7 @@ const markAsAnswer = async (req, res) => {
       user: { customId: user_id },
     } = req;
 
+    await Comments.query().patch({ is_answer: false }).where({ ticket_id: id });
     await Comments.query()
       .patch({ is_answer: true })
       .where({ id: commentId, ticket_id: id });
@@ -510,7 +513,7 @@ const markAsAnswer = async (req, res) => {
       id,
       user_id,
       "marked_as_answer",
-      "Ticket marked as answer"
+      "menandai komentar sebagai jawaban"
     );
     res.status(200).json({ message: "Ticket marked as answer successfully." });
   } catch (error) {
@@ -535,7 +538,7 @@ const unMarkAsAnswer = async (req, res) => {
       id,
       user_id,
       "unmarked_as_answer",
-      "Ticket unmarked as answer"
+      "menghapus tanda jawaban pada komentar"
     );
     res
       .status(200)
