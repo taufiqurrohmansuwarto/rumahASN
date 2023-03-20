@@ -4,6 +4,8 @@ const TicketsReactions = require("../models/tickets_reactions.model");
 const TicketHistories = require("../models/tickets_histories.model");
 const Comments = require("../models/tickets_comments_customers.model");
 const Subscriptions = require("../models/tickets_subscriptions.model");
+const CommentReaction = require("../models/comments-reactions.model");
+const { raw } = require("objection");
 
 const { insertTicketHistory } = require("@/utils/tickets-utilities");
 const {
@@ -45,6 +47,7 @@ const publishedTickets = async (req, res) => {
   }
 };
 
+const emojis = ["👍", "👎", "😁", "🎉", "🤔", "❤", "🚀", "🤬"];
 const detailPublishTickets = async (req, res) => {
   try {
     const { id } = req?.query;
@@ -60,7 +63,50 @@ const detailPublishTickets = async (req, res) => {
     const comments = await Comments.query()
       .where({ ticket_id: id })
       .withGraphFetched("user(simpleSelect)")
-      .orderBy("created_at", "asc");
+      .orderBy("tickets_comments_customers.created_at", "asc");
+
+    const myReactions = await CommentReaction.query()
+      .select("comments_reactions.reaction", "comments_reactions.comment_id")
+      .where("comments_reactions.user_id", req?.user?.customId)
+      .andWhere("comment.ticket_id", id)
+      .leftJoinRelated("comment");
+
+    const commentsReactions = await Comments.query()
+      .select("tickets_comments_customers.id")
+      .where({ ticket_id: id })
+      .leftJoinRelated("reactions")
+      .leftJoinRelated("reactions.user")
+      .whereIn("reactions.reaction", emojis)
+      .groupBy("tickets_comments_customers.id", "reactions.reaction")
+      .select(
+        raw(`
+    reactions.reaction as reaction,
+    count(distinct reactions.user_id) as total_users,
+    jsonb_agg(
+      jsonb_build_object(
+        'id', "reactions:user".custom_id,
+        'username', "reactions:user".username
+      )
+      order by reactions.created_at desc
+    ) as users
+  `)
+      );
+
+    const resultComment = comments.map((item) => {
+      const reactions = commentsReactions.filter(
+        (comment) => comment.id === item.id
+      );
+
+      const myReaction = myReactions.filter(
+        (comment) => comment.comment_id === item.id
+      );
+
+      return {
+        ...item,
+        reactions: reactions || [],
+        my_reaction: myReaction || [],
+      };
+    });
 
     const isSubscribe = await Subscriptions.query().where({
       ticket_id: id,
@@ -71,10 +117,12 @@ const detailPublishTickets = async (req, res) => {
       .where({ ticket_id: id })
       .withGraphFetched("user(simpleSelect)");
 
-    const participants = uniqBy(comments, "user_id").map((item) => item?.user);
+    const participants = uniqBy(resultComment, "user_id").map(
+      (item) => item?.user
+    );
 
     const dataAddition = [
-      ...serializeComments(comments),
+      ...serializeComments(resultComment),
       ...serializeHistories(histories),
     ].sort((a, b) => {
       return new Date(a.created_at) - new Date(b.created_at);

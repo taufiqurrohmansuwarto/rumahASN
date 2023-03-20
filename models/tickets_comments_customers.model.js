@@ -14,6 +14,7 @@ class TickestCommentsCustomers extends Model {
 
   static get relationMappings() {
     const user = require("./users.model");
+    const reactions = require("./comments-reactions.model");
 
     return {
       user: {
@@ -22,6 +23,14 @@ class TickestCommentsCustomers extends Model {
         join: {
           from: "tickets_comments_customers.user_id",
           to: "users.custom_id",
+        },
+      },
+      reactions: {
+        relation: Model.HasManyRelation,
+        modelClass: reactions,
+        join: {
+          from: "tickets_comments_customers.id",
+          to: "comments_reactions.comment_id",
         },
       },
     };
