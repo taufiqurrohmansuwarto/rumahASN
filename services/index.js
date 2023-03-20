@@ -296,3 +296,9 @@ export const refPriorities = () => {
 export const refStatus = () => {
   return api.get("/references/status").then((res) => res?.data);
 };
+
+export const updateCommentsReactions = ({ ticketId, commentId }) => {
+  return api
+    .put(`/tickets/${ticketId}/comments/${commentId}/reactions`)
+    .then((res) => res?.data);
+};

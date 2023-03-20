@@ -4,13 +4,17 @@ import { useState } from "react";
 
 const emoticons = ["👍", "👎", "😁", "🎉", "🤔", "❤", "🚀", "🤬"];
 
-const SimpleEmojiPicker = () => {
+const SimpleEmojiPicker = ({ emojis, commentId, ticketId }) => {
   const [visible, setVisible] = useState(false);
-  const [selectedEmoji, setSelectedEmoji] = useState(null);
+  const [selectedEmojis, setSelectedEmojis] = useState([]);
 
   const onEmojiClick = (emoji) => {
     console.log(emoji);
-    setSelectedEmoji(emoji);
+    if (selectedEmojis.includes(emoji)) {
+      setSelectedEmojis(selectedEmojis.filter((e) => e !== emoji));
+    } else {
+      setSelectedEmojis([...selectedEmojis, emoji]);
+    }
   };
 
   const handleClick = () => {
@@ -26,7 +30,7 @@ const SimpleEmojiPicker = () => {
       {emoticons.map((emoji, index) => (
         <Button
           style={
-            emoji === selectedEmoji
+            selectedEmojis.includes(emoji)
               ? { backgroundColor: "#1890ff", color: "white" }
               : {}
           }

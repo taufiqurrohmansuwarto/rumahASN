@@ -36,7 +36,7 @@ import {
   Dropdown,
 } from "antd";
 import { useRouter } from "next/router";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import RestrictedContent from "../RestrictedContent";
 import SimpleEmojiPicker from "../SimpleEmojiPicker";
 import ChangeSubCategory from "../TicketProps/ChageSubCategory";
@@ -432,6 +432,7 @@ const TicketTitle = ({ item }) => {
 
 // start header
 const DetailTicketPublish = ({ id }) => {
+  const bottomRef = useRef(null);
   const queryClient = useQueryClient();
 
   const { data, isLoading } = useQuery(
@@ -521,6 +522,7 @@ const DetailTicketPublish = ({ id }) => {
                       setValue={setValue}
                       loadingSubmit={isLoadingCreate}
                     />
+                    <div ref={bottomRef}></div>
                   </RestrictedContent>
                 </Col>
                 <Col span={6}>
