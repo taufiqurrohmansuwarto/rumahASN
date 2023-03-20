@@ -430,7 +430,6 @@ const TicketTitle = ({ item }) => {
   );
 };
 
-// start header
 const DetailTicketPublish = ({ id }) => {
   const bottomRef = useRef(null);
   const queryClient = useQueryClient();
