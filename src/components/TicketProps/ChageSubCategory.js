@@ -1,22 +1,51 @@
 import { SettingOutlined } from "@ant-design/icons";
 import { useState } from "react";
-import { Modal } from "antd";
+import { Modal, Form, Select, Radio } from "antd";
 import { useQuery } from "@tanstack/react-query";
 import { refCategories, refPriorities } from "@/services/index";
 
-const SubCategoryModal = ({ open, onCancel, onOk, categories, priorities }) => {
+const SubCategoryModal = ({ open, onCancel, categories, priorities }) => {
+  const handleSubmit = () => {};
+  const [form] = Form.useForm();
+
   return (
     <Modal
-      title="Pilih Sub Kategori"
+      title="Sub Kategori dan Prioritas"
       centered
+      width={800}
       destroyOnClose
       open={open}
       onCancel={onCancel}
-      onOk={onOk}
+      onOk={handleSubmit}
     >
-      <div>Sub Category Modal</div>
-      <div>{JSON.stringify(priorities)}</div>
-      <div>{JSON.stringify(categories)}</div>
+      <Form form={form}>
+        <Form.Item name="sub_category_id">
+          <Select showSearch optionFilterProp="name">
+            {categories?.map((category) => {
+              return (
+                <Select.Option
+                  key={category.name}
+                  name={category?.name}
+                  value={category.name}
+                >
+                  {category.name}
+                </Select.Option>
+              );
+            })}
+          </Select>
+        </Form.Item>
+        <Form.Item name="priority_id">
+          <Radio.Group>
+            {priorities?.map((priority) => {
+              return (
+                <Radio.Button key={priority.name} value={priority.name}>
+                  {priority.name}
+                </Radio.Button>
+              );
+            })}
+          </Radio.Group>
+        </Form.Item>
+      </Form>
     </Modal>
   );
 };
@@ -46,7 +75,6 @@ function ChangeSubCategory({ ticketId, subCategoryId }) {
   };
 
   const handleCancelModal = () => setOpen(false);
-  const handleOkModal = () => {};
 
   return (
     <div>
@@ -63,7 +91,6 @@ function ChangeSubCategory({ ticketId, subCategoryId }) {
         id={subCategoryId}
         open={open}
         onCancel={handleCancelModal}
-        onOk={handleOkModal}
       />
     </div>
   );

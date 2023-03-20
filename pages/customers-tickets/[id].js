@@ -1,10 +1,15 @@
 import Layout from "@/components/Layout";
 import DetailTicketPublish from "@/components/Ticket/DetailTicketPublish";
+import { Card } from "antd";
 import { useRouter } from "next/router";
 
 const DetailTicketCustomers = () => {
   const router = useRouter();
-  return <DetailTicketPublish id={router?.query?.id} />;
+  return (
+    <Card>
+      <DetailTicketPublish id={router?.query?.id} />;
+    </Card>
+  );
 };
 
 // add layout

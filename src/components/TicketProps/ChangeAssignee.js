@@ -4,8 +4,16 @@ import { Form, Modal, Select } from "antd";
 import { useQuery } from "@tanstack/react-query";
 import { refAgents } from "@/services/index";
 
-const AssigneeModal = ({ open, onCancel, onOk, agents }) => {
+const AssigneeModal = ({ open, onCancel, agents }) => {
   const [form] = Form.useForm();
+
+  const handleSubmit = async () => {
+    try {
+      const result = await form.validateFields();
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   return (
     <Modal
@@ -14,13 +22,17 @@ const AssigneeModal = ({ open, onCancel, onOk, agents }) => {
       destroyOnClose
       open={open}
       onCancel={onCancel}
-      onOk={onOk}
+      onOk={handleSubmit}
     >
       <Form form={form}>
-        <Form.Item>
-          <Select>
+        <Form.Item name="agent_id">
+          <Select showSearch optionFilterProp="name">
             {agents?.map((agent) => (
-              <Select.Option key={agent.custom_id} value={agent.custom_id}>
+              <Select.Option
+                key={agent.custom_id}
+                name={agent?.username}
+                value={agent.custom_id}
+              >
                 {agent.username}
               </Select.Option>
             ))}
@@ -47,7 +59,6 @@ function ChangeAssignee({ id, userId }) {
   };
 
   const handleCancelModal = () => setOpen(false);
-  const handleOkModal = () => {};
 
   return (
     <div>
@@ -63,7 +74,6 @@ function ChangeAssignee({ id, userId }) {
         open={open}
         agents={agents}
         onCancel={handleCancelModal}
-        onOk={handleOkModal}
       />
     </div>
   );
