@@ -12,11 +12,10 @@ import {
   setColorStatus,
 } from "@/utils/client-utils";
 import { formatDate } from "@/utils/index";
-import { LockOutlined, SettingOutlined } from "@ant-design/icons";
+import { EllipsisOutlined, LockOutlined } from "@ant-design/icons";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Affix,
-  Anchor,
   Avatar,
   BackTop,
   Card,
@@ -31,11 +30,15 @@ import {
   Tag,
   Timeline,
   Tooltip,
+  Menu,
   Typography,
+  Popover,
+  Dropdown,
 } from "antd";
 import { useRouter } from "next/router";
 import { useState } from "react";
 import RestrictedContent from "../RestrictedContent";
+import SimpleEmojiPicker from "../SimpleEmojiPicker";
 import ChangeSubCategory from "../TicketProps/ChageSubCategory";
 import ChangeAssignee from "../TicketProps/ChangeAssignee";
 import ChangeStatus from "../TicketProps/ChangeStatus";
@@ -49,6 +52,22 @@ import UnpinTicket from "../TicketProps/UnPin";
 import Unpublish from "../TicketProps/UnPublish";
 import Unsubscribe from "../TicketProps/Unsubscribe";
 import NewTicket from "./NewTicket";
+
+const renderOptionsMenu = () => (
+  <Menu>
+    <Menu.Item key="1">Option 1</Menu.Item>
+    <Menu.Item key="2">Option 2</Menu.Item>
+    <Menu.Item key="3">Option 3</Menu.Item>
+  </Menu>
+);
+
+const ActionWrapper = ({ attributes, name, ...props }) => {
+  return (
+    <RestrictedContent attributes={attributes} name={name} {...props}>
+      <Menu.Item {...props}>{props.children}</Menu.Item>
+    </RestrictedContent>
+  );
+};
 
 const CommentTicket = ({ item, agent, customer, admin }) => {
   const queryClient = useQueryClient();
@@ -162,7 +181,7 @@ const CommentTicket = ({ item, agent, customer, admin }) => {
         />
       ) : (
         <>
-          <Comment
+          <Row
             style={{
               border: "1px solid",
               borderColor: item?.is_answer ? "#52c41a" : "#d9d9d9",
@@ -171,56 +190,80 @@ const CommentTicket = ({ item, agent, customer, admin }) => {
               marginTop: 10,
               marginBottom: 10,
             }}
-            actions={[
-              <RestrictedContent
-                key="edit-comment"
-                attributes={{ comment: item }}
-                name="edit-comment"
+          >
+            <Col flex="auto">
+              <Comment
+                actions={[<SimpleEmojiPicker key="emoji" />]}
+                author={item?.user?.username}
+                datetime={
+                  <Tooltip title={formatDate(item?.created_at)}>
+                    <Space>
+                      <span>
+                        {item?.is_edited
+                          ? formatDateFromNow(item?.updated_at)
+                          : formatDateFromNow(item?.created_at)}
+                      </span>
+                      {item?.is_edited && <span>&#8226; diedit</span>}
+                    </Space>
+                  </Tooltip>
+                }
+                avatar={<Avatar src={item?.user?.image} />}
+                content={
+                  <div dangerouslySetInnerHTML={{ __html: item?.comment }} />
+                }
+              />
+            </Col>
+            <Col>
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "flex-start",
+                  height: "100%",
+                }}
               >
-                <span onClick={handleAccEdit}>Edit</span>
-              </RestrictedContent>,
-              <RestrictedContent
-                key="remove-comment"
-                name="remove-comment"
-                attributes={{ comment: item }}
-              >
-                <Popconfirm
-                  onConfirm={handleHapus}
-                  title="Apakah kamu yakin ingin menghapus?"
+                <Dropdown
+                  trigger={["click"]}
+                  overlay={
+                    <Menu>
+                      <ActionWrapper
+                        key="2"
+                        name="mark-answer"
+                        attributes={{ agent }}
+                      >
+                        {item?.is_answer ? (
+                          <span onClick={handleUnmarkAnswer}>
+                            Hapus Tanda Jawaban
+                          </span>
+                        ) : (
+                          <span onClick={handleMarkAnswer}>
+                            Tandai Sebagai Jawaban
+                          </span>
+                        )}
+                      </ActionWrapper>
+                      <ActionWrapper
+                        key="1"
+                        name="edit-comment"
+                        attributes={{ comment: item }}
+                      >
+                        <span onClick={handleAccEdit}>Edit</span>
+                      </ActionWrapper>
+                      <ActionWrapper
+                        style={{ color: "red" }}
+                        key="3"
+                        name="remove-comment"
+                        attributes={{ comment: item }}
+                      >
+                        <span onClick={handleHapus}>Hapus</span>
+                      </ActionWrapper>
+                    </Menu>
+                  }
                 >
-                  <span>Hapus</span>
-                </Popconfirm>
-              </RestrictedContent>,
-              <RestrictedContent
-                key="mark-answer"
-                name="mark-answer"
-                attributes={{ agent }}
-              >
-                {item?.is_answer ? (
-                  <span onClick={handleUnmarkAnswer}>Hapus Tanda Jawaban</span>
-                ) : (
-                  <span onClick={handleMarkAnswer}>Tandai Sebagai Jawaban</span>
-                )}
-              </RestrictedContent>,
-            ]}
-            author={item?.user?.username}
-            datetime={
-              <Tooltip title={formatDate(item?.created_at)}>
-                <Space>
-                  <span>
-                    {item?.is_edited
-                      ? formatDateFromNow(item?.updated_at)
-                      : formatDateFromNow(item?.created_at)}
-                  </span>
-                  {item?.is_edited && <span>&#8226; diedit</span>}
-                </Space>
-              </Tooltip>
-            }
-            avatar={<Avatar src={item?.user?.image} />}
-            content={
-              <div dangerouslySetInnerHTML={{ __html: item?.comment }} />
-            }
-          />
+                  <EllipsisOutlined />
+                </Dropdown>
+              </div>
+            </Col>
+          </Row>
+
           {item?.timelineItems?.length > 0 && (
             <Timeline>
               {item?.timelineItems?.map((timeline) => (
