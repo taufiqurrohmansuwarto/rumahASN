@@ -607,7 +607,9 @@ const changeAgent = async (req, res) => {
         .status(403)
         .json({ message: "You don't have permission to do this action." });
     } else {
-      await Ticket.query().patch({ assignee: agent_id }).where({ id });
+      await Ticket.query()
+        .patch({ assignee: agent_id, admin: user_id })
+        .where({ id });
       res.status(200).json({ message: "Ticket updated successfully." });
     }
   } catch (error) {
