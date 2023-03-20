@@ -532,10 +532,129 @@ const unMarkAsAnswer = async (req, res) => {
 };
 
 // todo : add reactions
-const editTicket = async (req, res) => {};
-const changePriorityAndSubCategory = async (req, res) => {};
-const changeAgent = async (req, res) => {};
-const changeStatus = async (req, res) => {};
+const editTicket = async (req, res) => {
+  try {
+    const { id } = req?.query;
+    const { customId: user_id, current_role: role } = req?.user;
+    const { title, description } = req?.body;
+
+    const currentTicket = await Ticket.query().findById(id);
+    const currentAgent = currentTicket?.assignee;
+    const currentRequester = currentTicket?.requester;
+
+    if (!currentTicket) {
+      res.status(404).json({ message: "Ticket not found." });
+    }
+
+    if (
+      role === "admin" ||
+      (role === "agent" && currentAgent === user_id) ||
+      (role === "uesr" && currentRequester === user_id)
+    ) {
+      await Ticket.query().patch({ title, description }).where({ id });
+      await insertTicketHistory(id, user_id, "edited", "Ticket edited");
+      res.status(200).json({ message: "Ticket edited successfully." });
+    } else {
+      res
+        .status(403)
+        .json({ message: "You don't have permission to do this action." });
+    }
+  } catch (error) {
+    console.log(error);
+    res
+      .status(500)
+      .json({ message: "Something went wrong, please try again later." });
+  }
+};
+
+const changePriorityAndSubCategory = async (req, res) => {
+  try {
+    const { id } = req?.query;
+    const { customId: user_id, current_role: role } = req?.user;
+    const { priority_id, sub_category_id } = req?.body;
+
+    const currentTicket = await Ticket.query().findById(id);
+    const currentAgent = currentTicket?.assignee;
+
+    if (!currentTicket) {
+      res.status(404).json({ message: "Ticket not found." });
+    }
+
+    if (role === "admin" || (role === "agent" && currentAgent === user_id)) {
+      await Ticket.query()
+        .patch({ priority_id, sub_category_id })
+        .where({ id });
+      res.status(200).json({ message: "Ticket updated successfully." });
+    } else {
+      res
+        .status(403)
+        .json({ message: "You don't have permission to do this action." });
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Something went wrong" });
+  }
+};
+
+const changeAgent = async (req, res) => {
+  try {
+    const { id } = req?.query;
+    const { customId: user_id, current_role: role } = req?.user;
+    const { agent_id } = req?.body;
+
+    if (role !== "admin") {
+      res
+        .status(403)
+        .json({ message: "You don't have permission to do this action." });
+    } else {
+      await Ticket.query().patch({ assignee: agent_id }).where({ id });
+      res.status(200).json({ message: "Ticket updated successfully." });
+    }
+  } catch (error) {
+    console.log(error);
+    res
+      .status(500)
+      .json({ message: "Something went wrong, please try again later." });
+  }
+};
+
+const changeStatus = async (req, res) => {
+  try {
+    const { id } = req?.query;
+    const { customId: user_id, current_role: role } = req?.user;
+    const { status } = req?.body;
+
+    // check currentTIcket
+    const currentTicket = await Ticket.query().findById(id);
+
+    const currentAgent = currentTicket?.assignee;
+
+    if (!currentTicket) {
+      res.status(404).json({ message: "Ticket not found" });
+    }
+
+    if (role === "admin" || (role === "agent" && currentAgent === user_id)) {
+      await Ticket.query()
+        .patch({
+          status,
+        })
+        .where({ id });
+      await insertTicketHistory(
+        id,
+        user_id,
+        "status_changed",
+        `Status diubah menjadi ${status}`
+      );
+    } else {
+      res
+        .status(403)
+        .json({ message: "You don't have permission to do this action." });
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Something went wrong" });
+  }
+};
 
 module.exports = {
   changePriorityAndSubCategory,
