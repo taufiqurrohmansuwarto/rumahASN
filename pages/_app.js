@@ -13,8 +13,7 @@ import { RBACProvider } from "context/RBACContext";
 import { SessionProvider, signIn, useSession } from "next-auth/react";
 import { useState } from "react";
 import Loading from "../src/components/Loading";
-import { AbilityContext } from "../src/context/Can";
-import ability from "../utils/ability";
+import "../styles/globals.css";
 
 // check user role and organization start with 123
 function Auth({ children, action, subject }) {
