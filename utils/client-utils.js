@@ -103,6 +103,20 @@ export const definitions = {
         requiredRoles: agent,
       },
     },
+    "edit-ticket-title": {
+      roles: allUser,
+      displayName: "Edit Ticket",
+      description: "To edit ticket",
+      attributeCheck: {
+        checkFunction: (attributes) => {
+          return (
+            attributes?.user?.id === attributes?.ticket?.user_id ||
+            attributes?.user?.id === attributes?.ticket?.assignee
+          );
+        },
+        requiredRoles: noAdmin,
+      },
+    },
     "options-ticket": {
       roles: ["admin", "agent"],
       displayName: "Options Ticket",

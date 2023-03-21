@@ -40,6 +40,7 @@ import SimpleEmojiPicker from "../SimpleEmojiPicker";
 import ChangeSubCategory from "../TicketProps/ChageSubCategory";
 import ChangeAssignee from "../TicketProps/ChangeAssignee";
 import ChangeStatus from "../TicketProps/ChangeStatus";
+import ChangeTicketTitle from "../TicketProps/ChangeTicketTitle";
 import LockConversation from "../TicketProps/LockConversation";
 import Pin from "../TicketProps/Pin";
 import Publish from "../TicketProps/Publish";
@@ -418,6 +419,10 @@ const SideRight = ({ item }) => {
 };
 
 const TicketTitle = ({ item }) => {
+  const queryClient = useQueryClient();
+  const { mutate, isLoading } = useMutation((data) => {});
+  const handleEdit = () => {};
+
   return (
     <div>
       <Card>
@@ -483,7 +488,11 @@ const DetailTicketPublish = ({ id }) => {
               <Row gutter={[8, 16]}>
                 <Col span={24}>
                   <Affix offsetTop={40}>
-                    <TicketTitle item={data} />
+                    <ChangeTicketTitle
+                      name="edit-ticket-title"
+                      attributes={{ ticket: data }}
+                      ticket={data}
+                    />
                   </Affix>
                   <Divider />
                 </Col>

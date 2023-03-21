@@ -308,3 +308,7 @@ export const removeCommentsReactions = ({ ticketId, commentId, data }) => {
     .put(`/tickets/${ticketId}/comments/${commentId}/reactions`, data)
     .then((res) => res?.data);
 };
+
+export const editTicket = ({ id, data }) => {
+  return api.patch(`/tickets/${id}`, data).then((res) => res?.data);
+};
