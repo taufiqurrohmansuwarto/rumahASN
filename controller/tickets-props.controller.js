@@ -584,7 +584,7 @@ const editTicket = async (req, res) => {
   try {
     const { id } = req?.query;
     const { customId: user_id, current_role: role } = req?.user;
-    const { title, description } = req?.body;
+    const { title, content } = req?.body;
 
     const currentTicket = await Ticket.query().findById(id);
     const currentAgent = currentTicket?.assignee;
@@ -599,9 +599,29 @@ const editTicket = async (req, res) => {
       (role === "agent" && currentAgent === user_id) ||
       (role === "uesr" && currentRequester === user_id)
     ) {
-      await Ticket.query().patch({ title, description }).where({ id });
-      await insertTicketHistory(id, user_id, "edited", "Ticket edited");
-      res.status(200).json({ message: "Ticket edited successfully." });
+      if (content === null) {
+        await Ticket.query().patch({ title }).where({ id });
+        await insertTicketHistory(
+          id,
+          user_id,
+          "edited",
+          `merubah tiket dari judul ${currentTicket.title} menjadi ${title}`
+        );
+
+        res.status(200).json({ message: "Ticket edited successfully." });
+      }
+
+      if (title === null) {
+        await Ticket.query().patch({ content }).where({ id });
+        await insertTicketHistory(
+          id,
+          user_id,
+          "edited",
+          `merubah tiket dari judul ${currentTicket.title} menjadi ${title}`
+        );
+
+        res.status(200).json({ message: "Ticket edited successfully." });
+      }
     } else {
       res
         .status(403)
