@@ -297,8 +297,14 @@ export const refStatus = () => {
   return api.get("/references/status").then((res) => res?.data);
 };
 
-export const updateCommentsReactions = ({ ticketId, commentId }) => {
+export const updateCommentsReactions = ({ ticketId, commentId, data }) => {
   return api
-    .put(`/tickets/${ticketId}/comments/${commentId}/reactions`)
+    .patch(`/tickets/${ticketId}/comments/${commentId}/reactions`, data)
+    .then((res) => res?.data);
+};
+
+export const removeCommentsReactions = ({ ticketId, commentId, data }) => {
+  return api
+    .put(`/tickets/${ticketId}/comments/${commentId}/reactions`, data)
     .then((res) => res?.data);
 };
