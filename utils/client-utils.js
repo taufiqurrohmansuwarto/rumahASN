@@ -8,6 +8,33 @@ export const formatDateFromNow = (date) => {
   return moment(date).locale("id").fromNow();
 };
 
+export const formatTooltipUsers = (currentUsers, users) => {
+  const newUsers = users?.map((user) => ({
+    ...user,
+    id: user?.id,
+    username: user?.id === currentUsers ? "Kamu" : user?.username,
+  }));
+  // if more 1, show 1
+  // if more 2, show 1 and 2
+  // if more 3, show 1, 2 and 3
+  // if more 4, show 1, 2, 3 and 4
+  // if more 5, show 1, 2, 3 and 2 more
+
+  if (newUsers?.length === 1) {
+    return newUsers[0]?.username;
+  } else if (newUsers?.length === 2) {
+    return `${newUsers[0]?.username} dan ${newUsers[1]?.username} bereaksi emoji ini`;
+  } else if (newUsers?.length === 3) {
+    return `${newUsers[0]?.username}, ${newUsers[1]?.username} dan ${newUsers[2]?.username} bereaksi emoji ini`;
+  } else if (newUsers?.length === 4) {
+    return `${newUsers[0]?.username}, ${newUsers[1]?.username}, ${newUsers[2]?.username} dan ${newUsers[3]?.username} bereaksi emoji ini`;
+  } else {
+    return `${newUsers[0]?.username}, ${newUsers[1]?.username}, ${
+      newUsers[2]?.username
+    } dan ${newUsers?.length - 3} yang lain bereaksi emoji ini`;
+  }
+};
+
 export const formatDateLL = (data) => {
   //  return Sep, 24 2021
   return moment(data).format("DD, MMM YYYY", { locale: "id" });

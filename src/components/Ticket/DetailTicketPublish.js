@@ -22,18 +22,16 @@ import {
   Col,
   Comment,
   Divider,
+  Dropdown,
+  Menu,
   message,
-  Popconfirm,
   Row,
   Skeleton,
   Space,
   Tag,
   Timeline,
   Tooltip,
-  Menu,
   Typography,
-  Popover,
-  Dropdown,
 } from "antd";
 import { useRouter } from "next/router";
 import { useRef, useState } from "react";
@@ -45,6 +43,7 @@ import ChangeStatus from "../TicketProps/ChangeStatus";
 import LockConversation from "../TicketProps/LockConversation";
 import Pin from "../TicketProps/Pin";
 import Publish from "../TicketProps/Publish";
+import ReactionsEmoji from "../TicketProps/ReactionsEmoji";
 import RemoveTicket from "../TicketProps/Remove";
 import Subscribe from "../TicketProps/Subscribe";
 import UnlockConversation from "../TicketProps/UnlockConversation";
@@ -52,14 +51,6 @@ import UnpinTicket from "../TicketProps/UnPin";
 import Unpublish from "../TicketProps/UnPublish";
 import Unsubscribe from "../TicketProps/Unsubscribe";
 import NewTicket from "./NewTicket";
-
-const renderOptionsMenu = () => (
-  <Menu>
-    <Menu.Item key="1">Option 1</Menu.Item>
-    <Menu.Item key="2">Option 2</Menu.Item>
-    <Menu.Item key="3">Option 3</Menu.Item>
-  </Menu>
-);
 
 const ActionWrapper = ({ attributes, name, ...props }) => {
   return (
@@ -193,7 +184,17 @@ const CommentTicket = ({ item, agent, customer, admin }) => {
           >
             <Col flex="auto">
               <Comment
-                actions={[<SimpleEmojiPicker key="emoji" />]}
+                actions={[
+                  <SimpleEmojiPicker
+                    ticketId={router?.query?.id}
+                    comment={item}
+                    key="emoji"
+                  />,
+                  <ReactionsEmoji
+                    key="reaction-emoji"
+                    reactions={item?.reactions}
+                  />,
+                ]}
                 author={item?.user?.username}
                 datetime={
                   <Tooltip title={formatDate(item?.created_at)}>
@@ -420,7 +421,16 @@ const TicketTitle = ({ item }) => {
   return (
     <div>
       <Card>
-        <Typography.Title level={4}>{item?.title}</Typography.Title>
+        <Typography.Title
+          editable={{
+            onChange: (value) => {
+              console.log(value);
+            },
+          }}
+          level={4}
+        >
+          {item?.title}
+        </Typography.Title>
         <Typography.Text style={{ fontSize: 12 }} type="secondary">
           {item?.customer?.username} membuat tiket pada{" "}
           {formatDateFromNow(item?.created_at)}
