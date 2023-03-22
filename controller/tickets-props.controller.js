@@ -594,10 +594,12 @@ const editTicket = async (req, res) => {
       res.status(404).json({ message: "Ticket not found." });
     }
 
+    console.log(role, currentRequester)
+
     if (
       role === "admin" ||
       (role === "agent" && currentAgent === user_id) ||
-      (role === "uesr" && currentRequester === user_id)
+      (currentRequester === user_id)
     ) {
       if (content === null) {
         await Ticket.query().patch({ title }).where({ id });

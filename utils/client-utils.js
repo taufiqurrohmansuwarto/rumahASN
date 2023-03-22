@@ -110,7 +110,7 @@ export const definitions = {
       attributeCheck: {
         checkFunction: (attributes) => {
           return (
-            attributes?.user?.id === attributes?.ticket?.user_id ||
+            attributes?.user?.id === attributes?.ticket?.requester ||
             attributes?.user?.id === attributes?.ticket?.assignee
           );
         },
@@ -196,3 +196,4 @@ export const setColorPrioritas = (prioritas) => {
     return "#000";
   }
 };
+

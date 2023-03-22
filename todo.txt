@@ -42,3 +42,12 @@ todo
 
 
 
+    "Terima kasih telah menggunakan sistem aplikasi helpdesk kami. Mohon berikan masukan Anda mengenai pengalaman Anda menggunakan sistem ini agar kami bisa meningkatkan layanan kami."
+
+    "Kami senang bisa membantu Anda menyelesaikan masalah Anda melalui sistem aplikasi helpdesk kami. Apakah ada hal lain yang bisa kami bantu?"
+
+    "Umpan balik Anda sangat berarti bagi kami untuk meningkatkan kualitas layanan sistem aplikasi helpdesk kami. Terima kasih atas partisipasi Anda."
+
+    "Terima kasih telah memberitahu kami tentang masalah yang Anda temui saat menggunakan sistem aplikasi helpdesk kami. Kami akan memperbaikinya dan mengupayakan agar hal ini tidak terjadi lagi di masa mendatang."
+
+    "Kami berterima kasih atas umpan balik Anda yang membantu kami dalam meningkatkan kinerja dan efisiensi sistem aplikasi helpdesk kami. Kami berharap bisa terus memberikan layanan yang terbaik bagi Anda dan pengguna lainnya."

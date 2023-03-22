@@ -25,9 +25,8 @@ function Feeds() {
     >
       <Stack>
         <TicketsPublish />
-        <RestrictedContent name="see-feedback">hello world</RestrictedContent>
-        <StatsGrid data={data} />
-        <DetailTicket />
+        {/* <StatsGrid data={data} /> */}
+        {/* <DetailTicket /> */}
       </Stack>
     </PageContainer>
   );

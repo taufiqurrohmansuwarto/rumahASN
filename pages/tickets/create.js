@@ -10,23 +10,13 @@ import Layout from "../../src/components/Layout";
 import PageContainer from "../../src/components/PageContainer";
 import RichTextEditor from "../../src/components/RichTextEditor";
 import { resizeImageTag } from "../../utils";
+import { MarkdownEditor } from "@primer/react/drafts";
+import { parseMarkdown, uploadFiles } from "@/services/index";
 
 const CreateTicket = () => {
   const [form] = Form.useForm();
   const router = useRouter();
 
-  const handleImageUpload = useCallback(
-    (file) =>
-      new Promise((resolve, reject) => {
-        const formData = new FormData();
-        formData.append("image", file);
-
-        uploadImage(formData)
-          .then((res) => resolve(res.data))
-          .catch(() => reject(new Error("Upload failed")));
-      }),
-    []
-  );
 
   const { mutate: create, isLoading } = useMutation(
     (data) => createTickets(data),
@@ -42,19 +32,42 @@ const CreateTicket = () => {
     }
   );
 
-  const handleFinish = (value) => {
-    const { title, content } = value;
-    if (title && content) {
-      const data = {
-        title,
-        content: resizeImageTag(content),
-      };
 
-      if (!isLoading) {
-        create(data);
-      }
+  const uploadFile = async (file) => {
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      const result = await uploadFiles(formData);
+      return {
+        url: result?.data,
+        file,
+      };
+    } catch (error) {
+      console.log(error);
     }
   };
+
+ 
+
+  const handleFinish = (value) => {
+    const { title, content } = value;
+     
+    if(!isLoading){
+      const data = {
+        title,
+        content
+      }
+      create(data);
+    }
+    
+  };
+
+  const renderMarkdown = async (markdown) => {
+    if(!markdown) return
+    const result = await parseMarkdown(markdown);
+    return result?.html;
+  };
+
 
   return (
     <PageContainer
@@ -77,8 +90,7 @@ const CreateTicket = () => {
                 Anda. Buatlah deskripsi dengan baik dan jelas serta gunakan tata
                 bahasa yang baik, agar kami dapat membantu anda dengan cepat.
                 Gunakan gambar atau link file sebagai bukti di bagian deskripsi
-                jika ada, untuk mempermudah kami dalam menyelesaikan masalah
-                anda. Terima Kasih.
+                jika ada. Terima Kasih.
               </Text>
             </Alert>
             <Form onFinish={handleFinish} form={form} layout="vertical">
@@ -91,14 +103,15 @@ const CreateTicket = () => {
               >
                 <Input />
               </Form.Item>
-              <Form.Item required name="content" label="Deskripsi">
-                <RichTextEditor
-                  onImageUpload={handleImageUpload}
-                  style={{ minHeight: 300 }}
-                />
+              <Form.Item required name="content" label="Deskripsi" rules={[{required: true, message: "Deskripsi tidak boleh kosong"}]}>
+                 <MarkdownEditor onRenderPreview={renderMarkdown}  onUploadFile={uploadFile}>
+                  <MarkdownEditor.Toolbar>
+                    <MarkdownEditor.DefaultToolbarButtons />
+                    </MarkdownEditor.Toolbar>
+                 </MarkdownEditor>
               </Form.Item>
               <Form.Item>
-                <Button type="primary" htmlType="submit">
+                <Button style={{ marginTop : 10 }} disabled={isLoading} type="primary" htmlType="submit">
                   Kirim
                 </Button>
               </Form.Item>

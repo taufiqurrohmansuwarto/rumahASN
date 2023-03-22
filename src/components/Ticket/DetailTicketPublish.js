@@ -35,6 +35,7 @@ import {
 } from "antd";
 import { useRouter } from "next/router";
 import { useRef, useState } from "react";
+import TimelineTicket from '../TicketProps/TimelineTicket'
 import RestrictedContent from "../RestrictedContent";
 import SimpleEmojiPicker from "../SimpleEmojiPicker";
 import ChangeSubCategory from "../TicketProps/ChageSubCategory";
@@ -266,21 +267,7 @@ const CommentTicket = ({ item, agent, customer, admin }) => {
             </Col>
           </Row>
 
-          {item?.timelineItems?.length > 0 && (
-            <Timeline>
-              {item?.timelineItems?.map((timeline) => (
-                <Timeline.Item dot={<LockOutlined />} key={timeline.custom_id}>
-                  <Space>
-                    <Avatar size="small" src={timeline?.user?.image} />
-                    <Typography.Text type="secondary" style={{ fontSize: 11 }}>
-                      {timeline?.user?.username} {timeline?.comment}{" "}
-                      {formatDateFromNow(timeline?.created_at)}
-                    </Typography.Text>
-                  </Space>
-                </Timeline.Item>
-              ))}
-            </Timeline>
-          )}
+       <TimelineTicket timelineItems={item?.timelineItems} />
         </>
       )}
     </>
