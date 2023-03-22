@@ -306,7 +306,7 @@ const SideRight = ({ item }) => {
             <Typography.Text type="secondary" style={{ fontSize: 12 }}>
               Status
             </Typography.Text>
-            <ChangeStatus />
+            <ChangeStatus statusId={item?.status_code} ticketId={item?.id} />
           </Space>
           <Tag color={setColorStatus(item?.status_code)}>
             {item?.status_code}
@@ -320,7 +320,7 @@ const SideRight = ({ item }) => {
             <Typography.Text type="secondary" style={{ fontSize: 12 }}>
               Penerima Tugas
             </Typography.Text>
-            <ChangeAssignee id={item?.id} userId={item?.assignee} />
+            <ChangeAssignee ticketId={item?.id} agentId={item?.assignee} />
           </Space>
           {!item?.assignee ? (
             <Typography.Text style={{ fontSize: 13 }}>

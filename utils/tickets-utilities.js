@@ -10,7 +10,7 @@ const insertTicketHistory = (ticketId, userId, status, comment) => {
   });
 };
 
-const allowUser = async (currentUser, ticketId){
+const allowUser = async (currentUser, ticketId)=>{
   const result = await Ticket.query().findById(ticketId);
   const {id, role} = currentUser;
 

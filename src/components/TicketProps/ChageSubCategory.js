@@ -5,8 +5,12 @@ import { useQuery } from "@tanstack/react-query";
 import { refCategories, refPriorities } from "@/services/index";
 
 const SubCategoryModal = ({ open, onCancel, categories, priorities }) => {
-  const handleSubmit = () => {};
+  
   const [form] = Form.useForm();
+
+  const handleSubmit = async() => {
+    const {sub_category_id, priority_id} = form.validateFields();
+  };
 
   return (
     <Modal
