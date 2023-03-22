@@ -1,15 +1,38 @@
 import { SettingOutlined } from "@ant-design/icons";
 import { useState } from "react";
-import { Form, Modal, Select } from "antd";
-import { useQuery } from "@tanstack/react-query";
-import { refAgents } from "@/services/index";
+import { Form, Modal, Select, message } from "antd";
+import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
+import { refAgents, changeAssignee } from "@/services/index";
 
-const AssigneeModal = ({ open, onCancel, agents }) => {
+const AssigneeModal = ({ open, onCancel, ticketId, agentId, agents }) => {
   const [form] = Form.useForm();
+  
+  const queryClient = useQueryClient();
+
+  const {mutate: updateAssignee, isLoading} = useMutation(data => changeAssignee(data), {
+    onSuccess : () => {
+       message.success('Berhasil merubah penerima tugas')
+       queryClient.invalidateQueries(['publish-ticket', ticketId])
+       onCancel()
+    },
+    onError : () => {
+      message.error('Gagal merubah penerima tugas')
+    }
+  })
 
   const handleSubmit = async () => {
     try {
-      const result = await form.validateFields();
+      const {assignee} = await form.validateFields();
+      const data = {
+        id : ticketId,
+        data : {
+          assignee
+        }
+      }
+      
+      if(!isLoading){
+       updateAssignee(data) 
+      }
     } catch (error) {
       console.log(error);
     }
@@ -23,9 +46,12 @@ const AssigneeModal = ({ open, onCancel, agents }) => {
       open={open}
       onCancel={onCancel}
       onOk={handleSubmit}
+      confirmLoading={isLoading}
     >
-      <Form form={form}>
-        <Form.Item name="agent_id">
+      <Form form={form} initialValues={{
+        assignee : agentId
+      }}>
+        <Form.Item name="assignee">
           <Select showSearch optionFilterProp="name">
             {agents?.map((agent) => (
               <Select.Option
@@ -43,7 +69,7 @@ const AssigneeModal = ({ open, onCancel, agents }) => {
   );
 };
 
-function ChangeAssignee({ id, userId }) {
+function ChangeAssignee({ ticketId, agentId }) {
   const { data: agents, isLoading: isLoadingAgents } = useQuery(
     ["refs-agents"],
     () => refAgents(),
@@ -70,9 +96,10 @@ function ChangeAssignee({ id, userId }) {
         onClick={handleShowModal}
       />
       <AssigneeModal
-        userId={userId}
-        open={open}
+        ticketId={ticketId}
+        agentId={agentId}
         agents={agents}
+        open={open}
         onCancel={handleCancelModal}
       />
     </div>

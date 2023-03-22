@@ -670,7 +670,15 @@ const changeAgent = async (req, res) => {
   try {
     const { id } = req?.query;
     const { customId: user_id, current_role: role } = req?.user;
-    const { agent_id } = req?.body;
+    const { assignee } = req?.body;
+    
+
+    let kata = ''
+    const currentTicket = await Ticket.query().findById(id);
+
+    if(!currentTicket){
+      res.status(404).json({message :"Ticket Not Found"})
+    }
 
     if (role !== "admin") {
       res
@@ -678,8 +686,14 @@ const changeAgent = async (req, res) => {
         .json({ message: "You don't have permission to do this action." });
     } else {
       await Ticket.query()
-        .patch({ assignee: agent_id, admin: user_id })
+        .patch({ assignee, chooser: user_id })
         .where({ id });
+      await insertTicketHistory(
+        id,
+        user_id,
+        "change_agent",
+        "merubah penerima tugas"
+      )
       res.status(200).json({ message: "Ticket updated successfully." });
     }
   } catch (error) {
@@ -708,15 +722,16 @@ const changeStatus = async (req, res) => {
     if (role === "admin" || (role === "agent" && currentAgent === user_id)) {
       await Ticket.query()
         .patch({
-          status,
+          status_code: status,
         })
         .where({ id });
       await insertTicketHistory(
         id,
         user_id,
         "status_changed",
-        `Status diubah menjadi ${status}`
+        `merubah status tiket dari ${currentTicket?.status_code} menjadi ${status}`
       );
+      res.status(200).json({code : 200,message : 'Status Changed succesfully'})
     } else {
       res
         .status(403)

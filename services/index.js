@@ -309,6 +309,15 @@ export const removeCommentsReactions = ({ ticketId, commentId, data }) => {
     .then((res) => res?.data);
 };
 
+// update ticket property
 export const editTicket = ({ id, data }) => {
   return api.patch(`/tickets/${id}`, data).then((res) => res?.data);
 };
+
+export const changeStatus = ({id, data}) => {
+  return api.patch(`/tickets/${id}/status`, data).then(res => res?.data)
+}
+
+export const changeAssignee = ({id, data}) => {
+  return api.patch(`/tickets/${id}/agents`, data).then(res => res?.data)
+}
