@@ -26,6 +26,7 @@ const NewTicket = ({
       console.log(error);
     }
   };
+  
   const renderMarkdown = async (markdown) => {
     const result = await parseMarkdown(markdown);
     return result?.html;
