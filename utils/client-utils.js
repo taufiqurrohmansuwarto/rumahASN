@@ -170,6 +170,17 @@ export const definitions = {
       displayName: "to change agent",
       description: "To change agent",
     },
+    "submit-feedback": {
+      roles : ['user'],
+      displayName : 'submit feedback',
+      description : 'To submit feedback',
+      attributeCheck : {
+        checkFunction : (attributes) => {
+          return attributes?.user?.id === attributes?.ticket?.requester;
+        },
+        requiredRoles : ['user']
+      }
+    }
   },
 };
 

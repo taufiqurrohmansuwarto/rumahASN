@@ -750,7 +750,36 @@ const changeStatus = async (req, res) => {
   }
 };
 
+const changeFeedback = async (req,res) => {
+  try {
+    const {id} = req?.query;
+    const {customId : user_id, current_role : role} = req?.user;
+    const {feedback} = req?.body;
+
+    const currentTicket = await Ticket.query().findById(id);
+
+    if(role === 'user' && currentTicket?.requester === user_id){
+      await Ticket.query().patch({feedback}).where({id});
+      await insertTicketHistory(
+        id,
+        user_id,
+        "feedback",
+        `memberikan feedback ${feedback}`
+      );
+      res.status(200).json({message : "Feedback changed successfully"})
+    }else{
+      res.status(403).json({message : "You don't have permission to do this action"})
+    }
+    
+
+  }catch(e){
+    console.log(error)
+    res.status(500).json({message: "Something went wrong"})
+  }
+}
+
 module.exports = {
+  changeFeedback,
   changePriorityAndSubCategory,
   changeAgent,
   changeStatus,
