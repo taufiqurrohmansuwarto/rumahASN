@@ -29,16 +29,23 @@ untuk rolenya nanti dulu
 
 
 todo
-1. edit judul tiket
+1. edit judul tiket = selesai
 2. edit deskripsi tiket
-3. submit kategori dan Prioritas tiket
-4. submit status tiket
-5. submit penerima tugas tiket
-6. create ui feedback
-7. form feedback
-8. submit feedback
-9. quote
-8. emoticons
+3. submit kategori dan Prioritas tiket = selesai
+4. submit status tiket = selesai
+5. submit penerima tugas tiket = selesai
+6. create ui feedback = belom
+7. form feedback = belom
+8. submit feedback = belom 
+9. quote = belom 
+8. emoticons = sudah
+
+buat notifikasi ke user ketika
+
+- status dirubah dikerjakan / diselesaika
+- dipublikasi / di unpublish
+- ada yang berkomentar di ticket nya
+- merubah agent
 
 
 

@@ -2,7 +2,7 @@
 import {
   formatDateFromNow,
 } from "@/utils/client-utils";
-import {LockOutlined, EditOutlined, AuditOutlined, UserSwitchOutlined} from '@ant-design/icons';
+import { LockOutlined, EditOutlined, AuditOutlined, UserSwitchOutlined, PushpinOutlined } from '@ant-design/icons';
 import {Avatar, Timeline, Typography, Space} from 'antd'
 
 const Icons = ({ status }) => {
@@ -12,6 +12,8 @@ const Icons = ({ status }) => {
       return <AuditOutlined />
     } else if (status === 'change_agent'){
       return <UserSwitchOutlined />
+    } else if (status === 'pinned'){
+      return <PushpinOutlined />
     }
      else {
         return <LockOutlined/>

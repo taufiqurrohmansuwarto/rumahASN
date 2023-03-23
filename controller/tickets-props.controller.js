@@ -641,7 +641,7 @@ const changePriorityAndSubCategory = async (req, res) => {
   try {
     const { id } = req?.query;
     const { customId: user_id, current_role: role } = req?.user;
-    const { priority_id, sub_category_id } = req?.body;
+    const { priority_code, sub_category_id } = req?.body;
 
     const currentTicket = await Ticket.query().findById(id);
     const currentAgent = currentTicket?.assignee;
@@ -652,8 +652,15 @@ const changePriorityAndSubCategory = async (req, res) => {
 
     if (role === "admin" || (role === "agent" && currentAgent === user_id)) {
       await Ticket.query()
-        .patch({ priority_id, sub_category_id })
+        .patch({ priority_code, sub_category_id })
         .where({ id });
+      
+      await insertTicketHistory(
+        id,
+        user_id,
+        "change_priority_sub_category",
+        "merubah prioritas dan sub kategori"
+      )
       res.status(200).json({ message: "Ticket updated successfully." });
     } else {
       res
@@ -686,7 +693,7 @@ const changeAgent = async (req, res) => {
         .json({ message: "You don't have permission to do this action." });
     } else {
       await Ticket.query()
-        .patch({ assignee, chooser: user_id })
+        .patch({ assignee, chooser: user_id, chooser_picked_at : new Date() })
         .where({ id });
       await insertTicketHistory(
         id,

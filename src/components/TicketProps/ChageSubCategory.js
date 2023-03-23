@@ -1,15 +1,39 @@
 import { SettingOutlined } from "@ant-design/icons";
 import { useState } from "react";
-import { Modal, Form, Select, Radio } from "antd";
-import { useQuery } from "@tanstack/react-query";
-import { refCategories, refPriorities } from "@/services/index";
+import { Modal, Form, Select, Radio,message } from "antd";
+import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
+import { refCategories, refPriorities,changePrioritySubcategory } from "@/services/index";
 
-const SubCategoryModal = ({ open, onCancel, categories, priorities }) => {
+const SubCategoryModal = ({ open, onCancel, categories, priorities, ticketId, priorityCode, subCategoryId }) => {
   
   const [form] = Form.useForm();
 
+  const queryClient = useQueryClient();
+
+  const {mutate: updateCategory, isLoading} = useMutation(data => changePrioritySubcategory(data), {
+    onSuccess: () => {
+      message.success('Berhasil merubah kategori dan status')
+       queryClient.invalidateQueries(['publish-ticket', ticketId])
+       onCancel()
+    },
+    onError : () => {
+      message.error('Gagal')
+      onCancel()
+    }
+  })
+
   const handleSubmit = async() => {
-    const {sub_category_id, priority_id} = form.validateFields();
+    const {sub_category_id, priority_code} = await form.validateFields();
+    const data = {
+      id : ticketId,
+      data : {
+        sub_category_id,
+        priority_code
+      }
+    }
+    if(!isLoading){
+      updateCategory(data)
+    }
   };
 
   return (
@@ -21,16 +45,20 @@ const SubCategoryModal = ({ open, onCancel, categories, priorities }) => {
       open={open}
       onCancel={onCancel}
       onOk={handleSubmit}
+      confirmLoading={isLoading}
     >
-      <Form form={form}>
+      <Form form={form} initialValues={{
+        sub_category_id : subCategoryId,
+        priority_code: priorityCode
+      }}>
         <Form.Item name="sub_category_id">
           <Select showSearch optionFilterProp="name">
             {categories?.map((category) => {
               return (
                 <Select.Option
-                  key={category.name}
+                  key={category.id}
                   name={category?.name}
-                  value={category.name}
+                  value={category.id}
                 >
                   {category.name}
                 </Select.Option>
@@ -38,7 +66,7 @@ const SubCategoryModal = ({ open, onCancel, categories, priorities }) => {
             })}
           </Select>
         </Form.Item>
-        <Form.Item name="priority_id">
+        <Form.Item name="priority_code">
           <Radio.Group>
             {priorities?.map((priority) => {
               return (
@@ -54,7 +82,7 @@ const SubCategoryModal = ({ open, onCancel, categories, priorities }) => {
   );
 };
 
-function ChangeSubCategory({ ticketId, subCategoryId }) {
+function ChangeSubCategory({ ticketId, subCategoryId, priorityCode }) {
   const { data, isLoading } = useQuery(
     ["ref-sub-categories"],
     () => refCategories(),
@@ -92,7 +120,9 @@ function ChangeSubCategory({ ticketId, subCategoryId }) {
       <SubCategoryModal
         categories={data}
         priorities={priorities}
-        id={subCategoryId}
+        subCategoryId={subCategoryId}
+        priorityCode={priorityCode}
+        ticketId={ticketId}
         open={open}
         onCancel={handleCancelModal}
       />

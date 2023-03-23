@@ -321,3 +321,7 @@ export const changeStatus = ({id, data}) => {
 export const changeAssignee = ({id, data}) => {
   return api.patch(`/tickets/${id}/agents`, data).then(res => res?.data)
 }
+
+export const changePrioritySubcategory=({id,data})=> {
+  return api.patch(`/tickets/${id}/priority-sub-category`,data).then(res => res?.data);
+}
