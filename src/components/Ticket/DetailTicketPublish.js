@@ -283,12 +283,12 @@ const SideRight = ({ item }) => {
             <Typography.Text type="secondary" style={{ fontSize: 12 }}>
               Kategori dan Prioritas
             </Typography.Text>
-            <ChangeSubCategory />
+            <ChangeSubCategory ticketId={item?.id} subCategoryId={item?.sub_category_id} priorityCode={item?.priority_code} />
           </Space>
           <Space>
             <Typography.Text style={{ fontSize: 13 }}>
               {item?.sub_category_id
-                ? item?.sub_category?.category?.name
+                ? item?.sub_category?.name
                 : "Tidak ada"}
             </Typography.Text>
             {item?.priority_code && (
