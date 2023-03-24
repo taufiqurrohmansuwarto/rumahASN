@@ -7,7 +7,7 @@ import { useState } from "react";
 import RestrictedContent from "../RestrictedContent";
 import NewTicket from "../Ticket/NewTicket";
 
-function ChangeDescription({ item }) {
+function ChangeTicketDescription({ item }) {
   const [isEdit, setIsEdit] = useState();
   const [value, setValue] = useState(item?.content);
 
@@ -93,4 +93,4 @@ function ChangeDescription({ item }) {
   );
 }
 
-export default ChangeDescription;
+export default ChangeTicketDescription;

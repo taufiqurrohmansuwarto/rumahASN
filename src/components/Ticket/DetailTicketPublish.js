@@ -12,13 +12,12 @@ import {
   setColorStatus,
 } from "@/utils/client-utils";
 import { formatDate } from "@/utils/index";
-import { EllipsisOutlined, LockOutlined } from "@ant-design/icons";
+import { EllipsisOutlined } from "@ant-design/icons";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Affix,
   Avatar,
   BackTop,
-  Card,
   Col,
   Comment,
   Divider,
@@ -29,32 +28,32 @@ import {
   Skeleton,
   Space,
   Tag,
-  Timeline,
   Tooltip,
   Typography,
 } from "antd";
 import { useRouter } from "next/router";
 import { useRef, useState } from "react";
-import TimelineTicket from "../TicketProps/TimelineTicket";
 import RestrictedContent from "../RestrictedContent";
 import SimpleEmojiPicker from "../SimpleEmojiPicker";
 import ChangeSubCategory from "../TicketProps/ChageSubCategory";
 import ChangeAssignee from "../TicketProps/ChangeAssignee";
+import ChangeTicketDescription from "../TicketProps/ChangeDescription";
+import ChangeFeedback from "../TicketProps/ChangeFeedback";
 import ChangeStatus from "../TicketProps/ChangeStatus";
 import ChangeTicketTitle from "../TicketProps/ChangeTicketTitle";
 import LockConversation from "../TicketProps/LockConversation";
+import Participants from "../TicketProps/Participants";
 import Pin from "../TicketProps/Pin";
 import Publish from "../TicketProps/Publish";
 import ReactionsEmoji from "../TicketProps/ReactionsEmoji";
 import RemoveTicket from "../TicketProps/Remove";
 import Subscribe from "../TicketProps/Subscribe";
+import TimelineTicket from "../TicketProps/TimelineTicket";
 import UnlockConversation from "../TicketProps/UnlockConversation";
 import UnpinTicket from "../TicketProps/UnPin";
 import Unpublish from "../TicketProps/UnPublish";
 import Unsubscribe from "../TicketProps/Unsubscribe";
 import NewTicket from "./NewTicket";
-import ChangeFeedback from "../TicketProps/ChangeFeedback";
-import ChangeDescription from "../TicketProps/ChangeDescription";
 
 const ActionWrapper = ({ attributes, name, ...props }) => {
   return (
@@ -371,21 +370,7 @@ const SideRight = ({ item }) => {
       </Col>
       <Divider />
       <Col span={24}>
-        <Space direction="vertical">
-          <Typography.Text style={{ fontSize: 12 }}>
-            {item?.participants?.length}{" "}
-            {item?.participants?.length > 1 ? "Peserta" : "Peserta"}
-          </Typography.Text>
-          {item?.participants?.length > 0 && (
-            <Avatar.Group>
-              {item?.participants?.map((item) => (
-                <Tooltip title={item?.username} key={item?.custom_id}>
-                  <Avatar src={item?.image} />
-                </Tooltip>
-              ))}
-            </Avatar.Group>
-          )}
-        </Space>
+        <Participants item={item} />
         <Divider />
       </Col>
       <RestrictedContent name="options-ticket" attributes={{ ticket: item }}>
@@ -409,33 +394,6 @@ const SideRight = ({ item }) => {
         </Col>
       </RestrictedContent>
     </Row>
-  );
-};
-
-const TicketTitle = ({ item }) => {
-  const queryClient = useQueryClient();
-  const { mutate, isLoading } = useMutation((data) => {});
-  const handleEdit = () => {};
-
-  return (
-    <div>
-      <Card>
-        <Typography.Title
-          editable={{
-            onChange: (value) => {
-              console.log(value);
-            },
-          }}
-          level={4}
-        >
-          {item?.title}
-        </Typography.Title>
-        <Typography.Text style={{ fontSize: 12 }} type="secondary">
-          {item?.customer?.username} membuat tiket pada{" "}
-          {formatDateFromNow(item?.created_at)}
-        </Typography.Text>
-      </Card>
-    </div>
   );
 };
 
@@ -493,7 +451,7 @@ const DetailTicketPublish = ({ id }) => {
               </Row>
               <Row gutter={[16, 32]}>
                 <Col span={18}>
-                  <ChangeDescription item={data} />
+                  <ChangeTicketDescription item={data} />
                   {data?.data?.map((item, index) => {
                     return (
                       <CommentTicket
