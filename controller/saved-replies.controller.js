@@ -3,7 +3,7 @@ const SavedReplies = require("@/models/saved-replies.model");
 const get = async (req, res) => {
   try {
     const { id } = req?.query;
-    const { customId: user_id } = req.user;
+    const { id: user_id } = req.user;
 
     const result = await SavedReplies.query()
       .where("user_id", user_id)
@@ -18,8 +18,11 @@ const get = async (req, res) => {
 
 const list = async (req, res) => {
   try {
-    const { customId: user_id } = req.user;
-    const result = await SavedReplies.query().where("user_id", user_id);
+    console.log(req.user);
+    const { id: user_id } = req.user;
+    const result = await SavedReplies.query()
+      .where("user_id", user_id)
+      .orderBy("created_at", "desc");
     res.json(result);
   } catch (error) {
     console.log(error);
@@ -29,7 +32,7 @@ const list = async (req, res) => {
 
 const create = async (req, res) => {
   try {
-    const { customId: user_id } = req.user;
+    const { id: user_id } = req.user;
     await SavedReplies.query().insert({
       ...req.body,
       user_id,

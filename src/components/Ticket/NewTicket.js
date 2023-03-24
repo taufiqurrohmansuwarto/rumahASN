@@ -28,6 +28,7 @@ const NewTicket = ({
   };
 
   const renderMarkdown = async (markdown) => {
+    if (!markdown) return;
     const result = await parseMarkdown(markdown);
     return result?.html;
   };

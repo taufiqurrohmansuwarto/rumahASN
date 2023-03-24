@@ -1,22 +1,17 @@
+import { parseMarkdown, uploadFiles } from "@/services/index";
 import { Alert, Grid, Text } from "@mantine/core";
+import { MarkdownEditor } from "@primer/react/drafts";
 import { IconAlertCircle } from "@tabler/icons";
 import { useMutation } from "@tanstack/react-query";
 import { Button, Card, Form, Input, message } from "antd";
 import { useRouter } from "next/router";
-import { useCallback } from "react";
-import { uploadImage } from "../../services";
 import { createTickets } from "../../services/users.services";
 import Layout from "../../src/components/Layout";
 import PageContainer from "../../src/components/PageContainer";
-import RichTextEditor from "../../src/components/RichTextEditor";
-import { resizeImageTag } from "../../utils";
-import { MarkdownEditor } from "@primer/react/drafts";
-import { parseMarkdown, uploadFiles } from "@/services/index";
 
 const CreateTicket = () => {
   const [form] = Form.useForm();
   const router = useRouter();
-
 
   const { mutate: create, isLoading } = useMutation(
     (data) => createTickets(data),
@@ -32,7 +27,6 @@ const CreateTicket = () => {
     }
   );
 
-
   const uploadFile = async (file) => {
     try {
       const formData = new FormData();
@@ -47,27 +41,23 @@ const CreateTicket = () => {
     }
   };
 
- 
-
   const handleFinish = (value) => {
     const { title, content } = value;
-     
-    if(!isLoading){
+
+    if (!isLoading) {
       const data = {
         title,
-        content
-      }
+        content,
+      };
       create(data);
     }
-    
   };
 
   const renderMarkdown = async (markdown) => {
-    if(!markdown) return
+    if (!markdown) return;
     const result = await parseMarkdown(markdown);
     return result?.html;
   };
-
 
   return (
     <PageContainer
@@ -103,15 +93,30 @@ const CreateTicket = () => {
               >
                 <Input />
               </Form.Item>
-              <Form.Item required name="content" label="Deskripsi" rules={[{required: true, message: "Deskripsi tidak boleh kosong"}]}>
-                 <MarkdownEditor onRenderPreview={renderMarkdown}  onUploadFile={uploadFile}>
+              <Form.Item
+                required
+                name="content"
+                label="Deskripsi"
+                rules={[
+                  { required: true, message: "Deskripsi tidak boleh kosong" },
+                ]}
+              >
+                <MarkdownEditor
+                  onRenderPreview={renderMarkdown}
+                  onUploadFile={uploadFile}
+                >
                   <MarkdownEditor.Toolbar>
                     <MarkdownEditor.DefaultToolbarButtons />
-                    </MarkdownEditor.Toolbar>
-                 </MarkdownEditor>
+                  </MarkdownEditor.Toolbar>
+                </MarkdownEditor>
               </Form.Item>
               <Form.Item>
-                <Button style={{ marginTop : 10 }} disabled={isLoading} type="primary" htmlType="submit">
+                <Button
+                  style={{ marginTop: 10 }}
+                  disabled={isLoading}
+                  type="primary"
+                  htmlType="submit"
+                >
                   Kirim
                 </Button>
               </Form.Item>

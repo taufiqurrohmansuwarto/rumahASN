@@ -48,6 +48,12 @@ export const userRoutes = {
       name: "FAQ",
       icon: <QuestionCircleOutlined />,
     },
+    {
+      path: "/settings",
+      name: "Konfigurasi",
+      icon: <SettingOutlined />,
+      routes: [{ path: "/settings/saved-replies", name: "Balasan Tersimpan" }],
+    },
   ],
 };
 

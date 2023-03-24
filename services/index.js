@@ -331,3 +331,24 @@ export const changePrioritySubcategory = ({ id, data }) => {
 export const changeFeedbackTicket = ({ id, data }) => {
   return api.patch(`/tickets/${id}/feedback`, data).then((res) => res?.data);
 };
+
+// saved replies
+export const getSavedReplies = () => {
+  return api.get("/saved-replies").then((res) => res?.data);
+};
+
+export const createSavedReplies = (data) => {
+  return api.post("/saved-replies", data).then((res) => res?.data);
+};
+
+export const updateSavedReplies = ({ id, data }) => {
+  return api.patch(`/saved-replies/${id}`, data).then((res) => res?.data);
+};
+
+export const deleteSavedReplies = (id) => {
+  return api.delete(`/saved-replies/${id}`).then((res) => res?.data);
+};
+
+export const detailSavedReplies = (id) => {
+  return api.get(`/saved-replies/${id}`).then((res) => res?.data);
+};
