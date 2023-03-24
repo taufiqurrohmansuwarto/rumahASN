@@ -1,16 +1,25 @@
 import {
-  createSavedReplies,
-  getSavedReplies,
   parseMarkdown,
+  updateSavedReplies,
   uploadFiles,
 } from "@/services/index";
 import { MarkdownEditor } from "@primer/react/drafts";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button, Form, Input, message, Skeleton } from "antd";
+import { useRouter } from "next/router";
+import { useEffect } from "react";
 
-const CreateSavedReplies = () => {
+const EditSavedReplies = ({ id, initialValues, loading, savedReplies }) => {
   const queryClient = useQueryClient();
   const [form] = Form.useForm();
+  const router = useRouter();
+
+  useEffect(() => {
+    form.setFieldsValue({
+      name: initialValues?.name,
+      content: initialValues?.content,
+    });
+  }, [initialValues, form]);
 
   const uploadFile = async (file) => {
     try {
@@ -32,19 +41,19 @@ const CreateSavedReplies = () => {
     return result?.html;
   };
 
-  const { mutate: create, isLoading } = useMutation(
-    (data) => createSavedReplies(data),
+  const { mutate: update, isLoading } = useMutation(
+    (data) => updateSavedReplies(data),
     {
       onSuccess: () => {
         queryClient.invalidateQueries("saved-replies");
-        message.success("Balasan disimpan berhasil dibuat");
         form.resetFields();
+        router.push(`/settings/saved-replies`);
+        message.success("Balasan disimpan berhasil dibuat");
       },
       onError: () => {
         message.error(
           "Gagal membuat balasan disimpan, silahkan coba lagi nanti"
         );
-
         form.resetFields();
       },
     }
@@ -53,18 +62,28 @@ const CreateSavedReplies = () => {
   const handleFinish = async () => {
     const result = await form.validateFields();
     if (!isLoading) {
-      create(result);
+      const data = {
+        id,
+        data: {
+          name: result.name,
+          content: result.content,
+        },
+      };
+      update(data);
     }
   };
 
-  const { data: savedReplies, isLoading: isLoadingSavedReplies } = useQuery(
-    ["saved-replies"],
-    () => getSavedReplies()
-  );
-
   return (
-    <Skeleton loading={isLoadingSavedReplies}>
-      <Form onFinish={handleFinish} form={form} layout="vertical">
+    <Skeleton loading={loading}>
+      <Form
+        initialValues={{
+          name: initialValues?.name,
+          content: initialValues?.content,
+        }}
+        onFinish={handleFinish}
+        form={form}
+        layout="vertical"
+      >
         <Form.Item
           rules={[{ required: true, message: "Judul tidak boleh kosong" }]}
           name="name"
@@ -95,7 +114,7 @@ const CreateSavedReplies = () => {
             type="primary"
             htmlType="submit"
           >
-            Tambahkan Balasan Disimpan
+            Edit Balasan Disimpan
           </Button>
         </Form.Item>
       </Form>
@@ -103,4 +122,4 @@ const CreateSavedReplies = () => {
   );
 };
 
-export default CreateSavedReplies;
+export default EditSavedReplies;
