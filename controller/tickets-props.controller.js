@@ -594,12 +594,12 @@ const editTicket = async (req, res) => {
       res.status(404).json({ message: "Ticket not found." });
     }
 
-    console.log(role, currentRequester)
+    console.log(role, currentRequester);
 
     if (
       role === "admin" ||
       (role === "agent" && currentAgent === user_id) ||
-      (currentRequester === user_id)
+      currentRequester === user_id
     ) {
       if (content === null) {
         await Ticket.query().patch({ title }).where({ id });
@@ -654,13 +654,13 @@ const changePriorityAndSubCategory = async (req, res) => {
       await Ticket.query()
         .patch({ priority_code, sub_category_id })
         .where({ id });
-      
+
       await insertTicketHistory(
         id,
         user_id,
         "change_priority_sub_category",
         "merubah prioritas dan sub kategori"
-      )
+      );
       res.status(200).json({ message: "Ticket updated successfully." });
     } else {
       res
@@ -678,13 +678,12 @@ const changeAgent = async (req, res) => {
     const { id } = req?.query;
     const { customId: user_id, current_role: role } = req?.user;
     const { assignee } = req?.body;
-    
 
-    let kata = ''
+    let kata = "";
     const currentTicket = await Ticket.query().findById(id);
 
-    if(!currentTicket){
-      res.status(404).json({message :"Ticket Not Found"})
+    if (!currentTicket) {
+      res.status(404).json({ message: "Ticket Not Found" });
     }
 
     if (role !== "admin") {
@@ -693,14 +692,14 @@ const changeAgent = async (req, res) => {
         .json({ message: "You don't have permission to do this action." });
     } else {
       await Ticket.query()
-        .patch({ assignee, chooser: user_id, chooser_picked_at : new Date() })
+        .patch({ assignee, chooser: user_id, chooser_picked_at: new Date() })
         .where({ id });
       await insertTicketHistory(
         id,
         user_id,
         "change_agent",
         "merubah penerima tugas"
-      )
+      );
       res.status(200).json({ message: "Ticket updated successfully." });
     }
   } catch (error) {
@@ -738,7 +737,9 @@ const changeStatus = async (req, res) => {
         "status_changed",
         `merubah status tiket dari ${currentTicket?.status_code} menjadi ${status}`
       );
-      res.status(200).json({code : 200,message : 'Status Changed succesfully'})
+      res
+        .status(200)
+        .json({ code: 200, message: "Status Changed succesfully" });
     } else {
       res
         .status(403)
@@ -750,33 +751,33 @@ const changeStatus = async (req, res) => {
   }
 };
 
-const changeFeedback = async (req,res) => {
+const changeFeedback = async (req, res) => {
   try {
-    const {id} = req?.query;
-    const {customId : user_id, current_role : role} = req?.user;
-    const {feedback} = req?.body;
+    const { id } = req?.query;
+    const { customId: user_id, current_role: role } = req?.user;
+    const { stars } = req?.body;
 
     const currentTicket = await Ticket.query().findById(id);
 
-    if(role === 'user' && currentTicket?.requester === user_id){
-      await Ticket.query().patch({feedback}).where({id});
+    if (currentTicket?.requester === user_id) {
+      await Ticket.query().patch({ stars }).where({ id });
       await insertTicketHistory(
         id,
         user_id,
         "feedback",
-        `memberikan feedback ${feedback}`
+        `memberikan ${stars} bintang untuk layanan tiket ini`
       );
-      res.status(200).json({message : "Feedback changed successfully"})
-    }else{
-      res.status(403).json({message : "You don't have permission to do this action"})
+      res.status(200).json({ message: "Feedback changed successfully" });
+    } else {
+      res
+        .status(403)
+        .json({ message: "You don't have permission to do this action" });
     }
-    
-
-  }catch(e){
-    console.log(error)
-    res.status(500).json({message: "Something went wrong"})
+  } catch (e) {
+    console.log(e);
+    res.status(500).json({ message: "Something went wrong" });
   }
-}
+};
 
 module.exports = {
   changeFeedback,

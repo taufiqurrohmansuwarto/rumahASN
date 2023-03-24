@@ -35,7 +35,7 @@ import {
 } from "antd";
 import { useRouter } from "next/router";
 import { useRef, useState } from "react";
-import TimelineTicket from '../TicketProps/TimelineTicket'
+import TimelineTicket from "../TicketProps/TimelineTicket";
 import RestrictedContent from "../RestrictedContent";
 import SimpleEmojiPicker from "../SimpleEmojiPicker";
 import ChangeSubCategory from "../TicketProps/ChageSubCategory";
@@ -53,6 +53,7 @@ import UnpinTicket from "../TicketProps/UnPin";
 import Unpublish from "../TicketProps/UnPublish";
 import Unsubscribe from "../TicketProps/Unsubscribe";
 import NewTicket from "./NewTicket";
+import ChangeFeedback from "../TicketProps/ChangeFeedback";
 
 const ActionWrapper = ({ attributes, name, ...props }) => {
   return (
@@ -267,7 +268,7 @@ const CommentTicket = ({ item, agent, customer, admin }) => {
             </Col>
           </Row>
 
-       <TimelineTicket timelineItems={item?.timelineItems} />
+          <TimelineTicket timelineItems={item?.timelineItems} />
         </>
       )}
     </>
@@ -283,13 +284,15 @@ const SideRight = ({ item }) => {
             <Typography.Text type="secondary" style={{ fontSize: 12 }}>
               Kategori dan Prioritas
             </Typography.Text>
-            <ChangeSubCategory ticketId={item?.id} subCategoryId={item?.sub_category_id} priorityCode={item?.priority_code} />
+            <ChangeSubCategory
+              ticketId={item?.id}
+              subCategoryId={item?.sub_category_id}
+              priorityCode={item?.priority_code}
+            />
           </Space>
           <Space>
             <Typography.Text style={{ fontSize: 13 }}>
-              {item?.sub_category_id
-                ? item?.sub_category?.name
-                : "Tidak ada"}
+              {item?.sub_category_id ? item?.sub_category?.name : "Tidak ada"}
             </Typography.Text>
             {item?.priority_code && (
               <Tag color={setColorPrioritas(item?.priority_code)}>
@@ -335,6 +338,9 @@ const SideRight = ({ item }) => {
           )}
         </Space>
         <Divider />
+      </Col>
+      <Col span={24}>
+        <ChangeFeedback item={item} />
       </Col>
       <Col span={24}>
         <Space direction="vertical">

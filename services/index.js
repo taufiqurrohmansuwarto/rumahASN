@@ -314,14 +314,20 @@ export const editTicket = ({ id, data }) => {
   return api.patch(`/tickets/${id}`, data).then((res) => res?.data);
 };
 
-export const changeStatus = ({id, data}) => {
-  return api.patch(`/tickets/${id}/status`, data).then(res => res?.data)
-}
+export const changeStatus = ({ id, data }) => {
+  return api.patch(`/tickets/${id}/status`, data).then((res) => res?.data);
+};
 
-export const changeAssignee = ({id, data}) => {
-  return api.patch(`/tickets/${id}/agents`, data).then(res => res?.data)
-}
+export const changeAssignee = ({ id, data }) => {
+  return api.patch(`/tickets/${id}/agents`, data).then((res) => res?.data);
+};
 
-export const changePrioritySubcategory=({id,data})=> {
-  return api.patch(`/tickets/${id}/priority-sub-category`,data).then(res => res?.data);
-}
+export const changePrioritySubcategory = ({ id, data }) => {
+  return api
+    .patch(`/tickets/${id}/priority-sub-category`, data)
+    .then((res) => res?.data);
+};
+
+export const changeFeedbackTicket = ({ id, data }) => {
+  return api.patch(`/tickets/${id}/feedback`, data).then((res) => res?.data);
+};
