@@ -54,6 +54,7 @@ import Unpublish from "../TicketProps/UnPublish";
 import Unsubscribe from "../TicketProps/Unsubscribe";
 import NewTicket from "./NewTicket";
 import ChangeFeedback from "../TicketProps/ChangeFeedback";
+import ChangeDescription from "../TicketProps/ChangeDescription";
 
 const ActionWrapper = ({ attributes, name, ...props }) => {
   return (
@@ -492,25 +493,7 @@ const DetailTicketPublish = ({ id }) => {
               </Row>
               <Row gutter={[16, 32]}>
                 <Col span={18}>
-                  <Comment
-                    style={{
-                      border: "1px solid #cecece",
-                      padding: 10,
-                      borderRadius: 10,
-                    }}
-                    author={data?.customer?.username}
-                    datetime={
-                      <Tooltip title={formatDate(data?.created_at)}>
-                        <span>{formatDateFromNow(data?.created_at)}</span>
-                      </Tooltip>
-                    }
-                    avatar={<Avatar src={data?.customer?.image} />}
-                    content={
-                      <div
-                        dangerouslySetInnerHTML={{ __html: data?.content }}
-                      />
-                    }
-                  />
+                  <ChangeDescription item={data} />
                   {data?.data?.map((item, index) => {
                     return (
                       <CommentTicket

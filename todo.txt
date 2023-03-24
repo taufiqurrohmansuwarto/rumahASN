@@ -34,9 +34,9 @@ todo
 3. submit kategori dan Prioritas tiket = selesai
 4. submit status tiket = selesai
 5. submit penerima tugas tiket = selesai
-6. create ui feedback = belom
-7. form feedback = belom
-8. submit feedback = belom 
+6. create ui feedback = sudah
+7. form feedback = sudah
+8. submit feedback = sudah 
 9. quote = belom 
 8. emoticons = sudah
 
