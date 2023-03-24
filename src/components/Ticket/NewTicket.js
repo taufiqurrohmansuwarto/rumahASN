@@ -26,7 +26,7 @@ const NewTicket = ({
       console.log(error);
     }
   };
-  
+
   const renderMarkdown = async (markdown) => {
     const result = await parseMarkdown(markdown);
     return result?.html;
@@ -61,7 +61,7 @@ const NewTicket = ({
                 size="medium"
                 onClick={submitMessage}
               >
-                Submit
+                {loadingSubmit ? "Loading..." : "Submit"}
               </MarkdownEditor.ActionButton>
             </MarkdownEditor.Actions>
           </MarkdownEditor>
