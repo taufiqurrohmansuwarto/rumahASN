@@ -117,6 +117,17 @@ export const definitions = {
         requiredRoles: noAdmin,
       },
     },
+    "edit-ticket-description": {
+      roles: allUser,
+      displayName: "Edit Ticket Description",
+      description: "To edit ticket description",
+      attributeCheck: {
+        checkFunction: (attributes) => {
+          return attributes?.user?.id === attributes?.ticket?.requester;
+        },
+        requiredRoles: allUser,
+      },
+    },
     "options-ticket": {
       roles: ["admin", "agent"],
       displayName: "Options Ticket",
@@ -171,16 +182,16 @@ export const definitions = {
       description: "To change agent",
     },
     "submit-feedback": {
-      roles : ['user'],
-      displayName : 'submit feedback',
-      description : 'To submit feedback',
-      attributeCheck : {
-        checkFunction : (attributes) => {
+      roles: ["user"],
+      displayName: "submit feedback",
+      description: "To submit feedback",
+      attributeCheck: {
+        checkFunction: (attributes) => {
           return attributes?.user?.id === attributes?.ticket?.requester;
         },
-        requiredRoles : ['user']
-      }
-    }
+        requiredRoles: ["user"],
+      },
+    },
   },
 };
 
@@ -207,4 +218,3 @@ export const setColorPrioritas = (prioritas) => {
     return "#000";
   }
 };
-

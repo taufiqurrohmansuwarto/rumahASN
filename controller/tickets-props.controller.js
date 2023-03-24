@@ -594,8 +594,6 @@ const editTicket = async (req, res) => {
       res.status(404).json({ message: "Ticket not found." });
     }
 
-    console.log(role, currentRequester);
-
     if (
       role === "admin" ||
       (role === "agent" && currentAgent === user_id) ||
@@ -619,7 +617,7 @@ const editTicket = async (req, res) => {
           id,
           user_id,
           "edited",
-          `merubah tiket dari judul ${currentTicket.title} menjadi ${title}`
+          `merubah deskripsi tiket`
         );
 
         res.status(200).json({ message: "Ticket edited successfully." });
