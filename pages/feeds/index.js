@@ -2,8 +2,8 @@ import SelamatDatang from "@/components/SelamatDatang";
 import PinnedTickets from "@/components/Ticket/PinnedTickets";
 import TicketsPublish from "@/components/Ticket/TicketsPublish";
 import { Grid, Stack } from "@mantine/core";
-import Layout from "../../src/components/Layout";
-import PageContainer from "../../src/components/PageContainer";
+import Layout from "@/components/Layout";
+import PageContainer from "@/components/PageContainer";
 
 function Feeds() {
   return (

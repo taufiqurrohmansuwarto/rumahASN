@@ -1,8 +1,15 @@
-import { Alert, Skeleton, Typography } from "antd";
+import { Alert, Button, Divider, Skeleton, Typography } from "antd";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
+import { useRouter } from "next/router";
 
 const MyText = ({ user }) => {
+  const router = useRouter();
+
+  const handleCreate = () => {
+    router.push("/tickets/create");
+  };
+
   return (
     <>
       <Typography.Text>
@@ -18,6 +25,10 @@ const MyText = ({ user }) => {
         menemukan jawaban yang Anda cari, jangan ragu untuk membuat tiket baru.
         Selalu ada untuk membantu Anda! 😊
       </Typography.Text>
+      <Divider />
+      <Button onClick={handleCreate} type="primary">
+        Buat Tiket Baru
+      </Button>
     </>
   );
 };

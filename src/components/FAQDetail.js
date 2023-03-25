@@ -1,13 +1,12 @@
 import {
-  createStyles,
-  Image,
   Accordion,
-  Grid,
   Col,
   Container,
+  createStyles,
+  Grid,
+  Image,
   Title,
 } from "@mantine/core";
-import { toString } from "lodash";
 import image from "../../public/faq.svg";
 
 const useStyles = createStyles((theme) => ({
@@ -49,7 +48,6 @@ const FAQDetail = ({ data, loading }) => {
             <Title order={2} align="left" className={classes.title}>
               Frequently Asked Questions
             </Title>
-
             <Accordion chevronPosition="right" variant="separated">
               {data?.map((item) => {
                 return (
@@ -59,7 +57,13 @@ const FAQDetail = ({ data, loading }) => {
                       value={`${item?.id}`}
                     >
                       <Accordion.Control>{item?.question}</Accordion.Control>
-                      <Accordion.Panel>{item?.answer}</Accordion.Panel>
+                      <Accordion.Panel>
+                        <div
+                          dangerouslySetInnerHTML={{
+                            __html: item?.html,
+                          }}
+                        />
+                      </Accordion.Panel>
                     </Accordion.Item>
                   </div>
                 );

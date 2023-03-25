@@ -4,10 +4,8 @@ import { useSession } from "next-auth/react";
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import React from "react";
 import { adminRoutes } from "../routes";
 import Notifications from "./Notifications";
-import SignoutButton from "./SignoutButton";
 
 const ProLayout = dynamic(
   () => import("@ant-design/pro-layout").then((mod) => mod.ProLayout),
