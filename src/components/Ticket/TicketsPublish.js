@@ -28,7 +28,11 @@ function TicketsPublish() {
       <List
         dataSource={data?.results}
         loading={isLoading}
-        renderItem={(item, index) => (
+        pagination={{
+          position: "bottom",
+          size: "small",
+        }}
+        renderItem={(item) => (
           <List.Item>
             <List.Item.Meta
               title={<TitleLink item={item} />}
@@ -39,10 +43,14 @@ function TicketsPublish() {
                 </div>
               }
             />
-            {/* create comment icon with total */}
             <Space size="small">
-              <MessageOutlined size={10} />
-              <Typography.Text>
+              <MessageOutlined
+                style={{
+                  color: "#1890ff",
+                }}
+                size={10}
+              />
+              <Typography.Text type="secondary">
                 {parseInt(item?.comments_count)}
               </Typography.Text>
             </Space>

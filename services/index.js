@@ -363,3 +363,7 @@ export const ticketsMentionsMarkdown = (ticketNumber) => {
     .get(`/tickets-mentions?ticket_number=${ticketNumber}`)
     .then((res) => res?.data);
 };
+
+export const pinnetdTickets = () => {
+  return api.get("/tickets/pinned").then((res) => res?.data);
+};
