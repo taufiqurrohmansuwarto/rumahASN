@@ -352,3 +352,14 @@ export const deleteSavedReplies = (id) => {
 export const detailSavedReplies = (id) => {
   return api.get(`/saved-replies/${id}`).then((res) => res?.data);
 };
+
+// mentions
+export const usersMentionsMarkdown = () => {
+  return api.get("/users-mentions").then((res) => res?.data);
+};
+
+export const ticketsMentionsMarkdown = (ticketNumber) => {
+  return api
+    .get(`/tickets-mentions?ticket_number=${ticketNumber}`)
+    .then((res) => res?.data);
+};
