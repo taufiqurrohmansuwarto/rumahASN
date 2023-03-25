@@ -30,35 +30,17 @@ function AgentLayout({ children, active, title = "Agent" }) {
   return (
     <ProLayout
       selectedKeys={[active ? active : router.pathname]}
-      title={title}
+      title={<Link href="/feeds">Agent Helpdesk</Link>}
       actionsRender={() => {
-        return [
-          <Notifications key="notifications" />,
-          <SignoutButton key="signout" />,
-        ];
+        return [<Notifications key="notifications" />];
       }}
-      // layout="mix"
+      layout="mix"
       // splitMenus={true}
       location={{
         pathname: router.pathname,
       }}
       menu={{
         defaultOpenAll: true,
-      }}
-      menuHeaderRender={(logo, title) => (
-        <Link href="/">
-          <a>
-            {logo}
-            {title}
-          </a>
-        </Link>
-      )}
-      headerTitleRender={(logo, title) => {
-        return (
-          <Link href="/feeds">
-            <a>{title} </a>
-          </Link>
-        );
       }}
       avatarProps={{
         src: data?.user?.image,

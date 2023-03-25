@@ -1,6 +1,7 @@
 import { Alert, Button, Stack, Text } from "@mantine/core";
 import { useQuery } from "@tanstack/react-query";
 import { useSession } from "next-auth/react";
+import Head from "next/head";
 import { adminDashboard } from "../../services/admin.services";
 import AdminLayout from "../../src/components/AdminLayout";
 import AggregateSubCategories from "../../src/components/Dashboards/AggregateSubCategories";
@@ -16,25 +17,28 @@ const Dashboard = () => {
   const { data: userData, status } = useSession();
 
   return (
-    <PageContainer loading={isLoading || status === "loading"}>
-      <Stack>
-        <Alert title="Perhatian">
-          <Text mb={10}>Halo Admin, {userData?.user?.name}</Text>
+    <>
+      <Head>Hello</Head>
+      <PageContainer title="hello" loading={isLoading || status === "loading"}>
+        <Stack>
+          <Alert title="Perhatian">
+            <Text mb={10}>Halo Admin, {userData?.user?.name}</Text>
 
-          <Button
-            component="a"
-            href="/helpdesk/api/admins/reports"
-            variant="filled"
-            color="green"
-          >
-            Simple Report
-          </Button>
-        </Alert>
-        <StatsGrid data={data} />
-        <PlotAdminTickets />
-        <AggregateSubCategories />
-      </Stack>
-    </PageContainer>
+            <Button
+              component="a"
+              href="/helpdesk/api/admins/reports"
+              variant="filled"
+              color="green"
+            >
+              Simple Report
+            </Button>
+          </Alert>
+          <StatsGrid data={data} />
+          <PlotAdminTickets />
+          <AggregateSubCategories />
+        </Stack>
+      </PageContainer>
+    </>
   );
 };
 

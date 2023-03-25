@@ -1,4 +1,4 @@
-import { GoogleOutlined, LoginOutlined } from "@ant-design/icons";
+import { LoginOutlined } from "@ant-design/icons";
 import { Blockquote } from "@mantine/core";
 import { Button, Col, Divider, Row, Space, Typography } from "antd";
 import { getProviders, signIn } from "next-auth/react";

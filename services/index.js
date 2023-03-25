@@ -181,6 +181,10 @@ export const getSubFaqs = async () => {
   return await api.get("/ref/sub-faqs").then((res) => res?.data);
 };
 
+export const detailSubFaqs = async (id) => {
+  return await api.get(`/ref/sub-faqs/${id}`).then((res) => res?.data);
+};
+
 export const createSubFaq = async (data) => {
   return await api.post("/ref/sub-faqs", data).then((res) => res?.data);
 };

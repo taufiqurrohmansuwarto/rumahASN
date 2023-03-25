@@ -1,3 +1,4 @@
+const { parseMarkdown } = require("@/utils/parsing");
 const Faqs = require("../models/faqs.model");
 
 const index = async (req, res) => {
@@ -6,7 +7,11 @@ const index = async (req, res) => {
     const result = await Faqs.query()
       .orderBy("created_at", "desc")
       .withGraphFetched("[created_by(simpleSelect)]");
-    res.json(result);
+    const data = result?.map((item) => ({
+      ...item,
+      // html: parseMarkdown(item?.answer),
+    }));
+    res.json(data);
   } catch (error) {
     console.log(error);
     res.status(400).json({ code: 400, message: "Internal Server Error" });
@@ -49,7 +54,21 @@ const detail = async (req, res) => {
     const result = await Faqs.query()
       .findById(id)
       .withGraphFetched("[sub_faq]");
-    res.json(result);
+
+    const data =
+      result?.sub_faq?.length > 0
+        ? result?.sub_faq?.map((item) => ({
+            ...item,
+            html: parseMarkdown(item?.answer),
+          }))
+        : [];
+
+    const hasil = {
+      ...result,
+      sub_faq: data,
+    };
+
+    res.json(hasil);
   } catch (error) {
     console.log(error);
     res.status(400).json({ code: 400, message: "Internal Server Error" });
