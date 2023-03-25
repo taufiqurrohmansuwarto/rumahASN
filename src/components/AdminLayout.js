@@ -1,3 +1,5 @@
+import { LogoutOutlined, SettingOutlined } from "@ant-design/icons";
+import { Dropdown } from "antd";
 import { useSession } from "next-auth/react";
 import dynamic from "next/dynamic";
 import Link from "next/link";
@@ -30,29 +32,46 @@ function AdminLayout({ children, active }) {
   return (
     <ProLayout
       selectedKeys={[active ? active : router.pathname]}
-      title="Admin"
+      title={<Link href="/feeds">Admin Helpdesk</Link>}
       location={{
         pathname: router.pathname,
       }}
+      layout="mix"
       actionsRender={() => {
-        return [
-          <Notifications key="notifications" />,
-          <SignoutButton key="signout" />,
-        ];
+        return [<Notifications key="notifications" />];
       }}
-      menuHeaderRender={(logo, title) => (
-        <Link href="/">
-          <a>
-            {logo}
-            {title}
-          </a>
-        </Link>
-      )}
       menu={{ defaultOpenAll: true }}
       avatarProps={{
         src: data?.user?.image,
         size: "default",
         title: data?.user?.name,
+        render: (props, dom) => {
+          return (
+            <Dropdown
+              menu={{
+                onClick: (e) => {
+                  if (e.key === "logout") {
+                    signOut();
+                  }
+                },
+                items: [
+                  {
+                    key: "setting",
+                    icon: <SettingOutlined />,
+                    label: "Pengaturan",
+                  },
+                  {
+                    key: "logout",
+                    icon: <LogoutOutlined />,
+                    label: "Keluar",
+                  },
+                ],
+              }}
+            >
+              {dom}
+            </Dropdown>
+          );
+        },
       }}
       menuItemRender={menuItemRender}
       route={adminRoutes}

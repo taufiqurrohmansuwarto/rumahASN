@@ -1,5 +1,6 @@
 import moment from "moment";
 import "moment/locale/id";
+import { uploadFiles, parseMarkdown } from "@/services/index";
 // language is set to Indonesia
 moment.locale("id");
 
@@ -217,4 +218,24 @@ export const setColorPrioritas = (prioritas) => {
   } else {
     return "#000";
   }
+};
+
+export const uploadFile = async (file) => {
+  try {
+    const formData = new FormData();
+    formData.append("file", file);
+    const result = await uploadFiles(formData);
+    return {
+      url: result?.data,
+      file,
+    };
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+export const renderMarkdown = async (markdown) => {
+  if (!markdown) return;
+  const result = await parseMarkdown(markdown);
+  return result?.html;
 };

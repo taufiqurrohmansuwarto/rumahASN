@@ -155,11 +155,19 @@ const subscribe = async (req, res) => {
     if (!ticket) {
       res.status(404).json({ message: "Ticket not found." });
     } else {
-      await TicketsSubscriptions.query().insert({
+      const subscription = await TicketsSubscriptions.query().findOne({
         user_id,
         ticket_id: id,
       });
-      res.status(200).json({ message: "Subscribed successfully." });
+      if (subscription) {
+        res.status(409).json({ message: "Already subscribed." });
+      } else {
+        await TicketsSubscriptions.query().insert({
+          user_id,
+          ticket_id: id,
+        });
+        res.status(200).json({ message: "Subscribed successfully." });
+      }
     }
   } catch (error) {
     console.log(error);
@@ -777,7 +785,20 @@ const changeFeedback = async (req, res) => {
   }
 };
 
+const pinnedTickets = async (req, res) => {
+  try {
+    const result = await Ticket.query()
+      .where({ is_pinned: true, is_published: true })
+      .withGraphFetched("[agent, customer, admin]");
+    res.json(result);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Something went wrong" });
+  }
+};
+
 module.exports = {
+  pinnedTickets,
   changeFeedback,
   changePriorityAndSubCategory,
   changeAgent,

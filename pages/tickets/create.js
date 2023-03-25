@@ -1,4 +1,4 @@
-import { parseMarkdown, uploadFiles } from "@/services/index";
+import { renderMarkdown, uploadFile } from "@/utils/client-utils";
 import { Alert, Grid, Text } from "@mantine/core";
 import { MarkdownEditor } from "@primer/react/drafts";
 import { IconAlertCircle } from "@tabler/icons";
@@ -27,20 +27,6 @@ const CreateTicket = () => {
     }
   );
 
-  const uploadFile = async (file) => {
-    try {
-      const formData = new FormData();
-      formData.append("file", file);
-      const result = await uploadFiles(formData);
-      return {
-        url: result?.data,
-        file,
-      };
-    } catch (error) {
-      console.log(error);
-    }
-  };
-
   const handleFinish = (value) => {
     const { title, content } = value;
 
@@ -51,12 +37,6 @@ const CreateTicket = () => {
       };
       create(data);
     }
-  };
-
-  const renderMarkdown = async (markdown) => {
-    if (!markdown) return;
-    const result = await parseMarkdown(markdown);
-    return result?.html;
   };
 
   return (

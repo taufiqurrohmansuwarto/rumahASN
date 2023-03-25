@@ -1,33 +1,22 @@
-import RestrictedContent from "@/components/RestrictedContent";
+import SelamatDatang from "@/components/SelamatDatang";
+import PinnedTickets from "@/components/Ticket/PinnedTickets";
 import TicketsPublish from "@/components/Ticket/TicketsPublish";
-import { Stack } from "@mantine/core";
-import { useQuery } from "@tanstack/react-query";
-import { customerDashboard } from "../../services/users.services";
+import { Grid, Stack } from "@mantine/core";
 import Layout from "../../src/components/Layout";
 import PageContainer from "../../src/components/PageContainer";
-import { StatsGrid } from "../../src/components/StatsGrid";
-import DetailTicket from "../../src/components/Ticket/DetailTicket";
 
 function Feeds() {
-  const { data, isLoading } = useQuery(
-    ["dashboard"],
-    () => customerDashboard(),
-    {
-      refetchOnWindowFocus: false,
-    }
-  );
-
   return (
-    <PageContainer
-      loading={isLoading || status === "loading"}
-      title="Beranda"
-      subTitle="Dashboard"
-    >
-      <Stack>
-        <TicketsPublish />
-        {/* <StatsGrid data={data} /> */}
-        {/* <DetailTicket /> */}
-      </Stack>
+    <PageContainer title="Beranda" subTitle="Dashboard">
+      <Grid justify="start">
+        <Grid.Col span={9}>
+          <Stack>
+            <SelamatDatang />
+            <PinnedTickets />
+            <TicketsPublish />
+          </Stack>
+        </Grid.Col>
+      </Grid>
     </PageContainer>
   );
 }

@@ -2,14 +2,14 @@ const SavedReplies = require("@/models/saved-replies.model");
 
 const get = async (req, res) => {
   try {
-    const { id } = req?.query;
-    const { id: user_id } = req.user;
+    const { id: savedReplyId } = req?.query;
+    const { id: userId } = req.user;
 
-    const result = await SavedReplies.query()
-      .where("user_id", user_id)
-      .andWhere("id", id)
+    const savedReply = await SavedReplies.query()
+      .where("user_id", userId)
+      .andWhere("id", savedReplyId)
       .first();
-    res.json(result);
+    res.json(savedReply);
   } catch (error) {
     console.log(error);
     res.status(500).json({ code: 500, message: "Internal Server Error" });
@@ -18,14 +18,18 @@ const get = async (req, res) => {
 
 const list = async (req, res) => {
   try {
-    console.log(req.user);
+    // get user_id from request
     const { id: user_id } = req.user;
+
+    // get saved replies from user
     const result = await SavedReplies.query()
       .where("user_id", user_id)
       .orderBy("created_at", "desc");
+
+    // return the saved replies
     res.json(result);
   } catch (error) {
-    console.log(error);
+    // return internal server error
     res.status(500).json({ code: 500, message: "Internal Server Error" });
   }
 };
@@ -46,16 +50,21 @@ const create = async (req, res) => {
 
 const update = async (req, res) => {
   try {
+    // get the id from the request query
     const { id } = req?.query;
+    // get the user id from the request user object
     const { customId: user_id } = req.user;
+    // update the saved reply in the database
     await SavedReplies.query()
       .where("user_id", user_id)
       .andWhere("id", id)
       .update({
         ...req.body,
       });
+    // return a success response
     res.json({ code: 200, message: "Success" });
   } catch (error) {
+    // catch any error and return an error response
     console.log(error);
     res.status(500).json({ code: 500, message: "Internal Server Error" });
   }
