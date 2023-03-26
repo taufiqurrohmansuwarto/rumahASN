@@ -18,12 +18,18 @@ const { uniqBy } = require("lodash");
 const publishedTickets = async (req, res) => {
   try {
     const page = req?.query?.page || 1;
-    const limit = req?.query?.limit || 25;
+    const limit = req?.query?.limit || 10;
     const search = req?.query?.search || "";
 
+    const { id: userId, current_role: role } = req?.user;
+
     const result = await Ticket.query()
-      .where({ is_published: true })
-      .withGraphFetched("[customer(simpleSelect)]")
+      .where((builder) => {
+        if (role === "user") {
+          builder.where({ is_published: true });
+        }
+      })
+      .withGraphFetched("[customer(simpleSelect), agent(simpleSelect)]")
       .andWhere((builder) => {
         if (search) {
           builder.where("title", "ilike", `%${search}%`);
@@ -31,14 +37,16 @@ const publishedTickets = async (req, res) => {
       })
       .select("*", Ticket.relatedQuery("comments").count().as("comments_count"))
       //   with count of comments
-      .orderBy("created_at", "desc")
+      .orderBy("updated_at", "desc")
       .page(parseInt(page) - 1, parseInt(limit));
 
-    res.json({
+    const data = {
       results: result?.results,
       total: result?.total,
       page: page,
-    });
+    };
+
+    res.json(data);
   } catch (error) {
     console.log(error);
     res
@@ -47,7 +55,9 @@ const publishedTickets = async (req, res) => {
   }
 };
 
+// list of emojis
 const emojis = ["👍", "👎", "😁", "🎉", "🤔", "❤", "🚀", "🤬"];
+
 const detailPublishTickets = async (req, res) => {
   try {
     const { id } = req?.query;

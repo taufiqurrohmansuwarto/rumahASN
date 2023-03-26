@@ -7,7 +7,7 @@ const DetailTicketCustomers = () => {
   const router = useRouter();
   return (
     <Card>
-      <DetailTicketPublish id={router?.query?.id} />;
+      <DetailTicketPublish id={router?.query?.id} />
     </Card>
   );
 };

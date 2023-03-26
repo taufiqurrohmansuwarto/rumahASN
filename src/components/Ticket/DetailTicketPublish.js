@@ -164,7 +164,7 @@ const CommentTicket = ({ item, agent, customer, admin }) => {
 
   return (
     <>
-      {item?.id === id ? (
+      {item?.id === id && item?.id !== null ? (
         <NewTicket
           handleCancel={handleCancelEdit}
           setValue={setComment}
@@ -175,99 +175,100 @@ const CommentTicket = ({ item, agent, customer, admin }) => {
         />
       ) : (
         <>
-          <Row
-            style={{
-              border: "1px solid",
-              borderColor: item?.is_answer ? "#52c41a" : "#d9d9d9",
-              padding: 10,
-              borderRadius: 10,
-              marginTop: 10,
-              marginBottom: 10,
-            }}
-          >
-            <Col flex="auto">
-              <Comment
-                actions={[
-                  <SimpleEmojiPicker
-                    ticketId={router?.query?.id}
-                    comment={item}
-                    key="emoji"
-                  />,
-                  <ReactionsEmoji
-                    key="reaction-emoji"
-                    reactions={item?.reactions}
-                  />,
-                ]}
-                author={item?.user?.username}
-                datetime={
-                  <Tooltip title={formatDate(item?.created_at)}>
-                    <Space>
-                      <span>
-                        {item?.is_edited
-                          ? formatDateFromNow(item?.updated_at)
-                          : formatDateFromNow(item?.created_at)}
-                      </span>
-                      {item?.is_edited && <span>&#8226; diedit</span>}
-                    </Space>
-                  </Tooltip>
-                }
-                avatar={<Avatar src={item?.user?.image} />}
-                content={
-                  <div dangerouslySetInnerHTML={{ __html: item?.comment }} />
-                }
-              />
-            </Col>
-            <Col>
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "flex-start",
-                  height: "100%",
-                }}
-              >
-                <Dropdown
-                  trigger={["click"]}
-                  overlay={
-                    <Menu>
-                      <ActionWrapper
-                        key="2"
-                        name="mark-answer"
-                        attributes={{ agent }}
-                      >
-                        {item?.is_answer ? (
-                          <span onClick={handleUnmarkAnswer}>
-                            Hapus Tanda Jawaban
-                          </span>
-                        ) : (
-                          <span onClick={handleMarkAnswer}>
-                            Tandai Sebagai Jawaban
-                          </span>
-                        )}
-                      </ActionWrapper>
-                      <ActionWrapper
-                        key="1"
-                        name="edit-comment"
-                        attributes={{ comment: item }}
-                      >
-                        <span onClick={handleAccEdit}>Edit</span>
-                      </ActionWrapper>
-                      <ActionWrapper
-                        style={{ color: "red" }}
-                        key="3"
-                        name="remove-comment"
-                        attributes={{ comment: item }}
-                      >
-                        <span onClick={handleHapus}>Hapus</span>
-                      </ActionWrapper>
-                    </Menu>
+          {item?.type === "comment" && item?.id !== null && (
+            <Row
+              style={{
+                border: "1px solid",
+                borderColor: item?.is_answer ? "#52c41a" : "#d9d9d9",
+                padding: 10,
+                borderRadius: 10,
+                marginTop: 10,
+                marginBottom: 10,
+              }}
+            >
+              <Col flex="auto">
+                <Comment
+                  actions={[
+                    <SimpleEmojiPicker
+                      ticketId={router?.query?.id}
+                      comment={item}
+                      key="emoji"
+                    />,
+                    <ReactionsEmoji
+                      key="reaction-emoji"
+                      reactions={item?.reactions}
+                    />,
+                  ]}
+                  author={item?.user?.username}
+                  datetime={
+                    <Tooltip title={formatDate(item?.created_at)}>
+                      <Space>
+                        <span>
+                          {item?.is_edited
+                            ? formatDateFromNow(item?.updated_at)
+                            : formatDateFromNow(item?.created_at)}
+                        </span>
+                        {item?.is_edited && <span>&#8226; diedit</span>}
+                      </Space>
+                    </Tooltip>
                   }
+                  avatar={<Avatar src={item?.user?.image} />}
+                  content={
+                    <div dangerouslySetInnerHTML={{ __html: item?.comment }} />
+                  }
+                />
+              </Col>
+              <Col>
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "flex-start",
+                    height: "100%",
+                  }}
                 >
-                  <EllipsisOutlined />
-                </Dropdown>
-              </div>
-            </Col>
-          </Row>
-
+                  <Dropdown
+                    trigger={["click"]}
+                    overlay={
+                      <Menu>
+                        <ActionWrapper
+                          key="2"
+                          name="mark-answer"
+                          attributes={{ agent }}
+                        >
+                          {item?.is_answer ? (
+                            <span onClick={handleUnmarkAnswer}>
+                              Hapus Tanda Jawaban
+                            </span>
+                          ) : (
+                            <span onClick={handleMarkAnswer}>
+                              Tandai Sebagai Jawaban
+                            </span>
+                          )}
+                        </ActionWrapper>
+                        <ActionWrapper
+                          key="1"
+                          name="edit-comment"
+                          attributes={{ comment: item }}
+                        >
+                          <span onClick={handleAccEdit}>Edit</span>
+                        </ActionWrapper>
+                        <ActionWrapper
+                          style={{ color: "red" }}
+                          key="3"
+                          name="remove-comment"
+                          attributes={{ comment: item }}
+                        >
+                          <span onClick={handleHapus}>Hapus</span>
+                        </ActionWrapper>
+                      </Menu>
+                    }
+                  >
+                    <EllipsisOutlined />
+                  </Dropdown>
+                </div>
+              </Col>
+            </Row>
+          )}
           <TimelineTicket timelineItems={item?.timelineItems} />
         </>
       )}
@@ -284,11 +285,16 @@ const SideRight = ({ item }) => {
             <Typography.Text type="secondary" style={{ fontSize: 12 }}>
               Kategori dan Prioritas
             </Typography.Text>
-            <ChangeSubCategory
-              ticketId={item?.id}
-              subCategoryId={item?.sub_category_id}
-              priorityCode={item?.priority_code}
-            />
+            <RestrictedContent
+              name="change-priority-kategory"
+              attributes={{ ticket: item }}
+            >
+              <ChangeSubCategory
+                ticketId={item?.id}
+                subCategoryId={item?.sub_category_id}
+                priorityCode={item?.priority_code}
+              />
+            </RestrictedContent>
           </Space>
           <Space>
             <Typography.Text style={{ fontSize: 13 }}>
@@ -309,7 +315,12 @@ const SideRight = ({ item }) => {
             <Typography.Text type="secondary" style={{ fontSize: 12 }}>
               Status
             </Typography.Text>
-            <ChangeStatus statusId={item?.status_code} ticketId={item?.id} />
+            <RestrictedContent
+              name="change-status"
+              attributes={{ ticket: item }}
+            >
+              <ChangeStatus statusId={item?.status_code} ticketId={item?.id} />
+            </RestrictedContent>
           </Space>
           <Tag color={setColorStatus(item?.status_code)}>
             {item?.status_code}
@@ -323,7 +334,9 @@ const SideRight = ({ item }) => {
             <Typography.Text type="secondary" style={{ fontSize: 12 }}>
               Penerima Tugas
             </Typography.Text>
-            <ChangeAssignee ticketId={item?.id} agentId={item?.assignee} />
+            <RestrictedContent name="change-agent">
+              <ChangeAssignee ticketId={item?.id} agentId={item?.assignee} />
+            </RestrictedContent>
           </Space>
           {!item?.assignee ? (
             <Typography.Text style={{ fontSize: 13 }}>
@@ -428,7 +441,7 @@ const DetailTicketPublish = ({ id }) => {
     createComment(data);
   };
 
-  const [value, setValue] = useState("");
+  const [value, setValue] = useState(null);
 
   return (
     <Row justify="center">
@@ -474,7 +487,6 @@ const DetailTicketPublish = ({ id }) => {
                       setValue={setValue}
                       loadingSubmit={isLoadingCreate}
                     />
-                    <div ref={bottomRef}></div>
                   </RestrictedContent>
                 </Col>
                 <Col span={6}>

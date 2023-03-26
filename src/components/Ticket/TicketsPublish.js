@@ -1,58 +1,136 @@
 import { publishTickets } from "@/services/index";
-import { formatDateFromNow, formatDateLL } from "@/utils/client-utils";
+import { formatDateLL, setColorStatus } from "@/utils/client-utils";
 import { MessageOutlined } from "@ant-design/icons";
 import { useQuery } from "@tanstack/react-query";
-import { Avatar, List, Space, Typography } from "antd";
+import {
+  Avatar,
+  Col,
+  Input,
+  List,
+  Popover,
+  Row,
+  Space,
+  Tag,
+  Typography,
+} from "antd";
 import Link from "next/link";
+import { useState } from "react";
+
+const Assignee = ({ item }) => {
+  if (item?.assignee) {
+    return (
+      <Popover title="Penerima Tugas" content={`${item?.agent?.username}`}>
+        <Avatar
+          size="small"
+          src={item?.agent?.image}
+          alt={item?.agent?.username}
+        />
+      </Popover>
+    );
+  } else {
+    return null;
+  }
+};
+
+const Status = ({ item }) => {
+  return (
+    <Tag color={setColorStatus(item?.status_code)}>{item?.status_code}</Tag>
+  );
+};
+
+const Published = ({ item }) => {
+  if (item?.is_published) {
+    return <Tag color="yellow">PUBLIKASI</Tag>;
+  } else {
+    return null;
+  }
+};
 
 // create item like github issue with primer UI
 const TitleLink = ({ item }) => {
   return (
-    <Typography.Text strong>
-      <Link href={`/customers-tickets/${item?.id}`}>{item.title}</Link>
-    </Typography.Text>
+    <Space>
+      <Typography.Text strong>
+        <Link href={`/customers-tickets/${item?.id}`}>{item.title}</Link>
+      </Typography.Text>
+      <Published item={item} />
+    </Space>
   );
 };
 
 function TicketsPublish() {
+  const [query, setQuery] = useState({
+    page: 1,
+    limit: 10,
+    search: "",
+  });
+
   const { data, isLoading } = useQuery(
-    ["publish-tickets-customers"],
-    () => publishTickets(),
+    ["publish-tickets-customers", query],
+    () => publishTickets(query),
     {
+      enabled: !!query,
       keepPreviousData: true,
     }
   );
 
+  const handleSearch = (e) => {
+    setQuery({
+      ...query,
+      search: e,
+      page: 1,
+    });
+  };
+
   return (
     <div>
+      <Row>
+        <Col span={8}>
+          <Input.Search
+            placeholder="Cari berdasarkan judul"
+            onSearch={handleSearch}
+          />
+        </Col>
+      </Row>
       <List
         dataSource={data?.results}
         loading={isLoading}
         pagination={{
-          position: "bottom",
+          position: "both",
+          current: query?.page,
+          pageSize: query?.limit,
+          onChange: (page) => setQuery({ ...query, page: page }),
+          total: data?.total,
           size: "small",
         }}
         renderItem={(item) => (
-          <List.Item>
+          <List.Item
+            actions={[
+              <Space size="small" key="total_comments">
+                <MessageOutlined
+                  style={{
+                    color: "#1890ff",
+                  }}
+                  size={10}
+                />
+                <Typography.Text type="secondary">
+                  {parseInt(item?.comments_count)}
+                </Typography.Text>
+              </Space>,
+            ]}
+          >
             <List.Item.Meta
               title={<TitleLink item={item} />}
               description={
-                <div>
+                <Typography.Text type="secondary">
                   Ditanyakan tanggal {formatDateLL(item?.created_at)} oleh{" "}
                   {item?.customer?.username}
-                </div>
+                </Typography.Text>
               }
             />
-            <Space size="small">
-              <MessageOutlined
-                style={{
-                  color: "#1890ff",
-                }}
-                size={10}
-              />
-              <Typography.Text type="secondary">
-                {parseInt(item?.comments_count)}
-              </Typography.Text>
+            <Space>
+              <Status item={item} key="status" />
+              <Assignee key="penerima_tugas" item={item} />
             </Space>
           </List.Item>
         )}
