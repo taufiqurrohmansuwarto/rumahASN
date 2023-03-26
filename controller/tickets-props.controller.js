@@ -62,34 +62,43 @@ const detailPublishTickets = async (req, res) => {
   try {
     const { id } = req?.query;
 
+    const { id: userId, current_role: role } = req?.user;
+
     const result = await Ticket.query()
-      .where({ is_published: true, id })
+      .where((builder) => {
+        if (role === "user") {
+          builder.where({ is_published: true });
+        }
+      })
       .select("*", Ticket.relatedQuery("comments").count().as("comments_count"))
       .withGraphFetched(
         "[customer(simpleSelect), agent(simpleSelect), admin(simpleSelect), sub_category.[category]]"
       )
       .first();
 
-    const comments = await Comments.query()
-      .where({ ticket_id: id })
-      .withGraphFetched("user(simpleSelect)")
-      .orderBy("tickets_comments_customers.created_at", "asc");
+    if (!result) {
+      res.json(null);
+    } else {
+      const comments = await Comments.query()
+        .where({ ticket_id: id })
+        .withGraphFetched("user(simpleSelect)")
+        .orderBy("tickets_comments_customers.created_at", "asc");
 
-    const myReactions = await CommentReaction.query()
-      .select("comments_reactions.reaction", "comments_reactions.comment_id")
-      .where("comments_reactions.user_id", req?.user?.customId)
-      .andWhere("comment.ticket_id", id)
-      .leftJoinRelated("comment");
+      const myReactions = await CommentReaction.query()
+        .select("comments_reactions.reaction", "comments_reactions.comment_id")
+        .where("comments_reactions.user_id", req?.user?.customId)
+        .andWhere("comment.ticket_id", id)
+        .leftJoinRelated("comment");
 
-    const commentsReactions = await Comments.query()
-      .select("tickets_comments_customers.id")
-      .where({ ticket_id: id })
-      .leftJoinRelated("reactions")
-      .leftJoinRelated("reactions.user")
-      .whereIn("reactions.reaction", emojis)
-      .groupBy("tickets_comments_customers.id", "reactions.reaction")
-      .select(
-        raw(`
+      const commentsReactions = await Comments.query()
+        .select("tickets_comments_customers.id")
+        .where({ ticket_id: id })
+        .leftJoinRelated("reactions")
+        .leftJoinRelated("reactions.user")
+        .whereIn("reactions.reaction", emojis)
+        .groupBy("tickets_comments_customers.id", "reactions.reaction")
+        .select(
+          raw(`
     reactions.reaction as reaction,
     count(distinct reactions.user_id) as total_users,
     jsonb_agg(
@@ -100,52 +109,53 @@ const detailPublishTickets = async (req, res) => {
       order by reactions.created_at desc
     ) as users
   `)
+        );
+
+      const resultComment = comments.map((item) => {
+        const reactions = commentsReactions.filter(
+          (comment) => comment.id === item.id
+        );
+
+        const myReaction = myReactions.filter(
+          (comment) => comment.comment_id === item.id
+        );
+
+        return {
+          ...item,
+          reactions: reactions || [],
+          my_reaction: myReaction || [],
+        };
+      });
+
+      const isSubscribe = await Subscriptions.query().where({
+        ticket_id: id,
+        user_id: req?.user?.customId,
+      });
+
+      const histories = await TicketHistories.query()
+        .where({ ticket_id: id })
+        .withGraphFetched("user(simpleSelect)");
+
+      const participants = uniqBy(resultComment, "user_id").map(
+        (item) => item?.user
       );
 
-    const resultComment = comments.map((item) => {
-      const reactions = commentsReactions.filter(
-        (comment) => comment.id === item.id
-      );
+      const dataAddition = [
+        ...serializeComments(resultComment),
+        ...serializeHistories(histories),
+      ].sort((a, b) => {
+        return new Date(a.created_at) - new Date(b.created_at);
+      });
 
-      const myReaction = myReactions.filter(
-        (comment) => comment.comment_id === item.id
-      );
-
-      return {
-        ...item,
-        reactions: reactions || [],
-        my_reaction: myReaction || [],
+      const data = {
+        ...result,
+        data: serializeData(dataAddition),
+        is_subscribe: isSubscribe.length > 0,
+        participants,
       };
-    });
 
-    const isSubscribe = await Subscriptions.query().where({
-      ticket_id: id,
-      user_id: req?.user?.customId,
-    });
-
-    const histories = await TicketHistories.query()
-      .where({ ticket_id: id })
-      .withGraphFetched("user(simpleSelect)");
-
-    const participants = uniqBy(resultComment, "user_id").map(
-      (item) => item?.user
-    );
-
-    const dataAddition = [
-      ...serializeComments(resultComment),
-      ...serializeHistories(histories),
-    ].sort((a, b) => {
-      return new Date(a.created_at) - new Date(b.created_at);
-    });
-
-    const data = {
-      ...result,
-      data: serializeData(dataAddition),
-      is_subscribe: isSubscribe.length > 0,
-      participants,
-    };
-
-    res.json(data);
+      res.json(data);
+    }
   } catch (error) {
     console.log(error);
     res
@@ -220,7 +230,10 @@ const pinned = async (req, res) => {
     if (pinnedTickets.length >= 3) {
       res.status(400).json({ message: "You can only pin 3 tickets." });
     } else {
-      await Ticket.query().patch({ is_pinned: true }).where({ id });
+      // ticket must be published to true so it can be view by customer
+      await Ticket.query()
+        .patch({ is_pinned: true, is_published: true })
+        .where({ id });
       await insertTicketHistory(
         id,
         user_id,

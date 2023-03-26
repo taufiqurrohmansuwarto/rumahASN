@@ -58,3 +58,9 @@ buat notifikasi ke user ketika
     "Terima kasih telah memberitahu kami tentang masalah yang Anda temui saat menggunakan sistem aplikasi helpdesk kami. Kami akan memperbaikinya dan mengupayakan agar hal ini tidak terjadi lagi di masa mendatang."
 
     "Kami berterima kasih atas umpan balik Anda yang membantu kami dalam meningkatkan kinerja dan efisiensi sistem aplikasi helpdesk kami. Kami berharap bisa terus memberikan layanan yang terbaik bagi Anda dan pengguna lainnya."
+    
+
+    todo
+
+    notifications
+    
