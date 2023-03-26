@@ -82,10 +82,13 @@ export const definitions = {
       description: "To create own comment",
       modelCheck: {
         model: "ticket",
-        checkFunction: (model, attributes) => {
+        checkFunction: (model, attributes, user) => {
           if (model === "ticket") {
             return (
-              attributes?.ticket?.is_published && !attributes?.ticket?.is_locked
+              (attributes?.ticket?.is_published &&
+                !attributes?.ticket?.is_locked) ||
+              (user?.id === attributes?.ticket?.requester &&
+                !attributes?.ticket?.is_locked)
             );
           }
           return true;
@@ -183,14 +186,14 @@ export const definitions = {
       description: "To change agent",
     },
     "submit-feedback": {
-      roles: ["user"],
+      roles: allUser,
       displayName: "submit feedback",
       description: "To submit feedback",
       attributeCheck: {
         checkFunction: (attributes) => {
           return attributes?.user?.id === attributes?.ticket?.requester;
         },
-        requiredRoles: ["user"],
+        requiredRoles: allUser,
       },
     },
   },

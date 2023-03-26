@@ -1,9 +1,11 @@
 import { changeFeedbackTicket } from "@/services/index";
 import { SettingOutlined } from "@ant-design/icons";
+import { Stack } from "@mantine/core";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Divider, message, Modal, Rate, Space } from "antd";
+import { Alert, Divider, message, Modal, Rate, Space } from "antd";
 import Typography from "antd/lib/typography/Typography";
 import { useState } from "react";
+import RestrictedContent from "../RestrictedContent";
 
 const SubmitFeeback = ({ item }) => {
   const queryClient = useQueryClient();
@@ -46,7 +48,10 @@ const SubmitFeeback = ({ item }) => {
         onOk={handleSubmit}
         open={open}
       >
-        <Rate value={value} onChange={setValue} />
+        <Stack>
+          <Alert description="Terima kasih telah menggunakan Helpdesk kami! Mohon beri penilaian dan umpan balik untuk meningkatkan layanan kami. Terima kasih!" />
+          <Rate value={value} onChange={setValue} />
+        </Stack>
       </Modal>
       <SettingOutlined
         onClick={handleOpen}
@@ -63,10 +68,17 @@ function ChangeFeedback({ item }) {
   return (
     <>
       <Space direction="vertical">
-        <Typography.Text type="secondary" style={{ fontSize: 12 }}>
-          Umpan Balik
-        </Typography.Text>
-        <SubmitFeeback item={item} />
+        <Space>
+          <Typography.Text type="secondary" style={{ fontSize: 12 }}>
+            Umpan Balik
+          </Typography.Text>
+          <RestrictedContent
+            name="submit-feedback"
+            attributes={{ ticket: item }}
+          >
+            <SubmitFeeback item={item} />
+          </RestrictedContent>
+        </Space>
         <Rate value={item?.stars} disabled />
       </Space>
       <Divider />

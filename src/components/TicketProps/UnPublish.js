@@ -1,7 +1,7 @@
 import { unpublish } from "@/services/index";
 import { CloseSquareOutlined } from "@ant-design/icons";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Modal, Row, Space, Typography } from "antd";
+import { message, Modal, Row, Space, Typography } from "antd";
 
 const { confirm } = Modal;
 function Unpublish({ id }) {
@@ -10,7 +10,9 @@ function Unpublish({ id }) {
   const { mutateAsync } = useMutation((data) => unpublish(data), {
     onSuccess: () => {
       queryClient.invalidateQueries(["publish-ticket", id]);
+      message.success("Tiket berhasil dibatalkan publikasi");
     },
+    onError: () => message.error("Tiket gagal dibatalkan publikasi"),
   });
 
   const handleSubmit = () => {

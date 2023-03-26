@@ -86,7 +86,9 @@ function ChangeTicketDescription({ item }) {
               <span>{formatDateFromNow(item?.created_at)}</span>
             </Tooltip>
           }
-          content={<div dangerouslySetInnerHTML={{ __html: item?.content }} />}
+          content={
+            <div dangerouslySetInnerHTML={{ __html: item?.content_html }} />
+          }
         />
       )}
     </>
