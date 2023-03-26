@@ -26,6 +26,7 @@ class Tickets extends Model {
     const SubCategories = require("../models/sub-categories.model");
     const Histories = require("../models/tickets_histories.model");
     const Comments = require("../models/tickets_comments_customers.model");
+    const TicketsSubscription = require("../models/tickets_subscriptions.model");
 
     return {
       histories: {
@@ -98,6 +99,14 @@ class Tickets extends Model {
         join: {
           from: "tickets.priority_code",
           to: "priorities.name",
+        },
+      },
+      subscriptions: {
+        relation: Model.HasManyRelation,
+        modelClass: TicketsSubscription,
+        join: {
+          from: "tickets.id",
+          to: "tickets_subscriptions.ticket_id",
         },
       },
     };

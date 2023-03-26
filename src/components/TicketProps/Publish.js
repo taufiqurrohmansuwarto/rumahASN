@@ -1,20 +1,17 @@
-import { publishTickets } from "@/services/index";
+import { publish } from "@/services/index";
 import { ReadOutlined } from "@ant-design/icons";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Space, Typography, Row, Modal, message } from "antd";
-import { useRouter } from "next/router";
+import { message, Modal, Row, Space, Typography } from "antd";
 
 const { confirm } = Modal;
 
 function Publish({ id }) {
   const queryClient = useQueryClient();
-  const router = useRouter();
 
-  const { mutateAsync } = useMutation((data) => publishTickets(data), {
+  const { mutateAsync } = useMutation((data) => publish(data), {
     onSuccess: () => {
       queryClient.invalidateQueries(["publish-ticket", id]);
       message.success("Tiket berhasil dipublish");
-      router.push("/helpdesk");
     },
     onError: () => message.error("Tiket gagal dipublish"),
   });

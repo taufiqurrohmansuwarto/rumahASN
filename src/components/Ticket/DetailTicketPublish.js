@@ -411,7 +411,6 @@ const SideRight = ({ item }) => {
 };
 
 const DetailTicketPublish = ({ id }) => {
-  const bottomRef = useRef(null);
   const queryClient = useQueryClient();
 
   const { data, isLoading } = useQuery(

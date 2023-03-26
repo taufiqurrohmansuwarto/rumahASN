@@ -5,6 +5,7 @@ const TicketHistories = require("../models/tickets_histories.model");
 const Comments = require("../models/tickets_comments_customers.model");
 const Subscriptions = require("../models/tickets_subscriptions.model");
 const CommentReaction = require("../models/comments-reactions.model");
+const { parseMarkdown } = require("../utils/parsing");
 const { raw } = require("objection");
 
 const { insertTicketHistory } = require("@/utils/tickets-utilities");
@@ -65,18 +66,22 @@ const detailPublishTickets = async (req, res) => {
     const { id: userId, current_role: role } = req?.user;
 
     const result = await Ticket.query()
-      .where((builder) => {
-        if (role === "user") {
-          builder.where({ is_published: true });
-        }
-      })
+      .where({ id })
       .select("*", Ticket.relatedQuery("comments").count().as("comments_count"))
       .withGraphFetched(
         "[customer(simpleSelect), agent(simpleSelect), admin(simpleSelect), sub_category.[category]]"
       )
       .first();
 
-    if (!result) {
+    const ticketNoPublished =
+      !result ||
+      (!result?.is_published &&
+        result?.requester !== userId &&
+        role !== "admin" &&
+        role !== "agent" &&
+        result?.agent !== userId);
+
+    if (ticketNoPublished) {
       res.json(null);
     } else {
       const comments = await Comments.query()
@@ -149,6 +154,7 @@ const detailPublishTickets = async (req, res) => {
 
       const data = {
         ...result,
+        content_html: parseMarkdown(result.content),
         data: serializeData(dataAddition),
         is_subscribe: isSubscribe.length > 0,
         participants,
@@ -449,18 +455,45 @@ const unPublish = async (req, res) => {
 const createComments = async (req, res) => {
   try {
     const { id: ticket_id } = req?.query;
-    const { customId: user_id } = req?.user;
+    const { customId: user_id, current_role: role } = req?.user;
 
-    const comment = req?.body?.comment;
+    const currentTicket = await Ticket.query().findById(ticket_id);
 
-    const data = {
-      comment,
-      user_id,
-      ticket_id,
-    };
+    if (!currentTicket) {
+      res.status(404).json({ message: "Ticket not found." });
+    } else if (currentTicket.is_locked && role !== "admin") {
+      res.status(403).json({ message: "Ticket is locked." });
+    } else if (!currentTicket.is_published) {
+      if (
+        role === "admin" ||
+        role === "agent" ||
+        currentTicket?.requester === user_id
+      ) {
+        const comment = req?.body?.comment;
 
-    await Comments.query().insert(data);
-    res.json({ message: "Comment added successfully." });
+        const data = {
+          comment,
+          user_id,
+          ticket_id,
+        };
+
+        await Comments.query().insert(data);
+        res.json({ message: "Comment added successfully." });
+      } else {
+        res.status(403).json({ message: "You are not allowed to comment." });
+      }
+    } else if (currentTicket.is_published) {
+      const comment = req?.body?.comment;
+
+      const data = {
+        comment,
+        user_id,
+        ticket_id,
+      };
+
+      await Comments.query().insert(data);
+      res.json({ message: "Comment added successfully." });
+    }
   } catch (error) {
     console.log(error);
     res
@@ -708,7 +741,6 @@ const changeAgent = async (req, res) => {
     const { customId: user_id, current_role: role } = req?.user;
     const { assignee } = req?.body;
 
-    let kata = "";
     const currentTicket = await Ticket.query().findById(id);
 
     if (!currentTicket) {
