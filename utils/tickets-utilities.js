@@ -3,9 +3,26 @@ const TicketHistory = require("../models/tickets_histories.model");
 const Ticket = require("../models/tickets.model");
 const TicketSubscriptions = require("../models/ticket_subscriptions.model");
 const User = require("../models/users.model");
+const Comment = require("../models/tickets_comments_customers.model");
+const Notification = require("../models/notifications.model");
 
-const TicketNotification = async ({
-  from,
+const commentReactionNotification = async ({ commentId, currentUserId }) => {
+  const currentComement = await Comment.query().findById(commentId);
+  const ticketId = currentComement?.ticket_id;
+  const commentUserId = currentComement?.user_id;
+  const currentUser = await User.query().findById(currentUserId);
+
+  return await Notification.query().insert({
+    from: currentUserId,
+    title: "Reaksi pada komentar anda",
+    content: `${currentUser?.name} telah memberikan reaksi pada komentar anda`,
+    type: "comment_reaction",
+    ticket_id: ticketId,
+    to: commentUserId,
+  });
+};
+
+const ticketNotification = async ({
   title,
   content,
   type,
@@ -47,7 +64,7 @@ const TicketNotification = async ({
     .filter((user) => user.user_id !== currentUserId)
     .map((user) => {
       return {
-        from,
+        from: currentUserId,
         title,
         content,
         type,
@@ -56,7 +73,7 @@ const TicketNotification = async ({
       };
     });
 
-  return sendNotifications;
+  return await Notification.query().insert(sendNotifications);
 };
 
 const insertTicketHistory = (ticketId, userId, status, comment) => {
@@ -89,5 +106,6 @@ const allowUser = async (currentUser, ticketId) => {
 module.exports = {
   insertTicketHistory,
   allowUser,
-  TicketNotification,
+  ticketNotification,
+  commentReactionNotification,
 };
