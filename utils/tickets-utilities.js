@@ -6,31 +6,57 @@ const User = require("../models/users.model");
 
 const TicketNotification = async ({
   from,
-  to,
   title,
   content,
   type,
   ticketId,
+  currentUserId,
 }) => {
   const currentTicket = await Ticket.query().findById(ticketId);
 
-  // all admins get notifications
-  let sendNotifications = [];
+  let users = [];
 
+  // all admins get notifications
   const admins = await User.query()
     .where({ current_role: "admin" })
     .select("custom_id as user_id");
 
+  // assignee on ticket
   const assignee = await Ticket.query()
     .where({ id: ticketId })
     .select("assignee as user_id");
 
+  // dan juga requester
+  const requester = await Ticket.query()
+    .where({ id: ticketId })
+    .select("requester as user_id");
+
+  users = [...admins, ...assignee, ...requester];
+
   if (currentTicket?.is_published) {
     // find the subscriptions
-    const userSubscriptions = await TicketSubscriptions.query().where({
-      ticket_id: ticketId,
-    });
+    const userSubscriptions = await TicketSubscriptions.query()
+      .where({
+        ticket_id: ticketId,
+      })
+      .select("user_id");
+    users = [...users, ...userSubscriptions];
   }
+
+  const sendNotifications = users
+    .filter((user) => user.user_id !== currentUserId)
+    .map((user) => {
+      return {
+        from,
+        title,
+        content,
+        type,
+        ticket_id: ticketId,
+        to: user.user_id,
+      };
+    });
+
+  return sendNotifications;
 };
 
 const insertTicketHistory = (ticketId, userId, status, comment) => {
@@ -63,4 +89,5 @@ const allowUser = async (currentUser, ticketId) => {
 module.exports = {
   insertTicketHistory,
   allowUser,
+  TicketNotification,
 };
