@@ -1,10 +1,11 @@
 const TicketHistory = require("../models/tickets_histories.model");
 
 const Ticket = require("../models/tickets.model");
-const TicketSubscriptions = require("../models/ticket_subscriptions.model");
+const TicketSubscriptions = require("../models/tickets_subscriptions.model");
 const User = require("../models/users.model");
 const Comment = require("../models/tickets_comments_customers.model");
 const Notification = require("../models/notifications.model");
+const { uniqBy } = require("lodash");
 
 const commentReactionNotification = async ({ commentId, currentUserId }) => {
   const currentComement = await Comment.query().findById(commentId);
@@ -60,18 +61,16 @@ const ticketNotification = async ({
     users = [...users, ...userSubscriptions];
   }
 
-  const sendNotifications = users
-    .filter((user) => user.user_id !== currentUserId)
-    .map((user) => {
-      return {
-        from: currentUserId,
-        title,
-        content,
-        type,
-        ticket_id: ticketId,
-        to: user.user_id,
-      };
-    });
+  const sendNotifications = uniqBy(users, "user_id").map((user) => {
+    return {
+      from: currentUserId,
+      title,
+      content,
+      type,
+      ticket_id: ticketId,
+      to: user.user_id,
+    };
+  });
 
   return await Notification.query().insert(sendNotifications);
 };

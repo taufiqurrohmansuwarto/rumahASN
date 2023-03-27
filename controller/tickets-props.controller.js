@@ -8,7 +8,10 @@ const CommentReaction = require("../models/comments-reactions.model");
 const { parseMarkdown } = require("../utils/parsing");
 const { raw } = require("objection");
 
-const { insertTicketHistory } = require("@/utils/tickets-utilities");
+const {
+  insertTicketHistory,
+  ticketNotification,
+} = require("@/utils/tickets-utilities");
 const {
   serializeComments,
   serializeHistories,
@@ -410,6 +413,13 @@ const publish = async (req, res) => {
     } else {
       await Ticket.query().patch({ is_published: true }).where({ id });
       await insertTicketHistory(id, user_id, "published", "Ticket published");
+      await ticketNotification({
+        ticketId: id,
+        type: "published",
+        title: "Tiket dipublikasikan",
+        content: `mempublikasikan tiket dengan judul "${ticket.title}"`,
+        currentUserId: user_id,
+      });
       // should be added to the ticket history
       res.status(200).json({ message: "Ticket published successfully." });
     }
@@ -626,6 +636,7 @@ const unMarkAsAnswer = async (req, res) => {
     await Comments.query()
       .patch({ is_answer: false })
       .where({ id: commentId, ticket_id: id });
+
     await insertTicketHistory(
       id,
       user_id,
@@ -723,6 +734,7 @@ const changePriorityAndSubCategory = async (req, res) => {
         "change_priority_sub_category",
         "merubah prioritas dan sub kategori"
       );
+
       res.status(200).json({ message: "Ticket updated successfully." });
     } else {
       res
@@ -755,12 +767,22 @@ const changeAgent = async (req, res) => {
       await Ticket.query()
         .patch({ assignee, chooser: user_id, chooser_picked_at: new Date() })
         .where({ id });
+
       await insertTicketHistory(
         id,
         user_id,
         "change_agent",
         "merubah penerima tugas"
       );
+
+      await ticketNotification({
+        ticketId: id,
+        type: "change_agent",
+        title: "Tiket telah diubah penerima tugasnya",
+        content: `merubah penerima tugas tiket dengan judul "${currentTicket.title}"`,
+        currentUserId: user_id,
+      });
+
       res.status(200).json({ message: "Ticket updated successfully." });
     }
   } catch (error) {
@@ -792,12 +814,22 @@ const changeStatus = async (req, res) => {
           status_code: status,
         })
         .where({ id });
+
       await insertTicketHistory(
         id,
         user_id,
         "status_changed",
         `merubah status tiket dari ${currentTicket?.status_code} menjadi ${status}`
       );
+
+      await ticketNotification({
+        ticketId: id,
+        content: `merubah status tiket dengan judul "${currentTicket?.title}" dari "${currentTicket?.status_code}" menjadi "${status}"`,
+        type: "status_changed",
+        currentUserId: user_id,
+        title: "Status Tiket Berubah",
+      });
+
       res
         .status(200)
         .json({ code: 200, message: "Status Changed succesfully" });
@@ -828,6 +860,15 @@ const changeFeedback = async (req, res) => {
         "feedback",
         `memberikan ${stars} bintang untuk layanan tiket ini`
       );
+
+      await ticketNotification({
+        ticketId: id,
+        currentUserId: user_id,
+        content: `memberikan ${stars} bintang untuk layanan tiket ini`,
+        title: "Feedback",
+        type: "feedback",
+      });
+
       res.status(200).json({ message: "Feedback changed successfully" });
     } else {
       res

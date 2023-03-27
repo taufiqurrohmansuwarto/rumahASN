@@ -1,18 +1,9 @@
 import { listNotifications } from "@/services/index";
 import { useQuery } from "@tanstack/react-query";
-import { Card, List, Avatar, Space, Tag } from "antd";
+import { Avatar, Card, List, Tag } from "antd";
 import { useRouter } from "next/router";
 import { useState } from "react";
 import { formatDate, notificationText } from "../../utils";
-
-const Title = ({ title, read_at }) => {
-  return (
-    <Space>
-      {title}
-      {read_at === null && <Tag color="red">Baru</Tag>}
-    </Space>
-  );
-};
 
 function ListNotifications() {
   const [query, setQuery] = useState({

@@ -132,12 +132,6 @@ const serializeHistories = (histories) => {
   }
 };
 
-const sortByTimestamp = (a, b) => {
-  if (a.created_at < b.created_at) return -1;
-  if (a.created_at > b.created_at) return 1;
-  return 0;
-};
-
 const serializeData = (data) => {
   const serializedData = [];
 
@@ -169,6 +163,12 @@ const serializeData = (data) => {
   }
 
   return serializedData;
+};
+
+// create function to check is markdown or html
+const isMarkdown = (text) => {
+  const regex = /<[^>]*>/;
+  return regex.test(text);
 };
 
 module.exports = {

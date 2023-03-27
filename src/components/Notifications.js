@@ -7,7 +7,7 @@ import { listNotifications } from "../../services";
 function Notifications() {
   const { data, isLoading } = useQuery(
     ["notifications-total"],
-    () => listNotifications("yes"),
+    () => listNotifications({ symbol: "yes" }),
     {
       refetchInterval: 1000,
     }
@@ -22,7 +22,7 @@ function Notifications() {
     <Badge
       onClick={changePageNotification}
       count={isLoading ? null : data?.count}
-      size="default"
+      size="small"
     >
       <BellOutlined />
     </Badge>
