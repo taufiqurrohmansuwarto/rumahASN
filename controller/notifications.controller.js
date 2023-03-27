@@ -2,24 +2,14 @@ const Notifications = require("../models/notifications.model");
 
 const index = async (req, res) => {
   try {
-    const { customId, current_role } = req?.user;
+    const { customId } = req?.user;
     const limit = req?.query?.limit || 10;
     const page = req?.query?.page || 1;
     const simbol = req?.query?.symbol || "no";
 
-    let findRole;
-    if (current_role === "user") {
-      findRole = ["requester"];
-    } else if (current_role === "agent") {
-      findRole = ["agent", "requester"];
-    } else if (current_role === "admin") {
-      findRole = ["admin", "agent", "requester"];
-    }
-
     if (simbol === "no") {
       const result = await Notifications.query()
         .where("to", customId)
-        .andWhere("role", "in", findRole)
         .withGraphFetched("[from_user(simpleSelect) ]")
         .page(parseInt(page) - 1, parseInt(limit))
         .orderBy("created_at", "desc");
@@ -28,7 +18,6 @@ const index = async (req, res) => {
       const result = await Notifications.query()
         .count()
         .where("to", customId)
-        .andWhere("role", "in", findRole)
         .andWhere("read_at", null);
       res.json(result[0]);
     }
@@ -41,20 +30,10 @@ const index = async (req, res) => {
 // clear chats
 const clearChats = async (req, res) => {
   try {
-    const { customId, current_role } = req?.user;
-    let findRole;
-
-    if (current_role === "user") {
-      findRole = ["requester"];
-    } else if (current_role === "agent") {
-      findRole = ["agent", "requester"];
-    } else if (current_role === "admin") {
-      findRole = ["admin", "agent", "requester"];
-    }
+    const { customId } = req?.user;
     await Notifications.query()
       .patch({ read_at: new Date() })
       .where("to", customId)
-      .andWhere("role", "in", findRole)
       .andWhere("read_at", null);
     res.status(200).json({ code: 200, message: "success" });
   } catch (error) {
