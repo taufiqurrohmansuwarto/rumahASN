@@ -1,6 +1,8 @@
-import { Card, Col, List, Row, Space, Tag } from "antd";
+import { listNotifications } from "@/services/index";
+import { useQuery } from "@tanstack/react-query";
+import { Card, List, Avatar, Space, Tag } from "antd";
 import { useRouter } from "next/router";
-import React from "react";
+import { useState } from "react";
 import { formatDate, notificationText } from "../../utils";
 
 const Title = ({ title, read_at }) => {
@@ -12,7 +14,19 @@ const Title = ({ title, read_at }) => {
   );
 };
 
-function ListNotifications({ data, loading }) {
+function ListNotifications() {
+  const [query, setQuery] = useState({
+    page: 1,
+    limit: 10,
+    symbol: "no",
+  });
+
+  const { data, isLoading: loading } = useQuery(
+    ["notifications", query],
+    () => listNotifications(query),
+    { keepPreviousData: true, enabled: !!query }
+  );
+
   const router = useRouter();
   const handleRouting = (item) => {
     const routing = notificationText(item);
@@ -21,21 +35,34 @@ function ListNotifications({ data, loading }) {
 
   return (
     <Card>
-      <List loading={loading}>
-        {data?.map((item) => (
+      <List
+        pagination={{
+          size: "small",
+          position: "both",
+          onChange: (page) => setQuery({ ...query, page }),
+          current: query.page,
+          pageSize: query.limit,
+          total: data?.total,
+        }}
+        loading={loading}
+      >
+        {data?.results?.map((item) => (
           <List.Item
             key={item.id}
             actions={[
               <a key="lihat" onClick={() => handleRouting(item)}>
                 Lihat
               </a>,
+              <div key="check-read">
+                {item?.read_at === null && <Tag color="red">Baru</Tag>}
+              </div>,
             ]}
           >
             <List.Item.Meta
-              title={<Title read_at={item?.read_at} title={item?.title} />}
-              description={`${item?.from_user?.username} ${
-                item?.content
-              } pada ${formatDate(item?.created_at)}`}
+              avatar={<Avatar src={item?.from_user?.image} />}
+              // title={<Title read_at={item?.read_at} title={item?.title} />}
+              description={formatDate(item?.created_at)}
+              title={`${item?.from_user?.username} ${item?.content}`}
             />
           </List.Item>
         ))}

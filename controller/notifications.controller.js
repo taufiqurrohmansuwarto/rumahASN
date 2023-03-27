@@ -3,7 +3,7 @@ const Notifications = require("../models/notifications.model");
 const index = async (req, res) => {
   try {
     const { customId, current_role } = req?.user;
-    const limit = req?.query?.limit || 50;
+    const limit = req?.query?.limit || 10;
     const page = req?.query?.page || 1;
     const simbol = req?.query?.symbol || "no";
 
@@ -21,7 +21,7 @@ const index = async (req, res) => {
         .where("to", customId)
         .andWhere("role", "in", findRole)
         .withGraphFetched("[from_user(simpleSelect) ]")
-        .page(page - 1, limit)
+        .page(parseInt(page) - 1, parseInt(limit))
         .orderBy("created_at", "desc");
       res.json(result);
     } else if (simbol === "yes") {

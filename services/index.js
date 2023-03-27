@@ -146,10 +146,12 @@ export const dataListBanner = async () => {
   return await api.get("/banner").then((res) => res?.data);
 };
 
-export const listNotifications = async (simbol = "no") => {
-  return await api
-    .get(`/notifications?symbol=${simbol}`)
-    .then((res) => res?.data);
+export const listNotifications = async (query) => {
+  const qs = queryString.stringify(query, {
+    skipNull: true,
+    skipEmptyString: true,
+  });
+  return await api.get(`/notifications?${qs}`).then((res) => res?.data);
 };
 
 export const clearChatsNotificatoins = async () => {
