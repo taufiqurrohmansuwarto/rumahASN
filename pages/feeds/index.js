@@ -4,6 +4,7 @@ import TicketsPublish from "@/components/Ticket/TicketsPublish";
 import { Grid, Stack } from "@mantine/core";
 import Layout from "@/components/Layout";
 import PageContainer from "@/components/PageContainer";
+import PublikasiCASN from "@/components/Web/PublikasiCASN";
 
 function Feeds() {
   return (
@@ -15,6 +16,9 @@ function Feeds() {
             <PinnedTickets />
             <TicketsPublish />
           </Stack>
+        </Grid.Col>
+        <Grid.Col span={3}>
+          <PublikasiCASN />
         </Grid.Col>
       </Grid>
     </PageContainer>
