@@ -402,3 +402,12 @@ export const publikasiCasn = (query) => {
 export const nilaiCasn = (query) => {
   return api.get(`/web/nilai-casn`).then((res) => res?.data);
 };
+
+// feedbacks
+export const createFeedbacks = (data) => {
+  return api.post("/feedbacks", data).then((res) => res?.data);
+};
+
+export const getFeedbacks = () => {
+  return api.get("/feedbacks").then((res) => res?.data);
+};
