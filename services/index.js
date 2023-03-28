@@ -383,3 +383,22 @@ export const ticketsMentionsMarkdown = (ticketNumber) => {
 export const pinnetdTickets = () => {
   return api.get("/tickets/pinned").then((res) => res?.data);
 };
+
+// list berita
+export const publikasiCasn = (query) => {
+  const { page, limit, search } = query;
+  const params = {
+    page,
+    limit,
+    search,
+  };
+  const queryString = Object.keys(params)
+    .map((key) => key + "=" + params[key])
+    .join("&");
+
+  return api.get(`/web/publikasi-casn?${query}`).then((res) => res?.data);
+};
+
+export const nilaiCasn = (query) => {
+  return api.get(`/web/nilai-casn`).then((res) => res?.data);
+};

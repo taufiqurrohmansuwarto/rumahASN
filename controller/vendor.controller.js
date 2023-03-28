@@ -10,6 +10,31 @@ const listBerita = async (req, res) => {
   }
 };
 
+const nilaiCasn = async (req, res) => {
+  try {
+    const { fetcher } = req;
+    const result = await fetcher.get(`/web/nilai-casn`);
+    res.json(result);
+  } catch (error) {
+    console.log(error);
+    res.status(400).json({ code: 400, message: "Internal Server Error" });
+  }
+};
+
+const publikasiCasn = async (req, res) => {
+  try {
+    const { fetcher } = req;
+
+    const query = new URLSearchParams(req.query).toString();
+
+    const result = await fetcher.get(`/web/publikasi-casn?${query}}`);
+    res.json(result?.data);
+  } catch (error) {
+    console.log(error);
+    res.status(400).json({ code: 400, message: "Internal Server Error" });
+  }
+};
+
 const listBanner = async (req, res) => {
   try {
     let hasil = [];
@@ -35,4 +60,6 @@ const listBanner = async (req, res) => {
 module.exports = {
   listBerita,
   listBanner,
+  nilaiCasn,
+  publikasiCasn,
 };
