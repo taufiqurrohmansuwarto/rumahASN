@@ -1,6 +1,6 @@
 import { LogoutOutlined, SettingOutlined } from "@ant-design/icons";
 import { Dropdown } from "antd";
-import { useSession } from "next-auth/react";
+import { signOut, useSession } from "next-auth/react";
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useRouter } from "next/router";
