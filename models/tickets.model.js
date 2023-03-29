@@ -18,6 +18,14 @@ class Tickets extends Model {
     return "tickets";
   }
 
+  static get modifiers() {
+    return {
+      selectPublish(query) {
+        query.select("id", "is_published");
+      },
+    };
+  }
+
   static get relationMappings() {
     const Categories = require("./categories.model");
     const Status = require("./status.model");

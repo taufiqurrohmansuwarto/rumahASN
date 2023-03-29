@@ -12,9 +12,18 @@ class Notifications extends Model {
     return "id";
   }
 
+  static get modifiers() {
+    return {
+      selectPublish(query) {
+        query.select("id", "is_published");
+      },
+    };
+  }
+
   //    relation with users table
   static get relationMappings() {
     const User = require("./users.model");
+    const Ticket = require("./tickets.model");
 
     return {
       from_user: {
@@ -23,6 +32,14 @@ class Notifications extends Model {
         join: {
           from: "notifications.from",
           to: "users.custom_id",
+        },
+      },
+      ticket: {
+        relation: Model.BelongsToOneRelation,
+        modelClass: Ticket,
+        join: {
+          from: "notifications.ticket_id",
+          to: "tickets.id",
         },
       },
       to_user: {

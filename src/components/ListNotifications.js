@@ -1,11 +1,14 @@
 import { listNotifications } from "@/services/index";
 import { useQuery } from "@tanstack/react-query";
 import { Avatar, Card, List, Tag } from "antd";
+import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import { useState } from "react";
-import { formatDate, notificationText } from "../../utils";
+import { formatDate } from "../../utils";
 
 function ListNotifications() {
+  const { data: userData, status } = useSession();
+
   const [query, setQuery] = useState({
     page: 1,
     limit: 10,
@@ -19,15 +22,33 @@ function ListNotifications() {
   );
 
   const router = useRouter();
-  const handleRouting = (item) => {
-    const routing = notificationText(item);
-    router.push(routing);
+
+  const handleRouting = (item, role) => {
+    const { ticket_id } = item;
+
+    if (item?.ticket === null) {
+      return;
+    } else if (item?.ticket?.is_published) {
+      router.push(`/customer-ticket/${ticket_id}`);
+    } else {
+      if (role === "admin") {
+        router.push(`/admin/tickets-managements/${ticket_id}/detail`);
+      } else if (role === "user") {
+        router.push(`/tickets/${ticket_id}/detail`);
+      } else if (role === "agent") {
+        router.push(`/agent/tickets/${ticket_id}/detail`);
+      }
+    }
+
+    // const routing = notificationText(item);
+    // router.push(routing);
   };
 
   return (
     <Card>
       <List
         pagination={{
+          showSizeChanger: false,
           size: "small",
           position: "both",
           onChange: (page) => setQuery({ ...query, page }),
@@ -35,13 +56,18 @@ function ListNotifications() {
           pageSize: query.limit,
           total: data?.total,
         }}
-        loading={loading}
+        loading={loading || status === "loading"}
       >
         {data?.results?.map((item) => (
           <List.Item
             key={item.id}
             actions={[
-              <a key="lihat" onClick={() => handleRouting(item)}>
+              <a
+                key="lihat"
+                onClick={() =>
+                  handleRouting(item, userData?.user?.current_role)
+                }
+              >
                 Lihat
               </a>,
               <div key="check-read">

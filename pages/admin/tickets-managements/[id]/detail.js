@@ -2,6 +2,7 @@ import PageContainer from "@/components/PageContainer";
 import DetailTicketPublish from "@/components/Ticket/DetailTicketPublish";
 import { useRouter } from "next/router";
 import AdminLayout from "../../../../src/components/AdminLayout";
+import { Card } from "antd";
 
 const SemuaTicket = () => {
   const router = useRouter();
@@ -14,7 +15,9 @@ const SemuaTicket = () => {
 
   return (
     <PageContainer onBack={handleBack} title="Tiket" subTitle="Detail">
-      <DetailTicketPublish id={id} />;
+      <Card>
+        <DetailTicketPublish id={id} />
+      </Card>
     </PageContainer>
   );
 };
