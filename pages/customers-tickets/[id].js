@@ -1,4 +1,5 @@
 import Layout from "@/components/Layout";
+import PageContainer from "@/components/PageContainer";
 import DetailTicketPublish from "@/components/Ticket/DetailTicketPublish";
 import { Card } from "antd";
 import { useRouter } from "next/router";
@@ -6,9 +7,11 @@ import { useRouter } from "next/router";
 const DetailTicketCustomers = () => {
   const router = useRouter();
   return (
-    <Card>
-      <DetailTicketPublish id={router?.query?.id} />
-    </Card>
+    <PageContainer>
+      <Card>
+        <DetailTicketPublish id={router?.query?.id} />
+      </Card>
+    </PageContainer>
   );
 };
 

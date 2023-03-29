@@ -7,6 +7,7 @@ import {
   Image,
   Title,
 } from "@mantine/core";
+import { Collapse } from "antd";
 import image from "../../public/faq.svg";
 
 const useStyles = createStyles((theme) => ({
@@ -38,41 +39,37 @@ const FAQDetail = ({ data, loading }) => {
   const { classes } = useStyles();
 
   return (
-    <div className={classes.wrapper}>
-      <Container size="lg">
-        <Grid id="faq-grid" gutter={50}>
-          <Col span={12} md={6}>
-            <Image src={image.src} alt="Frequently Asked Questions" />
-          </Col>
-          <Col span={12} md={6}>
-            <Title order={2} align="left" className={classes.title}>
-              Frequently Asked Questions
-            </Title>
-            <Accordion chevronPosition="right" variant="separated">
-              {data?.map((item) => {
-                return (
-                  <div key={item?.id}>
-                    <Accordion.Item
-                      className={classes.item}
-                      value={`${item?.id}`}
-                    >
-                      <Accordion.Control>{item?.question}</Accordion.Control>
-                      <Accordion.Panel>
-                        <div
-                          dangerouslySetInnerHTML={{
-                            __html: item?.html,
-                          }}
-                        />
-                      </Accordion.Panel>
-                    </Accordion.Item>
-                  </div>
-                );
-              })}
-            </Accordion>
-          </Col>
-        </Grid>
-      </Container>
-    </div>
+    <Grid id="faq-grid">
+      {/* <Grid.Col xs={12} md={6}>
+          <Image src={image.src} alt="Frequently Asked Questions" />
+        </Grid.Col> */}
+      <Grid.Col xs={12} md={12}>
+        {/* <Title order={2} align="left" className={classes.title}>
+          Frequently Asked Questions
+        </Title> */}
+        <Collapse accordion>
+          {data?.map((item) => {
+            return (
+              <Collapse.Panel
+                key={item?.id}
+                // className={classes.item}
+                header={item?.question}
+                value={`${item?.id}`}
+              >
+                {/* <Accordion.Control>{item?.question}</Accordion.Control> */}
+                {/* <Accordion.Panel> */}
+                <div
+                  dangerouslySetInnerHTML={{
+                    __html: item?.html,
+                  }}
+                />
+                {/* </Accordion.Panel> */}
+              </Collapse.Panel>
+            );
+          })}
+        </Collapse>
+      </Grid.Col>
+    </Grid>
   );
 };
 
