@@ -1,6 +1,8 @@
 import { publikasiCasn } from "@/services/index";
+import { capitalizeWithoutPPPK } from "@/utils/client-utils";
 import { useQuery } from "@tanstack/react-query";
-import { Card, List } from "antd";
+import { Badge, Card, List } from "antd";
+import { lowerCase } from "lodash";
 import React, { useState } from "react";
 
 function PublikasiCASN() {
@@ -17,17 +19,23 @@ function PublikasiCASN() {
   );
 
   return (
-    <List
-      loading={isLoading}
-      dataSource={data?.results}
-      renderItem={(item) => {
-        return (
-          <List.Item>
-            <List.Item.Meta description={item?.judul} />
-          </List.Item>
-        );
-      }}
-    />
+    <Badge.Ribbon text="Seleksi Pegawai">
+      <Card title="Web BKD">
+        <List
+          loading={isLoading}
+          dataSource={data?.results}
+          renderItem={(item) => {
+            return (
+              <List.Item>
+                <List.Item.Meta
+                  description={capitalizeWithoutPPPK(lowerCase(item?.judul))}
+                />
+              </List.Item>
+            );
+          }}
+        />
+      </Card>
+    </Badge.Ribbon>
   );
 }
 

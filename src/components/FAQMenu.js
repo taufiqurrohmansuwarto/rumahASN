@@ -19,7 +19,7 @@ function FAQMenu({ data }) {
 
   return (
     <Grid>
-      <Grid.Col span={2}>
+      <Grid.Col md={2} sm={12}>
         <Menu mode="inline">
           {data?.map((item) => {
             return (
@@ -30,7 +30,7 @@ function FAQMenu({ data }) {
           })}
         </Menu>
       </Grid.Col>
-      <Grid.Col span={10}>
+      <Grid.Col md={10} sm={12}>
         {dataFaq && <FAQDetail data={dataFaq?.sub_faq} />}
       </Grid.Col>
     </Grid>

@@ -502,6 +502,11 @@ const createComments = async (req, res) => {
           content: `mengomentari tiket dengan judul "${currentTicket.title}"`,
           title: "Tiket dikomentari",
         });
+
+        await Ticket.query()
+          .patch({ updated_at: new Date() })
+          .where({ id: ticket_id });
+
         res.json({ message: "Comment added successfully." });
       } else {
         res.status(403).json({ message: "You are not allowed to comment." });

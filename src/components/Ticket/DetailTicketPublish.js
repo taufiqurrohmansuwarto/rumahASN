@@ -445,12 +445,12 @@ const DetailTicketPublish = ({ id }) => {
   const [value, setValue] = useState(null);
 
   return (
-    <Row justify="center">
+    <Row>
       <Skeleton loading={isLoading}>
         {data && (
           <>
             <BackTop />
-            <Col span={20}>
+            <Col span={24}>
               <Row gutter={[8, 16]}>
                 <Col span={24}>
                   <Affix offsetTop={40}>
@@ -464,7 +464,7 @@ const DetailTicketPublish = ({ id }) => {
                 </Col>
               </Row>
               <Row gutter={[32, 64]}>
-                <Col span={20}>
+                <Col md={20}>
                   <ChangeTicketDescription item={data} />
                   {data?.data?.map((item, index) => {
                     return (
@@ -490,7 +490,7 @@ const DetailTicketPublish = ({ id }) => {
                     />
                   </RestrictedContent>
                 </Col>
-                <Col span={4}>
+                <Col md={4}>
                   <SideRight item={data} />
                 </Col>
               </Row>

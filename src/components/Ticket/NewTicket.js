@@ -37,10 +37,10 @@ const NewTicket = ({
   return (
     <>
       <Row>
-        <Col span={1}>
+        <Col md={1} sm={0} xs={0}>
           <Avatar src={data?.user?.image} />
         </Col>
-        <Col span={23}>
+        <Col md={23} sm={24} xs={24}>
           <MarkdownEditor
             onRenderPreview={renderMarkdown}
             acceptedFileTypes={[

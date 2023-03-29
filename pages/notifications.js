@@ -25,7 +25,7 @@ function NotificationsPage() {
   return (
     <PageContainer title="Notification" content="Notifikasi tiket">
       <Grid align="center" justify="center">
-        <Grid.Col span={8}>
+        <Grid.Col md={8} sm={12}>
           <Stack>
             <Button onClick={handleClearNotif}>Hapus Notifikasi</Button>
             <ListNotifications />

@@ -1,6 +1,7 @@
 import { publishTickets } from "@/services/index";
 import { formatDateLL, setColorStatus } from "@/utils/client-utils";
 import { MessageOutlined } from "@ant-design/icons";
+import { Grid } from "@mantine/core";
 import { useQuery } from "@tanstack/react-query";
 import {
   Avatar,
@@ -84,14 +85,15 @@ function TicketsPublish() {
 
   return (
     <div>
-      <Row>
-        <Col span={8}>
+      <Grid>
+        <Grid.Col md={6} sm={12}>
           <Input.Search
             placeholder="Cari berdasarkan judul"
             onSearch={handleSearch}
+            style={{ width: "100%" }}
           />
-        </Col>
-      </Row>
+        </Grid.Col>
+      </Grid>
       <List
         dataSource={data?.results}
         loading={isLoading}

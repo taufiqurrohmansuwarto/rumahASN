@@ -123,7 +123,6 @@ function Layout({ children, active }) {
       avatarProps={{
         src: data?.user?.image,
         size: "small",
-        title: data?.user?.name,
         render: (props, dom) => {
           return (
             <Dropdown

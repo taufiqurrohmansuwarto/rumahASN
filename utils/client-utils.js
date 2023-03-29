@@ -9,6 +9,16 @@ export const formatDateFromNow = (date) => {
   return moment(date).locale("id").fromNow();
 };
 
+export const capitalizeWithoutPPPK = (str) => {
+  let words = str.toLowerCase().split(" ");
+  for (let i = 0; i < words.length; i++) {
+    if (words[i] !== "pppk") {
+      words[i] = words[i].charAt(0).toUpperCase() + words[i].substring(1);
+    }
+  }
+  return words.join(" ");
+};
+
 export const formatTooltipUsers = (currentUsers, users) => {
   const newUsers = users?.map((user) => ({
     ...user,

@@ -10,14 +10,14 @@ function Feeds() {
   return (
     <PageContainer title="Beranda" subTitle="Dashboard">
       <Grid justify="start">
-        <Grid.Col span={9}>
+        <Grid.Col md={9} sm={12}>
           <Stack>
             <SelamatDatang />
             <PinnedTickets />
             <TicketsPublish />
           </Stack>
         </Grid.Col>
-        <Grid.Col span={3}>
+        <Grid.Col md={3} sm={12}>
           <PublikasiCASN />
         </Grid.Col>
       </Grid>
