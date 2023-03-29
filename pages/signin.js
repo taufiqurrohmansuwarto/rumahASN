@@ -28,8 +28,8 @@ const SignIn = ({ providers }) => {
         <Col md={8} xs={24}>
           <Typography.Title>Pusat Layanan Kepegawaian Jatim</Typography.Title>
           <Blockquote cite="- BKD Provinsi Jawa Timur">
-            Membantu Anda Menyelesaikan Masalah dengan Kolaborasi Bersama Staff
-            Kepegawaian Daerah Provinsi Jawa Timur
+            Membantu Anda Menyelesaikan Masalah dengan Kolaborasi Bersama TIM
+            BKD Provinsi Jawa Timur
           </Blockquote>
           <GoogleButton
             label="Masuk dengan Google"

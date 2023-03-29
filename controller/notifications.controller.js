@@ -10,7 +10,7 @@ const index = async (req, res) => {
     if (simbol === "no") {
       const result = await Notifications.query()
         .where("to", customId)
-        .withGraphFetched("[from_user(simpleSelect) ]")
+        .withGraphFetched("[from_user(simpleSelect), ticket(selectPublish) ]")
         .page(parseInt(page) - 1, parseInt(limit))
         .orderBy("created_at", "desc");
       res.json(result);
