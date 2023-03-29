@@ -61,16 +61,18 @@ const ticketNotification = async ({
     users = [...users, ...userSubscriptions];
   }
 
-  const sendNotifications = uniqBy(users, "user_id").map((user) => {
-    return {
-      from: currentUserId,
-      title,
-      content,
-      type,
-      ticket_id: ticketId,
-      to: user.user_id,
-    };
-  });
+  const sendNotifications = uniqBy(users, "user_id")
+    .filter((x) => x?.user_id !== currentUserId)
+    .map((user) => {
+      return {
+        from: currentUserId,
+        title,
+        content,
+        type,
+        ticket_id: ticketId,
+        to: user.user_id,
+      };
+    });
 
   return await Notification.query().insert(sendNotifications);
 };
