@@ -5,17 +5,18 @@ import { Grid } from "@mantine/core";
 import { useQuery } from "@tanstack/react-query";
 import {
   Avatar,
-  Col,
   Input,
   List,
   Popover,
-  Row,
   Space,
   Tag,
   Typography,
+  Grid as AntdGrid,
 } from "antd";
 import Link from "next/link";
 import { useState } from "react";
+
+const { useBreakpoint } = AntdGrid;
 
 const Assignee = ({ item }) => {
   if (item?.assignee) {
@@ -49,13 +50,17 @@ const Published = ({ item }) => {
 
 // create item like github issue with primer UI
 const TitleLink = ({ item }) => {
+  const screens = useBreakpoint();
+
   return (
-    <Space>
-      <Typography.Text strong>
+    <div>
+      <Typography.Text strong style={{ marginRight: 8 }}>
         <Link href={`/customers-tickets/${item?.id}`}>{item.title}</Link>
       </Typography.Text>
+      {screens?.xs && <br />}
       <Published item={item} />
-    </Space>
+      <Status item={item} key="status" />
+    </div>
   );
 };
 
@@ -132,7 +137,6 @@ function TicketsPublish() {
               }
             />
             <Space>
-              <Status item={item} key="status" />
               <Assignee key="penerima_tugas" item={item} />
             </Space>
           </List.Item>
