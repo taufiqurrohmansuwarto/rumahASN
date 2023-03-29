@@ -450,7 +450,7 @@ const DetailTicketPublish = ({ id }) => {
         {data && (
           <>
             <BackTop />
-            <Col span={18}>
+            <Col span={20}>
               <Row gutter={[8, 16]}>
                 <Col span={24}>
                   <Affix offsetTop={40}>
@@ -463,8 +463,8 @@ const DetailTicketPublish = ({ id }) => {
                   <Divider />
                 </Col>
               </Row>
-              <Row gutter={[16, 32]}>
-                <Col span={18}>
+              <Row gutter={[32, 64]}>
+                <Col span={20}>
                   <ChangeTicketDescription item={data} />
                   {data?.data?.map((item, index) => {
                     return (
@@ -490,7 +490,7 @@ const DetailTicketPublish = ({ id }) => {
                     />
                   </RestrictedContent>
                 </Col>
-                <Col span={6}>
+                <Col span={4}>
                   <SideRight item={data} />
                 </Col>
               </Row>

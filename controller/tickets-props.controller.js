@@ -304,6 +304,7 @@ const reactions = async (req, res) => {
         ticket_id: id,
         reaction,
       });
+
       await commentReactionNotification({
         commentId: id,
         currentUserId: user_id,
