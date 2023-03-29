@@ -73,6 +73,16 @@ const CreateTicket = () => {
             />
             <MarkdownEditor
               value={content}
+              acceptedFileTypes={[
+                "image/*",
+                // word, excel, txt, pdf
+                ".doc",
+                ".docx",
+                ".xls",
+                ".xlsx",
+                ".txt",
+                ".pdf",
+              ]}
               onChange={setContent}
               placeholder="Deskripsi"
               onRenderPreview={renderMarkdown}

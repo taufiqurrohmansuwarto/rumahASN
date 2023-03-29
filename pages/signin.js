@@ -10,7 +10,7 @@ const SignIn = ({ providers }) => {
   return (
     <>
       <Head>
-        <title>BKD Helpdesk</title>
+        <title>Pusat Layanan Kepegawaian Jatim</title>
       </Head>
       <Row
         style={{ minHeight: "100vh", padding: 16 }}
@@ -26,10 +26,10 @@ const SignIn = ({ providers }) => {
           />
         </Col>
         <Col md={8} xs={24}>
-          <Typography.Title>BKD Helpdesk</Typography.Title>
-          <Blockquote cite="- Scoot Bellsky">
-            Great customer service starts with providing the right help, to the
-            right person, at the right time.
+          <Typography.Title>Pusat Layanan Kepegawaian Jatim</Typography.Title>
+          <Blockquote cite="- BKD Provinsi Jawa Timur">
+            Membantu Anda Menyelesaikan Masalah dengan Kolaborasi Bersama Staff
+            Kepegawaian Daerah Provinsi Jawa Timur
           </Blockquote>
           <GoogleButton
             label="Masuk dengan Google"

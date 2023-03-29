@@ -96,6 +96,7 @@ function TicketsPublish() {
         dataSource={data?.results}
         loading={isLoading}
         pagination={{
+          showSizeChanger: false,
           position: "both",
           current: query?.page,
           pageSize: query?.limit,

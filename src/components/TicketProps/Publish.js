@@ -20,7 +20,7 @@ function Publish({ id }) {
     confirm({
       title: "Apakah Anda yakin ingin mempublish tiket ini?",
       content:
-        "Tiket yang sudah dipublish akan muncul di halaman utama, dan semua user dapat melihat tiket ini",
+        "Tiket yang sudah dipublish akan muncul di halaman utama, dan semua user dapat melihat tiket ini. Berhati-hatilah sebelum mempublish tiket ini. Jika ada informasi pribadi, sebaiknya jangan dipublish.",
       onOk: async () => {
         await mutateAsync(id);
       },

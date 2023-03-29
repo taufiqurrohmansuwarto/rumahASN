@@ -1,29 +1,19 @@
-import { useQuery } from "@tanstack/react-query";
-import { Skeleton } from "antd";
+import PageContainer from "@/components/PageContainer";
+import DetailTicketPublish from "@/components/Ticket/DetailTicketPublish";
 import { useRouter } from "next/router";
-import { detailTicket } from "../../../../services/agents.services";
-import ActiveLayout from "../../../../src/components/ActiveLayout";
-import AgentKerjakan from "../../../../src/components/AgentKerjakan";
 import AgentLayout from "../../../../src/components/AgentLayout";
-import AgentTicketDetail from "../../../../src/components/AgentTicketDetail";
 
 const TicketsDetail = () => {
   const router = useRouter();
-  const { data, isLoading } = useQuery(
-    ["agent-tickets", router?.query?.id],
-    () => detailTicket(router?.query?.id)
-  );
+
+  const handleBack = () => {
+    router.push("/agent/tickets/semua");
+  };
 
   return (
-    <ActiveLayout role="agent" id={router?.query?.id}>
-      <Skeleton loading={isLoading}>
-        {data?.status_code === "DIAJUKAN" && data?.chooser ? (
-          <AgentKerjakan data={data} />
-        ) : (
-          <AgentTicketDetail data={data} />
-        )}
-      </Skeleton>
-    </ActiveLayout>
+    <PageContainer onBack={handleBack} subTitle="Tiket" title="Detail">
+      <DetailTicketPublish id={router?.query?.id} />
+    </PageContainer>
   );
 };
 

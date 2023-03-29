@@ -17,6 +17,7 @@ const NewTicket = ({
     try {
       const formData = new FormData();
       formData.append("file", file);
+
       const result = await uploadFiles(formData);
       return {
         url: result?.data,
@@ -42,6 +43,16 @@ const NewTicket = ({
         <Col span={23}>
           <MarkdownEditor
             onRenderPreview={renderMarkdown}
+            acceptedFileTypes={[
+              "image/*",
+              // word, excel, txt, pdf
+              ".doc",
+              ".docx",
+              ".xls",
+              ".xlsx",
+              ".txt",
+              ".pdf",
+            ]}
             onUploadFile={uploadFile}
             value={value}
             onChange={setValue}

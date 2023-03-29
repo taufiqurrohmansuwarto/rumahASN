@@ -1,11 +1,11 @@
-import { useSession } from "next-auth/react";
+import { LogoutOutlined, SettingOutlined } from "@ant-design/icons";
+import { Dropdown } from "antd";
+import { signOut, useSession } from "next-auth/react";
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import React from "react";
 import { agentRoutes } from "../routes";
 import Notifications from "./Notifications";
-import SignoutButton from "./SignoutButton";
 
 const ProLayout = dynamic(
   () => import("@ant-design/pro-layout").then((mod) => mod.ProLayout),
@@ -46,6 +46,33 @@ function AgentLayout({ children, active, title = "Agent" }) {
         src: data?.user?.image,
         size: "default",
         title: data?.user?.name,
+        render: (props, dom) => {
+          return (
+            <Dropdown
+              menu={{
+                onClick: (e) => {
+                  if (e.key === "logout") {
+                    signOut();
+                  }
+                },
+                items: [
+                  {
+                    key: "setting",
+                    icon: <SettingOutlined />,
+                    label: "Pengaturan",
+                  },
+                  {
+                    key: "logout",
+                    icon: <LogoutOutlined />,
+                    label: "Keluar",
+                  },
+                ],
+              }}
+            >
+              {dom}
+            </Dropdown>
+          );
+        },
       }}
       menuItemRender={menuItemRender}
       route={agentRoutes}
