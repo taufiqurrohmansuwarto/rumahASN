@@ -29,7 +29,7 @@ function ListNotifications() {
     if (item?.ticket === null) {
       return;
     } else if (item?.ticket?.is_published) {
-      router.push(`/customer-ticket/${ticket_id}`);
+      router.push(`/customers-tickets/${ticket_id}`);
     } else {
       if (role === "admin") {
         router.push(`/admin/tickets-managements/${ticket_id}/detail`);
