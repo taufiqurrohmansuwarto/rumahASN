@@ -1,4 +1,6 @@
 const Tickets = require("../models/tickets.model");
+const Notification = require("../models/notifications.model");
+const { sendingNotificationToAdmin } = require("@/utils/tickets-utilities");
 
 const index = async (req, res) => {
   try {
@@ -62,6 +64,7 @@ const create = async (req, res) => {
     const data = { ...body, requester: customId, status_code: "DIAJUKAN" };
 
     const result = await Tickets.query().insert(data).returning("*");
+    await sendingNotificationToAdmin(result?.id, customId);
     res.status(201).json(result);
   } catch (error) {
     console.log(error);

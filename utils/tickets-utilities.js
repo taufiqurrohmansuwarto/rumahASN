@@ -102,7 +102,25 @@ const allowUser = async (currentUser, ticketId) => {
   }
 };
 
+const sendingNotificationToAdmin = async (ticketId, currentUserId) => {
+  const admins = await User.query()
+    .where("current_role", "admin")
+    .select("custom_id as user_id");
+
+  const data = admins?.map((admin) => ({
+    type: "new_ticket",
+    title: "Tiket baru",
+    content: "Tiket baru telah dibuat",
+    ticket_id: ticketId,
+    from: currentUserId,
+    to: admin.user_id,
+  }));
+
+  return await Notification.query().insert(data);
+};
+
 module.exports = {
+  sendingNotificationToAdmin,
   insertTicketHistory,
   allowUser,
   ticketNotification,

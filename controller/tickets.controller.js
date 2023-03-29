@@ -1,4 +1,5 @@
 const Tickets = require("../models/tickets.model");
+const Notification = require("../models/notifications.model");
 
 module.exports.index = async (req, res) => {
   const { current_role } = req?.user;
