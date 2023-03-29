@@ -13,18 +13,13 @@ const MyText = ({ user }) => {
   return (
     <>
       <Typography.Text>
-        Halo kak <Typography.Text strong>{user?.name}</Typography.Text>, Selamat
-        datang di Pusat Layanan Kepegawaian Jatim! 🌟 Kami senang bisa membantu
-        Anda. Sebelum mengajukan pertanyaan Anda, kami sarankan Anda untuk
-        memeriksa menu{" "}
+        Selamat datang di Pusat Layanan Kepegawaian Jatim! Sebelum bertanya,
+        silakan periksa menu{" "}
         <Link href={"/faq"}>
           <a>FAQ</a>
         </Link>{" "}
-        kami untuk informasi umum yang mungkin telah menjawab pertanyaan Anda.
-        Jangan lupa untuk juga melihat tiket yang sudah dibuat oleh pengguna
-        lain, siapa tahu ada solusi yang relevan untuk Anda. Jika Anda tidak
-        menemukan jawaban yang Anda cari, jangan ragu untuk membuat tiket baru.
-        Selalu ada untuk membantu Anda! 😊
+        dan tiket yang sudah ada. Jika belum menemukan jawaban, jangan ragu
+        untuk membuat tiket baru. Kami siap membantu!{" "}
       </Typography.Text>
       <Divider />
       <Button onClick={handleCreate} type="primary">

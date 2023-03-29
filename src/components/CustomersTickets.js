@@ -35,14 +35,30 @@ const CustomersTickets = ({ status = "all" }) => {
 
   const columns = [
     {
+      title: "Judul No. Ticket",
+      key: "judul_no_ticket",
+      render: (record) => {
+        return (
+          <>
+            {record?.title}
+            <br />
+            <Tag color="black">{record?.ticket_number}</Tag>
+          </>
+        );
+      },
+      responsive: ["xs"],
+    },
+    {
       title: "Judul",
       key: "title",
       dataIndex: "title",
+      responsive: ["sm"],
     },
     {
       title: "Nomer Tiket",
       key: "ticket_number",
       render: (_, record) => <Tag color="black">{record?.ticket_number}</Tag>,
+      responsive: ["sm"],
     },
     {
       title: "Tgl. dibuat",
@@ -50,6 +66,7 @@ const CustomersTickets = ({ status = "all" }) => {
       render: (_, record) => {
         return formatDate(record.created_at);
       },
+      responsive: ["sm"],
     },
     {
       title: "Tgl. diupdate",
@@ -57,6 +74,7 @@ const CustomersTickets = ({ status = "all" }) => {
       render: (_, record) => {
         return formatDate(record.updated_at);
       },
+      responsive: ["sm"],
     },
     {
       title: "Status",

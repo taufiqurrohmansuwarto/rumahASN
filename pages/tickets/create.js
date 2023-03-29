@@ -49,7 +49,7 @@ const CreateTicket = () => {
   return (
     <PageContainer title="Helpdesk" subTitle="Buat Tiket Baru">
       <Grid>
-        <Grid.Col span={8}>
+        <Grid.Col md={8} sm={12}>
           <Alert
             icon={<IconAlertCircle />}
             color="yellow"

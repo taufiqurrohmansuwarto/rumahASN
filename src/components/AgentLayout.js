@@ -45,7 +45,6 @@ function AgentLayout({ children, active, title = "Agent" }) {
       avatarProps={{
         src: data?.user?.image,
         size: "default",
-        title: data?.user?.name,
         render: (props, dom) => {
           return (
             <Dropdown
