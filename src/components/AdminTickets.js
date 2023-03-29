@@ -165,39 +165,7 @@ const AdminTickets = ({ status = "all" }) => {
         );
       },
     },
-    {
-      title: "Agent",
-      key: "agent",
-      render: (_, record) => {
-        return (
-          <>
-            {record?.agent ? (
-              <Tooltip title={record?.agent?.username}>
-                <Avatar shape="square" src={record?.agent?.image} />
-              </Tooltip>
-            ) : (
-              <div>belum ada agent</div>
-            )}
-          </>
-        );
-      },
-    },
-    {
-      title: "Prioritas",
-      key: "priority_code",
-      dataIndex: "priority_code",
-    },
-    {
-      title: "Sub Kategori",
-      key: "sub_category",
-      render: (_, row) => {
-        return (
-          <div>
-            {row?.sub_category?.name} - {row?.sub_category?.category?.name}
-          </div>
-        );
-      },
-    },
+    {},
     {
       title: "Aksi",
       key: "aksi",
@@ -207,15 +175,6 @@ const AdminTickets = ({ status = "all" }) => {
             <Link href={`/admin/tickets-managements/${row?.id}/detail`}>
               <a>Detail</a>
             </Link>
-            <Divider />
-            <a
-              onClick={() => {
-                setOpen(true);
-                setRow(row);
-              }}
-            >
-              Set Kategori
-            </a>
           </Space>
         );
       },
@@ -255,6 +214,7 @@ const AdminTickets = ({ status = "all" }) => {
         loading={isLoading}
         rowKey={(row) => row?.id}
         pagination={{
+          showSizeChanger: false,
           position: ["bottomRight", "topRight"],
           total: data?.total,
           showTotal: (total, range) =>

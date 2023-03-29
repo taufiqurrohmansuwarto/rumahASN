@@ -11,6 +11,7 @@ const { raw } = require("objection");
 const {
   insertTicketHistory,
   ticketNotification,
+  commentReactionNotification,
 } = require("@/utils/tickets-utilities");
 const {
   serializeComments,
@@ -303,6 +304,11 @@ const reactions = async (req, res) => {
         ticket_id: id,
         reaction,
       });
+      await commentReactionNotification({
+        commentId: id,
+        currentUserId: user_id,
+      });
+
       res.status(200).json({ message: "Reactions added successfully." });
     }
   } catch (error) {
@@ -488,6 +494,13 @@ const createComments = async (req, res) => {
         };
 
         await Comments.query().insert(data);
+        await ticketNotification({
+          ticketId: ticket_id,
+          type: "comment",
+          currentUserId: user_id,
+          content: `mengomentari tiket dengan judul "${currentTicket.title}"`,
+          title: "Tiket dikomentari",
+        });
         res.json({ message: "Comment added successfully." });
       } else {
         res.status(403).json({ message: "You are not allowed to comment." });
@@ -502,6 +515,13 @@ const createComments = async (req, res) => {
       };
 
       await Comments.query().insert(data);
+      await ticketNotification({
+        ticketId: ticket_id,
+        type: "comment",
+        currentUserId: user_id,
+        content: `mengomentari tiket dengan judul "${currentTicket.title}"`,
+        title: "Tiket dikomentari",
+      });
       res.json({ message: "Comment added successfully." });
     }
   } catch (error) {
@@ -617,6 +637,15 @@ const markAsAnswer = async (req, res) => {
       "marked_as_answer",
       "menandai komentar sebagai jawaban"
     );
+
+    await ticketNotification({
+      content: "menandai komentar sebagai jawaban",
+      currentUserId: user_id,
+      ticketId: id,
+      type: "marked_as_answer",
+      title: "Komentar ditandai sebagai jawaban",
+    });
+
     res.status(200).json({ message: "Ticket marked as answer successfully." });
   } catch (error) {
     console.log(error);
@@ -643,6 +672,7 @@ const unMarkAsAnswer = async (req, res) => {
       "unmarked_as_answer",
       "menghapus tanda jawaban pada komentar"
     );
+
     res
       .status(200)
       .json({ message: "Ticket unmarked as answer successfully." });
@@ -735,6 +765,14 @@ const changePriorityAndSubCategory = async (req, res) => {
         "merubah prioritas dan sub kategori"
       );
 
+      await ticketNotification({
+        ticket_id: id,
+        type: "change_priority_sub_category",
+        title: "Tiket telah diubah prioritas dan sub kategori",
+        content: `Tiket dengan judul ${currentTicket.title} telah diubah prioritas dan sub kategori`,
+        currentUserId: user_id,
+      });
+
       res.status(200).json({ message: "Ticket updated successfully." });
     } else {
       res
@@ -809,11 +847,25 @@ const changeStatus = async (req, res) => {
     }
 
     if (role === "admin" || (role === "agent" && currentAgent === user_id)) {
-      await Ticket.query()
-        .patch({
+      let data = {};
+
+      if (status === "DIKERJAKAN") {
+        data = {
           status_code: status,
-        })
-        .where({ id });
+          staart_work_at: new Date(),
+        };
+      } else if (status === "SELESAI") {
+        data = {
+          status_code: status,
+          completed_at: new Date(),
+        };
+      } else {
+        data = {
+          status_code: status,
+        };
+      }
+
+      await Ticket.query().patch(data).where({ id });
 
       await insertTicketHistory(
         id,

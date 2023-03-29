@@ -165,14 +165,16 @@ const CommentTicket = ({ item, agent, customer, admin }) => {
   return (
     <>
       {item?.id === id && item?.id !== null ? (
-        <NewTicket
-          handleCancel={handleCancelEdit}
-          setValue={setComment}
-          loadingSubmit={isLoadingEdit}
-          value={comment}
-          submitMessage={handleUpdate}
-          withCancel={true}
-        />
+        <div style={{ marginTop: 10 }}>
+          <NewTicket
+            handleCancel={handleCancelEdit}
+            setValue={setComment}
+            loadingSubmit={isLoadingEdit}
+            value={comment}
+            submitMessage={handleUpdate}
+            withCancel={true}
+          />
+        </div>
       ) : (
         <>
           {item?.type === "comment" && item?.id !== null && (

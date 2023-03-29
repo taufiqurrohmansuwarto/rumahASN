@@ -14,8 +14,9 @@ const MyText = ({ user }) => {
     <>
       <Typography.Text>
         Halo kak <Typography.Text strong>{user?.name}</Typography.Text>, Selamat
-        datang di Helpdesk kami! 🌟 Kami senang bisa membantu Anda. Sebelum
-        mengajukan pertanyaan Anda, kami sarankan Anda untuk memeriksa menu{" "}
+        datang di Pusat Layanan Kepegawaian Jatim! 🌟 Kami senang bisa membantu
+        Anda. Sebelum mengajukan pertanyaan Anda, kami sarankan Anda untuk
+        memeriksa menu{" "}
         <Link href={"/faq"}>
           <a>FAQ</a>
         </Link>{" "}
