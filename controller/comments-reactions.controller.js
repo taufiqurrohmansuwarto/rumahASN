@@ -1,4 +1,5 @@
 const Reactions = require("@/models/comments-reactions.model");
+const { commentReactionNotification } = require("@/utils/tickets-utilities");
 const addCommentsReactions = async (req, res) => {
   try {
     const { commentId } = req.query;
@@ -9,6 +10,12 @@ const addCommentsReactions = async (req, res) => {
     await Reactions.query().insert({
       comment_id: commentId,
       user_id: userId,
+      reaction: req.body.reaction,
+    });
+
+    await commentReactionNotification({
+      commentId,
+      currentUserId: userId,
       reaction: req.body.reaction,
     });
 

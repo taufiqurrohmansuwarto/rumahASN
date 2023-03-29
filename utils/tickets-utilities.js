@@ -7,20 +7,30 @@ const Comment = require("../models/tickets_comments_customers.model");
 const Notification = require("../models/notifications.model");
 const { uniqBy } = require("lodash");
 
-const commentReactionNotification = async ({ commentId, currentUserId }) => {
+const commentReactionNotification = async ({
+  commentId,
+  reaction,
+  currentUserId,
+}) => {
   const currentComement = await Comment.query().findById(commentId);
   const ticketId = currentComement?.ticket_id;
   const commentUserId = currentComement?.user_id;
   const currentUser = await User.query().findById(currentUserId);
 
-  return await Notification.query().insert({
+  const data = {
     from: currentUserId,
     title: "Reaksi pada komentar anda",
-    content: `${currentUser?.name} telah memberikan reaksi pada komentar anda`,
+    content: `telah memberikan reaksi ${reaction} pada komentar anda`,
     type: "comment_reaction",
     ticket_id: ticketId,
     to: commentUserId,
-  });
+  };
+
+  if (currentUserId === commentUserId) {
+    return;
+  } else {
+    return await Notification.query().insert(data);
+  }
 };
 
 const ticketNotification = async ({
