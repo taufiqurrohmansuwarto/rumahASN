@@ -1,5 +1,5 @@
-import { listNotifications } from "@/services/index";
-import { useQuery } from "@tanstack/react-query";
+import { listNotifications, removeNotification } from "@/services/index";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Avatar, Card, List, Tag } from "antd";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
@@ -7,6 +7,7 @@ import { useState } from "react";
 import { formatDate } from "../../utils";
 
 function ListNotifications() {
+  const queryClient = useQueryClient();
   const { data: userData, status } = useSession();
 
   const [query, setQuery] = useState({
@@ -23,8 +24,22 @@ function ListNotifications() {
 
   const router = useRouter();
 
-  const handleRouting = (item, role) => {
+  // remove notification
+  const { mutateAsync: remove, isLoading } = useMutation(
+    (data) => removeNotification(data),
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries("notifications");
+      },
+    }
+  );
+
+  const handleRouting = async (item, role) => {
     const { ticket_id } = item;
+
+    if (item?.read_at === null) {
+      await remove(item?.id);
+    }
 
     if (item?.ticket === null) {
       return;
@@ -64,8 +79,8 @@ function ListNotifications() {
             actions={[
               <a
                 key="lihat"
-                onClick={() =>
-                  handleRouting(item, userData?.user?.current_role)
+                onClick={async () =>
+                  await handleRouting(item, userData?.user?.current_role)
                 }
               >
                 Lihat

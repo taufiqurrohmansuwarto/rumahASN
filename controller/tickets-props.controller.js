@@ -753,6 +753,7 @@ const changePriorityAndSubCategory = async (req, res) => {
     const { priority_code, sub_category_id } = req?.body;
 
     const currentTicket = await Ticket.query().findById(id);
+
     const currentAgent = currentTicket?.assignee;
 
     if (!currentTicket) {
@@ -772,10 +773,10 @@ const changePriorityAndSubCategory = async (req, res) => {
       );
 
       await ticketNotification({
-        ticket_id: id,
+        ticketId: id,
         type: "change_priority_sub_category",
-        title: "Tiket telah diubah prioritas dan sub kategori",
-        content: `Tiket dengan judul ${currentTicket.title} telah diubah prioritas dan sub kategori`,
+        title: "merubah prioritas dan sub kategori",
+        content: `mengubah prioritas dan sub kategori tiket dengan judul "${currentTicket.title}"`,
         currentUserId: user_id,
       });
 
@@ -858,7 +859,7 @@ const changeStatus = async (req, res) => {
       if (status === "DIKERJAKAN") {
         data = {
           status_code: status,
-          staart_work_at: new Date(),
+          start_work_at: new Date(),
         };
       } else if (status === "SELESAI") {
         data = {

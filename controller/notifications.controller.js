@@ -42,8 +42,15 @@ const clearChats = async (req, res) => {
   }
 };
 
-const remove = async (req, res) => {
+const readNotification = async (req, res) => {
   try {
+    const { id } = req?.query;
+    const { customId: user_id } = req?.user;
+
+    await Notifications.query()
+      .patch({ read_at: new Date() })
+      .where({ id, to: user_id });
+    res.status(200).json({ code: 200, message: "success" });
   } catch (error) {
     console.log(error);
     res.status(400).json({ code: 400, message: "Internal Server Error" });
@@ -62,5 +69,5 @@ module.exports = {
   index,
   detail,
   clearChats,
-  remove,
+  readNotification,
 };
