@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
-import { Card } from "antd";
+import { Breadcrumb, Card } from "antd";
+import Link from "next/link";
 import { getFaqs } from "../../services";
 import FAQMenu from "../../src/components/FAQMenu";
 import Layout from "../../src/components/Layout";
@@ -12,12 +13,19 @@ function Feeds() {
     <PageContainer
       loading={isLoading}
       title="F.A.Q"
-      subTitle="Frequently Ask Question"
+      subTitle="Pertanyaan yang sering diajukan"
+      breadcrumbRender={() => (
+        <Breadcrumb>
+          <Breadcrumb.Item>
+            <Link href="/feeds">
+              <a>Beranda</a>
+            </Link>
+          </Breadcrumb.Item>
+          <Breadcrumb.Item>FAQ</Breadcrumb.Item>
+        </Breadcrumb>
+      )}
     >
-      <Card
-        title="Pertanyaan yang sering diajukan"
-        style={{ minHeight: "80vh" }}
-      >
+      <Card style={{ minHeight: "80vh" }}>
         <FAQMenu data={data} />
       </Card>
     </PageContainer>

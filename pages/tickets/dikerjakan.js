@@ -2,7 +2,7 @@ import CustomersTickets from "../../src/components/CustomersTickets";
 import Layout from "../../src/components/Layout";
 
 const Tickets = () => {
-  return <CustomersTickets status="DIKERJAKAN" />;
+  return <CustomersTickets status="DIKERJAKAN" title="Status Dikerjakan" />;
 };
 
 // add layout

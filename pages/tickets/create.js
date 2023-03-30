@@ -4,7 +4,8 @@ import { Alert, Grid, Stack, Text } from "@mantine/core";
 import { MarkdownEditor } from "@primer/react/drafts";
 import { IconAlertCircle } from "@tabler/icons";
 import { useMutation } from "@tanstack/react-query";
-import { Button, Input, message } from "antd";
+import { Breadcrumb, Button, Input, message } from "antd";
+import Link from "next/link";
 import { useRouter } from "next/router";
 import { useState } from "react";
 import { createTickets } from "../../services/users.services";
@@ -47,9 +48,27 @@ const CreateTicket = () => {
   };
 
   return (
-    <PageContainer title="Helpdesk" subTitle="Buat Tiket Baru">
+    <PageContainer
+      title="Helpdesk"
+      subTitle="Tiket Baru"
+      breadcrumbRender={() => (
+        <Breadcrumb>
+          <Breadcrumb.Item>
+            <Link href="/feeds">
+              <a>Beranda</a>
+            </Link>
+          </Breadcrumb.Item>
+          <Breadcrumb.Item>
+            <Link href="/tickets/semua">
+              <a>Tiket</a>
+            </Link>
+          </Breadcrumb.Item>
+          <Breadcrumb.Item>Tiket Baru</Breadcrumb.Item>
+        </Breadcrumb>
+      )}
+    >
       <Grid>
-        <Grid.Col md={8} sm={12}>
+        <Grid.Col md={8} xs={12}>
           <Alert
             icon={<IconAlertCircle />}
             color="yellow"
@@ -57,12 +76,11 @@ const CreateTicket = () => {
             mb={8}
           >
             <Text>
-              Jika Anda pegawai Pemerintah Provinsi Jawa Timur, gunakan akun
-              SIMASTER dan PTTPK untuk mempermudah kami dalam menangani tiket
-              Anda. Buatlah deskripsi dengan baik dan jelas serta gunakan tata
-              bahasa yang baik, agar kami dapat membantu anda dengan cepat.
-              Gunakan gambar atau link file sebagai bukti di bagian deskripsi
-              jika ada. Terima Kasih.
+              Anda pegawai Pemerintah Provinsi Jawa Timur? Gunakan akun SIMASTER
+              dan PTTPK agar kami bisa membantu Anda lebih mudah. Deskripsikan
+              masalah Anda dengan jelas dan gunakan tata bahasa yang baik.
+              Jangan lupa sertakan gambar atau link file sebagai bukti jika
+              diperlukan. Terima kasih.
             </Text>
           </Alert>
           <Stack>

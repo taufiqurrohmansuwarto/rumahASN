@@ -65,6 +65,11 @@ export const definitions = {
       displayName: "Create Ticket",
       description: "To create new ticket",
     },
+    "advanced-filter": {
+      roles: noUser,
+      displayName: "Advanced Filter",
+      description: "To use advanced filter",
+    },
     "edit-comment": {
       roles: allUser,
       displayName: "Create Own Comment",

@@ -215,17 +215,9 @@ export const parseMarkdown = async (data) => {
 
 // publish tickets
 export const publishTickets = async (query) => {
-  const { page, limit, search } = query;
-  const params = {
-    page,
-    limit,
-    search,
-  };
-  const queryString = Object.keys(params)
-    .map((key) => key + "=" + params[key])
-    .join("&");
+  const qs = queryString.stringify(query, { arrayFormat: "comma" });
 
-  return await api.get(`/tickets?${queryString}`).then((res) => res?.data);
+  return await api.get(`/tickets?${qs}`).then((res) => res?.data);
 };
 
 // detail publish tickets

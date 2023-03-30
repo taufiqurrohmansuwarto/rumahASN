@@ -1,6 +1,15 @@
 import { PlusOutlined } from "@ant-design/icons";
 import { useQuery } from "@tanstack/react-query";
-import { Button, Card, Input, Space, Table, Tag, Tooltip } from "antd";
+import {
+  Breadcrumb,
+  Button,
+  Card,
+  Input,
+  Space,
+  Table,
+  Tag,
+  Tooltip,
+} from "antd";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { useState } from "react";
@@ -8,7 +17,7 @@ import { getAllTickets } from "../../services/users.services";
 import { colorTag, formatDate } from "../../utils";
 import PageContainer from "./PageContainer";
 
-const CustomersTickets = ({ status = "all" }) => {
+const CustomersTickets = ({ status = "all", title = "Semua Tiket" }) => {
   const [query, setQuery] = useState({
     page: 1,
     limit: 50,
@@ -105,8 +114,21 @@ const CustomersTickets = ({ status = "all" }) => {
   };
 
   return (
-    <PageContainer title="Tiket" subTitle="Daftar Tiket">
-      <Card title="Tiket Pengguna">
+    <PageContainer
+      title="Tiket"
+      subTitle={title}
+      breadcrumbRender={() => (
+        <Breadcrumb>
+          <Breadcrumb.Item>
+            <Link href="/feeds">
+              <a>Beranda</a>
+            </Link>
+          </Breadcrumb.Item>
+          <Breadcrumb.Item>Tiket</Breadcrumb.Item>
+        </Breadcrumb>
+      )}
+    >
+      <Card>
         <Tooltip title="Buat tiket baru">
           <Button
             icon={<PlusOutlined />}

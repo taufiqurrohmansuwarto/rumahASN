@@ -5,16 +5,18 @@ import { Grid } from "@mantine/core";
 import { useQuery } from "@tanstack/react-query";
 import {
   Avatar,
+  Checkbox,
+  Grid as AntdGrid,
   Input,
   List,
   Popover,
   Space,
   Tag,
   Typography,
-  Grid as AntdGrid,
 } from "antd";
 import Link from "next/link";
 import { useState } from "react";
+import RestrictedContent from "../RestrictedContent";
 
 const { useBreakpoint } = AntdGrid;
 
@@ -88,16 +90,62 @@ function TicketsPublish() {
     });
   };
 
+  const status = [
+    { label: "Diajukan", value: "DIAJUKAN" },
+    { label: "Dikerjakan", value: "DIKERJAKAN" },
+    { label: "Selesai", value: "SELESAI" },
+  ];
+
+  const handleChangeStatus = (value) => {
+    if (value.length > 0) {
+      const status_code = value.join(",");
+      setQuery({
+        ...query,
+        status_code,
+        page: 1,
+      });
+    } else {
+      setQuery({
+        ...query,
+        status_code: "",
+        page: 1,
+      });
+    }
+  };
+
+  const handleChangePublikasi = (value) => {
+    const checked = value.target.checked;
+    if (checked) {
+      setQuery({
+        ...query,
+        is_published: checked,
+      });
+    } else {
+      setQuery({
+        ...query,
+        is_published: "",
+      });
+    }
+  };
+
   return (
     <div>
       <Grid>
-        <Grid.Col md={6} sm={12}>
+        <Grid.Col md={12} xs={12}>
           <Input.Search
             placeholder="Cari berdasarkan judul"
             onSearch={handleSearch}
             style={{ width: "100%" }}
           />
         </Grid.Col>
+        <RestrictedContent name="advanced-filter">
+          <Grid.Col md={12} xs={12}>
+            <Checkbox.Group onChange={handleChangeStatus} options={status} />
+          </Grid.Col>
+          <Grid.Col md={12} xs={12}>
+            <Checkbox onChange={handleChangePublikasi}>Publikasi</Checkbox>
+          </Grid.Col>
+        </RestrictedContent>
       </Grid>
       <List
         dataSource={data?.results}
