@@ -403,7 +403,7 @@ export const publikasiCasn = (query) => {
   return api.get(`/web/publikasi-casn?${query}`).then((res) => res?.data);
 };
 
-export const nilaiCasn = (query) => {
+export const nilaiCasn = () => {
   return api.get(`/web/nilai-casn`).then((res) => res?.data);
 };
 

@@ -16,6 +16,23 @@ order by 2 desc`
   return result?.rows;
 };
 
+const queryLast7DaysAll = async () => {
+  const result = await knex.raw(
+    `SELECT TO_CHAR(dates.date, 'dd-mm-yyyy') AS date,
+       COALESCE(t.count, 0) AS count,
+       s.status_code
+FROM (SELECT generate_series(now()::date - interval '6 day', now()::date, interval '1 day') AS date) dates
+         CROSS JOIN (SELECT DISTINCT status_code FROM tickets) s
+         LEFT JOIN (SELECT date_trunc('day', created_at) AS date, status_code, COUNT(*) AS count
+                    FROM tickets
+                    WHERE created_at >= now()::date - interval '6 day'
+                    GROUP BY date, status_code) t ON t.date = dates.date AND t.status_code = s.status_code
+ORDER BY dates.date ASC,
+         s.status_code ASC;`
+  );
+  return result?.rows;
+};
+
 const queryLast7Days = async () => {
   const result = await knex.raw(
     `select d.date, count(tickets.id)
@@ -155,6 +172,9 @@ from (select status_code, count(status_code)
       }
 
       // query for last 7 days
+    } else if (type === "last7DaysAll") {
+      const result = await queryLast7DaysAll();
+      res.json(result);
     } else if (type === "aggregateSubCategories") {
       const result = await aggregateBySubCategories();
 
