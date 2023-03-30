@@ -25,8 +25,12 @@ const publishedTickets = async (req, res) => {
     const page = req?.query?.page || 1;
     const limit = req?.query?.limit || 10;
     const search = req?.query?.search || "";
+    const status_code = req?.query?.status_code || "";
+    const is_published = req?.query?.is_published || false;
 
     const { id: userId, current_role: role } = req?.user;
+
+    const notUser = role !== "user";
 
     const result = await Ticket.query()
       .where((builder) => {
@@ -38,6 +42,12 @@ const publishedTickets = async (req, res) => {
       .andWhere((builder) => {
         if (search) {
           builder.where("title", "ilike", `%${search}%`);
+        }
+        if (notUser && status_code) {
+          builder.whereIn("status_code", status_code?.split(","));
+        }
+        if (is_published) {
+          builder.where({ is_published: true });
         }
       })
       .select("*", Ticket.relatedQuery("comments").count().as("comments_count"))

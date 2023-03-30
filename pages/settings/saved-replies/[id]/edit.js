@@ -1,10 +1,11 @@
 import Layout from "@/components/Layout";
 import PageContainer from "@/components/PageContainer";
 import { useQuery } from "@tanstack/react-query";
-import { Card, Col, Row } from "antd";
+import { Breadcrumb, Card, Col, Row } from "antd";
 import EditSavedReplies from "@/components/SavedReplies/EditSavedReplies";
 import { useRouter } from "next/router";
 import { detailSavedReplies, getSavedReplies } from "@/services/index";
+import Link from "next/link";
 
 const Edit = () => {
   const router = useRouter();
@@ -22,19 +23,37 @@ const Edit = () => {
   );
 
   return (
-    <PageContainer title="Edit Balasan Tersimpan">
-      <Row justify="center">
-        <Col span={14}>
-          <Card>
+    <PageContainer
+      title="Balasan Tersimpan"
+      subTitle="Edit"
+      breadcrumbRender={() => (
+        <Breadcrumb>
+          <Breadcrumb.Item>
+            <Link href="/feeds">
+              <a>Beranda</a>
+            </Link>
+          </Breadcrumb.Item>
+          <Breadcrumb.Item>
+            <Link href="/settings/saved-replies">
+              <a>Balasan Tersimpan</a>
+            </Link>
+          </Breadcrumb.Item>
+          <Breadcrumb.Item>Edit</Breadcrumb.Item>
+        </Breadcrumb>
+      )}
+    >
+      <Card>
+        <Row>
+          <Col md={14} xs={24}>
             <EditSavedReplies
               id={router?.query?.id}
               initialValues={data}
               loading={isLoading || isLoadingSavedReplies}
               savedReplies={dataSavedReplies}
             />
-          </Card>
-        </Col>
-      </Row>
+          </Col>
+        </Row>
+      </Card>
     </PageContainer>
   );
 };

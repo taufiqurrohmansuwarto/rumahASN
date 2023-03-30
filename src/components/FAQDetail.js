@@ -1,14 +1,5 @@
-import {
-  Accordion,
-  Col,
-  Container,
-  createStyles,
-  Grid,
-  Image,
-  Title,
-} from "@mantine/core";
+import { createStyles, Grid } from "@mantine/core";
 import { Collapse } from "antd";
-import image from "../../public/faq.svg";
 
 const useStyles = createStyles((theme) => ({
   wrapper: {

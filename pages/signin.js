@@ -10,7 +10,7 @@ const SignIn = ({ providers }) => {
   return (
     <>
       <Head>
-        <title>Pusat Layanan Kepegawaian Jatim</title>
+        <title>Konsultasi Online</title>
       </Head>
       <Row
         style={{ minHeight: "100vh", padding: 16 }}
@@ -26,31 +26,46 @@ const SignIn = ({ providers }) => {
           />
         </Col>
         <Col md={8} xs={24}>
-          <Typography.Title>Pusat Layanan Kepegawaian Jatim</Typography.Title>
+          <Typography.Title>Konsultasi Kepegawaian Online</Typography.Title>
           <Blockquote cite="- BKD Provinsi Jawa Timur">
-            Membantu Anda Menyelesaikan Masalah dengan Kolaborasi Bersama TIM
-            BKD Provinsi Jawa Timur
+            Kami hadir untuk melayani dan membantu masyarakat. Lewat konsultasi
+            online Badan Kepegawaian Daerah Provinsi Jawa Timur, kami siap
+            memberikan solusi dan jawaban terbaik untuk setiap pertanyaan dan
+            kebutuhan kamu terkait karier sebagai PNS di Jawa Timur. Jadilah
+            bagian dari PNS yang berkualitas dan berintegritas!
           </Blockquote>
-          <GoogleButton
-            label="Masuk dengan Google"
-            onClick={() => signIn("google")}
-          />
-          <Divider plain>atau punya akun Pegawai Provinsi Jawa Timur?</Divider>
-          <Space wrap>
-            {Object?.values(providers).map((provider) => (
-              <div key={provider.id}>
-                {provider?.id !== "google" && (
-                  <Button
-                    icon={<LoginOutlined />}
-                    type="primary"
-                    onClick={() => signIn(provider.id)}
-                  >
-                    Masuk dengan akun {provider.name}
-                  </Button>
-                )}
-              </div>
-            ))}
-          </Space>
+          <Row>
+            <Col md={24} xs={24}>
+              <GoogleButton
+                style={{ width: "100%" }}
+                label="Masuk dengan Google"
+                onClick={() => signIn("google")}
+              />
+            </Col>
+            <Col xs={24}>
+              <Divider plain>
+                atau punya akun Pegawai Provinsi Jawa Timur?
+              </Divider>
+            </Col>
+            <Col xs={24}>
+              <Row gutter={[4, 8]}>
+                {Object?.values(providers).map((provider) => (
+                  <Col xs={24} md={24} key={provider.id}>
+                    {provider?.id !== "google" && (
+                      <Button
+                        icon={<LoginOutlined />}
+                        type="primary"
+                        onClick={() => signIn(provider.id)}
+                        block
+                      >
+                        Masuk dengan akun {provider.name}
+                      </Button>
+                    )}
+                  </Col>
+                ))}
+              </Row>
+            </Col>
+          </Row>
           <Divider />
           <div
             style={{

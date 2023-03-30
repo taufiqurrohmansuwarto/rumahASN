@@ -23,9 +23,6 @@ function Feeds() {
             <Grid.Col md={12} xs={12}>
               <PublikasiCASN />
             </Grid.Col>
-            <Grid.Col md={12} xs={12}>
-              <NilaiCASN />
-            </Grid.Col>
           </Grid>
         </Grid.Col>
       </Grid>
