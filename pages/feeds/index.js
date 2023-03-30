@@ -5,6 +5,7 @@ import { Grid, Stack } from "@mantine/core";
 import Layout from "@/components/Layout";
 import PageContainer from "@/components/PageContainer";
 import PublikasiCASN from "@/components/Web/PublikasiCASN";
+import NilaiCASN from "@/components/Web/NilaiWeb";
 
 function Feeds() {
   return (
@@ -18,7 +19,14 @@ function Feeds() {
           </Stack>
         </Grid.Col>
         <Grid.Col md={3} sm={12}>
-          <PublikasiCASN />
+          <Grid>
+            <Grid.Col md={12} xs={12}>
+              <PublikasiCASN />
+            </Grid.Col>
+            <Grid.Col md={12} xs={12}>
+              <NilaiCASN />
+            </Grid.Col>
+          </Grid>
         </Grid.Col>
       </Grid>
     </PageContainer>

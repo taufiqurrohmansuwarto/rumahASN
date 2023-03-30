@@ -1,3 +1,4 @@
+import PlotAdminTicketsByStatusCode from "@/components/Dashboards/PlotAdminTicketsByStatusCode";
 import { Alert, Button, Stack, Text } from "@mantine/core";
 import { useQuery } from "@tanstack/react-query";
 import { useSession } from "next-auth/react";
@@ -35,6 +36,7 @@ const Dashboard = () => {
           </Alert>
           <StatsGrid data={data} />
           <PlotAdminTickets />
+          <PlotAdminTicketsByStatusCode />
           <AggregateSubCategories />
         </Stack>
       </PageContainer>
