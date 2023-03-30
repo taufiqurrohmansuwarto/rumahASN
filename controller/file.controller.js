@@ -8,7 +8,11 @@ const upload = async (req, res) => {};
 const uploadsMultipleFiles = async (req, res) => {
   const { buffer, originalname, size, mimetype } = req?.file;
   const id = crypto.randomBytes(20).toString("hex");
-  const currentFilename = `${id}_${originalname}`;
+
+  // mimetype to format
+  const format = mimetype.split("/")[1];
+
+  const currentFilename = `${id}.${format}`;
 
   try {
     // size must be less than 30 MB

@@ -158,6 +158,10 @@ export const clearChatsNotificatoins = async () => {
   return await api.put("/notifications").then((res) => res?.data);
 };
 
+export const removeNotification = async (id) => {
+  return await api.delete(`/notifications/${id}`).then((res) => res?.data);
+};
+
 // faq and sub faq
 export const getFaqs = async () => {
   return await api.get("/ref/faqs").then((res) => res?.data);
