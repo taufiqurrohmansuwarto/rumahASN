@@ -26,6 +26,7 @@ const publishedTickets = async (req, res) => {
     const limit = req?.query?.limit || 10;
     const search = req?.query?.search || "";
     const status_code = req?.query?.status_code || "";
+    const assignees = req?.query?.assignees || "";
     const is_published = req?.query?.is_published || false;
 
     const { id: userId, current_role: role } = req?.user;
@@ -48,6 +49,9 @@ const publishedTickets = async (req, res) => {
         }
         if (is_published) {
           builder.where({ is_published: true });
+        }
+        if (assignees) {
+          builder.whereIn("assignee", assignees?.split(","));
         }
       })
       .select("*", Ticket.relatedQuery("comments").count().as("comments_count"))

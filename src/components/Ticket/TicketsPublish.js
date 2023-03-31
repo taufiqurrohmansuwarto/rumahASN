@@ -1,4 +1,4 @@
-import { publishTickets } from "@/services/index";
+import { publishTickets, refAgents } from "@/services/index";
 import { formatDateLL, setColorStatus } from "@/utils/client-utils";
 import { MessageOutlined } from "@ant-design/icons";
 import { Grid } from "@mantine/core";
@@ -10,6 +10,8 @@ import {
   Input,
   List,
   Popover,
+  Select,
+  Skeleton,
   Space,
   Tag,
   Typography,
@@ -48,6 +50,25 @@ const Published = ({ item }) => {
   } else {
     return null;
   }
+};
+
+const FilterUser = ({ handleChange }) => {
+  const { data, isLoading } = useQuery(["agents"], () => refAgents(), {
+    refetchOnWindowFocus: false,
+  });
+
+  return (
+    <Skeleton loading={isLoading}>
+      <Select
+        optionFilterProp="label"
+        style={{ width: "100%" }}
+        mode="multiple"
+        onChange={handleChange}
+        placeholder="Cari berdasarkan orang"
+        options={data}
+      />
+    </Skeleton>
+  );
 };
 
 // create item like github issue with primer UI
@@ -128,6 +149,23 @@ function TicketsPublish() {
     }
   };
 
+  const handleSelectedUser = (user) => {
+    if (user.length > 0) {
+      const assignees = user.join(",");
+      setQuery({
+        ...query,
+        assignees,
+        page: 1,
+      });
+    } else {
+      setQuery({
+        ...query,
+        assignees: "",
+        page: 1,
+      });
+    }
+  };
+
   return (
     <div>
       <Grid>
@@ -144,6 +182,9 @@ function TicketsPublish() {
           </Grid.Col>
           <Grid.Col md={12} xs={12}>
             <Checkbox onChange={handleChangePublikasi}>Publikasi</Checkbox>
+          </Grid.Col>
+          <Grid.Col>
+            <FilterUser handleChange={handleSelectedUser} />
           </Grid.Col>
         </RestrictedContent>
       </Grid>

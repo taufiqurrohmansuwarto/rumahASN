@@ -1,11 +1,10 @@
+import Layout from "@/components/Layout";
+import PageContainer from "@/components/PageContainer";
 import SelamatDatang from "@/components/SelamatDatang";
 import PinnedTickets from "@/components/Ticket/PinnedTickets";
 import TicketsPublish from "@/components/Ticket/TicketsPublish";
-import { Grid, Stack } from "@mantine/core";
-import Layout from "@/components/Layout";
-import PageContainer from "@/components/PageContainer";
 import PublikasiCASN from "@/components/Web/PublikasiCASN";
-import NilaiCASN from "@/components/Web/NilaiWeb";
+import { Grid, Stack } from "@mantine/core";
 
 function Feeds() {
   return (
