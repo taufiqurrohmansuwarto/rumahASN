@@ -31,8 +31,8 @@ const SignIn = ({ providers }) => {
             Kami hadir untuk melayani dan membantu masyarakat. Lewat konsultasi
             online Badan Kepegawaian Daerah Provinsi Jawa Timur, kami siap
             memberikan solusi dan jawaban terbaik untuk setiap pertanyaan dan
-            kebutuhan kamu terkait karier sebagai PNS di Jawa Timur. Jadilah
-            bagian dari PNS yang berkualitas dan berintegritas!
+            kebutuhan kamu terkait karier sebagai ASN di Jawa Timur. Jadilah
+            bagian dari ASN yang berkualitas dan berintegritas!
           </Blockquote>
           <Row>
             <Col md={24} xs={24}>

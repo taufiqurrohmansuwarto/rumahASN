@@ -1,5 +1,6 @@
-import { parseMarkdown, uploadFiles } from "@/services/index";
+import { getSavedReplies, parseMarkdown, uploadFiles } from "@/services/index";
 import { MarkdownEditor } from "@primer/react/drafts";
+import { useQuery } from "@tanstack/react-query";
 import { Avatar, Col, Row } from "antd";
 import { useSession } from "next-auth/react";
 
@@ -12,6 +13,14 @@ const NewTicket = ({
   handleCancel,
 }) => {
   const { data, status } = useSession();
+
+  const { data: savedReplies, isLoading: loadingSavedReplies } = useQuery(
+    ["saved-replies"],
+    () => getSavedReplies(),
+    {
+      refetchOnWindowFocus: false,
+    }
+  );
 
   const uploadFile = async (file) => {
     try {
@@ -43,6 +52,7 @@ const NewTicket = ({
         <Col md={23} sm={24} xs={24}>
           <MarkdownEditor
             onRenderPreview={renderMarkdown}
+            savedReplies={savedReplies}
             acceptedFileTypes={[
               "image/*",
               // word, excel, txt, pdf
