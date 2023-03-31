@@ -29,6 +29,7 @@ const renderText = (text) => {
     });
   }
 
+  // check sekali lagi di users table
   if (mentions.length > 0) {
     mentions.forEach((mention) => {
       const username = mention.replace("@", "");
@@ -37,6 +38,7 @@ const renderText = (text) => {
         `<a href="/helpdesk/user/${username}">@${username}</a>`
       );
     });
+    // kalau sudah selesai insert di notification users
   }
 
   return text;

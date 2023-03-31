@@ -22,6 +22,8 @@ const NewTicket = ({
     }
   );
 
+  // todo add mentions
+
   const uploadFile = async (file) => {
     try {
       const formData = new FormData();
