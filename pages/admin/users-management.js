@@ -69,9 +69,9 @@ const Dashboard = () => {
       key: "current_role",
     },
     {
-      title: "Last Login",
+      title: "Login Terakhir",
       key: "last_login",
-      render: (_, record) => <div>{formatDate(record)}</div>,
+      render: (_, record) => <div>{formatDate(record?.last_login)}</div>,
     },
     {
       title: "Aksi",

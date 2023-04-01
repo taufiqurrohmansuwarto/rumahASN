@@ -57,6 +57,19 @@ export const userRoutes = {
   ],
 };
 
+export const pnsLayananRoutes = {
+  routes: [
+    {
+      path: "/layanan",
+      name: "Layanan",
+      icon: <CarOutlined />,
+      routes: [
+        { path: "/layanan/siasn", name: "SIASN", icon: <CarOutlined /> },
+      ],
+    },
+  ],
+};
+
 export const adminRoutes = {
   routes: [
     { path: "/admin/dashboard", name: "Dashboard", icon: <DashboardFilled /> },
