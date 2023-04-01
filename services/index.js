@@ -382,28 +382,33 @@ export const pinnetdTickets = () => {
 
 // list berita
 export const publikasiCasn = (query) => {
-  const { page, limit, search } = query;
-  const params = {
-    page,
-    limit,
-    search,
-  };
-  const queryString = Object.keys(params)
-    .map((key) => key + "=" + params[key])
-    .join("&");
+  const params = queryString.stringify(query);
 
-  return api.get(`/web/publikasi-casn?${query}`).then((res) => res?.data);
+  return api.get(`/web/publikasi-casn?${params}`).then((res) => res?.data);
 };
 
 export const nilaiCasn = () => {
   return api.get(`/web/nilai-casn`).then((res) => res?.data);
 };
 
-// feedbacks
+// ticket feedbacks
 export const createFeedbacks = (data) => {
   return api.post("/feedbacks", data).then((res) => res?.data);
 };
 
 export const getFeedbacks = () => {
   return api.get("/feedbacks").then((res) => res?.data);
+};
+
+// app rating
+export const showAppRating = () => {
+  return api.get("/ratings").then((res) => res?.data);
+};
+
+export const closeAppRating = () => {
+  return api.delete("/ratings").then((res) => res?.data);
+};
+
+export const giveAppRating = (data) => {
+  return api.post("/ratings", data).then((res) => res?.data);
 };

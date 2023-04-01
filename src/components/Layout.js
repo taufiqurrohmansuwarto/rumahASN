@@ -101,7 +101,7 @@ function Layout({ children, active }) {
     <ProLayout
       theme="light"
       selectedKeys={[active ? active : router.pathname]}
-      title="BKD Helpdesk"
+      title="Konsultasi Online"
       menuFooterRender={(props) => {
         if (props?.collapsed) return undefined;
         return (

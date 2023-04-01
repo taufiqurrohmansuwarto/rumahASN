@@ -1,6 +1,7 @@
 import Layout from "@/components/Layout";
 import PageContainer from "@/components/PageContainer";
 import SelamatDatang from "@/components/SelamatDatang";
+import ShowRatings from "@/components/ShowRatings";
 import PinnedTickets from "@/components/Ticket/PinnedTickets";
 import TicketsPublish from "@/components/Ticket/TicketsPublish";
 import PublikasiCASN from "@/components/Web/PublikasiCASN";
@@ -9,6 +10,7 @@ import { Grid, Stack } from "@mantine/core";
 function Feeds() {
   return (
     <PageContainer title="Beranda" subTitle="Dashboard">
+      <ShowRatings />
       <Grid justify="start">
         <Grid.Col md={9} sm={12}>
           <Stack>

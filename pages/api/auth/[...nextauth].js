@@ -72,22 +72,28 @@ const upsertUser = async (currentUser) => {
       group,
       role,
       image,
-      id: currentUserId,
+      id: currentUserId || null,
       custom_id: currentUser?.id,
       username,
       employee_number,
       email,
-      birthdate: new Date(birthdate),
+      birthdate: birthdate ? new Date(birthdate) : null,
       from,
       organization_id,
       last_login: new Date(),
     };
 
+    // upsert user if on custom_id then update the data
+
     const result = await User.query()
       .insert(data)
       .onConflict("custom_id")
-      .merge(data)
+      .merge()
       .returning("*");
+
+    await User.query()
+      .increment("frekuensi_kunjungan", 1)
+      .where("custom_id", currentUser?.id);
 
     return result;
   } catch (error) {
