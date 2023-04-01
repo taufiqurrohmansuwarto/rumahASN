@@ -54,6 +54,7 @@ import UnpinTicket from "../TicketProps/UnPin";
 import Unpublish from "../TicketProps/UnPublish";
 import Unsubscribe from "../TicketProps/Unsubscribe";
 import NewTicket from "./NewTicket";
+import Head from "next/head";
 
 const ActionWrapper = ({ attributes, name, ...props }) => {
   return (
@@ -447,6 +448,9 @@ const DetailTicketPublish = ({ id }) => {
   return (
     <Row>
       <Skeleton loading={isLoading}>
+        <Head>
+          <title>{data?.title}</title>
+        </Head>
         {data && (
           <>
             <BackTop />
