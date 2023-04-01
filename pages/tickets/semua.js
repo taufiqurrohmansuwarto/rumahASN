@@ -1,8 +1,16 @@
+import Head from "next/head";
 import CustomersTickets from "../../src/components/CustomersTickets";
 import Layout from "../../src/components/Layout";
 
 const Tickets = () => {
-  return <CustomersTickets status="all" />;
+  return (
+    <>
+      <Head>
+        <title>Konsultasi Online - Semua Tiket</title>
+      </Head>
+      <CustomersTickets status="all" />;
+    </>
+  );
 };
 
 // add layout

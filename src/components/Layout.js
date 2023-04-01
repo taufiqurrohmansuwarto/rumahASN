@@ -58,12 +58,12 @@ const changeRoutes = (user) => {
         routes: [
           {
             path: "/layanan-tracking/siasn",
-            name: "SIASN",
+            name: "Tracking SIASN",
             icon: <UserOutlined />,
           },
           {
             path: "/layanan-tracking/simaster",
-            name: "SIMASTER",
+            name: "Tracking SIMASTER",
             icon: <UserOutlined />,
           },
         ],
@@ -117,6 +117,16 @@ function Layout({ children, active }) {
       theme="light"
       selectedKeys={[active ? active : router.pathname]}
       title="Konsultasi Online"
+      headerTitleRender={(logo, title) => {
+        return (
+          <>
+            <Link href="/feeds">
+              <a>{logo}</a>
+            </Link>
+            {title}
+          </>
+        );
+      }}
       menuFooterRender={(props) => {
         if (props?.collapsed) return undefined;
         return (

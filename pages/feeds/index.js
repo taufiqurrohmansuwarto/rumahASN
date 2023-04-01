@@ -6,10 +6,14 @@ import PinnedTickets from "@/components/Ticket/PinnedTickets";
 import TicketsPublish from "@/components/Ticket/TicketsPublish";
 import PublikasiCASN from "@/components/Web/PublikasiCASN";
 import { Grid, Stack } from "@mantine/core";
+import Head from "next/head";
 
 function Feeds() {
   return (
     <PageContainer title="Beranda" subTitle="Dashboard">
+      <Head>
+        <title>Konsultasi Online - Beranda</title>
+      </Head>
       <ShowRatings />
       <Grid justify="start">
         <Grid.Col md={9} sm={12}>

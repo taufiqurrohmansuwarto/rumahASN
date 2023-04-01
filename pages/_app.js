@@ -14,6 +14,7 @@ import { SessionProvider, signIn, useSession } from "next-auth/react";
 import { useState } from "react";
 import Loading from "../src/components/Loading";
 import "../styles/globals.css";
+import Head from "next/head";
 
 // check user role and organization start with 123
 function Auth({ children, action, subject }) {
@@ -62,6 +63,9 @@ function MyApp({ Component, pageProps: { session, ...pageProps } }) {
       baseUrl="/helpdesk"
       basePath="/helpdesk/api/auth"
     >
+      <Head>
+        <link rel="shortcut icon" href="/helpdesk/headset.ico" />
+      </Head>
       <QueryClientProvider client={queryClient}>
         <MantineProvider withGlobalStyles withNormalizeCSS>
           <ThemeProvider colorMode="auto" preventSSRMismatch>
