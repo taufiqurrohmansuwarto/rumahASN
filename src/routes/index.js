@@ -1,4 +1,5 @@
 import {
+  BarChartOutlined,
   BookOutlined,
   CarOutlined,
   DashboardFilled,
@@ -73,7 +74,20 @@ export const pnsLayananRoutes = {
 export const adminRoutes = {
   routes: [
     { path: "/admin/dashboard", name: "Dashboard", icon: <DashboardFilled /> },
-
+    {
+      path: "/admin/analisis",
+      name: "Analisis",
+      icon: <BarChartOutlined />,
+      routes: [
+        { path: "/admin/analisis/kecepatan-respon", name: "Kecepatan Respon" },
+        {
+          path: "/admin/analisis/kepuasan-pelanggan",
+          name: "Kepuasan Pelanggan",
+        },
+        { path: "/admin/analisis/performa-agent", name: "Performa Agent" },
+        { path: "/admin/analisis/trend", name: "Trend" },
+      ],
+    },
     {
       path: "/admin/users-management",
       name: "User Management",

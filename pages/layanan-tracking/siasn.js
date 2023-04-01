@@ -1,11 +1,15 @@
 import Layout from "@/components/Layout";
 import PageContainer from "@/components/PageContainer";
-import { Card } from "antd";
+import SIASNTracking from "@/components/Tracking/SIASNTracking";
+import { Stack } from "@mantine/core";
+import { Alert, Card } from "antd";
 
 function TrackingSIASN() {
   return (
     <PageContainer title="Layanan Tracking" subTitle="Aplikasi SIASN">
-      <Card></Card>
+      <Card>
+        <SIASNTracking />
+      </Card>
     </PageContainer>
   );
 }

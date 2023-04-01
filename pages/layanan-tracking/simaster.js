@@ -1,11 +1,14 @@
 import Layout from "@/components/Layout";
 import PageContainer from "@/components/PageContainer";
+import SIMASTERTracking from "@/components/Tracking/SIMASTERTracking";
 import { Card } from "antd";
 
 function TrackingSIMASTER() {
   return (
     <PageContainer title="Layanan Tracking" subTitle="Aplikasi SIMASTER">
-      <Card></Card>
+      <Card>
+        <SIMASTERTracking />
+      </Card>
     </PageContainer>
   );
 }
