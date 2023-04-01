@@ -94,7 +94,6 @@ const changeRoutes = (user) => {
     }
 
     const routes = uniqBy(userRoutes.routes, "path");
-    console.log(routes);
 
     resolve(routes);
   });
