@@ -13,7 +13,7 @@ const MyText = ({ user }) => {
   return (
     <>
       <Typography.Text>
-        Selamat datang di Pusat Layanan Kepegawaian Jatim! Sebelum bertanya,
+        Selamat datang di Konsultasi Online Kepegawaian! Sebelum bertanya,
         silakan periksa menu{" "}
         <Link href={"/faq"}>
           <a>FAQ</a>
