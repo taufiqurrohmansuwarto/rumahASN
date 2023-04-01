@@ -1,15 +1,12 @@
 import {
-  BellOutlined,
-  GithubOutlined,
-  InfoCircleOutlined,
   LogoutOutlined,
   NotificationOutlined,
-  QuestionCircleOutlined,
+  ReconciliationOutlined,
   SettingOutlined,
   UserOutlined,
   UserSwitchOutlined,
 } from "@ant-design/icons";
-import { Menu, Dropdown } from "antd";
+import { Dropdown, Menu } from "antd";
 import { uniqBy } from "lodash";
 import { signOut, useSession } from "next-auth/react";
 import dynamic from "next/dynamic";
@@ -51,6 +48,27 @@ const changeRoutes = (user) => {
 
     const admin = (role === "admin" && bkd) || (role === "admin" && pttBkd);
     const agent = (role === "agent" && bkd) || (role === "agent" && pttBkd);
+    const userPns = user?.group === "MASTER";
+
+    if (userPns) {
+      userRoutes.routes.push({
+        path: "/layanan-tracking",
+        name: "Layanan Tracking",
+        icon: <ReconciliationOutlined />,
+        routes: [
+          {
+            path: "/layanan-tracking/siasn",
+            name: "SIASN",
+            icon: <UserOutlined />,
+          },
+          {
+            path: "/layanan-tracking/simaster",
+            name: "SIMASTER",
+            icon: <UserOutlined />,
+          },
+        ],
+      });
+    }
 
     if (admin) {
       userRoutes.routes.push(
@@ -65,10 +83,6 @@ const changeRoutes = (user) => {
           icon: <UserOutlined />,
         }
       );
-
-      const routes = uniqBy(userRoutes.routes, "path");
-
-      resolve(routes);
     }
 
     if (agent) {
@@ -78,7 +92,9 @@ const changeRoutes = (user) => {
         icon: <UserOutlined />,
       });
     }
+
     const routes = uniqBy(userRoutes.routes, "path");
+    console.log(routes);
 
     resolve(routes);
   });

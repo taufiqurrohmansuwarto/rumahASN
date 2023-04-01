@@ -45,6 +45,7 @@ function AgentLayout({ children, active, title = "Agent" }) {
         return [<Notifications key="notifications" />];
       }}
       layout="mix"
+      theme="light"
       // splitMenus={true}
       location={{
         pathname: router.pathname,

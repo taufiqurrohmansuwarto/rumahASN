@@ -29,6 +29,7 @@ function AdminLayout({ children, active }) {
 
   return (
     <ProLayout
+      theme="light"
       selectedKeys={[active ? active : router.pathname]}
       title="Admin Konsultasi Online"
       headerTitleRender={(logo, title) => {
