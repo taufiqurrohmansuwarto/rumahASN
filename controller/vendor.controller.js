@@ -1,4 +1,6 @@
 const urlImage = "https://bkd.jatimprov.go.id/file_pemprov/bannerweb/";
+const queryString = require("query-string");
+
 const listBerita = async (req, res) => {
   try {
     const { fetcher } = req;
@@ -25,9 +27,11 @@ const publikasiCasn = async (req, res) => {
   try {
     const { fetcher } = req;
 
-    const query = new URLSearchParams(req.query).toString();
+    const newQuery = queryString.stringify(req?.query, {
+      skipEmptyString: true,
+    });
 
-    const result = await fetcher.get(`/web/publikasi-casn?${query}}`);
+    const result = await fetcher.get(`/web/publikasi-casn?${newQuery}}`);
     res.json(result?.data);
   } catch (error) {
     console.log(error);

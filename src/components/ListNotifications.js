@@ -47,7 +47,7 @@ function ListNotifications() {
       router.push(`/customers-tickets/${ticket_id}`);
     } else {
       if (role === "admin") {
-        router.push(`/admin/tickets-managements/${ticket_id}/detail`);
+        router.push(`/customers-ticket/${ticket_id}`);
       } else if (role === "user") {
         router.push(`/tickets/${ticket_id}/detail`);
       } else if (role === "agent") {

@@ -30,7 +30,17 @@ function AgentLayout({ children, active, title = "Agent" }) {
   return (
     <ProLayout
       selectedKeys={[active ? active : router.pathname]}
-      title={<Link href="/feeds">Agent Helpdesk</Link>}
+      title="Penerima Tugas"
+      headerTitleRender={(logo, title) => {
+        return (
+          <>
+            <Link href="/feeds">
+              <a>{logo}</a>
+            </Link>
+            {title}
+          </>
+        );
+      }}
       actionsRender={() => {
         return [<Notifications key="notifications" />];
       }}

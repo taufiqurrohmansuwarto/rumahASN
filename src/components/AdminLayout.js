@@ -30,7 +30,17 @@ function AdminLayout({ children, active }) {
   return (
     <ProLayout
       selectedKeys={[active ? active : router.pathname]}
-      title={<Link href="/feeds">Admin Helpdesk</Link>}
+      title="Admin Konsultasi Online"
+      headerTitleRender={(logo, title) => {
+        return (
+          <>
+            <Link href="/feeds">
+              <a>{logo}</a>
+            </Link>
+            {title}
+          </>
+        );
+      }}
       location={{
         pathname: router.pathname,
       }}
