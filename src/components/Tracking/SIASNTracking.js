@@ -1,26 +1,53 @@
+import { pencarianLayananSIASN } from "@/services/index";
 import { Stack } from "@mantine/core";
-import { Alert, Button, Col, Form, Input, Row, Select } from "antd";
+import { Alert, Button, Col, Form, Input, Modal, Row, Select } from "antd";
+import { useState } from "react";
 
 function SIASNTracking() {
   const [form] = Form.useForm();
+  const [dataLayanan, setDataLayanan] = useState(null);
+
+  const [open, setOpen] = useState(false);
+  const handleOpen = () => setOpen(true);
+  const cancelOpen = () => setOpen(false);
+
+  const [result, setResult] = useState(null);
+  const [loading, setLoading] = useState(false);
 
   const listLayanan = [
-    "Kenaikan Pangkat",
-    "Pemberhentian",
+    // "Kenaikan Pangkat",
+    // "Pemberhentian",
     //     "Pindah Instansi",
-    "SKK",
+    // "SKK",
+    { key: "kenaikan-pangkat", label: "Kenaikan Pangkat" },
+    { key: "pemberhentian", label: "Pemberhentian" },
+    { key: "skk", label: "Status Kepegawaian Dan Kependudukan" },
   ];
 
   const handleFinish = async () => {
     try {
       const result = await form.validateFields();
-      console.log(result);
-    } catch (error) {}
+      setDataLayanan(result);
+      setLoading(true);
+      const hasil = await pencarianLayananSIASN(result);
+      setLoading(false);
+      setOpen(true);
+      console.log(hasil);
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   return (
     <div>
       <Row>
+        <Modal
+          title={`Layanan SIASN ${dataLayanan?.jenis_layanan} ${dataLayanan?.nip}`}
+          onCancel={cancelOpen}
+          open={open}
+        >
+          {result}
+        </Modal>
         <Col md={18} xs={24}>
           <Stack>
             <Alert
@@ -43,8 +70,12 @@ function SIASNTracking() {
                   }}
                 >
                   {listLayanan.map((item) => (
-                    <Select.Option key={item} name="item" value={item}>
-                      {item}
+                    <Select.Option
+                      key={item?.key}
+                      name="item"
+                      value={item?.key}
+                    >
+                      {item?.label}
                     </Select.Option>
                   ))}
                 </Select>
@@ -59,7 +90,9 @@ function SIASNTracking() {
                 <Input />
               </Form.Item>
               <Form.Item>
-                <Button htmlType="submit">Cari</Button>
+                <Button disabled={loading} loading={loading} htmlType="submit">
+                  Cari
+                </Button>
               </Form.Item>
             </Form>
           </Stack>

@@ -412,3 +412,10 @@ export const closeAppRating = () => {
 export const giveAppRating = (data) => {
   return api.post("/ratings", data).then((res) => res?.data);
 };
+
+// check layanan siasn
+export const pencarianLayananSIASN = ({ jenis_layanan, nip }) => {
+  return api
+    .get(`/layanan/siasn?jenis_layanan=${jenis_layanan}&nip=${nip}`)
+    .then((res) => res?.data);
+};
