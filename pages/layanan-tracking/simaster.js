@@ -2,14 +2,20 @@ import Layout from "@/components/Layout";
 import PageContainer from "@/components/PageContainer";
 import SIMASTERTracking from "@/components/Tracking/SIMASTERTracking";
 import { Card } from "antd";
+import Head from "next/head";
 
 function TrackingSIMASTER() {
   return (
-    <PageContainer title="Layanan Tracking" subTitle="Aplikasi SIMASTER">
-      <Card>
-        <SIMASTERTracking />
-      </Card>
-    </PageContainer>
+    <>
+      <Head>
+        <title>Tracking SIMASTER</title>
+      </Head>
+      <PageContainer title="Layanan Tracking" subTitle="Aplikasi SIMASTER">
+        <Card>
+          <SIMASTERTracking />
+        </Card>
+      </PageContainer>
+    </>
   );
 }
 

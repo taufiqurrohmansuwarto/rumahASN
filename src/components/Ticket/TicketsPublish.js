@@ -198,6 +198,8 @@ function TicketsPublish() {
           pageSize: query?.limit,
           onChange: (page) => setQuery({ ...query, page: page }),
           total: data?.total,
+          showTotal: (total, range) =>
+            `${range[0]}-${range[1]} dari ${total} data`,
           size: "small",
         }}
         renderItem={(item) => (

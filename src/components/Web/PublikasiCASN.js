@@ -15,7 +15,9 @@ function PublikasiCASN() {
   const { data, isLoading } = useQuery(
     ["publikasi-casn"],
     () => publikasiCasn(query),
-    {}
+    {
+      refetchOnWindowFocus: false,
+    }
   );
 
   return (
