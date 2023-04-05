@@ -67,11 +67,7 @@ const SignIn = ({ providers }) => {
             </Col>
           </Row>
           <Divider />
-          <div
-            style={{
-              marginBottom: 10,
-            }}
-          >
+          <div>
             <Space size="small">
               <Image
                 alt="pemprov"
@@ -88,7 +84,12 @@ const SignIn = ({ providers }) => {
             </Space>
           </div>
           <Space direction="vertical" size="small">
-            <Typography.Text type="secondary">
+            <Typography.Text
+              type="secondary"
+              style={{
+                fontSize: 12,
+              }}
+            >
               &#169; 2023 BKD Provinsi Jawa Timur
             </Typography.Text>
           </Space>

@@ -10,8 +10,6 @@ const layananTrackingSiasn = async (req, res) => {
     const { jenis_layanan, nip } = req?.query;
     const { customId: userId } = req?.user;
 
-    console.log(listLayananSIASN.includes(jenis_layanan));
-
     const { fetcher } = req;
 
     const currentUser = await User.query().findById(userId);

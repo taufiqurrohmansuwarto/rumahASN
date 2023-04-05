@@ -1,7 +1,62 @@
 import { pencarianLayananSIASN } from "@/services/index";
 import { Stack } from "@mantine/core";
-import { Alert, Button, Col, Form, Input, Modal, Row, Select } from "antd";
+import { useQuery } from "@tanstack/react-query";
+import {
+  Alert,
+  Button,
+  Col,
+  Form,
+  Input,
+  Modal,
+  Result,
+  Row,
+  Select,
+  Table,
+} from "antd";
 import { useState } from "react";
+
+const HasilLayanan = ({ data }) => {
+  const columns = [
+    { title: "Nama", key: "nama", dataIndex: "nama" },
+    { title: "NIP", key: "nip", dataIndex: "nip" },
+    {
+      title: "Jenis Layanan",
+      key: "jenis_layanan_nama",
+      dataIndex: "jenis_layanan_nama",
+    },
+    {
+      title: "Status Usulan",
+      key: "status_usulan",
+      dataIndex: "status_usulan",
+    },
+    {
+      title: "Tanggal Usulan",
+      key: "tanggal_usulan",
+      dataIndex: "tanggal_usulan",
+    },
+  ];
+
+  if (!data) {
+    return (
+      <Result
+        title="Tidak ada"
+        subTitle="Data yang anda cari tidak ada pada layanan siasn"
+        status="error"
+      />
+    );
+  } else {
+    return (
+      <>
+        <Table
+          size="small"
+          dataSource={data}
+          columns={columns}
+          pagination={false}
+        />
+      </>
+    );
+  }
+};
 
 function SIASNTracking() {
   const [form] = Form.useForm();
@@ -11,28 +66,29 @@ function SIASNTracking() {
   const handleOpen = () => setOpen(true);
   const cancelOpen = () => setOpen(false);
 
-  const [result, setResult] = useState(null);
-  const [loading, setLoading] = useState(false);
-
   const listLayanan = [
-    // "Kenaikan Pangkat",
-    // "Pemberhentian",
-    //     "Pindah Instansi",
-    // "SKK",
     { key: "kenaikan-pangkat", label: "Kenaikan Pangkat" },
     { key: "pemberhentian", label: "Pemberhentian" },
     { key: "skk", label: "Status Kepegawaian Dan Kependudukan" },
   ];
 
+  const { data, refetch, isFetching } = useQuery(
+    ["layanan-siasn", dataLayanan],
+    () => pencarianLayananSIASN(dataLayanan),
+    {
+      refetchOnWindowFocus: false,
+      enabled: !!dataLayanan,
+      onSuccess: () => {
+        handleOpen();
+      },
+    }
+  );
+
   const handleFinish = async () => {
     try {
       const result = await form.validateFields();
       setDataLayanan(result);
-      setLoading(true);
-      const hasil = await pencarianLayananSIASN(result);
-      setLoading(false);
-      setOpen(true);
-      console.log(hasil);
+      await refetch();
     } catch (error) {
       console.log(error);
     }
@@ -42,11 +98,15 @@ function SIASNTracking() {
     <div>
       <Row>
         <Modal
+          destroyOnClose
+          onOk={cancelOpen}
+          width={800}
+          centered
           title={`Layanan SIASN ${dataLayanan?.jenis_layanan} ${dataLayanan?.nip}`}
           onCancel={cancelOpen}
           open={open}
         >
-          {result}
+          <HasilLayanan data={data} />
         </Modal>
         <Col md={18} xs={24}>
           <Stack>
@@ -90,7 +150,11 @@ function SIASNTracking() {
                 <Input />
               </Form.Item>
               <Form.Item>
-                <Button disabled={loading} loading={loading} htmlType="submit">
+                <Button
+                  disabled={isFetching}
+                  loading={isFetching}
+                  htmlType="submit"
+                >
                   Cari
                 </Button>
               </Form.Item>

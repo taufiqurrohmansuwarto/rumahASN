@@ -3,14 +3,20 @@ import PageContainer from "@/components/PageContainer";
 import SIASNTracking from "@/components/Tracking/SIASNTracking";
 import { Stack } from "@mantine/core";
 import { Alert, Card } from "antd";
+import Head from "next/head";
 
 function TrackingSIASN() {
   return (
-    <PageContainer title="Layanan Tracking" subTitle="Aplikasi SIASN">
-      <Card>
-        <SIASNTracking />
-      </Card>
-    </PageContainer>
+    <>
+      <Head>
+        <title>Tracking SIASN</title>
+      </Head>
+      <PageContainer title="Layanan Tracking" subTitle="Aplikasi SIASN">
+        <Card>
+          <SIASNTracking />
+        </Card>
+      </PageContainer>
+    </>
   );
 }
 
