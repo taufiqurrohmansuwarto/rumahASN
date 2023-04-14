@@ -12,7 +12,7 @@ function Feeds() {
   return (
     <PageContainer
       loading={isLoading}
-      title="F.A.Q"
+      title="F.A.Q dan Knowledge Base"
       subTitle="Pertanyaan yang sering diajukan"
       breadcrumbRender={() => (
         <Breadcrumb>

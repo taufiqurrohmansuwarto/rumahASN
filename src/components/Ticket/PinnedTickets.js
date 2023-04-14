@@ -4,6 +4,7 @@ import { Grid } from "@mantine/core";
 import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/router";
 import CheckCard from "../CheckCard";
+import { Skeleton } from "antd";
 
 const CardPinnedTicket = ({ ticket }) => {
   const router = useRouter();
@@ -21,16 +22,6 @@ const CardPinnedTicket = ({ ticket }) => {
           ticket?.customer?.username
         } pada tanggal ${formatDate(ticket?.created_at)}`}
       />
-      {/* <Card
-        title={
-          <Link href={`/customers-tickets/${ticket?.id}`}>
-            <Typography.Link>{ticket?.title}</Typography.Link>
-          </Link>
-        }
-        extra={<PushpinOutlined />}
-      >
-        <Card.Meta description={`oleh ${ticket?.customer?.username}`} />
-      </Card> */}
     </Grid.Col>
   );
 };
@@ -43,10 +34,12 @@ function PinnedTickets() {
   if (!data?.length) return null;
 
   return (
-    <Grid>
-      {data?.map((ticket) => (
-        <CardPinnedTicket key={ticket?.id} ticket={ticket} />
-      ))}
+    <Grid gutter={5} gutterXs='sm' gutterMud='sm'>
+      <Skeleton loading={isLoading}>
+        {data?.map((ticket) => (
+          <CardPinnedTicket key={ticket?.id} ticket={ticket} />
+        ))}
+      </Skeleton>
     </Grid>
   );
 }

@@ -46,7 +46,7 @@ export const userRoutes = {
     },
     {
       path: "/faq",
-      name: "FAQ",
+      name: " FAQ & Knowledge Base",
       icon: <QuestionCircleOutlined />,
     },
     {

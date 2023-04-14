@@ -16,7 +16,7 @@ const MyText = ({ user }) => {
         Selamat datang di Konsultasi Online Kepegawaian! Sebelum bertanya,
         silakan periksa menu{" "}
         <Link href={"/faq"}>
-          <a>FAQ</a>
+          <a>F.A.Q & Knowledge Base</a>
         </Link>{" "}
         dan tiket yang sudah ada. Jika belum menemukan jawaban, jangan ragu
         untuk membuat tiket baru. Kami siap membantu!{" "}

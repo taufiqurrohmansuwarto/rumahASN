@@ -68,7 +68,7 @@ const CreateSavedReplies = () => {
         <Form.Item
           rules={[{ required: true, message: "Judul tidak boleh kosong" }]}
           name="name"
-          label="Nama"
+          label="Judul"
         >
           <Input />
         </Form.Item>
