@@ -19,8 +19,12 @@ const Dashboard = () => {
 
   return (
     <>
-      <Head>Hello</Head>
-      <PageContainer title="hello" loading={isLoading || status === "loading"}>
+      <Head>
+        <title>
+          Konsultasi Online - Admin
+        </title>
+      </Head>
+      <PageContainer title="Halaman Admin" loading={isLoading || status === "loading"}>
         <Stack>
           <Alert title="Perhatian">
             <Text mb={10}>Halo Admin, {userData?.user?.name}</Text>

@@ -18,7 +18,7 @@ const SavedReplies = () => {
               <a>Beranda</a>
             </Link>
           </Breadcrumb.Item>
-          <Breadcrumb.Item>Balasan Tersimpan</Breadcrumb.Item>
+          <Breadcrumb.Item>Balasan Disimpan</Breadcrumb.Item>
         </Breadcrumb>
       )}
       // content="Balasan yang disimpan adalah potongan teks yang dapat digunakan kembali yang dapat Anda gunakan di seluruh bidang komentar Helpdesk. Balasan yang disimpan dapat menghemat waktu Anda jika Anda sering mengetik tanggapan yang serupa."
@@ -28,8 +28,8 @@ const SavedReplies = () => {
           <Stack>
             <Alert
               showIcon
-              message="Balasan Tersimpan"
-              description="Balasan yang disimpan adalah teks yang bisa dipakai lagi dan berguna untuk dijadikan tanggapan di berbagai bidang Helpdesk. Menggunakan balasan yang disimpan bisa membantu Anda menghemat waktu jika sering mengetik respons yang sama."
+              message="Balasan Disimpan"
+              description="Balasan disimpan adalah teks siap pakai untuk berbagai situasi helpdesk. Penggunaannya menghemat waktu saat menanggapi pertanyaan yang sering muncul."
               type="info"
             />
             <ListSavedReplies />
