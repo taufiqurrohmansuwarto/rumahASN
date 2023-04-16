@@ -8,16 +8,13 @@ const { confirm } = Modal;
 function UnlockConversation({ id }) {
   const queryClient = useQueryClient();
 
-  const { mutateAsync, isLoading } = useMutation(
-    (data) => unlockConversation(data),
-    {
-      onSuccess: () => {
-        queryClient.invalidateQueries(["publish-ticket", id]);
-        message.success("Percakapan berhasil dibuka kembali");
-      },
-      onError: () => message.error("Percakapan gagal dibuka kembali"),
-    }
-  );
+  const { mutateAsync } = useMutation((data) => unlockConversation(data), {
+    onSuccess: () => {
+      queryClient.invalidateQueries(["publish-ticket", id]);
+      message.success("Percakapan berhasil dibuka kembali");
+    },
+    onError: () => message.error("Percakapan gagal dibuka kembali"),
+  });
 
   const handleSubmit = () => {
     confirm({

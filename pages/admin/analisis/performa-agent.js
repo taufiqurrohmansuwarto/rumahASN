@@ -1,11 +1,9 @@
+import PageContainer from "@/components/PageContainer";
+
 const { default: AdminLayout } = require("@/components/AdminLayout");
 
 const PerformaAgent = () => {
-  return (
-    <div>
-      <h1>Performa Agent</h1>
-    </div>
-  );
+  return <PageContainer title="Performa Penerima Tugas"></PageContainer>;
 };
 
 PerformaAgent.getLayout = function getLayout(page) {

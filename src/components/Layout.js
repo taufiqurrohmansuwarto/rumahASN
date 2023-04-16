@@ -116,7 +116,7 @@ function Layout({ children, active }) {
     <ProLayout
       theme="light"
       selectedKeys={[active ? active : router.pathname]}
-      title="Konsultasi Online"
+      title="Rumah ASN"
       headerTitleRender={(logo, title) => {
         return (
           <>

@@ -21,7 +21,7 @@ function Feeds() {
               <a>Beranda</a>
             </Link>
           </Breadcrumb.Item>
-          <Breadcrumb.Item>FAQ</Breadcrumb.Item>
+          <Breadcrumb.Item>FAQ & Knowledge Base</Breadcrumb.Item>
         </Breadcrumb>
       )}
     >
