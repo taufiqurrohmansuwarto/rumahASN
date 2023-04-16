@@ -1,30 +1,28 @@
 import { FileAddOutlined } from "@ant-design/icons";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
+  Alert,
   Button,
   Card,
   Divider,
   Form,
   Input,
-  message,
   Modal,
   Popconfirm,
   Select,
   Space,
   Table,
+  message,
 } from "antd";
 import { useEffect, useState } from "react";
 import {
-  createPriority,
   createSubCategory,
-  deletePriority,
   deleteSubCategory,
   getCategories,
-  getPriorities,
   subCategories,
-  updatePriority,
   updateSubCategory,
 } from "../../../services";
+import { Stack } from "@mantine/core";
 
 const { default: AdminLayout } = require("../../../src/components/AdminLayout");
 const {
@@ -239,36 +237,44 @@ const SubCategories = () => {
   ];
 
   return (
-    <PageContainer>
-      <Card loading={isLoading || isLoadingCategory}>
-        <Button
-          type="primary"
-          icon={<FileAddOutlined />}
-          onClick={openCreateModal}
-          style={{ marginBottom: 16 }}
-        >
-          Tambah
-        </Button>
-        <Table
-          columns={columns}
-          pagination={false}
-          dataSource={data}
-          rowKey={(row) => row?.id}
-          loading={isLoading}
+    <PageContainer title="Sub Kategori Pertanyaan">
+      <Stack>
+        <Alert
+          type="info"
+          message="Sub Kategori"
+          showIcon
+          description={`Subkategori adalah kelompok lebih spesifik yang mencakup topik atau isu yang berhubungan dengan kategori utama. Subkategori membantu tim helpdesk untuk lebih fokus pada pertanyaan atau masalah yang lebih spesifik dan relevan dengan topik tertentu dalam kategori yang lebih luas. Dalam contoh yang Anda berikan, subkategori mencakup "Seleksi PPPK tahun 2022" dan "Seleksi CPNS 2023", yang merupakan bagian dari kategori "Seleksi CASN" dan mencakup pertanyaan yang lebih spesifik tentang seleksi Pegawai Pemerintah dengan Perjanjian Kerja (PPPK) tahun 2022 dan seleksi Calon Pegawai Negeri Sipil (CPNS) tahun 2023.`}
         />
-        <CreateForm
-          open={openCreate}
-          categories={dataCategories}
-          onCancel={cancelCreate}
-        />
-        <UpdateForm
-          open={openUpdate}
-          data={selectedData}
-          update={update}
-          onCancel={cancelUpdate}
-          loading={updateLoading}
-        />
-      </Card>
+        <Card loading={isLoading || isLoadingCategory}>
+          <Button
+            type="primary"
+            icon={<FileAddOutlined />}
+            onClick={openCreateModal}
+            style={{ marginBottom: 16 }}
+          >
+            Tambah
+          </Button>
+          <Table
+            columns={columns}
+            pagination={false}
+            dataSource={data}
+            rowKey={(row) => row?.id}
+            loading={isLoading}
+          />
+          <CreateForm
+            open={openCreate}
+            categories={dataCategories}
+            onCancel={cancelCreate}
+          />
+          <UpdateForm
+            open={openUpdate}
+            data={selectedData}
+            update={update}
+            onCancel={cancelUpdate}
+            loading={updateLoading}
+          />
+        </Card>
+      </Stack>
     </PageContainer>
   );
 };

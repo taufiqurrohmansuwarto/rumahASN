@@ -3,7 +3,9 @@ import PageContainer from "@/components/PageContainer";
 const { default: AdminLayout } = require("@/components/AdminLayout");
 
 const PerformaAgent = () => {
-  return <PageContainer title="Performa Penerima Tugas"></PageContainer>;
+  return (
+    <PageContainer title="Analisis Performa Penerima Tugas"></PageContainer>
+  );
 };
 
 PerformaAgent.getLayout = function getLayout(page) {
