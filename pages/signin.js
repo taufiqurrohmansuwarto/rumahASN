@@ -88,7 +88,7 @@ const SignIn = ({ providers }) => {
                 fontSize: 12,
               }}
             >
-              &#169; 2022 Desain & Pengambangan | BKD Provinsi Jawa Timur
+              &#169; 2022 Desain & Pengembangan | BKD Provinsi Jawa Timur
             </Typography.Text>
           </Space>
         </Col>

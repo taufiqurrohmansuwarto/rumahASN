@@ -1,11 +1,9 @@
+import PageContainer from "@/components/PageContainer";
+
 const { default: AdminLayout } = require("@/components/AdminLayout");
 
 const Trend = () => {
-  return (
-    <div>
-      <h1>Kecepatan Respons</h1>
-    </div>
-  );
+  return <PageContainer title="Analisis Trend"></PageContainer>;
 };
 
 Trend.getLayout = function getLayout(page) {

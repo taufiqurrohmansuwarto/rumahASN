@@ -12,6 +12,7 @@ import {
   Popconfirm,
   Card,
   message,
+  Alert,
 } from "antd";
 import { useEffect, useState } from "react";
 import {
@@ -21,6 +22,8 @@ import {
   getTreeOrganization,
   updateCategory,
 } from "../../../services";
+import { formatDateLL } from "@/utils/client-utils";
+import { Stack } from "@mantine/core";
 
 const { default: AdminLayout } = require("../../../src/components/AdminLayout");
 const {
@@ -241,12 +244,12 @@ const Categories = () => {
       },
     },
     {
-      title: "Dibuat pada",
-      dataIndex: "created_at",
+      title: "Tgl. Dibuat",
       key: "created_at",
+      render: (text, record) => <div>{formatDateLL(record.created_at)}</div>,
     },
     {
-      title: "Dibuat oleh",
+      title: "Pembuat",
       key: "created_by",
       render: (text, record) => {
         return record?.createdBy?.username;
@@ -277,30 +280,41 @@ const Categories = () => {
   ];
 
   return (
-    <PageContainer>
-      <Card>
-        <Button
-          style={{ marginBottom: 16 }}
-          icon={<PlusOutlined />}
-          type="primary"
-          onClick={openCreateModal}
-        >
-          Tambah
-        </Button>
-        <Table
-          columns={columns}
-          pagination={false}
-          rowKey={(row) => row?.id}
-          dataSource={data}
-          loading={isLoading}
+    <PageContainer title="Kategori Pertanyaan">
+      <Stack>
+        <Alert
+          message="Kategori"
+          showIcon
+          type="info"
+          description='Kategori adalah kelompok umum yang mencakup berbagai topik atau isu terkait dengan bidang kepegawaian. Kategori membantu memisahkan pertanyaan atau masalah ke dalam area spesifik yang lebih mudah dikelola. Contoh, kategori adalah "Seleksi CASN" yang mencakup semua pertanyaan dan masalah yang terkait dengan seleksi Calon Aparatur Sipil Negara.'
         />
-        <CreateForm open={createModal} handleCancel={handleCancelCreateModal} />
-        <UpdateForm
-          open={updateModal}
-          data={dataUpdate}
-          onCancel={handleCancelUpdateModal}
-        />
-      </Card>
+        <Card>
+          <Button
+            style={{ marginBottom: 16 }}
+            icon={<PlusOutlined />}
+            type="primary"
+            onClick={openCreateModal}
+          >
+            Tambah
+          </Button>
+          <Table
+            columns={columns}
+            pagination={false}
+            rowKey={(row) => row?.id}
+            dataSource={data}
+            loading={isLoading}
+          />
+          <CreateForm
+            open={createModal}
+            handleCancel={handleCancelCreateModal}
+          />
+          <UpdateForm
+            open={updateModal}
+            data={dataUpdate}
+            onCancel={handleCancelUpdateModal}
+          />
+        </Card>
+      </Stack>
     </PageContainer>
   );
 };
