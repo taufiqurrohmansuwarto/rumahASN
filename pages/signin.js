@@ -10,7 +10,7 @@ const SignIn = ({ providers }) => {
   return (
     <>
       <Head>
-        <title>Konsultasi Online</title>
+        <title>Rumah ASN</title>
       </Head>
       <Row
         style={{ minHeight: "100vh", padding: 16 }}
@@ -26,13 +26,11 @@ const SignIn = ({ providers }) => {
           />
         </Col>
         <Col md={8} xs={24}>
-          <Typography.Title>Konsultasi Kepegawaian Online</Typography.Title>
+          <Typography.Title>Rumah ASN</Typography.Title>
           <Blockquote cite="- BKD Provinsi Jawa Timur">
-            Kami hadir untuk melayani dan membantu masyarakat. Lewat konsultasi
-            online Badan Kepegawaian Daerah Provinsi Jawa Timur, kami siap
-            memberikan solusi dan jawaban terbaik untuk setiap pertanyaan dan
-            kebutuhan kamu terkait karier sebagai ASN di Jawa Timur. Jadilah
-            bagian dari ASN yang berkualitas dan berintegritas!
+            Tempat Berkumpulnya Solusi Kepegawaian yang Cepat, Mudah, dan
+            Terpadu untuk Menciptakan Lingkungan Kerja yang Harmonis dan
+            Produktif
           </Blockquote>
           <Row>
             <Col md={24} xs={24}>
@@ -90,7 +88,7 @@ const SignIn = ({ providers }) => {
                 fontSize: 12,
               }}
             >
-              &#169; 2023 BKD Provinsi Jawa Timur
+              &#169; 2022 Desain & Pengambangan | BKD Provinsi Jawa Timur
             </Typography.Text>
           </Space>
         </Col>

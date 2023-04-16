@@ -12,7 +12,7 @@ function Feeds() {
   return (
     <PageContainer title="Beranda" subTitle="Dashboard">
       <Head>
-        <title>Konsultasi Online - Beranda</title>
+        <title>Rumah ASN - Beranda</title>
       </Head>
       <ShowRatings />
       <Grid justify="start">
