@@ -8,7 +8,7 @@ const Tickets = () => {
       <Head>
         <title>Konsultasi Online - Semua Tiket</title>
       </Head>
-      <CustomersTickets status="all" />;
+      <CustomersTickets status="all" />
     </>
   );
 };

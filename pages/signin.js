@@ -20,9 +20,9 @@ const SignIn = ({ providers }) => {
         <Col md={6} xs={24}>
           <Image
             alt="Mountains"
-            src="https://siasn.bkd.jatimprov.go.id:9000/public/helpdesk-title.png"
-            width={550}
-            height={600}
+            src="https://siasn.bkd.jatimprov.go.id:9000/public/layanan-online.png"
+            width={700}
+            height={500}
           />
         </Col>
         <Col md={8} xs={24}>
