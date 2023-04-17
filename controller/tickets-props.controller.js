@@ -921,12 +921,12 @@ const changeFeedback = async (req, res) => {
   try {
     const { id } = req?.query;
     const { customId: user_id, current_role: role } = req?.user;
-    const { stars } = req?.body;
+    const { stars, requester_comment } = req?.body;
 
     const currentTicket = await Ticket.query().findById(id);
 
     if (currentTicket?.requester === user_id) {
-      await Ticket.query().patch({ stars }).where({ id });
+      await Ticket.query().patch({ stars, requester_comment }).where({ id });
       await insertTicketHistory(
         id,
         user_id,
