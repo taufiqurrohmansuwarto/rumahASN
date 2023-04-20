@@ -257,3 +257,14 @@ export const renderMarkdown = async (markdown) => {
   const result = await parseMarkdown(markdown);
   return result?.html;
 };
+
+// create custom function from html if there is a tag add new blank target
+export const transformHref = (html) => {
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(html, "text/html");
+  const links = doc.querySelectorAll("a");
+  links.forEach((link) => {
+    link.setAttribute("target", "_blank");
+  });
+  return doc.body.innerHTML;
+};

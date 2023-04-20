@@ -387,6 +387,10 @@ export const publikasiCasn = (query) => {
   return api.get(`/web/publikasi-casn?${params}`).then((res) => res?.data);
 };
 
+export const detailPublikasiCasn = (id) => {
+  return api.get(`/web/publikasi-casn/${id}`).then((res) => res?.data);
+};
+
 export const nilaiCasn = () => {
   return api.get(`/web/nilai-casn`).then((res) => res?.data);
 };

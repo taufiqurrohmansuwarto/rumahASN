@@ -10,22 +10,22 @@ const SignIn = ({ providers }) => {
   return (
     <>
       <Head>
-        <title>Rumah ASN</title>
+        <title>Rumah ASN - Login</title>
       </Head>
       <Row
         style={{ minHeight: "100vh", padding: 16 }}
         align="middle"
         justify="center"
       >
-        <Col md={6} xs={24}>
+        <Col md={9} xs={24}>
           <Image
-            alt="Mountains"
+            alt="Rumah ASN BA"
             src="https://siasn.bkd.jatimprov.go.id:9000/public/layanan-online.png"
             width={700}
             height={500}
           />
         </Col>
-        <Col md={8} xs={24}>
+        <Col md={6} xs={24}>
           <Typography.Title>Rumah ASN</Typography.Title>
           <Blockquote cite="- BKD Provinsi Jawa Timur">
             Tempat Berkumpulnya Solusi Kepegawaian yang Cepat, Mudah, dan
