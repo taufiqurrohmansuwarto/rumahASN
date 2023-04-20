@@ -6,6 +6,7 @@ import PinnedTickets from "@/components/Ticket/PinnedTickets";
 import TicketsPublish from "@/components/Ticket/TicketsPublish";
 import PublikasiCASN from "@/components/Web/PublikasiCASN";
 import { Grid, Stack } from "@mantine/core";
+import { Card } from "antd";
 import Head from "next/head";
 
 function Feeds() {
@@ -17,11 +18,13 @@ function Feeds() {
       <ShowRatings />
       <Grid justify="start">
         <Grid.Col md={9} sm={12}>
-          <Stack>
-            <SelamatDatang />
-            <PinnedTickets />
-            <TicketsPublish />
-          </Stack>
+          <Card>
+            <Stack>
+              <SelamatDatang />
+              <PinnedTickets />
+              <TicketsPublish />
+            </Stack>
+          </Card>
         </Grid.Col>
         <Grid.Col md={3} sm={12}>
           <Grid>
