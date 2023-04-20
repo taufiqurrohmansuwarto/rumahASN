@@ -3,8 +3,9 @@ import PageContainer from "@/components/PageContainer";
 import { detailPublikasiCasn } from "@/services/index";
 import { transformHref } from "@/utils/client-utils";
 import { useQuery } from "@tanstack/react-query";
-import { Card } from "antd";
+import { Breadcrumb, Card, Col, Row } from "antd";
 import Head from "next/head";
+import Link from "next/link";
 import { useRouter } from "next/router";
 
 function NilaiCASN() {
@@ -26,6 +27,20 @@ function NilaiCASN() {
         <title>Rumah ASN - {data?.judul}</title>
       </Head>
       <PageContainer
+        onBack={() => router.back()}
+        header={{
+          title: data?.judul,
+          breadcrumbRender: () => (
+            <Breadcrumb>
+              <Breadcrumb.Item>
+                <Link href="/feeds">
+                  <a>Beranda</a>
+                </Link>
+              </Breadcrumb.Item>
+              <Breadcrumb.Item>Detail Berita</Breadcrumb.Item>
+            </Breadcrumb>
+          ),
+        }}
         loading={isLoading}
         title={data?.judul}
         subTitle={
@@ -36,13 +51,26 @@ function NilaiCASN() {
           </>
         }
       >
-        <Card loading={isLoading}>
-          <div
-            dangerouslySetInnerHTML={{
-              __html: transformHref(data?.isi_konten),
-            }}
-          />
-        </Card>
+        <Row>
+          <Col md={18} xs={24}>
+            <Card loading={isLoading}>
+              <div
+                dangerouslySetInnerHTML={{
+                  __html: transformHref(data?.isi_konten),
+                }}
+              />
+              {data?.file_publikasi && (
+                <a
+                  href={`https://bkd.jatimprov.go.id/Rekrutmen-PPPK2022/downloadfile/${data?.file_publikasi}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Unduh File
+                </a>
+              )}
+            </Card>
+          </Col>
+        </Row>
       </PageContainer>
     </>
   );

@@ -1,10 +1,10 @@
 import { publikasiCasn } from "@/services/index";
-import { capitalizeWithoutPPPK } from "@/utils/client-utils";
+import { capitalizeWithoutPPPK, isNotThreeDaysAgo } from "@/utils/client-utils";
 import { useQuery } from "@tanstack/react-query";
-import { Badge, Card, List } from "antd";
+import { Badge, Card, List, Tag } from "antd";
 import { lowerCase } from "lodash";
 import Link from "next/link";
-import React, { useState } from "react";
+import { useState } from "react";
 
 function PublikasiCASN() {
   const [query, setQuery] = useState({
@@ -37,9 +37,21 @@ function PublikasiCASN() {
               <List.Item>
                 <List.Item.Meta
                   description={
-                    <Link href={`/web/seleksi/${item?.id}`}>
-                      {capitalizeWithoutPPPK(lowerCase(item?.judul))}
-                    </Link>
+                    <>
+                      <Link href={`/web/seleksi/${item?.id}`}>
+                        {capitalizeWithoutPPPK(lowerCase(item?.judul))}
+                      </Link>
+                      {isNotThreeDaysAgo(item?.create_at) && (
+                        <Tag
+                          style={{
+                            marginLeft: 8,
+                          }}
+                          color="red"
+                        >
+                          Baru
+                        </Tag>
+                      )}
+                    </>
                   }
                 />
               </List.Item>

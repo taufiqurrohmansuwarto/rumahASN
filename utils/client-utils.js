@@ -268,3 +268,8 @@ export const transformHref = (html) => {
   });
   return doc.body.innerHTML;
 };
+
+// create custom function is date is not three days ago and retrun true
+export const isNotThreeDaysAgo = (date) => {
+  return moment(date).isAfter(moment().subtract(5, "days"));
+};
