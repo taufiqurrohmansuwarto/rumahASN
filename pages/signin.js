@@ -4,6 +4,7 @@ import { Button, Col, Divider, Row, Space, Typography } from "antd";
 import { getProviders, signIn } from "next-auth/react";
 import Head from "next/head";
 import Image from "next/image";
+import Link from "next/link";
 import GoogleButton from "react-google-button";
 
 const SignIn = ({ providers }) => {
@@ -90,6 +91,16 @@ const SignIn = ({ providers }) => {
             >
               &#169; 2022 Desain & Pengembangan | BKD Provinsi Jawa Timur
             </Typography.Text>
+
+            <Link href="/changelog">
+              <Typography.Link
+                style={{
+                  fontSize: 12,
+                }}
+              >
+                Ver 1.0.0-rc 1
+              </Typography.Link>
+            </Link>
           </Space>
         </Col>
       </Row>
