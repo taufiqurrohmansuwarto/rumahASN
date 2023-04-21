@@ -15,6 +15,14 @@ const ChangeLog = () => {
         "Penambahan daftar Web BKD khusus untuk seleksi dan detail halaman seleksi",
       ],
     },
+    {
+      version: "1.0.0-rc 2",
+      date: "21-04-2023",
+      changes: [
+        "Menambahkan variabel SLA (Service Level Agreement) pada sub kategori",
+        "Menambahkan pagination di kategori dan sub kategori",
+      ],
+    },
   ];
 
   return (
