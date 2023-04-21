@@ -1,4 +1,5 @@
 const SubCategories = require("../models/sub-categories.model");
+const { raw } = require("objection");
 
 const index = async (req, res) => {
   try {
@@ -7,6 +8,7 @@ const index = async (req, res) => {
     const search = req.query.search || "";
 
     const result = await SubCategories.query()
+      .select("*", raw("EXTRACT(EPOCH FROM durasi / 60) as durasi"))
       .where((builder) => {
         if (search) {
           builder.where("name", "ilike", `%${search}%`);
@@ -41,13 +43,14 @@ const detail = async (req, res) => {
 
 const create = async (req, res) => {
   try {
-    const { name, category_id, description } = req.body;
+    const { name, category_id, description, durasi } = req.body;
     const { customId } = req?.user;
     const result = await SubCategories.query().insert({
       name,
       category_id,
       description,
       user_id: customId,
+      durasi: `${durasi} minutes`,
     });
     res.json(result);
   } catch (error) {
