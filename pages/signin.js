@@ -98,7 +98,7 @@ const SignIn = ({ providers }) => {
                   fontSize: 12,
                 }}
               >
-                Ver 1.0.0-rc 1
+                Ver 1.0.0-rc 2
               </Typography.Link>
             </Link>
           </Space>
