@@ -136,8 +136,8 @@ function Layout({ children, active }) {
               paddingBlockStart: 12,
             }}
           >
-            <div>© 2023 BKD Helpdesk</div>
-            <div>by BKD Provinsi Jawa Timur</div>
+            <div>© 2022 Rumah ASN</div>
+            <div>oleh BKD Provinsi Jawa Timur</div>
           </div>
         );
       }}

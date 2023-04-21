@@ -2,11 +2,26 @@ const Categories = require("../models/categories.model.js");
 
 module.exports.index = async (req, res) => {
   try {
+    const page = req.query.page || 1;
+    const limit = req.query.limit || 20;
+    const search = req.query.search || "";
+
     // ga usah dipaging aja ya
     const result = await Categories.query()
       .withGraphFetched("[createdBy(simpleSelect)]")
+      .page(parseInt(page) - 1, limit)
+      .where((builder) => {
+        if (search) {
+          builder.where("name", "ilike", `%${search}%`);
+        }
+      })
       .orderBy("id", "desc");
-    res.json(result);
+    res.json({
+      data: result.results,
+      total: result.total,
+      page,
+      limit,
+    });
   } catch (error) {
     console.log(error);
     res.status(400).json(error);

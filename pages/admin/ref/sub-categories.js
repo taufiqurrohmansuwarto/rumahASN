@@ -29,14 +29,18 @@ const {
   default: PageContainer,
 } = require("../../../src/components/PageContainer");
 
-const UpdateForm = ({ open, onCancel, data, update, loading }) => {
+const UpdateForm = ({ open, onCancel, data, update, loading, categories }) => {
   const [form] = Form.useForm();
 
   const handleOk = async () => {
     const value = await form.validateFields();
     const patchData = {
       id: data?.id,
-      data: { name: value.name, color: value.color },
+      data: {
+        name: value.name,
+        category_id: value.category_id,
+        description: value.description,
+      },
     };
     update(patchData);
   };
@@ -44,7 +48,8 @@ const UpdateForm = ({ open, onCancel, data, update, loading }) => {
   useEffect(() => {
     form.setFieldsValue({
       name: data?.name,
-      color: data?.color,
+      category_id: data?.category_id,
+      description: data?.description,
     });
   }, [form, data]);
 
@@ -57,12 +62,38 @@ const UpdateForm = ({ open, onCancel, data, update, loading }) => {
       open={open}
       onCancel={onCancel}
     >
-      <Form form={form}>
-        <Form.Item name="name" label="Nama">
+      <Form form={form} layout="vertical">
+        <Form.Item
+          name="name"
+          label="Nama"
+          rules={[
+            {
+              required: true,
+              message: "Nama Tidak boleh kosong",
+            },
+          ]}
+        >
           <Input />
         </Form.Item>
-        <Form.Item name="color" label="Color">
-          <Input />
+        <Form.Item
+          rules={[{ required: true, message: "Kategori tidak boleh kosong" }]}
+          name="category_id"
+          label="Kategori"
+        >
+          <Select showSearch optionFilterProp="name">
+            {categories.map((category) => (
+              <Select.Option
+                key={category?.id}
+                name={category?.name}
+                value={category.id}
+              >
+                {category.name} - {category?.satuan_kerja?.label}
+              </Select.Option>
+            ))}
+          </Select>
+        </Form.Item>
+        <Form.Item label="Deskripsi" name="description">
+          <Input.TextArea />
         </Form.Item>
       </Form>
     </Modal>
@@ -100,17 +131,17 @@ const CreateForm = ({ open, onCancel, categories }) => {
       open={open}
       onCancel={onCancel}
     >
-      <Form form={form}>
+      <Form form={form} layout="vertical">
         <Form.Item
           rules={[{ required: true, message: "Nama tidak boleh kosogn" }]}
           name="name"
-          label="Name"
+          label="Nama Sub Kategori"
         >
           <Input />
         </Form.Item>
 
         <Form.Item
-          rules={[{ required: true, message: "Warna tidak boleh kosong" }]}
+          rules={[{ required: true, message: "Kategori tidak boleh kosong" }]}
           name="category_id"
           label="Kategori"
         >
@@ -135,8 +166,19 @@ const CreateForm = ({ open, onCancel, categories }) => {
 };
 
 const SubCategories = () => {
-  const { data, isLoading } = useQuery(["sub-categories"], () =>
-    subCategories()
+  const [query, setQuery] = useState({
+    page: 1,
+    limit: 20,
+    search: "",
+  });
+
+  const { data, isLoading } = useQuery(
+    ["sub-categories", query],
+    () => subCategories(query),
+    {
+      enabled: !!query,
+      keepPreviousData: true,
+    }
   );
 
   const { data: dataCategories, isLoading: isLoadingCategory } = useQuery(
@@ -236,6 +278,15 @@ const SubCategories = () => {
     },
   ];
 
+  const handleSearch = (e) => {
+    setQuery({
+      ...query,
+      search: e,
+      page: 1,
+      limit: 10,
+    });
+  };
+
   return (
     <PageContainer title="Sub Kategori Pertanyaan">
       <Stack>
@@ -255,9 +306,29 @@ const SubCategories = () => {
             Tambah
           </Button>
           <Table
+            title={() => (
+              <Input.Search
+                onSearch={handleSearch}
+                placeholder="Cari Sub Kategori"
+              />
+            )}
             columns={columns}
-            pagination={false}
-            dataSource={data}
+            size="small"
+            pagination={{
+              pageSize: query.limit,
+              total: data?.total,
+              showTotal: (total) => `Total ${total} item`,
+              position: ["topRight", "bottomRight"],
+              current: query.page,
+              onChange: (page, pageSize) => {
+                setQuery({
+                  ...query,
+                  page,
+                  limit: pageSize,
+                });
+              },
+            }}
+            dataSource={data?.data}
             rowKey={(row) => row?.id}
             loading={isLoading}
           />
@@ -267,6 +338,7 @@ const SubCategories = () => {
             onCancel={cancelCreate}
           />
           <UpdateForm
+            categories={dataCategories}
             open={openUpdate}
             data={selectedData}
             update={update}

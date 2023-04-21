@@ -856,7 +856,7 @@ const changeStatus = async (req, res) => {
   try {
     const { id } = req?.query;
     const { customId: user_id, current_role: role } = req?.user;
-    const { status } = req?.body;
+    const { status, completed_at, start_work_at } = req?.body;
 
     // check currentTIcket
     const currentTicket = await Ticket.query().findById(id);
@@ -868,44 +868,38 @@ const changeStatus = async (req, res) => {
     }
 
     if (role === "admin" || (role === "agent" && currentAgent === user_id)) {
-      let data = {};
+      // rubah ini karena harus bisa spesifik dan bisa diubah oleh admin / agent yang bertugas
+      // dengan begini completed_at dan start_work_at bisa dijadikan variable
+      const data = {
+        status_code: status,
+        completed_at,
+        start_work_at,
+      };
 
-      if (status === "DIKERJAKAN") {
-        data = {
-          status_code: status,
-          start_work_at: new Date(),
-        };
-      } else if (status === "SELESAI") {
-        data = {
-          status_code: status,
-          completed_at: new Date(),
-        };
+      if (currentTicket?.status_code === status) {
+        res.json({ message: "success" });
       } else {
-        data = {
-          status_code: status,
-        };
+        await Ticket.query().patch(data).where({ id });
+
+        await insertTicketHistory(
+          id,
+          user_id,
+          "status_changed",
+          `merubah status tiket dari ${currentTicket?.status_code} menjadi ${status}`
+        );
+
+        await ticketNotification({
+          ticketId: id,
+          content: `merubah status tiket dengan judul "${currentTicket?.title}" dari "${currentTicket?.status_code}" menjadi "${status}"`,
+          type: "status_changed",
+          currentUserId: user_id,
+          title: "Status Tiket Berubah",
+        });
+
+        res
+          .status(200)
+          .json({ code: 200, message: "Status Changed succesfully" });
       }
-
-      await Ticket.query().patch(data).where({ id });
-
-      await insertTicketHistory(
-        id,
-        user_id,
-        "status_changed",
-        `merubah status tiket dari ${currentTicket?.status_code} menjadi ${status}`
-      );
-
-      await ticketNotification({
-        ticketId: id,
-        content: `merubah status tiket dengan judul "${currentTicket?.title}" dari "${currentTicket?.status_code}" menjadi "${status}"`,
-        type: "status_changed",
-        currentUserId: user_id,
-        title: "Status Tiket Berubah",
-      });
-
-      res
-        .status(200)
-        .json({ code: 200, message: "Status Changed succesfully" });
     } else {
       res
         .status(403)

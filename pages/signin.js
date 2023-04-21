@@ -43,7 +43,7 @@ const SignIn = ({ providers }) => {
             </Col>
             <Col xs={24}>
               <Divider plain>
-                atau punya akun Pegawai Provinsi Jawa Timur?
+                atau akun pegawai Pemerintah Provinsi Jawa Timur
               </Divider>
             </Col>
             <Col xs={24}>
