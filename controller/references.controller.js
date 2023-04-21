@@ -2,6 +2,7 @@ const Users = require("@/models/users.model");
 const Categories = require("@/models/sub-categories.model");
 const Priorities = require("@/models/priorities.model");
 const Status = require("@/models/status.model");
+const { raw } = require("objection");
 
 const agents = async (req, res) => {
   try {
@@ -31,7 +32,9 @@ const agents = async (req, res) => {
 
 const categories = async (req, res) => {
   try {
-    const result = await Categories.query().withGraphFetched("category");
+    const result = await Categories.query()
+      .select("*", raw("EXTRACT (EPOCH FROM durasi/60) as durasi"))
+      .withGraphFetched("category");
     res.json(result);
   } catch (error) {
     console.log(error);

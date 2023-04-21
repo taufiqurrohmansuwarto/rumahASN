@@ -1,4 +1,4 @@
-const { Model } = require("objection");
+const { Model, raw } = require("objection");
 const knex = require("../db");
 Model.knex(knex);
 
@@ -9,6 +9,14 @@ class SubCategories extends Model {
 
   static get tableName() {
     return "sub_categories";
+  }
+
+  static get modifiers() {
+    return {
+      custom(builder) {
+        builder.select("*", raw("EXTRACT (EPOCH FROM durasi/60) as durasi"));
+      },
+    };
   }
 
   static get relationMappings() {

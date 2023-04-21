@@ -19,6 +19,7 @@ const {
   serializeData,
 } = require("@/utils/parsing");
 const { uniqBy } = require("lodash");
+const { sendReminder } = require("./mailer.controller");
 
 const publishedTickets = async (req, res) => {
   try {
@@ -87,7 +88,7 @@ const detailPublishTickets = async (req, res) => {
       .where({ id })
       .select("*", Ticket.relatedQuery("comments").count().as("comments_count"))
       .withGraphFetched(
-        "[customer(simpleSelect), agent(simpleSelect), admin(simpleSelect), sub_category.[category]]"
+        "[customer(simpleSelect), agent(simpleSelect), admin(simpleSelect), sub_category(custom).[category]]"
       )
       .first();
 
@@ -960,7 +961,46 @@ const pinnedTickets = async (req, res) => {
   }
 };
 
+const ticketReminders = async (req, res) => {
+  try {
+    const { id } = req?.query;
+    const { customId: userId, current_role } = req?.user;
+    const currentTicket = await Ticket.query()
+      .findById(id)
+      .withGraphFetched("[customer, agent]");
+
+    if (!currentTicket) {
+      res.status(404).json({ message: "Ticket not found" });
+    } else {
+      if (currentTicket?.asignee === userId || current_role === "admin") {
+        const words = `Yth. ${currentTicket?.customer?.username},
+                       Ini adalah pengingat singkat terkait tiket dukungan "${currentTicket?.title}". Kami menunggu respons Anda untuk melanjutkan penyelesaian masalah.
+                       Mohon balas segera dengan informasi yang diminta. Jika tidak ada respons, kami mungkin harus mengubah status tiket.
+                       Terima kasih,
+                       Rumah ASN - BKD Provinsi Jawa Timur`;
+        await sendReminder(words, currentTicket?.customer?.email);
+        await Ticket.query().patch({
+          total_reminders: currentTicket?.total_reminders + 1,
+        });
+        res.json({ message: "Reminder sent successfully" });
+      } else if (currentTicket?.total_reminders > 3) {
+        res.status(403).json({
+          message: "You have reached the maximum number of reminders",
+        });
+      } else {
+        res
+          .status(403)
+          .json({ message: "You don't have permission to do this action" });
+      }
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Something went wrong" });
+  }
+};
+
 module.exports = {
+  ticketReminders,
   pinnedTickets,
   changeFeedback,
   changePriorityAndSubCategory,

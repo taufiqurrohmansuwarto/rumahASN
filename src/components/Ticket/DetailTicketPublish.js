@@ -55,6 +55,7 @@ import Unpublish from "../TicketProps/UnPublish";
 import UnlockConversation from "../TicketProps/UnlockConversation";
 import Unsubscribe from "../TicketProps/Unsubscribe";
 import NewTicket from "./NewTicket";
+import ReminderTicket from "../TicketProps/ReminderTicket";
 
 const ActionWrapper = ({ attributes, name, ...props }) => {
   return (
@@ -410,6 +411,7 @@ const SideRight = ({ item }) => {
           ) : (
             <Pin id={item?.id} />
           )}
+          <ReminderTicket id={item?.id} />
           <RemoveTicket />
         </Col>
       </RestrictedContent>
