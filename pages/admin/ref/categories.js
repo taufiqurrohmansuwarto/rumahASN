@@ -40,21 +40,24 @@ const UpdateForm = ({ open, onCancel, data }) => {
 
   const queryClient = useQueryClient();
 
-  const { mutate: update } = useMutation((data) => updateCategory(data), {
-    onSuccess: () => {
-      queryClient.invalidateQueries(["categories"]);
-      message.success("Berhasil mengubah data");
-      onCancel();
-    },
-    onSettled: () => {
-      queryClient.invalidateQueries(["categories"]);
-      onCancel();
-    },
-    onError: (error) => {
-      message.error("Gagal mengubah data");
-      console.log(error);
-    },
-  });
+  const { mutate: update, isLoading } = useMutation(
+    (data) => updateCategory(data),
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries(["categories"]);
+        message.success("Berhasil mengubah data");
+        onCancel();
+      },
+      onSettled: () => {
+        queryClient.invalidateQueries(["categories"]);
+        onCancel();
+      },
+      onError: (error) => {
+        message.error("Gagal mengubah data");
+        console.log(error);
+      },
+    }
+  );
 
   const handleOk = async () => {
     try {
@@ -85,6 +88,7 @@ const UpdateForm = ({ open, onCancel, data }) => {
   return (
     <Modal
       onOk={handleOk}
+      confirmLoading={isLoading}
       width={700}
       title="Update Kategori"
       open={open}
@@ -231,14 +235,17 @@ const Categories = () => {
   };
 
   const queryClient = useQueryClient();
-  const { mutate: hapus } = useMutation((id) => deleteCategory(id), {
-    onSettled: () => {
-      queryClient.invalidateQueries(["categories"]);
-    },
-    onError: (error) => {
-      console.error(error);
-    },
-  });
+  const { mutate: hapus, isLoading: isLoadingHapus } = useMutation(
+    (id) => deleteCategory(id),
+    {
+      onSettled: () => {
+        queryClient.invalidateQueries(["categories"]);
+      },
+      onError: (error) => {
+        console.error(error);
+      },
+    }
+  );
 
   const handleDelete = (id) => {
     hapus(id);
@@ -309,15 +316,14 @@ const Categories = () => {
   return (
     <PageContainer title="Kategori Pertanyaan">
       <Stack>
-        <Alert
-          message="Kategori"
-          showIcon
-          type="info"
-          description='Kategori adalah kelompok umum yang mencakup berbagai topik atau isu terkait dengan bidang kepegawaian. Kategori membantu memisahkan pertanyaan atau masalah ke dalam area spesifik yang lebih mudah dikelola. Contoh, kategori adalah "Seleksi CASN" yang mencakup semua pertanyaan dan masalah yang terkait dengan seleksi Calon Aparatur Sipil Negara.'
-        />
-        <Card>
+        <Card title="Kamus Kategori">
+          <Alert
+            showIcon
+            type="info"
+            description='Kategori adalah kelompok umum yang mencakup berbagai topik atau isu terkait dengan bidang kepegawaian. Kategori membantu memisahkan pertanyaan atau masalah ke dalam area spesifik yang lebih mudah dikelola. Contoh, kategori adalah "Seleksi CASN" yang mencakup semua pertanyaan dan masalah yang terkait dengan seleksi Calon Aparatur Sipil Negara.'
+          />
           <Button
-            style={{ marginBottom: 16 }}
+            style={{ marginBottom: 16, marginTop: 16 }}
             icon={<PlusOutlined />}
             type="primary"
             onClick={openCreateModal}
@@ -337,7 +343,6 @@ const Categories = () => {
                 setQuery({ ...query, page, limit: pageSize });
               },
             }}
-            size="small"
             rowKey={(row) => row?.id}
             dataSource={data?.data}
             loading={isLoading}
@@ -357,7 +362,9 @@ const Categories = () => {
   );
 };
 
-Categories.getLayout = function getLayout(page) {};
+Categories.getLayout = function getLayout(page) {
+  return <AdminLayout>{page}</AdminLayout>;
+};
 
 Categories.Auth = {
   action: "manage",

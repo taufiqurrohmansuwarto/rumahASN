@@ -7,6 +7,7 @@ import {
   Divider,
   Form,
   Input,
+  InputNumber,
   Modal,
   Popconfirm,
   Select,
@@ -40,6 +41,7 @@ const UpdateForm = ({ open, onCancel, data, update, loading, categories }) => {
         name: value.name,
         category_id: value.category_id,
         description: value.description,
+        durasi: value.durasi,
       },
     };
     update(patchData);
@@ -50,6 +52,7 @@ const UpdateForm = ({ open, onCancel, data, update, loading, categories }) => {
       name: data?.name,
       category_id: data?.category_id,
       description: data?.description,
+      durasi: data?.durasi,
     });
   }, [form, data]);
 
@@ -57,7 +60,8 @@ const UpdateForm = ({ open, onCancel, data, update, loading, categories }) => {
     <Modal
       centered
       onOk={handleOk}
-      title="Update data"
+      width={800}
+      title="Update Sub Kategori"
       confirmLoading={loading}
       open={open}
       onCancel={onCancel}
@@ -74,6 +78,14 @@ const UpdateForm = ({ open, onCancel, data, update, loading, categories }) => {
           ]}
         >
           <Input />
+        </Form.Item>
+        <Form.Item
+          label="Durasi Penyelesaian (Dalam Menit)"
+          name="durasi"
+          rules={[{ required: true, message: "Durasi tidak boleh kosong" }]}
+          initialValue={0}
+        >
+          <InputNumber />
         </Form.Item>
         <Form.Item
           rules={[{ required: true, message: "Kategori tidak boleh kosong" }]}
@@ -105,12 +117,20 @@ const CreateForm = ({ open, onCancel, categories }) => {
 
   const queryClient = useQueryClient();
 
-  const { mutate: create } = useMutation((data) => createSubCategory(data), {
-    onSettled: () => {
-      queryClient.invalidateQueries(["sub-categories"]);
-      onCancel();
-    },
-  });
+  const { mutate: create, isLoading } = useMutation(
+    (data) => createSubCategory(data),
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries(["sub-categories"]);
+        message.success("Berhasil membuat sub kategori");
+        form.resetFields();
+        onCancel();
+      },
+      onError: (error) => {
+        message.error(error?.response?.data?.message);
+      },
+    }
+  );
 
   const handleOk = async () => {
     try {
@@ -124,6 +144,7 @@ const CreateForm = ({ open, onCancel, categories }) => {
   return (
     <Modal
       onOk={handleOk}
+      confirmLoading={isLoading}
       centered
       title="Buat Sub Kategori"
       destroyOnClose
@@ -133,13 +154,20 @@ const CreateForm = ({ open, onCancel, categories }) => {
     >
       <Form form={form} layout="vertical">
         <Form.Item
-          rules={[{ required: true, message: "Nama tidak boleh kosogn" }]}
+          rules={[{ required: true, message: "Nama tidak boleh kosong" }]}
           name="name"
           label="Nama Sub Kategori"
         >
           <Input />
         </Form.Item>
-
+        <Form.Item
+          label="Durasi Penyelesaian (Dalam Menit)"
+          name="durasi"
+          rules={[{ required: true, message: "Durasi tidak boleh kosong" }]}
+          initialValue={0}
+        >
+          <InputNumber />
+        </Form.Item>
         <Form.Item
           rules={[{ required: true, message: "Kategori tidak boleh kosong" }]}
           name="category_id"
@@ -183,7 +211,10 @@ const SubCategories = () => {
 
   const { data: dataCategories, isLoading: isLoadingCategory } = useQuery(
     ["categories"],
-    () => getCategories()
+    () => getCategories({ limit: -1 }),
+    {
+      refetchOnWindowFocus: false,
+    }
   );
 
   // wow fucking amazing
@@ -237,7 +268,7 @@ const SubCategories = () => {
 
   const columns = [
     {
-      title: "Name",
+      title: "Nama",
       dataIndex: "name",
       key: "name",
     },
@@ -252,11 +283,10 @@ const SubCategories = () => {
       render: (data) => data.category.satuan_kerja.label,
     },
     {
-      title: "Di buat oleh",
-      key: "created_by",
-      render: (text, record) => {
-        return record.createdBy?.username;
-      },
+      title: "Durasi Penyelesaian",
+      key: "durasi",
+      render: (data) =>
+        data?.durasi === null ? "0 Menit" : `${data?.durasi} Menit`,
     },
     {
       title: "Aksi",
@@ -290,18 +320,17 @@ const SubCategories = () => {
   return (
     <PageContainer title="Sub Kategori Pertanyaan">
       <Stack>
-        <Alert
-          type="info"
-          message="Sub Kategori"
-          showIcon
-          description={`Subkategori adalah kelompok lebih spesifik yang mencakup topik atau isu yang berhubungan dengan kategori utama. Subkategori membantu tim helpdesk untuk lebih fokus pada pertanyaan atau masalah yang lebih spesifik dan relevan dengan topik tertentu dalam kategori yang lebih luas. Dalam contoh yang Anda berikan, subkategori mencakup "Seleksi PPPK tahun 2022" dan "Seleksi CPNS 2023", yang merupakan bagian dari kategori "Seleksi CASN" dan mencakup pertanyaan yang lebih spesifik tentang seleksi Pegawai Pemerintah dengan Perjanjian Kerja (PPPK) tahun 2022 dan seleksi Calon Pegawai Negeri Sipil (CPNS) tahun 2023.`}
-        />
-        <Card loading={isLoading || isLoadingCategory}>
+        <Card title="Sub Kategori" loading={isLoading || isLoadingCategory}>
+          <Alert
+            type="info"
+            showIcon
+            description={`Subkategori adalah kelompok lebih spesifik yang mencakup topik atau isu yang berhubungan dengan kategori utama. Subkategori membantu tim helpdesk untuk lebih fokus pada pertanyaan atau masalah yang lebih spesifik dan relevan dengan topik tertentu dalam kategori yang lebih luas. Sebagai contoh, subkategori mencakup "Seleksi PPPK tahun 2022" dan "Seleksi CPNS 2023", yang merupakan bagian dari kategori "Seleksi CASN".`}
+          />
           <Button
             type="primary"
             icon={<FileAddOutlined />}
             onClick={openCreateModal}
-            style={{ marginBottom: 16 }}
+            style={{ marginBottom: 16, marginTop: 16 }}
           >
             Tambah
           </Button>
@@ -313,7 +342,6 @@ const SubCategories = () => {
               />
             )}
             columns={columns}
-            size="small"
             pagination={{
               pageSize: query.limit,
               total: data?.total,

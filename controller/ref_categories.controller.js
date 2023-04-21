@@ -7,21 +7,30 @@ module.exports.index = async (req, res) => {
     const search = req.query.search || "";
 
     // ga usah dipaging aja ya
-    const result = await Categories.query()
-      .withGraphFetched("[createdBy(simpleSelect)]")
-      .page(parseInt(page) - 1, limit)
-      .where((builder) => {
-        if (search) {
-          builder.where("name", "ilike", `%${search}%`);
-        }
-      })
-      .orderBy("id", "desc");
-    res.json({
-      data: result.results,
-      total: result.total,
-      page,
-      limit,
-    });
+    if (limit === -1 || limit === "-1") {
+      const result = await Categories.query()
+        .withGraphFetched("[createdBy(simpleSelect)]")
+        .orderBy("id", "desc");
+
+      res.json(result);
+    } else {
+      const result = await Categories.query()
+        .withGraphFetched("[createdBy(simpleSelect)]")
+        .page(parseInt(page) - 1, limit)
+        .where((builder) => {
+          if (search) {
+            builder.where("name", "ilike", `%${search}%`);
+          }
+        })
+        .orderBy("id", "desc");
+
+      res.json({
+        data: result.results,
+        total: result.total,
+        page,
+        limit,
+      });
+    }
   } catch (error) {
     console.log(error);
     res.status(400).json(error);

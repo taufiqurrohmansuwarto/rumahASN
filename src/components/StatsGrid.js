@@ -1,11 +1,9 @@
 import { createStyles, Group, Paper, SimpleGrid, Text } from "@mantine/core";
 import {
-  IconUserPlus,
+  IconCoin,
   IconDiscount2,
   IconReceipt2,
-  IconCoin,
-  IconArrowUpRight,
-  IconArrowDownRight,
+  IconUserPlus,
 } from "@tabler/icons";
 import { listDataDashboard } from "../../utils";
 
@@ -45,11 +43,7 @@ const icons = {
 export function StatsGrid({ data, role = "agent" }) {
   const { classes } = useStyles();
   const stats = data.map((stat) => {
-    // const Icon = icons[stat.icon];
     const Icon = listDataDashboard.find((item) => item.name === stat.name).icon;
-    const color = listDataDashboard.find(
-      (item) => item.name === stat.name
-    ).color;
 
     return (
       <Paper withBorder p="md" radius="md" key={stat.title}>
