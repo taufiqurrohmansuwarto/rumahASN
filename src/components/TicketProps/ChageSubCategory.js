@@ -1,44 +1,58 @@
 import { SettingOutlined } from "@ant-design/icons";
 import { useState } from "react";
-import { Modal, Form, Select, Radio,message } from "antd";
+import { Modal, Form, Select, Radio, message } from "antd";
 import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
-import { refCategories, refPriorities,changePrioritySubcategory } from "@/services/index";
+import {
+  refCategories,
+  refPriorities,
+  changePrioritySubcategory,
+} from "@/services/index";
 
-const SubCategoryModal = ({ open, onCancel, categories, priorities, ticketId, priorityCode, subCategoryId }) => {
-  
+const SubCategoryModal = ({
+  open,
+  onCancel,
+  categories,
+  priorities,
+  ticketId,
+  priorityCode,
+  subCategoryId,
+}) => {
   const [form] = Form.useForm();
 
   const queryClient = useQueryClient();
 
-  const {mutate: updateCategory, isLoading} = useMutation(data => changePrioritySubcategory(data), {
-    onSuccess: () => {
-      message.success('Berhasil merubah kategori dan status')
-       queryClient.invalidateQueries(['publish-ticket', ticketId])
-       onCancel()
-    },
-    onError : () => {
-      message.error('Gagal')
-      onCancel()
+  const { mutate: updateCategory, isLoading } = useMutation(
+    (data) => changePrioritySubcategory(data),
+    {
+      onSuccess: () => {
+        message.success("Berhasil merubah kategori dan status");
+        queryClient.invalidateQueries(["publish-ticket", ticketId]);
+        onCancel();
+      },
+      onError: () => {
+        message.error("Gagal");
+        onCancel();
+      },
     }
-  })
+  );
 
-  const handleSubmit = async() => {
-    const {sub_category_id, priority_code} = await form.validateFields();
+  const handleSubmit = async () => {
+    const { sub_category_id, priority_code } = await form.validateFields();
     const data = {
-      id : ticketId,
-      data : {
+      id: ticketId,
+      data: {
         sub_category_id,
-        priority_code
-      }
-    }
-    if(!isLoading){
-      updateCategory(data)
+        priority_code,
+      },
+    };
+    if (!isLoading) {
+      updateCategory(data);
     }
   };
 
   return (
     <Modal
-      title="Sub Kategori dan Prioritas"
+      title="Ubah Kategori dan Prioritas"
       centered
       width={800}
       destroyOnClose
@@ -47,10 +61,13 @@ const SubCategoryModal = ({ open, onCancel, categories, priorities, ticketId, pr
       onOk={handleSubmit}
       confirmLoading={isLoading}
     >
-      <Form form={form} initialValues={{
-        sub_category_id : subCategoryId,
-        priority_code: priorityCode
-      }}>
+      <Form
+        form={form}
+        initialValues={{
+          sub_category_id: subCategoryId,
+          priority_code: priorityCode,
+        }}
+      >
         <Form.Item name="sub_category_id">
           <Select showSearch optionFilterProp="name">
             {categories?.map((category) => {
@@ -60,7 +77,10 @@ const SubCategoryModal = ({ open, onCancel, categories, priorities, ticketId, pr
                   name={category?.name}
                   value={category.id}
                 >
-                  {category.name}
+                  <span>
+                    {category?.name} -{" "}
+                    {category?.durasi === null ? 0 : category?.durasi} Menit
+                  </span>
                 </Select.Option>
               );
             })}

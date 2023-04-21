@@ -432,3 +432,7 @@ export const pencarianLayananSIASN = ({ jenis_layanan, nip }) => {
     .get(`/layanan/siasn?jenis_layanan=${jenis_layanan}&nip=${nip}`)
     .then((res) => res?.data);
 };
+
+export const ticketReminder = (id) => {
+  return api.post(`/tickets/${id}/reminders`).then((res) => res?.data);
+};

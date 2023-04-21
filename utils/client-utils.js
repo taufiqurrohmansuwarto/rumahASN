@@ -184,6 +184,17 @@ export const definitions = {
         requiredRoles: ["agent"],
       },
     },
+    "reminder-ticket": {
+      roles: noUser,
+      displayName: "Reminder Ticket",
+      description: "To reminder ticket",
+      attributeCheck: {
+        checkFunction: (attributes) => {
+          return attributes?.user?.id === attributes?.ticket?.assignee;
+        },
+        requiredRoles: ["agent"],
+      },
+    },
     "change-status": {
       roles: noUser,
       displayName: "Change Status",

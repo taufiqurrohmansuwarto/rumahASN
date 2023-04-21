@@ -9,6 +9,25 @@ const auth = {
   pass,
 };
 
+const sendReminder = async (message, to) => {
+  try {
+    // send message using nodemailer
+    const transporter = nodemailer.createTransport({
+      service: "gmail",
+      auth,
+    });
+
+    await transporter.sendMail({
+      from: user,
+      to,
+      subject: "Reminder",
+      text: message,
+    });
+  } catch (error) {
+    console.log(error);
+  }
+};
+
 const sendMail = async (userId, message, subject) => {
   const currentUser = await User.query().findById(userId);
 
@@ -28,4 +47,5 @@ const sendMail = async (userId, message, subject) => {
 
 module.exports = {
   sendMail,
+  sendReminder,
 };
