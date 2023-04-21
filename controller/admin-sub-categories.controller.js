@@ -2,10 +2,26 @@ const SubCategories = require("../models/sub-categories.model");
 
 const index = async (req, res) => {
   try {
+    const page = req.query.page || 1;
+    const limit = req.query.limit || 20;
+    const search = req.query.search || "";
+
     const result = await SubCategories.query()
+      .where((builder) => {
+        if (search) {
+          builder.where("name", "ilike", `%${search}%`);
+        }
+      })
       .withGraphFetched("[category, created_by]")
+      .page(parseInt(page) - 1, parseInt(limit))
       .orderBy("created_at", "desc");
-    res.json(result);
+
+    res.json({
+      data: result.results,
+      total: result.total,
+      page,
+      limit,
+    });
   } catch (error) {
     console.log(error);
     res.status(400).json({ code: 400, message: "Internal Server Errror" });

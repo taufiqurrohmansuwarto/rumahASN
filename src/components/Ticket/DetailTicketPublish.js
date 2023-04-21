@@ -23,16 +23,17 @@ import {
   Divider,
   Dropdown,
   Menu,
-  message,
   Row,
   Skeleton,
   Space,
   Tag,
   Tooltip,
   Typography,
+  message,
 } from "antd";
+import Head from "next/head";
 import { useRouter } from "next/router";
-import { useRef, useState } from "react";
+import { useState } from "react";
 import RestrictedContent from "../RestrictedContent";
 import SimpleEmojiPicker from "../SimpleEmojiPicker";
 import ChangeSubCategory from "../TicketProps/ChageSubCategory";
@@ -49,12 +50,11 @@ import ReactionsEmoji from "../TicketProps/ReactionsEmoji";
 import RemoveTicket from "../TicketProps/Remove";
 import Subscribe from "../TicketProps/Subscribe";
 import TimelineTicket from "../TicketProps/TimelineTicket";
-import UnlockConversation from "../TicketProps/UnlockConversation";
 import UnpinTicket from "../TicketProps/UnPin";
 import Unpublish from "../TicketProps/UnPublish";
+import UnlockConversation from "../TicketProps/UnlockConversation";
 import Unsubscribe from "../TicketProps/Unsubscribe";
 import NewTicket from "./NewTicket";
-import Head from "next/head";
 
 const ActionWrapper = ({ attributes, name, ...props }) => {
   return (
@@ -322,7 +322,11 @@ const SideRight = ({ item }) => {
               name="change-status"
               attributes={{ ticket: item }}
             >
-              <ChangeStatus statusId={item?.status_code} ticketId={item?.id} />
+              <ChangeStatus
+                ticket={item}
+                statusId={item?.status_code}
+                ticketId={item?.id}
+              />
             </RestrictedContent>
           </Space>
           <Tag color={setColorStatus(item?.status_code)}>

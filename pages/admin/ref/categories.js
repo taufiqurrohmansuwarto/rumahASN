@@ -41,11 +41,17 @@ const UpdateForm = ({ open, onCancel, data }) => {
   const queryClient = useQueryClient();
 
   const { mutate: update } = useMutation((data) => updateCategory(data), {
+    onSuccess: () => {
+      queryClient.invalidateQueries(["categories"]);
+      message.success("Berhasil mengubah data");
+      onCancel();
+    },
     onSettled: () => {
       queryClient.invalidateQueries(["categories"]);
       onCancel();
     },
     onError: (error) => {
+      message.error("Gagal mengubah data");
       console.log(error);
     },
   });
@@ -196,9 +202,22 @@ const FormTree = () => {
 };
 
 const Categories = () => {
-  const { data, isLoading } = useQuery(["categories"], () => getCategories());
   const [createModal, setCreateModal] = useState(false);
   const [updateModal, setUpdateModal] = useState(false);
+  const [query, setQuery] = useState({
+    page: 1,
+    limit: 20,
+    search: "",
+  });
+
+  const { data, isLoading } = useQuery(
+    ["categories", query],
+    () => getCategories(query),
+    {
+      keepPreviousData: true,
+      enabled: !!query,
+    }
+  );
 
   const openCreateModal = () => setCreateModal(true);
   const handleCancelCreateModal = () => setCreateModal(false);
@@ -279,6 +298,14 @@ const Categories = () => {
     },
   ];
 
+  const handleSearch = (value) => {
+    setQuery({
+      ...query,
+      search: value,
+      page: 1,
+    });
+  };
+
   return (
     <PageContainer title="Kategori Pertanyaan">
       <Stack>
@@ -298,10 +325,21 @@ const Categories = () => {
             Tambah
           </Button>
           <Table
+            title={() => <Input.Search onSearch={handleSearch} />}
             columns={columns}
-            pagination={false}
+            pagination={{
+              current: query?.page,
+              pageSize: query?.limit,
+              total: data?.total,
+              position: ["bottomRight", "topRight"],
+              showTotal: (total) => `Total ${total} item`,
+              onChange: (page, pageSize) => {
+                setQuery({ ...query, page, limit: pageSize });
+              },
+            }}
+            size="small"
             rowKey={(row) => row?.id}
-            dataSource={data}
+            dataSource={data?.data}
             loading={isLoading}
           />
           <CreateForm
@@ -319,9 +357,7 @@ const Categories = () => {
   );
 };
 
-Categories.getLayout = function getLayout(page) {
-  return <AdminLayout>{page}</AdminLayout>;
-};
+Categories.getLayout = function getLayout(page) {};
 
 Categories.Auth = {
   action: "manage",

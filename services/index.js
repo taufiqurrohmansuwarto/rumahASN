@@ -87,13 +87,22 @@ export const deleteCategory = async (id) => {
   return await api.delete(`/ref/categories/${id}`).then((res) => res.data);
 };
 
-export const getCategories = async () => {
-  return await api.get("/ref/categories").then((res) => res.data);
+export const getCategories = async (query) => {
+  const qs = queryString.stringify(query, {
+    skipNull: true,
+    skipEmptyString: true,
+  });
+  return await api.get(`/ref/categories?${qs}`).then((res) => res.data);
 };
 
 // subcategories
-export const subCategories = async () => {
-  return await api.get("/ref/sub-categories").then((res) => res.data);
+export const subCategories = async (query) => {
+  const qs = queryString.stringify(query, {
+    skipNull: true,
+    skipEmptyString: true,
+  });
+
+  return await api.get(`/ref/sub-categories?${qs}`).then((res) => res.data);
 };
 
 export const createSubCategory = async (data) => {
