@@ -63,4 +63,28 @@ buat notifikasi ke user ketika
     todo
 
     notifications
-    
+
+
+
+Kebijakan Privasi
+Kami, sebagai pengembang Aplikasi Rumah ASN, menghargai privasi pengguna dan berkomitmen untuk menjaga kerahasiaan informasi pribadi yang diberikan oleh pengguna dalam penggunaan aplikasi ini. Oleh karena itu, kami telah mengembangkan Kebijakan Privasi sebagai panduan untuk mengumpulkan, menggunakan, dan melindungi informasi pribadi yang diberikan oleh pengguna.
+
+4.1. Informasi yang Dikumpulkan
+
+Aplikasi Rumah ASN hanya mengumpulkan informasi pribadi yang diberikan secara sukarela oleh pengguna saat mendaftar atau menggunakan aplikasi ini. Informasi yang dikumpulkan meliputi nama, alamat email, nomor PTTPK (jika berlaku), dan informasi yang diperlukan untuk menyelesaikan permintaan pengguna dalam layanan helpdesk kepegawaian.
+
+4.2. Penggunaan Informasi
+
+Informasi pribadi yang dikumpulkan oleh Aplikasi Rumah ASN hanya digunakan untuk tujuan pengelolaan dan penyediaan layanan helpdesk kepegawaian. Kami tidak akan membagikan informasi pribadi pengguna dengan pihak ketiga tanpa persetujuan pengguna, kecuali diwajibkan oleh hukum atau oleh otoritas yang berwenang.
+
+4.3. Keamanan Informasi
+
+Kami memastikan bahwa informasi pribadi yang diberikan oleh pengguna di Aplikasi Rumah ASN aman dan terlindungi. Kami menerapkan tindakan pengamanan teknis dan organisasional yang sesuai untuk melindungi informasi pribadi dari akses yang tidak sah, penyalahgunaan, perubahan, dan penghapusan.
+
+4.4. Perubahan Kebijakan Privasi
+
+Kami dapat mengubah kebijakan privasi ini dari waktu ke waktu untuk memenuhi kebutuhan pengguna dan perubahan peraturan yang berlaku. Setiap perubahan yang dilakukan akan diumumkan melalui aplikasi ini. Pengguna disarankan untuk membaca Kebijakan Privasi secara teratur untuk mengetahui informasi terbaru tentang bagaimana informasi pribadi mereka dikelola.
+
+4.5. Kontak
+
+Jika pengguna memiliki pertanyaan atau kekhawatiran terkait dengan Kebijakan Privasi ini atau pengelolaan informasi pribadi mereka, silakan hubungi kami melalui alamat email yang tercantum di aplikasi. Kami akan berusaha untuk menanggapi setiap pertanyaan atau kekhawatiran secepat mungkin.
