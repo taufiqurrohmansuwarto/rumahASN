@@ -92,15 +92,26 @@ const SignIn = ({ providers }) => {
               &#169; 2022 Desain & Pengembangan | BKD Provinsi Jawa Timur
             </Typography.Text>
 
-            <Link href="/changelog">
-              <Typography.Link
-                style={{
-                  fontSize: 12,
-                }}
-              >
-                Ver 1.0.0-rc 2
-              </Typography.Link>
-            </Link>
+            <Space>
+              <Link href="/changelog">
+                <Typography.Link
+                  style={{
+                    fontSize: 12,
+                  }}
+                >
+                  Ver 1.0.0-rc 2
+                </Typography.Link>
+              </Link>
+              <Link href="/privacy">
+                <Typography.Link
+                  style={{
+                    fontSize: 12,
+                  }}
+                >
+                  Kebijakan dan Privasi
+                </Typography.Link>
+              </Link>
+            </Space>
           </Space>
         </Col>
       </Row>

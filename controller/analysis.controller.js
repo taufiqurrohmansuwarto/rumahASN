@@ -1,5 +1,13 @@
 const User = require("@/models/users.model");
 const Ticket = require("@/models/tickets.model");
+const { trends3MonthAgo } = require("@/utils/query-utils");
+
+const serializeTrends = (data) => {
+  return data?.map((item) => ({
+    ...item,
+    bidang: item?.category_field?.label,
+  }));
+};
 
 const agentsPerformances = async (req, res) => {
   try {
@@ -27,6 +35,9 @@ const responsesTimes = async (req, res) => {
 
 const trends = async (req, res) => {
   try {
+    const hasil = await trends3MonthAgo();
+    const data = hasil?.rows;
+    res.json(serializeTrends(data));
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: "Internal server error" });

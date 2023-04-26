@@ -50,3 +50,7 @@ export const excelReport = async () => {
 export const commentsCustomersToAgents = async (id) => {
   return api.get(`/tickets/${id}/comments-customers`).then((res) => res?.data);
 };
+
+export const trends = async () => {
+  return api.get(`/analysis/trends`).then((res) => res?.data);
+};
