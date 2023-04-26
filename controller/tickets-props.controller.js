@@ -171,6 +171,8 @@ const detailPublishTickets = async (req, res) => {
         return new Date(a.created_at) - new Date(b.created_at);
       });
 
+      // raw query
+
       const data = {
         ...result,
         content_html: parseMarkdown(result.content),
