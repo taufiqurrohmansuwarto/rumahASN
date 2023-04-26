@@ -1,6 +1,9 @@
 const User = require("@/models/users.model");
 const Ticket = require("@/models/tickets.model");
 const { trends3MonthAgo } = require("@/utils/query-utils");
+const {
+  agentsPerformances: agentsPerformancesQuery,
+} = require("@/utils/query-utils");
 
 const serializeTrends = (data) => {
   return data?.map((item) => ({
@@ -11,6 +14,8 @@ const serializeTrends = (data) => {
 
 const agentsPerformances = async (req, res) => {
   try {
+    const result = await agentsPerformancesQuery();
+    res.json(result?.rows);
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: "Internal server error" });

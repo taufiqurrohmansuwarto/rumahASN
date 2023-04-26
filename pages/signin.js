@@ -12,6 +12,7 @@ const SignIn = ({ providers }) => {
     <>
       <Head>
         <title>Rumah ASN - Login</title>
+        <meta name="description" content="Rumah ASN" />
       </Head>
       <Row
         style={{ minHeight: "100vh", padding: 16 }}
@@ -99,7 +100,7 @@ const SignIn = ({ providers }) => {
                     fontSize: 12,
                   }}
                 >
-                  Ver 1.0.0-rc 2
+                  Ver 1.0.0-rc 3
                 </Typography.Link>
               </Link>
               <Link href="/privacy">

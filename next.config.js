@@ -32,6 +32,10 @@ const hashOnlyIdent = (context, _, exportName) =>
     .replace(/^(-?\d|--)/, "_$1");
 
 module.exports = withAntdLess({
+  i18n: {
+    locales: ["en"],
+    defaultLocale: "en",
+  },
   experimental: {},
   images: {
     domains: ["siasn.bkd.jatimprov.go.id"],

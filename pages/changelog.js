@@ -23,6 +23,14 @@ const ChangeLog = () => {
         "Menambahkan pagination di kategori dan sub kategori",
       ],
     },
+    {
+      version: "1.0.0-rc 3",
+      date: "26-04-2023",
+      changes: [
+        "Menambahkan kebijakan dan privasi",
+        "Menambahkan fungsi analisis data di halaman admin, trend, kepuasan pelanggan, kecepatan respon, dan performa agent",
+      ],
+    },
   ];
 
   return (

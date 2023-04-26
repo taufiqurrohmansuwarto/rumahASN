@@ -2,6 +2,29 @@ const User = require("@/models/users.model");
 
 const knex = User.knex();
 
+module.exports.agentsPerformances = async () => {
+  try {
+    const result = await knex.raw(
+      `SELECT u.custom_id                         AS agent_id,
+       u.username                          AS agent_username,
+       u.image                             as agent_image,
+       COALESCE(COUNT(t.id), 0)            AS total_tickets_handled,
+       COALESCE(ROUND(AVG(EXTRACT(EPOCH FROM (t.start_work_at - t.created_at)) / 60)::numeric, 2),
+                0)                         AS avg_response_time_minutes,
+       COALESCE(ROUND(AVG(t.stars), 1), 0) AS avg_satisfaction_rating
+FROM users u
+         LEFT JOIN
+     tickets t ON u.custom_id = t.assignee
+WHERE u."current_role" IN ('admin', 'agent')
+GROUP BY u.custom_id, u.username
+ORDER BY total_tickets_handled DESC;`
+    );
+    return result;
+  } catch (error) {
+    console.log(error);
+  }
+};
+
 module.exports.ticketResponse = async (id) => {
   const result = await knex.raw(
     `SELECT t.id                                                                                         AS tiket_id,
@@ -92,3 +115,9 @@ ORDER BY week_start, category_id, sub_category_id;`
     console.log(error);
   }
 };
+
+// kepuasan pelanggan
+module.exports.customersSatisfactionsByCategory = async () => {};
+module.exports.customersSatisfactionsByTimeRange = async () => {};
+module.exports.customersSatisfactionsByTicketPriority = async () => {};
+module.exports.customersSatisfactionsByStatus = async () => {};

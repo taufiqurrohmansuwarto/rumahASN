@@ -54,3 +54,7 @@ export const commentsCustomersToAgents = async (id) => {
 export const trends = async () => {
   return api.get(`/analysis/trends`).then((res) => res?.data);
 };
+
+export const agentsPerformances = async () => {
+  return api.get(`/analysis/performa-agent`).then((res) => res?.data);
+};
