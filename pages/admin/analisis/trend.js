@@ -8,6 +8,7 @@ const Trend = () => {
   const { data, isLoading } = useQuery(["analysis-trends"], () => trends(), {
     refetchOnWindowFocus: false,
   });
+
   return (
     <PageContainer title="Analisis Trend" loading={isLoading}>
       {JSON.stringify(data)}
