@@ -5,16 +5,27 @@ const knex = User.knex();
 module.exports.agentsPerformances = async () => {
   try {
     const result = await knex.raw(
-      `SELECT u.custom_id                         AS agent_id,
-       u.username                          AS agent_username,
-       u.image                             as agent_image,
-       COALESCE(COUNT(t.id), 0)            AS total_tickets_handled,
+      `SELECT u.custom_id                                                                         AS agent_id,
+       u.username                                                                          AS agent_username,
+       u.image                                                                             as agent_image,
+       COALESCE(COUNT(t.id), 0)                                                            AS total_tickets_handled,
        COALESCE(ROUND(AVG(EXTRACT(EPOCH FROM (t.start_work_at - t.created_at)) / 60)::numeric, 2),
-                0)                         AS avg_response_time_minutes,
-       COALESCE(ROUND(AVG(t.stars), 1), 0) AS avg_satisfaction_rating
+                0)                                                                         AS avg_response_time_minutes,
+       COALESCE(ROUND(AVG(t.stars), 1), 0)                                                 AS avg_satisfaction_rating,
+       ROUND(AVG(EXTRACT(EPOCH FROM (t.completed_at - t.start_work_at))::numeric) / 60, 2) AS avg_response_time_minutes,
+       array_agg(
+       jsonb_build_object(
+               'ticket_id', t.id,
+               'requester_image', req_users.image,
+               'requester_comment', t.requester_comment,
+               'stars', t.stars
+           )
+           ) filter ( where t.stars > 0 )                                                  AS feedbacks
 FROM users u
          LEFT JOIN
      tickets t ON u.custom_id = t.assignee
+         LEFT JOIN
+     users req_users ON t.requester = req_users.custom_id
 WHERE u."current_role" IN ('admin', 'agent')
 GROUP BY u.custom_id, u.username
 ORDER BY total_tickets_handled DESC;`
