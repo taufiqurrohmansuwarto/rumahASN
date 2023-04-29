@@ -181,16 +181,18 @@ const CommentTicket = ({ item, agent, customer, admin }) => {
         <>
           {item?.type === "comment" && item?.id !== null && (
             <Row
+              align="top"
+              justify="space-between"
               style={{
                 border: "1px solid",
                 borderColor: item?.is_answer ? "#52c41a" : "#d9d9d9",
                 padding: 10,
-                borderRadius: 10,
+                borderRadius: 6,
                 marginTop: 10,
                 marginBottom: 10,
               }}
             >
-              <Col flex="auto">
+              <Col span={23}>
                 <Comment
                   actions={[
                     <SimpleEmojiPicker
@@ -218,18 +220,18 @@ const CommentTicket = ({ item, agent, customer, admin }) => {
                   }
                   avatar={<Avatar src={item?.user?.image} />}
                   content={
-                    <div dangerouslySetInnerHTML={{ __html: item?.comment }} />
+                    <Row>
+                      <Col span={22}>
+                        <div
+                          dangerouslySetInnerHTML={{ __html: item?.comment }}
+                        />
+                      </Col>
+                    </Row>
                   }
                 />
               </Col>
-              <Col>
-                <div
-                  style={{
-                    display: "flex",
-                    alignItems: "flex-start",
-                    height: "100%",
-                  }}
-                >
+              <Col span={1}>
+                <div>
                   <Dropdown
                     trigger={["click"]}
                     overlay={
@@ -267,7 +269,11 @@ const CommentTicket = ({ item, agent, customer, admin }) => {
                       </Menu>
                     }
                   >
-                    <EllipsisOutlined />
+                    <EllipsisOutlined
+                      style={{
+                        color: "#262626",
+                      }}
+                    />
                   </Dropdown>
                 </div>
               </Col>
