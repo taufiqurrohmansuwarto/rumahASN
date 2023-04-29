@@ -1,9 +1,10 @@
 import { useRBAC } from "@/context/RBACContext";
 import { editTicket } from "@/services/index";
 import { formatDateFromNow, setColorStatus } from "@/utils/client-utils";
+import { ArrowLeftOutlined } from "@ant-design/icons";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Card, message, Space, Tag, Typography } from "antd";
-import React from "react";
+import { Card, Space, Tag, Typography, message } from "antd";
+import { useRouter } from "next/router";
 
 const StatusTiket = ({ ticket }) => {
   return (
@@ -17,6 +18,21 @@ const StatusTiket = ({ ticket }) => {
         komentar
       </Typography.Text>
     </Space>
+  );
+};
+
+const BackIcon = () => {
+  const router = useRouter();
+
+  return (
+    <ArrowLeftOutlined
+      onClick={() => router.back()}
+      style={{
+        cursor: "pointer",
+        fontSize: 18,
+        marginRight: 6,
+      }}
+    />
   );
 };
 
@@ -51,18 +67,28 @@ function ChangeTicketTitle({ name, attributes, ticket }) {
     return (
       <>
         <Card>
-          <Typography.Title level={4}>{ticket?.title}</Typography.Title>
-          <StatusTiket ticket={ticket} />
+          <Space align="baseline">
+            <BackIcon />
+            <Typography.Title level={4}>{ticket?.title}</Typography.Title>
+          </Space>
+          <div>
+            <StatusTiket ticket={ticket} />
+          </div>
         </Card>
       </>
     );
   } else {
     return (
       <Card>
-        <Typography.Title level={4} editable={{ onChange: handleEditTitle }}>
-          {ticket?.title}
-        </Typography.Title>
-        <StatusTiket ticket={ticket} />
+        <Space align="baseline">
+          <BackIcon />
+          <Typography.Title level={4} editable={{ onChange: handleEditTitle }}>
+            {ticket?.title}
+          </Typography.Title>
+        </Space>
+        <div>
+          <StatusTiket ticket={ticket} />
+        </div>
       </Card>
     );
   }

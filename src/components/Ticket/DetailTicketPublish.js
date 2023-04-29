@@ -47,6 +47,7 @@ import Participants from "../TicketProps/Participants";
 import Pin from "../TicketProps/Pin";
 import Publish from "../TicketProps/Publish";
 import ReactionsEmoji from "../TicketProps/ReactionsEmoji";
+import ReminderTicket from "../TicketProps/ReminderTicket";
 import RemoveTicket from "../TicketProps/Remove";
 import Subscribe from "../TicketProps/Subscribe";
 import TimelineTicket from "../TicketProps/TimelineTicket";
@@ -55,7 +56,6 @@ import Unpublish from "../TicketProps/UnPublish";
 import UnlockConversation from "../TicketProps/UnlockConversation";
 import Unsubscribe from "../TicketProps/Unsubscribe";
 import NewTicket from "./NewTicket";
-import ReminderTicket from "../TicketProps/ReminderTicket";
 
 const ActionWrapper = ({ attributes, name, ...props }) => {
   return (
