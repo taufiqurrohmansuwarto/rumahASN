@@ -9,6 +9,7 @@ const DetailTicketCustomers = () => {
   const router = useRouter();
   return (
     <PageContainer
+      onBack={() => router.back()}
       header={{
         title: "Detail Tiket",
         breadcrumbRender: () => (
