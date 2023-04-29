@@ -56,6 +56,7 @@ import Unpublish from "../TicketProps/UnPublish";
 import UnlockConversation from "../TicketProps/UnlockConversation";
 import Unsubscribe from "../TicketProps/Unsubscribe";
 import NewTicket from "./NewTicket";
+import TicketsRecommendations from "../TicketProps/TicketsRecommendations";
 
 const ActionWrapper = ({ attributes, name, ...props }) => {
   return (
@@ -505,6 +506,7 @@ const DetailTicketPublish = ({ id }) => {
                       loadingSubmit={isLoadingCreate}
                     />
                   </RestrictedContent>
+                  <TicketsRecommendations />
                 </Col>
                 <Col md={6} xs={24}>
                   <SideRight item={data} />
