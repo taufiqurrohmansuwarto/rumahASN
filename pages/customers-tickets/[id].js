@@ -1,12 +1,14 @@
 import Layout from "@/components/Layout";
 import PageContainer from "@/components/PageContainer";
 import DetailTicketPublish from "@/components/Ticket/DetailTicketPublish";
+import TicketsRecommendations from "@/components/TicketProps/TicketsRecommendations";
 import { Breadcrumb, Card } from "antd";
 import Link from "next/link";
 import { useRouter } from "next/router";
 
 const DetailTicketCustomers = () => {
   const router = useRouter();
+
   return (
     <PageContainer
       // onBack={() => router.back()}

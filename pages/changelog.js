@@ -39,6 +39,11 @@ const ChangeLog = () => {
         "scroll restoration",
       ],
     },
+    {
+      version: "1.0.0-rc 5",
+      date: "26-04-2023",
+      changes: ["Tambah Fitur Rekomendasi tiket di halaman detail tiket"],
+    },
   ];
 
   return (
