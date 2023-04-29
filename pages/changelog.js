@@ -31,6 +31,14 @@ const ChangeLog = () => {
         "Menambahkan fungsi analisis data di halaman admin, trend, kepuasan pelanggan, kecepatan respon, dan performa agent",
       ],
     },
+    {
+      version: "1.0.0-rc 4",
+      date: "26-04-2023",
+      changes: [
+        "Ubah Posisi Grid untuk membaca lebih mudah",
+        "scroll restoration",
+      ],
+    },
   ];
 
   return (
