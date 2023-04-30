@@ -57,6 +57,7 @@ import UnlockConversation from "../TicketProps/UnlockConversation";
 import Unsubscribe from "../TicketProps/Unsubscribe";
 import NewTicket from "./NewTicket";
 import TicketsRecommendations from "../TicketProps/TicketsRecommendations";
+import Link from "next/link";
 
 const ActionWrapper = ({ attributes, name, ...props }) => {
   return (
@@ -206,7 +207,11 @@ const CommentTicket = ({ item, agent, customer, admin }) => {
                       reactions={item?.reactions}
                     />,
                   ]}
-                  author={item?.user?.username}
+                  author={
+                    <Link href={`/users/${item?.user?.custom_id}`}>
+                      <Typography.Link>{item?.user?.username}</Typography.Link>
+                    </Link>
+                  }
                   datetime={
                     <Tooltip title={formatDate(item?.created_at)}>
                       <Space>

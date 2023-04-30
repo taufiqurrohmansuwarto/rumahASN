@@ -156,12 +156,20 @@ function Layout({ children, active }) {
                   if (e.key === "logout") {
                     signOut();
                   }
+                  if (e.key === "profile") {
+                    router.push("/settings/profile");
+                  }
                 },
                 items: [
                   {
                     key: "setting",
                     icon: <SettingOutlined />,
                     label: "Pengaturan",
+                  },
+                  {
+                    key: "profile",
+                    icon: <UserOutlined />,
+                    label: "Profil",
                   },
                   {
                     key: "logout",

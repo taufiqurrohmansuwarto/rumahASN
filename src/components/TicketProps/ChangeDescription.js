@@ -2,10 +2,11 @@ import { editTicket } from "@/services/index";
 import { formatDateFromNow } from "@/utils/client-utils";
 import { formatDate } from "@/utils/index";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Comment, Tooltip, message, Avatar } from "antd";
+import { Comment, Tooltip, message, Avatar, Typography } from "antd";
 import { useState } from "react";
 import RestrictedContent from "../RestrictedContent";
 import NewTicket from "../Ticket/NewTicket";
+import Link from "next/link";
 
 function ChangeTicketDescription({ item }) {
   const [isEdit, setIsEdit] = useState();
@@ -79,7 +80,11 @@ function ChangeTicketDescription({ item }) {
               <span onClick={selectEdit}>Edit</span>
             </RestrictedContent>,
           ]}
-          author={item?.customer?.username}
+          author={
+            <Link href={`/users/${item?.customer?.custom_id}`}>
+              <Typography.Link>{item?.customer?.username}</Typography.Link>
+            </Link>
+          }
           avatar={<Avatar src={item?.customer?.image} />}
           datetime={
             <Tooltip title={formatDate(item?.created_at)}>

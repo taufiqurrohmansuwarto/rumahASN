@@ -446,3 +446,14 @@ export const recommendationFaq = (title) => {
     .get(`/recommendations/faqs?title=${title}`)
     .then((res) => res?.data);
 };
+
+// profile
+export const ownProfile = () => {
+  return api.get("/profiles").then((res) => res?.data);
+};
+export const updateOwnProfile = (data) => {
+  return api.patch("/profiles", data).then((res) => res?.data);
+};
+export const getProfile = (id) => {
+  return api.get(`/profiles/${id}`).then((res) => res?.data);
+};
