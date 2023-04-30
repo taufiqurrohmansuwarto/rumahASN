@@ -85,7 +85,11 @@ function ChangeTicketDescription({ item }) {
               <Typography.Link>{item?.customer?.username}</Typography.Link>
             </Link>
           }
-          avatar={<Avatar src={item?.customer?.image} />}
+          avatar={
+            <Link href={`/users/${item?.customer?.custom_id}`}>
+              <Avatar src={item?.customer?.image} />
+            </Link>
+          }
           datetime={
             <Tooltip title={formatDate(item?.created_at)}>
               <span>{formatDateFromNow(item?.created_at)}</span>

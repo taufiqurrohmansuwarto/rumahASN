@@ -4,6 +4,7 @@ import { formatDateFromNow, setColorStatus } from "@/utils/client-utils";
 import { ArrowLeftOutlined } from "@ant-design/icons";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, Space, Tag, Typography, message } from "antd";
+import Link from "next/link";
 import { useRouter } from "next/router";
 
 const StatusTiket = ({ ticket }) => {
@@ -13,7 +14,10 @@ const StatusTiket = ({ ticket }) => {
         {ticket?.status_code}
       </Tag>
       <Typography.Text style={{ fontSize: 12 }} type="secondary">
-        oleh {ticket?.customer?.username}{" "}
+        oleh{" "}
+        <Link href={`/users/${ticket?.customer?.custom_id}`}>
+          <Typography.Link>{ticket?.customer?.username}</Typography.Link>
+        </Link>{" "}
         {formatDateFromNow(ticket?.created_at)} &#8226; {ticket?.data?.length}{" "}
         komentar
       </Typography.Text>
