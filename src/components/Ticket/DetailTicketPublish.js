@@ -224,7 +224,11 @@ const CommentTicket = ({ item, agent, customer, admin }) => {
                       </Space>
                     </Tooltip>
                   }
-                  avatar={<Avatar src={item?.user?.image} />}
+                  avatar={
+                    <Link href={`/users/${item?.user?.custom_id}`}>
+                      <Avatar src={item?.user?.image} />
+                    </Link>
+                  }
                   content={
                     <Row>
                       <Col span={22}>
@@ -364,9 +368,15 @@ const SideRight = ({ item }) => {
             </Typography.Text>
           ) : (
             <Space>
-              <Tooltip title={item?.agent?.username}>
-                <Avatar size="small" src={item?.agent?.image} />
-              </Tooltip>
+              <Link href={`/users/${item?.agent?.custom_id}`}>
+                <Tooltip title={item?.agent?.username}>
+                  <Avatar
+                    style={{ cursor: "pointer" }}
+                    size="small"
+                    src={item?.agent?.image}
+                  />
+                </Tooltip>
+              </Link>
             </Space>
           )}
         </Space>
@@ -386,9 +396,15 @@ const SideRight = ({ item }) => {
             </Typography.Text>
           ) : (
             <Space>
-              <Tooltip title={item?.admin?.username}>
-                <Avatar size="small" src={item?.admin?.image} />
-              </Tooltip>
+              <Link href={`/users/${item?.admin?.custom_id}`}>
+                <Tooltip title={item?.admin?.username}>
+                  <Avatar
+                    style={{ cursor: "pointer" }}
+                    size="small"
+                    src={item?.admin?.image}
+                  />
+                </Tooltip>
+              </Link>
             </Space>
           )}
         </Space>

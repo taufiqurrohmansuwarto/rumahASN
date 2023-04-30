@@ -1,4 +1,6 @@
 const User = require("@/models/users.model");
+const Ticket = require("@/models/tickets.model");
+const { raw } = require("objection");
 
 module.exports.getOwnProfile = async (req, res) => {
   try {
@@ -40,10 +42,69 @@ module.exports.updateOwnProfile = async (req, res) => {
 module.exports.detailUserProfile = async (req, res) => {
   try {
     const { id } = req.query;
-    const result = await User.query()
+    const { current_role } = req?.user;
+
+    let result;
+    let select;
+
+    if (current_role === "admin" || current_role === "agent") {
+      select = [
+        "username",
+        "image",
+        "about_me",
+        "current_role",
+        "employee_number",
+        "birthdate",
+      ];
+    } else {
+      select = ["username", "image", "about_me", "current_role"];
+    }
+
+    const currentUser = await User.query()
       .where("custom_id", id)
       .first()
-      .select("username", "image", "about_me", "group");
+      .select(select);
+
+    result = currentUser;
+
+    // get statistics if current_user is admin or agent
+
+    if (
+      currentUser?.current_role === "admin" ||
+      currentUser?.current_role === "agent"
+    ) {
+      // get statistics ticket
+      const tickets = await Ticket.query()
+        .select(
+          "assignee",
+          raw(
+            `count(case when status_code = 'DIAJUKAN' then 1 end) as tiket_diajukan`
+          ),
+          raw(
+            `count(case when status_code = 'DIKERJAKAN' then 1 end) as tiket_dikerjakan`
+          ),
+          raw(
+            `count(case when status_code = 'SELESAI' then 1 end) as tiket_diselesaikan`
+          )
+        )
+        .where("assignee", id)
+        .count("id as total_ticket")
+        .avg("stars as avg_rating")
+        .groupBy("assignee");
+
+      const rating = await Ticket.query()
+        .select("stars", "requester_comment", "requester")
+        .withGraphFetched("customer(simpleSelect)")
+        .where("assignee", id)
+        .andWhereNot("stars", null);
+
+      result = {
+        ...result,
+        tickets,
+        rating,
+      };
+    }
+
     res.json(result);
   } catch (error) {
     console.log(error);

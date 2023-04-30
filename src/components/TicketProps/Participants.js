@@ -1,4 +1,5 @@
 import { Space, Typography, Avatar, Tooltip } from "antd";
+import Link from "next/link";
 
 function Participants({ item }) {
   return (
@@ -10,9 +11,11 @@ function Participants({ item }) {
       {item?.participants?.length > 0 && (
         <Avatar.Group>
           {item?.participants?.map((item) => (
-            <Tooltip title={item?.username} key={item?.custom_id}>
-              <Avatar src={item?.image} />
-            </Tooltip>
+            <Link href={`/users/${item?.custom_id}`} key={item?.custom_id}>
+              <Tooltip title={item?.username}>
+                <Avatar style={{ cursor: "pointer" }} src={item?.image} />
+              </Tooltip>
+            </Link>
           ))}
         </Avatar.Group>
       )}
