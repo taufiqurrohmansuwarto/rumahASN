@@ -284,3 +284,7 @@ export const transformHref = (html) => {
 export const isNotThreeDaysAgo = (date) => {
   return moment(date).isAfter(moment().subtract(5, "days"));
 };
+
+export const stringToNumber = (string) => {
+  return parseInt(string).toFixed(0);
+};
