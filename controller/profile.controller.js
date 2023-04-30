@@ -52,6 +52,7 @@ module.exports.detailUserProfile = async (req, res) => {
         "username",
         "image",
         "about_me",
+        "group",
         "current_role",
         "employee_number",
         "birthdate",
@@ -85,7 +86,8 @@ module.exports.detailUserProfile = async (req, res) => {
           ),
           raw(
             `count(case when status_code = 'SELESAI' then 1 end) as tiket_diselesaikan`
-          )
+          ),
+          raw(`count(case when stars is not null then 1 end) as tiket_dinilai`)
         )
         .where("assignee", id)
         .count("id as total_ticket")
@@ -93,7 +95,7 @@ module.exports.detailUserProfile = async (req, res) => {
         .groupBy("assignee");
 
       const rating = await Ticket.query()
-        .select("stars", "requester_comment", "requester")
+        .select("stars", "requester_comment", "requester", "id")
         .withGraphFetched("customer(simpleSelect)")
         .where("assignee", id)
         .andWhereNot("stars", null);
