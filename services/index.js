@@ -440,3 +440,9 @@ export const ticketReminder = (id) => {
 export const getTicketRecommendations = (id) => {
   return api.get(`/tickets/${id}/recommendations`).then((res) => res?.data);
 };
+
+export const recommendationFaq = (title) => {
+  return api
+    .get(`/recommendations/faqs?title=${title}`)
+    .then((res) => res?.data);
+};

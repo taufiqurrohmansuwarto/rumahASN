@@ -44,6 +44,11 @@ const ChangeLog = () => {
       date: "26-04-2023",
       changes: ["Tambah Fitur Rekomendasi tiket di halaman detail tiket"],
     },
+    {
+      version: "1.0.0-rc 6",
+      date: "30-04-2023",
+      changes: ["Tambah fitur rekomendasi untuk faq"],
+    },
   ];
 
   return (

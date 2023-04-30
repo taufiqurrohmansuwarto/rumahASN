@@ -186,6 +186,77 @@ ORDER BY week_start, category_id, sub_category_id;`
   }
 };
 
+module.exports.agentsPerformances = async () => {
+  try {
+    const result = await knex.raw(
+      `SELECT u.custom_id                         AS agent_id,
+       u.username                          AS agent_username,
+       u.image                             as agent_image,
+       COALESCE(COUNT(t.id), 0)            AS total_tickets_handled,
+       COALESCE(ROUND(AVG(EXTRACT(EPOCH FROM (t.start_work_at - t.created_at)) / 60)::numeric, 2),
+                0)                         AS avg_response_time_minutes,
+       COALESCE(ROUND(AVG(t.stars), 1), 0) AS avg_satisfaction_rating
+FROM users u
+         LEFT JOIN
+     tickets t ON u.custom_id = t.assignee
+WHERE u."current_role" IN ('admin', 'agent')
+GROUP BY u.custom_id, u.username
+ORDER BY total_tickets_handled DESC;`
+    );
+    return result;
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+// rekomendasi faq berdasarkan judul tiket untuk mempercepat respon
+module.exports.recommendationsFaqs = async (title) => {
+  const result = await knex.raw(
+    `WITH search_query AS (
+  SELECT
+    plainto_tsquery('indonesian', '${title}') AS query
+),
+faq_ranking AS (
+  SELECT
+    faqs.id AS faq_id,
+    sub_faqs.id AS sub_faq_id,
+    sub_faqs.question,
+    sub_faqs.answer,
+    ts_rank_cd(
+      setweight(to_tsvector('indonesian', faqs.name), 'A') ||
+      setweight(to_tsvector('indonesian', faqs.description), 'B') ||
+      setweight(to_tsvector('indonesian', sub_faqs.question), 'C') ||
+      setweight(to_tsvector('indonesian', sub_faqs.answer), 'D'),
+      query
+    ) AS rank
+  FROM
+    faqs
+    JOIN sub_faqs ON faqs.id = sub_faqs.faq_id,
+    search_query
+  WHERE
+    (
+      to_tsvector('indonesian', faqs.name) ||
+      to_tsvector('indonesian', faqs.description) ||
+      to_tsvector('indonesian', sub_faqs.question) ||
+      to_tsvector('indonesian', sub_faqs.answer)
+    ) @@ query
+)
+SELECT
+  faq_id,
+  sub_faq_id,
+  question,
+  answer,
+  rank
+FROM
+  faq_ranking
+ORDER BY
+  rank DESC
+LIMIT 5;`
+  );
+
+  return result;
+};
+
 // kepuasan pelanggan
 module.exports.customersSatisfactionsByCategory = async () => {};
 module.exports.customersSatisfactionsByTimeRange = async () => {};

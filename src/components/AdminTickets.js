@@ -166,19 +166,19 @@ const AdminTickets = ({ status = "all" }) => {
       },
     },
     {},
-    {
-      title: "Aksi",
-      key: "aksi",
-      render: (_, row) => {
-        return (
-          <Space>
-            <Link href={`/admin/tickets-managements/${row?.id}/detail`}>
-              <a>Detail</a>
-            </Link>
-          </Space>
-        );
-      },
-    },
+    // {
+    //   title: "Aksi",
+    //   key: "aksi",
+    //   render: (_, row) => {
+    //     return (
+    //       <Space>
+    //         <Link href={`/admin/tickets-managements/${row?.id}/detail`}>
+    //           <a>Detail</a>
+    //         </Link>
+    //       </Space>
+    //     );
+    //   },
+    // },
   ];
   const [query, setQuery] = useState({
     page: 1,
@@ -231,13 +231,13 @@ const AdminTickets = ({ status = "all" }) => {
         }}
         columns={columns}
       />
-      <EditModal
+      {/* <EditModal
         subCategories={subCategory}
         priorities={priorityCode}
         open={open}
         onCancel={handleCancelOpen}
         data={row}
-      />
+      /> */}
     </Card>
   );
 };
