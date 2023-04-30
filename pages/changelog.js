@@ -49,6 +49,11 @@ const ChangeLog = () => {
       date: "30-04-2023",
       changes: ["Tambah fitur rekomendasi untuk faq"],
     },
+    {
+      version: "1.0.0-rc 7",
+      date: "01-05-2023",
+      changes: ["Tambah detail profile dan clickabel di setiap nama user"],
+    },
   ];
 
   return (
