@@ -13,7 +13,7 @@ const MyText = ({ user }) => {
   return (
     <>
       <Typography.Text>
-        Selamat datang di Konsultasi Online Kepegawaian! Sebelum bertanya,
+        Selamat datang di Rumah ASN BKD Provinsi Jawa Timur! Sebelum bertanya,
         silakan periksa menu{" "}
         <Link href={"/faq"}>
           <a>F.A.Q & Knowledge Base</a>
