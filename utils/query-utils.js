@@ -17,27 +17,60 @@ const preProcessText = (text) => {
 
 const knex = User.knex();
 
-module.exports.agentsPerformances = async () => {
-  try {
-    const result = await knex.raw(
-      `SELECT u.custom_id                         AS agent_id,
-       u.username                          AS agent_username,
-       u.image                             as agent_image,
-       COALESCE(COUNT(t.id), 0)            AS total_tickets_handled,
-       COALESCE(ROUND(AVG(EXTRACT(EPOCH FROM (t.start_work_at - t.created_at)) / 60)::numeric, 2),
-                0)                         AS avg_response_time_minutes,
-       COALESCE(ROUND(AVG(t.stars), 1), 0) AS avg_satisfaction_rating
-FROM users u
-         LEFT JOIN
-     tickets t ON u.custom_id = t.assignee
-WHERE u."current_role" IN ('admin', 'agent')
-GROUP BY u.custom_id, u.username
-ORDER BY total_tickets_handled DESC;`
-    );
-    return result;
-  } catch (error) {
-    console.log(error);
-  }
+module.exports.ticketRecomendationById = async (ticketId, role) => {
+  const allTickets = await Ticket.query()
+    .select("id", "title")
+    .distinctOn("title")
+    .whereNot("id", ticketId)
+    .andWhere((builder) => {
+      if (role === "user") {
+        builder.where("is_published", true);
+      }
+    });
+
+  const currentTicket = await Ticket.query()
+    .select("id", "title")
+    .findById(ticketId)
+    .orderBy("created_at", "desc");
+
+  // create TF-IDF
+  const tfidf = new natural.TfIdf();
+
+  const preprocessedTitles = allTickets.map((ticket) =>
+    preProcessText(ticket.title)
+  );
+
+  // calculate usign TF-IDF
+
+  preprocessedTitles.forEach((title) => {
+    tfidf.addDocument(title);
+  });
+
+  let distance = [];
+
+  tfidf.tfidfs(preProcessText(currentTicket.title), (index, measure) =>
+    distance.push({ index, measure })
+  );
+
+  let result = [];
+
+  allTickets.forEach((ticket, index) => {
+    result.push({
+      id: ticket.id,
+      title: ticket.title,
+      score: distance[index].measure,
+    });
+  });
+
+  const recommendations = result
+    .sort((a, b) => b.score - a.score)
+    .slice(0, 5)
+    .map((ticket) => ({
+      id: ticket.id,
+      title: ticket.title,
+    }));
+
+  return recommendations;
 };
 
 module.exports.ticketResponse = async (id) => {
