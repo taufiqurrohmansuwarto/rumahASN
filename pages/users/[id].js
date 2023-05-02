@@ -1,7 +1,9 @@
 import Layout from "@/components/Layout";
+import { renderMarkdown, uploadFile } from "@/utils/client-utils";
 import PageContainer from "@/components/PageContainer";
 import { getProfile } from "@/services/index";
-import { useQuery } from "@tanstack/react-query";
+import { MarkdownEditor } from "@primer/react/drafts";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/router";
 import {
   Avatar,
@@ -11,7 +13,9 @@ import {
   Descriptions,
   Divider,
   Image,
+  Input,
   List,
+  Modal,
   Rate,
   Space,
   Typography,
@@ -20,12 +24,73 @@ import Link from "next/link";
 import Head from "next/head";
 import { stringToNumber } from "@/utils/client-utils";
 import { MailOutlined } from "@ant-design/icons";
+import { useSession } from "next-auth/react";
+import { useState } from "react";
+import { Stack } from "@mantine/core";
+
+const CreateModal = ({ open, onCancel, receiver }) => {
+  const router = useRouter();
+  const queryClient = useQueryClient();
+  const [title, setTitle] = useState();
+  const [message, setMessage] = useState();
+
+  const { mutate: sendMessgae, isLoading } = useMutation();
+
+  const handleSendMessage = () => {
+    if (!title || !message) return message.error("Judul dan pesan harus diisi");
+    else {
+    }
+  };
+
+  return (
+    <Modal
+      centered
+      onOk={handleSendMessage}
+      width={600}
+      title={`Kirim Pesan ke ${receiver?.username}`}
+      open={open}
+      onCancel={onCancel}
+    >
+      <Stack>
+        <Input
+          value={title}
+          placeholder="Judul"
+          onChange={(e) => setTitle(e?.target?.value)}
+        />
+        <MarkdownEditor
+          value={message}
+          acceptedFileTypes={[
+            "image/*",
+            // word, excel, txt, pdf
+            ".doc",
+            ".docx",
+            ".xls",
+            ".xlsx",
+            ".txt",
+            ".pdf",
+          ]}
+          onChange={setMessage}
+          placeholder="Pesan"
+          onRenderPreview={renderMarkdown}
+          onUploadFile={uploadFile}
+          mentionSuggestions={null}
+        />
+      </Stack>
+    </Modal>
+  );
+};
 
 const DetailInformation = ({ user }) => {
+  const { data, status } = useSession();
+
+  const [open, setOpen] = useState();
+  const handleCancel = () => setOpen(false);
+  const handleOpen = () => setOpen(true);
+
   if (user?.group !== "GOOGLE") {
     return (
       <div>
-        {/* {JSON.stringify(user?.rating)} */}
+        <CreateModal receiver={user} open={open} onCancel={handleCancel} />
         <Image height={100} src={user?.image} alt="User Photo" />
         <Descriptions>
           <Descriptions.Item label="Nama">{user?.username}</Descriptions.Item>
@@ -41,9 +106,11 @@ const DetailInformation = ({ user }) => {
           <Descriptions.Item label="Jabatan">tunggu</Descriptions.Item>
           <Descriptions.Item label="Perangkat Daerah">Tunggu</Descriptions.Item>
         </Descriptions>
-        <Button icon={<MailOutlined />} type="primary">
-          Kirim Pesan
-        </Button>
+        {user?.custom_id !== data?.user?.id && (
+          <Button onClick={handleOpen} icon={<MailOutlined />} type="primary">
+            Kirim Pesan
+          </Button>
+        )}
         {(user?.current_role === "admin" || user?.current_role === "agent") && (
           <>
             <Divider />

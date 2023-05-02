@@ -49,6 +49,7 @@ module.exports.detailUserProfile = async (req, res) => {
 
     if (current_role === "admin" || current_role === "agent") {
       select = [
+        "custom_id",
         "username",
         "image",
         "about_me",
@@ -58,7 +59,7 @@ module.exports.detailUserProfile = async (req, res) => {
         "birthdate",
       ];
     } else {
-      select = ["username", "image", "about_me", "current_role"];
+      select = ["username", "image", "about_me", "current_role", "custom_id"];
     }
 
     const currentUser = await User.query()
