@@ -461,6 +461,27 @@ export const getProfile = (id) => {
 // private messages
 
 // send message
+export const sendPrivateMessage = (data) => {
+  return api.post("/private-messages", data).then((res) => res?.data);
+};
+
 // read message
+export const readPrivateMessage = (id) => {
+  return api.patch(`/private-messages/${id}`).then((res) => res?.data);
+};
+
 // detail message
+export const detailPrivateMessage = (id) => {
+  return api.get(`/private-messages/${id}`).then((res) => res?.data);
+};
+
 // all message
+export const allPrivateMessage = (query) => {
+  const params = queryString.stringify(query, {
+    arrayFormat: "comma",
+    skipEmptyString: true,
+    skipNull: true,
+  });
+
+  return api.get(`/private-messages?${params}`).then((res) => res?.data);
+};
