@@ -10,6 +10,7 @@ const connection = {
   database: process.env.DATABASE,
   user: process.env.USER_DB,
   password: process.env.PASSWORD,
+  port: process.env.PORT_DB || 5432,
 };
 
 module.exports = {

@@ -53,7 +53,10 @@ export const userRoutes = {
       path: "/settings",
       name: "Konfigurasi",
       icon: <SettingOutlined />,
-      routes: [{ path: "/settings/saved-replies", name: "Balasan Tersimpan" }],
+      routes: [
+        { path: "/settings/saved-replies", name: "Balasan Tersimpan" },
+        { path: "/settings/profile", name: "Profil" },
+      ],
     },
   ],
 };

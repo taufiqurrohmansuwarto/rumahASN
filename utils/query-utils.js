@@ -1,39 +1,98 @@
 const User = require("@/models/users.model");
+const Ticket = require("@/models/tickets.model");
+
+const natural = require("natural");
+const stopwords = require("natural/lib/natural/util/stopwords_id");
+const stemmer = natural.StemmerId;
+
+const preProcessText = (text) => {
+  const tokenizer = new natural.WordTokenizer();
+  const tokenizedText = tokenizer.tokenize(text);
+  const filteredText = tokenizedText.filter(
+    (word) => !stopwords?.words?.includes(word)
+  );
+  const stemmedText = filteredText.map((word) => stemmer.stem(word));
+  return stemmedText.join(" ");
+};
 
 const knex = User.knex();
 
-module.exports.agentsPerformances = async () => {
-  try {
-    const result = await knex.raw(
-      `SELECT u.custom_id                                                                         AS agent_id,
-       u.username                                                                          AS agent_username,
-       u.image                                                                             as agent_image,
-       COALESCE(COUNT(t.id), 0)                                                            AS total_tickets_handled,
-       COALESCE(ROUND(AVG(EXTRACT(EPOCH FROM (t.start_work_at - t.created_at)) / 60)::numeric, 2),
-                0)                                                                         AS avg_response_time_minutes,
-       COALESCE(ROUND(AVG(t.stars), 1), 0)                                                 AS avg_satisfaction_rating,
-       ROUND(AVG(EXTRACT(EPOCH FROM (t.completed_at - t.start_work_at))::numeric) / 60, 2) AS avg_response_time_minutes,
-       array_agg(
-       jsonb_build_object(
-               'ticket_id', t.id,
-               'requester_image', req_users.image,
-               'requester_comment', t.requester_comment,
-               'stars', t.stars
-           )
-           ) filter ( where t.stars > 0 )                                                  AS feedbacks
-FROM users u
-         LEFT JOIN
-     tickets t ON u.custom_id = t.assignee
-         LEFT JOIN
-     users req_users ON t.requester = req_users.custom_id
-WHERE u."current_role" IN ('admin', 'agent')
-GROUP BY u.custom_id, u.username
-ORDER BY total_tickets_handled DESC;`
-    );
-    return result;
-  } catch (error) {
-    console.log(error);
-  }
+module.exports.ticketRecomendationById = async (ticketId, role) => {
+  const allTickets = await Ticket.query()
+    .select("id", "title")
+    .distinctOn("title")
+    .whereNot("id", ticketId)
+    .andWhere((builder) => {
+      if (role === "user") {
+        builder.where("is_published", true);
+      }
+    });
+
+  const currentTicket = await Ticket.query()
+    .select("id", "title")
+    .findById(ticketId)
+    .orderBy("created_at", "desc");
+
+  // create TF-IDF
+  const tfidf = new natural.TfIdf();
+
+  const preprocessedTitles = allTickets.map((ticket) =>
+    preProcessText(ticket.title)
+  );
+
+  // calculate usign TF-IDF
+
+  preprocessedTitles.forEach((title) => {
+    tfidf.addDocument(title);
+  });
+
+  let distance = [];
+
+  tfidf.tfidfs(preProcessText(currentTicket.title), (index, measure) =>
+    distance.push({ index, measure })
+  );
+
+  let result = [];
+
+  allTickets.forEach((ticket, index) => {
+    result.push({
+      id: ticket.id,
+      title: ticket.title,
+      score: distance[index].measure,
+    });
+  });
+
+  const recommendations = result
+    .sort((a, b) => b.score - a.score)
+    .slice(0, 5)
+    .map((ticket) => ({
+      id: ticket.id,
+      title: ticket.title,
+    }));
+
+  return recommendations;
+
+  // // get 5 recomendation ticket from current ticket title
+  // allTickets.forEach((ticket) => {
+  //   tfidf.addDocument(preProcessText(ticket.title));
+  // });
+
+  // const currentTicketVector = tfidf
+  //   .tfidfs(preProcessText(currentTicket.title))
+  //   .map((value) => value.toFixed(3));
+  // const result = [];
+
+  // tfidf.listTerms().forEach((ticket, index) => {
+  //   result.push({
+  //     id: ticket,
+  //     score: currentTicketVector[index],
+  //   });
+  // });
+
+  // return result
+  //   .sort((a, b) => b.score - a.score)
+  //   .slice(1, 6)
+  //   .map((ticket) => ticket.id);
 };
 
 module.exports.ticketResponse = async (id) => {
@@ -125,6 +184,77 @@ ORDER BY week_start, category_id, sub_category_id;`
   } catch (error) {
     console.log(error);
   }
+};
+
+module.exports.agentsPerformances = async () => {
+  try {
+    const result = await knex.raw(
+      `SELECT u.custom_id                         AS agent_id,
+       u.username                          AS agent_username,
+       u.image                             as agent_image,
+       COALESCE(COUNT(t.id), 0)            AS total_tickets_handled,
+       COALESCE(ROUND(AVG(EXTRACT(EPOCH FROM (t.start_work_at - t.created_at)) / 60)::numeric, 2),
+                0)                         AS avg_response_time_minutes,
+       COALESCE(ROUND(AVG(t.stars), 1), 0) AS avg_satisfaction_rating
+FROM users u
+         LEFT JOIN
+     tickets t ON u.custom_id = t.assignee
+WHERE u."current_role" IN ('admin', 'agent')
+GROUP BY u.custom_id, u.username
+ORDER BY total_tickets_handled DESC;`
+    );
+    return result;
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+// rekomendasi faq berdasarkan judul tiket untuk mempercepat respon
+module.exports.recommendationsFaqs = async (title) => {
+  const result = await knex.raw(
+    `WITH search_query AS (
+  SELECT
+    plainto_tsquery('indonesian', '${title}') AS query
+),
+faq_ranking AS (
+  SELECT
+    faqs.id AS faq_id,
+    sub_faqs.id AS sub_faq_id,
+    sub_faqs.question,
+    sub_faqs.answer,
+    ts_rank_cd(
+      setweight(to_tsvector('indonesian', faqs.name), 'A') ||
+      setweight(to_tsvector('indonesian', faqs.description), 'B') ||
+      setweight(to_tsvector('indonesian', sub_faqs.question), 'C') ||
+      setweight(to_tsvector('indonesian', sub_faqs.answer), 'D'),
+      query
+    ) AS rank
+  FROM
+    faqs
+    JOIN sub_faqs ON faqs.id = sub_faqs.faq_id,
+    search_query
+  WHERE
+    (
+      to_tsvector('indonesian', faqs.name) ||
+      to_tsvector('indonesian', faqs.description) ||
+      to_tsvector('indonesian', sub_faqs.question) ||
+      to_tsvector('indonesian', sub_faqs.answer)
+    ) @@ query
+)
+SELECT
+  faq_id,
+  sub_faq_id,
+  question,
+  answer,
+  rank
+FROM
+  faq_ranking
+ORDER BY
+  rank DESC
+LIMIT 5;`
+  );
+
+  return result;
 };
 
 // kepuasan pelanggan

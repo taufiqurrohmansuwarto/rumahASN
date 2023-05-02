@@ -47,6 +47,7 @@ import Participants from "../TicketProps/Participants";
 import Pin from "../TicketProps/Pin";
 import Publish from "../TicketProps/Publish";
 import ReactionsEmoji from "../TicketProps/ReactionsEmoji";
+import ReminderTicket from "../TicketProps/ReminderTicket";
 import RemoveTicket from "../TicketProps/Remove";
 import Subscribe from "../TicketProps/Subscribe";
 import TimelineTicket from "../TicketProps/TimelineTicket";
@@ -55,7 +56,8 @@ import Unpublish from "../TicketProps/UnPublish";
 import UnlockConversation from "../TicketProps/UnlockConversation";
 import Unsubscribe from "../TicketProps/Unsubscribe";
 import NewTicket from "./NewTicket";
-import ReminderTicket from "../TicketProps/ReminderTicket";
+import TicketsRecommendations from "../TicketProps/TicketsRecommendations";
+import Link from "next/link";
 
 const ActionWrapper = ({ attributes, name, ...props }) => {
   return (
@@ -181,16 +183,18 @@ const CommentTicket = ({ item, agent, customer, admin }) => {
         <>
           {item?.type === "comment" && item?.id !== null && (
             <Row
+              align="top"
+              justify="space-between"
               style={{
                 border: "1px solid",
                 borderColor: item?.is_answer ? "#52c41a" : "#d9d9d9",
                 padding: 10,
-                borderRadius: 10,
+                borderRadius: 6,
                 marginTop: 10,
                 marginBottom: 10,
               }}
             >
-              <Col flex="auto">
+              <Col span={23}>
                 <Comment
                   actions={[
                     <SimpleEmojiPicker
@@ -203,7 +207,11 @@ const CommentTicket = ({ item, agent, customer, admin }) => {
                       reactions={item?.reactions}
                     />,
                   ]}
-                  author={item?.user?.username}
+                  author={
+                    <Link href={`/users/${item?.user?.custom_id}`}>
+                      <Typography.Link>{item?.user?.username}</Typography.Link>
+                    </Link>
+                  }
                   datetime={
                     <Tooltip title={formatDate(item?.created_at)}>
                       <Space>
@@ -216,20 +224,24 @@ const CommentTicket = ({ item, agent, customer, admin }) => {
                       </Space>
                     </Tooltip>
                   }
-                  avatar={<Avatar src={item?.user?.image} />}
+                  avatar={
+                    <Link href={`/users/${item?.user?.custom_id}`}>
+                      <Avatar src={item?.user?.image} />
+                    </Link>
+                  }
                   content={
-                    <div dangerouslySetInnerHTML={{ __html: item?.comment }} />
+                    <Row>
+                      <Col span={22}>
+                        <div
+                          dangerouslySetInnerHTML={{ __html: item?.comment }}
+                        />
+                      </Col>
+                    </Row>
                   }
                 />
               </Col>
-              <Col>
-                <div
-                  style={{
-                    display: "flex",
-                    alignItems: "flex-start",
-                    height: "100%",
-                  }}
-                >
+              <Col span={1}>
+                <div>
                   <Dropdown
                     trigger={["click"]}
                     overlay={
@@ -267,7 +279,11 @@ const CommentTicket = ({ item, agent, customer, admin }) => {
                       </Menu>
                     }
                   >
-                    <EllipsisOutlined />
+                    <EllipsisOutlined
+                      style={{
+                        color: "#262626",
+                      }}
+                    />
                   </Dropdown>
                 </div>
               </Col>
@@ -352,9 +368,15 @@ const SideRight = ({ item }) => {
             </Typography.Text>
           ) : (
             <Space>
-              <Tooltip title={item?.agent?.username}>
-                <Avatar size="small" src={item?.agent?.image} />
-              </Tooltip>
+              <Link href={`/users/${item?.agent?.custom_id}`}>
+                <Tooltip title={item?.agent?.username}>
+                  <Avatar
+                    style={{ cursor: "pointer" }}
+                    size="small"
+                    src={item?.agent?.image}
+                  />
+                </Tooltip>
+              </Link>
             </Space>
           )}
         </Space>
@@ -374,9 +396,15 @@ const SideRight = ({ item }) => {
             </Typography.Text>
           ) : (
             <Space>
-              <Tooltip title={item?.admin?.username}>
-                <Avatar size="small" src={item?.admin?.image} />
-              </Tooltip>
+              <Link href={`/users/${item?.admin?.custom_id}`}>
+                <Tooltip title={item?.admin?.username}>
+                  <Avatar
+                    style={{ cursor: "pointer" }}
+                    size="small"
+                    src={item?.admin?.image}
+                  />
+                </Tooltip>
+              </Link>
             </Space>
           )}
         </Space>
@@ -452,7 +480,7 @@ const DetailTicketPublish = ({ id }) => {
   const [value, setValue] = useState(null);
 
   return (
-    <Row>
+    <Row justify="center">
       <Skeleton loading={isLoading}>
         <Head>
           <title>{data?.title}</title>
@@ -460,7 +488,7 @@ const DetailTicketPublish = ({ id }) => {
         {data && (
           <>
             <BackTop />
-            <Col span={24}>
+            <Col md={18} xs={24}>
               <Row gutter={[8, 16]}>
                 <Col span={24}>
                   <Affix offsetTop={40}>
@@ -474,7 +502,7 @@ const DetailTicketPublish = ({ id }) => {
                 </Col>
               </Row>
               <Row gutter={[32, 64]}>
-                <Col md={20}>
+                <Col md={18} xs={24}>
                   <ChangeTicketDescription item={data} />
                   {data?.data?.map((item, index) => {
                     return (
@@ -499,8 +527,9 @@ const DetailTicketPublish = ({ id }) => {
                       loadingSubmit={isLoadingCreate}
                     />
                   </RestrictedContent>
+                  <TicketsRecommendations />
                 </Col>
-                <Col md={4}>
+                <Col md={6} xs={24}>
                   <SideRight item={data} />
                 </Col>
               </Row>

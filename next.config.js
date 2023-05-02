@@ -36,7 +36,9 @@ module.exports = withAntdLess({
     locales: ["en"],
     defaultLocale: "en",
   },
-  experimental: {},
+  experimental: {
+    scrollRestoration: true,
+  },
   images: {
     domains: ["siasn.bkd.jatimprov.go.id"],
     formats: ["image/webp"],
