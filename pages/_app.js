@@ -15,6 +15,7 @@ import { useState } from "react";
 import Loading from "../src/components/Loading";
 import "../styles/globals.css";
 import Head from "next/head";
+import Script from "next/script";
 
 // check user role and organization start with 123
 function Auth({ children, action, subject }) {
@@ -58,35 +59,50 @@ function MyApp({ Component, pageProps: { session, ...pageProps } }) {
   const getLayout = Component.getLayout || ((page) => page);
 
   return (
-    <SessionProvider
-      session={session}
-      baseUrl="/helpdesk"
-      basePath="/helpdesk/api/auth"
-    >
-      <Head>
-        <link rel="shortcut icon" href="/helpdesk/headset.ico" />
-      </Head>
-      <QueryClientProvider client={queryClient}>
-        <MantineProvider withGlobalStyles withNormalizeCSS>
-          <ThemeProvider colorMode="auto" preventSSRMismatch>
-            <ConfigProvider locale={id}>
-              <Hydrate>
-                {Component.Auth ? (
-                  <Auth
-                    subject={Component?.Auth?.subject}
-                    action={Component?.Auth?.action}
-                  >
-                    {getLayout(<Component {...pageProps} />)}
-                  </Auth>
-                ) : (
-                  <Component {...pageProps} />
-                )}
-              </Hydrate>
-            </ConfigProvider>
-          </ThemeProvider>
-        </MantineProvider>
-      </QueryClientProvider>
-    </SessionProvider>
+    <>
+      <Script
+        async
+        src="https://www.googletagmanager.com/gtag/js?id=G-Q1GNKXN1MQ"
+      />
+      <Script id="google-analytics" strategy="afterInteractive">
+        {`
+          window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-Q1GNKXN1MQ');
+                  `}
+      </Script>
+      <SessionProvider
+        session={session}
+        baseUrl="/helpdesk"
+        basePath="/helpdesk/api/auth"
+      >
+        <Head>
+          <link rel="shortcut icon" href="/helpdesk/headset.ico" />
+        </Head>
+        <QueryClientProvider client={queryClient}>
+          <MantineProvider withGlobalStyles withNormalizeCSS>
+            <ThemeProvider colorMode="auto" preventSSRMismatch>
+              <ConfigProvider locale={id}>
+                <Hydrate>
+                  {Component.Auth ? (
+                    <Auth
+                      subject={Component?.Auth?.subject}
+                      action={Component?.Auth?.action}
+                    >
+                      {getLayout(<Component {...pageProps} />)}
+                    </Auth>
+                  ) : (
+                    <Component {...pageProps} />
+                  )}
+                </Hydrate>
+              </ConfigProvider>
+            </ThemeProvider>
+          </MantineProvider>
+        </QueryClientProvider>
+      </SessionProvider>
+    </>
   );
 }
 

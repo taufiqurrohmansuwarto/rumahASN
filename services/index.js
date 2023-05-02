@@ -457,3 +457,10 @@ export const updateOwnProfile = (data) => {
 export const getProfile = (id) => {
   return api.get(`/profiles/${id}`).then((res) => res?.data);
 };
+
+// private messages
+
+// send message
+// read message
+// detail message
+// all message
