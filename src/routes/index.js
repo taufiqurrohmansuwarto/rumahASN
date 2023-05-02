@@ -4,7 +4,6 @@ import {
   CarOutlined,
   DashboardFilled,
   HomeOutlined,
-  MailOutlined,
   QuestionCircleOutlined,
   SettingOutlined,
   SmileOutlined,
@@ -18,7 +17,7 @@ export const userRoutes = {
     {
       path: "/tickets",
       name: "Tiket saya",
-      icon: <MailOutlined />,
+      icon: <SnippetsOutlined />,
       routes: [
         {
           path: "/tickets/semua",

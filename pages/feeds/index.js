@@ -11,7 +11,7 @@ import Head from "next/head";
 
 function Feeds() {
   return (
-    <PageContainer title="Beranda" subTitle="Dashboard">
+    <PageContainer title="Beranda" subTitle="Rumah ASN">
       <Head>
         <title>Rumah ASN - Beranda</title>
       </Head>
