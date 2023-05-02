@@ -50,6 +50,8 @@ const changeRoutes = (user) => {
     const agent = (role === "agent" && bkd) || (role === "agent" && pttBkd);
     const userPns = user?.group === "MASTER";
 
+    // persiapan ini seharusnya ditambahkan halaman dashboard seperti analisis dsb tapi jangan data
+
     if (userPns) {
       userRoutes.routes.push({
         path: "/layanan-tracking",
