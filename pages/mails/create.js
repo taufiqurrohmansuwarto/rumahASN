@@ -1,12 +1,50 @@
 import Layout from "@/components/Layout";
 import PageContainer from "@/components/PageContainer";
+import { sendPrivateMessage } from "@/services/index";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { Button, Form, Input } from "antd";
 import { useRouter } from "next/router";
 
 const CreatePrivateMessage = () => {
   const router = useRouter();
-  const handleBack = () => router.back();
+  const queryClient = useQueryClient();
 
-  return <PageContainer onBack={handleBack}></PageContainer>;
+  const handleBack = () => router.back();
+  const [form] = Form.useForm();
+
+  const { mutate: send, isLoading } = useMutation(
+    (data) => sendPrivateMessage(data),
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries(["private-messages"]);
+        router.push("/mails");
+      },
+    }
+  );
+
+  const handleFinish = async () => {
+    const result = await form.validateFields();
+    console.log(result);
+  };
+
+  return (
+    <PageContainer onBack={handleBack} title="Pesan Pribadi" subTitle="Buat">
+      <Form form={form} onFinish={handleFinish}>
+        <Form.Item name="title" label="Judul">
+          <Input />
+        </Form.Item>
+        <Form.Item name="sender_id" label="Kepada">
+          <Input />
+        </Form.Item>
+        <Form.Item name="message" label="Isi Pesan Pribadi">
+          <Input />
+        </Form.Item>
+        <Form.Item>
+          <Button htmlType="submit">Kirim</Button>
+        </Form.Item>
+      </Form>
+    </PageContainer>
+  );
 };
 
 CreatePrivateMessage.getLayout = function getLayout(page) {

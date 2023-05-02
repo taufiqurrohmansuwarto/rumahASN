@@ -476,7 +476,7 @@ export const detailPrivateMessage = (id) => {
 };
 
 // all message
-export const allPrivateMessage = (query) => {
+export const getPrivateMessages = (query = {}) => {
   const params = queryString.stringify(query, {
     arrayFormat: "comma",
     skipEmptyString: true,
