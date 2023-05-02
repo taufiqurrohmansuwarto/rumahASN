@@ -436,7 +436,10 @@ const publish = async (req, res) => {
     if (!ticket) {
       res.status(404).json({ message: "Ticket not found." });
     } else {
-      await Ticket.query().patch({ is_published: true }).where({ id });
+      await Ticket.query()
+        .patch({ is_published: true, published_at: new Date() })
+        .where({ id });
+
       await insertTicketHistory(id, user_id, "published", "Ticket published");
       await ticketNotification({
         ticketId: id,
