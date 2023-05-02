@@ -4,7 +4,7 @@ import {
 } from "@/services/index";
 import { SmileOutlined } from "@ant-design/icons";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Space, Popover, Button } from "antd";
+import { Space, Popover, Button, Tooltip } from "antd";
 import { useState } from "react";
 
 const emoticons = ["👍", "👎", "😁", "🎉", "🤔", "❤", "🚀", "🤬"];
@@ -90,7 +90,12 @@ const SimpleEmojiPicker = ({ comment, ticketId }) => {
       open={visible}
       onOpenChange={handleVisibleChange}
     >
-      <SmileOutlined onClick={handleClick} />
+      <SmileOutlined
+        style={{
+          color: "#52c41a",
+        }}
+        onClick={handleClick}
+      />
     </Popover>
   );
 };

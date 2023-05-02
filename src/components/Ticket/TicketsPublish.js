@@ -19,14 +19,23 @@ import {
 import Link from "next/link";
 import { useState } from "react";
 import RestrictedContent from "../RestrictedContent";
+import { useRouter } from "next/router";
 
 const { useBreakpoint } = AntdGrid;
 
 const Assignee = ({ item }) => {
+  const router = useRouter();
+
+  const gotoDetailUser = () => router.push(`/users/${item?.agent?.custom_id}`);
+
   if (item?.assignee) {
     return (
       <Popover title="Penerima Tugas" content={`${item?.agent?.username}`}>
         <Avatar
+          onClick={gotoDetailUser}
+          style={{
+            cursor: "pointer",
+          }}
           size="small"
           src={item?.agent?.image}
           alt={item?.agent?.username}
@@ -223,7 +232,11 @@ function TicketsPublish() {
               description={
                 <Typography.Text type="secondary">
                   Ditanyakan tanggal {formatDateLL(item?.created_at)} oleh{" "}
-                  {item?.customer?.username}
+                  <Link href={`/users/${item?.customer?.custom_id}`}>
+                    <Typography.Link>
+                      {item?.customer?.username}
+                    </Typography.Link>
+                  </Link>
                 </Typography.Text>
               }
             />

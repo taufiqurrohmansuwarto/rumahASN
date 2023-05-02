@@ -31,6 +31,29 @@ const ChangeLog = () => {
         "Menambahkan fungsi analisis data di halaman admin, trend, kepuasan pelanggan, kecepatan respon, dan performa agent",
       ],
     },
+    {
+      version: "1.0.0-rc 4",
+      date: "26-04-2023",
+      changes: [
+        "Ubah Posisi Grid untuk membaca lebih mudah",
+        "scroll restoration",
+      ],
+    },
+    {
+      version: "1.0.0-rc 5",
+      date: "26-04-2023",
+      changes: ["Tambah Fitur Rekomendasi tiket di halaman detail tiket"],
+    },
+    {
+      version: "1.0.0-rc 6",
+      date: "30-04-2023",
+      changes: ["Tambah fitur rekomendasi untuk faq"],
+    },
+    {
+      version: "1.0.0-rc 7",
+      date: "01-05-2023",
+      changes: ["Tambah detail profile dan clickabel di setiap nama user"],
+    },
   ];
 
   return (

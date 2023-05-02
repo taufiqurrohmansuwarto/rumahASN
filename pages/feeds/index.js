@@ -17,7 +17,7 @@ function Feeds() {
       </Head>
       <ShowRatings />
       <Grid justify="start">
-        <Grid.Col md={9} sm={12}>
+        <Grid.Col md={8} sm={12}>
           <Card>
             <Stack>
               <SelamatDatang />
@@ -26,7 +26,7 @@ function Feeds() {
             </Stack>
           </Card>
         </Grid.Col>
-        <Grid.Col md={3} sm={12}>
+        <Grid.Col md={4} sm={12}>
           <Grid>
             <Grid.Col md={12} xs={12}>
               <PublikasiCASN />

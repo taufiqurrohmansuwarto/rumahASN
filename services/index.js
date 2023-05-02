@@ -436,3 +436,24 @@ export const pencarianLayananSIASN = ({ jenis_layanan, nip }) => {
 export const ticketReminder = (id) => {
   return api.post(`/tickets/${id}/reminders`).then((res) => res?.data);
 };
+
+export const getTicketRecommendations = (id) => {
+  return api.get(`/tickets/${id}/recommendations`).then((res) => res?.data);
+};
+
+export const recommendationFaq = (title) => {
+  return api
+    .get(`/recommendations/faqs?title=${title}`)
+    .then((res) => res?.data);
+};
+
+// profile
+export const ownProfile = () => {
+  return api.get("/profiles").then((res) => res?.data);
+};
+export const updateOwnProfile = (data) => {
+  return api.patch("/profiles", data).then((res) => res?.data);
+};
+export const getProfile = (id) => {
+  return api.get(`/profiles/${id}`).then((res) => res?.data);
+};

@@ -20,6 +20,7 @@ const {
 } = require("@/utils/parsing");
 const { uniqBy } = require("lodash");
 const { sendReminder } = require("./mailer.controller");
+const { ticketRecomendationById } = require("@/utils/query-utils");
 
 const publishedTickets = async (req, res) => {
   try {
@@ -1001,7 +1002,21 @@ const ticketReminders = async (req, res) => {
   }
 };
 
+const ticketRecommendations = async (req, res) => {
+  try {
+    const { id } = req?.query;
+    const { current_role } = req?.user;
+
+    const result = await ticketRecomendationById(id, current_role);
+    res.json(result);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Something went wrong" });
+  }
+};
+
 module.exports = {
+  ticketRecommendations,
   ticketReminders,
   pinnedTickets,
   changeFeedback,

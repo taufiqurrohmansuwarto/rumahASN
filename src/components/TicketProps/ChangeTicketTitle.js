@@ -1,9 +1,11 @@
 import { useRBAC } from "@/context/RBACContext";
 import { editTicket } from "@/services/index";
 import { formatDateFromNow, setColorStatus } from "@/utils/client-utils";
+import { ArrowLeftOutlined } from "@ant-design/icons";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Card, message, Space, Tag, Typography } from "antd";
-import React from "react";
+import { Card, Space, Tag, Typography, message } from "antd";
+import Link from "next/link";
+import { useRouter } from "next/router";
 
 const StatusTiket = ({ ticket }) => {
   return (
@@ -12,11 +14,29 @@ const StatusTiket = ({ ticket }) => {
         {ticket?.status_code}
       </Tag>
       <Typography.Text style={{ fontSize: 12 }} type="secondary">
-        oleh {ticket?.customer?.username}{" "}
+        oleh{" "}
+        <Link href={`/users/${ticket?.customer?.custom_id}`}>
+          <Typography.Link>{ticket?.customer?.username}</Typography.Link>
+        </Link>{" "}
         {formatDateFromNow(ticket?.created_at)} &#8226; {ticket?.data?.length}{" "}
         komentar
       </Typography.Text>
     </Space>
+  );
+};
+
+const BackIcon = () => {
+  const router = useRouter();
+
+  return (
+    <ArrowLeftOutlined
+      onClick={() => router.back()}
+      style={{
+        cursor: "pointer",
+        fontSize: 18,
+        marginRight: 6,
+      }}
+    />
   );
 };
 
@@ -51,18 +71,28 @@ function ChangeTicketTitle({ name, attributes, ticket }) {
     return (
       <>
         <Card>
-          <Typography.Title level={4}>{ticket?.title}</Typography.Title>
-          <StatusTiket ticket={ticket} />
+          <Space align="baseline">
+            <BackIcon />
+            <Typography.Title level={4}>{ticket?.title}</Typography.Title>
+          </Space>
+          <div>
+            <StatusTiket ticket={ticket} />
+          </div>
         </Card>
       </>
     );
   } else {
     return (
       <Card>
-        <Typography.Title level={4} editable={{ onChange: handleEditTitle }}>
-          {ticket?.title}
-        </Typography.Title>
-        <StatusTiket ticket={ticket} />
+        <Space align="baseline">
+          <BackIcon />
+          <Typography.Title level={4} editable={{ onChange: handleEditTitle }}>
+            {ticket?.title}
+          </Typography.Title>
+        </Space>
+        <div>
+          <StatusTiket ticket={ticket} />
+        </div>
       </Card>
     );
   }
