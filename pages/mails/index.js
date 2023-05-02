@@ -1,7 +1,18 @@
 import Layout from "@/components/Layout";
+import PageContainer from "@/components/PageContainer";
+import { Button } from "antd";
+import { useRouter } from "next/router";
 
 const Mail = () => {
-  return <div>Mail</div>;
+  const router = useRouter();
+
+  const gotoCreate = () => router.push("/mails/create");
+
+  return (
+    <PageContainer>
+      <Button onClick={gotoCreate}>Buat Pesan</Button>
+    </PageContainer>
+  );
 };
 
 Mail.getLayout = function getLayout(page) {
