@@ -2,7 +2,8 @@ import PageContainer from "@/components/PageContainer";
 import { agentsPerformances } from "@/services/admin.services";
 import { Paper } from "@mantine/core";
 import { useQuery } from "@tanstack/react-query";
-import { Avatar, BackTop, Card, List, Rate, Typography } from "antd";
+import { Avatar, BackTop, Card, List, Rate, Typography, Divider } from "antd";
+import { Stack } from "@mantine/core";
 import { toNumber } from "lodash";
 import { Avatar as AvatarMantine, Text as TextMantine } from "@mantine/core";
 
