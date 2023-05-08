@@ -54,6 +54,14 @@ const ChangeLog = () => {
       date: "01-05-2023",
       changes: ["Tambah detail profile dan clickabel di setiap nama user"],
     },
+    {
+      version: "1.0.0-rc 8",
+      date: "09-05-2023",
+      changes: [
+        "Menambahkan api google di bkd jatim",
+        "dan implementasi fitur jalur pribadi",
+      ],
+    },
   ];
 
   return (
