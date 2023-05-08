@@ -8,7 +8,7 @@ function TrackingSIMASTER() {
   return (
     <>
       <Head>
-        <title>Tracking SIMASTER</title>
+        <title>Rumah ASN - Tracking SIMASTER</title>
       </Head>
       <PageContainer title="Layanan Tracking" subTitle="Aplikasi SIMASTER">
         <Card>

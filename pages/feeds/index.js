@@ -4,6 +4,7 @@ import SelamatDatang from "@/components/SelamatDatang";
 import ShowRatings from "@/components/ShowRatings";
 import PinnedTickets from "@/components/Ticket/PinnedTickets";
 import TicketsPublish from "@/components/Ticket/TicketsPublish";
+import VideoYoutube from "@/components/VideoYoutube";
 import PublikasiCASN from "@/components/Web/PublikasiCASN";
 import { Grid, Stack } from "@mantine/core";
 import { Card } from "antd";
@@ -30,6 +31,9 @@ function Feeds() {
           <Grid>
             <Grid.Col md={12} xs={12}>
               <PublikasiCASN />
+            </Grid.Col>
+            <Grid.Col md={12} xs={12}>
+              <VideoYoutube />
             </Grid.Col>
           </Grid>
         </Grid.Col>

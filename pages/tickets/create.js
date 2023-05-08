@@ -12,40 +12,46 @@ import { createTickets } from "../../services/users.services";
 import PageContainer from "../../src/components/PageContainer";
 import { recommendationFaq } from "@/services/index";
 import { useDebouncedValue } from "@mantine/hooks";
+import Head from "next/head";
 
 const Faqs = ({ data }) => {
   return (
-    <div
-      id="scrollableDiv"
-      style={{
-        height: 350,
-        overflow: "auto",
-        padding: "0 16px",
-        border: "1px solid rgba(140, 140, 140, 0.35)",
-      }}
-    >
-      <List
-        header={<Text variant="h4">Pertanyaan yang sering diajukan</Text>}
-        dataSource={data}
-        rowKey={(row) => row?.faq_id}
-        renderItem={(item) => {
-          return (
-            <List.Item>
-              <Stack>
-                <Typography.Text>{item?.question}</Typography.Text>
-                <Typography.Text>
-                  <div
-                    dangerouslySetInnerHTML={{
-                      __html: item?.html,
-                    }}
-                  />
-                </Typography.Text>
-              </Stack>
-            </List.Item>
-          );
+    <>
+      <Head>
+        <title>Rumah ASN - Buat Tiket Baru</title>
+      </Head>
+      <div
+        id="scrollableDiv"
+        style={{
+          height: 350,
+          overflow: "auto",
+          padding: "0 16px",
+          border: "1px solid rgba(140, 140, 140, 0.35)",
         }}
-      />
-    </div>
+      >
+        <List
+          header={<Text variant="h4">Pertanyaan yang sering diajukan</Text>}
+          dataSource={data}
+          rowKey={(row) => row?.faq_id}
+          renderItem={(item) => {
+            return (
+              <List.Item>
+                <Stack>
+                  <Typography.Text>{item?.question}</Typography.Text>
+                  <Typography.Text>
+                    <div
+                      dangerouslySetInnerHTML={{
+                        __html: item?.html,
+                      }}
+                    />
+                  </Typography.Text>
+                </Stack>
+              </List.Item>
+            );
+          }}
+        />
+      </div>
+    </>
   );
 };
 

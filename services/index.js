@@ -485,3 +485,7 @@ export const getPrivateMessages = (query = {}) => {
 
   return api.get(`/private-messages?${params}`).then((res) => res?.data);
 };
+
+export const getListYoutube = () => {
+  return api.get("/videos").then((res) => res?.data);
+};

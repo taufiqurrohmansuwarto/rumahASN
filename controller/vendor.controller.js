@@ -1,5 +1,6 @@
 const urlImage = "https://bkd.jatimprov.go.id/file_pemprov/bannerweb/";
 const queryString = require("query-string");
+const googleapis = require("googleapis");
 
 const listBerita = async (req, res) => {
   try {
@@ -73,7 +74,30 @@ const listBanner = async (req, res) => {
   }
 };
 
+// youtube api
+const getLIstYoutubeBKDJatim = async (req, res) => {
+  try {
+    const youtubeFetcher = googleapis.google.youtube({
+      version: "v3",
+      auth: process.env.YOUTUBE_API_KEY,
+    });
+    // get list youtube bkd jatim
+    const result = await youtubeFetcher.search.list({
+      part: ["snippet"],
+      channelId: "UCokkbWw9VaJxGp3xqOjbcKg",
+      maxResults: 6,
+      order: "date",
+      // get statistics
+    });
+    res.json(result?.data?.items);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
 module.exports = {
+  getLIstYoutubeBKDJatim,
   listBerita,
   listBanner,
   nilaiCasn,
