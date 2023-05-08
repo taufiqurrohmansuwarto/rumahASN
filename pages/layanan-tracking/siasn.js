@@ -9,7 +9,7 @@ function TrackingSIASN() {
   return (
     <>
       <Head>
-        <title>Tracking SIASN</title>
+        <title>Rumah ASN - Tracking SIASN</title>
       </Head>
       <PageContainer title="Layanan Tracking" subTitle="Aplikasi SIASN">
         <Card>

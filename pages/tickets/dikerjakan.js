@@ -1,8 +1,16 @@
+import Head from "next/head";
 import CustomersTickets from "../../src/components/CustomersTickets";
 import Layout from "../../src/components/Layout";
 
 const Tickets = () => {
-  return <CustomersTickets status="DIKERJAKAN" title="Status Dikerjakan" />;
+  return (
+    <>
+      <Head>
+        <title>Rumah ASN - Status Dikerjakan</title>
+      </Head>
+      <CustomersTickets status="DIKERJAKAN" title="Status Dikerjakan" />;
+    </>
+  );
 };
 
 // add layout

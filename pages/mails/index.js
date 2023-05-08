@@ -3,6 +3,7 @@ import PageContainer from "@/components/PageContainer";
 import { getPrivateMessages } from "@/services/index";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "antd";
+import Head from "next/head";
 import { useRouter } from "next/router";
 
 const Mail = () => {
@@ -14,10 +15,15 @@ const Mail = () => {
   const gotoCreate = () => router.push("/mails/create");
 
   return (
-    <PageContainer>
-      {JSON.stringify(data)}
-      <Button onClick={gotoCreate}>Buat Pesan</Button>
-    </PageContainer>
+    <>
+      <Head>
+        <title>Rumah ASN - Pesan Pribadi</title>
+      </Head>
+      <PageContainer>
+        {JSON.stringify(data)}
+        <Button onClick={gotoCreate}>Buat Pesan</Button>
+      </PageContainer>
+    </>
   );
 };
 

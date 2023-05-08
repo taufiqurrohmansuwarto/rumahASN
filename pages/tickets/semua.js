@@ -6,7 +6,7 @@ const Tickets = () => {
   return (
     <>
       <Head>
-        <title>Konsultasi Online - Semua Tiket</title>
+        <title>Rumah ASN - Semua Tiket</title>
       </Head>
       <CustomersTickets status="all" />
     </>
