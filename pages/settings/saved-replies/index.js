@@ -11,7 +11,7 @@ const SavedReplies = () => {
   return (
     <>
       <Head>
-        <title>Rumah ASN - Template Balasan</title>
+        <title>Rumah ASN - Konfigurasi - Template Balasan</title>
       </Head>
       <PageContainer
         title="Konfigurasi"

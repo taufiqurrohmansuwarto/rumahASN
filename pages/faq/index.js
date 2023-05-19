@@ -13,7 +13,7 @@ function Feeds() {
   return (
     <>
       <Head>
-        <title>Pertanyaan Umum</title>
+        <title>Rumah ASN - Pertanyaan Umum</title>
       </Head>
       <PageContainer
         loading={isLoading}

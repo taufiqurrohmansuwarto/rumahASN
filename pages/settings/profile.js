@@ -83,7 +83,7 @@ function Profile() {
   return (
     <>
       <Head>
-        <title>Rumah ASN - Pengaturan Profil</title>
+        <title>Rumah ASN - Pengaturan - Profil</title>
       </Head>
       <PageContainer
         onBack={handleBack}

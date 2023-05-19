@@ -1,4 +1,6 @@
 import {
+  BarChartOutlined,
+  BookOutlined,
   LogoutOutlined,
   NotificationOutlined,
   ReconciliationOutlined,
@@ -60,12 +62,12 @@ const changeRoutes = (user) => {
         routes: [
           {
             path: "/layanan-tracking/siasn",
-            name: "Tracking SIASN",
+            name: "Aplikasi SIASN",
             icon: <UserOutlined />,
           },
           {
             path: "/layanan-tracking/simaster",
-            name: "Tracking SIMASTER",
+            name: "Aplikasi SIMASTER",
             icon: <UserOutlined />,
           },
         ],
@@ -74,16 +76,76 @@ const changeRoutes = (user) => {
 
     if (admin) {
       userRoutes.routes.push(
+        // {
+        //   path: "/agent/dashboard",
+        //   name: "Agent",
+        //   icon: <UserSwitchOutlined />,
+        // },
         {
-          path: "/agent/dashboard",
-          name: "Agent",
-          icon: <UserSwitchOutlined />,
+          path: "/analysis",
+          name: "Analisis",
+          icon: <BarChartOutlined />,
+          routes: [
+            {
+              path: "/analysis/dashboard",
+              name: "Dashboard",
+            },
+            {
+              path: "/analysis/kecepatan-respon",
+              name: "Kecepatan Respon",
+            },
+            {
+              path: "/analysis/kepuasan-pelanggan",
+              name: "Kepuasan Pelanggan",
+            },
+            {
+              path: "/analysis/performa-pegawai",
+              name: "Performa Pegawai",
+            },
+            {
+              path: "/analysis/trend",
+              name: "Trend",
+            },
+          ],
         },
         {
-          path: "/admin/dashboard",
-          name: "Admin",
+          path: "/referensi",
+          name: "Referensi",
+          icon: <BookOutlined />,
+          routes: [
+            { path: "/referensi/status", name: "Status" },
+            {
+              path: "/referensi/priorities",
+              name: "Prioritas",
+            },
+            {
+              path: "/referensi/categories",
+              name: "Kategori",
+            },
+            {
+              path: "/referensi/sub-categories",
+              name: "Sub Kategori",
+            },
+            {
+              path: "/referensi/faq",
+              name: "F.A.Q",
+            },
+            {
+              path: "/referensi/faq-category",
+              name: "Kategori F.A.Q",
+            },
+          ],
+        },
+        {
+          path: "/managements/users",
+          name: "Manajemen Pengguna",
           icon: <UserOutlined />,
         }
+        // {
+        //   path: "/admin/dashboard",
+        //   name: "Admin",
+        //   icon: <UserOutlined />,
+        // }
       );
     }
 
