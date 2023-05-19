@@ -17,7 +17,7 @@ export const userRoutes = {
     { path: "/feeds", name: "Beranda", icon: <HomeOutlined /> },
     {
       path: "/tickets",
-      name: "Tiket saya",
+      name: "Pertanyaan saya",
       icon: <SnippetsOutlined />,
       routes: [
         {
@@ -47,7 +47,7 @@ export const userRoutes = {
     { path: "/mails", name: "Pesan Pribadi", icon: <MailOutlined /> },
     {
       path: "/faq",
-      name: " FAQ & Knowledge Base",
+      name: " Pertanyaan Umum",
       icon: <QuestionCircleOutlined />,
     },
     {
@@ -55,7 +55,7 @@ export const userRoutes = {
       name: "Konfigurasi",
       icon: <SettingOutlined />,
       routes: [
-        { path: "/settings/saved-replies", name: "Balasan Tersimpan" },
+        { path: "/settings/saved-replies", name: "Template Balasan" },
         { path: "/settings/profile", name: "Profil" },
       ],
     },

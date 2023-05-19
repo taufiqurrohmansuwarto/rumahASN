@@ -13,12 +13,12 @@ function Feeds() {
   return (
     <>
       <Head>
-        <title>FAQ & Knowledge Base</title>
+        <title>Pertanyaan Umum</title>
       </Head>
       <PageContainer
         loading={isLoading}
-        title="F.A.Q dan Knowledge Base"
-        subTitle="Pertanyaan yang sering diajukan"
+        title="Pertanyaan Umum"
+        subTitle="Pertanyaan Umum yang sering muncul"
         breadcrumbRender={() => (
           <Breadcrumb>
             <Breadcrumb.Item>
@@ -26,7 +26,7 @@ function Feeds() {
                 <a>Beranda</a>
               </Link>
             </Breadcrumb.Item>
-            <Breadcrumb.Item>FAQ & Knowledge Base</Breadcrumb.Item>
+            <Breadcrumb.Item>Pertanyaan Umum</Breadcrumb.Item>
           </Breadcrumb>
         )}
       >
