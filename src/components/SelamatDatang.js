@@ -16,14 +16,14 @@ const MyText = ({ user }) => {
         Selamat datang di Rumah ASN BKD Provinsi Jawa Timur! Sebelum bertanya,
         silakan periksa menu{" "}
         <Link href={"/faq"}>
-          <a>F.A.Q & Knowledge Base</a>
+          <a>Pertanyaan Umum</a>
         </Link>{" "}
-        dan tiket yang sudah ada. Jika belum menemukan jawaban, jangan ragu
-        untuk membuat tiket baru. Kami siap membantu!{" "}
+        dan daftar pertanyaan yang sudah ada. Jika belum menemukan jawaban,
+        jangan ragu untuk membuat pertanyaan baru. Kami siap membantu!{" "}
       </Typography.Text>
       <Divider />
       <Button onClick={handleCreate} type="primary">
-        Buat Tiket Baru
+        Buat Pertanyaan
       </Button>
     </>
   );

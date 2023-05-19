@@ -102,8 +102,8 @@ const CreateTicket = () => {
 
   return (
     <PageContainer
-      title="Helpdesk"
-      subTitle="Tiket Baru"
+      title="Rumah ASN"
+      subTitle="Pertanyaan Baru"
       breadcrumbRender={() => (
         <Breadcrumb>
           <Breadcrumb.Item>
@@ -129,11 +129,9 @@ const CreateTicket = () => {
             mb={8}
           >
             <Text>
-              Anda pegawai Pemerintah Provinsi Jawa Timur? Gunakan akun SIMASTER
-              dan PTTPK agar kami bisa membantu Anda lebih mudah. Deskripsikan
-              masalah Anda dengan jelas dan gunakan tata bahasa yang baik.
-              Jangan lupa sertakan gambar atau link file sebagai bukti jika
-              diperlukan. Terima kasih.
+              Deskripsikan masalah Anda dengan jelas dan gunakan tata bahasa
+              yang baik. Jangan lupa sertakan gambar atau link file sebagai
+              bukti jika diperlukan. Terima kasih.
             </Text>
           </Alert>
           <Stack>

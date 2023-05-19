@@ -11,11 +11,11 @@ const SavedReplies = () => {
   return (
     <>
       <Head>
-        <title>Rumah ASN - Balasan Tersimpan</title>
+        <title>Rumah ASN - Template Balasan</title>
       </Head>
       <PageContainer
         title="Konfigurasi"
-        subTitle="Balasan Tersimpan"
+        subTitle="Template Balasan"
         breadcrumbRender={() => (
           <Breadcrumb>
             <Breadcrumb.Item>
@@ -23,7 +23,7 @@ const SavedReplies = () => {
                 <a>Beranda</a>
               </Link>
             </Breadcrumb.Item>
-            <Breadcrumb.Item>Balasan Disimpan</Breadcrumb.Item>
+            <Breadcrumb.Item>Template Balasan</Breadcrumb.Item>
           </Breadcrumb>
         )}
         // content="Balasan yang disimpan adalah potongan teks yang dapat digunakan kembali yang dapat Anda gunakan di seluruh bidang komentar Helpdesk. Balasan yang disimpan dapat menghemat waktu Anda jika Anda sering mengetik tanggapan yang serupa."
@@ -33,12 +33,12 @@ const SavedReplies = () => {
             <Stack>
               <Alert
                 showIcon
-                message="Balasan Disimpan"
-                description="Balasan disimpan adalah teks siap pakai untuk berbagai situasi helpdesk. Penggunaannya menghemat waktu saat menanggapi pertanyaan yang sering muncul."
+                message="Template Balasan"
+                description="Template Balasan adalah teks siap pakai yang sudah dibuat sebelumnya. Penggunaannya menghemat waktu saat membalas atau membuat komentar."
                 type="info"
               />
               <ListSavedReplies />
-              <Divider orientation="left">Tambahkan Balasan Tersimpan</Divider>
+              <Divider orientation="left">Tambahkan Template Balasan</Divider>
               <CreateSavedReplies />
             </Stack>
           </Grid.Col>

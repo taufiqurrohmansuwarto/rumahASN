@@ -36,6 +36,7 @@ const SignIn = ({ providers }) => {
           </Blockquote>
           <Row>
             <Col md={24} xs={24}>
+              <Divider plain>Anda masyarakat umum?</Divider>
               <GoogleButton
                 style={{ width: "100%" }}
                 label="Masuk dengan Google"
@@ -44,7 +45,7 @@ const SignIn = ({ providers }) => {
             </Col>
             <Col xs={24}>
               <Divider plain>
-                atau akun pegawai Pemerintah Provinsi Jawa Timur
+                atau anda pegawai Pemerintah Provinsi Jawa Timur?
               </Divider>
             </Col>
             <Col xs={24}>
