@@ -52,7 +52,7 @@ export const userRoutes = {
     },
     {
       path: "/settings",
-      name: "Konfigurasi",
+      name: " Konfigurasi",
       icon: <SettingOutlined />,
       routes: [
         { path: "/settings/saved-replies", name: "Template Balasan" },

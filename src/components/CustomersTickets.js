@@ -64,7 +64,7 @@ const CustomersTickets = ({ status = "all", title = "Semua Tiket" }) => {
       responsive: ["sm"],
     },
     {
-      title: "Nomer Tiket",
+      title: "Nomer Pertanyaan",
       key: "ticket_number",
       render: (_, record) => <Tag color="black">{record?.ticket_number}</Tag>,
       responsive: ["sm"],
@@ -115,7 +115,7 @@ const CustomersTickets = ({ status = "all", title = "Semua Tiket" }) => {
 
   return (
     <PageContainer
-      title="Tiket"
+      title="Pertanyaan"
       subTitle={title}
       breadcrumbRender={() => (
         <Breadcrumb>
@@ -124,12 +124,12 @@ const CustomersTickets = ({ status = "all", title = "Semua Tiket" }) => {
               <a>Beranda</a>
             </Link>
           </Breadcrumb.Item>
-          <Breadcrumb.Item>Tiket</Breadcrumb.Item>
+          <Breadcrumb.Item>Pertanyaan</Breadcrumb.Item>
         </Breadcrumb>
       )}
     >
       <Card>
-        <Tooltip title="Buat tiket baru">
+        <Tooltip title="Buat pertanyaan baru">
           <Button
             icon={<PlusOutlined />}
             type="primary"
@@ -138,7 +138,7 @@ const CustomersTickets = ({ status = "all", title = "Semua Tiket" }) => {
             }}
             onClick={createTicket}
           >
-            Tiket
+            Pertanyaan
           </Button>
         </Tooltip>
         <Table
@@ -151,7 +151,7 @@ const CustomersTickets = ({ status = "all", title = "Semua Tiket" }) => {
             defaultCurrent: query?.page,
             defaultPageSize: 50,
             showTotal: (total, range) =>
-              `${range[0]}-${range[1]} dari ${total} tiket`,
+              `${range[0]}-${range[1]} dari ${total} pertanyaan`,
             onChange: (page, limit) => {
               setQuery({
                 ...query,
