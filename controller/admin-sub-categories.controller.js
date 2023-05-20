@@ -62,11 +62,12 @@ const create = async (req, res) => {
 const update = async (req, res) => {
   try {
     const { id } = req?.query;
-    const { name, category_id, description } = req.body;
+    const { name, category_id, description, durasi } = req.body;
     await SubCategories.query().patchAndFetchById(id, {
       name,
       category_id,
       description,
+      durasi: `${durasi} minutes`,
     });
     res.json({ code: 200, message: "success" });
   } catch (error) {
