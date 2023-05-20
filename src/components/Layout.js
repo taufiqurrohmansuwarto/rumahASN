@@ -1,4 +1,5 @@
 import {
+  ApartmentOutlined,
   BarChartOutlined,
   BookOutlined,
   LogoutOutlined,
@@ -131,15 +132,19 @@ const changeRoutes = (user) => {
               name: "F.A.Q",
             },
             {
-              path: "/referensi/faq-category",
+              path: "/referensi/sub-faq",
               name: "Kategori F.A.Q",
             },
           ],
         },
         {
-          path: "/managements/users",
-          name: "Manajemen Pengguna",
-          icon: <UserOutlined />,
+          path: "/apps-managements",
+          name: "Manajemen Aplikasi",
+          icon: <ApartmentOutlined />,
+          routes: [
+            { path: "/apps-managements/users", name: "Pengguna" },
+            // { path: "/managements/customers", name: "Pelanggan" },
+          ],
         }
         // {
         //   path: "/admin/dashboard",
