@@ -19,6 +19,11 @@ const renderImage = (href, title, text) => {
 };
 
 const renderText = (text) => {
+  // check if includes html symbol
+  if (text.includes("&#39;")) {
+    text = text.replace(/&#39;/g, "'");
+  }
+
   const hashTags = extractHashtags(text);
   const mentions = extractMentions(text);
 

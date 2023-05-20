@@ -12,7 +12,7 @@ function ReferensiFaqCategories() {
 }
 
 ReferensiFaqCategories.getLayout = function getLayout(page) {
-  return <Layout active="/referensi/status">{page}</Layout>;
+  return <Layout active="/referensi/faq-categories">{page}</Layout>;
 };
 
 ReferensiFaqCategories.Auth = {

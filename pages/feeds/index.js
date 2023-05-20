@@ -32,9 +32,9 @@ function Feeds() {
             <Grid.Col md={12} xs={12}>
               <PublikasiCASN />
             </Grid.Col>
-            <Grid.Col md={12} xs={12}>
+            {/* <Grid.Col md={12} xs={12}>
               <VideoYoutube />
-            </Grid.Col>
+            </Grid.Col> */}
           </Grid>
         </Grid.Col>
       </Grid>

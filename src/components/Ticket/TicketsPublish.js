@@ -87,7 +87,9 @@ const TitleLink = ({ item }) => {
   return (
     <div>
       <Typography.Text strong style={{ marginRight: 8 }}>
-        <Link href={`/customers-tickets/${item?.id}`}>{item.title}</Link>
+        <Link href={`/customers-tickets/${item?.id}`} target="_blank">
+          {item.title}
+        </Link>
       </Typography.Text>
       {screens?.xs && <br />}
       <Published item={item} />

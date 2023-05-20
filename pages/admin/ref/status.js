@@ -18,12 +18,10 @@ import {
   deleteStatus,
   getStatus,
   updateStatus,
-} from "../../../services";
+} from "@/services";
 
 const { default: AdminLayout } = require("../../../src/components/AdminLayout");
-const {
-  default: PageContainer,
-} = require("../../../src/components/PageContainer");
+const { default: PageContainer } = require("@/components/PageContainer");
 
 const CreateStatus = ({ open, onCancel }) => {
   const [form] = Form.useForm();
