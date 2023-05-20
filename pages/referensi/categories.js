@@ -1,23 +1,6 @@
 import Layout from "@/components/Layout";
 import Head from "next/head";
 
-import { PlusOutlined } from "@ant-design/icons";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import {
-  Input,
-  Form,
-  TreeSelect,
-  Modal,
-  Button,
-  Table,
-  Space,
-  Divider,
-  Popconfirm,
-  Card,
-  message,
-  Alert,
-} from "antd";
-import { useEffect, useState } from "react";
 import {
   createCategory,
   deleteCategory,
@@ -26,7 +9,21 @@ import {
   updateCategory,
 } from "@/services/index";
 import { formatDateLL } from "@/utils/client-utils";
-import { Stack } from "@mantine/core";
+import { PlusOutlined } from "@ant-design/icons";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  Button,
+  Divider,
+  Form,
+  Input,
+  Modal,
+  Popconfirm,
+  Space,
+  Table,
+  TreeSelect,
+  message,
+} from "antd";
+import { useEffect, useState } from "react";
 
 const { default: PageContainer } = require("@/components/PageContainer");
 
@@ -318,50 +315,38 @@ function ReferensiCategories() {
       <Head>
         <title>Rumah ASN - Referensi - Categories</title>
       </Head>
-      <PageContainer title="Kategori Pertanyaan">
-        <Stack>
-          <Card title="Kamus Kategori">
-            <Alert
-              showIcon
-              type="info"
-              description='Kategori adalah kelompok umum yang mencakup berbagai topik atau isu terkait dengan bidang kepegawaian. Kategori membantu memisahkan pertanyaan atau masalah ke dalam area spesifik yang lebih mudah dikelola. Contoh, kategori adalah "Seleksi CASN" yang mencakup semua pertanyaan dan masalah yang terkait dengan seleksi Calon Aparatur Sipil Negara.'
-            />
-            <Button
-              style={{ marginBottom: 16, marginTop: 16 }}
-              icon={<PlusOutlined />}
-              type="primary"
-              onClick={openCreateModal}
-            >
-              Tambah
-            </Button>
-            <Table
-              title={() => <Input.Search onSearch={handleSearch} />}
-              columns={columns}
-              pagination={{
-                current: query?.page,
-                pageSize: query?.limit,
-                total: data?.total,
-                position: ["bottomRight", "topRight"],
-                showTotal: (total) => `Total ${total} item`,
-                onChange: (page, pageSize) => {
-                  setQuery({ ...query, page, limit: pageSize });
-                },
-              }}
-              rowKey={(row) => row?.id}
-              dataSource={data?.data}
-              loading={isLoading}
-            />
-            <CreateForm
-              open={createModal}
-              handleCancel={handleCancelCreateModal}
-            />
-            <UpdateForm
-              open={updateModal}
-              data={dataUpdate}
-              onCancel={handleCancelUpdateModal}
-            />
-          </Card>
-        </Stack>
+      <PageContainer title="Kamus Referensi" subTitle="Kategori Pertanyaan">
+        <Button
+          style={{ marginBottom: 16, marginTop: 16 }}
+          icon={<PlusOutlined />}
+          type="primary"
+          onClick={openCreateModal}
+        >
+          Kategori Pertanyaan
+        </Button>
+        <Table
+          title={() => <Input.Search onSearch={handleSearch} />}
+          columns={columns}
+          pagination={{
+            current: query?.page,
+            pageSize: query?.limit,
+            total: data?.total,
+            position: ["bottomRight", "topRight"],
+            showTotal: (total) => `Total ${total} item`,
+            onChange: (page, pageSize) => {
+              setQuery({ ...query, page, limit: pageSize });
+            },
+          }}
+          rowKey={(row) => row?.id}
+          dataSource={data?.data}
+          loading={isLoading}
+        />
+        <CreateForm open={createModal} handleCancel={handleCancelCreateModal} />
+        <UpdateForm
+          open={updateModal}
+          data={dataUpdate}
+          onCancel={handleCancelUpdateModal}
+        />
       </PageContainer>
     </>
   );
