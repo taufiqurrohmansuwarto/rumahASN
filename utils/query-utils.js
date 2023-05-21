@@ -159,6 +159,30 @@ SELECT week_start,
 FROM weekly_tickets
 ORDER BY week_start, category_id, sub_category_id;`
     );
+    return result;
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+module.exports.customerSatisfactionsQuery = async () => {
+  try {
+    const result = await knex.raw(
+      `
+      WITH dates AS (SELECT generate_series(DATE_TRUNC('month', CURRENT_DATE - INTERVAL '6 month'), CURRENT_DATE,
+                                      '1 month')::date AS month)
+SELECT to_char(d.month, 'Month')                                 as month,
+       COALESCE(round(AVG(t.stars):: numeric, 2), 0)             AS average_ratings,
+       count(t.stars)                                            AS total_ratings,
+       COALESCE(SUM(CASE WHEN t.stars = 5 THEN 1 ELSE 0 END), 0) AS five_star_ratings
+FROM dates d
+         LEFT JOIN
+     tickets t ON DATE_TRUNC('month', t.completed_at) = d.month
+GROUP BY d.month
+ORDER BY d.month ASC;
+      `
+    );
+    return result;
   } catch (error) {
     console.log(error);
   }
@@ -171,6 +195,8 @@ module.exports.agentsPerformances = async () => {
        u.username                          AS agent_username,
        u.image                             as agent_image,
        COALESCE(COUNT(t.id), 0)            AS total_tickets_handled,
+       coalesce(count(t.id) filter (where t.status_code = 'DIKERJAKAN'), 0)   as total_tickets_handled_in_progress,
+       coalesce(count(t.id) filter (where t.status_code = 'SELESAI'), 0) as total_tickets_handled_done,
        COALESCE(ROUND(AVG(EXTRACT(EPOCH FROM (t.start_work_at - t.created_at)) / 60)::numeric, 2),
                 0)                         AS avg_response_time_minutes,
        COALESCE(ROUND(AVG(t.stars), 1), 0) AS avg_satisfaction_rating
@@ -233,6 +259,30 @@ LIMIT 5;`
   );
 
   return result;
+};
+
+module.exports.ticketsStatisticsQuery = async () => {
+  try {
+    const result = await knex.raw(
+      `
+    WITH dates AS (SELECT generate_series(DATE_TRUNC('month', CURRENT_DATE - INTERVAL '6 month'), CURRENT_DATE,
+                                      '1 month')::date AS month)
+SELECT to_char(d.month, 'Month')                                                  as "bulan",
+       COALESCE(SUM(CASE WHEN t.status_code = 'DIAJUKAN' THEN 1 ELSE 0 END), 0)   AS "diajukan",
+       COALESCE(SUM(CASE WHEN t.status_code = 'DIKERJAKAN' THEN 1 ELSE 0 END), 0) AS "dikerjakan",
+       COALESCE(SUM(CASE WHEN t.status_code = 'SELESAI' THEN 1 ELSE 0 END), 0)    AS "selesai",
+       COALESCE(COUNT(t.id), 0)                                                   as "total"
+FROM dates d
+         LEFT JOIN
+     tickets t ON DATE_TRUNC('month', t.created_at) = d.month
+GROUP BY d.month
+ORDER BY d.month ASC;
+    `
+    );
+    return result;
+  } catch (error) {
+    console.log(error);
+  }
 };
 
 // kepuasan pelanggan

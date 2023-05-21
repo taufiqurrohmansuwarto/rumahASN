@@ -155,11 +155,11 @@ const changeRoutes = (user) => {
     }
 
     if (agent) {
-      userRoutes.routes.push({
-        path: "/agent/dashboard",
-        name: "Agent",
-        icon: <UserOutlined />,
-      });
+      // userRoutes.routes.push({
+      //   path: "/agent/dashboard",
+      //   name: "Agent",
+      //   icon: <UserOutlined />,
+      // });
     }
 
     const routes = uniqBy(userRoutes.routes, "path");

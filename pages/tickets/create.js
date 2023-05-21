@@ -113,10 +113,10 @@ const CreateTicket = () => {
           </Breadcrumb.Item>
           <Breadcrumb.Item>
             <Link href="/tickets/semua">
-              <a>Tiket</a>
+              <a>Pertanyaan</a>
             </Link>
           </Breadcrumb.Item>
-          <Breadcrumb.Item>Tiket Baru</Breadcrumb.Item>
+          <Breadcrumb.Item>Pertanyaan Baru</Breadcrumb.Item>
         </Breadcrumb>
       )}
     >

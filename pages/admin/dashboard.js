@@ -20,15 +20,15 @@ const Dashboard = () => {
   return (
     <>
       <Head>
-        <title>
-          Konsultasi Online - Admin
-        </title>
+        <title>Konsultasi Online - Admin</title>
       </Head>
-      <PageContainer title="Halaman Admin" loading={isLoading || status === "loading"}>
+      <PageContainer
+        title="Halaman Admin"
+        loading={isLoading || status === "loading"}
+      >
         <Stack>
           <Alert title="Perhatian">
             <Text mb={10}>Halo Admin, {userData?.user?.name}</Text>
-
             <Button
               component="a"
               href="/helpdesk/api/admins/reports"

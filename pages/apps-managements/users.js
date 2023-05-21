@@ -95,7 +95,7 @@ const Dashboard = () => {
       <Head>
         <title>Manajemen Aplikasi</title>
       </Head>
-      <PageContainer title="Manajemen Aplikasi - Pengguna" subTitle="Pengguna">
+      <PageContainer title="Manajemen Aplikasi" subTitle="Pengguna">
         <Card>
           <Table
             size="small"

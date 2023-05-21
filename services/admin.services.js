@@ -58,3 +58,11 @@ export const trends = async () => {
 export const agentsPerformances = async () => {
   return api.get(`/analysis/performa-agent`).then((res) => res?.data);
 };
+
+export const customerSatisafactionsScore = async () => {
+  return api.get(`/analysis/kepuasan-pelanggan`).then((res) => res?.data);
+};
+
+export const ticketStatisticsScore = async () => {
+  return api.get(`/analysis/statistik-tiket`).then((res) => res?.data);
+};

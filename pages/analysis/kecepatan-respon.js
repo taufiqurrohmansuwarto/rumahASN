@@ -1,4 +1,5 @@
 import Layout from "@/components/Layout";
+import PageContainer from "@/components/PageContainer";
 import Head from "next/head";
 
 function KecepatanResponse() {
@@ -7,6 +8,10 @@ function KecepatanResponse() {
       <Head>
         <title>Rumah ASN - Analisis - Kecepatan Respon</title>
       </Head>
+      <PageContainer
+        title="Analisis"
+        subTitle="Kecepatan Respon"
+      ></PageContainer>
     </>
   );
 }

@@ -1,6 +1,10 @@
 const User = require("@/models/users.model");
 const Ticket = require("@/models/tickets.model");
-const { trends3MonthAgo } = require("@/utils/query-utils");
+const {
+  trends3MonthAgo,
+  customerSatisfactionsQuery,
+  ticketsStatisticsQuery,
+} = require("@/utils/query-utils");
 const {
   agentsPerformances: agentsPerformancesQuery,
 } = require("@/utils/query-utils");
@@ -24,6 +28,18 @@ const agentsPerformances = async (req, res) => {
 
 const customersSatistactions = async (req, res) => {
   try {
+    const result = await customerSatisfactionsQuery();
+    res.json(result?.rows);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+const ticketStatistics = async (req, res) => {
+  try {
+    const result = await ticketsStatisticsQuery();
+    res.json(result?.rows);
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: "Internal server error" });
@@ -54,4 +70,5 @@ module.exports = {
   customersSatistactions,
   responsesTimes,
   trends,
+  ticketStatistics,
 };

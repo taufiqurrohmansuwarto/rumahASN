@@ -147,7 +147,12 @@ from (select status_code, count(status_code)
       `
       );
 
-      res.json(result?.rows);
+      const data = result?.rows?.map((r) => ({
+        ...r,
+        count: parseInt(r?.count, 10),
+      }));
+
+      res.json(data);
     } else if (type === "last7Days") {
       const result = await queryLast7Days();
 

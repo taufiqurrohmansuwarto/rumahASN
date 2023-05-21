@@ -62,6 +62,14 @@ const ChangeLog = () => {
         "dan implementasi fitur jalur pribadi",
       ],
     },
+    {
+      version: "1.0.0-rc 9",
+      date: "21-05-2023",
+      changes: [
+        "Mengganti beberapa kalimat yang end user tidak mengerti",
+        "Menambahkan fitur",
+      ],
+    },
   ];
 
   return (

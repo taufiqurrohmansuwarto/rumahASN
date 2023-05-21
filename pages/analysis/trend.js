@@ -1,4 +1,6 @@
+import PlotTrendQuestion from "@/components/Dashboards/PlotTrendQuestion";
 import Layout from "@/components/Layout";
+import PageContainer from "@/components/PageContainer";
 import Head from "next/head";
 
 function Trend() {
@@ -7,6 +9,9 @@ function Trend() {
       <Head>
         <title>Rumah ASN - Analisis - Trend</title>
       </Head>
+      <PageContainer title="Analisis" subTitle="Trend Pertanyaan">
+        <PlotTrendQuestion />
+      </PageContainer>
     </>
   );
 }
