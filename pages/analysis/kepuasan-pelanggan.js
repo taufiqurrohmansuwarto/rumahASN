@@ -1,4 +1,6 @@
+import PlotKepuasanPelanggan from "@/components/Dashboards/PlotKepuasanPelanggan";
 import Layout from "@/components/Layout";
+import PageContainer from "@/components/PageContainer";
 import Head from "next/head";
 
 function KepuasanPelanggan() {
@@ -7,6 +9,9 @@ function KepuasanPelanggan() {
       <Head>
         <title>Rumah ASN - Analisis - Kepuasan Pelanggan</title>
       </Head>
+      <PageContainer title="Analisis" subTitle="Kepuasan Pelanggan">
+        <PlotKepuasanPelanggan />
+      </PageContainer>
     </>
   );
 }

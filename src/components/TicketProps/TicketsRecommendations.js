@@ -11,7 +11,7 @@ const Tickets = ({ tickets }) => {
   return (
     <List
       dataSource={tickets}
-      header={<Text strong>Rekomendasi Tiket</Text>}
+      header={<Text strong>Pertanyaan Terkait</Text>}
       rowKey={(row) => row?.id}
       renderItem={(item) => (
         <List.Item>
