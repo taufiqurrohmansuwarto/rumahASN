@@ -70,6 +70,11 @@ const ChangeLog = () => {
         "Menambahkan fitur",
       ],
     },
+    {
+      version: "1.0.0-rc 10",
+      date: "23-05-2023",
+      changes: ["Fix error di referensi sub categories"],
+    },
   ];
 
   return (

@@ -263,7 +263,7 @@ function ReferensiCategories() {
       title: "Bidang/Perangkat Daerah",
       key: "satuan_kerja",
       render: (text, record) => {
-        return record.satuan_kerja.label;
+        return record.satuan_kerja?.label;
       },
     },
     {
