@@ -272,12 +272,12 @@ function ReferensiSubCategories() {
     {
       title: "Kategori",
       key: "Kategori",
-      render: (data) => data.category.name,
+      render: (data) => data?.category?.name,
     },
     {
       title: "Satuan Kerja",
       key: "satuan_kerja",
-      render: (data) => data.category.satuan_kerja.label,
+      render: (data) => data?.category?.satuan_kerja?.label,
     },
     {
       title: "Durasi Penyelesaian",
