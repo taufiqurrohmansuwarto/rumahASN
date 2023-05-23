@@ -171,7 +171,7 @@ const CreateForm = ({ open, onCancel, categories }) => {
           label="Kategori"
         >
           <Select showSearch optionFilterProp="name">
-            {categories.map((category) => (
+            {categories?.map((category) => (
               <Select.Option
                 key={category?.id}
                 name={category?.name}
