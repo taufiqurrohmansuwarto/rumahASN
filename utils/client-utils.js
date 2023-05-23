@@ -108,7 +108,8 @@ export const definitions = {
               (attributes?.ticket?.is_published &&
                 !attributes?.ticket?.is_locked) ||
               (user?.id === attributes?.ticket?.requester &&
-                !attributes?.ticket?.is_locked)
+                !attributes?.ticket?.is_locked) ||
+              user?.id === attributes?.ticket?.assignee
             );
           }
           return true;
