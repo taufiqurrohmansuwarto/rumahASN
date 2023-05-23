@@ -8,7 +8,7 @@ const agents = async (req, res) => {
   try {
     const { current_role: role } = req?.user;
 
-    if (role !== "admin") {
+    if (role === "user") {
       res.status(403).json({ message: "Forbidden", code: 403 });
     } else {
       const result = await Users.query()
