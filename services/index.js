@@ -225,6 +225,7 @@ export const parseMarkdown = async (data) => {
 // publish tickets
 export const publishTickets = async (query) => {
   const qs = queryString.stringify(query, { arrayFormat: "comma" });
+  console.log(qs);
 
   return await api.get(`/tickets?${qs}`).then((res) => res?.data);
 };

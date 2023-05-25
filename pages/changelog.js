@@ -75,6 +75,11 @@ const ChangeLog = () => {
       date: "23-05-2023",
       changes: ["Fix error di referensi sub categories"],
     },
+    {
+      version: "1.0.0-rc 11",
+      date: "26-05-2023",
+      changes: ["Fix error in router.query"],
+    },
   ];
 
   return (

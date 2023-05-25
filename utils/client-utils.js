@@ -294,3 +294,13 @@ export const isNotThreeDaysAgo = (date) => {
 export const stringToNumber = (string) => {
   return parseInt(string).toFixed(0);
 };
+
+export const cleanQuery = (query) => {
+  const cleaned = {};
+  for (const key in query) {
+    if (query[key]) {
+      cleaned[key] = query[key];
+    }
+  }
+  return cleaned;
+};
