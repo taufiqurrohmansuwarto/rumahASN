@@ -1,5 +1,5 @@
 import { publishTickets, refAgents } from "@/services/index";
-import { formatDateLL, setColorStatus } from "@/utils/client-utils";
+import { cleanQuery, formatDateLL, setColorStatus } from "@/utils/client-utils";
 import { MessageOutlined } from "@ant-design/icons";
 import { Grid } from "@mantine/core";
 import { useQuery } from "@tanstack/react-query";
@@ -20,6 +20,7 @@ import Link from "next/link";
 import { useState } from "react";
 import RestrictedContent from "../RestrictedContent";
 import { useRouter } from "next/router";
+import { useDebouncedValue } from "@mantine/hooks";
 
 const { useBreakpoint } = AntdGrid;
 
@@ -61,7 +62,7 @@ const Published = ({ item }) => {
   }
 };
 
-const FilterUser = ({ handleChange }) => {
+const FilterUser = ({ handleChange, value }) => {
   const { data, isLoading } = useQuery(["agents"], () => refAgents(), {
     refetchOnWindowFocus: false,
   });
@@ -69,6 +70,7 @@ const FilterUser = ({ handleChange }) => {
   return (
     <Skeleton loading={isLoading}>
       <Select
+        value={value}
         optionFilterProp="label"
         style={{ width: "100%" }}
         mode="multiple"
@@ -98,27 +100,55 @@ const TitleLink = ({ item }) => {
   );
 };
 
-function TicketsPublish() {
+function debounce(fn, delay) {
+  let timeout;
+  return function (...args) {
+    const later = () => {
+      clearTimeout(timeout);
+      fn(...args);
+    };
+    clearTimeout(timeout);
+    timeout = setTimeout(later, delay);
+  };
+}
+
+// this is the main component
+const TicketsPublish = () => {
+  const router = useRouter();
   const [query, setQuery] = useState({
     page: 1,
     limit: 10,
     search: "",
   });
 
+  const [search, setSearch] = useState("");
+
   const { data, isLoading } = useQuery(
-    ["publish-tickets-customers", query],
-    () => publishTickets(query),
+    ["publish-tickets-customers", router?.query],
+    () => publishTickets(router?.query),
     {
-      enabled: !!query,
+      enabled: !!router?.query,
       keepPreviousData: true,
     }
   );
 
+  const handleChangeSeach = (e) => {
+    setSearch(e.target.value);
+  };
+
   const handleSearch = (e) => {
-    setQuery({
-      ...query,
+    // debounce e.target.value
+    console.log(e);
+
+    const query = cleanQuery({
+      ...router.query,
       search: e,
       page: 1,
+    });
+
+    router.push({
+      pathname: router.pathname,
+      query,
     });
   };
 
@@ -131,50 +161,86 @@ function TicketsPublish() {
   const handleChangeStatus = (value) => {
     if (value.length > 0) {
       const status_code = value.join(",");
-      setQuery({
-        ...query,
+      const query = cleanQuery({
+        ...router.query,
         status_code,
         page: 1,
       });
+
+      router.push({
+        pathname: router.pathname,
+        query,
+      });
     } else {
-      setQuery({
-        ...query,
+      const query = cleanQuery({
+        ...router.query,
         status_code: "",
         page: 1,
+      });
+
+      router.push({
+        pathname: router.pathname,
+        query,
       });
     }
   };
 
   const handleChangePublikasi = (value) => {
     const checked = value.target.checked;
+    let query;
+
     if (checked) {
-      setQuery({
-        ...query,
+      query = cleanQuery({
+        ...router.query,
+        page: 1,
         is_published: checked,
       });
     } else {
-      setQuery({
-        ...query,
+      query = cleanQuery({
+        ...router.query,
+        page: 1,
         is_published: "",
       });
     }
+
+    router.push({
+      pathname: router.pathname,
+      query,
+    });
+  };
+
+  const handleChangePage = (page) => {
+    const query = cleanQuery({
+      ...router.query,
+      page,
+    });
+
+    router.push({
+      pathname: router.pathname,
+      query,
+    });
   };
 
   const handleSelectedUser = (user) => {
+    let query;
     if (user.length > 0) {
-      const assignees = user.join(",");
-      setQuery({
-        ...query,
-        assignees,
+      query = cleanQuery({
+        ...router.query,
         page: 1,
+        assignees: user.join(","),
       });
     } else {
-      setQuery({
-        ...query,
-        assignees: "",
+      query = cleanQuery({
+        ...router.query,
         page: 1,
+        assignees: "",
       });
     }
+
+    router.push({
+      pathname: router.pathname,
+      query,
+    });
   };
 
   return (
@@ -183,19 +249,33 @@ function TicketsPublish() {
         <Grid.Col md={12} xs={12}>
           <Input.Search
             placeholder="Cari berdasarkan judul"
+            defaultValue={router?.query?.search}
+            onChange={handleChangeSeach}
             onSearch={handleSearch}
             style={{ width: "100%" }}
           />
         </Grid.Col>
         <RestrictedContent name="advanced-filter">
           <Grid.Col md={12} xs={12}>
-            <Checkbox.Group onChange={handleChangeStatus} options={status} />
+            <Checkbox.Group
+              value={router?.query?.status_code?.split(",") || []}
+              onChange={handleChangeStatus}
+              options={status}
+            />
           </Grid.Col>
           <Grid.Col md={12} xs={12}>
-            <Checkbox onChange={handleChangePublikasi}>Publikasi</Checkbox>
+            <Checkbox
+              value={router?.query?.is_published === "true" ? true : false}
+              onChange={handleChangePublikasi}
+            >
+              Publikasi
+            </Checkbox>
           </Grid.Col>
           <Grid.Col>
-            <FilterUser handleChange={handleSelectedUser} />
+            <FilterUser
+              value={router?.query?.assignees?.split(",") || []}
+              handleChange={handleSelectedUser}
+            />
           </Grid.Col>
         </RestrictedContent>
       </Grid>
@@ -205,9 +285,9 @@ function TicketsPublish() {
         pagination={{
           showSizeChanger: false,
           position: "both",
-          current: query?.page,
-          pageSize: query?.limit,
-          onChange: (page) => setQuery({ ...query, page: page }),
+          current: parseInt(router?.query?.page) || 1,
+          pageSize: 10,
+          onChange: handleChangePage,
           total: data?.total,
           showTotal: (total, range) =>
             `${range[0]}-${range[1]} dari ${total} data`,
@@ -250,6 +330,6 @@ function TicketsPublish() {
       />
     </div>
   );
-}
+};
 
 export default TicketsPublish;
