@@ -265,7 +265,8 @@ const TicketsPublish = () => {
           </Grid.Col>
           <Grid.Col md={12} xs={12}>
             <Checkbox
-              value={router?.query?.is_published === "true" ? true : false}
+              value={!!router?.query?.is_published}
+              checked={!!router?.query?.is_published}
               onChange={handleChangePublikasi}
             >
               Publikasi
