@@ -4,9 +4,9 @@ import { MessageOutlined } from "@ant-design/icons";
 import { Grid } from "@mantine/core";
 import { useQuery } from "@tanstack/react-query";
 import {
+  Grid as AntdGrid,
   Avatar,
   Checkbox,
-  Grid as AntdGrid,
   Input,
   List,
   Popover,
@@ -17,10 +17,8 @@ import {
   Typography,
 } from "antd";
 import Link from "next/link";
-import { useState } from "react";
-import RestrictedContent from "../RestrictedContent";
 import { useRouter } from "next/router";
-import { useDebouncedValue } from "@mantine/hooks";
+import RestrictedContent from "../RestrictedContent";
 
 const { useBreakpoint } = AntdGrid;
 
@@ -115,13 +113,6 @@ function debounce(fn, delay) {
 // this is the main component
 const TicketsPublish = () => {
   const router = useRouter();
-  const [query, setQuery] = useState({
-    page: 1,
-    limit: 10,
-    search: "",
-  });
-
-  const [search, setSearch] = useState("");
 
   const { data, isLoading } = useQuery(
     ["publish-tickets-customers", router?.query],
@@ -132,13 +123,8 @@ const TicketsPublish = () => {
     }
   );
 
-  const handleChangeSeach = (e) => {
-    setSearch(e.target.value);
-  };
-
   const handleSearch = (e) => {
     // debounce e.target.value
-    console.log(e);
 
     const query = cleanQuery({
       ...router.query,
@@ -250,7 +236,6 @@ const TicketsPublish = () => {
           <Input.Search
             placeholder="Cari berdasarkan judul"
             defaultValue={router?.query?.search}
-            onChange={handleChangeSeach}
             onSearch={handleSearch}
             style={{ width: "100%" }}
           />
@@ -313,7 +298,12 @@ const TicketsPublish = () => {
             <List.Item.Meta
               title={<TitleLink item={item} />}
               description={
-                <Typography.Text type="secondary">
+                <Typography.Text
+                  type="secondary"
+                  style={{
+                    fontSize: 13,
+                  }}
+                >
                   Ditanyakan tanggal {formatDateLL(item?.created_at)} oleh{" "}
                   <Link href={`/users/${item?.customer?.custom_id}`}>
                     <Typography.Link>
