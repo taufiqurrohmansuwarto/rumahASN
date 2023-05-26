@@ -67,7 +67,15 @@ module.exports.detailUserProfile = async (req, res) => {
       .first()
       .select(select);
 
-    result = currentUser;
+    const totalPost = await Ticket.query()
+      .where("requester", id)
+      .count("id as total_post")
+      .first();
+
+    result = {
+      ...currentUser,
+      total_post: totalPost?.total_post || 0,
+    };
 
     // get statistics if current_user is admin or agent
 

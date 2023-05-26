@@ -94,6 +94,9 @@ const DetailInformation = ({ user }) => {
         <Image height={100} src={user?.image} alt="User Photo" />
         <Descriptions>
           <Descriptions.Item label="Nama">{user?.username}</Descriptions.Item>
+          <Descriptions.Item label="Jumlah Pertanyaan">
+            {user?.total_post}
+          </Descriptions.Item>
           {user?.employee_number && (
             <Descriptions.Item label="NIP/NIPTT">
               {user?.employee_number}
@@ -210,7 +213,7 @@ const Users = () => {
   return (
     <>
       <Head>
-        <title>Rumah ASN - Detail User</title>
+        <title>{data?.username} </title>
       </Head>
       <PageContainer
         loading={isLoading}
