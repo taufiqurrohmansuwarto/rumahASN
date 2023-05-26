@@ -8,8 +8,33 @@ import PublikasiCASN from "@/components/Web/PublikasiCASN";
 import { Grid, Stack } from "@mantine/core";
 import { Card } from "antd";
 import Head from "next/head";
+import { useEffect } from "react";
+import { useRouter } from "next/router";
 
 function Feeds() {
+  const router = useRouter();
+
+  useEffect(() => {
+    // On before route change save scroll position
+    router.events.on("routeChangeStart", saveScrollPosition);
+    // On route change restore scroll position
+    router.events.on("routeChangeComplete", restoreScrollPosition);
+
+    return () => {
+      router.events.off("routeChangeStart", saveScrollPosition);
+      router.events.off("routeChangeComplete", restoreScrollPosition);
+    };
+  }, [router]);
+
+  function saveScrollPosition() {
+    window.sessionStorage.setItem("scrollPosition", window.scrollY.toString());
+  }
+
+  function restoreScrollPosition() {
+    const scrollY = window.sessionStorage.getItem("scrollPosition") ?? "0";
+    window.scrollTo(0, parseInt(scrollY));
+  }
+
   return (
     <PageContainer title="Beranda" subTitle="Rumah ASN">
       <Head>
