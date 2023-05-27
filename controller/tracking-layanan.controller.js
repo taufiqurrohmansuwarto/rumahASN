@@ -43,7 +43,34 @@ const layananTrackingSimaster = async (req, res) => {
   } catch (error) {}
 };
 
+// layanan lain
+const layananIpASN = async (req, res) => {
+  try {
+    const { nip } = req?.query;
+    const { fetcher } = req;
+    const { customId: userId } = req?.user;
+
+    const currentUser = await User.query().findById(userId);
+
+    if (currentUser?.group !== "MASTER") {
+      res.status(403).json({
+        message: "Forbidden",
+      });
+    } else {
+      const result = await fetcher.get(`/siasn-ws/layanan/ip-asn/${nip}`);
+      const hasil = result?.data;
+      res.json(hasil);
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      message: "Internal Server Error",
+    });
+  }
+};
+
 module.exports = {
   layananTrackingSiasn,
   layananTrackingSimaster,
+  layananIpASN,
 };

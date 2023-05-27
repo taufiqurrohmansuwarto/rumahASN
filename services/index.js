@@ -490,3 +490,8 @@ export const getPrivateMessages = (query = {}) => {
 export const getListYoutube = () => {
   return api.get("/videos").then((res) => res?.data);
 };
+
+// ipasn
+export const getIpasn = (nip) => {
+  return api.get(`/siasn/${nip}/ip-asn`).then((res) => res?.data);
+};

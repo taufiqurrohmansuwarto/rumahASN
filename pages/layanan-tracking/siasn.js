@@ -1,20 +1,29 @@
 import Layout from "@/components/Layout";
 import PageContainer from "@/components/PageContainer";
+import IpASN from "@/components/Tracking/IpASN";
 import SIASNTracking from "@/components/Tracking/SIASNTracking";
-import { Stack } from "@mantine/core";
-import { Alert, Card } from "antd";
+import { Card, Col, Divider, Row } from "antd";
 import Head from "next/head";
 
 function TrackingSIASN() {
   return (
     <>
       <Head>
-        <title>Rumah ASN - Tracking SIASN</title>
+        <title>Tracking SIASN</title>
       </Head>
       <PageContainer title="Layanan Tracking" subTitle="Aplikasi SIASN">
-        <Card>
-          <SIASNTracking />
-        </Card>
+        <Row gutter={[8, 16]}>
+          <Col span={24}>
+            <Card title="Layanan Tracking">
+              <SIASNTracking />
+            </Card>
+          </Col>
+          <Col span={24}>
+            <Card title="Check IP ASN">
+              <IpASN />
+            </Card>
+          </Col>
+        </Row>
       </PageContainer>
     </>
   );

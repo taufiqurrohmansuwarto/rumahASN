@@ -1,4 +1,4 @@
-import { Alert, Button, Divider, Skeleton, Typography } from "antd";
+import { Alert, Button, Divider, Skeleton, Typography, Space } from "antd";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { useRouter } from "next/router";
@@ -8,6 +8,10 @@ const MyText = ({ user }) => {
 
   const handleCreate = () => {
     router.push("/tickets/create");
+  };
+
+  const handleCheckIP = () => {
+    router.push("/layanan-tracking/siasn");
   };
 
   return (
@@ -22,9 +26,16 @@ const MyText = ({ user }) => {
         jangan ragu untuk membuat pertanyaan baru. Kami siap membantu!{" "}
       </Typography.Text>
       <Divider />
-      <Button onClick={handleCreate} type="primary">
-        Buat Pertanyaan
-      </Button>
+      <Space>
+        <Button onClick={handleCreate} type="primary">
+          Buat Pertanyaan
+        </Button>
+        {user?.group === "MASTER" && (
+          <Button danger type="primary" onClick={handleCheckIP}>
+            Check IP ASN
+          </Button>
+        )}
+      </Space>
     </>
   );
 };
