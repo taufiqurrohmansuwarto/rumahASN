@@ -11,7 +11,10 @@ const SignIn = ({ providers }) => {
   return (
     <>
       <Head>
-        <title>Rumah ASN - Login</title>
+        <title>
+          Rumah ASN by BKD Provinsi Jawa Timur - Ruang Menjawab Keluhan ASN Jawa
+          Timur dan Masyarakat UMUM
+        </title>
         <meta name="description" content="Rumah ASN" />
       </Head>
       <Row

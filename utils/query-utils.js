@@ -290,3 +290,5 @@ module.exports.customersSatisfactionsByCategory = async () => {};
 module.exports.customersSatisfactionsByTimeRange = async () => {};
 module.exports.customersSatisfactionsByTicketPriority = async () => {};
 module.exports.customersSatisfactionsByStatus = async () => {};
+
+// todo tambahkan statistik berdasarkan usia pelanggan yang bertanya 6 bulan terakhir
