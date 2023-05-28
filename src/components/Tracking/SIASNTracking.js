@@ -69,7 +69,7 @@ function SIASNTracking() {
   const listLayanan = [
     { key: "kenaikan-pangkat", label: "Kenaikan Pangkat" },
     { key: "pemberhentian", label: "Pemberhentian" },
-    { key: "skk", label: "Status Kepegawaian Dan Kependudukan" },
+    { key: "skk", label: "Usul Perbaikan Nama" },
   ];
 
   const { data, refetch, isFetching } = useQuery(
@@ -106,6 +106,10 @@ function SIASNTracking() {
           onCancel={cancelOpen}
           open={open}
         >
+          <Alert
+            description="Jika Status Usulan Sudah berubah menjadi Setuju TTD SK segera hubungi Kepegawaian Perangkat Daerah Anda atau BKD Provinsi Jawa Timur"
+            style={{ marginBottom: 12 }}
+          />
           <HasilLayanan data={data} />
         </Modal>
         <Col md={18} xs={24}>
