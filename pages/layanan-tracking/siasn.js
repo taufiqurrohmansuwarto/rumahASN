@@ -19,7 +19,7 @@ function TrackingSIASN() {
             </Card>
           </Col>
           <Col span={24}>
-            <Card title="Check IP ASN">
+            <Card title="Cek IP ASN">
               <IpASN />
             </Card>
           </Col>

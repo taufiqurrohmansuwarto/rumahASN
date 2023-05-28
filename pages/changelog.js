@@ -80,6 +80,11 @@ const ChangeLog = () => {
       date: "26-05-2023",
       changes: ["Fix error in router.query"],
     },
+    {
+      version: "1.0.0-rc 12",
+      date: "27-05-2023",
+      changes: ["Integrasi siasn pada layanan IP ASN"],
+    },
   ];
 
   return (

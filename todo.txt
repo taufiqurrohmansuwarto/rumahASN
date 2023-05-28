@@ -1,2 +1,1 @@
-2. perbaiki dashboard intinya data keluar dulu
-3. dan buat public pages untuk melihat trend dan performa pegawai
+1. buat kuesioner untuk private dan public

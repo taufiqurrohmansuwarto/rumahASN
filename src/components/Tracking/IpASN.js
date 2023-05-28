@@ -1,6 +1,6 @@
 import { getIpasn } from "@/services/index";
 import { useQuery } from "@tanstack/react-query";
-import { Button, Form, Input, Modal } from "antd";
+import { Button, Col, Form, Input, Modal, Row } from "antd";
 import { useState } from "react";
 
 const IPAsnModal = ({ open, handleCancel, data }) => {
@@ -16,35 +16,49 @@ const IPAsnModal = ({ open, handleCancel, data }) => {
       {data?.length && (
         <>
           <Form layout="vertical" form={form}>
-            <Form.Item label="Nama">
-              <Input value={data[0].nama} />
-            </Form.Item>
-            <Form.Item label="Sub Total">
-              <Input value={data[0].subtotal} />
-            </Form.Item>
-            <Form.Item label="Kualifikasi">
-              <Input value={data[0].kualifikasi} />
-            </Form.Item>
+            <Row gutter={[8, 8]}>
+              <Col span={24}>
+                <Form.Item label="Nama">
+                  <Input value={data[0].nama} readOnly />
+                </Form.Item>
+              </Col>
+              <Col span={4}>
+                <Form.Item label="Kualifikasi">
+                  <Input value={data[0].kualifikasi} readOnly />
+                </Form.Item>
+              </Col>
+              <Col span={4}>
+                <Form.Item label="Kompetensi">
+                  <Input value={data[0].kompetensi} readOnly />
+                </Form.Item>
+              </Col>
+              <Col span={4}>
+                <Form.Item label="Kinerja">
+                  <Input value={data[0].kinerja} readOnly />
+                </Form.Item>
+              </Col>
+              <Col span={4}>
+                <Form.Item label="Disiplin">
+                  <Input value={data[0].disiplin} readOnly />
+                </Form.Item>
+              </Col>
+              <Col span={4}>
+                <Form.Item label="Sub Total">
+                  <Input value={data[0].subtotal} />
+                </Form.Item>
+              </Col>
+            </Row>
             <Form.Item label="Keterangan Kualifikasi">
               <Input value={data[0].keterangan_kualifikasi} />
             </Form.Item>
-            <Form.Item label="Kompetensi">
-              <Input value={data[0].kompetensi} />
-            </Form.Item>
-            <Form.Item label="Keterangan Kualifikasi">
-              <Input.TextArea rows={5} value={data[0].keterangan_kompetensi} />
-            </Form.Item>
-            <Form.Item label="Kinerja">
-              <Input value={data[0].kinerja} />
+            <Form.Item label="Keterangan Kompetensi">
+              <Input.TextArea rows={4} value={data[0].keterangan_kompetensi} />
             </Form.Item>
             <Form.Item label="Keterangan Kinerja">
-              <Input.TextArea rows={5} value={data[0].keterangan_kinerja} />
-            </Form.Item>
-            <Form.Item label="Disiplin">
-              <Input value={data[0].disiplin} />
+              <Input.TextArea rows={4} value={data[0].keterangan_kinerja} />
             </Form.Item>
             <Form.Item label="Keterangan Disiplin">
-              <Input.TextArea rows={5} value={data[0].keterangan_disiplin} />
+              <Input.TextArea rows={4} value={data[0].keterangan_disiplin} />
             </Form.Item>
           </Form>
         </>
