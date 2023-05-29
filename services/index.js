@@ -495,3 +495,9 @@ export const getListYoutube = () => {
 export const getIpasn = (nip) => {
   return api.get(`/siasn/${nip}/ip-asn`).then((res) => res?.data);
 };
+
+// public
+
+export const landingData = () => {
+  return api.get("/public/landing").then((res) => res?.data);
+};
