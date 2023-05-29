@@ -1,3 +1,4 @@
+import AppRating from "@/components/Outer/AppRating";
 import { LoginOutlined } from "@ant-design/icons";
 import { Blockquote } from "@mantine/core";
 import { Button, Col, Divider, Row, Space, Typography } from "antd";
@@ -18,13 +19,13 @@ const SignIn = ({ providers }) => {
         <meta name="description" content="Rumah ASN" />
       </Head>
       <Row
-        style={{ minHeight: "100vh", padding: 16 }}
+        style={{ minHeight: "75vh", padding: 16 }}
         align="middle"
         justify="center"
       >
         <Col md={9} xs={24}>
           <Image
-            alt="Rumah ASN BA"
+            alt="Rumah ASN Brand Ambassador"
             src="https://siasn.bkd.jatimprov.go.id:9000/public/layanan-online.png"
             width={700}
             height={500}
@@ -120,6 +121,7 @@ const SignIn = ({ providers }) => {
           </Space>
         </Col>
       </Row>
+      <AppRating />
     </>
   );
 };

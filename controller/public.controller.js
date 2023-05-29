@@ -14,7 +14,8 @@ const landingPageData = async (req, res) => {
     const ticketsWithRatings = await Ticket.query()
       .whereNot("stars", null)
       .select("id", "stars", "requester_comment", "requester")
-      .withGraphFetched("[customer(simpleSelect)]");
+      .withGraphFetched("[customer(simpleSelect)]")
+      .orderBy("created_at", "desc");
 
     const ticketsPin = await Ticket.query()
       .where("is_pinned", true)

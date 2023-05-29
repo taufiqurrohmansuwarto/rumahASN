@@ -24,6 +24,9 @@ class User extends Model {
           // "employee_number"
         );
       },
+      simpleNoAvatar(query) {
+        query.select("custom_id", "username");
+      },
     };
   }
 
