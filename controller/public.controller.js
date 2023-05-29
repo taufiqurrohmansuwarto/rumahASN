@@ -13,6 +13,7 @@ const landingPageData = async (req, res) => {
   try {
     const ticketsWithRatings = await Ticket.query()
       .whereNot("stars", null)
+      .andWhereNot("requester_comment", null)
       .select("id", "stars", "requester_comment", "requester")
       .withGraphFetched("[customer(simpleSelect)]")
       .orderBy("created_at", "desc");
