@@ -143,6 +143,8 @@ const changeRoutes = (user) => {
           icon: <ApartmentOutlined />,
           routes: [
             { path: "/apps-managements/users", name: "Pengguna" },
+            { path: "/apps-managements/announcements", name: "Pengumuman" },
+            { path: "/apps-managements/votes", name: "Voting" },
             // { path: "/managements/customers", name: "Pelanggan" },
           ],
         }

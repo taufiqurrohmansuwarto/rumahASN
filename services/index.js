@@ -501,3 +501,16 @@ export const getIpasn = (nip) => {
 export const landingData = () => {
   return api.get("/public/landing").then((res) => res?.data);
 };
+
+// announcements
+export const getAnnouncements = () => {
+  return api.get("/announcements").then((res) => res?.data);
+};
+
+export const createAnnouncements = (data) => {
+  return api.post("/announcements", data).then((res) => res?.data);
+};
+
+export const updateAnnouncements = ({ id, data }) => {
+  return api.patch(`/announcements/${id}`, data).then((res) => res?.data);
+};
