@@ -1,5 +1,9 @@
+const Announcement = require("@/models/announcements.model");
+
 const announcements = async (req, res) => {
   try {
+    const result = await Announcement.query().first();
+    res.json(result);
   } catch (error) {
     console.log(error);
     res.status(500).json({ code: 500, message: "Internal Server Error" });
@@ -8,6 +12,9 @@ const announcements = async (req, res) => {
 
 const createAnnouncement = async (req, res) => {
   try {
+    const { body } = req;
+    await Announcement.query().insert(body);
+    res.json({ code: 200, message: "Success" });
   } catch (error) {
     console.log(error);
     res.status(500).json({ code: 500, message: "Internal Server Error" });
@@ -16,6 +23,11 @@ const createAnnouncement = async (req, res) => {
 
 const updateAnnouncement = async (req, res) => {
   try {
+    const { id } = req?.query;
+    const { body } = req;
+
+    await Announcement.query().findById(id).patch(body);
+    res.json({ code: 200, message: "Success" });
   } catch (error) {
     console.log(error);
     res.status(500).json({ code: 500, message: "Internal Server Error" });
