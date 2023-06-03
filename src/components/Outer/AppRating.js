@@ -1,10 +1,9 @@
 import { landingData } from "@/services/index";
 import { Avatar, Group, Rating, Text, createStyles } from "@mantine/core";
-import { IconMessageDots } from "@tabler/icons";
 import { useQuery } from "@tanstack/react-query";
 import { Carousel, Typography } from "antd";
 
-const COLORS = "#eb2f96";
+const COLORS = "#2f54eb";
 
 const blacklist = [
   "105503740477298041174",
@@ -83,12 +82,13 @@ function AppRating() {
   return (
     <div
       style={{
+        // create
         background: COLORS,
-        padding: 28,
+        padding: 72,
       }}
     >
       <Typography.Title
-        level={2}
+        level={3}
         style={{
           textAlign: "center",
           color: "white",
@@ -96,13 +96,11 @@ function AppRating() {
       >
         Apa kata mereka tentang Rumah ASN?
       </Typography.Title>
-      <Carousel>
-        <div>
-          {whiteListData(data?.ticketsWithRatings)?.map((ticket) => (
-            <UserInfo key={ticket?.id} data={ticket} />
-          ))}
-        </div>
-      </Carousel>
+      <div>
+        {whiteListData(data?.ticketsWithRatings)?.map((ticket) => (
+          <UserInfo key={ticket?.id} data={ticket} />
+        ))}
+      </div>
     </div>
   );
 }

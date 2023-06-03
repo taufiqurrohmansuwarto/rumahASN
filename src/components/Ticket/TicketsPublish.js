@@ -98,18 +98,6 @@ const TitleLink = ({ item }) => {
   );
 };
 
-function debounce(fn, delay) {
-  let timeout;
-  return function (...args) {
-    const later = () => {
-      clearTimeout(timeout);
-      fn(...args);
-    };
-    clearTimeout(timeout);
-    timeout = setTimeout(later, delay);
-  };
-}
-
 // this is the main component
 const TicketsPublish = () => {
   const router = useRouter();
@@ -267,6 +255,7 @@ const TicketsPublish = () => {
       </Grid>
       <List
         dataSource={data?.results}
+        rowKey={(row) => row?.id}
         loading={isLoading}
         pagination={{
           showSizeChanger: false,

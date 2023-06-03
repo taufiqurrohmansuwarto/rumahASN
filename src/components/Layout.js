@@ -188,6 +188,7 @@ function Layout({ children, active }) {
       theme="light"
       selectedKeys={[active ? active : router.pathname]}
       title="Rumah ASN"
+      logo={"https://siasn.bkd.jatimprov.go.id:9000/public/logobkd.jpg"}
       headerTitleRender={(logo, title) => {
         return (
           <>
