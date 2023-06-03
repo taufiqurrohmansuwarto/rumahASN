@@ -7,8 +7,41 @@ import Head from "next/head";
 import Image from "next/image";
 import Link from "next/link";
 import GoogleButton from "react-google-button";
+import { useSpring, animated } from "@react-spring/web";
+
+const BAComponent = () => {
+  const [props, api] = useSpring(
+    () => ({
+      from: {
+        opacity: 0,
+      },
+      to: {
+        opacity: 1,
+      },
+      delay: 500,
+    }),
+    []
+  );
+
+  return (
+    <animated.div style={props}>
+      <Image
+        alt="Rumah ASN Brand Ambassador"
+        src="https://siasn.bkd.jatimprov.go.id:9000/public/layanan-online.png"
+        width={700}
+        height={500}
+      />
+    </animated.div>
+  );
+};
 
 const SignIn = ({ providers }) => {
+  const textAnimation = useSpring({
+    from: { marginLeft: -100 },
+    to: { marginLeft: 0 },
+    config: { duration: 1000 },
+  });
+
   return (
     <>
       <Head>
@@ -24,15 +57,12 @@ const SignIn = ({ providers }) => {
         justify="center"
       >
         <Col md={9} xs={24}>
-          <Image
-            alt="Rumah ASN Brand Ambassador"
-            src="https://siasn.bkd.jatimprov.go.id:9000/public/layanan-online.png"
-            width={700}
-            height={500}
-          />
+          <BAComponent />
         </Col>
         <Col md={6} xs={24}>
-          <Typography.Title>Rumah ASN</Typography.Title>
+          <animated.div style={textAnimation}>
+            <Typography.Title level={2}>Rumah ASN</Typography.Title>
+          </animated.div>
           <Blockquote cite="- BKD Provinsi Jawa Timur">
             Tempat Berkumpulnya Solusi Kepegawaian yang Cepat, Mudah, dan
             Terpadu untuk Menciptakan Lingkungan Kerja yang Harmonis dan
@@ -85,6 +115,12 @@ const SignIn = ({ providers }) => {
                 src="https://siasn.bkd.jatimprov.go.id:9000/public/logobkd.jpg"
                 width={30}
                 height={40}
+              />
+              <Image
+                alt="logo-rumahasn"
+                src="https://siasn.bkd.jatimprov.go.id:9000/public/rumah-asn-logo.png"
+                width={20}
+                height={25}
               />
             </Space>
           </div>

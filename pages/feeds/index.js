@@ -8,8 +8,8 @@ import PublikasiCASN from "@/components/Web/PublikasiCASN";
 import { Grid, Stack } from "@mantine/core";
 import { Card } from "antd";
 import Head from "next/head";
-import { useEffect } from "react";
 import { useRouter } from "next/router";
+import { useEffect } from "react";
 
 function Feeds() {
   const router = useRouter();
