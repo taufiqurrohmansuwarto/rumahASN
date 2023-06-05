@@ -8,6 +8,7 @@ import Image from "next/image";
 import Link from "next/link";
 import GoogleButton from "react-google-button";
 import { useSpring, animated } from "@react-spring/web";
+import Footer from "@/components/Outer/Footer";
 
 const BAComponent = () => {
   const [props, api] = useSpring(
@@ -158,6 +159,7 @@ const SignIn = ({ providers }) => {
         </Col>
       </Row>
       <AppRating />
+      <Footer />
     </>
   );
 };

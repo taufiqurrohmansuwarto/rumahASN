@@ -1,9 +1,11 @@
 import { landingData } from "@/services/index";
-import { Avatar, Group, Rating, Text, createStyles } from "@mantine/core";
+import { Avatar, Group, createStyles } from "@mantine/core";
 import { useQuery } from "@tanstack/react-query";
-import { Carousel, Typography } from "antd";
+import { Rate, Typography } from "antd";
+const Text = Typography.Text;
 
-const COLORS = "#2f54eb";
+const COLORS = "#F2F2F0";
+const COLOR_FONT = "#595959";
 
 const blacklist = [
   "105503740477298041174",
@@ -43,32 +45,14 @@ const UserInfo = ({ data }) => {
       <Group px={40} my={40}>
         <Avatar src={data?.customer?.image} size={80} radius="md" />
         <div>
-          <Text
-            sx={{
-              fontSize: 16,
-              color: "white",
-            }}
-            className={classes.name}
-          >
-            {data?.customer?.username}
-          </Text>
+          <Text>{data?.customer?.username}</Text>
 
           <Group noWrap spacing={10} mt={3}>
-            <Text
-              sx={(theme) => ({
-                // subscribe to color scheme changes
-                // or use any other static values from theme
-                color: theme.colors.gray[1],
-                fontSize: theme.fontSizes.sm,
-                fontWeight: 500,
-              })}
-            >
-              {data?.requester_comment}
-            </Text>
+            <Text type="secondary">{data?.requester_comment}</Text>
           </Group>
 
           <Group noWrap spacing={10} mt={5}>
-            <Rating defaultValue={5} />
+            <Rate value={5} disabled />
           </Group>
         </div>
       </Group>
@@ -85,16 +69,19 @@ function AppRating() {
         // create
         background: COLORS,
         padding: 72,
+        // only border in bottom has round
+        borderBottomLeftRadius: 30,
+        borderBottomRightRadius: 30,
       }}
     >
       <Typography.Title
         level={3}
         style={{
           textAlign: "center",
-          color: "white",
+          color: COLOR_FONT,
         }}
       >
-        Apa kata mereka tentang Rumah ASN?
+        Apa Kata Mereka?
       </Typography.Title>
       <div>
         {whiteListData(data?.ticketsWithRatings)?.map((ticket) => (
