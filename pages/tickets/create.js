@@ -1,18 +1,18 @@
 import Layout from "@/components/Layout";
+import { recommendationFaq } from "@/services/index";
 import { renderMarkdown, uploadFile } from "@/utils/client-utils";
-import { Alert, Grid, ScrollArea, Stack, Text } from "@mantine/core";
+import { Alert, Grid, Stack, Text } from "@mantine/core";
+import { useDebouncedValue } from "@mantine/hooks";
 import { MarkdownEditor } from "@primer/react/drafts";
 import { IconAlertCircle } from "@tabler/icons";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { Breadcrumb, Button, Input, List, Typography, message } from "antd";
+import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { useState } from "react";
 import { createTickets } from "../../services/users.services";
 import PageContainer from "../../src/components/PageContainer";
-import { recommendationFaq } from "@/services/index";
-import { useDebouncedValue } from "@mantine/hooks";
-import Head from "next/head";
 
 const Faqs = ({ data }) => {
   return (

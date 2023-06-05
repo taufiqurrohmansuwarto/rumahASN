@@ -1,17 +1,26 @@
+import { renderMarkdown, uploadFile } from "@/utils/client-utils";
 import Layout from "@/components/Layout";
 import PageContainer from "@/components/PageContainer";
 import { sendPrivateMessage } from "@/services/index";
+import { Stack } from "@mantine/core";
+import { useDebouncedValue } from "@mantine/hooks";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Button, Card, Col, Form, Input, Row } from "antd";
+import { Card, Col, Input, Row, Select } from "antd";
 import Head from "next/head";
 import { useRouter } from "next/router";
+import { useState } from "react";
+import { MarkdownEditor } from "@primer/react/drafts";
 
 const CreatePrivateMessage = () => {
   const router = useRouter();
   const queryClient = useQueryClient();
 
+  const [content, setContent] = useState(); // [content, setContent
+  const [title, setTitle] = useState(null);
+  const [search, setSearch] = useState(null);
+  const [debounceSearch] = useDebouncedValue(search, 500);
+
   const handleBack = () => router.back();
-  const [form] = Form.useForm();
 
   const { mutate: send, isLoading } = useMutation(
     (data) => sendPrivateMessage(data),
@@ -33,24 +42,39 @@ const CreatePrivateMessage = () => {
       <Head>
         <title>Rumah ASN - Buat Pesan Pribadi</title>
       </Head>
-      <PageContainer onBack={handleBack} title="Pesan Pribadi" subTitle="Buat">
+      <PageContainer
+        onBack={handleBack}
+        title="Pesan Pribadi"
+        subTitle="Kirim Pesan"
+      >
         <Row>
           <Col md={18} xs={24}>
             <Card>
-              <Form form={form} onFinish={handleFinish} layout="vertical">
-                <Form.Item name="title" label="Judul">
-                  <Input />
-                </Form.Item>
-                <Form.Item name="sender_id" label="Kepada">
-                  <Input />
-                </Form.Item>
-                <Form.Item name="message" label="Isi Pesan Pribadi">
-                  <Input />
-                </Form.Item>
-                <Form.Item>
-                  <Button htmlType="submit">Kirim</Button>
-                </Form.Item>
-              </Form>
+              <Stack>
+                <Input
+                  value={title}
+                  onChange={(e) => setTitle(e?.target?.value)}
+                  placeholder="Judul"
+                />
+                <MarkdownEditor
+                  value={content}
+                  acceptedFileTypes={[
+                    "image/*",
+                    // word, excel, txt, pdf
+                    ".doc",
+                    ".docx",
+                    ".xls",
+                    ".xlsx",
+                    ".txt",
+                    ".pdf",
+                  ]}
+                  onChange={setContent}
+                  placeholder="Isi Pesan"
+                  onRenderPreview={renderMarkdown}
+                  onUploadFile={uploadFile}
+                  mentionSuggestions={null}
+                />
+              </Stack>
             </Card>
           </Col>
         </Row>
