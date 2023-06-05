@@ -89,3 +89,9 @@ tell me story
 
 - user membuat tiket
 
+
+#255941
+#F2F2F0
+#BF9C88
+#732F29
+#A64444
