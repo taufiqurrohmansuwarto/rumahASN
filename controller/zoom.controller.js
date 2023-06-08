@@ -3,7 +3,7 @@ const KJUR = require("jsrsasign");
 const sdkKey = process.env.ZOOM_MEETING_SDK_KEY;
 const sdkSecret = process.env.ZOOM_MEETING_SDK_SECRET;
 
-const generateSignature = (meetingNumber) => {
+const generateSignature = (meetingNumber, role = 0) => {
   const iat = Math.round(new Date().getTime() / 1000) - 30;
   const exp = iat + 60 * 60 * 2;
 
@@ -12,7 +12,7 @@ const generateSignature = (meetingNumber) => {
   const oPayload = {
     sdkKey,
     mn: meetingNumber,
-    role: 0,
+    role,
     iat: iat,
     exp: exp,
     appKey: sdkKey,
