@@ -1,6 +1,7 @@
 import Layout from "@/components/Layout";
 import { createSignatureZoom } from "@/services/index";
 import { useQuery } from "@tanstack/react-query";
+import { Col, Row, Typography } from "antd";
 import { useSession } from "next-auth/react";
 // import { ZoomMtg } from "@zoomus/websdk";
 import { useRouter } from "next/router";
@@ -11,6 +12,8 @@ const sdkKey = "qxzOwcf4Q_eaDuiICc7glg";
 const Meeting = () => {
   const router = useRouter();
   const zoomRef = useRef(null);
+  const zoomMeetingChatRef = useRef(null);
+
   const { data: user, status: statusUser } = useSession();
   const { data, isLoading, status } = useQuery(
     ["meeting", router.query.id],
@@ -27,6 +30,18 @@ const Meeting = () => {
         zoomAppRoot: zoomRef.current,
         language: "en-US",
         customize: {
+          video: {
+            popper: {
+              disableDraggable: true,
+            },
+          },
+          chat: {
+            popper: {
+              disableDraggable: true,
+              anchorElement: zoomMeetingChatRef.current,
+              placement: "top",
+            },
+          },
           meetingInfo: [
             "topic",
             "host",
@@ -75,7 +90,17 @@ const Meeting = () => {
         href="https://source.zoom.us/2.2.0/css/react-select.css"
       />
 
-      <div id="meetingSDKElement" ref={zoomRef} />
+      <Row>
+        <Col md={8}>
+          <div id="meetingSDKElement" ref={zoomRef} />
+        </Col>
+        <Col md={8}>
+          <Typography.Paragraph>hello world</Typography.Paragraph>
+        </Col>
+        <Col md={8}>
+          <div id="meetingChatElement" ref={zoomMeetingChatRef} />
+        </Col>
+      </Row>
     </>
   );
 };
