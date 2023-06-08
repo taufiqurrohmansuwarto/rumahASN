@@ -514,3 +514,8 @@ export const createAnnouncements = (data) => {
 export const updateAnnouncements = ({ id, data }) => {
   return api.patch(`/announcements/${id}`, data).then((res) => res?.data);
 };
+
+// create signature zoom
+export const createSignatureZoom = (id) => {
+  return api.get(`/zoom/meetings/${id}/signature`).then((res) => res?.data);
+};
