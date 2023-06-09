@@ -1,4 +1,5 @@
 const KJUR = require("jsrsasign");
+const qs = require("qs");
 
 const sdkKey = process.env.ZOOM_MEETING_SDK_KEY;
 const sdkSecret = process.env.ZOOM_MEETING_SDK_SECRET;
@@ -12,7 +13,7 @@ const generateSignature = (meetingNumber, role = 0) => {
   const oPayload = {
     sdkKey,
     mn: meetingNumber,
-    role,
+    role: 0,
     iat: iat,
     exp: exp,
     appKey: sdkKey,
@@ -38,10 +39,11 @@ module.exports.zoomIndex = async (req, res) => {
   }
 };
 
-module.exports.listMeetings = async (req, res) => {
+module.exports.liveMeetings = async (req, res) => {
   try {
     const zoomFetcher = req.zoomFetcher;
-    const result = await zoomFetcher.get("/users/me/meetings?type=upcoming");
+
+    const result = await zoomFetcher.get("/users/me/meetings?type=live");
     res.json(result?.data);
   } catch (error) {
     console.log(error);
