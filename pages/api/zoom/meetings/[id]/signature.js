@@ -1,6 +1,5 @@
-import { createRouter } from "next-connect";
-import auth from "@/middleware/auth.middleware";
 import { getSignature } from "@/controller/zoom.controller";
+import { createRouter } from "next-connect";
 const router = createRouter();
 
 router.get(getSignature);

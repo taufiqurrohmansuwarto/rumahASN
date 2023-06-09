@@ -1,5 +1,6 @@
 import {
   ApartmentOutlined,
+  AudioOutlined,
   BarChartOutlined,
   BookOutlined,
   LogoutOutlined,
@@ -17,6 +18,7 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import { userRoutes } from "../routes";
 import Notifications from "./Notifications";
+import { useState } from "react";
 
 const menu = (
   <Menu
@@ -53,7 +55,24 @@ const changeRoutes = (user) => {
     const agent = (role === "agent" && bkd) || (role === "agent" && pttBkd);
     const userPns = user?.group === "MASTER";
 
+    const pegawaiPemda = user?.group === "MASTER" || user?.group === "PTTPK";
+
     // persiapan ini seharusnya ditambahkan halaman dashboard seperti analisis dsb tapi jangan data
+
+    if (pegawaiPemda) {
+      userRoutes.routes.push({
+        path: "/webinars",
+        name: "Webinar",
+        icon: <AudioOutlined />,
+        routes: [
+          { path: "/webinars/live", name: "Live Meeting" },
+          {
+            path: "/webinars/my-webinar",
+            name: "Webinar Saya",
+          },
+        ],
+      });
+    }
 
     if (userPns) {
       userRoutes.routes.push({
@@ -179,9 +198,14 @@ const menuItemRender = (options, element) => {
   );
 };
 
-function Layout({ children, active }) {
+function Layout({ children, active, collapsed = false }) {
   const { data, status } = useSession();
   const router = useRouter();
+  const [tutup, setTutup] = useState(collapsed);
+
+  const onCollapsed = () => {
+    setTutup(!tutup);
+  };
 
   return (
     <ProLayout
@@ -268,6 +292,8 @@ function Layout({ children, active }) {
         },
         defaultOpenAll: true,
       }}
+      collapsed={tutup}
+      onCollapse={onCollapsed}
       menuItemRender={menuItemRender}
       layout="mix"
       loading={status === "loading"}

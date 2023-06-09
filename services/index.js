@@ -519,3 +519,8 @@ export const updateAnnouncements = ({ id, data }) => {
 export const createSignatureZoom = (id) => {
   return api.get(`/zoom/meetings/${id}/signature`).then((res) => res?.data);
 };
+
+// list meetings
+export const getListMeetings = () => {
+  return api.get("/zoom/meetings").then((res) => res?.data);
+};

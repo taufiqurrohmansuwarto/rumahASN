@@ -83,13 +83,19 @@ const FilterUser = ({ handleChange, value }) => {
 // create item like github issue with primer UI
 const TitleLink = ({ item }) => {
   const screens = useBreakpoint();
+  const router = useRouter();
+  const handleClick = () => {
+    router.push(`/customers-tickets/${item?.id}`);
+  };
 
   return (
     <div>
-      <Typography.Text strong style={{ marginRight: 8 }}>
-        <Link href={`/customers-tickets/${item?.id}`} target="_blank">
-          {item.title}
-        </Link>
+      <Typography.Text
+        onClick={handleClick}
+        style={{ marginRight: 8, cursor: "pointer" }}
+      >
+        {/* <Link href={`/customers-tickets/${item?.id}`}>{item.title}</Link> */}
+        {item?.title}
       </Typography.Text>
       {screens?.xs && <br />}
       <Published item={item} />

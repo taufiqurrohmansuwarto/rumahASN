@@ -1,12 +1,10 @@
 import Layout from "@/components/Layout";
 import { createSignatureZoom } from "@/services/index";
 import { useQuery } from "@tanstack/react-query";
-import { Col, Row, Typography } from "antd";
+import { Col, Row } from "antd";
 import { useSession } from "next-auth/react";
-// import { ZoomMtg } from "@zoomus/websdk";
 import { useRouter } from "next/router";
 import { useEffect, useRef } from "react";
-
 const sdkKey = "qxzOwcf4Q_eaDuiICc7glg";
 
 const Meeting = () => {
@@ -18,7 +16,7 @@ const Meeting = () => {
   const { data, isLoading, status } = useQuery(
     ["meeting", router.query.id],
     () => createSignatureZoom(router.query.id),
-    { enabled: !!router.query.id, refetchOnWindowFocus: false }
+    { enabled: !!router.query.id }
   );
 
   useEffect(() => {
@@ -34,12 +32,11 @@ const Meeting = () => {
             popper: {
               disableDraggable: true,
             },
-          },
-          chat: {
-            popper: {
-              disableDraggable: true,
-              anchorElement: zoomMeetingChatRef.current,
-              placement: "top",
+            viewSizes: {
+              default: {
+                width: 1500,
+                height: 600,
+              },
             },
           },
           meetingInfo: [
@@ -58,9 +55,7 @@ const Meeting = () => {
               {
                 text: "Custom Button",
                 className: "CustomButton",
-                onClick: () => {
-                  console.log("custom button");
-                },
+                onClick: () => {},
               },
             ],
           },
@@ -75,30 +70,24 @@ const Meeting = () => {
         userName: user?.user?.name,
       });
     }
-  }, [data?.token, router?.query?.id, status, statusUser, user?.user?.name]);
+  }, [data, router.query.id, status, statusUser, user]);
 
   return (
     <>
-      <link
+      {/* <link
         type="text/css"
         rel="stylesheet"
-        href="https://source.zoom.us/2.2.0/css/bootstrap.css"
+        href="https://source.zoom.us/2.13.0/css/bootstrap.css"
       />
       <link
         type="text/css"
         rel="stylesheet"
-        href="https://source.zoom.us/2.2.0/css/react-select.css"
+        href="https://source.zoom.us/2.13.0/css/react-select.css"
       />
-
+ */}
       <Row>
-        <Col md={8}>
+        <Col span={8}>
           <div id="meetingSDKElement" ref={zoomRef} />
-        </Col>
-        <Col md={8}>
-          <Typography.Paragraph>hello world</Typography.Paragraph>
-        </Col>
-        <Col md={8}>
-          <div id="meetingChatElement" ref={zoomMeetingChatRef} />
         </Col>
       </Row>
     </>
@@ -111,18 +100,7 @@ Meeting.Auth = {
 };
 
 Meeting.getLayout = (page) => {
-  return <Layout>{page}</Layout>;
-};
-
-export const getServerSideProps = async (ctx) => {
-  const sdkKey = process.env.ZOOM_MEETING_SDK_KEY;
-  return {
-    props: {
-      data: {
-        sdkKey,
-      },
-    },
-  };
+  return <Layout collapsed={true}>{page}</Layout>;
 };
 
 export default Meeting;

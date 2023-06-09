@@ -72,14 +72,36 @@ const blockquote = function (quote) {
   );
 };
 
-const link = function (href, title, text) {
-  // add http if not present in href example : bkd.jatimprov.go.id => http://bkd.jatimprov.go.id
-  const regex = /^(http|https):\/\//;
-  if (!regex.test(href)) {
-    href = "https://" + href;
-  }
+function htmlEncodedHexToAscii(inputStr) {
+  return inputStr.replace(/&#(x[0-9a-fA-F]+|[0-9]+);/g, function (match, p1) {
+    var code = p1.startsWith("x")
+      ? parseInt(p1.substr(1), 16)
+      : parseInt(p1, 10);
+    return String.fromCharCode(code);
+  });
+}
 
-  return `<a href="${href}" title="${text}" target="_blank" rel="noopener noreferrer">${text}</a>`;
+const link = function (href, title, text) {
+  if (href.includes("mailto")) {
+    const result = htmlEncodedHexToAscii(href);
+    // remove mailto: and trim
+    const hasil = result.replace("mailto:", "").trim();
+
+    return `
+    ${hasil}
+    `;
+  } else {
+    // if is mailto replace with normal
+    // href is hex encoded after mailto
+
+    // add http if not present in href example : bkd.jatimprov.go.id => http://bkd.jatimprov.go.id
+    const regex = /^(http|https):\/\//;
+    if (!regex.test(href)) {
+      href = "https://" + href;
+    }
+
+    return `<a href="${href}" title="${text}" target="_blank" rel="noopener noreferrer">${text}</a>`;
+  }
 };
 
 const renderer = {
@@ -103,6 +125,11 @@ const renderer = {
 marked.use({ renderer, gfm: true, breaks: true });
 
 const parseMarkdown = (text) => {
+  // replace all new line with <br>
+  text = text.replace(/\n/g, "<br>");
+
+  // replace mailto with <a> tag
+
   return marked.parse(text);
 };
 
