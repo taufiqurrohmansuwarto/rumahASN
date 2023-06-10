@@ -3,6 +3,7 @@ import { createSignatureZoom } from "@/services/index";
 import { useQuery } from "@tanstack/react-query";
 import { Col, Row, Skeleton } from "antd";
 import { useSession } from "next-auth/react";
+import Head from "next/head";
 import { useRouter } from "next/router";
 import { useEffect, useRef } from "react";
 const sdkKey = "qxzOwcf4Q_eaDuiICc7glg";
@@ -10,87 +11,91 @@ const sdkKey = "qxzOwcf4Q_eaDuiICc7glg";
 const Meeting = () => {
   const router = useRouter();
   const zoomRef = useRef(null);
-  const zoomMeetingChatRef = useRef(null);
 
   const { data: user, status: statusUser } = useSession();
   const { data, isLoading, status } = useQuery(
     ["meeting", router.query.id],
     () => createSignatureZoom(router.query.id),
-    { enabled: !!router.query.id }
+    {
+      refetchOnWindowFocus: false,
+      refetchOnReconnect: false,
+      refetchIntervalInBackground: false,
+    }
   );
 
   useEffect(() => {
-    const client = ZoomMtgEmbedded.createClient();
+    (async () => {
+      if (typeof window !== "undefined") {
+        if (window.fcWidget) window.fcWidget.hide();
+        await import("@zoomus/websdk");
+        const ZoomMtg = window.ZoomMtg;
+        ZoomMtg?.setZoomJSLib("https://source.zoom.us/2.13.0/lib", "/av");
 
-    if (status === "success" && statusUser === "authenticated") {
-      client.init({
-        debug: true,
-        zoomAppRoot: zoomRef.current,
-        language: "en-US",
-        customize: {
-          video: {
-            popper: {
-              disableDraggable: true,
-            },
-            viewSizes: {
-              default: {
-                width: 1500,
-                height: 600,
-              },
-            },
-          },
-          meetingInfo: [
-            "topic",
-            "host",
-            "mn",
-            "pwd",
-            "telPwd",
-            "invite",
-            "participant",
-            "dc",
-            "enctype",
-          ],
-          toolbar: {
-            buttons: [
-              {
-                text: "Custom Button",
-                className: "CustomButton",
-                onClick: () => {},
-              },
-            ],
-          },
-        },
-      });
+        ZoomMtg?.preLoadWasm();
+        ZoomMtg?.prepareWebSDK();
+        // loads language files, also passes any error messages to the ui
+        ZoomMtg?.i18n.load("en-US");
+        ZoomMtg?.i18n.reload("en-US");
 
-      client.join({
-        signature: data?.token,
-        sdkKey,
-        meetingNumber: router?.query?.id,
-        password: "",
-        userName: user?.user?.name,
-      });
-    }
-  }, [data, router.query.id, status, statusUser, user]);
+        document.getElementById("zmmtg-root").style.display = "block";
+        document.getElementById("zmmtg-root").style.zIndex = "999";
+
+        ZoomMtg.init({
+          leaveUrl: window.location.origin + "/helpdesk/webinars/live",
+          success: (success) => {
+            console.log(success);
+
+            ZoomMtg.join({
+              signature: data?.token,
+              sdkKey: sdkKey,
+              meetingNumber: router?.query?.id,
+              passWord: "",
+              userName: user?.user?.name,
+              success: (success) => {
+                console.log(success);
+              },
+              error: (error) => {
+                console.log(error);
+              },
+            });
+          },
+          error: (error) => {
+            console.log(error);
+          },
+        });
+      }
+    })();
+
+    return () => {
+      if (typeof window !== "undefined") {
+        if (window.fcWidget) window.fcWidget.show();
+        if (window.ZoomMtg) window.ZoomMtg.endMeeting({});
+      }
+    };
+  }, [data, router.query.id, user]);
 
   return (
     <>
-      {/* <link
-        type="text/css"
-        rel="stylesheet"
-        href="https://source.zoom.us/2.13.0/css/bootstrap.css"
-      />
-      <link
-        type="text/css"
-        rel="stylesheet"
-        href="https://source.zoom.us/2.13.0/css/react-select.css"
-      />
- */}
+      <Head>
+        <link
+          type="text/css"
+          rel="stylesheet"
+          href="https://source.zoom.us/2.13.0/css/bootstrap.css"
+        />
+        <link
+          type="text/css"
+          rel="stylesheet"
+          href="https://source.zoom.us/2.13.0/css/react-select.css"
+        />
+      </Head>
       <Skeleton loading={isLoading}>
-        <Row>
-          <Col span={8}>
-            <div id="meetingSDKElement" ref={zoomRef} />
-          </Col>
-        </Row>
+        <Skeleton loading={isLoading}>
+          <Row>
+            <Col span={8}>
+              <div id="zmmtg-root" />
+            </Col>
+          </Row>
+        </Skeleton>
       </Skeleton>
     </>
   );
