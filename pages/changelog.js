@@ -85,6 +85,11 @@ const ChangeLog = () => {
       date: "27-05-2023",
       changes: ["Integrasi siasn pada layanan IP ASN"],
     },
+    {
+      version: "1.0.0-rc 13",
+      date: "11-06-2023",
+      changes: ["Tambah fitur integrasi dengan zoom"],
+    },
   ];
 
   return (
