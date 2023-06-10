@@ -304,3 +304,22 @@ export const cleanQuery = (query) => {
   }
   return cleaned;
 };
+
+export const meetingType = [
+  {
+    value: 1,
+    label: "Instant Meeting",
+  },
+  {
+    value: 2,
+    label: "Scheduled Meeting",
+  },
+  {
+    value: 3,
+    label: "Recurring Meeting with no fixed time",
+  },
+  {
+    value: 8,
+    label: "Recurring Meeting with fixed time",
+  },
+];

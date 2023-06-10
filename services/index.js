@@ -524,3 +524,24 @@ export const createSignatureZoom = (id) => {
 export const getListMeetings = () => {
   return api.get("/zoom/meetings").then((res) => res?.data);
 };
+
+// admin zooms
+export const adminCreateZoomMeeting = (data) => {
+  return api.post("/zoom/admin/meetings", data).then((res) => res?.data);
+};
+
+export const adminListMeetings = (query) => {
+  const params = queryString.stringify(query);
+  return api.get(`/zoom/admin/meetings?${params}`).then((res) => res?.data);
+};
+
+export const adminDeleteMeetings = (id) => {
+  console.log(id);
+  return api.delete(`/zoom/admin/meetings/${id}`).then((res) => res?.data);
+};
+
+export const adminSignature = (id) => {
+  return api
+    .get(`/zoom/meetings/${id}/signature-admin`)
+    .then((res) => res?.data);
+};
