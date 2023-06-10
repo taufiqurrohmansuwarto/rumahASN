@@ -1,5 +1,3 @@
-import DataTickets from "@/components/Dashboards/DataTickets";
-import PlotAdminTickets from "@/components/Dashboards/PlotAdminTickets";
 import Layout from "@/components/Layout";
 import PageContainer from "@/components/PageContainer";
 import Head from "next/head";
@@ -11,8 +9,8 @@ function DashboardAnalysis() {
         <title>Rumah ASN - Analisis - Dashboard</title>
       </Head>
       <PageContainer title="Dashboard" subTitle="Analisis Data Rumah ASN">
-        <DataTickets />
-        <PlotAdminTickets />
+        {/* <DataTickets /> */}
+        {/* <PlotAdminTickets /> */}
       </PageContainer>
     </>
   );
