@@ -2,8 +2,9 @@ import PageContainer from "@/components/PageContainer";
 import { adminDeleteMeetings, adminListMeetings } from "@/services/index";
 import { meetingType } from "@/utils/client-utils";
 import { AudioOutlined } from "@ant-design/icons";
+import { Stack } from "@mantine/core";
 import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
-import { Button, Table, Space } from "antd";
+import { Button, Table, Space, Alert } from "antd";
 import Head from "next/head";
 import { useRouter } from "next/router";
 
@@ -110,18 +111,27 @@ const AdminWebinar = () => {
         title="Admin Webinar"
         subTitle="Pembuatan Webinar untuk peserta"
       >
-        <Button onClick={gotoCreateWebinar}>Buat Webinar</Button>
-        <Table
-          pagination={{
-            total: meetings?.total_records,
-            pageSize: 30,
-            showTotal: (total, range) =>
-              `${range[0]}-${range[1]} of ${total} items`,
-          }}
-          loading={isLoadingMeetings || isLoadingRemoveMeeting}
-          columns={columns}
-          dataSource={meetings?.meetings}
-        />
+        <Stack>
+          <Alert
+            type="error"
+            description="Fitur dalam pengembangan!!"
+            showIcon
+          />
+          <Table
+            title={() => (
+              <Button onClick={gotoCreateWebinar}>Buat Webinar</Button>
+            )}
+            pagination={{
+              total: meetings?.total_records,
+              pageSize: 30,
+              showTotal: (total, range) =>
+                `${range[0]}-${range[1]} of ${total} items`,
+            }}
+            loading={isLoadingMeetings || isLoadingRemoveMeeting}
+            columns={columns}
+            dataSource={meetings?.meetings}
+          />
+        </Stack>
       </PageContainer>
     </>
   );
