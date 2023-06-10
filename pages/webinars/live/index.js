@@ -1,8 +1,11 @@
 import Layout from "@/components/Layout";
+import PageContainer from "@/components/PageContainer";
 import { getListMeetings } from "@/services/index";
 import { AudioOutlined } from "@ant-design/icons";
+import { Stack } from "@mantine/core";
 import { useQuery } from "@tanstack/react-query";
-import { Button, Table } from "antd";
+import { Alert, Button, Table } from "antd";
+import Head from "next/head";
 import { useRouter } from "next/router";
 
 const meetingsType = [
@@ -84,12 +87,26 @@ const WebinarLive = () => {
   ];
 
   return (
-    <Table
-      columns={columns}
-      rowKey={(row) => row?.uuid}
-      loading={isLoading}
-      dataSource={data?.meetings}
-    />
+    <>
+      <Head>
+        <title>Webinar Live</title>
+      </Head>
+      <PageContainer title="Webinar Rumah ASN" subTitle="Live Meeting">
+        <Stack>
+          <Alert
+            type="error"
+            description="Fitur dalam pengembangan!!"
+            showIcon
+          />
+          <Table
+            columns={columns}
+            rowKey={(row) => row?.uuid}
+            loading={isLoading}
+            dataSource={data?.meetings}
+          />
+        </Stack>
+      </PageContainer>
+    </>
   );
 };
 
