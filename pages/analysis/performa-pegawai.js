@@ -1,4 +1,3 @@
-import PlotAgentPerformances from "@/components/Dashboards/PlotAgentPerformances";
 import Layout from "@/components/Layout";
 import PageContainer from "@/components/PageContainer";
 import Head from "next/head";
@@ -10,7 +9,7 @@ function PerformaPegawai() {
         <title>Rumah ASN - Analisis - Performa Pegawai</title>
       </Head>
       <PageContainer title="Analisis" subTitle="Performa Pegawai">
-        <PlotAgentPerformances />
+        {/* <PlotAgentPerformances /> */}
       </PageContainer>
     </>
   );
