@@ -13,7 +13,7 @@ const generateSignature = (meetingNumber, role = 0) => {
   const oPayload = {
     sdkKey,
     mn: meetingNumber,
-    role: 0,
+    role,
     iat: iat,
     exp: exp,
     appKey: sdkKey,
@@ -69,8 +69,55 @@ module.exports.joinMeeting = async (req, res) => {
 module.exports.getSignature = async (req, res) => {
   try {
     const { id } = req.query;
-    const token = generateSignature(id);
+    const token = generateSignature(id, 0);
     res.json({ token });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ code: 500, message: "Internal Server Error" });
+  }
+};
+
+module.exports.getSignatureAdmin = async (req, res) => {
+  try {
+    const { id } = req.query;
+    const token = generateSignature(id, 1);
+    res.json({ token });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ code: 500, message: "Internal Server Error" });
+  }
+};
+
+module.exports.createMeeting = async (req, res) => {
+  try {
+    const zoomFetcher = req.zoomFetcher;
+    const body = req.body;
+    const result = await zoomFetcher.post("/users/me/meetings", body);
+    res.json(result?.data);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ code: 500, message: "Internal Server Error" });
+  }
+};
+
+module.exports.adminListMeetings = async (req, res) => {
+  try {
+    const zoomFetcher = req.zoomFetcher;
+
+    const result = await zoomFetcher.get("/users/me/meetings");
+    res.json(result?.data);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ code: 500, message: "Internal Server Error" });
+  }
+};
+
+module.exports.adminDeleteMeeting = async (req, res) => {
+  try {
+    const zoomFetcher = req.zoomFetcher;
+    const { id } = req.query;
+    const result = await zoomFetcher.delete(`/meetings/${id}`);
+    res.json(result?.data);
   } catch (error) {
     console.log(error);
     res.status(500).json({ code: 500, message: "Internal Server Error" });

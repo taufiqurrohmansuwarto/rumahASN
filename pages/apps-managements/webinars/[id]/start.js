@@ -1,5 +1,5 @@
 import Layout from "@/components/Layout";
-import { createSignatureZoom } from "@/services/index";
+import { adminSignature } from "@/services/index";
 import { useQuery } from "@tanstack/react-query";
 import { Col, Row, Skeleton } from "antd";
 import { useSession } from "next-auth/react";
@@ -10,12 +10,11 @@ const sdkKey = "qxzOwcf4Q_eaDuiICc7glg";
 const Meeting = () => {
   const router = useRouter();
   const zoomRef = useRef(null);
-  const zoomMeetingChatRef = useRef(null);
 
   const { data: user, status: statusUser } = useSession();
   const { data, isLoading, status } = useQuery(
     ["meeting", router.query.id],
-    () => createSignatureZoom(router.query.id),
+    () => adminSignature(router.query.id),
     { enabled: !!router.query.id }
   );
 

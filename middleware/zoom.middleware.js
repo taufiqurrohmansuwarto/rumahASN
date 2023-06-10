@@ -7,16 +7,6 @@ const zoomMiddleware = async (req, res, next) => {
     const clientId = process.env.ZOOM_CLIENT_ID;
     const clientSecret = process.env.ZOOM_CLIENT_SECRET;
 
-    console.log({
-      accountId,
-      clientId,
-      clientSecret,
-    });
-
-    // base64 encode client id and client secret
-    const auth = Buffer.from(`${clientId}:${clientSecret}`).toString("base64");
-    console.log(auth);
-
     const result = await axios.post(
       `https://zoom.us/oauth/token?grant_type=account_credentials&account_id=${accountId}`,
       null,
