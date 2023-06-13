@@ -4,14 +4,27 @@ import { meetingType } from "@/utils/client-utils";
 import { AudioOutlined } from "@ant-design/icons";
 import { Stack } from "@mantine/core";
 import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
-import { Button, Table, Space, Alert } from "antd";
+import { Button, Table, Space, Alert, Select } from "antd";
 import Head from "next/head";
 import { useRouter } from "next/router";
+import { useState } from "react";
 
 const { default: Layout } = require("@/components/Layout");
 
+const filter = [
+  "scheduled",
+  "live",
+  "upcoming",
+  "upcoming_meetings",
+  "previous_meetings",
+];
+
 const AdminWebinar = () => {
   const router = useRouter();
+
+  const [filterType, setFilterType] = useState({
+    type: router.query.type || "scheduled",
+  });
 
   const queryClient = useQueryClient();
 
@@ -19,15 +32,29 @@ const AdminWebinar = () => {
     router.push("/apps-managements/webinars/create");
   };
 
+  const handleChange = (value) => {
+    router.push({
+      pathname: "/apps-managements/webinars",
+      query: { type: value },
+    });
+    setFilterType({ type: value });
+  };
+
   const startMeeting = (id) => {
     router.push(`/apps-managements/webinars/${id}/start`);
   };
 
-  const { data: meetings, isLoading: isLoadingMeetings } = useQuery(
-    ["admin-meetings"],
-    () => adminListMeetings(),
+  const {
+    data: meetings,
+    isFetching,
+    isLoading,
+    refetch,
+  } = useQuery(
+    ["admin-meetings", filterType],
+    () => adminListMeetings(filterType),
     {
       keepPreviousData: true,
+      enabled: !!filterType,
       refetchOnWindowFocus: false,
     }
   );
@@ -117,17 +144,26 @@ const AdminWebinar = () => {
             description="Fitur dalam pengembangan!!"
             showIcon
           />
+          <Select onChange={handleChange} defaultValue={filterType.type}>
+            {filter.map((item) => (
+              <Select.Option key={item} value={item}>
+                {item}
+              </Select.Option>
+            ))}
+          </Select>
+
           <Table
             title={() => (
               <Button onClick={gotoCreateWebinar}>Buat Webinar</Button>
             )}
+            rowKey={(row) => row?.id}
             pagination={{
               total: meetings?.total_records,
               pageSize: 30,
               showTotal: (total, range) =>
                 `${range[0]}-${range[1]} of ${total} items`,
             }}
-            loading={isLoadingMeetings || isLoadingRemoveMeeting}
+            loading={isFetching || isLoadingRemoveMeeting}
             columns={columns}
             dataSource={meetings?.meetings}
           />
@@ -137,13 +173,13 @@ const AdminWebinar = () => {
   );
 };
 
-AdminWebinar.getLayout = function getLayout(page) {
-  return <Layout>{page}</Layout>;
-};
-
 AdminWebinar.Auth = {
   action: "manage",
   subject: "DashboardAdmin",
+};
+
+AdminWebinar.getLayout = function getLayout(page) {
+  return <Layout>{page}</Layout>;
 };
 
 export default AdminWebinar;
