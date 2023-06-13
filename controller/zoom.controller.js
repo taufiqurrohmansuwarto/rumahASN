@@ -123,3 +123,15 @@ module.exports.adminDeleteMeeting = async (req, res) => {
     res.status(500).json({ code: 500, message: "Internal Server Error" });
   }
 };
+
+module.exports.getParticipantsMeeting = async (req, res) => {
+  try {
+    const zoomFetcher = req.zoomFetcher;
+    const { id } = req.query;
+    const result = await zoomFetcher.get(`/past_meetings/${id}/participants`);
+    res.json(result?.data);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ code: 500, message: "Internal Server Error" });
+  }
+};
