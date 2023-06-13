@@ -101,7 +101,7 @@ const Meeting = ({ data: { user } }) => {
 };
 
 export const getServerSideProps = async (ctx) => {
-  const session = await getSession();
+  const session = await getSession(ctx);
 
   return {
     props: {
