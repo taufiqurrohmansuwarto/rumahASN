@@ -2,16 +2,15 @@ import Layout from "@/components/Layout";
 import { adminSignature } from "@/services/index";
 import { useQuery } from "@tanstack/react-query";
 import { Col, Row, Skeleton } from "antd";
-import { useSession } from "next-auth/react";
+import { getSession, useSession } from "next-auth/react";
 import Head from "next/head";
 import { useRouter } from "next/router";
 import { useEffect } from "react";
 const sdkKey = "qxzOwcf4Q_eaDuiICc7glg";
 
-const Meeting = () => {
+const Meeting = ({ data: { user } }) => {
   const router = useRouter();
 
-  const { data: user, status: statusUser } = useSession();
   const { data, isLoading, status } = useQuery(
     ["meeting", router.query.id],
     () => adminSignature(router.query.id),
@@ -51,7 +50,7 @@ const Meeting = () => {
                 sdkKey: sdkKey,
                 meetingNumber: router?.query?.id,
                 passWord: "",
-                userName: user?.user?.name,
+                userName: user?.name,
                 success: (success) => {
                   console.log(success);
                 },
@@ -100,6 +99,17 @@ const Meeting = () => {
       </Skeleton>
     </>
   );
+};
+
+export const getServerSideProps = async (ctx) => {
+  const session = await getSession(ctx);
+  return {
+    props: {
+      data: {
+        user: session?.user,
+      },
+    },
+  };
 };
 
 Meeting.Auth = {
