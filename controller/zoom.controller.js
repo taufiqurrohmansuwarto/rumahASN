@@ -135,3 +135,45 @@ module.exports.getParticipantsMeeting = async (req, res) => {
     res.status(500).json({ code: 500, message: "Internal Server Error" });
   }
 };
+
+// create participants user registration
+module.exports.createParticipantsMeeting = async (req, res) => {
+  try {
+    const zoomFetcher = req.zoomFetcher;
+    const { id } = req.query;
+    const body = req.body;
+    const result = await zoomFetcher.post(`/meetings/${id}/registrants`, body);
+    res.json(result?.data);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ code: 500, message: "Internal Server Error" });
+  }
+};
+
+// list meeting registrants
+module.exports.listMeetingRegistrants = async (req, res) => {
+  try {
+    const zoomFetcher = req.zoomFetcher;
+    const { id } = req.query;
+    const result = await zoomFetcher.get(`/meetings/${id}/registrants`);
+    res.json(result?.data);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ code: 500, message: "Internal Server Error" });
+  }
+};
+
+// get meeting registrant
+module.exports.getMeetingRegistrant = async (req, res) => {
+  try {
+    const zoomFetcher = req.zoomFetcher;
+    const { id, registrantId } = req.query;
+    const result = await zoomFetcher.get(
+      `/meetings/${id}/registrants/${registrantId}`
+    );
+    res.json(result?.data);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ code: 500, message: "Internal Server Error" });
+  }
+};
