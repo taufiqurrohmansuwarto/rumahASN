@@ -1,5 +1,5 @@
 const KJUR = require("jsrsasign");
-const qs = require("qs");
+const queryString = require("query-string");
 
 const sdkKey = process.env.ZOOM_MEETING_SDK_KEY;
 const sdkSecret = process.env.ZOOM_MEETING_SDK_SECRET;
@@ -103,8 +103,17 @@ module.exports.createMeeting = async (req, res) => {
 module.exports.adminListMeetings = async (req, res) => {
   try {
     const zoomFetcher = req.zoomFetcher;
-
-    const result = await zoomFetcher.get("/users/me/meetings");
+    const type = req.query?.type || "scheduled";
+    const params = queryString.stringify(
+      {
+        type,
+      },
+      {
+        arrayFormat: "comma",
+        skipEmptyString: true,
+      }
+    );
+    const result = await zoomFetcher.get(`/users/me/meetings?${params}`);
     res.json(result?.data);
   } catch (error) {
     console.log(error);

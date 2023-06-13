@@ -108,7 +108,7 @@ const TitleLink = ({ item }) => {
 const TicketsPublish = () => {
   const router = useRouter();
 
-  const { data, isLoading } = useQuery(
+  const { data, isLoading, isFetching } = useQuery(
     ["publish-tickets-customers", router?.query],
     () => publishTickets(router?.query),
     {
@@ -262,7 +262,7 @@ const TicketsPublish = () => {
       <List
         dataSource={data?.results}
         rowKey={(row) => row?.id}
-        loading={isLoading}
+        loading={isFetching || isLoading}
         pagination={{
           showSizeChanger: false,
           position: "both",
