@@ -90,6 +90,11 @@ const ChangeLog = () => {
       date: "11-06-2023",
       changes: ["Tambah fitur integrasi dengan zoom"],
     },
+    {
+      version: "1.0.0-rc 14",
+      date: "14-06-2023",
+      changes: ["Fix alt tab to zoom"],
+    },
   ];
 
   return (
