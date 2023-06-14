@@ -95,3 +95,20 @@ tell me story
 #BF9C88
 #732F29
 #A64444
+
+
+pembuatan table podcast
+id 
+title
+slug
+content
+html
+user_id
+created_at
+updated_at
+published_at
+status (draft, published, archived)
+image
+duration
+file
+tags
