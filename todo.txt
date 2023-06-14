@@ -1,1 +1,6 @@
-1. buat kuesioner untuk private dan public
+1. buat kolom untuk menghandle jabatan dan perangkat daerah di users dengan nama kolom user_properties dengan jsonb benarkan di sso nya
+2. selesaikan pengumuman
+3. selesaikan voting
+4. selesaikan fitur podcast
+5. selesaikan chart
+6. selesaikan fitur zoom
