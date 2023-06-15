@@ -106,8 +106,12 @@ const DetailInformation = ({ user }) => {
             {user?.about_me}
           </Descriptions.Item>
           <Descriptions.Item label="Aplikasi">{user?.group}</Descriptions.Item>
-          <Descriptions.Item label="Jabatan">tunggu</Descriptions.Item>
-          <Descriptions.Item label="Perangkat Daerah">Tunggu</Descriptions.Item>
+          <Descriptions.Item label="Jabatan">
+            {user?.info?.jabatan?.jabatan}
+          </Descriptions.Item>
+          <Descriptions.Item label="Perangkat Daerah">
+            {user?.info?.perangkat_daerah?.detail}
+          </Descriptions.Item>
         </Descriptions>
         {user?.custom_id !== data?.user?.id && (
           <Button onClick={handleOpen} icon={<MailOutlined />} type="primary">

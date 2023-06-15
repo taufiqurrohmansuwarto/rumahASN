@@ -95,6 +95,13 @@ const ChangeLog = () => {
       date: "14-06-2023",
       changes: ["Fix alt tab to zoom"],
     },
+    {
+      version: "1.0.0-rc 15",
+      date: "15-06-2023",
+      changes: [
+        "Tambah jabatan dan juga unit kerja di halaman profile yang telah dikoneksikan dengan simaster dan pttpk",
+      ],
+    },
   ];
 
   return (
