@@ -4,3 +4,4 @@
 4. selesaikan fitur podcast
 5. selesaikan chart
 6. selesaikan fitur zoom
+7. selesaikan fitur jalur pribadi

@@ -2,7 +2,7 @@ const { Model } = require("objection");
 const knex = require("../db");
 Model.knex(knex);
 
-class Announcements extends Model {
+class Announcement extends Model {
   static get tableName() {
     return "announcements";
   }
@@ -16,7 +16,7 @@ class Announcements extends Model {
         relation: Model.BelongsToOneRelation,
         modelClass: Users,
         join: {
-          from: "announcements.author",
+          from: "categories.created_by",
           to: "users.custom_id",
         },
       },
@@ -24,4 +24,4 @@ class Announcements extends Model {
   }
 }
 
-export default Announcements;
+module.exports = Announcement;
