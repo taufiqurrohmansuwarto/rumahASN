@@ -2,7 +2,7 @@ const Announcement = require("@/models/announcements.model");
 
 const announcements = async (req, res) => {
   try {
-    const result = await Announcement.query().first();
+    const result = await Announcement.query();
     res.json(result);
   } catch (error) {
     console.log(error);
