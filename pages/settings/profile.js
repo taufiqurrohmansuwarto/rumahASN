@@ -14,12 +14,14 @@ import {
   Row,
   message,
 } from "antd";
+import { useSession } from "next-auth/react";
 import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
 
-const ProfileForm = ({ data }) => {
+const ProfileForm = ({ data, user }) => {
   const queryClient = useQueryClient();
+
   const { mutate, isLoading } = useMutation(
     (values) => updateOwnProfile(values),
     {
@@ -47,14 +49,32 @@ const ProfileForm = ({ data }) => {
       onFinish={handleFinish}
       form={form}
       layout="vertical"
-      initialValues={data}
+      initialValues={{
+        ...data,
+        jabatan: data?.info?.jabatan?.jabatan,
+        perangkat_daerah: data?.info?.perangkat_daerah?.detail,
+      }}
     >
       <Form.Item label="Nama" name="username">
-        <Input />
+        <Input readOnly disabled />
       </Form.Item>
+      {user?.group !== "GOOGLE" && (
+        <>
+          <Form.Item label="Nomer Pegawai" name="employee_number">
+            <Input readOnly disabled />
+          </Form.Item>
+          <Form.Item label="Jabatan" name="jabatan">
+            <Input readOnly disabled />
+          </Form.Item>
+          <Form.Item label="Perangkat Daerah" name="perangkat_daerah">
+            <Input readOnly disabled />
+          </Form.Item>
+        </>
+      )}
       <Form.Item label="Tentang Saya" name="about_me">
         <Input.TextArea rows={5} />
       </Form.Item>
+
       <Form.Item>
         <Button
           loading={isLoading}
@@ -72,13 +92,13 @@ const ProfileForm = ({ data }) => {
 function Profile() {
   const router = useRouter();
 
+  const { data: dataUser, status } = useSession();
+
   const handleBack = () => {
     router.back();
   };
 
-  const { data, isLoading } = useQuery(["profile"], () => ownProfile(), {
-    // refetchOnWindowFocus: false,
-  });
+  const { data, isLoading } = useQuery(["profile"], () => ownProfile(), {});
 
   return (
     <>
@@ -101,12 +121,12 @@ function Profile() {
         )}
         subTitle="Profil"
       >
-        <Card>
+        <Card loading={isLoading || status === "loading"}>
           <Row>
             <Col md={12} xs={24}>
               <Stack>
                 <Avatar size={100} src={data?.image} />
-                <ProfileForm data={data} />
+                <ProfileForm user={dataUser?.user} data={data} />
               </Stack>
             </Col>
           </Row>

@@ -8,7 +8,14 @@ module.exports.getOwnProfile = async (req, res) => {
     const result = await User.query()
       .where("custom_id", userId)
       .first()
-      .select("image", "current_role", "about_me", "username");
+      .select(
+        "image",
+        "current_role",
+        "about_me",
+        "username",
+        "employee_number",
+        "info"
+      );
 
     res.json(result);
   } catch (error) {
@@ -55,8 +62,9 @@ module.exports.detailUserProfile = async (req, res) => {
         "about_me",
         "group",
         "current_role",
-        "employee_number",
         "birthdate",
+        "employee_number",
+        "info",
       ];
     } else {
       select = ["username", "image", "about_me", "current_role", "custom_id"];

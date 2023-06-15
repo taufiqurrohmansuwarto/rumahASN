@@ -1,6 +1,8 @@
 import NextAuth from "next-auth/next";
 import GoogleProvider from "next-auth/providers/google";
 const User = require("../../../models/users.model");
+import axios from "axios";
+const apigateway = process.env.APIGATEWAY_URL;
 
 const operatorId = process.env.OPERATOR_ID;
 const operatorSecret = process.env.OPERATOR_SECRET;
@@ -27,6 +29,28 @@ const setOffline = async (id) => {
 
 const setOnline = async (id) => {
   await User.query().findById(id).patch({ is_online: true });
+};
+
+const getInformation = async (type, accessToken) => {
+  try {
+    if (type === "MASTER") {
+      const hasil = await axios.get(`${apigateway}/master/information`, {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
+      return hasil?.data;
+    } else if (type === "PTTPK") {
+      const hasil = await axios.get(`${apigateway}/pttpk/information`, {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
+      return hasil?.data;
+    }
+  } catch (error) {
+    console.log(error);
+  }
 };
 
 const updateUser = async (id) => {
@@ -66,6 +90,7 @@ const upsertUser = async (currentUser) => {
       email,
       birthdate,
       organization_id,
+      info,
     } = currentUser;
 
     const data = {
@@ -73,6 +98,7 @@ const upsertUser = async (currentUser) => {
       role,
       image,
       id: currentUserId || null,
+      info: info || null,
       custom_id: currentUser?.id,
       username,
       employee_number,
@@ -150,7 +176,7 @@ export default NextAuth({
       },
       idToken: true,
       checks: ["pkce", "state"],
-      profile: async (profile) => {
+      profile: async (profile, token) => {
         const currentUser = {
           id: profile.sub,
           username: profile.name,
@@ -164,7 +190,8 @@ export default NextAuth({
           organization_id: profile.organization_id || null,
         };
 
-        const result = await upsertUser(currentUser);
+        const info = await getInformation("PTTPK", token?.access_token);
+        const result = await upsertUser({ ...currentUser, info });
 
         const data = { ...currentUser, current_role: result?.current_role };
 
@@ -191,7 +218,7 @@ export default NextAuth({
       },
       idToken: true,
       checks: ["pkce", "state"],
-      profile: async (profile) => {
+      profile: async (profile, token) => {
         const currentUser = {
           id: profile.sub,
           username: profile.name,
@@ -205,7 +232,9 @@ export default NextAuth({
           organization_id: profile.organization_id || null,
         };
 
-        const result = await upsertUser(currentUser);
+        const info = await getInformation("MASTER", token?.access_token);
+
+        const result = await upsertUser({ ...currentUser, info });
 
         const data = { ...currentUser, current_role: result?.current_role };
 
