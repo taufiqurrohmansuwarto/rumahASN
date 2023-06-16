@@ -1,8 +1,10 @@
 import Layout from "@/components/Layout";
-import React from "react";
+import { getPodcast } from "@/services/index";
+import { useQuery } from "@tanstack/react-query";
 
 function Podcast() {
-  return <div>index</div>;
+  const { data, isLoading } = useQuery(["podcasts"], () => getPodcast(), {});
+  return <div>{JSON.stringify(data)}</div>;
 }
 
 Podcast.getLayout = (page) => {
