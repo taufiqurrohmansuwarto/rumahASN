@@ -1,6 +1,5 @@
-import { listPodcasts } from "@/controller/podcast.controller";
+import { listPodcasts, createPodcast } from "@/controller/podcast.controller";
 import auth from "@/middleware/auth.middleware";
-import { createPodcast } from "@/services/index";
 import { createRouter } from "next-connect";
 const router = createRouter();
 

@@ -1,14 +1,12 @@
 const { Model } = require("objection");
 const knex = require("../db");
-const { customAlphabet } = require("nanoid");
+const { nanoid } = require("nanoid");
 
 Model.knex(knex);
 
 class Podcast extends Model {
   $beforeInsert() {
-    const nanoid = customAlphabet("1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZ", 5);
-    this.ticket_number = nanoid();
-    this.id = uuid.v4();
+    this.id = nanoid();
   }
 
   static get tableName() {

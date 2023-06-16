@@ -570,3 +570,13 @@ export const deletePodcast = (id) => {
 export const updatePodcast = ({ id, data }) => {
   return api.patch(`/podcasts/${id}`, data).then((res) => res?.data);
 };
+
+export const uploadPodcast = ({ id, data }) => {
+  return api
+    .post(`/podcasts/${id}/upload`, data, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    })
+    .then((res) => res?.data);
+};
