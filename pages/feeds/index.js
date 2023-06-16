@@ -1,3 +1,4 @@
+import Announcement from "@/components/Announcement";
 import Layout from "@/components/Layout";
 import PageContainer from "@/components/PageContainer";
 import SelamatDatang from "@/components/SelamatDatang";
@@ -45,6 +46,7 @@ function Feeds() {
         <Grid.Col md={8} sm={12}>
           <Card>
             <Stack>
+              <Announcement />
               <SelamatDatang />
               <PinnedTickets />
               <TicketsPublish />

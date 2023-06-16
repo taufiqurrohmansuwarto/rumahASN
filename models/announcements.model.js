@@ -16,7 +16,7 @@ class Announcement extends Model {
         relation: Model.BelongsToOneRelation,
         modelClass: Users,
         join: {
-          from: "categories.created_by",
+          from: "announcements.author",
           to: "users.custom_id",
         },
       },

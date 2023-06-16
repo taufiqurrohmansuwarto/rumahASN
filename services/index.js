@@ -515,6 +515,10 @@ export const updateAnnouncements = ({ id, data }) => {
   return api.patch(`/announcements/${id}`, data).then((res) => res?.data);
 };
 
+export const removeAnnoucement = (id) => {
+  return api.delete(`/announcements/${id}`).then((res) => res?.data);
+};
+
 // create signature zoom
 export const createSignatureZoom = (id) => {
   return api.get(`/zoom/meetings/${id}/signature`).then((res) => res?.data);
