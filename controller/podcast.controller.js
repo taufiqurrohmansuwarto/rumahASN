@@ -13,9 +13,17 @@ const listPodcasts = async (req, res) => {
           builder.where("title", "like", `%${search}%`);
         }
       })
+      .orderBy("created_at", "desc")
       .page(parseInt(page - 1), parseInt(limit));
 
-    res.json(result);
+    res.json({
+      results: result.results,
+      meta: {
+        total: result.total,
+        page: result.page,
+        limit: result.limit,
+      },
+    });
   } catch (error) {
     console.log(error);
     res.status(500).json({ error: error.message });
@@ -25,7 +33,14 @@ const listPodcasts = async (req, res) => {
 // create podcast
 const createPodcast = async (req, res) => {
   try {
-    const result = await Podcast.query().insert(req.body);
+    const user = req?.user;
+    const body = req?.body;
+    const data = {
+      ...body,
+      author: user?.customId,
+    };
+
+    const result = await Podcast.query().insert(data);
     res.json(result);
   } catch (error) {
     console.log(error);
@@ -59,6 +74,10 @@ const removePodcast = async (req, res) => {
 
 const uploadPodcast = async (req, res) => {
   try {
+    console.log(req.file);
+    res.json({
+      url: req.file?.path,
+    });
   } catch (error) {
     console.log(error);
     res.status(500).json({ error: error.message });
@@ -67,7 +86,13 @@ const uploadPodcast = async (req, res) => {
 
 const detailPodcast = async (req, res) => {
   try {
-  } catch (error) {}
+    const id = req?.query?.id;
+    const result = await Podcast.query().findById(id);
+    res.json(result);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: error.message });
+  }
 };
 
 module.exports = {
