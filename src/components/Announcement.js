@@ -17,8 +17,7 @@ function Announcement() {
         <Alert
           icon={<IconAlertCircle size="1rem" />}
           title={data?.title}
-          color="yellow"
-          variant="filled"
+          color="orange"
         >
           <div
             dangerouslySetInnerHTML={{

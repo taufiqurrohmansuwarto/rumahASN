@@ -549,3 +549,24 @@ export const adminSignature = (id) => {
     .get(`/zoom/meetings/${id}/signature-admin`)
     .then((res) => res?.data);
 };
+
+// podcast
+export const getPodcast = () => {
+  return api.get("/podcasts").then((res) => res?.data);
+};
+
+export const getPodcastDetail = (id) => {
+  return api.get(`/podcasts/${id}`).then((res) => res?.data);
+};
+
+export const createPodcast = (data) => {
+  return api.post("/podcasts", data).then((res) => res?.data);
+};
+
+export const deletePodcast = (id) => {
+  return api.delete(`/podcasts/${id}`).then((res) => res?.data);
+};
+
+export const updatePodcast = ({ id, data }) => {
+  return api.patch(`/podcasts/${id}`, data).then((res) => res?.data);
+};

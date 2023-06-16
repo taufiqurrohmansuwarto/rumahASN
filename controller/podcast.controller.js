@@ -1,12 +1,19 @@
 const Podcast = require("@/models/podcast.model");
 
 // get podcast
-const index = async (req, res) => {
+const listPodcasts = async (req, res) => {
   try {
-    const limit = req.query.limit || 10;
-    const result = await Podcast.query({
-      limit,
-    });
+    const search = req.query.search || "";
+    const page = req.query.page || 1;
+    const limit = req.query.limit || 20;
+
+    const result = await Podcast.query()
+      .where((builder) => {
+        if (search) {
+          builder.where("title", "like", `%${search}%`);
+        }
+      })
+      .page(parseInt(page - 1), parseInt(limit));
 
     res.json(result);
   } catch (error) {
@@ -16,7 +23,7 @@ const index = async (req, res) => {
 };
 
 // create podcast
-const create = async (req, res) => {
+const createPodcast = async (req, res) => {
   try {
     const result = await Podcast.query().insert(req.body);
     res.json(result);
@@ -27,7 +34,7 @@ const create = async (req, res) => {
 };
 
 // update podcast
-const update = async (req, res) => {
+const updatePodcast = async (req, res) => {
   try {
     const { id } = req.query;
     const result = await Podcast.query().patchAndFetchById(id, req.body);
@@ -39,7 +46,7 @@ const update = async (req, res) => {
 };
 
 // delete podcast
-const destroy = async (req, res) => {
+const removePodcast = async (req, res) => {
   try {
     const { id } = req.query;
     const result = await Podcast.query().deleteById(id);
@@ -50,9 +57,24 @@ const destroy = async (req, res) => {
   }
 };
 
+const uploadPodcast = async (req, res) => {
+  try {
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: error.message });
+  }
+};
+
+const detailPodcast = async (req, res) => {
+  try {
+  } catch (error) {}
+};
+
 module.exports = {
-  index,
-  create,
-  update,
-  destroy,
+  detailPodcast,
+  listPodcasts,
+  createPodcast,
+  updatePodcast,
+  removePodcast,
+  uploadPodcast,
 };
