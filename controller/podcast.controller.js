@@ -1,4 +1,7 @@
 const Podcast = require("@/models/podcast.model");
+const { uploadFileMinio } = require("../utils");
+
+const URL_FILE = "https://siasn.bkd.jatimprov.go.id:9000/public";
 
 // get podcast
 const listPodcasts = async (req, res) => {
@@ -73,11 +76,43 @@ const removePodcast = async (req, res) => {
 };
 
 const uploadPodcast = async (req, res) => {
+  const { buffer, originalname, size, mimetype } = req?.file;
+  const id = req?.query?.id;
+
+  const format = mimetype.split("/")[1];
+  const currentFilename = `${id}.${format}`;
+
   try {
-    console.log(req.file);
-    res.json({
-      url: req.file?.path,
-    });
+    if (size > 10000000) {
+      res.status(403).json({ code: 400, message: "File size is too large" });
+    } else {
+      await uploadFileMinio(req.mc, buffer, currentFilename, size, mimetype);
+      const result = `${URL_FILE}/${currentFilename}`;
+
+      const type = req?.body?.type;
+      let name;
+
+      if (type === "image") {
+        await Podcast.query().patchAndFetchById(id, {
+          image_url: result,
+        });
+        name = "image";
+      } else if (type === "audio") {
+        await Podcast.query().patchAndFetchById(id, {
+          audio_url: result,
+        });
+        name = "audio";
+      }
+
+      res.json([
+        {
+          uid: id,
+          name,
+          status: "done",
+          url: result,
+        },
+      ]);
+    }
   } catch (error) {
     console.log(error);
     res.status(500).json({ error: error.message });
@@ -88,7 +123,34 @@ const detailPodcast = async (req, res) => {
   try {
     const id = req?.query?.id;
     const result = await Podcast.query().findById(id);
-    res.json(result);
+    const audio = result?.audio_url
+      ? [
+          {
+            uid: id,
+            name: "audio",
+            status: "done",
+            url: result?.audio_url,
+          },
+        ]
+      : [];
+    const image = result?.image_url
+      ? [
+          {
+            uid: id,
+            name: "image",
+            status: "done",
+            url: result?.image_url,
+          },
+        ]
+      : [];
+
+    const hasil = {
+      ...result,
+      audio,
+      image,
+    };
+
+    res.json(hasil);
   } catch (error) {
     console.log(error);
     res.status(500).json({ error: error.message });
