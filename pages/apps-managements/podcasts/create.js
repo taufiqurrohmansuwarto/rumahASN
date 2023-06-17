@@ -1,10 +1,9 @@
 import Layout from "@/components/Layout";
 import { MarkdownEditor } from "@primer/react/drafts";
 import PageContainer from "@/components/PageContainer";
-import { createPodcast, uploadFiles } from "@/services/index";
-import { parseMarkdown } from "@/utils/parsing";
+import { createPodcast, parseMarkdown, uploadFiles } from "@/services/index";
 import { useMutation } from "@tanstack/react-query";
-import { Button, Form, Input } from "antd";
+import { Button, Card, Col, Form, Input, Row } from "antd";
 import Head from "next/head";
 import { useRouter } from "next/router";
 
@@ -56,31 +55,42 @@ function CreatePodcast() {
       <Head>
         <title>Rumah ASN - Buat Rekaman Podcast</title>
       </Head>
-      <PageContainer onBack={handleBack} title="Buat Podcast">
-        <Form layout="vertical" onFinish={handleFinish} form={form}>
-          <Form.Item name="title" label="Judul">
-            <Input />
-          </Form.Item>
-          <Form.Item name="description" label="Deskripsi">
-            <MarkdownEditor
-              onRenderPreview={renderMarkdown}
-              onUploadFile={uploadFile}
-            >
-              <MarkdownEditor.Toolbar>
-                <MarkdownEditor.DefaultToolbarButtons />
-              </MarkdownEditor.Toolbar>
-            </MarkdownEditor>
-          </Form.Item>
-          <Form.Item>
-            <Button
-              disabled={isLoadingCreatePodcast}
-              loading={isLoadingCreatePodcast}
-              htmlType="submit"
-            >
-              Buat Podcast
-            </Button>
-          </Form.Item>
-        </Form>
+      <PageContainer
+        onBack={handleBack}
+        title="Buat Podcast"
+        subTitle="Podcast Baru - Rumah ASN"
+      >
+        <Row>
+          <Col md={18} xs={24}>
+            <Card>
+              <Form layout="vertical" onFinish={handleFinish} form={form}>
+                <Form.Item name="title" label="Judul">
+                  <Input />
+                </Form.Item>
+                <Form.Item name="description" label="Deskripsi">
+                  <MarkdownEditor
+                    onRenderPreview={renderMarkdown}
+                    onUploadFile={uploadFile}
+                  >
+                    <MarkdownEditor.Toolbar>
+                      <MarkdownEditor.DefaultToolbarButtons />
+                    </MarkdownEditor.Toolbar>
+                  </MarkdownEditor>
+                </Form.Item>
+                <Form.Item>
+                  <Button
+                    type="primary"
+                    disabled={isLoadingCreatePodcast}
+                    loading={isLoadingCreatePodcast}
+                    htmlType="submit"
+                  >
+                    Submit Podcast
+                  </Button>
+                </Form.Item>
+              </Form>
+            </Card>
+          </Col>
+        </Row>
       </PageContainer>
     </>
   );

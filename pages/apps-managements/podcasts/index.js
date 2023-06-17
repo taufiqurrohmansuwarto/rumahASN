@@ -2,8 +2,9 @@ import Layout from "@/components/Layout";
 import PageContainer from "@/components/PageContainer";
 import { getPodcast } from "@/services/index";
 import { useQuery } from "@tanstack/react-query";
-import { Button, Table } from "antd";
+import { Button, Card, Col, Divider, Popconfirm, Row, Table } from "antd";
 import Head from "next/head";
+import Link from "next/link";
 import { useRouter } from "next/router";
 
 function Podcast() {
@@ -24,21 +25,30 @@ function Podcast() {
       key: "title",
     },
     {
-      title: "Deskripsi",
-      dataIndex: "description",
-      key: "description",
+      title: "Publikasi",
+      key: "is_published",
+      render: (_, record) => (
+        <div>
+          {record?.is_published ? "Sudah dipublikasi" : "Belum dipublikasi"}
+        </div>
+      ),
     },
     {
       title: "Detail",
       key: "id",
       render: (text, record) => (
-        <Button
-          onClick={() =>
-            router.push(`/apps-managements/podcasts/${record?.id}`)
-          }
-        >
-          Detail
-        </Button>
+        <div>
+          <Link href={`/apps-managements/podcasts/${record?.id}`}>
+            <a>Detail</a>
+          </Link>
+          <Divider type="vertical" />
+          <Popconfirm
+            title="Apakah anda yakin ingin menghapus podcast ini?"
+            onConfirm={() => console.log("Hapus")}
+          >
+            <a>Hapus</a>
+          </Popconfirm>
+        </div>
       ),
     },
   ];
@@ -51,17 +61,25 @@ function Podcast() {
       <PageContainer
         onBack={handleBack}
         title="Podcast"
-        subTitle="Daftar Podcast"
+        subTitle="Daftar Podcast Rumah ASN"
       >
-        <div>
-          <Button onClick={gotoCreate}>Buat Rekaman Podcast</Button>
-          <Table
-            columns={columns}
-            rowKey={(row) => row?.id}
-            dataSource={data?.results}
-            loading={isLoading}
-          />
-        </div>
+        <Row>
+          <Col md={20} xs={24}>
+            <Card>
+              <Table
+                title={() => (
+                  <Button onClick={gotoCreate} type="primary">
+                    Buat Podcast
+                  </Button>
+                )}
+                columns={columns}
+                rowKey={(row) => row?.id}
+                dataSource={data?.results}
+                loading={isLoading}
+              />
+            </Card>
+          </Col>
+        </Row>
       </PageContainer>
     </>
   );

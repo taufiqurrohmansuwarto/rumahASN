@@ -572,11 +572,10 @@ export const updatePodcast = ({ id, data }) => {
 };
 
 export const uploadPodcast = ({ id, data }) => {
-  return api
-    .post(`/podcasts/${id}/upload`, data, {
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
-    })
-    .then((res) => res?.data);
+  console.log({ id, data });
+  return api.post(`/podcasts/${id}/upload`, data, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
 };

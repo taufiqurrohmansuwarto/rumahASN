@@ -75,7 +75,10 @@ const SignIn = ({ providers }) => {
               <GoogleButton
                 style={{ width: "100%" }}
                 label="Masuk dengan Google"
-                onClick={() => signIn("google")}
+                onClick={(e) => {
+                  e.preventDefault();
+                  signIn("google");
+                }}
               />
             </Col>
             <Col xs={24}>
@@ -91,7 +94,10 @@ const SignIn = ({ providers }) => {
                       <Button
                         icon={<LoginOutlined />}
                         type="primary"
-                        onClick={() => signIn(provider.id)}
+                        onClick={(e) => {
+                          e?.preventDefault();
+                          signIn(provider.id);
+                        }}
                         block
                       >
                         Masuk dengan akun {provider.name}
