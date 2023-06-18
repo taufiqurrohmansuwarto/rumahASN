@@ -5,8 +5,8 @@ import {
   PauseCircleFilled,
   PlayCircleFilled,
 } from "@ant-design/icons";
-import { Card } from "@mantine/core";
-import { Col, Image, Row, Slider, Typography } from "antd";
+import { Card, Group } from "@mantine/core";
+import { Col, Grid, Image, Row, Slider, Typography } from "antd";
 import { useRef, useState } from "react";
 import Duration from "./Duration";
 import ReactPlayer from "./ReactPlayer";
@@ -64,6 +64,8 @@ function PodcastPlayer({ data: dataPodcast }) {
     setData({ ...data, duration });
   };
 
+  const screens = Grid.useBreakpoint();
+
   return (
     <Card>
       <Row>
@@ -71,9 +73,10 @@ function PodcastPlayer({ data: dataPodcast }) {
           <Row gutter={[32, 32]}>
             <Col span={6}>
               <Image
-                src="https://images.transistor.fm/file/transistor/images/show/13470/thumb_1597943814-artwork.jpg"
+                src={dataPodcast?.image_url}
                 alt="Podcast Image"
-                width={160}
+                width={"100%"}
+                height={"100%"}
               />
             </Col>
             <Col span={18}>
@@ -87,7 +90,7 @@ function PodcastPlayer({ data: dataPodcast }) {
                   {dataPodcast?.episode}: {dataPodcast?.short_description}
                 </Typography.Title>
               </Row>
-              <Row gutter={[16, 16]}>
+              <Row gutter={[8, 8]} align="top" justify="space-between">
                 <ReactPlayer
                   ref={ref}
                   playing={data.playing}
@@ -104,12 +107,13 @@ function PodcastPlayer({ data: dataPodcast }) {
                   }}
                   style={{ display: "none" }}
                 />
-                <Col span={3}>
+                <Col md={3}>
                   {data.playing ? (
                     <PauseCircleFilled
                       onClick={handlePlayPause}
                       style={{
-                        fontSize: 50,
+                        // fontSize full width
+                        fontSize: screens.md ? 50 : 20,
                         cursor: "pointer",
                       }}
                     />
@@ -117,19 +121,18 @@ function PodcastPlayer({ data: dataPodcast }) {
                     <PlayCircleFilled
                       onClick={handlePlayPause}
                       style={{
-                        fontSize: 50,
+                        fontSize: screens.md ? 50 : 20,
                         cursor: "pointer",
                       }}
                     />
                   )}
                 </Col>
-                <Col span={16}>
+                <Col md={21} xs={21} sm={21}>
                   <Row>
                     <Col span={24}>
                       <Slider
                         value={data.played * 100}
                         onChange={handleSeekChange}
-                        // onAfterChange={handleSeekMouseUp}
                         onAfterChange={handleSeekMouseUp}
                         step={0.0001}
                         tooltip={{
@@ -141,26 +144,13 @@ function PodcastPlayer({ data: dataPodcast }) {
                       />
                     </Col>
                     <Col span={24}>
-                      <Row justify="space-evenly" align="middle">
-                        <Col span={20}>
-                          <FastBackwardFilled
-                            style={{
-                              fontSize: 24,
-                              cursor: "pointer",
-                            }}
-                          />
-                          <FastForwardFilled
-                            style={{
-                              fontSize: 24,
-                              cursor: "pointer",
-                            }}
-                          />
-                        </Col>
-                        <Col span={4}>
+                      <Group position="apart">
+                        <div></div>
+                        <div>
                           <Duration seconds={data?.duration * data?.played} /> :{" "}
                           <Duration seconds={data?.duration} />
-                        </Col>
-                      </Row>
+                        </div>
+                      </Group>
                     </Col>
                   </Row>
                 </Col>

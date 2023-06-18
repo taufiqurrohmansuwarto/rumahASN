@@ -60,7 +60,11 @@ function PodcastUserDetail() {
 }
 
 PodcastUserDetail.getLayout = (page) => {
-  return <Layout active="/edukasi/podcasts">{page}</Layout>;
+  return (
+    <Layout collapsed active="/edukasi/podcasts">
+      {page}
+    </Layout>
+  );
 };
 
 PodcastUserDetail.Auth = {
