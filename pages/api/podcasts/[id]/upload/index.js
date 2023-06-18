@@ -1,5 +1,9 @@
-import { uploadPodcast } from "@/controller/podcast.controller";
+import {
+  removeFilePodcast,
+  uploadPodcast,
+} from "@/controller/podcast.controller";
 import auth from "@/middleware/auth.middleware";
+import checkRole from "@/middleware/role.middleware";
 import multer from "multer";
 import { createRouter } from "next-connect";
 const router = createRouter();
@@ -10,6 +14,9 @@ export const config = {
   },
 };
 
-router.use(auth).post(multer().single("file"), uploadPodcast);
+router
+  .use(auth, checkRole("admin"))
+  .post(multer().single("file"), uploadPodcast)
+  .delete(removeFilePodcast);
 
 export default router.handler();

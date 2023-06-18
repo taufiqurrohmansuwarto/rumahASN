@@ -56,6 +56,11 @@ function Podcast() {
 
   const columns = [
     {
+      title: "Episode",
+      dataIndex: "episode",
+      key: "episode",
+    },
+    {
       title: "Judul Podcast",
       dataIndex: "title",
       key: "title",

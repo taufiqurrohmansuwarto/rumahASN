@@ -56,7 +56,24 @@ const createPodcast = async (req, res) => {
 const updatePodcast = async (req, res) => {
   try {
     const { id } = req.query;
-    const result = await Podcast.query().patchAndFetchById(id, req.body);
+
+    let data = {
+      ...req.body,
+    };
+
+    if (data?.is_published) {
+      data = {
+        ...data,
+        published_at: new Date(),
+      };
+    } else if (!data?.is_published) {
+      data = {
+        ...data,
+        published_at: null,
+      };
+    }
+
+    const result = await Podcast.query().patchAndFetchById(id, data);
     res.json(result);
   } catch (error) {
     console.log(error);
@@ -162,6 +179,7 @@ const detailPodcast = async (req, res) => {
     const hasil = {
       ...result,
       html: parseMarkdown(result?.description),
+      transcript_html: parseMarkdown(result?.transcript),
       audio,
       image,
     };
@@ -214,6 +232,7 @@ const detailPodcastUser = async (req, res) => {
     const hasil = {
       ...result,
       html: parseMarkdown(result?.description),
+      transcript_html: parseMarkdown(result?.transcript),
     };
     res.json(hasil);
   } catch (error) {
@@ -222,7 +241,32 @@ const detailPodcastUser = async (req, res) => {
   }
 };
 
+const removeFilePodcast = async (req, res) => {
+  try {
+    const { id } = req.query;
+    const currentPodcast = await Podcast.query().findById(id);
+    const type = req?.body?.type;
+    if (type === "image") {
+      const image = currentPodcast?.image_url.split("/").pop();
+      await deleteFileMinio(req.mc, image);
+      await Podcast.query().patchAndFetchById(id, {
+        image_url: null,
+      });
+    } else if (type === "audio") {
+      const audio = currentPodcast?.audio_url.split("/").pop();
+      await deleteFileMinio(req.mc, audio);
+      await Podcast.query().patchAndFetchById(id, {
+        audio_url: null,
+      });
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: error.message });
+  }
+};
+
 module.exports = {
+  removeFilePodcast,
   detailPodcastUser,
   listPodcastUser,
   detailPodcast,

@@ -580,6 +580,10 @@ export const uploadPodcast = ({ id, data }) => {
   });
 };
 
+export const removeFilePodcast = ({ id, data }) => {
+  return api.put(`/podcasts/${id}/upload`, data).then((res) => res?.data);
+};
+
 // users
 export const podcastUsers = () => {
   return api.get("/podcasts/users").then((res) => res?.data);

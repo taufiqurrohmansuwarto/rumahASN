@@ -1,6 +1,5 @@
 import Layout from "@/components/Layout";
 import PageContainer from "@/components/PageContainer";
-import { MarkdownEditor } from "@primer/react/drafts";
 import {
   getPodcastDetail,
   parseMarkdown,
@@ -8,19 +7,21 @@ import {
   uploadFiles,
   uploadPodcast,
 } from "@/services/index";
-import { EditOutlined, UploadOutlined } from "@ant-design/icons";
+import { UploadOutlined } from "@ant-design/icons";
 import { Stack } from "@mantine/core";
+import { MarkdownEditor } from "@primer/react/drafts";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Button,
   Card,
   Col,
-  Row,
-  Upload,
-  message,
   Form,
   Input,
+  InputNumber,
+  Row,
   Switch,
+  Upload,
+  message,
 } from "antd";
 import Head from "next/head";
 import { useRouter } from "next/router";
@@ -198,6 +199,9 @@ const UpdateForm = ({ data }) => {
         title: result?.title,
         description: result?.description,
         is_published: result?.is_published,
+        episode: result?.episode,
+        short_description: result?.short_description,
+        transcript: result?.transcript,
       },
     };
     mutate(sendData);
@@ -209,15 +213,44 @@ const UpdateForm = ({ data }) => {
         initialValues={{
           title: data?.title,
           description: data?.description,
+          is_published: data?.is_published,
+          episode: data?.episode,
+          short_description: data?.short_description,
+          transcript: data?.transcript,
         }}
         layout="vertical"
         onFinish={handleFinish}
         form={form}
       >
+        <Form.Item
+          name="episode"
+          label="Episode"
+          rules={[
+            {
+              required: true,
+              message: "Episode harus diisi",
+            },
+          ]}
+        >
+          <InputNumber />
+        </Form.Item>
         <Form.Item name="title" label="Judul">
           <Input />
         </Form.Item>
+        <Form.Item name="short_description" label="Deskripsi Pendek">
+          <Input.TextArea rows={5} />
+        </Form.Item>
         <Form.Item name="description" label="Deskripsi">
+          <MarkdownEditor
+            onRenderPreview={renderMarkdown}
+            onUploadFile={uploadFile}
+          >
+            <MarkdownEditor.Toolbar>
+              <MarkdownEditor.DefaultToolbarButtons />
+            </MarkdownEditor.Toolbar>
+          </MarkdownEditor>
+        </Form.Item>
+        <Form.Item name="transcript" label="Transkrip">
           <MarkdownEditor
             onRenderPreview={renderMarkdown}
             onUploadFile={uploadFile}

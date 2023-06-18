@@ -11,14 +11,14 @@ import { useRef, useState } from "react";
 import Duration from "./Duration";
 import ReactPlayer from "./ReactPlayer";
 
-function PodcastPlayer({ url, title, description }) {
+function PodcastPlayer({ data: dataPodcast }) {
   const ref = useRef(null);
 
   const [data, setData] = useState({
     ready: false,
     played: 0,
     loaded: 0,
-    url,
+    url: dataPodcast?.audio_url,
     pip: false,
     playing: false,
     controls: false,
@@ -69,26 +69,25 @@ function PodcastPlayer({ url, title, description }) {
       <Row>
         <Col md={16} xs={24}>
           <Row gutter={[32, 32]}>
-            <Col span={4}>
+            <Col span={6}>
               <Image
                 src="https://images.transistor.fm/file/transistor/images/show/13470/thumb_1597943814-artwork.jpg"
                 alt="Podcast Image"
                 width={160}
               />
             </Col>
-            <Col span={20}>
+            <Col span={18}>
               <Row>
                 <Typography.Text>
-                  Full Stack Radio • Episode 152
+                  {dataPodcast?.title} • Episode {dataPodcast?.episode}
                 </Typography.Text>
               </Row>
               <Row>
                 <Typography.Title level={4}>
-                  152: Ben Orenstein - How to Stand Out When Applying for a Job
-                  at a Small Company
+                  {dataPodcast?.episode}: {dataPodcast?.short_description}
                 </Typography.Title>
               </Row>
-              <Row gutter={[32, 32]}>
+              <Row gutter={[16, 16]}>
                 <ReactPlayer
                   ref={ref}
                   playing={data.playing}
@@ -99,17 +98,18 @@ function PodcastPlayer({ url, title, description }) {
                   onDuration={handleDuration}
                   url={data?.url}
                   onReady={(e) => {
+                    console.log(e["player"]);
                     ref.current = e["player"];
                     setData({ ...data, ready: true });
                   }}
                   style={{ display: "none" }}
                 />
-                <Col span={2}>
+                <Col span={3}>
                   {data.playing ? (
                     <PauseCircleFilled
                       onClick={handlePlayPause}
                       style={{
-                        fontSize: 64,
+                        fontSize: 50,
                         cursor: "pointer",
                       }}
                     />
@@ -117,7 +117,7 @@ function PodcastPlayer({ url, title, description }) {
                     <PlayCircleFilled
                       onClick={handlePlayPause}
                       style={{
-                        fontSize: 64,
+                        fontSize: 50,
                         cursor: "pointer",
                       }}
                     />
