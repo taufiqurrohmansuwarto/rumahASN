@@ -165,7 +165,7 @@ const SignIn = ({ providers }) => {
                     fontSize: 12,
                   }}
                 >
-                  Ver 1.0.0-rc 15
+                  Ver 1.0.0-rc 16
                 </Typography.Link>
               </Link>
               <Link href="/privacy">
