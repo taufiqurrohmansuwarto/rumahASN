@@ -579,3 +579,12 @@ export const uploadPodcast = ({ id, data }) => {
     },
   });
 };
+
+// users
+export const podcastUsers = () => {
+  return api.get("/podcasts/users").then((res) => res?.data);
+};
+
+export const podcastUserDetail = (id) => {
+  return api.get(`/podcasts/users/${id}`).then((res) => res?.data);
+};

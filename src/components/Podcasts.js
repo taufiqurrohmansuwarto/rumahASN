@@ -1,14 +1,19 @@
-import React from "react";
 import ReactPlayer from "@/components/ReactPlayer";
-import { Slider } from "antd";
+import {
+  PauseCircleOutlined,
+  PlayCircleFilled,
+  StepBackwardFilled,
+  StepForwardFilled,
+} from "@ant-design/icons";
+import { Button, Col, Row, Space } from "antd";
+import { useRef, useState } from "react";
 
-function Podcasts() {
+function Podcasts({ url }) {
   const ref = useRef(null);
-  const [played, setPlayed] = useState(0);
   const [data, setData] = useState({
     played: 0,
     loaded: 0,
-    url: null,
+    url,
     pip: false,
     playing: false,
     controls: false,
@@ -24,12 +29,19 @@ function Podcasts() {
     console.log("onProgress", state);
     // We only want to update time slider if we are not currently seeking
     if (!data.seeking) {
-      setData(state);
+      setData({
+        ...data,
+        ...state,
+      });
     }
   };
 
   const handlePlayPause = () => {
     setData({ ...data, playing: !data.playing });
+  };
+
+  const handleEnded = () => {
+    setData({ ...data, playing: data.loop });
   };
 
   const handleStop = () => {
@@ -58,35 +70,31 @@ function Podcasts() {
   };
 
   return (
-    <div>
-      helloword
-      <ReactPlayer
-        ref={ref}
-        onBuffer={() => console.log("onBuffer")}
-        playing={true}
-        onProgress={onProgress}
-        onSeek={handleSeekChange}
-        light={
-          <img
-            src="https://gw.alipayobjects.com/zos/rmsportal/KDpgvguMpGfqaHPjicRK.svg"
-            alt="Thumbnail"
+    <Row justify="center" align="center">
+      <Col md={24}>
+        <Space>
+          <ReactPlayer
+            ref={ref}
+            playing={data.playing}
+            onEnded={handleEnded}
+            url={url}
+            style={{
+              display: "none",
+            }}
           />
-        }
-        url={"https://siasn.bkd.jatimprov.go.id:9000/public/regex.mp3"}
-      />
-      <Slider
-        min={0}
-        max={1}
-        step={0.01}
-        value={
-          typeof data.played === "number"
-            ? data.played
-            : parseFloat(data.played)
-        }
-        onChange={handleSeekChange}
-      />
-      {played}
-    </div>
+          <Button shape="circle" size="small" icon={<StepBackwardFilled />} />
+          <Button
+            onClick={handlePlayPause}
+            shape="circle"
+            size="large"
+            icon={
+              data?.playing ? <PauseCircleOutlined /> : <PlayCircleFilled />
+            }
+          />
+          <Button shape="circle" size="small" icon={<StepForwardFilled />} />
+        </Space>
+      </Col>
+    </Row>
   );
 }
 

@@ -1,5 +1,6 @@
 const Podcast = require("@/models/podcast.model");
-const { uploadFileMinio } = require("../utils");
+const { uploadFileMinio, deleteFileMinio } = require("../utils");
+const { parseMarkdown } = require("@/utils/parsing");
 
 const URL_FILE = "https://siasn.bkd.jatimprov.go.id:9000/public";
 
@@ -67,7 +68,21 @@ const updatePodcast = async (req, res) => {
 const removePodcast = async (req, res) => {
   try {
     const { id } = req.query;
+    const currentPodcast = await Podcast.query().findById(id);
+    console.log(currentPodcast);
+
+    if (currentPodcast?.image_url) {
+      const image = currentPodcast?.image_url.split("/").pop();
+      await deleteFileMinio(req.mc, image);
+    }
+
+    if (currentPodcast?.audio_url) {
+      const audio = currentPodcast?.audio_url.split("/").pop();
+      await deleteFileMinio(req.mc, audio);
+    }
+
     const result = await Podcast.query().deleteById(id);
+
     res.json(result);
   } catch (error) {
     console.log(error);
@@ -146,6 +161,7 @@ const detailPodcast = async (req, res) => {
 
     const hasil = {
       ...result,
+      html: parseMarkdown(result?.description),
       audio,
       image,
     };
@@ -157,7 +173,58 @@ const detailPodcast = async (req, res) => {
   }
 };
 
+const listPodcastUser = async (req, res) => {
+  try {
+    const limit = req.query.limit || 10;
+    const page = req.query.page || 1;
+    const search = req.query.search || "";
+
+    const result = await Podcast.query()
+      .where("is_published", true)
+      .where((builder) => {
+        if (search) {
+          builder.where("title", "like", `%${search}%`);
+        }
+      })
+      .page(parseInt(page) - 1, parseInt(limit))
+      .orderBy("created_at", "desc");
+
+    const hasil = {
+      results: result.results,
+      meta: {
+        total: result.total,
+        page: parseInt(page),
+        limit: parseInt(limit),
+      },
+    };
+
+    res.json(hasil);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: error.message });
+  }
+};
+
+const detailPodcastUser = async (req, res) => {
+  try {
+    const result = await Podcast.query()
+      .where("id", req.query.id)
+      .andWhere("is_published", true)
+      .first();
+    const hasil = {
+      ...result,
+      html: parseMarkdown(result?.description),
+    };
+    res.json(hasil);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: error.message });
+  }
+};
+
 module.exports = {
+  detailPodcastUser,
+  listPodcastUser,
   detailPodcast,
   listPodcasts,
   createPodcast,

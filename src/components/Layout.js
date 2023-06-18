@@ -5,10 +5,10 @@ import {
   BookOutlined,
   LogoutOutlined,
   NotificationOutlined,
+  ReadOutlined,
   ReconciliationOutlined,
   SettingOutlined,
   UserOutlined,
-  UserSwitchOutlined,
 } from "@ant-design/icons";
 import { Dropdown, Menu } from "antd";
 import { uniqBy } from "lodash";
@@ -16,9 +16,9 @@ import { signOut, useSession } from "next-auth/react";
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useRouter } from "next/router";
+import { useState } from "react";
 import { userRoutes } from "../routes";
 import Notifications from "./Notifications";
-import { useState } from "react";
 
 const menu = (
   <Menu
@@ -60,18 +60,39 @@ const changeRoutes = (user) => {
     // persiapan ini seharusnya ditambahkan halaman dashboard seperti analisis dsb tapi jangan data
 
     if (pegawaiPemda) {
-      userRoutes.routes.push({
-        path: "/webinars",
-        name: "Webinar",
-        icon: <AudioOutlined />,
-        routes: [
-          { path: "/webinars/live", name: "Live Meeting" },
-          {
-            path: "/webinars/my-webinar",
-            name: "Webinar Saya",
-          },
-        ],
-      });
+      userRoutes.routes.push(
+        {
+          path: "/edukasi",
+          name: "Edukasi",
+          icon: <ReadOutlined />,
+          routes: [
+            {
+              path: "/edukasi/podcasts",
+              name: "Podcast",
+            },
+            {
+              path: "/edukasi/webinar",
+              name: "Webinar",
+            },
+            {
+              path: "/edukasi/webinar-saya",
+              name: "Webinar Saya",
+            },
+          ],
+        }
+        // {
+        //   path: "/webinars",
+        //   name: "Webinar",
+        //   icon: <AudioOutlined />,
+        //   routes: [
+        //     { path: "/webinars/live", name: "Live Meeting" },
+        //     {
+        //       path: "/webinars/my-webinar",
+        //       name: "Webinar Saya",
+        //     },
+        //   ],
+        // }
+      );
     }
 
     if (userPns) {
