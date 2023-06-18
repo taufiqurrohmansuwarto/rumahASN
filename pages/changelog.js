@@ -102,6 +102,11 @@ const ChangeLog = () => {
         "Tambah jabatan dan juga unit kerja di halaman profile yang telah dikoneksikan dengan simaster dan pttpk",
       ],
     },
+    {
+      version: "1.0.0-rc 16",
+      date: "18-06-2023",
+      changes: ["Tambah menu edukasi untuk podcast dan webinar"],
+    },
   ];
 
   return (

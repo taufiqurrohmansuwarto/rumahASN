@@ -231,8 +231,10 @@ const detailPodcastUser = async (req, res) => {
       .first();
     const hasil = {
       ...result,
-      html: parseMarkdown(result?.description),
-      transcript_html: parseMarkdown(result?.transcript),
+      html: result?.description ? parseMarkdown(result?.description) : null,
+      transcript_html: result?.transcript
+        ? parseMarkdown(result?.transcript)
+        : null,
     };
     res.json(hasil);
   } catch (error) {
