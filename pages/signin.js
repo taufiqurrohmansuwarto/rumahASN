@@ -61,26 +61,26 @@ const SignIn = ({ providers }) => {
           <BAComponent />
         </Col>
         <Col md={6} xs={24}>
-          <animated.div style={textAnimation}>
-            <Typography.Title
-              style={{
-                marginBottom: 0,
-                fontWeight: "bold",
-              }}
-              level={2}
-            >
-              RUMAH ASN
-            </Typography.Title>
-            <Typography.Text
-              level={5}
-              style={{
-                margin: 0,
-                fontSize: 14,
-              }}
-            >
-              Ruang Menjawab Keluhan ASN Jawa Timur dan Masyarakat UMUM
-            </Typography.Text>
-          </animated.div>
+          {/* <animated.div style={textAnimation}> */}
+          <Typography.Title
+            style={{
+              marginBottom: 0,
+              fontWeight: "bold",
+            }}
+            level={2}
+          >
+            RUMAH ASN
+          </Typography.Title>
+          <Typography.Text
+            level={5}
+            style={{
+              margin: 0,
+              fontSize: 14,
+            }}
+          >
+            Ruang Menjawab Keluhan ASN Jawa Timur dan Masyarakat UMUM
+          </Typography.Text>
+          {/* </animated.div> */}
           <Blockquote cite="- BKD Provinsi Jawa Timur">
             Tempat Berkumpulnya Solusi Kepegawaian yang Cepat, Mudah, dan
             Terpadu untuk Menciptakan Lingkungan Kerja yang Harmonis dan

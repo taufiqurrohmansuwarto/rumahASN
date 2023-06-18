@@ -34,18 +34,14 @@ function Podcast() {
                 dataSource={data?.results}
                 rowKey={(row) => row?.id}
                 renderItem={(item) => (
-                  <List.Item
-                    key={item?.id}
-                    actions={[]}
-                    extra={<Podcasts url={item?.audio_url} />}
-                  >
+                  <List.Item key={item?.id} actions={[]}>
                     <List.Item.Meta
                       title={
                         <Link href={`/edukasi/podcasts/${item?.id}`}>
                           {item?.title}
                         </Link>
                       }
-                      description={item?.description}
+                      description={item?.short_description}
                       avatar={<Avatar src={item?.image_url} />}
                     />
                   </List.Item>

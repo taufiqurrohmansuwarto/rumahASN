@@ -5,9 +5,14 @@ import {
 } from "@/controller/podcast.controller";
 
 import auth from "@/middleware/auth.middleware";
+import checkRole from "@/middleware/role.middleware";
 import { createRouter } from "next-connect";
 const router = createRouter();
 
-router.use(auth).patch(updatePodcast).delete(removePodcast).get(detailPodcast);
+router
+  .use(auth, checkRole("admin"))
+  .patch(updatePodcast)
+  .put(removePodcast)
+  .get(detailPodcast);
 
 export default router.handler();

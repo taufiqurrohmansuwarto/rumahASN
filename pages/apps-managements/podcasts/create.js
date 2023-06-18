@@ -3,7 +3,7 @@ import { MarkdownEditor } from "@primer/react/drafts";
 import PageContainer from "@/components/PageContainer";
 import { createPodcast, parseMarkdown, uploadFiles } from "@/services/index";
 import { useMutation } from "@tanstack/react-query";
-import { Button, Card, Col, Form, Input, Row } from "antd";
+import { Button, Card, Col, Form, Input, InputNumber, Row } from "antd";
 import Head from "next/head";
 import { useRouter } from "next/router";
 
@@ -64,8 +64,32 @@ function CreatePodcast() {
           <Col md={18} xs={24}>
             <Card>
               <Form layout="vertical" onFinish={handleFinish} form={form}>
-                <Form.Item name="title" label="Judul">
+                <Form.Item
+                  name="episode"
+                  label="Episode"
+                  rules={[
+                    {
+                      required: true,
+                      message: "Episode harus diisi",
+                    },
+                  ]}
+                >
+                  <InputNumber />
+                </Form.Item>
+                <Form.Item
+                  name="title"
+                  label="Judul"
+                  rules={[
+                    {
+                      required: true,
+                      message: "Judul harus diisi",
+                    },
+                  ]}
+                >
                   <Input />
+                </Form.Item>
+                <Form.Item name="short_description" label="Deskripsi Pendek">
+                  <Input.TextArea rows={5} />
                 </Form.Item>
                 <Form.Item name="description" label="Deskripsi">
                   <MarkdownEditor

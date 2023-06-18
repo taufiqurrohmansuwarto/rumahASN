@@ -3,7 +3,7 @@ import PageContainer from "@/components/PageContainer";
 import PodcastPlayer from "@/components/PodcastPlayer";
 import { podcastUserDetail } from "@/services/index";
 import { useQuery } from "@tanstack/react-query";
-import { Card } from "antd";
+import { Card, Col, Divider, Row, Tabs, Typography } from "antd";
 import Head from "next/head";
 import { useRouter } from "next/router";
 
@@ -25,12 +25,35 @@ function PodcastUserDetail() {
       <PageContainer
         onBack={() => router.back()}
         title="Detail Podcast"
-        subTitle={data?.title}
+        subTitle={`Epiosde ${data?.episode} • ${data?.title}`}
         loading={isLoading}
       >
-        <Card>
-          <PodcastPlayer url={data?.audio_url} />
-        </Card>
+        <Row>
+          <Col md={18} xs={24}>
+            <Card>
+              <PodcastPlayer data={data} url={data?.audio_url} />
+              <Divider />
+              <Typography.Title level={3}>Deskripsi</Typography.Title>
+              <div
+                dangerouslySetInnerHTML={{
+                  __html: data?.html,
+                }}
+              />
+              <Tabs defaultActiveKey="1">
+                <Tabs.TabPane tab="Transkrip" key="1">
+                  <div
+                    dangerouslySetInnerHTML={{
+                      __html: data?.transcript_html,
+                    }}
+                  />
+                </Tabs.TabPane>
+                <Tabs.TabPane tab="Komentar" key="2">
+                  Akan ditambahkan komentar
+                </Tabs.TabPane>
+              </Tabs>
+            </Card>
+          </Col>
+        </Row>
       </PageContainer>
     </>
   );
