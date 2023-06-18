@@ -11,7 +11,17 @@ import {
 import { EditOutlined, UploadOutlined } from "@ant-design/icons";
 import { Stack } from "@mantine/core";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Button, Card, Col, Row, Upload, message, Form, Input } from "antd";
+import {
+  Button,
+  Card,
+  Col,
+  Row,
+  Upload,
+  message,
+  Form,
+  Input,
+  Switch,
+} from "antd";
 import Head from "next/head";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
@@ -187,6 +197,7 @@ const UpdateForm = ({ data }) => {
       data: {
         title: result?.title,
         description: result?.description,
+        is_published: result?.is_published,
       },
     };
     mutate(sendData);
@@ -215,6 +226,9 @@ const UpdateForm = ({ data }) => {
               <MarkdownEditor.DefaultToolbarButtons />
             </MarkdownEditor.Toolbar>
           </MarkdownEditor>
+        </Form.Item>
+        <Form.Item name="is_published" label="Publikasi">
+          <Switch defaultChecked={data?.is_published} />
         </Form.Item>
         <UploadFileAudio data={data} />
         <UploadFileImage data={data} />

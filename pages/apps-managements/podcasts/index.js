@@ -1,13 +1,49 @@
 import Layout from "@/components/Layout";
 import PageContainer from "@/components/PageContainer";
-import { getPodcast } from "@/services/index";
-import { useQuery } from "@tanstack/react-query";
-import { Button, Card, Col, Divider, Popconfirm, Row, Table } from "antd";
+import { deletePodcast, getPodcast } from "@/services/index";
+import { CheckCircleOutlined, CloseOutlined } from "@ant-design/icons";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  Button,
+  Card,
+  Col,
+  Divider,
+  Popconfirm,
+  Row,
+  Table,
+  message,
+} from "antd";
 import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
 
 function Podcast() {
+  const queryClient = useQueryClient();
+
+  const { mutate: remove } = useMutation((data) => deletePodcast(data), {
+    onMutate: () => {
+      message.loading({
+        content: "Menghapus podcast...",
+        key: "remove",
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries(["podcasts"]);
+      message.success({
+        content: "Berhasil menghapus podcast",
+        key: "remove",
+        duration: 2,
+      });
+    },
+    onError: () => {
+      message.error({
+        content: "Gagal menghapus podcast",
+        key: "remove",
+        duration: 2,
+      });
+    },
+  });
+
   const router = useRouter();
 
   const gotoCreate = () => {
@@ -29,14 +65,23 @@ function Podcast() {
       key: "is_published",
       render: (_, record) => (
         <div>
-          {record?.is_published ? "Sudah dipublikasi" : "Belum dipublikasi"}
+          {record?.is_published ? (
+            <CheckCircleOutlined style={{ color: "green" }} />
+          ) : (
+            <CloseOutlined style={{ color: "red" }} />
+          )}
         </div>
       ),
     },
     {
+      title: "Tgl. Dibuat",
+      dataIndex: "created_at",
+      key: "created_at",
+    },
+    {
       title: "Detail",
       key: "id",
-      render: (text, record) => (
+      render: (_, record) => (
         <div>
           <Link href={`/apps-managements/podcasts/${record?.id}`}>
             <a>Detail</a>
@@ -44,7 +89,7 @@ function Podcast() {
           <Divider type="vertical" />
           <Popconfirm
             title="Apakah anda yakin ingin menghapus podcast ini?"
-            onConfirm={() => console.log("Hapus")}
+            onConfirm={() => remove(record?.id)}
           >
             <a>Hapus</a>
           </Popconfirm>
@@ -59,6 +104,7 @@ function Podcast() {
         <title>Rumah ASN - Manajemen Podcast</title>
       </Head>
       <PageContainer
+        ghost
         onBack={handleBack}
         title="Podcast"
         subTitle="Daftar Podcast Rumah ASN"
