@@ -1,6 +1,7 @@
 import Layout from "@/components/Layout";
 import PageContainer from "@/components/PageContainer";
 import PodcastPlayer from "@/components/PodcastPlayer";
+import PodcastsComments from "@/components/PodcastsComments";
 import { podcastUserDetail } from "@/services/index";
 import { Spoiler } from "@mantine/core";
 import { useQuery } from "@tanstack/react-query";
@@ -29,7 +30,7 @@ function PodcastUserDetail() {
         subTitle={`Epiosde ${data?.episode} • ${data?.title}`}
         loading={isLoading}
       >
-        <Row>
+        <Row justify="center">
           <Col md={18} xs={24}>
             <Card>
               <PodcastPlayer data={data} url={data?.audio_url} />
@@ -51,7 +52,7 @@ function PodcastUserDetail() {
                   />
                 </Tabs.TabPane>
                 <Tabs.TabPane tab="Komentar" key="2">
-                  Akan ditambahkan komentar
+                  <PodcastsComments id={router?.query?.id} />
                 </Tabs.TabPane>
               </Tabs>
             </Card>
