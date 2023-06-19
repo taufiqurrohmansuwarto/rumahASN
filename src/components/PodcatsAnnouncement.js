@@ -17,7 +17,7 @@ const useStyles = createStyles((theme) => ({
   },
 
   title: {
-    fontWeight: 700,
+    //     fontWeight: 700,
     fontFamily: `Greycliff CF, ${theme.fontFamily}`,
     lineHeight: 1.2,
   },
@@ -38,10 +38,16 @@ const ArticleCardVertical = ({ image, category, title }) => {
       <Group noWrap spacing={0}>
         <Image alt="tets" src={image} height={140} width={140} />
         <div className={classes.body}>
-          <Text transform="uppercase" color="dimmed" weight={700} size="xs">
+          <Text
+            transform="uppercase"
+            sx={{
+              fontWeight: 700,
+            }}
+            size="sm"
+          >
             {category}
           </Text>
-          <Text className={classes.title} mt="xs" mb="md">
+          <Text className={classes.title} mt="xs" mb="md" color="dimmed">
             {title}
           </Text>
           <Group noWrap spacing="xs">
@@ -51,7 +57,7 @@ const ArticleCardVertical = ({ image, category, title }) => {
                 leftIcon={<IconMicrophone size={15} />}
                 color="lime"
               >
-                Dengarkan Podcast!
+                Dengarkan Podcast
               </Button>
             </Group>
           </Group>

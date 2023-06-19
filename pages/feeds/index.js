@@ -50,7 +50,7 @@ function Feeds() {
               {/* <Announcement /> */}
               <SelamatDatang />
               <PodcastAnnouncement
-                image="https://siasn.bkd.jatimprov.go.id:9000/public/gedung.png"
+                image="https://siasn.bkd.jatimprov.go.id:9000/public/hijau-podcast.jpg"
                 title="Dari Kami Untuk Kalian"
                 category="Podcast Rumah ASN"
               />
