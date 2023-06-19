@@ -113,9 +113,10 @@ const uploadPodcast = async (req, res) => {
 
   const format = mimetype.split("/")[1];
   const currentFilename = `${id}.${format}`;
+  const limit50MB = size > 50000000;
 
   try {
-    if (size > 10000000) {
+    if (limit50MB) {
       res.status(403).json({ code: 400, message: "File size is too large" });
     } else {
       await uploadFileMinio(req.mc, buffer, currentFilename, size, mimetype);
