@@ -3,7 +3,10 @@ const CommentPodcast = require("@/models/comments-podcasts.model");
 const commentsPodcasts = async (req, res) => {
   try {
     const { id } = req?.query;
-    const result = await CommentPodcast.query().where("podcast_id", id);
+    const result = await CommentPodcast.query()
+      .where("podcast_id", id)
+      .withGraphFetched("[user(simpleSelect)]")
+      .orderBy("created_at", "desc");
     res.json(result);
   } catch (error) {
     console.log(error);
