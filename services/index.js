@@ -592,3 +592,28 @@ export const podcastUsers = () => {
 export const podcastUserDetail = (id) => {
   return api.get(`/podcasts/users/${id}`).then((res) => res?.data);
 };
+
+// podcast comment
+export const podcastComment = (id) => {
+  return api.get(`/podcasts/${id}/comments`).then((res) => res?.data);
+};
+
+export const createPodcastComment = ({ id, data }) => {
+  return api.post(`/podcasts/${id}/comments`, data).then((res) => res?.data);
+};
+
+export const deletePodcastComment = ({ id, commentId }) => {
+  return api
+    .delete(`/podcasts/${id}/comments/${commentId}`)
+    .then((res) => res?.data);
+};
+
+export const updatePodcastComment = ({ id, commentId, data }) => {
+  return api
+    .patch(`/podcasts/${id}/comments/${commentId}`, data)
+    .then((res) => res?.data);
+};
+
+export const detailPodcast = (id) => {
+  return api.get(`/podcasts/${id}`).then((res) => res?.data);
+};
