@@ -2,10 +2,10 @@ import Layout from "@/components/Layout";
 import PageContainer from "@/components/PageContainer";
 import { podcastUsers } from "@/services/index";
 import { formatDateLL } from "@/utils/client-utils";
-import { ActionIcon, Group, Text, Button } from "@mantine/core";
+import { ActionIcon, Group, Text, Avatar } from "@mantine/core";
 import { IconPlayerPlay } from "@tabler/icons";
 import { useQuery } from "@tanstack/react-query";
-import { Avatar, Card, Col, List, Row } from "antd";
+import { Card, Col, List, Row } from "antd";
 import Head from "next/head";
 import { useRouter } from "next/router";
 
@@ -17,7 +17,7 @@ const MyPodcast = ({ item }) => {
   return (
     <div>
       <Group>
-        <Avatar size={80} src={item?.image_url} />
+        <Avatar radius="sm" size={80} src={item?.image_url} />
         <div
           style={{
             width: "60%",
