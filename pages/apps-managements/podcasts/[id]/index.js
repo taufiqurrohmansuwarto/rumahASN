@@ -135,9 +135,9 @@ const UploadFileAudio = ({ data, type = "audio", title = "Audio" }) => {
     if (!isAudio) {
       message.error("You can only upload audio file!");
     }
-    const isLt20M = file.size / 1024 / 1024 < 20;
+    const isLt20M = file.size / 1024 / 1024 < 50;
     if (!isLt20M) {
-      message.error("Audio must smaller than 20MB!");
+      message.error("Audio must smaller than 50MB!");
     }
     return isAudio && isLt20M;
   };

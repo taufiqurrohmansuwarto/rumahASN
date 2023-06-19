@@ -6,9 +6,12 @@ import { useQuery } from "@tanstack/react-query";
 import { Avatar, Card, Col, List, Row } from "antd";
 import Head from "next/head";
 import Link from "next/link";
+import { useRouter } from "next/router";
 import React from "react";
 
 function Podcast() {
+  const router = useRouter();
+
   const { data, isLoading } = useQuery(
     ["podcasts-users"],
     () => podcastUsers(),
@@ -16,6 +19,8 @@ function Podcast() {
       refetchOnWindowFocus: false,
     }
   );
+
+  const handleBack = () => router.back();
 
   return (
     <>
@@ -25,7 +30,8 @@ function Podcast() {
       <PageContainer
         loading={isLoading}
         title="Podcast"
-        subTitle="Edukasi Podcast"
+        subTitle="Daftar Edukasi Podcast Rumah ASN"
+        onBack={handleBack}
       >
         <Row>
           <Col md={18} xs={24}>

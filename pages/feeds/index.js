@@ -1,6 +1,7 @@
 import Announcement from "@/components/Announcement";
 import Layout from "@/components/Layout";
 import PageContainer from "@/components/PageContainer";
+import PodcastAnnouncement from "@/components/PodcatsAnnouncement";
 import SelamatDatang from "@/components/SelamatDatang";
 import ShowRatings from "@/components/ShowRatings";
 import PinnedTickets from "@/components/Ticket/PinnedTickets";
@@ -56,7 +57,14 @@ function Feeds() {
         <Grid.Col md={4} sm={12}>
           <Grid>
             <Grid.Col md={12} xs={12}>
-              <PublikasiCASN />
+              <Stack>
+                <PublikasiCASN />
+                <PodcastAnnouncement
+                  image="https://siasn.bkd.jatimprov.go.id:9000/public/gedung.png"
+                  title="Dari Kami Untuk Kalian"
+                  category="Podcast Rumah ASN"
+                />
+              </Stack>
             </Grid.Col>
             {/* <Grid.Col md={12} xs={12}>
               <VideoYoutube />
