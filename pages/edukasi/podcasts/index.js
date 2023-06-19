@@ -1,13 +1,62 @@
 import Layout from "@/components/Layout";
 import PageContainer from "@/components/PageContainer";
-import Podcasts from "@/components/Podcasts";
 import { podcastUsers } from "@/services/index";
+import { formatDateLL } from "@/utils/client-utils";
+import { ActionIcon, Group, Text, Button } from "@mantine/core";
+import { IconPlayerPlay } from "@tabler/icons";
 import { useQuery } from "@tanstack/react-query";
 import { Avatar, Card, Col, List, Row } from "antd";
 import Head from "next/head";
-import Link from "next/link";
 import { useRouter } from "next/router";
-import React from "react";
+
+const MyPodcast = ({ item }) => {
+  const router = useRouter();
+
+  const gotoDetail = () => router.push(`/edukasi/podcasts/${item?.id}`);
+
+  return (
+    <div>
+      <Group>
+        <Avatar size={80} src={item?.image_url} />
+        <div
+          style={{
+            width: "60%",
+          }}
+        >
+          <Text
+            onClick={gotoDetail}
+            size="sm"
+            sx={{
+              fontWeight: 700,
+              ":hover": {
+                cursor: "pointer",
+              },
+            }}
+          >
+            {item?.title}
+          </Text>
+          <Text lineClamp={2} mb="sm" color="dimmed" size="sm">
+            {item?.short_description}
+          </Text>
+          <Group>
+            <ActionIcon
+              onClick={gotoDetail}
+              color="green"
+              size="lg"
+              radius="xl"
+              variant="filled"
+            >
+              <IconPlayerPlay size={14} />
+            </ActionIcon>
+            <div>
+              <Text>{formatDateLL(item?.created_at)}</Text>
+            </div>
+          </Group>
+        </div>
+      </Group>
+    </div>
+  );
+};
 
 function Podcast() {
   const router = useRouter();
@@ -40,16 +89,8 @@ function Podcast() {
                 dataSource={data?.results}
                 rowKey={(row) => row?.id}
                 renderItem={(item) => (
-                  <List.Item key={item?.id} actions={[]}>
-                    <List.Item.Meta
-                      title={
-                        <Link href={`/edukasi/podcasts/${item?.id}`}>
-                          {item?.title}
-                        </Link>
-                      }
-                      description={item?.short_description}
-                      avatar={<Avatar src={item?.image_url} />}
-                    />
+                  <List.Item>
+                    <MyPodcast item={item} />
                   </List.Item>
                 )}
               />

@@ -2,6 +2,7 @@ import Layout from "@/components/Layout";
 import PageContainer from "@/components/PageContainer";
 import PodcastPlayer from "@/components/PodcastPlayer";
 import { podcastUserDetail } from "@/services/index";
+import { Spoiler } from "@mantine/core";
 import { useQuery } from "@tanstack/react-query";
 import { Card, Col, Divider, Row, Tabs, Typography } from "antd";
 import Head from "next/head";
@@ -34,11 +35,13 @@ function PodcastUserDetail() {
               <PodcastPlayer data={data} url={data?.audio_url} />
               <Divider />
               <Typography.Title level={3}>Deskripsi</Typography.Title>
-              <div
-                dangerouslySetInnerHTML={{
-                  __html: data?.html,
-                }}
-              />
+              <Spoiler maxHeight={120} showLabel="Show more" hideLabel="Hide">
+                <div
+                  dangerouslySetInnerHTML={{
+                    __html: data?.html,
+                  }}
+                />
+              </Spoiler>
               <Tabs defaultActiveKey="1">
                 <Tabs.TabPane tab="Transkrip" key="1">
                   <div
