@@ -47,9 +47,14 @@ function Feeds() {
         <Grid.Col md={8} sm={12}>
           <Card>
             <Stack>
-              <Announcement />
+              {/* <Announcement /> */}
               <SelamatDatang />
-              <PinnedTickets />
+              <PodcastAnnouncement
+                image="https://siasn.bkd.jatimprov.go.id:9000/public/gedung.png"
+                title="Dari Kami Untuk Kalian"
+                category="Podcast Rumah ASN"
+              />
+              {/* <PinnedTickets /> */}
               <TicketsPublish />
             </Stack>
           </Card>
@@ -59,11 +64,6 @@ function Feeds() {
             <Grid.Col md={12} xs={12}>
               <Stack>
                 <PublikasiCASN />
-                <PodcastAnnouncement
-                  image="https://siasn.bkd.jatimprov.go.id:9000/public/gedung.png"
-                  title="Dari Kami Untuk Kalian"
-                  category="Podcast Rumah ASN"
-                />
               </Stack>
             </Grid.Col>
             {/* <Grid.Col md={12} xs={12}>

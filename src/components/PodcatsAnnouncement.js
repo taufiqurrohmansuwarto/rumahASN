@@ -34,7 +34,7 @@ const ArticleCardVertical = ({ image, category, title }) => {
   const gotoPodcast = () => router.push("/edukasi/podcasts");
 
   return (
-    <Card radius="md" p={0} className={classes.card}>
+    <Card withBorder radius="md" p={0} className={classes.card}>
       <Group noWrap spacing={0}>
         <Image alt="tets" src={image} height={140} width={140} />
         <div className={classes.body}>
@@ -49,7 +49,7 @@ const ArticleCardVertical = ({ image, category, title }) => {
               <Button
                 onClick={gotoPodcast}
                 leftIcon={<IconMicrophone size={15} />}
-                variant="default"
+                color="lime"
               >
                 Dengarkan Podcast!
               </Button>
