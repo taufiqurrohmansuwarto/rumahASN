@@ -110,7 +110,7 @@ const ChangeLog = () => {
     {
       version: "1.0.0-rc 17",
       date: "20-06-2023",
-      change: ["Tambah komentar di setiap podcast dan rating"],
+      changes: ["Tambah komentar di setiap podcast dan rating"],
     },
   ];
 
