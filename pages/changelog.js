@@ -107,6 +107,11 @@ const ChangeLog = () => {
       date: "18-06-2023",
       changes: ["Tambah menu edukasi untuk podcast dan webinar"],
     },
+    {
+      version: "1.0.0-rc 17",
+      date: "20-06-2023",
+      change: ["Tambah komentar di setiap podcast dan rating"],
+    },
   ];
 
   return (
