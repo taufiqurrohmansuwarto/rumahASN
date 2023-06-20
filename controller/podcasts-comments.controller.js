@@ -1,4 +1,5 @@
 const CommentPodcast = require("@/models/comments-podcasts.model");
+const { parseMarkdown } = require("@/utils/parsing");
 
 const commentsPodcasts = async (req, res) => {
   try {
@@ -7,7 +8,21 @@ const commentsPodcasts = async (req, res) => {
       .where("podcast_id", id)
       .withGraphFetched("[user(simpleSelect)]")
       .orderBy("created_at", "desc");
-    res.json(result);
+
+    let hasil;
+
+    if (result.length > 0) {
+      hasil = result.map((item) => {
+        return {
+          ...item,
+          html: parseMarkdown(item?.comment) || "",
+        };
+      });
+    } else {
+      hasil = [];
+    }
+
+    res.json(hasil);
   } catch (error) {
     console.log(error);
     res.status(500).json({ error: error.message });
