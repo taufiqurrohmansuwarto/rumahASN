@@ -26,7 +26,7 @@
     "@tabler/icons": "^1.109.0",
     "@tanstack/react-query": "^4.28.0",
     "@zoomus/websdk": "^2.13.0",
-    "antd": "^4.24.8",
+    "antd": "^4.24.10",
     "axios": "^0.27.2",
     "dotenv": "^16.0.2",
     "exceljs": "^4.3.0",
