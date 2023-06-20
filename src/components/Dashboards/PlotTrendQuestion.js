@@ -1,4 +1,5 @@
 import { trends } from "@/services/admin.services";
+import { Bar } from "@ant-design/plots";
 import { useQuery } from "@tanstack/react-query";
 import { Button, Card } from "antd";
 import { useRef } from "react";
@@ -39,7 +40,7 @@ function PlotTrendQuestion() {
       title="Trend Pertanyaan 3 Bulan Terakhir"
       extra={<Button onClick={downloadImage}>Unduh Gambar</Button>}
     >
-      {/* {data && (
+      {data && (
         <Bar
           loading={isLoading}
           onReady={(plot) => {
@@ -47,7 +48,7 @@ function PlotTrendQuestion() {
           }}
           {...config}
         />
-      )} */}
+      )}
     </Card>
   );
 }
