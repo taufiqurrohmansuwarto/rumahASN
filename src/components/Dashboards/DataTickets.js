@@ -59,7 +59,7 @@ function DataTickets() {
                 valueStyle={{
                   color: "#3f8600",
                 }}
-                value={sumBy(data, "count")}
+                value={questionFilter(data, "SELESAI")?.count}
               />
             </Card>
           </Col>

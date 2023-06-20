@@ -51,7 +51,7 @@ function Feeds() {
               <SelamatDatang />
               <PodcastAnnouncement
                 image="https://siasn.bkd.jatimprov.go.id:9000/public/hijau-podcast.jpg"
-                title="Dari Kami Untuk Kalian"
+                title={`"Podcast Kepegawaian dari kami untuk kalian"`}
                 category="Podcast Rumah ASN"
               />
               {/* <PinnedTickets /> */}
