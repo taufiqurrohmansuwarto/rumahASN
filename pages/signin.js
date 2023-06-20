@@ -78,7 +78,8 @@ const SignIn = ({ providers }) => {
               fontSize: 14,
             }}
           >
-            Ruang Menjawab Keluhan ASN Jawa Timur dan Masyarakat UMUM
+            Ruang Menjawab Keluhan ASN Jawa Timur dan Masyarakat UMUM Seputar
+            Kepegawaian
           </Typography.Text>
           {/* </animated.div> */}
           <Blockquote cite="- BKD Provinsi Jawa Timur">

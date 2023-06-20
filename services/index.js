@@ -617,3 +617,12 @@ export const updatePodcastComment = ({ id, commentId, data }) => {
 export const detailPodcast = (id) => {
   return api.get(`/podcasts/${id}`).then((res) => res?.data);
 };
+
+// votes pdocast
+export const votePodcast = ({ id, data }) => {
+  return api.post(`/podcasts/${id}/votes`, data).then((res) => res?.data);
+};
+
+export const getVotePodcast = (id) => {
+  return api.get(`/podcasts/${id}/votes`).then((res) => res?.data);
+};
