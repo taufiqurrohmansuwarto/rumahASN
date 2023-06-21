@@ -302,8 +302,10 @@ module.exports.getUsersAge = async () => {
            WHEN EXTRACT(YEAR FROM AGE(CURRENT_DATE, birthdate)) >= 57 THEN 'Masa Pensiun (>=57)'
            END  AS title,
        COUNT(*) AS value
-FROM users where users."group" != 'GOOGLE'
-GROUP BY title order by value desc;`
+FROM users
+where users."group" != 'GOOGLE' or users."group" != null
+GROUP BY title
+order by value desc;`
     );
     return result;
   } catch (error) {
@@ -315,6 +317,7 @@ module.exports.getTotalCaraMasuk = async () => {
   try {
     const result = await knex.raw(`select u."group" as title, count(*) as value
 from users u
+where u."group" is not null
 group by 1`);
     return result;
   } catch (error) {

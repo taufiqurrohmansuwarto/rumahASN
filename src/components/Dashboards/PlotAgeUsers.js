@@ -1,5 +1,5 @@
 import { adminDashboard } from "@/services/admin.services";
-import { Bar } from "@ant-design/plots";
+import { Column } from "@ant-design/plots";
 import { useQuery } from "@tanstack/react-query";
 import { Card, Col, Row } from "antd";
 import React from "react";
@@ -11,11 +11,24 @@ function PlotAgeUsers() {
 
   const config = {
     data: data?.ages,
-    xField: "value",
-    yField: "title",
+    xField: "title",
+    yField: "value",
     seriesField: "title",
     label: {
+      // 可手动配置 label 数据标签位置
       position: "middle",
+      // 'top', 'bottom', 'middle',
+      // 配置样式
+      style: {
+        fill: "#FFFFFF",
+        opacity: 0.6,
+      },
+    },
+    xAxis: {
+      label: {
+        autoHide: true,
+        autoRotate: false,
+      },
     },
     legend: { position: "top-left" },
   };
@@ -31,7 +44,7 @@ function PlotAgeUsers() {
         >
           <Col span={24}>
             <Card title="Data Usia Pengguna Pegawai Pemerintah Provinsi Jawa Timur">
-              <Bar {...config} />
+              <Column {...config} />
             </Card>
           </Col>
         </Row>
