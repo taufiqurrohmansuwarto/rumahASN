@@ -133,6 +133,17 @@ from (select status_code, count(status_code)
   }
 };
 
+const parsingInteger = (data) => {
+  if (data?.length) {
+    return data?.map((item) => ({
+      ...item,
+      value: parseInt(item?.value, 10),
+    }));
+  } else {
+    return [];
+  }
+};
+
 const adminDashboard = async (req, res) => {
   const type = req?.query?.type || "standard";
 
@@ -142,8 +153,8 @@ const adminDashboard = async (req, res) => {
       const groups = await getTotalCaraMasuk();
 
       const hasil = {
-        ages: ages.rows,
-        groups: groups.rows,
+        ages: parsingInteger(ages.rows),
+        groups: parsingInteger(groups.rows),
       };
       res.json(hasil);
     }
