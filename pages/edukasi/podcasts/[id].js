@@ -154,7 +154,14 @@ function PodcastUserDetail() {
                   }}
                 />
               </Spoiler>
-              <Tabs defaultActiveKey="1">
+              <Tabs defaultActiveKey="2">
+                <Tabs.TabPane tab={`Komentar (${comments?.length})`} key="2">
+                  <PodcastsComments
+                    id={router?.query?.id}
+                    comments={comments}
+                  />
+                </Tabs.TabPane>
+
                 <Tabs.TabPane tab="Transkrip" key="1">
                   <div
                     dangerouslySetInnerHTML={{
@@ -176,13 +183,6 @@ function PodcastUserDetail() {
                         content={item?.comment}
                       />
                     )}
-                  />
-                </Tabs.TabPane>
-
-                <Tabs.TabPane tab={`Komentar (${comments?.length})`} key="2">
-                  <PodcastsComments
-                    id={router?.query?.id}
-                    comments={comments}
                   />
                 </Tabs.TabPane>
               </Tabs>
