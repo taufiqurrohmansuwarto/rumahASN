@@ -22,6 +22,22 @@ const userScope = process.env.USER_SCOPE;
 const googleClientId = process.env.GOOGLE_CLIENT_ID;
 const googleClientSecret = process.env.GOOGLE_CLIENT_SECRET;
 
+const getUserBirtdahGoogle = async (accessToken) => {
+  try {
+    const result = axios.get(
+      `https://people.googleapis.com/v3/people/me?key=${googleClientId}`,
+      {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      }
+    );
+    return result;
+  } catch (error) {
+    console.log(error);
+  }
+};
+
 // automate fucking update current_role user
 const setOffline = async (id) => {
   await User.query().findById(id).patch({ is_online: false });
@@ -135,7 +151,7 @@ export default NextAuth({
     GoogleProvider({
       clientId: googleClientId,
       clientSecret: googleClientSecret,
-      profile: async (profile) => {
+      profile: async (profile, token) => {
         const currentUser = {
           id: profile.sub,
           username: profile.name,

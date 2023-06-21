@@ -3,6 +3,7 @@ const Tickets = require("../models/tickets.model");
 const knex = Status.knex();
 const { raw } = require("objection");
 const moment = require("moment");
+const { getUsersAge, getTotalCaraMasuk } = require("@/utils/query-utils");
 
 const aggregateBySubCategories = async () => {
   const result = await knex.raw(
@@ -136,6 +137,17 @@ const adminDashboard = async (req, res) => {
   const type = req?.query?.type || "standard";
 
   try {
+    if (type === "group-age") {
+      const ages = await getUsersAge();
+      const groups = await getTotalCaraMasuk();
+
+      const hasil = {
+        ages: ages.rows,
+        groups: groups.rows,
+      };
+      res.json(hasil);
+    }
+
     if (type === "standard") {
       const result = await knex.raw(
         `
