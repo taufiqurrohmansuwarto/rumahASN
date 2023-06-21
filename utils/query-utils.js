@@ -291,4 +291,35 @@ module.exports.customersSatisfactionsByTimeRange = async () => {};
 module.exports.customersSatisfactionsByTicketPriority = async () => {};
 module.exports.customersSatisfactionsByStatus = async () => {};
 
+module.exports.getUsersAge = async () => {
+  try {
+    const result = await knex.raw(
+      `SELECT CASE
+           WHEN EXTRACT(YEAR FROM AGE(CURRENT_DATE, birthdate)) BETWEEN 20 AND 29 THEN 'Usia Produktif Awal (20-29)'
+           WHEN EXTRACT(YEAR FROM AGE(CURRENT_DATE, birthdate)) BETWEEN 30 AND 39 THEN 'Usia Produktif Tengah (30-39)'
+           WHEN EXTRACT(YEAR FROM AGE(CURRENT_DATE, birthdate)) BETWEEN 40 AND 49 THEN 'Usia Produktif Lanjut (40-49)'
+           WHEN EXTRACT(YEAR FROM AGE(CURRENT_DATE, birthdate)) BETWEEN 50 AND 56 THEN 'Masa Pra-Pensiun (50-56)'
+           WHEN EXTRACT(YEAR FROM AGE(CURRENT_DATE, birthdate)) >= 57 THEN 'Masa Pensiun (>=57)'
+           END  AS title,
+       COUNT(*) AS value
+FROM users where users."group" != 'GOOGLE'
+GROUP BY title order by value desc;`
+    );
+    return result;
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+module.exports.getTotalCaraMasuk = async () => {
+  try {
+    const result = await knex.raw(`select u."group" as title, count(*) as value
+from users u
+group by 1`);
+    return result;
+  } catch (error) {
+    console.log(error);
+  }
+};
+
 // todo tambahkan statistik berdasarkan usia pelanggan yang bertanya 6 bulan terakhir

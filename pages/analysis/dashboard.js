@@ -1,5 +1,7 @@
 import DataTickets from "@/components/Dashboards/DataTickets";
 import PlotAdminTickets from "@/components/Dashboards/PlotAdminTickets";
+import PlotAgeUsers from "@/components/Dashboards/PlotAgeUsers";
+import UserByGroup from "@/components/Dashboards/UserByGroupCard";
 import Layout from "@/components/Layout";
 import PageContainer from "@/components/PageContainer";
 import Head from "next/head";
@@ -12,6 +14,8 @@ function DashboardAnalysis() {
       </Head>
       <PageContainer title="Dashboard" subTitle="Analisis Data Rumah ASN">
         <DataTickets />
+        <UserByGroup />
+        <PlotAgeUsers />
         <PlotAdminTickets />
       </PageContainer>
     </>
