@@ -1,14 +1,17 @@
 import AppRating from "@/components/Outer/AppRating";
-import { LoginOutlined } from "@ant-design/icons";
-import { Blockquote } from "@mantine/core";
-import { Button, Col, Divider, Row, Space, Typography } from "antd";
+import Footer from "@/components/Outer/Footer";
+import {
+  GlobalOutlined,
+  InstagramOutlined,
+  LoginOutlined,
+  YoutubeOutlined,
+} from "@ant-design/icons";
+import { Paper } from "@mantine/core";
+import { useSpring } from "@react-spring/web";
+import { Button, Col, Divider, Image, Row, Space, Typography } from "antd";
 import { getProviders, signIn } from "next-auth/react";
 import Head from "next/head";
-import Image from "next/image";
-import Link from "next/link";
 import GoogleButton from "react-google-button";
-import { useSpring, animated } from "@react-spring/web";
-import Footer from "@/components/Outer/Footer";
 
 const BAComponent = () => {
   const [props, api] = useSpring(
@@ -25,24 +28,15 @@ const BAComponent = () => {
   );
 
   return (
-    <animated.div style={props}>
-      <Image
-        alt="Rumah ASN Brand Ambassador"
-        src="https://siasn.bkd.jatimprov.go.id:9000/public/layanan-online.png"
-        width={700}
-        height={500}
-      />
-    </animated.div>
+    <Image
+      alt="Rumah ASN Brand Ambassador"
+      src="https://siasn.bkd.jatimprov.go.id:9000/public/ba-new.png"
+      width={400}
+    />
   );
 };
 
 const SignIn = ({ providers }) => {
-  const textAnimation = useSpring({
-    from: { marginLeft: -100 },
-    to: { marginLeft: 0 },
-    config: { duration: 1000 },
-  });
-
   return (
     <>
       <Head>
@@ -53,40 +47,60 @@ const SignIn = ({ providers }) => {
         <meta name="description" content="Rumah ASN" />
       </Head>
       <Row
-        style={{ minHeight: "75vh", padding: 16 }}
+        style={{
+          minHeight: "100vh",
+          padding: 16,
+          backgroundImage:
+            "url('https://siasn.bkd.jatimprov.go.id:9000/public/bg-buble.jpg')",
+          backgroundRepeat: "no-repeat",
+          backgroundSize: "cover",
+        }}
         align="middle"
         justify="center"
       >
-        <Col md={9} xs={24}>
-          <BAComponent />
+        <Col
+          md={5}
+          style={{
+            backgroundColor: "white",
+          }}
+          xs={24}
+        >
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "center",
+            }}
+          >
+            <BAComponent />
+          </div>
         </Col>
-        <Col md={6} xs={24}>
-          {/* <animated.div style={textAnimation}> */}
+        <Col
+          style={{
+            backgroundColor: "white",
+            padding: 7,
+          }}
+          md={5}
+          xs={24}
+        >
           <Typography.Title
             style={{
               marginBottom: 0,
               fontWeight: "bold",
             }}
-            level={2}
+            level={1}
           >
             RUMAH ASN
           </Typography.Title>
           <Typography.Text
+            type="secondary"
             level={5}
             style={{
               margin: 0,
-              fontSize: 14,
+              fontSize: 16,
             }}
           >
-            Ruang Menjawab Keluhan ASN Jawa Timur dan Masyarakat UMUM Seputar
-            Kepegawaian
+            Ruang Menjawab Keluhan ASN
           </Typography.Text>
-          {/* </animated.div> */}
-          <Blockquote cite="- BKD Provinsi Jawa Timur">
-            Tempat Berkumpulnya Solusi Kepegawaian yang Cepat, Mudah, dan
-            Terpadu untuk Menciptakan Lingkungan Kerja yang Harmonis dan
-            Produktif
-          </Blockquote>
           <Row>
             <Col md={24} xs={24}>
               <Divider plain>Anda masyarakat umum?</Divider>
@@ -127,59 +141,31 @@ const SignIn = ({ providers }) => {
             </Col>
           </Row>
           <Divider />
-          <div>
-            <Space size="small">
-              <Image
-                alt="pemprov"
-                src="https://siasn.bkd.jatimprov.go.id:9000/public/pemprov.png"
-                width={15}
-                height={20}
+          <Row justify="center">
+            <Space size="large">
+              <GlobalOutlined
+                style={{
+                  fontSize: 32,
+                  color: "#d9d9d9",
+                  cursor: "pointer",
+                }}
               />
-              <Image
-                alt="logobkd"
-                src="https://siasn.bkd.jatimprov.go.id:9000/public/logobkd.jpg"
-                width={30}
-                height={40}
+              <InstagramOutlined
+                style={{
+                  fontSize: 32,
+                  color: "#d9d9d9",
+                  cursor: "pointer",
+                }}
               />
-              <Image
-                alt="logo-rumahasn"
-                src="https://siasn.bkd.jatimprov.go.id:9000/public/rumah-asn-logo.png"
-                width={20}
-                height={25}
+              <YoutubeOutlined
+                style={{
+                  fontSize: 32,
+                  color: "#d9d9d9",
+                  cursor: "pointer",
+                }}
               />
             </Space>
-          </div>
-          <Space direction="vertical" size="small">
-            <Typography.Text
-              type="secondary"
-              style={{
-                fontSize: 12,
-              }}
-            >
-              &#169; 2022 Desain & Pengembangan | BKD Provinsi Jawa Timur
-            </Typography.Text>
-
-            <Space>
-              <Link href="/changelog">
-                <Typography.Link
-                  style={{
-                    fontSize: 12,
-                  }}
-                >
-                  Ver 1.0.0-rc 17
-                </Typography.Link>
-              </Link>
-              <Link href="/privacy">
-                <Typography.Link
-                  style={{
-                    fontSize: 12,
-                  }}
-                >
-                  Kebijakan dan Privasi
-                </Typography.Link>
-              </Link>
-            </Space>
-          </Space>
+          </Row>
         </Col>
       </Row>
       <AppRating />
