@@ -1,17 +1,27 @@
+import Features from "@/components/Features";
 import AppRating from "@/components/Outer/AppRating";
 import Footer from "@/components/Outer/Footer";
+import UserRating from "@/components/UserRating";
 import {
   GlobalOutlined,
   InstagramOutlined,
   LoginOutlined,
   YoutubeOutlined,
 } from "@ant-design/icons";
-import { Paper } from "@mantine/core";
+import { Text } from "@mantine/core";
 import { useSpring } from "@react-spring/web";
-import { Button, Col, Divider, Image, Row, Space, Typography } from "antd";
+import { Button, Col, Divider, Image, Row, Space } from "antd";
 import { getProviders, signIn } from "next-auth/react";
 import Head from "next/head";
 import GoogleButton from "react-google-button";
+
+const TestComponent = () => {
+  return (
+    <Text c="dimmed" fz="sm" ta="center">
+      iput
+    </Text>
+  );
+};
 
 const BAComponent = () => {
   const [props, api] = useSpring(
@@ -30,13 +40,17 @@ const BAComponent = () => {
   return (
     <Image
       alt="Rumah ASN Brand Ambassador"
-      src="https://siasn.bkd.jatimprov.go.id:9000/public/ba-new.png"
-      width={400}
+      src={"rumah_asn.png"}
+      preview={false}
+      width={450}
     />
   );
 };
 
 const SignIn = ({ providers }) => {
+  const title = "Rumah ASN: Sobat Kepegawaian #1 di Jatim";
+  const description =
+    "Dengerin nih, brosis! Rumah ASN tuh jawabannya buat semua pertanyaan seru seputar dunia kepegawaian di Jawa Timur. Mulai dari info terkini, diskusi hangat, sampe ngobrol santai via podcast, semuanya ada di sini. Kita juga punya fitur unik buat catat segala aktivitas dan data kamu, biar kamu makin mantap jadi ASN yang oke. So, yuk gabung dan rasain serunya jadi bagian dari Rumah ASN!";
   return (
     <>
       <Head>
@@ -46,63 +60,21 @@ const SignIn = ({ providers }) => {
         </title>
         <meta name="description" content="Rumah ASN" />
       </Head>
-      <Row
-        style={{
-          minHeight: "100vh",
-          padding: 16,
-          backgroundImage:
-            "url('https://siasn.bkd.jatimprov.go.id:9000/public/bg-buble.jpg')",
-          backgroundRepeat: "no-repeat",
-          backgroundSize: "cover",
-        }}
-        align="middle"
-        justify="center"
-      >
-        <Col
-          md={5}
-          style={{
-            backgroundColor: "white",
-          }}
-          xs={24}
-        >
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "center",
-            }}
-          >
-            <BAComponent />
-          </div>
+      <Row align="middle" justify="center">
+        <Col md={8} xs={24}>
+          <BAComponent />
         </Col>
-        <Col
-          style={{
-            backgroundColor: "white",
-            padding: 7,
-          }}
-          md={5}
-          xs={24}
-        >
-          <Typography.Title
-            style={{
-              marginBottom: 0,
-              fontWeight: "bold",
-            }}
-            level={1}
-          >
-            RUMAH ASN
-          </Typography.Title>
-          <Typography.Text
-            type="secondary"
-            level={5}
-            style={{
-              margin: 0,
-              fontSize: 16,
-            }}
-          >
-            Ruang Menjawab Keluhan ASN
-          </Typography.Text>
+        <Col md={5} xs={24}>
           <Row>
             <Col md={24} xs={24}>
+              <Image
+                alt="Rumah ASN"
+                src={"new_logo.png"}
+                preview={false}
+                style={{
+                  textAlign: "center",
+                }}
+              />
               <Divider plain>Anda masyarakat umum?</Divider>
               <GoogleButton
                 style={{ width: "100%" }}
@@ -168,7 +140,9 @@ const SignIn = ({ providers }) => {
           </Row>
         </Col>
       </Row>
-      <AppRating />
+      <Features title={title} description={description} />
+      {/* <AppRating /> */}
+      <UserRating />
       <Footer />
     </>
   );
