@@ -60,39 +60,25 @@ const changeRoutes = (user) => {
     // persiapan ini seharusnya ditambahkan halaman dashboard seperti analisis dsb tapi jangan data
 
     if (pegawaiPemda) {
-      userRoutes.routes.push(
-        {
-          path: "/edukasi",
-          name: "Edukasi",
-          icon: <ReadOutlined />,
-          routes: [
-            {
-              path: "/edukasi/podcasts",
-              name: "Podcast",
-            },
-            {
-              path: "/edukasi/webinar",
-              name: "Webinar",
-            },
-            {
-              path: "/edukasi/webinar-saya",
-              name: "Webinar Saya",
-            },
-          ],
-        }
-        // {
-        //   path: "/webinars",
-        //   name: "Webinar",
-        //   icon: <AudioOutlined />,
-        //   routes: [
-        //     { path: "/webinars/live", name: "Live Meeting" },
-        //     {
-        //       path: "/webinars/my-webinar",
-        //       name: "Webinar Saya",
-        //     },
-        //   ],
-        // }
-      );
+      userRoutes.routes.push({
+        path: "/edukasi",
+        name: "Edukasi",
+        icon: <ReadOutlined />,
+        routes: [
+          {
+            path: "/edukasi/podcasts",
+            name: "Podcast",
+          },
+          {
+            path: "/edukasi/webinar",
+            name: "Webinar",
+          },
+          {
+            path: "/edukasi/webinar-saya",
+            name: "Webinar Saya",
+          },
+        ],
+      });
     }
 
     if (userPns) {
@@ -117,11 +103,6 @@ const changeRoutes = (user) => {
 
     if (admin) {
       userRoutes.routes.push(
-        // {
-        //   path: "/agent/dashboard",
-        //   name: "Agent",
-        //   icon: <UserSwitchOutlined />,
-        // },
         {
           path: "/analysis",
           name: "Analisis",
