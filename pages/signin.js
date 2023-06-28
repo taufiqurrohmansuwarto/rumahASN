@@ -8,7 +8,7 @@ import {
   LoginOutlined,
   YoutubeOutlined,
 } from "@ant-design/icons";
-import { Text } from "@mantine/core";
+import { Center, Text } from "@mantine/core";
 import { useSpring } from "@react-spring/web";
 import { Button, Col, Divider, Image, Row, Space } from "antd";
 import { getProviders, signIn } from "next-auth/react";
@@ -42,7 +42,7 @@ const BAComponent = () => {
       alt="Rumah ASN Brand Ambassador"
       src={"rumah_asn.png"}
       preview={false}
-      width={450}
+      width={500}
     />
   );
 };
@@ -62,9 +62,17 @@ const SignIn = ({ providers }) => {
       </Head>
       <Row align="middle" justify="center">
         <Col md={8} xs={24}>
-          <BAComponent />
+          <Center>
+            <BAComponent />
+          </Center>
         </Col>
-        <Col md={5} xs={24}>
+        <Col
+          style={{
+            padding: "0 20px",
+          }}
+          md={5}
+          xs={24}
+        >
           <Row>
             <Col md={24} xs={24}>
               <Image
@@ -113,7 +121,12 @@ const SignIn = ({ providers }) => {
             </Col>
           </Row>
           <Divider />
-          <Row justify="center">
+          <Row
+            justify="center"
+            style={{
+              marginBottom: 20,
+            }}
+          >
             <Space size="large">
               <GlobalOutlined
                 style={{
