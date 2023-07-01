@@ -12,6 +12,7 @@ import { useSpring } from "@react-spring/web";
 import { Button, Col, Divider, Image, Row, Space } from "antd";
 import { getProviders, signIn } from "next-auth/react";
 import Head from "next/head";
+import Link from "next/link";
 import GoogleButton from "react-google-button";
 
 const BAComponent = () => {
@@ -119,27 +120,47 @@ const SignIn = ({ providers }) => {
             }}
           >
             <Space size="large">
-              <GlobalOutlined
-                style={{
-                  fontSize: 32,
-                  color: "#d9d9d9",
-                  cursor: "pointer",
-                }}
-              />
-              <InstagramOutlined
-                style={{
-                  fontSize: 32,
-                  color: "#d9d9d9",
-                  cursor: "pointer",
-                }}
-              />
-              <YoutubeOutlined
-                style={{
-                  fontSize: 32,
-                  color: "#d9d9d9",
-                  cursor: "pointer",
-                }}
-              />
+              <a
+                target="_blank"
+                href="https://bkd.jatimprov.go.id"
+                rel="noreferrer"
+              >
+                <GlobalOutlined
+                  style={{
+                    fontSize: 32,
+                    color: "#d9d9d9",
+                    cursor: "pointer",
+                  }}
+                />
+              </a>
+
+              <a
+                href="https://www.instagram.com/bkdjatim/?hl=en"
+                target="_blank"
+                rel="noreferrer"
+              >
+                <InstagramOutlined
+                  style={{
+                    fontSize: 32,
+                    color: "#d9d9d9",
+                    cursor: "pointer",
+                  }}
+                />
+              </a>
+
+              <a
+                href="https://www.youtube.com/channel/UCokkbWw9VaJxGp3xqOjbcKg"
+                target="_blank"
+                rel="noreferrer"
+              >
+                <YoutubeOutlined
+                  style={{
+                    fontSize: 32,
+                    color: "#d9d9d9",
+                    cursor: "pointer",
+                  }}
+                />
+              </a>
             </Space>
           </Row>
         </Col>

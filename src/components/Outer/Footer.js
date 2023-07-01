@@ -1,7 +1,8 @@
-import { Col, Row, Space, Typography, Grid } from "antd";
-import React from "react";
+import { Col, Divider, Grid, Row, Space, Typography } from "antd";
 
 const { useBreakpoint } = Grid;
+
+const COLOR = "#f0f0f0";
 
 const applications = [
   {
@@ -73,7 +74,7 @@ const zonaIntegritas = [
 
 const styles = {
   footer: {
-    backgroundColor: "#1f1f1f",
+    backgroundColor: "#141414",
     color: "white",
     padding: 80,
   },
@@ -107,9 +108,18 @@ function Footer() {
             </Typography.Title>
             <Space direction="vertical">
               {applications.map((application) => (
-                <Typography.Link key={application?.name} style={styles.text}>
-                  {application.name}
-                </Typography.Link>
+                <Typography key={application?.name} style={styles.text}>
+                  <a
+                    style={{
+                      color: COLOR,
+                    }}
+                    href={application?.url}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    {application.name}
+                  </a>
+                </Typography>
               ))}
             </Space>
           </Col>
@@ -119,9 +129,18 @@ function Footer() {
             </Typography.Title>
             <Space direction="vertical">
               {bidang?.map((bidang) => (
-                <Typography.Link key={bidang?.name} style={styles.text}>
-                  {bidang.name}
-                </Typography.Link>
+                <Typography key={bidang?.name} style={styles.text}>
+                  <a
+                    style={{
+                      color: COLOR,
+                    }}
+                    href={bidang?.url}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    {bidang.name}
+                  </a>
+                </Typography>
               ))}
             </Space>
           </Col>
@@ -131,9 +150,18 @@ function Footer() {
             </Typography.Title>
             <Space direction="vertical">
               {zonaIntegritas?.map((bidang) => (
-                <Typography.Link key={bidang?.name} style={styles.text}>
-                  {bidang.name}
-                </Typography.Link>
+                <Typography key={bidang?.name} style={styles.text}>
+                  <a
+                    style={{
+                      color: COLOR,
+                    }}
+                    href={bidang?.url}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    {bidang.name}
+                  </a>
+                </Typography>
               ))}
             </Space>
           </Col>
@@ -143,12 +171,35 @@ function Footer() {
             </Typography.Title>
             <Space direction="vertical">
               {profil?.map((bidang) => (
-                <Typography.Link key={bidang?.name} style={styles.text}>
-                  {bidang.name}
-                </Typography.Link>
+                <Typography key={bidang?.name} style={styles.text}>
+                  <a
+                    style={{
+                      color: COLOR,
+                    }}
+                    href={bidang?.url}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    {bidang.name}
+                  </a>
+                </Typography>
               ))}
             </Space>
           </Col>
+          <Divider
+            style={{
+              backgroundColor: "#f0f0f0",
+            }}
+          />
+          <Typography.Text
+            style={{
+              textAlign: "center",
+              color: "#fafafa",
+              fontSize: 14,
+            }}
+          >
+            Desain dan Pengembangan oleh Tim IT BKD Provinsi Jawa Timur
+          </Typography.Text>
         </Row>
       </div>
     </div>
