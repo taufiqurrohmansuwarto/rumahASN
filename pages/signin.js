@@ -1,5 +1,4 @@
 import Features from "@/components/Features";
-import AppRating from "@/components/Outer/AppRating";
 import Footer from "@/components/Outer/Footer";
 import UserRating from "@/components/UserRating";
 import {
@@ -8,20 +7,12 @@ import {
   LoginOutlined,
   YoutubeOutlined,
 } from "@ant-design/icons";
-import { Center, Text } from "@mantine/core";
+import { Center } from "@mantine/core";
 import { useSpring } from "@react-spring/web";
 import { Button, Col, Divider, Image, Row, Space } from "antd";
 import { getProviders, signIn } from "next-auth/react";
 import Head from "next/head";
 import GoogleButton from "react-google-button";
-
-const TestComponent = () => {
-  return (
-    <Text c="dimmed" fz="sm" ta="center">
-      iput
-    </Text>
-  );
-};
 
 const BAComponent = () => {
   const [props, api] = useSpring(

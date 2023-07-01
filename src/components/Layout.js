@@ -1,16 +1,15 @@
 import {
   ApartmentOutlined,
-  AudioOutlined,
   BarChartOutlined,
   BookOutlined,
+  FileOutlined,
   LogoutOutlined,
-  NotificationOutlined,
   ReadOutlined,
   ReconciliationOutlined,
   SettingOutlined,
   UserOutlined,
 } from "@ant-design/icons";
-import { Dropdown, Menu } from "antd";
+import { Dropdown } from "antd";
 import { uniqBy } from "lodash";
 import { signOut, useSession } from "next-auth/react";
 import dynamic from "next/dynamic";
@@ -19,24 +18,6 @@ import { useRouter } from "next/router";
 import { useState } from "react";
 import { userRoutes } from "../routes";
 import Notifications from "./Notifications";
-
-const menu = (
-  <Menu
-    items={[
-      {
-        key: "1",
-        label: "Notifikasi",
-        icon: <NotificationOutlined />,
-      },
-      {
-        key: "2",
-        label: "Keluar",
-
-        icon: <LogoutOutlined />,
-      },
-    ]}
-  />
-);
 
 const ProLayout = dynamic(
   () => import("@ant-design/pro-components").then((mod) => mod?.ProLayout),
@@ -56,8 +37,35 @@ const changeRoutes = (user) => {
     const userPns = user?.group === "MASTER";
 
     const pegawaiPemda = user?.group === "MASTER" || user?.group === "PTTPK";
+    const pegawaiBKD = bkd || pttBkd;
 
     // persiapan ini seharusnya ditambahkan halaman dashboard seperti analisis dsb tapi jangan data
+
+    if (pegawaiBKD) {
+      userRoutes.routes.push({
+        path: "/documents",
+        name: "Dokumen TTE",
+        icon: <FileOutlined />,
+        routes: [
+          {
+            path: "/documents/all",
+            name: "Semua Dokumen",
+          },
+          {
+            path: "/documents/waiting",
+            name: "Dokumen Menunggu TTE",
+          },
+          {
+            path: "/documents/rejected",
+            name: "Dokumen Ditolak",
+          },
+          {
+            path: "/documents/signed",
+            name: "Dokumen Sudah TTE",
+          },
+        ],
+      });
+    }
 
     if (pegawaiPemda) {
       userRoutes.routes.push({
@@ -168,22 +176,20 @@ const changeRoutes = (user) => {
             { path: "/apps-managements/podcasts", name: "Podcast" },
             { path: "/apps-managements/announcements", name: "Pengumuman" },
             { path: "/apps-managements/votes", name: "Voting" },
-            // { path: "/managements/customers", name: "Pelanggan" },
+            {
+              path: "/apps-managements/executives-signatures",
+              name: "Set Pejabat TTE",
+            },
           ],
         }
-        // {
-        //   path: "/admin/dashboard",
-        //   name: "Admin",
-        //   icon: <UserOutlined />,
-        // }
       );
     }
 
     if (agent) {
       // userRoutes.routes.push({
-      //   path: "/agent/dashboard",
+      //   path: "/documents",
       //   name: "Agent",
-      //   icon: <UserOutlined />,
+      //   icon: <ApiOutlined />,
       // });
     }
 
