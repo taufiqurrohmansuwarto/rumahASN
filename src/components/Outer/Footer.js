@@ -198,7 +198,8 @@ function Footer() {
               fontSize: 14,
             }}
           >
-            Desain dan Pengembangan oleh Tim IT BKD Provinsi Jawa Timur
+            @2023 Desain dan Pengembangan oleh Tim IT BKD Provinsi Jawa Timur |
+            Iput Taufiqurrohman Suwarto
           </Typography.Text>
         </Row>
       </div>

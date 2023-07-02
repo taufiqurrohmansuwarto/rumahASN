@@ -175,48 +175,6 @@ export default NextAuth({
       },
     }),
     {
-      name: "PTTPK",
-      id: "helpdesk-pttpk",
-      type: "oauth",
-      wellKnown: pttpkWellknown,
-      clientId: pttpkId,
-      clientSecret: pttpkSecret,
-      authorization: {
-        params: {
-          scope: pttpkScope,
-          prompt: "login",
-        },
-      },
-      httpOptions: {
-        timeout: 40000,
-      },
-      idToken: true,
-      checks: ["pkce", "state"],
-      profile: async (profile, token) => {
-        const currentUser = {
-          id: profile.sub,
-          username: profile.name,
-          image: profile.picture,
-          email: profile.email,
-          role: profile.role,
-          group: profile.group,
-          employee_number: profile.employee_number || "",
-          birthdate: profile.birthdate || null,
-          email: profile.email || null,
-          organization_id: profile.organization_id || null,
-        };
-
-        const info = await getInformation("PTTPK", token?.access_token);
-        const result = await upsertUser({ ...currentUser, info });
-
-        const data = { ...currentUser, current_role: result?.current_role };
-
-        const last = await updateUser(currentUser?.id);
-        const lastData = { ...data, ...last, id: last?.custom_id };
-        return lastData;
-      },
-    },
-    {
       name: "SIMASTER",
       id: "helpdesk-user",
       type: "oauth",
@@ -250,6 +208,48 @@ export default NextAuth({
 
         const info = await getInformation("MASTER", token?.access_token);
 
+        const result = await upsertUser({ ...currentUser, info });
+
+        const data = { ...currentUser, current_role: result?.current_role };
+
+        const last = await updateUser(currentUser?.id);
+        const lastData = { ...data, ...last, id: last?.custom_id };
+        return lastData;
+      },
+    },
+    {
+      name: "PTTPK",
+      id: "helpdesk-pttpk",
+      type: "oauth",
+      wellKnown: pttpkWellknown,
+      clientId: pttpkId,
+      clientSecret: pttpkSecret,
+      authorization: {
+        params: {
+          scope: pttpkScope,
+          prompt: "login",
+        },
+      },
+      httpOptions: {
+        timeout: 40000,
+      },
+      idToken: true,
+      checks: ["pkce", "state"],
+      profile: async (profile, token) => {
+        const currentUser = {
+          id: profile.sub,
+          username: profile.name,
+          image: profile.picture,
+          email: profile.email,
+          role: profile.role,
+          group: profile.group,
+          employee_number: profile.employee_number || "",
+          birthdate: profile.birthdate || null,
+          email: profile.email || null,
+          organization_id: profile.organization_id || null,
+        };
+
+        const info = await getInformation("PTTPK", token?.access_token);
         const result = await upsertUser({ ...currentUser, info });
 
         const data = { ...currentUser, current_role: result?.current_role };

@@ -149,7 +149,7 @@ export default function UserRating() {
               >
                 <Stack>
                   <Avatar src={item?.customer?.image} radius={100} />
-                  <Rating value={5} />
+                  <Rating readOnly={true} value={5} />
                 </Stack>
                 <Text fz="sm" fw={500} className={classes.cardTitle} mt="md">
                   {item?.customer?.username}
