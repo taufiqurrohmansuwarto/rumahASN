@@ -42,29 +42,36 @@ const changeRoutes = (user) => {
     // persiapan ini seharusnya ditambahkan halaman dashboard seperti analisis dsb tapi jangan data
 
     if (pegawaiBKD) {
-      userRoutes.routes.push({
-        path: "/documents",
-        name: "Dokumen TTE",
-        icon: <FileOutlined />,
-        routes: [
-          {
-            path: "/documents/all",
-            name: "Semua Dokumen",
-          },
-          {
-            path: "/documents/waiting",
-            name: "Dokumen Menunggu TTE",
-          },
-          {
-            path: "/documents/rejected",
-            name: "Dokumen Ditolak",
-          },
-          {
-            path: "/documents/signed",
-            name: "Dokumen Sudah TTE",
-          },
-        ],
-      });
+      userRoutes.routes.push(
+        {
+          path: "/beranda-bkd",
+          name: "Beranda BKD",
+          icon: <ApartmentOutlined />,
+        },
+        {
+          path: "/documents",
+          name: "Dokumen TTE",
+          icon: <FileOutlined />,
+          routes: [
+            {
+              path: "/documents/all",
+              name: "Semua Dokumen",
+            },
+            {
+              path: "/documents/waiting",
+              name: "Dokumen Menunggu TTE",
+            },
+            {
+              path: "/documents/signed",
+              name: "Dokumen Sudah TTE",
+            },
+            {
+              path: "/documents/rejected",
+              name: "Dokumen Ditolak",
+            },
+          ],
+        }
+      );
     }
 
     if (pegawaiPemda) {
@@ -75,15 +82,15 @@ const changeRoutes = (user) => {
         routes: [
           {
             path: "/edukasi/podcasts",
-            name: "Podcast",
+            name: "Edukasi Podcast",
           },
           {
             path: "/edukasi/webinar",
-            name: "Webinar",
+            name: "Pelatihan / Webinar",
           },
           {
             path: "/edukasi/webinar-saya",
-            name: "Webinar Saya",
+            name: "Pelatihan / Webinar Saya",
           },
         ],
       });
