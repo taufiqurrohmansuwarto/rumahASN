@@ -75,25 +75,6 @@ const changeRoutes = (user) => {
     }
 
     if (pegawaiPemda) {
-      userRoutes.routes.push({
-        path: "/edukasi",
-        name: "Edukasi",
-        icon: <ReadOutlined />,
-        routes: [
-          {
-            path: "/edukasi/podcasts",
-            name: "Edukasi Podcast",
-          },
-          {
-            path: "/edukasi/webinar",
-            name: "Pelatihan / Webinar",
-          },
-          {
-            path: "/edukasi/webinar-saya",
-            name: "Pelatihan / Webinar Saya",
-          },
-        ],
-      });
     }
 
     if (userPns) {

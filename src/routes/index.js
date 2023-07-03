@@ -6,6 +6,7 @@ import {
   HomeOutlined,
   MailOutlined,
   QuestionCircleOutlined,
+  ReadOutlined,
   SettingOutlined,
   SmileOutlined,
   SnippetsOutlined,
@@ -45,6 +46,25 @@ export const userRoutes = {
       hideInMenu: true,
     },
     { path: "/mails", name: "Pesan Pribadi", icon: <MailOutlined /> },
+    {
+      path: "/edukasi",
+      name: "Edukasi",
+      icon: <ReadOutlined />,
+      routes: [
+        {
+          path: "/edukasi/podcasts",
+          name: "Edukasi Podcast",
+        },
+        {
+          path: "/edukasi/webinar",
+          name: "Webinar",
+        },
+        {
+          path: "/edukasi/webinar-saya",
+          name: "Webinar saya",
+        },
+      ],
+    },
     {
       path: "/faq",
       name: " Pertanyaan Umum",

@@ -11,10 +11,12 @@ export default function Home() {
 
   if (status === "authenticated") {
     const currentUser = data?.user;
-    const asnBKD = currentUser?.organization_id === "123";
-    const pttBKD = currentUser?.organization_id === "134";
 
-    const pegawaiBKD = asnBKD || pttBKD;
+    // asn bkd adalah currentUser.organization_id yang berawalan  123
+    const asnBkd = currentUser?.organization_id?.startsWith("123");
+    const pttBkd = currentUser?.organization_id?.startsWith("134");
+
+    const pegawaiBKD = asnBkd || pttBkd;
 
     if (pegawaiBKD) {
       router.push("/beranda-bkd");
