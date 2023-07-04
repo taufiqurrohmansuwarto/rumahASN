@@ -12,7 +12,6 @@ import { useSpring } from "@react-spring/web";
 import { Button, Col, Divider, Image, Row, Space } from "antd";
 import { getProviders, signIn } from "next-auth/react";
 import Head from "next/head";
-import Link from "next/link";
 import GoogleButton from "react-google-button";
 
 const BAComponent = () => {
