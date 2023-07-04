@@ -7,20 +7,23 @@ const indexPetugasBKD = async (req, res) => {
     const { customId } = user;
 
     const tabQuery = req.query.tab || "my-task";
-    const limit = parseInt(req.query.limit) || 25;
+    const limit = parseInt(req.query.limit) || 20;
     const page = parseInt(req.query.page) || 1;
 
     const result = await Ticket.query()
+      .select("*", Ticket.relatedQuery("comments").count().as("comments_count"))
+      .withGraphFetched("[customer(simpleSelect), agent(simpleSelect)]")
       .where((builder) => {
         if (tabQuery === "my-task") {
           builder.where("assignee", customId);
-        } else if (tabQuery === "new-task") {
-          builder.where("status", "DIAJUKAN");
+        } else if (tabQuery === "unanswered-task") {
+          builder.where("status_code", "DIAJUKAN");
         } else if (tabQuery === "uncategorized-task") {
           builder.where("category_id", null);
         }
       })
-      .page(page - 1, limit);
+      .page(page - 1, limit)
+      .orderBy("updated_at", "desc");
 
     res.json({
       data: result.results,
