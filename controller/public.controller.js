@@ -1,4 +1,5 @@
 const Ticket = require("@/models/tickets.model");
+const { raw } = require("objection");
 
 const publicDashboard = async (req, res) => {
   try {
@@ -12,11 +13,15 @@ const publicDashboard = async (req, res) => {
 const landingPageData = async (req, res) => {
   try {
     const ticketsWithRatings = await Ticket.query()
-      .whereNot("stars", null)
+      .distinct("requester")
+      .where("stars", "=", 5)
+      // requester comment character length > 15
+      .andWhere(raw("LENGTH(requester_comment)"), ">", 30)
       .andWhereNot("requester_comment", null)
-      .select("id", "stars", "requester_comment", "requester")
+      .select("id", "stars", "requester_comment", "requester", "updated_at")
       .withGraphFetched("[customer(simpleSelect)]")
-      .orderBy("created_at", "desc");
+      .limit(9)
+      .orderBy("updated_at", "desc");
 
     const ticketsPin = await Ticket.query()
       .where("is_pinned", true)
