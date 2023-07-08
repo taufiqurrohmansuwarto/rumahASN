@@ -208,7 +208,7 @@ const TabsJobs = () => {
       key: "archive-task",
       children: (
         <div>
-          <p>Content of Tab Pane 3</p>
+          <p>Bentar ya mau dibuat...</p>
         </div>
       ),
     },

@@ -17,13 +17,14 @@ const MyText = ({ user }) => {
   return (
     <>
       <Typography.Text>
-        Selamat datang di Rumah ASN BKD Provinsi Jawa Timur! Sebelum bertanya,
-        silakan periksa menu{" "}
+        Halo, Sobat ASN! Selamat datang di Rumah ASN BKD Provinsi Jawa Timur!
+        Sebelum nyelonong tanya, coba deh mampir dulu ke menu{" "}
         <Link href={"/faq"}>
           <a>Pertanyaan Umum</a>
         </Link>{" "}
-        dan daftar pertanyaan yang sudah ada. Jika belum menemukan jawaban,
-        jangan ragu untuk membuat pertanyaan baru. Kami siap membantu!{" "}
+        atau lihat-lihat daftar pertanyaan yang udah ada. Kalo jawabannya masih
+        ngambang, yuk langsung gas pol buat pertanyaan baru. Tenang aja, kita
+        disini selalu siap bantu kalian, sob! Semangat terus, ya!{" "}
       </Typography.Text>
       <Divider />
       <Space>

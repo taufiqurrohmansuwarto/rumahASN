@@ -228,7 +228,6 @@ const TicketsPublish = () => {
       <Grid>
         <Grid.Col md={12} xs={12}>
           <Input.Search
-            placeholder="Cari berdasarkan judul"
             defaultValue={router?.query?.search}
             onSearch={handleSearch}
             style={{ width: "100%" }}

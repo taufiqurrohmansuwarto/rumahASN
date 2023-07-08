@@ -14,7 +14,7 @@ import {
   rem,
 } from "@mantine/core";
 import { useQuery } from "@tanstack/react-query";
-import { uniqBy } from "lodash";
+import { sortBy, uniqBy } from "lodash";
 
 const blacklist = [
   "105503740477298041174",
@@ -25,17 +25,7 @@ const blacklist = [
 ];
 
 const whiteListData = (data) => {
-  // take 6 items from data and requester_comment min 10 chars and unique requester
-  //   return data
-  //     ?.filter(
-  //       (item) =>
-  //         !blacklist.includes(item.customer?.custom_id) &&
-  //         item.requester_comment.length > 15
-  //     )
-  //     .slice(0, 6);
-
-  const hasil = uniqBy(data, "requester");
-
+  const hasil = uniqBy(sortBy(data, "created_at"), "requester");
   return hasil
     ?.filter(
       (item) =>
@@ -95,23 +85,6 @@ export default function UserRating() {
   });
 
   const { classes, theme } = useStyles();
-  //   const features = whiteListData(data?.ticketWithRatings).map((feature) => (
-  //     <Card
-  //       key={feature.title}
-  //       shadow="md"
-  //       radius="md"
-  //       className={classes.card}
-  //       padding="xl"
-  //     >
-  //       <feature.icon size={rem(50)} stroke={2} color={theme.fn.primaryColor()} />
-  //       <Text fz="lg" fw={500} className={classes.cardTitle} mt="md">
-  //         {feature.title}
-  //       </Text>
-  //       <Text fz="sm" c="dimmed" mt="sm">
-  //         {feature.description}
-  //       </Text>
-  //     </Card>
-  //   ));
 
   return (
     <Container size="lg" py="xl">
@@ -139,7 +112,7 @@ export default function UserRating() {
       >
         {data && (
           <>
-            {whiteListData(data?.ticketsWithRatings)?.map((item) => (
+            {data?.ticketsWithRatings?.map((item) => (
               <Card
                 key={item?.id}
                 shadow="md"

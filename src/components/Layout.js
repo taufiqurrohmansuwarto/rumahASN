@@ -3,6 +3,7 @@ import {
   BarChartOutlined,
   BookOutlined,
   FileOutlined,
+  HomeOutlined,
   LogoutOutlined,
   ReadOutlined,
   ReconciliationOutlined,
@@ -46,7 +47,7 @@ const changeRoutes = (user) => {
         {
           path: "/beranda-bkd",
           name: "Beranda BKD",
-          icon: <ApartmentOutlined />,
+          icon: <HomeOutlined />,
         },
         {
           path: "/documents",
