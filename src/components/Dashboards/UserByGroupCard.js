@@ -12,7 +12,7 @@ function UserByGroup() {
       <Skeleton loading={isLoading}>
         <Row gutter={[{ xs: 8, sm: 16, md: 24, lg: 32 }]}>
           {data?.groups?.map((group) => (
-            <Col md={8} key={group?.title}>
+            <Col md={8} xs={24} key={group?.title}>
               <Card bordered={false}>
                 <Statistic title={group?.title} value={group?.value} />
               </Card>
