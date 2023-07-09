@@ -18,8 +18,8 @@ function DataTickets() {
   return (
     <div style={{ marginBottom: 10 }}>
       <Skeleton loading={isLoading}>
-        <Row gutter={[{ xs: 8, sm: 16, md: 24, lg: 32 }]}>
-          <Col md={6}>
+        <Row gutter={[{ xs: 24, sm: 16, md: 12, lg: 32 }]}>
+          <Col md={6} xs={24}>
             <Card bordered={false}>
               <Statistic
                 title="Total Pertanyaan"
@@ -30,7 +30,7 @@ function DataTickets() {
               />
             </Card>
           </Col>
-          <Col md={6}>
+          <Col md={6} xs={24}>
             <Card bordered={false}>
               <Statistic
                 title="Pertanyaan Diajukan"
@@ -41,7 +41,7 @@ function DataTickets() {
               />
             </Card>
           </Col>
-          <Col md={6}>
+          <Col md={6} xs={24}>
             <Card bordered={false}>
               <Statistic
                 title="Pertanyaan Dikerjakan"
@@ -52,7 +52,7 @@ function DataTickets() {
               />
             </Card>
           </Col>
-          <Col md={6}>
+          <Col md={6} xs={24}>
             <Card bordered={false}>
               <Statistic
                 title="Pertanyaan Selesai"
