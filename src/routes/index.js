@@ -1,4 +1,5 @@
 import {
+  AudioOutlined,
   BarChartOutlined,
   BookOutlined,
   CarOutlined,
@@ -47,24 +48,29 @@ export const userRoutes = {
     },
     { path: "/mails", name: "Pesan Pribadi", icon: <MailOutlined /> },
     {
-      path: "/edukasi",
-      name: "Edukasi",
-      icon: <ReadOutlined />,
-      routes: [
-        {
-          path: "/edukasi/podcasts",
-          name: "Edukasi Podcast",
-        },
-        {
-          path: "/edukasi/webinar",
-          name: "Webinar",
-        },
-        {
-          path: "/edukasi/webinar-saya",
-          name: "Webinar saya",
-        },
-      ],
+      path: "/edukasi/podcasts",
+      name: "Podcast",
+      icon: <AudioOutlined />,
     },
+    // {
+    //   path: "/edukasi",
+    //   name: "Edukasi",
+    //   icon: <ReadOutlined />,
+    //   routes: [
+    //     {
+    //       path: "/edukasi/podcasts",
+    //       name: "Edukasi Podcast",
+    //     },
+    //     {
+    //       path: "/edukasi/webinar",
+    //       name: "Webinar",
+    //     },
+    //     {
+    //       path: "/edukasi/webinar-saya",
+    //       name: "Webinar saya",
+    //     },
+    //   ],
+    // },
     {
       path: "/faq",
       name: " Pertanyaan Umum",
