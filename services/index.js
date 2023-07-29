@@ -626,3 +626,11 @@ export const votePodcast = ({ id, data }) => {
 export const getVotePodcast = (id) => {
   return api.get(`/podcasts/${id}/votes`).then((res) => res?.data);
 };
+
+export const layananKepegawaian = () => {
+  return api.get("/layanan/kepegawaian").then((res) => res?.data);
+};
+
+export const slugLayananKepegawaian = (slug) => {
+  return api.get(`/layanan/kepegawaian/${slug}`).then((res) => res?.data);
+};

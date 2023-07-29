@@ -1,4 +1,5 @@
 import Announcement from "@/components/Announcement";
+import DaftarLayanan from "@/components/LayananKepegawaian/DaftarLayanan";
 import Layout from "@/components/Layout";
 import PageContainer from "@/components/PageContainer";
 import PodcastAnnouncement from "@/components/PodcatsAnnouncement";
@@ -64,6 +65,11 @@ function Feeds() {
             <Grid.Col md={12} xs={12}>
               <Stack>
                 <PublikasiCASN />
+              </Stack>
+            </Grid.Col>
+            <Grid.Col md={12} xs={12}>
+              <Stack>
+                <DaftarLayanan />
               </Stack>
             </Grid.Col>
             {/* <Grid.Col md={12} xs={12}>
