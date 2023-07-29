@@ -1,5 +1,6 @@
 import {
   ApartmentOutlined,
+  ApiOutlined,
   BarChartOutlined,
   BookOutlined,
   FileOutlined,
@@ -79,23 +80,30 @@ const changeRoutes = (user) => {
     }
 
     if (userPns) {
-      userRoutes.routes.push({
-        path: "/layanan-tracking",
-        name: "Layanan Tracking",
-        icon: <ReconciliationOutlined />,
-        routes: [
-          {
-            path: "/layanan-tracking/siasn",
-            name: "Aplikasi SIASN",
-            icon: <UserOutlined />,
-          },
-          {
-            path: "/layanan-tracking/simaster",
-            name: "Aplikasi SIMASTER",
-            icon: <UserOutlined />,
-          },
-        ],
-      });
+      userRoutes.routes.push(
+        {
+          path: "/pemutakhiran-data/data-utama",
+          name: "Pemutakhiran Data",
+          icon: <ApiOutlined />,
+        },
+        {
+          path: "/layanan-tracking",
+          name: "Layanan Tracking",
+          icon: <ReconciliationOutlined />,
+          routes: [
+            {
+              path: "/layanan-tracking/siasn",
+              name: "Aplikasi SIASN",
+              icon: <UserOutlined />,
+            },
+            {
+              path: "/layanan-tracking/simaster",
+              name: "Aplikasi SIMASTER",
+              icon: <UserOutlined />,
+            },
+          ],
+        }
+      );
     }
 
     if (admin) {

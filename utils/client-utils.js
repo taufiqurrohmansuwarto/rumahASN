@@ -338,3 +338,20 @@ export const formatTime = (seconds) => {
 function pad(string) {
   return ("0" + string).slice(-2);
 }
+
+// create function like arrayToTree javascript
+export const arrayToTree = (
+  items,
+  { curreProperty = "id", parentProperty = "parent_id" }
+) => {
+  return items.reduce((tree, item) => {
+    const parent_id = item[parentProperty];
+    const child = tree.find((child) => child[curreProperty] === parent_id);
+    if (child) {
+      child.children = [...(child.children || []), item];
+    } else {
+      tree.push(item);
+    }
+    return tree;
+  }, []);
+};
