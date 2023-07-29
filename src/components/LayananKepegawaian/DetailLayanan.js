@@ -1,6 +1,4 @@
-import { slugLayananKepegawaian } from "@/services/index";
-import { MarkdownViewer } from "@primer/react/lib-esm/drafts";
-import { useQuery } from "@tanstack/react-query";
+import { MarkdownViewer } from "@primer/react/drafts";
 
 function DetailLayanan({ data }) {
   return (
