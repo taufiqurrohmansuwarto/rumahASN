@@ -1,4 +1,4 @@
-import { Tabs } from "antd";
+import { Button, Tabs } from "antd";
 import { useRouter } from "next/router";
 import PageContainer from "../PageContainer";
 
@@ -38,14 +38,36 @@ const LayoutPemutakhiranData = ({ children, active = "1" }) => {
   };
 
   return (
-    <PageContainer title={findTitle(active)}>
-      <Tabs onChange={handleChange} type="card" defaultActiveKey={active}>
-        {items.map((item) => (
-          <TabPane tab={item.title} key={item.key}>
-            {children}
-          </TabPane>
-        ))}
-      </Tabs>
+    <PageContainer
+      tabActiveKey={active}
+      tabList={items.map((item) => {
+        return {
+          key: item.key,
+          tab: item.title,
+          path: item.path,
+        };
+      })}
+      tabBarExtraContent={
+        <Button key="3" type="primary">
+          Simpan
+        </Button>
+      }
+      extra={[
+        <Button key="3">Operation</Button>,
+        <Button key="2">Operation</Button>,
+        <Button key="1" type="primary">
+          Primary Action
+        </Button>,
+      ]}
+      tabProps={{
+        size: "small",
+        onChange: handleChange,
+        type: "card",
+      }}
+      title={`${findTitle(active)}`}
+      subTitle="Peremajaan Data"
+    >
+      {children}
     </PageContainer>
   );
 };
