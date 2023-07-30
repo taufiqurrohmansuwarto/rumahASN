@@ -11,7 +11,7 @@ const MyText = ({ user }) => {
   };
 
   const handleCheckIP = () => {
-    router.push("/layanan-tracking/siasn");
+    router.push("/pemutakhiran-data/data-utama");
   };
 
   return (
@@ -31,11 +31,11 @@ const MyText = ({ user }) => {
         <Button onClick={handleCreate} type="primary">
           Buat Pertanyaan
         </Button>
-        {/* {user?.group === "MASTER" && (
+        {user?.group === "MASTER" && (
           <Button danger type="primary" onClick={handleCheckIP}>
-            Check IP ASN
+            Peremajaan Data
           </Button>
-        )} */}
+        )}
       </Space>
     </>
   );

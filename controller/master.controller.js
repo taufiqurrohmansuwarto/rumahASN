@@ -116,8 +116,23 @@ export const rwSkpMaster = async (req, res) => {
   }
 };
 
+export const dataUtamaMaster = async (req, res) => {
+  try {
+    const { fetcher } = req;
+    const { employee_number: nip } = req.user;
+    const result = await fetcher.get(
+      `/master-ws/operator/employees/${nip}/data-utama-master`
+    );
+    res.json(result?.data);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ code: 500, message: "Internal Server Error" });
+  }
+};
+
 module.exports = {
   rwJabatanMaster,
   rwAngkakreditMaster,
   rwSkpMaster,
+  dataUtamaMaster,
 };
