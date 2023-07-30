@@ -1,8 +1,9 @@
 import { dataUtamaMaster } from "@/controller/master.controller";
+import asnMiddleware from "@/middleware/asn.middleware";
 import auth from "@/middleware/auth.middleware";
 import { createRouter } from "next-connect";
 const router = createRouter();
 
-router.use(auth).get(dataUtamaMaster);
+router.use(auth).use(asnMiddleware).get(dataUtamaMaster);
 
 export default router.handler();
