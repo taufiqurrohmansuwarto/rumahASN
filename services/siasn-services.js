@@ -26,9 +26,17 @@ export const getRwJabatan = () => {
   return api.get("/pns/rw-jabatan").then((res) => res.data);
 };
 
+export const postRwJabatan = (data) => {
+  return api.post("/pns/rw-jabatan", data).then((res) => res.data);
+};
+
 // angkakredit
 export const getRwAngkakredit = () => {
   return api.get("/pns/rw-angkakredit").then((res) => res.data);
+};
+
+export const postRwAngkakredit = (data) => {
+  return api.post("/pns/rw-angkakredit", data).then((res) => res.data);
 };
 
 // hukdis
@@ -44,4 +52,8 @@ export const getRwSkp = () => {
 // skp22
 export const getRwSkp22 = () => {
   return api.get("/pns/rw-skp22").then((res) => res.data);
+};
+
+export const postRwSkp22 = (data) => {
+  return api.post("/pns/rw-skp22", data).then((res) => res.data);
 };

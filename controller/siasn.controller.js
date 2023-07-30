@@ -1,6 +1,7 @@
 const { default: axios } = require("axios");
 const moment = require("moment");
 const arrayToTree = require("array-to-tree");
+const { NextResponse } = require("next/server");
 
 const siasnEmployeesDetail = async (req, res) => {
   try {
@@ -84,7 +85,7 @@ const postSkp2022 = async (req, res) => {
   try {
     const { siasnRequest } = req;
     const { penilain, ...body } = req?.body;
-    const { nip } = req?.query;
+    const { employee_number: nip } = req?.user;
 
     const dataCurrent = await siasnRequest.get(`/pns/data-utama/${nip}`);
     const dataPenilai = await siasnRequest.get(
@@ -190,30 +191,10 @@ const daftarKenaikanPangkat = async (req, res) => {
 const getDiklat = async (req, res) => {
   try {
     const { siasnRequest: request } = req;
-    const { nip } = req?.query;
+    const { employee_number: nip } = req?.user;
 
     const result = await request.get(`/pns/rw-diklat/${nip}`);
     res.json(result?.data);
-  } catch (error) {
-    console.log(error);
-    res.status(500).json({ message: "error" });
-  }
-};
-
-const downloadDokumen = async (req, res) => {
-  try {
-    const { siasnRequest: request } = req;
-    const { filePath } = req?.query;
-    const result = await request.get(`/download-dok?filePath=${filePath}`, {
-      responseType: "arrayBuffer",
-    });
-
-    res.writeHead(200, {
-      "Content-Type": "application/pdf",
-      "Content-Length": result?.data?.length,
-    });
-
-    res.end(Buffer.from(result?.data, "binary"));
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: "error" });
@@ -262,8 +243,7 @@ const postRiwayatJabatan = async (req, res) => {
       pnsId: id,
     };
 
-    console.log(data);
-    const result = await request.post(`/jabatan/save`, data);
+    await request.post(`/jabatan/save`, data);
 
     res.json({ success: true });
   } catch (error) {
@@ -298,13 +278,41 @@ const getRefJft = async (req, res) => {
   }
 };
 
+const downloadDocument = async (req, res) => {
+  try {
+    const { filePath } = req?.query;
+
+    const { fetcher } = req;
+
+    const result = await fetcher.get(
+      `/siasn-ws/proxy/download?file_path=${filePath}`,
+      {
+        responseType: "arraybuffer",
+      }
+    );
+
+    // send file via pdf
+    res.writeHead(200, {
+      "Content-Type": "application/pdf",
+      "Content-Length": result?.data?.length,
+    });
+
+    res.end(Buffer.from(result?.data, "binary"));
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ code: 500, message: "Internal Server Error" });
+  }
+};
+
 module.exports = {
+  downloadDocument,
   siasnEmployeesDetail,
   getTreeRef,
   getJabatan,
   postRiwayatJabatan,
   getSkp,
   getSkp2022,
+  postSkp2022,
   getHukdis,
   postAngkaKredit,
   getAngkaKredit,
