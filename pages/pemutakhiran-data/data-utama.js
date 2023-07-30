@@ -1,9 +1,17 @@
 import Layout from "@/components/Layout";
 import CompareDataUtama from "@/components/PemutakhiranData/CompareDataUtama";
 import LayoutPemutakhiranData from "@/components/PemutakhiranData/LayoutPemutakhiranData";
+import Head from "next/head";
 
 const DataUtama = () => {
-  return <CompareDataUtama />;
+  return (
+    <>
+      <Head>
+        <title>Rumah ASN - Peremajaan SIASN - Data Utama</title>
+      </Head>
+      <CompareDataUtama />
+    </>
+  );
 };
 
 DataUtama.Auth = {

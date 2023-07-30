@@ -1,4 +1,4 @@
-import { dataUtamaSIASN } from "@/services/siasn-services";
+import { dataUtamSIASNByNip } from "@/services/siasn-services";
 import { useDebouncedValue } from "@mantine/hooks";
 import { useQuery } from "@tanstack/react-query";
 import { Form, Select, Spin } from "antd";
@@ -10,7 +10,7 @@ const FormCariPegawai = ({ name, label = "Cari Pegawai", help = "" }) => {
 
   const { data, isLoading } = useQuery(
     ["data-utama-pegawai", debounceValue],
-    () => dataUtamaSIASN(debounceValue),
+    () => dataUtamSIASNByNip(debounceValue),
     {
       enabled: Boolean(debounceValue),
     }

@@ -1,10 +1,13 @@
-import { Button, Tabs } from "antd";
+import { Button } from "antd";
 import { useRouter } from "next/router";
 import PageContainer from "../PageContainer";
 
 const LayoutPemutakhiranData = ({ children, active = "1" }) => {
-  const { TabPane } = Tabs;
   const router = useRouter();
+
+  const buatPertanyaan = () => {
+    router.push("/tickets/create");
+  };
 
   const items = [
     {
@@ -48,17 +51,17 @@ const LayoutPemutakhiranData = ({ children, active = "1" }) => {
         };
       })}
       tabBarExtraContent={
-        <Button key="3" type="primary">
-          Simpan
+        <Button key="3" type="primary" onClick={buatPertanyaan}>
+          Tanya BKD
         </Button>
       }
-      extra={[
-        <Button key="3">Operation</Button>,
-        <Button key="2">Operation</Button>,
-        <Button key="1" type="primary">
-          Primary Action
-        </Button>,
-      ]}
+      // extra={[
+      //   <Button key="3">Operation</Button>,
+      //   <Button key="2">Operation</Button>,
+      //   <Button key="1" type="primary">
+      //     Primary Action
+      //   </Button>,
+      // ]}
       tabProps={{
         size: "small",
         onChange: handleChange,
