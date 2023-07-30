@@ -1,9 +1,17 @@
 import Layout from "@/components/Layout";
 import CompareJabatan from "@/components/PemutakhiranData/CompareJabatan";
 import LayoutPemutakhiranData from "@/components/PemutakhiranData/LayoutPemutakhiranData";
+import Head from "next/head";
 
 const Jabatan = () => {
-  return <CompareJabatan />;
+  return (
+    <>
+      <Head>
+        <title>Rumah ASN - Peremajaan SIASN - Jabatan</title>
+      </Head>
+      <CompareJabatan />
+    </>
+  );
 };
 
 Jabatan.Auth = {

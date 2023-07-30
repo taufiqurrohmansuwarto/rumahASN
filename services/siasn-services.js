@@ -9,16 +9,20 @@ export const dataUtamaSIASN = () => {
   return api.get("/pns/data-utama").then((res) => res.data);
 };
 
+export const dataUtamSIASNByNip = (nip) => {
+  return api.get(`/pns/${nip}/data-utama`).then((res) => res.data);
+};
+
 export const unitOrganisasi = () => {
   return api.get("/ref/unor").then((res) => res.data);
 };
 
-export const refJft = () => {
-  return api.get("/ref/jft").then((res) => res.data);
+export const refJft = (jabatan) => {
+  return api.get(`/ref/jft?jabatan=${jabatan}`).then((res) => res.data);
 };
 
-export const refJfu = () => {
-  return api.get("/ref/jfu").then((res) => res.data);
+export const refJfu = (jabatan) => {
+  return api.get(`/ref/jfu?jabatan=${jabatan}`).then((res) => res.data);
 };
 
 // jabatan
@@ -56,4 +60,8 @@ export const getRwSkp22 = () => {
 
 export const postRwSkp22 = (data) => {
   return api.post("/pns/rw-skp22", data).then((res) => res.data);
+};
+
+export const getTokenSIASNService = () => {
+  return api.get("/token").then((res) => res.data);
 };

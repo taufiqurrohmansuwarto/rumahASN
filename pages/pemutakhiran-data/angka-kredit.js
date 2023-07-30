@@ -1,9 +1,17 @@
 import Layout from "@/components/Layout";
 import CompareAngkaKredit from "@/components/PemutakhiranData/CompareAngkaKredit";
 import LayoutPemutakhiranData from "@/components/PemutakhiranData/LayoutPemutakhiranData";
+import Head from "next/head";
 
 const AngkaKredit = () => {
-  return <CompareAngkaKredit />;
+  return (
+    <>
+      <Head>
+        <title>Rumah ASN - Peremajaan SIASN - Angka Kredit</title>
+      </Head>
+      <CompareAngkaKredit />
+    </>
+  );
 };
 
 AngkaKredit.Auth = {

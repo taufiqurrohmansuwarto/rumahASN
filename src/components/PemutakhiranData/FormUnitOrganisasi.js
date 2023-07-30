@@ -5,7 +5,10 @@ import { Form, TreeSelect } from "antd";
 const FormUnitOrganisasi = ({ name }) => {
   const { data: tree, isLoading: isLoadingTree } = useQuery(
     ["ref-unor-new"],
-    () => unitOrganisasi()
+    () => unitOrganisasi(),
+    {
+      refetchOnWindowFocus: false,
+    }
   );
 
   return (
@@ -16,6 +19,7 @@ const FormUnitOrganisasi = ({ name }) => {
             label={"Unit Organisasi"}
             rules={[{ required: true }]}
             name={name}
+            help="Pilih Unit Organisasi terkecil dan untuk SMA/SMK gunakan UPT terlebih dahulu"
           >
             <TreeSelect treeNodeFilterProp="label" treeData={tree} showSearch />
           </Form.Item>

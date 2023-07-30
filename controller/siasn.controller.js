@@ -1,7 +1,8 @@
 const { default: axios } = require("axios");
 const moment = require("moment");
 const arrayToTree = require("array-to-tree");
-const { NextResponse } = require("next/server");
+const { ssoFetcher, wso2Fetcher } = require("@/utils/siasn-fetcher");
+const { orderBy } = require("lodash");
 
 const siasnEmployeesDetail = async (req, res) => {
   try {
@@ -11,6 +12,19 @@ const siasnEmployeesDetail = async (req, res) => {
     const nip = user?.employee_number;
     const { data } = await siasnRequest.get(`/pns/data-utama/${nip}`);
 
+    res.json(data?.data);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ code: 500, message: "Internal Server Error" });
+  }
+};
+
+const siasnEmployeeDetailByNip = async (req, res) => {
+  try {
+    const { nip } = req?.query;
+    const siasnRequest = req.siasnRequest;
+
+    const { data } = await siasnRequest.get(`/pns/data-utama/${nip}`);
     res.json(data?.data);
   } catch (error) {
     console.log(error);
@@ -84,7 +98,7 @@ function getKuadran(a, b) {
 const postSkp2022 = async (req, res) => {
   try {
     const { siasnRequest } = req;
-    const { penilain, ...body } = req?.body;
+    const { penilain, ...body } = req?.body?.data;
     const { employee_number: nip } = req?.user;
 
     const dataCurrent = await siasnRequest.get(`/pns/data-utama/${nip}`);
@@ -113,7 +127,7 @@ const postSkp2022 = async (req, res) => {
       tahun: 2022,
     };
 
-    await siasnRequest.post("/skp22/save", data);
+    const result = await siasnRequest.post("/skp22/save", data);
     res.json({ code: 200 });
   } catch (error) {
     console.log(error);
@@ -148,7 +162,7 @@ const postAngkaKredit = async (req, res) => {
   try {
     const { siasnRequest: request } = req;
     const { employee_number: nip } = req?.user;
-    const body = req?.body;
+    const body = req?.body?.data;
 
     const currentPns = await request.get(`/pns/data-utama/${nip}`);
 
@@ -222,7 +236,25 @@ const getJabatan = async (req, res) => {
     const { employee_number: nip } = req?.user;
 
     const result = await request.get(`/pns/rw-jabatan/${nip}`);
-    res.json(result?.data?.data);
+
+    const data = result?.data?.data;
+
+    if (!data?.length) {
+      res.json(data);
+    } else {
+      const hasil = orderBy(
+        data,
+        [
+          (d) => {
+            const dateParts = d?.tmtJabatan?.split("-");
+            return new Date(`${dateParts[2]}-${dateParts[1]}-${dateParts[0]}`);
+          },
+        ],
+        ["desc"]
+      );
+      console.log(hasil);
+      res.json(hasil);
+    }
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: "error" });
@@ -233,7 +265,7 @@ const postRiwayatJabatan = async (req, res) => {
   try {
     const { siasnRequest: request } = req;
     const { employee_number: nip } = req?.user;
-    const body = req?.body;
+    const body = req?.body?.data;
 
     // cekId
     const dataUtama = await request.get(`/pns/data-utama/${nip}`);
@@ -304,8 +336,26 @@ const downloadDocument = async (req, res) => {
   }
 };
 
+const getTokenSIASN = async (req, res) => {
+  try {
+    const firstToken = await ssoFetcher();
+    const secondToken = await wso2Fetcher();
+
+    res.json({
+      accessToken: {
+        sso: firstToken,
+        wso2: secondToken,
+      },
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ code: 500, message: "Internal Server Error" });
+  }
+};
+
 module.exports = {
   downloadDocument,
+  getTokenSIASN,
   siasnEmployeesDetail,
   getTreeRef,
   getJabatan,
@@ -318,4 +368,5 @@ module.exports = {
   getAngkaKredit,
   getRefJft,
   getRefJfu,
+  siasnEmployeeDetailByNip,
 };

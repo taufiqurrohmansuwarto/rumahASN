@@ -1,215 +1,250 @@
 import { rwJabatanMaster } from "@/services/master.services";
-import { getRwJabatan } from "@/services/siasn-services";
-import { PlusOutlined } from "@ant-design/icons";
+import axios from "axios";
+import {
+  getRwJabatan,
+  getTokenSIASNService,
+  postRwJabatan,
+} from "@/services/siasn-services";
+import { FileAddOutlined, PlusOutlined } from "@ant-design/icons";
 import { Stack } from "@mantine/core";
-import { useQuery } from "@tanstack/react-query";
-import { Button, Card, Table } from "antd";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  Button,
+  Card,
+  Col,
+  DatePicker,
+  Form,
+  Input,
+  Modal,
+  Row,
+  Select,
+  Table,
+  Upload,
+  message,
+} from "antd";
 import { useState } from "react";
+import FormJFT from "./FormJFT";
+import FormJFU from "./FormJFU";
+import FormUnitOrganisasi from "./FormUnitOrganisasi";
+import moment from "moment";
+import { API_URL } from "@/utils/client-utils";
+import AlertJabatan from "./AlertJabatan";
 
 const format = "DD-MM-YYYY";
 
-// const FormEntri = ({ visible, onCancel, nip }) => {
-//   const queryClient = useQueryClient();
-//   const [form] = Form.useForm();
+const FormEntri = ({ visible, onCancel, nip }) => {
+  const queryClient = useQueryClient();
+  const [form] = Form.useForm();
 
-//   const [fileList, setFileList] = useState([]);
-//   const [loading, setLoading] = useState(false);
+  const [fileList, setFileList] = useState([]);
+  const [loading, setLoading] = useState(false);
 
-//   const handleChange = (info) => {
-//     let fileList = [...info.fileList];
+  const handleChange = (info) => {
+    let fileList = [...info.fileList];
 
-//     fileList = fileList.slice(-1);
+    fileList = fileList.slice(-1);
 
-//     fileList = fileList.map((file) => {
-//       if (file.response) {
-//         file.url = file.response.url;
-//       }
-//       return file;
-//     });
+    fileList = fileList.map((file) => {
+      if (file.response) {
+        file.url = file.response.url;
+      }
+      return file;
+    });
 
-//     setFileList(fileList);
-//   };
+    setFileList(fileList);
+  };
 
-//   const handleFinish = async () => {
-//     try {
-//       setLoading(true);
-//       const {
-//         tmt_jabatan,
-//         tgl_sk,
-//         tmt_pelantikan,
-//         fungsional_id,
-//         fungsional_umum_id,
-//         unor_id,
-//         nomor_sk,
-//         jenis_jabatan,
-//       } = await form.validateFields();
+  const handleFinish = async () => {
+    try {
+      setLoading(true);
+      const {
+        tmt_jabatan,
+        tgl_sk,
+        tmt_pelantikan,
+        fungsional_id,
+        fungsional_umum_id,
+        unor_id,
+        nomor_sk,
+        jenis_jabatan,
+      } = await form.validateFields();
 
-//       let jenis_jabatan_id = jenis_jabatan === "Fungsional" ? "2" : "4";
+      let jenis_jabatan_id = jenis_jabatan === "Fungsional" ? "2" : "4";
 
-//       const data = {
-//         tmtJabatan: moment(tmt_jabatan).format("DD-MM-YYYY"),
-//         tanggalSk: moment(tgl_sk).format("DD-MM-YYYY"),
-//         tmtPelantikan: moment(tmt_pelantikan).format("DD-MM-YYYY"),
-//         jabatanFungsionalId: fungsional_id ? fungsional_id : "-",
-//         jabatanFungsionalUmumId: fungsional_umum_id ? fungsional_umum_id : "-",
-//         unorId: unor_id,
-//         nomorSk: nomor_sk,
-//         jenisJabatan: jenis_jabatan_id,
-//         eselonId: "",
-//         satuanKerjaId: "A5EB03E24213F6A0E040640A040252AD",
-//         instansiId: "A5EB03E23CCCF6A0E040640A040252AD",
-//       };
+      const data = {
+        tmtJabatan: moment(tmt_jabatan).format("DD-MM-YYYY"),
+        tanggalSk: moment(tgl_sk).format("DD-MM-YYYY"),
+        tmtPelantikan: moment(tmt_pelantikan).format("DD-MM-YYYY"),
+        jabatanFungsionalId: fungsional_id ? fungsional_id : "-",
+        jabatanFungsionalUmumId: fungsional_umum_id ? fungsional_umum_id : "-",
+        unorId: unor_id,
+        nomorSk: nomor_sk,
+        jenisJabatan: jenis_jabatan_id,
+        eselonId: "",
+        satuanKerjaId: "A5EB03E24213F6A0E040640A040252AD",
+        instansiId: "A5EB03E23CCCF6A0E040640A040252AD",
+      };
 
-//       const currentFile = fileList[0]?.originFileObj;
+      const currentFile = fileList[0]?.originFileObj;
 
-//       if (currentFile) {
-//         const result = await getTokenSIASNService();
+      if (currentFile) {
+        const result = await getTokenSIASNService();
 
-//         const wso2 = result?.accessToken?.wso2;
-//         const sso = result?.accessToken?.sso;
+        const wso2 = result?.accessToken?.wso2;
+        const sso = result?.accessToken?.sso;
 
-//         const formData = new FormData();
+        const formData = new FormData();
 
-//         formData.append("file", currentFile);
-//         formData.append("id_ref_dokumen", "872");
-//         const hasil = await axios.post(`${API_URL}/upload-dok`, formData, {
-//           headers: {
-//             "Content-Type": "multipart/form-data",
-//             Authorization: `Bearer ${wso2}`,
-//             Auth: `bearer ${sso}`,
-//           },
-//         });
+        formData.append("file", currentFile);
+        formData.append("id_ref_dokumen", "872");
+        const hasil = await axios.post(`${API_URL}/upload-dok`, formData, {
+          headers: {
+            "Content-Type": "multipart/form-data",
+            Authorization: `Bearer ${wso2}`,
+            Auth: `bearer ${sso}`,
+          },
+        });
 
-//         const postData = {
-//           ...data,
-//           path: [hasil?.data?.data],
-//         };
+        const postData = {
+          ...data,
+          path: [hasil?.data?.data],
+        };
 
-//         await postJabatan({
-//           nip,
-//           data: postData,
-//         });
+        await postRwJabatan({
+          nip,
+          data: postData,
+        });
 
-//         onCancel();
-//         form.resetFields();
-//         setFileList([]);
-//         setLoading(false);
-//       } else {
-//         await postJabatan({
-//           nip,
-//           data,
-//         });
-//         onCancel();
-//         form.resetFields();
-//         setFileList([]);
-//         setLoading(false);
-//       }
-//       queryClient.invalidateQueries("data-jabatan");
-//       message.success("Data berhasil disimpan");
-//     } catch (error) {
-//       setLoading(false);
-//       console.log(error);
-//     }
-//   };
+        message.success("Data berhasil disimpan");
+        onCancel();
+        form.resetFields();
+        setFileList([]);
+        setLoading(false);
+      } else {
+        await postRwJabatan({
+          nip,
+          data,
+        });
 
-//   return (
-//     <Modal
-//       title="Entri Jabatan SIASN"
-//       width={800}
-//       visible={visible}
-//       onOk={handleFinish}
-//       onCancel={onCancel}
-//       confirmLoading={loading}
-//     >
-//       <Form form={form} layout="vertical" onFinish={handleFinish}>
-//         <Upload
-//           beforeUpload={() => false}
-//           maxCount={1}
-//           accept=".pdf"
-//           onChange={handleChange}
-//           fileList={fileList}
-//         >
-//           <Button icon={<FileAddOutlined />}>Upload</Button>
-//         </Upload>
-//         <FormUnitOrganisasi name="unor_id" />
-//         <Form.Item
-//           rules={[{ required: true, message: "Tidak boleh kosong" }]}
-//           name="jenis_jabatan"
-//           label="Jenis Jabatan"
-//         >
-//           <Select
-//             onChange={() => {
-//               form.setFieldsValue({
-//                 fungsional_id: null,
-//                 fungsional_umum_id: null,
-//               });
-//             }}
-//           >
-//             <Select.Option value="Pelaksana">Pelaksana</Select.Option>
-//             <Select.Option value="Fungsional">Fungsional</Select.Option>
-//           </Select>
-//         </Form.Item>
-//         <Form.Item
-//           noStyle
-//           shouldUpdate={(prevValues, currentValues) =>
-//             prevValues.jenis_jabatan !== currentValues.jenis_jabatan
-//           }
-//         >
-//           {({ getFieldValue }) =>
-//             getFieldValue("jenis_jabatan") === "Fungsional" ? (
-//               <FormJFT name="fungsional_id" />
-//             ) : getFieldValue("jenis_jabatan") === "Pelaksana" ? (
-//               <FormJFU name="fungsional_umum_id" />
-//             ) : null
-//           }
-//         </Form.Item>
-//         <Form.Item
-//           rules={[
-//             {
-//               required: true,
-//               message: "'Nomer SK Tidak boleh kosong",
-//             },
-//           ]}
-//           name="nomor_sk"
-//           label="Nomor SK"
-//         >
-//           <Input />
-//         </Form.Item>
-//         <Form.Item
-//           rules={[
-//             {
-//               required: true,
-//               message: "TMT Jabatan Tidak boleh kosong",
-//             },
-//           ]}
-//           name="tmt_jabatan"
-//           label="TMT Jabatan"
-//         >
-//           <DatePicker format={format} />
-//         </Form.Item>
-//         <Form.Item
-//           rules={[{ required: true }]}
-//           name="tmt_pelantikan"
-//           label="TMT Pelantikan"
-//         >
-//           <DatePicker format={format} />
-//         </Form.Item>
-//         <Form.Item
-//           rules={[
-//             {
-//               required: true,
-//               message: "Tanggal SK Tidak boleh kosong",
-//             },
-//           ]}
-//           name="tgl_sk"
-//           label="Tanggal SK"
-//         >
-//           <DatePicker format={format} />
-//         </Form.Item>
-//       </Form>
-//     </Modal>
-//   );
-// };
+        message.success("Data berhasil disimpan");
+        onCancel();
+        form.resetFields();
+        setFileList([]);
+        setLoading(false);
+      }
+      queryClient.invalidateQueries("data-jabatan");
+    } catch (error) {
+      message.error("Data gagal disimpan");
+      setLoading(false);
+      console.log(error);
+    }
+  };
+
+  return (
+    <Modal
+      title="Entri Jabatan SIASN"
+      width={800}
+      visible={visible}
+      onOk={handleFinish}
+      onCancel={onCancel}
+      confirmLoading={loading}
+    >
+      <Form form={form} layout="vertical" onFinish={handleFinish}>
+        <Upload
+          beforeUpload={() => false}
+          maxCount={1}
+          accept=".pdf"
+          onChange={handleChange}
+          fileList={fileList}
+        >
+          <Button icon={<FileAddOutlined />}>Upload</Button>
+        </Upload>
+        <FormUnitOrganisasi name="unor_id" />
+        <Form.Item
+          rules={[{ required: true, message: "Tidak boleh kosong" }]}
+          name="jenis_jabatan"
+          label="Jenis Jabatan"
+        >
+          <Select
+            onChange={() => {
+              form.setFieldsValue({
+                fungsional_id: null,
+                fungsional_umum_id: null,
+              });
+            }}
+          >
+            <Select.Option value="Pelaksana">Pelaksana</Select.Option>
+            <Select.Option value="Fungsional">Fungsional</Select.Option>
+          </Select>
+        </Form.Item>
+        <Form.Item
+          noStyle
+          shouldUpdate={(prevValues, currentValues) =>
+            prevValues.jenis_jabatan !== currentValues.jenis_jabatan
+          }
+        >
+          {({ getFieldValue }) =>
+            getFieldValue("jenis_jabatan") === "Fungsional" ? (
+              <FormJFT name="fungsional_id" />
+            ) : getFieldValue("jenis_jabatan") === "Pelaksana" ? (
+              <FormJFU name="fungsional_umum_id" />
+            ) : null
+          }
+        </Form.Item>
+        <Form.Item
+          rules={[
+            {
+              required: true,
+              message: "'Nomer SK Tidak boleh kosong",
+            },
+          ]}
+          name="nomor_sk"
+          label="Nomor SK"
+        >
+          <Input />
+        </Form.Item>
+        <Row gutter={16}>
+          <Col span={8}>
+            <Form.Item
+              rules={[
+                {
+                  required: true,
+                  message: "TMT Jabatan Tidak boleh kosong",
+                },
+              ]}
+              name="tmt_jabatan"
+              label="TMT Jabatan"
+            >
+              <DatePicker format={format} />
+            </Form.Item>
+          </Col>
+          <Col span={8}>
+            <Form.Item
+              rules={[{ required: true }]}
+              name="tmt_pelantikan"
+              label="TMT Pelantikan"
+            >
+              <DatePicker format={format} />
+            </Form.Item>
+          </Col>
+          <Col span={8}>
+            <Form.Item
+              rules={[
+                {
+                  required: true,
+                  message: "Tanggal SK Tidak boleh kosong",
+                },
+              ]}
+              name="tgl_sk"
+              label="Tanggal SK"
+            >
+              <DatePicker format={format} />
+            </Form.Item>
+          </Col>
+        </Row>
+      </Form>
+    </Modal>
+  );
+};
 
 const checkJenisJabatan = (data) => {
   let result = "";
@@ -264,9 +299,7 @@ function CompareJabatan() {
   const handleOpen = () => setVisible(true);
   const handleClose = () => setVisible(false);
 
-  const { data, isLoading } = useQuery(["data-jabatan"], () => getRwJabatan(), {
-    refetchOnWindowFocus: false,
-  });
+  const { data, isLoading } = useQuery(["data-jabatan"], () => getRwJabatan());
 
   const { data: dataMaster, isLoading: loadingMasterJabatan } = useQuery(
     ["data-rw-jabatan-master"],
@@ -280,10 +313,11 @@ function CompareJabatan() {
       render: (_, row) => {
         return (
           <>
-            {row?.path && (
+            {row?.path?.[872] && (
               <a
                 href={`/helpdesk/api/siasn/ws/download?filePath=${row?.path?.[872]?.dok_uri}`}
                 target="_blank"
+                rel="noreferrer"
               >
                 File
               </a>
@@ -320,7 +354,7 @@ function CompareJabatan() {
       render: (_, record) => {
         return (
           <div>
-            <a href={record?.file} target="_blank">
+            <a href={record?.file} target="_blank" rel="noreferrer">
               {record?.jenis_jabatan}
             </a>
           </div>
@@ -344,9 +378,10 @@ function CompareJabatan() {
   ];
 
   return (
-    <Card loading={isLoading} title="Test">
-      {/* <FormEntri nip={nip} onCancel={handleClose} visible={visible} /> */}
+    <Card loading={isLoading} title="Komparasi Jabatan">
+      <FormEntri onCancel={handleClose} visible={visible} />
       <Stack>
+        <AlertJabatan />
         <Table
           title={() => (
             <Button type="primary" onClick={handleOpen} icon={<PlusOutlined />}>
@@ -359,14 +394,14 @@ function CompareJabatan() {
           rowKey={(row) => row?.id}
           pagination={false}
         />
-        {JSON.stringify(dataMaster)}
-        {/* <Table
+        <Table
+          title={() => `Jabatan Aplikasi SIMASTER`}
           columns={columnsMaster}
           dataSource={dataMaster}
           loading={loadingMasterJabatan}
           rowKey={(row) => row?.id}
           pagination={false}
-        /> */}
+        />
       </Stack>
     </Card>
   );

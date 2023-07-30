@@ -1,8 +1,9 @@
 import moment from "moment";
+const { orderBy } = require("lodash");
 
 const url = "https://master.bkd.jatimprov.go.id/files_jatimprov/";
 
-module.exports.serializeRwJabatanMaster = (data) => {
+const serializeRwJabatanMaster = (data) => {
   const jabatanStruktural = data?.jabatan_struktural;
   const jabatanFungsional = data?.jabatan_fungsional_tertentu;
   const jabatanPelaksana = data?.jabatan_pelaksana;
@@ -61,7 +62,25 @@ export const rwJabatanMaster = async (req, res) => {
     const result = await fetcher.get(
       `/master-ws/operator/employees/${nip}/rw-jabatan`
     );
-    res.json(result?.data);
+
+    const hasilku = serializeRwJabatanMaster(result?.data);
+
+    if (hasilku?.length) {
+      const sorting = orderBy(
+        hasilku,
+        [
+          (obj) => {
+            const [day, month, year] = obj?.tmt_jabatan.split("-");
+            return new Date(year, month - 1, day);
+          },
+        ],
+        ["asc"]
+      );
+
+      res.json(sorting);
+    } else {
+      res.json(null);
+    }
   } catch (error) {
     console.log(error);
     res.status(500).json({ code: 500, message: "Internal Server Error" });
@@ -72,6 +91,7 @@ export const rwAngkakreditMaster = async (req, res) => {
   try {
     const { fetcher } = req;
     const { employee_number: nip } = req.user;
+
     const result = await fetcher.get(
       `/master-ws/operator/employees/${nip}/rw-angkakredit`
     );

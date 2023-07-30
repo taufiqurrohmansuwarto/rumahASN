@@ -104,6 +104,7 @@ const CreateTicket = () => {
     <PageContainer
       title="Rumah ASN"
       subTitle="Pertanyaan Baru"
+      onBack={() => router.back()}
       breadcrumbRender={() => (
         <Breadcrumb>
           <Breadcrumb.Item>

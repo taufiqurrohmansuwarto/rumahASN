@@ -19,10 +19,10 @@ const FormJFU = ({ name, help }) => {
   return (
     <>
       <Form.Item
-        label={`Jabatan Fungsional Terampil - (${help})`}
+        label={`Jabatan Fungsional Umum`}
         rules={[{ required: true }]}
         name={name}
-        // help={help}
+        help="Ketik nama jabatan kemudian tunggu.."
       >
         <Select
           showSearch

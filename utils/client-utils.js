@@ -355,3 +355,5 @@ export const arrayToTree = (
     return tree;
   }, []);
 };
+
+export const API_URL = "https://apimws.bkn.go.id:8243/apisiasn/1.0";
