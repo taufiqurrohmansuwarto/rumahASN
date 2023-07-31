@@ -83,7 +83,7 @@ const changeRoutes = (user) => {
       userRoutes.routes.push(
         {
           path: "/pemutakhiran-data/data-utama",
-          name: "Pemutakhiran Data",
+          name: "Peremajaan Data",
           icon: <ApiOutlined />,
         },
         {
