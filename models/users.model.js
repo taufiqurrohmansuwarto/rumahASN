@@ -20,7 +20,8 @@ class User extends Model {
           "username",
           "image",
           "is_online",
-          "group"
+          "group",
+          "current_role"
           // "employee_number"
         );
       },
