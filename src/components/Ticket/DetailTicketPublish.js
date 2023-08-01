@@ -12,7 +12,7 @@ import {
   setColorStatus,
 } from "@/utils/client-utils";
 import { formatDate } from "@/utils/index";
-import { EllipsisOutlined } from "@ant-design/icons";
+import { EllipsisOutlined, FireOutlined } from "@ant-design/icons";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Affix,
@@ -209,13 +209,24 @@ const CommentTicket = ({ item, agent, customer, admin }) => {
                   ]}
                   author={
                     <Link href={`/users/${item?.user?.custom_id}`}>
-                      <Typography.Link>{item?.user?.username}</Typography.Link>
+                      <Space>
+                        <Typography.Link>
+                          {item?.user?.username}
+                        </Typography.Link>
+                        {item?.user?.current_role === "agent" ||
+                        item?.user?.current_role === "admin" ? (
+                          <Tag icon={<FireOutlined />} color="yellow">
+                            Staff BKD
+                          </Tag>
+                        ) : null}
+                      </Space>
                     </Link>
                   }
                   datetime={
                     <Tooltip title={formatDate(item?.created_at)}>
                       <Space>
                         <span>
+                          &#8226;{" "}
                           {item?.is_edited
                             ? formatDateFromNow(item?.updated_at)
                             : formatDateFromNow(item?.created_at)}
