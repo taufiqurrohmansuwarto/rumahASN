@@ -1,5 +1,5 @@
-import { getJabatan, postRiwayatJabatan } from "@/controller/siasn.controller";
-import asnMiddleware from "@/middleware/asn.middleware";
+import { siasnEmployeeDetailByNip } from "@/controller/siasn.controller";
+import adminMiddleware from "@/middleware/admin.middleware";
 import auth from "@/middleware/auth.middleware";
 import { siasnMiddleware } from "@/middleware/siasn.middleware";
 import { createRouter } from "next-connect";
@@ -7,9 +7,8 @@ const router = createRouter();
 
 router
   .use(auth)
-  .use(asnMiddleware)
+  .use(adminMiddleware)
   .use(siasnMiddleware)
-  .get(getJabatan)
-  .post(postRiwayatJabatan);
+  .get(siasnEmployeeDetailByNip);
 
 export default router.handler();

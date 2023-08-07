@@ -81,6 +81,17 @@ const getSkp2022 = async (req, res) => {
   }
 };
 
+const getSkp2022ByNip = async (req, res) => {
+  try {
+    const { siasnRequest: request } = req;
+    const { nip } = req?.query;
+    const result = await request.get(`/pns/rw-skp22/${nip}`);
+    res.json(result?.data?.data);
+  } catch (error) {
+    console.log(error);
+  }
+};
+
 function getKuadran(a, b) {
   if (a === b) {
     if (a === 1) {
@@ -149,6 +160,19 @@ const getAngkaKredit = async (req, res) => {
   try {
     const { siasnRequest: request } = req;
     const { employee_number: nip } = req?.user;
+
+    const result = await request.get(`/pns/rw-angkakredit/${nip}`);
+    res.json(result?.data?.data);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "error" });
+  }
+};
+
+const getAngkaKreditByNip = async (req, res) => {
+  try {
+    const { siasnRequest: request } = req;
+    const { nip } = req?.query;
 
     const result = await request.get(`/pns/rw-angkakredit/${nip}`);
     res.json(result?.data?.data);
@@ -252,7 +276,37 @@ const getJabatan = async (req, res) => {
         ],
         ["desc"]
       );
-      console.log(hasil);
+      res.json(hasil);
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "error" });
+  }
+};
+
+const getJabatanByNip = async (req, res) => {
+  try {
+    const { siasnRequest: request } = req;
+
+    const { nip } = req?.query;
+
+    const result = await request.get(`/pns/rw-jabatan/${nip}`);
+
+    const data = result?.data?.data;
+
+    if (!data?.length) {
+      res.json(data);
+    } else {
+      const hasil = orderBy(
+        data,
+        [
+          (d) => {
+            const dateParts = d?.tmtJabatan?.split("-");
+            return new Date(`${dateParts[2]}-${dateParts[1]}-${dateParts[0]}`);
+          },
+        ],
+        ["desc"]
+      );
       res.json(hasil);
     }
   } catch (error) {
@@ -369,4 +423,7 @@ module.exports = {
   getRefJft,
   getRefJfu,
   siasnEmployeeDetailByNip,
+  getSkp2022ByNip,
+  getJabatanByNip,
+  getAngkaKreditByNip,
 };
