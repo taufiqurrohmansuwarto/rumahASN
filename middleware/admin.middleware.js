@@ -1,9 +1,11 @@
 module.exports = async (req, res, next) => {
   try {
     const user = req.user;
-    const { current_role } = user;
+    const { current_role, group } = user;
 
-    const admin = current_role === "admin";
+    const currentGroup = group === "MASTER" || group === "PTTPK";
+
+    const admin = current_role === "admin" || currentGroup;
 
     if (!admin) {
       res.status(403).json({ code: 403, message: "Forbidden" });
