@@ -87,10 +87,57 @@ export const rwJabatanMaster = async (req, res) => {
   }
 };
 
+export const rwJabatanMasterByNip = async (req, res) => {
+  try {
+    const { fetcher } = req;
+    const { nip } = req.query;
+    const result = await fetcher.get(
+      `/master-ws/operator/employees/${nip}/rw-jabatan`
+    );
+
+    const hasilku = serializeRwJabatanMaster(result?.data);
+
+    if (hasilku?.length) {
+      const sorting = orderBy(
+        hasilku,
+        [
+          (obj) => {
+            const [day, month, year] = obj?.tmt_jabatan.split("-");
+            return new Date(year, month - 1, day);
+          },
+        ],
+        ["asc"]
+      );
+
+      res.json(sorting);
+    } else {
+      res.json(null);
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ code: 500, message: "Internal Server Error" });
+  }
+};
+
 export const rwAngkakreditMaster = async (req, res) => {
   try {
     const { fetcher } = req;
     const { employee_number: nip } = req.user;
+
+    const result = await fetcher.get(
+      `/master-ws/operator/employees/${nip}/rw-angkakredit`
+    );
+    res.json(result?.data);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ code: 500, message: "Internal Server Error" });
+  }
+};
+
+export const rwAngkakreditMasterByNip = async (req, res) => {
+  try {
+    const { fetcher } = req;
+    const { nip } = req.query;
 
     const result = await fetcher.get(
       `/master-ws/operator/employees/${nip}/rw-angkakredit`
@@ -116,10 +163,38 @@ export const rwSkpMaster = async (req, res) => {
   }
 };
 
+export const rwSkpMasterByNip = async (req, res) => {
+  try {
+    const { fetcher } = req;
+    const { nip } = req.query;
+    const result = await fetcher.get(
+      `/master-ws/operator/employees/${nip}/rw-skp`
+    );
+    res.json(result?.data);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ code: 500, message: "Internal Server Error" });
+  }
+};
+
 export const dataUtamaMaster = async (req, res) => {
   try {
     const { fetcher } = req;
     const { employee_number: nip } = req.user;
+    const result = await fetcher.get(
+      `/master-ws/operator/employees/${nip}/data-utama-master`
+    );
+    res.json(result?.data);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ code: 500, message: "Internal Server Error" });
+  }
+};
+
+export const dataUtamaMasterByNip = async (req, res) => {
+  try {
+    const { fetcher } = req;
+    const { nip } = req.query;
     const result = await fetcher.get(
       `/master-ws/operator/employees/${nip}/data-utama-master`
     );
@@ -135,4 +210,8 @@ module.exports = {
   rwAngkakreditMaster,
   rwSkpMaster,
   dataUtamaMaster,
+  dataUtamaMasterByNip,
+  rwJabatanMasterByNip,
+  rwAngkakreditMasterByNip,
+  rwSkpMasterByNip,
 };

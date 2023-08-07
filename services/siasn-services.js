@@ -1,5 +1,4 @@
 import axios from "axios";
-import queryString from "query-string";
 
 const api = axios.create({
   baseURL: "/helpdesk/api/siasn/ws",
@@ -10,7 +9,7 @@ export const dataUtamaSIASN = () => {
 };
 
 export const dataUtamSIASNByNip = (nip) => {
-  return api.get(`/pns/${nip}/data-utama`).then((res) => res.data);
+  return api.get(`/admin/${nip}/data-utama`).then((res) => res.data);
 };
 
 export const unitOrganisasi = () => {
@@ -30,6 +29,10 @@ export const getRwJabatan = () => {
   return api.get("/pns/rw-jabatan").then((res) => res.data);
 };
 
+export const getRwJabatanByNip = (nip) => {
+  return api.get(`/admin/${nip}/rw-jabatan`).then((res) => res.data);
+};
+
 export const postRwJabatan = (data) => {
   return api.post("/pns/rw-jabatan", data).then((res) => res.data);
 };
@@ -37,6 +40,10 @@ export const postRwJabatan = (data) => {
 // angkakredit
 export const getRwAngkakredit = () => {
   return api.get("/pns/rw-angkakredit").then((res) => res.data);
+};
+
+export const getRwAngkakreditByNip = (nip) => {
+  return api.get(`/admin/${nip}/rw-angkakredit`).then((res) => res.data);
 };
 
 export const postRwAngkakredit = (data) => {
@@ -58,8 +65,8 @@ export const getRwSkp22 = () => {
   return api.get("/pns/rw-skp22").then((res) => res.data);
 };
 
-export const postRwSkp22 = (data) => {
-  return api.post("/pns/rw-skp22", data).then((res) => res.data);
+export const getRwSkp22ByNip = (nip) => {
+  return api.get(`/admin/${nip}/rw-skp22`).then((res) => res.data);
 };
 
 export const getTokenSIASNService = () => {

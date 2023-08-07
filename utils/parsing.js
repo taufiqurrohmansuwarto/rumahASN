@@ -14,7 +14,11 @@ const extractHashtags = (text) => {
 
 const renderImage = (href, title, text) => {
   // resize image scale 0.5 using inline style
-  const img = `<img src="${href}" title="${text}" alt="${text}" style="width: 70%;"/>`;
+  // const img = `<img src="${href}" title="${text}" alt="${text}" style="width: 70%;"/>`;
+  // return img;
+
+  // add a href to image
+  const img = `<a href="${href}" target="_blank" rel="noopener noreferrer"><img src="${href}" title="${text}" alt="${text}" style="width: 70%;"/></a>`;
   return img;
 };
 
