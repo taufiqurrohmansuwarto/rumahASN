@@ -51,7 +51,7 @@ const LayoutPemutakhiranData = ({ children, active = "1" }) => {
         };
       })}
       tabBarExtraContent={
-        <Button key="3" type="primary" onClick={buatPertanyaan}>
+        <Button disabled key="3" type="primary" onClick={buatPertanyaan}>
           Tanya BKD
         </Button>
       }
