@@ -362,3 +362,12 @@ export const API_URL = "https://apimws.bkn.go.id:8243/apisiasn/1.0";
 export const compareText = (text1, text2) => {
   return text1.toLowerCase() === text2.toLowerCase();
 };
+
+const normalisasiGelar = (gelar) => {
+  return gelar?.replace(/\./g, "")?.trim()?.toUpperCase();
+};
+
+export const komparasiGelar = (gelar1, gelar2) => {
+  const result = normalisasiGelar(gelar1) === normalisasiGelar(gelar2);
+  return result;
+};
