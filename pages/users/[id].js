@@ -18,6 +18,7 @@ import {
   Modal,
   Rate,
   Space,
+  Tabs,
   Typography,
 } from "antd";
 import Link from "next/link";
@@ -27,6 +28,7 @@ import { MailOutlined } from "@ant-design/icons";
 import { useSession } from "next-auth/react";
 import { useState } from "react";
 import { Stack } from "@mantine/core";
+import SiasnTab from "@/components/PemutakhiranData/Admin/SiasnTab";
 
 const CreateModal = ({ open, onCancel, receiver }) => {
   const router = useRouter();
@@ -201,6 +203,7 @@ const DetailInformation = ({ user }) => {
 
 const Users = () => {
   const router = useRouter();
+  const { data: currentUser, status: currentUserStatus } = useSession();
 
   const { id } = router.query;
 
@@ -220,7 +223,9 @@ const Users = () => {
         <title>{data?.username} </title>
       </Head>
       <PageContainer
-        loading={isLoading}
+        loading={
+          isLoading || status === "loading" || currentUserStatus === "loading"
+        }
         onBack={handleBack}
         breadcrumbRender={() => (
           <Breadcrumb>
@@ -236,7 +241,16 @@ const Users = () => {
         subTitle="Detail User"
       >
         <Card>
-          <DetailInformation user={data} />
+          <Tabs defaultActiveKey="1">
+            <Tabs.TabPane tab="Informasi" key="1">
+              <DetailInformation user={data} />
+            </Tabs.TabPane>
+            {currentUser?.user?.current_role === "admin" && (
+              <Tabs.TabPane tab="Peremajaan Data" key="2">
+                <SiasnTab nip={data?.employee_number} />
+              </Tabs.TabPane>
+            )}
+          </Tabs>
         </Card>
       </PageContainer>
     </>
