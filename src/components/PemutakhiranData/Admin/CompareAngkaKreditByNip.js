@@ -1,36 +1,11 @@
-import {
-  rwAngkakreditMaster,
-  rwAngkakreditMasterByNip,
-} from "@/services/master.services";
-import {
-  getRwAngkakredit,
-  getRwAngkakreditByNip,
-  getTokenSIASNService,
-  postRwAngkakredit,
-} from "@/services/siasn-services";
+import { rwAngkakreditMasterByNip } from "@/services/master.services";
+import { getRwAngkakreditByNip } from "@/services/siasn-services";
 import { FileAddOutlined } from "@ant-design/icons";
 import { Stack } from "@mantine/core";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import {
-  Button,
-  Checkbox,
-  Col,
-  DatePicker,
-  Form,
-  Input,
-  InputNumber,
-  Modal,
-  Row,
-  Table,
-  Upload,
-  Card,
-  Typography,
-} from "antd";
-import axios from "axios";
+import { useQuery } from "@tanstack/react-query";
+import { Button, Card, Table, Typography } from "antd";
 import { useState } from "react";
-import FormRiwayatJabatan from "./FormRiwayatJabatan";
-import { API_URL } from "@/utils/client-utils";
-import AlertAngkaKredit from "./AlertAngkaKredit";
+import AlertAngkaKredit from "../AlertAngkaKredit";
 
 // const data = {
 //     bulanMulaiPenilaian: "string",
@@ -57,189 +32,6 @@ import AlertAngkaKredit from "./AlertAngkaKredit";
 //     tahunSelesaiPenilaian: "string",
 //     tanggalSk: "string"
 // };
-
-const FormAngkaKredit = ({ visible, onCancel, nip }) => {
-  const [form] = Form.useForm();
-  const [loading, setLoading] = useState(false);
-
-  const queryClient = useQueryClient();
-
-  const [fileList, setFileList] = useState([]);
-
-  const handleChange = (info) => {
-    let fileList = [...info.fileList];
-
-    fileList = fileList.slice(-1);
-
-    fileList = fileList.map((file) => {
-      if (file.response) {
-        file.url = file.response.url;
-      }
-      return file;
-    });
-
-    setFileList(fileList);
-  };
-
-  const onFinish = async () => {
-    setLoading(true);
-    try {
-      const result = await form.validateFields();
-      const { selesaiPenilaian, mulaiPenilaian, ...rest } = result;
-      const data = {
-        ...rest,
-        bulanMulaiPenailan: mulaiPenilaian.format("M"),
-        bulanSelesaiPenailan: selesaiPenilaian.format("M"),
-        tahunMulaiPenailan: mulaiPenilaian.format("YYYY"),
-        tahunSelesaiPenailan: selesaiPenilaian.format("YYYY"),
-        isAngkaKreditPertama: rest?.isAngkaKreditPertama ? "1" : "0",
-        isIntegrasi: rest?.isIntegrasi ? "1" : "0",
-        isKonversi: rest?.isKonversi ? "1" : "0",
-        tanggalSk: rest?.tanggalSk.format("DD-MM-YYYY"),
-      };
-
-      const currentFile = fileList[0]?.originFileObj;
-
-      if (currentFile) {
-        const result = await getTokenSIASNService();
-
-        const wso2 = result?.accessToken?.wso2;
-        const sso = result?.accessToken?.sso;
-
-        const formData = new FormData();
-
-        formData.append("file", currentFile);
-        formData.append("id_ref_dokumen", "879");
-        const hasil = await axios.post(`${API_URL}/upload-dok`, formData, {
-          headers: {
-            "Content-Type": "multipart/form-data",
-            Authorization: `Bearer ${wso2}`,
-            Auth: `bearer ${sso}`,
-          },
-        });
-
-        const postData = {
-          ...data,
-          path: [hasil?.data?.data],
-        };
-
-        await postRwAngkakredit({
-          data: postData,
-        });
-
-        queryClient.invalidateQueries("angka-kredit");
-        setLoading(false);
-        onCancel();
-        setFileList([]);
-      } else {
-        await postRwAngkakredit({
-          data,
-        });
-
-        queryClient.invalidateQueries("angka-kredit");
-        setLoading(false);
-        onCancel();
-        setFileList([]);
-      }
-    } catch (error) {
-      setLoading(false);
-      console.log(error);
-    }
-  };
-
-  return (
-    <Modal
-      confirmLoading={loading}
-      title="Tambah Angka Kredit"
-      centered
-      visible={visible}
-      width={800}
-      onCancel={onCancel}
-      onOk={onFinish}
-    >
-      <Form form={form} layout="vertical">
-        <Upload
-          beforeUpload={() => false}
-          maxCount={1}
-          accept=".pdf"
-          onChange={handleChange}
-          fileList={fileList}
-        >
-          <Button icon={<FileAddOutlined />}>Upload</Button>
-        </Upload>
-        <Form.Item required name="nomorSk" label="Nomor SK">
-          <Input />
-        </Form.Item>
-        <Form.Item required name="tanggalSk" label="Tanggal SK">
-          <DatePicker format={"DD-MM-YYYY"} />
-        </Form.Item>
-        <Row>
-          <Col span={12}>
-            <Form.Item required name="mulaiPenilaian" label="Mulai Penilaian">
-              <DatePicker picker="month" />
-            </Form.Item>
-          </Col>
-          <Col span={12}>
-            <Form.Item
-              required
-              name="selesaiPenilaian"
-              label="Selesai Penilaian"
-            >
-              <DatePicker picker="month" />
-            </Form.Item>
-          </Col>
-        </Row>
-        <Row>
-          <Col span={8}>
-            <Form.Item
-              required
-              name="kreditUtamaBaru"
-              label="Kredit Utama Baru"
-            >
-              <InputNumber />
-            </Form.Item>
-          </Col>
-          <Col span={8}>
-            <Form.Item
-              name="kreditPenunjangBaru"
-              label="Kredit Penunjang Baru"
-              required
-            >
-              <InputNumber />
-            </Form.Item>
-          </Col>
-          <Col span={8}>
-            <Form.Item
-              required
-              name="kreditBaruTotal"
-              label="Kredit Baru Total"
-            >
-              <InputNumber />
-            </Form.Item>
-          </Col>
-        </Row>
-        <Form.Item
-          valuePropName="checked"
-          name="isAngkaKreditPertama"
-          lable="Angka Kredit Pertama"
-        >
-          <Checkbox>Angka Kredit Pertama?</Checkbox>
-        </Form.Item>
-        <Form.Item
-          valuePropName="checked"
-          name="isIntegrasi"
-          lable="Integrasi?"
-        >
-          <Checkbox>Integrasi</Checkbox>
-        </Form.Item>
-        <Form.Item valuePropName="checked" name="isKonversi" lable="Konversi?">
-          <Checkbox>Konversi</Checkbox>
-        </Form.Item>
-        <FormRiwayatJabatan nip={nip} name="rwJabatanId" />
-      </Form>
-    </Modal>
-  );
-};
 
 function CompareAngkaKreditByNip({ nip }) {
   const { data, isLoading } = useQuery(["angka-kredit", nip], () =>
@@ -344,7 +136,6 @@ function CompareAngkaKreditByNip({ nip }) {
   return (
     <Card loading={isLoading || isLoadingAngkaKredit}>
       <Stack>
-        <FormAngkaKredit visible={visible} onCancel={handleCancel} />
         <AlertAngkaKredit />
         <Table
           title={() => (
