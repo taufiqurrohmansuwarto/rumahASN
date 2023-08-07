@@ -65,6 +65,10 @@ export const getRwSkp22 = () => {
   return api.get("/pns/rw-skp22").then((res) => res.data);
 };
 
+export const postRwSkp22 = (data) => {
+  return api.post("/pns/rw-skp22", data).then((res) => res.data);
+};
+
 export const getRwSkp22ByNip = (nip) => {
   return api.get(`/admin/${nip}/rw-skp22`).then((res) => res.data);
 };
