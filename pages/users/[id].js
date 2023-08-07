@@ -245,12 +245,13 @@ const Users = () => {
             <Tabs.TabPane tab="Informasi" key="1">
               <DetailInformation user={data} />
             </Tabs.TabPane>
-            {currentUser?.user?.current_role &&
-              data?.employee_number === "admin" && (
+            <>
+              {currentUser?.user?.current_role && data?.group === "MASTER" && (
                 <Tabs.TabPane tab="Peremajaan Data" key="2">
                   <SiasnTab nip={data?.employee_number} />
                 </Tabs.TabPane>
               )}
+            </>
           </Tabs>
         </Card>
       </PageContainer>
