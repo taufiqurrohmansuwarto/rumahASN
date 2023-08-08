@@ -7,6 +7,7 @@ import SelamatDatang from "@/components/SelamatDatang";
 import ShowRatings from "@/components/ShowRatings";
 import PinnedTickets from "@/components/Ticket/PinnedTickets";
 import TicketsPublish from "@/components/Ticket/TicketsPublish";
+import TutorialPeremajaanDataSIASN from "@/components/TutorialPeremajaanDataSIASN";
 import PublikasiCASN from "@/components/Web/PublikasiCASN";
 import { Grid, Stack } from "@mantine/core";
 import { Card } from "antd";
@@ -49,6 +50,7 @@ function Feeds() {
           <Card>
             <Stack>
               {/* <Announcement /> */}
+              <TutorialPeremajaanDataSIASN />
               <SelamatDatang />
               <PodcastAnnouncement
                 image="https://siasn.bkd.jatimprov.go.id:9000/public/hijau-podcast.jpg"

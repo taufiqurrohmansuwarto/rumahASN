@@ -6,13 +6,38 @@ import { useDebouncedValue } from "@mantine/hooks";
 import { MarkdownEditor } from "@primer/react/drafts";
 import { IconAlertCircle } from "@tabler/icons";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { Breadcrumb, Button, Input, List, Typography, message } from "antd";
+import {
+  Breadcrumb,
+  Button,
+  Input,
+  List,
+  Modal,
+  Typography,
+  message,
+} from "antd";
 import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { useState } from "react";
 import { createTickets } from "../../services/users.services";
 import PageContainer from "../../src/components/PageContainer";
+import { useSession } from "next-auth/react";
+import { useEffect } from "react";
+
+// peremajaan data
+const TextPeremajaanData = () => {
+  return (
+    <>
+      <Typography.Text>
+        Sebelum membuat pertanyaan tentang peremajaan Data SIASN, pastikan anda
+        membaca terlebih dahulu membaca tutorial yang telah kami buat{" "}
+        <Link href={"/layanan/pemutakhiran-data-siasn"}>
+          <a>Tutorial Layanan Peremajaan Data SIASN</a>
+        </Link>{" "}
+      </Typography.Text>
+    </>
+  );
+};
 
 const Faqs = ({ data }) => {
   return (
@@ -57,10 +82,18 @@ const Faqs = ({ data }) => {
 
 const CreateTicket = () => {
   const router = useRouter();
+  const { data, status } = useSession();
+
   const [title, setTitle] = useState(null);
   const [content, setContent] = useState();
 
+  const [modal] = Modal.useModal();
+
   const [debounceValue] = useDebouncedValue(title, 500);
+
+  useEffect(() => {
+    // clear instance
+  }, [data, status, modal]);
 
   const { data: recommendationsFaqs, isLoading: loadingRecommendationFaq } =
     useQuery(
@@ -124,6 +157,14 @@ const CreateTicket = () => {
       <Grid>
         <Grid.Col md={8} xs={12}>
           <Alert
+            color="red"
+            mb={8}
+            title="Peremajan Data"
+            icon={<IconAlertCircle />}
+          >
+            <TextPeremajaanData />
+          </Alert>
+          {/* <Alert
             icon={<IconAlertCircle />}
             color="yellow"
             title="Perhatian"
@@ -134,7 +175,7 @@ const CreateTicket = () => {
               yang baik. Jangan lupa sertakan gambar atau link file sebagai
               bukti jika diperlukan. Terima kasih.
             </Text>
-          </Alert>
+          </Alert> */}
           <Stack>
             <Input
               value={title}
