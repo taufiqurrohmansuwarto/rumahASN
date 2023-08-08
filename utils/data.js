@@ -1,5 +1,47 @@
 const servicesData = [
   {
+    name: "Pemutakhiran Data SIASN",
+    slug: "pemutakhiran-data-siasn",
+    content: `# Peremajaan Data SIASN Menggunakan Rumah SIASN
+
+**Kenapa ?**
+Pemutakhiran Data Mandiri melalui MySAPK sekarang masih ditutup dan layanan kepegawaian SIASN membutuhkan data yang akurat dan terkini. Data yang akurat tadi, digunakan untuk kenaikan pangkat dan pensiun, sehingga ASN Pemerintah Provinsi Jawa Timur wajib mengecek data SIASN nya. BKD Provinsi Jawa Timur mencoba memberikan fasilitas secara mandiri bagi ASN yang data SIASN nya belum update melalui menu peremajaan data di Rumah ASN.
+
+## Note :
+
+**Jangan gunakan data yang ada pada aplikasi SIMASTER di menu SAPK BKN**, karena SAPK sekarang sudah takedown gunakan menu di peremajaan data di Rumah ASN sebagai pembanding data SIASN dan SIMASTER.
+![enter image description here](https://siasn.bkd.jatimprov.go.id:9000/public/sapk-salah.png)
+
+
+
+
+##  Lantas Data Apa saja yang perlu di mutakhirkan / diperbarui?
+
+Jawab :  
+1. Pertama, cek dulu attribut yang sangat penting di menu Data Utama di peremajaan data. Usahakan Nama, NIP dan tanggal Lahir **harus sesuai berdasarkan data pribadimu di Aplikasi SIMASTER**.
+![enter image description here](https://siasn.bkd.jatimprov.go.id:9000/public/peremajaan-1.png)
+2. Data yang diremajakan adalah **Jabatan Terakhir, PAK Terakhir, dan SKP 2022 (bagi yang belum terentri)**
+
+
+##  Gelar saya tidak sama terus bagaimana?
+
+Jawab : Untuk perbedaan gelar di Data Utama seperti kasus ini di SIASN **S.Kom** dengan **S.Kom.** di SIMASTER (perbedaan ada titik). **Tidak perlu** mengajukan perbaikan. 
+Data **yang harus diperbaiki** adalah data yang benar-benar berbeda contoh Gelar Belakang  di **SIASN S.Pd** sedangkan gelar di **SIMASTER adalah S.Pd.,Msi**. Cara untuk menambahkan gelar bisa melihat di beranda di menu daftar **layanan kepegawaian -> penyesuaian gelar** . 
+
+## Pada Peremajaan Data Jabatan apa yang harus saya lakukan?
+
+Jawab : Anda hanya perlu mengupdate jabatan yang terakhir dengan Unit Organisasi yang sesuai. **Apabila data pada SIASN sudah jabatan terakhir dan sesuai TIDAK PERLU dilakukan update**, sedangkan untuk jabatan yang tidak sesuai di SIASN dapat melakukan tambah dengan mengklik tombol Tambah.
+
+##  Saya tidak dapat menghapus/mengedit data di menu peremajaan data!
+
+Jawab : Ya. a**nda tidak bisa menghapus/mengedit datanya**. **Anda hanya dapat menambah data**. Apabila ada kekeliruan pengentrian data, **tambahkan data yang paling benar**, kemudian request untuk hapus data yang salah  dengan cara bertanya di BKD.
+
+**Jika ada pertanyaan lain, silahkan membuat tiket baru di BKD.**
+
+
+`,
+  },
+  {
     name: "Mutasi Pegawai",
     slug: "mutasi-pegawai",
     content: `
