@@ -7,6 +7,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Alert, Card, Col, Form, Input, Row, Skeleton, Typography } from "antd";
 import { useEffect } from "react";
 import CheckHasil from "./CheckHasil";
+import { IconAlertCircle, IconCircleCheck } from "@tabler/icons";
 
 const dataMaster = (data) => {
   return {
@@ -165,16 +166,6 @@ function CompareDataUtama() {
               { xs: 8, sm: 16, md: 24, lg: 32 },
             ]}
           >
-            {/* <Col md={12} xs={24}>
-              <Card loading={isLoading} title="Data Utama SIASN">
-                <FormDataUtamSiasn data={data} />
-              </Card>
-            </Col>
-            <Col md={12} xs={24}>
-              <Card loading={isLoadingDataSimaster} title="Data Utama SIMASTER">
-                <FormDataSimaster data={dataSimaster} />
-              </Card>
-            </Col> */}
             <Col md={18}>
               <Card>
                 <Table>
@@ -251,7 +242,7 @@ function CompareDataUtama() {
                           data?.gelarDepan,
                           dataSimaster?.gelar_depan
                         ) ? (
-                          <CheckOutlined />
+                          <IconCircleCheck />
                         ) : (
                           <CloseOutlined />
                         )}
@@ -270,7 +261,7 @@ function CompareDataUtama() {
                           data?.gelarBelakang,
                           dataSimaster?.gelar_belakang
                         ) ? (
-                          <CheckOutlined />
+                          <IconCircleCheck />
                         ) : (
                           <CloseOutlined />
                         )}
@@ -288,6 +279,54 @@ function CompareDataUtama() {
                         <CheckHasil
                           firstData={data?.email}
                           secondData={dataSimaster?.email}
+                        />
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>Jabatan</td>
+                      <td>{data?.jabatanNama}</td>
+                      <td>{dataSimaster?.jabatan?.jabatan}</td>
+                      <td
+                        style={{
+                          textAlign: "center",
+                        }}
+                      >
+                        <IconAlertCircle
+                          style={{
+                            color: "orange",
+                          }}
+                        />
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>Pendidikan Terakhir</td>
+                      <td>{data?.pendidikanTerakhirNama}</td>
+                      <td>{`${dataSimaster?.pendidikan?.jenjang} ${dataSimaster?.pendidikan?.prodi}`}</td>
+                      <td
+                        style={{
+                          textAlign: "center",
+                        }}
+                      >
+                        <IconAlertCircle
+                          style={{
+                            color: "orange",
+                          }}
+                        />
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>Pangkat</td>
+                      <td>{`${data?.golRuangAkhir}-${data?.pangkatAkhir}`}</td>
+                      <td>{`${dataSimaster?.pangkat?.golongan}-${dataSimaster?.pangkat?.pangkat}`}</td>
+                      <td
+                        style={{
+                          textAlign: "center",
+                        }}
+                      >
+                        <IconAlertCircle
+                          style={{
+                            color: "orange",
+                          }}
                         />
                       </td>
                     </tr>

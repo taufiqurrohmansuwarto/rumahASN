@@ -360,7 +360,7 @@ export const API_URL = "https://apimws.bkn.go.id:8243/apisiasn/1.0";
 
 // buat fungsi pembanding teks
 export const compareText = (text1, text2) => {
-  return text1.toLowerCase() === text2.toLowerCase();
+  return text1?.trim()?.toLowerCase() === text2.trim()?.toLowerCase();
 };
 
 const normalisasiGelar = (gelar) => {
