@@ -1,7 +1,7 @@
-1. buat kolom untuk menghandle jabatan dan perangkat daerah di users dengan nama kolom user_properties dengan jsonb benarkan di sso nya
-2. selesaikan pengumuman
-3. selesaikan voting
-4. selesaikan fitur podcast
-5. selesaikan chart
-6. selesaikan fitur zoom
-7. selesaikan fitur jalur pribadi
+1. create discussions
+2. create discussions_categories
+3. create discussions_comments
+4. create discussions_reactions
+5. create discussions_votes
+
+
