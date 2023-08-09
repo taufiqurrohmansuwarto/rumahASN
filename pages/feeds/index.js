@@ -2,6 +2,7 @@ import Announcement from "@/components/Announcement";
 import DaftarLayanan from "@/components/LayananKepegawaian/DaftarLayanan";
 import Layout from "@/components/Layout";
 import PageContainer from "@/components/PageContainer";
+import AlertPemutakhiranData from "@/components/PemutakhiranData/AlertPemutakhiranData";
 import PodcastAnnouncement from "@/components/PodcatsAnnouncement";
 import SelamatDatang from "@/components/SelamatDatang";
 import ShowRatings from "@/components/ShowRatings";
@@ -49,7 +50,7 @@ function Feeds() {
         <Grid.Col md={8} sm={12}>
           <Card>
             <Stack>
-              {/* <Announcement /> */}
+              <AlertPemutakhiranData />
               <TutorialPeremajaanDataSIASN />
               <SelamatDatang />
               <PodcastAnnouncement
