@@ -1,12 +1,12 @@
 import { dataUtamaMasterByNip } from "@/services/master.services";
 import { dataUtamSIASNByNip } from "@/services/siasn-services";
 import { komparasiGelar } from "@/utils/client-utils";
-import { CheckOutlined, CloseOutlined } from "@ant-design/icons";
+import { CloseOutlined } from "@ant-design/icons";
 import { Stack, Table } from "@mantine/core";
+import { IconAlertCircle, IconCircleCheck } from "@tabler/icons";
 import { useQuery } from "@tanstack/react-query";
 import { Alert, Card, Col, Row, Skeleton, Typography } from "antd";
 import CheckHasil from "../CheckHasil";
-import { IconAlertCircle, IconCircleCheck } from "@tabler/icons";
 
 const Pemberitahuan = () => {
   return (

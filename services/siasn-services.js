@@ -37,6 +37,10 @@ export const postRwJabatan = (data) => {
   return api.post("/pns/rw-jabatan", data).then((res) => res.data);
 };
 
+export const postRwJabatanByNip = ({ nip, data }) => {
+  return api.post(`/admin/${nip}/rw-jabatan`, data).then((res) => res.data);
+};
+
 // angkakredit
 export const getRwAngkakredit = () => {
   return api.get("/pns/rw-angkakredit").then((res) => res.data);
@@ -48,6 +52,10 @@ export const getRwAngkakreditByNip = (nip) => {
 
 export const postRwAngkakredit = (data) => {
   return api.post("/pns/rw-angkakredit", data).then((res) => res.data);
+};
+
+export const postRwAngkakreditByNip = ({ nip, data }) => {
+  return api.post(`/admin/${nip}/rw-angkakredit`, data).then((res) => res.data);
 };
 
 // hukdis
@@ -71,6 +79,10 @@ export const postRwSkp22 = (data) => {
 
 export const getRwSkp22ByNip = (nip) => {
   return api.get(`/admin/${nip}/rw-skp22`).then((res) => res.data);
+};
+
+export const postRwSkp22ByNip = ({ nip, data }) => {
+  return api.post(`/admin/${nip}/rw-skp22`, data).then((res) => res.data);
 };
 
 export const getTokenSIASNService = () => {
