@@ -409,7 +409,7 @@ const postRiwayatJabatanByNip = async (req, res) => {
   try {
     const { siasnRequest: request } = req;
     const { nip } = req?.query;
-    const body = req?.body?.data;
+    const body = req?.body;
 
     // cekId
     const dataUtama = await request.get(`/pns/data-utama/${nip}`);
