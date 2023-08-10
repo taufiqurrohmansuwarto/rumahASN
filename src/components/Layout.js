@@ -6,7 +6,6 @@ import {
   FileOutlined,
   HomeOutlined,
   LogoutOutlined,
-  ReadOutlined,
   ReconciliationOutlined,
   SettingOutlined,
   UserOutlined,
@@ -49,30 +48,30 @@ const changeRoutes = (user) => {
           path: "/beranda-bkd",
           name: "Beranda BKD",
           icon: <HomeOutlined />,
-        },
-        {
-          path: "/documents",
-          name: "Dokumen TTE",
-          icon: <FileOutlined />,
-          routes: [
-            {
-              path: "/documents/all",
-              name: "Semua Dokumen",
-            },
-            {
-              path: "/documents/waiting",
-              name: "Dokumen Menunggu TTE",
-            },
-            {
-              path: "/documents/signed",
-              name: "Dokumen Sudah TTE",
-            },
-            {
-              path: "/documents/rejected",
-              name: "Dokumen Ditolak",
-            },
-          ],
         }
+        // {
+        //   path: "/documents",
+        //   name: "Dokumen TTE",
+        //   icon: <FileOutlined />,
+        //   routes: [
+        //     {
+        //       path: "/documents/all",
+        //       name: "Semua Dokumen",
+        //     },
+        //     {
+        //       path: "/documents/waiting",
+        //       name: "Dokumen Menunggu TTE",
+        //     },
+        //     {
+        //       path: "/documents/signed",
+        //       name: "Dokumen Sudah TTE",
+        //     },
+        //     {
+        //       path: "/documents/rejected",
+        //       name: "Dokumen Ditolak",
+        //     },
+        //   ],
+        // }
       );
     }
 
