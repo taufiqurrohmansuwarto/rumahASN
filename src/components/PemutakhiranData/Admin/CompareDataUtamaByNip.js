@@ -213,6 +213,22 @@ function CompareDataUtamaByNip({ nip }) {
                         />
                       </td>
                     </tr>
+                    <tr>
+                      <td>NIK</td>
+                      <td>{data?.nik}</td>
+                      <td>{dataSimaster?.nik}</td>
+                      <td
+                        style={{
+                          textAlign: "center",
+                        }}
+                      >
+                        <IconAlertCircle
+                          style={{
+                            color: "orange",
+                          }}
+                        />
+                      </td>
+                    </tr>
                   </tbody>
                 </Table>
               </Card>
