@@ -146,6 +146,46 @@ const postSkp2022 = async (req, res) => {
   }
 };
 
+const postSkp2022ByNip = async (req, res) => {
+  try {
+    const { siasnRequest } = req;
+    const { penilain, ...body } = req?.body?.data;
+    const { nip } = req?.query;
+
+    const dataCurrent = await siasnRequest.get(`/pns/data-utama/${nip}`);
+    const dataPenilai = await siasnRequest.get(
+      `/pns/data-utama/${body?.penilai}`
+    );
+
+    const penilai = dataPenilai?.data?.data;
+    const currentPns = dataCurrent?.data?.data;
+
+    const data = {
+      ...body,
+      hasilKinerjaNilai: parseInt(body?.hasilKinerjaNilai),
+      perilakuKerjaNilai: parseInt(body?.perilakuKerjaNilai),
+      kuadranKinerjaNilai: getKuadran(
+        parseInt(body?.hasilKinerjaNilai),
+        parseInt(body?.perilakuKerjaNilai)
+      ),
+      penilaiGolongan: penilai?.golRuangAkhirId,
+      penilaiJabatan: penilai?.jabatanNama,
+      penilaiNama: penilai?.nama,
+      penilaiNipNrp: penilai?.nipBaru,
+      penilaiUnorNama: penilai?.unorNama,
+      pnsDinilaiOrang: currentPns?.id,
+      statusPenilai: "ASN",
+      tahun: 2022,
+    };
+
+    const result = await siasnRequest.post("/skp22/save", data);
+    res.json({ code: 200 });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "error" });
+  }
+};
+
 const detailSkp2022 = async (req, res) => {
   try {
     const { siasnRequest: request } = req;
@@ -186,6 +226,33 @@ const postAngkaKredit = async (req, res) => {
   try {
     const { siasnRequest: request } = req;
     const { employee_number: nip } = req?.user;
+    const body = req?.body?.data;
+
+    const currentPns = await request.get(`/pns/data-utama/${nip}`);
+
+    const data = {
+      ...body,
+      pnsId: currentPns?.data?.data?.id,
+      kreditUtamaBaru: body?.kreditUtamaBaru?.toString(),
+      kreditPenunjangBaru: body?.kreditPenunjangBaru?.toString(),
+      kreditBaruTotal: body?.kreditBaruTotal?.toString(),
+    };
+
+    await request.post(`/angkakredit/save`, data);
+
+    res.json({
+      code: 200,
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "error" });
+  }
+};
+
+const postAngkaKreditByNip = async (req, res) => {
+  try {
+    const { siasnRequest: request } = req;
+    const { nip } = req?.query;
     const body = req?.body?.data;
 
     const currentPns = await request.get(`/pns/data-utama/${nip}`);
@@ -338,6 +405,29 @@ const postRiwayatJabatan = async (req, res) => {
   }
 };
 
+const postRiwayatJabatanByNip = async (req, res) => {
+  try {
+    const { siasnRequest: request } = req;
+    const { nip } = req?.query;
+    const body = req?.body?.data;
+
+    // cekId
+    const dataUtama = await request.get(`/pns/data-utama/${nip}`);
+    const id = dataUtama?.data?.data?.id;
+    const data = {
+      ...body,
+      pnsId: id,
+    };
+
+    await request.post(`/jabatan/save`, data);
+
+    res.json({ success: true });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "error" });
+  }
+};
+
 const getRefJfu = async (req, res) => {
   try {
     const { jabatan } = req?.query;
@@ -426,4 +516,7 @@ module.exports = {
   getSkp2022ByNip,
   getJabatanByNip,
   getAngkaKreditByNip,
+  postAngkaKreditByNip,
+  postRiwayatJabatanByNip,
+  postSkp2022ByNip,
 };
