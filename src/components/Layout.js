@@ -168,15 +168,22 @@ const changeRoutes = (user) => {
           name: "Manajemen Aplikasi",
           icon: <ApartmentOutlined />,
           routes: [
+            {
+              path: "/apps-managements/integrasi",
+              name: "Integrasi Aplikasi",
+              routes: [
+                { path: "/apps-managements/integrasi/siasn", name: "SIASN" },
+              ],
+            },
             { path: "/apps-managements/users", name: "Pengguna" },
             { path: "/apps-managements/webinars", name: "Webinar" },
             { path: "/apps-managements/podcasts", name: "Podcast" },
             { path: "/apps-managements/announcements", name: "Pengumuman" },
             { path: "/apps-managements/votes", name: "Voting" },
-            {
-              path: "/apps-managements/executives-signatures",
-              name: "Set Pejabat TTE",
-            },
+            // {
+            //   path: "/apps-managements/executives-signatures",
+            //   name: "Set Pejabat TTE",
+            // },
           ],
         }
       );
