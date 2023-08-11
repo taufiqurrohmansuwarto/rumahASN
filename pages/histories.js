@@ -6,6 +6,7 @@ import { List, Typography, Button, Card } from "antd";
 import Head from "next/head";
 import Link from "next/link";
 import { usersHistories } from "../services";
+import { useRouter } from "next/router";
 
 const fetchItems = async ({ pageParam = 1, queryKey }) => {
   const [_, limit] = queryKey;
@@ -65,6 +66,8 @@ const HistoriesData = ({ data, loading, hasNextPage, fetchNextPage }) => {
 };
 
 function Histories() {
+  const router = useRouter();
+
   const { data, fetchNextPage, hasNextPage, isLoading } = useInfiniteQuery(
     ["user-histories", 10],
     fetchItems,
@@ -76,12 +79,18 @@ function Histories() {
     }
   );
 
+  const handleBack = () => router?.back();
+
   return (
     <>
       <Head>
         <title>Rumah ASN - Riwayat</title>
       </Head>
-      <PageContainer title="Riwayat Anda" loading={isLoading}>
+      <PageContainer
+        onBack={handleBack}
+        title="Riwayat Anda"
+        loading={isLoading}
+      >
         <Card>
           <HistoriesData
             data={data?.pages?.flatMap((page) => page?.result)}
