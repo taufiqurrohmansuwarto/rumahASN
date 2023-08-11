@@ -4,6 +4,7 @@ import {
   BarChartOutlined,
   BookOutlined,
   FileOutlined,
+  HistoryOutlined,
   HomeOutlined,
   LogoutOutlined,
   ReconciliationOutlined,
@@ -268,8 +269,16 @@ function Layout({ children, active, collapsed = false }) {
                   if (e.key === "profile") {
                     router.push("/settings/profile");
                   }
+                  if (e.key === "riwayat") {
+                    router.push("/histories");
+                  }
                 },
                 items: [
+                  {
+                    key: "riwayat",
+                    icon: <HistoryOutlined />,
+                    label: "Riwayat",
+                  },
                   {
                     key: "setting",
                     icon: <SettingOutlined />,

@@ -634,3 +634,9 @@ export const layananKepegawaian = () => {
 export const slugLayananKepegawaian = (slug) => {
   return api.get(`/layanan/kepegawaian/${slug}`).then((res) => res?.data);
 };
+
+export const usersHistories = ({ page = 0, limit = 10 }) => {
+  return api
+    .get(`/users-histories?page=${page}&limit=${limit}`)
+    .then((res) => res?.data);
+};

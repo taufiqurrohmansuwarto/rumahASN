@@ -21,6 +21,7 @@ const {
 const { uniqBy } = require("lodash");
 const { sendReminder } = require("./mailer.controller");
 const { ticketRecomendationById } = require("@/utils/query-utils");
+const { createHistory } = require("@/utils/utility");
 
 const publishedTickets = async (req, res) => {
   try {
@@ -322,12 +323,11 @@ const reactions = async (req, res) => {
         ticket_id: id,
         reaction,
       });
-
       await commentReactionNotification({
         commentId: id,
         currentUserId: user_id,
       });
-
+      await createHistory(user_id, "reaction", "discussion", id);
       res.status(200).json({ message: "Reactions added successfully." });
     }
   } catch (error) {
@@ -528,6 +528,7 @@ const createComments = async (req, res) => {
           .patch({ updated_at: new Date() })
           .where({ id: ticket_id });
 
+        await createHistory(user_id, "comment", "discussion", ticket_id);
         res.json({ message: "Comment added successfully." });
       } else {
         res.status(403).json({ message: "You are not allowed to comment." });
@@ -549,6 +550,8 @@ const createComments = async (req, res) => {
         content: `mengomentari tiket dengan judul "${currentTicket.title}"`,
         title: "Tiket dikomentari",
       });
+
+      await createHistory(user_id, "comment", "discussion", ticket_id);
       res.json({ message: "Comment added successfully." });
     }
   } catch (error) {
