@@ -26,7 +26,7 @@ const LinkTicket = ({ item }) => {
         <>
           {" "}
           <Typography.Text>pada pertanyaan dengan judul</Typography.Text>{" "}
-          <Link href={`/customers-tickets/${item?.id}`}>
+          <Link href={`/customers-tickets/${item?.ticket?.id}`}>
             <a>{item?.ticket?.title}</a>
           </Link>
         </>
