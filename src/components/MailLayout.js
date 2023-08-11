@@ -4,7 +4,7 @@ import { useRouter } from "next/router";
 
 const { Content, Sider } = Layout;
 
-function MailLayout({ children, active = "all" }) {
+function MailLayout({ children, active = "inbox" }) {
   const router = useRouter();
 
   const changePage = (key) => {
@@ -20,14 +20,8 @@ function MailLayout({ children, active = "all" }) {
           }}
           onClick={({ key }) => changePage(key)}
           mode="inline"
-          defaultSelectedKeys={["all"]}
           activeKey={active}
           items={[
-            {
-              key: "all",
-              icon: <MailOutlined />,
-              label: "Semua Pesan",
-            },
             {
               key: "inbox",
               icon: <InboxOutlined />,

@@ -11,7 +11,7 @@ import {
   SettingOutlined,
   UserOutlined,
 } from "@ant-design/icons";
-import { Dropdown } from "antd";
+import { Dropdown, Space } from "antd";
 import { uniqBy } from "lodash";
 import { signOut, useSession } from "next-auth/react";
 import dynamic from "next/dynamic";

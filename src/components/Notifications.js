@@ -19,13 +19,15 @@ function Notifications() {
   };
 
   return (
-    <Badge
-      onClick={changePageNotification}
-      count={isLoading ? null : data?.count}
-      size="small"
-    >
-      <BellOutlined />
-    </Badge>
+    <div>
+      <Badge
+        onClick={changePageNotification}
+        count={isLoading ? null : data?.count}
+        size="small"
+      >
+        <BellOutlined />
+      </Badge>
+    </div>
   );
 }
 
