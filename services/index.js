@@ -640,3 +640,7 @@ export const usersHistories = ({ page = 0, limit = 10 }) => {
     .get(`/users-histories?page=${page}&limit=${limit}`)
     .then((res) => res?.data);
 };
+
+export const searchUser = (name) => {
+  return api.get(`/users/search/${name}`).then((res) => res?.data);
+};

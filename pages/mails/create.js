@@ -4,12 +4,25 @@ import PageContainer from "@/components/PageContainer";
 import { sendPrivateMessage } from "@/services/index";
 import { Stack } from "@mantine/core";
 import { useDebouncedValue } from "@mantine/hooks";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Card, Col, Input, Row, Select } from "antd";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  Avatar,
+  Card,
+  Space,
+  Col,
+  Input,
+  Row,
+  Select,
+  Spin,
+  Typography,
+  Button,
+  message,
+} from "antd";
 import Head from "next/head";
 import { useRouter } from "next/router";
 import { useState } from "react";
 import { MarkdownEditor } from "@primer/react/drafts";
+import { searchUser } from "@/services/index";
 
 const CreatePrivateMessage = () => {
   const router = useRouter();
@@ -19,6 +32,18 @@ const CreatePrivateMessage = () => {
   const [title, setTitle] = useState(null);
   const [search, setSearch] = useState(null);
   const [debounceSearch] = useDebouncedValue(search, 500);
+
+  // user
+  const [user, setUser] = useState(undefined);
+  const [debounceValue] = useDebouncedValue(user, 500);
+
+  const { data: dataUser, isLoading: isLoadingUser } = useQuery(
+    ["data-user", debounceValue],
+    () => searchUser(debounceValue),
+    {
+      enabled: Boolean(debounceValue),
+    }
+  );
 
   const handleBack = () => router.back();
 
@@ -33,8 +58,16 @@ const CreatePrivateMessage = () => {
   );
 
   const handleFinish = async () => {
-    const result = await form.validateFields();
-    console.log(result);
+    if (!title || !content || !user) {
+      message.error("Harap isi semua field");
+    } else {
+      const data = {
+        title,
+        message: content,
+        receiverId: user,
+      };
+      send(data);
+    }
   };
 
   return (
@@ -51,30 +84,80 @@ const CreatePrivateMessage = () => {
           <Col md={18} xs={24}>
             <Card>
               <Stack>
-                <Input
-                  value={title}
-                  onChange={(e) => setTitle(e?.target?.value)}
-                  placeholder="Judul"
-                />
-                <MarkdownEditor
-                  value={content}
-                  acceptedFileTypes={[
-                    "image/*",
-                    // word, excel, txt, pdf
-                    ".doc",
-                    ".docx",
-                    ".xls",
-                    ".xlsx",
-                    ".txt",
-                    ".pdf",
-                  ]}
-                  onChange={setContent}
-                  placeholder="Isi Pesan"
-                  onRenderPreview={renderMarkdown}
-                  onUploadFile={uploadFile}
-                  mentionSuggestions={null}
-                />
+                <Stack spacing="sm">
+                  <Typography.Text>Kepada :</Typography.Text>
+                  <Select
+                    style={{
+                      width: "100%",
+                    }}
+                    showSearch
+                    filterOption={false}
+                    placeholder="Ketik nama atau NIP"
+                    loading={isLoadingUser}
+                    notFoundContent={
+                      isLoadingUser && debounceValue ? (
+                        <Spin size="small" />
+                      ) : null
+                    }
+                    onSearch={(value) => setUser(value)}
+                    value={user}
+                    onChange={(value) => setUser(value)}
+                  >
+                    {dataUser?.map((item) => (
+                      <Select.Option
+                        key={item?.custom_id}
+                        value={item?.custom_id}
+                      >
+                        <Space>
+                          <Avatar size="small" src={item?.image} />
+                          <Typography.Text>{item?.username}</Typography.Text>
+                        </Space>
+                      </Select.Option>
+                    ))}
+                  </Select>
+                </Stack>
+                <Stack spacing="xs">
+                  <Typography.Text>Judul :</Typography.Text>
+                  <Input
+                    value={title}
+                    onChange={(e) => setTitle(e?.target?.value)}
+                    placeholder="Judul"
+                  />
+                </Stack>
+
+                <Stack spacing="xs">
+                  <Typography.Text>Isi Pesan :</Typography.Text>
+                  <MarkdownEditor
+                    value={content}
+                    acceptedFileTypes={[
+                      "image/*",
+                      // word, excel, txt, pdf
+                      ".doc",
+                      ".docx",
+                      ".xls",
+                      ".xlsx",
+                      ".txt",
+                      ".pdf",
+                    ]}
+                    onChange={setContent}
+                    placeholder="Isi Pesan"
+                    onRenderPreview={renderMarkdown}
+                    onUploadFile={uploadFile}
+                    mentionSuggestions={null}
+                  />
+                </Stack>
               </Stack>
+              <Button
+                style={{
+                  marginTop: 16,
+                }}
+                type="primary"
+                onClick={handleFinish}
+                disabled={isLoading}
+                loading={isLoading}
+              >
+                Kirim
+              </Button>
             </Card>
           </Col>
         </Row>
@@ -84,7 +167,7 @@ const CreatePrivateMessage = () => {
 };
 
 CreatePrivateMessage.getLayout = function getLayout(page) {
-  return <Layout active="/mails">{page}</Layout>;
+  return <Layout>{page}</Layout>;
 };
 
 CreatePrivateMessage.Auth = {
