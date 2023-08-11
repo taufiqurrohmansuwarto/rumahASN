@@ -15,8 +15,6 @@ const fetchItems = async ({ pageParam = 1, queryKey }) => {
     limit: limit,
   });
 
-  console.log(pageParam);
-
   return response;
 };
 
@@ -58,6 +56,7 @@ const HistoriesData = ({ data, loading, hasNextPage, fetchNextPage }) => {
             </Button>
           )
         }
+        rowKey={(row) => row?.id}
         loading={loading}
         dataSource={data}
       />

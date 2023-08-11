@@ -1,5 +1,28 @@
 const Tickets = require("../models/tickets.model");
-const Notification = require("../models/notifications.model");
+
+module.exports.userTicket = async (req, res) => {
+  try {
+    const { id: userId } = req?.query;
+    const limit = parseInt(req.query.limit) || 10;
+    const page = parseInt(req.query.page) || 1;
+
+    const currentTicket = await Tickets.query()
+      .andWhere("user_id", userId)
+      .page(page - 1, limit)
+      .orderBy("id", "desc");
+
+    const data = {
+      page,
+      limit,
+      result: currentTicket.results,
+    };
+
+    res.json(data);
+  } catch (error) {
+    console.log(error);
+    req.status(500).json({ message: error.message });
+  }
+};
 
 module.exports.index = async (req, res) => {
   const { current_role } = req?.user;
