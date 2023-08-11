@@ -10,7 +10,7 @@ import { useRouter } from "next/router";
 const Mail = () => {
   const router = useRouter();
   const { data, isLoading } = useQuery(["private-messages"], () =>
-    getPrivateMessages()
+    getPrivateMessages({})
   );
 
   const gotoCreate = () => router.push("/mails/create");

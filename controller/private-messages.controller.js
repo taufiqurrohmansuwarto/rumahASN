@@ -5,20 +5,44 @@ module.exports.findPrivateMessages = async (req, res) => {
     const { customId: userId } = req?.user;
     const limit = parseInt(req?.query?.limit) || 10;
     const page = parseInt(req?.query?.page) || 1;
+    const type = req?.query?.type || "inbox";
 
-    const result = await PrivateMessage.query()
-      .where("receiver_id", userId)
-      .orderBy("created_at", "desc")
-      .page(page - 1, limit);
+    if (type === "total_unread") {
+      const result = await PrivateMessage.query()
+        .where("receiver_id", userId)
+        .andWhere("is_read", false)
+        .count("id as total");
+      res.json({ total: result[0].total });
+    } else {
+      const result = await PrivateMessage.query()
+        .where("receiver_id", userId)
+        .andWhere((builder) => {
+          if (type === "inbox") builder.where("receiver_id", userId);
+          if (type === "sent") builder.where("sender_id", userId);
+        })
+        .withGraphFetched("[sender(simpleSelect), receiver(simpleSelect)]")
+        .orderBy("created_at", "desc")
+        .page(page - 1, limit);
 
-    const data = {
-      data: result.results,
-      limit,
-      page,
-      total: result.total,
-    };
+      const nextPage = await PrivateMessage.query()
+        .where("receiver_id", userId)
+        .andWhere((builder) => {
+          if (type === "inbox") builder.where("receiver_id", userId);
+          if (type === "sent") builder.where("sender_id", userId);
+        })
+        .offset(page * limit)
+        .limit(limit + 1);
 
-    res.json(data);
+      const data = {
+        data: result.results,
+        limit,
+        page,
+        total: result.total,
+        hasNextPage: nextPage.length > 0,
+      };
+
+      res.json(data);
+    }
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: error.message });
