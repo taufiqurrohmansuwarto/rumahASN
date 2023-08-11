@@ -371,3 +371,15 @@ export const komparasiGelar = (gelar1, gelar2) => {
   const result = normalisasiGelar(gelar1) === normalisasiGelar(gelar2);
   return result;
 };
+
+export const jenisRiwayat = (action) => {
+  let result = "";
+
+  if (action === "login") {
+    result = "Anda masuk pada aplikasi";
+  }
+  if (action === "comment") {
+    result = "Anda berkomentar";
+  }
+  return result;
+};

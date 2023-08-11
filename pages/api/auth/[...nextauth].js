@@ -2,6 +2,7 @@ import NextAuth from "next-auth/next";
 import GoogleProvider from "next-auth/providers/google";
 const User = require("../../../models/users.model");
 import axios from "axios";
+import { createHistory } from "@/utils/utility";
 const apigateway = process.env.APIGATEWAY_URL;
 
 const operatorId = process.env.OPERATOR_ID;
@@ -268,6 +269,7 @@ export default NextAuth({
     signIn: async ({ user, account, isNewUser, profile }) => {
       const { id } = user;
       await setOnline(id);
+      await createHistory(id, "login", "preferences");
     },
   },
   callbacks: {

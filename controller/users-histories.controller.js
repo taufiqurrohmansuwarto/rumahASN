@@ -2,23 +2,26 @@ const UserHistory = require("@/models/users-histories.model");
 
 const getUsersHistories = async (req, res) => {
   try {
-    const { user } = req;
-    const { userId } = user;
+    const userId = req?.user?.id;
     const limit = parseInt(req.query.limit) || 10;
     const page = parseInt(req.query.page) || 1;
 
     const result = await UserHistory.query()
       .where("user_id", userId)
       .page(page - 1, limit)
+      .withGraphFetched("[ticket(simple)]")
       .orderBy("created_at", "desc");
 
+    const nextPage = await UserHistory.query()
+      .where("user_id", userId)
+      .offset(page * limit)
+      .limit(limit + 1);
+
     const data = {
+      page,
+      limit,
       result: result.results,
-      pagination: {
-        total: result.total,
-        limit: result.limit,
-        page: result.page,
-      },
+      hasNextPage: nextPage.length > 0,
     };
 
     res.json(data);
