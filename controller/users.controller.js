@@ -68,3 +68,18 @@ module.exports.detail = async (req, res) => {
     res.status(500).json({ message: "Internal Server Error", code: 500 });
   }
 };
+
+module.exports.searchUser = async (req, res) => {
+  try {
+    const name = req.query.name || "";
+    const result = await User.query()
+      .select("custom_id", "username", "image")
+      .where("username", "ilike", `%${name}%`)
+      .orWhere("employee_number", "ilike", `%${name}%`)
+      .limit(10);
+    res.json(result);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Internal Server Error", code: 500 });
+  }
+};

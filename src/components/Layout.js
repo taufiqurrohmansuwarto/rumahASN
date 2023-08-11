@@ -20,6 +20,7 @@ import { useRouter } from "next/router";
 import { useState } from "react";
 import { userRoutes } from "../routes";
 import Notifications from "./Notifications";
+import Messages from "./Messages";
 
 const ProLayout = dynamic(
   () => import("@ant-design/pro-components").then((mod) => mod?.ProLayout),
@@ -253,7 +254,10 @@ function Layout({ children, active, collapsed = false }) {
       }}
       actionsRender={(props) => {
         // if (props.isMobile) return [];
-        return [<Notifications key="Notifications" />];
+        return [
+          <Messages key="messages" />,
+          <Notifications key="Notifications" />,
+        ];
       }}
       avatarProps={{
         src: data?.user?.image,

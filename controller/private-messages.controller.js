@@ -59,12 +59,13 @@ module.exports.getNotificationPrivateMessage = async (req, res) => {
 module.exports.sendPrivateMessage = async (req, res) => {
   try {
     const { customId: senderId } = req?.user;
-    const { receiverId, message } = req?.body;
+    const { receiverId, message, title } = req?.body;
 
     const result = await PrivateMessage.query().insert({
       sender_id: senderId,
       receiver_id: receiverId,
       message,
+      title,
     });
     res.json({
       message: "success",

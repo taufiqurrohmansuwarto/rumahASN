@@ -46,7 +46,6 @@ export const userRoutes = {
       icon: <SmileOutlined />,
       hideInMenu: true,
     },
-    { path: "/mails", name: "Pesan Pribadi", icon: <MailOutlined /> },
     {
       path: "/edukasi/podcasts",
       name: "Podcast",
