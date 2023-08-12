@@ -2,22 +2,36 @@ import Layout from "@/components/Layout";
 import MailLayout from "@/components/MailLayout";
 import ListPrivateMessages from "@/components/PrivateMessages/ListPrivateMessages";
 import { PageContainer } from "@ant-design/pro-layout";
-import { Button } from "antd";
+import { Breadcrumb } from "antd";
 import Head from "next/head";
-import { useRouter } from "next/router";
+import Link from "next/link";
 
 const InboxMail = () => {
-  const router = useRouter();
-  const gotoCreate = () => router.push("/mails/create");
+  const handleBack = () => router?.back();
 
   return (
     <>
       <Head>
         <title>Rumah ASN - Pesan Pribadi</title>
       </Head>
-      <PageContainer title="Inbox">
+      <PageContainer
+        header={{
+          breadcrumbRender: () => (
+            <Breadcrumb>
+              <Breadcrumb.Item>
+                <Link href="/feeds">
+                  <a>Beranda</a>
+                </Link>
+              </Breadcrumb.Item>
+              <Breadcrumb.Item>Pesan Pribadi</Breadcrumb.Item>
+            </Breadcrumb>
+          ),
+        }}
+        // onBack={handleBack}
+        title="Kotak Masuk"
+        subTitle="Pesan Pribadi"
+      >
         <ListPrivateMessages type="inbox" />
-        <Button onClick={gotoCreate}>Buat Pesan</Button>
       </PageContainer>
     </>
   );

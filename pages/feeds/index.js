@@ -1,4 +1,3 @@
-import Announcement from "@/components/Announcement";
 import DaftarLayanan from "@/components/LayananKepegawaian/DaftarLayanan";
 import Layout from "@/components/Layout";
 import PageContainer from "@/components/PageContainer";
@@ -6,7 +5,6 @@ import AlertPemutakhiranData from "@/components/PemutakhiranData/AlertPemutakhir
 import PodcastAnnouncement from "@/components/PodcatsAnnouncement";
 import SelamatDatang from "@/components/SelamatDatang";
 import ShowRatings from "@/components/ShowRatings";
-import PinnedTickets from "@/components/Ticket/PinnedTickets";
 import TicketsPublish from "@/components/Ticket/TicketsPublish";
 import TutorialPeremajaanDataSIASN from "@/components/TutorialPeremajaanDataSIASN";
 import PublikasiCASN from "@/components/Web/PublikasiCASN";

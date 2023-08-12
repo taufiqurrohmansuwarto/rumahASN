@@ -1,4 +1,4 @@
-import { InboxOutlined, MailOutlined, SendOutlined } from "@ant-design/icons";
+import { InboxOutlined, SendOutlined } from "@ant-design/icons";
 import { Layout, Menu } from "antd";
 import { useRouter } from "next/router";
 
@@ -13,7 +13,7 @@ function MailLayout({ children, active = "inbox" }) {
 
   return (
     <Layout>
-      <Sider theme="light" collapsible>
+      <Sider defaultCollapsed={true} theme="light" collapsible>
         <Menu
           style={{
             height: "85vh",

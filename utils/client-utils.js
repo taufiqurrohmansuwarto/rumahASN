@@ -383,3 +383,21 @@ export const jenisRiwayat = (action) => {
   }
   return result;
 };
+
+// create time like gmail format using moment if today show time else show date with format like 3 Aug if year same show date with format like 3 Aug 2021
+export const timeFormat = (date) => {
+  if (moment(date).isSame(moment(), "day")) {
+    return moment(date).format("HH:mm");
+  }
+  if (moment(date).isSame(moment(), "year")) {
+    return moment(date).format("DD MMM");
+  }
+  return moment(date).format("DD/MM/YYYY");
+};
+
+// create  function take 20 character from html text and make it one line even is p tag and the rest is ...
+export const truncate = (text, char = 20) => {
+  const regex = /(<([^>]+)>)/gi;
+  const result = text.replace(regex, "");
+  return result?.substring(0, char) + "...";
+};
