@@ -18,7 +18,6 @@ module.exports.findPrivateMessages = async (req, res) => {
     const limit = parseInt(req?.query?.limit) || 10;
     const page = parseInt(req?.query?.page) || 1;
     const type = req?.query?.type || "inbox";
-    console.log(type);
 
     if (type === "total_unread") {
       const result = await PrivateMessage.query()
@@ -38,7 +37,6 @@ module.exports.findPrivateMessages = async (req, res) => {
         .withGraphFetched("[sender(simpleSelect), receiver(simpleSelect)]")
         .orderBy("created_at", "desc")
         .page(page - 1, limit);
-      console.log(result);
 
       const nextPage = await PrivateMessage.query()
         .where("receiver_id", userId)

@@ -300,7 +300,7 @@ function Layout({ children, active, collapsed = false }) {
                   {
                     key: "riwayat",
                     icon: <HistoryOutlined />,
-                    label: "Riwayat",
+                    label: "Aktivitas",
                   },
                   {
                     key: "setting",

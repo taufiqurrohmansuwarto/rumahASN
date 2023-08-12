@@ -2,7 +2,7 @@ import Layout from "@/components/Layout";
 import PageContainer from "@/components/PageContainer";
 import { formatDateFromNow, jenisRiwayat } from "@/utils/client-utils";
 import { useInfiniteQuery } from "@tanstack/react-query";
-import { List, Typography, Button, Card } from "antd";
+import { List, Typography, Button, Card, Breadcrumb } from "antd";
 import Head from "next/head";
 import Link from "next/link";
 import { usersHistories } from "../services";
@@ -87,8 +87,26 @@ function Histories() {
       </Head>
       <PageContainer
         onBack={handleBack}
-        title="Riwayat Anda"
+        title="Laporan Aktivitas"
+        subTitle="Informasi Aktifitas Anda"
         loading={isLoading}
+        header={{
+          breadcrumbRender: () => (
+            <Breadcrumb>
+              <Breadcrumb.Item>
+                <Link href="/feeds">
+                  <a>Beranda</a>
+                </Link>
+              </Breadcrumb.Item>
+              <Breadcrumb.Item>
+                <Link href="/tickets/semua">
+                  <a>Pertanyaan Saya</a>
+                </Link>
+              </Breadcrumb.Item>
+              <Breadcrumb.Item>Riwayat</Breadcrumb.Item>
+            </Breadcrumb>
+          ),
+        }}
       >
         <Card>
           <HistoriesData

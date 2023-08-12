@@ -4,7 +4,9 @@ import PageContainer from "@/components/PageContainer";
 import DetailPrivateMessage from "@/components/PrivateMessages/DetailPrivateMessage";
 import { detailPrivateMessage } from "@/services/index";
 import { useQuery } from "@tanstack/react-query";
+import { Breadcrumb } from "antd";
 import Head from "next/head";
+import Link from "next/link";
 import { useRouter } from "next/router";
 
 const Mail = () => {
@@ -24,6 +26,18 @@ const Mail = () => {
       </Head>
       <PageContainer
         title="Detail Pesan"
+        header={{
+          breadcrumbRender: () => (
+            <Breadcrumb>
+              <Breadcrumb.Item>
+                <Link href="/feeds">
+                  <a>Beranda</a>
+                </Link>
+              </Breadcrumb.Item>
+              <Breadcrumb.Item>Detail Pesan Pribadi</Breadcrumb.Item>
+            </Breadcrumb>
+          ),
+        }}
         subTitle="Pesan Pribadi"
         loading={isLoading}
         onBack={handleBack}

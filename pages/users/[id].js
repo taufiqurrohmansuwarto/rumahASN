@@ -1,7 +1,7 @@
 import Layout from "@/components/Layout";
 import { renderMarkdown, uploadFile } from "@/utils/client-utils";
 import PageContainer from "@/components/PageContainer";
-import { getProfile } from "@/services/index";
+import { getProfile, sendPrivateMessage } from "@/services/index";
 import { MarkdownEditor } from "@primer/react/drafts";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/router";
@@ -20,6 +20,7 @@ import {
   Space,
   Tabs,
   Typography,
+  message as messageantd,
 } from "antd";
 import Link from "next/link";
 import Head from "next/head";
@@ -36,11 +37,28 @@ const CreateModal = ({ open, onCancel, receiver }) => {
   const [title, setTitle] = useState();
   const [message, setMessage] = useState();
 
-  const { mutate: sendMessgae, isLoading } = useMutation();
+  const { mutate: sendMessgae, isLoading } = useMutation(
+    (data) => sendPrivateMessage(data),
+    {
+      onSuccess: () => {
+        onCancel();
+        queryClient.invalidateQueries(["private-messages"]);
+        messageantd.success("Pesan berhasil dikirim");
+        router.push("/mails/sent");
+      },
+    }
+  );
 
   const handleSendMessage = () => {
     if (!title || !message) return message.error("Judul dan pesan harus diisi");
     else {
+      const receiverId = receiver?.custom_id;
+      const data = {
+        title,
+        message,
+        receiverId,
+      };
+      sendMessgae(data);
     }
   };
 
@@ -48,10 +66,11 @@ const CreateModal = ({ open, onCancel, receiver }) => {
     <Modal
       centered
       onOk={handleSendMessage}
-      width={600}
+      width={800}
       title={`Kirim Pesan ke ${receiver?.username}`}
       open={open}
       onCancel={onCancel}
+      confirmLoading={isLoading}
     >
       <Stack>
         <Input

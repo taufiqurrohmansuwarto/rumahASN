@@ -1,28 +1,27 @@
-import { renderMarkdown, uploadFile } from "@/utils/client-utils";
 import Layout from "@/components/Layout";
 import PageContainer from "@/components/PageContainer";
-import { sendPrivateMessage } from "@/services/index";
+import { searchUser, sendPrivateMessage } from "@/services/index";
+import { renderMarkdown, uploadFile } from "@/utils/client-utils";
 import { Stack } from "@mantine/core";
 import { useDebouncedValue } from "@mantine/hooks";
+import { MarkdownEditor } from "@primer/react/drafts";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Avatar,
+  Button,
   Card,
-  Space,
   Col,
   Input,
   Row,
   Select,
+  Space,
   Spin,
   Typography,
-  Button,
   message,
 } from "antd";
 import Head from "next/head";
 import { useRouter } from "next/router";
 import { useState } from "react";
-import { MarkdownEditor } from "@primer/react/drafts";
-import { searchUser } from "@/services/index";
 
 const CreatePrivateMessage = () => {
   const router = useRouter();
@@ -52,7 +51,8 @@ const CreatePrivateMessage = () => {
     {
       onSuccess: () => {
         queryClient.invalidateQueries(["private-messages"]);
-        router.push("/mails");
+        message.success("Pesan berhasil dikirim");
+        router.push("/mails/sent");
       },
     }
   );
