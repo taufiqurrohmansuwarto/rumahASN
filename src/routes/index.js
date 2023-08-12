@@ -5,9 +5,7 @@ import {
   CarOutlined,
   DashboardFilled,
   HomeOutlined,
-  MailOutlined,
   QuestionCircleOutlined,
-  ReadOutlined,
   SettingOutlined,
   SmileOutlined,
   SnippetsOutlined,
@@ -45,6 +43,25 @@ export const userRoutes = {
       name: "Buat Ticket",
       icon: <SmileOutlined />,
       hideInMenu: true,
+    },
+    {
+      path: "/mails",
+      name: "Pesan Pribadi",
+      hideInMenu: true,
+      routes: [
+        {
+          path: "/mails/create",
+          name: "Buat Pesan",
+        },
+        {
+          path: "/mails/inbox",
+          name: "Kotak Masuk",
+        },
+        {
+          path: "/mails/sent",
+          name: "Terkirim",
+        },
+      ],
     },
     {
       path: "/edukasi/podcasts",

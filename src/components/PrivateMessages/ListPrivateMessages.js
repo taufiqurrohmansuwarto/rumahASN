@@ -15,6 +15,7 @@ import {
 } from "antd";
 import CreatePrivateMessage from "./CreatePrivateMessage";
 import { useRouter } from "next/router";
+import Link from "next/link";
 
 const fetchItems =
   (type) =>
@@ -68,13 +69,20 @@ function ListPrivateMessages({ type }) {
                     avatar={
                       <>
                         {type === "inbox" ? (
-                          <Tooltip title={item?.sender?.username}>
-                            <Avatar size="small" src={item?.sender?.image} />
-                          </Tooltip>
+                          <Link href={`/users/${item?.sender?.custom_id}`}>
+                            <Tooltip title={item?.sender?.username}>
+                              <Avatar size="small" src={item?.sender?.image} />
+                            </Tooltip>
+                          </Link>
                         ) : (
-                          <Tooltip title={item?.receiver?.username}>
-                            <Avatar size="small" src={item?.receiver?.image} />
-                          </Tooltip>
+                          <Link href={`/users/${item?.receiver?.custom_id}`}>
+                            <Tooltip title={item?.receiver?.username}>
+                              <Avatar
+                                size="small"
+                                src={item?.receiver?.image}
+                              />
+                            </Tooltip>
+                          </Link>
                         )}
                       </>
                     }
