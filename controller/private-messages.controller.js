@@ -1,4 +1,16 @@
 const PrivateMessage = require("@/models/private-messages.model");
+const { parseMarkdown } = require("@/utils/parsing");
+
+const parsingMessage = (data) => {
+  if (data?.length > 0) {
+    return data?.map((d) => ({
+      ...d,
+      message: parseMarkdown(d?.message),
+    }));
+  } else {
+    return [];
+  }
+};
 
 module.exports.findPrivateMessages = async (req, res) => {
   try {
@@ -6,6 +18,7 @@ module.exports.findPrivateMessages = async (req, res) => {
     const limit = parseInt(req?.query?.limit) || 10;
     const page = parseInt(req?.query?.page) || 1;
     const type = req?.query?.type || "inbox";
+    console.log(type);
 
     if (type === "total_unread") {
       const result = await PrivateMessage.query()
@@ -15,14 +28,17 @@ module.exports.findPrivateMessages = async (req, res) => {
       res.json({ total: result[0].total });
     } else {
       const result = await PrivateMessage.query()
-        .where("receiver_id", userId)
-        .andWhere((builder) => {
-          if (type === "inbox") builder.where("receiver_id", userId);
-          if (type === "sent") builder.where("sender_id", userId);
+        .where((builder) => {
+          if (type === "inbox") {
+            builder.where("receiver_id", userId);
+          } else if (type === "sent") {
+            builder.where("sender_id", userId);
+          }
         })
         .withGraphFetched("[sender(simpleSelect), receiver(simpleSelect)]")
         .orderBy("created_at", "desc")
         .page(page - 1, limit);
+      console.log(result);
 
       const nextPage = await PrivateMessage.query()
         .where("receiver_id", userId)
@@ -34,7 +50,7 @@ module.exports.findPrivateMessages = async (req, res) => {
         .limit(limit + 1);
 
       const data = {
-        data: result.results,
+        data: parsingMessage(result.results),
         limit,
         page,
         total: result.total,
@@ -55,10 +71,26 @@ module.exports.getPrivateMessage = async (req, res) => {
     const { id } = req?.query;
     const result = await PrivateMessage.query()
       .where("id", id)
-      .andWhere("receiver_id", userId)
+      .andWhere((builder) => {
+        builder.where("sender_id", userId).orWhere("receiver_id", userId);
+      })
+      .withGraphFetched("[sender(simpleSelect), receiver(simpleSelect)]")
       .first();
 
-    res.json(result);
+    if (result) {
+      if (result?.receiver_id === userId && !result?.is_read) {
+        await PrivateMessage.query().where("id", id).update({
+          is_read: true,
+        });
+      }
+      const data = {
+        ...result,
+        message: parseMarkdown(result?.message),
+      };
+      res.json(data);
+    } else {
+      res.json(null);
+    }
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: error.message });
