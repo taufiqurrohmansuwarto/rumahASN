@@ -1,9 +1,8 @@
 import { rwAngkakreditMasterByNip } from "@/services/master.services";
 import { getRwAngkakreditByNip } from "@/services/siasn-services";
-import { FileAddOutlined } from "@ant-design/icons";
 import { Stack } from "@mantine/core";
 import { useQuery } from "@tanstack/react-query";
-import { Button, Card, Table, Typography } from "antd";
+import { Card, Table, Typography } from "antd";
 import { useState } from "react";
 import AlertAngkaKredit from "../AlertAngkaKredit";
 
