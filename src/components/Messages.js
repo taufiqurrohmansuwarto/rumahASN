@@ -25,17 +25,13 @@ function Messages() {
   };
 
   return (
-    <div
-      style={{
-        marginRight: 8,
-      }}
-    >
-      <Badge
-        size="small"
-        onClick={gotoMail}
-        count={isLoading ? null : data?.total}
-      >
-        <MailOutlined />
+    <div onClick={gotoMail}>
+      <Badge count={isLoading ? null : data?.total}>
+        <MailOutlined
+          style={{
+            fontSize: 16,
+          }}
+        />
       </Badge>
     </div>
   );

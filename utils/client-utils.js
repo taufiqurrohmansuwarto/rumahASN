@@ -395,7 +395,7 @@ export const timeFormat = (date) => {
   return moment(date).format("DD/MM/YYYY");
 };
 
-// create  function take 20 character from html text and make it one line even is p tag and the rest is ...
+// create  function take 20 character from html text and make it one line even is p tag and the rest is ... if less than 20 character return all text
 export const truncate = (text, char = 20) => {
   const regex = /(<([^>]+)>)/gi;
   const result = text.replace(regex, "");

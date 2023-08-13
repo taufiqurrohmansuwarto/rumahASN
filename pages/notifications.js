@@ -1,10 +1,12 @@
 import { Grid, Stack } from "@mantine/core";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Button, message } from "antd";
-import { clearChatsNotificatoins, listNotifications } from "../services";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { Breadcrumb, Button, message } from "antd";
+import { clearChatsNotificatoins } from "../services";
 import Layout from "../src/components/Layout";
 import ListNotifications from "../src/components/ListNotifications";
 import PageContainer from "../src/components/PageContainer";
+import Head from "next/head";
+import Link from "next/link";
 
 function NotificationsPage() {
   const queryClient = useQueryClient();
@@ -23,16 +25,36 @@ function NotificationsPage() {
   const handleClearNotif = () => clearNotif();
 
   return (
-    <PageContainer title="Notification" content="Notifikasi tiket">
-      <Grid align="center" justify="center">
-        <Grid.Col md={8} sm={12}>
-          <Stack>
-            <Button onClick={handleClearNotif}>Hapus Notifikasi</Button>
-            <ListNotifications />
-          </Stack>
-        </Grid.Col>
-      </Grid>
-    </PageContainer>
+    <>
+      <Head>
+        <title>Rumah ASN - Notifikasi</title>
+      </Head>
+      <PageContainer
+        header={{
+          breadcrumbRender: () => (
+            <Breadcrumb>
+              <Breadcrumb.Item>
+                <Link href="/feeds">
+                  <a>Beranda</a>
+                </Link>
+              </Breadcrumb.Item>
+              <Breadcrumb.Item>Notifikasi Pertanyaan</Breadcrumb.Item>
+            </Breadcrumb>
+          ),
+        }}
+        title="Notifikasi"
+        content="Notifikasi Pertanyaan"
+      >
+        <Grid align="center" justify="center">
+          <Grid.Col md={8} sm={12}>
+            <Stack>
+              <Button onClick={handleClearNotif}>Hapus Notifikasi</Button>
+              <ListNotifications />
+            </Stack>
+          </Grid.Col>
+        </Grid>
+      </PageContainer>
+    </>
   );
 }
 

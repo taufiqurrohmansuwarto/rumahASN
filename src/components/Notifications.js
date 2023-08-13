@@ -19,13 +19,13 @@ function Notifications() {
   };
 
   return (
-    <div>
-      <Badge
-        onClick={changePageNotification}
-        count={isLoading ? null : data?.count}
-        size="small"
-      >
-        <BellOutlined />
+    <div onClick={changePageNotification}>
+      <Badge count={isLoading ? null : data?.count}>
+        <BellOutlined
+          style={{
+            fontSize: 16,
+          }}
+        />
       </Badge>
     </div>
   );
