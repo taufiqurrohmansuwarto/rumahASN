@@ -92,15 +92,15 @@ export const userRoutes = {
       name: " Pertanyaan Umum",
       icon: <QuestionCircleOutlined />,
     },
-    {
-      path: "/settings",
-      name: " Konfigurasi",
-      icon: <SettingOutlined />,
-      routes: [
-        { path: "/settings/saved-replies", name: "Template Balasan" },
-        { path: "/settings/profile", name: "Profil" },
-      ],
-    },
+    // {
+    //   path: "/settings",
+    //   name: " Konfigurasi",
+    //   icon: <SettingOutlined />,
+    //   routes: [
+    //     { path: "/settings/saved-replies", name: "Template Balasan" },
+    //     { path: "/settings/profile", name: "Profil" },
+    //   ],
+    // },
   ],
 };
 

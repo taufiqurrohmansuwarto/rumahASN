@@ -248,7 +248,7 @@ function Layout({ children, active, collapsed = false }) {
       title="Rumah ASN"
       logo={"https://siasn.bkd.jatimprov.go.id:9000/public/logobkd.jpg"}
       headerTitleRender={(logo, title) => {
-        return (
+        const defaultDom = (
           <>
             <Link href="/feeds">
               <a>{logo}</a>
@@ -256,6 +256,8 @@ function Layout({ children, active, collapsed = false }) {
             {title}
           </>
         );
+
+        return defaultDom;
       }}
       menuFooterRender={(props) => {
         if (props?.collapsed) return undefined;
@@ -322,21 +324,8 @@ function Layout({ children, active, collapsed = false }) {
                   if (e.key === "profile") {
                     router.push("/settings/profile");
                   }
-                  if (e.key === "riwayat") {
-                    router.push("/histories");
-                  }
                 },
                 items: [
-                  {
-                    key: "riwayat",
-                    icon: <HistoryOutlined />,
-                    label: "Aktivitas",
-                  },
-                  {
-                    key: "setting",
-                    icon: <SettingOutlined />,
-                    label: "Pengaturan",
-                  },
                   {
                     key: "profile",
                     icon: <UserOutlined />,
