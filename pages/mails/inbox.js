@@ -14,25 +14,7 @@ const InboxMail = () => {
       <Head>
         <title>Rumah ASN - Pesan Pribadi</title>
       </Head>
-      <PageContainer
-        header={{
-          breadcrumbRender: () => (
-            <Breadcrumb>
-              <Breadcrumb.Item>
-                <Link href="/feeds">
-                  <a>Beranda</a>
-                </Link>
-              </Breadcrumb.Item>
-              <Breadcrumb.Item>Pesan Pribadi</Breadcrumb.Item>
-            </Breadcrumb>
-          ),
-        }}
-        // onBack={handleBack}
-        title="Kotak Masuk"
-        subTitle="Pesan Pribadi"
-      >
-        <ListPrivateMessages type="inbox" />
-      </PageContainer>
+      <ListPrivateMessages type="inbox" />
     </>
   );
 };

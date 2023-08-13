@@ -1,6 +1,7 @@
 import { deleteSavedReplies, getSavedReplies } from "@/services/index";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { List, message } from "antd";
+import { truncate } from "lodash";
 import { useRouter } from "next/router";
 
 function ListSavedReplies() {
@@ -8,7 +9,7 @@ function ListSavedReplies() {
   const router = useRouter();
 
   const gotoEdit = (id) => {
-    router.push(`/settings/saved-replies/${id}/edit`);
+    router.push(`/settings/profile/saved-replies/${id}/edit`);
   };
 
   const { mutate: remove, isLoading: isLoadingRemove } = useMutation(
@@ -57,7 +58,10 @@ function ListSavedReplies() {
             </a>,
           ]}
         >
-          <List.Item.Meta title={item?.name} description={item?.content} />
+          <List.Item.Meta
+            title={item?.name}
+            description={truncate(item?.content)}
+          />
         </List.Item>
       )}
     />

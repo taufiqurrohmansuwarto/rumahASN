@@ -5,7 +5,14 @@ import { renderMarkdown, uploadFile } from "@/utils/client-utils";
 import { sendPrivateMessage } from "@/services/index";
 import { IconPhone } from "@tabler/icons";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Card, Input, Modal, Space, message as messageantd } from "antd";
+import {
+  Card,
+  Input,
+  Modal,
+  PageHeader,
+  Space,
+  message as messageantd,
+} from "antd";
 import { useRouter } from "next/router";
 import { useState } from "react";
 
@@ -80,62 +87,65 @@ const SendModal = ({ visible, onCancel, receiver }) => {
 };
 
 function DetailPrivateMessage({ data }) {
+  const router = useRouter();
   const [visible, setVisible] = useState(false);
   const handleCancel = () => setVisible(false);
   const handleOpen = () => setVisible(true);
 
   return (
-    <Card>
-      <SendModal
-        receiver={data?.sender}
-        onCancel={handleCancel}
-        visible={visible}
-      />
-      <Title mb="lg" order={2}>{`"${data?.title}"`}</Title>
-      <Group position="apart">
-        <Group spacing="sm">
-          <Avatar size="lg" radius={100} src={data?.sender?.image} />
-          <Stack spacing="xs">
-            <Text>{data?.sender?.username}</Text>
-            <Text>Kepada saya :</Text>
-          </Stack>
-        </Group>
-        <Space align="center" size="large">
-          <Text fz={12}>
-            {timeFormat(data?.created_at)} -{" "}
-            {formatDateFromNow(data?.created_at)}
-          </Text>
-          <ThemeIcon
-            onClick={handleOpen}
-            size="xl"
-            style={{
-              cursor: "pointer",
-            }}
-            variant="gradient"
-            gradient={{ from: "indigo", to: "cyan" }}
-          >
-            <IconPhone size="1.2rem" />
-          </ThemeIcon>
-        </Space>
-      </Group>
-      <div
-        style={{
-          marginBottom: "1rem",
-          marginTop: "1rem",
-          borderRadius: "5px",
-          backgroundColor: "#eee",
-          width: "100%",
-          minHeight: "200px",
-          padding: "1rem",
-        }}
-      >
-        <div
-          dangerouslySetInnerHTML={{
-            __html: data?.message,
-          }}
+    <>
+      <PageHeader onBack={() => router?.back()} subTitle="Detail Pesan Pribadi">
+        <SendModal
+          receiver={data?.sender}
+          onCancel={handleCancel}
+          visible={visible}
         />
-      </div>
-    </Card>
+        <Title mb="lg" order={2}>{`"${data?.title}"`}</Title>
+        <Group position="apart">
+          <Group spacing="sm">
+            <Avatar size="lg" radius={100} src={data?.sender?.image} />
+            <Stack spacing="xs">
+              <Text>{data?.sender?.username}</Text>
+              <Text>Kepada saya :</Text>
+            </Stack>
+          </Group>
+          <Space align="center" size="large">
+            <Text fz={12}>
+              {timeFormat(data?.created_at)} -{" "}
+              {formatDateFromNow(data?.created_at)}
+            </Text>
+            <ThemeIcon
+              onClick={handleOpen}
+              size="xl"
+              style={{
+                cursor: "pointer",
+              }}
+              variant="gradient"
+              gradient={{ from: "indigo", to: "cyan" }}
+            >
+              <IconPhone size="1.2rem" />
+            </ThemeIcon>
+          </Space>
+        </Group>
+        <div
+          style={{
+            marginBottom: "1rem",
+            marginTop: "1rem",
+            borderRadius: "5px",
+            backgroundColor: "#eee",
+            width: "100%",
+            minHeight: "200px",
+            padding: "1rem",
+          }}
+        >
+          <div
+            dangerouslySetInnerHTML={{
+              __html: data?.message,
+            }}
+          />
+        </div>
+      </PageHeader>
+    </>
   );
 }
 

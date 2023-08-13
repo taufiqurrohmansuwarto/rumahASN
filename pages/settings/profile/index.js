@@ -1,23 +1,22 @@
 import Layout from "@/components/Layout";
-import PageContainer from "@/components/PageContainer";
+import ProfileLayout from "@/components/ProfileSettings/ProfileLayout";
 import { ownProfile, updateOwnProfile } from "@/services/index";
 import { Stack } from "@mantine/core";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Avatar,
-  Breadcrumb,
   Button,
   Card,
   Col,
   Form,
   Input,
+  PageHeader,
   Row,
+  Skeleton,
   message,
 } from "antd";
 import { useSession } from "next-auth/react";
 import Head from "next/head";
-import Link from "next/link";
-import { useRouter } from "next/router";
 
 const ProfileForm = ({ data, user }) => {
   const queryClient = useQueryClient();
@@ -90,13 +89,7 @@ const ProfileForm = ({ data, user }) => {
 };
 
 function Profile() {
-  const router = useRouter();
-
   const { data: dataUser, status } = useSession();
-
-  const handleBack = () => {
-    router.back();
-  };
 
   const { data, isLoading } = useQuery(["profile"], () => ownProfile(), {});
 
@@ -105,39 +98,28 @@ function Profile() {
       <Head>
         <title>Rumah ASN - Pengaturan - Profil</title>
       </Head>
-      <PageContainer
-        onBack={handleBack}
-        loading={isLoading}
-        title="Pengaturan"
-        breadcrumbRender={() => (
-          <Breadcrumb>
-            <Breadcrumb.Item>
-              <Link href="/feeds">
-                <a>Beranda</a>
-              </Link>
-            </Breadcrumb.Item>
-            <Breadcrumb.Item>Pengaturan Profil</Breadcrumb.Item>
-          </Breadcrumb>
-        )}
-        subTitle="Profil"
-      >
-        <Card loading={isLoading || status === "loading"}>
-          <Row>
-            <Col md={12} xs={24}>
-              <Stack>
-                <Avatar size={100} src={data?.image} />
+      <PageHeader title="Profile">
+        <Row>
+          <Col md={12} xs={24}>
+            <Stack>
+              <Skeleton loading={isLoading}>
+                <Avatar shape="square" size={80} src={data?.image} />
                 <ProfileForm user={dataUser?.user} data={data} />
-              </Stack>
-            </Col>
-          </Row>
-        </Card>
-      </PageContainer>
+              </Skeleton>
+            </Stack>
+          </Col>
+        </Row>
+      </PageHeader>
     </>
   );
 }
 
 Profile.getLayout = (page) => {
-  return <Layout>{page}</Layout>;
+  return (
+    <Layout>
+      <ProfileLayout>{page}</ProfileLayout>
+    </Layout>
+  );
 };
 
 Profile.Auth = {

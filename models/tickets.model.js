@@ -24,7 +24,7 @@ class Tickets extends Model {
         query.select("id", "is_published");
       },
       simple(query) {
-        query.select("id", "title");
+        query.select("id", "title", "created_at");
       },
     };
   }

@@ -1,16 +1,25 @@
-const Tickets = require("../models/tickets.model");
+const TicketsSubscription = require("@/models/tickets_subscriptions.model");
 
-const list = async (req, res) => {
+const subscribeList = async (req, res) => {
   try {
-    const { id: userId } = req.params;
+    const { user } = req;
+    const { customId: userId } = user;
+    const limit = parseInt(req.query.limit) || 10;
+    const page = parseInt(req.query.page) || 1;
 
-    //     find all tickets that the user is subscribed to
-    const result = await Tickets.query()
-      .select("tickets.*")
-      .withGraphJoined("subscriptions")
-      .where("subscriptions.user_id", userId);
+    const result = await TicketsSubscription.query()
+      .where("user_id", userId)
+      .withGraphFetched("[ticket(simple)]")
+      .page(parseInt(page) - 1, parseInt(limit));
 
-    res.json(result);
+    const data = {
+      page,
+      limit,
+      total: result.total,
+      data: result.results,
+    };
+
+    res.json(data);
   } catch (error) {
     console.log(error);
     res.status(500).send({ message: "Internal server error" });
@@ -18,5 +27,5 @@ const list = async (req, res) => {
 };
 
 module.exports = {
-  list,
+  subscribeList,
 };

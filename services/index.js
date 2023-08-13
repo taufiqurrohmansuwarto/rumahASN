@@ -644,3 +644,9 @@ export const usersHistories = ({ page = 0, limit = 10 }) => {
 export const searchUser = (name) => {
   return api.get(`/users/search/${name}`).then((res) => res?.data);
 };
+
+export const getSavedQuestions = (query) => {
+  const params = queryString.stringify(query);
+
+  return api.get(`/tickets/subscribes?${params}`).then((res) => res?.data);
+};
