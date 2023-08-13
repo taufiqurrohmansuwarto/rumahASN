@@ -71,13 +71,18 @@ function ListPrivateMessages({ type }) {
                         {type === "inbox" ? (
                           <Link href={`/users/${item?.sender?.custom_id}`}>
                             <Tooltip title={item?.sender?.username}>
-                              <Avatar size="small" src={item?.sender?.image} />
+                              <Avatar
+                                shape="square"
+                                size="small"
+                                src={item?.sender?.image}
+                              />
                             </Tooltip>
                           </Link>
                         ) : (
                           <Link href={`/users/${item?.receiver?.custom_id}`}>
                             <Tooltip title={item?.receiver?.username}>
                               <Avatar
+                                shape="square"
                                 size="small"
                                 src={item?.receiver?.image}
                               />
@@ -100,13 +105,13 @@ function ListPrivateMessages({ type }) {
                               color: item?.is_read ? "grey" : "black",
                             }}
                             dangerouslySetInnerHTML={{
-                              __html: truncate(item?.message, 30),
+                              __html: truncate(item?.message, 200),
                             }}
                           />
                         ) : (
                           <div
                             dangerouslySetInnerHTML={{
-                              __html: truncate(item?.message, 30),
+                              __html: truncate(item?.message, 200),
                             }}
                           />
                         )}

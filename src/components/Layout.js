@@ -275,12 +275,12 @@ function Layout({ children, active, collapsed = false }) {
         // if (props.isMobile) return [];
         return [
           <Messages key="messages" />,
-          <Notifications key="Notifications" />,
+          <Notifications props={props} key="Notifications" />,
         ];
       }}
       avatarProps={{
         src: data?.user?.image,
-        size: "small",
+        size: "large",
         render: (props, dom) => {
           return (
             <Dropdown
