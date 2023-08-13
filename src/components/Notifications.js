@@ -23,7 +23,7 @@ function Notifications() {
       <Badge count={isLoading ? null : data?.count}>
         <BellOutlined
           style={{
-            fontSize: 16,
+            fontSize: 13,
           }}
         />
       </Badge>

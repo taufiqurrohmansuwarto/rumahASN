@@ -278,6 +278,36 @@ function Layout({ children, active, collapsed = false }) {
           <Notifications props={props} key="Notifications" />,
         ];
       }}
+      appList={[
+        {
+          icon: "https://siasn.bkd.jatimprov.go.id:9000/public/logo-simaster.png",
+          title: "SIMASTER",
+          desc: "Sistem Manajemen ASN Terintegrasi",
+          url: "https://master.bkd.jatimprov.go.id",
+          target: "_blank",
+        },
+        {
+          icon: "https://siasn.bkd.jatimprov.go.id:9000/public/logo-simaster.png",
+          title: "SIMASTER Fasilitator",
+          desc: "Sistem Manajemen ASN Terintegrasi Fasilitator",
+          url: "https://master.bkd.jatimprov.go.id/fasilitator",
+          target: "_blank",
+        },
+        {
+          icon: "https://siasn.bkn.go.id/images/SI-ASN%201%20-%20PNG%20(2).png",
+          title: "SIASN",
+          desc: "Sistem Informasi Aparatur Sipil Negara",
+          url: "https://siasn-instansi.bkn.go.id",
+          target: "_blank",
+        },
+        {
+          icon: "https://mysapk.bkn.go.id/assets/images/logogram_login.png",
+          title: "MySAPK",
+          desc: "Sistem Administrasi Kepegawaian",
+          url: "https://mysapk.bkn.go.id",
+          target: "_blank",
+        },
+      ]}
       avatarProps={{
         src: data?.user?.image,
         size: "large",

@@ -1,9 +1,8 @@
 import { getPrivateMessages } from "@/services/index";
-import { MailOutlined } from "@ant-design/icons";
+import { InboxOutlined } from "@ant-design/icons";
 import { useQuery } from "@tanstack/react-query";
 import { Badge } from "antd";
 import { useRouter } from "next/router";
-import React from "react";
 
 function Messages() {
   const router = useRouter();
@@ -27,9 +26,9 @@ function Messages() {
   return (
     <div onClick={gotoMail}>
       <Badge count={isLoading ? null : data?.total}>
-        <MailOutlined
+        <InboxOutlined
           style={{
-            fontSize: 16,
+            fontSize: 15,
           }}
         />
       </Badge>
