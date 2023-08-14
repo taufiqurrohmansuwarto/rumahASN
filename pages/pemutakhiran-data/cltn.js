@@ -1,12 +1,11 @@
 import Layout from "@/components/Layout";
 import PageContainer from "@/components/PageContainer";
-import CompareJabatan from "@/components/PemutakhiranData/CompareJabatan";
 import { Breadcrumb, Card } from "antd";
 import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
 
-const Jabatan = () => {
+const RiwayatCLTN = () => {
   const router = useRouter();
 
   const handleBack = () => router.push("/pemutakhiran-data/komparasi");
@@ -14,7 +13,7 @@ const Jabatan = () => {
   return (
     <>
       <Head>
-        <title>Rumah ASN - Peremajaan SIASN - Data Jabatan</title>
+        <title>Rumah ASN - Peremajaan SIASN - Data CLTN</title>
       </Head>
       <PageContainer
         header={{
@@ -30,29 +29,29 @@ const Jabatan = () => {
                   <a>Peremajaan Data</a>
                 </Link>
               </Breadcrumb.Item>
-              <Breadcrumb.Item>Data Jabatan</Breadcrumb.Item>
+              <Breadcrumb.Item>Data Riwayat CLTN</Breadcrumb.Item>
             </Breadcrumb>
           ),
         }}
         onBack={handleBack}
-        title="Riwayat Jabatan"
-        content="Komparasi Data Jabatan SIASN dan SIMASTER"
+        title="Riwayat CLTN"
+        content="Komparasi Data CLTN SIASN dan SIMASTER"
       >
         <Card>
-          <CompareJabatan />
+          <div>Under Construction baby...</div>
         </Card>
       </PageContainer>
     </>
   );
 };
 
-Jabatan.Auth = {
+RiwayatCLTN.Auth = {
   action: "manage",
   subject: "Tickets",
 };
 
-Jabatan.getLayout = (page) => {
+RiwayatCLTN.getLayout = (page) => {
   return <Layout active="/pemutakhiran-data/data-utama">{page}</Layout>;
 };
 
-export default Jabatan;
+export default RiwayatCLTN;

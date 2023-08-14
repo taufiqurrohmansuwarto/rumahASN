@@ -3,6 +3,12 @@ const moment = require("moment");
 const arrayToTree = require("array-to-tree");
 const { ssoFetcher, wso2Fetcher } = require("@/utils/siasn-fetcher");
 const { orderBy } = require("lodash");
+const {
+  riwayatPendidikan,
+  riwayatGolonganPangkat,
+  riwayatPMK,
+  riwayatPenghargaan,
+} = require("@/utils/siasn-utils");
 
 const siasnEmployeesDetail = async (req, res) => {
   try {
@@ -497,7 +503,79 @@ const getTokenSIASN = async (req, res) => {
   }
 };
 
+const getRwPendidikan = async (req, res) => {
+  try {
+    const { siasnRequest: request } = req;
+    const { employee_number: nip } = req?.user;
+
+    const result = await riwayatPendidikan(request, nip);
+    const data = result?.data?.data;
+
+    res.json(data);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ code: 500, message: "Internal Server Error" });
+  }
+};
+
+const getRwGolongan = async (req, res) => {
+  try {
+    const { siasnRequest: request } = req;
+    const { employee_number: nip } = req?.user;
+
+    const result = await riwayatGolonganPangkat(request, nip);
+    const data = result?.data?.data;
+
+    res.json(data);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ code: 500, message: "Internal Server Error" });
+  }
+};
+
+const getRwMasaKerja = async (req, res) => {
+  try {
+    const { siasnRequest: request } = req;
+    const { employee_number: nip } = req?.user;
+
+    const result = await riwayatPMK(request, nip);
+    const data = result?.data?.data;
+
+    if (data === "Data tidak ditemukan") {
+      res.json([]);
+    } else {
+      res.json(data);
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ code: 500, message: "Internal Server Error" });
+  }
+};
+
+const getRwPenghargaan = async (req, res) => {
+  try {
+    const { siasnRequest: request } = req;
+    const { employee_number: nip } = req?.user;
+
+    const result = await riwayatPenghargaan(request, nip);
+    const data = result?.data?.data;
+
+    if (data === "Data tidak ditemukan") {
+      res.json([]);
+    } else {
+      res.json(data);
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ code: 500, message: "Internal Server Error" });
+  }
+};
+
 module.exports = {
+  getRwMasaKerja,
+  getRwPenghargaan,
+  getRwPendidikan,
+  getRwGolongan,
   downloadDocument,
   getTokenSIASN,
   siasnEmployeesDetail,
