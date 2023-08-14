@@ -38,7 +38,7 @@ function CompareAngkaKreditByNip({ nip }) {
   );
 
   const { data: dataRwAngkakredit, isLoading: isLoadingAngkaKredit } = useQuery(
-    ["angkat-kredit-master", nip],
+    ["angkat-kredit-master-by-nip", nip],
     () => rwAngkakreditMasterByNip(nip)
   );
 

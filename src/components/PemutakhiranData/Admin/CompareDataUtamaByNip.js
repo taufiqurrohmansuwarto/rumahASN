@@ -34,7 +34,7 @@ function CompareDataUtamaByNip({ nip }) {
   );
 
   const { data: dataSimaster, isLoading: isLoadingDataSimaster } = useQuery(
-    ["data-utama-simaster", nip],
+    ["data-utama-simaster-by-nip", nip],
     () => dataUtamaMasterByNip(nip)
   );
 

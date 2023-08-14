@@ -309,7 +309,7 @@ function CompareJabatanByNip({ nip }) {
   );
 
   const { data: dataMaster, isLoading: loadingMasterJabatan } = useQuery(
-    ["data-rw-jabatan-master", nip],
+    ["data-rw-jabatan-master-by-nip", nip],
     () => rwJabatanMasterByNip(nip)
   );
 
