@@ -21,6 +21,7 @@ import {
   Upload,
   Card,
   Typography,
+  Skeleton,
 } from "antd";
 import axios from "axios";
 import { useState } from "react";
@@ -338,7 +339,7 @@ function CompareAngkaKredit() {
   ];
 
   return (
-    <Card loading={isLoading || isLoadingAngkaKredit}>
+    <Skeleton loading={isLoading || isLoadingAngkaKredit}>
       <Stack>
         <FormAngkaKredit visible={visible} onCancel={handleCancel} />
         <AlertAngkaKredit />
@@ -367,7 +368,7 @@ function CompareAngkaKredit() {
           dataSource={dataRwAngkakredit}
         />
       </Stack>
-    </Card>
+    </Skeleton>
   );
 }
 
