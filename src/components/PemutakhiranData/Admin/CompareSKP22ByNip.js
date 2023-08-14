@@ -46,7 +46,7 @@ function CompareSKP22ByNip({ nip }) {
   );
 
   const { data: dataMaster, isLoading: isLoadingMaster } = useQuery(
-    ["data-master-skp", nip],
+    ["data-master-skp-by-nip", nip],
     () => rwSkpMasterByNip(nip)
   );
 
