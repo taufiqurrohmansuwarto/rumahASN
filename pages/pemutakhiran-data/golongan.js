@@ -1,12 +1,12 @@
 import Layout from "@/components/Layout";
 import PageContainer from "@/components/PageContainer";
-import CompareJabatan from "@/components/PemutakhiranData/CompareJabatan";
+import CompareDataGolongan from "@/components/PemutakhiranData/CompareDataGolongan";
 import { Breadcrumb, Card } from "antd";
 import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
 
-const Jabatan = () => {
+const RiwayatGolongan = () => {
   const router = useRouter();
 
   const handleBack = () => router.push("/pemutakhiran-data/komparasi");
@@ -14,7 +14,7 @@ const Jabatan = () => {
   return (
     <>
       <Head>
-        <title>Rumah ASN - Peremajaan SIASN - Data Jabatan</title>
+        <title>Rumah ASN - Peremajaan SIASN - Data Golongan/Pangkat</title>
       </Head>
       <PageContainer
         header={{
@@ -30,29 +30,29 @@ const Jabatan = () => {
                   <a>Peremajaan Data</a>
                 </Link>
               </Breadcrumb.Item>
-              <Breadcrumb.Item>Data Jabatan</Breadcrumb.Item>
+              <Breadcrumb.Item>Data Golongan</Breadcrumb.Item>
             </Breadcrumb>
           ),
         }}
         onBack={handleBack}
-        title="Riwayat Jabatan"
-        content="Komparasi Data Jabatan SIASN dan SIMASTER"
+        title="Riwayat Golongan"
+        content="Komparasi Data Golongan SIASN dan SIMASTER"
       >
         <Card>
-          <CompareJabatan />
+          <CompareDataGolongan />
         </Card>
       </PageContainer>
     </>
   );
 };
 
-Jabatan.Auth = {
+RiwayatGolongan.Auth = {
   action: "manage",
   subject: "Tickets",
 };
 
-Jabatan.getLayout = (page) => {
+RiwayatGolongan.getLayout = (page) => {
   return <Layout active="/pemutakhiran-data/data-utama">{page}</Layout>;
 };
 
-export default Jabatan;
+export default RiwayatGolongan;

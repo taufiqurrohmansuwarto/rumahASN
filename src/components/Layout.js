@@ -82,7 +82,7 @@ const changeRoutes = (user) => {
     if (userPns) {
       userRoutes.routes.push(
         {
-          path: "/pemutakhiran-data/data-utama",
+          path: "/pemutakhiran-data/komparasi",
           name: "Peremajaan Data",
           icon: <ApiOutlined />,
         },

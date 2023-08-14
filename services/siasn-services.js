@@ -8,6 +8,25 @@ export const dataUtamaSIASN = () => {
   return api.get("/pns/data-utama").then((res) => res.data);
 };
 
+// data pendidikan
+export const dataPendidikan = () => {
+  return api.get("/pns/rw-pendidikan").then((res) => res.data);
+};
+
+export const dataGolongan = () => {
+  return api.get("/pns/rw-golongan").then((res) => res.data);
+};
+
+export const dataMasaKerja = () => {
+  return api.get("/pns/rw-masakerja").then((res) => res.data);
+};
+
+export const dataPenghargaan = () => {
+  return api.get("/pns/rw-penghargaan").then((res) => res.data);
+};
+
+// end of shit
+
 export const dataUtamSIASNByNip = (nip) => {
   return api.get(`/admin/${nip}/data-utama`).then((res) => res.data);
 };
