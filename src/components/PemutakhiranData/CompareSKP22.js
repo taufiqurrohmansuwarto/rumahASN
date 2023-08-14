@@ -13,6 +13,7 @@ import {
   Form,
   Modal,
   Select,
+  Skeleton,
   Table,
   Upload,
   message,
@@ -276,7 +277,7 @@ function CompareSKP22({ nip, id }) {
   ];
 
   return (
-    <Card title="Komparasi SKP 2022" loading={isLoading || isLoadingMaster}>
+    <Skeleton loading={isLoading || isLoadingMaster}>
       <Stack>
         <FormSKP22 nip={nip} visible={visible} onCancel={handleCancel} />
         <AlertSKP22 />
@@ -304,7 +305,7 @@ function CompareSKP22({ nip, id }) {
           dataSource={dataMaster}
         />
       </Stack>
-    </Card>
+    </Skeleton>
   );
 }
 
