@@ -1,30 +1,58 @@
 import Layout from "@/components/Layout";
+import PageContainer from "@/components/PageContainer";
 import CompareAngkaKredit from "@/components/PemutakhiranData/CompareAngkaKredit";
-import LayoutPemutakhiranData from "@/components/PemutakhiranData/LayoutPemutakhiranData";
+import { Breadcrumb, Card } from "antd";
 import Head from "next/head";
+import Link from "next/link";
+import { useRouter } from "next/router";
 
-const AngkaKredit = () => {
+const RiwayatAngkaKredit = () => {
+  const router = useRouter();
+
+  const handleBack = () => router.push("/pemutakhiran-data/komparasi");
+
   return (
     <>
       <Head>
-        <title>Rumah ASN - Peremajaan SIASN - Angka Kredit</title>
+        <title>Rumah ASN - Peremajaan SIASN - Data Angka Kredit</title>
       </Head>
-      <CompareAngkaKredit />
+      <PageContainer
+        header={{
+          breadcrumbRender: () => (
+            <Breadcrumb>
+              <Breadcrumb.Item>
+                <Link href="/feeds">
+                  <a>Beranda</a>
+                </Link>
+              </Breadcrumb.Item>
+              <Breadcrumb.Item>
+                <Link href="/pemutakhiran-data/komparasi">
+                  <a>Peremajaan Data</a>
+                </Link>
+              </Breadcrumb.Item>
+              <Breadcrumb.Item>Data Riwayat Angka Kredit</Breadcrumb.Item>
+            </Breadcrumb>
+          ),
+        }}
+        onBack={handleBack}
+        title="Riwayat Angka Kredit"
+        content="Komparasi Data Angka Kredit SIASN dan SIMASTER"
+      >
+        <Card>
+          <CompareAngkaKredit />
+        </Card>
+      </PageContainer>
     </>
   );
 };
 
-AngkaKredit.Auth = {
+RiwayatAngkaKredit.Auth = {
   action: "manage",
   subject: "Tickets",
 };
 
-AngkaKredit.getLayout = (page) => {
-  return (
-    <Layout active="/pemutakhiran-data/data-utama">
-      <LayoutPemutakhiranData active="3">{page}</LayoutPemutakhiranData>
-    </Layout>
-  );
+RiwayatAngkaKredit.getLayout = (page) => {
+  return <Layout active="/pemutakhiran-data/data-utama">{page}</Layout>;
 };
 
-export default AngkaKredit;
+export default RiwayatAngkaKredit;

@@ -8,6 +8,7 @@ const {
   riwayatGolonganPangkat,
   riwayatPMK,
   riwayatPenghargaan,
+  riwayatCtln,
 } = require("@/utils/siasn-utils");
 
 const siasnEmployeesDetail = async (req, res) => {
@@ -571,7 +572,27 @@ const getRwPenghargaan = async (req, res) => {
   }
 };
 
+const getRwCltn = async (req, res) => {
+  try {
+    const { siasnRequest: request } = req;
+    const { employee_number: nip } = req?.user;
+
+    const result = await riwayatCtln(request, nip);
+    const data = result?.data?.data;
+
+    if (data === "Data tidak ditemukan") {
+      res.json([]);
+    } else {
+      res.json(data);
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ code: 500, message: "Internal Server Error" });
+  }
+};
+
 module.exports = {
+  getRwCltn,
   getRwMasaKerja,
   getRwPenghargaan,
   getRwPendidikan,

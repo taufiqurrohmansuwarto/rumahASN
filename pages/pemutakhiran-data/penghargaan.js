@@ -1,5 +1,6 @@
 import Layout from "@/components/Layout";
 import PageContainer from "@/components/PageContainer";
+import CompareDataPenghargaan from "@/components/PemutakhiranData/CompareDataPenghargaan";
 import { Breadcrumb, Card } from "antd";
 import Head from "next/head";
 import Link from "next/link";
@@ -38,7 +39,7 @@ const RiwayatPenghargaan = () => {
         content="Komparasi Data Penghargaan SIASN dan SIMASTER"
       >
         <Card>
-          <div>Under Construction baby...</div>
+          <CompareDataPenghargaan />
         </Card>
       </PageContainer>
     </>

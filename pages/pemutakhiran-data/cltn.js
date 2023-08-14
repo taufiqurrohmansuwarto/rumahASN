@@ -1,5 +1,6 @@
 import Layout from "@/components/Layout";
 import PageContainer from "@/components/PageContainer";
+import CompareDataCltn from "@/components/PemutakhiranData/CompareDataCltn";
 import { Breadcrumb, Card } from "antd";
 import Head from "next/head";
 import Link from "next/link";
@@ -38,7 +39,7 @@ const RiwayatCLTN = () => {
         content="Komparasi Data CLTN SIASN dan SIMASTER"
       >
         <Card>
-          <div>Under Construction baby...</div>
+          <CompareDataCltn />
         </Card>
       </PageContainer>
     </>
