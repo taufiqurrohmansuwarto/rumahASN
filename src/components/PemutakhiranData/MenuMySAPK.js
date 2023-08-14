@@ -34,6 +34,24 @@ const mockdata = [
     path: "/data-utama",
   },
   {
+    title: "Riwayat Jabatan",
+    icon: IconBadge,
+    color: "green",
+    path: "/jabatan",
+  },
+  {
+    title: "Riwayat Angka Kredit",
+    icon: Icon123,
+    color: "green",
+    path: "/angka-kredit",
+  },
+  {
+    title: "Riwayat Laporan Kinerja 22",
+    icon: IconCashBanknote,
+    color: "yellow",
+    path: "/laporan-kinerja",
+  },
+  {
     title: "Riwayat Golongan/Pangkat",
     icon: IconBadges,
     color: "indigo",
@@ -45,12 +63,7 @@ const mockdata = [
     color: "blue",
     path: "/pendidikan",
   },
-  {
-    title: "Riwayat Jabatan",
-    icon: IconBadge,
-    color: "green",
-    path: "/jabatan",
-  },
+
   {
     title: "Riwayat Peninjauan Masa Kerja",
     icon: IconClock,
@@ -106,23 +119,12 @@ const mockdata = [
     color: "orange",
     path: "/hukuman-disiplin",
   },
-  {
-    title: "Riwayat Angka Kredit",
-    icon: Icon123,
-    color: "green",
-    path: "/angka-kredit",
-  },
+
   {
     title: "Riwayat Pindah Instansi",
     icon: IconArrowsExchange,
     color: "red",
     path: "/pindah-instansi",
-  },
-  {
-    title: "Riwayat Laporan Kinerja",
-    icon: IconCashBanknote,
-    color: "yellow",
-    path: "/laporan-kinerja",
   },
 ];
 
