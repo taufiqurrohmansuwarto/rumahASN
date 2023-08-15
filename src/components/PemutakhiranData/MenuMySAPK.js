@@ -24,6 +24,7 @@ import {
   IconUserX,
   IconUsers,
 } from "@tabler/icons";
+import { Grid } from "antd";
 import { useRouter } from "next/router";
 
 const mockdata = [
@@ -130,7 +131,6 @@ const mockdata = [
 
 const useStyles = createStyles((theme) => ({
   card: {
-    width: 800,
     backgroundColor:
       theme.colorScheme === "dark"
         ? theme.colors.dark[6]
@@ -163,6 +163,8 @@ const useStyles = createStyles((theme) => ({
 
 export function MenuMySAPK() {
   const router = useRouter();
+  const { useBreakpoint } = Grid;
+  const screens = useBreakpoint();
 
   const { classes, theme } = useStyles();
 
@@ -185,11 +187,21 @@ export function MenuMySAPK() {
   ));
 
   return (
-    <Card withBorder radius="md" className={classes.card}>
+    <Card
+      style={{
+        width: screens.xs ? "100%" : 800,
+      }}
+      withBorder
+      radius="md"
+      className={classes.card}
+    >
       <Group position="apart">
         <Text className={classes.title}>Peremajaan Data SIASN-SIMASTER</Text>
       </Group>
-      <SimpleGrid cols={4} mt="md">
+      <SimpleGrid
+        cols={screens.xl ? 4 : screens.lg ? 3 : screens.md ? 2 : 2}
+        mt="md"
+      >
         {items}
       </SimpleGrid>
     </Card>
