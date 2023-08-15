@@ -1,11 +1,11 @@
-import { dataPenghargaan } from "@/services/siasn-services";
+import { dataMasaKerja } from "@/services/siasn-services";
 import { useQuery } from "@tanstack/react-query";
 import { Table } from "antd";
 
-function CompareDataPenghargaan() {
+function CompareDataMasaKerja() {
   const { data, isLoading } = useQuery(
-    ["riwayat-penghargaan"],
-    () => dataPenghargaan(),
+    ["riwayat-masakerja"],
+    () => dataMasaKerja(),
     {}
   );
 
@@ -46,9 +46,8 @@ function CompareDataPenghargaan() {
   return (
     <>
       <Table
-        title={() => <b>RIWAYAT Penghargaan SIASN</b>}
+        title={() => <b>RIWAYAT Masa Kerja SIASN</b>}
         pagination={false}
-        columns={columns}
         dataSource={data}
         loading={isLoading}
         rowKey={(row) => row?.id}
@@ -57,4 +56,4 @@ function CompareDataPenghargaan() {
   );
 }
 
-export default CompareDataPenghargaan;
+export default CompareDataMasaKerja;
