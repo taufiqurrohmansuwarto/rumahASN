@@ -9,6 +9,8 @@ const {
   riwayatPMK,
   riwayatPenghargaan,
   riwayatCtln,
+  riwayatDiklat,
+  riwayatKursus,
 } = require("@/utils/siasn-utils");
 
 const siasnEmployeesDetail = async (req, res) => {
@@ -300,19 +302,6 @@ const daftarKenaikanPangkat = async (req, res) => {
   }
 };
 
-const getDiklat = async (req, res) => {
-  try {
-    const { siasnRequest: request } = req;
-    const { employee_number: nip } = req?.user;
-
-    const result = await request.get(`/pns/rw-diklat/${nip}`);
-    res.json(result?.data);
-  } catch (error) {
-    console.log(error);
-    res.status(500).json({ message: "error" });
-  }
-};
-
 const getHukdis = async (req, res) => {
   try {
     const { siasnRequest: request } = req;
@@ -591,8 +580,29 @@ const getRwCltn = async (req, res) => {
   }
 };
 
+const getRwDiklat = async (req, res) => {
+  try {
+    const { siasnRequest: request } = req;
+    const { employee_number: nip } = req?.user;
+    const kursus = await riwayatKursus(request, nip);
+    const diklat = await riwayatDiklat(request, nip);
+
+    const dataKursus = kursus?.data?.data;
+    const dataDiklat = diklat?.data?.data;
+
+    res.json({
+      kursus: dataKursus,
+      diklat: dataDiklat,
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ code: 500, message: "Internal Server Error" });
+  }
+};
+
 module.exports = {
   getRwCltn,
+  getRwDiklat,
   getRwMasaKerja,
   getRwPenghargaan,
   getRwPendidikan,
