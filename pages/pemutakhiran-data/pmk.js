@@ -1,5 +1,6 @@
 import Layout from "@/components/Layout";
 import PageContainer from "@/components/PageContainer";
+import CompareDataMasaKerja from "@/components/PemutakhiranData/CompareDataMasaKerja";
 import { Breadcrumb, Card } from "antd";
 import Head from "next/head";
 import Link from "next/link";
@@ -38,7 +39,7 @@ const RiwayatPMK = () => {
         content="Komparasi Data Peninjauan Masa Kerja SIASN dan SIMASTER"
       >
         <Card>
-          <div>Under Construction baby...</div>
+          <CompareDataMasaKerja />
         </Card>
       </PageContainer>
     </>
