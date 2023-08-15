@@ -29,6 +29,10 @@ export const dataCltn = () => {
   return api.get(`/pns/rw-cltn`).then((res) => res.data);
 };
 
+export const dataDiklat = () => {
+  return api.get(`/pns/rw-diklat`).then((res) => res.data);
+};
+
 // end of shit
 
 export const dataUtamSIASNByNip = (nip) => {

@@ -15,6 +15,10 @@ module.exports.riwayatDiklat = (fetcher, nip) => {
   return fetcher.get(`/pns/rw-diklat/${nip}`);
 };
 
+module.exports.riwayatKursus = (fetcher, nip) => {
+  return fetcher.get(`/pns/rw-kursus/${nip}`);
+};
+
 module.exports.riwayatHukdis = (fetcher, nip) => {
   return fetcher.get(`/pns/rw-hukdis/${nip}`);
 };

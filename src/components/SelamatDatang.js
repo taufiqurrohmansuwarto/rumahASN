@@ -12,7 +12,7 @@ const MyText = ({ user }) => {
   };
 
   const handleCheckIP = () => {
-    router.push("/pemutakhiran-data/data-utama");
+    router.push("/pemutakhiran-data/komparasi");
   };
 
   return (

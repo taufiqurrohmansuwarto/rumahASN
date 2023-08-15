@@ -9,7 +9,6 @@ import { Stack } from "@mantine/core";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Button,
-  Card,
   Form,
   Modal,
   Select,
@@ -20,8 +19,8 @@ import {
 } from "antd";
 import axios from "axios";
 import { useState } from "react";
-import FormCariPegawai from "./FormCariPegawai";
 import AlertSKP22 from "./AlertSKP22";
+import FormCariPegawai from "./FormCariPegawai";
 
 // const data = {
 //     hasilKinerjaNilai: 0,
