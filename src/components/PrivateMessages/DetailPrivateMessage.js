@@ -1,18 +1,15 @@
-import { formatDateFromNow, timeFormat } from "@/utils/client-utils";
+import { sendPrivateMessage } from "@/services/index";
+import {
+  formatDateFromNow,
+  renderMarkdown,
+  timeFormat,
+  uploadFile,
+} from "@/utils/client-utils";
 import { Avatar, Group, Stack, Text, ThemeIcon, Title } from "@mantine/core";
 import { MarkdownEditor } from "@primer/react/drafts";
-import { renderMarkdown, uploadFile } from "@/utils/client-utils";
-import { sendPrivateMessage } from "@/services/index";
 import { IconPhone } from "@tabler/icons";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import {
-  Card,
-  Input,
-  Modal,
-  PageHeader,
-  Space,
-  message as messageantd,
-} from "antd";
+import { Input, Modal, PageHeader, Space, message as messageantd } from "antd";
 import { useRouter } from "next/router";
 import { useState } from "react";
 
