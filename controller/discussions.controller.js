@@ -47,3 +47,6 @@ module.exports.createComment = async (req, res) => {};
 module.exports.updateComment = async (req, res) => {};
 module.exports.getComment = async (req, res) => {};
 module.exports.removeComment = async (req, res) => {};
+
+module.exports.upvote = async (req, res) => {};
+module.exports.downvote = async (req, res) => {};
