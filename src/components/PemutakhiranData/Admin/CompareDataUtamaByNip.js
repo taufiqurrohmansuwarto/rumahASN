@@ -5,7 +5,7 @@ import { CloseOutlined } from "@ant-design/icons";
 import { Stack, Table } from "@mantine/core";
 import { IconAlertCircle, IconCircleCheck } from "@tabler/icons";
 import { useQuery } from "@tanstack/react-query";
-import { Alert, Card, Col, Row, Skeleton, Typography } from "antd";
+import { Alert, Card, Tooltip, Col, Row, Skeleton, Typography } from "antd";
 import CheckHasil from "../CheckHasil";
 
 const Pemberitahuan = () => {
@@ -166,6 +166,22 @@ function CompareDataUtamaByNip({ nip }) {
                       </td>
                     </tr>
                     <tr>
+                      <td>NIK</td>
+                      <td>{data?.nik}</td>
+                      <td>{dataSimaster?.nik}</td>
+                      <td
+                        style={{
+                          textAlign: "center",
+                        }}
+                      >
+                        <CheckHasil
+                          firstData={data?.nik}
+                          secondData={dataSimaster?.nik}
+                        />
+                      </td>
+                    </tr>
+
+                    <tr>
                       <td>Jabatan</td>
                       <td>{data?.jabatanNama}</td>
                       <td>{dataSimaster?.jabatan?.jabatan}</td>
@@ -174,11 +190,13 @@ function CompareDataUtamaByNip({ nip }) {
                           textAlign: "center",
                         }}
                       >
-                        <IconAlertCircle
-                          style={{
-                            color: "orange",
-                          }}
-                        />
+                        <Tooltip title="Penulisan kemungkinan beda tapi secara substansi sama">
+                          <IconAlertCircle
+                            style={{
+                              color: "orange",
+                            }}
+                          />
+                        </Tooltip>
                       </td>
                     </tr>
                     <tr>
@@ -190,11 +208,13 @@ function CompareDataUtamaByNip({ nip }) {
                           textAlign: "center",
                         }}
                       >
-                        <IconAlertCircle
-                          style={{
-                            color: "orange",
-                          }}
-                        />
+                        <Tooltip title="Penulisan kemungkinan beda tapi secara substansi sama">
+                          <IconAlertCircle
+                            style={{
+                              color: "orange",
+                            }}
+                          />
+                        </Tooltip>
                       </td>
                     </tr>
                     <tr>
@@ -206,27 +226,13 @@ function CompareDataUtamaByNip({ nip }) {
                           textAlign: "center",
                         }}
                       >
-                        <IconAlertCircle
-                          style={{
-                            color: "orange",
-                          }}
-                        />
-                      </td>
-                    </tr>
-                    <tr>
-                      <td>NIK</td>
-                      <td>{data?.nik}</td>
-                      <td>{dataSimaster?.nik}</td>
-                      <td
-                        style={{
-                          textAlign: "center",
-                        }}
-                      >
-                        <IconAlertCircle
-                          style={{
-                            color: "orange",
-                          }}
-                        />
+                        <Tooltip title="Penulisan kemungkinan beda tapi secara substansi sama">
+                          <IconAlertCircle
+                            style={{
+                              color: "orange",
+                            }}
+                          />
+                        </Tooltip>
                       </td>
                     </tr>
                   </tbody>
