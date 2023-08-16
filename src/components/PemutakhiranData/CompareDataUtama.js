@@ -4,7 +4,17 @@ import { komparasiGelar } from "@/utils/client-utils";
 import { CheckOutlined, CloseOutlined } from "@ant-design/icons";
 import { Stack, Table } from "@mantine/core";
 import { useQuery } from "@tanstack/react-query";
-import { Alert, Card, Col, Form, Input, Row, Skeleton, Typography } from "antd";
+import {
+  Alert,
+  Card,
+  Col,
+  Form,
+  Input,
+  Row,
+  Skeleton,
+  Tooltip,
+  Typography,
+} from "antd";
 import { useEffect } from "react";
 import CheckHasil from "./CheckHasil";
 import { IconAlertCircle, IconCircleCheck } from "@tabler/icons";
@@ -283,6 +293,22 @@ function CompareDataUtama() {
                       </td>
                     </tr>
                     <tr>
+                      <td>NIK</td>
+                      <td>{data?.nik}</td>
+                      <td>{dataSimaster?.nik}</td>
+                      <td
+                        style={{
+                          textAlign: "center",
+                        }}
+                      >
+                        <CheckHasil
+                          firstData={data?.nik}
+                          secondData={dataSimaster?.nik}
+                        />
+                      </td>
+                    </tr>
+
+                    <tr>
                       <td>Jabatan</td>
                       <td>{data?.jabatanNama}</td>
                       <td>{dataSimaster?.jabatan?.jabatan}</td>
@@ -291,11 +317,13 @@ function CompareDataUtama() {
                           textAlign: "center",
                         }}
                       >
-                        <IconAlertCircle
-                          style={{
-                            color: "orange",
-                          }}
-                        />
+                        <Tooltip title="Penulisan kemungkinan beda tapi secara substansi sama">
+                          <IconAlertCircle
+                            style={{
+                              color: "orange",
+                            }}
+                          />
+                        </Tooltip>
                       </td>
                     </tr>
                     <tr>
@@ -307,11 +335,13 @@ function CompareDataUtama() {
                           textAlign: "center",
                         }}
                       >
-                        <IconAlertCircle
-                          style={{
-                            color: "orange",
-                          }}
-                        />
+                        <Tooltip title="Penulisan kemungkinan beda tapi secara substansi sama">
+                          <IconAlertCircle
+                            style={{
+                              color: "orange",
+                            }}
+                          />
+                        </Tooltip>
                       </td>
                     </tr>
                     <tr>
@@ -323,27 +353,13 @@ function CompareDataUtama() {
                           textAlign: "center",
                         }}
                       >
-                        <IconAlertCircle
-                          style={{
-                            color: "orange",
-                          }}
-                        />
-                      </td>
-                    </tr>
-                    <tr>
-                      <td>NIK</td>
-                      <td>{data?.nik}</td>
-                      <td>{dataSimaster?.nik}</td>
-                      <td
-                        style={{
-                          textAlign: "center",
-                        }}
-                      >
-                        <IconAlertCircle
-                          style={{
-                            color: "orange",
-                          }}
-                        />
+                        <Tooltip title="Penulisan kemungkinan beda tapi secara substansi sama">
+                          <IconAlertCircle
+                            style={{
+                              color: "orange",
+                            }}
+                          />
+                        </Tooltip>
                       </td>
                     </tr>
                   </tbody>
