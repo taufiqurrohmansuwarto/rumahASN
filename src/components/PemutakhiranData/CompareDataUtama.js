@@ -346,8 +346,8 @@ function CompareDataUtama() {
                     </tr>
                     <tr>
                       <td>Pangkat</td>
-                      <td>{`${data?.golRuangAkhir}-${data?.pangkatAkhir}`}</td>
-                      <td>{`${dataSimaster?.pangkat?.golongan}-${dataSimaster?.pangkat?.pangkat}`}</td>
+                      <td>{`${data?.pangkatAkhir}-${data?.golRuangAkhir}`}</td>
+                      <td>{`${dataSimaster?.pangkat?.pangkat}-${dataSimaster?.pangkat?.golongan}`}</td>
                       <td
                         style={{
                           textAlign: "center",
