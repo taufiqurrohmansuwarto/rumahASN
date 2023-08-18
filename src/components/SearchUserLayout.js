@@ -24,45 +24,47 @@ function SearchUserLayout() {
 
   return (
     <>
-      {!screens.xs && data?.user?.current_role === "admin" && (
-        <Select
-          style={{
-            width: 250,
-          }}
-          showSearch
-          allowClear
-          filterOption={false}
-          placeholder="Ketik nama atau NIP"
-          //       loading={isLoadingUser}
+      {!screens.xs &&
+        (data?.user?.current_role === "admin" ||
+          data?.user?.current_role === "agent") && (
+          <Select
+            style={{
+              width: 250,
+            }}
+            showSearch
+            allowClear
+            filterOption={false}
+            placeholder="Ketik nama atau NIP"
+            //       loading={isLoadingUser}
 
-          notFoundContent={isLoadingUser ? <Spin size="small" /> : null}
-          onSearch={(value) => {
-            if (!value) {
-              return;
-            } else {
-              setUser(value);
-            }
-          }}
-          value={user}
-          onChange={(value) => {
-            if (!value) {
-              return;
-            } else {
-              router.push(`/users/${value}`);
-              setUser(value);
-            }
-          }}
-        >
-          {dataUser?.map((item) => (
-            <Select.Option key={item?.custom_id} value={item?.custom_id}>
-              <Space>
-                <Avatar size="small" src={item?.image} />
-                <Typography.Text>{item?.username}</Typography.Text>
-              </Space>
-            </Select.Option>
-          ))}
-        </Select>
-      )}
+            notFoundContent={isLoadingUser ? <Spin size="small" /> : null}
+            onSearch={(value) => {
+              if (!value) {
+                return;
+              } else {
+                setUser(value);
+              }
+            }}
+            value={user}
+            onChange={(value) => {
+              if (!value) {
+                return;
+              } else {
+                router.push(`/users/${value}`);
+                setUser(value);
+              }
+            }}
+          >
+            {dataUser?.map((item) => (
+              <Select.Option key={item?.custom_id} value={item?.custom_id}>
+                <Space>
+                  <Avatar size="small" src={item?.image} />
+                  <Typography.Text>{item?.username}</Typography.Text>
+                </Space>
+              </Select.Option>
+            ))}
+          </Select>
+        )}
     </>
   );
 }
