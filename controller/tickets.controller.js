@@ -7,7 +7,8 @@ module.exports.userTicket = async (req, res) => {
     const page = parseInt(req.query.page) || 1;
 
     const currentTicket = await Tickets.query()
-      .andWhere("user_id", userId)
+      .select("id", "title", "created_at")
+      .andWhere("requester", userId)
       .page(page - 1, limit)
       .orderBy("id", "desc");
 
@@ -20,7 +21,7 @@ module.exports.userTicket = async (req, res) => {
     res.json(data);
   } catch (error) {
     console.log(error);
-    req.status(500).json({ message: error.message });
+    res.status(500).json({ message: error.message });
   }
 };
 
