@@ -12,7 +12,7 @@ function SearchUserLayout() {
   const [user, setUser] = useState(undefined);
   const [debounceValue] = useDebouncedValue(user, 500);
   const screens = useBreakpoint();
-  const { data, status } = useSession();
+  const { data } = useSession();
 
   const { data: dataUser, isLoading: isLoadingUser } = useQuery(
     ["data-user", debounceValue],
