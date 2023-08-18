@@ -78,6 +78,21 @@ module.exports.removeThread = async (req, res) => {
   }
 };
 
+module.exports.getThread = async (req, res) => {
+  try {
+    const { threadId } = req?.query;
+    const result = await Discussion.query()
+      .where("id", threadId)
+      .andWhere("type", "thread")
+      .first();
+
+    res.json(result);
+  } catch (error) {
+    console.log(errror);
+    res.status(500).json({ message: "Server Error" });
+  }
+};
+
 // ini semua asn
 module.exports.createPost = async (req, res) => {
   try {
@@ -94,6 +109,25 @@ module.exports.createPost = async (req, res) => {
     res.json({
       message: "Post created successfully",
     });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Server Error" });
+  }
+};
+
+module.exports.getPost = async (req, res) => {
+  try {
+    const { postId, threadId } = req.query;
+
+    const result = await Discussion.query()
+      .where({
+        type: "post",
+        discussion_id: threadId,
+      })
+      .andWhere("id", postId)
+      .first();
+
+    res.json(result);
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: "Server Error" });

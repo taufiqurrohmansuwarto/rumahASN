@@ -1,5 +1,6 @@
 import {
   createThread,
+  getThreads,
   removeThread,
   updateThread,
 } from "@/controller/discussions.controller";
@@ -13,6 +14,7 @@ router
   .use(employeesMiddleware)
   .post(createThread)
   .patch(updateThread)
+  .get(getThreads)
   .delete(removeThread);
 
 export default router.handler({});

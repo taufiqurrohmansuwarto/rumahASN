@@ -1,5 +1,6 @@
 import {
   createPost,
+  getPost,
   removePost,
   updatePost,
 } from "@/controller/discussions.controller";
@@ -12,6 +13,7 @@ router
   .use(auth)
   .use(employeesMiddleware)
   .post(createPost)
+  .get(getPost)
   .patch(updatePost)
   .delete(removePost);
 

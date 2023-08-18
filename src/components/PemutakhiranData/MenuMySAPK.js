@@ -1,4 +1,5 @@
 import {
+  Alert,
   Card,
   Group,
   SimpleGrid,
@@ -9,6 +10,7 @@ import {
 } from "@mantine/core";
 import {
   Icon123,
+  IconAlertCircle,
   IconArrowsExchange,
   IconBadge,
   IconBadges,
@@ -55,76 +57,76 @@ const mockdata = [
   {
     title: "Riwayat Golongan/Pangkat",
     icon: IconBadges,
-    color: "indigo",
+    color: "gray",
     path: "/golongan",
   },
   {
     title: "Riwayat Pendidikan",
     icon: IconSchool,
-    color: "blue",
+    color: "gray",
     path: "/pendidikan",
   },
 
   {
     title: "Riwayat Peninjauan Masa Kerja",
     icon: IconClock,
-    color: "teal",
+    color: "gray",
     path: "/pmk",
   },
   {
     title: "Riwayat CPNS/PNS",
     icon: IconUserX,
-    color: "cyan",
+    color: "gray",
     path: "/cpnspns",
   },
   {
     title: "Riwayat Diklat/Kursus",
     icon: IconReport,
-    color: "pink",
+    color: "gray",
     path: "/diklat",
   },
   {
     title: "Riwayat Keluarga",
     icon: IconUsers,
-    color: "red",
+    color: "gray",
     path: "/keluarga",
   },
   {
     title: "Riwayat SKP",
     icon: IconClipboardData,
-    color: "orange",
+    color: "gray",
     path: "/skp",
   },
   {
     title: "Riwayat Penghargaan",
     icon: IconFileCertificate,
-    color: "orange",
+    color: "gray",
     path: "/penghargaan",
   },
   {
     title: "Riwayat Organisasi",
     icon: IconFileAnalytics,
-    color: "pink",
+    color: "gray",
     path: "/organisasi",
   },
-  { title: "Riwayat CLTN", icon: IconBriefcase, color: "green", path: "/cltn" },
+  { title: "Riwayat CLTN", icon: IconBriefcase, color: "gray", path: "/cltn" },
   {
     title: "Riwayat Pencamtuman Gelar",
     icon: IconSchool,
-    color: "cyan",
+    color: "gray",
     path: "/pencantuman-gelar",
   },
   {
     title: "Riwayat Hukuman Disiplin",
     icon: IconSchool,
-    color: "orange",
+    color: "gray",
     path: "/hukuman-disiplin",
   },
 
   {
     title: "Riwayat Pindah Instansi",
     icon: IconArrowsExchange,
-    color: "red",
+    color: "gray",
     path: "/pindah-instansi",
   },
 ];
@@ -195,6 +197,17 @@ export function MenuMySAPK() {
       radius="md"
       className={classes.card}
     >
+      <Alert
+        mb={10}
+        color="red"
+        icon={<IconAlertCircle size="1rem" />}
+        title="Perhatian!"
+      >
+        Bagi Para ASN yang mau melakukan peremajaan data, menu yang bisa
+        ditambah adalah Riwayat Jabatan, Riwayat Angka Kredit, dan Laporan
+        Kinerja 2022. Terima Kasih
+      </Alert>
+
       <Group position="apart">
         <Text className={classes.title}>Peremajaan Data SIASN-SIMASTER</Text>
       </Group>
