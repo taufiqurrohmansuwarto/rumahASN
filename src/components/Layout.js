@@ -20,6 +20,7 @@ import { useState } from "react";
 import { userRoutes } from "../routes";
 import Messages from "./Messages";
 import Notifications from "./Notifications";
+import SearchUserLayout from "./SearchUserLayout";
 
 const ProLayout = dynamic(
   () => import("@ant-design/pro-components").then((mod) => mod?.ProLayout),
@@ -276,6 +277,7 @@ function Layout({ children, active, collapsed = false }) {
       actionsRender={(props) => {
         // if (props.isMobile) return [];
         return [
+          <SearchUserLayout key="search" />,
           <Messages key="messages" />,
           <Notifications props={props} key="Notifications" />,
         ];
