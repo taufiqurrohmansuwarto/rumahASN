@@ -48,8 +48,8 @@ function Feeds() {
         <Grid.Col md={8} sm={12}>
           <Card>
             <Stack>
-              <AlertPemutakhiranData />
-              <TutorialPeremajaanDataSIASN />
+              {/* <AlertPemutakhiranData /> */}
+              {/* <TutorialPeremajaanDataSIASN /> */}
               <SelamatDatang />
               <PodcastAnnouncement
                 image="https://siasn.bkd.jatimprov.go.id:9000/public/hijau-podcast.jpg"
