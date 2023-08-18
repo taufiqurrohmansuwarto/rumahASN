@@ -30,6 +30,7 @@ import { useSession } from "next-auth/react";
 import { useState } from "react";
 import { Stack } from "@mantine/core";
 import SiasnTab from "@/components/PemutakhiranData/Admin/SiasnTab";
+import UserTickets from "@/components/Ticket/UserTickets";
 
 const CreateModal = ({ open, onCancel, receiver }) => {
   const router = useRouter();
@@ -268,6 +269,13 @@ const Users = () => {
               {currentUser?.user?.current_role && data?.group === "MASTER" && (
                 <Tabs.TabPane tab="Peremajaan Data" key="2">
                   <SiasnTab nip={data?.employee_number} />
+                </Tabs.TabPane>
+              )}
+            </>
+            <>
+              {currentUser?.user?.current_role === "admin" && (
+                <Tabs.TabPane tab="Daftar Pertanyaan" key="3">
+                  <UserTickets />
                 </Tabs.TabPane>
               )}
             </>

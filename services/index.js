@@ -5,6 +5,15 @@ const api = axios.create({
   baseURL: "/helpdesk/api",
 });
 
+export const getUsersTickets = async ({ id, query }) => {
+  const qs = queryString.stringify(query, {
+    skipNull: true,
+    skipEmptyString: true,
+  });
+
+  return await api.get(`/users/${id}/tickets?${qs}`).then((res) => res?.data);
+};
+
 export const createTickets = async (data) => {
   return await api.post("/tickets", data);
 };
