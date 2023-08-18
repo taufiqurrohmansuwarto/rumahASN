@@ -1,5 +1,6 @@
 import Layout from "@/components/Layout";
 import PageContainer from "@/components/PageContainer";
+import CompareSKP from "@/components/PemutakhiranData/CompareSKP";
 import { Breadcrumb, Card } from "antd";
 import Head from "next/head";
 import Link from "next/link";
@@ -38,7 +39,7 @@ const RiwayatSKP = () => {
         content="Komparasi Data SKP SIASN dan SIMASTER"
       >
         <Card>
-          <div>Under Construction baby...</div>
+          <CompareSKP />
         </Card>
       </PageContainer>
     </>
