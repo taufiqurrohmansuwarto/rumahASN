@@ -72,6 +72,10 @@ const detailPolling = async (req, res) => {
 // delete
 const deletePolling = async (req, res) => {
   try {
+    const { id } = req?.query;
+    await PollAnswer.query().delete().where({ poll_id: id });
+    await Poll.query().deleteById(id);
+    res.json({ code: 200, message: "Success" });
   } catch (error) {
     console.log(error);
     res.status(500).json({ code: 500, message: "Internal Server Error" });
@@ -81,6 +85,22 @@ const deletePolling = async (req, res) => {
 // vote
 const votePolling = async (req, res) => {
   try {
+    const { id } = req?.query;
+    const { customId } = req?.user;
+
+    const data = {
+      poll_id: id,
+      user_id: customId,
+    };
+
+    // upsert
+    await PollVote.query()
+      .insert(data)
+      .onConflict(["poll_id", "user_id"])
+      .merge()
+      .returning("*");
+
+    res.json({ code: 200, message: "Success" });
   } catch (error) {
     console.log(error);
     res.status(500).json({ code: 500, message: "Internal Server Error" });
@@ -99,6 +119,12 @@ const unvotePolling = async (req, res) => {
 // read
 const readPollUser = async (req, res) => {
   try {
+    // between start_date and end_date
+    const result = await Poll.query()
+      .where("start_date", "<=", new Date())
+      .andWhere("end_date", ">=", new Date())
+      .withGraphFetched("[answers]");
+    res.json(result);
   } catch (error) {
     console.log(error);
     res.status(500).json({ code: 500, message: "Internal Server Error" });

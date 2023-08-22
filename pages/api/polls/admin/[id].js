@@ -1,5 +1,8 @@
-import { removePooling } from "@/controller/announcements-poolings.controller";
-import { detailPolling, updatePolling } from "@/controller/polls.controller";
+import {
+  deletePolling,
+  detailPolling,
+  updatePolling,
+} from "@/controller/polls.controller";
 import adminMiddleware from "@/middleware/admin.middleware";
 import auth from "@/middleware/auth.middleware";
 import { createRouter } from "next-connect";
@@ -8,7 +11,7 @@ const router = createRouter();
 router
   .use(auth)
   .use(adminMiddleware)
-  .delete(removePooling)
+  .delete(deletePolling)
   .patch(updatePolling)
   .get(detailPolling);
 
