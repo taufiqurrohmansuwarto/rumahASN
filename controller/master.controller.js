@@ -1,3 +1,4 @@
+import { getRwPendidikanMaster } from "@/utils/master.utils";
 import moment from "moment";
 const { orderBy } = require("lodash");
 
@@ -203,6 +204,22 @@ export const dataUtamaMasterByNip = async (req, res) => {
     console.log(error);
     res.status(500).json({ code: 500, message: "Internal Server Error" });
   }
+};
+
+export const dataPendidikanMasterNIP = async (req, res) => {
+  try {
+    const { fetcher } = req;
+    const { nip } = req.query;
+    const hasil = await getRwPendidikanMaster(fetcher, nip);
+    res.json(hasil?.data);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ code: 500, message: "Internal Server Error" });
+  }
+};
+
+export const dataPendidikanMaster = async (req, res) => {
+  res.json({});
 };
 
 module.exports = {

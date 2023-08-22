@@ -21,6 +21,10 @@ export const dataUtamaSimaster = () => {
   return api.get("/data-utama").then((res) => res.data);
 };
 
+export const rwPendidikan = () => {
+  return api.get("/rw-pendidikan").then((res) => res.data);
+};
+
 // admin
 export const dataUtamaMasterByNip = (nip) => {
   return api.get(`/admin/${nip}/data-utama`).then((res) => res.data);
@@ -36,4 +40,8 @@ export const rwAngkakreditMasterByNip = (nip) => {
 
 export const rwSkpMasterByNip = (nip) => {
   return api.get(`/admin/${nip}/rw-skp`).then((res) => res.data);
+};
+
+export const rwPendidikanMasterByNip = (nip) => {
+  return api.get(`/admin/${nip}/rw-pendidikan`).then((res) => res.data);
 };
