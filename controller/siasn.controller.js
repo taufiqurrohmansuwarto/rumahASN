@@ -508,6 +508,21 @@ const getRwPendidikan = async (req, res) => {
   }
 };
 
+const getRwPendidikanByNip = async (req, res) => {
+  try {
+    const { siasnRequest: request } = req;
+    const { nip } = req?.query;
+
+    const result = await riwayatPendidikan(request, nip);
+    const data = result?.data?.data;
+
+    res.json(data);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ code: 500, message: "Internal Server Error" });
+  }
+};
+
 const getRwGolongan = async (req, res) => {
   try {
     const { siasnRequest: request } = req;
@@ -606,6 +621,7 @@ module.exports = {
   getRwMasaKerja,
   getRwPenghargaan,
   getRwPendidikan,
+  getRwPendidikanByNip,
   getRwGolongan,
   downloadDocument,
   getTokenSIASN,
