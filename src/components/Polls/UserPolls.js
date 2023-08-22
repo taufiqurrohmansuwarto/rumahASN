@@ -1,19 +1,37 @@
-import { pollForUser } from "@/services/polls.services";
+import { pollForUser, votePolling } from "@/services/polls.services";
 import { Stack } from "@mantine/core";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { Radio, Skeleton, Space, Typography } from "antd";
 import React, { useState } from "react";
 
 const Poll = ({ data }) => {
-  const [value, setValue] = useState(null);
+  const { mutate, isLoading } = useMutation((data) => votePolling(data), {
+    onSuccess: () => {
+      // queryClient.invalidateQueries("users-polls");
+    },
+  });
+
+  const handleChange = (id, data) => {
+    const currentData = {
+      poll_id: data?.id,
+      answer_id: id,
+    };
+
+    // setValue(value);
+    mutate(currentData);
+  };
 
   return (
     <Stack>
       <Typography.Text>{data?.question}</Typography.Text>
-      <Radio.Group>
+      <Radio.Group defaultValue={data?.vote}>
         <Space direction="vertical">
           {data?.answers?.map((answer) => (
-            <Radio key={answer?.id} value={answer?.id}>
+            <Radio
+              onChange={() => handleChange(answer?.id, data)}
+              key={answer?.id}
+              value={answer?.id}
+            >
               {answer?.answer}
             </Radio>
           ))}

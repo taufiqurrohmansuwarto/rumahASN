@@ -49,6 +49,11 @@ function Votes() {
             Update
           </Button>
           <Button onClick={() => handleRemove(id)}>Delete</Button>
+          <Button
+            onClick={() => router.push(`/apps-managements/votes/${id}/detail`)}
+          >
+            Detail
+          </Button>
         </Space>
       ),
     },
