@@ -23,3 +23,7 @@ export const updatePolling = ({ id, data }) => {
 export const removePooling = (id) => {
   return api.delete(`/admin/${id}`).then((res) => res?.data);
 };
+
+export const pollForUser = () => {
+  return api.get(``).then((res) => res?.data);
+};

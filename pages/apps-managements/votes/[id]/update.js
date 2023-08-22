@@ -1,9 +1,17 @@
 import Layout from "@/components/Layout";
 import { detailPolling, updatePolling } from "@/services/polls.services";
-import { useQuery } from "@tanstack/react-query";
-import { Skeleton, Form, Input, DatePicker, Space, Button } from "antd";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  Skeleton,
+  Form,
+  Input,
+  DatePicker,
+  Space,
+  Button,
+  message,
+} from "antd";
 import moment from "moment";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 
 import { PlusOutlined, MinusCircleOutlined } from "@ant-design/icons";
@@ -17,12 +25,22 @@ const FormUpdate = ({ data, id }) => {
   const [form] = Form.useForm();
   const [answers, setAnswers] = useState([]);
 
+  const queryClient = useQueryClient();
+
+  useEffect(() => {
+    form.setFieldsValue({
+      ...data,
+      date: [moment(data?.start_date), moment(data?.end_date)],
+    });
+  }, [data, form]);
+
   const gotoVotes = () => router.push(`/apps-managements/votes`);
 
   const { mutate, isLoading } = useMutation((data) => updatePolling(data), {
     onSuccess: (data) => {
       gotoVotes();
       message.success("Berhasil mengubah voting!");
+      queryClient.invalidateQueries("votes-admins", id);
     },
     onError: (error) => {
       console.log(error);
@@ -156,6 +174,8 @@ function VoteUpdate() {
     () => detailPolling(id),
     {}
   );
+
+  useEffect(() => {}, [data]);
 
   return (
     <>
