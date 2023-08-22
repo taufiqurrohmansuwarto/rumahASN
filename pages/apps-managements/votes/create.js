@@ -5,7 +5,9 @@ import {
   PlusOutlined,
 } from "@ant-design/icons";
 import {
+  Breadcrumb,
   Button,
+  Card,
   Col,
   DatePicker,
   Form,
@@ -20,6 +22,8 @@ import { createPolling } from "@/services/polls.services";
 import moment from "moment";
 import PageContainer from "@/components/PageContainer";
 import { useRouter } from "next/router";
+import Head from "next/head";
+import Link from "next/link";
 
 const MyForm = () => {
   const [form] = Form.useForm();
@@ -151,12 +155,37 @@ function CreateVote() {
 
   return (
     <>
-      <PageContainer onBack={handleBack}>
-        <Row>
-          <Col md={20}>
-            <MyForm />
-          </Col>
-        </Row>
+      <Head>
+        <title>Polling Baru</title>
+      </Head>
+      <PageContainer
+        header={{
+          breadcrumbRender: () => (
+            <Breadcrumb>
+              <Breadcrumb.Item>
+                <Link href="/feeds">
+                  <a>Beranda</a>
+                </Link>
+              </Breadcrumb.Item>
+              <Breadcrumb.Item>
+                <Link href="/apps-managements/votes">
+                  <a>Polling</a>
+                </Link>
+              </Breadcrumb.Item>
+              <Breadcrumb.Item>Buat Polling Baru</Breadcrumb.Item>
+            </Breadcrumb>
+          ),
+        }}
+        title="Polling Baru"
+        onBack={handleBack}
+      >
+        <Card>
+          <Row>
+            <Col md={20}>
+              <MyForm />
+            </Col>
+          </Row>
+        </Card>
       </PageContainer>
     </>
   );

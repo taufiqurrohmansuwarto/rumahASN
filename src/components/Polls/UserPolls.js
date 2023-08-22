@@ -1,7 +1,7 @@
 import { pollForUser, votePolling } from "@/services/polls.services";
 import { Stack } from "@mantine/core";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { Radio, Skeleton, Space, Typography } from "antd";
+import { Card, Radio, Skeleton, Space, Typography } from "antd";
 import React, { useState } from "react";
 
 const Poll = ({ data }) => {
@@ -48,11 +48,17 @@ function UserPolls() {
     {}
   );
   return (
-    <Skeleton loading={isLoading}>
-      {data?.map((item) => (
-        <Poll key={item?.id} data={item} />
-      ))}
-    </Skeleton>
+    <>
+      {data?.length > 0 ? (
+        <Card title="Polling">
+          <Skeleton loading={isLoading}>
+            {data?.map((item) => (
+              <Poll key={item?.id} data={item} />
+            ))}
+          </Skeleton>
+        </Card>
+      ) : null}
+    </>
   );
 }
 

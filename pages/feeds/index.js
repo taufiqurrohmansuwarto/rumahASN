@@ -3,6 +3,7 @@ import Layout from "@/components/Layout";
 import PageContainer from "@/components/PageContainer";
 import AlertPemutakhiranData from "@/components/PemutakhiranData/AlertPemutakhiranData";
 import PodcastAnnouncement from "@/components/PodcatsAnnouncement";
+import UserPolls from "@/components/Polls/UserPolls";
 import SelamatDatang from "@/components/SelamatDatang";
 import ShowRatings from "@/components/ShowRatings";
 import TicketsPublish from "@/components/Ticket/TicketsPublish";
@@ -65,7 +66,7 @@ function Feeds() {
           <Grid>
             <Grid.Col md={12} xs={12}>
               <Stack>
-                <PublikasiCASN />
+                <UserPolls />
               </Stack>
             </Grid.Col>
             <Grid.Col md={12} xs={12}>
