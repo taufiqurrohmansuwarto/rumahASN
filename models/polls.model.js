@@ -8,7 +8,20 @@ class Polls extends Model {
   }
 
   // realation with user
-  static get relationMappings() {}
+  static get relationMappings() {
+    const author = require("@/models/users.model");
+
+    return {
+      author: {
+        relation: Model.BelongsToOneRelation,
+        modelClass: author,
+        join: {
+          from: "polls.author",
+          to: "users.custom_id",
+        },
+      },
+    };
+  }
 }
 
 export default Polls;
