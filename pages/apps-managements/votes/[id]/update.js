@@ -9,6 +9,8 @@ import {
   Space,
   Button,
   message,
+  Card,
+  Breadcrumb,
 } from "antd";
 import moment from "moment";
 import { useEffect, useState } from "react";
@@ -19,6 +21,7 @@ import { PlusOutlined, MinusCircleOutlined } from "@ant-design/icons";
 import { useRouter } from "next/router";
 import React from "react";
 import PageContainer from "@/components/PageContainer";
+import Link from "next/link";
 
 const FormUpdate = ({ data, id }) => {
   const router = useRouter();
@@ -179,16 +182,38 @@ function VoteUpdate() {
 
   return (
     <>
-      <PageContainer onBack={handleBack}>
-        <Skeleton loading={isLoading}>
-          <FormUpdate
-            id={id}
-            data={{
-              ...data,
-              date: [moment(data?.start_date), moment(data?.end_date)],
-            }}
-          />
-        </Skeleton>
+      <PageContainer
+        header={{
+          breadcrumbRender: () => (
+            <Breadcrumb>
+              <Breadcrumb.Item>
+                <Link href="/feeds">
+                  <a>Beranda</a>
+                </Link>
+              </Breadcrumb.Item>
+              <Breadcrumb.Item>
+                <Link href="/apps-managements/votes">
+                  <a>Polling</a>
+                </Link>
+              </Breadcrumb.Item>
+              <Breadcrumb.Item>Edit Polling</Breadcrumb.Item>
+            </Breadcrumb>
+          ),
+        }}
+        title="Edit Polling"
+        onBack={handleBack}
+      >
+        <Card>
+          <Skeleton loading={isLoading}>
+            <FormUpdate
+              id={id}
+              data={{
+                ...data,
+                date: [moment(data?.start_date), moment(data?.end_date)],
+              }}
+            />
+          </Skeleton>
+        </Card>
       </PageContainer>
     </>
   );

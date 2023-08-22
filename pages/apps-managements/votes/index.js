@@ -1,10 +1,12 @@
 import Layout from "@/components/Layout";
-import UserPolls from "@/components/Polls/UserPolls";
+import PageContainer from "@/components/PageContainer";
 import { readAllPolling, removePooling } from "@/services/polls.services";
+import { PlusOutlined } from "@ant-design/icons";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Button, Space, Table, message } from "antd";
+import { Breadcrumb, Button, Card, Space, Table, message } from "antd";
+import Head from "next/head";
+import Link from "next/link";
 import { useRouter } from "next/router";
-
 function Votes() {
   const router = useRouter();
   const handleCreate = () => router.push(`/apps-managements/votes/create`);
@@ -60,17 +62,46 @@ function Votes() {
   ];
 
   return (
-    <div>
-      <Button onClick={handleCreate}>Create</Button>
-      <Table
-        pagination={false}
-        columns={columns}
-        dataSource={data}
-        loading={isLoading}
-        rowKey={(row) => row?.id}
-      />
-      <UserPolls />
-    </div>
+    <>
+      <Head>
+        <title>Polilng</title>
+      </Head>
+      <PageContainer
+        header={{
+          breadcrumbRender: () => (
+            <Breadcrumb>
+              <Breadcrumb.Item>
+                <Link href="/feeds">
+                  <a>Beranda</a>
+                </Link>
+              </Breadcrumb.Item>
+              <Breadcrumb.Item>Polling</Breadcrumb.Item>
+            </Breadcrumb>
+          ),
+        }}
+        title="Rumah ASN - Polling"
+      >
+        <Card>
+          <Button
+            style={{
+              marginBottom: 16,
+            }}
+            onClick={handleCreate}
+            type="primary"
+            icon={<PlusOutlined />}
+          >
+            Polling Baru
+          </Button>
+          <Table
+            pagination={false}
+            columns={columns}
+            dataSource={data}
+            loading={isLoading}
+            rowKey={(row) => row?.id}
+          />
+        </Card>
+      </PageContainer>
+    </>
   );
 }
 
