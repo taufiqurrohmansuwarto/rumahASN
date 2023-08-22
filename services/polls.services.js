@@ -12,8 +12,8 @@ export const readAllPolling = () => {
   return api.get(`/admin`).then((res) => res?.data);
 };
 
-export const detailPolling = (id) => {
-  return api.get(`/admin/${id}`).then((res) => res?.data);
+export const detailPolling = (id, query = "simple") => {
+  return api.get(`/admin/${id}?detail=${query}`).then((res) => res?.data);
 };
 
 export const updatePolling = ({ id, data }) => {
@@ -26,4 +26,9 @@ export const removePooling = (id) => {
 
 export const pollForUser = () => {
   return api.get(``).then((res) => res?.data);
+};
+
+// user
+export const votePolling = (data) => {
+  return api.patch(``, data).then((res) => res?.data);
 };

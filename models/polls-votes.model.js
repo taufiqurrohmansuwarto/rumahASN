@@ -7,6 +7,10 @@ class PollsVotes extends Model {
     return "polls_votes";
   }
 
+  static get idColumn() {
+    return ["poll_id", "user_id"];
+  }
+
   // realation with user
   static get relationMappings() {}
 }
