@@ -10,9 +10,10 @@ class Polls extends Model {
   // realation with user
   static get relationMappings() {
     const author = require("@/models/users.model");
+    const answers = require("@/models/polls-answers.model");
 
     return {
-      author: {
+      creator: {
         relation: Model.BelongsToOneRelation,
         modelClass: author,
         join: {
@@ -20,8 +21,16 @@ class Polls extends Model {
           to: "users.custom_id",
         },
       },
+      answers: {
+        relation: Model.HasManyRelation,
+        modelClass: answers,
+        join: {
+          from: "polls.id",
+          to: "polls_answers.poll_id",
+        },
+      },
     };
   }
 }
 
-export default Polls;
+module.exports = Polls;

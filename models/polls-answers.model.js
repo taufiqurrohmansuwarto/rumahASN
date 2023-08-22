@@ -2,13 +2,13 @@ const { Model } = require("objection");
 const knex = require("../db");
 Model.knex(knex);
 
-class PollsVotes extends Model {
+class PollsAnswers extends Model {
   static get tableName() {
-    return "polls_votes";
+    return "polls_answers";
   }
 
   // realation with user
   static get relationMappings() {}
 }
 
-module.exports = PollsVotes;
+module.exports = PollsAnswers;
