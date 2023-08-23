@@ -1,4 +1,4 @@
-const WebinarSeries = require("@/models/webinar-series.model copy");
+const WebinarSeries = require("@/models/webinar-series.model");
 const WebinarSeriesParticipates = require("@/models/webinar-series-participates.model");
 
 // admin
@@ -25,7 +25,7 @@ const listAdmin = async (req, res) => {
 
 const detailWebinarAdmin = async (req, res) => {
   try {
-    const { id } = req.params;
+    const { id } = req.query;
     const result = await WebinarSeries.query().findById(id);
     res.json(result);
   } catch (error) {
