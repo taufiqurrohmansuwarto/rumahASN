@@ -162,3 +162,19 @@ const unregisterWebinar = async (req, res) => {
 // document
 const generateCertificate = async (req, res) => {};
 const uploadTemplate = async (req, res) => {};
+
+module.exports = {
+  listAdmin,
+  detailWebinarAdmin,
+  createWebinar,
+  updateWebinar,
+  deleteWebinar,
+
+  listUser,
+  detailWebinarUser,
+  registerWebinar,
+  unregisterWebinar,
+
+  generateCertificate,
+  uploadTemplate,
+};

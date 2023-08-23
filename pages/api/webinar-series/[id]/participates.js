@@ -1,18 +1,17 @@
 import {
-  deleteWebinar,
-  detailWebinarAdmin,
-  updateWebinar,
+  detailWebinarUser,
+  registerWebinar,
+  unregisterWebinar,
 } from "@/controller/webinar-series.controller";
-import adminMiddleware from "@/middleware/admin.middleware";
+import asnMiddleware from "@/middleware/asn.middleware";
 import auth from "@/middleware/auth.middleware";
 import { createRouter } from "next-connect";
 const router = createRouter();
 
 router
   .use(auth)
-  .use(adminMiddleware)
-  .get(detailWebinarAdmin)
-  .patch(updateWebinar)
-  .delete(deleteWebinar);
+  .use(asnMiddleware)
+  .patch(registerWebinar)
+  .delete(unregisterWebinar);
 
 export default router.handler({});
