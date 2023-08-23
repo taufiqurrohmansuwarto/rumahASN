@@ -177,7 +177,10 @@ const changeRoutes = (user) => {
               ],
             },
             { path: "/apps-managements/users", name: "Pengguna" },
-            { path: "/apps-managements/webinars", name: "Webinar" },
+            {
+              path: "/apps-managements/webinar-series",
+              name: "Webinar Series",
+            },
             { path: "/apps-managements/podcasts", name: "Podcast" },
             { path: "/apps-managements/announcements", name: "Pengumuman" },
             { path: "/apps-managements/votes", name: "Voting" },

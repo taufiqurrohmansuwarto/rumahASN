@@ -10,6 +10,10 @@ export const createWebinar = (data) => {
   return api.post(`/admin`, data).then((res) => res?.data);
 };
 
+export const detailWebinar = (id) => {
+  return api.get(`/admin/${id}`).then((res) => res?.data);
+};
+
 export const readAllWebinar = (query) => {
   const queryStr = queryString.stringify(query);
   return api.get(`/admin?${queryStr}`).then((res) => res?.data);
