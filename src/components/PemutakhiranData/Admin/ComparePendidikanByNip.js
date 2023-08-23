@@ -47,6 +47,8 @@ const CompareDataPendidikanSIMASTER = ({ nip }) => {
       },
     },
     { title: "Pendidikan", dataIndex: "jenjang" },
+    { title: "Tahun Lulus", dataIndex: "tahun_lulus" },
+    { title: "No. Ijazah", dataIndex: "no_ijazah" },
     { title: "Nama Sekolah", dataIndex: "nama_sekolah" },
     { title: "Prodi", dataIndex: "prodi" },
   ];

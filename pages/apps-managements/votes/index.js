@@ -1,9 +1,19 @@
 import Layout from "@/components/Layout";
 import PageContainer from "@/components/PageContainer";
 import { readAllPolling, removePooling } from "@/services/polls.services";
+import { formatDateLL } from "@/utils/client-utils";
 import { PlusOutlined } from "@ant-design/icons";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Breadcrumb, Button, Card, Space, Table, message } from "antd";
+import {
+  Breadcrumb,
+  Button,
+  Card,
+  Divider,
+  Popconfirm,
+  Space,
+  Table,
+  message,
+} from "antd";
 import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
@@ -18,6 +28,7 @@ function Votes() {
     {
       onSuccess: () => {
         queryClient.invalidateQueries("votes-admins");
+        router.push("/apps-managements/votes");
         message.success("Berhasil menghapus voting!");
       },
       onError: () => {
@@ -38,24 +49,39 @@ function Votes() {
 
   const columns = [
     { title: "Pertanyaan", dataIndex: "question" },
-    { title: "Mulai Pada", dataIndex: "start_date" },
-    { title: "Berakhir Pada", dataIndex: "end_date" },
+    {
+      title: "Mulai Pada",
+      key: "start_date",
+      render: (row) => formatDateLL(row.start_date),
+    },
+    {
+      title: "Berakhir Pada",
+      key: "end_date",
+      render: (row) => formatDateLL(row.end_date),
+    },
     {
       title: "Aksi",
       dataIndex: "id",
       render: (id) => (
         <Space>
-          <Button
-            onClick={() => router.push(`/apps-managements/votes/${id}/update`)}
-          >
-            Update
-          </Button>
-          <Button onClick={() => handleRemove(id)}>Delete</Button>
-          <Button
+          <a
             onClick={() => router.push(`/apps-managements/votes/${id}/detail`)}
           >
             Detail
-          </Button>
+          </a>
+          <Divider type="vertical" />
+          <a
+            onClick={() => router.push(`/apps-managements/votes/${id}/update`)}
+          >
+            Edit
+          </a>
+          <Divider type="vertical" />
+          <Popconfirm
+            title="Apakah anda yakin menghapus voting ini?"
+            onConfirm={() => handleRemove(id)}
+          >
+            <a>Hapus</a>
+          </Popconfirm>
         </Space>
       ),
     },
