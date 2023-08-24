@@ -4,6 +4,33 @@ const { uploadFileMinio } = require("@/utils/index");
 
 const URL_FILE = "https://siasn.bkd.jatimprov.go.id:9000/public";
 
+const checkReadyRegistration = (data) => {
+  const { open_registration, close_registration } = data;
+  const currentDate = new Date().toISOString();
+
+  if (
+    currentDate >= new Date(open_registration).toISOString() &&
+    currentDate <= new Date(close_registration).toISOString()
+  ) {
+    return true;
+  } else {
+    return false;
+  }
+};
+
+const checkReady = (data) => {
+  if (!data?.length) {
+    return [];
+  } else {
+    return data?.map((item) => {
+      return {
+        ...item,
+        ready_registration: checkReadyRegistration(item),
+      };
+    });
+  }
+};
+
 // admin
 const listAdmin = async (req, res) => {
   try {
@@ -107,6 +134,44 @@ const deleteWebinar = async (req, res) => {
     const { id } = req.query;
     const result = await WebinarSeries.query().deleteById(id);
     res.json(result);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+const allWebinars = async (req, res) => {
+  const limit = req.query.limit || 25;
+  const page = req.query.page || 1;
+  const type = req.query.type || "all";
+
+  try {
+    if (type === "all") {
+      const result = await WebinarSeries.query()
+        .page(page - 1, limit)
+        .where("status", "published");
+      const data = {
+        data: checkReady(result.results),
+        limit: parseInt(limit),
+        page: parseInt(page),
+        total: result.total,
+      };
+      res.json(data);
+    }
+    if (type === "upcoming") {
+      const result = await WebinarSeries.query()
+        .page(page - 1, limit)
+        .where("status", "published")
+        .andWhere("start_date", ">", new Date().toISOString());
+
+      const data = {
+        data: checkReady(result.results),
+        limit: parseInt(limit),
+        page: parseInt(page),
+        total: result.total,
+      };
+      res.json(data);
+    }
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: "Internal server error" });
@@ -272,6 +337,7 @@ module.exports = {
   updateWebinar,
   deleteWebinar,
 
+  allWebinars,
   listUser,
   detailWebinarUser,
   registerWebinar,

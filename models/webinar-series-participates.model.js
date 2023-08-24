@@ -1,6 +1,5 @@
 const { Model } = require("objection");
 const knex = require("../db");
-const { nanoid } = require("nanoid");
 Model.knex(knex);
 
 class WebinarSeriesParticipates extends Model {
@@ -25,7 +24,7 @@ class WebinarSeriesParticipates extends Model {
           to: "webinar_series.id",
         },
       },
-      user: {
+      participation: {
         relation: Model.BelongsToOneRelation,
         modelClass: User,
         join: {
