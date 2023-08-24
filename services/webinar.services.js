@@ -44,3 +44,13 @@ export const registerWebinar = (id) => {
 export const unregisterWebinar = (id) => {
   return api.delete(`/${id}`).then((res) => res?.data);
 };
+
+export const uploadFileWebinar = ({ id, data }) => {
+  return api
+    .post(`/admin/${id}/upload`, data, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    })
+    .then((res) => res?.data);
+};

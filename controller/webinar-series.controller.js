@@ -1,5 +1,8 @@
 const WebinarSeries = require("@/models/webinar-series.model");
 const WebinarSeriesParticipates = require("@/models/webinar-series-participates.model");
+const { uploadFileMinio } = require("@/utils/index");
+
+const URL_FILE = "https://siasn.bkd.jatimprov.go.id:9000/public";
 
 // admin
 const listAdmin = async (req, res) => {
@@ -27,7 +30,34 @@ const detailWebinarAdmin = async (req, res) => {
   try {
     const { id } = req.query;
     const result = await WebinarSeries.query().findById(id);
-    res.json(result);
+
+    const imageUrl = result?.image_url
+      ? [
+          {
+            uid: id,
+            name: "image",
+            status: "done",
+            url: result?.image_url,
+          },
+        ]
+      : [];
+
+    const templateUrl = result?.template_url
+      ? [
+          {
+            uid: id,
+            name: "template",
+            status: "done",
+            url: result?.certificate_template,
+          },
+        ]
+      : [];
+
+    res.json({
+      ...result,
+      image: imageUrl,
+      template: templateUrl,
+    });
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: "Internal server error" });
@@ -58,10 +88,12 @@ const updateWebinar = async (req, res) => {
     const { customId } = req.user;
     const body = req.body;
 
-    const result = await WebinarSeries.query().patchAndFetchById(id, {
-      ...body,
-      updated_by: customId,
-    });
+    const result = await WebinarSeries.query()
+      .patch({
+        ...body,
+        updated_by: customId,
+      })
+      .where("id", id);
 
     res.json(result);
   } catch (error) {
@@ -159,11 +191,60 @@ const unregisterWebinar = async (req, res) => {
   }
 };
 
-// document
-const generateCertificate = async (req, res) => {};
-const uploadTemplate = async (req, res) => {};
+const uploadTemplateAndImage = async (req, res) => {
+  try {
+    const { buffer, originalname, size, mimetype } = req?.file;
+    const wordType = req?.body?.type === "word";
+    const imageType = req?.body?.type === "image";
+
+    const wordMimeType = mimetype === "application/msword";
+    const imageMimeType = mimetype === "image/jpeg" || mimetype === "image/png";
+
+    if (imageMimeType && imageType) {
+      const fileType = mimetype === "image/jpeg" ? "jpg" : "png";
+      const currentFilename = `image-${req?.query?.id}.${fileType}`;
+      await uploadFileMinio(req.mc, buffer, currentFilename, size, mimetype);
+      const result = `${URL_FILE}/${currentFilename}`;
+
+      await WebinarSeries.query()
+        .patch({
+          image_url: result,
+        })
+        .where("id", req?.query?.id);
+
+      const data = [
+        {
+          uid: req?.query?.id,
+          name: currentFilename,
+          status: "done",
+          url: result,
+        },
+      ];
+
+      res.json(data);
+    } else if (wordMimeType && wordType) {
+      res.json({
+        message: "success",
+      });
+    }
+
+    // // size must be less than 30 MB
+    // if (size > 30000000) {
+    //   res.status(400).json({ code: 400, message: "File size is too large" });
+    // } else {
+    //   await uploadFileWebinar(req.mc, buffer, currentFilename, size, mimetype);
+    //   const result = `${URL_FILE}/${currentFilename}`;
+    //   res.json(result);
+    // }
+  } catch (error) {
+    console.log(error);
+    res.status(400).json({ code: 400, message: "Internal Server Error" });
+  }
+};
 
 module.exports = {
+  uploadTemplateAndImage,
+
   listAdmin,
   detailWebinarAdmin,
   createWebinar,
@@ -174,7 +255,4 @@ module.exports = {
   detailWebinarUser,
   registerWebinar,
   unregisterWebinar,
-
-  generateCertificate,
-  uploadTemplate,
 };

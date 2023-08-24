@@ -32,6 +32,27 @@ export const uploadFileMinio = (mc, fileBuffer, filename, size, mimetype) => {
   });
 };
 
+export const uploadFileWebinar = (mc, fileBuffer, filename, size, mimetype) => {
+  return new Promise((resolve, reject) => {
+    mc.putObject(
+      "bkd",
+      `${filename}`,
+      fileBuffer,
+      size,
+      // cant be metadata add some username and department?
+      { "Content-Type": mimetype },
+      function (err, info) {
+        if (err) {
+          reject(err);
+          console.log(err);
+        } else {
+          resolve(info);
+        }
+      }
+    );
+  });
+};
+
 export const deleteFileMinio = (mc, filename) => {
   return new Promise((resolve, reject) => {
     mc.removeObject("public", `${filename}`, function (err, info) {
