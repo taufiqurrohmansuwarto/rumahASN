@@ -74,6 +74,16 @@ const WebinarSeries = () => {
       render: (text, record) => {
         return (
           <Space>
+            <a
+              onClick={() =>
+                router.push(
+                  `/apps-managements/webinar-series/${record?.id}/detail`
+                )
+              }
+            >
+              Detail
+            </a>
+            <Divider type="vertical" />
             <a onClick={() => gotoEdit(record?.id)}>Edit</a>
             <Divider type="vertical" />
             <Popconfirm
