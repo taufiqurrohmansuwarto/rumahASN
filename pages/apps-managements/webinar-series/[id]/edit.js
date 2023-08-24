@@ -10,6 +10,7 @@ import { Stack } from "@mantine/core";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Button,
+  Card,
   DatePicker,
   Form,
   Input,
@@ -327,17 +328,19 @@ const UpdateWebinarSeries = () => {
         onBack={handleBack}
         loading={isLoading}
         title="Rumah ASN"
-        content="Edit Webinar Series"
+        content="Webinar Series"
       >
-        <FormEditWebinarSeries
-          data={{
-            ...data,
-            id,
-            date: [moment(data?.start_date), moment(data?.end_date)],
-            open_registration: moment(data?.open_registration),
-            close_registration: moment(data?.close_registration),
-          }}
-        />
+        <Card title="Edit Webinar Series">
+          <FormEditWebinarSeries
+            data={{
+              ...data,
+              id,
+              date: [moment(data?.start_date), moment(data?.end_date)],
+              open_registration: moment(data?.open_registration),
+              close_registration: moment(data?.close_registration),
+            }}
+          />
+        </Card>
       </PageContainer>
     </>
   );

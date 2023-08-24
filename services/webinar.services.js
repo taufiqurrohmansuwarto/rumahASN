@@ -5,6 +5,12 @@ const api = axios.create({
   baseURL: "/helpdesk/api/webinar-series",
 });
 
+// all
+export const allWebinars = (query) => {
+  const queryStr = queryString.stringify(query);
+  return api.get(`/all?${queryStr}`).then((res) => res?.data);
+};
+
 // admin
 export const createWebinar = (data) => {
   return api.post(`/admin`, data).then((res) => res?.data);

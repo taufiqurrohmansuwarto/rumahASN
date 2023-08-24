@@ -12,6 +12,20 @@ class WebinarSeries extends Model {
     this.id = nanoid(10);
   }
 
+  static get relationMappings() {
+    const WebinarParticipate = require("@/models/webinar-series-participates.model");
+    return {
+      participates: {
+        relation: Model.HasManyRelation,
+        modelClass: WebinarParticipate,
+        join: {
+          from: "webinar_series.id",
+          to: "webinar_series_participates.webinar_series_id",
+        },
+      },
+    };
+  }
+
   static get idColumn() {
     return "id";
   }
