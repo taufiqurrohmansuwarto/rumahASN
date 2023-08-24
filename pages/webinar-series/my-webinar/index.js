@@ -1,7 +1,23 @@
-import React from "react";
+import Layout from "@/components/Layout";
+import Head from "next/head";
 
-function index() {
-  return <div>index</div>;
+function MyWebinar() {
+  return (
+    <>
+      <Head>
+        <title>My Webinar</title>
+      </Head>
+    </>
+  );
 }
 
-export default index;
+MyWebinar.getLayout = function getLayout(page) {
+  return <Layout>{page}</Layout>;
+};
+
+MyWebinar.Auth = {
+  action: "manage",
+  subject: "tickets",
+};
+
+export default MyWebinar;

@@ -3,12 +3,11 @@ import {
   ApiOutlined,
   BarChartOutlined,
   BookOutlined,
-  HistoryOutlined,
   HomeOutlined,
   LogoutOutlined,
   ReconciliationOutlined,
-  SettingOutlined,
   UserOutlined,
+  VideoCameraOutlined,
 } from "@ant-design/icons";
 import { Dropdown } from "antd";
 import { uniqBy } from "lodash";
@@ -45,39 +44,29 @@ const changeRoutes = (user) => {
     // persiapan ini seharusnya ditambahkan halaman dashboard seperti analisis dsb tapi jangan data
 
     if (pegawaiBKD) {
-      userRoutes.routes.push(
-        {
-          path: "/beranda-bkd",
-          name: "Beranda BKD",
-          icon: <HomeOutlined />,
-        }
-        // {
-        //   path: "/documents",
-        //   name: "Dokumen TTE",
-        //   icon: <FileOutlined />,
-        //   routes: [
-        //     {
-        //       path: "/documents/all",
-        //       name: "Semua Dokumen",
-        //     },
-        //     {
-        //       path: "/documents/waiting",
-        //       name: "Dokumen Menunggu TTE",
-        //     },
-        //     {
-        //       path: "/documents/signed",
-        //       name: "Dokumen Sudah TTE",
-        //     },
-        //     {
-        //       path: "/documents/rejected",
-        //       name: "Dokumen Ditolak",
-        //     },
-        //   ],
-        // }
-      );
+      userRoutes.routes.push({
+        path: "/beranda-bkd",
+        name: "Beranda BKD",
+        icon: <HomeOutlined />,
+      });
     }
 
     if (pegawaiPemda) {
+      userRoutes.routes.push({
+        path: "/webinar-series",
+        name: "Webinar Series",
+        icon: <VideoCameraOutlined />,
+        routes: [
+          {
+            path: "/webinar-series/all",
+            name: "Semua",
+          },
+          {
+            path: "/webinar-series/my-webinar",
+            name: "Webinar Saya",
+          },
+        ],
+      });
     }
 
     if (userPns) {
