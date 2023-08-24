@@ -197,7 +197,9 @@ const uploadTemplateAndImage = async (req, res) => {
     const wordType = req?.body?.type === "word";
     const imageType = req?.body?.type === "image";
 
-    const wordMimeType = mimetype === "application/msword";
+    const wordMimeType =
+      mimetype ===
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
     const imageMimeType = mimetype === "image/jpeg" || mimetype === "image/png";
 
     if (imageMimeType && imageType) {
@@ -223,9 +225,28 @@ const uploadTemplateAndImage = async (req, res) => {
 
       res.json(data);
     } else if (wordMimeType && wordType) {
-      res.json({
-        message: "success",
-      });
+      const currentFilename = `template-${req?.query?.id}.doc`;
+      await uploadFileMinio(req.mc, buffer, currentFilename, size, mimetype);
+      const result = `${URL_FILE}/${currentFilename}`;
+
+      await WebinarSeries.query()
+        .patch({
+          certificate_template: result,
+        })
+        .where("id", req?.query?.id);
+
+      const data = [
+        {
+          uid: req?.query?.id,
+          name: currentFilename,
+          status: "done",
+          url: result,
+        },
+      ];
+
+      res.json(data);
+    } else {
+      res.status(400).json({ code: 400, message: "File type is not allowed" });
     }
 
     // // size must be less than 30 MB

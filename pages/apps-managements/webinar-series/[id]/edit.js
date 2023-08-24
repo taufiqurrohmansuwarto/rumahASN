@@ -6,6 +6,7 @@ import {
   uploadFileWebinar,
 } from "@/services/webinar.services";
 import { UploadOutlined } from "@ant-design/icons";
+import { Stack } from "@mantine/core";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Button,
@@ -20,6 +21,80 @@ import moment from "moment";
 import Head from "next/head";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
+
+const UploadFileTemplate = ({ data, type = "image", title = "test" }) => {
+  const [fileListAudio, setFileListAudio] = useState(data?.template);
+  const queryClient = useQueryClient();
+
+  const { mutate: uploadAudio, isLoading: isLoadingUploadAudio } = useMutation(
+    (data) => uploadFileWebinar(data),
+    {
+      onSuccess: (result) => {
+        message.success("Berhasil mengunggah image");
+        queryClient.invalidateQueries([
+          "webinar-series-admin-detail",
+          data?.id,
+        ]);
+        setFileListAudio(result);
+      },
+      onError: (error) => {
+        console.error(error);
+        message.error("Gagal mengunggah image, silahkan coba lagi nanti");
+      },
+    }
+  );
+
+  useEffect(() => {}, [data]);
+
+  const handleBeforeUpload = (file) => {
+    const wordFileType =
+      file?.type ===
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+
+    if (!wordFileType) {
+      message.error("You can only upload image file!");
+    }
+    const isLt20M = file.size / 1024 / 1024 < 20;
+    if (!isLt20M) {
+      message.error("Image must smaller than 20MB!");
+    }
+
+    return isAudio && isLt20M;
+  };
+
+  const handleUpload = (info) => {
+    const id = data?.id;
+    const formData = new FormData();
+    formData.append("file", info.file);
+    formData.append("type", "word");
+    uploadAudio({ id, data: formData });
+  };
+
+  return (
+    <>
+      <Upload
+        beforeUpload={handleBeforeUpload}
+        multiple={false}
+        maxCount={1}
+        showUploadList={{
+          showRemoveIcon: false,
+        }}
+        // accept word only
+        accept=".docx"
+        onChange={handleUpload}
+        fileList={fileListAudio}
+      >
+        <Button
+          icon={<UploadOutlined />}
+          disabled={isLoadingUploadAudio}
+          loading={isLoadingUploadAudio}
+        >
+          {title}
+        </Button>
+      </Upload>
+    </>
+  );
+};
 
 const UploadFileImage = ({ data, type = "image", title = "test" }) => {
   const [fileListAudio, setFileListAudio] = useState(data?.image);
@@ -139,7 +214,10 @@ const FormEditWebinarSeries = ({ data }) => {
 
   return (
     <>
-      <UploadFileImage type="image" data={data} />
+      <Stack>
+        <UploadFileTemplate title="Upload Template" type="word" data={data} />
+        <UploadFileImage title="Upload Image" type="image" data={data} />
+      </Stack>
       <Form
         initialValues={data}
         onFinish={handleFinish}
