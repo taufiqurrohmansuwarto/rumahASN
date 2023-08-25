@@ -54,7 +54,7 @@ const WebinarSeries = () => {
     },
     {
       title: "Judul",
-      dataIndex: "name",
+      dataIndex: "title",
     },
     {
       title: "Tgl. Buka Pendaftaran",
