@@ -36,8 +36,49 @@ const listAdmin = async (req, res) => {
   try {
     const limit = req.query.limit || 10;
     const page = req.query.page || 1;
+    const search = req.query.search || "";
 
-    const result = await WebinarSeries.query().page(page - 1, limit);
+    const result = await WebinarSeries.query()
+      .select(
+        "*",
+        WebinarSeries.relatedQuery("participates")
+          .count()
+          .as("participants_count")
+      )
+      .where((builder) => {
+        if (search) {
+          builder.where("title", "like", `%${search}%`);
+        }
+      })
+      .orderBy("created_at", "desc")
+      .page(page - 1, limit);
+
+    const data = {
+      data: result.results,
+      limit: parseInt(limit),
+      page: parseInt(page),
+      total: result.total,
+    };
+
+    res.json(data);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+const listParticipants = async (req, res) => {
+  try {
+    const { id } = req?.query;
+
+    const limit = req.query.limit || 25;
+    const page = req.query.page || 1;
+    const search = req.query.search || "";
+
+    const result = await WebinarSeriesParticipates.query()
+      .where("webinar_series_id", id)
+      .page(parseInt(page) - 1, parseInt(limit))
+      .withGraphFetched("[participant(simpleSelect)]");
 
     const data = {
       data: result.results,
@@ -357,4 +398,6 @@ module.exports = {
   detailWebinarUser,
   registerWebinar,
   unregisterWebinar,
+
+  listParticipants,
 };

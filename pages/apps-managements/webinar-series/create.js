@@ -2,7 +2,18 @@ import Layout from "@/components/Layout";
 import PageContainer from "@/components/PageContainer";
 import { createWebinar } from "@/services/webinar.services";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Button, DatePicker, Form, Input, InputNumber, message } from "antd";
+import {
+  Button,
+  Card,
+  Col,
+  DatePicker,
+  Form,
+  Input,
+  InputNumber,
+  Row,
+  Select,
+  message,
+} from "antd";
 import Head from "next/head";
 import { useRouter } from "next/router";
 import moment from "moment";
@@ -103,6 +114,22 @@ const FormWebinarSeries = () => {
         <Input.TextArea />
       </Form.Item>
       <Form.Item
+        rules={[
+          {
+            required: true,
+            message: "Silahkan pilih jenis pengguna",
+          },
+        ]}
+        name="type_participant"
+        label="Jenis Pengguna"
+      >
+        <Select mode="multiple" placeholder="Pilih Jenis Pengguna">
+          <Select.Option value="asn">ASN</Select.Option>
+          <Select.Option value="non_asn">NON ASN</Select.Option>
+          <Select.Option value="umum">Umum</Select.Option>
+        </Select>
+      </Form.Item>
+      <Form.Item
         required
         label="Tanggal Mulai s/d Tanggal Berakhir"
         name="date"
@@ -144,13 +171,27 @@ const FormWebinarSeries = () => {
 };
 
 const CreateWebinarSeries = () => {
+  const router = useRouter();
+
+  const handleBack = () => router.back();
+
   return (
     <>
       <Head>
         <title>Rumah ASN - Buat Webinar Series</title>
       </Head>
-      <PageContainer>
-        <FormWebinarSeries />
+      <PageContainer
+        onBack={handleBack}
+        title="Webinar Series"
+        content="Webinar Series Baru"
+      >
+        <Card>
+          <Row>
+            <Col span={18}>
+              <FormWebinarSeries />
+            </Col>
+          </Row>
+        </Card>
       </PageContainer>
     </>
   );
