@@ -49,7 +49,13 @@ function WebinarAll() {
             dataSource={data?.data}
             renderItem={(item) => (
               <List.Item
-                extra={<Image width={272} src={item?.image_url} alt="test" />}
+                extra={
+                  <>
+                    {item?.image_url && (
+                      <Image width={272} src={item?.image_url} alt="test" />
+                    )}
+                  </>
+                }
                 actions={[
                   <IconText
                     icon={StarOutlined}
@@ -77,8 +83,8 @@ function WebinarAll() {
                       }
                     />
                   }
-                  title={item?.name}
-                  description={item?.description}
+                  title={item?.title}
+                  description={item?.subtitle}
                 />
                 {item?.description}
               </List.Item>

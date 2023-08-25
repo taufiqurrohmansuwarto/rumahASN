@@ -246,8 +246,21 @@ const FormEditWebinarSeries = ({ data }) => {
             },
           ]}
           required
-          name="name"
+          name="title"
           label="Judul"
+        >
+          <Input />
+        </Form.Item>
+        <Form.Item
+          rules={[
+            {
+              required: true,
+              message: "Sub Judul harus diisi",
+            },
+          ]}
+          required
+          name="subtitle"
+          label="Sub Judul"
         >
           <Input />
         </Form.Item>
@@ -262,7 +275,7 @@ const FormEditWebinarSeries = ({ data }) => {
           name="description"
           label="Deskripsi"
         >
-          <Input />
+          <Input.TextArea />
         </Form.Item>
         <Form.Item
           required
