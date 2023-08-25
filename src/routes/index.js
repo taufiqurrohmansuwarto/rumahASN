@@ -10,6 +10,7 @@ import {
   SmileOutlined,
   SnippetsOutlined,
   UserOutlined,
+  VideoCameraAddOutlined,
 } from "@ant-design/icons";
 
 export const userRoutes = {
@@ -64,43 +65,30 @@ export const userRoutes = {
       ],
     },
     {
+      path: "/webinar-series",
+      name: "Webinar Series",
+      icon: <VideoCameraAddOutlined />,
+      routes: [
+        {
+          path: "/webinar-series/all",
+          name: "Semua",
+        },
+        {
+          path: "/webinar-series/my-webinar",
+          name: "Webinar Saya",
+        },
+      ],
+    },
+    {
       path: "/edukasi/podcasts",
       name: "Podcast",
       icon: <AudioOutlined />,
     },
-    // {
-    //   path: "/edukasi",
-    //   name: "Edukasi",
-    //   icon: <ReadOutlined />,
-    //   routes: [
-    //     {
-    //       path: "/edukasi/podcasts",
-    //       name: "Edukasi Podcast",
-    //     },
-    //     {
-    //       path: "/edukasi/webinar",
-    //       name: "Webinar",
-    //     },
-    //     {
-    //       path: "/edukasi/webinar-saya",
-    //       name: "Webinar saya",
-    //     },
-    //   ],
-    // },
     {
       path: "/faq",
       name: " Pertanyaan Umum",
       icon: <QuestionCircleOutlined />,
     },
-    // {
-    //   path: "/settings",
-    //   name: " Konfigurasi",
-    //   icon: <SettingOutlined />,
-    //   routes: [
-    //     { path: "/settings/saved-replies", name: "Template Balasan" },
-    //     { path: "/settings/profile", name: "Profil" },
-    //   ],
-    // },
   ],
 };
 

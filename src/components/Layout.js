@@ -52,21 +52,6 @@ const changeRoutes = (user) => {
     }
 
     if (pegawaiPemda) {
-      userRoutes.routes.push({
-        path: "/webinar-series",
-        name: "Webinar Series",
-        icon: <VideoCameraOutlined />,
-        routes: [
-          {
-            path: "/webinar-series/all",
-            name: "Semua",
-          },
-          {
-            path: "/webinar-series/my-webinar",
-            name: "Webinar Saya",
-          },
-        ],
-      });
     }
 
     if (userPns) {
@@ -165,6 +150,7 @@ const changeRoutes = (user) => {
                 { path: "/apps-managements/integrasi/siasn", name: "SIASN" },
               ],
             },
+            { path: "/apps-managements/votes", name: "Poling" },
             { path: "/apps-managements/users", name: "Pengguna" },
             {
               path: "/apps-managements/webinar-series",
@@ -172,7 +158,6 @@ const changeRoutes = (user) => {
             },
             { path: "/apps-managements/podcasts", name: "Podcast" },
             { path: "/apps-managements/announcements", name: "Pengumuman" },
-            { path: "/apps-managements/votes", name: "Voting" },
             { path: "/apps-managements/discussions", name: "Diskusi" },
             // {
             //   path: "/apps-managements/executives-signatures",
