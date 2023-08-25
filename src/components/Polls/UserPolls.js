@@ -7,7 +7,7 @@ import React, { useState } from "react";
 const Poll = ({ data }) => {
   const { mutate, isLoading } = useMutation((data) => votePolling(data), {
     onSuccess: () => {
-      // queryClient.invalidateQueries("users-polls");
+      queryClient.invalidateQueries("users-polls");
     },
   });
 
@@ -54,7 +54,9 @@ function UserPolls() {
           <Card title="Pertanyaan">
             <Skeleton loading={isLoading}>
               {data?.map((item) => (
-                <Poll key={item?.id} data={item} />
+                <Stack key={item?.id}>
+                  <Poll data={item} />
+                </Stack>
               ))}
             </Skeleton>
           </Card>
