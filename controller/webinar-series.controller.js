@@ -225,20 +225,35 @@ const registerWebinar = async (req, res) => {
     const { customId } = req.user;
     const { id } = req.query;
 
-    const result = await WebinarSeriesParticipates.query()
-      .insert({
-        user_id: customId,
-        webinar_series_id: id,
-      })
-      .onConflict(["user_id", "webinar_series_id"])
-      .merge();
+    // check in webinar series table if status is published or current date is between open_registration and close_registration
+    const currentWebinarSeries = await WebinarSeries.query()
+      .where("id", id)
+      .andWhere("status", "published")
+      .andWhere("open_registration", "<=", new Date().toISOString())
+      .andWhere("close_registration", ">=", new Date().toISOString())
+      .first();
 
-    res.json(result);
+    if (!currentWebinarSeries) {
+      res
+        .status(400)
+        .json({ code: 400, message: "Webinar series is not ready" });
+    } else {
+      const result = await WebinarSeriesParticipates.query()
+        .insert({
+          user_id: customId,
+          webinar_series_id: id,
+        })
+        .onConflict(["user_id", "webinar_series_id"])
+        .merge();
+
+      res.json(result);
+    }
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: "Internal server error" });
   }
 };
+
 const unregisterWebinar = async (req, res) => {
   try {
     const { customId } = req.user;
