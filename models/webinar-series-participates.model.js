@@ -24,7 +24,7 @@ class WebinarSeriesParticipates extends Model {
           to: "webinar_series.id",
         },
       },
-      participation: {
+      participant: {
         relation: Model.BelongsToOneRelation,
         modelClass: User,
         join: {

@@ -9,12 +9,14 @@ import { UploadOutlined } from "@ant-design/icons";
 import { Stack } from "@mantine/core";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
+  BackTop,
   Button,
   Card,
   DatePicker,
   Form,
   Input,
   InputNumber,
+  Select,
   Upload,
   message,
 } from "antd";
@@ -215,6 +217,7 @@ const FormEditWebinarSeries = ({ data }) => {
 
   return (
     <>
+      <BackTop />
       <Stack>
         <UploadFileTemplate title="Upload Template" type="word" data={data} />
         <UploadFileImage title="Upload Image" type="image" data={data} />
@@ -278,6 +281,22 @@ const FormEditWebinarSeries = ({ data }) => {
           <Input.TextArea />
         </Form.Item>
         <Form.Item
+          rules={[
+            {
+              required: true,
+              message: "Silahkan pilih jenis pengguna",
+            },
+          ]}
+          name="type_participant"
+          label="Jenis Pengguna"
+        >
+          <Select mode="multiple" placeholder="Pilih Jenis Pengguna">
+            <Select.Option value="asn">ASN</Select.Option>
+            <Select.Option value="non_asn">NON ASN</Select.Option>
+            <Select.Option value="umum">Umum</Select.Option>
+          </Select>
+        </Form.Item>
+        <Form.Item
           required
           label="Tanggal Mulai s/d Tanggal Berakhir"
           name="date"
@@ -304,6 +323,16 @@ const FormEditWebinarSeries = ({ data }) => {
         >
           <DatePicker showTime />
         </Form.Item>
+        <Form.Item name="youtube_url" label="Link Youtube">
+          <Input />
+        </Form.Item>
+        <Form.Item name="zoom_url" label="Link Zoom">
+          <Input />
+        </Form.Item>
+        <Form.Item name="reference_link" label="Link Materi">
+          <Input />
+        </Form.Item>
+
         <Form.Item>
           <Button
             disabled={isLoading}

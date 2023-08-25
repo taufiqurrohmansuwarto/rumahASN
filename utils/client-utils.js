@@ -14,6 +14,11 @@ export const formatedMonth = (date) => {
   return moment(date).locale("id").format("MMMM");
 };
 
+export const formatDateFull = (date) => {
+  // language is set to Indonesia
+  return moment(date).locale("id").format("DD MMMM YYYY HH:mm");
+};
+
 export const capitalizeWithoutPPPK = (str) => {
   let words = str.toLowerCase().split(" ");
   for (let i = 0; i < words.length; i++) {

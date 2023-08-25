@@ -1,6 +1,7 @@
 import Layout from "@/components/Layout";
 import PageContainer from "@/components/PageContainer";
 import { readAllWebinar, removeWebinar } from "@/services/webinar.services";
+import { formatDateFull } from "@/utils/client-utils";
 import { PlusOutlined } from "@ant-design/icons";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Button, Divider, Popconfirm, Space, Table, message } from "antd";
@@ -58,15 +59,32 @@ const WebinarSeries = () => {
     },
     {
       title: "Tgl. Buka Pendaftaran",
-      dataIndex: "open_registration",
+      key: "open_registration",
+      render: (text) => {
+        return <span>{formatDateFull(text?.open_registration)}</span>;
+      },
     },
     {
       title: "Tgl. Tutup Pendaftaran",
-      dataIndex: "close_registration",
+      key: "close_registration",
+      render: (text) => {
+        return <span>{formatDateFull(text?.close_registration)}</span>;
+      },
+    },
+    {
+      title: "Tipe Peserta",
+      key: "type_participant",
+      render: (text) => {
+        return <span>{text?.type_participant?.join(", ")}</span>;
+      },
     },
     {
       title: "Status",
       dataIndex: "status",
+    },
+    {
+      title: "Total Peserta",
+      dataIndex: "participants_count",
     },
     {
       title: "Aksi",

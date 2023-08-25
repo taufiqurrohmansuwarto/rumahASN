@@ -21,7 +21,8 @@ class User extends Model {
           "image",
           "is_online",
           "group",
-          "current_role"
+          "current_role",
+          "info"
           // "employee_number"
         );
       },
