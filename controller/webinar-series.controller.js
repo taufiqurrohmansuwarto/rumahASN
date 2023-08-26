@@ -1,6 +1,8 @@
 const WebinarSeries = require("@/models/webinar-series.model");
 const WebinarSeriesParticipates = require("@/models/webinar-series-participates.model");
-const { uploadFileMinio } = require("@/utils/index");
+const User = require("@/models/users.model");
+const { uploadFileMinio, typeGroup, wordToPdf } = require("@/utils/index");
+const { toLower } = require("lodash");
 
 const URL_FILE = "https://siasn.bkd.jatimprov.go.id:9000/public";
 
@@ -110,11 +112,11 @@ const detailWebinarAdmin = async (req, res) => {
         ]
       : [];
 
-    const templateUrl = result?.template_url
+    const templateUrl = result?.certificate_template
       ? [
           {
             uid: id,
-            name: "template",
+            name: `template-${result?.id}.docx`,
             status: "done",
             url: result?.certificate_template,
           },
@@ -186,11 +188,17 @@ const allWebinars = async (req, res) => {
   const page = req.query.page || 1;
   const type = req.query.type || "all";
 
+  const group = toLower(req?.user?.group);
+  const userType = typeGroup(group);
+
   try {
     if (type === "all") {
       const result = await WebinarSeries.query()
         .page(page - 1, limit)
+        // andWhere type participant include userType
+        .andWhereRaw(`type_participant::text LIKE '%${userType}%'`)
         .where("status", "published");
+
       const data = {
         data: checkReady(result.results),
         limit: parseInt(limit),
@@ -203,6 +211,7 @@ const allWebinars = async (req, res) => {
       const result = await WebinarSeries.query()
         .page(page - 1, limit)
         .where("status", "published")
+        .andWhereRaw(`type_participant::text LIKE '%${userType}%'`)
         .andWhere("start_date", ">", new Date().toISOString());
 
       const data = {
@@ -227,6 +236,7 @@ const listUser = async (req, res) => {
     const page = req.query.page || 1;
 
     const result = await WebinarSeriesParticipates.query()
+      .withGraphFetched("[webinar_series]")
       .where("user_id", customId)
       .page(page - 1, limit);
 
@@ -254,7 +264,12 @@ const detailWebinarUser = async (req, res) => {
       .andWhere("webinar_series_id", id)
       .first();
 
-    res.json(result);
+    if (result) {
+      const hasil = await WebinarSeries.query().findById(id);
+      res.json(hasil);
+    } else {
+      res.json(result);
+    }
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: "Internal server error" });
@@ -346,7 +361,7 @@ const uploadTemplateAndImage = async (req, res) => {
 
       res.json(data);
     } else if (wordMimeType && wordType) {
-      const currentFilename = `template-${req?.query?.id}.doc`;
+      const currentFilename = `template-${req?.query?.id}.docx`;
       await uploadFileMinio(req.mc, buffer, currentFilename, size, mimetype);
       const result = `${URL_FILE}/${currentFilename}`;
 
@@ -384,7 +399,64 @@ const uploadTemplateAndImage = async (req, res) => {
   }
 };
 
+const downloadCertificate = async (req, res) => {
+  try {
+    const { id } = req.query;
+    const { customId } = req?.user;
+
+    const result = await WebinarSeriesParticipates.query()
+      .where("user_id", customId)
+      .andWhere("webinar_series_id", id)
+      .first();
+
+    // check in webinar series is allowed download ceritficate is true
+    const currentWebinarSeries = await WebinarSeries.query()
+      .where("id", id)
+      .andWhere("is_allow_download_certificate", true)
+      .andWhere("status", "published")
+      .first();
+
+    if (!result) {
+      res.status(400).json({ code: 400, message: "You are not registered" });
+    } else if (!currentWebinarSeries) {
+      res.status(400).json({
+        code: 400,
+        message: "Akses download sertifikat belum siap",
+      });
+    } else {
+      const numberCertificate = `BKD-${id}`;
+
+      await WebinarSeriesParticipates.query()
+        .patch({
+          certificate_number: numberCertificate,
+        })
+        .where("user_id", customId)
+        .andWhere("webinar_series_id", id);
+
+      const templateUrl = currentWebinarSeries?.certificate_template;
+
+      const currentUser = await User.query()
+        .where("custom_id", customId)
+        .first();
+
+      const pdf = await wordToPdf(templateUrl, currentUser);
+      const username = req?.user?.name;
+      const title = currentWebinarSeries?.title;
+
+      const pdfTitle = `${username}-${title}.pdf`;
+
+      res.setHeader("Content-Disposition", `attachment; filename=${pdfTitle}`);
+      res.setHeader("Content-Type", "application/pdf");
+      pdf.pipe(res);
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
 module.exports = {
+  downloadCertificate,
   uploadTemplateAndImage,
 
   listAdmin,

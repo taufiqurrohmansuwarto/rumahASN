@@ -67,3 +67,21 @@ export const uploadFileWebinar = ({ id, data }) => {
     })
     .then((res) => res?.data);
 };
+
+// user webinar
+export const webinarUser = async (query) => {
+  const queryStr = queryString.stringify(query);
+  return api.get(`/users?${queryStr}`).then((res) => res?.data);
+};
+
+export const webinarUserDetail = async (id) => {
+  return api.get(`/users/${id}`).then((res) => res?.data);
+};
+
+export const downloadCurrentUserCertificate = async (id) => {
+  return api
+    .get(`/users/${id}/download`, {
+      responseType: "arraybuffer",
+    })
+    .then((res) => res?.data);
+};

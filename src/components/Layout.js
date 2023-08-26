@@ -151,11 +151,12 @@ const changeRoutes = (user) => {
               ],
             },
             { path: "/apps-managements/votes", name: "Poling" },
-            { path: "/apps-managements/users", name: "Pengguna" },
             {
               path: "/apps-managements/webinar-series",
               name: "Webinar Series",
             },
+            { path: "/apps-managements/users", name: "Pengguna" },
+
             { path: "/apps-managements/podcasts", name: "Podcast" },
             { path: "/apps-managements/announcements", name: "Pengumuman" },
             { path: "/apps-managements/discussions", name: "Diskusi" },
@@ -191,7 +192,7 @@ const menuItemRender = (options, element) => {
   );
 };
 
-function Layout({ children, active, collapsed = false }) {
+function Layout({ children, active, collapsed = true }) {
   const { data, status } = useSession();
   const router = useRouter();
   const [tutup, setTutup] = useState(collapsed);

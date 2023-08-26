@@ -4,11 +4,75 @@ import {
   IconFileDots,
   IconFileOff,
 } from "@tabler/icons";
+import axios from "axios";
+import {
+  pipe,
+  gotenberg,
+  convert,
+  office,
+  to,
+  landscape,
+  set,
+  filename,
+  please,
+  adjust,
+} from "gotenberg-js-client";
+import { toLower } from "lodash";
 import moment from "moment";
+const https = require("https");
+
+const { TemplateHandler, MimeType } = require("easy-template-x");
+
+const GOTENBERG_URL = process.env.GOTENBERG_URL;
+
+const toPDF = pipe(
+  gotenberg(""),
+  convert,
+  office,
+  adjust({
+    url: GOTENBERG_URL,
+  }),
+  please
+);
+
+//
+export const wordToPdf = async (url, user) => {
+  try {
+    const response = await axios.get(url, { responseType: "arraybuffer" });
+    const buffer = Buffer.from(response.data, "utf-8");
+    const handler = new TemplateHandler();
+
+    const data = {
+      nama: user?.username,
+      jabatan: user?.info?.jabatan?.jabatan,
+      nip: user?.employee_number,
+    };
+
+    const doc = await handler.process(buffer, data, MimeType.docx);
+
+    const pdf = await toPDF({
+      "document.docx": doc,
+    });
+
+    return pdf;
+  } catch (error) {
+    console.log(error);
+  }
+};
 
 // change date format to DD-MM-YYYY
 export const formatDate = (date) => {
   return moment(date).format("DD-MM-YYYY HH:mm:ss");
+};
+
+export const typeGroup = (group) => {
+  if (toLower(group) === "master") {
+    return "asn";
+  } else if (toLower(group) === "pttpk") {
+    return "non_asn";
+  } else {
+    return "umum";
+  }
 };
 
 export const uploadFileMinio = (mc, fileBuffer, filename, size, mimetype) => {

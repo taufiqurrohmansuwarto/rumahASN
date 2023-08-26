@@ -7,10 +7,9 @@ const toPdf = await pipe(
   gotenberg.store()
 );
 
-module.exports.wordToPdf = async (req, url) => {
+export const wordToPdf = async (url) => {
   const response = await axios.get(url, { responseType: "arraybuffer" });
   const wordBuffer = Buffer.from(response.data, "binary");
 
-  const client = gotenberg("http://localhost:3000");
+  return wordBuffer;
 };
-module.exports.signCertificate = async () => {};
