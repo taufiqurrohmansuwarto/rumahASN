@@ -178,7 +178,7 @@ const FormEditWebinarSeries = ({ data }) => {
     {
       onSuccess: () => {
         router.push("/apps-managements/webinar-series");
-        message.success("Berhasil membuat webinar series");
+        message.success("Berhasil mengubah webinar series");
       },
       onSettled: () => {
         queryClient.invalidateQueries(["webinar-series-admin"]);
@@ -279,6 +279,9 @@ const FormEditWebinarSeries = ({ data }) => {
           label="Deskripsi"
         >
           <Input.TextArea />
+        </Form.Item>
+        <Form.Item name="hour" label="Jumlah Jam">
+          <InputNumber />
         </Form.Item>
         <Form.Item
           rules={[

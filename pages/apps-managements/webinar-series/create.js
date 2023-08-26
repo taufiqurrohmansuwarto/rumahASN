@@ -113,6 +113,9 @@ const FormWebinarSeries = () => {
       >
         <Input.TextArea />
       </Form.Item>
+      <Form.Item label="Jumlah Jam" name="hour">
+        <InputNumber />
+      </Form.Item>
       <Form.Item
         rules={[
           {

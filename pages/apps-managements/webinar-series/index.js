@@ -87,6 +87,15 @@ const WebinarSeries = () => {
       dataIndex: "participants_count",
     },
     {
+      title: "Download Sertifikat?",
+      key: "is_allow_download_certificate",
+      render: (text) => {
+        return (
+          <span>{text?.is_allow_download_certificate ? "Ya" : "Tidak"}</span>
+        );
+      },
+    },
+    {
       title: "Aksi",
       key: "aksi",
       render: (text, record) => {
@@ -121,11 +130,11 @@ const WebinarSeries = () => {
   return (
     <>
       <Head>
-        <title>Rumah ASN - Webinar Series</title>
+        <title>Rumah ASN - Admin - Webinar Series</title>
       </Head>
       <PageContainer
         title={"Rumah ASN"}
-        content="Webinar Series"
+        content="Manajemen Admin Webinar Series"
         loading={isLoading}
       >
         <Table
