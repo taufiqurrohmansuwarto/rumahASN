@@ -3,8 +3,10 @@ import PageContainer from "@/components/PageContainer";
 import { createWebinar } from "@/services/webinar.services";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
+  Breadcrumb,
   Button,
   Card,
+  Checkbox,
   Col,
   DatePicker,
   Form,
@@ -17,6 +19,7 @@ import {
 import Head from "next/head";
 import { useRouter } from "next/router";
 import moment from "moment";
+import Link from "next/link";
 
 const FormWebinarSeries = () => {
   const queryClient = useQueryClient();
@@ -132,6 +135,12 @@ const FormWebinarSeries = () => {
           <Select.Option value="umum">Umum</Select.Option>
         </Select>
       </Form.Item>
+      <Form.Item name="status" label="Status">
+        <Select defaultValue="draft" placeholder="Status Webinar">
+          <Select.Option value="draft">Draft</Select.Option>
+          <Select.Option value="published">Publish</Select.Option>
+        </Select>
+      </Form.Item>
       <Form.Item
         required
         label="Tanggal Mulai s/d Tanggal Berakhir"
@@ -184,13 +193,30 @@ const CreateWebinarSeries = () => {
         <title>Rumah ASN - Buat Webinar Series</title>
       </Head>
       <PageContainer
+        header={{
+          breadcrumbRender: () => (
+            <Breadcrumb>
+              <Breadcrumb.Item>
+                <Link href="/feeds">
+                  <a>Beranda</a>
+                </Link>
+              </Breadcrumb.Item>
+              <Breadcrumb.Item>
+                <Link href="/apps-managements/webinar-series">
+                  <a>Webinar Series Admin</a>
+                </Link>
+              </Breadcrumb.Item>
+              <Breadcrumb.Item>Buat Webinar</Breadcrumb.Item>
+            </Breadcrumb>
+          ),
+        }}
         onBack={handleBack}
-        title="Webinar Series"
+        title="Buat Webinar Series"
         content="Webinar Series Baru"
       >
         <Card>
           <Row>
-            <Col span={18}>
+            <Col md={16} xs={24}>
               <FormWebinarSeries />
             </Col>
           </Row>

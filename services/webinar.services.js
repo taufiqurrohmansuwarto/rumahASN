@@ -51,11 +51,11 @@ export const detailWebinarUser = (id) => {
 };
 
 export const registerWebinar = (id) => {
-  return api.patch(`/${id}`).then((res) => res?.data);
+  return api.patch(`/users/${id}/participates`).then((res) => res?.data);
 };
 
 export const unregisterWebinar = (id) => {
-  return api.delete(`/${id}`).then((res) => res?.data);
+  return api.delete(`/users/${id}/participates`).then((res) => res?.data);
 };
 
 export const uploadFileWebinar = ({ id, data }) => {

@@ -10,8 +10,10 @@ import { Stack } from "@mantine/core";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   BackTop,
+  Breadcrumb,
   Button,
   Card,
+  Checkbox,
   DatePicker,
   Form,
   Input,
@@ -22,6 +24,7 @@ import {
 } from "antd";
 import moment from "moment";
 import Head from "next/head";
+import Link from "next/link";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 
@@ -218,9 +221,17 @@ const FormEditWebinarSeries = ({ data }) => {
   return (
     <>
       <BackTop />
-      <Stack>
-        <UploadFileTemplate title="Upload Template" type="word" data={data} />
-        <UploadFileImage title="Upload Image" type="image" data={data} />
+      <Stack mb={10}>
+        <UploadFileTemplate
+          title="Unggah Template Sertifikat"
+          type="word"
+          data={data}
+        />
+        <UploadFileImage
+          title="Unggah Poster Webinar"
+          type="image"
+          data={data}
+        />
       </Stack>
       <Form
         initialValues={data}
@@ -299,6 +310,12 @@ const FormEditWebinarSeries = ({ data }) => {
             <Select.Option value="umum">Umum</Select.Option>
           </Select>
         </Form.Item>
+        <Form.Item name="status" label="Status">
+          <Select defaultValue="draft" placeholder="Status Webinar">
+            <Select.Option value="draft">Draft</Select.Option>
+            <Select.Option value="published">Publish</Select.Option>
+          </Select>
+        </Form.Item>
         <Form.Item
           required
           label="Tanggal Mulai s/d Tanggal Berakhir"
@@ -334,6 +351,22 @@ const FormEditWebinarSeries = ({ data }) => {
         </Form.Item>
         <Form.Item name="reference_link" label="Link Materi">
           <Input />
+        </Form.Item>
+
+        <Form.Item
+          valuePropName="checked"
+          name="is_allow_download_certificate"
+          label="Izinkan peserta mengunduh sertifikat?"
+        >
+          <Checkbox>Ya</Checkbox>
+        </Form.Item>
+
+        <Form.Item
+          valuePropName="checked"
+          name="use_esign"
+          label="Gunakan TTE untuk sertifikat?"
+        >
+          <Checkbox>Ya</Checkbox>
         </Form.Item>
 
         <Form.Item>
@@ -374,6 +407,23 @@ const UpdateWebinarSeries = () => {
         loading={isLoading}
         title="Rumah ASN"
         content="Webinar Series"
+        header={{
+          breadcrumbRender: () => (
+            <Breadcrumb>
+              <Breadcrumb.Item>
+                <Link href="/feeds">
+                  <a>Beranda</a>
+                </Link>
+              </Breadcrumb.Item>
+              <Breadcrumb.Item>
+                <Link href="/apps-managements/webinar-series">
+                  <a>Webinar Series Admin</a>
+                </Link>
+              </Breadcrumb.Item>
+              <Breadcrumb.Item>Edit Webinar</Breadcrumb.Item>
+            </Breadcrumb>
+          ),
+        }}
       >
         <Card title="Edit Webinar Series">
           <FormEditWebinarSeries

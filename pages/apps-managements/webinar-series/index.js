@@ -1,11 +1,20 @@
 import Layout from "@/components/Layout";
 import PageContainer from "@/components/PageContainer";
 import { readAllWebinar, removeWebinar } from "@/services/webinar.services";
-import { formatDateFull } from "@/utils/client-utils";
+import { StatusWebinar, formatDateFull } from "@/utils/client-utils";
 import { PlusOutlined } from "@ant-design/icons";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Button, Divider, Popconfirm, Space, Table, message } from "antd";
+import {
+  Breadcrumb,
+  Button,
+  Divider,
+  Popconfirm,
+  Space,
+  Table,
+  message,
+} from "antd";
 import Head from "next/head";
+import Link from "next/link";
 import { useRouter } from "next/router";
 import { useState } from "react";
 
@@ -80,7 +89,8 @@ const WebinarSeries = () => {
     },
     {
       title: "Status",
-      dataIndex: "status",
+      key: "status",
+      render: (text) => <StatusWebinar status={text?.status} />,
     },
     {
       title: "Total Peserta",
@@ -133,6 +143,18 @@ const WebinarSeries = () => {
         <title>Rumah ASN - Admin - Webinar Series</title>
       </Head>
       <PageContainer
+        header={{
+          breadcrumbRender: () => (
+            <Breadcrumb>
+              <Breadcrumb.Item>
+                <Link href="/feeds">
+                  <a>Beranda</a>
+                </Link>
+              </Breadcrumb.Item>
+              <Breadcrumb.Item>Daftar Webinar Series Admin</Breadcrumb.Item>
+            </Breadcrumb>
+          ),
+        }}
         title={"Rumah ASN"}
         content="Manajemen Admin Webinar Series"
         loading={isLoading}

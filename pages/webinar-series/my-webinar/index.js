@@ -2,8 +2,9 @@ import Layout from "@/components/Layout";
 import PageContainer from "@/components/PageContainer";
 import { webinarUser } from "@/services/webinar.services";
 import { useQuery } from "@tanstack/react-query";
-import { Space, Table } from "antd";
+import { Breadcrumb, Card, Space, Table } from "antd";
 import Head from "next/head";
+import Link from "next/link";
 import { useRouter } from "next/router";
 import { useState } from "react";
 
@@ -59,25 +60,39 @@ function MyWebinar() {
         loading={isLoading}
         title="Daftar Webinar Saya"
         subTitle="Webinar Series"
-        onBack={handleBack}
+        header={{
+          breadcrumbRender: () => (
+            <Breadcrumb>
+              <Breadcrumb.Item>
+                <Link href="/feeds">
+                  <a>Beranda</a>
+                </Link>
+              </Breadcrumb.Item>
+              <Breadcrumb.Item>Webinar Series Saya</Breadcrumb.Item>
+            </Breadcrumb>
+          ),
+        }}
       >
-        <Table
-          pagination={{
-            pageSize: query?.limit,
-            total: data?.total,
-            onChange: (page, limit) => {
-              setQuery({
-                ...query,
-                page,
-              });
-            },
-            current: query?.page,
-          }}
-          columns={columns}
-          dataSource={data?.data}
-          rowKey={(row) => `${row?.webinar_id}${row?.user_id}`}
-        />
-        {JSON.stringify(data)}
+        <Card>
+          <Table
+            pagination={{
+              pageSize: query?.limit,
+              total: data?.total,
+              onChange: (page, limit) => {
+                setQuery({
+                  ...query,
+                  page,
+                });
+              },
+              current: query?.page,
+            }}
+            columns={columns}
+            dataSource={data?.data}
+            rowKey={(row) => `${row?.webinar_id}${row?.user_id}`}
+          />
+        </Card>
+
+        {/* {JSON.stringify(data)} */}
       </PageContainer>
     </>
   );

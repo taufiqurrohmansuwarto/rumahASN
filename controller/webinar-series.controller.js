@@ -3,6 +3,7 @@ const WebinarSeriesParticipates = require("@/models/webinar-series-participates.
 const User = require("@/models/users.model");
 const { uploadFileMinio, typeGroup, wordToPdf } = require("@/utils/index");
 const { toLower } = require("lodash");
+const { createSignature } = require("@/utils/bsre-fetcher");
 
 const URL_FILE = "https://siasn.bkd.jatimprov.go.id:9000/public";
 
@@ -188,6 +189,8 @@ const allWebinars = async (req, res) => {
   const page = req.query.page || 1;
   const type = req.query.type || "all";
 
+  const currentUser = req?.user.customId;
+
   const group = toLower(req?.user?.group);
   const userType = typeGroup(group);
 
@@ -197,15 +200,39 @@ const allWebinars = async (req, res) => {
         .page(page - 1, limit)
         // andWhere type participant include userType
         .andWhereRaw(`type_participant::text LIKE '%${userType}%'`)
+        .andWhere("open_registration", "<=", new Date().toISOString())
+        .andWhere("close_registration", ">=", new Date().toISOString())
         .where("status", "published");
 
-      const data = {
-        data: checkReady(result.results),
+      let promises = [];
+
+      result.results.forEach((item) => {
+        promises.push(
+          WebinarSeriesParticipates.query()
+            .where("user_id", currentUser)
+            .andWhere("webinar_series_id", item.id)
+            .first()
+        );
+      });
+
+      const isUserRegistered = await Promise.all(promises);
+
+      const currentData = result.results.map((item, index) => {
+        return {
+          ...item,
+          is_registered: isUserRegistered[index] ? true : false,
+        };
+      });
+
+      const data = checkReady(currentData);
+
+      const hasil = {
+        data,
         limit: parseInt(limit),
         page: parseInt(page),
         total: result.total,
       };
-      res.json(data);
+      res.json(hasil);
     }
     if (type === "upcoming") {
       const result = await WebinarSeries.query()
@@ -445,9 +472,45 @@ const downloadCertificate = async (req, res) => {
 
       const pdfTitle = `${username}-${title}.pdf`;
 
-      res.setHeader("Content-Disposition", `attachment; filename=${pdfTitle}`);
-      res.setHeader("Content-Type", "application/pdf");
-      pdf.pipe(res);
+      // res.setHeader("Content-Disposition", `attachment; filename=${pdfTitle}`);
+      // res.setHeader("Content-Type", "application/pdf");
+      // pdf.pipe(res);
+
+      let buffer = [];
+
+      pdf.on("data", (chunk) => {
+        buffer.push(chunk);
+      });
+
+      pdf.on("end", async () => {
+        try {
+          const pdfData = Buffer.concat(buffer);
+
+          const result = await createSignature({
+            id: "test",
+            file: pdfData,
+          });
+
+          if (!result?.success) {
+            res.status(400).json({ code: 400, message: result?.data?.error });
+          } else {
+            const base64File = result?.data?.base64_signed_file;
+
+            const buffer = Buffer.from(base64File, "base64");
+
+            res.setHeader(
+              "Content-Disposition",
+              `attachment; filename=${pdfTitle}`
+            );
+
+            res.setHeader("Content-Type", "application/pdf");
+            res.send(buffer);
+          }
+        } catch (error) {
+          console.log(error);
+          res.status(400).json({ code: 400, message: "Internal Server Error" });
+        }
+      });
     }
   } catch (error) {
     console.log(error);
