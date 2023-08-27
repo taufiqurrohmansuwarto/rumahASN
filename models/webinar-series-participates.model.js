@@ -1,5 +1,6 @@
 const { Model } = require("objection");
 const knex = require("../db");
+const { nanoid } = require("nanoid");
 Model.knex(knex);
 
 class WebinarSeriesParticipates extends Model {
@@ -7,8 +8,12 @@ class WebinarSeriesParticipates extends Model {
     return "webinar_series_participates";
   }
 
+  $beforeInsert() {
+    this.id = nanoid(10);
+  }
+
   static get idColumn() {
-    return ["webinar_series_id", "user_id"];
+    return "id";
   }
 
   static get relationMappings() {

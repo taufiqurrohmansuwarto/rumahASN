@@ -6,16 +6,12 @@ import {
 } from "@tabler/icons";
 import axios from "axios";
 import {
-  pipe,
-  gotenberg,
-  convert,
-  office,
-  to,
-  landscape,
-  set,
-  filename,
-  please,
   adjust,
+  convert,
+  gotenberg,
+  office,
+  pipe,
+  please,
 } from "gotenberg-js-client";
 import { toLower } from "lodash";
 import moment from "moment";

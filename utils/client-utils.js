@@ -1,8 +1,28 @@
 import moment from "moment";
 import "moment/locale/id";
 import { uploadFiles, parseMarkdown } from "@/services/index";
+import { toLower } from "lodash";
+import { Tag } from "antd";
 // language is set to Indonesia
 moment.locale("id");
+
+export const StatusWebinar = ({ status }) => {
+  if (status === "published") {
+    return <Tag color="green">Published</Tag>;
+  } else if (status === "draft") {
+    return <Tag color="red">Draft</Tag>;
+  }
+};
+
+export const participantType = (group) => {
+  if (toLower(group) === "master") {
+    return "asn";
+  } else if (toLower(group) === "pttpk") {
+    return "non_asn";
+  } else {
+    return "umum";
+  }
+};
 
 export const formatDateFromNow = (date) => {
   // language is set to Indonesia
@@ -12,6 +32,10 @@ export const formatDateFromNow = (date) => {
 export const formatedMonth = (date) => {
   // language is set to Indonesia
   return moment(date).locale("id").format("MMMM");
+};
+
+export const base64ToPdf = (base64) => {
+  return `data:application/pdf;base64,${base64}`;
 };
 
 export const formatDateFull = (date) => {
