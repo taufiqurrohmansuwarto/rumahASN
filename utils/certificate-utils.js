@@ -10,6 +10,8 @@ const {
   landscape,
 } = require("gotenberg-js-client");
 
+const { default: axios } = require("axios");
+
 const { TemplateHandler, MimeType } = require("easy-template-x");
 
 const GOTENBERG_URL = process.env.GOTENBERG_URL;
