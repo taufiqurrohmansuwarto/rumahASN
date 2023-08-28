@@ -1,7 +1,7 @@
 import { formatDateFull, participantType } from "@/utils/client-utils";
 import { Col, Descriptions, Image, Row } from "antd";
 
-function DetailWebinar({ data }) {
+function DetailWebinar({ data, withDownload = false }) {
   return (
     <Row>
       <Col md={18} xs={24}>

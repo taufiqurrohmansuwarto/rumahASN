@@ -5,6 +5,8 @@ import {
   downloadCurrentUserCertificate,
   webinarUserDetail,
 } from "@/services/webinar.services";
+import { DownloadOutlined } from "@ant-design/icons";
+import { Stack } from "@mantine/core";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { Breadcrumb, Button, Card, message } from "antd";
 import Head from "next/head";
@@ -78,15 +80,21 @@ function MyWebinarDetail() {
         }}
       >
         <Card>
-          {/* {JSON.stringify(data)} */}
           <DetailWebinar data={data} />
-          <Button
-            onClick={handleDownload}
-            disabled={isLoadingDownloadCertificate}
-            loading={isLoadingDownloadCertificate}
-          >
-            Unduh Sertifikat
-          </Button>
+          {data?.is_allow_download_certificate && (
+            <Button
+              style={{
+                marginTop: 16,
+              }}
+              icon={<DownloadOutlined />}
+              type="primary"
+              onClick={handleDownload}
+              disabled={isLoadingDownloadCertificate}
+              loading={isLoadingDownloadCertificate}
+            >
+              Unduh Sertifikat
+            </Button>
+          )}
         </Card>
       </PageContainer>
     </>

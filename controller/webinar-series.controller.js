@@ -255,6 +255,27 @@ const allWebinars = async (req, res) => {
   }
 };
 
+const detailAllWebinar = async (req, res) => {
+  try {
+    const { id } = req?.query;
+    const { group } = req?.user;
+    const userType = typeGroup(group);
+
+    const currentData = await WebinarSeries.query()
+      .where("id", id)
+      .andWhere("status", "published")
+      .andWhereRaw(`type_participant::text LIKE '%${userType}%'`)
+      .first();
+
+    console.log(currentData);
+
+    res.json(currentData);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
 // user
 const listUser = async (req, res) => {
   try {
@@ -284,15 +305,14 @@ const listUser = async (req, res) => {
 const detailWebinarUser = async (req, res) => {
   try {
     const { id } = req.query;
-    const { customId } = req.user;
 
-    const result = await WebinarSeriesParticipates.query()
-      .where("user_id", customId)
-      .andWhere("webinar_series_id", id)
-      .first();
+    const result = await WebinarSeriesParticipates.query().findById(id);
 
     if (result) {
-      const hasil = await WebinarSeries.query().findById(id);
+      const hasil = await WebinarSeries.query().findById(
+        result?.webinar_series_id
+      );
+
       res.json(hasil);
     } else {
       res.json(result);
@@ -432,13 +452,14 @@ const downloadCertificate = async (req, res) => {
     const { customId } = req?.user;
 
     const result = await WebinarSeriesParticipates.query()
-      .where("user_id", customId)
-      .andWhere("webinar_series_id", id)
+      .where("id", id)
+      .andWhere("user_id", customId)
       .first();
 
     // check in webinar series is allowed download ceritficate is true
     const currentWebinarSeries = await WebinarSeries.query()
-      .where("id", id)
+      .where("id", result?.webinar_series_id)
+      // .andWhere("certificate_template", "!=", null)
       .andWhere("is_allow_download_certificate", true)
       .andWhere("status", "published")
       .first();
@@ -451,14 +472,14 @@ const downloadCertificate = async (req, res) => {
         message: "Akses download sertifikat belum siap",
       });
     } else {
-      const numberCertificate = `BKD-${id}`;
+      const numberCertificate = `BKD-${result?.id}`;
 
       await WebinarSeriesParticipates.query()
         .patch({
           certificate_number: numberCertificate,
         })
         .where("user_id", customId)
-        .andWhere("webinar_series_id", id);
+        .andWhere("id", id);
 
       const templateUrl = currentWebinarSeries?.certificate_template;
 
@@ -472,45 +493,52 @@ const downloadCertificate = async (req, res) => {
 
       const pdfTitle = `${username}-${title}.pdf`;
 
-      // res.setHeader("Content-Disposition", `attachment; filename=${pdfTitle}`);
-      // res.setHeader("Content-Type", "application/pdf");
-      // pdf.pipe(res);
+      if (!result?.use_esign) {
+        res.setHeader(
+          `Content-Disposition`,
+          `attachment; filename=${pdfTitle}`
+        );
+        res.setHeader(`Content-Type`, `application/pdf`);
+        pdf.pipe(res);
+      } else {
+        let buffer = [];
 
-      let buffer = [];
+        pdf.on("data", (chunk) => {
+          buffer.push(chunk);
+        });
 
-      pdf.on("data", (chunk) => {
-        buffer.push(chunk);
-      });
+        pdf.on("end", async () => {
+          try {
+            const pdfData = Buffer.concat(buffer);
 
-      pdf.on("end", async () => {
-        try {
-          const pdfData = Buffer.concat(buffer);
+            const result = await createSignature({
+              id,
+              file: pdfData,
+            });
 
-          const result = await createSignature({
-            id: "test",
-            file: pdfData,
-          });
+            if (!result?.success) {
+              res.status(400).json({ code: 400, message: result?.data?.error });
+            } else {
+              const base64File = result?.data?.base64_signed_file;
 
-          if (!result?.success) {
-            res.status(400).json({ code: 400, message: result?.data?.error });
-          } else {
-            const base64File = result?.data?.base64_signed_file;
+              const buffer = Buffer.from(base64File, "base64");
 
-            const buffer = Buffer.from(base64File, "base64");
+              res.setHeader(
+                "Content-Disposition",
+                `attachment; filename=${pdfTitle}`
+              );
 
-            res.setHeader(
-              "Content-Disposition",
-              `attachment; filename=${pdfTitle}`
-            );
-
-            res.setHeader("Content-Type", "application/pdf");
-            res.send(buffer);
+              res.setHeader("Content-Type", "application/pdf");
+              res.send(buffer);
+            }
+          } catch (error) {
+            console.log(error);
+            res
+              .status(400)
+              .json({ code: 400, message: "Internal Server Error" });
           }
-        } catch (error) {
-          console.log(error);
-          res.status(400).json({ code: 400, message: "Internal Server Error" });
-        }
-      });
+        });
+      }
     }
   } catch (error) {
     console.log(error);
@@ -529,6 +557,8 @@ module.exports = {
   deleteWebinar,
 
   allWebinars,
+  detailAllWebinar,
+
   listUser,
   detailWebinarUser,
   registerWebinar,

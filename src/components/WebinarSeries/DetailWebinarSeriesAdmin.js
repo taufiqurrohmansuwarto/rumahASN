@@ -15,12 +15,6 @@ function DetailWebinarSeriesAdmin() {
     },
   });
 
-  const { data, isLoading } = useQuery(
-    ["webinar-series-admin-detail", router?.query?.id],
-    () => detailWebinar(router?.query?.id),
-    {}
-  );
-
   const { data: participants, isLoading: isLoadingParticipants } = useQuery(
     ["webinar-series-admin-detail-participants", query],
     () => getParticipants(query),
@@ -57,30 +51,27 @@ function DetailWebinarSeriesAdmin() {
 
   return (
     <>
-      <Skeleton loading={isLoading}>
-        <div>{JSON.stringify(data)}</div>
-        <Table
-          columns={columns}
-          title={() => <h4>Peserta</h4>}
-          pagination={{
-            pageSize: query?.query?.limit,
-            current: query?.query?.page,
-            total: participants?.total,
-            onChange: (page) => {
-              setQuery({
-                ...query,
-                query: {
-                  ...query?.query,
-                  page: page,
-                },
-              });
-            },
-          }}
-          loading={isLoadingParticipants}
-          rowKey={(row) => row?.custom_id}
-          dataSource={participants?.data}
-        />
-      </Skeleton>
+      <Table
+        columns={columns}
+        title={() => <h4>Peserta</h4>}
+        pagination={{
+          pageSize: query?.query?.limit,
+          current: query?.query?.page,
+          total: participants?.total,
+          onChange: (page) => {
+            setQuery({
+              ...query,
+              query: {
+                ...query?.query,
+                page: page,
+              },
+            });
+          },
+        }}
+        loading={isLoadingParticipants}
+        rowKey={(row) => row?.custom_id}
+        dataSource={participants?.data}
+      />
     </>
   );
 }

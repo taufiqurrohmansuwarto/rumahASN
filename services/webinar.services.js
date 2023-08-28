@@ -43,7 +43,11 @@ export const removeWebinar = (id) => {
 // user
 export const readAllWebinarUser = (query) => {
   const queryStr = queryString.stringify(query);
-  return api.get(`?${queryStr}`).then((res) => res?.data);
+  return api.get(`/all?${queryStr}`).then((res) => res?.data);
+};
+
+export const detailAllWebinar = (id) => {
+  return api.get(`/all/${id}`).then((res) => res?.data);
 };
 
 export const detailWebinarUser = (id) => {
@@ -51,11 +55,11 @@ export const detailWebinarUser = (id) => {
 };
 
 export const registerWebinar = (id) => {
-  return api.patch(`/users/${id}/participates`).then((res) => res?.data);
+  return api.patch(`/all/${id}/participates`).then((res) => res?.data);
 };
 
 export const unregisterWebinar = (id) => {
-  return api.delete(`/users/${id}/participates`).then((res) => res?.data);
+  return api.delete(`/all/${id}/participates`).then((res) => res?.data);
 };
 
 export const uploadFileWebinar = ({ id, data }) => {
