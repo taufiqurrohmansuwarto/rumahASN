@@ -12,10 +12,12 @@ import {
   office,
   pipe,
   please,
+  to,
+  a4,
+  landscape,
 } from "gotenberg-js-client";
 import { toLower } from "lodash";
 import moment from "moment";
-const https = require("https");
 
 const { TemplateHandler, MimeType } = require("easy-template-x");
 
@@ -28,6 +30,7 @@ const toPDF = pipe(
   adjust({
     url: GOTENBERG_URL,
   }),
+  to(a4, landscape),
   please
 );
 
@@ -41,7 +44,7 @@ export const wordToPdf = async (url, user) => {
     const data = {
       nama: user?.username,
       jabatan: user?.info?.jabatan?.jabatan,
-      nip: user?.employee_number,
+      instansi: user?.info?.perangkat_daerah?.detail,
     };
 
     const doc = await handler.process(buffer, data, MimeType.docx);
