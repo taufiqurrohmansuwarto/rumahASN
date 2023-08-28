@@ -493,7 +493,7 @@ const downloadCertificate = async (req, res) => {
 
       const pdfTitle = `${username}-${title}.pdf`;
 
-      if (!result?.use_esign) {
+      if (!currentWebinarSeries?.use_esign) {
         res.setHeader(
           `Content-Disposition`,
           `attachment; filename=${pdfTitle}`
