@@ -5,7 +5,7 @@ import {
   IconFileOff,
 } from "@tabler/icons";
 import axios from "axios";
-import {
+const {
   adjust,
   convert,
   gotenberg,
@@ -15,7 +15,7 @@ import {
   to,
   a4,
   landscape,
-} from "gotenberg-js-client";
+} = require("gotenberg-js-client");
 import { toLower } from "lodash";
 import moment from "moment";
 
