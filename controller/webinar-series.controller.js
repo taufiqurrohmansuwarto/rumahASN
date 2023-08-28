@@ -1,7 +1,10 @@
 const WebinarSeries = require("@/models/webinar-series.model");
 const WebinarSeriesParticipates = require("@/models/webinar-series-participates.model");
 const User = require("@/models/users.model");
-const { uploadFileMinio, typeGroup, wordToPdf } = require("@/utils/index");
+const { uploadFileMinio, typeGroup } = require("@/utils/index");
+
+const { wordToPdf } = require("@/utils/certificate-utils");
+
 const { toLower } = require("lodash");
 const { createSignature } = require("@/utils/bsre-fetcher");
 
