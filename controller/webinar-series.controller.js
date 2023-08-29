@@ -549,6 +549,15 @@ const downloadCertificate = async (req, res) => {
   }
 };
 
+const downloadParticipants = async (req, res) => {
+  try {
+    const id = req?.query?.id;
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
 module.exports = {
   downloadCertificate,
   uploadTemplateAndImage,
