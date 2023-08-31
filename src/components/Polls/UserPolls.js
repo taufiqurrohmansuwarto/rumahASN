@@ -1,12 +1,26 @@
 import { pollForUser, votePolling } from "@/services/polls.services";
 import { Stack } from "@mantine/core";
-import { useMutation, useQuery } from "@tanstack/react-query";
-import { Badge, Card, Radio, Skeleton, Space, Typography } from "antd";
-import React, { useState } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  Badge,
+  Card,
+  List,
+  Radio,
+  Skeleton,
+  Space,
+  Typography,
+  message,
+} from "antd";
+import { useEffect } from "react";
 
 const Poll = ({ data }) => {
+  const queryClient = useQueryClient();
+
   const { mutate, isLoading } = useMutation((data) => votePolling(data), {
     onSuccess: () => {
+      queryClient.invalidateQueries("users-polls");
+    },
+    onSettled: () => {
       queryClient.invalidateQueries("users-polls");
     },
   });
@@ -17,7 +31,6 @@ const Poll = ({ data }) => {
       answer_id: id,
     };
 
-    // setValue(value);
     mutate(currentData);
   };
 
@@ -47,18 +60,21 @@ function UserPolls() {
     () => pollForUser(),
     {}
   );
+
   return (
     <>
       {data?.length > 0 ? (
         <Badge.Ribbon text="Voting BKD" color="pink">
           <Card title="Pertanyaan">
-            <Skeleton loading={isLoading}>
-              {data?.map((item) => (
-                <Stack key={item?.id}>
+            <List
+              dataSource={data}
+              loading={isLoading}
+              renderItem={(item) => (
+                <Stack mb={16}>
                   <Poll data={item} />
                 </Stack>
-              ))}
-            </Skeleton>
+              )}
+            />
           </Card>
         </Badge.Ribbon>
       ) : null}

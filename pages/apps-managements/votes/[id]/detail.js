@@ -1,10 +1,11 @@
 import Layout from "@/components/Layout";
 import PageContainer from "@/components/PageContainer";
 import { detailPolling } from "@/services/polls.services";
-import { Column } from "@ant-design/plots";
+import { Bar } from "@ant-design/plots";
 import { useQuery } from "@tanstack/react-query";
-import { Card, Col, Row, Skeleton } from "antd";
+import { Breadcrumb, Card, Col, Row, Skeleton } from "antd";
 import Head from "next/head";
+import Link from "next/link";
 import { useRouter } from "next/router";
 
 const DetailVote = () => {
@@ -22,24 +23,11 @@ const DetailVote = () => {
 
   const config = {
     data: data?.answers,
-    xField: "title",
-    yField: "value",
+    xField: "value",
+    yField: "title",
     seriesField: "title",
     label: {
-      // 可手动配置 label 数据标签位置
       position: "middle",
-      // 'top', 'bottom', 'middle',
-      // 配置样式
-      style: {
-        fill: "#FFFFFF",
-        opacity: 0.6,
-      },
-    },
-    xAxis: {
-      label: {
-        autoHide: true,
-        autoRotate: false,
-      },
     },
     legend: { position: "top-left" },
   };
@@ -49,7 +37,26 @@ const DetailVote = () => {
       <Head>
         <title>Detail Voting</title>
       </Head>
-      <PageContainer title="Detail Voting" onBack={handleBack}>
+      <PageContainer
+        header={{
+          breadcrumbRender: () => (
+            <Breadcrumb>
+              <Breadcrumb.Item>
+                <Link href="/feeds">
+                  <a>Beranda</a>
+                </Link>
+              </Breadcrumb.Item>
+              <Link href="/apps-managements/votes">
+                <a>Polling</a>
+              </Link>
+              <Breadcrumb.Item>Detail Polling</Breadcrumb.Item>
+            </Breadcrumb>
+          ),
+        }}
+        title="Rumah ASN"
+        content="Detail Polling"
+        onBack={handleBack}
+      >
         <Skeleton loading={isLoading}>
           {data && (
             <Row
@@ -60,7 +67,7 @@ const DetailVote = () => {
             >
               <Col md={16} xs={24}>
                 <Card title={data?.question}>
-                  <Column {...config} />
+                  <Bar {...config} />
                 </Card>
               </Col>
             </Row>

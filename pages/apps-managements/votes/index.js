@@ -1,7 +1,11 @@
 import Layout from "@/components/Layout";
 import PageContainer from "@/components/PageContainer";
-import { readAllPolling, removePooling } from "@/services/polls.services";
-import { formatDateLL } from "@/utils/client-utils";
+import {
+  readAllPolling,
+  removePooling,
+  updatePolling,
+} from "@/services/polls.services";
+import { formatDateFull } from "@/utils/client-utils";
 import { PlusOutlined } from "@ant-design/icons";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
@@ -12,6 +16,7 @@ import {
   Popconfirm,
   Space,
   Table,
+  Tag,
   message,
 } from "antd";
 import Head from "next/head";
@@ -27,15 +32,44 @@ function Votes() {
     (data) => removePooling(data),
     {
       onSuccess: () => {
-        queryClient.invalidateQueries("votes-admins");
-        router.push("/apps-managements/votes");
         message.success("Berhasil menghapus voting!");
+        queryClient.invalidateQueries("votes-admins");
       },
       onError: () => {
         message.error("Gagal menghapus voting!");
       },
     }
   );
+
+  const { mutate: update, isLoading: loadingUpdate } = useMutation(
+    (data) => updatePolling(data),
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries("votes-admins");
+        message.success("Berhasil mengubah voting!");
+      },
+    }
+  );
+
+  const handleActive = (data) => {
+    if (data?.is_active) {
+      const currentData = {
+        id: data?.id,
+        data: {
+          is_active: false,
+        },
+      };
+      update(currentData);
+    } else {
+      const currentData = {
+        id: data?.id,
+        data: {
+          is_active: true,
+        },
+      };
+      update(currentData);
+    }
+  };
 
   const handleRemove = (id) => {
     mutate(id);
@@ -48,37 +82,59 @@ function Votes() {
   );
 
   const columns = [
-    { title: "Pertanyaan", dataIndex: "question" },
     {
-      title: "Mulai Pada",
-      key: "start_date",
-      render: (row) => formatDateLL(row.start_date),
+      title: "Pertanyaan",
+      key: "question",
+      render: (row) => {
+        return (
+          <Link
+            href={`
+            /apps-managements/votes/${row.id}/detail
+          `}
+          >
+            <a>{row.question}</a>
+          </Link>
+        );
+      },
     },
     {
-      title: "Berakhir Pada",
-      key: "end_date",
-      render: (row) => formatDateLL(row.end_date),
+      title: "Tgl. Dibuat",
+      key: "created_at",
+      render: (row) => {
+        return <div>{formatDateFull(row?.created_at)}</div>;
+      },
+    },
+    {
+      title: "Status",
+      key: "status",
+      render: (row) => {
+        return (
+          <Tag color={row?.is_active ? "green" : "red"}>
+            {row?.is_active ? "Aktif" : "Tidak Aktif"}
+          </Tag>
+        );
+      },
     },
     {
       title: "Aksi",
-      dataIndex: "id",
-      render: (id) => (
+      key: "id",
+      render: (_, row) => (
         <Space>
-          <a
-            onClick={() => router.push(`/apps-managements/votes/${id}/detail`)}
-          >
-            Detail
+          <a onClick={() => handleActive(row)}>
+            {row?.is_active ? "Nonaktifkan" : "Aktifkan"}
           </a>
           <Divider type="vertical" />
           <a
-            onClick={() => router.push(`/apps-managements/votes/${id}/update`)}
+            onClick={() =>
+              router.push(`/apps-managements/votes/${row?.id}/update`)
+            }
           >
             Edit
           </a>
           <Divider type="vertical" />
           <Popconfirm
             title="Apakah anda yakin menghapus voting ini?"
-            onConfirm={() => handleRemove(id)}
+            onConfirm={() => handleRemove(row?.id)}
           >
             <a>Hapus</a>
           </Popconfirm>
@@ -90,7 +146,7 @@ function Votes() {
   return (
     <>
       <Head>
-        <title>Polilng</title>
+        <title>Polling</title>
       </Head>
       <PageContainer
         header={{

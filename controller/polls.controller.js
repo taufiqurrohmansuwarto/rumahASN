@@ -13,8 +13,6 @@ const createPolling = async (req, res) => {
       author: customId,
     };
 
-    console.log(data);
-
     await Poll.query().insertGraph(data);
 
     res.json({ code: 200, message: "Success" });
@@ -27,7 +25,9 @@ const createPolling = async (req, res) => {
 // read
 const readAllPolling = async (req, res) => {
   try {
-    const result = await Poll.query().withGraphFetched("[ answers]");
+    const result = await Poll.query()
+      .withGraphFetched("[answers]")
+      .orderBy("is_active", "desc");
     res.json(result);
   } catch (error) {
     console.log(error);
@@ -40,27 +40,38 @@ const updatePolling = async (req, res) => {
     const { id } = req?.query;
     const body = req.body;
 
-    // remove the answers first
+    // jika ada answers dengan array maka lakukan hal yang dibawaah ini
+    if (body?.answers) {
+      // remove the answers first
 
-    const currentPollAnswer = await PollAnswer.query().where({ poll_id: id });
+      const currentPollAnswer = await PollAnswer.query().where({ poll_id: id });
 
-    // compare the current answers with the new answers
-    const currentPollAnswerId = currentPollAnswer.map((item) => item.id);
-    const newPollAnswerId = body.answers.map((item) => item.id);
+      // compare the current answers with the new answers
+      const currentPollAnswerId = currentPollAnswer.map((item) => item.id);
+      const newPollAnswerId = body.answers.map((item) => item.id);
 
-    const toDelete = currentPollAnswerId.filter(
-      (item) => !newPollAnswerId.includes(item)
-    );
+      const toDelete = currentPollAnswerId.filter(
+        (item) => !newPollAnswerId.includes(item)
+      );
 
-    await Poll.query().patch(body).where({ id });
-    await PollAnswer.query()
-      .insert(body.answers?.map((item) => ({ ...item, poll_id: id })))
-      .onConflict(["id"])
-      .merge();
+      await Poll.query().patch(body).where({ id });
+      await PollAnswer.query()
+        .insert(body.answers?.map((item) => ({ ...item, poll_id: id })))
+        .onConflict(["id"])
+        .merge();
 
-    await PollAnswer.query().delete().whereIn("id", toDelete);
+      await PollAnswer.query().delete().whereIn("id", toDelete);
 
-    res.json({ code: 200, message: "Success" });
+      res.json({ code: 200, message: "Success" });
+    } else {
+      await Poll.query()
+        .patch({
+          ...body,
+          updated_at: new Date().toISOString(),
+        })
+        .where({ id });
+      res.json({ code: 200, message: "Success" });
+    }
   } catch (error) {
     console.log(error);
     res.status(500).json({ code: 500, message: "Internal Server Error" });
@@ -167,8 +178,7 @@ const readPollUser = async (req, res) => {
   try {
     // between start_date and end_date
     const result = await Poll.query()
-      .where("start_date", "<=", new Date())
-      .andWhere("end_date", ">=", new Date())
+      .where("is_active", true)
       .withGraphFetched("[answers]");
 
     const { customId } = req?.user;
