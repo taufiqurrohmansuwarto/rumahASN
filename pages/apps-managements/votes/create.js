@@ -26,16 +26,17 @@ import Head from "next/head";
 import Link from "next/link";
 
 const MyForm = () => {
+  const router = useRouter();
   const [form] = Form.useForm();
   const [answers, setAnswers] = useState([]);
 
   const { mutate, isLoading } = useMutation((data) => createPolling(data), {
     onSuccess: (data) => {
       message.success("Berhasil membuat voting baru!");
-      console.log(data);
+      router.push(`/apps-managements/votes`);
     },
     onError: (error) => {
-      console.log(error);
+      message.error("Gagal membuat voting baru!");
     },
   });
 

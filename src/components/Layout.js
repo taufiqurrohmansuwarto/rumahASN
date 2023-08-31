@@ -325,7 +325,6 @@ function Layout({ children, active, collapsed = true }) {
           );
         },
       }}
-      // defaultCollapsed={true}
       menu={{
         request: async () => {
           try {
@@ -335,7 +334,7 @@ function Layout({ children, active, collapsed = true }) {
             console.log(e);
           }
         },
-        defaultOpenAll: true,
+        defaultOpenAll: false,
       }}
       collapsed={tutup}
       onCollapse={onCollapsed}
