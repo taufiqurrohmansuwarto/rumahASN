@@ -55,13 +55,13 @@ const LayoutPemutakhiranData = ({ children, active = "1" }) => {
           Tanya BKD
         </Button>
       }
-      // extra={[
-      //   <Button key="3">Operation</Button>,
-      //   <Button key="2">Operation</Button>,
-      //   <Button key="1" type="primary">
-      //     Primary Action
-      //   </Button>,
-      // ]}
+      extra={[
+        <Button key="3">Operation</Button>,
+        <Button key="2">Operation</Button>,
+        <Button key="1" type="primary">
+          Primary Action
+        </Button>,
+      ]}
       tabProps={{
         size: "small",
         onChange: handleChange,

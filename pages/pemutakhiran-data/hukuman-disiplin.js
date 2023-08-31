@@ -1,5 +1,6 @@
 import Layout from "@/components/Layout";
 import PageContainer from "@/components/PageContainer";
+import CustomSelectMenu from "@/components/PemutakhiranData/CustomSelectMenu";
 import { Breadcrumb, Card } from "antd";
 import Head from "next/head";
 import Link from "next/link";
@@ -16,6 +17,7 @@ const RiwayatHukumanDisiplin = () => {
         <title>Rumah ASN - Peremajaan SIASN - Data Hukuman Disiplin</title>
       </Head>
       <PageContainer
+        extra={[<CustomSelectMenu key="menu" />]}
         header={{
           breadcrumbRender: () => (
             <Breadcrumb>

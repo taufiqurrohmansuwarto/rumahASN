@@ -1,6 +1,7 @@
 import Layout from "@/components/Layout";
 import PageContainer from "@/components/PageContainer";
 import CompareDataPendidikan from "@/components/PemutakhiranData/CompareDataPendidikan";
+import CustomSelectMenu from "@/components/PemutakhiranData/CustomSelectMenu";
 import { Breadcrumb, Card } from "antd";
 import Head from "next/head";
 import Link from "next/link";
@@ -17,6 +18,7 @@ const RiwayatPendidikan = () => {
         <title>Rumah ASN - Peremajaan SIASN - Data Pendidikan</title>
       </Head>
       <PageContainer
+        extra={[<CustomSelectMenu key="menu" />]}
         header={{
           breadcrumbRender: () => (
             <Breadcrumb>
