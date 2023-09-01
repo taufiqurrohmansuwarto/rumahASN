@@ -1,13 +1,12 @@
 import Layout from "@/components/Layout";
 import PageContainer from "@/components/PageContainer";
-import DetailWebinar from "@/components/WebinarSeries/DetailWebinar";
+import DetailWebinarNew from "@/components/WebinarSeries/DetailWebinarBaru";
 import { detailAllWebinar } from "@/services/webinar.services";
 import { useQuery } from "@tanstack/react-query";
 import { Breadcrumb, Card } from "antd";
 import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import React from "react";
 
 function Detail() {
   const router = useRouter();
@@ -54,9 +53,7 @@ function Detail() {
           ),
         }}
       >
-        <Card>
-          <DetailWebinar data={data} />
-        </Card>
+        <DetailWebinarNew data={data} />
       </PageContainer>
     </>
   );

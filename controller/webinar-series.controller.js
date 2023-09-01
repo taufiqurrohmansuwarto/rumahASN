@@ -5,7 +5,7 @@ const { uploadFileMinio, typeGroup } = require("@/utils/index");
 
 const { wordToPdf } = require("@/utils/certificate-utils");
 
-const { toLower } = require("lodash");
+const { toLower, orderBy } = require("lodash");
 const { createSignature } = require("@/utils/bsre-fetcher");
 
 const URL_FILE = "https://siasn.bkd.jatimprov.go.id:9000/public";
@@ -190,7 +190,9 @@ const deleteWebinar = async (req, res) => {
 const allWebinars = async (req, res) => {
   const limit = req.query.limit || 25;
   const page = req.query.page || 1;
-  const type = req.query.type || "all";
+  const search = req.query.search || "";
+
+  const sort = req.query.sort || "tanggalTerdekat";
 
   const currentUser = req?.user.customId;
 
@@ -198,60 +200,59 @@ const allWebinars = async (req, res) => {
   const userType = typeGroup(group);
 
   try {
-    if (type === "all") {
-      const result = await WebinarSeries.query()
-        .page(page - 1, limit)
-        // andWhere type participant include userType
-        .andWhereRaw(`type_participant::text LIKE '%${userType}%'`)
-        .andWhere("open_registration", "<=", new Date().toISOString())
-        .andWhere("close_registration", ">=", new Date().toISOString())
-        .where("status", "published");
+    const query = WebinarSeries.query()
+      .page(page - 1, limit)
+      .andWhere((builder) => {
+        if (search) {
+          builder.where("title", "ilike", `%${search}%`);
+        }
+      })
+      .andWhereRaw(`type_participant::text LIKE '%${userType}%'`)
+      .where("status", "published");
 
-      let promises = [];
-
-      result.results.forEach((item) => {
-        promises.push(
-          WebinarSeriesParticipates.query()
-            .where("user_id", currentUser)
-            .andWhere("webinar_series_id", item.id)
-            .first()
-        );
-      });
-
-      const isUserRegistered = await Promise.all(promises);
-
-      const currentData = result.results.map((item, index) => {
-        return {
-          ...item,
-          is_registered: isUserRegistered[index] ? true : false,
-        };
-      });
-
-      const data = checkReady(currentData);
-
-      const hasil = {
-        data,
-        limit: parseInt(limit),
-        page: parseInt(page),
-        total: result.total,
-      };
-      res.json(hasil);
+    if (sort === "tanggalTerdekat") {
+      query.orderByRaw(
+        "ABS(EXTRACT(EPOCH FROM age(start_date, CURRENT_TIMESTAMP)))"
+      );
+    } else if (sort === "tanggalEvent") {
+      query.orderBy("start_date", "asc");
+    } else if (sort === "asc") {
+      query.orderBy("title", "asc");
+    } else if (sort === "desc") {
+      query.orderBy("title", "desc");
     }
-    if (type === "upcoming") {
-      const result = await WebinarSeries.query()
-        .page(page - 1, limit)
-        .where("status", "published")
-        .andWhereRaw(`type_participant::text LIKE '%${userType}%'`)
-        .andWhere("start_date", ">", new Date().toISOString());
 
-      const data = {
-        data: checkReady(result.results),
-        limit: parseInt(limit),
-        page: parseInt(page),
-        total: result.total,
+    const result = await query.page(page - 1, limit);
+
+    let promises = [];
+
+    result.results.forEach((item) => {
+      promises.push(
+        WebinarSeriesParticipates.query()
+          .where("user_id", currentUser)
+          .andWhere("webinar_series_id", item.id)
+          .first()
+      );
+    });
+
+    const isUserRegistered = await Promise.all(promises);
+
+    const currentData = result.results.map((item, index) => {
+      return {
+        ...item,
+        is_registered: isUserRegistered[index] ? true : false,
       };
-      res.json(data);
-    }
+    });
+
+    const data = checkReady(currentData);
+
+    const hasil = {
+      data,
+      limit: parseInt(limit),
+      page: parseInt(page),
+      total: result.total,
+    };
+    res.json(hasil);
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: "Internal server error" });
@@ -434,15 +435,6 @@ const uploadTemplateAndImage = async (req, res) => {
     } else {
       res.status(400).json({ code: 400, message: "File type is not allowed" });
     }
-
-    // // size must be less than 30 MB
-    // if (size > 30000000) {
-    //   res.status(400).json({ code: 400, message: "File size is too large" });
-    // } else {
-    //   await uploadFileWebinar(req.mc, buffer, currentFilename, size, mimetype);
-    //   const result = `${URL_FILE}/${currentFilename}`;
-    //   res.json(result);
-    // }
   } catch (error) {
     console.log(error);
     res.status(400).json({ code: 400, message: "Internal Server Error" });
@@ -558,7 +550,22 @@ const downloadParticipants = async (req, res) => {
   }
 };
 
+const checkCertificate = async (req, res) => {
+  try {
+    const { id } = req?.query;
+
+    const result = await WebinarSeriesParticipates.query().findById(id);
+
+    res.json(result);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
 module.exports = {
+  checkCertificate,
+
   downloadCertificate,
   uploadTemplateAndImage,
 
