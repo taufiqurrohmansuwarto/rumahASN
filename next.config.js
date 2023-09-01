@@ -32,9 +32,6 @@ const hashOnlyIdent = (context, _, exportName) =>
     .replace(/^(-?\d|--)/, "_$1");
 
 module.exports = withAntdLess({
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
   i18n: {
     locales: ["en"],
     defaultLocale: "en",
