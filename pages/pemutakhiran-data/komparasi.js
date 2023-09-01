@@ -2,14 +2,13 @@ import Layout from "@/components/Layout";
 import PageContainer from "@/components/PageContainer";
 import { MenuMySAPK } from "@/components/PemutakhiranData/MenuMySAPK";
 import SIASNTracking from "@/components/Tracking/SIASNTracking";
-import WithAuth from "@/components/hoc/WithAuth";
 import { Card, Col, Row } from "antd";
+import { useSession } from "next-auth/react";
 import Head from "next/head";
-import React from "react";
-
-const StatusTrackingSIASN = WithAuth(SIASNTracking, ["MASTER"]);
 
 function Komparasi() {
+  const { data } = useSession();
+
   return (
     <>
       <Head>
@@ -33,7 +32,7 @@ function Komparasi() {
               <MenuMySAPK />
             </Col>
             <Col md={12} xs={24}>
-              <StatusTrackingSIASN />
+              {data?.user?.group === "MASTER" && <SIASNTracking />}
             </Col>
           </Row>
         </Card>
