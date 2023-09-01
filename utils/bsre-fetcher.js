@@ -1,7 +1,6 @@
 import axios from "axios";
 const FormData = require("form-data");
 const qrCode = require("qrcode");
-const fs = require("fs");
 
 const baseURL = process.env.ESIGN_URL;
 const username = process.env.ESIGN_USERNAME;
@@ -9,6 +8,8 @@ const password = process.env.ESIGN_PASSWORD;
 
 const nik = process.env.ESIGN_NIK;
 const passphrase = process.env.ESIGN_PASSPHRASE;
+
+const webinar_certificate_url = process.env.WEBINAR_CERTIFICATE_URL;
 
 const api = axios.create({
   baseURL: baseURL,
@@ -24,8 +25,9 @@ export const createSignature = async ({ id, file }) => {
     const formData = new FormData();
 
     // generate qr code to buffer
+    const qr = `${webinar_certificate_url}/${id}}`;
 
-    const currentQrCode = await qrCode.toBuffer(id);
+    const currentQrCode = await qrCode.toBuffer(qr);
 
     formData.append("nik", nik);
     formData.append("passphrase", passphrase);
