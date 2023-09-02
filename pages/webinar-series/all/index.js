@@ -209,7 +209,7 @@ function WebinarAll() {
                 style={{
                   width: "100%",
                 }}
-                value={query?.sort || "tangalTerdekat"}
+                value={query?.sort || "tanggalTerdekat"}
                 options={[
                   { label: "A-Z", value: "asc" },
                   { label: "Z-A", value: "desc" },
