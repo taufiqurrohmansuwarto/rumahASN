@@ -1,3 +1,5 @@
-3. selesaikan fitur private messages
-4. tambahkan fitur subscribe
-5. pelajari demo dari pro components layout
+1. buat kolom is_open to webinar series
+2. ganti deskripsi webinar series menjadi markdown
+3. hapus kolom webinar_series_surveys dan recreate foreign key menjadi ondelete cascade dan onupdate cascade
+4. buat download excel untuk peserta webinar series
+5. buat pertanyaan / kuisioner untuk webinar series
