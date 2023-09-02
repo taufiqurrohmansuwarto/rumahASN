@@ -11,6 +11,7 @@ import {
   Popconfirm,
   Space,
   Table,
+  Tag,
   message,
 } from "antd";
 import Head from "next/head";
@@ -67,17 +68,15 @@ const WebinarSeries = () => {
       dataIndex: "title",
     },
     {
-      title: "Tgl. Buka Pendaftaran",
-      key: "open_registration",
+      title: "Tanggal",
+      key: "tanggal",
       render: (text) => {
-        return <span>{formatDateFull(text?.open_registration)}</span>;
-      },
-    },
-    {
-      title: "Tgl. Tutup Pendaftaran",
-      key: "close_registration",
-      render: (text) => {
-        return <span>{formatDateFull(text?.close_registration)}</span>;
+        return (
+          <span>
+            {formatDateFull(text?.start_date)} s/d{" "}
+            {formatDateFull(text?.end_date)}
+          </span>
+        );
       },
     },
     {
@@ -91,6 +90,15 @@ const WebinarSeries = () => {
       title: "Status",
       key: "status",
       render: (text) => <StatusWebinar status={text?.status} />,
+    },
+    {
+      title: "Status Pendaftaran",
+      key: "status_registration",
+      render: (text) => (
+        <Tag color={text?.is_open ? "green" : "red"}>
+          {text?.is_open === "open" ? "Buka" : "Tutup"}
+        </Tag>
+      ),
     },
     {
       title: "Total Peserta",
