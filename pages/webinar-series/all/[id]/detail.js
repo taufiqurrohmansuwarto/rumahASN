@@ -1,16 +1,51 @@
 import Layout from "@/components/Layout";
 import PageContainer from "@/components/PageContainer";
 import DetailWebinarNew from "@/components/WebinarSeries/DetailWebinarBaru";
-import { detailAllWebinar } from "@/services/webinar.services";
-import { useQuery } from "@tanstack/react-query";
-import { Breadcrumb, Card } from "antd";
+import {
+  detailAllWebinar,
+  registerWebinar,
+  unregisterWebinar,
+} from "@/services/webinar.services";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { Breadcrumb, message } from "antd";
 import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
 
 function Detail() {
+  const queryClient = useQueryClient();
   const router = useRouter();
   const id = router?.query?.id;
+
+  const { mutate: register, isLoading: isLoadingRegister } = useMutation(
+    (data) => registerWebinar(data),
+    {
+      onSuccess: () => {
+        message.success("Berhasil mendaftar webinar");
+      },
+      onError: (error) => {
+        message.error(error?.response?.data?.message);
+      },
+      onSettled: () => {
+        queryClient.invalidateQueries(["webinar-series-all", id]);
+      },
+    }
+  );
+
+  const { mutate: unregister, isLoading: isLoadingUnregister } = useMutation(
+    (data) => unregisterWebinar(data),
+    {
+      onSuccess: () => {
+        message.success("Berhasil membatalkan pendaftaran webinar");
+      },
+      onError: (error) => {
+        message.error(error?.response?.data?.message);
+      },
+      onSettled: () => {
+        queryClient.invalidateQueries(["webinar-series-all", id]);
+      },
+    }
+  );
 
   const { data, isLoading } = useQuery(
     ["webinar-series-all", id],
@@ -53,7 +88,13 @@ function Detail() {
           ),
         }}
       >
-        <DetailWebinarNew data={data} />
+        <DetailWebinarNew
+          register={register}
+          unregister={unregister}
+          unregisterLoading={isLoadingUnregister}
+          registerLoading={isLoadingRegister}
+          data={data}
+        />
       </PageContainer>
     </>
   );
