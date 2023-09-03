@@ -1,10 +1,8 @@
 import Layout from "@/components/Layout";
 import PageContainer from "@/components/PageContainer";
+import AdminLayoutWebinar from "@/components/WebinarSeries/AdminLayoutWebinar";
 import { readAllWebinar, removeWebinar } from "@/services/webinar.services";
-import {
-  StatusWebinar,
-  formatDateSimple
-} from "@/utils/client-utils";
+import { StatusWebinar, formatDateSimple } from "@/utils/client-utils";
 import { PlusOutlined } from "@ant-design/icons";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
@@ -153,21 +151,9 @@ const WebinarSeries = () => {
       <Head>
         <title>Rumah ASN - Admin - Webinar Series</title>
       </Head>
-      <PageContainer
-        header={{
-          breadcrumbRender: () => (
-            <Breadcrumb>
-              <Breadcrumb.Item>
-                <Link href="/feeds">
-                  <a>Beranda</a>
-                </Link>
-              </Breadcrumb.Item>
-              <Breadcrumb.Item>Daftar Webinar Series Admin</Breadcrumb.Item>
-            </Breadcrumb>
-          ),
-        }}
-        title={"Rumah ASN"}
-        content="Manajemen Admin Webinar Series"
+      <AdminLayoutWebinar
+        title="Rumah ASN"
+        content="Daftar Webinar Series"
         loading={isLoading}
       >
         <Table
@@ -197,7 +183,7 @@ const WebinarSeries = () => {
             },
           }}
         />
-      </PageContainer>
+      </AdminLayoutWebinar>
     </>
   );
 };
