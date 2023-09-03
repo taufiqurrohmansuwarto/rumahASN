@@ -257,12 +257,15 @@ function WebinarAll() {
                       style={{
                         width: "90%",
                       }}
+                      disabled={!item?.is_open}
                       onClick={() => handleClick(item?.id)}
                       icon={<SmileOutlined />}
                       type="primary"
                       key="test"
                     >
-                      Registrasi
+                      {item?.is_open
+                        ? "Pendaftaran Dibuka"
+                        : "Pendaftaran Ditutup"}
                     </Button>,
                   ]}
                 >

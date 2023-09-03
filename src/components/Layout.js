@@ -7,9 +7,8 @@ import {
   LogoutOutlined,
   ReconciliationOutlined,
   UserOutlined,
-  VideoCameraOutlined,
 } from "@ant-design/icons";
-import { Dropdown } from "antd";
+import { Dropdown, Grid, Typography } from "antd";
 import { uniqBy } from "lodash";
 import { signOut, useSession } from "next-auth/react";
 import dynamic from "next/dynamic";
@@ -192,6 +191,7 @@ function Layout({ children, active, collapsed = true }) {
   const { data, status } = useSession();
   const router = useRouter();
   const [tutup, setTutup] = useState(collapsed);
+  const breakPoint = Grid.useBreakpoint();
 
   const onCollapsed = () => {
     setTutup(!tutup);
@@ -244,8 +244,29 @@ function Layout({ children, active, collapsed = true }) {
               paddingBlockStart: 12,
             }}
           >
-            <div>© 2022 Rumah ASN</div>
-            <div>oleh BKD Provinsi Jawa Timur</div>
+            <Typography.Text
+              style={{
+                fontSize: breakPoint.xs ? 13 : 14,
+              }}
+              type="secondary"
+            >
+              © 2022 Rumah ASN
+            </Typography.Text>
+            {/* <div>
+              <Typography.Text type="secondary">
+                Iput Taufiqurrohman Suwarto
+              </Typography.Text>
+            </div> */}
+            <div>
+              <Typography.Text
+                style={{
+                  fontSize: breakPoint.xs ? 13 : 14,
+                }}
+                type="secondary"
+              >
+                BKD Provinsi Jawa Timur
+              </Typography.Text>
+            </div>
           </div>
         );
       }}

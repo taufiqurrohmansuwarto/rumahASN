@@ -266,14 +266,31 @@ const detailAllWebinar = async (req, res) => {
     const userType = typeGroup(group);
 
     const currentData = await WebinarSeries.query()
+      .select(
+        "*",
+        WebinarSeries.relatedQuery("participates")
+          .count()
+          .as("participants_count")
+      )
       .where("id", id)
       .andWhere("status", "published")
       .andWhereRaw(`type_participant::text LIKE '%${userType}%'`)
       .first();
 
-    console.log(currentData);
+    const isUserRegistered = await WebinarSeriesParticipates.query()
+      .where("user_id", req?.user?.customId)
+      .andWhere("webinar_series_id", id)
+      .first();
 
-    res.json(currentData);
+    const { zoom_url, youtube_url, reference_link, ...last } = currentData;
+
+    const data = {
+      ...last,
+      is_registered: isUserRegistered ? true : false,
+      my_webinar: isUserRegistered?.id,
+    };
+
+    res.json(data);
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: "Internal server error" });
@@ -336,8 +353,7 @@ const registerWebinar = async (req, res) => {
     const currentWebinarSeries = await WebinarSeries.query()
       .where("id", id)
       .andWhere("status", "published")
-      .andWhere("open_registration", "<=", new Date().toISOString())
-      .andWhere("close_registration", ">=", new Date().toISOString())
+      .andWhere("is_open", true)
       .first();
 
     if (!currentWebinarSeries) {
