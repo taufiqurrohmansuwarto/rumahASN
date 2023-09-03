@@ -111,3 +111,12 @@ export const updateSurvey = ({ id, data }) => {
 export const deleteSurvey = (id) => {
   return api.delete(`/admin/surveys/${id}`).then((res) => res?.data);
 };
+
+// surveys user
+export const readAllSurveyUser = (id) => {
+  return api.get(`/users/${id}/surveys`).then((res) => res?.data);
+};
+
+export const submitSurveys = ({ id, data }) => {
+  return api.post(`/users/${id}/surveys`, data).then((res) => res?.data);
+};

@@ -224,13 +224,13 @@ function WebinarAll() {
               marginTop: 24,
             }}
             grid={{
-              gutter: 8,
+              gutter: 16,
               xs: 1,
               sm: 1,
               md: 4,
-              lg: 4,
-              xl: 4,
-              xxl: 4,
+              lg: 5,
+              xl: 5,
+              xxl: 5,
             }}
             pagination={{
               total: data?.total,
@@ -277,7 +277,11 @@ function WebinarAll() {
                             {item?.title}
                           </Typography.Text>
                         </Tooltip>
-                        <div>
+                        <div
+                          style={{
+                            fontSize: 12,
+                          }}
+                        >
                           <CalendarTwoTone color="green" />{" "}
                           {formatDateFull(item?.start_date)} -{" "}
                           {formatDateFull(item?.end_date)}

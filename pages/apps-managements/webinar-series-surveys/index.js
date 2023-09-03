@@ -1,13 +1,17 @@
 import Layout from "@/components/Layout";
+import AdminLayoutWebinar from "@/components/WebinarSeries/AdminLayoutWebinar";
+import SurveyQuestion from "@/components/WebinarSeries/SurveyQuestion";
 import {
   createSurvey,
   deleteSurvey,
   readAllSurvey,
   updateSurvey,
 } from "@/services/webinar.services";
+import { FileAddOutlined } from "@ant-design/icons";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Button,
+  Card,
   Divider,
   Form,
   Input,
@@ -18,6 +22,7 @@ import {
   Table,
   message,
 } from "antd";
+import Head from "next/head";
 import { useEffect, useState } from "react";
 
 const UpdateQuestion = ({ open, handleCancel, data }) => {
@@ -232,22 +237,42 @@ function WebinarSeriesSurveys() {
   ];
 
   return (
-    <div>
-      <CreateQuestion open={open} handleCancel={handleCancel} />
-      <UpdateQuestion
-        open={openEdit}
-        handleCancel={handleCancelEdit}
-        data={dataEdit}
-      />
-      <Button onClick={handleOpen}>Buat Survey Webinar</Button>
-      <Table
-        columns={columns}
+    <>
+      <Head>
+        <title>Webinar Series Surveys</title>
+      </Head>
+      <AdminLayoutWebinar
+        active="webinar-series-surveys"
+        title="Rumah ASN"
+        content="Webinar Survey"
         loading={isLoading}
-        rowKey={(row) => row?.id}
-        dataSource={data}
-        pagination={false}
-      />
-    </div>
+      >
+        <Card>
+          <CreateQuestion open={open} handleCancel={handleCancel} />
+          <UpdateQuestion
+            open={openEdit}
+            handleCancel={handleCancelEdit}
+            data={dataEdit}
+          />
+          <Table
+            title={() => (
+              <Button
+                type="primary"
+                icon={<FileAddOutlined />}
+                onClick={handleOpen}
+              >
+                Kuisioner
+              </Button>
+            )}
+            columns={columns}
+            loading={isLoading}
+            rowKey={(row) => row?.id}
+            dataSource={data}
+            pagination={false}
+          />
+        </Card>
+      </AdminLayoutWebinar>
+    </>
   );
 }
 
