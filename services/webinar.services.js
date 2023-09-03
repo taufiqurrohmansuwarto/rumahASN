@@ -89,3 +89,25 @@ export const downloadCurrentUserCertificate = async (id) => {
     })
     .then((res) => res?.data);
 };
+
+// surveys admin
+export const createSurvey = (data) => {
+  return api.post(`/admin/surveys`, data).then((res) => res?.data);
+};
+
+export const readAllSurvey = (query) => {
+  const queryStr = queryString.stringify(query);
+  return api.get(`/admin/surveys?${queryStr}`).then((res) => res?.data);
+};
+
+export const detailSurvey = (id) => {
+  return api.get(`/admin/surveys/${id}`).then((res) => res?.data);
+};
+
+export const updateSurvey = ({ id, data }) => {
+  return api.patch(`/admin/surveys/${id}`, data).then((res) => res?.data);
+};
+
+export const deleteSurvey = (id) => {
+  return api.delete(`/admin/surveys/${id}`).then((res) => res?.data);
+};

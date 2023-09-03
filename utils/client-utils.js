@@ -162,6 +162,10 @@ export const formatDateFull = (date) => {
   return moment(date).locale("id").format("DD MMMM YYYY HH:mm");
 };
 
+export const formatDateSimple = (date) => {
+  return moment(date).locale("id").format("D MMM YYYY HH:mm");
+};
+
 export const capitalizeWithoutPPPK = (str) => {
   let words = str.toLowerCase().split(" ");
   for (let i = 0; i < words.length; i++) {

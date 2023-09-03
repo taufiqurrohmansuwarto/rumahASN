@@ -235,6 +235,16 @@ function CompareDataUtamaByNip({ nip }) {
                         </Tooltip>
                       </td>
                     </tr>
+                    <tr>
+                      <td>Instansi Induk</td>
+                      <td>{data?.instansiIndukNama}</td>
+                      <td></td>
+                    </tr>
+                    <tr>
+                      <td>Unit Organisasi</td>
+                      <td>{data?.unorNama}</td>
+                      <td></td>
+                    </tr>
                   </tbody>
                 </Table>
               </Card>

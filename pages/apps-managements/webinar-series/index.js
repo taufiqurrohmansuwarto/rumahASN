@@ -1,7 +1,10 @@
 import Layout from "@/components/Layout";
 import PageContainer from "@/components/PageContainer";
 import { readAllWebinar, removeWebinar } from "@/services/webinar.services";
-import { StatusWebinar, formatDateFull } from "@/utils/client-utils";
+import {
+  StatusWebinar,
+  formatDateSimple
+} from "@/utils/client-utils";
 import { PlusOutlined } from "@ant-design/icons";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
@@ -73,8 +76,8 @@ const WebinarSeries = () => {
       render: (text) => {
         return (
           <span>
-            {formatDateFull(text?.start_date)} s/d{" "}
-            {formatDateFull(text?.end_date)}
+            {formatDateSimple(text?.start_date)} -{" "}
+            {formatDateSimple(text?.end_date)}
           </span>
         );
       },
