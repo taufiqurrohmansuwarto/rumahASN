@@ -1,8 +1,9 @@
 import { dataUtamaSimaster } from "@/services/master.services";
 import { dataUtamaSIASN } from "@/services/siasn-services";
 import { komparasiGelar } from "@/utils/client-utils";
-import { CheckOutlined, CloseOutlined } from "@ant-design/icons";
+import { CloseOutlined } from "@ant-design/icons";
 import { Stack, Table } from "@mantine/core";
+import { IconAlertCircle, IconCircleCheck } from "@tabler/icons";
 import { useQuery } from "@tanstack/react-query";
 import {
   Alert,
@@ -17,31 +18,6 @@ import {
 } from "antd";
 import { useEffect } from "react";
 import CheckHasil from "./CheckHasil";
-import { IconAlertCircle, IconCircleCheck } from "@tabler/icons";
-
-const dataMaster = (data) => {
-  return {
-    nama_master: data.nama,
-    nip_master: data.nip_baru,
-    tanggal_lahir_master: data.tgl_lahir,
-    gelar_depan_master: data.gelar_depan,
-    gelar_belakang_master: data.gelar_belakang,
-    email_master: data?.email,
-    jk_master: data.jk === "L" ? "pria" : "wanita",
-  };
-};
-
-const dataSiasn = (data) => {
-  return {
-    nama_siasn: data.nama,
-    nip_siasn: data.nipBaru,
-    tanggal_lahir_siasn: data.tglLahir,
-    gelar_depan_siasn: data.gelarDepan,
-    gelar_belakang_siasn: data.gelarBelakang,
-    email_siasn: data?.email,
-    jk_siasn: data.jenisKelamin === "M" ? "pria" : "wanita",
-  };
-};
 
 const Pemberitahuan = () => {
   return (
@@ -60,98 +36,6 @@ const Pemberitahuan = () => {
         </>
       }
     />
-  );
-};
-
-const FormDataUtamSiasn = ({ data }) => {
-  const [form] = Form.useForm();
-
-  useEffect(() => {
-    form.setFieldsValue({
-      nipBaru: data?.nipBaru,
-      nama: data?.nama,
-      tglLahir: data?.tglLahir,
-      jenisKelamin: data?.jenisKelamin === "M" ? "Laki-laki" : "Perempuan",
-      gelarDepan: data?.gelarDepan,
-      gelarBelakang: data?.gelarBelakang,
-      email: data?.email,
-    });
-  }, [data, form]);
-
-  return (
-    <Form layout="vertical" form={form}>
-      <Form.Item name="nipBaru" label="NIP">
-        <Input readOnly />
-      </Form.Item>
-      <Form.Item name="nama" label="Nama">
-        <Input readOnly />
-      </Form.Item>
-      <Form.Item name="tglLahir" label="Tanggal Lahir">
-        <Input readOnly />
-      </Form.Item>
-      <Form.Item name="jenisKelamin" label="Jenis Kelamin">
-        <Input readOnly />
-      </Form.Item>
-      <Form.Item name="gelarDepan" label="Gelar Depan">
-        <Input readOnly />
-      </Form.Item>
-      <Form.Item name="gelarBelakang" label="Gelar Belakang">
-        <Input readOnly />
-      </Form.Item>
-      <Form.Item
-        name="email"
-        label="Email"
-        help="Email yang digunakan di MySAPK"
-      >
-        <Input readOnly />
-      </Form.Item>
-    </Form>
-  );
-};
-
-const FormDataSimaster = ({ data }) => {
-  const [form] = Form.useForm();
-
-  useEffect(() => {
-    form.setFieldsValue({
-      nipBaru: data?.nip_baru,
-      nama: data?.nama,
-      tglLahir: data?.tgl_lahir,
-      jenisKelamin: data?.jk === "L" ? "Laki-laki" : "Perempuan",
-      gelarDepan: data?.gelar_depan,
-      gelarBelakang: data?.gelar_belakang,
-      email: data?.email,
-    });
-  }, [data, form]);
-
-  return (
-    <Form layout="vertical" form={form}>
-      <Form.Item name="nipBaru" label="NIP">
-        <Input readOnly />
-      </Form.Item>
-      <Form.Item name="nama" label="Nama">
-        <Input readOnly />
-      </Form.Item>
-      <Form.Item name="tglLahir" label="Tanggal Lahir">
-        <Input readOnly />
-      </Form.Item>
-      <Form.Item name="jenisKelamin" label="Jenis Kelamin">
-        <Input readOnly />
-      </Form.Item>
-      <Form.Item name="gelarDepan" label="Gelar Depan">
-        <Input readOnly />
-      </Form.Item>
-      <Form.Item name="gelarBelakang" label="Gelar Belakang">
-        <Input readOnly />
-      </Form.Item>
-      <Form.Item
-        name="email"
-        label="Email"
-        help="Email yang digunakan di MySAPK"
-      >
-        <Input readOnly />
-      </Form.Item>
-    </Form>
   );
 };
 
@@ -361,6 +245,16 @@ function CompareDataUtama() {
                           />
                         </Tooltip>
                       </td>
+                    </tr>
+                    <tr>
+                      <td>Instansi Induk</td>
+                      <td>{data?.instansiIndukNama}</td>
+                      <td></td>
+                    </tr>
+                    <tr>
+                      <td>Unit Organisasi</td>
+                      <td>{data?.unorNama}</td>
+                      <td></td>
                     </tr>
                   </tbody>
                 </Table>

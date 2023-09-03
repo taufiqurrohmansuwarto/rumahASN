@@ -1,0 +1,263 @@
+import Layout from "@/components/Layout";
+import {
+  createSurvey,
+  deleteSurvey,
+  readAllSurvey,
+  updateSurvey,
+} from "@/services/webinar.services";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  Button,
+  Divider,
+  Form,
+  Input,
+  Modal,
+  Popconfirm,
+  Select,
+  Space,
+  Table,
+  message,
+} from "antd";
+import { useEffect, useState } from "react";
+
+const UpdateQuestion = ({ open, handleCancel, data }) => {
+  const queryClient = useQueryClient();
+
+  const { mutate: update, isLoading: isLoadingUpdate } = useMutation(
+    (data) => updateSurvey(data),
+    {
+      onSuccess: () => {
+        message.success("Berhasil membuat survey!");
+        handleCancel();
+      },
+      onError: () => {
+        message.error("Gagal membuat survey!");
+      },
+      onSettled: () => {
+        queryClient.invalidateQueries("webinar-series-surveys");
+      },
+    }
+  );
+
+  useEffect(() => {
+    form.setFieldsValue(data);
+  }, [data, form]);
+
+  const [form] = Form.useForm();
+
+  const handleFinish = async () => {
+    const values = await form.validateFields();
+    update({
+      id: data?.id,
+      data: values,
+    });
+  };
+
+  return (
+    <Modal
+      confirmLoading={isLoadingUpdate}
+      title="Buat Survey Webinar"
+      centered
+      onOk={handleFinish}
+      open={open}
+      onCancel={handleCancel}
+    >
+      <Form
+        initialValues={data}
+        layout="vertical"
+        form={form}
+        name="form-webinar-question"
+      >
+        <Form.Item
+          name="question"
+          label="Pertanyaan"
+          rules={[{ required: true, message: "Pertanyaan Tidak boleh kosong" }]}
+        >
+          <Input.TextArea cols={12} />
+        </Form.Item>
+        <Form.Item
+          name="type"
+          label="Jenis Pertanyaan"
+          rules={[
+            { required: true, message: "Tipe pertanyaan tidak boleh kosong" },
+          ]}
+        >
+          <Select
+            options={[
+              {
+                label: "Skala 1-5",
+                value: "scale",
+              },
+              {
+                label: "Teks Bebas",
+                value: "free_text",
+              },
+            ]}
+          />
+        </Form.Item>
+      </Form>
+    </Modal>
+  );
+};
+
+const CreateQuestion = ({ open, handleCancel }) => {
+  const queryClient = useQueryClient();
+
+  const { mutate: create, isLoading: isLoadingCreate } = useMutation(
+    (data) => createSurvey(data),
+    {
+      onSuccess: () => {
+        message.success("Berhasil membuat survey!");
+        handleCancel();
+      },
+      onError: () => {
+        message.error("Gagal membuat survey!");
+      },
+      onSettled: () => {
+        queryClient.invalidateQueries("webinar-series-surveys");
+      },
+    }
+  );
+
+  const [form] = Form.useForm();
+
+  const handleFinish = async () => {
+    const values = await form.validateFields();
+    create(values);
+  };
+
+  return (
+    <Modal
+      confirmLoading={isLoadingCreate}
+      title="Buat Survey Webinar"
+      centered
+      onOk={handleFinish}
+      open={open}
+      onCancel={handleCancel}
+    >
+      <Form layout="vertical" form={form} name="form-webinar-question">
+        <Form.Item
+          name="question"
+          label="Pertanyaan"
+          rules={[{ required: true, message: "Pertanyaan Tidak boleh kosong" }]}
+        >
+          <Input.TextArea cols={12} />
+        </Form.Item>
+        <Form.Item
+          name="type"
+          label="Jenis Pertanyaan"
+          rules={[
+            { required: true, message: "Tipe pertanyaan tidak boleh kosong" },
+          ]}
+        >
+          <Select
+            options={[
+              {
+                label: "Skala 1-5",
+                value: "scale",
+              },
+              {
+                label: "Teks Bebas",
+                value: "free_text",
+              },
+            ]}
+          />
+        </Form.Item>
+      </Form>
+    </Modal>
+  );
+};
+
+function WebinarSeriesSurveys() {
+  const queryClient = useQueryClient();
+
+  const { mutateAsync: deleteQuestion } = useMutation(
+    (id) => deleteSurvey(id),
+    {
+      onSettled: () => {
+        message.success("Berhasil menghapus pertanyaan!");
+        queryClient.invalidateQueries("webinar-series-surveys");
+      },
+    }
+  );
+
+  const [open, setOpen] = useState(false);
+
+  const [openEdit, setOpenEdit] = useState(false);
+  const [dataEdit, setDataEdit] = useState({});
+
+  const handleOpenEdit = (row) => {
+    setOpenEdit(true);
+    setDataEdit(row);
+  };
+
+  const handleCancelEdit = () => setOpenEdit(false);
+
+  const handleOpen = () => setOpen(true);
+  const handleCancel = () => setOpen(false);
+
+  const { data, isLoading } = useQuery(
+    ["webinar-series-surveys"],
+    () => readAllSurvey(),
+    {}
+  );
+
+  const columns = [
+    {
+      title: "Pertanyaan",
+      dataIndex: "question",
+    },
+    {
+      title: "Jenis Pertanyaan",
+      dataIndex: "type",
+    },
+    {
+      title: "Aksi",
+      key: "aksi",
+      render: (row) => (
+        <Space>
+          <a onClick={() => handleOpenEdit(row)}>Edit</a>
+          <Divider type="vertical" />
+          <Popconfirm
+            onConfirm={async () => {
+              await deleteQuestion(row?.id);
+            }}
+            title="Apakah anda yakin ingin menghapus data?"
+          >
+            <a>Hapus</a>
+          </Popconfirm>
+        </Space>
+      ),
+    },
+  ];
+
+  return (
+    <div>
+      <CreateQuestion open={open} handleCancel={handleCancel} />
+      <UpdateQuestion
+        open={openEdit}
+        handleCancel={handleCancelEdit}
+        data={dataEdit}
+      />
+      <Button onClick={handleOpen}>Buat Survey Webinar</Button>
+      <Table
+        columns={columns}
+        loading={isLoading}
+        rowKey={(row) => row?.id}
+        dataSource={data}
+        pagination={false}
+      />
+    </div>
+  );
+}
+
+WebinarSeriesSurveys.Auth = {
+  action: "manage",
+  subject: "DashboardAdmin",
+};
+
+WebinarSeriesSurveys.getLayout = function getLayout(page) {
+  return <Layout>{page}</Layout>;
+};
+
+export default WebinarSeriesSurveys;

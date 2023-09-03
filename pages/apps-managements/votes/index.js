@@ -7,6 +7,7 @@ import {
 } from "@/services/polls.services";
 import { formatDateFull } from "@/utils/client-utils";
 import { PlusOutlined } from "@ant-design/icons";
+import { Stack } from "@mantine/core";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Breadcrumb,
@@ -83,6 +84,50 @@ function Votes() {
 
   const columns = [
     {
+      title: "Pertanyaan, Status",
+      key: "pertanyaanStatus",
+      responsive: ["xs"],
+      render: (text) => (
+        <>
+          <Link href={`/apps-managements/votes/${text?.id}/detail`}>
+            <a>{text?.question}</a>
+          </Link>
+          <br />
+          <Tag color={text?.is_active ? "green" : "red"}>
+            {text?.is_active ? "Aktif" : "Tidak Aktif"}
+          </Tag>
+        </>
+      ),
+    },
+    {
+      title: "Aksi",
+      key: "aksiXs",
+      responsive: ["xs"],
+      render: (row) => {
+        return (
+          <Stack>
+            <a onClick={() => handleActive(row)}>
+              {row?.is_active ? "Nonaktifkan" : "Aktifkan"}
+            </a>
+            <a
+              onClick={() =>
+                router.push(`/apps-managements/votes/${row?.id}/update`)
+              }
+            >
+              Edit
+            </a>
+            <br />
+            <Popconfirm
+              title="Apakah anda yakin menghapus voting ini?"
+              onConfirm={() => handleRemove(row?.id)}
+            >
+              <a>Hapus</a>
+            </Popconfirm>
+          </Stack>
+        );
+      },
+    },
+    {
       title: "Pertanyaan",
       key: "question",
       render: (row) => {
@@ -96,6 +141,7 @@ function Votes() {
           </Link>
         );
       },
+      responsive: ["sm"],
     },
     {
       title: "Tgl. Dibuat",
@@ -103,6 +149,7 @@ function Votes() {
       render: (row) => {
         return <div>{formatDateFull(row?.created_at)}</div>;
       },
+      responsive: ["sm"],
     },
     {
       title: "Status",
@@ -114,10 +161,12 @@ function Votes() {
           </Tag>
         );
       },
+      responsive: ["sm"],
     },
     {
       title: "Aksi",
       key: "id",
+      responsive: ["sm"],
       render: (_, row) => (
         <Space>
           <a onClick={() => handleActive(row)}>

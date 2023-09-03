@@ -6,7 +6,6 @@ import {
   Breadcrumb,
   Button,
   Card,
-  Checkbox,
   Col,
   DatePicker,
   Form,
@@ -16,10 +15,10 @@ import {
   Select,
   message,
 } from "antd";
-import Head from "next/head";
-import { useRouter } from "next/router";
 import moment from "moment";
+import Head from "next/head";
 import Link from "next/link";
+import { useRouter } from "next/router";
 
 const FormWebinarSeries = () => {
   const queryClient = useQueryClient();
@@ -42,7 +41,7 @@ const FormWebinarSeries = () => {
   );
   const [form] = Form.useForm();
 
-  const handleFinish = async (values) => {
+  const handleFinish = async () => {
     const { date, open_registration, close_registration, ...rest } =
       await form.validateFields();
     const [start_date, end_date] = date;
@@ -51,12 +50,6 @@ const FormWebinarSeries = () => {
       ...rest,
       start_date: moment(start_date).format("YYYY-MM-DD HH:mm:ss"),
       end_date: moment(end_date).format("YYYY-MM-DD HH:mm:ss"),
-      open_registration: moment(open_registration).format(
-        "YYYY-MM-DD HH:mm:ss"
-      ),
-      close_registration: moment(close_registration).format(
-        "YYYY-MM-DD HH:mm:ss"
-      ),
     };
 
     create(data);
@@ -78,6 +71,20 @@ const FormWebinarSeries = () => {
         <InputNumber />
       </Form.Item>
       <Form.Item
+        required
+        label="Tanggal Mulai s/d Tanggal Berakhir"
+        name="date"
+        rules={[
+          {
+            required: true,
+            message: "Tanggal harus diisi",
+          },
+        ]}
+      >
+        <DatePicker.RangePicker showTime />
+      </Form.Item>
+
+      <Form.Item
         rules={[
           {
             required: true,
@@ -87,19 +94,6 @@ const FormWebinarSeries = () => {
         required
         name="title"
         label="Judul"
-      >
-        <Input />
-      </Form.Item>
-      <Form.Item
-        rules={[
-          {
-            required: true,
-            message: "Sub Judul harus diisi",
-          },
-        ]}
-        required
-        name="subtitle"
-        label="Sub Judul"
       >
         <Input />
       </Form.Item>
@@ -137,36 +131,9 @@ const FormWebinarSeries = () => {
       </Form.Item>
       <Form.Item name="status" label="Status">
         <Select defaultValue="draft" placeholder="Status Webinar">
-          <Select.Option value="draft">Draft</Select.Option>
-          <Select.Option value="published">Publish</Select.Option>
+          <Select.Option value="draft">DRAFT</Select.Option>
+          <Select.Option value="published">PUBLISH</Select.Option>
         </Select>
-      </Form.Item>
-      <Form.Item
-        required
-        label="Tanggal Mulai s/d Tanggal Berakhir"
-        name="date"
-        rules={[
-          {
-            required: true,
-            message: "Tanggal harus diisi",
-          },
-        ]}
-      >
-        <DatePicker.RangePicker />
-      </Form.Item>
-      <Form.Item
-        required
-        name="open_registration"
-        label="Tanggal Buka Pendaftaran"
-      >
-        <DatePicker showTime />
-      </Form.Item>
-      <Form.Item
-        required
-        name="close_registration"
-        label="Tanggal Tutup Pendaftaran"
-      >
-        <DatePicker showTime />
       </Form.Item>
       <Form.Item>
         <Button

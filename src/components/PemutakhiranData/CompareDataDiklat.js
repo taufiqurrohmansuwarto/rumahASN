@@ -1,7 +1,7 @@
 import { dataDiklat } from "@/services/siasn-services";
-import { useQuery } from "@tanstack/react-query";
-import { Table, Typography } from "antd";
 import { Stack } from "@mantine/core";
+import { useQuery } from "@tanstack/react-query";
+import { Skeleton, Table, Typography } from "antd";
 
 const TableDiklat = ({ data }) => {
   const columns = [
@@ -39,20 +39,37 @@ const TableDiklat = ({ data }) => {
 const TableKursus = ({ data }) => {
   const columns = [
     {
-      title: "Jenis",
-      dataIndex: "jenisKursusSertifikat",
-    },
-    {
-      title: "Penyelenggara",
-      dataIndex: "institusiPenyelenggara",
-    },
-    {
-      title: "Jumlah Jam",
-      dataIndex: "jumlahJam",
+      title: "Nama Kursus, Jenis, Penyelenggara",
+      key: "kursusJenisPenyelenggara",
+      responsive: ["xs"],
+      render: (text) => {
+        return (
+          <Stack>
+            <div>{text?.namaKursus}</div>
+            <div>{text?.jenisKursusSertifikat}</div>
+            <div>{text?.institusiPenyelenggara}</div>
+          </Stack>
+        );
+      },
     },
     {
       title: "Nama Kursus",
       dataIndex: "namaKursus",
+      responsive: ["sm"],
+    },
+    {
+      title: "Jenis",
+      dataIndex: "jenisKursusSertifikat",
+      responsive: ["sm"],
+    },
+    {
+      title: "Penyelenggara",
+      dataIndex: "institusiPenyelenggara",
+      responsive: ["sm"],
+    },
+    {
+      title: "Jumlah Jam",
+      dataIndex: "jumlahJam",
     },
   ];
   return (
@@ -74,8 +91,10 @@ function CompareDataDiklat() {
 
   return (
     <Stack>
-      <TableKursus data={data?.kursus} />
-      <TableDiklat data={data?.diklat} />
+      <Skeleton loading={isLoading}>
+        <TableKursus data={data?.kursus} />
+        <TableDiklat data={data?.diklat} />
+      </Skeleton>
     </Stack>
   );
 }
