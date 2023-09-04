@@ -7,7 +7,7 @@ exports.up = function (knex) {
     table.string("training_program_id");
     table
       .foreign("training_program_id")
-      .references("trainings_programs.id")
+      .references("training_programs.id")
       .onDelete("cascade")
       .onUpdate("cascade");
   });
