@@ -55,11 +55,13 @@ function MyWebinarDetail() {
       <Head>
         <title>Rumah ASN - Webinar Series - {data?.title}</title>
       </Head>
-      <WebinarUserDetailLayout active="detail">
-        <Card>
-          {JSON.stringify(data)}
-          <DetailWebinarUser data={data?.webinar_series} />
-        </Card>
+      <WebinarUserDetailLayout loading={isLoading} active="detail">
+        <DetailWebinarUser
+          downloadCertificate={handleDownload}
+          loadingDownloadCertificate={isLoadingDownloadCertificate}
+          data={data?.webinar_series}
+          alreadyPoll={data?.result?.already_poll}
+        />
       </WebinarUserDetailLayout>
     </>
   );

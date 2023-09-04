@@ -3,9 +3,9 @@ import { Breadcrumb } from "antd";
 import Link from "next/link";
 import { useRouter } from "next/router";
 
-function WebinarUserDetailLayout({
+function AdminLayoutDetailWebinar({
   children,
-  active = "all",
+  active = "detail",
   loading,
   title,
   content,
@@ -16,6 +16,8 @@ function WebinarUserDetailLayout({
   return (
     <PageContainer
       loading={loading}
+      title={title}
+      content={content}
       header={{
         breadcrumbRender: () => (
           <Breadcrumb>
@@ -25,31 +27,34 @@ function WebinarUserDetailLayout({
               </Link>
             </Breadcrumb.Item>
             <Breadcrumb.Item>
-              <Link href="/webinar-series/all">
-                <a>Daftar Webinar</a>
+              <Link href="/apps-managements/webinar-series">
+                <a>Daftar Webinar Series Admin</a>
               </Link>
             </Breadcrumb.Item>
-            <Breadcrumb.Item>
-              <Link href="/webinar-series/my-webinar">
-                <a>Daftar Webinar Saya</a>
-              </Link>
-            </Breadcrumb.Item>
-            <Breadcrumb.Item>Detail Webinar</Breadcrumb.Item>
+            <Breadcrumb.Item>Detail Webinar Series</Breadcrumb.Item>
           </Breadcrumb>
         ),
       }}
-      title={title}
-      content={content}
       tabList={[
         {
-          tab: "Detail Webinar",
+          tab: "Detail",
           key: "detail",
-          href: "/detail",
+          href: `/apps-managements/webinar-series/${id}/detail`,
+        },
+        {
+          tab: "Peserta",
+          key: "participants",
+          href: `/apps-managements/webinar-series/${id}/participants`,
+        },
+        {
+          tab: "Hasil Survey",
+          key: "survey",
+          href: `/apps-managements/webinar-series/${id}/survey`,
         },
         {
           tab: "Komentar",
           key: "comments",
-          href: "/comments",
+          href: `/apps-managements/webinar-series/${id}/comments`,
         },
       ]}
       tabActiveKey={active}
@@ -57,8 +62,8 @@ function WebinarUserDetailLayout({
         type: "card",
         size: "small",
         onChange: (key) => {
-          const path = `/webinar-series/my-webinar/${id}/${key}`;
-          router.push(path);
+          const url = `/apps-managements/webinar-series/${id}/${key}`;
+          router.push(url);
         },
       }}
     >
@@ -67,4 +72,4 @@ function WebinarUserDetailLayout({
   );
 }
 
-export default WebinarUserDetailLayout;
+export default AdminLayoutDetailWebinar;

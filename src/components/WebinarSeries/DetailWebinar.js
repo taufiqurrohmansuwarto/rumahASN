@@ -1,70 +1,111 @@
-import { formatDateFull, participantType } from "@/utils/client-utils";
-import { Col, Descriptions, Image, Row } from "antd";
+import { formatDateSimple } from "@/utils/client-utils";
+import {
+  ClockCircleTwoTone,
+  FolderOpenOutlined,
+  PushpinTwoTone,
+  TagsTwoTone,
+  VideoCameraAddOutlined,
+  YoutubeOutlined,
+} from "@ant-design/icons";
+import { Stack } from "@mantine/core";
+import { Card, Col, Divider, Image, Row, Tag, Typography } from "antd";
 
-function DetailWebinar({ data, withDownload = false }) {
+function DetailWebinar({ data }) {
   return (
-    <Row>
-      <Col md={18} xs={24}>
-        <Descriptions
-          title="Informasi Webinar Series"
-          layout="vertical"
-          bordered
-        >
-          <Descriptions.Item label="Series">{data?.episode}</Descriptions.Item>
-          <Descriptions.Item label="Judul">{data?.title}</Descriptions.Item>
-          <Descriptions.Item label="Sub Judul">
-            {data?.subtitle}
-          </Descriptions.Item>
-          <Descriptions.Item label="Deskripsi">
-            {data?.description}
-          </Descriptions.Item>
-          <Descriptions.Item label="Poster">
-            {data?.image_url && (
-              <Image src={data?.image_url} width={200} alt="image" />
-            )}
-          </Descriptions.Item>
-          <Descriptions.Item label="Jumlah Jam">{data?.hour}</Descriptions.Item>
-          <Descriptions.Item label="Tanggal">
-            {formatDateFull(data?.start_date)} -{" "}
-            {formatDateFull(data?.end_date)}
-          </Descriptions.Item>
-          <Descriptions.Item label="Tanggal Registrasi">
-            {formatDateFull(data?.open_registration)} -{" "}
-            {formatDateFull(data?.close_registration)}
-          </Descriptions.Item>
-          <Descriptions.Item label="Tipe Peserta">
-            {participantType(data?.type_participant)}
-          </Descriptions.Item>
-          <Descriptions.Item label="Link Zoom">
-            {data?.zoom_url && (
-              <span>
-                <a target="_blank" href={data?.zoom_url} rel="noreferrer">
-                  Zoom
-                </a>
-              </span>
-            )}
-          </Descriptions.Item>
-          <Descriptions.Item label="Link Youtube">
-            {data?.youtube_url && (
-              <span>
-                <a target="_blank" href={data?.youtube_url} rel="noreferrer">
-                  Youtube
-                </a>
-              </span>
-            )}
-          </Descriptions.Item>
-          <Descriptions.Item label="Link Materi">
-            {data?.reference_link && (
-              <span>
-                <a target="_blank" href={data?.reference_link} rel="noreferrer">
-                  Materi
-                </a>
-              </span>
-            )}
-          </Descriptions.Item>
-        </Descriptions>
-      </Col>
-    </Row>
+    <>
+      <Row
+        gutter={{
+          xs: 16,
+          sm: 16,
+          md: 16,
+          lg: 16,
+        }}
+      >
+        <Col md={16} xs={24}>
+          <Card
+            cover={<Image preview={false} src={data?.image_url} alt="image" />}
+          >
+            <Divider />
+            <Typography.Title level={4}>
+              {data?.webinar_series?.title}
+            </Typography.Title>
+            <Typography.Text level={4}>{data?.description}</Typography.Text>
+          </Card>
+        </Col>
+        <Col md={8} xs={24}>
+          <Card title="Informasi Event">
+            <Stack>
+              <div>
+                <ClockCircleTwoTone />{" "}
+                <Typography.Text strong>
+                  {formatDateSimple(data?.start_date)} -{" "}
+                  {formatDateSimple(data?.end_date)}
+                </Typography.Text>
+              </div>
+              <div>
+                <PushpinTwoTone />{" "}
+                <Typography.Text strong>Online</Typography.Text>
+              </div>
+              <div>
+                <TagsTwoTone />{" "}
+                <Typography.Text strong>
+                  {parseInt(data?.participants_count)} Peserta
+                </Typography.Text>
+              </div>
+              <Divider />
+              {data?.reference_link && (
+                <div>
+                  <FolderOpenOutlined />{" "}
+                  <Typography.Text strong>
+                    <a
+                      href={data?.reference_link}
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      Link Materi
+                    </a>
+                  </Typography.Text>
+                </div>
+              )}
+              {data?.youtube_url && (
+                <div>
+                  <YoutubeOutlined />{" "}
+                  <Typography.Text strong>
+                    <a
+                      href={data?.youtube_url}
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      Link Youtube
+                    </a>
+                  </Typography.Text>
+                </div>
+              )}
+              {data?.zoom_url && (
+                <div>
+                  <VideoCameraAddOutlined />{" "}
+                  <Typography.Text strong>
+                    <a href={data?.zoom_url} target="_blank" rel="noreferrer">
+                      Link Zoom
+                    </a>
+                  </Typography.Text>
+                </div>
+              )}
+              <div>
+                <Tag
+                  color={data?.is_allow_download_certificate ? "green" : "red"}
+                >
+                  {data?.is_allow_download_certificate
+                    ? "Dapat mengunduh sertifikat"
+                    : "Sertifikat Belum bisa diunduh"}
+                </Tag>
+              </div>
+            </Stack>
+            <Divider />
+          </Card>
+        </Col>
+      </Row>
+    </>
   );
 }
 

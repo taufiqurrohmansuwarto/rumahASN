@@ -1,11 +1,12 @@
 import Layout from "@/components/Layout";
 import WebinarUserDetailLayout from "@/components/WebinarSeries/WebinarUserDetailLayout";
+import { Card } from "antd";
 import React from "react";
 
 function WebinarComments() {
   return (
     <WebinarUserDetailLayout active="comments">
-      <div>comments</div>
+      <Card>on the way</Card>
     </WebinarUserDetailLayout>
   );
 }

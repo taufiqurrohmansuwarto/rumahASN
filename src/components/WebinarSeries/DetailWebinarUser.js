@@ -1,106 +1,60 @@
 import { formatDateSimple } from "@/utils/client-utils";
 import {
   ClockCircleTwoTone,
-  CloseOutlined,
-  FolderTwoTone,
+  FolderOpenOutlined,
   PushpinTwoTone,
-  SearchOutlined,
-  SmileOutlined,
   TagsTwoTone,
+  VideoCameraAddOutlined,
+  YoutubeOutlined,
 } from "@ant-design/icons";
 import { Stack } from "@mantine/core";
-import {
-  Button,
-  Card,
-  Col,
-  Divider,
-  Image,
-  Row,
-  Space,
-  Tag,
-  Typography,
-} from "antd";
+import { Button, Card, Col, Divider, Image, Row, Tag, Typography } from "antd";
 import { useRouter } from "next/router";
 
 const Tombol = ({
   data,
-  register,
-  unregister,
-  registerLoading,
-  unregisterLoading,
+  alreadyPoll,
+  downloadCertificate,
+  loadingDownloadCertificate,
 }) => {
   const router = useRouter();
   const id = router.query.id;
 
-  const handleRegister = () => {
-    register(id);
-  };
-
-  const handleDetail = () => {
-    const my_webinar = data?.my_webinar;
-    router.push(`/webinar-series/my-webinar/${my_webinar}/detail`);
-  };
-
-  const handleUnregister = () => {
-    unregister(id);
-  };
-
-  if (!data?.is_open && !data?.my_webinar) {
-    return (
-      <Button icon={<SmileOutlined />} block disabled>
-        Ditutup
-      </Button>
-    );
+  if (!data?.is_allow_download_certificate) {
+    return null;
   }
 
-  if (data?.is_open && !data?.my_webinar) {
+  if (data?.is_allow_download_certificate && !alreadyPoll) {
     return (
       <Button
-        loading={registerLoading}
-        disabled={registerLoading}
-        icon={<SmileOutlined />}
-        block
         type="primary"
-        onClick={handleRegister}
+        block
+        onClick={() => router.push(`/webinar-series/my-webinar/${id}/survey`)}
       >
-        Registrasi
+        Isi Kuisioner
       </Button>
     );
   }
 
-  if (data?.my_webinar) {
+  if (data?.is_allow_download_certificate && alreadyPoll) {
     return (
-      <Space>
-        {data?.is_open && (
-          <Button
-            disabled={unregisterLoading}
-            loading={unregisterLoading}
-            onClick={handleUnregister}
-            danger
-            icon={<CloseOutlined />}
-          >
-            Batal Registrasi
-          </Button>
-        )}
-        <Button
-          onClick={handleDetail}
-          icon={<SearchOutlined />}
-          block
-          type="primary"
-        >
-          Detail
-        </Button>
-      </Space>
+      <Button
+        type="primary"
+        block
+        onClick={downloadCertificate}
+        loading={loadingDownloadCertificate}
+      >
+        Unduh Sertifikat
+      </Button>
     );
   }
 };
 
 function DetailWebinarNew({
   data,
-  register,
-  registerLoading,
-  unregister,
-  unregisterLoading,
+  downloadCertificate,
+  loadingDownloadCertificate,
+  alreadyPoll,
 }) {
   return (
     <>
@@ -113,7 +67,6 @@ function DetailWebinarNew({
         }}
       >
         <Col md={16} xs={24}>
-          {JSON.stringify(data)}
           <Card
             cover={<Image preview={false} src={data?.image_url} alt="image" />}
           >
@@ -144,22 +97,60 @@ function DetailWebinarNew({
                   {parseInt(data?.participants_count)} Peserta
                 </Typography.Text>
               </div>
+              <Divider />
+              {data?.reference_link && (
+                <div>
+                  <FolderOpenOutlined />{" "}
+                  <Typography.Text strong>
+                    <a
+                      href={data?.reference_link}
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      Link Materi
+                    </a>
+                  </Typography.Text>
+                </div>
+              )}
+              {data?.youtube_url && (
+                <div>
+                  <YoutubeOutlined />{" "}
+                  <Typography.Text strong>
+                    <a
+                      href={data?.youtube_url}
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      Link Youtube
+                    </a>
+                  </Typography.Text>
+                </div>
+              )}
+              {data?.zoom_url && (
+                <div>
+                  <VideoCameraAddOutlined />{" "}
+                  <Typography.Text strong>
+                    <a href={data?.zoom_url} target="_blank" rel="noreferrer">
+                      Link Zoom
+                    </a>
+                  </Typography.Text>
+                </div>
+              )}
               <div>
-                <FolderTwoTone />{" "}
-                <Typography.Text strong>Materi & Sertifikat</Typography.Text>
-              </div>
-              <div>
-                <Tag color={data?.my_webinar ? "green" : "red"}>
-                  {data?.my_webinar ? "Sudah Registrasi" : "Belum Registrasi"}
+                <Tag
+                  color={data?.is_allow_download_certificate ? "green" : "red"}
+                >
+                  {data?.is_allow_download_certificate
+                    ? "Dapat mengunduh sertifikat"
+                    : "Sertifikat Belum bisa diunduh"}
                 </Tag>
               </div>
             </Stack>
             <Divider />
             <Tombol
-              register={register}
-              registerLoading={registerLoading}
-              unregister={unregister}
-              unregisterLoading={unregisterLoading}
+              downloadCertificate={downloadCertificate}
+              loadingDownloadCertificate={loadingDownloadCertificate}
+              alreadyPoll={alreadyPoll}
               data={data}
             />
           </Card>

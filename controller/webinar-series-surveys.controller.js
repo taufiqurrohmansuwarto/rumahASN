@@ -1,6 +1,7 @@
 const WebinarSurvey = require("@/models/webinar-series-surveys.model");
 const WebinarQuestionSurvey = require("@/models/webinar-series-surveys-questions.model");
 const WebinarParticipate = require("@/models/webinar-series-participates.model");
+const WebinarSeries = require("@/models/webinar-series.model");
 
 const getSurvey = async (req, res) => {
   try {
@@ -15,7 +16,15 @@ const getSurvey = async (req, res) => {
 
     if (!currentWebinarSeries?.already_poll || !currentWebinarSeries) {
       const result = await WebinarQuestionSurvey.query();
-      res.json(result);
+      const webinar_series = await WebinarSeries.query()
+        .where("id", currentWebinarSeries?.webinar_series_id)
+        .first()
+        .select("title");
+
+      res.json({
+        survey: result,
+        webinar_series,
+      });
     } else {
       res.json(null);
     }
