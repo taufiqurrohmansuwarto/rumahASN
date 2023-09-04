@@ -97,7 +97,7 @@ const WebinarSeries = () => {
       key: "status_registration",
       render: (text) => (
         <Tag color={text?.is_open ? "green" : "red"}>
-          {text?.is_open === "open" ? "Buka" : "Tutup"}
+          {text?.is_open ? "Buka" : "Tutup"}
         </Tag>
       ),
     },

@@ -36,6 +36,11 @@ const Tombol = ({
     register(id);
   };
 
+  const handleDetail = () => {
+    const my_webinar = data?.my_webinar;
+    router.push(`/webinar-series/my-webinar/${my_webinar}/detail`);
+  };
+
   const handleUnregister = () => {
     unregister(id);
   };
@@ -77,7 +82,12 @@ const Tombol = ({
             Batal Registrasi
           </Button>
         )}
-        <Button icon={<SearchOutlined />} block type="primary">
+        <Button
+          onClick={handleDetail}
+          icon={<SearchOutlined />}
+          block
+          type="primary"
+        >
           Detail
         </Button>
       </Space>

@@ -1,9 +1,9 @@
 import PageContainer from "@/components/PageContainer";
 import { useRouter } from "next/router";
 
-function AdminLayoutWebinar({
+function WebinarUserLayout({
   children,
-  active = "webinar-series",
+  active = "all",
   loading,
   title,
   content,
@@ -17,14 +17,14 @@ function AdminLayoutWebinar({
       content={content}
       tabList={[
         {
-          tab: "Webinar Series",
-          key: "webinar-series",
-          href: "/apps-managements/webinar-series",
+          tab: "Daftar Webinar",
+          key: "all",
+          href: "/webinar-series/all",
         },
         {
-          tab: "Webinar Series Survey",
-          key: "webinar-series-surveys",
-          href: "/apps-managements/webinar-series-surveys",
+          tab: "Webinar Saya",
+          key: "my-webinar",
+          href: "/webinar-series/my-webinar",
         },
       ]}
       tabActiveKey={active}
@@ -41,4 +41,4 @@ function AdminLayoutWebinar({
   );
 }
 
-export default AdminLayoutWebinar;
+export default WebinarUserLayout;
