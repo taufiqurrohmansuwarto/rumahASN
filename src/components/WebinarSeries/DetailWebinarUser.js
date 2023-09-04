@@ -113,11 +113,14 @@ function DetailWebinarNew({
         }}
       >
         <Col md={16} xs={24}>
+          {JSON.stringify(data)}
           <Card
             cover={<Image preview={false} src={data?.image_url} alt="image" />}
           >
             <Divider />
-            <Typography.Title level={4}>{data?.title}</Typography.Title>
+            <Typography.Title level={4}>
+              {data?.webinar_series?.title}
+            </Typography.Title>
             <Typography.Text level={4}>{data?.description}</Typography.Text>
           </Card>
         </Col>

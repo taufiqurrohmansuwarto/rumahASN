@@ -1,6 +1,7 @@
 import Layout from "@/components/Layout";
 import PageContainer from "@/components/PageContainer";
 import DetailWebinarUser from "@/components/WebinarSeries/DetailWebinarUser";
+import WebinarUserDetailLayout from "@/components/WebinarSeries/WebinarUserDetailLayout";
 import {
   downloadCurrentUserCertificate,
   webinarUserDetail,
@@ -54,39 +55,18 @@ function MyWebinarDetail() {
       <Head>
         <title>Rumah ASN - Webinar Series - {data?.title}</title>
       </Head>
-      <PageContainer
-        title="Detail Webinar"
-        content={data?.title}
-        loading={isLoading}
-        onBack={() => router?.back()}
-        header={{
-          breadcrumbRender: () => (
-            <Breadcrumb>
-              <Breadcrumb.Item>
-                <Link href="/feeds">
-                  <a>Beranda</a>
-                </Link>
-              </Breadcrumb.Item>
-              <Breadcrumb.Item>
-                <Link href="/webinar-series/my-webinar">
-                  <a>Webinar Saya</a>
-                </Link>
-              </Breadcrumb.Item>
-              <Breadcrumb.Item>Detail</Breadcrumb.Item>
-            </Breadcrumb>
-          ),
-        }}
-      >
+      <WebinarUserDetailLayout active="detail">
         <Card>
+          {JSON.stringify(data)}
           <DetailWebinarUser data={data?.webinar_series} />
         </Card>
-      </PageContainer>
+      </WebinarUserDetailLayout>
     </>
   );
 }
 
 MyWebinarDetail.getLayout = function getLayout(page) {
-  return <Layout>{page}</Layout>;
+  return <Layout active="/webinar-series/all">{page}</Layout>;
 };
 
 MyWebinarDetail.Auth = {

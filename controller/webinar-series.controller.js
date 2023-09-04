@@ -343,11 +343,19 @@ const detailWebinarUser = async (req, res) => {
       .withGraphFetched("[webinar_series]");
 
     if (result) {
-      const hasil = await WebinarSeries.query().findById(
-        result?.webinar_series_id
-      );
+      const hasil = await WebinarSeries.query()
+        .findById(result?.webinar_series_id)
+        .select(
+          "*",
+          WebinarSeries.relatedQuery("participates")
+            .count()
+            .as("participants_count")
+        );
 
-      res.json(hasil);
+      res.json({
+        result,
+        webinar_series: hasil,
+      });
     } else {
       res.json(result);
     }
