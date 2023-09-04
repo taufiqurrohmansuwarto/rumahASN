@@ -338,7 +338,9 @@ const detailWebinarUser = async (req, res) => {
   try {
     const { id } = req.query;
 
-    const result = await WebinarSeriesParticipates.query().findById(id);
+    const result = await WebinarSeriesParticipates.query()
+      .findById(id)
+      .withGraphFetched("[webinar_series]");
 
     if (result) {
       const hasil = await WebinarSeries.query().findById(

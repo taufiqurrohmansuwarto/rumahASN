@@ -1,14 +1,12 @@
 import Layout from "@/components/Layout";
 import PageContainer from "@/components/PageContainer";
-import DetailWebinar from "@/components/WebinarSeries/DetailWebinar";
+import DetailWebinarUser from "@/components/WebinarSeries/DetailWebinarUser";
 import {
   downloadCurrentUserCertificate,
   webinarUserDetail,
 } from "@/services/webinar.services";
-import { DownloadOutlined } from "@ant-design/icons";
-import { Stack } from "@mantine/core";
-import { useQuery, useMutation } from "@tanstack/react-query";
-import { Breadcrumb, Button, Card, message } from "antd";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { Breadcrumb, Card, message } from "antd";
 import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
@@ -80,21 +78,7 @@ function MyWebinarDetail() {
         }}
       >
         <Card>
-          <DetailWebinar data={data} />
-          {data?.is_allow_download_certificate && (
-            <Button
-              style={{
-                marginTop: 16,
-              }}
-              icon={<DownloadOutlined />}
-              type="primary"
-              onClick={handleDownload}
-              disabled={isLoadingDownloadCertificate}
-              loading={isLoadingDownloadCertificate}
-            >
-              Unduh Sertifikat
-            </Button>
-          )}
+          <DetailWebinarUser data={data?.webinar_series} />
         </Card>
       </PageContainer>
     </>
