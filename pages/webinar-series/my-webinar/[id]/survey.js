@@ -92,6 +92,7 @@ const FormKuisionerWebinar = ({ data }) => {
       ))}
       <Form.Item>
         <Button
+          type="primary"
           loading={loadingPostSurvey}
           disabled={loadingPostSurvey}
           htmlType="submit"
@@ -117,11 +118,15 @@ const MyWebinarSurvey = () => {
       <Head>
         <title>Rumah ASN - Webinar Series - Survey</title>
       </Head>
-      <PageContainer title="Webinar Series" content="Survey">
-        <Card loading={isLoading} title="Kuisioner Webinar">
+      <PageContainer
+        loading={isLoading}
+        title="Webinar Series"
+        content="Survey"
+      >
+        <Card loading={isLoading} title={data?.webinar_series?.title}>
           <Row>
             <Col md={14} xs={24}>
-              {data && <FormKuisionerWebinar data={data} />}
+              {data && <FormKuisionerWebinar data={data?.survey} />}
             </Col>
           </Row>
         </Card>

@@ -215,7 +215,6 @@ const FormEditWebinarSeries = ({ data }) => {
   return (
     <>
       <BackTop />
-      {JSON.stringify(data)}
       <Stack mb={10}>
         <UploadFileTemplate
           title="Unggah Template Sertifikat"

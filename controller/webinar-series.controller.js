@@ -103,7 +103,14 @@ const listParticipants = async (req, res) => {
 const detailWebinarAdmin = async (req, res) => {
   try {
     const { id } = req.query;
-    const result = await WebinarSeries.query().findById(id);
+    const result = await WebinarSeries.query()
+      .findById(id)
+      .select(
+        "*",
+        WebinarSeries.relatedQuery("participates")
+          .count()
+          .as("participants_count")
+      );
 
     const imageUrl = result?.image_url
       ? [
