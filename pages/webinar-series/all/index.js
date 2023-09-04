@@ -1,25 +1,15 @@
 import Layout from "@/components/Layout";
-import PageContainer from "@/components/PageContainer";
-import {
-  allWebinars,
-  registerWebinar,
-  unregisterWebinar,
-} from "@/services/webinar.services";
+import WebinarUserLayout from "@/components/WebinarSeries/WebinarUserLayout";
+import { allWebinars } from "@/services/webinar.services";
 import { formatDateFull } from "@/utils/client-utils";
 import {
   CalendarTwoTone,
   CheckCircleTwoTone,
-  CheckOutlined,
-  ClockCircleFilled,
-  ClockCircleTwoTone,
-  CloseOutlined,
-  LoginOutlined,
-  PicCenterOutlined,
-  SearchOutlined,
+  ClockCircleOutlined,
   SmileOutlined,
 } from "@ant-design/icons";
 import { Stack } from "@mantine/core";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import {
   Button,
   Card,
@@ -28,102 +18,14 @@ import {
   Image,
   Input,
   List,
-  Modal,
   Row,
   Select,
   Tooltip,
   Typography,
-  message,
 } from "antd";
 import Head from "next/head";
 import { useRouter } from "next/router";
 import { useState } from "react";
-
-const Daftar = ({ data }) => {
-  const queryClient = useQueryClient();
-
-  const { mutateAsync: register } = useMutation(
-    (data) => registerWebinar(data),
-    {
-      onSuccess: () => {
-        message.success("Berhasil mendaftar webinar");
-      },
-      onSettled: () => {
-        queryClient.invalidateQueries(["webinar-series-all"]);
-      },
-      onError: (error) => {
-        message.error(error?.response?.data?.message);
-      },
-    }
-  );
-
-  const { mutateAsync: unregister } = useMutation(
-    (data) => unregisterWebinar(data),
-    {
-      onSuccess: () => {
-        message.success("Berhasil batal mendaftar webinar");
-      },
-      onSettled: () => {
-        queryClient.invalidateQueries(["webinar-series-all"]);
-      },
-      onError: (error) => {
-        message.error(error?.response?.data?.message);
-      },
-    }
-  );
-
-  const handleUnregister = () => {
-    Modal.confirm({
-      title: "Batal Daftar Webinar",
-      content: "Apakah anda yakin ingin batal mendaftar webinar ini?",
-      onOk: async () => {
-        await unregister(data?.id);
-      },
-      centered: true,
-      onCancel: () => {},
-    });
-  };
-
-  const handleClick = () => {
-    Modal.confirm({
-      title: "Daftar Webinar",
-      content: "Apakah anda yakin ingin mendaftar webinar ini?",
-      onOk: async () => {
-        await register(data?.id);
-      },
-      centered: true,
-      onCancel: () => {},
-    });
-  };
-
-  return (
-    <>
-      {data?.is_registered ? (
-        <Tooltip title="Batal Daftar Webinar">
-          <CloseOutlined onClick={handleUnregister} />
-        </Tooltip>
-      ) : (
-        <Tooltip title="Daftar Webinar">
-          <LoginOutlined onClick={handleClick} disabled />
-        </Tooltip>
-      )}
-    </>
-  );
-};
-
-const GotoDetail = ({ data }) => {
-  const router = useRouter();
-
-  const gotoDetail = () => {
-    router.push(`/webinar-series/all/${data?.id}/detail`);
-  };
-
-  return (
-    <Tooltip title="Detail Webinar">
-      <SearchOutlined onClick={gotoDetail} />
-    </Tooltip>
-  );
-};
 
 function WebinarAll() {
   const router = useRouter();
@@ -183,7 +85,7 @@ function WebinarAll() {
       <Head>
         <title>Rumah ASN - Semua Webinar</title>
       </Head>
-      <PageContainer title="Webinar Series" content="Daftar Semua webinar">
+      <WebinarUserLayout title="Rumah ASN" content="Semua Webinar">
         <Card>
           <Row
             gutter={{
@@ -290,6 +192,8 @@ function WebinarAll() {
                           {formatDateFull(item?.end_date)}
                           <Divider type="vertical" />
                           <CheckCircleTwoTone /> Materi & Sertifikat
+                          <Divider type="vertical" />
+                          <ClockCircleOutlined /> {item?.hour} JP
                         </div>
                       </Stack>
                     }
@@ -299,7 +203,7 @@ function WebinarAll() {
             )}
           />
         </Card>
-      </PageContainer>
+      </WebinarUserLayout>
     </>
   );
 }

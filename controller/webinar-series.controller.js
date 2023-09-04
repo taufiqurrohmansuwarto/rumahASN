@@ -303,11 +303,22 @@ const listUser = async (req, res) => {
     const { customId } = req.user;
     const limit = req.query.limit || 10;
     const page = req.query.page || 1;
+    const search = req.query.search || "";
 
-    const result = await WebinarSeriesParticipates.query()
-      .withGraphFetched("[webinar_series]")
-      .where("user_id", customId)
-      .page(page - 1, limit);
+    let query = WebinarSeriesParticipates.query();
+
+    if (!search) {
+      query = query.withGraphFetched("[webinar_series]").page(page - 1, limit);
+    } else {
+      query = query
+        .joinRelated("webinar_series")
+        .withGraphFetched("[webinar_series]")
+        .where("user_id", customId)
+        .andWhere("webinar_series.title", "ilike", `%${search}%`)
+        .page(page - 1, limit);
+    }
+
+    const result = await query;
 
     const data = {
       data: result.results,

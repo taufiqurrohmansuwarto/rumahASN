@@ -66,16 +66,12 @@ export const userRoutes = {
     },
     {
       path: "/webinar-series",
-      name: "Webinar Series",
+      name: "Pelatihan",
       icon: <VideoCameraAddOutlined />,
       routes: [
         {
           path: "/webinar-series/all",
-          name: "Semua",
-        },
-        {
-          path: "/webinar-series/my-webinar",
-          name: "Webinar Saya",
+          name: "Webinar",
         },
       ],
     },

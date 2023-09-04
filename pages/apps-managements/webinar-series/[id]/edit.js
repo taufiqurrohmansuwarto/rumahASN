@@ -193,7 +193,7 @@ const FormEditWebinarSeries = ({ data }) => {
   );
   const [form] = Form.useForm();
 
-  const handleFinish = async (values) => {
+  const handleFinish = async () => {
     const { date, open_registration, close_registration, ...rest } =
       await form.validateFields();
     const [start_date, end_date] = date;
@@ -202,12 +202,6 @@ const FormEditWebinarSeries = ({ data }) => {
       ...rest,
       start_date: moment(start_date).format("YYYY-MM-DD HH:mm:ss"),
       end_date: moment(end_date).format("YYYY-MM-DD HH:mm:ss"),
-      open_registration: moment(open_registration).format(
-        "YYYY-MM-DD HH:mm:ss"
-      ),
-      close_registration: moment(close_registration).format(
-        "YYYY-MM-DD HH:mm:ss"
-      ),
     };
 
     const dataSend = {
@@ -221,6 +215,7 @@ const FormEditWebinarSeries = ({ data }) => {
   return (
     <>
       <BackTop />
+      {JSON.stringify(data)}
       <Stack mb={10}>
         <UploadFileTemplate
           title="Unggah Template Sertifikat"
@@ -262,19 +257,6 @@ const FormEditWebinarSeries = ({ data }) => {
           required
           name="title"
           label="Judul"
-        >
-          <Input />
-        </Form.Item>
-        <Form.Item
-          rules={[
-            {
-              required: true,
-              message: "Sub Judul harus diisi",
-            },
-          ]}
-          required
-          name="subtitle"
-          label="Sub Judul"
         >
           <Input />
         </Form.Item>
@@ -329,20 +311,6 @@ const FormEditWebinarSeries = ({ data }) => {
         >
           <DatePicker.RangePicker />
         </Form.Item>
-        <Form.Item
-          required
-          name="open_registration"
-          label="Tanggal Buka Pendaftaran"
-        >
-          <DatePicker showTime />
-        </Form.Item>
-        <Form.Item
-          required
-          name="close_registration"
-          label="Tanggal Tutup Pendaftaran"
-        >
-          <DatePicker showTime />
-        </Form.Item>
         <Form.Item name="youtube_url" label="Link Youtube">
           <Input />
         </Form.Item>
@@ -351,6 +319,14 @@ const FormEditWebinarSeries = ({ data }) => {
         </Form.Item>
         <Form.Item name="reference_link" label="Link Materi">
           <Input />
+        </Form.Item>
+
+        <Form.Item
+          valuePropName="checked"
+          name="is_open"
+          label="Buka Pendaftaran"
+        >
+          <Checkbox>Ya</Checkbox>
         </Form.Item>
 
         <Form.Item
@@ -431,8 +407,6 @@ const UpdateWebinarSeries = () => {
               ...data,
               id,
               date: [moment(data?.start_date), moment(data?.end_date)],
-              open_registration: moment(data?.open_registration),
-              close_registration: moment(data?.close_registration),
             }}
           />
         </Card>
