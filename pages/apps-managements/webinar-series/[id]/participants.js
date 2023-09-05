@@ -2,15 +2,21 @@ import Layout from "@/components/Layout";
 import AdminLayoutDetailWebinar from "@/components/WebinarSeries/AdminLayoutDetailWebinar";
 import DetailWebinarParticipants from "@/components/WebinarSeries/DetailWebinarParticipants";
 import { Card } from "antd";
+import Head from "next/head";
 import React from "react";
 
 function Participants() {
   return (
-    <AdminLayoutDetailWebinar active="participants">
-      <Card>
-        <DetailWebinarParticipants />
-      </Card>
-    </AdminLayoutDetailWebinar>
+    <>
+      <Head>
+        <title>Rumah ASN - Webinar Series - Daftar Peserta Webinar</title>
+      </Head>
+      <AdminLayoutDetailWebinar active="participants">
+        <Card title="Daftar Peserta Webinar">
+          <DetailWebinarParticipants />
+        </Card>
+      </AdminLayoutDetailWebinar>
+    </>
   );
 }
 

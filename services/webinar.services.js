@@ -129,3 +129,7 @@ export const downloadParticipants = (id) => {
     })
     .then((res) => res?.data);
 };
+
+export const reportSurvey = (id) => {
+  return api.get(`/admin/${id}/surveys`).then((res) => res?.data);
+};
