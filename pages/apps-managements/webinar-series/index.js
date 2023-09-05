@@ -8,6 +8,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Breadcrumb,
   Button,
+  Card,
   Divider,
   Popconfirm,
   Space,
@@ -156,33 +157,35 @@ const WebinarSeries = () => {
         content="Daftar Webinar Series"
         loading={isLoading}
       >
-        <Table
-          columns={columns}
-          title={() => (
-            <Button
-              onClick={handleCreate}
-              type="primary"
-              icon={<PlusOutlined />}
-            >
-              Webinar Series
-            </Button>
-          )}
-          dataSource={data?.data}
-          rowKey={(row) => row?.id}
-          loading={isLoading}
-          pagination={{
-            current: query?.page,
-            pageSize: query?.limit,
-            total: data?.total,
-            onChange: (page, limit) => {
-              setQuery({
-                ...query,
-                page,
-                limit,
-              });
-            },
-          }}
-        />
+        <Card>
+          <Table
+            columns={columns}
+            title={() => (
+              <Button
+                onClick={handleCreate}
+                type="primary"
+                icon={<PlusOutlined />}
+              >
+                Webinar Series
+              </Button>
+            )}
+            dataSource={data?.data}
+            rowKey={(row) => row?.id}
+            loading={isLoading}
+            pagination={{
+              current: query?.page,
+              pageSize: query?.limit,
+              total: data?.total,
+              onChange: (page, limit) => {
+                setQuery({
+                  ...query,
+                  page,
+                  limit,
+                });
+              },
+            }}
+          />
+        </Card>
       </AdminLayoutWebinar>
     </>
   );
