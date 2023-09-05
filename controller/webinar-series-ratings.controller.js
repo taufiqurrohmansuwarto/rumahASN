@@ -2,6 +2,22 @@ const WebinarSeriesRatings = require("@/models/webinar-series-ratings.model");
 const WebinarSeriesParticipate = require("@/models/webinar-series-participates.model");
 const WebinarSeries = require("@/models/webinar-series.model");
 
+// id dari webinar id
+const getRating = async (req, res) => {
+  try {
+    const { id } = req?.query;
+    const result = await WebinarSeriesRatings.query().where(
+      "webinar_series_id",
+      id
+    );
+
+    res.json(result);
+  } catch (error) {
+    console.log(error);
+    res.status(400).json({ code: 400, message: "Internal Server Error" });
+  }
+};
+
 // create rating dicari berdasarkan id di webinar participates jadi bukan id untuk webinar_id
 const createRating = async (req, res) => {
   try {
@@ -37,4 +53,5 @@ const createRating = async (req, res) => {
 
 module.exports = {
   createRating,
+  getRating,
 };

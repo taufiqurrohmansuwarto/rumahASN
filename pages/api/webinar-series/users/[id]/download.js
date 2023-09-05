@@ -1,9 +1,8 @@
 import { downloadCertificate } from "@/controller/webinar-series.controller";
-import asnMiddleware from "@/middleware/asn.middleware";
 import auth from "@/middleware/auth.middleware";
 import { createRouter } from "next-connect";
 const router = createRouter();
 
-router.use(auth).use(asnMiddleware).get(downloadCertificate);
+router.use(auth).get(downloadCertificate);
 
 export default router.handler({});
