@@ -69,6 +69,11 @@ function DetailWebinarParticipants() {
       ),
     },
     {
+      title: "NIP/NIPTTK",
+      key: "employee_number",
+      render: (text) => <span>{text?.participant?.employee_number}</span>,
+    },
+    {
       title: "Jabatan",
       key: "jabatan",
       render: (text) => (

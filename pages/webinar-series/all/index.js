@@ -4,9 +4,10 @@ import { allWebinars } from "@/services/webinar.services";
 import { formatDateFull } from "@/utils/client-utils";
 import {
   CalendarTwoTone,
+  CheckCircleOutlined,
   CheckCircleTwoTone,
   ClockCircleOutlined,
-  SmileOutlined,
+  StopOutlined,
 } from "@ant-design/icons";
 import { Stack } from "@mantine/core";
 import { useQuery } from "@tanstack/react-query";
@@ -130,7 +131,7 @@ function WebinarAll() {
               xs: 1,
               sm: 1,
               md: 4,
-              lg: 5,
+              lg: 4,
               xl: 5,
               xxl: 5,
             }}
@@ -161,32 +162,35 @@ function WebinarAll() {
                       }}
                       disabled={!item?.is_open}
                       onClick={() => handleClick(item?.id)}
-                      icon={<SmileOutlined />}
+                      icon={
+                        item?.is_open ? (
+                          <CheckCircleOutlined />
+                        ) : (
+                          <StopOutlined />
+                        )
+                      }
                       type="primary"
                       key="test"
                     >
-                      {item?.is_open
-                        ? "Pendaftaran Dibuka"
-                        : "Pendaftaran Ditutup"}
+                      {item?.is_open ? "Dibuka" : "Ditutup"}
                     </Button>,
                   ]}
                 >
                   <Card.Meta
                     description={
                       <Stack>
-                        <Tooltip
-                          title={item?.description}
-                          placement="bottomLeft"
-                        >
-                          <Typography.Text type="secondary">
+                        <Tooltip title={item?.title} placement="bottomLeft">
+                          <Typography.Text
+                            ellipsis={{
+                              rows: 2,
+                            }}
+                            type="secondary"
+                          >
                             {item?.title}
                           </Typography.Text>
                         </Tooltip>
-                        <div
-                          style={{
-                            fontSize: 12,
-                          }}
-                        >
+
+                        <Typography.Text type="secondary">
                           <CalendarTwoTone color="green" />{" "}
                           {formatDateFull(item?.start_date)} -{" "}
                           {formatDateFull(item?.end_date)}
@@ -194,7 +198,7 @@ function WebinarAll() {
                           <CheckCircleTwoTone /> Materi & Sertifikat
                           <Divider type="vertical" />
                           <ClockCircleOutlined /> {item?.hour} JP
-                        </div>
+                        </Typography.Text>
                       </Stack>
                     }
                   />
