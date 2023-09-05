@@ -1,5 +1,4 @@
-1. buat kolom is_open to webinar series
-2. ganti deskripsi webinar series menjadi markdown
-3. hapus kolom webinar_series_surveys dan recreate foreign key menjadi ondelete cascade dan onupdate cascade
-4. buat download excel untuk peserta webinar series
-5. buat pertanyaan / kuisioner untuk webinar series
+1. ui untuk rating admin/user
+2. crud untuk komentar admin/user
+3. middleware untuk filter webinar type
+4. integrasi siasn kalau dia ASN
