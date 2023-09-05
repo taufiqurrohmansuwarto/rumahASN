@@ -3,21 +3,21 @@ import AdminLayoutDetailWebinar from "@/components/WebinarSeries/AdminLayoutDeta
 import { Card } from "antd";
 import React from "react";
 
-function Comments() {
+function Ratings() {
   return (
-    <AdminLayoutDetailWebinar active="comments">
+    <AdminLayoutDetailWebinar active="ratings">
       <Card>on the way</Card>
     </AdminLayoutDetailWebinar>
   );
 }
 
-Comments.getLayout = function getLayout(page) {
+Ratings.getLayout = function getLayout(page) {
   return <Layout active="/apps-managements/webinar-series">{page}</Layout>;
 };
 
-Comments.Auth = {
+Ratings.Auth = {
   action: "manage",
   subject: "DashboardAdmin",
 };
 
-export default Comments;
+export default Ratings;

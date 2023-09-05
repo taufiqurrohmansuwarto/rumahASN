@@ -47,7 +47,7 @@ function AdminLayoutDetailWebinar({
           href: `/apps-managements/webinar-series/${id}/participants`,
         },
         {
-          tab: "Hasil Survey",
+          tab: "Kuisioner",
           key: "survey",
           href: `/apps-managements/webinar-series/${id}/survey`,
         },
@@ -55,6 +55,11 @@ function AdminLayoutDetailWebinar({
           tab: "Komentar",
           key: "comments",
           href: `/apps-managements/webinar-series/${id}/comments`,
+        },
+        {
+          tab: "Rating",
+          key: "ratings",
+          href: `/apps-managements/webinar-series/${id}/ratings`,
         },
       ]}
       tabActiveKey={active}

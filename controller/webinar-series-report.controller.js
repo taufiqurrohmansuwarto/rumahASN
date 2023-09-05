@@ -3,6 +3,7 @@ const WebinarSeriesSurveys = require("@/models/webinar-series-surveys.model");
 const WebinarSeriesSurveysQuestion = require("@/models/webinar-series-surveys-questions.model");
 
 const xlsx = require("xlsx");
+const { iteratee, times } = require("lodash");
 
 const serializeDataReportParticipant = (data) => {
   if (!data?.length) {
@@ -20,6 +21,46 @@ const serializeDataReportParticipant = (data) => {
   }
 };
 
+const valueToText = (value) => {
+  if (value === 1) {
+    return "Sangat Tidak Puas";
+  } else if (value === 2) {
+    return "Tidak Puas";
+  } else if (value === 3) {
+    return "Cukup Puas";
+  } else if (value === 4) {
+    return "Puas";
+  } else if (value === 5) {
+    return "Sangat Puas";
+  }
+};
+
+const serializeWebinarSeriesSurveys = (data) => {
+  if (!data?.length) {
+    return [];
+  } else {
+    // key : 1, value: 0
+    const result = data.map((x) => {
+      const hasil = times(5, (i) => {
+        const key = i + 1;
+        const value = x[key];
+        return {
+          label: valueToText(key),
+          key,
+          value: parseInt(value),
+        };
+      });
+
+      return {
+        question: x?.question,
+        chart: hasil,
+      };
+    });
+
+    return result;
+  }
+};
+
 const reportSurvey = async (req, res) => {
   try {
     const { id } = req?.query;
@@ -27,11 +68,21 @@ const reportSurvey = async (req, res) => {
     const result = await WebinarSeriesSurveysQuestion.query()
       .select(
         "webinar_series_surveys_questions.question",
-        WebinarSeriesSurveys.query().count().where("value", 1).as("1"),
-        WebinarSeriesSurveys.query().count().where("value", 2).as("2"),
-        WebinarSeriesSurveys.query().count().where("value", 3).as("3"),
-        WebinarSeriesSurveys.query().count().where("value", 4).as("4"),
-        WebinarSeriesSurveys.query().count().where("value", 5).as("5"),
+        WebinarSeriesSurveys.raw(
+          `SUM (case when webinar_series_surveys.value = 1 then 1 else 0 end)`
+        ).as("1"),
+        WebinarSeriesSurveys.raw(
+          `SUM (case when webinar_series_surveys.value = 2 then 1 else 0 end)`
+        ).as("2"),
+        WebinarSeriesSurveys.raw(
+          `SUM (case when webinar_series_surveys.value = 3 then 1 else 0 end)`
+        ).as("3"),
+        WebinarSeriesSurveys.raw(
+          `SUM (case when webinar_series_surveys.value = 4 then 1 else 0 end)`
+        ).as("4"),
+        WebinarSeriesSurveys.raw(
+          `SUM (case when webinar_series_surveys.value = 5 then 1 else 0 end)`
+        ).as("5"),
         "webinar_series_surveys.webinar_series_id"
       )
       .joinRelated("webinar_series_surveys")
@@ -42,7 +93,7 @@ const reportSurvey = async (req, res) => {
         "webinar_series_surveys.webinar_series_id"
       );
 
-    res.json(result);
+    res.json(serializeWebinarSeriesSurveys(result));
   } catch (error) {
     console.log(error);
     res.status(400).json({ code: 400, message: "Internal Server Error" });
