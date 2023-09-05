@@ -1,11 +1,15 @@
 import Layout from "@/components/Layout";
 import AdminLayoutDetailWebinar from "@/components/WebinarSeries/AdminLayoutDetailWebinar";
+import DetailWebinarParticipants from "@/components/WebinarSeries/DetailWebinarParticipants";
+import { Card } from "antd";
 import React from "react";
 
 function Participants() {
   return (
     <AdminLayoutDetailWebinar active="participants">
-      <div>participants</div>
+      <Card>
+        <DetailWebinarParticipants />
+      </Card>
     </AdminLayoutDetailWebinar>
   );
 }
