@@ -1,6 +1,7 @@
 import { formatDateSimple } from "@/utils/client-utils";
 import {
   ClockCircleTwoTone,
+  DeleteOutlined,
   FolderOpenOutlined,
   PushpinTwoTone,
   TagsTwoTone,
@@ -8,9 +9,29 @@ import {
   YoutubeOutlined,
 } from "@ant-design/icons";
 import { Stack } from "@mantine/core";
-import { Card, Col, Divider, Image, Row, Tag, Typography } from "antd";
+import {
+  Button,
+  Card,
+  Col,
+  Divider,
+  Image,
+  Row,
+  Space,
+  Typography,
+  Modal,
+} from "antd";
 
 function DetailWebinar({ data }) {
+  const handleRemove = () => {
+    Modal.confirm({
+      title: "Hapus Webinar",
+      content:
+        "Apakah anda yakin ingin menghapus webinar ini?, data peserta, komentar, dan survey akan ikut terhapus",
+      okText: "Ya",
+      centered: true,
+    });
+  };
+
   return (
     <>
       <Row
@@ -91,17 +112,12 @@ function DetailWebinar({ data }) {
                   </Typography.Text>
                 </div>
               )}
-              <div>
-                <Tag
-                  color={data?.is_allow_download_certificate ? "green" : "red"}
-                >
-                  {data?.is_allow_download_certificate
-                    ? "Dapat mengunduh sertifikat"
-                    : "Sertifikat Belum bisa diunduh"}
-                </Tag>
-              </div>
             </Stack>
-            <Divider />
+            <Space>
+              <Button onClick={handleRemove} danger icon={<DeleteOutlined />}>
+                Hapus
+              </Button>
+            </Space>
           </Card>
         </Col>
       </Row>

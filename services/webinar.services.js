@@ -120,3 +120,12 @@ export const readAllSurveyUser = (id) => {
 export const submitSurveys = ({ id, data }) => {
   return api.post(`/users/${id}/surveys`, data).then((res) => res?.data);
 };
+
+// report
+export const downloadParticipants = (id) => {
+  return api
+    .get(`/admin/${id}/participants/download`, {
+      responseType: "arraybuffer",
+    })
+    .then((res) => res?.data);
+};

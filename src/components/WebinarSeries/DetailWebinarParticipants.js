@@ -1,14 +1,47 @@
-import { detailWebinar, getParticipants } from "@/services/webinar.services";
-import { useQuery } from "@tanstack/react-query";
-import { Avatar, Skeleton, Space, Table } from "antd";
+import {
+  downloadParticipants,
+  getParticipants,
+} from "@/services/webinar.services";
+import { CloudDownloadOutlined } from "@ant-design/icons";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { Avatar, Button, Space, Table, message } from "antd";
 import { useRouter } from "next/router";
 import { useState } from "react";
 
-function DetailWebinarSeriesAdmin() {
+function DetailWebinarParticipants() {
   const router = useRouter();
+  const { id } = router.query;
+
+  const {
+    mutateAsync: webinarParticipants,
+    isLoading: isLoadingWebinarParticipants,
+  } = useMutation((data) => downloadParticipants(data), {});
+
+  const handleDownload = async () => {
+    try {
+      const data = await webinarParticipants(id);
+
+      if (data) {
+        const blob = new Blob([data], {
+          type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+
+        link.href = url;
+        link.download = "file.xlsx";
+        link.click();
+
+        URL.revokeObjectURL(url);
+      }
+    } catch (error) {
+      console.log(error);
+      message.error("Gagal mengunduh peserta");
+    }
+  };
 
   const [query, setQuery] = useState({
-    id: router?.query?.id,
+    id,
     query: {
       page: 1,
       limit: 25,
@@ -18,7 +51,9 @@ function DetailWebinarSeriesAdmin() {
   const { data: participants, isLoading: isLoadingParticipants } = useQuery(
     ["webinar-series-admin-detail-participants", query],
     () => getParticipants(query),
-    {}
+    {
+      keepPreviousData: true,
+    }
   );
 
   const columns = [
@@ -52,8 +87,19 @@ function DetailWebinarSeriesAdmin() {
   return (
     <>
       <Table
+        size="small"
         columns={columns}
-        title={() => <h4>Peserta</h4>}
+        title={() => (
+          <Button
+            disabled={isLoadingWebinarParticipants}
+            loading={isLoadingWebinarParticipants}
+            onClick={handleDownload}
+            type="primary"
+            icon={<CloudDownloadOutlined />}
+          >
+            Peserta
+          </Button>
+        )}
         pagination={{
           pageSize: query?.query?.limit,
           current: query?.query?.page,
@@ -76,4 +122,4 @@ function DetailWebinarSeriesAdmin() {
   );
 }
 
-export default DetailWebinarSeriesAdmin;
+export default DetailWebinarParticipants;

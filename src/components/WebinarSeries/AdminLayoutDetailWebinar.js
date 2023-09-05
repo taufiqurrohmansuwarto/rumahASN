@@ -16,8 +16,8 @@ function AdminLayoutDetailWebinar({
   return (
     <PageContainer
       loading={loading}
-      title={title}
-      content={content}
+      title="Webinar Series"
+      content="Informasi Webinar Series"
       header={{
         breadcrumbRender: () => (
           <Breadcrumb>
