@@ -1,5 +1,6 @@
 const WebinarSeries = require("@/models/webinar-series.model");
 const WebinarSeriesParticipates = require("@/models/webinar-series-participates.model");
+const WebinarSeriesSurveys = require("@/models/webinar-series-surveys.model");
 const User = require("@/models/users.model");
 const { uploadFileMinio, typeGroup } = require("@/utils/index");
 
@@ -84,7 +85,7 @@ const listParticipants = async (req, res) => {
     const result = await WebinarSeriesParticipates.query()
       .where("webinar_series_id", id)
       .page(parseInt(page) - 1, parseInt(limit))
-      .withGraphFetched("[participant(simpleSelect)]");
+      .withGraphFetched("[participant(fullSelect)]");
 
     const data = {
       data: result.results,
@@ -315,7 +316,10 @@ const listUser = async (req, res) => {
     let query = WebinarSeriesParticipates.query();
 
     if (!search) {
-      query = query.withGraphFetched("[webinar_series]").page(page - 1, limit);
+      query = query
+        .withGraphFetched("[webinar_series]")
+        .where("user_id", customId)
+        .page(page - 1, limit);
     } else {
       query = query
         .joinRelated("webinar_series")
@@ -397,6 +401,11 @@ const registerWebinar = async (req, res) => {
         .onConflict(["user_id", "webinar_series_id"])
         .merge();
 
+      await WebinarSeriesSurveys.query()
+        .delete()
+        .where("user_id", customId)
+        .andWhere("webinar_series_id", id);
+
       res.json(result);
     }
   } catch (error) {
@@ -411,6 +420,11 @@ const unregisterWebinar = async (req, res) => {
     const { id } = req.query;
 
     const result = await WebinarSeriesParticipates.query()
+      .delete()
+      .where("user_id", customId)
+      .andWhere("webinar_series_id", id);
+
+    await WebinarSeriesSurveys.query()
       .delete()
       .where("user_id", customId)
       .andWhere("webinar_series_id", id);
@@ -579,15 +593,6 @@ const downloadCertificate = async (req, res) => {
         });
       }
     }
-  } catch (error) {
-    console.log(error);
-    res.status(500).json({ message: "Internal server error" });
-  }
-};
-
-const downloadParticipants = async (req, res) => {
-  try {
-    const id = req?.query?.id;
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: "Internal server error" });

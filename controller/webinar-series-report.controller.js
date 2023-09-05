@@ -12,6 +12,7 @@ const serializeDataReportParticipant = (data) => {
     const result = data.map((item) => {
       return {
         Nama: item?.participant?.username,
+        "NIP/NIPTTK": item?.participant?.employee_number || "-",
         Jabatan: item?.participant?.info?.jabatan?.jabatan,
         "Perangkat Daerah": item?.participant?.info?.perangkat_daerah?.detail,
         "Tanggal Registrasi": item?.created_at,

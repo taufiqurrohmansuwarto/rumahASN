@@ -26,6 +26,18 @@ class User extends Model {
           // "employee_number"
         );
       },
+      fullSelect(query) {
+        query.select(
+          "custom_id",
+          "username",
+          "image",
+          "is_online",
+          "group",
+          "current_role",
+          "info",
+          "employee_number"
+        );
+      },
       simpleNoAvatar(query) {
         query.select("custom_id", "username");
       },

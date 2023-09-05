@@ -15,6 +15,7 @@ import {
   Col,
   Divider,
   Image,
+  Modal,
   Row,
   Space,
   Tag,
@@ -33,7 +34,13 @@ const Tombol = ({
   const id = router.query.id;
 
   const handleRegister = () => {
-    register(id);
+    Modal.confirm({
+      title: "Registrasi Webinar",
+      content: "Apakah anda yakin ingin mendaftar webinar ini?",
+      okText: "Ya",
+      centered: true,
+      onOk: async () => await register(id),
+    });
   };
 
   const handleDetail = () => {
@@ -42,7 +49,13 @@ const Tombol = ({
   };
 
   const handleUnregister = () => {
-    unregister(id);
+    Modal.confirm({
+      title: "Batal Registrasi Webinar",
+      content: "Apakah anda yakin ingin membatalkan registrasi webinar ini?",
+      okText: "Ya",
+      centered: true,
+      onOk: async () => await unregister(id),
+    });
   };
 
   if (!data?.is_open && !data?.my_webinar) {

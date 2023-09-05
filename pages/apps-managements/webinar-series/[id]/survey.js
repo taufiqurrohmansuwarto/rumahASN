@@ -4,10 +4,14 @@ import { reportSurvey } from "@/services/webinar.services";
 import { Bar } from "@ant-design/plots";
 import { Stack } from "@mantine/core";
 import { useQuery } from "@tanstack/react-query";
-import { Card } from "antd";
+import { Card, Col, Row } from "antd";
+import Head from "next/head";
 import { useRouter } from "next/router";
+import { useRef } from "react";
 
 const Chart = ({ data }) => {
+  const ref = useRef();
+
   const config = {
     data: data?.chart,
     xField: "value",
@@ -16,17 +20,29 @@ const Chart = ({ data }) => {
     label: {
       position: "middle",
     },
-    legend: { position: "top-left" },
+    // legend: { position: "top-left" },
+    title: {
+      text: "something",
+    },
+  };
+
+  const handleDownload = () => {
+    ref.current?.downloadImage();
   };
 
   return (
-    <>
-      {data?.chart && (
-        <Card title={data?.question}>
-          <Bar {...config} />
-        </Card>
-      )}
-    </>
+    <Row>
+      <Col lg={16} xs={24}>
+        {data?.chart && (
+          <Card
+            extra={<a onClick={handleDownload}>Unduh</a>}
+            title={data?.question}
+          >
+            <Bar onReady={(plot) => (ref.current = plot)} {...config} />
+          </Card>
+        )}
+      </Col>
+    </Row>
   );
 };
 
@@ -41,15 +57,20 @@ function Surveys() {
   );
 
   return (
-    <AdminLayoutDetailWebinar loading={isLoading} active="survey">
-      {data?.length && (
-        <Stack>
-          {data?.map((item) => (
-            <Chart key={item?.question} data={item} />
-          ))}
-        </Stack>
-      )}
-    </AdminLayoutDetailWebinar>
+    <>
+      <Head>
+        <title>Rumah ASN - Webinar Series - Survey</title>
+      </Head>
+      <AdminLayoutDetailWebinar loading={isLoading} active="survey">
+        {data?.length && (
+          <Stack>
+            {data?.map((item) => (
+              <Chart key={item?.question} data={item} />
+            ))}
+          </Stack>
+        )}
+      </AdminLayoutDetailWebinar>
+    </>
   );
 }
 

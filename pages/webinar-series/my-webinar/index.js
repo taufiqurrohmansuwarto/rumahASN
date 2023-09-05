@@ -122,7 +122,7 @@ function MyWebinar() {
               xs: 1,
               sm: 1,
               md: 4,
-              lg: 5,
+              lg: 4,
               xl: 5,
               xxl: 5,
             }}
@@ -169,11 +169,7 @@ function MyWebinar() {
                             {item?.webinar_series?.title}
                           </Typography.Text>
                         </Tooltip>
-                        <div
-                          style={{
-                            fontSize: 12,
-                          }}
-                        >
+                        <Typography.Text type="secondary">
                           <CalendarTwoTone color="green" />{" "}
                           {formatDateFull(item?.webinar_series?.start_date)} -{" "}
                           {formatDateFull(item?.webinar_series?.end_date)}
@@ -184,7 +180,7 @@ function MyWebinar() {
                             item?.webinar_series?.hour
                           }{" "}
                           JP
-                        </div>
+                        </Typography.Text>
                       </Stack>
                     }
                   />

@@ -17,7 +17,7 @@ function Detail() {
   const router = useRouter();
   const id = router?.query?.id;
 
-  const { mutate: register, isLoading: isLoadingRegister } = useMutation(
+  const { mutateAsync: register, isLoading: isLoadingRegister } = useMutation(
     (data) => registerWebinar(data),
     {
       onSuccess: () => {
@@ -32,9 +32,8 @@ function Detail() {
     }
   );
 
-  const { mutate: unregister, isLoading: isLoadingUnregister } = useMutation(
-    (data) => unregisterWebinar(data),
-    {
+  const { mutateAsync: unregister, isLoading: isLoadingUnregister } =
+    useMutation((data) => unregisterWebinar(data), {
       onSuccess: () => {
         message.success("Berhasil membatalkan pendaftaran webinar");
       },
@@ -44,8 +43,7 @@ function Detail() {
       onSettled: () => {
         queryClient.invalidateQueries(["webinar-series-all", id]);
       },
-    }
-  );
+    });
 
   const { data, isLoading } = useQuery(
     ["webinar-series-all", id],
