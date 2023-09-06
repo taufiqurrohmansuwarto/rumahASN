@@ -152,6 +152,30 @@ export const submitSurveys = ({ id, data }) => {
   return api.post(`/users/${id}/surveys`, data).then((res) => res?.data);
 };
 
+// comments
+
+export const commentUserIndex = (id) => {
+  return api.get(`/users/${id}/comments`).then((res) => res?.data);
+};
+
+export const createComment = ({ id, data }) => {
+  return api.post(`/users/${id}/comments`, data).then((res) => res?.data);
+};
+
+export const updateComment = ({ id, commentId, data }) => {
+  return api
+    .patch(`/users/${id}/comments/${commentId}`, data)
+    .then((res) => res?.data);
+};
+
+export const deleteComment = ({ id, commentId }) => {
+  return api
+    .delete(`/users/${id}/comments/${commentId}`)
+    .then((res) => res?.data);
+};
+
+
+
 // report
 export const downloadParticipants = (id) => {
   return api
