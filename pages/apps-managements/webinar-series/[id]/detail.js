@@ -6,13 +6,12 @@ import { useQuery } from "@tanstack/react-query";
 import Head from "next/head";
 import { useRouter } from "next/router";
 import dynamic from "next/dynamic";
+import { BackTop } from "antd";
 
 const AdminLayoutDetailWebinar = dynamic(
   () => import("@/components/WebinarSeries/AdminLayoutDetailWebinar"),
   { ssr: false }
 );
-
-
 
 const DetailWebinarSeries = () => {
   const router = useRouter();
@@ -23,13 +22,13 @@ const DetailWebinarSeries = () => {
     {}
   );
 
-
   return (
     <>
       <Head>
         <title>Rumah ASN - Detail Webinar</title>
       </Head>
       <AdminLayoutDetailWebinar loading={isLoading}>
+        <BackTop />
         <DetailWebinar data={data} />
       </AdminLayoutDetailWebinar>
     </>

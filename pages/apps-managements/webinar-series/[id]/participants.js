@@ -12,9 +12,7 @@ function Participants() {
         <title>Rumah ASN - Webinar Series - Daftar Peserta Webinar</title>
       </Head>
       <AdminLayoutDetailWebinar active="participants">
-        <Card title="Daftar Peserta Webinar">
-          <DetailWebinarParticipants />
-        </Card>
+        <DetailWebinarParticipants />
       </AdminLayoutDetailWebinar>
     </>
   );
