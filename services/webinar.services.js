@@ -90,6 +90,10 @@ export const downloadCurrentUserCertificate = async (id) => {
     .then((res) => res?.data);
 };
 
+export const createRating = ({ id, data }) => {
+  return api.post(`/users/${id}/rating`, data).then((res) => res?.data);
+};
+
 // surveys admin
 export const createSurvey = (data) => {
   return api.post(`/admin/surveys`, data).then((res) => res?.data);
@@ -111,6 +115,33 @@ export const updateSurvey = ({ id, data }) => {
 export const deleteSurvey = (id) => {
   return api.delete(`/admin/surveys/${id}`).then((res) => res?.data);
 };
+
+export const getRatingAdmin = (id) => {
+  return api.get(`/admin/${id}/ratings`).then((res) => res?.data);
+};
+
+// comments
+export const commentAdminIndex = (id) => {
+  return api.get(`/admin/${id}/comments`).then((res) => res?.data);
+};
+
+export const commentAdminCreate = ({ id, data }) => {
+  return api.post(`/admin/${id}/comments`, data).then((res) => res?.data);
+};
+
+export const commentAdminUpdate = ({ id, commentId, data }) => {
+  return api
+    .patch(`/admin/${id}/comments/${commentId}`, data)
+    .then((res) => res?.data);
+};
+
+export const commentAdminDelete = ({ id, commentId }) => {
+  return api
+    .delete(`/admin/${id}/comments/${commentId}`)
+    .then((res) => res?.data);
+};
+
+// end of admin
 
 // surveys user
 export const readAllSurveyUser = (id) => {

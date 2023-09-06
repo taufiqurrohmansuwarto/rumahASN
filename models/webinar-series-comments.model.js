@@ -12,7 +12,20 @@ class WebinarSeriesComments extends Model {
     this.id = nanoid(10);
   }
 
-  static get relationMappings() {}
+  static get relationMappings() {
+    const Participant = require("@/models/users.model");
+
+    return {
+      participant: {
+        relation: Model.BelongsToOneRelation,
+        modelClass: Participant,
+        join: {
+          from: "webinar_series_comments.user_id",
+          to: "users.custom_id",
+        },
+      },
+    };
+  }
 
   static get idColumn() {
     return "id";
