@@ -4,9 +4,49 @@ import {
 } from "@/services/webinar.services";
 import { CloudDownloadOutlined } from "@ant-design/icons";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { Avatar, Button, Space, Table, message } from "antd";
+import { Avatar, Button, Card, Space, Table, message } from "antd";
 import { useRouter } from "next/router";
 import { useState } from "react";
+import { Bar } from "@ant-design/plots";
+import { Stack } from "@mantine/core";
+
+const AggregasiJabatan = ({ data }) => {
+  const config = {
+    data,
+    xField: "value",
+    yField: "title",
+    seriesField: "jabatan",
+    label: {
+      position: "middle",
+    },
+    legend: { position: "top-left" },
+  };
+
+  return (
+    <Card title="Agregasi Jabatan">
+      <Bar {...config} />
+    </Card>
+  );
+};
+
+const AggregasiPerangkatDaerah = ({ data }) => {
+  const config = {
+    data,
+    xField: "value",
+    yField: "title",
+    seriesField: "daerah",
+    label: {
+      position: "middle",
+    },
+    legend: { position: "top-left" },
+  };
+
+  return (
+    <Card title="Agregasi Perangkat Daerah">
+      <Bar {...config} />
+    </Card>
+  );
+};
 
 function DetailWebinarParticipants() {
   const router = useRouter();
@@ -91,38 +131,49 @@ function DetailWebinarParticipants() {
 
   return (
     <>
-      <Table
-        size="small"
-        columns={columns}
-        title={() => (
-          <Button
-            disabled={isLoadingWebinarParticipants}
-            loading={isLoadingWebinarParticipants}
-            onClick={handleDownload}
-            type="primary"
-            icon={<CloudDownloadOutlined />}
-          >
-            Peserta
-          </Button>
-        )}
-        pagination={{
-          pageSize: query?.query?.limit,
-          current: query?.query?.page,
-          total: participants?.total,
-          onChange: (page) => {
-            setQuery({
-              ...query,
-              query: {
-                ...query?.query,
-                page: page,
-              },
-            });
-          },
-        }}
-        loading={isLoadingParticipants}
-        rowKey={(row) => row?.custom_id}
-        dataSource={participants?.data}
-      />
+      <Card title="Daftar Peserta">
+        <Table
+          size="small"
+          columns={columns}
+          title={() => (
+            <Button
+              disabled={isLoadingWebinarParticipants}
+              loading={isLoadingWebinarParticipants}
+              onClick={handleDownload}
+              type="primary"
+              icon={<CloudDownloadOutlined />}
+            >
+              Peserta
+            </Button>
+          )}
+          pagination={{
+            pageSize: query?.query?.limit,
+            current: query?.query?.page,
+            total: participants?.total,
+            onChange: (page) => {
+              setQuery({
+                ...query,
+                query: {
+                  ...query?.query,
+                  page: page,
+                },
+              });
+            },
+          }}
+          loading={isLoadingParticipants}
+          rowKey={(row) => row?.custom_id}
+          dataSource={participants?.result?.data}
+        />
+      </Card>
+
+      {participants?.aggregate && (
+        <Stack mt={10}>
+          <AggregasiJabatan data={participants?.aggregate?.jabatan} />
+          <AggregasiPerangkatDaerah
+            data={participants?.aggregate?.perangkat_daerah}
+          />
+        </Stack>
+      )}
     </>
   );
 }

@@ -2,6 +2,8 @@ const WebinarSeries = require("@/models/webinar-series.model");
 const WebinarSeriesParticipates = require("@/models/webinar-series-participates.model");
 const WebinarSeriesSurveys = require("@/models/webinar-series-surveys.model");
 
+const Users = require("@/models/users.model");
+
 // rating
 const WebinarSeriesRatings = require("@/models/webinar-series-ratings.model");
 
@@ -78,6 +80,17 @@ const listAdmin = async (req, res) => {
   }
 };
 
+const serialize = (data) => {
+  if (!data?.length) {
+    return [];
+  } else {
+    return data?.map((d) => ({
+      title: d?.title,
+      value: parseInt(d?.value, 10),
+    }));
+  }
+};
+
 const listParticipants = async (req, res) => {
   try {
     const { id } = req?.query;
@@ -91,6 +104,28 @@ const listParticipants = async (req, res) => {
       .page(parseInt(page) - 1, parseInt(limit))
       .withGraphFetched("[participant(fullSelect)]");
 
+    const aggregasiPerangkatDaerah = await User.query()
+      .select(
+        User.raw(
+          "split_part(info->'perangkat_daerah'->>'detail', '-', 1) AS title"
+        )
+      )
+      .count("user_id as value")
+      .joinRelated("webinar_series_participates")
+      .where("webinar_series_participates.webinar_series_id", id)
+      .groupBy(
+        User.raw("split_part(info->'perangkat_daerah'->>'detail', '-', 1)")
+      )
+      .orderBy("value", "desc");
+
+    const aggregasiJabatan = await User.query()
+      .select(User.raw("info->'jabatan'->>'jabatan' AS title"))
+      .where("webinar_series_participates.webinar_series_id", id)
+      .count("user_id as value")
+      .joinRelated("webinar_series_participates")
+      .groupBy(User.raw("info->'jabatan'->>'jabatan'"))
+      .orderBy("value", "desc");
+
     const data = {
       data: result.results,
       limit: parseInt(limit),
@@ -98,7 +133,13 @@ const listParticipants = async (req, res) => {
       total: result.total,
     };
 
-    res.json(data);
+    res.json({
+      result: data,
+      aggregate: {
+        perangkat_daerah: serialize(aggregasiPerangkatDaerah),
+        jabatan: serialize(aggregasiJabatan),
+      },
+    });
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: "Internal server error" });

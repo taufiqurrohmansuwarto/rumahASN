@@ -1,5 +1,6 @@
 import { formatDateSimple } from "@/utils/client-utils";
 import {
+  AlertTwoTone,
   ClockCircleTwoTone,
   DeleteOutlined,
   FolderOpenOutlined,
@@ -17,6 +18,8 @@ import {
   Image,
   Modal,
   Row,
+  Space,
+  Tag,
   Typography,
 } from "antd";
 
@@ -71,9 +74,26 @@ function DetailWebinar({ data }) {
                 </Typography.Text>
               </div>
               <div>
-                <TagsTwoTone />
+                <AlertTwoTone />
                 <Typography.Text strong> {data?.hour} JP</Typography.Text>{" "}
               </div>
+              <Space>
+                <Tag color={data?.status === "published" ? "green" : "red"}>
+                  {data?.status === "published"
+                    ? "Sudah dipublikasikan"
+                    : "Belum dipublikasikan"}
+                </Tag>
+                <Tag
+                  color={data?.is_allow_download_certificate ? "green" : "red"}
+                >
+                  {data?.is_allow_download_certificate
+                    ? "Sertifikat Siap Unduh"
+                    : "Sertifikat belum siap unduh"}
+                </Tag>
+                <Tag color={data?.is_open ? "green" : "red"}>
+                  {data?.is_open ? "Pendaftaran dibuka" : "Pendaftaran ditutup"}
+                </Tag>
+              </Space>
               <Divider />
               {data?.reference_link && (
                 <div>
@@ -114,7 +134,14 @@ function DetailWebinar({ data }) {
                 </div>
               )}
             </Stack>
-            <Button onClick={handleRemove} danger icon={<DeleteOutlined />}>
+            <Button
+              style={{
+                marginTop: 16,
+              }}
+              onClick={handleRemove}
+              danger
+              icon={<DeleteOutlined />}
+            >
               Hapus
             </Button>
           </Card>
