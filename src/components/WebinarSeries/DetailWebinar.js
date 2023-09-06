@@ -15,10 +15,9 @@ import {
   Col,
   Divider,
   Image,
-  Row,
-  Space,
-  Typography,
   Modal,
+  Row,
+  Typography,
 } from "antd";
 
 function DetailWebinar({ data }) {
@@ -70,6 +69,10 @@ function DetailWebinar({ data }) {
                 <Typography.Text strong>
                   {parseInt(data?.participants_count)} Peserta
                 </Typography.Text>
+              </div>
+              <div>
+                <TagsTwoTone />
+                <Typography.Text strong> {data?.hour} JP</Typography.Text>{" "}
               </div>
               <Divider />
               {data?.reference_link && (

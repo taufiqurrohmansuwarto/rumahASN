@@ -6,6 +6,7 @@ import {
   PushpinTwoTone,
   SearchOutlined,
   SmileOutlined,
+  TagTwoTone,
   TagsTwoTone,
 } from "@ant-design/icons";
 import { Stack } from "@mantine/core";
@@ -153,6 +154,10 @@ function DetailWebinarNew({
                 <Typography.Text strong>
                   {parseInt(data?.participants_count)} Peserta
                 </Typography.Text>
+              </div>
+              <div>
+                <TagTwoTone />
+                <Typography.Text strong> {data?.hour} JP</Typography.Text>{" "}
               </div>
               <div>
                 <FolderTwoTone />{" "}
