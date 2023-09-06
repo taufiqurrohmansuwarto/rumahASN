@@ -7,16 +7,16 @@ const commentUserIndex = async (req, res) => {
     const { id } = req?.query;
     const { customId } = req?.user;
 
-    const result = await WebinarSeriesParticipate.query()
+    const hasil = await WebinarSeriesParticipate.query()
       .where("id", id)
       .andWhere("user_id", customId)
       .first();
 
-    if (!result) {
+    if (!hasil) {
       res.status(400).json({ code: 400, message: "You are not participant" });
     } else {
       const result = await WebinarSeriesComments.query()
-        .where("webinar_series_id", id)
+        .where("webinar_series_id", hasil?.webinar_series_id)
         .withGraphFetched("participant")
         .orderBy("created_at", "desc");
 
@@ -42,7 +42,7 @@ const commentUserCreate = async (req, res) => {
       res.status(400).json({ code: 400, message: "You are not participant" });
     } else {
       await WebinarSeriesComments.query().insert({
-        webinar_series_id: id,
+        webinar_series_id: result?.webinar_series_id,
         user_id: customId,
         comment: req.body.comment,
       });
@@ -57,6 +57,27 @@ const commentUserCreate = async (req, res) => {
 
 const commentUserUpdate = async (req, res) => {
   try {
+    const { id, commentId } = req?.query;
+    const { customId } = req?.user;
+
+    const result = await WebinarSeriesParticipate.query()
+      .where("id", id)
+      .andWhere("user_id", customId)
+      .first();
+
+    if (!result) {
+      res.status(400).json({ code: 400, message: "You are not participant" });
+    } else {
+      await WebinarSeriesComments.query()
+        .patch({
+          comment: req.body.comment,
+        })
+        .where("id", commentId)
+        .andWhere("user_id", customId)
+        .andWhere("webinar_series_id", result?.webinar_series_id);
+
+      res.json({ code: 200, message: "Success" });
+    }
   } catch (error) {
     console.log(error);
     res.status(400).json({ code: 400, message: "Internal Server Error" });
@@ -65,6 +86,27 @@ const commentUserUpdate = async (req, res) => {
 
 const commentUserDelete = async (req, res) => {
   try {
+    const { id, commentId } = req?.query;
+    const { customId } = req?.user;
+
+    const result = await WebinarSeriesParticipate.query()
+      .where("id", id)
+      .andWhere("user_id", customId)
+      .first();
+
+    if (!result) {
+      res.status(400).json({ code: 400, message: "You are not participant" });
+    } else {
+      await WebinarSeriesComments.query()
+        .patch({
+          comment: "komentar telah dihapus",
+        })
+        .where("id", commentId)
+        .andWhere("user_id", customId)
+        .andWhere("webinar_series_id", result?.webinar_series_id);
+
+      res.json({ code: 200, message: "Success" });
+    }
   } catch (error) {
     console.log(error);
     res.status(400).json({ code: 400, message: "Internal Server Error" });

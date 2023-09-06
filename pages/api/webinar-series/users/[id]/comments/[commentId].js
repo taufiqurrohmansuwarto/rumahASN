@@ -1,7 +1,5 @@
 import {
-  commentUserCreate,
   commentUserDelete,
-  commentUserIndex,
   commentUserUpdate,
 } from "@/controller/webinar-series-comments.controller";
 import auth from "@/middleware/auth.middleware";
