@@ -178,7 +178,7 @@ function DetailWebinarNew({
               {data?.already_rating ? (
                 <Rate disabled defaultValue={data?.my_rating} />
               ) : (
-                <Button onClick={handleOpen}>Beri harga Rating</Button>
+                <Button onClick={handleOpen}>Beri Rating</Button>
               )}
               <Divider />
               {data?.reference_link && (
