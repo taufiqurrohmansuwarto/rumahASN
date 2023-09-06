@@ -1,6 +1,10 @@
 const WebinarSeries = require("@/models/webinar-series.model");
 const WebinarSeriesParticipates = require("@/models/webinar-series-participates.model");
 const WebinarSeriesSurveys = require("@/models/webinar-series-surveys.model");
+
+// rating
+const WebinarSeriesRatings = require("@/models/webinar-series-ratings.model");
+
 const User = require("@/models/users.model");
 const { uploadFileMinio, typeGroup } = require("@/utils/index");
 
@@ -348,10 +352,13 @@ const listUser = async (req, res) => {
 const detailWebinarUser = async (req, res) => {
   try {
     const { id } = req.query;
+    const { customId } = req.user;
 
     const result = await WebinarSeriesParticipates.query()
-      .findById(id)
-      .withGraphFetched("[webinar_series]");
+      .where("id", id)
+      .andWhere("user_id", customId)
+      .withGraphFetched("[webinar_series]")
+      .first();
 
     if (result) {
       const hasil = await WebinarSeries.query()
@@ -363,9 +370,18 @@ const detailWebinarUser = async (req, res) => {
             .as("participants_count")
         );
 
+      const currentWebinarSeriesRating = await WebinarSeriesRatings.query()
+        .where("webinar_series_id", result?.webinar_series_id)
+        .andWhere("user_id", customId)
+        .first();
+
       res.json({
         result,
-        webinar_series: hasil,
+        webinar_series: {
+          ...hasil,
+          my_rating: currentWebinarSeriesRating?.rating,
+          already_rating: currentWebinarSeriesRating ? true : false,
+        },
       });
     } else {
       res.json(result);

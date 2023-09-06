@@ -1,5 +1,4 @@
 import Layout from "@/components/Layout";
-import PageContainer from "@/components/PageContainer";
 import DetailWebinarUser from "@/components/WebinarSeries/DetailWebinarUser";
 import WebinarUserDetailLayout from "@/components/WebinarSeries/WebinarUserDetailLayout";
 import {
@@ -7,15 +6,19 @@ import {
   webinarUserDetail,
 } from "@/services/webinar.services";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { Breadcrumb, Card, message } from "antd";
+import { message, Modal, Form, Rate } from "antd";
 import Head from "next/head";
-import Link from "next/link";
 import { useRouter } from "next/router";
+import { useState } from "react";
 
 function MyWebinarDetail() {
   const router = useRouter();
 
   const id = router?.query?.id;
+
+  const [open, setOpen] = useState(false);
+  const handleOpen = () => setOpen(true);
+  const handleClose = () => setOpen(false);
 
   const { data, isLoading } = useQuery(
     ["webinar-user-detail", id],

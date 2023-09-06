@@ -1,15 +1,86 @@
+import { createRating } from "@/services/webinar.services";
 import { formatDateSimple } from "@/utils/client-utils";
 import {
   ClockCircleTwoTone,
   FolderOpenOutlined,
   PushpinTwoTone,
+  TagTwoTone,
   TagsTwoTone,
   VideoCameraAddOutlined,
   YoutubeOutlined,
 } from "@ant-design/icons";
 import { Stack } from "@mantine/core";
-import { Button, Card, Col, Divider, Image, Row, Tag, Typography } from "antd";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import {
+  Button,
+  Card,
+  Col,
+  Divider,
+  Form,
+  Image,
+  Input,
+  Modal,
+  Rate,
+  Row,
+  Tag,
+  Typography,
+  message,
+} from "antd";
 import { useRouter } from "next/router";
+import { useState } from "react";
+
+const ModalRating = ({ open, onCancel }) => {
+  const router = useRouter();
+
+  const id = router?.query?.id;
+
+  const [form] = Form.useForm();
+  const queryClient = useQueryClient();
+
+  const { mutate: ratingWebinar, isLoading: isLoadingRatingWebinar } =
+    useMutation((data) => createRating(data), {
+      onSuccess: () => {
+        message.success("Berhasil memberi rating");
+        onCancel();
+      },
+      onError: () => {
+        message.error("Gagal memberi rating");
+      },
+      onSettled: () => {
+        queryClient.invalidateQueries(["webinar-user-detail", id]);
+      },
+    });
+
+  const handleOk = async () => {
+    const values = await form.validateFields();
+    const data = {
+      id,
+      data: values,
+    };
+
+    ratingWebinar(data);
+  };
+
+  return (
+    <Modal
+      confirmLoading={isLoadingRatingWebinar}
+      onOk={handleOk}
+      title="Rating Webinar"
+      centered
+      open={open}
+      onCancel={onCancel}
+    >
+      <Form form={form} layout="vertical">
+        <Form.Item required name="rating" label="Rating">
+          <Rate />
+        </Form.Item>
+        <Form.Item name="comment" label="Komentar">
+          <Input.TextArea />
+        </Form.Item>
+      </Form>
+    </Modal>
+  );
+};
 
 const Tombol = ({
   data,
@@ -56,8 +127,13 @@ function DetailWebinarNew({
   loadingDownloadCertificate,
   alreadyPoll,
 }) {
+  const [open, setOpen] = useState(false);
+  const handleOpen = () => setOpen(true);
+  const handleClose = () => setOpen(false);
+
   return (
     <>
+      <ModalRating open={open} onCancel={handleClose} />
       <Row
         gutter={{
           xs: 16,
@@ -71,10 +147,8 @@ function DetailWebinarNew({
             cover={<Image preview={false} src={data?.image_url} alt="image" />}
           >
             <Divider />
-            <Typography.Title level={4}>
-              {data?.webinar_series?.title}
-            </Typography.Title>
-            <Typography.Text level={4}>{data?.description}</Typography.Text>
+            <Typography.Title level={4}>{data?.title}</Typography.Title>
+            <Typography.Text>{data?.description}</Typography.Text>
           </Card>
         </Col>
         <Col md={8} xs={24}>
@@ -97,6 +171,15 @@ function DetailWebinarNew({
                   {parseInt(data?.participants_count)} Peserta
                 </Typography.Text>
               </div>
+              <div>
+                <TagTwoTone />
+                <Typography.Text strong> {data?.hour} JP</Typography.Text>{" "}
+              </div>
+              {data?.already_rating ? (
+                <Rate disabled defaultValue={data?.my_rating} />
+              ) : (
+                <Button onClick={handleOpen}>Beri harga Rating</Button>
+              )}
               <Divider />
               {data?.reference_link && (
                 <div>

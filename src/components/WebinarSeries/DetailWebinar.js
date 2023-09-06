@@ -111,12 +111,9 @@ function DetailWebinar({ data }) {
                 </div>
               )}
             </Stack>
-            <Divider />
-            <Space>
-              <Button onClick={handleRemove} danger icon={<DeleteOutlined />}>
-                Hapus
-              </Button>
-            </Space>
+            <Button onClick={handleRemove} danger icon={<DeleteOutlined />}>
+              Hapus
+            </Button>
           </Card>
         </Col>
       </Row>

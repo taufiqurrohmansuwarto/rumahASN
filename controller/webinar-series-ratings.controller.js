@@ -6,10 +6,10 @@ const WebinarSeries = require("@/models/webinar-series.model");
 const getRating = async (req, res) => {
   try {
     const { id } = req?.query;
-    const result = await WebinarSeriesRatings.query().where(
-      "webinar_series_id",
-      id
-    );
+    const result = await WebinarSeriesRatings.query()
+      .withGraphFetched("participant")
+      .where("webinar_series_id", id)
+      .orderBy("created_at", "desc");
 
     res.json(result);
   } catch (error) {
@@ -38,12 +38,14 @@ const createRating = async (req, res) => {
           webinar_series_id: result?.webinar_series_id,
           user_id: customId,
           rating,
-          comment,
+          comments: comment,
         })
         .onConflict(["webinar_series_id", "user_id"])
         .merge({
           rating: rating,
         });
+
+      res.json({ code: 200, message: "Success" });
     }
   } catch (error) {
     console.log(error);
