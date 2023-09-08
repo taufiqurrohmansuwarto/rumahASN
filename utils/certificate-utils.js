@@ -28,7 +28,7 @@ const toPDF = pipe(
 );
 
 //
-module.exports.wordToPdf = async (url, user) => {
+module.exports.wordToPdf = async (url, user, nomerSertifikat) => {
   try {
     const response = await axios.get(url, { responseType: "arraybuffer" });
     const buffer = Buffer.from(response.data, "utf-8");
@@ -38,6 +38,7 @@ module.exports.wordToPdf = async (url, user) => {
       nama: user?.username,
       jabatan: user?.info?.jabatan?.jabatan,
       instansi: user?.info?.perangkat_daerah?.detail,
+      nomer_sertifikat: nomerSertifikat,
     };
 
     const doc = await handler.process(buffer, data, MimeType.docx);
