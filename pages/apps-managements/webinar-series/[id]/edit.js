@@ -320,6 +320,10 @@ const FormEditWebinarSeries = ({ data }) => {
           <Input />
         </Form.Item>
 
+        <Form.Item name="certificate_number" label="Nomer Sertifikat">
+          <Input />
+        </Form.Item>
+
         <Form.Item
           valuePropName="checked"
           name="is_open"
