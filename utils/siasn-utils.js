@@ -39,6 +39,20 @@ module.exports.riwayatCtln = (fetcher, nip) => {
   return fetcher.get(`/pns/rw-ctln/${nip}`);
 };
 
+module.exports.postDataKursus = (fetcher, data) => {
+  const {
+    nip,
+    namaKursus,
+    penyelenggara,
+    tahun,
+    jam,
+    tanggalMulai,
+    tanggalSelesai,
+    tempat,
+    noSertifikat,
+  } = data;
+};
+
 module.exports.cpnspns = (fetcher, nip) => {};
 
 module.exports.riwayatKeluarga = (fetcher, nip) => {};
