@@ -1,0 +1,28 @@
+const WebinarSeries = require("@/models/webinar-series.model");
+const { typeGroup } = require("@/utils/index");
+
+// untuk melakukan pengecekan setiap kali ada request ke endpoint webinar dengan cara mengecek apakah user yang melakukan request memiliki group yang sama dengan group webinar yang diakses
+
+module.exports = async (req, res, next) => {
+  try {
+    const user = req?.user;
+    const group = user?.group;
+
+    const currentGroup = typeGroup(group);
+
+    const { id } = req?.query;
+    const webinar = await WebinarSeries.where("id", id)
+      .andWhere("type", "ilike", `%${currentGroup}%`)
+      .first();
+
+    if (!webinar) {
+      return res.status(404).json({ code: 404, message: "Webinar not found" });
+    } else {
+      req.webinar = webinar;
+      next();
+    }
+  } catch (e) {
+    console.log(e);
+    res.status(500).json({ code: 500, message: "Internal Server Error" });
+  }
+};
