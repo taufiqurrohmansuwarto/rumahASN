@@ -3,9 +3,9 @@ import {
   ApiOutlined,
   BarChartOutlined,
   BookOutlined,
-  HomeOutlined,
   LogoutOutlined,
   ReconciliationOutlined,
+  TeamOutlined,
   UserOutlined,
 } from "@ant-design/icons";
 import { Dropdown, Grid, Typography } from "antd";
@@ -46,7 +46,7 @@ const changeRoutes = (user) => {
       userRoutes.routes.push({
         path: "/beranda-bkd",
         name: "Beranda BKD",
-        icon: <HomeOutlined />,
+        icon: <TeamOutlined />,
       });
     }
 

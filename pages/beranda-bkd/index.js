@@ -252,17 +252,14 @@ const BerandaBKD = () => {
   return (
     <>
       <Head>
-        <title>Rumah ASN - Beranda BKD</title>
+        <title>Rumah ASN - Tugas Saya</title>
       </Head>
-      <PageContainer
-        title="Beranda"
-        subTitle="Badan Kepegawaian Daerah Provinsi Jawa Timur"
-      >
+      <PageContainer title="Beranda" subTitle="Tugas Saya">
         <Row>
           <Col md={16}>
             <Card>
               <Stack>
-                <BKDSpirit />
+                {/* <BKDSpirit /> */}
                 <TabsJobs />
               </Stack>
             </Card>
