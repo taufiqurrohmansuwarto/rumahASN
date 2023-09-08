@@ -1,6 +1,8 @@
 import PageContainer from "@/components/PageContainer";
 import { useRouter } from "next/router";
 
+import Watermark from "@/components/WaterMark";
+
 function WebinarUserLayout({
   children,
   active = "all",
@@ -36,7 +38,9 @@ function WebinarUserLayout({
         },
       }}
     >
-      {children}
+      <Watermark content="Demo" fontSize={40}>
+        {children}
+      </Watermark>
     </PageContainer>
   );
 }

@@ -40,17 +40,7 @@ module.exports.riwayatCtln = (fetcher, nip) => {
 };
 
 module.exports.postDataKursus = (fetcher, data) => {
-  const {
-    nip,
-    namaKursus,
-    penyelenggara,
-    tahun,
-    jam,
-    tanggalMulai,
-    tanggalSelesai,
-    tempat,
-    noSertifikat,
-  } = data;
+  return fetcher.post(`/kursus/save`, data);
 };
 
 module.exports.cpnspns = (fetcher, nip) => {};
