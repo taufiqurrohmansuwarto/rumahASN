@@ -11,6 +11,7 @@ const {
   riwayatCtln,
   riwayatDiklat,
   riwayatKursus,
+  postDataKursus,
 } = require("@/utils/siasn-utils");
 
 const siasnEmployeesDetail = async (req, res) => {
@@ -615,7 +616,33 @@ const getRwDiklat = async (req, res) => {
   }
 };
 
+const postRiwayatKursus = async (req, res) => {
+  try {
+    const { siasnRequest: request, body } = req;
+    const { employee_number: nip } = req?.user;
+
+    const dataUtama = await request.get(`/pns/data-utama/${nip}`);
+    const pnsOrangId = dataUtama?.data?.data?.id;
+
+    const data = {
+      ...body,
+      pnsOrangId,
+    };
+
+    const result = await postDataKursus(request, data);
+
+    if (result?.data?.status === "success") {
+      res.json({ code: 200 });
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ code: 500, message: "Internal Server Error" });
+  }
+};
+
 module.exports = {
+  postRiwayatKursus,
+
   getRwCltn,
   getRwDiklat,
   getRwMasaKerja,

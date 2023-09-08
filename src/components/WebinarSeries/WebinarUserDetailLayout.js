@@ -2,6 +2,7 @@ import PageContainer from "@/components/PageContainer";
 import { Breadcrumb } from "antd";
 import Link from "next/link";
 import { useRouter } from "next/router";
+import Watermark from "@/components/WaterMark";
 
 function WebinarUserDetailLayout({
   children,
@@ -62,7 +63,7 @@ function WebinarUserDetailLayout({
         },
       }}
     >
-      {children}
+      <Watermark content="Demo">{children}</Watermark>
     </PageContainer>
   );
 }
