@@ -495,6 +495,7 @@ const unregisterWebinar = async (req, res) => {
 
 const uploadTemplateAndImage = async (req, res) => {
   try {
+    // menyimpan dalam bentuk buffer ke minio
     const { buffer, originalname, size, mimetype } = req?.file;
     const wordType = req?.body?.type === "word";
     const imageType = req?.body?.type === "image";
@@ -582,14 +583,7 @@ const downloadCertificate = async (req, res) => {
         message: "Akses download sertifikat belum siap",
       });
     } else {
-      const numberCertificate = `BKD-${result?.id}`;
-
-      await WebinarSeriesParticipates.query()
-        .patch({
-          certificate_number: numberCertificate,
-        })
-        .where("user_id", customId)
-        .andWhere("id", id);
+      const numberCertificate = currentWebinarSeries?.certificate_number;
 
       const templateUrl = currentWebinarSeries?.certificate_template;
 
@@ -597,7 +591,7 @@ const downloadCertificate = async (req, res) => {
         .where("custom_id", customId)
         .first();
 
-      const pdf = await wordToPdf(templateUrl, currentUser);
+      const pdf = await wordToPdf(templateUrl, currentUser, numberCertificate);
       const username = req?.user?.name;
       const title = currentWebinarSeries?.title;
 
