@@ -174,10 +174,6 @@ export const commentUserDelete = ({ id, commentId }) => {
     .then((res) => res?.data);
 };
 
-
-
-
-
 // report
 export const downloadParticipants = (id) => {
   return api
@@ -189,4 +185,9 @@ export const downloadParticipants = (id) => {
 
 export const reportSurvey = (id) => {
   return api.get(`/admin/${id}/surveys`).then((res) => res?.data);
+};
+
+// public
+export const checkCertificateWebinar = (id) => {
+  return api.get(`/public/${id}`).then((res) => res?.data);
 };

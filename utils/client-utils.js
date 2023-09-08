@@ -148,6 +148,10 @@ export const formatDateFromNow = (date) => {
   return moment(date).locale("id").fromNow();
 };
 
+export const formatDateWebinar = (date) => {
+  return moment(date).locale("id").format("DD MMM YYYY");
+};
+
 export const formatedMonth = (date) => {
   // language is set to Indonesia
   return moment(date).locale("id").format("MMMM");

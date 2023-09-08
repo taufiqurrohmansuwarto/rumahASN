@@ -272,7 +272,10 @@ const FormEditWebinarSeries = ({ data }) => {
         >
           <Input.TextArea />
         </Form.Item>
-        <Form.Item name="hour" label="Jumlah Jam">
+        <Form.Item name="organizer" label="Penyelenggara">
+          <Input />
+        </Form.Item>
+        <Form.Item name="hour" label="Jumlah Jam Pelajaran">
           <InputNumber />
         </Form.Item>
         <Form.Item

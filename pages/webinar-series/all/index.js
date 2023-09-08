@@ -1,12 +1,11 @@
 import Layout from "@/components/Layout";
 import WebinarUserLayout from "@/components/WebinarSeries/WebinarUserLayout";
 import { allWebinars } from "@/services/webinar.services";
-import { formatDateFull } from "@/utils/client-utils";
+import { formatDateWebinar } from "@/utils/client-utils";
 import {
   CalendarTwoTone,
   CheckCircleOutlined,
-  CheckCircleTwoTone,
-  ClockCircleOutlined,
+  ClockCircleTwoTone,
   StopOutlined,
 } from "@ant-design/icons";
 import { Stack } from "@mantine/core";
@@ -178,28 +177,28 @@ function WebinarAll() {
                 >
                   <Card.Meta
                     description={
-                      <Stack>
-                        <Tooltip title={item?.title} placement="bottomLeft">
-                          <Typography.Text
-                            ellipsis={{
-                              rows: 2,
-                            }}
-                            type="secondary"
-                          >
-                            {item?.title}
-                          </Typography.Text>
-                        </Tooltip>
+                      <>
+                        <Stack>
+                          <Tooltip title={item?.title} placement="bottomLeft">
+                            <Typography.Text
+                              ellipsis={{
+                                rows: 2,
+                              }}
+                              type="secondary"
+                            >
+                              {item?.title}
+                            </Typography.Text>
+                          </Tooltip>
 
-                        <Typography.Text type="secondary">
-                          <CalendarTwoTone color="green" />{" "}
-                          {formatDateFull(item?.start_date)} -{" "}
-                          {formatDateFull(item?.end_date)}
-                          <Divider type="vertical" />
-                          <CheckCircleTwoTone /> Materi & Sertifikat
-                          <Divider type="vertical" />
-                          <ClockCircleOutlined /> {item?.hour} JP
-                        </Typography.Text>
-                      </Stack>
+                          <Typography.Text type="secondary">
+                            <CalendarTwoTone color="green" />{" "}
+                            {formatDateWebinar(item?.start_date)} -{" "}
+                            {formatDateWebinar(item?.end_date)}
+                            <Divider type="vertical" />
+                            <ClockCircleTwoTone /> {item?.hour} Jam Pelajaran
+                          </Typography.Text>
+                        </Stack>
+                      </>
                     }
                   />
                 </Card>
