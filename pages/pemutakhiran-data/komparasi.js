@@ -15,9 +15,9 @@ function Komparasi() {
         <title>Rumah ASN - Peremajaan - Komparasi</title>
       </Head>
       <PageContainer
-        title="Komparasi"
-        subTitle="Komparasi Data"
-        content="Peremajaan Data SIASN dan SIMASTER"
+        title="Integrasi SIASN dan SIMASTER"
+        // subTitle="Komparasi Data"
+        content="Layanan Komparasi Data SIASN dan SIMASTER"
       >
         <Card>
           <Row
@@ -47,7 +47,7 @@ Komparasi.Auth = {
 };
 
 Komparasi.getLayout = (page) => {
-  return <Layout active="/pemutakhiran-data/data-utama">{page}</Layout>;
+  return <Layout active="/pemutakhiran-data/komparasi">{page}</Layout>;
 };
 
 export default Komparasi;

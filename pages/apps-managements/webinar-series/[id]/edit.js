@@ -1,5 +1,5 @@
 import Layout from "@/components/Layout";
-import PageContainer from "@/components/PageContainer";
+import AdminLayoutDetailWebinar from "@/components/WebinarSeries/AdminLayoutDetailWebinar";
 import {
   detailWebinar,
   updateWebinar,
@@ -9,8 +9,8 @@ import { UploadOutlined } from "@ant-design/icons";
 import { Stack } from "@mantine/core";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
+  Space,
   BackTop,
-  Breadcrumb,
   Button,
   Card,
   Checkbox,
@@ -21,12 +21,16 @@ import {
   Select,
   Upload,
   message,
+  Row,
+  Col,
 } from "antd";
 import moment from "moment";
 import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
+
+const format = "DD-MM-YYYY";
 
 const UploadFileTemplate = ({ data, type = "image", title = "test" }) => {
   const [fileListAudio, setFileListAudio] = useState(data?.template);
@@ -77,7 +81,7 @@ const UploadFileTemplate = ({ data, type = "image", title = "test" }) => {
   };
 
   return (
-    <>
+    <Space>
       <Upload
         beforeUpload={handleBeforeUpload}
         multiple={false}
@@ -91,6 +95,7 @@ const UploadFileTemplate = ({ data, type = "image", title = "test" }) => {
         fileList={fileListAudio}
       >
         <Button
+          type="primary"
           icon={<UploadOutlined />}
           disabled={isLoadingUploadAudio}
           loading={isLoadingUploadAudio}
@@ -98,7 +103,10 @@ const UploadFileTemplate = ({ data, type = "image", title = "test" }) => {
           {title}
         </Button>
       </Upload>
-    </>
+      <Link href="google.com">
+        <a>Contoh Template</a>
+      </Link>
+    </Space>
   );
 };
 
@@ -148,7 +156,7 @@ const UploadFileImage = ({ data, type = "image", title = "test" }) => {
   };
 
   return (
-    <>
+    <Space>
       <Upload
         beforeUpload={handleBeforeUpload}
         multiple={false}
@@ -161,6 +169,7 @@ const UploadFileImage = ({ data, type = "image", title = "test" }) => {
         fileList={fileListAudio}
       >
         <Button
+          type="primary"
           icon={<UploadOutlined />}
           disabled={isLoadingUploadAudio}
           loading={isLoadingUploadAudio}
@@ -168,7 +177,10 @@ const UploadFileImage = ({ data, type = "image", title = "test" }) => {
           {title}
         </Button>
       </Upload>
-    </>
+      <Link href="google.com">
+        <a>Contoh Poster</a>
+      </Link>
+    </Space>
   );
 };
 
@@ -180,11 +192,13 @@ const FormEditWebinarSeries = ({ data }) => {
     (data) => updateWebinar(data),
     {
       onSuccess: () => {
-        router.push("/apps-managements/webinar-series");
         message.success("Berhasil mengubah webinar series");
       },
       onSettled: () => {
-        queryClient.invalidateQueries(["webinar-series-admin"]);
+        queryClient.invalidateQueries([
+          "webinar-series-admin-detail",
+          router?.query?.id,
+        ]);
       },
       onError: () => {
         message.error("Gagal membuat webinar series");
@@ -200,8 +214,8 @@ const FormEditWebinarSeries = ({ data }) => {
 
     const currentValues = {
       ...rest,
-      start_date: moment(start_date).format("YYYY-MM-DD HH:mm:ss"),
-      end_date: moment(end_date).format("YYYY-MM-DD HH:mm:ss"),
+      start_date: moment(start_date).format(format),
+      end_date: moment(end_date).format(format),
     };
 
     const dataSend = {
@@ -217,15 +231,11 @@ const FormEditWebinarSeries = ({ data }) => {
       <BackTop />
       <Stack mb={10}>
         <UploadFileTemplate
-          title="Unggah Template Sertifikat"
+          title="Template Sertifikat"
           type="word"
           data={data}
         />
-        <UploadFileImage
-          title="Unggah Poster Webinar"
-          type="image"
-          data={data}
-        />
+        <UploadFileImage title="Poster" type="image" data={data} />
       </Stack>
       <Form
         initialValues={data}
@@ -242,7 +252,7 @@ const FormEditWebinarSeries = ({ data }) => {
           ]}
           required
           name="episode"
-          label="Nomer Series"
+          label="Series"
         >
           <InputNumber />
         </Form.Item>
@@ -271,6 +281,9 @@ const FormEditWebinarSeries = ({ data }) => {
           label="Deskripsi"
         >
           <Input.TextArea />
+        </Form.Item>
+        <Form.Item name="certificate_number" label="Nomer Sertifikat">
+          <Input />
         </Form.Item>
         <Form.Item name="organizer" label="Penyelenggara">
           <Input />
@@ -311,7 +324,7 @@ const FormEditWebinarSeries = ({ data }) => {
             },
           ]}
         >
-          <DatePicker.RangePicker />
+          <DatePicker.RangePicker format={format} />
         </Form.Item>
         <Form.Item name="youtube_url" label="Link Youtube">
           <Input />
@@ -323,33 +336,35 @@ const FormEditWebinarSeries = ({ data }) => {
           <Input />
         </Form.Item>
 
-        <Form.Item name="certificate_number" label="Nomer Sertifikat">
-          <Input />
-        </Form.Item>
-
-        <Form.Item
-          valuePropName="checked"
-          name="is_open"
-          label="Buka Pendaftaran"
-        >
-          <Checkbox>Ya</Checkbox>
-        </Form.Item>
-
-        <Form.Item
-          valuePropName="checked"
-          name="is_allow_download_certificate"
-          label="Izinkan peserta mengunduh sertifikat?"
-        >
-          <Checkbox>Ya</Checkbox>
-        </Form.Item>
-
-        <Form.Item
-          valuePropName="checked"
-          name="use_esign"
-          label="Gunakan TTE untuk sertifikat?"
-        >
-          <Checkbox>Ya</Checkbox>
-        </Form.Item>
+        <Row gutter={[16, 16]}>
+          <Col>
+            <Form.Item
+              valuePropName="checked"
+              name="is_open"
+              label="Buka Pendaftaran?"
+            >
+              <Checkbox>Ya</Checkbox>
+            </Form.Item>
+          </Col>
+          <Col>
+            <Form.Item
+              valuePropName="checked"
+              name="is_allow_download_certificate"
+              label="Izinkan peserta mengunduh sertifikat?"
+            >
+              <Checkbox>Ya</Checkbox>
+            </Form.Item>
+          </Col>
+          <Col>
+            <Form.Item
+              valuePropName="checked"
+              name="use_esign"
+              label="Gunakan TTE untuk sertifikat?"
+            >
+              <Checkbox>Ya</Checkbox>
+            </Form.Item>
+          </Col>
+        </Row>
 
         <Form.Item>
           <Button
@@ -358,7 +373,7 @@ const FormEditWebinarSeries = ({ data }) => {
             type="primary"
             htmlType="submit"
           >
-            Submit
+            Edit
           </Button>
         </Form.Item>
       </Form>
@@ -377,46 +392,26 @@ const UpdateWebinarSeries = () => {
     {}
   );
 
-  const handleBack = () => router.back();
-
   return (
     <>
       <Head>
         <title>Rumah ASN - Update Webinar Series</title>
       </Head>
-      <PageContainer
-        onBack={handleBack}
-        loading={isLoading}
-        title="Rumah ASN"
-        content="Webinar Series"
-        header={{
-          breadcrumbRender: () => (
-            <Breadcrumb>
-              <Breadcrumb.Item>
-                <Link href="/feeds">
-                  <a>Beranda</a>
-                </Link>
-              </Breadcrumb.Item>
-              <Breadcrumb.Item>
-                <Link href="/apps-managements/webinar-series">
-                  <a>Webinar Series Admin</a>
-                </Link>
-              </Breadcrumb.Item>
-              <Breadcrumb.Item>Edit Webinar</Breadcrumb.Item>
-            </Breadcrumb>
-          ),
-        }}
-      >
-        <Card title="Edit Webinar Series">
-          <FormEditWebinarSeries
-            data={{
-              ...data,
-              id,
-              date: [moment(data?.start_date), moment(data?.end_date)],
-            }}
-          />
+      <AdminLayoutDetailWebinar loading={isLoading} active="edit">
+        <Card>
+          <Row>
+            <Col xs={24} md={18}>
+              <FormEditWebinarSeries
+                data={{
+                  ...data,
+                  id,
+                  date: [moment(data?.start_date), moment(data?.end_date)],
+                }}
+              />
+            </Col>
+          </Row>
         </Card>
-      </PageContainer>
+      </AdminLayoutDetailWebinar>
     </>
   );
 };

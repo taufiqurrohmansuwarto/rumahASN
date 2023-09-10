@@ -9,7 +9,7 @@ function Notifications() {
     ["notifications-total"],
     () => listNotifications({ symbol: "yes" }),
     {
-      refetchInterval: 5000,
+      refetchInterval: 30000,
     }
   );
   const router = useRouter();

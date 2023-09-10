@@ -1,10 +1,9 @@
 import Layout from "@/components/Layout";
 import { recommendationFaq } from "@/services/index";
 import { renderMarkdown, uploadFile } from "@/utils/client-utils";
-import { Alert, Grid, Stack, Text } from "@mantine/core";
+import { Grid, Stack, Text } from "@mantine/core";
 import { useDebouncedValue } from "@mantine/hooks";
 import { MarkdownEditor } from "@primer/react/drafts";
-import { IconAlertCircle } from "@tabler/icons";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import {
   Breadcrumb,
@@ -14,15 +13,15 @@ import {
   Modal,
   Typography,
   message,
+  Card,
 } from "antd";
+import { useSession } from "next-auth/react";
 import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { createTickets } from "../../services/users.services";
 import PageContainer from "../../src/components/PageContainer";
-import { useSession } from "next-auth/react";
-import { useEffect } from "react";
 
 // peremajaan data
 const TextPeremajaanData = () => {
@@ -156,15 +155,16 @@ const CreateTicket = () => {
     >
       <Grid>
         <Grid.Col md={8} xs={12}>
-          <Alert
+          <Card>
+            {/* <Alert
             color="red"
             mb={8}
             title="Peremajan Data"
             icon={<IconAlertCircle />}
           >
             <TextPeremajaanData />
-          </Alert>
-          {/* <Alert
+          </Alert> */}
+            {/* <Alert
             icon={<IconAlertCircle />}
             color="yellow"
             title="Perhatian"
@@ -176,40 +176,41 @@ const CreateTicket = () => {
               bukti jika diperlukan. Terima kasih.
             </Text>
           </Alert> */}
-          <Stack>
-            <Input
-              value={title}
-              onChange={(e) => setTitle(e?.target?.value)}
-              placeholder="Judul"
-            />
-            <MarkdownEditor
-              value={content}
-              acceptedFileTypes={[
-                "image/*",
-                // word, excel, txt, pdf
-                ".doc",
-                ".docx",
-                ".xls",
-                ".xlsx",
-                ".txt",
-                ".pdf",
-              ]}
-              onChange={setContent}
-              placeholder="Deskripsi"
-              onRenderPreview={renderMarkdown}
-              onUploadFile={uploadFile}
-              mentionSuggestions={null}
-            />
-          </Stack>
-          <Button
-            disabled={isLoading}
-            loading={isLoading}
-            style={{ marginTop: 14 }}
-            onClick={handleFinish}
-            type="primary"
-          >
-            Submit
-          </Button>
+            <Stack>
+              <Input
+                value={title}
+                onChange={(e) => setTitle(e?.target?.value)}
+                placeholder="Judul"
+              />
+              <MarkdownEditor
+                value={content}
+                acceptedFileTypes={[
+                  "image/*",
+                  // word, excel, txt, pdf
+                  ".doc",
+                  ".docx",
+                  ".xls",
+                  ".xlsx",
+                  ".txt",
+                  ".pdf",
+                ]}
+                onChange={setContent}
+                placeholder="Tulis deskripsi, sertakan bukti jika diperlukan(Foto/File)"
+                onRenderPreview={renderMarkdown}
+                onUploadFile={uploadFile}
+                mentionSuggestions={null}
+              />
+            </Stack>
+            <Button
+              disabled={isLoading}
+              loading={isLoading}
+              style={{ marginTop: 14 }}
+              onClick={handleFinish}
+              type="primary"
+            >
+              Submit
+            </Button>
+          </Card>
         </Grid.Col>
         <Grid.Col md={4} xs={12}>
           {recommendationsFaqs?.length > 0 && (

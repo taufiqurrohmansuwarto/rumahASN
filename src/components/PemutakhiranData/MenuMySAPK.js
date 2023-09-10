@@ -81,20 +81,19 @@ export function MenuMySAPK() {
       radius="md"
       className={classes.card}
     >
+      <Group position="apart" mb={14}>
+        <Text className={classes.title}>Data SIASN-SIMASTER</Text>
+      </Group>
       <Alert
         mb={10}
         color="red"
         icon={<IconAlertCircle size="1rem" />}
         title="Perhatian!"
       >
-        Bagi Para ASN yang mau melakukan peremajaan data, menu yang bisa
-        ditambah adalah Riwayat Jabatan, Riwayat Angka Kredit, dan Laporan
-        Kinerja 2022. Terima Kasih
+        Data yang bisa ditambah adalah Riwayat Jabatan, Riwayat Angka Kredit,
+        dan Kinerja 2022
       </Alert>
 
-      <Group position="apart">
-        <Text className={classes.title}>Peremajaan Data SIASN-SIMASTER</Text>
-      </Group>
       <SimpleGrid
         cols={screens.xl ? 4 : screens.lg ? 3 : screens.md ? 2 : 2}
         mt="md"

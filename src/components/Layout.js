@@ -1,10 +1,10 @@
 import {
-  ApartmentOutlined,
   ApiOutlined,
   BarChartOutlined,
   BookOutlined,
   LogoutOutlined,
   ReconciliationOutlined,
+  SolutionOutlined,
   TeamOutlined,
   UserOutlined,
 } from "@ant-design/icons";
@@ -57,26 +57,26 @@ const changeRoutes = (user) => {
       userRoutes.routes.push(
         {
           path: "/pemutakhiran-data/komparasi",
-          name: "Peremajaan Data",
+          name: "Integras SIASN",
           icon: <ApiOutlined />,
-        },
-        {
-          path: "/layanan-tracking",
-          name: "Layanan Tracking",
-          icon: <ReconciliationOutlined />,
-          routes: [
-            {
-              path: "/layanan-tracking/siasn",
-              name: "Aplikasi SIASN",
-              icon: <UserOutlined />,
-            },
-            {
-              path: "/layanan-tracking/simaster",
-              name: "Aplikasi SIMASTER",
-              icon: <UserOutlined />,
-            },
-          ],
         }
+        // {
+        //   path: "/layanan-tracking",
+        //   name: "Layanan Tracking",
+        //   icon: <ReconciliationOutlined />,
+        //   routes: [
+        //     {
+        //       path: "/layanan-tracking/siasn",
+        //       name: "Aplikasi SIASN",
+        //       icon: <UserOutlined />,
+        //     },
+        //     {
+        //       path: "/layanan-tracking/simaster",
+        //       name: "Aplikasi SIMASTER",
+        //       icon: <UserOutlined />,
+        //     },
+        //   ],
+        // }
       );
     }
 
@@ -140,7 +140,7 @@ const changeRoutes = (user) => {
         {
           path: "/apps-managements",
           name: "Manajemen Aplikasi",
-          icon: <ApartmentOutlined />,
+          icon: <SolutionOutlined />,
           routes: [
             {
               path: "/apps-managements/integrasi",

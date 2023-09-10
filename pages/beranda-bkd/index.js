@@ -5,9 +5,11 @@ import { Stack } from "@mantine/core";
 import { IconAlertCircle } from "@tabler/icons";
 import { useQuery } from "@tanstack/react-query";
 import {
+  Breadcrumb,
   Avatar,
   Card,
   Col,
+  Empty,
   Grid,
   List,
   Popover,
@@ -207,9 +209,11 @@ const TabsJobs = () => {
       label: "Arsip",
       key: "archive-task",
       children: (
-        <div>
-          <p>Bentar ya mau dibuat...</p>
-        </div>
+        <Empty>
+          <Typography.Text type="secondary">
+            Arsip pertanyaan yang sudah selesai dijawab.
+          </Typography.Text>
+        </Empty>
       ),
     },
   ];
@@ -254,12 +258,26 @@ const BerandaBKD = () => {
       <Head>
         <title>Rumah ASN - Tugas Saya</title>
       </Head>
-      <PageContainer title="Beranda" subTitle="Tugas Saya">
+      <PageContainer
+        header={{
+          breadcrumbRender: () => (
+            <Breadcrumb>
+              <Breadcrumb.Item>
+                <Link href="/feeds">
+                  <a>Beranda</a>
+                </Link>
+              </Breadcrumb.Item>
+              <Breadcrumb.Item>Tugas Saya</Breadcrumb.Item>
+            </Breadcrumb>
+          ),
+        }}
+        title="Beranda"
+        subTitle="Tugas Saya"
+      >
         <Row>
           <Col md={16}>
             <Card>
               <Stack>
-                {/* <BKDSpirit /> */}
                 <TabsJobs />
               </Stack>
             </Card>
