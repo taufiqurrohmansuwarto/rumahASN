@@ -1,15 +1,17 @@
-import { formatDateSimple } from "@/utils/client-utils";
+import { removeWebinar } from "@/services/webinar.services";
+import { formatDateWebinar } from "@/utils/client-utils";
 import {
-  AlertTwoTone,
+  CarryOutTwoTone,
   ClockCircleTwoTone,
   DeleteOutlined,
   FolderOpenOutlined,
-  PushpinTwoTone,
   TagsTwoTone,
   VideoCameraAddOutlined,
   YoutubeOutlined,
+  EditTwoTone,
 } from "@ant-design/icons";
 import { Stack } from "@mantine/core";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   Button,
   Card,
@@ -21,9 +23,57 @@ import {
   Space,
   Tag,
   Typography,
+  Tooltip,
+  message,
 } from "antd";
+import { useRouter } from "next/router";
+
+const WebinarStatus = ({ data }) => {
+  return (
+    <Space>
+      <Tag color={data?.status === "published" ? "green" : "red"}>
+        {data?.status === "published" ? "Publikasi" : "Belum publikasi"}
+      </Tag>
+      <Tag color={data?.is_allow_download_certificate ? "green" : "red"}>
+        {data?.is_allow_download_certificate
+          ? "Sertifikat Siap Unduh"
+          : "Sertifikat belum siap unduh"}
+      </Tag>
+      <Tag color={data?.is_open ? "green" : "red"}>
+        {data?.is_open ? "Pendaftaran dibuka" : "Pendaftaran ditutup"}
+      </Tag>
+    </Space>
+  );
+};
 
 function DetailWebinar({ data }) {
+  const router = useRouter();
+
+  const queryClient = useQueryClient();
+
+  const handleEdit = () => {
+    router.push(`/apps-managements/webinar-series/${data?.id}/edit`);
+  };
+
+  const { mutateAsync: hapus, isLoading: isLoadingHapus } = useMutation(
+    (data) => removeWebinar(data),
+    {
+      onSuccess: () => {
+        message.success("Berhasil menghapus webinar series");
+        router.push(`/apps-managements/webinar-series`);
+      },
+      onError: () => {
+        message.error("Gagal menghapus webinar series");
+      },
+      onSettled: () => {
+        queryClient.invalidateQueries([
+          "webinar-series-admin-detail",
+          router?.query?.id,
+        ]);
+      },
+    }
+  );
+
   const handleRemove = () => {
     Modal.confirm({
       title: "Hapus Webinar",
@@ -31,6 +81,7 @@ function DetailWebinar({ data }) {
         "Apakah anda yakin ingin menghapus webinar ini?, data peserta, komentar, dan survey akan ikut terhapus",
       okText: "Ya",
       centered: true,
+      onOk: async () => await hapus(router?.query?.id),
     });
   };
 
@@ -50,22 +101,30 @@ function DetailWebinar({ data }) {
           >
             <Typography.Title level={4}>{data?.title}</Typography.Title>
             <Divider />
-            <Typography.Text level={4}>{data?.description}</Typography.Text>
+            <Stack>
+              <WebinarStatus data={data} />
+              <Typography.Text level={4}>{data?.description}</Typography.Text>
+            </Stack>
           </Card>
         </Col>
         <Col md={8} xs={24}>
-          <Card title="Informasi Event">
+          <Card
+            title={
+              <Space>
+                <Typography.Text>Informasi Event</Typography.Text>
+                <Tooltip title="Edit Webinar">
+                  <EditTwoTone onClick={handleEdit} />
+                </Tooltip>
+              </Space>
+            }
+          >
             <Stack>
               <div>
                 <ClockCircleTwoTone />{" "}
                 <Typography.Text strong>
-                  {formatDateSimple(data?.start_date)} -{" "}
-                  {formatDateSimple(data?.end_date)}
+                  {formatDateWebinar(data?.start_date)} -{" "}
+                  {formatDateWebinar(data?.end_date)}
                 </Typography.Text>
-              </div>
-              <div>
-                <PushpinTwoTone />{" "}
-                <Typography.Text strong>Online</Typography.Text>
               </div>
               <div>
                 <TagsTwoTone />{" "}
@@ -74,26 +133,12 @@ function DetailWebinar({ data }) {
                 </Typography.Text>
               </div>
               <div>
-                <AlertTwoTone />
-                <Typography.Text strong> {data?.hour} JP</Typography.Text>{" "}
+                <CarryOutTwoTone />
+                <Typography.Text strong>
+                  {" "}
+                  {data?.hour} Jam Pelajaran
+                </Typography.Text>{" "}
               </div>
-              <Space>
-                <Tag color={data?.status === "published" ? "green" : "red"}>
-                  {data?.status === "published"
-                    ? "Sudah dipublikasikan"
-                    : "Belum dipublikasikan"}
-                </Tag>
-                <Tag
-                  color={data?.is_allow_download_certificate ? "green" : "red"}
-                >
-                  {data?.is_allow_download_certificate
-                    ? "Sertifikat Siap Unduh"
-                    : "Sertifikat belum siap unduh"}
-                </Tag>
-                <Tag color={data?.is_open ? "green" : "red"}>
-                  {data?.is_open ? "Pendaftaran dibuka" : "Pendaftaran ditutup"}
-                </Tag>
-              </Space>
               <Divider />
               {data?.reference_link && (
                 <div>

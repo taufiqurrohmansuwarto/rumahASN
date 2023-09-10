@@ -17,12 +17,12 @@ function AdminLayoutWebinar({
       content={content}
       tabList={[
         {
-          tab: "Webinar Series",
+          tab: "Series",
           key: "webinar-series",
           href: "/apps-managements/webinar-series",
         },
         {
-          tab: "Webinar Series Survey",
+          tab: "Kuisioner",
           key: "webinar-series-surveys",
           href: "/apps-managements/webinar-series-surveys",
         },

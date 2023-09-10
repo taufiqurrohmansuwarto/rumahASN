@@ -1,12 +1,11 @@
 import Layout from "@/components/Layout";
-import PageContainer from "@/components/PageContainer";
 import AdminLayoutWebinar from "@/components/WebinarSeries/AdminLayoutWebinar";
 import { readAllWebinar, removeWebinar } from "@/services/webinar.services";
-import { StatusWebinar, formatDateSimple } from "@/utils/client-utils";
+import { StatusWebinar, formatDateWebinar } from "@/utils/client-utils";
 import { PlusOutlined } from "@ant-design/icons";
+import { Input, Stack } from "@mantine/core";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
-  Breadcrumb,
   Button,
   Card,
   Divider,
@@ -15,6 +14,7 @@ import {
   Table,
   Tag,
   message,
+  Input as InputAntd,
 } from "antd";
 import Head from "next/head";
 import Link from "next/link";
@@ -53,8 +53,18 @@ const WebinarSeries = () => {
   const { data, isLoading } = useQuery(
     ["webinar-series-admin", query],
     () => readAllWebinar(query),
-    {}
+    {
+      keepPreviousData: true,
+      enabled: !!query,
+    }
   );
+
+  const handleSearch = (value) => {
+    setQuery({
+      ...query,
+      search: value,
+    });
+  };
 
   const handleCreate = () => {
     router.push("/apps-managements/webinar-series/create");
@@ -62,12 +72,37 @@ const WebinarSeries = () => {
 
   const columns = [
     {
-      title: "Nomer Series",
+      title: "Webinar Series",
+      key: "webinar_series_xs",
+      render: (text) => {
+        return (
+          <Stack>
+            {text?.episode} - {text?.title}
+            <div>
+              {formatDateWebinar(text?.start_date)} -{" "}
+              {formatDateWebinar(text?.end_date)}
+            </div>
+          </Stack>
+        );
+      },
+      responsive: ["xs"],
+    },
+    {
+      title: "Series",
       dataIndex: "episode",
+      responsive: ["sm"],
     },
     {
       title: "Judul",
-      dataIndex: "title",
+      key: "title",
+      render: (text) => {
+        return (
+          <Link href={`/apps-managements/webinar-series/${text?.id}/detail`}>
+            <a>{text?.title}</a>
+          </Link>
+        );
+      },
+      responsive: ["sm"],
     },
     {
       title: "Tanggal",
@@ -75,23 +110,26 @@ const WebinarSeries = () => {
       render: (text) => {
         return (
           <span>
-            {formatDateSimple(text?.start_date)} -{" "}
-            {formatDateSimple(text?.end_date)}
+            {formatDateWebinar(text?.start_date)} -{" "}
+            {formatDateWebinar(text?.end_date)}
           </span>
         );
       },
+      responsive: ["sm"],
     },
     {
-      title: "Tipe Peserta",
+      title: "Peserta",
       key: "type_participant",
       render: (text) => {
         return <span>{text?.type_participant?.join(", ")}</span>;
       },
+      responsive: ["sm"],
     },
     {
       title: "Status",
       key: "status",
       render: (text) => <StatusWebinar status={text?.status} />,
+      responsive: ["sm"],
     },
     {
       title: "Status Pendaftaran",
@@ -101,10 +139,12 @@ const WebinarSeries = () => {
           {text?.is_open ? "Buka" : "Tutup"}
         </Tag>
       ),
+      responsive: ["sm"],
     },
     {
       title: "Total Peserta",
       dataIndex: "participants_count",
+      responsive: ["sm"],
     },
     {
       title: "Download Sertifikat?",
@@ -114,36 +154,7 @@ const WebinarSeries = () => {
           <span>{text?.is_allow_download_certificate ? "Ya" : "Tidak"}</span>
         );
       },
-    },
-    {
-      title: "Aksi",
-      key: "aksi",
-      render: (text, record) => {
-        return (
-          <Space>
-            <a
-              onClick={() =>
-                router.push(
-                  `/apps-managements/webinar-series/${record?.id}/detail`
-                )
-              }
-            >
-              Detail
-            </a>
-            <Divider type="vertical" />
-            <a onClick={() => gotoEdit(record?.id)}>Edit</a>
-            <Divider type="vertical" />
-            <Popconfirm
-              onConfirm={() => {
-                handleDelete(record?.id);
-              }}
-              title="Apakah anda yakin ingin menghapus data?"
-            >
-              <a>Hapus</a>
-            </Popconfirm>
-          </Space>
-        );
-      },
+      responsive: ["sm"],
     },
   ];
 
@@ -158,17 +169,27 @@ const WebinarSeries = () => {
         loading={isLoading}
       >
         <Card>
+          <Button
+            style={{
+              marginBottom: 16,
+            }}
+            onClick={handleCreate}
+            type="primary"
+            icon={<PlusOutlined />}
+          >
+            Webinar Series
+          </Button>
           <Table
-            columns={columns}
             title={() => (
-              <Button
-                onClick={handleCreate}
-                type="primary"
-                icon={<PlusOutlined />}
-              >
-                Webinar Series
-              </Button>
+              <InputAntd.Search
+                allowClear
+                onSearch={handleSearch}
+                style={{
+                  width: 400,
+                }}
+              />
             )}
+            columns={columns}
             dataSource={data?.data}
             rowKey={(row) => row?.id}
             loading={isLoading}

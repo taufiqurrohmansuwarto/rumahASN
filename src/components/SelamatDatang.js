@@ -1,3 +1,4 @@
+import { Stack } from "@mantine/core";
 import { Alert, Button, Divider, Skeleton, Typography, Space } from "antd";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
@@ -17,26 +18,43 @@ const MyText = ({ user }) => {
 
   return (
     <>
-      <Typography.Text>
-        Halo, Sobat ASN! Selamat datang di Rumah ASN BKD Provinsi Jawa Timur!
-        Sebelum nyelonong tanya, coba deh mampir dulu ke menu{" "}
-        <Link href={"/faq"}>
-          <a>Pertanyaan Umum</a>
-        </Link>{" "}
-        atau lihat-lihat daftar pertanyaan yang udah ada. Kalo jawabannya masih
-        ngambang, yuk langsung gas pol buat pertanyaan baru. Tenang aja, kita
-        disini selalu siap bantu kalian, sob! Semangat terus, ya!{" "}
-      </Typography.Text>
-      <Divider />
+      <div
+        style={{
+          marginBottom: 16,
+        }}
+      >
+        <Typography.Text>
+          Kunjungi menu{" "}
+          <Link href={`/helpdesk/faq`}>
+            <a>Pertanyaan Umum</a>
+          </Link>{" "}
+          atau periksa daftar pertanyaan yang telah ada sebelum mengajukan
+          pertanyaan baru.
+        </Typography.Text>
+        {user?.group === "MASTER" && (
+          <Typography.Paragraph strong>
+            {" "}
+            Untuk melihat komparasi data utama SIMASTER dan SIASN anda silahkan
+            klik{" "}
+            <Link
+              href={`
+            /pemutakhiran-data/data-utama
+            `}
+            >
+              <a>di sini.</a>
+            </Link>{" "}
+            Atau cek status layanan kepegawaian SIASN{" "}
+            <Link href={`/pemutakhiran-data/komparasi`}>
+              <a>di sini.</a>
+            </Link>
+          </Typography.Paragraph>
+        )}
+      </div>
+
       <Space>
         <Button onClick={handleCreate} type="primary">
-          Buat Pertanyaan
+          Tanya BKD
         </Button>
-        {user?.group === "MASTER" && (
-          <Button danger type="primary" onClick={handleCheckIP}>
-            Peremajaan Data
-          </Button>
-        )}
       </Space>
     </>
   );
@@ -47,12 +65,7 @@ function SelamatDatang() {
 
   return (
     <Skeleton loading={status === "loading"}>
-      <Alert
-        showIcon
-        banner
-        description={<MyText user={data?.user} />}
-        type="success"
-      />
+      <Alert description={<MyText user={data?.user} />} />
     </Skeleton>
   );
 }

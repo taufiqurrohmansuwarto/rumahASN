@@ -12,6 +12,7 @@ import {
   Row,
   Select,
   Table,
+  Typography,
 } from "antd";
 import { useState } from "react";
 
@@ -114,10 +115,9 @@ function SIASNTracking() {
         </Modal>
         <Col md={18} xs={24}>
           <Stack>
-            <Alert
-              type="info"
-              description="Halo! Segera kenali kemudahan dalam melakukan tracking layanan pada aplikasi SIASN! Dengan layanan integrasi yang kami sediakan, kamu dapat memantau setiap langkah layananmu dengan mudah dan cepat. Jangan sampai kehilangan kontrol atas layananmu, mari gunakan layanan integrasi SIASN kami!"
-            />
+            <Typography.Title level={5}>
+              Cek Status Layanan Kepegawaian SIASN
+            </Typography.Title>
             <Form onFinish={handleFinish} form={form} layout="vertical">
               <Form.Item
                 rules={[

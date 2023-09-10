@@ -20,6 +20,8 @@ import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
 
+const format = "DD-MM-YYYY";
+
 const FormWebinarSeries = () => {
   const queryClient = useQueryClient();
   const router = useRouter();
@@ -48,8 +50,8 @@ const FormWebinarSeries = () => {
 
     const data = {
       ...rest,
-      start_date: moment(start_date).format("YYYY-MM-DD HH:mm:ss"),
-      end_date: moment(end_date).format("YYYY-MM-DD HH:mm:ss"),
+      start_date: moment(start_date).format(format),
+      end_date: moment(end_date).format(format),
     };
 
     create(data);
@@ -71,6 +73,13 @@ const FormWebinarSeries = () => {
         <InputNumber />
       </Form.Item>
       <Form.Item
+        name="organizer"
+        label="Penyelenggara"
+        rules={[{ required: true, message: "Penyelenggara harus diisi" }]}
+      >
+        <Input />
+      </Form.Item>
+      <Form.Item
         required
         label="Tanggal Mulai s/d Tanggal Berakhir"
         name="date"
@@ -81,7 +90,7 @@ const FormWebinarSeries = () => {
           },
         ]}
       >
-        <DatePicker.RangePicker showTime />
+        <DatePicker.RangePicker format={format} />
       </Form.Item>
 
       <Form.Item
@@ -110,7 +119,11 @@ const FormWebinarSeries = () => {
       >
         <Input.TextArea />
       </Form.Item>
-      <Form.Item label="Jumlah Jam" name="hour">
+      <Form.Item
+        label="Jumlah Jam Pelajaran (JP)"
+        rules={[{ required: true, message: "JP harus diisi" }]}
+        name="hour"
+      >
         <InputNumber />
       </Form.Item>
       <Form.Item

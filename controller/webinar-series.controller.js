@@ -60,7 +60,7 @@ const listAdmin = async (req, res) => {
       )
       .where((builder) => {
         if (search) {
-          builder.where("title", "like", `%${search}%`);
+          builder.where("title", "ilike", `%${search}%`);
         }
       })
       .orderBy("created_at", "desc")

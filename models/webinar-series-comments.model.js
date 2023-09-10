@@ -24,6 +24,14 @@ class WebinarSeriesComments extends Model {
           to: "users.custom_id",
         },
       },
+      children: {
+        relation: Model.HasManyRelation,
+        modelClass: WebinarSeriesComments,
+        join: {
+          from: "webinar_series_comments.id",
+          to: "webinar_series_comments.webinar_series_comment_id",
+        },
+      },
     };
   }
 
