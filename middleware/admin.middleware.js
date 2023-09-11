@@ -5,7 +5,7 @@ module.exports = async (req, res, next) => {
 
     const currentGroup = group === "MASTER" || group === "PTTPK";
 
-    const admin = current_role === "admin" || currentGroup;
+    const admin = current_role === "admin" && currentGroup;
 
     if (!admin) {
       res.status(403).json({ code: 403, message: "Forbidden" });
