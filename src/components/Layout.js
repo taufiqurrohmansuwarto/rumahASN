@@ -57,7 +57,7 @@ const changeRoutes = (user) => {
       userRoutes.routes.push(
         {
           path: "/pemutakhiran-data/komparasi",
-          name: "Integras SIASN",
+          name: "Integrasi SIASN",
           icon: <ApiOutlined />,
         }
         // {

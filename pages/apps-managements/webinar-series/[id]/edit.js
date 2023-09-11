@@ -40,7 +40,7 @@ const UploadFileTemplate = ({ data, type = "image", title = "test" }) => {
     (data) => uploadFileWebinar(data),
     {
       onSuccess: (result) => {
-        message.success("Berhasil mengunggah image");
+        message.success("Berhasil mengunggah template sertifikat");
         queryClient.invalidateQueries([
           "webinar-series-admin-detail",
           data?.id,

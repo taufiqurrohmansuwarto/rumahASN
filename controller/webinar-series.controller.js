@@ -659,10 +659,12 @@ const downloadCertificate = async (req, res) => {
           try {
             const pdfData = Buffer.concat(buffer);
 
-            const result = await createSignature({
+            const data = {
               id,
               file: pdfData,
-            });
+            };
+
+            const result = await createSignature(data);
 
             if (!result?.success) {
               res.status(400).json({ code: 400, message: result?.data?.error });
