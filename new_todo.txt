@@ -1,4 +1,12 @@
-1. ui untuk rating admin/user
-2. crud untuk komentar admin/user
-3. middleware untuk filter webinar type
-4. integrasi siasn kalau dia ASN
+Aplikasi (12-09-2023)
+- integrasi siasn kalau dia ASN
+- tabs di webinar series admin harus ada nomer seperti peserta, dan komentar
+- di tabs peserta cek aggregasi kenapa warna nya hitam
+- tambahkan download untuk kuisioner di tab webinar series admin
+- tambahkan rerata hasil kuisioner dan rating
+
+tugas
+- anomali 100 data 
+
+
+
