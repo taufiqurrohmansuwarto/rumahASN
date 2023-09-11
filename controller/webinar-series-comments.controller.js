@@ -21,12 +21,12 @@ const commentUserIndex = async (req, res) => {
         .withGraphFetched("[participant]")
         .orderBy("created_at", "desc");
 
-      const hasil = arrayToTree(result, {
+      const tree = arrayToTree(result, {
         parentProperty: "webinar_series_comment_id",
         customID: "id",
       });
 
-      res.json(hasil);
+      res.json(tree);
     }
   } catch (error) {
     console.log(error);

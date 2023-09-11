@@ -1,5 +1,6 @@
-import { formatDateSimple } from "@/utils/client-utils";
+import { formatDateSimple, formatDateWebinar } from "@/utils/client-utils";
 import {
+  CarryOutTwoTone,
   ClockCircleTwoTone,
   CloseOutlined,
   FolderTwoTone,
@@ -141,13 +142,9 @@ function DetailWebinarNew({
               <div>
                 <ClockCircleTwoTone />{" "}
                 <Typography.Text strong>
-                  {formatDateSimple(data?.start_date)} -{" "}
-                  {formatDateSimple(data?.end_date)}
+                  {formatDateWebinar(data?.start_date)} -{" "}
+                  {formatDateWebinar(data?.end_date)}
                 </Typography.Text>
-              </div>
-              <div>
-                <PushpinTwoTone />{" "}
-                <Typography.Text strong>Online</Typography.Text>
               </div>
               <div>
                 <TagsTwoTone />{" "}
@@ -156,12 +153,11 @@ function DetailWebinarNew({
                 </Typography.Text>
               </div>
               <div>
-                <TagTwoTone />
-                <Typography.Text strong> {data?.hour} JP</Typography.Text>{" "}
-              </div>
-              <div>
-                <FolderTwoTone />{" "}
-                <Typography.Text strong>Materi & Sertifikat</Typography.Text>
+                <CarryOutTwoTone />
+                <Typography.Text strong>
+                  {" "}
+                  {data?.hour} Jam Pelajaran
+                </Typography.Text>{" "}
               </div>
               <div>
                 <Tag color={data?.my_webinar ? "green" : "red"}>

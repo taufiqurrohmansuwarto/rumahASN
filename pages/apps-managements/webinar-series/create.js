@@ -50,8 +50,8 @@ const FormWebinarSeries = () => {
 
     const data = {
       ...rest,
-      start_date: moment(start_date).format(format),
-      end_date: moment(end_date).format(format),
+      start_date: moment(start_date).format("YYYY-MM-DD"),
+      end_date: moment(end_date).format("YYYY-MM-DD"),
     };
 
     create(data);

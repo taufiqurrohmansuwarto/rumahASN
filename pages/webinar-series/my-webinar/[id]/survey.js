@@ -107,6 +107,8 @@ const FormKuisionerWebinar = ({ data }) => {
 const MyWebinarSurvey = () => {
   const router = useRouter();
 
+  const handleBack = () => router?.back();
+
   const { data, isLoading } = useQuery(
     ["webinar-surveys", router?.query?.id],
     () => readAllSurveyUser(router?.query?.id),
@@ -119,6 +121,7 @@ const MyWebinarSurvey = () => {
         <title>Rumah ASN - Webinar Series - Survey</title>
       </Head>
       <PageContainer
+        onBack={handleBack}
         loading={isLoading}
         title="Webinar Series"
         content="Survey"

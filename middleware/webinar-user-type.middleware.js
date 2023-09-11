@@ -1,4 +1,6 @@
 const WebinarSeries = require("@/models/webinar-series.model");
+const WebinarParticipates = require("@/models/webinar-series-participates.model");
+
 const { typeGroup } = require("@/utils/index");
 
 // untuk melakukan pengecekan setiap kali ada request ke endpoint webinar dengan cara mengecek apakah user yang melakukan request memiliki group yang sama dengan group webinar yang diakses
@@ -11,8 +13,16 @@ module.exports = async (req, res, next) => {
     const currentGroup = typeGroup(group);
 
     const { id } = req?.query;
-    const webinar = await WebinarSeries.where("id", id)
-      .andWhere("type", "ilike", `%${currentGroup}%`)
+
+    const currentWebinarParticipate = await WebinarParticipates.query()
+      .where("user_id", user?.id)
+      .andWhere("id", id)
+      .first();
+
+    const webinar = await WebinarSeries.query()
+      .where("id", currentWebinarParticipate?.webinar_series_id)
+      // raw query untuk mencari webinar yang memiliki group yang sama dengan group user yang melakukan request
+      .andWhereRaw(`type_participant::text LIKE '%${currentGroup}%'`)
       .first();
 
     if (!webinar) {
@@ -22,7 +32,6 @@ module.exports = async (req, res, next) => {
       next();
     }
   } catch (e) {
-    console.log(e);
     res.status(500).json({ code: 500, message: "Internal Server Error" });
   }
 };

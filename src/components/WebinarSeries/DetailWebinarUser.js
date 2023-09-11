@@ -1,7 +1,12 @@
-import { createRating } from "@/services/webinar.services";
-import { formatDateSimple } from "@/utils/client-utils";
 import {
+  createRating,
+  unregisterUserWebinar,
+} from "@/services/webinar.services";
+import { formatDateSimple, formatDateWebinar } from "@/utils/client-utils";
+import {
+  CarryOutTwoTone,
   ClockCircleTwoTone,
+  CloseOutlined,
   FolderOpenOutlined,
   PushpinTwoTone,
   TagTwoTone,
@@ -109,14 +114,16 @@ const Tombol = ({
 
   if (data?.is_allow_download_certificate && alreadyPoll) {
     return (
-      <Button
-        type="primary"
-        block
-        onClick={downloadCertificate}
-        loading={loadingDownloadCertificate}
-      >
-        Unduh Sertifikat
-      </Button>
+      <>
+        <Button
+          type="primary"
+          block
+          onClick={downloadCertificate}
+          loading={loadingDownloadCertificate}
+        >
+          Unduh Sertifikat
+        </Button>
+      </>
     );
   }
 };
@@ -127,9 +134,34 @@ function DetailWebinarNew({
   loadingDownloadCertificate,
   alreadyPoll,
 }) {
+  const router = useRouter();
+
   const [open, setOpen] = useState(false);
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
+
+  const { mutateAsync: unregister, isLoading: isLoadingUnregister } =
+    useMutation((data) => unregisterUserWebinar(data), {
+      onSuccess: () => {
+        message.success("Berhasil membatalkan registrasi");
+        router.push("/webinar-series/my-webinar");
+      },
+      onError: () => {
+        message.error("Gagal membatalkan registrasi");
+      },
+    });
+
+  const handleUnregister = () => {
+    Modal.confirm({
+      centered: true,
+      title: "Batalkan Registrasi",
+      content: "Apakah anda yakin ingin membatalkan registrasi webinar ini?",
+      okText: "Ya",
+      onOk: async () => {
+        await unregister(router?.query?.id);
+      },
+    });
+  };
 
   return (
     <>
@@ -157,13 +189,9 @@ function DetailWebinarNew({
               <div>
                 <ClockCircleTwoTone />{" "}
                 <Typography.Text strong>
-                  {formatDateSimple(data?.start_date)} -{" "}
-                  {formatDateSimple(data?.end_date)}
+                  {formatDateWebinar(data?.start_date)} -{" "}
+                  {formatDateWebinar(data?.end_date)}
                 </Typography.Text>
-              </div>
-              <div>
-                <PushpinTwoTone />{" "}
-                <Typography.Text strong>Online</Typography.Text>
               </div>
               <div>
                 <TagsTwoTone />{" "}
@@ -172,8 +200,11 @@ function DetailWebinarNew({
                 </Typography.Text>
               </div>
               <div>
-                <TagTwoTone />
-                <Typography.Text strong> {data?.hour} JP</Typography.Text>{" "}
+                <CarryOutTwoTone />
+                <Typography.Text strong>
+                  {" "}
+                  {data?.hour} Jam Pelajaran
+                </Typography.Text>{" "}
               </div>
               {data?.already_rating ? (
                 <Rate disabled defaultValue={data?.my_rating} />
@@ -219,17 +250,18 @@ function DetailWebinarNew({
                   </Typography.Text>
                 </div>
               )}
-              <div>
-                <Tag
-                  color={data?.is_allow_download_certificate ? "green" : "red"}
-                >
-                  {data?.is_allow_download_certificate
-                    ? "Dapat mengunduh sertifikat"
-                    : "Sertifikat Belum bisa diunduh"}
-                </Tag>
-              </div>
             </Stack>
-            <Divider />
+            <Button
+              block
+              style={{
+                marginBottom: 10,
+              }}
+              danger
+              icon={<CloseOutlined />}
+              onClick={handleUnregister}
+            >
+              Batal Registrasi
+            </Button>
             <Tombol
               downloadCertificate={downloadCertificate}
               loadingDownloadCertificate={loadingDownloadCertificate}

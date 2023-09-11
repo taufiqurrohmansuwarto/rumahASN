@@ -1,8 +1,33 @@
 import PageContainer from "@/components/PageContainer";
-import { Breadcrumb } from "antd";
+import Watermark from "@/components/WaterMark";
+import { webinarUserDetail } from "@/services/webinar.services";
+import { useQuery } from "@tanstack/react-query";
+import { Breadcrumb, Skeleton, Space, Tag, Typography } from "antd";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import Watermark from "@/components/WaterMark";
+
+const WebinarUserTitle = ({ data }) => {
+  return (
+    <Space>
+      <Typography.Text>{data?.title}</Typography.Text>
+    </Space>
+  );
+};
+
+const WebinarUserContent = ({ data }) => {
+  return (
+    <Space>
+      <Tag color={data?.is_open ? "green" : "red"}>
+        {data?.is_open ? "Pendaftaran dibuka" : "Pendaftaran ditutup"}
+      </Tag>
+      <Tag color={data?.is_allow_download_certificate ? "green" : "red"}>
+        {data?.is_open
+          ? "Sertifikat dapat diunduh"
+          : "Sertifikat belum siap unduh"}
+      </Tag>
+    </Space>
+  );
+};
 
 function WebinarUserDetailLayout({
   children,
@@ -14,9 +39,18 @@ function WebinarUserDetailLayout({
   const router = useRouter();
   const { id } = router.query;
 
+  const handleBack = () => router.push(`/webinar-series/my-webinar`);
+
+  const { data, isLoading } = useQuery(
+    ["webinar-user-detail", id],
+    () => webinarUserDetail(id),
+    {}
+  );
+
   return (
     <PageContainer
       loading={loading}
+      onBack={handleBack}
       header={{
         breadcrumbRender: () => (
           <Breadcrumb>
@@ -39,8 +73,8 @@ function WebinarUserDetailLayout({
           </Breadcrumb>
         ),
       }}
-      title={title}
-      content={content}
+      title={<WebinarUserTitle data={data?.result?.webinar_series} />}
+      content={<WebinarUserContent data={data?.result?.webinar_series} />}
       tabList={[
         {
           tab: "Detail Webinar",
@@ -63,7 +97,9 @@ function WebinarUserDetailLayout({
         },
       }}
     >
-      <Watermark content="Demo">{children}</Watermark>
+      <Watermark content="Demo">
+        <Skeleton loading={isLoading}>{children}</Skeleton>
+      </Watermark>
     </PageContainer>
   );
 }
