@@ -1,11 +1,11 @@
 import Layout from "@/components/Layout";
 import WebinarUserLayout from "@/components/WebinarSeries/WebinarUserLayout";
 import { webinarUser } from "@/services/webinar.services";
-import { formatDateFull } from "@/utils/client-utils";
+import { formatDateWebinar } from "@/utils/client-utils";
 import {
   CalendarTwoTone,
-  CheckCircleTwoTone,
   ClockCircleOutlined,
+  ClockCircleTwoTone,
   SearchOutlined,
 } from "@ant-design/icons";
 import { Stack } from "@mantine/core";
@@ -162,7 +162,7 @@ function MyWebinar() {
                     description={
                       <Stack>
                         <Tooltip
-                          title={item?.webinar_series?.description}
+                          title={item?.webinar_series?.title}
                           placement="bottomLeft"
                         >
                           <Typography.Text type="secondary">
@@ -171,15 +171,13 @@ function MyWebinar() {
                         </Tooltip>
                         <Typography.Text type="secondary">
                           <CalendarTwoTone color="green" />{" "}
-                          {formatDateFull(item?.webinar_series?.start_date)} -{" "}
-                          {formatDateFull(item?.webinar_series?.end_date)}
+                          {formatDateWebinar(item?.webinar_series?.start_date)}{" "}
+                          - {formatDateWebinar(item?.webinar_series?.end_date)}
                           <Divider type="vertical" />
-                          <CheckCircleTwoTone /> Materi & Sertifikat
-                          <Divider type="vertical" />
-                          <ClockCircleOutlined /> {
+                          <ClockCircleTwoTone /> {
                             item?.webinar_series?.hour
                           }{" "}
-                          JP
+                          Jam Pelajaran
                         </Typography.Text>
                       </Stack>
                     }

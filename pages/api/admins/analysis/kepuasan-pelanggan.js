@@ -1,10 +1,10 @@
 import { customersSatistactions } from "@/controller/analysis.controller";
+import adminMiddleware from "@/middleware/admin.middleware";
 import auth from "@/middleware/auth.middleware";
-import checkRole from "@/middleware/role.middleware";
 import { createRouter } from "next-connect";
 
 const router = createRouter();
 
-router.use(auth, checkRole("admin")).get(customersSatistactions);
+router.use(auth).use(adminMiddleware).get(customersSatistactions);
 
 export default router.handler({});

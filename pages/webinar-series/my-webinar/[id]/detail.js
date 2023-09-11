@@ -6,7 +6,7 @@ import {
   webinarUserDetail,
 } from "@/services/webinar.services";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { message, Modal, Form, Rate } from "antd";
+import { message } from "antd";
 import Head from "next/head";
 import { useRouter } from "next/router";
 import { useState } from "react";
