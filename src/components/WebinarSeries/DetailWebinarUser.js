@@ -7,6 +7,7 @@ import {
   CarryOutTwoTone,
   ClockCircleTwoTone,
   CloseOutlined,
+  DownloadOutlined,
   FolderOpenOutlined,
   PushpinTwoTone,
   TagTwoTone,
@@ -116,6 +117,7 @@ const Tombol = ({
     return (
       <>
         <Button
+          icon={<DownloadOutlined />}
           type="primary"
           block
           onClick={downloadCertificate}

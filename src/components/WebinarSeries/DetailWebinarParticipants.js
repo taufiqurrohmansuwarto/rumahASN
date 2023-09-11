@@ -4,11 +4,12 @@ import {
 } from "@/services/webinar.services";
 import { CloudDownloadOutlined } from "@ant-design/icons";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { Avatar, Button, Card, Space, Table, message } from "antd";
+import { Avatar, Button, Card, Space, Table, Tag, message } from "antd";
 import { useRouter } from "next/router";
 import { useState } from "react";
 import { Bar } from "@ant-design/plots";
 import { Stack } from "@mantine/core";
+import { formatDateLL, formatDateSimple } from "@/utils/client-utils";
 
 const AggregasiJabatan = ({ data }) => {
   const config = {
@@ -102,14 +103,23 @@ function DetailWebinarParticipants() {
       title: "Nama",
       key: "name",
       render: (text) => (
-        <Space>
-          <Avatar src={text?.participant?.image} />
-          <span>{text?.participant?.username}</span>
-        </Space>
+        <Stack>
+          <Space>
+            <Avatar size="small" src={text?.participant?.image} />
+            <span>{text?.participant?.username}</span>
+          </Space>
+        </Stack>
       ),
     },
     {
-      title: "NIP/NIPTTK",
+      title: "Group",
+      key: "group",
+      render: (text) => {
+        return <Tag color="green">{text?.participant?.group}</Tag>;
+      },
+    },
+    {
+      title: "Nomer Pegawai",
       key: "employee_number",
       render: (text) => <span>{text?.participant?.employee_number}</span>,
     },
@@ -126,6 +136,11 @@ function DetailWebinarParticipants() {
       render: (text) => (
         <span>{text?.participant?.info?.perangkat_daerah?.detail}</span>
       ),
+    },
+    {
+      title: "Tgl. Pendaftaran",
+      key: "created_at",
+      render: (text) => <span>{formatDateSimple(text?.created_at)}</span>,
     },
   ];
 
