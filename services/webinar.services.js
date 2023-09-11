@@ -174,6 +174,10 @@ export const commentUserDelete = ({ id, commentId }) => {
     .then((res) => res?.data);
 };
 
+export const unregisterUserWebinar = (id) => {
+  return api.delete(`/users/${id}/registers`).then((res) => res?.data);
+};
+
 // report
 export const downloadParticipants = (id) => {
   return api

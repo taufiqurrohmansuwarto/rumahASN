@@ -433,6 +433,45 @@ const detailWebinarUser = async (req, res) => {
   }
 };
 
+const unregisterUserWebinar = async (req, res) => {
+  try {
+    const { customId } = req.user;
+    const { id } = req.query;
+
+    const currentParticipates = await WebinarSeriesParticipates.query()
+      .where("id", id)
+      .andWhere("user_id", customId)
+      .first();
+
+    if (!currentParticipates) {
+      res.status(400).json({ code: 400, message: "You are not registered" });
+    } else {
+      await WebinarSeriesParticipates.query()
+        .delete()
+        .where("user_id", customId)
+        .andWhere("id", id);
+
+      await WebinarSeriesSurveys.query()
+        .delete()
+        .where("user_id", customId)
+        .andWhere("webinar_series_id", currentParticipates?.webinar_series_id);
+
+      await WebinarSeriesRatings.query()
+        .delete()
+        .where("user_id", customId)
+        .andWhere("webinar_series_id", currentParticipates?.webinar_series_id);
+
+      res.json({
+        message: "Berhasil membatalkan pendaftaran",
+        code: 200,
+      });
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
 const registerWebinar = async (req, res) => {
   try {
     const { customId } = req.user;
@@ -482,6 +521,11 @@ const unregisterWebinar = async (req, res) => {
       .andWhere("webinar_series_id", id);
 
     await WebinarSeriesSurveys.query()
+      .delete()
+      .where("user_id", customId)
+      .andWhere("webinar_series_id", id);
+
+    await WebinarSeriesRatings.query()
       .delete()
       .where("user_id", customId)
       .andWhere("webinar_series_id", id);
@@ -682,6 +726,8 @@ module.exports = {
   detailWebinarUser,
   registerWebinar,
   unregisterWebinar,
+
+  unregisterUserWebinar,
 
   listParticipants,
 };
