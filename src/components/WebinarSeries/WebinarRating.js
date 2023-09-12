@@ -11,16 +11,26 @@ const DaftarUserRating = ({ data }) => {
         renderItem={(item) => (
           <List.Item>
             <Grid>
-              <Grid.Col md={4} xs={12}>
+              <Grid.Col md={8} xs={12}>
                 <Stack>
                   <Rating value={item?.rating} readOnly />
                   <Typography.Text strong>
                     {item?.participant?.username}
                   </Typography.Text>
-                  <Typography.Text type="secondary">
+                  <Typography.Text
+                    type="secondary"
+                    style={{
+                      fontSize: 11,
+                    }}
+                  >
                     {item?.participant?.info?.jabatan?.jabatan}
                   </Typography.Text>
-                  <Typography.Text type="secondary">
+                  <Typography.Text
+                    type="secondary"
+                    style={{
+                      fontSize: 11,
+                    }}
+                  >
                     {item?.participant?.info?.perangkat_daerah?.detail}
                   </Typography.Text>
                   <Typography.Text type="secondary">
@@ -28,7 +38,7 @@ const DaftarUserRating = ({ data }) => {
                   </Typography.Text>
                 </Stack>
               </Grid.Col>
-              <Grid.Col md={8} xs={12}>
+              <Grid.Col md={4} xs={12}>
                 <Typography.Text srong>{item?.comments}</Typography.Text>
               </Grid.Col>
             </Grid>
