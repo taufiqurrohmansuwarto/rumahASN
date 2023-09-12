@@ -9,28 +9,30 @@ const DaftarUserRating = ({ data }) => {
         dataSource={data}
         rowKey={(row) => row?.id}
         renderItem={(item) => (
-          <Grid>
-            <Grid.Col md={4} xs={12}>
-              <Stack>
-                <Rating value={item?.rating} readOnly />
-                <Typography.Text strong>
-                  {item?.participant?.username}
-                </Typography.Text>
-                <Typography.Text type="secondary">
-                  {item?.participant?.info?.jabatan?.jabatan}
-                </Typography.Text>
-                <Typography.Text type="secondary">
-                  {item?.participant?.info?.perangkat_daerah?.detail}
-                </Typography.Text>
-                <Typography.Text type="secondary">
-                  {formatDateSimple(item?.created_at)}
-                </Typography.Text>
-              </Stack>
-            </Grid.Col>
-            <Grid.Col md={8} xs={12}>
-              <Typography.Text srong>{item?.comments}</Typography.Text>
-            </Grid.Col>
-          </Grid>
+          <List.Item>
+            <Grid>
+              <Grid.Col md={4} xs={12}>
+                <Stack>
+                  <Rating value={item?.rating} readOnly />
+                  <Typography.Text strong>
+                    {item?.participant?.username}
+                  </Typography.Text>
+                  <Typography.Text type="secondary">
+                    {item?.participant?.info?.jabatan?.jabatan}
+                  </Typography.Text>
+                  <Typography.Text type="secondary">
+                    {item?.participant?.info?.perangkat_daerah?.detail}
+                  </Typography.Text>
+                  <Typography.Text type="secondary">
+                    {formatDateSimple(item?.created_at)}
+                  </Typography.Text>
+                </Stack>
+              </Grid.Col>
+              <Grid.Col md={8} xs={12}>
+                <Typography.Text srong>{item?.comments}</Typography.Text>
+              </Grid.Col>
+            </Grid>
+          </List.Item>
         )}
       />
     </>

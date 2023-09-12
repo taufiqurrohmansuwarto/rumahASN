@@ -96,14 +96,15 @@ const listParticipants = async (req, res) => {
   try {
     const { id } = req?.query;
 
-    const limit = req.query.limit || 25;
+    const limit = req.query.limit || 10;
     const page = req.query.page || 1;
     const search = req.query.search || "";
 
     const result = await WebinarSeriesParticipates.query()
       .where("webinar_series_id", id)
       .page(parseInt(page) - 1, parseInt(limit))
-      .withGraphFetched("[participant(fullSelect)]");
+      .withGraphFetched("[participant(fullSelect)]")
+      .orderBy("created_at", "desc");
 
     const aggregasiPerangkatDaerah = await User.query()
       .select(
