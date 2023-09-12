@@ -1,10 +1,11 @@
 import Layout from "@/components/Layout";
 import AdminLayoutDetailWebinar from "@/components/WebinarSeries/AdminLayoutDetailWebinar";
-import { reportSurvey } from "@/services/webinar.services";
+import { downloadSurvey, reportSurvey } from "@/services/webinar.services";
+import { DownloadOutlined } from "@ant-design/icons";
 import { Bar } from "@ant-design/plots";
 import { Stack } from "@mantine/core";
-import { useQuery } from "@tanstack/react-query";
-import { Card, Col, Row } from "antd";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { Button, Card, Col, Row, message } from "antd";
 import Head from "next/head";
 import { useRouter } from "next/router";
 import { useRef } from "react";
@@ -50,11 +51,37 @@ function Surveys() {
   const router = useRouter();
   const { id } = router.query;
 
+  const { mutateAsync: webinarSurveys, isLoading: isLoadingWebinarSurveys } =
+    useMutation((data) => downloadSurvey(data), {});
+
   const { data, isLoading } = useQuery(
     ["admin-survey", id],
     () => reportSurvey(id),
     {}
   );
+
+  const handleDownloadSurvey = async () => {
+    try {
+      const data = await webinarSurveys(id);
+
+      if (data) {
+        const blob = new Blob([data], {
+          type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+
+        link.href = url;
+        link.download = "file.xlsx";
+        link.click();
+
+        URL.revokeObjectURL(url);
+      }
+    } catch (error) {
+      console.log(error);
+      message.error("Gagal mengunduh data");
+    }
+  };
 
   return (
     <>
@@ -62,6 +89,17 @@ function Surveys() {
         <title>Rumah ASN - Webinar Series - Survey</title>
       </Head>
       <AdminLayoutDetailWebinar loading={isLoading} active="survey">
+        <Button
+          style={{
+            marginBottom: 16,
+          }}
+          onClick={handleDownloadSurvey}
+          loading={isLoadingWebinarSurveys}
+          type="primary"
+          icon={<DownloadOutlined />}
+        >
+          Unduh Data Survey
+        </Button>
         {data?.length && (
           <Stack>
             {data?.map((item) => (
