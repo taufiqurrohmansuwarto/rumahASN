@@ -94,6 +94,10 @@ export const createRating = ({ id, data }) => {
   return api.post(`/users/${id}/rating`, data).then((res) => res?.data);
 };
 
+export const getRatingForUser = (id) => {
+  return api.get(`/users/${id}/rating`).then((res) => res?.data);
+};
+
 // surveys admin
 export const createSurvey = (data) => {
   return api.post(`/admin/surveys`, data).then((res) => res?.data);
@@ -182,6 +186,14 @@ export const unregisterUserWebinar = (id) => {
 export const downloadParticipants = (id) => {
   return api
     .get(`/admin/${id}/participants/download`, {
+      responseType: "arraybuffer",
+    })
+    .then((res) => res?.data);
+};
+
+export const downloadSurvey = (id) => {
+  return api
+    .get(`/admin/${id}/surveys/download`, {
       responseType: "arraybuffer",
     })
     .then((res) => res?.data);

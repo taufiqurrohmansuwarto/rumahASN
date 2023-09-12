@@ -3,7 +3,7 @@ const WebinarSeriesSurveys = require("@/models/webinar-series-surveys.model");
 const WebinarSeriesSurveysQuestion = require("@/models/webinar-series-surveys-questions.model");
 
 const xlsx = require("xlsx");
-const { iteratee, times } = require("lodash");
+const { times } = require("lodash");
 
 const serializeDataReportParticipant = (data) => {
   if (!data?.length) {
@@ -94,7 +94,63 @@ const reportSurvey = async (req, res) => {
         "webinar_series_surveys.webinar_series_id"
       );
 
-    res.json(serializeWebinarSeriesSurveys(result));
+    const data = serializeWebinarSeriesSurveys(result);
+
+    res.json(data);
+  } catch (error) {
+    console.log(error);
+    res.status(400).json({ code: 400, message: "Internal Server Error" });
+  }
+};
+
+const downloadSurvey = async (req, res) => {
+  try {
+    const { id } = req?.query;
+
+    const result = await WebinarSeriesSurveysQuestion.query()
+      .select(
+        "webinar_series_surveys_questions.question",
+        WebinarSeriesSurveys.raw(
+          `SUM (case when webinar_series_surveys.value = 1 then 1 else 0 end)`
+        ).as("Sangat Tidak Puas"),
+        WebinarSeriesSurveys.raw(
+          `SUM (case when webinar_series_surveys.value = 2 then 1 else 0 end)`
+        ).as("Tidak Puas"),
+        WebinarSeriesSurveys.raw(
+          `SUM (case when webinar_series_surveys.value = 3 then 1 else 0 end)`
+        ).as("Cukup Puas"),
+        WebinarSeriesSurveys.raw(
+          `SUM (case when webinar_series_surveys.value = 4 then 1 else 0 end)`
+        ).as("Puas"),
+        WebinarSeriesSurveys.raw(
+          `SUM (case when webinar_series_surveys.value = 5 then 1 else 0 end)`
+        ).as("Sangat Puas"),
+        "webinar_series_surveys.webinar_series_id"
+      )
+      .joinRelated("webinar_series_surveys")
+      .where("webinar_series_surveys.webinar_series_id", id)
+      .andWhere("webinar_series_surveys_questions.type", "scale")
+      .groupBy(
+        "webinar_series_surveys_questions.question",
+        "webinar_series_surveys.webinar_series_id"
+      );
+
+    const wb = xlsx.utils.book_new();
+    const ws = xlsx.utils.json_to_sheet(result);
+
+    xlsx.utils.book_append_sheet(wb, ws, "Survey");
+
+    res.setHeader(
+      "Content-Type",
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    );
+
+    res.setHeader(
+      "Content-Disposition",
+      "attachment; filename=" + "survey.xlsx"
+    );
+
+    res.end(xlsx.write(wb, { type: "buffer", bookType: "xlsx" }));
   } catch (error) {
     console.log(error);
     res.status(400).json({ code: 400, message: "Internal Server Error" });
@@ -137,5 +193,6 @@ const downloadParticipants = async (req, res) => {
 
 module.exports = {
   downloadParticipants,
+  downloadSurvey,
   reportSurvey,
 };

@@ -86,6 +86,11 @@ function WebinarUserDetailLayout({
           key: "comments",
           href: "/comments",
         },
+        {
+          tab: "Rating",
+          key: "ratings",
+          href: "/ratings",
+        },
       ]}
       tabActiveKey={active}
       tabProps={{

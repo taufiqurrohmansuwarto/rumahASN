@@ -16,7 +16,7 @@ const AggregasiJabatan = ({ data }) => {
     data,
     xField: "value",
     yField: "title",
-    seriesField: "jabatan",
+    seriesField: "title",
     label: {
       position: "middle",
     },
@@ -35,7 +35,7 @@ const AggregasiPerangkatDaerah = ({ data }) => {
     data,
     xField: "value",
     yField: "title",
-    seriesField: "daerah",
+    seriesField: "title",
     label: {
       position: "middle",
     },

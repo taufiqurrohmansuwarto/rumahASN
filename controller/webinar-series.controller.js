@@ -1,6 +1,7 @@
 const WebinarSeries = require("@/models/webinar-series.model");
 const WebinarSeriesParticipates = require("@/models/webinar-series-participates.model");
 const WebinarSeriesSurveys = require("@/models/webinar-series-surveys.model");
+const WebinarSeriesComments = require("@/models/webinar-series-comments.model");
 
 const Users = require("@/models/users.model");
 
@@ -180,10 +181,36 @@ const detailWebinarAdmin = async (req, res) => {
         ]
       : [];
 
+    // total participants
+    const totalParticipants = await WebinarSeriesParticipates.query()
+      .where("webinar_series_id", id)
+      .count();
+
+    // total comments
+    const totalComments = await WebinarSeriesComments.query()
+      .where("webinar_series_id", id)
+      .count();
+
+    // average ratings
+    const averageRatings = await WebinarSeriesRatings.query()
+      .where("webinar_series_id", id)
+      .avg("rating");
+
+    const participants = totalParticipants[0]?.count || 0;
+    const comments = totalComments[0]?.count || 0;
+    const ratings = averageRatings[0]?.avg || 0;
+
+    const aggregate = {
+      participants,
+      comments,
+      ratings: parseInt(ratings) || 0,
+    };
+
     res.json({
       ...result,
       image: imageUrl,
       template: templateUrl,
+      ...aggregate,
     });
   } catch (error) {
     console.log(error);

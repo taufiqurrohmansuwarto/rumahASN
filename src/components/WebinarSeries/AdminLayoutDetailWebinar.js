@@ -1,10 +1,12 @@
 import PageContainer from "@/components/PageContainer";
 import { detailWebinar } from "@/services/webinar.services";
+import { formatDateWebinar } from "@/utils/client-utils";
 import { useQuery } from "@tanstack/react-query";
-import { Breadcrumb, Skeleton } from "antd";
+import { Breadcrumb, Skeleton, Tag } from "antd";
 import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
+import { AndroidOutlined } from "@ant-design/icons";
 
 function AdminLayoutDetailWebinar({
   children,
@@ -37,7 +39,12 @@ function AdminLayoutDetailWebinar({
         loading={isLoading}
         onBack={handleBack}
         title={data?.title}
-        content={data?.description}
+        content={
+          <>
+            {formatDateWebinar(data?.start_date)} -{" "}
+            {formatDateWebinar(data?.end_date)}{" "}
+          </>
+        }
         header={{
           breadcrumbRender: () => (
             <Breadcrumb>
@@ -67,7 +74,11 @@ function AdminLayoutDetailWebinar({
             href: `/apps-managements/webinar-series/${id}/edit`,
           },
           {
-            tab: "Peserta",
+            tab: (
+              <>
+                Peserta <Tag color="red">{data?.participants}</Tag>
+              </>
+            ),
             key: "participants",
             href: `/apps-managements/webinar-series/${id}/participants`,
           },
@@ -77,12 +88,20 @@ function AdminLayoutDetailWebinar({
             href: `/apps-managements/webinar-series/${id}/survey`,
           },
           {
-            tab: "Komentar",
+            tab: (
+              <>
+                Komentar <Tag color="red">{data?.comments}</Tag>
+              </>
+            ),
             key: "comments",
             href: `/apps-managements/webinar-series/${id}/comments`,
           },
           {
-            tab: "Rating",
+            tab: (
+              <>
+                Rating <Tag color="red">{data?.ratings}</Tag>
+              </>
+            ),
             key: "ratings",
             href: `/apps-managements/webinar-series/${id}/ratings`,
           },

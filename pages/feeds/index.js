@@ -6,6 +6,7 @@ import UserPolls from "@/components/Polls/UserPolls";
 import SelamatDatang from "@/components/SelamatDatang";
 import ShowRatings from "@/components/ShowRatings";
 import TicketsPublish from "@/components/Ticket/TicketsPublish";
+import CarouselBanner from "@/components/Utils/CarouselBanner";
 import { Grid, Stack } from "@mantine/core";
 import { Card } from "antd";
 import Head from "next/head";
@@ -43,17 +44,23 @@ function Feeds() {
       </Head>
       <ShowRatings />
       <Grid justify="start">
+        <Grid.Col md={12} sm={12}></Grid.Col>
         <Grid.Col md={8} sm={12}>
-          <Card>
+          <CarouselBanner />
+          <Card
+            style={{
+              marginTop: 14,
+            }}
+          >
             <Stack>
               {/* <AlertPemutakhiranData /> */}
               {/* <TutorialPeremajaanDataSIASN /> */}
               <SelamatDatang />
-              <PodcastAnnouncement
+              {/* <PodcastAnnouncement
                 image="https://siasn.bkd.jatimprov.go.id:9000/public/hijau-podcast.jpg"
                 title={`"Podcast Kepegawaian dari kami untuk kalian"`}
                 category="Podcast Rumah ASN"
-              />
+              /> */}
               {/* <PinnedTickets /> */}
               <TicketsPublish />
             </Stack>
@@ -67,9 +74,7 @@ function Feeds() {
               </Stack>
             </Grid.Col>
             <Grid.Col md={12} xs={12}>
-              <Stack>
-                <DaftarLayanan />
-              </Stack>
+              <DaftarLayanan />
             </Grid.Col>
             {/* <Grid.Col md={12} xs={12}>
               <VideoYoutube />
