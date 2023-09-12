@@ -1,6 +1,7 @@
 import { Carousel } from "@mantine/carousel";
 import { Image } from "@mantine/core";
 import { useRouter } from "next/router";
+
 function CarouselBanner() {
   const router = useRouter();
   return (
