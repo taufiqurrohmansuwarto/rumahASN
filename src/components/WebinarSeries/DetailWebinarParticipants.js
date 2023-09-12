@@ -2,14 +2,14 @@ import {
   downloadParticipants,
   getParticipants,
 } from "@/services/webinar.services";
+import { formatDateSimple } from "@/utils/client-utils";
 import { CloudDownloadOutlined } from "@ant-design/icons";
+import { Bar } from "@ant-design/plots";
+import { Stack } from "@mantine/core";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { Avatar, Button, Card, Space, Table, Tag, message } from "antd";
 import { useRouter } from "next/router";
 import { useState } from "react";
-import { Bar } from "@ant-design/plots";
-import { Stack } from "@mantine/core";
-import { formatDateLL, formatDateSimple } from "@/utils/client-utils";
 
 const AggregasiJabatan = ({ data }) => {
   const config = {
@@ -85,7 +85,7 @@ function DetailWebinarParticipants() {
     id,
     query: {
       page: 1,
-      limit: 25,
+      limit: 10,
     },
   });
 
@@ -148,7 +148,6 @@ function DetailWebinarParticipants() {
     <>
       <Card title="Daftar Peserta">
         <Table
-          size="small"
           columns={columns}
           title={() => (
             <Button
@@ -164,7 +163,8 @@ function DetailWebinarParticipants() {
           pagination={{
             pageSize: query?.query?.limit,
             current: query?.query?.page,
-            total: participants?.total,
+            total: participants?.result?.total,
+            showTotal: (total) => `Total ${total} peserta`,
             onChange: (page) => {
               setQuery({
                 ...query,
