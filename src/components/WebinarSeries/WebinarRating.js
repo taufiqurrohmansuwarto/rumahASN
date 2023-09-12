@@ -1,6 +1,6 @@
 import { formatDateSimple } from "@/utils/client-utils";
 import { Grid, Progress, Rating, Stack } from "@mantine/core";
-import { Card, Divider, List, Space, Typography } from "antd";
+import { Card, Divider, List, Space, Typography, Row, Col } from "antd";
 
 const DaftarUserRating = ({ data }) => {
   return (
@@ -10,8 +10,12 @@ const DaftarUserRating = ({ data }) => {
         rowKey={(row) => row?.id}
         renderItem={(item) => (
           <List.Item>
-            <Grid>
-              <Grid.Col md={8} xs={12}>
+            <Row
+              style={{
+                width: "100%",
+              }}
+            >
+              <Col md={12} xs={12}>
                 <Stack>
                   <Rating value={item?.rating} readOnly />
                   <Typography.Text strong>
@@ -37,11 +41,11 @@ const DaftarUserRating = ({ data }) => {
                     {formatDateSimple(item?.created_at)}
                   </Typography.Text>
                 </Stack>
-              </Grid.Col>
-              <Grid.Col md={4} xs={12}>
+              </Col>
+              <Col md={12} xs={12}>
                 <Typography.Text srong>{item?.comments}</Typography.Text>
-              </Grid.Col>
-            </Grid>
+              </Col>
+            </Row>
           </List.Item>
         )}
       />
