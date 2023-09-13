@@ -10,7 +10,7 @@ import {
   YoutubeOutlined,
   EditTwoTone,
 } from "@ant-design/icons";
-import { Stack } from "@mantine/core";
+import { Stack, TypographyStylesProvider } from "@mantine/core";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   Button,
@@ -96,14 +96,18 @@ function DetailWebinar({ data }) {
         }}
       >
         <Col md={16} xs={24}>
-          <Card
-            cover={<Image preview={false} src={data?.image_url} alt="image" />}
-          >
+          <Card>
             <Typography.Title level={4}>{data?.title}</Typography.Title>
             <Divider />
             <Stack>
               <WebinarStatus data={data} />
-              <Typography.Text level={4}>{data?.description}</Typography.Text>
+              <TypographyStylesProvider>
+                <div
+                  dangerouslySetInnerHTML={{
+                    __html: data?.description_markdown,
+                  }}
+                />
+              </TypographyStylesProvider>
             </Stack>
           </Card>
         </Col>

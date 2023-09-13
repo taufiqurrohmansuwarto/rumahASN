@@ -1,22 +1,18 @@
-import { formatDateSimple, formatDateWebinar } from "@/utils/client-utils";
+import { formatDateWebinar } from "@/utils/client-utils";
 import {
   CarryOutTwoTone,
   ClockCircleTwoTone,
   CloseOutlined,
-  FolderTwoTone,
-  PushpinTwoTone,
   SearchOutlined,
   SmileOutlined,
-  TagTwoTone,
   TagsTwoTone,
 } from "@ant-design/icons";
-import { Stack } from "@mantine/core";
+import { Stack, TypographyStylesProvider } from "@mantine/core";
 import {
   Button,
   Card,
   Col,
   Divider,
-  Image,
   Modal,
   Row,
   Space,
@@ -128,12 +124,16 @@ function DetailWebinarNew({
         }}
       >
         <Col md={16} xs={24}>
-          <Card
-            cover={<Image preview={false} src={data?.image_url} alt="image" />}
-          >
-            <Divider />
+          <Card>
             <Typography.Title level={4}>{data?.title}</Typography.Title>
-            <Typography.Text level={4}>{data?.description}</Typography.Text>
+            <Divider />
+            <TypographyStylesProvider>
+              <div
+                dangerouslySetInnerHTML={{
+                  __html: data?.description_markdown,
+                }}
+              />
+            </TypographyStylesProvider>
           </Card>
         </Col>
         <Col md={8} xs={24}>

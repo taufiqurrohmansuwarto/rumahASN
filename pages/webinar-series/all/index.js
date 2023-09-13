@@ -148,11 +148,7 @@ function WebinarAll() {
                   hoverable
                   onClick={() => handleClick(item?.id)}
                   cover={
-                    <Image
-                      preview={false}
-                      src="https://gw.alipayobjects.com/zos/rmsportal/JiqGstEfoWAOHiTxclqi.png"
-                      alt="images"
-                    />
+                    <Image preview={false} src={item?.image_url} alt="images" />
                   }
                   actions={[
                     <Button

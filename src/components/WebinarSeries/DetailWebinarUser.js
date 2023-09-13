@@ -2,20 +2,19 @@ import {
   createRating,
   unregisterUserWebinar,
 } from "@/services/webinar.services";
-import { formatDateSimple, formatDateWebinar } from "@/utils/client-utils";
+import { formatDateWebinar } from "@/utils/client-utils";
 import {
   CarryOutTwoTone,
   ClockCircleTwoTone,
   CloseOutlined,
   DownloadOutlined,
+  EditTwoTone,
   FolderOpenOutlined,
-  PushpinTwoTone,
-  TagTwoTone,
   TagsTwoTone,
   VideoCameraAddOutlined,
   YoutubeOutlined,
 } from "@ant-design/icons";
-import { Stack } from "@mantine/core";
+import { Stack, TypographyStylesProvider } from "@mantine/core";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   Button,
@@ -23,22 +22,27 @@ import {
   Col,
   Divider,
   Form,
-  Image,
   Input,
   Modal,
   Rate,
   Row,
-  Tag,
+  Space,
   Typography,
   message,
 } from "antd";
 import { useRouter } from "next/router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
-const ModalRating = ({ open, onCancel }) => {
+const ModalRating = ({ open, onCancel, initialValues }) => {
   const router = useRouter();
 
   const id = router?.query?.id;
+
+  useEffect(() => {
+    if (initialValues) {
+      form.setFieldsValue(initialValues);
+    }
+  }, [initialValues, form]);
 
   const [form] = Form.useForm();
   const queryClient = useQueryClient();
@@ -80,7 +84,12 @@ const ModalRating = ({ open, onCancel }) => {
         <Form.Item required name="rating" label="Rating">
           <Rate />
         </Form.Item>
-        <Form.Item name="comment" label="Komentar">
+        <Form.Item
+          extra="Yuk biasakan menambah komentar"
+          required
+          name="comment"
+          label="Komentar"
+        >
           <Input.TextArea />
         </Form.Item>
       </Form>
@@ -167,7 +176,14 @@ function DetailWebinarNew({
 
   return (
     <>
-      <ModalRating open={open} onCancel={handleClose} />
+      <ModalRating
+        open={open}
+        onCancel={handleClose}
+        initialValues={{
+          rating: data?.my_rating,
+          comment: data?.my_rating_comment,
+        }}
+      />
       <Row
         gutter={{
           xs: 16,
@@ -177,12 +193,16 @@ function DetailWebinarNew({
         }}
       >
         <Col md={16} xs={24}>
-          <Card
-            cover={<Image preview={false} src={data?.image_url} alt="image" />}
-          >
-            <Divider />
+          <Card>
             <Typography.Title level={4}>{data?.title}</Typography.Title>
-            <Typography.Text>{data?.description}</Typography.Text>
+            <Divider />
+            <TypographyStylesProvider>
+              <div
+                dangerouslySetInnerHTML={{
+                  __html: data?.description_markdown,
+                }}
+              />
+            </TypographyStylesProvider>
           </Card>
         </Col>
         <Col md={8} xs={24}>
@@ -209,7 +229,15 @@ function DetailWebinarNew({
                 </Typography.Text>{" "}
               </div>
               {data?.already_rating ? (
-                <Rate disabled defaultValue={data?.my_rating} />
+                <Space>
+                  <Rate disabled defaultValue={data?.my_rating} />
+                  <EditTwoTone
+                    style={{
+                      cursor: "pointer",
+                    }}
+                    onClick={handleOpen}
+                  />
+                </Space>
               ) : (
                 <Button onClick={handleOpen}>Beri Rating</Button>
               )}

@@ -140,7 +140,7 @@ function MyWebinar() {
                   cover={
                     <Image
                       preview={false}
-                      src="https://gw.alipayobjects.com/zos/rmsportal/JiqGstEfoWAOHiTxclqi.png"
+                      src={item?.webinar_series?.image_url}
                       alt="images"
                     />
                   }
