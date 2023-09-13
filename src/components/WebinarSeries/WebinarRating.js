@@ -1,5 +1,5 @@
 import { formatDateSimple } from "@/utils/client-utils";
-import { Grid, Progress, Rating, Stack } from "@mantine/core";
+import { Avatar, Grid, Progress, Rating, Stack } from "@mantine/core";
 import { Card, Divider, List, Space, Typography, Row, Col } from "antd";
 
 const DaftarUserRating = ({ data }) => {
@@ -16,8 +16,9 @@ const DaftarUserRating = ({ data }) => {
               }}
             >
               <Col md={12} xs={12}>
-                <Stack>
+                <Stack spacing="xs">
                   <Rating value={item?.rating} readOnly />
+                  <Avatar src={item?.participant?.image} size="sm" />
                   <Typography.Text strong>
                     {item?.participant?.username}
                   </Typography.Text>
