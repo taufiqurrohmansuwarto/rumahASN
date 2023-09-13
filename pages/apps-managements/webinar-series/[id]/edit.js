@@ -5,24 +5,26 @@ import {
   updateWebinar,
   uploadFileWebinar,
 } from "@/services/webinar.services";
+import { renderMarkdown, uploadFile } from "@/utils/client-utils";
 import { UploadOutlined } from "@ant-design/icons";
 import { Stack } from "@mantine/core";
+import { MarkdownEditor } from "@primer/react/drafts";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
-  Space,
   BackTop,
   Button,
   Card,
   Checkbox,
+  Col,
   DatePicker,
   Form,
   Input,
   InputNumber,
+  Row,
   Select,
+  Space,
   Upload,
   message,
-  Row,
-  Col,
 } from "antd";
 import moment from "moment";
 import Head from "next/head";
@@ -280,7 +282,21 @@ const FormEditWebinarSeries = ({ data }) => {
           name="description"
           label="Deskripsi"
         >
-          <Input.TextArea />
+          <MarkdownEditor
+            acceptedFileTypes={[
+              "image/*",
+              // word, excel, txt, pdf
+              ".doc",
+              ".docx",
+              ".xls",
+              ".xlsx",
+              ".txt",
+              ".pdf",
+            ]}
+            onRenderPreview={renderMarkdown}
+            onUploadFile={uploadFile}
+            mentionSuggestions={null}
+          />
         </Form.Item>
         <Form.Item name="certificate_number" label="Nomer Sertifikat">
           <Input />

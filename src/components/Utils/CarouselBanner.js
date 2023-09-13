@@ -1,11 +1,22 @@
 import { Carousel } from "@mantine/carousel";
-import { Image } from "@mantine/core";
+import { Box, Image } from "@mantine/core";
+import Autoplay from "embla-carousel-autoplay";
 import { useRouter } from "next/router";
+import { useRef } from "react";
 
 function CarouselBanner() {
   const router = useRouter();
+  const autoplay = useRef(
+    Autoplay({
+      delay: 1000,
+    })
+  );
+
   return (
     <Carousel
+      plugins={[autoplay.current]}
+      onMouseEnter={() => autoplay.current.stop}
+      onMouseLeave={() => autoplay.current.reset}
       mx="auto"
       withIndicators
       height="auto"
@@ -19,16 +30,12 @@ function CarouselBanner() {
         }}
         onClick={() => router.push("/webinar-series/all")}
       >
-        <div
-          style={{
-            height: "100%",
-          }}
-        >
+        <Box>
           <Image
             src={"https://siasn.bkd.jatimprov.go.id:9000/public/banner2.png"}
             alt="banner-sample.webp"
           />
-        </div>
+        </Box>
       </Carousel.Slide>
 
       <Carousel.Slide

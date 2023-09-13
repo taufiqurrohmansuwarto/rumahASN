@@ -1,6 +1,8 @@
 import Layout from "@/components/Layout";
 import PageContainer from "@/components/PageContainer";
 import { createWebinar } from "@/services/webinar.services";
+import { renderMarkdown, uploadFile } from "@/utils/client-utils";
+import { MarkdownEditor } from "@primer/react/drafts";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   Breadcrumb,
@@ -117,7 +119,21 @@ const FormWebinarSeries = () => {
         name="description"
         label="Deskripsi"
       >
-        <Input.TextArea />
+        <MarkdownEditor
+          acceptedFileTypes={[
+            "image/*",
+            // word, excel, txt, pdf
+            ".doc",
+            ".docx",
+            ".xls",
+            ".xlsx",
+            ".txt",
+            ".pdf",
+          ]}
+          onRenderPreview={renderMarkdown}
+          onUploadFile={uploadFile}
+          mentionSuggestions={null}
+        />
       </Form.Item>
       <Form.Item
         label="Jumlah Jam Pelajaran (JP)"

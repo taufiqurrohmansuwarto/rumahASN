@@ -15,6 +15,7 @@ const { wordToPdf } = require("@/utils/certificate-utils");
 
 const { toLower, orderBy } = require("lodash");
 const { createSignature } = require("@/utils/bsre-fetcher");
+const { parseMarkdown } = require("@/utils/parsing");
 
 const URL_FILE = "https://siasn.bkd.jatimprov.go.id:9000/public";
 
@@ -209,6 +210,7 @@ const detailWebinarAdmin = async (req, res) => {
 
     res.json({
       ...result,
+      description_markdown: parseMarkdown(result?.description),
       image: imageUrl,
       template: templateUrl,
       ...aggregate,
@@ -367,6 +369,7 @@ const detailAllWebinar = async (req, res) => {
 
     const data = {
       ...last,
+      description_markdown: parseMarkdown(last?.description),
       is_registered: isUserRegistered ? true : false,
       my_webinar: isUserRegistered?.id,
     };
@@ -446,9 +449,12 @@ const detailWebinarUser = async (req, res) => {
 
       res.json({
         result,
+        description_markdown: parseMarkdown(hasil?.description),
         webinar_series: {
           ...hasil,
+          description_markdown: parseMarkdown(hasil?.description),
           my_rating: currentWebinarSeriesRating?.rating,
+          my_rating_comment: currentWebinarSeriesRating?.comments,
           already_rating: currentWebinarSeriesRating ? true : false,
         },
       });
