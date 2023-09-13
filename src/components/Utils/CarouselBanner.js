@@ -8,7 +8,7 @@ function CarouselBanner() {
   const router = useRouter();
   const autoplay = useRef(
     Autoplay({
-      delay: 1000,
+      delay: 2500,
     })
   );
 
