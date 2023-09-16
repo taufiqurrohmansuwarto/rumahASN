@@ -135,7 +135,6 @@ function CompareAngkaKreditByNip({ nip }) {
   return (
     <Card loading={isLoading || isLoadingAngkaKredit}>
       <Stack>
-        <AlertAngkaKredit />
         <Table
           columns={columns}
           rowKey={(record) => record.id}

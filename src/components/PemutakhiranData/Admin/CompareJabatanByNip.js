@@ -388,7 +388,6 @@ function CompareJabatanByNip({ nip }) {
     <Card loading={isLoading} title="Komparasi Jabatan">
       <Stack>
         <FormEntri nip={nip} onCancel={handleClose} visible={visible} />
-        <AlertJabatan />
         <Table
           title={() => (
             <Button type="primary" onClick={handleOpen} icon={<PlusOutlined />}>

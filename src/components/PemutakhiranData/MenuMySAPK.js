@@ -1,6 +1,5 @@
 import { mysapkMenu } from "@/utils/client-utils";
 import {
-  Alert,
   Card,
   Group,
   SimpleGrid,
@@ -9,12 +8,12 @@ import {
   createStyles,
   rem,
 } from "@mantine/core";
-import { IconAlertCircle } from "@tabler/icons";
-import { Grid } from "antd";
+import { Avatar, Grid, Space, Typography } from "antd";
 import { useRouter } from "next/router";
 
 const mockdata = mysapkMenu;
 
+const toImage = (base64) => `data:image/jpeg;base64,${base64}`;
 const useStyles = createStyles((theme) => ({
   card: {
     backgroundColor:
@@ -47,7 +46,7 @@ const useStyles = createStyles((theme) => ({
   },
 }));
 
-export function MenuMySAPK() {
+export function MenuMySAPK({ dataUtama }) {
   const router = useRouter();
   const { useBreakpoint } = Grid;
   const screens = useBreakpoint();
@@ -82,18 +81,19 @@ export function MenuMySAPK() {
       className={classes.card}
     >
       <Group position="apart" mb={14}>
-        <Text className={classes.title}>Data SIASN-SIMASTER</Text>
+        <Card w={"100%"}>
+          <Space direction="vertical" size="small">
+            <Avatar size="large" src={toImage(dataUtama?.foto)} />
+            <Typography.Text strong>{dataUtama?.nama}</Typography.Text>
+            <Typography.Text type="secondary">
+              NIP {dataUtama?.nipBaru}
+            </Typography.Text>
+            <Typography.Text type="secondary">
+              {dataUtama?.instansiIndukNama}
+            </Typography.Text>
+          </Space>
+        </Card>
       </Group>
-      <Alert
-        mb={10}
-        color="red"
-        icon={<IconAlertCircle size="1rem" />}
-        title="Perhatian!"
-      >
-        Data yang bisa ditambah adalah Riwayat Jabatan, Riwayat Angka Kredit,
-        dan Kinerja 2022
-      </Alert>
-
       <SimpleGrid
         cols={screens.xl ? 4 : screens.lg ? 3 : screens.md ? 2 : 2}
         mt="md"

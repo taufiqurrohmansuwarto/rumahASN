@@ -13,16 +13,35 @@ const {
   riwayatKursus,
   postDataKursus,
 } = require("@/utils/siasn-utils");
+const {
+  proxyDownloadFoto,
+  proxyKeluargaDataOrtu,
+  proxyKeluargaAnak,
+  proxyKeluargaPasangan,
+} = require("@/utils/siasn-proxy.utils");
 
 const siasnEmployeesDetail = async (req, res) => {
   try {
     const user = req.user;
     const siasnRequest = req.siasnRequest;
+    const siansProxyFetcher = req?.fetcher;
 
     const nip = user?.employee_number;
     const { data } = await siasnRequest.get(`/pns/data-utama/${nip}`);
+    const { data: bufferPhotos } = await proxyDownloadFoto(
+      siansProxyFetcher,
+      nip
+    );
 
-    res.json(data?.data);
+    // buffer to base64
+    const foto = Buffer.from(bufferPhotos).toString("base64");
+
+    const currentResult = {
+      ...data?.data,
+      foto,
+    };
+
+    res.json(currentResult);
   } catch (error) {
     console.log(error);
     res.status(500).json({ code: 500, message: "Internal Server Error" });
@@ -539,6 +558,26 @@ const getRwGolongan = async (req, res) => {
   }
 };
 
+const getRwKeluarga = async (req, res) => {
+  try {
+    const { fetcher } = req;
+    const { employee_number: nip } = req?.user;
+
+    const { data: dataOrtu } = await proxyKeluargaDataOrtu(fetcher, nip);
+    const { data: dataAnak } = await proxyKeluargaAnak(fetcher, nip);
+    const { data: dataPasangan } = await proxyKeluargaPasangan(fetcher, nip);
+
+    res.json({
+      ortu: dataOrtu,
+      anak: dataAnak,
+      pasangan: dataPasangan,
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ code: 500, message: "Internal Server Error" });
+  }
+};
+
 const getRwMasaKerja = async (req, res) => {
   try {
     const { siasnRequest: request } = req;
@@ -664,6 +703,7 @@ module.exports = {
   getAngkaKredit,
   getRefJft,
   getRefJfu,
+  getRwKeluarga,
   siasnEmployeeDetailByNip,
   getSkp2022ByNip,
   getJabatanByNip,

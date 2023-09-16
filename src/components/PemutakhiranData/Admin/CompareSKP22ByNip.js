@@ -136,7 +136,6 @@ function CompareSKP22ByNip({ nip }) {
   return (
     <Card title="Komparasi SKP 2022" loading={isLoading || isLoadingMaster}>
       <Stack>
-        <AlertSKP22 />
         <Table
           pagination={false}
           columns={columns}

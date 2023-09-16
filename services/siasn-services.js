@@ -8,6 +8,10 @@ export const dataUtamaSIASN = () => {
   return api.get("/pns/data-utama").then((res) => res.data);
 };
 
+export const dataRiwayatKeluargaSIASN = () => {
+  return api.get("/pns/rw-keluarga").then((res) => res.data);
+};
+
 // data pendidikan
 export const dataPendidikan = () => {
   return api.get("/pns/rw-pendidikan").then((res) => res.data);
