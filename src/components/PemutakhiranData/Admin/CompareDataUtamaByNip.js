@@ -5,28 +5,8 @@ import { CloseOutlined } from "@ant-design/icons";
 import { Stack, Table } from "@mantine/core";
 import { IconAlertCircle, IconCircleCheck } from "@tabler/icons";
 import { useQuery } from "@tanstack/react-query";
-import { Alert, Card, Tooltip, Col, Row, Skeleton, Typography } from "antd";
+import { Card, Col, Row, Skeleton, Tooltip } from "antd";
 import CheckHasil from "../CheckHasil";
-
-const Pemberitahuan = () => {
-  return (
-    <Alert
-      showIcon
-      banner
-      type="info"
-      description={
-        <>
-          <Typography.Text>
-            Cek segera Data Nama, NIP, dan Tanggal Lahirmu. Apabila ada yang
-            berbeda silahkan lapor menggunakan tombol Tanya BKD diatas.
-            Penulisan gelar seperti S.Kom dengan S.Kom. dianggap sama tidak
-            perlu perbaikan #datamutanggungjawabmu
-          </Typography.Text>
-        </>
-      }
-    />
-  );
-};
 
 function CompareDataUtamaByNip({ nip }) {
   const { data, isLoading } = useQuery(["data-utama-siasn", nip], () =>
@@ -41,7 +21,6 @@ function CompareDataUtamaByNip({ nip }) {
   return (
     <div>
       <Stack>
-        <Pemberitahuan />
         <Skeleton loading={isLoading || isLoadingDataSimaster}>
           <Row
             gutter={[

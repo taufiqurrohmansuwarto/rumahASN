@@ -7,7 +7,7 @@ import CompareSKP22ByNip from "./CompareSKP22ByNip";
 
 function SiasnTab({ nip }) {
   return (
-    <Tabs defaultActiveKey="1">
+    <Tabs type="card" tabPosition="left" defaultActiveKey="1">
       <Tabs.TabPane tab="Data Utama" key="1">
         <CompareDataUtamaByNip nip={nip} />
       </Tabs.TabPane>

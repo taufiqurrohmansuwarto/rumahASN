@@ -1,6 +1,9 @@
 import Layout from "@/components/Layout";
 import PageContainer from "@/components/PageContainer";
+import CompareDataKeluarga from "@/components/PemutakhiranData/CompareDataKeluarga";
 import CustomSelectMenu from "@/components/PemutakhiranData/CustomSelectMenu";
+import { dataRiwayatKeluargaSIASN } from "@/services/siasn-services";
+import { useQuery } from "@tanstack/react-query";
 import { Breadcrumb, Card } from "antd";
 import Head from "next/head";
 import Link from "next/link";
@@ -8,6 +11,12 @@ import { useRouter } from "next/router";
 
 const RiwayatKeluarga = () => {
   const router = useRouter();
+
+  const { data, isLoading } = useQuery(
+    ["data-siasn-rw-keluarga"],
+    () => dataRiwayatKeluargaSIASN(),
+    {}
+  );
 
   const handleBack = () => router.push("/pemutakhiran-data/komparasi");
 
@@ -17,6 +26,7 @@ const RiwayatKeluarga = () => {
         <title>Rumah ASN - Peremajaan SIASN - Data Keluarga</title>
       </Head>
       <PageContainer
+        loading={isLoading}
         extra={[<CustomSelectMenu key="menu" />]}
         header={{
           breadcrumbRender: () => (
@@ -39,9 +49,7 @@ const RiwayatKeluarga = () => {
         title="Riwayat Keluarga"
         content="Komparasi Data Keluarga SIASN dan SIMASTER"
       >
-        <Card>
-          <div>Under Construction baby...</div>
-        </Card>
+        <CompareDataKeluarga data={data} />
       </PageContainer>
     </>
   );
