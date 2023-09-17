@@ -40,6 +40,31 @@ export const removeWebinar = (id) => {
   return api.delete(`/admin/${id}`).then((res) => res?.data);
 };
 
+// crud absence entries
+export const absenceEntries = (id) => {
+  return api.get(`/admin/${id}/absence-entries`).then((res) => res?.data);
+};
+
+export const createAbsenceEntries = ({ id, data }) => {
+  return api
+    .post(`/admin/${id}/absence-entries`, data)
+    .then((res) => res?.data);
+};
+
+export const updateAbsenceEntries = ({ id, absenceId, data }) => {
+  return api
+    .patch(`/admin/${id}/absence-entries/${absenceId}`, data)
+    .then((res) => res?.data);
+};
+
+export const deleteAbsenceEntries = ({ id, absenceId }) => {
+  return api
+    .delete(`/admin/${id}/absence-entries/${absenceId}`)
+    .then((res) => res?.data);
+};
+
+// end of crud absence entries
+
 // user
 export const readAllWebinarUser = (query) => {
   const queryStr = queryString.stringify(query);
@@ -54,8 +79,8 @@ export const detailWebinarUser = (id) => {
   return api.get(`/${id}`).then((res) => res?.data);
 };
 
-export const registerWebinar = (id) => {
-  return api.patch(`/all/${id}/participates`).then((res) => res?.data);
+export const registerWebinar = ({ id, data }) => {
+  return api.patch(`/all/${id}/participates`, data).then((res) => res?.data);
 };
 
 export const unregisterWebinar = (id) => {

@@ -73,6 +73,7 @@ function AdminLayoutDetailWebinar({
             key: "edit",
             href: `/apps-managements/webinar-series/${id}/edit`,
           },
+
           {
             tab: (
               <>
@@ -81,6 +82,11 @@ function AdminLayoutDetailWebinar({
             ),
             key: "participants",
             href: `/apps-managements/webinar-series/${id}/participants`,
+          },
+          {
+            tab: "Presensi",
+            key: "absences",
+            href: `/apps-managements/webinar-series/${id}/absences`,
           },
           {
             tab: "Kuisioner",

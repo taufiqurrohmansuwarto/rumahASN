@@ -13,7 +13,7 @@ const { uploadFileMinio, typeGroup } = require("@/utils/index");
 
 const { wordToPdf } = require("@/utils/certificate-utils");
 
-const { toLower, orderBy } = require("lodash");
+const { toLower, orderBy, isEmpty } = require("lodash");
 const { createSignature } = require("@/utils/bsre-fetcher");
 const { parseMarkdown } = require("@/utils/parsing");
 
@@ -480,6 +480,12 @@ const unregisterUserWebinar = async (req, res) => {
     if (!currentParticipates) {
       res.status(400).json({ code: 400, message: "You are not registered" });
     } else {
+      await User.query()
+        .patch({
+          info: null,
+        })
+        .where("custom_id", customId);
+
       await WebinarSeriesParticipates.query()
         .delete()
         .where("user_id", customId)
@@ -508,8 +514,9 @@ const unregisterUserWebinar = async (req, res) => {
 
 const registerWebinar = async (req, res) => {
   try {
-    const { customId } = req.user;
+    const { customId, group } = req.user;
     const { id } = req.query;
+    const body = req?.body || {};
 
     // check in webinar series table if status is published or current date is between open_registration and close_registration
     const currentWebinarSeries = await WebinarSeries.query()
@@ -523,6 +530,21 @@ const registerWebinar = async (req, res) => {
         .status(400)
         .json({ code: 400, message: "Webinar series is not ready" });
     } else {
+      let currentBody = {};
+      // if user group from google he must be fill information eg: nama, jabatan, perangkat daerah
+      if (group === "GOOGLE") {
+        currentBody = {
+          ...body,
+        };
+
+        // update user information group google
+        await Users.query()
+          .patch({
+            info: currentBody,
+          })
+          .where("custom_id", customId);
+      }
+
       const result = await WebinarSeriesParticipates.query()
         .insert({
           user_id: customId,
@@ -553,6 +575,12 @@ const unregisterWebinar = async (req, res) => {
       .delete()
       .where("user_id", customId)
       .andWhere("webinar_series_id", id);
+
+    await User.query()
+      .patch({
+        info: null,
+      })
+      .where("custom_id", customId);
 
     await WebinarSeriesSurveys.query()
       .delete()
@@ -764,6 +792,5 @@ module.exports = {
   unregisterWebinar,
 
   unregisterUserWebinar,
-
   listParticipants,
 };
