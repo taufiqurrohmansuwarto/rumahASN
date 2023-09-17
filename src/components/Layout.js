@@ -35,7 +35,7 @@ const changeRoutes = (user) => {
 
     const admin = (role === "admin" && bkd) || (role === "admin" && pttBkd);
     const agent = (role === "agent" && bkd) || (role === "agent" && pttBkd);
-    const userPns = user?.group === "MASTER";
+    const userPns = user?.group === "MASTER" && user?.role === "USER";
 
     const pegawaiPemda = user?.group === "MASTER" || user?.group === "PTTPK";
     const pegawaiBKD = bkd || pttBkd;
