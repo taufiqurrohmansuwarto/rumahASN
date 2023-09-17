@@ -218,8 +218,8 @@ export default NextAuth({
           username: profile.name,
           image: profile.picture,
           email: profile.email,
-          role: profile.role,
-          group: profile.group,
+          role: profile?.role,
+          group: profile?.group,
           employee_number: profile.employee_number || "",
           birthdate: profile.birthdate || null,
           email: profile.email || null,
@@ -362,8 +362,8 @@ export default NextAuth({
         token.expires = profile.exp;
         token.username = profile?.name;
         token.id = account?.providerAccountId;
-        token.role = profile?.role;
-        token.group = profile?.group;
+        token.role = profile?.role || user?.role;
+        token.group = profile?.group || user?.group;
         token.employee_number = profile?.employee_number;
         token.organization_id = profile?.organization_id;
         token.current_role = user?.current_role;

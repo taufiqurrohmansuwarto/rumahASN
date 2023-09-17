@@ -88,11 +88,6 @@ const WebinarSeries = () => {
       responsive: ["xs"],
     },
     {
-      title: "Series",
-      dataIndex: "episode",
-      responsive: ["sm"],
-    },
-    {
       title: "Judul",
       key: "title",
       render: (text) => {

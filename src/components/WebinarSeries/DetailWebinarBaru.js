@@ -13,13 +13,132 @@ import {
   Card,
   Col,
   Divider,
+  Form,
+  Input,
   Modal,
   Row,
   Space,
   Tag,
   Typography,
 } from "antd";
+import { trim } from "lodash";
+import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
+import { useState } from "react";
+
+const FormGoogleParticipants = ({
+  data,
+  register,
+  unregister,
+  registerLoading,
+  unregisterLoading,
+  open,
+  id,
+  onCancel,
+}) => {
+  const [form] = Form.useForm();
+
+  const handleFinish = async () => {
+    const value = await form.validateFields();
+    const payload = {
+      id,
+      data: {
+        jabatan: {
+          jabatan: trim(value.jabatan),
+        },
+        perangkat_daerah: {
+          detail: trim(value.perangkat_daerah),
+        },
+        username: trim(value.username),
+        employee_number: trim(value.employee_number),
+      },
+    };
+    register(payload);
+  };
+
+  return (
+    <Modal
+      centered
+      title="Registrasi Webinar"
+      onOk={handleFinish}
+      confirmLoading={registerLoading}
+      open={open}
+      width={600}
+      onCancel={onCancel}
+      destroyOnClose
+    >
+      <Form form={form} layout="vertical">
+        <Form.Item
+          rules={[
+            {
+              required: true,
+              message: "Nama lengkap harus diisi",
+            },
+          ]}
+          normalize={
+            // automatic capitalize
+            (value) => value?.toUpperCase()
+          }
+          label="Nama Lengkap"
+          extra="Nama lengkap sesuai dengan KTP dengan tambahan gelar"
+          name="username"
+          required
+        >
+          <Input />
+        </Form.Item>
+        <Form.Item
+          rules={[
+            {
+              required: true,
+              message: "Nomer Pegawai harus diisi",
+            },
+          ]}
+          extra="Jika kamu PNS gunakan NIP, atau gunakan Nomer Pegawai jika kamu bukan PNS"
+          label="Nomer Pegawai"
+          name="employee_number"
+          required
+        >
+          <Input />
+        </Form.Item>
+        <Form.Item
+          rules={[
+            {
+              required: true,
+              message: "Jabatan harus diisi",
+            },
+          ]}
+          normalize={
+            // automatic capitalize
+            (value) => value?.toUpperCase()
+          }
+          label="Jabatan"
+          name="jabatan"
+          required
+        >
+          <Input />
+        </Form.Item>
+        <Form.Item
+          rules={[
+            {
+              required: true,
+              message: "Instansi harus diisi",
+            },
+          ]}
+          normalize={
+            // automatic capitalize
+            (value) => value?.toUpperCase()
+          }
+          extra="Tulis secara detail Instansi anda dengan pemisah tanda hubung (-). Contoh : Pemerintah Provinsi Kalimantan Tengah - Biro Pemerintahan"
+          label="Instansi"
+          name="perangkat_daerah"
+          required
+        >
+          <Input />
+        </Form.Item>
+      </Form>
+    </Modal>
+  );
+};
 
 const Tombol = ({
   data,
@@ -28,17 +147,28 @@ const Tombol = ({
   registerLoading,
   unregisterLoading,
 }) => {
+  const { data: user, status } = useSession();
+
+  // modal
+  const [open, setOpen] = useState(false);
+  const handleOpen = () => setOpen(true);
+  const handleClose = () => setOpen(false);
+
   const router = useRouter();
   const id = router.query.id;
 
   const handleRegister = () => {
-    Modal.confirm({
-      title: "Registrasi Webinar",
-      content: "Apakah anda yakin ingin mendaftar webinar ini?",
-      okText: "Ya",
-      centered: true,
-      onOk: async () => await register(id),
-    });
+    if (user?.user?.group === "GOOGLE") {
+      handleOpen();
+    } else {
+      Modal.confirm({
+        title: "Registrasi Webinar",
+        content: "Apakah anda yakin ingin mendaftar webinar ini?",
+        okText: "Ya",
+        centered: true,
+        onOk: async () => await register({ id, data: {} }),
+      });
+    }
   };
 
   const handleDetail = () => {
@@ -52,7 +182,10 @@ const Tombol = ({
       content: "Apakah anda yakin ingin membatalkan registrasi webinar ini?",
       okText: "Ya",
       centered: true,
-      onOk: async () => await unregister(id),
+      onOk: async () => {
+        await unregister(id);
+        handleClose();
+      },
     });
   };
 
@@ -66,16 +199,28 @@ const Tombol = ({
 
   if (data?.is_open && !data?.my_webinar) {
     return (
-      <Button
-        loading={registerLoading}
-        disabled={registerLoading}
-        icon={<SmileOutlined />}
-        block
-        type="primary"
-        onClick={handleRegister}
-      >
-        Registrasi
-      </Button>
+      <>
+        <FormGoogleParticipants
+          id={id}
+          data={data}
+          onCancel={handleClose}
+          open={open}
+          register={register}
+          registerLoading={registerLoading}
+          unregister={unregister}
+          unregisterLoading={unregisterLoading}
+        />
+        <Button
+          loading={registerLoading}
+          disabled={registerLoading}
+          icon={<SmileOutlined />}
+          block
+          type="primary"
+          onClick={handleRegister}
+        >
+          Registrasi
+        </Button>
+      </>
     );
   }
 
