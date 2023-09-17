@@ -3,30 +3,40 @@ import PageContainer from "@/components/PageContainer";
 import SiasnTab from "@/components/PemutakhiranData/Admin/SiasnTab";
 import { dataUtamaMasterByNip } from "@/services/master.services";
 import { useQuery } from "@tanstack/react-query";
-import { Avatar, Breadcrumb, Card, Space, Tag, Typography } from "antd";
+import {
+  Avatar,
+  Breadcrumb,
+  Card,
+  Skeleton,
+  Space,
+  Tag,
+  Typography,
+} from "antd";
 import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
 
-const EmployeeBio = ({ data }) => {
+const EmployeeBio = ({ data, loading }) => {
   return (
-    <Card>
-      <Space direction="vertical">
-        <Avatar shape="square" src={data?.foto} />
-        <Tag color={data?.status === "Aktif" ? "green" : "red"}>
-          {data?.status === "Aktif" ? "Pegawai Aktif" : "Pegawai Non Aktif"}
-        </Tag>
-        <Typography.Text>
-          {data?.nama} - {data?.nip_baru}
-        </Typography.Text>
-        <Typography.Text>
-          {data?.jabatan?.jabatan} -{" "}
-          <Typography.Text type="secondary">
-            {data?.skpd?.detail}
+    <Skeleton loading={loading}>
+      <Card>
+        <Space direction="vertical">
+          <Avatar shape="square" src={data?.foto} />
+          <Tag color={data?.status === "Aktif" ? "green" : "red"}>
+            {data?.status === "Aktif" ? "Pegawai Aktif" : "Pegawai Non Aktif"}
+          </Tag>
+          <Typography.Text>
+            {data?.nama} - {data?.nip_baru}
           </Typography.Text>
-        </Typography.Text>
-      </Space>
-    </Card>
+          <Typography.Text>
+            {data?.jabatan?.jabatan} -{" "}
+            <Typography.Text type="secondary">
+              {data?.skpd?.detail}
+            </Typography.Text>
+          </Typography.Text>
+        </Space>
+      </Card>
+    </Skeleton>
   );
 };
 
@@ -49,7 +59,9 @@ const IntegrasiSIASNByNIP = () => {
         title="Data Integrasi SIASN"
         loading={isLoadingDataSimaster}
         subTitle={`Integrasi SIASN - SIMASTER ${nip}`}
-        content={<EmployeeBio data={dataSimaster} />}
+        content={
+          <EmployeeBio loading={isLoadingDataSimaster} data={dataSimaster} />
+        }
         header={{
           breadcrumbRender: () => (
             <Breadcrumb>

@@ -20,6 +20,11 @@ const userSecret = process.env.USER_SECRET;
 const userWellknown = process.env.USER_WELLKNOWN;
 const userScope = process.env.USER_SCOPE;
 
+const masterFasilitatorId = process.env.MASTER_FASILITATOR_ID;
+const masterFasilitatorSecret = process.env.MASTER_FASILITATOR_SECRET;
+const masterFasilitatorWellknown = process.env.MASTER_FASILITATOR_WELLKNOWN;
+const masterFasilitatorScope = process.env.MASTER_FASILITATOR_SCOPE;
+
 const googleClientId = process.env.GOOGLE_CLIENT_ID;
 const googleClientSecret = process.env.GOOGLE_CLIENT_SECRET;
 
@@ -75,16 +80,31 @@ const updateUser = async (id) => {
     const currentUser = await User.query().findById(id);
 
     const bkd = currentUser?.organization_id?.startsWith("123");
-    const role = currentUser?.current_role;
+    const role = currentUser?.role;
+    const currentRole = currentUser?.current_role;
     const group = currentUser?.group;
 
     const pttpkBkd = currentUser?.organization_id?.startsWith("134");
 
-    const isBKDEmployee = bkd && role === "user" && group === "MASTER";
-    const isBKDEmployeePttpk = pttpkBkd && role === "user" && group === "PTTPK";
+    const isBKDEmployee =
+      bkd && role === "USER" && group === "MASTER" && currentRole !== "admin";
+
+    const isBKDEmployeePttpk =
+      pttpkBkd &&
+      role === "USER" &&
+      group === "PTTPK" &&
+      currentRole !== "admin";
+
+    // fasilitator
+    const isFasilitatorBKD =
+      bkd && (role === "FASILITATOR" || role === "ADMIN") && group === "MASTER";
 
     if (isBKDEmployee || isBKDEmployeePttpk) {
       await User.query().findById(id).patch({ current_role: "agent" });
+      return User.query().findById(id);
+    }
+    if (isFasilitatorBKD) {
+      await User.query().findById(id).patch({ current_role: "admin" });
       return User.query().findById(id);
     } else {
       return currentUser;
@@ -107,7 +127,6 @@ const upsertUser = async (currentUser) => {
       email,
       birthdate,
       organization_id,
-      info,
     } = currentUser;
 
     const data = {
@@ -115,7 +134,7 @@ const upsertUser = async (currentUser) => {
       role,
       image,
       id: currentUserId || null,
-      info: info || null,
+      info: currentUser?.info || null,
       custom_id: currentUser?.id,
       username,
       employee_number,
@@ -252,6 +271,47 @@ export default NextAuth({
 
         const info = await getInformation("PTTPK", token?.access_token);
         const result = await upsertUser({ ...currentUser, info });
+
+        const data = { ...currentUser, current_role: result?.current_role };
+
+        const last = await updateUser(currentUser?.id);
+        const lastData = { ...data, ...last, id: last?.custom_id };
+        return lastData;
+      },
+    },
+    {
+      name: "SIMASTER FASILITATOR",
+      id: "helpdesk-fasilitator",
+      type: "oauth",
+      wellKnown: masterFasilitatorWellknown,
+      clientId: masterFasilitatorId,
+      clientSecret: masterFasilitatorSecret,
+      authorization: {
+        params: {
+          scope: masterFasilitatorScope,
+          prompt: "login",
+        },
+      },
+      httpOptions: {
+        timeout: 40000,
+      },
+      idToken: true,
+      checks: ["pkce", "state"],
+      profile: async (profile, token) => {
+        const currentUser = {
+          id: profile.sub,
+          username: profile.name,
+          image: profile.picture,
+          email: profile.email,
+          role: profile.role,
+          group: profile.group,
+          employee_number: profile.employee_number || "",
+          birthdate: profile.birthdate || null,
+          email: profile.email || null,
+          organization_id: profile.organization_id || null,
+        };
+
+        const result = await upsertUser({ ...currentUser });
 
         const data = { ...currentUser, current_role: result?.current_role };
 
