@@ -4,6 +4,7 @@ import CompareDataUtamaByNip from "./CompareDataUtamaByNip";
 import CompareJabatanByNip from "./CompareJabatanByNip";
 import ComparePendidikanByNip from "./ComparePendidikanByNip";
 import CompareSKP22ByNip from "./CompareSKP22ByNip";
+import ComparePangkatByNip from "./ComparePangkatByNip";
 
 function SiasnTab({ nip }) {
   return (
@@ -13,6 +14,9 @@ function SiasnTab({ nip }) {
       </Tabs.TabPane>
       <Tabs.TabPane tab="Jabatan" key="2">
         <CompareJabatanByNip nip={nip} />
+      </Tabs.TabPane>
+      <Tabs.TabPane tab="Pangkat" key="6">
+        <ComparePangkatByNip nip={nip} />
       </Tabs.TabPane>
       <Tabs.TabPane tab="Angka Kredit" key="3">
         <CompareAngkaKreditByNip nip={nip} />
