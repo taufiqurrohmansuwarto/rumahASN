@@ -21,6 +21,10 @@ export const dataPendidikanByNip = (nip) => {
   return api.get(`/admin/${nip}/rw-pendidikan`).then((res) => res.data);
 };
 
+export const dataPangkatByNip = (nip) => {
+  return api.get(`/admin/${nip}/rw-pangkat`).then((res) => res.data);
+};
+
 export const dataGolongan = () => {
   return api.get("/pns/rw-golongan").then((res) => res.data);
 };

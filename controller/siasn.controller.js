@@ -19,6 +19,7 @@ const {
   proxyKeluargaAnak,
   proxyKeluargaPasangan,
 } = require("@/utils/siasn-proxy.utils");
+const { getRwPangkat } = require("@/utils/master.utils");
 
 const siasnEmployeesDetail = async (req, res) => {
   try {
@@ -55,6 +56,29 @@ const siasnEmployeeDetailByNip = async (req, res) => {
 
     const { data } = await siasnRequest.get(`/pns/data-utama/${nip}`);
     res.json(data?.data);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ code: 500, message: "Internal Server Error" });
+  }
+};
+
+const siasnEmployeeDetailPangkat = async (req, res) => {
+  try {
+    const { nip } = req?.query;
+    const siasnRequest = req.siasnRequest;
+    const fetcher = req?.fetcher;
+
+    const { data: pangkat_siasn } = await riwayatGolonganPangkat(
+      siasnRequest,
+      nip
+    );
+
+    const { data: pangkat_simaster } = await getRwPangkat(fetcher, nip);
+
+    res.json({
+      pangkat_siasn: pangkat_siasn?.data,
+      pangkat_simaster,
+    });
   } catch (error) {
     console.log(error);
     res.status(500).json({ code: 500, message: "Internal Server Error" });
@@ -711,4 +735,7 @@ module.exports = {
   postAngkaKreditByNip,
   postRiwayatJabatanByNip,
   postSkp2022ByNip,
+
+  //
+  siasnEmployeeDetailPangkat,
 };
