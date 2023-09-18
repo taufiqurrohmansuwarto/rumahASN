@@ -114,7 +114,7 @@ function ComparePangkatByNip({ nip }) {
   );
 
   return (
-    <Card title="Komparasi Pangkat">
+    <Card title="Komparasi Pangkat" loading={isLoading}>
       <Stack>
         <PangkatSimaster data={data?.pangkat_simaster} />
         <PangkatSiasn data={data?.pangkat_siasn} />

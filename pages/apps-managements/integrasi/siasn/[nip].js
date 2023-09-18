@@ -7,6 +7,8 @@ import {
   Avatar,
   Breadcrumb,
   Card,
+  Col,
+  Row,
   Skeleton,
   Space,
   Tag,
@@ -18,25 +20,29 @@ import { useRouter } from "next/router";
 
 const EmployeeBio = ({ data, loading }) => {
   return (
-    <Skeleton loading={loading}>
-      <Card>
-        <Space direction="vertical">
-          <Avatar shape="square" src={data?.foto} />
-          <Tag color={data?.status === "Aktif" ? "green" : "red"}>
-            {data?.status === "Aktif" ? "Pegawai Aktif" : "Pegawai Non Aktif"}
-          </Tag>
-          <Typography.Text>
-            {data?.nama} - {data?.nip_baru}
-          </Typography.Text>
-          <Typography.Text>
-            {data?.jabatan?.jabatan} -{" "}
-            <Typography.Text type="secondary">
-              {data?.skpd?.detail}
+    <Card loading={loading}>
+      <Row>
+        <Col md={2}>
+          <Avatar size={90} shape="square" src={data?.foto} />
+        </Col>
+        <Col md={10}>
+          <Space direction="vertical">
+            <Tag color={data?.status === "Aktif" ? "green" : "red"}>
+              {data?.status === "Aktif" ? "Pegawai Aktif" : "Pegawai Non Aktif"}
+            </Tag>
+            <Typography.Text>
+              {data?.nama} - {data?.nip_baru}
             </Typography.Text>
-          </Typography.Text>
-        </Space>
-      </Card>
-    </Skeleton>
+            <Typography.Text>
+              {data?.jabatan?.jabatan} -{" "}
+              <Typography.Text type="secondary">
+                {data?.skpd?.detail}
+              </Typography.Text>
+            </Typography.Text>
+          </Space>
+        </Col>
+      </Row>
+    </Card>
   );
 };
 
@@ -80,7 +86,9 @@ const IntegrasiSIASNByNIP = () => {
           ),
         }}
       >
-        <SiasnTab nip={nip} />
+        <Card>
+          <SiasnTab nip={nip} />
+        </Card>
       </PageContainer>
     </>
   );
