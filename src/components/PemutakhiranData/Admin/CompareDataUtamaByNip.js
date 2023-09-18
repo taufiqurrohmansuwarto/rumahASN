@@ -29,7 +29,7 @@ function CompareDataUtamaByNip({ nip }) {
             ]}
           >
             <Col md={18}>
-              <Card>
+              <Card title="Komparasi Data Utama">
                 <Table>
                   <thead>
                     <tr>

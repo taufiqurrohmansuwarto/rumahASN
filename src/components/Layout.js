@@ -3,7 +3,6 @@ import {
   BarChartOutlined,
   BookOutlined,
   LogoutOutlined,
-  ReconciliationOutlined,
   SolutionOutlined,
   TeamOutlined,
   UserOutlined,
@@ -191,6 +190,7 @@ function Layout({ children, active, collapsed = true }) {
   const { data, status } = useSession();
   const router = useRouter();
   const [tutup, setTutup] = useState(collapsed);
+
   const breakPoint = Grid.useBreakpoint();
 
   const onCollapsed = () => {
@@ -353,7 +353,9 @@ function Layout({ children, active, collapsed = true }) {
         },
         defaultOpenAll: false,
       }}
-      collapsed={tutup}
+      collapsed={!tutup}
+      inlineCollapsed={!tutup}
+      defaultCollapsed={!tutup}
       onCollapse={onCollapsed}
       menuItemRender={menuItemRender}
       layout="mix"

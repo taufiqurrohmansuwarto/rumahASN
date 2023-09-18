@@ -2,7 +2,7 @@ import { rwPendidikanMasterByNip } from "@/services/master.services";
 import { dataPendidikanByNip } from "@/services/siasn-services";
 import { Stack } from "@mantine/core";
 import { useQuery } from "@tanstack/react-query";
-import { Table } from "antd";
+import { Card, Table } from "antd";
 
 const CompareDataPendidikanSIMASTER = ({ nip }) => {
   const { data, isLoading } = useQuery(
@@ -85,17 +85,19 @@ function ComparePendidikanByNip({ nip }) {
   ];
 
   return (
-    <Stack>
-      <Table
-        title={() => <b>RIWAYAT DATA PENDIDIKAN SIASN</b>}
-        pagination={false}
-        columns={columns}
-        dataSource={data}
-        loading={isLoading}
-        rowKey={(row) => row?.id}
-      />
-      <CompareDataPendidikanSIMASTER nip={nip} />
-    </Stack>
+    <Card title="Komparasi Pendidikan">
+      <Stack>
+        <Table
+          title={() => <b>RIWAYAT DATA PENDIDIKAN SIASN</b>}
+          pagination={false}
+          columns={columns}
+          dataSource={data}
+          loading={isLoading}
+          rowKey={(row) => row?.id}
+        />
+        <CompareDataPendidikanSIMASTER nip={nip} />
+      </Stack>
+    </Card>
   );
 }
 
