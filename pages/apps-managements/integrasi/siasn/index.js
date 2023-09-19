@@ -1,7 +1,8 @@
 import Layout from "@/components/Layout";
 import PageContainer from "@/components/PageContainer";
-import { Button, Card, Form, Input } from "antd";
+import { Breadcrumb, Button, Card, Form, Input } from "antd";
 import Head from "next/head";
+import Link from "next/link";
 import { useRouter } from "next/router";
 
 const IntegrasiSIASN = () => {
@@ -22,6 +23,23 @@ const IntegrasiSIASN = () => {
         title="Data Integrasi SIASN"
         subTitle="Integrasi SIASN - SIMASTER"
         onBack={() => router.back()}
+        header={{
+          breadcrumbRender: () => (
+            <Breadcrumb>
+              <Breadcrumb.Item>
+                <Link href="/feeds">
+                  <a>Beranda</a>
+                </Link>
+              </Breadcrumb.Item>
+              <Breadcrumb.Item>
+                <Link href="/apps-managements/logs/siasn">
+                  <a>Log SIASN</a>
+                </Link>
+              </Breadcrumb.Item>
+              <Breadcrumb.Item>Integrasi SIASN</Breadcrumb.Item>
+            </Breadcrumb>
+          ),
+        }}
       >
         <Card>
           <Form
