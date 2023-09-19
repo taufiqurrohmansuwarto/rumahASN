@@ -158,6 +158,20 @@ const changeRoutes = (user) => {
             { path: "/apps-managements/podcasts", name: "Podcast" },
             { path: "/apps-managements/announcements", name: "Pengumuman" },
             { path: "/apps-managements/discussions", name: "Diskusi" },
+            {
+              path: "/apps-managements/logs",
+              name: "Log",
+              routes: [
+                {
+                  path: "/apps-managements/logs/siasn",
+                  name: "SIASN",
+                },
+                {
+                  path: "/apps-managements/logs/bsre",
+                  name: "BsRE",
+                },
+              ],
+            },
           ],
         }
       );
