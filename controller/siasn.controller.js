@@ -12,6 +12,8 @@ const {
   riwayatDiklat,
   riwayatKursus,
   postDataKursus,
+  rwPemberhentian,
+  rwMasaKerja,
 } = require("@/utils/siasn-utils");
 const {
   proxyDownloadFoto,
@@ -56,6 +58,34 @@ const siasnEmployeeDetailByNip = async (req, res) => {
 
     const { data } = await siasnRequest.get(`/pns/data-utama/${nip}`);
     res.json(data?.data);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ code: 500, message: "Internal Server Error" });
+  }
+};
+
+const siasnRwPemberhentian = async (req, res) => {
+  try {
+    const { nip } = req?.query;
+    const siasnRequest = req.siasnRequest;
+
+    const result = await rwPemberhentian(siasnRequest, nip);
+
+    res.json(result?.data);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ code: 500, message: "Internal Server Error" });
+  }
+};
+
+const siasnRwMasaKerja = async (req, res) => {
+  try {
+    const { nip } = req?.query;
+    const siasnRequest = req.siasnRequest;
+
+    const result = await rwMasaKerja(siasnRequest, nip);
+
+    res.json(result?.data);
   } catch (error) {
     console.log(error);
     res.status(500).json({ code: 500, message: "Internal Server Error" });
@@ -738,4 +768,6 @@ module.exports = {
 
   //
   siasnEmployeeDetailPangkat,
+  siasnRwPemberhentian,
+  siasnRwMasaKerja,
 };
