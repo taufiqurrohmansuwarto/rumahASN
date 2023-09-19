@@ -54,3 +54,24 @@ module.exports.riwayatPencantumanGelar = (fetcher, nip) => {};
 module.exports.riwayatAngkaKredit = (fetcher, nip) => {};
 
 module.exports.riwayatLaporanKinerja = (fetcher, nip) => {};
+
+// tambahan dar webservices
+module.exports.rwCltn = (fetcher, nip) => {
+  return fetcher.get(`/pns/rw-ctln/${nip}`);
+};
+
+module.exports.rwDp3 = (fetcher, nip) => {
+  return fetcher.get(`/pns/rw-dp3/${nip}`);
+};
+
+module.exports.rwMasaKerja = (fetcher, nip) => {
+  return fetcher.get(`/pns/rw-masakerja/${nip}`);
+};
+
+module.exports.rwPemberhentian = (fetcher, nip) => {
+  return fetcher.get(`/pns/rw-pemberhentian/${nip}`);
+};
+
+module.exports.rwPindahInstansi = (fetcher, nip) => {
+  return fetcher.get(`/pns/rw-pindahinstansi/${nip}`);
+};

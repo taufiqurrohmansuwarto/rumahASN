@@ -25,8 +25,12 @@ export const dataPangkatByNip = (nip) => {
   return api.get(`/admin/${nip}/rw-pangkat`).then((res) => res.data);
 };
 
-export const dataGolongan = () => {
-  return api.get("/pns/rw-golongan").then((res) => res.data);
+export const dataRiwayatPemberhentian = (nip) => {
+  return api.get(`/admin/${nip}/rw-pemberhentian`).then((res) => res.data);
+};
+
+export const dataRiwayatMasaKerja = (nip) => {
+  return api.get(`/admin/${nip}/rw-masakerja`).then((res) => res.data);
 };
 
 export const dataMasaKerja = () => {

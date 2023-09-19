@@ -2,6 +2,8 @@ import PageContainer from "@/components/PageContainer";
 import { useRouter } from "next/router";
 
 import Watermark from "@/components/WaterMark";
+import { Breadcrumb } from "antd";
+import Link from "next/link";
 
 function WebinarUserLayout({
   children,
@@ -17,9 +19,21 @@ function WebinarUserLayout({
       loading={loading}
       title={title}
       content={content}
+      header={{
+        breadcrumbRender: () => (
+          <Breadcrumb>
+            <Breadcrumb.Item>
+              <Link href="/feeds">
+                <a>Beranda</a>
+              </Link>
+            </Breadcrumb.Item>
+            <Breadcrumb.Item>Webinar</Breadcrumb.Item>
+          </Breadcrumb>
+        ),
+      }}
       tabList={[
         {
-          tab: "Daftar Webinar",
+          tab: "Daftar Semua Webinar",
           key: "all",
           href: "/webinar-series/all",
         },

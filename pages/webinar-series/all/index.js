@@ -85,7 +85,7 @@ function WebinarAll() {
       <Head>
         <title>Rumah ASN - Semua Webinar</title>
       </Head>
-      <WebinarUserLayout title="Rumah ASN" content="Semua Webinar">
+      <WebinarUserLayout title="Rumah ASN" content="Daftar Webinar">
         <Card>
           <Row
             gutter={{
