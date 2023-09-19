@@ -1,9 +1,12 @@
 import Layout from "@/components/Layout";
 import { logSIASN } from "@/services/log.services";
 import { useQuery } from "@tanstack/react-query";
-import { Input, Table } from "antd";
+import { Breadcrumb, Input, Table } from "antd";
 import { useState } from "react";
 import moment from "moment";
+import Head from "next/head";
+import PageContainer from "@/components/PageContainer";
+import Link from "next/link";
 
 function LogSIASN() {
   const [query, setQuery] = useState({
@@ -33,7 +36,7 @@ function LogSIASN() {
       render: (text) => <>{text?.user?.username}</>,
     },
     {
-      title: "Type",
+      title: "Aksi",
       dataIndex: "type",
     },
     {
@@ -41,7 +44,7 @@ function LogSIASN() {
       dataIndex: "siasn_service",
     },
     {
-      title: "Employee Number",
+      title: "NIP",
       dataIndex: "employee_number",
     },
     {
@@ -54,42 +57,68 @@ function LogSIASN() {
   ];
 
   return (
-    <div>
-      <Table
-        title={() => (
-          <Input.Search
-            allowClear
-            onSearch={handleSearch}
-            placeholder="NIP"
-            style={{
-              width: 300,
-            }}
-          />
-        )}
-        pagination={{
-          position: ["bottomRight", "topRight"],
-          current: query?.page,
-          pageSize: query?.limit,
-          total: data?.total,
-          onChange: (page, limit) => {
-            setQuery({
-              ...query,
-              page,
-              limit,
-            });
-          },
+    <>
+      <Head>
+        <title>Log SIASN</title>
+      </Head>
+      <PageContainer
+        title="Log"
+        subTitle="Layanan SIASN"
+        header={{
+          breadcrumbRender: () => (
+            <Breadcrumb>
+              <Breadcrumb.Item>
+                <Link href="/feeds">
+                  <a>Beranda</a>
+                </Link>
+              </Breadcrumb.Item>
+              <Breadcrumb.Item>
+                <Link href="/apps-managements/integrasi/siasn">
+                  <a>Integrasi SIASN</a>
+                </Link>
+              </Breadcrumb.Item>
+              <Breadcrumb.Item>Log</Breadcrumb.Item>
+            </Breadcrumb>
+          ),
         }}
-        columns={columns}
-        loading={isLoading}
-        dataSource={data?.data}
-        rowKey={(row) => row?.id}
-      />
-    </div>
+      >
+        <Table
+          title={() => (
+            <Input.Search
+              allowClear
+              onSearch={handleSearch}
+              placeholder="NIP"
+              style={{
+                width: 300,
+              }}
+            />
+          )}
+          size="small"
+          pagination={{
+            position: ["bottomRight", "topRight"],
+            current: query?.page,
+            pageSize: query?.limit,
+            total: data?.total,
+            onChange: (page, limit) => {
+              setQuery({
+                ...query,
+                page,
+                limit,
+              });
+            },
+          }}
+          columns={columns}
+          loading={isLoading}
+          dataSource={data?.data}
+          rowKey={(row) => row?.id}
+        />
+      </PageContainer>
+    </>
   );
 }
 
 LogSIASN.getLayout = function getLayout(page) {
-  return <Layout active="/apps-managements/logs">{page}</Layout>;
+  return <Layout active="/apps-managements/logs/siasn">{page}</Layout>;
 };
 
 LogSIASN.Auth = {
