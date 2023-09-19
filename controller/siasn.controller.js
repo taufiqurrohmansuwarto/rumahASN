@@ -20,6 +20,7 @@ const {
   proxyKeluargaPasangan,
 } = require("@/utils/siasn-proxy.utils");
 const { getRwPangkat } = require("@/utils/master.utils");
+const { createLogSIASN } = require("@/utils/logs");
 
 const siasnEmployeesDetail = async (req, res) => {
   try {
@@ -192,6 +193,15 @@ const postSkp2022 = async (req, res) => {
     };
 
     const result = await siasnRequest.post("/skp22/save", data);
+
+    // create log
+    await createLogSIASN({
+      userId: req?.user?.customId,
+      type: "CREATE",
+      employeeNumber: nip,
+      siasnService: "skp22",
+    });
+
     res.json({ code: 200 });
   } catch (error) {
     console.log(error);
@@ -231,7 +241,16 @@ const postSkp2022ByNip = async (req, res) => {
       tahun: 2022,
     };
 
-    const result = await siasnRequest.post("/skp22/save", data);
+    await siasnRequest.post("/skp22/save", data);
+
+    // create log
+    await createLogSIASN({
+      userId: req?.user?.customId,
+      type: "CREATE",
+      employeeNumber: nip,
+      siasnService: "skp22",
+    });
+
     res.json({ code: 200 });
   } catch (error) {
     console.log(error);
@@ -292,6 +311,14 @@ const postAngkaKredit = async (req, res) => {
     };
 
     await request.post(`/angkakredit/save`, data);
+
+    // create log
+    await createLogSIASN({
+      userId: req?.user?.customId,
+      type: "CREATE",
+      employeeNumber: nip,
+      siasnService: "angkakredit",
+    });
 
     res.json({
       code: 200,
@@ -430,6 +457,15 @@ const postRiwayatJabatan = async (req, res) => {
 
     // cekId
     const dataUtama = await request.get(`/pns/data-utama/${nip}`);
+
+    // insert log
+    await createLogSIASN({
+      userId: req?.user?.customId,
+      type: "CREATE",
+      employeeNumber: nip,
+      siasnService: "jabatan",
+    });
+
     const id = dataUtama?.data?.data?.id;
     const data = {
       ...body,
@@ -460,6 +496,14 @@ const postRiwayatJabatanByNip = async (req, res) => {
     };
 
     await request.post(`/jabatan/save`, data);
+
+    // create log
+    await createLogSIASN({
+      userId: req?.user?.customId,
+      type: "CREATE",
+      employeeNumber: nip,
+      siasnService: "jabatan",
+    });
 
     res.json({ success: true });
   } catch (error) {
