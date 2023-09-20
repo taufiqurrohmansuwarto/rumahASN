@@ -81,10 +81,21 @@ const ModalRating = ({ open, onCancel, initialValues }) => {
       onCancel={onCancel}
     >
       <Form form={form} layout="vertical">
-        <Form.Item required name="rating" label="Rating">
+        <Form.Item
+          rules={[
+            {
+              required: true,
+              message: "Rating harus diisi",
+            },
+          ]}
+          required
+          name="rating"
+          label="Rating"
+        >
           <Rate />
         </Form.Item>
         <Form.Item
+          rules={[{ required: true, message: "Komentar harus diisi" }]}
           extra="Yuk biasakan menambah komentar"
           required
           name="comment"
