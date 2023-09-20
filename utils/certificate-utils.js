@@ -27,6 +27,22 @@ const toPDF = pipe(
   please
 );
 
+const getParticipantName = (user) => {
+  if (user?.group === "GOOGLE") {
+    return user?.info?.username;
+  } else {
+    return user?.username;
+  }
+};
+
+const getParticipantEmployeeNumber = (user) => {
+  if (user?.group === "GOOGLE") {
+    return user?.info?.employee_number;
+  } else {
+    return user?.employee_number;
+  }
+};
+
 //
 module.exports.wordToPdf = async (url, user, nomerSertifikat) => {
   try {
@@ -35,7 +51,8 @@ module.exports.wordToPdf = async (url, user, nomerSertifikat) => {
     const handler = new TemplateHandler();
 
     const data = {
-      nama: user?.username,
+      nama: getParticipantName(user),
+      employee_number: getParticipantEmployeeNumber(user),
       jabatan: user?.info?.jabatan?.jabatan,
       instansi: user?.info?.perangkat_daerah?.detail,
       nomer_sertifikat: nomerSertifikat,

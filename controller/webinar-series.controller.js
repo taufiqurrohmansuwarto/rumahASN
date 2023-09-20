@@ -280,7 +280,8 @@ const allWebinars = async (req, res) => {
   const currentUser = req?.user.customId;
 
   const group = toLower(req?.user?.group);
-  const userType = typeGroup(group);
+  const role = toLower(req?.user?.role);
+  const userType = typeGroup(group, role);
 
   try {
     const query = WebinarSeries.query()

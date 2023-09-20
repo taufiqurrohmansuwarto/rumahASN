@@ -15,13 +15,32 @@ export const formatDate = (date) => {
   return moment(date).format("DD-MM-YYYY HH:mm:ss");
 };
 
-export const typeGroup = (group) => {
-  if (toLower(group) === "master") {
-    return "asn";
-  } else if (toLower(group) === "pttpk") {
-    return "non_asn";
+export const getParticipantName = (user) => {
+  if (user?.group === "GOOGLE") {
+    return user?.info?.username;
   } else {
+    return user?.username;
+  }
+};
+
+export const getParticipantEmployeeNumber = (user) => {
+  if (user?.group === "GOOGLE") {
+    return user?.info?.employee_number;
+  } else {
+    return user?.employee_number;
+  }
+};
+
+// add role, batasi hanya untuk asn, pttpk, dan umum bukan untuk fasilitator di simaster atau pttpk
+export const typeGroup = (group, role) => {
+  if (toLower(group) === "master" && toLower(role) === "user") {
+    return "asn";
+  } else if (toLower(group) === "pttpk" && toLower(role) === "user") {
+    return "non_asn";
+  } else if (toLower(group) === "google") {
     return "umum";
+  } else {
+    return "fasilitator";
   }
 };
 
