@@ -9,6 +9,7 @@ import {
 } from "@ant-design/icons";
 import { Stack, TypographyStylesProvider } from "@mantine/core";
 import {
+  Alert,
   Button,
   Card,
   Col,
@@ -69,6 +70,10 @@ const FormGoogleParticipants = ({
       onCancel={onCancel}
       destroyOnClose
     >
+      <Alert
+        type="info"
+        description="Jika Anda Pegawai Pemerintah Provinsi Jawa Timur kami sarankan menggunakan akun SIMASTER/PTTPK"
+      />
       <Form form={form} layout="vertical">
         <Form.Item
           normalize={
