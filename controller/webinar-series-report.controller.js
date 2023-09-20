@@ -3,7 +3,31 @@ const WebinarSeriesSurveys = require("@/models/webinar-series-surveys.model");
 const WebinarSeriesSurveysQuestion = require("@/models/webinar-series-surveys-questions.model");
 
 const xlsx = require("xlsx");
-const { times } = require("lodash");
+const { times, get } = require("lodash");
+
+const getNama = (user) => {
+  if (user?.group === "GOOGLE") {
+    return user?.info?.username;
+  } else {
+    return user?.username;
+  }
+};
+
+const getEmployeeNumber = (user) => {
+  if (user?.group === "GOOGLE") {
+    return user?.info?.employee_number;
+  } else {
+    return user?.employee_number;
+  }
+};
+
+const getEmail = (user) => {
+  if (user?.group === "GOOGLE") {
+    return user?.email;
+  } else {
+    return user?.email;
+  }
+};
 
 const serializeDataReportParticipant = (data) => {
   if (!data?.length) {
@@ -11,11 +35,13 @@ const serializeDataReportParticipant = (data) => {
   } else {
     const result = data.map((item) => {
       return {
-        Nama: item?.participant?.username,
-        "NIP/NIPTTK": item?.participant?.employee_number || "-",
+        Nama: getNama(item?.participant),
+        email: getEmail(item?.participant),
+        "NIP/NIPTTK": getEmployeeNumber(item?.participant),
         Jabatan: item?.participant?.info?.jabatan?.jabatan,
         "Perangkat Daerah": item?.participant?.info?.perangkat_daerah?.detail,
         "Tanggal Registrasi": item?.created_at,
+        "Sudah Polling": item?.already_poll ? "Sudah" : "Belum",
       };
     });
     return result;
@@ -167,7 +193,6 @@ const downloadParticipants = async (req, res) => {
       .withGraphFetched("[participant]");
 
     const data = serializeDataReportParticipant(result);
-    console.log(data);
 
     const wb = xlsx.utils.book_new();
     const ws = xlsx.utils.json_to_sheet(data);

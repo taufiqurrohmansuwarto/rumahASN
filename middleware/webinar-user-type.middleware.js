@@ -9,8 +9,9 @@ module.exports = async (req, res, next) => {
   try {
     const user = req?.user;
     const group = user?.group;
+    const role = user?.role;
 
-    const currentGroup = typeGroup(group);
+    const currentGroup = typeGroup(group, role);
 
     const { id } = req?.query;
 
