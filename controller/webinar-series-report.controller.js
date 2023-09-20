@@ -1,9 +1,10 @@
 const WebinarSeriesParticipate = require("@/models/webinar-series-participates.model");
 const WebinarSeriesSurveys = require("@/models/webinar-series-surveys.model");
 const WebinarSeriesSurveysQuestion = require("@/models/webinar-series-surveys-questions.model");
+const moment = require("moment");
 
 const xlsx = require("xlsx");
-const { times, get } = require("lodash");
+const { times } = require("lodash");
 
 const getNama = (user) => {
   if (user?.group === "GOOGLE") {
@@ -15,8 +16,8 @@ const getNama = (user) => {
 
 const getEmployeeNumber = (user) => {
   if (user?.group === "GOOGLE") {
-    const nama_lengkap = `${user?.info?.gelar_depan} ${user?.info?.username} ${user?.info?.gelar_belakang}`;
-    return nama_lengkap;
+    const employee_number = `${user?.info?.employee_number}` || "";
+    return employee_number;
   } else {
     return user?.employee_number;
   }
@@ -37,11 +38,14 @@ const serializeDataReportParticipant = (data) => {
     const result = data.map((item) => {
       return {
         Nama: getNama(item?.participant),
+        "Asal Pendaftaran": item?.participant?.group,
         email: getEmail(item?.participant),
         "NIP/NIPTTK": getEmployeeNumber(item?.participant),
         Jabatan: item?.participant?.info?.jabatan?.jabatan,
         "Perangkat Daerah": item?.participant?.info?.perangkat_daerah?.detail,
-        "Tanggal Registrasi": item?.created_at,
+        "Tanggal Registrasi": moment(item?.created_at).format(
+          "DD-MM-YYYY HH:mm"
+        ),
         "Sudah Polling": item?.already_poll ? "Sudah" : "Belum",
       };
     });
@@ -191,7 +195,8 @@ const downloadParticipants = async (req, res) => {
 
     const result = await WebinarSeriesParticipate.query()
       .where("webinar_series_id", id)
-      .withGraphFetched("[participant]");
+      .withGraphFetched("[participant]")
+      .orderBy("created_at", "desc");
 
     const data = serializeDataReportParticipant(result);
 

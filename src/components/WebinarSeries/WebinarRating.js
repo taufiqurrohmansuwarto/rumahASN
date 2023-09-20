@@ -1,6 +1,15 @@
 import { formatDateSimple } from "@/utils/client-utils";
 import { Avatar, Grid, Progress, Rating, Stack } from "@mantine/core";
-import { Card, Divider, List, Space, Typography, Row, Col } from "antd";
+import {
+  Card,
+  Divider,
+  List,
+  Space,
+  Typography,
+  Row,
+  Col,
+  BackTop,
+} from "antd";
 
 const DaftarUserRating = ({ data }) => {
   return (
@@ -105,6 +114,7 @@ const ViewRatingComponent = ({ data }) => {
 const WebinarRatings = ({ data }) => {
   return (
     <Card>
+      <BackTop />
       <ViewRatingComponent data={data} />
       <Divider />
       <DaftarUserRating data={data?.data} />

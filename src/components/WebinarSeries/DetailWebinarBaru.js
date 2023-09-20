@@ -76,10 +76,6 @@ const FormGoogleParticipants = ({
       />
       <Form form={form} layout="vertical">
         <Form.Item
-          normalize={
-            // automatic capitalize
-            (value) => value?.toUpperCase()
-          }
           label="Gelar Depan"
           extra="Jika Tidak diisi Kosongkan saja"
           name="gelar_depan"
@@ -87,10 +83,6 @@ const FormGoogleParticipants = ({
           <Input />
         </Form.Item>
         <Form.Item
-          normalize={
-            // automatic capitalize
-            (value) => value?.toUpperCase()
-          }
           label="Gelar Belakang"
           extra="Jika Tidak diisi Kosongkan saja"
           name="gelar_belakang"
