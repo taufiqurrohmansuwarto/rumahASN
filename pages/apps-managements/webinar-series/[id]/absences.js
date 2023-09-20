@@ -66,4 +66,13 @@ function Absences() {
   );
 }
 
+Absences.getLayout = function getLayout(page) {
+  return <Layout active="/apps-managements/webinar-series">{page}</Layout>;
+};
+
+Absences.Auth = {
+  action: "manage",
+  subject: "DashboardAdmin",
+};
+
 export default Absences;

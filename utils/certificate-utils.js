@@ -29,7 +29,8 @@ const toPDF = pipe(
 
 const getParticipantName = (user) => {
   if (user?.group === "GOOGLE") {
-    return user?.info?.username;
+    const nama_lengkap = `${user?.info?.gelar_depan} ${user?.info?.username} ${user?.info?.gelar_belakang}`;
+    return nama_lengkap;
   } else {
     return user?.username;
   }
