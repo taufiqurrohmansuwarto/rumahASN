@@ -104,7 +104,7 @@ const FormGoogleParticipants = ({
             (value) => value?.toUpperCase()
           }
           label="Nama Lengkap"
-          extra="Nama lengkap sesuai dengan KTP dengan tambahan gelar"
+          extra="Nama Lengkap tanpa gelar"
           name="username"
           required
         >
