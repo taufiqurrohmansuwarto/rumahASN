@@ -50,6 +50,8 @@ const FormGoogleParticipants = ({
           detail: trim(value.perangkat_daerah),
         },
         username: trim(value.username),
+        gelar_depan: trim(value.gelar_depan),
+        gelar_belakang: trim(value.gelar_belakang),
         employee_number: trim(value.employee_number),
       },
     };
@@ -68,6 +70,28 @@ const FormGoogleParticipants = ({
       destroyOnClose
     >
       <Form form={form} layout="vertical">
+        <Form.Item
+          normalize={
+            // automatic capitalize
+            (value) => value?.toUpperCase()
+          }
+          label="Gelar Depan"
+          extra="Jika Tidak diisi Kosongkan saja"
+          name="gelar_depan"
+        >
+          <Input />
+        </Form.Item>
+        <Form.Item
+          normalize={
+            // automatic capitalize
+            (value) => value?.toUpperCase()
+          }
+          label="Gelar Belakang"
+          extra="Jika Tidak diisi Kosongkan saja"
+          name="gelar_belakang"
+        >
+          <Input />
+        </Form.Item>
         <Form.Item
           rules={[
             {

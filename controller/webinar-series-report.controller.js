@@ -15,7 +15,8 @@ const getNama = (user) => {
 
 const getEmployeeNumber = (user) => {
   if (user?.group === "GOOGLE") {
-    return user?.info?.employee_number;
+    const nama_lengkap = `${user?.info?.gelar_depan} ${user?.info?.username} ${user?.info?.gelar_belakang}`;
+    return nama_lengkap;
   } else {
     return user?.employee_number;
   }
