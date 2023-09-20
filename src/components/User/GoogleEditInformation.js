@@ -1,9 +1,6 @@
-import {
-  getGoogleInformation,
-  updateGoogleInformation,
-} from "@/services/index";
+import { getUserInformation, updateGoogleInformation } from "@/services/index";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Button, Form, Modal, Skeleton, Input, message } from "antd";
+import { Button, Form, Input, Modal, Skeleton, message } from "antd";
 import { trim } from "lodash";
 import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
@@ -36,7 +33,7 @@ const FormGoogleInformation = ({ open, handleCancel, information }) => {
         message.error("Gagal mengubah informasi");
       },
       onSettled: () => {
-        queryClient.invalidateQueries(["google-information"]);
+        queryClient.invalidateQueries(["user-information"]);
       },
     }
   );
@@ -164,7 +161,7 @@ function GoogleEditInformation() {
     data: information,
     isLoading,
     refetch,
-  } = useQuery(["google-information"], () => getGoogleInformation(), {});
+  } = useQuery(["user-information"], () => getUserInformation(), {});
 
   const handleOpen = () => {
     refetch();

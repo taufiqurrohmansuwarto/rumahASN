@@ -557,3 +557,31 @@ export const truncate = (text, char = 20) => {
   const result = text.replace(regex, "");
   return result?.substring(0, char) + "...";
 };
+
+export const participantColor = (group) => {
+  if (group === "MASTER") {
+    return "red";
+  } else if (group === "PTPK") {
+    return "yellow";
+  } else if (group === "GOOGLE") {
+    return "green";
+  }
+};
+
+export const participantUsername = (participant) => {
+  if (participant?.group === "GOOGLE") {
+    return `${participant?.info?.gelar_depan} ${participant?.info?.username} ${participant?.info?.gelar_belakang}`;
+  } else {
+    return participant?.username;
+  }
+};
+
+export const participantEmployeeNumber = (participant) => {
+  if (participant?.group === "GOOGLE") {
+    return participant?.info?.employee_number;
+  } else {
+    return participant?.employee_number;
+  }
+};
+
+// show information for webinar series

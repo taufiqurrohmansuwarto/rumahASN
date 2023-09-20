@@ -21,7 +21,7 @@ const WebinarUserContent = ({ data }) => {
         {data?.is_open ? "Pendaftaran dibuka" : "Pendaftaran ditutup"}
       </Tag>
       <Tag color={data?.is_allow_download_certificate ? "green" : "red"}>
-        {data?.is_open
+        {data?.is_allow_download_certificate
           ? "Sertifikat dapat diunduh"
           : "Sertifikat belum siap unduh"}
       </Tag>
@@ -82,6 +82,12 @@ function WebinarUserDetailLayout({
           href: "/detail",
         },
         {
+          tab: "Presensi",
+          key: "absence",
+          href: "/absence",
+        },
+
+        {
           tab: "Komentar",
           key: "comments",
           href: "/comments",
@@ -102,9 +108,7 @@ function WebinarUserDetailLayout({
         },
       }}
     >
-      <Watermark content="Demo">
-        <Skeleton loading={isLoading}>{children}</Skeleton>
-      </Watermark>
+      <Skeleton loading={isLoading}>{children}</Skeleton>
     </PageContainer>
   );
 }
