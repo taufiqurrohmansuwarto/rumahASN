@@ -5,6 +5,14 @@ const api = axios.create({
   baseURL: "/helpdesk/api",
 });
 
+export const updateGoogleInformation = async (data) => {
+  return api.patch(`/users/information`, data).then((res) => res?.data);
+};
+
+export const getGoogleInformation = async (data) => {
+  return api.get(`/users/information`).then((res) => res?.data);
+};
+
 export const getUsersTickets = async ({ id, query }) => {
   const qs = queryString.stringify(query, {
     skipNull: true,

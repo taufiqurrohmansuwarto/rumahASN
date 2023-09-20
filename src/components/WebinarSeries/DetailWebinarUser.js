@@ -32,6 +32,7 @@ import {
 } from "antd";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
+import GoogleEditInformation from "../User/GoogleEditInformation";
 
 const ModalRating = ({ open, onCancel, initialValues }) => {
   const router = useRouter();
@@ -292,6 +293,7 @@ function DetailWebinarNew({
                 </div>
               )}
             </Stack>
+            <GoogleEditInformation />
             <Button
               block
               style={{
