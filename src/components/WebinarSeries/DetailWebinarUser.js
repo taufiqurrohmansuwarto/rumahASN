@@ -10,6 +10,7 @@ import {
   DownloadOutlined,
   EditTwoTone,
   FolderOpenOutlined,
+  StarOutlined,
   TagsTwoTone,
   VideoCameraAddOutlined,
   YoutubeOutlined,
@@ -33,6 +34,7 @@ import {
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import GoogleEditInformation from "../User/GoogleEditInformation";
+import UserInfo from "../User/UserInfo";
 
 const ModalRating = ({ open, onCancel, initialValues }) => {
   const router = useRouter();
@@ -204,7 +206,7 @@ function DetailWebinarNew({
           lg: 16,
         }}
       >
-        <Col md={16} xs={24}>
+        <Col md={17} xs={24}>
           <Card>
             <Typography.Title level={4}>{data?.title}</Typography.Title>
             <Divider />
@@ -217,9 +219,10 @@ function DetailWebinarNew({
             </TypographyStylesProvider>
           </Card>
         </Col>
-        <Col md={8} xs={24}>
+        <Col md={7} xs={24}>
           <Card title="Informasi Event">
             <Stack>
+              <UserInfo />
               <div>
                 <ClockCircleTwoTone />{" "}
                 <Typography.Text strong>
@@ -251,48 +254,59 @@ function DetailWebinarNew({
                   />
                 </Space>
               ) : (
-                <Button onClick={handleOpen}>Beri Rating</Button>
+                <Button
+                  type="dashed"
+                  onClick={handleOpen}
+                  icon={<StarOutlined />}
+                >
+                  Beri Kami Rating
+                </Button>
               )}
-              <Divider />
-              {data?.reference_link && (
-                <div>
-                  <FolderOpenOutlined />{" "}
-                  <Typography.Text strong>
-                    <a
-                      href={data?.reference_link}
-                      target="_blank"
-                      rel="noreferrer"
-                    >
-                      Link Materi
-                    </a>
-                  </Typography.Text>
-                </div>
-              )}
-              {data?.youtube_url && (
-                <div>
-                  <YoutubeOutlined />{" "}
-                  <Typography.Text strong>
-                    <a
-                      href={data?.youtube_url}
-                      target="_blank"
-                      rel="noreferrer"
-                    >
-                      Link Youtube
-                    </a>
-                  </Typography.Text>
-                </div>
-              )}
-              {data?.zoom_url && (
-                <div>
-                  <VideoCameraAddOutlined />{" "}
-                  <Typography.Text strong>
-                    <a href={data?.zoom_url} target="_blank" rel="noreferrer">
-                      Link Zoom
-                    </a>
-                  </Typography.Text>
-                </div>
-              )}
+              <Space>
+                {data?.reference_link && (
+                  <div>
+                    <FolderOpenOutlined />{" "}
+                    <Typography.Text strong>
+                      <a
+                        href={data?.reference_link}
+                        target="_blank"
+                        rel="noreferrer"
+                      >
+                        Link Materi
+                      </a>
+                    </Typography.Text>
+                    <Divider type="vertical" />
+                  </div>
+                )}
+                {data?.youtube_url && (
+                  <div>
+                    <YoutubeOutlined />{" "}
+                    <Typography.Text strong>
+                      <a
+                        href={data?.youtube_url}
+                        target="_blank"
+                        rel="noreferrer"
+                      >
+                        Link Youtube
+                      </a>
+                    </Typography.Text>
+                    <Divider type="vertical" />
+                  </div>
+                )}
+                {data?.zoom_url && (
+                  <div>
+                    <VideoCameraAddOutlined />{" "}
+                    <Typography.Text strong>
+                      <a href={data?.zoom_url} target="_blank" rel="noreferrer">
+                        Link Zoom
+                      </a>
+                    </Typography.Text>
+                    <Divider type="vertical" />
+                  </div>
+                )}
+              </Space>
             </Stack>
+            <Divider />
             <GoogleEditInformation />
             <Button
               block

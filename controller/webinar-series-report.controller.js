@@ -1,6 +1,8 @@
 const WebinarSeriesParticipate = require("@/models/webinar-series-participates.model");
 const WebinarSeriesSurveys = require("@/models/webinar-series-surveys.model");
 const WebinarSeriesSurveysQuestion = require("@/models/webinar-series-surveys-questions.model");
+const WebinarSeriesRating = require("@/models/webinar-series-ratings.model");
+
 const moment = require("moment");
 
 const xlsx = require("xlsx");
@@ -28,6 +30,22 @@ const getEmail = (user) => {
     return user?.email;
   } else {
     return user?.email;
+  }
+};
+
+const serializeDataReportRatings = (data) => {
+  if (!data?.length) {
+    return [];
+  } else {
+    const result = data?.map((item) => {
+      return {
+        Nama: getNama(item?.participant),
+        Jabatan: item?.participant?.info?.jabatan?.jabatan,
+        "Perangkat Daerah": item?.participant?.info?.perangkat_daerah?.detail,
+        rating: item?.rating,
+        komentar: item?.comments,
+      };
+    });
   }
 };
 
@@ -222,8 +240,40 @@ const downloadParticipants = async (req, res) => {
   }
 };
 
+const downloadRating = async (req, res) => {
+  try {
+    const { id } = req?.query;
+    const result = await WebinarSeriesRating.query()
+      .where("webinar_series_id", id)
+      .withGraphFetched("[participant]")
+      .orderBy("created_at", "desc");
+    const data = serializeDataReportRatings(result);
+
+    const wb = xlsx.utils.book_new();
+    const ws = xlsx.utils.json_to_sheet(data);
+
+    xlsx.utils.book_append_sheet(wb, ws, "Rating");
+
+    res.setHeader(
+      "Content-Type",
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    );
+
+    res.setHeader(
+      "Content-Disposition",
+      "attachment; filename=" + "rating.xlsx"
+    );
+
+    res.end(xlsx.write(wb, { type: "buffer", bookType: "xlsx" }));
+  } catch (error) {
+    console.log(error);
+    res.status(400).json({ code: 400, message: "Internal Server Error" });
+  }
+};
+
 module.exports = {
   downloadParticipants,
   downloadSurvey,
+  downloadRating,
   reportSurvey,
 };

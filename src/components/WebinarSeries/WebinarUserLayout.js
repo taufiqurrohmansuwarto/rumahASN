@@ -1,7 +1,6 @@
 import PageContainer from "@/components/PageContainer";
 import { useRouter } from "next/router";
 
-import Watermark from "@/components/WaterMark";
 import { Breadcrumb } from "antd";
 import Link from "next/link";
 
@@ -52,9 +51,7 @@ function WebinarUserLayout({
         },
       }}
     >
-      <Watermark content="Demo" fontSize={40}>
-        {children}
-      </Watermark>
+      {children}
     </PageContainer>
   );
 }

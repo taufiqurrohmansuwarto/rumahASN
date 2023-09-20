@@ -1,5 +1,6 @@
 import Layout from "@/components/Layout";
 import AdminLayoutDetailWebinar from "@/components/WebinarSeries/AdminLayoutDetailWebinar";
+import DownloadRating from "@/components/WebinarSeries/DownloadRating";
 import WebinarRatings from "@/components/WebinarSeries/WebinarRating";
 import { getRatingAdmin } from "@/services/webinar.services";
 import { useQuery } from "@tanstack/react-query";
@@ -17,6 +18,7 @@ function Ratings() {
 
   return (
     <AdminLayoutDetailWebinar loading={isLoading} active="ratings">
+      <DownloadRating id={id} />
       <WebinarRatings data={data} />
     </AdminLayoutDetailWebinar>
   );

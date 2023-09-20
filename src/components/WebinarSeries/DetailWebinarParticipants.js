@@ -2,12 +2,26 @@ import {
   downloadParticipants,
   getParticipants,
 } from "@/services/webinar.services";
-import { formatDateSimple } from "@/utils/client-utils";
+import {
+  formatDateSimple,
+  participantColor,
+  participantEmployeeNumber,
+  participantUsername,
+} from "@/utils/client-utils";
 import { CloudDownloadOutlined } from "@ant-design/icons";
 import { Bar } from "@ant-design/plots";
 import { Stack } from "@mantine/core";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { Avatar, Button, Card, Space, Table, Tag, message } from "antd";
+import {
+  Avatar,
+  Button,
+  Card,
+  Space,
+  Table,
+  Tag,
+  Tooltip,
+  message,
+} from "antd";
 import { useRouter } from "next/router";
 import { useState } from "react";
 
@@ -106,7 +120,7 @@ function DetailWebinarParticipants() {
         <Stack>
           <Space>
             <Avatar size="small" src={text?.participant?.image} />
-            <span>{text?.participant?.username}</span>
+            <span>{participantUsername(text?.participant)}</span>
           </Space>
         </Stack>
       ),
@@ -115,13 +129,19 @@ function DetailWebinarParticipants() {
       title: "Group",
       key: "group",
       render: (text) => {
-        return <Tag color="green">{text?.participant?.group}</Tag>;
+        return (
+          <Tag color={participantColor(text?.participant?.group)}>
+            {text?.participant?.group}
+          </Tag>
+        );
       },
     },
     {
       title: "Nomer Pegawai",
       key: "employee_number",
-      render: (text) => <span>{text?.participant?.employee_number}</span>,
+      render: (text) => (
+        <span>{participantEmployeeNumber(text?.participant)}</span>
+      ),
     },
     {
       title: "Jabatan",
@@ -150,18 +170,20 @@ function DetailWebinarParticipants() {
         <Table
           columns={columns}
           title={() => (
-            <Button
-              disabled={isLoadingWebinarParticipants}
-              loading={isLoadingWebinarParticipants}
-              onClick={handleDownload}
-              type="primary"
-              icon={<CloudDownloadOutlined />}
-            >
-              Peserta
-            </Button>
+            <Tooltip title="Unduh Data Peserta">
+              <Button
+                disabled={isLoadingWebinarParticipants}
+                loading={isLoadingWebinarParticipants}
+                onClick={handleDownload}
+                type="primary"
+                icon={<CloudDownloadOutlined />}
+              >
+                Peserta
+              </Button>
+            </Tooltip>
           )}
           pagination={{
-            pageSize: query?.query?.limit,
+            position: ["bottomRight", "topRight"],
             current: query?.query?.page,
             total: participants?.result?.total,
             showTotal: (total) => `Total ${total} peserta`,

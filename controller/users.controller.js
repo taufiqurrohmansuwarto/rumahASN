@@ -86,22 +86,26 @@ module.exports.searchUser = async (req, res) => {
 
 module.exports.googleEditInformation = async (req, res) => {
   try {
-    const { customId } = req?.user;
+    const { customId, group } = req?.user;
 
-    await User.query()
-      .patch({
-        info: req?.body,
-      })
-      .where("custom_id", customId);
+    if (group === "GOOGLE") {
+      await User.query()
+        .patch({
+          info: req?.body,
+        })
+        .where("custom_id", customId);
 
-    res.json({ code: 200, message: "success" });
+      res.json({ code: 200, message: "success" });
+    } else {
+      res.status(403).json({ code: 403, message: "Forbidden" });
+    }
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: "Internal Server Error", code: 500 });
   }
 };
 
-module.exports.googleInformation = async (req, res) => {
+module.exports.getUserInformation = async (req, res) => {
   try {
     const { customId } = req?.user;
     const result = await User.query().where("custom_id", customId).first();
