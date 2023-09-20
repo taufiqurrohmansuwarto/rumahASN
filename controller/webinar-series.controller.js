@@ -346,8 +346,9 @@ const allWebinars = async (req, res) => {
 const detailAllWebinar = async (req, res) => {
   try {
     const { id } = req?.query;
-    const { group } = req?.user;
-    const userType = typeGroup(group);
+    const { group, role } = req?.user;
+
+    const userType = typeGroup(group, role);
 
     const currentData = await WebinarSeries.query()
       .select(
