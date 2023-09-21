@@ -222,6 +222,12 @@ function DetailWebinarNew({
         <Col md={7} xs={24}>
           <Card title="Informasi Event">
             <Stack>
+              <Tombol
+                downloadCertificate={downloadCertificate}
+                loadingDownloadCertificate={loadingDownloadCertificate}
+                alreadyPoll={alreadyPoll}
+                data={data}
+              />
               <UserInfo />
               <div>
                 <ClockCircleTwoTone />{" "}
@@ -319,12 +325,6 @@ function DetailWebinarNew({
             >
               Batal Registrasi
             </Button>
-            <Tombol
-              downloadCertificate={downloadCertificate}
-              loadingDownloadCertificate={loadingDownloadCertificate}
-              alreadyPoll={alreadyPoll}
-              data={data}
-            />
           </Card>
         </Col>
       </Row>

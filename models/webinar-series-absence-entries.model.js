@@ -12,7 +12,20 @@ class WebinarSeriesAbsenceEntries extends Model {
     this.id = nanoid(10);
   }
 
-  static get relationMappings() {}
+  static get relationMappings() {
+    const absences = require("@/models/webinar-series-participants-absence.model");
+
+    return {
+      absences: {
+        relation: Model.HasManyRelation,
+        modelClass: absences,
+        join: {
+          from: "webinar_series_absence_entries.id",
+          to: "webinar_series_participants_absence.webinar_series_absence_entry_id",
+        },
+      },
+    };
+  }
 
   static get idColumn() {
     return "id";
