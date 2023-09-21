@@ -5,9 +5,11 @@ import {
   absenceEntries,
   createAbsenceEntries,
   deleteAbsenceEntries,
+  downloadAbsences,
   updateAbsenceEntries,
 } from "@/services/webinar.services";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { message } from "antd";
 import { useRouter } from "next/router";
 
 function Absences() {
@@ -50,12 +52,23 @@ function Absences() {
     }
   );
 
+  const { mutateAsync: download, isLoading: isLoadingDownload } = useMutation(
+    (data) => downloadAbsences(data),
+    {
+      onSettled: () => {
+        message.success("Berhasil mengunduh absensi");
+      },
+    }
+  );
+
   return (
     <AdminLayoutDetailWebinar loading={isLoading} active="absences">
       <AbsenceEtries
         id={id}
         data={data}
         create={create}
+        download={download}
+        isLoadingDownload={isLoadingDownload}
         isLoadingCreate={isLoadingCreate}
         update={update}
         isLoadingUpdate={isLoadingUpdate}

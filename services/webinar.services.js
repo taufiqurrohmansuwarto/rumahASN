@@ -63,12 +63,12 @@ export const deleteAbsenceEntries = ({ id, absenceId }) => {
     .then((res) => res?.data);
 };
 
-// end of crud absence entries
-
-// user
-export const readAllWebinarUser = (query) => {
-  const queryStr = queryString.stringify(query);
-  return api.get(`/all?${queryStr}`).then((res) => res?.data);
+export const downloadAbsences = ({ id, absenceId }) => {
+  return api
+    .get(`/admin/${id}/absence-entries/${absenceId}/download`, {
+      responseType: "arraybuffer",
+    })
+    .then((res) => res?.data);
 };
 
 export const detailAllWebinar = (id) => {
@@ -179,6 +179,23 @@ export const readAllSurveyUser = (id) => {
 
 export const submitSurveys = ({ id, data }) => {
   return api.post(`/users/${id}/surveys`, data).then((res) => res?.data);
+};
+
+// absences for users
+export const getAbsenceUsers = (id) => {
+  return api.get(`/users/${id}/absences`).then((res) => res?.data);
+};
+
+export const registerAbsence = ({ id, absenceId }) => {
+  return api
+    .patch(`/users/${id}/absences/${absenceId}`)
+    .then((res) => res?.data);
+};
+
+export const unregisterAbsence = ({ id, absenceId }) => {
+  return api
+    .delete(`/users/${id}/absences/${absenceId}`)
+    .then((res) => res?.data);
 };
 
 // comments
