@@ -8,6 +8,7 @@ import {
   rem,
 } from "@mantine/core";
 import {
+  IconCertificate,
   IconChartInfographic,
   IconDatabaseImport,
   IconMessages,
@@ -48,10 +49,10 @@ export const MOCKDATA = [
       "Fitur Single Sign-On memudahkan pengguna untuk mengakses Rumah ASN, baik menggunakan akun Gmail untuk masyarakat umum, maupun Single Sign On Kepegawaian untuk pegawai pemerintah Provinsi Jawa Timur.",
   },
   {
-    icon: IconChartInfographic,
-    title: "Analisis Data",
+    icon: IconCertificate,
+    title: "Webinar Series",
     description:
-      "Fitur Analisis Data membantu Rumah ASN dalam memahami dan menanggapi kebutuhan serta tantangan pengguna, sehingga strategi dan langkah perbaikan layanan dapat lebih tepat dan efektif.",
+      "Fitur Webinar dari Rumah ASN menawarkan penyampaian edukatif yang tersistemasi. Keunggulan ini diperkuat dengan sertifikat menggunakan TTE, memastikan keabsahan dan kemudahan bagi pengguna. Ini tidak hanya meningkatkan kualitas edukasi, tetapi juga memberikan kepraktisan dan kepercayaan bagi setiap peserta.",
   },
 ];
 

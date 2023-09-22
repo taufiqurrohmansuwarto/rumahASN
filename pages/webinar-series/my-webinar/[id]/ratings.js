@@ -8,12 +8,13 @@ import { useRouter } from "next/router";
 function WebinarComments() {
   const router = useRouter();
 
-  const { id } = router?.query;
-
   const { data, isLoading } = useQuery(
-    ["webinar-user-rating", id],
-    () => getRatingForUser(id),
-    {}
+    ["webinar-user-rating", router?.query],
+    () => getRatingForUser(router?.query),
+    {
+      keepPreviousData: true,
+      enabled: !!router?.query,
+    }
   );
 
   return (

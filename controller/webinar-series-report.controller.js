@@ -39,13 +39,16 @@ const serializeDataReportRatings = (data) => {
   } else {
     const result = data?.map((item) => {
       return {
+        email: getEmail(item?.participant),
         Nama: getNama(item?.participant),
         Jabatan: item?.participant?.info?.jabatan?.jabatan,
         "Perangkat Daerah": item?.participant?.info?.perangkat_daerah?.detail,
         rating: item?.rating,
+        cara_masuk: item?.participant?.group,
         komentar: item?.comments,
       };
     });
+    return result;
   }
 };
 
@@ -246,7 +249,9 @@ const downloadRating = async (req, res) => {
     const result = await WebinarSeriesRating.query()
       .where("webinar_series_id", id)
       .withGraphFetched("[participant]")
-      .orderBy("created_at", "desc");
+      .orderBy("created_at", "desc")
+      .orderBy("rating", "desc");
+
     const data = serializeDataReportRatings(result);
 
     const wb = xlsx.utils.book_new();
