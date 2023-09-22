@@ -1,7 +1,7 @@
 import Layout from "@/components/Layout";
 import { logSIASN } from "@/services/log.services";
 import { useQuery } from "@tanstack/react-query";
-import { Breadcrumb, Input, Table } from "antd";
+import { BackTop, Breadcrumb, Input, Table } from "antd";
 import { useState } from "react";
 import moment from "moment";
 import Head from "next/head";
@@ -14,11 +14,12 @@ function LogSIASN() {
     limit: 50,
   });
 
-  const { data, isLoading } = useQuery(
+  const { data, isLoading, isFetching } = useQuery(
     ["logs-siasn", query],
     () => logSIASN(query),
     {
       enabled: !!query,
+      keepPreviousData: true,
     }
   );
 
@@ -82,6 +83,7 @@ function LogSIASN() {
           ),
         }}
       >
+        <BackTop />
         <Table
           title={() => (
             <Input.Search
@@ -93,8 +95,8 @@ function LogSIASN() {
               }}
             />
           )}
-          size="small"
           pagination={{
+            showSizeChanger: false,
             position: ["bottomRight", "topRight"],
             current: query?.page,
             pageSize: query?.limit,
@@ -108,7 +110,7 @@ function LogSIASN() {
             },
           }}
           columns={columns}
-          loading={isLoading}
+          loading={isLoading || isFetching}
           dataSource={data?.data}
           rowKey={(row) => row?.id}
         />
