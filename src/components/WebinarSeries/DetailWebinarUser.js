@@ -7,15 +7,16 @@ import {
   CarryOutTwoTone,
   ClockCircleTwoTone,
   CloseOutlined,
-  DownloadOutlined,
+  CloudDownloadOutlined,
   EditTwoTone,
+  ExclamationCircleOutlined,
   FolderOpenOutlined,
   StarOutlined,
   TagsTwoTone,
   VideoCameraAddOutlined,
   YoutubeOutlined,
 } from "@ant-design/icons";
-import { Stack, TypographyStylesProvider } from "@mantine/core";
+import { Alert, Stack, TypographyStylesProvider } from "@mantine/core";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   Button,
@@ -35,6 +36,7 @@ import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import GoogleEditInformation from "../User/GoogleEditInformation";
 import UserInfo from "../User/UserInfo";
+import { IconExclamationMark } from "@tabler/icons";
 
 const ModalRating = ({ open, onCancel, initialValues }) => {
   const router = useRouter();
@@ -120,6 +122,19 @@ const Tombol = ({
   const router = useRouter();
   const id = router.query.id;
 
+  const handleDownload = () => {
+    Modal.confirm({
+      title: "Unduh Sertifikat",
+      content:
+        "Apakah anda yakin ingin mengunduh sertifikat? Pastikan informasi biodata anda sudah benar",
+      okText: "Ya",
+      centered: true,
+      onOk: async () => {
+        await downloadCertificate();
+      },
+    });
+  };
+
   if (!data?.is_allow_download_certificate) {
     return null;
   }
@@ -136,14 +151,35 @@ const Tombol = ({
     );
   }
 
-  if (data?.is_allow_download_certificate && alreadyPoll) {
+  if (
+    data?.is_allow_download_certificate &&
+    alreadyPoll &&
+    !data?.get_certificate
+  ) {
+    return (
+      <Alert
+        icon={<IconExclamationMark />}
+        color="red"
+        title="Anda Tidak mendapatkan sertifikat"
+      >
+        Mohon maaf anda tidak mendapatkan sertifikat karena tidak melakukan
+        presensi sebelumnya. Cek di tab presensi
+      </Alert>
+    );
+  }
+
+  if (
+    data?.is_allow_download_certificate &&
+    alreadyPoll &&
+    data?.get_certificate
+  ) {
     return (
       <>
         <Button
-          icon={<DownloadOutlined />}
+          icon={<CloudDownloadOutlined />}
           type="primary"
           block
-          onClick={downloadCertificate}
+          onClick={handleDownload}
           loading={loadingDownloadCertificate}
         >
           Unduh Sertifikat

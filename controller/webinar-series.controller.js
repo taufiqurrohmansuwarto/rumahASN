@@ -8,12 +8,16 @@ const Users = require("@/models/users.model");
 // rating
 const WebinarSeriesRatings = require("@/models/webinar-series-ratings.model");
 
+// absensi
+const AbsenceEntry = require("@/models/webinar-series-absence-entries.model");
+const AbsenceParticipant = require("@/models/webinar-series-participants-absence.model");
+
 const User = require("@/models/users.model");
 const { uploadFileMinio, typeGroup } = require("@/utils/index");
 
 const { wordToPdf } = require("@/utils/certificate-utils");
 
-const { toLower, orderBy, isEmpty } = require("lodash");
+const { toLower } = require("lodash");
 const { createSignature } = require("@/utils/bsre-fetcher");
 const { parseMarkdown } = require("@/utils/parsing");
 
@@ -119,6 +123,7 @@ const listParticipants = async (req, res) => {
       .groupBy(
         User.raw("split_part(info->'perangkat_daerah'->>'detail', '-', 1)")
       )
+      .limit(10)
       .orderBy("value", "desc");
 
     const aggregasiJabatan = await User.query()
@@ -127,6 +132,7 @@ const listParticipants = async (req, res) => {
       .count("user_id as value")
       .joinRelated("webinar_series_participates")
       .groupBy(User.raw("info->'jabatan'->>'jabatan'"))
+      .limit(10)
       .orderBy("value", "desc");
 
     const data = {
@@ -449,6 +455,26 @@ const detailWebinarUser = async (req, res) => {
         .andWhere("user_id", customId)
         .first();
 
+      // daftar absensi
+      const absenceEntry = await AbsenceEntry.query().where(
+        "webinar_series_id",
+        result?.webinar_series_id
+      );
+
+      // absensi untuk user
+      const absenceUser = await AbsenceParticipant.query()
+        .whereIn(
+          "webinar_series_absence_entry_id",
+          absenceEntry.map((item) => item.id)
+        )
+        .andWhere("user_id", customId);
+
+      const absensi = {
+        absence_entry: absenceEntry,
+        absence_user: absenceUser,
+        get_certificate: absenceUser.length === absenceEntry.length,
+      };
+
       res.json({
         result,
         description_markdown: parseMarkdown(hasil?.description),
@@ -458,6 +484,7 @@ const detailWebinarUser = async (req, res) => {
           my_rating: currentWebinarSeriesRating?.rating,
           my_rating_comment: currentWebinarSeriesRating?.comments,
           already_rating: currentWebinarSeriesRating ? true : false,
+          ...absensi,
         },
       });
     } else {
@@ -726,6 +753,7 @@ const downloadCertificate = async (req, res) => {
             const data = {
               id,
               file: pdfData,
+              userId: customId,
             };
 
             const result = await createSignature(data);

@@ -1,4 +1,5 @@
 import axios from "axios";
+import { createLogBsre } from "./logs";
 const FormData = require("form-data");
 const qrCode = require("qrcode");
 
@@ -20,7 +21,7 @@ const api = axios.create({
   },
 });
 
-export const createSignature = async ({ id, file }) => {
+export const createSignature = async ({ id, file, userId }) => {
   try {
     const formData = new FormData();
 
@@ -47,18 +48,17 @@ export const createSignature = async ({ id, file }) => {
       },
     });
 
-    // console.log({
-    //   response: response?.data?.base64_signed_file,
-    // });
-
-    // fs.writeFileSync("data.txt", response?.data?.base64_signed_file, "utf8");
-
     return {
       success: true,
       data: response?.data,
     };
   } catch (error) {
     console.log(error);
+    await createLogBsre({
+      userId,
+      webinarParticipantId: id,
+      log: JSON.stringify(error?.response?.data),
+    });
     return {
       success: false,
       data: error?.response?.data,

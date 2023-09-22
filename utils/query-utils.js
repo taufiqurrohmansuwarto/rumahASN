@@ -326,3 +326,60 @@ group by 1`);
 };
 
 // todo tambahkan statistik berdasarkan usia pelanggan yang bertanya 6 bulan terakhir
+
+module.exports.getReportWebinarSeries = async (webinarSeriesId) => {
+  try {
+    const result = await knex.raw(`WITH AbsenceData AS (SELECT u.username,
+                            u.email,
+                            u.employee_number,
+                            u.info,
+                            u."group"               as "group",
+                            wsp.already_poll,
+                            ws.title                AS nama_webinar,
+                            'hari ke-' || wsa.day || ': ' ||
+                            COALESCE('hadir tanggal ' || TO_CHAR(wspa.created_at, 'DD-MM-YYYY HH24:MI'),
+                                     'tidak hadir') AS waktu_absen_entry
+                     FROM webinar_series_participates wsp
+                              JOIN users u ON wsp.user_id = u.custom_id
+                              JOIN webinar_series ws ON wsp.webinar_series_id = ws.id
+                              LEFT JOIN webinar_series_absence_entries wsa ON ws.id = wsa.webinar_series_id
+                              LEFT JOIN webinar_series_participants_absence wspa
+                                        ON wsp.user_id = wspa.user_id AND wsa.id = wspa.webinar_series_absence_entry_id
+                     WHERE wsp.webinar_series_id = '${webinarSeriesId}'),
+     CertificateData AS (SELECT u.username,
+                                ws.title             AS nama_webinar,
+                                CASE
+                                    WHEN COUNT(DISTINCT wsa.id) =
+                                         COUNT(DISTINCT wspa.webinar_series_absence_entry_id) and
+                                         wsp.already_poll = true
+                                        THEN 'Ya'
+                                    ELSE 'Tidak' END AS dapat_sertifikat
+                         FROM webinar_series_participates wsp
+                                  JOIN users u ON wsp.user_id = u.custom_id
+                                  JOIN webinar_series ws ON wsp.webinar_series_id = ws.id
+                                  LEFT JOIN webinar_series_absence_entries wsa ON ws.id = wsa.webinar_series_id
+                                  LEFT JOIN webinar_series_participants_absence wspa ON wsp.user_id = wspa.user_id AND
+                                                                                        wsa.id =
+                                                                                        wspa.webinar_series_absence_entry_id
+                         WHERE wsp.webinar_series_id = '${webinarSeriesId}'
+                         GROUP BY u.username, ws.title, wsp.already_poll)
+SELECT ad.username,
+       ad.already_poll,
+       ad.info,
+       ad.email,
+       ad.employee_number,
+       ad.nama_webinar,
+       ad.group,
+       STRING_AGG(ad.waktu_absen_entry, ', ') AS waktu_absen,
+       cd.dapat_sertifikat
+FROM AbsenceData ad
+         JOIN CertificateData cd ON ad.username = cd.username AND ad.nama_webinar = cd.nama_webinar
+GROUP BY ad.username, ad.nama_webinar, cd.dapat_sertifikat, ad.already_poll, ad.info, ad.email, ad.employee_number,
+         ad.group
+ORDER BY ad.username, ad.nama_webinar;
+`);
+    return result;
+  } catch (e) {
+    console.log(e);
+  }
+};

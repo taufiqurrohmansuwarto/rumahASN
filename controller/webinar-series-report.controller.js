@@ -6,7 +6,8 @@ const WebinarSeriesRating = require("@/models/webinar-series-ratings.model");
 const moment = require("moment");
 
 const xlsx = require("xlsx");
-const { times } = require("lodash");
+const { times, toLower } = require("lodash");
+const { getReportWebinarSeries } = require("@/utils/query-utils");
 
 const getNama = (user) => {
   if (user?.group === "GOOGLE") {
@@ -58,16 +59,18 @@ const serializeDataReportParticipant = (data) => {
   } else {
     const result = data.map((item) => {
       return {
-        Nama: getNama(item?.participant),
+        Nama: getNama(item),
         "Asal Pendaftaran": item?.participant?.group,
-        email: getEmail(item?.participant),
-        "NIP/NIPTTK": getEmployeeNumber(item?.participant),
-        Jabatan: item?.participant?.info?.jabatan?.jabatan,
-        "Perangkat Daerah": item?.participant?.info?.perangkat_daerah?.detail,
+        email: toLower(getEmail(item)),
+        "NIP/NIPTTK": getEmployeeNumber(item),
+        Jabatan: item?.info?.jabatan?.jabatan,
+        "Perangkat Daerah": item?.info?.perangkat_daerah?.detail,
         "Tanggal Registrasi": moment(item?.created_at).format(
           "DD-MM-YYYY HH:mm"
         ),
         "Sudah Polling": item?.already_poll ? "Sudah" : "Belum",
+        waktu_absen: item?.waktu_absen,
+        dapat_sertifikat: item?.dapat_sertifikat,
       };
     });
     return result;
@@ -214,12 +217,8 @@ const downloadParticipants = async (req, res) => {
   try {
     const { id } = req?.query;
 
-    const result = await WebinarSeriesParticipate.query()
-      .where("webinar_series_id", id)
-      .withGraphFetched("[participant]")
-      .orderBy("created_at", "desc");
-
-    const data = serializeDataReportParticipant(result);
+    const result = await getReportWebinarSeries(id);
+    const data = serializeDataReportParticipant(result?.rows);
 
     const wb = xlsx.utils.book_new();
     const ws = xlsx.utils.json_to_sheet(data);
