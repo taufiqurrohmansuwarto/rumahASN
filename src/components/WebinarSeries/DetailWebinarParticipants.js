@@ -182,10 +182,13 @@ function DetailWebinarParticipants() {
               </Button>
             </Tooltip>
           )}
+          size="small"
           pagination={{
             position: ["bottomRight", "topRight"],
+            size: "small",
             current: query?.query?.page,
             total: participants?.result?.total,
+            showSizeChanger: false,
             showTotal: (total) => `Total ${total} peserta`,
             onChange: (page) => {
               setQuery({

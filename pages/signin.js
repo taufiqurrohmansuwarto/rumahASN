@@ -74,6 +74,14 @@ const SignIn = ({ providers }) => {
                   textAlign: "center",
                 }}
               />
+              <Image
+                style={{
+                  width: 150,
+                  height: "auto",
+                }}
+                src="https://bsre.bssn.go.id/img/bsre-logo-full.aa4caa4d.png"
+                alt="bsre"
+              />
               <Divider plain>Anda masyarakat umum?</Divider>
               <GoogleButton
                 style={{ width: "100%" }}
