@@ -119,8 +119,14 @@ export const createRating = ({ id, data }) => {
   return api.post(`/users/${id}/rating`, data).then((res) => res?.data);
 };
 
-export const getRatingForUser = (id) => {
-  return api.get(`/users/${id}/rating`).then((res) => res?.data);
+export const getRatingForUser = (query) => {
+  const queryStr = queryString.stringify(query, {
+    skipEmptyString: true,
+  });
+
+  return api
+    .get(`/users/${query?.id}/rating?${queryStr}`)
+    .then((res) => res?.data);
 };
 
 // surveys admin
@@ -145,8 +151,14 @@ export const deleteSurvey = (id) => {
   return api.delete(`/admin/surveys/${id}`).then((res) => res?.data);
 };
 
-export const getRatingAdmin = (id) => {
-  return api.get(`/admin/${id}/ratings`).then((res) => res?.data);
+export const getRatingAdmin = (query) => {
+  const queryStr = queryString.stringify(query, {
+    skipEmptyString: true,
+  });
+
+  return api
+    .get(`/admin/${query?.id}/ratings?${queryStr}`)
+    .then((res) => res?.data);
 };
 
 // comments

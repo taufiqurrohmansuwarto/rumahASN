@@ -11,9 +11,12 @@ function Ratings() {
   const { id } = router?.query;
 
   const { data, isLoading } = useQuery(
-    ["webinar-series-ratings", id],
-    () => getRatingAdmin(id),
-    {}
+    ["webinar-series-ratings", router?.query],
+    () => getRatingAdmin(router?.query),
+    {
+      keepPreviousData: true,
+      enabled: !!router?.query,
+    }
   );
 
   return (

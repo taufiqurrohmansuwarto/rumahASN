@@ -55,15 +55,34 @@ const getRatingForUser = async (req, res) => {
         ),
       };
 
+      const page = req?.query?.page || 1;
+      const limit = req?.query?.limit || 10;
+      const rating = req?.query?.rating;
+
       const result = await WebinarSeriesRatings.query()
         .withGraphFetched("participant")
         .where("webinar_series_id", webinarId)
+        .andWhere((builder) => {
+          if (rating) {
+            builder.where("rating", rating);
+          }
+        })
+        .page(parseInt(page) - 1, parseInt(limit))
         .orderBy("created_at", "desc");
 
-      res.json({
+      const data = {
+        data: result.results,
+        total: result.total,
+        page: parseInt(page),
+        limit: parseInt(limit),
+      };
+
+      const payload = {
         aggregate,
-        data: result,
-      });
+        data,
+      };
+
+      res.json(payload);
     }
   } catch (error) {
     console.log(error);
@@ -101,15 +120,34 @@ const getRating = async (req, res) => {
       ),
     };
 
+    const page = req?.query?.page || 1;
+    const limit = req?.query?.limit || 10;
+    const rating = req?.query?.rating;
+
     const result = await WebinarSeriesRatings.query()
       .withGraphFetched("participant")
       .where("webinar_series_id", id)
-      .orderBy("created_at", "desc");
+      .andWhere((builder) => {
+        if (rating) {
+          builder.where("rating", rating);
+        }
+      })
+      .orderBy("created_at", "desc")
+      .page(parseInt(page) - 1, parseInt(limit));
 
-    res.json({
+    const data = {
+      data: result.results,
+      total: result.total,
+      page: parseInt(page),
+      limit: parseInt(limit),
+    };
+
+    const payload = {
       aggregate,
-      data: result,
-    });
+      data,
+    };
+
+    res.json(payload);
   } catch (error) {
     console.log(error);
     res.status(400).json({ code: 400, message: "Internal Server Error" });
