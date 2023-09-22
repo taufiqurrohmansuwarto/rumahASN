@@ -9,7 +9,7 @@ import {
 } from "@ant-design/icons";
 import { Center } from "@mantine/core";
 import { useSpring } from "@react-spring/web";
-import { Button, Col, Divider, Image, Row, Space } from "antd";
+import { BackTop, Button, Col, Divider, Image, Row, Space } from "antd";
 import { getProviders, signIn } from "next-auth/react";
 import Head from "next/head";
 import GoogleButton from "react-google-button";
@@ -176,6 +176,7 @@ const SignIn = ({ providers }) => {
       {/* <AppRating /> */}
       <UserRating />
       <Footer />
+      <BackTop />
     </>
   );
 };

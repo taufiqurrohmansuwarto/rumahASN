@@ -1,4 +1,5 @@
 const Ticket = require("@/models/tickets.model");
+const { chunk } = require("lodash");
 const { raw } = require("objection");
 
 const publicDashboard = async (req, res) => {
@@ -16,21 +17,25 @@ const landingPageData = async (req, res) => {
       .distinct("requester")
       .where("stars", "=", 5)
       // requester comment character length > 15
-      .andWhere(raw("LENGTH(requester_comment)"), ">", 30)
+      .andWhere(raw("LENGTH(requester_comment)"), ">", 50)
       .andWhereNot("requester_comment", null)
       .select("id", "stars", "requester_comment", "requester", "updated_at")
       .withGraphFetched("[customer(simpleSelect)]")
-      .limit(9)
+      .limit(27)
       .orderBy("updated_at", "desc");
 
-    const ticketsPin = await Ticket.query()
-      .where("is_pinned", true)
-      .select("id", "title", "content")
-      .withGraphFetched("[customer(simpleSelect)]");
+    // using lodash to divide array into 3 [[],[], []]
+    const result = chunk(ticketsWithRatings, 9);
+    const hasil = result?.map((_, index) => {
+      return {
+        key: index,
+        data: result[index],
+      };
+    });
 
     res.json({
-      ticketsPin,
       ticketsWithRatings,
+      hasil,
     });
   } catch (error) {
     console.log(error);

@@ -10,6 +10,7 @@ import { Button, Card, List, Modal, Tag, message } from "antd";
 import { useRouter } from "next/router";
 import moment from "moment";
 import { Stack } from "@mantine/core";
+import { CheckOutlined, CloseOutlined } from "@ant-design/icons";
 
 const RegisterUnregister = ({
   data,
@@ -66,7 +67,7 @@ const RegisterUnregister = ({
                     loading={isLoadingUnregister}
                     onClick={async () => await handleUnregister(item?.id)}
                   >
-                    Unregister
+                    Batal Absen
                   </Button>
                 ) : (
                   <Button
@@ -75,7 +76,7 @@ const RegisterUnregister = ({
                     loading={isLoadingRegister}
                     disabled={isLoadingRegister}
                   >
-                    Register
+                    Absen
                   </Button>
                 )}
               </div>,
@@ -88,17 +89,27 @@ const RegisterUnregister = ({
                   <Stack>
                     <div>
                       {moment(item?.registration_open_at).format(
-                        "DD-MM-YYYY hh:mm"
-                      )}{" "}
+                        "DD-MM-YYYY HH:mm"
+                      )}
+                      {" s/d "}
                       {moment(item?.registration_close_at).format(
-                        "DD-MM-YYYY hh:mm"
+                        "DD-MM-YYYY HH:mm"
                       )}
                     </div>
                     <div>
-                      <Tag color={item?.current_user_absence ? "green" : "red"}>
+                      <Tag
+                        icon={
+                          item?.current_user_absence ? (
+                            <CheckOutlined />
+                          ) : (
+                            <CloseOutlined />
+                          )
+                        }
+                        color={item?.current_user_absence ? "green" : "red"}
+                      >
                         {item?.current_user_absence
-                          ? "Registered"
-                          : "Unregistered"}
+                          ? "SUDAH ABSEN"
+                          : "BELUM ABSEN"}
                       </Tag>
                     </div>
                   </Stack>
@@ -128,8 +139,12 @@ function WebinarAbsence() {
       onSettled: () => {
         queryClient.invalidateQueries(["webinar-series-absences", id]);
       },
-      onError: () => {
-        message.error("Gagal melakukan absensi");
+      onError: (error) => {
+        message.error(
+          `Gagal melakukan absensi. ${JSON.stringify(
+            error?.response?.data?.message
+          )}`
+        );
       },
     }
   );
@@ -139,7 +154,7 @@ function WebinarAbsence() {
       onSettled: () => {
         queryClient.invalidateQueries(["webinar-series-absences", id]);
       },
-      onError: () => {
+      onError: (error) => {
         message.error("Gagal membatalkan absensi");
       },
     });

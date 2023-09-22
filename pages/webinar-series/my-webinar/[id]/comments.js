@@ -78,9 +78,18 @@ function WebinarComments() {
     }
   );
 
+  const { data: myWebinar, isLoading: isLoadingMyWebinar } = useQuery(
+    ["webinar-user-detail", id],
+    () => webinarUserDetail(id),
+    {
+      keepPreviousData: true,
+    }
+  );
+
   return (
     <WebinarUserDetailLayout loading={isLoading} active="comments">
       <WebinarSeriesComments
+        youtubeUrl={myWebinar?.webinar_series?.youtube_url}
         data={data}
         create={create}
         hapus={hapus}

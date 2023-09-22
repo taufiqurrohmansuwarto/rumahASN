@@ -92,7 +92,7 @@ const Assignee = ({ item }) => {
 
 const TicketsTable = ({ query }) => {
   const router = useRouter();
-  const { data, isLoading } = useQuery(
+  const { data, isLoading, isFetching } = useQuery(
     ["bkd-tickets", query],
     () => pegawaiBkdTickets(query),
     {
@@ -111,7 +111,7 @@ const TicketsTable = ({ query }) => {
     <List
       rowKey={(row) => row?.id}
       dataSource={data?.data}
-      loading={isLoading}
+      loading={isLoading || isFetching}
       pagination={{
         onChange: handleChangePage,
         showSizeChanger: false,

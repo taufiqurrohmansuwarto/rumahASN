@@ -8,7 +8,7 @@ import {
   commentAdminUpdate,
 } from "@/services/webinar.services";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { message } from "antd";
+import { BackTop, message } from "antd";
 import { useRouter } from "next/router";
 
 function Comments() {
@@ -79,6 +79,7 @@ function Comments() {
 
   return (
     <AdminLayoutDetailWebinar loading={isLoading} active="comments">
+      <BackTop />
       <WebinarSeriesComments
         data={data}
         create={create}

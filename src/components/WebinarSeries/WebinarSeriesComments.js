@@ -12,10 +12,12 @@ import {
   Typography,
   Row,
   Col,
+  BackTop,
 } from "antd";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import { useEffect, useRef, useState } from "react";
+import ReactPlayer from "../ReactPlayer";
 
 const Editor = ({
   onChange,
@@ -275,6 +277,7 @@ const Comments = ({
 };
 
 function WebinarSeriesComments({
+  youtubeUrl,
   data,
   create,
   isLoadingCreate,
@@ -316,8 +319,10 @@ function WebinarSeriesComments({
 
   return (
     <Card>
+      <BackTop />
       <Row>
-        <Col xs={24} md={18}>
+        <Col xs={24} md={14}>
+          {youtubeUrl && <ReactPlayer url={youtubeUrl} />}
           <Group position="apart">
             <Typography.Text strong>{data?.length} Komentar</Typography.Text>
             <Segmented
