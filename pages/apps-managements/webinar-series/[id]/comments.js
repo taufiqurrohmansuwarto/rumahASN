@@ -77,10 +77,17 @@ function Comments() {
     }
   );
 
+  const { data: detailAdmin, isLoading: isLoadingDetailAdmin } = useQuery(
+    ["webinar-series-admin-detail", router?.query?.id],
+    () => detailWebinar(router?.query?.id),
+    {}
+  );
+
   return (
     <AdminLayoutDetailWebinar loading={isLoading} active="comments">
       <BackTop />
       <WebinarSeriesComments
+        youtubeUrl={detailAdmin?.youtube_url}
         data={data}
         create={create}
         isloadingCreate={isLoadingCreate}

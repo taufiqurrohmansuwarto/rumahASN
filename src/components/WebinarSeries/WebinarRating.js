@@ -114,10 +114,11 @@ const DaftarRating = ({ data }) => {
   };
 
   return (
-    <Stack>
+    <Space direction="vertical">
       {data?.map((d) => {
         return (
           <Space
+            size="small"
             key={d?.rating}
             style={{
               cursor: "pointer",
@@ -125,20 +126,26 @@ const DaftarRating = ({ data }) => {
             }}
             onClick={() => handleActive(d?.rating)}
           >
-            <span>{d?.rating} Bintang</span>
             <Rating value={d?.rating} readOnly />
             <Progress w={200} value={d?.percentage} />
             <Typography.Text>{d?.total}</Typography.Text>
           </Space>
         );
       })}
-    </Stack>
+    </Space>
   );
 };
 
 const ViewRatingComponent = ({ data }) => {
   return (
-    <Grid>
+    <Grid
+      gutter={{
+        xs: 8,
+        md: 16,
+        lg: 24,
+        xl: 32,
+      }}
+    >
       <Grid.Col md={6} xs={12}>
         <Typography.Title level={5}>Review Peserta & Rating</Typography.Title>
         <Stack>

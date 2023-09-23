@@ -33,6 +33,9 @@ function DownloadRating({ id }) {
   return (
     <Tooltip title="Unduh Rating">
       <Button
+        style={{
+          marginBottom: 16,
+        }}
         loading={isLoading}
         disabled={isLoading}
         onClick={handleDownload}

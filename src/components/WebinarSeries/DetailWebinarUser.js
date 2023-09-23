@@ -234,14 +234,7 @@ function DetailWebinarNew({
           comment: data?.my_rating_comment,
         }}
       />
-      <Row
-        gutter={{
-          xs: 16,
-          sm: 16,
-          md: 16,
-          lg: 16,
-        }}
-      >
+      <Row gutter={[16, 16]}>
         <Col md={17} xs={24}>
           <Card>
             <Typography.Title level={4}>{data?.title}</Typography.Title>
@@ -285,25 +278,6 @@ function DetailWebinarNew({
                   {data?.hour} Jam Pelajaran
                 </Typography.Text>{" "}
               </div>
-              {data?.already_rating ? (
-                <Space>
-                  <Rate disabled defaultValue={data?.my_rating} />
-                  <EditTwoTone
-                    style={{
-                      cursor: "pointer",
-                    }}
-                    onClick={handleOpen}
-                  />
-                </Space>
-              ) : (
-                <Button
-                  type="dashed"
-                  onClick={handleOpen}
-                  icon={<StarOutlined />}
-                >
-                  Beri Kami Rating
-                </Button>
-              )}
               <Space>
                 {data?.reference_link && (
                   <div>
@@ -347,6 +321,25 @@ function DetailWebinarNew({
                   </div>
                 )}
               </Space>
+              {data?.already_rating ? (
+                <Space>
+                  <Rate disabled defaultValue={data?.my_rating} />
+                  <EditTwoTone
+                    style={{
+                      cursor: "pointer",
+                    }}
+                    onClick={handleOpen}
+                  />
+                </Space>
+              ) : (
+                <Button
+                  type="primary"
+                  onClick={handleOpen}
+                  icon={<StarOutlined />}
+                >
+                  Beri Rating Webinar
+                </Button>
+              )}
             </Stack>
             <Divider />
             <GoogleEditInformation />
