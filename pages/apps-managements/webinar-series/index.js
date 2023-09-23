@@ -15,6 +15,9 @@ import {
   Tag,
   message,
   Input as InputAntd,
+  Grid,
+  Row,
+  Col,
 } from "antd";
 import Head from "next/head";
 import Link from "next/link";
@@ -77,11 +80,16 @@ const WebinarSeries = () => {
       render: (text) => {
         return (
           <Stack>
-            {text?.episode} - {text?.title}
-            <div>
-              {formatDateWebinar(text?.start_date)} -{" "}
-              {formatDateWebinar(text?.end_date)}
-            </div>
+            <Link href={`/apps-managements/webinar-series/${text?.id}/detail`}>
+              <a>
+                {text?.episode} - {text?.title}
+              </a>
+            </Link>
+            <Space>
+              <Tag color={text?.is_open ? "green" : "red"}>
+                {text?.is_open ? "Pendaftaran dibuka" : "Pendaftaran ditutup"}
+              </Tag>
+            </Space>
           </Stack>
         );
       },
@@ -164,25 +172,29 @@ const WebinarSeries = () => {
         loading={isLoading}
       >
         <Card>
-          <Button
-            style={{
-              marginBottom: 16,
-            }}
-            onClick={handleCreate}
-            type="primary"
-            icon={<PlusOutlined />}
-          >
-            Webinar Series
-          </Button>
           <Table
             title={() => (
-              <InputAntd.Search
-                allowClear
-                onSearch={handleSearch}
-                style={{
-                  width: 400,
-                }}
-              />
+              <div>
+                <Button
+                  style={{
+                    marginBottom: 16,
+                  }}
+                  onClick={handleCreate}
+                  type="primary"
+                  icon={<PlusOutlined />}
+                >
+                  Webinar Series
+                </Button>
+                <Row>
+                  <Col md={8} xs={24}>
+                    <InputAntd.Search
+                      width={"100%"}
+                      allowClear
+                      onSearch={handleSearch}
+                    />
+                  </Col>
+                </Row>
+              </div>
             )}
             columns={columns}
             dataSource={data?.data}

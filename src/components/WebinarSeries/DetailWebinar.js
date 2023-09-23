@@ -87,14 +87,7 @@ function DetailWebinar({ data }) {
 
   return (
     <>
-      <Row
-        gutter={{
-          xs: 16,
-          sm: 16,
-          md: 16,
-          lg: 16,
-        }}
-      >
+      <Row gutter={[16, 16]}>
         <Col md={16} xs={24}>
           <Card>
             <Typography.Title level={4}>{data?.title}</Typography.Title>

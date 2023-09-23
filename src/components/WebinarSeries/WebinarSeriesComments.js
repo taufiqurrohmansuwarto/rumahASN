@@ -13,6 +13,7 @@ import {
   Row,
   Col,
   BackTop,
+  Grid,
 } from "antd";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
@@ -295,6 +296,7 @@ function WebinarSeriesComments({
   } = useSession();
 
   const [value, setValue] = useState();
+  const screens = Grid.useBreakpoint();
 
   const handleChange = (e) => {
     setValue(e.target.value);
@@ -322,7 +324,16 @@ function WebinarSeriesComments({
       <BackTop />
       <Row>
         <Col xs={24} md={14}>
-          {youtubeUrl && <ReactPlayer url={youtubeUrl} />}
+          {youtubeUrl && (
+            <ReactPlayer
+              style={{
+                marginBottom: 16,
+              }}
+              height={screens?.md ? 600 : 200}
+              width="100%"
+              url={youtubeUrl}
+            />
+          )}
           <Group position="apart">
             <Typography.Text strong>{data?.length} Komentar</Typography.Text>
             <Segmented
