@@ -12,6 +12,14 @@ class TickestCommentsCustomers extends Model {
     return "id";
   }
 
+  static modifiers() {
+    return {
+      isAnswer(query) {
+        query.where("in_answer", true).first();
+      },
+    };
+  }
+
   static get relationMappings() {
     const user = require("./users.model");
     const reactions = require("./comments-reactions.model");

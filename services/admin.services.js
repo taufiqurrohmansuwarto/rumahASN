@@ -44,7 +44,11 @@ export const adminDashboard = async (type = "standard") => {
 };
 
 export const excelReport = async () => {
-  return api.get(`/reports`).then((res) => res?.data);
+  return api
+    .get(`/reports`, {
+      responseType: "arraybuffer",
+    })
+    .then((res) => res?.data);
 };
 
 export const commentsCustomersToAgents = async (id) => {
