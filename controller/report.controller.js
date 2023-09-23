@@ -7,7 +7,7 @@ const { convert } = require("html-to-text");
 const excelReport = async (req, res) => {
   try {
     const result = await Tickets.query().withGraphFetched(
-      "[admin(simpleSelect), customer(simpleSelect), agent(simpleSelect), sub_category, sub_category.[category], priorities]"
+      "[admin(simpleSelect),  customer(simpleSelect), agent(simpleSelect), sub_category, sub_category.[category], priorities]"
     );
 
     const serialize = result?.map((r) => {
@@ -30,9 +30,13 @@ const excelReport = async (req, res) => {
         ),
         prioritas: checkUndefined(r?.priorities?.name),
         agent: checkUndefined(r?.agent?.username),
-        tgl_agent_ditugaskan: formatDate(r?.chooser_picked_at),
-        tgl_agent_dikerjakan: formatDate(r?.start_work_at),
-        tgl_agent_selesai: formatDate(r?.completed_at),
+        tgl_agent_ditugaskan: r?.chooser_picked_at
+          ? formatDate(r?.chooser_picked_at)
+          : "-",
+        tgl_agent_dikerjakan: r?.start_work_at
+          ? formatDate(r?.start_work_at)
+          : "-",
+        tgl_agent_selesai: r?.completed_at ? formatDate(r?.completed_at) : "-",
         rating: checkUndefined(r?.stars),
         komen_rating: checkUndefined(r?.requester_comment),
         solusi: checkUndefined(r?.assignee_reason),
@@ -59,6 +63,12 @@ const excelReport = async (req, res) => {
     console.log(error);
     res.status(400).json({ code: 400, message: "Internal Server Error" });
   }
+};
+
+const questionReport = async (req, res) => {
+  try {
+    const query = req.query;
+  } catch (error) {}
 };
 
 module.exports = {
