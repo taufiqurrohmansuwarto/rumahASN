@@ -4,6 +4,7 @@ const User = require("../../../models/users.model");
 import axios from "axios";
 import { createHistory } from "@/utils/utility";
 const apigateway = process.env.APIGATEWAY_URL;
+import moment from "moment";
 
 const operatorId = process.env.OPERATOR_ID;
 const operatorSecret = process.env.OPERATOR_SECRET;
@@ -31,8 +32,7 @@ const googleApiKey = process.env.GOOGLE_API_KEY;
 
 const getUserBirtdahGoogle = async (accessToken) => {
   try {
-    console.log({ googleApiKey, accessToken });
-    const result = axios.get(
+    const result = await axios.get(
       `https://people.googleapis.com/v1/people/me?personFields=birthdays&key=${googleApiKey}`,
       {
         headers: {
@@ -42,7 +42,9 @@ const getUserBirtdahGoogle = async (accessToken) => {
     );
     return result;
   } catch (error) {
-    console.log(error);
+    const data = error?.response?.data;
+    const details = data?.error?.details;
+    console.log("error", details);
   }
 };
 
@@ -181,7 +183,7 @@ export default NextAuth({
         },
       },
       profile: async (profile, token) => {
-        const currentUser = {
+        let currentUser = {
           id: profile.sub,
           username: profile.name,
           image: profile.picture,
@@ -196,7 +198,15 @@ export default NextAuth({
 
         const accessToken = token?.access_token;
         const tanggalLahir = await getUserBirtdahGoogle(accessToken);
-        console.log(tanggalLahir);
+        const currentUserDate = tanggalLahir?.data?.birthdays?.[0]?.date;
+
+        if (currentUserDate) {
+          const birthdate = `${currentUserDate?.year}-${currentUserDate?.month}-${currentUserDate?.day}`;
+          currentUser = {
+            ...currentUser,
+            birthdate,
+          };
+        }
 
         const result = await upsertUser(currentUser);
 
