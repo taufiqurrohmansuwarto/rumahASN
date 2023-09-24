@@ -1,17 +1,18 @@
 import { removeTicket } from "@/services/index";
 import { DeleteOutlined } from "@ant-design/icons";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Row, Space, Typography, Modal, message } from "antd";
+import { useMutation } from "@tanstack/react-query";
+import { Modal, Row, Space, Typography, message } from "antd";
+import { useRouter } from "next/router";
 
 const { confirm } = Modal;
 
 function RemoveTicket({ id }) {
-  const queryClient = useQueryClient();
+  const router = useRouter();
 
-  const { mutateAsync, isLoading } = useMutation((data) => removeTicket(data), {
+  const { mutateAsync } = useMutation((data) => removeTicket(data), {
     onSuccess: () => {
-      queryClient.invalidateQueries(["publish-ticket", id]);
       message.success("Tiket berhasil dihapus");
+      router.push(`/feeds`);
     },
     onError: () => message.error("Tiket gagal dihapus"),
   });

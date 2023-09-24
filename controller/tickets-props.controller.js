@@ -633,7 +633,7 @@ const removeTicket = async (req, res) => {
     const { id } = req?.query;
     const { current_role, customId } = req?.user;
 
-    if (!current_role !== "admin") {
+    if (current_role !== "admin" || !id) {
       res
         .status(403)
         .json({ message: "You don't have permission to do this action." });

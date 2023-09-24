@@ -1,6 +1,7 @@
 import { getRwPendidikanMaster } from "@/utils/master.utils";
 import moment from "moment";
 const { orderBy } = require("lodash");
+const Anomali23 = require("@/models/anomali23.model");
 
 const url = "https://master.bkd.jatimprov.go.id/files_jatimprov/";
 
@@ -185,7 +186,14 @@ export const dataUtamaMaster = async (req, res) => {
     const result = await fetcher.get(
       `/master-ws/operator/employees/${nip}/data-utama-master`
     );
-    res.json(result?.data);
+
+    const anomali = await Anomali23.query().where({ nip_baru: nip });
+    const data = {
+      ...result?.data,
+      anomali,
+    };
+
+    res.json(data);
   } catch (error) {
     console.log(error);
     res.status(500).json({ code: 500, message: "Internal Server Error" });
@@ -199,7 +207,16 @@ export const dataUtamaMasterByNip = async (req, res) => {
     const result = await fetcher.get(
       `/master-ws/operator/employees/${nip}/data-utama-master`
     );
-    res.json(result?.data);
+
+    const anomali = await Anomali23.query()
+      .where({ nip_baru: nip })
+      .withGraphFetched("user(simpleSelect)");
+    const data = {
+      ...result?.data,
+      anomali,
+    };
+
+    res.json(data);
   } catch (error) {
     console.log(error);
     res.status(500).json({ code: 500, message: "Internal Server Error" });

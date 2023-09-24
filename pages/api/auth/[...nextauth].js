@@ -27,11 +27,13 @@ const masterFasilitatorScope = process.env.MASTER_FASILITATOR_SCOPE;
 
 const googleClientId = process.env.GOOGLE_CLIENT_ID;
 const googleClientSecret = process.env.GOOGLE_CLIENT_SECRET;
+const googleApiKey = process.env.GOOGLE_API_KEY;
 
 const getUserBirtdahGoogle = async (accessToken) => {
   try {
+    console.log({ googleApiKey, accessToken });
     const result = axios.get(
-      `https://people.googleapis.com/v3/people/me?key=${googleClientId}`,
+      `https://people.googleapis.com/v1/people/me?personFields=birthdays&key=${googleApiKey}`,
       {
         headers: {
           Authorization: `Bearer ${accessToken}`,
@@ -171,6 +173,13 @@ export default NextAuth({
     GoogleProvider({
       clientId: googleClientId,
       clientSecret: googleClientSecret,
+      authorization: {
+        params: {
+          scope:
+            "https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/user.gender.read https://www.googleapis.com/auth/user.birthday.read",
+          prompt: "login",
+        },
+      },
       profile: async (profile, token) => {
         const currentUser = {
           id: profile.sub,
@@ -184,6 +193,10 @@ export default NextAuth({
           email: profile.email || null,
           organization_id: profile.organization_id || null,
         };
+
+        const accessToken = token?.access_token;
+        const tanggalLahir = await getUserBirtdahGoogle(accessToken);
+        console.log(tanggalLahir);
 
         const result = await upsertUser(currentUser);
 
