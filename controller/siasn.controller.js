@@ -23,6 +23,7 @@ const {
 } = require("@/utils/siasn-proxy.utils");
 const { getRwPangkat } = require("@/utils/master.utils");
 const { createLogSIASN } = require("@/utils/logs");
+const Anomali23 = require("@/models/anomali23.model");
 
 const siasnEmployeesDetail = async (req, res) => {
   try {
@@ -58,7 +59,12 @@ const siasnEmployeeDetailByNip = async (req, res) => {
     const siasnRequest = req.siasnRequest;
 
     const { data } = await siasnRequest.get(`/pns/data-utama/${nip}`);
-    res.json(data?.data);
+
+    const hasil = {
+      ...data?.data,
+    };
+
+    res.json(hasil);
   } catch (error) {
     console.log(error);
     res.status(500).json({ code: 500, message: "Internal Server Error" });

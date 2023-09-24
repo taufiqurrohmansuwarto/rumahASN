@@ -451,7 +451,7 @@ const SideRight = ({ item }) => {
             <Pin id={item?.id} />
           )}
           <ReminderTicket id={item?.id} />
-          <RemoveTicket />
+          <RemoveTicket id={item?.id} />
         </Col>
       </RestrictedContent>
     </Row>

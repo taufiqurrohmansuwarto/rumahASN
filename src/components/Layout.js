@@ -148,6 +148,10 @@ const changeRoutes = (user) => {
                 { path: "/apps-managements/integrasi/siasn", name: "SIASN" },
               ],
             },
+            {
+              path: "/apps-managements/anomali-data-2023",
+              name: "Data Anomali 2023",
+            },
             { path: "/apps-managements/votes", name: "Poling" },
             {
               path: "/apps-managements/webinar-series",

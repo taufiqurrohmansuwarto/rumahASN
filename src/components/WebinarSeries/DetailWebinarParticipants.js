@@ -103,7 +103,11 @@ function DetailWebinarParticipants() {
     },
   });
 
-  const { data: participants, isLoading: isLoadingParticipants } = useQuery(
+  const {
+    data: participants,
+    isLoading: isLoadingParticipants,
+    isFetching,
+  } = useQuery(
     ["webinar-series-admin-detail-participants", query],
     () => getParticipants(query),
     {
@@ -112,8 +116,39 @@ function DetailWebinarParticipants() {
   );
 
   const columns = [
-    ,
     {
+      title: "Peserta",
+      key: "peserta",
+      render: (text) => (
+        <Stack>
+          <Space>
+            <Avatar
+              shape="square"
+              size="default"
+              src={text?.participant?.image}
+            />
+            <Space size="small" direction="vertical">
+              <span
+                style={{
+                  fontSize: 12,
+                }}
+              >
+                {participantUsername(text?.participant)}
+              </span>
+              <Tag color={participantColor(text?.participant?.group)}>
+                {text?.participant?.group}
+              </Tag>
+            </Space>
+          </Space>
+
+          <Space></Space>
+          <div>{formatDateSimple(text?.created_at)} </div>
+        </Stack>
+      ),
+      responsive: ["xs"],
+    },
+    {
+      responsive: ["sm"],
       title: "Nama",
       key: "name",
       render: (text) => (
@@ -126,6 +161,7 @@ function DetailWebinarParticipants() {
       ),
     },
     {
+      responsive: ["sm"],
       title: "Group",
       key: "group",
       render: (text) => {
@@ -137,6 +173,7 @@ function DetailWebinarParticipants() {
       },
     },
     {
+      responsive: ["sm"],
       title: "Nomer Pegawai",
       key: "employee_number",
       render: (text) => (
@@ -144,6 +181,7 @@ function DetailWebinarParticipants() {
       ),
     },
     {
+      responsive: ["sm"],
       title: "Jabatan",
       key: "jabatan",
       render: (text) => (
@@ -151,6 +189,7 @@ function DetailWebinarParticipants() {
       ),
     },
     {
+      responsive: ["sm"],
       title: "Perangkat Daerah",
       key: "perangkat_daerah",
       render: (text) => (
@@ -158,6 +197,7 @@ function DetailWebinarParticipants() {
       ),
     },
     {
+      responsive: ["sm"],
       title: "Tgl. Pendaftaran",
       key: "created_at",
       render: (text) => <span>{formatDateSimple(text?.created_at)}</span>,
@@ -200,7 +240,7 @@ function DetailWebinarParticipants() {
               });
             },
           }}
-          loading={isLoadingParticipants}
+          loading={isLoadingParticipants || isFetching}
           rowKey={(row) => row?.custom_id}
           dataSource={participants?.result?.data}
         />
