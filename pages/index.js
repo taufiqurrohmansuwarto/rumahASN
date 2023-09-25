@@ -19,7 +19,7 @@ export default function Home() {
     const pegawaiBKD = asnBkd || pttBkd;
 
     if (pegawaiBKD) {
-      router.push("/beranda-bkd");
+      router.push("/beranda-bkd?tab=my-task");
     } else {
       router.push("/feeds");
     }

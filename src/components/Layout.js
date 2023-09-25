@@ -43,7 +43,7 @@ const changeRoutes = (user) => {
 
     if (pegawaiBKD) {
       userRoutes.routes.push({
-        path: "/beranda-bkd",
+        path: "/beranda-bkd?tab=my-task",
         name: "Beranda BKD",
         icon: <TeamOutlined />,
       });
