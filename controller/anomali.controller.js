@@ -1,5 +1,10 @@
 const xlsx = require("xlsx");
 const Anomali23 = require("@/models/anomali23.model");
+const { raw } = require("objection");
+const {
+  getAggregateAnomali,
+  getPerbaikanByUser,
+} = require("@/utils/query-utils");
 
 const downloadReportAnomali = async (req, res) => {
   try {
@@ -52,10 +57,10 @@ const uploadAnomali2022 = async (req, res) => {
       await Anomali23.query().delete();
       await Anomali23.query().insert(xlData);
       trx.commit();
-
       res.status(200).json({ message: "success" });
     }
   } catch (error) {
+    console.log(error);
     trx.rollback();
     res.status(500).json({ message: "Internal server error" });
   }
@@ -91,11 +96,34 @@ const getAnomali2022 = async (req, res) => {
       ])
       .withGraphFetched("[user(simpleSelect)]");
 
+    const repairedCount = await Anomali23.query()
+      .count("id as value")
+      .where("is_repaired", true)
+      .first();
+
+    const notRepairedCount = await Anomali23.query()
+      .count("id as value")
+      .where("is_repaired", false)
+      .first();
+
+    const pieChart = [
+      { type: "Sudah diperbaiki", value: parseInt(repairedCount.value) },
+      { type: "Belum diperbaiki", value: parseInt(notRepairedCount.value) },
+    ];
+
+    const barFirst = await getAggregateAnomali();
+    const barSecond = await getPerbaikanByUser();
+
     const sendData = {
       data: data.results,
       total: data.total,
       limit: parseInt(limit),
       page: parseInt(page),
+      chart: {
+        pieChart,
+        barFirst,
+        barSecond,
+      },
     };
 
     res.json(sendData);

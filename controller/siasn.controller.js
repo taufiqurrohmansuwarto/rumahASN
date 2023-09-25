@@ -24,6 +24,8 @@ const {
 const { getRwPangkat } = require("@/utils/master.utils");
 const { createLogSIASN } = require("@/utils/logs");
 const Anomali23 = require("@/models/anomali23.model");
+const BackupSIASN = require("@/models/backup-siasn.model");
+const RefSIASNUnor = require("@/models/ref-siasn-unor.model");
 
 const siasnEmployeesDetail = async (req, res) => {
   try {
@@ -125,8 +127,26 @@ const siasnEmployeeDetailPangkat = async (req, res) => {
 const getTreeRef = async (req, res) => {
   try {
     const { siasnRequest: request } = req;
-    const result = await request.get("/referensi/ref-unor");
-    const data = result?.data?.data;
+
+    const currentTime = moment().format("YYYY-MM-DD");
+    const checkUpdate = await BackupSIASN.query()
+      .where("backup_date", currentTime)
+      .andWhere("type", "ref_unor")
+      .first();
+
+    if (!checkUpdate) {
+      const result = await request.get("/referensi/ref-unor");
+      await RefSIASNUnor.query().delete();
+      await RefSIASNUnor.query().insertGraph(result?.data?.data);
+      await BackupSIASN.query().insert({
+        backup_date: currentTime,
+        type: "ref_unor",
+      });
+    }
+
+    const refUnor = await RefSIASNUnor.query();
+
+    const data = refUnor;
     const dataFlat = data?.map((d) => ({
       id: d?.Id,
       key: d?.Id,
