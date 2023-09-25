@@ -9,6 +9,8 @@ class LogBsre extends Model {
 
   static get relationMappings() {
     const User = require("@/models/users.model");
+    const WebinarSeries = require("@/models/webinar-series.model");
+
     return {
       user: {
         relation: Model.BelongsToOneRelation,
@@ -16,6 +18,14 @@ class LogBsre extends Model {
         join: {
           from: "log_bsre.user_id",
           to: "users.custom_id",
+        },
+      },
+      webinar_series: {
+        relation: Model.BelongsToOneRelation,
+        modelClass: WebinarSeries,
+        join: {
+          from: "log_bsre.webinar_series_id",
+          to: "webinar_series.id",
         },
       },
     };

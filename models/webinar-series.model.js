@@ -12,6 +12,14 @@ class WebinarSeries extends Model {
     this.id = nanoid(10);
   }
 
+  static get modifiers() {
+    return {
+      selectName(builder) {
+        builder.select("id", "title");
+      },
+    };
+  }
+
   static get relationMappings() {
     const WebinarParticipate = require("@/models/webinar-series-participates.model");
     return {
