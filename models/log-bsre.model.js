@@ -9,7 +9,7 @@ class LogBsre extends Model {
 
   static get relationMappings() {
     const User = require("@/models/users.model");
-    const WebinarSeries = require("@/models/webinar-series.model");
+    const WebinarSeriesParticipants = require("@/models/webinar-series-participates.model");
 
     return {
       user: {
@@ -20,12 +20,12 @@ class LogBsre extends Model {
           to: "users.custom_id",
         },
       },
-      webinar_series: {
+      webinar_series_participates: {
         relation: Model.BelongsToOneRelation,
-        modelClass: WebinarSeries,
+        modelClass: WebinarSeriesParticipants,
         join: {
-          from: "log_bsre.webinar_series_id",
-          to: "webinar_series.id",
+          from: "log_bsre.webinar_series_participate_id",
+          to: "webinar_series_participates.id",
         },
       },
     };
