@@ -5,6 +5,7 @@ const {
   getAggregateAnomali,
   getPerbaikanByUser,
 } = require("@/utils/query-utils");
+const { sortBy } = require("lodash");
 
 const downloadReportAnomali = async (req, res) => {
   try {
@@ -78,11 +79,8 @@ const getAnomali2022 = async (req, res) => {
         if (jenis_anomali) {
           builder.where("jenis_anomali_nama", "like", `%${jenis_anomali}%`);
         }
-        if (is_repaired) {
-          builder.where("is_repaired", is_repaired);
-        }
       })
-
+      .andWhere("is_repaired", is_repaired)
       .page(parseInt(page) - 1, parseInt(limit))
       .orderBy([
         {
@@ -120,9 +118,9 @@ const getAnomali2022 = async (req, res) => {
       limit: parseInt(limit),
       page: parseInt(page),
       chart: {
-        pieChart,
-        barFirst,
-        barSecond,
+        pieChart: sortBy(pieChart, "value").reverse(),
+        barFirst: sortBy(barFirst, "label").reverse(),
+        barSecond: sortBy(barSecond, "label").reverse(),
       },
     };
 

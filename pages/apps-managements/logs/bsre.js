@@ -18,6 +18,8 @@ function LogBSRE() {
     enabled: !!query,
   });
 
+  const columns = [{}];
+
   return (
     <>
       <Head>

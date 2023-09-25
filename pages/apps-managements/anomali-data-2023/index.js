@@ -13,7 +13,7 @@ import {
   Upload,
   message,
 } from "antd";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import {
   daftarAnomali23,
@@ -362,6 +362,29 @@ const ListAnomali = () => {
 };
 
 function AnomaliData2023() {
+  const router = useRouter();
+
+  useEffect(() => {
+    // On before route change save scroll position
+    router.events.on("routeChangeStart", saveScrollPosition);
+    // On route change restore scroll position
+    router.events.on("routeChangeComplete", restoreScrollPosition);
+
+    return () => {
+      router.events.off("routeChangeStart", saveScrollPosition);
+      router.events.off("routeChangeComplete", restoreScrollPosition);
+    };
+  }, [router]);
+
+  function saveScrollPosition() {
+    window.sessionStorage.setItem("scrollPosition", window.scrollY.toString());
+  }
+
+  function restoreScrollPosition() {
+    const scrollY = window.sessionStorage.getItem("scrollPosition") ?? "0";
+    window.scrollTo(0, parseInt(scrollY));
+  }
+
   return (
     <>
       <Head>
