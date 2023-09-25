@@ -3,15 +3,15 @@ import PageContainer from "@/components/PageContainer";
 import {
   Breadcrumb,
   Button,
+  Card,
+  Checkbox,
   Col,
   Row,
   Select,
   Table,
+  Tag,
   Upload,
   message,
-  Card,
-  Tag,
-  Checkbox,
 } from "antd";
 import { useState } from "react";
 
@@ -21,10 +21,78 @@ import {
   uploadDataAnomali2023,
 } from "@/services/anomali.services";
 import { UploadOutlined } from "@ant-design/icons";
+import { Bar, Pie } from "@ant-design/plots";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { useRouter } from "next/router";
-import Link from "next/link";
 import Head from "next/head";
+import Link from "next/link";
+import { useRouter } from "next/router";
+
+const PieChart = ({ data }) => {
+  const config = {
+    appendPadding: 10,
+    data,
+    angleField: "value",
+    colorField: "type",
+    radius: 0.8,
+    label: {
+      type: "outer",
+    },
+    interactions: [
+      {
+        type: "element-active",
+      },
+    ],
+  };
+
+  return (
+    <>
+      <Pie {...config} />
+    </>
+  );
+};
+
+const BarChart = ({ data }) => {
+  const config = {
+    data: data.reverse(),
+    isStack: true,
+    xField: "value",
+    yField: "label",
+    seriesField: "type",
+    label: {
+      // 可手动配置 label 数据标签位置
+      position: "middle",
+      // 'left', 'middle', 'right'
+      // 可配置附加的布局方法
+      layout: [
+        // 柱形图数据标签位置自动调整
+        {
+          type: "interval-adjust-position",
+        }, // 数据标签防遮挡
+        {
+          type: "interval-hide-overlap",
+        }, // 数据标签文颜色自动调整
+        {
+          type: "adjust-color",
+        },
+      ],
+    },
+  };
+
+  return <Bar {...config} />;
+};
+
+const BarChart2 = ({ data }) => {
+  const config = {
+    data,
+    xField: "value",
+    yField: "label",
+    seriesField: "label",
+    legend: {
+      position: "top-left",
+    },
+  };
+  return <Bar {...config} />;
+};
 
 const anomaliTypes = [
   "BELUM_SKP_TH_BERJALAN",
@@ -270,6 +338,25 @@ const ListAnomali = () => {
         loading={isLoading || isFetching}
         columns={columns}
       />
+      {data && (
+        <Row gutter={[16, 16]}>
+          <Col md={12}>
+            <Card title="Pie Chart">
+              <PieChart data={data?.chart?.pieChart} />
+            </Card>
+          </Col>
+          <Col md={12}>
+            <Card title="Bar">
+              <BarChart data={data?.chart?.barFirst} />
+            </Card>
+          </Col>
+          <Col md={12}>
+            <Card title="Bar">
+              <BarChart2 data={data?.chart?.barSecond} />
+            </Card>
+          </Col>
+        </Row>
+      )}
     </Card>
   );
 };

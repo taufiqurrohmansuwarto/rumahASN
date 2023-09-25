@@ -326,7 +326,6 @@ group by 1`);
 };
 
 // todo tambahkan statistik berdasarkan usia pelanggan yang bertanya 6 bulan terakhir
-
 module.exports.getReportWebinarSeries = async (webinarSeriesId) => {
   try {
     const result = await knex.raw(`WITH AbsenceData AS (SELECT u.username,
@@ -382,4 +381,53 @@ ORDER BY ad.username, ad.nama_webinar;
   } catch (e) {
     console.log(e);
   }
+};
+
+module.exports.getAggregateAnomali = async () => {
+  const tableName = "anomali_23";
+  const result = await knex.raw(`  SELECT
+      sub_anomali.jenis_anomali_nama,
+      sub_repaired.is_repaired,
+      COALESCE(COUNT(${tableName}.id), 0) AS value
+    FROM
+      (SELECT DISTINCT jenis_anomali_nama FROM ${tableName}) AS sub_anomali
+    CROSS JOIN
+      (VALUES (true), (false)) AS sub_repaired(is_repaired)
+    LEFT JOIN
+      ${tableName}
+    ON
+      sub_anomali.jenis_anomali_nama = ${tableName}.jenis_anomali_nama
+      AND sub_repaired.is_repaired = ${tableName}.is_repaired
+    GROUP BY
+      sub_anomali.jenis_anomali_nama, sub_repaired.is_repaired
+  `);
+
+  return result.rows.map((row) => ({
+    label: row.jenis_anomali_nama,
+    value: parseInt(row.value, 10),
+    type: row.is_repaired ? "sudah_diperbaiki" : "belum_diperbaiki",
+  }));
+};
+
+module.exports.getPerbaikanByUser = async () => {
+  const rawQuery = `
+    SELECT
+      users.username AS label,
+      COUNT(anomali_23.id) AS value
+    FROM
+      anomali_23
+    JOIN
+      users ON anomali_23.user_id = users.custom_id
+    WHERE
+      anomali_23.is_repaired = true
+    GROUP BY
+      users.username
+  `;
+
+  const results = await knex.raw(rawQuery);
+
+  return results.rows.map((row) => ({
+    label: row.label,
+    value: parseInt(row.value, 10),
+  }));
 };
