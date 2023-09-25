@@ -8,7 +8,9 @@ const indexLogBsre = async (req, res) => {
 
     const result = await LogBsre.query()
       .page(parseInt(page) - 1, parseInt(limit))
-      .withGraphFetched("[user(simpleSelect), webinar_series(selectName)]")
+      .withGraphFetched(
+        "[user(simpleSelect), webinar_series_participantes.[webinar_series] ]"
+      )
       .orderBy("created_at", "desc");
 
     const data = {
