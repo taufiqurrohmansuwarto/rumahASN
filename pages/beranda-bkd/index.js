@@ -18,6 +18,11 @@ import {
   Tabs,
   Tag,
   Typography,
+  Select,
+  Radio,
+  Form,
+  Input,
+  Button,
 } from "antd";
 import Head from "next/head";
 import { useEffect } from "react";
@@ -90,6 +95,74 @@ const Assignee = ({ item }) => {
   }
 };
 
+const FilterStatus = () => {
+  const router = useRouter();
+
+  const handleChange = (e) => {
+    router.push({
+      pathname: "/beranda-bkd",
+      query: { ...router?.query, status: e.target.value },
+    });
+  };
+
+  const handleReset = () => {
+    router.push({
+      pathname: "/beranda-bkd",
+      query: { tab: "my-task" },
+    });
+  };
+
+  const handleSearch = (value) => {
+    router.push({
+      pathname: "/beranda-bkd",
+      query: { ...router?.query, search: value },
+    });
+  };
+
+  return (
+    <div
+      style={{
+        borderRadius: 8,
+        backgroundColor: "#eee",
+        marginTop: 16,
+        padding: 16,
+      }}
+    >
+      <Form>
+        <Row gutter={[16, 16]}>
+          <Col md={7}>
+            <Form.Item label="Cari">
+              <Input.Search
+                defaultValue={router?.query?.search || ""}
+                onSearch={handleSearch}
+              />
+            </Form.Item>
+          </Col>
+          <Col md={10}>
+            <Form.Item label="Status">
+              <Radio.Group
+                value={router?.query?.status || ""}
+                onChange={handleChange}
+                optionType="button"
+                buttonStyle="solid"
+              >
+                <Radio.Button value="DIAJUKAN">DIAJUKAN</Radio.Button>
+                <Radio.Button value="DIKERJAKAN">DIKERJAKAN</Radio.Button>
+                <Radio.Button value="SELESAI">SELESAI</Radio.Button>
+              </Radio.Group>
+            </Form.Item>
+          </Col>
+          <Col>
+            <Button onClick={handleReset} type="link">
+              Reset
+            </Button>
+          </Col>
+        </Row>
+      </Form>
+    </div>
+  );
+};
+
 const TicketsTable = ({ query }) => {
   const router = useRouter();
   const { data, isLoading, isFetching } = useQuery(
@@ -108,59 +181,64 @@ const TicketsTable = ({ query }) => {
   };
 
   return (
-    <List
-      rowKey={(row) => row?.id}
-      dataSource={data?.data}
-      loading={isLoading || isFetching}
-      pagination={{
-        onChange: handleChangePage,
-        showSizeChanger: false,
-        position: "both",
-        current: parseInt(query?.page) || 1,
-        pageSize: parseInt(query?.limit) || 20,
-        total: data?.total,
-        showTotal: (total, range) =>
-          `${range[0]}-${range[1]} dari ${total} pertanyaan`,
-        size: "small",
-      }}
-      renderItem={(item) => (
-        <List.Item
-          actions={[
-            <Space size="small" key="total_comments">
-              <MessageOutlined
-                style={{
-                  color: "#1890ff",
-                }}
-                size={10}
-              />
-              <Typography.Text type="secondary">
-                {parseInt(item?.comments_count)}
-              </Typography.Text>
-            </Space>,
-          ]}
-        >
-          <List.Item.Meta
-            title={<TitleLink item={item} />}
-            description={
-              <Typography.Text
-                type="secondary"
-                style={{
-                  fontSize: 13,
-                }}
-              >
-                Ditanyakan tanggal {formatDateLL(item?.created_at)} oleh{" "}
-                <Link href={`/users/${item?.customer?.custom_id}`}>
-                  <Typography.Link>{item?.customer?.username}</Typography.Link>
-                </Link>
-              </Typography.Text>
-            }
-          />
-          <Space>
-            <Assignee key="penerima_tugas" item={item} />
-          </Space>
-        </List.Item>
-      )}
-    />
+    <>
+      {router?.query?.tab === "my-task" && <FilterStatus />}
+      <List
+        rowKey={(row) => row?.id}
+        dataSource={data?.data}
+        loading={isLoading || isFetching}
+        pagination={{
+          onChange: handleChangePage,
+          showSizeChanger: false,
+          position: "both",
+          current: parseInt(query?.page) || 1,
+          pageSize: parseInt(query?.limit) || 20,
+          total: data?.total,
+          showTotal: (total, range) =>
+            `${range[0]}-${range[1]} dari ${total} pertanyaan`,
+          size: "small",
+        }}
+        renderItem={(item) => (
+          <List.Item
+            actions={[
+              <Space size="small" key="total_comments">
+                <MessageOutlined
+                  style={{
+                    color: "#1890ff",
+                  }}
+                  size={10}
+                />
+                <Typography.Text type="secondary">
+                  {parseInt(item?.comments_count)}
+                </Typography.Text>
+              </Space>,
+            ]}
+          >
+            <List.Item.Meta
+              title={<TitleLink item={item} />}
+              description={
+                <Typography.Text
+                  type="secondary"
+                  style={{
+                    fontSize: 13,
+                  }}
+                >
+                  Ditanyakan tanggal {formatDateLL(item?.created_at)} oleh{" "}
+                  <Link href={`/users/${item?.customer?.custom_id}`}>
+                    <Typography.Link>
+                      {item?.customer?.username}
+                    </Typography.Link>
+                  </Link>
+                </Typography.Text>
+              }
+            />
+            <Space>
+              <Assignee key="penerima_tugas" item={item} />
+            </Space>
+          </List.Item>
+        )}
+      />
+    </>
   );
 };
 
@@ -276,7 +354,7 @@ const BerandaBKD = () => {
       >
         <Row>
           <Col md={16}>
-            <Card>
+            <Card title="Daftar Tugas">
               <Stack>
                 <TabsJobs />
               </Stack>

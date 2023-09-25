@@ -34,3 +34,7 @@ export const downloadAnomali2023 = async () => {
     })
     .then((res) => res?.data);
 };
+
+export const aggregateAnomali2023 = async () => {
+  return api.get(`/2023/admin/aggregate`).then((res) => res?.data);
+};
