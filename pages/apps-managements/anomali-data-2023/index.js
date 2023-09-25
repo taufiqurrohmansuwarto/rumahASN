@@ -8,6 +8,7 @@ import {
   Col,
   Row,
   Select,
+  Skeleton,
   Table,
   Tag,
   Upload,
@@ -16,6 +17,7 @@ import {
 import { useEffect, useState } from "react";
 
 import {
+  aggregateAnomali2023,
   daftarAnomali23,
   downloadAnomali2023,
   uploadDataAnomali2023,
@@ -53,29 +55,11 @@ const PieChart = ({ data }) => {
 
 const BarChart = ({ data }) => {
   const config = {
-    data: data.reverse(),
+    data,
     isStack: true,
     xField: "value",
     yField: "label",
     seriesField: "type",
-    label: {
-      // 可手动配置 label 数据标签位置
-      position: "middle",
-      // 'left', 'middle', 'right'
-      // 可配置附加的布局方法
-      layout: [
-        // 柱形图数据标签位置自动调整
-        {
-          type: "interval-adjust-position",
-        }, // 数据标签防遮挡
-        {
-          type: "interval-hide-overlap",
-        }, // 数据标签文颜色自动调整
-        {
-          type: "adjust-color",
-        },
-      ],
-    },
   };
 
   return <Bar {...config} />;
@@ -338,26 +322,38 @@ const ListAnomali = () => {
         loading={isLoading || isFetching}
         columns={columns}
       />
+      <AggregateAnomali23 />
+    </Card>
+  );
+};
+
+const AggregateAnomali23 = () => {
+  const { data, isLoading } = useQuery(["aggregate-data-anomali"], () =>
+    aggregateAnomali2023()
+  );
+
+  return (
+    <Skeleton loading={isLoading}>
       {data && (
         <Row gutter={[16, 16]}>
           <Col md={12}>
-            <Card title="Pie Chart">
-              <PieChart data={data?.chart?.pieChart} />
+            <Card title="Presentase Pengerjaan">
+              <PieChart data={data?.pieChart} />
             </Card>
           </Col>
           <Col md={12}>
-            <Card title="Bar">
-              <BarChart data={data?.chart?.barFirst} />
+            <Card title="Presentase Pengerjaan berdasar jenis nama anomali">
+              <BarChart data={data?.barFirst} />
             </Card>
           </Col>
           <Col md={12}>
-            <Card title="Bar">
-              <BarChart2 data={data?.chart?.barSecond} />
+            <Card title="Presentase pengerjana berdasar User">
+              <BarChart2 data={data?.barSecond} />
             </Card>
           </Col>
         </Row>
       )}
-    </Card>
+    </Skeleton>
   );
 };
 

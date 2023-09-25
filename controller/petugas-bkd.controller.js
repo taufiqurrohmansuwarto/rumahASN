@@ -9,6 +9,8 @@ const indexPetugasBKD = async (req, res) => {
     const tabQuery = req.query.tab || "my-task";
     const limit = parseInt(req.query.limit) || 20;
     const page = parseInt(req.query.page) || 1;
+    const status = req.query.status || "";
+    const search = req.query.search || "";
 
     const result = await Ticket.query()
       .select("*", Ticket.relatedQuery("comments").count().as("comments_count"))
@@ -20,6 +22,14 @@ const indexPetugasBKD = async (req, res) => {
           builder.where("status_code", "DIAJUKAN");
         } else if (tabQuery === "uncategorized-task") {
           builder.where("category_id", null);
+        }
+      })
+      .andWhere((builder) => {
+        if (status) {
+          builder.where("status_code", status);
+        }
+        if (search) {
+          builder.where("title", "ilike", `%${search}%`);
         }
       })
       .page(page - 1, limit)

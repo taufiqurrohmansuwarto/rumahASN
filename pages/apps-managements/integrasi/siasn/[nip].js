@@ -130,7 +130,7 @@ const EmployeeBio = ({ data, loading }) => {
                   ? "Pegawai Aktif"
                   : "Pegawai Non Aktif"}
               </Tag>
-              {data?.anomali?.length && (
+              {data?.anomali?.length > 0 && (
                 <>
                   {data?.anomali?.map((d) => (
                     <Tag

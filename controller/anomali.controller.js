@@ -94,34 +94,11 @@ const getAnomali2022 = async (req, res) => {
       ])
       .withGraphFetched("[user(simpleSelect)]");
 
-    const repairedCount = await Anomali23.query()
-      .count("id as value")
-      .where("is_repaired", true)
-      .first();
-
-    const notRepairedCount = await Anomali23.query()
-      .count("id as value")
-      .where("is_repaired", false)
-      .first();
-
-    const pieChart = [
-      { type: "Sudah diperbaiki", value: parseInt(repairedCount.value) },
-      { type: "Belum diperbaiki", value: parseInt(notRepairedCount.value) },
-    ];
-
-    const barFirst = await getAggregateAnomali();
-    const barSecond = await getPerbaikanByUser();
-
     const sendData = {
       data: data.results,
       total: data.total,
       limit: parseInt(limit),
       page: parseInt(page),
-      chart: {
-        pieChart: sortBy(pieChart, "value").reverse(),
-        barFirst: sortBy(barFirst, "label").reverse(),
-        barSecond: sortBy(barSecond, "label").reverse(),
-      },
     };
 
     res.json(sendData);
@@ -178,7 +155,41 @@ const userAnomali2022 = async (req, res) => {
   }
 };
 
+const aggregateAnomali = async (req, res) => {
+  try {
+    const repairedCount = await Anomali23.query()
+      .count("id as value")
+      .where("is_repaired", true)
+      .first();
+
+    const notRepairedCount = await Anomali23.query()
+      .count("id as value")
+      .where("is_repaired", false)
+      .first();
+
+    const pieChart = [
+      { type: "Sudah diperbaiki", value: parseInt(repairedCount.value) },
+      { type: "Belum diperbaiki", value: parseInt(notRepairedCount.value) },
+    ];
+
+    const barFirst = await getAggregateAnomali();
+    const barSecond = await getPerbaikanByUser();
+
+    const data = {
+      pieChart: sortBy(pieChart, "value").reverse(),
+      barFirst: sortBy(barFirst, "label").reverse(),
+      barSecond: sortBy(barSecond, "label").reverse(),
+    };
+
+    res.json(data);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
 module.exports = {
+  aggregateAnomali,
   uploadAnomali2022,
   getAnomali2022,
   patchAnomali2022,
