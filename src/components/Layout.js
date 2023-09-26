@@ -2,6 +2,7 @@ import {
   ApiOutlined,
   BarChartOutlined,
   BookOutlined,
+  GroupOutlined,
   LogoutOutlined,
   SolutionOutlined,
   TeamOutlined,
@@ -36,6 +37,9 @@ const changeRoutes = (user) => {
     const agent = (role === "agent" && bkd) || (role === "agent" && pttBkd);
     const userPns = user?.group === "MASTER" && user?.role === "USER";
 
+    const fasilitatorMaster =
+      user?.group === "MASTER" && user?.role === "FASILITATOR";
+
     const pegawaiPemda = user?.group === "MASTER" || user?.group === "PTTPK";
     const pegawaiBKD = bkd || pttBkd;
 
@@ -46,6 +50,14 @@ const changeRoutes = (user) => {
         path: "/beranda-bkd?tab=my-task",
         name: "Beranda BKD",
         icon: <TeamOutlined />,
+      });
+    }
+
+    if (fasilitatorMaster) {
+      userRoutes.routes.push({
+        path: "/fasilitator-employees",
+        name: "Daftar Pegawai",
+        icon: <GroupOutlined />,
       });
     }
 

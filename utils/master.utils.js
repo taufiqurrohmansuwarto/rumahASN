@@ -19,3 +19,12 @@ module.exports.getRwPangkat = async (fetcher, nip) => {
     console.log(error);
   }
 };
+
+module.exports.getAllEmployees = async (fetcher, res) => {
+  try {
+    const result = await fetcher.get(`/master-ws/operator/full-employees`);
+    return result?.data;
+  } catch (error) {
+    console.log(error);
+  }
+};
