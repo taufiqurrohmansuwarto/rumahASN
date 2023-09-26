@@ -23,6 +23,10 @@ export const daftarAnomali23 = async (query) => {
   return api.get(`/2023/admin?${queryStr}`).then((res) => res?.data);
 };
 
+export const getUserAnomali2023 = async () => {
+  return api.get(`/2023/user`).then((res) => res?.data);
+};
+
 export const patchAnomali2023 = async ({ id, data }) => {
   return api.patch(`/2023/admin/${id}`, data).then((res) => res?.data);
 };

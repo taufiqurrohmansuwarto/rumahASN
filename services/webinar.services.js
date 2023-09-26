@@ -253,6 +253,14 @@ export const downloadSurvey = (id) => {
     .then((res) => res?.data);
 };
 
+export const downloadComments = (id) => {
+  return api
+    .get(`/admin/${id}/comments/download`, {
+      responseType: "arraybuffer",
+    })
+    .then((res) => res?.data);
+};
+
 export const downloadRatings = (id) => {
   return api
     .get(`/admin/${id}/ratings/download`, {

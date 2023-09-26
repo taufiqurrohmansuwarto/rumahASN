@@ -6,9 +6,11 @@ import {
   commentAdminDelete,
   commentAdminIndex,
   commentAdminUpdate,
+  downloadComments,
 } from "@/services/webinar.services";
+import { CloudDownloadOutlined } from "@ant-design/icons";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { BackTop, message } from "antd";
+import { BackTop, Button, message } from "antd";
 import { useRouter } from "next/router";
 
 function Comments() {
@@ -83,9 +85,46 @@ function Comments() {
     {}
   );
 
+  const { mutateAsync: download, isLoading: isLoadingDownload } = useMutation(
+    (data) => downloadComments(data),
+    {}
+  );
+
+  const handleDownload = async () => {
+    try {
+      const data = await download(router?.query?.id);
+
+      const url = window.URL.createObjectURL(
+        new Blob([data], { type: "application/vnd.ms-excel" })
+      );
+
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", "komentar.xlsx");
+      document.body.appendChild(link);
+      link.click();
+
+      message.success("Berhasil mengunduh data");
+    } catch (error) {
+      message.error("Gagal mengunduh data");
+    }
+  };
+
   return (
     <AdminLayoutDetailWebinar loading={isLoading} active="comments">
       <BackTop />
+      <Button
+        disabled={isLoadingDownload}
+        onClick={handleDownload}
+        loading={isLoadingDownload}
+        type="primary"
+        icon={<CloudDownloadOutlined />}
+        style={{
+          marginBottom: 16,
+        }}
+      >
+        Unduh Komentar
+      </Button>
       <WebinarSeriesComments
         youtubeUrl={detailAdmin?.youtube_url}
         data={data}
