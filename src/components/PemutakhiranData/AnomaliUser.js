@@ -40,7 +40,7 @@ function AnomaliUser() {
                   style={{
                     cursor: "pointer",
                   }}
-                  color="red"
+                  color={item?.is_repaired ? "green" : "red"}
                   icon={<ExclamationCircleOutlined />}
                 >
                   {item?.jenis_anomali_nama}
