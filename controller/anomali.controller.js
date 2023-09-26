@@ -147,7 +147,7 @@ const userAnomali2022 = async (req, res) => {
       .where({
         nip_baru: employee_number,
       })
-      .anWhere("is_repaired", false)
+      .andWhere("is_repaired", false)
       .andWhere((builder) => {
         builder
           .where("jenis_anomali_nama", "FORMASI_JF_BELUMDIANGKAT")
