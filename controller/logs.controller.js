@@ -9,15 +9,15 @@ const indexLogBsre = async (req, res) => {
     const result = await LogBsre.query()
       .page(parseInt(page) - 1, parseInt(limit))
       .withGraphFetched(
-        "[user(simpleSelect), webinar_series_participantes.[webinar_series] ]"
+        "[user(simpleSelect), webinar_series_participates.[webinar_series(selectName)] ]"
       )
       .orderBy("created_at", "desc");
 
     const data = {
       data: result.results,
       total: result.total,
-      page,
-      limit,
+      page: parseInt(page),
+      limit: parseInt(limit),
     };
 
     res.json(data);

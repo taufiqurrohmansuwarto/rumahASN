@@ -145,9 +145,14 @@ const userAnomali2022 = async (req, res) => {
     const { employee_number } = req?.user;
     const data = await Anomali23.query()
       .where({
-        employee_number,
+        nip_baru: employee_number,
       })
-      .first();
+      .andWhere((builder) => {
+        builder
+          .where("jenis_anomali_nama", "FORMASI_JF_BELUMDIANGKAT")
+          .orWhere("jenis_anomali_nama", "UNOR_NONAKTIF");
+      });
+
     res.json(data);
   } catch (error) {
     console.log(error);

@@ -10,6 +10,7 @@ import {
 } from "@mantine/core";
 import { Avatar, Grid, Space, Typography } from "antd";
 import { useRouter } from "next/router";
+import AnomaliUser from "./AnomaliUser";
 
 const mockdata = mysapkMenu;
 
@@ -91,6 +92,7 @@ export function MenuMySAPK({ dataUtama }) {
             <Typography.Text type="secondary">
               {dataUtama?.instansiIndukNama}
             </Typography.Text>
+            <AnomaliUser />
           </Space>
         </Card>
       </Group>

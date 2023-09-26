@@ -29,6 +29,7 @@ import FormUnitOrganisasi from "./FormUnitOrganisasi";
 import moment from "moment";
 import { API_URL } from "@/utils/client-utils";
 import AlertJabatan from "./AlertJabatan";
+import AnomaliUser from "./AnomaliUser";
 
 const format = "DD-MM-YYYY";
 
@@ -381,8 +382,10 @@ function CompareJabatan() {
   return (
     <Card loading={isLoading} title="Komparasi Jabatan">
       <FormEntri onCancel={handleClose} visible={visible} />
+      <div style={{ marginBottom: 16 }}>
+        <AnomaliUser />
+      </div>
       <Stack>
-        <AlertJabatan />
         <Table
           title={() => (
             <Button type="primary" onClick={handleOpen} icon={<PlusOutlined />}>
