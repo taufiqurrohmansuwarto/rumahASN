@@ -204,7 +204,11 @@ export const dataUtamaMasterByNip = async (req, res) => {
   try {
     const { fetcher } = req;
     const { nip } = req.query;
-    const currentUser = req?.user;
+    const { organization_id, current_role, role, group } = req?.user;
+
+    const admin = current_role === "admin";
+    const fasilitatorBiasa =
+      current_role === "user" && role === "FASILITATOR" && group === "MASTER";
 
     // check ngentot
 
@@ -212,15 +216,33 @@ export const dataUtamaMasterByNip = async (req, res) => {
       `/master-ws/operator/employees/${nip}/data-utama-master`
     );
 
-    const anomali = await Anomali23.query()
-      .where({ nip_baru: nip })
-      .withGraphFetched("user(simpleSelect)");
-    const data = {
-      ...result?.data,
-      anomali,
-    };
+    const user_organization_id = result?.data?.skpd_id;
 
-    res.json(data);
+    if (fasilitatorBiasa) {
+      if (user_organization_id !== organization_id) {
+        res.json(null);
+      } else {
+        const anomali = await Anomali23.query()
+          .where({ nip_baru: nip })
+          .withGraphFetched("user(simpleSelect)");
+        const data = {
+          ...result?.data,
+          anomali,
+        };
+
+        res.json(data);
+      }
+    } else if (admin) {
+      const anomali = await Anomali23.query()
+        .where({ nip_baru: nip })
+        .withGraphFetched("user(simpleSelect)");
+      const data = {
+        ...result?.data,
+        anomali,
+      };
+
+      res.json(data);
+    }
   } catch (error) {
     console.log(error);
     res.status(500).json({ code: 500, message: "Internal Server Error" });
