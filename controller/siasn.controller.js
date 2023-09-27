@@ -2,7 +2,7 @@ const { default: axios } = require("axios");
 const moment = require("moment");
 const arrayToTree = require("array-to-tree");
 const { ssoFetcher, wso2Fetcher } = require("@/utils/siasn-fetcher");
-const { orderBy } = require("lodash");
+const { orderBy, sortBy } = require("lodash");
 const {
   riwayatPendidikan,
   riwayatGolonganPangkat,
@@ -115,8 +115,12 @@ const siasnEmployeeDetailPangkat = async (req, res) => {
     const { data: pangkat_simaster } = await getRwPangkat(fetcher, nip);
 
     res.json({
-      pangkat_siasn: pangkat_siasn?.data,
-      pangkat_simaster,
+      pangkat_siasn: orderBy(pangkat_siasn?.data, "golongan", "desc"),
+      pangkat_simaster: orderBy(
+        pangkat_simaster,
+        (item) => item?.pangkat?.gol_ruang,
+        "desc"
+      ),
     });
   } catch (error) {
     console.log(error);
@@ -673,9 +677,11 @@ const getRwGolongan = async (req, res) => {
     const { employee_number: nip } = req?.user;
 
     const result = await riwayatGolonganPangkat(request, nip);
-    const data = result?.data?.data;
 
-    res.json(data);
+    const data = result?.data?.data;
+    const sortData = orderBy(data, ["golongan"], "desc");
+
+    res.json(sortData);
   } catch (error) {
     console.log(error);
     res.status(500).json({ code: 500, message: "Internal Server Error" });

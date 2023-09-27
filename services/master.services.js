@@ -17,6 +17,10 @@ export const rwSkpMaster = () => {
   return api.get("/rw-skp").then((res) => res.data);
 };
 
+export const rwGolonganMaster = () => {
+  return api.get("/rw-golongan").then((res) => res.data);
+};
+
 export const dataUtamaSimaster = () => {
   return api.get("/data-utama").then((res) => res.data);
 };

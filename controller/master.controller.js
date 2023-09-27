@@ -1,6 +1,6 @@
-import { getRwPendidikanMaster } from "@/utils/master.utils";
+import { getRwPangkat, getRwPendidikanMaster } from "@/utils/master.utils";
 import moment from "moment";
-const { orderBy } = require("lodash");
+const { orderBy, sortBy } = require("lodash");
 const Anomali23 = require("@/models/anomali23.model");
 
 const url = "https://master.bkd.jatimprov.go.id/files_jatimprov/";
@@ -265,6 +265,25 @@ export const dataPendidikanMaster = async (req, res) => {
   res.json({});
 };
 
+export const rwPangkatMaster = async (req, res) => {
+  try {
+    const result = await getRwPangkat(req.fetcher, req.user.employee_number);
+    const data = result?.data;
+    console.log(result?.data?.length);
+    const sortData = orderBy(
+      data,
+      (item) => {
+        return item?.pangkat?.gol_ruang;
+      },
+      "desc"
+    );
+    res.json(sortData);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ code: 500, message: "Internal Server Error" });
+  }
+};
+
 module.exports = {
   rwJabatanMaster,
   rwAngkakreditMaster,
@@ -274,4 +293,5 @@ module.exports = {
   rwJabatanMasterByNip,
   rwAngkakreditMasterByNip,
   rwSkpMasterByNip,
+  rwPangkatMaster,
 };

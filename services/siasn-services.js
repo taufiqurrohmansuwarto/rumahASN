@@ -106,6 +106,10 @@ export const getRwHukdis = () => {
   return api.get("/pns/rw-hukdis").then((res) => res.data);
 };
 
+export const getRwGolongan = () => {
+  return api.get("/pns/rw-golongan").then((res) => res.data);
+};
+
 // skp
 export const getRwSkp = () => {
   return api.get("/pns/rw-skp").then((res) => res.data);
