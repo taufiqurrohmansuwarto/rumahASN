@@ -73,18 +73,19 @@ function MyApp({ Component, pageProps: { session, ...pageProps } }) {
   gtag('config', 'G-Q1GNKXN1MQ');
                   `}
       </Script>
-      <SessionProvider
-        session={session}
-        baseUrl="/helpdesk"
-        basePath="/helpdesk/api/auth"
-      >
-        <Head>
-          <link rel="shortcut icon" href="/helpdesk/headset.ico" />
-        </Head>
-        <QueryClientProvider client={queryClient}>
-          <MantineProvider withGlobalStyles withNormalizeCSS>
-            <ThemeProvider colorMode="auto" preventSSRMismatch>
-              <ConfigProvider locale={id}>
+
+      <ConfigProvider locale={id}>
+        <SessionProvider
+          session={session}
+          baseUrl="/helpdesk"
+          basePath="/helpdesk/api/auth"
+        >
+          <Head>
+            <link rel="shortcut icon" href="/helpdesk/headset.ico" />
+          </Head>
+          <QueryClientProvider client={queryClient}>
+            <MantineProvider withGlobalStyles withNormalizeCSS>
+              <ThemeProvider colorMode="auto" preventSSRMismatch>
                 <Hydrate>
                   {Component.Auth ? (
                     <Auth
@@ -97,11 +98,11 @@ function MyApp({ Component, pageProps: { session, ...pageProps } }) {
                     <Component {...pageProps} />
                   )}
                 </Hydrate>
-              </ConfigProvider>
-            </ThemeProvider>
-          </MantineProvider>
-        </QueryClientProvider>
-      </SessionProvider>
+              </ThemeProvider>
+            </MantineProvider>
+          </QueryClientProvider>
+        </SessionProvider>
+      </ConfigProvider>
     </>
   );
 }
