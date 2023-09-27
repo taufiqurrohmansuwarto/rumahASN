@@ -6,6 +6,7 @@ import {
   Card,
   Checkbox,
   Col,
+  Form,
   Row,
   Select,
   Skeleton,
@@ -16,6 +17,7 @@ import {
 } from "antd";
 import { useEffect, useState } from "react";
 
+import QueryFilter from "@/components/QueryFilter";
 import {
   aggregateAnomali2023,
   daftarAnomali23,
@@ -242,6 +244,81 @@ const ListAnomali = () => {
     },
   ];
 
+  const Filter = () => {
+    const [form] = Form.useForm();
+    const router = useRouter();
+    const query = router.query;
+
+    useEffect(() => {
+      form.setFieldsValue({
+        jenis_anomali: query?.jenis_anomali,
+        is_repaired:
+          query?.is_repaired === "true" || query?.is_repaired === true,
+      });
+    }, [query, form]);
+
+    const handleReset = () => {
+      form.resetFields();
+      router.push({
+        pathname: "/apps-managements/anomali-data-2023",
+        query: {},
+      });
+    };
+
+    const handleFinish = (value) => {
+      console.log(value);
+      router.push({
+        pathname: "/apps-managements/anomali-data-2023",
+        query: {
+          ...query,
+          ...value,
+          page: 1,
+        },
+      });
+    };
+
+    return (
+      <QueryFilter
+        form={form}
+        onFinish={handleFinish}
+        onReset={handleReset}
+        layout="vertical"
+        defaultCollapsed
+        collapseRender={(collapsed) =>
+          collapsed ? "Filter" : "Sembunyikan Filter"
+        }
+        submitter={{
+          searchConfig: {
+            resetText: "Reset",
+            submitText: "Cari",
+          },
+        }}
+      >
+        <Form.Item name="jenis_anomali" label="Pilih Jenis Anomali">
+          <Select
+            allowClear
+            style={{
+              width: "100%",
+            }}
+          >
+            {anomaliTypes.map((item) => (
+              <Select.Option key={item} value={item}>
+                {item}
+              </Select.Option>
+            ))}
+          </Select>
+        </Form.Item>
+        <Form.Item
+          valuePropName="checked"
+          name="is_repaired"
+          label="Sudah diperbaiki?"
+        >
+          <Checkbox />
+        </Form.Item>
+      </QueryFilter>
+    );
+  };
+
   const handleChangePage = (page) => {
     const currentQuery = {
       ...query,
@@ -279,31 +356,8 @@ const ListAnomali = () => {
             >
               Download
             </Button>
-            <Col md={4} xs={12}>
-              <Select
-                value={query?.jenis_anomali}
-                onChange={handleChange}
-                allowClear
-                placeholder="Pilih Jenis Anomali"
-                style={{
-                  width: "100%",
-                }}
-              >
-                {anomaliTypes.map((item) => (
-                  <Select.Option key={item} value={item}>
-                    {item}
-                  </Select.Option>
-                ))}
-              </Select>
-            </Col>
-            <Col md={6}>
-              <span>Sudah diperbaiki?</span>{" "}
-              <Checkbox
-                checked={
-                  query?.is_repaired === "true" || query?.is_repaired === true
-                }
-                onChange={handleChangeCheckbox}
-              />
+            <Col span={24}>
+              <Filter />
             </Col>
           </Row>
         )}
@@ -327,35 +381,7 @@ const ListAnomali = () => {
   );
 };
 
-const AggregateAnomali23 = () => {
-  const { data, isLoading } = useQuery(["aggregate-data-anomali"], () =>
-    aggregateAnomali2023()
-  );
-
-  return (
-    <Skeleton loading={isLoading}>
-      {data && (
-        <Row gutter={[16, 16]}>
-          <Col md={12}>
-            <Card title="Presentase Pengerjaan">
-              <PieChart data={data?.pieChart} />
-            </Card>
-          </Col>
-          <Col md={12}>
-            <Card title="Presentase Pengerjaan berdasar jenis nama anomali">
-              <BarChart data={data?.barFirst} />
-            </Card>
-          </Col>
-          <Col md={12}>
-            <Card title="Presentase pengerjana berdasar User">
-              <BarChart2 data={data?.barSecond} />
-            </Card>
-          </Col>
-        </Row>
-      )}
-    </Skeleton>
-  );
-};
+const AggregateAnomali23 = () => {};
 
 function AnomaliData2023() {
   const router = useRouter();

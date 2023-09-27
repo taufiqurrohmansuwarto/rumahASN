@@ -11,6 +11,8 @@ const indexPetugasBKD = async (req, res) => {
     const page = parseInt(req.query.page) || 1;
     const status = req.query.status || "";
     const search = req.query.search || "";
+    const star = req.query.star || "";
+    const sub_category_id = req.query.sub_category_id || "";
 
     const result = await Ticket.query()
       .select("*", Ticket.relatedQuery("comments").count().as("comments_count"))
@@ -31,6 +33,12 @@ const indexPetugasBKD = async (req, res) => {
         if (search) {
           builder.where("title", "ilike", `%${search}%`);
         }
+        if (star) {
+          builder.where("stars", star);
+        }
+        if (sub_category_id) {
+          builder.where("sub_category_id", sub_category_id);
+        }
       })
       .page(page - 1, limit)
       .orderBy("updated_at", "desc");
@@ -47,6 +55,40 @@ const indexPetugasBKD = async (req, res) => {
   }
 };
 
+const statistikPegawaiBKD = async (req, res) => {
+  try {
+    const { customId } = req.user;
+    const averageRating = await Ticket.query()
+      .avg("stars")
+      .where("assignee", customId);
+
+    // aggregate sub category
+    const subCategory = await Ticket.query()
+      .select("sub_category_id")
+      .count("sub_category_id")
+      .withGraphFetched("[sub_category]")
+      .where("assignee", customId)
+      .groupBy("sub_category_id");
+
+    // aggregate status
+    const status = await Ticket.query()
+      .select("status_code")
+      .count("status_code")
+      .where("assignee", customId)
+      .groupBy("status_code");
+
+    res.json({
+      averageRating: averageRating[0].avg,
+      subCategory,
+      status,
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
 module.exports = {
   indexPetugasBKD,
+  statistikPegawaiBKD,
 };

@@ -1,36 +1,42 @@
+import FormSubCategory from "@/components/Filter/FormSubCategory";
 import Layout from "@/components/Layout";
 import PageContainer from "@/components/PageContainer";
+import QueryFilter from "@/components/QueryFilter";
 import { pegawaiBkdTickets } from "@/services/bkd.services";
-import { Stack } from "@mantine/core";
+import { refCategories } from "@/services/index";
+import { formatDateLL, setColorStatus } from "@/utils/client-utils";
+import {
+  CaretDownOutlined,
+  CaretUpOutlined,
+  MessageOutlined,
+} from "@ant-design/icons";
+import { Alert, Stack } from "@mantine/core";
 import { IconAlertCircle } from "@tabler/icons";
 import { useQuery } from "@tanstack/react-query";
 import {
-  Breadcrumb,
   Avatar,
+  Breadcrumb,
   Card,
   Col,
   Empty,
+  Form,
   Grid,
+  Input,
   List,
   Popover,
+  Radio,
+  Rate,
   Row,
+  Select,
   Space,
   Tabs,
   Tag,
   Typography,
-  Select,
-  Radio,
-  Form,
-  Input,
-  Button,
 } from "antd";
 import Head from "next/head";
-import { useEffect } from "react";
-import { useRouter } from "next/router";
-import { Alert } from "@mantine/core";
-import { MessageOutlined } from "@ant-design/icons";
 import Link from "next/link";
-import { formatDateLL, setColorStatus } from "@/utils/client-utils";
+import { useRouter } from "next/router";
+import { useEffect } from "react";
 
 const { useBreakpoint } = Grid;
 
@@ -97,13 +103,15 @@ const Assignee = ({ item }) => {
 
 const FilterStatus = () => {
   const router = useRouter();
+  const query = router?.query;
 
-  const handleChange = (e) => {
-    router.push({
-      pathname: "/beranda-bkd",
-      query: { ...router?.query, status: e.target.value },
-    });
-  };
+  const { data, isLoading } = useQuery(
+    ["ref-sub-categories"],
+    () => refCategories(),
+    {
+      refetchOnWindowFocus: false,
+    }
+  );
 
   const handleReset = () => {
     router.push({
@@ -112,53 +120,93 @@ const FilterStatus = () => {
     });
   };
 
-  const handleSearch = (value) => {
-    router.push({
-      pathname: "/beranda-bkd",
-      query: { ...router?.query, search: value },
-    });
+  const [form] = Form.useForm();
+
+  const handleFinish = (values) => {
+    // check every property of values if empty
+    const emptyQuery = (obj) => {
+      return Object.values(obj).every((x) => x === "");
+    };
+
+    if (emptyQuery(values)) {
+      return;
+    } else {
+      // remove empty property
+      Object.keys(values).forEach(
+        (key) => values[key] === "" && delete values[key]
+      );
+
+      router.push({
+        pathname: "/beranda-bkd",
+        query: { ...router?.query, ...values },
+      });
+    }
   };
 
+  useEffect(() => {
+    form.setFieldsValue({
+      search: query?.search || "",
+      status: query?.status || "",
+    });
+  }, [form, query]);
+
   return (
-    <div
-      style={{
-        borderRadius: 8,
-        backgroundColor: "#eee",
-        marginTop: 16,
-        padding: 16,
-      }}
-    >
-      <Form>
-        <Row gutter={[16, 16]}>
-          <Col md={7}>
-            <Form.Item label="Cari">
-              <Input.Search
-                defaultValue={router?.query?.search || ""}
-                onSearch={handleSearch}
-              />
-            </Form.Item>
-          </Col>
-          <Col md={10}>
-            <Form.Item label="Status">
-              <Radio.Group
-                value={router?.query?.status || ""}
-                onChange={handleChange}
-                optionType="button"
-                buttonStyle="solid"
-              >
-                <Radio.Button value="DIAJUKAN">DIAJUKAN</Radio.Button>
-                <Radio.Button value="DIKERJAKAN">DIKERJAKAN</Radio.Button>
-                <Radio.Button value="SELESAI">SELESAI</Radio.Button>
-              </Radio.Group>
-            </Form.Item>
-          </Col>
-          <Col>
-            <Button onClick={handleReset} type="link">
-              Reset
-            </Button>
-          </Col>
-        </Row>
-      </Form>
+    <div>
+      <QueryFilter
+        span={8}
+        layout="vertical"
+        form={form}
+        collapseRender={(collapsed) =>
+          collapsed ? (
+            <Space>
+              <span>More</span>
+              <CaretDownOutlined />
+            </Space>
+          ) : (
+            <Space>
+              <span>Collapse</span>
+              <CaretUpOutlined />
+            </Space>
+          )
+        }
+        onReset={handleReset}
+        onFinish={handleFinish}
+        submitter={{
+          searchConfig: {
+            resetText: "Reset",
+            submitText: "Cari",
+          },
+        }}
+      >
+        <Form.Item name="search" label="Judul">
+          <Input />
+        </Form.Item>
+        <Form.Item name="status" label="Status">
+          <Radio.Group optionType="button" buttonStyle="solid">
+            <Radio.Button value="DIAJUKAN">DIAJUKAN</Radio.Button>
+            <Radio.Button value="DIKERJAKAN">DIKERJAKAN</Radio.Button>
+            <Radio.Button value="SELESAI">SELESAI</Radio.Button>
+          </Radio.Group>
+        </Form.Item>
+        <Form.Item name="star" label="Bintang">
+          <Rate />
+        </Form.Item>
+        <Form.Item name="sub_category_id" label="Kategori">
+          <Select showSearch optionFilterProp="name">
+            {data?.map((category) => {
+              return (
+                <Select.Option
+                  key={category.id}
+                  name={category?.name}
+                  value={category.id}
+                >
+                  <span>{category?.name}</span>
+                </Select.Option>
+              );
+            })}
+          </Select>
+        </Form.Item>
+      </QueryFilter>
     </div>
   );
 };

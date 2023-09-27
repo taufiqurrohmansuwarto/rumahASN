@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import {
   Alert,
   Button,
+  Card,
   Col,
   Form,
   Input,
@@ -13,6 +14,7 @@ import {
   Select,
   Table,
   Typography,
+  message,
 } from "antd";
 import { useState } from "react";
 
@@ -73,7 +75,7 @@ function SIASNTracking() {
     { key: "skk", label: "Usul Perbaikan Nama" },
   ];
 
-  const { data, refetch, isFetching } = useQuery(
+  const { data, refetch, isFetching, isLoading } = useQuery(
     ["layanan-siasn", dataLayanan],
     () => pencarianLayananSIASN(dataLayanan),
     {
@@ -81,6 +83,9 @@ function SIASNTracking() {
       enabled: !!dataLayanan,
       onSuccess: () => {
         handleOpen();
+      },
+      onError: () => {
+        message.error("Gagal mendapatkan data");
       },
     }
   );
@@ -90,9 +95,7 @@ function SIASNTracking() {
       const result = await form.validateFields();
       setDataLayanan(result);
       await refetch();
-    } catch (error) {
-      console.log(error);
-    }
+    } catch (error) {}
   };
 
   return (
@@ -107,17 +110,10 @@ function SIASNTracking() {
           onCancel={cancelOpen}
           open={open}
         >
-          <Alert
-            description="Jika Status Usulan Sudah berubah menjadi Setuju TTD SK segera hubungi Kepegawaian Perangkat Daerah Anda atau BKD Provinsi Jawa Timur"
-            style={{ marginBottom: 12 }}
-          />
           <HasilLayanan data={data} />
         </Modal>
         <Col md={18} xs={24}>
-          <Stack>
-            <Typography.Title level={5}>
-              Cek Status Layanan Kepegawaian SIASN
-            </Typography.Title>
+          <Card title="Cek Status Kepegawaian">
             <Form onFinish={handleFinish} form={form} layout="vertical">
               <Form.Item
                 rules={[
@@ -163,7 +159,7 @@ function SIASNTracking() {
                 </Button>
               </Form.Item>
             </Form>
-          </Stack>
+          </Card>
         </Col>
       </Row>
     </div>
