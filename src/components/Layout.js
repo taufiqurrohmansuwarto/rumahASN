@@ -2,11 +2,11 @@ import {
   ApiOutlined,
   BarChartOutlined,
   BookOutlined,
-  GroupOutlined,
   LogoutOutlined,
   SolutionOutlined,
   TeamOutlined,
   UserOutlined,
+  UsergroupAddOutlined,
 } from "@ant-design/icons";
 import { Dropdown, Grid, Typography } from "antd";
 import { uniqBy } from "lodash";
@@ -57,7 +57,7 @@ const changeRoutes = (user) => {
       userRoutes.routes.push({
         path: "/fasilitator-employees",
         name: "Daftar Pegawai",
-        icon: <GroupOutlined />,
+        icon: <UsergroupAddOutlined />,
       });
     }
 

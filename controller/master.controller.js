@@ -204,6 +204,10 @@ export const dataUtamaMasterByNip = async (req, res) => {
   try {
     const { fetcher } = req;
     const { nip } = req.query;
+    const currentUser = req?.user;
+
+    // check ngentot
+
     const result = await fetcher.get(
       `/master-ws/operator/employees/${nip}/data-utama-master`
     );
