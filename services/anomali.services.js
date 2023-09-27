@@ -42,3 +42,12 @@ export const downloadAnomali2023 = async () => {
 export const aggregateAnomali2023 = async () => {
   return api.get(`/2023/admin/aggregate`).then((res) => res?.data);
 };
+
+// anomali untuk user
+export const downloadDataAnomaliFasilitator = async () => {
+  return api
+    .get(`/2023/fasilitator/download`, {
+      responseType: "arraybuffer",
+    })
+    .then((res) => res?.data);
+};
