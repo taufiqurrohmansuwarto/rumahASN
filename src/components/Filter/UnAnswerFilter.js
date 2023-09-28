@@ -48,7 +48,14 @@ function UnAnswerFilter() {
   return (
     <div>
       <QueryFilter
-        span={8}
+        span={{
+          sm: 24,
+          md: 24,
+          xl: 24,
+          lg: 24,
+          xxl: 12,
+          xs: 24,
+        }}
         layout="vertical"
         form={form}
         collapseRender={(collapsed) =>

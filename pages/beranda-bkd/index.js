@@ -2,24 +2,27 @@ import AllTaskFilter from "@/components/Filter/AllTaskFilter";
 import UnAnswerFilter from "@/components/Filter/UnAnswerFilter";
 import Layout from "@/components/Layout";
 import PageContainer from "@/components/PageContainer";
+import UserPerformance from "@/components/PetugasBKD/UserPerformance";
 import QueryFilter from "@/components/QueryFilter";
-import { pegawaiBkdTickets } from "@/services/bkd.services";
+import { downloadTicketBKD, pegawaiBkdTickets } from "@/services/bkd.services";
 import { refCategories } from "@/services/index";
 import { formatDateLL, setColorStatus } from "@/utils/client-utils";
 import {
   CaretDownOutlined,
   CaretUpOutlined,
+  CloudDownloadOutlined,
   MessageOutlined,
 } from "@ant-design/icons";
-import { Alert, Stack } from "@mantine/core";
-import { IconAlertCircle } from "@tabler/icons";
-import { useQuery } from "@tanstack/react-query";
+import { Stack } from "@mantine/core";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import {
   Avatar,
+  BackTop,
   Breadcrumb,
+  Button,
   Card,
   Col,
-  Empty,
+  Divider,
   Form,
   Grid,
   Input,
@@ -33,6 +36,7 @@ import {
   Tabs,
   Tag,
   Typography,
+  message,
 } from "antd";
 import Head from "next/head";
 import Link from "next/link";
@@ -40,6 +44,46 @@ import { useRouter } from "next/router";
 import { useEffect } from "react";
 
 const { useBreakpoint } = Grid;
+
+const DownloadData = () => {
+  const router = useRouter();
+
+  const { mutateAsync: download, isLoading } = useMutation((data) =>
+    downloadTicketBKD(data)
+  );
+
+  const handleDownload = async () => {
+    try {
+      const data = await download(router?.query);
+
+      const url = window.URL.createObjectURL(
+        new Blob([data], { type: "application/vnd.ms-excel" })
+      );
+
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", "report-bkd.xlsx");
+      document.body.appendChild(link);
+      link.click();
+
+      message.success("Berhasil mengunduh data");
+    } catch (error) {
+      message.error("Gagal mengunduh data");
+    }
+  };
+
+  return (
+    <Button
+      type="primary"
+      onClick={handleDownload}
+      loading={isLoading}
+      disabled={isLoading}
+      icon={<CloudDownloadOutlined />}
+    >
+      Unduh Data Filter
+    </Button>
+  );
+};
 
 const Status = ({ item }) => {
   return (
@@ -154,7 +198,15 @@ const FilterStatus = () => {
   return (
     <div>
       <QueryFilter
-        span={8}
+        loading={isLoading}
+        span={{
+          sm: 24,
+          md: 24,
+          xl: 24,
+          lg: 24,
+          xxl: 8,
+          xs: 24,
+        }}
         layout="vertical"
         form={form}
         collapseRender={(collapsed) =>
@@ -230,10 +282,21 @@ const TicketsTable = ({ query }) => {
   };
 
   return (
-    <>
-      {router?.query?.tab === "my-task" && <FilterStatus />}
-      {router?.query?.tab === "unanswered-task" && <UnAnswerFilter />}
-      {router?.query?.tab === "all-task" && <AllTaskFilter />}
+    <Stack mt={8}>
+      <div
+        style={{
+          padding: 8,
+          paddingTop: 16,
+          paddingBottom: 16,
+          border: "1px solid #e8e8e8",
+        }}
+      >
+        {router?.query?.tab === "my-task" && <FilterStatus />}
+        {router?.query?.tab === "unanswered-task" && <UnAnswerFilter />}
+        {router?.query?.tab === "all-task" && <AllTaskFilter />}
+        <Divider />
+        <DownloadData />
+      </div>
       <List
         rowKey={(row) => row?.id}
         dataSource={data?.data}
@@ -289,21 +352,7 @@ const TicketsTable = ({ query }) => {
           </List.Item>
         )}
       />
-    </>
-  );
-};
-
-const BKDSpirit = () => {
-  return (
-    <Alert
-      icon={<IconAlertCircle size="1rem" />}
-      title="Perhatian!"
-      color="green"
-    >
-      Apa kabar, Keluarga BKD! Di aplikasi Rumah ASN, setiap pertanyaan pengguna
-      tuh kayak puzzle yang menantang. Yuk kita selesaikan satu per satu, show
-      them what weve got. Semangat terus ya, guys!
-    </Alert>
+    </Stack>
   );
 };
 
@@ -333,17 +382,6 @@ const TabsJobs = () => {
       label: "Semua Daftar Pertanyaan",
       key: "all-task",
       children: <TicketsTable query={router?.query} />,
-    },
-    {
-      label: "Arsip",
-      key: "archive-task",
-      children: (
-        <Empty>
-          <Typography.Text type="secondary">
-            Arsip pertanyaan yang sudah selesai dijawab.
-          </Typography.Text>
-        </Empty>
-      ),
     },
   ];
 
@@ -400,16 +438,20 @@ const BerandaBKD = () => {
             </Breadcrumb>
           ),
         }}
-        title="Beranda"
+        title="Beranda BKD"
         subTitle="Tugas Saya"
       >
-        <Row>
-          <Col md={16}>
+        <BackTop />
+        <Row gutter={[16, 16]}>
+          <Col md={18} xs={24}>
             <Card title="Daftar Tugas">
               <Stack>
                 <TabsJobs />
               </Stack>
             </Card>
+          </Col>
+          <Col md={6} xs={24}>
+            <UserPerformance />
           </Col>
         </Row>
       </PageContainer>
