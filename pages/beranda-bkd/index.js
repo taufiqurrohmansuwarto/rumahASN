@@ -1,4 +1,5 @@
-import FormSubCategory from "@/components/Filter/FormSubCategory";
+import AllTaskFilter from "@/components/Filter/AllTaskFilter";
+import UnAnswerFilter from "@/components/Filter/UnAnswerFilter";
 import Layout from "@/components/Layout";
 import PageContainer from "@/components/PageContainer";
 import QueryFilter from "@/components/QueryFilter";
@@ -231,6 +232,8 @@ const TicketsTable = ({ query }) => {
   return (
     <>
       {router?.query?.tab === "my-task" && <FilterStatus />}
+      {router?.query?.tab === "unanswered-task" && <UnAnswerFilter />}
+      {router?.query?.tab === "all-task" && <AllTaskFilter />}
       <List
         rowKey={(row) => row?.id}
         dataSource={data?.data}

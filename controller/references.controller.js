@@ -21,7 +21,8 @@ const agents = async (req, res) => {
           "username as label"
         )
         .where("current_role", "agent")
-        .orWhere("current_role", "admin");
+        .orWhere("current_role", "admin")
+        .orderBy("last_login", "desc");
       res.json(result);
     }
   } catch (error) {
