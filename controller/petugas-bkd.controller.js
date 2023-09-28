@@ -13,6 +13,7 @@ const indexPetugasBKD = async (req, res) => {
     const search = req.query.search || "";
     const star = req.query.star || "";
     const sub_category_id = req.query.sub_category_id || "";
+    const assignee = req.query.assignee || "";
 
     const result = await Ticket.query()
       .select("*", Ticket.relatedQuery("comments").count().as("comments_count"))
@@ -38,6 +39,9 @@ const indexPetugasBKD = async (req, res) => {
         }
         if (sub_category_id) {
           builder.where("sub_category_id", sub_category_id);
+        }
+        if (assignee) {
+          builder.where("assignee", assignee);
         }
       })
       .page(page - 1, limit)
