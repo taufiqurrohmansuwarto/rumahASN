@@ -10,6 +10,7 @@ import {
   Form,
   Row,
   Select,
+  Skeleton,
   Space,
   Table,
   Tag,
@@ -392,23 +393,25 @@ const AggregateAnomali23 = () => {
   );
 
   return (
-    <Row gutter={[12, 12]}>
-      <Col md={12} xs={24}>
-        <Card title="Persentase">
-          <PieChart data={data?.pieChart} />
-        </Card>
-      </Col>
-      <Col md={12} xs={24}>
-        <Card title="Progress">
-          <BarChart data={data?.barFirst} />
-        </Card>
-      </Col>
-      <Col md={12} xs={24}>
-        <Card title="Progress User">
-          <BarChart2 data={data?.barSecond} />
-        </Card>
-      </Col>
-    </Row>
+    <Skeleton loading={isLoading || isFetching}>
+      <Row gutter={[12, 12]}>
+        <Col md={12} xs={24}>
+          <Card title="Persentase">
+            <PieChart data={data?.pieChart} />
+          </Card>
+        </Col>
+        <Col md={12} xs={24}>
+          <Card title="Progress">
+            <BarChart data={data?.barFirst} />
+          </Card>
+        </Col>
+        <Col md={12} xs={24}>
+          <Card title="Progress User">
+            <BarChart2 data={data?.barSecond} />
+          </Card>
+        </Col>
+      </Row>
+    </Skeleton>
   );
 };
 
