@@ -1,6 +1,6 @@
 import { getRwPangkat, getRwPendidikanMaster } from "@/utils/master.utils";
 import moment from "moment";
-const { orderBy, sortBy } = require("lodash");
+const { orderBy, sortBy, toString } = require("lodash");
 const Anomali23 = require("@/models/anomali23.model");
 
 const url = "https://master.bkd.jatimprov.go.id/files_jatimprov/";
@@ -216,10 +216,14 @@ export const dataUtamaMasterByNip = async (req, res) => {
       `/master-ws/operator/employees/${nip}/data-utama-master`
     );
 
-    const user_organization_id = result?.data?.skpd_id;
+    const user_organization_id = result?.data?.skpd?.id;
+
+    const isTheSameOrganization = toString(user_organization_id)?.startsWith(
+      toString(organization_id)
+    );
 
     if (fasilitatorBiasa) {
-      if (user_organization_id !== organization_id) {
+      if (!isTheSameOrganization) {
         res.json(null);
       } else {
         const anomali = await Anomali23.query()

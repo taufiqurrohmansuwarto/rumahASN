@@ -55,8 +55,6 @@ const getAllEmployeesAnomali23Report = async (req, res) => {
     );
 
     res.end(xlsx.write(wb, { type: "buffer", bookType: "xlsx" }));
-
-    res.json(hasil);
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: "Internal server error" });
