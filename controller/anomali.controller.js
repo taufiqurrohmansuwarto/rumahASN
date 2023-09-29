@@ -161,6 +161,26 @@ const userAnomali2022 = async (req, res) => {
   }
 };
 
+function updateValues(data) {
+  const updatedData = [...data];
+
+  updatedData.forEach((item, index) => {
+    if (item.type === "belum_diperbaiki" && item.value > 0) {
+      const sameLabelItem = data.find(
+        (d) =>
+          d.label === item.label && d.type === "sudah_diperbaiki" && d.value > 0
+      );
+
+      if (sameLabelItem) {
+        updatedData[index].value -= sameLabelItem.value;
+        updatedData[index].value = Math.max(0, updatedData[index].value); // memastikan value tidak menjadi negatif
+      }
+    }
+  });
+
+  return updatedData;
+}
+
 const aggregateAnomali = async (req, res) => {
   try {
     const repairedCount = await Anomali23.query()
@@ -181,10 +201,14 @@ const aggregateAnomali = async (req, res) => {
     const barFirst = await getAggregateAnomali();
     const barSecond = await getPerbaikanByUser();
 
+    const pieChartResult = sortBy(pieChart, "value").reverse();
+    const barFirstResult = updateValues(sortBy(barFirst, "label").reverse());
+    const barSecondResult = sortBy(barSecond, "label").reverse();
+
     const data = {
-      pieChart: sortBy(pieChart, "value").reverse(),
-      barFirst: sortBy(barFirst, "label").reverse(),
-      barSecond: sortBy(barSecond, "label").reverse(),
+      pieChart: pieChartResult,
+      barFirst: barFirstResult,
+      barSecond: barSecondResult,
     };
 
     res.json(data);

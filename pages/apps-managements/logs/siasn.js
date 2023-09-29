@@ -1,18 +1,20 @@
 import Layout from "@/components/Layout";
 import { logSIASN } from "@/services/log.services";
 import { useQuery } from "@tanstack/react-query";
-import { BackTop, Breadcrumb, Input, Table } from "antd";
+import { BackTop, Breadcrumb, Card, Input, Space, Table, Tag } from "antd";
 import { useState } from "react";
 import moment from "moment";
 import Head from "next/head";
 import PageContainer from "@/components/PageContainer";
 import Link from "next/link";
+import { upperCase } from "lodash";
+import { useRouter } from "next/router";
+import LogSIASNFilter from "@/components/Filter/LogSIASNFilter";
 
 function LogSIASN() {
-  const [query, setQuery] = useState({
-    page: 1,
-    limit: 50,
-  });
+  const router = useRouter();
+
+  const query = router?.query;
 
   const { data, isLoading, isFetching } = useQuery(
     ["logs-siasn", query],
@@ -23,10 +25,26 @@ function LogSIASN() {
     }
   );
 
+  const gotoDetail = (nip) => {
+    router.push(`/apps-managements/integrasi/siasn/${nip}`);
+  };
+
   const handleSearch = (e) => {
-    setQuery({
-      ...query,
-      employeeNumber: e,
+    router.push({
+      pathname: "/apps-managements/logs/siasn",
+      query: {
+        nip: e?.target?.value,
+      },
+    });
+  };
+
+  const handleChangePage = (page, limit) => {
+    router.push({
+      pathname: "/apps-managements/logs/siasn",
+      query: {
+        ...query,
+        page,
+      },
     });
   };
 
@@ -34,25 +52,35 @@ function LogSIASN() {
     {
       title: "Aktor",
       key: "actor",
-      render: (text) => <>{text?.user?.username}</>,
+      render: (text) => (
+        <Space direction="vertical">
+          {text?.user?.username}
+          <Tag color="blue">{text?.employee_number}</Tag>
+        </Space>
+      ),
     },
     {
       title: "Aksi",
-      dataIndex: "type",
-    },
-    {
-      title: "Layanan",
-      dataIndex: "siasn_service",
-    },
-    {
-      title: "NIP",
-      dataIndex: "employee_number",
+      key: "type",
+      render: (text) => (
+        <Space>
+          <Tag color="green">{text?.type}</Tag>
+          <Tag color="red">{upperCase(text?.siasn_service)}</Tag>
+        </Space>
+      ),
     },
     {
       title: "Tgl. Dibuat",
       key: "created_at",
       render: (text) => (
         <>{moment(text?.created_at).format("DD MMM YYYY HH:mm:ss")}</>
+      ),
+    },
+    {
+      title: "Aksi",
+      key: "aksi",
+      render: (text) => (
+        <a onClick={() => gotoDetail(text?.employee_number)}>Detail</a>
       ),
     },
   ];
@@ -84,43 +112,31 @@ function LogSIASN() {
         }}
       >
         <BackTop />
-        <Table
-          title={() => (
-            <Input.Search
-              allowClear
-              onSearch={handleSearch}
-              placeholder="NIP"
-              style={{
-                width: 300,
-              }}
-            />
-          )}
-          pagination={{
-            showSizeChanger: false,
-            position: ["bottomRight", "topRight"],
-            current: query?.page,
-            pageSize: query?.limit,
-            total: data?.total,
-            onChange: (page, limit) => {
-              setQuery({
-                ...query,
-                page,
-                limit,
-              });
-            },
-          }}
-          columns={columns}
-          loading={isLoading || isFetching}
-          dataSource={data?.data}
-          rowKey={(row) => row?.id}
-        />
+        <Card title="Tabel Log SIASN">
+          <LogSIASNFilter />
+          <Table
+            size="small"
+            pagination={{
+              showSizeChanger: false,
+              position: ["bottomRight", "topRight"],
+              current: parseInt(query?.page) || 1,
+              pageSize: 15,
+              total: data?.total,
+              onChange: handleChangePage,
+            }}
+            columns={columns}
+            loading={isLoading || isFetching}
+            dataSource={data?.data}
+            rowKey={(row) => row?.id}
+          />
+        </Card>
       </PageContainer>
     </>
   );
 }
 
 LogSIASN.getLayout = function getLayout(page) {
-  return <Layout active="/apps-managements/logs/siasn">{page}</Layout>;
+  return <Layout>{page}</Layout>;
 };
 
 LogSIASN.Auth = {

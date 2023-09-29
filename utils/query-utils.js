@@ -402,11 +402,15 @@ module.exports.getAggregateAnomali = async () => {
       sub_anomali.jenis_anomali_nama, sub_repaired.is_repaired
   `);
 
-  return result.rows.map((row) => ({
-    label: row.jenis_anomali_nama,
-    value: parseInt(row.value, 10),
-    type: row.is_repaired ? "sudah_diperbaiki" : "belum_diperbaiki",
-  }));
+  const hasil = result.rows.map((row) => {
+    return {
+      label: row.jenis_anomali_nama,
+      value: parseInt(row.value, 10),
+      type: row.is_repaired ? "sudah_diperbaiki" : "belum_diperbaiki",
+    };
+  });
+
+  return hasil;
 };
 
 module.exports.getPerbaikanByUser = async () => {
