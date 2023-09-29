@@ -1,6 +1,7 @@
 import Layout from "@/components/Layout";
 import PageContainer from "@/components/PageContainer";
 import {
+  BackTop,
   Breadcrumb,
   Button,
   Card,
@@ -9,7 +10,7 @@ import {
   Form,
   Row,
   Select,
-  Skeleton,
+  Space,
   Table,
   Tag,
   Upload,
@@ -344,44 +345,72 @@ const ListAnomali = () => {
   };
 
   return (
-    <Card title="Data Anomali 2023">
-      <UploadExcel />
-      <Table
-        title={() => (
-          <Row gutter={[16, 16]}>
-            <Button
-              loading={isLoadingDownload}
-              onClick={handleDownload}
-              disabled={isLoadingDownload}
-            >
-              Download
-            </Button>
-            <Col span={24}>
-              <Filter />
-            </Col>
-          </Row>
-        )}
-        size="small"
-        pagination={{
-          onChange: handleChangePage,
-          position: ["bottomRight", "topRight"],
-          pageSize: parseInt(query?.limit) || 20,
-          showSizeChanger: false,
-          total: data?.total,
-          showTotal: (total, range) =>
-            `${range[0]}-${range[1]} dari ${total} data`,
-          current: parseInt(query?.page) || 1,
+    <>
+      <Card
+        title="Data Anomali 2023"
+        style={{
+          marginBottom: 12,
         }}
-        dataSource={data?.data}
-        loading={isLoading || isFetching}
-        columns={columns}
-      />
+      >
+        <Space direction="vertical">
+          <UploadExcel />
+          <Button
+            loading={isLoadingDownload}
+            onClick={handleDownload}
+            disabled={isLoadingDownload}
+          >
+            Download
+          </Button>
+        </Space>
+        <Filter />
+        <Table
+          size="small"
+          pagination={{
+            onChange: handleChangePage,
+            position: ["bottomRight", "topRight"],
+            pageSize: parseInt(query?.limit) || 20,
+            showSizeChanger: false,
+            total: data?.total,
+            showTotal: (total, range) =>
+              `${range[0]}-${range[1]} dari ${total} data`,
+            current: parseInt(query?.page) || 1,
+          }}
+          dataSource={data?.data}
+          loading={isLoading || isFetching}
+          columns={columns}
+        />
+      </Card>
       <AggregateAnomali23 />
-    </Card>
+    </>
   );
 };
 
-const AggregateAnomali23 = () => {};
+const AggregateAnomali23 = () => {
+  const { data, isLoading, isFetching } = useQuery(
+    ["aggregate-anomali-2023"],
+    () => aggregateAnomali2023()
+  );
+
+  return (
+    <Row gutter={[12, 12]}>
+      <Col md={12} xs={24}>
+        <Card title="Persentase">
+          <PieChart data={data?.pieChart} />
+        </Card>
+      </Col>
+      <Col md={12} xs={24}>
+        <Card title="Progress">
+          <BarChart data={data?.barFirst} />
+        </Card>
+      </Col>
+      <Col md={12} xs={24}>
+        <Card title="Progress User">
+          <BarChart2 data={data?.barSecond} />
+        </Card>
+      </Col>
+    </Row>
+  );
+};
 
 function AnomaliData2023() {
   const router = useRouter();
@@ -432,6 +461,7 @@ function AnomaliData2023() {
           ),
         }}
       >
+        <BackTop />
         <ListAnomali />
       </PageContainer>
     </>

@@ -32,9 +32,10 @@ const indexLogSiasn = async (req, res) => {
     const type = req?.query?.type || "";
     const siasnService = req?.query?.siasn_service || "";
     const employeeNumber = req?.query?.employeeNumber || "";
+    const action = req?.query?.action || "";
 
     const page = req?.query?.page || 1;
-    const limit = req?.query?.limit || 25;
+    const limit = req?.query?.limit || 10;
 
     const result = await LogSIASN.query()
       .where((builder) => {
@@ -46,6 +47,9 @@ const indexLogSiasn = async (req, res) => {
         }
         if (employeeNumber) {
           builder.where("employee_number", "ilike", `%${employeeNumber}%`);
+        }
+        if (action) {
+          builder.where("action", "ilike", `%${action}%`);
         }
       })
       .page(parseInt(page) - 1, parseInt(limit))

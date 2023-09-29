@@ -26,18 +26,18 @@ function UserPerformance() {
           <Divider />
           <Space>
             <Space direction="vertical" align="center">
-              <Typography.Text>DIAJUKAN</Typography.Text>
-              <Typography.Text>{data?.status?.diajukan}</Typography.Text>
+              <Text fz="xs">DIAJUKAN</Text>
+              <Text fz="xs">{data?.status?.diajukan}</Text>
             </Space>
             <Divider type="vertical" />
             <Space direction="vertical" align="center">
-              <Typography.Text>DIKERJAKAN</Typography.Text>
-              <Typography.Text>{data?.status?.dikerjakan}</Typography.Text>
+              <Text fz="xs">DIKERJAKAN</Text>
+              <Text fz="xs">{data?.status?.dikerjakan}</Text>
             </Space>
             <Divider type="vertical" />
             <Space direction="vertical" align="center">
-              <Typography.Text>SELESAI</Typography.Text>
-              <Typography.Text>{data?.status?.selesai}</Typography.Text>
+              <Text fz="xs">SELESAI</Text>
+              <Text fz="xs">{data?.status?.selesai}</Text>
             </Space>
             <Divider type="vertical" />
           </Space>
