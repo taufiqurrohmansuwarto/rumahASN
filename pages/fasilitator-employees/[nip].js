@@ -18,6 +18,7 @@ import {
   Space,
   Tag,
   Typography,
+  message,
 } from "antd";
 import Head from "next/head";
 import { useRouter } from "next/router";

@@ -1,10 +1,10 @@
 import { rwJabatanMaster } from "@/services/master.services";
-import axios from "axios";
 import {
   getRwJabatan,
   getTokenSIASNService,
   postRwJabatan,
 } from "@/services/siasn-services";
+import { API_URL } from "@/utils/client-utils";
 import { FileAddOutlined, PlusOutlined } from "@ant-design/icons";
 import { Stack } from "@mantine/core";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -22,14 +22,13 @@ import {
   Upload,
   message,
 } from "antd";
+import axios from "axios";
+import moment from "moment";
 import { useState } from "react";
+import AnomaliUser from "./AnomaliUser";
 import FormJFT from "./FormJFT";
 import FormJFU from "./FormJFU";
 import FormUnitOrganisasi from "./FormUnitOrganisasi";
-import moment from "moment";
-import { API_URL } from "@/utils/client-utils";
-import AlertJabatan from "./AlertJabatan";
-import AnomaliUser from "./AnomaliUser";
 
 const format = "DD-MM-YYYY";
 
