@@ -14,9 +14,7 @@ function Messages() {
   const { data, isLoading } = useQuery(
     ["total-unread-messages", query],
     () => getPrivateMessages(query),
-    {
-      refetchInterval: 5000,
-    }
+    {}
   );
 
   const gotoMail = () => {

@@ -10,9 +10,18 @@ function UserPerformance() {
     status,
   } = useSession();
 
-  const { data, isLoading } = useQuery(["statistik-tiket-pegawai-bkd"], () =>
-    statistikPegawaiBKD()
+  const { data, isLoading, refetch } = useQuery(
+    ["statistik-tiket-pegawai-bkd"],
+    () => statistikPegawaiBKD(),
+    {
+      refetchOnWindowFocus: false,
+      refetchOnReconnect: false,
+    }
   );
+
+  const handleRefresh = () => {
+    refetch();
+  };
 
   return (
     <Card title="Performa Pegawai" loading={status === "loading" || isLoading}>

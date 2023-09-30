@@ -8,10 +8,9 @@ function Notifications() {
   const { data, isLoading } = useQuery(
     ["notifications-total"],
     () => listNotifications({ symbol: "yes" }),
-    {
-      refetchInterval: 30000,
-    }
+    {}
   );
+
   const router = useRouter();
 
   const changePageNotification = () => {
