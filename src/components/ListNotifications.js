@@ -1,6 +1,6 @@
 import { listNotifications, removeNotification } from "@/services/index";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Avatar, Card, List, Tag } from "antd";
+import { Avatar, BackTop, Card, List, Tag } from "antd";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import { useState } from "react";
@@ -9,20 +9,41 @@ import { formatDate } from "../../utils";
 function ListNotifications() {
   const queryClient = useQueryClient();
   const { data: userData, status } = useSession();
+  const router = useRouter();
+  const query = router?.query;
 
-  const [query, setQuery] = useState({
-    page: 1,
-    limit: 10,
-    symbol: "no",
-  });
+  // const [query, setQuery] = useState({
+  //   page: 1,
+  //   limit: 50,
+  //   symbol: "no",
+  // });
 
-  const { data, isLoading: loading } = useQuery(
+  const {
+    data,
+    isLoading: loading,
+    isFetching,
+  } = useQuery(
     ["notifications", query],
-    () => listNotifications(query),
-    { keepPreviousData: true, enabled: !!query }
+    () =>
+      listNotifications({
+        ...query,
+        symbol: "no",
+      }),
+    {
+      keepPreviousData: true,
+      enabled: !!query,
+    }
   );
 
-  const router = useRouter();
+  const handleChange = (page) => {
+    router.push({
+      pathname: router.pathname,
+      query: {
+        ...router.query,
+        page,
+      },
+    });
+  };
 
   // remove notification
   const { mutateAsync: remove, isLoading } = useMutation(
@@ -61,17 +82,19 @@ function ListNotifications() {
 
   return (
     <Card>
+      <BackTop />
       <List
         pagination={{
           showSizeChanger: false,
           size: "small",
           position: "both",
-          onChange: (page) => setQuery({ ...query, page }),
-          current: query.page,
-          pageSize: query.limit,
+          onChange: handleChange,
+          current: parseInt(query.page) || 1,
+          pageSize: parseInt(query.limit) || 50,
           total: data?.total,
+          showTotal: (total) => `Total ${total} item`,
         }}
-        loading={loading || status === "loading"}
+        loading={loading || status === "loading" || isFetching}
       >
         {data?.results?.map((item) => (
           <List.Item

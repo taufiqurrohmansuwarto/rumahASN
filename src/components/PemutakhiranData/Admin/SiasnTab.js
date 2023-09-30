@@ -1,4 +1,4 @@
-import { Tabs } from "antd";
+import { Grid, Tabs } from "antd";
 import CompareAngkaKreditByNip from "./CompareAngkaKreditByNip";
 import CompareDataUtamaByNip from "./CompareDataUtamaByNip";
 import CompareJabatanByNip from "./CompareJabatanByNip";
@@ -9,8 +9,13 @@ import ComparePemberhentianByNip from "./ComparePemberhentianByNip";
 import CompareMasaKerjaByNip from "./CompareMasaKerjaByNip";
 
 function SiasnTab({ nip }) {
+  const breakPoint = Grid.useBreakpoint();
   return (
-    <Tabs type="card" tabPosition="left" defaultActiveKey="1">
+    <Tabs
+      type="card"
+      tabPosition={breakPoint.xs ? "top" : "left"}
+      defaultActiveKey="1"
+    >
       <Tabs.TabPane tab="Data Utama" key="1">
         <CompareDataUtamaByNip nip={nip} />
       </Tabs.TabPane>

@@ -5,7 +5,7 @@ import {
   postRwSkp22,
 } from "@/services/siasn-services";
 import { FileAddOutlined } from "@ant-design/icons";
-import { Stack } from "@mantine/core";
+import { Stack, Text } from "@mantine/core";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Button,
@@ -194,6 +194,39 @@ function CompareSKP22({ nip, id }) {
 
   const columns = [
     {
+      title: "SKP",
+      key: "skp",
+      responsive: ["xs"],
+      render: (_, record) => {
+        return (
+          <Stack spacing="xs">
+            <div>
+              {record?.path?.[873] && (
+                <a
+                  href={`/helpdesk/api/siasn/ws/download?filePath=${record?.path?.[873]?.dok_uri}`}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  File
+                </a>
+              )}
+            </div>
+            <Text>{record?.tahun}</Text>
+            <Text>Hasil Kerja : {record?.hasilKinerja}</Text>
+            <Text>Kuadran : {record?.kuadranKinerja}</Text>
+            <Text>
+              {record?.namaPenilai} - {record?.penilaiUnorNm} -{" "}
+              {record?.statusPenilai}
+            </Text>
+            <Text>
+              Perilaku Kerja : {record?.perilakuKerja} -{" "}
+              {record?.PerilakuKerjaNilai}
+            </Text>
+          </Stack>
+        );
+      },
+    },
+    {
       title: "File",
       key: "file",
       render: (_, record) => {
@@ -211,46 +244,75 @@ function CompareSKP22({ nip, id }) {
           </>
         );
       },
+      responsive: ["sm"],
     },
     {
       title: "Hasil Kinerja",
       dataIndex: "hasilKinerja",
+      responsive: ["sm"],
     },
     {
       title: "Hasil Kinerja Nilai",
       dataIndex: "hasilKinerjaNilai",
+      responsive: ["sm"],
     },
     {
       title: "Kuadran Kinerja",
       dataIndex: "kuadranKinerja",
+      responsive: ["sm"],
     },
     {
       title: "Nama Penilai",
       dataIndex: "namaPenilai",
+      responsive: ["sm"],
     },
     {
       title: "Unor Penilai",
       dataIndex: "penilaiUnorNm",
+      responsive: ["sm"],
     },
     {
       title: "Perilaku Kerja",
       dataIndex: "perilakuKerja",
+      responsive: ["sm"],
     },
     {
       title: "Perilaku Kerja Nilai",
       dataIndex: "PerilakuKerjaNilai",
+      responsive: ["sm"],
     },
     {
       title: "Status Penilai",
       dataIndex: "statusPenilai",
+      responsive: ["sm"],
     },
     {
       title: "Tahun",
       dataIndex: "tahun",
+      responsive: ["sm"],
     },
   ];
 
   const columnMaster = [
+    {
+      title: "SKP",
+      key: "skp_xs",
+      responsive: ["xs"],
+      render: (_, record) => {
+        return (
+          <Stack spacing="xs">
+            <div>
+              <a href={record?.file_skp} target="_blank" rel="noreferrer">
+                File
+              </a>
+            </div>
+            <Text>{record?.tahun}</Text>
+            <Text>Hasil Kerja : {record?.hasil_kerja}</Text>
+            <Text>Perilaku : {record?.perilaku}</Text>
+          </Stack>
+        );
+      },
+    },
     {
       title: "File",
       key: "file_skp",
@@ -260,18 +322,22 @@ function CompareSKP22({ nip, id }) {
         </a>
       ),
       width: 100,
+      responsive: ["sm"],
     },
     {
       title: "Tahun",
       dataIndex: "tahun",
+      responsive: ["sm"],
     },
     {
       title: "Hasil Kerja",
       dataIndex: "hasil_kerja",
+      responsive: ["sm"],
     },
     {
       title: "Perilaku Kerja",
       dataIndex: "perilaku",
+      responsive: ["sm"],
     },
   ];
 

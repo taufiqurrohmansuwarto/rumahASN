@@ -121,8 +121,8 @@ const sendingNotificationToAdmin = async (ticketId, currentUserId) => {
 
   const data = admins?.map((admin) => ({
     type: "new_ticket",
-    title: "Tiket baru",
-    content: "Tiket baru telah dibuat",
+    title: "Pertanyaan baru",
+    content: "Membuat pertanyaan baru",
     ticket_id: ticketId,
     from: currentUserId,
     to: admin.user_id,
