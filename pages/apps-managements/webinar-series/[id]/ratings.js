@@ -10,7 +10,7 @@ function Ratings() {
   const router = useRouter();
   const { id } = router?.query;
 
-  const { data, isLoading } = useQuery(
+  const { data, isLoading, isFetching } = useQuery(
     ["webinar-series-ratings", router?.query],
     () => getRatingAdmin(router?.query),
     {
@@ -22,7 +22,7 @@ function Ratings() {
   return (
     <AdminLayoutDetailWebinar loading={isLoading} active="ratings">
       <DownloadRating id={id} />
-      <WebinarRatings data={data} />
+      <WebinarRatings loadingRating={isLoading || isFetching} data={data} />
     </AdminLayoutDetailWebinar>
   );
 }

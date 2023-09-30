@@ -13,7 +13,7 @@ import {
 import { useRouter } from "next/router";
 import { useState } from "react";
 
-const DaftarUserRating = ({ data }) => {
+const DaftarUserRating = ({ data, loadingRating }) => {
   const router = useRouter();
 
   const handleChangePage = (page) => {
@@ -28,6 +28,7 @@ const DaftarUserRating = ({ data }) => {
   return (
     <>
       <List
+        loading={loadingRating}
         size="small"
         pagination={{
           onChange: handleChangePage,
@@ -172,13 +173,13 @@ const ViewRatingComponent = ({ data }) => {
   );
 };
 
-const WebinarRatings = ({ data }) => {
+const WebinarRatings = ({ data, loadingRating }) => {
   return (
     <Card>
       <BackTop />
       <ViewRatingComponent data={data} />
       <Divider />
-      <DaftarUserRating data={data?.data} />
+      <DaftarUserRating loadingRating={loadingRating} data={data?.data} />
     </Card>
   );
 };
