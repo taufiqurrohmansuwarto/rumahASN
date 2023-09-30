@@ -8,7 +8,7 @@ import { useRouter } from "next/router";
 function WebinarComments() {
   const router = useRouter();
 
-  const { data, isLoading } = useQuery(
+  const { data, isLoading, isFetching } = useQuery(
     ["webinar-user-rating", router?.query],
     () => getRatingForUser(router?.query),
     {
@@ -19,7 +19,7 @@ function WebinarComments() {
 
   return (
     <WebinarUserDetailLayout loading={isLoading} active="ratings">
-      <WebinarRatings data={data} />
+      <WebinarRatings loadingRating={isLoading || isFetching} data={data} />
     </WebinarUserDetailLayout>
   );
 }
