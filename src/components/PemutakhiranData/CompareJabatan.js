@@ -6,7 +6,7 @@ import {
 } from "@/services/siasn-services";
 import { API_URL } from "@/utils/client-utils";
 import { FileAddOutlined, PlusOutlined } from "@ant-design/icons";
-import { Stack } from "@mantine/core";
+import { Stack, Text } from "@mantine/core";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Button,
@@ -143,8 +143,9 @@ const FormEntri = ({ visible, onCancel, nip }) => {
   return (
     <Modal
       title="Entri Jabatan SIASN"
+      centered
       width={800}
-      visible={visible}
+      open={visible}
       onOk={handleFinish}
       onCancel={onCancel}
       confirmLoading={loading}
@@ -203,8 +204,8 @@ const FormEntri = ({ visible, onCancel, nip }) => {
         >
           <Input />
         </Form.Item>
-        <Row gutter={16}>
-          <Col span={8}>
+        <Row gutter={[8, 8]}>
+          <Col md={8} xs={24}>
             <Form.Item
               rules={[
                 {
@@ -218,7 +219,7 @@ const FormEntri = ({ visible, onCancel, nip }) => {
               <DatePicker format={format} />
             </Form.Item>
           </Col>
-          <Col span={8}>
+          <Col md={8} xs={24}>
             <Form.Item
               rules={[{ required: true }]}
               name="tmt_pelantikan"
@@ -227,7 +228,7 @@ const FormEntri = ({ visible, onCancel, nip }) => {
               <DatePicker format={format} />
             </Form.Item>
           </Col>
-          <Col span={8}>
+          <Col md={8} xs={24}>
             <Form.Item
               rules={[
                 {
@@ -309,6 +310,35 @@ function CompareJabatan() {
 
   const columns = [
     {
+      title: "Jabatan",
+      responsive: ["xs"],
+      key: "jabatan_xs",
+      render: (_, row) => {
+        return (
+          <Stack>
+            <div>
+              {row?.path?.[872] && (
+                <a
+                  href={`/helpdesk/api/siasn/ws/download?filePath=${row?.path?.[872]?.dok_uri}`}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  File
+                </a>
+              )}
+            </div>
+            <Text>{checkJenisJabatan(row)}</Text>
+            <Text>{namaJabatan(row)}</Text>
+            <Text>{row?.unorNama}</Text>
+            <Text>
+              {row?.nomorSk} - {row?.tanggalSk}
+            </Text>
+            <Text>TMT Jab : {row?.tmtJabatan}</Text>
+          </Stack>
+        );
+      },
+    },
+    {
       title: "File",
       key: "file",
       render: (_, row) => {
@@ -326,29 +356,70 @@ function CompareJabatan() {
           </>
         );
       },
+      responsive: ["sm"],
     },
     {
       title: "Jenis",
       key: "jenis_jabatan",
       render: (row) => <div>{checkJenisJabatan(row)}</div>,
+      responsive: ["sm"],
     },
     {
       title: "Jabatan",
       key: "nama_jabatan",
 
       render: (row) => <div>{namaJabatan(row)}</div>,
+      responsive: ["sm"],
     },
 
     {
       title: "Unor",
       dataIndex: "unorNama",
+      responsive: ["sm"],
     },
-    { title: "No. SK", dataIndex: "nomorSk", key: "nomorSk" },
-    { title: "TMT Jab", dataIndex: "tmtJabatan", key: "tmtJabatan" },
-    { title: "Tgl SK", dataIndex: "tanggalSk", key: "tanggalSk" },
+    {
+      title: "No. SK",
+      dataIndex: "nomorSk",
+      key: "nomorSk",
+      responsive: ["sm"],
+    },
+    {
+      title: "TMT Jab",
+      dataIndex: "tmtJabatan",
+      key: "tmtJabatan",
+      responsive: ["sm"],
+    },
+    {
+      title: "Tgl SK",
+      dataIndex: "tanggalSk",
+      key: "tanggalSk",
+      responsive: ["sm"],
+    },
   ];
 
   const columnsMaster = [
+    {
+      title: "Jabatan",
+      responsive: ["xs"],
+      key: "jabatan_xs",
+      render: (_, row) => {
+        return (
+          <Stack>
+            <div>
+              <a href={row?.file} target="_blank" rel="noreferrer">
+                {row?.jenis_jabatan}
+              </a>
+            </div>
+            <Text>{row?.jabatan}</Text>
+            <Text>{row?.unor}</Text>
+            <Text>
+              {row?.nomor_sk} - {row?.tgl_sk}
+            </Text>
+            <Text>TMT Jab : {row?.tmt_jabatan}</Text>
+          </Stack>
+        );
+      },
+    },
     {
       title: "Jenis",
       dataIndex: "jenis_jabatan",
@@ -361,31 +432,50 @@ function CompareJabatan() {
           </div>
         );
       },
+      responsive: ["sm"],
     },
     {
       title: "Jabatan",
       key: "jabatan",
       dataIndex: "jabatan",
+      responsive: ["sm"],
     },
     {
       title: "Unor",
       key: "unor",
       dataIndex: "unor",
+      responsive: ["sm"],
     },
-    { title: "No. SK", dataIndex: "nomor_sk", key: "nomor_sk" },
-    { title: "TMT. Jab", dataIndex: "tmt_jabatan", key: "tmt_jabatan" },
-    { title: "Tgl. SK", dataIndex: "tgl_sk", key: "tgl_sk" },
-    { title: "Aktif", dataIndex: "aktif", key: "aktif" },
+    {
+      title: "No. SK",
+      dataIndex: "nomor_sk",
+      key: "nomor_sk",
+      responsive: ["sm"],
+    },
+    {
+      title: "TMT. Jab",
+      dataIndex: "tmt_jabatan",
+      key: "tmt_jabatan",
+      responsive: ["sm"],
+    },
+    {
+      title: "Tgl. SK",
+      dataIndex: "tgl_sk",
+      key: "tgl_sk",
+      responsive: ["sm"],
+    },
+    { title: "Aktif", dataIndex: "aktif", key: "aktif", responsive: ["sm"] },
   ];
 
   return (
-    <Card loading={isLoading} title="Komparasi Jabatan">
+    <>
       <FormEntri onCancel={handleClose} visible={visible} />
       <div style={{ marginBottom: 16 }}>
         <AnomaliUser />
       </div>
       <Stack>
         <Table
+          bordered
           title={() => (
             <Button type="primary" onClick={handleOpen} icon={<PlusOutlined />}>
               Jabatan SIASN
@@ -398,7 +488,8 @@ function CompareJabatan() {
           pagination={false}
         />
         <Table
-          title={() => `Jabatan Aplikasi SIMASTER`}
+          bordered
+          title={() => <Text fw="bold">Jabatan SIMASTER</Text>}
           columns={columnsMaster}
           dataSource={dataMaster}
           loading={loadingMasterJabatan}
@@ -406,7 +497,7 @@ function CompareJabatan() {
           pagination={false}
         />
       </Stack>
-    </Card>
+    </>
   );
 }
 

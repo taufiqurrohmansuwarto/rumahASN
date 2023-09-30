@@ -43,14 +43,7 @@ function Komparasi() {
         }}
       >
         <Card>
-          <Row
-            gutter={{
-              xs: 20,
-              sm: 20,
-              md: 24,
-              lg: 32,
-            }}
-          >
+          <Row gutter={[16, 16]}>
             <Col md={12} xs={24}>
               <MenuMySAPK dataUtama={dataUtama} />
             </Col>

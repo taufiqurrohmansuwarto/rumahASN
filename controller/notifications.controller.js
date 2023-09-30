@@ -3,7 +3,7 @@ const Notifications = require("../models/notifications.model");
 const index = async (req, res) => {
   try {
     const { customId } = req?.user;
-    const limit = req?.query?.limit || 10;
+    const limit = req?.query?.limit || 50;
     const page = req?.query?.page || 1;
     const simbol = req?.query?.symbol || "no";
 
@@ -13,7 +13,12 @@ const index = async (req, res) => {
         .withGraphFetched("[from_user(simpleSelect), ticket(selectPublish) ]")
         .page(parseInt(page) - 1, parseInt(limit))
         .orderBy("created_at", "desc");
-      res.json(result);
+      res.json({
+        results: result.results,
+        total: result.total,
+        limit: parseInt(limit),
+        page: parseInt(page),
+      });
     } else if (simbol === "yes") {
       const result = await Notifications.query()
         .count()

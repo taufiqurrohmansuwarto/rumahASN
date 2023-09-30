@@ -1,23 +1,131 @@
 import { dataUtamaSimaster } from "@/services/master.services";
 import { dataUtamaSIASN } from "@/services/siasn-services";
-import { komparasiGelar } from "@/utils/client-utils";
-import { CloseOutlined } from "@ant-design/icons";
-import { Stack, Table } from "@mantine/core";
-import { IconAlertCircle, IconCircleCheck } from "@tabler/icons";
+import { compareText, komparasiGelar } from "@/utils/client-utils";
+import { Stack, Text } from "@mantine/core";
 import { useQuery } from "@tanstack/react-query";
 import {
   Alert,
   Card,
   Col,
-  Form,
-  Input,
   Row,
   Skeleton,
-  Tooltip,
+  Space,
+  Table as TableAntd,
+  Tag,
   Typography,
 } from "antd";
-import { useEffect } from "react";
-import CheckHasil from "./CheckHasil";
+
+const dataTabel = (siasn, simaster) => {
+  return [
+    {
+      id: "nama",
+      siasn: siasn?.nama,
+      master: simaster?.nama,
+      label: "Nama",
+      result: compareText(siasn?.nama, simaster?.nama),
+    },
+    {
+      id: "nip",
+      siasn: siasn?.nipBaru,
+      master: simaster?.nip_baru,
+      label: "NIP",
+      result: compareText(siasn?.nipBaru, simaster?.nip_baru),
+    },
+    {
+      id: "tanggal_lahir",
+      siasn: siasn?.tglLahir,
+      master: simaster?.tgl_lahir,
+      label: "Tanggal Lahir",
+      result: compareText(siasn?.tglLahir, simaster?.tgl_lahir),
+    },
+    {
+      id: "gelar_depan",
+      siasn: siasn?.gelarDepan,
+      master: simaster?.gelar_depan,
+      label: "Gelar Depan",
+      result: komparasiGelar(siasn?.gelarDepan, simaster?.gelar_depan),
+    },
+    {
+      id: "gelar_belakang",
+      siasn: siasn?.gelarBelakang,
+      master: simaster?.gelar_belakang,
+      label: "Gelar Belakang",
+      result: komparasiGelar(siasn?.gelarBelakang, simaster?.gelar_belakang),
+    },
+    {
+      id: "email",
+      siasn: siasn?.email,
+      master: simaster?.email,
+      label: "Email",
+      result: compareText(siasn?.email, simaster?.email),
+    },
+    {
+      id: "nik",
+      siasn: siasn?.nik,
+      master: simaster?.nik,
+      label: "NIK",
+      result: compareText(siasn?.nik, simaster?.nik),
+    },
+    {
+      id: "jabatan",
+      siasn: siasn?.jabatanNama,
+      master: simaster?.jabatan?.jabatan,
+      label: "Jabatan",
+      result: "cant compare",
+    },
+    {
+      id: "pendidikan",
+      siasn: siasn?.pendidikanTerakhirNama,
+      master: `${simaster?.pendidikan?.jenjang} ${simaster?.pendidikan?.prodi}`,
+      label: "Pendidikan",
+      result: "cant compare",
+    },
+    {
+      id: "pangkat",
+      siasn: `${siasn?.pangkatAkhir}-${siasn?.golRuangAkhir}`,
+      master: `${simaster?.pangkat?.pangkat}-${simaster?.pangkat?.golongan}`,
+      label: "Pangkat",
+      result: "cant compare",
+    },
+    {
+      id: "instansi_induk",
+      siasn: siasn?.instansiIndukNama,
+      master: "",
+      label: "Instansi Induk",
+      result: "cant compare",
+    },
+    {
+      id: "unit_organisasi",
+      siasn: siasn?.unorNama,
+      master: "",
+      label: "Unit Organisasi",
+      result: "cant compare",
+    },
+  ];
+};
+
+const TagResult = ({ record }) => {
+  const id = record?.id;
+  const cantCompare =
+    id === "jabatan" ||
+    id === "pendidikan" ||
+    id === "pangkat" ||
+    id === "instansi_induk" ||
+    id === "unit_organisasi";
+  if (cantCompare) {
+    return (
+      <Tag color="orange">
+        Penulisan kemungkinan beda tapi secara substansi sama
+      </Tag>
+    );
+  }
+
+  return (
+    <Tag color={record?.result ? "green" : "red"}>
+      {record?.result ? "Sama" : "Tidak Sama"}
+    </Tag>
+  );
+};
 
 const Pemberitahuan = () => {
   return (
@@ -49,10 +157,48 @@ function CompareDataUtama() {
     () => dataUtamaSimaster()
   );
 
+  const columns = [
+    {
+      title: "Komparasi",
+      key: "komparasi",
+      responsive: ["xs"],
+      render: (_, record) => {
+        return (
+          <Space direction="vertical">
+            <Text fw="bold">{record?.label}</Text>
+            <Text>SIASN : {record?.siasn}</Text>
+            <Text>SIMASTER : {record?.master}</Text>
+            <TagResult record={record} />
+          </Space>
+        );
+      },
+    },
+    {
+      title: "Jenis Data",
+      dataIndex: "label",
+      responsive: ["sm"],
+    },
+    {
+      title: "SIASN",
+      dataIndex: "siasn",
+      responsive: ["sm"],
+    },
+    {
+      title: "SIMASTER",
+      dataIndex: "master",
+      responsive: ["sm"],
+    },
+    {
+      title: "Hasil",
+      key: "result",
+      responsive: ["sm"],
+      render: (_, record) => <TagResult record={record} />,
+    },
+  ];
+
   return (
     <div>
       <Stack>
-        <Pemberitahuan />
         <Skeleton loading={isLoading || isLoadingDataSimaster}>
           <Row
             gutter={[
@@ -60,204 +206,13 @@ function CompareDataUtama() {
               { xs: 8, sm: 16, md: 24, lg: 32 },
             ]}
           >
-            <Col md={18}>
+            <Col md={24}>
               <Card>
-                <Table>
-                  <thead>
-                    <tr>
-                      <th>Jenis Data</th>
-                      <th>SIASN</th>
-                      <th>SIMASTER</th>
-                      <th
-                        style={{
-                          textAlign: "center",
-                        }}
-                      >
-                        Hasil
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr>
-                      <td>Nama</td>
-                      <td>{data?.nama}</td>
-                      <td>{dataSimaster?.nama}</td>
-                      <td
-                        style={{
-                          textAlign: "center",
-                        }}
-                      >
-                        <CheckHasil
-                          firstData={data?.nama}
-                          secondData={dataSimaster?.nama}
-                        />
-                      </td>
-                    </tr>
-                    <tr>
-                      <td>NIP</td>
-                      <td>{data?.nipBaru}</td>
-                      <td>{dataSimaster?.nip_baru}</td>
-                      <td
-                        style={{
-                          textAlign: "center",
-                        }}
-                      >
-                        <CheckHasil
-                          firstData={data?.nipBaru}
-                          secondData={dataSimaster?.nip_baru}
-                        />
-                      </td>
-                    </tr>
-                    <tr>
-                      <td>Tanggal Lahir</td>
-                      <td>{data?.tglLahir}</td>
-                      <td>{dataSimaster?.tgl_lahir}</td>
-                      <td
-                        style={{
-                          textAlign: "center",
-                        }}
-                      >
-                        <CheckHasil
-                          firstData={data?.tglLahir}
-                          secondData={dataSimaster?.tgl_lahir}
-                        />
-                      </td>
-                    </tr>
-                    <tr>
-                      <td>Gelar Depan</td>
-                      <td>{data?.gelarDepan}</td>
-                      <td>{dataSimaster?.gelar_depan}</td>
-                      <td
-                        style={{
-                          textAlign: "center",
-                        }}
-                      >
-                        {komparasiGelar(
-                          data?.gelarDepan,
-                          dataSimaster?.gelar_depan
-                        ) ? (
-                          <IconCircleCheck />
-                        ) : (
-                          <CloseOutlined />
-                        )}
-                      </td>
-                    </tr>
-                    <tr>
-                      <td>Gelar Belakang</td>
-                      <td>{data?.gelarBelakang}</td>
-                      <td>{dataSimaster?.gelar_belakang}</td>
-                      <td
-                        style={{
-                          textAlign: "center",
-                        }}
-                      >
-                        {komparasiGelar(
-                          data?.gelarBelakang,
-                          dataSimaster?.gelar_belakang
-                        ) ? (
-                          <IconCircleCheck />
-                        ) : (
-                          <CloseOutlined />
-                        )}
-                      </td>
-                    </tr>
-                    <tr>
-                      <td>Email</td>
-                      <td>{data?.email}</td>
-                      <td>{dataSimaster?.email}</td>
-                      <td
-                        style={{
-                          textAlign: "center",
-                        }}
-                      >
-                        <CheckHasil
-                          firstData={data?.email}
-                          secondData={dataSimaster?.email}
-                        />
-                      </td>
-                    </tr>
-                    <tr>
-                      <td>NIK</td>
-                      <td>{data?.nik}</td>
-                      <td>{dataSimaster?.nik}</td>
-                      <td
-                        style={{
-                          textAlign: "center",
-                        }}
-                      >
-                        <CheckHasil
-                          firstData={data?.nik}
-                          secondData={dataSimaster?.nik}
-                        />
-                      </td>
-                    </tr>
-
-                    <tr>
-                      <td>Jabatan</td>
-                      <td>{data?.jabatanNama}</td>
-                      <td>{dataSimaster?.jabatan?.jabatan}</td>
-                      <td
-                        style={{
-                          textAlign: "center",
-                        }}
-                      >
-                        <Tooltip title="Penulisan kemungkinan beda tapi secara substansi sama">
-                          <IconAlertCircle
-                            style={{
-                              color: "orange",
-                            }}
-                          />
-                        </Tooltip>
-                      </td>
-                    </tr>
-                    <tr>
-                      <td>Pendidikan Terakhir</td>
-                      <td>{data?.pendidikanTerakhirNama}</td>
-                      <td>{`${dataSimaster?.pendidikan?.jenjang} ${dataSimaster?.pendidikan?.prodi}`}</td>
-                      <td
-                        style={{
-                          textAlign: "center",
-                        }}
-                      >
-                        <Tooltip title="Penulisan kemungkinan beda tapi secara substansi sama">
-                          <IconAlertCircle
-                            style={{
-                              color: "orange",
-                            }}
-                          />
-                        </Tooltip>
-                      </td>
-                    </tr>
-                    <tr>
-                      <td>Pangkat</td>
-                      <td>{`${data?.pangkatAkhir}-${data?.golRuangAkhir}`}</td>
-                      <td>{`${dataSimaster?.pangkat?.pangkat}-${dataSimaster?.pangkat?.golongan}`}</td>
-                      <td
-                        style={{
-                          textAlign: "center",
-                        }}
-                      >
-                        <Tooltip title="Penulisan kemungkinan beda tapi secara substansi sama">
-                          <IconAlertCircle
-                            style={{
-                              color: "orange",
-                            }}
-                          />
-                        </Tooltip>
-                      </td>
-                    </tr>
-                    <tr>
-                      <td>Instansi Induk</td>
-                      <td>{data?.instansiIndukNama}</td>
-                      <td></td>
-                    </tr>
-                    <tr>
-                      <td>Unit Organisasi</td>
-                      <td>{data?.unorNama}</td>
-                      <td></td>
-                    </tr>
-                  </tbody>
-                </Table>
+                <TableAntd
+                  columns={columns}
+                  dataSource={dataTabel(data, dataSimaster)}
+                  pagination={false}
+                />
               </Card>
             </Col>
           </Row>

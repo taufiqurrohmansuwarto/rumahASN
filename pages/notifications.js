@@ -7,6 +7,7 @@ import ListNotifications from "../src/components/ListNotifications";
 import PageContainer from "../src/components/PageContainer";
 import Head from "next/head";
 import Link from "next/link";
+import { DeleteOutlined } from "@ant-design/icons";
 
 function NotificationsPage() {
   const queryClient = useQueryClient();
@@ -48,7 +49,13 @@ function NotificationsPage() {
         <Grid align="center" justify="center">
           <Grid.Col md={8} sm={12}>
             <Stack>
-              <Button onClick={handleClearNotif}>Hapus Notifikasi</Button>
+              <Button
+                type="primary"
+                icon={<DeleteOutlined />}
+                onClick={handleClearNotif}
+              >
+                Hapus Notifikasi
+              </Button>
               <ListNotifications />
             </Stack>
           </Grid.Col>
