@@ -9,7 +9,6 @@ import {
   Col,
   Row,
   Skeleton,
-  Space,
   Table as TableAntd,
   Tag,
   Typography,
@@ -113,11 +112,7 @@ const TagResult = ({ record }) => {
     id === "instansi_induk" ||
     id === "unit_organisasi";
   if (cantCompare) {
-    return (
-      <Tag color="orange">
-        Penulisan kemungkinan beda tapi secara substansi sama
-      </Tag>
-    );
+    return <Tag color="orange">Bisa Jadi Sama</Tag>;
   }
 
   return (
@@ -164,12 +159,28 @@ function CompareDataUtama() {
       responsive: ["xs"],
       render: (_, record) => {
         return (
-          <Space direction="vertical">
-            <Text fw="bold">{record?.label}</Text>
-            <Text>SIASN : {record?.siasn}</Text>
-            <Text>SIMASTER : {record?.master}</Text>
-            <TagResult record={record} />
-          </Space>
+          <Row>
+            <Col span={24}>
+              <Text fz="md" mb={8} fw="bold" td="underline">
+                {record?.label}
+              </Text>
+              <Text fz="sm">SIASN</Text>
+              <Text fz="xs" mb={4} c="dimmed">
+                {record?.siasn}
+              </Text>
+              <Text fz="sm">MASTER</Text>
+              <Text fz="xs" c="dimmed">
+                {record?.master}
+              </Text>
+              <div
+                style={{
+                  marginTop: 8,
+                }}
+              >
+                <TagResult record={record} />
+              </div>
+            </Col>
+          </Row>
         );
       },
     },
@@ -209,6 +220,7 @@ function CompareDataUtama() {
             <Col md={24}>
               <Card>
                 <TableAntd
+                  rowKey={(row) => row?.id}
                   columns={columns}
                   dataSource={dataTabel(data, dataSimaster)}
                   pagination={false}
