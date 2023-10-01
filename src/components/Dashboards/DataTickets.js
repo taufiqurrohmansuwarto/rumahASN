@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Card, Col, Row, Skeleton, Statistic } from "antd";
 import { sumBy } from "lodash";
 import React from "react";
+import PlotTickets from "./PlotTickets";
 
 const questionFilter = (questions, status) => {
   return questions?.find((question) => question.name === status);
@@ -16,56 +17,9 @@ function DataTickets() {
   );
 
   return (
-    <div style={{ marginBottom: 10 }}>
-      <Skeleton loading={isLoading}>
-        <Row gutter={[{ xs: 24, sm: 16, md: 12, lg: 32 }]}>
-          <Col md={6} xs={24}>
-            <Card bordered={false}>
-              <Statistic
-                title="Total Pertanyaan"
-                value={sumBy(data, "count")}
-                valueStyle={{
-                  color: "#3f8600",
-                }}
-              />
-            </Card>
-          </Col>
-          <Col md={6} xs={24}>
-            <Card bordered={false}>
-              <Statistic
-                title="Pertanyaan Diajukan"
-                value={questionFilter(data, "DIAJUKAN")?.count}
-                valueStyle={{
-                  color: "#cf1322",
-                }}
-              />
-            </Card>
-          </Col>
-          <Col md={6} xs={24}>
-            <Card bordered={false}>
-              <Statistic
-                title="Pertanyaan Dikerjakan"
-                value={questionFilter(data, "DIKERJAKAN")?.count}
-                valueStyle={{
-                  color: "#cf1322",
-                }}
-              />
-            </Card>
-          </Col>
-          <Col md={6} xs={24}>
-            <Card bordered={false}>
-              <Statistic
-                title="Pertanyaan Selesai"
-                valueStyle={{
-                  color: "#3f8600",
-                }}
-                value={questionFilter(data, "SELESAI")?.count}
-              />
-            </Card>
-          </Col>
-        </Row>
-      </Skeleton>
-    </div>
+    <Skeleton loading={isLoading}>
+      <PlotTickets data={data} />
+    </Skeleton>
   );
 }
 

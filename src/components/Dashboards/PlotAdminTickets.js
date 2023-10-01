@@ -34,6 +34,12 @@ function PlotAdminTickets() {
     xField: "bulan",
     yField: "total",
     // smooth: true,
+    interactions: [
+      {
+        type: "marker-active",
+      },
+    ],
+    label: {},
     point: {
       size: 5,
       shape: "diamond",
