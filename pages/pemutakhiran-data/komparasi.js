@@ -14,8 +14,10 @@ import Link from "next/link";
 function Komparasi() {
   const { data } = useSession();
 
-  const { data: dataUtama, isLoading } = useQuery(["data-utama-siasn"], () =>
-    dataUtamaSIASN()
+  const { data: dataUtama, isLoading } = useQuery(
+    ["data-utama-siasn"],
+    () => dataUtamaSIASN(),
+    {}
   );
 
   return (

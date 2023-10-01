@@ -265,9 +265,9 @@ module.exports.ticketsStatisticsQuery = async () => {
   try {
     const result = await knex.raw(
       `
-    WITH dates AS (SELECT generate_series(DATE_TRUNC('month', CURRENT_DATE - INTERVAL '6 month'), CURRENT_DATE,
+    WITH dates AS (SELECT generate_series(DATE_TRUNC('month', CURRENT_DATE - INTERVAL '12 month'), CURRENT_DATE,
                                       '1 month')::date AS month)
-SELECT to_char(d.month, 'Month')                                                  as "bulan",
+SELECT to_char(d.month, 'Month YYYY')                                                  as "bulan",
        COALESCE(SUM(CASE WHEN t.status_code = 'DIAJUKAN' THEN 1 ELSE 0 END), 0)   AS "diajukan",
        COALESCE(SUM(CASE WHEN t.status_code = 'DIKERJAKAN' THEN 1 ELSE 0 END), 0) AS "dikerjakan",
        COALESCE(SUM(CASE WHEN t.status_code = 'SELESAI' THEN 1 ELSE 0 END), 0)    AS "selesai",

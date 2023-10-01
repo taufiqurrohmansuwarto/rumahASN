@@ -67,7 +67,7 @@ function PlotAdminTickets() {
         </Col>
         <Col md={24}>
           {dataTicket && (
-            <Card title="Total Tiket 8 Bulan Terakhir" loading={loadingTicket}>
+            <Card title="Total Tiket 12 Bulan Terakhir" loading={loadingTicket}>
               <Line {...configTotalTiket} />
             </Card>
           )}

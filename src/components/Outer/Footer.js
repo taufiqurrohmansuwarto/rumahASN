@@ -92,17 +92,18 @@ const styles = {
 
 function Footer() {
   const screens = useBreakpoint();
+
   return (
     <div>
       <div style={styles.footer}>
         <Row
-          gutter={[16, 16]}
+          gutter={[32, 32]}
           style={{
-            paddingLeft: screens.xs ? 0 : 300,
-            paddingRight: screens.xs ? 0 : 300,
+            paddingLeft: screens?.xxl ? 400 : 0,
+            paddingRight: screens?.xxl ? 400 : 0,
           }}
         >
-          <Col md={6} xs={12}>
+          <Col xl={6} lg={6} sm={12} md={12} xs={24}>
             <Typography.Title level={2} style={styles.textFont}>
               Aplikasi
             </Typography.Title>
@@ -123,7 +124,7 @@ function Footer() {
               ))}
             </Space>
           </Col>
-          <Col md={6} xs={12}>
+          <Col xl={6} lg={6} sm={12} md={12} xs={24}>
             <Typography.Title level={2} style={styles.textFont}>
               Bidang
             </Typography.Title>
@@ -144,7 +145,7 @@ function Footer() {
               ))}
             </Space>
           </Col>
-          <Col md={6} xs={12}>
+          <Col lg={6} xl={6} sm={12} md={12} xs={24}>
             <Typography.Title level={2} style={styles.textFont}>
               Zona Integritas
             </Typography.Title>
@@ -165,7 +166,7 @@ function Footer() {
               ))}
             </Space>
           </Col>
-          <Col md={6} xs={12}>
+          <Col xl={6} lg={6} sm={12} md={12} xs={24}>
             <Typography.Title level={2} style={styles.textFont}>
               Profil
             </Typography.Title>

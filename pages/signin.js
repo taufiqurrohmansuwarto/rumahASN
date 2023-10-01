@@ -9,7 +9,17 @@ import {
 } from "@ant-design/icons";
 import { Center } from "@mantine/core";
 import { useSpring } from "@react-spring/web";
-import { BackTop, Button, Col, Divider, Image, Row, Space } from "antd";
+import {
+  BackTop,
+  Button,
+  Col,
+  Divider,
+  Grid,
+  Image,
+  Row,
+  Space,
+  Tooltip,
+} from "antd";
 import { getProviders, signIn } from "next-auth/react";
 import Head from "next/head";
 import GoogleButton from "react-google-button";
@@ -39,6 +49,8 @@ const BAComponent = () => {
 };
 
 const SignIn = ({ providers }) => {
+  const breakPoint = Grid.useBreakpoint();
+
   const title = "Rumah ASN: Sobat Kepegawaian #1 di Jatim";
   const description =
     "Dengerin nih, brosis! Rumah ASN tuh jawabannya buat semua pertanyaan seru seputar dunia kepegawaian di Jawa Timur. Mulai dari info terkini, diskusi hangat, sampe ngobrol santai via podcast, semuanya ada di sini. Kita juga punya fitur unik buat catat segala aktivitas dan data kamu, biar kamu makin mantap jadi ASN yang oke. So, yuk gabung dan rasain serunya jadi bagian dari Rumah ASN!";
@@ -51,19 +63,13 @@ const SignIn = ({ providers }) => {
         </title>
         <meta name="description" content="Rumah ASN" />
       </Head>
-      <Row align="middle" justify="center">
-        <Col md={8} xs={24}>
+      <Row justify="center" align="center">
+        <Col md={12} xxl={6} lg={8} xs={24} sm={24}>
           <Center>
             <BAComponent />
           </Center>
         </Col>
-        <Col
-          style={{
-            padding: "0 20px",
-          }}
-          md={5}
-          xs={24}
-        >
+        <Col md={12} xxl={5} lg={10} xs={24} sm={24}>
           <Row>
             <Col md={24} xs={24}>
               <Image
@@ -84,11 +90,13 @@ const SignIn = ({ providers }) => {
               />
               <Divider plain>Anda masyarakat umum?</Divider>
               <GoogleButton
-                style={{ width: "100%" }}
                 label="Masuk dengan Google"
                 onClick={(e) => {
                   e.preventDefault();
                   signIn("google");
+                }}
+                style={{
+                  width: "100%",
                 }}
               />
             </Col>
@@ -127,47 +135,53 @@ const SignIn = ({ providers }) => {
             }}
           >
             <Space size="large">
-              <a
-                target="_blank"
-                href="https://bkd.jatimprov.go.id"
-                rel="noreferrer"
-              >
-                <GlobalOutlined
-                  style={{
-                    fontSize: 32,
-                    color: "#d9d9d9",
-                    cursor: "pointer",
-                  }}
-                />
-              </a>
+              <Tooltip title="Web BKD Jatim">
+                <a
+                  target="_blank"
+                  href="https://bkd.jatimprov.go.id"
+                  rel="noreferrer"
+                >
+                  <GlobalOutlined
+                    style={{
+                      fontSize: 32,
+                      color: "#d9d9d9",
+                      cursor: "pointer",
+                    }}
+                  />
+                </a>
+              </Tooltip>
 
-              <a
-                href="https://www.instagram.com/bkdjatim/?hl=en"
-                target="_blank"
-                rel="noreferrer"
-              >
-                <InstagramOutlined
-                  style={{
-                    fontSize: 32,
-                    color: "#d9d9d9",
-                    cursor: "pointer",
-                  }}
-                />
-              </a>
+              <Tooltip title="Instagram BKD Jatim">
+                <a
+                  href="https://www.instagram.com/bkdjatim/?hl=en"
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  <InstagramOutlined
+                    style={{
+                      fontSize: 32,
+                      color: "#d9d9d9",
+                      cursor: "pointer",
+                    }}
+                  />
+                </a>
+              </Tooltip>
 
-              <a
-                href="https://www.youtube.com/channel/UCokkbWw9VaJxGp3xqOjbcKg"
-                target="_blank"
-                rel="noreferrer"
-              >
-                <YoutubeOutlined
-                  style={{
-                    fontSize: 32,
-                    color: "#d9d9d9",
-                    cursor: "pointer",
-                  }}
-                />
-              </a>
+              <Tooltip title="Youtube BKD Jatim">
+                <a
+                  href="https://www.youtube.com/channel/UCokkbWw9VaJxGp3xqOjbcKg"
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  <YoutubeOutlined
+                    style={{
+                      fontSize: 32,
+                      color: "#d9d9d9",
+                      cursor: "pointer",
+                    }}
+                  />
+                </a>
+              </Tooltip>
             </Space>
           </Row>
         </Col>
