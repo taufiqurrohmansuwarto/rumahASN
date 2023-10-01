@@ -415,18 +415,17 @@ module.exports.getAggregateAnomali = async () => {
 
 module.exports.getPerbaikanByUser = async () => {
   const rawQuery = `
-    SELECT
-      users.username AS label,
-      COUNT(anomali_23.id) AS value
-    FROM
-      anomali_23
-    JOIN
-      users ON anomali_23.user_id = users.custom_id
-    WHERE
-      anomali_23.is_repaired = true
-    GROUP BY
-      users.username
-  `;
+  SELECT users.username       AS label,
+       COUNT(anomali_23.id) AS value
+FROM anomali_23
+         JOIN
+     users ON anomali_23.user_id = users.custom_id
+WHERE anomali_23.is_repaired = true
+
+GROUP BY users.username
+order by value desc
+limit 10
+      `;
 
   const results = await knex.raw(rawQuery);
 
