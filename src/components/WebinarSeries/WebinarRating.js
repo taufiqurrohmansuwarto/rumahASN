@@ -151,7 +151,12 @@ const ViewRatingComponent = ({ data }) => {
         <Typography.Title level={5}>Review Peserta & Rating</Typography.Title>
         <Stack>
           <Space>
-            <Rating value={data?.aggregate?.averageRatings} readOnly /> (
+            <Rating
+              fractions={3}
+              value={data?.aggregate?.averageRatings}
+              readOnly
+            />{" "}
+            (
             <span
               style={{
                 fontSize: 11,

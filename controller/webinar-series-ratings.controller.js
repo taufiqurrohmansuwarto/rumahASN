@@ -1,6 +1,7 @@
 const WebinarSeriesRatings = require("@/models/webinar-series-ratings.model");
 const WebinarSeriesParticipate = require("@/models/webinar-series-participates.model");
 const WebinarSeries = require("@/models/webinar-series.model");
+const { toNumber, round } = require("lodash");
 
 const serializeRating = (data, totalUser) => {
   const ratings = [1, 2, 3, 4, 5];
@@ -46,8 +47,10 @@ const getRatingForUser = async (req, res) => {
         .where("webinar_series_id", webinarId)
         .groupBy("rating");
 
+      const avgRating = toNumber(round(averageRatings?.avg, 2)) || 0;
+
       const aggregate = {
-        averageRatings: parseInt(averageRatings?.avg) || 0,
+        averageRatings: avgRating,
         totalUserRatings: totalUserRatings[0]?.count || 0,
         totalRatingPerValue: serializeRating(
           totalRatingPerValue,
@@ -111,8 +114,10 @@ const getRating = async (req, res) => {
       .where("webinar_series_id", id)
       .groupBy("rating");
 
+    const avgRating = toNumber(round(averageRatings?.avg, 2)) || 0;
+
     const aggregate = {
-      averageRatings: parseInt(averageRatings?.avg) || 0,
+      averageRatings: avgRating,
       totalUserRatings: totalUserRatings[0]?.count || 0,
       totalRatingPerValue: serializeRating(
         totalRatingPerValue,
