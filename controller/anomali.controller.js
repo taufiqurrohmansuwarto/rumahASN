@@ -240,11 +240,13 @@ const patchUserAnomali = async (req, res) => {
         description: null,
         user_id: null,
         updated_at: new Date(),
-        nip_baru: employee_number,
       });
       res.json({ message: "success" });
     } else {
-      await Anomali23.query().findById(id).patch(payload);
+      await Anomali23.query()
+        .where("id", id)
+        .andWhere("nip_baru", employee_number)
+        .patch(payload);
       res.json({ message: "success" });
     }
   } catch (error) {
