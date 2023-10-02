@@ -27,6 +27,10 @@ export const getUserAnomali2023 = async () => {
   return api.get(`/2023/user`).then((res) => res?.data);
 };
 
+export const patchAnomaliUser2023 = async ({ id, data }) => {
+  return api.patch(`/2023/user/${id}`, data).then((res) => res?.data);
+};
+
 export const patchAnomali2023 = async ({ id, data }) => {
   return api.patch(`/2023/admin/${id}`, data).then((res) => res?.data);
 };

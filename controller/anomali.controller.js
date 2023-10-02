@@ -220,7 +220,41 @@ const aggregateAnomali = async (req, res) => {
   }
 };
 
+const patchUserAnomali = async (req, res) => {
+  try {
+    const id = req?.query?.id;
+    const { customId, employee_number } = req?.user;
+
+    const reset = req?.body?.reset;
+
+    const payload = {
+      is_repaired: req?.body?.is_repaired,
+      description: req?.body?.description,
+      user_id: customId,
+      updated_at: new Date(),
+    };
+
+    if (reset) {
+      await Anomali23.query().findById(id).patch({
+        is_repaired: false,
+        description: null,
+        user_id: null,
+        updated_at: new Date(),
+        nip_baru: employee_number,
+      });
+      res.json({ message: "success" });
+    } else {
+      await Anomali23.query().findById(id).patch(payload);
+      res.json({ message: "success" });
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
 module.exports = {
+  patchUserAnomali,
   aggregateAnomali,
   uploadAnomali2022,
   getAnomali2022,
