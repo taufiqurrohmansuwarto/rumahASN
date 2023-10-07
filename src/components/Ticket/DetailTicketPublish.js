@@ -10,6 +10,7 @@ import {
   formatDateFromNow,
   setColorPrioritas,
   setColorStatus,
+  setStatusIcon,
 } from "@/utils/client-utils";
 import { formatDate } from "@/utils/index";
 import { EllipsisOutlined, FireOutlined } from "@ant-design/icons";
@@ -357,7 +358,10 @@ const SideRight = ({ item }) => {
               />
             </RestrictedContent>
           </Space>
-          <Tag color={setColorStatus(item?.status_code)}>
+          <Tag
+            icon={setStatusIcon(item?.status_code)}
+            color={setColorStatus(item?.status_code)}
+          >
             {item?.status_code}
           </Tag>
         </Space>

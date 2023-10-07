@@ -82,7 +82,7 @@ const SignIn = ({ providers }) => {
               />
               <Image
                 style={{
-                  width: 150,
+                  width: 75,
                   height: "auto",
                 }}
                 src="https://bsre.bssn.go.id/img/bsre-logo-full.aa4caa4d.png"

@@ -1,5 +1,11 @@
 import { parseMarkdown, uploadFiles } from "@/services/index";
 import {
+  CheckCircleOutlined,
+  ClockCircleOutlined,
+  ExclamationOutlined,
+  SyncOutlined,
+} from "@ant-design/icons";
+import {
   Icon123,
   IconArrowsExchange,
   IconBadge,
@@ -389,25 +395,25 @@ export const definitions = {
 
 export const setColorStatus = (status) => {
   if (status === "DIAJUKAN") {
-    return "#FFC107";
+    return "warning";
   } else if (status === "SELESAI") {
-    return "#00FF00";
+    return "success";
   } else if (status === "DIKERJAKAN") {
-    return "#0000FF";
+    return "processing";
   } else {
     return "#000";
   }
 };
 
-export const setColorPrioritas = (prioritas) => {
-  if (prioritas === "RENDAH") {
-    return "#00FF00";
-  } else if (prioritas === "SEDANG") {
-    return "#FFC107";
-  } else if (prioritas === "TINGGI") {
-    return "#FF0000";
+export const setStatusIcon = (status) => {
+  if (status === "DIAJUKAN") {
+    return <SyncOutlined />;
+  } else if (status === "SELESAI") {
+    return <CheckCircleOutlined />;
+  } else if (status === "DIKERJAKAN") {
+    return <ClockCircleOutlined />;
   } else {
-    return "#000";
+    return <ExclamationOutlined />;
   }
 };
 
@@ -585,3 +591,14 @@ export const participantEmployeeNumber = (participant) => {
 };
 
 // show information for webinar series
+export const setColorPrioritas = (prioritas) => {
+  if (prioritas === "RENDAH") {
+    return "#00FF00";
+  } else if (prioritas === "SEDANG") {
+    return "#FFC107";
+  } else if (prioritas === "TINGGI") {
+    return "#FF0000";
+  } else {
+    return "#000";
+  }
+};

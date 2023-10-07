@@ -1,6 +1,10 @@
 import { useRBAC } from "@/context/RBACContext";
 import { editTicket } from "@/services/index";
-import { formatDateFromNow, setColorStatus } from "@/utils/client-utils";
+import {
+  formatDateFromNow,
+  setColorStatus,
+  setStatusIcon,
+} from "@/utils/client-utils";
 import { ArrowLeftOutlined } from "@ant-design/icons";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, Space, Tag, Typography, message } from "antd";
@@ -10,7 +14,10 @@ import { useRouter } from "next/router";
 const StatusTiket = ({ ticket }) => {
   return (
     <Space size="small">
-      <Tag color={setColorStatus(ticket?.status_code)}>
+      <Tag
+        icon={setStatusIcon(ticket?.status_code)}
+        color={setColorStatus(ticket?.status_code)}
+      >
         {ticket?.status_code}
       </Tag>
       <Typography.Text style={{ fontSize: 12 }} type="secondary">
