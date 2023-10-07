@@ -1,5 +1,10 @@
 import { publishTickets, refAgents } from "@/services/index";
-import { cleanQuery, formatDateLL, setColorStatus } from "@/utils/client-utils";
+import {
+  cleanQuery,
+  formatDateLL,
+  setColorStatus,
+  setStatusIcon,
+} from "@/utils/client-utils";
 import { MessageOutlined } from "@ant-design/icons";
 import { Grid } from "@mantine/core";
 import { useQuery } from "@tanstack/react-query";
@@ -48,7 +53,12 @@ const Assignee = ({ item }) => {
 
 const Status = ({ item }) => {
   return (
-    <Tag color={setColorStatus(item?.status_code)}>{item?.status_code}</Tag>
+    <Tag
+      icon={setStatusIcon(item?.status_code)}
+      color={setColorStatus(item?.status_code)}
+    >
+      {item?.status_code}
+    </Tag>
   );
 };
 

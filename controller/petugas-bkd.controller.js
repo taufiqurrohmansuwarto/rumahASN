@@ -1,14 +1,32 @@
 // ini adalah controller khusus untuk petugas BKD dengan tab tugas saya, pertanyaan baru, semua daftar pertanyaan, dan pertanyaan belum dikategorikan
 const Ticket = require("@/models/tickets.model");
+const TicketCommentCustomer = require("@/models/tickets_comments_customers.model");
 const xlsx = require("xlsx");
 const { convert } = require("html-to-text");
 
 const { formatDate, checkUndefined } = require("../utils");
 const { round, toNumber } = require("lodash");
 
+const serializeComment = (data) => {
+  if (!data?.length) {
+    return [];
+  } else {
+    return data?.map((r) => ({
+      id: r?.id,
+      ticket_id: r?.ticket_id,
+      comment: convert(r?.comment, {
+        wordwrap: 130,
+      }),
+      is_answer: r?.in_answer,
+      role: r?.user?.current_role,
+    }));
+  }
+};
+
 const serialize = (data) => {
   return data?.map((r) => {
     return {
+      id: r?.id,
       nomer_tiket: r?.ticket_number,
       judul: r?.title,
       status: r?.status_code,
@@ -88,10 +106,21 @@ const downloadDataBKD = async (req, res) => {
 
     const hasil = serialize(result);
 
+    // data percakapan
+    const comments = await TicketCommentCustomer.query()
+      .whereIn(
+        "ticket_id",
+        result.map((r) => r.id)
+      )
+      .withGraphFetched("[user]");
+
     const wb = xlsx.utils.book_new();
     const ws = xlsx.utils.json_to_sheet(hasil);
 
+    const ws2 = xlsx.utils.json_to_sheet(serializeComment(comments));
+
     xlsx.utils.book_append_sheet(wb, ws, "Report BKD");
+    xlsx.utils.book_append_sheet(wb, ws2, "Percakapan");
 
     res.setHeader(
       "Content-Type",
@@ -123,8 +152,11 @@ const indexPetugasBKD = async (req, res) => {
     const star = req.query.star || "";
     const sub_category_id = req.query.sub_category_id || "";
     const assignee = req.query.assignee || "";
+    const group = req.query.group || "";
 
-    const result = await Ticket.query()
+    let query = {};
+
+    query = Ticket.query()
       .select("*", Ticket.relatedQuery("comments").count().as("comments_count"))
       .withGraphFetched("[customer(simpleSelect), agent(simpleSelect)]")
       .where((builder) => {
@@ -152,7 +184,13 @@ const indexPetugasBKD = async (req, res) => {
         if (assignee) {
           builder.where("assignee", assignee);
         }
-      })
+      });
+
+    if (group) {
+      query = query.joinRelated("customer").where("customer.group", group);
+    }
+
+    const result = await query
       .page(page - 1, limit)
       .orderBy("updated_at", "desc");
 

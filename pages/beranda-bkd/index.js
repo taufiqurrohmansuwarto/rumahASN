@@ -2,11 +2,14 @@ import AllTaskFilter from "@/components/Filter/AllTaskFilter";
 import UnAnswerFilter from "@/components/Filter/UnAnswerFilter";
 import Layout from "@/components/Layout";
 import PageContainer from "@/components/PageContainer";
-import UserPerformance from "@/components/PetugasBKD/UserPerformance";
 import QueryFilter from "@/components/QueryFilter";
 import { downloadTicketBKD, pegawaiBkdTickets } from "@/services/bkd.services";
 import { refCategories } from "@/services/index";
-import { formatDateLL, setColorStatus } from "@/utils/client-utils";
+import {
+  formatDateLL,
+  setColorStatus,
+  setStatusIcon,
+} from "@/utils/client-utils";
 import {
   CaretDownOutlined,
   CaretUpOutlined,
@@ -87,7 +90,12 @@ const DownloadData = () => {
 
 const Status = ({ item }) => {
   return (
-    <Tag color={setColorStatus(item?.status_code)}>{item?.status_code}</Tag>
+    <Tag
+      icon={setStatusIcon(item?.status_code)}
+      color={setColorStatus(item?.status_code)}
+    >
+      {item?.status_code}
+    </Tag>
   );
 };
 
@@ -109,6 +117,7 @@ const TitleLink = ({ item }) => {
   return (
     <div>
       <Typography.Text
+        strong
         onClick={handleClick}
         style={{ marginRight: 8, cursor: "pointer" }}
       >
@@ -236,9 +245,9 @@ const FilterStatus = () => {
         </Form.Item>
         <Form.Item name="status" label="Status">
           <Radio.Group optionType="button" buttonStyle="solid">
-            <Radio.Button value="DIAJUKAN">DIAJUKAN</Radio.Button>
-            <Radio.Button value="DIKERJAKAN">DIKERJAKAN</Radio.Button>
-            <Radio.Button value="SELESAI">SELESAI</Radio.Button>
+            <Radio.Button value="DIAJUKAN">Diajukan</Radio.Button>
+            <Radio.Button value="DIKERJAKAN">Dikerjakan</Radio.Button>
+            <Radio.Button value="SELESAI">Selesai</Radio.Button>
           </Radio.Group>
         </Form.Item>
         <Form.Item name="star" label="Bintang">
@@ -258,6 +267,13 @@ const FilterStatus = () => {
               );
             })}
           </Select>
+        </Form.Item>
+        <Form.Item name="group" label="Asal">
+          <Radio.Group optionType="button" buttonStyle="solid">
+            <Radio.Button value="MASTER">SIMASTER</Radio.Button>
+            <Radio.Button value="GOOGLE">GOOGLE</Radio.Button>
+            <Radio.Button value="PTTPK">PTTPK</Radio.Button>
+          </Radio.Group>
         </Form.Item>
       </QueryFilter>
     </div>
@@ -438,20 +454,19 @@ const BerandaBKD = () => {
             </Breadcrumb>
           ),
         }}
-        title="Beranda BKD"
-        subTitle="Tugas Saya"
+        title="Beranda Staff BKD"
       >
         <BackTop />
         <Row gutter={[16, 16]}>
           <Col md={18} xs={24}>
-            <Card title="Daftar Tugas">
+            <Card title="Daftar Pertanyaan">
               <Stack>
                 <TabsJobs />
               </Stack>
             </Card>
           </Col>
           <Col md={6} xs={24}>
-            <UserPerformance />
+            {/* <UserPerformance /> */}
           </Col>
         </Row>
       </PageContainer>

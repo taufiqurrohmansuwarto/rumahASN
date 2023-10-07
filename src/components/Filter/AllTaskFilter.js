@@ -103,9 +103,9 @@ function AllTaskFilter() {
         </Form.Item>
         <Form.Item name="status" label="Status">
           <Radio.Group optionType="button" buttonStyle="solid">
-            <Radio.Button value="DIAJUKAN">DIAJUKAN</Radio.Button>
-            <Radio.Button value="DIKERJAKAN">DIKERJAKAN</Radio.Button>
-            <Radio.Button value="SELESAI">SELESAI</Radio.Button>
+            <Radio.Button value="DIAJUKAN">Diajukan</Radio.Button>
+            <Radio.Button value="DIKERJAKAN">Dikerjakan</Radio.Button>
+            <Radio.Button value="SELESAI">Selesai</Radio.Button>
           </Radio.Group>
         </Form.Item>
         <Form.Item name="star" label="Bintang">
@@ -125,6 +125,13 @@ function AllTaskFilter() {
               );
             })}
           </Select>
+        </Form.Item>
+        <Form.Item name="group" label="Asal">
+          <Radio.Group optionType="button" buttonStyle="solid">
+            <Radio.Button value="MASTER">SIMASTER</Radio.Button>
+            <Radio.Button value="GOOGLE">GOOGLE</Radio.Button>
+            <Radio.Button value="PTTPK">PTTPK</Radio.Button>
+          </Radio.Group>
         </Form.Item>
         <Form.Item name="assignee" label="Penerima Tugas">
           <Select showSearch optionFilterProp="name">

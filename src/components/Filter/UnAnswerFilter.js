@@ -1,5 +1,5 @@
 import { CaretDownOutlined, CaretUpOutlined } from "@ant-design/icons";
-import { Form, Input, Space } from "antd";
+import { Form, Input, Radio, Space } from "antd";
 import { useRouter } from "next/router";
 import { useEffect } from "react";
 import QueryFilter from "../QueryFilter";
@@ -53,7 +53,7 @@ function UnAnswerFilter() {
           md: 24,
           xl: 24,
           lg: 24,
-          xxl: 12,
+          xxl: 8,
           xs: 24,
         }}
         layout="vertical"
@@ -82,6 +82,13 @@ function UnAnswerFilter() {
       >
         <Form.Item name="search" label="Judul">
           <Input />
+        </Form.Item>
+        <Form.Item name="group" label="Asal">
+          <Radio.Group optionType="button" buttonStyle="solid">
+            <Radio.Button value="MASTER">SIMASTER</Radio.Button>
+            <Radio.Button value="GOOGLE">GOOGLE</Radio.Button>
+            <Radio.Button value="PTTPK">PTTPK</Radio.Button>
+          </Radio.Group>
         </Form.Item>
       </QueryFilter>
     </div>
