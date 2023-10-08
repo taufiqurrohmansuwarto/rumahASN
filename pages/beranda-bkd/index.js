@@ -16,6 +16,7 @@ import {
   CaretUpOutlined,
   CloudDownloadOutlined,
   MessageOutlined,
+  SearchOutlined,
 } from "@ant-design/icons";
 import { Stack } from "@mantine/core";
 import { useMutation, useQuery } from "@tanstack/react-query";
@@ -440,6 +441,9 @@ const BerandaBKD = () => {
     window.scrollTo(0, parseInt(scrollY));
   }
 
+  const handleCariPegawai = () =>
+    router.push(`/apps-managements/integrasi/siasn`);
+
   return (
     <>
       <Head>
@@ -463,7 +467,18 @@ const BerandaBKD = () => {
         <BackTop />
         <Row gutter={[16, 16]}>
           <Col md={18} xs={24}>
-            <Card title="Daftar Pertanyaan">
+            <Card
+              title="Daftar Pertanyaan"
+              extra={
+                <Button
+                  onClick={handleCariPegawai}
+                  icon={<SearchOutlined />}
+                  type="link"
+                >
+                  Cari Pegawai
+                </Button>
+              }
+            >
               <Stack>
                 <TabsJobs />
               </Stack>
