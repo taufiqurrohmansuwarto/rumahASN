@@ -1,7 +1,7 @@
 import Layout from "@/components/Layout";
 import { recommendationFaq } from "@/services/index";
 import { renderMarkdown, uploadFile } from "@/utils/client-utils";
-import { Grid, Stack, Text } from "@mantine/core";
+import { Grid, Stack, Text, TypographyStylesProvider } from "@mantine/core";
 import { useDebouncedValue } from "@mantine/hooks";
 import { MarkdownEditor } from "@primer/react/drafts";
 import { useMutation, useQuery } from "@tanstack/react-query";
@@ -14,6 +14,8 @@ import {
   Typography,
   message,
   Card,
+  Form,
+  Space,
 } from "antd";
 import { useSession } from "next-auth/react";
 import Head from "next/head";
@@ -22,6 +24,7 @@ import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { createTickets } from "../../services/users.services";
 import PageContainer from "../../src/components/PageContainer";
+import { QuestionCircleFilled } from "@ant-design/icons";
 
 // peremajaan data
 const TextPeremajaanData = () => {
@@ -79,9 +82,46 @@ const Faqs = ({ data }) => {
   );
 };
 
+const Bantuan = ({ open, onCancel }) => {
+  const html = `
+<p>Contoh Permasalahan:</p>
+<ul>
+<li><p><strong>Judul:</strong></p>
+<ul>
+<li>&quot;Kesulitan Mengakses Portal Absensi Karyawan&quot;</li>
+</ul>
+</li>
+<li><p><strong>Deskripsi:</strong></p>
+<ul>
+<li>Saya, sebagai karyawan bagian pemasaran, mengalami kesulitan saat mencoba mengakses portal absensi karyawan. Setiap kali mencoba untuk login, sistem selalu mengeluarkan pesan error &quot;Username atau Password Salah&quot;, meskipun saya sudah memasukkan informasi akun dengan benar.</li>
+<li>Saya sudah mencoba untuk mereset password dan membersihkan cache browser, namun masalah ini tetap terjadi. </li>
+<li>Mohon bantuan untuk mengatasi permasalahan ini agar saya dapat melaporkan kehadiran dengan tepat waktu.</li>
+</ul>
+</li>
+</ul>
+<p>Di contoh di atas, judul dan deskripsi dibuat dengan jelas dan informatif sehingga tim helpdesk dapat dengan cepat memahami dan menangani permasalahan yang dialami oleh karyawan.</p>`;
+
+  return (
+    <Modal
+      title="Bantuan"
+      open={open}
+      centered
+      onCancel={onCancel}
+      width="80vh"
+    >
+      <TypographyStylesProvider>
+        <div dangerouslySetInnerHTML={{ __html: html }} />
+      </TypographyStylesProvider>
+    </Modal>
+  );
+};
+
 const CreateTicket = () => {
   const router = useRouter();
   const { data, status } = useSession();
+  const [open, setOpen] = useState(false);
+  const handleOpen = () => setOpen(true);
+  const handleClose = () => setOpen(false);
 
   const [title, setTitle] = useState(null);
   const [content, setContent] = useState();
@@ -133,92 +173,95 @@ const CreateTicket = () => {
   };
 
   return (
-    <PageContainer
-      title="Rumah ASN"
-      subTitle="Pertanyaan Baru"
-      onBack={() => router.back()}
-      breadcrumbRender={() => (
-        <Breadcrumb>
-          <Breadcrumb.Item>
-            <Link href="/feeds">
-              <a>Beranda</a>
-            </Link>
-          </Breadcrumb.Item>
-          <Breadcrumb.Item>
-            <Link href="/tickets/semua">
-              <a>Pertanyaan</a>
-            </Link>
-          </Breadcrumb.Item>
-          <Breadcrumb.Item>Pertanyaan Baru</Breadcrumb.Item>
-        </Breadcrumb>
-      )}
-    >
-      <Grid>
-        <Grid.Col md={8} xs={12}>
-          <Card>
-            {/* <Alert
-            color="red"
-            mb={8}
-            title="Peremajan Data"
-            icon={<IconAlertCircle />}
-          >
-            <TextPeremajaanData />
-          </Alert> */}
-            {/* <Alert
-            icon={<IconAlertCircle />}
-            color="yellow"
-            title="Perhatian"
-            mb={8}
-          >
-            <Text>
-              Deskripsikan masalah Anda dengan jelas dan gunakan tata bahasa
-              yang baik. Jangan lupa sertakan gambar atau link file sebagai
-              bukti jika diperlukan. Terima kasih.
-            </Text>
-          </Alert> */}
-            <Stack>
-              <Input
-                value={title}
-                onChange={(e) => setTitle(e?.target?.value)}
-                placeholder="Judul"
-              />
-              <MarkdownEditor
-                value={content}
-                acceptedFileTypes={[
-                  "image/*",
-                  // word, excel, txt, pdf
-                  ".doc",
-                  ".docx",
-                  ".xls",
-                  ".xlsx",
-                  ".txt",
-                  ".pdf",
-                ]}
-                onChange={setContent}
-                placeholder="Tulis deskripsi, sertakan bukti jika diperlukan(Foto/File)"
-                onRenderPreview={renderMarkdown}
-                onUploadFile={uploadFile}
-                mentionSuggestions={null}
-              />
-            </Stack>
-            <Button
-              disabled={isLoading}
-              loading={isLoading}
-              style={{ marginTop: 14 }}
-              onClick={handleFinish}
-              type="primary"
+    <>
+      <Head>
+        <title>Rumah ASN - Buat Pertanyaan Baru</title>
+      </Head>
+      <PageContainer
+        title="Tanya BKD"
+        content="Buat Pertanyaan Baru"
+        onBack={() => router.back()}
+        breadcrumbRender={() => (
+          <Breadcrumb>
+            <Breadcrumb.Item>
+              <Link href="/feeds">
+                <a>Beranda</a>
+              </Link>
+            </Breadcrumb.Item>
+            <Breadcrumb.Item>
+              <Link href="/tickets/semua">
+                <a>Daftar Pertanyaan</a>
+              </Link>
+            </Breadcrumb.Item>
+            <Breadcrumb.Item>Pertanyaan Baru</Breadcrumb.Item>
+          </Breadcrumb>
+        )}
+      >
+        <Grid>
+          <Grid.Col md={8} xs={24}>
+            <Bantuan open={open} onCancel={handleClose} />
+            <Card
+              title="Form Pertanyaan"
+              extra={
+                <Button
+                  onClick={handleOpen}
+                  icon={<QuestionCircleFilled />}
+                  type="link"
+                >
+                  Bantuan
+                </Button>
+              }
             >
-              Submit
-            </Button>
-          </Card>
-        </Grid.Col>
-        <Grid.Col md={4} xs={12}>
-          {recommendationsFaqs?.length > 0 && (
-            <Faqs data={recommendationsFaqs} />
-          )}
-        </Grid.Col>
-      </Grid>
-    </PageContainer>
+              <Form layout="vertical">
+                <Form.Item label="Judul">
+                  <Input
+                    value={title}
+                    onChange={(e) => setTitle(e?.target?.value)}
+                  />
+                </Form.Item>
+                <Form.Item label="Deskripsi">
+                  <MarkdownEditor
+                    value={content}
+                    fullHeight
+                    acceptedFileTypes={[
+                      "image/*",
+                      // word, excel, txt, pdf
+                      ".doc",
+                      ".docx",
+                      ".xls",
+                      ".xlsx",
+                      ".txt",
+                      ".pdf",
+                    ]}
+                    onChange={setContent}
+                    placeholder="Untuk memudahkan kami dalam memahami pertanyaan anda, mohon jelaskan secara detail, serta lampirkan file pendukung jika diperlukan."
+                    onRenderPreview={renderMarkdown}
+                    onUploadFile={uploadFile}
+                    mentionSuggestions={null}
+                  />
+                </Form.Item>
+                <Space align="center">
+                  <Button
+                    disabled={isLoading}
+                    loading={isLoading}
+                    onClick={handleFinish}
+                    type="primary"
+                    shape="round"
+                  >
+                    Submit
+                  </Button>
+                </Space>
+              </Form>
+            </Card>
+          </Grid.Col>
+          <Grid.Col md={4} xs={24}>
+            {recommendationsFaqs?.length > 0 && (
+              <Faqs data={recommendationsFaqs} />
+            )}
+          </Grid.Col>
+        </Grid>
+      </PageContainer>
+    </>
   );
 };
 

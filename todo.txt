@@ -1,2 +1,10 @@
-1. benerin filter
-2. hapus foto saja biar ndak lama
+
+1. di layanan siasn hapus foto siasn karena terlalu lama
+2. add crud layanan kepegawaian
+   id integer auto increment primary key
+   title string
+   description string
+   icon_url string 
+   slug string
+   view_count integer
+   timestamps true
