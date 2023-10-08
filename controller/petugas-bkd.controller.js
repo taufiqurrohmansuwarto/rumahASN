@@ -187,19 +187,24 @@ const indexPetugasBKD = async (req, res) => {
       });
 
     if (group) {
-      query = query.joinRelated("customer").where("customer.group", group);
+      query = query
+        .joinRelated("customer")
+        .where("customer.group", group)
+        .select("tickets.*");
     }
 
     const result = await query
       .page(page - 1, limit)
       .orderBy("updated_at", "desc");
 
-    res.json({
+    const data = {
       data: result.results,
       total: result.total,
       limit: result.limit,
       page: result.page,
-    });
+    };
+
+    res.json(data);
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: "Internal server error" });

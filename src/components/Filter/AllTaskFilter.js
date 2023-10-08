@@ -60,6 +60,10 @@ function AllTaskFilter() {
     form.setFieldsValue({
       search: query?.search || "",
       status: query?.status || "",
+      star: query?.star || "",
+      sub_category_id: query?.sub_category_id || "",
+      group: query?.group || "",
+      assignee: query?.assignee || "",
     });
   }, [form, query]);
 
