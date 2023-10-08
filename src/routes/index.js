@@ -1,4 +1,5 @@
 import {
+  AppstoreOutlined,
   AudioOutlined,
   BarChartOutlined,
   BookOutlined,
@@ -65,20 +66,19 @@ export const userRoutes = {
       ],
     },
     {
-      path: "/webinar-series",
-      name: "Pelatihan",
+      path: "/webinar-series/all",
+      name: "Webinar",
       icon: <VideoCameraAddOutlined />,
-      routes: [
-        {
-          path: "/webinar-series/all",
-          name: "Webinar",
-        },
-      ],
     },
     {
       path: "/edukasi/podcasts",
       name: "Podcast",
       icon: <AudioOutlined />,
+    },
+    {
+      path: "/layanan-kepegawaian",
+      name: "Layanan Kepegawaian",
+      icon: <AppstoreOutlined />,
     },
     {
       path: "/faq",

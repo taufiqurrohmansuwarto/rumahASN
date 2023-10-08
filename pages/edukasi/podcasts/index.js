@@ -5,8 +5,9 @@ import { formatDateLL } from "@/utils/client-utils";
 import { ActionIcon, Group, Text, Avatar } from "@mantine/core";
 import { IconPlayerPlay } from "@tabler/icons";
 import { useQuery } from "@tanstack/react-query";
-import { Card, Col, List, Row } from "antd";
+import { Breadcrumb, Card, Col, List, Row } from "antd";
 import Head from "next/head";
+import Link from "next/link";
 import { useRouter } from "next/router";
 
 const MyPodcast = ({ item }) => {
@@ -78,9 +79,18 @@ function Podcast() {
       </Head>
       <PageContainer
         loading={isLoading}
+        breadcrumbRender={() => (
+          <Breadcrumb>
+            <Breadcrumb.Item>
+              <Link href="/">
+                <a>Beranda</a>
+              </Link>
+            </Breadcrumb.Item>
+            <Breadcrumb.Item>Podcast</Breadcrumb.Item>
+          </Breadcrumb>
+        )}
         title="Podcast"
-        subTitle="Daftar Edukasi Podcast Rumah ASN"
-        onBack={handleBack}
+        content="Daftar Layanan Podcast"
       >
         <Row>
           <Col md={18} xs={24}>

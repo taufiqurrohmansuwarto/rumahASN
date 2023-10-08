@@ -165,7 +165,12 @@ function MyWebinar() {
                           title={item?.webinar_series?.title}
                           placement="bottomLeft"
                         >
-                          <Typography.Text type="secondary">
+                          <Typography.Text
+                            ellipsis={{
+                              rows: 2,
+                            }}
+                            type="secondary"
+                          >
                             {item?.webinar_series?.title}
                           </Typography.Text>
                         </Tooltip>
@@ -194,7 +199,7 @@ function MyWebinar() {
 }
 
 MyWebinar.getLayout = function getLayout(page) {
-  return <Layout>{page}</Layout>;
+  return <Layout active="/webinar-series/all">{page}</Layout>;
 };
 
 MyWebinar.Auth = {
