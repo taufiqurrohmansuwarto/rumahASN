@@ -6,7 +6,8 @@ import QueryFilter from "@/components/QueryFilter";
 import { downloadTicketBKD, pegawaiBkdTickets } from "@/services/bkd.services";
 import { refCategories } from "@/services/index";
 import {
-  formatDateLL,
+  formatDateFromNow,
+  formatDateFull,
   setColorStatus,
   setStatusIcon,
 } from "@/utils/client-utils";
@@ -201,6 +202,9 @@ const FilterStatus = () => {
     form.setFieldsValue({
       search: query?.search || "",
       status: query?.status || "",
+      star: query?.star || "",
+      sub_category_id: query?.sub_category_id || "",
+      group: query?.group || "",
     });
   }, [form, query]);
 
@@ -353,7 +357,7 @@ const TicketsTable = ({ query }) => {
                     fontSize: 13,
                   }}
                 >
-                  Ditanyakan tanggal {formatDateLL(item?.created_at)} oleh{" "}
+                  {formatDateFull(item?.created_at)} oleh{" "}
                   <Link href={`/users/${item?.customer?.custom_id}`}>
                     <Typography.Link>
                       {item?.customer?.username}

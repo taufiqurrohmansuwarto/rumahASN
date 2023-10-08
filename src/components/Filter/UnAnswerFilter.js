@@ -41,7 +41,7 @@ function UnAnswerFilter() {
   useEffect(() => {
     form.setFieldsValue({
       search: query?.search || "",
-      status: query?.status || "",
+      group: query?.group || "",
     });
   }, [form, query]);
 

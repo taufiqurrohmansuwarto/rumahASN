@@ -3,12 +3,13 @@ import {
   BarChartOutlined,
   BookOutlined,
   LogoutOutlined,
+  QuestionCircleFilled,
   SolutionOutlined,
   TeamOutlined,
   UserOutlined,
   UsergroupAddOutlined,
 } from "@ant-design/icons";
-import { Dropdown, Grid, Typography } from "antd";
+import { Button, Dropdown, Grid, Tooltip, Typography } from "antd";
 import { uniqBy } from "lodash";
 import { signOut, useSession } from "next-auth/react";
 import dynamic from "next/dynamic";
@@ -19,6 +20,7 @@ import { userRoutes } from "../routes";
 import Messages from "./Messages";
 import Notifications from "./Notifications";
 import SearchUserLayout from "./SearchUserLayout";
+import { Center } from "@mantine/core";
 
 const ProLayout = dynamic(
   () => import("@ant-design/pro-components").then((mod) => mod?.ProLayout),
@@ -204,6 +206,10 @@ function Layout({ children, active, collapsed = true }) {
 
   const breakPoint = Grid.useBreakpoint();
 
+  const handlePertanyan = () => {
+    router.push(`/tickets/create`);
+  };
+
   const onCollapsed = () => {
     setTutup(!tutup);
   };
@@ -232,6 +238,33 @@ function Layout({ children, active, collapsed = true }) {
           width: "331px",
         },
       ]}
+      menuExtraRender={({ collapsed }) => {
+        if (!collapsed) {
+          return (
+            <Button
+              onClick={handlePertanyan}
+              shape="round"
+              icon={<QuestionCircleFilled />}
+              block
+              type="primary"
+            >
+              Tanya BKD
+            </Button>
+          );
+        } else {
+          return (
+            <Center>
+              <Button
+                onClick={handlePertanyan}
+                shape="circle"
+                size="middle"
+                icon={<QuestionCircleFilled />}
+                type="primary"
+              />
+            </Center>
+          );
+        }
+      }}
       title="Rumah ASN"
       logo={"https://siasn.bkd.jatimprov.go.id:9000/public/logobkd.jpg"}
       headerTitleRender={(logo, title) => {
