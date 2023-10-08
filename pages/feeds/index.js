@@ -55,7 +55,7 @@ function Feeds() {
             <Stack>
               {/* <AlertPemutakhiranData /> */}
               {/* <TutorialPeremajaanDataSIASN /> */}
-              <SelamatDatang />
+              {/* <SelamatDatang /> */}
               {/* <PodcastAnnouncement
                 image="https://siasn.bkd.jatimprov.go.id:9000/public/hijau-podcast.jpg"
                 title={`"Podcast Kepegawaian dari kami untuk kalian"`}

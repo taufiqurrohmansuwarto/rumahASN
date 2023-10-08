@@ -241,15 +241,21 @@ function Layout({ children, active, collapsed = true }) {
       menuExtraRender={({ collapsed }) => {
         if (!collapsed) {
           return (
-            <Button
-              onClick={handlePertanyan}
-              shape="round"
-              icon={<QuestionCircleFilled />}
-              block
-              type="primary"
+            <div
+              style={{
+                padding: breakPoint.xs ? 16 : 0,
+              }}
             >
-              Tanya BKD
-            </Button>
+              <Button
+                onClick={handlePertanyan}
+                shape="round"
+                icon={<QuestionCircleFilled />}
+                block
+                type="primary"
+              >
+                Tanya BKD
+              </Button>
+            </div>
           );
         } else {
           return (
@@ -296,11 +302,6 @@ function Layout({ children, active, collapsed = true }) {
             >
               © 2022 Rumah ASN
             </Typography.Text>
-            {/* <div>
-              <Typography.Text type="secondary">
-                Iput Taufiqurrohman Suwarto
-              </Typography.Text>
-            </div> */}
             <div>
               <Typography.Text
                 style={{
