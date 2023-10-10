@@ -1,28 +1,38 @@
-import { Center, Paper, Text } from "@mantine/core";
-import { Col, Image, Row, Space } from "antd";
+import { Center, Image, Paper, Text } from "@mantine/core";
+import { Card, Col, Row, Space } from "antd";
+import { startCase, toLower } from "lodash";
 
-function CardLayananKepegawaian({ title, image, description, bidang }) {
+function CardLayananKepegawaian({ title, image, bidang, onClick }) {
   return (
-    <Paper shadow="xs" radius="sm" p="xl">
+    <Card hoverable onClick={onClick}>
       <Row gutter={[16, 16]}>
         <Col md={6} xs={6}>
           <Center>
-            <Image alt="image" src={image} />
+            <Image
+              maw={240}
+              mx="auto"
+              radius="md"
+              src={
+                image ||
+                "https://siasn.bkd.jatimprov.go.id:9000/public/layanan_cuti_umroh.png"
+              }
+              alt="Random image"
+            />
           </Center>
         </Col>
         <Col md={18} xs={18}>
           <Space direction="vertical">
             <Text fz="xs" c="dimmed">
-              {title}
+              Layanan Kepegawaian
             </Text>
-            <Text fz="md">{description}</Text>
+            <Text fz="lg">{title}</Text>
             <Text fz="xs" c="dimmed">
-              {bidang}
+              {startCase(toLower(bidang))}
             </Text>
           </Space>
         </Col>
       </Row>
-    </Paper>
+    </Card>
   );
 }
 

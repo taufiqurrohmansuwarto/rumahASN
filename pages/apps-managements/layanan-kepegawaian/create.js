@@ -5,7 +5,17 @@ import { createLayanan } from "@/services/layanan-kepegawaian.services";
 import { renderMarkdown, uploadFile } from "@/utils/client-utils";
 import { MarkdownEditor } from "@primer/react/drafts";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { Breadcrumb, Button, Form, Input, TreeSelect, message } from "antd";
+import {
+  Breadcrumb,
+  Button,
+  Card,
+  Col,
+  Form,
+  Input,
+  Row,
+  TreeSelect,
+  message,
+} from "antd";
 import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
@@ -20,7 +30,7 @@ const FormTree = () => {
       {dataTree && (
         <>
           <Form.Item
-            label="Struktur Organisasi"
+            label="Bidang Pengampu"
             name="bidang"
             rules={[
               {
@@ -64,20 +74,22 @@ const CreateLayananKepegawaian = () => {
   const handleBack = () => router.back();
 
   const handleFinish = async () => {
-    const value = await form.validateFields();
-    const bidang = JSON.stringify({
-      id: value.bidang.value,
-      label: value.bidang.label,
-    });
+    try {
+      const value = await form.validateFields();
+      const bidang = JSON.stringify({
+        id: value.bidang.value,
+        label: value.bidang.label,
+      });
 
-    const data = {
-      ...value,
-      bidang,
-    };
+      const data = {
+        ...value,
+        bidang,
+      };
 
-    //     console.log(data);
-
-    create(data);
+      create(data);
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   return (
@@ -88,7 +100,7 @@ const CreateLayananKepegawaian = () => {
       <PageContainer
         onBack={handleBack}
         title="Layanan Kepegawaian"
-        content="Layanan Kepegawaian Baru"
+        content="Form Tambah Layanan Kepegawaian"
         header={{
           breadcrumbRender: () => (
             <Breadcrumb>
@@ -107,47 +119,60 @@ const CreateLayananKepegawaian = () => {
           ),
         }}
       >
-        <Form onFinish={handleFinish} form={form} layout="vertical">
-          <Form.Item
-            name="title"
-            label="Judul"
-            rules={[{ required: true, message: "Judul tidak boleh kosong" }]}
-          >
-            <Input />
-          </Form.Item>
-          <Form.Item
-            rules={[
-              { required: true, message: "Deskripsi Tidak boleh kosong" },
-            ]}
-            name="description"
-            label="Deskripsi"
-          >
-            <MarkdownEditor
-              acceptedFileTypes={[
-                "image/*",
-                // word, excel, txt, pdf
-                ".doc",
-                ".docx",
-                ".xls",
-                ".xlsx",
-                ".txt",
-                ".pdf",
-              ]}
-              onRenderPreview={renderMarkdown}
-              onUploadFile={uploadFile}
-              mentionSuggestions={null}
-            />
-          </Form.Item>
-          <Form.Item name="icon_url" label="Alamat Gambar">
-            <Input />
-          </Form.Item>
-          <FormTree />
-          <Form.Item>
-            <Button disabled={isLoading} loading={isLoading} htmlType="submit">
-              Submit
-            </Button>
-          </Form.Item>
-        </Form>
+        <Row>
+          <Col md={18} xs={24}>
+            <Card>
+              <Form form={form} layout="vertical">
+                <Form.Item
+                  name="title"
+                  label="Judul"
+                  rules={[
+                    { required: true, message: "Judul tidak boleh kosong" },
+                  ]}
+                >
+                  <Input />
+                </Form.Item>
+                <Form.Item
+                  rules={[
+                    { required: true, message: "Deskripsi Tidak boleh kosong" },
+                  ]}
+                  name="description"
+                  label="Deskripsi"
+                >
+                  <MarkdownEditor
+                    acceptedFileTypes={[
+                      "image/*",
+                      // word, excel, txt, pdf
+                      ".doc",
+                      ".docx",
+                      ".xls",
+                      ".xlsx",
+                      ".txt",
+                      ".pdf",
+                    ]}
+                    onRenderPreview={renderMarkdown}
+                    onUploadFile={uploadFile}
+                    mentionSuggestions={null}
+                  />
+                </Form.Item>
+                <Form.Item name="icon_url" label="Alamat Gambar">
+                  <Input />
+                </Form.Item>
+                <FormTree />
+                <Form.Item>
+                  <Button
+                    onClick={handleFinish}
+                    disabled={isLoading}
+                    loading={isLoading}
+                    htmlType="submit"
+                  >
+                    Submit
+                  </Button>
+                </Form.Item>
+              </Form>
+            </Card>
+          </Col>
+        </Row>
       </PageContainer>
     </>
   );

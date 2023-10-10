@@ -5,6 +5,7 @@ import {
   readLayanan,
 } from "@/services/layanan-kepegawaian.services";
 import { formatDateFull } from "@/utils/client-utils";
+import { PlusOutlined } from "@ant-design/icons";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Breadcrumb,
@@ -108,10 +109,18 @@ const LayananKepegawaian = () => {
           ),
         }}
         title="Daftar Layanan Kepegawaian"
-        content="Admin"
+        content="Layanan Kepegawaian BKD Provinsi Jawa Timur"
       >
-        <Button onClick={handleCreate}>Buat Layanan</Button>
         <Table
+          title={() => (
+            <Button
+              type="primary"
+              icon={<PlusOutlined />}
+              onClick={handleCreate}
+            >
+              Layanan
+            </Button>
+          )}
           columns={columns}
           rowKey={(row) => row?.id}
           dataSource={data?.data}

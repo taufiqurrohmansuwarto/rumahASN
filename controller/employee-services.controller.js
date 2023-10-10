@@ -142,7 +142,12 @@ const userReadDetail = async (req, res) => {
   try {
     const { id } = req?.query;
     const result = await EmployeeServices.query().findById(id);
-    res.json(result);
+    const data = {
+      html: result?.description ? parseMarkdown(result?.description) : null,
+      ...result,
+    };
+
+    res.json(data);
   } catch (error) {
     console.log(error);
     res.status(500).json({
@@ -159,6 +164,8 @@ module.exports = {
   createEmployeeService,
   updateEmployeeService,
   removeEmployeeService,
+
+  // user
   userReadData,
   userReadDetail,
 };

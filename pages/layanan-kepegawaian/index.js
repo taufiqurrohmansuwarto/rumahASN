@@ -1,18 +1,40 @@
 import CardLayananKepegawaian from "@/components/FiturLayananKepegawaian/CardLayananKepegawaian";
 import Layout from "@/components/Layout";
+import { readUser } from "@/services/layanan-kepegawaian.services";
+import { useQuery } from "@tanstack/react-query";
 import { Breadcrumb, List } from "antd";
 import { times } from "lodash";
 import Head from "next/head";
 import Link from "next/link";
+import { useRouter } from "next/router";
 
 const { default: PageContainer } = require("@/components/PageContainer");
 
 const LayananKepegawaian = () => {
+  const router = useRouter();
+  const query = router.query;
+
+  const {
+    data: employeeServices,
+    isLoading,
+    isFetching,
+  } = useQuery(
+    ["data-layanan-kepegawaian-user", query],
+    () => readUser(query),
+    {
+      keepPreviousData: true,
+    }
+  );
+
+  const handleClick = (id) => {
+    router.push(`/layanan-kepegawaian/${id}`);
+  };
+
   const title = "Layanan Kepegawaian";
   const description =
     "Get Started with AI-Drive App Development Using the OpenAI Node.js SDK";
   const image =
-    "https://egghead.io/_next/image?url=https%3A%2F%2Fd2eip9sf3oo6c2.cloudfront.net%2Fplaylists%2Fsquare_covers%2F001%2F141%2F294%2Fthumb%2Fegh_appwrite-react_2000.png&w=96&q=100";
+    "https://siasn.bkd.jatimprov.go.id:9000/public/layanan_cuti_umroh.png";
   const bidang =
     "Perencanaan, Pengadaan, Pengolahan Data dan Sistem Informasi ASN";
 
@@ -44,6 +66,7 @@ const LayananKepegawaian = () => {
         )}
       >
         <List
+          loading={isLoading || isFetching}
           grid={{
             gutter: 16,
             xs: 1,
@@ -52,14 +75,16 @@ const LayananKepegawaian = () => {
             lg: 4,
             xxl: 4,
           }}
-          dataSource={data}
-          renderItem={({ id, title, description, image, bidang }) => (
+          dataSource={employeeServices?.data}
+          rowKey={(row) => row?.id}
+          renderItem={({ id, title, description, icon_url, bidang }) => (
             <List.Item>
               <CardLayananKepegawaian
                 title={title}
                 description={description}
-                image={image}
-                bidang={bidang}
+                image={icon_url}
+                bidang={bidang?.label}
+                onClick={() => handleClick(id)}
               />
             </List.Item>
           )}
