@@ -2,12 +2,16 @@ import axios from "axios";
 import queryString from "query-string";
 
 const api = axios.create({
-  baseURL: "/helpdesk/api/layanan-kepegawaian",
+  baseURL: "/helpdesk/api/employee-services",
 });
 
 // crud admin
 export const createLayanan = (data) => {
-  return api.post(`/admin/create`, data).then((res) => res?.data);
+  return api.post(`/admin`, data).then((res) => res?.data);
+};
+
+export const detailLayanan = (id) => {
+  return api.get(`/admin/${id}`).then((res) => res?.data);
 };
 
 export const readLayanan = (query) => {
@@ -15,11 +19,15 @@ export const readLayanan = (query) => {
     skipEmptyString: true,
   });
 
-  return api.get(`/admin/read?${queryStr}`).then((res) => res?.data);
+  return api.get(`/admin?${queryStr}`).then((res) => res?.data);
 };
 
-export const updateLayanan = (data) => {
-  return api.put(`/admin/update`, data).then((res) => res?.data);
+export const updateLayanan = ({ id, data }) => {
+  return api.patch(`/admin/${id}`, data).then((res) => res?.data);
+};
+
+export const deleteLayanan = (id) => {
+  return api.delete(`/admin/${id}`).then((res) => res?.data);
 };
 
 // read user

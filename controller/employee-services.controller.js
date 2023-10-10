@@ -1,14 +1,42 @@
 const EmployeeServices = require("@/models/employee-services.model");
+const { parseMarkdown } = require("@/utils/parsing");
 
-const index = async (req, res) => {
+const parsingMarkdown = (data) => {
+  if (!data?.length) {
+    return [];
+  } else {
+    return data?.map((d) => ({
+      ...d,
+      html: d?.description ? parseMarkdown(d?.description) : null,
+    }));
+  }
+};
+
+const findEmployeeServices = async (req, res) => {
   try {
-    const employeeServices = await EmployeeServices.query();
-    res.status(200).json({
-      status: "success",
-      message: "Employee Services retrieved successfully",
-      data: employeeServices,
-    });
+    const page = req.query.page || 1;
+    const limit = req.query.limit || 30;
+    const search = req.query.search || "";
+
+    const result = await EmployeeServices.query()
+      .page(parseInt(page) - 1, parseInt(limit))
+      .where((builder) => {
+        if (search) {
+          builder.where("title", "ilike", `%${search}%`);
+        }
+      })
+      .orderBy("created_at", "desc");
+
+    const data = {
+      data: parsingMarkdown(result?.results),
+      total: result.total,
+      page: parseInt(page),
+      limit: parseInt(limit),
+    };
+
+    res.json(data);
   } catch (error) {
+    console.log(error);
     res.status(500).json({
       status: "error",
       message: "Error retrieving Employee Services",
@@ -17,15 +45,11 @@ const index = async (req, res) => {
   }
 };
 
-const show = async (req, res) => {
+const detailEmployeeService = async (req, res) => {
   const { id } = req.query;
   try {
     const employeeServices = await EmployeeServices.query().findById(id);
-    res.status(200).json({
-      status: "success",
-      message: "Employee Services retrieved successfully",
-      data: employeeServices,
-    });
+    res.json(employeeServices);
   } catch (error) {
     res.status(500).json({
       status: "error",
@@ -35,18 +59,12 @@ const show = async (req, res) => {
   }
 };
 
-const store = async (req, res) => {
-  const { title, description, icon_url } = req.body;
+const createEmployeeService = async (req, res) => {
   try {
-    const employeeServices = await EmployeeServices.query().insert({
-      title,
-      description,
-      icon_url,
-    });
-    res.status(200).json({
+    await EmployeeServices.query().insert(req?.body);
+    res.json({
       status: "success",
       message: "Employee Services created successfully",
-      data: employeeServices,
     });
   } catch (error) {
     res.status(500).json({
@@ -57,22 +75,15 @@ const store = async (req, res) => {
   }
 };
 
-const update = async (req, res) => {
+const updateEmployeeService = async (req, res) => {
   const { id } = req.query;
-  const { title, description, icon_url } = req.body;
   try {
-    const employeeServices = await EmployeeServices.query().patchAndFetchById(
-      id,
-      {
-        title,
-        description,
-        icon_url,
-      }
-    );
-    res.status(200).json({
+    const body = req?.body;
+    await EmployeeServices.query().patchAndFetchById(id, body);
+
+    res.json({
       status: "success",
       message: "Employee Services updated successfully",
-      data: employeeServices,
     });
   } catch (error) {
     res.status(500).json({
@@ -83,7 +94,7 @@ const update = async (req, res) => {
   }
 };
 
-const destroy = async (req, res) => {
+const removeEmployeeService = async (req, res) => {
   const { id } = req.query;
   try {
     const employeeServices = await EmployeeServices.query().deleteById(id);
@@ -101,10 +112,20 @@ const destroy = async (req, res) => {
   }
 };
 
+const userReadData = async (req, res) => {
+  try {
+  } catch (error) {}
+};
+
+const userReadDetail = async (req, res) => {
+  try {
+  } catch (error) {}
+};
+
 module.exports = {
-  index,
-  show,
-  store,
-  update,
-  destroy,
+  findEmployeeServices,
+  detailEmployeeService,
+  createEmployeeService,
+  updateEmployeeService,
+  removeEmployeeService,
 };
