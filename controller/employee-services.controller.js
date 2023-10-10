@@ -114,12 +114,43 @@ const removeEmployeeService = async (req, res) => {
 
 const userReadData = async (req, res) => {
   try {
-  } catch (error) {}
+    const page = req?.query?.page || 1;
+    const limit = req?.query?.limit || 30;
+
+    const result = await EmployeeServices.query()
+      .page(parseInt(page) - 1, parseInt(limit))
+      .orderBy("created_at", "desc");
+
+    const data = {
+      data: parsingMarkdown(result?.results),
+      total: result.total,
+      page: parseInt(page),
+      limit: parseInt(limit),
+    };
+    res.json(data);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      status: "error",
+      message: "Error retrieving User",
+      data: error,
+    });
+  }
 };
 
 const userReadDetail = async (req, res) => {
   try {
-  } catch (error) {}
+    const { id } = req?.query;
+    const result = await EmployeeServices.query().findById(id);
+    res.json(result);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      status: "error",
+      message: "Error retrieving User",
+      data: error,
+    });
+  }
 };
 
 module.exports = {
@@ -128,4 +159,6 @@ module.exports = {
   createEmployeeService,
   updateEmployeeService,
   removeEmployeeService,
+  userReadData,
+  userReadDetail,
 };
