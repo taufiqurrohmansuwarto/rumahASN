@@ -31,3 +31,14 @@ export const deleteLayanan = (id) => {
 };
 
 // read user
+export const readUser = (query) => {
+  const queryStr = queryString.stringify(query, {
+    skipEmptyString: true,
+  });
+
+  return api.get(`/user?${queryStr}`).then((res) => res?.data);
+};
+
+export const readDetailUser = (id) => {
+  return api.get(`/user/${id}`).then((res) => res?.data);
+};

@@ -7,9 +7,19 @@ import {
 import { renderMarkdown, uploadFile } from "@/utils/client-utils";
 import { MarkdownEditor } from "@primer/react/drafts";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { Breadcrumb, Button, Form, Input, TreeSelect, message } from "antd";
+import {
+  Breadcrumb,
+  Button,
+  Card,
+  Col,
+  Form,
+  Input,
+  Row,
+  TreeSelect,
+  message,
+} from "antd";
 import { useRouter } from "next/router";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 import { getTreeOrganization } from "@/services/index";
 import Link from "next/link";
@@ -81,24 +91,28 @@ const EditLayananKepegawaian = () => {
         },
       });
     }
-  });
+  }, [data, form]);
 
   const handleUpdate = async () => {
-    const value = await form.validateFields();
-    const bidang = JSON.stringify({
-      id: value.bidang.value,
-      label: value.bidang.label,
-    });
+    try {
+      const value = await form.validateFields();
+      const bidang = JSON.stringify({
+        id: value.bidang.value,
+        label: value.bidang.label,
+      });
 
-    const data = {
-      id,
-      data: {
-        ...value,
-        bidang,
-      },
-    };
+      const data = {
+        id,
+        data: {
+          ...value,
+          bidang,
+        },
+      };
 
-    update(data);
+      update(data);
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   return (
@@ -107,7 +121,7 @@ const EditLayananKepegawaian = () => {
         loading={isLoading}
         title="Edit Layanan Kepegawaian"
         onBack={() => router?.back()}
-        content="Admin"
+        content="Form Edit Layanan Kepegawaian"
         header={{
           breadcrumbRender: () => (
             <Breadcrumb>
@@ -126,51 +140,53 @@ const EditLayananKepegawaian = () => {
           ),
         }}
       >
-        <Form onFinish={handleUpdate} form={form} layout="vertical">
-          <Form.Item
-            name="title"
-            label="Judul"
-            rules={[{ required: true, message: "Judul tidak boleh kosong" }]}
-          >
-            <Input />
-          </Form.Item>
-          <Form.Item
-            rules={[
-              { required: true, message: "Deskripsi Tidak boleh kosong" },
-            ]}
-            name="description"
-            label="Deskripsi"
-          >
-            <MarkdownEditor
-              acceptedFileTypes={[
-                "image/*",
-                // word, excel, txt, pdf
-                ".doc",
-                ".docx",
-                ".xls",
-                ".xlsx",
-                ".txt",
-                ".pdf",
-              ]}
-              onRenderPreview={renderMarkdown}
-              onUploadFile={uploadFile}
-              mentionSuggestions={null}
-            />
-          </Form.Item>
-          <Form.Item name="icon_url" label="Alamat Gambar">
-            <Input />
-          </Form.Item>
-          <FormTree />
-          <Form.Item>
-            <Button
-              disabled={isLoadingUpdate}
-              loading={isLoadingUpdate}
-              htmlType="submit"
-            >
-              Edit
-            </Button>
-          </Form.Item>
-        </Form>
+        <Row>
+          <Col xs={24} md={18}>
+            <Card>
+              <Form form={form} layout="vertical">
+                <Form.Item
+                  name="title"
+                  label="Judul"
+                  rules={[
+                    { required: true, message: "Judul tidak boleh kosong" },
+                  ]}
+                >
+                  <Input />
+                </Form.Item>
+                <Form.Item label="Deskripsi" name="description">
+                  <MarkdownEditor
+                    acceptedFileTypes={[
+                      "image/*",
+                      // word, excel, txt, pdf
+                      ".doc",
+                      ".docx",
+                      ".xls",
+                      ".xlsx",
+                      ".txt",
+                      ".pdf",
+                    ]}
+                    onRenderPreview={renderMarkdown}
+                    onUploadFile={uploadFile}
+                    mentionSuggestions={null}
+                  />
+                </Form.Item>
+                <Form.Item name="icon_url" label="Alamat Gambar">
+                  <Input />
+                </Form.Item>
+                <FormTree />
+                <Form.Item>
+                  <Button
+                    onClick={handleUpdate}
+                    disabled={isLoadingUpdate}
+                    loading={isLoadingUpdate}
+                  >
+                    Edit
+                  </Button>
+                </Form.Item>
+              </Form>
+            </Card>
+          </Col>
+        </Row>
       </PageContainer>
     </>
   );
