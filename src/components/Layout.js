@@ -144,6 +144,10 @@ const changeRoutes = (user) => {
               ],
             },
             {
+              path: "/apps-managements/layanan-kepegawaian",
+              name: "Layanan Kepegawaian",
+            },
+            {
               path: "/apps-managements/anomali-data-2023",
               name: "Data Anomali 2023",
             },
