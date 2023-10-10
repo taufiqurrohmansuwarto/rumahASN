@@ -2,6 +2,10 @@ module.exports.riwayatGolonganPangkat = (fetcher, nip) => {
   return fetcher.get(`/pns/rw-golongan/${nip}`);
 };
 
+module.exports.updateDataUtama = (fetcher, data) => {
+  return fetcher.post(`/pns/data-utama-update`, data);
+};
+
 module.exports.riwayatPMK = (fetcher, nip) => {
   return fetcher.get(`/pns/rw-masakerja/${nip}`);
 };
