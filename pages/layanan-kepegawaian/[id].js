@@ -53,11 +53,10 @@ const DetailLayananKepegawaian = () => {
         onBack={() => router?.back()}
         title="Detail Layanan"
       >
-        <Card>
+        <Card title={() => <Title order={1}>{data?.title || ""}</Title>}>
           <Row gutter={[16, 16]}>
             <Col md={10} xs={24}>
               <Space direction="vertical">
-                <Title order={1}>{data?.title || ""}</Title>
                 <Text color="dimmed">{data?.bidang?.label}</Text>
                 <TypographyStylesProvider>
                   <div dangerouslySetInnerHTML={{ __html: data?.html }} />
