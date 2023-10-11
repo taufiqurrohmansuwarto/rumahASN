@@ -23,6 +23,7 @@ import { useEffect, useState } from "react";
 
 import { getTreeOrganization } from "@/services/index";
 import Link from "next/link";
+import Head from "next/head";
 
 const FormTree = () => {
   const { data: dataTree } = useQuery(["organization-tree"], () =>
@@ -117,6 +118,9 @@ const EditLayananKepegawaian = () => {
 
   return (
     <>
+      <Head>
+        <title>Edit Layanan Kepegawaian</title>
+      </Head>
       <PageContainer
         loading={isLoading}
         title="Edit Layanan Kepegawaian"
