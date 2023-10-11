@@ -1,10 +1,19 @@
-import { Center, Image, Paper, Text } from "@mantine/core";
-import { Card, Col, Row, Space } from "antd";
+import { Center, Image, Paper, Stack, Text } from "@mantine/core";
+import { Col, Row } from "antd";
 import { startCase, toLower } from "lodash";
 
 function CardLayananKepegawaian({ title, image, bidang, onClick }) {
   return (
-    <Card hoverable onClick={onClick}>
+    <Paper
+      onClick={onClick}
+      shadow="xs"
+      radius="sm"
+      p={20}
+      style={{
+        height: 180,
+        cursor: "pointer",
+      }}
+    >
       <Row gutter={[16, 16]}>
         <Col md={6} xs={6}>
           <Center>
@@ -21,18 +30,20 @@ function CardLayananKepegawaian({ title, image, bidang, onClick }) {
           </Center>
         </Col>
         <Col md={18} xs={18}>
-          <Space direction="vertical">
-            <Text fz="xs" c="dimmed">
+          <Stack spacing="lg">
+            <Text lineClamp={2} fz="xs" c="dimmed">
               Layanan Kepegawaian
             </Text>
-            <Text fz="lg">{title}</Text>
+            <Text fz="lg" lineClamp={1}>
+              {title}
+            </Text>
             <Text fz="xs" c="dimmed">
               {startCase(toLower(bidang))}
             </Text>
-          </Space>
+          </Stack>
         </Col>
       </Row>
-    </Card>
+    </Paper>
   );
 }
 
