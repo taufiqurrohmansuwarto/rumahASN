@@ -54,13 +54,13 @@ const renderText = (text) => {
 };
 
 const renderListItem = function (text, task) {
-  // Check if the list item is a task item
+  // render list item must be support nested list
+  // check if task is true
+
   if (task) {
-    // Render a checkbox
-    return '<li><input type="checkbox" checked disabled>' + text + "</li>";
+    return `<li style="list-style: none;"><input type="checkbox" disabled ${task} /> ${text}</li>`;
   } else {
-    // Render a regular list item
-    return "<li>" + text + "</li>";
+    return `<li>${text}</li>`;
   }
 };
 
@@ -108,6 +108,10 @@ const link = function (href, title, text) {
   }
 };
 
+const paragraph = function (text) {
+  return `<p>${text}</p>`;
+};
+
 const renderer = {
   text(string) {
     return renderText(string);
@@ -115,7 +119,7 @@ const renderer = {
   image(href, title, text) {
     return renderImage(href, title, text);
   },
-  lisitem(text, task) {
+  listitem(text, task) {
     return renderListItem(text, task);
   },
   link(href, title, text) {
@@ -123,6 +127,9 @@ const renderer = {
   },
   blockquote(quote) {
     return blockquote(quote);
+  },
+  paragraph(text) {
+    return paragraph(text);
   },
 };
 
