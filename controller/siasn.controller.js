@@ -64,6 +64,13 @@ const updateEmployeeInformation = async (req, res) => {
       ...req?.body,
     };
 
+    await createLogSIASN({
+      userId: req?.user?.customId,
+      type: "UPDATE",
+      employeeNumber: nip,
+      siasnService: "data-utama",
+    });
+
     await updateDataUtama(siasnRequest, payload);
 
     res.json({
