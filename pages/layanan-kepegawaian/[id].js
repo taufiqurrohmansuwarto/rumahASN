@@ -53,7 +53,7 @@ const DetailLayananKepegawaian = () => {
         onBack={() => router?.back()}
         title="Detail Layanan"
       >
-        <Card title={() => <Title order={1}>{data?.title || ""}</Title>}>
+        <Card title={<Title order={1}>{data?.title || ""}</Title>}>
           <Row gutter={[16, 16]}>
             <Col md={10} xs={24}>
               <Space direction="vertical">
