@@ -2,6 +2,7 @@ import { mysapkMenu } from "@/utils/client-utils";
 import {
   Card,
   Group,
+  Image,
   SimpleGrid,
   Text,
   UnstyledButton,
@@ -47,6 +48,10 @@ const useStyles = createStyles((theme) => ({
   },
 }));
 
+const Base64Image = ({ data }) => {
+  return <Image maw={200} src={`data:image/png;base64,${data}`} alt="base64" />;
+};
+
 export function MenuMySAPK({ dataUtama }) {
   const router = useRouter();
   const { useBreakpoint } = Grid;
@@ -84,7 +89,6 @@ export function MenuMySAPK({ dataUtama }) {
       <Group position="apart" mb={14}>
         <Card w={"100%"}>
           <Space direction="vertical" size="small">
-            <Avatar size="large" src={toImage(dataUtama?.foto)} />
             <Typography.Text strong>{dataUtama?.nama}</Typography.Text>
             <Typography.Text type="secondary">
               NIP {dataUtama?.nipBaru}
