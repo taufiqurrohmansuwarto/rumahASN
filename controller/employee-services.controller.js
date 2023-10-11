@@ -1,5 +1,6 @@
 const EmployeeServices = require("@/models/employee-services.model");
 const { parseMarkdown } = require("@/utils/parsing");
+const { marked } = require("marked");
 
 const parsingMarkdown = (data) => {
   if (!data?.length) {
@@ -143,7 +144,7 @@ const userReadDetail = async (req, res) => {
     const { id } = req?.query;
     const result = await EmployeeServices.query().findById(id);
     const data = {
-      html: result?.description ? parseMarkdown(result?.description) : null,
+      html: result?.description ? marked(result?.description) : null,
       ...result,
     };
 
