@@ -1,18 +1,26 @@
 import { dataUtamaSimaster } from "@/services/master.services";
-import { dataUtamaSIASN } from "@/services/siasn-services";
-import { compareText, komparasiGelar } from "@/utils/client-utils";
-import { Stack, Text } from "@mantine/core";
-import { useQuery } from "@tanstack/react-query";
 import {
-  Alert,
-  Card,
+  dataUtamaSIASN,
+  updateDataUtamaSIASN,
+} from "@/services/siasn-services";
+import { compareText, komparasiGelar } from "@/utils/client-utils";
+import { Image, Stack, Text } from "@mantine/core";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  Button,
   Col,
+  Divider,
+  Form,
+  Input,
+  Modal,
   Row,
   Skeleton,
+  Space,
   Table as TableAntd,
   Tag,
-  Typography,
+  message,
 } from "antd";
+import { useEffect } from "react";
 
 const dataTabel = (siasn, simaster) => {
   return [
@@ -103,6 +111,10 @@ const dataTabel = (siasn, simaster) => {
   ];
 };
 
+const Base64Image = ({ data }) => {
+  return <Image maw={200} src={`data:image/png;base64,${data}`} alt="base64" />;
+};
+
 const TagResult = ({ record }) => {
   const id = record?.id;
   const cantCompare =
@@ -122,23 +134,75 @@ const TagResult = ({ record }) => {
   );
 };
 
-const Pemberitahuan = () => {
+const FormEditBiodata = ({ data }) => {
+  const [form] = Form.useForm();
+  const queryClient = useQueryClient();
+
+  const { mutateAsync: update, isLoading: isLoadingUpdate } = useMutation(
+    (data) => updateDataUtamaSIASN(data),
+    {
+      onSuccess: () => {
+        message.success("Berhasil mengubah data");
+      },
+      onSettled: () => {
+        queryClient.invalidateQueries(["data-utama-siasn"]);
+      },
+    }
+  );
+
+  const handleSubmit = async () => {
+    try {
+      const value = await form.validateFields();
+
+      Modal.confirm({
+        title: "Apakah anda yakin?",
+        content: "Data yang anda masukkan adalah data yang benar",
+        centered: true,
+        onOk: async () => {
+          await update({
+            email: value?.email,
+          });
+        },
+      });
+    } catch (error) {
+      message.error("Gagal mengubah data");
+    }
+  };
+
+  useEffect(() => {
+    if (data) {
+      form.setFieldsValue({
+        email: data?.email,
+      });
+    }
+  }, [data, form]);
+
+  const handleReset = () => {
+    form.setFieldsValue({
+      email: data?.email,
+    });
+  };
+
   return (
-    <Alert
-      showIcon
-      banner
-      type="info"
-      description={
-        <>
-          <Typography.Text>
-            Cek segera Data Nama, NIP, dan Tanggal Lahirmu. Apabila ada yang
-            berbeda silahkan lapor menggunakan tombol Tanya BKD diatas.
-            Penulisan gelar seperti S.Kom dengan S.Kom. dianggap sama tidak
-            perlu perbaikan #datamutanggungjawabmu
-          </Typography.Text>
-        </>
-      }
-    />
+    <Form form={form} layout="vertical">
+      <Form.Item
+        rules={[
+          {
+            type: "email",
+          },
+        ]}
+        label="Email SIASN"
+        name="email"
+      >
+        <Input />
+      </Form.Item>
+      <Space>
+        <Button onClick={handleSubmit} type="primary">
+          Submit
+        </Button>
+        <Button onClick={handleReset}>Reset</Button>
+      </Space>
+    </Form>
   );
 };
 
@@ -218,14 +282,15 @@ function CompareDataUtama() {
             ]}
           >
             <Col md={24}>
-              <Card>
-                <TableAntd
-                  rowKey={(row) => row?.id}
-                  columns={columns}
-                  dataSource={dataTabel(data, dataSimaster)}
-                  pagination={false}
-                />
-              </Card>
+              <Divider orientation="left">Edit Informasi SIASN</Divider>
+              <FormEditBiodata data={data} />
+              <Divider orientation="left">Komparasi Data Utama</Divider>
+              <TableAntd
+                rowKey={(row) => row?.id}
+                columns={columns}
+                dataSource={dataTabel(data, dataSimaster)}
+                pagination={false}
+              />
             </Col>
           </Row>
         </Skeleton>

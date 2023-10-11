@@ -14,6 +14,7 @@ const {
   postDataKursus,
   rwPemberhentian,
   rwMasaKerja,
+  updateDataUtama,
 } = require("@/utils/siasn-utils");
 const {
   proxyDownloadFoto,
@@ -27,28 +28,62 @@ const Anomali23 = require("@/models/anomali23.model");
 const BackupSIASN = require("@/models/backup-siasn.model");
 const RefSIASNUnor = require("@/models/ref-siasn-unor.model");
 
+const dataUtamaUpdate = {
+  agama_id: "string",
+  alamat: "string",
+  email: "string",
+  email_gov: "string",
+  kabupaten_id: "string",
+  karis_karsu: "string",
+  kelas_jabatan: "string",
+  kpkn_id: "string",
+  lokasi_kerja_id: "string",
+  nomor_bpjs: "string",
+  nomor_hp: "string",
+  nomor_telpon: "string",
+  npwp_nomor: "string",
+  npwp_tanggal: "string",
+  pns_orang_id: "string",
+  tanggal_taspen: "string",
+  tapera_nomor: "string",
+  taspen_nomor: "string",
+};
+
+const updateEmployeeInformation = async (req, res) => {
+  try {
+    const user = req?.user;
+    const siasnRequest = req.siasnRequest;
+
+    const nip = user?.employee_number;
+    const { data } = await siasnRequest.get(`/pns/data-utama/${nip}`);
+
+    const id = data?.data?.id;
+
+    const payload = {
+      pns_orang_id: id,
+      ...req?.body,
+    };
+
+    await updateDataUtama(siasnRequest, payload);
+
+    res.json({
+      message: "success",
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ code: 500, message: "Internal Server Error" });
+  }
+};
+
 const siasnEmployeesDetail = async (req, res) => {
   try {
     const user = req.user;
     const siasnRequest = req.siasnRequest;
-    const siansProxyFetcher = req?.fetcher;
 
     const nip = user?.employee_number;
     const { data } = await siasnRequest.get(`/pns/data-utama/${nip}`);
-    const { data: bufferPhotos } = await proxyDownloadFoto(
-      siansProxyFetcher,
-      nip
-    );
 
-    // buffer to base64
-    const foto = Buffer.from(bufferPhotos).toString("base64");
-
-    const currentResult = {
-      ...data?.data,
-      foto,
-    };
-
-    res.json(currentResult);
+    res.json(data?.data);
   } catch (error) {
     console.log(error);
     res.status(500).json({ code: 500, message: "Internal Server Error" });
@@ -843,4 +878,7 @@ module.exports = {
   siasnEmployeesDetail,
   siasnRwMasaKerja,
   siasnRwPemberhentian,
+
+  //
+  updateEmployeeInformation,
 };
