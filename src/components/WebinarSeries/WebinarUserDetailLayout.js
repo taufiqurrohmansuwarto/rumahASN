@@ -97,12 +97,12 @@ function WebinarUserDetailLayout({
           },
 
           {
-            tab: "Komentar",
+            tab: "Diskusi",
             key: "comments",
             href: "/comments",
           },
           {
-            tab: "Rating",
+            tab: "Ulasan",
             key: "ratings",
             href: "/ratings",
           },
