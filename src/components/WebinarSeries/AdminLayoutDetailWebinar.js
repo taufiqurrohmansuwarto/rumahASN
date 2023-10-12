@@ -96,7 +96,7 @@ function AdminLayoutDetailWebinar({
           {
             tab: (
               <>
-                Komentar <Tag color="red">{data?.comments}</Tag>
+                Diskusi <Tag color="red">{data?.comments}</Tag>
               </>
             ),
             key: "comments",
@@ -105,7 +105,7 @@ function AdminLayoutDetailWebinar({
           {
             tab: (
               <>
-                Rating <Tag color="red">{data?.ratings}</Tag>
+                Ulasan <Tag color="red">{data?.ratings}</Tag>
               </>
             ),
             key: "ratings",
