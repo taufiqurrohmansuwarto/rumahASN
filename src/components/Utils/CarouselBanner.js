@@ -8,7 +8,7 @@ function CarouselBanner() {
   const router = useRouter();
   const autoplay = useRef(
     Autoplay({
-      delay: 2500,
+      delay: 4500,
     })
   );
 
@@ -24,6 +24,30 @@ function CarouselBanner() {
       slideGap="md"
       align="start"
     >
+      <Carousel.Slide
+        style={{
+          cursor: "pointer",
+        }}
+      >
+        <div
+          style={{
+            height: "100%",
+          }}
+        >
+          <a
+            href="https://monitoring-siasn.bkn.go.id/"
+            target={"_blank"}
+            rel={"noreferrer"}
+          >
+            <Image
+              src={
+                "https://siasn.bkd.jatimprov.go.id:9000/public/banner-tracking-layanan.png"
+              }
+              alt="banner-sample.webp"
+            />
+          </a>
+        </div>
+      </Carousel.Slide>
       <Carousel.Slide
         style={{
           cursor: "pointer",
