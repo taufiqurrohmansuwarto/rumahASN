@@ -40,6 +40,9 @@ function SiasnTab({ nip }) {
       <Tabs.TabPane tab="Masa Kerja" key="8">
         <CompareMasaKerjaByNip nip={nip} />
       </Tabs.TabPane>
+      <Tabs.TabPane tab="Kedudukan Hukum" key="9">
+        <CompareMasaKerjaByNip nip={nip} />
+      </Tabs.TabPane>
     </Tabs>
   );
 }
