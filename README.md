@@ -6,6 +6,26 @@
 
 Aplikasi **Rumah ASN** adalah platform tanya jawab yang dirancang khusus untuk menyelesaikan masalah kepegawaian di Provinsi Jawa Timur. Dikelola oleh BKD Provinsi Jawa Timur, aplikasi ini menyajikan solusi bagi masyarakat umum dan pegawai pemerintah provinsi untuk mendapatkan informasi dan bantuan terkait kepegawaian. Pertanyaan dijawab langsung oleh staf BKD yang kompeten di bidangnya.
 
+## Teknologi yang Digunakan
+
+Proyek ini dibangun menggunakan teknologi dan framework berikut:
+
+### Frontend
+
+- **NEXT.JS**: React Framework.
+- **ANTD**: Sebuah library UI yang menyediakan berbagai komponen desain antarmuka yang berkualitas.
+- **Mantine**: Sebuah library komponen React modern dan mudah digunakan untuk membangun aplikasi yang responsif dan aksesibel.
+
+### Backend
+
+- **Next Auth**: Solusi autentikasi ringan dan mudah untuk aplikasi Next.js.
+- **Objection.js**: Sebuah SQL-friendly ORM untuk Node.js.
+- **Knex**: Sebuah query builder untuk SQL, yang mendukung PostgreSQL, MySQL, dan SQLite.
+
+### Database
+
+- **PostgreSQL**: Sebuah sistem manajemen database relasional objek yang kuat dan terbuka.
+
 ## Fitur Utama
 
 - **SSO (Single Sign-On)**: Integrasi login dengan sistem kepegawaian dan Google.
