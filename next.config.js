@@ -40,7 +40,7 @@ module.exports = withAntdLess({
     scrollRestoration: true,
   },
   images: {
-    domains: ["siasn.bkd.jatimprov.go.id"],
+    domains: ["siasn.bkd.jatimprov.go.id", "master.bkd.jatimprov.go.id"],
     formats: ["image/webp"],
   },
   poweredByHeader: false,

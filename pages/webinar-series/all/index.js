@@ -10,12 +10,12 @@ import {
 } from "@ant-design/icons";
 import { Stack } from "@mantine/core";
 import { useQuery } from "@tanstack/react-query";
+import Image from "next/image";
 import {
   Button,
   Card,
   Col,
   Divider,
-  Image,
   Input,
   List,
   Row,
@@ -148,7 +148,12 @@ function WebinarAll() {
                   hoverable
                   onClick={() => handleClick(item?.id)}
                   cover={
-                    <Image preview={false} src={item?.image_url} alt="images" />
+                    <Image
+                      width={500}
+                      height={300}
+                      src={item?.image_url}
+                      alt="images"
+                    />
                   }
                   actions={[
                     <Button
