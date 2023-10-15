@@ -4,7 +4,6 @@ import { webinarUser } from "@/services/webinar.services";
 import { formatDateWebinar } from "@/utils/client-utils";
 import {
   CalendarTwoTone,
-  ClockCircleOutlined,
   ClockCircleTwoTone,
   SearchOutlined,
 } from "@ant-design/icons";
@@ -15,7 +14,6 @@ import {
   Card,
   Col,
   Divider,
-  Image,
   Input,
   List,
   Row,
@@ -25,6 +23,7 @@ import {
 import Head from "next/head";
 import { useRouter } from "next/router";
 import { useState } from "react";
+import Image from "next/image";
 
 function MyWebinar() {
   const router = useRouter();
@@ -139,7 +138,8 @@ function MyWebinar() {
                   onClick={() => gotoDetail(item?.id)}
                   cover={
                     <Image
-                      preview={false}
+                      width={500}
+                      height={300}
                       src={item?.webinar_series?.image_url}
                       alt="images"
                     />

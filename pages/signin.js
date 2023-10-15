@@ -9,19 +9,10 @@ import {
 } from "@ant-design/icons";
 import { Center } from "@mantine/core";
 import { useSpring } from "@react-spring/web";
-import {
-  BackTop,
-  Button,
-  Col,
-  Divider,
-  Grid,
-  Image,
-  Row,
-  Space,
-  Tooltip,
-} from "antd";
+import { BackTop, Button, Col, Divider, Grid, Row, Space, Tooltip } from "antd";
 import { getProviders, signIn } from "next-auth/react";
 import Head from "next/head";
+import Image from "next/image";
 import GoogleButton from "react-google-button";
 
 const BAComponent = () => {
@@ -41,9 +32,9 @@ const BAComponent = () => {
   return (
     <Image
       alt="Rumah ASN Brand Ambassador"
-      src={"rumah_asn.png"}
-      preview={false}
-      width={500}
+      src={"https://siasn.bkd.jatimprov.go.id:9000/public/signin_ba.png"}
+      width={420}
+      height={570}
     />
   );
 };
@@ -72,22 +63,27 @@ const SignIn = ({ providers }) => {
         <Col md={12} xxl={5} lg={10} xs={24} sm={24}>
           <Row>
             <Col md={24} xs={24}>
-              <Image
-                alt="Rumah ASN"
-                src={"new_logo.png"}
-                preview={false}
-                style={{
-                  textAlign: "center",
-                }}
-              />
-              <Image
-                style={{
-                  width: 75,
-                  height: "auto",
-                }}
-                src="https://bsre.bssn.go.id/img/bsre-logo-full.aa4caa4d.png"
-                alt="bsre"
-              />
+              <Center>
+                <Space align="center" direction="vertical">
+                  <Image
+                    alt="Logo Rumah ASN"
+                    src={
+                      "https://siasn.bkd.jatimprov.go.id:9000/public/signin_logo.png"
+                    }
+                    height={120}
+                    width={350}
+                  />
+                  <Image
+                    alt="Logo Rumah ASN"
+                    src={
+                      "https://siasn.bkd.jatimprov.go.id:9000/public/signin_bsre.png"
+                    }
+                    height={30}
+                    width={80}
+                  />
+                </Space>
+              </Center>
+
               <Divider plain>Anda masyarakat umum?</Divider>
               <GoogleButton
                 label="Masuk dengan Google"

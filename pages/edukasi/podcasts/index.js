@@ -7,6 +7,7 @@ import { IconPlayerPlay } from "@tabler/icons";
 import { useQuery } from "@tanstack/react-query";
 import { Breadcrumb, Card, Col, List, Row } from "antd";
 import Head from "next/head";
+import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/router";
 
@@ -18,7 +19,13 @@ const MyPodcast = ({ item }) => {
   return (
     <div>
       <Group>
-        <Avatar radius="sm" size={80} src={item?.image_url} />
+        {/* <Avatar radius="sm" size={80} src={item?.image_url} /> */}
+        <Image
+          width={80}
+          height={80}
+          src={item?.image_url}
+          alt="podcast_cover"
+        />
         <div
           style={{
             width: "60%",

@@ -6,15 +6,8 @@ import { Breadcrumb, Skeleton, Tag } from "antd";
 import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { AndroidOutlined } from "@ant-design/icons";
 
-function AdminLayoutDetailWebinar({
-  children,
-  active = "detail",
-  loading,
-  title,
-  content,
-}) {
+function AdminLayoutDetailWebinar({ children, active = "detail", loading }) {
   const router = useRouter();
   const { id } = router.query;
 
