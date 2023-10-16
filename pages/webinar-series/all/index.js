@@ -148,12 +148,16 @@ function WebinarAll() {
                   hoverable
                   onClick={() => handleClick(item?.id)}
                   cover={
-                    <Image
-                      width={500}
-                      height={300}
-                      src={item?.image_url}
-                      alt="images"
-                    />
+                    <>
+                      {item?.image_url && (
+                        <Image
+                          width={500}
+                          height={300}
+                          src={item?.image_url}
+                          alt="images"
+                        />
+                      )}
+                    </>
                   }
                   actions={[
                     <Button

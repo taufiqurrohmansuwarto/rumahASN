@@ -137,12 +137,16 @@ function MyWebinar() {
                   hoverable
                   onClick={() => gotoDetail(item?.id)}
                   cover={
-                    <Image
-                      width={500}
-                      height={300}
-                      src={item?.webinar_series?.image_url}
-                      alt="images"
-                    />
+                    <>
+                      {item?.webinar_series?.image_url && (
+                        <Image
+                          width={500}
+                          height={300}
+                          src={item?.webinar_series?.image_url}
+                          alt="images"
+                        />
+                      )}
+                    </>
                   }
                   actions={[
                     <Button

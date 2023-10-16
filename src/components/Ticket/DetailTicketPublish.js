@@ -537,6 +537,7 @@ const DetailTicketPublish = ({ id }) => {
                     <Divider />
                     <NewTicket
                       submitMessage={handleSubmit}
+                      currentStatus={data?.status_code}
                       value={value}
                       setValue={setValue}
                       loadingSubmit={isLoadingCreate}

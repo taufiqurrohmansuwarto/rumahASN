@@ -7,10 +7,14 @@ const baseURL = process.env.ESIGN_URL;
 const username = process.env.ESIGN_USERNAME;
 const password = process.env.ESIGN_PASSWORD;
 
+const isProduction = process.env.NODE_ENV === "production";
+
 const nik = process.env.ESIGN_NIK;
 const passphrase = process.env.ESIGN_PASSPHRASE;
 
-const webinar_certificate_url = process.env.WEBINAR_CERTIFICATE_URL;
+const webinar_certificate_url = isProduction
+  ? "siasn.bkd.jatimprov.go.id/helpdesk/certificate/webinar"
+  : "http://localhost:3000/helpdesk/certificate/webinar";
 
 const api = axios.create({
   baseURL: baseURL,
@@ -28,7 +32,16 @@ export const createSignature = async ({ id, file, userId }) => {
     // generate qr code to buffer
     const qr = `${webinar_certificate_url}/${id}}`;
 
-    const currentQrCode = await qrCode.toBuffer(qr);
+    const currentQrCode = await qrCode.toBuffer(qr, {
+      errorCorrectionLevel: "H",
+      type: "image/png",
+      quality: 1,
+      margin: 1,
+      color: {
+        dark: "#000000",
+        light: "#ffffff",
+      },
+    });
 
     formData.append("nik", nik);
     formData.append("passphrase", passphrase);
@@ -48,6 +61,13 @@ export const createSignature = async ({ id, file, userId }) => {
       },
     });
 
+    await createLogBsre({
+      userId,
+      webinarParticipantId: id,
+      log: JSON.stringify(response?.data),
+      status: "success",
+    });
+
     return {
       success: true,
       data: response?.data,
@@ -58,6 +78,7 @@ export const createSignature = async ({ id, file, userId }) => {
       userId,
       webinarParticipantId: id,
       log: JSON.stringify(error?.response?.data),
+      status: "error",
     });
     return {
       success: false,
