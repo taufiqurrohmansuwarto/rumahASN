@@ -1,9 +1,7 @@
 import DaftarLayanan from "@/components/LayananKepegawaian/DaftarLayanan";
 import Layout from "@/components/Layout";
 import PageContainer from "@/components/PageContainer";
-import PodcastAnnouncement from "@/components/PodcatsAnnouncement";
 import UserPolls from "@/components/Polls/UserPolls";
-import SelamatDatang from "@/components/SelamatDatang";
 import ShowRatings from "@/components/ShowRatings";
 import TicketsPublish from "@/components/Ticket/TicketsPublish";
 import CarouselBanner from "@/components/Utils/CarouselBanner";
@@ -53,15 +51,6 @@ function Feeds() {
             }}
           >
             <Stack>
-              {/* <AlertPemutakhiranData /> */}
-              {/* <TutorialPeremajaanDataSIASN /> */}
-              {/* <SelamatDatang /> */}
-              {/* <PodcastAnnouncement
-                image="https://siasn.bkd.jatimprov.go.id:9000/public/hijau-podcast.jpg"
-                title={`"Podcast Kepegawaian dari kami untuk kalian"`}
-                category="Podcast Rumah ASN"
-              /> */}
-              {/* <PinnedTickets /> */}
               <TicketsPublish />
             </Stack>
           </Card>

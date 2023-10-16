@@ -3,6 +3,7 @@ import { MarkdownEditor } from "@primer/react/drafts";
 import { useQuery } from "@tanstack/react-query";
 import { Avatar, Col, Row } from "antd";
 import { useSession } from "next-auth/react";
+import ButtonStatus from "../TicketProps/ButtonStatus";
 
 const NewTicket = ({
   value,
@@ -11,6 +12,7 @@ const NewTicket = ({
   loadingSubmit,
   withCancel = false,
   handleCancel,
+  currentStatus,
 }) => {
   const { data, status } = useSession();
 
@@ -79,6 +81,7 @@ const NewTicket = ({
                   Cancel
                 </MarkdownEditor.ActionButton>
               )}
+              <ButtonStatus currentStatus={currentStatus} />
               <MarkdownEditor.ActionButton
                 disabled={!value || loadingSubmit}
                 variant="primary"
