@@ -65,7 +65,7 @@ function UserPolls() {
     <>
       {data?.length > 0 ? (
         <Badge.Ribbon text="Kami Butuh Suaramu!" color="green">
-          <Card>
+          <Card title="Yuk Ikutan Voting!">
             <List
               dataSource={data}
               loading={isLoading}

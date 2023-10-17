@@ -3,11 +3,9 @@ import UnAnswerFilter from "@/components/Filter/UnAnswerFilter";
 import Layout from "@/components/Layout";
 import PageContainer from "@/components/PageContainer";
 import QueryFilter from "@/components/QueryFilter";
-import UserQuiz from "@/components/Quiz/UserQuiz";
 import { downloadTicketBKD, pegawaiBkdTickets } from "@/services/bkd.services";
 import { refCategories } from "@/services/index";
 import {
-  formatDateFromNow,
   formatDateFull,
   setColorStatus,
   setStatusIcon,
@@ -486,7 +484,6 @@ const BerandaBKD = () => {
             </Card>
           </Col>
           <Col md={6} xs={24}>
-            <UserQuiz />
             {/* <UserPerformance /> */}
           </Col>
         </Row>

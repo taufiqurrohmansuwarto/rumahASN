@@ -28,6 +28,25 @@ function CarouselBanner() {
         style={{
           cursor: "pointer",
         }}
+        onClick={() => router.push("/quiz")}
+      >
+        <div
+          style={{
+            height: "100%",
+          }}
+        >
+          <Image
+            src={
+              "https://siasn.bkd.jatimprov.go.id:9000/public/banner-quiz.png"
+            }
+            alt="banner-sample.webp"
+          />
+        </div>
+      </Carousel.Slide>
+      <Carousel.Slide
+        style={{
+          cursor: "pointer",
+        }}
       >
         <div
           style={{
