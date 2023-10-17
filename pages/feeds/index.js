@@ -2,6 +2,7 @@ import DaftarLayanan from "@/components/LayananKepegawaian/DaftarLayanan";
 import Layout from "@/components/Layout";
 import PageContainer from "@/components/PageContainer";
 import UserPolls from "@/components/Polls/UserPolls";
+import UserQuiz from "@/components/Quiz/UserQuiz";
 import ShowRatings from "@/components/ShowRatings";
 import TicketsPublish from "@/components/Ticket/TicketsPublish";
 import CarouselBanner from "@/components/Utils/CarouselBanner";
@@ -59,6 +60,7 @@ function Feeds() {
           <Grid>
             <Grid.Col md={12} xs={12}>
               <Stack>
+                <UserQuiz />
                 <UserPolls />
               </Stack>
             </Grid.Col>

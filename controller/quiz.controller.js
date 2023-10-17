@@ -1,5 +1,6 @@
 // user
 const QuestionAnswer = require("@/models/questions_answers.model");
+const LeaderboardQuiz = require("@/models/leaderboard_quiz.model");
 
 const shuffleOptions = (options) => {
   for (let i = options.length - 1; i > 0; i--) {
@@ -31,6 +32,11 @@ const randomizeQuestionOptions = (question) => {
       // is_correct: question.option_d.is_correct,
       option: "option_d",
     },
+    {
+      text: question.option_e.text,
+      // is_correct: question.option_e.is_correct,
+      option: "option_e",
+    },
   ];
 
   return {
@@ -56,7 +62,7 @@ const userGetQuiz = async (req, res) => {
 const userAnswerQuiz = async (req, res) => {
   try {
     const { id } = req?.query;
-    const user = req?.user;
+    const { customId } = req?.user;
     const result = await QuestionAnswer.query().findById(id);
     const answer = req?.body?.answer;
 
@@ -82,11 +88,33 @@ const userAnswerQuiz = async (req, res) => {
         is_correct: result.option_d.is_correct,
         option: "option_d",
       },
+      {
+        text: result.option_e.text,
+        is_correct: result.option_e.is_correct,
+        option: "option_e",
+      },
     ];
 
     const correct_option = options.find((item) => !!item?.is_correct);
 
     if (is_correct) {
+      // check if user already answer
+      const check = await LeaderboardQuiz.query().findById(customId);
+
+      if (!check) {
+        await LeaderboardQuiz.query().insert({
+          user_id: customId,
+          score: 1,
+          date: new Date(),
+        });
+      } else {
+        await LeaderboardQuiz.query()
+          .findById(customId)
+          .patch({
+            score: check.score + 1,
+            date: new Date(),
+          });
+      }
     }
 
     res.json({
@@ -101,7 +129,30 @@ const userAnswerQuiz = async (req, res) => {
 };
 
 // leaderboard
-const leaderBoardQuiz = async (req, res) => {};
+const leaderBoardQuiz = async (req, res) => {
+  try {
+    const result = await LeaderboardQuiz.query()
+      .orderBy("score", "desc")
+      .limit(25)
+      .withGraphFetched("user(simpleSelect)");
+    res.json(result);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+const userScore = async (req, res) => {
+  try {
+    const { customId } = req?.user;
+    const result = await LeaderboardQuiz.query().findById(customId);
+
+    res.json(result);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+};
 
 // admin imports quiz from file
 const importQuiz = async (req, res) => {};
@@ -122,4 +173,5 @@ module.exports = {
   userGetQuiz,
   userAnswerQuiz,
   leaderBoardQuiz,
+  userScore,
 };
