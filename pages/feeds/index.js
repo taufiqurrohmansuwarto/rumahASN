@@ -64,12 +64,7 @@ function Feeds() {
                 <UserPolls />
               </Stack>
             </Grid.Col>
-            <Grid.Col md={12} xs={12}>
-              <DaftarLayanan />
-            </Grid.Col>
-            {/* <Grid.Col md={12} xs={12}>
-              <VideoYoutube />
-            </Grid.Col> */}
+            <Grid.Col md={12} xs={12}></Grid.Col>
           </Grid>
         </Grid.Col>
       </Grid>
