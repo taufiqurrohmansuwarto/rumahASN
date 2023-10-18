@@ -13,7 +13,7 @@ const nik = process.env.ESIGN_NIK;
 const passphrase = process.env.ESIGN_PASSPHRASE;
 
 const webinar_certificate_url = isProduction
-  ? "siasn.bkd.jatimprov.go.id/helpdesk/certificates/webinar"
+  ? "https://siasn.bkd.jatimprov.go.id/helpdesk/certificates/webinar"
   : "http://localhost:3088/helpdesk/certificates/webinar";
 
 const api = axios.create({
