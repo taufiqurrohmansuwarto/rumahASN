@@ -13,8 +13,8 @@ const nik = process.env.ESIGN_NIK;
 const passphrase = process.env.ESIGN_PASSPHRASE;
 
 const webinar_certificate_url = isProduction
-  ? "siasn.bkd.jatimprov.go.id/helpdesk/certificate/webinar"
-  : "http://localhost:3000/helpdesk/certificate/webinar";
+  ? "siasn.bkd.jatimprov.go.id/helpdesk/certificates/webinar"
+  : "http://localhost:3088/helpdesk/certificates/webinar";
 
 const api = axios.create({
   baseURL: baseURL,
@@ -30,7 +30,7 @@ export const createSignature = async ({ id, file, userId }) => {
     const formData = new FormData();
 
     // generate qr code to buffer
-    const qr = `${webinar_certificate_url}/${id}}`;
+    const qr = `${webinar_certificate_url}/${id}`;
 
     const currentQrCode = await qrCode.toBuffer(qr, {
       errorCorrectionLevel: "H",
