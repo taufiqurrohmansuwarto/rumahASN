@@ -11,7 +11,9 @@ const checkWebinarCertificates = async (req, res) => {
     } else {
       const data = await WebinarSeriesParticipates.query()
         .findById(id)
-        .withGraphFetched("[webinar_series, participant]");
+        .withGraphFetched(
+          "[webinar_series(selectName), participant(simpleSelect)]"
+        );
 
       res.json(data);
     }

@@ -3,19 +3,20 @@ import PageContainer from "@/components/PageContainer";
 import { logBsre } from "@/services/log.services";
 import { formatDateFull } from "@/utils/client-utils";
 import { useQuery } from "@tanstack/react-query";
-import { Breadcrumb, Card, Space, Table, Tag } from "antd";
+import { Breadcrumb, Card, Modal, Space, Table, Tag } from "antd";
 import Head from "next/head";
 import Link from "next/link";
 import { useState } from "react";
+import { Code } from "@mantine/core";
 
 function LogBSRE() {
   const [query, setQuery] = useState({
     page: 1,
-    limit: 25,
+    limit: 10,
   });
 
   const { data, isLoading, isFetching } = useQuery(
-    ["log-bsre"],
+    ["log-bsre", query],
     () => logBsre(query),
     {
       keepPreviousData: true,
@@ -23,14 +24,33 @@ function LogBSRE() {
     }
   );
 
+  const showModal = (item) => {
+    Modal.info({
+      title: "Detail Log Unduh Sertifikat",
+      centered: true,
+      width: 800,
+      content: (
+        <div
+          style={{
+            maxHeight: 400,
+            minWidth: 600,
+            overflow: "auto",
+          }}
+        >
+          <Code>{JSON.stringify(item?.log, null, 2)}</Code>,
+        </div>
+      ),
+    });
+  };
+
   const columns = [
     {
-      title: "Nama",
+      title: "Nama / Cara Masuk",
       key: "nama",
       render: (text) => (
-        <Space direction="vertical">
+        <Space>
           <span>{text?.user?.username}</span>
-          <Tag>{text?.user?.group}</Tag>
+          <Tag color="yellow">{text?.user?.group}</Tag>
         </Space>
       ),
     },
@@ -42,10 +62,31 @@ function LogBSRE() {
       ),
     },
     {
-      title: "Log",
-      key: "log",
-      render: (item) => <pre>{JSON.stringify(item?.log, null, 2)}</pre>,
+      title: "Status",
+      key: "status",
+      render: (item) => {
+        return (
+          <>
+            {item?.status && (
+              <Tag
+                style={{
+                  cursor: "pointer",
+                }}
+                onClick={() => showModal(item)}
+                color={item?.status === "success" ? "green" : "red"}
+              >
+                {item?.status}
+              </Tag>
+            )}
+          </>
+        );
+      },
     },
+    // {
+    //   title: "Log",
+    //   key: "log",
+    //   render: (item) => <pre>{JSON.stringify(item?.log, null, 2)}</pre>,
+    // },
     {
       title: "Waktu",
       key: "waktu",
@@ -56,11 +97,10 @@ function LogBSRE() {
   return (
     <>
       <Head>
-        <title>Log BSRE</title>
+        <title>Log Unduh Sertifikat TTE</title>
       </Head>
       <PageContainer
-        title="Log"
-        subTitle="Layanan BsRE"
+        title="Log BSrE"
         header={{
           breadcrumbRender: () => (
             <Breadcrumb>
@@ -79,16 +119,20 @@ function LogBSRE() {
           ),
         }}
       >
-        <Card title="Daftar Log BSRE">
+        <Card title="Daftar Log Unduh">
           <Table
-            size="small"
             loading={isLoading || isFetching}
             pagination={{
+              position: ["bottomRight", "topRight"],
+              showTotal: (total) => `Total ${total} data`,
               current: query?.page,
               pageSize: query?.limit,
               total: data?.total,
               onChange: (page) => {
-                setQuery((old) => ({ ...old, page }));
+                setQuery({
+                  ...query,
+                  page,
+                });
               },
             }}
             columns={columns}

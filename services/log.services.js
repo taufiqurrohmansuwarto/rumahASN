@@ -18,5 +18,7 @@ export const logBsre = (query) => {
     skipEmptyString: true,
   });
 
+  console.log(query);
+
   return api.get(`/bsre?${queryStr}`).then((res) => res?.data);
 };
