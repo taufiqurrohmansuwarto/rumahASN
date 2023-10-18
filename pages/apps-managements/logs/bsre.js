@@ -67,26 +67,19 @@ function LogBSRE() {
       render: (item) => {
         return (
           <>
-            {item?.status && (
-              <Tag
-                style={{
-                  cursor: "pointer",
-                }}
-                onClick={() => showModal(item)}
-                color={item?.status === "success" ? "green" : "red"}
-              >
-                {item?.status}
-              </Tag>
-            )}
+            <Tag
+              style={{
+                cursor: "pointer",
+              }}
+              onClick={() => showModal(item)}
+              color={item?.status === "success" ? "green" : "red"}
+            >
+              {item?.status}
+            </Tag>
           </>
         );
       },
     },
-    // {
-    //   title: "Log",
-    //   key: "log",
-    //   render: (item) => <pre>{JSON.stringify(item?.log, null, 2)}</pre>,
-    // },
     {
       title: "Waktu",
       key: "waktu",
