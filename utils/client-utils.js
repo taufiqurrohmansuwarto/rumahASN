@@ -18,6 +18,7 @@ import {
   IconFileCertificate,
   IconReport,
   IconSchool,
+  IconUserExclamation,
   IconUserSearch,
   IconUserX,
   IconUsers,
@@ -35,6 +36,12 @@ export const mysapkMenu = [
     icon: IconUserSearch,
     color: "violet",
     path: "/data-utama",
+  },
+  {
+    title: "Riwayat Ubah Data",
+    icon: IconUserExclamation,
+    color: "orange",
+    path: "/ubah-data",
   },
   {
     title: "Riwayat Jabatan",

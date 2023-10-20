@@ -2,6 +2,7 @@ import Layout from "@/components/Layout";
 import PageContainer from "@/components/PageContainer";
 import CompareDataUtama from "@/components/PemutakhiranData/CompareDataUtama";
 import CustomSelectMenu from "@/components/PemutakhiranData/CustomSelectMenu";
+import RiwayatUbahData from "@/components/PemutakhiranData/RiwayatUbahData";
 import { Breadcrumb, Button, Card } from "antd";
 import Head from "next/head";
 import Link from "next/link";
@@ -15,7 +16,7 @@ const DataUtama = () => {
   return (
     <>
       <Head>
-        <title>Rumah ASN - Peremajaan SIASN - Data Utama</title>
+        <title>Rumah ASN - Peremajaan SIASN - Riwayat Ubah Data</title>
       </Head>
       <PageContainer
         extra={[<CustomSelectMenu key="menu" />]}
@@ -32,15 +33,15 @@ const DataUtama = () => {
                   <a>Peremajaan Data</a>
                 </Link>
               </Breadcrumb.Item>
-              <Breadcrumb.Item>Data Utama</Breadcrumb.Item>
+              <Breadcrumb.Item>Riwayat Ubah Data</Breadcrumb.Item>
             </Breadcrumb>
           ),
         }}
         onBack={handleBack}
-        title="Data Utama"
-        content="Komparasi Data Utama SIASN dan SIMASTER"
+        title="Riwayat Ubah Data"
+        content="Riwayat Budah Data Utama"
       >
-        <CompareDataUtama />
+        <RiwayatUbahData />
       </PageContainer>
     </>
   );
