@@ -48,8 +48,16 @@ const randomizeQuestionOptions = (question) => {
 // get random  quiz
 const userGetQuiz = async (req, res) => {
   try {
-    const result = await QuestionAnswer.query().orderByRaw("RANDOM()").first();
+    const { customId } = req?.user;
+    const dataKuis = await LeaderboardQuiz.query().findById(customId);
+    const correct_question = dataKuis?.correct_question;
+
+    const result = await QuestionAnswer.query()
+      .orderByRaw("RANDOM()")
+      .first()
+      .whereNotIn("id", correct_question);
     const hasil = randomizeQuestionOptions(result);
+
     res.json({
       id: result.id,
       ...hasil,
@@ -100,12 +108,25 @@ const userAnswerQuiz = async (req, res) => {
     if (is_correct) {
       // check if user already answer
       const check = await LeaderboardQuiz.query().findById(customId);
+      const correct_question = check?.correct_question?.push(id);
+
+      // if total correct_question is 70% of total question then reset
+      const totalData = await QuestionAnswer.query().count();
+      const totalQuestion = totalData[0].count;
+      const totalCorrectQuestion = check?.correct_question?.length;
+
+      if (totalCorrectQuestion >= totalQuestion * 0.7) {
+        await LeaderboardQuiz.query().findById(customId).patch({
+          correct_question: [],
+        });
+      }
 
       if (!check) {
         await LeaderboardQuiz.query().insert({
           user_id: customId,
           score: 1,
           date: new Date(),
+          correct_question,
         });
       } else {
         await LeaderboardQuiz.query()
@@ -113,6 +134,7 @@ const userAnswerQuiz = async (req, res) => {
           .patch({
             score: check.score + 1,
             date: new Date(),
+            correct_question,
           });
       }
     }
