@@ -53,9 +53,14 @@ const userGetQuiz = async (req, res) => {
     const correct_question = dataKuis?.correct_question;
 
     const result = await QuestionAnswer.query()
+      .where((builder) => {
+        if (correct_question?.length > 0 && dataKuis) {
+          builder.whereNotIn("id", correct_question);
+        }
+      })
       .orderByRaw("RANDOM()")
-      .first()
-      .whereNotIn("id", correct_question);
+      .first();
+
     const hasil = randomizeQuestionOptions(result);
 
     res.json({
@@ -108,14 +113,14 @@ const userAnswerQuiz = async (req, res) => {
     if (is_correct) {
       // check if user already answer
       const check = await LeaderboardQuiz.query().findById(customId);
-      const correct_question = check?.correct_question?.push(id);
+      const correct_question = [...check?.correct_question, id];
 
       // if total correct_question is 70% of total question then reset
       const totalData = await QuestionAnswer.query().count();
       const totalQuestion = totalData[0].count;
       const totalCorrectQuestion = check?.correct_question?.length;
 
-      if (totalCorrectQuestion >= totalQuestion * 0.7) {
+      if (parseInt(totalCorrectQuestion) >= parseInt(totalQuestion) * 0.7) {
         await LeaderboardQuiz.query().findById(customId).patch({
           correct_question: [],
         });
@@ -126,8 +131,9 @@ const userAnswerQuiz = async (req, res) => {
           user_id: customId,
           score: 1,
           date: new Date(),
-          correct_question,
+          correct_question: [id],
         });
+        console.log("insert baru");
       } else {
         await LeaderboardQuiz.query()
           .findById(customId)
@@ -136,6 +142,7 @@ const userAnswerQuiz = async (req, res) => {
             date: new Date(),
             correct_question,
           });
+        console.log("insert lama");
       }
     }
 
