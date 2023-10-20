@@ -88,31 +88,32 @@ const RiwayatUbahData = () => {
 
   return (
     <Skeleton loading={isLoading}>
-      <Card>
-        <Form form={form} layout="vertical">
-          <Form.Item
-            rules={[
-              {
-                type: "email",
-              },
-            ]}
-            label="Email SIASN"
-            name="email"
-          >
-            <Input />
-          </Form.Item>
-          <Form.Item
-            rules={[
-              {
-                type: "email",
-              },
-            ]}
-            label="Email Instansi"
-            name="email_gov"
-          >
-            <Input />
-          </Form.Item>
-          {/* <Form.Item
+      {data && (
+        <Card>
+          <Form form={form} layout="vertical">
+            <Form.Item
+              rules={[
+                {
+                  type: "email",
+                },
+              ]}
+              label="Email SIASN"
+              name="email"
+            >
+              <Input />
+            </Form.Item>
+            <Form.Item
+              rules={[
+                {
+                  type: "email",
+                },
+              ]}
+              label="Email Instansi"
+              name="email_gov"
+            >
+              <Input />
+            </Form.Item>
+            {/* <Form.Item
             rules={[
               {
                 pattern: new RegExp(/^((\+62)|0)[8-9][0-9]{7,11}$/),
@@ -137,23 +138,24 @@ const RiwayatUbahData = () => {
           >
             <Input />
           </Form.Item> */}
-          <Form.Item label="Alamat" name="alamat">
-            <Input.TextArea />
-          </Form.Item>
-          <Form.Item label="Nomor BPJS" name="nomor_bpjs">
-            <Input />
-          </Form.Item>
-          <Form.Item label="Nomor NPWP" name="nomor_npwp">
-            <Input />
-          </Form.Item>
-          <Space>
-            <Button onClick={handleSubmit} type="primary">
-              Submit
-            </Button>
-            <Button onClick={handleReset}>Reset</Button>
-          </Space>
-        </Form>
-      </Card>
+            <Form.Item label="Alamat" name="alamat">
+              <Input.TextArea />
+            </Form.Item>
+            <Form.Item label="Nomor BPJS" name="nomor_bpjs">
+              <Input />
+            </Form.Item>
+            <Form.Item label="Nomor NPWP" name="nomor_npwp">
+              <Input />
+            </Form.Item>
+            <Space>
+              <Button onClick={handleSubmit} type="primary">
+                Submit
+              </Button>
+              <Button onClick={handleReset}>Reset</Button>
+            </Space>
+          </Form>
+        </Card>
+      )}
     </Skeleton>
   );
 };
