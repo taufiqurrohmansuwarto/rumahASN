@@ -8,6 +8,7 @@ import { Image, Stack, Text } from "@mantine/core";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Button,
+  Card,
   Col,
   Divider,
   Form,
@@ -17,6 +18,7 @@ import {
   Skeleton,
   Space,
   Table as TableAntd,
+  Tabs,
   Tag,
   message,
 } from "antd";
@@ -173,6 +175,12 @@ const FormEditBiodata = ({ data }) => {
     if (data) {
       form.setFieldsValue({
         email: data?.email,
+        email_gov: data?.emailGov,
+        alamat: data?.alamat,
+        nomor_hp: data?.noHp,
+        nomor_telepon: data?.noTelp,
+        nomor_bpjs: data?.bpjs,
+        nomor_npwp: data?.noNpwp,
       });
     }
   }, [data, form]);
@@ -185,6 +193,7 @@ const FormEditBiodata = ({ data }) => {
 
   return (
     <Form form={form} layout="vertical">
+      {JSON.stringify(data)}{" "}
       <Form.Item
         rules={[
           {
@@ -194,6 +203,32 @@ const FormEditBiodata = ({ data }) => {
         label="Email SIASN"
         name="email"
       >
+        <Input />
+      </Form.Item>
+      <Form.Item
+        rules={[
+          {
+            type: "email",
+          },
+        ]}
+        label="Email Instansi"
+        name="email_gov"
+      >
+        <Input />
+      </Form.Item>
+      <Form.Item label="No. HP" name="nomor_hp">
+        <Input.TextArea />
+      </Form.Item>
+      <Form.Item label="No. Telephone" name="nomor_telepon">
+        <Input.TextArea />
+      </Form.Item>
+      <Form.Item label="Alamat" name="alamat">
+        <Input.TextArea />
+      </Form.Item>
+      <Form.Item label="Nomor BPJS" name="nomor_bpjs">
+        <Input />
+      </Form.Item>
+      <Form.Item label="Nomor NPWP" name="nomor_npwp">
         <Input />
       </Form.Item>
       <Space>
@@ -272,7 +307,7 @@ function CompareDataUtama() {
   ];
 
   return (
-    <div>
+    <Card>
       <Stack>
         <Skeleton loading={isLoading || isLoadingDataSimaster}>
           <Row
@@ -282,9 +317,6 @@ function CompareDataUtama() {
             ]}
           >
             <Col md={24}>
-              <Divider orientation="left">Edit Informasi SIASN</Divider>
-              <FormEditBiodata data={data} />
-              <Divider orientation="left">Komparasi Data Utama</Divider>
               <TableAntd
                 rowKey={(row) => row?.id}
                 columns={columns}
@@ -295,7 +327,7 @@ function CompareDataUtama() {
           </Row>
         </Skeleton>
       </Stack>
-    </div>
+    </Card>
   );
 }
 

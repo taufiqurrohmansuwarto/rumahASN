@@ -9,7 +9,7 @@ import {
   createStyles,
   rem,
 } from "@mantine/core";
-import { Avatar, Grid, Space, Typography } from "antd";
+import { Grid, Space, Typography } from "antd";
 import { useRouter } from "next/router";
 import AnomaliUser from "./AnomaliUser";
 
