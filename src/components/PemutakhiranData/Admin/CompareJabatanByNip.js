@@ -1,5 +1,6 @@
 import { rwJabatanMasterByNip } from "@/services/master.services";
 import {
+  dataUtamSIASNByNip,
   getRwJabatanByNip,
   getTokenSIASNService,
   postRwJabatanByNip,
@@ -522,6 +523,11 @@ const jenisJabatanSiasn = (data) => {
 };
 
 function CompareJabatanByNip({ nip }) {
+  const { data: dataSiasn, isLoading: loadingDataSiasn } = useQuery(
+    ["data-utama-siasn", nip],
+    () => dataUtamSIASNByNip(nip)
+  );
+
   const [visible, setVisible] = useState(false);
   const [currentData, setCurrentData] = useState(null);
 
@@ -643,7 +649,7 @@ function CompareJabatanByNip({ nip }) {
   ];
 
   return (
-    <Card loading={isLoading} title="Komparasi Jabatan">
+    <Card loading={isLoading || loadingDataSiasn} title="Komparasi Jabatan">
       <Stack>
         <FormEntriKosong
           nip={nip}
@@ -658,13 +664,17 @@ function CompareJabatanByNip({ nip }) {
         />
         <Table
           title={() => (
-            <Button
-              type="primary"
-              onClick={handleOpenKosong}
-              icon={<PlusOutlined />}
-            >
-              Jabatan SIASN
-            </Button>
+            <>
+              {dataSiasn?.kedudukanPnsNama !== "PPPK Aktif" && (
+                <Button
+                  type="primary"
+                  onClick={handleOpenKosong}
+                  icon={<PlusOutlined />}
+                >
+                  Jabatan SIASN
+                </Button>
+              )}
+            </>
           )}
           columns={columns}
           dataSource={data}
