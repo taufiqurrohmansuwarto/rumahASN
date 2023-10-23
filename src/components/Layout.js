@@ -9,7 +9,8 @@ import {
   UserOutlined,
   UsergroupAddOutlined,
 } from "@ant-design/icons";
-import { Button, Dropdown, Grid, Tooltip, Typography } from "antd";
+import { Center } from "@mantine/core";
+import { Button, Dropdown, Grid, Typography } from "antd";
 import { uniqBy } from "lodash";
 import { signOut, useSession } from "next-auth/react";
 import dynamic from "next/dynamic";
@@ -20,7 +21,6 @@ import { userRoutes } from "../routes";
 import Messages from "./Messages";
 import Notifications from "./Notifications";
 import SearchUserLayout from "./SearchUserLayout";
-import { Center } from "@mantine/core";
 
 const ProLayout = dynamic(
   () => import("@ant-design/pro-components").then((mod) => mod?.ProLayout),
@@ -38,11 +38,12 @@ const changeRoutes = (user) => {
     const admin = (role === "admin" && bkd) || (role === "admin" && pttBkd);
     const agent = (role === "agent" && bkd) || (role === "agent" && pttBkd);
     const userPns = user?.group === "MASTER" && user?.role === "USER";
+    const userPttpk = user?.group === "PTTPK" && user?.role === "USER";
 
     const fasilitatorMaster =
       user?.group === "MASTER" && user?.role === "FASILITATOR";
 
-    const pegawaiPemda = user?.group === "MASTER" || user?.group === "PTTPK";
+    const pegawaiPemda = userPns || userPttpk;
     const pegawaiBKD = bkd || pttBkd;
 
     // persiapan ini seharusnya ditambahkan halaman dashboard seperti analisis dsb tapi jangan data
