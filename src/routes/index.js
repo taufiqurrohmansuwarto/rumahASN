@@ -7,6 +7,7 @@ import {
   DashboardFilled,
   HomeOutlined,
   QuestionCircleOutlined,
+  ReconciliationOutlined,
   SettingOutlined,
   SmileOutlined,
   SnippetsOutlined,
@@ -71,6 +72,11 @@ export const userRoutes = {
       icon: <VideoCameraAddOutlined />,
     },
     {
+      path: "/coaching-clinic",
+      name: "Coaching Clinic",
+      icon: <ReconciliationOutlined />,
+    },
+    {
       path: "/edukasi/podcasts",
       name: "Podcast",
       icon: <AudioOutlined />,
@@ -80,6 +86,7 @@ export const userRoutes = {
       name: "Layanan Kepegawaian",
       icon: <AppstoreOutlined />,
     },
+
     {
       path: "/faq",
       name: " Pertanyaan Umum",
