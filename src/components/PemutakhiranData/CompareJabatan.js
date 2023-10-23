@@ -1,5 +1,6 @@
 import { rwJabatanMaster } from "@/services/master.services";
 import {
+  dataUtamaSIASN,
   getRwJabatan,
   getTokenSIASNService,
   postRwJabatan,
@@ -303,6 +304,11 @@ function CompareJabatan() {
 
   const { data, isLoading } = useQuery(["data-jabatan"], () => getRwJabatan());
 
+  const { data: dataSIASN, isLoading: isLoadingSiasn } = useQuery(
+    ["data-utama-siasn"],
+    () => dataUtamaSIASN()
+  );
+
   const { data: dataMaster, isLoading: loadingMasterJabatan } = useQuery(
     ["data-rw-jabatan-master"],
     () => rwJabatanMaster()
@@ -477,13 +483,21 @@ function CompareJabatan() {
         <Table
           bordered
           title={() => (
-            <Button type="primary" onClick={handleOpen} icon={<PlusOutlined />}>
-              Jabatan SIASN
-            </Button>
+            <>
+              {dataSIASN?.kedudukanPnsNama !== "PPPK Aktif" && (
+                <Button
+                  type="primary"
+                  onClick={handleOpen}
+                  icon={<PlusOutlined />}
+                >
+                  Jabatan SIASN
+                </Button>
+              )}
+            </>
           )}
           columns={columns}
           dataSource={data}
-          loading={isLoading}
+          loading={isLoading || isLoadingSiasn}
           rowKey={(row) => row?.id}
           pagination={false}
         />
