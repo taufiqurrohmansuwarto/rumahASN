@@ -1,7 +1,9 @@
 import { dataPangkatByNip } from "@/services/siasn-services";
+import { findPangkat } from "@/utils/client-utils";
 import { Stack } from "@mantine/core";
 import { useQuery } from "@tanstack/react-query";
 import { Card, Table } from "antd";
+import { orderBy } from "lodash";
 import moment from "moment";
 
 const PangkatSiasn = ({ data }) => {
@@ -26,8 +28,9 @@ const PangkatSiasn = ({ data }) => {
       },
     },
     {
-      title: "Golongan",
-      dataIndex: "golongan",
+      title: "Pangkat",
+      key: "Pangkat",
+      render: (_, record) => <>{findPangkat(record?.golonganId)}</>,
     },
     {
       title: "No. SK",
@@ -36,8 +39,9 @@ const PangkatSiasn = ({ data }) => {
     {
       title: "TMT Golongan",
       key: "tmt_golongan",
-      render: (text) => <>{moment(text?.tmt_golongan).format("DD-MM-YYYY")}</>,
+      render: (text) => <>{moment(text?.tmtGolongan).format("DD-MM-YYYY")}</>,
     },
+
     {
       title: "Tgl. SK",
       dataIndex: "skTanggal",
@@ -49,7 +53,15 @@ const PangkatSiasn = ({ data }) => {
         columns={columns}
         title={() => <div>RIWAYAT PANGKAT SIASN</div>}
         pagination={false}
-        dataSource={data}
+        dataSource={orderBy(
+          data,
+          [
+            (o) => {
+              return moment(o.tmtGolongan).valueOf();
+            },
+          ],
+          ["desc"]
+        )}
         rowKey={(row) => row?.id}
       />
     </>

@@ -4,6 +4,7 @@ import { formatDateLL } from "@/utils/client-utils";
 import { Stack } from "@mantine/core";
 import { useQuery } from "@tanstack/react-query";
 import { Table } from "antd";
+import { orderBy } from "lodash";
 
 const DataGolonganSIMASTER = () => {
   const { data, isLoading } = useQuery(
@@ -35,7 +36,8 @@ const DataGolonganSIMASTER = () => {
     },
     {
       title: "TMT Golongan",
-      dataIndex: "tmt_pangkat",
+      key: "tmt_golongan",
+      render: (text) => <>{moment(text?.tmtGolongan).format("DD-MM-YYYY")}</>,
     },
     {
       title: "Tanggal SK",
@@ -50,7 +52,15 @@ const DataGolonganSIMASTER = () => {
         title={() => <b>RIWAYAT GOLONGAN SIMASTER</b>}
         columns={columns}
         loading={isLoading}
-        dataSource={data}
+        dataSource={orderBy(
+          data,
+          [
+            (o) => {
+              return moment(o.tmtGolongan).valueOf();
+            },
+          ],
+          ["desc"]
+        )}
         rowKey={(row) => row?.kp_id}
       />
     </>

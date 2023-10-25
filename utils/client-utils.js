@@ -30,6 +30,26 @@ import "moment/locale/id";
 // language is set to Indonesia
 moment.locale("id");
 
+const REF_PANGKAT = [
+  { id: "11", nama: "I/a", nama_pangkat: "Juru Muda" },
+  { id: "12", nama: "I/b", nama_pangkat: "Juru Muda Tingkat I" },
+  { id: "13", nama: "I/c", nama_pangkat: "Juru" },
+  { id: "14", nama: "I/d", nama_pangkat: "Juru Tingkat I" },
+  { id: "21", nama: "II/a", nama_pangkat: "Pengatur Muda" },
+  { id: "22", nama: "II/b", nama_pangkat: "Pengatur Muda Tingkat I" },
+  { id: "23", nama: "II/c", nama_pangkat: "Pengatur" },
+  { id: "24", nama: "II/d", nama_pangkat: "Pengatur Tingkat I" },
+  { id: "31", nama: "III/a", nama_pangkat: "Penata Muda" },
+  { id: "32", nama: "III/b", nama_pangkat: "Penata Muda Tingkat I" },
+  { id: "33", nama: "III/c", nama_pangkat: "Penata" },
+  { id: "34", nama: "III/d", nama_pangkat: "Penata Tingkat I" },
+  { id: "41", nama: "IV/a", nama_pangkat: "Pembina" },
+  { id: "42", nama: "IV/b", nama_pangkat: "Pembina Tingkat I" },
+  { id: "43", nama: "IV/c", nama_pangkat: "Pembina Utama Muda" },
+  { id: "44", nama: "IV/d", nama_pangkat: "Pembina Utama Madya" },
+  { id: "45", nama: "IV/e", nama_pangkat: "Pembina Utama" },
+];
+
 export const mysapkMenu = [
   {
     title: "Data Utama",
@@ -608,4 +628,8 @@ export const setColorPrioritas = (prioritas) => {
   } else {
     return "#000";
   }
+};
+
+export const findPangkat = (idPangkat) => {
+  return REF_PANGKAT.find((item) => item.id === idPangkat)?.nama_pangkat;
 };
