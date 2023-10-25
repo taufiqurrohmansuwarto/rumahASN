@@ -3,7 +3,7 @@ import PageContainer from "@/components/PageContainer";
 import SiasnTab from "@/components/PemutakhiranData/Admin/SiasnTab";
 import { patchAnomali2023 } from "@/services/anomali.services";
 import { dataUtamaMasterByNip } from "@/services/master.services";
-import { Stack } from "@mantine/core";
+import { Alert, Stack } from "@mantine/core";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Avatar,
@@ -82,21 +82,27 @@ const ChangeStatusAnomali = ({ data, open, onCancel }) => {
       open={open}
       onCancel={onCancel}
     >
-      <Form layout="vertical" form={form}>
-        <Form.Item
-          valuePropName="checked"
-          name="is_repaired"
-          label="Sudah diperbaiki?"
-        >
-          <Checkbox />
-        </Form.Item>
-        <Form.Item valuePropName="checked" name="reset" label="Lepas">
-          <Checkbox />
-        </Form.Item>
-        <Form.Item name="description" label="Deskripsi">
-          <Input.TextArea />
-        </Form.Item>
-      </Form>
+      <Stack>
+        <Alert title="Harap diperhatikan" color="red">
+          Pastikan Data Jabatan Terakhir di SIASN menggunakan awalan UPT jika di
+          sekolah. Jangan di beri tanda cek sebelum diperbaiki
+        </Alert>
+        <Form layout="vertical" form={form}>
+          <Form.Item
+            valuePropName="checked"
+            name="is_repaired"
+            label="Sudah diperbaiki?"
+          >
+            <Checkbox />
+          </Form.Item>
+          <Form.Item valuePropName="checked" name="reset" label="Lepas">
+            <Checkbox />
+          </Form.Item>
+          <Form.Item name="description" label="Deskripsi">
+            <Input.TextArea />
+          </Form.Item>
+        </Form>
+      </Stack>
     </Modal>
   );
 };
