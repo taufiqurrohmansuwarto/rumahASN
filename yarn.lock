@@ -1385,6 +1385,71 @@
     aria-hidden "^1.1.3"
     tabbable "^6.0.1"
 
+"@fullcalendar/core@^6.1.9":
+  version "6.1.9"
+  resolved "https://registry.yarnpkg.com/@fullcalendar/core/-/core-6.1.9.tgz#ea735b0dd0a0a487969ebbb6c99b0967e07568c0"
+  integrity sha512-eeG+z9BWerdsU9Ac6j16rpYpPnE0wxtnEHiHrh/u/ADbGTR3hCOjCD9PxQOfhOTHbWOVs7JQunGcksSPu5WZBQ==
+  dependencies:
+    preact "~10.12.1"
+
+"@fullcalendar/daygrid@^6.1.9", "@fullcalendar/daygrid@~6.1.9":
+  version "6.1.9"
+  resolved "https://registry.yarnpkg.com/@fullcalendar/daygrid/-/daygrid-6.1.9.tgz#efb8aabb2f928ac0b05a77c5443accb546ae5818"
+  integrity sha512-o/6joH/7lmVHXAkbaa/tUbzWYnGp/LgfdiFyYPkqQbjKEeivNZWF1WhHqFbhx0zbFONSHtrvkjY2bjr+Ef2quQ==
+
+"@fullcalendar/interaction@^6.1.9":
+  version "6.1.9"
+  resolved "https://registry.yarnpkg.com/@fullcalendar/interaction/-/interaction-6.1.9.tgz#9023922df24c296cb7f4671887f1731f5d5a5db2"
+  integrity sha512-I3FGnv0kKZpIwujg3HllbKrciNjTqeTYy3oJG226oAn7lV6wnrrDYMmuGmA0jPJAGN46HKrQqKN7ItxQRDec4Q==
+
+"@fullcalendar/premium-common@~6.1.9":
+  version "6.1.9"
+  resolved "https://registry.yarnpkg.com/@fullcalendar/premium-common/-/premium-common-6.1.9.tgz#588cd6e4a70c89e83c0ea3098d3f4fb230e3cc54"
+  integrity sha512-hbyXAPU0r9psO0oH22ge0GCxQhlHQ0KJRJhAM2KkTTfYUSAYgaaYfX9cUC6ysNE7T1gZ5JDlYDu/xskwPymyvA==
+
+"@fullcalendar/react@^6.1.9":
+  version "6.1.9"
+  resolved "https://registry.yarnpkg.com/@fullcalendar/react/-/react-6.1.9.tgz#280fd543901d792c19b50f363c55cc3068917299"
+  integrity sha512-ioxu0V++pYz2u/N1LL1V8DkMyiKGRun0gMAll2tQz3Kzi3r9pTwncGKRb1zO8h0e+TrInU08ywk/l5lBwp7eog==
+
+"@fullcalendar/resource-timeline@^6.1.9":
+  version "6.1.9"
+  resolved "https://registry.yarnpkg.com/@fullcalendar/resource-timeline/-/resource-timeline-6.1.9.tgz#cdbd49c320192f52f6c5d3e444031ef5b42414d3"
+  integrity sha512-lXv37zTbaAYMrx6xgGLlWGNCzhH+RwyX41BwlzzVgfZXKrW0QlwjyxKrSgZeFQr9mNta5ACqPH1FeZffzBVO0Q==
+  dependencies:
+    "@fullcalendar/premium-common" "~6.1.9"
+    "@fullcalendar/scrollgrid" "~6.1.9"
+    "@fullcalendar/timeline" "~6.1.9"
+
+"@fullcalendar/resource@^6.1.9":
+  version "6.1.9"
+  resolved "https://registry.yarnpkg.com/@fullcalendar/resource/-/resource-6.1.9.tgz#cb480815fbec26eed9e52d9e5fb6c0dd55a4844b"
+  integrity sha512-A0yQs08WNxx7XeQlAZ9gkmiJOuNOjwpiusnnNSWw/xriNoXmWasDih9ury3GcTjJ8T13Y9d+E6IgxLZgBejTZQ==
+  dependencies:
+    "@fullcalendar/premium-common" "~6.1.9"
+
+"@fullcalendar/scrollgrid@~6.1.9":
+  version "6.1.9"
+  resolved "https://registry.yarnpkg.com/@fullcalendar/scrollgrid/-/scrollgrid-6.1.9.tgz#26c9d98dd30db535f4dc30ad12c4e44d21e19748"
+  integrity sha512-mrdNb0kgDrs15oesKFfr475UYEuqAEQmxBJB2IjQVUL1v213ZqY1TYzgXsIQhVmyGudosVbBOaiQ+vb0zMk8HA==
+  dependencies:
+    "@fullcalendar/premium-common" "~6.1.9"
+
+"@fullcalendar/timegrid@^6.1.9":
+  version "6.1.9"
+  resolved "https://registry.yarnpkg.com/@fullcalendar/timegrid/-/timegrid-6.1.9.tgz#83b61ac734638d11182aeb579b638fa0bc52ea32"
+  integrity sha512-le7UV05wVE1Trdr054kgJXTwa+A1pEI8nlCBnPWdcyrL+dTLoPvQ4AWEVCnV7So+4zRYaCqnqGXfCJsj0RQa0g==
+  dependencies:
+    "@fullcalendar/daygrid" "~6.1.9"
+
+"@fullcalendar/timeline@~6.1.9":
+  version "6.1.9"
+  resolved "https://registry.yarnpkg.com/@fullcalendar/timeline/-/timeline-6.1.9.tgz#4b4139046de94e38de9ddda6a0a1d989c8c5cb83"
+  integrity sha512-0WuLvJpIsJZPYUuVlRsELdOUOuw6Tizer5pF93/EoHoQa7ZKMWvQY/6H+foxGXBszjHMFpIjRFlltDytL9VbGQ==
+  dependencies:
+    "@fullcalendar/premium-common" "~6.1.9"
+    "@fullcalendar/scrollgrid" "~6.1.9"
+
 "@github/combobox-nav@^2.1.5":
   version "2.1.7"
   resolved "https://registry.yarnpkg.com/@github/combobox-nav/-/combobox-nav-2.1.7.tgz#ae7d895291dee847ce6218063d2c286fcfb2235e"
@@ -6302,6 +6367,11 @@ preact@^10.6.3:
   version "10.11.1"
   resolved "https://registry.yarnpkg.com/preact/-/preact-10.11.1.tgz#35fdad092de8b2ad29df3a0bef9af1f4fdd2256b"
   integrity sha512-1Wz5PCRm6Fg+6BTXWJHhX4wRK9MZbZBHuwBqfZlOdVm2NqPe8/rjYpufvYCwJSGb9layyzB2jTTXfpCTynLqFQ==
+
+preact@~10.12.1:
+  version "10.12.1"
+  resolved "https://registry.yarnpkg.com/preact/-/preact-10.12.1.tgz#8f9cb5442f560e532729b7d23d42fd1161354a21"
+  integrity sha512-l8386ixSsBdbreOAkqtrwqHwdvR35ID8c3rKPa8lCWuO86dBi32QWHV4vfsZK1utLLFMvw+Z5Ad4XLkZzchscg==
 
 prelude-ls@^1.2.1:
   version "1.2.1"

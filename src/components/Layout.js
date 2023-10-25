@@ -50,11 +50,18 @@ const changeRoutes = (user) => {
     // persiapan ini seharusnya ditambahkan halaman dashboard seperti analisis dsb tapi jangan data
 
     if (pegawaiBKD) {
-      userRoutes.routes.push({
-        path: "/beranda-bkd?tab=my-task",
-        name: "Beranda BKD",
-        icon: <TeamOutlined />,
-      });
+      userRoutes.routes.push(
+        {
+          path: "/beranda-bkd?tab=my-task",
+          name: "Beranda BKD",
+          icon: <TeamOutlined />,
+        },
+        {
+          path: "/coaching-clinic-consultant",
+          name: "Instruktur",
+          icon: <UsergroupAddOutlined />,
+        }
+      );
     }
 
     if (fasilitatorMaster) {

@@ -1,7 +1,8 @@
+import CreateCoaching from "@/components/CoachingClinic/Consultant/CreateCoaching";
 import Layout from "@/components/Layout";
 import PageContainer from "@/components/PageContainer";
 import { SearchOutlined } from "@ant-design/icons";
-import { Button } from "antd";
+import { Button, Empty } from "antd";
 import Head from "next/head";
 import { useRouter } from "next/router";
 
@@ -13,15 +14,10 @@ const CoachingClinic = () => {
   return (
     <>
       <Head>
-        <title>Rumah ASN - Coaching Clinic</title>
+        <title>Rumah ASN - Instruktur Coaching Clinic</title>
       </Head>
-      <PageContainer
-        title="Coaching Clinic"
-        content="Daftar Coaching Clinic Saya"
-      >
-        <Button onClick={handleCreate} type="primary" icon={<SearchOutlined />}>
-          Cari Coaching
-        </Button>
+      <PageContainer title="Coaching Clinic" content="Jadwal Konsultasi Online">
+        <CreateCoaching />
       </PageContainer>
     </>
   );
@@ -33,7 +29,7 @@ CoachingClinic.Auth = {
 };
 
 CoachingClinic.getLayout = (page) => {
-  return <Layout active="/coaching-clinic">{page}</Layout>;
+  return <Layout active="/coaching-clinic-consultant">{page}</Layout>;
 };
 
 export default CoachingClinic;
