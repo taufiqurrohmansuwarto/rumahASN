@@ -486,10 +486,7 @@ function CompareJabatan() {
           bordered
           title={() => (
             <>
-              {(
-                dataSIASN?.kedudukanPnsNama !== "PPPK Aktif" ||
-                currentUser?.user?.current_role === "ADMIN"
-              )(
+              {dataSIASN?.kedudukanPnsNama !== "PPPK Aktif" && (
                 <Button
                   type="primary"
                   onClick={handleOpen}

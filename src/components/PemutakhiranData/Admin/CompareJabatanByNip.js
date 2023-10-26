@@ -29,6 +29,7 @@ import { useEffect, useState } from "react";
 import FormJFT from "../FormJFT";
 import FormJFU from "../FormJFU";
 import FormUnitOrganisasi from "../FormUnitOrganisasi";
+import { useSession } from "next-auth/react";
 
 const format = "DD-MM-YYYY";
 
@@ -523,6 +524,8 @@ const jenisJabatanSiasn = (data) => {
 };
 
 function CompareJabatanByNip({ nip }) {
+  const { data: dataUser, status } = useSession();
+
   const { data: dataSiasn, isLoading: loadingDataSiasn } = useQuery(
     ["data-utama-siasn", nip],
     () => dataUtamSIASNByNip(nip)
@@ -665,7 +668,8 @@ function CompareJabatanByNip({ nip }) {
         <Table
           title={() => (
             <>
-              {dataSiasn?.kedudukanPnsNama !== "PPPK Aktif" && (
+              {(dataSiasn?.kedudukanPnsNama !== "PPPK Aktif" ||
+                dataUser?.user?.current_role === "admin") && (
                 <Button
                   type="primary"
                   onClick={handleOpenKosong}
