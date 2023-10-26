@@ -1,4 +1,13 @@
-import { Button, Col, DatePicker, Form, Input, Modal, Row } from "antd";
+import {
+  Button,
+  Col,
+  DatePicker,
+  Form,
+  Input,
+  InputNumber,
+  Modal,
+  Row,
+} from "antd";
 import React from "react";
 
 const ModalCoaching = ({ open, onCancel }) => {
@@ -39,6 +48,18 @@ const ModalCoaching = ({ open, onCancel }) => {
             </Form.Item>
           </Col>
         </Row>
+        <Form.Item
+          rules={[
+            {
+              required: true,
+              message: "Jumlah peserta harus diisi",
+            },
+          ]}
+          name="max_total_participants"
+          label="Jumlah Peserta"
+        >
+          <InputNumber />
+        </Form.Item>
       </Form>
     </Modal>
   );
