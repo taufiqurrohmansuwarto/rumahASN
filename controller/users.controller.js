@@ -18,15 +18,23 @@ module.exports.index = async (req, res) => {
             .where("current_role", "agent")
             .orWhere("current_role", "admin");
         })
-        .andWhereNot("custom_id", req?.user?.customId)
+        // .andWhereNot("custom_id", req?.user?.customId)
         .where((builder) => {
           if (search) {
             builder.where("username", "ilike", `%${search}%`);
           }
         })
-        .page(page - 1, limit);
+        .orderBy("last_login", "desc")
+        .page(parseInt(page) - 1, parseInt(limit));
 
-      res.json({ data: users?.results, total: users.total });
+      const data = {
+        data: users?.results,
+        total: users.total,
+        page: parseInt(page),
+        limit: parseInt(limit),
+      };
+
+      res.json(data);
     }
     if (type === "check_online") {
       const onlineUsers = await User.query().where("is_online", true);
