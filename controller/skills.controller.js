@@ -1,6 +1,6 @@
 const Skill = require("@/models/skills.model");
 
-const index = async (req, res) => {
+const skillIndex = async (req, res) => {
   try {
     const page = req.query.page || 1;
     const limit = req.query.limit || 10;
@@ -10,7 +10,7 @@ const index = async (req, res) => {
   }
 };
 
-const create = async (req, res) => {
+const createSkill = async (req, res) => {
   try {
     const { title, description } = req.body;
     const skill = await Skill.query().insert({ title, description });
@@ -21,7 +21,7 @@ const create = async (req, res) => {
   }
 };
 
-const update = async (req, res) => {
+const updateSkill = async (req, res) => {
   try {
     const { id } = req.query;
     const { title, description } = req.body;
@@ -36,7 +36,7 @@ const update = async (req, res) => {
   }
 };
 
-const destroy = async (req, res) => {
+const destroySkill = async (req, res) => {
   try {
     const { id } = req.query;
     await Skill.query().deleteById(id);
@@ -48,8 +48,8 @@ const destroy = async (req, res) => {
 };
 
 module.exports = {
-  index,
-  create,
-  update,
-  destroy,
+  skillIndex,
+  createSkill,
+  updateSkill,
+  destroySkill,
 };
