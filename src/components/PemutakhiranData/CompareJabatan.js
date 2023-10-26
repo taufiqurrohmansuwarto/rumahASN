@@ -30,6 +30,7 @@ import AnomaliUser from "./AnomaliUser";
 import FormJFT from "./FormJFT";
 import FormJFU from "./FormJFU";
 import FormUnitOrganisasi from "./FormUnitOrganisasi";
+import { useSession } from "next-auth/react";
 
 const format = "DD-MM-YYYY";
 
@@ -301,6 +302,7 @@ function CompareJabatan() {
   const [visible, setVisible] = useState(false);
   const handleOpen = () => setVisible(true);
   const handleClose = () => setVisible(false);
+  const { data: currentUser } = useSession();
 
   const { data, isLoading } = useQuery(["data-jabatan"], () => getRwJabatan());
 
@@ -484,7 +486,10 @@ function CompareJabatan() {
           bordered
           title={() => (
             <>
-              {dataSIASN?.kedudukanPnsNama !== "PPPK Aktif" && (
+              {(
+                dataSIASN?.kedudukanPnsNama !== "PPPK Aktif" ||
+                currentUser?.user?.current_role === "ADMIN"
+              )(
                 <Button
                   type="primary"
                   onClick={handleOpen}
