@@ -1,8 +1,11 @@
-import { checkStatusCoaching } from "@/controller/coaching-clinic.controller";
+import {
+  createMeeting,
+  findMeeting,
+} from "@/controller/coaching-clinic.controller";
 import auth from "@/middleware/auth.middleware";
 import { createRouter } from "next-connect";
 const router = createRouter();
 
-router.use(auth).get(checkStatusCoaching);
+router.use(auth).get(findMeeting).post(createMeeting);
 
 export default router.handler();

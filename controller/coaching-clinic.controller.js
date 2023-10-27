@@ -79,6 +79,31 @@ const checkStatusCoaching = async (req, res) => {
 };
 
 // CRUD meeting
+
+const findMeeting = async (req, res) => {
+  try {
+    const page = req?.query?.page || 1;
+    const limit = req?.query?.limit || 10;
+    const { customId } = req?.user;
+
+    const result = await CCMeetings.query()
+      .where({ user_id: customId })
+      .page(parseInt(page) - 1, parseInt(limit));
+
+    const data = {
+      data: result.results,
+      total: result.total,
+      page: result.page,
+      limit: result.limit,
+    };
+
+    res.json(data);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
 const createMeeting = async (req, res) => {
   try {
     const { customId } = req?.user;
@@ -179,6 +204,7 @@ module.exports = {
   dropUserCoach,
   checkStatusCoaching,
   // instructur
+  findMeeting,
   createMeeting,
   removeMeeting,
   updateMeeting,

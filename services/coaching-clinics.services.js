@@ -23,3 +23,30 @@ export const checkStatus = () => {
   const url = "/consultants/status";
   return coachingClinicApi.get(url).then((res) => res.data);
 };
+
+// consultant / instructor
+export const createMeeting = (data) => {
+  const url = "/consultants/meetings";
+  return coachingClinicApi.post(url, data).then((res) => res?.data);
+};
+
+export const findMeeting = (params) => {
+  const qs = queryString.stringify(params);
+  const url = `/consultants/meetings?${qs}`;
+  return coachingClinicApi.get(url).then((res) => res?.data);
+};
+
+export const updateMeeting = ({ id, data }) => {
+  const url = `/consultants/meetings/${id}`;
+  return coachingClinicApi.patch(url, data).then((res) => res?.data);
+};
+
+export const removeMeeting = (id) => {
+  const url = `/consultants/meetings/${id}`;
+  return coachingClinicApi.delete(url).then((res) => res?.data);
+};
+
+export const detailMeeting = (id) => {
+  const url = `/consultants/meetings/${id}`;
+  return coachingClinicApi.get(url).then((res) => res?.data);
+};
