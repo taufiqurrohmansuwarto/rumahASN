@@ -1,11 +1,42 @@
 const User = require("@/models/users.model");
 const CCMeetings = require("@/models/cc_meetings.model");
 const CCMeetingsParticipants = require("@/models/cc_meetings_participants.model");
+const jsonwebtoken = require("jsonwebtoken");
 
 const appId = process.env.APP_ID;
 const appSecret = process.env.APP_SECRET;
 
-const createJWT = () => {};
+const createJWT = (id, { id, name, email, avatar, appId, kid }) => {
+  const now = new Date();
+  const jwt = jsonwebtoken.sign(
+    {
+      aud: "jitsi",
+      context: {
+        user: {
+          id,
+          name,
+          avatar,
+          email: email,
+          moderator: "true",
+        },
+        features: {
+          livestreaming: "true",
+          recording: "true",
+          transcription: "true",
+          "outbound-call": "true",
+        },
+      },
+      iss: "chat",
+      room: "*",
+      sub: appId,
+      exp: Math.round(now.setHours(now.getHours() + 3) / 1000),
+      nbf: Math.round(new Date().getTime() / 1000) - 10,
+    },
+    privateKey,
+    { algorithm: "RS256", header: { kid } }
+  );
+  return jwt;
+};
 
 const alterUserCoach = async (req, res) => {
   try {
