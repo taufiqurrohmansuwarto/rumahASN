@@ -1,5 +1,5 @@
 import { createMeeting } from "@/services/coaching-clinics.services";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   Button,
   Col,
@@ -16,11 +16,15 @@ import moment from "moment";
 
 const ModalCoaching = ({ open, onCancel }) => {
   const [form] = Form.useForm();
+  const queryClient = useQueryClient();
+
   const { mutate: create, isLoading: isLoadingCreate } = useMutation(
     (data) => createMeeting(data),
     {
       onSuccess: () => {
         message.success("Berhasil membuat jadwal coaching");
+        queryClient.invalidateQueries(["meetings"]);
+        onCancel();
       },
       onError: () => {
         message.error("Gagal membuat jadwal coaching");

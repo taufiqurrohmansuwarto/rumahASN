@@ -1,12 +1,27 @@
-import { findMeeting } from "@/services/coaching-clinics.services";
-import { useQuery } from "@tanstack/react-query";
-import { Table } from "antd";
-import Link from "next/link";
+import {
+  findMeeting,
+  removeMeeting,
+  updateMeeting,
+} from "@/services/coaching-clinics.services";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { Divider, Table } from "antd";
 import { useRouter } from "next/router";
-import React from "react";
 
 function CoachingMeetings() {
   const router = useRouter();
+
+  const queryClient = useQueryClient();
+  const { mutate: remove, isLoading: isLoadingRemove } = useMutation(
+    (id) => removeMeeting(id),
+    {}
+  );
+
+  const { mutate: update, isLoading: isLoadingUpdate } = useMutation(
+    (id) => updateMeeting(id),
+    {}
+  );
+
+  const handleHapus = () => {};
 
   const { data, isLoading } = useQuery(
     ["meetings", router?.query],
@@ -17,19 +32,29 @@ function CoachingMeetings() {
     }
   );
 
+  const gotoDetail = (id) => {
+    router.push(`/coaching-clinic-consultant/${id}/detail`);
+  };
+
   const columns = [
     {
       title: "Judul",
       dataIndex: "title",
     },
     {
-      title: "Goto",
-      key: "goto",
-      render: (_, row) => (
-        <Link href={`/coaching-clinic-consultant/${row?.id}/detail`}>
-          Detail
-        </Link>
-      ),
+      title: "Aksi",
+      key: "action",
+      render: (_, row) => {
+        return (
+          <>
+            <a onClick={() => gotoDetail(row?.id)}>Detail</a>
+            <Divider type="vertical" />
+            <a>Update</a>
+            <Divider type="vertical" />
+            <a>Hapus</a>
+          </>
+        );
+      },
     },
   ];
 
