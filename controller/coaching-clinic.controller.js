@@ -1,4 +1,11 @@
 const User = require("@/models/users.model");
+const CCMeetings = require("@/models/cc_meetings.model");
+const CCMeetingsParticipants = require("@/models/cc_meetings_participants.model");
+
+const appId = process.env.APP_ID;
+const appSecret = process.env.APP_SECRET;
+
+const createJWT = () => {};
 
 const alterUserCoach = async (req, res) => {
   try {
@@ -71,8 +78,114 @@ const checkStatusCoaching = async (req, res) => {
   }
 };
 
+// CRUD meeting
+const createMeeting = async (req, res) => {
+  try {
+    const { customId } = req?.user;
+    const body = req?.body;
+    await CCMeetings.query().insert({
+      ...body,
+      user_id: customId,
+    });
+    res.status(201).json({ message: "Success" });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+const removeMeeting = async (req, res) => {
+  try {
+    const { id } = req?.query;
+    const { customId } = req?.user;
+
+    await CCMeetings.query().delete().where({
+      id,
+      user_id: customId,
+    });
+    res.status(200).json({ message: "Success" });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+const updateMeeting = async (req, res) => {
+  try {
+    const { id } = req?.query;
+    const { customId } = req?.user;
+    const body = req?.body;
+
+    await CCMeetings.query().patch(body).where({
+      id,
+      user_id: customId,
+    });
+
+    res.status(200).json({ message: "Success" });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+const getMeeting = async (req, res) => {
+  try {
+    const { id } = req?.query;
+    const { customId } = req?.user;
+
+    const result = await CCMeetings.query()
+      .where({
+        id,
+        user_id: customId,
+      })
+      .first();
+
+    res.json(result);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+const startMeeting = async (req, res) => {
+  try {
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+// CRUD participant
+const addMeetingParticipant = async (req, res) => {
+  try {
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+const removeMeetingParticipant = async (req, res) => {
+  try {
+  } catch (error) {}
+};
+
+const startMeetingParticipant = async (req, res) => {
+  try {
+  } catch (error) {}
+};
+
 module.exports = {
   alterUserCoach,
   dropUserCoach,
   checkStatusCoaching,
+  // instructur
+  createMeeting,
+  removeMeeting,
+  updateMeeting,
+  getMeeting,
+  startMeeting,
+  // participant
+  addMeetingParticipant,
+  removeMeetingParticipant,
+  startMeetingParticipant,
 };
