@@ -1,3 +1,4 @@
+import CoachingMeetings from "@/components/CoachingClinic/Consultant/CoachingMeetings";
 import CreateCoaching from "@/components/CoachingClinic/Consultant/CreateCoaching";
 import Layout from "@/components/Layout";
 import PageContainer from "@/components/PageContainer";
@@ -54,8 +55,8 @@ const CoachingClinic = () => {
           </>
         ) : (
           <>
-            {JSON.stringify(meetings)}
             <CreateCoaching />
+            <CoachingMeetings />
           </>
         )}
       </PageContainer>

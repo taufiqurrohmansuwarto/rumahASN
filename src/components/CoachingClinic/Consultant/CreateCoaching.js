@@ -12,6 +12,7 @@ import {
   message,
 } from "antd";
 import React from "react";
+import moment from "moment";
 
 const ModalCoaching = ({ open, onCancel }) => {
   const [form] = Form.useForm();
@@ -29,7 +30,13 @@ const ModalCoaching = ({ open, onCancel }) => {
 
   const handleFinish = async () => {
     const result = await form.validateFields();
-    create(result);
+    const payload = {
+      ...result,
+      start_date: moment(result.start_time).format("YYYY-MM-DD"),
+      start_hours: moment(result.start_hours).format("HH:mm"),
+      end_hours: moment(result.end_hours).format("HH:mm"),
+    };
+    create(payload);
   };
 
   return (
@@ -51,7 +58,7 @@ const ModalCoaching = ({ open, onCancel }) => {
         </Form.Item>
         <Row gutter={[16, 16]}>
           <Col md={8} xs={24}>
-            <Form.Item name="start_time" label="Tanggal">
+            <Form.Item name="start_date" label="Tanggal">
               <DatePicker />
             </Form.Item>
           </Col>
