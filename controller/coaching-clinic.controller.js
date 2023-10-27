@@ -6,7 +6,7 @@ const jsonwebtoken = require("jsonwebtoken");
 const appId = process.env.APP_ID;
 const appSecret = process.env.APP_SECRET;
 
-const createJWT = (id, { id, name, email, avatar, appId, kid }) => {
+const createJWT = (id, { name, email, avatar, appId, kid }) => {
   const now = new Date();
   const jwt = jsonwebtoken.sign(
     {
