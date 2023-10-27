@@ -1,3 +1,5 @@
+import { createMeeting } from "@/services/coaching-clinics.services";
+import { useMutation } from "@tanstack/react-query";
 import {
   Button,
   Col,
@@ -7,19 +9,35 @@ import {
   InputNumber,
   Modal,
   Row,
+  message,
 } from "antd";
 import React from "react";
 
 const ModalCoaching = ({ open, onCancel }) => {
   const [form] = Form.useForm();
+  const { mutate: create, isLoading: isLoadingCreate } = useMutation(
+    (data) => createMeeting(data),
+    {
+      onSuccess: () => {
+        message.success("Berhasil membuat jadwal coaching");
+      },
+      onError: () => {
+        message.error("Gagal membuat jadwal coaching");
+      },
+    }
+  );
+
   const handleFinish = async () => {
     const result = await form.validateFields();
+    create(result);
   };
 
   return (
     <Modal
       centered
       width={600}
+      onOk={handleFinish}
+      confirmLoading={isLoadingCreate}
       title="Buat Jadwal Coaching"
       open={open}
       onCancel={onCancel}
@@ -33,7 +51,7 @@ const ModalCoaching = ({ open, onCancel }) => {
         </Form.Item>
         <Row gutter={[16, 16]}>
           <Col md={8} xs={24}>
-            <Form.Item name="started_at" label="Tanggal">
+            <Form.Item name="start_time" label="Tanggal">
               <DatePicker />
             </Form.Item>
           </Col>
@@ -55,7 +73,7 @@ const ModalCoaching = ({ open, onCancel }) => {
               message: "Jumlah peserta harus diisi",
             },
           ]}
-          name="max_total_participants"
+          name="max_participants"
           label="Jumlah Peserta"
         >
           <InputNumber />

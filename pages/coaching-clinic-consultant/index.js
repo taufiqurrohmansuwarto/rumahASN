@@ -1,7 +1,7 @@
 import CreateCoaching from "@/components/CoachingClinic/Consultant/CreateCoaching";
 import Layout from "@/components/Layout";
 import PageContainer from "@/components/PageContainer";
-import { checkStatus } from "@/services/coaching-clinics.services";
+import { checkStatus, findMeeting } from "@/services/coaching-clinics.services";
 import { useQuery } from "@tanstack/react-query";
 import { Breadcrumb, Empty } from "antd";
 import Head from "next/head";
@@ -17,6 +17,11 @@ const CoachingClinic = () => {
   );
 
   const handleCreate = () => router.push("/coaching-clinic/consults");
+
+  const { data: meetings, isLoading: isloadingMeeting } = useQuery(
+    ["meetings", router?.query],
+    () => findMeeting(router?.query)
+  );
 
   return (
     <>
@@ -48,7 +53,10 @@ const CoachingClinic = () => {
             />
           </>
         ) : (
-          <CreateCoaching />
+          <>
+            {JSON.stringify(meetings)}
+            <CreateCoaching />
+          </>
         )}
       </PageContainer>
     </>
