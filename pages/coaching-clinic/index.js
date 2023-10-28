@@ -5,6 +5,8 @@ import { Button, Calendar, Card } from "antd";
 import Head from "next/head";
 import { useRouter } from "next/router";
 import moment from "moment";
+import UpcomingMeetings from "@/components/CoachingClinic/Participant/UpcomingMeetings";
+import MyMeetings from "@/components/CoachingClinic/Participant/MyMeetings";
 
 const CoachingClinic = () => {
   const router = useRouter();
@@ -35,11 +37,9 @@ const CoachingClinic = () => {
         title="Coaching Clinic"
         content="Daftar Coaching Clinic Saya"
       >
-        <Button onClick={handleCreate} type="primary" icon={<SearchOutlined />}>
-          Cari Coaching
-        </Button>
         <Card>
-          <Calendar dateCellRender={dateCellRender} mode="month" />
+          <UpcomingMeetings />
+          <MyMeetings />
         </Card>
       </PageContainer>
     </>

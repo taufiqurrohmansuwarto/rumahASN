@@ -2,32 +2,50 @@ const User = require("@/models/users.model");
 const CCMeetings = require("@/models/cc_meetings.model");
 const CCMeetingsParticipants = require("@/models/cc_meetings_participants.model");
 const jsonwebtoken = require("jsonwebtoken");
+const { raw } = require("objection");
 
 const appId = process.env.APP_ID;
 const appSecret = process.env.APP_SECRET;
 
-console.log({ appId, appSecret });
-
 const createJWT = (user, id) => {
-  const jwt = jsonwebtoken.sign(
-    {
-      context: {
-        user: {
-          avatar: user?.image,
-          name: user?.name,
-          email: user?.email,
-        },
+  const payload = {
+    context: {
+      user: {
+        avatar: user?.image,
+        name: user?.name,
+        email: user?.email,
       },
-      moderator: true,
-      aud: "jitsi",
-      iss: appId,
-      sub: "coaching-online.site",
-      room: id,
-      exp: 1753498815,
     },
-    appSecret
-  );
+    moderator: true,
+    aud: appId,
+    iss: appId,
+    sub: "coaching-online.site",
+    room: id,
+    exp: 1753498815,
+  };
 
+  const jwt = jsonwebtoken.sign(payload, appSecret);
+  return jwt;
+};
+
+const createJwtParticipant = (user, id) => {
+  const payload = {
+    context: {
+      user: {
+        avatar: user?.image,
+        name: user?.name,
+        email: user?.email,
+      },
+    },
+    moderator: false,
+    aud: appId,
+    iss: appId,
+    sub: "coaching-online.site",
+    room: id,
+    exp: 1753498815,
+  };
+
+  const jwt = jsonwebtoken.sign(payload, appSecret);
   return jwt;
 };
 
@@ -254,16 +272,68 @@ const endMeeting = async (req, res) => {
 };
 
 // CRUD participant
-const addMeetingParticipant = async (req, res) => {
+const joinMeeting = async (req, res) => {
   try {
+    const { id } = req?.query;
+    const { customId } = req?.user;
+
+    const currentMeeting = await CCMeetings.query().findById(id);
+
+    if (!currentMeeting) {
+      res.status(404).json({ message: "Not found" });
+    } else {
+      const currentMeetingParticipan =
+        await CCMeetingsParticipants.query().where({
+          meeting_id: id,
+        });
+
+      const alreadyJoin = await CCMeetingsParticipants.query()
+        .where({
+          meeting_id: id,
+          user_id: customId,
+        })
+        .first();
+
+      if (alreadyJoin) {
+        res.status(403).json({
+          message: "You already join this meeting",
+        });
+      } else if (
+        currentMeetingParticipan?.length > currentMeeting?.max_participant
+      ) {
+        res.status(403).json({
+          message: "The meeting is full",
+        });
+      } else {
+        const result = await CCMeetingsParticipants.query()
+          .upsertGraph({
+            meeting_id: id,
+            user_id: customId,
+          })
+          .onConflict(["meeting_id", "user_id"])
+          .merge()
+          .returning("*");
+
+        res.json(result);
+      }
+    }
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: "Internal server error" });
   }
 };
 
-const removeMeetingParticipant = async (req, res) => {
+const deleteMeeting = async (req, res) => {
   try {
+    const { id } = req?.query;
+    const { customId } = req?.user;
+
+    const result = await CCMeetingsParticipants.query().delete().where({
+      meeting_id: id,
+      user_id: customId,
+    });
+
+    res.json(result);
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: "Internal server error" });
@@ -272,6 +342,80 @@ const removeMeetingParticipant = async (req, res) => {
 
 const startMeetingParticipant = async (req, res) => {
   try {
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+const meetingsParticipants = async (req, res) => {
+  try {
+    const { customId } = req?.user;
+
+    const result = await CCMeetingsParticipants.query()
+      .where({
+        user_id: customId,
+      })
+      .withGraphFetched("[meeting.[coach(simpleSelect)]]");
+
+    res.json(result);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+const detailMeetingParticipant = async (req, res) => {
+  try {
+    const { id } = req?.query;
+    const { customId } = req?.user;
+
+    const result = await CCMeetingsParticipants.query()
+      .where({
+        id,
+        user_id: customId,
+      })
+      .first()
+      .withGraphFetched("[meeting.[coach(simpleSelect)]]");
+
+    const currentMeeting = await CCMeetings.query().findById(
+      result?.meeting_id
+    );
+
+    const participants = await CCMeetingsParticipants.query()
+      .where({
+        meeting_id: result?.meeting_id,
+      })
+      .withGraphFetched("[participant(simpleSelect)]");
+
+    if (currentMeeting?.status === "live") {
+      const jwt = createJwtParticipant(req?.user, result?.meeting_id);
+      res.json({
+        ...result,
+        jwt,
+        participants,
+      });
+    } else {
+      res.json({
+        ...result,
+        jwt: null,
+        participants,
+      });
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+const upcomingMeetings = async (req, res) => {
+  try {
+    const currentMonth = new Date().getMonth() + 1;
+    const result = await CCMeetings.query()
+      .whereRaw(`extract(month from start_date) = ${currentMonth}`)
+      .withGraphFetched("[coach(simpleSelect)]");
+
+    res.json(result);
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: "Internal server error" });
@@ -291,7 +435,10 @@ module.exports = {
   startMeeting,
   endMeeting,
   // participant
-  addMeetingParticipant,
-  removeMeetingParticipant,
+  meetingsParticipants,
+  detailMeetingParticipant,
+  joinMeeting,
+  deleteMeeting,
   startMeetingParticipant,
+  upcomingMeetings,
 };

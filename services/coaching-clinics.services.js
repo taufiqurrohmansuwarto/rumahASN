@@ -60,3 +60,29 @@ export const endMeeting = (id) => {
   const url = `/consultants/meetings/${id}/live`;
   return coachingClinicApi.delete(url).then((res) => res?.data);
 };
+
+// participants
+export const upcomingMeetings = () => {
+  const url = "/participants/upcoming";
+  return coachingClinicApi.get(url).then((res) => res?.data);
+};
+
+export const requestMeeting = (id) => {
+  const url = `/participants/meetings/${id}/request`;
+  return coachingClinicApi.put(url).then((res) => res?.data);
+};
+
+export const cancelRequestMeeting = (id) => {
+  const url = `/participants/meetings/${id}/request`;
+  return coachingClinicApi.delete(url).then((res) => res?.data);
+};
+
+export const meetingsParticipant = () => {
+  const url = `/participants/me`;
+  return coachingClinicApi.get(url).then((res) => res?.data);
+};
+
+export const detailMeetingParticipant = (id) => {
+  const url = `/participants/meetings/${id}`;
+  return coachingClinicApi.get(url).then((res) => res?.data);
+};

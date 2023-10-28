@@ -1,58 +1,50 @@
+import DetailMeetingParticipant from "@/components/CoachingClinic/Participant/DetailMeetingParticipant";
 import Layout from "@/components/Layout";
 import PageContainer from "@/components/PageContainer";
-import JitsiMeeting from "@/components/VideoConference/JitsiMeeting";
-import { useSession } from "next-auth/react";
+import { detailMeetingParticipant } from "@/services/coaching-clinics.services";
+import { useQuery } from "@tanstack/react-query";
+import { Breadcrumb } from "antd";
 import Head from "next/head";
-
-const jwt =
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiIzNzVlNDYyMmYyM2QwOTExNjE2Y2E2NjA4ZDFiZTM0YjA1MjRkYzAzOWIwMTM2ZDlkYjA1ZTgzYWQ4NjQ1YTQwIiwiaXNzIjoiMzc1ZTQ2MjJmMjNkMDkxMTYxNmNhNjYwOGQxYmUzNGIwNTI0ZGMwMzliMDEzNmQ5ZGIwNWU4M2FkODY0NWE0MCIsInN1YiI6ImNvYWNoaW5nLW9ubGluZS5zaXRlIiwicm9vbSI6IioifQ.vLeS0MSYWRXH9IOkvV_ClD-H1MAmbHvUlBZu_4sYj_E";
+import Link from "next/link";
+import { useRouter } from "next/router";
 
 const DetailCoachingClinic = () => {
-  const { data, status } = useSession();
+  const router = useRouter();
+  const { id } = router.query;
+
+  const { data, isLoading } = useQuery(
+    ["detailMeetingParticipant", id],
+    () => detailMeetingParticipant(id),
+    {
+      enabled: !!id,
+    }
+  );
   return (
     <>
       <Head>
-        <title>Rumah ASN - Coaching Clinic</title>
+        <title>Rumah ASN - Detail Coaching Clinic</title>
       </Head>
       <PageContainer
-        title="Coaching Clinic"
-        content="Rumah ASN Coaching Clinic"
-      >
-        {status === "authenticated" && (
-          <>
-            {JSON.stringify(data?.user?.name)}
-            <JitsiMeeting
-              domain="coaching-online.site"
-              jwt={jwt}
-              roomName="somethingUsefullHelloworld"
-              getIFrameRef={(iframeRef) => {
-                iframeRef.style.height = "800px";
-              }}
-              configOverwrite={{
-                startWithAudioMuted: true,
-                disableModeratorIndicator: true,
-                startScreenSharing: true,
-                enableEmailInStats: false,
-              }}
-              interfaceConfigOverwrite={{
-                DISABLE_JOIN_LEAVE_NOTIFICATIONS: true,
-              }}
-              onReadyToClose={() => {
-                console.log("onReadyToClose");
-              }}
-              userInfo={{
-                displayName: data?.user?.name,
-                email: data?.user?.image,
-              }}
-              onApiReady={(api) => {
-                console.log(api);
-                api.executeCommand("avatarUrl", data?.user?.image);
-                // here you can attach custom event listeners to the Jitsi Meet External API
-                // you can also store it locally to execute commands
-              }}
-            />
-          </>
+        breadcrumbRender={() => (
+          <Breadcrumb>
+            <Breadcrumb.Item>
+              <Link href="/feeds">
+                <a>Beranda</a>
+              </Link>
+            </Breadcrumb.Item>
+            <Breadcrumb.Item>
+              <Link href="/coaching-clinic">
+                <a>Coaching Clinic</a>
+              </Link>
+            </Breadcrumb.Item>
+            <Breadcrumb.Item>Detail Coaching Clinic</Breadcrumb.Item>
+          </Breadcrumb>
         )}
+        loading={isLoading}
+        title="Coaching Clinic"
+        content={data?.meeting?.title}
+      >
+        <DetailMeetingParticipant />
       </PageContainer>
     </>
   );
@@ -64,7 +56,7 @@ DetailCoachingClinic.Auth = {
 };
 
 DetailCoachingClinic.getLayout = (page) => {
-  return <Layout>{page}</Layout>;
+  return <Layout active={"/coaching-clinic"}>{page}</Layout>;
 };
 
 export default DetailCoachingClinic;
