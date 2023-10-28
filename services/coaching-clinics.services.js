@@ -50,3 +50,13 @@ export const detailMeeting = (id) => {
   const url = `/consultants/meetings/${id}`;
   return coachingClinicApi.get(url).then((res) => res?.data);
 };
+
+export const startMeeting = (id) => {
+  const url = `/consultants/meetings/${id}/live`;
+  return coachingClinicApi.put(url).then((res) => res?.data);
+};
+
+export const endMeeting = (id) => {
+  const url = `/consultants/meetings/${id}/live`;
+  return coachingClinicApi.delete(url).then((res) => res?.data);
+};
