@@ -1,12 +1,11 @@
 import {
-  removeMeeting,
-  updateMeeting,
-  getMeeting,
+  endMeeting,
+  startMeeting,
 } from "@/controller/coaching-clinic.controller";
 import auth from "@/middleware/auth.middleware";
 import { createRouter } from "next-connect";
 const router = createRouter();
 
-router.use(auth).get(getMeeting).patch(updateMeeting).delete(removeMeeting);
+router.use(auth).put(startMeeting).delete(endMeeting);
 
 export default router.handler();
