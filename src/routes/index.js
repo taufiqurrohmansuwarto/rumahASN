@@ -72,7 +72,7 @@ export const userRoutes = {
       icon: <VideoCameraAddOutlined />,
     },
     {
-      path: "/coaching-clinic",
+      path: "/coaching-clinic/all",
       name: "Coaching Clinic",
       icon: <ReconciliationOutlined />,
     },

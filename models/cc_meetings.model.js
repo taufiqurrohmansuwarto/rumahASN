@@ -13,7 +13,28 @@ class CCMeetings extends Model {
   }
 
   // realation with user
-  static get relationMappings() {}
+  static get relationMappings() {
+    const user = require("@/models/users.model");
+    const participants = require("@/models/cc_meetings_participants.model");
+    return {
+      coach: {
+        relation: Model.BelongsToOneRelation,
+        modelClass: user,
+        join: {
+          from: "cc_meetings.user_id",
+          to: "users.custom_id",
+        },
+      },
+      participants: {
+        relation: Model.HasManyRelation,
+        modelClass: participants,
+        join: {
+          from: "cc_meetings.id",
+          to: "cc_meetings_participants.meeting_id",
+        },
+      },
+    };
+  }
 }
 
 module.exports = CCMeetings;
