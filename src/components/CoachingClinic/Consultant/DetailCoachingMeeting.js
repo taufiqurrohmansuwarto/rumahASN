@@ -1,13 +1,85 @@
+import JitsiMeeting from "@/components/VideoConference/JitsiMeeting";
 import {
   detailMeeting,
   startMeeting,
 } from "@/services/coaching-clinics.services";
+import { QuestionCircleTwoTone, SoundOutlined } from "@ant-design/icons";
+import { ScrollArea } from "@mantine/core";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Button, Col, Modal, Row, Skeleton, message } from "antd";
+import {
+  Avatar,
+  Button,
+  Card,
+  Col,
+  Descriptions,
+  Empty,
+  List,
+  Modal,
+  Row,
+  Space,
+  Typography,
+  message,
+} from "antd";
+import moment from "moment";
 import { useRouter } from "next/router";
-import JitsiMeeting from "@/components/VideoConference/JitsiMeeting";
 import { useState } from "react";
-import { SoundOutlined } from "@ant-design/icons";
+
+const DaftarPeserta = ({ data }) => {
+  return (
+    <ScrollArea h={600}>
+      <List
+        header={<div>Daftar Peserta</div>}
+        dataSource={data}
+        rowKey={(row) => row?.custom_id}
+        renderItem={(item) => (
+          <List.Item>
+            <List.Item.Meta
+              title={item?.participant?.username}
+              description={
+                <Space direction="vertical" size="small">
+                  <div>{item?.participant?.info?.jabatan?.jabatan}</div>
+                  <div>{item?.participant?.info?.perangkat_daerah?.detail}</div>
+                </Space>
+              }
+              avatar={<Avatar src={item?.participant?.image} />}
+            />
+          </List.Item>
+        )}
+      />
+    </ScrollArea>
+  );
+};
+
+const ModalInformation = ({ open, onClose, item }) => {
+  return (
+    <Modal
+      centered
+      title="Informasi Coaching Clinic"
+      open={open}
+      onCancel={onClose}
+    >
+      <Descriptions layout="vertical" size="small">
+        <Descriptions.Item label="Judul">{item?.title}</Descriptions.Item>
+        <Descriptions.Item label="Deskripsi">
+          {item?.description}
+        </Descriptions.Item>
+        <Descriptions.Item label="Status">{item?.status}</Descriptions.Item>
+        <Descriptions.Item label="Tanggal" span={3}>
+          {moment(item?.start_date).format("DD MMMM YYYY")}
+        </Descriptions.Item>
+        <Descriptions.Item label="Jam" span={3}>
+          {item?.start_hours} - {item?.end_hours}
+        </Descriptions.Item>
+        <Descriptions.Item label="Maksimum Peserta" span={3}>
+          {item?.max_participants}
+        </Descriptions.Item>
+        <Descriptions.Item label="Coaching">
+          {item?.coach?.username}
+        </Descriptions.Item>
+      </Descriptions>
+    </Modal>
+  );
+};
 
 function DetailCoachingMeeting() {
   const router = useRouter();
@@ -63,21 +135,28 @@ function DetailCoachingMeeting() {
     });
   };
 
+  const [open, setOpen] = useState(false);
+
+  const handleOpen = () => setOpen(true);
+  const handleClose = () => setOpen(false);
+
   return (
-    <Skeleton loading={isLoading}>
-      <Button
-        style={{
-          marginBottom: 20,
-        }}
-        onClick={handleStartMeeting}
-        loading={isLoadingStart}
-        disabled={isLoading}
-        type="primary"
-        icon={<SoundOutlined />}
-      >
-        Mulai Coaching Clinic
-      </Button>
-      {data?.status === "live" && (
+    <Card
+      title={
+        <Space>
+          <Typography.Text>{data?.title}</Typography.Text>
+          <QuestionCircleTwoTone
+            onClick={handleOpen}
+            style={{
+              cursor: "pointer",
+            }}
+          />
+        </Space>
+      }
+      loading={isLoading}
+    >
+      <ModalInformation open={open} item={data} onClose={handleClose} />
+      {data?.status === "live" ? (
         <Row>
           <Col md={18}>
             <JitsiMeeting
@@ -106,9 +185,35 @@ function DetailCoachingMeeting() {
               }}
             />
           </Col>
+          <Col md={8} xs={24}>
+            <DaftarPeserta data={data?.participants} />
+          </Col>
         </Row>
+      ) : (
+        <>
+          <Row gutter={[16, 16]}>
+            <Col md={16} xs={24}>
+              <Empty
+                description={`Hmmm... sepertinya coaching clinic belum dimulai atau coaching clinic sudah berakhir`}
+              >
+                <Button
+                  onClick={handleStartMeeting}
+                  loading={isLoadingStart}
+                  disabled={isLoading}
+                  type="primary"
+                  icon={<SoundOutlined />}
+                >
+                  Mulai Coaching Clinic
+                </Button>
+              </Empty>
+            </Col>
+            <Col md={8} xs={24}>
+              <DaftarPeserta data={data?.participants} />
+            </Col>
+          </Row>
+        </>
       )}
-    </Skeleton>
+    </Card>
   );
 }
 

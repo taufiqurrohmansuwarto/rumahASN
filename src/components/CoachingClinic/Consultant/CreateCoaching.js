@@ -13,6 +13,7 @@ import {
 } from "antd";
 import React from "react";
 import moment from "moment";
+import { PlusOutlined } from "@ant-design/icons";
 
 const ModalCoaching = ({ open, onCancel }) => {
   const [form] = Form.useForm();
@@ -36,9 +37,9 @@ const ModalCoaching = ({ open, onCancel }) => {
     const result = await form.validateFields();
     const payload = {
       ...result,
-      start_date: moment(result.start_time).format("YYYY-MM-DD"),
-      start_hours: moment(result.start_hours).format("HH:mm"),
-      end_hours: moment(result.end_hours).format("HH:mm"),
+      start_date: moment(result.start_date).format("DD-MM-YYYY"),
+      start_hours: moment(result.start_hours).format("HH:mm:ss"),
+      end_hours: moment(result.end_hours).format("HH:mm:ss"),
     };
     create(payload);
   };
@@ -102,7 +103,16 @@ function CreateCoaching() {
   return (
     <div>
       <ModalCoaching open={open} onCancel={handleClose} />
-      <Button onClick={handleOpen}>Buat Jawdal Coaching</Button>
+      <Button
+        type="primary"
+        icon={<PlusOutlined />}
+        onClick={handleOpen}
+        style={{
+          marginBottom: 20,
+        }}
+      >
+        Buat Jawdal Coaching
+      </Button>
     </div>
   );
 }

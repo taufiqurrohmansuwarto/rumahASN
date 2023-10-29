@@ -19,12 +19,14 @@ const DetailCoachingClinic = () => {
       enabled: !!id,
     }
   );
+
   return (
     <>
       <Head>
         <title>Rumah ASN - Detail Coaching Clinic</title>
       </Head>
       <PageContainer
+        onBack={() => router?.back()}
         breadcrumbRender={() => (
           <Breadcrumb>
             <Breadcrumb.Item>
@@ -42,7 +44,6 @@ const DetailCoachingClinic = () => {
         )}
         loading={isLoading}
         title="Coaching Clinic"
-        content={data?.meeting?.title}
       >
         <DetailMeetingParticipant />
       </PageContainer>
@@ -56,7 +57,7 @@ DetailCoachingClinic.Auth = {
 };
 
 DetailCoachingClinic.getLayout = (page) => {
-  return <Layout active={"/coaching-clinic"}>{page}</Layout>;
+  return <Layout active={"/coaching-clinic/all"}>{page}</Layout>;
 };
 
 export default DetailCoachingClinic;

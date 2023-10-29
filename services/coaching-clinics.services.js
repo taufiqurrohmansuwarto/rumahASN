@@ -62,8 +62,11 @@ export const endMeeting = (id) => {
 };
 
 // participants
-export const upcomingMeetings = () => {
-  const url = "/participants/upcoming";
+export const upcomingMeetings = (query) => {
+  const qs = queryString.stringify(query, {
+    skipNull: true,
+  });
+  const url = `/participants/upcoming?${qs}`;
   return coachingClinicApi.get(url).then((res) => res?.data);
 };
 
@@ -77,8 +80,12 @@ export const cancelRequestMeeting = (id) => {
   return coachingClinicApi.delete(url).then((res) => res?.data);
 };
 
-export const meetingsParticipant = () => {
-  const url = `/participants/me`;
+export const meetingsParticipant = (query) => {
+  const qs = queryString.stringify(query, {
+    skipNull: true,
+  });
+
+  const url = `/participants/me?${qs}`;
   return coachingClinicApi.get(url).then((res) => res?.data);
 };
 

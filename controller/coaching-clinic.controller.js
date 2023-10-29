@@ -2,7 +2,7 @@ const User = require("@/models/users.model");
 const CCMeetings = require("@/models/cc_meetings.model");
 const CCMeetingsParticipants = require("@/models/cc_meetings_participants.model");
 const jsonwebtoken = require("jsonwebtoken");
-const { raw } = require("objection");
+const moment = require("moment");
 
 const appId = process.env.APP_ID;
 const appSecret = process.env.APP_SECRET;
@@ -125,11 +125,16 @@ const checkStatusCoaching = async (req, res) => {
 const findMeeting = async (req, res) => {
   try {
     const page = req?.query?.page || 1;
-    const limit = req?.query?.limit || 10;
+    const limit = req?.query?.limit || 20;
     const { customId } = req?.user;
 
     const result = await CCMeetings.query()
       .where({ user_id: customId })
+      .select(
+        "*",
+        CCMeetings.relatedQuery("participants").count().as("participants_count")
+      )
+      .withGraphFetched("[coach(simpleSelect)]")
       .page(parseInt(page) - 1, parseInt(limit));
 
     const data = {
@@ -149,14 +154,21 @@ const findMeeting = async (req, res) => {
 const createMeeting = async (req, res) => {
   try {
     const { customId } = req?.user;
-    const body = req?.body;
-    await CCMeetings.query().insert({
-      ...body,
-      status: "upcoming",
-      user_id: customId,
-    });
 
-    res.status(201).json({ message: "Success" });
+    const currentUser = await User.query().findById(customId);
+
+    if (!currentUser?.is_consultant) {
+      res.status(403).json({ message: "Kamu bukan konsultan" });
+    } else {
+      const body = req?.body;
+      await CCMeetings.query().insert({
+        ...body,
+        status: "upcoming",
+        user_id: customId,
+      });
+
+      res.status(201).json({ message: "Success" });
+    }
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: "Internal server error" });
@@ -207,6 +219,10 @@ const getMeeting = async (req, res) => {
         id,
         user_id: customId,
       })
+      .withGraphFetched(
+        "[participants.[participant(simpleSelect)], coach(simpleSelect)]"
+      )
+
       .first();
 
     if (result?.status === "live") {
@@ -351,14 +367,26 @@ const startMeetingParticipant = async (req, res) => {
 const meetingsParticipants = async (req, res) => {
   try {
     const { customId } = req?.user;
+    const page = req?.query?.page || 1;
+    const limit = req?.query?.limit || 25;
 
     const result = await CCMeetingsParticipants.query()
       .where({
         user_id: customId,
       })
-      .withGraphFetched("[meeting.[coach(simpleSelect)]]");
+      .withGraphFetched("[meeting.[coach(simpleSelect)]]")
+      .page(parseInt(page) - 1, parseInt(limit));
 
-    res.json(result);
+    const data = {
+      data: result.results,
+      total: result.total,
+      page: parseInt(page),
+      limit: parseInt(limit),
+    };
+
+    console.log(data);
+
+    res.json(data);
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: "Internal server error" });
@@ -410,12 +438,55 @@ const detailMeetingParticipant = async (req, res) => {
 
 const upcomingMeetings = async (req, res) => {
   try {
-    const currentMonth = new Date().getMonth() + 1;
-    const result = await CCMeetings.query()
-      .whereRaw(`extract(month from start_date) = ${currentMonth}`)
-      .withGraphFetched("[coach(simpleSelect)]");
+    const month = req?.query?.month || moment().format("MM");
+    const year = req?.query?.year || moment().format("YYYY");
+    const day = req?.query?.day;
 
-    res.json(result);
+    const result = await CCMeetings.query()
+      .select(
+        "*",
+        CCMeetings.relatedQuery("participants").count().as("participants_count")
+      )
+      .where((builder) => {
+        if (day) {
+          builder.whereRaw(
+            `extract(year from start_date) = ${year} and extract(month from start_date) = ${month} and extract(day from start_date) = ${day}`
+          );
+        } else {
+          builder.whereRaw(
+            `extract(year from start_date) = ${year} and extract(month from start_date) = ${month}`
+          );
+        }
+      })
+      .withGraphFetched("[coach(simpleSelect)]")
+      .orderBy("created_at", "asc");
+
+    const checkCurrent = await CCMeetingsParticipants.query().andWhere(
+      "user_id",
+      req?.user?.customId
+    );
+
+    const data = result.map((item) => {
+      const isJoin = checkCurrent.find(
+        (participant) => participant?.meeting_id === item?.id
+      );
+
+      return {
+        ...item,
+        is_join: !!isJoin,
+        detail_id: isJoin?.id,
+      };
+    });
+
+    res.json(data);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+const detailMeetingsParticipantsByDay = async (req, res) => {
+  try {
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: "Internal server error" });
@@ -441,4 +512,5 @@ module.exports = {
   deleteMeeting,
   startMeetingParticipant,
   upcomingMeetings,
+  detailMeetingsParticipantsByDay,
 };
