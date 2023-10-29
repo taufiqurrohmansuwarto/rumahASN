@@ -37,7 +37,7 @@ const ModalCoaching = ({ open, onCancel }) => {
     const result = await form.validateFields();
     const payload = {
       ...result,
-      start_date: moment(result.start_date).format("DD-MM-YYYY"),
+      start_date: moment(result.start_date).format("YYYY-MM-DD"),
       start_hours: moment(result.start_hours).format("HH:mm:ss"),
       end_hours: moment(result.end_hours).format("HH:mm:ss"),
     };
