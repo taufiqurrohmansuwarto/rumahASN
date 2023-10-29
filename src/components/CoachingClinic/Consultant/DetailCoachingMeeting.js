@@ -101,6 +101,7 @@ function DetailCoachingMeeting() {
       onSuccess: () => {
         message.success("Meeting started");
         queryClient.invalidateQueries(["meeting", id]);
+        queryClient.invalidateQueries(["detailMeetingParticipant"]);
         setRenderKey((prev) => prev + 1);
       },
       onSettled: () => {
@@ -157,7 +158,7 @@ function DetailCoachingMeeting() {
     >
       <ModalInformation open={open} item={data} onClose={handleClose} />
       {data?.status === "live" ? (
-        <Row>
+        <Row gutter={[16, 16]}>
           <Col md={18}>
             <JitsiMeeting
               key={renderKey}
@@ -185,14 +186,14 @@ function DetailCoachingMeeting() {
               }}
             />
           </Col>
-          <Col md={8} xs={24}>
+          <Col md={6} xs={24}>
             <DaftarPeserta data={data?.participants} />
           </Col>
         </Row>
       ) : (
         <>
           <Row gutter={[16, 16]}>
-            <Col md={16} xs={24}>
+            <Col md={18} xs={24}>
               <Empty
                 description={`Hmmm... sepertinya coaching clinic belum dimulai atau coaching clinic sudah berakhir`}
               >
@@ -207,7 +208,7 @@ function DetailCoachingMeeting() {
                 </Button>
               </Empty>
             </Col>
-            <Col md={8} xs={24}>
+            <Col md={6} xs={24}>
               <DaftarPeserta data={data?.participants} />
             </Col>
           </Row>
