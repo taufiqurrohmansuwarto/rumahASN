@@ -18,10 +18,12 @@ import {
   Row,
   Col,
   InputNumber,
+  Tag,
 } from "antd";
 import { useRouter } from "next/router";
 import { useState } from "react";
 import { useEffect } from "react";
+import { setColorStatusCoachingClinic } from "@/utils/client-utils";
 
 const ModalUpdate = ({ open, handleClose, data, handleUpdate, loading }) => {
   const [form] = Form.useForm();
@@ -183,32 +185,59 @@ function CoachingMeetings() {
     }
   );
 
+  const handleChangePage = (page) => {
+    router.push({
+      pathname: router.pathname,
+      query: {
+        ...router.query,
+        page,
+      },
+    });
+  };
+
   const gotoDetail = (id) => {
     router.push(`/coaching-clinic-consultant/${id}/detail`);
   };
 
   const columns = [
     {
+      title: "Daftar",
+      key: "daftar",
+      responsive: ["xs"],
+      render: (_, row) => {
+        return (
+          <>
+            <a onClick={() => gotoDetail(row?.id)}>Detail</a>
+          </>
+        );
+      },
+    },
+    {
       title: "Judul",
       dataIndex: "title",
+      responsive: ["sm"],
     },
     {
       title: "Tanggal",
       dataIndex: "start_date",
+      responsive: ["sm"],
       render: (row) => {
         return <>{moment(row).format("DD MMMM YYYY")}</>;
       },
     },
     {
       title: "Maximal Peserta",
+      responsive: ["sm"],
       dataIndex: "max_participants",
     },
     {
       title: "Peserta Terdaftar",
+      responsive: ["sm"],
       dataIndex: "participants_count",
     },
     {
       title: "Jam",
+      responsive: ["sm"],
       dataIndex: "start_hours",
       render: (_, row) => {
         return <>{`${row?.start_hours} - ${row?.end_hours}`}</>;
@@ -216,10 +245,17 @@ function CoachingMeetings() {
     },
     {
       title: "Status",
-      dataIndex: "status",
+      responsive: ["sm"],
+      key: "status",
+      render: (_, row) => (
+        <Tag color={setColorStatusCoachingClinic(row?.status)}>
+          {row?.status}
+        </Tag>
+      ),
     },
     {
       title: "Tgl. Dibuat",
+      responsive: ["sm"],
       key: "created_at",
       render: (_, row) => (
         <>{moment(row?.created_at).format("DD MMMM YYYY HH:mm:ss")}</>
@@ -227,6 +263,7 @@ function CoachingMeetings() {
     },
     {
       title: "Aksi",
+      responsive: ["sm"],
       key: "action",
       render: (_, row) => {
         return (
@@ -241,14 +278,13 @@ function CoachingMeetings() {
             >
               <a>Hapus</a>
             </Popconfirm>
-            {/* <Divider type="vertical" />
-            <a onClick={() => handleReset(row)}>Reset</a> */}
           </>
         );
       },
     },
     {
       title: "Set Status",
+      responsive: ["sm"],
       key: "set_status",
       render: (_, row) => {
         return (
@@ -272,6 +308,13 @@ function CoachingMeetings() {
         loading={isLoadingUpdate}
       />
       <Table
+        pagination={{
+          onChange: handleChangePage,
+          current: router?.query?.page || 1,
+          total: data?.total,
+          showTotal: (total) => `Total ${total} data`,
+          position: ["bottomRight", "topRight"],
+        }}
         columns={columns}
         loading={isLoading}
         rowKey={(row) => row?.id}
