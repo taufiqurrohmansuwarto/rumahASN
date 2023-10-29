@@ -110,8 +110,9 @@ function CreateCoaching() {
         style={{
           marginBottom: 20,
         }}
+        shape="round"
       >
-        Buat Jawdal Coaching
+        Buat Coaching
       </Button>
     </div>
   );

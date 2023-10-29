@@ -126,16 +126,32 @@ const findMeeting = async (req, res) => {
   try {
     const page = req?.query?.page || 1;
     const limit = req?.query?.limit || 20;
+
+    const status = req?.query?.status;
+    const startDate = req?.query?.start_date;
+    const endDate = req?.query?.end_date;
+    const title = req?.query?.title;
+
     const { customId } = req?.user;
 
     const result = await CCMeetings.query()
       .where({ user_id: customId })
+      .andWhere((builder) => {
+        if (status) {
+          builder.where("status", status);
+        } else if (startDate && endDate) {
+          builder.whereBetween("start_date", [startDate, endDate]);
+        } else if (title) {
+          builder.where("title", "ilike", `%${title}%`);
+        }
+      })
       .select(
         "*",
         CCMeetings.relatedQuery("participants").count().as("participants_count")
       )
       .withGraphFetched("[coach(simpleSelect)]")
-      .page(parseInt(page) - 1, parseInt(limit));
+      .page(parseInt(page) - 1, parseInt(limit))
+      .orderBy("created_at", "desc");
 
     const data = {
       data: result.results,
@@ -320,6 +336,10 @@ const joinMeeting = async (req, res) => {
         res.status(403).json({
           message: "The meeting is full",
         });
+      } else if (currentMeeting?.status !== "upcoming") {
+        res.status(403).json({
+          message: "The meeting is already started or ended",
+        });
       } else {
         const result = await CCMeetingsParticipants.query()
           .upsertGraph({
@@ -369,6 +389,12 @@ const meetingsParticipants = async (req, res) => {
     const { customId } = req?.user;
     const page = req?.query?.page || 1;
     const limit = req?.query?.limit || 25;
+
+    // status, judul, tanggal
+    const status = req?.query?.status;
+    const title = req?.query?.title;
+    const startDate = req?.query?.start_date;
+    const endDate = req?.query?.end_date;
 
     const result = await CCMeetingsParticipants.query()
       .where({
@@ -458,6 +484,7 @@ const upcomingMeetings = async (req, res) => {
           );
         }
       })
+      .andWhere("status", "upcoming")
       .withGraphFetched("[coach(simpleSelect)]")
       .orderBy("created_at", "asc");
 

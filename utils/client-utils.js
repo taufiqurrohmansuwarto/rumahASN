@@ -633,3 +633,13 @@ export const setColorPrioritas = (prioritas) => {
 export const findPangkat = (idPangkat) => {
   return REF_PANGKAT.find((item) => item.id === idPangkat)?.nama_pangkat;
 };
+
+export const setColorStatusCoachingClinic = (status) => {
+  if (status === "upcoming") {
+    return "yellow";
+  } else if (status === "live") {
+    return "green";
+  } else if (status === "end") {
+    return "red";
+  }
+};
