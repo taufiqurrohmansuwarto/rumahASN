@@ -150,7 +150,9 @@ function DetailCoachingMeeting() {
 
   const handleMuteAll = async () => {
     const result = await api.getParticipantsInfo();
-    console.log(result);
+    const participantId = result?.[0]?.participantId;
+
+    api.executeCommand("grantModerator", participantId);
   };
 
   return (
@@ -169,7 +171,6 @@ function DetailCoachingMeeting() {
       loading={isLoading}
     >
       <ModalInformation open={open} item={data} onClose={handleClose} />
-      <Button onClick={handleMuteAll}>test</Button>
       {data?.status === "live" ? (
         <Row gutter={[16, 16]}>
           <Col md={18}>
