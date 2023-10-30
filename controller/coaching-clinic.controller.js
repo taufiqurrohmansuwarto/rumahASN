@@ -3,6 +3,7 @@ const CCMeetings = require("@/models/cc_meetings.model");
 const CCMeetingsParticipants = require("@/models/cc_meetings_participants.model");
 const jsonwebtoken = require("jsonwebtoken");
 const moment = require("moment");
+const { isArray } = require("lodash");
 
 const appId = process.env.APP_ID;
 const appSecret = process.env.APP_SECRET;
@@ -128,8 +129,7 @@ const findMeeting = async (req, res) => {
     const limit = req?.query?.limit || 20;
 
     const status = req?.query?.status;
-    const startDate = req?.query?.start_date;
-    const endDate = req?.query?.end_date;
+    const rangeDate = req?.query?.range_date;
     const title = req?.query?.title;
 
     const { customId } = req?.user;
@@ -139,9 +139,11 @@ const findMeeting = async (req, res) => {
       .andWhere((builder) => {
         if (status) {
           builder.where("status", status);
-        } else if (startDate && endDate) {
-          builder.whereBetween("start_date", [startDate, endDate]);
-        } else if (title) {
+        }
+        if (isArray(rangeDate)) {
+          builder.whereBetween("start_date", rangeDate);
+        }
+        if (title) {
           builder.where("title", "ilike", `%${title}%`);
         }
       })
@@ -393,15 +395,33 @@ const meetingsParticipants = async (req, res) => {
     // status, judul, tanggal
     const status = req?.query?.status;
     const title = req?.query?.title;
-    const startDate = req?.query?.start_date;
-    const endDate = req?.query?.end_date;
+    const rangeDate = req?.query?.range_date;
 
-    const result = await CCMeetingsParticipants.query()
-      .where({
-        user_id: customId,
-      })
-      .withGraphFetched("[meeting.[coach(simpleSelect)]]")
-      .page(parseInt(page) - 1, parseInt(limit));
+    let query = {};
+
+    query = CCMeetingsParticipants.query()
+      .where("cc_meetings_participants.user_id", customId)
+      .withGraphFetched("[meeting.[coach(simpleSelect)]]");
+
+    if (status) {
+      query = query.joinRelated("meeting").where("meeting.status", status);
+    }
+
+    if (title) {
+      query = query
+        .joinRelated("meeting")
+        .where("meeting.title", "ilike", `%${title}%`);
+    }
+
+    if (isArray(rangeDate)) {
+      query = query
+        .joinRelated("meeting")
+        .whereBetween("meeting.start_date", rangeDate);
+    }
+
+    const result = await query
+      .page(parseInt(page) - 1, parseInt(limit))
+      .orderBy("created_at", "desc");
 
     const data = {
       data: result.results,
@@ -409,8 +429,6 @@ const meetingsParticipants = async (req, res) => {
       page: parseInt(page),
       limit: parseInt(limit),
     };
-
-    console.log(data);
 
     res.json(data);
   } catch (error) {

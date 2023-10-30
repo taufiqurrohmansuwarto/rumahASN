@@ -6,13 +6,13 @@ import { useEffect } from "react";
 import moment from "moment";
 import { isArray } from "lodash";
 
-function FilterConsultantMeetings() {
+function FilterParticipantMeetings() {
   const router = useRouter();
   const query = router?.query;
 
   const handleReset = () => {
     router.push({
-      pathname: "/coaching-clinic-consultant",
+      pathname: "/coaching-clinic/my-coaching-clinic",
     });
   };
 
@@ -40,7 +40,7 @@ function FilterConsultantMeetings() {
       }
 
       router.push({
-        pathname: "/coaching-clinic-consultant",
+        pathname: "/coaching-clinic/my-coaching-clinic",
         query: { ...router?.query, ...values },
       });
     }
@@ -112,4 +112,4 @@ function FilterConsultantMeetings() {
   );
 }
 
-export default FilterConsultantMeetings;
+export default FilterParticipantMeetings;
