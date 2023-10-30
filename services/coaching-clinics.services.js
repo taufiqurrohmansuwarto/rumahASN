@@ -93,3 +93,8 @@ export const detailMeetingParticipant = (id) => {
   const url = `/participants/meetings/${id}`;
   return coachingClinicApi.get(url).then((res) => res?.data);
 };
+
+export const giveRatingMeeting = ({ id, data }) => {
+  const url = `/participants/meetings/${id}/rating`;
+  return coachingClinicApi.put(url, data).then((res) => res?.data);
+};
