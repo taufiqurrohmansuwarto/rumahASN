@@ -3,11 +3,13 @@ import {
   meetingsParticipant,
 } from "@/services/coaching-clinics.services";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Divider, Popconfirm, Space, Table, message } from "antd";
+import { Divider, Popconfirm, Space, Table, Tag, message } from "antd";
 import { useRouter } from "next/router";
 import React from "react";
 import moment from "moment";
 import { Stack } from "@mantine/core";
+import { setColorStatusCoachingClinic } from "@/utils/client-utils";
+import FilterParticipantMeetings from "./FilterParticipantMeetings";
 
 function MyMeetings() {
   const router = useRouter();
@@ -89,7 +91,7 @@ function MyMeetings() {
       responsive: ["sm"],
     },
     {
-      title: "Tanggal",
+      title: "Tanggal Coaching Clinic",
       key: "tanggal",
       render: (_, row) => (
         <>{moment(row?.meeting?.start_date).format("DD MMMM YYYY")}</>
@@ -109,8 +111,19 @@ function MyMeetings() {
     {
       title: "Status",
       key: "status",
-      render: (_, row) => <>{row?.meeting?.status}</>,
+      render: (_, row) => (
+        <Tag color={setColorStatusCoachingClinic(row?.meeting?.status)}>
+          {row?.meeting?.status}
+        </Tag>
+      ),
       responsive: ["sm"],
+    },
+    {
+      title: "Tanggal Daftar",
+      key: "tanggal_daftar",
+      render: (_, row) => (
+        <>{moment(row?.created_at).format("DD MMMM YYYY HH:mm:ss")}</>
+      ),
     },
     {
       title: "Aksi",
@@ -136,6 +149,7 @@ function MyMeetings() {
 
   return (
     <>
+      <FilterParticipantMeetings />
       <Table columns={columns} dataSource={data?.data} loading={isLoading} />
     </>
   );

@@ -24,6 +24,7 @@ import { useRouter } from "next/router";
 import { useState } from "react";
 import { useEffect } from "react";
 import { setColorStatusCoachingClinic } from "@/utils/client-utils";
+import FilterConsultantMeetings from "./FilterConsultantMeetings";
 
 const ModalUpdate = ({ open, handleClose, data, handleUpdate, loading }) => {
   const [form] = Form.useForm();
@@ -307,6 +308,7 @@ function CoachingMeetings() {
         handleUpdate={handleUpdate}
         loading={isLoadingUpdate}
       />
+      <FilterConsultantMeetings />
       <Table
         pagination={{
           onChange: handleChangePage,

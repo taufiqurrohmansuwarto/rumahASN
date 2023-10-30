@@ -4,10 +4,10 @@ import {
   BarChartOutlined,
   BookOutlined,
   CarOutlined,
+  CustomerServiceOutlined,
   DashboardFilled,
   HomeOutlined,
   QuestionCircleOutlined,
-  ReconciliationOutlined,
   SettingOutlined,
   SmileOutlined,
   SnippetsOutlined,
@@ -74,7 +74,7 @@ export const userRoutes = {
     {
       path: "/coaching-clinic/all",
       name: "Coaching Clinic",
-      icon: <ReconciliationOutlined />,
+      icon: <CustomerServiceOutlined />,
     },
     {
       path: "/edukasi/podcasts",

@@ -87,11 +87,12 @@ function DetailMeetingParticipant() {
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
 
-  const { data, isLoading } = useQuery(
+  const { data, isLoading, refetch, isFetching } = useQuery(
     ["detailMeetingParticipant", id],
     () => detailMeetingParticipant(id),
     {
       enabled: !!id,
+      refetchOnWindowFocus: false,
     }
   );
 
@@ -158,7 +159,17 @@ function DetailMeetingParticipant() {
                 <Empty
                   description={`Hmmm... sepertinya coaching clinic belum dimulai atau coaching clinic sudah berakhir`}
                 >
-                  <Button>Kembali</Button>
+                  <Space>
+                    <Button onClick={() => router.back()}>Kembali</Button>
+                    <Button
+                      loading={isLoading || isFetching}
+                      disabled={isLoading || isFetching}
+                      type="primary"
+                      onClick={() => refetch()}
+                    >
+                      Refresh
+                    </Button>
+                  </Space>
                 </Empty>
               </Col>
               <Col md={8} xs={24}>
