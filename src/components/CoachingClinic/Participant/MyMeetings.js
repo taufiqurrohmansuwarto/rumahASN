@@ -10,6 +10,7 @@ import moment from "moment";
 import { Stack } from "@mantine/core";
 import { setColorStatusCoachingClinic } from "@/utils/client-utils";
 import FilterParticipantMeetings from "./FilterParticipantMeetings";
+import Link from "next/link";
 
 function MyMeetings() {
   const router = useRouter();
@@ -55,7 +56,9 @@ function MyMeetings() {
       render: (_, row) => (
         <>
           <Stack>
-            <div>{row?.meeting?.title}</div>
+            <Link href={`/coaching-clinic/${row?.meeting?.id}/detail`}>
+              {row?.meeting?.title}
+            </Link>
             <div>{row?.meeting?.coach?.username}</div>
             <div>{row?.meeting?.status}</div>
             <div>
@@ -81,7 +84,11 @@ function MyMeetings() {
     {
       title: "Judul",
       key: "title",
-      render: (_, row) => <>{row?.meeting?.title}</>,
+      render: (_, row) => (
+        <Link href={`/coaching-clinic/${row?.meeting?.id}/detail`}>
+          {row?.meeting?.title}
+        </Link>
+      ),
       responsive: ["sm"],
     },
     {
@@ -132,7 +139,7 @@ function MyMeetings() {
         return (
           <>
             <Space>
-              <a onClick={() => gotoDetailMeetingParticipant(row)}>Detail</a>
+              <a onClick={() => gotoDetailMeetingParticipant(row)}>Lihat</a>
               <Divider type="vertical" />
               <Popconfirm
                 onConfirm={async () => await handleBatal(row)}
