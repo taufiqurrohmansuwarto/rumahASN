@@ -16,6 +16,7 @@ import {
   Row,
   Skeleton,
   Space,
+  Tag,
   Typography,
 } from "antd";
 import { useRouter } from "next/router";
@@ -25,7 +26,7 @@ const DaftarPeserta = ({ data }) => {
   return (
     <ScrollArea h={600}>
       <List
-        header={<div>Daftar Peserta</div>}
+        header={<div>{data?.length} Peserta</div>}
         dataSource={data}
         rowKey={(row) => row?.custom_id}
         renderItem={(item) => (
@@ -34,8 +35,13 @@ const DaftarPeserta = ({ data }) => {
               title={item?.participant?.username}
               description={
                 <Space direction="vertical" size="small">
-                  <div>{item?.participant?.info?.jabatan?.jabatan}</div>
+                  <Tag color="blue">
+                    {item?.participant?.info?.jabatan?.jabatan}
+                  </Tag>
                   <div>{item?.participant?.info?.perangkat_daerah?.detail}</div>
+                  <Tag color="yellow">
+                    {moment(item?.created_at).format("DD MMMM YYYY HH:mm:ss")}
+                  </Tag>
                 </Space>
               }
               avatar={<Avatar src={item?.participant?.image} />}
@@ -139,6 +145,7 @@ function DetailMeetingParticipant() {
                   }}
                   interfaceConfigOverwrite={{
                     DISABLE_JOIN_LEAVE_NOTIFICATIONS: false,
+                    APP_NAME: "Coaching Clinic",
                   }}
                   onReadyToClose={() => {
                     leaveMeeting();

@@ -1,32 +1,13 @@
+import MyMeetings from "@/components/CoachingClinic/Participant/MyMeetings";
+import UpcomingMeetings from "@/components/CoachingClinic/Participant/UpcomingMeetings";
 import Layout from "@/components/Layout";
 import PageContainer from "@/components/PageContainer";
-import { SearchOutlined } from "@ant-design/icons";
-import { Button, Calendar, Card } from "antd";
+import { Card } from "antd";
 import Head from "next/head";
 import { useRouter } from "next/router";
-import moment from "moment";
-import UpcomingMeetings from "@/components/CoachingClinic/Participant/UpcomingMeetings";
-import MyMeetings from "@/components/CoachingClinic/Participant/MyMeetings";
 
 const CoachingClinic = () => {
   const router = useRouter();
-
-  const handleCreate = () => router.push("/coaching-clinic/consults");
-
-  const dateCellRender = (value) => {
-    // every sunday in this month
-
-    const isSunday = moment(value).day() === 0;
-
-    if (isSunday) {
-      return (
-        <div className="text-center">
-          <div className="text-2xl">12</div>
-          <div className="text-sm">Minggu</div>
-        </div>
-      );
-    }
-  };
 
   return (
     <>

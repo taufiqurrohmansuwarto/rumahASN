@@ -13,6 +13,14 @@ class CCMeetingsParticipants extends Model {
     return "cc_meetings_participants";
   }
 
+  static get modifiers() {
+    return {
+      allSelect(query) {
+        query.orderBy("created_at", "desc");
+      },
+    };
+  }
+
   // realation with user
   static get relationMappings() {
     const meeting = require("@/models/cc_meetings.model");

@@ -3,7 +3,9 @@ import {
   requestMeeting,
   upcomingMeetings,
 } from "@/services/coaching-clinics.services";
-import { Stack } from "@mantine/core";
+import { setColorStatusCoachingClinic } from "@/utils/client-utils";
+import { CloseOutlined } from "@ant-design/icons";
+import { Alert, Stack } from "@mantine/core";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Avatar,
@@ -17,6 +19,7 @@ import {
   Modal,
   Skeleton,
   Space,
+  Tag,
   Tooltip,
   Typography,
   message,
@@ -26,6 +29,40 @@ import { useRouter } from "next/router";
 import { useState } from "react";
 
 const { Panel } = Collapse;
+
+const ButtonKonsultasi = ({ item, handleBatal, gotoDetail, handleGabung }) => {
+  if (item?.is_join) {
+    return (
+      <Space>
+        <Button
+          icon={<CloseOutlined />}
+          danger
+          onClick={() => handleBatal(item)}
+        >
+          Batal
+        </Button>
+        <Button onClick={() => gotoDetail(item)}>Lihat Detail</Button>
+      </Space>
+    );
+  }
+
+  if (!item?.is_join && item?.status === "upcoming") {
+    return (
+      <Button type="primary" onClick={() => handleGabung(item)}>
+        Ikuti Coaching Clinic
+      </Button>
+    );
+  }
+
+  if (!item?.is_join && (item?.status === "live" || item?.status === "end")) {
+    return (
+      <Alert color="red">
+        Kamu tidak bisa mengikuti coaching clinic ini karena statusnya{" "}
+        {item?.status}
+      </Alert>
+    );
+  }
+};
 
 const PickCoachingModal = ({ open, onCancel, onOk, row }) => {
   const router = useRouter();
@@ -62,8 +99,8 @@ const PickCoachingModal = ({ open, onCancel, onOk, row }) => {
 
   const handleGabung = (row) => {
     Modal.confirm({
-      title: "Gabung",
-      content: "Apakah anda yakin ingin gabung?",
+      title: "Konfirmasi",
+      content: "Apakah anda yakin ingin mengikuti coaching clinic ini?",
       okText: "Ya",
       cancelText: "Tidak",
       centered: true,
@@ -76,7 +113,7 @@ const PickCoachingModal = ({ open, onCancel, onOk, row }) => {
   const handleBatal = (row) => {
     Modal.confirm({
       title: "Batal",
-      content: "Apakah anda yakin ingin membatalkan?",
+      content: "Apakah anda yakin ingin membatalkan coaching clinic ini?",
       okText: "Ya",
       cancelText: "Tidak",
       centered: true,
@@ -133,7 +170,9 @@ const PickCoachingModal = ({ open, onCancel, onOk, row }) => {
                     {item?.description}
                   </Descriptions.Item>
                   <Descriptions.Item label="Status">
-                    {item?.status}
+                    <Tag color={setColorStatusCoachingClinic(item?.status)}>
+                      {item?.status}
+                    </Tag>
                   </Descriptions.Item>
                   <Descriptions.Item label="Tanggal" span={3}>
                     {moment(item?.start_date).format("DD MMMM YYYY")}
@@ -144,20 +183,17 @@ const PickCoachingModal = ({ open, onCancel, onOk, row }) => {
                   <Descriptions.Item label="Maksimum Peserta">
                     {item?.max_participants}
                   </Descriptions.Item>
+                  <Descriptions.Item label="Peserta Mendaftar">
+                    {item?.participants_count}
+                  </Descriptions.Item>
                 </Descriptions>
                 <Space>
-                  {item?.is_join ? (
-                    <>
-                      <Button danger onClick={() => handleBatal(item)}>
-                        Batal
-                      </Button>
-                      <Button onClick={() => gotoDetail(item)}>Detail</Button>
-                    </>
-                  ) : (
-                    <Button type="primary" onClick={() => handleGabung(item)}>
-                      Gabung
-                    </Button>
-                  )}
+                  <ButtonKonsultasi
+                    item={item}
+                    handleBatal={handleBatal}
+                    gotoDetail={gotoDetail}
+                    handleGabung={handleGabung}
+                  />
                 </Space>
               </Space>
             </Panel>
