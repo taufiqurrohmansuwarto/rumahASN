@@ -1,12 +1,51 @@
 const User = require("@/models/users.model");
+
+// coaching clinic
 const CCMeetings = require("@/models/cc_meetings.model");
 const CCMeetingsParticipants = require("@/models/cc_meetings_participants.model");
+const CCRatings = require("@/models/cc_ratings.model");
+
 const jsonwebtoken = require("jsonwebtoken");
 const moment = require("moment");
 const { isArray } = require("lodash");
 
 const appId = process.env.APP_ID;
 const appSecret = process.env.APP_SECRET;
+
+const giveRatingMeeting = async (req, res) => {
+  try {
+    const { body } = req;
+    const { customId } = req?.user;
+    const { id } = req?.query;
+
+    const result = await CCMeetingsParticipants.query()
+      .where({
+        id,
+        user_id: customId,
+      })
+      .first();
+
+    if (!result) {
+      res.status(404).json({ message: "Not found" });
+    } else {
+      const meetingId = result?.meeting_id;
+
+      await CCRatings.query()
+        .insert({
+          ...body,
+          user_id: customId,
+          meeting_id: meetingId,
+        })
+        .onConflict(["user_id", "meeting_id"])
+        .merge();
+
+      res.json({ message: "Success" });
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
 
 const createJWT = (user, id) => {
   const payload = {
@@ -558,4 +597,5 @@ module.exports = {
   startMeetingParticipant,
   upcomingMeetings,
   detailMeetingsParticipantsByDay,
+  giveRatingMeeting,
 };
