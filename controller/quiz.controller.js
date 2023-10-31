@@ -13,34 +13,34 @@ const shuffleOptions = (options) => {
 const randomizeQuestionOptions = (question) => {
   const options = [
     {
-      text: question.option_a.text,
+      text: question?.option_a?.text,
       // is_correct: question.option_a.is_correct,
       option: "option_a",
     },
     {
-      text: question.option_b.text,
+      text: question?.option_b?.text,
       // is_correct: question.option_b.is_correct,
       option: "option_b",
     },
     {
-      text: question.option_c.text,
+      text: question?.option_c?.text,
       // is_correct: question.option_c.is_correct,
       option: "option_c",
     },
     {
-      text: question.option_d.text,
+      text: question?.option_d?.text,
       // is_correct: question.option_d.is_correct,
       option: "option_d",
     },
     {
-      text: question.option_e.text,
+      text: question?.option_e?.text,
       // is_correct: question.option_e.is_correct,
       option: "option_e",
     },
   ];
 
   return {
-    question: question.question,
+    question: question?.question,
     options: shuffleOptions(options),
   };
 };
@@ -82,28 +82,28 @@ const userAnswerQuiz = async (req, res) => {
     const is_correct = result[answer].is_correct;
     const options = [
       {
-        text: result.option_a.text,
+        text: result?.option_a?.text,
         is_correct: result.option_a.is_correct,
         option: "option_a",
       },
       {
-        text: result.option_b.text,
+        text: result?.option_b?.text,
         is_correct: result.option_b.is_correct,
         option: "option_b",
       },
       {
-        text: result.option_c.text,
-        is_correct: result.option_c.is_correct,
+        text: result?.option_c?.text,
+        is_correct: result?.option_c?.is_correct,
         option: "option_c",
       },
       {
-        text: result.option_d.text,
-        is_correct: result.option_d.is_correct,
+        text: result?.option_d?.text,
+        is_correct: result?.option_d?.is_correct,
         option: "option_d",
       },
       {
-        text: result.option_e.text,
-        is_correct: result.option_e.is_correct,
+        text: result?.option_e?.text,
+        is_correct: result?.option_e?.is_correct,
         option: "option_e",
       },
     ];
