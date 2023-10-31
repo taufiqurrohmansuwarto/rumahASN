@@ -183,8 +183,19 @@ const PickCoachingModal = ({ open, onCancel, onOk, row }) => {
                   <Descriptions.Item label="Maksimum Peserta">
                     {item?.max_participants}
                   </Descriptions.Item>
-                  <Descriptions.Item label="Peserta Mendaftar">
-                    {item?.participants_count}
+                  <Descriptions.Item
+                    label={`${item?.participants_count} Peserta Mendaftar`}
+                  >
+                    <Avatar.Group maxCount={6} size="small">
+                      {item?.participants?.map((item) => (
+                        <Tooltip
+                          key={item?.id}
+                          title={item?.participant?.username}
+                        >
+                          <Avatar src={item?.participant?.image} />
+                        </Tooltip>
+                      ))}
+                    </Avatar.Group>
                   </Descriptions.Item>
                 </Descriptions>
                 <Space>
@@ -304,6 +315,9 @@ function UpcomingMeetings() {
 
   return (
     <>
+      <Alert color="green" title="Tips">
+        Pilih tanggal coaching clinic yang ada pada kalender, lalu klik
+      </Alert>
       <PickCoachingModal open={open} onCancel={handleClose} row={row} />
       <Calendar
         onPanelChange={handleChange}
