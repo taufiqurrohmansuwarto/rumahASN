@@ -61,10 +61,15 @@ const userGetQuiz = async (req, res) => {
       .orderByRaw("RANDOM()")
       .first();
 
+    console.log({
+      result,
+    });
+
     const hasil = randomizeQuestionOptions(result);
+    console.log({ hasil });
 
     res.json({
-      id: result.id,
+      id: result?.id,
       ...hasil,
     });
   } catch (error) {
