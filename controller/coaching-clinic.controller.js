@@ -52,8 +52,9 @@ const createJWT = (user, id) => {
     context: {
       user: {
         avatar: user?.image,
-        name: user?.name,
+        name: `${user?.name} (Coach)`,
         email: user?.email,
+        id: user?.customId,
       },
     },
     moderator: true,
@@ -75,6 +76,7 @@ const createJwtParticipant = (user, id) => {
         avatar: user?.image,
         name: user?.name,
         email: user?.email,
+        id: user?.customId,
       },
     },
     moderator: false,
@@ -277,7 +279,7 @@ const getMeeting = async (req, res) => {
         user_id: customId,
       })
       .withGraphFetched(
-        "[participants.[participant(simpleSelect)], coach(simpleSelect)]"
+        "[participants(allSelect).[participant(simpleSelect)], coach(simpleSelect)]"
       )
 
       .first();
@@ -497,7 +499,8 @@ const detailMeetingParticipant = async (req, res) => {
       .where({
         meeting_id: result?.meeting_id,
       })
-      .withGraphFetched("[participant(simpleSelect)]");
+      .withGraphFetched("[participant(simpleSelect)]")
+      .orderBy("created_at", "desc");
 
     if (currentMeeting?.status === "live") {
       const jwt = createJwtParticipant(req?.user, result?.meeting_id);
@@ -541,7 +544,7 @@ const upcomingMeetings = async (req, res) => {
           );
         }
       })
-      .andWhere("status", "upcoming")
+      // .andWhere("status", "upcoming")
       .withGraphFetched("[coach(simpleSelect)]")
       .orderBy("created_at", "asc");
 
