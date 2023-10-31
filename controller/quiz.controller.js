@@ -48,12 +48,21 @@ const randomizeQuestionOptions = (question) => {
 // get random  quiz
 const userGetQuiz = async (req, res) => {
   try {
+    let correct_question = [];
     const { customId } = req?.user;
     const dataKuis = await LeaderboardQuiz.query().findById(customId);
-    const correct_question = dataKuis?.correct_question;
-    console.log({
-      correct_question,
-    });
+    correct_question = dataKuis?.correct_question;
+
+    const totalQuiz = await QuestionAnswer.query().count();
+
+    // if correct question is 75% of total question then reset
+    if (correct_question?.length >= totalQuiz[0].count * 0.75) {
+      await LeaderboardQuiz.query().findById(customId).patch({
+        correct_question: [],
+      });
+      const dataKuisReload = await LeaderboardQuiz.query().findById(customId);
+      correct_question = dataKuisReload?.correct_question;
+    }
 
     const result = await QuestionAnswer.query()
       .where((builder) => {
@@ -64,12 +73,7 @@ const userGetQuiz = async (req, res) => {
       .orderByRaw("RANDOM()")
       .first();
 
-    console.log({
-      result,
-    });
-
     const hasil = randomizeQuestionOptions(result);
-    console.log({ hasil });
 
     res.json({
       id: result?.id,
