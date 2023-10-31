@@ -51,6 +51,9 @@ const userGetQuiz = async (req, res) => {
     const { customId } = req?.user;
     const dataKuis = await LeaderboardQuiz.query().findById(customId);
     const correct_question = dataKuis?.correct_question;
+    console.log({
+      correct_question,
+    });
 
     const result = await QuestionAnswer.query()
       .where((builder) => {
