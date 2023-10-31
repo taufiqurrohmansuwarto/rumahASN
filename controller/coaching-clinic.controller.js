@@ -545,7 +545,7 @@ const upcomingMeetings = async (req, res) => {
         }
       })
       // .andWhere("status", "upcoming")
-      .withGraphFetched("[coach(simpleSelect)]")
+      .withGraphFetched("[coach(simpleSelect), participants.[participant]]")
       .orderBy("created_at", "asc");
 
     const checkCurrent = await CCMeetingsParticipants.query().andWhere(
