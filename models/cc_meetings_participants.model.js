@@ -17,6 +17,7 @@ class CCMeetingsParticipants extends Model {
   static get relationMappings() {
     const meeting = require("@/models/cc_meetings.model");
     const participants = require("@/models/users.model");
+
     return {
       participant: {
         relation: Model.BelongsToOneRelation,
