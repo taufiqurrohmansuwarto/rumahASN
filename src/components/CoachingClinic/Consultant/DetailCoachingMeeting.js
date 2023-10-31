@@ -17,6 +17,7 @@ import {
   Modal,
   Row,
   Space,
+  Tag,
   Typography,
   message,
 } from "antd";
@@ -28,7 +29,7 @@ const DaftarPeserta = ({ data }) => {
   return (
     <ScrollArea h={600}>
       <List
-        header={<div>Daftar Peserta</div>}
+        header={<div>{data?.length} Peserta</div>}
         dataSource={data}
         rowKey={(row) => row?.custom_id}
         renderItem={(item) => (
@@ -37,8 +38,13 @@ const DaftarPeserta = ({ data }) => {
               title={item?.participant?.username}
               description={
                 <Space direction="vertical" size="small">
-                  <div>{item?.participant?.info?.jabatan?.jabatan}</div>
+                  <Tag color="blue">
+                    {item?.participant?.info?.jabatan?.jabatan}
+                  </Tag>
                   <div>{item?.participant?.info?.perangkat_daerah?.detail}</div>
+                  <Tag color="yellow">
+                    {moment(item?.created_at).format("DD MMMM YYYY HH:mm:ss")}
+                  </Tag>
                 </Space>
               }
               avatar={<Avatar src={item?.participant?.image} />}
@@ -137,9 +143,17 @@ function DetailCoachingMeeting() {
   };
 
   const [open, setOpen] = useState(false);
+  const [api, setApi] = useState(null);
 
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
+
+  const handleMuteAll = async () => {
+    const result = await api.getParticipantsInfo();
+    const participantId = result?.[0]?.participantId;
+
+    api.executeCommand("grantModerator", participantId);
+  };
 
   return (
     <Card
@@ -176,11 +190,13 @@ function DetailCoachingMeeting() {
               }}
               interfaceConfigOverwrite={{
                 DISABLE_JOIN_LEAVE_NOTIFICATIONS: false,
+                APP_NAME: "Coaching Clinic",
               }}
               onReadyToClose={() => {
                 closeMeeting();
               }}
               onApiReady={(api) => {
+                setApi(api);
                 // here you can attach custom event listeners to the Jitsi Meet External API
                 // you can also store it locally to execute commands
               }}

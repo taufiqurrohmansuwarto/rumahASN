@@ -25,6 +25,7 @@ import { useState } from "react";
 import { useEffect } from "react";
 import { setColorStatusCoachingClinic } from "@/utils/client-utils";
 import FilterConsultantMeetings from "./FilterConsultantMeetings";
+import Link from "next/link";
 
 const ModalUpdate = ({ open, handleClose, data, handleUpdate, loading }) => {
   const [form] = Form.useForm();
@@ -215,7 +216,12 @@ function CoachingMeetings() {
     },
     {
       title: "Judul",
-      dataIndex: "title",
+      key: "title",
+      render: (_, row) => (
+        <Link href={`/coaching-clinic-consultant/${row?.id}/detail`}>
+          {row?.title}
+        </Link>
+      ),
       responsive: ["sm"],
     },
     {
