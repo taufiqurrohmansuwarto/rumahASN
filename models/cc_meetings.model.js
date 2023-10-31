@@ -16,7 +16,17 @@ class CCMeetings extends Model {
   static get relationMappings() {
     const user = require("@/models/users.model");
     const participants = require("@/models/cc_meetings_participants.model");
+    const rating = require("@/models/cc_ratings.model");
+
     return {
+      ratings: {
+        relation: Model.HasManyRelation,
+        modelClass: rating,
+        join: {
+          from: "cc_meetings.id",
+          to: "cc_ratings.meeting_id",
+        },
+      },
       coach: {
         relation: Model.BelongsToOneRelation,
         modelClass: user,

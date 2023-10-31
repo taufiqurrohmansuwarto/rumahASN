@@ -20,30 +20,36 @@ import {
 } from "antd";
 import { useRouter } from "next/router";
 import { useState } from "react";
+import AddRating from "./AddRating";
 
 const DaftarPeserta = ({ data }) => {
   return (
-    <ScrollArea h={600}>
-      <List
-        header={<div>Daftar Peserta</div>}
-        dataSource={data}
-        rowKey={(row) => row?.custom_id}
-        renderItem={(item) => (
-          <List.Item>
-            <List.Item.Meta
-              title={item?.participant?.username}
-              description={
-                <Space direction="vertical" size="small">
-                  <div>{item?.participant?.info?.jabatan?.jabatan}</div>
-                  <div>{item?.participant?.info?.perangkat_daerah?.detail}</div>
-                </Space>
-              }
-              avatar={<Avatar src={item?.participant?.image} />}
-            />
-          </List.Item>
-        )}
-      />
-    </ScrollArea>
+    <>
+      <AddRating />
+      <ScrollArea h={600}>
+        <List
+          header={<div>Daftar Peserta</div>}
+          dataSource={data}
+          rowKey={(row) => row?.custom_id}
+          renderItem={(item) => (
+            <List.Item>
+              <List.Item.Meta
+                title={item?.participant?.username}
+                description={
+                  <Space direction="vertical" size="small">
+                    <div>{item?.participant?.info?.jabatan?.jabatan}</div>
+                    <div>
+                      {item?.participant?.info?.perangkat_daerah?.detail}
+                    </div>
+                  </Space>
+                }
+                avatar={<Avatar src={item?.participant?.image} />}
+              />
+            </List.Item>
+          )}
+        />
+      </ScrollArea>
+    </>
   );
 };
 
