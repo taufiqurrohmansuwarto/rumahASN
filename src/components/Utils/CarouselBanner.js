@@ -28,6 +28,25 @@ function CarouselBanner() {
         style={{
           cursor: "pointer",
         }}
+        onClick={() => router.push("/coaching-clinic/all")}
+      >
+        <div
+          style={{
+            height: "100%",
+          }}
+        >
+          <Image
+            src={
+              "https://siasn.bkd.jatimprov.go.id:9000/public/banner-coaching-clinic.png"
+            }
+            alt="banner-coaching-clinic.webp"
+          />
+        </div>
+      </Carousel.Slide>
+      <Carousel.Slide
+        style={{
+          cursor: "pointer",
+        }}
         onClick={() => router.push("/quiz")}
       >
         <div
