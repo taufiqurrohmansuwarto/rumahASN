@@ -8,6 +8,7 @@ import {
   rem,
 } from "@mantine/core";
 import {
+  IconBrandZoom,
   IconCertificate,
   IconChartInfographic,
   IconDatabaseImport,
@@ -53,6 +54,12 @@ export const MOCKDATA = [
     title: "Webinar Series",
     description:
       "Fitur Webinar dari Rumah ASN menawarkan penyampaian edukatif yang tersistemasi. Keunggulan ini diperkuat dengan sertifikat menggunakan TTE, memastikan keabsahan dan kemudahan bagi pengguna. Ini tidak hanya meningkatkan kualitas edukasi, tetapi juga memberikan kepraktisan dan kepercayaan bagi setiap peserta.",
+  },
+  {
+    icon: IconBrandZoom,
+    title: "Coaching Clinic",
+    description:
+      "Pelatihan virtual tentang kepegawaian daerah di platform digital. Setiap sesi dirancang sesuai tema untuk diskusi mendalam dengan ahli BKD. Tujuannya adalah mempermudah informasi dan meningkatkan kualitas pelayanan BKD.",
   },
 ];
 

@@ -146,7 +146,6 @@ const SignIn = ({ providers }) => {
                   />
                 </a>
               </Tooltip>
-
               <Tooltip title="Instagram BKD Jatim">
                 <a
                   href="https://www.instagram.com/bkdjatim/?hl=en"
