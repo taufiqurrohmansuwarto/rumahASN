@@ -55,3 +55,7 @@ export const downloadDataAnomaliFasilitator = async () => {
     })
     .then((res) => res?.data);
 };
+
+export const dataAdminByDate = async (query) => {
+  return api.get(`/2023/admin/by-date?date=${query}`).then((res) => res?.data);
+};

@@ -32,6 +32,7 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
+import UserByDateAnomali from "@/components/Anomali/UserByDateAnomali";
 
 const PieChart = ({ data }) => {
   const config = {
@@ -395,6 +396,11 @@ const AggregateAnomali23 = () => {
   return (
     <Skeleton loading={isLoading || isFetching}>
       <Row gutter={[12, 12]}>
+        <Col md={12} xs={24}>
+          <Card title="Pekerjaan admin berdasarkan tanggal">
+            <UserByDateAnomali />
+          </Card>
+        </Col>
         <Col md={12} xs={24}>
           <Card title="Persentase">
             <PieChart data={data?.pieChart} />
