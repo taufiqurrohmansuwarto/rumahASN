@@ -1,5 +1,6 @@
 const xlsx = require("xlsx");
 const Anomali23 = require("@/models/anomali23.model");
+const moment = require("moment");
 const { raw } = require("objection");
 const {
   getAggregateAnomali,
@@ -255,7 +256,33 @@ const patchUserAnomali = async (req, res) => {
   }
 };
 
+const userAnomaliByDate = async (req, res) => {
+  try {
+    let date = req?.query?.date;
+
+    const result = await Anomali23.query()
+      .select("user.custom_id", "user.username as label")
+      .whereRaw(`DATE(updated_at) = '${moment(date).format("YYYY-MM-DD")}'`)
+      .joinRelated("user")
+      .andWhere("anomali_23.is_repaired", true)
+      .andWhere("user.current_role", "=", "admin")
+      .count("anomali_23.id as value")
+      .groupBy("user.custom_id");
+
+    const hasil = result.map((item) => ({
+      ...item,
+      value: Number(item.value),
+    }));
+
+    res.json(hasil);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
 module.exports = {
+  userAnomaliByDate,
   patchUserAnomali,
   aggregateAnomali,
   uploadAnomali2022,
