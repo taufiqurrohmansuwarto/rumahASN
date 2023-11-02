@@ -20,9 +20,9 @@ function UserByDateAnomali() {
 
   const config = {
     data,
-    //     label: {
-    //       position: "middle",
-    //     },
+    label: {
+      position: "middle",
+    },
     xField: "value",
     yField: "label",
     seriesField: "label",
