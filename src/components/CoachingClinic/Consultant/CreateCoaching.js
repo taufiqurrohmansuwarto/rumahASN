@@ -2,6 +2,7 @@ import { createMeeting } from "@/services/coaching-clinics.services";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   Button,
+  Checkbox,
   Col,
   DatePicker,
   Form,
@@ -60,6 +61,9 @@ const ModalCoaching = ({ open, onCancel }) => {
         </Form.Item>
         <Form.Item name="description" label="Deskripsi">
           <Input.TextArea />
+        </Form.Item>
+        <Form.Item valuePropName="checked" name="is_private" label="Privat?">
+          <Checkbox />
         </Form.Item>
         <Row gutter={[16, 16]}>
           <Col md={8} xs={24}>

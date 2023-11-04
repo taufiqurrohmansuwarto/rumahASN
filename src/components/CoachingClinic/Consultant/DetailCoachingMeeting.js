@@ -187,6 +187,11 @@ function DetailCoachingMeeting() {
                 disableModeratorIndicator: false,
                 startScreenSharing: true,
                 enableEmailInStats: false,
+                whiteboard: {
+                  enabled: true,
+                  collabServerBaseUrl:
+                    "https://siasn.bkd.jatimprov.go.id/whiteboard",
+                },
               }}
               interfaceConfigOverwrite={{
                 DISABLE_JOIN_LEAVE_NOTIFICATIONS: false,

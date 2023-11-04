@@ -21,7 +21,7 @@ import {
 } from "antd";
 import { useRouter } from "next/router";
 import { useState } from "react";
-import AddRating from "./AddRating";
+import AddRating from "./CoachingClinicRating";
 
 const DaftarPeserta = ({ data }) => {
   return (
