@@ -1,31 +1,78 @@
-import moment from "moment";
 import {
   findMeeting,
   removeMeeting,
   updateMeeting,
 } from "@/services/coaching-clinics.services";
+import { setColorStatusCoachingClinic } from "@/utils/client-utils";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Card,
+  Checkbox,
+  Col,
+  DatePicker,
   Divider,
   Form,
+  Input,
+  InputNumber,
   Modal,
   Popconfirm,
-  Table,
-  message,
-  DatePicker,
-  Input,
   Row,
-  Col,
-  InputNumber,
+  Select,
+  Space,
+  Table,
   Tag,
+  Tooltip,
+  message,
 } from "antd";
-import { useRouter } from "next/router";
-import { useState } from "react";
-import { useEffect } from "react";
-import { setColorStatusCoachingClinic } from "@/utils/client-utils";
-import FilterConsultantMeetings from "./FilterConsultantMeetings";
+import { upperCase } from "lodash";
+import moment from "moment";
 import Link from "next/link";
+import { useRouter } from "next/router";
+import { useEffect, useState } from "react";
+import ConsultantAlertMeetingLive from "./ConsultantAlertMeetingLive";
+import FilterConsultantMeetings from "./FilterConsultantMeetings";
+
+const ModalChangeStatus = ({
+  open,
+  handleClose,
+  row,
+  handleChangeStatus,
+  loadingChangeStatus,
+}) => {
+  const [form] = Form.useForm();
+
+  useEffect(() => {
+    form.setFieldsValue({
+      status: row?.status,
+    });
+  }, [form, row]);
+
+  const handleSubmit = async () => {
+    const result = await form.validateFields();
+    handleChangeStatus(row, result?.status);
+  };
+
+  return (
+    <Modal
+      onOk={handleSubmit}
+      confirmLoading={loadingChangeStatus}
+      title="Ubah Status Coaching Clinic"
+      centered
+      open={open}
+      onCancel={handleClose}
+    >
+      <Form form={form}>
+        <Form.Item name="status" label="Status">
+          <Select>
+            <Select.Option value="upcoming">Upcoming</Select.Option>
+            <Select.Option value="end">End</Select.Option>
+            <Select.Option value="live">Live</Select.Option>
+          </Select>
+        </Form.Item>
+      </Form>
+    </Modal>
+  );
+};
 
 const ModalUpdate = ({ open, handleClose, data, handleUpdate, loading }) => {
   const [form] = Form.useForm();
@@ -33,6 +80,7 @@ const ModalUpdate = ({ open, handleClose, data, handleUpdate, loading }) => {
   useEffect(() => {
     form.setFieldsValue({
       title: data?.title,
+      is_private: data?.is_private,
       description: data?.description,
       start_date: data?.start_date ? moment(data.start_date) : null,
       start_hours: data?.start_hours
@@ -69,25 +117,78 @@ const ModalUpdate = ({ open, handleClose, data, handleUpdate, loading }) => {
       title="Update Data Coaching Clinic"
     >
       <Form layout="vertical" form={form}>
-        <Form.Item name="title" label="Judul">
+        <Form.Item
+          rules={[
+            {
+              required: true,
+              message: "Judul harus diisi",
+            },
+          ]}
+          name="title"
+          label="Judul"
+        >
           <Input />
         </Form.Item>
-        <Form.Item name="description" label="Deskripsi">
+        <Form.Item
+          rules={[
+            {
+              required: true,
+              message: "Deskripsi harus diisi",
+            },
+          ]}
+          name="description"
+          label="Deskripsi"
+        >
           <Input.TextArea />
+        </Form.Item>
+        <Form.Item
+          help="Status Privat tidak akan muncul dijadwal coaching clinic secara public"
+          valuePropName="checked"
+          name="is_private"
+          label="Privat?"
+        >
+          <Checkbox />
         </Form.Item>
         <Row gutter={[16, 16]}>
           <Col md={8} xs={24}>
-            <Form.Item name="start_date" label="Tanggal">
+            <Form.Item
+              rules={[
+                {
+                  required: true,
+                  message: "Tanggal harus diisi",
+                },
+              ]}
+              name="start_date"
+              label="Tanggal"
+            >
               <DatePicker />
             </Form.Item>
           </Col>
           <Col md={8} xs={24}>
-            <Form.Item name="start_hours" label="Mulai Jam">
+            <Form.Item
+              rules={[
+                {
+                  required: true,
+                  message: "Mulai jam harus diisi",
+                },
+              ]}
+              name="start_hours"
+              label="Mulai Jam"
+            >
               <DatePicker.TimePicker />
             </Form.Item>
           </Col>
           <Col md={8} xs={24}>
-            <Form.Item name="end_hours" label="Berakhir Jam">
+            <Form.Item
+              rules={[
+                {
+                  required: true,
+                  message: "Berakhir jam harus diisi",
+                },
+              ]}
+              name="end_hours"
+              label="Berakhir Jam"
+            >
               <DatePicker.TimePicker />
             </Form.Item>
           </Col>
@@ -113,6 +214,19 @@ function CoachingMeetings() {
   const router = useRouter();
 
   const [open, setOpen] = useState(false);
+  const [openModalStatus, setOpenModalStatus] = useState(false);
+  const [status, setStatus] = useState(null);
+
+  const handleOpenModalStatus = (row) => {
+    setOpenModalStatus(true);
+    setStatus(row);
+  };
+
+  const handleCloseModalStatus = () => {
+    setOpenModalStatus(false);
+    setStatus(null);
+  };
+
   const [row, setRow] = useState(null);
 
   const handleOpen = (row) => {
@@ -145,9 +259,10 @@ function CoachingMeetings() {
     mutate: updateData,
   } = useMutation((data) => updateMeeting(data), {
     onSuccess: () => {
-      message.success("Coaching Clinic telah direset");
+      message.success("Coaching clinic berhasil diupdate");
       queryClient.invalidateQueries(["meetings"]);
       handleClose();
+      handleCloseModalStatus();
     },
     onSettled: () => {
       queryClient.invalidateQueries(["meetings"]);
@@ -166,16 +281,7 @@ function CoachingMeetings() {
       },
     };
 
-    Modal.confirm({
-      title: "Ubah Status Coaching Clinic",
-      content: `Apakah anda yakin ingin mengubah status coaching clinic menjadi ${status}?`,
-      okText: "Ya",
-      cancelText: "Tidak",
-      centered: true,
-      onOk: async () => {
-        await update(payload);
-      },
-    });
+    updateData(payload);
   };
 
   const { data, isLoading } = useQuery(
@@ -228,8 +334,13 @@ function CoachingMeetings() {
       title: "Tanggal",
       dataIndex: "start_date",
       responsive: ["sm"],
-      render: (row) => {
-        return <>{moment(row).format("DD MMMM YYYY")}</>;
+      render: (_, row) => {
+        return (
+          <Space direction="vertical">
+            {moment(row?.start_date).format("DD MMMM YYYY")}
+            <div>Pukul. {`${row?.start_hours} - ${row?.end_hours}`}</div>
+          </Space>
+        );
       },
     },
     {
@@ -243,21 +354,30 @@ function CoachingMeetings() {
       dataIndex: "participants_count",
     },
     {
-      title: "Jam",
-      responsive: ["sm"],
-      dataIndex: "start_hours",
-      render: (_, row) => {
-        return <>{`${row?.start_hours} - ${row?.end_hours}`}</>;
-      },
-    },
-    {
       title: "Status",
       responsive: ["sm"],
       key: "status",
       render: (_, row) => (
-        <Tag color={setColorStatusCoachingClinic(row?.status)}>
-          {row?.status}
-        </Tag>
+        <Space>
+          <Tag
+            onClick={() => handleOpenModalStatus(row)}
+            style={{
+              cursor: "pointer",
+            }}
+            color={setColorStatusCoachingClinic(row?.status)}
+          >
+            {upperCase(row?.status)}
+          </Tag>
+          <Tooltip
+            title={
+              row?.is_private
+                ? "Jadwal coaching clinic tidak terlihat oleh banyak orang"
+                : "Jadwal coaching clinic terlihat oleh banyak orang"
+            }
+          >
+            <Tag>{row?.is_private ? "PRIVATE" : "PUBLIC"}</Tag>
+          </Tooltip>
+        </Space>
       ),
     },
     {
@@ -289,24 +409,32 @@ function CoachingMeetings() {
         );
       },
     },
-    {
-      title: "Set Status",
-      responsive: ["sm"],
-      key: "set_status",
-      render: (_, row) => {
-        return (
-          <>
-            <a onClick={() => handleChangeStatus(row, "upcoming")}>Upcoming</a>
-            <Divider type="vertical" />
-            <a onClick={() => handleChangeStatus(row, "end")}>End</a>
-          </>
-        );
-      },
-    },
+    // {
+    //   title: "Set Status",
+    //   responsive: ["sm"],
+    //   key: "set_status",
+    //   render: (_, row) => {
+    //     return (
+    //       <>
+    //         <a onClick={() => handleChangeStatus(row, "upcoming")}>Upcoming</a>
+    //         <Divider type="vertical" />
+    //         <a onClick={() => handleChangeStatus(row, "end")}>End</a>
+    //       </>
+    //     );
+    //   },
+    // },
   ];
 
   return (
     <Card title="Daftar Riwayat Instruktur Coaching Clinic">
+      <ConsultantAlertMeetingLive />
+      <ModalChangeStatus
+        open={openModalStatus}
+        handleClose={handleCloseModalStatus}
+        row={status}
+        handleChangeStatus={handleChangeStatus}
+        loadingChangeStatus={isLoadingUpdate}
+      />
       <ModalUpdate
         open={open}
         handleClose={handleClose}
@@ -316,6 +444,7 @@ function CoachingMeetings() {
       />
       <FilterConsultantMeetings />
       <Table
+        size="small"
         pagination={{
           onChange: handleChangePage,
           current: router?.query?.page || 1,

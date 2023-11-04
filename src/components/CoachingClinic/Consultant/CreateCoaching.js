@@ -56,28 +56,73 @@ const ModalCoaching = ({ open, onCancel }) => {
       onCancel={onCancel}
     >
       <Form layout="vertical" form={form} onFinish={handleFinish}>
-        <Form.Item name="title" label="Judul">
+        <Form.Item
+          rules={[
+            {
+              required: true,
+              message: "Judul harus diisi",
+            },
+          ]}
+          name="title"
+          label="Judul"
+        >
           <Input />
         </Form.Item>
-        <Form.Item name="description" label="Deskripsi">
+        <Form.Item
+          rules={[{ required: true, message: "Deskripsi harus diisi" }]}
+          name="description"
+          label="Deskripsi"
+        >
           <Input.TextArea />
         </Form.Item>
-        <Form.Item valuePropName="checked" name="is_private" label="Privat?">
+        <Form.Item
+          help="Status Privat tidak akan muncul dijadwal coaching clinic secara public"
+          valuePropName="checked"
+          name="is_private"
+          label="Privat?"
+        >
           <Checkbox />
         </Form.Item>
         <Row gutter={[16, 16]}>
           <Col md={8} xs={24}>
-            <Form.Item name="start_date" label="Tanggal">
+            <Form.Item
+              rules={[
+                {
+                  required: true,
+                  message: "Tanggal harus diisi",
+                },
+              ]}
+              name="start_date"
+              label="Tanggal"
+            >
               <DatePicker />
             </Form.Item>
           </Col>
           <Col md={8} xs={24}>
-            <Form.Item name="start_hours" label="Mulai Jam">
+            <Form.Item
+              rules={[
+                {
+                  required: true,
+                  message: "Jam mulai harus diisi",
+                },
+              ]}
+              name="start_hours"
+              label="Mulai Jam"
+            >
               <DatePicker.TimePicker />
             </Form.Item>
           </Col>
           <Col md={8} xs={24}>
-            <Form.Item name="end_hours" label="Berakhir Jam">
+            <Form.Item
+              rules={[
+                {
+                  required: true,
+                  message: "Jam berakhir harus diisi",
+                },
+              ]}
+              name="end_hours"
+              label="Berakhir Jam"
+            >
               <DatePicker.TimePicker />
             </Form.Item>
           </Col>
