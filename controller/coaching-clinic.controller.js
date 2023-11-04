@@ -544,7 +544,7 @@ const upcomingMeetings = async (req, res) => {
           );
         }
       })
-      // .andWhere("status", "upcoming")
+      .andWhere("is_private", false)
       .withGraphFetched("[coach(simpleSelect), participants.[participant]]")
       .orderBy("created_at", "asc");
 
@@ -580,6 +580,23 @@ const detailMeetingsParticipantsByDay = async (req, res) => {
   }
 };
 
+// addRemove participant
+const addParticipant = async (req, res) => {
+  try {
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+const removeParticipant = async (req, res) => {
+  try {
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
 module.exports = {
   alterUserCoach,
   dropUserCoach,
@@ -601,4 +618,6 @@ module.exports = {
   upcomingMeetings,
   detailMeetingsParticipantsByDay,
   giveRatingMeeting,
+  addParticipant,
+  removeParticipant,
 };
