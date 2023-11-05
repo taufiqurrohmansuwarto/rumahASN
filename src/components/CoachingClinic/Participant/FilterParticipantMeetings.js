@@ -25,7 +25,7 @@ function FilterParticipantMeetings() {
     };
 
     if (emptyQuery(values)) {
-      return;
+      return handleReset();
     } else {
       // remove empty property
       Object.keys(values).forEach(
@@ -95,7 +95,7 @@ function FilterParticipantMeetings() {
         }}
       >
         <Form.Item name="title" label="Judul">
-          <Input />
+          <Input allowClear />
         </Form.Item>
         <Form.Item name="status" label="Status">
           <Radio.Group optionType="button" buttonStyle="solid">

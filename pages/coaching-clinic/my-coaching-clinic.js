@@ -14,9 +14,7 @@ const MyCoachingClinic = () => {
         content="Daftar Jadwal Coaching Clinic Saya"
         active="my-coaching-clinic"
       >
-        <Card title="Daftar Coaching Clinic Saya">
-          <MyMeetings />
-        </Card>
+        <MyMeetings />
       </LayoutParticipant>
     </>
   );

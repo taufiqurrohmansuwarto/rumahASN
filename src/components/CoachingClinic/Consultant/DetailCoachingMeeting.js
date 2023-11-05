@@ -420,7 +420,7 @@ function DetailCoachingMeeting() {
               />
             </Col>
             <Col md={6} xs={24}>
-              <DaftarPeserta data={data?.participants} />
+              <DaftarPeserta meeting={data} data={data?.participants} />
             </Col>
           </Row>
         ) : (
