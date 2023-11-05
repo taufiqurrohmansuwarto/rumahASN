@@ -28,7 +28,6 @@ const DetailCoachingClinic = () => {
                 <a>Coaching Clinic</a>
               </Link>
             </Breadcrumb.Item>
-            <Breadcrumb.Item>Detail Coaching Clinic</Breadcrumb.Item>
           </Breadcrumb>
         )}
         title="Coaching Clinic"

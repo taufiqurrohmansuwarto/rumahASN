@@ -52,7 +52,7 @@ const createJWT = (user, id) => {
     context: {
       user: {
         avatar: user?.image,
-        name: `${user?.name} (Coach)`,
+        name: `${user?.name} | Coach`,
         email: user?.email,
         id: user?.customId,
       },
@@ -74,7 +74,7 @@ const createJwtParticipant = (user, id) => {
     context: {
       user: {
         avatar: user?.image,
-        name: user?.name,
+        name: `${user?.name}|Peserta`,
         email: user?.email,
         id: user?.customId,
       },
@@ -583,6 +583,26 @@ const detailMeetingsParticipantsByDay = async (req, res) => {
 // addRemove participant
 const addParticipant = async (req, res) => {
   try {
+    const { id } = req?.query;
+    const { customId } = req?.user;
+    const body = req?.body;
+
+    const currentMeeting = await CCMeetings.query()
+      .where({ id, user_id: customId })
+      .first();
+
+    if (!currentMeeting) {
+      res.status(404).json({ message: "Not found" });
+    } else {
+      await CCMeetingsParticipants.query()
+        .insert({
+          user_id: body?.user_id,
+          meeting_id: id,
+        })
+        .onConflict(["meeting_id", "user_id"])
+        .merge();
+      res.json({ message: "Success" });
+    }
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: "Internal server error" });
@@ -591,6 +611,22 @@ const addParticipant = async (req, res) => {
 
 const removeParticipant = async (req, res) => {
   try {
+    const { id, participantId } = req?.query;
+    const { customId } = req?.user;
+
+    const currentMeeting = await CCMeetings.query()
+      .where({ id, user_id: customId })
+      .first();
+
+    if (!currentMeeting) {
+      res.status(404).json({ message: "Not found" });
+    } else {
+      await CCMeetingsParticipants.query()
+        .delete()
+        .where({ id: participantId });
+
+      res.json({ message: "Success" });
+    }
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: "Internal server error" });

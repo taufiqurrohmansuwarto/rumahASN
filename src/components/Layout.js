@@ -419,6 +419,36 @@ function Layout({ children, active, collapsed = true }) {
       menuItemRender={menuItemRender}
       layout="mix"
       loading={status === "loading"}
+      footerRender={() => {
+        return (
+          <div
+            style={{
+              textAlign: "center",
+              marginBottom: 20,
+            }}
+          >
+            <Typography.Text
+              style={{
+                fontSize: breakPoint.xs ? 13 : 14,
+              }}
+              type="secondary"
+            >
+              Desain dan Pengembangan
+            </Typography.Text>
+            <div>
+              <Typography.Text
+                style={{
+                  fontSize: breakPoint.xs ? 13 : 14,
+                }}
+                type="secondary"
+              >
+                © 2022 BKD Provinsi Jawa Timur | Iput Taufiqurrohman Suwarto,
+                S.Kom.
+              </Typography.Text>
+            </div>
+          </div>
+        );
+      }}
     >
       {children}
     </ProLayout>
