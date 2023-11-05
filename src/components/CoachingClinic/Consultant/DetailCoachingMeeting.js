@@ -1,58 +1,230 @@
 import JitsiMeeting from "@/components/VideoConference/JitsiMeeting";
 import {
+  addParticipant,
   detailMeeting,
+  removeParticipant,
   startMeeting,
+  updateMeeting,
 } from "@/services/coaching-clinics.services";
-import { QuestionCircleTwoTone, SoundOutlined } from "@ant-design/icons";
-import { ScrollArea } from "@mantine/core";
+import { setColorStatusCoachingClinic } from "@/utils/client-utils";
+import {
+  DeleteOutlined,
+  EditOutlined,
+  QuestionCircleTwoTone,
+  UserAddOutlined,
+  VideoCameraOutlined,
+} from "@ant-design/icons";
+import { Group, ScrollArea, Stack } from "@mantine/core";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Avatar,
+  BackTop,
   Button,
   Card,
   Col,
   Descriptions,
+  Divider,
   Empty,
+  Form,
+  Input,
   List,
   Modal,
   Row,
   Space,
   Tag,
+  Tooltip,
   Typography,
   message,
 } from "antd";
+import { capitalize } from "lodash";
 import moment from "moment";
 import { useRouter } from "next/router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import FormParticipants from "./FormParticipants";
+import EditCoachingClinicModal from "./EditCoachingClinicModal";
 
-const DaftarPeserta = ({ data }) => {
+const ModalAddParticipant = ({ open, onClose }) => {
+  const [form] = Form.useForm();
+
+  const queryClient = useQueryClient();
+  const router = useRouter();
+  const { id } = router.query;
+
+  const { mutateAsync: add, isLoading: isLoadingAdd } = useMutation(
+    (data) => addParticipant(data),
+    {
+      onSuccess: () => {
+        message.success("Peserta berhasil ditambahkan");
+        queryClient.invalidateQueries(["meeting", id]);
+        onClose();
+      },
+      onError: () => {
+        message.error("Gagal menambahkan peserta");
+      },
+    }
+  );
+
+  const handleFinish = async () => {
+    const value = await form.validateFields();
+    const payload = {
+      meetingId: id,
+      data: {
+        user_id: value?.user_id,
+      },
+    };
+
+    add(payload);
+  };
+
   return (
-    <ScrollArea h={600}>
-      <List
-        header={<div>{data?.length} Peserta</div>}
-        dataSource={data}
-        rowKey={(row) => row?.custom_id}
-        renderItem={(item) => (
-          <List.Item>
-            <List.Item.Meta
-              title={item?.participant?.username}
-              description={
-                <Space direction="vertical" size="small">
-                  <Tag color="blue">
-                    {item?.participant?.info?.jabatan?.jabatan}
-                  </Tag>
-                  <div>{item?.participant?.info?.perangkat_daerah?.detail}</div>
-                  <Tag color="yellow">
-                    {moment(item?.created_at).format("DD MMMM YYYY HH:mm:ss")}
-                  </Tag>
-                </Space>
-              }
-              avatar={<Avatar src={item?.participant?.image} />}
+    <Modal
+      confirmLoading={isLoadingAdd}
+      width={600}
+      onOk={handleFinish}
+      centered
+      open={open}
+      onCancel={onClose}
+      title="Tambah Peserta Coaching Clinic"
+    >
+      <Form layout="vertical" form={form}>
+        <FormParticipants name="user_id" />
+      </Form>
+    </Modal>
+  );
+};
+
+const DaftarPeserta = ({ data, meeting }) => {
+  const queryClient = useQueryClient();
+  const router = useRouter();
+  const { id } = router.query;
+  const [filterData, setFilterData] = useState(data);
+
+  useEffect(() => {
+    setFilterData(data);
+  }, [data]);
+
+  const [open, setOpen] = useState(false);
+  const handleOpen = () => setOpen(true);
+  const handleClose = () => setOpen(false);
+
+  const { mutateAsync: remove, isLoading: isLoadingRemove } = useMutation(
+    (data) => removeParticipant(data),
+    {
+      onSuccess: () => {
+        message.success("Peserta berhasil dihapus");
+        queryClient.invalidateQueries(["meeting", id]);
+      },
+      onError: () => {
+        message.error("Gagal menghapus peserta");
+      },
+    }
+  );
+
+  const handleRemove = (participant) => {
+    Modal.confirm({
+      title: "Hapus Peserta",
+      centered: true,
+      content: `Apakah anda yakin ingin menghapus peserta ${participant?.participant?.username} dari coaching clinic ini?`,
+      okText: "Ya",
+      onOk: async () => {
+        try {
+          const payload = {
+            meetingId: id,
+            participantId: participant?.id,
+          };
+          await remove(payload);
+        } catch (error) {
+          console.log(error);
+        }
+      },
+      cancelText: "Tidak",
+    });
+  };
+
+  return (
+    <>
+      <Stack>
+        <Group position="apart">
+          <Tooltip title="Tambah Peserta">
+            <Button
+              shape="circle"
+              onClick={handleOpen}
+              type="primary"
+              icon={<UserAddOutlined />}
             />
-          </List.Item>
-        )}
-      />
-    </ScrollArea>
+          </Tooltip>
+          <Typography.Text strong>
+            {data?.length} dari {meeting?.max_participants} Peserta
+          </Typography.Text>
+        </Group>
+        <Input.Search
+          allowClear
+          onChange={(e) => {
+            const value = e.target.value;
+            if (!value) {
+              setFilterData(data);
+            } else {
+              const filter = data.filter((item) => {
+                const username = item?.participant?.username?.toLowerCase();
+                return username.includes(value.toLowerCase());
+              });
+              setFilterData(filter);
+            }
+          }}
+        />
+      </Stack>
+      <ScrollArea h={450}>
+        <ModalAddParticipant open={open} onClose={handleClose} />
+        <List
+          size="small"
+          dataSource={filterData}
+          rowKey={(row) => row?.custom_id}
+          renderItem={(item) => (
+            <List.Item
+              actions={[
+                <Button
+                  key="hapus"
+                  size="small"
+                  onClick={() => handleRemove(item)}
+                  icon={<DeleteOutlined />}
+                />,
+              ]}
+            >
+              <List.Item.Meta
+                title={<Space>{item?.participant?.username}</Space>}
+                description={
+                  <Space direction="vertical" size="small">
+                    {/* <>
+                    {item?.participant?.info?.jabatan?.jabatan && (
+                      <Tag color="blue">
+                        {item?.participant?.info?.jabatan?.jabatan}
+                      </Tag>
+                    )}
+                  </> */}
+                    <>
+                      {item?.participant?.info?.perangkat_daerah?.detail && (
+                        <Typography.Text
+                          style={{
+                            fontSize: 12,
+                          }}
+                          type="secondary"
+                        >
+                          {item?.participant?.info?.perangkat_daerah?.detail}
+                        </Typography.Text>
+                      )}
+                    </>
+                    <Typography.Text type="secondary">
+                      {moment(item?.created_at).format("DD MMMM YYYY HH:mm:ss")}
+                    </Typography.Text>
+                  </Space>
+                }
+                avatar={<Avatar size="small" src={item?.participant?.image} />}
+              />
+            </List.Item>
+          )}
+        />
+      </ScrollArea>
+    </>
   );
 };
 
@@ -107,11 +279,22 @@ function DetailCoachingMeeting() {
       onSuccess: () => {
         message.success("Meeting started");
         queryClient.invalidateQueries(["meeting", id]);
-        queryClient.invalidateQueries(["detailMeetingParticipant"]);
         setRenderKey((prev) => prev + 1);
       },
       onSettled: () => {
         queryClient.invalidateQueries(["meeting", id]);
+      },
+    }
+  );
+
+  const { mutateAsync: updateData, isLoading: isLoadingUpdate } = useMutation(
+    (data) => updateMeeting(data),
+    {
+      onSuccess: () => {
+        message.success("Coaching clinic berhasil diupdate");
+        queryClient.invalidateQueries(["meeting", id]);
+        queryClient.invalidateQueries(["meetings"]);
+        router.push("/coaching-clinic-consultant");
       },
     }
   );
@@ -136,106 +319,148 @@ function DetailCoachingMeeting() {
         "Terima kasih telah menggunakan layanan coaching clinic Rumah ASN",
       okText: "Tutup",
       centered: true,
-      onOk: () => {
-        router.push("/coaching-clinic-consultant");
+      onOk: async () => {
+        await updateData({
+          id,
+          data: {
+            status: "end",
+          },
+        });
       },
     });
   };
 
   const [open, setOpen] = useState(false);
   const [api, setApi] = useState(null);
+  const [openEditModal, setOpenEditModal] = useState(false);
+
+  const handleEdit = () => {
+    setOpenEditModal(true);
+  };
+
+  const handleEditModalClose = () => {
+    setOpenEditModal(false);
+  };
 
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
 
-  const handleMuteAll = async () => {
-    const result = await api.getParticipantsInfo();
-    const participantId = result?.[0]?.participantId;
-
-    api.executeCommand("grantModerator", participantId);
-  };
-
   return (
-    <Card
-      title={
-        <Space>
-          <Typography.Text>{data?.title}</Typography.Text>
+    <>
+      <BackTop />
+      <EditCoachingClinicModal
+        id={router?.query?.id}
+        open={openEditModal}
+        onClose={handleEditModalClose}
+      />
+      <Card
+        extra={
           <QuestionCircleTwoTone
             onClick={handleOpen}
             style={{
               cursor: "pointer",
             }}
           />
-        </Space>
-      }
-      loading={isLoading}
-    >
-      <ModalInformation open={open} item={data} onClose={handleClose} />
-      {data?.status === "live" ? (
-        <Row gutter={[16, 16]}>
-          <Col md={18}>
-            <JitsiMeeting
-              key={renderKey}
-              domain="coaching-online.site"
-              jwt={data?.jwt}
-              roomName={data?.id}
-              getIFrameRef={(iframeRef) => {
-                iframeRef.style.height = "800px";
-              }}
-              configOverwrite={{
-                startWithAudioMuted: true,
-                disableModeratorIndicator: false,
-                startScreenSharing: true,
-                enableEmailInStats: false,
-                whiteboard: {
-                  enabled: true,
-                  collabServerBaseUrl:
-                    "https://siasn.bkd.jatimprov.go.id/whiteboard",
-                },
-              }}
-              interfaceConfigOverwrite={{
-                DISABLE_JOIN_LEAVE_NOTIFICATIONS: false,
-                APP_NAME: "Coaching Clinic",
-              }}
-              onReadyToClose={() => {
-                closeMeeting();
-              }}
-              onApiReady={(api) => {
-                setApi(api);
-                // here you can attach custom event listeners to the Jitsi Meet External API
-                // you can also store it locally to execute commands
+        }
+        title={
+          <Space>
+            <Typography.Text>{data?.title}</Typography.Text>
+            <EditOutlined
+              onClick={handleEdit}
+              style={{
+                cursor: "pointer",
               }}
             />
-          </Col>
-          <Col md={6} xs={24}>
-            <DaftarPeserta data={data?.participants} />
-          </Col>
-        </Row>
-      ) : (
-        <>
+            <Divider type="vertical" />
+            <Tag color={data?.is_private ? "red" : "green"}>
+              {data?.is_private ? "Privat" : "Publik"}
+            </Tag>
+            <Tag color={setColorStatusCoachingClinic(data?.status)}>
+              {capitalize(data?.status)}
+            </Tag>
+          </Space>
+        }
+        loading={isLoading}
+      >
+        <ModalInformation open={open} item={data} onClose={handleClose} />
+        {data?.status === "live" ? (
           <Row gutter={[16, 16]}>
-            <Col md={18} xs={24}>
-              <Empty
-                description={`Hmmm... sepertinya coaching clinic belum dimulai atau coaching clinic sudah berakhir`}
-              >
-                <Button
-                  onClick={handleStartMeeting}
-                  loading={isLoadingStart}
-                  disabled={isLoading}
-                  type="primary"
-                  icon={<SoundOutlined />}
-                >
-                  Mulai Coaching Clinic
-                </Button>
-              </Empty>
+            <Col md={18}>
+              <JitsiMeeting
+                key={renderKey}
+                domain="coaching-online.site"
+                jwt={data?.jwt}
+                roomName={data?.id}
+                getIFrameRef={(iframeRef) => {
+                  iframeRef.style.height = "800px";
+                }}
+                configOverwrite={{
+                  startWithAudioMuted: true,
+                  disableModeratorIndicator: false,
+                  startScreenSharing: true,
+                  enableEmailInStats: false,
+                  whiteboard: {
+                    enabled: true,
+                    collabServerBaseUrl:
+                      "https://siasn.bkd.jatimprov.go.id/whiteboard",
+                  },
+                }}
+                interfaceConfigOverwrite={{
+                  DISABLE_JOIN_LEAVE_NOTIFICATIONS: false,
+                  APP_NAME: "Coaching Clinic",
+                }}
+                onReadyToClose={() => {
+                  closeMeeting();
+                }}
+                onApiReady={(api) => {
+                  setApi(api);
+                  // here you can attach custom event listeners to the Jitsi Meet External API
+                  // you can also store it locally to execute commands
+                }}
+              />
             </Col>
             <Col md={6} xs={24}>
               <DaftarPeserta data={data?.participants} />
             </Col>
           </Row>
-        </>
-      )}
-    </Card>
+        ) : (
+          <>
+            <Row gutter={[32, 32]}>
+              <Col md={18} xs={24}>
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    borderRadius: 8,
+                    height: "50vh",
+                    backgroundColor: "#eee",
+                  }}
+                >
+                  <Empty
+                    description={`Hmmm... sepertinya coaching clinic belum dimulai atau coaching clinic sudah berakhir`}
+                  >
+                    <Button
+                      shape="round"
+                      onClick={handleStartMeeting}
+                      loading={isLoadingStart}
+                      disabled={isLoading}
+                      type="primary"
+                      icon={<VideoCameraOutlined />}
+                    >
+                      Mulai
+                    </Button>
+                  </Empty>
+                </div>
+              </Col>
+              <Col md={6} xs={24}>
+                <DaftarPeserta meeting={data} data={data?.participants} />
+              </Col>
+            </Row>
+          </>
+        )}
+      </Card>
+    </>
   );
 }
 

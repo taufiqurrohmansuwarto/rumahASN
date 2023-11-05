@@ -3,7 +3,16 @@ import {
   meetingsParticipant,
 } from "@/services/coaching-clinics.services";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Divider, Popconfirm, Space, Table, Tag, message } from "antd";
+import {
+  Avatar,
+  Divider,
+  Popconfirm,
+  Space,
+  Table,
+  Tag,
+  Tooltip,
+  message,
+} from "antd";
 import { useRouter } from "next/router";
 import React from "react";
 import moment from "moment";
@@ -11,6 +20,7 @@ import { Stack } from "@mantine/core";
 import { setColorStatusCoachingClinic } from "@/utils/client-utils";
 import FilterParticipantMeetings from "./FilterParticipantMeetings";
 import Link from "next/link";
+import { upperCase } from "lodash";
 
 function MyMeetings() {
   const router = useRouter();
@@ -85,7 +95,7 @@ function MyMeetings() {
       title: "Judul",
       key: "title",
       render: (_, row) => (
-        <Link href={`/coaching-clinic/${row?.meeting?.id}/detail`}>
+        <Link href={`/coaching-clinic/${row?.id}/detail`}>
           {row?.meeting?.title}
         </Link>
       ),
@@ -94,24 +104,23 @@ function MyMeetings() {
     {
       title: "Coaching",
       key: "coaching",
-      render: (_, row) => <>{row?.meeting?.coach?.username}</>,
-      responsive: ["sm"],
-    },
-    {
-      title: "Tanggal Coaching Clinic",
-      key: "tanggal",
       render: (_, row) => (
-        <>{moment(row?.meeting?.start_date).format("DD MMMM YYYY")}</>
+        <Tooltip title={row?.meeting?.coach?.username}>
+          <Avatar src={row?.meeting?.coach?.image} />
+        </Tooltip>
       ),
       responsive: ["sm"],
     },
     {
-      title: "Jam",
-      key: "jam",
+      title: "Tanggal Coaching",
+      key: "tanggal",
       render: (_, row) => (
-        <>
-          {row?.meeting?.start_hours} - {row?.meeting?.end_hours}
-        </>
+        <Space direction="vertical">
+          <div>{moment(row?.meeting?.start_date).format("DD MMMM YYYY")}</div>
+          <div>
+            {row?.meeting?.start_hours} - {row?.meeting?.end_hours}
+          </div>
+        </Space>
       ),
       responsive: ["sm"],
     },
@@ -120,7 +129,7 @@ function MyMeetings() {
       key: "status",
       render: (_, row) => (
         <Tag color={setColorStatusCoachingClinic(row?.meeting?.status)}>
-          {row?.meeting?.status}
+          {upperCase(row?.meeting?.status)}
         </Tag>
       ),
       responsive: ["sm"],

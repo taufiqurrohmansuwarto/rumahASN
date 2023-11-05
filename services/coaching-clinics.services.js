@@ -98,3 +98,14 @@ export const giveRatingMeeting = ({ id, data }) => {
   const url = `/participants/meetings/${id}/rating`;
   return coachingClinicApi.put(url, data).then((res) => res?.data);
 };
+
+// tambah participants
+export const addParticipant = ({ meetingId, data }) => {
+  const url = `/consultants/meetings/${meetingId}/participants`;
+  return coachingClinicApi.post(url, data).then((res) => res?.data);
+};
+
+export const removeParticipant = ({ meetingId, participantId }) => {
+  const url = `/consultants/meetings/${meetingId}/participants/${participantId}`;
+  return coachingClinicApi.delete(url).then((res) => res?.data);
+};
