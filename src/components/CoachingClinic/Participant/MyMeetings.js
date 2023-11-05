@@ -5,8 +5,11 @@ import {
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Avatar,
+  Card,
+  Col,
   Divider,
   Popconfirm,
+  Row,
   Space,
   Table,
   Tag,
@@ -66,7 +69,7 @@ function MyMeetings() {
       render: (_, row) => (
         <>
           <Stack>
-            <Link href={`/coaching-clinic/${row?.meeting?.id}/detail`}>
+            <Link href={`/coaching-clinic/${row?.id}/detail`}>
               {row?.meeting?.title}
             </Link>
             <div>{row?.meeting?.coach?.username}</div>
@@ -128,9 +131,12 @@ function MyMeetings() {
       title: "Status",
       key: "status",
       render: (_, row) => (
-        <Tag color={setColorStatusCoachingClinic(row?.meeting?.status)}>
-          {upperCase(row?.meeting?.status)}
-        </Tag>
+        <Space>
+          <Tag color={setColorStatusCoachingClinic(row?.meeting?.status)}>
+            {upperCase(row?.meeting?.status)}
+          </Tag>
+          <Tag>{row?.meeting?.is_private ? "Private" : "Public"}</Tag>
+        </Space>
       ),
       responsive: ["sm"],
     },
@@ -164,10 +170,28 @@ function MyMeetings() {
   ];
 
   return (
-    <>
-      <FilterParticipantMeetings />
-      <Table columns={columns} dataSource={data?.data} loading={isLoading} />
-    </>
+    <Row gutter={[16, 16]}>
+      <Col span={24}>
+        <Card>
+          <FilterParticipantMeetings />
+        </Card>
+      </Col>
+      <Col span={24}>
+        <Card>
+          <Table
+            size="small"
+            pagination={{
+              total: data?.total,
+              showTotal: (total) => `Total ${total} item`,
+              position: ["bottomRight", "topRight"],
+            }}
+            columns={columns}
+            dataSource={data?.data}
+            loading={isLoading}
+          />
+        </Card>
+      </Col>
+    </Row>
   );
 }
 

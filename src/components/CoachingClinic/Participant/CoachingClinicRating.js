@@ -1,16 +1,17 @@
 import { giveRatingMeeting } from "@/services/coaching-clinics.services";
+import { StarOutlined } from "@ant-design/icons";
 import { useMutation } from "@tanstack/react-query";
 import { Button, Form, Input, Modal, Rate } from "antd";
 import React, { useState } from "react";
 
-const ModalRating = ({ open, onCancel, handleRate, loading }) => {
+const ModalRating = ({ open, onCancel, handleRate, loading, meetingId }) => {
   const [form] = Form.useForm();
 
   const handleFinish = async () => {
     const payload = await form.validateFields();
     const data = {
       ...payload,
-      meeting_id: open?.id,
+      meeting_id: meetingId,
     };
 
     handleRate(data);
@@ -36,7 +37,7 @@ const ModalRating = ({ open, onCancel, handleRate, loading }) => {
   );
 };
 
-function CoachingClinicRating() {
+function CoachingClinicRating({ meetingId }) {
   const [open, setOpen] = useState(false);
   const { mutate: giveRate, isLoading: isLoadingGiveRate } = useMutation(
     (data) => giveRatingMeeting(data),
@@ -49,13 +50,14 @@ function CoachingClinicRating() {
   return (
     <div>
       <ModalRating
+        meetingId={meetingId}
         handleRate={giveRate}
         loading={isLoadingGiveRate}
         open={open}
         onCancel={handleClose}
       />
-      <Button onClick={handleOpen}>
-        Tambahkan Rating untuk Coaching Clinic
+      <Button type="primary" onClick={handleOpen} icon={<StarOutlined />}>
+        Rating
       </Button>
     </div>
   );

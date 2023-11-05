@@ -2,7 +2,7 @@ import JitsiMeeting from "@/components/VideoConference/JitsiMeeting";
 import moment from "moment";
 import { detailMeetingParticipant } from "@/services/coaching-clinics.services";
 import { QuestionCircleTwoTone } from "@ant-design/icons";
-import { ScrollArea } from "@mantine/core";
+import { Group, ScrollArea, Stack } from "@mantine/core";
 import { useQuery } from "@tanstack/react-query";
 import {
   Avatar,
@@ -11,6 +11,7 @@ import {
   Col,
   Descriptions,
   Empty,
+  Input,
   List,
   Modal,
   Row,
@@ -20,37 +21,71 @@ import {
   Typography,
 } from "antd";
 import { useRouter } from "next/router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import AddRating from "./CoachingClinicRating";
 
-const DaftarPeserta = ({ data }) => {
+const DaftarPeserta = ({ data, meeting }) => {
+  useEffect(() => {
+    setFilterData(data);
+  }, [data]);
+
+  const [filterData, setFilterData] = useState(data);
+
+  const handleFilter = (e) => {
+    const value = e.target.value;
+    const newData = data.filter((item) => {
+      return item?.participant?.username
+        .toLowerCase()
+        .includes(value.toLowerCase());
+    });
+    setFilterData(newData);
+  };
+
   return (
-    <ScrollArea h={600}>
-      <List
-        header={<div>{data?.length} Peserta</div>}
-        dataSource={data}
-        rowKey={(row) => row?.custom_id}
-        renderItem={(item) => (
-          <List.Item>
-            <List.Item.Meta
-              title={item?.participant?.username}
-              description={
-                <Space direction="vertical" size="small">
-                  <Tag color="blue">
-                    {item?.participant?.info?.jabatan?.jabatan}
-                  </Tag>
-                  <div>{item?.participant?.info?.perangkat_daerah?.detail}</div>
-                  <Tag color="yellow">
-                    {moment(item?.created_at).format("DD MMMM YYYY HH:mm:ss")}
-                  </Tag>
-                </Space>
-              }
-              avatar={<Avatar src={item?.participant?.image} />}
-            />
-          </List.Item>
-        )}
-      />
-    </ScrollArea>
+    <Stack>
+      <Stack>
+        <Group position="apart">
+          <AddRating meetingId={meeting?.meeting?.id} />
+          <Typography.Text strong>
+            {data?.length} dari {meeting?.meeting?.max_participants} Peserta
+          </Typography.Text>
+          <Input.Search allowClear onChange={handleFilter} />
+        </Group>
+      </Stack>
+      <ScrollArea h={450}>
+        <List
+          dataSource={filterData}
+          rowKey={(row) => row?.custom_id}
+          renderItem={(item) => (
+            <List.Item>
+              <List.Item.Meta
+                title={item?.participant?.username}
+                description={
+                  <Space direction="vertical" size="small">
+                    <>
+                      {item?.participant?.info?.perangkat_daerah?.detail && (
+                        <Typography.Text
+                          style={{
+                            fontSize: 12,
+                          }}
+                          type="secondary"
+                        >
+                          {item?.participant?.info?.perangkat_daerah?.detail}
+                        </Typography.Text>
+                      )}
+                    </>
+                    <Typography.Text type="secondary">
+                      {moment(item?.created_at).format("DD MMMM YYYY HH:mm:ss")}
+                    </Typography.Text>
+                  </Space>
+                }
+                avatar={<Avatar size="small" src={item?.participant?.image} />}
+              />
+            </List.Item>
+          )}
+        />
+      </ScrollArea>
+    </Stack>
   );
 };
 
@@ -131,7 +166,7 @@ function DetailMeetingParticipant() {
           />
           {data?.meeting?.status === "live" ? (
             <Row gutter={[16, 16]}>
-              <Col md={16} xs={24}>
+              <Col md={18} xs={24}>
                 <JitsiMeeting
                   domain="coaching-online.site"
                   jwt={data?.jwt}
@@ -157,31 +192,42 @@ function DetailMeetingParticipant() {
                   }}
                 />
               </Col>
-              <Col md={8} xs={24}>
-                <DaftarPeserta data={data?.participants} />
+              <Col md={6} xs={24}>
+                <DaftarPeserta meeting={meeting} data={data?.participants} />
               </Col>
             </Row>
           ) : (
             <Row gutter={[16, 16]}>
-              <Col md={16} xs={24}>
-                <Empty
-                  description={`Hmmm... sepertinya coaching clinic belum dimulai atau coaching clinic sudah berakhir`}
+              <Col md={18} xs={24}>
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    borderRadius: 8,
+                    height: "50vh",
+                    backgroundColor: "#eee",
+                  }}
                 >
-                  <Space>
-                    <Button onClick={() => router.back()}>Kembali</Button>
-                    <Button
-                      loading={isLoading || isFetching}
-                      disabled={isLoading || isFetching}
-                      type="primary"
-                      onClick={() => refetch()}
-                    >
-                      Refresh
-                    </Button>
-                  </Space>
-                </Empty>
+                  <Empty
+                    description={`Hmmm... sepertinya coaching clinic belum dimulai atau coaching clinic sudah berakhir`}
+                  >
+                    <Space>
+                      <Button onClick={() => router.back()}>Kembali</Button>
+                      <Button
+                        loading={isLoading || isFetching}
+                        disabled={isLoading || isFetching}
+                        type="primary"
+                        onClick={() => refetch()}
+                      >
+                        Refresh
+                      </Button>
+                    </Space>
+                  </Empty>
+                </div>
               </Col>
-              <Col md={8} xs={24}>
-                <DaftarPeserta data={data?.participants} />
+              <Col md={6} xs={24}>
+                <DaftarPeserta meeting={data} data={data?.participants} />
               </Col>
             </Row>
           )}
