@@ -7,10 +7,29 @@ const CCRatings = require("@/models/cc_ratings.model");
 
 const jsonwebtoken = require("jsonwebtoken");
 const moment = require("moment");
-const { isArray } = require("lodash");
+const { isArray, toNumber, round } = require("lodash");
 
 const appId = process.env.APP_ID;
 const appSecret = process.env.APP_SECRET;
+
+const ratingMeetingParticipant = async (req, res) => {
+  try {
+    const { id } = req?.query;
+    const { customId } = req?.user;
+
+    const result = await CCRatings.query()
+      .where({
+        meeting_id: id,
+        user_id: customId,
+      })
+      .first();
+
+    res.json(result);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
 
 const giveRatingMeeting = async (req, res) => {
   try {
@@ -633,6 +652,31 @@ const removeParticipant = async (req, res) => {
   }
 };
 
+const getRatingMeetingConsultant = async (req, res) => {
+  try {
+    const { id } = req?.query;
+    const avgRating = await CCRatings.query()
+      .where({ meeting_id: id })
+      .avg("stars")
+      .first();
+
+    const countRating = await CCRatings.query()
+      .where({ meeting_id: id })
+      .count("stars")
+      .first();
+
+    const data = {
+      avg: toNumber(round(avgRating?.avg, 2)) || 0,
+      count: toNumber(countRating?.count) || 0,
+    };
+
+    res.json(data);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
 module.exports = {
   alterUserCoach,
   dropUserCoach,
@@ -645,6 +689,7 @@ module.exports = {
   getMeeting,
   startMeeting,
   endMeeting,
+  getRatingMeetingConsultant,
   // participant
   meetingsParticipants,
   detailMeetingParticipant,
@@ -656,4 +701,5 @@ module.exports = {
   giveRatingMeeting,
   addParticipant,
   removeParticipant,
+  ratingMeetingParticipant,
 };

@@ -1,11 +1,9 @@
-import {
-  addParticipant,
-  removeParticipant,
-} from "@/controller/coaching-clinic.controller";
+import { removeParticipant } from "@/controller/coaching-clinic.controller";
 import auth from "@/middleware/auth.middleware";
+import ccConsultantMiddleware from "@/middleware/cc-consultant.middleware";
 import { createRouter } from "next-connect";
 const router = createRouter();
 
-router.use(auth).delete(removeParticipant);
+router.use(auth).use(ccConsultantMiddleware).delete(removeParticipant);
 
 export default router.handler();

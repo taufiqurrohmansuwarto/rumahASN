@@ -25,7 +25,7 @@ function FilterParticipantMeetings() {
     };
 
     if (emptyQuery(values)) {
-      return;
+      return handleReset();
     } else {
       // remove empty property
       Object.keys(values).forEach(

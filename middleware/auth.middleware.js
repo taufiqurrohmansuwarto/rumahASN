@@ -26,6 +26,7 @@ const auth = async (req, res, next) => {
         userId: parseInt(userId),
         customId,
         current_role: result?.current_role,
+        ...result,
       };
 
       req.user = currentUser;
