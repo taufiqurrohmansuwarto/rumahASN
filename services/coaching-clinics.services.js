@@ -94,6 +94,11 @@ export const detailMeetingParticipant = (id) => {
   return coachingClinicApi.get(url).then((res) => res?.data);
 };
 
+export const getRatingParticipant = (id) => {
+  const url = `/participants/meetings/${id}/rating`;
+  return coachingClinicApi.get(url).then((res) => res?.data);
+};
+
 export const giveRatingMeeting = ({ id, data }) => {
   const url = `/participants/meetings/${id}/rating`;
   return coachingClinicApi.put(url, data).then((res) => res?.data);
@@ -108,4 +113,9 @@ export const addParticipant = ({ meetingId, data }) => {
 export const removeParticipant = ({ meetingId, participantId }) => {
   const url = `/consultants/meetings/${meetingId}/participants/${participantId}`;
   return coachingClinicApi.delete(url).then((res) => res?.data);
+};
+
+export const ratingMeetingConsultant = async (id) => {
+  const url = `/consultants/meetings/${id}/rating`;
+  return coachingClinicApi.get(url).then((res) => res?.data);
 };

@@ -42,6 +42,7 @@ import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import FormParticipants from "./FormParticipants";
 import EditCoachingClinicModal from "./EditCoachingClinicModal";
+import ConsultantRatingMeeting from "./ConsultantRatingMeeting";
 
 const ModalAddParticipant = ({ open, onClose }) => {
   const [form] = Form.useForm();
@@ -355,12 +356,15 @@ function DetailCoachingMeeting() {
       />
       <Card
         extra={
-          <QuestionCircleTwoTone
-            onClick={handleOpen}
-            style={{
-              cursor: "pointer",
-            }}
-          />
+          <Space>
+            <QuestionCircleTwoTone
+              onClick={handleOpen}
+              style={{
+                cursor: "pointer",
+              }}
+            />
+            <ConsultantRatingMeeting />
+          </Space>
         }
         title={
           <Space>
