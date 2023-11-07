@@ -346,14 +346,7 @@ function Layout({ children, active, collapsed = true }) {
           target: "_blank",
         },
         {
-          icon: "https://siasn.bkd.jatimprov.go.id:9000/public/logo-simaster.png",
-          title: "SIMASTER Fasilitator",
-          desc: "Sistem Manajemen ASN Terintegrasi Fasilitator",
-          url: "https://master.bkd.jatimprov.go.id/fasilitator",
-          target: "_blank",
-        },
-        {
-          icon: "https://siasn.bkn.go.id/images/SI-ASN%201%20-%20PNG%20(2).png",
+          icon: "https://idis-siasn.bkn.go.id/assets/imgs/logo.svg",
           title: "SIASN",
           desc: "Sistem Informasi Aparatur Sipil Negara",
           url: "https://siasn-instansi.bkn.go.id",
@@ -361,9 +354,9 @@ function Layout({ children, active, collapsed = true }) {
         },
         {
           icon: "https://mysapk.bkn.go.id/assets/images/logogram_login.png",
-          title: "MySAPK",
+          title: "MyASN",
           desc: "Sistem Administrasi Kepegawaian",
-          url: "https://mysapk.bkn.go.id",
+          url: "https://myasn.bkn.go.id",
           target: "_blank",
         },
       ]}
