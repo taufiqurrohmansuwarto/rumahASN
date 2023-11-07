@@ -22,6 +22,7 @@ import { userRoutes } from "../routes";
 import Messages from "./Messages";
 import Notifications from "./Notifications";
 import SearchUserLayout from "./SearchUserLayout";
+import { appList } from "@/utils/app-lists";
 
 const ProLayout = dynamic(
   () => import("@ant-design/pro-components").then((mod) => mod?.ProLayout),
@@ -337,29 +338,7 @@ function Layout({ children, active, collapsed = true }) {
           <Notifications props={props} key="Notifications" />,
         ];
       }}
-      appList={[
-        {
-          icon: "https://siasn.bkd.jatimprov.go.id:9000/public/logo-simaster.png",
-          title: "SIMASTER",
-          desc: "Sistem Manajemen ASN Terintegrasi",
-          url: "https://master.bkd.jatimprov.go.id",
-          target: "_blank",
-        },
-        {
-          icon: "https://idis-siasn.bkn.go.id/assets/imgs/logo.svg",
-          title: "SIASN",
-          desc: "Sistem Informasi Aparatur Sipil Negara",
-          url: "https://siasn-instansi.bkn.go.id",
-          target: "_blank",
-        },
-        {
-          icon: "https://mysapk.bkn.go.id/assets/images/logogram_login.png",
-          title: "MyASN",
-          desc: "Sistem Administrasi Kepegawaian",
-          url: "https://myasn.bkn.go.id",
-          target: "_blank",
-        },
-      ]}
+      appList={appList(data?.user)}
       avatarProps={{
         src: data?.user?.image,
         size: "large",
