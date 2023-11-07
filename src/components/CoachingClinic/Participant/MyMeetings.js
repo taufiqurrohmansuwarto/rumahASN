@@ -135,11 +135,7 @@ function MyMeetings() {
           <Tag color={setColorStatusCoachingClinic(row?.meeting?.status)}>
             {upperCase(row?.meeting?.status)}
           </Tag>
-<<<<<<< HEAD
-          <Tag>{row?.meeting?.is_private ? "Private" : "Public"}</Tag>
-=======
           <Tag>{upperCase(row?.is_private ? "Private" : "Public")}</Tag>
->>>>>>> 7cab964e61c9888d5c1898527ea13a0cff592382
         </Space>
       ),
       responsive: ["sm"],
@@ -185,16 +181,10 @@ function MyMeetings() {
           <Table
             size="small"
             pagination={{
-<<<<<<< HEAD
-              total: data?.total,
-              showTotal: (total) => `Total ${total} item`,
-              position: ["bottomRight", "topRight"],
-=======
               position: ["bottomRight", "topRight"],
               total: data?.total,
               showTotal: (total, range) =>
                 `Total ${total} data | Halaman ${range[0]} - ${range[1]}`,
->>>>>>> 7cab964e61c9888d5c1898527ea13a0cff592382
             }}
             columns={columns}
             dataSource={data?.data}
