@@ -25,74 +25,12 @@ import { useEffect, useState } from "react";
 import AddRating from "./CoachingClinicRating";
 
 const DaftarPeserta = ({ data, meeting }) => {
-<<<<<<< HEAD
-=======
   const [filterData, setFilterData] = useState(data);
 
->>>>>>> 7cab964e61c9888d5c1898527ea13a0cff592382
   useEffect(() => {
     setFilterData(data);
   }, [data]);
 
-<<<<<<< HEAD
-  const [filterData, setFilterData] = useState(data);
-
-  const handleFilter = (e) => {
-    const value = e.target.value;
-    const newData = data.filter((item) => {
-      return item?.participant?.username
-        .toLowerCase()
-        .includes(value.toLowerCase());
-    });
-    setFilterData(newData);
-  };
-
-  return (
-    <Stack>
-      <Stack>
-        <Group position="apart">
-          <AddRating meetingId={meeting?.meeting?.id} />
-          <Typography.Text strong>
-            {data?.length} dari {meeting?.meeting?.max_participants} Peserta
-          </Typography.Text>
-          <Input.Search allowClear onChange={handleFilter} />
-        </Group>
-      </Stack>
-      <ScrollArea h={450}>
-        <List
-          dataSource={filterData}
-          rowKey={(row) => row?.custom_id}
-          renderItem={(item) => (
-            <List.Item>
-              <List.Item.Meta
-                title={item?.participant?.username}
-                description={
-                  <Space direction="vertical" size="small">
-                    <>
-                      {item?.participant?.info?.perangkat_daerah?.detail && (
-                        <Typography.Text
-                          style={{
-                            fontSize: 12,
-                          }}
-                          type="secondary"
-                        >
-                          {item?.participant?.info?.perangkat_daerah?.detail}
-                        </Typography.Text>
-                      )}
-                    </>
-                    <Typography.Text type="secondary">
-                      {moment(item?.created_at).format("DD MMMM YYYY HH:mm:ss")}
-                    </Typography.Text>
-                  </Space>
-                }
-                avatar={<Avatar size="small" src={item?.participant?.image} />}
-              />
-            </List.Item>
-          )}
-        />
-      </ScrollArea>
-    </Stack>
-=======
   return (
     <>
       <Stack>
@@ -156,7 +94,6 @@ const DaftarPeserta = ({ data, meeting }) => {
         </ScrollArea>
       </Stack>
     </>
->>>>>>> 7cab964e61c9888d5c1898527ea13a0cff592382
   );
 };
 
@@ -265,11 +202,7 @@ function DetailMeetingParticipant() {
                 />
               </Col>
               <Col md={6} xs={24}>
-<<<<<<< HEAD
-                <DaftarPeserta meeting={meeting} data={data?.participants} />
-=======
                 <DaftarPeserta data={data?.participants} />
->>>>>>> 7cab964e61c9888d5c1898527ea13a0cff592382
               </Col>
             </Row>
           ) : (
