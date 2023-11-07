@@ -25,10 +25,16 @@ import { useEffect, useState } from "react";
 import AddRating from "./CoachingClinicRating";
 
 const DaftarPeserta = ({ data, meeting }) => {
+<<<<<<< HEAD
+=======
+  const [filterData, setFilterData] = useState(data);
+
+>>>>>>> 7cab964e61c9888d5c1898527ea13a0cff592382
   useEffect(() => {
     setFilterData(data);
   }, [data]);
 
+<<<<<<< HEAD
   const [filterData, setFilterData] = useState(data);
 
   const handleFilter = (e) => {
@@ -86,6 +92,71 @@ const DaftarPeserta = ({ data, meeting }) => {
         />
       </ScrollArea>
     </Stack>
+=======
+  return (
+    <>
+      <Stack>
+        <Stack>
+          <Group position="right">
+            <Typography.Text type="secondary">
+              {data?.length} dari {meeting?.meeting?.max_participants} Peserta
+            </Typography.Text>
+          </Group>
+          <Input.Search
+            allowClear
+            onChange={(e) => {
+              const value = e.target.value;
+
+              if (!value) return setFilterData(data);
+              else {
+                const data = filterData?.filter((item) =>
+                  item?.participant?.username
+                    ?.toLowerCase()
+                    .includes(value?.toLowerCase())
+                );
+                setFilterData(data);
+              }
+            }}
+          />
+        </Stack>
+        <ScrollArea h={450}>
+          <List
+            dataSource={filterData}
+            rowKey={(row) => row?.custom_id}
+            renderItem={(item) => (
+              <List.Item>
+                <List.Item.Meta
+                  title={item?.participant?.username}
+                  description={
+                    <Space direction="vertical" size="small">
+                      <>
+                        {item?.participant?.info?.perangkat_daerah?.detail && (
+                          <Typography.Text
+                            style={{
+                              fontSize: 12,
+                            }}
+                            type="secondary"
+                          >
+                            {item?.participant?.info?.perangkat_daerah?.detail}
+                          </Typography.Text>
+                        )}
+                      </>
+                      <Typography.Text type="secondary">
+                        {moment(item?.created_at).format(
+                          "DD MMMM YYYY HH:mm:ss"
+                        )}
+                      </Typography.Text>
+                    </Space>
+                  }
+                  avatar={<Avatar src={item?.participant?.image} />}
+                />
+              </List.Item>
+            )}
+          />
+        </ScrollArea>
+      </Stack>
+    </>
+>>>>>>> 7cab964e61c9888d5c1898527ea13a0cff592382
   );
 };
 
@@ -144,6 +215,7 @@ function DetailMeetingParticipant() {
 
   return (
     <Card
+      extra={<AddRating meetingId={data?.meeting?.id} />}
       loading={isLoading}
       title={
         <Space>
@@ -193,7 +265,11 @@ function DetailMeetingParticipant() {
                 />
               </Col>
               <Col md={6} xs={24}>
+<<<<<<< HEAD
                 <DaftarPeserta meeting={meeting} data={data?.participants} />
+=======
+                <DaftarPeserta data={data?.participants} />
+>>>>>>> 7cab964e61c9888d5c1898527ea13a0cff592382
               </Col>
             </Row>
           ) : (

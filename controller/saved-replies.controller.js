@@ -3,7 +3,7 @@ const SavedReplies = require("@/models/saved-replies.model");
 const get = async (req, res) => {
   try {
     const { id: savedReplyId } = req?.query;
-    const { id: userId } = req.user;
+    const { customId: userId } = req.user;
 
     const savedReply = await SavedReplies.query()
       .where("user_id", userId)
@@ -19,7 +19,7 @@ const get = async (req, res) => {
 const list = async (req, res) => {
   try {
     // get user_id from request
-    const { id: user_id } = req.user;
+    const { customId: user_id } = req.user;
 
     // get saved replies from user
     const result = await SavedReplies.query()
@@ -36,11 +36,14 @@ const list = async (req, res) => {
 
 const create = async (req, res) => {
   try {
-    const { id: user_id } = req.user;
-    await SavedReplies.query().insert({
+    const { customId: user_id } = req.user;
+
+    const payload = {
       ...req.body,
       user_id,
-    });
+    };
+
+    await SavedReplies.query().insert(payload);
     res.json({ code: 200, message: "Success" });
   } catch (error) {
     console.log(error);
