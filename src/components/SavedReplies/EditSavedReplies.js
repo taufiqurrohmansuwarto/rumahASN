@@ -47,7 +47,7 @@ const EditSavedReplies = ({ id, initialValues, loading, savedReplies }) => {
       onSuccess: () => {
         queryClient.invalidateQueries("saved-replies");
         form.resetFields();
-        router.push(`/settings/saved-replies`);
+        router.push(`/settings/profile/saved-replies`);
         message.success("Balasan disimpan berhasil dibuat");
       },
       onError: () => {

@@ -9,7 +9,20 @@ class CCRatings extends Model {
   }
 
   // realation with user
-  static get relationMappings() {}
+  static get relationMappings() {
+    const User = require("@/models/users.model");
+
+    return {
+      user: {
+        relation: Model.BelongsToOneRelation,
+        modelClass: User,
+        join: {
+          from: "cc_ratings.user_id",
+          to: "users.custom_id",
+        },
+      },
+    };
+  }
 }
 
 module.exports = CCRatings;
