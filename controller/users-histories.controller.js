@@ -2,7 +2,7 @@ const UserHistory = require("@/models/users-histories.model");
 
 const getUsersHistories = async (req, res) => {
   try {
-    const userId = req?.user?.id;
+    const userId = req?.user?.customId;
     const limit = parseInt(req.query.limit) || 10;
     const page = parseInt(req.query.page) || 1;
 
