@@ -16,7 +16,7 @@ module.exports = async (req, res, next) => {
     const { id } = req?.query;
 
     const currentWebinarParticipate = await WebinarParticipates.query()
-      .where("user_id", user?.id)
+      .where("user_id", user?.customId)
       .andWhere("id", id)
       .first();
 
@@ -33,6 +33,7 @@ module.exports = async (req, res, next) => {
       next();
     }
   } catch (e) {
+    console.log(e);
     res.status(500).json({ code: 500, message: "Internal Server Error" });
   }
 };
