@@ -328,12 +328,15 @@ group by 1`);
 // todo tambahkan statistik berdasarkan usia pelanggan yang bertanya 6 bulan terakhir
 module.exports.getReportWebinarSeries = async (webinarSeriesId) => {
   try {
-    const result = await knex.raw(`WITH AbsenceData AS (SELECT u.username,
+    const result = await knex.raw(
+      `
+    WITH AbsenceData AS (SELECT u.username,
                             u.email,
                             u.employee_number,
                             u.info,
                             u."group"               as "group",
                             wsp.already_poll,
+                            wsp.created_at,
                             ws.title                AS nama_webinar,
                             'hari ke-' || wsa.day || ': ' ||
                             COALESCE('hadir tanggal ' || TO_CHAR(wspa.created_at, 'DD-MM-YYYY HH24:MI'),
@@ -344,7 +347,7 @@ module.exports.getReportWebinarSeries = async (webinarSeriesId) => {
                               LEFT JOIN webinar_series_absence_entries wsa ON ws.id = wsa.webinar_series_id
                               LEFT JOIN webinar_series_participants_absence wspa
                                         ON wsp.user_id = wspa.user_id AND wsa.id = wspa.webinar_series_absence_entry_id
-                     WHERE wsp.webinar_series_id = '${webinarSeriesId}'),
+                     WHERE wsp.webinar_series_id = ?),
      CertificateData AS (SELECT u.username,
                                 ws.title             AS nama_webinar,
                                 CASE
@@ -360,9 +363,11 @@ module.exports.getReportWebinarSeries = async (webinarSeriesId) => {
                                   LEFT JOIN webinar_series_participants_absence wspa ON wsp.user_id = wspa.user_id AND
                                                                                         wsa.id =
                                                                                         wspa.webinar_series_absence_entry_id
-                         WHERE wsp.webinar_series_id = '${webinarSeriesId}'
+                         WHERE wsp.webinar_series_id = ?
                          GROUP BY u.username, ws.title, wsp.already_poll)
 SELECT ad.username,
+       ad.created_at                          as waktu_registrasi,
+       cd.nama_webinar                        as nama_webinar,
        ad.already_poll,
        ad.info,
        ad.email,
@@ -374,9 +379,11 @@ SELECT ad.username,
 FROM AbsenceData ad
          JOIN CertificateData cd ON ad.username = cd.username AND ad.nama_webinar = cd.nama_webinar
 GROUP BY ad.username, ad.nama_webinar, cd.dapat_sertifikat, ad.already_poll, ad.info, ad.email, ad.employee_number,
-         ad.group
+         ad.group, ad.created_at, cd.nama_webinar
 ORDER BY ad.username, ad.nama_webinar;
-`);
+    `,
+      [webinarSeriesId, webinarSeriesId]
+    );
     return result;
   } catch (e) {
     console.log(e);

@@ -7,7 +7,7 @@ const WebinrSeriesComments = require("@/models/webinar-series-comments.model");
 const moment = require("moment");
 
 const xlsx = require("xlsx");
-const { times, toLower } = require("lodash");
+const { times, toLower, isUndefined } = require("lodash");
 const { getReportWebinarSeries } = require("@/utils/query-utils");
 
 const getNama = (user) => {
@@ -20,7 +20,9 @@ const getNama = (user) => {
 
 const getEmployeeNumber = (user) => {
   if (user?.group === "GOOGLE") {
-    const employee_number = `${user?.info?.employee_number}` || "";
+    const employee_number = isUndefined(user?.info?.employee_number)
+      ? ""
+      : user?.info?.employee_number;
     return employee_number;
   } else {
     return user?.employee_number;
@@ -61,12 +63,12 @@ const serializeDataReportParticipant = (data) => {
     const result = data.map((item) => {
       return {
         Nama: getNama(item),
-        "Asal Pendaftaran": item?.participant?.group,
+        "Asal Pendaftaran": item?.group,
         email: toLower(getEmail(item)),
         "NIP/NIPTTK": getEmployeeNumber(item),
         Jabatan: item?.info?.jabatan?.jabatan,
         "Perangkat Daerah": item?.info?.perangkat_daerah?.detail,
-        "Tanggal Registrasi": moment(item?.created_at).format(
+        "Tanggal Registrasi": moment(item?.waktu_registrasi).format(
           "DD-MM-YYYY HH:mm"
         ),
         "Sudah Polling": item?.already_poll ? "Sudah" : "Belum",
