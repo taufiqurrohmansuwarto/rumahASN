@@ -68,7 +68,7 @@ const changeRoutes = (user) => {
     if (fasilitatorMaster) {
       userRoutes.routes.push({
         path: "/fasilitator-employees",
-        name: "Daftar Pegawai",
+        name: "Integrasi SIASN",
         icon: <UsergroupAddOutlined />,
       });
     }

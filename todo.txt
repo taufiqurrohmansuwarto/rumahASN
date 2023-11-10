@@ -1,4 +1,0 @@
-1. tambahkan rating untuk coaching clinic di coaching clinic detail peserta
-2. tambahkan tipe coaching clinic baru : yaitu tipe undangan, yang mana peserta tidak perlu mendaftar, tapi langsung di undang oleh admin
-   - consultant dapat mengundang peserta coaching clinic
-   - consultant dapat menghapus peserta coaching clinic
