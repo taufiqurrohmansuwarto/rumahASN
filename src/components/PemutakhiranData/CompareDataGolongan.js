@@ -5,6 +5,7 @@ import { Stack } from "@mantine/core";
 import { useQuery } from "@tanstack/react-query";
 import { Table } from "antd";
 import { orderBy } from "lodash";
+import moment from "moment";
 
 const DataGolonganSIMASTER = () => {
   const { data, isLoading } = useQuery(
