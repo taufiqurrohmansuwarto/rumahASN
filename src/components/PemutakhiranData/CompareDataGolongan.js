@@ -38,7 +38,7 @@ const DataGolonganSIMASTER = () => {
     {
       title: "TMT Golongan",
       key: "tmt_golongan",
-      render: (text) => <>{moment(text?.tmtGolongan).format("DD-MM-YYYY")}</>,
+      render: (text) => <>{text?.tmt_pangkat}</>,
     },
     {
       title: "Tanggal SK",
