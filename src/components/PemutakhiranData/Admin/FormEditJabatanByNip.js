@@ -1,4 +1,10 @@
-import { getTokenSIASNService, postRwJabatan } from "@/services/siasn-services";
+import FormJFT from "@/components/PemutakhiranData/FormJFT";
+import FormJFU from "@/components/PemutakhiranData/FormJFU";
+import FormUnitOrganisasi from "@/components/PemutakhiranData/FormUnitOrganisasi";
+import {
+  getTokenSIASNService,
+  postRwJabatanByNip,
+} from "@/services/siasn-services";
 import { API_URL } from "@/utils/client-utils";
 import { FileAddOutlined } from "@ant-design/icons";
 import { useQueryClient } from "@tanstack/react-query";
@@ -15,13 +21,10 @@ import {
   message,
 } from "antd";
 import axios from "axios";
-import moment from "moment";
-import { useState, useEffect } from "react";
-import FormJFT from "@/components/PemutakhiranData/FormJFT";
-import FormJFU from "@/components/PemutakhiranData/FormJFU";
-import FormUnitOrganisasi from "@/components/PemutakhiranData/FormUnitOrganisasi";
 import { isObject } from "lodash";
+import moment from "moment";
 import { useRouter } from "next/router";
+import { useEffect, useState } from "react";
 
 const format = "DD-MM-YYYY";
 function FormEditJabatanByNip({ open, onClose, data }) {
@@ -130,7 +133,7 @@ function FormEditJabatanByNip({ open, onClose, data }) {
           path: [hasil?.data?.data],
         };
 
-        await postRwJabatan({
+        await postRwJabatanByNip({
           nip,
           data: postData,
         });
@@ -141,7 +144,7 @@ function FormEditJabatanByNip({ open, onClose, data }) {
         setFileList([]);
         setLoading(false);
       } else {
-        await postRwJabatan({
+        await postRwJabatanByNip({
           nip,
           data,
         });
