@@ -7,6 +7,10 @@ module.exports.proxyDownloadFoto = async (fetcher, nip) => {
   });
 };
 
+module.exports.cariPnsKinerja = async (fetcher, nip) => {
+  return fetcher.get(`${BASE_URL}/cari-pns-kinerja/${nip}`);
+};
+
 module.exports.proxyKeluargaDataOrtu = async (fetcher, nip) => {
   return fetcher.get(`${BASE_URL}/data-ortu/${nip}`);
 };
