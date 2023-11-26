@@ -31,6 +31,7 @@ import FormJFT from "./FormJFT";
 import FormJFU from "./FormJFU";
 import FormUnitOrganisasi from "./FormUnitOrganisasi";
 import { useSession } from "next-auth/react";
+import EditRiwayatJabatanSIASN from "./EditRiwayatJabatanSIASN";
 
 const format = "DD-MM-YYYY";
 
@@ -306,6 +307,18 @@ function CompareJabatan() {
 
   const { data, isLoading } = useQuery(["data-jabatan"], () => getRwJabatan());
 
+  const [editLastData, setEditLastData] = useState(false);
+  const [dataEdit, setDataEdit] = useState(null);
+
+  const handleOpenEdit = (data) => {
+    setEditLastData(true);
+    setDataEdit(data);
+  };
+  const handleCloseEdit = () => {
+    setEditLastData(false);
+    setDataEdit(null);
+  };
+
   const { data: dataSIASN, isLoading: isLoadingSiasn } = useQuery(
     ["data-utama-siasn"],
     () => dataUtamaSIASN()
@@ -403,6 +416,30 @@ function CompareJabatan() {
       key: "tanggalSk",
       responsive: ["sm"],
     },
+    {
+      title: "Aksi",
+      key: "edit",
+      render: (_, row) => {
+        // get the last index
+        // get the last data
+        const length = data?.length;
+        const lastData = data?.[0];
+
+        if (length <= 1) {
+          return null;
+        } else {
+          return (
+            <div>
+              {lastData?.id === row?.id && (
+                <>
+                  <a onClick={() => handleOpenEdit(lastData)}>Edit</a>
+                </>
+              )}
+            </div>
+          );
+        }
+      },
+    },
   ];
 
   const columnsMaster = [
@@ -478,6 +515,12 @@ function CompareJabatan() {
   return (
     <>
       <FormEntri onCancel={handleClose} visible={visible} />
+      <EditRiwayatJabatanSIASN
+        data={dataEdit}
+        open={editLastData}
+        onClose={handleCloseEdit}
+        user={currentUser}
+      />
       <div style={{ marginBottom: 16 }}>
         <AnomaliUser />
       </div>

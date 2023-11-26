@@ -30,6 +30,7 @@ import FormJFT from "../FormJFT";
 import FormJFU from "../FormJFU";
 import FormUnitOrganisasi from "../FormUnitOrganisasi";
 import { useSession } from "next-auth/react";
+import FormEditJabatanByNip from "./FormEditJabatanByNip";
 
 const format = "DD-MM-YYYY";
 
@@ -534,6 +535,20 @@ function CompareJabatanByNip({ nip }) {
   const [visible, setVisible] = useState(false);
   const [currentData, setCurrentData] = useState(null);
 
+  // form edit
+  const [visibleEdit, setVisibleEdit] = useState(false);
+  const [currentDataEdit, setCurrentDataEdit] = useState(null);
+
+  const handleOpenEdit = (data) => {
+    setVisibleEdit(true);
+    setCurrentDataEdit(data);
+  };
+
+  const handleCloseEdit = () => {
+    setVisibleEdit(false);
+    setCurrentDataEdit(null);
+  };
+
   // formKosong
   const [visibleKosong, setVisibleKosong] = useState(false);
   const handleOpenKosong = () => setVisibleKosong(true);
@@ -610,6 +625,26 @@ function CompareJabatanByNip({ nip }) {
     { title: "No. SK", dataIndex: "nomorSk", key: "nomorSk" },
     { title: "TMT Jab", dataIndex: "tmtJabatan", key: "tmtJabatan" },
     { title: "Tgl SK", dataIndex: "tanggalSk", key: "tanggalSk" },
+    {
+      title: "Aksi",
+      key: "edit",
+      render: (_, row) => {
+        const length = data?.length;
+        const lastData = data?.[0];
+
+        if (length <= 1) {
+          return null;
+        } else {
+          return (
+            <>
+              {lastData?.id === row?.id && (
+                <a onClick={() => handleOpenEdit(row)}>Edit</a>
+              )}
+            </>
+          );
+        }
+      },
+    },
   ];
 
   const columnsMaster = [
@@ -654,6 +689,11 @@ function CompareJabatanByNip({ nip }) {
   return (
     <Card loading={isLoading || loadingDataSiasn} title="Komparasi Jabatan">
       <Stack>
+        <FormEditJabatanByNip
+          open={visibleEdit}
+          data={currentDataEdit}
+          onClose={handleCloseEdit}
+        />
         <FormEntriKosong
           nip={nip}
           onCancel={handleCloseKosong}
