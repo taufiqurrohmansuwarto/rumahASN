@@ -1,4 +1,5 @@
 const { default: axios } = require("axios");
+
 const moment = require("moment");
 const arrayToTree = require("array-to-tree");
 const { ssoFetcher, wso2Fetcher } = require("@/utils/siasn-fetcher");
@@ -21,12 +22,14 @@ const {
   proxyKeluargaDataOrtu,
   proxyKeluargaAnak,
   proxyKeluargaPasangan,
+  cariPnsKinerja,
 } = require("@/utils/siasn-proxy.utils");
 const { getRwPangkat } = require("@/utils/master.utils");
 const { createLogSIASN } = require("@/utils/logs");
 const Anomali23 = require("@/models/anomali23.model");
 const BackupSIASN = require("@/models/backup-siasn.model");
 const RefSIASNUnor = require("@/models/ref-siasn-unor.model");
+const { getSession } = require("next-auth/react");
 
 const dataUtamaUpdate = {
   agama_id: "string",
@@ -265,46 +268,57 @@ function getKuadran(a, b) {
 const postSkp2022 = async (req, res) => {
   try {
     const { siasnRequest } = req;
-    const { penilain, ...body } = req?.body?.data;
+    const { pns_penilai, ...body } = req?.body?.data;
     const { employee_number: nip } = req?.user;
 
-    const dataCurrent = await siasnRequest.get(`/pns/data-utama/${nip}`);
-    const dataPenilai = await siasnRequest.get(
-      `/pns/data-utama/${body?.penilai}`
-    );
+    const apiGateway = process.env.APIGATEWAY_URL;
+    const hasil = await getSession({ req });
 
-    const penilai = dataPenilai?.data?.data;
-    const currentPns = dataCurrent?.data?.data;
-
-    const data = {
-      ...body,
-      hasilKinerjaNilai: parseInt(body?.hasilKinerjaNilai),
-      perilakuKerjaNilai: parseInt(body?.perilakuKerjaNilai),
-      kuadranKinerjaNilai: getKuadran(
-        parseInt(body?.hasilKinerjaNilai),
-        parseInt(body?.perilakuKerjaNilai)
-      ),
-      penilaiGolongan: penilai?.golRuangAkhirId,
-      penilaiJabatan: penilai?.jabatanNama,
-      penilaiNama: penilai?.nama,
-      penilaiNipNrp: penilai?.nipBaru,
-      penilaiUnorNama: penilai?.unorNama,
-      pnsDinilaiOrang: currentPns?.id,
-      statusPenilai: "ASN",
-      tahun: 2022,
-    };
-
-    const result = await siasnRequest.post("/skp22/save", data);
-
-    // create log
-    await createLogSIASN({
-      userId: req?.user?.customId,
-      type: "CREATE",
-      employeeNumber: nip,
-      siasnService: "skp22",
+    const fetcher = axios.create({
+      baseURL: apiGateway,
+      headers: {
+        Authorization: `Bearer ${hasil?.accessToken}`,
+      },
     });
 
-    res.json({ code: 200 });
+    const dataCurrent = await siasnRequest.get(`/pns/data-utama/${nip}`);
+    const dataPenilai = await cariPnsKinerja(fetcher, pns_penilai);
+
+    if (!dataPenilai) {
+      res.status(500).json({ message: "error" });
+    } else {
+      const penilai = dataPenilai?.data;
+      const currentPns = dataCurrent?.data?.data;
+
+      const data = {
+        ...body,
+        hasilKinerjaNilai: parseInt(body?.hasilKinerjaNilai),
+        perilakuKerjaNilai: parseInt(body?.perilakuKerjaNilai),
+        kuadranKinerjaNilai: getKuadran(
+          parseInt(body?.hasilKinerjaNilai),
+          parseInt(body?.perilakuKerjaNilai)
+        ),
+        penilaiGolongan: penilai?.golongan_id,
+        penilaiJabatan: penilai?.jabatan_nama,
+        penilaiNama: penilai?.nama,
+        penilaiNipNrp: penilai?.nip_baru,
+        penilaiUnorNama: penilai?.unor_nm,
+        pnsDinilaiOrang: currentPns?.id,
+        statusPenilai: "ASN",
+        tahun: 2022,
+      };
+
+      await siasnRequest.post("/skp22/save", data);
+
+      await createLogSIASN({
+        userId: req?.user?.customId,
+        type: "CREATE",
+        employeeNumber: nip,
+        siasnService: "skp22",
+      });
+
+      res.json({ code: 200 });
+    }
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: "error" });
@@ -314,46 +328,59 @@ const postSkp2022 = async (req, res) => {
 const postSkp2022ByNip = async (req, res) => {
   try {
     const { siasnRequest } = req;
-    const { penilain, ...body } = req?.body?.data;
+    const { pns_penilai, ...body } = req?.body;
     const { nip } = req?.query;
 
-    const dataCurrent = await siasnRequest.get(`/pns/data-utama/${nip}`);
-    const dataPenilai = await siasnRequest.get(
-      `/pns/data-utama/${body?.penilai}`
-    );
+    const apiGateway = process.env.APIGATEWAY_URL;
+    const hasil = await getSession({ req });
 
-    const penilai = dataPenilai?.data?.data;
-    const currentPns = dataCurrent?.data?.data;
-
-    const data = {
-      ...body,
-      hasilKinerjaNilai: parseInt(body?.hasilKinerjaNilai),
-      perilakuKerjaNilai: parseInt(body?.perilakuKerjaNilai),
-      kuadranKinerjaNilai: getKuadran(
-        parseInt(body?.hasilKinerjaNilai),
-        parseInt(body?.perilakuKerjaNilai)
-      ),
-      penilaiGolongan: penilai?.golRuangAkhirId,
-      penilaiJabatan: penilai?.jabatanNama,
-      penilaiNama: penilai?.nama,
-      penilaiNipNrp: penilai?.nipBaru,
-      penilaiUnorNama: penilai?.unorNama,
-      pnsDinilaiOrang: currentPns?.id,
-      statusPenilai: "ASN",
-      tahun: 2022,
-    };
-
-    await siasnRequest.post("/skp22/save", data);
-
-    // create log
-    await createLogSIASN({
-      userId: req?.user?.customId,
-      type: "CREATE",
-      employeeNumber: nip,
-      siasnService: "skp22",
+    const fetcher = axios.create({
+      baseURL: apiGateway,
+      headers: {
+        Authorization: `Bearer ${hasil?.accessToken}`,
+      },
     });
 
-    res.json({ code: 200 });
+    const dataCurrent = await siasnRequest.get(`/pns/data-utama/${nip}`);
+
+    const dataPenilai = await cariPnsKinerja(fetcher, pns_penilai);
+
+    if (!dataPenilai) {
+      res.status(500).json({ message: "error" });
+    } else {
+      const penilai = dataPenilai?.data;
+      const currentPns = dataCurrent?.data?.data;
+
+      const data = {
+        ...body,
+        hasilKinerjaNilai: parseInt(body?.hasilKinerjaNilai),
+        perilakuKerjaNilai: parseInt(body?.perilakuKerjaNilai),
+        kuadranKinerjaNilai: getKuadran(
+          parseInt(body?.hasilKinerjaNilai),
+          parseInt(body?.perilakuKerjaNilai)
+        ),
+        penilaiGolongan: penilai?.golongan_id,
+        penilaiJabatan: penilai?.jabatan_nama,
+        penilaiNama: penilai?.nama,
+        penilaiNipNrp: penilai?.nip_baru,
+        penilaiUnorNama: penilai?.unor_nm,
+        pnsDinilaiOrang: currentPns?.id,
+        statusPenilai: "ASN",
+        tahun: 2022,
+      };
+
+      await siasnRequest.post("/skp22/save", data);
+
+      // create log
+      await createLogSIASN({
+        userId: req?.user?.customId,
+        type: "CREATE",
+        employeeNumber: nip,
+        siasnService: "skp22",
+      });
+
+      res.json({ code: 200 });
+    }
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: "error" });

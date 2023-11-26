@@ -1,8 +1,8 @@
 import { rwSkpMasterByNip } from "@/services/master.services";
+import { API_URL } from "@/utils/client-utils";
 import {
   getRwSkp22ByNip,
   getTokenSIASNService,
-  postRwSkp22,
   postRwSkp22ByNip,
 } from "@/services/siasn-services";
 import { FileAddOutlined } from "@ant-design/icons";
@@ -20,7 +20,7 @@ import {
 } from "antd";
 import axios from "axios";
 import { useState } from "react";
-import FormCariPegawai from "../FormCariPegawai";
+import FormCariPNSKinerja from "../FormCariPNSKinerja";
 
 // const data = {
 //     hasilKinerjaNilai: 0,
@@ -109,7 +109,7 @@ const FormSKP22 = ({ visible, onCancel, nip }) => {
         setLoading(false);
         queryClient.invalidateQueries(["data-skp-22"]);
       } else {
-        await postRwSkp22({
+        await postRwSkp22ByNip({
           nip,
           data,
         });
@@ -164,10 +164,10 @@ const FormSKP22 = ({ visible, onCancel, nip }) => {
             <Select.Option value="3">DIBAWAH EKSPETASI</Select.Option>
           </Select>
         </Form.Item>
-        <FormCariPegawai
+        <FormCariPNSKinerja
           help="ketik NIP Tanpa Spasi dan tunggu..."
           label="Atasan Penilai"
-          name="penilai"
+          name="pns_penilai"
         />
       </Form>
     </Modal>
