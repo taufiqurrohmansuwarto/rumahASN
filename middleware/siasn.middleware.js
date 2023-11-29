@@ -1,5 +1,8 @@
 const { ssoFetcher, wso2Fetcher } = require("@/utils/siasn-fetcher");
 const { default: axios } = require("axios");
+const fs = require("fs");
+const { filename } = require("gotenberg-js-client");
+const path = require("path");
 
 const baseUrl = "https://apimws.bkn.go.id:8243/apisiasn/1.0";
 
@@ -24,6 +27,11 @@ const requestHandler = async (request) => {
   const sso_token = result?.sso_token;
   const wso_token = result?.wso_token;
 
+  // get base directory
+
+  const baseDir = path.resolve(`${process.cwd()}/token.txt`);
+  console.log(baseDir);
+
   request.headers.Authorization = `Bearer ${wso_token}`;
   request.headers.Auth = `bearer ${sso_token}`;
 
@@ -31,11 +39,23 @@ const requestHandler = async (request) => {
 };
 
 const responseHandler = async (response) => {
+  const firstJwt = response.config.headers.Authorization;
+  const secondJwt = response.config.headers.Auth;
+
+  const firstJwtSplit = firstJwt.split(" ");
+  const secondJwtSplit = secondJwt.split(" ");
+
+  // save token to file
+  const firstJwtToken = firstJwtSplit[1];
+  const secondJwtToken = secondJwtSplit[1];
+
+  // create file name token.txt to root application
+
   return response;
 };
 
-const errorHandler = async (error) => {
-  return Promise.reject(error?.response?.data);
+const errorHandler = (error) => {
+  return Promise.reject(error?.response?.data?.message);
 };
 
 siasnWsAxios.interceptors.request.use(
@@ -53,7 +73,6 @@ const siasnMiddleware = async (req, res, next) => {
     req.siasnRequest = siasnWsAxios;
     next();
   } catch (error) {
-    console.log(error);
     res.status(500).json({ message: "error" });
   }
 };

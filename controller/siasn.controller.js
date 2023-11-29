@@ -95,7 +95,6 @@ const siasnEmployeesDetail = async (req, res) => {
 
     res.json(data?.data);
   } catch (error) {
-    console.log(error);
     res.status(500).json({ code: 500, message: "Internal Server Error" });
   }
 };

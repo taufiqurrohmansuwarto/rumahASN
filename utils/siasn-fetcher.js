@@ -1,12 +1,29 @@
 import axios from "axios";
 const qs = require("query-string");
-
+const jsonwebtoken = require("jsonwebtoken");
 const clientId = process.env.CLIENT_ID;
 const nip = process.env.SSO_NIP;
 const password = process.env.SSO_PASSWORD;
+const moment = require("moment");
 
 const clientIdWso2 = process.env.CLIENT_ID_WSO2;
 const clientSecretWso2 = process.env.CLIENT_SECRET_WSO2;
+
+const logToken = (token) => {
+  // check expired token
+  const decoded = jsonwebtoken.decode(token);
+  const expired = decoded?.exp;
+
+  // expired to dd-mm-yyyy hh:mm:ss
+
+  const expiredDate = moment.unix(expired).format("DD-MM-YYYY HH:mm:ss");
+  const currentDate = moment().format("DD-MM-YYYY HH:mm:ss");
+
+  return {
+    expiredDate,
+    currentDate,
+  };
+};
 
 export const ssoFetcher = async () => {
   try {
@@ -66,6 +83,7 @@ export const wso2Fetcher = async () => {
     });
 
     const token = result?.data?.access_token;
+
     return token;
   } catch (error) {
     console.log(error);
