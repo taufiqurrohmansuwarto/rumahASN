@@ -11,7 +11,6 @@ module.exports.riwayatPMK = (fetcher, nip) => {
 };
 
 module.exports.riwayatPendidikan = (fetcher, nip) => {
-  console.log(nip);
   return fetcher.get(`/pns/rw-pendidikan/${nip}`);
 };
 
