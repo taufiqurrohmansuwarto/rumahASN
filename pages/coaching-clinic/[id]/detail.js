@@ -3,7 +3,7 @@ import Layout from "@/components/Layout";
 import PageContainer from "@/components/PageContainer";
 import { detailMeetingParticipant } from "@/services/coaching-clinics.services";
 import { useQuery } from "@tanstack/react-query";
-import { Breadcrumb } from "antd";
+import { Alert, Breadcrumb } from "antd";
 import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
@@ -45,6 +45,25 @@ const DetailCoachingClinic = () => {
         loading={isLoading}
         title="Coaching Clinic"
       >
+        <Alert
+          style={{
+            marginBottom: 10,
+          }}
+          showIcon
+          message="Perhatian layanan coaching clinic dipindahtugaskan ke zoom."
+          description={
+            <div
+              dangerouslySetInnerHTML={{
+                __html: `<p>Bergabung Zoom Rapat
+<a href="https://us06web.zoom.us/j/87259201447?pwd=adabHFxbkc4R05kTVJ0NzlqTVdFRngrUT09">https://us06web.zoom.us/j/87259201447?pwd=adabHFxbkc4R05kTVJ0NzlqTVdFRngrUT09</a></p>
+<p>ID Rapat: 872 5920 1447
+Kode Sandi: bkdjatim</p>
+`,
+              }}
+            />
+          }
+          type="error"
+        />
         <DetailMeetingParticipant />
       </PageContainer>
     </>
