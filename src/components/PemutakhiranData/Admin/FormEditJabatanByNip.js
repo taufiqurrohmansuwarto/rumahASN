@@ -239,7 +239,7 @@ function FormEditJabatanByNip({ open, onClose, data }) {
               name="tmt_jabatan"
               label="TMT Jabatan"
             >
-              <DatePicker format={format} />
+              <DatePicker disabled format={format} />
             </Form.Item>
           </Col>
           <Col md={8} xs={24}>

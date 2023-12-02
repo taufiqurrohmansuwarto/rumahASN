@@ -1,10 +1,10 @@
 const { ssoFetcher, wso2Fetcher } = require("@/utils/siasn-fetcher");
 const { default: axios } = require("axios");
 const fs = require("fs");
-const { filename } = require("gotenberg-js-client");
 const path = require("path");
 
 const baseUrl = "https://apimws.bkn.go.id:8243/apisiasn/1.0";
+const CURRENT_DIRECTORY = process.cwd();
 
 const siasnWsAxios = axios.create({
   baseURL: baseUrl,
@@ -23,39 +23,56 @@ const getoken = async () => {
 };
 
 const requestHandler = async (request) => {
-  const result = await getoken();
-  const sso_token = result?.sso_token;
-  const wso_token = result?.wso_token;
+  // cek kalau ada file token.json
+  const filePath = path.join(CURRENT_DIRECTORY, "token.json");
 
-  // get base directory
+  const ifExists = fs.existsSync(filePath);
 
-  const baseDir = path.resolve(`${process.cwd()}/token.txt`);
-  console.log(baseDir);
+  if (ifExists) {
+    const token = JSON.parse(fs.readFileSync(filePath, "utf8"));
+    const sso_token = token?.sso_token;
+    const wso_token = token?.wso_token;
 
-  request.headers.Authorization = `Bearer ${wso_token}`;
-  request.headers.Auth = `bearer ${sso_token}`;
+    request.headers.Authorization = `Bearer ${wso_token}`;
+    request.headers.Auth = `bearer ${sso_token}`;
 
-  return request;
+    return request;
+  } else {
+    const token = await getoken();
+    const sso_token = token?.sso_token;
+    const wso_token = token?.wso_token;
+
+    request.headers.Authorization = `Bearer ${wso_token}`;
+    request.headers.Auth = `bearer ${sso_token}`;
+
+    return request;
+  }
 };
 
 const responseHandler = async (response) => {
-  const firstJwt = response.config.headers.Authorization;
-  const secondJwt = response.config.headers.Auth;
+  const filePath = path.join(CURRENT_DIRECTORY, "token.json");
 
-  const firstJwtSplit = firstJwt.split(" ");
-  const secondJwtSplit = secondJwt.split(" ");
+  const authorizationHeaders = response.config.headers;
+  const sso_token = authorizationHeaders?.Auth?.split(" ")[1];
+  const wso_token = authorizationHeaders?.Authorization?.split(" ")[1];
 
-  // save token to file
-  const firstJwtToken = firstJwtSplit[1];
-  const secondJwtToken = secondJwtSplit[1];
+  const token = {
+    sso_token,
+    wso_token,
+  };
 
-  // create file name token.txt to root application
+  fs.writeFileSync(filePath, JSON.stringify(token));
 
   return response;
 };
 
-const errorHandler = (error) => {
-  return Promise.reject(error?.response?.data?.message);
+const errorHandler = async (error) => {
+  const filePath = path.join(CURRENT_DIRECTORY, "token.json");
+
+  // hapus file token.json
+  fs.unlinkSync(filePath);
+
+  return Promise.reject(error?.response?.data);
 };
 
 siasnWsAxios.interceptors.request.use(
