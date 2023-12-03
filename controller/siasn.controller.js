@@ -1,4 +1,5 @@
 const { default: axios } = require("axios");
+const fs = require("fs");
 
 const moment = require("moment");
 const arrayToTree = require("array-to-tree");
@@ -693,14 +694,18 @@ const downloadDocument = async (req, res) => {
 };
 
 const getTokenSIASN = async (req, res) => {
+  const CURRENT_DIRECTORY = process.cwd();
+  const filePath = path.join(CURRENT_DIRECTORY, "token.json");
+
   try {
-    const firstToken = await ssoFetcher();
-    const secondToken = await wso2Fetcher();
+    const token = JSON.parse(fs.readFileSync(filePath, "utf8"));
+    const sso_token = token?.sso_token;
+    const wso_token = token?.wso_token;
 
     res.json({
       accessToken: {
-        sso: firstToken,
-        wso2: secondToken,
+        sso: sso_token,
+        wso2: wso_token,
       },
     });
   } catch (error) {
