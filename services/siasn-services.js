@@ -143,3 +143,7 @@ export const postRwSkp22ByNip = ({ nip, data }) => {
 export const getTokenSIASNService = () => {
   return api.get("/token").then((res) => res.data);
 };
+
+export const getPnsAllByNip = (nip) => {
+  return api.get(`/admin/${nip}/pns-all`).then((res) => res.data);
+};

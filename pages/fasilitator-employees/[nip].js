@@ -177,6 +177,7 @@ const EmployeeNumberFasilitator = () => {
     ["data-utama-simaster-by-nip", nip],
     () => dataUtamaMasterByNip(nip)
   );
+
   return (
     <>
       <Head>

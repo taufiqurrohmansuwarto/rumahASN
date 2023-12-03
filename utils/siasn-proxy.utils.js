@@ -8,7 +8,8 @@ module.exports.proxyDownloadFoto = async (fetcher, nip) => {
 };
 
 module.exports.cariPnsKinerja = async (fetcher, nip) => {
-  return fetcher.get(`${BASE_URL}/cari-pns-kinerja/${nip}`);
+  const url = `${BASE_URL}/cari-pns-kinerja/${nip}`;
+  return fetcher.get(url);
 };
 
 module.exports.proxyKeluargaDataOrtu = async (fetcher, nip) => {

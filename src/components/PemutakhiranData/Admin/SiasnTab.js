@@ -7,6 +7,7 @@ import CompareSKP22ByNip from "./CompareSKP22ByNip";
 import ComparePangkatByNip from "./ComparePangkatByNip";
 import ComparePemberhentianByNip from "./ComparePemberhentianByNip";
 import CompareMasaKerjaByNip from "./CompareMasaKerjaByNip";
+import CompareKedudukanHukumByNip from "./CompareKedudukanHukumByNip";
 
 function SiasnTab({ nip }) {
   const breakPoint = Grid.useBreakpoint();
@@ -22,7 +23,7 @@ function SiasnTab({ nip }) {
       <Tabs.TabPane tab="Jabatan" key="2">
         <CompareJabatanByNip nip={nip} />
       </Tabs.TabPane>
-      <Tabs.TabPane tab="Pangkat" key="6">
+      <Tabs.TabPane tab="Pangkat & Golongan" key="6">
         <ComparePangkatByNip nip={nip} />
       </Tabs.TabPane>
       <Tabs.TabPane tab="Angka Kredit" key="3">
@@ -41,7 +42,28 @@ function SiasnTab({ nip }) {
         <CompareMasaKerjaByNip nip={nip} />
       </Tabs.TabPane>
       <Tabs.TabPane tab="Kedudukan Hukum" key="9">
-        <CompareMasaKerjaByNip nip={nip} />
+        <CompareKedudukanHukumByNip nip={nip} />
+      </Tabs.TabPane>
+      <Tabs.TabPane tab="CLTN" key="10">
+        <CompareKedudukanHukumByNip nip={nip} />
+      </Tabs.TabPane>
+      <Tabs.TabPane tab="DP3" key="11">
+        <CompareKedudukanHukumByNip nip={nip} />
+      </Tabs.TabPane>
+      <Tabs.TabPane tab="Diklat" key="12">
+        <CompareKedudukanHukumByNip nip={nip} />
+      </Tabs.TabPane>
+      <Tabs.TabPane tab="Kursus" key="13">
+        <CompareKedudukanHukumByNip nip={nip} />
+      </Tabs.TabPane>
+      <Tabs.TabPane tab="Penghargaan" key="14">
+        <CompareKedudukanHukumByNip nip={nip} />
+      </Tabs.TabPane>
+      <Tabs.TabPane tab="Pindah Instansi" key="15">
+        <CompareKedudukanHukumByNip nip={nip} />
+      </Tabs.TabPane>
+      <Tabs.TabPane tab="PWK" key="16">
+        <CompareKedudukanHukumByNip nip={nip} />
       </Tabs.TabPane>
     </Tabs>
   );
