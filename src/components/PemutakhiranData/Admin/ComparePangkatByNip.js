@@ -6,7 +6,7 @@ import { Card, Table } from "antd";
 import { orderBy } from "lodash";
 import moment from "moment";
 
-const PangkatSiasn = ({ data }) => {
+const PangkatSiasn = ({ data, isLoading }) => {
   const columns = [
     {
       title: "File",
@@ -50,6 +50,7 @@ const PangkatSiasn = ({ data }) => {
   return (
     <>
       <Table
+        loading={isLoading}
         columns={columns}
         title={() => <div>RIWAYAT PANGKAT SIASN</div>}
         pagination={false}
@@ -68,7 +69,7 @@ const PangkatSiasn = ({ data }) => {
   );
 };
 
-const PangkatSimaster = ({ data }) => {
+const PangkatSimaster = ({ data, isLoading }) => {
   const columns = [
     {
       title: "File",
@@ -110,6 +111,7 @@ const PangkatSimaster = ({ data }) => {
   return (
     <>
       <Table
+        loading={isLoading}
         title={() => <span>RIWAYAT DATA PANGKAT SIMASTER</span>}
         pagination={false}
         columns={columns}
@@ -126,10 +128,10 @@ function ComparePangkatByNip({ nip }) {
   );
 
   return (
-    <Card title="Komparasi Pangkat" loading={isLoading}>
+    <Card title="Komparasi Pangkat">
       <Stack>
-        <PangkatSimaster data={data?.pangkat_simaster} />
-        <PangkatSiasn data={data?.pangkat_siasn} />
+        <PangkatSimaster isLoading={isLoading} data={data?.pangkat_simaster} />
+        <PangkatSiasn isLoading={isLoading} data={data?.pangkat_siasn} />
       </Stack>
     </Card>
   );

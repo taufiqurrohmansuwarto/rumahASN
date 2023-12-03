@@ -687,7 +687,7 @@ function CompareJabatanByNip({ nip }) {
   ];
 
   return (
-    <Card loading={isLoading || loadingDataSiasn} title="Komparasi Jabatan">
+    <Card title="Komparasi Jabatan">
       <Stack>
         <FormEditJabatanByNip
           open={visibleEdit}

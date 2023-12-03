@@ -133,10 +133,7 @@ function CompareAngkaKreditByNip({ nip }) {
   ];
 
   return (
-    <Card
-      title="Komparasi Angka Kredit"
-      loading={isLoading || isLoadingAngkaKredit}
-    >
+    <Card title="Komparasi Angka Kredit">
       <Stack>
         <Table
           columns={columns}

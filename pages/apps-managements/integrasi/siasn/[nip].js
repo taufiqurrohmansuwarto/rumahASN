@@ -3,6 +3,8 @@ import PageContainer from "@/components/PageContainer";
 import SiasnTab from "@/components/PemutakhiranData/Admin/SiasnTab";
 import { patchAnomali2023 } from "@/services/anomali.services";
 import { dataUtamaMasterByNip } from "@/services/master.services";
+import { getPnsAllByNip } from "@/services/siasn-services";
+import { Alert, Stack } from "@mantine/core";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Avatar,
@@ -14,6 +16,7 @@ import {
   Input,
   Modal,
   Row,
+  Skeleton,
   Space,
   Tag,
   Typography,
@@ -101,7 +104,7 @@ const ChangeStatusAnomali = ({ data, open, onCancel }) => {
   );
 };
 
-const EmployeeBio = ({ data, loading }) => {
+const EmployeeBio = ({ data, loading, isLoadingDataPns, dataPnsAll }) => {
   const [open, setOpen] = useState(false);
   const [anomali, setAnomali] = useState(null);
 
@@ -118,7 +121,7 @@ const EmployeeBio = ({ data, loading }) => {
   return (
     <Card loading={loading}>
       <ChangeStatusAnomali data={anomali} open={open} onCancel={handleClose} />
-      <Row>
+      <Row gutter={[32, 32]}>
         <Col md={2}>
           <Avatar size={90} shape="square" src={data?.foto} />
         </Col>
@@ -159,6 +162,26 @@ const EmployeeBio = ({ data, loading }) => {
           </Space>
         </Col>
       </Row>
+      <Row
+        style={{
+          marginTop: 8,
+        }}
+        gutter={[32, 32]}
+      >
+        <Col md={24}>
+          <Skeleton loading={isLoadingDataPns}>
+            <Alert title="Informasi ASN" color="yellow">
+              <Row>
+                <Col span={24}>
+                  {dataPnsAll?.nama} ({dataPnsAll?.nip_baru}) -{" "}
+                  {dataPnsAll?.unor_nm}
+                </Col>
+                <Col span={24}>{dataPnsAll?.jabatan_nama}</Col>
+              </Row>
+            </Alert>
+          </Skeleton>
+        </Col>
+      </Row>
     </Card>
   );
 };
@@ -172,6 +195,11 @@ const IntegrasiSIASNByNIP = () => {
     () => dataUtamaMasterByNip(nip)
   );
 
+  const { data: dataPnsAll, isLoading: isLoadingDataPns } = useQuery(
+    ["data-pns-all", nip],
+    () => getPnsAllByNip(nip)
+  );
+
   return (
     <>
       <Head>
@@ -183,7 +211,14 @@ const IntegrasiSIASNByNIP = () => {
         loading={isLoadingDataSimaster}
         subTitle={`Integrasi SIASN - SIMASTER ${nip}`}
         content={
-          <EmployeeBio loading={isLoadingDataSimaster} data={dataSimaster} />
+          <Stack>
+            <EmployeeBio
+              isLoadingDataPns={isLoadingDataPns}
+              dataPnsAll={dataPnsAll}
+              loading={isLoadingDataSimaster}
+              data={dataSimaster}
+            />
+          </Stack>
         }
         header={{
           breadcrumbRender: () => (

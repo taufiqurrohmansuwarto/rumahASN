@@ -40,9 +40,7 @@ const RiwayatPindahInstansi = () => {
         title="Riwayat Pindah Instansi"
         content="Komparasi Data Pindah Instansi SIASN dan SIMASTER"
       >
-        <Card>
-          <CompareAngkaKredit />
-        </Card>
+        <Card></Card>
       </PageContainer>
     </>
   );

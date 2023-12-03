@@ -1,4 +1,5 @@
 const { default: axios } = require("axios");
+const apiGateway = process.env.APIGATEWAY_URL;
 const fs = require("fs");
 const path = require("path");
 
@@ -97,6 +98,28 @@ const siasnEmployeesDetail = async (req, res) => {
 
     res.json(data?.data);
   } catch (error) {
+    res.status(500).json({ code: 500, message: "Internal Server Error" });
+  }
+};
+
+const allPnsByNip = async (req, res) => {
+  try {
+    const { nip } = req?.query;
+    const siasnRequest = req.siasnRequest;
+
+    const hasil = await getSession({ req });
+
+    const fetcher = axios.create({
+      baseURL: apiGateway,
+      headers: {
+        Authorization: `Bearer ${hasil?.accessToken}`,
+      },
+    });
+
+    const { data } = await cariPnsKinerja(fetcher, nip);
+    res.json(data);
+  } catch (error) {
+    console.log(error);
     res.status(500).json({ code: 500, message: "Internal Server Error" });
   }
 };
@@ -920,4 +943,5 @@ module.exports = {
 
   //
   updateEmployeeInformation,
+  allPnsByNip,
 };
