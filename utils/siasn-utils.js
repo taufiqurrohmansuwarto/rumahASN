@@ -2,6 +2,32 @@ module.exports.riwayatGolonganPangkat = (fetcher, nip) => {
   return fetcher.get(`/pns/rw-golongan/${nip}`);
 };
 
+// baru
+module.exports.foto = (fetcher, pnsId) => {
+  return fetcher.get(`/pns/photo/${pnsId}`);
+};
+
+module.exports.dataUtama = (fetcher, nip) => {
+  return fetcher.get(`/pns/data-utama/${nip}`);
+};
+
+// keluarga
+module.exports.anak = (fetcher, nip) => {
+  return fetcher.get(`/pns/data-anak/${nip}`);
+};
+
+module.exports.pasangan = (fetcher, nip) => {
+  return fetcher.get(`/pns/data-pasangan/${nip}`);
+};
+
+module.exports.orangTua = (fetcher, nip) => {
+  return fetcher.get(`/pns/data-ortu/${nip}`);
+};
+
+module.exports.daftarKenaikanPangkat = (fetcher, periode) => {
+  return fetcher.get(`/pns/list-kp-instansi/${periode}`);
+};
+
 module.exports.updateDataUtama = (fetcher, data) => {
   return fetcher.post(`/pns/data-utama-update`, data);
 };

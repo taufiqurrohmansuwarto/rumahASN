@@ -21,7 +21,7 @@ SKP22.Auth = {
 
 SKP22.getLayout = (page) => {
   return (
-    <Layout active="/pemutakhiran-data/data-utama">
+    <Layout active="/pemutakhiran-data/komparasi">
       <LayoutPemutakhiranData active="4">{page}</LayoutPemutakhiranData>
     </Layout>
   );
