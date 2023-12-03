@@ -10,10 +10,9 @@ const { sortBy } = require("lodash");
 
 const downloadReportAnomali = async (req, res) => {
   try {
-    const result = await Anomali23.query()
-      .withGraphFetched("[user(simpleSelect)]")
-      .where("jenis_anomali_nama", "FORMASI_JF_BELUMDIANGKAT")
-      .orWhere("jenis_anomali_nama", "UNOR_NONAKTIF");
+    const result = await Anomali23.query().withGraphFetched(
+      "[user(simpleSelect)]"
+    );
 
     const serialize = result.map((item) => {
       return {
