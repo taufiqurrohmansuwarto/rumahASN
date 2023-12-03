@@ -67,7 +67,12 @@ const errorHandler = async (error) => {
   const invalidJwt =
     error?.response?.data?.message === "invalid or expired jwt";
 
-  if (ifExists && invalidJwt) {
+  const invalidCredentials =
+    error?.response?.data?.message === "Invalid Credentials";
+
+  const notValid = invalidJwt || invalidCredentials;
+
+  if (ifExists && notValid) {
     // hapus file token.json
     fs.unlinkSync(filePath);
     console.log("token.json deleted");
