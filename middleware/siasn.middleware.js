@@ -28,6 +28,8 @@ const requestHandler = async (request) => {
 
   const ifExists = fs.existsSync(filePath);
 
+  console.log("file token.json ada?", ifExists);
+
   if (ifExists) {
     const token = JSON.parse(fs.readFileSync(filePath, "utf8"));
     const sso_token = token?.sso_token;
@@ -45,34 +47,34 @@ const requestHandler = async (request) => {
     request.headers.Authorization = `Bearer ${wso_token}`;
     request.headers.Auth = `bearer ${sso_token}`;
 
+    console.log("token.json created, di request handler");
+    fs.writeFileSync(filePath, JSON.stringify(token));
+
     return request;
   }
 };
 
 const responseHandler = async (response) => {
-  const filePath = path.join(CURRENT_DIRECTORY, "token.json");
-
-  const authorizationHeaders = response.config.headers;
-  const sso_token = authorizationHeaders?.Auth?.split(" ")[1];
-  const wso_token = authorizationHeaders?.Authorization?.split(" ")[1];
-
-  const token = {
-    sso_token,
-    wso_token,
-  };
-
-  fs.writeFileSync(filePath, JSON.stringify(token));
-
   return response;
 };
 
 const errorHandler = async (error) => {
   const filePath = path.join(CURRENT_DIRECTORY, "token.json");
 
-  // hapus file token.json
-  fs.unlinkSync(filePath);
+  // cek kalau ada file token.json
+  const ifExists = fs.existsSync(filePath);
 
-  return Promise.reject(error?.response?.data);
+  const invalidJwt =
+    error?.response?.data?.message === "invalid or expired jwt";
+
+  if (ifExists && invalidJwt) {
+    // hapus file token.json
+    fs.unlinkSync(filePath);
+    console.log("token.json deleted");
+    return Promise.reject(error?.response?.data);
+  } else {
+    return Promise.reject(error?.response?.data);
+  }
 };
 
 siasnWsAxios.interceptors.request.use(

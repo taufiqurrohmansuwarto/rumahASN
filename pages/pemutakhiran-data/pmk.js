@@ -54,7 +54,7 @@ RiwayatPMK.Auth = {
 };
 
 RiwayatPMK.getLayout = (page) => {
-  return <Layout active="/pemutakhiran-data/data-utama">{page}</Layout>;
+  return <Layout active="/pemutakhiran-data/komparasi">{page}</Layout>;
 };
 
 export default RiwayatPMK;
