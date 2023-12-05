@@ -1,4 +1,7 @@
-const { getRwPendidikanMaster } = require("@/utils/master.utils");
+const {
+  getRwPendidikanMaster,
+  getRwKedudukanHukum: kedudukanHukum,
+} = require("@/utils/master.utils");
 
 const rwPendidikanSIMASTER = async (req, res) => {
   try {
@@ -25,7 +28,21 @@ const rwPendidikanSIMASTERByNip = async (req, res) => {
   }
 };
 
+const rwKedudukanHukumByNip = async (req, res) => {
+  try {
+    const { fetcher } = req;
+    const { nip } = req.query;
+    const result = await kedudukanHukum(fetcher, nip);
+
+    res.json(result?.data);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ code: 500, message: "Internal Server Error" });
+  }
+};
+
 module.exports = {
   rwPendidikanSIMASTER,
   rwPendidikanSIMASTERByNip,
+  rwKedudukanHukumByNip,
 };

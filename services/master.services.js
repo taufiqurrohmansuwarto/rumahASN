@@ -49,3 +49,7 @@ export const rwSkpMasterByNip = (nip) => {
 export const rwPendidikanMasterByNip = (nip) => {
   return api.get(`/admin/${nip}/rw-pendidikan`).then((res) => res.data);
 };
+
+export const rwKedudukanHukumByNip = (nip) => {
+  return api.get(`/admin/${nip}/rw-kedudukan-hukum`).then((res) => res.data);
+};
