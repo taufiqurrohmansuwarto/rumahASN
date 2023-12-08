@@ -48,7 +48,23 @@ const changeRoutes = (user) => {
     const pegawaiPemda = userPns || userPttpk;
     const pegawaiBKD = bkd || pttBkd;
 
+    const adminFasilitator = admin || fasilitatorMaster;
+
     // persiapan ini seharusnya ditambahkan halaman dashboard seperti analisis dsb tapi jangan data
+
+    if (adminFasilitator) {
+      userRoutes.routes.push({
+        path: "/siasn",
+        name: "Layanan SIASN",
+        icon: <TeamOutlined />,
+        routes: [
+          {
+            path: "/siasn/kenaikan-pangkat",
+            name: "Kenaikan Pangkat",
+          },
+        ],
+      });
+    }
 
     if (pegawaiBKD) {
       userRoutes.routes.push(

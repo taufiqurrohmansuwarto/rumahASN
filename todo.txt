@@ -1,3 +1,21 @@
-1. edit tmt pangkat karena salah
-2. tambahkan edit jabatan di jabatan terahir
-3. edit skp
+
+tabel netralitas_laporan
+id -> uuidv4
+user_id -> string (fk)
+nama -> string (required)
+pekerjaan -> string (required)
+nomor_hp -> string (required)
+email -> string (required)
+alamat -> string (required)
+nip -> string
+kode -> string (required)
+judul -> string
+isi -> text
+terlapor_nama -> string (required)
+terlapor_nip -> string
+terlapor_jabatan -> string
+terlapor_instansi -> string
+status -> string
+catatan -> string
+di_proses_oleh -> string (custom_id) fk
+timetsamps

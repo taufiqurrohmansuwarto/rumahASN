@@ -147,3 +147,7 @@ export const getTokenSIASNService = () => {
 export const getPnsAllByNip = (nip) => {
   return api.get(`/admin/${nip}/pns-all`).then((res) => res.data);
 };
+
+export const getDaftarKenaikanPangkatByPeriode = (periode) => {
+  return api.get(`/admin/kp?periode=${periode}`).then((res) => res.data);
+};
