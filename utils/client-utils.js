@@ -643,3 +643,15 @@ export const setColorStatusCoachingClinic = (status) => {
     return "red";
   }
 };
+
+export const setColorStatusUsulan = (status) => {
+  // 22 sudah di ttd pertek
+  // 32 pembuatan sk berhasil
+  if (status === "22") {
+    return "yellow";
+  } else if (status === "32") {
+    return "green";
+  } else {
+    return "red";
+  }
+};
