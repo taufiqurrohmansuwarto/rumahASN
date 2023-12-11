@@ -1,9 +1,21 @@
-import { dataPangkatByNip } from "@/services/siasn-services";
+import {
+  dataPangkatByNip,
+  uploadDokumenKenaikanPangkat,
+} from "@/services/siasn-services";
 import { findGolongan, findPangkat } from "@/utils/client-utils";
 import { UploadOutlined } from "@ant-design/icons";
 import { Stack } from "@mantine/core";
-import { useQuery } from "@tanstack/react-query";
-import { Button, DatePicker, Form, Input, Modal, Table, Upload } from "antd";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import {
+  Button,
+  DatePicker,
+  Form,
+  Input,
+  Modal,
+  Table,
+  Upload,
+  message,
+} from "antd";
 import { orderBy } from "lodash";
 import moment from "moment";
 import React, { useState } from "react";
@@ -135,6 +147,19 @@ const PangkatSimaster = ({ data, isLoading }) => {
 const ModalForm = ({ open, onCancel, data }) => {
   const [form] = Form.useForm();
 
+  const { mutate, isLoading } = useMutation(
+    (values) => uploadDokumenKenaikanPangkat(values),
+    {
+      onSuccess: (data) => {
+        form.resetFields();
+        onCancel();
+      },
+      onError: (error) => {
+        message.error("Gagal menambahkan data");
+      },
+    }
+  );
+
   const handleFinish = async () => {
     try {
       const result = await form.validateFields();
@@ -145,12 +170,13 @@ const ModalForm = ({ open, onCancel, data }) => {
       formData.append("no_sk", result?.no_sk);
       formData.append("file", currentFile);
 
-      console.log(result);
+      mutate(formData);
     } catch (error) {}
   };
 
   return (
     <Modal
+      confirmLoading={isLoading}
       onOk={handleFinish}
       title="Upload Dokumen Pangkat"
       centered
