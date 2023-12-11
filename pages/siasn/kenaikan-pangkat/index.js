@@ -8,8 +8,11 @@ import { findPangkat, setColorStatusUsulan } from "@/utils/client-utils";
 import PageContainer from "@/components/PageContainer";
 import { Stack } from "@mantine/core";
 import ModalDetailKP from "@/components/LayananSIASN/ModalDetailKP";
+import { useRouter } from "next/router";
 
 const DaftarKenaikanPangkat = () => {
+  const router = useRouter();
+
   const [date, setDate] = useState(new Date());
 
   // modal
@@ -27,10 +30,13 @@ const DaftarKenaikanPangkat = () => {
   };
 
   const { data, isLoading } = useQuery(
-    ["kenaikan-pangkat", moment(date).format("YYYY-MM-DD")],
-    () => getDaftarKenaikanPangkatByPeriode(moment(date).format("YYYY-MM-DD")),
+    ["kenaikan-pangkat", moment(router?.query?.periode).format("YYYY-MM-DD")],
+    () =>
+      getDaftarKenaikanPangkatByPeriode(
+        moment(router?.query?.periode).format("YYYY-MM-DD")
+      ),
     {
-      enabled: !!date,
+      enabled: !!router?.query?.periode,
     }
   );
 
@@ -130,7 +136,21 @@ const DaftarKenaikanPangkat = () => {
       <BackTop />
       <ModalDetailKP open={openKPModal} data={dataKP} onCancel={handleClose} />
       <Stack>
-        <DatePicker format="YYYY-MM-DD" onChange={(date) => setDate(date)} />
+        <DatePicker
+          value={
+            router?.query?.periode
+              ? moment(router?.query?.periode)
+              : moment(date)
+          }
+          format="YYYY-MM-DD"
+          onChange={(date) => {
+            setDate(date);
+            router.push({
+              pathname: router.pathname,
+              query: { periode: moment(date).format("YYYY-MM-DD") },
+            });
+          }}
+        />
         <Card>
           <Table
             size="small"

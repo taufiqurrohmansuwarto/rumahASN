@@ -104,3 +104,11 @@ module.exports.rwPemberhentian = (fetcher, nip) => {
 module.exports.rwPindahInstansi = (fetcher, nip) => {
   return fetcher.get(`/pns/rw-pindahinstansi/${nip}`);
 };
+
+module.exports.uploadFileKP = (fetcher, data) => {
+  return fetcher.post(`/upload-dok-sk-kp`, data, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
+};

@@ -151,3 +151,13 @@ export const getPnsAllByNip = (nip) => {
 export const getDaftarKenaikanPangkatByPeriode = (periode) => {
   return api.get(`/admin/kp?periode=${periode}`).then((res) => res.data);
 };
+
+export const uploadDokumenKenaikanPangkat = (data) => {
+  return api
+    .post(`/admin/kp/upload`, data, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    })
+    .then((res) => res.data);
+};
