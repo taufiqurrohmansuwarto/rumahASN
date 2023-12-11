@@ -1,4 +1,4 @@
-const { daftarKenaikanPangkat } = require("@/utils/siasn-utils");
+const { daftarKenaikanPangkat, uploadFileKP } = require("@/utils/siasn-utils");
 const moment = require("moment");
 const FormData = require("form-data");
 
@@ -24,8 +24,17 @@ const uploadDokumenKenaikanPangkat = async (req, res) => {
   try {
     const file = req?.file;
     const { siasnRequest: request } = req;
+    const { tgl_sk, no_sk } = req?.body;
 
     const formData = new FormData();
+    formData.append("tgl_sk", moment(tgl_sk).format("YYYY-MM-DD"));
+
+    formData.append("no_sk", no_sk);
+    formData.append("file", file.buffer, file.originalname);
+
+    const hasil = await uploadFileKP(request, formData);
+
+    res.json(hasil?.data);
   } catch (error) {
     console.log(error);
     res.status(400).json({
