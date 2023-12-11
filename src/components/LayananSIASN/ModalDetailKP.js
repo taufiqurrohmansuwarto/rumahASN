@@ -1,10 +1,12 @@
 import { dataPangkatByNip } from "@/services/siasn-services";
-import { findPangkat } from "@/utils/client-utils";
-import { Divider, Stack } from "@mantine/core";
+import { findGolongan, findPangkat } from "@/utils/client-utils";
+import { UploadOutlined } from "@ant-design/icons";
+import { Stack } from "@mantine/core";
 import { useQuery } from "@tanstack/react-query";
-import { Modal, Table } from "antd";
+import { Button, DatePicker, Form, Input, Modal, Table, Upload } from "antd";
 import { orderBy } from "lodash";
 import moment from "moment";
+import React, { useState } from "react";
 
 const PangkatSiasn = ({ data, isLoading }) => {
   const columns = [
@@ -30,7 +32,11 @@ const PangkatSiasn = ({ data, isLoading }) => {
     {
       title: "Pangkat",
       key: "Pangkat",
-      render: (_, record) => <>{findPangkat(record?.golonganId)}</>,
+      render: (_, record) => (
+        <>
+          {findPangkat(record?.golonganId)} ({findGolongan(record?.golonganId)})
+        </>
+      ),
     },
     {
       title: "No. SK",
@@ -89,7 +95,11 @@ const PangkatSimaster = ({ data, isLoading }) => {
     {
       title: "Pangkat",
       key: "pangkat",
-      render: (text) => <span>{text?.pangkat?.pangkat}</span>,
+      render: (text) => (
+        <span>
+          {text?.pangkat?.pangkat} ({text?.pangkat?.gol_ruang})
+        </span>
+      ),
     },
     {
       title: "No. SK",
@@ -122,11 +132,74 @@ const PangkatSimaster = ({ data, isLoading }) => {
   );
 };
 
+const ModalForm = ({ open, onCancel, data }) => {
+  const [form] = Form.useForm();
+
+  const handleFinish = async () => {
+    try {
+      const result = await form.validateFields();
+      const currentFile = result?.file?.fileList?.[0]?.originFileObj;
+
+      const formData = new FormData();
+      formData.append("tgl_sk", moment(result?.tgl_sk).format("YYYY-MM-DD"));
+      formData.append("no_sk", result?.no_sk);
+      formData.append("file", currentFile);
+
+      console.log(result);
+    } catch (error) {}
+  };
+
+  return (
+    <Modal
+      onOk={handleFinish}
+      title="Upload Dokumen Pangkat"
+      centered
+      open={open}
+      onCancel={onCancel}
+    >
+      {/* {JSON.stringify(data)} */}
+      <Form form={form} layout="vertical">
+        <Form.Item name="no_sk" label="No. SK" required>
+          <Input />
+        </Form.Item>
+        <Form.Item name="tgl_sk" label="Tanggal SK" required>
+          <DatePicker format={"DD-MM-YYYY"} />
+        </Form.Item>
+        <Form.Item name="file" required label="File SK">
+          <Upload
+            showUploadList={{
+              showDownloadIcon: false,
+              removeIcon: false,
+              showRemoveIcon: false,
+              downloadIcon: false,
+              previewIcon: false,
+              showPreviewIcon: false,
+            }}
+            accept=".pdf"
+            multiple={false}
+            maxCount={1}
+          >
+            <Button type="primary" icon={<UploadOutlined />}>
+              Upload
+            </Button>
+          </Upload>
+        </Form.Item>
+      </Form>
+    </Modal>
+  );
+};
+
 function ModalDetailKP({ open, onCancel, data }) {
   const { data: dataPadanan, isLoading } = useQuery(
     ["data-riwayat-pangkat", data?.nipBaru],
     () => dataPangkatByNip(data?.nipBaru)
   );
+
+  const [showModal, setShowModal] = useState(false);
+
+  const openModal = () => setShowModal(true);
+  const closeModal = () => setShowModal(false);
+
   return (
     <Modal
       centered={true}
@@ -136,7 +209,10 @@ function ModalDetailKP({ open, onCancel, data }) {
       open={open}
       onCancel={onCancel}
     >
-      {JSON.stringify(data?.id)}
+      <ModalForm open={showModal} onCancel={closeModal} data={data} />
+      <Button type="primary" onClick={openModal} centered>
+        Upload Pangkat
+      </Button>
       <Stack>
         <PangkatSimaster
           isLoading={isLoading}

@@ -634,6 +634,10 @@ export const findPangkat = (idPangkat) => {
   return REF_PANGKAT.find((item) => item.id === idPangkat)?.nama_pangkat;
 };
 
+export const findGolongan = (idPangkat) => {
+  return REF_PANGKAT.find((item) => item.id === idPangkat)?.nama;
+};
+
 export const setColorStatusCoachingClinic = (status) => {
   if (status === "upcoming") {
     return "yellow";

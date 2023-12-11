@@ -6,6 +6,29 @@ const axios = require("axios");
 
 const URL_FILE = "https://siasn.bkd.jatimprov.go.id:9000/public";
 
+const getNetralitas = async (req, res) => {
+  try {
+    const page = req.query.page || 1;
+    const limit = req.query.limit || 20;
+
+    const result = await LaporanNetralitas.query()
+      .orderBy("created_at", "desc")
+      .page(parseInt(page - 1), parseInt(limit));
+
+    res.json({
+      results: result.results,
+      meta: {
+        total: result.total,
+        page,
+        limit,
+      },
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: error.message });
+  }
+};
+
 const uploadMultiplesFiles = async (request, files) => {
   try {
     files.forEach(async (file) => {
@@ -86,4 +109,5 @@ const createPostNetralitas = async (req, res) => {
 
 module.exports = {
   createPostNetralitas,
+  getNetralitas,
 };

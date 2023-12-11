@@ -1,5 +1,6 @@
 const { daftarKenaikanPangkat } = require("@/utils/siasn-utils");
 const moment = require("moment");
+const FormData = require("form-data");
 
 const listKenaikanPangkat = async (req, res) => {
   try {
@@ -21,6 +22,10 @@ const listKenaikanPangkat = async (req, res) => {
 
 const uploadDokumenKenaikanPangkat = async (req, res) => {
   try {
+    const file = req?.file;
+    const { siasnRequest: request } = req;
+
+    const formData = new FormData();
   } catch (error) {
     console.log(error);
     res.status(400).json({
