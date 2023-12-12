@@ -1,3 +1,4 @@
+import { appList } from "@/utils/app-lists";
 import {
   ApiOutlined,
   BarChartOutlined,
@@ -6,6 +7,7 @@ import {
   ProfileOutlined,
   QuestionCircleFilled,
   SolutionOutlined,
+  StarOutlined,
   TeamOutlined,
   UserOutlined,
   UsergroupAddOutlined,
@@ -22,7 +24,6 @@ import { userRoutes } from "../routes";
 import Messages from "./Messages";
 import Notifications from "./Notifications";
 import SearchUserLayout from "./SearchUserLayout";
-import { appList } from "@/utils/app-lists";
 
 const ProLayout = dynamic(
   () => import("@ant-design/pro-components").then((mod) => mod?.ProLayout),
@@ -56,7 +57,7 @@ const changeRoutes = (user) => {
       userRoutes.routes.push({
         path: "/siasn",
         name: "Layanan SIASN",
-        icon: <TeamOutlined />,
+        icon: <StarOutlined />,
         routes: [
           {
             path: "/siasn/kenaikan-pangkat",

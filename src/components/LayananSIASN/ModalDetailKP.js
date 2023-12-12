@@ -1,3 +1,4 @@
+import { dataUtamaMasterByNip } from "@/services/master.services";
 import {
   dataPangkatByNip,
   uploadDokumenKenaikanPangkat,
@@ -5,14 +6,22 @@ import {
 import { findGolongan, findPangkat } from "@/utils/client-utils";
 import { UploadOutlined } from "@ant-design/icons";
 import { Stack } from "@mantine/core";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
+  Avatar,
   Button,
+  Col,
   DatePicker,
+  Divider,
   Form,
   Input,
   Modal,
+  Row,
+  Skeleton,
+  Space,
   Table,
+  Tag,
+  Typography,
   Upload,
   message,
 } from "antd";
@@ -146,16 +155,22 @@ const PangkatSimaster = ({ data, isLoading }) => {
 
 const ModalForm = ({ open, onCancel, data }) => {
   const [form] = Form.useForm();
+  const queryClient = useQueryClient();
 
   const { mutate, isLoading } = useMutation(
     (values) => uploadDokumenKenaikanPangkat(values),
     {
-      onSuccess: (data) => {
+      onSuccess: () => {
         form.resetFields();
         onCancel();
+        message.success("Berhasil menambahkan riwayat golongan");
       },
       onError: (error) => {
-        message.error("Gagal menambahkan data");
+        const errMessage = error?.response?.data?.message || "Internal Error";
+        message.error(errMessage);
+      },
+      onSettled: () => {
+        queryClient.invalidateQueries(["data-riwayat-pangkat", data?.nipBaru]);
       },
     }
   );
@@ -169,9 +184,12 @@ const ModalForm = ({ open, onCancel, data }) => {
       formData.append("tgl_sk", moment(result?.tgl_sk).format("YYYY-MM-DD"));
       formData.append("no_sk", result?.no_sk);
       formData.append("file", currentFile);
-
+      formData.append("nip", data?.nipBaru);
+      formData.append("id_usulan", data?.id);
       mutate(formData);
-    } catch (error) {}
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   return (
@@ -218,7 +236,16 @@ const ModalForm = ({ open, onCancel, data }) => {
 function ModalDetailKP({ open, onCancel, data }) {
   const { data: dataPadanan, isLoading } = useQuery(
     ["data-riwayat-pangkat", data?.nipBaru],
-    () => dataPangkatByNip(data?.nipBaru)
+    () => dataPangkatByNip(data?.nipBaru),
+    {
+      enabled: !!data?.nipBaru,
+      refetchOnWindowFocus: false,
+    }
+  );
+
+  const { data: dataSimaster, isLoading: isLoadingDataSimaster } = useQuery(
+    ["data-utama-simaster-by-nip", data?.nipBaru],
+    () => dataUtamaMasterByNip(data?.nipBaru)
   );
 
   const [showModal, setShowModal] = useState(false);
@@ -230,15 +257,45 @@ function ModalDetailKP({ open, onCancel, data }) {
     <Modal
       centered={true}
       title="Detail Pegawai"
-      width={850}
-      bodyStyle={{ overflowY: "auto", maxHeight: "calc(100vh - 400px)" }}
+      width={900}
+      bodyStyle={{ overflowY: "auto", maxHeight: "calc(100vh - 200px)" }}
       open={open}
       onCancel={onCancel}
     >
       <ModalForm open={showModal} onCancel={closeModal} data={data} />
-      <Button type="primary" onClick={openModal} centered>
-        Upload Pangkat
-      </Button>
+      <Space direction="vertical">
+        <Skeleton loading={isLoadingDataSimaster}>
+          {dataSimaster && (
+            <>
+              <Row gutter={[32, 32]}>
+                <Col span={4}>
+                  <Avatar size={90} shape="square" src={dataSimaster?.foto} />
+                </Col>
+                <Col span={12}>
+                  <Space direction="vertical">
+                    <Typography.Text>
+                      {dataSimaster?.nama} - {dataSimaster?.nip_baru}
+                    </Typography.Text>
+                    <Typography.Text>
+                      {dataSimaster?.jabatan?.jabatan} -{" "}
+                      <Typography.Text type="secondary">
+                        {dataSimaster?.skpd?.detail}
+                      </Typography.Text>
+                    </Typography.Text>
+                  </Space>
+                </Col>
+              </Row>
+              <Space style={{ marginTop: 10 }} direction="vertical">
+                <Tag>{data?.statusUsulanNama}</Tag>
+                <Button type="primary" onClick={openModal} centered>
+                  Unggah Pangkat Baru
+                </Button>
+              </Space>
+            </>
+          )}
+        </Skeleton>
+      </Space>
+      <Divider />
       <Stack>
         <PangkatSimaster
           isLoading={isLoading}
