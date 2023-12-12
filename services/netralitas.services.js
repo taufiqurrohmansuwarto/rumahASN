@@ -13,3 +13,7 @@ export const createLapor = (data) => {
     })
     .then((res) => res?.data);
 };
+
+export const getNetralitasASN = () => {
+  return api.get(`/admin/`).then((res) => res?.data);
+};
