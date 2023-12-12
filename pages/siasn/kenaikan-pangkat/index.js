@@ -1,14 +1,20 @@
 import Layout from "@/components/Layout";
 import { getDaftarKenaikanPangkatByPeriode } from "@/services/siasn-services";
 import { useQuery } from "@tanstack/react-query";
-import { BackTop, Card, DatePicker, Skeleton, Table, Tag } from "antd";
-import { useState } from "react";
+import { BackTop, Card, DatePicker, Input, Skeleton, Table, Tag } from "antd";
+import { useEffect, useState } from "react";
 import moment from "moment";
-import { findPangkat, setColorStatusUsulan } from "@/utils/client-utils";
+import {
+  findGolongan,
+  findPangkat,
+  setColorStatusUsulan,
+} from "@/utils/client-utils";
 import PageContainer from "@/components/PageContainer";
 import { Stack } from "@mantine/core";
 import ModalDetailKP from "@/components/LayananSIASN/ModalDetailKP";
 import { useRouter } from "next/router";
+import Head from "next/head";
+import { set } from "lodash";
 
 const DaftarKenaikanPangkat = () => {
   const router = useRouter();
@@ -29,7 +35,9 @@ const DaftarKenaikanPangkat = () => {
     setDataKP(null);
   };
 
-  const { data, isLoading } = useQuery(
+  const [filteredData, setFilteredData] = useState([]);
+
+  const { data, isLoading, status } = useQuery(
     ["kenaikan-pangkat", moment(router?.query?.periode).format("YYYY-MM-DD")],
     () =>
       getDaftarKenaikanPangkatByPeriode(
@@ -39,6 +47,12 @@ const DaftarKenaikanPangkat = () => {
       enabled: !!router?.query?.periode,
     }
   );
+
+  useEffect(() => {
+    if (status === "success") {
+      setFilteredData(data?.data);
+    }
+  }, [status, data]);
 
   const columns = [
     {
@@ -73,7 +87,12 @@ const DaftarKenaikanPangkat = () => {
     {
       title: "Golongan Baru",
       key: "golongan_baru",
-      render: (_, row) => <span>{findPangkat(row?.golonganBaruId)}</span>,
+      render: (_, row) => (
+        <span>
+          {findPangkat(row?.golonganBaruId)} - (
+          {findGolongan(row?.golonganBaruId)})
+        </span>
+      ),
     },
     {
       title: "Status Usulan Nama",
@@ -131,41 +150,78 @@ const DaftarKenaikanPangkat = () => {
     },
   ];
 
+  const handleSearch = (value) => {
+    const filteredData = data?.data?.filter((d) => {
+      return (
+        d?.nama?.toLowerCase().includes(value.toLowerCase()) ||
+        d?.nipBaru?.toLowerCase().includes(value.toLowerCase()) ||
+        d?.statusUsulanNama?.toLowerCase().includes(value.toLowerCase())
+      );
+    });
+    setFilteredData(filteredData);
+  };
+
   return (
-    <PageContainer>
-      <BackTop />
-      <ModalDetailKP open={openKPModal} data={dataKP} onCancel={handleClose} />
-      <Stack>
-        <DatePicker
-          value={
-            router?.query?.periode
-              ? moment(router?.query?.periode)
-              : moment(date)
-          }
-          format="YYYY-MM-DD"
-          onChange={(date) => {
-            setDate(date);
-            router.push({
-              pathname: router.pathname,
-              query: { periode: moment(date).format("YYYY-MM-DD") },
-            });
-          }}
+    <>
+      <Head>
+        <title>Rumah ASN - Daftar Kenaikan Pangkat</title>
+      </Head>
+      <PageContainer title="Daftar Kenaikan Pangkat" content="Layanan SIASN">
+        <BackTop />
+        <ModalDetailKP
+          open={openKPModal}
+          data={dataKP}
+          onCancel={handleClose}
         />
-        <Card>
-          <Table
-            size="small"
-            columns={columns}
-            dataSource={data?.data}
-            loading={isLoading}
-            pagination={{
-              position: ["bottomRight, topRight"],
-              total: data?.count,
-              pageSize: 20,
+        <Stack>
+          <DatePicker
+            value={
+              router?.query?.periode
+                ? moment(router?.query?.periode)
+                : moment(date)
+            }
+            format="YYYY-MM-DD"
+            onChange={(date) => {
+              setDate(date);
+              router.push({
+                pathname: router.pathname,
+                query: { periode: moment(date).format("YYYY-MM-DD") },
+              });
             }}
           />
-        </Card>
-      </Stack>
-    </PageContainer>
+          <Card
+            title={
+              `Periode - ${moment(router?.query?.periode).format(
+                "DD MMMM YYYY"
+              )}` || "-"
+            }
+          >
+            <Table
+              title={() => (
+                <Input.Search
+                  onSearch={handleSearch}
+                  placeholder="Cari NIP / Nama / Status Usulan"
+                  style={{
+                    width: 300,
+                  }}
+                />
+              )}
+              size="small"
+              columns={columns}
+              dataSource={filteredData}
+              loading={isLoading}
+              pagination={{
+                position: ["bottomRight", "topRight"],
+                total: filteredData?.length,
+                pageSize: 20,
+                showSizeChanger: false,
+                showTotal: (total) => `Total ${total} Data`,
+              }}
+            />
+          </Card>
+        </Stack>
+      </PageContainer>
+    </>
   );
 };
 
