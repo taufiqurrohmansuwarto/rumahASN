@@ -1,8 +1,19 @@
 import PageContainer from "@/components/PageContainer";
 import { createLapor } from "@/services/netralitas.services";
 import { useMutation } from "@tanstack/react-query";
-import { Button, Col, Form, Input, Modal, Row, Upload, message } from "antd";
+import {
+  Breadcrumb,
+  Button,
+  Col,
+  Form,
+  Input,
+  Modal,
+  Row,
+  Upload,
+  message,
+} from "antd";
 import Head from "next/head";
+import Link from "next/link";
 import React from "react";
 import ReCAPTCHA from "react-google-recaptcha";
 
@@ -22,11 +33,14 @@ function Netralitas({ data }) {
       Modal.success({
         centered: true,
         title: "Berhasil mengirim laporan",
-        content: `Terima kasih telah mengirim laporan, laporan anda akan segera kami proses. Kode Laporan Anda adalah ${data?.data?.kode_laporan}`,
+        content: `Terima kasih telah mengirim laporan, laporan anda akan segera kami proses. Kode Laporan Anda adalah ${data?.data?.kode_laporan}. Harap simpan kode laporan anda untuk keperluan selanjutnya.`,
       });
     },
     onError: (error) => {
       message.error("Gagal mengirim laporan");
+      if (recaptchaRef.current) {
+        recaptchaRef.current.reset();
+      }
     },
   });
 
@@ -65,6 +79,23 @@ function Netralitas({ data }) {
       <PageContainer
         title="Laporan Netralitas ASN"
         subTitle="Rumah ASN Lapor Netralitas"
+        header={{
+          breadcrumbRender: () => (
+            <Breadcrumb>
+              <Breadcrumb.Item>
+                <Link href="/feeds">
+                  <a>Beranda</a>
+                </Link>
+              </Breadcrumb.Item>
+              <Breadcrumb.Item>
+                <Link href="/tickets/semua">
+                  <a>Pertanyaan Saya</a>
+                </Link>
+              </Breadcrumb.Item>
+              <Breadcrumb.Item>Riwayat</Breadcrumb.Item>
+            </Breadcrumb>
+          ),
+        }}
       >
         <Form onFinish={handleFinish} form={form} layout="vertical">
           <Row gutter={[32, 32]}>
@@ -107,6 +138,10 @@ function Netralitas({ data }) {
                     required: true,
                     message: "Nomer HP Pelapor tidak boleh kosong",
                   },
+                  {
+                    pattern: new RegExp(/^[0-9]+$/),
+                    message: "Nomer HP tidak valid",
+                  },
                 ]}
               >
                 <Input placeholder="Nomor HP" />
@@ -118,6 +153,10 @@ function Netralitas({ data }) {
                   {
                     required: true,
                     message: "Email Pelapor tidak boleh kosong",
+                  },
+                  {
+                    type: "email",
+                    message: "Email tidak valid",
                   },
                 ]}
               >
@@ -202,7 +241,7 @@ function Netralitas({ data }) {
               type="primary"
               htmlType="submit"
             >
-              Kirim
+              Submit Laporan
             </Button>
           </Form.Item>
         </Form>

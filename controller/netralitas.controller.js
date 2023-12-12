@@ -4,6 +4,18 @@ const { nanoid } = require("nanoid");
 const { uploadFileMinio } = require("../utils");
 const axios = require("axios");
 
+const Minio = require("minio");
+
+const minioConfig = {
+  port: parseInt(process.env.MINIO_PORT),
+  useSSL: true,
+  accessKey: process.env.MINIO_ACCESS_KEY,
+  secretKey: process.env.MINIO_SECRET_KEY,
+  endPoint: process.env.MINIO_ENDPOINT,
+};
+
+const mc = new Minio.Client(minioConfig);
+
 const URL_FILE = "https://siasn.bkd.jatimprov.go.id:9000/public";
 
 const updateNetralitas = async (req, res) => {
@@ -109,7 +121,7 @@ const createPostNetralitas = async (req, res) => {
             url: file.url,
           }));
 
-          await uploadMultiplesFiles(req.mc, renamingFiles);
+          await uploadMultiplesFiles(mc, renamingFiles);
 
           const { captcha, ...payload } = body;
 
