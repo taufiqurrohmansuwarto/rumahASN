@@ -171,6 +171,10 @@ const changeRoutes = (user) => {
               ],
             },
             {
+              path: "/apps-managements/netralitas-asn",
+              name: "Netralitas ASN",
+            },
+            {
               path: "/apps-managements/layanan-kepegawaian",
               name: "Layanan Kepegawaian",
             },
