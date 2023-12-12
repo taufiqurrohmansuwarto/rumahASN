@@ -17,3 +17,11 @@ export const createLapor = (data) => {
 export const getNetralitasASN = () => {
   return api.get(`/admin/`).then((res) => res?.data);
 };
+
+export const searchByKodeNetralitas = ({ kode, captcha }) => {
+  return api
+    .put(`/lapor/${kode}`, {
+      captcha,
+    })
+    .then((res) => res?.data);
+};
