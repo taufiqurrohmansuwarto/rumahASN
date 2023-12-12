@@ -14,6 +14,8 @@ import { getProviders, signIn } from "next-auth/react";
 import Head from "next/head";
 import Image from "next/image";
 import GoogleButton from "react-google-button";
+import { Button as MantineButton } from "@mantine/core";
+import { useRouter } from "next/router";
 
 const BAComponent = () => {
   const [props, api] = useSpring(
@@ -40,7 +42,12 @@ const BAComponent = () => {
 };
 
 const SignIn = ({ providers }) => {
+  const router = useRouter();
   const breakPoint = Grid.useBreakpoint();
+
+  const gotoNetralitas = () => {
+    router.push("/netralitas");
+  };
 
   const title = "Rumah ASN: Sobat Kepegawaian #1 di Jatim";
   const description =
@@ -83,7 +90,6 @@ const SignIn = ({ providers }) => {
                   />
                 </Space>
               </Center>
-
               <Divider plain>Anda masyarakat umum?</Divider>
               <GoogleButton
                 label="Masuk dengan Google"
@@ -124,6 +130,17 @@ const SignIn = ({ providers }) => {
             </Col>
           </Row>
           <Divider />
+          <Center>
+            <MantineButton
+              variant="gradient"
+              fullWidth
+              gradient={{ from: "#ed6ea0", to: "#ec8c69", deg: 35 }}
+              mb={12}
+              onClick={gotoNetralitas}
+            >
+              Lapor Netralitas!
+            </MantineButton>
+          </Center>
           <Row
             justify="center"
             style={{
