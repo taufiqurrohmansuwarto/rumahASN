@@ -141,8 +141,41 @@ const createPostNetralitas = async (req, res) => {
   }
 };
 
+const searchByKodeNetralitas = async (req, res) => {
+  try {
+    const { id: kode_laporan } = req?.query;
+    const captcha = req?.body?.captcha;
+
+    if (!captcha) {
+      return res.status(400).json({ message: "Captcha is required" });
+    } else {
+      const hasil = await axios.post(
+        `https://www.google.com/recaptcha/api/siteverify?secret=${captchaKey}&response=${captcha}`
+      );
+
+      if (hasil.data.success === false) {
+        return res.status(400).json({ message: "Captcha is not valid" });
+      } else {
+        const result = await LaporanNetralitas.query()
+          .where("kode_laporan", kode_laporan)
+          .first();
+
+        if (!result) {
+          res.json(null);
+        } else {
+          res.json(result);
+        }
+      }
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: error.message });
+  }
+};
+
 module.exports = {
   createPostNetralitas,
   getNetralitas,
   updateNetralitas,
+  searchByKodeNetralitas,
 };

@@ -2,19 +2,23 @@ import Layout from "@/components/Layout";
 import PageContainer from "@/components/PageContainer";
 import { getNetralitasASN } from "@/services/netralitas.services";
 import { useQuery } from "@tanstack/react-query";
-import { Modal, Table } from "antd";
+import { Card, Modal, Table } from "antd";
 import { useState } from "react";
 import moment from "moment";
+import InformasiNetralitas from "@/components/LaporNetralitas/InformasiNetralitas";
 
 const ModalLaporan = ({ open, onCancel, data }) => {
   return (
     <Modal
+      okButtonProps={{ style: { display: "none" } }}
       title="Laporan Netralitas ASN"
+      bodyStyle={{ overflowY: "auto", maxHeight: "calc(100vh - 500px)" }}
       centered
       open={open}
       onCancel={onCancel}
+      width={800}
     >
-      {JSON.stringify(data)}
+      <InformasiNetralitas data={data} />
     </Modal>
   );
 };
@@ -73,24 +77,27 @@ const NetralitasAsn = () => {
   ];
 
   return (
-    <PageContainer>
-      {JSON.stringify(data)}
+    <PageContainer
+      title="Daftar Laporan Netralitas"
+      content="Laporan Netralitas ASN"
+    >
       <ModalLaporan
         open={open}
         onCancel={handleCloseModal}
         data={currentData}
       />
-
-      <Table
-        columns={columns}
-        pagination={{
-          total: data?.total,
-          showTotal: (total, range) =>
-            `${range[0]}-${range[1]} dari ${total} data`,
-        }}
-        dataSource={data?.results}
-        loading={isLoading}
-      />
+      <Card>
+        <Table
+          columns={columns}
+          pagination={{
+            total: data?.total,
+            showTotal: (total, range) =>
+              `${range[0]}-${range[1]} dari ${total} data`,
+          }}
+          dataSource={data?.results}
+          loading={isLoading}
+        />
+      </Card>
     </PageContainer>
   );
 };
