@@ -1,8 +1,8 @@
 import { trends } from "@/services/admin.services";
-import { Bar } from "@ant-design/plots";
 import { useQuery } from "@tanstack/react-query";
 import { Button, Card } from "antd";
 import { useRef } from "react";
+import Bar from "@/components/Plots/Bar";
 
 const serialize = (data) => {
   return data?.map((item) => {

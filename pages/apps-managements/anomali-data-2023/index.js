@@ -27,12 +27,13 @@ import {
   uploadDataAnomali2023,
 } from "@/services/anomali.services";
 import { UploadOutlined } from "@ant-design/icons";
-import { Bar, Pie } from "@ant-design/plots";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import UserByDateAnomali from "@/components/Anomali/UserByDateAnomali";
+import Pie from "@/components/Plots/Pie";
+import Bar from "@/components/Plots/Bar";
 
 const PieChart = ({ data }) => {
   const config = {

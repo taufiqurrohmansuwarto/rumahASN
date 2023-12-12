@@ -1,9 +1,9 @@
 import { dataAdminByDate } from "@/services/anomali.services";
-import { Bar } from "@ant-design/plots";
 import { useQuery } from "@tanstack/react-query";
 import { DatePicker } from "antd";
 import { useState } from "react";
 import moment from "moment";
+import Bar from "@/components/Plots/Bar";
 
 function UserByDateAnomali() {
   const [currentDate, setCurrentDate] = useState(moment().format("YYYY-MM-DD"));

@@ -1,7 +1,7 @@
 import Layout from "@/components/Layout";
 import PageContainer from "@/components/PageContainer";
+import Bar from "@/components/Plots/Bar";
 import { detailPolling } from "@/services/polls.services";
-import { Bar } from "@ant-design/plots";
 import { useQuery } from "@tanstack/react-query";
 import { Breadcrumb, Card, Col, Row, Skeleton } from "antd";
 import Head from "next/head";

@@ -1,5 +1,4 @@
-import React from "react";
-import { Pie, measureTextWidth } from "@ant-design/plots";
+import Pie from "@/components/Plots/Pie";
 
 function PlotUsers({ data }) {
   const config = {

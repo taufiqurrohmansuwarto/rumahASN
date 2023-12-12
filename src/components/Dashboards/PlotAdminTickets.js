@@ -1,4 +1,3 @@
-import { Line } from "@ant-design/plots";
 import { useQuery } from "@tanstack/react-query";
 import { Card, Col, Row } from "antd";
 import React from "react";
@@ -6,6 +5,7 @@ import {
   adminDashboard,
   ticketStatisticsScore,
 } from "../../../services/admin.services";
+import Line from "@/components/Plots/Line";
 
 const serialize = (data) => {
   return data?.map((d) => {
