@@ -6,6 +6,28 @@ const axios = require("axios");
 
 const URL_FILE = "https://siasn.bkd.jatimprov.go.id:9000/public";
 
+const updateNetralitas = async (req, res) => {
+  try {
+    const { body } = req;
+    const {
+      user: { customId },
+    } = req;
+    const id = req?.query;
+
+    const result = await LaporanNetralitas.query()
+      .patch({
+        ...body,
+        operator: customId,
+      })
+      .where("id", id);
+
+    res.json({ message: "Success", data: result });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: error.message });
+  }
+};
+
 const getNetralitas = async (req, res) => {
   try {
     const page = req.query.page || 1;
@@ -110,4 +132,5 @@ const createPostNetralitas = async (req, res) => {
 module.exports = {
   createPostNetralitas,
   getNetralitas,
+  updateNetralitas,
 };
