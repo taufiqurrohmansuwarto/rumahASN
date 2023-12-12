@@ -1,7 +1,7 @@
 import { customerSatisafactionsScore } from "@/services/admin.services";
 import { useQuery } from "@tanstack/react-query";
-import { Line } from "@ant-design/plots";
 import { Card, Col, Row } from "antd";
+import Line from "@/components/Plots/Line";
 
 const serialize = (data) => {
   return data?.map((item) => ({

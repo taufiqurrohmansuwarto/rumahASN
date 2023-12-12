@@ -1,4 +1,4 @@
-import { Pie } from "@ant-design/plots";
+import Pie from "@/components/Plots/Pie";
 
 function PlotTickets({ data }) {
   const config = {

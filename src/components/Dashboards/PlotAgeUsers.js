@@ -1,8 +1,8 @@
 import { adminDashboard } from "@/services/admin.services";
-import { Column } from "@ant-design/plots";
 import { useQuery } from "@tanstack/react-query";
 import { Card, Col, Row } from "antd";
 import React from "react";
+import Column from "@/components/Plots/Column";
 
 function PlotAgeUsers() {
   const { data, isLoading } = useQuery(["analysis-age-users"], () =>

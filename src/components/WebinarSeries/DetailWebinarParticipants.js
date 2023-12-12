@@ -9,7 +9,6 @@ import {
   participantUsername,
 } from "@/utils/client-utils";
 import { CloudDownloadOutlined } from "@ant-design/icons";
-import { Bar } from "@ant-design/plots";
 import { Stack } from "@mantine/core";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import {
@@ -24,6 +23,7 @@ import {
 } from "antd";
 import { useRouter } from "next/router";
 import { useState } from "react";
+import Bar from "@/components/Plots/Bar";
 
 const AggregasiJabatan = ({ data }) => {
   const config = {

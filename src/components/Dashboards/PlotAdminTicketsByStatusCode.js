@@ -1,7 +1,7 @@
-import { Line } from "@ant-design/plots";
 import { useQuery } from "@tanstack/react-query";
 import { Card } from "antd";
 import { adminDashboard } from "../../../services/admin.services";
+import Line from "@/components/Plots/Line";
 
 function PlotAdminTicketsByStatusCode() {
   const { data, isLoading } = useQuery(

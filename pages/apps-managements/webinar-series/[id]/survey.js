@@ -1,8 +1,8 @@
 import Layout from "@/components/Layout";
+import Bar from "@/components/Plots/Bar";
 import AdminLayoutDetailWebinar from "@/components/WebinarSeries/AdminLayoutDetailWebinar";
 import { downloadSurvey, reportSurvey } from "@/services/webinar.services";
 import { DownloadOutlined } from "@ant-design/icons";
-import { Bar } from "@ant-design/plots";
 import { Stack } from "@mantine/core";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { Button, Card, Col, Row, message } from "antd";
