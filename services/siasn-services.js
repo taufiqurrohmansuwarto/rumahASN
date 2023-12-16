@@ -161,3 +161,11 @@ export const uploadDokumenKenaikanPangkat = (data) => {
     })
     .then((res) => res.data);
 };
+
+export const getDaftarPemberhentianSIASN = (data) => {
+  const { tglAwal, tglAkhir } = data;
+
+  return api
+    .get(`/admin/pemberhentian?tglAwal=${tglAwal}&tglAkhir=${tglAkhir}`)
+    .then((res) => res.data);
+};

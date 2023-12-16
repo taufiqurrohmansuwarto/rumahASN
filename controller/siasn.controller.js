@@ -149,7 +149,13 @@ const siasnRwPemberhentian = async (req, res) => {
 
     const result = await rwPemberhentian(siasnRequest, nip);
 
-    res.json(result?.data);
+    const data = result?.data;
+
+    if (data?.code === 0) {
+      return res.json([]);
+    } else {
+      return res.json(data?.data);
+    }
   } catch (error) {
     console.log(error);
     res.status(500).json({ code: 500, message: "Internal Server Error" });
@@ -163,7 +169,13 @@ const siasnRwMasaKerja = async (req, res) => {
 
     const result = await rwMasaKerja(siasnRequest, nip);
 
-    res.json(result?.data);
+    const data = result?.data;
+
+    if (data?.code === 0) {
+      return res.json([]);
+    } else {
+      return res.json(data?.data);
+    }
   } catch (error) {
     console.log(error);
     res.status(500).json({ code: 500, message: "Internal Server Error" });

@@ -1,6 +1,6 @@
 import { dataRiwayatPemberhentian } from "@/services/siasn-services";
 import { useQuery } from "@tanstack/react-query";
-import { Card } from "antd";
+import { Card, Table } from "antd";
 import React from "react";
 
 function ComparePemberhentianByNip({ nip }) {
@@ -12,9 +12,37 @@ function ComparePemberhentianByNip({ nip }) {
     }
   );
 
+  const columns = [
+    {
+      title: "Jenis Henti",
+      dataIndex: "jenisHenti",
+    },
+    {
+      title: "Kedudukan Hukum PNS",
+      dataIndex: "kedudukanHukumPns",
+    },
+    {
+      title: "Nomor SK",
+      dataIndex: "skNomor",
+    },
+    {
+      title: "Tanggal SK",
+      dataIndex: "skTanggal",
+    },
+    {
+      title: "Asal Nama",
+      dataIndex: "asalNama",
+    },
+  ];
+
   return (
     <Card title="Riwayat Pemberhentian" loading={isLoading}>
-      <pre>{JSON.stringify(data, null, 2)}</pre>
+      <Table
+        pagination={false}
+        columns={columns}
+        rowKey={(row) => row?.id}
+        dataSource={data}
+      />
     </Card>
   );
 }
