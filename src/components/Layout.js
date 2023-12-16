@@ -63,6 +63,10 @@ const changeRoutes = (user) => {
             path: "/siasn/kenaikan-pangkat",
             name: "Kenaikan Pangkat",
           },
+          {
+            path: "/siasn/pemberhentian",
+            name: "Pemberhentian",
+          },
         ],
       });
     }

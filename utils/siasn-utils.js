@@ -28,6 +28,12 @@ module.exports.daftarKenaikanPangkat = (fetcher, periode) => {
   return fetcher.get(`/pns/list-kp-instansi?periode=${periode}`);
 };
 
+module.exports.listPemberhentianSIASN = (fetcher, tglAwal, tglAkhir) => {
+  return fetcher.get(
+    `/pns/list-pensiun-instansi?tglAwal=${tglAwal}&tglAkhir=${tglAkhir}`
+  );
+};
+
 module.exports.updateDataUtama = (fetcher, data) => {
   return fetcher.post(`/pns/data-utama-update`, data);
 };
