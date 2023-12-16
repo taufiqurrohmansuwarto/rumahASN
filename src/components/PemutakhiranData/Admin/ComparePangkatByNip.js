@@ -1,5 +1,5 @@
 import { dataPangkatByNip } from "@/services/siasn-services";
-import { findPangkat } from "@/utils/client-utils";
+import { findGolongan, findPangkat } from "@/utils/client-utils";
 import { Stack } from "@mantine/core";
 import { useQuery } from "@tanstack/react-query";
 import { Card, Table } from "antd";
@@ -30,7 +30,12 @@ const PangkatSiasn = ({ data, isLoading }) => {
     {
       title: "Pangkat",
       key: "Pangkat",
-      render: (_, record) => <>{findPangkat(record?.golonganId)}</>,
+      render: (_, record) => (
+        <>
+          {findPangkat(record?.golonganId)} - (
+          {findGolongan(record?.golonganId)})
+        </>
+      ),
     },
     {
       title: "No. SK",
@@ -89,7 +94,11 @@ const PangkatSimaster = ({ data, isLoading }) => {
     {
       title: "Pangkat",
       key: "pangkat",
-      render: (text) => <span>{text?.pangkat?.pangkat}</span>,
+      render: (text) => (
+        <span>
+          {text?.pangkat?.pangkat} - ({text?.pangkat?.gol_ruang})
+        </span>
+      ),
     },
     {
       title: "No. SK",

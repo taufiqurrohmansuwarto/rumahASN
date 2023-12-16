@@ -8,6 +8,7 @@ import ComparePangkatByNip from "./ComparePangkatByNip";
 import ComparePemberhentianByNip from "./ComparePemberhentianByNip";
 import CompareMasaKerjaByNip from "./CompareMasaKerjaByNip";
 import CompareKedudukanHukumByNip from "./CompareKedudukanHukumByNip";
+import ComparePindahInstansiByNip from "./ComparePindahInstansiByNip";
 
 function SiasnTab({ nip }) {
   const breakPoint = Grid.useBreakpoint();
@@ -45,6 +46,10 @@ function SiasnTab({ nip }) {
       <Tabs.TabPane tab="Masa Kerja" key="8">
         <CompareMasaKerjaByNip nip={nip} />
       </Tabs.TabPane>
+      <Tabs.TabPane tab="Pindah Instansi" key="15">
+        <ComparePindahInstansiByNip nip={nip} />
+      </Tabs.TabPane>
+
       <Tabs.TabPane tab="CLTN" key="10">
         <CompareKedudukanHukumByNip nip={nip} />
       </Tabs.TabPane>
@@ -58,9 +63,6 @@ function SiasnTab({ nip }) {
         <CompareKedudukanHukumByNip nip={nip} />
       </Tabs.TabPane>
       <Tabs.TabPane tab="Penghargaan" key="14">
-        <CompareKedudukanHukumByNip nip={nip} />
-      </Tabs.TabPane>
-      <Tabs.TabPane tab="Pindah Instansi" key="15">
         <CompareKedudukanHukumByNip nip={nip} />
       </Tabs.TabPane>
       <Tabs.TabPane tab="PWK" key="16">

@@ -19,6 +19,7 @@ const {
   rwPemberhentian,
   rwMasaKerja,
   updateDataUtama,
+  riwayatPindahInstansi,
 } = require("@/utils/siasn-utils");
 const {
   proxyDownloadFoto,
@@ -918,7 +919,27 @@ const postRiwayatKursus = async (req, res) => {
   }
 };
 
+const getRwPindahInstansiByNip = async (req, res) => {
+  try {
+    const { siasnRequest: request } = req;
+    const { nip } = req?.query;
+    const result = await riwayatPindahInstansi(request, nip);
+    const hasil = result?.data;
+    const success = hasil?.code === 1 && hasil?.data?.length !== 0;
+
+    if (success) {
+      res.json(hasil?.data);
+    } else {
+      res.json([]);
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ code: 500, message: "Internal Server Error" });
+  }
+};
+
 module.exports = {
+  getRwPindahInstansiByNip,
   downloadDocument,
   getAngkaKredit,
   getAngkaKreditByNip,

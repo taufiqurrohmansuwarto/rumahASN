@@ -56,7 +56,7 @@ const CompareDataPendidikanSIMASTER = ({ nip }) => {
   return (
     <>
       <Table
-        title={() => <b>RIWAYAT DATA PENDIDIKAN SIMASTER</b>}
+        title={() => <b>PENDIDIKAN SIMASTER</b>}
         columns={columns}
         dataSource={data}
         loading={isLoading}
@@ -82,13 +82,33 @@ function ComparePendidikanByNip({ nip }) {
       title: "Nama Sekolah",
       dataIndex: "namaSekolah",
     },
+    {
+      title: "Nomor Ijazah",
+      dataIndex: "nomorIjasah",
+    },
+    {
+      title: "Gelar Depan",
+      dataIndex: "gelarDepan",
+    },
+    {
+      title: "Gelar Belakang",
+      dataIndex: "gelarBelakang",
+    },
+    {
+      title: "Tahun Lulus",
+      dataIndex: "tahunLulus",
+    },
+    {
+      title: "Tgl. Lulus",
+      dataIndex: "tglLulus",
+    },
   ];
 
   return (
     <Card title="Komparasi Pendidikan">
       <Stack>
         <Table
-          title={() => <b>RIWAYAT DATA PENDIDIKAN SIASN</b>}
+          title={() => <b>PENDIDIKAN SIASN</b>}
           pagination={false}
           columns={columns}
           dataSource={data}

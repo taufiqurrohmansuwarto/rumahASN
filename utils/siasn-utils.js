@@ -62,6 +62,10 @@ module.exports.riwayatPindahInstansi = (fetcher, nip) => {
   return fetcher.get(`/pns/rw-pindahinstansi/${nip}`);
 };
 
+module.exports.riwayatPindahWilayahKerja = (fetcher, nip) => {
+  return fetcher.get(`/pns/rw-pwk/${nip}`);
+};
+
 module.exports.riwayatPenghargaan = (fetcher, nip) => {
   return fetcher.get(`/pns/rw-penghargaan/${nip}`);
 };
