@@ -1,6 +1,6 @@
 import { rwKedudukanHukumByNip } from "@/services/master.services";
 import { useQuery } from "@tanstack/react-query";
-import { Table } from "antd";
+import { Card, Table } from "antd";
 
 function CompareKedudukanHukumByNip({ nip }) {
   const { data, isLoading } = useQuery(
@@ -52,14 +52,15 @@ function CompareKedudukanHukumByNip({ nip }) {
 
   return (
     <>
-      <Table
-        title={() => <h3>Kedudukan Hukum SIMASTER</h3>}
-        columns={columns}
-        rowKey={(row) => row?.kedudukan_hukum_id}
-        pagination={false}
-        dataSource={data}
-        loading={isLoading}
-      />
+      <Card title="Kedudukan Hukum SIMASTER">
+        <Table
+          columns={columns}
+          rowKey={(row) => row?.kedudukan_hukum_id}
+          pagination={false}
+          dataSource={data}
+          loading={isLoading}
+        />
+      </Card>
     </>
   );
 }
