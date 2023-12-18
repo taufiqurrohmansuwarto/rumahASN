@@ -19,7 +19,6 @@ function ComparePwkByNip({ nip }) {
 
   return (
     <Card title="Riwayat Pindah Wilayah Kerja">
-      {JSON.stringify(data)}
       <Table columns={columns} dataSource={data} loading={isLoading} />
     </Card>
   );

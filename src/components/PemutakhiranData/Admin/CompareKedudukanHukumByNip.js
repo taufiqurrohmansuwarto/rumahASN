@@ -45,6 +45,14 @@ function CompareKedudukanHukumByNip({ nip }) {
       dataIndex: "keterangan_instansi",
     },
     {
+      title: "Tgl. Edit",
+      dataIndex: "tgl_edit",
+    },
+    {
+      title: "Jam Edit",
+      dataIndex: "jam_edit",
+    },
+    {
       title: "Aktif",
       dataIndex: "aktif",
     },
