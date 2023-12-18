@@ -166,6 +166,14 @@ export const uploadDokumenKenaikanPangkat = (data) => {
     .then((res) => res.data);
 };
 
+export const getRwPwkByNip = async (nip) => {
+  return api.get(`/admin/${nip}/rw-pwk`).then((res) => res.data);
+};
+
+export const getPnsUnorByNip = async (nip) => {
+  return api.get(`/admin/${nip}/pnsunor`).then((res) => res.data);
+};
+
 export const getDaftarPemberhentianSIASN = (data) => {
   const { tglAwal, tglAkhir } = data;
 

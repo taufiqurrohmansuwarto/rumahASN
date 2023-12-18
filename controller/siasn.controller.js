@@ -20,6 +20,8 @@ const {
   rwMasaKerja,
   updateDataUtama,
   riwayatPindahInstansi,
+  riwayatPindahWilayahKerja,
+  riwayatPnsUnor,
 } = require("@/utils/siasn-utils");
 const {
   proxyDownloadFoto,
@@ -938,7 +940,50 @@ const getRwPindahInstansiByNip = async (req, res) => {
   }
 };
 
+const getRwPwkByNip = async (req, res) => {
+  try {
+    const { siasnRequest: request } = req;
+    const { nip } = req?.query;
+    const result = await riwayatPindahWilayahKerja(request, nip);
+    const hasil = result?.data;
+
+    const success = hasil?.code === 1 && hasil?.data?.length !== 0;
+
+    if (success) {
+      res.json(hasil?.data);
+    } else {
+      res.json([]);
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ code: 500, message: "Internal Server Error" });
+  }
+};
+
+const getRwPnsUnorByNip = async (req, res) => {
+  try {
+    const { siasnRequest: request } = req;
+    const { nip } = req?.query;
+    const result = await riwayatPnsUnor(request, nip);
+
+    const hasil = result?.data;
+
+    const success = hasil?.code === 1 && hasil?.data?.length !== 0;
+
+    if (success) {
+      res.json(hasil?.data);
+    } else {
+      res.json([]);
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ code: 500, message: "Internal Server Error" });
+  }
+};
+
 module.exports = {
+  getRwPwkByNip,
+  getRwPnsUnorByNip,
   getRwPindahInstansiByNip,
   downloadDocument,
   getAngkaKredit,
