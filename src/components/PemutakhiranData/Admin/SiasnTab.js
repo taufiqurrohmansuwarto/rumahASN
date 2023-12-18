@@ -2,13 +2,15 @@ import { Grid, Tabs } from "antd";
 import CompareAngkaKreditByNip from "./CompareAngkaKreditByNip";
 import CompareDataUtamaByNip from "./CompareDataUtamaByNip";
 import CompareJabatanByNip from "./CompareJabatanByNip";
-import ComparePendidikanByNip from "./ComparePendidikanByNip";
-import CompareSKP22ByNip from "./CompareSKP22ByNip";
+import CompareKedudukanHukumByNip from "./CompareKedudukanHukumByNip";
+import CompareMasaKerjaByNip from "./CompareMasaKerjaByNip";
 import ComparePangkatByNip from "./ComparePangkatByNip";
 import ComparePemberhentianByNip from "./ComparePemberhentianByNip";
-import CompareMasaKerjaByNip from "./CompareMasaKerjaByNip";
-import CompareKedudukanHukumByNip from "./CompareKedudukanHukumByNip";
+import ComparePendidikanByNip from "./ComparePendidikanByNip";
 import ComparePindahInstansiByNip from "./ComparePindahInstansiByNip";
+import ComparePnsUnorByNip from "./ComparePnsUnorByNip";
+import ComparePwkByNip from "./ComparePwkByNip";
+import CompareSKP22ByNip from "./CompareSKP22ByNip";
 
 function SiasnTab({ nip }) {
   const breakPoint = Grid.useBreakpoint();
@@ -42,14 +44,18 @@ function SiasnTab({ nip }) {
       <Tabs.TabPane tab="Kedudukan Hukum" key="9">
         <CompareKedudukanHukumByNip nip={nip} />
       </Tabs.TabPane>
-
       <Tabs.TabPane tab="Masa Kerja" key="8">
         <CompareMasaKerjaByNip nip={nip} />
       </Tabs.TabPane>
       <Tabs.TabPane tab="Pindah Instansi" key="15">
         <ComparePindahInstansiByNip nip={nip} />
       </Tabs.TabPane>
-
+      <Tabs.TabPane tab="Pindah Wilayah Kerja" key="pwk">
+        <ComparePwkByNip nip={nip} />
+      </Tabs.TabPane>
+      <Tabs.TabPane tab="PNS Unor" key="pns-unor">
+        <ComparePnsUnorByNip nip={nip} />
+      </Tabs.TabPane>
       <Tabs.TabPane tab="CLTN" key="10">
         <CompareKedudukanHukumByNip nip={nip} />
       </Tabs.TabPane>
@@ -63,9 +69,6 @@ function SiasnTab({ nip }) {
         <CompareKedudukanHukumByNip nip={nip} />
       </Tabs.TabPane>
       <Tabs.TabPane tab="Penghargaan" key="14">
-        <CompareKedudukanHukumByNip nip={nip} />
-      </Tabs.TabPane>
-      <Tabs.TabPane tab="PWK" key="16">
         <CompareKedudukanHukumByNip nip={nip} />
       </Tabs.TabPane>
     </Tabs>

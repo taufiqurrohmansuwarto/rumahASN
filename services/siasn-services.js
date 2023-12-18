@@ -171,7 +171,7 @@ export const getRwPwkByNip = async (nip) => {
 };
 
 export const getPnsUnorByNip = async (nip) => {
-  return api.get(`/admin/${nip}/pnsunor`).then((res) => res.data);
+  return api.get(`/admin/${nip}/rw-pnsunor`).then((res) => res.data);
 };
 
 export const getDaftarPemberhentianSIASN = (data) => {
