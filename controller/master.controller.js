@@ -1,4 +1,5 @@
 import {
+  getRwAnak,
   getRwPangkat,
   getRwPasangan,
   getRwPendidikanMaster,
