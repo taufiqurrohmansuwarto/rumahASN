@@ -24,6 +24,8 @@ module.exports.orangTua = (fetcher, nip) => {
   return fetcher.get(`/pns/data-ortu/${nip}`);
 };
 
+// end of keluarga
+
 module.exports.daftarKenaikanPangkat = (fetcher, periode) => {
   return fetcher.get(`/pns/list-kp-instansi?periode=${periode}`);
 };

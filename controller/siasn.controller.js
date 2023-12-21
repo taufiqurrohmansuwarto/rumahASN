@@ -22,6 +22,9 @@ const {
   riwayatPindahInstansi,
   riwayatPindahWilayahKerja,
   riwayatPnsUnor,
+  anak,
+  pasangan,
+  orangTua,
 } = require("@/utils/siasn-utils");
 const {
   proxyDownloadFoto,
@@ -820,6 +823,27 @@ const getRwKeluarga = async (req, res) => {
   }
 };
 
+const riwayatKeluargaByNip = async (req, res) => {
+  try {
+    const { siasnRequest: request, fetcher } = req;
+    const { nip } = req?.query;
+
+    const hasilAnak = await proxyKeluargaAnak(fetcher, nip);
+    const hasilPasangan = await proxyKeluargaPasangan(fetcher, nip);
+    // const hasilPasangan = await pasangan(request, nip);
+    const hasilOrtu = await proxyKeluargaDataOrtu(fetcher, nip);
+
+    res.json({
+      anak: hasilAnak?.data,
+      pasangan: hasilPasangan?.data,
+      ortu: hasilOrtu?.data,
+    });
+  } catch (error) {
+    console.log("error coy", error);
+    res.status(500).json({ code: 500, message: "Internal Server Error" });
+  }
+};
+
 const getRwMasaKerja = async (req, res) => {
   try {
     const { siasnRequest: request } = req;
@@ -1022,4 +1046,5 @@ module.exports = {
   //
   updateEmployeeInformation,
   allPnsByNip,
+  riwayatKeluargaByNip,
 };
