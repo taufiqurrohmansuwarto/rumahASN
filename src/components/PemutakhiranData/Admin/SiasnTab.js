@@ -3,6 +3,7 @@ import CompareAngkaKreditByNip from "./CompareAngkaKreditByNip";
 import CompareDataUtamaByNip from "./CompareDataUtamaByNip";
 import CompareJabatanByNip from "./CompareJabatanByNip";
 import CompareKedudukanHukumByNip from "./CompareKedudukanHukumByNip";
+import CompareKeluargaByNip from "./CompareKeluargaByNip";
 import CompareMasaKerjaByNip from "./CompareMasaKerjaByNip";
 import ComparePangkatByNip from "./ComparePangkatByNip";
 import ComparePemberhentianByNip from "./ComparePemberhentianByNip";
@@ -44,6 +45,10 @@ function SiasnTab({ nip }) {
       <Tabs.TabPane tab="Kedudukan Hukum" key="9">
         <CompareKedudukanHukumByNip nip={nip} />
       </Tabs.TabPane>
+      <Tabs.TabPane tab="Keluarga" key="rw-keluarga">
+        <CompareKeluargaByNip nip={nip} />
+      </Tabs.TabPane>
+
       <Tabs.TabPane tab="Masa Kerja" key="8">
         <CompareMasaKerjaByNip nip={nip} />
       </Tabs.TabPane>
