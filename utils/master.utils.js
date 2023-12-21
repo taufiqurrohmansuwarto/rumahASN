@@ -9,6 +9,29 @@ module.exports.getRwPendidikanMaster = async (fetcher, nip) => {
   }
 };
 
+// keluarga, pasangan, dan anak
+module.exports.getRwPasangan = async (fetcher, nip) => {
+  try {
+    const result = await fetcher.get(
+      `/master-ws/operator/employees/${nip}/rw-pasangan`
+    );
+    return result;
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+module.exports.getRwAnak = async (fetcher, nip) => {
+  try {
+    const result = await fetcher.get(
+      `/master-ws/operator/employees/${nip}/rw-anak`
+    );
+    return result;
+  } catch (error) {
+    console.log(error);
+  }
+};
+
 module.exports.getRwKedudukanHukum = async (fetcher, nip) => {
   try {
     const result = await fetcher.get(

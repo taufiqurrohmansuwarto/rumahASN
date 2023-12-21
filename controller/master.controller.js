@@ -1,4 +1,8 @@
-import { getRwPangkat, getRwPendidikanMaster } from "@/utils/master.utils";
+import {
+  getRwPangkat,
+  getRwPasangan,
+  getRwPendidikanMaster,
+} from "@/utils/master.utils";
 import moment from "moment";
 const { orderBy, sortBy, toString } = require("lodash");
 const Anomali23 = require("@/models/anomali23.model");
@@ -288,6 +292,32 @@ export const rwPangkatMaster = async (req, res) => {
   }
 };
 
+export const rwPasanganMasterByNip = async (req, res) => {
+  try {
+    const { fetcher } = req;
+    const { nip } = req.query;
+    const result = await getRwPasangan(fetcher, nip);
+
+    res.json(result?.data);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ code: 500, message: "Internal Server Error" });
+  }
+};
+
+export const rwAnakMasterByNip = async (req, res) => {
+  try {
+    const { fetcher } = req;
+    const { nip } = req.query;
+    const result = await getRwAnak(fetcher, nip);
+
+    res.json(result?.data);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ code: 500, message: "Internal Server Error" });
+  }
+};
+
 module.exports = {
   rwJabatanMaster,
   rwAngkakreditMaster,
@@ -298,4 +328,6 @@ module.exports = {
   rwAngkakreditMasterByNip,
   rwSkpMasterByNip,
   rwPangkatMaster,
+  rwPasanganMasterByNip,
+  rwAnakMasterByNip,
 };
