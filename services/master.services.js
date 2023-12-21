@@ -53,3 +53,11 @@ export const rwPendidikanMasterByNip = (nip) => {
 export const rwKedudukanHukumByNip = (nip) => {
   return api.get(`/admin/${nip}/rw-kedudukan-hukum`).then((res) => res.data);
 };
+
+export const rwAnakByNip = (nip) => {
+  return api.get(`/admin/${nip}/rw-anak`).then((res) => res.data);
+};
+
+export const rwPasanganByNip = (nip) => {
+  return api.get(`/admin/${nip}/rw-pasangan`).then((res) => res.data);
+};
