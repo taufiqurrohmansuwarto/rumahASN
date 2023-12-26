@@ -3,6 +3,7 @@ import UnAnswerFilter from "@/components/Filter/UnAnswerFilter";
 import Layout from "@/components/Layout";
 import PageContainer from "@/components/PageContainer";
 import QueryFilter from "@/components/QueryFilter";
+import SocmedCreatePost from "@/components/Socmed/SocmedCreatePost";
 import { downloadTicketBKD, pegawaiBkdTickets } from "@/services/bkd.services";
 import { refCategories } from "@/services/index";
 import {
@@ -465,6 +466,7 @@ const BerandaBKD = () => {
       >
         <BackTop />
         <Row gutter={[16, 16]}>
+          <SocmedCreatePost />
           <Col md={18} xs={24}>
             <Card
               title="Daftar Pertanyaan"
