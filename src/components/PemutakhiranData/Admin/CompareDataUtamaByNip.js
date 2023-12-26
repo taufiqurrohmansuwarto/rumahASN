@@ -3,7 +3,15 @@ import { dataUtamSIASNByNip } from "@/services/siasn-services";
 import { compareText, komparasiGelar } from "@/utils/client-utils";
 import { Stack, Text } from "@mantine/core";
 import { useQuery } from "@tanstack/react-query";
-import { Card, Col, Row, Skeleton, Space, Table as TableAntd, Tag } from "antd";
+import {
+  Card,
+  Col,
+  Row,
+  Skeleton,
+  Table as TableAntd,
+  Tag,
+  Tooltip,
+} from "antd";
 
 const dataTabel = (siasn, simaster) => {
   return [
@@ -185,6 +193,16 @@ function CompareDataUtamaByNip({ nip }) {
           <Row>
             <Col md={24}>
               <Card title="Komparasi Data Utama">
+                <Tooltip title="Status Pegawai SIASN">
+                  <Tag
+                    style={{
+                      marginBottom: 8,
+                    }}
+                    color="yellow"
+                  >
+                    {data?.kedudukanPnsNama}
+                  </Tag>
+                </Tooltip>
                 <TableAntd
                   columns={columns}
                   dataSource={dataTabel(data, dataSimaster)}
