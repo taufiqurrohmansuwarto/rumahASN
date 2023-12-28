@@ -1,9 +1,9 @@
 import Layout from "@/components/Layout";
 import PageContainer from "@/components/PageContainer";
-import CompareDataUtama from "@/components/PemutakhiranData/CompareDataUtama";
 import CustomSelectMenu from "@/components/PemutakhiranData/CustomSelectMenu";
 import RiwayatUbahData from "@/components/PemutakhiranData/RiwayatUbahData";
-import { Breadcrumb, Button, Card } from "antd";
+import { Alert, Stack } from "@mantine/core";
+import { Breadcrumb } from "antd";
 import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
@@ -39,9 +39,15 @@ const DataUtama = () => {
         }}
         onBack={handleBack}
         title="Riwayat Ubah Data"
-        content="Riwayat Budah Data Utama"
+        content="Ubah Data Utama"
       >
-        <RiwayatUbahData />
+        <Stack>
+          <Alert color="yellow" title="Perlu diperhatikan">
+            Email yang telah diubah membutuhkan waktu 2x24 jam untuk
+            sinkronisasi data
+          </Alert>
+          <RiwayatUbahData />
+        </Stack>
       </PageContainer>
     </>
   );

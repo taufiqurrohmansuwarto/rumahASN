@@ -1,30 +1,25 @@
 import { appList } from "@/utils/app-lists";
-import {
-  ApiOutlined,
-  BarChartOutlined,
-  BookOutlined,
-  LogoutOutlined,
-  ProfileOutlined,
-  QuestionCircleFilled,
-  SolutionOutlined,
-  StarOutlined,
-  TeamOutlined,
-  UserOutlined,
-  UsergroupAddOutlined,
-} from "@ant-design/icons";
-import { Center } from "@mantine/core";
-import { Button, Dropdown, Grid, Typography } from "antd";
+import { LogoutOutlined, UserOutlined } from "@ant-design/icons";
+import { Dropdown, Grid, Typography } from "antd";
 import { uniqBy } from "lodash";
 import { signOut, useSession } from "next-auth/react";
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { useState } from "react";
-import { userRoutes } from "../routes";
 import Messages from "./Messages";
 import Notifications from "./Notifications";
 import SearchUserLayout from "./SearchUserLayout";
 
+const userRoutes = {
+  routes: [
+    {
+      path: "/asn-connect/asn-updates",
+      name: "ASN Updates",
+      icon: <UserOutlined />,
+    },
+  ],
+};
 const ProLayout = dynamic(
   () => import("@ant-design/pro-components").then((mod) => mod?.ProLayout),
   {
@@ -54,181 +49,24 @@ const changeRoutes = (user) => {
     // persiapan ini seharusnya ditambahkan halaman dashboard seperti analisis dsb tapi jangan data
 
     if (adminFasilitator) {
-      userRoutes.routes.push({
-        path: "/siasn",
-        name: "Layanan SIASN",
-        icon: <StarOutlined />,
-        routes: [
-          {
-            path: "/siasn/kenaikan-pangkat",
-            name: "Kenaikan Pangkat",
-          },
-          {
-            path: "/siasn/pemberhentian",
-            name: "Pemberhentian",
-          },
-        ],
-      });
     }
 
     if (pegawaiBKD) {
-      userRoutes.routes.push(
-        {
-          path: "/beranda-bkd?tab=my-task",
-          name: "Beranda BKD",
-          icon: <TeamOutlined />,
-        },
-        {
-          path: "/coaching-clinic-consultant",
-          name: "Instruktur",
-          icon: <UsergroupAddOutlined />,
-        }
-      );
     }
 
     if (fasilitatorMaster) {
-      userRoutes.routes.push({
-        path: "/fasilitator-employees",
-        name: "Integrasi SIASN",
-        icon: <UsergroupAddOutlined />,
-      });
     }
 
     if (pegawaiPemda) {
     }
 
     if (userPns) {
-      userRoutes.routes.push(
-        {
-          path: "/asn-connect/asn-updates",
-          name: "ASN Connect",
-          icon: <UserOutlined />,
-        },
-        {
-          path: "/pemutakhiran-data/komparasi",
-          name: "Integrasi SIASN",
-          icon: <ApiOutlined />,
-        }
-      );
     }
 
     if (admin) {
-      userRoutes.routes.push(
-        {
-          path: "/analysis",
-          name: "Analisis",
-          icon: <BarChartOutlined />,
-          routes: [
-            {
-              path: "/analysis/dashboard",
-              name: "Dashboard",
-            },
-            {
-              path: "/analysis/kecepatan-respon",
-              name: "Kecepatan Respon",
-            },
-            {
-              path: "/analysis/kepuasan-pelanggan",
-              name: "Kepuasan Pelanggan",
-            },
-            {
-              path: "/analysis/performa-pegawai",
-              name: "Performa Pegawai",
-            },
-            {
-              path: "/analysis/trend",
-              name: "Trend",
-            },
-          ],
-        },
-        {
-          path: "/referensi",
-          name: "Referensi",
-          icon: <BookOutlined />,
-          routes: [
-            { path: "/referensi/status", name: "Status" },
-            {
-              path: "/referensi/priorities",
-              name: "Prioritas",
-            },
-            {
-              path: "/referensi/categories",
-              name: "Kategori",
-            },
-            {
-              path: "/referensi/sub-categories",
-              name: "Sub Kategori",
-            },
-            {
-              path: "/referensi/faq",
-              name: "F.A.Q",
-            },
-            {
-              path: "/referensi/sub-faq",
-              name: "Kategori F.A.Q",
-            },
-          ],
-        },
-        {
-          path: "/apps-managements",
-          name: "Manajemen Aplikasi",
-          icon: <SolutionOutlined />,
-          routes: [
-            {
-              path: "/apps-managements/integrasi",
-              name: "Integrasi Aplikasi",
-              routes: [
-                { path: "/apps-managements/integrasi/siasn", name: "SIASN" },
-              ],
-            },
-            {
-              path: "/apps-managements/netralitas-asn",
-              name: "Netralitas ASN",
-            },
-            {
-              path: "/apps-managements/layanan-kepegawaian",
-              name: "Layanan Kepegawaian",
-            },
-            {
-              path: "/apps-managements/anomali-data-2023",
-              name: "Data Anomali 2023",
-            },
-            { path: "/apps-managements/votes", name: "Poling" },
-            {
-              path: "/apps-managements/webinar-series",
-              name: "Webinar Series",
-            },
-            { path: "/apps-managements/users", name: "Pengguna" },
-
-            { path: "/apps-managements/podcasts", name: "Podcast" },
-            { path: "/apps-managements/announcements", name: "Pengumuman" },
-            { path: "/apps-managements/discussions", name: "Diskusi" },
-          ],
-        },
-        {
-          path: "/logs",
-          name: "Riwayat Log",
-          icon: <ProfileOutlined />,
-          routes: [
-            {
-              path: "/logs/siasn",
-              name: "Riwayat Log SIASN",
-            },
-            {
-              path: "/logs/bsre",
-              name: "Riwayat Log BSrE",
-            },
-          ],
-        }
-      );
     }
 
     if (agent) {
-      // userRoutes.routes.push({
-      //   path: "/documents",
-      //   name: "Agent",
-      //   icon: <ApiOutlined />,
-      // });
     }
 
     const routes = uniqBy(userRoutes.routes, "path");
@@ -246,16 +84,12 @@ const menuItemRender = (options, element) => {
   );
 };
 
-function Layout({ children, active, collapsed = true }) {
+function LayoutAsnConnect({ children, active, collapsed = true }) {
   const { data, status } = useSession();
   const router = useRouter();
   const [tutup, setTutup] = useState(collapsed);
 
   const breakPoint = Grid.useBreakpoint();
-
-  const handlePertanyan = () => {
-    router.push(`/tickets/create`);
-  };
 
   const onCollapsed = () => {
     setTutup(!tutup);
@@ -285,40 +119,7 @@ function Layout({ children, active, collapsed = true }) {
           width: "331px",
         },
       ]}
-      menuExtraRender={({ collapsed }) => {
-        if (!collapsed) {
-          return (
-            <div
-              style={{
-                padding: breakPoint.xs ? 16 : 0,
-              }}
-            >
-              <Button
-                onClick={handlePertanyan}
-                shape="round"
-                icon={<QuestionCircleFilled />}
-                block
-                type="primary"
-              >
-                Tanya BKD
-              </Button>
-            </div>
-          );
-        } else {
-          return (
-            <Center>
-              <Button
-                onClick={handlePertanyan}
-                shape="circle"
-                size="middle"
-                icon={<QuestionCircleFilled />}
-                type="primary"
-              />
-            </Center>
-          );
-        }
-      }}
-      title="Rumah ASN"
+      title="ASN Connect"
       logo={"https://siasn.bkd.jatimprov.go.id:9000/public/logobkd.jpg"}
       headerTitleRender={(logo, title) => {
         const defaultDom = (
@@ -459,4 +260,4 @@ function Layout({ children, active, collapsed = true }) {
   );
 }
 
-export default Layout;
+export default LayoutAsnConnect;
