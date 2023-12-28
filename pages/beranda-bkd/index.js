@@ -466,7 +466,6 @@ const BerandaBKD = () => {
       >
         <BackTop />
         <Row gutter={[16, 16]}>
-          <SocmedCreatePost />
           <Col md={18} xs={24}>
             <Card
               title="Daftar Pertanyaan"
