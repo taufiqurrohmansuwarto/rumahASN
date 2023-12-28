@@ -30,6 +30,12 @@ module.exports.daftarKenaikanPangkat = (fetcher, periode) => {
   return fetcher.get(`/pns/list-kp-instansi?periode=${periode}`);
 };
 
+module.exports.daftarPengadaanInstansi = (fetcher, tahunAnggaran) => {
+  return fetcher.get(
+    `/pengadaan/list-pengadaan-instansi?tahun=${tahunAnggaran}`
+  );
+};
+
 module.exports.listPemberhentianSIASN = (fetcher, tglAwal, tglAkhir) => {
   return fetcher.get(
     `/pns/list-pensiun-instansi?tglAwal=${tglAwal}&tglAkhir=${tglAkhir}`
