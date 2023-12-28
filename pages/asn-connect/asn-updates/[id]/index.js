@@ -4,7 +4,7 @@ import SocmedCreatePost from "@/components/Socmed/SocmedCreatePost";
 import Head from "next/head";
 import { useRouter } from "next/router";
 
-const AsnUpdates = () => {
+const ASNUpdateDetail = () => {
   const router = useRouter();
 
   return (
@@ -22,12 +22,12 @@ const AsnUpdates = () => {
   );
 };
 
-AsnUpdates.Auth = {
+ASNUpdateDetail.Auth = {
   action: "manage",
   subject: "tickets",
 };
 
-AsnUpdates.getLayout = (page) => {
+ASNUpdateDetail.getLayout = (page) => {
   return (
     <LayoutAsnConnect active="/asn-connect/asn-updates">
       {page}
@@ -35,4 +35,4 @@ AsnUpdates.getLayout = (page) => {
   );
 };
 
-export default AsnUpdates;
+export default ASNUpdateDetail;

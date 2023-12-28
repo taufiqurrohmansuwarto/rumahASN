@@ -1,9 +1,11 @@
 import { createPost } from "@/services/socmed.services";
 import { useMutation } from "@tanstack/react-query";
-import { Button, Form, Input } from "antd";
+import { Avatar, Button, Col, Comment, Form, Input, Row } from "antd";
+import { useSession } from "next-auth/react";
 import React from "react";
 
 function SocmedCreatePost() {
+  const { data, status } = useSession();
   const [form] = Form.useForm();
   const { mutate: create, isLoading } = useMutation(
     (data) => createPost(data),
@@ -22,16 +24,30 @@ function SocmedCreatePost() {
   };
 
   return (
-    <Form form={form} onFinish={handleFinish}>
-      <Form.Item name="content">
-        <Input.TextArea rows={4} />
-      </Form.Item>
-      <Form.Item>
-        <Button loading={isLoading} disabled={isLoading} htmlType="submit">
-          Submit
-        </Button>
-      </Form.Item>
-    </Form>
+    <Row>
+      <Col xs={24} md={18}>
+        <Comment
+          avatar={<Avatar src={data?.user?.image} alt={data?.user?.name} />}
+          content={
+            <Form form={form} onFinish={handleFinish}>
+              <Form.Item name="content">
+                <Input.TextArea rows={4} />
+              </Form.Item>
+              <Form.Item>
+                <Button
+                  type="primary"
+                  loading={isLoading}
+                  disabled={isLoading}
+                  htmlType="submit"
+                >
+                  Post
+                </Button>
+              </Form.Item>
+            </Form>
+          }
+        />
+      </Col>
+    </Row>
   );
 }
 
