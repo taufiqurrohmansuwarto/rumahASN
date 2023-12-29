@@ -1,11 +1,21 @@
 import LayoutAsnConnect from "@/components/LayoutASNConnect";
 import PageContainer from "@/components/PageContainer";
-import SocmedCreatePost from "@/components/Socmed/SocmedCreatePost";
+import { getPost } from "@/services/socmed.services";
+import { useQuery } from "@tanstack/react-query";
 import Head from "next/head";
 import { useRouter } from "next/router";
 
 const ASNUpdateDetail = () => {
   const router = useRouter();
+  const { id } = router.query;
+
+  const { data, isLoading } = useQuery(
+    ["socmed-posts", id],
+    () => getPost(id),
+    {}
+  );
+
+  const handleBack = () => router?.back();
 
   return (
     <>
@@ -15,8 +25,10 @@ const ASNUpdateDetail = () => {
       <PageContainer
         title="ASN Updates"
         content="Apa yang terjadi di ASN Connect?"
+        onBack={handleBack}
       >
-        <SocmedCreatePost />
+        {id}
+        {JSON.stringify(data)}
       </PageContainer>
     </>
   );

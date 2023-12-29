@@ -1,11 +1,12 @@
 import { createPost } from "@/services/socmed.services";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Avatar, Button, Col, Comment, Form, Input, Row } from "antd";
 import { useSession } from "next-auth/react";
 import React from "react";
 
 function SocmedCreatePost() {
   const { data, status } = useSession();
+  const queryClient = useQueryClient();
   const [form] = Form.useForm();
   const { mutate: create, isLoading } = useMutation(
     (data) => createPost(data),
@@ -15,6 +16,9 @@ function SocmedCreatePost() {
       },
       onError: (error) => {
         alert(error.message);
+      },
+      onSettled: () => {
+        queryClient.invalidateQueries("socmed-posts");
       },
     }
   );

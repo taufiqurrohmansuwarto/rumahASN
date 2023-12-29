@@ -16,3 +16,29 @@ export const getPost = (id) => {
 export const createPost = (data) => {
   return api.post("/posts", data).then((res) => res?.data);
 };
+
+export const updatePost = ({ id, data }) => {
+  return api.put(`/posts/${id}`, data).then((res) => res?.data);
+};
+
+export const deletePost = (id) => {
+  return api.delete(`/posts/${id}`).then((res) => res?.data);
+};
+
+export const likePost = (id) => {
+  return api.put(`/posts/${id}/likes`).then((res) => res?.data);
+};
+
+export const getComments = (postId) => {
+  return api.get(`/posts/${postId}/comments`).then((res) => res?.data);
+};
+
+export const createComment = ({ postId, data }) => {
+  return api.post(`/posts/${postId}/comments`, data).then((res) => res?.data);
+};
+
+export const deleteComment = ({ postId, commentId }) => {
+  return api
+    .delete(`/posts/${postId}/comments/${commentId}`)
+    .then((res) => res?.data);
+};

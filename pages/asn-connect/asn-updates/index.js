@@ -1,6 +1,7 @@
 import LayoutAsnConnect from "@/components/LayoutASNConnect";
 import PageContainer from "@/components/PageContainer";
 import SocmedCreatePost from "@/components/Socmed/SocmedCreatePost";
+import SocmedPosts from "@/components/Socmed/SocmedPosts";
 import Head from "next/head";
 import { useRouter } from "next/router";
 
@@ -17,6 +18,7 @@ const AsnUpdates = () => {
         content="Apa yang terjadi di ASN Connect?"
       >
         <SocmedCreatePost />
+        <SocmedPosts />
       </PageContainer>
     </>
   );
