@@ -7,9 +7,6 @@ import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { useState } from "react";
-import Messages from "./Messages";
-import Notifications from "./Notifications";
-import SearchUserLayout from "./SearchUserLayout";
 
 const userRoutes = {
   routes: [
@@ -164,12 +161,7 @@ function LayoutAsnConnect({ children, active, collapsed = true }) {
         );
       }}
       actionsRender={(props) => {
-        // if (props.isMobile) return [];
-        return [
-          <SearchUserLayout key="search" />,
-          <Messages key="messages" />,
-          <Notifications props={props} key="Notifications" />,
-        ];
+        return [];
       }}
       appList={appList(data?.user)}
       avatarProps={{

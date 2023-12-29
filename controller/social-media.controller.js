@@ -3,6 +3,39 @@ const SocmedComments = require("@/models/socmed-comments.model");
 const SocmedLikes = require("@/models/socmed-likes.model");
 const SocmedShares = require("@/models/socmed-shares.model");
 const SocmedAudits = require("@/models/socmed-audits.model");
+const SocmedNotifications = require("@/models/socmed-notifications.model");
+
+const handleLike = async (userId, postId) => {
+  try {
+    const existingLike = await SocmedLikes.query()
+      .where({
+        user_id: userId,
+        post_id: postId,
+      })
+      .first();
+
+    if (existingLike) {
+      await SocmedLikes.query()
+        .where({
+          user_id: userId,
+          post_id: postId,
+        })
+        .delete();
+
+      await SocmedPosts.query().findById(postId).decrement("like_count", 1);
+    } else {
+      await SocmedLikes.query().insert({
+        user_id: userId,
+        post_id: postId,
+      });
+
+      await SocmedPosts.query().findById(postId).increment("like_count", 1);
+      console.log("success");
+    }
+  } catch (error) {
+    console.log(error);
+  }
+};
 
 const posts = async (req, res) => {
   try {
@@ -16,7 +49,11 @@ const posts = async (req, res) => {
 
     const data = {
       data: result?.results,
-      pagination: {},
+      pagination: {
+        page,
+        limit,
+        total: result?.total,
+      },
     };
 
     res.json(data);
@@ -103,6 +140,29 @@ const removePost = async (req, res) => {
   }
 };
 
+const postLikes = async (req, res) => {
+  try {
+    const { postId } = req?.query;
+    const { customId: userId } = req?.user;
+
+    console.log({
+      postId,
+      userId,
+    });
+
+    await handleLike(userId, postId);
+
+    res.json({
+      message: "success",
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      message: "Internal server error",
+    });
+  }
+};
+
 const comments = async (req, res) => {};
 const detailComment = async (req, res) => {};
 const createComment = async (req, res) => {};
@@ -115,4 +175,5 @@ module.exports = {
   createPost,
   updatePost,
   removePost,
+  postLikes,
 };
