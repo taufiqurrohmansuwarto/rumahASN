@@ -21,7 +21,7 @@ const userRoutes = {
       icon: <UserOutlined />,
     },
     {
-      path: "/asn-connect/asn-discussion",
+      path: "/asn-connect/asn-discussions",
       name: "ASN Discussion",
       icon: <CommentOutlined />,
     },
