@@ -1,5 +1,10 @@
 import { appList } from "@/utils/app-lists";
-import { LogoutOutlined, UserOutlined } from "@ant-design/icons";
+import {
+  CommentOutlined,
+  LogoutOutlined,
+  UserOutlined,
+  VideoCameraOutlined,
+} from "@ant-design/icons";
 import { Dropdown, Grid, Typography } from "antd";
 import { uniqBy } from "lodash";
 import { signOut, useSession } from "next-auth/react";
@@ -14,6 +19,16 @@ const userRoutes = {
       path: "/asn-connect/asn-updates",
       name: "ASN Updates",
       icon: <UserOutlined />,
+    },
+    {
+      path: "/asn-connect/asn-discussion",
+      name: "ASN Discussion",
+      icon: <CommentOutlined />,
+    },
+    {
+      path: "/asn-connect/asn-virtual-meet",
+      name: "ASN Virtual Meet",
+      icon: <VideoCameraOutlined />,
     },
   ],
 };
