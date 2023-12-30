@@ -1,5 +1,6 @@
 
 Entitas dan Atribut dengan Tipe Data
+
 Users
 UserID (INT, Primary Key, Auto Increment)
 Username (VARCHAR(50))
