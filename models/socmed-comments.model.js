@@ -15,6 +15,21 @@ class SocmedComments extends Model {
     this.id = nanoid(8);
   }
 
+  static get relationMappings() {
+    const User = require("@/models/users.model");
+
+    return {
+      user: {
+        relation: Model.BelongsToOneRelation,
+        modelClass: User,
+        join: {
+          from: "socmed_comments.user_id",
+          to: "users.custom_id",
+        },
+      },
+    };
+  }
+
   async $afterInsert(queryContext) {
     await super.$afterInsert(queryContext);
 

@@ -157,9 +157,59 @@ const postLikes = async (req, res) => {
   }
 };
 
-const comments = async (req, res) => {};
+const comments = async (req, res) => {
+  try {
+    const { postId } = req?.query;
+    const page = req.query.page || 1;
+    const limit = Math.min(req.query.limit || 10, 50);
+
+    const result = await SocmedComments.query()
+      .where({
+        post_id: postId,
+      })
+      .withGraphFetched("[user(simpleSelect)]")
+      .page(page - 1, limit)
+      .orderBy("created_at", "desc");
+
+    const data = {
+      data: result?.results,
+      pagination: {
+        page,
+        limit,
+        total: result?.total,
+      },
+    };
+
+    res.json(data);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      message: "Internal server error",
+    });
+  }
+};
+
 const detailComment = async (req, res) => {};
-const createComment = async (req, res) => {};
+const createComment = async (req, res) => {
+  try {
+    const { postId } = req?.query;
+    const data = req.body;
+    const { customId: userId } = req?.user;
+
+    const result = await SocmedComments.query().insert({
+      ...data,
+      user_id: userId,
+      post_id: postId,
+    });
+
+    res.json(result);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      message: "Internal server error",
+    });
+  }
+};
 const updateComment = async (req, res) => {};
 const removeComment = async (req, res) => {};
 
@@ -170,4 +220,9 @@ module.exports = {
   updatePost,
   removePost,
   postLikes,
+  comments,
+  detailComment,
+  createComment,
+  updateComment,
+  removeComment,
 };

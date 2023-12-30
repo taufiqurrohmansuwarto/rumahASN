@@ -1,21 +1,70 @@
 
-tabel netralitas_laporan
-id -> uuidv4
-user_id -> string (fk)
-nama -> string (required)
-pekerjaan -> string (required)
-nomor_hp -> string (required)
-email -> string (required)
-alamat -> string (required)
-nip -> string
-kode -> string (required)
-judul -> string
-isi -> text
-terlapor_nama -> string (required)
-terlapor_nip -> string
-terlapor_jabatan -> string
-terlapor_instansi -> string
-status -> string
-catatan -> string
-di_proses_oleh -> string (custom_id) fk
-timetsamps
+Entitas dan Atribut dengan Tipe Data
+Users
+UserID (INT, Primary Key, Auto Increment)
+Username (VARCHAR(50))
+Email (VARCHAR(100))
+PasswordHash (VARCHAR(255))
+DateJoined (DATETIME)
+KarmaPoints (INT)
+ProfileBio (TEXT, nullable)
+ProfileImageURL (VARCHAR(255), nullable)
+
+Groups (Subreddits)
+GroupID (INT, Primary Key, Auto Increment)
+GroupName (VARCHAR(100))
+Description (TEXT)
+DateCreated (DATETIME)
+CreatorUserID (INT, Foreign Key - UserID)
+MemberCount (INT)
+GroupRules (TEXT, nullable)
+GroupPrivacy (ENUM('Public', 'Private'))
+
+Posts
+PostID (INT, Primary Key, Auto Increment)
+GroupID (INT, Foreign Key - GroupID)
+UserID (INT, Foreign Key - UserID)
+Title (VARCHAR(255))
+ContentText (TEXT, nullable)
+ContentURL (VARCHAR(255), nullable)
+PostTime (DATETIME)
+UpvoteCount (INT)
+DownvoteCount (INT)
+CommentCount (INT)
+
+Comments
+CommentID (INT, Primary Key, Auto Increment)
+PostID (INT, Foreign Key - PostID)
+ParentCommentID (INT, Foreign Key, nullable)
+UserID (INT, Foreign Key - UserID)
+CommentText (TEXT)
+CommentTime (DATETIME)
+UpvoteCount (INT)
+DownvoteCount (INT)
+
+UserGroupMemberships
+MembershipID (INT, Primary Key, Auto Increment)
+UserID (INT, Foreign Key - UserID)
+GroupID (INT, Foreign Key - GroupID)
+JoinDate (DATETIME)
+UserRole (ENUM('Admin', 'Member', etc.))
+
+Votes
+VoteID (INT, Primary Key, Auto Increment)
+UserID (INT, Foreign Key - UserID)
+PostID (INT, Foreign Key, nullable)
+CommentID (INT, Foreign Key, nullable)
+VoteType (ENUM('Upvote', 'Downvote'))
+VoteTime (DATETIME)
+
+UserPostBookmarks
+BookmarkID (INT, Primary Key, Auto Increment)
+UserID (INT, Foreign Key - UserID)
+PostID (INT, Foreign Key - PostID)
+BookmarkTime (DATETIME)
+
+UserPreferences
+PreferenceID (INT, Primary Key, Auto Increment)
+UserID (INT, Foreign Key - UserID)
+PreferenceType (VARCHAR(50))
+PreferenceValue (VARCHAR(255))
