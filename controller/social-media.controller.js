@@ -22,15 +22,14 @@ const handleLike = async (userId, postId) => {
         })
         .delete();
 
-      await SocmedPosts.query().findById(postId).decrement("like_count", 1);
+      await SocmedPosts.query().findById(postId).decrement("likes_count", 1);
     } else {
       await SocmedLikes.query().insert({
         user_id: userId,
         post_id: postId,
       });
 
-      await SocmedPosts.query().findById(postId).increment("like_count", 1);
-      console.log("success");
+      await SocmedPosts.query().findById(postId).increment("likes_count", 1);
     }
   } catch (error) {
     console.log(error);
@@ -144,11 +143,6 @@ const postLikes = async (req, res) => {
   try {
     const { postId } = req?.query;
     const { customId: userId } = req?.user;
-
-    console.log({
-      postId,
-      userId,
-    });
 
     await handleLike(userId, postId);
 

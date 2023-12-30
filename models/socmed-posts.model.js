@@ -3,11 +3,16 @@ const { nanoid } = require("nanoid");
 const SocmedAudits = require("./socmed-audits.model");
 
 const knex = require("../db");
+const { isEmpty } = require("lodash");
 Model.knex(knex);
 
 class SocmedPosts extends Model {
   static get tableName() {
     return "socmed_posts";
+  }
+
+  static get idColumn() {
+    return "id";
   }
 
   static async auditLog(action, oldValue, newValue, userId, id) {
@@ -71,15 +76,26 @@ class SocmedPosts extends Model {
 
   async $beforeUpdate(opt, queryContext) {
     await super.$beforeUpdate(opt, queryContext);
-    const oldValue = await SocmedPosts.query().findById(this.id);
-    await SocmedPosts.auditLog("UPDATE", oldValue, this, this.user_id, this.id);
+    // jika data kosong, maka tidak perlu di audit. Terjadi ketika tambah like
+    if (isEmpty(this)) {
+      return;
+    } else {
+      const oldValue = await SocmedPosts.query().findById(this.id);
+      await SocmedPosts.auditLog(
+        "UPDATE",
+        oldValue,
+        this,
+        this.user_id,
+        this.id
+      );
+    }
   }
 
-  async $beforeDelete(queryContext) {
-    await super.$beforeDelete(queryContext);
-    const oldValue = await SocmedPosts.query().findById(this.id);
-    await SocmedPosts.auditLog("DELETE", oldValue, {}, this.user_id, this.id);
-  }
+  // async $beforeDelete(queryContext) {
+  //   await super.$beforeDelete(queryContext);
+  //   const oldValue = await SocmedPosts.query().findById(this.id);
+  //   await SocmedPosts.auditLog("DELETE", oldValue, {}, this.user_id, this.id);
+  // }
 }
 
 module.exports = SocmedPosts;
