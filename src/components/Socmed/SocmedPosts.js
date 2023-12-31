@@ -5,13 +5,14 @@ import {
   updatePost,
 } from "@/services/socmed.services";
 import { CommentOutlined, LikeOutlined, MoreOutlined } from "@ant-design/icons";
-import { Group, Stack } from "@mantine/core";
+import { Stack } from "@mantine/core";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Avatar,
   Button,
   Col,
   Comment,
+  Divider,
   Dropdown,
   Form,
   Input,
@@ -25,8 +26,8 @@ import {
 import moment from "moment";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
-import { useEffect } from "react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import SocmedPostsFilter from "./SocmedPostsFilter";
 
 function SocmedEditPost({ post, edit, isLoading, cancel }) {
   const [form] = Form.useForm();
@@ -43,6 +44,11 @@ function SocmedEditPost({ post, edit, isLoading, cancel }) {
 
   return (
     <Comment
+      author={
+        <Stack>
+          <span>{post?.user?.username}</span>
+        </Stack>
+      }
       avatar={<Avatar src={post?.user?.image} alt={post?.user?.name} />}
       content={
         <Form form={form} onFinish={handleFinish}>
@@ -226,19 +232,29 @@ const Post = ({ post, currentUser }) => {
 };
 
 function SocmedPosts() {
+  const router = useRouter();
+
   const { data: currentUser } = useSession();
-  const { data: posts, isLoading } = useQuery(
-    ["socmed-posts"],
-    () => getPosts(),
-    {}
+  const {
+    data: posts,
+    isLoading,
+    isFetching,
+  } = useQuery(
+    ["socmed-posts", router?.query?.sortBy],
+    () => getPosts(router?.query?.sortBy),
+    {
+      keepPreviousData: true,
+    }
   );
   return (
     <Row>
-      <Col md={24}>
+      <Col md={16}>
+        <Divider />
+        <SocmedPostsFilter />
         <List
           dataSource={posts?.data}
           rowKey={(item) => item.id}
-          loading={isLoading}
+          loading={isLoading || isFetching}
           renderItem={(item) => {
             return <Post currentUser={currentUser?.user} post={item} />;
           }}

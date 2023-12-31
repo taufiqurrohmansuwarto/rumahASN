@@ -5,8 +5,8 @@ const api = axios.create({
   baseURL: "/helpdesk/api/asn/socmed",
 });
 
-export const getPosts = () => {
-  return api.get("/posts").then((res) => res?.data);
+export const getPosts = (sortBy = "latest") => {
+  return api.get(`/posts?sortBy=${sortBy}`).then((res) => res?.data);
 };
 
 export const getPost = (id) => {

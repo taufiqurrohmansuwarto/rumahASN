@@ -29,7 +29,7 @@ function SocmedCreatePost() {
 
   return (
     <Row>
-      <Col xs={24} md={18}>
+      <Col xs={24} md={16}>
         <Comment
           avatar={<Avatar src={data?.user?.image} alt={data?.user?.name} />}
           content={
