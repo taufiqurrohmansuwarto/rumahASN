@@ -18,7 +18,7 @@ export const createPost = (data) => {
 };
 
 export const updatePost = ({ id, data }) => {
-  return api.put(`/posts/${id}`, data).then((res) => res?.data);
+  return api.patch(`/posts/${id}`, data).then((res) => res?.data);
 };
 
 export const deletePost = (id) => {
@@ -35,6 +35,12 @@ export const getComments = (postId) => {
 
 export const createComment = ({ postId, data }) => {
   return api.post(`/posts/${postId}/comments`, data).then((res) => res?.data);
+};
+
+export const updateComment = ({ postId, commentId, data }) => {
+  return api
+    .patch(`/posts/${postId}/comments/${commentId}`, data)
+    .then((res) => res?.data);
 };
 
 export const deleteComment = ({ postId, commentId }) => {

@@ -5,6 +5,8 @@ const SocmedShares = require("@/models/socmed-shares.model");
 const SocmedAudits = require("@/models/socmed-audits.model");
 const SocmedNotifications = require("@/models/socmed-notifications.model");
 
+const arrayToTree = require("array-to-tree");
+
 const handleLike = async (userId, postId) => {
   try {
     const existingLike = await SocmedLikes.query()
@@ -104,9 +106,17 @@ const updatePost = async (req, res) => {
     const data = req.body;
     const { customId: userId } = req?.user;
 
-    const result = await SocmedPosts.query().patchAndFetchById(postId, {
+    const result = await SocmedPosts.query()
+      .where({
+        id: postId,
+        user_id: userId,
+      })
+      .first();
+
+    await result?.$query().patch({
       ...data,
       user_id: userId,
+      id: postId,
     });
 
     res.json(result);
@@ -128,7 +138,9 @@ const removePost = async (req, res) => {
         id: postId,
         user_id: userId,
       })
-      .delete();
+      .first();
+
+    await result?.$query().delete();
 
     res.json(result);
   } catch (error) {
@@ -160,25 +172,18 @@ const postLikes = async (req, res) => {
 const comments = async (req, res) => {
   try {
     const { postId } = req?.query;
-    const page = req.query.page || 1;
-    const limit = Math.min(req.query.limit || 10, 50);
 
     const result = await SocmedComments.query()
       .where({
         post_id: postId,
       })
       .withGraphFetched("[user(simpleSelect)]")
-      .page(page - 1, limit)
       .orderBy("created_at", "desc");
 
-    const data = {
-      data: result?.results,
-      pagination: {
-        page,
-        limit,
-        total: result?.total,
-      },
-    };
+    const data = arrayToTree(result, {
+      parentProperty: "parent_id",
+      customID: "id",
+    });
 
     res.json(data);
   } catch (error) {
@@ -202,6 +207,8 @@ const createComment = async (req, res) => {
       post_id: postId,
     });
 
+    await SocmedPosts.query().findById(postId).increment("comments_count", 1);
+
     res.json(result);
   } catch (error) {
     console.log(error);
@@ -210,8 +217,54 @@ const createComment = async (req, res) => {
     });
   }
 };
-const updateComment = async (req, res) => {};
-const removeComment = async (req, res) => {};
+const updateComment = async (req, res) => {
+  try {
+    const { postId, commentId } = req?.query;
+    const data = req.body;
+    const { customId: userId } = req?.user;
+
+    const result = await SocmedComments.query()
+      .patchAndFetchById(commentId, {
+        ...data,
+        user_id: userId,
+      })
+      .where({
+        id: commentId,
+        user_id: userId,
+        post_id: postId,
+      });
+
+    res.json(result);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      message: "Internal server error",
+    });
+  }
+};
+const removeComment = async (req, res) => {
+  try {
+    const { postId, commentId } = req?.query;
+    const { customId: userId } = req?.user;
+
+    const result = await SocmedComments.query()
+      .where({
+        id: commentId,
+        user_id: userId,
+        post_id: postId,
+      })
+      .first();
+
+    await result?.$query().delete();
+    await SocmedPosts.query().findById(postId).decrement("comments_count", 1);
+    res.json(result);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      message: "Internal server error",
+    });
+  }
+};
 
 module.exports = {
   posts,
