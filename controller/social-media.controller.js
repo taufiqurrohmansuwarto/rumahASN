@@ -42,11 +42,21 @@ const posts = async (req, res) => {
   try {
     const page = req.query.page || 1;
     const limit = Math.min(req.query.limit || 10, 50);
+    const sortBy = req.query.sortBy || "latest";
 
-    const result = await SocmedPosts.query()
+    let query = SocmedPosts.query()
       .withGraphFetched("[comments, likes, shares, user]")
-      .page(page - 1, limit)
-      .orderBy("created_at", "desc");
+      .page(page - 1, limit);
+
+    if (sortBy === "latest") {
+      query = query.orderBy("created_at", "desc");
+    } else if (sortBy === "popular") {
+      query = query.orderBy("likes_count", "desc");
+    } else if (sortBy === "trending") {
+      query = query.orderBy("comments_count", "desc");
+    }
+
+    const result = await query;
 
     const data = {
       data: result?.results,

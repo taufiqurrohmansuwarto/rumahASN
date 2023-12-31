@@ -1,21 +1,16 @@
 import {
-  createComment,
   deleteComment,
   getComments,
   getPost,
-  updateComment,
 } from "@/services/socmed.services";
 import { MoreOutlined, RetweetOutlined } from "@ant-design/icons";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Avatar,
-  Button,
   Col,
   Comment,
   Divider,
   Dropdown,
-  Form,
-  Input,
   List,
   Modal,
   Row,
@@ -25,76 +20,14 @@ import moment from "moment";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import { useState } from "react";
-
-const CreateComment = ({ parentId, withBatal = false, onCancel }) => {
-  const { data: currentUser } = useSession();
-  const router = useRouter();
-  const [form] = Form.useForm();
-
-  const queryClient = useQueryClient();
-
-  const { mutate: create, isLoading } = useMutation(
-    (data) => createComment(data),
-    {
-      onSuccess: () => {
-        form.resetFields();
-        message.success("Comment posted");
-        queryClient.invalidateQueries(["socmed-comments", router.query.id]);
-        if (withBatal) onCancel();
-      },
-      onError: (error) => {
-        message.error(error.message);
-      },
-      onSettled: () => {},
-    }
-  );
-
-  const handleFinish = (values) => {
-    if (!values.comment) return;
-    const data = {
-      postId: router.query.id,
-      data: {
-        ...values,
-        parent_id: parentId || null,
-      },
-    };
-
-    create(data);
-  };
-
-  return (
-    <Comment
-      avatar={
-        <Avatar src={currentUser?.user?.image} alt={currentUser?.user?.name} />
-      }
-      content={
-        <Form form={form} onFinish={handleFinish}>
-          <Form.Item name="comment">
-            <Input.TextArea rows={4} />
-          </Form.Item>
-          <Form.Item>
-            <Button
-              type="primary"
-              loading={isLoading}
-              disabled={isLoading}
-              htmlType="submit"
-            >
-              Post Komentar
-            </Button>
-            {withBatal && (
-              <Button style={{ marginLeft: 8 }} onClick={onCancel}>
-                Batal
-              </Button>
-            )}
-          </Form.Item>
-        </Form>
-      }
-    />
-  );
-};
+import SocmedCreateComment from "./SocmedCreateComment";
+import SocmedEditComment from "./SocmedEditComment";
 
 const UserComment = ({ comment }) => {
   const [selectedId, setSelectedId] = useState(null);
+
+  const [selectedEditId, setSelectedEditId] = useState(null);
+
   const { data: currentUser } = useSession();
   const queryClient = useQueryClient();
 
@@ -106,18 +39,13 @@ const UserComment = ({ comment }) => {
     setSelectedId(null);
   };
 
-  const { mutate: edit, isLoading: isLoadingEdit } = useMutation(
-    (data) => updateComment(data),
-    {
-      onSuccess: () => {
-        message.success("Comment updated");
-      },
-      onError: (error) => {
-        message.error(error.message);
-      },
-      onSettled: () => {},
-    }
-  );
+  const handleEdit = () => {
+    setSelectedEditId(comment?.id);
+  };
+
+  const handleCancelEdit = () => {
+    setSelectedEditId(null);
+  };
 
   const { mutateAsync: remove, isLoading: isLoadingRemove } = useMutation(
     (data) => deleteComment(data),
@@ -162,6 +90,7 @@ const UserComment = ({ comment }) => {
   const handleDropdown = (item) => {
     switch (item.key) {
       case "edit":
+        handleEdit();
         break;
       case "hapus":
         handleHapus();
@@ -188,27 +117,41 @@ const UserComment = ({ comment }) => {
   ];
 
   return (
-    <Comment
-      actions={actions}
-      avatar={
-        <Avatar src={comment?.user?.image} alt={comment?.user?.username} />
-      }
-      content={comment?.comment}
-      datetime={moment(comment?.created_at).fromNow()}
-      author={comment?.user?.username}
-    >
-      {selectedId === comment?.id && (
-        <CreateComment
-          parentId={comment?.id}
-          data={comment?.user}
-          withBatal
-          onCancel={handleCancel}
-        />
-      )}
-      {comment?.children?.map((item) => (
-        <UserComment key={item?.id} comment={item} />
-      ))}
-    </Comment>
+    <>
+      <Comment
+        actions={selectedEditId === comment?.id ? null : actions}
+        avatar={
+          <Avatar src={comment?.user?.image} alt={comment?.user?.username} />
+        }
+        content={
+          <>
+            {selectedEditId === comment?.id ? (
+              <SocmedEditComment
+                comment={comment}
+                onCancel={handleCancelEdit}
+                withBatal
+              />
+            ) : (
+              comment?.comment
+            )}
+          </>
+        }
+        datetime={moment(comment?.created_at).fromNow()}
+        author={comment?.user?.username}
+      >
+        {selectedId === comment?.id && (
+          <SocmedCreateComment
+            parentId={comment?.id}
+            data={comment?.user}
+            withBatal
+            onCancel={handleCancel}
+          />
+        )}
+        {comment?.children?.map((item) => (
+          <UserComment key={item?.id} comment={item} />
+        ))}
+      </Comment>
+    </>
   );
 };
 
@@ -223,21 +166,16 @@ const UserComments = ({ postId }) => {
     <List
       loading={isLoading}
       dataSource={data}
-      renderItem={(item) => <UserComment comment={item} />}
+      renderItem={(item) => (
+        <>
+          <UserComment comment={item} />
+        </>
+      )}
     />
   );
 };
 
-function SocmedComments() {
-  const router = useRouter();
-  const { id } = router.query;
-
-  const { data: post, isLoading } = useQuery(
-    ["socmed-posts", id],
-    () => getPost(id),
-    {}
-  );
-
+function SocmedComments({ post, id }) {
   return (
     <Row>
       <Col md={16}>
@@ -248,7 +186,7 @@ function SocmedComments() {
           datetime={post?.created_at}
         />
         <Divider />
-        <CreateComment />
+        <SocmedCreateComment />
         <UserComments postId={id} />
       </Col>
     </Row>

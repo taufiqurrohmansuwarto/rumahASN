@@ -5,6 +5,8 @@ import SocmedPosts from "@/components/Socmed/SocmedPosts";
 import Head from "next/head";
 import { useEffect } from "react";
 import { useRouter } from "next/router";
+import { BackTop, Divider } from "antd";
+import SocmedPostsFilter from "@/components/Socmed/SocmedPostsFilter";
 
 const AsnUpdates = () => {
   const router = useRouter();
@@ -39,6 +41,7 @@ const AsnUpdates = () => {
         title="ASN Updates"
         content="Apa yang terjadi di ASN Connect?"
       >
+        <BackTop />
         <SocmedCreatePost />
         <SocmedPosts />
       </PageContainer>
