@@ -91,11 +91,11 @@ class SocmedPosts extends Model {
     }
   }
 
-  // async $beforeDelete(queryContext) {
-  //   await super.$beforeDelete(queryContext);
-  //   const oldValue = await SocmedPosts.query().findById(this.id);
-  //   await SocmedPosts.auditLog("DELETE", oldValue, {}, this.user_id, this.id);
-  // }
+  async $beforeDelete(queryContext) {
+    await super.$beforeDelete(queryContext);
+    const oldValue = await SocmedPosts.query().findById(this.id);
+    await SocmedPosts.auditLog("DELETE", oldValue, {}, this.user_id, this.id);
+  }
 }
 
 module.exports = SocmedPosts;
