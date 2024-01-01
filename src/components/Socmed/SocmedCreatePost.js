@@ -28,30 +28,28 @@ function SocmedCreatePost() {
   };
 
   return (
-    <Row>
-      <Col xs={24} md={16}>
-        <Comment
-          avatar={<Avatar src={data?.user?.image} alt={data?.user?.name} />}
-          content={
-            <Form form={form} onFinish={handleFinish}>
-              <Form.Item name="content">
-                <Input.TextArea rows={4} />
-              </Form.Item>
-              <Form.Item>
-                <Button
-                  type="primary"
-                  loading={isLoading}
-                  disabled={isLoading}
-                  htmlType="submit"
-                >
-                  Post
-                </Button>
-              </Form.Item>
-            </Form>
-          }
-        />
-      </Col>
-    </Row>
+    <>
+      <Comment
+        avatar={<Avatar src={data?.user?.image} alt={data?.user?.name} />}
+        content={
+          <Form form={form} onFinish={handleFinish}>
+            <Form.Item name="content">
+              <Input.TextArea rows={4} />
+            </Form.Item>
+            <Form.Item>
+              <Button
+                type="primary"
+                loading={isLoading}
+                disabled={isLoading}
+                htmlType="submit"
+              >
+                Post
+              </Button>
+            </Form.Item>
+          </Form>
+        }
+      />
+    </>
   );
 }
 

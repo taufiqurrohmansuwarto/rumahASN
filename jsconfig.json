@@ -3,12 +3,13 @@
     "baseUrl": ".",
     "paths": {
       "@/components/*": ["src/components/*"],
+      "@/hooks/*": ["src/hooks/*"],
       "@/controller/*": ["controller/*"],
       "@/middleware/*": ["middleware/*"],
       "@/models/*": ["models/*"],
       "@/services/*": ["services/*"],
       "@/utils/*": ["utils/*"],
-      "@/context/*" : ["context/*"],
+      "@/context/*": ["context/*"]
     }
   }
 }

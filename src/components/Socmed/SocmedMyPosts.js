@@ -1,6 +1,6 @@
 import {
   deletePost,
-  getPosts,
+  getMyPosts,
   likePost,
   updatePost,
 } from "@/services/socmed.services";
@@ -104,12 +104,12 @@ const Post = ({ post, currentUser }) => {
     (data) => likePost(data),
     {
       onSuccess: () => {
-        queryClient.invalidateQueries(["socmed-posts"]);
         queryClient.invalidateQueries(["my-socmed-posts"]);
+        queryClient.invalidateQueries(["socmed-posts"]);
         message.success("berhasil");
       },
       onSettled: () => {
-        queryClient.invalidateQueries(["socmed-posts"]);
+        queryClient.invalidateQueries(["my-socmed-posts"]);
       },
     }
   );
@@ -118,11 +118,11 @@ const Post = ({ post, currentUser }) => {
     (data) => deletePost(data),
     {
       onSuccess: () => {
-        queryClient.invalidateQueries(["socmed-posts"]);
+        queryClient.invalidateQueries(["my-socmed-posts"]);
         message.success("berhasil");
       },
       onSettled: () => {
-        queryClient.invalidateQueries(["socmed-posts"]);
+        queryClient.invalidateQueries(["my-socmed-posts"]);
       },
     }
   );
@@ -131,12 +131,12 @@ const Post = ({ post, currentUser }) => {
     (data) => updatePost(data),
     {
       onSuccess: () => {
-        queryClient.invalidateQueries(["socmed-posts"]);
+        queryClient.invalidateQueries(["my-socmed-posts"]);
         message.success("berhasil");
         setSelectedId(null);
       },
       onSettled: () => {
-        queryClient.invalidateQueries(["socmed-posts"]);
+        queryClient.invalidateQueries(["my-socmed-posts"]);
       },
     }
   );
@@ -239,7 +239,7 @@ const Post = ({ post, currentUser }) => {
   );
 };
 
-function SocmedPosts() {
+function SocmedMyPosts() {
   const router = useRouter();
 
   const { data: currentUser } = useSession();
@@ -250,8 +250,8 @@ function SocmedPosts() {
     isFetching,
     fetchNextPage,
   } = useInfiniteQuery(
-    ["socmed-posts", router?.query],
-    ({ pageParam = 1 }) => getPosts({ ...router?.query, page: pageParam }),
+    ["my-socmed-posts", router?.query],
+    ({ pageParam = 1 }) => getMyPosts({ ...router?.query, page: pageParam }),
     {
       getNextPageParam: (lastPage) => {
         const defaultLimit = 10;
@@ -301,4 +301,4 @@ function SocmedPosts() {
   );
 }
 
-export default SocmedPosts;
+export default SocmedMyPosts;

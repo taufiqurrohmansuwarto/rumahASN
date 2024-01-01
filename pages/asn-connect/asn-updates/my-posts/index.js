@@ -5,17 +5,14 @@ import useScrollRestoration from "@/hooks/useScrollRestoration";
 import { BackTop } from "antd";
 import Head from "next/head";
 
-const AsnUpdates = () => {
+const AsnUpdatesMyPosts = () => {
   useScrollRestoration();
   return (
     <>
       <Head>
         <title>Rumah ASN - ASN Update</title>
       </Head>
-      <PageContainer
-        title="ASN Updates"
-        content="Apa yang terjadi di ASN Connect?"
-      >
+      <PageContainer title="ASN Updates" content="Postingan Saya">
         <BackTop />
         <SocmedTabs />
       </PageContainer>
@@ -23,12 +20,12 @@ const AsnUpdates = () => {
   );
 };
 
-AsnUpdates.Auth = {
+AsnUpdatesMyPosts.Auth = {
   action: "manage",
   subject: "tickets",
 };
 
-AsnUpdates.getLayout = (page) => {
+AsnUpdatesMyPosts.getLayout = (page) => {
   return (
     <LayoutAsnConnect active="/asn-connect/asn-updates">
       {page}
@@ -36,4 +33,4 @@ AsnUpdates.getLayout = (page) => {
   );
 };
 
-export default AsnUpdates;
+export default AsnUpdatesMyPosts;

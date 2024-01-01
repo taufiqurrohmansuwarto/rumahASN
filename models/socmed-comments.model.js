@@ -31,20 +31,14 @@ class SocmedComments extends Model {
   }
 
   async $afterInsert(queryContext) {
+    console.log("after insert");
     await super.$afterInsert(queryContext);
-
-    const post = await SocmedPosts.query().findById(this.post_id);
-
-    // cek jika pengguna bukan yang membuat postingan
-    if (post.user_id !== this.user_id) {
-      // jika bukan, maka buat notifikasi
-      await SocmedNotification.query().insert({
-        user_id: this.user_id,
-        trigger_user_id: this.user_id,
-        type: "comment",
-        reference_id: this.id,
-      });
-    }
+    await SocmedNotification.query().insert({
+      user_id: this.user_id,
+      trigger_user_id: this.user_id,
+      type: "comment",
+      reference_id: this.post_id,
+    });
   }
 }
 
