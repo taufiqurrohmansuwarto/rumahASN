@@ -5,8 +5,22 @@ const api = axios.create({
   baseURL: "/helpdesk/api/asn/socmed",
 });
 
-export const getPosts = (sortBy = "latest") => {
-  return api.get(`/posts?sortBy=${sortBy}`).then((res) => res?.data);
+export const getPosts = (query) => {
+  const params = queryString.stringify(query, {
+    skipEmptyString: true,
+    skipNull: true,
+  });
+
+  return api.get(`/posts?${params}`).then((res) => res?.data);
+};
+
+export const getMyPosts = (query) => {
+  const params = queryString.stringify(query, {
+    skipEmptyString: true,
+    skipNull: true,
+  });
+
+  return api.get(`/posts/my-posts?${params}`).then((res) => res?.data);
 };
 
 export const getPost = (id) => {
@@ -47,4 +61,13 @@ export const deleteComment = ({ postId, commentId }) => {
   return api
     .delete(`/posts/${postId}/comments/${commentId}`)
     .then((res) => res?.data);
+};
+
+export const getActivities = (query) => {
+  const params = queryString.stringify(query, {
+    skipEmptyString: true,
+    skipNull: true,
+  });
+
+  return api.get(`/activities?${params}`).then((res) => res?.data);
 };

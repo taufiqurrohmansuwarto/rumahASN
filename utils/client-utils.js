@@ -659,3 +659,20 @@ export const setColorStatusUsulan = (status) => {
     return "red";
   }
 };
+
+export const socmedActivities = (activity) => {
+  // parsing object to text : {user} {action} {post}
+  const { type, user, trigger_user } = activity;
+  let action;
+  if (type === "post") {
+    action = `${user?.username} membuat postingan baru`;
+  } else if (type === "like") {
+    action = `${user?.username} menyukai postingan ${trigger_user?.username}`;
+  } else if (type === "comment") {
+    action = `${user?.username} berkomentar pada postingan ${trigger_user?.username}`;
+  }
+
+  return {
+    text: action,
+  };
+};

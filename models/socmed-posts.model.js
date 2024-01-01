@@ -1,6 +1,7 @@
 const { Model } = require("objection");
 const { nanoid } = require("nanoid");
 const SocmedAudits = require("./socmed-audits.model");
+const SocmedNotifications = require("./socmed-notifications.model");
 
 const knex = require("../db");
 const { isEmpty } = require("lodash");
@@ -24,6 +25,11 @@ class SocmedPosts extends Model {
       new_value: JSON.stringify(newValue),
       user_id: userId,
     });
+  }
+
+  // custom filter function
+  static get modifiers() {
+    return {};
   }
 
   static get relationMappings() {
@@ -70,8 +76,15 @@ class SocmedPosts extends Model {
 
   async $beforeInsert(queryContext) {
     this.id = nanoid(8);
+    console.log(this);
     await super.$beforeInsert(queryContext);
     await SocmedPosts.auditLog("INSERT", {}, this, this.user_id, this.id);
+    await SocmedNotifications.query().insert({
+      user_id: this.user_id,
+      trigger_user_id: null,
+      type: "post",
+      reference_id: this.id,
+    });
   }
 
   async $beforeUpdate(opt, queryContext) {

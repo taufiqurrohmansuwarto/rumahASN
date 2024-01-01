@@ -10,6 +10,7 @@ function SocmedPostsFilter() {
 
   const handleChange = (filter) => {
     setFilter(filter);
+
     router.push({
       pathname: router.pathname,
       query: {
