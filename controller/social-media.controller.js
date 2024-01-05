@@ -336,7 +336,7 @@ const allActivities = async (req, res) => {
   try {
     const page = req.query.page || 1;
     // limit 10, max 50
-    const limit = Math.min(req.query.limit || 10, 50);
+    const limit = Math.min(req.query.limit || 25, 50);
 
     const result = await SocmedNotifications.query()
       .orderBy("created_at", "desc")

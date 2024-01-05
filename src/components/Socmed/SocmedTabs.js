@@ -1,4 +1,4 @@
-import { Col, Row, Tabs } from "antd";
+import { Card, Col, Row, Tabs } from "antd";
 import { useRouter } from "next/router";
 import React from "react";
 import SocmedPosts from "./SocmedPosts";
@@ -21,32 +21,44 @@ function SocmedTabs() {
 
   return (
     <>
-      <Row gutter={[16, 16]}>
+      <Row gutter={[8, 8]}>
         <Col md={16}>
-          <SocmedCreatePost />
-          <Tabs
-            defaultActiveKey="all"
-            type="card"
-            activeKey={activeKey}
-            onChange={handleChangeTab}
-            items={[
-              {
-                key: "all",
-                label: "Semua Postingan",
-                tab: "Semua Postingan",
-                children: <SocmedPosts />,
-              },
-              {
-                key: "my",
-                label: "Postingan Saya",
-                tab: "Postingan Saya",
-                children: <SocmedMyPosts />,
-              },
-            ]}
-          />
+          <Row gutter={[8, 8]}>
+            <Col md={24}>
+              <Card>
+                <SocmedCreatePost />
+              </Card>
+            </Col>
+            <Col md={24}>
+              <Card title="Daftar Postingan">
+                <Tabs
+                  defaultActiveKey="all"
+                  type="card"
+                  activeKey={activeKey}
+                  onChange={handleChangeTab}
+                  items={[
+                    {
+                      key: "all",
+                      label: "Semua Postingan",
+                      tab: "Semua Postingan",
+                      children: <SocmedPosts />,
+                    },
+                    {
+                      key: "my",
+                      label: "Postingan Saya",
+                      tab: "Postingan Saya",
+                      children: <SocmedMyPosts />,
+                    },
+                  ]}
+                />
+              </Card>
+            </Col>
+          </Row>
         </Col>
         <Col md={8}>
-          <SocmedActivities />
+          <Card title="Aktifitas">
+            <SocmedActivities />
+          </Card>
         </Col>
       </Row>
     </>
