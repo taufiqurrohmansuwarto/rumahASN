@@ -99,11 +99,11 @@ const changeRoutes = (user) => {
 
     if (userPns) {
       userRoutes.routes.push(
-        {
-          path: "/asn-connect/asn-updates",
-          name: "ASN Connect",
-          icon: <UserOutlined />,
-        },
+        // {
+        //   path: "/asn-connect/asn-updates",
+        //   name: "ASN Connect",
+        //   icon: <UserOutlined />,
+        // },
         {
           path: "/pemutakhiran-data/komparasi",
           name: "Integrasi SIASN",
