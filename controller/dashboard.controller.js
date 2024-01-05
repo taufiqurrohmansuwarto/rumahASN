@@ -159,6 +159,19 @@ const adminDashboard = async (req, res) => {
       res.json(hasil);
     }
 
+    if (type === "visitors") {
+      const result =
+        await knex.raw(`SELECT TO_CHAR(created_at, 'DD-MM-YYYY') AS tanggal, COUNT(DISTINCT user_id)
+FROM users_histories
+WHERE action = 'login'
+  AND created_at >= CURRENT_DATE - INTERVAL '30 days'
+GROUP BY TO_CHAR(created_at, 'DD-MM-YYYY'), DATE(created_at)
+ORDER BY DATE(created_at);
+`);
+
+      res.json(result?.rows);
+    }
+
     if (type === "standard") {
       const result = await knex.raw(
         `

@@ -47,7 +47,7 @@ const Activity = ({ activity }) => {
   );
 };
 
-function SocmedActivities() {
+function SocmedActivitiesFull() {
   const router = useRouter();
 
   const handleViewAll = () => {
@@ -57,7 +57,9 @@ function SocmedActivities() {
   const { data, isLoading } = useQuery(
     ["socmed-activities"],
     () => getActivities(),
-    {}
+    {
+      enabled: router?.query,
+    }
   );
 
   return (
@@ -78,4 +80,4 @@ function SocmedActivities() {
   );
 }
 
-export default SocmedActivities;
+export default SocmedActivitiesFull;
