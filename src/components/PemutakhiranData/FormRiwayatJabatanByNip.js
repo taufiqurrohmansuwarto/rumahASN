@@ -2,9 +2,18 @@ import { getRwJabatanByNip } from "@/services/siasn-services";
 import { useQuery } from "@tanstack/react-query";
 import { Form, Select } from "antd";
 
+const filterJustFungsional = (data) => {
+  return data?.filter((item) => item?.jenisJabatan === "2");
+};
+
 const FormRiwayatJabatanByNip = ({ name, form, nip }) => {
-  const { data, isLoading } = useQuery(["data-jabatan", nip], () =>
-    getRwJabatanByNip(nip)
+  const { data, isLoading } = useQuery(
+    ["data-jabatan", nip],
+    () => getRwJabatanByNip(nip),
+    {
+      enabled: !!nip,
+      select: filterJustFungsional,
+    }
   );
 
   return (
