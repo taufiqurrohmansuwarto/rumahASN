@@ -518,6 +518,14 @@ const postAngkaKreditByNip = async (req, res) => {
 
     await request.post(`/angkakredit/save`, data);
 
+    // create log
+    await createLogSIASN({
+      userId: req?.user?.customId,
+      type: "CREATE",
+      employeeNumber: nip,
+      siasnService: "angkakredit",
+    });
+
     res.json({
       code: 200,
     });
