@@ -22,6 +22,17 @@ const allAppList = [
   },
 ];
 
+// pegawai (asn dan non asn) apps
+const pegawaiPemprovAppList = [
+  {
+    icon: "https://siasn.bkd.jatimprov.go.id:9000/public/logo-simaster.png",
+    title: "ASN Connect",
+    desc: "ASN Connect",
+    url: "http://localhost:3088/helpdesk/asn-connect/asn-updates",
+    target: "_blank",
+  },
+];
+
 // admin apps
 
 // pegawai pemprov apps
@@ -69,6 +80,9 @@ export const appList = (user) => {
 
   if (userPttpk) {
     const currentApplist = [...allAppList, ...pttpkAppList];
+    return currentApplist;
+  } else if (pegawaiPemda) {
+    const currentApplist = [...allAppList, ...pegawaiPemprovAppList];
     return currentApplist;
   } else {
     return allAppList;

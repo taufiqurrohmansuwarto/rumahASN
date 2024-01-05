@@ -45,7 +45,7 @@ const DetailCoachingClinic = () => {
         loading={isLoading}
         title="Coaching Clinic"
       >
-        <Alert
+        {/* <Alert
           style={{
             marginBottom: 10,
           }}
@@ -63,7 +63,7 @@ Kode Sandi: bkdjatim</p>
             />
           }
           type="error"
-        />
+        /> */}
         <DetailMeetingParticipant />
       </PageContainer>
     </>
