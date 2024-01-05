@@ -73,6 +73,8 @@ function SIASNTracking() {
     { key: "kenaikan-pangkat", label: "Kenaikan Pangkat" },
     { key: "pemberhentian", label: "Pemberhentian" },
     { key: "skk", label: "Usul Perbaikan Nama" },
+    { key: "pmk", label: "Penyesuaian Masa Kerja" },
+    { key: "pg", label: "Penambahan Gelar Pendidikan" },
   ];
 
   const { data, refetch, isFetching, isLoading } = useQuery(
