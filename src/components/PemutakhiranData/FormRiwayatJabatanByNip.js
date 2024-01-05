@@ -1,10 +1,10 @@
-import { getRwJabatan } from "@/services/siasn-services";
+import { getRwJabatanByNip } from "@/services/siasn-services";
 import { useQuery } from "@tanstack/react-query";
 import { Form, Select } from "antd";
 
-const FormRiwayatJabatan = ({ name, form }) => {
-  const { data, isLoading } = useQuery(["data-rw-jabatan"], () =>
-    getRwJabatan()
+const FormRiwayatJabatanByNip = ({ name, form, nip }) => {
+  const { data, isLoading } = useQuery(["data-jabatan", nip], () =>
+    getRwJabatanByNip(nip)
   );
 
   return (
@@ -35,4 +35,4 @@ const FormRiwayatJabatan = ({ name, form }) => {
   );
 };
 
-export default FormRiwayatJabatan;
+export default FormRiwayatJabatanByNip;
