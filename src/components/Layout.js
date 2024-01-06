@@ -446,8 +446,7 @@ function Layout({ children, active, collapsed = true }) {
                 }}
                 type="secondary"
               >
-                © 2022 BKD Provinsi Jawa Timur | Iput Taufiqurrohman Suwarto,
-                S.Kom.
+                © 2022 BKD Provinsi Jawa Timur
               </Typography.Text>
             </div>
           </div>
