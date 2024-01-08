@@ -6,7 +6,7 @@ const path = require("path");
 const moment = require("moment");
 const arrayToTree = require("array-to-tree");
 const { ssoFetcher, wso2Fetcher } = require("@/utils/siasn-fetcher");
-const { orderBy, sortBy } = require("lodash");
+const { orderBy, sortBy, trim } = require("lodash");
 const {
   riwayatPendidikan,
   riwayatGolonganPangkat,
@@ -475,6 +475,7 @@ const postAngkaKredit = async (req, res) => {
 
     const data = {
       ...body,
+      nomorSk: trim(body?.nomorSk?.toString()),
       pnsId: currentPns?.data?.data?.id,
       kreditUtamaBaru: body?.kreditUtamaBaru?.toString(),
       kreditPenunjangBaru: body?.kreditPenunjangBaru?.toString(),
@@ -510,20 +511,43 @@ const postAngkaKreditByNip = async (req, res) => {
 
     const data = {
       ...body,
+      nomorSk: trim(body?.nomorSk),
       pnsId: currentPns?.data?.data?.id,
       kreditUtamaBaru: body?.kreditUtamaBaru?.toString(),
       kreditPenunjangBaru: body?.kreditPenunjangBaru?.toString(),
       kreditBaruTotal: body?.kreditBaruTotal?.toString(),
     };
 
-    await request.post(`/angkakredit/save`, data);
+    const hasil = await request.post(`/angkakredit/save`, data);
 
-    res.json({
-      code: 200,
-    });
+    if (hasil?.data?.success === false) {
+      res.status(500).json({
+        code: 500,
+        message: hasil?.data?.message,
+      });
+    } else {
+      res.json({
+        code: 200,
+      });
+    }
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: "error" });
+  }
+};
+
+const hapusAkByNip = async (req, res) => {
+  try {
+    const { siasnRequest: request } = req;
+    const { id } = req?.query;
+    const hasil = await request.delete(`/angkakredit/delete/${id}`);
+
+    res.json({
+      code: 200,
+      message: "success",
+    });
+  } catch (error) {
+    console.log(error);
   }
 };
 
@@ -1047,4 +1071,5 @@ module.exports = {
   updateEmployeeInformation,
   allPnsByNip,
   riwayatKeluargaByNip,
+  hapusAkByNip,
 };
