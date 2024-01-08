@@ -520,27 +520,13 @@ const postAngkaKreditByNip = async (req, res) => {
 
     const hasil = await request.post(`/angkakredit/save`, data);
 
-    if (hasil?.data?.success === false) {
-      res.status(500).json({
-        code: 500,
-        message: hasil?.data?.message,
-      });
-    } else {
-      res.json({
-        code: 200,
-      });
-    }
-  } catch (error) {
-    console.log(error);
-    res.status(500).json({ message: "error" });
-  }
-};
-
-const hapusAkByNip = async (req, res) => {
-  try {
-    const { siasnRequest: request } = req;
-    const { id } = req?.query;
-    const hasil = await request.delete(`/angkakredit/delete/${id}`);
+    // create log
+    await createLogSIASN({
+      userId: req?.user?.customId,
+      type: "CREATE",
+      employeeNumber: nip,
+      siasnService: "angkakredit",
+    });
 
     res.json({
       code: 200,
