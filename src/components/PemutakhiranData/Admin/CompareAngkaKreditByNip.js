@@ -1,12 +1,13 @@
 import { rwAngkakreditMasterByNip } from "@/services/master.services";
 import {
+  deleteAkByNip,
   getRwAngkakreditByNip,
   getTokenSIASNService,
   postRwAngkakreditByNip,
 } from "@/services/siasn-services";
 import { FileAddOutlined } from "@ant-design/icons";
 import { Stack } from "@mantine/core";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { API_URL } from "@/utils/client-utils";
 import {
@@ -224,6 +225,23 @@ function CompareAngkaKreditByNip({ nip }) {
     () => rwAngkakreditMasterByNip(nip)
   );
 
+  const { mutateAsync: hapusAk, isLoading: isLoadingRemoveAk } = useMutation(
+    (data) => deleteAkByNip(data),
+    {
+      onSuccess: () => {
+        message.success("Berhasil menghapus angka kredit");
+      },
+      onError: () => {
+        message.error("Gagal menghapus angka kredit");
+      },
+      onSettled: () => queryClient.invalidateQueries(["angka-kredit", nip]),
+    }
+  );
+
+  const handleHapus = (row) => {
+    alert(JSON.stringify(row));
+  };
+
   const [visible, setVisible] = useState(false);
 
   const handleVisible = () => setVisible(true);
@@ -284,6 +302,17 @@ function CompareAngkaKreditByNip({ nip }) {
     {
       title: "Nama Jabatan",
       dataIndex: "namaJabatan",
+    },
+    {
+      title: "Hapus",
+      key: "hapus",
+      render: (_, record) => {
+        return (
+          <Button type="primary" danger onClick={() => handleHapus(record?.id)}>
+            Hapus
+          </Button>
+        );
+      },
     },
   ];
 
