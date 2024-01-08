@@ -97,8 +97,10 @@ export const getRwAngkakredit = () => {
   return api.get("/pns/rw-angkakredit").then((res) => res.data);
 };
 
-export const deleteAkByNip = (id) => {
-  return api.delete(`/pns/rw-angkakredit/${id}`).then((res) => res.data);
+export const deleteAkByNip = ({ nip, id }) => {
+  return api
+    .delete(`/admin/${nip}/rw-angkakredit/${id}`)
+    .then((res) => res.data);
 };
 
 export const getRwAngkakreditByNip = (nip) => {
