@@ -20,10 +20,13 @@ import {
   Input,
   InputNumber,
   Modal,
+  Popconfirm,
+  Radio,
   Row,
   Table,
   Typography,
   Upload,
+  message,
 } from "antd";
 import axios from "axios";
 import moment from "moment";
@@ -117,6 +120,7 @@ const FormAngkaKredit = ({ visible, onCancel, nip }) => {
       }
     } catch (error) {
       setLoading(false);
+      message.error(error?.response?.data?.message);
       console.log(error);
     }
   };
@@ -192,6 +196,15 @@ const FormAngkaKredit = ({ visible, onCancel, nip }) => {
             </Form.Item>
           </Col>
         </Row>
+        {/* <Form.Item name="status">
+          <Radio.Group>
+            <Radio.Button value="angkaKreditPertama">
+              Angka Kredit Pertama
+            </Radio.Button>
+            <Radio.Button value="integrasi">Integrasi</Radio.Button>
+            <Radio.Button value="konversi">Konversi</Radio.Button>
+          </Radio.Group>
+        </Form.Item> */}
         <Form.Item
           valuePropName="checked"
           name="isAngkaKreditPertama"
@@ -216,6 +229,8 @@ const FormAngkaKredit = ({ visible, onCancel, nip }) => {
 };
 
 function CompareAngkaKreditByNip({ nip }) {
+  const queryClient = useQueryClient();
+
   const { data, isLoading } = useQuery(["angka-kredit", nip], () =>
     getRwAngkakreditByNip(nip)
   );
@@ -238,8 +253,15 @@ function CompareAngkaKreditByNip({ nip }) {
     }
   );
 
-  const handleHapus = (row) => {
-    alert(JSON.stringify(row));
+  const handleHapus = async (row) => {
+    try {
+      await hapusAk({
+        nip,
+        id: row?.id,
+      });
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   const [visible, setVisible] = useState(false);
@@ -306,11 +328,14 @@ function CompareAngkaKreditByNip({ nip }) {
     {
       title: "Hapus",
       key: "hapus",
-      render: (_, record) => {
+      render: (_, row) => {
         return (
-          <Button type="primary" danger onClick={() => handleHapus(record?.id)}>
-            Hapus
-          </Button>
+          <Popconfirm
+            title="Apakah kamu ingin menghapus data riwayat angka kredit?"
+            onConfirm={async () => await handleHapus(row)}
+          >
+            <a>Hapus</a>
+          </Popconfirm>
         );
       },
     },
@@ -369,7 +394,16 @@ function CompareAngkaKreditByNip({ nip }) {
   return (
     <Card title="Komparasi Angka Kredit">
       <FormAngkaKredit visible={visible} onCancel={handleCancel} nip={nip} />
-      <Button onClick={handleVisible}>Tambah Angka Kredit</Button>
+      <Button
+        icon={<FileAddOutlined />}
+        style={{
+          marginBottom: 10,
+        }}
+        type="primary"
+        onClick={handleVisible}
+      >
+        Angka Kredit
+      </Button>
       <Stack>
         <Table
           columns={columns}

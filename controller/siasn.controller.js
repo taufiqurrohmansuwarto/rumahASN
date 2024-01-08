@@ -6,7 +6,7 @@ const path = require("path");
 const moment = require("moment");
 const arrayToTree = require("array-to-tree");
 const { ssoFetcher, wso2Fetcher } = require("@/utils/siasn-fetcher");
-const { orderBy, sortBy, trim } = require("lodash");
+const { orderBy, sortBy, trim, toString } = require("lodash");
 const {
   riwayatPendidikan,
   riwayatGolonganPangkat,
@@ -484,7 +484,6 @@ const postAngkaKredit = async (req, res) => {
 
     await request.post(`/angkakredit/save`, data);
 
-    // create log
     await createLogSIASN({
       userId: req?.user?.customId,
       type: "CREATE",
@@ -501,6 +500,23 @@ const postAngkaKredit = async (req, res) => {
   }
 };
 
+const hapusAkByNip = async (req, res) => {
+  try {
+    const { siasnRequest: request } = req;
+    const { id } = req?.query;
+
+    const result = await request.delete(`/angkakredit/delete/${id}`);
+
+    res.json({
+      code: 200,
+      message: "success",
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "error" });
+  }
+};
+
 const postAngkaKreditByNip = async (req, res) => {
   try {
     const { siasnRequest: request } = req;
@@ -508,6 +524,24 @@ const postAngkaKreditByNip = async (req, res) => {
     const body = req?.body;
 
     const currentPns = await request.get(`/pns/data-utama/${nip}`);
+
+    const dataBaru = {
+      pnsId: currentPns?.data?.data?.id,
+      nomorSk: "800/12/PAK/060/2017",
+      tanggalSk: "12-01-2017",
+      bulanMulaiPenailan: "7",
+      tahunMulaiPenailan: "2016",
+      bulanSelesaiPenailan: "12",
+      tahunSelesaiPenailan: "2016",
+      kreditUtamaBaru: "54.365",
+      kreditPenunjangBaru: "3.040",
+      kreditBaruTotal: "57.405",
+      rwJabatan: "",
+      namaJabatan: null,
+      isAngkaKreditPertama: "",
+      isIntegrasi: "",
+      isKonversi: "",
+    };
 
     const data = {
       ...body,
@@ -520,18 +554,22 @@ const postAngkaKreditByNip = async (req, res) => {
 
     const hasil = await request.post(`/angkakredit/save`, data);
 
-    // create log
-    await createLogSIASN({
-      userId: req?.user?.customId,
-      type: "CREATE",
-      employeeNumber: nip,
-      siasnService: "angkakredit",
-    });
+    if (hasil?.data?.code === 0) {
+      console.log(hasil?.data?.message);
+      res.status(500).json({ message: hasil?.data?.message });
+    } else {
+      await createLogSIASN({
+        userId: req?.user?.customId,
+        type: "CREATE",
+        employeeNumber: nip,
+        siasnService: "angkakredit",
+      });
 
-    res.json({
-      code: 200,
-      message: "success",
-    });
+      res.json({
+        code: 200,
+        message: "success",
+      });
+    }
   } catch (error) {
     console.log(error);
   }
