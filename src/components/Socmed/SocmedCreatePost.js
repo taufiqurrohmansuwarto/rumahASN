@@ -1,8 +1,7 @@
 import { createPost } from "@/services/socmed.services";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Avatar, Button, Col, Comment, Form, Input, Row } from "antd";
+import { Avatar, Button, Comment, Form, Input } from "antd";
 import { useSession } from "next-auth/react";
-import React from "react";
 
 function SocmedCreatePost() {
   const { data, status } = useSession();
@@ -28,28 +27,26 @@ function SocmedCreatePost() {
   };
 
   return (
-    <>
-      <Comment
-        avatar={<Avatar src={data?.user?.image} alt={data?.user?.name} />}
-        content={
-          <Form form={form} onFinish={handleFinish}>
-            <Form.Item name="content">
-              <Input.TextArea rows={4} />
-            </Form.Item>
-            <Form.Item>
-              <Button
-                type="primary"
-                loading={isLoading}
-                disabled={isLoading}
-                htmlType="submit"
-              >
-                Post
-              </Button>
-            </Form.Item>
-          </Form>
-        }
-      />
-    </>
+    <Comment
+      avatar={<Avatar src={data?.user?.image} alt={data?.user?.name} />}
+      content={
+        <Form form={form} onFinish={handleFinish}>
+          <Form.Item name="content">
+            <Input.TextArea rows={4} />
+          </Form.Item>
+          <Form.Item>
+            <Button
+              type="primary"
+              loading={isLoading}
+              disabled={isLoading}
+              htmlType="submit"
+            >
+              Post
+            </Button>
+          </Form.Item>
+        </Form>
+      }
+    />
   );
 }
 

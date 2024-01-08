@@ -1,6 +1,7 @@
 import DataTickets from "@/components/Dashboards/DataTickets";
 import PlotAdminTickets from "@/components/Dashboards/PlotAdminTickets";
 import PlotAgeUsers from "@/components/Dashboards/PlotAgeUsers";
+import PlotVisitors from "@/components/Dashboards/PlotVisitors";
 import UserByGroup from "@/components/Dashboards/UserByGroupCard";
 import Layout from "@/components/Layout";
 import PageContainer from "@/components/PageContainer";
@@ -28,6 +29,7 @@ function DashboardAnalysis() {
         </Row>
         <PlotAgeUsers />
         <PlotAdminTickets />
+        <PlotVisitors />
       </PageContainer>
     </>
   );
