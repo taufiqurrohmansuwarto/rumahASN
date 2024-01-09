@@ -477,23 +477,28 @@ const postAngkaKredit = async (req, res) => {
       ...body,
       nomorSk: trim(body?.nomorSk?.toString()),
       pnsId: currentPns?.data?.data?.id,
-      kreditUtamaBaru: body?.kreditUtamaBaru?.toString(),
-      kreditPenunjangBaru: body?.kreditPenunjangBaru?.toString(),
-      kreditBaruTotal: body?.kreditBaruTotal?.toString(),
+      kreditUtamaBaru: toString(body?.kreditUtamaBaru),
+      kreditPenunjangBaru: toString(body?.kreditPenunjangBaru),
+      kreditBaruTotal: toString(body?.kreditBaruTotal),
     };
 
-    await request.post(`/angkakredit/save`, data);
+    const result = await request.post(`/angkakredit/save`, data);
 
-    await createLogSIASN({
-      userId: req?.user?.customId,
-      type: "CREATE",
-      employeeNumber: nip,
-      siasnService: "angkakredit",
-    });
+    if (result?.data?.code === 0) {
+      console.log(result?.data?.message);
+      res.status(500).json({ message: result?.data?.message });
+    } else {
+      await createLogSIASN({
+        userId: req?.user?.customId,
+        type: "CREATE",
+        employeeNumber: nip,
+        siasnService: "angkakredit",
+      });
 
-    res.json({
-      code: 200,
-    });
+      res.json({
+        code: 200,
+      });
+    }
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: "error" });
@@ -503,9 +508,40 @@ const postAngkaKredit = async (req, res) => {
 const hapusAkByNip = async (req, res) => {
   try {
     const { siasnRequest: request } = req;
+    const { id, nip } = req?.query;
+
+    const result = await request.delete(`/angkakredit/delete/${id}`);
+
+    await createLogSIASN({
+      userId: req?.user?.customId,
+      type: "DELETE",
+      employeeNumber: nip,
+      siasnService: "angkakredit",
+    });
+
+    res.json({
+      code: 200,
+      message: "success",
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "error" });
+  }
+};
+
+const hapusAk = async (req, res) => {
+  try {
+    const { siasnRequest: request } = req;
     const { id } = req?.query;
 
     const result = await request.delete(`/angkakredit/delete/${id}`);
+
+    await createLogSIASN({
+      userId: req?.user?.customId,
+      type: "DELETE",
+      employeeNumber: req?.user?.employee_number,
+      siasnService: "angkakredit",
+    });
 
     res.json({
       code: 200,
@@ -524,24 +560,6 @@ const postAngkaKreditByNip = async (req, res) => {
     const body = req?.body;
 
     const currentPns = await request.get(`/pns/data-utama/${nip}`);
-
-    const dataBaru = {
-      pnsId: currentPns?.data?.data?.id,
-      nomorSk: "800/12/PAK/060/2017",
-      tanggalSk: "12-01-2017",
-      bulanMulaiPenailan: "7",
-      tahunMulaiPenailan: "2016",
-      bulanSelesaiPenailan: "12",
-      tahunSelesaiPenailan: "2016",
-      kreditUtamaBaru: "54.365",
-      kreditPenunjangBaru: "3.040",
-      kreditBaruTotal: "57.405",
-      rwJabatan: "",
-      namaJabatan: null,
-      isAngkaKreditPertama: "",
-      isIntegrasi: "",
-      isKonversi: "",
-    };
 
     const data = {
       ...body,
@@ -1096,4 +1114,5 @@ module.exports = {
   allPnsByNip,
   riwayatKeluargaByNip,
   hapusAkByNip,
+  hapusAk,
 };

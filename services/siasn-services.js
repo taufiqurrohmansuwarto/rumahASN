@@ -103,6 +103,10 @@ export const deleteAkByNip = ({ nip, id }) => {
     .then((res) => res.data);
 };
 
+export const deleteAk = (id) => {
+  return api.delete(`/pns/rw-angkakredit/${id}`).then((res) => res.data);
+};
+
 export const getRwAngkakreditByNip = (nip) => {
   return api.get(`/admin/${nip}/rw-angkakredit`).then((res) => res.data);
 };

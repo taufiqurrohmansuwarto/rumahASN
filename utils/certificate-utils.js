@@ -16,6 +16,8 @@ const { TemplateHandler, MimeType } = require("easy-template-x");
 
 const GOTENBERG_URL = process.env.GOTENBERG_URL;
 
+console.log(GOTENBERG_URL);
+
 const toPDF = pipe(
   gotenberg(""),
   convert,
@@ -64,6 +66,7 @@ module.exports.wordToPdf = async (url, user, nomerSertifikat) => {
     const pdf = await toPDF({
       "document.docx": doc,
     });
+    console.log(pdf);
 
     return pdf;
   } catch (error) {

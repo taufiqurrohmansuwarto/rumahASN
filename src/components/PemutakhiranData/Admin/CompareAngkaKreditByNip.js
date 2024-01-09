@@ -107,6 +107,7 @@ const FormAngkaKredit = ({ visible, onCancel, nip }) => {
         setLoading(false);
         onCancel();
         setFileList([]);
+        message.success("Berhasil menambahkan angka kredit");
       } else {
         await postRwAngkakreditByNip({
           data,
@@ -117,6 +118,7 @@ const FormAngkaKredit = ({ visible, onCancel, nip }) => {
         setLoading(false);
         onCancel();
         setFileList([]);
+        message.success("Berhasil menambahkan angka kredit");
       }
     } catch (error) {
       setLoading(false);

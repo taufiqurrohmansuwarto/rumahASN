@@ -727,6 +727,7 @@ const downloadCertificate = async (req, res) => {
         .first();
 
       const pdf = await wordToPdf(templateUrl, currentUser, numberCertificate);
+      console.log(pdf);
       const username = req?.user?.name;
       const title = currentWebinarSeries?.title;
 
@@ -742,11 +743,11 @@ const downloadCertificate = async (req, res) => {
       } else {
         let buffer = [];
 
-        pdf.on("data", (chunk) => {
+        pdf?.on("data", (chunk) => {
           buffer.push(chunk);
         });
 
-        pdf.on("end", async () => {
+        pdf?.on("end", async () => {
           try {
             const pdfData = Buffer.concat(buffer);
 
