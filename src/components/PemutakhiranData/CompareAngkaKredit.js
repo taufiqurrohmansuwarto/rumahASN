@@ -1,12 +1,14 @@
 import { rwAngkakreditMaster } from "@/services/master.services";
 import {
+  deleteAk,
   getRwAngkakredit,
   getTokenSIASNService,
   postRwAngkakredit,
 } from "@/services/siasn-services";
+import { API_URL } from "@/utils/client-utils";
 import { FileAddOutlined } from "@ant-design/icons";
 import { Stack } from "@mantine/core";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Button,
   Checkbox,
@@ -16,18 +18,18 @@ import {
   Input,
   InputNumber,
   Modal,
+  Popconfirm,
   Row,
-  Table,
-  Upload,
-  Card,
-  Typography,
   Skeleton,
+  Table,
+  Typography,
+  Upload,
+  message,
 } from "antd";
 import axios from "axios";
 import { useState } from "react";
-import FormRiwayatJabatan from "./FormRiwayatJabatan";
-import { API_URL } from "@/utils/client-utils";
 import AlertAngkaKredit from "./AlertAngkaKredit";
+import FormRiwayatJabatan from "./FormRiwayatJabatan";
 
 // const data = {
 //     bulanMulaiPenilaian: "string",
@@ -128,6 +130,7 @@ const FormAngkaKredit = ({ visible, onCancel, nip }) => {
         setLoading(false);
         onCancel();
         setFileList([]);
+        message.success("Berhasil menambahkan angka kredit");
       } else {
         await postRwAngkakredit({
           data,
@@ -137,10 +140,12 @@ const FormAngkaKredit = ({ visible, onCancel, nip }) => {
         setLoading(false);
         onCancel();
         setFileList([]);
+        message.success("Berhasil menambahkan angka kredit");
       }
     } catch (error) {
       setLoading(false);
       console.log(error);
+      message.error("Gagal menambahkan angka kredit");
     }
   };
 
@@ -248,6 +253,25 @@ function CompareAngkaKredit() {
     () => rwAngkakreditMaster()
   );
 
+  const queryClient = useQueryClient();
+
+  const { mutateAsync: hapus, isLoading: isLoadingHapus } = useMutation(
+    (id) => deleteAk(id),
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries("angka-kredit");
+        message.success("Berhasil menghapus data angka kredit");
+      },
+      onError: () => {
+        message.error("Gagal menghapus data angka kredit");
+      },
+    }
+  );
+
+  const handleHapus = async (row) => {
+    await hapus(row?.id);
+  };
+
   const [visible, setVisible] = useState(false);
 
   const handleVisible = () => setVisible(true);
@@ -308,6 +332,20 @@ function CompareAngkaKredit() {
     {
       title: "Nama Jabatan",
       dataIndex: "namaJabatan",
+    },
+    {
+      title: "Hapus",
+      key: "hapus",
+      render: (_, row) => {
+        return (
+          <Popconfirm
+            title="Apakah kamu ingin menghapus data riwayat angka kredit?"
+            onConfirm={async () => await handleHapus(row)}
+          >
+            <a>Hapus</a>
+          </Popconfirm>
+        );
+      },
     },
   ];
 
