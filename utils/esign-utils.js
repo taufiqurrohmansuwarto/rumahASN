@@ -23,17 +23,21 @@ module.exports.requestSealOtp = async ({ totp }) => {
 };
 
 module.exports.sealPdf = async ({ totp, file }) => {
-  return esignFetcher.post(`/api/v2/seal/pdf`, {
+  const data = {
     idSubscriber,
     totp,
-    signatureProperties: {
-      tampilan: "INVISIBLE",
-      location: "null",
-      contactInfo: "null",
-      reason: "null",
-    },
+    signatureProperties: [
+      {
+        tampilan: "INVISIBLE",
+        location: "null",
+        contactInfo: "null",
+        reason: "null",
+      },
+    ],
     file,
-  });
+  };
+
+  return esignFetcher.post(`/api/v2/seal/pdf`, data);
 };
 
 module.exports.checkStatusByEmail = async ({ email }) => {
