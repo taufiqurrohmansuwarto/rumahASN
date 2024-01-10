@@ -103,7 +103,7 @@ const FormSKP22 = ({ visible, onCancel, nip }) => {
           data: hasilAkhir,
         });
 
-        message.success("Berhasil menambahkan SKP 22");
+        message.success("Berhasil menambahkan SKP ");
         setFileList([]);
         onCancel();
         setLoading(false);
@@ -114,7 +114,7 @@ const FormSKP22 = ({ visible, onCancel, nip }) => {
           data,
         });
 
-        message.success("Berhasil menambahkan SKP 22");
+        message.success("Berhasil menambahkan SKP ");
         setFileList([]);
         onCancel();
         setLoading(false);
@@ -162,6 +162,12 @@ const FormSKP22 = ({ visible, onCancel, nip }) => {
             <Select.Option value="1">DIATAS EKSPETASI</Select.Option>
             <Select.Option value="2">SESUAI EKSPETASI</Select.Option>
             <Select.Option value="3">DIBAWAH EKSPETASI</Select.Option>
+          </Select>
+        </Form.Item>
+        <Form.Item name="tahun" label="Tahun Penilaian" required>
+          <Select>
+            <Select.Option value="2022">TAHUN PENILAIAN 2022</Select.Option>
+            <Select.Option value="2023">TAHUN PENILAIAN 2023</Select.Option>
           </Select>
         </Form.Item>
         <FormCariPNSKinerja
@@ -229,6 +235,11 @@ function CompareSKP22ByNip({ nip }) {
     {
       title: "Nama Penilai",
       dataIndex: "namaPenilai",
+    },
+    {
+      title: "NIP Penilai",
+      dataIndex: "nipNrpPenilai",
+      responsive: ["sm"],
     },
     {
       title: "Unor Penilai",
