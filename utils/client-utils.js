@@ -76,7 +76,7 @@ export const mysapkMenu = [
     path: "/angka-kredit",
   },
   {
-    title: "Riwayat Laporan Kinerja 22",
+    title: "Riwayat Laporan Kinerja",
     icon: IconCashBanknote,
     color: "yellow",
     path: "/laporan-kinerja",

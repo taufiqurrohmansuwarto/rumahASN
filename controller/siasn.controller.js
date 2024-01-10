@@ -6,7 +6,7 @@ const path = require("path");
 const moment = require("moment");
 const arrayToTree = require("array-to-tree");
 const { ssoFetcher, wso2Fetcher } = require("@/utils/siasn-fetcher");
-const { orderBy, sortBy, trim, toString } = require("lodash");
+const { orderBy, sortBy, trim, toString, toNumber } = require("lodash");
 const {
   riwayatPendidikan,
   riwayatGolonganPangkat,
@@ -347,7 +347,7 @@ const postSkp2022 = async (req, res) => {
         penilaiUnorNama: penilai?.unor_nm,
         pnsDinilaiOrang: currentPns?.id,
         statusPenilai: "ASN",
-        tahun: 2022,
+        tahun: toNumber(body?.tahun) || 2022,
       };
 
       await siasnRequest.post("/skp22/save", data);
@@ -408,7 +408,7 @@ const postSkp2022ByNip = async (req, res) => {
         penilaiUnorNama: penilai?.unor_nm,
         pnsDinilaiOrang: currentPns?.id,
         statusPenilai: "ASN",
-        tahun: 2022,
+        tahun: toNumber(body?.tahun) || 2022,
       };
 
       await siasnRequest.post("/skp22/save", data);
