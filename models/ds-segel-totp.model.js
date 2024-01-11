@@ -6,6 +6,8 @@ class DSSegelTOTP extends Model {
   static get tableName() {
     return "ds_segel_totp";
   }
+
+  static get relationMappings() {}
 }
 
 module.exports = DSSegelTOTP;

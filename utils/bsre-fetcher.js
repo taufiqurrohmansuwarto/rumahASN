@@ -86,3 +86,30 @@ export const createSignature = async ({ id, file, userId }) => {
     };
   }
 };
+
+export const createQrFromId = async (id) => {
+  try {
+    const qr = `${webinar_certificate_url}/${id}`;
+
+    const currentQrCode = await qrCode.toString(qr, {
+      errorCorrectionLevel: "H",
+      type: "image/png",
+      quality: 1,
+      margin: 1,
+      color: {
+        dark: "#000000",
+        light: "#ffffff",
+      },
+    });
+
+    const currentBuffer = Buffer.from(currentQrCode).toString("base64");
+
+    return currentBuffer;
+  } catch (error) {
+    console.log(error);
+    return {
+      success: false,
+      data: error?.response?.data,
+    };
+  }
+};

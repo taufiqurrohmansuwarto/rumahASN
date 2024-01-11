@@ -9,14 +9,13 @@ const {
   a4,
   landscape,
 } = require("gotenberg-js-client");
+const qrCode = require("qrcode");
 
 const { default: axios } = require("axios");
 
 const { TemplateHandler, MimeType } = require("easy-template-x");
 
 const GOTENBERG_URL = process.env.GOTENBERG_URL;
-
-console.log(GOTENBERG_URL);
 
 const toPDF = pipe(
   gotenberg(""),
@@ -46,10 +45,27 @@ const getParticipantEmployeeNumber = (user) => {
   }
 };
 
+const pdfToBuffer = (pdf) => {
+  return new Promise((resolve, reject) => {
+    const pdfBuffer = [];
+    pdf.on("data", (chunk) => pdfBuffer.push(chunk));
+
+    pdf.on("end", () => {
+      const pdfData = Buffer.concat(pdfBuffer);
+      resolve(pdfData);
+    });
+
+    pdf.on("error", (error) => {
+      reject(error);
+    });
+  });
+};
+
 //
 module.exports.wordToPdf = async (url, user, nomerSertifikat) => {
   try {
     const response = await axios.get(url, { responseType: "arraybuffer" });
+
     const buffer = Buffer.from(response.data, "utf-8");
     const handler = new TemplateHandler();
 
@@ -66,9 +82,11 @@ module.exports.wordToPdf = async (url, user, nomerSertifikat) => {
     const pdf = await toPDF({
       "document.docx": doc,
     });
-    console.log(pdf);
 
-    return pdf;
+    const pdfBuffer = await pdfToBuffer(pdf);
+    const base64Pdf = pdfBuffer.toString("base64");
+
+    return base64Pdf;
   } catch (error) {
     console.log(error);
   }

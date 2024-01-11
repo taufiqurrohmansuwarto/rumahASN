@@ -17,9 +17,10 @@ const { uploadFileMinio, typeGroup } = require("@/utils/index");
 
 const { wordToPdf } = require("@/utils/certificate-utils");
 
-const { toLower } = require("lodash");
-const { createSignature } = require("@/utils/bsre-fetcher");
+const { toLower, template } = require("lodash");
+const { createSignature, createQrFromId } = require("@/utils/bsre-fetcher");
 const { parseMarkdown } = require("@/utils/parsing");
+const { sealPdf } = require("@/utils/esign-utils");
 
 const URL_FILE = "https://siasn.bkd.jatimprov.go.id:9000/public";
 
@@ -726,62 +727,21 @@ const downloadCertificate = async (req, res) => {
         .where("custom_id", customId)
         .first();
 
+      const qrCode = await createQrFromId(id);
       const pdf = await wordToPdf(templateUrl, currentUser, numberCertificate);
-      console.log(pdf);
-      const username = req?.user?.name;
-      const title = currentWebinarSeries?.title;
+      // const username = req?.user?.name;
+      const totpSeal = req?.totpSeal;
 
-      const pdfTitle = `${username}-${title}.pdf`;
+      const data = {
+        totp: totpSeal,
+        file: [pdf],
+        image: qrCode,
+      };
 
-      if (!currentWebinarSeries?.use_esign) {
-        res.setHeader(
-          `Content-Disposition`,
-          `attachment; filename=${pdfTitle}`
-        );
-        res.setHeader(`Content-Type`, `application/pdf`);
-        pdf.pipe(res);
-      } else {
-        let buffer = [];
+      const sealDocument = await sealPdf(data);
 
-        pdf?.on("data", (chunk) => {
-          buffer.push(chunk);
-        });
-
-        pdf?.on("end", async () => {
-          try {
-            const pdfData = Buffer.concat(buffer);
-
-            const data = {
-              id,
-              file: pdfData,
-              userId: customId,
-            };
-
-            const result = await createSignature(data);
-
-            if (!result?.success) {
-              res.status(400).json({ code: 400, message: result?.data?.error });
-            } else {
-              const base64File = result?.data?.base64_signed_file;
-
-              const buffer = Buffer.from(base64File, "base64");
-
-              res.setHeader(
-                "Content-Disposition",
-                `attachment; filename=${pdfTitle}`
-              );
-
-              res.setHeader("Content-Type", "application/pdf");
-              res.send(buffer);
-            }
-          } catch (error) {
-            console.log(error);
-            res
-              .status(400)
-              .json({ code: 400, message: "Internal Server Error" });
-          }
-        });
-      }
+      // base64 to file pdf using pipe
+      res.json(sealDocument?.data);
     }
   } catch (error) {
     console.log(error);
