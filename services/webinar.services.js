@@ -108,11 +108,7 @@ export const webinarUserDetail = async (id) => {
 };
 
 export const downloadCurrentUserCertificate = async (id) => {
-  return api
-    .get(`/users/${id}/download`, {
-      responseType: "arraybuffer",
-    })
-    .then((res) => res?.data);
+  return api.get(`/users/${id}/download`).then((res) => res?.data);
 };
 
 export const createRating = ({ id, data }) => {

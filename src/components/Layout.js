@@ -182,6 +182,16 @@ const changeRoutes = (user) => {
               ],
             },
             {
+              path: "/apps-managements/esign",
+              name: "E-Sign",
+              routes: [
+                {
+                  path: "/apps-managements/esign/seal",
+                  name: "Segel Elektronik",
+                },
+              ],
+            },
+            {
               path: "/apps-managements/netralitas-asn",
               name: "Netralitas ASN",
             },

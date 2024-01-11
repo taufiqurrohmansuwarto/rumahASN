@@ -22,16 +22,22 @@ module.exports.requestSealOtp = async ({ totp }) => {
   });
 };
 
-module.exports.sealPdf = async ({ totp, file }) => {
+module.exports.sealPdf = async ({ totp, file, image }) => {
   const data = {
     idSubscriber,
     totp,
     signatureProperties: [
       {
-        tampilan: "INVISIBLE",
+        imageBase64: image,
+        tampilan: "visible",
+        page: 1,
+        originX: 0.0,
+        originY: 0.0,
+        width: 150.0,
+        height: 50.0,
         location: "null",
-        contactInfo: "null",
         reason: "null",
+        contactInfo: "null",
       },
     ],
     file,
