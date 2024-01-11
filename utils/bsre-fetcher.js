@@ -91,7 +91,7 @@ export const createQrFromId = async (id) => {
   try {
     const qr = `${webinar_certificate_url}/${id}`;
 
-    const currentQrCode = await qrCode.toString(qr, {
+    const currentQrCode = await qrCode.toBuffer(qr, {
       errorCorrectionLevel: "H",
       type: "image/png",
       quality: 1,
@@ -107,9 +107,5 @@ export const createQrFromId = async (id) => {
     return currentBuffer;
   } catch (error) {
     console.log(error);
-    return {
-      success: false,
-      data: error?.response?.data,
-    };
   }
 };

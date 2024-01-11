@@ -729,7 +729,7 @@ const downloadCertificate = async (req, res) => {
 
       const qrCode = await createQrFromId(id);
       const pdf = await wordToPdf(templateUrl, currentUser, numberCertificate);
-      // const username = req?.user?.name;
+
       const totpSeal = req?.totpSeal;
 
       const data = {

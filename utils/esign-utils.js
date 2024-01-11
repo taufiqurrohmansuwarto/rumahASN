@@ -23,21 +23,34 @@ module.exports.requestSealOtp = async ({ totp }) => {
 };
 
 module.exports.sealPdf = async ({ totp, file, image }) => {
+  // sertifikat webinar menggunakan kertas a4 dengan ukuran 210 x 297 mm ganti ke pixel
+  const panjangKertas = 595;
+  const lebarKertas = 842;
+
+  const panjangQr = 50;
+  const lebarQr = 50;
+
+  const KURANG = 2;
+
+  // letakkan qr code di pojok kanan bawah, originX dan originY ketika 0 berarti pojok kiri atas
+  const originX = lebarKertas - lebarQr - KURANG;
+  const originY = panjangKertas - panjangQr - KURANG;
+
   const data = {
     idSubscriber,
     totp,
     signatureProperties: [
       {
         imageBase64: image,
-        tampilan: "visible",
+        tampilan: "VISIBLE",
         page: 1,
-        originX: 0.0,
-        originY: 0.0,
-        width: 150.0,
+        originX,
+        originY,
+        width: 50.0,
         height: 50.0,
-        location: "null",
-        reason: "null",
-        contactInfo: "null",
+        location: "Surabaya",
+        reason: "Sertifikat dibuat di aplikasi Rumah ASN BKD Jatim",
+        contactInfo: "bkd@jatimprov.go.id",
       },
     ],
     file,
