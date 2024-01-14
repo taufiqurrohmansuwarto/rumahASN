@@ -51,48 +51,50 @@ const UploadFileTemplate = ({ data, type = "image", title = "test" }) => {
       },
       onError: (error) => {
         console.error(error);
-        message.error("Gagal mengunggah image, silahkan coba lagi nanti");
+        message.error(
+          "Gagal mengunggah template sertifikat, silahkan coba lagi nanti"
+        );
       },
     }
   );
 
   useEffect(() => {}, [data]);
 
-  const handleBeforeUpload = (file) => {
-    const wordFileType =
-      file?.type ===
-      "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+  const handleCheckPdfUpload = (file) => {
+    const pdfFileType = file.type === "application/pdf";
 
-    if (!wordFileType) {
-      message.error("You can only upload image file!");
+    if (!pdfFileType) {
+      message.error("File harus berupa pdf!");
     }
     const isLt20M = file.size / 1024 / 1024 < 20;
+
     if (!isLt20M) {
-      message.error("Image must smaller than 20MB!");
+      message.error("File harus kurang dari 20MB!");
     }
 
-    return isAudio && isLt20M;
+    return pdfFileType && isLt20M;
   };
 
   const handleUpload = (info) => {
     const id = data?.id;
     const formData = new FormData();
-    formData.append("file", info.file);
-    formData.append("type", "word");
+    const file = info.file?.originFileObj;
+    formData.append("file", file);
+    formData.append("type", "pdf");
     uploadAudio({ id, data: formData });
   };
 
   return (
     <Space>
       <Upload
-        beforeUpload={handleBeforeUpload}
+        beforeUpload={handleCheckPdfUpload}
         multiple={false}
         maxCount={1}
         showUploadList={{
           showRemoveIcon: false,
         }}
         // accept word only
-        accept=".docx"
+        accept=".pdf"
         onChange={handleUpload}
         fileList={fileListAudio}
       >
@@ -152,7 +154,8 @@ const UploadFileImage = ({ data, type = "image", title = "test" }) => {
     console.log(info?.file);
     const id = data?.id;
     const formData = new FormData();
-    formData.append("file", info.file?.originFileObj);
+    const file = info.file?.originFileObj;
+    formData.append("file", file);
     formData.append("type", type);
     uploadAudio({ id, data: formData });
   };

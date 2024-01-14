@@ -9,11 +9,15 @@ const {
   a4,
   landscape,
 } = require("gotenberg-js-client");
+
+const { PDFDocument, TextAlignment } = require("pdf-lib");
+
 const qrCode = require("qrcode");
 
 const { default: axios } = require("axios");
 
 const { TemplateHandler, MimeType } = require("easy-template-x");
+const { round } = require("lodash");
 
 const GOTENBERG_URL = process.env.GOTENBERG_URL;
 
@@ -61,33 +65,71 @@ const pdfToBuffer = (pdf) => {
   });
 };
 
-//
-module.exports.wordToPdf = async (url, user, nomerSertifikat) => {
+const dynamicFontSize = (form, fieldName, fieldValue) => {
+  const field = form.getTextField(fieldName);
+
+  field.setText(fieldValue);
+  field.setAlignment(TextAlignment.Center);
+  field.enableMultiline();
+  field.setFontSize(10);
+  field.enableReadOnly();
+};
+
+module.exports.generateWebinarCertificate = async ({
+  url,
+  user,
+  certificateNumber,
+}) => {
   try {
-    const response = await axios.get(url, { responseType: "arraybuffer" });
+    const pdfBytes = await axios.get(url, { responseType: "arraybuffer" });
+    const pdfDoc = await PDFDocument.load(pdfBytes.data);
 
-    const buffer = Buffer.from(response.data, "utf-8");
-    const handler = new TemplateHandler();
+    // get height and width not minus
+    const { width, height } = pdfDoc.getPages()[0].getSize();
 
-    const data = {
-      nama: getParticipantName(user),
-      employee_number: getParticipantEmployeeNumber(user),
-      jabatan: user?.info?.jabatan?.jabatan,
-      instansi: user?.info?.perangkat_daerah?.detail,
-      nomer_sertifikat: nomerSertifikat,
+    const form = pdfDoc.getForm();
+
+    const nama = getParticipantName(user);
+    const employee_number = getParticipantEmployeeNumber(user);
+    const jabatan = user?.info?.jabatan?.jabatan;
+    const instansi = user?.info?.perangkat_daerah?.detail;
+    const nomer_sertifikat = certificateNumber;
+
+    const certificateData = {
+      nama,
+      employee_number,
+      jabatan,
+      instansi,
+      nomer_sertifikat,
     };
 
-    const doc = await handler.process(buffer, data, MimeType.docx);
+    // iterate form
+    const fields = form.getFields();
 
-    const pdf = await toPDF({
-      "document.docx": doc,
-    });
+    for (const field of fields) {
+      const fieldName = field.getName();
 
-    const pdfBuffer = await pdfToBuffer(pdf);
-    const base64Pdf = pdfBuffer.toString("base64");
+      dynamicFontSize(form, fieldName, certificateData[fieldName]);
+    }
 
-    return base64Pdf;
+    const pdfBytesWithText = await pdfDoc.save();
+    const pdfBase64 = Buffer.from(pdfBytesWithText).toString("base64");
+    const data = {
+      file: pdfBase64,
+      // normalize minus value and 1 decimal using lodash
+      width: round(width, 0),
+      height: round(height, 0),
+    };
+
+    return {
+      success: true,
+      data,
+    };
   } catch (error) {
     console.log(error);
+    return {
+      success: false,
+      data: error,
+    };
   }
 };

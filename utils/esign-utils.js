@@ -22,15 +22,15 @@ module.exports.requestSealOtp = async ({ totp }) => {
   });
 };
 
-module.exports.sealPdf = async ({ totp, file, image }) => {
+module.exports.sealPdf = async ({ totp, file, image, height, width }) => {
   // sertifikat webinar menggunakan kertas a4 dengan ukuran 210 x 297 mm ganti ke pixel
-  const panjangKertas = 595;
-  const lebarKertas = 842;
+  const panjangKertas = height;
+  const lebarKertas = width;
 
   const panjangQr = 50;
   const lebarQr = 50;
 
-  const KURANG = 2;
+  const KURANG = 7;
 
   // letakkan qr code di pojok kanan bawah, originX dan originY ketika 0 berarti pojok kiri atas
   const originX = lebarKertas - lebarQr - KURANG;
@@ -44,8 +44,8 @@ module.exports.sealPdf = async ({ totp, file, image }) => {
         imageBase64: image,
         tampilan: "VISIBLE",
         page: 1,
-        originX,
-        originY,
+        originX: 0,
+        originY: 0,
         width: 50.0,
         height: 50.0,
         location: "Surabaya",
@@ -53,10 +53,25 @@ module.exports.sealPdf = async ({ totp, file, image }) => {
         contactInfo: "bkd@jatimprov.go.id",
       },
     ],
-    file,
+    file: [file],
   };
 
-  return esignFetcher.post(`/api/v2/seal/pdf`, data);
+  return new Promise((resolve, reject) => {
+    esignFetcher
+      .post(`/api/v2/seal/pdf`, data)
+      .then((response) => {
+        resolve({
+          success: true,
+          data: response?.data,
+        });
+      })
+      .catch((error) => {
+        resolve({
+          success: false,
+          data: error,
+        });
+      });
+  });
 };
 
 module.exports.checkStatusByEmail = async ({ email }) => {

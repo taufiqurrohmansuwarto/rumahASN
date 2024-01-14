@@ -33,8 +33,10 @@ function MyWebinarDetail() {
     onSuccess: (data) => {
       message.success("Berhasil mengunduh sertifikat");
     },
-    onError: () => {
-      message.error("Gagal mengunduh sertifikat, silahkan lihat log");
+    onError: (error) => {
+      message.error(
+        error?.response?.data?.message || "Gagal mengunduh sertifikat"
+      );
     },
   });
 
