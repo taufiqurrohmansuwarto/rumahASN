@@ -2,6 +2,7 @@ const WebinarSeries = require("@/models/webinar-series.model");
 const WebinarSeriesParticipates = require("@/models/webinar-series-participates.model");
 const WebinarSeriesSurveys = require("@/models/webinar-series-surveys.model");
 const WebinarSeriesComments = require("@/models/webinar-series-comments.model");
+const { nanoid } = require("nanoid");
 
 const Users = require("@/models/users.model");
 
@@ -15,7 +16,10 @@ const AbsenceParticipant = require("@/models/webinar-series-participants-absence
 const User = require("@/models/users.model");
 const { uploadFileMinio, typeGroup } = require("@/utils/index");
 
-const { wordToPdf } = require("@/utils/certificate-utils");
+const {
+  wordToPdf,
+  generateWebinarCertificate,
+} = require("@/utils/certificate-utils");
 
 const { toLower, template } = require("lodash");
 const { createSignature, createQrFromId } = require("@/utils/bsre-fetcher");
@@ -635,11 +639,13 @@ const uploadTemplateAndImage = async (req, res) => {
     const { buffer, originalname, size, mimetype } = req?.file;
     const wordType = req?.body?.type === "word";
     const imageType = req?.body?.type === "image";
+    const pdfType = req?.body?.type === "pdf";
 
     const wordMimeType =
       mimetype ===
       "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
     const imageMimeType = mimetype === "image/jpeg" || mimetype === "image/png";
+    const pdfMimeType = mimetype === "application/pdf";
 
     if (imageMimeType && imageType) {
       const fileType = mimetype === "image/jpeg" ? "jpg" : "png";
@@ -665,6 +671,27 @@ const uploadTemplateAndImage = async (req, res) => {
       res.json(data);
     } else if (wordMimeType && wordType) {
       const currentFilename = `template-${req?.query?.id}.docx`;
+      await uploadFileMinio(req.mc, buffer, currentFilename, size, mimetype);
+      const result = `${URL_FILE}/${currentFilename}`;
+
+      await WebinarSeries.query()
+        .patch({
+          certificate_template: result,
+        })
+        .where("id", req?.query?.id);
+
+      const data = [
+        {
+          uid: req?.query?.id,
+          name: currentFilename,
+          status: "done",
+          url: result,
+        },
+      ];
+
+      res.json(data);
+    } else if (pdfMimeType && pdfType) {
+      const currentFilename = `template-${req?.query?.id}_${nanoid(6)}.pdf`;
       await uploadFileMinio(req.mc, buffer, currentFilename, size, mimetype);
       const result = `${URL_FILE}/${currentFilename}`;
 
@@ -727,24 +754,36 @@ const downloadCertificate = async (req, res) => {
         .where("custom_id", customId)
         .first();
 
+      const userSertificate = await generateWebinarCertificate({
+        url: templateUrl,
+        user: currentUser,
+        certificateNumber: numberCertificate,
+      });
+
+      const dataCertificate = userSertificate?.data;
+
       const qrCode = await createQrFromId(id);
-      const pdf = await wordToPdf(templateUrl, currentUser, numberCertificate);
+      // const pdf = await wordToPdf(templateUrl, currentUser, numberCertificate);
 
       const totpSeal = req?.totpSeal;
 
       const data = {
         totp: totpSeal,
-        file: [pdf],
+        file: dataCertificate?.file,
+        height: dataCertificate?.height,
+        width: dataCertificate?.width,
         image: qrCode,
       };
 
       const sealDocument = await sealPdf(data);
 
-      // base64 to file pdf using pipe
-      res.json(sealDocument?.data);
+      if (sealDocument?.success) {
+        res.json(sealDocument?.data);
+      } else {
+        res.status(400).json({ code: 400, "Bsre Error": sealDocument?.data });
+      }
     }
   } catch (error) {
-    console.log(error);
     res.status(500).json({ message: "Internal server error" });
   }
 };

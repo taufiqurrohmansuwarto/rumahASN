@@ -13,4 +13,14 @@ const esignFetcher = axios.create({
   },
 });
 
+esignFetcher.interceptors.response.use(
+  (response) => {
+    return response;
+  },
+  (error) => {
+    const data = error?.response?.data;
+    return Promise.reject(data);
+  }
+);
+
 module.exports = esignFetcher;

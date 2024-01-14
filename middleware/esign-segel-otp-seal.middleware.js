@@ -10,9 +10,10 @@ module.exports = async (req, res, next) => {
 
     // check didatabase kalau tidak ada
     if (!result) {
-      res
-        .status(404)
-        .json({ message: "Kode tidak ditemukan segera hubungi admin" });
+      res.status(404).json({
+        message:
+          "TOTP belum digenerate, silahkan hubungi admin untuk melakukan generate TOTP",
+      });
     } else {
       const hasilSeal = await requestSealOtp({
         totp: result.totp,
@@ -20,9 +21,10 @@ module.exports = async (req, res, next) => {
 
       // dan kalau totp nya null / kadaluarsa & lain sebagainya
       if (!hasilSeal?.data?.totp) {
-        res
-          .status(404)
-          .json({ message: "Kode tidak ditemukan segera hubungi admin" });
+        res.status(404).json({
+          message:
+            "Tidak dapat melakukan generate sertifikat karena kode TOTP kadaluarsa, atau belum digenerate silahkan hubungi admin",
+        });
       } else {
         // kalau ada, maka return totp nya
         req.totpSeal = hasilSeal?.data?.totp;
