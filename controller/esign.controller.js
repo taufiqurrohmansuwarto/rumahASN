@@ -1,11 +1,38 @@
 const { getSealActivationOTP } = require("@/utils/esign-utils");
 const DSSegelTOTP = require("@/models/ds-segel-totp.model");
+const LogSealBsre = require("@/models/log-seal-bsre.model");
 
 // admin request totp confirmation
 const requestTotpConfirmation = async (req, res) => {
   try {
     const result = await getSealActivationOTP();
-    res.json(result?.data);
+    const { customId: userId } = req?.user;
+
+    if (result?.success) {
+      const dataSuccessLog = {
+        user_id: userId,
+        action: "REQUEST_TOTP",
+        status: "SUCCESS",
+        request_data: JSON.stringify({}),
+        response_data: JSON.stringify(result),
+        description: "Request TOTP Seal Activation",
+      };
+
+      await LogSealBsre.query().insert(dataSuccessLog);
+      res.json(result?.data);
+    } else {
+      const dataErrorLog = {
+        user_id: userId,
+        action: "REQUEST_TOTP",
+        status: "ERROR",
+        request_data: JSON.stringify({}),
+        response_data: JSON.stringify(result),
+        description: "Request TOTP Seal Activation",
+      };
+
+      await LogSealBsre.query().insert(dataErrorLog);
+      res.status(500).json({ code: 500, message: result?.data?.message });
+    }
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: "Internal server error" });

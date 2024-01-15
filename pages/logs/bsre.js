@@ -1,13 +1,14 @@
 import Layout from "@/components/Layout";
 import PageContainer from "@/components/PageContainer";
-import { logBsre } from "@/services/log.services";
+import { logBsreSeal } from "@/services/log.services";
 import { formatDateFull } from "@/utils/client-utils";
+import { Code } from "@mantine/core";
 import { useQuery } from "@tanstack/react-query";
-import { Breadcrumb, Card, Modal, Space, Table, Tag } from "antd";
+import { Breadcrumb, Card, Collapse, Modal, Space, Table, Tag } from "antd";
 import Head from "next/head";
 import Link from "next/link";
 import { useState } from "react";
-import { Code } from "@mantine/core";
+import ReactJson from "react-json-view";
 
 function LogBSRE() {
   const [query, setQuery] = useState({
@@ -16,13 +17,45 @@ function LogBSRE() {
   });
 
   const { data, isLoading, isFetching } = useQuery(
-    ["log-bsre", query],
-    () => logBsre(query),
+    ["log-bsre-seal", query],
+    () => logBsreSeal(query),
     {
       keepPreviousData: true,
       enabled: !!query,
     }
   );
+
+  const showModalInformation = (item) => {
+    Modal.info({
+      title: "Detail Log Seal BSrE",
+      centered: true,
+      width: 800,
+      content: (
+        <Collapse>
+          <Collapse.Panel header="Request Data" key="1">
+            <div
+              style={{
+                maxHeight: 400,
+                overflow: "auto",
+              }}
+            >
+              <ReactJson src={JSON.parse(item?.request_data)} />
+            </div>
+          </Collapse.Panel>
+          <Collapse.Panel header="Response Data" key="2">
+            <div
+              style={{
+                maxHeight: 400,
+                overflow: "auto",
+              }}
+            >
+              <ReactJson src={JSON.parse(item?.response_data)} />
+            </div>
+          </Collapse.Panel>
+        </Collapse>
+      ),
+    });
+  };
 
   const showModal = (item) => {
     Modal.info({
@@ -55,11 +88,8 @@ function LogBSRE() {
       ),
     },
     {
-      title: "Nama Webinar",
-      key: "nama_webinar",
-      render: (item) => (
-        <span>{item?.webinar_series_participates?.webinar_series?.title}</span>
-      ),
+      title: "Aksi",
+      dataIndex: "action",
     },
     {
       title: "Status",
@@ -72,7 +102,7 @@ function LogBSRE() {
                 cursor: "pointer",
               }}
               onClick={() => showModal(item)}
-              color={item?.status === "success" ? "green" : "red"}
+              color={item?.status === "SUCCESS" ? "green" : "red"}
             >
               {item?.status}
             </Tag>
@@ -84,6 +114,13 @@ function LogBSRE() {
       title: "Waktu",
       key: "waktu",
       render: (item) => <span>{formatDateFull(item?.created_at)}</span>,
+    },
+    {
+      title: "Aksi",
+      key: "aksi",
+      render: (item) => (
+        <a onClick={() => showModalInformation(item)}>detail</a>
+      ),
     },
   ];
 

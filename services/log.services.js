@@ -18,7 +18,13 @@ export const logBsre = (query) => {
     skipEmptyString: true,
   });
 
-  console.log(query);
-
   return api.get(`/bsre?${queryStr}`).then((res) => res?.data);
+};
+
+export const logBsreSeal = (query) => {
+  const queryStr = queryString.stringify(query, {
+    skipEmptyString: true,
+  });
+
+  return api.get(`/bsre-seal?${queryStr}`).then((res) => res?.data);
 };

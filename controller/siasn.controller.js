@@ -726,13 +726,15 @@ const postRiwayatJabatanByNip = async (req, res) => {
 
     // cekId
     const dataUtama = await request.get(`/pns/data-utama/${nip}`);
+    console.log(dataUtama?.data);
+
     const id = dataUtama?.data?.data?.id;
     const data = {
       ...body,
       pnsId: id,
     };
 
-    await request.post(`/jabatan/save`, data);
+    const result = await request.post(`/jabatan/save`, data);
 
     // create log
     await createLogSIASN({
