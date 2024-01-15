@@ -9,16 +9,55 @@ const esignFetcher = require("./esign-fetcher");
 
 // seal
 module.exports.getSealActivationOTP = async () => {
-  return esignFetcher.post(`/api/v2/seal/get/activation`, {
-    idSubscriber,
+  return new Promise((resolve, reject) => {
+    esignFetcher
+      .post(`/api/v2/seal/get/activation`, {
+        idSubscriber,
+      })
+      .then((response) => {
+        resolve({
+          success: true,
+          data: response?.data,
+        });
+      })
+      .catch((error) => {
+        resolve({
+          success: false,
+          data: error,
+        });
+      });
   });
 };
 
 module.exports.requestSealOtp = async ({ totp }) => {
-  return esignFetcher.post(`/api/v2/seal/get/totp`, {
+  const data = {
     idSubscriber,
     totp,
     data: 1,
+  };
+
+  return new Promise((resolve, reject) => {
+    esignFetcher
+      .post(`/api/v2/seal/get/totp`, data)
+      .then((response) => {
+        if (!response?.data?.result) {
+          resolve({
+            success: false,
+            data: response?.data,
+          });
+        } else {
+          resolve({
+            success: true,
+            data: response?.data,
+          });
+        }
+      })
+      .catch((error) => {
+        resolve({
+          success: false,
+          data: error,
+        });
+      });
   });
 };
 

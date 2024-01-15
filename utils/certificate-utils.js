@@ -89,11 +89,11 @@ module.exports.generateWebinarCertificate = async ({
 
     const form = pdfDoc.getForm();
 
-    const nama = getParticipantName(user);
-    const employee_number = getParticipantEmployeeNumber(user);
-    const jabatan = user?.info?.jabatan?.jabatan;
-    const instansi = user?.info?.perangkat_daerah?.detail;
-    const nomer_sertifikat = certificateNumber;
+    const nama = getParticipantName(user) || "";
+    const employee_number = getParticipantEmployeeNumber(user) || "";
+    const jabatan = user?.info?.jabatan?.jabatan || "";
+    const instansi = user?.info?.perangkat_daerah?.detail || "";
+    const nomer_sertifikat = certificateNumber || "";
 
     const certificateData = {
       nama,

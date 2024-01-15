@@ -2,6 +2,9 @@ const WebinarSeries = require("@/models/webinar-series.model");
 const WebinarSeriesParticipates = require("@/models/webinar-series-participates.model");
 const WebinarSeriesSurveys = require("@/models/webinar-series-surveys.model");
 const WebinarSeriesComments = require("@/models/webinar-series-comments.model");
+
+const LogSealBsre = require("@/models/log-seal-bsre.model");
+
 const { nanoid } = require("nanoid");
 
 const Users = require("@/models/users.model");
@@ -691,7 +694,7 @@ const uploadTemplateAndImage = async (req, res) => {
 
       res.json(data);
     } else if (pdfMimeType && pdfType) {
-      const currentFilename = `template-${req?.query?.id}_${nanoid(6)}.pdf`;
+      const currentFilename = `template-${req?.query?.id}.pdf`;
       await uploadFileMinio(req.mc, buffer, currentFilename, size, mimetype);
       const result = `${URL_FILE}/${currentFilename}`;
 
@@ -754,16 +757,17 @@ const downloadCertificate = async (req, res) => {
         .where("custom_id", customId)
         .first();
 
-      const userSertificate = await generateWebinarCertificate({
+      const certificate = {
         url: templateUrl,
         user: currentUser,
         certificateNumber: numberCertificate,
-      });
+      };
+
+      const userSertificate = await generateWebinarCertificate(certificate);
 
       const dataCertificate = userSertificate?.data;
 
       const qrCode = await createQrFromId(id);
-      // const pdf = await wordToPdf(templateUrl, currentUser, numberCertificate);
 
       const totpSeal = req?.totpSeal;
 
@@ -778,9 +782,33 @@ const downloadCertificate = async (req, res) => {
       const sealDocument = await sealPdf(data);
 
       if (sealDocument?.success) {
+        const successLog = {
+          user_id: customId,
+          action: "SEAL_CERTIFICATE",
+          status: "SUCCESS",
+          request_data: JSON.stringify(data),
+          response_data: JSON.stringify(sealDocument),
+          description: "Seal Certificate",
+        };
+
+        await LogSealBsre.query().insert(successLog);
+
         res.json(sealDocument?.data);
       } else {
-        res.status(400).json({ code: 400, "Bsre Error": sealDocument?.data });
+        const errorLog = {
+          user_id: customId,
+          action: "SEAL_CERTIFICATE",
+          status: "ERROR",
+          request_data: JSON.stringify(data),
+          response_data: JSON.stringify(sealDocument),
+          description: "Seal Certificate",
+        };
+
+        await LogSealBsre.query().insert(errorLog);
+
+        res
+          .status(400)
+          .json({ code: 400, message: sealDocument?.data?.message });
       }
     }
   } catch (error) {
