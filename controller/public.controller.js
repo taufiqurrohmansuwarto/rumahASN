@@ -1,10 +1,22 @@
 const Ticket = require("@/models/tickets.model");
 const { chunk } = require("lodash");
 const { raw } = require("objection");
+const WebinarSeries = require("@/models/webinar-series.model");
+const CoachingClinic = require("@/models/cc_meetings.model");
 
 const publicDashboard = async (req, res) => {
   try {
     // todo ini digunakan untuk melakukan query dashboard berdasarkan BIDANG yang dapat dilihat bu kaban
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ code: 500, message: "Internal Server Error" });
+  }
+};
+
+const events = async (req, res) => {
+  try {
+    // get webinar events : properti [status, type, title, action, id]
+    // get coaching clinic
   } catch (error) {
     console.log(error);
     res.status(500).json({ code: 500, message: "Internal Server Error" });
@@ -46,4 +58,5 @@ const landingPageData = async (req, res) => {
 module.exports = {
   publicDashboard,
   landingPageData,
+  events,
 };
