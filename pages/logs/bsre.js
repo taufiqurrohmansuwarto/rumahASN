@@ -1,5 +1,6 @@
 import Layout from "@/components/Layout";
 import PageContainer from "@/components/PageContainer";
+import ReactJson from "@/components/ReactJson";
 import { logBsreSeal } from "@/services/log.services";
 import { formatDateFull } from "@/utils/client-utils";
 import { Code } from "@mantine/core";
@@ -8,7 +9,6 @@ import { Breadcrumb, Card, Collapse, Modal, Space, Table, Tag } from "antd";
 import Head from "next/head";
 import Link from "next/link";
 import { useState } from "react";
-import ReactJson from "react-json-view";
 
 function LogBSRE() {
   const [query, setQuery] = useState({
