@@ -1,4 +1,4 @@
-const { getSealActivationOTP } = require("@/utils/esign-utils");
+const { getSealActivationOTP, verifyPdf } = require("@/utils/esign-utils");
 const DSSegelTOTP = require("@/models/ds-segel-totp.model");
 const LogSealBsre = require("@/models/log-seal-bsre.model");
 
@@ -74,4 +74,20 @@ module.exports = {
   requestTotpConfirmation,
   saveTotpConfirmation,
   getLastTotpConfirmation,
+};
+
+const verifyPdfController = async (req, res) => {
+  try {
+    const { file } = req?.body;
+    const result = await verifyPdf({ file });
+
+    if (result?.success) {
+      res.json({ success: true, data: result?.data });
+    } else {
+      res.status(500).json({ success: false, data: result?.data });
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Internal server error" });
+  }
 };

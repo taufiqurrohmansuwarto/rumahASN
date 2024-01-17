@@ -1,0 +1,24 @@
+import { Button, Upload } from "antd";
+
+const pdfToBase64 = (file) => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = (error) => reject(error);
+  });
+};
+
+function VerifyPdf() {
+  const accept = ".pdf";
+
+  return (
+    <div>
+      <Upload accept={accept}>
+        <Button>Upload</Button>
+      </Upload>
+    </div>
+  );
+}
+
+export default VerifyPdf;
