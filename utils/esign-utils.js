@@ -3,6 +3,7 @@
  */
 const idSubscriber = process.env.ESIGN_ID_SUBSCRIBER;
 
+const { resolve } = require("styled-jsx/css");
 const esignFetcher = require("./esign-fetcher");
 
 // sign
@@ -121,8 +122,23 @@ module.exports.checkStatusByEmail = async ({ email }) => {
 
 // verify
 module.exports.verifyPdf = async ({ file }) => {
-  return esignFetcher.post("/api/v2/verify/pdf", {
-    file,
+  return new Promise((resolve, reject) => {
+    esignFetcher
+      .post(`/api/v2/verify/pdf`, {
+        file,
+      })
+      .then((response) => {
+        resolve({
+          success: true,
+          data: response?.data,
+        });
+      })
+      .catch((error) => {
+        resolve({
+          success: false,
+          data: error,
+        });
+      });
   });
 };
 
