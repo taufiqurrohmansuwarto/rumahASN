@@ -382,15 +382,15 @@ function CompareAngkaKredit() {
         <FormAngkaKredit visible={visible} onCancel={handleCancel} />
         <AlertAngkaKredit />
         <Table
-          title={() => (
-            <Button
-              onClick={handleVisible}
-              icon={<FileAddOutlined />}
-              type="primary"
-            >
-              Angka Kredit SIASN
-            </Button>
-          )}
+          // title={() => (
+          //   <Button
+          //     onClick={handleVisible}
+          //     icon={<FileAddOutlined />}
+          //     type="primary"
+          //   >
+          //     Angka Kredit SIASN
+          //   </Button>
+          // )}
           columns={columns}
           rowKey={(record) => record.id}
           pagination={false}

@@ -527,19 +527,19 @@ function CompareJabatan() {
       <Stack>
         <Table
           bordered
-          title={() => (
-            <>
-              {dataSIASN?.kedudukanPnsNama !== "PPPK Aktif" && (
-                <Button
-                  type="primary"
-                  onClick={handleOpen}
-                  icon={<PlusOutlined />}
-                >
-                  Jabatan SIASN
-                </Button>
-              )}
-            </>
-          )}
+          // title={() => (
+          //   <>
+          //     {dataSIASN?.kedudukanPnsNama !== "PPPK Aktif" && (
+          //       <Button
+          //         type="primary"
+          //         onClick={handleOpen}
+          //         icon={<PlusOutlined />}
+          //       >
+          //         Jabatan SIASN
+          //       </Button>
+          //     )}
+          //   </>
+          // )}
           columns={columns}
           dataSource={data}
           loading={isLoading || isLoadingSiasn}
