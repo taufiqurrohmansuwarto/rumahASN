@@ -10,7 +10,7 @@ function LogSIASNFilter() {
 
   const handleReset = () => {
     router.push({
-      pathname: "/apps-managements/logs/siasn",
+      pathname: "/logs/siasn",
     });
   };
 
@@ -31,7 +31,7 @@ function LogSIASNFilter() {
       );
 
       router.push({
-        pathname: "/apps-managements/logs/siasn",
+        pathname: "/logs/siasn",
         query: { ...router?.query, ...values },
       });
     }

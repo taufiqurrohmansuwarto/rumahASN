@@ -1,15 +1,48 @@
+import LogSIASNFilter from "@/components/Filter/LogSIASNFilter";
 import Layout from "@/components/Layout";
+import PageContainer from "@/components/PageContainer";
+import ReactJson from "@/components/ReactJson";
 import { logSIASN } from "@/services/log.services";
 import { useQuery } from "@tanstack/react-query";
-import { BackTop, Breadcrumb, Card, Input, Space, Table, Tag } from "antd";
-import { useState } from "react";
+import {
+  BackTop,
+  Breadcrumb,
+  Card,
+  Collapse,
+  Modal,
+  Space,
+  Table,
+  Tag,
+} from "antd";
+import { upperCase } from "lodash";
 import moment from "moment";
 import Head from "next/head";
-import PageContainer from "@/components/PageContainer";
 import Link from "next/link";
-import { upperCase } from "lodash";
 import { useRouter } from "next/router";
-import LogSIASNFilter from "@/components/Filter/LogSIASNFilter";
+
+const showModalInformation = (item) => {
+  Modal.info({
+    title: "Detail Log Seal BSrE",
+    centered: true,
+    width: 800,
+    content: (
+      <Collapse>
+        <Collapse.Panel header="Request Data" key="1">
+          <div
+            style={{
+              maxHeight: 400,
+              overflow: "auto",
+            }}
+          >
+            {item?.request_data && (
+              <ReactJson src={JSON.parse(item?.request_data)} />
+            )}
+          </div>
+        </Collapse.Panel>
+      </Collapse>
+    ),
+  });
+};
 
 function LogSIASN() {
   const router = useRouter();
@@ -29,18 +62,9 @@ function LogSIASN() {
     router.push(`/apps-managements/integrasi/siasn/${nip}`);
   };
 
-  const handleSearch = (e) => {
-    router.push({
-      pathname: "/apps-managements/logs/siasn",
-      query: {
-        nip: e?.target?.value,
-      },
-    });
-  };
-
   const handleChangePage = (page, limit) => {
     router.push({
-      pathname: "/apps-managements/logs/siasn",
+      pathname: "/logs/siasn",
       query: {
         ...query,
         page,
@@ -77,10 +101,31 @@ function LogSIASN() {
       ),
     },
     {
+      title: "Role",
+      key: "role",
+      render: (text) => (
+        <div>
+          {text?.user?.role} from {text?.user?.from}
+        </div>
+      ),
+    },
+    {
+      title: "Current Role",
+      key: "current_role",
+      render: (text) => <div>{text?.user?.current_role}</div>,
+    },
+    {
       title: "Aksi",
       key: "aksi",
       render: (text) => (
         <a onClick={() => gotoDetail(text?.employee_number)}>Detail</a>
+      ),
+    },
+    {
+      title: "Show Data",
+      key: "show_data",
+      render: (_, record) => (
+        <a onClick={() => showModalInformation(record)}>show data</a>
       ),
     },
   ];

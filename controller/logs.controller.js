@@ -54,7 +54,7 @@ const indexLogSiasn = async (req, res) => {
         }
       })
       .page(parseInt(page) - 1, parseInt(limit))
-      .withGraphFetched("user(simpleSelect)")
+      .withGraphFetched("user(fullSelect)")
       .orderBy("created_at", "desc");
 
     const data = {

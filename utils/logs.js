@@ -6,6 +6,7 @@ module.exports.createLogSIASN = async ({
   type,
   siasnService,
   employeeNumber,
+  request_data = "",
 }) => {
   try {
     const result = await LogSIASN.query().insert({
@@ -13,6 +14,7 @@ module.exports.createLogSIASN = async ({
       type,
       siasn_service: siasnService,
       employee_number: employeeNumber,
+      request_data,
     });
     return result;
   } catch (error) {
