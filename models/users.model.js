@@ -23,7 +23,6 @@ class User extends Model {
           "group",
           "current_role",
           "info"
-          // "employee_number"
         );
       },
       fullSelect(query) {
@@ -33,6 +32,8 @@ class User extends Model {
           "image",
           "is_online",
           "group",
+          "from",
+          "role",
           "current_role",
           "info",
           "employee_number"

@@ -81,6 +81,7 @@ const updateEmployeeInformation = async (req, res) => {
       type: "UPDATE",
       employeeNumber: nip,
       siasnService: "data-utama",
+      request_data: JSON.stringify(payload),
     });
 
     await updateDataUtama(siasnRequest, payload);
@@ -581,6 +582,7 @@ const postAngkaKreditByNip = async (req, res) => {
         type: "CREATE",
         employeeNumber: nip,
         siasnService: "angkakredit",
+        request_data: JSON.stringify(data),
       });
 
       res.json({
@@ -742,6 +744,7 @@ const postRiwayatJabatanByNip = async (req, res) => {
       type: "CREATE",
       employeeNumber: nip,
       siasnService: "jabatan",
+      request_data: JSON.stringify(data),
     });
 
     res.json({ success: true });
