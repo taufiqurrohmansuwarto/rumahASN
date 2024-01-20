@@ -61,3 +61,7 @@ export const rwAnakByNip = (nip) => {
 export const rwPasanganByNip = (nip) => {
   return api.get(`/admin/${nip}/rw-pasangan`).then((res) => res.data);
 };
+
+export const rwPindahByNip = (nip) => {
+  return api.get(`/admin/${nip}/rw-pindah`).then((res) => res.data);
+};

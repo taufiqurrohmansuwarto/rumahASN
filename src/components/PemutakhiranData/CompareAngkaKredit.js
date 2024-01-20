@@ -333,20 +333,20 @@ function CompareAngkaKredit() {
       title: "Nama Jabatan",
       dataIndex: "namaJabatan",
     },
-    {
-      title: "Hapus",
-      key: "hapus",
-      render: (_, row) => {
-        return (
-          <Popconfirm
-            title="Apakah kamu ingin menghapus data riwayat angka kredit?"
-            onConfirm={async () => await handleHapus(row)}
-          >
-            <a>Hapus</a>
-          </Popconfirm>
-        );
-      },
-    },
+    // {
+    //   title: "Hapus",
+    //   key: "hapus",
+    //   render: (_, row) => {
+    //     return (
+    //       <Popconfirm
+    //         title="Apakah kamu ingin menghapus data riwayat angka kredit?"
+    //         onConfirm={async () => await handleHapus(row)}
+    //       >
+    //         <a>Hapus</a>
+    //       </Popconfirm>
+    //     );
+    //   },
+    // },
   ];
 
   const columnsMaster = [

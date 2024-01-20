@@ -48,7 +48,6 @@ function SiasnTab({ nip }) {
       <Tabs.TabPane tab="Keluarga" key="rw-keluarga">
         <CompareKeluargaByNip nip={nip} />
       </Tabs.TabPane>
-
       <Tabs.TabPane tab="Masa Kerja" key="8">
         <CompareMasaKerjaByNip nip={nip} />
       </Tabs.TabPane>
