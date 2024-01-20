@@ -1,7 +1,7 @@
 import Line from "@/components/Plots/Line";
 import { useQuery } from "@tanstack/react-query";
 import { Card, Col, Row } from "antd";
-import { remove, trim } from "lodash";
+import { trim } from "lodash";
 import {
   adminDashboard,
   ticketStatisticsScore,

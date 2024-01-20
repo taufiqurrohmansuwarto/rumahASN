@@ -425,6 +425,7 @@ const postSkp2022ByNip = async (req, res) => {
         type: "CREATE",
         employeeNumber: nip,
         siasnService: "skp22",
+        request_data: JSON.stringify(data),
       });
 
       res.json({ code: 200 });
