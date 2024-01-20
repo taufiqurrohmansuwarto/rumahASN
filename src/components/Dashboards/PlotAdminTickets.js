@@ -1,11 +1,11 @@
+import Line from "@/components/Plots/Line";
 import { useQuery } from "@tanstack/react-query";
 import { Card, Col, Row } from "antd";
-import React from "react";
+import { remove, trim } from "lodash";
 import {
   adminDashboard,
   ticketStatisticsScore,
 } from "../../../services/admin.services";
-import Line from "@/components/Plots/Line";
 
 const serialize = (data) => {
   return data?.map((d) => {
@@ -19,6 +19,19 @@ const serialize = (data) => {
   });
 };
 
+const serializeVisitors = (data) => {
+  const removeSpacingWithRegex = (str) => {
+    return str.replace(/\s/g, "");
+  };
+  return data?.map((d) => {
+    return {
+      ...d,
+      total: parseInt(d.count, 10),
+      tanggal: removeSpacingWithRegex(trim(d.tanggal)),
+    };
+  });
+};
+
 function PlotAdminTickets() {
   const { data, isLoading } = useQuery(["dashboard-admin", "last7Days"], () =>
     adminDashboard("last7Days")
@@ -27,6 +40,14 @@ function PlotAdminTickets() {
   const { data: dataTicket, isLoading: loadingTicket } = useQuery(
     ["dashboard-admin", "ticketStatistics"],
     () => ticketStatisticsScore()
+  );
+
+  const { data: visitors, isLoading: loadingVisitors } = useQuery(
+    ["analysis-visitors"],
+    () => adminDashboard("visitors"),
+    {
+      refetchOnWindowFocus: false,
+    }
   );
 
   const configTotalTiket = {
@@ -76,6 +97,50 @@ function PlotAdminTickets() {
             <Card title="Total Tiket 12 Bulan Terakhir" loading={loadingTicket}>
               <Line {...configTotalTiket} />
             </Card>
+          )}
+        </Col>
+        <Col md={24}>
+          {visitors && (
+            <>
+              <Card
+                title="Total Pengunjung 30 Hari Terakhir"
+                loading={loadingVisitors}
+              >
+                <Line
+                  loading={loadingVisitors}
+                  data={serializeVisitors(visitors)}
+                  tooltip={{
+                    showMarkers: false,
+                  }}
+                  color={"#09d3ac"}
+                  interactions={
+                    loadingVisitors
+                      ? []
+                      : [
+                          {
+                            type: "marker-active",
+                          },
+                        ]
+                  }
+                  point={
+                    loadingVisitors
+                      ? {}
+                      : {
+                          size: 5,
+                          shape: "diamond",
+                          style: {
+                            fill: "white",
+                            stroke: "#5B8FF9",
+                            lineWidth: 2,
+                          },
+                        }
+                  }
+                  xField="tanggal"
+                  yField="total"
+                  padding="auto"
+                />
+              </Card>
+            </>
           )}
         </Col>
       </Row>

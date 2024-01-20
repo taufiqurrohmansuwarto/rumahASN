@@ -29,7 +29,6 @@ function DashboardAnalysis() {
         </Row>
         <PlotAgeUsers />
         <PlotAdminTickets />
-        <PlotVisitors />
       </PageContainer>
     </>
   );

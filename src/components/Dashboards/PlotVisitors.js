@@ -1,12 +1,17 @@
 import { adminDashboard } from "@/services/admin.services";
 import { useQuery } from "@tanstack/react-query";
+import { Card } from "antd";
 
 function PlotVisitors() {
-  const { data, isLoading } = useQuery(["analysis-visitors"], () =>
-    adminDashboard("visitors")
+  const { data, isLoading } = useQuery(
+    ["analysis-visitors"],
+    () => adminDashboard("visitors"),
+    {
+      refetchOnWindowFocus: false,
+    }
   );
 
-  return <div>{JSON.stringify(data)}</div>;
+  return <div>{data && <Card title="test"></Card>}</div>;
 }
 
 export default PlotVisitors;
