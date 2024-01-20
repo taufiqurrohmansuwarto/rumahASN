@@ -275,44 +275,18 @@ function Layout({ children, active, collapsed = true }) {
     <ProLayout
       theme="light"
       selectedKeys={[active ? active : router.pathname]}
-      bgLayoutImgList={[
-        {
-          src: "https://img.alicdn.com/imgextra/i2/O1CN01O4etvp1DvpFLKfuWq_!!6000000000279-2-tps-609-606.png",
-          left: 85,
-          bottom: 100,
-          height: "303px",
-        },
-        {
-          src: "https://img.alicdn.com/imgextra/i2/O1CN01O4etvp1DvpFLKfuWq_!!6000000000279-2-tps-609-606.png",
-          bottom: -68,
-          right: -45,
-          height: "303px",
-        },
-        {
-          src: "https://img.alicdn.com/imgextra/i3/O1CN018NxReL1shX85Yz6Cx_!!6000000005798-2-tps-884-496.png",
-          bottom: 0,
-          left: 0,
-          width: "331px",
-        },
-      ]}
       menuExtraRender={({ collapsed }) => {
         if (!collapsed) {
           return (
-            <div
-              style={{
-                padding: breakPoint.xs ? 16 : 0,
-              }}
+            <Button
+              onClick={handlePertanyan}
+              shape="round"
+              icon={<QuestionCircleFilled />}
+              block
+              type="primary"
             >
-              <Button
-                onClick={handlePertanyan}
-                shape="round"
-                icon={<QuestionCircleFilled />}
-                block
-                type="primary"
-              >
-                Tanya BKD
-              </Button>
-            </div>
+              Tanya BKD
+            </Button>
           );
         } else {
           return (
@@ -353,7 +327,7 @@ function Layout({ children, active, collapsed = true }) {
           >
             <Typography.Text
               style={{
-                fontSize: breakPoint.xs ? 13 : 14,
+                fontSize: breakPoint.xs ? 12 : 14,
               }}
               type="secondary"
             >
@@ -362,7 +336,7 @@ function Layout({ children, active, collapsed = true }) {
             <div>
               <Typography.Text
                 style={{
-                  fontSize: breakPoint.xs ? 13 : 14,
+                  fontSize: breakPoint.xs ? 12 : 14,
                 }}
                 type="secondary"
               >

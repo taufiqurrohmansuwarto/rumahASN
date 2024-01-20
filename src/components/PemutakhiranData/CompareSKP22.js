@@ -72,7 +72,6 @@ const FormSKP22 = ({ visible, onCancel, nip }) => {
     try {
       setLoading(true);
       const data = await form.validateFields();
-      console.log(data);
 
       const currentFile = fileList[0]?.originFileObj;
 
@@ -139,7 +138,9 @@ const FormSKP22 = ({ visible, onCancel, nip }) => {
         cancelText: "Tidak",
         onOk: async () => await handleFinish(),
       });
-    } catch (error) {}
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   return (

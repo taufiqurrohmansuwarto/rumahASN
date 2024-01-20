@@ -16,6 +16,8 @@ import {
   Card,
   Form,
   Space,
+  Row,
+  Col,
 } from "antd";
 import { useSession } from "next-auth/react";
 import Head from "next/head";
@@ -197,8 +199,8 @@ const CreateTicket = () => {
           </Breadcrumb>
         )}
       >
-        <Grid>
-          <Grid.Col md={8} xs={24}>
+        <Row gutter={[8, 16]}>
+          <Col md={16} xs={24}>
             <Bantuan open={open} onCancel={handleClose} />
             <Card
               title="Form Pertanyaan"
@@ -253,13 +255,13 @@ const CreateTicket = () => {
                 </Space>
               </Form>
             </Card>
-          </Grid.Col>
-          <Grid.Col md={4} xs={24}>
+          </Col>
+          <Col md={8} xs={24}>
             {recommendationsFaqs?.length > 0 && (
               <Faqs data={recommendationsFaqs} />
             )}
-          </Grid.Col>
-        </Grid>
+          </Col>
+        </Row>
       </PageContainer>
     </>
   );
