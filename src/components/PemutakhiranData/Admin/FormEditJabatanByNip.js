@@ -87,6 +87,7 @@ function FormEditJabatanByNip({ open, onClose, data }) {
       } = await form.validateFields();
 
       let jenis_jabatan_id = jenis_jabatan === "Fungsional" ? "2" : "4";
+
       const jfu = isObject(fungsional_umum_id)
         ? fungsional_umum_id?.value
         : fungsional_umum_id;

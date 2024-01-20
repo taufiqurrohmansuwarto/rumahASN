@@ -683,3 +683,116 @@ export const socmedActivities = (activity) => {
     trigger_user: trigger_user,
   };
 };
+
+export const getJenisJabatanId = (jenisJabatan) => {
+  if (jenisJabatan === "Fungsional") {
+    return "2";
+  } else if (jenisJabatan === "Struktural") {
+    return "1";
+  } else if (jenisJabatan === "Pelaksana") {
+    return "4";
+  }
+};
+
+export const checkKonversiIntegrasiPertama = (data) => {
+  if (data?.isAngkaKreditPertama === "1") {
+    return "Angka Kredit Pertama";
+  } else if (data?.isKonversi === "1") {
+    return "Konversi";
+  } else if (data?.isIntegrasi === "1") {
+    return "Integrasi";
+  }
+};
+
+export const daftarStruktural = [
+  {
+    id: "10",
+    nama: "I.a",
+    terendah_id: "44",
+    tertinggi_id: "45",
+    eselon_level_id: "0",
+    asn_jenjang_jabatan_id: "01",
+    jabatan_asn: "JABATAN PIMPINAN TINGGI UTAMA",
+    level_kompetensi_jabatan: "",
+  },
+  {
+    id: "11",
+    nama: "I.a",
+    terendah_id: "43",
+    tertinggi_id: "45",
+    eselon_level_id: "1",
+    asn_jenjang_jabatan_id: "02",
+    jabatan_asn: "JABATAN PIMPINAN TINGGI MADYA",
+    level_kompetensi_jabatan: "",
+  },
+  {
+    id: "12",
+    nama: "I.b",
+    terendah_id: "42",
+    tertinggi_id: "45",
+    eselon_level_id: "1",
+    asn_jenjang_jabatan_id: "02",
+    jabatan_asn: "JABATAN PIMPINAN TINGGI MADYA",
+    level_kompetensi_jabatan: "",
+  },
+  {
+    id: "21",
+    nama: "II.a",
+    terendah_id: "42",
+    tertinggi_id: "44",
+    eselon_level_id: "2",
+    asn_jenjang_jabatan_id: "03",
+    jabatan_asn: "JABATAN PIMPINAN TINGGI PRATAMA",
+    level_kompetensi_jabatan: "",
+  },
+  {
+    id: "22",
+    nama: "II.b",
+    terendah_id: "41",
+    tertinggi_id: "43",
+    eselon_level_id: "2",
+    asn_jenjang_jabatan_id: "03",
+    jabatan_asn: "JABATAN PIMPINAN TINGGI PRATAMA",
+    level_kompetensi_jabatan: "",
+  },
+  {
+    id: "31",
+    nama: "III.a",
+    terendah_id: "34",
+    tertinggi_id: "42",
+    eselon_level_id: "3",
+    asn_jenjang_jabatan_id: "04",
+    jabatan_asn: "JABATAN ADMINISTRATOR",
+    level_kompetensi_jabatan: "",
+  },
+  {
+    id: "32",
+    nama: "III.b",
+    terendah_id: "33",
+    tertinggi_id: "41",
+    eselon_level_id: "3",
+    asn_jenjang_jabatan_id: "04",
+    jabatan_asn: "JABATAN ADMINISTRATOR",
+    level_kompetensi_jabatan: "",
+  },
+  {
+    id: "41",
+    nama: "IV.a",
+    terendah_id: "32",
+    tertinggi_id: "34",
+    eselon_level_id: "4",
+    asn_jenjang_jabatan_id: "05",
+    jabatan_asn: "JABATAN PENGAWAS",
+    level_kompetensi_jabatan: "",
+  },
+  {
+    id: "42",
+    nama: "IV.b",
+    terendah_id: "31",
+    tertinggi_id: "33",
+    eselon_level_id: "4",
+    asn_jenjang_jabatan_id: "05",
+    jabatan_asn: "JABATAN PENGAWAS",
+    level_kompetensi_jabatan: "",
+  },
+];

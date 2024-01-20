@@ -5,7 +5,7 @@ import {
   getTokenSIASNService,
   postRwJabatanByNip,
 } from "@/services/siasn-services";
-import { API_URL } from "@/utils/client-utils";
+import { API_URL, getJenisJabatanId } from "@/utils/client-utils";
 import { FileAddOutlined, PlusOutlined } from "@ant-design/icons";
 import { Stack } from "@mantine/core";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -31,6 +31,7 @@ import FormJFU from "../FormJFU";
 import FormUnitOrganisasi from "../FormUnitOrganisasi";
 import { useSession } from "next-auth/react";
 import FormEditJabatanByNip from "./FormEditJabatanByNip";
+import FormStruktural from "../FormStruktural";
 
 const format = "DD-MM-YYYY";
 
@@ -68,9 +69,10 @@ const FormEntriKosong = ({ visible, onCancel, nip }) => {
         unor_id,
         nomor_sk,
         jenis_jabatan,
+        eselon_id,
       } = await form.validateFields();
 
-      let jenis_jabatan_id = jenis_jabatan === "Fungsional" ? "2" : "4";
+      let jenis_jabatan_id = getJenisJabatanId(jenis_jabatan);
 
       const data = {
         tmtJabatan: moment(tmt_jabatan).format("DD-MM-YYYY"),
@@ -78,10 +80,10 @@ const FormEntriKosong = ({ visible, onCancel, nip }) => {
         tmtPelantikan: moment(tmt_pelantikan).format("DD-MM-YYYY"),
         jabatanFungsionalId: fungsional_id ? fungsional_id : "-",
         jabatanFungsionalUmumId: fungsional_umum_id ? fungsional_umum_id : "-",
+        eselonId: eselon_id ? eselon_id : "-",
         unorId: unor_id,
         nomorSk: nomor_sk,
         jenisJabatan: jenis_jabatan_id,
-        eselonId: "",
         satuanKerjaId: "A5EB03E24213F6A0E040640A040252AD",
         instansiId: "A5EB03E23CCCF6A0E040640A040252AD",
       };
@@ -145,13 +147,27 @@ const FormEntriKosong = ({ visible, onCancel, nip }) => {
     }
   };
 
+  const handleConfirmModal = async () => {
+    try {
+      const result = await form.validateFields();
+      Modal.confirm({
+        centered: true,
+        title: "Apakah anda yakin?",
+        content: `Mohon pastikan semua data dan dokumen yang Anda masukkan selalu terkini dan akurat. Ketidaksesuaian informasi bisa berdampak pada proses layanan kepegawaian pegawai. Ingat, setiap entri data akan dicatat dan dipertanggungjawabkan melalui sistem log Rumah ASN.`,
+        okText: "Ya",
+        cancelText: "Tidak",
+        onOk: async () => await handleFinish(),
+      });
+    } catch (error) {}
+  };
+
   return (
     <Modal
       centered
       title="Entri Jabatan SIASN"
       width={800}
       open={visible}
-      onOk={handleFinish}
+      onOk={handleConfirmModal}
       onCancel={onCancel}
       confirmLoading={loading}
     >
@@ -176,11 +192,13 @@ const FormEntriKosong = ({ visible, onCancel, nip }) => {
               form.setFieldsValue({
                 fungsional_id: null,
                 fungsional_umum_id: null,
+                eselon_id: null,
               });
             }}
           >
             <Select.Option value="Pelaksana">Pelaksana</Select.Option>
             <Select.Option value="Fungsional">Fungsional</Select.Option>
+            <Select.Option value="Struktural">Struktural</Select.Option>
           </Select>
         </Form.Item>
         <Form.Item
@@ -194,6 +212,8 @@ const FormEntriKosong = ({ visible, onCancel, nip }) => {
               <FormJFT name="fungsional_id" />
             ) : getFieldValue("jenis_jabatan") === "Pelaksana" ? (
               <FormJFU name="fungsional_umum_id" />
+            ) : getFieldValue("jenis_jabatan") === "Struktural" ? (
+              <FormStruktural name="eselon_id" />
             ) : null
           }
         </Form.Item>
@@ -637,9 +657,10 @@ function CompareJabatanByNip({ nip }) {
         } else {
           return (
             <>
-              {lastData?.id === row?.id && (
-                <a onClick={() => handleOpenEdit(row)}>Edit</a>
-              )}
+              {lastData?.id === row?.id &&
+                checkJenisJabatan(row) !== "Struktural" && (
+                  <a onClick={() => handleOpenEdit(row)}>Edit</a>
+                )}
             </>
           );
         }
@@ -680,7 +701,9 @@ function CompareJabatanByNip({ nip }) {
       key: "aksi",
       render: (row) => (
         <>
-          <a onClick={() => handlePakai(row)}>Pakai</a>
+          {row?.jenis_jabatan !== "Struktural" && (
+            <a onClick={() => handlePakai(row)}>Pakai</a>
+          )}
         </>
       ),
     },

@@ -9,7 +9,7 @@ import { FileAddOutlined } from "@ant-design/icons";
 import { Stack } from "@mantine/core";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
-import { API_URL } from "@/utils/client-utils";
+import { API_URL, checkKonversiIntegrasiPertama } from "@/utils/client-utils";
 import {
   Button,
   Card,
@@ -127,6 +127,20 @@ const FormAngkaKredit = ({ visible, onCancel, nip }) => {
     }
   };
 
+  const handleConfirmModal = async () => {
+    try {
+      const result = await form.validateFields();
+      Modal.confirm({
+        centered: true,
+        title: "Apakah anda yakin?",
+        content: `Mohon pastikan semua data dan dokumen yang Anda masukkan selalu terkini dan akurat. Ketidaksesuaian informasi bisa berdampak pada proses layanan kepegawaian pegawai. Ingat, setiap entri data akan dicatat dan dipertanggungjawabkan melalui sistem log Rumah ASN.`,
+        okText: "Ya",
+        cancelText: "Tidak",
+        onOk: async () => await onFinish(),
+      });
+    } catch (error) {}
+  };
+
   return (
     <Modal
       confirmLoading={loading}
@@ -135,7 +149,7 @@ const FormAngkaKredit = ({ visible, onCancel, nip }) => {
       visible={visible}
       width={800}
       onCancel={onCancel}
-      onOk={onFinish}
+      onOk={handleConfirmModal}
     >
       <Form form={form} layout="vertical">
         <Upload
@@ -322,6 +336,17 @@ function CompareAngkaKreditByNip({ nip }) {
     {
       title: "Kredit Baru Total",
       dataIndex: "kreditBaruTotal",
+    },
+    {
+      title: "Jenis AK",
+      key: "jenis_ak",
+      render: (_, row) => {
+        return <>{checkKonversiIntegrasiPertama(row)}</>;
+      },
+    },
+    {
+      title: "Sumber",
+      dataIndex: "Sumber",
     },
     {
       title: "Nama Jabatan",
