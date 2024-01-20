@@ -161,11 +161,11 @@ const adminDashboard = async (req, res) => {
 
     if (type === "visitors") {
       const result =
-        await knex.raw(`SELECT TO_CHAR(created_at, 'DD-MM-YYYY') AS tanggal, COUNT(DISTINCT user_id)
+        await knex.raw(`SELECT TRIM(TO_CHAR(created_at, 'Day, DD-MM-YYYY')) AS tanggal, COUNT(DISTINCT user_id)
 FROM users_histories
 WHERE action = 'login'
   AND created_at >= CURRENT_DATE - INTERVAL '30 days'
-GROUP BY TO_CHAR(created_at, 'DD-MM-YYYY'), DATE(created_at)
+GROUP BY TRIM(TO_CHAR(created_at, 'Day, DD-MM-YYYY')), DATE(created_at)
 ORDER BY DATE(created_at);
 `);
 
