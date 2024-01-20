@@ -6,7 +6,7 @@ const path = require("path");
 const moment = require("moment");
 const arrayToTree = require("array-to-tree");
 const { ssoFetcher, wso2Fetcher } = require("@/utils/siasn-fetcher");
-const { orderBy, sortBy, trim, toString, toNumber } = require("lodash");
+const { orderBy, sortBy, trim, toString, toNumber, get } = require("lodash");
 const {
   riwayatPendidikan,
   riwayatGolonganPangkat,
@@ -195,23 +195,27 @@ const siasnEmployeeDetailPangkat = async (req, res) => {
     const siasnRequest = req.siasnRequest;
     const fetcher = req?.fetcher;
 
-    const { data: pangkat_siasn } = await riwayatGolonganPangkat(
-      siasnRequest,
-      nip
-    );
+    const results = await Promise.allSettled([
+      riwayatGolonganPangkat(siasnRequest, nip),
+      getRwPangkat(fetcher, nip),
+    ]);
 
-    const { data: pangkat_simaster } = await getRwPangkat(fetcher, nip);
+    const pangkat_simaster =
+      results[1].status === "fulfilled" ? results[1].value.data : [];
+    const pangkat_siasn =
+      results[0].status === "fulfilled" ? results[0].value.data : [];
 
-    res.json({
+    const data = {
       pangkat_siasn: orderBy(pangkat_siasn?.data, "golongan", "desc"),
       pangkat_simaster: orderBy(
         pangkat_simaster,
         (item) => item?.pangkat?.gol_ruang,
         "desc"
       ),
-    });
+    };
+
+    res.json(data);
   } catch (error) {
-    console.log(error);
     res.status(500).json({ code: 500, message: "Internal Server Error" });
   }
 };
