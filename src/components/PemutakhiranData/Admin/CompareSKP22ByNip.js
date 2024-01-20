@@ -142,7 +142,7 @@ const FormSKP22 = ({ visible, onCancel, nip }) => {
 
   return (
     <Modal
-      title="Tambah SKP 22 SIASN"
+      title="Tambah SKP SIASN"
       centered
       open={visible}
       confirmLoading={loading}

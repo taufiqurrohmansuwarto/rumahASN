@@ -43,6 +43,17 @@ module.exports.getRwKedudukanHukum = async (fetcher, nip) => {
   }
 };
 
+module.exports.getRwPindah = async (fetcher, nip) => {
+  try {
+    const result = await fetcher.get(
+      `/master-ws/operator/employees/${nip}/rw-pindah`
+    );
+    return result;
+  } catch (error) {
+    console.log(error);
+  }
+};
+
 module.exports.getRwPangkat = async (fetcher, nip) => {
   try {
     const result = await fetcher.get(
