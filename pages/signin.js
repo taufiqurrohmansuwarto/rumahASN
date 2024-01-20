@@ -35,8 +35,8 @@ const BAComponent = () => {
     <Image
       alt="Rumah ASN Brand Ambassador"
       src={"https://siasn.bkd.jatimprov.go.id:9000/public/signin_ba.png"}
-      width={420}
-      height={570}
+      width={500}
+      height={680}
     />
   );
 };
