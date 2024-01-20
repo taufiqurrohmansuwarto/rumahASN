@@ -76,7 +76,7 @@ const updateEmployeeInformation = async (req, res) => {
       ...req?.body,
     };
 
-    await createLogSIASN({
+    await SIASN({
       userId: req?.user?.customId,
       type: "UPDATE",
       employeeNumber: nip,
@@ -244,6 +244,7 @@ const getTreeRef = async (req, res) => {
       key: d?.Id,
       parentId: d?.DiatasanId,
       name: d?.NamaUnor,
+      titleJabatan: d?.NamaJabatan,
       value: d?.Id,
       label: d?.NamaUnor,
       title: d?.NamaUnor,
@@ -728,7 +729,6 @@ const postRiwayatJabatanByNip = async (req, res) => {
 
     // cekId
     const dataUtama = await request.get(`/pns/data-utama/${nip}`);
-    console.log(dataUtama?.data);
 
     const id = dataUtama?.data?.data?.id;
     const data = {
@@ -738,7 +738,6 @@ const postRiwayatJabatanByNip = async (req, res) => {
 
     const result = await request.post(`/jabatan/save`, data);
 
-    // create log
     await createLogSIASN({
       userId: req?.user?.customId,
       type: "CREATE",

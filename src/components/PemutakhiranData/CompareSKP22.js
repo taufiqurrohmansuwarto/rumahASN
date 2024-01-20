@@ -128,6 +128,20 @@ const FormSKP22 = ({ visible, onCancel, nip }) => {
     }
   };
 
+  const handleConfirmModal = async () => {
+    try {
+      const result = await form.validateFields();
+      Modal.confirm({
+        centered: true,
+        title: "Apakah anda yakin?",
+        content: `Mohon pastikan semua data dan dokumen yang Anda masukkan selalu terkini dan akurat. Ketidaksesuaian informasi bisa berdampak pada proses layanan kepegawaian pegawai. Ingat, setiap entri data akan dicatat dan dipertanggungjawabkan melalui sistem log Rumah ASN.`,
+        okText: "Ya",
+        cancelText: "Tidak",
+        onOk: async () => await handleFinish(),
+      });
+    } catch (error) {}
+  };
+
   return (
     <Modal
       title="Tambah SKP 22 SIASN"
@@ -135,7 +149,7 @@ const FormSKP22 = ({ visible, onCancel, nip }) => {
       open={visible}
       confirmLoading={loading}
       onCancel={onCancel}
-      onOk={handleFinish}
+      onOk={handleConfirmModal}
       width={1000}
     >
       <Upload
