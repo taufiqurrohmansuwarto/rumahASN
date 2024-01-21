@@ -70,12 +70,6 @@ const getLastTotpConfirmation = async (req, res) => {
   }
 };
 
-module.exports = {
-  requestTotpConfirmation,
-  saveTotpConfirmation,
-  getLastTotpConfirmation,
-};
-
 const verifyPdfController = async (req, res) => {
   try {
     const { file } = req?.body;
@@ -90,4 +84,11 @@ const verifyPdfController = async (req, res) => {
     console.log(error);
     res.status(500).json({ message: "Internal server error" });
   }
+};
+
+module.exports = {
+  requestTotpConfirmation,
+  saveTotpConfirmation,
+  getLastTotpConfirmation,
+  verifyPdfController,
 };
