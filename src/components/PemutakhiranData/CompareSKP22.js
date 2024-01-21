@@ -1,12 +1,13 @@
 import { rwSkpMaster } from "@/services/master.services";
-import { API_URL } from "@/utils/client-utils";
 import {
   getRwSkp22,
   getTokenSIASNService,
   postRwSkp22,
 } from "@/services/siasn-services";
-import { FileAddOutlined } from "@ant-design/icons";
-import { Stack, Text } from "@mantine/core";
+import { API_URL } from "@/utils/client-utils";
+import { FileAddOutlined, PlusOutlined } from "@ant-design/icons";
+import { Alert, Stack, Text } from "@mantine/core";
+import { IconAlertCircle } from "@tabler/icons";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Button,
@@ -20,7 +21,6 @@ import {
 } from "antd";
 import axios from "axios";
 import { useState } from "react";
-import AlertSKP22 from "./AlertSKP22";
 import FormCariPNSKinerja from "./FormCariPNSKinerja";
 
 // const data = {
@@ -145,7 +145,7 @@ const FormSKP22 = ({ visible, onCancel, nip }) => {
 
   return (
     <Modal
-      title="Tambah SKP 22 SIASN"
+      title="Tambah Kinerja SIASN"
       centered
       open={visible}
       confirmLoading={loading}
@@ -371,19 +371,23 @@ function CompareSKP22({ nip, id }) {
 
   return (
     <Skeleton loading={isLoading || isLoadingMaster}>
+      <Alert
+        color="yellow"
+        title="Harap diperhatikan"
+        icon={<IconAlertCircle />}
+        style={{ marginBottom: 16 }}
+      >
+        Gunakan data dukung dari SIMASTER yang sesuai untuk melakukan
+        pengentrian Kinerja SIASN. Jangan Lupa untuk mengupload file Kinerja
+      </Alert>
+
+      <Button onClick={handleVisible} type="primary" icon={<PlusOutlined />}>
+        Kinerja SIASN
+      </Button>
       <Stack>
         <FormSKP22 nip={nip} visible={visible} onCancel={handleCancel} />
-        <AlertSKP22 />
         <Table
-          title={() => (
-            <Button
-              onClick={handleVisible}
-              type="primary"
-              icon={<FileAddOutlined />}
-            >
-              SKP SIASN
-            </Button>
-          )}
+          title={() => <Text fw="bold">SIASN</Text>}
           pagination={false}
           columns={columns}
           loading={isLoading}
@@ -391,6 +395,7 @@ function CompareSKP22({ nip, id }) {
           dataSource={data}
         />
         <Table
+          title={() => <Text fw="bold">SIMASTER</Text>}
           pagination={false}
           columns={columnMaster}
           loading={isLoadingMaster}

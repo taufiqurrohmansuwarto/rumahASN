@@ -1,5 +1,6 @@
 import { rwAngkakreditMaster } from "@/services/master.services";
 import {
+  dataUtamaSIASN,
   deleteAk,
   getRwAngkakredit,
   getTokenSIASNService,
@@ -7,13 +8,14 @@ import {
 } from "@/services/siasn-services";
 import { API_URL } from "@/utils/client-utils";
 import { FileAddOutlined } from "@ant-design/icons";
-import { Stack } from "@mantine/core";
+import { Alert, Stack, Text } from "@mantine/core";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Button,
   Checkbox,
   Col,
   DatePicker,
+  Empty,
   Form,
   Input,
   InputNumber,
@@ -30,6 +32,7 @@ import axios from "axios";
 import { useState } from "react";
 import AlertAngkaKredit from "./AlertAngkaKredit";
 import FormRiwayatJabatan from "./FormRiwayatJabatan";
+import { IconAlertCircle } from "@tabler/icons";
 
 // const data = {
 //     bulanMulaiPenilaian: "string",
@@ -248,6 +251,12 @@ function CompareAngkaKredit() {
     getRwAngkakredit()
   );
 
+  const { data: dataUtama, isLoading: isLoadingDataUtama } = useQuery(
+    ["data-utama-siasn"],
+    () => dataUtamaSIASN(),
+    {}
+  );
+
   const { data: dataRwAngkakredit, isLoading: isLoadingAngkaKredit } = useQuery(
     ["angkat-kredit-master"],
     () => rwAngkakreditMaster()
@@ -377,35 +386,49 @@ function CompareAngkaKredit() {
   ];
 
   return (
-    <Skeleton loading={isLoading || isLoadingAngkaKredit}>
-      <Stack>
-        <FormAngkaKredit visible={visible} onCancel={handleCancel} />
-        <AlertAngkaKredit />
-        <Table
-          // title={() => (
-          //   <Button
-          //     onClick={handleVisible}
-          //     icon={<FileAddOutlined />}
-          //     type="primary"
-          //   >
-          //     Angka Kredit SIASN
-          //   </Button>
-          // )}
-          columns={columns}
-          rowKey={(record) => record.id}
-          pagination={false}
-          loading={isLoading}
-          dataSource={data}
-        />
-        <Table
-          title={() => <Typography.Text>Angka Kredit SIMASTER</Typography.Text>}
-          columns={columnsMaster}
-          rowKey={(record) => record.pak_id}
-          pagination={false}
-          loading={isLoadingAngkaKredit}
-          dataSource={dataRwAngkakredit}
-        />
-      </Stack>
+    <Skeleton loading={isLoading || isLoadingAngkaKredit || isLoadingDataUtama}>
+      {dataUtama?.jenisJabatanId !== "2" ||
+      dataUtama?.kedudukanPnsNama === "PPPK Aktif" ? (
+        <Empty description="Tidak ada isian Angka Kredit karena Jabatan Anda Bukan JFT" />
+      ) : (
+        <Stack>
+          <FormAngkaKredit visible={visible} onCancel={handleCancel} />
+          <Alert
+            color="red"
+            title="Harap diperhatikan"
+            icon={<IconAlertCircle />}
+          >
+            Layanan Penambahan Angka Kredit SIASN secara personal dihentikan
+            sementara, silahkan hubungi fasilitator kepegawaian anda untuk
+            melakukan penambahan Angka Kredit.
+          </Alert>
+          <Table
+            title={() => <Text fw="bold">SIASN</Text>}
+            // title={() => (
+            //   <Button
+            //     onClick={handleVisible}
+            //     icon={<FileAddOutlined />}
+            //     type="primary"
+            //   >
+            //     Angka Kredit SIASN
+            //   </Button>
+            // )}
+            columns={columns}
+            rowKey={(record) => record.id}
+            pagination={false}
+            loading={isLoading}
+            dataSource={data}
+          />
+          <Table
+            title={() => <Text fw="bold">SIMASTER</Text>}
+            columns={columnsMaster}
+            rowKey={(record) => record.pak_id}
+            pagination={false}
+            loading={isLoadingAngkaKredit}
+            dataSource={dataRwAngkakredit}
+          />
+        </Stack>
+      )}
     </Skeleton>
   );
 }
