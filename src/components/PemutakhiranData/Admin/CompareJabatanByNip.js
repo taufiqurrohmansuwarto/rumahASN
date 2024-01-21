@@ -7,7 +7,7 @@ import {
 } from "@/services/siasn-services";
 import { API_URL, getJenisJabatanId } from "@/utils/client-utils";
 import { FileAddOutlined, PlusOutlined } from "@ant-design/icons";
-import { Stack } from "@mantine/core";
+import { Alert, Stack, Text } from "@mantine/core";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Button,
@@ -32,6 +32,7 @@ import FormUnitOrganisasi from "../FormUnitOrganisasi";
 import { useSession } from "next-auth/react";
 import FormEditJabatanByNip from "./FormEditJabatanByNip";
 import FormStruktural from "../FormStruktural";
+import { IconAlertCircle } from "@tabler/icons";
 
 const format = "DD-MM-YYYY";
 
@@ -711,6 +712,28 @@ function CompareJabatanByNip({ nip }) {
 
   return (
     <Card title="Komparasi Jabatan">
+      {dataSiasn?.kedudukanPnsNama === "PPPK Aktif" && (
+        <Alert
+          color="red"
+          title="Harap diperhatikan"
+          icon={<IconAlertCircle />}
+          style={{
+            marginBottom: 16,
+          }}
+        >
+          Data Riwayat Jabatan PPPK tidak dapat diubah
+        </Alert>
+      )}
+      {dataSiasn?.kedudukanPnsNama === "PPPK Aktif" &&
+      dataUser?.user?.current_role !== "admin" ? null : (
+        <Button
+          type="primary"
+          onClick={handleOpenKosong}
+          icon={<PlusOutlined />}
+        >
+          Jabatan SIASN
+        </Button>
+      )}
       <Stack>
         <FormEditJabatanByNip
           open={visibleEdit}
@@ -728,21 +751,9 @@ function CompareJabatanByNip({ nip }) {
           onCancel={handleClose}
           visible={visible}
         />
+
         <Table
-          title={() => (
-            <>
-              {(dataSiasn?.kedudukanPnsNama !== "PPPK Aktif" ||
-                dataUser?.user?.current_role === "admin") && (
-                <Button
-                  type="primary"
-                  onClick={handleOpenKosong}
-                  icon={<PlusOutlined />}
-                >
-                  Jabatan SIASN
-                </Button>
-              )}
-            </>
-          )}
+          title={() => <Text fw="bold">SIASN</Text>}
           columns={columns}
           dataSource={data}
           loading={isLoading}
@@ -750,7 +761,7 @@ function CompareJabatanByNip({ nip }) {
           pagination={false}
         />
         <Table
-          title={() => `Jabatan Aplikasi SIMASTER`}
+          title={() => <Text fw="bold">SIMASTER</Text>}
           columns={columnsMaster}
           dataSource={dataMaster}
           loading={loadingMasterJabatan}

@@ -303,7 +303,7 @@ function CompareSKP22ByNip({ nip }) {
   ];
 
   return (
-    <Card title="Komparasi SKP 2022">
+    <Card title="Komparasi Kinerja">
       <Stack>
         <FormSKP22 visible={visible} onCancel={handleCancel} nip={nip} />
         <Table

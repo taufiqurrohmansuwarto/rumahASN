@@ -1,6 +1,6 @@
 import { dataPangkatByNip } from "@/services/siasn-services";
 import { findGolongan, findPangkat } from "@/utils/client-utils";
-import { Stack } from "@mantine/core";
+import { Stack, Text } from "@mantine/core";
 import { useQuery } from "@tanstack/react-query";
 import { Card, Table } from "antd";
 import { orderBy } from "lodash";
@@ -57,7 +57,7 @@ const PangkatSiasn = ({ data, isLoading }) => {
       <Table
         loading={isLoading}
         columns={columns}
-        title={() => <div>RIWAYAT PANGKAT SIASN</div>}
+        title={() => <Text fw="bold">SIASN</Text>}
         pagination={false}
         dataSource={orderBy(
           data,
@@ -121,7 +121,7 @@ const PangkatSimaster = ({ data, isLoading }) => {
     <>
       <Table
         loading={isLoading}
-        title={() => <span>RIWAYAT DATA PANGKAT SIMASTER</span>}
+        title={() => <Text fw="bold">SIMASTER</Text>}
         pagination={false}
         columns={columns}
         dataSource={data}
@@ -139,8 +139,8 @@ function ComparePangkatByNip({ nip }) {
   return (
     <Card title="Komparasi Pangkat">
       <Stack>
-        <PangkatSimaster isLoading={isLoading} data={data?.pangkat_simaster} />
         <PangkatSiasn isLoading={isLoading} data={data?.pangkat_siasn} />
+        <PangkatSimaster isLoading={isLoading} data={data?.pangkat_simaster} />
       </Stack>
     </Card>
   );

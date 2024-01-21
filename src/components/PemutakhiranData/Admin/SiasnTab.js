@@ -33,7 +33,7 @@ function SiasnTab({ nip }) {
       <Tabs.TabPane tab="Angka Kredit" key="3">
         <CompareAngkaKreditByNip nip={nip} />
       </Tabs.TabPane>
-      <Tabs.TabPane tab="SKP 2022" key="4">
+      <Tabs.TabPane tab="Kinerja" key="4">
         <CompareSKP22ByNip nip={nip} />
       </Tabs.TabPane>
       <Tabs.TabPane tab="Pendidikan" key="5">

@@ -56,7 +56,7 @@ const CompareDataPendidikanSIMASTER = ({ nip }) => {
   return (
     <>
       <Table
-        title={() => <b>PENDIDIKAN SIMASTER</b>}
+        title={() => <b>SIMASTER</b>}
         columns={columns}
         dataSource={data}
         loading={isLoading}
@@ -108,7 +108,7 @@ function ComparePendidikanByNip({ nip }) {
     <Card title="Komparasi Pendidikan">
       <Stack>
         <Table
-          title={() => <b>PENDIDIKAN SIASN</b>}
+          title={() => <b>SIASN</b>}
           pagination={false}
           columns={columns}
           dataSource={data}

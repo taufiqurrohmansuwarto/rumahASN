@@ -1,12 +1,13 @@
 import { rwAngkakreditMasterByNip } from "@/services/master.services";
 import {
+  dataUtamSIASNByNip,
   deleteAkByNip,
   getRwAngkakreditByNip,
   getTokenSIASNService,
   postRwAngkakreditByNip,
 } from "@/services/siasn-services";
 import { FileAddOutlined } from "@ant-design/icons";
-import { Stack } from "@mantine/core";
+import { Stack, Text } from "@mantine/core";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { API_URL, checkKonversiIntegrasiPertama } from "@/utils/client-utils";
@@ -16,6 +17,7 @@ import {
   Checkbox,
   Col,
   DatePicker,
+  Empty,
   Form,
   Input,
   InputNumber,
@@ -23,6 +25,7 @@ import {
   Popconfirm,
   Radio,
   Row,
+  Skeleton,
   Table,
   Typography,
   Upload,
@@ -251,6 +254,11 @@ function CompareAngkaKreditByNip({ nip }) {
     getRwAngkakreditByNip(nip)
   );
 
+  const { data: dataSiasn, isLoading: loadingDataSiasn } = useQuery(
+    ["data-utama-siasn", nip],
+    () => dataUtamSIASNByNip(nip)
+  );
+
   const { data: dataRwAngkakredit, isLoading: isLoadingAngkaKredit } = useQuery(
     ["angkat-kredit-master-by-nip", nip],
     () => rwAngkakreditMasterByNip(nip)
@@ -420,34 +428,48 @@ function CompareAngkaKreditByNip({ nip }) {
 
   return (
     <Card title="Komparasi Angka Kredit">
-      <FormAngkaKredit visible={visible} onCancel={handleCancel} nip={nip} />
-      <Button
-        icon={<FileAddOutlined />}
-        style={{
-          marginBottom: 10,
-        }}
-        type="primary"
-        onClick={handleVisible}
-      >
-        Angka Kredit
-      </Button>
-      <Stack>
-        <Table
-          columns={columns}
-          rowKey={(record) => record.id}
-          pagination={false}
-          loading={isLoading}
-          dataSource={data}
-        />
-        <Table
-          title={() => <Typography.Text>Angka Kredit SIMASTER</Typography.Text>}
-          columns={columnsMaster}
-          rowKey={(record) => record.pak_id}
-          pagination={false}
-          loading={isLoadingAngkaKredit}
-          dataSource={dataRwAngkakredit}
-        />
-      </Stack>
+      <Skeleton loading={loadingDataSiasn}>
+        {dataSiasn?.jenisJabatanId !== "2" ||
+        dataSiasn?.kedudukanPnsNama === "PPPK Aktif" ? (
+          <Empty description="Tidak dapat mengentri AK karena pegawai PPPK / Bukan JFT" />
+        ) : (
+          <>
+            <FormAngkaKredit
+              visible={visible}
+              onCancel={handleCancel}
+              nip={nip}
+            />
+            <Button
+              icon={<FileAddOutlined />}
+              style={{
+                marginBottom: 10,
+              }}
+              type="primary"
+              onClick={handleVisible}
+            >
+              Angka Kredit
+            </Button>
+            <Stack>
+              <Table
+                title={() => <Text fw="bold">SIASN</Text>}
+                columns={columns}
+                rowKey={(record) => record.id}
+                pagination={false}
+                loading={isLoading}
+                dataSource={data}
+              />
+              <Table
+                title={() => <Text fw="bold">SIMASTER</Text>}
+                columns={columnsMaster}
+                rowKey={(record) => record.pak_id}
+                pagination={false}
+                loading={isLoadingAngkaKredit}
+                dataSource={dataRwAngkakredit}
+              />
+            </Stack>
+          </>
+        )}
+      </Skeleton>
     </Card>
   );
 }

@@ -6,12 +6,12 @@ import {
   postRwJabatan,
 } from "@/services/siasn-services";
 import { API_URL } from "@/utils/client-utils";
-import { FileAddOutlined, PlusOutlined } from "@ant-design/icons";
-import { Stack, Text } from "@mantine/core";
+import { FileAddOutlined } from "@ant-design/icons";
+import { Alert, Stack, Text } from "@mantine/core";
+import { IconAlertCircle } from "@tabler/icons";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Button,
-  Card,
   Col,
   DatePicker,
   Form,
@@ -25,13 +25,13 @@ import {
 } from "antd";
 import axios from "axios";
 import moment from "moment";
+import { useSession } from "next-auth/react";
 import { useState } from "react";
 import AnomaliUser from "./AnomaliUser";
+import EditRiwayatJabatanSIASN from "./EditRiwayatJabatanSIASN";
 import FormJFT from "./FormJFT";
 import FormJFU from "./FormJFU";
 import FormUnitOrganisasi from "./FormUnitOrganisasi";
-import { useSession } from "next-auth/react";
-import EditRiwayatJabatanSIASN from "./EditRiwayatJabatanSIASN";
 
 const format = "DD-MM-YYYY";
 
@@ -416,30 +416,28 @@ function CompareJabatan() {
       key: "tanggalSk",
       responsive: ["sm"],
     },
-    {
-      title: "Aksi",
-      key: "edit",
-      render: (_, row) => {
-        // get the last index
-        // get the last data
-        const length = data?.length;
-        const lastData = data?.[0];
+    // {
+    //   title: "Aksi",
+    //   key: "edit",
+    //   render: (_, row) => {
+    //     const length = data?.length;
+    //     const lastData = data?.[0];
 
-        if (length <= 1) {
-          return null;
-        } else {
-          return (
-            <div>
-              {lastData?.id === row?.id && (
-                <>
-                  <a onClick={() => handleOpenEdit(lastData)}>Edit</a>
-                </>
-              )}
-            </div>
-          );
-        }
-      },
-    },
+    //     if (length <= 1) {
+    //       return null;
+    //     } else {
+    //       return (
+    //         <div>
+    //           {lastData?.id === row?.id && (
+    //             <>
+    //               <a onClick={() => handleOpenEdit(lastData)}>Edit</a>
+    //             </>
+    //           )}
+    //         </div>
+    //       );
+    //     }
+    //   },
+    // },
   ];
 
   const columnsMaster = [
@@ -525,8 +523,16 @@ function CompareJabatan() {
         <AnomaliUser />
       </div>
       <Stack>
+        <Alert
+          color="red"
+          title="Harap diperhatikan"
+          icon={<IconAlertCircle />}
+        >
+          Layanan Penambahan Jabatan SIASN secara personal dihentikan sementara,
+          silahkan hubungi fasilitator kepegawaian anda untuk melakukan
+          penambahan jabatan.
+        </Alert>
         <Table
-          bordered
           // title={() => (
           //   <>
           //     {dataSIASN?.kedudukanPnsNama !== "PPPK Aktif" && (
@@ -540,6 +546,7 @@ function CompareJabatan() {
           //     )}
           //   </>
           // )}
+          title={() => <Text fw="bold">SIASN</Text>}
           columns={columns}
           dataSource={data}
           loading={isLoading || isLoadingSiasn}
@@ -547,8 +554,7 @@ function CompareJabatan() {
           pagination={false}
         />
         <Table
-          bordered
-          title={() => <Text fw="bold">Jabatan SIMASTER</Text>}
+          title={() => <Text fw="bold">SIMASTER</Text>}
           columns={columnsMaster}
           dataSource={dataMaster}
           loading={loadingMasterJabatan}
