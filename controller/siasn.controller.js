@@ -5,8 +5,7 @@ const path = require("path");
 
 const moment = require("moment");
 const arrayToTree = require("array-to-tree");
-const { ssoFetcher, wso2Fetcher } = require("@/utils/siasn-fetcher");
-const { orderBy, sortBy, trim, toString, toNumber, get } = require("lodash");
+const { orderBy, trim, toString, toNumber } = require("lodash");
 const {
   riwayatPendidikan,
   riwayatGolonganPangkat,
@@ -22,12 +21,9 @@ const {
   riwayatPindahInstansi,
   riwayatPindahWilayahKerja,
   riwayatPnsUnor,
-  anak,
-  pasangan,
-  orangTua,
 } = require("@/utils/siasn-utils");
+
 const {
-  proxyDownloadFoto,
   proxyKeluargaDataOrtu,
   proxyKeluargaAnak,
   proxyKeluargaPasangan,

@@ -7,15 +7,26 @@ import {
   LoginOutlined,
   YoutubeOutlined,
 } from "@ant-design/icons";
-import { Center } from "@mantine/core";
+import { Center, Stack } from "@mantine/core";
 import { useSpring } from "@react-spring/web";
-import { BackTop, Button, Col, Divider, Grid, Row, Space, Tooltip } from "antd";
+import {
+  BackTop,
+  Button,
+  Col,
+  Divider,
+  Grid,
+  Row,
+  Space,
+  Tooltip,
+  Typography,
+} from "antd";
 import { getProviders, signIn } from "next-auth/react";
 import Head from "next/head";
 import Image from "next/image";
 import GoogleButton from "react-google-button";
 import { Button as MantineButton } from "@mantine/core";
 import { useRouter } from "next/router";
+import Link from "next/link";
 
 const BAComponent = () => {
   const [props, api] = useSpring(
@@ -130,6 +141,7 @@ const SignIn = ({ providers }) => {
             </Col>
           </Row>
           <Divider />
+
           <Center>
             <MantineButton
               variant="gradient"
@@ -196,8 +208,14 @@ const SignIn = ({ providers }) => {
               </Tooltip>
             </Space>
           </Row>
+          <Center>
+            <Link href="/public/verify-pdf">
+              <Typography.Link>Verifikasi PDF</Typography.Link>
+            </Link>
+          </Center>
         </Col>
       </Row>
+
       <Features title={title} description={description} />
       {/* <AppRating /> */}
       <UserRating />
