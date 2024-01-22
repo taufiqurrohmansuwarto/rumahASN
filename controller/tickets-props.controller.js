@@ -84,7 +84,7 @@ const detailPublishTickets = async (req, res) => {
   try {
     const { id } = req?.query;
 
-    const { id: userId, current_role: role } = req?.user;
+    const { customId: userId, current_role: role } = req?.user;
 
     const result = await Ticket.query()
       .where({ id })

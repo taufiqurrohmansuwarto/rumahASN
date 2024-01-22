@@ -8,7 +8,7 @@ const Tickets = () => {
       <Head>
         <title>Rumah ASN - Status Selesai</title>
       </Head>
-      <CustomersTickets status="SELESAI" title="Status Selesai" />;
+      <CustomersTickets status="SELESAI" title="Status Selesai" />
     </>
   );
 };
