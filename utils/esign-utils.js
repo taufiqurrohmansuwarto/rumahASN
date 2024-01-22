@@ -2,8 +2,6 @@
  * bsre esign untuk melakukan tanda tangan digital melalui versi 2.0
  */
 const idSubscriber = process.env.ESIGN_ID_SUBSCRIBER;
-
-const { resolve } = require("styled-jsx/css");
 const esignFetcher = require("./esign-fetcher");
 
 // sign
