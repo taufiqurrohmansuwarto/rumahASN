@@ -229,12 +229,27 @@ function VerifyPdf() {
           {pdfData && (
             <>
               <Alert
-                color="green"
-                title="Dokumen Valid"
+                color={
+                  pdfData?.data?.conclusion === "NO_SIGNATURE" ? "red" : "green"
+                }
+                title={
+                  pdfData?.data?.conclusion === "NO_SIGNATURE"
+                    ? "Tidak Ditemukan Tanda Tangan Digital"
+                    : "Ditemukan Tanda Tangan Digital"
+                }
                 icon={<IconAlertCircle />}
               >
                 <Space>
-                  Dokumen Ini memiliki Tanda Tangan Digital
+                  {pdfData?.data?.conclusion === "NO_SIGNATURE" ? (
+                    <span>
+                      Tidak ditemukan tanda tangan digital pada file PDF yang
+                      diunggah
+                    </span>
+                  ) : (
+                    <span>
+                      Ditemukan tanda tangan digital pada file PDF yang diunggah
+                    </span>
+                  )}
                   <Button onClick={toggleInformation} type="primary">
                     Tampilkan
                   </Button>
