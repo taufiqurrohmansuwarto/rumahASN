@@ -77,6 +77,7 @@ const indexLogBsreSeal = async (req, res) => {
     const limit = req?.query?.limit || 25;
 
     const result = await LogSealBsre.query()
+      .select("id", "user_id", "action", "status", "created_at")
       .page(parseInt(page) - 1, parseInt(limit))
       .withGraphFetched("user(simpleSelect)")
       .orderBy("created_at", "desc");
@@ -93,8 +94,24 @@ const indexLogBsreSeal = async (req, res) => {
   }
 };
 
+const dataLogSealById = async (req, res) => {
+  try {
+    const { id } = req?.query;
+    const result = await LogSealBsre.query()
+      .select("request_data", "response_data")
+      .where("id", id)
+      .first();
+
+    res.json(result);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
 module.exports = {
   indexLogSiasn,
   indexLogBsreSeal,
   indexLogBsre,
+  dataLogSealById,
 };
