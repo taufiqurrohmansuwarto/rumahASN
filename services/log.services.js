@@ -28,3 +28,7 @@ export const logBsreSeal = (query) => {
 
   return api.get(`/bsre-seal?${queryStr}`).then((res) => res?.data);
 };
+
+export const dataSealById = (id) => {
+  return api.get(`/bsre-seal/${id}/data`).then((res) => res?.data);
+};
