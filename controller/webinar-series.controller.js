@@ -114,6 +114,16 @@ const listParticipants = async (req, res) => {
     const search = req.query.search || "";
 
     const result = await WebinarSeriesParticipates.query()
+      .select(
+        "id",
+        "webinar_series_id",
+        "user_id",
+        "already_poll",
+        "is_registered",
+        "created_at",
+        "updated_at",
+        "is_generate_certificate"
+      )
       .where("webinar_series_id", id)
       .page(parseInt(page) - 1, parseInt(limit))
       .withGraphFetched("[participant(fullSelect)]")
@@ -327,6 +337,16 @@ const allWebinars = async (req, res) => {
     result.results.forEach((item) => {
       promises.push(
         WebinarSeriesParticipates.query()
+          .select(
+            "id",
+            "webinar_series_id",
+            "user_id",
+            "already_poll",
+            "is_registered",
+            "created_at",
+            "updated_at",
+            "is_generate_certificate"
+          )
           .where("user_id", currentUser)
           .andWhere("webinar_series_id", item.id)
           .first()
@@ -377,6 +397,16 @@ const detailAllWebinar = async (req, res) => {
       .first();
 
     const isUserRegistered = await WebinarSeriesParticipates.query()
+      .select(
+        "id",
+        "webinar_series_id",
+        "user_id",
+        "already_poll",
+        "is_registered",
+        "created_at",
+        "updated_at",
+        "is_generate_certificate"
+      )
       .where("user_id", req?.user?.customId)
       .andWhere("webinar_series_id", id)
       .first();
@@ -405,7 +435,16 @@ const listUser = async (req, res) => {
     const page = req.query.page || 1;
     const search = req.query.search || "";
 
-    let query = WebinarSeriesParticipates.query();
+    let query = WebinarSeriesParticipates.query().select(
+      "id",
+      "webinar_series_id",
+      "user_id",
+      "already_poll",
+      "is_registered",
+      "created_at",
+      "updated_at",
+      "is_generate_certificate"
+    );
 
     if (!search) {
       query = query
@@ -443,6 +482,16 @@ const detailWebinarUser = async (req, res) => {
     const { customId } = req.user;
 
     const result = await WebinarSeriesParticipates.query()
+      .select(
+        "id",
+        "webinar_series_id",
+        "user_id",
+        "already_poll",
+        "is_registered",
+        "created_at",
+        "updated_at",
+        "is_generate_certificate"
+      )
       .where("id", id)
       .andWhere("user_id", customId)
       .withGraphFetched("[webinar_series]")
@@ -510,6 +559,16 @@ const unregisterUserWebinar = async (req, res) => {
     const { id } = req.query;
 
     const currentParticipates = await WebinarSeriesParticipates.query()
+      .select(
+        "id",
+        "webinar_series_id",
+        "user_id",
+        "already_poll",
+        "is_registered",
+        "created_at",
+        "updated_at",
+        "is_generate_certificate"
+      )
       .where("id", id)
       .andWhere("user_id", customId)
       .first();
@@ -729,6 +788,16 @@ const downloadCertificate = async (req, res) => {
     const { customId } = req?.user;
 
     const result = await WebinarSeriesParticipates.query()
+      .select(
+        "id",
+        "webinar_series_id",
+        "user_id",
+        "already_poll",
+        "is_registered",
+        "created_at",
+        "updated_at",
+        "is_generate_certificate"
+      )
       .where("id", id)
       .andWhere("user_id", customId)
       .first();
@@ -820,7 +889,18 @@ const checkCertificate = async (req, res) => {
   try {
     const { id } = req?.query;
 
-    const result = await WebinarSeriesParticipates.query().findById(id);
+    const result = await WebinarSeriesParticipates.query()
+      .findById(id)
+      .select(
+        "id",
+        "webinar_series_id",
+        "user_id",
+        "already_poll",
+        "is_registered",
+        "created_at",
+        "updated_at",
+        "is_generate_certificate"
+      );
 
     res.json(result);
   } catch (error) {
