@@ -1,11 +1,19 @@
 import Layout from "@/components/Layout";
 import PageContainer from "@/components/PageContainer";
 import ReactJson from "@/components/ReactJson";
-import { logBsreSeal } from "@/services/log.services";
+import { dataSealById, logBsreSeal } from "@/services/log.services";
 import { formatDateFull } from "@/utils/client-utils";
-import { Code } from "@mantine/core";
 import { useQuery } from "@tanstack/react-query";
-import { Breadcrumb, Card, Collapse, Modal, Space, Table, Tag } from "antd";
+import {
+  Breadcrumb,
+  Card,
+  Collapse,
+  Modal,
+  Skeleton,
+  Space,
+  Table,
+  Tag,
+} from "antd";
 import Head from "next/head";
 import Link from "next/link";
 import { useState } from "react";
@@ -15,6 +23,16 @@ function LogBSRE() {
     page: 1,
     limit: 10,
   });
+
+  const [itemIid, setItemIid] = useState(null);
+
+  const { data: dataResponseSeal, isLoading: isLoadingSeal } = useQuery(
+    ["data-seal", itemIid],
+    () => dataSealById(itemIid),
+    {
+      enabled: !!itemIid,
+    }
+  );
 
   const { data, isLoading, isFetching } = useQuery(
     ["log-bsre-seal", query],
@@ -26,52 +44,43 @@ function LogBSRE() {
   );
 
   const showModalInformation = (item) => {
+    setItemIid(item?.id);
     Modal.info({
       title: "Detail Log Seal BSrE",
       centered: true,
+      onCancel: () => setItemIid(null),
       width: 800,
       content: (
-        <Collapse>
-          <Collapse.Panel header="Request Data" key="1">
-            <div
-              style={{
-                maxHeight: 400,
-                overflow: "auto",
-              }}
-            >
-              <ReactJson src={JSON.parse(item?.request_data)} />
-            </div>
-          </Collapse.Panel>
-          <Collapse.Panel header="Response Data" key="2">
-            <div
-              style={{
-                maxHeight: 400,
-                overflow: "auto",
-              }}
-            >
-              <ReactJson src={JSON.parse(item?.response_data)} />
-            </div>
-          </Collapse.Panel>
-        </Collapse>
-      ),
-    });
-  };
-
-  const showModal = (item) => {
-    Modal.info({
-      title: "Detail Log Unduh Sertifikat",
-      centered: true,
-      width: 800,
-      content: (
-        <div
-          style={{
-            maxHeight: 400,
-            minWidth: 600,
-            overflow: "auto",
-          }}
-        >
-          <Code>{JSON.stringify(item?.log, null, 2)}</Code>,
-        </div>
+        <Skeleton loading={isLoadingSeal}>
+          {dataResponseSeal && (
+            <Collapse>
+              <Collapse.Panel header="Request Data" key="1">
+                <div
+                  style={{
+                    maxHeight: 400,
+                    overflow: "auto",
+                  }}
+                >
+                  <ReactJson
+                    src={JSON?.parse(dataResponseSeal?.request_data)}
+                  />
+                </div>
+              </Collapse.Panel>
+              <Collapse.Panel header="Response Data" key="2">
+                <div
+                  style={{
+                    maxHeight: 400,
+                    overflow: "auto",
+                  }}
+                >
+                  <ReactJson
+                    src={JSON?.parse(dataResponseSeal?.response_data)}
+                  />
+                </div>
+              </Collapse.Panel>
+            </Collapse>
+          )}
+        </Skeleton>
       ),
     });
   };
@@ -101,7 +110,6 @@ function LogBSRE() {
               style={{
                 cursor: "pointer",
               }}
-              onClick={() => showModal(item)}
               color={item?.status === "SUCCESS" ? "green" : "red"}
             >
               {item?.status}
