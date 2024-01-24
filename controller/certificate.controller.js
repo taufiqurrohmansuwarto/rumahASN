@@ -1,5 +1,23 @@
-const WebinarSeries = require("@/models/webinar-series.model");
 const WebinarSeriesParticipates = require("@/models/webinar-series-participates.model");
+
+const downloadWebinarCertificates = async (req, res) => {
+  try {
+    const { id } = req?.query;
+    const result = await WebinarSeriesParticipates.query()
+      .findById(id)
+      .select("document_sign")
+      .select("id");
+
+    if (!result) {
+      res.json(null);
+    } else {
+      res.json(result?.document_sign);
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
 
 const checkWebinarCertificates = async (req, res) => {
   try {
@@ -37,4 +55,5 @@ const checkWebinarCertificates = async (req, res) => {
 
 module.exports = {
   checkWebinarCertificates,
+  downloadWebinarCertificates,
 };
