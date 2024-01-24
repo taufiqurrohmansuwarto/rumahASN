@@ -16,7 +16,61 @@ import {
 } from "antd";
 import Head from "next/head";
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+
+const ModalDetail = ({ itemid, open, onClose }) => {
+  const {
+    data: dataResponseSeal,
+    isLoading: isLoadingSeal,
+    isFetching,
+    refetch,
+  } = useQuery(["data-seal", itemid], () => dataSealById(itemid), {
+    refetchOnWindowFocus: false,
+    enabled: false,
+  });
+
+  useEffect(() => {
+    if (itemid) {
+      refetch();
+    }
+  }, [itemid, refetch]);
+
+  return (
+    <Modal
+      title={`Data seal dengan nomer ${itemid}`}
+      open={open}
+      onCancel={onClose}
+      width={800}
+    >
+      <Skeleton loading={isFetching}>
+        {dataResponseSeal && (
+          <Collapse>
+            <Collapse.Panel header="Request Data" key="1">
+              <div
+                style={{
+                  maxHeight: 400,
+                  overflow: "auto",
+                }}
+              >
+                <ReactJson src={JSON?.parse(dataResponseSeal?.request_data)} />
+              </div>
+            </Collapse.Panel>
+            <Collapse.Panel header="Response Data" key="2">
+              <div
+                style={{
+                  maxHeight: 400,
+                  overflow: "auto",
+                }}
+              >
+                <ReactJson src={JSON?.parse(dataResponseSeal?.response_data)} />
+              </div>
+            </Collapse.Panel>
+          </Collapse>
+        )}
+      </Skeleton>
+    </Modal>
+  );
+};
 
 function LogBSRE() {
   const [query, setQuery] = useState({
@@ -24,15 +78,18 @@ function LogBSRE() {
     limit: 10,
   });
 
-  const [itemIid, setItemIid] = useState(null);
+  const [itemId, setItemId] = useState(null);
+  const [openModal, setOpenModal] = useState(false);
 
-  const { data: dataResponseSeal, isLoading: isLoadingSeal } = useQuery(
-    ["data-seal", itemIid],
-    () => dataSealById(itemIid),
-    {
-      enabled: !!itemIid,
-    }
-  );
+  const handleOpenModal = (item) => {
+    setItemId(item?.id);
+    setOpenModal(true);
+  };
+
+  const handleCloseModal = () => {
+    setItemId(null);
+    setOpenModal(false);
+  };
 
   const { data, isLoading, isFetching } = useQuery(
     ["log-bsre-seal", query],
@@ -42,48 +99,6 @@ function LogBSRE() {
       enabled: !!query,
     }
   );
-
-  const showModalInformation = (item) => {
-    setItemIid(item?.id);
-    Modal.info({
-      title: "Detail Log Seal BSrE",
-      centered: true,
-      onCancel: () => setItemIid(null),
-      width: 800,
-      content: (
-        <Skeleton loading={isLoadingSeal}>
-          {dataResponseSeal && (
-            <Collapse>
-              <Collapse.Panel header="Request Data" key="1">
-                <div
-                  style={{
-                    maxHeight: 400,
-                    overflow: "auto",
-                  }}
-                >
-                  <ReactJson
-                    src={JSON?.parse(dataResponseSeal?.request_data)}
-                  />
-                </div>
-              </Collapse.Panel>
-              <Collapse.Panel header="Response Data" key="2">
-                <div
-                  style={{
-                    maxHeight: 400,
-                    overflow: "auto",
-                  }}
-                >
-                  <ReactJson
-                    src={JSON?.parse(dataResponseSeal?.response_data)}
-                  />
-                </div>
-              </Collapse.Panel>
-            </Collapse>
-          )}
-        </Skeleton>
-      ),
-    });
-  };
 
   const columns = [
     {
@@ -126,9 +141,7 @@ function LogBSRE() {
     {
       title: "Aksi",
       key: "aksi",
-      render: (item) => (
-        <a onClick={() => showModalInformation(item)}>detail</a>
-      ),
+      render: (item) => <a onClick={() => handleOpenModal(item)}>detail</a>,
     },
   ];
 
@@ -158,6 +171,11 @@ function LogBSRE() {
         }}
       >
         <Card title="Daftar Log Unduh">
+          <ModalDetail
+            itemid={itemId}
+            open={openModal}
+            onClose={handleCloseModal}
+          />
           <Table
             loading={isLoading || isFetching}
             pagination={{
