@@ -1,9 +1,9 @@
 import PageContainer from "@/components/PageContainer";
 import { checkCertificateWebinar } from "@/services/webinar.services";
 import { LoginOutlined } from "@ant-design/icons";
-import { Center, Container, Paper } from "@mantine/core";
+import { Center, Paper } from "@mantine/core";
 import { useQuery } from "@tanstack/react-query";
-import { Button, Empty, Result, Row, Skeleton } from "antd";
+import { Button, Empty, Result, Skeleton } from "antd";
 import Head from "next/head";
 import { useRouter } from "next/router";
 

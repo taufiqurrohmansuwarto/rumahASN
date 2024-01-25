@@ -181,6 +181,7 @@ function LogBSRE() {
             pagination={{
               position: ["bottomRight", "topRight"],
               showTotal: (total) => `Total ${total} data`,
+              showSizeChanger: false,
               current: query?.page,
               pageSize: query?.limit,
               total: data?.total,

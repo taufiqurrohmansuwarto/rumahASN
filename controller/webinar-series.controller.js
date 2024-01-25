@@ -862,6 +862,12 @@ const downloadCertificate = async (req, res) => {
 
         await LogSealBsre.query().insert(successLog);
 
+        // update the database
+        await WebinarSeriesParticipates.query().patch({
+          is_generate_certificate: true,
+          document_sign: sealDocument?.data?.file[0],
+        });
+
         res.json(sealDocument?.data);
       } else {
         const errorLog = {
@@ -881,6 +887,7 @@ const downloadCertificate = async (req, res) => {
       }
     }
   } catch (error) {
+    console.log(error);
     res.status(500).json({ message: "Internal server error" });
   }
 };
@@ -911,10 +918,8 @@ const checkCertificate = async (req, res) => {
 
 module.exports = {
   checkCertificate,
-
   downloadCertificate,
   uploadTemplateAndImage,
-
   listAdmin,
   detailWebinarAdmin,
   createWebinar,
