@@ -182,7 +182,6 @@ const checkStatusCoaching = async (req, res) => {
 };
 
 // CRUD meeting
-
 const findMeeting = async (req, res) => {
   try {
     const page = req?.query?.page || 1;
@@ -330,6 +329,8 @@ const startMeeting = async (req, res) => {
         id,
         user_id: customId,
       });
+
+    // todo send email to participant
 
     res.json({
       ...result,
