@@ -1,6 +1,11 @@
-const { getSealActivationOTP, verifyPdf } = require("@/utils/esign-utils");
+const {
+  getSealActivationOTP,
+  verifyPdf,
+  verifyUserWithNik,
+} = require("@/utils/esign-utils");
 const DSSegelTOTP = require("@/models/ds-segel-totp.model");
 const LogSealBsre = require("@/models/log-seal-bsre.model");
+const { dataUtama } = require("@/utils/siasn-utils");
 
 // admin request totp confirmation
 const requestTotpConfirmation = async (req, res) => {
@@ -86,7 +91,36 @@ const verifyPdfController = async (req, res) => {
   }
 };
 
+const checkTTEUser = async (req, res) => {
+  try {
+    const { employee_number } = req?.user;
+    const request = req?.siasnRequest;
+
+    const result = await dataUtama(request, employee_number);
+    const currentUser = result?.data?.data;
+
+    if (!currentUser) {
+      res.status(404).json({ code: 404, message: "User not found" });
+    } else {
+      const { nik } = currentUser;
+      // const hasil = await verifyUserWithNik({ nik });
+      const hasil = await verifyUserWithNik({ nik: "0803202100007062" });
+
+      if (hasil?.success) {
+        const userTTEData = hasil?.data;
+        res.json(userTTEData);
+      } else {
+        res.status(400).json({ code: 400, message: hasil?.data?.message });
+      }
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
 module.exports = {
+  checkTTEUser,
   requestTotpConfirmation,
   saveTotpConfirmation,
   getLastTotpConfirmation,
