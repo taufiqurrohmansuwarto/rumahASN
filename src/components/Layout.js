@@ -108,6 +108,25 @@ const changeRoutes = (user) => {
           path: "/pemutakhiran-data/komparasi",
           name: "Integrasi SIASN",
           icon: <ApiOutlined />,
+        },
+        {
+          path: "/tte",
+          name: "Tanda Tangan Digital",
+          icon: <BookOutlined />,
+          routes: [
+            {
+              path: "/tte/certificates",
+              name: "Sertifikat",
+            },
+            {
+              path: "/tte/documents",
+              name: "Dokumen",
+            },
+            {
+              path: "/tte/sk",
+              name: "Surat Keputusan",
+            },
+          ],
         }
       );
     }
@@ -430,7 +449,7 @@ function Layout({ children, active, collapsed = true }) {
                 }}
                 type="secondary"
               >
-                © 2022 BKD Provinsi Jawa Timur
+                © 2022 BKD Provinsi Jawa Timur | Iput Taufiqurrohman Suwarto
               </Typography.Text>
             </div>
           </div>
