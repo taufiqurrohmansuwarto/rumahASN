@@ -15,3 +15,7 @@ export const getLastTotpConfirmation = () => {
 export const saveTotpConfirmation = (data) => {
   return esignApi.patch("/totp-confirmation", data).then((res) => res?.data);
 };
+
+export const checkUserByNip = (nip) => {
+  return esignApi.get(`/check/${nip}`).then((res) => res?.data);
+};
