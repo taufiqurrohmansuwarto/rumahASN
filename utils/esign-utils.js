@@ -5,6 +5,49 @@ const idSubscriber = process.env.ESIGN_ID_SUBSCRIBER;
 const esignFetcher = require("./esign-fetcher");
 
 // sign
+module.exports.signWithNikAndPassphrase = async ({
+  nik,
+  passphrase,
+  file,
+  image,
+}) => {
+  const data = {
+    nik,
+    passphrase,
+    signatureProperties: file?.map((item, index) => {
+      return {
+        imageBase64: image[index],
+        tampilan: "VISIBLE",
+        page: 1,
+        originX: 0,
+        originY: 0,
+        width: 50.0,
+        height: 50.0,
+        location: "Surabaya",
+        reason: "Sertifikat dibuat di aplikasi Rumah ASN BKD Jatim",
+        contactInfo: "",
+      };
+    }),
+    file,
+  };
+
+  return new Promise((resolve, reject) => {
+    esignFetcher
+      .post(`/api/v2/sign/pdf`, data)
+      .then((response) => {
+        resolve({
+          success: true,
+          data: response?.data,
+        });
+      })
+      .catch((error) => {
+        resolve({
+          success: false,
+          data: error,
+        });
+      });
+  });
+};
 
 // seal
 module.exports.getSealActivationOTP = async () => {

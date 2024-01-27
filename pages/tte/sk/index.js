@@ -1,16 +1,14 @@
 import Layout from "@/components/Layout";
 import PageContainer from "@/components/PageContainer";
-import LeaderBoard from "@/components/Quiz/LeaderBoard";
-import UserQuiz from "@/components/Quiz/UserQuiz";
-import { Breadcrumb, Col, Row } from "antd";
+import { Breadcrumb } from "antd";
 import Head from "next/head";
 import Link from "next/link";
 
-function TTESk() {
+function TTESuratKeputusan() {
   return (
     <>
       <Head>
-        <title>Rumah ASN - Quiz Kepegawaian</title>
+        <title>Rumah ASN - Surat Keputusan Tanda Tangan Elektronik</title>
       </Head>
       <PageContainer
         header={{
@@ -21,33 +19,28 @@ function TTESk() {
                   <a>Beranda</a>
                 </Link>
               </Breadcrumb.Item>
-              <Breadcrumb.Item>Quiz Kepegawaian</Breadcrumb.Item>
+              <Breadcrumb.Item>
+                Surat Keputusan Tanda Tangan Elektronik
+              </Breadcrumb.Item>
             </Breadcrumb>
           ),
         }}
-        title="Quiz Kepegawaian"
-        content="Tes Pengetahuan Kepegawaian mu!"
+        title="Tanda Tangan Elektronik"
+        content="Daftar Surat Keputusan Tanda Tangan Elektronik"
       >
-        <Row gutter={[8, 8]} justify="center" align="center">
-          <Col md={14} xs={24}>
-            <UserQuiz />
-          </Col>
-          <Col md={14} xs={24}>
-            <LeaderBoard />
-          </Col>
-        </Row>
+        <div>hello world</div>
       </PageContainer>
     </>
   );
 }
 
-TTESk.getLayout = function getLayout(page) {
+TTESuratKeputusan.getLayout = function getLayout(page) {
   return <Layout>{page}</Layout>;
 };
 
-TTESk.Auth = {
+TTESuratKeputusan.Auth = {
   action: "manage",
   subject: "Tickets",
 };
 
-export default TTESk;
+export default TTESuratKeputusan;
