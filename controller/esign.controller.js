@@ -98,20 +98,20 @@ const checkTTEUser = async (req, res) => {
     const request = req?.siasnRequest;
 
     // ini menggunakan web service siasn
-    const result = await dataUtama(request, employee_number);
+    // const result = await dataUtama(request, employee_number);
 
     // ini menggunakan web service simaster
     const simasterEmployee = await fetcher.get(
       `/master-ws/operator/employees/${employee_number}/data-utama-master`
     );
 
-    const currentUser = result?.data?.data;
+    // const currentUser = result?.data?.data;
     const currentUserSimaster = simasterEmployee?.data;
 
-    if (!currentUser || !currentUserSimaster) {
+    if (!currentUserSimaster) {
       res.status(404).json({ code: 404, message: "User not found" });
     } else {
-      const { nik: nikSiasn } = currentUser;
+      // const { nik: nikSiasn } = currentUser;
       const { nik: nikSimaster } = currentUserSimaster;
 
       // verify nik
@@ -130,8 +130,56 @@ const checkTTEUser = async (req, res) => {
   }
 };
 
+const checkTTEUserByNip = async (req, res) => {
+  try {
+    console.log("kesini");
+    const { nip } = req?.query;
+    const { fetcher } = req;
+
+    // ini menggunakan web service simaster
+    const simasterEmployee = await fetcher.get(
+      `/master-ws/operator/employees/${nip}/data-utama-master`
+    );
+
+    // const currentUser = result?.data?.data;
+    const currentUserSimaster = simasterEmployee?.data;
+
+    if (!currentUserSimaster) {
+      res.json(null);
+    } else {
+      // const { nik: nikSiasn } = currentUser;
+      const { nik: nikSimaster } = currentUserSimaster;
+
+      // verify nik
+      const hasil = await verifyUserWithNik({ nik: nikSimaster });
+
+      if (hasil?.success) {
+        const userTTEData = hasil?.data;
+
+        if (userTTEData?.status === "NOT_REGISTERED") {
+          res.json(null);
+        } else {
+          const data = {
+            nama: currentUserSimaster?.nama,
+            nip: currentUserSimaster?.nip_baru,
+            foto: currentUserSimaster?.foto,
+          };
+
+          res.json(data);
+        }
+      } else {
+        res.status(400).json({ code: 400, message: hasil?.data?.message });
+      }
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
 module.exports = {
   checkTTEUser,
+  checkTTEUserByNip,
   requestTotpConfirmation,
   saveTotpConfirmation,
   getLastTotpConfirmation,

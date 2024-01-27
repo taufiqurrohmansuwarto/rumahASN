@@ -1,3 +1,4 @@
+import FormPersonalSign from "@/components/Esign/FormPersonalSign";
 import Layout from "@/components/Layout";
 import PageContainer from "@/components/PageContainer";
 import { createWebinar } from "@/services/webinar.services";
@@ -61,6 +62,30 @@ const FormWebinarSeries = () => {
 
   return (
     <Form onFinish={handleFinish} form={form} layout="vertical">
+      <Form.Item
+        rules={[{ required: true, message: "Tidak boleh kosong" }]}
+        name="type_sign"
+        label="Tanda Tangan Elektronik"
+      >
+        <Select>
+          <Select.Option value="SEAL">Segel Elektronik</Select.Option>
+          <Select.Option value="PERSONAL_SIGN">
+            Tanda Tangan Personal
+          </Select.Option>
+        </Select>
+      </Form.Item>
+      <Form.Item
+        noStyle
+        shouldUpdate={(prevValues, currentValues) =>
+          prevValues.type_sign !== currentValues.type_sign
+        }
+      >
+        {({ getFieldValue }) =>
+          getFieldValue("type_sign") === "PERSONAL_SIGN" ? (
+            <FormPersonalSign name="employee_number" />
+          ) : null
+        }
+      </Form.Item>
       <Form.Item
         rules={[
           {
@@ -210,7 +235,7 @@ const CreateWebinarSeries = () => {
         title="Buat Webinar Series"
         content="Webinar Series Baru"
       >
-        <Card>
+        <Card title="Form Entrian Webinar Baru">
           <Row>
             <Col md={16} xs={24}>
               <FormWebinarSeries />
