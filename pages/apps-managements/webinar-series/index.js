@@ -121,6 +121,11 @@ const WebinarSeries = () => {
       responsive: ["sm"],
     },
     {
+      title: "Tipe TTE",
+      dataIndex: "type_sign",
+      responsive: ["sm"],
+    },
+    {
       title: "Peserta",
       key: "type_participant",
       render: (text) => {

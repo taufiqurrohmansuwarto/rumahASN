@@ -47,12 +47,22 @@ const FormWebinarSeries = () => {
   const [form] = Form.useForm();
 
   const handleFinish = async () => {
-    const { date, open_registration, close_registration, ...rest } =
-      await form.validateFields();
+    const {
+      date,
+      status,
+      open_registration,
+      type_sign,
+      close_registration,
+      ...rest
+    } = await form.validateFields();
     const [start_date, end_date] = date;
 
     const data = {
       ...rest,
+      type_sign,
+      status: status || "draft",
+      employee_number_signer:
+        type_sign === "SEAL" ? null : rest.employee_number_signer,
       start_date: moment(start_date).format("YYYY-MM-DD"),
       end_date: moment(end_date).format("YYYY-MM-DD"),
     };
@@ -67,7 +77,11 @@ const FormWebinarSeries = () => {
         name="type_sign"
         label="Tanda Tangan Elektronik"
       >
-        <Select>
+        <Select
+          onChange={() => {
+            form.setFieldsValue({ employee_number_signer: null });
+          }}
+        >
           <Select.Option value="SEAL">Segel Elektronik</Select.Option>
           <Select.Option value="PERSONAL_SIGN">
             Tanda Tangan Personal
@@ -82,7 +96,7 @@ const FormWebinarSeries = () => {
       >
         {({ getFieldValue }) =>
           getFieldValue("type_sign") === "PERSONAL_SIGN" ? (
-            <FormPersonalSign name="employee_number" />
+            <FormPersonalSign name="employee_number_signer" />
           ) : null
         }
       </Form.Item>

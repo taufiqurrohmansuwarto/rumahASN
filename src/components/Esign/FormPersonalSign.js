@@ -1,12 +1,12 @@
 import { checkUserByNip } from "@/services/esign-admin.services";
 import { useDebouncedValue } from "@mantine/hooks";
 import { useQuery } from "@tanstack/react-query";
-import { Avatar, Form, Select, Space, Spin, Tag } from "antd";
+import { Form, Select, Space, Spin, Tag } from "antd";
 import { useState } from "react";
 
 const FormPersonalSign = ({ name, help }) => {
   const [personalSigner, setPersonalSigner] = useState(undefined);
-  const [debounceValue] = useDebouncedValue(personalSigner, 500);
+  const [debounceValue] = useDebouncedValue(personalSigner, 700);
 
   const { data: dataPersonalSigner, isLoading: isLoadingPersonalSigner } =
     useQuery(
@@ -14,6 +14,7 @@ const FormPersonalSign = ({ name, help }) => {
       () => checkUserByNip(debounceValue),
       {
         enabled: Boolean(debounceValue),
+        refetchOnWindowFocus: false,
       }
     );
 
@@ -43,7 +44,6 @@ const FormPersonalSign = ({ name, help }) => {
               value={dataPersonalSigner?.nip}
             >
               <Space>
-                <Avatar src={dataPersonalSigner?.foto} size="small" />
                 {dataPersonalSigner?.nama} - {dataPersonalSigner?.nip}
                 <Tag color="green">Tersertifikasi TTE</Tag>
               </Space>

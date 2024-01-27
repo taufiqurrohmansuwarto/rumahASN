@@ -132,7 +132,6 @@ const checkTTEUser = async (req, res) => {
 
 const checkTTEUserByNip = async (req, res) => {
   try {
-    console.log("kesini");
     const { nip } = req?.query;
     const { fetcher } = req;
 

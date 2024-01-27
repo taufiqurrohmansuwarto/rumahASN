@@ -1,3 +1,4 @@
+import FormPersonalSign from "@/components/Esign/FormPersonalSign";
 import Layout from "@/components/Layout";
 import AdminLayoutDetailWebinar from "@/components/WebinarSeries/AdminLayoutDetailWebinar";
 import {
@@ -151,7 +152,6 @@ const UploadFileImage = ({ data, type = "image", title = "test" }) => {
   };
 
   const handleUpload = (info) => {
-    console.log(info?.file);
     const id = data?.id;
     const formData = new FormData();
     const file = info.file?.originFileObj;
@@ -213,12 +213,15 @@ const FormEditWebinarSeries = ({ data }) => {
   const [form] = Form.useForm();
 
   const handleFinish = async () => {
-    const { date, open_registration, close_registration, ...rest } =
+    const { date, open_registration, type_sign, close_registration, ...rest } =
       await form.validateFields();
     const [start_date, end_date] = date;
 
     const currentValues = {
       ...rest,
+      type_sign,
+      employee_number_signer:
+        type_sign === "SEAL" ? null : rest.employee_number_signer,
       start_date: moment(start_date).format("YYYY-MM-DD"),
       end_date: moment(end_date).format("YYYY-MM-DD"),
     };
@@ -248,6 +251,34 @@ const FormEditWebinarSeries = ({ data }) => {
         form={form}
         layout="vertical"
       >
+        <Form.Item
+          rules={[{ required: true, message: "Tidak boleh kosong" }]}
+          name="type_sign"
+          label="Tanda Tangan Elektronik"
+        >
+          <Select
+            onChange={() => {
+              form.setFieldsValue({ employee_number_signer: null });
+            }}
+          >
+            <Select.Option value="SEAL">Segel Elektronik</Select.Option>
+            <Select.Option value="PERSONAL_SIGN">
+              Tanda Tangan Personal
+            </Select.Option>
+          </Select>
+        </Form.Item>
+        <Form.Item
+          noStyle
+          shouldUpdate={(prevValues, currentValues) =>
+            prevValues.type_sign !== currentValues.type_sign
+          }
+        >
+          {({ getFieldValue }) =>
+            getFieldValue("type_sign") === "PERSONAL_SIGN" ? (
+              <FormPersonalSign name="employee_number_signer" />
+            ) : null
+          }
+        </Form.Item>
         <Form.Item
           rules={[
             {
@@ -370,15 +401,6 @@ const FormEditWebinarSeries = ({ data }) => {
               valuePropName="checked"
               name="is_allow_download_certificate"
               label="Izinkan peserta mengunduh sertifikat?"
-            >
-              <Checkbox>Ya</Checkbox>
-            </Form.Item>
-          </Col>
-          <Col>
-            <Form.Item
-              valuePropName="checked"
-              name="use_esign"
-              label="Gunakan TTE untuk sertifikat?"
             >
               <Checkbox>Ya</Checkbox>
             </Form.Item>
