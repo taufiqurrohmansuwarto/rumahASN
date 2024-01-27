@@ -10,7 +10,9 @@ const daftarCertificateSigner = async (req, res) => {
     const webinarParticipates = await WebinarSeries.query()
       .where({
         employee_number_signer: employee_number,
-        use_personal_signer: true,
+        status: "published",
+        type_sign: "PERSONAL_SIGNER",
+        is_allow_download_certificate: true,
       })
       .page(page, limit);
 

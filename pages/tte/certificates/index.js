@@ -1,4 +1,5 @@
 import Checker from "@/components/Esign/Checker";
+import WebinarsCertificates from "@/components/Esign/WebinarsCertificates";
 import Layout from "@/components/Layout";
 import PageContainer from "@/components/PageContainer";
 import { Breadcrumb, Card } from "antd";
@@ -29,7 +30,7 @@ function TTECertificates() {
       >
         <Card>
           <Checker>
-            <div>hello world</div>
+            <WebinarsCertificates />
           </Checker>
         </Card>
       </PageContainer>
