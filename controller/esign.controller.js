@@ -94,17 +94,28 @@ const verifyPdfController = async (req, res) => {
 const checkTTEUser = async (req, res) => {
   try {
     const { employee_number } = req?.user;
+    const { fetcher } = req;
     const request = req?.siasnRequest;
 
+    // ini menggunakan web service siasn
     const result = await dataUtama(request, employee_number);
-    const currentUser = result?.data?.data;
 
-    if (!currentUser) {
+    // ini menggunakan web service simaster
+    const simasterEmployee = await fetcher.get(
+      `/master-ws/operator/employees/${employee_number}/data-utama-master`
+    );
+
+    const currentUser = result?.data?.data;
+    const currentUserSimaster = simasterEmployee?.data;
+
+    if (!currentUser || !currentUserSimaster) {
       res.status(404).json({ code: 404, message: "User not found" });
     } else {
-      const { nik } = currentUser;
-      // const hasil = await verifyUserWithNik({ nik });
-      const hasil = await verifyUserWithNik({ nik: "0803202100007062" });
+      const { nik: nikSiasn } = currentUser;
+      const { nik: nikSimaster } = currentUserSimaster;
+
+      // verify nik
+      const hasil = await verifyUserWithNik({ nik: nikSimaster });
 
       if (hasil?.success) {
         const userTTEData = hasil?.data;

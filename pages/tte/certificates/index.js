@@ -1,6 +1,7 @@
+import Checker from "@/components/Esign/Checker";
 import Layout from "@/components/Layout";
 import PageContainer from "@/components/PageContainer";
-import { Breadcrumb } from "antd";
+import { Breadcrumb, Card } from "antd";
 import Head from "next/head";
 import Link from "next/link";
 
@@ -25,7 +26,13 @@ function TTECertificates() {
         }}
         title="Tanda Tangan Elektronik"
         content="Tanda Tangan Elektronik - Sertifikat"
-      ></PageContainer>
+      >
+        <Card>
+          <Checker>
+            <div>hello world</div>
+          </Checker>
+        </Card>
+      </PageContainer>
     </>
   );
 }
