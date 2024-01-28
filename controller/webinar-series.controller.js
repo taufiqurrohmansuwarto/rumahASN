@@ -542,6 +542,41 @@ const detailWebinarUser = async (req, res) => {
       };
 
       let deskripsi_tte_sertifikat = "";
+      let status_download = "";
+
+      const documentSudahDitandatangani = result?.is_generate_certificate;
+
+      const syaratPersonalSignerTerpenuhi =
+        syaratTerpenuhi &&
+        hasil?.type_sign === "PERSONAL_SIGN" &&
+        documentSudahDitandatangani;
+
+      const syaratSealTerpenuhi =
+        syaratTerpenuhi &&
+        hasil?.type_sign === "SEAL" &&
+        documentSudahDitandatangani;
+
+      const syaratPersonalSignerTidakTerpenuhi =
+        syaratTerpenuhi &&
+        hasil?.type_sign === "PERSONAL_SIGN" &&
+        !documentSudahDitandatangani;
+
+      const syaratSealTidakTerpenuhi =
+        syaratTerpenuhi &&
+        hasil?.type_sign === "SEAL" &&
+        !documentSudahDitandatangani;
+
+      if (syaratPersonalSignerTerpenuhi) {
+        status_download = "DOWNLOAD_PERSONAL_SIGNER";
+      } else if (syaratSealTerpenuhi) {
+        status_download = "DOWNLOAD_SEAL";
+      } else if (syaratPersonalSignerTidakTerpenuhi) {
+        status_download = "BELUM_TANDATANGAN_PERSONAL_SIGNER";
+      } else if (syaratSealTidakTerpenuhi) {
+        status_download = "BELUM_TANDATANGAN_SEAL";
+      } else {
+        status_download = "BELUM_TANDATANGAN";
+      }
 
       if (hasil?.type_sign === "SEAL") {
         deskripsi_tte_sertifikat =
@@ -563,6 +598,7 @@ const detailWebinarUser = async (req, res) => {
           ...absensi,
           user_information: result?.user_information,
           deskripsi_tte_sertifikat,
+          status_download,
           syarat: {
             sudah_absen: absensiTerpenuhi,
             sudah_poll: sudahPoll,

@@ -5,27 +5,13 @@ const idSubscriber = process.env.ESIGN_ID_SUBSCRIBER;
 const esignFetcher = require("./esign-fetcher");
 
 // sign
-module.exports.signWithNikAndPassphrase = async ({
-  nik,
-  passphrase,
-  file,
-  image,
-}) => {
+module.exports.signWithNikAndPassphrase = async ({ nik, passphrase, file }) => {
   const data = {
     nik,
     passphrase,
-    signatureProperties: file?.map((item, index) => {
+    signatureProperties: file?.map(() => {
       return {
-        imageBase64: image[index],
-        tampilan: "VISIBLE",
-        page: 1,
-        originX: 0,
-        originY: 0,
-        width: 50.0,
-        height: 50.0,
-        location: "Surabaya",
-        reason: "Sertifikat dibuat di aplikasi Rumah ASN BKD Jatim",
-        contactInfo: "",
+        tampilan: "INVISIBLE",
       };
     }),
     file,
