@@ -490,7 +490,8 @@ const detailWebinarUser = async (req, res) => {
         "is_registered",
         "created_at",
         "updated_at",
-        "is_generate_certificate"
+        "is_generate_certificate",
+        "user_information"
       )
       .where("id", id)
       .andWhere("user_id", customId)
@@ -526,11 +527,29 @@ const detailWebinarUser = async (req, res) => {
         )
         .andWhere("user_id", customId);
 
+      const absensiTerpenuhi = absenceUser?.length === absenceEntry?.length;
+
+      const sudahPoll = result?.already_poll;
+      const sudahMengisiInformasiUser = !!result?.user_information;
+
+      const syaratTerpenuhi =
+        absensiTerpenuhi && sudahPoll && sudahMengisiInformasiUser;
+
       const absensi = {
         absence_entry: absenceEntry,
         absence_user: absenceUser,
-        get_certificate: absenceUser.length === absenceEntry.length,
+        get_certificate: syaratTerpenuhi,
       };
+
+      let deskripsi_tte_sertifikat = "";
+
+      if (hasil?.type_sign === "SEAL") {
+        deskripsi_tte_sertifikat =
+          "Sertifikat ini menggunakan Segel Elektronik Rumah ASN";
+      } else if (hasil?.type_sign === "PERSONAL_SIGN") {
+        deskripsi_tte_sertifikat =
+          "Sertifikat ini menggunakan Tanda Tangan Personal";
+      }
 
       res.json({
         result,
@@ -542,6 +561,13 @@ const detailWebinarUser = async (req, res) => {
           my_rating_comment: currentWebinarSeriesRating?.comments,
           already_rating: currentWebinarSeriesRating ? true : false,
           ...absensi,
+          user_information: result?.user_information,
+          deskripsi_tte_sertifikat,
+          syarat: {
+            sudah_absen: absensiTerpenuhi,
+            sudah_poll: sudahPoll,
+            sudah_mengisi_informasi_user: sudahMengisiInformasiUser,
+          },
         },
       });
     } else {
@@ -656,6 +682,53 @@ const registerWebinar = async (req, res) => {
 
       res.json(result);
     }
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+const updateInformationWebinarSeries = async (req, res) => {
+  try {
+    const { customId, group } = req?.user;
+
+    const id = req?.query?.id;
+    const user_information = req?.body;
+
+    await WebinarSeriesParticipates.query()
+      .patch({
+        user_information,
+      })
+      .where({
+        user_id: customId,
+        id,
+      });
+
+    // karena sudah terlanjur membaca dari user info maka di entri 2x di table user
+    if (group === "GOOGLE") {
+      const info = {
+        jabatan: {
+          jabatan: user_information?.jabatan,
+        },
+        username: user_information?.name,
+        gelar_depan: "",
+        gelar_belakang: "",
+        employee_number: user_information?.employee_number,
+        perangkat_daerah: {
+          detail: user_information?.instansi,
+        },
+      };
+
+      await User.query()
+        .patch({
+          info,
+        })
+        .where("custom_id", customId);
+    }
+
+    res.json({
+      message: "Berhasil mengisi informasi",
+    });
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: "Internal server error" });
@@ -933,6 +1006,7 @@ module.exports = {
   detailWebinarUser,
   registerWebinar,
   unregisterWebinar,
+  updateInformationWebinarSeries,
 
   unregisterUserWebinar,
   listParticipants,

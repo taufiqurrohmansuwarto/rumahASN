@@ -9,7 +9,7 @@ export const updateGoogleInformation = async (data) => {
   return api.patch(`/users/information`, data).then((res) => res?.data);
 };
 
-export const getUserInformation = async (data) => {
+export const getUserInformation = async () => {
   return api.get(`/users/information`).then((res) => res?.data);
 };
 

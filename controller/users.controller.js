@@ -117,7 +117,6 @@ module.exports.getUserInformation = async (req, res) => {
   try {
     const { customId } = req?.user;
     const result = await User.query().where("custom_id", customId).first();
-
     res.json(result);
   } catch (error) {
     console.log(error);

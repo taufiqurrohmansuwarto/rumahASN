@@ -207,7 +207,6 @@ export const unregisterAbsence = ({ id, absenceId }) => {
 };
 
 // comments
-
 export const commentUserIndex = (id) => {
   return api.get(`/users/${id}/comments`).then((res) => res?.data);
 };
@@ -230,6 +229,13 @@ export const commentUserDelete = ({ id, commentId }) => {
 
 export const unregisterUserWebinar = (id) => {
   return api.delete(`/users/${id}/registers`).then((res) => res?.data);
+};
+
+// user information
+export const updateUserInformation = ({ id, data }) => {
+  return api
+    .patch(`/users/${id}/user-information`, data)
+    .then((res) => res?.data);
 };
 
 // report
