@@ -7,21 +7,21 @@ const daftarCertificateSigner = async (req, res) => {
     const page = parseInt(req.query.page) || 1;
     const employee_number = req.user.employee_number;
 
-    const webinarParticipates = await WebinarSeries.query()
+    const webinar = await WebinarSeries.query()
       .where({
         employee_number_signer: employee_number,
         status: "published",
-        type_sign: "PERSONAL_SIGNER",
+        type_sign: "PERSONAL_SIGN",
         is_allow_download_certificate: true,
       })
-      .page(page, limit);
+      .page(page - 1, limit);
 
     const data = {
-      data: webinarParticipates.results,
+      data: webinar?.results,
       pagination: {
-        total: webinarParticipates.total,
-        page: webinarParticipates.page,
-        limit: webinarParticipates.limit,
+        total: webinar?.total,
+        page,
+        limit,
       },
     };
 
@@ -34,7 +34,7 @@ const daftarCertificateSigner = async (req, res) => {
 
 const dataCertificateSignerByWebinarId = async (req, res) => {
   try {
-    const webinar_id = req.query?.id;
+    const webinar_id = req.query?.webinarId;
     const limit = parseInt(req.query.limit) || 10;
     const page = parseInt(req.query.page) || 1;
 
@@ -44,6 +44,7 @@ const dataCertificateSignerByWebinarId = async (req, res) => {
         id: webinar_id,
         is_allow_download_certificate: true,
         status: "published",
+        type_sign: "PERSONAL_SIGN",
       })
       .first();
 
@@ -59,15 +60,15 @@ const dataCertificateSignerByWebinarId = async (req, res) => {
       res.json(data);
     } else {
       const webinarParticipates = await WebinarParticipates.query()
-        .where({ webinar_id })
-        .page(page, limit);
+        .where({ webinar_series_id: webinar_id })
+        .page(page - 1, limit);
 
       const data = {
         data: webinarParticipates.results,
         pagination: {
           total: webinarParticipates.total,
-          page: webinarParticipates.page,
-          limit: webinarParticipates.limit,
+          page,
+          limit,
         },
       };
 

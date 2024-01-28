@@ -89,7 +89,7 @@ const registerAbsence = async (req, res) => {
         res.status(403).json({
           code: 403,
           message:
-            "Tidak bisa mendaftar absen karena sudah melewati batas waktu",
+            "Tidak bisa mendaftar absen karena tidak sesuai dengan jadwal",
         });
       } else {
         await WebinarSeriesParticipantsAbsence.query()

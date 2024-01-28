@@ -13,3 +13,14 @@ export const getWebinars = async (query = {}) => {
 
   return esignApi.get(`/certificates?${queryStr}`).then((res) => res?.data);
 };
+
+export const certificateDetailWebinar = async ({ id, query = {} }) => {
+  const queryStr = queryString.stringify(query, {
+    skipEmptyString: true,
+    skipNull: true,
+  });
+
+  return esignApi
+    .get(`/certificates/${id}?${queryStr}`)
+    .then((res) => res?.data);
+};

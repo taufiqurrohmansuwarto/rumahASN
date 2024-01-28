@@ -7,9 +7,8 @@ import {
   SmileOutlined,
   TagsTwoTone,
 } from "@ant-design/icons";
-import { Stack, TypographyStylesProvider } from "@mantine/core";
+import { Alert, Stack, TypographyStylesProvider } from "@mantine/core";
 import {
-  Alert,
   Button,
   Card,
   Col,
@@ -28,11 +27,8 @@ import { useRouter } from "next/router";
 import { useState } from "react";
 
 const FormGoogleParticipants = ({
-  data,
   register,
-  unregister,
   registerLoading,
-  unregisterLoading,
   open,
   id,
   onCancel,
@@ -70,25 +66,11 @@ const FormGoogleParticipants = ({
       onCancel={onCancel}
       destroyOnClose
     >
-      <Alert
-        type="info"
-        description="Jika Anda Pegawai Pemerintah Provinsi Jawa Timur kami sarankan menggunakan akun SIMASTER/PTTPK"
-      />
+      <Alert variant="filled" color="red" mb="sm">
+        Jika Anda Pegawai Pemerintah Provinsi Jawa Timur kami sarankan
+        menggunakan akun SIMASTER/PTTPK
+      </Alert>
       <Form form={form} layout="vertical">
-        <Form.Item
-          label="Gelar Depan"
-          extra="Jika Tidak diisi Kosongkan saja"
-          name="gelar_depan"
-        >
-          <Input />
-        </Form.Item>
-        <Form.Item
-          label="Gelar Belakang"
-          extra="Jika Tidak diisi Kosongkan saja"
-          name="gelar_belakang"
-        >
-          <Input />
-        </Form.Item>
         <Form.Item
           rules={[
             {
@@ -154,7 +136,7 @@ const FormGoogleParticipants = ({
           name="perangkat_daerah"
           required
         >
-          <Input />
+          <Input.TextArea rows={5} />
         </Form.Item>
       </Form>
     </Modal>

@@ -37,6 +37,9 @@ import { useEffect, useState } from "react";
 import GoogleEditInformation from "../User/GoogleEditInformation";
 import UserInfo from "../User/UserInfo";
 import { IconExclamationMark } from "@tabler/icons";
+import SyaratMendapatkanSertifikat from "./SyaratMendapatkanSertifikat";
+import InformasiTTE from "./InformasiTTE";
+import FormUserInformation from "./FormUserInformation";
 
 const ModalRating = ({ open, onCancel, initialValues }) => {
   const router = useRouter();
@@ -257,7 +260,12 @@ function DetailWebinarNew({
                 alreadyPoll={alreadyPoll}
                 data={data}
               />
-              <UserInfo />
+              <InformasiTTE data={data?.deskripsi_tte_sertifikat} />
+              <SyaratMendapatkanSertifikat data={data?.syarat} />
+              {!data?.user_information && (
+                <FormUserInformation data={data?.syarat} />
+              )}
+              {/* <UserInfo /> */}
               <div>
                 <ClockCircleTwoTone />{" "}
                 <Typography.Text strong>
@@ -342,7 +350,7 @@ function DetailWebinarNew({
               )}
             </Stack>
             <Divider />
-            <GoogleEditInformation />
+            {/* <GoogleEditInformation /> */}
             <Button
               block
               style={{

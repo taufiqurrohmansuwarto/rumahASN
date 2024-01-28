@@ -11,7 +11,6 @@ const Checker = ({ children }) => {
     () => checkUser(),
     {
       refetchOnWindowFocus: false,
-      enabled: false,
     }
   );
 
