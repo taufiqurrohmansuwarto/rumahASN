@@ -24,3 +24,7 @@ export const certificateDetailWebinar = async ({ id, query = {} }) => {
     .get(`/certificates/${id}?${queryStr}`)
     .then((res) => res?.data);
 };
+
+export const signCertificateByWebinarId = ({ data, id }) => {
+  return esignApi.patch(`/certificates/${id}`, data).then((res) => res?.data);
+};

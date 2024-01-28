@@ -9,14 +9,15 @@ import {
   CloseOutlined,
   CloudDownloadOutlined,
   EditTwoTone,
-  ExclamationCircleOutlined,
   FolderOpenOutlined,
+  RedoOutlined,
   StarOutlined,
   TagsTwoTone,
   VideoCameraAddOutlined,
   YoutubeOutlined,
 } from "@ant-design/icons";
 import { Alert, Stack, TypographyStylesProvider } from "@mantine/core";
+import { IconExclamationMark } from "@tabler/icons";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   Button,
@@ -34,12 +35,9 @@ import {
 } from "antd";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
-import GoogleEditInformation from "../User/GoogleEditInformation";
-import UserInfo from "../User/UserInfo";
-import { IconExclamationMark } from "@tabler/icons";
-import SyaratMendapatkanSertifikat from "./SyaratMendapatkanSertifikat";
-import InformasiTTE from "./InformasiTTE";
 import FormUserInformation from "./FormUserInformation";
+import InformasiTTE from "./InformasiTTE";
+import SyaratMendapatkanSertifikat from "./SyaratMendapatkanSertifikat";
 
 const ModalRating = ({ open, onCancel, initialValues }) => {
   const router = useRouter();
@@ -128,8 +126,7 @@ const Tombol = ({
   const handleDownload = () => {
     Modal.confirm({
       title: "Unduh Sertifikat",
-      content:
-        "Apakah anda yakin ingin mengunduh sertifikat? Pastikan informasi biodata anda sudah benar",
+      content: "Apakah anda yakin ingin mengunduh sertifikat?",
       okText: "Ya",
       centered: true,
       onOk: async () => {
@@ -174,7 +171,8 @@ const Tombol = ({
   if (
     data?.is_allow_download_certificate &&
     alreadyPoll &&
-    data?.get_certificate
+    data?.get_certificate &&
+    data?.status_download === "DOWNLOAD_PERSONAL_SIGNER"
   ) {
     return (
       <>
@@ -186,6 +184,43 @@ const Tombol = ({
           loading={loadingDownloadCertificate}
         >
           Unduh Sertifikat
+        </Button>
+      </>
+    );
+  }
+
+  if (
+    data?.is_allow_download_certificate &&
+    alreadyPoll &&
+    data?.get_certificate &&
+    (data?.status_download === "DOWNLOAD_SEAL" ||
+      data?.status_download === "BELUM_TANDATANGAN_SEAL")
+  ) {
+    return (
+      <>
+        <Button
+          icon={<CloudDownloadOutlined />}
+          type="primary"
+          block
+          onClick={handleDownload}
+          loading={loadingDownloadCertificate}
+        >
+          Unduh Sertifikat
+        </Button>
+      </>
+    );
+  }
+
+  if (
+    data?.is_allow_download_certificate &&
+    alreadyPoll &&
+    data?.get_certificate &&
+    data?.status_download === "BELUM_TANDATANGAN_PERSONAL_SIGNER"
+  ) {
+    return (
+      <>
+        <Button icon={<RedoOutlined />} type="primary" block disabled>
+          Proses Tanda Tangan ...
         </Button>
       </>
     );
@@ -254,17 +289,17 @@ function DetailWebinarNew({
         <Col md={7} xs={24}>
           <Card title="Informasi Event">
             <Stack>
+              <InformasiTTE data={data?.deskripsi_tte_sertifikat} />
+              <SyaratMendapatkanSertifikat data={data?.syarat} />
+              {!data?.user_information && (
+                <FormUserInformation data={data?.syarat} />
+              )}
               <Tombol
                 downloadCertificate={downloadCertificate}
                 loadingDownloadCertificate={loadingDownloadCertificate}
                 alreadyPoll={alreadyPoll}
                 data={data}
               />
-              <InformasiTTE data={data?.deskripsi_tte_sertifikat} />
-              <SyaratMendapatkanSertifikat data={data?.syarat} />
-              {!data?.user_information && (
-                <FormUserInformation data={data?.syarat} />
-              )}
               {/* <UserInfo /> */}
               <div>
                 <ClockCircleTwoTone />{" "}
