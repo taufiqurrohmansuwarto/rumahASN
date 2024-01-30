@@ -178,6 +178,10 @@ export const commentAdminDelete = ({ id, commentId }) => {
     .then((res) => res?.data);
 };
 
+export const resetCertificates = (id) => {
+  return api.delete(`/admin/${id}/certificates`).then((res) => res?.data);
+};
+
 // end of admin
 
 // surveys user

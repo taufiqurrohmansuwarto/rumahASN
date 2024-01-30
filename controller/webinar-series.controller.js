@@ -1025,6 +1025,23 @@ const checkCertificate = async (req, res) => {
   }
 };
 
+const resetCertificates = async (req, res) => {
+  try {
+    const { id } = req?.query;
+
+    await WebinarSeriesParticipates.query()
+      .patch({
+        is_generate_certificate: false,
+        document_sign: null,
+        document_sign_at: null,
+      })
+      .where("webinar_series_id", id);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
 module.exports = {
   checkCertificate,
   downloadCertificate,
@@ -1046,4 +1063,6 @@ module.exports = {
 
   unregisterUserWebinar,
   listParticipants,
+
+  resetCertificates,
 };

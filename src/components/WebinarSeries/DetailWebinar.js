@@ -1,4 +1,4 @@
-import { removeWebinar } from "@/services/webinar.services";
+import { removeWebinar, resetCertificates } from "@/services/webinar.services";
 import { formatDateWebinar } from "@/utils/client-utils";
 import {
   CarryOutTwoTone,
@@ -74,6 +74,24 @@ function DetailWebinar({ data }) {
     }
   );
 
+  const { mutateAsync: reset, isLoading: isLoadingReset } = useMutation(
+    (data) => resetCertificates(data),
+    {
+      onSuccess: () => {
+        message.success("Berhasil mereset sertifikat");
+      },
+      onError: () => {
+        message.error("Gagal mereset sertifikat");
+      },
+      onSettled: () => {
+        queryClient.invalidateQueries([
+          "webinar-series-admin-detail",
+          router?.query?.id,
+        ]);
+      },
+    }
+  );
+
   const handleRemove = () => {
     Modal.confirm({
       title: "Hapus Webinar",
@@ -82,6 +100,17 @@ function DetailWebinar({ data }) {
       okText: "Ya",
       centered: true,
       onOk: async () => await hapus(router?.query?.id),
+    });
+  };
+
+  const handleReset = () => {
+    Modal.confirm({
+      title: "Reset Sertifikat",
+      content:
+        "Apakah anda yakin ingin mereset sertifikat webinar ini?, data sertifikat yang sudah diunduh akan hilang",
+      okText: "Ya",
+      centered: true,
+      onOk: async () => await reset(router?.query?.id),
     });
   };
 
@@ -176,16 +205,18 @@ function DetailWebinar({ data }) {
                 </div>
               )}
             </Stack>
-            <Button
+            <Space
               style={{
                 marginTop: 16,
               }}
-              onClick={handleRemove}
-              danger
-              icon={<DeleteOutlined />}
             >
-              Hapus
-            </Button>
+              <Button onClick={handleRemove} danger icon={<DeleteOutlined />}>
+                Hapus
+              </Button>
+              <Button danger onClick={handleReset}>
+                Reset Sertifikat
+              </Button>
+            </Space>
           </Card>
         </Col>
       </Row>
