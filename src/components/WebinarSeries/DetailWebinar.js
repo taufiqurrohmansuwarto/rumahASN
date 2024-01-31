@@ -79,6 +79,10 @@ function DetailWebinar({ data }) {
     {
       onSuccess: () => {
         message.success("Berhasil mereset sertifikat");
+        queryClient.invalidateQueries([
+          "webinar-user-detail",
+          router?.query?.id,
+        ]);
       },
       onError: () => {
         message.error("Gagal mereset sertifikat");
@@ -213,7 +217,12 @@ function DetailWebinar({ data }) {
               <Button onClick={handleRemove} danger icon={<DeleteOutlined />}>
                 Hapus
               </Button>
-              <Button danger onClick={handleReset}>
+              <Button
+                type="dashed"
+                icon={<DeleteOutlined />}
+                danger
+                onClick={handleReset}
+              >
                 Reset Sertifikat
               </Button>
             </Space>
