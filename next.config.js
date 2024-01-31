@@ -1,5 +1,6 @@
 /** @type {import('next').NextConfig} */
 const withAntdLess = require("next-plugin-antd-less");
+const cron = require("node-cron");
 
 const isProd = process.env.NODE_ENV === "production";
 
