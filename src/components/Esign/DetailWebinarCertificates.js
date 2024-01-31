@@ -1,3 +1,4 @@
+import moment from "moment";
 import {
   certificateDetailWebinar,
   signCertificateByWebinarId,
@@ -19,14 +20,16 @@ const FormTandaTangan = ({ open, id, onCancel, sign, loading }) => {
       };
 
       await sign(payload);
-      form.resetFields();
     } catch (error) {
       console.log(error);
+    } finally {
+      form.resetFields();
     }
   };
 
   return (
     <Modal
+      destroyOnClose
       onOk={handleFinish}
       confirmLoading={loading}
       centered
@@ -67,6 +70,7 @@ function DetailWebinarCertificates() {
     {
       onSuccess: () => {
         message.success("Berhasil menandatangani sertifikat");
+        queryClient.invalidateQueries(["webinars-certificates"]);
         handleCancel();
       },
       onError: (error) => {
@@ -111,6 +115,17 @@ function DetailWebinarCertificates() {
       key: "instansi",
       render: (text) => text?.user_information?.instansi,
     },
+    {
+      title: "Di Tanda Tangani",
+      key: "di_tanda_tangani",
+      render: (text) => (
+        <>
+          {text?.document_sign_at
+            ? moment(text?.document_sign_at).format("DD MMMM YYYY HH:mm:ss")
+            : "Belum di tanda tangani"}
+        </>
+      ),
+    },
   ];
 
   return (
@@ -123,7 +138,13 @@ function DetailWebinarCertificates() {
         onCancel={handleCancel}
       />
       <Table
-        title={() => <Button onClick={handleOpen}>Tanda Tangan</Button>}
+        title={() => (
+          <>
+            {data?.total_generate > 0 && (
+              <Button onClick={handleOpen}>Tanda Tangan</Button>
+            )}
+          </>
+        )}
         columns={columns}
         loading={isLoading}
         rowKey={(row) => row?.id}

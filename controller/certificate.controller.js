@@ -24,28 +24,21 @@ const checkWebinarCertificates = async (req, res) => {
     const { id } = req?.query;
     const result = await WebinarSeriesParticipates.query()
       .findById(id)
-      .select("id");
+      .withGraphFetched("[webinar_series]");
 
     if (!result) {
       res.json(null);
     } else {
-      const data = await WebinarSeriesParticipates.query()
-        .findById(id)
-        .select(
-          "id",
-          "webinar_series_id",
-          "user_id",
-          "already_poll",
-          "is_registered",
-          "created_at",
-          "updated_at",
-          "is_generate_certificate"
-        )
-        .withGraphFetched(
-          "[webinar_series(selectName), participant(simpleSelect)]"
-        );
-
-      res.json(data);
+      if (
+        result?.is_generate_certificate &&
+        result?.user_information &&
+        result?.document_sign &&
+        result?.document_sign_at
+      ) {
+        res.json(result);
+      } else {
+        res.json(null);
+      }
     }
   } catch (error) {
     console.log(error);

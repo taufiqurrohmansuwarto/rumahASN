@@ -1,7 +1,7 @@
 import { getUserInformation } from "@/services/index";
 import { updateUserInformation } from "@/services/webinar.services";
 import { Alert, Stack } from "@mantine/core";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Button, Form, Input, Modal, message } from "antd";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
@@ -133,6 +133,8 @@ function FormUserInformation() {
   const [open, setOpen] = useState(false);
   const router = useRouter();
 
+  const queryClient = useQueryClient();
+
   const { data: information, isLoading } = useQuery(
     ["user-information"],
     () => getUserInformation(),
@@ -154,6 +156,10 @@ function FormUserInformation() {
     {
       onSuccess: () => {
         message.success("Berhasil mengubah informasi sertifikat");
+        queryClient.invalidateQueries([
+          "webinar-user-detail",
+          router?.query?.id,
+        ]);
         handleClose();
       },
       onError: (error) => {

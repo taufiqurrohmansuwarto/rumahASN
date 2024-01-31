@@ -153,18 +153,21 @@ const Tombol = ({
 
   if (
     data?.is_allow_download_certificate &&
-    alreadyPoll &&
-    !data?.get_certificate
+    !data?.syarat?.sudah_absen &&
+    !data?.syarat?.sudah_poll &&
+    !data?.syarat?.sudah_mengisi_informasi_user
   ) {
     return (
-      <Alert
-        icon={<IconExclamationMark />}
-        color="red"
-        title="Anda Tidak mendapatkan sertifikat"
-      >
-        Mohon maaf anda tidak mendapatkan sertifikat karena tidak melakukan
-        presensi sebelumnya. Cek di tab presensi
-      </Alert>
+      <>
+        <Alert
+          icon={<IconExclamationMark />}
+          color="red"
+          title="Anda Tidak mendapatkan sertifikat"
+        >
+          Mohon maaf anda tidak mendapatkan sertifikat karena tidak melakukan
+          presensi sebelumnya. Cek di tab presensi
+        </Alert>
+      </>
     );
   }
 

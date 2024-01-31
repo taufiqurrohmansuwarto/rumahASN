@@ -905,7 +905,10 @@ const downloadCertificate = async (req, res) => {
         "is_registered",
         "created_at",
         "updated_at",
-        "is_generate_certificate"
+        "is_generate_certificate",
+        "user_information",
+        "document_sign",
+        "document_sign_at"
       )
       .where("id", id)
       .andWhere("user_id", customId)
@@ -927,72 +930,80 @@ const downloadCertificate = async (req, res) => {
         message: "Akses download sertifikat belum siap",
       });
     } else {
-      const numberCertificate = currentWebinarSeries?.certificate_number;
-
-      const templateUrl = currentWebinarSeries?.certificate_template;
-
-      const currentUser = await User.query()
-        .where("custom_id", customId)
-        .first();
-
-      const certificate = {
-        url: templateUrl,
-        user: currentUser,
-        certificateNumber: numberCertificate,
-      };
-
-      const userSertificate = await generateWebinarCertificate(certificate);
-
-      const dataCertificate = userSertificate?.data;
-
-      const qrCode = await createQrFromId(id);
-
-      const totpSeal = req?.totpSeal;
-
-      const data = {
-        totp: totpSeal,
-        file: dataCertificate?.file,
-        height: dataCertificate?.height,
-        width: dataCertificate?.width,
-        image: qrCode,
-      };
-
-      const sealDocument = await sealPdf(data);
-
-      if (sealDocument?.success) {
-        const successLog = {
-          user_id: customId,
-          action: "SEAL_CERTIFICATE",
-          status: "SUCCESS",
-          request_data: JSON.stringify(data),
-          response_data: JSON.stringify(sealDocument),
-          description: "Seal Certificate",
-        };
-
-        await LogSealBsre.query().insert(successLog);
-
-        // update the database
-        await WebinarSeriesParticipates.query().patch({
-          is_generate_certificate: true,
-          document_sign: sealDocument?.data?.file[0],
-        });
-
-        res.json(sealDocument?.data);
+      // check if user already generate certificate
+      if (result?.document_sign) {
+        res.json(result?.document_sign);
       } else {
-        const errorLog = {
-          user_id: customId,
-          action: "SEAL_CERTIFICATE",
-          status: "ERROR",
-          request_data: JSON.stringify(data),
-          response_data: JSON.stringify(sealDocument),
-          description: "Seal Certificate",
+        // jika belum generate maka generate dulu kalau ini menggunakan seal
+        const numberCertificate = currentWebinarSeries?.certificate_number;
+        const templateUrl = currentWebinarSeries?.certificate_template;
+        const currentUser = await User.query()
+          .where("custom_id", customId)
+          .first();
+
+        const certificate = {
+          url: templateUrl,
+          user: currentUser,
+          certificateNumber: numberCertificate,
         };
 
-        await LogSealBsre.query().insert(errorLog);
+        const userSertificate = await generateWebinarCertificate(certificate);
 
-        res
-          .status(400)
-          .json({ code: 400, message: sealDocument?.data?.message });
+        const dataCertificate = userSertificate?.data;
+
+        const qrCode = await createQrFromId(id);
+
+        const totpSeal = req?.totpSeal;
+
+        const data = {
+          totp: totpSeal,
+          file: dataCertificate?.file,
+          height: dataCertificate?.height,
+          width: dataCertificate?.width,
+          image: qrCode,
+        };
+
+        const sealDocument = await sealPdf(data);
+
+        if (sealDocument?.success) {
+          const successLog = {
+            user_id: customId,
+            action: "SEAL_CERTIFICATE",
+            status: "SUCCESS",
+            request_data: JSON.stringify(data),
+            response_data: JSON.stringify(sealDocument),
+            description: "Seal Certificate",
+          };
+
+          await LogSealBsre.query().insert(successLog);
+
+          // update the database
+          await WebinarSeriesParticipates.query()
+            .patch({
+              is_generate_certificate: true,
+              document_sign: sealDocument?.data?.file[0],
+              document_sign_at: new Date(),
+            })
+            .where("id", id)
+            .andWhere("user_id", customId);
+
+          res.json(sealDocument?.data?.file[0]);
+        } else {
+          const errorLog = {
+            user_id: customId,
+            action: "SEAL_CERTIFICATE",
+            status: "ERROR",
+            request_data: JSON.stringify(data),
+            response_data: JSON.stringify(sealDocument),
+            description: "Seal Certificate",
+          };
+
+          await LogSealBsre.query().insert(errorLog);
+
+          res
+            .status(400)
+            .json({ code: 400, message: sealDocument?.data?.message });
+        }
       }
     }
   } catch (error) {
@@ -1036,6 +1047,10 @@ const resetCertificates = async (req, res) => {
         document_sign_at: null,
       })
       .where("webinar_series_id", id);
+
+    res.status(200).json({
+      message: "Berhasil mereset sertifikat",
+    });
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: "Internal server error" });

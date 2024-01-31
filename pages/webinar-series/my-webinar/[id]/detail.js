@@ -45,8 +45,7 @@ function MyWebinarDetail() {
       const data = await downloadCertificate(id);
 
       if (data) {
-        const file = data?.file?.[0];
-        const url = `data:application/pdf;base64,${file}`;
+        const url = `data:application/pdf;base64,${data}`;
         // const blob = new Blob([data], { type: "application/pdf" });
         // const url = URL.createObjectURL(blob);
         const link = document.createElement("a");
