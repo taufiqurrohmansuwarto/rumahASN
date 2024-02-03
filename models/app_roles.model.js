@@ -25,6 +25,14 @@ class AppRoles extends Model {
           to: "app_permissions.id",
         },
       },
+      role_permissions: {
+        relation: Model.HasManyRelation,
+        modelClass: AppRolePermissions,
+        join: {
+          from: "app_roles.id",
+          to: "app_role_permissions.role_id",
+        },
+      },
     };
   }
 }
