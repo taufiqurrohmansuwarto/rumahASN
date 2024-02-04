@@ -4,6 +4,10 @@ const cron = require("node-cron");
 
 const isProd = process.env.NODE_ENV === "production";
 
+cron.schedule("*/5 * * * * *", () => {
+  console.log("running a task every 5 seconds");
+});
+
 function getBasePath() {
   var basePath = "";
 

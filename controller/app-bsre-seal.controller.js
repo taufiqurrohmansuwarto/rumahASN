@@ -47,6 +47,23 @@ const setIdSubscriber = async (req, res) => {
   }
 };
 
+const setTotpActivationCode = async (req, res) => {
+  try {
+    const data = req.body;
+
+    const seal = await AppBsreSeal.query().first();
+
+    if (!seal) {
+      res.status(404).json({ error: "Seal ID not found" });
+    } else {
+      await AppBsreSeal.query().patchAndFetchById(seal.id, data);
+      res.json({ message: "Seal activation code has been set" });
+    }
+  } catch (error) {
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+};
+
 const refreshSealActivation = async (req, res) => {
   try {
     const seal = await AppBsreSeal.query().first();
@@ -79,4 +96,5 @@ module.exports = {
   generateSealActivation,
   setIdSubscriber,
   refreshSealActivation,
+  setTotpActivationCode,
 };
