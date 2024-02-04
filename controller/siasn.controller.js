@@ -628,6 +628,24 @@ const getHukdis = async (req, res) => {
   }
 };
 
+const getHukdisByNip = async (req, res) => {
+  try {
+    const { siasnRequest: request } = req;
+    const { nip } = req?.query;
+
+    const result = await request.get(`/pns/rw-hukdis/${nip}`);
+    const data = result?.data?.data;
+    if (!data) {
+      res.json([]);
+    } else {
+      res.json(data);
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "error" });
+  }
+};
+
 const getJabatan = async (req, res) => {
   try {
     const { siasnRequest: request } = req;
@@ -1084,6 +1102,7 @@ module.exports = {
   getAngkaKredit,
   getAngkaKreditByNip,
   getHukdis,
+  getHukdisByNip,
   getJabatan,
   getJabatanByNip,
   getRefJft,

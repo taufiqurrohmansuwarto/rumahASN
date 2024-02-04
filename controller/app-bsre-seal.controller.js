@@ -2,7 +2,9 @@ const AppBsreSeal = require("@/models/app_bsre_seal.model");
 const {
   getSealActivationOTP,
   refreshSealTotp,
+  refreshSealActivationTotp,
 } = require("@/utils/esign-utils");
+const moment = require("moment");
 
 const subscribersDetail = async (req, res) => {
   try {
@@ -16,20 +18,40 @@ const subscribersDetail = async (req, res) => {
 const generateSealActivation = async (req, res) => {
   try {
     const seal = await AppBsreSeal.query().first();
+    const { id_subscriber, totp_activation_code } = seal;
 
-    if (!seal) {
-      res.status(404).json({ error: "Seal ID not found" });
+    if (id_subscriber && totp_activation_code) {
+      // merefresh kalau ada id_subscriber dan totp_activation_code
+      const response = await refreshSealActivationTotp({
+        idSubscriber: id_subscriber,
+        totp: totp_activation_code,
+      });
+      if (response.success) {
+        const data = response?.data?.data;
+        await AppBsreSeal.query().patchAndFetchById(seal.id, {
+          totp_activation_code: data?.totp,
+        });
+
+        const result = {
+          ...data,
+          expired_at: moment(data?.expires).format("DD-MM-YYYY HH:mm:ss"),
+          expire_from_now_in_hours: moment(data?.expires).diff(
+            moment(),
+            "hours"
+          ),
+        };
+
+        res.json(result);
+      } else {
+        res.status(500).json({ message: response.data });
+      }
     } else {
       const subscriberId = seal?.id_subscriber;
       const response = await getSealActivationOTP(subscriberId);
-
       if (response.success) {
-        await AppBsreSeal.query().patchAndFetchById(seal.id, {
-          totp_activation_code: response.data,
-        });
-        res.json({ message: "Seal activation code has been generated" });
+        res.json(response?.data);
       } else {
-        res.json({ message: response.data });
+        res.status(500).json({ message: response.data });
       }
     }
   } catch (error) {

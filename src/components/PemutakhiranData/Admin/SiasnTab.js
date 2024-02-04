@@ -12,6 +12,7 @@ import ComparePindahInstansiByNip from "./ComparePindahInstansiByNip";
 import ComparePnsUnorByNip from "./ComparePnsUnorByNip";
 import ComparePwkByNip from "./ComparePwkByNip";
 import CompareSKP22ByNip from "./CompareSKP22ByNip";
+import CompareHukdisByNip from "./CompareHukdisByNip";
 
 function SiasnTab({ nip }) {
   const breakPoint = Grid.useBreakpoint();
@@ -57,22 +58,25 @@ function SiasnTab({ nip }) {
       <Tabs.TabPane tab="Pindah Wilayah Kerja" key="pwk">
         <ComparePwkByNip nip={nip} />
       </Tabs.TabPane>
+      <Tabs.TabPane tab="Hukuman Disiplin" key="hukdis">
+        <CompareHukdisByNip nip={nip} />
+      </Tabs.TabPane>
       <Tabs.TabPane tab="PNS Unor" key="pns-unor">
         <ComparePnsUnorByNip nip={nip} />
       </Tabs.TabPane>
-      <Tabs.TabPane tab="CLTN" key="10">
+      <Tabs.TabPane tab="Cuti" key="cltn">
         <CompareKedudukanHukumByNip nip={nip} />
       </Tabs.TabPane>
-      <Tabs.TabPane tab="DP3" key="11">
+      <Tabs.TabPane tab="DP3" key="dp3">
         <CompareKedudukanHukumByNip nip={nip} />
       </Tabs.TabPane>
-      <Tabs.TabPane tab="Diklat" key="12">
+      <Tabs.TabPane tab="Diklat" key="diklat">
         <CompareKedudukanHukumByNip nip={nip} />
       </Tabs.TabPane>
-      <Tabs.TabPane tab="Kursus" key="13">
+      <Tabs.TabPane tab="Kursus" key="kursus">
         <CompareKedudukanHukumByNip nip={nip} />
       </Tabs.TabPane>
-      <Tabs.TabPane tab="Penghargaan" key="14">
+      <Tabs.TabPane tab="Penghargaan" key="penghargaan">
         <CompareKedudukanHukumByNip nip={nip} />
       </Tabs.TabPane>
     </Tabs>
