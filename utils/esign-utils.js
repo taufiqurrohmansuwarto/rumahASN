@@ -57,7 +57,7 @@ module.exports.getSealActivationOTP = async () => {
   });
 };
 
-module.exports.refreshSealTotp = async ({ idSubscriber, totp }) => {
+module.exports.refreshSealActivationTotp = async ({ idSubscriber, totp }) => {
   return new Promise((resolve, reject) => {
     esignFetcher
       .post(`/api/v2/seal/get/activation`, {

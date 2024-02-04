@@ -121,11 +121,11 @@ const EmployeeBio = ({ data, loading, isLoadingDataPns, dataPnsAll }) => {
   return (
     <Card loading={loading}>
       <ChangeStatusAnomali data={anomali} open={open} onCancel={handleClose} />
-      <Row gutter={[32, 32]}>
-        <Col md={2}>
-          <Avatar size={90} shape="square" src={data?.foto} />
+      <Row gutter={[16, 16]}>
+        <Col md={2} sm={2}>
+          <Avatar size={95} shape="circle" src={data?.foto} />
         </Col>
-        <Col md={10}>
+        <Col md={10} sm={10}>
           <Space direction="vertical">
             <Space size="small">
               <Tag color={data?.status === "Aktif" ? "green" : "red"}>

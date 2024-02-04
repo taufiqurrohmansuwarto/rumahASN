@@ -1,6 +1,8 @@
 import RequestSealActivation from "@/components/Esign/RequestSealActivation";
+import AdminSeal from "@/components/Esign/Seal/AdminSeal";
 import Layout from "@/components/Layout";
 import PageContainer from "@/components/PageContainer";
+import { Stack } from "@mantine/core";
 import Head from "next/head";
 
 const SegelElektronik = () => {
@@ -11,6 +13,9 @@ const SegelElektronik = () => {
       </Head>
       <PageContainer title="E-Sign" content="Segel Elektronik">
         <RequestSealActivation />
+        <div style={{ marginTop: 10 }}>
+          <AdminSeal />
+        </div>
       </PageContainer>
     </>
   );

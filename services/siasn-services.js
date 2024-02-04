@@ -180,6 +180,10 @@ export const getRwPwkByNip = async (nip) => {
   return api.get(`/admin/${nip}/rw-pwk`).then((res) => res.data);
 };
 
+export const getHukdisByNip = async (nip) => {
+  return api.get(`/admin/${nip}/rw-hukdis`).then((res) => res.data);
+};
+
 export const getPnsUnorByNip = async (nip) => {
   return api.get(`/admin/${nip}/rw-pnsunor`).then((res) => res.data);
 };

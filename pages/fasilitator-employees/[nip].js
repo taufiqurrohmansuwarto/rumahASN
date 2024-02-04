@@ -125,10 +125,10 @@ const EmployeeBio = ({ data, loading }) => {
     <Card loading={loading}>
       <ChangeStatusAnomali data={anomali} open={open} onCancel={handleClose} />
       <Row gutter={[16, 16]}>
-        <Col md={2}>
-          <Avatar size={90} shape="square" src={data?.foto} />
+        <Col md={2} sm={5}>
+          <Avatar size={80} shape="square" src={data?.foto} />
         </Col>
-        <Col md={10}>
+        <Col md={10} sm={13}>
           <Space direction="vertical">
             <Space size="small">
               <Tag color={data?.status === "Aktif" ? "green" : "red"}>
