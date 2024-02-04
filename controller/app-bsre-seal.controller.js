@@ -4,6 +4,15 @@ const {
   refreshSealTotp,
 } = require("@/utils/esign-utils");
 
+const subscribersDetail = async (req, res) => {
+  try {
+    const seal = await AppBsreSeal.query();
+    res.json(seal);
+  } catch (error) {
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+};
+
 const generateSealActivation = async (req, res) => {
   try {
     const seal = await AppBsreSeal.query().first();
@@ -97,4 +106,5 @@ module.exports = {
   setIdSubscriber,
   refreshSealActivation,
   setTotpActivationCode,
+  subscribersDetail,
 };
