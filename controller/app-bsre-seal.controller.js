@@ -18,40 +18,43 @@ const subscribersDetail = async (req, res) => {
 const generateSealActivation = async (req, res) => {
   try {
     const seal = await AppBsreSeal.query().first();
-    const { id_subscriber, totp_activation_code } = seal;
 
-    if (id_subscriber && totp_activation_code) {
-      // merefresh kalau ada id_subscriber dan totp_activation_code
-      const response = await refreshSealActivationTotp({
-        idSubscriber: id_subscriber,
-        totp: totp_activation_code,
-      });
-      if (response.success) {
-        const data = response?.data?.data;
-        await AppBsreSeal.query().patchAndFetchById(seal.id, {
-          totp_activation_code: data?.totp,
-        });
-
-        const result = {
-          ...data,
-          expired_at: moment(data?.expires).format("DD-MM-YYYY HH:mm:ss"),
-          expire_from_now_in_hours: moment(data?.expires).diff(
-            moment(),
-            "hours"
-          ),
-        };
-
-        res.json(result);
-      } else {
-        res.status(500).json({ message: response.data });
-      }
+    if (!seal) {
+      res.status(404).json({ message: "Seal Information not found" });
     } else {
-      const subscriberId = seal?.id_subscriber;
-      const response = await getSealActivationOTP(subscriberId);
-      if (response.success) {
-        res.json(response?.data);
+      if (seal?.id_subscriber && seal?.totp_activation_code) {
+        // merefresh kalau ada id_subscriber dan totp_activation_code
+        const response = await refreshSealActivationTotp({
+          idSubscriber: id_subscriber,
+          totp: totp_activation_code,
+        });
+        if (response.success) {
+          const data = response?.data?.data;
+          await AppBsreSeal.query().patchAndFetchById(seal.id, {
+            totp_activation_code: data?.totp,
+          });
+
+          const result = {
+            ...data,
+            expired_at: moment(data?.expires).format("DD-MM-YYYY HH:mm:ss"),
+            expire_from_now_in_hours: moment(data?.expires).diff(
+              moment(),
+              "hours"
+            ),
+          };
+
+          res.json(result);
+        } else {
+          res.status(500).json({ message: response.data });
+        }
       } else {
-        res.status(500).json({ message: response.data });
+        const subscriberId = seal?.id_subscriber;
+        const response = await getSealActivationOTP(subscriberId);
+        if (response.success) {
+          res.json(response?.data);
+        } else {
+          res.status(500).json({ message: response.data });
+        }
       }
     }
   } catch (error) {
