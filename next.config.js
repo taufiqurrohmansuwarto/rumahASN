@@ -1,8 +1,38 @@
 /** @type {import('next').NextConfig} */
 const withAntdLess = require("next-plugin-antd-less");
 const cron = require("node-cron");
+const AppBsreSeal = require("./models/app_bsre_seal.model");
+const { refreshSealActivationTotp } = require("./utils/esign-utils");
 
 const isProd = process.env.NODE_ENV === "production";
+
+// cron every 5 seconds with scheduler
+cron.schedule("*/5 * * * * *", async () => {
+  // check id_subscriber and totp_activation_code
+  const result = await AppBsreSeal.query().first();
+
+  if (!result) {
+    return;
+  } else {
+    const id_subscriber = result?.id_subscriber;
+    const totp_activation_code = result?.totp_activation_code;
+
+    const response = await refreshSealActivationTotp({
+      idSubscriber: id_subscriber,
+      totp: totp_activation_code,
+    });
+
+    if (response?.success && response?.data?.totp) {
+      const currentData = response?.data;
+      await AppBsreSeal.query().patchAndFetchById(result.id, {
+        totp_activation_code: currentData?.totp,
+      });
+      console.log("Refresh seal activation totp success");
+    } else {
+      console.log("Refresh seal activation totp failed");
+    }
+  }
+});
 
 function getBasePath() {
   var basePath = "";

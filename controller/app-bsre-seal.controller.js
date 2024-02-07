@@ -4,6 +4,7 @@ const {
   refreshSealTotp,
   refreshSealActivationTotp,
 } = require("@/utils/esign-utils");
+const { trim } = require("lodash");
 const moment = require("moment");
 
 const subscribersDetail = async (req, res) => {
@@ -25,13 +26,13 @@ const generateSealActivation = async (req, res) => {
       if (seal?.id_subscriber && seal?.totp_activation_code) {
         // merefresh kalau ada id_subscriber dan totp_activation_code
         const response = await refreshSealActivationTotp({
-          idSubscriber: id_subscriber,
-          totp: totp_activation_code,
+          idSubscriber: seal?.id_subscriber,
+          totp: seal?.totp_activation_code,
         });
         if (response.success) {
-          const data = response?.data?.data;
+          const data = response?.data;
           await AppBsreSeal.query().patchAndFetchById(seal.id, {
-            totp_activation_code: data?.totp,
+            totp_activation_code: trim(data?.totp),
           });
 
           const result = {

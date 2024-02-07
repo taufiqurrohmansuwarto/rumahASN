@@ -1,6 +1,13 @@
-const { requestSealOtp } = require("@/utils/esign-utils");
+const {
+  requestSealOtp,
+  requestSealOtpWithIdSubscriber,
+} = require("@/utils/esign-utils");
 const DsSegelTOTP = require("@/models/ds-segel-totp.model");
 const LogSealBsre = require("@/models/log-seal-bsre.model");
+const AppBsreSeal = require("@/models/app_bsre_seal.model");
+
+// app seal
+const appSealBsre = require("@/models/app_bsre_seal.model");
 
 module.exports = async (req, res, next) => {
   const { customId: userId } = req?.user;
@@ -9,22 +16,21 @@ module.exports = async (req, res, next) => {
     if (webinar?.type_sign === "PERSONAL_SIGN") {
       next();
     } else {
-      const result = await DsSegelTOTP.query()
-        .where("type", "SEAL_ACTIVATION")
-        .orderBy("created_at", "desc")
-        .first();
+      const result = await appSealBsre.query().first();
 
       // check didatabase kalau tidak ada
-      if (!result) {
+      if (!result?.totp_activation_code) {
         res.status(404).json({
           message:
             "TOTP belum digenerate, silahkan hubungi admin untuk melakukan generate TOTP",
         });
       } else {
         const requestData = {
-          totp: result.totp,
+          totp: result.totp_activation_code,
+          idSubscriber: result.id_subscriber,
         };
-        const hasilSeal = await requestSealOtp(requestData);
+
+        const hasilSeal = await requestSealOtpWithIdSubscriber(requestData);
 
         if (hasilSeal?.success) {
           const dataSuccessLog = {

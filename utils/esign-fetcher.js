@@ -1,4 +1,4 @@
-import axios from "axios";
+const { default: axios } = require("axios");
 
 const baseURL = process.env.ESIGN_URL;
 const username = process.env.ESIGN_USERNAME;
