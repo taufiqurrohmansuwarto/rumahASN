@@ -22,6 +22,7 @@ const { uploadFileMinio, typeGroup } = require("@/utils/index");
 const {
   wordToPdf,
   generateWebinarCertificate,
+  generateCertificateWithUserInformation,
 } = require("@/utils/certificate-utils");
 
 const { toLower, template } = require("lodash");
@@ -908,7 +909,8 @@ const downloadCertificate = async (req, res) => {
         "is_generate_certificate",
         "user_information",
         "document_sign",
-        "document_sign_at"
+        "document_sign_at",
+        "user_information"
       )
       .where("id", id)
       .andWhere("user_id", customId)
@@ -937,72 +939,75 @@ const downloadCertificate = async (req, res) => {
         // jika belum generate maka generate dulu kalau ini menggunakan seal
         const numberCertificate = currentWebinarSeries?.certificate_number;
         const templateUrl = currentWebinarSeries?.certificate_template;
-        const currentUser = await User.query()
-          .where("custom_id", customId)
-          .first();
 
         const certificate = {
           url: templateUrl,
-          user: currentUser,
-          certificateNumber: numberCertificate,
+          user: {
+            nama: result?.user_information?.name,
+            employee_number: result?.user_information?.employee_number,
+            jabatan: result?.user_information?.jabatan,
+            instansi: result?.user_information?.instansi,
+          },
+          nomer_sertifikat: numberCertificate,
+          id: result?.id,
         };
 
-        const userSertificate = await generateWebinarCertificate(certificate);
+        const userSertificate = await generateCertificateWithUserInformation(
+          certificate
+        );
 
-        const dataCertificate = userSertificate?.data;
-
-        const qrCode = await createQrFromId(id);
-
-        const totpSeal = req?.totpSeal;
-
-        const data = {
-          totp: totpSeal,
-          file: dataCertificate?.file,
-          height: dataCertificate?.height,
-          width: dataCertificate?.width,
-          image: qrCode,
-        };
-
-        const sealDocument = await sealPdf(data);
-
-        if (sealDocument?.success) {
-          const successLog = {
-            user_id: customId,
-            action: "SEAL_CERTIFICATE",
-            status: "SUCCESS",
-            request_data: JSON.stringify(data),
-            response_data: JSON.stringify(sealDocument),
-            description: "Seal Certificate",
+        if (userSertificate?.success) {
+          const data = {
+            totp: req?.totpSeal,
+            idSubscriber: req?.idSubscriber,
+            file: userSertificate?.file,
           };
 
-          await LogSealBsre.query().insert(successLog);
+          const sealDocument = await sealPdf(data);
 
-          // update the database
-          await WebinarSeriesParticipates.query()
-            .patch({
-              is_generate_certificate: true,
-              document_sign: sealDocument?.data?.file[0],
-              document_sign_at: new Date(),
-            })
-            .where("id", id)
-            .andWhere("user_id", customId);
+          if (sealDocument?.success) {
+            const successLog = {
+              user_id: customId,
+              action: "SEAL_CERTIFICATE",
+              status: "SUCCESS",
+              request_data: JSON.stringify(data),
+              response_data: JSON.stringify(sealDocument),
+              description: "Seal Certificate",
+            };
 
-          res.json(sealDocument?.data?.file[0]);
+            await LogSealBsre.query().insert(successLog);
+
+            // update the database
+            await WebinarSeriesParticipates.query()
+              .patch({
+                is_generate_certificate: true,
+                document_sign: sealDocument?.data?.file[0],
+                document_sign_at: new Date(),
+              })
+              .where("id", id)
+              .andWhere("user_id", customId);
+
+            res.json(sealDocument?.data?.file[0]);
+          } else {
+            const errorLog = {
+              user_id: customId,
+              action: "SEAL_CERTIFICATE",
+              status: "ERROR",
+              request_data: JSON.stringify(data),
+              response_data: JSON.stringify(sealDocument),
+              description: "Seal Certificate",
+            };
+
+            await LogSealBsre.query().insert(errorLog);
+
+            res
+              .status(400)
+              .json({ code: 400, message: sealDocument?.data?.message });
+          }
         } else {
-          const errorLog = {
-            user_id: customId,
-            action: "SEAL_CERTIFICATE",
-            status: "ERROR",
-            request_data: JSON.stringify(data),
-            response_data: JSON.stringify(sealDocument),
-            description: "Seal Certificate",
-          };
-
-          await LogSealBsre.query().insert(errorLog);
-
           res
             .status(400)
-            .json({ code: 400, message: sealDocument?.data?.message });
+            .json({ code: 400, message: userSertificate?.data?.message });
         }
       }
     }
