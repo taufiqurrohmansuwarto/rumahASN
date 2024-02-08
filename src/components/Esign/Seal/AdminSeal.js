@@ -133,8 +133,8 @@ function AdminSeal() {
 
   const handleGenerateOTPActivation = () => {
     Modal.confirm({
-      title: "Generate OTP Activation",
-      content: "Are you sure to generate OTP Activation?",
+      title: "Generate Kode Aktivasi TOTP",
+      content: "Apakah anda yakin ingin generate kode aktivasi TOTP?",
       centered: true,
       onOk: async () => {
         await generate();
@@ -143,11 +143,6 @@ function AdminSeal() {
   };
 
   const columns = [
-    {
-      title: "ID",
-      dataIndex: "id",
-      key: "id",
-    },
     {
       title: "ID Subscriber",
       dataIndex: "id_subscriber",
@@ -158,17 +153,26 @@ function AdminSeal() {
       dataIndex: "totp_activation_code",
       key: "totp_activation_code",
     },
+    {
+      title: "Di update pada",
+      dataIndex: "updated_at",
+      key: "updated_at",
+    },
   ];
 
   return (
     <>
-      <Space>
+      <Space
+        style={{
+          marginBottom: "1rem",
+        }}
+      >
         <Button
           onClick={handleGenerateOTPActivation}
           type="primary"
           icon={<KeyOutlined />}
         >
-          OTP Activation
+          Generate TOTP Aktivasi
         </Button>
         <Button onClick={showModalSetSubscriberId} type="primary">
           ID Subscriber

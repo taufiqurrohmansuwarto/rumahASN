@@ -124,6 +124,7 @@ module.exports.generateCertificateWithUserInformation = async ({
     const pdfBase64 = Buffer.from(pdfBytesWithText).toString("base64");
 
     return {
+      success: true,
       file: pdfBase64,
       id,
     };
@@ -138,52 +139,46 @@ module.exports.generateCertificateWithUserInformation = async ({
 module.exports.generateWebinarCertificate = async ({
   url,
   user,
-  certificateNumber,
+  id,
+  nomer_sertifikat,
 }) => {
   try {
+    const { nama, employee_number, jabatan, instansi } = user;
+    const qrCode = await createQrFromId(id);
     const pdfBytes = await axios.get(url, { responseType: "arraybuffer" });
     const pdfDoc = await PDFDocument.load(pdfBytes.data);
 
-    // get height and width not minus
-    const { width, height } = pdfDoc.getPages()[0].getSize();
-
-    const form = pdfDoc.getForm();
-
-    const nama = getParticipantName(user) || "";
-    const employee_number = getParticipantEmployeeNumber(user) || "";
-    const jabatan = user?.info?.jabatan?.jabatan || "";
-    const instansi = user?.info?.perangkat_daerah?.detail || "";
-    const nomer_sertifikat = certificateNumber || "";
-
     const certificateData = {
-      nama,
-      employee_number,
-      jabatan,
-      instansi,
-      nomer_sertifikat,
+      nama: nama || "",
+      employee_number: employee_number || "",
+      jabatan: jabatan || "",
+      instansi: instansi || "",
+      nomer_sertifikat: nomer_sertifikat || "",
     };
 
-    // iterate form
-    const fields = form.getFields();
+    // add qr code in bottom right
+    const qrImage = await pdfDoc.embedPng(qrCode);
+    const qrDims = qrImage.scale(0.2);
+    const page = pdfDoc.getPages()[0];
+    page.drawImage(qrImage, {
+      x: page.getWidth() - qrDims.width - 50,
+      y: 50,
+      width: qrDims.width,
+      height: qrDims.height,
+    });
 
-    for (const field of fields) {
-      const fieldName = field.getName();
-
-      dynamicFontSize(form, fieldName, certificateData[fieldName]);
+    const form = pdfDoc.getForm();
+    for (const field of fieldsColumn) {
+      dynamicFontSize(form, field, certificateData[field]);
     }
 
     const pdfBytesWithText = await pdfDoc.save();
     const pdfBase64 = Buffer.from(pdfBytesWithText).toString("base64");
-    const data = {
-      file: pdfBase64,
-      // normalize minus value and 1 decimal using lodash
-      width: round(width, 0),
-      height: round(height, 0),
-    };
 
     return {
       success: true,
-      data,
+      file: pdfBase64,
+      id,
     };
   } catch (error) {
     console.log(error);
