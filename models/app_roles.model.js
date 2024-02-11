@@ -11,8 +11,17 @@ class AppRoles extends Model {
   static get relationMappings() {
     const AppRolePermissions = require("./app_role_permissions.model");
     const AppPermissions = require("./app_permissions.model");
+    const User = require("@/models/users.model");
 
     return {
+      users: {
+        relation: Model.HasManyRelation,
+        modelClass: User,
+        join: {
+          from: "app_roles.id",
+          to: "users.app_role_id",
+        },
+      },
       permissions: {
         relation: Model.ManyToManyRelation,
         modelClass: AppPermissions,
