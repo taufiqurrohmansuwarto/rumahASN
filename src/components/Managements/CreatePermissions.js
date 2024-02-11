@@ -1,6 +1,7 @@
-import { createRole } from "@/services/managements.services";
+import { createPermission } from "@/services/managements.services";
+import { PlusOutlined } from "@ant-design/icons";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Button, Form, Input, Modal, message } from "antd";
+import { Button, Form, Input, Modal, Select, message } from "antd";
 import React from "react";
 
 const CreatePermissionModal = ({ open, onCancel, create, loading }) => {
@@ -20,13 +21,22 @@ const CreatePermissionModal = ({ open, onCancel, create, loading }) => {
     <Modal
       onOk={handleOk}
       confirmLoading={loading}
-      title="Tambah Role"
+      title="Tambah Permissions"
       open={open}
       onCancel={onCancel}
     >
-      <Form form={form}>
-        <Form.Item name="name" label="Nama Role">
+      <Form form={form} layout="vertical">
+        <Form.Item name="name" label="Nama Permission/Action">
           <Input />
+        </Form.Item>
+        <Form.Item name="resource" label="Resource">
+          <Input />
+        </Form.Item>
+        <Form.Item name="description" label="Deksripsi">
+          <Input.TextArea />
+        </Form.Item>
+        <Form.Item name="attributes" label="Attribute">
+          <Select mode="tags" />
         </Form.Item>
       </Form>
     </Modal>
@@ -38,12 +48,15 @@ function CreatePermissions() {
   const [open, setOpen] = React.useState(false);
 
   const { mutateAsync: create, isLoading: isLoadingCreate } = useMutation(
-    (data) => createRole(data),
+    (data) => createPermission(data),
     {
       onSuccess: () => {
         setOpen(false);
+        message.success("Berhasil menambahkan permission");
       },
-      onError: () => {},
+      onError: () => {
+        message.error("Gagal menambahkan permission");
+      },
       onSettled: () => {
         queryClient.invalidateQueries("roles");
       },
@@ -55,7 +68,16 @@ function CreatePermissions() {
 
   return (
     <>
-      <Button onClick={handleOpen}>Create Permission</Button>
+      <Button
+        type="primary"
+        style={{
+          marginBottom: 16,
+        }}
+        onClick={handleOpen}
+        icon={<PlusOutlined />}
+      >
+        Permission
+      </Button>
       <CreatePermissionModal
         create={create}
         loading={isLoadingCreate}

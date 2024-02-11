@@ -1,4 +1,5 @@
 import { createRole } from "@/services/managements.services";
+import { PlusOutlined } from "@ant-design/icons";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button, Form, Input, Modal, message } from "antd";
 import React from "react";
@@ -18,15 +19,19 @@ const CreateRoleModal = ({ open, onCancel, create, loading }) => {
 
   return (
     <Modal
+      centered
       onOk={handleOk}
       confirmLoading={loading}
       title="Tambah Role"
       open={open}
       onCancel={onCancel}
     >
-      <Form form={form}>
+      <Form layout="vertical" form={form}>
         <Form.Item name="name" label="Nama Role">
           <Input />
+        </Form.Item>
+        <Form.Item name="description" label="Deskripsi">
+          <Input.TextArea />
         </Form.Item>
       </Form>
     </Modal>
@@ -55,7 +60,16 @@ function CreateRole() {
 
   return (
     <>
-      <Button onClick={handleOpen}>Create Role</Button>
+      <Button
+        style={{
+          marginBottom: 16,
+        }}
+        icon={<PlusOutlined />}
+        type="primary"
+        onClick={handleOpen}
+      >
+        Role
+      </Button>
       <CreateRoleModal
         create={create}
         loading={isLoadingCreate}
