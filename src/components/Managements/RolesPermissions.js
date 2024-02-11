@@ -5,8 +5,36 @@ import {
   updateRolePermission,
 } from "@/services/managements.services";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Button, Checkbox, Form, Select, message, Tooltip } from "antd";
+import { Button, Checkbox, Form, Select, message, Tooltip, Table } from "antd";
 import React, { useEffect } from "react";
+
+const UserTable = ({ users }) => {
+  const columns = [
+    {
+      title: "Name",
+      dataIndex: "username",
+    },
+    {
+      title: "NIP",
+      dataIndex: "employee_number",
+    },
+    {
+      title: "Perangkat Daerah",
+      key: "perangkat_daerah",
+      render: (text, record) => (
+        <span>{record?.info?.perangkat_daerah?.detail}</span>
+      ),
+    },
+  ];
+  return (
+    <Table
+      columns={columns}
+      pagination={false}
+      dataSource={users}
+      rowKey={(row) => row?.custom_id}
+    />
+  );
+};
 
 function RolesPermissions() {
   const [role, setRole] = React.useState(null);
@@ -76,6 +104,8 @@ function RolesPermissions() {
         onChange={handleChange}
         showSearch
         optionFilterProp="name"
+        placeholder="Select a role"
+        allowClear
       >
         {roles?.map((role) => (
           <Select.Option name={role?.name} key={role.id} value={role.id}>
@@ -85,24 +115,30 @@ function RolesPermissions() {
       </Select>
       <>
         {rolePermissions && role && (
-          <Form form={form} onFinish={handleSubmit} layout="vertical">
-            <Form.Item name="permissions" label="Permissions">
-              <Checkbox.Group>
-                {permissions?.map((permission) => (
-                  <Tooltip key={permission?.id} title={permission?.description}>
-                    <Checkbox value={permission?.id}>
-                      {permission?.name} - {permission?.resource}
-                    </Checkbox>
-                  </Tooltip>
-                ))}
-              </Checkbox.Group>
-            </Form.Item>
-            <Form.Item>
-              <Button htmlType="submit" type="primary">
-                Submit
-              </Button>
-            </Form.Item>
-          </Form>
+          <>
+            <Form form={form} onFinish={handleSubmit} layout="vertical">
+              <Form.Item name="permissions" label="Permissions">
+                <Checkbox.Group>
+                  {permissions?.map((permission) => (
+                    <Tooltip
+                      key={permission?.id}
+                      title={permission?.description}
+                    >
+                      <Checkbox value={permission?.id}>
+                        {permission?.name} - {permission?.resource}
+                      </Checkbox>
+                    </Tooltip>
+                  ))}
+                </Checkbox.Group>
+              </Form.Item>
+              <Form.Item>
+                <Button htmlType="submit" type="primary">
+                  Submit
+                </Button>
+              </Form.Item>
+            </Form>
+            <UserTable users={rolePermissions?.users} />
+          </>
         )}
       </>
     </>

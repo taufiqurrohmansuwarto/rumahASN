@@ -3,6 +3,7 @@ import {
   ApiOutlined,
   BarChartOutlined,
   BookOutlined,
+  GroupOutlined,
   LogoutOutlined,
   ProfileOutlined,
   QuestionCircleFilled,
@@ -42,6 +43,7 @@ const changeRoutes = (user) => {
     const agent = (role === "agent" && bkd) || (role === "agent" && pttBkd);
     const userPns = user?.group === "MASTER" && user?.role === "USER";
     const userPttpk = user?.group === "PTTPK" && user?.role === "USER";
+    const prakom = user?.id === "master|56543";
 
     const fasilitatorMaster =
       user?.group === "MASTER" && user?.role === "FASILITATOR";
@@ -250,6 +252,14 @@ const changeRoutes = (user) => {
           ],
         }
       );
+    }
+
+    if (prakom) {
+      userRoutes.routes.push({
+        path: "/management-users",
+        name: "Manajemen Pengguna",
+        icon: <GroupOutlined />,
+      });
     }
 
     if (agent) {

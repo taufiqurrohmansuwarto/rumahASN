@@ -47,6 +47,7 @@ function CreateRole() {
     {
       onSuccess: () => {
         setOpen(false);
+        message.success("Berhasil menambahkan role");
       },
       onError: () => {},
       onSettled: () => {

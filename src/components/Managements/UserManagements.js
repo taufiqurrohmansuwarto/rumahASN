@@ -23,6 +23,8 @@ import CreatePermissions from "./CreatePermissions";
 import CreateRole from "./CreateRole";
 import RolesPermissions from "./RolesPermissions";
 import { useEffect, useState } from "react";
+import { useSession } from "next-auth/react";
+import UserRoles from "./UserRoles";
 
 const EditRoleModal = ({ open, onCancel, update, data, loading }) => {
   const [form] = Form.useForm();
@@ -274,6 +276,7 @@ const PermissionTable = ({
 
 function UserManagements() {
   const queryClient = useQueryClient();
+  const { data } = useSession();
 
   const { data: roles, isLoading: isLoadingRoles } = useQuery(
     ["roles"],
@@ -358,6 +361,9 @@ function UserManagements() {
             loadingUpdate={isLoadingPermissionUpdate}
             loadingRemove={isLoadingPermissionDelete}
           />
+        </Tabs.TabPane>
+        <Tabs.TabPane tab="User Roles" key="users">
+          <UserRoles />
         </Tabs.TabPane>
       </Tabs>
     </div>

@@ -50,3 +50,19 @@ export const updateRolePermission = async ({ id, data }) => {
     .put(`/roles/${id}/roles-permissions`, data)
     .then((res) => res?.data);
 };
+
+// user roles
+export const getUsers = async (params) => {
+  return await api
+    .get(
+      `/users?${queryString.stringify(params, {
+        skipEmptyString: true,
+        skipNull: true,
+      })}`
+    )
+    .then((res) => res?.data);
+};
+
+export const updateUserRole = async ({ id, data }) => {
+  return await api.patch(`/users/${id}/roles`, data).then((res) => res?.data);
+};

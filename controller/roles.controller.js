@@ -2,10 +2,16 @@
 const Role = require("@/models/app_roles.model");
 const Permission = require("@/models/app_permissions.model");
 const RolePermission = require("@/models/app_role_permissions.model");
+const User = require("@/models/users.model");
 
 const userRoles = async (req, res) => {
   try {
     const { customId } = req.user;
+    const roles = await Role.query()
+      .where("user_id", customId)
+      .withGraphFetched("permissions");
+
+    res.json(roles);
   } catch (error) {
     console.log(error);
     res.status(500).json({ error: error.message });
@@ -37,8 +43,11 @@ const deleteRole = async (req, res) => {
   try {
     const { id } = req.query;
     await Role.query().deleteById(id);
-    res.status(204).end();
+    res.json({
+      message: "Role deleted",
+    });
   } catch (error) {
+    console.log(error);
     res.status(500).json({ error: error.message });
   }
 };
@@ -106,7 +115,7 @@ const getRolePermissions = async (req, res) => {
     const { id } = req.query;
     const role = await Role.query()
       .findById(id)
-      .withGraphFetched("permissions");
+      .withGraphFetched("[permissions, users]");
 
     if (!role) {
       res.status(404).json({ message: "Role not found" });
@@ -150,6 +159,58 @@ const updateRolePermission = async (req, res) => {
   }
 };
 
+const usersRoles = async (req, res) => {
+  try {
+    const limit = req.query.limit || 10;
+    const page = req.query.page || 1;
+    const search = req.query.search || "";
+    console.log(search);
+
+    const users = await User.query()
+      .withGraphFetched("app_role")
+      .andWhere("group", "=", "MASTER")
+      .andWhere("role", "=", "USER")
+      .andWhere((builder) => {
+        if (search) {
+          builder.where("username", "ilike", `%${search}%`);
+        }
+      })
+      // .orWhere("group", "=", "PTTPK")
+      .page(page - 1, limit);
+
+    const data = {
+      data: users.results,
+      total: users.total,
+      page: users.page,
+      limit: users.limit,
+    };
+
+    res.json(data);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: error.message });
+  }
+};
+
+const updateUserRole = async (req, res) => {
+  try {
+    const { id: userId } = req?.query;
+
+    if (!userId) {
+      res.status(400).json({ message: "User id is required" });
+    } else {
+      await User.query().findById(userId).patch({
+        app_role_id: req.body.app_role_id,
+      });
+
+      res.status(200).json({ message: "User role updated" });
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: error.message });
+  }
+};
+
 module.exports = {
   userRoles,
 
@@ -167,4 +228,7 @@ module.exports = {
 
   getRolePermissions,
   updateRolePermission,
+
+  usersRoles,
+  updateUserRole,
 };
