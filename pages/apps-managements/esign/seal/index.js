@@ -1,5 +1,6 @@
 import AdminSeal from "@/components/Esign/Seal/AdminSeal";
 import Layout from "@/components/Layout";
+import UserManagements from "@/components/Managements/UserManagements";
 import PageContainer from "@/components/PageContainer";
 import { Card } from "antd";
 import Head from "next/head";
@@ -13,6 +14,7 @@ const SegelElektronik = () => {
       <PageContainer title="E-Sign" content="Segel Elektronik">
         <Card title="Admin Segel Elektronik">
           <AdminSeal />
+          <UserManagements />
         </Card>
       </PageContainer>
     </>
