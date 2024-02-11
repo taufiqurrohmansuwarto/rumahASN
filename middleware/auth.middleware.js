@@ -20,7 +20,11 @@ const auth = async (req, res, next) => {
       const userId = data?.user?.id?.split("|")?.[1];
       const customId = data?.user?.id;
 
-      const result = await User.query().where("custom_id", customId).first();
+      const result = await User.query()
+        .where("custom_id", customId)
+        .first()
+        .withGraphFetched("app_role");
+
       const currentUser = {
         ...data?.user,
         userId: parseInt(userId),
