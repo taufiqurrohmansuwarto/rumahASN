@@ -14,7 +14,6 @@ const SegelElektronik = () => {
       <PageContainer title="E-Sign" content="Segel Elektronik">
         <Card title="Admin Segel Elektronik">
           <AdminSeal />
-          <UserManagements />
         </Card>
       </PageContainer>
     </>
