@@ -1,6 +1,5 @@
 import AdminSeal from "@/components/Esign/Seal/AdminSeal";
 import Layout from "@/components/Layout";
-import UserManagements from "@/components/Managements/UserManagements";
 import PageContainer from "@/components/PageContainer";
 import { Card } from "antd";
 import Head from "next/head";
