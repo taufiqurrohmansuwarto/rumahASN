@@ -53,8 +53,6 @@ const changeRoutes = (user) => {
     const pegawaiPemda = userPns || userPttpk;
     const pegawaiBKD = bkd || pttBkd;
 
-    console.log(user?.app_role);
-
     const grantList = user?.app_role?.roles;
     const currentRoleName = user?.app_role?.role;
 
