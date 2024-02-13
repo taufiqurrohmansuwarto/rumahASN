@@ -91,12 +91,19 @@ function AdminSeal() {
     (data) => generateSealActivation(data),
     {
       onSuccess: (result) => {
-        queryClient.invalidateQueries("subscriber");
         message.success("Seal activation code has been generated");
         Modal.info({
           title: "Seal Activation Code",
           content: <div>{JSON.stringify(result)}</div>,
         });
+      },
+      onError: (err) => {
+        const msg = err?.response?.data?.message;
+        message.error(msg || "Failed to generate seal activation code");
+      },
+      onSettled: () => {
+        queryClient.invalidateQueries("subscriber");
+        closeModalSetTotp();
       },
     }
   );
@@ -104,14 +111,14 @@ function AdminSeal() {
   const { mutateAsync: setIdSubscriber, isLoading: isLoadingSetIdSubscriber } =
     useMutation((data) => setSubscriberId(data), {
       onSuccess: () => {
-        queryClient.invalidateQueries("subscriber");
         message.success("Subscriber ID has been set");
       },
-      onError: (error) => {
+      onError: () => {
         message.error("Failed to set subscriber id");
       },
       onSettled: () => {
         closeModalSetSubscriberId();
+        queryClient.invalidateQueries("subscriber");
       },
     });
 
@@ -119,13 +126,13 @@ function AdminSeal() {
     (data) => setTotpActivationCode(data),
     {
       onSuccess: () => {
-        queryClient.invalidateQueries("subscriber");
         message.success("Totp activation code has been set");
       },
       onError: (error) => {
         message.error("Failed to set totp activation code");
       },
       onSettled: () => {
+        queryClient.invalidateQueries("subscriber");
         closeModalSetTotp();
       },
     }
@@ -137,7 +144,9 @@ function AdminSeal() {
       content: "Apakah anda yakin ingin generate kode aktivasi TOTP?",
       centered: true,
       onOk: async () => {
-        await generate();
+        try {
+          await generate();
+        } catch (error) {}
       },
     });
   };

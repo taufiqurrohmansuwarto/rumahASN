@@ -25,6 +25,8 @@ import { userRoutes } from "../routes";
 import Messages from "./Messages";
 import Notifications from "./Notifications";
 import SearchUserLayout from "./SearchUserLayout";
+import { currentUserRole } from "@/services/current-user.services";
+import { AccessControl } from "accesscontrol";
 
 const ProLayout = dynamic(
   () => import("@ant-design/pro-components").then((mod) => mod?.ProLayout),
@@ -50,6 +52,14 @@ const changeRoutes = (user) => {
 
     const pegawaiPemda = userPns || userPttpk;
     const pegawaiBKD = bkd || pttBkd;
+
+    console.log(user?.app_role);
+
+    const grantList = user?.app_role?.roles;
+    const currentRoleName = user?.app_role?.role;
+
+    const ac = new AccessControl(grantList);
+    const sealAdmin = ac.can(currentRoleName).updateAny("seal");
 
     const adminFasilitator = admin || fasilitatorMaster;
 
@@ -202,7 +212,7 @@ const changeRoutes = (user) => {
                 { path: "/apps-managements/integrasi/siasn", name: "SIASN" },
               ],
             },
-            {
+            sealAdmin?.granted && {
               path: "/apps-managements/esign",
               name: "E-Sign",
               routes: [
@@ -421,7 +431,12 @@ function Layout({ children, active, collapsed = true }) {
       menu={{
         request: async () => {
           try {
-            const user = await changeRoutes(data?.user);
+            const userRole = await currentUserRole();
+            const payload = {
+              ...data?.user,
+              app_role: userRole,
+            };
+            const user = await changeRoutes(payload);
             return user;
           } catch (e) {
             console.log(e);
