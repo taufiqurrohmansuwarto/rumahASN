@@ -1,10 +1,31 @@
 import { dataDiklat } from "@/services/siasn-services";
 import { Stack } from "@mantine/core";
 import { useQuery } from "@tanstack/react-query";
-import { Skeleton, Table, Typography } from "antd";
+import { Card, Skeleton, Table, Typography } from "antd";
+import FormDiklat from "./FormDiklat";
 
 const TableDiklat = ({ data }) => {
   const columns = [
+    {
+      title: "File",
+      key: "file",
+      render: (_, row) => {
+        return (
+          <>
+            {row?.path?.[874] && (
+              <a
+                href={`/helpdesk/api/siasn/ws/download?filePath=${row?.path?.[874]?.dok_uri}`}
+                target="_blank"
+                rel="noreferrer"
+              >
+                File
+              </a>
+            )}
+          </>
+        );
+      },
+      responsive: ["sm"],
+    },
     {
       title: "Nama Diklat",
       dataIndex: "latihanStrukturalNama",
@@ -31,6 +52,7 @@ const TableDiklat = ({ data }) => {
       title={() => <Typography.Text strong>Data Diklat</Typography.Text>}
       columns={columns}
       pagination={false}
+      rowKey={(row) => row?.id}
       dataSource={data}
     />
   );
@@ -38,6 +60,26 @@ const TableDiklat = ({ data }) => {
 
 const TableKursus = ({ data }) => {
   const columns = [
+    {
+      title: "File",
+      key: "file",
+      render: (_, row) => {
+        return (
+          <>
+            {row?.path?.[881] && (
+              <a
+                href={`/helpdesk/api/siasn/ws/download?filePath=${row?.path?.[881]?.dok_uri}`}
+                target="_blank"
+                rel="noreferrer"
+              >
+                File
+              </a>
+            )}
+          </>
+        );
+      },
+      responsive: ["sm"],
+    },
     {
       title: "Nama Kursus, Jenis, Penyelenggara",
       key: "kursusJenisPenyelenggara",
@@ -56,6 +98,22 @@ const TableKursus = ({ data }) => {
       title: "Nama Kursus",
       dataIndex: "namaKursus",
       responsive: ["sm"],
+    },
+    {
+      title: "Tahun Kursus",
+      dataIndex: "tahunKursus",
+    },
+    {
+      title: "Nomer Sertifikat",
+      dataIndex: "noSertipikat",
+    },
+    {
+      title: "Tanggal Kursus",
+      dataIndex: "tanggalKursus",
+    },
+    {
+      title: "Tanggal Selesai Kursus",
+      dataIndex: "tanggalSelesaiKursus",
     },
     {
       title: "Jenis",
@@ -78,6 +136,7 @@ const TableKursus = ({ data }) => {
       pagination={false}
       columns={columns}
       dataSource={data}
+      rowKey={(row) => row?.id}
     />
   );
 };
@@ -90,12 +149,15 @@ function CompareDataDiklat() {
   );
 
   return (
-    <Stack>
-      <Skeleton loading={isLoading}>
-        <TableKursus data={data?.kursus} />
-        <TableDiklat data={data?.diklat} />
-      </Skeleton>
-    </Stack>
+    <Card title="Data Riwayat Diklat dan Kursus SIASN">
+      <FormDiklat />
+      <Stack>
+        <Skeleton loading={isLoading}>
+          <TableKursus data={data?.kursus} />
+          <TableDiklat data={data?.diklat} />
+        </Skeleton>
+      </Stack>
+    </Card>
   );
 }
 

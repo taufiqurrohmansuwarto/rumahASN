@@ -4,8 +4,17 @@ const api = axios.create({
   baseURL: "/helpdesk/api/siasn/ws",
 });
 
-export const dataKinerjaPns = (nip) => {
-  return api.get(`/pns-kinerja/${nip}`).then((res) => res.data);
+// referensi
+export const refJenisDiklat = () => {
+  return api.get("/ref/jenis-diklat").then((res) => res.data);
+};
+
+export const refUrusanPemerintahan = () => {
+  return api.get("/ref/urusan-pemerintahan").then((res) => res.data);
+};
+
+export const refDiklatStruktural = () => {
+  return api.get("/ref/diklat-struktural").then((res) => res.data);
 };
 
 export const dataUtamaSIASN = () => {
@@ -57,6 +66,11 @@ export const dataDiklat = () => {
   return api.get(`/pns/rw-diklat`).then((res) => res.data);
 };
 
+export const dataIpAsn = (tahun) => {
+  const currentTahun = tahun || new Date().getFullYear();
+  return api.get(`/pns/ip-asn?tahun=${currentTahun}`).then((res) => res.data);
+};
+
 // end of shit
 
 export const dataUtamSIASNByNip = (nip) => {
@@ -86,6 +100,10 @@ export const getRwJabatanByNip = (nip) => {
 
 export const postRwJabatan = (data) => {
   return api.post("/pns/rw-jabatan", data).then((res) => res.data);
+};
+
+export const postRwKursus = (data) => {
+  return api.post("/pns/rw-diklat", data).then((res) => res?.data);
 };
 
 export const postRwJabatanByNip = ({ nip, data }) => {

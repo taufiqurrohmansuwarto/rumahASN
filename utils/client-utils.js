@@ -82,6 +82,12 @@ export const mysapkMenu = [
     path: "/laporan-kinerja",
   },
   {
+    title: "Riwayat Diklat/Kursus",
+    icon: IconReport,
+    color: "blue",
+    path: "/diklat",
+  },
+  {
     title: "Riwayat Golongan/Pangkat",
     icon: IconBadges,
     color: "gray",
@@ -106,12 +112,7 @@ export const mysapkMenu = [
     color: "gray",
     path: "/cpnspns",
   },
-  {
-    title: "Riwayat Diklat/Kursus",
-    icon: IconReport,
-    color: "gray",
-    path: "/diklat",
-  },
+
   {
     title: "Riwayat Keluarga",
     icon: IconUsers,

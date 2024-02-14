@@ -1,4 +1,5 @@
 import CardLayananKepegawaian from "@/components/FiturLayananKepegawaian/CardLayananKepegawaian";
+import IPAsn from "@/components/LayananSIASN/IPAsn";
 import Layout from "@/components/Layout";
 import { readUser } from "@/services/layanan-kepegawaian.services";
 import { useQuery } from "@tanstack/react-query";

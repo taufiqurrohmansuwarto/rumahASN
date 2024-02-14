@@ -94,6 +94,10 @@ module.exports.postDataKursus = (fetcher, data) => {
   return fetcher.post(`/kursus/save`, data);
 };
 
+module.exports.postDataDiklat = (fetcher, data) => {
+  return fetcher.post(`/diklat/save`, data);
+};
+
 module.exports.cpnspns = (fetcher, nip) => {};
 
 module.exports.riwayatKeluarga = (fetcher, nip) => {};
