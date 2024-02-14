@@ -40,9 +40,7 @@ const RiwayatDiklat = () => {
         title="Riwayat Diklat"
         content="Komparasi Data Diklat SIASN dan SIMASTER"
       >
-        <Card>
-          <CompareDataDiklat />
-        </Card>
+        <CompareDataDiklat />
       </PageContainer>
     </>
   );

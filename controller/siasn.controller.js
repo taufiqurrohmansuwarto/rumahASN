@@ -31,31 +31,9 @@ const {
 } = require("@/utils/siasn-proxy.utils");
 const { getRwPangkat } = require("@/utils/master.utils");
 const { createLogSIASN } = require("@/utils/logs");
-const Anomali23 = require("@/models/anomali23.model");
 const BackupSIASN = require("@/models/backup-siasn.model");
 const RefSIASNUnor = require("@/models/ref-siasn-unor.model");
 const { getSession } = require("next-auth/react");
-
-const dataUtamaUpdate = {
-  agama_id: "string",
-  alamat: "string",
-  email: "string",
-  email_gov: "string",
-  kabupaten_id: "string",
-  karis_karsu: "string",
-  kelas_jabatan: "string",
-  kpkn_id: "string",
-  lokasi_kerja_id: "string",
-  nomor_bpjs: "string",
-  nomor_hp: "string",
-  nomor_telpon: "string",
-  npwp_nomor: "string",
-  npwp_tanggal: "string",
-  pns_orang_id: "string",
-  tanggal_taspen: "string",
-  tapera_nomor: "string",
-  taspen_nomor: "string",
-};
 
 const updateEmployeeInformation = async (req, res) => {
   try {
@@ -790,7 +768,16 @@ const getRefJenisDikalt = async (req, res) => {
     const result = await axios.get(
       `https://siasn.bkd.jatimprov.go.id/pemprov-api/vendor/reference/jenis-diklat`
     );
-    res.json(result?.data);
+
+    const order = orderBy(result?.data, ["jenis_diklat"], ["asc"]);
+
+    const data = order?.map((d) => ({
+      ...d,
+      label: d?.jenis_diklat,
+      value: d?.id,
+    }));
+
+    res.json(data);
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: "error" });
@@ -802,7 +789,14 @@ const getRefUrusanPemerintahan = async (req, res) => {
     const result = await axios.get(
       `https://siasn.bkd.jatimprov.go.id/pemprov-api/vendor/reference/urusan-pemerintahan`
     );
-    res.json(result?.data);
+
+    const data = result?.data?.map((d) => ({
+      ...d,
+      label: d?.nama,
+      value: d?.id,
+    }));
+
+    res.json(data);
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: "error" });
@@ -814,7 +808,14 @@ const getDiklatStruktural = async (req, res) => {
     const result = await axios.get(
       `https://siasn.bkd.jatimprov.go.id/pemprov-api/vendor/reference/diklat-struktural`
     );
-    res.json(result?.data);
+
+    const data = result?.data?.map((d) => ({
+      ...d,
+      label: d?.nama,
+      value: d?.id,
+    }));
+
+    res.json(data);
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: "error" });

@@ -12,6 +12,7 @@ import {
 import { Grid, Space, Typography } from "antd";
 import { useRouter } from "next/router";
 import AnomaliUser from "./AnomaliUser";
+import IPAsn from "../LayananSIASN/IPAsn";
 
 const mockdata = mysapkMenu;
 
@@ -96,6 +97,7 @@ export function MenuMySAPK({ dataUtama }) {
             <Typography.Text type="secondary">
               {dataUtama?.instansiIndukNama}
             </Typography.Text>
+            <IPAsn tahun={2023} />
             <AnomaliUser />
           </Space>
         </Card>
