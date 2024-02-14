@@ -785,6 +785,42 @@ const getRefJfu = async (req, res) => {
   }
 };
 
+const getRefJenisDikalt = async (req, res) => {
+  try {
+    const result = await axios.get(
+      `https://siasn.bkd.jatimprov.go.id/pemprov-api/vendor/reference/jenis-diklat`
+    );
+    res.json(result?.data);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "error" });
+  }
+};
+
+const getRefUrusanPemerintahan = async (req, res) => {
+  try {
+    const result = await axios.get(
+      `https://siasn.bkd.jatimprov.go.id/pemprov-api/vendor/reference/urusan-pemerintahan`
+    );
+    res.json(result?.data);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "error" });
+  }
+};
+
+const getDiklatStruktural = async (req, res) => {
+  try {
+    const result = await axios.get(
+      `https://siasn.bkd.jatimprov.go.id/pemprov-api/vendor/reference/diklat-struktural`
+    );
+    res.json(result?.data);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "error" });
+  }
+};
+
 const getRefJft = async (req, res) => {
   try {
     const { jabatan } = req?.query;
@@ -1139,4 +1175,8 @@ module.exports = {
   riwayatKeluargaByNip,
   hapusAkByNip,
   hapusAk,
+
+  getRefJenisDikalt,
+  getRefUrusanPemerintahan,
+  getDiklatStruktural,
 };
