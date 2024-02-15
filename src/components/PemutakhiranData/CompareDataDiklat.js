@@ -1,8 +1,9 @@
 import { dataDiklat } from "@/services/siasn-services";
 import { Stack } from "@mantine/core";
 import { useQuery } from "@tanstack/react-query";
-import { Card, Skeleton, Table, Typography } from "antd";
+import { Card, Skeleton, Table, Tabs, Typography } from "antd";
 import FormDiklat from "./FormDiklat";
+import CompareDataDiklatMaster from "./CompareDataDiklatMaster";
 
 const TableDiklat = ({ data }) => {
   const columns = [
@@ -151,12 +152,24 @@ function CompareDataDiklat() {
   return (
     <Card title="Data Riwayat Diklat dan Kursus SIASN">
       <FormDiklat />
-      <Stack>
-        <Skeleton loading={isLoading}>
-          <TableKursus data={data?.kursus} />
-          <TableDiklat data={data?.diklat} />
-        </Skeleton>
-      </Stack>
+      <Tabs
+        type="card"
+        style={{
+          marginTop: 16,
+        }}
+      >
+        <Tabs.TabPane key="diklat-siasn" tab="SIASN">
+          <Stack>
+            <Skeleton loading={isLoading}>
+              <TableKursus data={data?.kursus} />
+              <TableDiklat data={data?.diklat} />
+            </Skeleton>
+          </Stack>
+        </Tabs.TabPane>
+        <Tabs.TabPane key="diklat-master" tab="SIMASTER">
+          <CompareDataDiklatMaster />
+        </Tabs.TabPane>
+      </Tabs>
     </Card>
   );
 }

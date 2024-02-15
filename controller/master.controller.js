@@ -1,5 +1,6 @@
 import {
   getRwAnak,
+  getRwDiklat,
   getRwPangkat,
   getRwPasangan,
   getRwPendidikanMaster,
@@ -293,6 +294,18 @@ export const rwPangkatMaster = async (req, res) => {
   }
 };
 
+export const rwDiklatMaster = async (req, res) => {
+  try {
+    const result = await getRwDiklat(req.fetcher, req.user.employee_number);
+    const data = result?.data;
+
+    res.json(data);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ code: 500, message: "Internal Server Error" });
+  }
+};
+
 export const rwPasanganMasterByNip = async (req, res) => {
   try {
     const { fetcher } = req;
@@ -320,6 +333,7 @@ export const rwAnakMasterByNip = async (req, res) => {
 };
 
 module.exports = {
+  rwDiklatMaster,
   rwJabatanMaster,
   rwAngkakreditMaster,
   rwSkpMaster,
