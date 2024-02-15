@@ -705,6 +705,30 @@ export const checkKonversiIntegrasiPertama = (data) => {
   }
 };
 
+export const dataKategoriIPASN = (total) => {
+  // 91 - 100 sangat tingg
+  // 81 - 90 tinggi
+  // 71 - 80 cukup
+  // 61 - 70 rendah
+  // <= 60 sangat rendah
+
+  if (total >= 91 && total <= 100) {
+    return "Sangat Tinggi";
+  }
+  if (total >= 81 && total <= 90) {
+    return "Tinggi";
+  }
+  if (total >= 71 && total <= 80) {
+    return "Cukup";
+  }
+  if (total >= 61 && total <= 70) {
+    return "Rendah";
+  }
+  if (total <= 60) {
+    return "Sangat Rendah";
+  }
+};
+
 export const daftarStruktural = [
   {
     id: "10",

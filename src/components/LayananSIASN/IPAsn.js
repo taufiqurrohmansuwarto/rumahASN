@@ -1,6 +1,7 @@
 import { dataIpAsn } from "@/services/siasn-services";
+import { dataKategoriIPASN } from "@/utils/client-utils";
 import { useQuery } from "@tanstack/react-query";
-import { Col, Form, Input, Modal, Row, Tag } from "antd";
+import { Col, Form, Input, Modal, Row, Skeleton, Tag } from "antd";
 import moment from "moment";
 import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
@@ -178,16 +179,25 @@ function IPAsn({ tahun }) {
   }, [data, refetch]);
 
   return (
-    <>
-      {dataUtama?.kedudukanPnsNama === "Aktif" && (
+    <Skeleton loading={isLoading || isLoadingDataIPAsn}>
+      {dataUtama?.kedudukanPnsNama === "Aktif" && dataIPAsn && (
         <>
-          <Tag color="red" style={{ cursor: "pointer" }} onClick={handleOpen}>
-            IP ASN tahun {tahun} {dataIPAsn?.subtotal}
+          <Tag
+            color={
+              dataKategoriIPASN(dataIPAsn?.subtotal) === "Sangat Tinggi"
+                ? "#a0d911"
+                : "#f5222d"
+            }
+            style={{ cursor: "pointer" }}
+            onClick={handleOpen}
+          >
+            IP ASN tahun {tahun} {dataIPAsn?.subtotal} (
+            {dataKategoriIPASN(dataIPAsn?.subtotal)})
           </Tag>
           <ModalDataIPAsn open={open} onCancel={handleClose} data={dataIPAsn} />
         </>
       )}
-    </>
+    </Skeleton>
   );
 }
 
