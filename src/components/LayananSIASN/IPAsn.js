@@ -179,7 +179,7 @@ function IPAsn({ tahun }) {
 
   return (
     <>
-      {dataUtama?.statusPegawai === "PNS" && (
+      {!dataUtama?.kedudukanPnsNama === "PPPK Aktif" && (
         <>
           <Tag color="red" style={{ cursor: "pointer" }} onClick={handleOpen}>
             IP ASN tahun {tahun} {dataIPAsn?.subtotal}
