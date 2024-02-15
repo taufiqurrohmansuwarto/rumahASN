@@ -9,6 +9,10 @@ export const rwJabatanMaster = () => {
   return api.get("/rw-jabatan").then((res) => res.data);
 };
 
+export const rwDiklatMaster = () => {
+  return api.get("/rw-diklat").then((res) => res.data);
+};
+
 export const rwAngkakreditMaster = () => {
   return api.get("/rw-angkakredit").then((res) => res.data);
 };

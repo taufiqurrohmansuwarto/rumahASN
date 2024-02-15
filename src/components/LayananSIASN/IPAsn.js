@@ -155,6 +155,12 @@ function IPAsn({ tahun }) {
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
 
+  const { data: dataUtama, isLoading } = useQuery(
+    ["data-utama-siasn"],
+    () => dataUtamaSIASN(),
+    {}
+  );
+
   const {
     data: dataIPAsn,
     isLoading: isLoadingDataIPAsn,
@@ -173,7 +179,7 @@ function IPAsn({ tahun }) {
 
   return (
     <>
-      {data?.user?.group === "MASTER" && (
+      {dataUtama?.statusPegawai === "PNS" && (
         <>
           <Tag color="red" style={{ cursor: "pointer" }} onClick={handleOpen}>
             IP ASN tahun {tahun} {dataIPAsn?.subtotal}

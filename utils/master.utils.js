@@ -73,3 +73,15 @@ module.exports.getAllEmployees = async (fetcher, res) => {
     console.log(error);
   }
 };
+
+module.exports.getRwDiklat = async (fetcher, nip) => {
+  try {
+    const result = await fetcher.get(
+      `/master-ws/operator/employees/${nip}/rw-diklat`
+    );
+
+    return result;
+  } catch (error) {
+    console.log(error);
+  }
+};
