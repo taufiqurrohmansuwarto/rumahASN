@@ -1,5 +1,6 @@
 import AllTaskFilter from "@/components/Filter/AllTaskFilter";
 import UnAnswerFilter from "@/components/Filter/UnAnswerFilter";
+import UploadFileSIASN from "@/components/LayananSIASN/UploadFileSIASN";
 import Layout from "@/components/Layout";
 import PageContainer from "@/components/PageContainer";
 import QueryFilter from "@/components/QueryFilter";
@@ -465,6 +466,7 @@ const BerandaBKD = () => {
         title="Beranda Staff BKD"
       >
         <BackTop />
+        <UploadFileSIASN />
         <Row gutter={[16, 16]}>
           <Col md={18} xs={24}>
             <Card
