@@ -1,3 +1,4 @@
+import IPAsnByNip from "@/components/LayananSIASN/IPASNByNip";
 import Layout from "@/components/Layout";
 import PageContainer from "@/components/PageContainer";
 import SiasnTab from "@/components/PemutakhiranData/Admin/SiasnTab";
@@ -165,6 +166,7 @@ const EmployeeBio = ({ data, loading }) => {
           </Space>
         </Col>
       </Row>
+      <IPAsnByNip tahun={2023} nip={data?.nip_baru} />
     </Card>
   );
 };
