@@ -17,6 +17,10 @@ export const refDiklatStruktural = () => {
   return api.get("/ref/diklat-struktural").then((res) => res.data);
 };
 
+export const dataKinerjaPns = (nip) => {
+  return api.get(`/pns-kinerja/${nip}`).then((res) => res.data);
+};
+
 export const dataUtamaSIASN = () => {
   return api.get("/pns/data-utama").then((res) => res.data);
 };
