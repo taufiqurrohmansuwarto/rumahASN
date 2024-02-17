@@ -110,6 +110,14 @@ export const postRwJabatanByNip = ({ nip, data }) => {
   return api.post(`/admin/${nip}/rw-jabatan`, data).then((res) => res.data);
 };
 
+export const ipAsnByNip = (nip, tahun) => {
+  return api.get(`/admin/${nip}/ip-asn?tahun=${tahun}`).then((res) => res.data);
+};
+
+export const getRwDiklatByNip = (nip) => {
+  return api.get(`/admin/${nip}/rw-diklat`).then((res) => res.data);
+};
+
 // angkakredit
 export const getRwAngkakredit = () => {
   return api.get("/pns/rw-angkakredit").then((res) => res.data);

@@ -466,7 +466,6 @@ const BerandaBKD = () => {
         title="Beranda Staff BKD"
       >
         <BackTop />
-        <UploadFileSIASN />
         <Row gutter={[16, 16]}>
           <Col md={18} xs={24}>
             <Card

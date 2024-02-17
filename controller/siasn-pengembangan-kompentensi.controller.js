@@ -1,5 +1,10 @@
 const { createLogSIASN } = require("@/utils/logs");
-const { postDataKursus, postDataDiklat } = require("@/utils/siasn-utils");
+const {
+  postDataKursus,
+  postDataDiklat,
+  riwayatKursus,
+  riwayatDiklat,
+} = require("@/utils/siasn-utils");
 const { toString, upperCase } = require("lodash");
 
 const postRiwayatKursus = async (req, res) => {
@@ -42,7 +47,6 @@ const postRiwayatKursus = async (req, res) => {
     }
 
     if (!result?.data?.success) {
-      console.log(result?.data);
       res.status(400).json({
         message: result?.data?.message,
       });
@@ -78,7 +82,59 @@ const getIpAsn = async (req, res) => {
       `/siasn-ws/layanan/ip-asn/${nip}?tahun=${tahun}`
     );
     const hasil = result?.data;
-    res.json(hasil);
+
+    if (hasil) {
+      res.json(hasil);
+    } else {
+      res.json(null);
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      message: "Internal Server Error",
+    });
+  }
+};
+
+const getIpAsnByNip = async (req, res) => {
+  try {
+    const { fetcher } = req;
+    const { nip } = req?.query;
+    const tahun = req?.query?.tahun || new Date().getFullYear();
+
+    const result = await fetcher.get(
+      `/siasn-ws/layanan/ip-asn/${nip}?tahun=${tahun}`
+    );
+
+    const hasil = result?.data;
+
+    if (hasil) {
+      res.json(hasil);
+    } else {
+      res.json(null);
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      message: "Internal Server Error",
+    });
+  }
+};
+
+const getRwDiklatByNip = async (req, res) => {
+  try {
+    const { siasnRequest: request } = req;
+    const { nip } = req?.query;
+    const kursus = await riwayatKursus(request, nip);
+    const diklat = await riwayatDiklat(request, nip);
+
+    const dataKursus = kursus?.data?.data;
+    const dataDiklat = diklat?.data?.data;
+
+    res.json({
+      kursus: dataKursus,
+      diklat: dataDiklat,
+    });
   } catch (error) {
     console.log(error);
     res.status(500).json({
@@ -88,7 +144,9 @@ const getIpAsn = async (req, res) => {
 };
 
 module.exports = {
+  getRwDiklatByNip,
   postRiwayatKursus,
   postRiwayatKursusByNip,
   getIpAsn,
+  getIpAsnByNip,
 };

@@ -306,6 +306,19 @@ export const rwDiklatMaster = async (req, res) => {
   }
 };
 
+export const rwDiklatMasterByNip = async (req, res) => {
+  try {
+    const { nip } = req.query;
+    const result = await getRwDiklat(req.fetcher, nip);
+    const data = result?.data;
+
+    res.json(data);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ code: 500, message: "Internal Server Error" });
+  }
+};
+
 export const rwPasanganMasterByNip = async (req, res) => {
   try {
     const { fetcher } = req;
@@ -334,6 +347,7 @@ export const rwAnakMasterByNip = async (req, res) => {
 
 module.exports = {
   rwDiklatMaster,
+  rwDiklatMasterByNip,
   rwJabatanMaster,
   rwAngkakreditMaster,
   rwSkpMaster,
