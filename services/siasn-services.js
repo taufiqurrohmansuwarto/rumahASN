@@ -1,4 +1,5 @@
 import axios from "axios";
+import queryString from "query-string";
 
 const api = axios.create({
   baseURL: "/helpdesk/api/siasn/ws",
@@ -40,6 +41,27 @@ export const dataPendidikan = () => {
 
 export const dataPendidikanByNip = (nip) => {
   return api.get(`/admin/${nip}/rw-pendidikan`).then((res) => res.data);
+};
+
+export const downloadDataIPASN = (query) => {
+  const type = query?.type;
+  const queryStr = queryString.stringify(query, {
+    skipEmptyString: true,
+    skipNull: true,
+  });
+
+  if (type === "xlsx") {
+    console.log("client dengan tipe xlsx");
+    return api
+      .get(`/admin/ip-asn/download?${queryStr}`, {
+        responseType: "blob",
+      })
+      .then((res) => res?.data);
+  } else {
+    return api
+      .get(`/admin/ip-asn/download?${queryStr}`)
+      .then((res) => res.data);
+  }
 };
 
 export const dataPangkatByNip = (nip) => {

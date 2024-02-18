@@ -297,7 +297,7 @@ export const rwPangkatMaster = async (req, res) => {
 export const rwDiklatMaster = async (req, res) => {
   try {
     const result = await getRwDiklat(req.fetcher, req.user.employee_number);
-    const data = result?.data;
+    const data = orderBy(result?.data, "tahun", "desc");
 
     res.json(data);
   } catch (error) {
@@ -310,7 +310,7 @@ export const rwDiklatMasterByNip = async (req, res) => {
   try {
     const { nip } = req.query;
     const result = await getRwDiklat(req.fetcher, nip);
-    const data = result?.data;
+    const data = orderBy(result?.data, "tahun", "desc");
 
     res.json(data);
   } catch (error) {

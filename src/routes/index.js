@@ -81,11 +81,11 @@ export const userRoutes = {
       name: "Podcast",
       icon: <AudioOutlined />,
     },
-    {
-      path: "/layanan-kepegawaian",
-      name: "Layanan Kepegawaian",
-      icon: <AppstoreOutlined />,
-    },
+    // {
+    //   path: "/layanan-kepegawaian",
+    //   name: "Layanan Kepegawaian",
+    //   icon: <AppstoreOutlined />,
+    // },
 
     {
       path: "/faq",
