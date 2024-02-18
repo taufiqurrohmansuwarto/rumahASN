@@ -706,25 +706,27 @@ export const checkKonversiIntegrasiPertama = (data) => {
 };
 
 export const dataKategoriIPASN = (total) => {
-  // 91 - 100 sangat tingg
-  // 81 - 90 tinggi
-  // 71 - 80 cukup
-  // 61 - 70 rendah
-  // <= 60 sangat rendah
+  // 91.00 - 100.00 sangat tingg
+  // 81.00 - 90.99 tinggi
+  // 71.00 - 80.99 cukup
+  // 61.00 - 70.99 rendah
+  // <= 60.99 sangat rendah
 
-  if (total >= 91 && total <= 100) {
+  const totalInt = Math.floor(total * 100) / 100;
+
+  if (totalInt >= 91.0 && totalInt <= 100.0) {
     return "Sangat Tinggi";
   }
-  if (total >= 81 && total <= 90) {
+  if (totalInt >= 81.0 && totalInt <= 90.99) {
     return "Tinggi";
   }
-  if (total >= 71 && total <= 80) {
+  if (totalInt >= 71.0 && totalInt <= 80.99) {
     return "Cukup";
   }
-  if (total >= 61 && total <= 70) {
+  if (totalInt >= 61.0 && totalInt <= 70.99) {
     return "Rendah";
   }
-  if (total <= 60) {
+  if (totalInt <= 60.99) {
     return "Sangat Rendah";
   }
 };

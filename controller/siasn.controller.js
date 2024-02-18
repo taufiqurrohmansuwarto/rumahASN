@@ -1034,8 +1034,8 @@ const getRwDiklat = async (req, res) => {
     const kursus = await riwayatKursus(request, nip);
     const diklat = await riwayatDiklat(request, nip);
 
-    const dataKursus = kursus?.data?.data;
-    const dataDiklat = diklat?.data?.data;
+    const dataKursus = orderBy(kursus?.data?.data, ["tahun"], "desc");
+    const dataDiklat = orderBy(diklat?.data?.data, ["tahun"], "desc");
 
     res.json({
       kursus: dataKursus,

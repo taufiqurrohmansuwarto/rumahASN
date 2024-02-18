@@ -149,40 +149,51 @@ const getRwDiklatByNip = async (req, res) => {
 const downloadIPASNTahunan = async (req, res) => {
   try {
     const tahun = req?.query?.tahun || new Date().getFullYear() - 1;
+    const limit = req?.query?.limit || 10;
+    const offset = req?.query?.offset || 0;
+
     const { fetcher } = req;
+    const type = req?.query?.type || "xlsx";
 
     const url = `/siasn-ws/layanan/ip-asn?tahun=${tahun}&limit=1`;
     const result = await fetcher.get(url);
 
-    // get the fucking total and get all data
-    const secondUrl = `/siasn-ws/layanan/ip-asn?tahun=${tahun}&limit=${1000}`;
-    const secondResult = await fetcher.get(secondUrl);
+    if (type === "json") {
+      res.json(result?.data?.data);
+    } else if (type === "xlsx") {
+      console.log("masuk sini");
+      // get the fucking total and get all data
+      const secondUrl = `/siasn-ws/layanan/ip-asn?tahun=${tahun}&limit=${limit}&offset=${offset}`;
 
-    const data = secondResult?.data?.data?.data;
-    let currentData = [];
+      const secondResult = await fetcher.get(secondUrl);
 
-    if (!data?.length) {
-      currentData = [];
-    } else {
-      currentData = data;
+      const data = secondResult?.data?.data?.data;
+
+      let currentData = [];
+
+      if (!data?.length) {
+        currentData = [];
+      } else {
+        currentData = data;
+      }
+
+      const wb = xlsx.utils.book_new();
+      const ws = xlsx.utils.json_to_sheet(currentData);
+
+      xlsx.utils.book_append_sheet(wb, ws, "IP ASN tahun");
+
+      res.setHeader(
+        "Content-Type",
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+      );
+
+      res.setHeader(
+        "Content-Disposition",
+        "attachment; filename=" + "ipasn.xlsx"
+      );
+
+      res.end(xlsx.write(wb, { type: "buffer", bookType: "xlsx" }));
     }
-
-    const wb = xlsx.utils.book_new();
-    const ws = xlsx.utils.json_to_sheet(currentData);
-
-    xlsx.utils.book_append_sheet(wb, ws, "IP ASN tahun");
-
-    res.setHeader(
-      "Content-Type",
-      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-    );
-
-    res.setHeader(
-      "Content-Disposition",
-      "attachment; filename=" + "rating.xlsx"
-    );
-
-    res.end(xlsx.write(wb, { type: "buffer", bookType: "xlsx" }));
   } catch (error) {
     console.log(error);
     res.status(500).json({

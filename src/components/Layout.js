@@ -58,6 +58,7 @@ const changeRoutes = (user) => {
 
     const ac = new AccessControl(grantList);
     const sealAdmin = ac.can(currentRoleName).updateAny("seal");
+    const canDownload = ac.can(currentRoleName).readAny("download");
 
     const adminFasilitator = admin || fasilitatorMaster;
 
@@ -148,6 +149,16 @@ const changeRoutes = (user) => {
           name: "Analisis",
           icon: <BarChartOutlined />,
           routes: [
+            canDownload?.granted && {
+              path: "/analysis/download",
+              name: "Download Data",
+              routes: [
+                {
+                  path: "/analysis/download/ip-asn",
+                  name: "IP ASN",
+                },
+              ],
+            },
             {
               path: "/analysis/dashboard",
               name: "Dashboard",

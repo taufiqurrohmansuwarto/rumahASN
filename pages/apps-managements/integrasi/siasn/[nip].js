@@ -254,7 +254,7 @@ const IntegrasiSIASNByNIP = () => {
 };
 
 IntegrasiSIASNByNIP.getLayout = function (page) {
-  return <Layout>{page}</Layout>;
+  return <Layout active={"/apps-managements/integrasi/siasn"}>{page}</Layout>;
 };
 
 IntegrasiSIASNByNIP.Auth = {
