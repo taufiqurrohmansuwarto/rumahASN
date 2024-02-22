@@ -194,6 +194,16 @@ const siasnEmployeeDetailPangkat = async (req, res) => {
   }
 };
 
+const removeBackupSIASN = async (req, res) => {
+  try {
+    await BackupSIASN.query().delete();
+    res.json({ code: 200, message: "success" });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ code: 500, message: "Internal Server Error" });
+  }
+};
+
 const getTreeRef = async (req, res) => {
   try {
     const { siasnRequest: request } = req;
@@ -1157,6 +1167,7 @@ module.exports = {
   getSkp2022ByNip,
   getTokenSIASN,
   getTreeRef,
+  removeBackupSIASN,
   postAngkaKredit,
   postAngkaKreditByNip,
   postRiwayatJabatan,
