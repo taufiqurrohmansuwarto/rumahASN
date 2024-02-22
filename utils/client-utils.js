@@ -88,6 +88,12 @@ export const mysapkMenu = [
     path: "/diklat",
   },
   {
+    title: "Riwayat Pencantuman Gelar",
+    icon: IconSchool,
+    color: "red",
+    path: "/pencantuman-gelar",
+  },
+  {
     title: "Riwayat Golongan/Pangkat",
     icon: IconBadges,
     color: "gray",
@@ -138,12 +144,7 @@ export const mysapkMenu = [
     path: "/organisasi",
   },
   { title: "Riwayat CLTN", icon: IconBriefcase, color: "gray", path: "/cltn" },
-  {
-    title: "Riwayat Pencamtuman Gelar",
-    icon: IconSchool,
-    color: "gray",
-    path: "/pencantuman-gelar",
-  },
+
   {
     title: "Riwayat Hukuman Disiplin",
     icon: IconSchool,

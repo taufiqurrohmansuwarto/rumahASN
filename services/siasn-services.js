@@ -99,6 +99,21 @@ export const dataIpAsn = (tahun) => {
 
 // end of shit
 
+// add more the shit
+export const dataPencantumanGelar = () => {
+  return api.get(`/pns/pencantuman-gelar`).then((res) => res?.data);
+};
+
+export const dataPencantumanGelarByNip = (nip) => {
+  return api.get(`/admin/${nip}/pencantuman-gelar`).then((res) => res?.data);
+};
+
+export const dataPencantumanGelarSKByNip = ({ nip, id }) => {
+  return api
+    .get(`/admin/${nip}/pencantuman-gelar/${id}`)
+    .then((res) => res?.data);
+};
+
 export const dataUtamSIASNByNip = (nip) => {
   return api.get(`/admin/${nip}/data-utama`).then((res) => res.data);
 };
