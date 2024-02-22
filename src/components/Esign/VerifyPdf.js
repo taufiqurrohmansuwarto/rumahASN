@@ -160,7 +160,6 @@ function VerifyPdf() {
         const payload = {
           file: currentFile,
         };
-        console.log(payload);
         await mutateAsync(payload);
         setFileList([
           {

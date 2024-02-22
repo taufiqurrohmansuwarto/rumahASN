@@ -74,7 +74,83 @@ const layananIpASN = async (req, res) => {
   }
 };
 
+const layananPencantumanGelar = async (req, res) => {
+  try {
+    const { fetcher } = req;
+    const { employee_number: nip } = req?.user;
+    // const nip = "196504091990032002";
+
+    const result = await fetcher.get(
+      `/siasn-ws/layanan/pencantuman-gelar/${nip}`
+    );
+
+    const hasil = result?.data;
+
+    if (!hasil) {
+      res.json([]);
+    } else {
+      res.json(hasil);
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      message: "Internal Server Error",
+    });
+  }
+};
+
+const layananPencantumanGelarByNip = async (req, res) => {
+  try {
+    const { nip } = req?.query;
+    const { fetcher } = req;
+    const result = await fetcher.get(
+      `/siasn-ws/layanan/pencantuman-gelar/${nip}`
+    );
+
+    const hasil = result?.data;
+
+    if (!hasil) {
+      res.json([]);
+    } else {
+      res.json(hasil);
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      message: "Internal Server Error",
+    });
+  }
+};
+
+const layananPencantumanGelarSK = async (req, res) => {
+  try {
+    try {
+      const { id } = req?.query;
+      const { fetcher } = req;
+      const result = await fetcher.get(
+        `/siasn-ws/layanan/pencantuman-gelar/0000/sk/${id}`
+      );
+
+      const hasil = result?.data;
+      res.json(hasil);
+    } catch (error) {
+      console.log(error);
+      res.status(500).json({
+        message: "Internal Server Error",
+      });
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      message: "Internal Server Error",
+    });
+  }
+};
+
 module.exports = {
+  layananPencantumanGelar,
+  layananPencantumanGelarByNip,
+  layananPencantumanGelarSK,
   layananTrackingSiasn,
   layananTrackingSimaster,
   layananIpASN,

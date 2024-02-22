@@ -1,5 +1,6 @@
 import Layout from "@/components/Layout";
 import PageContainer from "@/components/PageContainer";
+import PencantumanGelar from "@/components/PemutakhiranData/Admin/PencantumanGelar";
 import CustomSelectMenu from "@/components/PemutakhiranData/CustomSelectMenu";
 import { Breadcrumb, Card } from "antd";
 import Head from "next/head";
@@ -40,7 +41,7 @@ const RiwayatPencantumanGelar = () => {
         content="Komparasi Data Pencantuman Gelar SIASN dan SIMASTER"
       >
         <Card>
-          <div>Under Construction baby...</div>
+          <PencantumanGelar />
         </Card>
       </PageContainer>
     </>

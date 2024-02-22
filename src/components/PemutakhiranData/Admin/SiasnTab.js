@@ -14,6 +14,7 @@ import ComparePwkByNip from "./ComparePwkByNip";
 import CompareSKP22ByNip from "./CompareSKP22ByNip";
 import CompareHukdisByNip from "./CompareHukdisByNip";
 import CompareDataDiklatByNip from "../CompareDataDiklatByNip";
+import PencantumanGelarByNip from "./PencantumanGelarByNip";
 
 function SiasnTab({ nip }) {
   const breakPoint = Grid.useBreakpoint();
@@ -40,6 +41,9 @@ function SiasnTab({ nip }) {
       </Tabs.TabPane>
       <Tabs.TabPane tab="Pendidikan" key="5">
         <ComparePendidikanByNip nip={nip} />
+      </Tabs.TabPane>
+      <Tabs.TabPane tab="Pencantuman Gelar" key="pencantuman-gelar">
+        <PencantumanGelarByNip nip={nip} />
       </Tabs.TabPane>
       <Tabs.TabPane tab="Diklat dan Kursus" key="diklat">
         <CompareDataDiklatByNip nip={nip} />
