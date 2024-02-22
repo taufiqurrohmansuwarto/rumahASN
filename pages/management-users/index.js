@@ -1,3 +1,4 @@
+import RemoveTreeSIASN from "@/components/LayananSIASN/RemoveTreeSIASN";
 import Layout from "@/components/Layout";
 import UserManagements from "@/components/Managements/UserManagements";
 import { Card } from "antd";
@@ -15,6 +16,7 @@ const ManagementUsers = () => {
       <PageContainer title="Manajemen Pengguna" content="Manajemen Pengguna">
         <Card>
           <UserManagements />
+          <RemoveTreeSIASN />
         </Card>
       </PageContainer>
     </>

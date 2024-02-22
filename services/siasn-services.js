@@ -107,6 +107,10 @@ export const unitOrganisasi = () => {
   return api.get("/ref/unor").then((res) => res.data);
 };
 
+export const removeBackup = () => {
+  return api.delete("/ref/unor").then((res) => res?.data);
+};
+
 export const refJft = (jabatan) => {
   return api.get(`/ref/jft?jabatan=${jabatan}`).then((res) => res.data);
 };

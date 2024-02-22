@@ -1,4 +1,4 @@
-import { getTreeRef } from "@/controller/siasn.controller";
+import { getTreeRef, removeBackupSIASN } from "@/controller/siasn.controller";
 import adminFasilitatorAsnMiddleware from "@/middleware/admin-fasilitator-asn.middleware";
 import auth from "@/middleware/auth.middleware";
 import { siasnMiddleware } from "@/middleware/siasn.middleware";
@@ -9,6 +9,7 @@ router
   .use(auth)
   .use(adminFasilitatorAsnMiddleware)
   .use(siasnMiddleware)
-  .get(getTreeRef);
+  .get(getTreeRef)
+  .delete(removeBackupSIASN);
 
 export default router.handler();
