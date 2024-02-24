@@ -1,5 +1,6 @@
 import FormPersonalSign from "@/components/Esign/FormPersonalSign";
 import Layout from "@/components/Layout";
+import FormJenisDiklat from "@/components/PemutakhiranData/FormJenisDiklat";
 import AdminLayoutDetailWebinar from "@/components/WebinarSeries/AdminLayoutDetailWebinar";
 import {
   detailWebinar,
@@ -267,6 +268,7 @@ const FormEditWebinarSeries = ({ data }) => {
             </Select.Option>
           </Select>
         </Form.Item>
+        <FormJenisDiklat name="type" />
         <Form.Item
           noStyle
           shouldUpdate={(prevValues, currentValues) =>

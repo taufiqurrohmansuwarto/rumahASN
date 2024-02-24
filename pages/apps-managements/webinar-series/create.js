@@ -1,6 +1,7 @@
 import FormPersonalSign from "@/components/Esign/FormPersonalSign";
 import Layout from "@/components/Layout";
 import PageContainer from "@/components/PageContainer";
+import FormJenisDiklat from "@/components/PemutakhiranData/FormJenisDiklat";
 import { createWebinar } from "@/services/webinar.services";
 import { renderMarkdown, uploadFile } from "@/utils/client-utils";
 import { MarkdownEditor } from "@primer/react/drafts";
@@ -100,40 +101,7 @@ const FormWebinarSeries = () => {
           ) : null
         }
       </Form.Item>
-      <Form.Item
-        rules={[
-          {
-            required: true,
-            message: "Nomer Series harus diisi",
-          },
-        ]}
-        required
-        name="episode"
-        label="Nomer Series"
-      >
-        <InputNumber />
-      </Form.Item>
-      <Form.Item
-        name="organizer"
-        label="Penyelenggara"
-        rules={[{ required: true, message: "Penyelenggara harus diisi" }]}
-      >
-        <Input />
-      </Form.Item>
-      <Form.Item
-        required
-        label="Tanggal Mulai s/d Tanggal Berakhir"
-        name="date"
-        rules={[
-          {
-            required: true,
-            message: "Tanggal harus diisi",
-          },
-        ]}
-      >
-        <DatePicker.RangePicker format={format} />
-      </Form.Item>
-
+      <FormJenisDiklat name="type" />
       <Form.Item
         rules={[
           {
@@ -173,6 +141,40 @@ const FormWebinarSeries = () => {
           onUploadFile={uploadFile}
           mentionSuggestions={null}
         />
+      </Form.Item>
+
+      <Form.Item
+        rules={[
+          {
+            required: true,
+            message: "Nomer Series harus diisi",
+          },
+        ]}
+        required
+        name="episode"
+        label="Nomer Series"
+      >
+        <InputNumber />
+      </Form.Item>
+      <Form.Item
+        name="organizer"
+        label="Nama Penyelenggara"
+        rules={[{ required: true, message: "Penyelenggara harus diisi" }]}
+      >
+        <Input />
+      </Form.Item>
+      <Form.Item
+        required
+        label="Tanggal Mulai s/d Tanggal Berakhir"
+        name="date"
+        rules={[
+          {
+            required: true,
+            message: "Tanggal harus diisi",
+          },
+        ]}
+      >
+        <DatePicker.RangePicker format={format} />
       </Form.Item>
       <Form.Item
         label="Jumlah Jam Pelajaran (JP)"
