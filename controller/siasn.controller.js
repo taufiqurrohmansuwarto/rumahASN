@@ -249,6 +249,22 @@ const getTreeRef = async (req, res) => {
   }
 };
 
+const getEmployeesByUnor = async (req, res) => {
+  try {
+    const { fetcher } = req;
+    const { id } = req?.query;
+
+    const result = await fetcher.get(
+      `/siasn-ws/perencanaan/hr/${id}/employees`
+    );
+    const data = result?.data;
+    res.json(data);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "error" });
+  }
+};
+
 const getSkp = async (req, res) => {
   try {
     const { siasnRequest: request } = req;
@@ -1191,4 +1207,5 @@ module.exports = {
   getRefJenisDikalt,
   getRefUrusanPemerintahan,
   getDiklatStruktural,
+  getEmployeesByUnor,
 };
