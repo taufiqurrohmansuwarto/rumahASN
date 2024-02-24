@@ -122,6 +122,10 @@ export const unitOrganisasi = () => {
   return api.get("/ref/unor").then((res) => res.data);
 };
 
+export const employeesByUnitOrganisasi = (id) => {
+  return api.get(`/ref/unor/${id}/employees`).then((res) => res?.data);
+};
+
 export const removeBackup = () => {
   return api.delete("/ref/unor").then((res) => res?.data);
 };
