@@ -38,6 +38,7 @@ import { useEffect, useState } from "react";
 import FormUserInformation from "./FormUserInformation";
 import InformasiTTE from "./InformasiTTE";
 import SyaratMendapatkanSertifikat from "./SyaratMendapatkanSertifikat";
+import WebinarTransferToSIASN from "./WebinarTransferToSIASN";
 
 const ModalRating = ({ open, onCancel, initialValues }) => {
   const router = useRouter();
@@ -200,7 +201,7 @@ const Tombol = ({
       data?.status_download === "BELUM_TANDATANGAN_SEAL")
   ) {
     return (
-      <>
+      <Space direction="vertical">
         <Button
           icon={<CloudDownloadOutlined />}
           type="primary"
@@ -210,7 +211,8 @@ const Tombol = ({
         >
           Unduh Sertifikat
         </Button>
-      </>
+        <WebinarTransferToSIASN data={data} />
+      </Space>
     );
   }
 
