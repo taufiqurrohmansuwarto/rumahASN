@@ -10,12 +10,7 @@ import { useRouter } from "next/router";
 function HRWithEmployees() {
   const router = useRouter();
 
-  const {
-    data: employees,
-    isLoading: isLoadingEmployees,
-    refetch,
-    isFetching,
-  } = useQuery(
+  const { data: employees, isFetching } = useQuery(
     ["ref-unor-employees", router?.query?.id],
     () => employeesByUnitOrganisasi(router?.query?.id),
     {
@@ -76,7 +71,6 @@ function HRWithEmployees() {
           />
         </Col>
         <Col md={16}>
-          {/* {JSON.stringify(employees)} */}
           <Table
             columns={columns}
             dataSource={employees?.data?.records}
