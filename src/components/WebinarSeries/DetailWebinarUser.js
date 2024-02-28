@@ -211,7 +211,7 @@ const Tombol = ({
         >
           Unduh Sertifikat
         </Button>
-        <WebinarTransferToSIASN data={data} />
+        {/* <WebinarTransferToSIASN data={data} /> */}
       </Space>
     );
   }
