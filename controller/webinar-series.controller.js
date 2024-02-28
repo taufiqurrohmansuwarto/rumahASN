@@ -864,6 +864,7 @@ const uploadTemplateAndImage = async (req, res) => {
       res.json(data);
     } else if (pdfMimeType && pdfType) {
       const currentFilename = `template-${req?.query?.id}.pdf`;
+      console.log({ currentFilename, size, mimetype });
       await uploadFileMinio(req.mc, buffer, currentFilename, size, mimetype);
       const result = `${URL_FILE}/${currentFilename}`;
 

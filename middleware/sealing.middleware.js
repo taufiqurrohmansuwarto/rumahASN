@@ -9,7 +9,6 @@ module.exports = async (req, res, next) => {
 
     const permission = acInstance.can(app_role?.name).updateAny("seal");
 
-
     if (!permission?.granted) {
       res.status(403).json({ code: 403, message: "Forbidden" });
     } else {

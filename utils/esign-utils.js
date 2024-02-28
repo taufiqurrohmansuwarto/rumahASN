@@ -36,7 +36,7 @@ module.exports.signWithNikAndPassphrase = async ({ nik, passphrase, file }) => {
 };
 
 // seal
-module.exports.getSealActivationOTP = async () => {
+module.exports.getSealActivationOTP = async (idSubscriber) => {
   return new Promise((resolve, reject) => {
     esignFetcher
       .post(`/api/v2/seal/get/activation`, {
