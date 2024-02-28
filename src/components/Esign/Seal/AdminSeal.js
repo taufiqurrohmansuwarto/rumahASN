@@ -146,7 +146,10 @@ function AdminSeal() {
       onOk: async () => {
         try {
           await generate();
-        } catch (error) {}
+        } catch (error) {
+          console.log(JSON.stringify(error));
+          message.error("Failed to generate seal activation code");
+        }
       },
     });
   };
