@@ -147,8 +147,8 @@ function AdminSeal() {
         try {
           await generate();
         } catch (error) {
-          console.log(JSON.stringify(error));
           message.error("Failed to generate seal activation code");
+          console.error(error);
         }
       },
     });
