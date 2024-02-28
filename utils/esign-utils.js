@@ -37,7 +37,6 @@ module.exports.signWithNikAndPassphrase = async ({ nik, passphrase, file }) => {
 
 // seal
 module.exports.getSealActivationOTP = async (idSubscriber) => {
-  console.log({ idSubscriber });
   return new Promise((resolve, reject) => {
     esignFetcher
       .post(`/api/v2/seal/get/activation`, {
@@ -59,7 +58,6 @@ module.exports.getSealActivationOTP = async (idSubscriber) => {
 };
 
 module.exports.refreshSealActivationTotp = async ({ idSubscriber, totp }) => {
-  console.log({ idSubscriber, totp });
   return new Promise((resolve, reject) => {
     esignFetcher
       .post(`/api/v2/seal/get/activation`, {
