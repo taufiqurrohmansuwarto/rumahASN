@@ -77,6 +77,14 @@ const generateSealActivation = async (req, res) => {
           });
           res.json(response?.data);
         } else {
+          await LogSealBsre.query().insert({
+            user_id: req?.user?.customId,
+            action: "GENERATE_SEAL_OTP",
+            status: "ERROR",
+            request_data: JSON.stringify({ subscriberId }),
+            response_data: JSON.stringify(response),
+            description: "Generate Seal OTP",
+          });
           res.status(500).json({ message: response.data });
         }
       }
