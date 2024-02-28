@@ -4,6 +4,12 @@ const baseURL = process.env.ESIGN_URL;
 const username = process.env.ESIGN_USERNAME;
 const password = process.env.ESIGN_PASSWORD;
 
+console.log({
+  baseURL,
+  username,
+  password,
+});
+
 const esignFetcher = axios.create({
   baseURL,
   headers: {

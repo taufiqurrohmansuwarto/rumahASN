@@ -25,7 +25,6 @@ const generateSealActivation = async (req, res) => {
       res.status(404).json({ message: "Seal Information not found" });
     } else {
       if (seal?.id_subscriber && seal?.totp_activation_code) {
-        // merefresh kalau ada id_subscriber dan totp_activation_code
         const response = await refreshSealActivationTotp({
           idSubscriber: seal?.id_subscriber,
           totp: seal?.totp_activation_code,
