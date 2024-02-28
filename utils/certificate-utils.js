@@ -70,7 +70,7 @@ const dynamicFontSize = (form, fieldName, fieldValue) => {
   const field = form.getTextField(fieldName);
 
   field.setText(fieldValue);
-  field.setAlignment(TextAlignment.Center);
+  field.setAlignment(TextAlignment.Left);
   field.enableMultiline();
   field.setFontSize(10);
   field.enableReadOnly();
