@@ -34,7 +34,7 @@ function SyaratMendapatkanSertifikat({ data }) {
               <IconCircleX size={20} />
             )}
           </ActionIcon>
-          Mengisi Daftar Hadir / Presensi
+          Mengisi Daftar Hadir / Presensi (Jika Ada)
         </Space>
 
         <Space>
@@ -48,7 +48,7 @@ function SyaratMendapatkanSertifikat({ data }) {
               <IconCircleX size={20} />
             )}
           </ActionIcon>
-          Mengisi Survey
+          Mengisi Kuisioner (Dilakukan setelah acara selesai)
         </Space>
       </Stack>
     </Alert>

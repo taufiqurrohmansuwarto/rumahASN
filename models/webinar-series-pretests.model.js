@@ -3,9 +3,9 @@ const knex = require("../db");
 const { nanoid } = require("nanoid");
 Model.knex(knex);
 
-class WebinarSeriesPostests extends Model {
+class WebinarSeriesPretest extends Model {
   static get tableName() {
-    return "webinar_series_postests";
+    return "webinar_series_pretests";
   }
 
   $beforeInsert() {
@@ -21,4 +21,4 @@ class WebinarSeriesPostests extends Model {
   }
 }
 
-module.exports = WebinarSeriesPostests;
+module.exports = WebinarSeriesPretest;

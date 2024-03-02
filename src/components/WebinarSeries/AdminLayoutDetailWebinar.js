@@ -104,6 +104,16 @@ function AdminLayoutDetailWebinar({ children, active = "detail", loading }) {
             key: "ratings",
             href: `/apps-managements/webinar-series/${id}/ratings`,
           },
+          {
+            tab: <>Pre Test</>,
+            key: "pretest",
+            href: `/apps-managements/webinar-series/${id}/pretest`,
+          },
+          {
+            tab: <>Post Test</>,
+            key: "posttest",
+            href: `/apps-managements/webinar-series/${id}/postest`,
+          },
         ]}
         tabActiveKey={active}
         tabProps={{

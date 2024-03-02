@@ -267,6 +267,31 @@ export const downloadComments = (id) => {
     .then((res) => res?.data);
 };
 
+// pretest
+export const findPretest = (id) => {
+  return api.get(`/admin/${id}/pretests`).then((res) => res?.data);
+};
+
+export const createPretest = ({ id, data }) => {
+  return api.post(`/admin/${id}/pretests`, data).then((res) => res?.data);
+};
+
+export const getPretest = ({ id, pretestId }) => {
+  return api.get(`/admin/${id}/pretests/${pretestId}`).then((res) => res?.data);
+};
+
+export const updatePretest = ({ id, pretestId, data }) => {
+  return api
+    .patch(`/admin/${id}/pretests/${pretestId}`, data)
+    .then((res) => res?.data);
+};
+
+export const removePretest = ({ id, pretestId }) => {
+  return api
+    .delete(`/admin/${id}/pretests/${pretestId}`)
+    .then((res) => res?.data);
+};
+
 export const downloadRatings = (id) => {
   return api
     .get(`/admin/${id}/ratings/download`, {

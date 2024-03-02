@@ -385,7 +385,7 @@ function DetailWebinarNew({
                   onClick={handleOpen}
                   icon={<StarOutlined />}
                 >
-                  Beri Rating Webinar
+                  Beri Rating
                 </Button>
               )}
             </Stack>
