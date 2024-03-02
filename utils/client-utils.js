@@ -732,6 +732,49 @@ export const dataKategoriIPASN = (total) => {
   }
 };
 
+export const serializeFormatTest = (inputData) => {
+  const question = inputData.question;
+  const correctAnswer = inputData.correctAnswer;
+  const answers = [];
+
+  // Loop through each property in the inputData object
+  Object.keys(inputData).forEach((key) => {
+    if (key.startsWith("answer")) {
+      // Extract the ID from the key by splitting it at the '-' and taking the second part
+      const id = key.split("-")[1];
+      // Check if this answer is the correct one
+      const isCorrect =
+        parseInt(key.split("answer")[1].split("-")[0], 10) === correctAnswer;
+      // Push the answer object to the answers array
+      answers.push({ id, text: inputData[key], isCorrect });
+    }
+  });
+
+  // Return the transformed data
+  return {
+    question,
+    answers,
+  };
+};
+
+export const serializeFormatTestNormal = (transformedData) => {
+  const result = {
+    question: transformedData.question,
+    correctAnswer: transformedData.answers.find((answer) => answer.isCorrect)
+      .id,
+  };
+
+  // Loop through each answer in the answers array
+  transformedData.answers.forEach((answer, index) => {
+    // Construct the answer key using the index and the answer ID
+    const key = `answer${index + 1}-${answer.id}`;
+    // Add the answer text to the result object with the constructed key
+    result[key] = answer.text;
+  });
+
+  return result;
+};
+
 export const daftarStruktural = [
   {
     id: "10",
