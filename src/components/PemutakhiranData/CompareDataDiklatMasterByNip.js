@@ -1,8 +1,35 @@
 import { rwDiklatByNip } from "@/services/master.services";
 import { useQuery } from "@tanstack/react-query";
-import { Table } from "antd";
+import { Form, Modal, Table } from "antd";
+import { useEffect } from "react";
+import { useState } from "react";
+
+const ModalTransfer = ({ open, onCancel, data }) => {
+  const [form] = Form.useForm();
+
+  useEffect(() => {}, [form, data]);
+
+  return (
+    <Modal open={open} onCancel={onCancel}>
+      {JSON.stringify(data)}
+    </Modal>
+  );
+};
 
 function CompareDataDiklatMasterByNip({ nip }) {
+  const [open, setOpen] = useState(false);
+  const [currentDiklat, setCurrentDiklat] = useState(null);
+
+  const handleOpen = (data) => {
+    setOpen(true);
+    setCurrentDiklat(data);
+  };
+
+  const handleClose = () => {
+    setOpen(false);
+    setCurrentDiklat(null);
+  };
+
   const { data, isLoading } = useQuery(
     ["rw-diklat-master-by-nip", nip],
     () => rwDiklatByNip(nip),
@@ -53,6 +80,13 @@ function CompareDataDiklatMasterByNip({ nip }) {
       title: "Jumlah Jam",
       dataIndex: "jml",
     },
+    {
+      title: "Aksi",
+      key: "aksi",
+      render: (_, row) => {
+        return <a onClick={() => handleOpen(row)}>Transfer</a>;
+      },
+    },
   ];
 
   return (
@@ -64,6 +98,7 @@ function CompareDataDiklatMasterByNip({ nip }) {
         columns={columns}
         loading={isLoading}
       />
+      <ModalTransfer open={open} onCancel={handleClose} data={currentDiklat} />
     </div>
   );
 }
