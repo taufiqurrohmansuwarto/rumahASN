@@ -10,8 +10,11 @@ const ModalTransfer = ({ open, onCancel, data }) => {
   useEffect(() => {}, [form, data]);
 
   return (
-    <Modal open={open} onCancel={onCancel}>
+    <Modal title="Transfer ke SIASN" open={open} onCancel={onCancel}>
       {JSON.stringify(data)}
+      <Form form={form}>
+        <Form.Item></Form.Item>
+      </Form>
     </Modal>
   );
 };
