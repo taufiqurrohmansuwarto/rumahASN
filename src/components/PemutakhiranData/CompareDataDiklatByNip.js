@@ -158,6 +158,9 @@ function CompareDataDiklatByNip({ nip }) {
           marginTop: 16,
         }}
       >
+        <Tabs.TabPane key="diklat-master" tab="SIMASTER">
+          <CompareDataDiklatMasterByNip nip={nip} />
+        </Tabs.TabPane>
         <Tabs.TabPane key="diklat-siasn" tab="SIASN">
           <Stack>
             <Skeleton loading={isLoading}>
@@ -165,9 +168,6 @@ function CompareDataDiklatByNip({ nip }) {
               <TableDiklat data={data?.diklat} />
             </Skeleton>
           </Stack>
-        </Tabs.TabPane>
-        <Tabs.TabPane key="diklat-master" tab="SIMASTER">
-          <CompareDataDiklatMasterByNip nip={nip} />
         </Tabs.TabPane>
       </Tabs>
     </Card>

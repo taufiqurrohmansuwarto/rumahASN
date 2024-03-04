@@ -1,4 +1,7 @@
-import { getRwDiklatByNip } from "@/controller/siasn-pengembangan-kompentensi.controller";
+import {
+  getRwDiklatByNip,
+  postRiwayatKursusByNip,
+} from "@/controller/siasn-pengembangan-kompentensi.controller";
 import adminFasilitatorMiddleware from "@/middleware/admin-fasilitator.middleware";
 import auth from "@/middleware/auth.middleware";
 import { siasnMiddleware } from "@/middleware/siasn.middleware";
@@ -9,6 +12,7 @@ router
   .use(auth)
   .use(adminFasilitatorMiddleware)
   .use(siasnMiddleware)
-  .get(getRwDiklatByNip);
+  .get(getRwDiklatByNip)
+  .post(postRiwayatKursusByNip);
 
 export default router.handler();
