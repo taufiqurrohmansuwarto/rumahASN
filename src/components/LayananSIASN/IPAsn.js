@@ -1,4 +1,4 @@
-import { dataIpAsn } from "@/services/siasn-services";
+import { dataIpAsn, dataUtamaSIASN } from "@/services/siasn-services";
 import { dataKategoriIPASN } from "@/utils/client-utils";
 import { useQuery } from "@tanstack/react-query";
 import { Col, Form, Input, Modal, Row, Skeleton, Tag } from "antd";

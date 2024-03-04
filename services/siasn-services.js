@@ -237,6 +237,10 @@ export const getRwPindahInstansiByNip = (nip) => {
   return api.get(`/admin/${nip}/rw-pindah-instansi`).then((res) => res.data);
 };
 
+export const postRiwayatKursusByNip = ({ nip, data }) => {
+  return api.post(`/admin/${nip}/rw-diklat`, data).then((res) => res.data);
+};
+
 export const getDaftarKenaikanPangkatByPeriode = (periode) => {
   return api.get(`/admin/kp?periode=${periode}`).then((res) => res.data);
 };

@@ -158,6 +158,9 @@ function CompareDataDiklat() {
           marginTop: 16,
         }}
       >
+        <Tabs.TabPane key="diklat-master" tab="SIMASTER">
+          <CompareDataDiklatMaster />
+        </Tabs.TabPane>
         <Tabs.TabPane key="diklat-siasn" tab="SIASN">
           <Stack>
             <Skeleton loading={isLoading}>
@@ -165,9 +168,6 @@ function CompareDataDiklat() {
               <TableDiklat data={data?.diklat} />
             </Skeleton>
           </Stack>
-        </Tabs.TabPane>
-        <Tabs.TabPane key="diklat-master" tab="SIMASTER">
-          <CompareDataDiklatMaster />
         </Tabs.TabPane>
       </Tabs>
     </Card>
