@@ -2,10 +2,8 @@ module.exports = {
   apps: [
     {
       name: "next-app",
-      script: "npm",
+      script: "node_modules/next/dist/bin/next",
       args: "start",
-      watch: ".",
-      // Instances to 0 will auto-detect the number of available CPU cores
       instances: 5,
       exec_mode: "cluster",
       env: {
