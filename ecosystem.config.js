@@ -6,7 +6,7 @@ module.exports = {
       args: "start",
       watch: ".",
       // Instances to 0 will auto-detect the number of available CPU cores
-      instances: 0,
+      instances: 5,
       exec_mode: "cluster",
       env: {
         NODE_ENV: "development",
