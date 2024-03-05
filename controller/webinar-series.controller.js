@@ -916,7 +916,8 @@ const downloadCertificate = async (req, res) => {
         "user_information",
         "document_sign",
         "document_sign_at",
-        "user_information"
+        "user_information",
+        "document_sign_url"
       )
       .where("id", id)
       .andWhere("user_id", customId)
