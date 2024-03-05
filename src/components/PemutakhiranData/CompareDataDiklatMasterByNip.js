@@ -1,6 +1,10 @@
 import FormTransferDiklat from "@/components/PemutakhiranData/FormTransferDiklat";
-import { rwDiklatMaster } from "@/services/master.services";
 import {
+  rwDiklatMaster,
+  rwDiklatMasterByNip,
+} from "@/services/master.services";
+import {
+  getRwDiklatByNip,
   getTokenSIASNService,
   postRiwayatKursusByNip,
 } from "@/services/siasn-services";
@@ -165,8 +169,8 @@ const TransferModal = ({ open, handleClose, data, nip }) => {
 
 function CompareDataDiklatMasterByNip({ nip }) {
   const { data, isLoading } = useQuery(
-    ["rw-diklat-master"],
-    () => rwDiklatMaster(),
+    ["rw-diklat-master", nip],
+    () => rwDiklatMasterByNip(nip),
     {}
   );
 

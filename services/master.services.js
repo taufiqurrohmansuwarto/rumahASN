@@ -13,6 +13,10 @@ export const rwDiklatMaster = () => {
   return api.get("/rw-diklat").then((res) => res.data);
 };
 
+export const rwDiklatMasterByNip = (nip) => {
+  return api.get(`/admin/${nip}/rw-diklat`).then((res) => res.data);
+};
+
 export const rwAngkakreditMaster = () => {
   return api.get("/rw-angkakredit").then((res) => res.data);
 };
