@@ -27,7 +27,10 @@ import { useEffect, useState } from "react";
 
 const QuestionDisplay = ({ id, webinarId, data, remove, isLoadingRemove }) => {
   const [open, setOpen] = useState(false);
-  const handleOpen = () => {};
+
+  const handleOpen = () => {
+    setOpen(true);
+  };
 
   const handleRemove = () => {
     Modal.confirm({
@@ -52,7 +55,7 @@ const QuestionDisplay = ({ id, webinarId, data, remove, isLoadingRemove }) => {
         <Button danger type="primary" onClick={handleRemove}>
           Hapus
         </Button>
-        <Button>Update</Button>
+        <Button onClick={handleOpen}>Update</Button>
       </Space>
       <List
         dataSource={data.answers}

@@ -99,6 +99,26 @@ export const deleteFileMinio = (mc, filename) => {
   });
 };
 
+export const uploadSertifikatToMinio = (mc, filename, base64Pdf) => {
+  return new Promise((resolve, reject) => {
+    mc.putObject(
+      "public",
+      `/certificates/${filename}`,
+      Buffer.from(base64Pdf, "base64"),
+      base64Pdf.length,
+      { "Content-Type": "application/pdf" },
+      function (err, info) {
+        if (err) {
+          reject(err);
+          console.log(err);
+        } else {
+          resolve(info);
+        }
+      }
+    );
+  });
+};
+
 export const fromNow = (date) => {
   return moment(date).fromNow();
 };
