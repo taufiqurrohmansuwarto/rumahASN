@@ -17,7 +17,11 @@ const AbsenceEntry = require("@/models/webinar-series-absence-entries.model");
 const AbsenceParticipant = require("@/models/webinar-series-participants-absence.model");
 
 const User = require("@/models/users.model");
-const { uploadFileMinio, typeGroup } = require("@/utils/index");
+const {
+  uploadFileMinio,
+  typeGroup,
+  uploadSertifikatToMinio,
+} = require("@/utils/index");
 
 const {
   wordToPdf,
@@ -29,6 +33,7 @@ const { toLower, template } = require("lodash");
 const { createSignature, createQrFromId } = require("@/utils/bsre-fetcher");
 const { parseMarkdown } = require("@/utils/parsing");
 const { sealPdf } = require("@/utils/esign-utils");
+const { default: axios } = require("axios");
 
 const URL_FILE = "https://siasn.bkd.jatimprov.go.id:9000/public";
 
@@ -936,6 +941,16 @@ const downloadCertificate = async (req, res) => {
       // check if user already generate certificate
       if (result?.document_sign) {
         res.json(result?.document_sign);
+      } else if (result?.document_sign_url) {
+        // download file using axios and return to base64
+        const response = await axios.get(
+          `${URL_FILE}${result?.document_sign_url}`,
+          {
+            responseType: "arraybuffer",
+          }
+        );
+        const base64 = Buffer.from(response.data, "binary").toString("base64");
+        res.json(base64);
       } else {
         // jika belum generate maka generate dulu kalau ini menggunakan seal
         const numberCertificate = currentWebinarSeries?.certificate_number;
@@ -971,19 +986,28 @@ const downloadCertificate = async (req, res) => {
               user_id: customId,
               action: "SEAL_CERTIFICATE",
               status: "SUCCESS",
-              request_data: JSON.stringify(data),
-              response_data: JSON.stringify(sealDocument),
+              request_data: JSON.stringify({}),
+              response_data: JSON.stringify({}),
               description: "Seal Certificate",
             };
 
             await LogSealBsre.query().insert(successLog);
 
+            const fileNameUpload = `${id}.pdf`;
+
+            await uploadSertifikatToMinio(
+              req?.mc,
+              fileNameUpload,
+              sealDocument?.data?.file[0]
+            );
+
             // update the database
             await WebinarSeriesParticipates.query()
               .patch({
                 is_generate_certificate: true,
-                document_sign: sealDocument?.data?.file[0],
+                // document_sign: sealDocument?.data?.file[0],
                 document_sign_at: new Date(),
+                document_sign_url: `/certificates/${fileNameUpload}`,
               })
               .where("id", id)
               .andWhere("user_id", customId);
@@ -994,8 +1018,8 @@ const downloadCertificate = async (req, res) => {
               user_id: customId,
               action: "SEAL_CERTIFICATE",
               status: "ERROR",
-              request_data: JSON.stringify(data),
-              response_data: JSON.stringify(sealDocument),
+              request_data: JSON.stringify({}),
+              response_data: JSON.stringify({}),
               description: "Seal Certificate",
             };
 
@@ -1051,6 +1075,7 @@ const resetCertificates = async (req, res) => {
         is_generate_certificate: false,
         document_sign: null,
         document_sign_at: null,
+        document_sign_url: null,
       })
       .where("webinar_series_id", id);
 
