@@ -1,4 +1,7 @@
 const WebinarSeriesParticipates = require("@/models/webinar-series-participates.model");
+const { default: axios } = require("axios");
+
+const URL_FILE = "https://siasn.bkd.jatimprov.go.id:9000/public";
 
 const downloadWebinarCertificates = async (req, res) => {
   try {
@@ -32,9 +35,24 @@ const checkWebinarCertificates = async (req, res) => {
       if (
         result?.is_generate_certificate &&
         result?.user_information &&
-        result?.document_sign &&
         result?.document_sign_at
       ) {
+        if (result?.document_sign_url) {
+          const response = await axios.get(
+            `${URL_FILE}/${result?.document_sign_url}`,
+            {
+              responseType: "arraybuffer",
+            }
+          );
+
+          const buffer = Buffer.from(response?.data, "binary").toString(
+            "base64"
+          );
+          res.json({ ...result, document_sign: buffer });
+        } else if (result?.document_sign) {
+          res.json(result);
+        }
+
         res.json(result);
       } else {
         res.json(null);
