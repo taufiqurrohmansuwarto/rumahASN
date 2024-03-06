@@ -918,8 +918,7 @@ const downloadCertificate = async (req, res) => {
         "document_sign",
         "document_sign_at",
         "user_information",
-        "document_sign_url",
-        "template_attributes"
+        "document_sign_url"
       )
       .where("id", id)
       .andWhere("user_id", customId)
@@ -969,7 +968,7 @@ const downloadCertificate = async (req, res) => {
           },
           nomer_sertifikat: numberCertificate,
           id: result?.id,
-          attributes: result?.template_attributes,
+          attributes: currentWebinarSeries?.template_attributes,
         };
 
         const userSertificate = await generateCertificateWithUserInformation(
