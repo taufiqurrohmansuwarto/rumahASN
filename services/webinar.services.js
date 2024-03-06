@@ -304,6 +304,28 @@ export const reportSurvey = (id) => {
   return api.get(`/admin/${id}/surveys`).then((res) => res?.data);
 };
 
+export const viewCertificate = (id) => {
+  return api.get(`/admin/${id}/view-certificate`).then((res) => res?.data);
+};
+
+export const editTemplateCertificate = ({ id, data }) => {
+  return api
+    .patch(`/admin/${id}/view-certificate`, data)
+    .then((res) => res?.data);
+};
+
+export const getSettingTemplate = (id) => {
+  return api
+    .get(`/admin/${id}/setting-template-certificate`)
+    .then((res) => res?.data);
+};
+
+export const editSettingTemplate = ({ id, data }) => {
+  return api
+    .patch(`/admin/${id}/setting-template-certificate`, data)
+    .then((res) => res?.data);
+};
+
 // public
 export const checkCertificateWebinar = (id) => {
   return api.get(`/public/${id}`).then((res) => res?.data);
