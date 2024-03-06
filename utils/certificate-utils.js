@@ -10,7 +10,7 @@ const {
   landscape,
 } = require("gotenberg-js-client");
 
-const { PDFDocument, TextAlignment } = require("pdf-lib");
+const { PDFDocument, TextAlignment, StandardFonts } = require("pdf-lib");
 
 const qrCode = require("qrcode");
 
@@ -66,14 +66,34 @@ const pdfToBuffer = (pdf) => {
   });
 };
 
-const dynamicFontSize = (form, fieldName, fieldValue) => {
+const dynamicFontSize = (
+  form,
+  fieldName,
+  fieldValue,
+  font,
+  fontSize,
+  alignment
+) => {
   const field = form.getTextField(fieldName);
 
   field.setText(fieldValue);
-  field.setAlignment(TextAlignment.Left);
+
+  if (alignment === "center") {
+    field.setAlignment(TextAlignment.Center);
+  } else if (alignment === "right") {
+    field.setAlignment(TextAlignment.Right);
+  } else {
+    field.setAlignment(TextAlignment.Left);
+  }
+
   field.enableMultiline();
-  field.setFontSize(10);
+
+  field.setFontSize(fontSize);
+
   field.enableReadOnly();
+
+  field.updateAppearances(font);
+  field.defaultUpdateAppearances(font);
 };
 
 const fieldsColumn = [
@@ -84,17 +104,58 @@ const fieldsColumn = [
   "nomer_sertifikat",
 ];
 
-module.exports.generateCertificateWithUserInformation = async ({
+module.exports.viewCertificateWithUserInformation = async ({
   url,
   id,
-  nomer_sertifikat,
-  user,
+  attributes,
 }) => {
   try {
-    const { nama, employee_number, jabatan, instansi } = user;
-    const qrCode = await createQrFromId(id);
+    const user = {
+      nama: "IPUT TAUFIQURROHMAN SUWARTO",
+      employee_number: "199103052019031008",
+      jabatan: "Pranta Komputer Ahli Pertama",
+      instansi: "BADAN KEPEGAWAIAN DAERAH PROVINSI JAWA TIMUR - BIDANG P3DASI",
+      nomer_sertifikat: "123456",
+    };
+    const { nama, employee_number, jabatan, instansi, nomer_sertifikat } = user;
+    const qrCode = await createQrFromId("abcedfghijklmnopqrstuvwxyz");
     const pdfBytes = await axios.get(url, { responseType: "arraybuffer" });
     const pdfDoc = await PDFDocument.load(pdfBytes.data);
+    const font = await pdfDoc.embedFont(StandardFonts.HelveticaBoldOblique);
+
+    // set all page to font
+    const pages = pdfDoc.getPages();
+    for (const page of pages) {
+      page.setFont(font);
+    }
+
+    const templateAttr = [
+      {
+        field: "nomer_sertifikat",
+        fontSize: attributes?.nomerSertifikatFontSize || 10,
+        alignment: attributes?.nomerSertifikatAlignment || "left",
+      },
+      {
+        field: "nama",
+        fontSize: attributes?.namaFontSize || 10,
+        alignment: attributes?.namaAlignment || "left",
+      },
+      {
+        field: "employee_number",
+        fontSize: attributes?.employeeNumberFontSize || 10,
+        alignment: attributes?.employeeNumberAlignment || "left",
+      },
+      {
+        field: "jabatan",
+        fontSize: attributes?.jabatanFontSize || 10,
+        alignment: attributes?.jabatanAlignment || "left",
+      },
+      {
+        field: "instansi",
+        fontSize: attributes?.instansiFontSize || 10,
+        alignment: attributes?.instansiAlignment || "left",
+      },
+    ];
 
     const certificateData = {
       nama: nama || "",
@@ -117,8 +178,114 @@ module.exports.generateCertificateWithUserInformation = async ({
 
     const form = pdfDoc.getForm();
     for (const field of fieldsColumn) {
-      dynamicFontSize(form, field, certificateData[field]);
+      dynamicFontSize(
+        form,
+        field,
+        certificateData[field],
+        font,
+        templateAttr.find((attr) => attr.field === field)?.fontSize,
+        templateAttr.find((attr) => attr.field === field)?.alignment
+      );
     }
+
+    form.flatten();
+
+    const pdfBytesWithText = await pdfDoc.save();
+    const pdfBase64 = Buffer.from(pdfBytesWithText).toString("base64");
+
+    return {
+      success: true,
+      file: pdfBase64,
+      id,
+    };
+  } catch (error) {
+    console.log(error);
+    return {
+      success: false,
+      data: error,
+    };
+  }
+};
+
+module.exports.generateCertificateWithUserInformation = async ({
+  url,
+  id,
+  nomer_sertifikat,
+  user,
+  attributes,
+}) => {
+  try {
+    const { nama, employee_number, jabatan, instansi } = user;
+    const qrCode = await createQrFromId(id);
+    const pdfBytes = await axios.get(url, { responseType: "arraybuffer" });
+    const pdfDoc = await PDFDocument.load(pdfBytes.data);
+    const font = await pdfDoc.embedFont(StandardFonts.HelveticaBoldOblique);
+
+    const certificateData = {
+      nama: nama || "",
+      employee_number: employee_number || "",
+      jabatan: jabatan || "",
+      instansi: instansi || "",
+      nomer_sertifikat: nomer_sertifikat || "",
+    };
+
+    const pages = pdfDoc.getPages();
+    for (const page of pages) {
+      page.setFont(font);
+    }
+
+    const templateAttr = [
+      {
+        field: "nomer_sertifikat",
+        fontSize: attributes?.nomerSertifikatFontSize || 10,
+        alignment: attributes?.nomerSertifikatAlignment || "left",
+      },
+      {
+        field: "nama",
+        fontSize: attributes?.namaFontSize || 10,
+        alignment: attributes?.namaAlignment || "left",
+      },
+      {
+        field: "employee_number",
+        fontSize: attributes?.employeeNumberFontSize || 10,
+        alignment: attributes?.employeeNumberAlignment || "left",
+      },
+      {
+        field: "jabatan",
+        fontSize: attributes?.jabatanFontSize || 10,
+        alignment: attributes?.jabatanAlignment || "left",
+      },
+      {
+        field: "instansi",
+        fontSize: attributes?.instansiFontSize || 10,
+        alignment: attributes?.instansiAlignment || "left",
+      },
+    ];
+
+    // add qr code in bottom right
+    const qrImage = await pdfDoc.embedPng(qrCode);
+    const qrDims = qrImage.scale(0.2);
+    const page = pdfDoc.getPages()[0];
+    page.drawImage(qrImage, {
+      x: page.getWidth() - qrDims.width - 50,
+      y: 50,
+      width: qrDims.width,
+      height: qrDims.height,
+    });
+
+    const form = pdfDoc.getForm();
+    for (const field of fieldsColumn) {
+      dynamicFontSize(
+        form,
+        field,
+        certificateData[field],
+        font,
+        templateAttr.find((attr) => attr.field === field)?.fontSize,
+        templateAttr.find((attr) => attr.field === field)?.alignment
+      );
+    }
+
+    form.flatten();
 
     const pdfBytesWithText = await pdfDoc.save();
     const pdfBase64 = Buffer.from(pdfBytesWithText).toString("base64");

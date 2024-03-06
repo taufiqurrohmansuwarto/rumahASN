@@ -114,6 +114,11 @@ function AdminLayoutDetailWebinar({ children, active = "detail", loading }) {
             key: "posttest",
             href: `/apps-managements/webinar-series/${id}/postest`,
           },
+          {
+            tab: <>Lihat Sertifikat</>,
+            key: "view-certificate",
+            href: `/apps-managements/webinar-series/${id}/view-certificate`,
+          },
         ]}
         tabActiveKey={active}
         tabProps={{

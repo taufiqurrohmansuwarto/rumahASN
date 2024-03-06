@@ -27,6 +27,7 @@ const {
   wordToPdf,
   generateWebinarCertificate,
   generateCertificateWithUserInformation,
+  viewCertificateWithUserInformation,
 } = require("@/utils/certificate-utils");
 
 const { toLower, template } = require("lodash");
@@ -917,7 +918,8 @@ const downloadCertificate = async (req, res) => {
         "document_sign",
         "document_sign_at",
         "user_information",
-        "document_sign_url"
+        "document_sign_url",
+        "template_attributes"
       )
       .where("id", id)
       .andWhere("user_id", customId)
@@ -967,6 +969,7 @@ const downloadCertificate = async (req, res) => {
           },
           nomer_sertifikat: numberCertificate,
           id: result?.id,
+          attributes: result?.template_attributes,
         };
 
         const userSertificate = await generateCertificateWithUserInformation(
@@ -1089,7 +1092,70 @@ const resetCertificates = async (req, res) => {
   }
 };
 
+const viewCertificate = async (req, res) => {
+  try {
+    const { id } = req?.query;
+    const result = await WebinarSeries.query().where("id", id).first();
+
+    if (!result) {
+      res.json(null);
+    } else if (!result?.certificate_template) {
+      res.json(null);
+    } else if (result?.certificate_template) {
+      const hasil = await viewCertificateWithUserInformation({
+        attributes: result?.template_attributes,
+        url: result?.certificate_template,
+        id,
+      });
+
+      res.json(hasil);
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+const customEditSertificate = async (req, res) => {
+  try {
+    const { id } = req?.query;
+
+    const body = req?.body;
+
+    const result = await WebinarSeries.query()
+      .patch({
+        template_attributes: body,
+      })
+      .where("id", id);
+
+    res.json(result);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+const getTemplateSettingSertificate = async (req, res) => {
+  try {
+    const { id } = req?.query;
+
+    const result = await WebinarSeries.query().where("id", id).first();
+
+    if (!result) {
+      res.json({});
+    } else {
+      res.json(result?.template_attributes);
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
 module.exports = {
+  getTemplateSettingSertificate,
+  customEditSertificate,
+  viewCertificate,
   checkCertificate,
   downloadCertificate,
   uploadTemplateAndImage,
