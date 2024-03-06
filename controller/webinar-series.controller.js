@@ -1034,7 +1034,7 @@ const downloadCertificate = async (req, res) => {
                 totp: req?.totpSeal,
                 idSubscriber: req?.idSubscriber,
               }),
-              response_data: JSON.stringify({}),
+              response_data: JSON.stringify(sealDocument?.data),
               description: "Seal Certificate",
             };
 
@@ -1054,10 +1054,27 @@ const downloadCertificate = async (req, res) => {
                 })
                 .where("id", req?.id);
 
+              await LogSealBsre.query().insert({
+                user_id: customId,
+                action: "REQUEST_OTP_SEAL",
+                status: "SUCCESS",
+                request_data: JSON.stringify(requestData),
+                response_data: JSON.stringify(result?.data),
+                description: "Request OTP Seal",
+              });
+
               res
                 .status(400)
                 .json({ code: 400, message: sealDocument?.data?.message });
             } else {
+              await LogSealBsre.query().insert({
+                user_id: customId,
+                action: "REQUEST_OTP_SEAL",
+                status: "ERROR",
+                request_data: JSON.stringify(requestData),
+                response_data: JSON.stringify(result?.data),
+                description: "Request OTP Seal",
+              });
               res
                 .status(400)
                 .json({ code: 400, message: sealDocument?.data?.message });
