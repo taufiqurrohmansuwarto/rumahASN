@@ -290,8 +290,6 @@ module.exports.generateCertificateWithUserInformation = async ({
     const pdfBytesWithText = await pdfDoc.save();
     const pdfBase64 = Buffer.from(pdfBytesWithText).toString("base64");
 
-    console.log("success", pdfBase64);
-
     return {
       success: true,
       file: pdfBase64,
