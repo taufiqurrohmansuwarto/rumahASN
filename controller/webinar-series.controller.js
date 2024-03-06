@@ -33,7 +33,10 @@ const {
 const { toLower, template } = require("lodash");
 const { createSignature, createQrFromId } = require("@/utils/bsre-fetcher");
 const { parseMarkdown } = require("@/utils/parsing");
-const { sealPdf } = require("@/utils/esign-utils");
+const {
+  sealPdf,
+  requestSealOtpWithIdSubscriber,
+} = require("@/utils/esign-utils");
 const { default: axios } = require("axios");
 
 const URL_FILE = "https://siasn.bkd.jatimprov.go.id:9000/public";
@@ -1025,15 +1028,34 @@ const downloadCertificate = async (req, res) => {
                 totp: req?.totpSeal,
                 idSubscriber: req?.idSubscriber,
               }),
-              response_data: JSON.stringify(sealDocument?.data),
+              response_data: JSON.stringify({}),
               description: "Seal Certificate",
             };
 
             await LogSealBsre.query().insert(errorLog);
 
-            res
-              .status(400)
-              .json({ code: 400, message: sealDocument?.data?.message });
+            const requestData = {
+              totp: req?.totp,
+              idSubscriber: req?.idSubscriber,
+            };
+
+            const result = await requestSealOtpWithIdSubscriber(requestData);
+
+            if (result?.success) {
+              await LogSealBsre.query()
+                .patch({
+                  otp_seal: result?.data?.totp,
+                })
+                .where("id", req?.id);
+
+              res
+                .status(400)
+                .json({ code: 400, message: sealDocument?.data?.message });
+            } else {
+              res
+                .status(400)
+                .json({ code: 400, message: sealDocument?.data?.message });
+            }
           }
         } else {
           res

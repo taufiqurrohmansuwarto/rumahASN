@@ -25,36 +25,49 @@ module.exports = async (req, res, next) => {
           idSubscriber: result.id_subscriber,
         };
 
-        const hasilSeal = await requestSealOtpWithIdSubscriber(requestData);
+        if (!result?.otp_seal) {
+          const hasilSeal = await requestSealOtpWithIdSubscriber(requestData);
+          if (hasilSeal?.success) {
+            const dataSuccessLog = {
+              user_id: userId,
+              action: "REQUEST_SEAL_OTP",
+              status: "SUCCESS",
+              request_data: JSON.stringify(requestData),
+              response_data: JSON.stringify(hasilSeal),
+              description: "Request Seal OTP",
+            };
 
-        if (hasilSeal?.success) {
-          const dataSuccessLog = {
-            user_id: userId,
-            action: "REQUEST_SEAL_OTP",
-            status: "SUCCESS",
-            request_data: JSON.stringify(requestData),
-            response_data: JSON.stringify(hasilSeal),
-            description: "Request Seal OTP",
-          };
+            await LogSealBsre.query().insert(dataSuccessLog);
+            await AppBsreSeal.query()
+              .patch({ otp_seal: hasilSeal?.data?.totp })
+              .where("id", result.id);
 
-          await LogSealBsre.query().insert(dataSuccessLog);
-          req.totpSeal = hasilSeal?.data?.totp;
+            req.id = result.id;
+            req.totpSeal = hasilSeal?.data?.totp;
+            req.totp = result.totp_activation_code;
+            req.idSubscriber = result.id_subscriber;
+            next();
+          } else {
+            const dataErrorLog = {
+              user_id: userId,
+              action: "REQUEST_SEAL_OTP",
+              status: "ERROR",
+              request_data: JSON.stringify(requestData),
+              response_data: JSON.stringify(hasilSeal),
+              description: "Request Seal OTP",
+            };
+
+            await LogSealBsre.query().insert(dataErrorLog);
+            res
+              .status(500)
+              .json({ code: 500, message: hasilSeal?.data?.message });
+          }
+        } else {
+          req.id = result.id;
+          req.totp = result.totp_activation_code;
+          req.totpSeal = result.otp_seal;
           req.idSubscriber = result.id_subscriber;
           next();
-        } else {
-          const dataErrorLog = {
-            user_id: userId,
-            action: "REQUEST_SEAL_OTP",
-            status: "ERROR",
-            request_data: JSON.stringify(requestData),
-            response_data: JSON.stringify(hasilSeal),
-            description: "Request Seal OTP",
-          };
-
-          await LogSealBsre.query().insert(dataErrorLog);
-          res
-            .status(500)
-            .json({ code: 500, message: hasilSeal?.data?.message });
         }
       }
     }
