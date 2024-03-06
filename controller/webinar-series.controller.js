@@ -38,6 +38,7 @@ const {
   requestSealOtpWithIdSubscriber,
 } = require("@/utils/esign-utils");
 const { default: axios } = require("axios");
+const AppBsreSeal = require("@/models/app_bsre_seal.model");
 
 const URL_FILE = "https://siasn.bkd.jatimprov.go.id:9000/public";
 
@@ -1047,7 +1048,7 @@ const downloadCertificate = async (req, res) => {
             const result = await requestSealOtpWithIdSubscriber(requestData);
 
             if (result?.success) {
-              await LogSealBsre.query()
+              await AppBsreSeal.query()
                 .patch({
                   otp_seal: result?.data?.totp,
                 })
