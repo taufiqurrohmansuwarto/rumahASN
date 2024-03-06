@@ -1045,36 +1045,41 @@ const downloadCertificate = async (req, res) => {
               idSubscriber: req?.idSubscriber,
             };
 
-            const result = await requestSealOtpWithIdSubscriber(requestData);
+            if (sealDocument?.data?.error === "TOTP Salah") {
+              const result = await requestSealOtpWithIdSubscriber(requestData);
+              if (result?.success) {
+                await AppBsreSeal.query()
+                  .patch({
+                    otp_seal: result?.data?.totp,
+                  })
+                  .where("id", req?.id);
 
-            if (result?.success) {
-              await AppBsreSeal.query()
-                .patch({
-                  otp_seal: result?.data?.totp,
-                })
-                .where("id", req?.id);
+                await LogSealBsre.query().insert({
+                  user_id: customId,
+                  action: "REQUEST_OTP_SEAL",
+                  status: "SUCCESS",
+                  request_data: JSON.stringify(requestData),
+                  response_data: JSON.stringify(result?.data),
+                  description: "Request OTP Seal",
+                });
 
-              await LogSealBsre.query().insert({
-                user_id: customId,
-                action: "REQUEST_OTP_SEAL",
-                status: "SUCCESS",
-                request_data: JSON.stringify(requestData),
-                response_data: JSON.stringify(result?.data),
-                description: "Request OTP Seal",
-              });
-
-              res
-                .status(400)
-                .json({ code: 400, message: sealDocument?.data?.message });
+                res
+                  .status(400)
+                  .json({ code: 400, message: sealDocument?.data?.message });
+              } else {
+                await LogSealBsre.query().insert({
+                  user_id: customId,
+                  action: "REQUEST_OTP_SEAL",
+                  status: "ERROR",
+                  request_data: JSON.stringify(requestData),
+                  response_data: JSON.stringify(result?.data),
+                  description: "Request OTP Seal",
+                });
+                res
+                  .status(400)
+                  .json({ code: 400, message: sealDocument?.data?.message });
+              }
             } else {
-              await LogSealBsre.query().insert({
-                user_id: customId,
-                action: "REQUEST_OTP_SEAL",
-                status: "ERROR",
-                request_data: JSON.stringify(requestData),
-                response_data: JSON.stringify(result?.data),
-                description: "Request OTP Seal",
-              });
               res
                 .status(400)
                 .json({ code: 400, message: sealDocument?.data?.message });
