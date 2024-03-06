@@ -1021,7 +1021,10 @@ const downloadCertificate = async (req, res) => {
               user_id: customId,
               action: "SEAL_CERTIFICATE",
               status: "ERROR",
-              request_data: JSON.stringify({}),
+              request_data: JSON.stringify({
+                totp: req?.totpSeal,
+                idSubscriber: req?.idSubscriber,
+              }),
               response_data: JSON.stringify(sealDocument?.data),
               description: "Seal Certificate",
             };
