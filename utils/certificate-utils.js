@@ -296,6 +296,7 @@ module.exports.generateCertificateWithUserInformation = async ({
       id,
     };
   } catch (error) {
+    console.log("error generate certificate", error);
     return {
       success: false,
       data: error,

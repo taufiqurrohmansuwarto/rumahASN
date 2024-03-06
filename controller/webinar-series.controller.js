@@ -1022,7 +1022,7 @@ const downloadCertificate = async (req, res) => {
               action: "SEAL_CERTIFICATE",
               status: "ERROR",
               request_data: JSON.stringify({}),
-              response_data: JSON.stringify({}),
+              response_data: JSON.stringify(sealDocument?.data),
               description: "Seal Certificate",
             };
 
