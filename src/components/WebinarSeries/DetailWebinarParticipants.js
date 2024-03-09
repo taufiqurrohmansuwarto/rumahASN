@@ -20,10 +20,12 @@ import {
   Tag,
   Tooltip,
   message,
+  Input,
 } from "antd";
 import { useRouter } from "next/router";
 import { useState } from "react";
 import Bar from "@/components/Plots/Bar";
+import Pie from "../Plots/Pie";
 
 const AggregasiJabatan = ({ data }) => {
   const config = {
@@ -59,6 +61,27 @@ const AggregasiPerangkatDaerah = ({ data }) => {
   return (
     <Card title="Agregasi Perangkat Daerah">
       <Bar {...config} />
+    </Card>
+  );
+};
+
+const AggregasiDownloadSertifikat = ({ data }) => {
+  const config = {
+    data,
+    angleField: "value",
+    colorField: "type",
+    radius: 1,
+    innerRadius: 0.64,
+    meta: {
+      value: {
+        formatter: (v) => `${v} orang`,
+      },
+    },
+  };
+
+  return (
+    <Card title="Aggregasi Unduh Sertifikat">
+      <Pie {...config} />
     </Card>
   );
 };
@@ -102,6 +125,21 @@ function DetailWebinarParticipants() {
       limit: 10,
     },
   });
+
+  const handleSearch = (value) => {
+    if (!value) {
+      value = undefined;
+    }
+
+    setQuery({
+      ...query,
+      query: {
+        ...query?.query,
+        search: value,
+        page: 1,
+      },
+    });
+  };
 
   const {
     data: participants,
@@ -202,6 +240,18 @@ function DetailWebinarParticipants() {
       key: "created_at",
       render: (text) => <span>{formatDateSimple(text?.created_at)}</span>,
     },
+    {
+      responsive: ["sm"],
+      title: "Sudah Generate Sertifikat",
+      key: "is_generate_certificate",
+      render: (text) => {
+        return (
+          <Tag color={text?.is_generate_certificate ? "green" : "red"}>
+            {text?.is_generate_certificate ? "Sudah" : "Belum"}
+          </Tag>
+        );
+      },
+    },
   ];
 
   return (
@@ -210,17 +260,27 @@ function DetailWebinarParticipants() {
         <Table
           columns={columns}
           title={() => (
-            <Tooltip title="Unduh Data Peserta">
-              <Button
-                disabled={isLoadingWebinarParticipants}
-                loading={isLoadingWebinarParticipants}
-                onClick={handleDownload}
-                type="primary"
-                icon={<CloudDownloadOutlined />}
-              >
-                Peserta
-              </Button>
-            </Tooltip>
+            <Space direction="vertical">
+              <Tooltip title="Unduh Data Peserta">
+                <Button
+                  disabled={isLoadingWebinarParticipants}
+                  loading={isLoadingWebinarParticipants}
+                  onClick={handleDownload}
+                  type="primary"
+                  icon={<CloudDownloadOutlined />}
+                >
+                  Peserta
+                </Button>
+              </Tooltip>
+              <Input.Search
+                allowClear
+                onSearch={handleSearch}
+                enterButton
+                style={{
+                  width: 800,
+                }}
+              />
+            </Space>
           )}
           size="small"
           pagination={{
@@ -251,6 +311,9 @@ function DetailWebinarParticipants() {
           <AggregasiJabatan data={participants?.aggregate?.jabatan} />
           <AggregasiPerangkatDaerah
             data={participants?.aggregate?.perangkat_daerah}
+          />
+          <AggregasiDownloadSertifikat
+            data={participants?.aggregate?.certificate}
           />
         </Stack>
       )}

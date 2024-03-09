@@ -21,6 +21,7 @@ const {
   riwayatPindahInstansi,
   riwayatPindahWilayahKerja,
   riwayatPnsUnor,
+  removeKursusSiasn,
 } = require("@/utils/siasn-utils");
 
 const {
@@ -1157,7 +1158,22 @@ const getRwPnsUnorByNip = async (req, res) => {
   }
 };
 
+const removeKursus = async (req, res) => {
+  try {
+    const { siasnRequest: request } = req;
+    const { id } = req?.query;
+
+    await removeKursusSiasn(request, id);
+
+    res.json({ code: 200, message: "success" });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ code: 500, message: "Internal Server Error" });
+  }
+};
+
 module.exports = {
+  removeKursus,
   getRwPwkByNip,
   getRwPnsUnorByNip,
   getRwPindahInstansiByNip,

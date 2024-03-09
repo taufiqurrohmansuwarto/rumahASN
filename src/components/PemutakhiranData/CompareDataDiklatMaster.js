@@ -48,8 +48,7 @@ const TransferModal = ({ open, handleClose, data }) => {
     };
 
     if (!filePath) {
-      message.error("File belum diupload");
-      return;
+      tambah(payload);
     } else {
       const data = {
         ...payload,

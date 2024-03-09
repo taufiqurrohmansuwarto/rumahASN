@@ -8,6 +8,7 @@ import {
   Breadcrumb,
   Card,
   Collapse,
+  Input,
   Modal,
   Skeleton,
   Space,
@@ -16,6 +17,7 @@ import {
 } from "antd";
 import Head from "next/head";
 import Link from "next/link";
+import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 
 const ModalDetail = ({ itemid, open, onClose }) => {
@@ -73,9 +75,11 @@ const ModalDetail = ({ itemid, open, onClose }) => {
 };
 
 function LogBSRE() {
+  const router = useRouter();
+
   const [query, setQuery] = useState({
-    page: 1,
-    limit: 10,
+    page: router?.query?.page || 1,
+    limit: router?.query?.limit || 25,
   });
 
   const [itemId, setItemId] = useState(null);
@@ -84,6 +88,42 @@ function LogBSRE() {
   const handleOpenModal = (item) => {
     setItemId(item?.id);
     setOpenModal(true);
+  };
+
+  const handleChange = (page) => {
+    router.push({
+      pathname: router.pathname,
+      query: {
+        ...router.query,
+        page,
+      },
+    });
+
+    setQuery((prev) => ({
+      ...prev,
+      page,
+    }));
+  };
+
+  const handleSearch = (value) => {
+    if (!value) {
+      value = undefined;
+    }
+
+    router.push({
+      pathname: router.pathname,
+      query: {
+        ...router.query,
+        search: value,
+        page: 1,
+      },
+    });
+
+    setQuery((prev) => ({
+      ...prev,
+      search: value,
+      page: 1,
+    }));
   };
 
   const handleCloseModal = () => {
@@ -96,7 +136,7 @@ function LogBSRE() {
     () => logBsreSeal(query),
     {
       keepPreviousData: true,
-      enabled: !!query,
+      enabled: !!router?.query,
     }
   );
 
@@ -178,19 +218,15 @@ function LogBSRE() {
           />
           <Table
             loading={isLoading || isFetching}
+            title={() => <Input.Search onSearch={handleSearch} enterButton />}
             pagination={{
               position: ["bottomRight", "topRight"],
               showTotal: (total) => `Total ${total} data`,
               showSizeChanger: false,
-              current: query?.page,
+              current: parseInt(router?.query?.page) || 1,
               pageSize: query?.limit,
               total: data?.total,
-              onChange: (page) => {
-                setQuery({
-                  ...query,
-                  page,
-                });
-              },
+              onChange: handleChange,
             }}
             columns={columns}
             dataSource={data?.data}

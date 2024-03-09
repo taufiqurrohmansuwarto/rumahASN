@@ -138,3 +138,7 @@ module.exports.uploadFileKP = (fetcher, data) => {
     },
   });
 };
+
+module.exports.removeKursusSiasn = (fetcher, id) => {
+  return fetcher.delete(`/kursus/delete/${id}`);
+};
