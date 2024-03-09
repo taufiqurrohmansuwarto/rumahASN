@@ -141,18 +141,6 @@ const SignIn = ({ providers }) => {
             </Col>
           </Row>
           <Divider />
-
-          <Center>
-            <MantineButton
-              variant="gradient"
-              fullWidth
-              gradient={{ from: "#ed6ea0", to: "#ec8c69", deg: 35 }}
-              mb={12}
-              onClick={gotoNetralitas}
-            >
-              Lapor Netralitas!
-            </MantineButton>
-          </Center>
           <Row
             justify="center"
             style={{

@@ -75,12 +75,21 @@ const indexLogBsreSeal = async (req, res) => {
   try {
     const page = req?.query?.page || 1;
     const limit = req?.query?.limit || 25;
+    const username = req?.query?.search || "";
 
-    const result = await LogSealBsre.query()
-      .select("id", "user_id", "action", "status", "created_at")
-      .page(parseInt(page) - 1, parseInt(limit))
+    let query = LogSealBsre.query()
+      .select("log_seal_bsre.id", "user_id", "action", "status", "created_at")
       .withGraphFetched("user(simpleSelect)")
+      .page(parseInt(page) - 1, parseInt(limit))
       .orderBy("created_at", "desc");
+
+    if (username) {
+      query
+        .joinRelated("user")
+        .where("user.username", "ilike", `%${username}%`);
+    }
+
+    const result = await query;
 
     res.json({
       data: result.results,

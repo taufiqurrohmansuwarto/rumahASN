@@ -155,8 +155,8 @@ export const postRwKursus = (data) => {
   return api.post("/pns/rw-diklat", data).then((res) => res?.data);
 };
 
-export const postRwJabatanByNip = ({ nip, data }) => {
-  return api.post(`/admin/${nip}/rw-jabatan`, data).then((res) => res.data);
+export const deleteKursus = (id) => {
+  return api.delete(`/pns/rw-diklat/${id}`).then((res) => res?.data);
 };
 
 export const ipAsnByNip = (nip, tahun) => {

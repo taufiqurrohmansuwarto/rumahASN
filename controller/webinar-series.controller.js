@@ -124,9 +124,11 @@ const listParticipants = async (req, res) => {
     const page = req.query.page || 1;
     const search = req.query.search || "";
 
-    const result = await WebinarSeriesParticipates.query()
+    let query;
+
+    query = WebinarSeriesParticipates.query()
       .select(
-        "id",
+        "webinar_series_participates.id",
         "webinar_series_id",
         "user_id",
         "already_poll",
@@ -140,6 +142,13 @@ const listParticipants = async (req, res) => {
       .withGraphFetched("[participant(fullSelect)]")
       .orderBy("created_at", "desc");
 
+    if (search) {
+      query
+        .joinRelated("participant")
+        .where("username", "ilike", `%${search}%`);
+    }
+
+    const result = await query;
     const aggregasiPerangkatDaerah = await User.query()
       .select(
         User.raw(
@@ -164,6 +173,29 @@ const listParticipants = async (req, res) => {
       .limit(10)
       .orderBy("value", "desc");
 
+    const totalParticipantsNotGenerateCertificate =
+      await WebinarSeriesParticipates.query()
+        .where("webinar_series_id", id)
+        .andWhere("is_generate_certificate", false)
+        .count("id");
+
+    const totalParticipantsGenerateCertificate =
+      await WebinarSeriesParticipates.query()
+        .where("webinar_series_id", id)
+        .andWhere("is_generate_certificate", true)
+        .count("id");
+
+    const aggregateCertificate = [
+      {
+        type: "Sudah Generate",
+        value: parseInt(totalParticipantsGenerateCertificate[0].count) || 0,
+      },
+      {
+        type: "Belum Generate",
+        value: parseInt(totalParticipantsNotGenerateCertificate[0].count) || 0,
+      },
+    ];
+
     const data = {
       data: result.results,
       limit: parseInt(limit),
@@ -176,6 +208,7 @@ const listParticipants = async (req, res) => {
       aggregate: {
         perangkat_daerah: serialize(aggregasiPerangkatDaerah),
         jabatan: serialize(aggregasiJabatan),
+        certificate: aggregateCertificate,
       },
     });
   } catch (error) {
