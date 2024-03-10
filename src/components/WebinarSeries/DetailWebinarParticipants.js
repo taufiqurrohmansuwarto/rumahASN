@@ -1,6 +1,7 @@
 import {
   downloadParticipants,
   getParticipants,
+  redownloadCertificateParticipant,
 } from "@/services/webinar.services";
 import {
   formatDateSimple,
@@ -10,7 +11,7 @@ import {
 } from "@/utils/client-utils";
 import { CloudDownloadOutlined } from "@ant-design/icons";
 import { Stack } from "@mantine/core";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Avatar,
   Button,
@@ -21,6 +22,7 @@ import {
   Tooltip,
   message,
   Input,
+  Popconfirm,
 } from "antd";
 import { useRouter } from "next/router";
 import { useState } from "react";
@@ -90,6 +92,8 @@ function DetailWebinarParticipants() {
   const router = useRouter();
   const { id } = router.query;
 
+  const queryClient = useQueryClient();
+
   const {
     mutateAsync: webinarParticipants,
     isLoading: isLoadingWebinarParticipants,
@@ -152,6 +156,24 @@ function DetailWebinarParticipants() {
       keepPreviousData: true,
     }
   );
+
+  const {
+    mutateAsync: regenerateCertificate,
+    isLoading: isLoadingRegenerateCertificate,
+  } = useMutation((data) => redownloadCertificateParticipant(data), {
+    onSuccess: () => {
+      message.success("Sertifikat berhasil diregenerate");
+    },
+    onError: () => {
+      message.error("Gagal meregenerate sertifikat");
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries([
+        "webinar-series-admin-detail-participants",
+        query,
+      ]);
+    },
+  });
 
   const columns = [
     {
@@ -249,6 +271,26 @@ function DetailWebinarParticipants() {
           <Tag color={text?.is_generate_certificate ? "green" : "red"}>
             {text?.is_generate_certificate ? "Sudah" : "Belum"}
           </Tag>
+        );
+      },
+    },
+    {
+      responsive: ["sm"],
+      title: "Aksi",
+      key: "action",
+      render: (text) => {
+        return (
+          <Popconfirm
+            onConfirm={async () =>
+              await regenerateCertificate({
+                id,
+                participantId: text?.id,
+              })
+            }
+            title="Apakah anda yakin ingin menggenerate ulang sertifikat?"
+          >
+            <a>Reset</a>
+          </Popconfirm>
         );
       },
     },

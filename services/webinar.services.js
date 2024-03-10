@@ -23,6 +23,13 @@ export const getParticipants = ({ id, query }) => {
     .then((res) => res?.data);
 };
 
+// redownload certificate participant
+export const redownloadCertificateParticipant = ({ id, participantId }) => {
+  return api
+    .delete(`/admin/${id}/participants/${participantId}/certificate`)
+    .then((res) => res?.data);
+};
+
 export const detailWebinar = (id) => {
   return api.get(`/admin/${id}`).then((res) => res?.data);
 };
