@@ -28,7 +28,7 @@ module.exports = async (req, res, next) => {
 
         const hasilSeal = await requestSealOtpWithIdSubscriber(requestData);
 
-        if (reqOtpSeal.success) {
+        if (hasilSeal.success) {
           const successLog = {
             user_id: userId,
             action: "REQUEST_SEAL_OTP",
