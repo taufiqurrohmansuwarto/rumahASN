@@ -1034,11 +1034,9 @@ const downloadCertificate = async (req, res) => {
             description: "Seal Certificate",
           };
 
-          // insert log
-          await LogSealBsre.query().insert(successLog);
-
           // if success upload to minio
           const fileNameUpload = `${result?.id}.pdf`;
+
           await uploadSertifikatToMinio(
             req?.mc,
             fileNameUpload,
@@ -1053,6 +1051,9 @@ const downloadCertificate = async (req, res) => {
             })
             .where("id", id)
             .andWhere("user_id", customId);
+
+          // insert log
+          await LogSealBsre.query().insert(successLog);
 
           res.json(sealDocumentResponse?.data?.file[0]);
         } else {

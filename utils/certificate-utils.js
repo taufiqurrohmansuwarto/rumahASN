@@ -77,7 +77,6 @@ const dynamicFontSize = (
   const field = form.getTextField(fieldName);
 
   field.setText(fieldValue);
-
   if (alignment === "center") {
     field.setAlignment(TextAlignment.Center);
   } else if (alignment === "right") {
@@ -87,11 +86,8 @@ const dynamicFontSize = (
   }
 
   field.enableMultiline();
-
   field.setFontSize(fontSize);
-
   field.enableReadOnly();
-
   field.updateAppearances(font);
   field.defaultUpdateAppearances(font);
 };
@@ -123,7 +119,6 @@ module.exports.viewCertificateWithUserInformation = async ({
     const pdfDoc = await PDFDocument.load(pdfBytes.data);
     const font = await pdfDoc.embedFont(StandardFonts.HelveticaBoldOblique);
 
-    // set all page to font
     const pages = pdfDoc.getPages();
     for (const page of pages) {
       page.setFont(font);
@@ -165,7 +160,6 @@ module.exports.viewCertificateWithUserInformation = async ({
       nomer_sertifikat: nomer_sertifikat || "",
     };
 
-    // add qr code in bottom right
     const qrImage = await pdfDoc.embedPng(qrCode);
     const qrDims = qrImage.scale(0.2);
     const page = pdfDoc.getPages()[0];
@@ -296,7 +290,7 @@ module.exports.generateCertificateWithUserInformation = async ({
       id,
     };
   } catch (error) {
-    console.log("error generate sertifikate di certificate utils");
+    console.log("error generate certificate di certificate utils");
     return {
       success: false,
       data: error,
