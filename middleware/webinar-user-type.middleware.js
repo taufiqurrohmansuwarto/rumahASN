@@ -30,6 +30,8 @@ module.exports = async (req, res, next) => {
       return res.status(404).json({ code: 404, message: "Webinar not found" });
     } else {
       req.webinar = webinar;
+      req.is_generate_certificate =
+        currentWebinarParticipate?.is_generate_certificate;
       next();
     }
   } catch (e) {
