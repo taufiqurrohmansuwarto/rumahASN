@@ -1040,9 +1040,9 @@ const downloadCertificate = async (req, res) => {
           // if success upload to minio
           const fileNameUpload = `${result?.id}.pdf`;
           await uploadSertifikatToMinio(
-            req.mc,
-            sealDocumentResponse?.data?.file[0],
-            fileNameUpload
+            req?.mc,
+            fileNameUpload,
+            sealDocumentResponse?.data?.file[0]
           );
 
           await WebinarSeriesParticipates.query()
