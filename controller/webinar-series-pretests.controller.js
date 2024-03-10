@@ -58,7 +58,7 @@ const updatePretest = async (req, res) => {
         id: body.id,
         webinar_series_id: id,
       })
-      .update(body);
+      .patch(body);
 
     res.json({ message: "success" });
   } catch (error) {
