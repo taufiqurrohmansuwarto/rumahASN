@@ -1189,7 +1189,30 @@ const getTemplateSettingSertificate = async (req, res) => {
   }
 };
 
+const redownloadCertificate = async (req, res) => {
+  try {
+    const { participantId, id } = req?.query;
+    const result = await WebinarSeriesParticipates.query()
+      .patch({
+        is_generate_certificate: false,
+        document_sign: null,
+        document_sign_at: null,
+        document_sign_url: null,
+      })
+      .where("id", participantId)
+      .andWhere("webinar_series_id", id);
+
+    res.status(200).json({
+      message: "Berhasil mereset sertifikat",
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
 module.exports = {
+  redownloadCertificate,
   getTemplateSettingSertificate,
   customEditSertificate,
   viewCertificate,
