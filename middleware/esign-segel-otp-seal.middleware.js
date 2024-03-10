@@ -13,61 +13,49 @@ module.exports = async (req, res, next) => {
     } else {
       const result = await AppBsreSeal.query().first();
 
-      // check didatabase kalau tidak ada
       if (!result?.totp_activation_code) {
-        res.status(404).json({
-          message:
-            "TOTP belum digenerate, silahkan hubungi admin untuk melakukan generate TOTP",
-        });
+        res
+          .status(500)
+          .json({ message: "Cannot get  TOTP Seal. Please generate TOTP" });
       } else {
+        const totp = result?.totp_activation_code;
+        const idSubscriber = result?.id_subscriber;
+
         const requestData = {
-          totp: result.totp_activation_code,
-          idSubscriber: result.id_subscriber,
+          totp,
+          idSubscriber,
         };
 
-        if (!result?.otp_seal) {
-          const hasilSeal = await requestSealOtpWithIdSubscriber(requestData);
-          if (hasilSeal?.success) {
-            const dataSuccessLog = {
-              user_id: userId,
-              action: "REQUEST_SEAL_OTP",
-              status: "SUCCESS",
-              request_data: JSON.stringify(requestData),
-              response_data: JSON.stringify(hasilSeal),
-              description: "Request Seal OTP",
-            };
+        const hasilSeal = await requestSealOtpWithIdSubscriber(requestData);
 
-            await LogSealBsre.query().insert(dataSuccessLog);
-            await AppBsreSeal.query()
-              .patch({ otp_seal: hasilSeal?.data?.totp })
-              .where("id", result.id);
+        if (reqOtpSeal.success) {
+          const successLog = {
+            user_id: userId,
+            action: "REQUEST_SEAL_OTP",
+            status: "SUCCESS",
+            request_data: JSON.stringify(requestData),
+            response_data: JSON.stringify(hasilSeal),
+            description: "Request Seal OTP",
+          };
 
-            req.id = result.id;
-            req.totpSeal = hasilSeal?.data?.totp;
-            req.totp = result.totp_activation_code;
-            req.idSubscriber = result.id_subscriber;
-            next();
-          } else {
-            const dataErrorLog = {
-              user_id: userId,
-              action: "REQUEST_SEAL_OTP",
-              status: "ERROR",
-              request_data: JSON.stringify(requestData),
-              response_data: JSON.stringify(hasilSeal),
-              description: "Request Seal OTP",
-            };
-
-            await LogSealBsre.query().insert(dataErrorLog);
-            res
-              .status(500)
-              .json({ code: 500, message: hasilSeal?.data?.message });
-          }
-        } else {
-          req.id = result.id;
-          req.totp = result.totp_activation_code;
-          req.totpSeal = result.otp_seal;
-          req.idSubscriber = result.id_subscriber;
+          await LogSealBsre.query().insert(successLog);
+          req.totpSeal = hasilSeal?.data?.totp;
+          req.idSubscriber = idSubscriber;
           next();
+        } else {
+          const dataErrorLog = {
+            user_id: userId,
+            action: "REQUEST_SEAL_OTP",
+            status: "ERROR",
+            request_data: JSON.stringify(requestData),
+            response_data: JSON.stringify(hasilSeal),
+            description: "Request Seal OTP",
+          };
+
+          await LogSealBsre.query().insert(dataErrorLog);
+          res
+            .status(500)
+            .json({ code: 500, message: hasilSeal?.data?.message });
         }
       }
     }
