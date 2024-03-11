@@ -4,6 +4,7 @@ import PageContainer from "@/components/PageContainer";
 import SiasnTab from "@/components/PemutakhiranData/Admin/SiasnTab";
 import { patchAnomali2023 } from "@/services/anomali.services";
 import { dataUtamaMasterByNip } from "@/services/master.services";
+import { getPnsAllByNip } from "@/services/siasn-services";
 import { Alert, Stack } from "@mantine/core";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
@@ -16,6 +17,7 @@ import {
   Input,
   Modal,
   Row,
+  Skeleton,
   Space,
   Tag,
   Typography,
@@ -108,7 +110,7 @@ const ChangeStatusAnomali = ({ data, open, onCancel }) => {
   );
 };
 
-const EmployeeBio = ({ data, loading }) => {
+const EmployeeBio = ({ data, loading, isLoadingDataPns, dataPnsAll }) => {
   const [open, setOpen] = useState(false);
   const [anomali, setAnomali] = useState(null);
 
@@ -127,7 +129,7 @@ const EmployeeBio = ({ data, loading }) => {
       <ChangeStatusAnomali data={anomali} open={open} onCancel={handleClose} />
       <Row gutter={[16, 16]}>
         <Col md={2} sm={5}>
-          <Avatar size={80} shape="square" src={data?.foto} />
+          <Avatar size={95} shape="circle" src={data?.foto} />
         </Col>
         <Col md={10} sm={13}>
           <Space direction="vertical">
@@ -166,6 +168,26 @@ const EmployeeBio = ({ data, loading }) => {
           </Space>
         </Col>
       </Row>
+      <Row
+        style={{
+          marginTop: 8,
+        }}
+        gutter={[32, 32]}
+      >
+        <Col md={24}>
+          <Skeleton loading={isLoadingDataPns}>
+            <Alert title="Informasi ASN" color="yellow">
+              <Row>
+                <Col span={24}>
+                  {dataPnsAll?.nama} ({dataPnsAll?.nip_baru}) -{" "}
+                  {dataPnsAll?.unor_nm}
+                </Col>
+                <Col span={24}>{dataPnsAll?.jabatan_nama}</Col>
+              </Row>
+            </Alert>
+          </Skeleton>
+        </Col>
+      </Row>
       <IPAsnByNip tahun={2023} nip={data?.nip_baru} />
     </Card>
   );
@@ -180,6 +202,11 @@ const EmployeeNumberFasilitator = () => {
     () => dataUtamaMasterByNip(nip)
   );
 
+  const { data: dataPnsAll, isLoading: isLoadingDataPns } = useQuery(
+    ["data-pns-all", nip],
+    () => getPnsAllByNip(nip)
+  );
+
   return (
     <>
       <Head>
@@ -187,6 +214,7 @@ const EmployeeNumberFasilitator = () => {
       </Head>
       <PageContainer
         title="Detail Pegawai"
+        content="Komparasi data SIMASTER dan SIASN."
         onBack={() => router.back()}
         loading={isLoadingDataSimaster}
       >
@@ -195,6 +223,8 @@ const EmployeeNumberFasilitator = () => {
             <>
               <Stack>
                 <EmployeeBio
+                  isLoadingDataPns={isLoadingDataPns}
+                  dataPnsAll={dataPnsAll}
                   data={dataSimaster}
                   loading={isLoadingDataSimaster}
                 />
@@ -218,7 +248,7 @@ EmployeeNumberFasilitator.Auth = {
 };
 
 EmployeeNumberFasilitator.getLayout = function getLayout(page) {
-  return <Layout>{page}</Layout>;
+  return <Layout active="/fasilitator-employees">{page}</Layout>;
 };
 
 export default EmployeeNumberFasilitator;

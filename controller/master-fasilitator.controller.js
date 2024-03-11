@@ -12,6 +12,22 @@ const getAllEmployeesMaster = async (req, res) => {
   }
 };
 
+const getIPAsnReport = async (req, res) => {
+  try {
+    const fetcher = req?.clientCredentialsFetcher;
+    const opdId = req?.user?.organization_id;
+
+    const result = await fetcher.get(
+      `/master-ws/pemprov/opd/${opdId}/employees`
+    );
+
+    res.json(result?.data);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
 const getAllEmployeesAnomali23Report = async (req, res) => {
   try {
     const result = await getAllEmployees(req.fetcher);
@@ -64,4 +80,5 @@ const getAllEmployeesAnomali23Report = async (req, res) => {
 module.exports = {
   getAllEmployeesMaster,
   getAllEmployeesAnomali23Report,
+  getIPAsnReport,
 };
