@@ -1,5 +1,6 @@
 const { getAllEmployees } = require("@/utils/master.utils");
 const Anomali23 = require("@/models/anomali23.model");
+const SiasnIPASN = require("@/models/siasn-ipasn.model");
 const xlsx = require("xlsx");
 
 const getAllEmployeesMaster = async (req, res) => {
@@ -21,7 +22,54 @@ const getIPAsnReport = async (req, res) => {
       `/master-ws/pemprov/opd/${opdId}/employees`
     );
 
-    res.json(result?.data);
+    const nip = result?.data?.map((item) => item?.nip_master);
+
+    const siasnIPASN = await SiasnIPASN.query().whereIn("nip", nip);
+
+    const hasil = result?.data?.map((item, idx) => {
+      const ipasn = siasnIPASN?.find(
+        (ipasn) => ipasn?.nip === item?.nip_master
+      );
+
+      const { id, ...allData } = item;
+
+      return {
+        no: idx + 1,
+        ...allData,
+        ipasn_kualifikasi: ipasn?.kualifikasi,
+        // kompetensi
+        ipasn_kompetensi: ipasn?.kompetensi,
+        // kinerja
+        ipasn_kinerja: ipasn?.kinerja,
+        // disiplin
+        ipasn_disiplin: ipasn?.disiplin,
+        // total
+        // tahun
+        // updated
+        ipasn_total: ipasn?.total,
+        ipasn_tahun: ipasn?.tahun,
+        ipasn_updated: ipasn?.updated,
+      };
+    });
+
+    const wb = xlsx.utils.book_new();
+    const ws = xlsx.utils.json_to_sheet(hasil);
+
+    xlsx.utils.book_append_sheet(wb, ws, "Sheet1");
+
+    xlsx.writeFile(wb, "ipasn.xlsx");
+
+    res.setHeader(
+      "Content-Type",
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    );
+
+    res.setHeader(
+      "Content-Disposition",
+      "attachment; filename=" + "ipasn.xlsx"
+    );
+
+    res.end(xlsx.write(wb, { type: "buffer", bookType: "xlsx" }));
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: "Internal server error" });
