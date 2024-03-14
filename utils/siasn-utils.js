@@ -7,6 +7,10 @@ module.exports.foto = (fetcher, pnsId) => {
   return fetcher.get(`/pns/photo/${pnsId}`);
 };
 
+module.exports.saveUnorJabatan = (fetcher, data) => {
+  return fetcher.post(`/jabatan/unorjabatan/save`, data);
+};
+
 module.exports.dataUtama = (fetcher, nip) => {
   return fetcher.get(`/pns/data-utama/${nip}`);
 };
