@@ -4,6 +4,15 @@ const api = axios.create({
   baseURL: "/helpdesk/api/master/ws",
 });
 
+// unor asn
+export const unorASN = () => {
+  return api.get("/unor/asn").then((res) => res.data);
+};
+
+export const unorPTTPK = () => {
+  return api.get("/unor/pttpk").then((res) => res.data);
+};
+
 // single
 export const rwJabatanMaster = () => {
   return api.get("/rw-jabatan").then((res) => res.data);
