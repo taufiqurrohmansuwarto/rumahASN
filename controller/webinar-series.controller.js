@@ -346,8 +346,10 @@ const allWebinars = async (req, res) => {
   const sort = req.query.sort || "tanggalTerdekat";
 
   const currentUser = req?.user.customId;
+  const organizationId = req?.user?.organization_id;
 
   const group = toLower(req?.user?.group);
+
   const role = toLower(req?.user?.role);
   const userType = typeGroup(group, role);
 
@@ -360,7 +362,29 @@ const allWebinars = async (req, res) => {
         }
       })
       .andWhereRaw(`type_participant::text LIKE '%${userType}%'`)
-      .where("status", "published");
+      .where("status", "published")
+      .modify((queryBuilder) => {
+        if (userType === "asn") {
+          queryBuilder.andWhere((builder) => {
+            builder.where((builder) => {
+              // Cek jika unor_asn adalah awalan dari organizationId atau unor_asn adalah null
+              builder.whereRaw(
+                `(unor_asn IS NULL OR '${organizationId}' ILIKE unor_asn || '%' )`
+              );
+            });
+          });
+        }
+        if (userType === "non_asn") {
+          queryBuilder.andWhere((builder) => {
+            builder.where((builder) => {
+              // Cek jika unor_asn adalah awalan dari organizationId atau unor_asn adalah null
+              builder.whereRaw(
+                `(unor_nonasn IS NULL OR '${organizationId}' ILIKE unor_nonasn || '%' )`
+              );
+            });
+          });
+        }
+      });
 
     if (sort === "tanggalTerdekat") {
       query.orderByRaw(
@@ -375,6 +399,7 @@ const allWebinars = async (req, res) => {
     }
 
     const result = await query.page(page - 1, limit);
+    console.log(result.total);
 
     let promises = [];
 

@@ -2,6 +2,8 @@ import FormPersonalSign from "@/components/Esign/FormPersonalSign";
 import Layout from "@/components/Layout";
 import FormJenisDiklat from "@/components/PemutakhiranData/FormJenisDiklat";
 import AdminLayoutDetailWebinar from "@/components/WebinarSeries/AdminLayoutDetailWebinar";
+import FormUnorASN from "@/components/WebinarSeries/FormUnorASN";
+import FormUnorPTTPK from "@/components/WebinarSeries/FormUnorPTTPK";
 import {
   detailWebinar,
   updateWebinar,
@@ -358,6 +360,27 @@ const FormEditWebinarSeries = ({ data }) => {
             <Select.Option value="non_asn">NON ASN</Select.Option>
             <Select.Option value="umum">Umum</Select.Option>
           </Select>
+        </Form.Item>
+
+        <Form.Item
+          noStyle
+          shouldUpdate={(prevValues, currentValues) =>
+            prevValues.type_participant !== currentValues.type_participant
+          }
+        >
+          {({ getFieldValue }) => {
+            const typeParticipant = getFieldValue("type_participant");
+            return (
+              <>
+                {typeParticipant?.includes("asn") && (
+                  <FormUnorASN name="unor_asn" />
+                )}
+                {typeParticipant?.includes("non_asn") && (
+                  <FormUnorPTTPK name="unor_nonasn" />
+                )}
+              </>
+            );
+          }}
         </Form.Item>
         <Form.Item name="status" label="Status">
           <Select defaultValue="draft" placeholder="Status Webinar">

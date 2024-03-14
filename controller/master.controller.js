@@ -5,6 +5,7 @@ import {
   getRwPasangan,
   getRwPendidikanMaster,
 } from "@/utils/master.utils";
+import arrayToTree from "array-to-tree";
 import moment from "moment";
 const { orderBy, sortBy, toString } = require("lodash");
 const Anomali23 = require("@/models/anomali23.model");
@@ -345,7 +346,55 @@ export const rwAnakMasterByNip = async (req, res) => {
   }
 };
 
+export const unorASN = async (req, res) => {
+  try {
+    const { clientCredentialsFetcher } = req;
+    const result = await clientCredentialsFetcher.get(
+      `/master-ws/pemprov/opd/departments-asn`
+    );
+    const hasil = result?.data?.map((item) => ({
+      title: item?.name,
+      value: item?.id,
+      id: item?.id,
+      pId: item?.pId,
+    }));
+    const data = arrayToTree(hasil, {
+      parentProperty: "pId",
+      customID: "id",
+    });
+    res.json(data);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ code: 500, message: "Internal Server Error" });
+  }
+};
+
+export const unorPTTPK = async (req, res) => {
+  try {
+    const { clientCredentialsFetcher } = req;
+    const result = await clientCredentialsFetcher.get(
+      `/master-ws/pemprov/opd/departments-pttpk`
+    );
+    const hasil = result?.data?.map((item) => ({
+      title: item?.name,
+      value: item?.id,
+      id: item?.id,
+      pId: item?.pId,
+    }));
+    const data = arrayToTree(hasil, {
+      parentProperty: "pId",
+      customID: "id",
+    });
+    res.json(data);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ code: 500, message: "Internal Server Error" });
+  }
+};
+
 module.exports = {
+  unorASN,
+  unorPTTPK,
   rwDiklatMaster,
   rwDiklatMasterByNip,
   rwJabatanMaster,
