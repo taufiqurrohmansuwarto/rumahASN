@@ -18,62 +18,66 @@ const getIPAsnReport = async (req, res) => {
     const fetcher = req?.clientCredentialsFetcher;
     const opdId = req?.user?.organization_id;
 
-    const result = await fetcher.get(
-      `/master-ws/pemprov/opd/${opdId}/employees`
-    );
-
-    const nip = result?.data?.map((item) => item?.nip_master);
-
-    const siasnIPASN = await SiasnIPASN.query().whereIn("nip", nip);
-
-    const hasil = result?.data?.map((item, idx) => {
-      const ipasn = siasnIPASN?.find(
-        (ipasn) => ipasn?.nip === item?.nip_master
+    if (!opdId) {
+      res.status(400).json({ message: "Organization ID is required" });
+    } else {
+      const result = await fetcher.get(
+        `/master-ws/pemprov/opd/${opdId}/employees`
       );
 
-      const { id, ...allData } = item;
+      const nip = result?.data?.map((item) => item?.nip_master);
 
-      return {
-        no: idx + 1,
-        ...allData,
-        ipasn_kualifikasi: ipasn?.kualifikasi,
-        ip_asn_keterangan_kualifikasi: ipasn?.keterangan_kualifikasi,
-        // kompetensi
-        ipasn_kompetensi: ipasn?.kompetensi,
-        ip_asn_keterangan_kompetensi: ipasn?.keterangan_kompetensi,
-        // kinerja
-        ipasn_kinerja: ipasn?.kinerja,
-        ip_asn_keterangan_kinerja: ipasn?.keterangan_kinerja,
-        // disiplin
-        ipasn_disiplin: ipasn?.disiplin,
-        ip_asn_keterangan_disiplin: ipasn?.keterangan_disiplin,
-        // total
-        // tahun
-        // updated
-        ipasn_total: ipasn?.total,
-        ipasn_tahun: ipasn?.tahun,
-        ipasn_updated: ipasn?.updated,
-      };
-    });
+      const siasnIPASN = await SiasnIPASN.query().whereIn("nip", nip);
 
-    const wb = xlsx.utils.book_new();
-    const ws = xlsx.utils.json_to_sheet(hasil);
+      const hasil = result?.data?.map((item, idx) => {
+        const ipasn = siasnIPASN?.find(
+          (ipasn) => ipasn?.nip === item?.nip_master
+        );
 
-    xlsx.utils.book_append_sheet(wb, ws, "Sheet1");
+        const { id, ...allData } = item;
 
-    xlsx.writeFile(wb, "ipasn.xlsx");
+        return {
+          no: idx + 1,
+          ...allData,
+          ipasn_kualifikasi: ipasn?.kualifikasi,
+          ip_asn_keterangan_kualifikasi: ipasn?.keterangan_kualifikasi,
+          // kompetensi
+          ipasn_kompetensi: ipasn?.kompetensi,
+          ip_asn_keterangan_kompetensi: ipasn?.keterangan_kompetensi,
+          // kinerja
+          ipasn_kinerja: ipasn?.kinerja,
+          ip_asn_keterangan_kinerja: ipasn?.keterangan_kinerja,
+          // disiplin
+          ipasn_disiplin: ipasn?.disiplin,
+          ip_asn_keterangan_disiplin: ipasn?.keterangan_disiplin,
+          // total
+          // tahun
+          // updated
+          ipasn_total: ipasn?.total,
+          ipasn_tahun: ipasn?.tahun,
+          ipasn_updated: ipasn?.updated,
+        };
+      });
 
-    res.setHeader(
-      "Content-Type",
-      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-    );
+      const wb = xlsx.utils.book_new();
+      const ws = xlsx.utils.json_to_sheet(hasil);
 
-    res.setHeader(
-      "Content-Disposition",
-      "attachment; filename=" + "ipasn.xlsx"
-    );
+      xlsx.utils.book_append_sheet(wb, ws, "Sheet1");
 
-    res.end(xlsx.write(wb, { type: "buffer", bookType: "xlsx" }));
+      xlsx.writeFile(wb, "ipasn.xlsx");
+
+      res.setHeader(
+        "Content-Type",
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+      );
+
+      res.setHeader(
+        "Content-Disposition",
+        "attachment; filename=" + "ipasn.xlsx"
+      );
+
+      res.end(xlsx.write(wb, { type: "buffer", bookType: "xlsx" }));
+    }
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: "Internal server error" });
