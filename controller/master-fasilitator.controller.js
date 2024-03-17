@@ -37,12 +37,16 @@ const getIPAsnReport = async (req, res) => {
         no: idx + 1,
         ...allData,
         ipasn_kualifikasi: ipasn?.kualifikasi,
+        ip_asn_keterangan_kualifikasi: ipasn?.keterangan_kualifikasi,
         // kompetensi
         ipasn_kompetensi: ipasn?.kompetensi,
+        ip_asn_keterangan_kompetensi: ipasn?.keterangan_kompetensi,
         // kinerja
         ipasn_kinerja: ipasn?.kinerja,
+        ip_asn_keterangan_kinerja: ipasn?.keterangan_kinerja,
         // disiplin
         ipasn_disiplin: ipasn?.disiplin,
+        ip_asn_keterangan_disiplin: ipasn?.keterangan_disiplin,
         // total
         // tahun
         // updated

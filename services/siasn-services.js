@@ -278,3 +278,26 @@ export const getDaftarPemberhentianSIASN = (data) => {
     .get(`/admin/pemberhentian?tglAwal=${tglAwal}&tglAkhir=${tglAkhir}`)
     .then((res) => res.data);
 };
+
+// report employees
+export const showEmployees = (query) => {
+  return api
+    .get(`/report/employees?${queryString.stringify(query)}`)
+    .then((res) => res.data);
+};
+
+export const showIPASN = (query) => {
+  return api
+    .get(`/report/ip-asn?${queryString.stringify(query)}`)
+    .then((res) => res.data);
+};
+
+export const uploadIPASN = async (data) => {
+  return api
+    .post(`/report/ip-asn`, data, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    })
+    .then((res) => res?.data);
+};

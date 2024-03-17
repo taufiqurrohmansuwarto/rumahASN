@@ -4,6 +4,15 @@ const api = axios.create({
   baseURL: "/helpdesk/api/master/ws",
 });
 
+// download ip-asn
+export const downloadDataIPASN = () => {
+  return api
+    .get("/fasilitator/download/ip-asn", {
+      responseType: "arraybuffer",
+    })
+    .then((res) => res.data);
+};
+
 // unor asn
 export const unorASN = () => {
   return api.get("/unor/asn").then((res) => res.data);
