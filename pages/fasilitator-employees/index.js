@@ -1,6 +1,7 @@
 import Layout from "@/components/Layout";
 import PageContainer from "@/components/PageContainer";
 import { downloadDataAnomaliFasilitator } from "@/services/anomali.services";
+import { downloadDataIPASN } from "@/services/master.services";
 import { useMutation } from "@tanstack/react-query";
 import { Button, message, Form, Input, Card } from "antd";
 import { useRouter } from "next/router";
@@ -18,6 +19,31 @@ const FasilitatorEmployees = () => {
     (data) => downloadDataAnomaliFasilitator(data),
     {}
   );
+
+  const { mutateAsync: downloadIPASN, isLoading: isLoadingDownloadIPASN } =
+    useMutation(() => downloadDataIPASN(), {});
+
+  const handleDownloadIPASN = async () => {
+    try {
+      const data = await downloadIPASN();
+
+      if (data) {
+        const blob = new Blob([data], {
+          type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+
+        link.href = url;
+        link.download = "data_ipasn.xlsx";
+        link.click();
+
+        URL.revokeObjectURL(url);
+      }
+    } catch (error) {
+      message.error("Gagal mendownload data");
+    }
+  };
 
   const handleDownload = async () => {
     try {
@@ -46,12 +72,20 @@ const FasilitatorEmployees = () => {
   return (
     <PageContainer title="Fasilitator SIMASTER" content="Integrasi SIASN">
       <Card>
-        <Button
+        {/* <Button
           disabled={isLoadingDownload}
           loading={isLoadingDownload}
           onClick={handleDownload}
         >
           Unduh Data Anomali
+        </Button> */}
+        <Button
+          disabled={isLoadingDownloadIPASN}
+          loading={isLoadingDownloadIPASN}
+          onClick={handleDownloadIPASN}
+          type="primary"
+        >
+          Unduh Data IPASN
         </Button>
         <Form
           layout="vertical"

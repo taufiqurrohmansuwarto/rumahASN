@@ -160,6 +160,20 @@ const changeRoutes = (user) => {
               ],
             },
             {
+              path: "/analysis/report",
+              name: "Report",
+              routes: [
+                {
+                  path: "/analysis/report/employees",
+                  name: "Report Pegawai",
+                },
+                {
+                  path: "/analysis/report/ip-asn",
+                  name: "Report IP ASN",
+                },
+              ],
+            },
+            {
               path: "/analysis/dashboard",
               name: "Dashboard",
             },
