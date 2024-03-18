@@ -13,7 +13,7 @@ import { useState } from "react";
 
 const dateFormat = "DD-MM-YYYY";
 
-function ModalFormJabatanUnor({ open, handleClose }) {
+function ModalFormJabatanUnor({ open, handleClose, handleOk, isLoading }) {
   const handleFinish = async () => {
     try {
       const {
@@ -57,7 +57,12 @@ function ModalFormJabatanUnor({ open, handleClose }) {
   const [form] = Form.useForm();
 
   return (
-    <Modal onOk={handleFinish} open={open} onCancel={handleClose}>
+    <Modal
+      confirmLoading={isLoading}
+      onOk={handleFinish}
+      open={open}
+      onCancel={handleClose}
+    >
       <Form form={form} layout="vertical">
         <Form.Item
           rules={[{ required: true, message: "Tidak boleh kosong" }]}
@@ -120,7 +125,8 @@ function ModalFormJabatanUnor({ open, handleClose }) {
 
 const FormUnorJabatan = () => {
   const queryClient = useQueryClient();
-  const { mutate, isLoading } = useMutation();
+  const { mutate: addJabatanUnor, isLoading: isLoadingAddJabatanUnor } =
+    useMutation();
 
   const [open, setOpen] = useState(false);
   const handleOpen = () => setOpen(true);
@@ -131,7 +137,12 @@ const FormUnorJabatan = () => {
       <Button type="primary" onClick={handleOpen}>
         Tambah Jabatan Unor
       </Button>
-      <ModalFormJabatanUnor open={open} handleClose={handleClose} />
+      <ModalFormJabatanUnor
+        handleOk={addJabatanUnor}
+        isLoading={isLoadingAddJabatanUnor}
+        open={open}
+        handleClose={handleClose}
+      />
     </>
   );
 };
