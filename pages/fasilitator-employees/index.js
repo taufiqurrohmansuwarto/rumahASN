@@ -1,9 +1,12 @@
 import Layout from "@/components/Layout";
 import PageContainer from "@/components/PageContainer";
 import { downloadDataAnomaliFasilitator } from "@/services/anomali.services";
-import { downloadDataIPASN } from "@/services/master.services";
+import {
+  downloadDataIPASN,
+  downloadEmployees,
+} from "@/services/master.services";
 import { useMutation } from "@tanstack/react-query";
-import { Button, message, Form, Input, Card } from "antd";
+import { Button, Card, Form, Input, Space, message } from "antd";
 import { useRouter } from "next/router";
 
 const FasilitatorEmployees = () => {
@@ -23,6 +26,9 @@ const FasilitatorEmployees = () => {
   const { mutateAsync: downloadIPASN, isLoading: isLoadingDownloadIPASN } =
     useMutation(() => downloadDataIPASN(), {});
 
+  const { mutateAsync: downloadPegawai, isLoading: isLoadingDownloadPegawai } =
+    useMutation(() => downloadEmployees(), {});
+
   const handleDownloadIPASN = async () => {
     try {
       const data = await downloadIPASN();
@@ -36,6 +42,28 @@ const FasilitatorEmployees = () => {
 
         link.href = url;
         link.download = "data_ipasn.xlsx";
+        link.click();
+
+        URL.revokeObjectURL(url);
+      }
+    } catch (error) {
+      message.error("Gagal mendownload data");
+    }
+  };
+
+  const handleDownloadPegawai = async () => {
+    try {
+      const data = await downloadPegawai();
+
+      if (data) {
+        const blob = new Blob([data], {
+          type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+
+        link.href = url;
+        link.download = "data_komparasi_pegawai.xlsx";
         link.click();
 
         URL.revokeObjectURL(url);
@@ -79,14 +107,24 @@ const FasilitatorEmployees = () => {
         >
           Unduh Data Anomali
         </Button> */}
-        <Button
-          disabled={isLoadingDownloadIPASN}
-          loading={isLoadingDownloadIPASN}
-          onClick={handleDownloadIPASN}
-          type="primary"
-        >
-          Unduh Data IPASN
-        </Button>
+        <Space>
+          <Button
+            disabled={isLoadingDownloadIPASN}
+            loading={isLoadingDownloadIPASN}
+            onClick={handleDownloadIPASN}
+            type="primary"
+          >
+            Unduh Data IPASN
+          </Button>
+          <Button
+            disabled={isLoadingDownloadPegawai}
+            loading={isLoadingDownloadPegawai}
+            onClick={handleDownloadPegawai}
+            type="primary"
+          >
+            Unduh Data Komparasi
+          </Button>
+        </Space>
         <Form
           layout="vertical"
           form={form}

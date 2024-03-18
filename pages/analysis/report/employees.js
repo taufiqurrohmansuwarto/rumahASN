@@ -1,4 +1,4 @@
-import UnduhDataIPASN from "@/components/LayananSIASN/UnduhDataIPASN";
+import ReportEmployees from "@/components/LayananSIASN/ReportEmployees";
 import Layout from "@/components/Layout";
 import PageContainer from "@/components/PageContainer";
 import Head from "next/head";
@@ -9,8 +9,8 @@ function EmployeesReport() {
       <Head>
         <title>Rumah ASN - Report - Report Pegawai SIASN</title>
       </Head>
-      <PageContainer title="Download" subTitle="Unduh Data IP ASN">
-        <UnduhDataIPASN />
+      <PageContainer title="Download" subTitle="Data Semua SIASN">
+        <ReportEmployees />
       </PageContainer>
     </>
   );

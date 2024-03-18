@@ -9,11 +9,6 @@ router
   .use(auth)
   .use(fasilitatorMasterMiddleware)
   .use(clientCredentialsMiddleware)
-  .get(async (req, res) => {
-    res.json({
-      message: "This is a protected route",
-      status: 200,
-    });
-  });
+  .get(getAllEmployeesMaster);
 
 export default router.handler();
