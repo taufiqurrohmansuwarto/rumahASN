@@ -74,6 +74,8 @@ const getAllEmployeesMaster = async (req, res) => {
           golongan_siasn: currentEmployees?.gol_akhir_nama,
           jabatan_simaster: allData?.jabatan_master,
           jabatan_siasn: currentEmployees?.jabatan_nama,
+          unor_simaster: allData?.opd_master,
+          unor_siasn: currentEmployees?.unor_nama,
           validasi_nik: currentEmployees?.is_valid_nik,
         };
       });
