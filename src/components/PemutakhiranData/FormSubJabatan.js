@@ -1,4 +1,4 @@
-import { refJft, refSubJabatan } from "@/services/siasn-services";
+import { refSubJabatan } from "@/services/siasn-services";
 import { useDebouncedValue } from "@mantine/hooks";
 import { useQuery } from "@tanstack/react-query";
 import { Form, Select, Spin } from "antd";
