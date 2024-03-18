@@ -862,6 +862,44 @@ const getRefJft = async (req, res) => {
   }
 };
 
+const getRefJenisMutasi = async (req, res) => {
+  try {
+    const result = await axios.get(
+      `https://siasn.bkd.jatimprov.go.id/pemprov-api/vendor/reference/jenis-mutasi`
+    );
+    res.json(result?.data);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "error" });
+  }
+};
+
+const getRefJenisPenugasan = async (req, res) => {
+  try {
+    const result = await axios.get(
+      `https://siasn.bkd.jatimprov.go.id/pemprov-api/vendor/reference/jenis-penugasan`
+    );
+    res.json(result?.data);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "error" });
+  }
+};
+
+const getRefSubJabatan = async (req, res) => {
+  try {
+    const { jabatan } = req?.query;
+    const result = await axios.get(
+      `https://siasn.bkd.jatimprov.go.id/pemprov-api/vendor/reference/sub-jabatan/${jabatan}`
+    );
+
+    res.json(result?.data);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "error" });
+  }
+};
+
 const downloadDocument = async (req, res) => {
   try {
     const { filePath } = req?.query;
@@ -1224,4 +1262,8 @@ module.exports = {
   getRefUrusanPemerintahan,
   getDiklatStruktural,
   getEmployeesByUnor,
+
+  getRefJenisMutasi,
+  getRefJenisPenugasan,
+  getRefSubJabatan,
 };
