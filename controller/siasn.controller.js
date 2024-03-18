@@ -713,6 +713,70 @@ const getJabatanByNip = async (req, res) => {
   }
 };
 
+const postUnorJabatan = async (req, res) => {
+  try {
+    const { siasnRequest: request } = req;
+    const { employee_number: nip } = req?.user;
+    const body = req?.body?.data;
+
+    // cekId
+    const dataUtama = await request.get(`/pns/data-utama/${nip}`);
+
+    // insert log
+    await createLogSIASN({
+      userId: req?.user?.customId,
+      type: "CREATE",
+      employeeNumber: nip,
+      siasnService: "jabatan",
+    });
+
+    const id = dataUtama?.data?.data?.id;
+    const data = {
+      ...body,
+      pnsId: id,
+    };
+
+    await request.post(`/unorjabatan/save`, data);
+
+    res.json({ success: true });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "error" });
+  }
+};
+
+const postUnorJabatanByNip = async (req, res) => {
+  try {
+    const { siasnRequest: request } = req;
+    const { nip } = req?.query;
+    const body = req?.body;
+
+    // cekId
+    const dataUtama = await request.get(`/pns/data-utama/${nip}`);
+
+    const id = dataUtama?.data?.data?.id;
+    const data = {
+      ...body,
+      pnsId: id,
+    };
+
+    const result = await request.post(`/unorjabatan/save`, data);
+
+    await createLogSIASN({
+      userId: req?.user?.customId,
+      type: "CREATE",
+      employeeNumber: nip,
+      siasnService: "jabatan",
+      request_data: JSON.stringify(data),
+    });
+
+    res.json({ success: true });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "error" });
+  }
+};
+
 const postRiwayatJabatan = async (req, res) => {
   try {
     const { siasnRequest: request } = req;
@@ -1266,4 +1330,7 @@ module.exports = {
   getRefJenisMutasi,
   getRefJenisPenugasan,
   getRefSubJabatan,
+
+  postUnorJabatan,
+  postUnorJabatanByNip,
 };

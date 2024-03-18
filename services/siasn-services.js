@@ -134,8 +134,16 @@ export const refJft = (jabatan) => {
   return api.get(`/ref/jft?jabatan=${jabatan}`).then((res) => res.data);
 };
 
-export const refJfu = (jabatan) => {
-  return api.get(`/ref/jfu?jabatan=${jabatan}`).then((res) => res.data);
+export const refJenisMutasi = () => {
+  return api.get("/ref/jenis-mutasi").then((res) => res.data);
+};
+
+export const refJenisPenugasan = () => {
+  return api.get("/ref/jenis-penugasan").then((res) => res.data);
+};
+
+export const refSubJabatan = (jabatan) => {
+  return api.get(`/ref/sub-jabatan?jabatan=${jabatan}`).then((res) => res.data);
 };
 
 // jabatan
