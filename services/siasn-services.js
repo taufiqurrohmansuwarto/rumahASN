@@ -286,6 +286,16 @@ export const showEmployees = (query) => {
     .then((res) => res.data);
 };
 
+export const uploadEmployees = async (data) => {
+  return api
+    .post(`/report/employees`, data, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    })
+    .then((res) => res?.data);
+};
+
 export const showIPASN = (query) => {
   return api
     .get(`/report/ip-asn?${queryString.stringify(query)}`)

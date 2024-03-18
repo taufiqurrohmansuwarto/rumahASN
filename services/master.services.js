@@ -13,6 +13,14 @@ export const downloadDataIPASN = () => {
     .then((res) => res.data);
 };
 
+export const downloadEmployees = () => {
+  return api
+    .get("/fasilitator/download/data-siasn", {
+      responseType: "arraybuffer",
+    })
+    .then((res) => res.data);
+};
+
 // unor asn
 export const unorASN = () => {
   return api.get("/unor/asn").then((res) => res.data);
