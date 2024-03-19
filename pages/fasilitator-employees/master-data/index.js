@@ -15,7 +15,7 @@ const FasilitatorEmployees = () => {
 
   const handleFinish = async () => {
     const values = await form.validateFields();
-    router.push(`/fasilitator-employees/${values.nip}`);
+    router.push(`/fasilitator-employees/master-data/${values.nip}`);
   };
 
   const { mutateAsync: download, isLoading: isLoadingDownload } = useMutation(
