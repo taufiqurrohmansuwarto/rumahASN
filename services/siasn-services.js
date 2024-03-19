@@ -323,3 +323,12 @@ export const uploadIPASN = async (data) => {
     })
     .then((res) => res?.data);
 };
+
+// peta jabatan
+export const petaJabatan = async () => {
+  return api.get(`/perencanaan/peta-jabatan`).then((res) => res.data);
+};
+
+export const petaJabatanById = async (id) => {
+  return api.get(`/perencanaan/peta-jabatan/${id}`).then((res) => res.data);
+};

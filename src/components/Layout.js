@@ -1,5 +1,7 @@
+import { currentUserRole } from "@/services/current-user.services";
 import { appList } from "@/utils/app-lists";
 import {
+  AntDesignOutlined,
   ApiOutlined,
   BarChartOutlined,
   BookOutlined,
@@ -14,6 +16,7 @@ import {
   UsergroupAddOutlined,
 } from "@ant-design/icons";
 import { Center } from "@mantine/core";
+import { AccessControl } from "accesscontrol";
 import { Button, Dropdown, Grid, Typography } from "antd";
 import { uniqBy } from "lodash";
 import { signOut, useSession } from "next-auth/react";
@@ -25,8 +28,6 @@ import { userRoutes } from "../routes";
 import Messages from "./Messages";
 import Notifications from "./Notifications";
 import SearchUserLayout from "./SearchUserLayout";
-import { currentUserRole } from "@/services/current-user.services";
-import { AccessControl } from "accesscontrol";
 
 const ProLayout = dynamic(
   () => import("@ant-design/pro-components").then((mod) => mod?.ProLayout),
@@ -100,8 +101,18 @@ const changeRoutes = (user) => {
     if (fasilitatorMaster) {
       userRoutes.routes.push({
         path: "/fasilitator-employees",
-        name: "Integrasi SIASN",
-        icon: <UsergroupAddOutlined />,
+        name: "Layanan Fasilitator",
+        icon: <AntDesignOutlined />,
+        routes: [
+          {
+            path: "/fasilitator-employees/master-data",
+            name: "Master Data",
+          },
+          {
+            path: "/fasilitator-employees/peta-jabatan",
+            name: "Peta Jabatan SIASN",
+          },
+        ],
       });
     }
 
