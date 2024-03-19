@@ -33,6 +33,7 @@ import { useSession } from "next-auth/react";
 import FormEditJabatanByNip from "./FormEditJabatanByNip";
 import FormStruktural from "../FormStruktural";
 import { IconAlertCircle } from "@tabler/icons";
+import FormUnorJabatan from "../FormUnorJabatan";
 
 const format = "DD-MM-YYYY";
 
@@ -726,13 +727,7 @@ function CompareJabatanByNip({ nip }) {
       )}
       {dataSiasn?.kedudukanPnsNama === "PPPK Aktif" &&
       dataUser?.user?.current_role !== "admin" ? null : (
-        <Button
-          type="primary"
-          onClick={handleOpenKosong}
-          icon={<PlusOutlined />}
-        >
-          Jabatan SIASN
-        </Button>
+        <FormUnorJabatan />
       )}
       <Stack>
         <FormEditJabatanByNip
@@ -752,6 +747,7 @@ function CompareJabatanByNip({ nip }) {
           visible={visible}
         />
 
+        {JSON.stringify(data)}
         <Table
           title={() => <Text fw="bold">SIASN</Text>}
           columns={columns}

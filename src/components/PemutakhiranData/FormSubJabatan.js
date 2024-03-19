@@ -1,46 +1,45 @@
 import { refSubJabatan } from "@/services/siasn-services";
-import { useDebouncedValue } from "@mantine/hooks";
 import { useQuery } from "@tanstack/react-query";
-import { Form, Select, Spin } from "antd";
-import { useState } from "react";
+import { Form, Select } from "antd";
+import { useEffect } from "react";
 
-const FormSubJabatan = ({ name, help }) => {
-  const [subJabatan, setSubJabatan] = useState(undefined);
-  const [debounceValue] = useDebouncedValue(subJabatan, 500);
-
-  const { data: dataSubJabatan, isLoading: isLoadingSubJabatan } = useQuery(
-    ["data-sub-jabatan", debounceValue],
-    () => refSubJabatan(debounceValue),
-    {
-      enabled: Boolean(debounceValue),
-    }
+const FormSubJabatan = ({ name, help, kelJabatanId }) => {
+  const { data, isLoading, refetch } = useQuery(
+    ["data-sub-jabatan", kelJabatanId],
+    () => refSubJabatan(kelJabatanId),
+    {}
   );
+
+  useEffect(() => {
+    if (kelJabatanId) {
+      refetch();
+    }
+  }, [kelJabatanId, refetch]);
 
   return (
     <>
-      <Form.Item
-        label={"Pilih Sub Jabatan"}
-        rules={[{ required: true }]}
-        name={name}
-        help="Ketik nama jabatan kemudian tunggu.."
-      >
-        <Select
-          showSearch
-          filterOption={false}
-          placeholder="Pilih Jabatan Fungsional Terampil"
-          loading={isLoadingSubJabatan}
-          notFoundContent={
-            isLoadingSubJabatan && debounceValue ? <Spin size="small" /> : null
-          }
-          onSearch={(value) => setSubJabatan(value)}
+      {data && data?.length ? (
+        <Form.Item
+          required
+          label={"Pilih Sub Jabatan"}
+          rules={[{ required: true }]}
+          name={name}
+          help="Ketik nama jabatan kemudian tunggu.."
         >
-          {dataSubJabatan?.map((item) => (
-            <Select.Option key={item?.id} value={item?.id}>
-              {item?.nama}
-            </Select.Option>
-          ))}
-        </Select>
-      </Form.Item>
+          <Select
+            showSearch
+            placeholder="Pilih Sub Jabatan"
+            loading={isLoading}
+            optionFilterProp="nama"
+          >
+            {data?.map((item) => (
+              <Select.Option nama={item?.nama} key={item?.id} value={item?.id}>
+                {item?.nama}
+              </Select.Option>
+            ))}
+          </Select>
+        </Form.Item>
+      ) : null}
     </>
   );
 };
