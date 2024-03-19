@@ -75,6 +75,63 @@ function CompareDataPendidikan() {
 
   const columns = [
     {
+      title: "File Ijazah",
+      key: "dokumenIjazah",
+      render: (_, row) => {
+        return (
+          <>
+            {row?.path?.[1173] && (
+              <a
+                href={`/helpdesk/api/siasn/ws/download?filePath=${row?.path?.[1173]?.dok_uri}`}
+                target="_blank"
+                rel="noreferrer"
+              >
+                File
+              </a>
+            )}
+          </>
+        );
+      },
+    },
+    {
+      title: "File Transkrip",
+      key: "dokumenTranskrip",
+      render: (_, row) => {
+        return (
+          <>
+            {row?.path?.[1174] && (
+              <a
+                href={`/helpdesk/api/siasn/ws/download?filePath=${row?.path?.[1174]?.dok_uri}`}
+                target="_blank"
+                rel="noreferrer"
+              >
+                File
+              </a>
+            )}
+          </>
+        );
+      },
+    },
+    {
+      title: "File SK Pencantuman Gelar",
+      key: "dokumenSKPencantumanGelar",
+      render: (_, row) => {
+        return (
+          <>
+            {row?.path?.[867] && (
+              <a
+                href={`/helpdesk/api/siasn/ws/download?filePath=${row?.path?.[867]?.dok_uri}`}
+                target="_blank"
+                rel="noreferrer"
+              >
+                File
+              </a>
+            )}
+          </>
+        );
+      },
+    },
+    {
       title: "Pendidikan",
       dataIndex: "pendidikanNama",
     },
