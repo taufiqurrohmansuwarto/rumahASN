@@ -12,7 +12,7 @@ function FormJenisPenugasan({ name }) {
   return (
     <>
       {data && (
-        <Form.Item name={name}>
+        <Form.Item required name={name} label="Jenis Penugasan">
           <Select>
             {data?.map((item) => (
               <Select.Option key={item?.id} value={item?.id}>

@@ -764,7 +764,7 @@ const postUnorJabatanByNip = async (req, res) => {
       satuanKerjaId: "A5EB03E24213F6A0E040640A040252AD",
     };
 
-    const result = await request.post(`/unorjabatan/save`, data);
+    const result = await request.post(`/jabatan/unorjabatan/save`, data);
 
     await createLogSIASN({
       userId: req?.user?.customId,

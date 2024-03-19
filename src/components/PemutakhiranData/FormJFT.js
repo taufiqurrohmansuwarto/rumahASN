@@ -36,7 +36,7 @@ const FormJFT = ({ name, help }) => {
         >
           {dataJfu?.map((item) => (
             <Select.Option key={item?.id} value={item?.id}>
-              {item?.nama} - {item?.cepat_kode}
+              {item?.nama}
             </Select.Option>
           ))}
         </Select>

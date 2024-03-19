@@ -279,6 +279,10 @@ export const getRiwayatKeluargaByNip = async (nip) => {
   return api.get(`/admin/${nip}/rw-keluarga`).then((res) => res.data);
 };
 
+export const postUnorJabatanByNip = async ({ nip, data }) => {
+  return api.post(`/admin/${nip}/unor-jabatan`, data).then((res) => res.data);
+};
+
 export const getDaftarPemberhentianSIASN = (data) => {
   const { tglAwal, tglAkhir } = data;
 
