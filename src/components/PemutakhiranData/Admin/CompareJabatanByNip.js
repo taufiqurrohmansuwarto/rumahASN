@@ -746,8 +746,6 @@ function CompareJabatanByNip({ nip }) {
           onCancel={handleClose}
           visible={visible}
         />
-
-        {JSON.stringify(data)}
         <Table
           title={() => <Text fw="bold">SIASN</Text>}
           columns={columns}
