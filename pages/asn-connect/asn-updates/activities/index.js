@@ -1,4 +1,4 @@
-import LayoutAsnConnect from "@/components/LayoutASNConnect";
+import Layout from "@/components/Layout";
 import PageContainer from "@/components/PageContainer";
 import useScrollRestoration from "@/hooks/useScrollRestoration";
 import Head from "next/head";
@@ -21,9 +21,7 @@ const AsnUpdateAllActivities = () => {
         onBack={handleBack}
         title="ASN Updates"
         content="Semua Aktifitas"
-      >
-        <p>test all my activities</p>
-      </PageContainer>
+      ></PageContainer>
     </>
   );
 };
@@ -34,11 +32,7 @@ AsnUpdateAllActivities.Auth = {
 };
 
 AsnUpdateAllActivities.getLayout = (page) => {
-  return (
-    <LayoutAsnConnect active="/asn-connect/asn-updates">
-      {page}
-    </LayoutAsnConnect>
-  );
+  return <Layout active="/asn-connect/asn-updates">{page}</Layout>;
 };
 
 export default AsnUpdateAllActivities;

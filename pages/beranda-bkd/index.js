@@ -485,9 +485,6 @@ const BerandaBKD = () => {
               </Stack>
             </Card>
           </Col>
-          <Col md={6} xs={24}>
-            {/* <UserPerformance /> */}
-          </Col>
         </Row>
       </PageContainer>
     </>

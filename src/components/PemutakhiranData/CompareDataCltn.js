@@ -7,38 +7,39 @@ function CompareDataCltn() {
 
   const columns = [
     {
-      title: "File",
-      key: "file",
-      render: (_, record) => {
-        return (
-          <>
-            {record?.path?.[858] && (
-              <a
-                href={`/helpdesk/api/siasn/ws/download?filePath=${record?.path?.[858]?.dok_uri}`}
-                target="_blank"
-                rel="noreferrer"
-              >
-                File
-              </a>
-            )}
-          </>
-        );
-      },
+      title: "Nomer Letter BKN",
+      dataIndex: "nomorLetterBkn",
     },
     {
-      title: "Golongan",
-      dataIndex: "golongan",
+      title: "Nomor SK",
+      dataIndex: "skNomor",
     },
     {
-      title: "Jenis Kenaikan Pangkat",
-      dataIndex: "jenisKPNama",
+      title: "Tanggal SK",
+      dataIndex: "skTanggal",
+    },
+    {
+      title: "Tanggal Akhir",
+      dataIndex: "tanggalAkhir",
+    },
+    {
+      title: "Tgl. Aktif",
+      dataIndex: "tanggalAktif",
+    },
+    {
+      title: "Tgl. Awal",
+      dataIndex: "tanggalAwal",
+    },
+    {
+      title: "Tgl. Letter BKN",
+      dataIndex: "tanggalLetterBkn",
     },
   ];
 
   return (
     <>
       <Table
-        title={() => <b>RIWAYAT GOLONGAN SIASN</b>}
+        title={() => <b>Riwayat CLTN SIASN</b>}
         pagination={false}
         columns={columns}
         dataSource={data}

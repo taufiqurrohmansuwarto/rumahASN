@@ -17,7 +17,7 @@ import {
 
 export const userRoutes = {
   routes: [
-    { path: "/feeds", name: "Beranda", icon: <HomeOutlined /> },
+    { path: "/feeds", name: "Forum Kepegawaian", icon: <HomeOutlined /> },
     {
       path: "/tickets",
       name: "Pertanyaan saya",

@@ -64,6 +64,13 @@ const changeRoutes = (user) => {
     const adminFasilitator = admin || fasilitatorMaster;
 
     // persiapan ini seharusnya ditambahkan halaman dashboard seperti analisis dsb tapi jangan data
+    if (pegawaiPemda) {
+      userRoutes.routes.push({
+        path: "/asn-connect/asn-updates",
+        name: "ASN Connect",
+        icon: <UserOutlined />,
+      });
+    }
 
     if (adminFasilitator) {
       userRoutes.routes.push({
@@ -116,16 +123,8 @@ const changeRoutes = (user) => {
       });
     }
 
-    if (pegawaiPemda) {
-    }
-
     if (userPns) {
       userRoutes.routes.push(
-        // {
-        //   path: "/asn-connect/asn-updates",
-        //   name: "ASN Connect",
-        //   icon: <UserOutlined />,
-        // },
         {
           path: "/pemutakhiran-data/komparasi",
           name: "Integrasi SIASN",
@@ -314,9 +313,24 @@ const changeRoutes = (user) => {
       // });
     }
 
+    // buat routes di pegawai pemda menjadi paling atas
+    // Ensure all routes are unique to avoid duplicates
     const routes = uniqBy(userRoutes.routes, "path");
 
-    resolve(routes);
+    // Filter out the routes related to "pegawai pemda" specifically
+    const pegawaiPemdaRoutes = routes.filter((route) =>
+      route.path.includes("/asn-connect")
+    );
+
+    // Filter out the remaining routes that are not related to "pegawai pemda"
+    const otherRoutes = routes.filter(
+      (route) => !route.path.includes("/asn-connect")
+    );
+
+    // Combine the "pegawai pemda" routes to be at the top, followed by other routes
+    const sortedRoutes = [...pegawaiPemdaRoutes, ...otherRoutes];
+
+    resolve(sortedRoutes);
   });
 };
 

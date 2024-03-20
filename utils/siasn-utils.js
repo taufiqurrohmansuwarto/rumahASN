@@ -91,7 +91,7 @@ module.exports.riwayatPindahInstansi = (fetcher, nip) => {
 };
 
 module.exports.riwayatCtln = (fetcher, nip) => {
-  return fetcher.get(`/pns/rw-ctln/${nip}`);
+  return fetcher.get(`/pns/rw-cltn/${nip}`);
 };
 
 module.exports.postDataKursus = (fetcher, data) => {
