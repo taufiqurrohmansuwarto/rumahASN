@@ -613,6 +613,55 @@ function CompareJabatanByNip({ nip }) {
     setVisible(true);
   };
 
+  const columnsMaster = [
+    {
+      title: "Jenis",
+      dataIndex: "jenis_jabatan",
+      render: (_, record) => {
+        return (
+          <div>
+            <a href={record?.file} target="_blank" rel="noreferrer">
+              {record?.jenis_jabatan}
+            </a>
+          </div>
+        );
+      },
+    },
+    {
+      title: "Jabatan",
+      key: "jabatan",
+      dataIndex: "jabatan",
+    },
+    {
+      title: "Unor",
+      key: "unor",
+      dataIndex: "unor",
+    },
+    { title: "No. SK", dataIndex: "nomor_sk", key: "nomor_sk" },
+    { title: "TMT. Jab", dataIndex: "tmt_jabatan", key: "tmt_jabatan" },
+    { title: "Tgl. SK", dataIndex: "tgl_sk", key: "tgl_sk" },
+    { title: "Aktif", dataIndex: "aktif", key: "aktif" },
+    {
+      title: "Aksi",
+      key: "aksi",
+      render: (_, row) => {
+        const data = {
+          tmtJabatan: row?.tmtJabatan
+            ? moment(row?.tmt_jabatan, "DD-MM-YYYY")
+            : null,
+          tanggalSk: row?.tanggalSk ? moment(row?.tgl_sk, "DD-MM-YYYY") : null,
+          tmtPelantikan: row?.tmtPelantikan
+            ? moment(row?.tmt_pelantikan, "DD-MM-YYYY")
+            : null,
+          nomorSk: row?.nomor_sk,
+          jenisJabatan: row?.jenis_jabatan,
+        };
+
+        return <FormUnorJabatanTransfer data={data} kata="Pakai" />;
+      },
+    },
+  ];
+
   const columns = [
     {
       title: "File",
