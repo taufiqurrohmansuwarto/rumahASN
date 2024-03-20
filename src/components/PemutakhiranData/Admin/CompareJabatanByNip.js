@@ -676,60 +676,11 @@ function CompareJabatanByNip({ nip }) {
           eselon_id: row?.eselonId,
         };
 
-        if (
-          dataSiasn?.kedudukanPnsNama === "PPPK Aktif" &&
-          dataUser?.user?.current_role !== "admin"
-        ) {
-          return null;
-        } else if (data?.[0]?.id === row?.id) {
+        if (data?.[0]?.id === row?.id) {
           return <FormUnorJabatanTransfer data={payload} kata="Edit" />;
         } else {
           return null;
         }
-      },
-    },
-  ];
-
-  const columnsMaster = [
-    {
-      title: "Jenis",
-      dataIndex: "jenis_jabatan",
-      render: (_, record) => {
-        return (
-          <div>
-            <a href={record?.file} target="_blank" rel="noreferrer">
-              {record?.jenis_jabatan}
-            </a>
-          </div>
-        );
-      },
-    },
-    {
-      title: "Jabatan",
-      key: "jabatan",
-      dataIndex: "jabatan",
-    },
-    {
-      title: "Unor",
-      key: "unor",
-      dataIndex: "unor",
-    },
-    { title: "No. SK", dataIndex: "nomor_sk", key: "nomor_sk" },
-    { title: "TMT. Jab", dataIndex: "tmt_jabatan", key: "tmt_jabatan" },
-    { title: "Tgl. SK", dataIndex: "tgl_sk", key: "tgl_sk" },
-    { title: "Aktif", dataIndex: "aktif", key: "aktif" },
-    {
-      title: "Aksi",
-      key: "aksi",
-      render: (_, row) => {
-        const data = {
-          tmtJabatan: moment(row?.tmt_jabatan, "DD-MM-YYYY"),
-          jenis_jabatan: row?.jenis_jabatan,
-          nomorSk: row?.nomor_sk,
-          tanggalSk: moment(row?.tgl_sk, "DD-MM-YYYY"),
-        };
-
-        return <FormUnorJabatanTransfer data={data} kata="Pakai" />;
       },
     },
   ];
