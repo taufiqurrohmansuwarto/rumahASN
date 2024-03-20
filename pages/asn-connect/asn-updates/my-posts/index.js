@@ -1,3 +1,4 @@
+import Layout from "@/components/Layout";
 import LayoutAsnConnect from "@/components/LayoutASNConnect";
 import PageContainer from "@/components/PageContainer";
 import SocmedTabs from "@/components/Socmed/SocmedTabs";
@@ -26,11 +27,7 @@ AsnUpdatesMyPosts.Auth = {
 };
 
 AsnUpdatesMyPosts.getLayout = (page) => {
-  return (
-    <LayoutAsnConnect active="/asn-connect/asn-updates">
-      {page}
-    </LayoutAsnConnect>
-  );
+  return <Layout active="/asn-connect/asn-updates">{page}</Layout>;
 };
 
 export default AsnUpdatesMyPosts;

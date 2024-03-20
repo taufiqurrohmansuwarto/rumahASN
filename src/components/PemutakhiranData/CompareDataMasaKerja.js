@@ -1,6 +1,7 @@
 import { dataMasaKerja } from "@/services/siasn-services";
+import { FilePdfOutlined } from "@ant-design/icons";
 import { useQuery } from "@tanstack/react-query";
-import { Table } from "antd";
+import { Space, Table, Tooltip } from "antd";
 
 function CompareDataMasaKerja() {
   const { data, isLoading } = useQuery(
@@ -13,39 +14,71 @@ function CompareDataMasaKerja() {
     {
       title: "File",
       key: "file",
-      render: (_, record) => {
+      render: (_, row) => {
         return (
           <>
-            {record?.path?.[892] && (
+            <Space>
               <a
-                href={`/helpdesk/api/siasn/ws/download?filePath=${record?.path?.[892]?.dok_uri}`}
+                href={`/helpdesk/api/siasn/ws/download?filePath=${row?.path?.[1643]?.dok_uri}`}
                 target="_blank"
                 rel="noreferrer"
               >
-                File
+                <Tooltip title="Pertek PMK">
+                  <FilePdfOutlined />
+                </Tooltip>
               </a>
-            )}
+              <a
+                href={`/helpdesk/api/siasn/ws/download?filePath=${row?.path?.[1644]?.dok_uri}`}
+                target="_blank"
+                rel="noreferrer"
+              >
+                <Tooltip title="SK PMK">
+                  <FilePdfOutlined />
+                </Tooltip>
+              </a>
+            </Space>
           </>
         );
       },
     },
     {
-      title: "Nama Penghargaan",
-      dataIndex: "hargaNama",
+      title: "Pengalaman",
+      dataIndex: "pengalaman",
     },
     {
-      title: "Nomor SK",
-      dataIndex: "skNomor",
+      title: "Tanggal Awal",
+      dataIndex: "tanggalAwal",
     },
     {
-      title: "Tanggal SK",
-      dataIndex: "skDate",
+      title: "Tanggal Selesai",
+      dataIndex: "tanggalSelesai",
+    },
+    {
+      title: "No. SK",
+      dataIndex: "nomorSk",
+    },
+    {
+      title: "No. BKN",
+      dataIndex: "nomorBkn",
+    },
+    {
+      title: "Tgl. BKN",
+      dataIndex: "tanggalBkn",
+    },
+    {
+      title: "Masa Kerja (Tahun)",
+      dataIndex: "tasaKerjaTahun",
+    },
+    {
+      title: "Masa Kerja (Bulan)",
+      dataIndex: "masaKerjaBulan",
     },
   ];
 
   return (
     <>
       <Table
+        columns={columns}
         title={() => <b>RIWAYAT Masa Kerja SIASN</b>}
         pagination={false}
         dataSource={data}

@@ -1,3 +1,4 @@
+import Layout from "@/components/Layout";
 import LayoutAsnConnect from "@/components/LayoutASNConnect";
 import PageContainer from "@/components/PageContainer";
 import SocmedComments from "@/components/Socmed/SocmedComments";
@@ -47,6 +48,7 @@ const ASNUpdateDetail = () => {
         <title>ASN Update - {post?.content} </title>
       </Head>
       <PageContainer
+        title="ASN Connect"
         content="Detail Postingan"
         onBack={handleBack}
         loading={isLoading}
@@ -64,11 +66,7 @@ ASNUpdateDetail.Auth = {
 };
 
 ASNUpdateDetail.getLayout = (page) => {
-  return (
-    <LayoutAsnConnect active="/asn-connect/asn-updates">
-      {page}
-    </LayoutAsnConnect>
-  );
+  return <Layout active="/asn-connect/asn-updates">{page}</Layout>;
 };
 
 export default ASNUpdateDetail;

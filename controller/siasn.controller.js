@@ -22,6 +22,9 @@ const {
   riwayatPindahWilayahKerja,
   riwayatPnsUnor,
   removeKursusSiasn,
+  pasangan,
+  anak,
+  orangTua,
 } = require("@/utils/siasn-utils");
 
 const {
@@ -1064,17 +1067,17 @@ const getRwGolongan = async (req, res) => {
 
 const getRwKeluarga = async (req, res) => {
   try {
-    const { fetcher } = req;
+    const { siasnRequest } = req;
     const { employee_number: nip } = req?.user;
 
-    const { data: dataOrtu } = await proxyKeluargaDataOrtu(fetcher, nip);
-    const { data: dataAnak } = await proxyKeluargaAnak(fetcher, nip);
-    const { data: dataPasangan } = await proxyKeluargaPasangan(fetcher, nip);
+    const hasilPasangan = await pasangan(siasnRequest, nip);
+    const hasilOrtu = await orangTua(siasnRequest, nip);
+    const hasilAnak = await anak(siasnRequest, nip);
+    console.log(hasilAnak?.data);
 
     res.json({
-      ortu: dataOrtu,
-      anak: dataAnak,
-      pasangan: dataPasangan,
+      pasangan: hasilPasangan?.data?.data?.listPasangan,
+      ortu: hasilOrtu?.data?.data,
     });
   } catch (error) {
     console.log(error);

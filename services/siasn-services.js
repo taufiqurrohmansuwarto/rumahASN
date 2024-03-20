@@ -92,6 +92,18 @@ export const dataDiklat = () => {
   return api.get(`/pns/rw-diklat`).then((res) => res.data);
 };
 
+export const dataPasangan = () => {
+  return api.get(`/pns/rw-pasangan`).then((res) => res.data);
+};
+
+export const dataOrtu = () => {
+  return api.get(`/pns/rw-ortu`).then((res) => res.data);
+};
+
+export const dataAnak = () => {
+  return api.get(`/pns/rw-anak`).then((res) => res.data);
+};
+
 export const dataIpAsn = (tahun) => {
   const currentTahun = tahun || new Date().getFullYear();
   return api.get(`/pns/ip-asn?tahun=${currentTahun}`).then((res) => res.data);

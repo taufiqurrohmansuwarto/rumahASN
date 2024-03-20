@@ -12,12 +12,6 @@ import { useRouter } from "next/router";
 const RiwayatKeluarga = () => {
   const router = useRouter();
 
-  const { data, isLoading } = useQuery(
-    ["data-siasn-rw-keluarga"],
-    () => dataRiwayatKeluargaSIASN(),
-    {}
-  );
-
   const handleBack = () => router.push("/pemutakhiran-data/komparasi");
 
   return (
@@ -26,7 +20,6 @@ const RiwayatKeluarga = () => {
         <title>Rumah ASN - Peremajaan SIASN - Data Keluarga</title>
       </Head>
       <PageContainer
-        loading={isLoading}
         extra={[<CustomSelectMenu key="menu" />]}
         header={{
           breadcrumbRender: () => (
@@ -49,7 +42,7 @@ const RiwayatKeluarga = () => {
         title="Riwayat Keluarga"
         content="Komparasi Data Keluarga SIASN dan SIMASTER"
       >
-        <CompareDataKeluarga data={data} />
+        <CompareDataKeluarga />
       </PageContainer>
     </>
   );
