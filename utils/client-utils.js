@@ -696,6 +696,16 @@ export const getJenisJabatanId = (jenisJabatan) => {
   }
 };
 
+export const getNamaJabatan = (idJabatan) => {
+  if (idJabatan === "1") {
+    return "Struktural";
+  } else if (idJabatan === "2") {
+    return "Fungsional";
+  } else if (idJabatan === "4") {
+    return "Pelaksana";
+  }
+};
+
 export const checkKonversiIntegrasiPertama = (data) => {
   if (data?.isAngkaKreditPertama === "1") {
     return "Angka Kredit Pertama";
