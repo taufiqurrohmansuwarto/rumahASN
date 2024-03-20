@@ -5,7 +5,11 @@ import {
   getTokenSIASNService,
   postRwJabatanByNip,
 } from "@/services/siasn-services";
-import { API_URL, getJenisJabatanId } from "@/utils/client-utils";
+import {
+  API_URL,
+  getJenisJabatanId,
+  getNamaJabatan,
+} from "@/utils/client-utils";
 import { FileAddOutlined, PlusOutlined } from "@ant-design/icons";
 import { Alert, Stack, Text } from "@mantine/core";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -34,6 +38,7 @@ import FormEditJabatanByNip from "./FormEditJabatanByNip";
 import FormStruktural from "../FormStruktural";
 import { IconAlertCircle } from "@tabler/icons";
 import FormUnorJabatan from "../FormUnorJabatan";
+import FormUnorJabatanTransfer from "../FormUnorJabatanTransfer";
 
 const format = "DD-MM-YYYY";
 
@@ -651,20 +656,35 @@ function CompareJabatanByNip({ nip }) {
       title: "Aksi",
       key: "edit",
       render: (_, row) => {
-        const length = data?.length;
-        const lastData = data?.[0];
+        const payload = {
+          ...row,
+          jenis_jabatan: getNamaJabatan(row?.jenisJabatan),
+          tmtJabatan: row?.tmtJabatan
+            ? moment(row?.tmtJabatan, "DD-MM-YYYY")
+            : null,
+          tmtMutasi: row?.tmtMutasi
+            ? moment(row?.tmtMutasi, "DD-MM-YYYY")
+            : null,
+          tmtPelantikan: row?.tmtPelantikan
+            ? moment(row?.tmtPelantikan, "DD-MM-YYYY")
+            : null,
+          tanggalSk: row?.tanggalSk
+            ? moment(row?.tanggalSk, "DD-MM-YYYY")
+            : null,
+          fungsional_umum_id: row?.jabatanFungsionalUmumId,
+          fungsional_id: row?.jabatanFungsionalId,
+          eselon_id: row?.eselonId,
+        };
 
-        if (length <= 1) {
+        if (
+          dataSiasn?.kedudukanPnsNama === "PPPK Aktif" &&
+          dataUser?.user?.current_role !== "admin"
+        ) {
           return null;
+        } else if (data?.[0]?.id === row?.id) {
+          return <FormUnorJabatanTransfer data={payload} kata="Edit" />;
         } else {
-          return (
-            <>
-              {lastData?.id === row?.id &&
-                checkJenisJabatan(row) !== "Struktural" && (
-                  <a onClick={() => handleOpenEdit(row)}>Edit</a>
-                )}
-            </>
-          );
+          return null;
         }
       },
     },
@@ -701,13 +721,16 @@ function CompareJabatanByNip({ nip }) {
     {
       title: "Aksi",
       key: "aksi",
-      render: (row) => (
-        <>
-          {row?.jenis_jabatan !== "Struktural" && (
-            <a onClick={() => handlePakai(row)}>Pakai</a>
-          )}
-        </>
-      ),
+      render: (_, row) => {
+        const data = {
+          tmtJabatan: moment(row?.tmt_jabatan, "DD-MM-YYYY"),
+          jenis_jabatan: row?.jenis_jabatan,
+          nomorSk: row?.nomor_sk,
+          tanggalSk: moment(row?.tgl_sk, "DD-MM-YYYY"),
+        };
+
+        return <FormUnorJabatanTransfer data={data} kata="Pakai" />;
+      },
     },
   ];
 
