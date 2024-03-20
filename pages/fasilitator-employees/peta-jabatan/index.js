@@ -93,6 +93,7 @@ const PetaJabatan = () => {
       >
         <Tree
           loadData={onLoadData}
+          loadedKeys={[treeData?.[0]?.key]}
           treeData={treeData}
           height={500}
           showIcon
