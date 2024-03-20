@@ -646,10 +646,10 @@ function CompareJabatanByNip({ nip }) {
       key: "aksi",
       render: (_, row) => {
         const data = {
-          tmtJabatan: row?.tmtJabatan
+          tmtJabatan: row?.tmt_jabatan
             ? moment(row?.tmt_jabatan, "DD-MM-YYYY")
             : null,
-          tanggalSk: row?.tanggalSk ? moment(row?.tgl_sk, "DD-MM-YYYY") : null,
+          tanggalSk: row?.tgl_sk ? moment(row?.tgl_sk, "DD-MM-YYYY") : null,
           tmtPelantikan: row?.tmtPelantikan
             ? moment(row?.tmt_pelantikan, "DD-MM-YYYY")
             : null,
