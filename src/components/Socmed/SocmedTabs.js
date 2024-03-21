@@ -7,6 +7,7 @@ import SocmedMyPosts from "./SocmedMyPosts";
 import SocmedActivities from "./SocmedActivities";
 import { Alert, Stack } from "@mantine/core";
 import { IconAlertCircle } from "@tabler/icons";
+import Announcement from "../Announcement";
 
 function SocmedTabs() {
   const router = useRouter();
@@ -24,18 +25,12 @@ function SocmedTabs() {
   return (
     <>
       <Row gutter={[8, 8]}>
-        <Col md={16}>
+        <Col md={16} xs={24}>
           <Row gutter={[8, 8]}>
             <Col md={24}>
               <Card>
                 <Stack>
-                  <Alert
-                    icon={<IconAlertCircle size="1rem" />}
-                    title="Bummer!"
-                    color="yellow"
-                  >
-                    Yuk Ramaikan ASN Connect dengan pantun terbaikmu!
-                  </Alert>
+                  <Announcement />
                   <SocmedCreatePost />
                 </Stack>
               </Card>
@@ -66,7 +61,7 @@ function SocmedTabs() {
             </Col>
           </Row>
         </Col>
-        <Col md={8}>
+        <Col md={8} xs={24}>
           <Card title="Aktifitas">
             <SocmedActivities />
           </Card>

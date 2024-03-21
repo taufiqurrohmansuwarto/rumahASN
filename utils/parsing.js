@@ -18,7 +18,7 @@ const renderImage = (href, title, text) => {
   // return img;
 
   // add a href to image
-  const img = `<a href="${href}" target="_blank" rel="noopener noreferrer"><img src="${href}" title="${text}" alt="${text}" style="width: 70%;"/></a>`;
+  const img = `<a href="${href}" target="_blank" rel="noopener noreferrer"><img src="${href}" title="${text}" alt="${text}" style="width: 10%; margin-top: 6px; margin-bottom: 6px;"/></a>`;
   return img;
 };
 

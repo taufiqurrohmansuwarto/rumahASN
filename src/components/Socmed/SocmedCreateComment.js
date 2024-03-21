@@ -1,13 +1,44 @@
+import { parseMarkdown, uploadFiles } from "@/services/index";
 import { createComment } from "@/services/socmed.services";
+import { MarkdownEditor } from "@primer/react/drafts";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Avatar, Button, Comment, Form, Input, message } from "antd";
+import { Avatar, Comment, Form, message } from "antd";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
+import { useState } from "react";
+
+const uploadFile = async (file) => {
+  try {
+    const formData = new FormData();
+
+    // if file not image png, jpg, jpeg, gif
+    const allowedTypes = ["image/png", "image/jpg", "image/jpeg", "image/gif"];
+
+    if (!allowedTypes.includes(file.type)) {
+      return;
+    } else {
+      formData.append("file", file);
+      const result = await uploadFiles(formData);
+      return {
+        url: result?.data,
+        file,
+      };
+    }
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+const renderMarkdown = async (markdown) => {
+  if (!markdown) return;
+  const result = await parseMarkdown(markdown);
+  return result?.html;
+};
 
 const SocmedCreateComment = ({ parentId, withBatal = false, onCancel }) => {
   const { data: currentUser } = useSession();
   const router = useRouter();
-  const [form] = Form.useForm();
+  const [value, setValue] = useState("");
 
   const queryClient = useQueryClient();
 
@@ -15,9 +46,9 @@ const SocmedCreateComment = ({ parentId, withBatal = false, onCancel }) => {
     (data) => createComment(data),
     {
       onSuccess: () => {
-        form.resetFields();
         message.success("Comment posted");
         queryClient.invalidateQueries(["socmed-comments", router.query.id]);
+        setValue("");
         if (withBatal) onCancel();
       },
       onError: (error) => {
@@ -27,17 +58,21 @@ const SocmedCreateComment = ({ parentId, withBatal = false, onCancel }) => {
     }
   );
 
-  const handleFinish = (values) => {
-    if (!values.comment) return;
+  const submitMessage = () => {
+    if (!value) return;
     const data = {
       postId: router.query.id,
       data: {
-        ...values,
+        comment: value,
         parent_id: parentId || null,
       },
     };
 
     create(data);
+  };
+
+  const handleCancel = () => {
+    onCancel();
   };
 
   return (
@@ -46,26 +81,40 @@ const SocmedCreateComment = ({ parentId, withBatal = false, onCancel }) => {
         <Avatar src={currentUser?.user?.image} alt={currentUser?.user?.name} />
       }
       content={
-        <Form form={form} onFinish={handleFinish}>
-          <Form.Item name="comment">
-            <Input.TextArea rows={4} />
-          </Form.Item>
-          <Form.Item>
-            <Button
-              type="primary"
-              loading={isLoading}
-              disabled={isLoading}
-              htmlType="submit"
-            >
-              Post Komentar
-            </Button>
+        <MarkdownEditor
+          acceptedFileTypes={[
+            "image/png",
+            "image/jpg",
+            "image/jpeg",
+            "image/gif",
+          ]}
+          value={value}
+          onChange={setValue}
+          onRenderPreview={renderMarkdown}
+          onUploadFile={uploadFile}
+          savedReplies={false}
+          mentionSuggestions={false}
+        >
+          <MarkdownEditor.Actions>
             {withBatal && (
-              <Button style={{ marginLeft: 8 }} onClick={onCancel}>
-                Batal
-              </Button>
+              <MarkdownEditor.ActionButton
+                variant="danger"
+                size="medium"
+                onClick={handleCancel}
+              >
+                Cancel
+              </MarkdownEditor.ActionButton>
             )}
-          </Form.Item>
-        </Form>
+            <MarkdownEditor.ActionButton
+              disabled={!value || isLoading}
+              variant="primary"
+              size="medium"
+              onClick={submitMessage}
+            >
+              {isLoading ? "Loading..." : "Submit"}
+            </MarkdownEditor.ActionButton>
+          </MarkdownEditor.Actions>
+        </MarkdownEditor>
       }
     />
   );

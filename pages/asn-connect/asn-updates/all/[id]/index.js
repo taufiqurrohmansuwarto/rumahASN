@@ -45,10 +45,11 @@ const ASNUpdateDetail = () => {
   return (
     <>
       <Head>
-        <title>ASN Update - {post?.content} </title>
+        <title>ASN Update - Detail </title>
       </Head>
       <PageContainer
         title="ASN Connect"
+        subTitle="Berjejaring, Berkolaborasi, Berinovasi Bersama ASN Connect"
         content="Detail Postingan"
         onBack={handleBack}
         loading={isLoading}

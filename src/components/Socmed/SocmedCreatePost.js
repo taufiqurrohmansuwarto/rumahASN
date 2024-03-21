@@ -1,17 +1,49 @@
+import { parseMarkdown, uploadFiles } from "@/services/index";
 import { createPost } from "@/services/socmed.services";
+import { MarkdownEditor } from "@primer/react/drafts";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Avatar, Button, Comment, Form, Input } from "antd";
+import { Avatar, Comment } from "antd";
 import { useSession } from "next-auth/react";
+import { useState } from "react";
+
+const uploadFile = async (file) => {
+  try {
+    const formData = new FormData();
+
+    // if file not image png, jpg, jpeg, gif
+    const allowedTypes = ["image/png", "image/jpg", "image/jpeg", "image/gif"];
+
+    if (!allowedTypes.includes(file.type)) {
+      return;
+    } else {
+      formData.append("file", file);
+      const result = await uploadFiles(formData);
+      return {
+        url: result?.data,
+        file,
+      };
+    }
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+const renderMarkdown = async (markdown) => {
+  if (!markdown) return;
+  const result = await parseMarkdown(markdown);
+  return result?.html;
+};
 
 function SocmedCreatePost() {
   const { data, status } = useSession();
   const queryClient = useQueryClient();
-  const [form] = Form.useForm();
+
+  const [value, setValue] = useState();
   const { mutate: create, isLoading } = useMutation(
     (data) => createPost(data),
     {
       onSuccess: () => {
-        form.resetFields();
+        setValue("");
       },
       onError: (error) => {
         alert(error.message);
@@ -22,29 +54,52 @@ function SocmedCreatePost() {
     }
   );
 
-  const handleFinish = (values) => {
-    create(values);
+  const submitMessage = () => {
+    if (!value) {
+      return;
+    } else {
+      create({ content: value });
+    }
   };
 
   return (
     <Comment
       avatar={<Avatar src={data?.user?.image} alt={data?.user?.name} />}
       content={
-        <Form form={form} onFinish={handleFinish}>
-          <Form.Item name="content">
-            <Input.TextArea rows={4} />
-          </Form.Item>
-          <Form.Item>
-            <Button
-              type="primary"
-              loading={isLoading}
-              disabled={isLoading}
-              htmlType="submit"
-            >
-              Post
-            </Button>
-          </Form.Item>
-        </Form>
+        <>
+          <MarkdownEditor
+            acceptedFileTypes={[
+              "image/png",
+              "image/jpg",
+              "image/jpeg",
+              "image/gif",
+            ]}
+            value={value}
+            onChange={setValue}
+            onRenderPreview={renderMarkdown}
+            onUploadFile={uploadFile}
+            savedReplies={false}
+            mentionSuggestions={false}
+          >
+            <MarkdownEditor.Actions>
+              <MarkdownEditor.ActionButton
+                variant="danger"
+                size="medium"
+                onClick={handleCancel}
+              >
+                Cancel
+              </MarkdownEditor.ActionButton>
+              <MarkdownEditor.ActionButton
+                disabled={!value || isLoading}
+                variant="primary"
+                size="medium"
+                onClick={submitMessage}
+              >
+                {isLoading ? "Loading..." : "Submit"}
+              </MarkdownEditor.ActionButton>
+            </MarkdownEditor.Actions>
+          </MarkdownEditor>
+        </>
       }
     />
   );
