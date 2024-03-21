@@ -83,13 +83,6 @@ function SocmedCreatePost() {
           >
             <MarkdownEditor.Actions>
               <MarkdownEditor.ActionButton
-                variant="danger"
-                size="medium"
-                onClick={handleCancel}
-              >
-                Cancel
-              </MarkdownEditor.ActionButton>
-              <MarkdownEditor.ActionButton
                 disabled={!value || isLoading}
                 variant="primary"
                 size="medium"
