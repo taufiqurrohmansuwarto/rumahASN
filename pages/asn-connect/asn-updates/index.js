@@ -28,7 +28,7 @@ const AsnUpdates = () => {
           ),
         }}
         title="ASN Connect"
-        content="Jaringan Tanpa Henti"
+        content="Berjejaring, Berkolaborasi, Berinovasi Bersama ASN Connect."
       >
         <BackTop />
         <SocmedTabs />

@@ -4,6 +4,7 @@ const SocmedLikes = require("@/models/socmed-likes.model");
 const SocmedShares = require("@/models/socmed-shares.model");
 const SocmedAudits = require("@/models/socmed-audits.model");
 const SocmedNotifications = require("@/models/socmed-notifications.model");
+const { parseMarkdown } = require("@/utils/parsing");
 
 const arrayToTree = require("array-to-tree");
 
@@ -64,8 +65,15 @@ const posts = async (req, res) => {
 
     const result = await query;
 
+    const results = result?.results.map((item) => {
+      return {
+        ...item,
+        html: item?.content ? parseMarkdown(item?.content) : null,
+      };
+    });
+
     const data = {
-      data: result?.results,
+      data: results,
       pagination: {
         page: parseInt(page),
         limit: parseInt(limit),
@@ -137,7 +145,13 @@ const detailPost = async (req, res) => {
     const result = await SocmedPosts.query()
       .findById(postId)
       .withGraphFetched("[comments, likes, shares, user]");
-    res.json(result);
+
+    const data = {
+      ...result,
+      html: result?.content ? parseMarkdown(result?.content) : null,
+    };
+
+    res.json(data);
   } catch (error) {
     console.log(error);
     res.status(500).json({
@@ -245,7 +259,14 @@ const comments = async (req, res) => {
       .withGraphFetched("[user(simpleSelect)]")
       .orderBy("created_at", "desc");
 
-    const data = arrayToTree(result, {
+    const hasil = result.map((item) => {
+      return {
+        ...item,
+        html: item?.comment ? parseMarkdown(item?.comment) : null,
+      };
+    });
+
+    const data = arrayToTree(hasil, {
       parentProperty: "parent_id",
       customID: "id",
     });

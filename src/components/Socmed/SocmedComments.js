@@ -132,7 +132,10 @@ const UserComment = ({ comment }) => {
                 withBatal
               />
             ) : (
-              comment?.comment
+              <div
+                dangerouslySetInnerHTML={{ __html: comment?.html }}
+                style={{ marginBottom: 16 }}
+              />
             )}
           </>
         }
@@ -180,7 +183,12 @@ function SocmedComments({ post, id }) {
     <Row>
       <Col md={16}>
         <Comment
-          content={post?.content}
+          content={
+            <div
+              dangerouslySetInnerHTML={{ __html: post?.html }}
+              style={{ marginBottom: 16 }}
+            />
+          }
           author={post?.user?.username}
           avatar={<Avatar src={post?.user?.image} />}
           datetime={post?.created_at}

@@ -1,9 +1,39 @@
+import { parseMarkdown, uploadFiles } from "@/services/index";
 import { updateComment } from "@/services/socmed.services";
+import { MarkdownEditor } from "@primer/react/drafts";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Avatar, Button, Comment, Form, Input, message } from "antd";
+import { Comment, Form, message } from "antd";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
-import { useEffect } from "react";
+import { useState } from "react";
+
+const uploadFile = async (file) => {
+  try {
+    const formData = new FormData();
+
+    // if file not image png, jpg, jpeg, gif
+    const allowedTypes = ["image/png", "image/jpg", "image/jpeg", "image/gif"];
+
+    if (!allowedTypes.includes(file.type)) {
+      return;
+    } else {
+      formData.append("file", file);
+      const result = await uploadFiles(formData);
+      return {
+        url: result?.data,
+        file,
+      };
+    }
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+const renderMarkdown = async (markdown) => {
+  if (!markdown) return;
+  const result = await parseMarkdown(markdown);
+  return result?.html;
+};
 
 const SocmedEditComment = ({
   parentId,
@@ -15,13 +45,13 @@ const SocmedEditComment = ({
   const router = useRouter();
   const [form] = Form.useForm();
 
-  const queryClient = useQueryClient();
+  const [value, setValue] = useState(comment?.comment);
 
-  useEffect(() => {
-    form.setFieldsValue({
-      comment: comment?.comment,
-    });
-  }, [comment, form]);
+  const handleCancel = () => {
+    onCancel();
+  };
+
+  const queryClient = useQueryClient();
 
   const { mutate: update, isLoading } = useMutation(
     (data) => updateComment(data),
@@ -39,13 +69,13 @@ const SocmedEditComment = ({
     }
   );
 
-  const handleFinish = (values) => {
-    if (!values.comment) return;
+  const submitMessage = () => {
+    if (!value) return;
     const data = {
       postId: router.query.id,
       commentId: comment?.id,
       data: {
-        ...values,
+        comment: value,
       },
     };
 
@@ -55,26 +85,38 @@ const SocmedEditComment = ({
   return (
     <Comment
       content={
-        <Form form={form} onFinish={handleFinish}>
-          <Form.Item name="comment">
-            <Input.TextArea rows={4} />
-          </Form.Item>
-          <Form.Item>
-            <Button
-              type="primary"
-              loading={isLoading}
-              disabled={isLoading}
-              htmlType="submit"
+        <MarkdownEditor
+          acceptedFileTypes={[
+            "image/png",
+            "image/jpg",
+            "image/jpeg",
+            "image/gif",
+          ]}
+          value={value}
+          onChange={setValue}
+          onRenderPreview={renderMarkdown}
+          onUploadFile={uploadFile}
+          savedReplies={false}
+          mentionSuggestions={false}
+        >
+          <MarkdownEditor.Actions>
+            <MarkdownEditor.ActionButton
+              variant="danger"
+              size="medium"
+              onClick={handleCancel}
             >
-              Edit Komentar
-            </Button>
-            {withBatal && (
-              <Button style={{ marginLeft: 8 }} onClick={onCancel}>
-                Batal
-              </Button>
-            )}
-          </Form.Item>
-        </Form>
+              Cancel
+            </MarkdownEditor.ActionButton>
+            <MarkdownEditor.ActionButton
+              disabled={!value || isLoading}
+              variant="primary"
+              size="medium"
+              onClick={submitMessage}
+            >
+              {isLoading ? "Loading..." : "Submit"}
+            </MarkdownEditor.ActionButton>
+          </MarkdownEditor.Actions>
+        </MarkdownEditor>
       }
     />
   );

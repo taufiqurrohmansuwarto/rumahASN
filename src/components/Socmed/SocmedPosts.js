@@ -1,3 +1,4 @@
+import { parseMarkdown, uploadFiles } from "@/services/index";
 import {
   deletePost,
   getPosts,
@@ -6,6 +7,7 @@ import {
 } from "@/services/socmed.services";
 import { CommentOutlined, LikeOutlined, MoreOutlined } from "@ant-design/icons";
 import { Stack } from "@mantine/core";
+import { MarkdownEditor } from "@primer/react/drafts";
 import {
   useInfiniteQuery,
   useMutation,
@@ -17,8 +19,6 @@ import {
   Col,
   Comment,
   Dropdown,
-  Form,
-  Input,
   List,
   Modal,
   Row,
@@ -29,20 +29,55 @@ import {
 import moment from "moment";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import SocmedPostsFilter from "./SocmedPostsFilter";
 
+const uploadFile = async (file) => {
+  try {
+    const formData = new FormData();
+
+    // if file not image png, jpg, jpeg, gif
+    const allowedTypes = ["image/png", "image/jpg", "image/jpeg", "image/gif"];
+
+    if (!allowedTypes.includes(file.type)) {
+      return;
+    } else {
+      formData.append("file", file);
+      const result = await uploadFiles(formData);
+      return {
+        url: result?.data,
+        file,
+      };
+    }
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+const renderMarkdown = async (markdown) => {
+  if (!markdown) return;
+  const result = await parseMarkdown(markdown);
+  return result?.html;
+};
+
 function SocmedEditPost({ post, edit, isLoading, cancel }) {
-  const [form] = Form.useForm();
+  const [value, setValue] = useState(post?.content);
 
-  useEffect(() => {
-    form.setFieldsValue({
-      content: post?.content,
-    });
-  }, [post, form]);
+  const handleCancel = () => {
+    cancel();
+  };
 
-  const handleFinish = (values) => {
-    edit({ id: post?.id, data: values });
+  const handleFinish = () => {
+    if (!value) {
+      return;
+    } else {
+      edit({
+        id: post?.id,
+        data: {
+          content: value,
+        },
+      });
+    }
   };
 
   return (
@@ -54,29 +89,38 @@ function SocmedEditPost({ post, edit, isLoading, cancel }) {
       }
       avatar={<Avatar src={post?.user?.image} alt={post?.user?.name} />}
       content={
-        <Form form={form} onFinish={handleFinish}>
-          <Form.Item name="content">
-            <Input.TextArea
-              style={{
-                width: "100%",
-              }}
-              rows={4}
-            />
-          </Form.Item>
-          <Form.Item>
-            <Space>
-              <Button
-                type="primary"
-                loading={isLoading}
-                disabled={isLoading}
-                htmlType="submit"
-              >
-                Edit
-              </Button>
-              <Button onClick={cancel}>Batal</Button>
-            </Space>
-          </Form.Item>
-        </Form>
+        <MarkdownEditor
+          acceptedFileTypes={[
+            "image/png",
+            "image/jpg",
+            "image/jpeg",
+            "image/gif",
+          ]}
+          value={value}
+          onChange={setValue}
+          onRenderPreview={renderMarkdown}
+          onUploadFile={uploadFile}
+          savedReplies={false}
+          mentionSuggestions={false}
+        >
+          <MarkdownEditor.Actions>
+            <MarkdownEditor.ActionButton
+              variant="danger"
+              size="medium"
+              onClick={handleCancel}
+            >
+              Cancel
+            </MarkdownEditor.ActionButton>
+            <MarkdownEditor.ActionButton
+              disabled={!value || isLoading}
+              variant="primary"
+              size="medium"
+              onClick={handleFinish}
+            >
+              {isLoading ? "Loading..." : "Submit"}
+            </MarkdownEditor.ActionButton>
+          </MarkdownEditor.Actions>
+        </MarkdownEditor>
       }
     />
   );
@@ -232,7 +276,7 @@ const Post = ({ post, currentUser }) => {
               {moment(post?.created_at).fromNow()}
             </Tooltip>
           }
-          content={<div dangerouslySetInnerHTML={{ __html: post?.content }} />}
+          content={<div dangerouslySetInnerHTML={{ __html: post?.html }} />}
         />
       )}
     </>
