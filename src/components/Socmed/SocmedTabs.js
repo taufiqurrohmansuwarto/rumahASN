@@ -1,13 +1,11 @@
+import { Stack } from "@mantine/core";
 import { Card, Col, Row, Tabs } from "antd";
 import { useRouter } from "next/router";
-import React from "react";
-import SocmedPosts from "./SocmedPosts";
+import Announcement from "../Announcement";
+import SocmedActivities from "./SocmedActivities";
 import SocmedCreatePost from "./SocmedCreatePost";
 import SocmedMyPosts from "./SocmedMyPosts";
-import SocmedActivities from "./SocmedActivities";
-import { Alert, Stack } from "@mantine/core";
-import { IconAlertCircle } from "@tabler/icons";
-import Announcement from "../Announcement";
+import SocmedPosts from "./SocmedPosts";
 
 function SocmedTabs() {
   const router = useRouter();
