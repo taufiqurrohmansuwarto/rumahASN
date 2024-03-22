@@ -59,11 +59,11 @@ function SocmedTabs() {
             </Col>
           </Row>
         </Col>
-        <Col md={8} xs={24}>
+        {/* <Col md={8} xs={24}>
           <Card title="Aktifitas">
             <SocmedActivities />
           </Card>
-        </Col>
+        </Col> */}
       </Row>
     </>
   );
