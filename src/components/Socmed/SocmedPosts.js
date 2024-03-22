@@ -298,7 +298,7 @@ function SocmedPosts() {
     ({ pageParam = 1 }) => getPosts({ ...router?.query, page: pageParam }),
     {
       getNextPageParam: (lastPage) => {
-        const defaultLimit = 10;
+        const defaultLimit = 50;
         const nextPage = lastPage?.pagination?.page + 1;
         if (lastPage?.data?.length < defaultLimit) return undefined;
         return nextPage;
