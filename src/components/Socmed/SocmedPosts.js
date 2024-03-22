@@ -295,7 +295,8 @@ function SocmedPosts() {
     fetchNextPage,
   } = useInfiniteQuery(
     ["socmed-posts", router?.query],
-    ({ pageParam = 1 }) => getPosts({ ...router?.query, page: pageParam }),
+    ({ pageParam = 1 }) =>
+      getPosts({ ...router?.query, page: pageParam, limit: 50 }),
     {
       getNextPageParam: (lastPage) => {
         const defaultLimit = 50;
