@@ -7,6 +7,7 @@ import { useState } from "react";
 import RestrictedContent from "../RestrictedContent";
 import NewTicket from "../Ticket/NewTicket";
 import Link from "next/link";
+import ReactMarkdownCustom from "../MarkdownEditor/ReactMarkdownCustom";
 
 function ChangeTicketDescription({ item }) {
   const [isEdit, setIsEdit] = useState();
@@ -95,9 +96,7 @@ function ChangeTicketDescription({ item }) {
               <span>{formatDateFromNow(item?.created_at)}</span>
             </Tooltip>
           }
-          content={
-            <div dangerouslySetInnerHTML={{ __html: item?.content_html }} />
-          }
+          content={<ReactMarkdownCustom>{item?.content}</ReactMarkdownCustom>}
         />
       )}
     </>

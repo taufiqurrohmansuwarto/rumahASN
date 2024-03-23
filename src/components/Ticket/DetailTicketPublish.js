@@ -59,6 +59,7 @@ import Unsubscribe from "../TicketProps/Unsubscribe";
 import NewTicket from "./NewTicket";
 import TicketsRecommendations from "../TicketProps/TicketsRecommendations";
 import Link from "next/link";
+import ReactMarkdownCustom from "../MarkdownEditor/ReactMarkdownCustom";
 
 const ActionWrapper = ({ attributes, name, ...props }) => {
   return (
@@ -244,9 +245,9 @@ const CommentTicket = ({ item, agent, customer, admin }) => {
                   content={
                     <Row>
                       <Col span={22}>
-                        <div
-                          dangerouslySetInnerHTML={{ __html: item?.comment }}
-                        />
+                        <ReactMarkdownCustom>
+                          {item?.commentMarkdown}
+                        </ReactMarkdownCustom>
                       </Col>
                     </Row>
                   }

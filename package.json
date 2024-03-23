@@ -11,8 +11,8 @@
   "dependencies": {
     "@ant-design/charts": "^1.4.3",
     "@ant-design/icons": "^4.7.0",
-    "@ant-design/pro-components": "^2.6.48",
-    "@ant-design/pro-layout": "^7.17.19",
+    "@ant-design/pro-components": "^2.6.52",
+    "@ant-design/pro-layout": "^7.18.0",
     "@casl/ability": "^6.3.3",
     "@casl/react": "^3.1.0",
     "@emotion/react": "^11.10.5",

@@ -7,7 +7,7 @@ import remarkBreaks from "remark-breaks";
 function ReactMarkdownCustom({ children }) {
   const components = {
     img({ node, ...props }) {
-      return <Image height={150} alt={props.alt || "Image"} {...props} />;
+      return <Image height={200} alt={props.alt || "Image"} {...props} />;
     },
     blockquote({ node, ...props }) {
       return (
