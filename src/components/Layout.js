@@ -129,26 +129,26 @@ const changeRoutes = (user) => {
           path: "/pemutakhiran-data/komparasi",
           name: "Integrasi SIASN",
           icon: <ApiOutlined />,
-        },
-        {
-          path: "/tte",
-          name: "Tanda Tangan Digital",
-          icon: <BookOutlined />,
-          routes: [
-            {
-              path: "/tte/certificates",
-              name: "Sertifikat",
-            },
-            {
-              path: "/tte/documents",
-              name: "Dokumen",
-            },
-            {
-              path: "/tte/sk",
-              name: "Surat Keputusan",
-            },
-          ],
         }
+        // {
+        //   path: "/tte",
+        //   name: "Tanda Tangan Digital",
+        //   icon: <BookOutlined />,
+        //   routes: [
+        //     {
+        //       path: "/tte/certificates",
+        //       name: "Sertifikat",
+        //     },
+        //     {
+        //       path: "/tte/documents",
+        //       name: "Dokumen",
+        //     },
+        //     {
+        //       path: "/tte/sk",
+        //       name: "Surat Keputusan",
+        //     },
+        //   ],
+        // }
       );
     }
 
