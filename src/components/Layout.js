@@ -245,6 +245,16 @@ const changeRoutes = (user) => {
                 { path: "/apps-managements/integrasi/siasn", name: "SIASN" },
               ],
             },
+            {
+              path: "/apps-managements/submissions",
+              name: "Usulan",
+              routes: [
+                {
+                  path: "/apps-managements/submissions/references",
+                  name: "Kamus Usulan",
+                },
+              ],
+            },
             sealAdmin?.granted && {
               path: "/apps-managements/esign",
               name: "E-Sign",
