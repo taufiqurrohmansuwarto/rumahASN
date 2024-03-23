@@ -7,10 +7,70 @@ import {
   updateSubmissionPersonInCharge,
 } from "@/services/submissions.services";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Button, Form, Modal, Table, message } from "antd";
+import { Button, Divider, Form, Modal, Table, message } from "antd";
 import { useRouter } from "next/router";
 import { useState } from "react";
 import FormSearchUserBKD from "./FormSearchUserBKD";
+import { FileAddOutlined } from "@ant-design/icons";
+import { useEffect } from "react";
+
+const FormEditPersonInCharge = ({ open, onCancel, loading, edit, data }) => {
+  const router = useRouter();
+  const [form] = Form.useForm();
+
+  useEffect(() => {
+    form.setFieldsValue({
+      ...data,
+    });
+  }, [data, form]);
+
+  const handleOK = async () => {
+    try {
+      const result = await form.validateFields();
+      const organization_id = result.organization.map((item) => item.value);
+      const organization = result?.organization.map((item) => ({
+        value: item.value,
+        label: item.label,
+      }));
+      const user_id = result?.user?.value;
+
+      const payload = {
+        id: router.query.id,
+        picId: data?.id,
+        data: {
+          ...result,
+          organization_id,
+          user: JSON.stringify(result?.user),
+          user_id,
+          organization: JSON.stringify(organization),
+          submission_reference_id: router.query.id,
+        },
+      };
+      await edit(payload);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  return (
+    <Modal
+      destroyOnClose
+      confirmLoading={loading}
+      onOk={handleOK}
+      maskClosable={false}
+      closable={false}
+      title="Form PIC Usulan"
+      centered
+      open={open}
+      onCancel={onCancel}
+    >
+      <Form form={form} layout="vertical">
+        <FormSearchUserBKD name="user" />
+        <FormUnorSIMASTER name="organization" />
+      </Form>
+    </Modal>
+  );
+};
 
 const FormAddPersonInCharge = ({ open, onCancel, loading, add }) => {
   const router = useRouter();
@@ -24,17 +84,19 @@ const FormAddPersonInCharge = ({ open, onCancel, loading, add }) => {
         value: item.value,
         label: item.label,
       }));
+      const user_id = result?.user?.value;
 
       const payload = {
         id: router.query.id,
         data: {
           ...result,
           organization_id,
+          user: JSON.stringify(result?.user),
+          user_id,
           organization: JSON.stringify(organization),
           submission_reference_id: router.query.id,
         },
       };
-      //       console.log(payload);
       await add(payload);
     } catch (error) {
       console.log(error);
@@ -54,7 +116,7 @@ const FormAddPersonInCharge = ({ open, onCancel, loading, add }) => {
       onCancel={onCancel}
     >
       <Form form={form} layout="vertical">
-        <FormSearchUserBKD name="user_id" />
+        <FormSearchUserBKD name="user" />
         <FormUnorSIMASTER name="organization" />
       </Form>
     </Modal>
@@ -66,6 +128,18 @@ const PersonInChargeSubmission = ({ id }) => {
   const [open, setOpen] = useState(false);
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
+
+  const [dataEdit, setDataEdit] = useState(null);
+  const [edit, setEdit] = useState(false);
+  const handleEdit = (value) => {
+    setEdit(true);
+    setDataEdit(value);
+  };
+
+  const handleCancelEdit = () => {
+    setEdit(false);
+    setDataEdit(null);
+  };
 
   const { data, isLoading } = useQuery(
     ["person-in-charge", id],
@@ -108,41 +182,41 @@ const PersonInChargeSubmission = ({ id }) => {
   const columns = [
     {
       title: "Nama",
-      dataIndex: "user_id",
-      render: (value) => value?.name,
+      key: "user_id",
+      render: (value) => value?.user?.label,
     },
     {
       title: "Wilayah",
-      dataIndex: "organization_id",
-      render: (value) => value?.name,
-    },
-    {
-      title: "Usulan",
-      dataIndex: "submission_reference_id",
-      render: (value) => value?.name,
+      key: "organization_id",
+      render: (value) =>
+        value?.organization?.map((item) => item.label).join(", "),
     },
     {
       title: "Aksi",
       render: (value) => {
         return (
-          <Button
-            onClick={() => {
-              Modal.confirm({
-                title: "Hapus PIC",
-                content: "Apakah anda yakin ingin menghapus PIC ini?",
-                okText: "Ya",
-                cancelText: "Tidak",
-                onOk: async () => {
-                  await deletePIC({
-                    id,
-                    picId: value?.id,
-                  });
-                },
-              });
-            }}
-          >
-            Hapus
-          </Button>
+          <>
+            <a
+              onClick={() => {
+                Modal.confirm({
+                  title: "Hapus PIC",
+                  content: "Apakah anda yakin ingin menghapus PIC ini?",
+                  okText: "Ya",
+                  cancelText: "Tidak",
+                  onOk: async () => {
+                    await deletePIC({
+                      id,
+                      picId: value?.id,
+                    });
+                  },
+                });
+              }}
+            >
+              Hapus
+            </a>
+            <Divider type="vertical" />
+            <a onClick={() => handleEdit(value)}>Edit</a>
+          </>
         );
       },
     },
@@ -150,12 +224,21 @@ const PersonInChargeSubmission = ({ id }) => {
 
   return (
     <div>
-      <Button onClick={handleOpen}>Tambahkan PIC</Button>
+      <Button onClick={handleOpen} type="primary" icon={<FileAddOutlined />}>
+        PIC
+      </Button>
       <FormAddPersonInCharge
         add={addPIC}
         loading={isLoadingAddPIC}
         open={open}
         onCancel={handleClose}
+      />
+      <FormEditPersonInCharge
+        edit={updatePIC}
+        data={dataEdit}
+        loading={isLoadingUpdatePIC}
+        open={edit}
+        onCancel={handleCancelEdit}
       />
       <Table
         columns={columns}
