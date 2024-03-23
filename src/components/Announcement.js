@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import React from "react";
 import { Alert } from "@mantine/core";
 import { IconAlertCircle } from "@tabler/icons";
+import ReactMarkdownCustom from "./MarkdownEditor/ReactMarkdownCustom";
 
 function Announcement() {
   const { data, isLoading } = useQuery(
@@ -19,11 +20,7 @@ function Announcement() {
           title={data?.title}
           color="green"
         >
-          <div
-            dangerouslySetInnerHTML={{
-              __html: data?.html,
-            }}
-          />
+          <ReactMarkdownCustom>{data?.content}</ReactMarkdownCustom>
         </Alert>
       )}
     </>

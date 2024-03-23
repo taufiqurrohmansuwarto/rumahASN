@@ -31,6 +31,7 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import { useState } from "react";
 import SocmedPostsFilter from "./SocmedPostsFilter";
+import ReactMarkdownCustom from "../MarkdownEditor/ReactMarkdownCustom";
 
 const uploadFile = async (file) => {
   try {
@@ -276,7 +277,7 @@ const Post = ({ post, currentUser }) => {
               {moment(post?.created_at).fromNow()}
             </Tooltip>
           }
-          content={<div dangerouslySetInnerHTML={{ __html: post?.html }} />}
+          content={<ReactMarkdownCustom>{post?.content}</ReactMarkdownCustom>}
         />
       )}
     </>

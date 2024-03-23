@@ -8,6 +8,7 @@ import Link from "next/link";
 
 const AsnUpdates = () => {
   useScrollRestoration();
+
   return (
     <>
       <Head>
