@@ -7,6 +7,7 @@ import { MoreOutlined, RetweetOutlined } from "@ant-design/icons";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Avatar,
+  Card,
   Col,
   Comment,
   Divider,
@@ -22,6 +23,7 @@ import { useRouter } from "next/router";
 import { useState } from "react";
 import SocmedCreateComment from "./SocmedCreateComment";
 import SocmedEditComment from "./SocmedEditComment";
+import ReactMarkdownCustom from "../MarkdownEditor/ReactMarkdownCustom";
 
 const UserComment = ({ comment }) => {
   const [selectedId, setSelectedId] = useState(null);
@@ -132,10 +134,7 @@ const UserComment = ({ comment }) => {
                 withBatal
               />
             ) : (
-              <div
-                dangerouslySetInnerHTML={{ __html: comment?.html }}
-                style={{ marginBottom: 16 }}
-              />
+              <ReactMarkdownCustom>{comment?.comment}</ReactMarkdownCustom>
             )}
           </>
         }
@@ -182,20 +181,17 @@ function SocmedComments({ post, id }) {
   return (
     <Row>
       <Col md={16}>
-        <Comment
-          content={
-            <div
-              dangerouslySetInnerHTML={{ __html: post?.html }}
-              style={{ marginBottom: 16 }}
-            />
-          }
-          author={post?.user?.username}
-          avatar={<Avatar src={post?.user?.image} />}
-          datetime={post?.created_at}
-        />
-        <Divider />
-        <SocmedCreateComment />
-        <UserComments postId={id} />
+        <Card>
+          <Comment
+            content={<ReactMarkdownCustom>{post?.content}</ReactMarkdownCustom>}
+            author={post?.user?.username}
+            avatar={<Avatar src={post?.user?.image} />}
+            datetime={post?.created_at}
+          />
+          <Divider />
+          <SocmedCreateComment />
+          <UserComments postId={id} />
+        </Card>
       </Col>
     </Row>
   );

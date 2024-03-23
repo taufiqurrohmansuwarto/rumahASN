@@ -50,7 +50,6 @@ const ASNUpdateDetail = () => {
       <PageContainer
         title="ASN Connect"
         subTitle="Berjejaring, Berkolaborasi, Berinovasi Bersama ASN Connect"
-        content="Detail Postingan"
         onBack={handleBack}
         loading={isLoading}
       >
