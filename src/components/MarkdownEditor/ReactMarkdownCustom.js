@@ -6,6 +6,9 @@ import remarkBreaks from "remark-breaks";
 
 function ReactMarkdownCustom({ children }) {
   const components = {
+    a({ node, ...props }) {
+      return <a {...props} target="_blank" />;
+    },
     img({ node, ...props }) {
       return <Image height={200} alt={props.alt || "Image"} {...props} />;
     },
