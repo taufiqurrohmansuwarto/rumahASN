@@ -399,7 +399,6 @@ const allWebinars = async (req, res) => {
     }
 
     const result = await query.page(page - 1, limit);
-    console.log(result.total);
 
     let promises = [];
 
