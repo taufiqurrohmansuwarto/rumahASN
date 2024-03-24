@@ -1,6 +1,8 @@
 import {
   getRwAnak,
   getRwDiklat,
+  getRwJabDokter,
+  getRwJabGuru,
   getRwPangkat,
   getRwPasangan,
   getRwPendidikanMaster,
@@ -320,6 +322,30 @@ export const rwDiklatMasterByNip = async (req, res) => {
   }
 };
 
+export const rwJabDokterByNip = async (req, res) => {
+  try {
+    const { fetcher } = req;
+    const { nip } = req.query;
+    const result = await getRwJabDokter(fetcher, nip);
+    res.json(result?.data);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ code: 500, message: "Internal Server Error" });
+  }
+};
+
+export const rwJabGuruByNip = async (req, res) => {
+  try {
+    const { fetcher } = req;
+    const { nip } = req.query;
+    const result = await getRwJabGuru(fetcher, nip);
+    res.json(result?.data);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ code: 500, message: "Internal Server Error" });
+  }
+};
+
 export const rwPasanganMasterByNip = async (req, res) => {
   try {
     const { fetcher } = req;
@@ -408,4 +434,7 @@ module.exports = {
   rwPangkatMaster,
   rwPasanganMasterByNip,
   rwAnakMasterByNip,
+
+  rwJabDokterByNip,
+  rwJabGuruByNip,
 };
