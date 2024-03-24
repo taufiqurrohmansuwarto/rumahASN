@@ -19,6 +19,7 @@ import {
   Col,
   Comment,
   Dropdown,
+  Image,
   List,
   Modal,
   Row,
@@ -32,6 +33,7 @@ import { useRouter } from "next/router";
 import { useState } from "react";
 import SocmedPostsFilter from "./SocmedPostsFilter";
 import ReactMarkdownCustom from "../MarkdownEditor/ReactMarkdownCustom";
+import Link from "next/link";
 
 const uploadFile = async (file) => {
   try {
@@ -132,6 +134,7 @@ const Post = ({ post, currentUser }) => {
   const queryClient = useQueryClient();
 
   const [selectedId, setSelectedId] = useState(null);
+  const [open, setOpen] = useState(false);
 
   const handleEdit = () => {
     setSelectedId(post?.id);
@@ -265,11 +268,31 @@ const Post = ({ post, currentUser }) => {
         <Comment
           author={
             <Stack>
-              <span>{post?.user?.username}</span>
+              <Link href={`/users/${post?.user?.custom_id}`}>
+                <a
+                  style={{
+                    color: "green",
+                  }}
+                >
+                  {post?.user?.username}
+                </a>
+              </Link>
             </Stack>
           }
           actions={actions}
-          avatar={<Avatar src={post?.user?.image} />}
+          avatar={
+            <>
+              <Avatar src={post?.user?.image} />
+              {/* <Modal
+                footer={null}
+                open={open}
+                onCancel={() => setOpen(false)}
+                title={post?.user?.username}
+              >
+                <Image height={80} src={post?.user?.image} alt="test" />
+              </Modal> */}
+            </>
+          }
           datetime={
             <Tooltip
               title={moment(post?.created_at).format("DD-MM-YYYY HH:mm:ss")}
