@@ -103,3 +103,11 @@ export const rwPasanganByNip = (nip) => {
 export const rwPindahByNip = (nip) => {
   return api.get(`/admin/${nip}/rw-pindah`).then((res) => res.data);
 };
+
+export const rwJabGuruByNip = (nip) => {
+  return api.get(`/admin/${nip}/rw-jab-guru`).then((res) => res.data);
+};
+
+export const rwJabDokterByNip = (nip) => {
+  return api.get(`/admin/${nip}/rw-jab-dokter`).then((res) => res.data);
+};

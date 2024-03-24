@@ -85,3 +85,25 @@ module.exports.getRwDiklat = async (fetcher, nip) => {
     console.log(error);
   }
 };
+
+module.exports.getRwJabDokter = async (fetcher, nip) => {
+  try {
+    const result = await fetcher.get(
+      `/master-ws/operator/employees/${nip}/rw-jab-dokter`
+    );
+    return result;
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+module.exports.getRwJabGuru = async (fetcher, nip) => {
+  try {
+    const result = await fetcher.get(
+      `/master-ws/operator/employees/${nip}/rw-jab-guru`
+    );
+    return result;
+  } catch (error) {
+    console.log(error);
+  }
+};
