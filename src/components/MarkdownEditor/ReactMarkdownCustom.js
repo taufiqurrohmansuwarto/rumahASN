@@ -3,6 +3,51 @@ import { Image } from "antd";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import remarkBreaks from "remark-breaks";
+import { visit } from "unist-util-visit";
+
+const remarkMentions = () => {
+  return (tree) => {
+    visit(tree, "text", (node, index, parent) => {
+      if (!node.value.includes("@")) return; // No mentions, skip
+
+      const matches = node.value.match(/@\w+/g);
+      if (matches) {
+        const newNodes = [];
+        let lastIndex = 0;
+
+        matches.forEach((match) => {
+          const startPos = node.value.indexOf(match, lastIndex);
+          const endPos = startPos + match.length;
+
+          // Text before the mention
+          if (startPos > lastIndex) {
+            newNodes.push({
+              type: "text",
+              value: node.value.slice(lastIndex, startPos),
+            });
+          }
+
+          // The mention link
+          newNodes.push({
+            type: "link",
+            url: `/helpdesk/user/${match.slice(1)}`, // Assuming username without '@'
+            title: null,
+            children: [{ type: "text", value: match }],
+          });
+
+          lastIndex = endPos;
+        });
+
+        // Text after the last mention
+        if (lastIndex < node.value.length) {
+          newNodes.push({ type: "text", value: node.value.slice(lastIndex) });
+        }
+
+        parent.children.splice(index, 1, ...newNodes);
+      }
+    });
+  };
+};
 
 function ReactMarkdownCustom({ children }) {
   const components = {
@@ -66,7 +111,7 @@ function ReactMarkdownCustom({ children }) {
 
   return (
     <ReactMarkdown
-      remarkPlugins={[remarkGfm, remarkBreaks]}
+      remarkPlugins={[remarkGfm, remarkBreaks, remarkMentions]}
       components={components}
     >
       {custom(children)}

@@ -103,11 +103,16 @@ const CreateModal = ({ open, onCancel, receiver }) => {
 };
 
 const DetailInformation = ({ user }) => {
+  const router = useRouter();
   const { data, status } = useSession();
 
   const [open, setOpen] = useState();
   const handleCancel = () => setOpen(false);
   const handleOpen = () => setOpen(true);
+
+  const gotoDetailPegawai = () => {
+    router.push(`/apps-managements/integrasi/siasn/${user?.employee_number}`);
+  };
 
   if (user?.group !== "GOOGLE") {
     return (
@@ -135,11 +140,30 @@ const DetailInformation = ({ user }) => {
             {user?.info?.perangkat_daerah?.detail}
           </Descriptions.Item>
         </Descriptions>
-        {user?.custom_id !== data?.user?.id && (
-          <Button onClick={handleOpen} icon={<MailOutlined />} type="primary">
-            Kirim Pesan
-          </Button>
-        )}
+        <Space>
+          {user?.custom_id !== data?.user?.id && (
+            <>
+              <Button
+                onClick={handleOpen}
+                icon={<MailOutlined />}
+                type="primary"
+              >
+                Kirim Pesan
+              </Button>
+            </>
+          )}
+          <>
+            {(data?.user?.current_role === "admin" ||
+              (data?.user?.current_role === "agent" &&
+                user?.group === "MASTER")) && (
+              <>
+                <Button onClick={gotoDetailPegawai} type="primary">
+                  Data Pegawai
+                </Button>
+              </>
+            )}
+          </>
+        </Space>
         {(user?.current_role === "admin" || user?.current_role === "agent") && (
           <>
             <Divider />
@@ -261,17 +285,10 @@ const Users = () => {
         subTitle="Detail User"
       >
         <Card>
-          <Tabs defaultActiveKey="1">
+          <Tabs defaultActiveKey="1" type="card">
             <Tabs.TabPane tab="Informasi" key="1">
               <DetailInformation user={data} />
             </Tabs.TabPane>
-            <>
-              {currentUser?.user?.current_role && data?.group === "MASTER" && (
-                <Tabs.TabPane tab="Peremajaan Data" key="2">
-                  <SiasnTab nip={data?.employee_number} />
-                </Tabs.TabPane>
-              )}
-            </>
             <>
               {currentUser?.user?.current_role === "admin" && (
                 <Tabs.TabPane tab="Daftar Pertanyaan" key="3">

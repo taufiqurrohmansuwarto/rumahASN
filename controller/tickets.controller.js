@@ -10,7 +10,7 @@ module.exports.userTicket = async (req, res) => {
       .select("id", "title", "created_at")
       .andWhere("requester", userId)
       .page(page - 1, limit)
-      .orderBy("id", "desc");
+      .orderBy("created_at", "desc");
 
     const data = {
       page,
