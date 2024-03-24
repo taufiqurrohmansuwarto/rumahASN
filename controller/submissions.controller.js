@@ -1,6 +1,22 @@
 const SubmissionsReferences = require("../models/submissions-references.model");
 const SubmissionPics = require("../models/submissions-pics.model");
 
+const createSubmissions = async (req, res) => {
+  try {
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: error.message });
+  }
+};
+
+const sendSubmissions = async (req, res) => {
+  try {
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: error.message });
+  }
+};
+
 const createSubmissionPersonInCharge = async (req, res) => {
   try {
     const { body } = req;
@@ -153,4 +169,8 @@ module.exports = {
   updateSubmissionPersonInCharge,
   detailSubmissionPersonInCharge,
   deleteSubmissionPersonInCharge,
+
+  // user
+  createSubmissions,
+  sendSubmissions,
 };
