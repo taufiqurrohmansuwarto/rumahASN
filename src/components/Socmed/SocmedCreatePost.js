@@ -6,6 +6,58 @@ import { Avatar, Comment } from "antd";
 import { useSession } from "next-auth/react";
 import { useState } from "react";
 
+const emojis = [
+  { name: "+1", character: "👍" },
+  { name: "-1", character: "👎" },
+  { name: "heart", character: "❤️" },
+  { name: "wave", character: "👋" },
+  { name: "raised_hands", character: "🙌" },
+  { name: "pray", character: "🙏" },
+  { name: "clap", character: "👏" },
+  { name: "ok_hand", character: "👌" },
+  { name: "point_up", character: "☝️" },
+  { name: "point_down", character: "👇" },
+  { name: "point_left", character: "👈" },
+  { name: "point_right", character: "👉" },
+  { name: "raised_hand", character: "✋" },
+  { name: "thumbsup", character: "👍" },
+  { name: "thumbsdown", character: "👎" },
+];
+
+const references = [
+  {
+    id: "1",
+    titleText: "Add logging functionality",
+    titleHtml: "Add logging functionality",
+  },
+  {
+    id: "2",
+    titleText: "Error: `Failed to install` when installing",
+    titleHtml: "Error: <code>Failed to install</code> when installing",
+  },
+  {
+    id: "3",
+    titleText: "Add error-handling functionality",
+    titleHtml: "Add error-handling functionality",
+  },
+];
+
+const mentionables = [
+  { identifier: "monalisa", description: "Monalisa Octocat" },
+  { identifier: "github", description: "GitHub" },
+  { identifier: "primer", description: "Primer" },
+];
+
+const savedReplies = [
+  { name: "Duplicate", content: "Duplicate of #" },
+  {
+    name: "Welcome",
+    content:
+      "Welcome to the project!\n\nPlease be sure to read the contributor guidelines.",
+  },
+  { name: "Thanks", content: "Thanks for your contribution!" },
+];
+
 const uploadFile = async (file) => {
   try {
     const formData = new FormData();
@@ -78,8 +130,10 @@ function SocmedCreatePost() {
             onChange={setValue}
             onRenderPreview={renderMarkdown}
             onUploadFile={uploadFile}
-            savedReplies={false}
-            mentionSuggestions={false}
+            emojiSuggestions={null}
+            referenceSuggestions={null}
+            mentionSuggestions={null}
+            savedReplies={null}
           >
             <MarkdownEditor.Actions>
               <MarkdownEditor.ActionButton

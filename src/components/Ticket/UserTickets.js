@@ -4,6 +4,7 @@ import { Table } from "antd";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { useState } from "react";
+import moment from "moment";
 
 function UserTickets() {
   const router = useRouter();
@@ -36,13 +37,17 @@ function UserTickets() {
     },
     {
       title: "Tgl. Dibuat",
-      dataIndex: "created_at",
+      key: "created_at",
+      render: (_, record) => {
+        return moment(record?.created_at).format("DD-MM-YYYY HH:mm:ss");
+      },
     },
   ];
 
   return (
     <div>
       <Table
+        loading={isLoading}
         pagination={{
           pageSize: query?.query?.limit,
           current: query?.query?.page,
