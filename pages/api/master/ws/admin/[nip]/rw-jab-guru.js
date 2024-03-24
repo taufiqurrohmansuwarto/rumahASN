@@ -1,9 +1,12 @@
-import { rwDiklatMasterByNip } from "@/controller/master.controller";
+import {
+  rwDiklatMasterByNip,
+  rwJabGuruByNip,
+} from "@/controller/master.controller";
 import adminFasilitatorMiddleware from "@/middleware/admin-fasilitator.middleware";
 import auth from "@/middleware/auth.middleware";
 import { createRouter } from "next-connect";
 const router = createRouter();
 
-router.use(auth).use(adminFasilitatorMiddleware).get(rwDiklatMasterByNip);
+router.use(auth).use(adminFasilitatorMiddleware).get(rwJabGuruByNip);
 
 export default router.handler();

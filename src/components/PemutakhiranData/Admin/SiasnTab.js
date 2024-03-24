@@ -1,7 +1,11 @@
 import { Grid, Tabs } from "antd";
+import CompareDataDiklatByNip from "../CompareDataDiklatByNip";
 import CompareAngkaKreditByNip from "./CompareAngkaKreditByNip";
 import CompareDataUtamaByNip from "./CompareDataUtamaByNip";
+import CompareHukdisByNip from "./CompareHukdisByNip";
 import CompareJabatanByNip from "./CompareJabatanByNip";
+import CompareJabatanDokterByNip from "./CompareJabatanDokterByNip";
+import CompareJabatanGuruByNip from "./CompareJabatanGuruByNip";
 import CompareKedudukanHukumByNip from "./CompareKedudukanHukumByNip";
 import CompareKeluargaByNip from "./CompareKeluargaByNip";
 import CompareMasaKerjaByNip from "./CompareMasaKerjaByNip";
@@ -12,8 +16,6 @@ import ComparePindahInstansiByNip from "./ComparePindahInstansiByNip";
 import ComparePnsUnorByNip from "./ComparePnsUnorByNip";
 import ComparePwkByNip from "./ComparePwkByNip";
 import CompareSKP22ByNip from "./CompareSKP22ByNip";
-import CompareHukdisByNip from "./CompareHukdisByNip";
-import CompareDataDiklatByNip from "../CompareDataDiklatByNip";
 import PencantumanGelarByNip from "./PencantumanGelarByNip";
 
 function SiasnTab({ nip }) {
@@ -29,6 +31,12 @@ function SiasnTab({ nip }) {
       </Tabs.TabPane>
       <Tabs.TabPane tab="Jabatan" key="2">
         <CompareJabatanByNip nip={nip} />
+      </Tabs.TabPane>
+      <Tabs.TabPane tab="Jabatan Guru" key="jabatan_guru">
+        <CompareJabatanGuruByNip nip={nip} />
+      </Tabs.TabPane>
+      <Tabs.TabPane tab="Jabatan Dokter" key="jabatan_dokter">
+        <CompareJabatanDokterByNip nip={nip} />
       </Tabs.TabPane>
       <Tabs.TabPane tab="Pangkat & Golongan" key="6">
         <ComparePangkatByNip nip={nip} />

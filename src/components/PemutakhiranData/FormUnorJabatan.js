@@ -9,6 +9,7 @@ import {
   Modal,
   Row,
   Select,
+  Space,
   Upload,
   message,
 } from "antd";
@@ -28,6 +29,8 @@ import {
 import axios from "axios";
 import { InboxOutlined } from "@ant-design/icons";
 import { useRouter } from "next/router";
+import DetailJabatanGuruDokter from "./Admin/DetailJabatanGuruDokter";
+import { Text } from "@mantine/core";
 
 export const API_URL = "https://apimws.bkn.go.id:8243/apisiasn/1.0";
 
@@ -137,7 +140,12 @@ function ModalFormJabatanUnor({ open, handleClose, handleOk, isLoading }) {
   return (
     <Modal
       centered
-      title="Tambah Jabatan Unor"
+      title={
+        <Space>
+          <Text>Tambah Jabatan</Text>
+          <DetailJabatanGuruDokter />
+        </Space>
+      }
       width={800}
       confirmLoading={isLoading}
       onOk={handleFinish}
