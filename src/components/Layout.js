@@ -7,7 +7,6 @@ import {
   BookOutlined,
   GroupOutlined,
   LogoutOutlined,
-  MailOutlined,
   ProfileOutlined,
   QuestionCircleFilled,
   SolutionOutlined,
@@ -127,21 +126,30 @@ const changeRoutes = (user) => {
     if (userPns) {
       userRoutes.routes.push(
         {
+          path: "/pemutakhiran-data/komparasi",
+          name: "Integrasi SIASN",
+          icon: <ApiOutlined />,
+        },
+        {
           path: "/submissions",
           name: "Usulan",
-          icon: <MailOutlined />,
+          icon: <SolutionOutlined />,
           routes: [
             {
               path: "/submissions/all",
               name: "Semua Usulan",
             },
+            {
+              path: "/submissions/input-usulan",
+              name: "Status Input Usul",
+            },
+            {
+              path: "/submissions/kirim-usulan",
+              name: "Kirim Usulan",
+            },
           ],
-        },
-        {
-          path: "/pemutakhiran-data/komparasi",
-          name: "Integrasi SIASN",
-          icon: <ApiOutlined />,
         }
+
         // {
         //   path: "/tte",
         //   name: "Tanda Tangan Digital",

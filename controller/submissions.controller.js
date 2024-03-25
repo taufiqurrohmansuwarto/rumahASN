@@ -30,6 +30,22 @@ const sendSubmissions = async (req, res) => {
   }
 };
 
+const deleteSubmission = async (req, res) => {
+  try {
+    const { submissionId } = req?.query;
+    const { customId } = req?.user;
+
+    await SubmissionsReferences.query()
+      .deleteById(submissionId)
+      .andWhere("user_id", customId)
+      .andWhere("status", "input_usul");
+    res.json({ message: "Submission deleted successfully" });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: error.message });
+  }
+};
+
 const createSubmissionPersonInCharge = async (req, res) => {
   try {
     const { body } = req;
@@ -187,4 +203,5 @@ module.exports = {
   createSubmissions,
   sendSubmissions,
   detailSubmission,
+  deleteSubmission,
 };
