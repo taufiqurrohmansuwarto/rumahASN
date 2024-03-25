@@ -877,3 +877,21 @@ export const daftarStruktural = [
     level_kompetensi_jabatan: "",
   },
 ];
+
+export const dokumenMaster = [
+  {
+    id: "pangkat",
+    name: "pangkat",
+  },
+  {
+    id: "pendidiikan",
+    name: "pendidikan",
+  },
+];
+
+export const additionalData = [
+  {
+    id: "surat-pengantar",
+    name: "Surat Pengantar",
+  },
+];

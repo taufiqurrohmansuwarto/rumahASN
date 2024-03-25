@@ -7,6 +7,7 @@ import {
   BookOutlined,
   GroupOutlined,
   LogoutOutlined,
+  MailOutlined,
   ProfileOutlined,
   QuestionCircleFilled,
   SolutionOutlined,
@@ -125,6 +126,17 @@ const changeRoutes = (user) => {
 
     if (userPns) {
       userRoutes.routes.push(
+        {
+          path: "/submissions",
+          name: "Usulan",
+          icon: <MailOutlined />,
+          routes: [
+            {
+              path: "/submissions/all",
+              name: "Semua Usulan",
+            },
+          ],
+        },
         {
           path: "/pemutakhiran-data/komparasi",
           name: "Integrasi SIASN",
