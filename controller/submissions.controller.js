@@ -3,6 +3,19 @@ const SubmissionPics = require("../models/submissions-pics.model");
 
 const createSubmissions = async (req, res) => {
   try {
+    const { customId } = req?.user;
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: error.message });
+  }
+};
+
+const detailSubmission = async (req, res) => {
+  try {
+    const { submissionId } = req?.query;
+    const result = await SubmissionsReferences.query().findById(submissionId);
+
+    res.json(result);
   } catch (error) {
     console.log(error);
     res.status(500).json({ error: error.message });
@@ -173,4 +186,5 @@ module.exports = {
   // user
   createSubmissions,
   sendSubmissions,
+  detailSubmission,
 };
