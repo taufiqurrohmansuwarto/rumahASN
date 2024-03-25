@@ -68,7 +68,7 @@ const posts = async (req, res) => {
     const results = result?.results.map((item) => {
       return {
         ...item,
-        html: item?.content ? parseMarkdown(item?.content) : null,
+        html: item?.content ? parseMarkdown(item?.content) : "",
       };
     });
 
@@ -148,7 +148,7 @@ const detailPost = async (req, res) => {
 
     const data = {
       ...result,
-      html: result?.content ? parseMarkdown(result?.content) : null,
+      html: result?.content ? parseMarkdown(result?.content) : "",
     };
 
     res.json(data);
@@ -262,7 +262,7 @@ const comments = async (req, res) => {
     const hasil = result.map((item) => {
       return {
         ...item,
-        html: item?.comment ? parseMarkdown(item?.comment) : null,
+        html: item?.comment ? parseMarkdown(item?.comment) : "",
       };
     });
 
