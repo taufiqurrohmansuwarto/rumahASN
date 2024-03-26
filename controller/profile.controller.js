@@ -115,7 +115,8 @@ module.exports.detailUserProfile = async (req, res) => {
         .select("stars", "requester_comment", "requester", "id")
         .withGraphFetched("customer(simpleSelect)")
         .where("assignee", id)
-        .andWhereNot("stars", null);
+        .andWhereNot("stars", null)
+        .orderBy("created_at", "desc");
 
       result = {
         ...result,
