@@ -192,6 +192,7 @@ const DetailInformation = ({ user }) => {
               </Descriptions.Item>
             </Descriptions>
             <Divider />
+            {/* todo betulkan ini karena jelek */}
             <List
               rowKey={(row) => row?.id}
               renderItem={(item) => (
