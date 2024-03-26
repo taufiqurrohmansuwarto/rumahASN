@@ -4,7 +4,7 @@ import PageContainer from "@/components/PageContainer";
 import SiasnTab from "@/components/PemutakhiranData/Admin/SiasnTab";
 import { patchAnomali2023 } from "@/services/anomali.services";
 import { dataUtamaMasterByNip } from "@/services/master.services";
-import { getPnsAllByNip } from "@/services/siasn-services";
+import { dataUtamSIASNByNip, getPnsAllByNip } from "@/services/siasn-services";
 import { Alert, Stack } from "@mantine/core";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
@@ -20,6 +20,7 @@ import {
   Skeleton,
   Space,
   Tag,
+  Tooltip,
   Typography,
   message,
 } from "antd";
@@ -110,7 +111,14 @@ const ChangeStatusAnomali = ({ data, open, onCancel }) => {
   );
 };
 
-const EmployeeBio = ({ data, loading, isLoadingDataPns, dataPnsAll }) => {
+const EmployeeBio = ({
+  data,
+  loading,
+  isLoadingDataPns,
+  dataPnsAll,
+  siasn,
+  loadingSiasn,
+}) => {
   const [open, setOpen] = useState(false);
   const [anomali, setAnomali] = useState(null);
 
@@ -134,11 +142,16 @@ const EmployeeBio = ({ data, loading, isLoadingDataPns, dataPnsAll }) => {
         <Col md={10} sm={13}>
           <Space direction="vertical">
             <Space size="small">
-              <Tag color={data?.status === "Aktif" ? "green" : "red"}>
-                {data?.status === "Aktif"
-                  ? "Pegawai Aktif"
-                  : "Pegawai Non Aktif"}
-              </Tag>
+              <Tooltip title="Status Pegawai dari SIMASTER">
+                <Tag color={data?.status === "Aktif" ? "green" : "red"}>
+                  {data?.status === "Aktif"
+                    ? "Pegawai Aktif"
+                    : "Pegawai Non Aktif"}
+                </Tag>
+              </Tooltip>
+              <Tooltip title="Status Pegawai dari SIASN">
+                <Tag color="yellow">{siasn?.kedudukanPnsNama}</Tag>
+              </Tooltip>
               {data?.anomali?.length > 0 && (
                 <>
                   {data?.anomali?.map((d) => (
@@ -207,6 +220,11 @@ const EmployeeNumberFasilitator = () => {
     () => getPnsAllByNip(nip)
   );
 
+  const { data: siasn, isLoading: loadingSiasn } = useQuery(
+    ["data-utama-siasn", nip],
+    () => dataUtamSIASNByNip(nip)
+  );
+
   return (
     <>
       <Head>
@@ -223,6 +241,8 @@ const EmployeeNumberFasilitator = () => {
             <>
               <Stack>
                 <EmployeeBio
+                  siasn={siasn}
+                  loadingSiasn={loadingSiasn}
                   isLoadingDataPns={isLoadingDataPns}
                   dataPnsAll={dataPnsAll}
                   data={dataSimaster}

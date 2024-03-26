@@ -4,7 +4,8 @@ import {
   updateDataUtamaSIASN,
 } from "@/services/siasn-services";
 import { compareText, komparasiGelar } from "@/utils/client-utils";
-import { Image, Stack, Text } from "@mantine/core";
+import { Alert, Image, Stack, Text } from "@mantine/core";
+import { IconAlertCircle } from "@tabler/icons";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Button,
@@ -33,6 +34,7 @@ const dataTabel = (siasn, simaster) => {
       label: "Nama",
       result: compareText(siasn?.nama, simaster?.nama),
     },
+
     {
       id: "nip",
       siasn: siasn?.nipBaru,
@@ -46,6 +48,16 @@ const dataTabel = (siasn, simaster) => {
       master: simaster?.tgl_lahir,
       label: "Tanggal Lahir",
       result: compareText(siasn?.tglLahir, simaster?.tgl_lahir),
+    },
+    {
+      id: "jenis_kelamin",
+      siasn: siasn?.jenisKelamin === "F" ? "Perempuan" : "Laki-laki",
+      master: simaster?.jk === "P" ? "Perempuan" : "Laki-laki",
+      label: "Jenis Kelamin",
+      result: compareText(
+        siasn?.jenisKelamin === "F" ? "Perempuan" : "Laki-laki",
+        simaster?.jk === "P" ? "Perempuan" : "Laki-laki"
+      ),
     },
     {
       id: "gelar_depan",
@@ -317,12 +329,19 @@ function CompareDataUtama() {
             ]}
           >
             <Col md={24}>
-              <TableAntd
-                rowKey={(row) => row?.id}
-                columns={columns}
-                dataSource={dataTabel(data, dataSimaster)}
-                pagination={false}
-              />
+              <Stack>
+                <Alert icon={<IconAlertCircle />} title="Perhatian" color="red">
+                  Jika ada perbedaan NIP, Nama, dan Tanggal Lahir antara SIASN
+                  dan SIMASTER silahkan melakukan perbaikan elemen tersebut ke
+                  BKD Provinsi Jawa Timur
+                </Alert>
+                <TableAntd
+                  rowKey={(row) => row?.id}
+                  columns={columns}
+                  dataSource={dataTabel(data, dataSimaster)}
+                  pagination={false}
+                />
+              </Stack>
             </Col>
           </Row>
         </Skeleton>

@@ -9,7 +9,7 @@ import {
   createStyles,
   rem,
 } from "@mantine/core";
-import { Grid, Space, Typography } from "antd";
+import { Grid, Space, Tag, Typography } from "antd";
 import { useRouter } from "next/router";
 import AnomaliUser from "./AnomaliUser";
 import IPAsn from "../LayananSIASN/IPAsn";
@@ -97,7 +97,15 @@ export function MenuMySAPK({ dataUtama }) {
             <Typography.Text type="secondary">
               {dataUtama?.instansiIndukNama}
             </Typography.Text>
-            <IPAsn tahun={2023} />
+            <Space size="small">
+              <IPAsn tahun={2023} />
+              <Tag color="yellow">{dataUtama?.kedudukanPnsNama}</Tag>
+              <Tag color={dataUtama?.validNik ? "green" : "red"}>
+                {dataUtama?.validNik
+                  ? "NIK Terverifikasi"
+                  : "NIK Belum Terverifikasi"}
+              </Tag>
+            </Space>
             <AnomaliUser />
           </Space>
         </Card>

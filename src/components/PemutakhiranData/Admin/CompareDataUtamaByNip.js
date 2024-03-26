@@ -1,7 +1,8 @@
 import { dataUtamaMasterByNip } from "@/services/master.services";
 import { dataUtamSIASNByNip } from "@/services/siasn-services";
 import { compareText, komparasiGelar } from "@/utils/client-utils";
-import { Stack, Text } from "@mantine/core";
+import { Alert, Stack, Text } from "@mantine/core";
+import { IconAlertCircle } from "@tabler/icons";
 import { useQuery } from "@tanstack/react-query";
 import {
   Card,
@@ -35,6 +36,16 @@ const dataTabel = (siasn, simaster) => {
       master: simaster?.tgl_lahir,
       label: "Tanggal Lahir",
       result: compareText(siasn?.tglLahir, simaster?.tgl_lahir),
+    },
+    {
+      id: "jenis_kelamin",
+      siasn: siasn?.jenisKelamin === "F" ? "Perempuan" : "Laki-laki",
+      master: simaster?.jk === "P" ? "Perempuan" : "Laki-laki",
+      label: "Jenis Kelamin",
+      result: compareText(
+        siasn?.jenisKelamin === "F" ? "Perempuan" : "Laki-laki",
+        simaster?.jk === "P" ? "Perempuan" : "Laki-laki"
+      ),
     },
     {
       id: "gelar_depan",
@@ -203,11 +214,22 @@ function CompareDataUtamaByNip({ nip }) {
                     {data?.kedudukanPnsNama}
                   </Tag>
                 </Tooltip>
-                <TableAntd
-                  columns={columns}
-                  dataSource={dataTabel(data, dataSimaster)}
-                  pagination={false}
-                />
+                <Stack>
+                  <Alert
+                    icon={<IconAlertCircle />}
+                    title="Perhatian"
+                    color="red"
+                  >
+                    Jika ada perbedaan NIP, Nama, dan Tanggal Lahir antara SIASN
+                    dan SIMASTER silahkan melakukan perbaikan elemen tersebut ke
+                    BKD Provinsi Jawa Timur
+                  </Alert>
+                  <TableAntd
+                    columns={columns}
+                    dataSource={dataTabel(data, dataSimaster)}
+                    pagination={false}
+                  />
+                </Stack>
               </Card>
             </Col>
           </Row>
