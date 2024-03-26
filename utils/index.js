@@ -86,6 +86,41 @@ export const uploadFileWebinar = (mc, fileBuffer, filename, size, mimetype) => {
   });
 };
 
+export const checkFileMinioSK = (mc, filename) => {
+  return new Promise((resolve, reject) => {
+    mc.statObject("bkd", filename, function (err, stat) {
+      if (err) {
+        if (err.code === "NotFound") {
+          resolve(null);
+        }
+      } else {
+        resolve(stat);
+      }
+    });
+  });
+};
+
+export const downloadFileSK = (mc, filename) => {
+  return new Promise((resolve, reject) => {
+    mc.getObject("bkd", `${filename}`, function (err, dataStream) {
+      if (err) {
+        reject(err);
+        console.log(err);
+      } else {
+        let fileBuffer = [];
+        dataStream.on("data", function (chunk) {
+          fileBuffer.push(chunk);
+        });
+        dataStream.on("end", function () {
+          const chunks = Buffer.concat(fileBuffer);
+          const base64 = Buffer.from(chunks).toString("base64");
+          resolve(base64);
+        });
+      }
+    });
+  });
+};
+
 export const deleteFileMinio = (mc, filename) => {
   return new Promise((resolve, reject) => {
     mc.removeObject("public", `${filename}`, function (err, info) {
