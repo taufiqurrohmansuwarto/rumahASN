@@ -4,6 +4,7 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import remarkBreaks from "remark-breaks";
 import { visit } from "unist-util-visit";
+import rehypeRaw from "rehype-raw";
 
 const remarkMentions = () => {
   return (tree) => {
@@ -112,6 +113,7 @@ function ReactMarkdownCustom({ children }) {
   return (
     <ReactMarkdown
       remarkPlugins={[remarkGfm, remarkBreaks, remarkMentions]}
+      rehypePlugins={[rehypeRaw]}
       components={components}
     >
       {custom(children)}
