@@ -1144,10 +1144,48 @@ const getRwPenghargaan = async (req, res) => {
   }
 };
 
+const getRwPenghargaanByNip = async (req, res) => {
+  try {
+    const { siasnRequest: request } = req;
+    const { nip } = req?.query;
+
+    const result = await riwayatPenghargaan(request, nip);
+    const data = result?.data?.data;
+
+    if (data === "Data tidak ditemukan") {
+      res.json([]);
+    } else {
+      res.json(data);
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ code: 500, message: "Internal Server Error" });
+  }
+};
+
 const getRwCltn = async (req, res) => {
   try {
     const { siasnRequest: request } = req;
     const { employee_number: nip } = req?.user;
+
+    const result = await riwayatCtln(request, nip);
+    const data = result?.data?.data;
+
+    if (data === "Data tidak ditemukan") {
+      res.json([]);
+    } else {
+      res.json(data);
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ code: 500, message: "Internal Server Error" });
+  }
+};
+
+const getRwCltnByNip = async (req, res) => {
+  try {
+    const { siasnRequest: request } = req;
+    const { nip } = req?.query;
 
     const result = await riwayatCtln(request, nip);
     const data = result?.data?.data;
@@ -1340,4 +1378,6 @@ module.exports = {
 
   postUnorJabatan,
   postUnorJabatanByNip,
+  getRwCltnByNip,
+  getRwPenghargaanByNip,
 };

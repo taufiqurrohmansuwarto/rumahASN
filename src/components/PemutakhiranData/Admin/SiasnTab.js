@@ -1,6 +1,8 @@
 import { Grid, Tabs } from "antd";
 import CompareDataDiklatByNip from "../CompareDataDiklatByNip";
+import ComparePenghargaanByNip from "../ComparePenghargaanByNip";
 import CompareAngkaKreditByNip from "./CompareAngkaKreditByNip";
+import CompareCLTNByNip from "./CompareCLTNByNip";
 import CompareDataUtamaByNip from "./CompareDataUtamaByNip";
 import CompareHukdisByNip from "./CompareHukdisByNip";
 import CompareJabatanByNip from "./CompareJabatanByNip";
@@ -13,10 +15,8 @@ import ComparePangkatByNip from "./ComparePangkatByNip";
 import ComparePemberhentianByNip from "./ComparePemberhentianByNip";
 import ComparePendidikanByNip from "./ComparePendidikanByNip";
 import ComparePindahInstansiByNip from "./ComparePindahInstansiByNip";
-import ComparePnsUnorByNip from "./ComparePnsUnorByNip";
 import ComparePwkByNip from "./ComparePwkByNip";
 import CompareSKP22ByNip from "./CompareSKP22ByNip";
-import PencantumanGelarByNip from "./PencantumanGelarByNip";
 
 function SiasnTab({ nip }) {
   const breakPoint = Grid.useBreakpoint();
@@ -50,9 +50,9 @@ function SiasnTab({ nip }) {
       <Tabs.TabPane tab="Pendidikan" key="5">
         <ComparePendidikanByNip nip={nip} />
       </Tabs.TabPane>
-      <Tabs.TabPane tab="Pencantuman Gelar" key="pencantuman-gelar">
+      {/* <Tabs.TabPane tab="Pencantuman Gelar" key="pencantuman-gelar">
         <PencantumanGelarByNip nip={nip} />
-      </Tabs.TabPane>
+      </Tabs.TabPane> */}
       <Tabs.TabPane tab="Diklat dan Kursus" key="diklat">
         <CompareDataDiklatByNip nip={nip} />
       </Tabs.TabPane>
@@ -77,17 +77,14 @@ function SiasnTab({ nip }) {
       <Tabs.TabPane tab="Hukuman Disiplin" key="hukdis">
         <CompareHukdisByNip nip={nip} />
       </Tabs.TabPane>
-      <Tabs.TabPane tab="PNS Unor" key="pns-unor">
+      {/* <Tabs.TabPane tab="PNS Unor" key="pns-unor">
         <ComparePnsUnorByNip nip={nip} />
-      </Tabs.TabPane>
-      <Tabs.TabPane tab="Cuti" key="cltn">
-        <CompareKedudukanHukumByNip nip={nip} />
-      </Tabs.TabPane>
-      <Tabs.TabPane tab="DP3" key="dp3">
-        <CompareKedudukanHukumByNip nip={nip} />
+      </Tabs.TabPane> */}
+      <Tabs.TabPane tab="CLTN" key="cltn">
+        <CompareCLTNByNip nip={nip} />
       </Tabs.TabPane>
       <Tabs.TabPane tab="Penghargaan" key="penghargaan">
-        <CompareKedudukanHukumByNip nip={nip} />
+        <ComparePenghargaanByNip nip={nip} />
       </Tabs.TabPane>
     </Tabs>
   );

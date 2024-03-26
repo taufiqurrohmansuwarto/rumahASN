@@ -1,4 +1,4 @@
-import { getRwCltnByNip } from "@/controller/siasn.controller";
+import { getRwPenghargaanByNip } from "@/controller/siasn.controller";
 import adminFasilitatorMiddleware from "@/middleware/admin-fasilitator.middleware";
 import auth from "@/middleware/auth.middleware";
 import { siasnMiddleware } from "@/middleware/siasn.middleware";
@@ -9,6 +9,6 @@ router
   .use(auth)
   .use(adminFasilitatorMiddleware)
   .use(siasnMiddleware)
-  .get(getRwCltnByNip);
+  .get(getRwPenghargaanByNip);
 
 export default router.handler();
