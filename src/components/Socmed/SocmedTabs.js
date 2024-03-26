@@ -2,12 +2,13 @@ import { Stack } from "@mantine/core";
 import { Card, Col, Row, Tabs } from "antd";
 import { useRouter } from "next/router";
 import Announcement from "../Announcement";
-import SocmedActivities from "./SocmedActivities";
 import SocmedCreatePost from "./SocmedCreatePost";
 import SocmedMyPosts from "./SocmedMyPosts";
 import SocmedPosts from "./SocmedPosts";
+import useScrollRestoration from "@/hooks/useScrollRestoration";
 
 function SocmedTabs() {
+  useScrollRestoration();
   const router = useRouter();
 
   const handleChangeTab = (key) => {

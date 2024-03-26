@@ -1,9 +1,6 @@
-import {
-  deleteComment,
-  getComments,
-  getPost,
-} from "@/services/socmed.services";
+import { deleteComment, getComments } from "@/services/socmed.services";
 import { MoreOutlined, RetweetOutlined } from "@ant-design/icons";
+import { Stack } from "@mantine/core";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Avatar,
@@ -15,15 +12,16 @@ import {
   List,
   Modal,
   Row,
+  Tooltip,
   message,
 } from "antd";
 import moment from "moment";
 import { useSession } from "next-auth/react";
-import { useRouter } from "next/router";
+import Link from "next/link";
 import { useState } from "react";
+import ReactMarkdownCustom from "../MarkdownEditor/ReactMarkdownCustom";
 import SocmedCreateComment from "./SocmedCreateComment";
 import SocmedEditComment from "./SocmedEditComment";
-import ReactMarkdownCustom from "../MarkdownEditor/ReactMarkdownCustom";
 
 const UserComment = ({ comment }) => {
   const [selectedId, setSelectedId] = useState(null);
@@ -138,8 +136,26 @@ const UserComment = ({ comment }) => {
             )}
           </>
         }
-        datetime={moment(comment?.created_at).fromNow()}
-        author={comment?.user?.username}
+        datetime={
+          <Tooltip
+            title={moment(comment?.created_at).format("DD-MM-YYYY HH:mm:ss")}
+          >
+            {moment(comment?.created_at).fromNow()}
+          </Tooltip>
+        }
+        author={
+          <Stack>
+            <Link href={`/users/${comment?.user?.custom_id}`}>
+              <a
+                style={{
+                  color: "green",
+                }}
+              >
+                {comment?.user?.username}
+              </a>
+            </Link>
+          </Stack>
+        }
       >
         {selectedId === comment?.id && (
           <SocmedCreateComment
@@ -184,9 +200,27 @@ function SocmedComments({ post, id }) {
         <Card>
           <Comment
             content={<ReactMarkdownCustom>{post?.content}</ReactMarkdownCustom>}
-            author={post?.user?.username}
+            author={
+              <Stack>
+                <Link href={`/users/${post?.user?.custom_id}`}>
+                  <a
+                    style={{
+                      color: "green",
+                    }}
+                  >
+                    {post?.user?.username}
+                  </a>
+                </Link>
+              </Stack>
+            }
             avatar={<Avatar src={post?.user?.image} />}
-            datetime={post?.created_at}
+            datetime={
+              <Tooltip
+                title={moment(post?.created_at).format("DD-MM-YYYY HH:mm:ss")}
+              >
+                {moment(post?.created_at).fromNow()}
+              </Tooltip>
+            }
           />
           <Divider />
           <SocmedCreateComment />
