@@ -148,6 +148,21 @@ const changeRoutes = (user) => {
               name: "Kirim Usulan",
             },
           ],
+        },
+        {
+          path: "/berkas",
+          name: "Berkas",
+          icon: <BookOutlined />,
+          routes: [
+            {
+              path: "/berkas/sk-pns",
+              name: "SK PNS",
+            },
+            {
+              path: "/berkas/sk-pppk",
+              name: "SK PPPK",
+            },
+          ],
         }
 
         // {
