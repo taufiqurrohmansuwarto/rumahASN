@@ -10,6 +10,8 @@ import {
   Breadcrumb,
   Button,
   Card,
+  Col,
+  Comment,
   Descriptions,
   Divider,
   Image,
@@ -17,6 +19,7 @@ import {
   List,
   Modal,
   Rate,
+  Row,
   Space,
   Tabs,
   Typography,
@@ -31,6 +34,7 @@ import { useState } from "react";
 import { Stack } from "@mantine/core";
 import SiasnTab from "@/components/PemutakhiranData/Admin/SiasnTab";
 import UserTickets from "@/components/Ticket/UserTickets";
+import moment from "moment";
 
 const CreateModal = ({ open, onCancel, receiver }) => {
   const router = useRouter();
@@ -192,40 +196,35 @@ const DetailInformation = ({ user }) => {
               </Descriptions.Item>
             </Descriptions>
             <Divider />
-            {/* todo betulkan ini karena jelek */}
-            <List
-              rowKey={(row) => row?.id}
-              renderItem={(item) => (
-                <List.Item>
-                  <List.Item.Meta
-                    title={
-                      <Link href={`/users/${item?.customer?.custom_id}`}>
-                        <Typography.Link>
-                          {item?.customer?.username}
-                        </Typography.Link>
-                      </Link>
-                    }
-                    avatar={
-                      <Link href={`/users/${item?.customer?.custom_id}`}>
-                        <Avatar
-                          style={{ cursor: "pointer" }}
-                          src={item?.customer?.image}
-                        />
-                      </Link>
-                    }
-                    description={
-                      <>
-                        <Space>
-                          {item?.requester_comment}
-                          <Rate disabled value={stringToNumber(item?.stars)} />
-                        </Space>
-                      </>
-                    }
-                  />
-                </List.Item>
-              )}
-              dataSource={user?.rating}
-            />
+            <Row>
+              <Col md={10}>
+                <List
+                  rowKey={(row) => row?.id}
+                  renderItem={(item) => (
+                    <>
+                      <Comment
+                        content={
+                          <Space direction="vertical">
+                            <Rate
+                              style={{
+                                fontSize: 16,
+                              }}
+                              disabled
+                              value={stringToNumber(item?.stars)}
+                            />
+                            {item?.requester_comment}
+                          </Space>
+                        }
+                        author={item?.customer?.username}
+                        avatar={item?.customer?.image}
+                        datetime={moment(item?.created_at).format("LL")}
+                      />
+                    </>
+                  )}
+                  dataSource={user?.rating}
+                />
+              </Col>
+            </Row>
           </>
         )}
       </div>

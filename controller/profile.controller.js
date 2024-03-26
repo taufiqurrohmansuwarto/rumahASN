@@ -112,7 +112,7 @@ module.exports.detailUserProfile = async (req, res) => {
         .groupBy("assignee");
 
       const rating = await Ticket.query()
-        .select("stars", "requester_comment", "requester", "id")
+        .select("stars", "requester_comment", "requester", "id", "created_at")
         .withGraphFetched("customer(simpleSelect)")
         .where("assignee", id)
         .andWhereNot("stars", null)
