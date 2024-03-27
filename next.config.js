@@ -7,7 +7,7 @@ const { refreshSealActivationTotp } = require("./utils/esign-utils");
 const isProd = process.env.NODE_ENV === "production";
 
 // cron every 5 seconds with scheduler
-cron.schedule("*/5 * * * * *", async () => {
+cron.schedule("*/10 * * * *", async () => {
   // check id_subscriber and totp_activation_code
   const result = await AppBsreSeal.query().first();
 
