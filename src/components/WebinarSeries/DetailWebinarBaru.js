@@ -25,6 +25,7 @@ import { trim } from "lodash";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import { useState } from "react";
+import ReactMarkdownCustom from "../MarkdownEditor/ReactMarkdownCustom";
 
 const FormGoogleParticipants = ({
   register,
@@ -275,13 +276,9 @@ function DetailWebinarNew({
           <Card>
             <Typography.Title level={4}>{data?.title}</Typography.Title>
             <Divider />
-            <TypographyStylesProvider>
-              <div
-                dangerouslySetInnerHTML={{
-                  __html: data?.description_markdown,
-                }}
-              />
-            </TypographyStylesProvider>
+            <ReactMarkdownCustom>
+              {data?.description_markdown}
+            </ReactMarkdownCustom>
           </Card>
         </Col>
         <Col md={8} xs={24}>

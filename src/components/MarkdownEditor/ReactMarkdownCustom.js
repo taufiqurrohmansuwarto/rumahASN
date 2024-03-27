@@ -112,7 +112,7 @@ function ReactMarkdownCustom({ children }) {
 
   return (
     <ReactMarkdown
-      remarkPlugins={[remarkGfm, remarkBreaks, remarkMentions]}
+      remarkPlugins={[remarkGfm, remarkBreaks]}
       rehypePlugins={[rehypeRaw]}
       components={components}
     >

@@ -42,8 +42,6 @@ const auth = async (req, res, next) => {
         },
       });
 
-      console.log(minioConfig);
-
       req.mc = mc;
       next();
     } else {
