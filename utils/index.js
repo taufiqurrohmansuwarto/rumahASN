@@ -90,6 +90,7 @@ export const checkFileMinioSK = (mc, filename) => {
   return new Promise((resolve, reject) => {
     mc.statObject("bkd", filename, function (err, stat) {
       if (err) {
+        console.log(err);
         if (err.code === "NotFound") {
           resolve(null);
         }
@@ -104,8 +105,8 @@ export const downloadFileSK = (mc, filename) => {
   return new Promise((resolve, reject) => {
     mc.getObject("bkd", `${filename}`, function (err, dataStream) {
       if (err) {
-        reject(err);
         console.log(err);
+        reject(err);
       } else {
         let fileBuffer = [];
         dataStream.on("data", function (chunk) {
