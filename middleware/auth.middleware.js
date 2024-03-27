@@ -11,8 +11,6 @@ const minioConfig = {
   endPoint: process.env.MINIO_ENDPOINT,
 };
 
-console.log(minioConfig);
-
 const mc = new Minio.Client(minioConfig);
 
 const auth = async (req, res, next) => {
@@ -43,6 +41,8 @@ const auth = async (req, res, next) => {
           Authorization: `Bearer ${data?.accessToken}`,
         },
       });
+
+      console.log(minioConfig);
 
       req.mc = mc;
       next();
