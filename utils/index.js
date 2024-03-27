@@ -90,7 +90,6 @@ export const checkFileMinioSK = (mc, filename) => {
   return new Promise((resolve, reject) => {
     mc.statObject("bkd", filename, function (err, stat) {
       if (err) {
-        console.log(err);
         if (err.code === "NotFound") {
           resolve(null);
         } else {
