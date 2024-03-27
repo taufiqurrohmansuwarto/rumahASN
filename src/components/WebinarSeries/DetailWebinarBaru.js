@@ -276,7 +276,9 @@ function DetailWebinarNew({
           <Card>
             <Typography.Title level={4}>{data?.title}</Typography.Title>
             <Divider />
-            <ReactMarkdownCustom>{data?.description}</ReactMarkdownCustom>
+            <Stack>
+              <ReactMarkdownCustom>{data?.description}</ReactMarkdownCustom>
+            </Stack>
           </Card>
         </Col>
         <Col md={8} xs={24}>
