@@ -28,7 +28,7 @@ const requestHandler = async (request) => {
 
   const ifExists = fs.existsSync(filePath);
 
-  console.log("file token.json ada?", ifExists);
+  // console.log("file token.json ada?", ifExists);
 
   if (ifExists) {
     const token = JSON.parse(fs.readFileSync(filePath, "utf8"));
