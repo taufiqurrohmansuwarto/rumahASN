@@ -4,29 +4,29 @@ import {
   CarryOutTwoTone,
   ClockCircleTwoTone,
   DeleteOutlined,
+  EditTwoTone,
   FolderOpenOutlined,
   TagsTwoTone,
   VideoCameraAddOutlined,
   YoutubeOutlined,
-  EditTwoTone,
 } from "@ant-design/icons";
-import { Stack, TypographyStylesProvider } from "@mantine/core";
+import { Stack } from "@mantine/core";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   Button,
   Card,
   Col,
   Divider,
-  Image,
   Modal,
   Row,
   Space,
   Tag,
-  Typography,
   Tooltip,
+  Typography,
   message,
 } from "antd";
 import { useRouter } from "next/router";
+import ReactMarkdownCustom from "../MarkdownEditor/ReactMarkdownCustom";
 
 const WebinarStatus = ({ data }) => {
   return (
@@ -127,13 +127,7 @@ function DetailWebinar({ data }) {
             <Divider />
             <Stack>
               <WebinarStatus data={data} />
-              <TypographyStylesProvider>
-                <div
-                  dangerouslySetInnerHTML={{
-                    __html: data?.description_markdown,
-                  }}
-                />
-              </TypographyStylesProvider>
+              <ReactMarkdownCustom>{data?.description}</ReactMarkdownCustom>
             </Stack>
           </Card>
         </Col>
