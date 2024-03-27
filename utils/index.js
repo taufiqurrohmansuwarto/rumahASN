@@ -93,6 +93,8 @@ export const checkFileMinioSK = (mc, filename) => {
         console.log(err);
         if (err.code === "NotFound") {
           resolve(null);
+        } else {
+          reject(err);
         }
       } else {
         resolve(stat);
