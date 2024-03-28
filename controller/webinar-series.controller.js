@@ -504,13 +504,13 @@ const listUser = async (req, res) => {
     const search = req.query.search || "";
 
     let query = WebinarSeriesParticipates.query().select(
-      "id",
+      "webinar_series_participates.id",
       "webinar_series_id",
       "user_id",
       "already_poll",
       "is_registered",
-      "created_at",
-      "updated_at",
+      "webinar_series_participates.created_at",
+      "webinar_series_participates.updated_at",
       "is_generate_certificate"
     );
 
