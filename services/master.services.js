@@ -1,4 +1,5 @@
 import axios from "axios";
+import queryString from "query-string";
 
 const api = axios.create({
   baseURL: "/helpdesk/api/master/ws",
@@ -18,6 +19,17 @@ export const downloadEmployees = () => {
     .get("/fasilitator/download/data-siasn", {
       responseType: "arraybuffer",
     })
+    .then((res) => res.data);
+};
+
+export const getAllEmployeesPaging = (query) => {
+  return api
+    .get(
+      `/fasilitator/employees?${queryString.stringify(query, {
+        skipNull: true,
+        skipEmptyString: true,
+      })}`
+    )
     .then((res) => res.data);
 };
 

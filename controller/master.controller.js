@@ -434,7 +434,6 @@ module.exports = {
   rwPangkatMaster,
   rwPasanganMasterByNip,
   rwAnakMasterByNip,
-
   rwJabDokterByNip,
   rwJabGuruByNip,
 };

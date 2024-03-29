@@ -1,15 +1,24 @@
-const { getAllEmployees } = require("@/utils/master.utils");
+const { getAllEmployees, referensiJenjang } = require("@/utils/master.utils");
 const Anomali23 = require("@/models/anomali23.model");
 const SiasnIPASN = require("@/models/siasn-ipasn.model");
 const SiasnEmployees = require("@/models/siasn-employees.model");
 const xlsx = require("xlsx");
+const queryString = require("query-string");
 const { toLower, trim } = require("lodash");
+const { dataUtama } = require("@/utils/siasn-utils");
 
 const compareText = (a, b) => {
   const text1 = trim(toLower(a));
   const text2 = trim(toLower(b));
 
   return text1 === text2 ? "Benar" : "Salah";
+};
+
+const compareString = (a, b) => {
+  const text1 = trim(toLower(a));
+  const text2 = trim(toLower(b));
+
+  return text1 === text2;
 };
 
 function calculateMaxWidthOfColumns(data) {
@@ -227,8 +236,100 @@ const getAllEmployeesAnomali23Report = async (req, res) => {
   }
 };
 
+const getAllEmployeesMasterPaging = async (req, res) => {
+  try {
+    const fetcher = req?.clientCredentialsFetcher;
+    const siasnFetcher = req?.siasnRequest;
+    const opdId = req?.user?.organization_id;
+    if (!opdId) {
+      res.status(400).json({ message: "Organization ID is required" });
+    } else {
+      const query = queryString.stringify(req.query, {
+        skipEmptyString: true,
+        skipNull: true,
+      });
+
+      const result = await fetcher.get(
+        `/master-ws/pemprov/opd/${opdId}/employees/paging?${query}`
+      );
+
+      let dataSiasn = [];
+
+      const nip = result?.data?.results?.map((item) => item?.nip_master);
+      let promises = [];
+
+      await Promise.all(
+        nip?.map(async (nip) => {
+          promises.push(
+            dataUtama(siasnFetcher, nip).then((res) => res?.data?.data)
+          );
+        })
+      );
+
+      const resultSiasn = await Promise.all(promises);
+
+      const results = result?.data?.results?.map((item, idx) => {
+        const currentEmployees = resultSiasn?.find(
+          (employee) => employee?.nipBaru === item?.nip_master
+        );
+
+        const referensiJenjangId = referensiJenjang?.find(
+          (item) =>
+            String(item?.kode_bkn) === currentEmployees?.tkPendidikanTerakhirId
+        );
+
+        return {
+          ...item,
+          komparasi: {
+            nama: compareString(item?.nama_master, currentEmployees?.nama),
+            nip: compareString(item?.nip_master, currentEmployees?.nipBaru),
+            pangkat: compareString(
+              String(item?.kode_golongan_bkn),
+              String(currentEmployees?.golRuangAkhirId)
+            ),
+            pendidikan: compareString(
+              referensiJenjangId?.kode_master,
+              item?.kode_jenjang_master
+            ),
+          },
+          siasn: {
+            nama: currentEmployees?.nama,
+            nip_baru: currentEmployees?.nipBaru,
+            gelar_depan: currentEmployees?.gelarDepan,
+            gelar_belakang: currentEmployees?.gelarBelakang,
+            pangkat: currentEmployees?.golRuangAkhir,
+            kode_pangkat: currentEmployees?.golRuangAkhirId,
+            jenis_jabatan: currentEmployees?.asnJenjangJabatan,
+            kode_jenis_jabatan: currentEmployees?.jenisJabatanId,
+            nama_jabatan: currentEmployees?.jabatanNama,
+            kode_jenjang: currentEmployees?.tkPendidikanTerakhirId,
+            jenjang: currentEmployees?.pendidikanTerakhirNama,
+            unor: `${currentEmployees?.unorIndukNama} - ${currentEmployees?.unorNama}`,
+            valid_nik: currentEmployees?.validNik,
+          },
+        };
+      });
+
+      const hasil = {
+        results,
+        total: result?.data?.total,
+        meta: {
+          page: result?.data?.meta?.page,
+          limit: result?.data?.meta?.limit,
+          total_page: result?.data?.total,
+        },
+      };
+
+      res.json(hasil);
+    }
+  } catch (error) {
+    console.log(error);
+  }
+};
+
 module.exports = {
   getAllEmployeesMaster,
   getAllEmployeesAnomali23Report,
   getIPAsnReport,
+  getAllEmployeesMasterPaging,
 };

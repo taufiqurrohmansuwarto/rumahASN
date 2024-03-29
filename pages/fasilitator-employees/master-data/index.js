@@ -1,5 +1,7 @@
+import EmployeesTable from "@/components/Fasilitator/EmployeesTable";
 import Layout from "@/components/Layout";
 import PageContainer from "@/components/PageContainer";
+import useScrollRestoration from "@/hooks/useScrollRestoration";
 import { downloadDataAnomaliFasilitator } from "@/services/anomali.services";
 import {
   downloadDataIPASN,
@@ -7,9 +9,11 @@ import {
 } from "@/services/master.services";
 import { useMutation } from "@tanstack/react-query";
 import { Button, Card, Form, Input, Space, message } from "antd";
+import Head from "next/head";
 import { useRouter } from "next/router";
 
 const FasilitatorEmployees = () => {
+  useScrollRestoration();
   const router = useRouter();
   const [form] = Form.useForm();
 
@@ -98,59 +102,65 @@ const FasilitatorEmployees = () => {
   };
 
   return (
-    <PageContainer title="Fasilitator SIMASTER" content="Integrasi SIASN">
-      <Card>
-        {/* <Button
+    <>
+      <Head>
+        <title>Rumah ASN - Fasilitator SIMASTER</title>
+      </Head>
+      <PageContainer title="Fasilitator SIMASTER" content="Integrasi SIASN">
+        <Card>
+          {/* <Button
           disabled={isLoadingDownload}
           loading={isLoadingDownload}
           onClick={handleDownload}
         >
           Unduh Data Anomali
         </Button> */}
-        <Space>
-          <Button
-            disabled={isLoadingDownloadIPASN}
-            loading={isLoadingDownloadIPASN}
-            onClick={handleDownloadIPASN}
-            type="primary"
-          >
-            Unduh Data IPASN
-          </Button>
-          <Button
-            disabled={isLoadingDownloadPegawai}
-            loading={isLoadingDownloadPegawai}
-            onClick={handleDownloadPegawai}
-            type="primary"
-          >
-            Unduh Data Komparasi
-          </Button>
-        </Space>
-        <Form
-          layout="vertical"
-          form={form}
-          name="form cari siasn"
-          onFinish={handleFinish}
-        >
-          <Form.Item
-            normalize={(values) => values.replace(/\s/g, "")}
-            rules={[
-              { min: 18, message: "NIP harus 18 karakter" },
-              { required: true, message: "Harus diisi" },
-            ]}
-            name="nip"
-            help="Masukkan NIP pegawai sesuai dengan perangkat daerah"
-            label="Nomer Induk Pegawai"
-          >
-            <Input />
-          </Form.Item>
-          <Form.Item>
-            <Button htmlType="submit" type="primary">
-              Cari
+          <Space>
+            <Button
+              disabled={isLoadingDownloadIPASN}
+              loading={isLoadingDownloadIPASN}
+              onClick={handleDownloadIPASN}
+              type="primary"
+            >
+              Unduh Data IPASN
             </Button>
-          </Form.Item>
-        </Form>
-      </Card>
-    </PageContainer>
+            <Button
+              disabled={isLoadingDownloadPegawai}
+              loading={isLoadingDownloadPegawai}
+              onClick={handleDownloadPegawai}
+              type="primary"
+            >
+              Unduh Data Komparasi
+            </Button>
+          </Space>
+          <Form
+            layout="vertical"
+            form={form}
+            name="form cari siasn"
+            onFinish={handleFinish}
+          >
+            <Form.Item
+              normalize={(values) => values.replace(/\s/g, "")}
+              rules={[
+                { min: 18, message: "NIP harus 18 karakter" },
+                { required: true, message: "Harus diisi" },
+              ]}
+              name="nip"
+              help="Masukkan NIP pegawai sesuai dengan perangkat daerah"
+              label="Nomer Induk Pegawai"
+            >
+              <Input />
+            </Form.Item>
+            <Form.Item>
+              <Button htmlType="submit" type="primary">
+                Cari
+              </Button>
+            </Form.Item>
+          </Form>
+          <EmployeesTable />
+        </Card>
+      </PageContainer>
+    </>
   );
 };
 
