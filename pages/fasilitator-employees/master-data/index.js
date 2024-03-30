@@ -106,7 +106,10 @@ const FasilitatorEmployees = () => {
       <Head>
         <title>Rumah ASN - Fasilitator SIMASTER</title>
       </Head>
-      <PageContainer title="Fasilitator SIMASTER" content="Integrasi SIASN">
+      <PageContainer
+        title="Fasilitator SIMASTER"
+        content="Integrasi SIASN dan SIMASTER"
+      >
         <Card>
           {/* <Button
           disabled={isLoadingDownload}
