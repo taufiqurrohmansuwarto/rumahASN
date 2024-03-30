@@ -33,6 +33,10 @@ export const getAllEmployeesPaging = (query) => {
     .then((res) => res.data);
 };
 
+export const getOpdFasilitator = () => {
+  return api.get(`/fasilitator/unor`).then((res) => res.data);
+};
+
 // unor asn
 export const unorASN = () => {
   return api.get("/unor/asn").then((res) => res.data);

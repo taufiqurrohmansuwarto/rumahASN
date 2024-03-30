@@ -73,21 +73,21 @@ const changeRoutes = (user) => {
     }
 
     if (adminFasilitator) {
-      userRoutes.routes.push({
-        path: "/siasn",
-        name: "Layanan SIASN",
-        icon: <StarOutlined />,
-        routes: [
-          {
-            path: "/siasn/kenaikan-pangkat",
-            name: "Kenaikan Pangkat",
-          },
-          {
-            path: "/siasn/pemberhentian",
-            name: "Pemberhentian",
-          },
-        ],
-      });
+      // userRoutes.routes.push({
+      //   path: "/siasn",
+      //   name: "Layanan SIASN",
+      //   icon: <StarOutlined />,
+      //   routes: [
+      //     {
+      //       path: "/siasn/kenaikan-pangkat",
+      //       name: "Kenaikan Pangkat",
+      //     },
+      //     {
+      //       path: "/siasn/pemberhentian",
+      //       name: "Pemberhentian",
+      //     },
+      //   ],
+      // });
     }
 
     if (pegawaiBKD) {
