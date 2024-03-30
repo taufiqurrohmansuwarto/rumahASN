@@ -133,7 +133,7 @@ const FasilitatorEmployees = () => {
               Unduh Data Komparasi
             </Button>
           </Space>
-          <Form
+          {/* <Form
             layout="vertical"
             form={form}
             name="form cari siasn"
@@ -156,7 +156,7 @@ const FasilitatorEmployees = () => {
                 Cari
               </Button>
             </Form.Item>
-          </Form>
+          </Form> */}
           <EmployeesTable />
         </Card>
       </PageContainer>

@@ -6,6 +6,108 @@ const xlsx = require("xlsx");
 const queryString = require("query-string");
 const { toLower, trim } = require("lodash");
 const { dataUtama } = require("@/utils/siasn-utils");
+const arrayToTree = require("array-to-tree");
+
+// keperluan komparasi
+const validateOpdId = (opdId) => {
+  if (!opdId) {
+    throw new Error("Organization ID is required");
+  }
+};
+
+const determineOpdId = (opd, opdId) => {
+  const regex = new RegExp(`^${opd}`);
+  return opd === opdId || regex.test(opdId) ? opdId : opd;
+};
+
+// helper function to fetch employee paging data
+const fetchEmployeeData = (fetcher, idOpd, query) => {
+  const queryStringParameters = queryString.stringify(query, {
+    skipEmptyString: true,
+    skipNull: true,
+  });
+  return fetcher.get(
+    `/master-ws/pemprov/opd/${idOpd}/employees/paging?${queryStringParameters}`
+  );
+};
+
+// Helper function to fetch detailed employee data asynchronously using Promise.allSettled
+const fetchDetailedEmployeeData = async (siasnFetcher, nips) => {
+  const promises = nips.map((nip) => dataUtama(siasnFetcher, nip));
+  const results = await Promise.allSettled(promises);
+
+  // Process results, considering both fulfilled and rejected promises
+  return results.map((result) =>
+    result.status === "fulfilled" ? result.value.data.data : {}
+  );
+};
+
+// Helper function to construct the response payload
+const constructResponsePayload = (employeeData, detailedEmployeeData) => {
+  const results = employeeData?.data?.results?.map((item, idx) => {
+    const currentEmployees = detailedEmployeeData[idx]; // Handle null values appropriately in your logic
+    // Continue with your logic to construct the employee object
+    // ...
+
+    const referensiJenjangId = referensiJenjang?.find(
+      (item) =>
+        String(item?.kode_bkn) === currentEmployees?.tkPendidikanTerakhirId
+    );
+
+    return {
+      // Constructed object based on your requirements
+      ...item,
+      komparasi: {
+        nama: compareString(item?.nama_master, currentEmployees?.nama),
+        nip: compareString(item?.nip_master, currentEmployees?.nipBaru),
+        tanggal_lahir: compareString(
+          item?.tgl_lahir_master,
+          currentEmployees?.tglLahir
+        ),
+        email: compareString(item?.email_master, currentEmployees?.email),
+        pangkat: compareString(
+          String(item?.kode_golongan_bkn),
+          String(currentEmployees?.golRuangAkhirId)
+        ),
+        pendidikan: compareString(
+          referensiJenjangId?.kode_master,
+          item?.kode_jenjang_master
+        ),
+        jenis_jabatan: compareString(
+          item?.kode_jenis_jabatan_bkn,
+          currentEmployees?.jenisJabatanId
+        ),
+      },
+      siasn: {
+        nama: currentEmployees?.nama,
+        status: currentEmployees?.kedudukanPnsNama,
+        jenjang_jabatan: currentEmployees?.asnJenjangJabatan,
+        nip_baru: currentEmployees?.nipBaru,
+        gelar_depan: currentEmployees?.gelarDepan,
+        gelar_belakang: currentEmployees?.gelarBelakang,
+        pangkat: currentEmployees?.golRuangAkhir,
+        kode_pangkat: currentEmployees?.golRuangAkhirId,
+        jenis_jabatan: currentEmployees?.asnJenjangJabatan,
+        kode_jenis_jabatan: currentEmployees?.jenisJabatanId,
+        nama_jabatan: currentEmployees?.jabatanNama,
+        kode_jenjang: currentEmployees?.tkPendidikanTerakhirId,
+        jenjang: currentEmployees?.pendidikanTerakhirNama,
+        unor: `${currentEmployees?.unorIndukNama} - ${currentEmployees?.unorNama}`,
+        valid_nik: currentEmployees?.validNik,
+      },
+    };
+  });
+
+  return {
+    results,
+    total: employeeData?.data?.total,
+    meta: {
+      page: employeeData?.data?.meta?.page,
+      limit: employeeData?.data?.meta?.limit,
+      total_page: employeeData?.data?.total,
+    },
+  };
+};
 
 const compareText = (a, b) => {
   const text1 = trim(toLower(a));
@@ -238,92 +340,67 @@ const getAllEmployeesAnomali23Report = async (req, res) => {
 
 const getAllEmployeesMasterPaging = async (req, res) => {
   try {
+    const {
+      clientCredentialsFetcher: fetcher,
+      siasnRequest: siasnFetcher,
+      user,
+      query,
+    } = req;
+    const opdId = user?.organization_id;
+    const opd = query?.opd_id || opdId;
+
+    validateOpdId(opdId);
+    const idOpd = determineOpdId(opd, opdId);
+    const employeeData = await fetchEmployeeData(fetcher, idOpd, query);
+
+    const nips = employeeData?.data?.results?.map((item) => item?.nip_master);
+    const detailedEmployeeData = await fetchDetailedEmployeeData(
+      siasnFetcher,
+      nips
+    );
+
+    const responsePayload = constructResponsePayload(
+      employeeData,
+      detailedEmployeeData
+    );
+
+    res.json(responsePayload);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+const getOpd = async (req, res) => {
+  try {
     const fetcher = req?.clientCredentialsFetcher;
-    const siasnFetcher = req?.siasnRequest;
     const opdId = req?.user?.organization_id;
+
     if (!opdId) {
       res.status(400).json({ message: "Organization ID is required" });
     } else {
-      const query = queryString.stringify(req.query, {
-        skipEmptyString: true,
-        skipNull: true,
-      });
-
       const result = await fetcher.get(
-        `/master-ws/pemprov/opd/${opdId}/employees/paging?${query}`
+        `/master-ws/pemprov/opd/${opdId}/departments`
       );
 
-      let dataSiasn = [];
+      const hasil = result?.data?.map((d) => ({
+        id: d.id,
+        pId: d.pId,
+        title: d.name,
+        key: d.id,
+        label: d.name,
+        value: d.id,
+      }));
 
-      const nip = result?.data?.results?.map((item) => item?.nip_master);
-      let promises = [];
-
-      await Promise.all(
-        nip?.map(async (nip) => {
-          promises.push(
-            dataUtama(siasnFetcher, nip).then((res) => res?.data?.data)
-          );
-        })
-      );
-
-      const resultSiasn = await Promise.all(promises);
-
-      const results = result?.data?.results?.map((item, idx) => {
-        const currentEmployees = resultSiasn?.find(
-          (employee) => employee?.nipBaru === item?.nip_master
-        );
-
-        const referensiJenjangId = referensiJenjang?.find(
-          (item) =>
-            String(item?.kode_bkn) === currentEmployees?.tkPendidikanTerakhirId
-        );
-
-        return {
-          ...item,
-          komparasi: {
-            nama: compareString(item?.nama_master, currentEmployees?.nama),
-            nip: compareString(item?.nip_master, currentEmployees?.nipBaru),
-            pangkat: compareString(
-              String(item?.kode_golongan_bkn),
-              String(currentEmployees?.golRuangAkhirId)
-            ),
-            pendidikan: compareString(
-              referensiJenjangId?.kode_master,
-              item?.kode_jenjang_master
-            ),
-          },
-          siasn: {
-            nama: currentEmployees?.nama,
-            nip_baru: currentEmployees?.nipBaru,
-            gelar_depan: currentEmployees?.gelarDepan,
-            gelar_belakang: currentEmployees?.gelarBelakang,
-            pangkat: currentEmployees?.golRuangAkhir,
-            kode_pangkat: currentEmployees?.golRuangAkhirId,
-            jenis_jabatan: currentEmployees?.asnJenjangJabatan,
-            kode_jenis_jabatan: currentEmployees?.jenisJabatanId,
-            nama_jabatan: currentEmployees?.jabatanNama,
-            kode_jenjang: currentEmployees?.tkPendidikanTerakhirId,
-            jenjang: currentEmployees?.pendidikanTerakhirNama,
-            unor: `${currentEmployees?.unorIndukNama} - ${currentEmployees?.unorNama}`,
-            valid_nik: currentEmployees?.validNik,
-          },
-        };
+      const treeData = arrayToTree(hasil, {
+        parentProperty: "pId",
+        customID: "id",
       });
-
-      const hasil = {
-        results,
-        total: result?.data?.total,
-        meta: {
-          page: result?.data?.meta?.page,
-          limit: result?.data?.meta?.limit,
-          total_page: result?.data?.total,
-        },
-      };
-
-      res.json(hasil);
+      res.json(treeData);
     }
   } catch (error) {
     console.log(error);
+    res.status(500).json({ message: "Internal server error" });
   }
 };
 
@@ -331,5 +408,6 @@ module.exports = {
   getAllEmployeesMaster,
   getAllEmployeesAnomali23Report,
   getIPAsnReport,
+  getOpd,
   getAllEmployeesMasterPaging,
 };
