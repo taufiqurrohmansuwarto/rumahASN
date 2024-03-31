@@ -1,11 +1,20 @@
 import Layout from "@/components/Layout";
 import PageContainer from "@/components/PageContainer";
 import DetailKamusUsulan from "@/components/Usulan/DetailKamusUsulan";
+import FormKamusUsulanFile from "@/components/Usulan/FormKamusUsulanFile";
+import { detailSubmissionsFileRefs } from "@/services/submissions.services";
+import { useQuery } from "@tanstack/react-query";
 import Head from "next/head";
 import { useRouter } from "next/router";
 
-const SubmissionReferenceDetail = () => {
+const SubmissionFileDetail = () => {
   const router = useRouter();
+
+  const { data, isLoading } = useQuery(
+    ["sumbissions-file-detail", router.query.id],
+    () => detailSubmissionsFileRefs(router.query.id),
+    {}
+  );
 
   const handleBack = () => {
     router.back();
@@ -21,19 +30,19 @@ const SubmissionReferenceDetail = () => {
         title="Detail Kamus Usulan"
         content="Detail Kamus Usulan ASN"
       >
-        <DetailKamusUsulan />
+        <FormKamusUsulanFile data={data} type="edit" />
       </PageContainer>
     </>
   );
 };
 
-SubmissionReferenceDetail.Auth = {
+SubmissionFileDetail.Auth = {
   action: "manage",
   subject: "DashboardAdmin",
 };
 
-SubmissionReferenceDetail.getLayout = function getLayout(page) {
+SubmissionFileDetail.getLayout = function getLayout(page) {
   return <Layout active="/apps-managements/submissions">{page}</Layout>;
 };
 
-export default SubmissionReferenceDetail;
+export default SubmissionFileDetail;

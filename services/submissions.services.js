@@ -55,3 +55,55 @@ export const deleteSubmissionPersonInCharge = async ({ id, picId }) => {
     .delete(`/admin/references/${id}/person-in-charge/${picId}`)
     .then((res) => res?.data);
 };
+
+//files references crud
+export const createSubmissionsFileRefs = async (data) => {
+  return api.post(`/admin/files`, data).then((res) => res?.data);
+};
+
+export const updateSubmissionsFileRefs = async ({ id, data }) => {
+  return api.patch(`/admin/files/${id}`, data).then((res) => res?.data);
+};
+
+export const detailSubmissionsFileRefs = async (id) => {
+  return api.get(`/admin/files/${id}`).then((res) => res?.data);
+};
+
+export const deleteSubmissionsFileRefs = async (id) => {
+  return api.delete(`/admin/files/${id}`).then((res) => res?.data);
+};
+
+export const getSubmissionsFileRefs = async (params) => {
+  return api
+    .get(`/admin/files?${queryString.stringify(params)}`)
+    .then((res) => res?.data);
+};
+
+// submission with files
+export const createSubmissionWithFiles = async ({ id, data }) => {
+  return api
+    .post(`/admin/references/${id}/files`, data)
+    .then((res) => res?.data);
+};
+
+export const detailSubmissionWithFiles = async ({ id, fileId }) => {
+  return api
+    .get(`/admin/references/${id}/files/${fileId}`)
+    .then((res) => res?.data);
+};
+
+export const deleteSubmissionWithFiles = async ({ id, fileId }) => {
+  return api
+    .delete(`/admin/references/${id}/files/${fileId}`)
+    .then((res) => res?.data);
+};
+
+export const updateSubmissionWithFiles = async ({ id, data }) => {
+  return api
+    .patch(`/admin/references/${id}/files`, data)
+    .then((res) => res?.data);
+};
+
+export const getSubmissionWithFiles = async (id) => {
+  return api.get(`/admin/references/${id}/files`).then((res) => res?.data);
+};
