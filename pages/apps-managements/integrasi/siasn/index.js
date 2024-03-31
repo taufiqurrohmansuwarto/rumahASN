@@ -1,3 +1,4 @@
+import EmployeesTableAdmin from "@/components/Fasilitator/EmployeesTableAdmin";
 import HRWithEmployees from "@/components/LayananSIASN/HRWithEmployees";
 import Layout from "@/components/Layout";
 import PageContainer from "@/components/PageContainer";
@@ -43,7 +44,8 @@ const IntegrasiSIASN = () => {
         }}
       >
         <Card>
-          <Form
+          <EmployeesTableAdmin />
+          {/* <Form
             layout="vertical"
             form={form}
             name="form cari siasn"
@@ -65,9 +67,9 @@ const IntegrasiSIASN = () => {
                 Cari
               </Button>
             </Form.Item>
-          </Form>
-          <Divider>Cari Berdasarkan Perangkat Daerah</Divider>
-          <HRWithEmployees />
+          </Form> */}
+          {/* <Divider>Cari Berdasarkan Perangkat Daerah</Divider>
+          <HRWithEmployees /> */}
         </Card>
       </PageContainer>
     </>

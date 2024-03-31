@@ -77,6 +77,10 @@ const constructResponsePayload = (employeeData, detailedEmployeeData) => {
           item?.kode_jenis_jabatan_bkn,
           currentEmployees?.jenisJabatanId
         ),
+        jenjang_jabatan: compareString(
+          item?.jabatan_asn,
+          currentEmployees?.asnJenjangJabatan
+        ),
       },
       siasn: {
         nama: currentEmployees?.nama,
@@ -371,10 +375,75 @@ const getAllEmployeesMasterPaging = async (req, res) => {
   }
 };
 
+const getAllEmployeesMasterPagingAdmin = async (req, res) => {
+  try {
+    const {
+      clientCredentialsFetcher: fetcher,
+      siasnRequest: siasnFetcher,
+      query,
+    } = req;
+    const opdId = "1";
+    const opd = query?.opd_id || opdId;
+
+    validateOpdId(opdId);
+    const idOpd = determineOpdId(opd, opdId);
+    const employeeData = await fetchEmployeeData(fetcher, idOpd, query);
+
+    const nips = employeeData?.data?.results?.map((item) => item?.nip_master);
+    const detailedEmployeeData = await fetchDetailedEmployeeData(
+      siasnFetcher,
+      nips
+    );
+
+    const responsePayload = constructResponsePayload(
+      employeeData,
+      detailedEmployeeData
+    );
+
+    res.json(responsePayload);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
 const getOpd = async (req, res) => {
   try {
     const fetcher = req?.clientCredentialsFetcher;
     const opdId = req?.user?.organization_id;
+
+    if (!opdId) {
+      res.status(400).json({ message: "Organization ID is required" });
+    } else {
+      const result = await fetcher.get(
+        `/master-ws/pemprov/opd/${opdId}/departments`
+      );
+
+      const hasil = result?.data?.map((d) => ({
+        id: d.id,
+        pId: d.pId,
+        title: d.name,
+        key: d.id,
+        label: d.name,
+        value: d.id,
+      }));
+
+      const treeData = arrayToTree(hasil, {
+        parentProperty: "pId",
+        customID: "id",
+      });
+      res.json(treeData);
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+const getOpdAdmin = async (req, res) => {
+  try {
+    const fetcher = req?.clientCredentialsFetcher;
+    const opdId = "1";
 
     if (!opdId) {
       res.status(400).json({ message: "Organization ID is required" });
@@ -410,4 +479,6 @@ module.exports = {
   getIPAsnReport,
   getOpd,
   getAllEmployeesMasterPaging,
+  getAllEmployeesMasterPagingAdmin,
+  getOpdAdmin,
 };

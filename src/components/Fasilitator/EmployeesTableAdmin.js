@@ -1,4 +1,4 @@
-import { getAllEmployeesPaging } from "@/services/master.services";
+import { getAllEmployeesPagingAdmin } from "@/services/master.services";
 import { capitalizeWords } from "@/utils/client-utils";
 import {
   CheckCircleOutlined,
@@ -7,7 +7,7 @@ import {
 import { useQuery } from "@tanstack/react-query";
 import { Avatar, Space, Table, Tag, Tooltip, Typography } from "antd";
 import { useRouter } from "next/router";
-import EmployeesTableFilter from "../Filter/EmployeesTableFilter";
+import EmployeesTableFilterAdmin from "../Filter/EmployeesTableFilterAdmin";
 
 const TagKomparasi = ({ komparasi, nama }) => {
   return (
@@ -20,11 +20,11 @@ const TagKomparasi = ({ komparasi, nama }) => {
   );
 };
 
-function EmployeesTable() {
+function EmployeesTableAdmin() {
   const router = useRouter();
   const { data, isLoading, isFetching } = useQuery(
-    ["employees-paging", router?.query],
-    () => getAllEmployeesPaging(router?.query),
+    ["employees-paging-admin", router?.query],
+    () => getAllEmployeesPagingAdmin(router?.query),
     {
       keepPreviousData: true,
       refetchOnWindowFocus: false,
@@ -194,7 +194,7 @@ function EmployeesTable() {
 
   return (
     <div>
-      <EmployeesTableFilter />
+      <EmployeesTableFilterAdmin />
       <Table
         size="small"
         columns={columns}
@@ -215,4 +215,4 @@ function EmployeesTable() {
   );
 }
 
-export default EmployeesTable;
+export default EmployeesTableAdmin;
