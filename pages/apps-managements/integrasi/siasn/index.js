@@ -2,6 +2,7 @@ import EmployeesTableAdmin from "@/components/Fasilitator/EmployeesTableAdmin";
 import HRWithEmployees from "@/components/LayananSIASN/HRWithEmployees";
 import Layout from "@/components/Layout";
 import PageContainer from "@/components/PageContainer";
+import useScrollRestoration from "@/hooks/useScrollRestoration";
 import { Breadcrumb, Button, Card, Divider, Form, Input } from "antd";
 import Head from "next/head";
 import Link from "next/link";
@@ -10,6 +11,8 @@ import { useRouter } from "next/router";
 const IntegrasiSIASN = () => {
   const router = useRouter();
   const [form] = Form.useForm();
+
+  useScrollRestoration();
 
   const handleFinish = async () => {
     const values = await form.validateFields();
