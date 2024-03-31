@@ -33,8 +33,23 @@ export const getAllEmployeesPaging = (query) => {
     .then((res) => res.data);
 };
 
+export const getAllEmployeesPagingAdmin = (query) => {
+  return api
+    .get(
+      `/admin/employees?${queryString.stringify(query, {
+        skipNull: true,
+        skipEmptyString: true,
+      })}`
+    )
+    .then((res) => res.data);
+};
+
 export const getOpdFasilitator = () => {
   return api.get(`/fasilitator/unor`).then((res) => res.data);
+};
+
+export const getOpdAdmin = () => {
+  return api.get(`/admin/unor`).then((res) => res.data);
 };
 
 // unor asn
