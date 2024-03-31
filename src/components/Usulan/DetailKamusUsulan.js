@@ -2,17 +2,19 @@ import FormUnorSIMASTER from "@/components/Usulan/FormUnorSIMASTER";
 import {
   createSubmissionPersonInCharge,
   deleteSubmissionPersonInCharge,
+  detailSubmissionReference,
   getSubmissionPersonInCharge,
-  getSubmissionReference,
   updateSubmissionPersonInCharge,
 } from "@/services/submissions.services";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Button, Divider, Form, Modal, Table, message } from "antd";
-import { useRouter } from "next/router";
-import { useState } from "react";
-import FormSearchUserBKD from "./FormSearchUserBKD";
 import { FileAddOutlined } from "@ant-design/icons";
-import { useEffect } from "react";
+import { Stack } from "@mantine/core";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { Button, Card, Divider, Form, Modal, Table, message } from "antd";
+import { useRouter } from "next/router";
+import { useEffect, useState } from "react";
+import BuatKamusUsulan from "./BuatKamusUsulan";
+import FormSearchUserBKD from "./FormSearchUserBKD";
+import UsulanFile from "./UsulanFile";
 
 const FormEditPersonInCharge = ({ open, onCancel, loading, edit, data }) => {
   const router = useRouter();
@@ -224,8 +226,13 @@ const PersonInChargeSubmission = ({ id }) => {
 
   return (
     <div>
-      <Button onClick={handleOpen} type="primary" icon={<FileAddOutlined />}>
-        PIC
+      <Button
+        style={{ marginBottom: 10 }}
+        onClick={handleOpen}
+        type="primary"
+        icon={<FileAddOutlined />}
+      >
+        Person In Charge
       </Button>
       <FormAddPersonInCharge
         add={addPIC}
@@ -256,15 +263,18 @@ function DetailKamusUsulan() {
 
   const { data, isLoading } = useQuery(
     ["detail-kamus-usulan", router.query.id],
-    () => getSubmissionReference(router.query.id),
+    () => detailSubmissionReference(router.query.id),
     {}
   );
 
   return (
-    <div>
-      {JSON.stringify(data)}
-      <PersonInChargeSubmission id={router.query.id} />
-    </div>
+    <Card>
+      <Stack>
+        <BuatKamusUsulan type="update" data={data} />
+        <PersonInChargeSubmission id={router.query.id} />
+        <UsulanFile />
+      </Stack>
+    </Card>
   );
 }
 

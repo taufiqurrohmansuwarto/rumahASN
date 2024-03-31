@@ -1,5 +1,7 @@
-const SubmissionsReferences = require("../models/submissions-references.model");
-const SubmissionPics = require("../models/submissions-pics.model");
+const SubmissionsReferences = require("@/models/submissions-references.model");
+const SubmissionPics = require("@/models/submissions-pics.model");
+const SubmissionsFileRefs = require("@/models/submissions-file-refs.model");
+const SubmissionsFiles = require("@/models/submissions-files.model");
 
 const createSubmissions = async (req, res) => {
   try {
@@ -151,7 +153,8 @@ const getSubmissionReference = async (req, res) => {
 
 const detailSubmissionReference = async (req, res) => {
   try {
-    const rseult = await SubmissionsReferences.query().findById(req?.query?.id);
+    const id = req?.query?.id;
+    const result = await SubmissionsReferences.query().findById(id);
     res.json(result);
   } catch (error) {
     console.log(error);
@@ -186,6 +189,159 @@ const deleteSubmissionReference = async (req, res) => {
   }
 };
 
+const uploadSubmissionsFile = async (req, res) => {
+  try {
+    const { file } = req;
+    const { id } = req?.query;
+
+    // upload file
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: error.message });
+  }
+};
+
+// crud for submissions_file_refs
+const createSubmissionsFileRefs = async (req, res) => {
+  try {
+    const { body } = req;
+    const result = await SubmissionsFileRefs.query().insert(body);
+    res.json(result);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: error.message });
+  }
+};
+
+const getSubmissionsFileRefs = async (req, res) => {
+  try {
+    const result = await SubmissionsFileRefs.query().orderBy(
+      "created_at",
+      "desc"
+    );
+
+    res.json(result);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: error.message });
+  }
+};
+
+const updateSubmissionsFileRefs = async (req, res) => {
+  try {
+    const { body } = req;
+    const { id } = req?.query;
+
+    const result = await SubmissionsFileRefs.query().patchAndFetchById(
+      id,
+      body
+    );
+    res.json(result);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: error.message });
+  }
+};
+
+const detailSubmissionsFileRefs = async (req, res) => {
+  try {
+    const { id } = req?.query;
+    const result = await SubmissionsFileRefs.query().findById(id);
+    res.json(result);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: error.message });
+  }
+};
+
+const deleteSubmissionsFileRefs = async (req, res) => {
+  try {
+    const { id } = req?.query;
+    const result = await SubmissionsFileRefs.query().deleteById(id);
+    res.json(result);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: error.message });
+  }
+};
+
+// submission with files
+const createSubmissionWithFiles = async (req, res) => {
+  try {
+    const { body } = req;
+    const { id } = req.query;
+
+    // check first
+    const check = await SubmissionsReferences.query().findById(id);
+
+    if (!check) {
+      res.status(404).json({ error: "Submission not found" });
+    } else {
+      // insert submission
+      const result = await SubmissionsFiles.query().insert({
+        ...body,
+        submission_ref: id,
+      });
+      res.json(result);
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: error.message });
+  }
+};
+
+const getSubmissionWithFiles = async (req, res) => {
+  try {
+    const { id } = req.query;
+    const result = await SubmissionsFiles.query().where("submission_ref", id);
+    res.json(result);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: error.message });
+  }
+};
+
+const updateSubmissionWithFiles = async (req, res) => {
+  try {
+    const { body } = req;
+    const { id, fileId } = req.query;
+
+    const result = await SubmissionsFiles.query()
+      .patchAndFetchById(fileId, body)
+      .where("submission_ref", id);
+    res.json(result);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: error.message });
+  }
+};
+
+const detailSubmissionWithFiles = async (req, res) => {
+  try {
+    const { id, fileId } = req.query;
+    const result = await SubmissionsFiles.query()
+      .where("submission_ref", id)
+      .andWhere("id", fileId);
+    res.json(result);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: error.message });
+  }
+};
+
+const deleteSubmissionWithFiles = async (req, res) => {
+  try {
+    const { id, fileId } = req.query;
+    const result = await SubmissionsFiles.query()
+      .deleteById(fileId)
+      .where("submission_ref", id);
+    res.json(result);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: error.message });
+  }
+};
+
 module.exports = {
   createSubmissionReference,
   getSubmissionReference,
@@ -204,4 +360,18 @@ module.exports = {
   sendSubmissions,
   detailSubmission,
   deleteSubmission,
+
+  // submissions_file_refs
+  createSubmissionsFileRefs,
+  getSubmissionsFileRefs,
+  updateSubmissionsFileRefs,
+  detailSubmissionsFileRefs,
+  deleteSubmissionsFileRefs,
+
+  // submission with files
+  createSubmissionWithFiles,
+  getSubmissionWithFiles,
+  updateSubmissionWithFiles,
+  detailSubmissionWithFiles,
+  deleteSubmissionWithFiles,
 };

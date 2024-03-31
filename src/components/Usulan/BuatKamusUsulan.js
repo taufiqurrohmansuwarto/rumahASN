@@ -1,13 +1,24 @@
-import { createSubmissionReference } from "@/services/submissions.services";
+import {
+  createSubmissionReference,
+  updateSubmissionReference,
+} from "@/services/submissions.services";
 import { renderMarkdown, uploadFile } from "@/utils/client-utils";
 import { MarkdownEditor } from "@primer/react/drafts";
 import { useMutation } from "@tanstack/react-query";
 import { Button, Card, Col, Form, Input, Row, Select, message } from "antd";
 import { useRouter } from "next/router";
+import { useEffect } from "react";
 
-function BuatKamusUsulan() {
+function BuatKamusUsulan({ type = "create", data = null }) {
   const router = useRouter();
   const [form] = Form.useForm();
+
+  useEffect(() => {
+    if (type === "update") {
+      form.setFieldsValue(data);
+    }
+  }, [data, form, type]);
+
   const { mutateAsync: create, isLoading: isLoadingCreate } = useMutation(
     (data) => createSubmissionReference(data),
     {
@@ -21,18 +32,34 @@ function BuatKamusUsulan() {
     }
   );
 
+  const { mutateAsync: update, isLoading: isLoadingUpdate } = useMutation(
+    (data) => updateSubmissionReference(data),
+    {
+      onSuccess: () => {
+        message.success("Berhasil mengubah kamus usulan");
+      },
+      onError: () => {
+        message.error("Gagal mengubah kamus usulan");
+      },
+    }
+  );
+
   const handleSubmit = async () => {
     try {
       const payload = await form.validateFields();
-      console.log(payload);
-      await create(payload);
+
+      if (type === "update") {
+        await update({ id: data.id, data: payload });
+      } else if (type === "create") {
+        await create(payload);
+      }
     } catch (error) {
       message.error("Gagal membuat kamus usulan");
     }
   };
 
   return (
-    <Card>
+    <Card title={type === "update" ? "Ubah Kamus Usulan" : "Buat Kamus Usulan"}>
       <Row>
         <Col md={12}>
           <Form form={form} onFinish={handleSubmit} layout="vertical">
@@ -84,7 +111,7 @@ function BuatKamusUsulan() {
                 type="primary"
                 htmlType="submit"
               >
-                Submit
+                {type === "update" ? "Ubah" : "Buat"}
               </Button>
             </Form.Item>
           </Form>

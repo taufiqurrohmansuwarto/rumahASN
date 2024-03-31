@@ -22,7 +22,9 @@ SubmissionReference.Auth = {
 };
 
 SubmissionReference.getLayout = function getLayout(page) {
-  return <Layout active="/apps-managements/submissions">{page}</Layout>;
+  return (
+    <Layout active="/apps-managements/submissions/references">{page}</Layout>
+  );
 };
 
 export default SubmissionReference;

@@ -288,6 +288,10 @@ const changeRoutes = (user) => {
                   path: "/apps-managements/submissions/references",
                   name: "Kamus Usulan",
                 },
+                {
+                  path: "/apps-managements/submissions/files",
+                  name: "File Usulan",
+                },
               ],
             },
             sealAdmin?.granted && {
