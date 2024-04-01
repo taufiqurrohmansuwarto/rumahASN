@@ -4,7 +4,7 @@ import { Button, Space, Typography } from "antd";
 import { useState } from "react";
 
 const list_tmt = ["01042024"];
-const dokumen = ["SK", "PERTEK"];
+const dokumen = ["SK", "PERTEK", "SPMT"];
 
 const Tombol = ({ tmt, file }) => {
   const { data, isLoading } = useQuery(
