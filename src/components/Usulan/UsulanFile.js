@@ -2,14 +2,73 @@ import {
   createSubmissionWithFiles,
   getSubmissionWithFiles,
   getSubmissionsFileRefs,
+  deleteSubmissionWithFiles,
+  updateSubmissionWithFiles,
 } from "@/services/submissions.services";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Button, Form, Modal, Select, Table, message } from "antd";
+import {
+  Button,
+  Form,
+  Modal,
+  Popconfirm,
+  Select,
+  Space,
+  Table,
+  message,
+} from "antd";
 import { useRouter } from "next/router";
-import React from "react";
+import React, { useEffect } from "react";
+
+const ModalFormEdit = ({
+  open,
+  onClose,
+  data,
+  files,
+  update,
+  isLoadingUpdate,
+  id,
+}) => {
+  const [form] = Form.useForm();
+
+  useEffect(() => {
+    form.setFieldsValue({ kode_file: data?.kode_file });
+  }, [data, form]);
+
+  const handleOk = async () => {
+    try {
+      const result = await form.validateFields();
+      await update({ id, data: result });
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  return (
+    <Modal
+      confirmLoading={isLoadingUpdate}
+      onOk={handleOk}
+      open={open}
+      onCancel={onClose}
+      title="Edit"
+    >
+      <Form layout="vertical" form={form}>
+        <Form.Item label="File Usulan" name="kode_file">
+          <Select showSearch optionFilterProp="name">
+            {files?.map((item) => (
+              <Select.Option name={item.kode} key={item.kode} value={item.kode}>
+                {item.kode}
+              </Select.Option>
+            ))}
+          </Select>
+        </Form.Item>
+      </Form>
+    </Modal>
+  );
+};
 
 const ModalFormUsulan = ({
   files,
+  id,
   open,
   onClose,
   type = "create",
@@ -18,10 +77,12 @@ const ModalFormUsulan = ({
 }) => {
   const [form] = Form.useForm();
 
+  // const router = useRouter();
+
   const handleOk = async () => {
     try {
       const result = await form.validateFields();
-      await create({ id: router.query.id, data: result });
+      await create({ id, data: result });
     } catch (error) {
       console.log(error);
     }
@@ -31,13 +92,13 @@ const ModalFormUsulan = ({
     <Modal
       centered
       open={open}
-      confirmLoading={false}
-      onOk={null}
+      confirmLoading={isLoadingCreate}
+      onOk={handleOk}
       title={type === "create" ? "Tambah Usulan" : "Edit Usulan"}
       onCancel={onClose}
     >
       <Form layout="vertical" form={form}>
-        <Form.Item label="File Usulan" name="file">
+        <Form.Item label="File Usulan" name="kode_file">
           <Select showSearch optionFilterProp="name">
             {files?.map((item) => (
               <Select.Option name={item.kode} key={item.kode} value={item.kode}>
@@ -55,6 +116,8 @@ function UsulanFile() {
   const router = useRouter();
   const { id } = router.query;
   const [open, setOpen] = React.useState(false);
+  const [edit, setEdit] = React.useState(false);
+  const [editData, setEditData] = React.useState(null);
 
   const queryClient = useQueryClient();
 
@@ -80,6 +143,16 @@ function UsulanFile() {
     setOpen(false);
   };
 
+  const handleEditOpen = (record) => {
+    setEditData(record);
+    setEdit(true);
+  };
+
+  const handleEditClose = () => {
+    setEditData(null);
+    setEdit(false);
+  };
+
   const { data, isLoading } = useQuery(
     ["submissions-files-details", id],
     () => getSubmissionWithFiles(id),
@@ -94,7 +167,58 @@ function UsulanFile() {
     {}
   );
 
-  const columns = [{ title: "Kode", dataIndex: "kode" }];
+  const { mutateAsync: remove, isLoading: isLoadingRemove } = useMutation(
+    (data) => deleteSubmissionWithFiles(data),
+    {
+      onSuccess: () => {
+        message.success("Berhasil menghapus usulan");
+        queryClient.invalidateQueries(["submissions-files-details", id]);
+      },
+      onError: (error) => {
+        message.error(error.message);
+      },
+    }
+  );
+
+  const { mutateAsync: update, isLoading: isLoadingUpdate } = useMutation(
+    (data) => updateSubmissionWithFiles(data),
+    {
+      onSuccess: () => {
+        message.success("Berhasil merubah usulan");
+        queryClient.invalidateQueries(["submissions-files-details", id]);
+        handleEditClose();
+      },
+      onError: (error) => {
+        message.error(error.message);
+      },
+    }
+  );
+
+  const hapusFile = async (id) => {
+    const payload = { id: router.query.id, fileId: id };
+    await remove(payload);
+  };
+
+  const columns = [
+    { title: "Kode", dataIndex: "kode_file" },
+    {
+      title: "Aksi",
+      key: "aksi",
+      render: (row, record) => {
+        return (
+          <Space>
+            <Popconfirm
+              title="apakah anda yakin menghapus"
+              onConfirm={async () => hapusFile(row.id)}
+            >
+              <a>Hapus</a>
+            </Popconfirm>
+            <a onClick={() => handleEditOpen(row)}>Edit</a>
+          </Space>
+        );
+      },
+    },
+  ];
 
   return (
     <div>
@@ -114,10 +238,22 @@ function UsulanFile() {
         loading={isLoading}
       />
       <ModalFormUsulan
+        create={create}
+        id={router.query.id}
+        isLoadingCreate={isLoadingCreate}
         files={files}
         type="create"
         open={open}
         onClose={handleClose}
+      />
+      <ModalFormEdit
+        open={edit}
+        onClose={handleEditClose}
+        data={editData}
+        files={files}
+        isLoadingUpdate={isLoadingUpdate}
+        update={update}
+        id={router.query.id}
       />
     </div>
   );
