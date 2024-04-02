@@ -485,7 +485,7 @@ function Layout({ children, active, collapsed = true }) {
       actionsRender={(props) => {
         // if (props.isMobile) return [];
         return [
-          <SearchUserLayout key="search" />,
+          // <SearchUserLayout key="search" />,
           <Messages key="messages" />,
           <Notifications props={props} key="Notifications" />,
         ];
