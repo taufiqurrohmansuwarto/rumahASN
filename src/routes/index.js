@@ -13,6 +13,7 @@ import {
   SnippetsOutlined,
   UserOutlined,
   VideoCameraAddOutlined,
+  YoutubeOutlined,
 } from "@ant-design/icons";
 
 export const userRoutes = {
@@ -88,10 +89,15 @@ export const userRoutes = {
     // },
 
     {
-      path: "/faq",
-      name: " Pertanyaan Umum",
+      path: "/information",
+      name: "Informasi",
       icon: <QuestionCircleOutlined />,
     },
+    // {
+    //   path: "/pusat-bantuan",
+    //   name: "Pusat Bantuan",
+    //   icon: <YoutubeOutlined />,
+    // },
   ],
 };
 
