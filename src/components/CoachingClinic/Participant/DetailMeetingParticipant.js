@@ -178,7 +178,7 @@ function DetailMeetingParticipant() {
               <Col md={18} xs={24}>
                 <JitsiMeeting
                   domain="coaching-online.site"
-                  jwt={data?.jwt}
+                  // jwt={data?.jwt}
                   roomName={data?.meeting?.id}
                   getIFrameRef={(iframeRef) => {
                     iframeRef.style.height = "800px";
