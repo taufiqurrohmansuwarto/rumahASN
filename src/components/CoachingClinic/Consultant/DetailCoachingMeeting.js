@@ -393,7 +393,7 @@ function DetailCoachingMeeting() {
               <JitsiMeeting
                 key={renderKey}
                 domain="coaching-online.site"
-                jwt={data?.jwt}
+                // jwt={data?.jwt}
                 roomName={data?.id}
                 getIFrameRef={(iframeRef) => {
                   iframeRef.style.height = "800px";
