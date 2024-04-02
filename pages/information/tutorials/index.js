@@ -28,7 +28,7 @@ Tutorial.Auth = {
 };
 
 Tutorial.getLayout = function getLayout(page) {
-  return <Layout active="/information">{page}</Layout>;
+  return <Layout active="/information/faq">{page}</Layout>;
 };
 
 export default Tutorial;

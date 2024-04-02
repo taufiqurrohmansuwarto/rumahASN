@@ -93,11 +93,6 @@ export const userRoutes = {
       name: "Informasi",
       icon: <QuestionCircleOutlined />,
     },
-    // {
-    //   path: "/pusat-bantuan",
-    //   name: "Pusat Bantuan",
-    //   icon: <YoutubeOutlined />,
-    // },
   ],
 };
 
