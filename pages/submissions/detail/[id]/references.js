@@ -5,11 +5,11 @@ import { Breadcrumb } from "antd";
 import Head from "next/head";
 import Link from "next/link";
 
-function AllSubmission() {
+function DetailSubmissionReferences() {
   return (
     <>
       <Head>
-        <title>Rumah ASN - Surat Keputusan Tanda Tangan Elektronik</title>
+        <title>Rumah ASN - Detail Informasi Usulan</title>
       </Head>
       <PageContainer
         header={{
@@ -25,21 +25,19 @@ function AllSubmission() {
           ),
         }}
         title="Usulan"
-        content="Daftar Semua Usulan"
-      >
-        <BuatUsulan />
-      </PageContainer>
+        content="Detail Informasi Usulan"
+      ></PageContainer>
     </>
   );
 }
 
-AllSubmission.getLayout = function getLayout(page) {
+DetailSubmissionReferences.getLayout = function getLayout(page) {
   return <Layout active="/submissions/all">{page}</Layout>;
 };
 
-AllSubmission.Auth = {
+DetailSubmissionReferences.Auth = {
   action: "manage",
   subject: "Tickets",
 };
 
-export default AllSubmission;
+export default DetailSubmissionReferences;
