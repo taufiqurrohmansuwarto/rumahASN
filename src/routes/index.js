@@ -89,7 +89,7 @@ export const userRoutes = {
     // },
 
     {
-      path: "/information",
+      path: "/information/faq",
       name: "Informasi",
       icon: <QuestionCircleOutlined />,
     },
