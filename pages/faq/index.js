@@ -6,6 +6,7 @@ import FAQMenu from "../../src/components/FAQMenu";
 import Layout from "../../src/components/Layout";
 import PageContainer from "../../src/components/PageContainer";
 import Head from "next/head";
+import InformationLayout from "@/components/Information/InformationLayout";
 
 function Feeds() {
   const { data, isLoading } = useQuery(["faqs"], () => getFaqs());
@@ -44,7 +45,11 @@ Feeds.Auth = {
 };
 
 Feeds.getLayout = function getLayout(page) {
-  return <Layout>{page}</Layout>;
+  return (
+    <Layout>
+      <InformationLayout>{page}</InformationLayout>
+    </Layout>
+  );
 };
 
 export default Feeds;
