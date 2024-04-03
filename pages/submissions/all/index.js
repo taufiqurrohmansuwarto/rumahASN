@@ -9,7 +9,7 @@ function AllSubmission() {
   return (
     <>
       <Head>
-        <title>Rumah ASN - Surat Keputusan Tanda Tangan Elektronik</title>
+        <title>Rumah ASN - Daftar Usulan Aplikasi Rumah ASN</title>
       </Head>
       <PageContainer
         header={{

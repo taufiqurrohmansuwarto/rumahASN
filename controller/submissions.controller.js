@@ -2,20 +2,68 @@ const SubmissionsReferences = require("@/models/submissions-references.model");
 const SubmissionPics = require("@/models/submissions-pics.model");
 const SubmissionsFileRefs = require("@/models/submissions-file-refs.model");
 const SubmissionsFiles = require("@/models/submissions-files.model");
+const Submissions = require("@/models/submissions.model");
+const SubmissionHistories = require("@/models/submissions-histories.model");
 
-const createSubmissions = async (req, res) => {
+const typeGroup = ({ role, group }) => {
+  const asn = role === "USER" && group === "MASTER";
+  const fasilitator = group === "MASTER" && role === "FASILITATOR";
+
+  if (asn) {
+    return "asn";
+  } else if (fasilitator) {
+    return "fasilitator";
+  }
+};
+
+const createSubmissionSubmitter = async (req, res) => {
   try {
     const { customId } = req?.user;
+
+    const data = {
+      ...req?.body,
+      submitter: customId,
+      status: "INPUT_USUL",
+    };
+
+    const hasil = await Submissions.query().insert(data);
+
+    await SubmissionHistories.query().insert({
+      submission_id: hasil?.id,
+      user_id: customId,
+      old_data: null,
+      new_data: JSON.stringify(data),
+    });
+
+    res.json({ message: "Submission created successfully" });
   } catch (error) {
     console.log(error);
     res.status(500).json({ error: error.message });
   }
 };
 
-const detailSubmission = async (req, res) => {
+const submitterSubmissions = async (req, res) => {
   try {
-    const { submissionId } = req?.query;
-    const result = await SubmissionsReferences.query().findById(submissionId);
+    const userType = typeGroup(req?.user);
+    const result = await SubmissionsReferences.query().whereRaw(
+      `submitter_type::text LIKE '%${userType}%'`
+    );
+
+    res.json(result);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: error.message });
+  }
+};
+
+const detailSubmissionReferenceSubmitter = async (req, res) => {
+  try {
+    const userType = typeGroup(req?.user);
+    const { id: submissionId } = req?.query;
+    const result = await SubmissionsReferences.query()
+      .where("id", submissionId)
+      .andWhereRaw(`submitter_type::text LIKE '%${userType}%'`)
+      .first();
 
     res.json(result);
   } catch (error) {
@@ -59,6 +107,7 @@ const createSubmissionPersonInCharge = async (req, res) => {
       submission_reference_id: id,
       user_id: userId,
     });
+
     res.json(result);
   } catch (error) {
     console.log(error);
@@ -356,9 +405,10 @@ module.exports = {
   deleteSubmissionPersonInCharge,
 
   // user
-  createSubmissions,
+  submitterSubmissions,
+  createSubmissionSubmitter,
   sendSubmissions,
-  detailSubmission,
+  detailSubmissionReferenceSubmitter,
   deleteSubmission,
 
   // submissions_file_refs

@@ -1,5 +1,6 @@
 import Layout from "@/components/Layout";
 import PageContainer from "@/components/PageContainer";
+import NewSubmission from "@/components/Usulan/Submitter/NewSubmission";
 import { Breadcrumb } from "antd";
 import Head from "next/head";
 import Link from "next/link";
@@ -25,7 +26,9 @@ function AllSubmission() {
         }}
         title="Usulan"
         content="Daftar Semua Usulan"
-      ></PageContainer>
+      >
+        <NewSubmission />
+      </PageContainer>
     </>
   );
 }
