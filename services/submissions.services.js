@@ -107,3 +107,16 @@ export const updateSubmissionWithFiles = async ({ id, data }) => {
 export const getSubmissionWithFiles = async (id) => {
   return api.get(`/admin/references/${id}/files`).then((res) => res?.data);
 };
+
+// submitter
+export const submissionsSubmitter = async () => {
+  return api.get(`/submitter/submissions`).then((res) => res?.data);
+};
+
+export const detailSubmissionSubmitter = async (id) => {
+  return api.get(`/submitter/submissions/${id}`).then((res) => res?.data);
+};
+
+export const createSubmissionSubmitter = async (data) => {
+  return api.post(`/submitter/my-submission`, data).then((res) => res?.data);
+};

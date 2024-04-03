@@ -11,7 +11,6 @@ import {
   Button,
   Card,
   Col,
-  Divider,
   Form,
   Input,
   Modal,
@@ -19,7 +18,6 @@ import {
   Skeleton,
   Space,
   Table as TableAntd,
-  Tabs,
   Tag,
   message,
 } from "antd";

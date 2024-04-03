@@ -1,17 +1,23 @@
 import Layout from "@/components/Layout";
 import PageContainer from "@/components/PageContainer";
-import BuatUsulan from "@/components/Usulan/Submitter/BuatUsulan";
+import DetailSubmission from "@/components/Usulan/Submitter/DetailSubmission";
 import { Breadcrumb } from "antd";
 import Head from "next/head";
 import Link from "next/link";
+import { useRouter } from "next/router";
 
 function DetailSubmissionReferences() {
+  const router = useRouter();
+
+  const handleBack = () => router.back();
+
   return (
     <>
       <Head>
         <title>Rumah ASN - Detail Informasi Usulan</title>
       </Head>
       <PageContainer
+        onBack={handleBack}
         header={{
           breadcrumbRender: () => (
             <Breadcrumb>
@@ -26,7 +32,9 @@ function DetailSubmissionReferences() {
         }}
         title="Usulan"
         content="Detail Informasi Usulan"
-      ></PageContainer>
+      >
+        <DetailSubmission />
+      </PageContainer>
     </>
   );
 }

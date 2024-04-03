@@ -1,13 +1,14 @@
 const {
-  createSubmissions,
-  detailSubmission,
+  detailSubmissionReferenceSubmitter,
 } = require("@/controller/submissions.controller");
-const adminFasilitatorAsnMiddleware = require("@/middleware/admin-fasilitator-asn.middleware");
-const adminMiddleware = require("@/middleware/admin.middleware");
+const asnFasilitatorMiddleware = require("@/middleware/asn-fasilitator.middleware");
 const { default: auth } = require("@/middleware/auth.middleware");
 const { createRouter } = require("next-connect");
 
 const router = createRouter();
-router.use(auth).use(adminFasilitatorAsnMiddleware).get(detailSubmission);
+router
+  .use(auth)
+  .use(asnFasilitatorMiddleware)
+  .get(detailSubmissionReferenceSubmitter);
 
 module.exports = router.handler({});
