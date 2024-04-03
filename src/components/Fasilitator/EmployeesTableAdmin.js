@@ -194,7 +194,14 @@ function EmployeesTableAdmin() {
 
   return (
     <div>
-      <EmployeesTableFilterAdmin />
+      <div
+        style={{
+          border: "1px solid #f0f0f0",
+          padding: 10,
+        }}
+      >
+        <EmployeesTableFilterAdmin />
+      </div>
       <Table
         size="small"
         columns={columns}

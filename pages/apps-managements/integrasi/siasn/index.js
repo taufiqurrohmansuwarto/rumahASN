@@ -47,8 +47,7 @@ const IntegrasiSIASN = () => {
         }}
       >
         <Card>
-          <EmployeesTableAdmin />
-          {/* <Form
+          <Form
             layout="vertical"
             form={form}
             name="form cari siasn"
@@ -70,7 +69,8 @@ const IntegrasiSIASN = () => {
                 Cari
               </Button>
             </Form.Item>
-          </Form> */}
+          </Form>
+          <EmployeesTableAdmin />
           {/* <Divider>Cari Berdasarkan Perangkat Daerah</Divider>
           <HRWithEmployees /> */}
         </Card>
