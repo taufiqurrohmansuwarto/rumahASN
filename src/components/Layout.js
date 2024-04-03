@@ -281,18 +281,18 @@ const changeRoutes = (user) => {
               ],
             },
             {
-              path: "/apps-managements/submissions",
-              name: "Usulan",
-              routes: [
-                {
-                  path: "/apps-managements/submissions/references",
-                  name: "Kamus Usulan",
-                },
-                {
-                  path: "/apps-managements/submissions/files",
-                  name: "File Usulan",
-                },
-              ],
+              // path: "/apps-managements/submissions",
+              // name: "Usulan",
+              // routes: [
+              //   {
+              //     path: "/apps-managements/submissions/references",
+              //     name: "Kamus Usulan",
+              //   },
+              //   {
+              //     path: "/apps-managements/submissions/files",
+              //     name: "File Usulan",
+              //   },
+              // ],
             },
             sealAdmin?.granted && {
               path: "/apps-managements/esign",
