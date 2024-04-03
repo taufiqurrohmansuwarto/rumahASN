@@ -102,6 +102,26 @@ export const checkFileMinioSK = (mc, filename) => {
   });
 };
 
+export const uploadFileUsulan = (mc, filename, file) => {
+  return new Promise((resolve, reject) => {
+    mc.putObject(
+      "bkd",
+      `${filename}`,
+      file.buffer,
+      file.size,
+      { "Content-Type": file.mimetype },
+      function (err, info) {
+        if (err) {
+          reject(err);
+          console.log(err);
+        } else {
+          resolve(info);
+        }
+      }
+    );
+  });
+};
+
 export const downloadFileSK = (mc, filename) => {
   return new Promise((resolve, reject) => {
     mc.getObject("bkd", `${filename}`, function (err, dataStream) {

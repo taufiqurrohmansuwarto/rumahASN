@@ -5,7 +5,7 @@ import multer from "multer";
 import { uploadSubmissionsFile } from "@/controller/submissions.controller";
 const router = createRouter();
 
-const config = {
+export const config = {
   api: {
     bodyParser: false,
   },
