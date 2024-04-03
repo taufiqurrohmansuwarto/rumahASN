@@ -135,3 +135,13 @@ export const getAllSubmissionSubmitter = async (query) => {
 export const detailSubmissionSubmitters = async (id) => {
   return api.get(`/submitter/my-submission/${id}`).then((res) => res?.data);
 };
+
+export const uploadSubmitter = async ({ id, data }) => {
+  return api
+    .post(`/submitter/my-submission/${id}/upload`, data, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    })
+    .then((res) => res?.data);
+};

@@ -5,6 +5,7 @@ const SubmissionsFiles = require("@/models/submissions-files.model");
 const Submissions = require("@/models/submissions.model");
 const SubmissionHistories = require("@/models/submissions-histories.model");
 const { TEMPORARY_REDIRECT_STATUS } = require("next/dist/shared/lib/constants");
+const { uploadFileUsulan } = require("../utils");
 
 const typeGroup = ({ role, group }) => {
   const asn = role === "USER" && group === "MASTER";
@@ -29,7 +30,7 @@ const detailSubmissionSubmitter = async (req, res) => {
     const result = await Submissions.query()
       .andWhere("id", id)
       .andWhere("submitter", customId)
-      .withGraphFetched("[reference.[submission_files]]")
+      .withGraphFetched("[reference.[submission_files.[file]]]")
       .first();
 
     res.json(result);
@@ -309,10 +310,24 @@ const uploadSubmissionsFile = async (req, res) => {
   try {
     const { file } = req;
     const { id } = req?.query;
+    const body = req?.body;
 
-    // diupload
+    const filename = `/usulan/${id}_${body?.kode_file}.pdf`;
 
-    // upload file
+    await uploadFileUsulan(req?.mc, filename, file);
+    const payload = {
+      kode: body?.kode_file,
+      path: filename,
+    };
+
+    // files in submissions is type array of object so we need to push it
+    await Submissions.query().patch(
+      {
+        submission_files: Submissions.raw("submission_files || ?", [payload]),
+      },
+      id
+    );
+
     res.json({ message: "File uploaded successfully" });
   } catch (error) {
     console.log(error);
