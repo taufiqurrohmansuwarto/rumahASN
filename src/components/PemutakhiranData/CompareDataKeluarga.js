@@ -1,12 +1,6 @@
-import {
-  dataAnak,
-  dataOrtu,
-  dataPasangan,
-  dataRiwayatKeluargaSIASN,
-} from "@/services/siasn-services";
+import { dataAnak, dataOrtu, dataPasangan } from "@/services/siasn-services";
 import { useQuery } from "@tanstack/react-query";
 import { Card, Table, Tabs } from "antd";
-import React from "react";
 
 const OrangTua = ({ data, loading }) => {
   const columns = [
@@ -21,6 +15,7 @@ const OrangTua = ({ data, loading }) => {
       loading={loading}
       pagination={false}
       dataSource={data}
+      rowKey={(row) => row?.id}
     />
   );
 };
@@ -41,9 +36,29 @@ const Pasangan = ({ data, loading }) => {
         columns={columns}
         pagination={false}
         dataSource={data}
+        rowKey={(row) => row?.id}
       />
     </>
   );
+};
+
+const Anak = ({ data, loading }) => {
+  const columns = [
+    {
+      title: "Nama",
+      dataIndex: "nama",
+    },
+    {
+      title: "Jenis Kelamin",
+      dataIndex: "jenisKelamin",
+    },
+    {
+      title: "Tanggal Lahir",
+      dataIndex: "tglLahir",
+    },
+  ];
+
+  return <Table columns={columns} loading={loading} dataSource={data} />;
 };
 
 function CompareDataKeluarga() {
@@ -73,7 +88,7 @@ function CompareDataKeluarga() {
         </Card>
       </Tabs.TabPane>
       <Tabs.TabPane tab="Anak" key="2">
-        <Card>{JSON.stringify(anak)}</Card>
+        <Anak loading={loadingAnak} data={anak} />
       </Tabs.TabPane>
       <Tabs.TabPane tab="Pasangan" key="3">
         <Card>
