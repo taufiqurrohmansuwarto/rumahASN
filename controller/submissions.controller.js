@@ -4,7 +4,6 @@ const SubmissionsFileRefs = require("@/models/submissions-file-refs.model");
 const SubmissionsFiles = require("@/models/submissions-files.model");
 const Submissions = require("@/models/submissions.model");
 const SubmissionHistories = require("@/models/submissions-histories.model");
-const { TEMPORARY_REDIRECT_STATUS } = require("next/dist/shared/lib/constants");
 const { uploadFileUsulan } = require("../utils");
 
 const typeGroup = ({ role, group }) => {
@@ -16,11 +15,6 @@ const typeGroup = ({ role, group }) => {
   } else if (fasilitator) {
     return "fasilitator";
   }
-};
-
-const uploadDokumen = async (req, res) => {
-  try {
-  } catch (error) {}
 };
 
 const detailSubmissionSubmitter = async (req, res) => {
@@ -43,11 +37,13 @@ const detailSubmissionSubmitter = async (req, res) => {
 const createSubmissionSubmitter = async (req, res) => {
   try {
     const { customId } = req?.user;
+    const group = typeGroup(req?.user);
 
     const data = {
       ...req?.body,
       submitter: customId,
       status: "INPUT_USUL",
+      employee_number: group === "asn" ? req?.user?.employee_number : null,
     };
 
     const hasil = await Submissions.query().insert(data);
@@ -142,6 +138,29 @@ const deleteSubmissionSubmitter = async (req, res) => {
 
 const sendSubmissions = async (req, res) => {
   try {
+    const { id } = req?.query;
+    const { customId } = req?.user;
+
+    const currentSubmission = await Submissions.query()
+      .where("id", id)
+      .andWhere("submitter", customId)
+      .andWhere("status", "INPUT_USUL")
+      .first();
+
+    await Submissions.query()
+      .patch({ status: "TERKIRIM" })
+      .where("id", id)
+      .andWhere("submitter", customId)
+      .andWhere("status", "INPUT_USUL");
+
+    await SubmissionHistories.query().insert({
+      submission_id: id,
+      user_id: customId,
+      new_data: JSON.stringify({ status: "TERKIRIM" }),
+      old_data: JSON.stringify(currentSubmission),
+    });
+
+    res.json({ message: "Submission sent successfully" });
   } catch (error) {
     console.log(error);
     res.status(500).json({ error: error.message });
@@ -312,23 +331,43 @@ const uploadSubmissionsFile = async (req, res) => {
     const { id } = req?.query;
     const body = req?.body;
 
-    const filename = `/usulan/${id}_${body?.kode_file}.pdf`;
-
+    const currentSubmission = await Submissions.query().findById(id);
+    const filename = `usulan/${id}_${body?.kode_file}.pdf`;
     await uploadFileUsulan(req?.mc, filename, file);
+
     const payload = {
-      kode: body?.kode_file,
-      path: filename,
+      uid: body?.kode_file,
+      name: file?.originalname,
+      url: `https://siasn.bkd.jatimprov.go.id:9000/public/${filename}`,
+      status: "done",
     };
 
-    // files in submissions is type array of object so we need to push it
-    await Submissions.query().patch(
-      {
-        submission_files: Submissions.raw("submission_files || ?", [payload]),
-      },
-      id
+    const findFile = currentSubmission?.files?.find(
+      (item) => item?.uid === body?.kode_file
     );
 
-    res.json({ message: "File uploaded successfully" });
+    if (!findFile) {
+      const data = currentSubmission?.files?.concat(payload);
+      await Submissions.query().patchAndFetchById(id, {
+        files: JSON.stringify(data),
+      });
+
+      res.json(payload);
+    } else {
+      // update file
+      const data = currentSubmission?.files?.map((item) => {
+        if (item?.uid === body?.kode_file) {
+          return payload;
+        }
+        return item;
+      });
+
+      await Submissions.query().patchAndFetchById(id, {
+        files: JSON.stringify(data),
+      });
+
+      res.json(payload);
+    }
   } catch (error) {
     console.log(error);
     res.status(500).json({ error: error.message });

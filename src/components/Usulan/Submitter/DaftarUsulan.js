@@ -31,6 +31,10 @@ function DaftarUsulan() {
       render: (_, row) => <div>{row?.reference?.type}</div>,
     },
     {
+      title: "NIP",
+      dataIndex: "employee_number",
+    },
+    {
       title: "Status",
       key: "status",
       render: (_, row) => <Tag color="yellow">{row?.status}</Tag>,

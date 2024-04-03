@@ -50,7 +50,9 @@ function BuatUsulan() {
 
   return (
     <Skeleton loading={isLoading}>
-      <Button onClick={handleOpen}>Buat Usulan</Button>
+      <Button type="primary" onClick={handleOpen}>
+        Buat Usulan
+      </Button>
       <ModalUsulan data={data} open={open} handleCancel={handleClose} />
     </Skeleton>
   );

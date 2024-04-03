@@ -1,4 +1,4 @@
-import { Form } from "antd";
+import { Form, Input } from "antd";
 import React from "react";
 
 function FormPerbaikanNama() {
@@ -6,7 +6,14 @@ function FormPerbaikanNama() {
 
   return (
     <div>
-      <Form form={form}></Form>
+      <Form form={form}>
+        <Form.Item name="nipLama">
+          <Input placeholder="NIP Lama" />
+        </Form.Item>
+        <Form.Item name="nipBaru">
+          <Input placeholder="NIP Baru" />
+        </Form.Item>
+      </Form>
     </div>
   );
 }

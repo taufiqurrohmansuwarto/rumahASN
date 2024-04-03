@@ -5,12 +5,12 @@ import {
   ApiOutlined,
   BarChartOutlined,
   BookOutlined,
+  FileSearchOutlined,
   GroupOutlined,
   LogoutOutlined,
   ProfileOutlined,
   QuestionCircleFilled,
   SolutionOutlined,
-  StarOutlined,
   TeamOutlined,
   UserOutlined,
   UsergroupAddOutlined,
@@ -27,7 +27,6 @@ import { useState } from "react";
 import { userRoutes } from "../routes";
 import Messages from "./Messages";
 import Notifications from "./Notifications";
-import SearchUserLayout from "./SearchUserLayout";
 
 const ProLayout = dynamic(
   () => import("@ant-design/pro-components").then((mod) => mod?.ProLayout),
@@ -131,23 +130,9 @@ const changeRoutes = (user) => {
           icon: <ApiOutlined />,
         },
         {
-          path: "/submissions",
+          path: "/submissions/all",
           name: "Usulan",
-          icon: <SolutionOutlined />,
-          routes: [
-            {
-              path: "/submissions/all",
-              name: "Semua Usulan",
-            },
-            {
-              path: "/submissions/input-usulan",
-              name: "Status Input Usul",
-            },
-            {
-              path: "/submissions/kirim-usulan",
-              name: "Kirim Usulan",
-            },
-          ],
+          icon: <FileSearchOutlined />,
         },
         {
           path: "/berkas",

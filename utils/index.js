@@ -105,7 +105,7 @@ export const checkFileMinioSK = (mc, filename) => {
 export const uploadFileUsulan = (mc, filename, file) => {
   return new Promise((resolve, reject) => {
     mc.putObject(
-      "bkd",
+      "public",
       `${filename}`,
       file.buffer,
       file.size,
