@@ -120,3 +120,18 @@ export const detailSubmissionSubmitter = async (id) => {
 export const createSubmissionSubmitter = async (data) => {
   return api.post(`/submitter/my-submission`, data).then((res) => res?.data);
 };
+
+export const getAllSubmissionSubmitter = async (query) => {
+  return api
+    .get(
+      `/submitter/my-submission?${queryString.stringify(query, {
+        skipEmptyString: true,
+        skipNull: true,
+      })}`
+    )
+    .then((res) => res?.data);
+};
+
+export const detailSubmissionSubmitters = async (id) => {
+  return api.get(`/submitter/my-submission/${id}`).then((res) => res?.data);
+};

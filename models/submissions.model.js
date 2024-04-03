@@ -9,7 +9,19 @@ class Submissions extends Model {
     return "submissions";
   }
 
-  static get relationMappings() {}
+  static get relationMappings() {
+    const SubmissionReference = require("@/models/submissions-references.model");
+    return {
+      reference: {
+        relation: Model.HasOneRelation,
+        modelClass: SubmissionReference,
+        join: {
+          from: "submissions.submission_reference_id",
+          to: "submissions_references.id",
+        },
+      },
+    };
+  }
 
   $beforeInsert() {
     this.id = nanoid(12);

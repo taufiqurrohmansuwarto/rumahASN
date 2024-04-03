@@ -1,12 +1,13 @@
 import Layout from "@/components/Layout";
 import PageContainer from "@/components/PageContainer";
-import BuatUsulan from "@/components/Usulan/Submitter/BuatUsulan";
-import DaftarUsulan from "@/components/Usulan/Submitter/DaftarUsulan";
+import DetailUsulan from "@/components/Usulan/Submitter/DetailUsulan";
 import { Breadcrumb } from "antd";
 import Head from "next/head";
 import Link from "next/link";
+import { useRouter } from "next/router";
 
-function AllSubmission() {
+function DetailSubmissionSubmitter() {
+  const router = useRouter();
   return (
     <>
       <Head>
@@ -28,20 +29,19 @@ function AllSubmission() {
         title="Usulan"
         content="Daftar Semua Usulan"
       >
-        <BuatUsulan />
-        <DaftarUsulan />
+        <DetailUsulan id={router?.query?.id} />
       </PageContainer>
     </>
   );
 }
 
-AllSubmission.getLayout = function getLayout(page) {
+DetailSubmissionSubmitter.getLayout = function getLayout(page) {
   return <Layout active="/submissions/all">{page}</Layout>;
 };
 
-AllSubmission.Auth = {
+DetailSubmissionSubmitter.Auth = {
   action: "manage",
   subject: "Tickets",
 };
 
-export default AllSubmission;
+export default DetailSubmissionSubmitter;
