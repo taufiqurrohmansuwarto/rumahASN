@@ -2,7 +2,7 @@ import Layout from "@/components/Layout";
 import PageContainer from "@/components/PageContainer";
 import BuatUsulan from "@/components/Usulan/Submitter/BuatUsulan";
 import DaftarUsulan from "@/components/Usulan/Submitter/DaftarUsulan";
-import { Breadcrumb } from "antd";
+import { Breadcrumb, Card } from "antd";
 import Head from "next/head";
 import Link from "next/link";
 
@@ -28,8 +28,10 @@ function AllSubmission() {
         title="Usulan"
         content="Daftar Semua Usulan"
       >
-        <BuatUsulan />
-        <DaftarUsulan />
+        <Card>
+          <BuatUsulan />
+          <DaftarUsulan />
+        </Card>
       </PageContainer>
     </>
   );

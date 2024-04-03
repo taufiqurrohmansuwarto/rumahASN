@@ -22,6 +22,7 @@ const TagKomparasi = ({ komparasi, nama }) => {
 
 function EmployeesTable() {
   const router = useRouter();
+
   const { data, isLoading, isFetching } = useQuery(
     ["employees-paging", router?.query],
     () => getAllEmployeesPaging(router?.query),

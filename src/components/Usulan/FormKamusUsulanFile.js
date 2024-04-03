@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { Button, Checkbox, Form, Input, message } from "antd";
+import { Button, Card, Checkbox, Col, Form, Input, Row, message } from "antd";
 import { useMutation } from "@tanstack/react-query";
 import {
   createSubmissionsFileRefs,
@@ -65,54 +65,76 @@ function FormKamusUsulanFile({ type = "create", data }) {
     }
   };
 
+  const normalizeToSnakeCase = (value) => {
+    return value.replace(/\s/g, "_").toLowerCase();
+  };
+
   return (
-    <Form
-      title="Form Kamus Usulan File"
-      form={form}
-      layout="vertical"
-      onFinish={handleFinish}
-    >
-      <Form.Item name="kode" label="Kode">
-        <Input />
-      </Form.Item>
-      <Form.Item
-        required
-        rules={[{ required: true, message: "Tidak boleh kosong" }]}
-        label="Deskripsi"
-        name="description"
-      >
-        <MarkdownEditor
-          acceptedFileTypes={[
-            "image/*",
-            // word, excel, txt, pdf
-            ".doc",
-            ".docx",
-            ".xls",
-            ".xlsx",
-            ".txt",
-            ".pdf",
-          ]}
-          onRenderPreview={renderMarkdown}
-          onUploadFile={uploadFile}
-          mentionSuggestions={null}
-        />
-      </Form.Item>
-      <Form.Item valuePropName="checked" name="is_primary" label="Wajib?">
-        <Checkbox />
-      </Form.Item>
-      <Form.Item valuePropName="checked" name="is_active" label="Aktif?">
-        <Checkbox />
-      </Form.Item>
-      <Form.Item>
-        <Button
-          htmlType="submit"
-          loading={isLoadingCreate || isLoadingUpdate}
-          type="primary"
-        >
-          {type === "create" ? "Tambah" : "Ubah"}
-        </Button>
-      </Form.Item>
-    </Form>
+    <Card>
+      <Row>
+        <Col md={18}>
+          <Form
+            title="Form Kamus Usulan File"
+            form={form}
+            layout="vertical"
+            onFinish={handleFinish}
+          >
+            <Form.Item
+              help="Kode harus unik, tidak boleh ada spasi, dan hanya boleh huruf kecil"
+              normalize={normalizeToSnakeCase}
+              name="kode"
+              label="Kode"
+            >
+              <Input />
+            </Form.Item>
+            <Form.Item
+              name="title"
+              label="Nama Dokumen"
+              help="Nama dokumen yang akan ditampilkan di aplikasi"
+            >
+              <Input />
+            </Form.Item>
+            <Form.Item
+              required
+              rules={[{ required: true, message: "Tidak boleh kosong" }]}
+              label="Deskripsi"
+              name="description"
+            >
+              <MarkdownEditor
+                acceptedFileTypes={[
+                  "image/*",
+                  // word, excel, txt, pdf
+                  ".doc",
+                  ".docx",
+                  ".xls",
+                  ".xlsx",
+                  ".txt",
+                  ".pdf",
+                ]}
+                onRenderPreview={renderMarkdown}
+                onUploadFile={uploadFile}
+                mentionSuggestions={null}
+              />
+            </Form.Item>
+            <Form.Item valuePropName="checked" name="is_primary" label="Wajib?">
+              <Checkbox />
+            </Form.Item>
+            <Form.Item valuePropName="checked" name="is_active" label="Aktif?">
+              <Checkbox />
+            </Form.Item>
+            <Form.Item>
+              <Button
+                htmlType="submit"
+                loading={isLoadingCreate || isLoadingUpdate}
+                type="primary"
+              >
+                {type === "create" ? "Tambah" : "Ubah"}
+              </Button>
+            </Form.Item>
+          </Form>
+        </Col>
+      </Row>
+    </Card>
   );
 }
 
