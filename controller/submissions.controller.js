@@ -4,6 +4,7 @@ const SubmissionsFileRefs = require("@/models/submissions-file-refs.model");
 const SubmissionsFiles = require("@/models/submissions-files.model");
 const Submissions = require("@/models/submissions.model");
 const SubmissionHistories = require("@/models/submissions-histories.model");
+const { TEMPORARY_REDIRECT_STATUS } = require("next/dist/shared/lib/constants");
 
 const typeGroup = ({ role, group }) => {
   const asn = role === "USER" && group === "MASTER";
@@ -13,6 +14,28 @@ const typeGroup = ({ role, group }) => {
     return "asn";
   } else if (fasilitator) {
     return "fasilitator";
+  }
+};
+
+const uploadDokumen = async (req, res) => {
+  try {
+  } catch (error) {}
+};
+
+const detailSubmissionSubmitter = async (req, res) => {
+  try {
+    const { id } = req?.query;
+    const { customId } = req?.user;
+    const result = await Submissions.query()
+      .andWhere("id", id)
+      .andWhere("submitter", customId)
+      .withGraphFetched("[reference.[submission_files]]")
+      .first();
+
+    res.json(result);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: error.message });
   }
 };
 
@@ -36,6 +59,34 @@ const createSubmissionSubmitter = async (req, res) => {
     });
 
     res.json({ message: "Submission created successfully" });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: error.message });
+  }
+};
+
+const getAllSubmissionSubmitter = async (req, res) => {
+  try {
+    const page = req?.query?.page || 1;
+    const limit = req?.query?.limit || 10;
+
+    const { customId } = req?.user;
+    const result = await Submissions.query()
+      .where("submitter", customId)
+      .orderBy("created_at", "desc")
+      .withGraphFetched("[reference]")
+      .page(page - 1, limit);
+
+    const data = {
+      total: result.total,
+      data: result.results,
+      meta: {
+        page: parseInt(page),
+        limit: parseInt(limit),
+      },
+    };
+
+    res.json(data);
   } catch (error) {
     console.log(error);
     res.status(500).json({ error: error.message });
@@ -66,6 +117,22 @@ const detailSubmissionReferenceSubmitter = async (req, res) => {
       .first();
 
     res.json(result);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: error.message });
+  }
+};
+
+const deleteSubmissionSubmitter = async (req, res) => {
+  try {
+    const { id } = req?.query;
+    const { customId } = req?.user;
+
+    await Submissions.query()
+      .deleteById(id)
+      .andWhere("submitter", customId)
+      .andWhere("status", "INPUT_USUL");
+    res.json({ message: "Submission deleted successfully" });
   } catch (error) {
     console.log(error);
     res.status(500).json({ error: error.message });
@@ -243,7 +310,10 @@ const uploadSubmissionsFile = async (req, res) => {
     const { file } = req;
     const { id } = req?.query;
 
+    // diupload
+
     // upload file
+    res.json({ message: "File uploaded successfully" });
   } catch (error) {
     console.log(error);
     res.status(500).json({ error: error.message });
@@ -405,11 +475,14 @@ module.exports = {
   deleteSubmissionPersonInCharge,
 
   // user
+  getAllSubmissionSubmitter,
   submitterSubmissions,
   createSubmissionSubmitter,
+  detailSubmissionSubmitter,
   sendSubmissions,
   detailSubmissionReferenceSubmitter,
-  deleteSubmission,
+  deleteSubmissionSubmitter,
+  uploadSubmissionsFile,
 
   // submissions_file_refs
   createSubmissionsFileRefs,

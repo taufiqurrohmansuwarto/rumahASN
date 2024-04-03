@@ -11,6 +11,8 @@ class SubmissionsReferences extends Model {
 
   static get relationMappings() {
     const User = require("./users.model");
+    const SubmissionFiles = require("./submissions-files.model");
+
     return {
       user: {
         relation: Model.BelongsToOneRelation,
@@ -18,6 +20,14 @@ class SubmissionsReferences extends Model {
         join: {
           from: "submissions_references.user_id",
           to: "users.custom_id",
+        },
+      },
+      submission_files: {
+        relation: Model.HasManyRelation,
+        modelClass: SubmissionFiles,
+        join: {
+          from: "submissions_references.id",
+          to: "submissions_files.submission_ref",
         },
       },
     };
