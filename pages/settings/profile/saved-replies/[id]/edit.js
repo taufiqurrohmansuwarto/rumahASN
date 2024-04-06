@@ -1,12 +1,11 @@
 import Layout from "@/components/Layout";
 import PageContainer from "@/components/PageContainer";
-import { useQuery } from "@tanstack/react-query";
-import { Breadcrumb, Card, Col, PageHeader, Row } from "antd";
-import EditSavedReplies from "@/components/SavedReplies/EditSavedReplies";
-import { useRouter } from "next/router";
-import { detailSavedReplies, getSavedReplies } from "@/services/index";
-import Link from "next/link";
 import ProfileLayout from "@/components/ProfileSettings/ProfileLayout";
+import EditSavedReplies from "@/components/SavedReplies/EditSavedReplies";
+import { detailSavedReplies, getSavedReplies } from "@/services/index";
+import { useQuery } from "@tanstack/react-query";
+import { Col, Row } from "antd";
+import { useRouter } from "next/router";
 
 const Edit = () => {
   const router = useRouter();
@@ -24,7 +23,7 @@ const Edit = () => {
   );
 
   return (
-    <PageHeader
+    <PageContainer
       title="Edit"
       subTitle="Template Balasan"
       onBack={() => router?.back()}
@@ -39,7 +38,7 @@ const Edit = () => {
           />
         </Col>
       </Row>
-    </PageHeader>
+    </PageContainer>
   );
 };
 

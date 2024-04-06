@@ -1,20 +1,10 @@
 import Layout from "@/components/Layout";
+import PageContainer from "@/components/PageContainer";
 import ProfileLayout from "@/components/ProfileSettings/ProfileLayout";
 import { ownProfile, updateOwnProfile } from "@/services/index";
 import { Stack } from "@mantine/core";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import {
-  Avatar,
-  Button,
-  Card,
-  Col,
-  Form,
-  Input,
-  PageHeader,
-  Row,
-  Skeleton,
-  message,
-} from "antd";
+import { Avatar, Button, Col, Form, Input, Row, Skeleton, message } from "antd";
 import { useSession } from "next-auth/react";
 import Head from "next/head";
 
@@ -98,7 +88,7 @@ function Profile() {
       <Head>
         <title>Rumah ASN - Pengaturan - Profil</title>
       </Head>
-      <PageHeader title="Profile">
+      <PageContainer>
         <Row>
           <Col md={12} xs={24}>
             <Stack>
@@ -109,7 +99,7 @@ function Profile() {
             </Stack>
           </Col>
         </Row>
-      </PageHeader>
+      </PageContainer>
     </>
   );
 }

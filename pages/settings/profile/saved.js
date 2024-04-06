@@ -1,7 +1,7 @@
 import Layout from "@/components/Layout";
+import PageContainer from "@/components/PageContainer";
 import ProfileLayout from "@/components/ProfileSettings/ProfileLayout";
 import SavedQuestions from "@/components/ProfileSettings/SavedQuestions";
-import { PageHeader } from "antd";
 import Head from "next/head";
 
 const Saved = () => {
@@ -10,9 +10,9 @@ const Saved = () => {
       <Head>
         <title>Rumah ASN - Konfigurasi - Daftar Pertanyaan Tersimpan</title>
       </Head>
-      <PageHeader title="Daftar Pertanyaan Tersimpan">
+      <PageContainer title="Daftar Pertanyaan Tersimpan">
         <SavedQuestions />
-      </PageHeader>
+      </PageContainer>
     </>
   );
 };

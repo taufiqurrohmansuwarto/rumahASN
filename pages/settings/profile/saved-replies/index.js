@@ -1,9 +1,10 @@
 import Layout from "@/components/Layout";
+import PageContainer from "@/components/PageContainer";
 import ProfileLayout from "@/components/ProfileSettings/ProfileLayout";
 import CreateSavedReplies from "@/components/SavedReplies/CreateSavedReplies";
 import ListSavedReplies from "@/components/SavedReplies/ListSavedReplies";
 import { Grid, Stack } from "@mantine/core";
-import { Alert, Divider, PageHeader } from "antd";
+import { Divider } from "antd";
 import Head from "next/head";
 
 const SavedReplies = () => {
@@ -12,7 +13,7 @@ const SavedReplies = () => {
       <Head>
         <title>Rumah ASN - Konfigurasi - Template Balasan</title>
       </Head>
-      <PageHeader title="Template Balasan">
+      <PageContainer title="Template Balasan">
         <Grid>
           <Grid.Col md={8} xs={12}>
             <Stack>
@@ -28,7 +29,7 @@ const SavedReplies = () => {
             </Stack>
           </Grid.Col>
         </Grid>
-      </PageHeader>
+      </PageContainer>
     </>
   );
 };
