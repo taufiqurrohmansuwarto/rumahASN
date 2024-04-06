@@ -1,7 +1,7 @@
 import Layout from "@/components/Layout";
 import PageContainer from "@/components/PageContainer";
 import {
-  BackTop,
+  FloatButton,
   Breadcrumb,
   Button,
   Card,
@@ -471,7 +471,7 @@ function AnomaliData2023() {
           ),
         }}
       >
-        <BackTop />
+        <FloatButton.BackTop />
         <ListAnomali />
       </PageContainer>
     </>

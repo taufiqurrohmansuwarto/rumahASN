@@ -115,7 +115,7 @@ export function MenuMySAPK({ dataUtama }) {
         </Card>
       </Group>
       <SimpleGrid
-        cols={screens.xl ? 4 : screens.lg ? 3 : screens.md ? 2 : 2}
+        cols={screens.xl ? 6 : screens.lg ? 3 : screens.md ? 2 : 2}
         mt="md"
       >
         {items}

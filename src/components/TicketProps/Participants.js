@@ -1,7 +1,13 @@
-import { Space, Typography, Avatar, Tooltip } from "antd";
-import Link from "next/link";
+import { Avatar, Space, Tooltip, Typography } from "antd";
+import { useRouter } from "next/router";
 
 function Participants({ item }) {
+  const router = useRouter();
+
+  const gotoDetailUser = (id) => {
+    router.push(`/users/${id}`);
+  };
+
   return (
     <Space direction="vertical">
       <Typography.Text style={{ fontSize: 12 }}>
@@ -11,11 +17,13 @@ function Participants({ item }) {
       {item?.participants?.length > 0 && (
         <Avatar.Group>
           {item?.participants?.map((item) => (
-            <Link href={`/users/${item?.custom_id}`} key={item?.custom_id}>
-              <Tooltip title={item?.username}>
-                <Avatar style={{ cursor: "pointer" }} src={item?.image} />
-              </Tooltip>
-            </Link>
+            <Tooltip title={item?.username} key={item?.custom_id}>
+              <Avatar
+                onClick={() => gotoDetailUser(item?.custom_id)}
+                style={{ cursor: "pointer" }}
+                src={item?.image}
+              />
+            </Tooltip>
           ))}
         </Avatar.Group>
       )}

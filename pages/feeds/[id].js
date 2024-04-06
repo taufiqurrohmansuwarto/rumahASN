@@ -1,5 +1,6 @@
 import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
-import { Button, Comment, Form, Input, message } from "antd";
+import { Button, Form, Input, message } from "antd";
+import { Comment } from "@ant-design/compatible";
 import { signOut, useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import { createComment, detailComments } from "../../services";

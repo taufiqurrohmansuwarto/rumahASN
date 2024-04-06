@@ -1,4 +1,4 @@
-import { Blockquote, Code, Table, Text, Title } from "@mantine/core";
+import { Blockquote, Code, Stack, Table, Text, Title } from "@mantine/core";
 import { Image } from "antd";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -111,13 +111,15 @@ function ReactMarkdownCustom({ children }) {
   };
 
   return (
-    <ReactMarkdown
-      remarkPlugins={[remarkGfm, remarkBreaks]}
-      rehypePlugins={[rehypeRaw]}
-      components={components}
-    >
-      {custom(children)}
-    </ReactMarkdown>
+    <Stack>
+      <ReactMarkdown
+        remarkPlugins={[remarkGfm, remarkBreaks]}
+        rehypePlugins={[rehypeRaw]}
+        components={components}
+      >
+        {custom(children)}
+      </ReactMarkdown>
+    </Stack>
   );
 }
 

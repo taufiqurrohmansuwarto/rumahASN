@@ -104,7 +104,6 @@ const TitleLink = ({ item }) => {
         onClick={handleClick}
         style={{ marginRight: 8, cursor: "pointer" }}
       >
-        {/* <Link href={`/customers-tickets/${item?.id}`}>{item.title}</Link> */}
         {item?.title}
       </Typography.Text>
       {screens?.xs && <br />}

@@ -6,17 +6,14 @@ import {
   BarChartOutlined,
   BookOutlined,
   FileSearchOutlined,
-  GithubFilled,
   GroupOutlined,
   LogoutOutlined,
-  PhoneOutlined,
   ProfileOutlined,
   QuestionCircleFilled,
   SolutionOutlined,
   TeamOutlined,
   UserOutlined,
   UsergroupAddOutlined,
-  WechatOutlined,
 } from "@ant-design/icons";
 import { Center } from "@mantine/core";
 import { AccessControl } from "accesscontrol";
@@ -28,8 +25,10 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import { useState } from "react";
 import { userRoutes } from "../routes";
-import Messages from "./Messages";
-import Notifications from "./Notifications";
+import NotifikasiASNConnect from "./Notification/NotifikasiASNConnect";
+import NotifikasiForumKepegawaian from "./Notification/NotifikasiForumKepegawaian";
+import NotifikasiPrivateMessage from "./Notification/NotifikasiPrivateMessage";
+import NotifikasiUsulan from "./Notification/NotifikasiUsulan";
 
 const ProLayout = dynamic(
   () => import("@ant-design/pro-components").then((mod) => mod?.ProLayout),
@@ -129,14 +128,14 @@ const changeRoutes = (user) => {
       userRoutes.routes.push(
         {
           path: "/pemutakhiran-data/komparasi",
-          name: "Integrasi SIASN",
+          name: "Integrasi MyASN",
           icon: <ApiOutlined />,
         },
-        {
-          path: "/submissions/all",
-          name: "Usulan",
-          icon: <FileSearchOutlined />,
-        },
+        // {
+        //   path: "/submissions/all",
+        //   name: "Usulan",
+        //   icon: <FileSearchOutlined />,
+        // },
         {
           path: "/berkas",
           name: "Berkas",
@@ -403,6 +402,10 @@ function Layout({ children, active, collapsed = true }) {
         if (!collapsed) {
           return (
             <Button
+              style={{
+                // marginTop: 10,
+                marginBottom: 10,
+              }}
               onClick={handlePertanyan}
               shape="round"
               icon={<QuestionCircleFilled />}
@@ -427,7 +430,7 @@ function Layout({ children, active, collapsed = true }) {
         }
       }}
       title="Rumah ASN"
-      logo={"https://siasn.bkd.jatimprov.go.id:9000/public/logobkd.jpg"}
+      logo={null}
       headerTitleRender={(logo, title) => {
         const defaultDom = (
           <>
@@ -473,11 +476,10 @@ function Layout({ children, active, collapsed = true }) {
       actionsRender={(props) => {
         // if (props.isMobile) return [];
         return [
-          // <SearchUserLayout key="search" />,
-          <WechatOutlined key="github" />,
-          <PhoneOutlined key="phone" />,
-          // <Messages key="messages" />,
-          <Notifications props={props} key="Notifications" />,
+          <NotifikasiUsulan key="usulan" />,
+          <NotifikasiPrivateMessage key="private-message" />,
+          <NotifikasiASNConnect key="asn-connect" />,
+          <NotifikasiForumKepegawaian key="forum-kepegawaian" />,
         ];
       }}
       appList={appList(data?.user)}

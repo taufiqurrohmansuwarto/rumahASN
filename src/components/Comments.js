@@ -1,7 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Button, Card, Comment, Form, Input, message } from "antd";
+import { Button, Card, Form, Input, message } from "antd";
 import { createComment, getComments } from "../../services";
 import { useSession } from "next-auth/react";
+import { Comment } from "@ant-design/compatible";
 
 const CreateComments = ({ user }) => {
   const queryClient = useQueryClient();

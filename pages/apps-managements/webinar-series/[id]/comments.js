@@ -10,7 +10,7 @@ import {
 } from "@/services/webinar.services";
 import { CloudDownloadOutlined } from "@ant-design/icons";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { BackTop, Button, message } from "antd";
+import { FloatButton, Button, message } from "antd";
 import { useRouter } from "next/router";
 
 function Comments() {
@@ -112,7 +112,7 @@ function Comments() {
 
   return (
     <AdminLayoutDetailWebinar loading={isLoading} active="comments">
-      <BackTop />
+      <FloatButton.BackTop />
       <Button
         disabled={isLoadingDownload}
         onClick={handleDownload}

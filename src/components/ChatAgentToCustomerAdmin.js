@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
-import { Card, Comment, List, Skeleton } from "antd";
+import { Card, List, Skeleton } from "antd";
+import { Comment } from "@ant-design/compatible";
 import { commentsCustomersToAgents } from "../../services/admin.services";
 import { fromNow } from "../../utils";
 

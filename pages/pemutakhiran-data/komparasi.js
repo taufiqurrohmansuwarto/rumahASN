@@ -23,11 +23,11 @@ function Komparasi() {
   return (
     <>
       <Head>
-        <title>Rumah ASN - Peremajaan - Komparasi</title>
+        <title>Rumah ASN - Integrasi - MyASN dan SIMASTER</title>
       </Head>
       <PageContainer
-        title="Integrasi SIASN dan SIMASTER"
-        content="Layanan Komparasi Data SIASN dan SIMASTER"
+        title="Integrasi MyASN dan SIMASTER"
+        content="Layanan Komparasi Data MyASN dan SIMASTER"
         loading={isLoading}
         header={{
           breadcrumbRender: () => (
@@ -38,22 +38,20 @@ function Komparasi() {
                 </Link>
               </Breadcrumb.Item>
               <Breadcrumb.Item>
-                Integrasi Data SIASN dan SIMASTER
+                Integrasi Data MyASN dan SIMASTER
               </Breadcrumb.Item>
             </Breadcrumb>
           ),
         }}
       >
-        <Card>
-          <Row gutter={[16, 16]}>
-            <Col md={12} xs={24}>
-              <MenuMySAPK dataUtama={dataUtama} />
-            </Col>
-            <Col md={12} xs={24}>
+        <Row gutter={[16, 16]}>
+          <Col md={16} xs={24}>
+            <MenuMySAPK dataUtama={dataUtama} />
+          </Col>
+          {/* <Col md={12} xs={24}>
               {data?.user?.group === "MASTER" && <SIASNTracking />}
-            </Col>
-          </Row>
-        </Card>
+            </Col> */}
+        </Row>
       </PageContainer>
     </>
   );

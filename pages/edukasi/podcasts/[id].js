@@ -17,7 +17,6 @@ import {
   Button,
   Card,
   Col,
-  Comment,
   Divider,
   Form,
   Input,
@@ -30,6 +29,7 @@ import {
   Typography,
   message,
 } from "antd";
+import { Comment } from "@ant-design/compatible";
 import Head from "next/head";
 import { useRouter } from "next/router";
 import { useState } from "react";
