@@ -1,7 +1,7 @@
 import Layout from "@/components/Layout";
+import PageContainer from "@/components/PageContainer";
 import ProfileLayout from "@/components/ProfileSettings/ProfileLayout";
 import UserActivities from "@/components/ProfileSettings/UserActivities";
-import { Card, PageHeader } from "antd";
 import Head from "next/head";
 
 const Activities = () => {
@@ -10,18 +10,10 @@ const Activities = () => {
       <Head>
         <title>Rumah ASN - Aktivitas</title>
       </Head>
-      <PageHeader title="Aktivitas Saya">
+      <PageContainer>
         <UserActivities />
-      </PageHeader>
+      </PageContainer>
     </>
-  );
-};
-
-Activities.getLayout = (page) => {
-  return (
-    <Layout>
-      <ProfileLayout tabActiveKey="activities">{page}</ProfileLayout>
-    </Layout>
   );
 };
 
