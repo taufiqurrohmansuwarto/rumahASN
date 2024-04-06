@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const api = axios.create({
-  baseURL: "/helpdesk/ws/siasn/pns/usulan-siasn",
+  baseURL: "/helpdesk/api/siasn/ws/pns/usulan-siasn",
 });
 
 export const usulanPemberhentian = () => {
@@ -13,9 +13,13 @@ export const usulanPerbaikanNama = () => {
 };
 
 export const usulanPenyesuaianMasaKerja = () => {
-  return api.get(`/penyesuaian-masa-kerja`).then((res) => res?.data);
+  return api.get(`/masa-kerja`).then((res) => res?.data);
 };
 
-export const usulanPencantumanGelar = (nip) => {
-  return api.get(`/pencantuman-gelar?nip=${nip}`).then((res) => res?.data);
+export const usulanPencantumanGelar = () => {
+  return api.get(`/pencantuman-gelar`).then((res) => res?.data);
+};
+
+export const usulanKenaikanPangkat = () => {
+  return api.get(`/kenaikan-pangkat`).then((res) => res?.data);
 };

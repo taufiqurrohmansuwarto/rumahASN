@@ -3,7 +3,7 @@ import RiwayatUsulanLayout from "@/components/RiwayatUsulan/RiwayatUsulanLayout"
 import { Card } from "antd";
 import Head from "next/head";
 
-const PencantumanGelar = () => {
+const PerbaikanNama = () => {
   return (
     <>
       <Head>
@@ -11,9 +11,9 @@ const PencantumanGelar = () => {
       </Head>
       <RiwayatUsulanLayout
         title="Usulan SIASN"
-        content="Riwayat Usulan SIASN Pencantuman Gelar"
-        active="pencantuman-gelar"
-        breadcrumbTitle="Usulan Pencantuman Gelar"
+        content="Riwayat Usulan SIASN Perbaikan Nama"
+        active="perbaikan-nama"
+        breadcrumbTitle="Usulan Perbaikan Nama"
       >
         <Card></Card>
       </RiwayatUsulanLayout>
@@ -21,13 +21,13 @@ const PencantumanGelar = () => {
   );
 };
 
-PencantumanGelar.Auth = {
+PerbaikanNama.Auth = {
   action: "manage",
   subject: "Tickets",
 };
 
-PencantumanGelar.getLayout = (page) => {
+PerbaikanNama.getLayout = (page) => {
   return <Layout active="/pemutakhiran-data/komparasi">{page}</Layout>;
 };
 
-export default PencantumanGelar;
+export default PerbaikanNama;

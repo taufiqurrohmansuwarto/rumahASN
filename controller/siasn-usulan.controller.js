@@ -1,69 +1,51 @@
-const usulanKenaikanPangkatByNip = async (req, res) => {
+const fetchDataUsulan = async (
+  _req,
+  res,
+  fetcher,
+  tipeUsulan,
+  employeeNumber
+) => {
   try {
-    const { employee_number } = req?.user;
-    const { fetcher } = req;
-    const url = `/siasn-ws/layanan/kenaikan-pangkat/${employee_number}`;
+    const url = `/siasn-ws/layanan/${tipeUsulan}/${employeeNumber}`;
     const result = await fetcher.get(url);
     const response = result?.data;
     res.json(response);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
+};
+
+const usulanKenaikanPangkatByNip = async (req, res) => {
+  const { employee_number: employeeNumber } = req?.user;
+  const { fetcher } = req;
+  fetchDataUsulan(req, res, fetcher, "kenaikan-pangkat", employeeNumber);
 };
 
 const usulanPemberhentianByNip = async (req, res) => {
-  try {
-    const { employee_number } = req?.user;
-    const { fetcher } = req;
-    const url = `/siasn-ws/layanan/pemberhentian/${employee_number}`;
-    const result = await fetcher.get(url);
-    const response = result?.data;
-    res.json(response);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
+  const { employee_number: employeeNumber } = req?.user;
+  const { fetcher } = req;
+  fetchDataUsulan(req, res, fetcher, "pemberhentian", employeeNumber);
 };
 
 const usulanPerbaikanNamaByNip = async (req, res) => {
-  try {
-    const { employee_number } = req?.user;
-    const { fetcher } = req;
-    const url = `/siasn-ws/layanan/skk/${employee_number}`;
-    const result = await fetcher.get(url);
-    const response = result?.data;
-    res.json(response);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
+  const { employee_number: employeeNumber } = req?.user;
+  const { fetcher } = req;
+  fetchDataUsulan(req, res, fetcher, "perbaikan-nama", employeeNumber);
 };
 
 const usulanPenyesuaianMasaKerjaByNip = async (req, res) => {
-  try {
-    const { employee_number } = req?.user;
-    const { fetcher } = req;
-    const url = `/siasn-ws/layanan/pmk/${employee_number}`;
-    const result = await fetcher.get(url);
-    const response = result?.data;
-    res.json(response);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
+  const { employee_number: employeeNumber } = req?.user;
+  const { fetcher } = req;
+  fetchDataUsulan(req, res, fetcher, "mk", employeeNumber);
 };
 
 const usulanPencantumanGelarByNip = async (req, res) => {
-  try {
-    const { nip } = req?.query;
-    const { fetcher } = req;
-    const url = `/siasn-ws/layanan/pg/${nip}`;
-    const result = await fetcher.get(url);
-    const response = result?.data;
-    res.json(response);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
+  const { employee_number: employeeNumber } = req?.query;
+  const { fetcher } = req;
+  fetchDataUsulan(req, res, fetcher, "pg", employeeNumber);
 };
 
-module.exports = {
+export {
   usulanKenaikanPangkatByNip,
   usulanPemberhentianByNip,
   usulanPerbaikanNamaByNip,

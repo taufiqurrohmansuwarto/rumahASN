@@ -22,15 +22,11 @@ function Messages() {
   };
 
   return (
-    <div onClick={gotoMail}>
-      <Badge count={isLoading ? null : data?.total}>
-        <InboxOutlined
-          style={{
-            fontSize: 15,
-          }}
-        />
-      </Badge>
-    </div>
+    // <div onClick={gotoMail}>
+    <Badge count={isLoading ? null : data?.total}>
+      <InboxOutlined />
+    </Badge>
+    // </div>
   );
 }
 
