@@ -1,8 +1,8 @@
-import { BellOutlined } from "@ant-design/icons";
+import { IconMailbox } from "@tabler/icons";
 import { useQuery } from "@tanstack/react-query";
-import { Badge, Tooltip } from "antd";
+import { Badge } from "antd";
 import { useRouter } from "next/router";
-import { listNotifications } from "../../services";
+import { listNotifications } from "@/services/index";
 
 function Notifications() {
   const { data, isLoading } = useQuery(
@@ -18,15 +18,15 @@ function Notifications() {
   };
 
   return (
-    <div onClick={changePageNotification}>
-      <Badge count={isLoading ? null : data?.count}>
-        <BellOutlined
-          style={{
-            fontSize: 13,
-          }}
-        />
-      </Badge>
-    </div>
+    <Badge count={isLoading ? null : data?.count}>
+      <IconMailbox onClick={changePageNotification} color="gray" size={24} />
+      {/* <BellOutlined
+        style={{
+          color: "gray",
+        }}
+        onClick={changePageNotification}
+      /> */}
+    </Badge>
   );
 }
 

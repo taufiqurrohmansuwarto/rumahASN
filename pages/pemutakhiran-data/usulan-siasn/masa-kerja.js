@@ -1,9 +1,10 @@
 import Layout from "@/components/Layout";
 import RiwayatUsulanLayout from "@/components/RiwayatUsulan/RiwayatUsulanLayout";
+import RwUsulanPMK from "@/components/RiwayatUsulan/RwUsulanPMK";
 import { Card } from "antd";
 import Head from "next/head";
 
-const PencantumanGelar = () => {
+const MasaKerja = () => {
   return (
     <>
       <Head>
@@ -11,23 +12,25 @@ const PencantumanGelar = () => {
       </Head>
       <RiwayatUsulanLayout
         title="Usulan SIASN"
-        content="Riwayat Usulan SIASN Pencantuman Gelar"
-        active="pencantuman-gelar"
-        breadcrumbTitle="Usulan Pencantuman Gelar"
+        content="Riwayat Usulan SIASN Masa Kerja"
+        active="masa-kerja"
+        breadcrumbTitle="Usulan Masa Kerja"
       >
-        <Card></Card>
+        <Card>
+          <RwUsulanPMK />
+        </Card>
       </RiwayatUsulanLayout>
     </>
   );
 };
 
-PencantumanGelar.Auth = {
+MasaKerja.Auth = {
   action: "manage",
   subject: "Tickets",
 };
 
-PencantumanGelar.getLayout = (page) => {
+MasaKerja.getLayout = (page) => {
   return <Layout active="/pemutakhiran-data/komparasi">{page}</Layout>;
 };
 
-export default PencantumanGelar;
+export default MasaKerja;

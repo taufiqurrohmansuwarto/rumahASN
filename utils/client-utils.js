@@ -73,7 +73,7 @@ export const mysapkMenu = [
     title: "Usulan SIASN",
     icon: IconClipboardData,
     color: "green",
-    path: "/usulan-siasn",
+    path: "/usulan-siasn/kenaikan-pangkat",
   },
   {
     title: "Riwayat Angka Kredit",

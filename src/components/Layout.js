@@ -6,14 +6,17 @@ import {
   BarChartOutlined,
   BookOutlined,
   FileSearchOutlined,
+  GithubFilled,
   GroupOutlined,
   LogoutOutlined,
+  PhoneOutlined,
   ProfileOutlined,
   QuestionCircleFilled,
   SolutionOutlined,
   TeamOutlined,
   UserOutlined,
   UsergroupAddOutlined,
+  WechatOutlined,
 } from "@ant-design/icons";
 import { Center } from "@mantine/core";
 import { AccessControl } from "accesscontrol";
@@ -471,14 +474,16 @@ function Layout({ children, active, collapsed = true }) {
         // if (props.isMobile) return [];
         return [
           // <SearchUserLayout key="search" />,
-          <Messages key="messages" />,
+          <WechatOutlined key="github" />,
+          <PhoneOutlined key="phone" />,
+          // <Messages key="messages" />,
           <Notifications props={props} key="Notifications" />,
         ];
       }}
       appList={appList(data?.user)}
       avatarProps={{
         src: data?.user?.image,
-        size: "large",
+        size: "small",
         render: (props, dom) => {
           return (
             <Dropdown
