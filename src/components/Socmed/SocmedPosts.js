@@ -13,11 +13,11 @@ import {
   useMutation,
   useQueryClient,
 } from "@tanstack/react-query";
+import { Comment } from "@ant-design/compatible";
 import {
   Avatar,
   Button,
   Col,
-  Comment,
   Dropdown,
   List,
   Modal,
@@ -230,7 +230,7 @@ const Post = ({ post, currentUser }) => {
       <Space>
         <LikeOutlined
           style={{
-            color: post?.likes?.length > 0 ? "green" : null,
+            color: post?.likes?.length > 0 ? "#faad14" : null,
           }}
         />
         {post?.likes_count}
@@ -268,13 +268,7 @@ const Post = ({ post, currentUser }) => {
           author={
             <Stack>
               <Link href={`/users/${post?.user?.custom_id}`}>
-                <a
-                  style={{
-                    color: "green",
-                  }}
-                >
-                  {post?.user?.username}
-                </a>
+                <a>{post?.user?.username}</a>
               </Link>
             </Stack>
           }

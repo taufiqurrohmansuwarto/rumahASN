@@ -7,9 +7,9 @@ import { formatDateFromNow } from "@/utils/client-utils";
 import { formatDate } from "@/utils/index";
 import { Group } from "@mantine/core";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { Comment } from "@ant-design/compatible";
 import {
   Avatar,
-  Comment,
   Divider,
   Popconfirm,
   Space,

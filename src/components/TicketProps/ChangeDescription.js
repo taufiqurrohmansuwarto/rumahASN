@@ -2,12 +2,13 @@ import { editTicket } from "@/services/index";
 import { formatDateFromNow } from "@/utils/client-utils";
 import { formatDate } from "@/utils/index";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Comment, Tooltip, message, Avatar, Typography } from "antd";
+import { Tooltip, message, Avatar, Typography } from "antd";
+import { Comment } from "@ant-design/compatible";
 import { useState } from "react";
 import RestrictedContent from "../RestrictedContent";
 import NewTicket from "../Ticket/NewTicket";
 import Link from "next/link";
-import ReactMarkdownCustom from "../MarkdownEditor/ReactMarkdownCustom";
+import ReactMarkdownCustom from "@/components/MarkdownEditor/ReactMarkdownCustom";
 
 function ChangeTicketDescription({ item }) {
   const [isEdit, setIsEdit] = useState();

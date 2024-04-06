@@ -7,15 +7,22 @@ import {
   QueryClientProvider,
 } from "@tanstack/react-query";
 import { ConfigProvider } from "antd";
-import "antd/dist/antd.css";
+// import "antd/dist/antd.css";
 import id from "antd/lib/locale/id_ID";
 import { RBACProvider } from "context/RBACContext";
 import { SessionProvider, signIn, useSession } from "next-auth/react";
+import Head from "next/head";
+import Script from "next/script";
 import { useState } from "react";
 import Loading from "../src/components/Loading";
 import "../styles/globals.css";
-import Head from "next/head";
-import Script from "next/script";
+
+const theme = {
+  token: {
+    // fontSize: 16,
+    colorPrimary: "#faad14",
+  },
+};
 
 // check user role and organization start with 123
 function Auth({ children, action, subject }) {
@@ -74,7 +81,7 @@ function MyApp({ Component, pageProps: { session, ...pageProps } }) {
                   `}
       </Script>
 
-      <ConfigProvider locale={id}>
+      <ConfigProvider theme={theme} locale={id}>
         <SessionProvider
           session={session}
           baseUrl="/helpdesk"

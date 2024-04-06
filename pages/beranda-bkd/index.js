@@ -1,10 +1,8 @@
 import AllTaskFilter from "@/components/Filter/AllTaskFilter";
 import UnAnswerFilter from "@/components/Filter/UnAnswerFilter";
-import UploadFileSIASN from "@/components/LayananSIASN/UploadFileSIASN";
 import Layout from "@/components/Layout";
 import PageContainer from "@/components/PageContainer";
 import QueryFilter from "@/components/QueryFilter";
-import SocmedCreatePost from "@/components/Socmed/SocmedCreatePost";
 import { downloadTicketBKD, pegawaiBkdTickets } from "@/services/bkd.services";
 import { refCategories } from "@/services/index";
 import {
@@ -23,7 +21,7 @@ import { Stack } from "@mantine/core";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import {
   Avatar,
-  BackTop,
+  FloatButton,
   Breadcrumb,
   Button,
   Card,
@@ -120,11 +118,9 @@ const TitleLink = ({ item }) => {
   return (
     <div>
       <Typography.Text
-        strong
         onClick={handleClick}
         style={{ marginRight: 8, cursor: "pointer" }}
       >
-        {/* <Link href={`/customers-tickets/${item?.id}`}>{item.title}</Link> */}
         {item?.title}
       </Typography.Text>
       {screens?.xs && <br />}
@@ -465,7 +461,7 @@ const BerandaBKD = () => {
         }}
         title="Beranda Staff BKD"
       >
-        <BackTop />
+        <FloatButton.BackTop />
         <Row gutter={[16, 16]}>
           <Col md={18} xs={24}>
             <Card

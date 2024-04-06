@@ -890,3 +890,8 @@ export const additionalData = [
     name: "Surat Pengantar",
   },
 ];
+
+export const NOTIFICATION_ATTR = {
+  color: "#595959",
+  size: 18,
+};

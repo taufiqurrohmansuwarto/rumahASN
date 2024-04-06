@@ -1,8 +1,9 @@
 import { parseMarkdown, uploadFiles } from "@/services/index";
 import { createPost } from "@/services/socmed.services";
+import { Comment } from "@ant-design/compatible";
 import { MarkdownEditor } from "@primer/react/drafts";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Avatar, Comment } from "antd";
+import { Avatar } from "antd";
 import { useSession } from "next-auth/react";
 import { useState } from "react";
 

@@ -4,7 +4,6 @@ import {
   Segmented,
   Button,
   Card,
-  Comment,
   Form,
   Input,
   Popconfirm,
@@ -18,6 +17,7 @@ import {
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import { useEffect, useRef, useState } from "react";
+import { Comment } from "@ant-design/compatible";
 import ReactPlayer from "../ReactPlayer";
 
 const Editor = ({

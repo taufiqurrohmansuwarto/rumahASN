@@ -7,10 +7,10 @@ import {
   LoginOutlined,
   YoutubeOutlined,
 } from "@ant-design/icons";
-import { Center, Stack } from "@mantine/core";
+import { Center } from "@mantine/core";
 import { useSpring } from "@react-spring/web";
 import {
-  BackTop,
+  FloatButton,
   Button,
   Col,
   Divider,
@@ -23,10 +23,9 @@ import {
 import { getProviders, signIn } from "next-auth/react";
 import Head from "next/head";
 import Image from "next/image";
-import GoogleButton from "react-google-button";
-import { Button as MantineButton } from "@mantine/core";
-import { useRouter } from "next/router";
 import Link from "next/link";
+import { useRouter } from "next/router";
+import GoogleButton from "react-google-button";
 
 const BAComponent = () => {
   const [props, api] = useSpring(
@@ -208,7 +207,7 @@ const SignIn = ({ providers }) => {
       {/* <AppRating /> */}
       <UserRating />
       <Footer />
-      <BackTop />
+      <FloatButton.BackTop />
     </>
   );
 };

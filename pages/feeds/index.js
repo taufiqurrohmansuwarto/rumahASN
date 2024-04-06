@@ -37,7 +37,7 @@ function Feeds() {
   }
 
   return (
-    <PageContainer title="Beranda" subTitle="Rumah ASN">
+    <PageContainer title="Forum Kepegawaian Rumah ASN" content="Rumah ASN">
       <Head>
         <title>Rumah ASN - Beranda</title>
       </Head>

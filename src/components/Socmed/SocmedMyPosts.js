@@ -15,7 +15,6 @@ import {
   Avatar,
   Button,
   Col,
-  Comment,
   Dropdown,
   Form,
   Input,
@@ -26,6 +25,7 @@ import {
   Tooltip,
   message,
 } from "antd";
+import { Comment } from "@ant-design/compatible";
 import moment from "moment";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
