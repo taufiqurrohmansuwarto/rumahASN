@@ -11,12 +11,13 @@ import {
 } from "@mantine/core";
 import { Grid, Space, Tag, Typography } from "antd";
 import { useRouter } from "next/router";
-import AnomaliUser from "./AnomaliUser";
-import IPAsn from "../LayananSIASN/IPAsn";
+import AnomaliUser from "@/components/PemutakhiranData/AnomaliUser";
+import IPAsn from "@/components/LayananSIASN/IPAsn";
 
 const mockdata = mysapkMenu;
 
 const toImage = (base64) => `data:image/jpeg;base64,${base64}`;
+
 const useStyles = createStyles((theme) => ({
   card: {
     backgroundColor:
@@ -97,7 +98,10 @@ export function MenuMySAPK({ dataUtama }) {
             <Typography.Text type="secondary">
               {dataUtama?.instansiIndukNama}
             </Typography.Text>
-            <Space size="small">
+            <Space
+              size="small"
+              direction={screens.xl ? "horizontal" : "vertical"}
+            >
               <IPAsn tahun={2023} />
               <Tag color="yellow">{dataUtama?.kedudukanPnsNama}</Tag>
               <Tag color={dataUtama?.validNik ? "green" : "red"}>

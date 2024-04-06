@@ -70,13 +70,19 @@ export const mysapkMenu = [
     path: "/jabatan",
   },
   {
+    title: "Usulan SIASN",
+    icon: IconClipboardData,
+    color: "green",
+    path: "/usulan-siasn",
+  },
+  {
     title: "Riwayat Angka Kredit",
     icon: Icon123,
     color: "green",
     path: "/angka-kredit",
   },
   {
-    title: "Riwayat Laporan Kinerja",
+    title: "Riwayat Laporan Kinerja (SKP)",
     icon: IconCashBanknote,
     color: "yellow",
     path: "/laporan-kinerja",
@@ -88,22 +94,17 @@ export const mysapkMenu = [
     path: "/diklat",
   },
   {
-    title: "Riwayat Pencantuman Gelar",
-    icon: IconSchool,
-    color: "red",
-    path: "/pencantuman-gelar",
-  },
-  {
-    title: "Riwayat Golongan/Pangkat",
-    icon: IconBadges,
-    color: "gray",
-    path: "/golongan",
-  },
-  {
     title: "Riwayat Pendidikan",
     icon: IconSchool,
     color: "gray",
     path: "/pendidikan",
+  },
+
+  {
+    title: "Riwayat Golongan/Pangkat",
+    icon: IconBadges,
+    color: "green",
+    path: "/golongan",
   },
 
   {
@@ -113,23 +114,10 @@ export const mysapkMenu = [
     path: "/pmk",
   },
   {
-    title: "Riwayat CPNS/PNS",
-    icon: IconUserX,
-    color: "gray",
-    path: "/cpnspns",
-  },
-
-  {
     title: "Riwayat Keluarga",
     icon: IconUsers,
     color: "gray",
     path: "/keluarga",
-  },
-  {
-    title: "Riwayat SKP",
-    icon: IconClipboardData,
-    color: "gray",
-    path: "/skp",
   },
   {
     title: "Riwayat Penghargaan",
@@ -151,7 +139,6 @@ export const mysapkMenu = [
     color: "gray",
     path: "/hukuman-disiplin",
   },
-
   {
     title: "Riwayat Pindah Instansi",
     icon: IconArrowsExchange,
