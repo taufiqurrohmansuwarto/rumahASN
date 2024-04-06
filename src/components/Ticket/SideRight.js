@@ -23,7 +23,7 @@ import RemoveTicket from "@/components/TicketProps/Remove";
 import RestrictedContent from "@/components/RestrictedContent";
 import Subscribe from "@/components/TicketProps/Subscribe";
 import UnpinTicket from "@/components/TicketProps/UnPin";
-import Unpublish from "@/components/TicketProps/Unpublish";
+import Unpublish from "@/components/TicketProps/UnPublish";
 import UnlockConversation from "@/components/TicketProps/UnlockConversation";
 import Unsubscribe from "@/components/TicketProps/Unsubscribe";
 import {
