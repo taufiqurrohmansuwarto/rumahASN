@@ -1,9 +1,9 @@
 import { NOTIFICATION_ATTR } from "@/utils/client-utils";
-import { IconMail } from "@tabler/icons";
+import { IconBrandTelegram } from "@tabler/icons";
 import { Badge, Tooltip } from "antd";
 import { useRouter } from "next/router";
 
-function NotifikasiPrivateMessage({ url, title }) {
+function NotifikasiKepegawaian({ url, title }) {
   const router = useRouter();
 
   const changePageNotification = () => {
@@ -13,7 +13,7 @@ function NotifikasiPrivateMessage({ url, title }) {
   return (
     <Badge>
       <Tooltip title={title}>
-        <IconMail
+        <IconBrandTelegram
           onClick={changePageNotification}
           color={NOTIFICATION_ATTR.color}
           size={NOTIFICATION_ATTR.size}
@@ -23,4 +23,4 @@ function NotifikasiPrivateMessage({ url, title }) {
   );
 }
 
-export default NotifikasiPrivateMessage;
+export default NotifikasiKepegawaian;

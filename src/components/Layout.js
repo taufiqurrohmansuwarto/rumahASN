@@ -29,6 +29,7 @@ import NotifikasiASNConnect from "./Notification/NotifikasiASNConnect";
 import NotifikasiForumKepegawaian from "./Notification/NotifikasiForumKepegawaian";
 import NotifikasiPrivateMessage from "./Notification/NotifikasiPrivateMessage";
 import NotifikasiUsulan from "./Notification/NotifikasiUsulan";
+import NotifikasiKepegawaian from "./Notification/NotifikasiKepegawaian";
 
 const ProLayout = dynamic(
   () => import("@ant-design/pro-components").then((mod) => mod?.ProLayout),
@@ -476,10 +477,31 @@ function Layout({ children, active, collapsed = true }) {
       actionsRender={(props) => {
         // if (props.isMobile) return [];
         return [
-          <NotifikasiUsulan key="usulan" />,
-          <NotifikasiPrivateMessage key="private-message" />,
-          <NotifikasiASNConnect key="asn-connect" />,
-          <NotifikasiForumKepegawaian key="forum-kepegawaian" />,
+          <NotifikasiKepegawaian
+            key="kepegawaian"
+            url="kepegawaian"
+            title="Inbox Kepegawaian"
+          />,
+          <NotifikasiUsulan
+            key="submission"
+            url="submissions"
+            title="Inbox Usulan"
+          />,
+          <NotifikasiPrivateMessage
+            key="private-message"
+            url="private-messages"
+            title="Inbox Pesan Pribadi"
+          />,
+          <NotifikasiASNConnect
+            key="asn-connect"
+            url="asn-connect"
+            title="Inbox ASN Connect"
+          />,
+          <NotifikasiForumKepegawaian
+            key="forum-kepegawaian"
+            url="forum-kepegawaian"
+            title="Inbox Forum Kepegawaian"
+          />,
         ];
       }}
       appList={appList(data?.user)}

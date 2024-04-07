@@ -892,7 +892,7 @@ export const additionalData = [
 ];
 
 export const NOTIFICATION_ATTR = {
-  color: "#595959",
+  color: "#000",
   size: 18,
 };
 
