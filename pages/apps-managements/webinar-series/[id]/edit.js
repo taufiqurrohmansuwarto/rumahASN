@@ -30,11 +30,14 @@ import {
   Upload,
   message,
 } from "antd";
-import moment from "moment";
 import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
+
+import dayjs from "dayjs";
+import "dayjs/locale/id";
+dayjs.locale("id");
 
 const format = "DD-MM-YYYY";
 
@@ -225,8 +228,8 @@ const FormEditWebinarSeries = ({ data }) => {
       type_sign,
       employee_number_signer:
         type_sign === "SEAL" ? null : rest.employee_number_signer,
-      start_date: moment(start_date).format("YYYY-MM-DD"),
-      end_date: moment(end_date).format("YYYY-MM-DD"),
+      start_date: dayjs(start_date).format("YYYY-MM-DD"),
+      end_date: dayjs(end_date).format("YYYY-MM-DD"),
     };
 
     const dataSend = {
@@ -471,7 +474,7 @@ const UpdateWebinarSeries = () => {
                 data={{
                   ...data,
                   id,
-                  date: [moment(data?.start_date), moment(data?.end_date)],
+                  date: [dayjs(data?.start_date), dayjs(data?.end_date)],
                 }}
               />
             </Col>

@@ -1,4 +1,10 @@
+import {
+  getTokenSIASNService,
+  postUnorJabatanByNip,
+} from "@/services/siasn-services";
 import { getJenisJabatanId } from "@/utils/client-utils";
+import { InboxOutlined } from "@ant-design/icons";
+import { Text } from "@mantine/core";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   Button,
@@ -13,8 +19,10 @@ import {
   Upload,
   message,
 } from "antd";
-import moment from "moment";
+import axios from "axios";
+import { useRouter } from "next/router";
 import { useState } from "react";
+import DetailJabatanGuruDokter from "./Admin/DetailJabatanGuruDokter";
 import FormJFT from "./FormJFT";
 import FormJFU from "./FormJFU";
 import FormJenisMutasi from "./FormJenisMutasi";
@@ -22,15 +30,10 @@ import FormJenisPenugasan from "./FormJenisPenugasan";
 import FormStruktural from "./FormStruktural";
 import FormSubJabatan from "./FormSubJabatan";
 import FormUnorSIASN from "./FormUnorSIASN";
-import {
-  getTokenSIASNService,
-  postUnorJabatanByNip,
-} from "@/services/siasn-services";
-import axios from "axios";
-import { InboxOutlined } from "@ant-design/icons";
-import { useRouter } from "next/router";
-import DetailJabatanGuruDokter from "./Admin/DetailJabatanGuruDokter";
-import { Text } from "@mantine/core";
+
+import dayjs from "dayjs";
+import "dayjs/locale/id";
+dayjs.locale("id");
 
 export const API_URL = "https://apimws.bkn.go.id:8243/apisiasn/1.0";
 
@@ -96,10 +99,10 @@ function ModalFormJabatanUnor({ open, handleClose, handleOk, isLoading }) {
       let jenis_jabatan_id = getJenisJabatanId(jenis_jabatan);
 
       const data = {
-        tmtJabatan: moment(tmtJabatan).format("DD-MM-YYYY"),
-        tanggalSk: moment(tanggalSk).format("DD-MM-YYYY"),
-        tmtPelantikan: moment(tmtPelantikan).format("DD-MM-YYYY"),
-        tmtMutasi: moment(tmtMutasi).format("DD-MM-YYYY"),
+        tmtJabatan: dayjs(tmtJabatan).format("DD-MM-YYYY"),
+        tanggalSk: dayjs(tanggalSk).format("DD-MM-YYYY"),
+        tmtPelantikan: dayjs(tmtPelantikan).format("DD-MM-YYYY"),
+        tmtMutasi: dayjs(tmtMutasi).format("DD-MM-YYYY"),
         jabatanFungsionalId: fungsional_id ? fungsional_id : "",
         jabatanFungsionalUmumId: fungsional_umum_id ? fungsional_umum_id : "",
         jenisMutasiId: jenisMutasiId ? jenisMutasiId : "",

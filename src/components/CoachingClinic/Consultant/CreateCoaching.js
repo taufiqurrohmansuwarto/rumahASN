@@ -13,8 +13,10 @@ import {
   message,
 } from "antd";
 import React from "react";
-import moment from "moment";
 import { PlusOutlined } from "@ant-design/icons";
+import dayjs from "dayjs";
+
+dayjs.locale("id");
 
 const ModalCoaching = ({ open, onCancel }) => {
   const [form] = Form.useForm();
@@ -38,9 +40,9 @@ const ModalCoaching = ({ open, onCancel }) => {
     const result = await form.validateFields();
     const payload = {
       ...result,
-      start_date: moment(result.start_date).format("YYYY-MM-DD"),
-      start_hours: moment(result.start_hours).format("HH:mm:ss"),
-      end_hours: moment(result.end_hours).format("HH:mm:ss"),
+      start_date: dayjs(result.start_date).format("YYYY-MM-DD"),
+      start_hours: dayjs(result.start_hours).format("HH:mm:ss"),
+      end_hours: dayjs(result.end_hours).format("HH:mm:ss"),
     };
     create(payload);
   };
@@ -159,7 +161,7 @@ function CreateCoaching() {
         style={{
           marginBottom: 20,
         }}
-        shape="round"
+        // shape="round"
       >
         Buat Coaching
       </Button>

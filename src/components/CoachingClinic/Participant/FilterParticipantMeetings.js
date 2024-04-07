@@ -1,10 +1,13 @@
 import QueryFilter from "@/components/QueryFilter";
 import { CaretDownOutlined, CaretUpOutlined } from "@ant-design/icons";
 import { DatePicker, Form, Input, Radio, Space } from "antd";
+import { isArray } from "lodash";
 import { useRouter } from "next/router";
 import { useEffect } from "react";
-import moment from "moment";
-import { isArray } from "lodash";
+
+import dayjs from "dayjs";
+import "dayjs/locale/id";
+dayjs.locale("id");
 
 function FilterParticipantMeetings() {
   const router = useRouter();
@@ -35,7 +38,7 @@ function FilterParticipantMeetings() {
       // if values has range_date then parse with moment
       if (values?.range_date) {
         values.range_date = values.range_date.map((item) =>
-          moment(item).format("YYYY-MM-DD")
+          dayjs(item).format("YYYY-MM-DD")
         );
       }
 
@@ -52,8 +55,8 @@ function FilterParticipantMeetings() {
       status: query?.status || "",
       range_date: isArray(query?.range_date)
         ? [
-            moment(query?.range_date?.[0], "YYYY-MM-DD") || "",
-            moment(query?.range_date?.[1], "YYYY-MM-DD") || "",
+            dayjs(query?.range_date?.[0], "YYYY-MM-DD") || "",
+            dayjs(query?.range_date?.[1], "YYYY-MM-DD") || "",
           ]
         : "",
     });

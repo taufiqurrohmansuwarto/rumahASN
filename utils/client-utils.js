@@ -895,3 +895,13 @@ export const NOTIFICATION_ATTR = {
   color: "#595959",
   size: 18,
 };
+
+export const setJenisJabatanColor = (jenisJabatan) => {
+  if (jenisJabatan === "Struktural") {
+    return "red";
+  } else if (jenisJabatan === "Fungsional") {
+    return "gray";
+  } else if (jenisJabatan === "Pelaksana") {
+    return "yellow";
+  }
+};

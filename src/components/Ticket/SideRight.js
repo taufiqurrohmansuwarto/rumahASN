@@ -91,10 +91,71 @@ const SideRight = ({ item }) => {
         </Space>
         <Divider />
       </Col>
-      <Col span={24}></Col>
-      <Col span={24}></Col>
-      <Col span={24}></Col>
-      <Col span={24}></Col>
+      <Col span={24}>
+        <Space direction="vertical">
+          <Space>
+            <Typography.Text type="secondary" style={{ fontSize: 12 }}>
+              Penerima Tugas
+            </Typography.Text>
+            <RestrictedContent name="change-agent">
+              <ChangeAssignee ticketId={item?.id} agentId={item?.assignee} />
+            </RestrictedContent>
+          </Space>
+          {!item?.assignee ? (
+            <Typography.Text style={{ fontSize: 13 }}>
+              Belum Ada
+            </Typography.Text>
+          ) : (
+            <Space>
+              {/* <Link href={`/users/${item?.agent?.custom_id}`}> */}
+              <Tooltip title={item?.agent?.username}>
+                <Avatar
+                  style={{ cursor: "pointer" }}
+                  size="small"
+                  src={item?.agent?.image}
+                />
+              </Tooltip>
+              {/* </Link> */}
+            </Space>
+          )}
+        </Space>
+        <Divider />
+      </Col>
+      <Col span={24}>
+        <ChangeFeedback item={item} />
+      </Col>
+      <Col span={24}>
+        <Space direction="vertical">
+          <Typography.Text type="secondary" style={{ fontSize: 12 }}>
+            Pemilih Penerima Tugas
+          </Typography.Text>
+          {!item?.chooser ? (
+            <Typography.Text style={{ fontSize: 13 }}>
+              Belum Ada
+            </Typography.Text>
+          ) : (
+            <Space>
+              {/* <Link href={`/users/${item?.admin?.custom_id}`}> */}
+              <Tooltip title={item?.admin?.username}>
+                <Avatar
+                  style={{ cursor: "pointer" }}
+                  size="small"
+                  src={item?.admin?.image}
+                />
+              </Tooltip>
+              {/* </Link> */}
+            </Space>
+          )}
+        </Space>
+        <Divider />
+      </Col>
+      <Col span={24}>
+        {item?.is_subscribe ? (
+          <Unsubscribe id={item?.id} />
+        ) : (
+          <Subscribe id={item?.id} />
+        )}
+      </Col>
       <Divider />
       <Col span={24}>
         <Participants item={item} />

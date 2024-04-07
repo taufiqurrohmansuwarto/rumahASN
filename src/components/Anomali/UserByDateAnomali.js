@@ -4,9 +4,14 @@ import { DatePicker } from "antd";
 import { useState } from "react";
 import moment from "moment";
 import Bar from "@/components/Plots/Bar";
+import dayjs from "dayjs";
+import "dayjs/locale/id";
+dayjs.locale("id");
 
 function UserByDateAnomali() {
-  const [currentDate, setCurrentDate] = useState(moment().format("YYYY-MM-DD"));
+  const [currentDate, setCurrentDate] = useState(
+    dayjs(new Date()).format("YYYY-MM-DD")
+  );
 
   const { data, isLoading } = useQuery(
     ["data-admin-by-date", currentDate],

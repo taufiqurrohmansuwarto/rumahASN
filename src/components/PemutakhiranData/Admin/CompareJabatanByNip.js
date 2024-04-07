@@ -9,11 +9,15 @@ import {
   API_URL,
   getJenisJabatanId,
   getNamaJabatan,
+  setJenisJabatanColor,
 } from "@/utils/client-utils";
-import { FileAddOutlined, PlusOutlined } from "@ant-design/icons";
+import { FileAddOutlined } from "@ant-design/icons";
 import { Alert, Stack, Text } from "@mantine/core";
+import { IconAlertCircle } from "@tabler/icons";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
+  Typography,
+  Tag,
   Button,
   Card,
   Col,
@@ -28,17 +32,18 @@ import {
   message,
 } from "antd";
 import axios from "axios";
-import moment from "moment";
+import dayjs from "dayjs";
+import "dayjs/locale/id";
+import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
 import FormJFT from "../FormJFT";
 import FormJFU from "../FormJFU";
-import FormUnitOrganisasi from "../FormUnitOrganisasi";
-import { useSession } from "next-auth/react";
-import FormEditJabatanByNip from "./FormEditJabatanByNip";
 import FormStruktural from "../FormStruktural";
-import { IconAlertCircle } from "@tabler/icons";
+import FormUnitOrganisasi from "../FormUnitOrganisasi";
 import FormUnorJabatan from "../FormUnorJabatan";
 import FormUnorJabatanTransfer from "../FormUnorJabatanTransfer";
+import FormEditJabatanByNip from "./FormEditJabatanByNip";
+dayjs.locale("id");
 
 const format = "DD-MM-YYYY";
 
@@ -82,9 +87,9 @@ const FormEntriKosong = ({ visible, onCancel, nip }) => {
       let jenis_jabatan_id = getJenisJabatanId(jenis_jabatan);
 
       const data = {
-        tmtJabatan: moment(tmt_jabatan).format("DD-MM-YYYY"),
-        tanggalSk: moment(tgl_sk).format("DD-MM-YYYY"),
-        tmtPelantikan: moment(tmt_pelantikan).format("DD-MM-YYYY"),
+        tmtJabatan: dayjs(tmt_jabatan).format("DD-MM-YYYY"),
+        tanggalSk: dayjs(tgl_sk).format("DD-MM-YYYY"),
+        tmtPelantikan: dayjs(tmt_pelantikan).format("DD-MM-YYYY"),
         jabatanFungsionalId: fungsional_id ? fungsional_id : "",
         jabatanFungsionalUmumId: fungsional_umum_id ? fungsional_umum_id : "",
         eselonId: eselon_id ? eselon_id : "",
@@ -323,9 +328,9 @@ const FormEntri = ({ visible, onCancel, nip, data }) => {
       let jenis_jabatan_id = jenis_jabatan === "Fungsional" ? "2" : "4";
 
       const data = {
-        tmtJabatan: moment(tmt_jabatan).format("DD-MM-YYYY"),
-        tanggalSk: moment(tgl_sk).format("DD-MM-YYYY"),
-        tmtPelantikan: moment(tmt_pelantikan).format("DD-MM-YYYY"),
+        tmtJabatan: dayjs(tmt_jabatan).format("DD-MM-YYYY"),
+        tanggalSk: dayjs(tgl_sk).format("DD-MM-YYYY"),
+        tmtPelantikan: dayjs(tmt_pelantikan).format("DD-MM-YYYY"),
         jabatanFungsionalId: fungsional_id ? fungsional_id : "",
         jabatanFungsionalUmumId: fungsional_umum_id ? fungsional_umum_id : "",
         unorId: unor_id,
@@ -597,9 +602,9 @@ function CompareJabatanByNip({ nip }) {
   );
 
   const handlePakai = (row) => {
-    const tmt_jabatan = moment(row?.tmt_jabatan, "DD-MM-YYYY");
-    const tgl_sk = moment(row?.tgl_sk, "DD-MM-YYYY");
-    const tmt_pelantikan = moment(row?.tmt_jabatan, "DD-MM-YYYY");
+    const tmt_jabatan = dayjs(row?.tmt_jabatan, "DD-MM-YYYY");
+    const tgl_sk = dayjs(row?.tgl_sk, "DD-MM-YYYY");
+    const tmt_pelantikan = dayjs(row?.tmt_jabatan, "DD-MM-YYYY");
 
     const data = {
       tmt_jabatan,
@@ -615,22 +620,40 @@ function CompareJabatanByNip({ nip }) {
 
   const columnsMaster = [
     {
-      title: "Jenis",
-      dataIndex: "jenis_jabatan",
+      title: "File",
+      dataIndex: "file",
       render: (_, record) => {
         return (
           <div>
             <a href={record?.file} target="_blank" rel="noreferrer">
-              {record?.jenis_jabatan}
+              File
             </a>
           </div>
         );
       },
     },
     {
+      title: "Jenis",
+      key: "jenis_jabatan",
+      render: (row) => (
+        <Tag color={setJenisJabatanColor(row?.jenis_jabatan)}>
+          {row?.jenis_jabatan}
+        </Tag>
+      ),
+    },
+    {
       title: "Jabatan",
       key: "jabatan",
-      dataIndex: "jabatan",
+      render: (row) => {
+        return (
+          <Typography.Text
+            underline={row?.aktif === "Y"}
+            strong={row?.aktif === "Y"}
+          >
+            {row?.jabatan}
+          </Typography.Text>
+        );
+      },
     },
     {
       title: "Unor",
@@ -640,21 +663,21 @@ function CompareJabatanByNip({ nip }) {
     { title: "No. SK", dataIndex: "nomor_sk", key: "nomor_sk" },
     { title: "TMT. Jab", dataIndex: "tmt_jabatan", key: "tmt_jabatan" },
     { title: "Tgl. SK", dataIndex: "tgl_sk", key: "tgl_sk" },
-    { title: "Aktif", dataIndex: "aktif", key: "aktif" },
+    // { title: "Aktif", dataIndex: "aktif", key: "aktif" },
     {
       title: "Aksi",
       key: "aksi",
       render: (_, row) => {
         const data = {
           tmtJabatan: row?.tmt_jabatan
-            ? moment(row?.tmt_jabatan, "DD-MM-YYYY")
+            ? dayjs(row?.tmt_jabatan, "DD-MM-YYYY")
             : null,
-          tanggalSk: row?.tgl_sk ? moment(row?.tgl_sk, "DD-MM-YYYY") : null,
+          tanggalSk: row?.tgl_sk ? dayjs(row?.tgl_sk, "DD-MM-YYYY") : null,
           tmtPelantikan: row?.tmtPelantikan
-            ? moment(row?.tmt_pelantikan, "DD-MM-YYYY")
+            ? dayjs(row?.tmt_pelantikan, "DD-MM-YYYY")
             : null,
           nomorSk: row?.nomor_sk,
-          jenisJabatan: row?.jenis_jabatan,
+          jenis_jabatan: row?.jenis_jabatan,
         };
 
         return <FormUnorJabatanTransfer data={data} kata="Pakai" />;
@@ -685,7 +708,12 @@ function CompareJabatanByNip({ nip }) {
     {
       title: "Jenis",
       key: "jenis_jabatan",
-      render: (row) => <div>{checkJenisJabatan(row)}</div>,
+      render: (row) => {
+        const jenisJabatan = checkJenisJabatan(row);
+        return (
+          <Tag color={setJenisJabatanColor(jenisJabatan)}>{jenisJabatan}</Tag>
+        );
+      },
     },
     {
       title: "Jabatan",
@@ -709,16 +737,16 @@ function CompareJabatanByNip({ nip }) {
           ...row,
           jenis_jabatan: getNamaJabatan(row?.jenisJabatan),
           tmtJabatan: row?.tmtJabatan
-            ? moment(row?.tmtJabatan, "DD-MM-YYYY")
+            ? dayjs(row?.tmtJabatan, "DD-MM-YYYY")
             : null,
           tmtMutasi: row?.tmtMutasi
-            ? moment(row?.tmtMutasi, "DD-MM-YYYY")
+            ? dayjs(row?.tmtMutasi, "DD-MM-YYYY")
             : null,
           tmtPelantikan: row?.tmtPelantikan
-            ? moment(row?.tmtPelantikan, "DD-MM-YYYY")
+            ? dayjs(row?.tmtPelantikan, "DD-MM-YYYY")
             : null,
           tanggalSk: row?.tanggalSk
-            ? moment(row?.tanggalSk, "DD-MM-YYYY")
+            ? dayjs(row?.tanggalSk, "DD-MM-YYYY")
             : null,
           fungsional_umum_id: row?.jabatanFungsionalUmumId,
           fungsional_id: row?.jabatanFungsionalId,

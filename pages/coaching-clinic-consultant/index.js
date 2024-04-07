@@ -55,7 +55,7 @@ const CoachingClinic = () => {
           </>
         ) : (
           <>
-            <CreateCoaching />
+            {/* <CreateCoaching /> */}
             <CoachingMeetings />
           </>
         )}

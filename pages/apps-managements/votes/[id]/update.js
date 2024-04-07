@@ -1,27 +1,28 @@
 import Layout from "@/components/Layout";
 import { detailPolling, updatePolling } from "@/services/polls.services";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
-  Skeleton,
+  Breadcrumb,
+  Button,
+  Card,
+  DatePicker,
   Form,
   Input,
-  DatePicker,
+  Skeleton,
   Space,
-  Button,
   message,
-  Card,
-  Breadcrumb,
 } from "antd";
-import moment from "moment";
 import { useEffect, useState } from "react";
-import { useMutation } from "@tanstack/react-query";
 
-import { PlusOutlined, MinusCircleOutlined } from "@ant-design/icons";
+import { MinusCircleOutlined, PlusOutlined } from "@ant-design/icons";
 
-import { useRouter } from "next/router";
-import React from "react";
 import PageContainer from "@/components/PageContainer";
 import Link from "next/link";
+import { useRouter } from "next/router";
+
+import dayjs from "dayjs";
+import "dayjs/locale/id";
+dayjs.locale("id");
 
 const FormUpdate = ({ data, id }) => {
   const router = useRouter();
@@ -33,7 +34,7 @@ const FormUpdate = ({ data, id }) => {
   useEffect(() => {
     form.setFieldsValue({
       ...data,
-      date: [moment(data?.start_date), moment(data?.end_date)],
+      date: [dayjs(data?.start_date), dayjs(data?.end_date)],
     });
   }, [data, form]);
 
@@ -57,8 +58,8 @@ const FormUpdate = ({ data, id }) => {
 
     const data = {
       ...rest,
-      start_date: moment(start_date).format("YYYY-MM-DD HH:mm:ss"),
-      end_date: moment(end_date).format("YYYY-MM-DD HH:mm:ss"),
+      start_date: dayjs(start_date).format("YYYY-MM-DD HH:mm:ss"),
+      end_date: dayjs(end_date).format("YYYY-MM-DD HH:mm:ss"),
     };
 
     mutate({
@@ -209,7 +210,7 @@ function VoteUpdate() {
               id={id}
               data={{
                 ...data,
-                date: [moment(data?.start_date), moment(data?.end_date)],
+                date: [dayjs(data?.start_date), dayjs(data?.end_date)],
               }}
             />
           </Skeleton>
