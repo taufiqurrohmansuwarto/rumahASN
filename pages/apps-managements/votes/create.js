@@ -1,9 +1,8 @@
 import Layout from "@/components/Layout";
-import {
-  ConsoleSqlOutlined,
-  MinusCircleOutlined,
-  PlusOutlined,
-} from "@ant-design/icons";
+import PageContainer from "@/components/PageContainer";
+import { createPolling } from "@/services/polls.services";
+import { MinusCircleOutlined, PlusOutlined } from "@ant-design/icons";
+import { useMutation } from "@tanstack/react-query";
 import {
   Breadcrumb,
   Button,
@@ -16,14 +15,14 @@ import {
   Space,
   message,
 } from "antd";
-import React, { useState } from "react";
-import { useMutation } from "@tanstack/react-query";
-import { createPolling } from "@/services/polls.services";
-import moment from "moment";
-import PageContainer from "@/components/PageContainer";
-import { useRouter } from "next/router";
 import Head from "next/head";
 import Link from "next/link";
+import { useRouter } from "next/router";
+import { useState } from "react";
+
+import dayjs from "dayjs";
+import "dayjs/locale/id";
+dayjs.locale("id");
 
 const MyForm = () => {
   const router = useRouter();
@@ -47,8 +46,8 @@ const MyForm = () => {
 
     const data = {
       ...rest,
-      start_date: moment(start_date).format("YYYY-MM-DD HH:mm:ss"),
-      end_date: moment(end_date).format("YYYY-MM-DD HH:mm:ss"),
+      start_date: dayjs(start_date).format("YYYY-MM-DD HH:mm:ss"),
+      end_date: dayjs(end_date).format("YYYY-MM-DD HH:mm:ss"),
     };
 
     mutate(data);

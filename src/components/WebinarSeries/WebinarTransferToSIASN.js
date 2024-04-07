@@ -1,21 +1,23 @@
-import React, { useState } from "react";
+import { refJenisDiklat } from "@/services/siasn-services";
+import { FileAddOutlined } from "@ant-design/icons";
+import { useQuery } from "@tanstack/react-query";
 import {
-  DatePicker,
   Button,
+  Col,
+  DatePicker,
   Form,
   Input,
   InputNumber,
   Modal,
+  Row,
   Select,
   Upload,
-  Row,
-  Col,
 } from "antd";
-import { FileAddOutlined } from "@ant-design/icons";
-import { refJenisDiklat } from "@/services/siasn-services";
-import { useQuery } from "@tanstack/react-query";
-import { useEffect } from "react";
-import moment from "moment";
+import { useEffect, useState } from "react";
+
+import dayjs from "dayjs";
+import "dayjs/locale/id";
+dayjs.locale("id");
 
 const ModalTransferToSIASN = ({ diklat, open, handleClose, data }) => {
   const [form] = Form.useForm();
@@ -27,9 +29,9 @@ const ModalTransferToSIASN = ({ diklat, open, handleClose, data }) => {
       namaKursus: data?.title,
       institusiPenyelenggara: data?.organizer,
       nomorSertipikat: data?.certificate_number,
-      tahunKursus: moment(data?.start_date).format("YYYY"),
-      tanggalKursus: moment(data?.start_date),
-      tanggalSelesaiKursus: moment(data?.end_date),
+      tahunKursus: dayjs(data?.start_date).format("YYYY"),
+      tanggalKursus: dayjs(data?.start_date),
+      tanggalSelesaiKursus: dayjs(data?.end_date),
       jumlahJam: data?.hour,
     });
   }, [form, data]);

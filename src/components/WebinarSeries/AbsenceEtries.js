@@ -12,8 +12,10 @@ import {
   Table,
   message,
 } from "antd";
-import moment from "moment";
+import dayjs from "dayjs";
+import "dayjs/locale/id";
 import { useEffect, useState } from "react";
+dayjs.locale("id");
 
 const FormUpdate = ({
   id,
@@ -29,8 +31,8 @@ const FormUpdate = ({
     form.setFieldsValue({
       day: data?.day,
       date: [
-        moment(data?.registration_open_at),
-        moment(data?.registration_close_at),
+        dayjs(data?.registration_open_at),
+        dayjs(data?.registration_close_at),
       ],
     });
   }, [data, form]);
@@ -41,8 +43,8 @@ const FormUpdate = ({
     } = await form.validateFields();
 
     const currentData = {
-      registration_open_at: moment(open).format("YYYY-MM-DD HH:mm:ss"),
-      registration_close_at: moment(close).format("YYYY-MM-DD HH:mm:ss"),
+      registration_open_at: dayjs(open).format("YYYY-MM-DD HH:mm:ss"),
+      registration_close_at: dayjs(close).format("YYYY-MM-DD HH:mm:ss"),
       day: form.getFieldValue("day"),
     };
 
@@ -144,13 +146,13 @@ const TableAbseceEntries = ({
       title: "Mulai Presensi",
       key: "registration_open_at",
       render: (text) =>
-        moment(text.registration_open_at).format("DD MMMM YYYY HH:mm:ss"),
+        dayjs(text.registration_open_at).format("DD MMMM YYYY HH:mm:ss"),
     },
     {
       title: "Selesai Presensi",
       key: "registration_close_at",
       render: (text) =>
-        moment(text.registration_close_at).format("DD MMMM YYYY HH:mm:ss"),
+        dayjs(text.registration_close_at).format("DD MMMM YYYY HH:mm:ss"),
     },
     {
       title: "Action",
@@ -201,8 +203,8 @@ const FormCreate = ({ id, open, handleClose, create, isLoadingCreate }) => {
     } = await form.validateFields();
 
     const data = {
-      registration_open_at: moment(open).format("YYYY-MM-DD HH:mm:ss"),
-      registration_close_at: moment(close).format("YYYY-MM-DD HH:mm:ss"),
+      registration_open_at: dayjs(open).format("YYYY-MM-DD HH:mm:ss"),
+      registration_close_at: dayjs(close).format("YYYY-MM-DD HH:mm:ss"),
       day: form.getFieldValue("day"),
     };
 

@@ -24,13 +24,16 @@ import {
   Tooltip,
   message,
 } from "antd";
+import dayjs from "dayjs";
 import { upperCase } from "lodash";
-import moment from "moment";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
-import ConsultantAlertMeetingLive from "./ConsultantAlertMeetingLive";
+import CreateCoaching from "./CreateCoaching";
 import FilterConsultantMeetings from "./FilterConsultantMeetings";
+import "dayjs/locale/id";
+
+dayjs.locale("id");
 
 const ModalChangeStatus = ({
   open,
@@ -82,11 +85,11 @@ const ModalUpdate = ({ open, handleClose, data, handleUpdate, loading }) => {
       title: data?.title,
       is_private: data?.is_private,
       description: data?.description,
-      start_date: data?.start_date ? moment(data.start_date) : null,
+      start_date: data?.start_date ? dayjs(data.start_date) : null,
       start_hours: data?.start_hours
-        ? moment(data.start_hours, "HH:mm:ss")
+        ? dayjs(data.start_hours, "HH:mm:ss")
         : null,
-      end_hours: data?.end_hours ? moment(data.end_hours, "HH:mm:ss") : null,
+      end_hours: data?.end_hours ? dayjs(data.end_hours, "HH:mm:ss") : null,
       max_participants: data?.max_participants,
     });
   }, [data, form]);
@@ -95,9 +98,9 @@ const ModalUpdate = ({ open, handleClose, data, handleUpdate, loading }) => {
     const result = await form.validateFields();
     const hasil = {
       ...result,
-      start_date: moment(result.start_date).format("YYYY-MM-DD"),
-      start_hours: moment(result.start_hours).format("HH:mm:ss"),
-      end_hours: moment(result.end_hours).format("HH:mm:ss"),
+      start_date: dayjs(result.start_date).format("YYYY-MM-DD"),
+      start_hours: dayjs(result.start_hours).format("HH:mm:ss"),
+      end_hours: dayjs(result.end_hours).format("HH:mm:ss"),
     };
     const payload = {
       id: data?.id,
@@ -337,7 +340,7 @@ function CoachingMeetings() {
       render: (_, row) => {
         return (
           <Space direction="vertical">
-            {moment(row?.start_date).format("DD MMMM YYYY")}
+            {dayjs(row?.start_date).format("DD MMMM YYYY")}
             <div>Pukul. {`${row?.start_hours} - ${row?.end_hours}`}</div>
           </Space>
         );
@@ -385,7 +388,7 @@ function CoachingMeetings() {
       responsive: ["sm"],
       key: "created_at",
       render: (_, row) => (
-        <>{moment(row?.created_at).format("DD MMMM YYYY HH:mm:ss")}</>
+        <>{dayjs(row?.created_at).format("DD MMMM YYYY HH:mm:ss")}</>
       ),
     },
     {
@@ -409,25 +412,10 @@ function CoachingMeetings() {
         );
       },
     },
-    // {
-    //   title: "Set Status",
-    //   responsive: ["sm"],
-    //   key: "set_status",
-    //   render: (_, row) => {
-    //     return (
-    //       <>
-    //         <a onClick={() => handleChangeStatus(row, "upcoming")}>Upcoming</a>
-    //         <Divider type="vertical" />
-    //         <a onClick={() => handleChangeStatus(row, "end")}>End</a>
-    //       </>
-    //     );
-    //   },
-    // },
   ];
 
   return (
     <Card title="Daftar Riwayat Instruktur Coaching Clinic">
-      <ConsultantAlertMeetingLive />
       <ModalChangeStatus
         open={openModalStatus}
         handleClose={handleCloseModalStatus}
@@ -442,7 +430,14 @@ function CoachingMeetings() {
         handleUpdate={handleUpdate}
         loading={isLoadingUpdate}
       />
-      <FilterConsultantMeetings />
+      <CreateCoaching />
+      <div
+        style={{
+          border: "1px solid #f0f0f0",
+        }}
+      >
+        <FilterConsultantMeetings />
+      </div>
       <Table
         size="small"
         pagination={{

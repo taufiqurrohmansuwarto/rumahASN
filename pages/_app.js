@@ -9,13 +9,18 @@ import {
 import { ConfigProvider } from "antd";
 // import "antd/dist/antd.css";
 import id from "antd/lib/locale/id_ID";
+import locale from "antd/locale/id_ID";
 import { RBACProvider } from "context/RBACContext";
+import dayjs from "dayjs";
+import "dayjs/locale/id";
 import { SessionProvider, signIn, useSession } from "next-auth/react";
 import Head from "next/head";
 import Script from "next/script";
 import { useState } from "react";
 import Loading from "../src/components/Loading";
 import "../styles/globals.css";
+
+dayjs.locale("id");
 
 const theme = {
   token: {
@@ -90,7 +95,7 @@ function MyApp({ Component, pageProps: { session, ...pageProps } }) {
           <Head>
             <link rel="shortcut icon" href="/helpdesk/headset.ico" />
           </Head>
-          <QueryClientProvider client={queryClient}>
+          <QueryClientProvider client={queryClient} locale={locale}>
             <MantineProvider withGlobalStyles withNormalizeCSS>
               <ThemeProvider colorMode="auto" preventSSRMismatch>
                 <Hydrate>

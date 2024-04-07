@@ -1,9 +1,12 @@
-import moment from "moment";
+import { changeStatus, refStatus } from "@/services/index";
 import { SettingOutlined } from "@ant-design/icons";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { DatePicker, Form, Modal, Select, message } from "antd";
 import { useState } from "react";
-import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
-import { refStatus, changeStatus } from "@/services/index";
-import { Form, Select, Modal, message, TimePicker, DatePicker } from "antd";
+
+import dayjs from "dayjs";
+import "dayjs/locale/id";
+dayjs.locale("id");
 
 const StatusModal = ({ open, onCancel, data, ticketId, statusId, ticket }) => {
   const [form] = Form.useForm();
@@ -57,12 +60,12 @@ const StatusModal = ({ open, onCancel, data, ticketId, statusId, ticket }) => {
         form={form}
         initialValues={{
           status: statusId,
-          created_at: moment(ticket?.created_at),
+          created_at: dayjs(ticket?.created_at),
           start_work_at: ticket?.start_work_at
-            ? moment(ticket?.start_work_at)
+            ? dayjs(ticket?.start_work_at)
             : null,
           completed_at: ticket?.completed_at
-            ? moment(ticket?.completed_at)
+            ? dayjs(ticket?.completed_at)
             : null,
         }}
       >

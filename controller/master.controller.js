@@ -117,7 +117,7 @@ export const rwJabatanMasterByNip = async (req, res) => {
             return new Date(year, month - 1, day);
           },
         ],
-        ["asc"]
+        ["desc"]
       );
 
       res.json(sorting);
