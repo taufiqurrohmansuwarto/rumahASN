@@ -2,12 +2,13 @@ import Layout from "@/components/Layout";
 import PageContainer from "@/components/PageContainer";
 import SocmedTabs from "@/components/Socmed/SocmedTabs";
 import useScrollRestoration from "@/hooks/useScrollRestoration";
-import { FloatButton, Breadcrumb } from "antd";
+import { FloatButton, Breadcrumb, Grid } from "antd";
 import Head from "next/head";
 import Link from "next/link";
 
 const AsnUpdates = () => {
   useScrollRestoration();
+  const breakPoint = Grid.useBreakpoint();
 
   return (
     <>
@@ -15,6 +16,9 @@ const AsnUpdates = () => {
         <title>Rumah ASN - ASN Connect</title>
       </Head>
       <PageContainer
+        childrenContentStyle={{
+          padding: breakPoint.xs ? 0 : null,
+        }}
         header={{
           breadcrumbRender: () => (
             <Breadcrumb>
@@ -23,7 +27,6 @@ const AsnUpdates = () => {
                   <a>Forum Kepegawaian</a>
                 </Link>
               </Breadcrumb.Item>
-
               <Breadcrumb.Item>ASN Connect</Breadcrumb.Item>
             </Breadcrumb>
           ),

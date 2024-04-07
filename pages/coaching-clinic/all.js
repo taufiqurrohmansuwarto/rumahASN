@@ -10,7 +10,10 @@ const CoachingClinic = () => {
       <Head>
         <title>Rumah ASN - Coaching Clinic</title>
       </Head>
-      <LayoutParticipant content="Daftar Jadwal Coaching Clinic" active="all">
+      <LayoutParticipant
+        content="Jadwal Coaching Clinic Kepegawaian BKD Jatim"
+        active="all"
+      >
         <Card>
           <UpcomingMeetings />
         </Card>

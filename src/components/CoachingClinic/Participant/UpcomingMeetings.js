@@ -24,9 +24,13 @@ import {
   Typography,
   message,
 } from "antd";
-import moment from "moment";
 import { useRouter } from "next/router";
 import { useState } from "react";
+
+import dayjs from "dayjs";
+import "dayjs/locale/id";
+
+dayjs.locale("id");
 
 const { Panel } = Collapse;
 
@@ -175,7 +179,7 @@ const PickCoachingModal = ({ open, onCancel, onOk, row }) => {
                     </Tag>
                   </Descriptions.Item>
                   <Descriptions.Item label="Tanggal" span={3}>
-                    {moment(item?.start_date).format("DD MMMM YYYY")}
+                    {dayjs(item?.start_date).format("DD MMMM YYYY")}
                   </Descriptions.Item>
                   <Descriptions.Item label="Jam" span={3}>
                     {item?.start_hours} - {item?.end_hours}
@@ -221,11 +225,9 @@ function UpcomingMeetings() {
   const [row, setRow] = useState({});
 
   const handleOpen = (row) => {
-    const month = moment(row).format("MM");
-    const year = moment(row).format("YYYY");
-    const day = moment(row).format("DD");
-
-    console.log(day);
+    const month = dayjs(row).format("MM");
+    const year = dayjs(row).format("YYYY");
+    const day = dayjs(row).format("DD");
 
     setRow({
       month,
@@ -248,8 +250,8 @@ function UpcomingMeetings() {
   );
 
   const handleChange = (value) => {
-    const month = moment(value).format("MM");
-    const year = moment(value).format("YYYY");
+    const month = dayjs(value).format("MM");
+    const year = dayjs(value).format("YYYY");
     const newQuery = {
       year,
       month,
@@ -315,17 +317,14 @@ function UpcomingMeetings() {
 
   return (
     <>
-      <Alert color="green" title="Tips">
-        Pilih tanggal coaching clinic yang ada pada kalender, lalu klik
-      </Alert>
       <PickCoachingModal open={open} onCancel={handleClose} row={row} />
       <Calendar
         onPanelChange={handleChange}
         disabledDate={(value) => {
-          const currentMonth = moment(value).format("YYYY-MM-DD");
+          const currentMonth = dayjs(value).format("YYYY-MM-DD");
           const findData = data?.filter(
             (item) =>
-              moment(item?.start_date).format("YYYY-MM-DD") === currentMonth
+              dayjs(item?.start_date).format("YYYY-MM-DD") === currentMonth
           );
           if (findData?.length > 0) {
             return false;
@@ -334,11 +333,11 @@ function UpcomingMeetings() {
           }
         }}
         mode="month"
-        dateCellRender={(value) => {
-          const currentMonth = moment(value).format("YYYY-MM-DD");
+        cellRender={(value) => {
+          const currentMonth = dayjs(value).format("YYYY-MM-DD");
           const findData = data?.filter(
             (item) =>
-              moment(item?.start_date).format("YYYY-MM-DD") === currentMonth
+              dayjs(item?.start_date).format("YYYY-MM-DD") === currentMonth
           );
 
           if (findData?.length > 0) {
