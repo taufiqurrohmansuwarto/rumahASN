@@ -1,7 +1,7 @@
 import PageContainer from "@/components/PageContainer";
 import { useRouter } from "next/router";
 
-import { Breadcrumb } from "antd";
+import { Breadcrumb, Grid } from "antd";
 import Link from "next/link";
 
 function LayoutParticipant({
@@ -12,12 +12,16 @@ function LayoutParticipant({
   content,
 }) {
   const router = useRouter();
+  const breakPoint = Grid.useBreakpoint();
 
   return (
     <PageContainer
       loading={loading}
       title={title}
       content={content}
+      childrenContentStyle={{
+        padding: breakPoint.xs ? 0 : null,
+      }}
       header={{
         breadcrumbRender: () => (
           <Breadcrumb>

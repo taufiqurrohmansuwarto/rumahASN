@@ -1,13 +1,13 @@
+import Layout from "@/components/Layout";
+import ListNotifications from "@/components/ListNotifications";
+import PageContainer from "@/components/PageContainer";
+import { DeleteOutlined } from "@ant-design/icons";
 import { Grid, Stack } from "@mantine/core";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Breadcrumb, Button, message } from "antd";
-import { clearChatsNotificatoins } from "../services";
-import Layout from "../src/components/Layout";
-import ListNotifications from "../src/components/ListNotifications";
-import PageContainer from "../src/components/PageContainer";
 import Head from "next/head";
 import Link from "next/link";
-import { DeleteOutlined } from "@ant-design/icons";
+import { clearChatsNotificatoins } from "@/services/index";
 
 function NotificationsPage() {
   const queryClient = useQueryClient();

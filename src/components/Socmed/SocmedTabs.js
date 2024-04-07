@@ -26,16 +26,18 @@ function SocmedTabs() {
       <Row gutter={[8, 8]}>
         <Col md={16} xs={24}>
           <Row gutter={[8, 8]}>
-            <Col md={24}>
+            {/* <Col md={24}>
               <Card>
+                <Stack>
+                </Stack>
+              </Card>
+            </Col> */}
+            <Col md={24} xs={24}>
+              <Card title="Daftar Postingan">
                 <Stack>
                   <Announcement />
                   <SocmedCreatePost />
                 </Stack>
-              </Card>
-            </Col>
-            <Col md={24}>
-              <Card title="Daftar Postingan">
                 <Tabs
                   defaultActiveKey="all"
                   type="card"

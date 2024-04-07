@@ -9,16 +9,16 @@ import {
 } from "@ant-design/icons";
 import { Center } from "@mantine/core";
 import { useSpring } from "@react-spring/web";
+import { IconKey } from "@tabler/icons";
 import {
-  FloatButton,
   Button,
   Col,
   Divider,
+  FloatButton,
   Grid,
   Row,
   Space,
   Tooltip,
-  Typography,
 } from "antd";
 import { getProviders, signIn } from "next-auth/react";
 import Head from "next/head";
@@ -197,7 +197,10 @@ const SignIn = ({ providers }) => {
           </Row>
           <Center>
             <Link href="/public/verify-pdf">
-              <Typography.Link>Verifikasi PDF</Typography.Link>
+              {/* <Typography.Link>Verifikasi PDF</Typography.Link> */}
+              <Button size="small" icon={<IconKey size={14} />}>
+                Verifikasi PDF
+              </Button>
             </Link>
           </Center>
         </Col>

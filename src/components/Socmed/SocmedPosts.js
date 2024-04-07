@@ -25,6 +25,7 @@ import {
   Space,
   Tooltip,
   message,
+  Divider,
 } from "antd";
 import moment from "moment";
 import { useSession } from "next-auth/react";
@@ -33,6 +34,7 @@ import { useRouter } from "next/router";
 import { useState } from "react";
 import ReactMarkdownCustom from "../MarkdownEditor/ReactMarkdownCustom";
 import SocmedPostsFilter from "./SocmedPostsFilter";
+import SocmedCreatePost from "./SocmedCreatePost";
 
 const uploadFile = async (file) => {
   try {
