@@ -1,9 +1,8 @@
 import { listNotifications, removeNotification } from "@/services/index";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Avatar, BackTop, Card, List, Tag } from "antd";
+import { Avatar, Card, FloatButton, List, Tag } from "antd";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
-import { useState } from "react";
 import { formatDate } from "../../utils";
 
 function ListNotifications() {
@@ -11,12 +10,6 @@ function ListNotifications() {
   const { data: userData, status } = useSession();
   const router = useRouter();
   const query = router?.query;
-
-  // const [query, setQuery] = useState({
-  //   page: 1,
-  //   limit: 50,
-  //   symbol: "no",
-  // });
 
   const {
     data,
@@ -75,14 +68,11 @@ function ListNotifications() {
         router.push(`/agent/tickets/${ticket_id}/detail`);
       }
     }
-
-    // const routing = notificationText(item);
-    // router.push(routing);
   };
 
   return (
     <Card>
-      <BackTop />
+      <FloatButton.BackTop />
       <List
         pagination={{
           showSizeChanger: false,
@@ -92,7 +82,6 @@ function ListNotifications() {
           current: parseInt(query.page) || 1,
           pageSize: parseInt(query.limit) || 50,
           total: data?.total,
-          showTotal: (total) => `Total ${total} item`,
         }}
         loading={loading || status === "loading" || isFetching}
       >

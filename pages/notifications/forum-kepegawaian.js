@@ -8,8 +8,9 @@ import { Breadcrumb, Button, message } from "antd";
 import Head from "next/head";
 import Link from "next/link";
 import { clearChatsNotificatoins } from "@/services/index";
+import NotificationLayout from "@/components/Notification/NotificationLayout";
 
-function NotificationsPage() {
+function ForumKepegawaianNotification() {
   const queryClient = useQueryClient();
   const { mutate: clearNotif, isLoading: loadingClearChats } = useMutation(
     (data) => clearChatsNotificatoins(data),
@@ -46,32 +47,34 @@ function NotificationsPage() {
         title="Notifikasi"
         content="Notifikasi Pertanyaan"
       >
-        <Grid align="center" justify="center">
-          <Grid.Col md={8} sm={12}>
-            <Stack>
-              <Button
-                type="primary"
-                icon={<DeleteOutlined />}
-                onClick={handleClearNotif}
-              >
-                Hapus Notifikasi
-              </Button>
-              <ListNotifications />
-            </Stack>
-          </Grid.Col>
-        </Grid>
+        <NotificationLayout active="forum-kepegawaian">
+          <Grid align="center" justify="center">
+            <Grid.Col md={8} sm={12}>
+              <Stack>
+                <Button
+                  type="primary"
+                  icon={<DeleteOutlined />}
+                  onClick={handleClearNotif}
+                >
+                  Hapus Notifikasi
+                </Button>
+                <ListNotifications />
+              </Stack>
+            </Grid.Col>
+          </Grid>
+        </NotificationLayout>
       </PageContainer>
     </>
   );
 }
 
-NotificationsPage.getLayout = function getLayout(page) {
+ForumKepegawaianNotification.getLayout = function getLayout(page) {
   return <Layout>{page}</Layout>;
 };
 
-NotificationsPage.Auth = {
+ForumKepegawaianNotification.Auth = {
   action: "manage",
   subject: "Tickets",
 };
 
-export default NotificationsPage;
+export default ForumKepegawaianNotification;

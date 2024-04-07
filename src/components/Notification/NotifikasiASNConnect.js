@@ -1,14 +1,24 @@
 import { NOTIFICATION_ATTR } from "@/utils/client-utils";
 import { IconMessageCircle } from "@tabler/icons";
-import { Badge } from "antd";
+import { Badge, Tooltip } from "antd";
+import { useRouter } from "next/router";
 
-function NotifikasiASNConnect() {
+function NotifikasiASNConnect({ url, title }) {
+  const router = useRouter();
+
+  const changePageNotification = () => {
+    router.push(`/notifications/${url}`);
+  };
+
   return (
     <Badge>
-      <IconMessageCircle
-        color={NOTIFICATION_ATTR.color}
-        size={NOTIFICATION_ATTR.size}
-      />
+      <Tooltip title={title}>
+        <IconMessageCircle
+          onClick={changePageNotification}
+          color={NOTIFICATION_ATTR.color}
+          size={NOTIFICATION_ATTR.size}
+        />
+      </Tooltip>
     </Badge>
   );
 }
