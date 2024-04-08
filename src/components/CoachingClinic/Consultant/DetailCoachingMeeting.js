@@ -24,6 +24,7 @@ import {
   Col,
   Descriptions,
   Divider,
+  Drawer,
   Empty,
   Form,
   Input,
@@ -94,7 +95,7 @@ const ModalAddParticipant = ({ open, onClose }) => {
   );
 };
 
-const DaftarPeserta = ({ data, meeting }) => {
+const DaftarPeserta = ({ data, meeting, openDrawer, handleCancelDrawer }) => {
   const queryClient = useQueryClient();
   const router = useRouter();
   const { id } = router.query;
@@ -143,7 +144,12 @@ const DaftarPeserta = ({ data, meeting }) => {
   };
 
   return (
-    <>
+    <Drawer
+      open={openDrawer}
+      onClose={handleCancelDrawer}
+      title="Daftar Peserta"
+      width={600}
+    >
       <Stack>
         <Group position="apart">
           <Tooltip title="Tambah Peserta">
@@ -225,7 +231,7 @@ const DaftarPeserta = ({ data, meeting }) => {
           )}
         />
       </ScrollArea>
-    </>
+    </Drawer>
   );
 };
 
@@ -334,6 +340,10 @@ function DetailCoachingMeeting() {
   const [open, setOpen] = useState(false);
   const [api, setApi] = useState(null);
   const [openEditModal, setOpenEditModal] = useState(false);
+  const [openDrawer, setOpenDrawer] = useState(false);
+
+  const handleOpenDrawer = () => setOpenDrawer(true);
+  const handleCancelDrawer = () => setOpenDrawer(false);
 
   const handleEdit = () => {
     setOpenEditModal(true);
@@ -363,7 +373,10 @@ function DetailCoachingMeeting() {
                 cursor: "pointer",
               }}
             />
-            <ConsultantRatingMeeting />
+            <Button type="primary" onClick={handleOpenDrawer}>
+              Peserta
+            </Button>
+            {/* <ConsultantRatingMeeting /> */}
           </Space>
         }
         title={
@@ -375,13 +388,13 @@ function DetailCoachingMeeting() {
                 cursor: "pointer",
               }}
             />
-            <Divider type="vertical" />
+            {/* <Divider type="vertical" />
             <Tag color={data?.is_private ? "red" : "green"}>
               {data?.is_private ? "Privat" : "Publik"}
             </Tag>
             <Tag color={setColorStatusCoachingClinic(data?.status)}>
               {capitalize(data?.status)}
-            </Tag>
+            </Tag> */}
           </Space>
         }
         loading={isLoading}
@@ -389,7 +402,7 @@ function DetailCoachingMeeting() {
         <ModalInformation open={open} item={data} onClose={handleClose} />
         {data?.status === "live" ? (
           <Row gutter={[16, 16]}>
-            <Col md={18}>
+            <Col md={24}>
               <JitsiMeeting
                 key={renderKey}
                 domain="coaching-online.site"
@@ -424,13 +437,18 @@ function DetailCoachingMeeting() {
               />
             </Col>
             <Col md={6} xs={24}>
-              <DaftarPeserta meeting={data} data={data?.participants} />
+              <DaftarPeserta
+                meeting={data}
+                data={data?.participants}
+                openDrawer={openDrawer}
+                handleCancelDrawer={handleCancelDrawer}
+              />
             </Col>
           </Row>
         ) : (
           <>
             <Row gutter={[32, 32]}>
-              <Col md={18} xs={24}>
+              <Col md={24} xs={24}>
                 <div
                   style={{
                     display: "flex",
@@ -458,7 +476,12 @@ function DetailCoachingMeeting() {
                 </div>
               </Col>
               <Col md={6} xs={24}>
-                <DaftarPeserta meeting={data} data={data?.participants} />
+                <DaftarPeserta
+                  meeting={data}
+                  data={data?.participants}
+                  openDrawer={openDrawer}
+                  handleCancelDrawer={handleCancelDrawer}
+                />
               </Col>
             </Row>
           </>

@@ -80,8 +80,8 @@ const SignIn = ({ providers }) => {
         <Col md={12} xxl={5} lg={10} xs={24} sm={24}>
           <Row
             style={{
-              paddingLeft: breakPoint.xs ? 8 : null,
-              paddingRight: breakPoint.xs ? 8 : null,
+              paddingLeft: breakPoint.xs ? 16 : null,
+              paddingRight: breakPoint.xs ? 16 : null,
             }}
           >
             <Col md={24} xs={24}>
@@ -95,14 +95,14 @@ const SignIn = ({ providers }) => {
                     height={120}
                     width={350}
                   />
-                  <Image
+                  {/* <Image
                     alt="Logo Rumah ASN"
                     src={
                       "https://siasn.bkd.jatimprov.go.id:9000/public/signin_bsre.png"
                     }
                     height={30}
                     width={80}
-                  />
+                  /> */}
                 </Space>
               </Center>
               <Divider plain>Anda masyarakat umum?</Divider>

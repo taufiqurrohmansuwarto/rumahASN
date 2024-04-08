@@ -1,13 +1,14 @@
 import DetailCoachingMeeting from "@/components/CoachingClinic/Consultant/DetailCoachingMeeting";
 import Layout from "@/components/Layout";
 import PageContainer from "@/components/PageContainer";
-import { Breadcrumb } from "antd";
+import { Breadcrumb, Grid } from "antd";
 import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
 
 const DetailCoachingClinic = () => {
   const router = useRouter();
+  const breakPoint = Grid.useBreakpoint();
 
   return (
     <>
@@ -15,6 +16,9 @@ const DetailCoachingClinic = () => {
         <title>Rumah ASN - Instruktur Coaching Clinic</title>
       </Head>
       <PageContainer
+        childrenContentStyle={{
+          padding: breakPoint.xs ? 0 : null,
+        }}
         onBack={() => router?.back()}
         breadcrumbRender={() => (
           <Breadcrumb>
