@@ -6,7 +6,7 @@ import {
   QueryClient,
   QueryClientProvider,
 } from "@tanstack/react-query";
-import { ConfigProvider } from "antd";
+import { ConfigProvider, Grid } from "antd";
 // import "antd/dist/antd.css";
 import id from "antd/lib/locale/id_ID";
 import locale from "antd/locale/id_ID";
@@ -21,13 +21,6 @@ import Loading from "../src/components/Loading";
 import "../styles/globals.css";
 
 dayjs.locale("id");
-
-const theme = {
-  token: {
-    // fontSize: 16,
-    colorPrimary: "#faad14",
-  },
-};
 
 // check user role and organization start with 123
 function Auth({ children, action, subject }) {
@@ -70,6 +63,8 @@ function MyApp({ Component, pageProps: { session, ...pageProps } }) {
   const [queryClient] = useState(() => new QueryClient());
   const getLayout = Component.getLayout || ((page) => page);
 
+  const breakPoint = Grid.useBreakpoint();
+
   return (
     <>
       <Script
@@ -86,7 +81,20 @@ function MyApp({ Component, pageProps: { session, ...pageProps } }) {
                   `}
       </Script>
 
-      <ConfigProvider theme={theme} locale={id}>
+      <ConfigProvider
+        theme={{
+          components: {
+            Card: {
+              // padding: breakPoint.xs ? 8 : 16,
+              paddingLG: breakPoint.xs ? 8 : 24,
+            },
+          },
+          token: {
+            colorPrimary: "#faad14",
+          },
+        }}
+        locale={id}
+      >
         <SessionProvider
           session={session}
           baseUrl="/helpdesk"
