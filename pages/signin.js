@@ -78,7 +78,12 @@ const SignIn = ({ providers }) => {
           </Center>
         </Col>
         <Col md={12} xxl={5} lg={10} xs={24} sm={24}>
-          <Row>
+          <Row
+            style={{
+              paddingLeft: breakPoint.xs ? 8 : null,
+              paddingRight: breakPoint.xs ? 8 : null,
+            }}
+          >
             <Col md={24} xs={24}>
               <Center>
                 <Space align="center" direction="vertical">

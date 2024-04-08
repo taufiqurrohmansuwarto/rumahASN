@@ -14,7 +14,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Affix,
   Avatar,
-  BackTop,
+  FloatButton,
   Col,
   Divider,
   Dropdown,
@@ -330,7 +330,7 @@ const DetailTicketPublish = ({ id }) => {
         </Head>
         {data && (
           <>
-            <BackTop />
+            <FloatButton.BackTop />
             <Col md={18} xs={24}>
               <Row gutter={[8, 16]}>
                 <Col span={24}>

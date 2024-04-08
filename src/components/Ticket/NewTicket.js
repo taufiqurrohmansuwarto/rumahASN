@@ -81,7 +81,7 @@ const NewTicket = ({
                   Cancel
                 </MarkdownEditor.ActionButton>
               )}
-              <ButtonStatus currentStatus={currentStatus} />
+              {/* <ButtonStatus currentStatus={currentStatus} /> */}
               <MarkdownEditor.ActionButton
                 disabled={!value || loadingSubmit}
                 variant="primary"

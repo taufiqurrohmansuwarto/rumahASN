@@ -397,25 +397,48 @@ function Layout({ children, active, collapsed = true }) {
 
   return (
     <ProLayout
+      style={{
+        "&::WebkitScrollbar": {
+          background: "transparent",
+          height: "8px",
+          width: "8px",
+        },
+      }}
       theme="light"
       selectedKeys={[active ? active : router.pathname]}
-      menuExtraRender={({ collapsed }) => {
+      menuExtraRender={({ collapsed, isMobile }) => {
         if (!collapsed) {
-          return (
-            <Button
-              style={{
-                // marginTop: 10,
-                marginBottom: 10,
-              }}
-              onClick={handlePertanyan}
-              shape="round"
-              icon={<QuestionCircleFilled />}
-              block
-              type="primary"
-            >
-              Tanya BKD
-            </Button>
-          );
+          if (isMobile)
+            return (
+              <Button
+                style={{
+                  marginBottom: 8,
+                  marginTop: 8,
+                }}
+                size="middle"
+                shape="round"
+                type="primary"
+                icon={<QuestionCircleFilled />}
+              >
+                Tanya BKD
+              </Button>
+            );
+          else {
+            return (
+              <Button
+                style={{
+                  marginBottom: 10,
+                }}
+                onClick={handlePertanyan}
+                shape="round"
+                icon={<QuestionCircleFilled />}
+                block
+                type="primary"
+              >
+                Tanya BKD
+              </Button>
+            );
+          }
         } else {
           return (
             <Center>

@@ -76,21 +76,29 @@ function ChangeTicketTitle({ name, attributes, ticket }) {
 
   if (!canAccess(name, attributes)) {
     return (
-      <>
-        <Card>
-          <Space align="baseline">
-            <BackIcon />
-            <Typography.Title level={4}>{ticket?.title}</Typography.Title>
-          </Space>
-          <div>
-            <StatusTiket ticket={ticket} />
-          </div>
-        </Card>
-      </>
+      <div
+        style={{
+          backgroundColor: "white",
+          paddingBottom: 16,
+        }}
+      >
+        <Space align="baseline">
+          <BackIcon />
+          <Typography.Title level={4}>{ticket?.title}</Typography.Title>
+        </Space>
+        <div>
+          <StatusTiket ticket={ticket} />
+        </div>
+      </div>
     );
   } else {
     return (
-      <Card>
+      <div
+        style={{
+          backgroundColor: "white",
+          paddingBottom: 16,
+        }}
+      >
         <Space align="baseline">
           <BackIcon />
           <Typography.Title level={4} editable={{ onChange: handleEditTitle }}>
@@ -100,7 +108,7 @@ function ChangeTicketTitle({ name, attributes, ticket }) {
         <div>
           <StatusTiket ticket={ticket} />
         </div>
-      </Card>
+      </div>
     );
   }
 }
