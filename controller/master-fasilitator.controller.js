@@ -149,21 +149,29 @@ const getAllEmployeesMaster = async (req, res) => {
   try {
     const fetcher = req?.clientCredentialsFetcher;
     const opdId = req?.user?.organization_id;
+    const currentRole = req?.user?.current_role;
+
+    const organizationId = req?.query?.organizationId || opdId;
+    const idOpd = determineOpdId(organizationId, opdId);
 
     if (!opdId) {
       res.status(400).json({ message: "Organization ID is required" });
     } else {
       const result = await fetcher.get(
-        `/master-ws/pemprov/opd/${opdId}/employees`
+        `/master-ws/pemprov/opd/${idOpd}/employees`
       );
 
       const nip = result?.data?.map((item) => item?.nip_master);
-
       const employees = await SiasnEmployees.query().whereIn("nip_baru", nip);
 
       const hasil = result?.data?.map((item, idx) => {
         const currentEmployees = employees?.find(
           (employee) => employee?.nip_baru === item?.nip_master
+        );
+
+        const referensiJenjangId = referensiJenjang?.find(
+          (item) =>
+            String(item?.kode_bkn) === currentEmployees?.tingkat_pendidikan_id
         );
 
         const { id, ...allData } = item;
@@ -172,13 +180,8 @@ const getAllEmployeesMaster = async (req, res) => {
           no: idx + 1,
           nama_simaster: allData?.nama_master,
           nama_siasn: currentEmployees?.nama,
-          hasil_nama: compareText(allData?.nama_master, currentEmployees?.nama),
           nip_simaster: allData?.nip_master,
           nip_siasn: currentEmployees?.nip_baru,
-          hasil_nip: compareText(
-            allData?.nip_master,
-            currentEmployees?.nip_baru
-          ),
           gelar_depan_simaster: allData?.gelar_depan_master,
           gelar_depan_siasn: currentEmployees?.gelar_depan,
           gelar_belakang_simaster: allData?.gelar_belakang_master,
@@ -191,7 +194,40 @@ const getAllEmployeesMaster = async (req, res) => {
           jabatan_siasn: currentEmployees?.jabatan_nama,
           unor_simaster: allData?.opd_master,
           unor_siasn: currentEmployees?.unor_nama,
-          validasi_nik: currentEmployees?.is_valid_nik,
+          valid_nik: currentEmployees?.is_valid_nik,
+          nama: compareString(allData?.nama_master, currentEmployees?.nama)
+            ? 1
+            : 0,
+          nip: compareString(allData?.nip_master, currentEmployees?.nip_baru)
+            ? 1
+            : 0,
+          tgl_lahir: compareString(
+            allData?.tgl_lahir_master,
+            currentEmployees?.tanggal_lahir
+          )
+            ? 1
+            : 0,
+          email: compareString(allData?.email_master, currentEmployees?.email)
+            ? 1
+            : 0,
+          pangkat: compareString(
+            String(allData?.kode_golongan_bkn),
+            String(currentEmployees?.gol_akhir_id)
+          )
+            ? 1
+            : 0,
+          jenjang_pendidikan: compareString(
+            referensiJenjangId?.kode_master,
+            allData?.kode_jenjang_master
+          )
+            ? 1
+            : 0,
+          jenis_jabatan: compareString(
+            allData?.kode_jenis_jabatan_bkn,
+            currentEmployees?.jenis_jabatan_id
+          )
+            ? 1
+            : 0,
         };
       });
 

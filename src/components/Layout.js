@@ -484,12 +484,12 @@ function Layout({ children, active, collapsed = true }) {
           />,
           <NotifikasiUsulan
             key="submission"
-            url="submissions"
+            url="submission"
             title="Inbox Usulan"
           />,
           <NotifikasiPrivateMessage
             key="private-message"
-            url="private-messages"
+            url="private-message"
             title="Inbox Pesan Pribadi"
           />,
           <NotifikasiASNConnect

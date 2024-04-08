@@ -91,6 +91,18 @@ function ReportEmployees() {
       title: "Nama",
       dataIndex: "nama",
     },
+    {
+      title: "Email",
+      dataIndex: "email",
+    },
+    {
+      title: "Tanggal Lahir",
+      dataIndex: "tanggal_lahir",
+    },
+    {
+      title: "Jenis Jabatan Nama",
+      dataIndex: "jenis_jabatan_nama",
+    },
   ];
 
   const router = useRouter();

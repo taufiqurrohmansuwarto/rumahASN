@@ -8,7 +8,7 @@ import {
   downloadEmployees,
 } from "@/services/master.services";
 import { useMutation } from "@tanstack/react-query";
-import { Button, Card, Form, Input, Space, message } from "antd";
+import { Button, Card, FloatButton, Form, Input, Space, message } from "antd";
 import Head from "next/head";
 import { useRouter } from "next/router";
 
@@ -104,12 +104,13 @@ const FasilitatorEmployees = () => {
   return (
     <>
       <Head>
-        <title>Rumah ASN - Fasilitator SIMASTER</title>
+        <title>Rumah ASN - Master Data - Fasilitator SIMASTER</title>
       </Head>
       <PageContainer
         title="Fasilitator SIMASTER"
         content="Integrasi SIASN dan SIMASTER"
       >
+        <FloatButton.BackTop />
         <Card>
           {/* <Button
           disabled={isLoadingDownload}
@@ -119,7 +120,7 @@ const FasilitatorEmployees = () => {
           Unduh Data Anomali
         </Button> */}
           <Space>
-            <Button
+            {/* <Button
               disabled={isLoadingDownloadIPASN}
               loading={isLoadingDownloadIPASN}
               onClick={handleDownloadIPASN}
@@ -134,7 +135,7 @@ const FasilitatorEmployees = () => {
               type="primary"
             >
               Unduh Data Komparasi
-            </Button>
+            </Button> */}
           </Space>
           {/* <Form
             layout="vertical"

@@ -14,9 +14,14 @@ export const downloadDataIPASN = () => {
     .then((res) => res.data);
 };
 
-export const downloadEmployees = () => {
+export const downloadEmployees = (query) => {
+  const url = queryString.stringify(query, {
+    skipNull: true,
+    skipEmptyString: true,
+  });
+
   return api
-    .get("/fasilitator/download/data-siasn", {
+    .get(`/fasilitator/download/data-siasn?${url}`, {
       responseType: "arraybuffer",
     })
     .then((res) => res.data);

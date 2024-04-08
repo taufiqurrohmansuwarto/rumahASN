@@ -2,12 +2,24 @@ import { getAllEmployeesPaging } from "@/services/master.services";
 import { capitalizeWords } from "@/utils/client-utils";
 import {
   CheckCircleOutlined,
+  CloudDownloadOutlined,
   ExclamationCircleOutlined,
 } from "@ant-design/icons";
 import { useQuery } from "@tanstack/react-query";
-import { Avatar, Space, Table, Tag, Tooltip, Typography } from "antd";
+import {
+  Avatar,
+  Button,
+  Flex,
+  Modal,
+  Space,
+  Table,
+  Tag,
+  Tooltip,
+  Typography,
+} from "antd";
 import { useRouter } from "next/router";
 import EmployeesTableFilter from "../Filter/EmployeesTableFilter";
+import DownloadASN from "./DownloadASN";
 
 const TagKomparasi = ({ komparasi, nama }) => {
   return (
@@ -195,9 +207,22 @@ function EmployeesTable() {
 
   return (
     <div>
-      <EmployeesTableFilter />
+      <div
+        style={{
+          border: "1px solid #f0f0f0",
+          padding: 16,
+          marginTop: 16,
+          marginBottom: 16,
+        }}
+      >
+        <EmployeesTableFilter />
+        <Flex gap="small">
+          <DownloadASN />
+          <Button type="primary">Unduh IP ASN</Button>
+        </Flex>
+      </div>
       <Table
-        size="small"
+        size="middle"
         columns={columns}
         dataSource={data?.results}
         pagination={{
