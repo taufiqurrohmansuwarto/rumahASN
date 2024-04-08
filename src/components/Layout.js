@@ -397,13 +397,6 @@ function Layout({ children, active, collapsed = true }) {
 
   return (
     <ProLayout
-      style={{
-        "&::WebkitScrollbar": {
-          background: "transparent",
-          height: "8px",
-          width: "8px",
-        },
-      }}
       theme="light"
       selectedKeys={[active ? active : router.pathname]}
       menuExtraRender={({ collapsed, isMobile }) => {
