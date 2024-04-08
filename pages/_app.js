@@ -86,7 +86,7 @@ function MyApp({ Component, pageProps: { session, ...pageProps } }) {
           components: {
             Card: {
               // padding: breakPoint.xs ? 8 : 16,
-              paddingLG: breakPoint.xs ? 8 : 24,
+              paddingLG: breakPoint.xs ? 14 : 24,
             },
           },
           token: {
