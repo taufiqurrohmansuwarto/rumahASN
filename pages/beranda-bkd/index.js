@@ -416,6 +416,7 @@ const TabsJobs = () => {
 
 const BerandaBKD = () => {
   const router = useRouter();
+  const breakPoint = Grid.useBreakpoint();
 
   useEffect(() => {
     // On before route change save scroll position
@@ -447,6 +448,9 @@ const BerandaBKD = () => {
         <title>Rumah ASN - Tugas Saya</title>
       </Head>
       <PageContainer
+        childrenContentStyle={{
+          padding: breakPoint.xs ? 0 : null,
+        }}
         header={{
           breadcrumbRender: () => (
             <Breadcrumb>

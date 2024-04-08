@@ -1,4 +1,3 @@
-import DaftarLayanan from "@/components/LayananKepegawaian/DaftarLayanan";
 import Layout from "@/components/Layout";
 import PageContainer from "@/components/PageContainer";
 import UserPolls from "@/components/Polls/UserPolls";
@@ -7,7 +6,7 @@ import ShowRatings from "@/components/ShowRatings";
 import TicketsPublish from "@/components/Ticket/TicketsPublish";
 import CarouselBanner from "@/components/Utils/CarouselBanner";
 import { Grid, Stack } from "@mantine/core";
-import { Card } from "antd";
+import { Card, Grid as GridAntd } from "antd";
 import Head from "next/head";
 import { useRouter } from "next/router";
 import { useEffect } from "react";
@@ -36,8 +35,16 @@ function Feeds() {
     window.scrollTo(0, parseInt(scrollY));
   }
 
+  const breakPoint = GridAntd.useBreakpoint();
+
   return (
-    <PageContainer title="Forum Kepegawaian Rumah ASN" content="Rumah ASN">
+    <PageContainer
+      title="Forum Kepegawaian Rumah ASN"
+      content="Kamu bertanya kami menjawab!"
+      childrenContentStyle={{
+        padding: breakPoint.xs ? 0 : null,
+      }}
+    >
       <Head>
         <title>Rumah ASN - Beranda</title>
       </Head>
