@@ -23,6 +23,7 @@ import {
   Tooltip,
   Typography,
   message,
+  Grid,
 } from "antd";
 import Head from "next/head";
 import { useRouter } from "next/router";
@@ -225,12 +226,17 @@ const EmployeeNumberFasilitator = () => {
     () => dataUtamSIASNByNip(nip)
   );
 
+  const breakPoint = Grid.useBreakpoint();
+
   return (
     <>
       <Head>
         <title>Rumah ASN - Detail Pegawai</title>
       </Head>
       <PageContainer
+        childrenContentStyle={{
+          padding: breakPoint.xs ? 0 : null,
+        }}
         title="Detail Pegawai"
         content="Komparasi data SIMASTER dan SIASN."
         onBack={() => router.back()}

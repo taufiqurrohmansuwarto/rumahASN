@@ -8,12 +8,14 @@ import {
   downloadEmployees,
 } from "@/services/master.services";
 import { useMutation } from "@tanstack/react-query";
-import { Button, Card, FloatButton, Form, Input, Space, message } from "antd";
+import { Card, FloatButton, Form, Grid, Space, message } from "antd";
 import Head from "next/head";
 import { useRouter } from "next/router";
 
 const FasilitatorEmployees = () => {
   useScrollRestoration();
+  const breakPoint = Grid.useBreakpoint();
+
   const router = useRouter();
   const [form] = Form.useForm();
 
@@ -107,6 +109,9 @@ const FasilitatorEmployees = () => {
         <title>Rumah ASN - Master Data - Fasilitator SIMASTER</title>
       </Head>
       <PageContainer
+        childrenContentStyle={{
+          padding: breakPoint.xs ? 0 : null,
+        }}
         title="Fasilitator SIMASTER"
         content="Integrasi SIASN dan SIMASTER"
       >
