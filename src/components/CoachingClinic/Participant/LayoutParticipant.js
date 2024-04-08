@@ -27,7 +27,7 @@ function LayoutParticipant({
           <Breadcrumb>
             <Breadcrumb.Item>
               <Link href="/feeds">
-                <a>Beranda</a>
+                <a>Forum Kepegawaian</a>
               </Link>
             </Breadcrumb.Item>
             <Breadcrumb.Item>Coaching Clinic</Breadcrumb.Item>

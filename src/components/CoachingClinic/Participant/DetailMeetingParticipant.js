@@ -1,5 +1,4 @@
 import JitsiMeeting from "@/components/VideoConference/JitsiMeeting";
-import moment from "moment";
 import { detailMeetingParticipant } from "@/services/coaching-clinics.services";
 import { QuestionCircleTwoTone } from "@ant-design/icons";
 import { Group, ScrollArea, Stack } from "@mantine/core";
@@ -10,21 +9,23 @@ import {
   Card,
   Col,
   Descriptions,
+  Drawer,
   Empty,
+  FloatButton,
   Input,
   List,
   Modal,
   Row,
   Skeleton,
   Space,
-  Tag,
   Typography,
 } from "antd";
+import moment from "moment";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import AddRating from "./CoachingClinicRating";
 
-const DaftarPeserta = ({ data, meeting }) => {
+const DaftarPeserta = ({ data, meeting, open, handleCancel }) => {
   const [filterData, setFilterData] = useState(data);
 
   useEffect(() => {
@@ -32,7 +33,13 @@ const DaftarPeserta = ({ data, meeting }) => {
   }, [data]);
 
   return (
-    <>
+    <Drawer
+      width={600}
+      open={open}
+      onClose={handleCancel}
+      title="Daftar Peserta"
+      placement="right"
+    >
       <Stack>
         <Stack>
           <Group position="right">
@@ -57,7 +64,7 @@ const DaftarPeserta = ({ data, meeting }) => {
             }}
           />
         </Stack>
-        <ScrollArea h={450}>
+        <ScrollArea>
           <List
             dataSource={filterData}
             rowKey={(row) => row?.custom_id}
@@ -93,7 +100,7 @@ const DaftarPeserta = ({ data, meeting }) => {
           />
         </ScrollArea>
       </Stack>
-    </>
+    </Drawer>
   );
 };
 
@@ -133,6 +140,10 @@ function DetailMeetingParticipant() {
   const { id } = router.query;
 
   const [open, setOpen] = useState(false);
+  const [openParticipant, setOpenParticipant] = useState(false);
+
+  const handleOpenParticipant = () => setOpenParticipant(true);
+  const handleCloseParticipant = () => setOpenParticipant(false);
 
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
@@ -152,7 +163,14 @@ function DetailMeetingParticipant() {
 
   return (
     <Card
-      extra={<AddRating meetingId={data?.meeting?.id} />}
+      extra={[
+        <Space key="action">
+          <AddRating meetingId={data?.meeting?.id} key="rating" />
+          <Button onClick={handleOpenParticipant} key="participant">
+            Peserta
+          </Button>
+        </Space>,
+      ]}
       loading={isLoading}
       title={
         <Space>
@@ -175,7 +193,7 @@ function DetailMeetingParticipant() {
           />
           {data?.meeting?.status === "live" ? (
             <Row gutter={[16, 16]}>
-              <Col md={18} xs={24}>
+              <Col md={24} xs={24}>
                 <JitsiMeeting
                   domain="coaching-online.site"
                   jwt={data?.jwt}
@@ -202,12 +220,17 @@ function DetailMeetingParticipant() {
                 />
               </Col>
               <Col md={6} xs={24}>
-                <DaftarPeserta data={data?.participants} />
+                <DaftarPeserta
+                  meeting={data}
+                  data={data?.participants}
+                  open={openParticipant}
+                  handleCancel={handleCloseParticipant}
+                />
               </Col>
             </Row>
           ) : (
             <Row gutter={[16, 16]}>
-              <Col md={18} xs={24}>
+              <Col md={24} xs={24}>
                 <div
                   style={{
                     display: "flex",
@@ -218,11 +241,14 @@ function DetailMeetingParticipant() {
                     backgroundColor: "#eee",
                   }}
                 >
+                  <FloatButton.BackTop />
                   <Empty
-                    description={`Hmmm... sepertinya coaching clinic belum dimulai atau coaching clinic sudah berakhir`}
+                    description={`Coaching clinic belum dimulai atau Coaching clinic sudah berakhir`}
                   >
                     <Space>
-                      <Button onClick={() => router.back()}>Kembali</Button>
+                      <Button danger onClick={() => router.back()}>
+                        Kembali
+                      </Button>
                       <Button
                         loading={isLoading || isFetching}
                         disabled={isLoading || isFetching}
@@ -236,7 +262,12 @@ function DetailMeetingParticipant() {
                 </div>
               </Col>
               <Col md={6} xs={24}>
-                <DaftarPeserta meeting={data} data={data?.participants} />
+                <DaftarPeserta
+                  meeting={data}
+                  data={data?.participants}
+                  open={openParticipant}
+                  handleCancel={handleCloseParticipant}
+                />
               </Col>
             </Row>
           )}

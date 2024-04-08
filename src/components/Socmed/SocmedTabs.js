@@ -33,7 +33,7 @@ function SocmedTabs() {
               </Card>
             </Col> */}
             <Col md={24} xs={24}>
-              <Card title="Daftar Postingan">
+              <Card>
                 <Stack>
                   <Announcement />
                   <SocmedCreatePost />

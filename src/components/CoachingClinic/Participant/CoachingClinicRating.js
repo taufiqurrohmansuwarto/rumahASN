@@ -6,7 +6,7 @@ import { Rating } from "@mantine/core";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Button, Form, Input, Modal, Rate, Skeleton, message } from "antd";
 import { useRouter } from "next/router";
-import React, { useState } from "react";
+import { useState } from "react";
 
 const ModalRating = ({ open, onCancel, handleRate, loading, meetingId }) => {
   const router = useRouter();

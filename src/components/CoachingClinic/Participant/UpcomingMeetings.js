@@ -179,7 +179,7 @@ const PickCoachingModal = ({ open, onCancel, onOk, row }) => {
                     </Tag>
                   </Descriptions.Item>
                   <Descriptions.Item label="Tanggal" span={3}>
-                    {dayjs(item?.start_date).format("DD MMMM YYYY")}
+                    {dayjs(item?.start_date).format("DD-MM-YYYY")}
                   </Descriptions.Item>
                   <Descriptions.Item label="Jam" span={3}>
                     {item?.start_hours} - {item?.end_hours}
@@ -269,51 +269,6 @@ function UpcomingMeetings() {
         message.error(error?.response?.data?.message);
       },
     });
-
-  const { mutate: cancelJoin, isLoading: isLoadingCancelJoin } = useMutation(
-    (data) => cancelRequestMeeting(data),
-    {}
-  );
-
-  const handleRequest = (row) => {
-    Modal.confirm({
-      title: "Request",
-      content: "Apakah anda yakin ingin request?",
-      okText: "Ya",
-      cancelText: "Tidak",
-      centered: true,
-      onOk: async () => {
-        await requestJoin(row?.id);
-      },
-    });
-  };
-
-  const columns = [
-    {
-      title: "status",
-      dataIndex: "status",
-    },
-    {
-      title: "Peserta",
-      dataIndex: "max_participants",
-    },
-    {
-      title: "Start Date",
-      dataIndex: "start_date",
-    },
-    {
-      key: "aksi",
-      title: "Aksi",
-      render: (_, row) => {
-        return (
-          <>
-            <a onClick={() => handleRequest(row)}>Request</a>
-            <Divider type="vertical" />
-          </>
-        );
-      },
-    },
-  ];
 
   return (
     <>
