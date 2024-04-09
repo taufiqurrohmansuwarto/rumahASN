@@ -408,6 +408,7 @@ function Layout({ children, active, collapsed = true }) {
                   marginBottom: 8,
                   marginTop: 8,
                 }}
+                onClick={handlePertanyan}
                 size="middle"
                 shape="round"
                 type="primary"
