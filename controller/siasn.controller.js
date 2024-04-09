@@ -114,10 +114,10 @@ const siasnEmployeeDetailByNip = async (req, res) => {
     const { nip } = req?.query;
     const siasnRequest = req.siasnRequest;
 
-    const { data } = await siasnRequest.get(`/pns/data-utama/${nip}`);
+    const result = await siasnRequest.get(`/pns/data-utama/${trim(nip)}`);
 
     const hasil = {
-      ...data?.data,
+      ...result?.data?.data,
     };
 
     res.json(hasil);

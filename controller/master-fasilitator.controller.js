@@ -155,103 +155,95 @@ const getAllEmployeesMaster = async (req, res) => {
     const idOpd = determineOpdId(organizationId, opdId);
 
     if (!opdId) {
-      res.status(400).json({ message: "Organization ID is required" });
-    } else {
-      const result = await fetcher.get(
-        `/master-ws/pemprov/opd/${idOpd}/employees`
-      );
-
-      const nip = result?.data?.map((item) => item?.nip_master);
-      const employees = await SiasnEmployees.query().whereIn("nip_baru", nip);
-
-      const hasil = result?.data?.map((item, idx) => {
-        const currentEmployees = employees?.find(
-          (employee) => employee?.nip_baru === item?.nip_master
-        );
-
-        const referensiJenjangId = referensiJenjang?.find(
-          (item) =>
-            String(item?.kode_bkn) === currentEmployees?.tingkat_pendidikan_id
-        );
-
-        const { id, ...allData } = item;
-
-        return {
-          no: idx + 1,
-          nama_simaster: allData?.nama_master,
-          nama_siasn: currentEmployees?.nama,
-          nip_simaster: allData?.nip_master,
-          nip_siasn: currentEmployees?.nip_baru,
-          gelar_depan_simaster: allData?.gelar_depan_master,
-          gelar_depan_siasn: currentEmployees?.gelar_depan,
-          gelar_belakang_simaster: allData?.gelar_belakang_master,
-          gelar_belakang_siasn: currentEmployees?.gelar_belakang,
-          jenjang_pendidikan_simaster: allData?.jenjang_master,
-          jenjang_pendidikan_siasn: currentEmployees?.tingkat_pendidikan_nama,
-          golongan_simaster: allData?.golongan_master,
-          golongan_siasn: currentEmployees?.gol_akhir_nama,
-          jabatan_simaster: allData?.jabatan_master,
-          jabatan_siasn: currentEmployees?.jabatan_nama,
-          unor_simaster: allData?.opd_master,
-          unor_siasn: currentEmployees?.unor_nama,
-          valid_nik: currentEmployees?.is_valid_nik,
-          nama: compareString(allData?.nama_master, currentEmployees?.nama)
-            ? 1
-            : 0,
-          nip: compareString(allData?.nip_master, currentEmployees?.nip_baru)
-            ? 1
-            : 0,
-          tgl_lahir: compareString(
-            allData?.tgl_lahir_master,
-            currentEmployees?.tanggal_lahir
-          )
-            ? 1
-            : 0,
-          email: compareString(allData?.email_master, currentEmployees?.email)
-            ? 1
-            : 0,
-          pangkat: compareString(
-            String(allData?.kode_golongan_bkn),
-            String(currentEmployees?.gol_akhir_id)
-          )
-            ? 1
-            : 0,
-          jenjang_pendidikan: compareString(
-            referensiJenjangId?.kode_master,
-            allData?.kode_jenjang_master
-          )
-            ? 1
-            : 0,
-          jenis_jabatan: compareString(
-            allData?.kode_jenis_jabatan_bkn,
-            currentEmployees?.jenis_jabatan_id
-          )
-            ? 1
-            : 0,
-        };
-      });
-
-      const maxWidths = calculateMaxWidthOfColumns(hasil);
-      const wb = xlsx.utils.book_new();
-      const ws = xlsx.utils.json_to_sheet(hasil);
-      ws["!cols"] = maxWidths.map((w) => ({ wch: w + 2 }));
-
-      xlsx.utils.book_append_sheet(wb, ws, "Sheet1");
-
-      xlsx.writeFile(wb, "ipasn.xlsx");
-
-      res.setHeader(
-        "Content-Type",
-        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-      );
-
-      res.setHeader(
-        "Content-Disposition",
-        "attachment; filename=" + "ipasn.xlsx"
-      );
-
-      res.end(xlsx.write(wb, { type: "buffer", bookType: "xlsx" }));
+      return res.status(400).json({ message: "Organization ID is required" });
     }
+
+    const result = await fetcher.get(
+      `/master-ws/pemprov/opd/${idOpd}/employees`
+    );
+    const nip = result?.data?.map((item) => item?.nip_master);
+    const employees = await SiasnEmployees.query().whereIn("nip_baru", nip);
+
+    const hasil = result?.data?.map((item, idx) => {
+      const currentEmployees = employees?.find(
+        (employee) => employee?.nip_baru === item?.nip_master
+      );
+      const referensiJenjangId = referensiJenjang?.find(
+        (item) =>
+          String(item?.kode_bkn) === currentEmployees?.tingkat_pendidikan_id
+      );
+      const { id, foto, ...allData } = item;
+
+      const namaMaster = allData?.nama_master;
+      const namaSiasn = currentEmployees?.nama;
+
+      const tglLahirMaster = allData?.tgl_lahir_master;
+      const tglLahirSiasn = currentEmployees?.tanggal_lahir;
+
+      const nipMaster = allData?.nip_master;
+      const nipSiasn = currentEmployees?.nip_baru;
+
+      const emailMaster = allData?.email_master;
+      const emailSiasn = currentEmployees?.email;
+
+      const pangkatMaster = allData?.kode_golongan_bkn;
+      const pangkatSiasn = currentEmployees?.gol_akhir_id;
+
+      const jenisJabatanMaster = allData?.kode_jenis_jabatan_bkn;
+      const jenisJabatanSiasn = currentEmployees?.jenis_jabatan_id;
+
+      const jenjangPendidikanMaster = referensiJenjangId?.kode_master;
+      const jenjangPendidikanSiasn = allData?.kode_jenjang_master;
+
+      return {
+        no: idx + 1,
+        ...allData,
+        nama_siasn: currentEmployees?.nama,
+        nip_siasn: currentEmployees?.nip_baru,
+        gelar_depan_siasn: currentEmployees?.gelar_depan,
+        gelar_belakang_siasn: currentEmployees?.gelar_belakang,
+        jenjang_pendidikan_siasn: currentEmployees?.tingkat_pendidikan_nama,
+        golongan_siasn: currentEmployees?.gol_akhir_nama,
+        jabatan_siasn: currentEmployees?.jabatan_nama,
+        unor_siasn: currentEmployees?.unor_nama,
+        valid_nik: currentEmployees?.is_valid_nik,
+        nama: compareString(namaMaster, namaSiasn) ? 1 : 0,
+        nip: compareString(nipMaster, nipSiasn) ? 1 : 0,
+        tgl_lahir: compareString(tglLahirMaster, tglLahirSiasn) ? 1 : 0,
+        email: compareString(emailMaster, emailSiasn) ? 1 : 0,
+        pangkat: compareString(pangkatMaster, pangkatSiasn) ? 1 : 0,
+        jenis_jabatan: compareString(jenisJabatanMaster, jenisJabatanSiasn)
+          ? 1
+          : 0,
+        jenjang_pendidikan: compareString(
+          jenjangPendidikanMaster,
+          jenjangPendidikanSiasn
+        )
+          ? 1
+          : 0,
+        jenis_jabatan: compareString(jenisJabatanMaster, jenisJabatanSiasn)
+          ? 1
+          : 0,
+      };
+    });
+
+    const maxWidths = calculateMaxWidthOfColumns(hasil);
+    const wb = xlsx.utils.book_new();
+    const ws = xlsx.utils.json_to_sheet(hasil);
+    ws["!cols"] = maxWidths.map((w) => ({ wch: w + 2 }));
+
+    xlsx.utils.book_append_sheet(wb, ws, "Sheet1");
+    xlsx.writeFile(wb, "ipasn.xlsx");
+
+    res.setHeader(
+      "Content-Type",
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    );
+    res.setHeader(
+      "Content-Disposition",
+      "attachment; filename=" + "ipasn.xlsx"
+    );
+    res.end(xlsx.write(wb, { type: "buffer", bookType: "xlsx" }));
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: "Internal server error" });

@@ -1,6 +1,6 @@
 import { cltnByNip } from "@/services/siasn-services";
 import { useQuery } from "@tanstack/react-query";
-import { Table, Typography } from "antd";
+import { Card, Table, Typography } from "antd";
 import React from "react";
 
 function CompareCLTNByNip({ nip }) {
@@ -34,15 +34,14 @@ function CompareCLTNByNip({ nip }) {
   ];
 
   return (
-    <div>
+    <Card title="CLTN">
       <Table
-        title={() => <Typography.Title level={5}>SIASN CLTN</Typography.Title>}
         columns={columns}
         pagination={false}
         dataSource={data}
         loading={isLoading}
       />
-    </div>
+    </Card>
   );
 }
 

@@ -297,7 +297,7 @@ const FormUnorJabatan = () => {
   return (
     <>
       <Button type="primary" onClick={handleOpen}>
-        Tambah Jabatan Unor
+        Tambah Jabatan
       </Button>
       <ModalFormJabatanUnor
         handleOk={addJabatanUnor}

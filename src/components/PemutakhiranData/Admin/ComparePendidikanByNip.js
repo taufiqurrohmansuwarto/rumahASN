@@ -13,22 +13,7 @@ const CompareDataPendidikanSIMASTER = ({ nip }) => {
 
   const columns = [
     {
-      title: "File Nilai",
-      key: "file_nilai",
-      render: (text, record) => {
-        return (
-          <>
-            {record?.file_nilai_url && (
-              <a href={record?.file_nilai_url} target="_blank" rel="noreferrer">
-                File
-              </a>
-            )}
-          </>
-        );
-      },
-    },
-    {
-      title: "File Ijazah",
+      title: "Ijazah",
       key: "file_nilai",
       render: (text, record) => {
         return (
@@ -46,6 +31,22 @@ const CompareDataPendidikanSIMASTER = ({ nip }) => {
         );
       },
     },
+    {
+      title: "Transkrip",
+      key: "file_nilai",
+      render: (text, record) => {
+        return (
+          <>
+            {record?.file_nilai_url && (
+              <a href={record?.file_nilai_url} target="_blank" rel="noreferrer">
+                File
+              </a>
+            )}
+          </>
+        );
+      },
+    },
+
     { title: "Pendidikan", dataIndex: "jenjang" },
     { title: "Tahun Lulus", dataIndex: "tahun_lulus" },
     { title: "No. Ijazah", dataIndex: "no_ijazah" },
@@ -75,7 +76,7 @@ function ComparePendidikanByNip({ nip }) {
 
   const columns = [
     {
-      title: "File Ijazah",
+      title: "Ijazah",
       key: "dokumenIjazah",
       render: (_, row) => {
         return (
@@ -94,7 +95,7 @@ function ComparePendidikanByNip({ nip }) {
       },
     },
     {
-      title: "File Transkrip",
+      title: "Transkrip",
       key: "dokumenTranskrip",
       render: (_, row) => {
         return (
@@ -113,7 +114,7 @@ function ComparePendidikanByNip({ nip }) {
       },
     },
     {
-      title: "File SK Pencantuman Gelar",
+      title: "SK Pencantuman Gelar",
       key: "dokumenSKPencantumanGelar",
       render: (_, row) => {
         return (

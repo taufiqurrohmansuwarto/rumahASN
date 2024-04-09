@@ -892,8 +892,8 @@ export const additionalData = [
 ];
 
 export const NOTIFICATION_ATTR = {
-  color: "#000",
-  size: 18,
+  color: "#595959",
+  size: 16,
 };
 
 export const setJenisJabatanColor = (jenisJabatan) => {
@@ -904,4 +904,39 @@ export const setJenisJabatanColor = (jenisJabatan) => {
   } else if (jenisJabatan === "Pelaksana") {
     return "yellow";
   }
+};
+
+// jabatan guru, ahli pertama, ahli muda, ahli madya, ahli utama
+// jabatan fungsional tertentu, terampil, mahir, ahli pertama, ahli muda, ahli madya, ahli utama
+
+const daftarJabatanGuru = [
+  "guru ahli pertama",
+  "guru ahli muda",
+  "guru ahli madya",
+  "guru ahli utama",
+];
+
+const daftarJabatanFungsionalTertentu = [
+  { title: "terampil", value: "terampil" },
+  { title: "mahir", value: "mahir" },
+  { title: "ahli pertama", value: "pertama" },
+  { title: "ahli muda", value: "muda" },
+  { title: "ahli madya", value: "madya" },
+  { title: "ahli utama", value: "utama" },
+];
+
+export const cekJabatanGuruSalah = (jabatan) => {
+  // trim dulu
+  const jabatanTrim = jabatan?.trim()?.toLowerCase();
+  return daftarJabatanGuru.includes(jabatanTrim);
+};
+
+export const cekJabatanFungsional = (jabatan) => {
+  // trim dulu jabatan dan lowercase kemudian cek jika di paramater jabatan apa ada kata di jabatan yang mirip dengan daftarJabatanFungsionalTertentu, jika ada return value nya
+  const jabatanTrim = jabatan?.trim()?.toLowerCase();
+  const jabatanCek = daftarJabatanFungsionalTertentu.find(
+    (item) => item.title === jabatanTrim
+  );
+  const kata = `JFT ${jabatanCek?.value}`;
+  return kata;
 };

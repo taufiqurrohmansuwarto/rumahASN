@@ -1,6 +1,6 @@
 import { penghargaanByNip } from "@/services/siasn-services";
 import { useQuery } from "@tanstack/react-query";
-import { Table } from "antd";
+import { Card, Table } from "antd";
 
 function ComparePenghargaanByNip({ nip }) {
   const { data, isLoading } = useQuery(
@@ -44,16 +44,15 @@ function ComparePenghargaanByNip({ nip }) {
   ];
 
   return (
-    <>
+    <Card title="Penghargaan SIASN">
       <Table
-        title={() => <b>RIWAYAT Penghargaan SIASN</b>}
         pagination={false}
         columns={columns}
         dataSource={data}
         loading={isLoading}
         rowKey={(row) => row?.id}
       />
-    </>
+    </Card>
   );
 }
 

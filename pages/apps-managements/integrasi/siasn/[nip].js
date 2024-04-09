@@ -14,6 +14,7 @@ import {
   Checkbox,
   Col,
   Form,
+  Grid,
   Input,
   Modal,
   Row,
@@ -220,12 +221,17 @@ const IntegrasiSIASNByNIP = () => {
     () => dataUtamSIASNByNip(nip)
   );
 
+  const breakPoint = Grid.useBreakpoint();
+
   return (
     <>
       <Head>
         <title>Data SIASN - SIMASTER {nip}</title>
       </Head>
       <PageContainer
+        childrenContentStyle={{
+          padding: breakPoint.xs ? 0 : null,
+        }}
         onBack={() => router.back()}
         title="Data Integrasi SIASN"
         loading={isLoadingDataSimaster}
@@ -265,9 +271,7 @@ const IntegrasiSIASNByNIP = () => {
           ),
         }}
       >
-        <Card>
-          <SiasnTab nip={nip} />
-        </Card>
+        <SiasnTab nip={nip} />
       </PageContainer>
     </>
   );

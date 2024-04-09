@@ -398,6 +398,28 @@ function Layout({ children, active, collapsed = true }) {
   return (
     <ProLayout
       theme="light"
+      token={{
+        // bgLayout: "#ECEEF1",
+        sider: {
+          // colorBgCollapsedButton: "#E65100", // Oranye gelap untuk tombol collapse
+          // colorBgMenuItemActive: "#E65100", // Oranye gelap untuk item menu yang aktif
+          // colorTextCollapsedButton: "#FFFFFF", // Putih untuk tombol collapse
+          // colorTextCollapsedButtonHover: "#FFFFFF", // Putih untuk tombol collapse saat di-hover
+          // colorTextMenuSecondary: "#9E9E9E", // Abu-abu untuk teks menu sekunder
+          // colorTextSubMenuSelected: "#E65100", // Oranye gelap untuk teks sub-menu yang dipilih
+          // colorMenuBackground: "#424242", // Abu-abu gelap untuk latar belakang menu
+          // colorTextMenuTitle: "#FFFFFF", // Putih untuk judul menu
+          // colorMenuItemDivider: "rgba(255, 255, 255, 0.12)", // Pembatas menu dengan transparansi
+          // colorTextMenu: "#FFFFFF", // Putih untuk teks menu
+          colorTextMenuItemHover: "#d46b08", // Putih untuk teks menu saat di-hover
+          colorTextMenuSelected: "#d46b08", // Putih untuk teks menu saat dipilih
+          colorTextMenuActive: "#d46b08", // Putih untuk teks menu saat aktif
+          // colorBgMenuItemHover: "rgba(255, 180, 0, 0.2)", // Transparan oranye saat item menu di-hover
+          colorBgMenuItemSelected: "rgba(255, 180, 0, 0.3)", // Transparan oranye lebih terang untuk item menu yang dipilih
+          colorBgMenuItemCollapsedElevated: "#424242", // Abu-abu gelap untuk menu yang tertutup namun ditinggikan
+        },
+        header: {},
+      }}
       selectedKeys={[active ? active : router.pathname]}
       menuExtraRender={({ collapsed, isMobile }) => {
         if (!collapsed) {

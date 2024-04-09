@@ -48,6 +48,7 @@ function WebinarUserLayout({
       ]}
       tabActiveKey={active}
       tabProps={{
+        // active color to red
         type: "card",
         size: "small",
         onChange: (key) => {
