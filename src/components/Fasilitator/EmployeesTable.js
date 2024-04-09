@@ -293,7 +293,7 @@ function EmployeesTable() {
     {
       title: "Aksi",
       key: "action",
-      responsive: ["xs"],
+      responsive: ["sm"],
       render: (row) => {
         return <a onClick={() => gotoDetail(row?.nip_master)}>Detail</a>;
       },

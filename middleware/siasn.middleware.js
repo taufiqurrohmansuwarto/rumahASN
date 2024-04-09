@@ -83,8 +83,12 @@ const errorHandler = async (error) => {
 };
 
 siasnWsAxios.interceptors.request.use(
-  (request) => requestHandler(request),
-  (error) => errorHandler(error)
+  (request) => {
+    return requestHandler(request);
+  },
+  (error) => {
+    return errorHandler(error);
+  }
 );
 
 siasnWsAxios.interceptors.response.use(

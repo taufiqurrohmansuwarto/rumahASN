@@ -27,7 +27,7 @@ const ModalDataIPAsn = ({ data, open, onCancel, tahun }) => {
       footer={null}
       width={800}
       centered
-      title="Data IP ASN"
+      title="IP ASN Tahun 2023"
       open={open}
       onCancel={onCancel}
     >

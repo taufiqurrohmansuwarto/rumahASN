@@ -1,18 +1,22 @@
 import { dataUtamaMasterByNip } from "@/services/master.services";
 import { dataUtamSIASNByNip } from "@/services/siasn-services";
 import { compareText, komparasiGelar } from "@/utils/client-utils";
-import { Alert, Stack, Text } from "@mantine/core";
-import { IconAlertCircle } from "@tabler/icons";
+import { Stack, Text } from "@mantine/core";
 import { useQuery } from "@tanstack/react-query";
 import {
+  Anchor,
   Card,
   Col,
   Row,
   Skeleton,
   Table as TableAntd,
   Tag,
-  Tooltip,
 } from "antd";
+import ComparePenghargaanByNip from "../ComparePenghargaanByNip";
+import InformationDetail from "../InformationDetail";
+import CompareCLTNByNip from "./CompareCLTNByNip";
+import CompareHukdisByNip from "./CompareHukdisByNip";
+import CompareMasaKerjaByNip from "./CompareMasaKerjaByNip";
 
 const dataTabel = (siasn, simaster) => {
   return [
@@ -199,42 +203,79 @@ function CompareDataUtamaByNip({ nip }) {
 
   return (
     <div>
-      <Stack>
-        <Skeleton loading={isLoading || isLoadingDataSimaster}>
-          <Row>
-            <Col md={24}>
-              <Card title="Komparasi Data Utama">
-                <Tooltip title="Status Pegawai SIASN">
-                  <Tag
-                    style={{
-                      marginBottom: 8,
-                    }}
-                    color="yellow"
-                  >
-                    {data?.kedudukanPnsNama}
-                  </Tag>
-                </Tooltip>
-                <Stack>
-                  <Alert
-                    icon={<IconAlertCircle />}
-                    title="Perhatian"
-                    color="red"
-                  >
-                    Jika ada perbedaan NIP, Nama, dan Tanggal Lahir antara SIASN
-                    dan SIMASTER silahkan melakukan perbaikan elemen tersebut ke
-                    BKD Provinsi Jawa Timur
-                  </Alert>
-                  <TableAntd
-                    columns={columns}
-                    dataSource={dataTabel(data, dataSimaster)}
-                    pagination={false}
-                  />
-                </Stack>
-              </Card>
-            </Col>
-          </Row>
-        </Skeleton>
-      </Stack>
+      <Skeleton loading={isLoading || isLoadingDataSimaster}>
+        <Row gutter={[16, 8]}>
+          <Col md={20}>
+            <Row gutter={[16, 8]}>
+              <Col md={24}>
+                <Card id="status-pegawai">
+                  <InformationDetail data={data} />
+                </Card>
+              </Col>
+              <Col md={24}>
+                <Card title="Komparasi Data" id="komparasi-data">
+                  <Stack>
+                    <TableAntd
+                      columns={columns}
+                      dataSource={dataTabel(data, dataSimaster)}
+                      pagination={false}
+                    />
+                  </Stack>
+                </Card>
+              </Col>
+              <Col md={24} id="masa-kerja-siasn">
+                <CompareMasaKerjaByNip nip={nip} />
+              </Col>
+              <Col md={24} id="penghargaan">
+                <ComparePenghargaanByNip nip={nip} />
+              </Col>
+              <Col md={24} id="hukdis">
+                <CompareHukdisByNip nip={nip} />
+              </Col>
+              <Col md={24} id="cltn">
+                <CompareCLTNByNip nip={nip} />
+              </Col>
+            </Row>
+          </Col>
+          <Col md={4}>
+            <Anchor
+              offsetTop={70}
+              items={[
+                {
+                  key: "status-pegawai",
+                  href: "#status-pegawai",
+                  title: "Informasi MyASN",
+                },
+                {
+                  key: "komparasi-data",
+                  href: "#komparasi-data",
+                  title: "Komparasi Data",
+                },
+                {
+                  key: "masa-kerja-siasn",
+                  href: "#masa-kerja-siasn",
+                  title: "Riwayat Masa Kerja MyASN",
+                },
+                {
+                  key: "penghargaan",
+                  href: "#penghargaan",
+                  title: "Penghargaan MyASN",
+                },
+                {
+                  key: "hukdis",
+                  href: "#hukdis",
+                  title: "Hukuman Disiplin MyASN",
+                },
+                {
+                  key: "cltn",
+                  href: "#cltn",
+                  title: "CLTN MyASN",
+                },
+              ]}
+            />
+          </Col>
+        </Row>
+      </Skeleton>
     </div>
   );
 }

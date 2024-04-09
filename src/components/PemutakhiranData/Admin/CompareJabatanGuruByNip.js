@@ -1,6 +1,6 @@
 import { rwJabGuruByNip } from "@/services/master.services";
 import { useQuery } from "@tanstack/react-query";
-import { Table } from "antd";
+import { Card, Table } from "antd";
 import React from "react";
 
 function CompareJabatanGuruByNip({ nip }) {
@@ -30,7 +30,7 @@ function CompareJabatanGuruByNip({ nip }) {
   ];
 
   return (
-    <div>
+    <Card title="Jabatan Guru">
       <Table
         columns={columns}
         dataSource={data}
@@ -38,7 +38,7 @@ function CompareJabatanGuruByNip({ nip }) {
         rowKey={(row) => row?.guru_id}
         pagination={false}
       />
-    </div>
+    </Card>
   );
 }
 

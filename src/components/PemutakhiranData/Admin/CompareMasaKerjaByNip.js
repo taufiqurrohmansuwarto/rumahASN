@@ -48,7 +48,7 @@ function CompareMasaKerjaByNip({ nip }) {
   ];
 
   return (
-    <Card title="Riwayat Masa Kerja SIASN" loading={isLoading}>
+    <Card title="Masa Kerja SIASN" loading={isLoading}>
       <Table
         pagination={false}
         columns={columns}

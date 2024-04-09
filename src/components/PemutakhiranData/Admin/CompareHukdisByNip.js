@@ -1,6 +1,6 @@
 import { getHukdisByNip } from "@/services/siasn-services";
 import { useQuery } from "@tanstack/react-query";
-import { Table } from "antd";
+import { Card, Table } from "antd";
 
 const CompareHukdisByNip = ({ nip }) => {
   const { data, isLoading } = useQuery(
@@ -60,16 +60,15 @@ const CompareHukdisByNip = ({ nip }) => {
   ];
 
   return (
-    <>
+    <Card title="Hukuman Disiplin">
       <Table
-        title={() => "Hukuman Disiplin SIASN"}
         columns={columns}
         isLoading={isLoading}
         dataSource={data}
         rowKey={(row) => row?.id}
         pagination={false}
       />
-    </>
+    </Card>
   );
 };
 

@@ -2,10 +2,10 @@ import Layout from "@/components/Layout";
 import PageContainer from "@/components/PageContainer";
 import { podcastUsers } from "@/services/index";
 import { formatDateLL } from "@/utils/client-utils";
-import { ActionIcon, Group, Text, Avatar } from "@mantine/core";
+import { ActionIcon, Group, Text } from "@mantine/core";
 import { IconPlayerPlay } from "@tabler/icons";
 import { useQuery } from "@tanstack/react-query";
-import { Breadcrumb, Card, Col, List, Row } from "antd";
+import { Breadcrumb, Card, Col, Grid, List, Row } from "antd";
 import Head from "next/head";
 import Image from "next/image";
 import Link from "next/link";
@@ -67,8 +67,6 @@ const MyPodcast = ({ item }) => {
 };
 
 function Podcast() {
-  const router = useRouter();
-
   const { data, isLoading } = useQuery(
     ["podcasts-users"],
     () => podcastUsers(),
@@ -77,7 +75,7 @@ function Podcast() {
     }
   );
 
-  const handleBack = () => router.back();
+  const breakPoint = Grid.useBreakpoint();
 
   return (
     <>
@@ -85,12 +83,15 @@ function Podcast() {
         <title>Rumah ASN - Edukasi - Podcast</title>
       </Head>
       <PageContainer
+        childrenContentStyle={{
+          padding: breakPoint.xs ? 0 : null,
+        }}
         loading={isLoading}
         breadcrumbRender={() => (
           <Breadcrumb>
             <Breadcrumb.Item>
               <Link href="/">
-                <a>Beranda</a>
+                <a>Forum Kepegawaian</a>
               </Link>
             </Breadcrumb.Item>
             <Breadcrumb.Item>Podcast</Breadcrumb.Item>

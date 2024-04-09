@@ -9,7 +9,8 @@ import {
   votePodcast,
 } from "@/services/index";
 import { stringToNumber } from "@/utils/client-utils";
-import { FileOutlined, StarOutlined } from "@ant-design/icons";
+import { Comment } from "@ant-design/compatible";
+import { FileOutlined } from "@ant-design/icons";
 import { Spoiler } from "@mantine/core";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
@@ -29,7 +30,6 @@ import {
   Typography,
   message,
 } from "antd";
-import { Comment } from "@ant-design/compatible";
 import Head from "next/head";
 import { useRouter } from "next/router";
 import { useState } from "react";

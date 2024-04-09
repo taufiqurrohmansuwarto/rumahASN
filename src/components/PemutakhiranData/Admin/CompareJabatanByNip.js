@@ -16,8 +16,7 @@ import { Alert, Stack, Text } from "@mantine/core";
 import { IconAlertCircle } from "@tabler/icons";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
-  Typography,
-  Tag,
+  Anchor,
   Button,
   Card,
   Col,
@@ -28,6 +27,8 @@ import {
   Row,
   Select,
   Table,
+  Tag,
+  Typography,
   Upload,
   message,
 } from "antd";
@@ -42,7 +43,13 @@ import FormStruktural from "../FormStruktural";
 import FormUnitOrganisasi from "../FormUnitOrganisasi";
 import FormUnorJabatan from "../FormUnorJabatan";
 import FormUnorJabatanTransfer from "../FormUnorJabatanTransfer";
+import CompareJabatanDokterByNip from "./CompareJabatanDokterByNip";
+import CompareJabatanGuruByNip from "./CompareJabatanGuruByNip";
+import ComparePangkatByNip from "./ComparePangkatByNip";
 import FormEditJabatanByNip from "./FormEditJabatanByNip";
+import ComparePendidikanByNip from "./ComparePendidikanByNip";
+import ComparePindahInstansiByNip from "./ComparePindahInstansiByNip";
+import ComparePwkByNip from "./ComparePwkByNip";
 dayjs.locale("id");
 
 const format = "DD-MM-YYYY";
@@ -763,58 +770,126 @@ function CompareJabatanByNip({ nip }) {
   ];
 
   return (
-    <Card title="Komparasi Jabatan">
-      {dataSiasn?.kedudukanPnsNama === "PPPK Aktif" && (
-        <Alert
-          color="red"
-          title="Harap diperhatikan"
-          icon={<IconAlertCircle />}
-          style={{
-            marginBottom: 16,
-          }}
-        >
-          Data Riwayat Jabatan PPPK tidak dapat diubah
-        </Alert>
-      )}
-      {dataSiasn?.kedudukanPnsNama === "PPPK Aktif" &&
-      dataUser?.user?.current_role !== "admin" ? null : (
-        <FormUnorJabatan />
-      )}
-      <Stack>
-        <FormEditJabatanByNip
-          open={visibleEdit}
-          data={currentDataEdit}
-          onClose={handleCloseEdit}
+    <Row gutter={[16, 16]}>
+      <Col md={20}>
+        <Row gutter={[16, 8]}>
+          <Col md={24}>
+            <Card id="komparasi-jabatan" title="Komparasi Jabatan">
+              {dataSiasn?.kedudukanPnsNama === "PPPK Aktif" && (
+                <Alert
+                  color="red"
+                  title="Harap diperhatikan"
+                  icon={<IconAlertCircle />}
+                  style={{
+                    marginBottom: 16,
+                  }}
+                >
+                  Data Riwayat Jabatan PPPK tidak dapat diubah
+                </Alert>
+              )}
+              {dataSiasn?.kedudukanPnsNama === "PPPK Aktif" &&
+              dataUser?.user?.current_role !== "admin" ? null : (
+                <FormUnorJabatan />
+              )}
+              <Stack>
+                <FormEditJabatanByNip
+                  open={visibleEdit}
+                  data={currentDataEdit}
+                  onClose={handleCloseEdit}
+                />
+                <FormEntriKosong
+                  nip={nip}
+                  onCancel={handleCloseKosong}
+                  visible={visibleKosong}
+                />
+                <FormEntri
+                  data={currentData}
+                  nip={nip}
+                  onCancel={handleClose}
+                  visible={visible}
+                />
+                <Table
+                  title={() => <Text fw="bold">SIASN</Text>}
+                  columns={columns}
+                  dataSource={data}
+                  loading={isLoading}
+                  rowKey={(row) => row?.id}
+                  pagination={false}
+                />
+                <Table
+                  title={() => <Text fw="bold">SIMASTER</Text>}
+                  columns={columnsMaster}
+                  dataSource={dataMaster}
+                  loading={loadingMasterJabatan}
+                  rowKey={(row) => row?.id}
+                  pagination={false}
+                />
+              </Stack>
+            </Card>
+          </Col>
+          <Col md={24} id="jabatan-guru">
+            <CompareJabatanGuruByNip nip={nip} />
+          </Col>
+          <Col md={24} id="jabatan-dokter">
+            <CompareJabatanDokterByNip nip={nip} />
+          </Col>
+          <Col md={24} id="pangkat">
+            <ComparePangkatByNip nip={nip} />
+          </Col>
+          <Col md={24} id="pendidikan">
+            <ComparePendidikanByNip nip={nip} />
+          </Col>
+          <Col md={24} id="pindah-instansi">
+            <ComparePindahInstansiByNip nip={nip} />
+          </Col>
+          <Col md={24} id="pindah-wilayah-kerja">
+            <ComparePwkByNip nip={nip} />
+          </Col>
+        </Row>
+      </Col>
+      <Col md={4}>
+        <Anchor
+          offsetTop={70}
+          items={[
+            {
+              key: "komparasi-jabatan",
+              href: "#komparasi-jabatan",
+              title: "Komparasi Jabatan",
+            },
+            {
+              key: "jabatan-guru",
+              href: "#jabatan-guru",
+              title: "Jabatan Guru",
+            },
+            {
+              key: "jabatan-dokter",
+              href: "#jabatan-dokter",
+              title: "Jabatan Dokter",
+            },
+            {
+              key: "pangkat",
+              href: "#pangkat",
+              title: "Pangkat",
+            },
+            {
+              key: "pendidikan",
+              href: "#pendidikan",
+              title: "Pendidikan",
+            },
+            {
+              key: "pindah-instansi",
+              href: "#pindah-instansi",
+              title: "Pindah Instansi",
+            },
+            {
+              key: "pindah-wilayah-kerja",
+              href: "#pindah-wilayah-kerja",
+              title: "Pindah Wilayah Kerja",
+            },
+          ]}
         />
-        <FormEntriKosong
-          nip={nip}
-          onCancel={handleCloseKosong}
-          visible={visibleKosong}
-        />
-        <FormEntri
-          data={currentData}
-          nip={nip}
-          onCancel={handleClose}
-          visible={visible}
-        />
-        <Table
-          title={() => <Text fw="bold">SIASN</Text>}
-          columns={columns}
-          dataSource={data}
-          loading={isLoading}
-          rowKey={(row) => row?.id}
-          pagination={false}
-        />
-        <Table
-          title={() => <Text fw="bold">SIMASTER</Text>}
-          columns={columnsMaster}
-          dataSource={dataMaster}
-          loading={loadingMasterJabatan}
-          rowKey={(row) => row?.id}
-          pagination={false}
-        />
-      </Stack>
-    </Card>
+      </Col>
+    </Row>
   );
 }
 
