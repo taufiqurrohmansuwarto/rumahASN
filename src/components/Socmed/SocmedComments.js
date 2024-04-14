@@ -1,4 +1,5 @@
 import { deleteComment, getComments } from "@/services/socmed.services";
+import { Comment } from "@ant-design/compatible";
 import { MoreOutlined, RetweetOutlined } from "@ant-design/icons";
 import { Stack } from "@mantine/core";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -14,14 +15,18 @@ import {
   Tooltip,
   message,
 } from "antd";
-import { Comment } from "@ant-design/compatible";
-import moment from "moment";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { useState } from "react";
 import ReactMarkdownCustom from "../MarkdownEditor/ReactMarkdownCustom";
 import SocmedCreateComment from "./SocmedCreateComment";
 import SocmedEditComment from "./SocmedEditComment";
+
+import dayjs from "dayjs";
+import "dayjs/locale/id";
+import relativeTime from "dayjs/plugin/relativeTime";
+dayjs.locale("id");
+dayjs.extend(relativeTime);
 
 const UserComment = ({ comment }) => {
   const [selectedId, setSelectedId] = useState(null);
@@ -138,9 +143,9 @@ const UserComment = ({ comment }) => {
         }
         datetime={
           <Tooltip
-            title={moment(comment?.created_at).format("DD-MM-YYYY HH:mm:ss")}
+            title={dayjs(comment?.created_at).format("DD-MM-YYYY HH:mm:ss")}
           >
-            {moment(comment?.created_at).fromNow()}
+            {dayjs(comment?.created_at).fromNow()}
           </Tooltip>
         }
         author={
@@ -216,9 +221,10 @@ function SocmedComments({ post, id }) {
             avatar={<Avatar src={post?.user?.image} />}
             datetime={
               <Tooltip
-                title={moment(post?.created_at).format("DD-MM-YYYY HH:mm:ss")}
+                title={dayjs(post?.created_at).format("DD-MM-YYYY HH:mm:ss")}
               >
-                {moment(post?.created_at).fromNow()}
+                {/* add dots html */}
+                &#x2022; {dayjs(post?.created_at).fromNow()}
               </Tooltip>
             }
           />

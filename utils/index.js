@@ -6,13 +6,18 @@ import {
 } from "@tabler/icons";
 
 import { toLower } from "lodash";
-import moment from "moment";
+
+import dayjs from "dayjs";
+import "dayjs/locale/id";
+import relativeTime from "dayjs/plugin/relativeTime";
+dayjs.extend(relativeTime);
+dayjs.locale("id");
 
 //
 
 // change date format to DD-MM-YYYY
 export const formatDate = (date) => {
-  return moment(date).format("DD-MM-YYYY HH:mm:ss");
+  return dayjs(date).format("DD-MM-YYYY HH:mm:ss");
 };
 
 export const getParticipantName = (user) => {
@@ -177,7 +182,7 @@ export const uploadSertifikatToMinio = (mc, filename, base64Pdf) => {
 };
 
 export const fromNow = (date) => {
-  return moment(date).fromNow();
+  return dayjs(date).fromNow();
 };
 
 // add break line before and after image tag

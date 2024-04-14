@@ -1,4 +1,3 @@
-import moment from "moment";
 import {
   certificateDetailWebinar,
   signCertificateByWebinarId,
@@ -7,6 +6,12 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Button, Form, Input, Modal, Table, message } from "antd";
 import { useRouter } from "next/router";
 import { useState } from "react";
+
+import dayjs from "dayjs";
+import "dayjs/locale/id";
+import relativeTime from "dayjs/plugin/relativeTime";
+dayjs.locale("id");
+dayjs.extend(relativeTime);
 
 const FormTandaTangan = ({ open, id, onCancel, sign, loading }) => {
   const [form] = Form.useForm();
@@ -121,7 +126,7 @@ function DetailWebinarCertificates() {
       render: (text) => (
         <>
           {text?.document_sign_at
-            ? moment(text?.document_sign_at).format("DD MMMM YYYY HH:mm:ss")
+            ? dayjs(text?.document_sign_at).format("DD MMMM YYYY HH:mm:ss")
             : "Belum di tanda tangani"}
         </>
       ),

@@ -21,6 +21,7 @@ function SocmedPostsFilter() {
 
   return (
     <Segmented
+      style={{ marginBottom: 16 }}
       onChange={handleChange}
       options={[
         {

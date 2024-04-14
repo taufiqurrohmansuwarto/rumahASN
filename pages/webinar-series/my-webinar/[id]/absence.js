@@ -5,12 +5,17 @@ import {
   registerAbsence,
   unregisterAbsence,
 } from "@/services/webinar.services";
+import { CheckOutlined, CloseOutlined } from "@ant-design/icons";
+import { Stack } from "@mantine/core";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Button, Card, List, Modal, Tag, message } from "antd";
 import { useRouter } from "next/router";
-import moment from "moment";
-import { Stack } from "@mantine/core";
-import { CheckOutlined, CloseOutlined } from "@ant-design/icons";
+
+import dayjs from "dayjs";
+import "dayjs/locale/id";
+import relativeTime from "dayjs/plugin/relativeTime";
+dayjs.locale("id");
+dayjs.extend(relativeTime);
 
 const RegisterUnregister = ({
   data,
@@ -88,11 +93,11 @@ const RegisterUnregister = ({
                 <>
                   <Stack>
                     <div>
-                      {moment(item?.registration_open_at).format(
+                      {dayjs(item?.registration_open_at).format(
                         "DD-MM-YYYY HH:mm"
                       )}
                       {" s/d "}
-                      {moment(item?.registration_close_at).format(
+                      {dayjs(item?.registration_close_at).format(
                         "DD-MM-YYYY HH:mm"
                       )}
                     </div>

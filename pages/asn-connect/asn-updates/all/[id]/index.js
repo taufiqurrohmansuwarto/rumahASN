@@ -53,23 +53,6 @@ const ASNUpdateDetail = () => {
         childrenContentStyle={{
           padding: breakPoint.xs ? 0 : null,
         }}
-        header={{
-          breadcrumbRender: () => (
-            <Breadcrumb>
-              <Breadcrumb.Item>
-                <Link href="/feeds">
-                  <a>Forum Kepegawaian</a>
-                </Link>
-              </Breadcrumb.Item>
-              <Breadcrumb.Item>
-                <Link href="/asn-connect/asn-updates">
-                  <a>ASN Updates</a>
-                </Link>
-              </Breadcrumb.Item>
-              <Breadcrumb.Item>Detail</Breadcrumb.Item>
-            </Breadcrumb>
-          ),
-        }}
         title="ASN Connect"
         content="Berjejaring, Berkolaborasi, Berinovasi Bersama ASN Connect"
         onBack={handleBack}

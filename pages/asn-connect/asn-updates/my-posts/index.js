@@ -1,6 +1,5 @@
 import Layout from "@/components/Layout";
-import LayoutAsnConnect from "@/components/LayoutASNConnect";
-import PageContainer from "@/components/PageContainer";
+import LayoutASNConnect from "@/components/Socmed/LayoutASNConnect";
 import SocmedTabs from "@/components/Socmed/SocmedTabs";
 import useScrollRestoration from "@/hooks/useScrollRestoration";
 import { BackTop } from "antd";
@@ -13,10 +12,10 @@ const AsnUpdatesMyPosts = () => {
       <Head>
         <title>Rumah ASN - ASN Update</title>
       </Head>
-      <PageContainer title="ASN Updates" content="Postingan Saya">
+      <LayoutASNConnect>
         <BackTop />
         <SocmedTabs />
-      </PageContainer>
+      </LayoutASNConnect>
     </>
   );
 };

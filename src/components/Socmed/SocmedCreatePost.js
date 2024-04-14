@@ -3,61 +3,9 @@ import { createPost } from "@/services/socmed.services";
 import { Comment } from "@ant-design/compatible";
 import { MarkdownEditor } from "@primer/react/drafts";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Avatar } from "antd";
+import { Avatar, Input, Modal, message } from "antd";
 import { useSession } from "next-auth/react";
-import { useState } from "react";
-
-const emojis = [
-  { name: "+1", character: "👍" },
-  { name: "-1", character: "👎" },
-  { name: "heart", character: "❤️" },
-  { name: "wave", character: "👋" },
-  { name: "raised_hands", character: "🙌" },
-  { name: "pray", character: "🙏" },
-  { name: "clap", character: "👏" },
-  { name: "ok_hand", character: "👌" },
-  { name: "point_up", character: "☝️" },
-  { name: "point_down", character: "👇" },
-  { name: "point_left", character: "👈" },
-  { name: "point_right", character: "👉" },
-  { name: "raised_hand", character: "✋" },
-  { name: "thumbsup", character: "👍" },
-  { name: "thumbsdown", character: "👎" },
-];
-
-const references = [
-  {
-    id: "1",
-    titleText: "Add logging functionality",
-    titleHtml: "Add logging functionality",
-  },
-  {
-    id: "2",
-    titleText: "Error: `Failed to install` when installing",
-    titleHtml: "Error: <code>Failed to install</code> when installing",
-  },
-  {
-    id: "3",
-    titleText: "Add error-handling functionality",
-    titleHtml: "Add error-handling functionality",
-  },
-];
-
-const mentionables = [
-  { identifier: "monalisa", description: "Monalisa Octocat" },
-  { identifier: "github", description: "GitHub" },
-  { identifier: "primer", description: "Primer" },
-];
-
-const savedReplies = [
-  { name: "Duplicate", content: "Duplicate of #" },
-  {
-    name: "Welcome",
-    content:
-      "Welcome to the project!\n\nPlease be sure to read the contributor guidelines.",
-  },
-  { name: "Thanks", content: "Thanks for your contribution!" },
-];
+import { useRef, useState } from "react";
 
 const uploadFile = async (file) => {
   try {
@@ -87,9 +35,76 @@ const renderMarkdown = async (markdown) => {
   return result?.html;
 };
 
+const ModalCreate = ({
+  open,
+  onCancel,
+  value,
+  setValue,
+  submitMessage,
+  isLoading,
+}) => {
+  return (
+    <Modal
+      centered
+      width={800}
+      footer={null}
+      title="Buat Postingan"
+      open={open}
+      onCancel={onCancel}
+    >
+      <>
+        <MarkdownEditor
+          acceptedFileTypes={[
+            "image/png",
+            "image/jpg",
+            "image/jpeg",
+            "image/gif",
+          ]}
+          value={value}
+          onChange={setValue}
+          onRenderPreview={renderMarkdown}
+          onUploadFile={uploadFile}
+          emojiSuggestions={null}
+          referenceSuggestions={null}
+          mentionSuggestions={null}
+          savedReplies={null}
+        >
+          <MarkdownEditor.Actions>
+            <MarkdownEditor.ActionButton
+              disabled={!value || isLoading}
+              variant="primary"
+              size="medium"
+              onClick={submitMessage}
+            >
+              {isLoading ? "Loading..." : "Submit"}
+            </MarkdownEditor.ActionButton>
+          </MarkdownEditor.Actions>
+        </MarkdownEditor>
+      </>
+    </Modal>
+  );
+};
+
 function SocmedCreatePost() {
   const { data, status } = useSession();
   const queryClient = useQueryClient();
+  const [showModalCreate, setShowModalCreate] = useState(false);
+  const [inputValue, setInputValue] = useState("");
+  const inputRef = useRef(null); // Added useRef for input
+
+  const handleOpenModal = () => {
+    if (inputValue === "") {
+      setShowModalCreate(true);
+      setInputValue("");
+      if (inputRef.current) {
+        inputRef.current.blur(); // Blur the input when modal is opened
+      }
+    }
+  };
+
+  const handleCloseModal = () => {
+    setShowModalCreate(false);
+  };
 
   const [value, setValue] = useState();
   const { mutate: create, isLoading } = useMutation(
@@ -97,6 +112,8 @@ function SocmedCreatePost() {
     {
       onSuccess: () => {
         setValue("");
+        handleCloseModal();
+        message.success("Berhasil membuat postingan");
       },
       onError: (error) => {
         alert(error.message);
@@ -116,40 +133,29 @@ function SocmedCreatePost() {
   };
 
   return (
-    <Comment
-      avatar={<Avatar src={data?.user?.image} alt={data?.user?.name} />}
-      content={
-        <>
-          <MarkdownEditor
-            acceptedFileTypes={[
-              "image/png",
-              "image/jpg",
-              "image/jpeg",
-              "image/gif",
-            ]}
-            value={value}
-            onChange={setValue}
-            onRenderPreview={renderMarkdown}
-            onUploadFile={uploadFile}
-            emojiSuggestions={null}
-            referenceSuggestions={null}
-            mentionSuggestions={null}
-            savedReplies={null}
-          >
-            <MarkdownEditor.Actions>
-              <MarkdownEditor.ActionButton
-                disabled={!value || isLoading}
-                variant="primary"
-                size="medium"
-                onClick={submitMessage}
-              >
-                {isLoading ? "Loading..." : "Submit"}
-              </MarkdownEditor.ActionButton>
-            </MarkdownEditor.Actions>
-          </MarkdownEditor>
-        </>
-      }
-    />
+    <>
+      <ModalCreate
+        value={value}
+        setValue={setValue}
+        open={showModalCreate}
+        onCancel={handleCloseModal}
+        submitMessage={submitMessage}
+        isLoading={isLoading}
+      />
+      <Comment
+        avatar={<Avatar src={data?.user?.image} alt={data?.user?.name} />}
+        content={
+          <Input.TextArea
+            ref={inputRef} // Set the ref to the input
+            value={inputValue}
+            onChange={(e) => setInputValue(e.target.value)}
+            onFocus={handleOpenModal}
+            placeholder="Berbagi apa yang anda pikirkan"
+            autoSize={{ minRows: 1, maxRows: 4 }}
+          />
+        }
+      />
+    </>
   );
 }
 

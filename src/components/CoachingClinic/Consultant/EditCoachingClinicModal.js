@@ -15,8 +15,13 @@ import {
   Skeleton,
   message,
 } from "antd";
-import moment from "moment";
 import { useEffect } from "react";
+
+import dayjs from "dayjs";
+import "dayjs/locale/id";
+import relativeTime from "dayjs/plugin/relativeTime";
+dayjs.locale("id");
+dayjs.extend(relativeTime);
 
 function EditCoachingClinicModal({ open, onClose, id }) {
   const queryClient = useQueryClient();
@@ -49,9 +54,9 @@ function EditCoachingClinicModal({ open, onClose, id }) {
     const result = await form.validateFields();
     const hasil = {
       ...result,
-      start_date: moment(result.start_date).format("YYYY-MM-DD"),
-      start_hours: moment(result.start_hours).format("HH:mm:ss"),
-      end_hours: moment(result.end_hours).format("HH:mm:ss"),
+      start_date: dayjs(result.start_date).format("YYYY-MM-DD"),
+      start_hours: dayjs(result.start_hours).format("HH:mm:ss"),
+      end_hours: dayjs(result.end_hours).format("HH:mm:ss"),
     };
     const payload = {
       id,
@@ -67,11 +72,11 @@ function EditCoachingClinicModal({ open, onClose, id }) {
         title: data?.title,
         is_private: data?.is_private,
         description: data?.description,
-        start_date: data?.start_date ? moment(data.start_date) : null,
+        start_date: data?.start_date ? dayjs(data.start_date) : null,
         start_hours: data?.start_hours
-          ? moment(data.start_hours, "HH:mm:ss")
+          ? dayjs(data.start_hours, "HH:mm:ss")
           : null,
-        end_hours: data?.end_hours ? moment(data.end_hours, "HH:mm:ss") : null,
+        end_hours: data?.end_hours ? dayjs(data.end_hours, "HH:mm:ss") : null,
         max_participants: data?.max_participants,
       });
     }

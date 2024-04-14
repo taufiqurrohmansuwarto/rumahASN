@@ -1,13 +1,19 @@
 const { daftarKenaikanPangkat, uploadFileKP } = require("@/utils/siasn-utils");
-const moment = require("moment");
 const FormData = require("form-data");
 const { createLogSIASN } = require("@/utils/logs");
+
+const dayjs = require("dayjs");
+require("dayjs/locale/id");
+
+const relativeTime = require("dayjs/plugin/relativeTime");
+dayjs.locale("id");
+dayjs.extend(relativeTime);
 
 const listKenaikanPangkat = async (req, res) => {
   try {
     const { siasnRequest: request } = req;
 
-    const periode = req?.query?.periode || moment().format("YYYY-MM-DD");
+    const periode = req?.query?.periode || dayjs().format("YYYY-MM-DD");
 
     const result = await daftarKenaikanPangkat(request, periode);
     const data = result?.data;
@@ -33,7 +39,7 @@ const uploadDokumenKenaikanPangkat = async (req, res) => {
       });
     } else {
       const formData = new FormData();
-      formData.append("tgl_sk", moment(tgl_sk).format("DD-MM-YYYY"));
+      formData.append("tgl_sk", dayjs(tgl_sk).format("DD-MM-YYYY"));
       formData.append("no_sk", no_sk);
       formData.append("file", file.buffer, file.originalname);
       formData.append("id_usulan", id_usulan);

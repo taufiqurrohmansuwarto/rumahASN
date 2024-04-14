@@ -15,7 +15,7 @@ const IntegrasiSIASN = () => {
 
   const handleFinish = async () => {
     const values = await form.validateFields();
-    router.push(`/apps-managements/integrasi/siasn/${values.nip}`);
+    router.push(`/apps-managements/integrasi/siasn/${values.nip}/data-utama`);
   };
 
   return (

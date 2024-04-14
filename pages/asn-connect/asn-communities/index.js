@@ -2,24 +2,24 @@ import Layout from "@/components/Layout";
 import LayoutASNConnect from "@/components/Socmed/LayoutASNConnect";
 import Head from "next/head";
 
-const AsnDiscussions = () => {
+const ASNStoryLines = () => {
   return (
     <>
       <Head>
         <title>Rumah ASN - ASN Update</title>
       </Head>
-      <LayoutASNConnect active="asn-discussions">Hello world</LayoutASNConnect>
+      <LayoutASNConnect active="asn-storylines">Hello world</LayoutASNConnect>
     </>
   );
 };
 
-AsnDiscussions.Auth = {
+ASNStoryLines.Auth = {
   action: "manage",
   subject: "tickets",
 };
 
-AsnDiscussions.getLayout = (page) => {
+ASNStoryLines.getLayout = (page) => {
   return <Layout active="/asn-connect/asn-updates">{page}</Layout>;
 };
 
-export default AsnDiscussions;
+export default ASNStoryLines;

@@ -19,10 +19,13 @@ import {
   Select,
   message,
 } from "antd";
-import moment from "moment";
 import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
+
+import dayjs from "dayjs";
+import "dayjs/locale/id";
+dayjs.locale("id");
 
 const format = "DD-MM-YYYY";
 
@@ -64,8 +67,8 @@ const FormWebinarSeries = () => {
       status: status || "draft",
       employee_number_signer:
         type_sign === "SEAL" ? null : rest.employee_number_signer,
-      start_date: moment(start_date).format("YYYY-MM-DD"),
-      end_date: moment(end_date).format("YYYY-MM-DD"),
+      start_date: dayjs(start_date).format("YYYY-MM-DD"),
+      end_date: dayjs(end_date).format("YYYY-MM-DD"),
     };
 
     create(data);

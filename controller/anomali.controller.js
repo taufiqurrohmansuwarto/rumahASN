@@ -1,12 +1,14 @@
 const xlsx = require("xlsx");
 const Anomali23 = require("@/models/anomali23.model");
-const moment = require("moment");
-const { raw } = require("objection");
 const {
   getAggregateAnomali,
   getPerbaikanByUser,
 } = require("@/utils/query-utils");
 const { sortBy } = require("lodash");
+const dayjs = require("dayjs");
+
+dayjs.locale("id");
+require("dayjs/locale/id");
 
 const downloadReportAnomali = async (req, res) => {
   try {
@@ -261,7 +263,7 @@ const userAnomaliByDate = async (req, res) => {
 
     const result = await Anomali23.query()
       .select("user.custom_id", "user.username as label")
-      .whereRaw(`DATE(updated_at) = '${moment(date).format("YYYY-MM-DD")}'`)
+      .whereRaw(`DATE(updated_at) = '${dayjs(date).format("YYYY-MM-DD")}'`)
       .joinRelated("user")
       .andWhere("anomali_23.is_repaired", true)
       .andWhere("user.current_role", "=", "admin")

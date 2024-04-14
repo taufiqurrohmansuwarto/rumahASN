@@ -1,8 +1,7 @@
 import { getAnnouncements } from "@/services/index";
-import { useQuery } from "@tanstack/react-query";
-import React from "react";
 import { Alert } from "@mantine/core";
 import { IconAlertCircle } from "@tabler/icons";
+import { useQuery } from "@tanstack/react-query";
 import ReactMarkdownCustom from "./MarkdownEditor/ReactMarkdownCustom";
 
 function Announcement() {
@@ -15,11 +14,7 @@ function Announcement() {
   return (
     <>
       {data && (
-        <Alert
-          icon={<IconAlertCircle size="1rem" />}
-          title={data?.title}
-          color="green"
-        >
+        <Alert icon={<IconAlertCircle />} title={data?.title} color="yellow">
           <ReactMarkdownCustom>{data?.content}</ReactMarkdownCustom>
         </Alert>
       )}

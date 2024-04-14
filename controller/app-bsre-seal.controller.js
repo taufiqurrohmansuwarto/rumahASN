@@ -5,8 +5,11 @@ const {
   refreshSealActivationTotp,
 } = require("@/utils/esign-utils");
 const { trim } = require("lodash");
-const moment = require("moment");
 const LogSealBsre = require("@/models/log-seal-bsre.model");
+
+const dayjs = require("dayjs");
+require("dayjs/locale/id");
+dayjs.locale("id");
 
 const subscribersDetail = async (req, res) => {
   try {
@@ -51,9 +54,9 @@ const generateSealActivation = async (req, res) => {
 
           const result = {
             ...data,
-            expired_at: moment(data?.expires).format("DD-MM-YYYY HH:mm:ss"),
-            expire_from_now_in_hours: moment(data?.expires).diff(
-              moment(),
+            expired_at: dayjs(data?.expires).format("DD-MM-YYYY HH:mm:ss"),
+            expire_from_now_in_hours: dayjs(data?.expires).diff(
+              dayjs(),
               "hours"
             ),
           };

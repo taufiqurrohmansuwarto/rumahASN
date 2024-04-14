@@ -14,11 +14,15 @@ import {
   Table,
   Tag,
 } from "antd";
+import dayjs from "dayjs";
+import "dayjs/locale/id";
+import relativeTime from "dayjs/plugin/relativeTime";
 import { upperCase } from "lodash";
-import moment from "moment";
 import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
+dayjs.locale("id");
+dayjs.extend(relativeTime);
 
 const showModalInformation = (item) => {
   Modal.info({
@@ -97,7 +101,7 @@ function LogSIASN() {
       title: "Tgl. Dibuat",
       key: "created_at",
       render: (text) => (
-        <>{moment(text?.created_at).format("DD MMM YYYY HH:mm:ss")}</>
+        <>{dayjs(text?.created_at).format("DD MMM YYYY HH:mm:ss")}</>
       ),
     },
     {

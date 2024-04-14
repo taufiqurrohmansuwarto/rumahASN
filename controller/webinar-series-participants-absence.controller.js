@@ -1,7 +1,13 @@
 const WebinarSeriesParticipantsAbsence = require("@/models/webinar-series-participants-absence.model");
 const WebinarSeriesAbsenceEntries = require("@/models/webinar-series-absence-entries.model");
 const WebinarParticipates = require("@/models/webinar-series-participates.model");
-const moment = require("moment");
+
+const dayjs = require("dayjs");
+require("dayjs/locale/id");
+
+const relativeTime = require("dayjs/plugin/relativeTime");
+dayjs.locale("id");
+dayjs.extend(relativeTime);
 
 const xlsx = require("xlsx");
 
@@ -172,7 +178,7 @@ const serializeAbsecesParticipants = (data) => {
         email: getEmail(item?.user),
         nomer_pegawai: getEmployeeNumber(item?.user),
         perangkat_daerah: item?.user?.info?.perangkat_daerah?.detail,
-        tanggal_absensi: moment(item?.created_at).format("DD-MM-YYYY HH:mm"),
+        tanggal_absensi: dayjs(item?.created_at).format("DD-MM-YYYY HH:mm"),
         asal_masuk: item?.user?.group,
       };
     });

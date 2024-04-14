@@ -6,7 +6,6 @@ import {
   startMeeting,
   updateMeeting,
 } from "@/services/coaching-clinics.services";
-import { setColorStatusCoachingClinic } from "@/utils/client-utils";
 import {
   DeleteOutlined,
   EditOutlined,
@@ -23,7 +22,6 @@ import {
   Card,
   Col,
   Descriptions,
-  Divider,
   Drawer,
   Empty,
   Form,
@@ -32,18 +30,20 @@ import {
   Modal,
   Row,
   Space,
-  Tag,
   Tooltip,
   Typography,
   message,
 } from "antd";
-import { capitalize } from "lodash";
-import moment from "moment";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
-import FormParticipants from "./FormParticipants";
 import EditCoachingClinicModal from "./EditCoachingClinicModal";
-import ConsultantRatingMeeting from "./ConsultantRatingMeeting";
+import FormParticipants from "./FormParticipants";
+
+import dayjs from "dayjs";
+import "dayjs/locale/id";
+import relativeTime from "dayjs/plugin/relativeTime";
+dayjs.locale("id");
+dayjs.extend(relativeTime);
 
 const ModalAddParticipant = ({ open, onClose }) => {
   const [form] = Form.useForm();
@@ -221,7 +221,7 @@ const DaftarPeserta = ({ data, meeting, openDrawer, handleCancelDrawer }) => {
                       )}
                     </>
                     <Typography.Text type="secondary">
-                      {moment(item?.created_at).format("DD MMMM YYYY HH:mm:ss")}
+                      {dayjs(item?.created_at).format("DD MMMM YYYY HH:mm:ss")}
                     </Typography.Text>
                   </Space>
                 }
@@ -250,7 +250,7 @@ const ModalInformation = ({ open, onClose, item }) => {
         </Descriptions.Item>
         <Descriptions.Item label="Status">{item?.status}</Descriptions.Item>
         <Descriptions.Item label="Tanggal" span={3}>
-          {moment(item?.start_date).format("DD MMMM YYYY")}
+          {dayjs(item?.start_date).format("DD MMMM YYYY")}
         </Descriptions.Item>
         <Descriptions.Item label="Jam" span={3}>
           {item?.start_hours} - {item?.end_hours}

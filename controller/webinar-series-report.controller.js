@@ -1,10 +1,14 @@
-const WebinarSeriesParticipate = require("@/models/webinar-series-participates.model");
 const WebinarSeriesSurveys = require("@/models/webinar-series-surveys.model");
 const WebinarSeriesSurveysQuestion = require("@/models/webinar-series-surveys-questions.model");
 const WebinarSeriesRating = require("@/models/webinar-series-ratings.model");
 const WebinrSeriesComments = require("@/models/webinar-series-comments.model");
 
-const moment = require("moment");
+const dayjs = require("dayjs");
+require("dayjs/locale/id");
+
+const relativeTime = require("dayjs/plugin/relativeTime");
+dayjs.locale("id");
+dayjs.extend(relativeTime);
 
 const xlsx = require("xlsx");
 const { times, toLower, isUndefined } = require("lodash");
@@ -68,7 +72,7 @@ const serializeDataReportParticipant = (data) => {
         "NIP/NIPTTK": getEmployeeNumber(item),
         Jabatan: item?.info?.jabatan?.jabatan,
         "Perangkat Daerah": item?.info?.perangkat_daerah?.detail,
-        "Tanggal Registrasi": moment(item?.waktu_registrasi).format(
+        "Tanggal Registrasi": dayjs(item?.waktu_registrasi).format(
           "DD-MM-YYYY HH:mm"
         ),
         "Sudah Polling": item?.already_poll ? "Sudah" : "Belum",
@@ -288,7 +292,7 @@ const serializeComments = (data) => {
       email: getEmail(item?.participant),
       cara_masuk: item?.participant?.group,
       komentar: item?.comment,
-      waktu: moment(item?.created_at).format("DD-MM-YYYY HH:mm"),
+      waktu: dayjs(item?.created_at).format("DD-MM-YYYY HH:mm"),
       sub_comment_id: item?.webinar_series_comment_id,
     }));
     return result;

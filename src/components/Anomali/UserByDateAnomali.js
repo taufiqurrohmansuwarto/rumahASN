@@ -1,11 +1,10 @@
+import Bar from "@/components/Plots/Bar";
 import { dataAdminByDate } from "@/services/anomali.services";
 import { useQuery } from "@tanstack/react-query";
 import { DatePicker } from "antd";
-import { useState } from "react";
-import moment from "moment";
-import Bar from "@/components/Plots/Bar";
 import dayjs from "dayjs";
 import "dayjs/locale/id";
+import { useState } from "react";
 dayjs.locale("id");
 
 function UserByDateAnomali() {

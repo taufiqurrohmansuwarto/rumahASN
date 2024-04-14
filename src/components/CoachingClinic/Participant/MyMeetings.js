@@ -2,6 +2,8 @@ import {
   cancelRequestMeeting,
   meetingsParticipant,
 } from "@/services/coaching-clinics.services";
+import { setColorStatusCoachingClinic } from "@/utils/client-utils";
+import { Stack } from "@mantine/core";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Avatar,
@@ -16,14 +18,16 @@ import {
   Tooltip,
   message,
 } from "antd";
-import { useRouter } from "next/router";
-import React from "react";
-import moment from "moment";
-import { Stack } from "@mantine/core";
-import { setColorStatusCoachingClinic } from "@/utils/client-utils";
-import FilterParticipantMeetings from "./FilterParticipantMeetings";
-import Link from "next/link";
 import { upperCase } from "lodash";
+import Link from "next/link";
+import { useRouter } from "next/router";
+import FilterParticipantMeetings from "./FilterParticipantMeetings";
+
+import dayjs from "dayjs";
+import "dayjs/locale/id";
+import relativeTime from "dayjs/plugin/relativeTime";
+dayjs.locale("id");
+dayjs.extend(relativeTime);
 
 function MyMeetings() {
   const router = useRouter();
@@ -74,9 +78,7 @@ function MyMeetings() {
             </Link>
             <div>{row?.meeting?.coach?.username}</div>
             <div>{row?.meeting?.status}</div>
-            <div>
-              {moment(row?.meeting?.start_date).format("DD MMMM YYYY")}{" "}
-            </div>
+            <div>{dayjs(row?.meeting?.start_date).format("DD MMMM YYYY")} </div>
             <div>
               {row?.meeting?.start_hours} - {row?.meeting?.end_hours}
             </div>
@@ -119,7 +121,7 @@ function MyMeetings() {
       key: "tanggal",
       render: (_, row) => (
         <Space direction="vertical">
-          <div>{moment(row?.meeting?.start_date).format("DD MMMM YYYY")}</div>
+          <div>{dayjs(row?.meeting?.start_date).format("DD MMMM YYYY")}</div>
           <div>
             {row?.meeting?.start_hours} - {row?.meeting?.end_hours}
           </div>
@@ -144,7 +146,7 @@ function MyMeetings() {
       title: "Tanggal Daftar",
       key: "tanggal_daftar",
       render: (_, row) => (
-        <>{moment(row?.created_at).format("DD MMMM YYYY HH:mm:ss")}</>
+        <>{dayjs(row?.created_at).format("DD MMMM YYYY HH:mm:ss")}</>
       ),
     },
     {

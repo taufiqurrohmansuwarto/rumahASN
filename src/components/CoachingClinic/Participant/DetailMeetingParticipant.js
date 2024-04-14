@@ -20,10 +20,15 @@ import {
   Space,
   Typography,
 } from "antd";
-import moment from "moment";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import AddRating from "./CoachingClinicRating";
+
+import dayjs from "dayjs";
+import "dayjs/locale/id";
+import relativeTime from "dayjs/plugin/relativeTime";
+dayjs.locale("id");
+dayjs.extend(relativeTime);
 
 const DaftarPeserta = ({ data, meeting, open, handleCancel }) => {
   const [filterData, setFilterData] = useState(data);
@@ -87,7 +92,7 @@ const DaftarPeserta = ({ data, meeting, open, handleCancel }) => {
                         )}
                       </>
                       <Typography.Text type="secondary">
-                        {moment(item?.created_at).format(
+                        {dayjs(item?.created_at).format(
                           "DD MMMM YYYY HH:mm:ss"
                         )}
                       </Typography.Text>
@@ -119,7 +124,7 @@ const ModalInformation = ({ open, onClose, item }) => {
         </Descriptions.Item>
         <Descriptions.Item label="Status">{item?.status}</Descriptions.Item>
         <Descriptions.Item label="Tanggal" span={3}>
-          {moment(item?.start_date).format("DD MMMM YYYY")}
+          {dayjs(item?.start_date).format("DD MMMM YYYY")}
         </Descriptions.Item>
         <Descriptions.Item label="Jam" span={3}>
           {item?.start_hours} - {item?.end_hours}
