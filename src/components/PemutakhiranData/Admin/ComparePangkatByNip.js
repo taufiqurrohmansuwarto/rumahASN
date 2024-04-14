@@ -4,7 +4,12 @@ import { Stack, Text } from "@mantine/core";
 import { useQuery } from "@tanstack/react-query";
 import { Card, Table } from "antd";
 import { orderBy } from "lodash";
-import moment from "moment";
+
+import dayjs from "dayjs";
+import "dayjs/locale/id";
+import relativeTime from "dayjs/plugin/relativeTime";
+dayjs.locale("id");
+dayjs.extend(relativeTime);
 
 const PangkatSiasn = ({ data, isLoading }) => {
   const columns = [
@@ -44,7 +49,7 @@ const PangkatSiasn = ({ data, isLoading }) => {
     {
       title: "TMT Golongan",
       key: "tmt_golongan",
-      render: (text) => <>{moment(text?.tmtGolongan).format("DD-MM-YYYY")}</>,
+      render: (text) => <>{dayjs(text?.tmtGolongan).format("DD-MM-YYYY")}</>,
     },
 
     {
@@ -63,7 +68,7 @@ const PangkatSiasn = ({ data, isLoading }) => {
           data,
           [
             (o) => {
-              return moment(o.tmtGolongan).valueOf();
+              return dayjs(o.tmtGolongan).valueOf();
             },
           ],
           ["desc"]

@@ -2,8 +2,11 @@ const Status = require("../models/status.model");
 const Tickets = require("../models/tickets.model");
 const knex = Status.knex();
 const { raw } = require("objection");
-const moment = require("moment");
 const { getUsersAge, getTotalCaraMasuk } = require("@/utils/query-utils");
+
+const dayjs = require("dayjs");
+require("dayjs/locale/id");
+dayjs.locale("id");
 
 const aggregateBySubCategories = async () => {
   const result = await knex.raw(
@@ -194,7 +197,7 @@ from (select status_code, count(status_code)
 
       if (result?.length) {
         const hasil = result?.map((item) => ({
-          date: moment(item?.date).format("DD-MM-YYYY"),
+          date: dayjs(item?.date).format("DD-MM-YYYY"),
           count: parseInt(item?.count, 10),
         }));
         res.json(hasil);
@@ -203,7 +206,7 @@ from (select status_code, count(status_code)
 
         if (result?.length) {
           const hasil = result?.map((item) => ({
-            date: moment(item?.date).format("DD-MM-YYYY"),
+            date: dayjs(item?.date).format("DD-MM-YYYY"),
             count: parseInt(item?.count, 10),
           }));
           res.json(hasil);

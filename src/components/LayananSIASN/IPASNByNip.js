@@ -2,8 +2,13 @@ import { ipAsnByNip } from "@/services/siasn-services";
 import { dataKategoriIPASN } from "@/utils/client-utils";
 import { useQuery } from "@tanstack/react-query";
 import { Col, Form, Input, Modal, Row, Skeleton, Tag } from "antd";
-import moment from "moment";
 import { useEffect, useState } from "react";
+
+import dayjs from "dayjs";
+import "dayjs/locale/id";
+import relativeTime from "dayjs/plugin/relativeTime";
+dayjs.locale("id");
+dayjs.extend(relativeTime);
 
 const ModalDataIPAsn = ({ data, open, onCancel, tahun }) => {
   const [form] = Form.useForm();
@@ -36,7 +41,7 @@ const ModalDataIPAsn = ({ data, open, onCancel, tahun }) => {
         }}
         color="yellow"
       >
-        Data diambil {moment(data?.created_at).format("DD MMMM YYYY")}
+        Data diambil {dayjs(data?.created_at).format("DD MMMM YYYY")}
       </Tag>
       <Form disabled layout="vertical" form={form}>
         <Row gutter={[8, 16]}>

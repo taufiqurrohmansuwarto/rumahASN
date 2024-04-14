@@ -4,7 +4,12 @@ const jsonwebtoken = require("jsonwebtoken");
 const clientId = process.env.CLIENT_ID;
 const nip = process.env.SSO_NIP;
 const password = process.env.SSO_PASSWORD;
-const moment = require("moment");
+
+const dayjs = require("dayjs");
+require("dayjs/locale/id");
+dayjs.locale("id");
+const relativeTime = require("dayjs/plugin/relativeTime");
+dayjs.extend(relativeTime);
 
 const clientIdWso2 = process.env.CLIENT_ID_WSO2;
 const clientSecretWso2 = process.env.CLIENT_SECRET_WSO2;
@@ -16,8 +21,8 @@ const logToken = (token) => {
 
   // expired to dd-mm-yyyy hh:mm:ss
 
-  const expiredDate = moment.unix(expired).format("DD-MM-YYYY HH:mm:ss");
-  const currentDate = moment().format("DD-MM-YYYY HH:mm:ss");
+  const expiredDate = dayjs.unix(expired).format("DD-MM-YYYY HH:mm:ss");
+  const currentDate = dayjs().format("DD-MM-YYYY HH:mm:ss");
 
   return {
     expiredDate,

@@ -4,7 +4,12 @@ import { Table } from "antd";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { useState } from "react";
-import moment from "moment";
+
+import dayjs from "dayjs";
+import "dayjs/locale/id";
+import relativeTime from "dayjs/plugin/relativeTime";
+dayjs.locale("id");
+dayjs.extend(relativeTime);
 
 function UserTickets() {
   const router = useRouter();
@@ -39,7 +44,7 @@ function UserTickets() {
       title: "Tgl. Dibuat",
       key: "created_at",
       render: (_, record) => {
-        return moment(record?.created_at).format("DD-MM-YYYY HH:mm:ss");
+        return dayjs(record?.created_at).format("DD-MM-YYYY HH:mm:ss");
       },
     },
   ];

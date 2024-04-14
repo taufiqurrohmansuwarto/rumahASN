@@ -24,41 +24,36 @@ function SocmedTabs() {
   return (
     <>
       <Row gutter={[8, 8]}>
-        <Col md={16} xs={24}>
-          <Row gutter={[8, 8]}>
-            {/* <Col md={24}>
-              <Card>
-                <Stack>
-                </Stack>
-              </Card>
-            </Col> */}
+        <Col md={10} xs={24}>
+          <Row gutter={[8, 16]}>
             <Col md={24} xs={24}>
-              <Card>
-                <Stack>
-                  <Announcement />
+              <Stack>
+                <Card>
                   <SocmedCreatePost />
-                </Stack>
-                <Tabs
-                  defaultActiveKey="all"
-                  type="card"
-                  activeKey={activeKey}
-                  onChange={handleChangeTab}
-                  items={[
-                    {
-                      key: "all",
-                      label: "Semua Postingan",
-                      tab: "Semua Postingan",
-                      children: <SocmedPosts />,
-                    },
-                    {
-                      key: "my",
-                      label: "Postingan Saya",
-                      tab: "Postingan Saya",
-                      children: <SocmedMyPosts />,
-                    },
-                  ]}
-                />
-              </Card>
+                </Card>
+                <Card>
+                  {/* <Announcement /> */}
+                  <Tabs
+                    defaultActiveKey="all"
+                    activeKey={activeKey}
+                    onChange={handleChangeTab}
+                    items={[
+                      {
+                        key: "all",
+                        label: "Semua Postingan",
+                        tab: "Semua Postingan",
+                        children: <SocmedPosts />,
+                      },
+                      {
+                        key: "my",
+                        label: "Postingan Saya",
+                        tab: "Postingan Saya",
+                        children: <SocmedMyPosts />,
+                      },
+                    ]}
+                  />
+                </Card>
+              </Stack>
             </Col>
           </Row>
         </Col>

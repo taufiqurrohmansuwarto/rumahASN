@@ -8,7 +8,11 @@ import {
   getRwPendidikanMaster,
 } from "@/utils/master.utils";
 import arrayToTree from "array-to-tree";
-import moment from "moment";
+import dayjs from "dayjs";
+import "dayjs/locale/id";
+import relativeTime from "dayjs/plugin/relativeTime";
+dayjs.locale("id");
+dayjs.extend(relativeTime);
 const { orderBy, sortBy, toString } = require("lodash");
 const Anomali23 = require("@/models/anomali23.model");
 
@@ -24,8 +28,8 @@ const serializeRwJabatanMaster = (data) => {
     jenis_jabatan: "Struktural",
     jabatan: strutkural?.jabatan_struktural?.jab_struktural,
     unor: `${strutkural?.instansi} - ${strutkural?.unit_kerja}`,
-    tmt_jabatan: moment(strutkural?.tmt_jab).format("DD-MM-YYYY"),
-    tgl_sk: moment(strutkural?.tgl_sk).format("DD-MM-YYYY"),
+    tmt_jabatan: dayjs(strutkural?.tmt_jab).format("DD-MM-YYYY"),
+    tgl_sk: dayjs(strutkural?.tgl_sk).format("DD-MM-YYYY"),
     nomor_sk: strutkural?.no_sk,
     aktif: strutkural?.aktif,
     file: `${url}${strutkural?.file_struktural}`,
@@ -36,8 +40,8 @@ const serializeRwJabatanMaster = (data) => {
     jenis_jabatan: "Pelaksana",
     jabatan: strutkural?.jfu?.name,
     unor: `${strutkural?.instansi} - ${strutkural?.unit_kerja}`,
-    tmt_jabatan: moment(strutkural?.tmt_jab).format("DD-MM-YYYY"),
-    tgl_sk: moment(strutkural?.tgl_sk).format("DD-MM-YYYY"),
+    tmt_jabatan: dayjs(strutkural?.tmt_jab).format("DD-MM-YYYY"),
+    tgl_sk: dayjs(strutkural?.tgl_sk).format("DD-MM-YYYY"),
     nomor_sk: strutkural?.no_sk,
     aktif: strutkural?.aktif,
     file: `${url}${strutkural?.file_jfu}`,
@@ -48,8 +52,8 @@ const serializeRwJabatanMaster = (data) => {
     jenis_jabatan: "Fungsional",
     jabatan: `${strutkural?.jft?.name} ${strutkural?.jft?.jenjang_jab}`,
     unor: `${strutkural?.instansi} - ${strutkural?.unit_kerja}`,
-    tmt_jabatan: moment(strutkural?.tmt_jab).format("DD-MM-YYYY"),
-    tgl_sk: moment(strutkural?.tgl_sk).format("DD-MM-YYYY"),
+    tmt_jabatan: dayjs(strutkural?.tmt_jab).format("DD-MM-YYYY"),
+    tgl_sk: dayjs(strutkural?.tgl_sk).format("DD-MM-YYYY"),
     nomor_sk: strutkural?.no_sk,
     aktif: strutkural?.aktif,
     file: `${url}${strutkural?.file_jft}`,

@@ -2,24 +2,24 @@ import Layout from "@/components/Layout";
 import LayoutASNConnect from "@/components/Socmed/LayoutASNConnect";
 import Head from "next/head";
 
-const AsnDiscussions = () => {
+const AsnCalendar = () => {
   return (
     <>
       <Head>
         <title>Rumah ASN - ASN Update</title>
       </Head>
-      <LayoutASNConnect active="asn-discussions">Hello world</LayoutASNConnect>
+      <LayoutASNConnect active="asn-calendar">Hello world</LayoutASNConnect>
     </>
   );
 };
 
-AsnDiscussions.Auth = {
+AsnCalendar.Auth = {
   action: "manage",
   subject: "tickets",
 };
 
-AsnDiscussions.getLayout = (page) => {
-  return <Layout active="/asn-connect/asn-updates">{page}</Layout>;
+AsnCalendar.getLayout = (page) => {
+  return <Layout active="/asn-connect/asn-calendar">{page}</Layout>;
 };
 
-export default AsnDiscussions;
+export default AsnCalendar;

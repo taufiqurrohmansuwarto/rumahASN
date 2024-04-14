@@ -15,12 +15,17 @@ import {
   message,
 } from "antd";
 import axios from "axios";
-import moment from "moment";
-import { useState, useEffect } from "react";
+import { isObject } from "lodash";
+import { useEffect, useState } from "react";
 import FormJFT from "./FormJFT";
 import FormJFU from "./FormJFU";
 import FormUnitOrganisasi from "./FormUnitOrganisasi";
-import { isObject } from "lodash";
+
+import dayjs from "dayjs";
+import "dayjs/locale/id";
+import relativeTime from "dayjs/plugin/relativeTime";
+dayjs.locale("id");
+dayjs.extend(relativeTime);
 
 const format = "DD-MM-YYYY";
 function EditRiwayatJabatanSIASN({ open, onClose, data, user }) {
@@ -41,9 +46,9 @@ function EditRiwayatJabatanSIASN({ open, onClose, data, user }) {
           label: data?.jabatanFungsionalUmumNama,
         },
         nomor_sk: data?.nomorSk,
-        tmt_jabatan: moment(data?.tmtJabatan, "DD-MM-YYYY"),
-        tmt_pelantikan: moment(data?.tmtJabatan, "DD-MM-YYYY"),
-        tgl_sk: moment(data?.tanggalSk, "DD-MM-YYYY"),
+        tmt_jabatan: dayjs(data?.tmtJabatan, "DD-MM-YYYY"),
+        tmt_pelantikan: dayjs(data?.tmtJabatan, "DD-MM-YYYY"),
+        tgl_sk: dayjs(data?.tanggalSk, "DD-MM-YYYY"),
       });
     }
   }, [data, form]);
@@ -90,9 +95,9 @@ function EditRiwayatJabatanSIASN({ open, onClose, data, user }) {
         : fungsional_id;
 
       const data = {
-        tmtJabatan: moment(tmt_jabatan).format("DD-MM-YYYY"),
-        tanggalSk: moment(tgl_sk).format("DD-MM-YYYY"),
-        tmtPelantikan: moment(tmt_pelantikan).format("DD-MM-YYYY"),
+        tmtJabatan: dayjs(tmt_jabatan).format("DD-MM-YYYY"),
+        tanggalSk: dayjs(tgl_sk).format("DD-MM-YYYY"),
+        tmtPelantikan: dayjs(tmt_pelantikan).format("DD-MM-YYYY"),
         jabatanFungsionalId: jft,
         jabatanFungsionalUmumId: jfu,
         unorId: unor_id,

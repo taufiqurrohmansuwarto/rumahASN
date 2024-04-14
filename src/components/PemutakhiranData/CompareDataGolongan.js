@@ -5,7 +5,12 @@ import { Stack } from "@mantine/core";
 import { useQuery } from "@tanstack/react-query";
 import { Table } from "antd";
 import { orderBy } from "lodash";
-import moment from "moment";
+
+import dayjs from "dayjs";
+import "dayjs/locale/id";
+import relativeTime from "dayjs/plugin/relativeTime";
+dayjs.locale("id");
+dayjs.extend(relativeTime);
 
 const DataGolonganSIMASTER = () => {
   const { data, isLoading } = useQuery(
@@ -57,7 +62,7 @@ const DataGolonganSIMASTER = () => {
           data,
           [
             (o) => {
-              return moment(o.tmtGolongan).valueOf();
+              return dayjs(o.tmtGolongan).valueOf();
             },
           ],
           ["desc"]

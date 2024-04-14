@@ -22,9 +22,14 @@ import {
 } from "antd";
 import axios from "axios";
 import { isObject } from "lodash";
-import moment from "moment";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
+
+import dayjs from "dayjs";
+import "dayjs/locale/id";
+import relativeTime from "dayjs/plugin/relativeTime";
+dayjs.locale("id");
+dayjs.extend(relativeTime);
 
 const format = "DD-MM-YYYY";
 function FormEditJabatanByNip({ open, onClose, data }) {
@@ -46,9 +51,9 @@ function FormEditJabatanByNip({ open, onClose, data }) {
           label: data?.jabatanFungsionalUmumNama,
         },
         nomor_sk: data?.nomorSk,
-        tmt_jabatan: moment(data?.tmtJabatan, "DD-MM-YYYY"),
-        tmt_pelantikan: moment(data?.tmtJabatan, "DD-MM-YYYY"),
-        tgl_sk: moment(data?.tanggalSk, "DD-MM-YYYY"),
+        tmt_jabatan: dayjs(data?.tmtJabatan, "DD-MM-YYYY"),
+        tmt_pelantikan: dayjs(data?.tmtJabatan, "DD-MM-YYYY"),
+        tgl_sk: dayjs(data?.tanggalSk, "DD-MM-YYYY"),
       });
     }
   }, [data, form]);
@@ -96,9 +101,9 @@ function FormEditJabatanByNip({ open, onClose, data }) {
         : fungsional_id;
 
       const data = {
-        tmtJabatan: moment(tmt_jabatan).format("DD-MM-YYYY"),
-        tanggalSk: moment(tgl_sk).format("DD-MM-YYYY"),
-        tmtPelantikan: moment(tmt_pelantikan).format("DD-MM-YYYY"),
+        tmtJabatan: dayjs(tmt_jabatan).format("DD-MM-YYYY"),
+        tanggalSk: dayjs(tgl_sk).format("DD-MM-YYYY"),
+        tmtPelantikan: dayjs(tmt_pelantikan).format("DD-MM-YYYY"),
         jabatanFungsionalId: jft,
         jabatanFungsionalUmumId: jfu,
         unorId: unor_id,

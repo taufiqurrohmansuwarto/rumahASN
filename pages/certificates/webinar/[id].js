@@ -20,10 +20,15 @@ import {
   Tag,
   message,
 } from "antd";
-import moment from "moment";
 import Head from "next/head";
 import { useRouter } from "next/router";
 import { useState } from "react";
+
+import dayjs from "dayjs";
+import "dayjs/locale/id";
+import relativeTime from "dayjs/plugin/relativeTime";
+dayjs.locale("id");
+dayjs.extend(relativeTime);
 
 const DetailInformartion = ({ data }) => {
   return (
@@ -49,7 +54,7 @@ const DetailInformartion = ({ data }) => {
                   </Form.Item>
                   <Form.Item label="Ditandatangani pada">
                     <Input
-                      value={moment(item?.signatureDate).format(
+                      value={dayjs(item?.signatureDate).format(
                         "DD-MM-YYYY HH:mm:ss"
                       )}
                       readOnly
@@ -57,7 +62,7 @@ const DetailInformartion = ({ data }) => {
                   </Form.Item>
                   <Form.Item label="Stempel Waktu">
                     <Input
-                      value={moment(
+                      value={dayjs(
                         item?.timestampInfomation?.timestampDate
                       ).format("DD-MM-YYYY HH:mm:ss")}
                       readOnly
@@ -88,9 +93,9 @@ const DetailInformartion = ({ data }) => {
                         </Form.Item>
                         <Form.Item label="Validity">
                           <Input
-                            value={`${moment(certificate?.notBeforeDate).format(
+                            value={`${dayjs(certificate?.notBeforeDate).format(
                               "DD-MM-YYYY HH:mm:ss"
-                            )} s/d ${moment(certificate?.notAfterDate).format(
+                            )} s/d ${dayjs(certificate?.notAfterDate).format(
                               "DD-MM-YYYY HH:mm:ss"
                             )}`}
                             readOnly

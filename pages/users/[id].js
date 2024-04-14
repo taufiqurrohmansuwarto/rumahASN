@@ -7,11 +7,11 @@ import {
   stringToNumber,
   uploadFile,
 } from "@/utils/client-utils";
+import { Comment } from "@ant-design/compatible";
 import { MailOutlined } from "@ant-design/icons";
 import { Stack } from "@mantine/core";
 import { MarkdownEditor } from "@primer/react/drafts";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Comment } from "@ant-design/compatible";
 import {
   Breadcrumb,
   Button,
@@ -29,12 +29,17 @@ import {
   Tabs,
   message as messageantd,
 } from "antd";
-import moment from "moment";
 import { useSession } from "next-auth/react";
 import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { useState } from "react";
+
+import dayjs from "dayjs";
+import "dayjs/locale/id";
+import relativeTime from "dayjs/plugin/relativeTime";
+dayjs.locale("id");
+dayjs.extend(relativeTime);
 
 const CreateModal = ({ open, onCancel, receiver }) => {
   const router = useRouter();
@@ -217,7 +222,7 @@ const DetailInformation = ({ user }) => {
                         }
                         author={item?.customer?.username}
                         avatar={item?.customer?.image}
-                        datetime={moment(item?.created_at).format("LL")}
+                        datetime={dayjs(item?.created_at).format("LL")}
                       />
                     </>
                   )}

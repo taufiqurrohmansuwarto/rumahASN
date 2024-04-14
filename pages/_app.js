@@ -8,11 +8,8 @@ import {
 } from "@tanstack/react-query";
 import { ConfigProvider, Grid } from "antd";
 // import "antd/dist/antd.css";
-import id from "antd/lib/locale/id_ID";
-import locale from "antd/locale/id_ID";
+import id from "antd/locale/id_ID";
 import { RBACProvider } from "context/RBACContext";
-import dayjs from "dayjs";
-import "dayjs/locale/id";
 import { SessionProvider, signIn, useSession } from "next-auth/react";
 import Head from "next/head";
 import Script from "next/script";
@@ -20,7 +17,11 @@ import { useState } from "react";
 import Loading from "../src/components/Loading";
 import "../styles/globals.css";
 
+import dayjs from "dayjs";
+import "dayjs/locale/id";
+import relativeTime from "dayjs/plugin/relativeTime";
 dayjs.locale("id");
+dayjs.extend(relativeTime);
 
 // check user role and organization start with 123
 function Auth({ children, action, subject }) {
@@ -102,7 +103,7 @@ function MyApp({ Component, pageProps: { session, ...pageProps } }) {
           <Head>
             <link rel="shortcut icon" href="/helpdesk/headset.ico" />
           </Head>
-          <QueryClientProvider client={queryClient} locale={locale}>
+          <QueryClientProvider client={queryClient}>
             <MantineProvider withGlobalStyles withNormalizeCSS>
               <ThemeProvider colorMode="auto" preventSSRMismatch>
                 <Hydrate>

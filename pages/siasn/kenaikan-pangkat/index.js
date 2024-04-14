@@ -1,20 +1,24 @@
+import ModalDetailKP from "@/components/LayananSIASN/ModalDetailKP";
 import Layout from "@/components/Layout";
+import PageContainer from "@/components/PageContainer";
 import { getDaftarKenaikanPangkatByPeriode } from "@/services/siasn-services";
-import { useQuery } from "@tanstack/react-query";
-import { BackTop, Card, DatePicker, Input, Skeleton, Table, Tag } from "antd";
-import { useEffect, useState } from "react";
-import moment from "moment";
 import {
   findGolongan,
   findPangkat,
   setColorStatusUsulan,
 } from "@/utils/client-utils";
-import PageContainer from "@/components/PageContainer";
 import { Stack } from "@mantine/core";
-import ModalDetailKP from "@/components/LayananSIASN/ModalDetailKP";
-import { useRouter } from "next/router";
+import { useQuery } from "@tanstack/react-query";
+import { BackTop, Card, DatePicker, Input, Table, Tag } from "antd";
 import Head from "next/head";
-import { set } from "lodash";
+import { useRouter } from "next/router";
+import { useEffect, useState } from "react";
+
+import dayjs from "dayjs";
+import "dayjs/locale/id";
+import relativeTime from "dayjs/plugin/relativeTime";
+dayjs.locale("id");
+dayjs.extend(relativeTime);
 
 const DaftarKenaikanPangkat = () => {
   const router = useRouter();
@@ -38,10 +42,10 @@ const DaftarKenaikanPangkat = () => {
   const [filteredData, setFilteredData] = useState([]);
 
   const { data, isLoading, status } = useQuery(
-    ["kenaikan-pangkat", moment(router?.query?.periode).format("YYYY-MM-DD")],
+    ["kenaikan-pangkat", dayjs(router?.query?.periode).format("YYYY-MM-DD")],
     () =>
       getDaftarKenaikanPangkatByPeriode(
-        moment(router?.query?.periode).format("YYYY-MM-DD")
+        dayjs(router?.query?.periode).format("YYYY-MM-DD")
       ),
     {
       enabled: !!router?.query?.periode,
@@ -177,21 +181,21 @@ const DaftarKenaikanPangkat = () => {
           <DatePicker
             value={
               router?.query?.periode
-                ? moment(router?.query?.periode)
-                : moment(date)
+                ? dayjs(router?.query?.periode)
+                : dayjs(date)
             }
             format="YYYY-MM-DD"
             onChange={(date) => {
               setDate(date);
               router.push({
                 pathname: router.pathname,
-                query: { periode: moment(date).format("YYYY-MM-DD") },
+                query: { periode: dayjs(date).format("YYYY-MM-DD") },
               });
             }}
           />
           <Card
             title={
-              `Periode - ${moment(router?.query?.periode).format(
+              `Periode - ${dayjs(router?.query?.periode).format(
                 "DD MMMM YYYY"
               )}` || "-"
             }

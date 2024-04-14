@@ -3,7 +3,13 @@ const apiGateway = process.env.APIGATEWAY_URL;
 const fs = require("fs");
 const path = require("path");
 
-const moment = require("moment");
+const dayjs = require("dayjs");
+require("dayjs/locale/id");
+
+const relativeTime = require("dayjs/plugin/relativeTime");
+dayjs.locale("id");
+dayjs.extend(relativeTime);
+
 const arrayToTree = require("array-to-tree");
 const { orderBy, trim, toString, toNumber } = require("lodash");
 const {
@@ -212,7 +218,7 @@ const getTreeRef = async (req, res) => {
   try {
     const { siasnRequest: request } = req;
 
-    const currentTime = moment().format("YYYY-MM-DD");
+    const currentTime = dayjs().format("YYYY-MM-DD");
     const checkUpdate = await BackupSIASN.query()
       .where("backup_date", currentTime)
       .andWhere("type", "ref_unor")
@@ -609,7 +615,7 @@ const daftarKenaikanPangkat = async (req, res) => {
   try {
     const { siasnRequest: request } = req;
 
-    const periode = req?.query?.periode || moment().format("YYYY-MM-DD");
+    const periode = req?.query?.periode || dayjs().format("YYYY-MM-DD");
 
     const result = await request.get(
       `/pns/list-kp-instansi?periode=${periode}`

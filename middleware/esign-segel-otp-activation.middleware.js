@@ -1,6 +1,12 @@
 const DSSegelTOTP = require("@/models/ds-segel-totp.model");
 const { getSealActivationOTP } = require("@/utils/esign-utils");
-const moment = require("moment");
+
+const dayjs = require("dayjs");
+require("dayjs/locale/id");
+
+const relativeTime = require("dayjs/plugin/relativeTime");
+dayjs.locale("id");
+dayjs.extend(relativeTime);
 
 function extractCode(str) {
   const regex = /\((\d+)\s/g;
@@ -25,15 +31,15 @@ module.exports = async (req, res, next) => {
 
     const expiredAt = lastTotpActivation?.expired_at;
 
-    const now = moment().format("YYYY-MM-DD HH:mm:ss");
+    const now = dayjs().format("YYYY-MM-DD HH:mm:ss");
 
-    if (moment(now).isAfter(expiredAt) || !lastTotpActivation) {
+    if (dayjs(now).isAfter(expiredAt) || !lastTotpActivation) {
       const getTotp = await getSealActivationOTP();
 
       const message = getTotp?.data?.message;
       const totp = extractCode(message);
 
-      const add24Hours = moment()
+      const add24Hours = dayjs()
         .add(24, "hours")
         ?.format("YYYY-MM-DD HH:mm:ss");
       const data = {

@@ -1,5 +1,10 @@
 const User = require("@/models/users.model");
-const moment = require("moment");
+
+const dayjs = require("dayjs");
+const relativeTime = require("dayjs/plugin/relativeTime");
+dayjs.extend(relativeTime);
+require("dayjs/locale/id");
+dayjs.locale("id");
 
 const showModalRatings = async (req, res) => {
   try {
@@ -22,8 +27,8 @@ const showModalRatings = async (req, res) => {
     const sudahMemberikanRating = currentUser.terakhir_diberi_rate !== null;
 
     //     cek terakhir tutup rating apakah lebih dari 1 bulan
-    const terakhirTutupRating = moment(currentUser.terakhir_tutup_rating);
-    const sekarang = moment(new Date());
+    const terakhirTutupRating = dayjs(currentUser.terakhir_tutup_rating);
+    const sekarang = dayjs(new Date());
     const selisihBulan = sekarang.diff(terakhirTutupRating, "months");
 
     if (

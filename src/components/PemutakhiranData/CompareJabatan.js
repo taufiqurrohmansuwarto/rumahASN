@@ -24,7 +24,6 @@ import {
   message,
 } from "antd";
 import axios from "axios";
-import moment from "moment";
 import { useSession } from "next-auth/react";
 import { useState } from "react";
 import AnomaliUser from "./AnomaliUser";
@@ -32,6 +31,12 @@ import EditRiwayatJabatanSIASN from "./EditRiwayatJabatanSIASN";
 import FormJFT from "./FormJFT";
 import FormJFU from "./FormJFU";
 import FormUnitOrganisasi from "./FormUnitOrganisasi";
+
+import dayjs from "dayjs";
+import "dayjs/locale/id";
+import relativeTime from "dayjs/plugin/relativeTime";
+dayjs.locale("id");
+dayjs.extend(relativeTime);
 
 const format = "DD-MM-YYYY";
 
@@ -75,9 +80,9 @@ const FormEntri = ({ visible, onCancel, nip }) => {
       let jenis_jabatan_id = jenis_jabatan === "Fungsional" ? "2" : "4";
 
       const data = {
-        tmtJabatan: moment(tmt_jabatan).format("DD-MM-YYYY"),
-        tanggalSk: moment(tgl_sk).format("DD-MM-YYYY"),
-        tmtPelantikan: moment(tmt_pelantikan).format("DD-MM-YYYY"),
+        tmtJabatan: dayjs(tmt_jabatan).format("DD-MM-YYYY"),
+        tanggalSk: dayjs(tgl_sk).format("DD-MM-YYYY"),
+        tmtPelantikan: dayjs(tmt_pelantikan).format("DD-MM-YYYY"),
         jabatanFungsionalId: fungsional_id ? fungsional_id : "-",
         jabatanFungsionalUmumId: fungsional_umum_id ? fungsional_umum_id : "-",
         unorId: unor_id,

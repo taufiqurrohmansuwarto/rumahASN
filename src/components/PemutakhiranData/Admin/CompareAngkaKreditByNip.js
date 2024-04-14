@@ -10,6 +10,12 @@ import { FileAddOutlined } from "@ant-design/icons";
 import { Stack, Text } from "@mantine/core";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
+import dayjs from "dayjs";
+import "dayjs/locale/id";
+import relativeTime from "dayjs/plugin/relativeTime";
+dayjs.locale("id");
+dayjs.extend(relativeTime);
+
 import { API_URL, checkKonversiIntegrasiPertama } from "@/utils/client-utils";
 import {
   Button,
@@ -23,16 +29,13 @@ import {
   InputNumber,
   Modal,
   Popconfirm,
-  Radio,
   Row,
   Skeleton,
   Table,
-  Typography,
   Upload,
   message,
 } from "antd";
 import axios from "axios";
-import moment from "moment";
 import { useState } from "react";
 import FormRiwayatJabatanByNip from "../FormRiwayatJabatanByNip";
 
@@ -414,14 +417,14 @@ function CompareAngkaKreditByNip({ nip }) {
       title: "Periode Awal",
       key: "tgl_awal",
       render: (_, record) => {
-        return <>{moment(record?.periode_awal).format("YYYY-MM")}</>;
+        return <>{dayjs(record?.periode_awal).format("YYYY-MM")}</>;
       },
     },
     {
       title: "Periode Akhir",
       key: "tgl_akhir",
       render: (_, record) => {
-        return <>{moment(record?.periode_akhir).format("YYYY-MM")}</>;
+        return <>{dayjs(record?.periode_akhir).format("YYYY-MM")}</>;
       },
     },
   ];

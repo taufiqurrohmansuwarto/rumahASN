@@ -5,8 +5,13 @@ import { InboxOutlined } from "@ant-design/icons";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Form, Modal, Table, Upload, message } from "antd";
 import axios from "axios";
-import moment from "moment";
 import { useEffect, useState } from "react";
+
+import dayjs from "dayjs";
+import "dayjs/locale/id";
+import relativeTime from "dayjs/plugin/relativeTime";
+dayjs.locale("id");
+dayjs.extend(relativeTime);
 
 export const API_URL = "https://apimws.bkn.go.id:8243/apisiasn/1.0";
 
@@ -68,7 +73,7 @@ const TransferModal = ({ open, handleClose, data }) => {
       nomorSertipikat: data?.no_sertifikat,
       tahunKursus: data?.tahun,
       jumlahJam: data?.jml,
-      tanggalKursus: moment(data?.tanggal_mulai, "DD-MM-YYYY"),
+      tanggalKursus: dayjs(data?.tanggal_mulai, "DD-MM-YYYY"),
     });
   }, [form, data]);
 

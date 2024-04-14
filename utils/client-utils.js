@@ -20,15 +20,18 @@ import {
   IconSchool,
   IconUserExclamation,
   IconUserSearch,
-  IconUserX,
   IconUsers,
 } from "@tabler/icons";
 import { Tag } from "antd";
 import { toLower } from "lodash";
-import moment from "moment";
-import "moment/locale/id";
-// language is set to Indonesia
-moment.locale("id");
+
+import dayjs from "dayjs";
+import relativeTime from "dayjs/plugin/relativeTime";
+
+import "dayjs/locale/id";
+
+dayjs.extend(relativeTime);
+dayjs.locale("id");
 
 const REF_PANGKAT = [
   { id: "11", nama: "I/a", nama_pangkat: "Juru Muda" },
@@ -167,16 +170,16 @@ export const participantType = (group) => {
 
 export const formatDateFromNow = (date) => {
   // language is set to Indonesia
-  return moment(date).locale("id").fromNow();
+  return dayjs(date).fromNow();
 };
 
 export const formatDateWebinar = (date) => {
-  return moment(date).locale("id").format("DD MMM YYYY");
+  return dayjs(date).format("DD MMM YYYY");
 };
 
 export const formatedMonth = (date) => {
   // language is set to Indonesia
-  return moment(date).locale("id").format("MMMM");
+  return dayjs(date).format("MMMM");
 };
 
 export const base64ToPdf = (base64) => {
@@ -185,11 +188,11 @@ export const base64ToPdf = (base64) => {
 
 export const formatDateFull = (date) => {
   // language is set to Indonesia
-  return moment(date).locale("id").format("DD MMMM YYYY HH:mm");
+  return dayjs(date).format("DD MMMM YYYY HH:mm");
 };
 
 export const formatDateSimple = (date) => {
-  return moment(date).locale("id").format("D MMM YYYY HH:mm");
+  return dayjs(date).format("D MMM YYYY HH:mm");
 };
 
 export const capitalizeWords = (str) => {
@@ -239,7 +242,7 @@ export const formatTooltipUsers = (currentUsers, users) => {
 
 export const formatDateLL = (data) => {
   //  return Sep, 24 2021
-  return moment(data).format("DD, MMM YYYY", { locale: "id" });
+  return dayjs(data).format("DD, MMM YYYY");
 };
 
 const allUser = ["admin", "agent", "user"];
@@ -474,7 +477,7 @@ export const transformHref = (html) => {
 
 // create custom function is date is not three days ago and retrun true
 export const isNotThreeDaysAgo = (date) => {
-  return moment(date).isAfter(moment().subtract(5, "days"));
+  return dayjs(date).isAfter(dayjs().subtract(5, "days"));
 };
 
 export const stringToNumber = (string) => {
@@ -572,13 +575,13 @@ export const jenisRiwayat = (action) => {
 
 // create time like gmail format using moment if today show time else show date with format like 3 Aug if year same show date with format like 3 Aug 2021
 export const timeFormat = (date) => {
-  if (moment(date).isSame(moment(), "day")) {
-    return moment(date).format("HH:mm");
+  if (dayjs(date).isSame(dayjs(), "day")) {
+    return dayjs(date).format("HH:mm");
   }
-  if (moment(date).isSame(moment(), "year")) {
-    return moment(date).format("DD MMM");
+  if (dayjs(date).isSame(dayjs(), "year")) {
+    return dayjs(date).format("DD MMM");
   }
-  return moment(date).format("DD/MM/YYYY");
+  return dayjs(date).format("DD/MM/YYYY");
 };
 
 // create  function take 20 character from html text and make it one line even is p tag and the rest is ... if less than 20 character return all text
@@ -939,4 +942,13 @@ export const cekJabatanFungsional = (jabatan) => {
   );
   const kata = `JFT ${jabatanCek?.value}`;
   return kata;
+};
+
+export const getUmur = (tanggalLahir) => {
+  // format tanggal lahir DD-MM-YYYY
+  // gunakan dayjs
+  const today = dayjs();
+  const birth = dayjs(tanggalLahir, "DD-MM-YYYY");
+  const umur = today.diff(birth, "year");
+  return umur;
 };

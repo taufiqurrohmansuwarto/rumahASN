@@ -5,6 +5,7 @@ import {
   likePost,
   updatePost,
 } from "@/services/socmed.services";
+import { Comment } from "@ant-design/compatible";
 import { CommentOutlined, LikeOutlined, MoreOutlined } from "@ant-design/icons";
 import { Stack } from "@mantine/core";
 import { MarkdownEditor } from "@primer/react/drafts";
@@ -13,7 +14,6 @@ import {
   useMutation,
   useQueryClient,
 } from "@tanstack/react-query";
-import { Comment } from "@ant-design/compatible";
 import {
   Avatar,
   Button,
@@ -25,16 +25,20 @@ import {
   Space,
   Tooltip,
   message,
-  Divider,
 } from "antd";
-import moment from "moment";
+
+import dayjs from "dayjs";
+import "dayjs/locale/id";
+import relativeTime from "dayjs/plugin/relativeTime";
+dayjs.locale("id");
+dayjs.extend(relativeTime);
+
 import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { useState } from "react";
 import ReactMarkdownCustom from "../MarkdownEditor/ReactMarkdownCustom";
 import SocmedPostsFilter from "./SocmedPostsFilter";
-import SocmedCreatePost from "./SocmedCreatePost";
 
 const uploadFile = async (file) => {
   try {
@@ -278,21 +282,13 @@ const Post = ({ post, currentUser }) => {
           avatar={
             <>
               <Avatar src={post?.user?.image} />
-              {/* <Modal
-                footer={null}
-                open={open}
-                onCancel={() => setOpen(false)}
-                title={post?.user?.username}
-              >
-                <Image height={80} src={post?.user?.image} alt="test" />
-              </Modal> */}
             </>
           }
           datetime={
             <Tooltip
-              title={moment(post?.created_at).format("DD-MM-YYYY HH:mm:ss")}
+              title={dayjs(post?.created_at).format("DD-MM-YYYY HH:mm:ss")}
             >
-              {moment(post?.created_at).fromNow()}
+              &#x2022; {dayjs(post?.created_at).fromNow()}
             </Tooltip>
           }
           content={<ReactMarkdownCustom>{post?.content}</ReactMarkdownCustom>}
@@ -323,9 +319,8 @@ function SocmedPosts() {
         if (lastPage?.data?.length < defaultLimit) return undefined;
         return nextPage;
       },
-    },
-    {
       keepPreviousData: true,
+      staleTime: 1000 * 60 * 5,
     }
   );
   return (
@@ -358,7 +353,7 @@ function SocmedPosts() {
         rowKey={(item) => item.id}
         loading={isLoading || isFetching}
         renderItem={(item) => {
-          return <Post currentUser={currentUser?.user} post={item} />;
+          return <Post post={item} currentUser={currentUser} />;
         }}
       />
     </>

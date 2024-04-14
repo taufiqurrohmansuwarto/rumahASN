@@ -6,11 +6,14 @@ const CCMeetingsParticipants = require("@/models/cc_meetings_participants.model"
 const CCRatings = require("@/models/cc_ratings.model");
 
 const jsonwebtoken = require("jsonwebtoken");
-const moment = require("moment");
 const { isArray, toNumber, round } = require("lodash");
 
 const appId = process.env.APP_ID;
 const appSecret = process.env.APP_SECRET;
+
+const dayjs = require("dayjs");
+require("dayjs/locale/id");
+dayjs.locale("id");
 
 const ratingMeetingParticipant = async (req, res) => {
   try {
@@ -544,8 +547,8 @@ const detailMeetingParticipant = async (req, res) => {
 
 const upcomingMeetings = async (req, res) => {
   try {
-    const month = req?.query?.month || moment().format("MM");
-    const year = req?.query?.year || moment().format("YYYY");
+    const month = req?.query?.month || dayjs().format("MM");
+    const year = req?.query?.year || dayjs().format("YYYY");
     const day = req?.query?.day;
 
     const result = await CCMeetings.query()

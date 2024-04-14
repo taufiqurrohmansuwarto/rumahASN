@@ -4,6 +4,7 @@ import {
   likePost,
   updatePost,
 } from "@/services/socmed.services";
+import { Comment } from "@ant-design/compatible";
 import { CommentOutlined, LikeOutlined, MoreOutlined } from "@ant-design/icons";
 import { Stack } from "@mantine/core";
 import {
@@ -25,12 +26,14 @@ import {
   Tooltip,
   message,
 } from "antd";
-import { Comment } from "@ant-design/compatible";
-import moment from "moment";
+import dayjs from "dayjs";
+import "dayjs/locale/id";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import SocmedPostsFilter from "./SocmedPostsFilter";
+import ReactMarkdownCustom from "../MarkdownEditor/ReactMarkdownCustom";
+dayjs.locale("id");
 
 function SocmedEditPost({ post, edit, isLoading, cancel }) {
   const [form] = Form.useForm();
@@ -227,12 +230,12 @@ const Post = ({ post, currentUser }) => {
           avatar={<Avatar src={post?.user?.image} />}
           datetime={
             <Tooltip
-              title={moment(post?.created_at).format("DD-MM-YYYY HH:mm:ss")}
+              title={dayjs(post?.created_at).format("DD-MM-YYYY HH:mm:ss")}
             >
-              {moment(post?.created_at).fromNow()}
+              &#x2022; {dayjs(post?.created_at).fromNow()}
             </Tooltip>
           }
-          content={<div dangerouslySetInnerHTML={{ __html: post?.content }} />}
+          content={<ReactMarkdownCustom>{post?.content}</ReactMarkdownCustom>}
         />
       )}
     </>
@@ -259,9 +262,8 @@ function SocmedMyPosts() {
         if (lastPage?.data?.length < defaultLimit) return undefined;
         return nextPage;
       },
-    },
-    {
       keepPreviousData: true,
+      staleTime: 1000 * 60 * 5,
     }
   );
   return (

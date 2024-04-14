@@ -1,10 +1,9 @@
+import { createHistory } from "@/utils/utility";
+import axios from "axios";
 import NextAuth from "next-auth/next";
 import GoogleProvider from "next-auth/providers/google";
 const User = require("../../../models/users.model");
-import axios from "axios";
-import { createHistory } from "@/utils/utility";
 const apigateway = process.env.APIGATEWAY_URL;
-import moment from "moment";
 
 const operatorId = process.env.OPERATOR_ID;
 const operatorSecret = process.env.OPERATOR_SECRET;

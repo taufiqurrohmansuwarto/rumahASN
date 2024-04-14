@@ -1,6 +1,11 @@
 import { Button, Form, Input, Modal } from "antd";
 import React, { useEffect } from "react";
-import moment from "moment";
+
+import dayjs from "dayjs";
+import "dayjs/locale/id";
+import relativeTime from "dayjs/plugin/relativeTime";
+dayjs.locale("id");
+dayjs.extend(relativeTime);
 
 const FormModal = ({ open, handleClose, currentWebinar }) => {
   const [form] = Form.useForm();
@@ -16,9 +21,9 @@ const FormModal = ({ open, handleClose, currentWebinar }) => {
         lokasiId: "",
         // akhir dari tambahan
         nama: currentWebinar.nama,
-        tahunKursus: moment(currentWebinar?.start_date).format("YYYY"),
-        tanggalKursus: moment(currentWebinar?.start_date).format("DD-MM-YYYY"),
-        selesaiKursus: moment(currentWebinar?.end_date).format("DD-MM-YYYY"),
+        tahunKursus: dayjs(currentWebinar?.start_date).format("YYYY"),
+        tanggalKursus: dayjs(currentWebinar?.start_date).format("DD-MM-YYYY"),
+        selesaiKursus: dayjs(currentWebinar?.end_date).format("DD-MM-YYYY"),
         nomorSertipikat: currentWebinar?.certificate_number,
         namaKursus: currentWebinar?.title,
         jumlahJam: currentWebinar?.hour,

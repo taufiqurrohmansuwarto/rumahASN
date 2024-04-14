@@ -1,11 +1,14 @@
+import InformasiNetralitas from "@/components/LaporNetralitas/InformasiNetralitas";
 import Layout from "@/components/Layout";
 import PageContainer from "@/components/PageContainer";
 import { getNetralitasASN } from "@/services/netralitas.services";
 import { useQuery } from "@tanstack/react-query";
 import { Card, Modal, Table } from "antd";
 import { useState } from "react";
-import moment from "moment";
-import InformasiNetralitas from "@/components/LaporNetralitas/InformasiNetralitas";
+
+import dayjs from "dayjs";
+import "dayjs/locale/id";
+dayjs.locale("id");
 
 const ModalLaporan = ({ open, onCancel, data }) => {
   return (
@@ -60,7 +63,7 @@ const NetralitasAsn = () => {
       title: "Tanggal Laporan",
       key: "created_at",
       render: (_, row) => {
-        return <>{moment(row.created_at).format("DD MMMM YYYY")}</>;
+        return <>{dayjs(row.created_at).format("DD MMMM YYYY")}</>;
       },
     },
     {
