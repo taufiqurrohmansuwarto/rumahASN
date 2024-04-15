@@ -1,3 +1,5 @@
+import IPAsn from "@/components/LayananSIASN/IPAsn";
+import AnomaliUser from "@/components/PemutakhiranData/AnomaliUser";
 import { mysapkMenu } from "@/utils/client-utils";
 import {
   Card,
@@ -11,8 +13,6 @@ import {
 } from "@mantine/core";
 import { Grid, Space, Tag, Typography } from "antd";
 import { useRouter } from "next/router";
-import AnomaliUser from "@/components/PemutakhiranData/AnomaliUser";
-import IPAsn from "@/components/LayananSIASN/IPAsn";
 
 const mockdata = mysapkMenu;
 
@@ -102,7 +102,7 @@ export function MenuMySAPK({ dataUtama }) {
               size="small"
               direction={screens.xl ? "horizontal" : "vertical"}
             >
-              <IPAsn tahun={2023} />
+              {/* <IPAsn tahun={2023} /> */}
               <Tag color="yellow">{dataUtama?.kedudukanPnsNama}</Tag>
               <Tag color={dataUtama?.validNik ? "green" : "red"}>
                 {dataUtama?.validNik

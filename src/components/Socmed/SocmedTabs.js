@@ -23,8 +23,8 @@ function SocmedTabs() {
 
   return (
     <>
-      <Row gutter={[8, 8]}>
-        <Col md={10} xs={24}>
+      <Row justify="center" gutter={[8, 8]}>
+        <Col md={12} xs={24}>
           <Row gutter={[8, 16]}>
             <Col md={24} xs={24}>
               <Stack>
