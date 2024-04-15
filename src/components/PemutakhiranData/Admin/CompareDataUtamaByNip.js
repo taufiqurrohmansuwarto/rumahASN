@@ -204,16 +204,11 @@ function CompareDataUtamaByNip({ nip }) {
   return (
     <div>
       <Skeleton loading={isLoading || isLoadingDataSimaster}>
-        <Row gutter={[16, 8]}>
+        <Row gutter={[16, 16]}>
           <Col md={20}>
-            <Row gutter={[16, 8]}>
+            <Row gutter={[16, 16]}>
               <Col md={24}>
-                <Card id="status-pegawai">
-                  <InformationDetail data={data} />
-                </Card>
-              </Col>
-              <Col md={24}>
-                <Card title="Komparasi Data" id="komparasi-data">
+                <Card title="Komparasi SIMASTER dan MyASN" id="komparasi-data">
                   <Stack>
                     <TableAntd
                       columns={columns}
@@ -223,17 +218,10 @@ function CompareDataUtamaByNip({ nip }) {
                   </Stack>
                 </Card>
               </Col>
-              <Col md={24} id="masa-kerja-siasn">
-                <CompareMasaKerjaByNip nip={nip} />
-              </Col>
-              <Col md={24} id="penghargaan">
-                <ComparePenghargaanByNip nip={nip} />
-              </Col>
-              <Col md={24} id="hukdis">
-                <CompareHukdisByNip nip={nip} />
-              </Col>
-              <Col md={24} id="cltn">
-                <CompareCLTNByNip nip={nip} />
+              <Col md={24}>
+                <Card id="status-pegawai">
+                  <InformationDetail data={data} />
+                </Card>
               </Col>
             </Row>
           </Col>
@@ -242,34 +230,109 @@ function CompareDataUtamaByNip({ nip }) {
               offsetTop={70}
               items={[
                 {
-                  key: "status-pegawai",
-                  href: "#status-pegawai",
-                  title: "Informasi MyASN",
-                },
-                {
                   key: "komparasi-data",
                   href: "#komparasi-data",
                   title: "Komparasi Data",
                 },
                 {
-                  key: "masa-kerja-siasn",
-                  href: "#masa-kerja-siasn",
-                  title: "Riwayat Masa Kerja MyASN",
+                  key: "Informasi MyASN",
+                  href: "#status-pegawai",
+                  title: "Informasi MyASN",
+                  children: [
+                    {
+                      key: "personal-information",
+                      href: "#personal-information",
+                      title: "Personal",
+                    },
+                    {
+                      key: "contact-information",
+                      href: "#contact-information",
+                      title: "Kontak",
+                    },
+                    {
+                      key: "professional-information",
+                      href: "#professional-information",
+                      title: "Professional",
+                    },
+                    {
+                      key: "pendidikan",
+                      href: "#pendidikan",
+                      title: "Pendidikan",
+                    },
+                    {
+                      key: "ASN",
+                      href: "#asn",
+                      title: "ASN",
+                    },
+                    {
+                      key: "tambahan-informasi",
+                      href: "#tambahan-informasi",
+                      title: "Tambahan Informasi",
+                    },
+                    {
+                      key: "dokumen-layanan",
+                      href: "#dokumen-layanan",
+                      title: "Dokumen Layanan",
+                    },
+                  ],
                 },
                 {
-                  key: "penghargaan",
-                  href: "#penghargaan",
-                  title: "Penghargaan MyASN",
-                },
-                {
-                  key: "hukdis",
-                  href: "#hukdis",
-                  title: "Hukuman Disiplin MyASN",
-                },
-                {
-                  key: "cltn",
-                  href: "#cltn",
-                  title: "CLTN MyASN",
+                  key: "keluarga",
+                  href: "#keluarga",
+                  title: "Keluarga",
+                  children: [
+                    {
+                      key: "orang-tua",
+                      href: "#orang-tua",
+                      title: "Orang Tua",
+                      children: [
+                        {
+                          key: "orang-tua-simaster",
+                          href: "#orang-tua-simaster",
+                          title: "SIMASTER",
+                        },
+                        {
+                          key: "orang-tua-siasn",
+                          href: "#orang-tua-siasn",
+                          title: "SIASN",
+                        },
+                      ],
+                    },
+                    {
+                      key: "pasangan",
+                      href: "#pasangan",
+                      title: "Pasangan",
+                      children: [
+                        {
+                          key: "pasangan-simaster",
+                          href: "#pasangan-simaster",
+                          title: "SIMASTER",
+                        },
+                        {
+                          key: "pasangan-siasn",
+                          href: "#pasangan-siasn",
+                          title: "SIASN",
+                        },
+                      ],
+                    },
+                    {
+                      key: "anak",
+                      href: "#anak",
+                      title: "Anak",
+                      children: [
+                        {
+                          key: "anak-simaster",
+                          href: "#anak-simaster",
+                          title: "SIMASTER",
+                        },
+                        {
+                          key: "anak-siasn",
+                          href: "#anak-siasn",
+                          title: "SIASN",
+                        },
+                      ],
+                    },
+                  ],
                 },
               ]}
             />

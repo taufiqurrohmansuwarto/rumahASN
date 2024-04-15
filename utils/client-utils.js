@@ -952,3 +952,13 @@ export const getUmur = (tanggalLahir) => {
   const umur = today.diff(birth, "year");
   return umur;
 };
+
+export const formatCurrency = (number) => {
+  return new Intl.NumberFormat("id-ID", {
+    style: "currency",
+    currency: "IDR",
+    minimumFractionDigits: 0, // To avoid showing any decimal places
+  })
+    .format(number)
+    .replace(/(\.|,)00$/g, "");
+};

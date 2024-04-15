@@ -1,34 +1,31 @@
 import Layout from "@/components/Layout";
-import CompareDataUtamaByNip from "@/components/PemutakhiranData/Admin/CompareDataUtamaByNip";
 import EmployeesLayout from "@/components/PemutakhiranData/Admin/EmployeesLayout";
-import { FloatButton } from "antd";
 import Head from "next/head";
 import { useRouter } from "next/router";
 
-function DataUtama() {
+function PrestasiDisiplin() {
   const router = useRouter();
   const { nip } = router.query;
 
   return (
     <>
       <Head>
-        <title>Integrasi MyASN - Data Utama</title>
+        <title>Integrasi MyASN - Prestasi & Disiplin</title>
       </Head>
       <EmployeesLayout>
-        <CompareDataUtamaByNip nip={nip} />
-        <FloatButton.BackTop />
+        <div>Prestasi & Disiplin</div>
       </EmployeesLayout>
     </>
   );
 }
 
-DataUtama.getLayout = function (page) {
+PrestasiDisiplin.getLayout = function (page) {
   return <Layout>{page}</Layout>;
 };
 
-DataUtama.Auth = {
+PrestasiDisiplin.Auth = {
   action: "manage",
   subject: "DashboardAdmin",
 };
 
-export default DataUtama;
+export default PrestasiDisiplin;
