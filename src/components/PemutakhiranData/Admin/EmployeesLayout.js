@@ -1,5 +1,7 @@
 import IPAsnByNip from "@/components/LayananSIASN/IPASNByNip";
 import PageContainer from "@/components/PageContainer";
+import { dataUtamaMasterByNip } from "@/services/master.services";
+import { dataUtamSIASNByNip, getPnsAllByNip } from "@/services/siasn-services";
 import { getUmur } from "@/utils/client-utils";
 import { Alert } from "@mantine/core";
 import { useQuery } from "@tanstack/react-query";
@@ -18,8 +20,6 @@ import {
 } from "antd";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { dataUtamaMasterByNip } from "@/services/master.services";
-import { dataUtamSIASNByNip, getPnsAllByNip } from "@/services/siasn-services";
 
 const EmployeeUnor = ({ data }) => {
   return (
@@ -34,7 +34,7 @@ const EmployeeUnor = ({ data }) => {
   );
 };
 
-const EmployeeDescriptionMaster = ({ data }) => {
+const EmployeeDescriptionMaster = ({ data, loading }) => {
   const breakPoint = Grid.useBreakpoint();
   return (
     <>
@@ -64,7 +64,7 @@ const EmployeeDescriptionMaster = ({ data }) => {
   );
 };
 
-const EmployeeContent = ({ data }) => {
+const EmployeeContent = ({ data, loading }) => {
   return (
     <Row gutter={[8, 16]}>
       <Col sm={24} md={24}>
@@ -72,14 +72,14 @@ const EmployeeContent = ({ data }) => {
           <div>
             <Avatar size={110} shape="square" src={data?.master?.foto} />
           </div>
-          <EmployeeDescriptionMaster data={data?.master} />
+          <EmployeeDescriptionMaster loading={loading} data={data?.master} />
         </Flex>
       </Col>
     </Row>
   );
 };
 
-function EmployeesLayout({ children }) {
+function EmployeesLayout({ children, active }) {
   const router = useRouter();
   const { nip } = router.query;
 
@@ -87,7 +87,7 @@ function EmployeesLayout({ children }) {
     router.push(`/apps-managements/integrasi/siasn/${nip}/${key}`);
   };
 
-  const { data: dataSimaster, isLoading: isLoadingDataSimaster } = useQuery(
+  const { data: dataSimaster, isLoading: isLoadingSimaster } = useQuery(
     ["data-utama-simaster-by-nip", nip],
     () => dataUtamaMasterByNip(nip)
   );
@@ -105,15 +105,16 @@ function EmployeesLayout({ children }) {
   return (
     <>
       <PageContainer
-        loading={isLoadingDataSimaster || isLoadingDataPns || loadingSiasn}
+        // loading={isLoadingDataSimaster || isLoadingDataPns || loadingSiasn}
         token={{
-          paddingInlinePageContainerContent: 0,
+          // paddingInlinePageContainerContent: 0,
+          paddingBlockPageContainerContent: 0,
         }}
         style={{
           backgroundColor: "white",
         }}
         onTabChange={handleTabChange}
-        tabActiveKey={router?.query?.tab || "data-utama"}
+        tabActiveKey={active || "data-utama"}
         tags={[
           <Tooltip key="test" title="Status Kepegawaian SIMASTER">
             <Tag
@@ -139,18 +140,37 @@ function EmployeesLayout({ children }) {
             },
           },
           {
-            key: "riwayat",
-            label: "Riwayat",
+            key: "profesional",
+            label: "Profesional",
+            style: { padding: 0 },
+          },
+          {
+            key: "pengembangan-karir-dan-kompetensi",
+            label: "Pengembangan Karir & Kompetensi",
+            style: {
+              padding: 0,
+            },
+          },
+          {
+            key: "prestasi-dan-disiplin",
+            label: "Prestasi & Disiplin",
             style: {
               padding: 0,
             },
           },
         ]}
+        tabProps={{
+          tabBarStyle: {
+            padding: 0,
+            margin: 0,
+          },
+        }}
         title={dataSimaster?.nama}
         subTitle={dataSimaster?.nip_baru}
         content={
           <Space direction="vertical">
             <EmployeeContent
+              loading={isLoadingSimaster}
               data={{
                 master: dataSimaster,
                 siasn: siasn,

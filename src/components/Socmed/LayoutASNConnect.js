@@ -62,10 +62,8 @@ function LayoutASNConnect({ children, active = "asn-updates" }) {
           style: {
             color: "black",
           },
-          // centered: true,
         }}
         token={{
-          // paddingInlinePageContainerContent: 0,
           paddingBlockPageContainerContent: 0,
         }}
         title="Smart ASN Connect"
