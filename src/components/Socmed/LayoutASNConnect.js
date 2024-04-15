@@ -13,10 +13,15 @@ function LayoutASNConnect({ children, active = "asn-updates" }) {
   return (
     <>
       <PageContainer
+        header={{
+          avatar: {
+            src: "https://avatars.githubusercontent.com/u/8186664?v=4",
+          },
+        }}
         style={{
           backgroundColor: "white",
+          padding: 0,
         }}
-        ghost
         tabActiveKey={active}
         onTabChange={handleChangeTab}
         tabList={[
@@ -47,10 +52,21 @@ function LayoutASNConnect({ children, active = "asn-updates" }) {
         ]}
         tabPosition="top"
         tabProps={{
+          tabBarStyle: {
+            padding: 0,
+            margin: 0,
+            accentColor: "yellow",
+            borderColor: "yellow",
+            color: "yellow",
+          },
           style: {
             color: "black",
           },
           // centered: true,
+        }}
+        token={{
+          // paddingInlinePageContainerContent: 0,
+          paddingBlockPageContainerContent: 0,
         }}
         title="Smart ASN Connect"
         content="Berjejaring, Berkolaborasi, Berinovasi Bersama ASN Connect."

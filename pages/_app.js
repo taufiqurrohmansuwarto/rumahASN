@@ -94,6 +94,7 @@ function MyApp({ Component, pageProps: { session, ...pageProps } }) {
           },
         }}
         locale={id}
+        // locale={id}
       >
         <SessionProvider
           session={session}

@@ -10,7 +10,7 @@ const AsnUpdates = () => {
   return (
     <>
       <Head>
-        <title>Rumah ASN - ASN Connect</title>
+        <title>Rumah ASN - Smart ASN Connect Update</title>
       </Head>
       <LayoutASNConnect>
         <SocmedTabs />

@@ -134,10 +134,16 @@ function EmployeesLayout({ children }) {
           {
             key: "data-utama",
             label: "Data Utama",
+            style: {
+              padding: 0,
+            },
           },
           {
             key: "riwayat",
             label: "Riwayat",
+            style: {
+              padding: 0,
+            },
           },
         ]}
         title={dataSimaster?.nama}

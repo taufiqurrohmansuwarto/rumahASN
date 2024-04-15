@@ -1,10 +1,9 @@
 import Layout from "@/components/Layout";
 import PageContainer from "@/components/PageContainer";
 import { MenuMySAPK } from "@/components/PemutakhiranData/MenuMySAPK";
-import SIASNTracking from "@/components/Tracking/SIASNTracking";
 import { dataUtamaSIASN } from "@/services/siasn-services";
 import { useQuery } from "@tanstack/react-query";
-import { Breadcrumb, Card, Col, Row } from "antd";
+import { Breadcrumb, Col, Row } from "antd";
 import { useSession } from "next-auth/react";
 import Head from "next/head";
 import Link from "next/link";
