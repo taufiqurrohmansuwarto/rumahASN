@@ -1,9 +1,10 @@
 import Layout from "@/components/Layout";
 import EmployeesLayout from "@/components/PemutakhiranData/Admin/EmployeesLayout";
+import ContentPrestasiDanDisiplin from "@/components/PemutakhiranData/Admin/Menu/ContenPrestasiDanDisiplin";
 import Head from "next/head";
 import { useRouter } from "next/router";
 
-function PrestasiDisiplin() {
+function PrestasiDanDisiplin() {
   const router = useRouter();
   const { nip } = router.query;
 
@@ -12,20 +13,20 @@ function PrestasiDisiplin() {
       <Head>
         <title>Integrasi MyASN - Prestasi & Disiplin</title>
       </Head>
-      <EmployeesLayout>
-        <div>Prestasi & Disiplin</div>
+      <EmployeesLayout active="prestasi-dan-disiplin">
+        <ContentPrestasiDanDisiplin nip={nip} />
       </EmployeesLayout>
     </>
   );
 }
 
-PrestasiDisiplin.getLayout = function (page) {
-  return <Layout>{page}</Layout>;
+PrestasiDanDisiplin.getLayout = function (page) {
+  return <Layout active="/apps-managements/integrasi/siasn">{page}</Layout>;
 };
 
-PrestasiDisiplin.Auth = {
+PrestasiDanDisiplin.Auth = {
   action: "manage",
   subject: "DashboardAdmin",
 };
 
-export default PrestasiDisiplin;
+export default PrestasiDanDisiplin;

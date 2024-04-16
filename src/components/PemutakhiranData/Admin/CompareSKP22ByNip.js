@@ -1,20 +1,22 @@
 import { rwSkpMasterByNip } from "@/services/master.services";
-import { API_URL } from "@/utils/client-utils";
 import {
   getRwSkp22ByNip,
   getTokenSIASNService,
   postRwSkp22ByNip,
 } from "@/services/siasn-services";
-import { FileAddOutlined } from "@ant-design/icons";
+import { API_URL } from "@/utils/client-utils";
+import { FileAddOutlined, PlusOutlined } from "@ant-design/icons";
 import { Stack } from "@mantine/core";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Button,
   Card,
+  Flex,
   Form,
   Modal,
   Select,
   Table,
+  Typography,
   Upload,
   message,
 } from "antd";
@@ -303,28 +305,51 @@ function CompareSKP22ByNip({ nip }) {
   ];
 
   return (
-    <Card title="Komparasi Kinerja">
+    <Card title="Komparasi Kinerja" id="kinerja">
       <Stack>
         <FormSKP22 visible={visible} onCancel={handleCancel} nip={nip} />
-        <Table
-          title={() => (
-            <Button type="primary" onClick={handleVisible}>
+        <div id="kinerja-siasn">
+          <Flex justify="space-between">
+            <div>
+              <Typography.Title level={5} strong>
+                SKP SIASN
+              </Typography.Title>
+            </div>
+            <Button
+              icon={<PlusOutlined />}
+              type="primary"
+              onClick={handleVisible}
+            >
               Tambah
             </Button>
-          )}
-          pagination={false}
-          columns={columns}
-          loading={isLoading}
-          rowKey={(row) => row?.id}
-          dataSource={data}
-        />
-        <Table
-          pagination={false}
-          columns={columnMaster}
-          loading={isLoadingMaster}
-          rowKey={(row) => row?.skp_id}
-          dataSource={dataMaster}
-        />
+          </Flex>
+          <Table
+            style={{
+              marginTop: 20,
+            }}
+            pagination={false}
+            columns={columns}
+            loading={isLoading}
+            rowKey={(row) => row?.id}
+            dataSource={data}
+          />
+        </div>
+        <div id="kinerja-simaster">
+          <Flex justify="start">
+            <div>
+              <Typography.Title level={5} strong>
+                SKP SIMASTER
+              </Typography.Title>
+            </div>
+          </Flex>
+          <Table
+            pagination={false}
+            columns={columnMaster}
+            loading={isLoadingMaster}
+            rowKey={(row) => row?.skp_id}
+            dataSource={dataMaster}
+          />
+        </div>
       </Stack>
     </Card>
   );

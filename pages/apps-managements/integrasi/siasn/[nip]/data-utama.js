@@ -14,7 +14,7 @@ function DataUtama() {
       <Head>
         <title>Integrasi MyASN - Data Utama</title>
       </Head>
-      <EmployeesLayout>
+      <EmployeesLayout active="data-utama">
         <CompareDataUtamaByNip nip={nip} />
         <FloatButton.BackTop />
       </EmployeesLayout>
@@ -23,7 +23,7 @@ function DataUtama() {
 }
 
 DataUtama.getLayout = function (page) {
-  return <Layout>{page}</Layout>;
+  return <Layout active="/apps-managements/integrasi/siasn">{page}</Layout>;
 };
 
 DataUtama.Auth = {
