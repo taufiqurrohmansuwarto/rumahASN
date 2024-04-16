@@ -12,7 +12,7 @@ function PengembanganKarirDanKompetensi() {
       <Head>
         <title>Integrasi MyASN - Pengembangan Karir dan Kompetensi</title>
       </Head>
-      <EmployeesLayout>
+      <EmployeesLayout active="pengembangan-karir-dan-kompetensi">
         <div>Pengembangan Karir dan Kompetensi</div>
       </EmployeesLayout>
     </>
@@ -20,7 +20,7 @@ function PengembanganKarirDanKompetensi() {
 }
 
 PengembanganKarirDanKompetensi.getLayout = function (page) {
-  return <Layout>{page}</Layout>;
+  return <Layout active="/apps-managements/integrasi/siasn">{page}</Layout>;
 };
 
 PengembanganKarirDanKompetensi.Auth = {

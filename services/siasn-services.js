@@ -249,6 +249,23 @@ export const getRwSkp22ByNip = (nip) => {
   return api.get(`/admin/${nip}/rw-skp22`).then((res) => res.data);
 };
 
+// kinerja periodik
+export const getRwKinerjaPeriodikByNip = (nip) => {
+  return api.get(`/admin/${nip}/rw-kinerjaperiodik`).then((res) => res.data);
+};
+
+export const createKinerjaPeriodikByNip = ({ nip, data }) => {
+  return api
+    .post(`/admin/${nip}/rw-kinerjaperiodik`, data)
+    .then((res) => res.data);
+};
+
+export const removeKinerjaPeriodikByNip = ({ id, nip }) => {
+  return api
+    .delete(`/admin/${nip}/rw-kinerjaperiodik/${id}`)
+    .then((res) => res.data);
+};
+
 export const postRwSkp22ByNip = ({ nip, data }) => {
   return api.post(`/admin/${nip}/rw-skp22`, data).then((res) => res.data);
 };
