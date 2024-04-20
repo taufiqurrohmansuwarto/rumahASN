@@ -27,7 +27,6 @@ import { toLower } from "lodash";
 
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
-
 import "dayjs/locale/id";
 
 dayjs.extend(relativeTime);

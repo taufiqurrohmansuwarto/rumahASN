@@ -44,7 +44,7 @@ function ComparePenghargaanByNip({ nip }) {
   ];
 
   return (
-    <Card title="Penghargaan SIASN">
+    <Card title="Penghargaan">
       <Table
         pagination={false}
         columns={columns}

@@ -1,5 +1,7 @@
 import Layout from "@/components/Layout";
 import EmployeesLayout from "@/components/PemutakhiranData/Admin/EmployeesLayout";
+import ContentProfesional from "@/components/PemutakhiranData/Admin/Menu/ContentProfesional";
+import { FloatButton } from "antd";
 import Head from "next/head";
 import { useRouter } from "next/router";
 
@@ -12,15 +14,16 @@ function Profesional() {
       <Head>
         <title>Integrasi MyASN - Profesional</title>
       </Head>
-      <EmployeesLayout>
-        <div>Profesional</div>
+      <FloatButton.BackTop />
+      <EmployeesLayout active="profesional">
+        <ContentProfesional nip={nip} />
       </EmployeesLayout>
     </>
   );
 }
 
 Profesional.getLayout = function (page) {
-  return <Layout>{page}</Layout>;
+  return <Layout active="/apps-managements/integrasi/siasn">{page}</Layout>;
 };
 
 Profesional.Auth = {

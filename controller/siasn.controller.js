@@ -31,6 +31,8 @@ const {
   pasangan,
   anak,
   orangTua,
+  rwKinerjaPeriodik,
+  hapusKinerjaPeriodik,
 } = require("@/utils/siasn-utils");
 
 const {
@@ -1325,7 +1327,55 @@ const removeKursus = async (req, res) => {
   }
 };
 
+const kinerjaPeriodikByNip = async (req, res) => {
+  try {
+    const { siasnRequest: request } = req;
+    const { nip } = req?.query;
+
+    const result = await rwKinerjaPeriodik(request, nip);
+
+    res.json(result?.data?.data);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ code: 500, message: "Internal Server Error" });
+  }
+};
+
+const hapusKinerjaPeriodikByNip = async (req, res) => {
+  try {
+    const { siasnRequest: request } = req;
+    const { id } = req?.query;
+
+    await hapusKinerjaPeriodik(request, id);
+    res.json({ code: 200, message: "success" });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ code: 500, message: "Internal Server Error" });
+  }
+};
+
+const tambahKinerjaPeridoikByNip = async (req, res) => {
+  try {
+    const { siasnRequest: request } = req;
+    const { nip } = req?.query;
+
+    const data = req?.body;
+
+    const payload = {
+      ...data,
+      nip,
+    };
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ code: 500, message: "Internal Server Error" });
+  }
+};
+
 module.exports = {
+  kinerjaPeriodikByNip,
+  hapusKinerjaPeriodikByNip,
+  tambahKinerjaPeridoikByNip,
+
   removeKursus,
   getRwPwkByNip,
   getRwPnsUnorByNip,

@@ -146,3 +146,17 @@ module.exports.uploadFileKP = (fetcher, data) => {
 module.exports.removeKursusSiasn = (fetcher, id) => {
   return fetcher.delete(`/kursus/delete/${id}`);
 };
+
+// kinerja periodik
+module.exports.rwKinerjaPeriodik = (fetcher, nip) => {
+  return fetcher.get(`/pns/rw-kinerjaperiodik/${nip}`);
+};
+
+// create kinerja periodik
+module.exports.createKinerjaPeriodik = (fetcher, data) => {
+  return fetcher.post(`/kinerja-periodik/save`, data);
+};
+
+module.exports.hapusKinerjaPeriodik = (fetcher, id) => {
+  return fetcher.delete(`/kinerja-periodik/delete/${id}`);
+};
