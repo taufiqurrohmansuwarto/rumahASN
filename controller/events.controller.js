@@ -44,8 +44,8 @@ const getEvents = async (req, res) => {
 
 const getEvent = async (req, res) => {
   try {
-    const { id } = req.query;
-    const event = await Events.query().findById(id);
+    const { eventId } = req.query;
+    const event = await Events.query().findById(eventId);
     res.json(event);
   } catch (error) {
     console.log(error);

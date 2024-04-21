@@ -3,7 +3,6 @@ const EventMaps = require("@/models/event-maps.model");
 const getEventMaps = async (req, res) => {
   try {
     const { eventId } = req?.query;
-    const { userId } = req?.query;
 
     const result = await EventMaps.query().where("event_id", eventId);
 
