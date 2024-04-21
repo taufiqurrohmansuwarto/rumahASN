@@ -1,5 +1,5 @@
 const Events = require("@/models/events.model");
-const EventParticipants = require("@/models/events-participants.model");
+const EventParticipants = require("@/models/event-participants.model");
 
 const userEvents = async (req, res) => {
   try {
@@ -17,6 +17,15 @@ const userEvents = async (req, res) => {
 const createEvents = async (req, res) => {
   try {
     const { customId } = req.user;
+    const data = {
+      ...req.body,
+      created_by: customId,
+    };
+
+    await Events.query().insert(data);
+    res.json({
+      message: "Event created successfully",
+    });
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: "Internal server error" });

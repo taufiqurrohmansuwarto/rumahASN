@@ -5,8 +5,8 @@ import {
   ApiOutlined,
   BarChartOutlined,
   BookOutlined,
-  FileSearchOutlined,
   GroupOutlined,
+  IdcardOutlined,
   LogoutOutlined,
   ProfileOutlined,
   QuestionCircleFilled,
@@ -27,9 +27,9 @@ import { useState } from "react";
 import { userRoutes } from "../routes";
 import NotifikasiASNConnect from "./Notification/NotifikasiASNConnect";
 import NotifikasiForumKepegawaian from "./Notification/NotifikasiForumKepegawaian";
+import NotifikasiKepegawaian from "./Notification/NotifikasiKepegawaian";
 import NotifikasiPrivateMessage from "./Notification/NotifikasiPrivateMessage";
 import NotifikasiUsulan from "./Notification/NotifikasiUsulan";
-import NotifikasiKepegawaian from "./Notification/NotifikasiKepegawaian";
 
 const ProLayout = dynamic(
   () => import("@ant-design/pro-components").then((mod) => mod?.ProLayout),
@@ -108,21 +108,34 @@ const changeRoutes = (user) => {
     }
 
     if (fasilitatorMaster) {
-      userRoutes.routes.push({
-        path: "/fasilitator-employees",
-        name: "Layanan Fasilitator",
-        icon: <AntDesignOutlined />,
-        routes: [
-          {
-            path: "/fasilitator-employees/master-data",
-            name: "Master Data",
-          },
-          {
-            path: "/fasilitator-employees/peta-jabatan",
-            name: "Peta Jabatan SIASN",
-          },
-        ],
-      });
+      userRoutes.routes.push(
+        {
+          path: "/fasilitator-employees",
+          name: "Layanan Fasilitator",
+          icon: <AntDesignOutlined />,
+          routes: [
+            {
+              path: "/fasilitator-employees/master-data",
+              name: "Master Data",
+            },
+            {
+              path: "/fasilitator-employees/peta-jabatan",
+              name: "Peta Jabatan SIASN",
+            },
+          ],
+        },
+        {
+          path: "/fasilitator/smart-asn-connect",
+          name: "Smart ASN Connect",
+          icon: <IdcardOutlined />,
+          routes: [
+            {
+              path: "/fasilitator/smart-asn-connect/events",
+              name: "Kegiatan",
+            },
+          ],
+        }
+      );
     }
 
     if (userPns) {

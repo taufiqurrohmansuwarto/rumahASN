@@ -5,14 +5,13 @@ const { nanoid } = require("nanoid");
 
 Model.knex(knex);
 
-class Events extends Model {
+class EventExhibitors extends Model {
   $beforeInsert() {
     this.id = nanoid();
-    this.kode_event = nanoid(10);
   }
 
   static get tableName() {
-    return "events";
+    return "event_exhibitors";
   }
 
   static get idColumn() {
@@ -22,4 +21,4 @@ class Events extends Model {
   static get relationMappings() {}
 }
 
-module.exports = Events;
+module.exports = EventExhibitors;
