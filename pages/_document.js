@@ -3,6 +3,8 @@ import Script from "next/script";
 import { createCache, extractStyle, StyleProvider } from "@ant-design/cssinjs";
 
 const MyDocument = () => {
+  // Set dayjs to use the Indonesian locale globally
+
   return (
     <Html>
       <Head />

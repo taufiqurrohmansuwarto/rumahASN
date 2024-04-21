@@ -20,11 +20,12 @@ import "../styles/globals.css";
 import dayjs from "dayjs";
 import "dayjs/locale/id";
 import relativeTime from "dayjs/plugin/relativeTime";
-dayjs.locale("id");
-dayjs.extend(relativeTime);
 
 // check user role and organization start with 123
 function Auth({ children, action, subject }) {
+  dayjs.locale("id");
+  dayjs.extend(relativeTime);
+
   const { data, status } = useSession({
     required: true,
     onUnauthenticated: () => signIn(),
@@ -94,7 +95,6 @@ function MyApp({ Component, pageProps: { session, ...pageProps } }) {
           },
         }}
         locale={id}
-        // locale={id}
       >
         <SessionProvider
           session={session}
