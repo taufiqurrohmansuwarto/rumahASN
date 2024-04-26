@@ -4,10 +4,9 @@ const getEventExhibitors = async (req, res) => {
   try {
     const { eventId } = req?.query;
 
-    const eventExhibitors = await EventExhibitors.query().where(
-      "event_id",
-      eventId
-    );
+    const eventExhibitors = await EventExhibitors.query()
+      .where("event_id", eventId)
+      .orderBy("created_at", "desc");
 
     res.json(eventExhibitors);
   } catch (error) {

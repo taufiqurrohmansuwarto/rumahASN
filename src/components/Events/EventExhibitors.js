@@ -6,7 +6,17 @@ import {
 } from "@/services/events.services";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/router";
-import { Button, Form, Input, Modal, Table, message } from "antd";
+import {
+  Button,
+  Divider,
+  Form,
+  Input,
+  Modal,
+  Popconfirm,
+  Space,
+  Table,
+  message,
+} from "antd";
 import { useEffect, useState } from "react";
 
 const ModalExhibitors = ({
@@ -29,10 +39,14 @@ const ModalExhibitors = ({
   const handleOk = async () => {
     try {
       const values = await form.validateFields();
-      const payload = {
+      let payload = {
         eventId: eventId,
         data: values,
       };
+
+      if (initialValues) {
+        payload.id = initialValues.id;
+      }
 
       onOk(payload);
     } catch (error) {
@@ -67,11 +81,20 @@ function EventExhibitors() {
   const [open, setOpen] = useState(false);
   const [openEdit, setOpenEdit] = useState(false);
 
+  const [selectedRow, setSelectedRow] = useState(null);
+
   const handleShowModal = () => setOpen(true);
   const handleCloseModal = () => setOpen(false);
 
-  const handleShowModalEdit = () => setOpenEdit(true);
-  const handleCloseModalEdit = () => setOpenEdit(false);
+  const handleShowModalEdit = (row) => {
+    setSelectedRow(row);
+    setOpenEdit(true);
+  };
+
+  const handleCloseModalEdit = () => {
+    setSelectedRow(null);
+    setOpenEdit(false);
+  };
 
   // create
   const { mutateAsync: create, isLoading: isLoadingCreate } = useMutation(
@@ -99,7 +122,7 @@ function EventExhibitors() {
     {
       onSuccess: () => {
         message.success("Berhasil mengubah peserta pameran");
-        handleCloseModal();
+        handleCloseModalEdit();
       },
       onError: () => {
         message.error("Gagal mengubah peserta pameran");
@@ -141,6 +164,10 @@ function EventExhibitors() {
     }
   );
 
+  const handleRemove = async (id) => {
+    await remove({ eventId, id });
+  };
+
   const columns = [
     {
       title: "Nama Peserta Pameran",
@@ -154,10 +181,36 @@ function EventExhibitors() {
       title: "Deskripsi",
       dataIndex: "exhibitor_description",
     },
+    {
+      title: "Aksi",
+      key: "aksi",
+      render: (row) => (
+        <Space>
+          <a onClick={() => handleShowModalEdit(row)}>Edit</a>
+          <Divider type="vertical" />
+          <Popconfirm
+            title="Apakah anda yakin?"
+            onConfirm={async () => await handleRemove(row.id)}
+          >
+            <a>Hapus</a>
+          </Popconfirm>
+        </Space>
+      ),
+    },
   ];
 
   return (
     <div>
+      <ModalExhibitors
+        onOk={update}
+        loading={isLoadingUpdate}
+        open={openEdit}
+        onClose={handleCloseModalEdit}
+        title="Edit Peserta Pameran"
+        eventId={eventId}
+        initialValues={selectedRow}
+      />
+
       <ModalExhibitors
         onOk={create}
         loading={isLoadingCreate}
@@ -166,7 +219,12 @@ function EventExhibitors() {
         eventId={eventId}
       />
       <Button onClick={handleShowModal}>Tambah</Button>
-      <Table columns={columns} dataSource={data} loading={isLoading} />
+      <Table
+        pagination={false}
+        columns={columns}
+        dataSource={data}
+        loading={isLoading}
+      />
     </div>
   );
 }
