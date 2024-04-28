@@ -3,7 +3,11 @@ import { getEvent } from "@/services/events.services";
 import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/router";
 
-function LayoutEvent({ children, tabActiveKey = "detail" }) {
+function LayoutEvent({
+  children,
+  tabActiveKey = "detail",
+  title = "Rumah ASN - Smart ASN Connect - Event",
+}) {
   const router = useRouter();
   const id = router?.query?.eventId;
   const { data, isLoading } = useQuery(
@@ -26,7 +30,7 @@ function LayoutEvent({ children, tabActiveKey = "detail" }) {
     <>
       <PageContainer
         onBack={handleBack}
-        title="Rumah ASN - ASN Connect - Event"
+        title={title}
         content={data?.title}
         loading={isLoading}
         onTabChange={handleChangeTabList}
