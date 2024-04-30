@@ -9,9 +9,9 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@ant-design/charts": "^2.1.0",
+    "@ant-design/charts": "^2.0.3",
     "@ant-design/compatible": "^5.1.2",
-    "@ant-design/cssinjs": "^1.20.0",
+    "@ant-design/cssinjs": "^1.19.1",
     "@ant-design/icons": "^5.3.6",
     "@ant-design/pro-components": "^2.7.1",
     "@ant-design/pro-layout": "^7.19.0",
@@ -31,7 +31,7 @@
     "@zoomus/websdk": "^2.17.0",
     "accesscontrol": "^2.2.1",
     "ahooks": "^3.7.11",
-    "antd": "^5.16.5",
+    "antd": "^5.16.2",
     "array-to-tree": "^3.3.2",
     "axios": "^0.27.2",
     "client-oauth2": "^4.3.3",
