@@ -26,8 +26,12 @@ import {
   message,
 } from "antd";
 import { orderBy } from "lodash";
-import moment from "moment";
-import React, { useState } from "react";
+import { useState } from "react";
+
+import dayjs from "dayjs";
+
+dayjs.locale("id");
+require("dayjs/locale/id");
 
 const PangkatSiasn = ({ data, isLoading }) => {
   const columns = [
@@ -66,7 +70,7 @@ const PangkatSiasn = ({ data, isLoading }) => {
     {
       title: "TMT Golongan",
       key: "tmt_golongan",
-      render: (text) => <>{moment(text?.tmtGolongan).format("DD-MM-YYYY")}</>,
+      render: (text) => <>{dayjs(text?.tmtGolongan).format("DD-MM-YYYY")}</>,
     },
 
     {
@@ -85,7 +89,7 @@ const PangkatSiasn = ({ data, isLoading }) => {
           data,
           [
             (o) => {
-              return moment(o.tmtGolongan).valueOf();
+              return dayjs(o.tmtGolongan).valueOf();
             },
           ],
           ["desc"]
@@ -181,7 +185,7 @@ const ModalForm = ({ open, onCancel, data }) => {
       const currentFile = result?.file?.fileList?.[0]?.originFileObj;
 
       const formData = new FormData();
-      formData.append("tgl_sk", moment(result?.tgl_sk).format("YYYY-MM-DD"));
+      formData.append("tgl_sk", dayjs(result?.tgl_sk).format("YYYY-MM-DD"));
       formData.append("no_sk", result?.no_sk);
       formData.append("file", currentFile);
       formData.append("nip", data?.nipBaru);

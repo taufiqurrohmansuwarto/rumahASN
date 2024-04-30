@@ -1,6 +1,10 @@
 import { Descriptions } from "antd";
 import React from "react";
-import moment from "moment";
+
+import dayjs from "dayjs";
+
+dayjs.locale("id");
+require("dayjs/locale/id");
 
 function InformasiNetralitas({ data }) {
   return (
@@ -52,7 +56,7 @@ function InformasiNetralitas({ data }) {
       </Descriptions.Item>
       <Descriptions.Item label="Status">{data?.status}</Descriptions.Item>
       <Descriptions.Item label="Tanggal Laporan">
-        {moment(data?.created_at).format("DD MMMM YYYY HH:mm:ss")}
+        {dayjs(data?.created_at).format("DD MMMM YYYY HH:mm:ss")}
       </Descriptions.Item>
     </Descriptions>
   );
