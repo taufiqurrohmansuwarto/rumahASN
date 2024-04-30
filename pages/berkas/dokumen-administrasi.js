@@ -1,3 +1,4 @@
+import Administrasi from "@/components/Berkas/Administrasi";
 import BerkasPNS from "@/components/Berkas/BerkasPNS";
 import Layout from "@/components/Layout";
 import PageContainer from "@/components/PageContainer";
@@ -5,7 +6,7 @@ import { Breadcrumb } from "antd";
 import Head from "next/head";
 import Link from "next/link";
 
-const SkPNS = () => {
+const DokumenAdministrasi = () => {
   return (
     <>
       <Head>
@@ -20,26 +21,26 @@ const SkPNS = () => {
                   <a>Forum Kepegawaian</a>
                 </Link>
               </Breadcrumb.Item>
-              <Breadcrumb.Item>ASN Connect</Breadcrumb.Item>
+              <Breadcrumb.Item>Dokumen Administrasi</Breadcrumb.Item>
             </Breadcrumb>
           ),
-        }}ggggbbb
-        title="Berkas"
-        content="Berkas Kepegawaian PNS"
+        }}
+        title="Dokumen Administrasi"
+        content="Dokumen Administrasi"
       >
-        <BerkasPNS />
+        <Administrasi />
       </PageContainer>
     </>
   );
 };
 
-SkPNS.Auth = {
+DokumenAdministrasi.Auth = {
   action: "manage",
   subject: "tickets",
 };
 
-SkPNS.getLayout = (page) => {
-  return <Layout active="/berkas/sk-pns">{page}</Layout>;
+DokumenAdministrasi.getLayout = (page) => {
+  return <Layout active="/berkas/dokumen-administrasi">{page}</Layout>;
 };
 
-export default SkPNS;
+export default DokumenAdministrasi;

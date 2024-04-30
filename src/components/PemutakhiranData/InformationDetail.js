@@ -1,6 +1,7 @@
 import { formatCurrency } from "@/utils/client-utils";
 import { Descriptions, Divider } from "antd";
 import { trim } from "lodash";
+import AdministrasiByNip from "../Berkas/AdministrasiByNip";
 
 function InformationDetail({ data }) {
   return (
@@ -158,6 +159,9 @@ function InformationDetail({ data }) {
           {data?.nomorSkPns} | {data?.tglSkPns}
         </Descriptions.Item>
       </Descriptions>
+
+      <Divider orientation="left"> Administrasi </Divider>
+      <AdministrasiByNip />
     </>
   );
 }
