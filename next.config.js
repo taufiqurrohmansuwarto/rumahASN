@@ -69,6 +69,7 @@ module.exports = withAntdLess({
   },
   experimental: {
     scrollRestoration: true,
+    esmExternals: true,
   },
   images: {
     domains: ["siasn.bkd.jatimprov.go.id", "master.bkd.jatimprov.go.id"],
