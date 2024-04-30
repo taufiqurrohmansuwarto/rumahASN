@@ -1,9 +1,12 @@
 const { daftarPengadaanInstansi } = require("@/utils/siasn-utils");
-const moment = require("moment");
+
+const dayjs = require("dayjs");
+dayjs.locale("id");
+require("dayjs/locale/id");
 
 const listPengadaanInstansi = async (req, res) => {
   try {
-    const tahun = req?.query?.tahun || moment().format("YYYY");
+    const tahun = req?.query?.tahun || dayjs().format("YYYY");
     const { siasnRequest: request } = req;
     const result = await daftarPengadaanInstansi(request, tahun);
 
