@@ -1,6 +1,6 @@
-import AdminEvents from "@/components/Events/AdminEvents";
+import EventSpeakers from "@/components/Events/EventSpeakers";
+import LayoutEvent from "@/components/Events/LayoutEvent";
 import Layout from "@/components/Layout";
-import { PageContainer } from "@ant-design/pro-layout";
 import Head from "next/head";
 
 const ASNConnectEventSpeakers = () => {
@@ -9,12 +9,15 @@ const ASNConnectEventSpeakers = () => {
       <Head>
         <title>Rumah ASN - ASN Connect - Event</title>
       </Head>
+      <LayoutEvent tabActiveKey="speakers">
+        <EventSpeakers />
+      </LayoutEvent>
     </>
   );
 };
 
 ASNConnectEventSpeakers.getLayout = function getLayout(page) {
-  return <Layout>{page}</Layout>;
+  return <Layout active="/fasilitator/smart-asn-connect/events">{page}</Layout>;
 };
 
 ASNConnectEventSpeakers.Auth = {

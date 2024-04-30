@@ -1,3 +1,4 @@
+import EventDetail from "@/components/Events/EventDetail";
 import LayoutEvent from "@/components/Events/LayoutEvent";
 import Layout from "@/components/Layout";
 import Head from "next/head";
@@ -6,9 +7,11 @@ const ASNConnectEventDetail = () => {
   return (
     <>
       <Head>
-        <title>Rumah ASN - ASN Connect - Event</title>
+        <title>Rumah ASN - Smart ASN Connect - Event Detail</title>
       </Head>
-      <LayoutEvent></LayoutEvent>
+      <LayoutEvent>
+        <EventDetail />
+      </LayoutEvent>
     </>
   );
 };
