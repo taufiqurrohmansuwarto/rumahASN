@@ -1,19 +1,23 @@
 import Layout from "@/components/Layout";
 import PageContainer from "@/components/PageContainer";
-import { useRouter } from "next/router";
-import { useEffect, useState } from "react";
-import moment from "moment";
-import { useQuery } from "@tanstack/react-query";
 import { getDaftarPemberhentianSIASN } from "@/services/siasn-services";
+import { useQuery } from "@tanstack/react-query";
 import { BackTop, Card, DatePicker, Input, Table } from "antd";
 import Head from "next/head";
+import { useRouter } from "next/router";
+import { useEffect, useState } from "react";
+
+import dayjs from "dayjs";
+
+dayjs.locale("id");
+require("dayjs/locale/id");
 
 const Pemberhentian = () => {
   const router = useRouter();
 
   const [query, setQuery] = useState({
-    tglAwal: router?.query?.tglAwal || moment().format("DD-MM-YYYY"),
-    tglAkhir: router?.query?.tglAkhir || moment().format("DD-MM-YYYY"),
+    tglAwal: router?.query?.tglAwal || dayjs().format("DD-MM-YYYY"),
+    tglAkhir: router?.query?.tglAkhir || dayjs().format("DD-MM-YYYY"),
   });
 
   const [filteredData, setFilteredData] = useState([]);
@@ -146,7 +150,7 @@ const Pemberhentian = () => {
       title: "TMT Pensiun",
       key: "tmtPensiun",
       render: (_, row) => {
-        return <>{moment(row?.tmtPensiun).format("DD-MM-YYYY")}</>;
+        return <>{dayjs(row?.tmtPensiun).format("DD-MM-YYYY")}</>;
       },
     },
   ];
@@ -182,8 +186,8 @@ const Pemberhentian = () => {
               <DatePicker.RangePicker
                 allowClear={false}
                 value={[
-                  moment(query.tglAwal, "DD-MM-YYYY"),
-                  moment(query.tglAkhir, "DD-MM-YYYY"),
+                  dayjs(query.tglAwal, "DD-MM-YYYY"),
+                  dayjs(query.tglAkhir, "DD-MM-YYYY"),
                 ]}
                 onChange={handleDateChange}
                 format={"DD-MM-YYYY"}
