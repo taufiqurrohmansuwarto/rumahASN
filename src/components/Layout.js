@@ -156,12 +156,8 @@ const changeRoutes = (user) => {
           icon: <BookOutlined />,
           routes: [
             {
-              path: "/berkas/sk-pns",
-              name: "SK PNS",
-            },
-            {
-              path: "/berkas/sk-pppk",
-              name: "SK PPPK",
+              path: "/berkas/dokumen-administrasi",
+              name: "Dokumen Administrasi",
             },
           ],
         }

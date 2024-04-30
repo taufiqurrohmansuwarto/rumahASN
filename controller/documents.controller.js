@@ -3,7 +3,6 @@ const { checkFileMinioSK, downloadFileSK } = require("../utils");
 const downloadDocument = async (req, res) => {
   try {
     const { employee_number } = req?.user;
-    const type = req.query.employee_type || "PNS";
     const file = req?.query?.file || "";
     const tmt = req?.query?.tmt || "";
 
@@ -11,15 +10,7 @@ const downloadDocument = async (req, res) => {
 
     const mc = req.mc;
 
-    let folder = "";
-
-    if (type === "PNS") {
-      folder = "sk_pns";
-    }
-
-    if (type === "PPPK") {
-      folder = "sk_pppk";
-    }
+    let folder = "sk_pns";
 
     const path = `${folder}/${fileName}`;
     const result = await checkFileMinioSK(mc, path);
@@ -39,7 +30,6 @@ const downloadDocument = async (req, res) => {
 const checkDocument = async (req, res) => {
   try {
     const { employee_number } = req?.user;
-    const type = req.query.employee_type || "PNS";
     const file = req?.query?.file || "";
     const tmt = req?.query?.tmt || "";
 
@@ -47,15 +37,7 @@ const checkDocument = async (req, res) => {
 
     const mc = req.mc;
 
-    let folder = "";
-
-    if (type === "PNS") {
-      folder = "sk_pns";
-    }
-
-    if (type === "PPPK") {
-      folder = "sk_pppk";
-    }
+    let folder = "sk_pns";
 
     const path = `${folder}/${fileName}`;
     const result = await checkFileMinioSK(mc, path);
@@ -71,7 +53,63 @@ const checkDocument = async (req, res) => {
   }
 };
 
+const downloadDocumentByNip = async (req, res) => {
+  try {
+    const { nip: employee_number } = req?.query;
+    const file = req?.query?.file || "";
+    const tmt = req?.query?.tmt || "";
+
+    const fileName = `${file}_${tmt}_${employee_number}.pdf`;
+
+    const mc = req.mc;
+
+    let folder = "sk_pns";
+
+    const path = `${folder}/${fileName}`;
+    const result = await checkFileMinioSK(mc, path);
+
+    if (!result) {
+      res.json(null);
+    } else {
+      const hasil = await downloadFileSK(mc, path);
+      res.json(hasil);
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({ message: "Error checking document" });
+  }
+};
+
+const checkDocumentByNip = async (req, res) => {
+  try {
+    const { nip: employee_number } = req?.query;
+    const file = req?.query?.file || "";
+    const tmt = req?.query?.tmt || "";
+
+    const fileName = `${file}_${tmt}_${employee_number}.pdf`;
+
+    const mc = req.mc;
+
+    let folder = "sk_pns";
+
+    const path = `${folder}/${fileName}`;
+    const result = await checkFileMinioSK(mc, path);
+
+    if (!result) {
+      res.json(null);
+    } else {
+      const hasil = await downloadFileSK(mc, path);
+      res.json(hasil);
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({ message: "Error checking document" });
+  }
+};
+
 module.exports = {
   checkDocument,
   downloadDocument,
+  downloadDocumentByNip,
+  checkDocumentByNip,
 };

@@ -147,3 +147,29 @@ export const rwJabGuruByNip = (nip) => {
 export const rwJabDokterByNip = (nip) => {
   return api.get(`/admin/${nip}/rw-jab-dokter`).then((res) => res.data);
 };
+
+// dokumen administrasi
+
+// download
+export const downloadDocumentByNip = (query) => {
+  const params = queryString.stringify(query, {
+    skipEmptyString: true,
+    skipNull: true,
+  });
+
+  return api
+    .get(`/admin/${query?.nip}/dokumen-administrasi-download?${params}`)
+    .then((res) => res?.data);
+};
+
+// check
+export const checkDocumentByNip = (query) => {
+  const params = queryString.stringify(query, {
+    skipEmptyString: true,
+    skipNull: true,
+  });
+
+  return api
+    .get(`/admin/${query?.nip}/dokumen-administrasi-check?${params}`)
+    .then((res) => res?.data);
+};
