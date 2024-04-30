@@ -1,11 +1,14 @@
 const { listPemberhentianSIASN } = require("@/utils/siasn-utils");
-const moment = require("moment");
+
+const dayjs = require("dayjs");
+dayjs.locale("id");
+require("dayjs/locale/id");
 
 const daftarPemberhentianSIASN = async (req, res) => {
   try {
     const { siasnRequest: request, user } = req;
-    const tglAwal = req?.query?.tglAwal || moment().format("DD-MM-YYYY");
-    const tglAkhir = req?.query?.tglAkhir || moment().format("DD-MM-YYYY");
+    const tglAwal = req?.query?.tglAwal || dayjs().format("DD-MM-YYYY");
+    const tglAkhir = req?.query?.tglAkhir || dayjs().format("DD-MM-YYYY");
     const current_role = user?.current_role;
 
     if (current_role !== "admin") {

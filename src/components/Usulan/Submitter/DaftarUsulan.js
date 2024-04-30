@@ -1,9 +1,13 @@
 import { getAllSubmissionSubmitter } from "@/services/submissions.services";
 import { useQuery } from "@tanstack/react-query";
 import { Table, Tag } from "antd";
-import moment from "moment";
 import { useRouter } from "next/router";
 import React from "react";
+
+import dayjs from "dayjs";
+
+dayjs.locale("id");
+require("dayjs/locale/id");
 
 function DaftarUsulan() {
   const router = useRouter();
@@ -43,7 +47,7 @@ function DaftarUsulan() {
       title: "Tgl. Usulan",
       key: "tgl_usulan",
       render: (_, row) => (
-        <div>{moment(row?.created_at).format("DD-MM-YYYY HH:mm:ss")}</div>
+        <div>{dayjs(row?.created_at).format("DD-MM-YYYY HH:mm:ss")}</div>
       ),
     },
     {

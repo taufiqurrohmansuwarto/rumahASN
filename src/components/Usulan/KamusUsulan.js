@@ -2,8 +2,12 @@ import { getSubmissionReference } from "@/services/submissions.services";
 import { useQuery } from "@tanstack/react-query";
 import { Button, Card, Table } from "antd";
 import { useRouter } from "next/router";
-import moment from "moment";
 import { PlusOutlined } from "@ant-design/icons";
+
+import dayjs from "dayjs";
+
+dayjs.locale("id");
+require("dayjs/locale/id");
 
 function KamusUsulan() {
   const router = useRouter();
@@ -41,7 +45,7 @@ function KamusUsulan() {
       title: "Tgl. Dibuat",
       key: "created_at",
       render: (_, row) => {
-        return <>{moment(row?.created_at).format("DD-MM-YYYY")}</>;
+        return <>{dayjs(row?.created_at).format("DD-MM-YYYY")}</>;
       },
     },
     {
