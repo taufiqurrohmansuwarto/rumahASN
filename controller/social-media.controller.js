@@ -105,7 +105,9 @@ const myPosts = async (req, res) => {
       .where({
         user_id: userId,
       })
-      .withGraphFetched(`[user(simpleSelect), likes(whereUserId)]`)
+      .withGraphFetched(
+        `[user(simpleSelect), likes(whereUserId).[user(simpleNoAvatar)]`
+      )
       .modifiers({
         whereUserId(query) {
           query.where("user_id", userId);
