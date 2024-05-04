@@ -45,7 +45,7 @@ import { useRouter } from "next/router";
 import { useState } from "react";
 import ReactMarkdownCustom from "../MarkdownEditor/ReactMarkdownCustom";
 import SocmedPostsFilter from "./SocmedPostsFilter";
-import { personLikes } from "@/utils/client-utils";
+import { mineLike, personLikes } from "@/utils/client-utils";
 
 const uploadFile = async (file) => {
   try {
@@ -242,11 +242,19 @@ const Post = ({ post, currentUser }) => {
       <Space>
         <Tooltip
           color="green"
-          title={post?.likes?.length > 0 ? personLikes(post?.likes) : null}
+          title={
+            post?.likes?.length > 0
+              ? personLikes(post?.likes, currentUser?.user?.id)
+              : null
+          }
         >
           <HeartFilled
             onClick={handleLike}
-            style={{ color: post?.likes?.length > 0 ? "red" : null }}
+            style={{
+              color: mineLike(currentUser?.user?.id, post?.likes)
+                ? "red"
+                : null,
+            }}
           />
         </Tooltip>
         {post?.likes_count}

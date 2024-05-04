@@ -47,14 +47,7 @@ const posts = async (req, res) => {
     const sortBy = req.query.sortBy || "latest";
 
     let query = SocmedPosts.query()
-      .withGraphFetched(
-        "[user(simpleSelect), likes(whereUserId).[user(simpleNoAvatar)] ]"
-      )
-      .modifiers({
-        whereUserId(query) {
-          query.where("user_id", req?.user?.customId).select("id");
-        },
-      })
+      .withGraphFetched("[user(simpleSelect), likes.[user(simpleNoAvatar)] ]")
       .page(page - 1, limit);
 
     if (sortBy === "latest") {
@@ -105,14 +98,7 @@ const myPosts = async (req, res) => {
       .where({
         user_id: userId,
       })
-      .withGraphFetched(
-        `[user(simpleSelect), likes(whereUserId).[user(simpleNoAvatar)]`
-      )
-      .modifiers({
-        whereUserId(query) {
-          query.where("user_id", userId);
-        },
-      })
+      .withGraphFetched(`[user(simpleSelect), likes.[user(simpleNoAvatar)]]`)
       .page(page - 1, limit);
 
     if (sortBy === "popular") {

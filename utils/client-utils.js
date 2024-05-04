@@ -962,6 +962,28 @@ export const formatCurrency = (number) => {
     .replace(/(\.|,)00$/g, "");
 };
 
-export const personLikes = (likes) => {
-  return likes.map((like) => like?.user?.username).join(", ") + " menyukai ini";
+export const personLikes = (likes, currentUserId) => {
+  const usernames = likes.map((like) => {
+    if (like?.user?.custom_id === currentUserId) {
+      return "Anda";
+    } else {
+      return like?.user?.username;
+    }
+  });
+
+  let result = "";
+  if (usernames?.length === 1) {
+    result = usernames[0];
+  } else if (usernames?.length === 2) {
+    result = usernames.join(" dan ");
+  } else if (usernames?.length > 2) {
+    const last = usernames?.pop();
+    result = usernames?.join(", ") + ", dan " + last;
+  }
+
+  return result + " menyukai postingan ini";
+};
+
+export const mineLike = (currentUserId, likes) => {
+  return likes.some((like) => like?.user?.custom_id === currentUserId);
 };
