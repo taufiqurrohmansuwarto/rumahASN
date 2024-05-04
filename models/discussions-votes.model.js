@@ -5,11 +5,7 @@ Model.knex(knex);
 
 class DiscussionsVotes extends Model {
   static get tableName() {
-    return "discussions_reactions";
-  }
-
-  static get idColumn() {
-    return ["discussion_id", "user_id"];
+    return "discussion_votes";
   }
 }
 
