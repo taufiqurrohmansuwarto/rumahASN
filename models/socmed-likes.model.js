@@ -18,7 +18,22 @@ class SocmedLikes extends Model {
     return {
       // select where user id
       whereUserId(query, userId) {
-        query.where("user_id", userId);
+        query.where("user_id", userId).select("id");
+      },
+    };
+  }
+
+  static get relationMappings() {
+    const User = require("@/models/users.model");
+
+    return {
+      user: {
+        relation: Model.BelongsToOneRelation,
+        modelClass: User,
+        join: {
+          from: "socmed_likes.user_id",
+          to: "users.custom_id",
+        },
       },
     };
   }
