@@ -1,74 +1,278 @@
-const AsnDiscussions = require("@/models/d_posts.model");
-const AsnDiscussionComments = require("@/models/d_comments.model");
+const Discussion = require("@/models/discussions.model");
+const DiscussionVote = require("@/models/discussions-votes.model");
+const { transaction } = require("objection");
 
-const getDiscussions = async (req, res) => {
+const toggleVote = async (discussionId, userId, voteType) => {
+  const trx = await transaction.start(Discussion.knex());
+
   try {
-    const limit = req?.query?.limit || 10;
-    const page = req?.query?.page || 1;
+    const existingVote = await DiscussionVote.query(trx)
+      .where({
+        discussion_id: discussionId,
+        user_id: userId,
+      })
+      .first();
 
-    const result = await AsnDiscussions.query().page(
-      parseInt(page) - 1,
-      parseInt(limit)
-    );
+    if (existingVote) {
+      if (existingVote.vote_type === voteType) {
+        // Pembatalan suara
+        await DiscussionVote.query(trx).delete().where({ id: existingVote.id });
+
+        const updateColumn =
+          voteType === "upvote" ? "upvote_count" : "downvote_count";
+        await Discussion.query(trx)
+          .findById(discussionId)
+          .decrement(updateColumn, 1);
+      } else {
+        // Mengubah jenis suara
+        await DiscussionVote.query(trx)
+          .patch({ vote_type: voteType })
+          .where({ id: existingVote.id });
+
+        // Update discussion votes
+        await Discussion.query(trx)
+          .findById(discussionId)
+          .decrement(
+            existingVote.vote_type === "upvote"
+              ? "upvote_count"
+              : "downvote_count",
+            1
+          )
+          .increment(
+            voteType === "upvote" ? "upvote_count" : "downvote_count",
+            1
+          );
+      }
+    } else {
+      await DiscussionVote.query(trx).insert({
+        discussion_id: discussionId,
+        user_id: userId,
+        vote_type: voteType,
+      });
+
+      const updateColumn =
+        voteType === "upvote" ? "upvote_count" : "downvote_count";
+      await Discussion.query(trx)
+        .findById(discussionId)
+        .increment(updateColumn, 1);
+    }
+
+    await trx.commit();
+  } catch (error) {
+    await trx.rollback();
+    throw error;
+  }
+};
+
+// start from here
+const getDisccusions = async (req, res) => {
+  try {
+    const limit = req.query.limit || 25;
+    const page = req.query.page || 1;
+
+    const result = await Discussion.query()
+      .where("type", "discussion")
+      .where("is_active", true)
+      .withGraphFetched("[user,votes]")
+      .page(page - 1, limit);
 
     const data = {
-      limit,
-      page,
-      total: result.total,
       data: result.results,
+      pagination: {
+        total: result.total,
+        limit: result.results.length,
+        page: page,
+      },
     };
     res.json(data);
   } catch (error) {
     console.log(error);
-    res.status(500).json({ message: "Server error" });
+    res.status(500).json({ message: "Internal server error" });
   }
 };
 
 const createDiscussion = async (req, res) => {
   try {
-    const {
-      user: { customId },
-    } = req;
+    const body = req.body;
+    const { customId } = req?.user;
 
-    const result = await AsnDiscussions.create({
-      ...req.body,
+    const payload = {
+      ...body,
       created_by: customId,
-    });
+      type: "discussion",
+    };
 
-    res.json(result);
+    await Discussion.query().insert(payload);
+    res.json({ message: "Discussion created" });
   } catch (error) {
     console.log(error);
-    res.status(500).json({ message: "Server error" });
+    res.status(500).json({ message: "Internal server error" });
   }
 };
 
-const updateDiscussion = async (req, res) => {};
-const deleteDiscussion = async (req, res) => {};
-const getDiscussion = async (req, res) => {};
-const upvoteDiscussion = async (req, res) => {};
-const downvoteDiscussion = async (req, res) => {};
+const updateDiscussion = async (req, res) => {
+  try {
+    const { discussionId } = req.query;
+    const body = req.body;
+    await Discussion.query().patch(body).where({ id: discussionId });
+    res.json({ message: "Discussion updated" });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
 
-const getDiscussionComments = async (req, res) => {};
-const createDiscussionComment = async (req, res) => {};
-const updateDiscussionComment = async (req, res) => {};
-const deleteDiscussionComment = async (req, res) => {};
-const getDiscussionComment = async (req, res) => {};
-const upvoteDiscussionComment = async (req, res) => {};
-const downvoteDiscussionComment = async (req, res) => {};
+const deleteDiscussion = async (req, res) => {
+  try {
+    const { discussionId } = req.query;
+    await Discussion.query()
+      .patch({ is_active: false })
+      .where({ id: discussionId });
+
+    await DiscussionVote.query()
+      .delete()
+      .where({ discussion_id: discussionId });
+    res.json({ message: "Discussion deleted" });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+const upvoteDiscussion = async (req, res) => {
+  try {
+    const { discussionId } = req.query;
+    const { customId } = req?.user;
+
+    await toggleVote(discussionId, customId, "upvote");
+
+    res.json({ message: "Discussion upvoted successfully" });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+const downvoteDiscussion = async (req, res) => {
+  try {
+    const { discussionId } = req.query;
+    const { customId } = req?.user;
+    await toggleVote(discussionId, customId, "downvote");
+    res.json({ message: "Discussion downvoted successfully" });
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+// comments
+const getComments = async (req, res) => {
+  try {
+    const limit = req.query.limit || 25;
+    const page = req.query.page || 1;
+
+    const result = await Discussion.query()
+      .where("type", "comment")
+      .where("is_active", true)
+      .withGraphFetched("[user,votes]")
+      .page(page - 1, limit);
+
+    const data = {
+      data: result.results,
+      pagination: {
+        total: result.total,
+        limit: result.results.length,
+        page: page,
+      },
+    };
+    res.json(data);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+const createComment = async (req, res) => {
+  try {
+    const body = req.body;
+    const { customId } = req?.user;
+
+    const payload = {
+      ...body,
+      created_by: customId,
+      type: "comment",
+    };
+
+    await Discussion.query().insert(payload);
+    res.json({ message: "Comment created" });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+const updateComment = async (req, res) => {
+  try {
+    const { commentId } = req.query;
+    const body = req.body;
+    await Discussion.query().patch(body).where({ id: commentId });
+    res.json({ message: "Comment updated" });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+const deleteComment = async (req, res) => {
+  try {
+    const { commentId } = req.query;
+    await Discussion.query()
+      .patch({ is_active: false })
+      .where({ id: commentId });
+
+    await DiscussionVote.query().delete().where({ discussion_id: commentId });
+    res.json({ message: "Comment deleted" });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+const upvoteComment = async (req, res) => {
+  try {
+    const { commentId } = req.query;
+    const { customId } = req?.user;
+
+    await toggleVote(commentId, customId, "upvote");
+
+    res.json({ message: "Comment upvoted successfully" });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+const downvoteComment = async (req, res) => {
+  try {
+    const { commentId } = req.query;
+    const { customId } = req?.user;
+    await toggleVote(commentId, customId, "downvote");
+    res.json({ message: "Comment downvoted successfully" });
+  } catch (error) {
+    console.log(error);
+  }
+};
 
 module.exports = {
-  getDiscussions,
+  getDisccusions,
   createDiscussion,
-  updateDiscussion,
-  deleteDiscussion,
-  getDiscussion,
   upvoteDiscussion,
   downvoteDiscussion,
-  getDiscussionComments,
-  createDiscussionComment,
-  updateDiscussionComment,
-  deleteDiscussionComment,
-  getDiscussionComment,
-  upvoteDiscussionComment,
-  downvoteDiscussionComment,
+  updateDiscussion,
+  deleteDiscussion,
+  getComments,
+  createComment,
+  updateComment,
+  deleteComment,
+  upvoteComment,
+  downvoteComment,
 };

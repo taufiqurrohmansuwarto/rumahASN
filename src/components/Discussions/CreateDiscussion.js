@@ -12,7 +12,7 @@ function CreateDiscussion() {
         <Input />
       </Form.Item>
       <Form.Item label="Konten" name="content">
-        <Input />
+        <Input.TextArea rows={4} />
       </Form.Item>
     </Form>
   );
