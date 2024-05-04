@@ -5,7 +5,12 @@ import {
   updatePost,
 } from "@/services/socmed.services";
 import { Comment } from "@ant-design/compatible";
-import { CommentOutlined, LikeOutlined, MoreOutlined } from "@ant-design/icons";
+import {
+  CommentOutlined,
+  HeartFilled,
+  LikeOutlined,
+  MoreOutlined,
+} from "@ant-design/icons";
 import { Stack } from "@mantine/core";
 import {
   useInfiniteQuery,
@@ -33,6 +38,7 @@ import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import SocmedPostsFilter from "./SocmedPostsFilter";
 import ReactMarkdownCustom from "../MarkdownEditor/ReactMarkdownCustom";
+import { mineLike, personLikes } from "@/utils/client-utils";
 dayjs.locale("id");
 
 function SocmedEditPost({ post, edit, isLoading, cancel }) {
@@ -182,16 +188,27 @@ const Post = ({ post, currentUser }) => {
   };
 
   const actions = [
-    <span key="likes" onClick={handleLike}>
+    <span key="likes">
       <Space>
-        <LikeOutlined
-          style={{
-            color: post?.likes?.length > 0 ? "green" : null,
-          }}
-        />
+        <Tooltip
+          color="green"
+          title={
+            post?.likes?.length > 0
+              ? personLikes(post?.likes, currentUser?.id)
+              : null
+          }
+        >
+          <HeartFilled
+            onClick={handleLike}
+            style={{
+              color: mineLike(currentUser?.id, post?.likes) ? "red" : null,
+            }}
+          />
+        </Tooltip>
         {post?.likes_count}
       </Space>
     </span>,
+
     <span key="comment" onClick={gotoDetailPost}>
       <Space>
         <CommentOutlined />
