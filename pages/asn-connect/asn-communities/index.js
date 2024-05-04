@@ -8,7 +8,7 @@ const ASNStoryLines = () => {
       <Head>
         <title>Rumah ASN - ASN Update</title>
       </Head>
-      <LayoutASNConnect active="asn-storylines">Hello world</LayoutASNConnect>
+      <LayoutASNConnect active="asn-communities">Hello world</LayoutASNConnect>
     </>
   );
 };

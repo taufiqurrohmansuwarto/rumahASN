@@ -38,16 +38,8 @@ function LayoutASNConnect({ children, active = "asn-updates" }) {
             tab: "Komunitas",
           },
           {
-            key: "asn-storylines",
-            tab: "Storylines",
-          },
-          {
             key: "asn-events",
             tab: "Kegiatan",
-          },
-          {
-            key: "asn-calendar",
-            tab: "Kalender",
           },
         ]}
         tabPosition="top"

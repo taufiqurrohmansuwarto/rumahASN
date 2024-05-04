@@ -1,6 +1,7 @@
 import Layout from "@/components/Layout";
 import LayoutASNConnect from "@/components/Socmed/LayoutASNConnect";
 import Head from "next/head";
+import Discussions from "@/components/Discussions/Discussions";
 
 const AsnDiscussions = () => {
   return (
@@ -8,7 +9,9 @@ const AsnDiscussions = () => {
       <Head>
         <title>Rumah ASN - ASN Update</title>
       </Head>
-      <LayoutASNConnect active="asn-discussions">Hello world</LayoutASNConnect>
+      <LayoutASNConnect active="asn-discussions">
+        <Discussions />
+      </LayoutASNConnect>
     </>
   );
 };
