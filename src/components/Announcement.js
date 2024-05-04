@@ -14,7 +14,12 @@ function Announcement() {
   return (
     <>
       {data && (
-        <Alert icon={<IconAlertCircle />} title={data?.title} color="yellow">
+        <Alert
+          variant="outline"
+          icon={<IconAlertCircle />}
+          title={data?.title}
+          color="yellow"
+        >
           <ReactMarkdownCustom>{data?.content}</ReactMarkdownCustom>
         </Alert>
       )}

@@ -961,3 +961,7 @@ export const formatCurrency = (number) => {
     .format(number)
     .replace(/(\.|,)00$/g, "");
 };
+
+export const personLikes = (likes) => {
+  return likes.map((like) => like?.user?.username).join(", ") + " menyukai ini";
+};

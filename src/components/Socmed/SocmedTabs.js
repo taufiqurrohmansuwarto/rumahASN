@@ -27,12 +27,12 @@ function SocmedTabs() {
         <Col md={12} xs={24}>
           <Row gutter={[8, 16]}>
             <Col md={24} xs={24}>
-              <Stack>
+              <Stack spacing="sm">
+                <Announcement />
                 <Card>
                   <SocmedCreatePost />
                 </Card>
                 <Card>
-                  {/* <Announcement /> */}
                   <Tabs
                     defaultActiveKey="all"
                     activeKey={activeKey}

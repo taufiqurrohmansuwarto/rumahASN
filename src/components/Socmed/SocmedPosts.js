@@ -6,7 +6,13 @@ import {
   updatePost,
 } from "@/services/socmed.services";
 import { Comment } from "@ant-design/compatible";
-import { CommentOutlined, LikeOutlined, MoreOutlined } from "@ant-design/icons";
+import {
+  CommentOutlined,
+  HeartFilled,
+  HeartOutlined,
+  LikeOutlined,
+  MoreOutlined,
+} from "@ant-design/icons";
 import { Stack } from "@mantine/core";
 import { MarkdownEditor } from "@primer/react/drafts";
 import {
@@ -39,6 +45,7 @@ import { useRouter } from "next/router";
 import { useState } from "react";
 import ReactMarkdownCustom from "../MarkdownEditor/ReactMarkdownCustom";
 import SocmedPostsFilter from "./SocmedPostsFilter";
+import { personLikes } from "@/utils/client-utils";
 
 const uploadFile = async (file) => {
   try {
@@ -159,7 +166,6 @@ const Post = ({ post, currentUser }) => {
       onSuccess: () => {
         queryClient.invalidateQueries(["socmed-posts"]);
         queryClient.invalidateQueries(["my-socmed-posts"]);
-        message.success("berhasil");
       },
       onSettled: () => {
         queryClient.invalidateQueries(["socmed-posts"]);
@@ -232,13 +238,17 @@ const Post = ({ post, currentUser }) => {
   };
 
   const actions = [
-    <span key="likes" onClick={handleLike}>
+    <span key="likes">
       <Space>
-        <LikeOutlined
-          style={{
-            color: post?.likes?.length > 0 ? "#faad14" : null,
-          }}
-        />
+        <Tooltip
+          color="green"
+          title={post?.likes?.length > 0 ? personLikes(post?.likes) : null}
+        >
+          <HeartFilled
+            onClick={handleLike}
+            style={{ color: post?.likes?.length > 0 ? "red" : null }}
+          />
+        </Tooltip>
         {post?.likes_count}
       </Space>
     </span>,
