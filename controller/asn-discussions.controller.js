@@ -1,5 +1,5 @@
 const Discussion = require("@/models/discussions.model");
-const DiscussionVote = require("@/models/discussions-votes.model");
+const DiscussionVote = require("@/models/discussion-votes.model");
 const { transaction } = require("objection");
 
 const toggleVote = async (discussionId, userId, voteType) => {
@@ -167,12 +167,14 @@ const downvoteDiscussion = async (req, res) => {
 // comments
 const getComments = async (req, res) => {
   try {
+    const { discussionId } = req.query;
     const limit = req.query.limit || 25;
     const page = req.query.page || 1;
 
     const result = await Discussion.query()
       .where("type", "comment")
       .where("is_active", true)
+      .where("discussion_id", discussionId)
       .withGraphFetched("[user,votes]")
       .page(page - 1, limit);
 
@@ -191,13 +193,28 @@ const getComments = async (req, res) => {
   }
 };
 
+const getComment = async (req, res) => {
+  try {
+    const { commentId, discussionId } = req.query;
+    const result = await Discussion.query()
+      .findById(commentId)
+      .where({ id: discussionId });
+    res.json(result);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
 const createComment = async (req, res) => {
   try {
     const body = req.body;
     const { customId } = req?.user;
+    const { discussionId } = req.query;
 
     const payload = {
       ...body,
+      discussion_id: discussionId,
       created_by: customId,
       type: "comment",
     };
@@ -212,9 +229,14 @@ const createComment = async (req, res) => {
 
 const updateComment = async (req, res) => {
   try {
-    const { commentId } = req.query;
+    const { commentId, discussionId } = req.query;
     const body = req.body;
-    await Discussion.query().patch(body).where({ id: commentId });
+    await Discussion.query()
+      .patch(body)
+      .where({ id: commentId })
+      .where("type", "comment")
+      .where("discussion_id", discussionId);
+
     res.json({ message: "Comment updated" });
   } catch (error) {
     console.log(error);
@@ -224,10 +246,13 @@ const updateComment = async (req, res) => {
 
 const deleteComment = async (req, res) => {
   try {
-    const { commentId } = req.query;
+    const { commentId, discussionId } = req.query;
+
     await Discussion.query()
       .patch({ is_active: false })
-      .where({ id: commentId });
+      .where({ id: commentId })
+      .where("discussion_id", discussionId)
+      .where("type", "comment");
 
     await DiscussionVote.query().delete().where({ discussion_id: commentId });
     res.json({ message: "Comment deleted" });
@@ -275,4 +300,5 @@ module.exports = {
   deleteComment,
   upvoteComment,
   downvoteComment,
+  getComment,
 };

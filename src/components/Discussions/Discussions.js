@@ -4,7 +4,9 @@ import {
   CaretUpFilled,
   CommentOutlined,
 } from "@ant-design/icons";
-import { Avatar, Card, Flex, List, Space } from "antd";
+import { Avatar, Button, Card, Flex, List, Space } from "antd";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/router";
 
 const DiscussionCard = ({ title, description }) => {
   return (
@@ -92,6 +94,29 @@ const DiscussionCard = ({ title, description }) => {
   );
 };
 
+const CreateDiscussionButton = () => {
+  const { data } = useSession();
+  const router = useRouter();
+
+  const gotoCreateDiscussion = () => {
+    router.push("/asn-connect/asn-discussions/create");
+  };
+
+  return (
+    <>
+      {data && (
+        <>
+          {data?.user?.current_role === "admin" && (
+            <Button type="primary" onClick={gotoCreateDiscussion}>
+              Buat Diskusi
+            </Button>
+          )}
+        </>
+      )}
+    </>
+  );
+};
+
 const Discussions = () => {
   const posts = [
     {
@@ -106,14 +131,17 @@ const Discussions = () => {
   ];
 
   return (
-    <List
-      dataSource={posts}
-      renderItem={(item) => (
-        <List.Item>
-          <DiscussionCard title={item.title} description={item.description} />
-        </List.Item>
-      )}
-    />
+    <Space direction="vertical">
+      <CreateDiscussionButton />
+      <List
+        dataSource={posts}
+        renderItem={(item) => (
+          <List.Item>
+            <DiscussionCard title={item.title} description={item.description} />
+          </List.Item>
+        )}
+      />
+    </Space>
   );
 };
 

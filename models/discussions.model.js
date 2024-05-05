@@ -1,5 +1,6 @@
 const { Model } = require("objection");
 const knex = require("../db");
+const uuid = require("uuid");
 
 Model.knex(knex);
 
@@ -8,9 +9,13 @@ class Discussions extends Model {
     return "discussions";
   }
 
+  $beforeInsert() {
+    this.id = uuid.v4();
+  }
+
   static get relationMappings() {
-    const DiscussionVote = require("./discussion-votes.model");
-    const User = require("./users.model");
+    const DiscussionVote = require("@/models/discussion-votes.model");
+    const User = require("@/models/users.model");
 
     return {
       user: {
