@@ -1,6 +1,6 @@
 import dynamic from "next/dynamic";
 
-const Pie = dynamic(() => import("@ant-design/plots").then((mod) => mod.Pie), {
+const Pie = dynamic(() => import("@ant-design/charts").then((mod) => mod.Pie), {
   ssr: false,
 });
 
