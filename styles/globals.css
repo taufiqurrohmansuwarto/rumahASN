@@ -6,3 +6,7 @@
 .dropdown-content .ant-dropdown-menu {
   box-shadow: none;
 }
+
+.ant-tree-node-content-wrapper {
+  width: auto !important;
+}

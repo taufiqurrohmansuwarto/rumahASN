@@ -1,7 +1,7 @@
 import dynamic from "next/dynamic";
 
 const Line = dynamic(
-  () => import("@ant-design/charts").then((mod) => mod.Line),
+  () => import("@ant-design/plots").then((mod) => mod.Line),
   {
     ssr: false,
   }

@@ -22,8 +22,16 @@ class Discussions extends Model {
         relation: Model.BelongsToOneRelation,
         modelClass: User,
         join: {
-          from: "discussions.user_id",
+          from: "discussions.created_by",
           to: "users.custom_id",
+        },
+      },
+      discussion: {
+        relation: Model.BelongsToOneRelation,
+        modelClass: Discussions,
+        join: {
+          from: "discussions.discussion_id",
+          to: "discussions.id",
         },
       },
       votes: {

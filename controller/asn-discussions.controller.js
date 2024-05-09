@@ -4,7 +4,6 @@ const { transaction } = require("objection");
 
 const toggleVote = async (discussionId, userId, voteType) => {
   const trx = await transaction.start(Discussion.knex());
-
   try {
     const existingVote = await DiscussionVote.query(trx)
       .where({
@@ -15,21 +14,16 @@ const toggleVote = async (discussionId, userId, voteType) => {
 
     if (existingVote) {
       if (existingVote.vote_type === voteType) {
-        // Pembatalan suara
+        // Remove vote if clicking same type again (toggle off)
         await DiscussionVote.query(trx).delete().where({ id: existingVote.id });
-
         const updateColumn =
           voteType === "upvote" ? "upvote_count" : "downvote_count";
         await Discussion.query(trx)
           .findById(discussionId)
           .decrement(updateColumn, 1);
       } else {
-        // Mengubah jenis suara
-        await DiscussionVote.query(trx)
-          .patch({ vote_type: voteType })
-          .where({ id: existingVote.id });
-
-        // Update discussion votes
+        // If the existing vote is of the opposite type, remove it and adjust the counts accordingly
+        await DiscussionVote.query(trx).delete().where({ id: existingVote.id });
         await Discussion.query(trx)
           .findById(discussionId)
           .decrement(
@@ -37,26 +31,23 @@ const toggleVote = async (discussionId, userId, voteType) => {
               ? "upvote_count"
               : "downvote_count",
             1
-          )
-          .increment(
-            voteType === "upvote" ? "upvote_count" : "downvote_count",
-            1
           );
+
+        // No incrementing the opposite, as we want to reach a neutral state
       }
     } else {
+      // Insert new vote and increment the corresponding vote count
       await DiscussionVote.query(trx).insert({
         discussion_id: discussionId,
         user_id: userId,
         vote_type: voteType,
       });
-
       const updateColumn =
         voteType === "upvote" ? "upvote_count" : "downvote_count";
       await Discussion.query(trx)
         .findById(discussionId)
         .increment(updateColumn, 1);
     }
-
     await trx.commit();
   } catch (error) {
     await trx.rollback();
@@ -71,9 +62,22 @@ const getDisccusions = async (req, res) => {
     const page = req.query.page || 1;
 
     const result = await Discussion.query()
+      .select(
+        "*",
+        Discussion.relatedQuery("discussion")
+          .where("type", "comment")
+          .count()
+          .as("comment_count")
+      )
       .where("type", "discussion")
       .where("is_active", true)
-      .withGraphFetched("[user,votes]")
+      .withGraphFetched("[user(simpleSelect),votes(whereUserId)]")
+      .modifiers({
+        whereUserId: (query, userId) => {
+          query.where("user_id", req?.user?.customId);
+        },
+      })
+      .orderBy("created_at", "desc")
       .page(page - 1, limit);
 
     const data = {
@@ -85,6 +89,33 @@ const getDisccusions = async (req, res) => {
       },
     };
     res.json(data);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+const getDiscussion = async (req, res) => {
+  try {
+    const { discussionId } = req.query;
+    const result = await Discussion.query()
+      .findById(discussionId)
+      .select(
+        "*",
+        Discussion.relatedQuery("discussion")
+          .where("type", "comment")
+          .count()
+          .as("comment_count")
+      )
+      .where("type", "discussion")
+      .where("is_active", true)
+      .withGraphFetched("[user(simpleSelect),votes(whereUserId)]")
+      .modifiers({
+        whereUserId: (query, userId) => {
+          query.where("user_id", req?.user?.customId);
+        },
+      });
+    res.json(result);
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: "Internal server error" });
@@ -301,4 +332,5 @@ module.exports = {
   upvoteComment,
   downvoteComment,
   getComment,
+  getDiscussion,
 };
