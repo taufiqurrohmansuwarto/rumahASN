@@ -1,38 +1,25 @@
+import { Card, Avatar, Typography, Space, message, Flex } from "antd";
 import {
-  downvoteDiscussion,
-  getDiscussions,
-  upvoteDiscussion,
-} from "@/services/asn-connect-discussions.services";
-import {
-  BookOutlined,
-  CaretDownFilled,
   CaretUpFilled,
+  CaretDownFilled,
   CommentOutlined,
+  BookOutlined,
 } from "@ant-design/icons";
-import { Stack } from "@mantine/core";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import {
-  Avatar,
-  Button,
-  Card,
-  Flex,
-  List,
-  Space,
-  Typography,
-  message,
-} from "antd";
-import { useSession } from "next-auth/react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/router";
+import {
+  upvoteDiscussion,
+  downvoteDiscussion,
+  getDiscussion,
+} from "@/services/asn-connect-discussions.services";
 import dayjs from "dayjs";
 import "dayjs/locale/id";
 
 import relativeTime from "dayjs/plugin/relativeTime";
+import { useQuery } from "@tanstack/react-query";
+import CommentList from "./CommentList";
 
-dayjs.extend(relativeTime);
-
-const DiscussionCard = ({ item }) => {
-  const router = useRouter();
-
+const Detail = ({ item }) => {
   const gotoDetail = () =>
     router.push(`/asn-connect/asn-discussions/${item.id}/detail`);
 
@@ -152,50 +139,28 @@ const DiscussionCard = ({ item }) => {
   );
 };
 
-const CreateDiscussionButton = () => {
-  const { data } = useSession();
+const DetailDiscussion = () => {
   const router = useRouter();
+  const { id } = router.query;
 
-  const gotoCreateDiscussion = () => {
-    router.push("/asn-connect/asn-discussions/create");
-  };
+  const { data, isLoading } = useQuery(
+    ["asn-discussions", id],
+    () => getDiscussion(id),
+    {
+      enabled: !!id,
+    }
+  );
 
   return (
     <>
       {data && (
         <>
-          {data?.user?.current_role === "admin" && (
-            <Button type="primary" onClick={gotoCreateDiscussion}>
-              Buat Diskusi
-            </Button>
-          )}
+          <Detail item={data} />
+          <CommentList />
         </>
       )}
     </>
   );
 };
 
-const Discussions = () => {
-  const { data: posts, isLoading } = useQuery(["asn-discussions"], () =>
-    getDiscussions()
-  );
-
-  return (
-    <>
-      <CreateDiscussionButton />
-      <Stack>
-        <List
-          loading={isLoading}
-          dataSource={posts?.data}
-          renderItem={(item) => (
-            <List.Item>
-              <DiscussionCard item={item} />
-            </List.Item>
-          )}
-        />
-      </Stack>
-    </>
-  );
-};
-
-export default Discussions;
+export default DetailDiscussion;

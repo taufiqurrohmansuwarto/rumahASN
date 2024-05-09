@@ -1,4 +1,3 @@
-import DetailDiscussion from "@/components/Discussions/DetailDiscussion";
 import Layout from "@/components/Layout";
 import PageContainer from "@/components/PageContainer";
 import Head from "next/head";
@@ -15,7 +14,7 @@ const AsnDiscussions = () => {
         onBack={() => router.push("/asn-connect/asn-discussions")}
         title="ASN Discussion Detail"
       >
-        <DetailDiscussion />
+        detail
       </PageContainer>
     </>
   );

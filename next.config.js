@@ -3,6 +3,7 @@ const withAntdLess = require("next-plugin-antd-less");
 const cron = require("node-cron");
 const AppBsreSeal = require("./models/app_bsre_seal.model");
 const { refreshSealActivationTotp } = require("./utils/esign-utils");
+const withTM = require("next-transpile-modules")(["lodash-es"]);
 
 const isProd = process.env.NODE_ENV === "production";
 
@@ -62,14 +63,14 @@ const hashOnlyIdent = (context, _, exportName) =>
     )
     .replace(/^(-?\d|--)/, "_$1");
 
-module.exports = withAntdLess({
+module.exports = withTM({
   i18n: {
     locales: ["en"],
     defaultLocale: "en",
   },
   experimental: {
     scrollRestoration: true,
-    esmExternals: "loose",
+    // esmExternals: "loose",
   },
   images: {
     domains: ["siasn.bkd.jatimprov.go.id", "master.bkd.jatimprov.go.id"],
@@ -80,10 +81,9 @@ module.exports = withAntdLess({
   publicRuntimeConfig: {
     basePath: getBasePath(),
   },
-  modifyVars: { "@primary-color": "#52c41a" }, // optional
-  lessVarsFilePath: "./src/styles/variables.less", // optional
-  lessVarsFilePathAppendToEndOfContent: false, // optional
-  // optional https://github.com/webpack-contrib/css-loader#object
+  // modifyVars: { "@primary-color": "#52c41a" }, // optional
+  // lessVarsFilePath: "./src/styles/variables.less", // optional
+  // lessVarsFilePathAppendToEndOfContent: false, // optional
   cssLoaderOptions: {
     // ...
     mode: "local",
@@ -110,6 +110,12 @@ module.exports = withAntdLess({
     const rules = config.module.rules
       .find((rule) => typeof rule.oneOf === "object")
       .oneOf.filter((rule) => Array.isArray(rule.use));
+
+    if (!isServer) {
+      config.optimization = {
+        sideEffects: false,
+      };
+    }
 
     if (isProd)
       rules.forEach((rule) => {

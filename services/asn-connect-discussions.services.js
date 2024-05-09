@@ -15,7 +15,7 @@ export const updateDiscussion = async ({ id, data }) => {
 };
 
 // user role
-export const getDisccusions = async (params) => {
+export const getDiscussions = async (params) => {
   const query = queryString.stringify(params, {
     skipEmptyString: true,
     skipNull: true,

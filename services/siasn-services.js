@@ -369,3 +369,18 @@ export const petaJabatan = async () => {
 export const petaJabatanById = async (id) => {
   return api.get(`/perencanaan/peta-jabatan/${id}`).then((res) => res.data);
 };
+
+// kinerja periodik
+export const getRwKinerjaPeriodik = async (nip) => {
+  return api.get(`/pns/rw-kinerjaperiodik/${nip}`).then((res) => res.data);
+};
+
+// delete
+export const deleteRwKinerjaPeriodik = async (id) => {
+  return api.delete(`/kinerjaperiodik/delete/${id}`).then((res) => res.data);
+};
+
+// create
+export const createdRwKinerjaPeriodik = async (data) => {
+  return api.post(`/kinerjaperiodik/save`, data).then((res) => res.data);
+};
