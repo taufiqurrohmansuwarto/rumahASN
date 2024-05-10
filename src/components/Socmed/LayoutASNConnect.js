@@ -11,66 +11,58 @@ function LayoutASNConnect({ children, active = "asn-updates" }) {
   };
 
   return (
-    <>
-      <PageContainer
-        header={{
-          avatar: {
-            src: "https://avatars.githubusercontent.com/u/8186664?v=4",
-          },
-        }}
-        style={{
-          backgroundColor: "white",
+    <PageContainer
+      header={{
+        avatar: {
+          src: "https://avatars.githubusercontent.com/u/8186664?v=4",
+        },
+      }}
+      childrenContentStyle={{
+        padding: breakPoint.xs ? 0 : 24,
+        margin: 0,
+      }}
+      style={{
+        backgroundColor: "white",
+        padding: 0,
+      }}
+      tabActiveKey={active}
+      onTabChange={handleChangeTab}
+      tabList={[
+        {
+          key: "asn-updates",
+          tab: "Beranda",
+        },
+        {
+          key: "asn-discussions",
+          tab: "Diskusi",
+        },
+        {
+          key: "asn-communities",
+          tab: "Komunitas",
+        },
+        {
+          key: "asn-events",
+          tab: "Kegiatan",
+        },
+      ]}
+      tabPosition="top"
+      tabProps={{
+        tabBarStyle: {
           padding: 0,
-        }}
-        tabActiveKey={active}
-        onTabChange={handleChangeTab}
-        tabList={[
-          {
-            key: "asn-updates",
-            tab: "Beranda",
-          },
-          {
-            key: "asn-discussions",
-            tab: "Diskusi",
-          },
-          {
-            key: "asn-communities",
-            tab: "Komunitas",
-          },
-          {
-            key: "asn-events",
-            tab: "Kegiatan",
-          },
-        ]}
-        tabPosition="top"
-        tabProps={{
-          tabBarStyle: {
-            padding: 0,
-            margin: 0,
-            accentColor: "yellow",
-            borderColor: "yellow",
-            color: "yellow",
-          },
-          style: {
-            color: "black",
-          },
-        }}
-        token={{
-          paddingBlockPageContainerContent: 0,
-        }}
-        title="Smart ASN Connect"
-        content="Berjejaring, Berkolaborasi, Berinovasi Bersama ASN Connect."
-      />
-      <Layout.Content
-        style={{
-          paddingLeft: breakPoint.xs ? 0 : 24,
-          paddingRight: breakPoint.xs ? 0 : 24,
-          paddingTop: 16,
-        }}
-      >
-        {children}
-      </Layout.Content>
-    </>
+          margin: 0,
+          accentColor: "yellow",
+          borderColor: "yellow",
+          color: "yellow",
+        },
+        style: {
+          color: "black",
+        },
+      }}
+      title="Smart ASN Connect"
+      content="Berjejaring, Berkolaborasi, Berinovasi Bersama ASN Connect."
+    >
+      {children}
+    </PageContainer>
   );
 }
 

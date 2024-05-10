@@ -1,14 +1,43 @@
 import { createDiscussion } from "@/services/asn-connect-discussions.services";
+import { parseMarkdown, uploadFiles } from "@/services/index";
+import { MarkdownEditor } from "@primer/react/drafts";
 import { useMutation } from "@tanstack/react-query";
-import { Button, Form, Input, message } from "antd";
+import { Button, Card, Checkbox, Form, Input, message } from "antd";
 import { useRouter } from "next/router";
+
+const uploadFile = async (file) => {
+  try {
+    const formData = new FormData();
+
+    // if file not image png, jpg, jpeg, gif
+    const allowedTypes = ["image/png", "image/jpg", "image/jpeg", "image/gif"];
+
+    if (!allowedTypes.includes(file.type)) {
+      return;
+    } else {
+      formData.append("file", file);
+      const result = await uploadFiles(formData);
+      return {
+        url: result?.data,
+        file,
+      };
+    }
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+const renderMarkdown = async (markdown) => {
+  if (!markdown) return;
+  const result = await parseMarkdown(markdown);
+  return result?.html;
+};
 
 function CreateDiscussion() {
   const router = useRouter();
-
   const [form] = Form.useForm();
 
-  const { mutate: create, isLoading: isLoadingCreate } = useMutation(
+  const { mutateAsync: create, isLoading: isLoadingCreate } = useMutation(
     (data) => createDiscussion(data),
     {
       onSuccess: () => {
@@ -22,32 +51,64 @@ function CreateDiscussion() {
   );
 
   const handleFinish = async () => {
-    const payload = await form.validateFields();
-    create(payload);
+    try {
+      const payload = await form.validateFields();
+      await create(payload);
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   return (
-    <Form onFinish={handleFinish} form={form} layout="vertical">
-      <Form.Item label="Judul" name="title">
-        <Input />
-      </Form.Item>
-      <Form.Item label="Sub Judul" name="subtitle">
-        <Input />
-      </Form.Item>
-      <Form.Item label="Konten" name="content">
-        <Input.TextArea rows={4} />
-      </Form.Item>
-      <Form.Item>
-        <Button
-          disabled={isLoadingCreate}
-          type="primary"
-          htmlType="submit"
-          loading={isLoadingCreate}
+    <Card>
+      <Form form={form} layout="vertical">
+        <Form.Item
+          label="Tambahkan Judul"
+          name="title"
+          required
+          rules={[{ required: true, message: "Judul tidak boleh kosong" }]}
         >
-          Submit
-        </Button>
-      </Form.Item>
-    </Form>
+          <Input />
+        </Form.Item>
+        <Form.Item
+          label="Body"
+          name="content"
+          required
+          rules={[{ required: true, message: "Konten tidak boleh kosong" }]}
+        >
+          <MarkdownEditor
+            acceptedFileTypes={[
+              "image/png",
+              "image/jpg",
+              "image/jpeg",
+              "image/gif",
+            ]}
+            onRenderPreview={renderMarkdown}
+            onUploadFile={uploadFile}
+          >
+            <MarkdownEditor.Toolbar>
+              <MarkdownEditor.DefaultToolbarButtons />
+            </MarkdownEditor.Toolbar>
+          </MarkdownEditor>
+        </Form.Item>
+        <Form.Item>
+          <Checkbox>
+            Saya telah melakukan pencarian diskusi yang sejenis
+          </Checkbox>
+        </Form.Item>
+        <Form.Item>
+          <Button
+            onClick={handleFinish}
+            disabled={isLoadingCreate}
+            type="primary"
+            htmlType="submit"
+            loading={isLoadingCreate}
+          >
+            Mulai Diskusi
+          </Button>
+        </Form.Item>
+      </Form>
+    </Card>
   );
 }
 

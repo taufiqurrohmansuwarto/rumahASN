@@ -406,6 +406,10 @@ function Layout({ children, active, collapsed = true }) {
 
   return (
     <ProLayout
+      contentStyle={{
+        padding: breakPoint.xs ? 0 : null,
+        margin: breakPoint.xs ? 0 : null,
+      }}
       theme="light"
       token={{
         // bgLayout: "#ECEEF1",
@@ -633,7 +637,7 @@ function Layout({ children, active, collapsed = true }) {
                 }}
                 type="secondary"
               >
-                © 2022 BKD Provinsi Jawa Timur 
+                © 2022 BKD Provinsi Jawa Timur
               </Typography.Text>
             </div>
           </div>

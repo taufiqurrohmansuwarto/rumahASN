@@ -3,7 +3,6 @@ const withAntdLess = require("next-plugin-antd-less");
 const cron = require("node-cron");
 const AppBsreSeal = require("./models/app_bsre_seal.model");
 const { refreshSealActivationTotp } = require("./utils/esign-utils");
-const withTM = require("next-transpile-modules")(["lodash-es"]);
 
 const isProd = process.env.NODE_ENV === "production";
 
@@ -63,7 +62,7 @@ const hashOnlyIdent = (context, _, exportName) =>
     )
     .replace(/^(-?\d|--)/, "_$1");
 
-module.exports = withTM({
+module.exports = withAntdLess({
   i18n: {
     locales: ["en"],
     defaultLocale: "en",
@@ -83,7 +82,7 @@ module.exports = withTM({
   },
   // modifyVars: { "@primary-color": "#52c41a" }, // optional
   // lessVarsFilePath: "./src/styles/variables.less", // optional
-  // lessVarsFilePathAppendToEndOfContent: false, // optional
+  lessVarsFilePathAppendToEndOfContent: false, // optional
   cssLoaderOptions: {
     // ...
     mode: "local",
