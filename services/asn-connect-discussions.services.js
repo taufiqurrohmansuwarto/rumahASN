@@ -37,7 +37,13 @@ export const downvoteDiscussion = async (id) => {
 
 // create comment
 export const createComment = async ({ discussionId, data }) => {
-  return api.post(`/user/all/${discussionId}`, data).then((res) => res.data);
+  return api
+    .post(`/user/all/${discussionId}/comments`, data)
+    .then((res) => res.data);
+};
+
+export const getComments = async (discussionId) => {
+  return api.get(`/user/all/${discussionId}/comments`).then((res) => res.data);
 };
 
 export const updateComment = async ({ discussionId, commentId, data }) => {

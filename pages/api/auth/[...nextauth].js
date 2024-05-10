@@ -165,8 +165,7 @@ const upsertUser = async (currentUser) => {
     console.log(error);
   }
 };
-
-export default NextAuth({
+export const authOptions = {
   pages: {
     signIn: "/helpdesk/signin",
   },
@@ -399,4 +398,6 @@ export default NextAuth({
   jwt: {
     secret: process.env.SECRET,
   },
-});
+};
+
+export default NextAuth(authOptions);

@@ -1,6 +1,7 @@
 const Discussion = require("@/models/discussions.model");
 const DiscussionVote = require("@/models/discussion-votes.model");
 const { transaction } = require("objection");
+const { cutMarkdown } = require("../utils");
 
 const toggleVote = async (discussionId, userId, voteType) => {
   const trx = await transaction.start(Discussion.knex());
@@ -80,8 +81,16 @@ const getDisccusions = async (req, res) => {
       .orderBy("created_at", "desc")
       .page(page - 1, limit);
 
+    const hasil = result.results.map((item) => {
+      return {
+        ...item,
+        total_vote: parseInt(item.upvote_count) - parseInt(item.downvote_count),
+        content: cutMarkdown(item.content),
+      };
+    });
+
     const data = {
-      data: result.results,
+      data: hasil,
       pagination: {
         total: result.total,
         limit: result.results.length,
@@ -199,25 +208,14 @@ const downvoteDiscussion = async (req, res) => {
 const getComments = async (req, res) => {
   try {
     const { discussionId } = req.query;
-    const limit = req.query.limit || 25;
-    const page = req.query.page || 1;
 
     const result = await Discussion.query()
       .where("type", "comment")
       .where("is_active", true)
       .where("discussion_id", discussionId)
-      .withGraphFetched("[user,votes]")
-      .page(page - 1, limit);
+      .withGraphFetched("[user,votes]");
 
-    const data = {
-      data: result.results,
-      pagination: {
-        total: result.total,
-        limit: result.results.length,
-        page: page,
-      },
-    };
-    res.json(data);
+    res.json(result);
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: "Internal server error" });
@@ -249,6 +247,8 @@ const createComment = async (req, res) => {
       created_by: customId,
       type: "comment",
     };
+
+    console.log(payload);
 
     await Discussion.query().insert(payload);
     res.json({ message: "Comment created" });

@@ -273,3 +273,7 @@ export const checkUndefined = (data) => {
     return data;
   }
 };
+
+export const cutMarkdown = (text) => {
+  return text.substring(0, 200) + "...";
+};

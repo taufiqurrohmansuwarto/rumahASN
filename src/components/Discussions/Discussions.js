@@ -15,8 +15,10 @@ import {
   Avatar,
   Button,
   Card,
+  Col,
   Flex,
   List,
+  Row,
   Space,
   Typography,
   message,
@@ -27,6 +29,7 @@ import dayjs from "dayjs";
 import "dayjs/locale/id";
 
 import relativeTime from "dayjs/plugin/relativeTime";
+import ReactMarkdownCustom from "../MarkdownEditor/ReactMarkdownCustom";
 
 dayjs.extend(relativeTime);
 
@@ -53,7 +56,7 @@ const DiscussionCard = ({ item }) => {
   });
 
   return (
-    <Card style={{ width: "100%" }}>
+    <Card bordered={true} style={{ width: "100%" }}>
       <Flex align="center" gap={50}>
         <Flex vertical align="center" gap={4}>
           <CaretUpFilled
@@ -113,7 +116,7 @@ const DiscussionCard = ({ item }) => {
                 {item.title}
               </span>
             </Typography.Link>
-            <span>{item.content}</span>
+            <ReactMarkdownCustom>{item.content}</ReactMarkdownCustom>
           </Flex>
           <Flex justify="space-between">
             <Flex>
@@ -182,17 +185,30 @@ const Discussions = () => {
 
   return (
     <>
-      <CreateDiscussionButton />
       <Stack>
-        <List
-          loading={isLoading}
-          dataSource={posts?.data}
-          renderItem={(item) => (
-            <List.Item>
-              <DiscussionCard item={item} />
-            </List.Item>
-          )}
-        />
+        <Row justify="center" gutter={[0, 16]}>
+          <Col md={18}>
+            <CreateDiscussionButton />
+            <List
+              loading={isLoading}
+              dataSource={posts?.data}
+              renderItem={(item) => (
+                <List.Item>
+                  <DiscussionCard item={item} />
+                </List.Item>
+              )}
+              size="large"
+              pagination={{
+                pageSize: 10,
+
+                position: "both",
+                total: posts?.pagination?.total || 0,
+                showTotal: (total, range) =>
+                  `Menampilkan ${range[0]}-${range[1]} dari ${total} diskusi`,
+              }}
+            />
+          </Col>
+        </Row>
       </Stack>
     </>
   );

@@ -9,12 +9,22 @@ import {
   CommentOutlined,
 } from "@ant-design/icons";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Avatar, Card, Flex, Space, Typography, message } from "antd";
+import {
+  Avatar,
+  Card,
+  Flex,
+  FloatButton,
+  Space,
+  Typography,
+  message,
+} from "antd";
 import dayjs from "dayjs";
 import "dayjs/locale/id";
 import { useRouter } from "next/router";
 
 import { useQuery } from "@tanstack/react-query";
+import ReactMarkdownCustom from "../MarkdownEditor/ReactMarkdownCustom";
+import CreateComment from "./CreateComment";
 import CommentList from "./CommentList";
 
 const Detail = ({ item }) => {
@@ -38,80 +48,81 @@ const Detail = ({ item }) => {
   });
 
   return (
-    <Card style={{ width: "100%" }}>
-      <Flex align="center" gap={0}>
-        <Flex style={{ flexGrow: 1 }} vertical gap={10}>
-          <Flex align="center" gap={10}>
-            <Flex>
-              <Avatar size={40} src={item?.user?.image} />
-            </Flex>
-            <Flex vertical>
-              <Typography.Text style={{ fontSize: 12 }}>
-                {item?.user?.username}
-              </Typography.Text>
-              <Typography.Text style={{ fontSize: 12 }}>
-                {dayjs(item?.created_at).locale("id").fromNow()}
-              </Typography.Text>
-            </Flex>
+    <Flex align="center" gap={0}>
+      <Flex style={{ flexGrow: 1 }} vertical gap={10}>
+        <Flex align="center" gap={10}>
+          <Flex>
+            <Avatar size={40} src={item?.user?.image} />
           </Flex>
           <Flex vertical>
-            <span style={{ fontSize: 24, fontWeight: "bold" }}>
-              {item?.title}
-            </span>
-            <Typography.Text>{item.content}</Typography.Text>
+            <Typography.Text style={{ fontSize: 12 }}>
+              {item?.user?.username}
+            </Typography.Text>
+            <Typography.Text style={{ fontSize: 12 }}>
+              {dayjs(item?.created_at).locale("id").fromNow()}
+            </Typography.Text>
           </Flex>
-          <Flex gap={10}>
-            <Flex>
-              <div
-                style={{
-                  backgroundColor: "#f5f5f5",
-                  padding: "5px 10px",
-                  borderRadius: 10,
-                }}
-              >
-                <Space>
-                  <ArrowUpOutlined
-                    onClick={upvote}
-                    style={{
-                      cursor: "pointer",
-                      color:
-                        item?.votes?.[0]?.vote_type === "upvote"
-                          ? "#ffc53d"
-                          : "gray",
-                    }}
-                  />
-                  <span>{item?.upvote_count}</span>
-                  <ArrowDownOutlined
-                    onClick={downvote}
-                    style={{
-                      cursor: "pointer",
-                      color:
-                        item?.votes?.[0]?.vote_type === "downvote"
-                          ? "#ffc53d"
-                          : "gray",
-                    }}
-                  />
-                </Space>
-              </div>
-            </Flex>
-            <Flex>
-              <div
-                style={{
-                  backgroundColor: "#f5f5f5",
-                  padding: "5px 10px",
-                  borderRadius: 10,
-                }}
-              >
-                <Space>
-                  <CommentOutlined style={{ cursor: "pointer" }} />
-                  <span>{item?.comment_count}</span>
-                </Space>
-              </div>
-            </Flex>
+        </Flex>
+        <Flex vertical>
+          <span style={{ fontSize: 24, fontWeight: "bold" }}>
+            {item?.title}
+          </span>
+          <ReactMarkdownCustom>{item?.content}</ReactMarkdownCustom>
+        </Flex>
+        <Flex gap={10}>
+          <Flex>
+            <div
+              style={{
+                backgroundColor: "#f5f5f5",
+                padding: "5px 10px",
+                borderRadius: 10,
+              }}
+            >
+              <Space>
+                <ArrowUpOutlined
+                  onClick={upvote}
+                  style={{
+                    cursor: "pointer",
+                    color:
+                      item?.votes?.[0]?.vote_type === "upvote"
+                        ? "#ffc53d"
+                        : "gray",
+                  }}
+                />
+                <span>
+                  {parseInt(item?.upvote_count) -
+                    parseInt(item?.downvote_count)}
+                </span>
+                <ArrowDownOutlined
+                  onClick={downvote}
+                  style={{
+                    cursor: "pointer",
+                    color:
+                      item?.votes?.[0]?.vote_type === "downvote"
+                        ? "#ffc53d"
+                        : "gray",
+                  }}
+                />
+              </Space>
+            </div>
+          </Flex>
+          <Flex>
+            <div
+              style={{
+                backgroundColor: "#f5f5f5",
+                padding: "5px 10px",
+                borderRadius: 10,
+              }}
+            >
+              <Space>
+                <CommentOutlined style={{ cursor: "pointer" }} />
+                <span>{item?.comment_count}</span>
+              </Space>
+            </div>
           </Flex>
         </Flex>
       </Flex>
-    </Card>
+    </Flex>
   );
 };
 
@@ -131,7 +142,9 @@ const DetailDiscussion = () => {
     <>
       {data && (
         <>
+          <FloatButton.BackTop />
           <Detail item={data} />
+          <CreateComment discussionId={id} />
           <CommentList />
         </>
       )}

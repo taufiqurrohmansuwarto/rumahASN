@@ -1,11 +1,10 @@
 import { formatTime } from "@/utils/client-utils";
-import { PauseCircleFilled, PlayCircleFilled } from "@ant-design/icons";
-import { ActionIcon, Avatar, Card, Group, Paper, Text } from "@mantine/core";
-import { Col, Grid, Image, Row, Slider, Typography } from "antd";
+import { ActionIcon, Avatar, Group, Paper, Text } from "@mantine/core";
+import { IconPlayerPause, IconPlayerPlay } from "@tabler/icons";
+import { Grid, Slider } from "antd";
 import { useRef, useState } from "react";
 import Duration from "./Duration";
 import ReactPlayer from "./ReactPlayer";
-import { IconPlayerPause, IconPlayerPlay } from "@tabler/icons";
 
 function PodcastPlayer({ data: dataPodcast }) {
   const ref = useRef(null);

@@ -1,7 +1,8 @@
 import axios from "axios";
-import { getSession } from "next-auth/react";
+import { getServerSession } from "next-auth/next";
 const User = require("../models/users.model");
 const Minio = require("minio");
+import { authOptions } from "pages/api/auth/[...nextauth]";
 
 const minioConfig = {
   port: parseInt(process.env.MINIO_PORT),
@@ -15,7 +16,7 @@ const mc = new Minio.Client(minioConfig);
 
 const auth = async (req, res, next) => {
   try {
-    const data = await getSession({ req });
+    const data = await getServerSession(req, res, authOptions);
     if (data) {
       const userId = data?.user?.id?.split("|")?.[1];
       const customId = data?.user?.id;
