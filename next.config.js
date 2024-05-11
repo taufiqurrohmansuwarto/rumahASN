@@ -110,12 +110,6 @@ module.exports = withAntdLess({
       .find((rule) => typeof rule.oneOf === "object")
       .oneOf.filter((rule) => Array.isArray(rule.use));
 
-    if (!isServer) {
-      config.optimization = {
-        sideEffects: false,
-      };
-    }
-
     if (isProd)
       rules.forEach((rule) => {
         rule.use.forEach((moduleLoader) => {
