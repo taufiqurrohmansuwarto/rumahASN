@@ -1,9 +1,13 @@
-import { createDiscussion } from "@/services/asn-connect-discussions.services";
+import {
+  createDiscussion,
+  updateDiscussion,
+} from "@/services/asn-connect-discussions.services";
 import { parseMarkdown, uploadFiles } from "@/services/index";
 import { MarkdownEditor } from "@primer/react/drafts";
-import { useMutation } from "@tanstack/react-query";
-import { Button, Card, Checkbox, Form, Input, message } from "antd";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { Button, Card, Checkbox, Form, Input, Space, message } from "antd";
 import { useRouter } from "next/router";
+import { useEffect } from "react";
 
 const uploadFile = async (file) => {
   try {
@@ -33,9 +37,20 @@ const renderMarkdown = async (markdown) => {
   return result?.html;
 };
 
-function CreateDiscussion() {
+function CreateDiscussion({ action = "create", item = null, onCancel }) {
   const router = useRouter();
   const [form] = Form.useForm();
+
+  const queryClient = useQueryClient();
+
+  useEffect(() => {
+    if (action === "edit" && item) {
+      form.setFieldsValue({
+        title: item?.title,
+        content: item?.content,
+      });
+    }
+  }, [action, item, form]);
 
   const { mutateAsync: create, isLoading: isLoadingCreate } = useMutation(
     (data) => createDiscussion(data),
@@ -50,10 +65,35 @@ function CreateDiscussion() {
     }
   );
 
+  const { mutateAsync: update, isLoading: isLoadingUpdate } = useMutation(
+    (data) => updateDiscussion(data),
+    {
+      onSuccess: () => {
+        message.success("Diskusi berhasil diupdate");
+        onCancel();
+      },
+      onError: (error) => {
+        message.error(error?.response?.data?.message);
+      },
+      onSettled: () => {
+        queryClient.invalidateQueries(["asn-discussions", item?.id]);
+      },
+    }
+  );
+
   const handleFinish = async () => {
     try {
-      const payload = await form.validateFields();
-      await create(payload);
+      if (action === "create") {
+        const payload = await form.validateFields();
+        await create(payload);
+      } else if (action === "edit") {
+        const result = await form.validateFields();
+        const payload = {
+          id: item?.id,
+          data: result,
+        };
+        await update(payload);
+      }
     } catch (error) {
       console.log(error);
     }
@@ -92,20 +132,22 @@ function CreateDiscussion() {
           </MarkdownEditor>
         </Form.Item>
         <Form.Item>
-          <Checkbox>
-            Saya telah melakukan pencarian diskusi yang sejenis
-          </Checkbox>
-        </Form.Item>
-        <Form.Item>
-          <Button
-            onClick={handleFinish}
-            disabled={isLoadingCreate}
-            type="primary"
-            htmlType="submit"
-            loading={isLoadingCreate}
-          >
-            Mulai Diskusi
-          </Button>
+          <Space>
+            {action === "edit" && (
+              <Button onClick={onCancel} type="default">
+                Batal
+              </Button>
+            )}
+            <Button
+              onClick={handleFinish}
+              disabled={isLoadingCreate || isLoadingUpdate}
+              type="primary"
+              htmlType="submit"
+              loading={isLoadingCreate || isLoadingUpdate}
+            >
+              {action === "edit" ? "Edit Diskusi" : "Buat Diskusi"}
+            </Button>
+          </Space>
         </Form.Item>
       </Form>
     </Card>

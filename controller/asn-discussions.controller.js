@@ -3,6 +3,7 @@ const DiscussionVote = require("@/models/discussion-votes.model");
 const { transaction } = require("objection");
 const { cutMarkdown } = require("../utils");
 const arrayToTree = require("array-to-tree");
+const { parseMarkdown } = require("@/utils/parsing");
 
 const createCommentTree = async ({
   discussion_id,
@@ -188,7 +189,11 @@ const getDiscussion = async (req, res) => {
           query.where("user_id", req?.user?.customId);
         },
       });
-    res.json(result);
+
+    res.json({
+      ...result,
+      md: parseMarkdown(result?.content),
+    });
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: "Internal server error" });
@@ -218,7 +223,12 @@ const updateDiscussion = async (req, res) => {
   try {
     const { discussionId } = req.query;
     const body = req.body;
-    await Discussion.query().patch(body).where({ id: discussionId });
+    await Discussion.query()
+      .patch({
+        ...body,
+        edited_at: new Date(),
+      })
+      .where({ id: discussionId });
     res.json({ message: "Discussion updated" });
   } catch (error) {
     console.log(error);
@@ -343,12 +353,20 @@ const updateComment = async (req, res) => {
   try {
     const { commentId, discussionId } = req.query;
     const body = req.body;
+    const currentUser = req?.user;
 
     await Discussion.query()
-      .patch(body)
+      .patch({
+        ...body,
+        edited_at: new Date(),
+      })
       .where({ id: commentId, discussion_id: discussionId })
       .where("type", "comment")
-      .andWhere("created_by", req?.user?.customId);
+      .andWhere((builder) => {
+        if (currentUser?.current_role !== "admin") {
+          builder.where("created_by", currentUser?.customId);
+        }
+      });
 
     res.json({ message: "Comment updated" });
   } catch (error) {
@@ -360,14 +378,19 @@ const updateComment = async (req, res) => {
 const deleteComment = async (req, res) => {
   try {
     const { commentId, discussionId } = req.query;
+    const currentUser = req?.user;
 
     await Discussion.query()
       .patch({
-        content: "_Komentar ini telah dihapus oleh pengguna_",
+        content: "_Komentar ini telah dihapus_",
       })
       .where({ discussion_id: discussionId, id: commentId })
       .andWhere("type", "comment")
-      .andWhere("created_by", req?.user?.customId);
+      .andWhere((builder) => {
+        if (currentUser?.current_role !== "admin") {
+          builder.where("created_by", currentUser?.customId);
+        }
+      });
 
     res.json({ message: "Comment deleted" });
   } catch (error) {
