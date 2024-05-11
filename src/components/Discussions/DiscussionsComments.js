@@ -7,7 +7,6 @@ import {
   deleteComment,
   downvoteComment,
   getComments,
-  updateComment,
   upvoteComment,
 } from "@/services/asn-connect-discussions.services";
 import { Comment } from "@ant-design/compatible";
@@ -20,13 +19,13 @@ import {
 } from "@ant-design/icons";
 import { Stack, Text } from "@mantine/core";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Avatar, message, Dropdown, List, Tooltip, Modal } from "antd";
+import { Dropdown, List, Modal, Space, Tooltip, message } from "antd";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import { useState } from "react";
 import ReactMarkdownCustom from "../MarkdownEditor/ReactMarkdownCustom";
-import DiscussionCreateComment from "./DiscussionCreateComment";
 import AvatarUser from "../Users/AvatarUser";
+import DiscussionCreateComment from "./DiscussionCreateComment";
 
 const UserComment = ({ discussionId, comment }) => {
   const [selectedId, setSelectedId] = useState(null);
@@ -45,17 +44,17 @@ const UserComment = ({ discussionId, comment }) => {
   };
 
   const handleEdit = () => {
-    setSelectedEditId(comment?.id);
+    // if there is a another selected edit id, cancel it first
+    if (selectedEditId) {
+      setSelectedEditId(null);
+    } else {
+      setSelectedEditId(comment?.id);
+    }
   };
 
   const handleCancelEdit = () => {
     setSelectedEditId(null);
   };
-
-  const { mutateAsync: edit, isLoading: isLoadingEdit } = useMutation(
-    (data) => updateComment(data),
-    {}
-  );
 
   const { mutateAsync: remove, isLoading: isLoadingRemove } = useMutation(
     (data) => deleteComment(data),
@@ -141,7 +140,9 @@ const UserComment = ({ discussionId, comment }) => {
   };
 
   const items = () => {
-    if (currentUser?.user?.id !== comment?.user?.custom_id) {
+    const admin = currentUser?.user?.current_role === "admin";
+
+    if (currentUser?.user?.id !== comment?.user?.custom_id && !admin) {
       return [{ label: "Laporkan", key: "lapor" }];
     } else
       return [
@@ -166,33 +167,38 @@ const UserComment = ({ discussionId, comment }) => {
 
   const actions = [
     <span key="upvote" onClick={handleUpvote}>
-      <ArrowUpOutlined
-        style={{
-          color: `
+      <Tooltip title="Upvote">
+        <ArrowUpOutlined
+          style={{
+            color: `
       ${comment?.votes?.[0]?.vote_type === "upvote" ? "orange" : null}`,
-        }}
-      />
+          }}
+        />
+      </Tooltip>
     </span>,
     <span key="vote">
       {parseInt(comment?.upvote_count) - parseInt(comment?.downvote_count)}
     </span>,
-    <span
-      key="downvote"
-      onClick={handleDownvote}
-      style={{
-        color: `${
-          comment?.votes?.[0]?.vote_type === "downvote" ? "orange" : null
-        }`,
-      }}
-    >
-      <ArrowDownOutlined />
+    <span key="downvote" onClick={handleDownvote}>
+      <Tooltip title="Downvote">
+        <ArrowDownOutlined
+          style={{
+            color: `${
+              comment?.votes?.[0]?.vote_type === "downvote" ? "orange" : null
+            }`,
+          }}
+        />
+      </Tooltip>
     </span>,
     <span key="balas" onClick={handleAddComment}>
-      <RetweetOutlined /> Balas
+      <Tooltip title="Balas">
+        <RetweetOutlined />
+      </Tooltip>
     </span>,
     <span key="total_comment">
-      <CommentOutlined /> {comment?.total_comment} Komentar
+      <CommentOutlined />
     </span>,
+    <span key="total_comment">{comment?.total_comment}</span>,
     <span key="actions" style={{ marginLeft: 8 }}>
       <Dropdown
         menu={{
@@ -208,6 +214,7 @@ const UserComment = ({ discussionId, comment }) => {
   return (
     <>
       <Comment
+        id={comment?.id}
         actions={selectedEditId === comment?.id ? null : actions}
         avatar={
           <AvatarUser
@@ -217,14 +224,34 @@ const UserComment = ({ discussionId, comment }) => {
         }
         content={
           <>
-            <ReactMarkdownCustom>{comment?.content}</ReactMarkdownCustom>
+            {selectedEditId === comment?.id ? (
+              <DiscussionCreateComment
+                discussionId={discussionId}
+                commentId={comment?.id}
+                onCancel={handleCancelEdit}
+                content={comment?.content}
+                action="edit"
+                withBatal
+              />
+            ) : (
+              <>
+                <ReactMarkdownCustom>{comment?.content}</ReactMarkdownCustom>
+              </>
+            )}
           </>
         }
         datetime={
           <Tooltip
             title={dayjs(comment?.created_at).format("DD-MM-YYYY HH:mm:ss")}
           >
-            &#x2022; {dayjs(comment?.created_at).fromNow()}
+            <Space size="small">
+              <div>&#x2022; {dayjs(comment?.created_at).fromNow()}</div>
+              <div>
+                {comment?.edited_at && (
+                  <>&#x2022; diubah {dayjs(comment?.edited_at).fromNow()}</>
+                )}
+              </div>
+            </Space>
           </Tooltip>
         }
         author={
@@ -249,6 +276,7 @@ const UserComment = ({ discussionId, comment }) => {
         )}
         {comment?.children?.map((item) => (
           <UserComment
+            id={item?.id}
             discussionId={discussionId}
             key={item?.id}
             comment={item}
@@ -259,12 +287,7 @@ const UserComment = ({ discussionId, comment }) => {
   );
 };
 
-const UserComments = ({ discussionId }) => {
-  const { data, isLoading } = useQuery(
-    ["asn-discussions-comment", discussionId],
-    () => getComments(discussionId)
-  );
-
+const UserComments = ({ discussionId, data, loading }) => {
   return (
     <>
       <List
@@ -272,7 +295,7 @@ const UserComments = ({ discussionId }) => {
           <UserComment discussionId={discussionId} comment={item} />
         )}
         rowKey={(row) => row?.id}
-        loading={isLoading}
+        loading={loading}
         dataSource={data}
       />
     </>
@@ -283,10 +306,19 @@ const DiscussionsComments = () => {
   const router = useRouter();
   const { id } = router.query;
 
+  const { data, isLoading } = useQuery(
+    ["asn-discussions-comment", id],
+    () => getComments(id),
+    {
+      keepPreviousData: true,
+      refetchOnWindowFocus: false,
+    }
+  );
+
   return (
     <>
       <DiscussionCreateComment discussionId={id} />
-      <UserComments discussionId={id} />
+      <UserComments loading={isLoading} data={data} discussionId={id} />
     </>
   );
 };

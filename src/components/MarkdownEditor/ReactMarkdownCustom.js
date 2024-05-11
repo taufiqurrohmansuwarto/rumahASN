@@ -93,7 +93,7 @@ function ReactMarkdownCustom({ children }) {
       return <Title order={6} {...props} />;
     },
     code({ node, inline, className, children, ...props }) {
-      return <Code block>{children}</Code>;
+      return <Code>{children}</Code>;
     },
     table({ node, ...props }) {
       return <Table {...props} />;

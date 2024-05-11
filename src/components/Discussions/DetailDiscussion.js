@@ -27,9 +27,17 @@ import { useRouter } from "next/router";
 import { useQuery } from "@tanstack/react-query";
 import ReactMarkdownCustom from "../MarkdownEditor/ReactMarkdownCustom";
 import DiscussionsComments from "./DiscussionsComments";
+import { Text, Title } from "@mantine/core";
+import AvatarUser from "../Users/AvatarUser";
+import { useState } from "react";
+import CreateDiscussion from "./CreateDiscussion";
+import { useSession } from "next-auth/react";
 
 const Detail = ({ item }) => {
   const queryClient = useQueryClient();
+  const { data: currentUser } = useSession();
+
+  const [edit, setEdit] = useState(false);
 
   const { mutate: upvote } = useMutation(() => upvoteDiscussion(item?.id), {
     onSuccess: () => {
@@ -47,26 +55,49 @@ const Detail = ({ item }) => {
 
   return (
     <Flex align="center" gap={0}>
-      <Flex style={{ flexGrow: 1 }} vertical gap={10}>
-        <Flex align="center" gap={10}>
-          <Flex>
-            <Avatar size={40} src={item?.user?.image} />
+      <Flex style={{ flexGrow: 1 }} vertical gap={20}>
+        <Flex justify="space-between">
+          <Flex align="center" gap={10}>
+            <Flex>
+              <AvatarUser
+                src={item?.user?.image}
+                size={40}
+                userId={item?.user?.custom_id}
+              />
+            </Flex>
+            <Flex vertical>
+              <Text>{item?.user?.username}</Text>
+              <Text size="sm">
+                {dayjs(item?.created_at).locale("id").fromNow()}
+              </Text>
+            </Flex>
           </Flex>
-          <Flex vertical>
-            <Typography.Text style={{ fontSize: 12 }}>
-              {item?.user?.username}
-            </Typography.Text>
-            <Typography.Text style={{ fontSize: 12 }}>
-              {dayjs(item?.created_at).locale("id").fromNow()}
-            </Typography.Text>
-          </Flex>
+          {currentUser?.user?.current_role === "admin" && (
+            <Flex onClick={() => setEdit(true)}>
+              <Text>Edit</Text>
+            </Flex>
+          )}
         </Flex>
-        <Flex vertical>
-          <span style={{ fontSize: 24, fontWeight: "bold" }}>
-            {item?.title}
-          </span>
-          <ReactMarkdownCustom>{item?.content}</ReactMarkdownCustom>
-        </Flex>
+        {edit ? (
+          <CreateDiscussion
+            action="edit"
+            item={item}
+            onCancel={() => setEdit(false)}
+          />
+        ) : (
+          <>
+            <Title order={3}>{item?.title}</Title>
+            <span>
+              <ReactMarkdownCustom>{item?.content}</ReactMarkdownCustom>
+            </span>
+            {item?.edited_at && (
+              <Text italic>
+                Terakhir di edit{" "}
+                {dayjs(item?.edited_at).format("DD-MM-YYYY HH:mm:ss")}
+              </Text>
+            )}
+          </>
+        )}
         <Flex gap={10}>
           <Flex>
             <div
@@ -142,12 +173,12 @@ const DetailDiscussion = () => {
       {data && (
         <>
           <Row justify="center">
-            <Col md={16}>
+            <Col md={12}>
               <Detail item={data} />
             </Col>
           </Row>
           <Row justify="center">
-            <Col md={16}>
+            <Col md={12}>
               <Divider />
               <DiscussionsComments />
             </Col>

@@ -1,4 +1,7 @@
-import { createComment } from "@/services/asn-connect-discussions.services";
+import {
+  createComment,
+  updateComment,
+} from "@/services/asn-connect-discussions.services";
 import { parseMarkdown, uploadFiles } from "@/services/index";
 import { Comment } from "@ant-design/compatible";
 import { MarkdownEditor } from "@primer/react/drafts";
@@ -38,13 +41,16 @@ const renderMarkdown = async (markdown) => {
 
 function DiscussionCreateComment({
   discussionId,
+  commentId = null,
   parentId = null,
   withBatal = false,
   onCancel,
+  action = "create",
+  content = "",
 }) {
   const queryClient = useQueryClient();
   const { data } = useSession();
-  const [value, setValue] = useState("");
+  const [value, setValue] = useState(content);
 
   const { mutateAsync: create, isLoading: isLoadingCreate } = useMutation(
     (data) => createComment(data),
@@ -67,20 +73,53 @@ function DiscussionCreateComment({
     }
   );
 
+  const { mutateAsync: update, isLoading: isLoadingUpdate } = useMutation(
+    (data) => updateComment(data),
+    {
+      onSuccess: () => {
+        message.success("Comment updated successfully");
+        setValue("");
+        if (withBatal) onCancel();
+      },
+      onSettled: () => {
+        queryClient.invalidateQueries([
+          "asn-discussions-comment",
+          discussionId,
+        ]);
+      },
+      onError: (error) => {
+        message.error(error?.response?.data?.message);
+      },
+    }
+  );
+
   const handleCancel = () => {
     onCancel();
   };
 
   const submitMessage = async () => {
+    console.log(action);
     try {
-      const payload = {
-        discussionId,
-        data: {
-          content: value,
-          parentId,
-        },
-      };
-      await create(payload);
+      if (action === "create") {
+        const payload = {
+          discussionId,
+          data: {
+            content: value,
+            parentId,
+          },
+        };
+        await create(payload);
+      } else if (action === "edit") {
+        // do something
+        const payload = {
+          discussionId,
+          commentId,
+          data: {
+            content: value,
+          },
+        };
+        await update(payload);
+      }
     } catch (error) {
       console.log(error);
     }
@@ -89,11 +128,15 @@ function DiscussionCreateComment({
   return (
     <Comment
       avatar={
-        <AvatarUser
-          userId={data?.user?.id}
-          src={data?.user?.image}
-          alt={data?.user?.name}
-        />
+        <>
+          {action === "create" && (
+            <AvatarUser
+              userId={data?.user?.id}
+              src={data?.user?.image}
+              alt={data?.user?.name}
+            />
+          )}
+        </>
       }
       content={
         <MarkdownEditor
@@ -121,12 +164,12 @@ function DiscussionCreateComment({
               </MarkdownEditor.ActionButton>
             )}
             <MarkdownEditor.ActionButton
-              disabled={!value || isLoadingCreate}
+              disabled={!value || isLoadingCreate || isLoadingUpdate}
               variant="primary"
               size="medium"
               onClick={submitMessage}
             >
-              {isLoadingCreate ? "Loading..." : "OK"}
+              {isLoadingCreate || isLoadingUpdate ? "Loading..." : "OK"}
             </MarkdownEditor.ActionButton>
           </MarkdownEditor.Actions>
         </MarkdownEditor>
