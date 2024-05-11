@@ -42,30 +42,37 @@ export const createComment = async ({ discussionId, data }) => {
     .then((res) => res.data);
 };
 
-export const getComments = async (discussionId) => {
-  return api.get(`/user/all/${discussionId}/comments`).then((res) => res.data);
+export const getComments = async (discussionId, params) => {
+  const query = queryString.stringify(params, {
+    skipEmptyString: true,
+    skipNull: true,
+  });
+
+  return api
+    .get(`/user/all/${discussionId}/comments?${query}`)
+    .then((res) => res.data);
 };
 
 export const updateComment = async ({ discussionId, commentId, data }) => {
   return api
-    .patch(`/user/all/${discussionId}/${commentId}`, data)
+    .patch(`/user/all/${discussionId}/comments/${commentId}`, data)
     .then((res) => res.data);
 };
 
 export const deleteComment = async ({ discussionId, commentId }) => {
   return api
-    .delete(`/user/all/${discussionId}/${commentId}`)
+    .delete(`/user/all/${discussionId}/comments/${commentId}`)
     .then((res) => res.data);
 };
 
 export const upvoteComment = async ({ discussionId, commentId }) => {
   return api
-    .put(`/user/all/${discussionId}/${commentId}/votes`)
+    .put(`/user/all/${discussionId}/comments/${commentId}/votes`)
     .then((res) => res.data);
 };
 
 export const downvoteComment = async ({ discussionId, commentId }) => {
   return api
-    .delete(`/user/all/${discussionId}/${commentId}/votes`)
+    .delete(`/user/all/${discussionId}/comments/${commentId}/votes`)
     .then((res) => res.data);
 };

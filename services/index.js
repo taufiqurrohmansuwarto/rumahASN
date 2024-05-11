@@ -667,3 +667,7 @@ export const getSavedQuestions = (query) => {
 
   return api.get(`/tickets/subscribes?${params}`).then((res) => res?.data);
 };
+
+export const getUserInformationDetail = (id) => {
+  return api.get(`/users/${id}/info`).then((res) => res?.data);
+};
