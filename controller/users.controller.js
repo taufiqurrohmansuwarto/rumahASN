@@ -123,3 +123,29 @@ module.exports.getUserInformation = async (req, res) => {
     res.status(500).json({ message: "Internal Server Error", code: 500 });
   }
 };
+
+module.exports.getUserInfo = async (req, res) => {
+  try {
+    const { id } = req?.query;
+    const currentUser = req?.user;
+    const result = await User.query().findById(id);
+
+    if (!result) {
+      return res.json(null);
+    }
+
+    const { group } = currentUser;
+    const isGroupAsn = group === "MASTER" || group === "PTTPK";
+
+    const response = {
+      username: result.username,
+      image: result.image,
+      information: isGroupAsn ? result.info : null,
+    };
+
+    res.json(response);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Internal Server Error", code: 500 });
+  }
+};

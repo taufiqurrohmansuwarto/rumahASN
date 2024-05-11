@@ -11,9 +11,11 @@ import {
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   Avatar,
-  Card,
+  Col,
+  Divider,
   Flex,
   FloatButton,
+  Row,
   Space,
   Typography,
   message,
@@ -24,13 +26,9 @@ import { useRouter } from "next/router";
 
 import { useQuery } from "@tanstack/react-query";
 import ReactMarkdownCustom from "../MarkdownEditor/ReactMarkdownCustom";
-import CreateComment from "./CreateComment";
-import CommentList from "./CommentList";
+import DiscussionsComments from "./DiscussionsComments";
 
 const Detail = ({ item }) => {
-  const gotoDetail = () =>
-    router.push(`/asn-connect/asn-discussions/${item.id}/detail`);
-
   const queryClient = useQueryClient();
 
   const { mutate: upvote } = useMutation(() => upvoteDiscussion(item?.id), {
@@ -116,7 +114,7 @@ const Detail = ({ item }) => {
             >
               <Space>
                 <CommentOutlined style={{ cursor: "pointer" }} />
-                <span>{item?.comment_count}</span>
+                <span>{item?.total_comment}</span>
               </Space>
             </div>
           </Flex>
@@ -140,12 +138,20 @@ const DetailDiscussion = () => {
 
   return (
     <>
+      <FloatButton.BackTop />
       {data && (
         <>
-          <FloatButton.BackTop />
-          <Detail item={data} />
-          <CreateComment discussionId={id} />
-          <CommentList />
+          <Row justify="center">
+            <Col md={16}>
+              <Detail item={data} />
+            </Col>
+          </Row>
+          <Row justify="center">
+            <Col md={16}>
+              <Divider />
+              <DiscussionsComments />
+            </Col>
+          </Row>
         </>
       )}
     </>
