@@ -1,6 +1,7 @@
 import IPAsnByNip from "@/components/LayananSIASN/IPASNByNip";
 import Layout from "@/components/Layout";
 import PageContainer from "@/components/PageContainer";
+import EmployeeDetail from "@/components/PemutakhiranData/Admin/EmployeeDetail";
 import SiasnTab from "@/components/PemutakhiranData/Admin/SiasnTab";
 import { patchAnomali2023 } from "@/services/anomali.services";
 import { dataUtamaMasterByNip } from "@/services/master.services";
@@ -23,11 +24,13 @@ import {
   Tooltip,
   Typography,
   message,
+  Breadcrumb,
   Grid,
 } from "antd";
 import Head from "next/head";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
+import Link from "next/link";
 
 const ChangeStatusAnomali = ({ data, open, onCancel }) => {
   const [form] = Form.useForm();
@@ -234,6 +237,23 @@ const EmployeeNumberFasilitator = () => {
         <title>Rumah ASN - Detail Pegawai</title>
       </Head>
       <PageContainer
+        header={{
+          breadcrumbRender: () => (
+            <Breadcrumb>
+              <Breadcrumb.Item>
+                <Link href="/feeds">
+                  <a>Forum Kepegawaian</a>
+                </Link>
+              </Breadcrumb.Item>
+              <Breadcrumb.Item>
+                <Link href="/fasilitator-employees/master-data">
+                  <a>Master Data</a>
+                </Link>
+              </Breadcrumb.Item>
+              <Breadcrumb.Item>Detail Informasi</Breadcrumb.Item>
+            </Breadcrumb>
+          ),
+        }}
         childrenContentStyle={{
           padding: breakPoint.xs ? 0 : null,
         }}
@@ -246,14 +266,7 @@ const EmployeeNumberFasilitator = () => {
           {dataSimaster ? (
             <>
               <Stack>
-                <EmployeeBio
-                  siasn={siasn}
-                  loadingSiasn={loadingSiasn}
-                  isLoadingDataPns={isLoadingDataPns}
-                  dataPnsAll={dataPnsAll}
-                  data={dataSimaster}
-                  loading={isLoadingDataSimaster}
-                />
+                <EmployeeDetail nip={nip} />
                 <Card>
                   <SiasnTab nip={nip} />
                 </Card>

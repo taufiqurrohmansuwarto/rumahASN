@@ -35,8 +35,13 @@ function ProfileLayout({ children, tabActiveKey = "profil" }) {
     }
   };
 
+  const breakPoint = Grid.useBreakpoint();
+
   return (
     <PageContainer
+      childrenContentStyle={{
+        padding: breakPoint.xs ? 0 : null,
+      }}
       breadcrumbRender={() => (
         <Breadcrumb>
           <Breadcrumb.Item>

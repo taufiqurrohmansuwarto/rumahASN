@@ -149,7 +149,20 @@ module.exports.removeKursusSiasn = (fetcher, id) => {
 
 // kinerja periodik
 module.exports.rwKinerjaPeriodik = (fetcher, nip) => {
-  return fetcher.get(`/pns/rw-kinerjaperiodik/${nip}`);
+  return new Promise((resolve, reject) => {
+    fetcher
+      .get(`/pns/rw-kinerjaperiodik/${nip}`)
+      .then((response) => {
+        resolve(response.data);
+      })
+      .catch((error) => {
+        if (error?.code === 0) {
+          resolve([]);
+        } else {
+          reject(error);
+        }
+      });
+  });
 };
 
 // create kinerja periodik

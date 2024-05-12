@@ -14,6 +14,10 @@ export const refUrusanPemerintahan = () => {
   return api.get("/ref/urusan-pemerintahan").then((res) => res.data);
 };
 
+export const getKinerjaPeriodikPersonal = () => {
+  return api.get("/pns/kinerja-periodik").then((res) => res.data);
+};
+
 export const refDiklatStruktural = () => {
   return api.get("/ref/diklat-struktural").then((res) => res.data);
 };

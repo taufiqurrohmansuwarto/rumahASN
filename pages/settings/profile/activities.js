@@ -22,4 +22,12 @@ Activities.Auth = {
   subject: "Tickets",
 };
 
+Activities.getLayout = function getLayout(page) {
+  return (
+    <Layout>
+      <ProfileLayout tabActiveKey="activities">{page}</ProfileLayout>
+    </Layout>
+  );
+};
+
 export default Activities;

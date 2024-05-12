@@ -22,6 +22,7 @@ import {
   Col,
   DatePicker,
   Form,
+  Grid,
   Input,
   Modal,
   Row,
@@ -565,6 +566,7 @@ const jenisJabatanSiasn = (data) => {
 
 function CompareJabatanByNip({ nip }) {
   const { data: dataUser, status } = useSession();
+  const breakPoint = Grid.useBreakpoint();
 
   const { data: dataSiasn, isLoading: loadingDataSiasn } = useQuery(
     ["data-utama-siasn", nip],
@@ -627,6 +629,38 @@ function CompareJabatanByNip({ nip }) {
 
   const columnsMaster = [
     {
+      title: "Data",
+      key: "data",
+      responsive: ["xs"],
+      render: (_, record) => {
+        return (
+          <Stack>
+            <div>
+              <a href={record?.file} target="_blank" rel="noreferrer">
+                File
+              </a>
+            </div>
+            <Tag color={setJenisJabatanColor(record?.jenis_jabatan)}>
+              {record?.jenis_jabatan}
+            </Tag>
+            <Text
+              underline={record?.aktif === "Y"}
+              strong={record?.aktif === "Y"}
+            >
+              {record?.jabatan}
+            </Text>
+            <Text>
+              {record?.unor} - {record?.nomor_sk}
+            </Text>
+            <Text>
+              TMT Jabatan {record?.tmt_jabatan} - Tgl. SK {record?.tgl_sk}
+            </Text>
+            <Text>{record?.aktif === "Y" ? "Aktif" : "Tidak Aktif"}</Text>
+          </Stack>
+        );
+      },
+    },
+    {
       title: "File",
       dataIndex: "file",
       render: (_, record) => {
@@ -638,6 +672,7 @@ function CompareJabatanByNip({ nip }) {
           </div>
         );
       },
+      responsive: ["sm"],
     },
     {
       title: "Jenis",
@@ -647,6 +682,7 @@ function CompareJabatanByNip({ nip }) {
           {row?.jenis_jabatan}
         </Tag>
       ),
+      responsive: ["sm"],
     },
     {
       title: "Jabatan",
@@ -661,19 +697,37 @@ function CompareJabatanByNip({ nip }) {
           </Typography.Text>
         );
       },
+      responsive: ["sm"],
     },
     {
       title: "Unor",
       key: "unor",
       dataIndex: "unor",
+      responsive: ["sm"],
     },
-    { title: "No. SK", dataIndex: "nomor_sk", key: "nomor_sk" },
-    { title: "TMT. Jab", dataIndex: "tmt_jabatan", key: "tmt_jabatan" },
-    { title: "Tgl. SK", dataIndex: "tgl_sk", key: "tgl_sk" },
+    {
+      title: "No. SK",
+      dataIndex: "nomor_sk",
+      key: "nomor_sk",
+      responsive: ["sm"],
+    },
+    {
+      title: "TMT. Jab",
+      dataIndex: "tmt_jabatan",
+      key: "tmt_jabatan",
+      responsive: ["sm"],
+    },
+    {
+      title: "Tgl. SK",
+      dataIndex: "tgl_sk",
+      key: "tgl_sk",
+      responsive: ["sm"],
+    },
     // { title: "Aktif", dataIndex: "aktif", key: "aktif" },
     {
       title: "Aksi",
       key: "aksi",
+      responsive: ["sm"],
       render: (_, row) => {
         const data = {
           tmtJabatan: row?.tmt_jabatan
@@ -694,6 +748,40 @@ function CompareJabatanByNip({ nip }) {
 
   const columns = [
     {
+      title: "Data",
+      key: "data",
+      responsive: ["xs"],
+      render: (row, record) => {
+        const jenisJabatan = checkJenisJabatan(row);
+        return (
+          <Stack>
+            <div>
+              {record?.path?.[872] && (
+                <a
+                  href={`/helpdesk/api/siasn/ws/download?filePath=${record?.path?.[872]?.dok_uri}`}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  File
+                </a>
+              )}
+            </div>
+            <Text>
+              <Tag color={setJenisJabatanColor(jenisJabatan)}>
+                {jenisJabatan}
+              </Tag>
+            </Text>
+            <Text>
+              {namaJabatan(row)} - {row?.unorNama}
+            </Text>
+            <Text>No. SK {row?.nomorSk}</Text>
+            <Text>Tgl. SK {row?.tanggalSk}</Text>
+            <Text>TMT Jabatan {row?.tmtJabatan}</Text>
+          </Stack>
+        );
+      },
+    },
+    {
       title: "File",
       key: "file",
       render: (_, row) => {
@@ -711,6 +799,7 @@ function CompareJabatanByNip({ nip }) {
           </>
         );
       },
+      responsive: ["sm"],
     },
     {
       title: "Jenis",
@@ -721,24 +810,42 @@ function CompareJabatanByNip({ nip }) {
           <Tag color={setJenisJabatanColor(jenisJabatan)}>{jenisJabatan}</Tag>
         );
       },
+      responsive: ["sm"],
     },
     {
       title: "Jabatan",
       key: "nama_jabatan",
-
+      responsive: ["sm"],
       render: (row) => <div>{namaJabatan(row)}</div>,
     },
 
     {
       title: "Unor",
       dataIndex: "unorNama",
+      responsive: ["sm"],
     },
-    { title: "No. SK", dataIndex: "nomorSk", key: "nomorSk" },
-    { title: "TMT Jab", dataIndex: "tmtJabatan", key: "tmtJabatan" },
-    { title: "Tgl SK", dataIndex: "tanggalSk", key: "tanggalSk" },
+    {
+      title: "No. SK",
+      dataIndex: "nomorSk",
+      key: "nomorSk",
+      responsive: ["sm"],
+    },
+    {
+      title: "TMT Jab",
+      dataIndex: "tmtJabatan",
+      key: "tmtJabatan",
+      responsive: ["sm"],
+    },
+    {
+      title: "Tgl SK",
+      dataIndex: "tanggalSk",
+      key: "tanggalSk",
+      responsive: ["sm"],
+    },
     {
       title: "Aksi",
       key: "edit",
+      responsive: ["sm"],
       render: (_, row) => {
         const payload = {
           ...row,
@@ -836,7 +943,7 @@ function CompareJabatanByNip({ nip }) {
           <Col md={24} id="pangkat">
             <ComparePangkatByNip nip={nip} />
           </Col>
-          <Col md={24} id="pendidikan">
+          <Col md={24} id="pendidikan-pns">
             <ComparePendidikanByNip nip={nip} />
           </Col>
           <Col md={24} id="pindah-instansi">
@@ -848,46 +955,48 @@ function CompareJabatanByNip({ nip }) {
         </Row>
       </Col>
       <Col md={4}>
-        <Anchor
-          offsetTop={70}
-          items={[
-            {
-              key: "komparasi-jabatan",
-              href: "#komparasi-jabatan",
-              title: "Komparasi Jabatan",
-            },
-            {
-              key: "jabatan-guru",
-              href: "#jabatan-guru",
-              title: "Jabatan Guru",
-            },
-            {
-              key: "jabatan-dokter",
-              href: "#jabatan-dokter",
-              title: "Jabatan Dokter",
-            },
-            {
-              key: "pangkat",
-              href: "#pangkat",
-              title: "Pangkat",
-            },
-            {
-              key: "pendidikan",
-              href: "#pendidikan",
-              title: "Pendidikan",
-            },
-            {
-              key: "pindah-instansi",
-              href: "#pindah-instansi",
-              title: "Pindah Instansi",
-            },
-            {
-              key: "pindah-wilayah-kerja",
-              href: "#pindah-wilayah-kerja",
-              title: "Pindah Wilayah Kerja",
-            },
-          ]}
-        />
+        {breakPoint.md && (
+          <Anchor
+            offsetTop={70}
+            items={[
+              {
+                key: "komparasi-jabatan",
+                href: "#komparasi-jabatan",
+                title: "Komparasi Jabatan",
+              },
+              {
+                key: "jabatan-guru",
+                href: "#jabatan-guru",
+                title: "Jabatan Guru",
+              },
+              {
+                key: "jabatan-dokter",
+                href: "#jabatan-dokter",
+                title: "Jabatan Dokter",
+              },
+              {
+                key: "pangkat",
+                href: "#pangkat",
+                title: "Pangkat",
+              },
+              {
+                key: "pendidikan-pns",
+                href: "#pendidikan-pns",
+                title: "Pendidikan",
+              },
+              {
+                key: "pindah-instansi",
+                href: "#pindah-instansi",
+                title: "Pindah Instansi",
+              },
+              {
+                key: "pindah-wilayah-kerja",
+                href: "#pindah-wilayah-kerja",
+                title: "Pindah Wilayah Kerja",
+              },
+            ]}
+          />
+        )}
       </Col>
     </Row>
   );

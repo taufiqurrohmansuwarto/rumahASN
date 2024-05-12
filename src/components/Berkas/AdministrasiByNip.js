@@ -2,6 +2,7 @@ import {
   checkDocumentByNip,
   downloadDocumentByNip,
 } from "@/services/master.services";
+import { CloudDownloadOutlined } from "@ant-design/icons";
 import { useQuery } from "@tanstack/react-query";
 import { Button, Space, Typography } from "antd";
 import { useRouter } from "next/router";
@@ -50,8 +51,9 @@ const Tombol = ({ tmt, file, nip }) => {
         disabled={isLoading || !data}
         loading={loading}
         type="primary"
+        icon={<CloudDownloadOutlined />}
       >
-        Download {file}
+        {file}
       </Button>
     </>
   );
@@ -75,9 +77,7 @@ function AdministrasiByNip() {
     <Space direction="vertical" size="large">
       {list_tmt?.map((tmt) => (
         <>
-          <Typography.Text strong>
-            Download Administrasi PNS/PPPK TMT {tmt}
-          </Typography.Text>
+          <Typography.Text strong>PNS/PPPK TMT {tmt}</Typography.Text>
           <Dokumen nip={nip} key={tmt} tmt={tmt} />
         </>
       ))}

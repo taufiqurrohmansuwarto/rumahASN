@@ -1,8 +1,9 @@
-const { getRwKinerjaPeriodik } = require("@/services/siasn-services");
+const { rwKinerjaPeriodik } = require("@/utils/siasn-utils");
 
-const handleKinerjaPeriodikResponse = async (nip, res) => {
+const handleKinerjaPeriodikResponse = async (req, res, nip) => {
   try {
-    const data = await getRwKinerjaPeriodik(nip);
+    const fetcher = req?.siasnRequest;
+    const data = await rwKinerjaPeriodik(fetcher, nip);
     res.json(data);
   } catch (error) {
     console.log(error);
@@ -12,12 +13,12 @@ const handleKinerjaPeriodikResponse = async (nip, res) => {
 
 const getKinerjaPeriodikPersonal = async (req, res) => {
   const { employeeNumber: nip } = req.user;
-  await handleKinerjaPeriodikResponse(nip, res);
+  await handleKinerjaPeriodikResponse(req, res, nip);
 };
 
 const getKinerjaPeriodikByNip = async (req, res) => {
   const { nip } = req.query;
-  await handleKinerjaPeriodikResponse(nip, res);
+  await handleKinerjaPeriodikResponse(req, res, nip);
 };
 
 module.exports = {

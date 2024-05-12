@@ -7,6 +7,7 @@ import {
 } from "@ant-design/icons";
 import {
   Icon123,
+  IconArrowFork,
   IconArrowsExchange,
   IconBadge,
   IconBadges,
@@ -126,6 +127,12 @@ export const mysapkMenu = [
     icon: IconFileCertificate,
     color: "gray",
     path: "/penghargaan",
+  },
+  {
+    title: "Kinerja Periodik",
+    icon: IconArrowFork,
+    color: "yellow",
+    path: "/kinerja-periodik",
   },
   {
     title: "Riwayat Organisasi",
