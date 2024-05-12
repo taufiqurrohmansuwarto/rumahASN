@@ -17,7 +17,7 @@ import {
   MoreOutlined,
   RetweetOutlined,
 } from "@ant-design/icons";
-import { Stack, Text } from "@mantine/core";
+import { Stack } from "@mantine/core";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Dropdown, List, Modal, Space, Tooltip, message } from "antd";
 import { useSession } from "next-auth/react";
@@ -25,6 +25,7 @@ import { useRouter } from "next/router";
 import { useState } from "react";
 import ReactMarkdownCustom from "../MarkdownEditor/ReactMarkdownCustom";
 import AvatarUser from "../Users/AvatarUser";
+import UserText from "../Users/UserText";
 import DiscussionCreateComment from "./DiscussionCreateComment";
 
 const UserComment = ({ discussionId, comment }) => {
@@ -256,10 +257,10 @@ const UserComment = ({ discussionId, comment }) => {
         }
         author={
           <Stack>
-            <Text>
-              {comment?.user?.username}
-              {/* dot html */}
-            </Text>
+            <UserText
+              userId={comment?.user?.custom_id}
+              text={comment?.user?.username}
+            />
           </Stack>
         }
       >

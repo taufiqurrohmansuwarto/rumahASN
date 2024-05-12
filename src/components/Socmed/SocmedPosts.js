@@ -46,6 +46,8 @@ import { useState } from "react";
 import ReactMarkdownCustom from "../MarkdownEditor/ReactMarkdownCustom";
 import SocmedPostsFilter from "./SocmedPostsFilter";
 import { mineLike, personLikes } from "@/utils/client-utils";
+import AvatarUser from "../Users/AvatarUser";
+import UserText from "../Users/UserText";
 
 const uploadFile = async (file) => {
   try {
@@ -291,15 +293,19 @@ const Post = ({ post, currentUser }) => {
         <Comment
           author={
             <Stack>
-              <Link href={`/users/${post?.user?.custom_id}`}>
-                <a>{post?.user?.username}</a>
-              </Link>
+              <UserText
+                text={post?.user?.username}
+                userId={post?.user?.custom_id}
+              />
             </Stack>
           }
           actions={actions}
           avatar={
             <>
-              <Avatar src={post?.user?.image} />
+              <AvatarUser
+                src={post?.user?.image}
+                userId={post?.user?.custom_id}
+              />
             </>
           }
           datetime={

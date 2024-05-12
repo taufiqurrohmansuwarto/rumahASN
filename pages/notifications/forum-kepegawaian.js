@@ -4,7 +4,7 @@ import PageContainer from "@/components/PageContainer";
 import { DeleteOutlined } from "@ant-design/icons";
 import { Grid, Stack } from "@mantine/core";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Breadcrumb, Button, message } from "antd";
+import { Breadcrumb, Button, message, Grid as GridAntd } from "antd";
 import Head from "next/head";
 import Link from "next/link";
 import { clearChatsNotificatoins } from "@/services/index";
@@ -24,6 +24,8 @@ function ForumKepegawaianNotification() {
     }
   );
 
+  const breakPoint = GridAntd.useBreakpoint();
+
   const handleClearNotif = () => clearNotif();
 
   return (
@@ -32,6 +34,9 @@ function ForumKepegawaianNotification() {
         <title>Rumah ASN - Notifikasi</title>
       </Head>
       <PageContainer
+        childrenContentStyle={{
+          padding: breakPoint.xs ? 0 : null,
+        }}
         header={{
           breadcrumbRender: () => (
             <Breadcrumb>

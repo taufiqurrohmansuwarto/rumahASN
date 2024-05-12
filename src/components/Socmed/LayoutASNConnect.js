@@ -12,11 +12,11 @@ function LayoutASNConnect({ children, active = "asn-updates" }) {
 
   return (
     <PageContainer
-      header={{
-        avatar: {
-          src: "https://avatars.githubusercontent.com/u/8186664?v=4",
-        },
-      }}
+      // header={{
+      //   avatar: {
+      //     src: "https://avatars.githubusercontent.com/u/8186664?v=4",
+      //   },
+      // }}
       childrenContentStyle={{
         padding: breakPoint.xs ? 0 : 24,
         margin: 0,

@@ -9,7 +9,7 @@ import {
   CaretUpFilled,
   CommentOutlined,
 } from "@ant-design/icons";
-import { Stack } from "@mantine/core";
+import { Stack, Text } from "@mantine/core";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Avatar,
@@ -57,7 +57,7 @@ const DiscussionCard = ({ item }) => {
 
   return (
     <Card bordered={true} style={{ width: "100%" }}>
-      <Flex align="center" gap={50}>
+      <Flex align="center" gap={24}>
         <Flex vertical align="center" gap={4}>
           <CaretUpFilled
             style={{
@@ -91,23 +91,13 @@ const DiscussionCard = ({ item }) => {
         <Flex style={{ flexGrow: 1 }} gap={14} vertical>
           <Flex align="center" gap={4}>
             <Flex>
-              <Avatar size={28} src={item?.user?.image} />
+              <Avatar size={36} src={item?.user?.image} />
             </Flex>
             <Flex vertical>
-              <span
-                style={{
-                  fontSize: 10,
-                }}
-              >
-                {item?.user?.username}
-              </span>
-              <span
-                style={{
-                  fontSize: 10,
-                }}
-              >
+              <Text fz="xs">{item?.user?.username}</Text>
+              <Text fz="xs">
                 {dayjs(item?.created_at).locale("id").fromNow()}
-              </span>
+              </Text>
             </Flex>
           </Flex>
           <Flex vertical>
@@ -128,25 +118,9 @@ const DiscussionCard = ({ item }) => {
                   }}
                 >
                   <CommentOutlined style={{ marginRight: 8 }} />
-                  {item?.comment_count} Komentar
-                </span>
-                <span>
-                  {/* dot html */}
-                  &#x2022;
-                </span>
-                <span
-                  style={{
-                    fontSize: 12,
-                    color: "gray",
-                  }}
-                >
-                  <BookOutlined style={{ marginRight: 8 }} />
-                  Simpan
+                  {item?.total_comment} Komentar
                 </span>
               </Space>
-            </Flex>
-            <Flex>
-              <Space></Space>
             </Flex>
           </Flex>
         </Flex>
