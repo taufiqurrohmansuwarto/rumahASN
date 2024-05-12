@@ -7,16 +7,19 @@ import {
   ArrowDownOutlined,
   ArrowUpOutlined,
   CommentOutlined,
+  EditOutlined,
 } from "@ant-design/icons";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   Avatar,
+  Button,
   Col,
   Divider,
   Flex,
   FloatButton,
   Row,
   Space,
+  Tooltip,
   Typography,
   message,
 } from "antd";
@@ -53,6 +56,10 @@ const Detail = ({ item }) => {
     },
   });
 
+  const toogleEdit = () => {
+    setEdit(!edit);
+  };
+
   return (
     <Flex align="center" gap={0}>
       <Flex style={{ flexGrow: 1 }} vertical gap={20}>
@@ -73,8 +80,10 @@ const Detail = ({ item }) => {
             </Flex>
           </Flex>
           {currentUser?.user?.current_role === "admin" && (
-            <Flex onClick={() => setEdit(true)}>
-              <Text>Edit</Text>
+            <Flex>
+              <Tooltip title="Edit">
+                <Button onClick={toogleEdit} icon={<EditOutlined />} />
+              </Tooltip>
             </Flex>
           )}
         </Flex>
