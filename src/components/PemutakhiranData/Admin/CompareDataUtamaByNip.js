@@ -7,6 +7,7 @@ import {
   Anchor,
   Card,
   Col,
+  Grid,
   Row,
   Skeleton,
   Table as TableAntd,
@@ -141,6 +142,8 @@ function CompareDataUtamaByNip({ nip }) {
     dataUtamSIASNByNip(nip)
   );
 
+  const breakPoint = Grid.useBreakpoint();
+
   const { data: dataSimaster, isLoading: isLoadingDataSimaster } = useQuery(
     ["data-utama-simaster-by-nip", nip],
     () => dataUtamaMasterByNip(nip)
@@ -208,7 +211,7 @@ function CompareDataUtamaByNip({ nip }) {
           <Col md={20}>
             <Row gutter={[16, 16]}>
               <Col md={24}>
-                <Card title="Komparasi SIMASTER dan MyASN" id="komparasi-data">
+                <Card title="SIMASTER dan MyASN" id="komparasi-data">
                   <Stack>
                     <TableAntd
                       columns={columns}
@@ -226,116 +229,118 @@ function CompareDataUtamaByNip({ nip }) {
             </Row>
           </Col>
           <Col md={4}>
-            <Anchor
-              offsetTop={70}
-              items={[
-                {
-                  key: "komparasi-data",
-                  href: "#komparasi-data",
-                  title: "Komparasi Data",
-                },
-                {
-                  key: "Informasi MyASN",
-                  href: "#status-pegawai",
-                  title: "Informasi MyASN",
-                  children: [
-                    {
-                      key: "personal-information",
-                      href: "#personal-information",
-                      title: "Personal",
-                    },
-                    {
-                      key: "contact-information",
-                      href: "#contact-information",
-                      title: "Kontak",
-                    },
-                    {
-                      key: "professional-information",
-                      href: "#professional-information",
-                      title: "Professional",
-                    },
-                    {
-                      key: "pendidikan",
-                      href: "#pendidikan",
-                      title: "Pendidikan",
-                    },
-                    {
-                      key: "ASN",
-                      href: "#asn",
-                      title: "ASN",
-                    },
-                    {
-                      key: "tambahan-informasi",
-                      href: "#tambahan-informasi",
-                      title: "Tambahan Informasi",
-                    },
-                    {
-                      key: "dokumen-layanan",
-                      href: "#dokumen-layanan",
-                      title: "Dokumen Layanan",
-                    },
-                  ],
-                },
-                {
-                  key: "keluarga",
-                  href: "#keluarga",
-                  title: "Keluarga",
-                  children: [
-                    {
-                      key: "orang-tua",
-                      href: "#orang-tua",
-                      title: "Orang Tua",
-                      children: [
-                        {
-                          key: "orang-tua-simaster",
-                          href: "#orang-tua-simaster",
-                          title: "SIMASTER",
-                        },
-                        {
-                          key: "orang-tua-siasn",
-                          href: "#orang-tua-siasn",
-                          title: "SIASN",
-                        },
-                      ],
-                    },
-                    {
-                      key: "pasangan",
-                      href: "#pasangan",
-                      title: "Pasangan",
-                      children: [
-                        {
-                          key: "pasangan-simaster",
-                          href: "#pasangan-simaster",
-                          title: "SIMASTER",
-                        },
-                        {
-                          key: "pasangan-siasn",
-                          href: "#pasangan-siasn",
-                          title: "SIASN",
-                        },
-                      ],
-                    },
-                    {
-                      key: "anak",
-                      href: "#anak",
-                      title: "Anak",
-                      children: [
-                        {
-                          key: "anak-simaster",
-                          href: "#anak-simaster",
-                          title: "SIMASTER",
-                        },
-                        {
-                          key: "anak-siasn",
-                          href: "#anak-siasn",
-                          title: "SIASN",
-                        },
-                      ],
-                    },
-                  ],
-                },
-              ]}
-            />
+            {breakPoint.md && (
+              <Anchor
+                offsetTop={70}
+                items={[
+                  {
+                    key: "komparasi-data",
+                    href: "#komparasi-data",
+                    title: "Komparasi Data",
+                  },
+                  {
+                    key: "Informasi MyASN",
+                    href: "#status-pegawai",
+                    title: "Informasi MyASN",
+                    children: [
+                      {
+                        key: "personal-information",
+                        href: "#personal-information",
+                        title: "Personal",
+                      },
+                      {
+                        key: "contact-information",
+                        href: "#contact-information",
+                        title: "Kontak",
+                      },
+                      {
+                        key: "professional-information",
+                        href: "#professional-information",
+                        title: "Professional",
+                      },
+                      {
+                        key: "pendidikan",
+                        href: "#pendidikan",
+                        title: "Pendidikan",
+                      },
+                      {
+                        key: "ASN",
+                        href: "#asn",
+                        title: "ASN",
+                      },
+                      {
+                        key: "tambahan-informasi",
+                        href: "#tambahan-informasi",
+                        title: "Tambahan Informasi",
+                      },
+                      {
+                        key: "dokumen-layanan",
+                        href: "#dokumen-layanan",
+                        title: "Dokumen Layanan",
+                      },
+                    ],
+                  },
+                  {
+                    key: "keluarga",
+                    href: "#keluarga",
+                    title: "Keluarga",
+                    children: [
+                      {
+                        key: "orang-tua",
+                        href: "#orang-tua",
+                        title: "Orang Tua",
+                        children: [
+                          {
+                            key: "orang-tua-simaster",
+                            href: "#orang-tua-simaster",
+                            title: "SIMASTER",
+                          },
+                          {
+                            key: "orang-tua-siasn",
+                            href: "#orang-tua-siasn",
+                            title: "SIASN",
+                          },
+                        ],
+                      },
+                      {
+                        key: "pasangan",
+                        href: "#pasangan",
+                        title: "Pasangan",
+                        children: [
+                          {
+                            key: "pasangan-simaster",
+                            href: "#pasangan-simaster",
+                            title: "SIMASTER",
+                          },
+                          {
+                            key: "pasangan-siasn",
+                            href: "#pasangan-siasn",
+                            title: "SIASN",
+                          },
+                        ],
+                      },
+                      {
+                        key: "anak",
+                        href: "#anak",
+                        title: "Anak",
+                        children: [
+                          {
+                            key: "anak-simaster",
+                            href: "#anak-simaster",
+                            title: "SIMASTER",
+                          },
+                          {
+                            key: "anak-siasn",
+                            href: "#anak-siasn",
+                            title: "SIASN",
+                          },
+                        ],
+                      },
+                    ],
+                  },
+                ]}
+              />
+            )}
           </Col>
         </Row>
       </Skeleton>

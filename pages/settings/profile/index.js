@@ -4,7 +4,17 @@ import ProfileLayout from "@/components/ProfileSettings/ProfileLayout";
 import { ownProfile, updateOwnProfile } from "@/services/index";
 import { Stack } from "@mantine/core";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Avatar, Button, Col, Form, Input, Row, Skeleton, message } from "antd";
+import {
+  Avatar,
+  Button,
+  Col,
+  Form,
+  Grid,
+  Input,
+  Row,
+  Skeleton,
+  message,
+} from "antd";
 import { useSession } from "next-auth/react";
 import Head from "next/head";
 
@@ -56,7 +66,7 @@ const ProfileForm = ({ data, user }) => {
             <Input readOnly disabled />
           </Form.Item>
           <Form.Item label="Perangkat Daerah" name="perangkat_daerah">
-            <Input readOnly disabled />
+            <Input.TextArea readOnly disabled />
           </Form.Item>
         </>
       )}
@@ -79,16 +89,21 @@ const ProfileForm = ({ data, user }) => {
 };
 
 function Profile() {
-  const { data: dataUser, status } = useSession();
+  const { data: dataUser } = useSession();
 
   const { data, isLoading } = useQuery(["profile"], () => ownProfile(), {});
+  const breakPoint = Grid.useBreakpoint();
 
   return (
     <>
       <Head>
         <title>Rumah ASN - Pengaturan - Profil</title>
       </Head>
-      <PageContainer>
+      <PageContainer
+        childrenContentStyle={{
+          padding: breakPoint.xs ? 0 : null,
+        }}
+      >
         <Row>
           <Col md={12} xs={24}>
             <Stack>

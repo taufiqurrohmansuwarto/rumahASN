@@ -15,8 +15,8 @@ function DataUtama() {
         <title>Integrasi MyASN - Data Utama</title>
       </Head>
       <EmployeesLayout active="data-utama">
-        <CompareDataUtamaByNip nip={nip} />
-        <FloatButton.BackTop />
+        {/* <CompareDataUtamaByNip nip={nip} /> */}
+        {/* <FloatButton.BackTop /> */}
       </EmployeesLayout>
     </>
   );

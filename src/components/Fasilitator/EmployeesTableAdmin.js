@@ -8,6 +8,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Avatar, Space, Table, Tag, Tooltip, Typography } from "antd";
 import { useRouter } from "next/router";
 import EmployeesTableFilterAdmin from "../Filter/EmployeesTableFilterAdmin";
+import { useSession } from "next-auth/react";
 
 const TagKomparasi = ({ komparasi, nama }) => {
   return (
@@ -22,6 +23,8 @@ const TagKomparasi = ({ komparasi, nama }) => {
 
 function EmployeesTableAdmin() {
   const router = useRouter();
+  const { data: currentUser } = useSession();
+
   const { data, isLoading, isFetching } = useQuery(
     ["employees-paging-admin", router?.query],
     () => getAllEmployeesPagingAdmin(router?.query),
@@ -39,7 +42,13 @@ function EmployeesTableAdmin() {
   };
 
   const gotoDetail = (nip) => {
-    router.push(`/fasilitator-employees/master-data/${nip}`);
+    const currentRole = currentUser?.user?.current_role;
+
+    if (currentRole === "admin") {
+      router.push(`/apps-managements/integrasi/siasn/${nip}`);
+    } else {
+      router.push(`/fasilitator-employees/master-data/${nip}`);
+    }
   };
 
   const columns = [
