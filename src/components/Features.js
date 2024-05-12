@@ -8,6 +8,8 @@ import {
   rem,
 } from "@mantine/core";
 import {
+  IconBrand4chan,
+  IconBrandAirbnb,
   IconBrandZoom,
   IconCertificate,
   IconChartInfographic,
@@ -21,9 +23,9 @@ import {
 export const MOCKDATA = [
   {
     icon: IconMessages,
-    title: "Forum Diskusi",
+    title: "Forum Kepegawaian",
     description:
-      "Fitur Forum Diskusi Rumah ASN memberikan ruang bagi pengguna untuk berinteraksi, berdiskusi, dan bertukar informasi mengenai berbagai hal yang berkaitan dengan kepegawaian, langsung dengan pejabat BKD yang berkompeten di bidangnya",
+      "Fitur Forum Kepegawaian Rumah ASN memberikan ruang bagi pengguna untuk berinteraksi, berdiskusi, dan bertukar informasi mengenai berbagai hal yang berkaitan dengan kepegawaian, langsung dengan pejabat BKD yang berkompeten di bidangnya",
   },
   {
     icon: IconStar,
@@ -60,6 +62,18 @@ export const MOCKDATA = [
     title: "Coaching Clinic",
     description:
       "Pelatihan virtual tentang kepegawaian daerah di platform digital. Setiap sesi dirancang sesuai tema untuk diskusi mendalam dengan ahli BKD. Tujuannya adalah mempermudah informasi dan meningkatkan kualitas pelayanan BKD.",
+  },
+  {
+    icon: IconBrand4chan,
+    title: "Smart ASN Connect - ASN Updates",
+    description:
+      "Hayo, siapa yang pengen eksis? Fitur ini mirip kayak Facebook atau Twitter, tapi khusus buat kalian, para ASN. Di sini bisa loh update status yang informatif dan inspiratif. Share pengalaman atau info bermanfaat yang bisa memotivasi teman-teman ASN lainnya. Jangan lupa, tetap keep it professional ya!",
+  },
+  {
+    icon: IconBrandAirbnb,
+    title: "Smart ASN Connect - ASN Discussions",
+    description:
+      "Udah siap diskusi yang lebih seru dan fokus? Di fitur ini, BKD kasih tema-tema panas untuk dibahas. Dari mulai strategi kerja sampe perkembangan terbaru di sektor pemerintahan, semua bisa jadi topik diskusi. Fitur ini bener-bener designed buat memfasilitasi diskusi yang konstruktif dan menghasilkan ide-ide cemerlang untuk kemajuan bersama.",
   },
 ];
 
