@@ -3,6 +3,7 @@ import PageContainer from "@/components/PageContainer";
 import EmployeeDetail from "@/components/PemutakhiranData/Admin/EmployeeDetail";
 import SiasnTab from "@/components/PemutakhiranData/Admin/SiasnTab";
 import { Breadcrumb, Card, Flex, Grid } from "antd";
+import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
 
@@ -16,6 +17,9 @@ function DetailNIP() {
   const { nip } = router.query;
   return (
     <>
+      <Head>
+        <title>Integrasi SIASN - Detail Informasi</title>
+      </Head>
       <PageContainer
         onBack={handleBack}
         childrenContentStyle={{

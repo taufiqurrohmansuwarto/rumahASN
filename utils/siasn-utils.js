@@ -11,6 +11,10 @@ module.exports.saveUnorJabatan = (fetcher, data) => {
   return fetcher.post(`/jabatan/unorjabatan/save`, data);
 };
 
+module.exports.removeJabatan = (fetcher, jabatanId) => {
+  return fetcher.delete(`/jabatan/delete/${jabatanId}`);
+};
+
 module.exports.dataUtama = (fetcher, nip) => {
   return fetcher.get(`/pns/data-utama/${nip}`);
 };
