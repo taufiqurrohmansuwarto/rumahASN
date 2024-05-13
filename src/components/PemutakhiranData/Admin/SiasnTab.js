@@ -34,6 +34,9 @@ function SiasnTab({ nip }) {
         <Tabs.TabPane tab="Data Utama" key="1">
           <CompareDataUtamaByNip nip={nip} />
         </Tabs.TabPane>
+        <Tabs.TabPane tab="Berkas" key="berkas">
+          <AdministrasiByNip />
+        </Tabs.TabPane>
         <Tabs.TabPane tab="Info" key="2">
           <CompareJabatanByNip nip={nip} />
         </Tabs.TabPane>
@@ -69,9 +72,6 @@ function SiasnTab({ nip }) {
         </Tabs.TabPane>
         <Tabs.TabPane tab="Keluarga" key="rw-keluarga">
           <CompareKeluargaByNip nip={nip} />
-        </Tabs.TabPane>
-        <Tabs.TabPane tab="Berkas" key="berkas">
-          <AdministrasiByNip />
         </Tabs.TabPane>
         <Tabs.TabPane tab="Masa Kerja" key="8">
           <CompareMasaKerjaByNip nip={nip} />
