@@ -324,6 +324,10 @@ export const postUnorJabatanByNip = async ({ nip, data }) => {
   return api.post(`/admin/${nip}/unor-jabatan`, data).then((res) => res.data);
 };
 
+export const removeJabatan = async ({ nip, id }) => {
+  return api.delete(`/admin/${nip}/rw-jabatan/${id}`).then((res) => res.data);
+};
+
 export const getDaftarPemberhentianSIASN = (data) => {
   const { tglAwal, tglAkhir } = data;
 

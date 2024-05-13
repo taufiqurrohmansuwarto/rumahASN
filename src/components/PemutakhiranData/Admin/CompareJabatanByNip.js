@@ -21,12 +21,14 @@ import {
   Card,
   Col,
   DatePicker,
+  Divider,
   Form,
   Grid,
   Input,
   Modal,
   Row,
   Select,
+  Space,
   Table,
   Tag,
   Typography,
@@ -51,6 +53,7 @@ import FormEditJabatanByNip from "./FormEditJabatanByNip";
 import ComparePendidikanByNip from "./ComparePendidikanByNip";
 import ComparePindahInstansiByNip from "./ComparePindahInstansiByNip";
 import ComparePwkByNip from "./ComparePwkByNip";
+import HapusJabatan from "./HapusJabatan";
 dayjs.locale("id");
 
 const format = "DD-MM-YYYY";
@@ -741,7 +744,11 @@ function CompareJabatanByNip({ nip }) {
           jenis_jabatan: row?.jenis_jabatan,
         };
 
-        return <FormUnorJabatanTransfer data={data} kata="Pakai" />;
+        return (
+          <Space>
+            <FormUnorJabatanTransfer data={data} kata="Pakai" />
+          </Space>
+        );
       },
     },
   ];
@@ -868,9 +875,15 @@ function CompareJabatanByNip({ nip }) {
         };
 
         if (data?.[0]?.id === row?.id) {
-          return <FormUnorJabatanTransfer data={payload} kata="Edit" />;
+          return (
+            <Space>
+              <FormUnorJabatanTransfer data={payload} kata="Edit" />
+              <Divider type="vertical" />
+              <HapusJabatan id={row?.id} />
+            </Space>
+          );
         } else {
-          return null;
+          return <HapusJabatan id={row?.id} />;
         }
       },
     },
