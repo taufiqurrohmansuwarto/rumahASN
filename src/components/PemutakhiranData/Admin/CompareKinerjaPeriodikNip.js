@@ -1,7 +1,9 @@
 import { getRwKinerjaPeriodikByNip } from "@/services/siasn-services";
+import { Stack } from "@mantine/core";
 import { useQuery } from "@tanstack/react-query";
-import { Card, Table } from "antd";
+import { Card, Flex, Table } from "antd";
 import React from "react";
+import CreateKinerjaPeriodik from "./CreateKinerjaPeriodik";
 
 const CompareKinerjaPeriodikNip = ({ nip }) => {
   const { data, isLoading } = useQuery(
@@ -18,17 +20,22 @@ const CompareKinerjaPeriodikNip = ({ nip }) => {
     { title: "Presentase", dataIndex: "persentase" },
     { title: "Jabatan", dataIndex: "jabatan" },
     { title: "Koefisien", dataIndex: "koefisen" },
-    { title: "" },
+    { title: "Aksi", key: "aksi", render: (_, row) => <a>Hapus</a> },
   ];
 
   return (
     <Card title="Kinerja Periodik" id="kinerja-periodik">
-      <Table
-        pagination={false}
-        columns={columns}
-        dataSource={data}
-        loading={isLoading}
-      />
+      <div style={{ marginBottom: 10 }}>
+        <CreateKinerjaPeriodik />
+      </div>
+      <Flex vertical gap={10}>
+        <Table
+          pagination={false}
+          columns={columns}
+          dataSource={data}
+          loading={isLoading}
+        />
+      </Flex>
     </Card>
   );
 };
