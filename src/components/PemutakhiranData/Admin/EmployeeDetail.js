@@ -30,6 +30,7 @@ const EmployeeDescriptionMaster = ({ data, loading }) => {
         layout={breakPoint?.xs ? "vertical" : "horizontal"}
       >
         <Descriptions.Item label="NIP">{data?.nip_baru}</Descriptions.Item>
+        <Descriptions.Item label="Nama">{data?.nama}</Descriptions.Item>
         <Descriptions.Item label="Usia">
           {getUmur(data?.tgl_lahir)} Tahun
         </Descriptions.Item>

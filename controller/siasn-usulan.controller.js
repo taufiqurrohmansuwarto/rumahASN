@@ -11,6 +11,7 @@ const fetchDataUsulan = async (
     const response = result?.data;
     res.json(response);
   } catch (error) {
+    console.log(error);
     res.status(500).json({ message: error.message });
   }
 };
@@ -36,7 +37,7 @@ const usulanPerbaikanNamaByNip = async (req, res) => {
 const usulanPenyesuaianMasaKerjaByNip = async (req, res) => {
   const { employee_number: employeeNumber } = req?.user;
   const { fetcher } = req;
-  fetchDataUsulan(req, res, fetcher, "mk", employeeNumber);
+  fetchDataUsulan(req, res, fetcher, "pmk", employeeNumber);
 };
 
 const usulanPencantumanGelarByNip = async (req, res) => {

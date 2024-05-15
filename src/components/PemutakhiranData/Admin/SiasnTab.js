@@ -19,6 +19,7 @@ import ComparePwkByNip from "./ComparePwkByNip";
 import CompareSKP22ByNip from "./CompareSKP22ByNip";
 import AdministrasiByNip from "@/components/Berkas/AdministrasiByNip";
 import ComparePnsUnorByNip from "./ComparePnsUnorByNip";
+import CompareKinerjaPeriodikNip from "./CompareKinerjaPeriodikNip";
 
 function SiasnTab({ nip }) {
   const breakPoint = Grid.useBreakpoint();
@@ -39,6 +40,9 @@ function SiasnTab({ nip }) {
         </Tabs.TabPane>
         <Tabs.TabPane tab="Info" key="2">
           <CompareJabatanByNip nip={nip} />
+        </Tabs.TabPane>
+        <Tabs.TabPane tab="Kinerja Periodik" key="kinerja-periodik">
+          <CompareKinerjaPeriodikNip nip={nip} />
         </Tabs.TabPane>
         <Tabs.TabPane tab="Jabatan Guru" key="jabatan_guru">
           <CompareJabatanGuruByNip nip={nip} />

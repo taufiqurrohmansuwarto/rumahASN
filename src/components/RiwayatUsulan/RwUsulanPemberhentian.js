@@ -1,6 +1,7 @@
 import { usulanKenaikanPangkat } from "@/services/usulan-siasn.services";
 import { useQuery } from "@tanstack/react-query";
 import React from "react";
+import { Table } from "antd";
 
 function RwUsulanKenaikanPangkat() {
   const { data, isLoading } = useQuery(
@@ -9,7 +10,25 @@ function RwUsulanKenaikanPangkat() {
     {}
   );
 
-  return <div>{JSON.stringify(data)}</div>;
+  const columns = [
+    { title: "Nama", dataIndex: "nama" },
+    { title: "NIP", dataIndex: "nip" },
+    { title: "Status Usulan", dataIndex: "status_usulan" },
+    { title: "Tipe", dataIndex: "type" },
+    { title: "Tanggal Usulan", dataIndex: "tanggal_usulan" },
+    { title: "Jenis Layanan", dataIndex: "jenis_layanan_nama" },
+  ];
+
+  return (
+    <div>
+      <Table
+        pagination={false}
+        columns={columns}
+        dataSource={data}
+        loading={isLoading}
+      />
+    </div>
+  );
 }
 
 export default RwUsulanKenaikanPangkat;
