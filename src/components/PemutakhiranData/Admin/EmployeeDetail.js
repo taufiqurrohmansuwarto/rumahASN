@@ -1,3 +1,4 @@
+import IPAsnByNip from "@/components/LayananSIASN/IPASNByNip";
 import { dataUtamaMasterByNip } from "@/services/master.services";
 import { dataUtamSIASNByNip, getPnsAllByNip } from "@/services/siasn-services";
 import { getUmur } from "@/utils/client-utils";
@@ -29,8 +30,8 @@ const EmployeeDescriptionMaster = ({ data, loading }) => {
         column={1}
         layout={breakPoint?.xs ? "vertical" : "horizontal"}
       >
-        <Descriptions.Item label="NIP">{data?.nip_baru}</Descriptions.Item>
         <Descriptions.Item label="Nama">{data?.nama}</Descriptions.Item>
+        <Descriptions.Item label="NIP">{data?.nip_baru}</Descriptions.Item>
         <Descriptions.Item label="Usia">
           {getUmur(data?.tgl_lahir)} Tahun
         </Descriptions.Item>
@@ -61,6 +62,7 @@ const EmployeeContent = ({ data, loading }) => {
             <Avatar size={110} shape="square" src={data?.master?.foto} />
           </div>
           <EmployeeDescriptionMaster loading={loading} data={data?.master} />
+          <IPAsnByNip nip={data?.master?.nip_baru} />
         </Flex>
       </Col>
     </Row>
