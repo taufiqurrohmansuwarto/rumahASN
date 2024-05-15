@@ -1,4 +1,13 @@
-import { Button, Form, Input, InputNumber, Modal } from "antd";
+import {
+  Button,
+  Col,
+  DatePicker,
+  Form,
+  Input,
+  InputNumber,
+  Modal,
+  Row,
+} from "antd";
 import React from "react";
 import { useState } from "react";
 
@@ -48,18 +57,27 @@ const ModalCreate = ({ visible, onClose }) => {
     <Modal
       centered
       width={800}
-      title="Basic Modal"
+      title="Tambah Kinerja Periodik"
       open={visible}
       onOk={onClose}
       onCancel={onClose}
     >
       <Form layout="vertical" form={form} onFinish={onFinish}>
-        <Form.Item name="bulanMulaiPenilaian" label="Bulan Mulai Penilaian">
-          <InputNumber />
-        </Form.Item>
-        <Form.Item name="bulanSelesaiPenilaian" label="Bulan Selesai Penilaian">
-          <InputNumber />
-        </Form.Item>
+        <Row gutter={[16, 16]}>
+          <Col md={8}>
+            <Form.Item name="bulanMulaiPenilaian" label="Bulan Mulai Penilaian">
+              <DatePicker picker="month" />
+            </Form.Item>
+          </Col>
+          <Col md={8}>
+            <Form.Item
+              name="bulanSelesaiPenilaian"
+              label="Bulan Selesai Penilaian"
+            >
+              <DatePicker picker="month" />
+            </Form.Item>
+          </Col>
+        </Row>
         <Form.Item name="hasilKinerjaNilai" label="Hasil Kinerja Nilai">
           <InputNumber />
         </Form.Item>
@@ -73,13 +91,13 @@ const ModalCreate = ({ visible, onClose }) => {
           <InputNumber />
         </Form.Item>
         <Form.Item name="tahun" label="Tahun">
-          <InputNumber />
+          <DatePicker picker="year" />
         </Form.Item>
         <Form.Item name="tahunMulaiPenilaian" label="Tahun Mulai Penilaian">
-          <InputNumber />
+          <DatePicker picker="year" />
         </Form.Item>
         <Form.Item name="tahunSelesaiPenilaian" label="Tahun Selesai Penilaian">
-          <InputNumber />
+          <DatePicker picker="year" />
         </Form.Item>
       </Form>
     </Modal>

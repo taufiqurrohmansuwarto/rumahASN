@@ -447,6 +447,7 @@ function CompareAngkaKreditByNip({ nip }) {
               style={{
                 marginBottom: 10,
               }}
+              disabled
               type="primary"
               onClick={handleVisible}
             >
