@@ -1,6 +1,6 @@
 import React from "react";
 import PageContainer from "@/components/PageContainer";
-import { Breadcrumb } from "antd";
+import { Breadcrumb, Grid } from "antd";
 import Link from "next/link";
 import { useRouter } from "next/router";
 
@@ -16,8 +16,13 @@ function RiwayatUsulanLayout({
 
   const handleBack = () => router?.back();
 
+  const breakPoint = Grid.useBreakpoint();
+
   return (
     <PageContainer
+      childrenContentStyle={{
+        padding: breakPoint.xs ? 0 : null,
+      }}
       header={{
         breadcrumbRender: () => (
           <Breadcrumb>

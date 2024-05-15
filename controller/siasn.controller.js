@@ -1334,7 +1334,7 @@ const kinerjaPeriodikByNip = async (req, res) => {
 
     const result = await rwKinerjaPeriodik(request, nip);
 
-    res.json(result?.data?.data);
+    res.json(result?.data);
   } catch (error) {
     console.log(error);
     res.status(500).json({ code: 500, message: "Internal Server Error" });
