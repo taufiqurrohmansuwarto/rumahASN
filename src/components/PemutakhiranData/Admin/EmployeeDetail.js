@@ -4,7 +4,17 @@ import { dataUtamSIASNByNip, getPnsAllByNip } from "@/services/siasn-services";
 import { getUmur } from "@/utils/client-utils";
 import { Alert } from "@mantine/core";
 import { useQuery } from "@tanstack/react-query";
-import { Avatar, Card, Col, Descriptions, Flex, Grid, Row } from "antd";
+import {
+  Avatar,
+  Card,
+  Col,
+  Descriptions,
+  Flex,
+  Grid,
+  Row,
+  Tag,
+  Tooltip,
+} from "antd";
 
 // import { patchAnomali2023 } from "@/services/anomali.services";
 
@@ -57,15 +67,43 @@ const EmployeeContent = ({ data, loading }) => {
   return (
     <Row gutter={[8, 16]}>
       <Col sm={24} md={24}>
-        <Flex gap={20} justify="space-between">
-          <div>
-            <Avatar size={110} shape="square" src={data?.master?.foto} />
-          </div>
-          <EmployeeDescriptionMaster loading={loading} data={data?.master} />
-          <IPAsnByNip nip={data?.master?.nip_baru} />
+        <Flex gap={10} vertical>
+          <Flex>
+            <Tooltip title="Status Kepegawaian SIMASTER">
+              <StatusMaster status={data?.master?.status} />
+            </Tooltip>
+            <Tooltip title="Status Kepegawaian SIASN">
+              <StatusSIASN
+                status={data?.siasn?.statusPegawai}
+                kedudukanNama={data?.siasn?.kedudukanPnsNama}
+              />
+            </Tooltip>
+          </Flex>
+          <Flex gap={20} justify="space-between">
+            <div>
+              <Avatar size={110} shape="square" src={data?.master?.foto} />
+            </div>
+            <EmployeeDescriptionMaster loading={loading} data={data?.master} />
+          </Flex>
         </Flex>
       </Col>
     </Row>
+  );
+};
+
+const StatusSIASN = ({ status, kedudukanNama }) => {
+  return (
+    <Tag color="orange">
+      {status} - {kedudukanNama}
+    </Tag>
+  );
+};
+
+const StatusMaster = ({ status }) => {
+  return (
+    <Tag color={status === "Aktif" ? "green" : "red"}>
+      {status === "Aktif" ? "Pegawai Aktif" : "Pegawai Non Aktif"}
+    </Tag>
   );
 };
 
@@ -96,6 +134,9 @@ function EmployeeDetail({ nip }) {
         }}
       />
       <EmployeeUnor data={dataPnsAll} />
+      <Flex align="start" justify="start">
+        <IPAsnByNip tahun={2023} nip={dataSimaster?.nip_baru} />
+      </Flex>
     </Card>
   );
 }
