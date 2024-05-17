@@ -44,12 +44,12 @@ function SiasnTab({ nip }) {
         <Tabs.TabPane tab="Kinerja Periodik" key="kinerja-periodik">
           <CompareKinerjaPeriodikNip nip={nip} />
         </Tabs.TabPane>
-        <Tabs.TabPane tab="Jabatan Guru" key="jabatan_guru">
+        {/* <Tabs.TabPane tab="Jabatan Guru" key="jabatan_guru">
           <CompareJabatanGuruByNip nip={nip} />
         </Tabs.TabPane>
         <Tabs.TabPane tab="Jabatan Dokter" key="jabatan_dokter">
           <CompareJabatanDokterByNip nip={nip} />
-        </Tabs.TabPane>
+        </Tabs.TabPane> */}
         <Tabs.TabPane tab="Pangkat & Golongan" key="6">
           <ComparePangkatByNip nip={nip} />
         </Tabs.TabPane>
@@ -59,9 +59,9 @@ function SiasnTab({ nip }) {
         <Tabs.TabPane tab="Kinerja" key="4">
           <CompareSKP22ByNip nip={nip} />
         </Tabs.TabPane>
-        <Tabs.TabPane tab="Pendidikan" key="5">
+        {/* <Tabs.TabPane tab="Pendidikan" key="5">
           <ComparePendidikanByNip nip={nip} />
-        </Tabs.TabPane>
+        </Tabs.TabPane> */}
         {/* <Tabs.TabPane tab="Pencantuman Gelar" key="pencantuman-gelar">
         <PencantumanGelarByNip nip={nip} />
       </Tabs.TabPane> */}
