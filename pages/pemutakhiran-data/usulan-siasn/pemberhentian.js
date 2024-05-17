@@ -1,5 +1,6 @@
 import Layout from "@/components/Layout";
 import RiwayatUsulanLayout from "@/components/RiwayatUsulan/RiwayatUsulanLayout";
+import RwUsulanPemberhentian from "@/components/RiwayatUsulan/RwUsulanPemberhentian";
 import { Card } from "antd";
 import Head from "next/head";
 
@@ -15,7 +16,9 @@ const Pemberhentian = () => {
         active="pemberhentian"
         breadcrumbTitle="Usulan Pemberhentian"
       >
-        <Card></Card>
+        <Card>
+          <RwUsulanPemberhentian />
+        </Card>
       </RiwayatUsulanLayout>
     </>
   );

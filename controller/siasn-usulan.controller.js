@@ -31,7 +31,7 @@ const usulanPemberhentianByNip = async (req, res) => {
 const usulanPerbaikanNamaByNip = async (req, res) => {
   const { employee_number: employeeNumber } = req?.user;
   const { fetcher } = req;
-  fetchDataUsulan(req, res, fetcher, "perbaikan-nama", employeeNumber);
+  fetchDataUsulan(req, res, fetcher, "skk", employeeNumber);
 };
 
 const usulanPenyesuaianMasaKerjaByNip = async (req, res) => {

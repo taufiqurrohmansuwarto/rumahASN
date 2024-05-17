@@ -1,5 +1,6 @@
 import Layout from "@/components/Layout";
 import RiwayatUsulanLayout from "@/components/RiwayatUsulan/RiwayatUsulanLayout";
+import RwUsulanPerbaikanNama from "@/components/RiwayatUsulan/RwUsulanPerbaikanNama";
 import { Card } from "antd";
 import Head from "next/head";
 
@@ -15,7 +16,9 @@ const PerbaikanNama = () => {
         active="perbaikan-nama"
         breadcrumbTitle="Usulan Perbaikan Nama"
       >
-        <Card></Card>
+        <Card>
+          <RwUsulanPerbaikanNama />
+        </Card>
       </RiwayatUsulanLayout>
     </>
   );
