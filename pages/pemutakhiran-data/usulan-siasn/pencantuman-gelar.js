@@ -2,6 +2,8 @@ import Layout from "@/components/Layout";
 import RiwayatUsulanLayout from "@/components/RiwayatUsulan/RiwayatUsulanLayout";
 import { Card } from "antd";
 import Head from "next/head";
+import RiwayatPencantumanGelar from "../pencantuman-gelar";
+import RwUsulanPencantumanGelar from "@/components/RiwayatUsulan/RwUsulanPencantumanGelar";
 
 const PencantumanGelar = () => {
   return (
@@ -15,7 +17,9 @@ const PencantumanGelar = () => {
         active="pencantuman-gelar"
         breadcrumbTitle="Usulan Pencantuman Gelar"
       >
-        <Card></Card>
+        <Card>
+          <RwUsulanPencantumanGelar />
+        </Card>
       </RiwayatUsulanLayout>
     </>
   );
