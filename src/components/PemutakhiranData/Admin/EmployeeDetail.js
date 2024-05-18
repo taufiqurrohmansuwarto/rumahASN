@@ -12,23 +12,26 @@ import {
   Flex,
   Grid,
   Row,
+  Spin,
   Tag,
   Tooltip,
 } from "antd";
 
 // import { patchAnomali2023 } from "@/services/anomali.services";
 
-const EmployeeUnor = ({ data }) => {
+const EmployeeUnor = ({ data, loading }) => {
   return (
     <Alert title="Informasi ASN Via SIASN" color="yellow">
-      <Row>
-        <Col span={24}>
-          {data?.nama} ({data?.nip_baru}) - {data?.unor_nm}
-        </Col>
-        <Col span={24}>
-          {data?.jabatan_nama} - {data?.golongan_nm}
-        </Col>
-      </Row>
+      <Spin spinning={loading}>
+        <Row>
+          <Col span={24}>
+            {data?.nama} ({data?.nip_baru}) - {data?.unor_nm}
+          </Col>
+          <Col span={24}>
+            {data?.jabatan_nama} - {data?.golongan_nm}
+          </Col>
+        </Row>
+      </Spin>
     </Alert>
   );
 };
@@ -135,7 +138,7 @@ function EmployeeDetail({ nip }) {
           pns: dataPnsAll,
         }}
       />
-      <EmployeeUnor data={dataPnsAll} />
+      <EmployeeUnor loading={isLoadingDataPns} data={dataPnsAll} />
       <Flex align="start" justify="start">
         <IPAsnByNip tahun={2023} nip={dataSimaster?.nip_baru} />
       </Flex>
