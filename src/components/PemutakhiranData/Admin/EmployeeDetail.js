@@ -25,7 +25,9 @@ const EmployeeUnor = ({ data }) => {
         <Col span={24}>
           {data?.nama} ({data?.nip_baru}) - {data?.unor_nm}
         </Col>
-        <Col span={24}>{data?.jabatan_nama}</Col>
+        <Col span={24}>
+          {data?.jabatan_nama} - {data?.golongan_nm}
+        </Col>
       </Row>
     </Alert>
   );

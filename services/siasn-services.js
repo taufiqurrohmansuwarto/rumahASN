@@ -80,6 +80,16 @@ export const penghargaanByNip = (nip) => {
   return api.get(`/admin/${nip}/rw-penghargaan`).then((res) => res.data);
 };
 
+export const createPenghargaanByNip = ({ nip, data }) => {
+  return api.post(`/admin/${nip}/rw-penghargaan`, data).then((res) => res.data);
+};
+
+export const hapusPenghargaanByNip = ({ nip, id }) => {
+  return api
+    .delete(`/admin/${nip}/rw-penghargaan/${id}`)
+    .then((res) => res.data);
+};
+
 export const dataRiwayatMasaKerja = (nip) => {
   return api.get(`/admin/${nip}/rw-masakerja`).then((res) => res.data);
 };

@@ -20,6 +20,7 @@ import CompareSKP22ByNip from "./CompareSKP22ByNip";
 import AdministrasiByNip from "@/components/Berkas/AdministrasiByNip";
 import ComparePnsUnorByNip from "./ComparePnsUnorByNip";
 import CompareKinerjaPeriodikNip from "./CompareKinerjaPeriodikNip";
+import SiasnTrackingLayanan from "./SiasnTrackingLayanan";
 
 function SiasnTab({ nip }) {
   const breakPoint = Grid.useBreakpoint();
@@ -89,14 +90,17 @@ function SiasnTab({ nip }) {
         <Tabs.TabPane tab="Hukuman Disiplin" key="hukdis">
           <CompareHukdisByNip nip={nip} />
         </Tabs.TabPane>
-        <Tabs.TabPane tab="PNS Unor" key="pns-unor">
+        {/* <Tabs.TabPane tab="PNS Unor" key="pns-unor">
           <ComparePnsUnorByNip nip={nip} />
-        </Tabs.TabPane>
+        </Tabs.TabPane> */}
         <Tabs.TabPane tab="CLTN" key="cltn">
           <CompareCLTNByNip nip={nip} />
         </Tabs.TabPane>
         <Tabs.TabPane tab="Penghargaan" key="penghargaan">
           <ComparePenghargaanByNip nip={nip} />
+        </Tabs.TabPane>
+        <Tabs.TabPane tab="Tracking SIASN" key="tracking-siasn">
+          <SiasnTrackingLayanan nip={nip} />
         </Tabs.TabPane>
       </Tabs>
     </>

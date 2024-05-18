@@ -1,3 +1,5 @@
+const { OrderedListOutlined } = require("@ant-design/icons");
+
 module.exports.riwayatGolonganPangkat = (fetcher, nip) => {
   return fetcher.get(`/pns/rw-golongan/${nip}`);
 };
@@ -88,6 +90,14 @@ module.exports.riwayatPnsUnor = (fetcher, nip) => {
 
 module.exports.riwayatPenghargaan = (fetcher, nip) => {
   return fetcher.get(`/pns/rw-penghargaan/${nip}`);
+};
+
+module.exports.tambahRiwayatPengharggan = (fetcher, data) => {
+  return fetcher.post(`/penghargaan/save`, data);
+};
+
+module.exports.hapusRiwayatPenghargaan = (fetcher, id) => {
+  return fetcher.delete(`/penghargaan/delete/${id}`);
 };
 
 module.exports.riwayatPindahInstansi = (fetcher, nip) => {
