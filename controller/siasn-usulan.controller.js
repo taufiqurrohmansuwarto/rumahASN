@@ -11,9 +11,15 @@ const fetchDataUsulan = async (
     const response = result?.data;
     res.json(response);
   } catch (error) {
-    console.log(error);
+    // console.log(error);
     res.status(500).json({ message: error.message });
   }
+};
+
+const trackingUsulanByNip = async (req, res) => {
+  const { nip, tipe_usulan } = req?.query;
+  const { fetcher } = req;
+  fetchDataUsulan(req, res, fetcher, tipe_usulan, nip);
 };
 
 const usulanKenaikanPangkatByNip = async (req, res) => {
@@ -52,4 +58,5 @@ export {
   usulanPerbaikanNamaByNip,
   usulanPenyesuaianMasaKerjaByNip,
   usulanPencantumanGelarByNip,
+  trackingUsulanByNip,
 };
