@@ -205,6 +205,15 @@ export const ipAsnByNip = (nip, tahun) => {
   return api.get(`/admin/${nip}/ip-asn?tahun=${tahun}`).then((res) => res.data);
 };
 
+export const trackingLayananSIASN = ({
+  nip,
+  tipeUsulan = "kenaikan-pangkat",
+}) => {
+  return api
+    .get(`/admin/${nip}/layanan-siasn?tipe_usulan=${tipeUsulan}`)
+    .then((res) => res.data);
+};
+
 export const getRwDiklatByNip = (nip) => {
   return api.get(`/admin/${nip}/rw-diklat`).then((res) => res.data);
 };
