@@ -1,3 +1,4 @@
+import AdministrasiByNip from "@/components/Berkas/AdministrasiByNip";
 import { FloatButton, Grid, Tabs } from "antd";
 import CompareDataDiklatByNip from "../CompareDataDiklatByNip";
 import ComparePenghargaanByNip from "../ComparePenghargaanByNip";
@@ -6,20 +7,15 @@ import CompareCLTNByNip from "./CompareCLTNByNip";
 import CompareDataUtamaByNip from "./CompareDataUtamaByNip";
 import CompareHukdisByNip from "./CompareHukdisByNip";
 import CompareJabatanByNip from "./CompareJabatanByNip";
-import CompareJabatanDokterByNip from "./CompareJabatanDokterByNip";
-import CompareJabatanGuruByNip from "./CompareJabatanGuruByNip";
 import CompareKedudukanHukumByNip from "./CompareKedudukanHukumByNip";
 import CompareKeluargaByNip from "./CompareKeluargaByNip";
+import CompareKinerjaPeriodikNip from "./CompareKinerjaPeriodikNip";
 import CompareMasaKerjaByNip from "./CompareMasaKerjaByNip";
 import ComparePangkatByNip from "./ComparePangkatByNip";
 import ComparePemberhentianByNip from "./ComparePemberhentianByNip";
-import ComparePendidikanByNip from "./ComparePendidikanByNip";
 import ComparePindahInstansiByNip from "./ComparePindahInstansiByNip";
 import ComparePwkByNip from "./ComparePwkByNip";
 import CompareSKP22ByNip from "./CompareSKP22ByNip";
-import AdministrasiByNip from "@/components/Berkas/AdministrasiByNip";
-import ComparePnsUnorByNip from "./ComparePnsUnorByNip";
-import CompareKinerjaPeriodikNip from "./CompareKinerjaPeriodikNip";
 import SiasnTrackingLayanan from "./SiasnTrackingLayanan";
 
 function SiasnTab({ nip }) {
