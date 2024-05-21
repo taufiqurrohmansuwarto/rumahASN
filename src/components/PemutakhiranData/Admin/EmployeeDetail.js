@@ -15,6 +15,7 @@ import {
   Spin,
   Tag,
   Tooltip,
+  Typography,
 } from "antd";
 
 // import { patchAnomali2023 } from "@/services/anomali.services";
@@ -45,8 +46,12 @@ const EmployeeDescriptionMaster = ({ data, loading }) => {
         column={1}
         layout={breakPoint?.xs ? "vertical" : "horizontal"}
       >
-        <Descriptions.Item label="Nama">{data?.nama}</Descriptions.Item>
-        <Descriptions.Item label="NIP">{data?.nip_baru}</Descriptions.Item>
+        <Descriptions.Item label="Nama">
+          <Typography.Text copyable>{data?.nama}</Typography.Text>
+        </Descriptions.Item>
+        <Descriptions.Item label="NIP">
+          <Typography.Text copyable>{data?.nip_baru}</Typography.Text>
+        </Descriptions.Item>
         <Descriptions.Item label="Usia">
           {getUmur(data?.tgl_lahir)} Tahun
         </Descriptions.Item>
