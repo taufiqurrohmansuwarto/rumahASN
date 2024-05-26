@@ -22,7 +22,7 @@ function Komparasi() {
     Modal.info({
       title: "What Should I Do?",
       content:
-        "Jika anda merupakan PPPK baru, sembari menunggu bisa melengkapi dokumen pada aplikasi SIMASTER terlebih dahulu seperti foto, jabatan, sk pppk, pendidikan, dokumen pendukung dsb.",
+        "Jika anda merupakan PPPK baru, sembari menunggu proses masuk ke myASN bisa melengkapi dokumen pada aplikasi SIMASTER terlebih dahulu seperti foto, jabatan, sk pppk, pendidikan, dokumen pendukung dsb.",
     });
   };
 

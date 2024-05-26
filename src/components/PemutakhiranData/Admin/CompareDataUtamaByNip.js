@@ -280,64 +280,6 @@ function CompareDataUtamaByNip({ nip }) {
                       },
                     ],
                   },
-                  {
-                    key: "keluarga",
-                    href: "#keluarga",
-                    title: "Keluarga",
-                    children: [
-                      {
-                        key: "orang-tua",
-                        href: "#orang-tua",
-                        title: "Orang Tua",
-                        children: [
-                          {
-                            key: "orang-tua-simaster",
-                            href: "#orang-tua-simaster",
-                            title: "SIMASTER",
-                          },
-                          {
-                            key: "orang-tua-siasn",
-                            href: "#orang-tua-siasn",
-                            title: "SIASN",
-                          },
-                        ],
-                      },
-                      {
-                        key: "pasangan",
-                        href: "#pasangan",
-                        title: "Pasangan",
-                        children: [
-                          {
-                            key: "pasangan-simaster",
-                            href: "#pasangan-simaster",
-                            title: "SIMASTER",
-                          },
-                          {
-                            key: "pasangan-siasn",
-                            href: "#pasangan-siasn",
-                            title: "SIASN",
-                          },
-                        ],
-                      },
-                      {
-                        key: "anak",
-                        href: "#anak",
-                        title: "Anak",
-                        children: [
-                          {
-                            key: "anak-simaster",
-                            href: "#anak-simaster",
-                            title: "SIMASTER",
-                          },
-                          {
-                            key: "anak-siasn",
-                            href: "#anak-siasn",
-                            title: "SIASN",
-                          },
-                        ],
-                      },
-                    ],
-                  },
                 ]}
               />
             )}

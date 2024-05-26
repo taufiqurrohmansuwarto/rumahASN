@@ -22,6 +22,8 @@ import {
   message,
 } from "antd";
 import { useEffect } from "react";
+import SyncJabatan from "./Sync/SyncJabatan";
+import SyncGolongan from "./Sync/SyncGolongan";
 
 const dataTabel = (siasn, simaster) => {
   return [
@@ -327,19 +329,23 @@ function CompareDataUtama() {
             ]}
           >
             <Col md={24}>
-              <Stack>
+              <Space direction="vertical">
                 <Alert icon={<IconAlertCircle />} title="Perhatian" color="red">
                   Jika ada perbedaan NIP, Nama, dan Tanggal Lahir antara SIASN
                   dan SIMASTER silahkan melakukan perbaikan elemen tersebut ke
                   BKD Provinsi Jawa Timur
                 </Alert>
+                <Space>
+                  <SyncJabatan />
+                  <SyncGolongan />
+                </Space>
                 <TableAntd
                   rowKey={(row) => row?.id}
                   columns={columns}
                   dataSource={dataTabel(data, dataSimaster)}
                   pagination={false}
                 />
-              </Stack>
+              </Space>
             </Col>
           </Row>
         </Skeleton>

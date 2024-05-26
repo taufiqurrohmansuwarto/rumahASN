@@ -35,7 +35,7 @@ function SiasnTab({ nip }) {
         <Tabs.TabPane tab="Berkas" key="berkas">
           <AdministrasiByNip />
         </Tabs.TabPane>
-        <Tabs.TabPane tab="Info" key="2">
+        <Tabs.TabPane tab="Jab, Pend, & Pangkat" key="2">
           <CompareJabatanByNip nip={nip} />
         </Tabs.TabPane>
         <Tabs.TabPane tab="Kinerja Periodik" key="kinerja-periodik">
@@ -47,9 +47,9 @@ function SiasnTab({ nip }) {
         <Tabs.TabPane tab="Jabatan Dokter" key="jabatan_dokter">
           <CompareJabatanDokterByNip nip={nip} />
         </Tabs.TabPane> */}
-        <Tabs.TabPane tab="Pangkat & Golongan" key="6">
+        {/* <Tabs.TabPane tab="Pangkat & Golongan" key="6">
           <ComparePangkatByNip nip={nip} />
-        </Tabs.TabPane>
+        </Tabs.TabPane> */}
         <Tabs.TabPane tab="Angka Kredit" key="3">
           <CompareAngkaKreditByNip nip={nip} />
         </Tabs.TabPane>
@@ -95,7 +95,7 @@ function SiasnTab({ nip }) {
         <Tabs.TabPane tab="Penghargaan" key="penghargaan">
           <ComparePenghargaanByNip nip={nip} />
         </Tabs.TabPane>
-        <Tabs.TabPane tab="Tracking SIASN" key="tracking-siasn">
+        <Tabs.TabPane tab="Status SIASN" key="tracking-siasn">
           <SiasnTrackingLayanan nip={nip} />
         </Tabs.TabPane>
       </Tabs>
