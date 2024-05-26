@@ -4,7 +4,7 @@ import { MenuMySAPK } from "@/components/PemutakhiranData/MenuMySAPK";
 import { dataUtamaSIASN } from "@/services/siasn-services";
 import { Center } from "@mantine/core";
 import { useQuery } from "@tanstack/react-query";
-import { Breadcrumb, Col, Empty, Row } from "antd";
+import { Breadcrumb, Button, Col, Empty, Row, Modal } from "antd";
 import { useSession } from "next-auth/react";
 import Head from "next/head";
 import Link from "next/link";
@@ -17,6 +17,14 @@ function Komparasi() {
     isLoading,
     error,
   } = useQuery(["data-utama-siasn"], () => dataUtamaSIASN(), {});
+
+  const showModal = () => {
+    Modal.info({
+      title: "What Should I Do?",
+      content:
+        "Jika anda merupakan PPPK baru, sembari menunggu bisa melengkapi dokumen pada aplikasi SIMASTER terlebih dahulu seperti foto, jabatan, sk pppk, pendidikan, dokumen pendukung dsb.",
+    });
+  };
 
   return (
     <>
@@ -55,7 +63,11 @@ function Komparasi() {
                       pengentrian di SIASN.
                     </span>
                   }
-                />
+                >
+                  <Button onClick={showModal} type="primary">
+                    What Should I Do?
+                  </Button>
+                </Empty>
               </Center>
             )}
           </Col>

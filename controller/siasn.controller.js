@@ -103,10 +103,7 @@ const siasnEmployeesDetail = async (req, res) => {
 
     const nip = user?.employee_number;
 
-    const testerNip = "199104242024211029";
-
-    // const result = await siasnRequest.get(`/pns/data-utama/${testerNip}`);
-    const result = await FetcherEmployeeDetail(siasnRequest, testerNip);
+    const result = await FetcherEmployeeDetail(siasnRequest, nip);
     res.json(result);
   } catch (error) {
     res.status(500).json({ code: 500, message: "Internal Server Error" });
