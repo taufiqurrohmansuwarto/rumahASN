@@ -26,14 +26,20 @@ const EmployeeUnor = ({ data, loading }) => {
   return (
     <Alert title="Informasi ASN Via SIASN" color="yellow">
       <Spin spinning={loading}>
-        <Row>
-          <Col span={24}>
-            {data?.nama} ({data?.nip_baru}) - {data?.unor_nm}
-          </Col>
-          <Col span={24}>
-            {data?.jabatan_nama} - {data?.golongan_nm}
-          </Col>
-        </Row>
+        {data ? (
+          <Row>
+            <Col span={24}>
+              {data?.nama} ({data?.nip_baru}) - {data?.unor_nm}
+            </Col>
+            <Col span={24}>
+              {data?.jabatan_nama} - {data?.golongan_nm}
+            </Col>
+          </Row>
+        ) : (
+          <div>
+            <Tag color="red">Pegawai Tidak ditemukan di SIASN</Tag>
+          </div>
+        )}
       </Spin>
     </Alert>
   );
@@ -146,7 +152,7 @@ function EmployeeDetail({ nip }) {
         }}
       />
       <EmployeeUnor loading={isLoadingDataPns} data={dataPnsAll} />
-      <Flex gap={10} align="center" justify="start">
+      <Flex style={{ marginTop: 10 }} gap={10} align="center" justify="start">
         <IPAsnByNip tahun={2023} nip={dataSimaster?.nip_baru} />
         <SyncGolonganByNip nip={nip} />
         <SyncJabatanByNip nip={nip} />

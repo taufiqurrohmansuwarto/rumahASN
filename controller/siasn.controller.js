@@ -110,22 +110,40 @@ const siasnEmployeesDetail = async (req, res) => {
   }
 };
 
+const cariPNS = (token, nip) => {
+  const fetcher = axios.create({
+    baseURL: apiGateway,
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  return new Promise(async (resolve, reject) => {
+    try {
+      const result = await cariPnsKinerja(fetcher, nip);
+      const hasil = result?.data;
+      if (!hasil?.id) {
+        resolve(null);
+      } else {
+        resolve(hasil);
+      }
+    } catch (error) {
+      console.log({ error });
+      if (error?.code === 0) {
+        resolve(null);
+      } else {
+        reject(error);
+      }
+    }
+  });
+};
+
 const allPnsByNip = async (req, res) => {
   try {
     const { nip } = req?.query;
-    const siasnRequest = req.siasnRequest;
-
     const hasil = await getSession({ req });
-
-    const fetcher = axios.create({
-      baseURL: apiGateway,
-      headers: {
-        Authorization: `Bearer ${hasil?.accessToken}`,
-      },
-    });
-
-    const { data } = await cariPnsKinerja(fetcher, nip);
-    res.json(data);
+    const result = await cariPNS(hasil?.accessToken, nip);
+    res.json(result);
   } catch (error) {
     console.log(error);
     res.status(500).json({ code: 500, message: "Internal Server Error" });
