@@ -17,6 +17,8 @@ import {
   Tooltip,
   Typography,
 } from "antd";
+import SyncGolonganByNip from "../Sync/SyncGolonganByNip";
+import SyncJabatanByNip from "../Sync/SyncJabatanByNip";
 
 // import { patchAnomali2023 } from "@/services/anomali.services";
 
@@ -144,8 +146,10 @@ function EmployeeDetail({ nip }) {
         }}
       />
       <EmployeeUnor loading={isLoadingDataPns} data={dataPnsAll} />
-      <Flex align="start" justify="start">
+      <Flex gap={10} align="center" justify="start">
         <IPAsnByNip tahun={2023} nip={dataSimaster?.nip_baru} />
+        <SyncGolonganByNip nip={nip} />
+        <SyncJabatanByNip nip={nip} />
       </Flex>
     </Card>
   );

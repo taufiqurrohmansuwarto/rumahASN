@@ -411,3 +411,20 @@ export const deleteRwKinerjaPeriodik = async (id) => {
 export const createdRwKinerjaPeriodik = async (data) => {
   return api.post(`/kinerjaperiodik/save`, data).then((res) => res.data);
 };
+
+// refresh jabatan dan golongan
+export const refreshGolongan = async () => {
+  return api.put(`/pns/sync/golongan`).then((res) => res.data);
+};
+
+export const refreshJabatan = async () => {
+  return api.put(`/pns/sync/jabatan`).then((res) => res.data);
+};
+
+export const refreshJabatanByNip = async (nip) => {
+  return api.put(`/admin/${nip}/sync/jabatan`).then((res) => res.data);
+};
+
+export const refreshGolonganByNip = async (nip) => {
+  return api.put(`/admin/${nip}/sync/golongan`).then((res) => res.data);
+};
