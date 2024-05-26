@@ -21,6 +21,18 @@ module.exports.getRwPasangan = async (fetcher, nip) => {
   }
 };
 
+// penghargaan
+module.exports.getRwPenghargaan = async (fetcher, nip) => {
+  try {
+    const result = await fetcher.get(
+      `/master-ws/operator/employees/${nip}/rw-penghargaan`
+    );
+    return result;
+  } catch (error) {
+    console.log(error);
+  }
+};
+
 module.exports.getRwAnak = async (fetcher, nip) => {
   try {
     const result = await fetcher.get(
