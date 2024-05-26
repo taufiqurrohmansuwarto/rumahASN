@@ -81,15 +81,33 @@ const updateEmployeeInformation = async (req, res) => {
   }
 };
 
+const FetcherEmployeeDetail = (fetcher, nip) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const result = await fetcher.get(`/pns/data-utama/${nip}`);
+      resolve(result?.data?.data);
+    } catch (error) {
+      if (error?.code === 0) {
+        resolve(null);
+      } else {
+        reject(error);
+      }
+    }
+  });
+};
+
 const siasnEmployeesDetail = async (req, res) => {
   try {
     const user = req.user;
     const siasnRequest = req.siasnRequest;
 
     const nip = user?.employee_number;
-    const { data } = await siasnRequest.get(`/pns/data-utama/${nip}`);
 
-    res.json(data?.data);
+    const testerNip = "199104242024211029";
+
+    // const result = await siasnRequest.get(`/pns/data-utama/${testerNip}`);
+    const result = await FetcherEmployeeDetail(siasnRequest, testerNip);
+    res.json(result);
   } catch (error) {
     res.status(500).json({ code: 500, message: "Internal Server Error" });
   }

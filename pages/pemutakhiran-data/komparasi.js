@@ -2,8 +2,9 @@ import Layout from "@/components/Layout";
 import PageContainer from "@/components/PageContainer";
 import { MenuMySAPK } from "@/components/PemutakhiranData/MenuMySAPK";
 import { dataUtamaSIASN } from "@/services/siasn-services";
+import { Center } from "@mantine/core";
 import { useQuery } from "@tanstack/react-query";
-import { Breadcrumb, Col, Row } from "antd";
+import { Breadcrumb, Col, Empty, Row } from "antd";
 import { useSession } from "next-auth/react";
 import Head from "next/head";
 import Link from "next/link";
@@ -11,13 +12,11 @@ import Link from "next/link";
 // base64 to image
 
 function Komparasi() {
-  const { data } = useSession();
-
-  const { data: dataUtama, isLoading } = useQuery(
-    ["data-utama-siasn"],
-    () => dataUtamaSIASN(),
-    {}
-  );
+  const {
+    data: dataUtama,
+    isLoading,
+    error,
+  } = useQuery(["data-utama-siasn"], () => dataUtamaSIASN(), {});
 
   return (
     <>
@@ -45,7 +44,20 @@ function Komparasi() {
       >
         <Row gutter={[16, 16]}>
           <Col md={16} xs={24}>
-            <MenuMySAPK dataUtama={dataUtama} />
+            {dataUtama ? (
+              <MenuMySAPK dataUtama={dataUtama} />
+            ) : (
+              <Center>
+                <Empty
+                  description={
+                    <span>
+                      Oops! Data pegawai tidak ditemukan atau masih dalam proses
+                      pengentrian di SIASN.
+                    </span>
+                  }
+                />
+              </Center>
+            )}
           </Col>
           {/* <Col md={12} xs={24}>
               {data?.user?.group === "MASTER" && <SIASNTracking />}
