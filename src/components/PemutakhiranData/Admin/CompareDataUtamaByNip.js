@@ -13,11 +13,7 @@ import {
   Table as TableAntd,
   Tag,
 } from "antd";
-import ComparePenghargaanByNip from "../ComparePenghargaanByNip";
 import InformationDetail from "../InformationDetail";
-import CompareCLTNByNip from "./CompareCLTNByNip";
-import CompareHukdisByNip from "./CompareHukdisByNip";
-import CompareMasaKerjaByNip from "./CompareMasaKerjaByNip";
 
 const dataTabel = (siasn, simaster) => {
   return [
@@ -211,7 +207,10 @@ function CompareDataUtamaByNip({ nip }) {
           <Col md={20}>
             <Row gutter={[16, 16]}>
               <Col md={24}>
-                <Card title="SIMASTER dan MyASN" id="komparasi-data">
+                <Card
+                  title="Komparasi Data SIMASTER dan MyASN"
+                  id="komparasi-data"
+                >
                   <Stack>
                     <TableAntd
                       columns={columns}
@@ -251,7 +250,7 @@ function CompareDataUtamaByNip({ nip }) {
                       {
                         key: "contact-information",
                         href: "#contact-information",
-                        title: "Kontak",
+                        title: "Kontak/Ganti Email",
                       },
                       {
                         key: "professional-information",
@@ -266,7 +265,7 @@ function CompareDataUtamaByNip({ nip }) {
                       {
                         key: "ASN",
                         href: "#asn",
-                        title: "ASN",
+                        title: "Informasi ASN",
                       },
                       {
                         key: "tambahan-informasi",

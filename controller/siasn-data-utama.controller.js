@@ -1,3 +1,5 @@
+const { createLogSIASN } = require("@/utils/logs");
+
 const fetcherSyncJabatanGolongan = (fetcher, nip, routes) => {
   return new Promise(async (resolve, reject) => {
     try {
@@ -11,6 +13,25 @@ const fetcherSyncJabatanGolongan = (fetcher, nip, routes) => {
         url,
         currentPns,
       });
+      resolve(result?.data);
+    } catch (error) {
+      console.log(error);
+      reject(error);
+    }
+  });
+};
+
+const updateDataUtama = (fetcher, nip, data) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const currentData = await fetcher.get(`/pns/data-utama/${nip}`);
+      const currentPns = currentData?.data?.data;
+      const url = `/pns/data-utama-update`;
+      const payload = {
+        ...data,
+        pns_orang_id: currentPns?.id,
+      };
+      const result = await fetcher.post(url, payload);
       resolve(result?.data);
     } catch (error) {
       console.log(error);
@@ -145,6 +166,38 @@ const ipASNByNip = async (req, res) => {
   }
 };
 
+const updateDataUtamaByNip = async (req, res) => {
+  try {
+    const siasnRequest = req.siasnRequest;
+    const nip = req?.query?.nip;
+    const data = req?.body;
+
+    const payload = {
+      nip,
+      data,
+    };
+
+    if (nip === "199103052019031008") {
+      res.status(403).json({ message: "Forbidden" });
+    } else {
+      const result = await updateDataUtama(siasnRequest, nip, data);
+
+      await createLogSIASN({
+        employeeNumber: nip,
+        request_data: JSON.stringify(payload),
+        siasnService: "data-utama-update",
+        type: "UPDATE",
+        userId: req.user.customId,
+      });
+
+      res.json(result);
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(400).json({ message: "Internal Server Error" });
+  }
+};
+
 module.exports = {
   refreshJabatan,
   refreshJabatanByNip,
@@ -152,4 +205,5 @@ module.exports = {
   refreshGolonganByNip,
   ipASN,
   ipASNByNip,
+  updateDataUtamaByNip,
 };

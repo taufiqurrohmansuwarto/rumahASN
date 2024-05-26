@@ -1,9 +1,48 @@
 import { formatCurrency } from "@/utils/client-utils";
-import { Descriptions, Divider } from "antd";
+import { Descriptions, Divider, Typography, message } from "antd";
 import { trim } from "lodash";
 import AdministrasiByNip from "../Berkas/AdministrasiByNip";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { updateDataUtamaByNip } from "@/services/siasn-services";
 
 function InformationDetail({ data }) {
+  const queryClient = useQueryClient();
+
+  const { mutate: updateData, isLoading } = useMutation(
+    (data) => updateDataUtamaByNip(data),
+    {
+      onSuccess: (data) => {
+        message.success(data?.message);
+      },
+      onError: (error) => {
+        message.error(error?.message);
+      },
+      onSettled: () => {
+        queryClient.invalidateQueries({
+          queryKey: ["data-utama-siasn", data.nipBaru],
+        });
+      },
+    }
+  );
+
+  const handleUpdateData = (email) => {
+    const payload = {
+      nip: data.nipBaru,
+      data: {
+        email,
+      },
+    };
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    if (!emailRegex.test(email)) {
+      message.error("Email tidak valid");
+      return;
+    } else {
+      updateData(payload);
+    }
+  };
+
   return (
     <>
       <Descriptions
@@ -46,7 +85,13 @@ function InformationDetail({ data }) {
       >
         <Descriptions.Item label="Alamat">{data?.alamat}</Descriptions.Item>
         <Descriptions.Item label="Email Pribadi">
-          {data?.email}
+          <Typography.Text
+            editable={{
+              onChange: (value) => handleUpdateData(value),
+            }}
+          >
+            {data?.email}
+          </Typography.Text>
         </Descriptions.Item>
         <Descriptions.Item label="Email Kantor">
           {data?.emailGov}

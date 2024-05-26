@@ -20,7 +20,7 @@ function Komparasi() {
 
   const showModal = () => {
     Modal.info({
-      title: "What Should I Do?",
+      title: "Apa yang harus dilakukan?",
       content:
         "Jika anda merupakan PPPK baru, sembari menunggu proses masuk ke myASN bisa melengkapi dokumen pada aplikasi SIMASTER terlebih dahulu seperti foto, jabatan, sk pppk, pendidikan, dokumen pendukung dsb.",
     });
@@ -59,13 +59,13 @@ function Komparasi() {
                 <Empty
                   description={
                     <span>
-                      Oops! Data pegawai tidak ditemukan atau masih dalam proses
+                      Oops! Data pegawai tidak ditemukan atau data pegawai masih
                       pengentrian di SIASN.
                     </span>
                   }
                 >
                   <Button onClick={showModal} type="primary">
-                    What Should I Do?
+                    Apa yang harus dilakukan?
                   </Button>
                 </Empty>
               </Center>
