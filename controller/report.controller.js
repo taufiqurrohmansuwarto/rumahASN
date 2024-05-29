@@ -1,18 +1,24 @@
 // todo create report to admin using excel
 const Tickets = require("../models/tickets.model");
 const xlsx = require("xlsx");
-const { formatDate, checkUndefined } = require("../utils");
+const { formatDate, checkUndefined, formatDateSimple } = require("../utils");
 const { convert } = require("html-to-text");
 
 const excelReport = async (req, res) => {
   try {
     const result = await Tickets.query().withGraphFetched(
-      "[admin(simpleSelect),  customer(simpleSelect), agent(simpleSelect), sub_category, sub_category.[category], priorities]"
+      "[admin,  customer, agent, sub_category, sub_category.[category], priorities]"
     );
 
     const serialize = result?.map((r) => {
       return {
         nomer_tiket: r?.ticket_number,
+        unit_kerja: "BADAN KEPEGAWAIAN DAERAH PROVINSI JAWA TIMUR",
+        nama_layanan_yang_diterima: checkUndefined(r?.sub_category?.name),
+        tanggal_bulan_tahun: formatDateSimple(r?.created_at),
+        nama_pengguna_layanan: checkUndefined(r?.customer?.username),
+        no_hp: "-",
+        email_pengguna_layanan: checkUndefined(r?.customer?.email),
         judul: r?.title,
         status: r?.status_code,
         deskripsi: convert(r?.content, {

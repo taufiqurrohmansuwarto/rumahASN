@@ -20,6 +20,10 @@ export const formatDate = (date) => {
   return dayjs(date).format("DD-MM-YYYY HH:mm:ss");
 };
 
+export const formatDateSimple = (date) => {
+  return dayjs(date).format("DD-MM-YYYY");
+};
+
 export const getParticipantName = (user) => {
   if (user?.group === "GOOGLE") {
     return user?.info?.username;
