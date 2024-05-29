@@ -4,7 +4,7 @@ const TicketCommentCustomer = require("@/models/tickets_comments_customers.model
 const xlsx = require("xlsx");
 const { convert } = require("html-to-text");
 
-const { formatDate, checkUndefined } = require("../utils");
+const { formatDate, checkUndefined, formatDateSimple } = require("../utils");
 const { round, toNumber } = require("lodash");
 
 const serializeComment = (data) => {
