@@ -27,6 +27,12 @@ const serialize = (data) => {
   return data?.map((r) => {
     return {
       id: r?.id,
+      unit_kerja: "BADAN KEPEGAWAIAN DAERAH PROVINSI JAWA TIMUR",
+      nama_layanan_yang_diterima: checkUndefined(r?.sub_category?.name),
+      tanggal_bulan_tahun: formatDateSimple(r?.created_at),
+      nama_pengguna_layanan: checkUndefined(r?.customer?.username),
+      no_hp: "-",
+      email_pengguna_layanan: checkUndefined(r?.customer?.email),
       nomer_tiket: r?.ticket_number,
       judul: r?.title,
       status: r?.status_code,
@@ -74,7 +80,7 @@ const downloadDataBKD = async (req, res) => {
     const result = await Ticket.query()
       .select("*", Ticket.relatedQuery("comments").count().as("comments_count"))
       .withGraphFetched(
-        "[admin(simpleSelect),  customer(simpleSelect), agent(simpleSelect), sub_category, sub_category.[category], priorities]"
+        "[admin,  customer, agent, sub_category, sub_category.[category], priorities]"
       )
       .where((builder) => {
         if (tabQuery === "my-task") {
