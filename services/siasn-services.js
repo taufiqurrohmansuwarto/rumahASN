@@ -10,6 +10,10 @@ export const refJenisDiklat = () => {
   return api.get("/ref/jenis-diklat").then((res) => res.data);
 };
 
+export const refJenisRiwayat = () => {
+  return api.get("/ref/jenis-riwayat").then((res) => res.data);
+};
+
 export const refUrusanPemerintahan = () => {
   return api.get("/ref/urusan-pemerintahan").then((res) => res.data);
 };
@@ -431,4 +435,10 @@ export const refreshJabatanByNip = async (nip) => {
 
 export const refreshGolonganByNip = async (nip) => {
   return api.put(`/admin/${nip}/sync/golongan`).then((res) => res.data);
+};
+
+export const inboxUsulanByNip = async ({ nip, layananId }) => {
+  return api
+    .get(`/admin/${nip}/inbox-layanan?layanan_id=${layananId}`)
+    .then((res) => res.data);
 };

@@ -6,7 +6,7 @@ function TableUsulan({ data, isLoading }) {
     { title: "Nama", dataIndex: "nama" },
     { title: "NIP", dataIndex: "nip" },
     { title: "Status Usulan", dataIndex: "status_usulan" },
-    { title: "Tipe", dataIndex: "type" },
+    // { title: "Tipe", dataIndex: "type" },
     { title: "Tanggal Usulan", dataIndex: "tanggal_usulan" },
     { title: "Jenis Layanan", dataIndex: "jenis_layanan_nama" },
     { title: "Keterangan", dataIndex: "keterangan" },
@@ -14,6 +14,7 @@ function TableUsulan({ data, isLoading }) {
 
   return (
     <Table
+      style={{ width: "100%" }}
       rowKey={(row) => row?.id}
       pagination={false}
       columns={columns}

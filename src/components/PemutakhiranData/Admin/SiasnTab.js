@@ -11,94 +11,87 @@ import CompareKedudukanHukumByNip from "./CompareKedudukanHukumByNip";
 import CompareKeluargaByNip from "./CompareKeluargaByNip";
 import CompareKinerjaPeriodikNip from "./CompareKinerjaPeriodikNip";
 import CompareMasaKerjaByNip from "./CompareMasaKerjaByNip";
-import ComparePangkatByNip from "./ComparePangkatByNip";
 import ComparePemberhentianByNip from "./ComparePemberhentianByNip";
 import ComparePindahInstansiByNip from "./ComparePindahInstansiByNip";
 import ComparePwkByNip from "./ComparePwkByNip";
 import CompareSKP22ByNip from "./CompareSKP22ByNip";
 import SiasnTrackingLayanan from "./SiasnTrackingLayanan";
+import { ActiveTabProvider, useActiveTab } from "@/context/TabContext";
 
 function SiasnTab({ nip }) {
   const breakPoint = Grid.useBreakpoint();
+  const { setActiveTab } = useActiveTab();
+
+  const handleTabChange = (key) => {
+    setActiveTab(key);
+  };
 
   return (
     <>
       <FloatButton.BackTop />
-      <Tabs
-        type="card"
-        tabPosition={breakPoint.xs ? "top" : "left"}
-        defaultActiveKey="1"
-      >
-        <Tabs.TabPane tab="Data Utama" key="1">
-          <CompareDataUtamaByNip nip={nip} />
-        </Tabs.TabPane>
-        <Tabs.TabPane tab="Berkas" key="berkas">
-          <AdministrasiByNip />
-        </Tabs.TabPane>
-        <Tabs.TabPane tab="Jab, Pend, & Pangkat" key="2">
-          <CompareJabatanByNip nip={nip} />
-        </Tabs.TabPane>
-        <Tabs.TabPane tab="Kinerja Periodik" key="kinerja-periodik">
-          <CompareKinerjaPeriodikNip nip={nip} />
-        </Tabs.TabPane>
-        {/* <Tabs.TabPane tab="Jabatan Guru" key="jabatan_guru">
-          <CompareJabatanGuruByNip nip={nip} />
-        </Tabs.TabPane>
-        <Tabs.TabPane tab="Jabatan Dokter" key="jabatan_dokter">
-          <CompareJabatanDokterByNip nip={nip} />
-        </Tabs.TabPane> */}
-        {/* <Tabs.TabPane tab="Pangkat & Golongan" key="6">
-          <ComparePangkatByNip nip={nip} />
-        </Tabs.TabPane> */}
-        <Tabs.TabPane tab="Angka Kredit" key="3">
-          <CompareAngkaKreditByNip nip={nip} />
-        </Tabs.TabPane>
-        <Tabs.TabPane tab="Kinerja" key="4">
-          <CompareSKP22ByNip nip={nip} />
-        </Tabs.TabPane>
-        {/* <Tabs.TabPane tab="Pendidikan" key="5">
-          <ComparePendidikanByNip nip={nip} />
-        </Tabs.TabPane> */}
-        {/* <Tabs.TabPane tab="Pencantuman Gelar" key="pencantuman-gelar">
-        <PencantumanGelarByNip nip={nip} />
-      </Tabs.TabPane> */}
-        <Tabs.TabPane tab="Diklat dan Kursus" key="diklat">
-          <CompareDataDiklatByNip nip={nip} />
-        </Tabs.TabPane>
-        <Tabs.TabPane tab="Pemberhentian" key="7">
-          <ComparePemberhentianByNip nip={nip} />
-        </Tabs.TabPane>
-        <Tabs.TabPane tab="Kedudukan Hukum" key="9">
-          <CompareKedudukanHukumByNip nip={nip} />
-        </Tabs.TabPane>
-        <Tabs.TabPane tab="Keluarga" key="rw-keluarga">
-          <CompareKeluargaByNip nip={nip} />
-        </Tabs.TabPane>
-        <Tabs.TabPane tab="Masa Kerja" key="8">
-          <CompareMasaKerjaByNip nip={nip} />
-        </Tabs.TabPane>
-        <Tabs.TabPane tab="Pindah Instansi" key="15">
-          <ComparePindahInstansiByNip nip={nip} />
-        </Tabs.TabPane>
-        <Tabs.TabPane tab="Pindah Wilayah Kerja" key="pwk">
-          <ComparePwkByNip nip={nip} />
-        </Tabs.TabPane>
-        <Tabs.TabPane tab="Hukuman Disiplin" key="hukdis">
-          <CompareHukdisByNip nip={nip} />
-        </Tabs.TabPane>
-        {/* <Tabs.TabPane tab="PNS Unor" key="pns-unor">
+      <ActiveTabProvider>
+        <Tabs
+          onChange={handleTabChange}
+          type="card"
+          tabPosition={breakPoint.xs ? "top" : "left"}
+          defaultActiveKey="data-utama"
+        >
+          <Tabs.TabPane tab="Data Utama" key="data-utama">
+            <CompareDataUtamaByNip nip={nip} />
+          </Tabs.TabPane>
+          <Tabs.TabPane tab="Berkas" key="berkas">
+            <AdministrasiByNip />
+          </Tabs.TabPane>
+          <Tabs.TabPane tab="Jab, Pend, & Pangkat" key="jab-pend-pangkat">
+            <CompareJabatanByNip nip={nip} />
+          </Tabs.TabPane>
+          <Tabs.TabPane tab="Kinerja Periodik" key="kinerja-periodik">
+            <CompareKinerjaPeriodikNip nip={nip} />
+          </Tabs.TabPane>
+          <Tabs.TabPane tab="Angka Kredit" key="angka-kredit">
+            <CompareAngkaKreditByNip nip={nip} />
+          </Tabs.TabPane>
+          <Tabs.TabPane tab="Kinerja" key="kinerja">
+            <CompareSKP22ByNip nip={nip} />
+          </Tabs.TabPane>
+          <Tabs.TabPane tab="Diklat dan Kursus" key="diklat-dan-kursus">
+            <CompareDataDiklatByNip nip={nip} />
+          </Tabs.TabPane>
+          <Tabs.TabPane tab="Pemberhentian" key="pemberhentian">
+            <ComparePemberhentianByNip nip={nip} />
+          </Tabs.TabPane>
+          <Tabs.TabPane tab="Kedudukan Hukum" key="kedudukan-hukum">
+            <CompareKedudukanHukumByNip nip={nip} />
+          </Tabs.TabPane>
+          <Tabs.TabPane tab="Keluarga" key="keluarga">
+            <CompareKeluargaByNip nip={nip} />
+          </Tabs.TabPane>
+          <Tabs.TabPane tab="Masa Kerja" key="masa-kerja">
+            <CompareMasaKerjaByNip nip={nip} />
+          </Tabs.TabPane>
+          <Tabs.TabPane tab="Pindah Instansi" key="pindah-instansi">
+            <ComparePindahInstansiByNip nip={nip} />
+          </Tabs.TabPane>
+          <Tabs.TabPane tab="Pindah Wilayah Kerja" key="pindah-wilayah-kerja">
+            <ComparePwkByNip nip={nip} />
+          </Tabs.TabPane>
+          <Tabs.TabPane tab="Hukuman Disiplin" key="hukuman-disiplin">
+            <CompareHukdisByNip nip={nip} />
+          </Tabs.TabPane>
+          {/* <Tabs.TabPane tab="PNS Unor" key="pns-unor">
           <ComparePnsUnorByNip nip={nip} />
         </Tabs.TabPane> */}
-        <Tabs.TabPane tab="CLTN" key="cltn">
-          <CompareCLTNByNip nip={nip} />
-        </Tabs.TabPane>
-        <Tabs.TabPane tab="Penghargaan" key="penghargaan">
-          <ComparePenghargaanByNip nip={nip} />
-        </Tabs.TabPane>
-        <Tabs.TabPane tab="Status SIASN" key="tracking-siasn">
-          <SiasnTrackingLayanan nip={nip} />
-        </Tabs.TabPane>
-      </Tabs>
+          <Tabs.TabPane tab="CLTN" key="cltn">
+            <CompareCLTNByNip nip={nip} />
+          </Tabs.TabPane>
+          <Tabs.TabPane tab="Penghargaan" key="penghargaan">
+            <ComparePenghargaanByNip nip={nip} />
+          </Tabs.TabPane>
+          <Tabs.TabPane tab="Usulan SIASN" key="tracking-siasn">
+            <SiasnTrackingLayanan nip={nip} />
+          </Tabs.TabPane>
+        </Tabs>
+      </ActiveTabProvider>
     </>
   );
 }
