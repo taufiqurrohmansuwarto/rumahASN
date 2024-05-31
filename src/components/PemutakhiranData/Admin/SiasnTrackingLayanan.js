@@ -3,6 +3,7 @@ import { Form, Select, Space, Spin } from "antd";
 import { useQuery } from "@tanstack/react-query";
 import { trackingLayananSIASN } from "@/services/siasn-services";
 import TableUsulan from "@/components/RiwayatUsulan/TableUsulan";
+import RefJenisUsulan from "@/components/RiwayatUsulan/RefJenisUsulan";
 
 const layananType = [
   { name: "Kenaikan Pangkat", id: "kenaikan-pangkat" },
@@ -27,26 +28,7 @@ function SiasnTrackingLayanan({ nip }) {
   return (
     <>
       <Space direction="vertical" size={10}>
-        <Select
-          style={{
-            width: "80%",
-          }}
-          showSearch
-          optionFilterProp="tipe"
-          allowClear
-          value={tipeLayanan}
-          onSelect={(value) => setTipeLayanan(value)}
-          loading={isLoading}
-        >
-          {layananType.map((item) => (
-            <Select.Option tipe={item.name} key={item.id} value={item.id}>
-              {item.name}
-            </Select.Option>
-          ))}
-        </Select>
-        <Spin spinning={isLoading}>
-          <TableUsulan isLoading={isLoading} data={data} />
-        </Spin>
+        <RefJenisUsulan nip={nip} />
       </Space>
     </>
   );
