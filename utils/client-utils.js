@@ -994,3 +994,23 @@ export const personLikes = (likes, currentUserId) => {
 export const mineLike = (currentUserId, likes) => {
   return likes.some((like) => like?.user?.custom_id === currentUserId);
 };
+
+export const artiStatus = (status) => {
+  if (status === "Input Berkas") {
+    return "Masih di Instansi menu input usulan";
+  } else if (status === "Berkas Terverifikasi") {
+    return "Sudah selesai diverifikasi instansi";
+  } else if (status === "Tidak Memenuhi Syarat") {
+    return "Di TMS oleh Approval instansi/BKN";
+  } else if (status === "Terima Usulan") {
+    return "Sudah di approve instansi, saat ini di inbox Tim Teknis BKN Berkas";
+  } else if (status === "Disetujui") {
+    return "Sudah divalidasi Tim Teknis BKN, sekarang di inbox Pemaraf Setuju Paraf SK";
+  } else if (status === "Sudah di Paraf") {
+    return "Sekarang di inbox Penandatanganan";
+  } else if (status === "Profil PNS telah diperbaharui") {
+    return "Sudah di TTD BKN, Surat PG siap di Inbox SK dan riwayat pendidikan ybs sudah ter update";
+  } else if (status === "Validasi Usulan - Tidak Memenuhi Syarat") {
+    return "Sudah pernah di approve lalu masuk inbox BKN";
+  } else return "";
+};

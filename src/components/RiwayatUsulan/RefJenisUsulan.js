@@ -42,7 +42,7 @@ function RefJenisUsulan({ nip }) {
                 showSearch
                 value={dataInbox}
                 onChange={(value) => setDataInbox(value)}
-                style={{ width: 500 }}
+                style={{ width: 350 }}
                 optionFilterProp="label"
                 placeholder="Pilih Jenis Usulan"
                 options={data?.map((item) => ({
