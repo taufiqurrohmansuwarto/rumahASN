@@ -27,3 +27,16 @@ module.exports.proxyKeluargaPasangan = async (fetcher, nip) => {
 module.exports.proxyDataUtamaASN = async (fetcher, nip) => {
   return fetcher.get(`/siasn-ws/proxy/asn/${nip}/data-utama`);
 };
+
+module.exports.getDataUtamaASNProxy = (fetcher, nip) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const response = await fetcher.get(
+        `/siasn-ws/proxy/asn/${nip}/data-utama`
+      );
+      resolve(response.data?.data);
+    } catch (error) {
+      resolve(null);
+    }
+  });
+};
