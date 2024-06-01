@@ -430,11 +430,11 @@ export const refreshJabatan = async () => {
 };
 
 export const refreshJabatanByNip = async (nip) => {
-  return api.put(`/admin/${nip}/sync/jabatan`).then((res) => res.data);
+  return api.get(`/admin/${nip}/sync/jabatan`).then((res) => res.data);
 };
 
 export const refreshGolonganByNip = async (nip) => {
-  return api.put(`/admin/${nip}/sync/golongan`).then((res) => res.data);
+  return api.get(`/admin/${nip}/sync/golongan`).then((res) => res.data);
 };
 
 export const inboxUsulanByNip = async ({ nip, layananId }) => {
