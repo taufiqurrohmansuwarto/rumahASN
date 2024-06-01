@@ -53,90 +53,6 @@ const fetcherIPASN = (fetcher, nip) => {
   });
 };
 
-const refreshJabatan = async (req, res) => {
-  try {
-    const user = req.user;
-    const siasnRequest = req.siasnRequest;
-    const nip = user?.employee_number;
-
-    const result = await fetcherSyncJabatanGolongan(
-      siasnRequest,
-      nip,
-      "data-utama-jabatansync"
-    );
-
-    res.json({
-      message: result?.Message,
-      status: "success",
-    });
-  } catch (error) {
-    res.status(400).json({ message: "Internal Server Error" });
-  }
-};
-
-const refreshJabatanByNip = async (req, res) => {
-  try {
-    const siasnRequest = req.siasnRequest;
-    const nip = req?.query?.nip;
-
-    const result = await fetcherSyncJabatanGolongan(
-      siasnRequest,
-      nip,
-      "data-utama-jabatansync"
-    );
-
-    res.json({
-      message: result?.Message,
-      status: "success",
-    });
-  } catch (error) {
-    console.log(error);
-    res.status(400).json({ message: "Internal Server Error" });
-  }
-};
-
-const refreshGolongan = async (req, res) => {
-  try {
-    const user = req.user;
-    const siasnRequest = req.siasnRequest;
-    const nip = user?.employee_number;
-
-    const result = await fetcherSyncJabatanGolongan(
-      siasnRequest,
-      nip,
-      "data-utama-golongansync"
-    );
-
-    res.json({
-      message: result?.Message,
-      status: "success",
-    });
-  } catch (error) {
-    console.log(error);
-    res.status(400).json({ message: "Internal Server Error" });
-  }
-};
-const refreshGolonganByNip = async (req, res) => {
-  try {
-    const siasnRequest = req.siasnRequest;
-    const nip = req?.query?.nip;
-
-    const result = await fetcherSyncJabatanGolongan(
-      siasnRequest,
-      nip,
-      "data-utama-golongansync"
-    );
-
-    res.json({
-      message: result?.Message,
-      status: "success",
-    });
-  } catch (error) {
-    console.log(error);
-    res.status(400).json({ message: "Internal Server Error" });
-  }
-};
-
 const ipASN = async (req, res) => {
   try {
     const user = req.user;
@@ -199,10 +115,6 @@ const updateDataUtamaByNip = async (req, res) => {
 };
 
 module.exports = {
-  refreshJabatan,
-  refreshJabatanByNip,
-  refreshGolongan,
-  refreshGolonganByNip,
   ipASN,
   ipASNByNip,
   updateDataUtamaByNip,

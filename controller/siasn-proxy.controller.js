@@ -9,18 +9,15 @@ const refreshAttributeByNip = async (fetcher, attribute, nip) => {
     const result = await fetcher.get(
       `/siasn-ws/proxy/pns/refresh-${attribute}/${nip}`
     );
-
     const data = result?.data;
-
     return data;
   } catch (error) {
     console.log(error);
-    return null;
   }
 };
 
 // refresh golongan,jabatan, pendidikan, dan pernikahan
-const refreshGolongan = async (req, res) => {
+const syncGolongan = async (req, res) => {
   try {
     const { employee_number: nip } = req?.user;
     const result = await refreshAttributeByNip(req.fetcher, "golongan", nip);
@@ -31,7 +28,7 @@ const refreshGolongan = async (req, res) => {
   }
 };
 
-const refreshGolonganByNip = async (req, res) => {
+const syncGolonganByNip = async (req, res) => {
   try {
     const { nip } = req.query;
     const result = await refreshAttributeByNip(req.fetcher, "golongan", nip);
@@ -42,7 +39,7 @@ const refreshGolonganByNip = async (req, res) => {
   }
 };
 
-const refreshJabatan = async (req, res) => {
+const syncJabatan = async (req, res) => {
   try {
     const { employee_number: nip } = req?.user;
     const result = await refreshAttributeByNip(req.fetcher, "jabatan", nip);
@@ -53,9 +50,10 @@ const refreshJabatan = async (req, res) => {
   }
 };
 
-const refreshJabatanByNip = async (req, res) => {
+const syncJabatanByNip = async (req, res) => {
   try {
     const { nip } = req.query;
+    console.log("nip", nip);
     const result = await refreshAttributeByNip(req.fetcher, "jabatan", nip);
     res.json(result);
   } catch (error) {
@@ -64,7 +62,7 @@ const refreshJabatanByNip = async (req, res) => {
   }
 };
 
-const refreshPendidikan = async (req, res) => {
+const syncPendidikan = async (req, res) => {
   try {
     const { employee_number: nip } = req?.user;
     const result = await refreshAttributeByNip(req.fetcher, "pendidikan", nip);
@@ -75,7 +73,7 @@ const refreshPendidikan = async (req, res) => {
   }
 };
 
-const refreshPendidikanByNip = async (req, res) => {
+const syncPendidikanByNip = async (req, res) => {
   try {
     const { nip } = req.query;
     const result = await refreshAttributeByNip(req.fetcher, "pendidikan", nip);
@@ -86,7 +84,7 @@ const refreshPendidikanByNip = async (req, res) => {
   }
 };
 
-const refreshPernikahan = async (req, res) => {
+const syncPernikahan = async (req, res) => {
   try {
     const { employee_number: nip } = req?.user;
     const result = await refreshAttributeByNip(req.fetcher, "pernikahan", nip);
@@ -97,7 +95,7 @@ const refreshPernikahan = async (req, res) => {
   }
 };
 
-const refreshPernikahanByNip = async (req, res) => {
+const syncPernikahanByNip = async (req, res) => {
   try {
     const { nip } = req.query;
     const result = await refreshAttributeByNip(req.fetcher, "pernikahan", nip);
@@ -138,12 +136,12 @@ const cariPnsKinerjaProxy = async (req, res) => {
 
 module.exports = {
   cariPnsKinerjaProxy,
-  refreshGolongan,
-  refreshGolonganByNip,
-  refreshJabatan,
-  refreshJabatanByNip,
-  refreshPendidikan,
-  refreshPendidikanByNip,
-  refreshPernikahan,
-  refreshPernikahanByNip,
+  syncGolongan,
+  syncGolonganByNip,
+  syncJabatan,
+  syncJabatanByNip,
+  syncPendidikan,
+  syncPendidikanByNip,
+  syncPernikahan,
+  syncPernikahanByNip,
 };
