@@ -40,6 +40,7 @@ const {
   proxyKeluargaAnak,
   proxyKeluargaPasangan,
   cariPnsKinerja,
+  getDataUtamaASNProxy,
 } = require("@/utils/siasn-proxy.utils");
 const { getRwPangkat } = require("@/utils/master.utils");
 const { createLogSIASN } = require("@/utils/logs");
@@ -100,10 +101,11 @@ const siasnEmployeesDetail = async (req, res) => {
   try {
     const user = req.user;
     const siasnRequest = req.siasnRequest;
+    const fetcher = req?.fetcher;
 
     const nip = user?.employee_number;
 
-    const result = await FetcherEmployeeDetail(siasnRequest, nip);
+    const result = await getDataUtamaASNProxy(fetcher, nip);
     res.json(result);
   } catch (error) {
     res.status(500).json({ code: 500, message: "Internal Server Error" });
@@ -154,14 +156,16 @@ const siasnEmployeeDetailByNip = async (req, res) => {
   try {
     const { nip } = req?.query;
     const siasnRequest = req.siasnRequest;
+    const fetcher = req?.fetcher;
 
-    const result = await siasnRequest.get(`/pns/data-utama/${trim(nip)}`);
+    // const result = await siasnRequest.get(`/pns/data-utama/${trim(nip)}`);
 
-    const hasil = {
-      ...result?.data?.data,
-    };
+    // const hasil = {
+    //   ...result?.data?.data,
+    // };
 
-    res.json(hasil);
+    const result = await getDataUtamaASNProxy(fetcher, nip);
+    res.json(result);
   } catch (error) {
     console.log(error);
     res.status(500).json({ code: 500, message: "Internal Server Error" });
