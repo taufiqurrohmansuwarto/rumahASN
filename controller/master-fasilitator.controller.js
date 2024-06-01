@@ -7,6 +7,7 @@ const queryString = require("query-string");
 const { toLower, trim } = require("lodash");
 const { dataUtama } = require("@/utils/siasn-utils");
 const arrayToTree = require("array-to-tree");
+const { proxyDataUtamaASN } = require("@/utils/siasn-proxy.utils");
 
 // keperluan komparasi
 const validateOpdId = (opdId) => {
@@ -33,7 +34,7 @@ const fetchEmployeeData = (fetcher, idOpd, query) => {
 
 // Helper function to fetch detailed employee data asynchronously using Promise.allSettled
 const fetchDetailedEmployeeData = async (siasnFetcher, nips) => {
-  const promises = nips.map((nip) => dataUtama(siasnFetcher, nip));
+  const promises = nips.map((nip) => proxyDataUtamaASN(siasnFetcher, nip));
   const results = await Promise.allSettled(promises);
 
   // Process results, considering both fulfilled and rejected promises
@@ -374,6 +375,7 @@ const getAllEmployeesMasterPaging = async (req, res) => {
   try {
     const {
       clientCredentialsFetcher: fetcher,
+      fetcher: proxyFetcher,
       siasnRequest: siasnFetcher,
       user,
       query,
@@ -387,7 +389,7 @@ const getAllEmployeesMasterPaging = async (req, res) => {
 
     const nips = employeeData?.data?.results?.map((item) => item?.nip_master);
     const detailedEmployeeData = await fetchDetailedEmployeeData(
-      siasnFetcher,
+      proxyFetcher,
       nips
     );
 
@@ -408,6 +410,7 @@ const getAllEmployeesMasterPagingAdmin = async (req, res) => {
     const {
       clientCredentialsFetcher: fetcher,
       siasnRequest: siasnFetcher,
+      fetcher: proxyFetcher,
       query,
     } = req;
     const opdId = "1";
@@ -419,7 +422,7 @@ const getAllEmployeesMasterPagingAdmin = async (req, res) => {
 
     const nips = employeeData?.data?.results?.map((item) => item?.nip_master);
     const detailedEmployeeData = await fetchDetailedEmployeeData(
-      siasnFetcher,
+      proxyFetcher,
       nips
     );
 

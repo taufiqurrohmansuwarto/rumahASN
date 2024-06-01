@@ -23,3 +23,7 @@ module.exports.proxyKeluargaAnak = async (fetcher, nip) => {
 module.exports.proxyKeluargaPasangan = async (fetcher, nip) => {
   return fetcher.get(`${BASE_URL}/data-pasangan/${nip}`);
 };
+
+module.exports.proxyDataUtamaASN = async (fetcher, nip) => {
+  return fetcher.get(`/siasn-ws/proxy/asn/${nip}/data-utama`);
+};
