@@ -853,7 +853,7 @@ function CompareJabatanByNip({ nip }) {
       title: "Aksi",
       key: "edit",
       responsive: ["sm"],
-      render: (_, row) => {
+      render: (records, row, index) => {
         const payload = {
           ...row,
           jenis_jabatan: getNamaJabatan(row?.jenisJabatan),
@@ -874,7 +874,11 @@ function CompareJabatanByNip({ nip }) {
           eselon_id: row?.eselonId,
         };
 
-        if (data?.[0]?.id === row?.id) {
+        const lastId = data?.[data?.length - 1]?.id;
+
+        if (lastId === row?.id) {
+          return null;
+        } else {
           return (
             <Space>
               <FormUnorJabatanTransfer data={payload} kata="Edit" />
@@ -882,8 +886,6 @@ function CompareJabatanByNip({ nip }) {
               <HapusJabatan id={row?.id} />
             </Space>
           );
-        } else {
-          return <HapusJabatan id={row?.id} />;
         }
       },
     },

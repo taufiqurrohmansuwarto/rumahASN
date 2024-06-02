@@ -181,9 +181,9 @@ module.exports.rwKinerjaPeriodik = (fetcher, nip) => {
 
 // create kinerja periodik
 module.exports.createKinerjaPeriodik = (fetcher, data) => {
-  return fetcher.post(`/kinerja-periodik/save`, data);
+  return fetcher.post(`/kinerjaperiodik/save`, data);
 };
 
 module.exports.hapusKinerjaPeriodik = (fetcher, id) => {
-  return fetcher.delete(`/kinerja-periodik/delete/${id}`);
+  return fetcher.delete(`/kinerjaperiodik/delete/${id}`);
 };

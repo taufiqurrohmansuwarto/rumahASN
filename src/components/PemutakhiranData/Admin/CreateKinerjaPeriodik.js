@@ -1,4 +1,10 @@
 import {
+  getKuadran,
+  refHasilKerja,
+  refKoefisien,
+  refPeriodik,
+} from "@/utils/client-utils";
+import {
   Button,
   Col,
   DatePicker,
@@ -7,9 +13,21 @@ import {
   InputNumber,
   Modal,
   Row,
+  Select,
+  message,
 } from "antd";
 import React from "react";
 import { useState } from "react";
+import FormCariPNSKinerja from "../FormCariPNSKinerja";
+import dayjs from "dayjs";
+import {
+  createKinerjaPeriodikByNip,
+  dataKinerjaPns,
+  dataUtamSIASNByNip,
+} from "@/services/siasn-services";
+import { toNumber, toString } from "lodash";
+import { useRouter } from "next/router";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 /**
  * 
@@ -46,11 +64,71 @@ import { useState } from "react";
 Parameter c
  */
 
-const ModalCreate = ({ visible, onClose }) => {
+const ModalCreate = ({ visible, onClose, nip }) => {
   const [form] = Form.useForm();
+  const [formLoading, setFormLoading] = useState(false);
 
-  const onFinish = (values) => {
-    console.log("Received values of form: ", values);
+  const queryClient = useQueryClient();
+
+  const { mutateAsync: create, isLoading: isLoadingCreate } = useMutation(
+    (data) => createKinerjaPeriodikByNip(data),
+    {
+      onSuccess: () => {
+        message.success("Berhasil menambahkan kinerja periodik");
+        onClose();
+        form.resetFields();
+      },
+      onError: (error) => {
+        message.error("Gagal menambahkan kinerja periodik");
+      },
+      onSettled: () => {
+        queryClient.invalidateQueries(["kinerja-periodik", nip]);
+      },
+    }
+  );
+
+  const onFinish = async () => {
+    setFormLoading(true);
+    const values = await form.validateFields();
+    const atasan = await dataKinerjaPns(values.pns_penilai);
+    const currentNip = await dataUtamSIASNByNip(nip);
+
+    const payload = {
+      pnsDinilaiId: currentNip?.id,
+      tahun: toNumber(dayjs(values.tahun).format("YYYY")),
+      tahunMulaiPenilaian: toNumber(
+        dayjs(values.tahunMulaiPenilaian).format("YYYY")
+      ),
+      tahunSelesaiPenilaian: toNumber(
+        dayjs(values.tahunSelesaiPenilaian).format("YYYY")
+      ),
+      bulanMulaiPenilaian: dayjs(values.bulanMulaiPenilaian).format("M"),
+      bulanSelesaiPenilaian: dayjs(values.bulanSelesaiPenilaian).format("M"),
+      statusPenilai: "ASN",
+      penilaiGolongan: atasan?.golongan_id,
+      penilaiJabatanNama: atasan?.jabatan_nama,
+      penilaiNama: atasan?.nama,
+      penilaiNipNrp: atasan?.nip_baru,
+      penilaiUnorNama: atasan?.unor_nm,
+      koefisienId: toString(values?.koefisienId),
+      perilakuKerjaNilai: values?.perilakuKerjaNilai,
+      hasilKinerjaNilai: values?.hasilKinerjaNilai,
+      periodikId: toString(values?.periodikId),
+      kuadranKinerjaNilai: getKuadran(
+        values?.hasilKinerjaNilai,
+        values?.perilakuKerjaNilai
+      ),
+    };
+
+    const sendData = {
+      nip,
+      data: payload,
+    };
+
+    console.log(atasan);
+
+    await create(sendData);
+    setFormLoading(false);
   };
 
   return (
@@ -58,18 +136,22 @@ const ModalCreate = ({ visible, onClose }) => {
       centered
       width={800}
       title="Tambah Kinerja Periodik"
+      confirmLoading={isLoadingCreate || formLoading}
       open={visible}
-      onOk={onClose}
+      onOk={onFinish}
       onCancel={onClose}
     >
       <Form layout="vertical" form={form} onFinish={onFinish}>
+        <Form.Item name="tahun" label="Tahun">
+          <DatePicker picker="year" />
+        </Form.Item>
         <Row gutter={[16, 16]}>
-          <Col md={8}>
+          <Col md={6}>
             <Form.Item name="bulanMulaiPenilaian" label="Bulan Mulai Penilaian">
               <DatePicker picker="month" />
             </Form.Item>
           </Col>
-          <Col md={8}>
+          <Col md={6}>
             <Form.Item
               name="bulanSelesaiPenilaian"
               label="Bulan Selesai Penilaian"
@@ -77,28 +159,61 @@ const ModalCreate = ({ visible, onClose }) => {
               <DatePicker picker="month" />
             </Form.Item>
           </Col>
+          <Col md={6}>
+            <Form.Item name="tahunMulaiPenilaian" label="Tahun Mulai Penilaian">
+              <DatePicker picker="year" />
+            </Form.Item>
+          </Col>
+          <Col md={6}>
+            <Form.Item
+              name="tahunSelesaiPenilaian"
+              label="Tahun Selesai Penilaian"
+            >
+              <DatePicker picker="year" />
+            </Form.Item>
+          </Col>
         </Row>
         <Form.Item name="hasilKinerjaNilai" label="Hasil Kinerja Nilai">
-          <InputNumber />
+          <Select>
+            {refHasilKerja.map((item) => (
+              <Select.Option key={item?.value} value={item.value}>
+                {item.title}
+              </Select.Option>
+            ))}
+          </Select>
         </Form.Item>
-        <Form.Item name="koefisienId" label="Koefisien ID">
-          <Input />
+        <Form.Item name="perilakuKerjaNilai" label="Perilaku Kinerja Nilai">
+          <Select>
+            {refHasilKerja.map((item) => (
+              <Select.Option key={item?.value} value={item.value}>
+                {item.title}
+              </Select.Option>
+            ))}
+          </Select>
         </Form.Item>
-        <Form.Item name="kuadranKinerjaNilai" label="Kuadran Kinerja Nilai">
-          <InputNumber />
+        <Form.Item name="periodikId" label="Periode">
+          <Select>
+            {refPeriodik.map((item) => (
+              <Select.Option key={item?.value} value={item.value}>
+                {item.title}
+              </Select.Option>
+            ))}
+          </Select>
         </Form.Item>
-        <Form.Item name="perilakuKerjaNilai" label="Perilaku Kerja Nilai">
-          <InputNumber />
+        <Form.Item name="koefisienId" label="Jabatan">
+          <Select>
+            {refKoefisien.map((item) => (
+              <Select.Option key={item?.value} value={item.value}>
+                {item.title}
+              </Select.Option>
+            ))}
+          </Select>
         </Form.Item>
-        <Form.Item name="tahun" label="Tahun">
-          <DatePicker picker="year" />
-        </Form.Item>
-        <Form.Item name="tahunMulaiPenilaian" label="Tahun Mulai Penilaian">
-          <DatePicker picker="year" />
-        </Form.Item>
-        <Form.Item name="tahunSelesaiPenilaian" label="Tahun Selesai Penilaian">
-          <DatePicker picker="year" />
-        </Form.Item>
+        <FormCariPNSKinerja
+          help="ketik NIP Tanpa Spasi dan tunggu..."
+          label="Atasan Penilai"
+          name="pns_penilai"
+        />
       </Form>
     </Modal>
   );
@@ -106,6 +221,9 @@ const ModalCreate = ({ visible, onClose }) => {
 
 function CreateKinerjaPeriodik() {
   const [visible, setVisible] = useState(false);
+  const router = useRouter();
+
+  const nip = router.query?.nip;
 
   const handleOpen = () => {
     setVisible(true);
@@ -117,8 +235,10 @@ function CreateKinerjaPeriodik() {
 
   return (
     <>
-      <Button onClick={handleOpen}>Tambah Kinerja Periodik</Button>
-      <ModalCreate visible={visible} onClose={handleClose} />
+      <Button onClick={handleOpen} type="primary">
+        Tambah Kinerja Periodik
+      </Button>
+      <ModalCreate nip={nip} visible={visible} onClose={handleClose} />
     </>
   );
 }

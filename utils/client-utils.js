@@ -1012,5 +1012,99 @@ export const artiStatus = (status) => {
     return "Sudah di TTD BKN, Surat PG siap di Inbox SK dan riwayat pendidikan ybs sudah ter update";
   } else if (status === "Validasi Usulan - Tidak Memenuhi Syarat") {
     return "Sudah pernah di approve lalu masuk inbox BKN";
+  } else if (status === "Perbaikan Dokumen") {
+    return "Masih di Instansi menu perbaikan dokumen";
   } else return "";
+};
+
+export const refPeriodik = [
+  { value: 1, title: "bulanan" },
+  { value: 2, title: "triwulanan" },
+];
+
+export const refHasilKerja = [
+  { value: 1, title: "Diatas Ekspektasi" },
+  { value: 2, title: "Sesuai Ekspektasi" },
+  { value: 3, title: "Dibawah Ekspektasi" },
+];
+
+export const refKoefisien = [
+  {
+    value: 12,
+    title: "Ahli Pertama",
+    kriteria: 12.5,
+    persentase: 100,
+    keterangan: "Baik",
+    jenjang: "PT",
+  },
+  {
+    value: 22,
+    title: "Ahli Muda",
+    kriteria: 25.0,
+    persentase: 100,
+    keterangan: "Baik",
+    jenjang: "MU",
+  },
+  {
+    value: 32,
+    title: "Ahli Madya",
+    kriteria: 37.5,
+    persentase: 100,
+    keterangan: "Baik",
+    jenjang: "MA",
+  },
+  {
+    value: 42,
+    title: "Ahli Utama",
+    kriteria: 50.0,
+    persentase: 100,
+    keterangan: "Baik",
+    jenjang: "UT",
+  },
+  {
+    value: 52,
+    title: "Pemula",
+    kriteria: 3.75,
+    persentase: 100,
+    keterangan: "Baik",
+    jenjang: "PM",
+  },
+  {
+    value: 62,
+    title: "Terampil",
+    kriteria: 5.0,
+    persentase: 100,
+    keterangan: "Baik",
+    jenjang: "TR",
+  },
+  {
+    value: 72,
+    title: "Mahir",
+    kriteria: 12.5,
+    persentase: 100,
+    keterangan: "Baik",
+    jenjang: "MH",
+  },
+  {
+    value: 82,
+    title: "Penyelia",
+    kriteria: 25.0,
+    persentase: 100,
+    keterangan: "Baik",
+    jenjang: "PY",
+  },
+];
+
+export const getKuadran = (a, b) => {
+  if (a === b) {
+    if (a === 1) {
+      return 1;
+    } else if (a === 2) {
+      return 2;
+    } else if (a === 3) {
+      return 5;
+    }
+  } else {
+    return Math.max(a, b);
+  }
 };
