@@ -83,7 +83,7 @@ function SocmedTabs() {
                           }}
                           onClick={() =>
                             router.push(
-                              "/pemutakhiran-data/usulan-siasn/kenaikan-pangkat"
+                              "/pemutakhiran-data/usulan-siasn/inbox-usulan"
                             )
                           }
                         >

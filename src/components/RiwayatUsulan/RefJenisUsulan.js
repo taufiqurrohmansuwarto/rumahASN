@@ -40,6 +40,7 @@ function RefJenisUsulan({ nip }) {
             <Space>
               <Select
                 showSearch
+                allowClear
                 value={dataInbox}
                 onChange={(value) => setDataInbox(value)}
                 style={{ width: 350 }}

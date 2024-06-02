@@ -1,7 +1,7 @@
 import { inboxUsulan, refJenisRiwayat } from "@/services/siasn-services";
 import { Stack } from "@mantine/core";
 import { useQuery } from "@tanstack/react-query";
-import { Button, Select, Space } from "antd";
+import { Select, Space } from "antd";
 import { useState } from "react";
 import TableUsulan from "./TableUsulan";
 
@@ -9,52 +9,38 @@ function RwInboxUsulan() {
   const [dataInbox, setDataInbox] = useState(null);
   const { data, isLoading } = useQuery(
     ["ref-jenis-riwayat-siasn"],
-    () => refJenisRiwayat(),
+    refJenisRiwayat,
     {
       refetchOnWindowFocus: false,
     }
   );
 
-  const {
-    data: dataUsulan,
-    isFetching: isLoadingUsulan,
-    refetch: refetchUsulan,
-  } = useQuery(
-    ["inbox-layanan-personal", dataInbox],
+  const { data: dataUsulan, isFetching: isLoadingUsulan } = useQuery(
+    ["inbox-usulan-layanan", dataInbox],
     () => inboxUsulan(dataInbox),
     {
-      enabled: false,
+      enabled: Boolean(dataInbox),
       refetchOnWindowFocus: false,
+      // staleTime: 1000 * 60 * 5,
     }
   );
-
-  const handleSubmit = () => {
-    refetchUsulan();
-  };
 
   return (
     <Stack>
       <Space>
         <Select
           showSearch
+          allowClear
           value={dataInbox}
-          onChange={(value) => setDataInbox(value)}
+          onChange={setDataInbox}
           style={{ width: 350 }}
           optionFilterProp="label"
           placeholder="Pilih Jenis Usulan"
           options={data?.map((item) => ({
-            label: item?.nama,
-            value: item?.id,
+            label: item.nama,
+            value: item.id,
           }))}
         />
-        <Button
-          loading={isLoadingUsulan}
-          type="primary"
-          htmlType="submit"
-          onClick={handleSubmit}
-        >
-          Cari
-        </Button>
       </Space>
       <TableUsulan data={dataUsulan} isLoading={isLoadingUsulan} />
     </Stack>
