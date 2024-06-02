@@ -33,6 +33,7 @@ const {
   orangTua,
   rwKinerjaPeriodik,
   hapusKinerjaPeriodik,
+  createKinerjaPeriodik,
 } = require("@/utils/siasn-utils");
 
 const {
@@ -1384,6 +1385,15 @@ const hapusKinerjaPeriodikByNip = async (req, res) => {
     const { id } = req?.query;
 
     await hapusKinerjaPeriodik(request, id);
+
+    await createLogSIASN({
+      userId: req?.user?.customId,
+      type: "delete",
+      siasnService: "rw-kinerja-periodik",
+      employeeNumber: req?.query?.nip,
+      request_data: JSON.stringify(id),
+    });
+
     res.json({ code: 200, message: "success" });
   } catch (error) {
     console.log(error);
@@ -1394,14 +1404,19 @@ const hapusKinerjaPeriodikByNip = async (req, res) => {
 const tambahKinerjaPeridoikByNip = async (req, res) => {
   try {
     const { siasnRequest: request } = req;
-    const { nip } = req?.query;
 
     const data = req?.body;
+    const result = await createKinerjaPeriodik(request, data);
 
-    const payload = {
-      ...data,
-      nip,
-    };
+    await createLogSIASN({
+      userId: req?.user?.customId,
+      type: "create",
+      siasnService: "rw-kinerja-periodik",
+      employeeNumber: req?.query?.nip,
+      request_data: JSON.stringify(data),
+    });
+
+    res.json(result?.data);
   } catch (error) {
     console.log(error);
     res.status(500).json({ code: 500, message: "Internal Server Error" });

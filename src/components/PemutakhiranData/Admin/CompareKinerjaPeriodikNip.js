@@ -1,16 +1,43 @@
-import { getRwKinerjaPeriodikByNip } from "@/services/siasn-services";
-import { Stack } from "@mantine/core";
-import { useQuery } from "@tanstack/react-query";
-import { Card, Flex, Table } from "antd";
-import React from "react";
+import {
+  getRwKinerjaPeriodikByNip,
+  removeKinerjaPeriodikByNip,
+} from "@/services/siasn-services";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { Card, Flex, Popconfirm, Table, message } from "antd";
 import CreateKinerjaPeriodik from "./CreateKinerjaPeriodik";
 
 const CompareKinerjaPeriodikNip = ({ nip }) => {
+  const queryClient = useQueryClient();
+
   const { data, isLoading } = useQuery(
     ["kinerja-periodik", nip],
     () => getRwKinerjaPeriodikByNip(nip),
     {}
   );
+
+  const { mutateAsync: hapus, isLoading: isLoadingHapus } = useMutation(
+    (data) => removeKinerjaPeriodikByNip(data),
+    {
+      onSuccess: () => {
+        message.success("Berhasil menghapus data kinerja periodik");
+      },
+      onError: (error) => {
+        message.error("Gagal menghapus data kinerja periodik");
+      },
+      onSettled: () => {
+        queryClient.invalidateQueries(["kinerja-periodik", nip]);
+      },
+    }
+  );
+
+  const handleHapus = async (row) => {
+    const payload = {
+      id: row.id,
+      nip: row.nip,
+    };
+
+    await hapus(payload);
+  };
 
   const columns = [
     { title: "Tahun", dataIndex: "tahun" },
@@ -20,7 +47,18 @@ const CompareKinerjaPeriodikNip = ({ nip }) => {
     { title: "Presentase", dataIndex: "persentase" },
     { title: "Jabatan", dataIndex: "jabatan" },
     { title: "Koefisien", dataIndex: "koefisen" },
-    { title: "Aksi", key: "aksi", render: (_, row) => <a>Hapus</a> },
+    {
+      title: "Aksi",
+      key: "aksi",
+      render: (_, row) => (
+        <Popconfirm
+          title="Are you sure you want to delete this item?"
+          onConfirm={() => handleHapus(row)}
+        >
+          <a>Hapus</a>
+        </Popconfirm>
+      ),
+    },
   ];
 
   return (
