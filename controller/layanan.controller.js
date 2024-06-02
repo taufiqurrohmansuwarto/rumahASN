@@ -65,9 +65,22 @@ const inboxLayananByNip = async (req, res) => {
   }
 };
 
+const inboxLayanan = async (req, res) => {
+  try {
+    const { employee_number: nip } = req.user;
+    const layanan_id = req.query?.layanan_id;
+    const result = await findInboxUsulanByNip(req.fetcher, layanan_id, nip);
+    res.json(result);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ code: 500, message: "Internal Server Error" });
+  }
+};
+
 module.exports = {
   getLayananKepegawaian,
   layananKepegawaianSlug,
   referensiJenisRiwayat,
   inboxLayananByNip,
+  inboxLayanan,
 };

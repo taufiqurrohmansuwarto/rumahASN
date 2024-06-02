@@ -1,17 +1,8 @@
-import React, { useState } from "react";
-import { Form, Select, Space, Spin } from "antd";
-import { useQuery } from "@tanstack/react-query";
-import { trackingLayananSIASN } from "@/services/siasn-services";
-import TableUsulan from "@/components/RiwayatUsulan/TableUsulan";
 import RefJenisUsulan from "@/components/RiwayatUsulan/RefJenisUsulan";
-
-const layananType = [
-  { name: "Kenaikan Pangkat", id: "kenaikan-pangkat" },
-  { name: "Pemberhentian", id: "pemberhentian" },
-  { name: "Perbaikan Nama", id: "skk" },
-  { name: "Pencantuman Gelar", id: "pg" },
-  { name: "Penyesuaian Masa Kerja", id: "pmk" },
-];
+import { trackingLayananSIASN } from "@/services/siasn-services";
+import { useQuery } from "@tanstack/react-query";
+import { Space } from "antd";
+import { useState } from "react";
 
 function SiasnTrackingLayanan({ nip }) {
   const [tipeLayanan, setTipeLayanan] = useState();

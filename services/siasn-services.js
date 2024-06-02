@@ -442,3 +442,9 @@ export const inboxUsulanByNip = async ({ nip, layananId }) => {
     .get(`/admin/${nip}/inbox-layanan?layanan_id=${layananId}`)
     .then((res) => res.data);
 };
+
+export const inboxUsulan = async (layananId) => {
+  return api
+    .get(`/pns/inbox-layanan?layanan_id=${layananId}`)
+    .then((res) => res.data);
+};

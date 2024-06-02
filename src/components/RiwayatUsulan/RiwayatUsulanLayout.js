@@ -45,6 +45,11 @@ function RiwayatUsulanLayout({
       content={content}
       tabList={[
         {
+          tab: "Inbox Usulan",
+          key: "inbox-usulan",
+          href: "/pemutakhiran-data/usulan-siasn/inbox-usulan",
+        },
+        {
           tab: "Kenaikan Pangkat",
           key: "kenaikan-pangkat",
           href: "/pemutakhiran-data/usulan-siasn/kenaikan-pangkat",
@@ -55,19 +60,9 @@ function RiwayatUsulanLayout({
           href: "/pemutakhiran-data/usulan-siasn/perbaikan-nama",
         },
         {
-          tab: "Pencantuman Gelar",
-          key: "pencantuman-gelar",
-          href: "/pemutakhiran-data/usulan-siasn/pencantuman-gelar",
-        },
-        {
           tab: "Pemberhentian",
           key: "pemberhentian",
           href: "/pemutakhiran-data/usulan-siasn/pemberhentian",
-        },
-        {
-          tab: "Masa Kerja",
-          key: "masa-kerja",
-          href: "/pemutakhiran-data/usulan-siasn/masa-kerja",
         },
       ]}
       tabActiveKey={active}
