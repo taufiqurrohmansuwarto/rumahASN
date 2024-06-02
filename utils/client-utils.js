@@ -61,7 +61,7 @@ export const mysapkMenu = [
     path: "/data-utama",
   },
   {
-    title: "Riwayat Ubah Data",
+    title: "Ubah Biodata",
     icon: IconUserExclamation,
     color: "orange",
     path: "/ubah-data",
@@ -76,7 +76,7 @@ export const mysapkMenu = [
     title: "Usulan SIASN",
     icon: IconClipboardData,
     color: "green",
-    path: "/usulan-siasn/kenaikan-pangkat",
+    path: "/usulan-siasn/inbox-usulan",
   },
   {
     title: "Riwayat Angka Kredit",
@@ -1018,8 +1018,8 @@ export const artiStatus = (status) => {
 };
 
 export const refPeriodik = [
-  { value: 1, title: "bulanan" },
-  { value: 2, title: "triwulanan" },
+  { value: 1, title: "Bulanan" },
+  { value: 2, title: "Triwulanan" },
 ];
 
 export const refHasilKerja = [

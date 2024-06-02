@@ -142,17 +142,36 @@ const ModalCreate = ({ visible, onClose, nip }) => {
       onCancel={onClose}
     >
       <Form layout="vertical" form={form} onFinish={onFinish}>
-        <Form.Item name="tahun" label="Tahun">
+        <Form.Item
+          name="tahun"
+          label="Tahun"
+          rules={[{ required: true, message: "Tahun harus diisi" }]}
+        >
           <DatePicker picker="year" />
         </Form.Item>
         <Row gutter={[16, 16]}>
           <Col md={6}>
-            <Form.Item name="bulanMulaiPenilaian" label="Bulan Mulai Penilaian">
+            <Form.Item
+              name="bulanMulaiPenilaian"
+              label="Bulan Mulai Penilaian"
+              rules={[
+                {
+                  required: true,
+                  message: "Bulan mulai penilaian harus diisi",
+                },
+              ]}
+            >
               <DatePicker picker="month" />
             </Form.Item>
           </Col>
           <Col md={6}>
             <Form.Item
+              rules={[
+                {
+                  required: true,
+                  message: "Bulan selesai penilaian harus diisi",
+                },
+              ]}
               name="bulanSelesaiPenilaian"
               label="Bulan Selesai Penilaian"
             >
@@ -160,12 +179,27 @@ const ModalCreate = ({ visible, onClose, nip }) => {
             </Form.Item>
           </Col>
           <Col md={6}>
-            <Form.Item name="tahunMulaiPenilaian" label="Tahun Mulai Penilaian">
+            <Form.Item
+              rules={[
+                {
+                  required: true,
+                  message: "Tahun mulai penilaian harus diisi",
+                },
+              ]}
+              name="tahunMulaiPenilaian"
+              label="Tahun Mulai Penilaian"
+            >
               <DatePicker picker="year" />
             </Form.Item>
           </Col>
           <Col md={6}>
             <Form.Item
+              rules={[
+                {
+                  required: true,
+                  message: "Tahun selesai penilaian harus diisi",
+                },
+              ]}
               name="tahunSelesaiPenilaian"
               label="Tahun Selesai Penilaian"
             >
@@ -173,7 +207,13 @@ const ModalCreate = ({ visible, onClose, nip }) => {
             </Form.Item>
           </Col>
         </Row>
-        <Form.Item name="hasilKinerjaNilai" label="Hasil Kinerja Nilai">
+        <Form.Item
+          name="hasilKinerjaNilai"
+          label="Hasil Kinerja Nilai"
+          rules={[
+            { required: true, message: "Hasil kinerja nilai harus diisi" },
+          ]}
+        >
           <Select>
             {refHasilKerja.map((item) => (
               <Select.Option key={item?.value} value={item.value}>
@@ -182,7 +222,13 @@ const ModalCreate = ({ visible, onClose, nip }) => {
             ))}
           </Select>
         </Form.Item>
-        <Form.Item name="perilakuKerjaNilai" label="Perilaku Kinerja Nilai">
+        <Form.Item
+          name="perilakuKerjaNilai"
+          label="Perilaku Kinerja Nilai"
+          rules={[
+            { required: true, message: "Perilaku kinerja nilai harus diisi" },
+          ]}
+        >
           <Select>
             {refHasilKerja.map((item) => (
               <Select.Option key={item?.value} value={item.value}>
@@ -191,7 +237,11 @@ const ModalCreate = ({ visible, onClose, nip }) => {
             ))}
           </Select>
         </Form.Item>
-        <Form.Item name="periodikId" label="Periode">
+        <Form.Item
+          name="periodikId"
+          label="Periode"
+          rules={[{ required: true, message: "Periode harus diisi" }]}
+        >
           <Select>
             {refPeriodik.map((item) => (
               <Select.Option key={item?.value} value={item.value}>
@@ -200,7 +250,11 @@ const ModalCreate = ({ visible, onClose, nip }) => {
             ))}
           </Select>
         </Form.Item>
-        <Form.Item name="koefisienId" label="Jabatan">
+        <Form.Item
+          name="koefisienId"
+          label="Jabatan"
+          rules={[{ required: true, message: "Jabatan harus diisi" }]}
+        >
           <Select>
             {refKoefisien.map((item) => (
               <Select.Option key={item?.value} value={item.value}>
