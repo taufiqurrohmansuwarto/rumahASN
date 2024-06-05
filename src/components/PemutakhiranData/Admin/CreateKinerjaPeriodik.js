@@ -29,41 +29,6 @@ import { toNumber, toString } from "lodash";
 import { useRouter } from "next/router";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
-/**
- * 
- * {
-  "bulanMulaiPenilaian": 0,
-  "bulanSelesaiPenilaian": 0,
-  "hasilKinerjaNilai": 0,
-  "id": "string",
-  "koefisienId": "string",
-  "kuadranKinerjaNilai": 0,
-  "path": [
-    {
-      "dok_id": "string",
-      "dok_nama": "string",
-      "dok_uri": "string",
-      "object": "string",
-      "slug": "string"
-    }
-  ],
-  "penilaiGolongan": "string",
-  "penilaiJabatanNama": "string",
-  "penilaiNama": "string",
-  "penilaiNipNrp": "string",
-  "penilaiUnorNama": "string",
-  "perilakuKerjaNilai": 0,
-  "periodikId": "string",
-  "pnsDinilaiId": "string",
-  "statusPenilai": "string",
-  "tahun": 0,
-  "tahunMulaiPenilaian": 0,
-  "tahunSelesaiPenilaian": 0
-}
-
-Parameter c
- */
-
 const ModalCreate = ({ visible, onClose, nip }) => {
   const [form] = Form.useForm();
   const [formLoading, setFormLoading] = useState(false);
