@@ -21,6 +21,7 @@ import {
   Button,
   Card,
   Checkbox,
+  Radio,
   Col,
   DatePicker,
   Empty,
@@ -69,6 +70,9 @@ const FormAngkaKredit = ({ visible, onCancel, nip }) => {
       const { selesaiPenilaian, mulaiPenilaian, ...rest } = result;
       const data = {
         ...rest,
+        tahun: rest?.tahun?.format("YYYY") || "",
+        kreditUtamaBaru: rest?.kreditUtamaBaru || 0,
+        kreditPenunjangBaru: rest?.kreditPenunjangBaru || 0,
         bulanMulaiPenailan: mulaiPenilaian.format("M"),
         bulanSelesaiPenailan: selesaiPenilaian.format("M"),
         tahunMulaiPenailan: mulaiPenilaian.format("YYYY"),
@@ -135,7 +139,6 @@ const FormAngkaKredit = ({ visible, onCancel, nip }) => {
 
   const handleConfirmModal = async () => {
     try {
-      const result = await form.validateFields();
       Modal.confirm({
         centered: true,
         title: "Apakah anda yakin?",
@@ -147,12 +150,15 @@ const FormAngkaKredit = ({ visible, onCancel, nip }) => {
     } catch (error) {}
   };
 
+  const [showFieldAngkaKredit, setShowFieldAngkaKredit] = useState(true);
+  const [showTahun, setShowTahun] = useState(false);
+
   return (
     <Modal
       confirmLoading={loading}
       title="Tambah Angka Kredit"
       centered
-      visible={visible}
+      open={visible}
       width={800}
       onCancel={onCancel}
       onOk={handleConfirmModal}
@@ -165,32 +171,68 @@ const FormAngkaKredit = ({ visible, onCancel, nip }) => {
           onChange={handleChange}
           fileList={fileList}
         >
-          <Button icon={<FileAddOutlined />}>Upload</Button>
+          <Button icon={<FileAddOutlined />} style={{ marginBottom: 10 }}>
+            Upload
+          </Button>
         </Upload>
+        <Form.Item
+          name={"jenisAngkaKredit"}
+          label={"Jenis Angka Kredit"}
+          required
+        >
+          <Radio.Group
+            onChange={(e) => {
+              const value = e.target.value;
+              if (value === "isKonversi") {
+                setShowFieldAngkaKredit(false);
+                setShowTahun(true);
+                form.setFieldsValue({
+                  kreditUtamaBaru: "",
+                  kreditPenunjangBaru: "",
+                });
+              } else if (value === "isIntegrasi") {
+                setShowTahun(false);
+                setShowFieldAngkaKredit(false);
+                form.setFieldsValue({
+                  tahun: "",
+                  kreditUtamaBaru: "",
+                  kreditPenunjangBaru: "",
+                });
+              } else {
+                setShowTahun(false);
+                setShowFieldAngkaKredit(true);
+                form.setFieldsValue({
+                  tahun: "",
+                });
+              }
+            }}
+          >
+            <Radio.Button value="isAngkaKreditPertama">
+              Angka Kredit Pertama?
+            </Radio.Button>
+            <Radio.Button value="isIntegrasi">Integrasi</Radio.Button>
+            <Radio.Button value="isKonversi">Konversi</Radio.Button>
+          </Radio.Group>
+        </Form.Item>
         <Form.Item required name="nomorSk" label="Nomor SK">
           <Input />
         </Form.Item>
+        {showTahun ? (
+          <Form.Item required name="tahun" label="Tahun">
+            <DatePicker picker="year" />
+          </Form.Item>
+        ) : null}
         <Form.Item required name="tanggalSk" label="Tanggal SK">
           <DatePicker format={"DD-MM-YYYY"} />
         </Form.Item>
-        <Row>
-          <Col span={12}>
-            <Form.Item required name="mulaiPenilaian" label="Mulai Penilaian">
-              <DatePicker picker="month" />
-            </Form.Item>
-          </Col>
-          <Col span={12}>
-            <Form.Item
-              required
-              name="selesaiPenilaian"
-              label="Selesai Penilaian"
-            >
-              <DatePicker picker="month" />
-            </Form.Item>
-          </Col>
-        </Row>
-        <Row>
-          <Col span={8}>
+        <Form.Item required name="mulaiPenilaian" label="Mulai Penilaian">
+          <DatePicker picker="month" />
+        </Form.Item>
+        <Form.Item required name="selesaiPenilaian" label="Selesai Penilaian">
+          <DatePicker picker="month" />
+        </Form.Item>
+        {showFieldAngkaKredit ? (
+          <>
             <Form.Item
               required
               name="kreditUtamaBaru"
@@ -198,8 +240,6 @@ const FormAngkaKredit = ({ visible, onCancel, nip }) => {
             >
               <InputNumber />
             </Form.Item>
-          </Col>
-          <Col span={8}>
             <Form.Item
               name="kreditPenunjangBaru"
               label="Kredit Penunjang Baru"
@@ -207,17 +247,11 @@ const FormAngkaKredit = ({ visible, onCancel, nip }) => {
             >
               <InputNumber />
             </Form.Item>
-          </Col>
-          <Col span={8}>
-            <Form.Item
-              required
-              name="kreditBaruTotal"
-              label="Kredit Baru Total"
-            >
-              <InputNumber />
-            </Form.Item>
-          </Col>
-        </Row>
+          </>
+        ) : null}
+        <Form.Item required name="kreditBaruTotal" label="Kredit Baru Total">
+          <InputNumber />
+        </Form.Item>
         {/* <Form.Item name="status">
           <Radio.Group>
             <Radio.Button value="angkaKreditPertama">
@@ -227,7 +261,8 @@ const FormAngkaKredit = ({ visible, onCancel, nip }) => {
             <Radio.Button value="konversi">Konversi</Radio.Button>
           </Radio.Group>
         </Form.Item> */}
-        <Form.Item
+
+        {/* <Form.Item
           valuePropName="checked"
           name="isAngkaKreditPertama"
           lable="Angka Kredit Pertama"
@@ -243,7 +278,7 @@ const FormAngkaKredit = ({ visible, onCancel, nip }) => {
         </Form.Item>
         <Form.Item valuePropName="checked" name="isKonversi" lable="Konversi?">
           <Checkbox>Konversi</Checkbox>
-        </Form.Item>
+        </Form.Item> */}
         <FormRiwayatJabatanByNip nip={nip} name="rwJabatanId" />
       </Form>
     </Modal>
@@ -432,7 +467,7 @@ function CompareAngkaKreditByNip({ nip }) {
   return (
     <Card title="Komparasi Angka Kredit">
       <Skeleton loading={loadingDataSiasn}>
-        {dataSiasn?.jenisJabatanId !== "2" ||
+        {dataSiasn?.jenisJabatanId !== 2 ||
         dataSiasn?.kedudukanPnsNama === "PPPK Aktif" ? (
           <Empty description="Tidak dapat mengentri AK karena pegawai PPPK / Bukan JFT" />
         ) : (
@@ -447,7 +482,6 @@ function CompareAngkaKreditByNip({ nip }) {
               style={{
                 marginBottom: 10,
               }}
-              disabled
               type="primary"
               onClick={handleVisible}
             >
