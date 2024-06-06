@@ -77,9 +77,9 @@ const FormAngkaKredit = ({ visible, onCancel, nip }) => {
         bulanSelesaiPenailan: selesaiPenilaian.format("M"),
         tahunMulaiPenailan: mulaiPenilaian.format("YYYY"),
         tahunSelesaiPenailan: selesaiPenilaian.format("YYYY"),
-        isAngkaKreditPertama: rest?.isAngkaKreditPertama ? "1" : "0",
-        isIntegrasi: rest?.isIntegrasi ? "1" : "0",
-        isKonversi: rest?.isKonversi ? "1" : "0",
+        isAngkaKreditPertama: rest?.jenisAngkaKredit === "isAngkaKreditPertama" ? "1" : "0",
+        isIntegrasi: rest?.jenisAngkaKredit === "isIntegrasi" ? "1" : "0",
+        isKonversi: rest?.jenisAngkaKredit === "isKonversi" ? "1" : "0",
         tanggalSk: rest?.tanggalSk.format("DD-MM-YYYY"),
       };
 
