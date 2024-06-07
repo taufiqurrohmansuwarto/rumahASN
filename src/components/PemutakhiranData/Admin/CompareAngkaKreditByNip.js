@@ -77,7 +77,8 @@ const FormAngkaKredit = ({ visible, onCancel, nip }) => {
         bulanSelesaiPenailan: selesaiPenilaian.format("M"),
         tahunMulaiPenailan: mulaiPenilaian.format("YYYY"),
         tahunSelesaiPenailan: selesaiPenilaian.format("YYYY"),
-        isAngkaKreditPertama: rest?.jenisAngkaKredit === "isAngkaKreditPertama" ? "1" : "0",
+        isAngkaKreditPertama:
+          rest?.jenisAngkaKredit === "isAngkaKreditPertama" ? "1" : "0",
         isIntegrasi: rest?.jenisAngkaKredit === "isIntegrasi" ? "1" : "0",
         isKonversi: rest?.jenisAngkaKredit === "isKonversi" ? "1" : "0",
         tanggalSk: rest?.tanggalSk.format("DD-MM-YYYY"),
@@ -132,22 +133,22 @@ const FormAngkaKredit = ({ visible, onCancel, nip }) => {
       }
     } catch (error) {
       setLoading(false);
-      message.error(error?.response?.data?.message);
+      message.error(
+        error?.response?.data?.message || "Gagal menambahkan angka kredit"
+      );
       console.log(error);
     }
   };
 
-  const handleConfirmModal = async () => {
-    try {
-      Modal.confirm({
-        centered: true,
-        title: "Apakah anda yakin?",
-        content: `Mohon pastikan semua data dan dokumen yang Anda masukkan selalu terkini dan akurat. Ketidaksesuaian informasi bisa berdampak pada proses layanan kepegawaian pegawai. Ingat, setiap entri data akan dicatat dan dipertanggungjawabkan melalui sistem log Rumah ASN.`,
-        okText: "Ya",
-        cancelText: "Tidak",
-        onOk: async () => await onFinish(),
-      });
-    } catch (error) {}
+  const handleConfirmModal = () => {
+    Modal.confirm({
+      centered: true,
+      title: "Apakah anda yakin?",
+      content: `Mohon pastikan semua data dan dokumen yang Anda masukkan selalu terkini dan akurat. Ketidaksesuaian informasi bisa berdampak pada proses layanan kepegawaian pegawai. Ingat, setiap entri data akan dicatat dan dipertanggungjawabkan melalui sistem log Rumah ASN.`,
+      okText: "Ya",
+      cancelText: "Tidak",
+      onOk: async () => await onFinish(),
+    });
   };
 
   const [showFieldAngkaKredit, setShowFieldAngkaKredit] = useState(true);
@@ -179,6 +180,12 @@ const FormAngkaKredit = ({ visible, onCancel, nip }) => {
           name={"jenisAngkaKredit"}
           label={"Jenis Angka Kredit"}
           required
+          rules={[
+            {
+              required: true,
+              message: "Pilih Jenis Angka Kredit",
+            },
+          ]}
         >
           <Radio.Group
             onChange={(e) => {
@@ -252,33 +259,6 @@ const FormAngkaKredit = ({ visible, onCancel, nip }) => {
         <Form.Item required name="kreditBaruTotal" label="Kredit Baru Total">
           <InputNumber />
         </Form.Item>
-        {/* <Form.Item name="status">
-          <Radio.Group>
-            <Radio.Button value="angkaKreditPertama">
-              Angka Kredit Pertama
-            </Radio.Button>
-            <Radio.Button value="integrasi">Integrasi</Radio.Button>
-            <Radio.Button value="konversi">Konversi</Radio.Button>
-          </Radio.Group>
-        </Form.Item> */}
-
-        {/* <Form.Item
-          valuePropName="checked"
-          name="isAngkaKreditPertama"
-          lable="Angka Kredit Pertama"
-        >
-          <Checkbox>Angka Kredit Pertama?</Checkbox>
-        </Form.Item>
-        <Form.Item
-          valuePropName="checked"
-          name="isIntegrasi"
-          lable="Integrasi?"
-        >
-          <Checkbox>Integrasi</Checkbox>
-        </Form.Item>
-        <Form.Item valuePropName="checked" name="isKonversi" lable="Konversi?">
-          <Checkbox>Konversi</Checkbox>
-        </Form.Item> */}
         <FormRiwayatJabatanByNip nip={nip} name="rwJabatanId" />
       </Form>
     </Modal>
