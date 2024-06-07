@@ -8,6 +8,7 @@ import {
   Breadcrumb,
   Card,
   Collapse,
+  Grid,
   Input,
   Modal,
   Skeleton,
@@ -77,6 +78,8 @@ const ModalDetail = ({ itemid, open, onClose }) => {
 function LogBSRE() {
   const router = useRouter();
 
+  const breakPoint = Grid.useBreakpoint();
+
   const [query, setQuery] = useState({
     page: router?.query?.page || 1,
     limit: router?.query?.limit || 25,
@@ -142,6 +145,31 @@ function LogBSRE() {
 
   const columns = [
     {
+      title: "Data",
+      key: "data",
+      render: (text) => {
+        return (
+          <Space direction="vertical">
+            <span>{text?.user?.username}</span>
+            <Space>
+              <Tag color="yellow">{text?.user?.group}</Tag>
+              <Tag
+                style={{
+                  cursor: "pointer",
+                }}
+                color={text?.status === "SUCCESS" ? "green" : "red"}
+              >
+                {text?.status}
+              </Tag>
+            </Space>
+            <span>{formatDateFull(text?.created_at)}</span>
+            <a onClick={() => handleOpenModal(text)}>Detail</a>
+          </Space>
+        );
+      },
+      responsive: ["xs"],
+    },
+    {
       title: "Nama / Cara Masuk",
       key: "nama",
       render: (text) => (
@@ -150,14 +178,17 @@ function LogBSRE() {
           <Tag color="yellow">{text?.user?.group}</Tag>
         </Space>
       ),
+      responsive: ["sm"],
     },
     {
       title: "Aksi",
       dataIndex: "action",
+      responsive: ["sm"],
     },
     {
       title: "Status",
       key: "status",
+      responsive: ["sm"],
       render: (item) => {
         return (
           <>
@@ -176,11 +207,13 @@ function LogBSRE() {
     {
       title: "Waktu",
       key: "waktu",
+      responsive: ["sm"],
       render: (item) => <span>{formatDateFull(item?.created_at)}</span>,
     },
     {
       title: "Aksi",
       key: "aksi",
+      responsive: ["sm"],
       render: (item) => <a onClick={() => handleOpenModal(item)}>detail</a>,
     },
   ];
@@ -191,6 +224,9 @@ function LogBSRE() {
         <title>Log Unduh Sertifikat TTE</title>
       </Head>
       <PageContainer
+        childrenContentStyle={{
+          padding: breakPoint.xs ? 0 : null,
+        }}
         title="Log BSrE"
         header={{
           breadcrumbRender: () => (
@@ -236,10 +272,6 @@ function LogBSRE() {
     </>
   );
 }
-
-LogBSRE.getLayout = function getLayout(page) {
-  return <Layout active="/logs/bsre">{page}</Layout>;
-};
 
 LogBSRE.Auth = {
   action: "manage",

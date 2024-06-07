@@ -5,14 +5,16 @@ import ReactJson from "@/components/ReactJson";
 import { logSIASN } from "@/services/log.services";
 import { useQuery } from "@tanstack/react-query";
 import {
-  BackTop,
   Breadcrumb,
   Card,
   Collapse,
+  FloatButton,
+  Grid,
   Modal,
   Space,
   Table,
   Tag,
+  Typography,
 } from "antd";
 import dayjs from "dayjs";
 import "dayjs/locale/id";
@@ -24,9 +26,9 @@ import { useRouter } from "next/router";
 dayjs.locale("id");
 dayjs.extend(relativeTime);
 
-const showModalInformation = (item) => {
+const showModalInformation = (item, title = "BsRE") => {
   Modal.info({
-    title: "Detail Log Seal BSrE",
+    title: `Detail Log ${title}`,
     centered: true,
     width: 800,
     content: (
@@ -53,6 +55,8 @@ function LogSIASN() {
 
   const query = router?.query;
 
+  const breakPoint = Grid.useBreakpoint();
+
   const { data, isLoading, isFetching } = useQuery(
     ["logs-siasn", query],
     () => logSIASN(query),
@@ -78,6 +82,27 @@ function LogSIASN() {
 
   const columns = [
     {
+      title: "Data",
+      key: "data",
+      responsive: ["xs"],
+      render: (text) => {
+        return (
+          <Space direction="vertical">
+            <Typography.Text>{text?.user?.username}</Typography.Text>
+            <Typography.Text>{text?.employee_number}</Typography.Text>
+            <Tag color="yellow">
+              {text?.type} {upperCase(text?.siasn_service)}
+            </Tag>
+
+            <Space>
+              <a onClick={() => gotoDetail(text?.employee_number)}>Detail</a>
+              <a onClick={() => showModalInformation(text)}>Show Data</a>
+            </Space>
+          </Space>
+        );
+      },
+    },
+    {
       title: "Aktor",
       key: "actor",
       render: (text) => (
@@ -86,6 +111,7 @@ function LogSIASN() {
           <Tag color="blue">{text?.employee_number}</Tag>
         </Space>
       ),
+      responsive: ["sm"],
     },
     {
       title: "Aksi",
@@ -96,6 +122,7 @@ function LogSIASN() {
           <Tag color="red">{upperCase(text?.siasn_service)}</Tag>
         </Space>
       ),
+      responsive: ["sm"],
     },
     {
       title: "Tgl. Dibuat",
@@ -103,6 +130,7 @@ function LogSIASN() {
       render: (text) => (
         <>{dayjs(text?.created_at).format("DD MMM YYYY HH:mm:ss")}</>
       ),
+      responsive: ["sm"],
     },
     {
       title: "Role",
@@ -112,11 +140,13 @@ function LogSIASN() {
           {text?.user?.role} from {text?.user?.from}
         </div>
       ),
+      responsive: ["sm"],
     },
     {
       title: "Current Role",
       key: "current_role",
       render: (text) => <div>{text?.user?.current_role}</div>,
+      responsive: ["sm"],
     },
     {
       title: "Aksi",
@@ -124,6 +154,7 @@ function LogSIASN() {
       render: (text) => (
         <a onClick={() => gotoDetail(text?.employee_number)}>Detail</a>
       ),
+      responsive: ["sm"],
     },
     {
       title: "Show Data",
@@ -131,6 +162,7 @@ function LogSIASN() {
       render: (_, record) => (
         <a onClick={() => showModalInformation(record)}>show data</a>
       ),
+      responsive: ["sm"],
     },
   ];
 
@@ -140,6 +172,9 @@ function LogSIASN() {
         <title>Log SIASN</title>
       </Head>
       <PageContainer
+        childrenContentStyle={{
+          padding: breakPoint.xs ? 0 : null,
+        }}
         title="Log"
         subTitle="Layanan SIASN"
         header={{
@@ -160,7 +195,7 @@ function LogSIASN() {
           ),
         }}
       >
-        <BackTop />
+        <FloatButton.BackTop />
         <Card title="Tabel Log SIASN">
           <LogSIASNFilter />
           <Table
