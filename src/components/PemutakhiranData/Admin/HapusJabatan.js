@@ -28,14 +28,12 @@ function HapusJabatan({ id }) {
 
   return (
     <>
-      {data?.user?.current_role === "admin" && (
-        <Popconfirm
-          title="Are you sure you want to delete this item?"
-          onConfirm={async () => await hapus()}
-        >
-          <a>Hapus</a>
-        </Popconfirm>
-      )}
+      <Popconfirm
+        title="Are you sure you want to delete this item?"
+        onConfirm={async () => await hapus()}
+      >
+        <a>Hapus</a>
+      </Popconfirm>
     </>
   );
 }
