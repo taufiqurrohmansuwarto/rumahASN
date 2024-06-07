@@ -67,7 +67,6 @@ const CompareKinerjaPeriodikNip = ({ nip }) => {
         <CreateKinerjaPeriodik />
       </div>
       <Flex vertical gap={10}>
-        {JSON.stringify(data)}
         <Table
           pagination={false}
           columns={columns}
