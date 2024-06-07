@@ -17,12 +17,17 @@ const handleRemoveJabatan = async (req, res, jabatanId) => {
 
 const hapusJabatan = async (req, res) => {
   const user = req?.user;
-  const isAdmin = user?.current_role === "admin";
 
-  if (!isAdmin) {
+  const { id, nip } = req.query;
+  const request = req?.siasnRequest;
+  const result = await request.get(`/pns/rw-jabatan/${nip}`);
+  const resultPegawai = await request.get(`/pns/data-utama/${nip}`);
+  const Pppk = resultPegawai.data.data.kedudukanPnsNama === "PPPK Aktif";
+
+  const dataJabatan = result.data.data;
+  if (dataJabatan.length === 1 || Pppk) {
     res.status(403).json({ message: "Forbidden" });
   } else {
-    const { id, nip } = req.query;
     await createLogSIASN({
       userId: user.custom_id,
       type: "delete",
