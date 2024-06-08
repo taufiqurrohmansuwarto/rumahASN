@@ -5,6 +5,7 @@ import { getUmur } from "@/utils/client-utils";
 import { Alert } from "@mantine/core";
 import { useQuery } from "@tanstack/react-query";
 import {
+  Alert as AlertAntd,
   Avatar,
   Card,
   Col,
@@ -23,26 +24,37 @@ import SyncJabatanByNip from "../Sync/SyncJabatanByNip";
 
 // import { patchAnomali2023 } from "@/services/anomali.services";
 
-const EmployeeUnor = ({ data, loading }) => {
+const EmployeeUnor = ({ data, loading, nip }) => {
   return (
-    <Alert title="Informasi ASN Via SIASN" color="yellow">
-      <Spin spinning={loading}>
-        {data ? (
-          <Row>
-            <Col span={24}>
-              {data?.nama} ({data?.nip_baru}) - {data?.unor_nm}
-            </Col>
-            <Col span={24}>
-              {data?.jabatan_nama} - {data?.golongan_nm}
-            </Col>
-          </Row>
-        ) : (
-          <div>
-            <Tag color="red">Pegawai Tidak ditemukan di SIASN</Tag>
-          </div>
-        )}
-      </Spin>
-    </Alert>
+    <AlertAntd
+      message="Informasi ASN Via SIASN"
+      showIcon
+      type="warning"
+      action={
+        <Space direction="vertical">
+          <SyncJabatanByNip nip={nip} />
+          <SyncGolonganByNip nip={nip} />
+        </Space>
+      }
+      description={
+        <Spin spinning={loading}>
+          {data ? (
+            <Row>
+              <Col span={24}>
+                {data?.nama} ({data?.nip_baru}) - {data?.unor_nm}
+              </Col>
+              <Col span={24}>
+                {data?.jabatan_nama} - {data?.golongan_nm}
+              </Col>
+            </Row>
+          ) : (
+            <div>
+              <Tag color="red">Pegawai Tidak ditemukan di SIASN</Tag>
+            </div>
+          )}
+        </Spin>
+      }
+    ></AlertAntd>
   );
 };
 
@@ -160,14 +172,12 @@ function EmployeeDetail({ nip }) {
           pns: dataPnsAll,
         }}
       />
-      <EmployeeUnor loading={isLoadingDataPns} data={dataPnsAll} />
+      <EmployeeUnor nip={nip} loading={isLoadingDataPns} data={dataPnsAll} />
       <Space
         direction={breakPoint?.xs ? "vertical" : "horizontal"}
         align={breakPoint?.xs ? "start" : "center"}
       >
         <IPAsnByNip tahun={2023} nip={dataSimaster?.nip_baru} />
-        <SyncGolonganByNip nip={nip} />
-        <SyncJabatanByNip nip={nip} />
       </Space>
     </Card>
   );

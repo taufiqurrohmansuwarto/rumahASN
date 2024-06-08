@@ -448,3 +448,15 @@ export const inboxUsulan = async (layananId) => {
     .get(`/pns/inbox-layanan?layanan_id=${layananId}`)
     .then((res) => res.data);
 };
+
+// admin
+export const daftarPengadaan = async (query) => {
+  return api
+    .get(
+      `/admin/pengadaan?${queryString.stringify(query, {
+        skipEmptyString: true,
+        skipNull: true,
+      })}`
+    )
+    .then((res) => res.data);
+};
