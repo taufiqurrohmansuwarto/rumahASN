@@ -330,38 +330,47 @@ function CompareAngkaKreditByNip({ nip }) {
           </>
         );
       },
+      responsive: ["sm"],
     },
     {
       title: "Nomor SK",
       dataIndex: "nomorSk",
+      responsive: ["sm"],
     },
     {
       title: "Bulan Mulai Penilaian",
       dataIndex: "bulanMulaiPenailan",
+      responsive: ["sm"],
     },
     {
       title: "Tahun Mulai Penilaian",
       dataIndex: "tahunMulaiPenailan",
+      responsive: ["sm"],
     },
     {
       title: "Bulan Selesai Penilaian",
       dataIndex: "bulanSelesaiPenailan",
+      responsive: ["sm"],
     },
     {
       title: "Tahun Selesai Penilaian",
       dataIndex: "tahunSelesaiPenailan",
+      responsive: ["sm"],
     },
     {
       title: "Kredit Utama Baru",
       dataIndex: "kreditUtamaBaru",
+      responsive: ["sm"],
     },
     {
       title: "Kredit Penunjang Baru",
       dataIndex: "kreditPenunjangBaru",
+      responsive: ["sm"],
     },
     {
       title: "Kredit Baru Total",
       dataIndex: "kreditBaruTotal",
+      responsive: ["sm"],
     },
     {
       title: "Jenis AK",
@@ -369,14 +378,17 @@ function CompareAngkaKreditByNip({ nip }) {
       render: (_, row) => {
         return <>{checkKonversiIntegrasiPertama(row)}</>;
       },
+      responsive: ["sm"],
     },
     {
       title: "Sumber",
       dataIndex: "Sumber",
+      responsive: ["sm"],
     },
     {
       title: "Nama Jabatan",
       dataIndex: "namaJabatan",
+      responsive: ["sm"],
     },
     {
       title: "Hapus",
@@ -391,6 +403,7 @@ function CompareAngkaKreditByNip({ nip }) {
           </Popconfirm>
         );
       },
+      responsive: ["sm"],
     },
   ];
 
@@ -405,28 +418,32 @@ function CompareAngkaKreditByNip({ nip }) {
           </a>
         );
       },
+      responsive: ["sm"],
     },
     {
       title: "Nomor SK",
       dataIndex: "no_sk",
+      responsive: ["sm"],
     },
     {
       title: "Kredit Utama Baru",
       dataIndex: "nilai_unsur_utama_baru",
+      responsive: ["sm"],
     },
     {
       title: "Kredit Unsur Penunjang",
       dataIndex: "nilai_unsur_penunjang_baru",
+      responsive: ["sm"],
     },
-
     {
       title: "Kredit Baru Total",
       dataIndex: "nilai_pak",
+      responsive: ["sm"],
     },
-
     {
       title: "Tgl SK",
       dataIndex: "tgl_sk",
+      responsive: ["sm"],
     },
     {
       title: "Periode Awal",
@@ -434,6 +451,7 @@ function CompareAngkaKreditByNip({ nip }) {
       render: (_, record) => {
         return <>{dayjs(record?.periode_awal).format("YYYY-MM")}</>;
       },
+      responsive: ["sm"],
     },
     {
       title: "Periode Akhir",
@@ -441,6 +459,7 @@ function CompareAngkaKreditByNip({ nip }) {
       render: (_, record) => {
         return <>{dayjs(record?.periode_akhir).format("YYYY-MM")}</>;
       },
+      responsive: ["sm"],
     },
   ];
 

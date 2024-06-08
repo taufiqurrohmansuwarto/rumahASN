@@ -18,7 +18,9 @@ module.exports.removeJabatan = (fetcher, jabatanId) => {
 };
 
 module.exports.dataUtama = (fetcher, nip) => {
-  return fetcher.get(`/pns/data-utama/${nip}`);
+  return fetcher.get(`/pns/data-utama/${nip}`).then((res) => {
+    return res.data?.data;
+  });
 };
 
 // keluarga

@@ -1,4 +1,5 @@
 import AdministrasiByNip from "@/components/Berkas/AdministrasiByNip";
+import { ActiveTabProvider, useActiveTab } from "@/context/TabContext";
 import { FloatButton, Grid, Tabs } from "antd";
 import CompareDataDiklatByNip from "../CompareDataDiklatByNip";
 import ComparePenghargaanByNip from "../ComparePenghargaanByNip";
@@ -16,7 +17,6 @@ import ComparePindahInstansiByNip from "./ComparePindahInstansiByNip";
 import ComparePwkByNip from "./ComparePwkByNip";
 import CompareSKP22ByNip from "./CompareSKP22ByNip";
 import SiasnTrackingLayanan from "./SiasnTrackingLayanan";
-import { ActiveTabProvider, useActiveTab } from "@/context/TabContext";
 
 function SiasnTab({ nip }) {
   const breakPoint = Grid.useBreakpoint();
@@ -78,9 +78,6 @@ function SiasnTab({ nip }) {
           <Tabs.TabPane tab="Hukuman Disiplin" key="hukuman-disiplin">
             <CompareHukdisByNip nip={nip} />
           </Tabs.TabPane>
-          {/* <Tabs.TabPane tab="PNS Unor" key="pns-unor">
-          <ComparePnsUnorByNip nip={nip} />
-        </Tabs.TabPane> */}
           <Tabs.TabPane tab="CLTN" key="cltn">
             <CompareCLTNByNip nip={nip} />
           </Tabs.TabPane>

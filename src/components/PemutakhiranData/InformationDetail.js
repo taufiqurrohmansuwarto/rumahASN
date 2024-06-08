@@ -46,7 +46,7 @@ function InformationDetail({ data }) {
   return (
     <>
       <Descriptions
-        title="Personal Information"
+        title="Informasi Pribadi"
         size="middle"
         column={3}
         layout="vertical"
@@ -77,7 +77,7 @@ function InformationDetail({ data }) {
       </Descriptions>
       <Divider />
       <Descriptions
-        title="Contact Information"
+        title="Informasi Kontak"
         size="middle"
         column={2}
         layout="vertical"
@@ -103,7 +103,7 @@ function InformationDetail({ data }) {
       </Descriptions>
       <Divider />
       <Descriptions
-        title="Professional Information"
+        title="Informasi Professional"
         size="middle"
         column={2}
         layout="vertical"
@@ -204,9 +204,6 @@ function InformationDetail({ data }) {
           {data?.nomorSkPns} | {data?.tglSkPns}
         </Descriptions.Item>
       </Descriptions>
-
-      <Divider orientation="left"> Administrasi </Divider>
-      <AdministrasiByNip />
     </>
   );
 }

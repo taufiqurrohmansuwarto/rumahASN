@@ -12,6 +12,7 @@ import {
   Flex,
   Grid,
   Row,
+  Space,
   Spin,
   Tag,
   Tooltip,
@@ -118,14 +119,11 @@ const StatusSIASN = ({ status, kedudukanNama }) => {
 };
 
 const StatusMaster = ({ status }) => {
-  return (
-    <Tag color={status === "Aktif" ? "green" : "red"}>
-      {status === "Aktif" ? "Pegawai Aktif" : "Pegawai Non Aktif"}
-    </Tag>
-  );
+  return <Tag color={status === "Aktif" ? "green" : "red"}>{status}</Tag>;
 };
 
 function EmployeeDetail({ nip }) {
+  const breakPoint = Grid.useBreakpoint();
   const { data: dataSimaster, isLoading: isLoadingDataSimaster } = useQuery(
     ["data-utama-simaster-by-nip", nip],
     () => dataUtamaMasterByNip(nip)
@@ -152,11 +150,14 @@ function EmployeeDetail({ nip }) {
         }}
       />
       <EmployeeUnor loading={isLoadingDataPns} data={dataPnsAll} />
-      <Flex style={{ marginTop: 10 }} gap={10} align="center" justify="start">
+      <Space
+        direction={breakPoint?.xs ? "vertical" : "horizontal"}
+        align={breakPoint?.xs ? "start" : "center"}
+      >
         <IPAsnByNip tahun={2023} nip={dataSimaster?.nip_baru} />
         <SyncGolonganByNip nip={nip} />
         <SyncJabatanByNip nip={nip} />
-      </Flex>
+      </Space>
     </Card>
   );
 }

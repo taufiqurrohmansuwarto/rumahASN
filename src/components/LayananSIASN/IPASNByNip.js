@@ -166,31 +166,25 @@ function IPAsnByNip({ tahun, nip }) {
   );
 
   return (
-    <Skeleton loading={isLoadingDataIPAsn}>
-      <>
-        {dataIPAsn && (
-          <>
-            <Tag
-              color={
-                dataKategoriIPASN(dataIPAsn?.subtotal) === "Sangat Tinggi"
-                  ? "#a0d911"
-                  : "#f5222d"
-              }
-              style={{ cursor: "pointer", marginBottom: 16, marginTop: 16 }}
-              onClick={handleOpen}
-            >
-              IP ASN tahun {tahun} {dataIPAsn?.subtotal} (
-              {dataKategoriIPASN(dataIPAsn?.subtotal)})
-            </Tag>
-            <ModalDataIPAsn
-              open={open}
-              onCancel={handleClose}
-              data={dataIPAsn}
-            />
-          </>
-        )}
-      </>
-    </Skeleton>
+    <>
+      {dataIPAsn && (
+        <>
+          <Tag
+            color={
+              dataKategoriIPASN(dataIPAsn?.subtotal) === "Sangat Tinggi"
+                ? "#a0d911"
+                : "#f5222d"
+            }
+            style={{ cursor: "pointer", marginBottom: 16, marginTop: 16 }}
+            onClick={handleOpen}
+          >
+            IP ASN tahun {tahun} {dataIPAsn?.subtotal} (
+            {dataKategoriIPASN(dataIPAsn?.subtotal)})
+          </Tag>
+          <ModalDataIPAsn open={open} onCancel={handleClose} data={dataIPAsn} />
+        </>
+      )}
+    </>
   );
 }
 
