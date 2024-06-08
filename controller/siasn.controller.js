@@ -34,6 +34,7 @@ const {
   rwKinerjaPeriodik,
   hapusKinerjaPeriodik,
   createKinerjaPeriodik,
+  dataUtama,
 } = require("@/utils/siasn-utils");
 
 const {
@@ -106,7 +107,7 @@ const siasnEmployeesDetail = async (req, res) => {
 
     const nip = user?.employee_number;
 
-    const result = await getDataUtamaASNProxy(fetcher, nip);
+    const result = await dataUtama(siasnRequest, nip);
     res.json(result);
   } catch (error) {
     res.status(500).json({ code: 500, message: "Internal Server Error" });
@@ -165,7 +166,7 @@ const siasnEmployeeDetailByNip = async (req, res) => {
     //   ...result?.data?.data,
     // };
 
-    const result = await getDataUtamaASNProxy(fetcher, nip);
+    const result = await dataUtama(siasnRequest, nip);
     res.json(result);
   } catch (error) {
     console.log(error);

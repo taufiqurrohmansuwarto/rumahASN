@@ -1,5 +1,2 @@
 
-1. tambahkan tab Tracking Layanan SIASN di master data pegawai
-2. tambahkan CRUD untuk kinerja periodik 
-3. tambahkan CRUD untuk penghargaan
-4. tambahkan edit untuk email
+1. tambahkan CRUD untuk penghargaan
