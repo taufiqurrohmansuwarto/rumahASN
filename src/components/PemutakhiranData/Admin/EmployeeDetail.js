@@ -89,13 +89,24 @@ const EmployeeContent = ({ data, loading }) => {
         <Flex gap={10} vertical>
           <Flex>
             <Tooltip title="Status Kepegawaian SIMASTER">
-              <StatusMaster status={data?.master?.status} />
+              <div>
+                <StatusMaster status={data?.master?.status} />
+              </div>
             </Tooltip>
             <Tooltip title="Status Kepegawaian SIASN">
-              <StatusSIASN
-                status={data?.siasn?.statusPegawai}
-                kedudukanNama={data?.siasn?.kedudukanPnsNama}
-              />
+              <div>
+                <StatusSIASN
+                  status={data?.siasn?.statusPegawai}
+                  kedudukanNama={data?.siasn?.kedudukanPnsNama}
+                />
+              </div>
+            </Tooltip>
+            <Tooltip title="Status Verifikasi NIK">
+              <Tag color={data?.siasn?.validNik ? "green" : "red"}>
+                {data?.siasn?.validNik
+                  ? "NIK Terverifikasi"
+                  : "NIK Belum Terverifikasi"}
+              </Tag>
             </Tooltip>
           </Flex>
           <Flex gap={20} justify="space-between">
