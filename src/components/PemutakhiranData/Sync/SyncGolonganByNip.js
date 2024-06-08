@@ -1,7 +1,7 @@
 import { refreshGolonganByNip } from "@/services/siasn-services";
 import { SyncOutlined } from "@ant-design/icons";
 import { useMutation } from "@tanstack/react-query";
-import { Button, message } from "antd";
+import { Button, Tooltip, message } from "antd";
 
 function SyncGolonganByNip({ nip }) {
   const {
@@ -18,15 +18,17 @@ function SyncGolonganByNip({ nip }) {
   });
 
   return (
-    <Button
-      icon={<SyncOutlined />}
-      onClick={refresh}
-      loading={isLoading || isError}
-      type="primary"
-      size="small"
-    >
-      Golongan
-    </Button>
+    <Tooltip title="Refresh Golongan jika tidak sesuai">
+      <Button
+        icon={<SyncOutlined />}
+        onClick={refresh}
+        loading={isLoading || isError}
+        type="primary"
+        size="small"
+      >
+        Golongan
+      </Button>
+    </Tooltip>
   );
 }
 

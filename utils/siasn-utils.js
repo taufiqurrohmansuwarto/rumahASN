@@ -43,9 +43,15 @@ module.exports.daftarKenaikanPangkat = (fetcher, periode) => {
 };
 
 module.exports.daftarPengadaanInstansi = (fetcher, tahunAnggaran) => {
-  return fetcher.get(
-    `/pengadaan/list-pengadaan-instansi?tahun=${tahunAnggaran}`
-  );
+  return fetcher
+    .get(`/pengadaan/list-pengadaan-instansi?tahun=${tahunAnggaran}`)
+    .then((res) => res?.data?.data);
+};
+
+module.exports.daftarPengadaanDokumen = (fetcher, tahunAnggaran) => {
+  return fetcher
+    .get(`/pengadaan/dokumen-pengadaan?tahun=${tahunAnggaran}`)
+    .then((res) => res?.data);
 };
 
 module.exports.listPemberhentianSIASN = (fetcher, tglAwal, tglAkhir) => {
@@ -188,4 +194,11 @@ module.exports.createKinerjaPeriodik = (fetcher, data) => {
 
 module.exports.hapusKinerjaPeriodik = (fetcher, id) => {
   return fetcher.delete(`/kinerjaperiodik/delete/${id}`);
+};
+
+// admin
+module.exports.kenaikanPangkatPeriode = (fetcher, periode) => {
+  return fetcher
+    .get(`/pns/list-kp-instansi?periode=${periode}`)
+    .then((res) => res?.data);
 };

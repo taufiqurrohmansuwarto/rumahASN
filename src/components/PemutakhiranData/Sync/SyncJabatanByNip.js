@@ -1,7 +1,7 @@
 import { refreshJabatanByNip } from "@/services/siasn-services";
 import { SyncOutlined } from "@ant-design/icons";
 import { useMutation } from "@tanstack/react-query";
-import { Button, message } from "antd";
+import { Button, Tooltip, message } from "antd";
 
 function SyncJabatanByNip({ nip }) {
   const {
@@ -18,15 +18,17 @@ function SyncJabatanByNip({ nip }) {
   });
 
   return (
-    <Button
-      icon={<SyncOutlined />}
-      onClick={refresh}
-      loading={isLoading || isError}
-      size="small"
-      type="primary"
-    >
-      Jabatan
-    </Button>
+    <Tooltip title="Refresh Jabatan jika jabatan tidak sesuai">
+      <Button
+        icon={<SyncOutlined />}
+        onClick={refresh}
+        loading={isLoading || isError}
+        size="small"
+        type="primary"
+      >
+        Jabatan
+      </Button>
+    </Tooltip>
   );
 }
 

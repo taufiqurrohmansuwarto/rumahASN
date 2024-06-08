@@ -271,26 +271,44 @@ const changeRoutes = (user) => {
           icon: <SolutionOutlined />,
           routes: [
             {
+              path: "/apps-managements/siasn-services",
+              name: "Layanan SIASN",
+              routes: [
+                {
+                  path: "/apps-managements/siasn-services/pengadaan",
+                  name: "Pengadaan",
+                },
+                {
+                  path: "/apps-managements/siasn-services/pemberhentian",
+                  name: "Pemberhentian",
+                },
+                {
+                  path: "/apps-managements/siasn-services/kenaikan-pangkat",
+                  name: "Kenaikan Pangkat",
+                },
+              ],
+            },
+            {
               path: "/apps-managements/integrasi",
               name: "Integrasi Aplikasi",
               routes: [
                 { path: "/apps-managements/integrasi/siasn", name: "SIASN" },
               ],
             },
-            {
-              path: "/apps-managements/submissions",
-              name: "Usulan",
-              routes: [
-                {
-                  path: "/apps-managements/submissions/references",
-                  name: "Kamus Usulan",
-                },
-                {
-                  path: "/apps-managements/submissions/files",
-                  name: "File Usulan",
-                },
-              ],
-            },
+            // {
+            //   path: "/apps-managements/submissions",
+            //   name: "Usulan",
+            //   routes: [
+            //     {
+            //       path: "/apps-managements/submissions/references",
+            //       name: "Kamus Usulan",
+            //     },
+            //     {
+            //       path: "/apps-managements/submissions/files",
+            //       name: "File Usulan",
+            //     },
+            //   ],
+            // },
             sealAdmin?.granted && {
               path: "/apps-managements/esign",
               name: "E-Sign",
@@ -301,14 +319,14 @@ const changeRoutes = (user) => {
                 },
               ],
             },
-            {
-              path: "/apps-managements/netralitas-asn",
-              name: "Netralitas ASN",
-            },
-            {
-              path: "/apps-managements/layanan-kepegawaian",
-              name: "Layanan Kepegawaian",
-            },
+            // {
+            //   path: "/apps-managements/netralitas-asn",
+            //   name: "Netralitas ASN",
+            // },
+            // {
+            //   path: "/apps-managements/layanan-kepegawaian",
+            //   name: "Layanan Kepegawaian",
+            // },
             {
               path: "/apps-managements/anomali-data-2023",
               name: "Data Anomali 2023",
