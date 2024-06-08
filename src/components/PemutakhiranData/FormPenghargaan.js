@@ -1,0 +1,22 @@
+import { dataRiwayatPenghargaan } from "@/utils/client-data";
+import { Form, Input, Select } from "antd";
+
+const FormPenghargaan = ({ name, label }) => {
+  const [form] = Form.useForm();
+
+  return (
+    <Form form={form}>
+      <Form.Item name={name} label={label}>
+        <Select>
+          {dataRiwayatPenghargaan.map((item) => (
+            <Select.Option key={item.id} value={item.id}>
+              {item.nama}
+            </Select.Option>
+          ))}
+        </Select>
+      </Form.Item>
+    </Form>
+  );
+};
+
+export default FormPenghargaan;

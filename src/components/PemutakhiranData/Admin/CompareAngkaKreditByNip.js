@@ -466,7 +466,7 @@ function CompareAngkaKreditByNip({ nip }) {
   return (
     <Card title="Komparasi Angka Kredit">
       <Skeleton loading={loadingDataSiasn}>
-        {dataSiasn?.jenisJabatanId !== 2 ||
+        {dataSiasn?.jenisJabatanId !== "2" ||
         dataSiasn?.kedudukanPnsNama === "PPPK Aktif" ? (
           <Empty description="Tidak dapat mengentri AK karena pegawai PPPK / Bukan JFT" />
         ) : (
