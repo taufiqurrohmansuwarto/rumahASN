@@ -4,38 +4,55 @@ import {
   penghargaanByNip,
 } from "@/services/siasn-services";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Card, Table, message } from "antd";
+import { Card, Popconfirm, Table, message } from "antd";
 import CreatePenghargaan from "./CreatePenghargaan";
 
 function ComparePenghargaanByNip({ nip }) {
   const queryClient = useQueryClient();
 
   const { data, isLoading } = useQuery(
-    ["riwayat-penghargaan", nip],
+    ["riwayat-penghargaan-nip", nip],
     () => penghargaanByNip(nip),
-    {
-      enabled: !!nip,
-      refetchOnWindowFocus: false,
-    }
+    {}
   );
 
-  const { mutate: create, isLoading: isLoadingCreate } = useMutation(
+  const { mutateAsync: create, isLoading: isLoadingCreate } = useMutation(
     (data) => createPenghargaanByNip(data),
     {
-      onSuccess: () => message.success("Berhasil menambahkan penghargaan"),
+      onSuccess: () => {
+        message.success("Berhasil menambahkan penghargaan");
+        queryClient.invalidateQueries(["riwayat-penghargaan-nip", nip]);
+      },
+      onError: (error) => {
+        message.error(error?.response?.data?.message || error?.message);
+      },
       onSettled: () =>
-        queryClient.invalidateQueries(["riwayat-penghargaan", nip]),
+        queryClient.invalidateQueries(["riwayat-penghargaan-nip", nip]),
     }
   );
 
-  const { mutate: hapus, isLoadsing: isLoadingHapus } = useMutation(
+  const { mutateAsync: hapus, isLoadsing: isLoadingHapus } = useMutation(
     (data) => hapusPenghargaanByNip(data),
     {
-      onSuccess: () => message.success("Berhasil menghapus penghargaan"),
+      onSuccess: () => {
+        message.success("Berhasil menghapus penghargaan");
+        queryClient.invalidateQueries(["riwayat-penghargaan-nip", nip]);
+      },
+      onError: (error) => {
+        message.error(error?.response?.data?.message || error?.message);
+      },
       onSettled: () =>
-        queryClient.invalidateQueries(["riwayat-penghargaan", nip]),
+        queryClient.invalidateQueries(["riwayat-penghargaan-nip", nip]),
     }
   );
+
+  const handleHapus = async (id) => {
+    const payload = {
+      nip,
+      id,
+    };
+    await hapus(payload);
+  };
 
   const columns = [
     {
@@ -56,25 +73,49 @@ function ComparePenghargaanByNip({ nip }) {
           </>
         );
       },
+      responsive: ["sm"],
     },
     {
       title: "Nama Penghargaan",
       dataIndex: "hargaNama",
+      responsive: ["sm"],
     },
     {
       title: "Nomor SK",
       dataIndex: "skNomor",
+      responsive: ["sm"],
     },
     {
       title: "Tanggal SK",
       dataIndex: "skDate",
+      responsive: ["sm"],
+    },
+    {
+      title: "Aksi",
+      key: "aksi",
+      render: (text) => {
+        return (
+          <Popconfirm
+            title="Apakah anda yakin ingin menghapus penghargaan ini?"
+            onConfirm={async () => await handleHapus(text?.ID)}
+          >
+            <a>Hapus</a>
+          </Popconfirm>
+        );
+      },
     },
   ];
 
   return (
     <Card title="Penghargaan">
       <Table
-        title={() => <CreatePenghargaan />}
+        title={() => (
+          <CreatePenghargaan
+            loading={isLoadingCreate}
+            nip={nip}
+            onSubmit={create}
+          />
+        )}
         pagination={false}
         columns={columns}
         dataSource={data}

@@ -1,20 +1,27 @@
 import { Button, DatePicker, Form, Input, Modal, Select } from "antd";
 import { useState } from "react";
 import dayjs from "dayjs";
+import FormPenghargaan from "./FormPenghargaan";
 
-function ModalCreatePenghargaan({ open, onCancel, onSubmit, loading }) {
+function ModalCreatePenghargaan({ open, onCancel, onSubmit, loading, nip }) {
   const format = "DD-MM-YYYY";
   const [form] = Form.useForm();
 
   const handleOk = async () => {
     const value = await form.validateFields();
-    const payload = {
+    const data = {
       ...value,
-      skDate: dayjs(value.skDate).format("YYYY-MM-DD"),
+      skDate: dayjs(value.skDate).format(format),
       tahun: dayjs(value.tahun).format("YYYY"),
     };
 
-    console.log(payload);
+    const payload = {
+      nip,
+      data,
+    };
+
+    await onSubmit(payload);
+    onCancel();
   };
 
   return (
@@ -27,19 +34,41 @@ function ModalCreatePenghargaan({ open, onCancel, onSubmit, loading }) {
         confirmLoading={loading}
       >
         <Form form={form} layout="vertical">
-          <Form.Item name="harga_id" label="Jenis Penghargaan">
-            <Select>
-              <Select.Option value="1">Penghargaan Satya Lencana</Select.Option>
-              <Select.Option value="2">Penghargaan Karya Satya</Select.Option>
-            </Select>
-          </Form.Item>
-          <Form.Item name="skDate" label="Tanggal SK">
+          <FormPenghargaan name="hargaId" label="Jenis Penghargaan" />
+          <Form.Item
+            rules={[
+              {
+                required: true,
+                message: "Tanggal SK harus diisi",
+              },
+            ]}
+            name="skDate"
+            label="Tanggal SK"
+          >
             <DatePicker format={format} />
           </Form.Item>
-          <Form.Item name="skNomor" label="Nomor SK">
+          <Form.Item
+            rules={[
+              {
+                required: true,
+                message: "Nomor SK harus diisi",
+              },
+            ]}
+            name="skNomor"
+            label="Nomor SK"
+          >
             <Input />
           </Form.Item>
-          <Form.Item name="tahun" label="Tahun">
+          <Form.Item
+            rules={[
+              {
+                required: true,
+                message: "Tahun harus diisi",
+              },
+            ]}
+            name="tahun"
+            label="Tahun"
+          >
             <DatePicker picker="year" />
           </Form.Item>
         </Form>
@@ -48,7 +77,7 @@ function ModalCreatePenghargaan({ open, onCancel, onSubmit, loading }) {
   );
 }
 
-const CreatePenghargaan = ({ onSubmit, loading }) => {
+const CreatePenghargaan = ({ nip, onSubmit, loading }) => {
   const [open, setOpen] = useState();
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
@@ -59,6 +88,7 @@ const CreatePenghargaan = ({ onSubmit, loading }) => {
         Tambah Penghargaan
       </Button>
       <ModalCreatePenghargaan
+        nip={nip}
         open={open}
         onCancel={handleClose}
         onSubmit={onSubmit}

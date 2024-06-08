@@ -1,6 +1,6 @@
 import AdministrasiByNip from "@/components/Berkas/AdministrasiByNip";
 import { ActiveTabProvider, useActiveTab } from "@/context/TabContext";
-import { FloatButton, Grid, Tabs } from "antd";
+import { Alert, FloatButton, Grid, Tabs } from "antd";
 import CompareDataDiklatByNip from "../CompareDataDiklatByNip";
 import ComparePenghargaanByNip from "../ComparePenghargaanByNip";
 import CompareAngkaKreditByNip from "./CompareAngkaKreditByNip";
@@ -28,6 +28,12 @@ function SiasnTab({ nip }) {
 
   return (
     <>
+      <Alert
+        banner
+        type="info"
+        message="Integrasi dengan SIASN yang sudah adalah Jabatan, Angka Kredit, Kinerja Periodik, Diklat, dan Penghargaan"
+        style={{ marginBottom: 10 }}
+      />
       <FloatButton.BackTop />
       <ActiveTabProvider>
         <Tabs

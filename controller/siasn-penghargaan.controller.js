@@ -1,8 +1,11 @@
+const { createLogSIASN } = require("@/utils/logs");
 const {
   riwayatPenghargaan,
   tambahRiwayatPengharggan,
   hapusRiwayatPenghargaan,
+  dataUtama,
 } = require("@/utils/siasn-utils");
+const { toNumber } = require("lodash");
 
 const handlePenghargaanResponse = async (req, res, nip) => {
   try {
@@ -15,11 +18,26 @@ const handlePenghargaanResponse = async (req, res, nip) => {
   }
 };
 
-const handlePenghargaanCreate = async (req, res) => {
+const handlePenghargaanCreate = async (req, res, nip) => {
   try {
     const fetcher = req?.siasnRequest;
-    const data = await tambahRiwayatPengharggan(fetcher, req.body);
-    res.json(data);
+    const pns = await dataUtama(fetcher, nip);
+    const payload = {
+      ...req.body,
+      pnsOrangId: pns?.id,
+      tahun: toNumber(req?.body?.tahun),
+    };
+    const data = await tambahRiwayatPengharggan(fetcher, payload);
+    await createLogSIASN({
+      userId: req?.user?.customId,
+      type: "Tambah Penghargaan",
+      siasnService: "siasn-penghargaan",
+      employeeNumber: req.query?.nip,
+      request_data: JSON.stringify(req.body),
+    });
+    res.json({
+      message: "Berhasil menambahkan penghargaan",
+    });
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: "Internal server error" });
@@ -31,7 +49,16 @@ const handlePenghargaanDelete = async (req, res) => {
     const fetcher = req?.siasnRequest;
     const { id } = req.query;
     const data = await hapusRiwayatPenghargaan(fetcher, id);
-    res.json(data);
+    await createLogSIASN({
+      userId: req?.user?.customId,
+      type: "Hapus Penghargaan",
+      siasnService: "siasn-penghargaan",
+      employeeNumber: req.query?.nip,
+      request_data: JSON.stringify(req.query),
+    });
+    res.json({
+      message: "Berhasil menghapus penghargaan",
+    });
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: "Internal server error" });
