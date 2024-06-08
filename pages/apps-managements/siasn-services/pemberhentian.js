@@ -1,6 +1,6 @@
 import Layout from "@/components/Layout";
 
-const LayananSiasnKenaikanPangkat = () => {
+const LayananSiasnPemberhentian = () => {
   return <div>helo</div>;
 };
 
