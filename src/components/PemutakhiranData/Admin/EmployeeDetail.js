@@ -2,7 +2,13 @@ import IPAsnByNip from "@/components/LayananSIASN/IPASNByNip";
 import { dataUtamaMasterByNip } from "@/services/master.services";
 import { dataUtamSIASNByNip, getPnsAllByNip } from "@/services/siasn-services";
 import { getUmur } from "@/utils/client-utils";
-import { Alert } from "@mantine/core";
+import { ActionIcon } from "@mantine/core";
+import {
+  IconBadges,
+  IconBarrierBlock,
+  IconEyeCheck,
+  IconHistory,
+} from "@tabler/icons";
 import { useQuery } from "@tanstack/react-query";
 import {
   Alert as AlertAntd,
@@ -122,9 +128,31 @@ const EmployeeContent = ({ data, loading }) => {
             </Tooltip>
           </Flex>
           <Flex gap={20} justify="space-between">
-            <div>
-              <Avatar size={110} shape="square" src={data?.master?.foto} />
-            </div>
+            <Space direction="vertical" align="center">
+              <Avatar size={110} shape="circle" src={data?.master?.foto} />
+              <Space align="center">
+                <Tooltip title="Usulan Kenaikan Pangkat">
+                  <ActionIcon variant="light" color="indigo">
+                    <IconBadges size="1rem" />
+                  </ActionIcon>
+                </Tooltip>
+                <Tooltip title="Usulan Pemberhentian">
+                  <ActionIcon variant="light" color="indigo">
+                    <IconBarrierBlock size="1rem" />
+                  </ActionIcon>
+                </Tooltip>
+                <Tooltip title="Usulan Perbaikan Nama">
+                  <ActionIcon variant="light" color="indigo">
+                    <IconEyeCheck size="1rem" />
+                  </ActionIcon>
+                </Tooltip>
+                <Tooltip title="Usulan Lainnya">
+                  <ActionIcon variant="light" color="indigo">
+                    <IconHistory size="1rem" />
+                  </ActionIcon>
+                </Tooltip>
+              </Space>
+            </Space>
             <EmployeeDescriptionMaster loading={loading} data={data?.master} />
           </Flex>
         </Flex>
