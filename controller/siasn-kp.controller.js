@@ -13,12 +13,23 @@ const listKenaikanPangkat = async (req, res) => {
   try {
     const { siasnRequest: request } = req;
 
-    const periode = req?.query?.periode || dayjs().format("YYYY-MM-DD");
+    let periodePangkat = dayjs().format("YYYY-MM-DD");
 
-    const result = await daftarKenaikanPangkat(request, periode);
-    const data = result?.data;
+    if (req?.query?.periode) {
+      periodePangkat = dayjs(req?.query?.periode, "DD-MM-YYYY").format(
+        "YYYY-MM-DD"
+      );
+    }
 
-    res.json(data);
+    const result = await daftarKenaikanPangkat(request, periodePangkat);
+
+    const data = result?.data?.data;
+
+    if (data?.code === 1) {
+      res.json([]);
+    } else {
+      res.json(data);
+    }
   } catch (error) {
     console.log(error);
     res.status(400).json({

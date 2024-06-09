@@ -460,3 +460,25 @@ export const daftarPengadaan = async (query) => {
     )
     .then((res) => res.data);
 };
+
+export const daftarKenaikanPangkat = async (query) => {
+  return api
+    .get(
+      `/admin/kp?${queryString.stringify(query, {
+        skipEmptyString: true,
+        skipNull: true,
+      })}`
+    )
+    .then((res) => res.data);
+};
+
+export const daftarPemberhentian = async (query) => {
+  return api
+    .get(
+      `/admin/pemberhentian?${queryString.stringify(query, {
+        skipEmptyString: true,
+        skipNull: true,
+      })}`
+    )
+    .then((res) => res.data);
+};

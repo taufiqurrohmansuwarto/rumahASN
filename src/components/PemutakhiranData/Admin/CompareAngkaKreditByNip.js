@@ -20,9 +20,6 @@ import { API_URL, checkKonversiIntegrasiPertama } from "@/utils/client-utils";
 import {
   Button,
   Card,
-  Checkbox,
-  Radio,
-  Col,
   DatePicker,
   Empty,
   Form,
@@ -30,7 +27,7 @@ import {
   InputNumber,
   Modal,
   Popconfirm,
-  Row,
+  Radio,
   Skeleton,
   Table,
   Upload,
