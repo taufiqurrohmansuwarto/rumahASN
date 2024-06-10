@@ -1,3 +1,4 @@
+import { postHukdisByNip } from "@/controller/siasn-hukdis.controller";
 import { getHukdisByNip } from "@/controller/siasn.controller";
 import adminFasilitatorMiddleware from "@/middleware/admin-fasilitator.middleware";
 import auth from "@/middleware/auth.middleware";
@@ -9,6 +10,7 @@ router
   .use(auth)
   .use(adminFasilitatorMiddleware)
   .use(siasnMiddleware)
-  .get(getHukdisByNip);
+  .get(getHukdisByNip)
+  .post(postHukdisByNip);
 
 export default router.handler();

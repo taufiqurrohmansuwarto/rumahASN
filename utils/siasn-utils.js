@@ -202,3 +202,8 @@ module.exports.kenaikanPangkatPeriode = (fetcher, periode) => {
     .get(`/pns/list-kp-instansi?periode=${periode}`)
     .then((res) => res?.data);
 };
+
+// create hukuman disiplin
+module.exports.createHukdis = (fetcher, data) => {
+  return fetcher.post(`/hukdis/save`, data);
+};

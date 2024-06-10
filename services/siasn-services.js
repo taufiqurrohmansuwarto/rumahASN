@@ -258,6 +258,10 @@ export const getRwHukdis = () => {
   return api.get("/pns/rw-hukdis").then((res) => res.data);
 };
 
+export const postRwHukdisByNip = ({ nip, data }) => {
+  return api.post(`/admin/${nip}/rw-hukdis`, data).then((res) => res.data);
+};
+
 export const getRwGolongan = () => {
   return api.get("/pns/rw-golongan").then((res) => res.data);
 };
