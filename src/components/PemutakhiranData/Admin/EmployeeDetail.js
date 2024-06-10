@@ -27,6 +27,11 @@ import {
 } from "antd";
 import SyncGolonganByNip from "../Sync/SyncGolonganByNip";
 import SyncJabatanByNip from "../Sync/SyncJabatanByNip";
+import TrackingKenaikanPangkatByNip from "./Usulan/TrackingKenaikanPangkatByNip";
+import { useRouter } from "next/router";
+import TrackingPemberhentianByNip from "./Usulan/TrackingPemberhentianByNip";
+import TrackingPerbaikanNamaByNip from "./Usulan/TrackingPerbaikanNamaByNip";
+import TrackingUsulanLainnyaByNip from "./Usulan/TrackingUsulanLainnyaByNip";
 
 // import { patchAnomali2023 } from "@/services/anomali.services";
 
@@ -101,6 +106,7 @@ const EmployeeDescriptionMaster = ({ data, loading }) => {
 };
 
 const EmployeeContent = ({ data, loading }) => {
+  const router = useRouter();
   return (
     <Row gutter={[8, 16]}>
       <Col sm={24} md={24}>
@@ -131,26 +137,10 @@ const EmployeeContent = ({ data, loading }) => {
             <Space direction="vertical" align="center">
               <Avatar size={110} shape="circle" src={data?.master?.foto} />
               <Space align="center">
-                <Tooltip title="Usulan Kenaikan Pangkat">
-                  <ActionIcon variant="light" color="indigo">
-                    <IconBadges size="1rem" />
-                  </ActionIcon>
-                </Tooltip>
-                <Tooltip title="Usulan Pemberhentian">
-                  <ActionIcon variant="light" color="indigo">
-                    <IconBarrierBlock size="1rem" />
-                  </ActionIcon>
-                </Tooltip>
-                <Tooltip title="Usulan Perbaikan Nama">
-                  <ActionIcon variant="light" color="indigo">
-                    <IconEyeCheck size="1rem" />
-                  </ActionIcon>
-                </Tooltip>
-                <Tooltip title="Usulan Lainnya">
-                  <ActionIcon variant="light" color="indigo">
-                    <IconHistory size="1rem" />
-                  </ActionIcon>
-                </Tooltip>
+                <TrackingKenaikanPangkatByNip nip={router.query.nip} />
+                <TrackingPemberhentianByNip nip={router.query.nip} />
+                <TrackingPerbaikanNamaByNip nip={router.query.nip} />
+                <TrackingUsulanLainnyaByNip nip={router.query.nip} />
               </Space>
             </Space>
             <EmployeeDescriptionMaster loading={loading} data={data?.master} />
