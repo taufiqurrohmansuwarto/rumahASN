@@ -13,7 +13,12 @@ const ModalUsulan = ({ open, onClose, nip }) => {
   );
 
   return (
-    <Modal open={open} onCancel={onClose} title={"Usulan Pemberhentian"}>
+    <Modal
+      width={800}
+      open={open}
+      onCancel={onClose}
+      title={"Usulan Pemberhentian"}
+    >
       <TableUsulan data={data} isLoading={isLoading} />
     </Modal>
   );
