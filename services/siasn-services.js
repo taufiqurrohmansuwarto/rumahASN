@@ -486,3 +486,21 @@ export const daftarPemberhentian = async (query) => {
     )
     .then((res) => res.data);
 };
+
+export const trackingKenaikanPangkatByNipFasilitator = async (nip) => {
+  return api
+    .get(`/admin/${nip}/layanan-siasn/kenaikan-pangkat`)
+    .then((res) => res.data);
+};
+
+export const trackingPemberhentianByNipFasilitator = async (nip) => {
+  return api
+    .get(`/admin/${nip}/layanan-siasn/pemberhentian`)
+    .then((res) => res.data);
+};
+
+export const trackingPerbaikanNamaByNipFasilitator = async (nip) => {
+  return api
+    .get(`/admin/${nip}/layanan-siasn/perbaikan-nama`)
+    .then((res) => res.data);
+};
