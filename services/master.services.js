@@ -99,9 +99,17 @@ export const rwPendidikan = () => {
   return api.get("/rw-pendidikan").then((res) => res.data);
 };
 
+export const kelengkapanDokumenMaster = () => {
+  return api.get("/kelengkapan-dokumen").then((res) => res.data);
+};
+
 // admin
 export const dataUtamaMasterByNip = (nip) => {
   return api.get(`/admin/${nip}/data-utama`).then((res) => res.data);
+};
+
+export const kelengkapanDokumenMasterByNip = (nip) => {
+  return api.get(`/admin/${nip}/kelengkapan-dokumen`).then((res) => res.data);
 };
 
 export const rwJabatanMasterByNip = (nip) => {

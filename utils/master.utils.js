@@ -21,6 +21,18 @@ module.exports.getRwPasangan = async (fetcher, nip) => {
   }
 };
 
+// kelengkapan dokumen pppk
+module.exports.getKelengkapanDokumen = async (fetcher, nip) => {
+  try {
+    const result = await fetcher.get(
+      `/master-ws/operator/employees/${nip}/kelengkapan-dokumen`
+    );
+    return result;
+  } catch (error) {
+    console.log(error);
+  }
+};
+
 // penghargaan
 module.exports.getRwPenghargaan = async (fetcher, nip) => {
   try {
