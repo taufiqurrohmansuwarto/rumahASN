@@ -111,13 +111,6 @@ const cariPnsKinerjaProxy = async (req, res) => {
     const { nip } = req.query;
     const hasil = await getSession({ req });
 
-    const token = hasil?.accessToken;
-
-    console.log({
-      apiGateway,
-      token,
-    });
-
     const fetcher = axios.create({
       baseURL: apiGateway,
       headers: {

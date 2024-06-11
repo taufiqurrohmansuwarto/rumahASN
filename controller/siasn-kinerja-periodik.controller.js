@@ -4,7 +4,11 @@ const handleKinerjaPeriodikResponse = async (req, res, nip) => {
   try {
     const fetcher = req?.siasnRequest;
     const data = await rwKinerjaPeriodik(fetcher, nip);
-    res.json(data);
+    if (data?.code === 1 && !data?.data) {
+      res.json([]);
+    } else {
+      res.json(data);
+    }
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: "Internal server error" });
@@ -12,7 +16,7 @@ const handleKinerjaPeriodikResponse = async (req, res, nip) => {
 };
 
 const getKinerjaPeriodikPersonal = async (req, res) => {
-  const { employeeNumber: nip } = req.user;
+  const { employee_number: nip } = req.user;
   await handleKinerjaPeriodikResponse(req, res, nip);
 };
 

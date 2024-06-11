@@ -369,8 +369,6 @@ export const kelengkapanDokumenByNip = async (req, res) => {
     const { fetcher } = req;
     const { nip } = req.query;
     const result = await getKelengkapanDokumen(fetcher, nip);
-    console.log(result.data);
-
     res.json(result?.data);
   } catch (error) {
     console.log(error);

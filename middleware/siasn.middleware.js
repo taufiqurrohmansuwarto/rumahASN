@@ -19,8 +19,6 @@ const getoken = async () => {
     wso_token: wso2,
   };
 
-  console.log(result);
-
   return result;
 };
 

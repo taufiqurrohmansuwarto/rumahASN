@@ -426,19 +426,9 @@ const postSkp2022 = async (req, res) => {
 
 const postSkp2022ByNip = async (req, res) => {
   try {
-    const { siasnRequest } = req;
+    const { siasnRequest, fetcher } = req;
     const { pns_penilai, ...body } = req?.body;
     const { nip } = req?.query;
-
-    const apiGateway = process.env.APIGATEWAY_URL;
-    const hasil = await getSession({ req });
-
-    const fetcher = axios.create({
-      baseURL: apiGateway,
-      headers: {
-        Authorization: `Bearer ${hasil?.accessToken}`,
-      },
-    });
 
     const dataCurrent = await siasnRequest.get(`/pns/data-utama/${nip}`);
 
