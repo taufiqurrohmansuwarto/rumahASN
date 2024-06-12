@@ -27,6 +27,7 @@ import { useEffect, useState } from "react";
 import { createTickets } from "../../services/users.services";
 import PageContainer from "../../src/components/PageContainer";
 import { QuestionCircleFilled } from "@ant-design/icons";
+import EletterBKD from "@/components/Utils/EletterBKD";
 
 // peremajaan data
 const TextPeremajaanData = () => {
@@ -199,6 +200,7 @@ const CreateTicket = () => {
           </Breadcrumb>
         )}
       >
+        <EletterBKD />
         <Row gutter={[8, 16]}>
           <Col md={16} xs={24}>
             <Bantuan open={open} onCancel={handleClose} />

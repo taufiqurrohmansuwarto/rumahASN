@@ -1108,3 +1108,5 @@ export const getKuadran = (a, b) => {
     return Math.max(a, b);
   }
 };
+
+export const notificationText = (userId, data) => {};

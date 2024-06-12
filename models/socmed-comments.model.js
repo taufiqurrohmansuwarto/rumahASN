@@ -30,16 +30,16 @@ class SocmedComments extends Model {
     };
   }
 
-  async $afterInsert(queryContext) {
-    console.log("after insert");
-    await super.$afterInsert(queryContext);
-    await SocmedNotification.query().insert({
-      user_id: this.user_id,
-      trigger_user_id: this.user_id,
-      type: "comment",
-      reference_id: this.post_id,
-    });
-  }
+  // async $afterInsert(queryContext) {
+  //   await super.$afterInsert(queryContext);
+  //   const triggerUserId = queryContext?.context?.triggerUserId;
+  //   await SocmedNotification.query().insert({
+  //     user_id: this.user_id,
+  //     trigger_user_id: triggerUserId,
+  //     type: "comment",
+  //     reference_id: this.post_id,
+  //   });
+  // }
 }
 
 module.exports = SocmedComments;

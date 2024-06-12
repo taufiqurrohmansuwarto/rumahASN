@@ -1,6 +1,7 @@
 import Layout from "@/components/Layout";
 import NotificationLayout from "@/components/Notification/NotificationLayout";
 import PageContainer from "@/components/PageContainer";
+import SocmedNotifications from "@/components/Socmed/SocmedNotifications";
 import { Breadcrumb } from "antd";
 import Head from "next/head";
 import Link from "next/link";
@@ -28,7 +29,7 @@ function ASNConnectNotification() {
         content="Notifikasi ASN Connect"
       >
         <NotificationLayout active="asn-connect">
-          <div>Not Yet Implemented</div>
+          <SocmedNotifications />
         </NotificationLayout>
       </PageContainer>
     </>

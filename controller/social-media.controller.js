@@ -278,14 +278,51 @@ const createComment = async (req, res) => {
     const data = req.body;
     const { customId: userId } = req?.user;
 
-    const result = await SocmedComments.query().insert({
+    const currentPost = await SocmedPosts.query()
+      .findById(postId)
+      .select("user_id");
+    const currentUserPost = currentPost?.user_id;
+
+    const payload = {
       ...data,
       user_id: userId,
       post_id: postId,
-    });
+    };
+
+    const result = await SocmedComments.query().insert(payload);
+
+    if (payload?.parent_id) {
+      const allUserInPost = await SocmedComments.query()
+        .where("post_id", postId)
+        .andWhere("user_id", "<>", userId)
+        .select("user_id")
+        .distinct("user_id");
+
+      const allUserPostIdUnique = allUserInPost.map((item) => item?.user_id);
+
+      if (allUserPostIdUnique.length > 0) {
+        const payload = allUserPostIdUnique.map((item) => {
+          return {
+            user_id: userId,
+            trigger_user_id: item,
+            type: "comment",
+            reference_id: postId,
+          };
+        });
+        await SocmedNotifications.query().insert(payload);
+      }
+    } else {
+      if (currentUserPost !== userId && !payload?.parent_id) {
+        await SocmedNotifications.query().insert({
+          user_id: userId,
+          trigger_user_id: currentUserPost,
+          type: "comment",
+          reference_id: postId,
+        });
+      }
+    }
 
     await SocmedPosts.query().findById(postId).increment("comments_count", 1);
-
     res.json(result);
   } catch (error) {
     console.log(error);

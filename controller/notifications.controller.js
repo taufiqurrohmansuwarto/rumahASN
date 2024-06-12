@@ -1,4 +1,5 @@
 const Notifications = require("../models/notifications.model");
+const ASNConnectNotification = require("@/models/socmed-notifications.model");
 
 const index = async (req, res) => {
   try {
@@ -66,7 +67,54 @@ const detail = async (req, res) => {
   try {
   } catch (error) {
     console.log(error);
-    res.statsu(400).json({ code: 400, message: "Internal Server Error" });
+    res.status(400).json({ code: 400, message: "Internal Server Error" });
+  }
+};
+
+const asnConnectNotifications = async (req, res) => {
+  try {
+    const { customId } = req?.user;
+    const page = req?.query?.page || 1;
+    const symbol = req?.query?.symbol || "no";
+    const limit = req?.query?.limit || 50;
+
+    if (symbol === "no") {
+      const result = await ASNConnectNotification.query()
+        .where("trigger_user_id", "=", customId)
+        .withGraphFetched("[trigger_user(simpleSelect), user(simpleSelect)]")
+        .page(parseInt(page) - 1, parseInt(limit))
+        .orderBy("created_at", "desc");
+
+      const data = {
+        results: result.results,
+        total: result.total,
+        limit: parseInt(limit),
+        page: parseInt(page),
+      };
+      res.json(data);
+    } else if (symbol === "yes") {
+      const result = await ASNConnectNotification.query().count().where({
+        trigger_user_id: customId,
+        is_read: false,
+      });
+      res.json(result[0]);
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(400).json({ code: 400, message: "Internal Server Error" });
+  }
+};
+
+const asnConnectClearNotifications = async (req, res) => {
+  try {
+    const { customId } = req?.user;
+    await ASNConnectNotification.query()
+      .patch({ is_read: true })
+      .where("user_id", customId);
+    res.status(200).json({ code: 200, message: "success" });
+  } catch (error) {
+    console.log(error);
+    res.status(400).json({ code: 400, message: "Internal Server Error" });
   }
 };
 
@@ -75,4 +123,6 @@ module.exports = {
   detail,
   clearChats,
   readNotification,
+  asnConnectClearNotifications,
+  asnConnectNotifications,
 };
