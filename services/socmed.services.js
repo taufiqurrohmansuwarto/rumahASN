@@ -14,6 +14,19 @@ export const getPosts = (query) => {
   return api.get(`/posts?${params}`).then((res) => res?.data);
 };
 
+export const asnConnectGetNotifications = (query) => {
+  const params = queryString.stringify(query, {
+    skipEmptyString: true,
+    skipNull: true,
+  });
+
+  return api.get(`/posts/notifications?${params}`).then((res) => res?.data);
+};
+
+export const asnConnectClearNotifications = () => {
+  return api.delete("/posts/notifications").then((res) => res?.data);
+};
+
 export const getMyPosts = (query) => {
   const params = queryString.stringify(query, {
     skipEmptyString: true,

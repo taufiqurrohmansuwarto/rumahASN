@@ -5,6 +5,7 @@ import UserQuiz from "@/components/Quiz/UserQuiz";
 import ShowRatings from "@/components/ShowRatings";
 import TicketsPublish from "@/components/Ticket/TicketsPublish";
 import CarouselBanner from "@/components/Utils/CarouselBanner";
+import EletterBKD from "@/components/Utils/EletterBKD";
 import { Grid, Stack } from "@mantine/core";
 import { Card, Grid as GridAntd } from "antd";
 import Head from "next/head";
@@ -48,6 +49,7 @@ function Feeds() {
       <Head>
         <title>Rumah ASN - Beranda</title>
       </Head>
+      <EletterBKD right={50} />
       <ShowRatings />
       <Grid justify="start">
         <Grid.Col md={12} sm={12}></Grid.Col>
