@@ -1109,4 +1109,7 @@ export const getKuadran = (a, b) => {
   }
 };
 
-export const notificationText = (userId, data) => {};
+export const serializeCommentText = (item) => {
+  const text = `${item?.user?.username} telah berkomentar pada postingan anda`;
+  return text;
+};

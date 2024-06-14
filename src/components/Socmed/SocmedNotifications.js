@@ -1,6 +1,7 @@
 import { asnConnectGetNotifications } from "@/services/socmed.services";
+import { serializeCommentText } from "@/utils/client-utils";
 import { useQuery } from "@tanstack/react-query";
-import { List } from "antd";
+import { Button, Card, List } from "antd";
 import React, { useState } from "react";
 
 function SocmedNotifications() {
@@ -16,8 +17,10 @@ function SocmedNotifications() {
   );
 
   return (
-    <div>
-      {JSON.stringify(data)}
+    <Card>
+      <Button type="primary" onClick={() => setQuery({ ...query, page: 1 })}>
+        Mark as Read
+      </Button>
       <List
         pagination={{
           current: query?.page,
@@ -26,11 +29,13 @@ function SocmedNotifications() {
           showTotal: (total, range) =>
             `${range[0]}-${range[1]} of ${total} items`,
         }}
-        renderItem={(item) => <List.Item>yes</List.Item>}
+        renderItem={(item) => (
+          <List.Item>{serializeCommentText(item)}</List.Item>
+        )}
         rowKey={(row) => row?.id}
         dataSource={data?.results}
       />
-    </div>
+    </Card>
   );
 }
 
