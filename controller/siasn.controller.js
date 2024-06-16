@@ -619,9 +619,8 @@ const postAngkaKreditByNip = async (req, res) => {
     };
 
     const hasil = await request.post(`/angkakredit/save`, data);
-    console.log(hasil);
 
-    if (hasil?.data?.code === 0) {
+    if (!(hasil?.data?.success)) {
       res.status(500).json({ message: hasil?.data?.message });
     } else {
       await createLogSIASN({
