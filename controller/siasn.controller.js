@@ -619,9 +619,9 @@ const postAngkaKreditByNip = async (req, res) => {
     };
 
     const hasil = await request.post(`/angkakredit/save`, data);
+    console.log(hasil);
 
     if (hasil?.data?.code === 0) {
-      console.log(hasil?.data?.message);
       res.status(500).json({ message: hasil?.data?.message });
     } else {
       await createLogSIASN({
@@ -639,6 +639,7 @@ const postAngkaKreditByNip = async (req, res) => {
     }
   } catch (error) {
     console.log(error);
+    res.status(400).json({code : 400, messsage : "Internal Server Error"});
   }
 };
 
