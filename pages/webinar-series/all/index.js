@@ -26,6 +26,7 @@ import {
 import Head from "next/head";
 import { useRouter } from "next/router";
 import { useState } from "react";
+import SearchWebinarByCode from "@/components/WebinarSeries/SearchWebinarByCode";
 
 function WebinarAll() {
   const router = useRouter();
@@ -87,9 +88,10 @@ function WebinarAll() {
       </Head>
       <WebinarUserLayout title="Rumah ASN" content="Daftar Webinar">
         <Card>
+          <SearchWebinarByCode />
           <Row
             gutter={{
-              xs: 8,
+              xs: 10,
               sm: 8,
               md: 8,
               lg: 8,
@@ -105,7 +107,7 @@ function WebinarAll() {
                 placeholder="Cari Webinar"
               />
             </Col>
-            <Col md={5}>
+            <Col md={5} xs={24}>
               <Select
                 onChange={handleSelect}
                 style={{

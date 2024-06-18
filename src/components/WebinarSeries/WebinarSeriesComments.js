@@ -1,23 +1,23 @@
 import { formatDateFromNow } from "@/utils/client-utils";
+import { Comment } from "@ant-design/compatible";
 import { Group } from "@mantine/core";
 import {
-  Segmented,
   Button,
   Card,
+  Col,
+  FloatButton,
   Form,
+  Grid,
   Input,
   Popconfirm,
+  Row,
+  Segmented,
   Space,
   Typography,
-  Row,
-  Col,
-  BackTop,
-  Grid,
 } from "antd";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import { useEffect, useRef, useState } from "react";
-import { Comment } from "@ant-design/compatible";
 import ReactPlayer from "../ReactPlayer";
 
 const Editor = ({
@@ -321,7 +321,7 @@ function WebinarSeriesComments({
 
   return (
     <Card>
-      <BackTop />
+      <FloatButton.BackTop />
       <Row>
         <Col xs={24} md={14}>
           {youtubeUrl && (

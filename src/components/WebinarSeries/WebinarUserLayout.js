@@ -36,7 +36,7 @@ function WebinarUserLayout({
       }}
       tabList={[
         {
-          tab: "Daftar Semua Webinar",
+          tab: "Semua Webinar",
           key: "all",
           href: "/webinar-series/all",
         },
