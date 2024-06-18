@@ -6,7 +6,13 @@ module.exports.riwayatGolonganPangkat = (fetcher, nip) => {
 
 // baru
 module.exports.foto = (fetcher, pnsId) => {
-  return fetcher.get(`/pns/photo/${pnsId}`);
+  return fetcher.get(`/pns/photo/${pnsId}`, {
+    responseType: "arraybuffer",
+  });
+};
+
+module.exports.IPASNBaru = (fetcher, nip) => {
+  return fetcher.get(`/pns/nilaiipasn/${nip}`).then((res) => res?.data);
 };
 
 module.exports.saveUnorJabatan = (fetcher, data) => {

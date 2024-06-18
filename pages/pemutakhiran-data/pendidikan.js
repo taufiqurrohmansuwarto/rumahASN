@@ -37,7 +37,7 @@ const RiwayatPendidikan = () => {
           ),
         }}
         onBack={handleBack}
-        title="Riwayat Golongan"
+        title="Riwayat Pendidikan"
         content="Komparasi Data Pendidikan SIASN dan SIMASTER"
       >
         <Card>

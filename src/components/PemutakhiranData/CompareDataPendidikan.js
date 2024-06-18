@@ -1,8 +1,9 @@
 import { rwPendidikan } from "@/services/master.services";
 import { dataPendidikan } from "@/services/siasn-services";
+import { FileOutlined, FilePdfTwoTone } from "@ant-design/icons";
 import { Stack } from "@mantine/core";
 import { useQuery } from "@tanstack/react-query";
-import { Table } from "antd";
+import { Descriptions, Space, Table, Tooltip } from "antd";
 
 const CompareDataPendidikanSIMASTER = () => {
   const { data, isLoading } = useQuery(
@@ -13,50 +14,101 @@ const CompareDataPendidikanSIMASTER = () => {
 
   const columns = [
     {
-      title: "File Nilai",
-      key: "file_nilai",
-      render: (text, record) => {
+      title: "Data",
+      responsive: ["xs"],
+      key: "data",
+      render: (_, record) => {
         return (
-          <>
-            {record?.file_nilai_url && (
-              <a href={record?.file_nilai_url} target="_blank" rel="noreferrer">
-                File
-              </a>
-            )}
-          </>
+          <Space direction="vertical">
+            <Space>
+              <Tooltip title="Nilai">
+                {record?.file_nilai_url && (
+                  <a
+                    href={record?.file_nilai_url}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    <FilePdfTwoTone color="orange" />
+                  </a>
+                )}
+              </Tooltip>
+              <Tooltip title="Ijazah">
+                {record?.file_ijazah_url && (
+                  <a
+                    href={record?.file_ijazah_url}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    <FilePdfTwoTone color="orange" />
+                  </a>
+                )}
+              </Tooltip>
+            </Space>
+            <Descriptions size="middle" layout="vertical">
+              <Descriptions.Item label="Pendidikan">
+                {record?.jenjang}
+              </Descriptions.Item>
+              <Descriptions.Item label="Tahun Lulus">
+                {record?.tahun_lulus}
+              </Descriptions.Item>
+              <Descriptions.Item label="No. Ijazah">
+                {record?.no_ijazah}
+              </Descriptions.Item>
+              <Descriptions.Item label="Nama Sekolah">
+                {record?.nama_sekolah}
+              </Descriptions.Item>
+              <Descriptions.Item label="Prodi">
+                {record?.prodi}
+              </Descriptions.Item>
+            </Descriptions>
+          </Space>
         );
       },
     },
     {
-      title: "File Ijazah",
-      key: "file_nilai",
-      render: (text, record) => {
+      title: "File",
+      responsive: ["sm"],
+      key: "file",
+      render: (_, record) => {
         return (
-          <>
-            {record?.file_ijazah_url && (
-              <a
-                href={record?.file_ijazah_url}
-                target="_blank"
-                rel="noreferrer"
-              >
-                File
-              </a>
-            )}
-          </>
+          <Space>
+            <Tooltip title="Nilai">
+              {record?.file_nilai_url && (
+                <a
+                  href={record?.file_nilai_url}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  <FilePdfTwoTone color="orange" />
+                </a>
+              )}
+            </Tooltip>
+            <Tooltip title="Ijazah">
+              {record?.file_ijazah_url && (
+                <a
+                  href={record?.file_ijazah_url}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  <FilePdfTwoTone color="orange" />
+                </a>
+              )}
+            </Tooltip>
+          </Space>
         );
       },
     },
-    { title: "Pendidikan", dataIndex: "jenjang" },
-    { title: "Tahun Lulus", dataIndex: "tahun_lulus" },
-    { title: "No. Ijazah", dataIndex: "no_ijazah" },
-    { title: "Nama Sekolah", dataIndex: "nama_sekolah" },
-    { title: "Prodi", dataIndex: "prodi" },
+    { title: "Pendidikan", dataIndex: "jenjang", responsive: ["sm"] },
+    { title: "Tahun Lulus", dataIndex: "tahun_lulus", responsive: ["sm"] },
+    { title: "No. Ijazah", dataIndex: "no_ijazah", responsive: ["sm"] },
+    { title: "Nama Sekolah", dataIndex: "nama_sekolah", responsive: ["sm"] },
+    { title: "Prodi", dataIndex: "prodi", responsive: ["sm"] },
   ];
 
   return (
     <>
       <Table
-        title={() => <b>RIWAYAT DATA PENDIDIKAN SIMASTER</b>}
+        title={() => <b>SIMASTER</b>}
         columns={columns}
         dataSource={data}
         loading={isLoading}
@@ -75,76 +127,156 @@ function CompareDataPendidikan() {
 
   const columns = [
     {
-      title: "File Ijazah",
-      key: "dokumenIjazah",
+      title: "Data",
+      key: "data",
+      responsive: ["xs"],
       render: (_, row) => {
         return (
-          <>
-            {row?.path?.[1173] && (
-              <a
-                href={`/helpdesk/api/siasn/ws/download?filePath=${row?.path?.[1173]?.dok_uri}`}
-                target="_blank"
-                rel="noreferrer"
-              >
-                File
-              </a>
-            )}
-          </>
+          <Space direction="vertical">
+            <Space>
+              <div>
+                {row?.path?.[1173] && (
+                  <a
+                    href={`/helpdesk/api/siasn/ws/download?filePath=${row?.path?.[1173]?.dok_uri}`}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    <FileOutlined />
+                  </a>
+                )}
+              </div>
+              <div>
+                {row?.path?.[1174] && (
+                  <a
+                    href={`/helpdesk/api/siasn/ws/download?filePath=${row?.path?.[1174]?.dok_uri}`}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    <FileOutlined />
+                  </a>
+                )}
+              </div>
+              <div>
+                {row?.path?.[867] && (
+                  <a
+                    href={`/helpdesk/api/siasn/ws/download?filePath=${row?.path?.[867]?.dok_uri}`}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    <FileOutlined />
+                  </a>
+                )}
+              </div>
+            </Space>
+            <Descriptions size="middle" layout="vertical">
+              <Descriptions.Item label="Pendidikan">
+                {record?.pendidikanNama}
+              </Descriptions.Item>
+              <Descriptions.Item label="Tahun Lulus">
+                {record?.tahunLulus}
+              </Descriptions.Item>
+              <Descriptions.Item label="No. Ijazah">
+                {record?.nomorIjasah}
+              </Descriptions.Item>
+              <Descriptions.Item label="Nama Sekolah">
+                {record?.namaSekolah}
+              </Descriptions.Item>
+              <Descriptions.Item label="Gelar Depan">
+                {record?.gelarDepan}
+              </Descriptions.Item>
+              <Descriptions.Item label="Gelar Belakang">
+                {record?.gelarBelakang}
+              </Descriptions.Item>
+            </Descriptions>
+          </Space>
         );
       },
     },
     {
-      title: "File Transkrip",
-      key: "dokumenTranskrip",
+      title: "File",
+      key: "file",
+      responsive: ["sm"],
       render: (_, row) => {
         return (
-          <>
-            {row?.path?.[1174] && (
-              <a
-                href={`/helpdesk/api/siasn/ws/download?filePath=${row?.path?.[1174]?.dok_uri}`}
-                target="_blank"
-                rel="noreferrer"
-              >
-                File
-              </a>
-            )}
-          </>
-        );
-      },
-    },
-    {
-      title: "File SK Pencantuman Gelar",
-      key: "dokumenSKPencantumanGelar",
-      render: (_, row) => {
-        return (
-          <>
-            {row?.path?.[867] && (
-              <a
-                href={`/helpdesk/api/siasn/ws/download?filePath=${row?.path?.[867]?.dok_uri}`}
-                target="_blank"
-                rel="noreferrer"
-              >
-                File
-              </a>
-            )}
-          </>
+          <Space>
+            <div>
+              {row?.path?.[1173] && (
+                <a
+                  href={`/helpdesk/api/siasn/ws/download?filePath=${row?.path?.[1173]?.dok_uri}`}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  <FileOutlined />
+                </a>
+              )}
+            </div>
+            <div>
+              {row?.path?.[1174] && (
+                <a
+                  href={`/helpdesk/api/siasn/ws/download?filePath=${row?.path?.[1174]?.dok_uri}`}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  <FileOutlined />
+                </a>
+              )}
+            </div>
+            <div>
+              {row?.path?.[867] && (
+                <a
+                  href={`/helpdesk/api/siasn/ws/download?filePath=${row?.path?.[867]?.dok_uri}`}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  <FileOutlined />
+                </a>
+              )}
+            </div>
+          </Space>
         );
       },
     },
     {
       title: "Pendidikan",
+      responsive: ["sm"],
       dataIndex: "pendidikanNama",
     },
     {
+      title: "Tahun Lulus",
+      responsive: ["sm"],
+      dataIndex: "tahunLulus",
+    },
+    {
+      title: "No. Ijazah",
+      responsive: ["sm"],
+      dataIndex: "nomorIjasah",
+    },
+    {
       title: "Nama Sekolah",
+      responsive: ["sm"],
       dataIndex: "namaSekolah",
+    },
+    {
+      title: "Gelar Depan",
+      responsive: ["sm"],
+      dataIndex: "gelarDepan",
+    },
+    {
+      title: "Gelar Belakang",
+      responsive: ["sm"],
+      dataIndex: "gelarBelakang",
+    },
+    {
+      title: "Tgl. Lulus",
+      responsive: ["sm"],
+      dataIndex: "tglLulus",
     },
   ];
 
   return (
     <Stack>
       <Table
-        title={() => <b>RIWAYAT DATA PENDIDIKAN SIASN</b>}
+        title={() => <b>SIASN</b>}
         pagination={false}
         columns={columns}
         dataSource={data}
