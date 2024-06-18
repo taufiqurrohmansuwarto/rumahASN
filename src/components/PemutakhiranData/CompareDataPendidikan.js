@@ -170,22 +170,22 @@ function CompareDataPendidikan() {
             </Space>
             <Descriptions size="middle" layout="vertical">
               <Descriptions.Item label="Pendidikan">
-                {record?.pendidikanNama}
+                {row?.pendidikanNama}
               </Descriptions.Item>
               <Descriptions.Item label="Tahun Lulus">
-                {record?.tahunLulus}
+                {row?.tahunLulus}
               </Descriptions.Item>
               <Descriptions.Item label="No. Ijazah">
-                {record?.nomorIjasah}
+                {row?.nomorIjasah}
               </Descriptions.Item>
               <Descriptions.Item label="Nama Sekolah">
-                {record?.namaSekolah}
+                {row?.namaSekolah}
               </Descriptions.Item>
               <Descriptions.Item label="Gelar Depan">
-                {record?.gelarDepan}
+                {row?.gelarDepan}
               </Descriptions.Item>
               <Descriptions.Item label="Gelar Belakang">
-                {record?.gelarBelakang}
+                {row?.gelarBelakang}
               </Descriptions.Item>
             </Descriptions>
           </Space>

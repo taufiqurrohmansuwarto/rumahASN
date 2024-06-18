@@ -2,13 +2,13 @@ import { formatDateSimple } from "@/utils/client-utils";
 import { Avatar, Grid, Progress, Rating, Stack } from "@mantine/core";
 import {
   Card,
+  Col,
   Divider,
+  FloatButton,
   List,
+  Row,
   Space,
   Typography,
-  Row,
-  Col,
-  BackTop,
 } from "antd";
 import { useRouter } from "next/router";
 import { useState } from "react";
@@ -181,7 +181,7 @@ const ViewRatingComponent = ({ data }) => {
 const WebinarRatings = ({ data, loadingRating }) => {
   return (
     <Card>
-      <BackTop />
+      <FloatButton.BackTop />
       <ViewRatingComponent data={data} />
       <Divider />
       <DaftarUserRating loadingRating={loadingRating} data={data?.data} />
