@@ -34,6 +34,10 @@ export const dataUtamaSIASN = () => {
   return api.get("/pns/data-utama").then((res) => res.data);
 };
 
+export const fotoSiasn = () => {
+  return api.get("/pns/foto").then((res) => res.data);
+};
+
 export const updateDataUtamaSIASN = (data) => {
   return api.post("/pns/data-utama", data).then((res) => res.data);
 };
@@ -129,6 +133,10 @@ export const dataAnak = () => {
 export const dataIpAsn = (tahun) => {
   const currentTahun = tahun || new Date().getFullYear();
   return api.get(`/pns/ip-asn?tahun=${currentTahun}`).then((res) => res.data);
+};
+
+export const dataNilaiIPASN = () => {
+  return api.get("/pns/nilai-ipasn").then((res) => res.data);
 };
 
 // end of shit
