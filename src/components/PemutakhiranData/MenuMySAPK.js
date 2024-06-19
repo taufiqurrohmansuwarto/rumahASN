@@ -11,7 +11,7 @@ import {
   createStyles,
   rem,
 } from "@mantine/core";
-import { Grid, Space, Tag, Typography } from "antd";
+import { Avatar, Grid, Space, Tag, Typography } from "antd";
 import { useRouter } from "next/router";
 
 const mockdata = mysapkMenu;
@@ -54,7 +54,7 @@ const Base64Image = ({ data }) => {
   return <Image maw={200} src={`data:image/png;base64,${data}`} alt="base64" />;
 };
 
-export function MenuMySAPK({ dataUtama }) {
+export function MenuMySAPK({ dataUtama, foto }) {
   const router = useRouter();
   const { useBreakpoint } = Grid;
   const screens = useBreakpoint();
@@ -91,12 +91,13 @@ export function MenuMySAPK({ dataUtama }) {
       <Group position="apart" mb={14}>
         <Card w={"100%"}>
           <Space direction="vertical" size="small">
+            <Avatar size={50} src={`${foto?.data}`} alt="Foto-SIASN" />
             <Typography.Text strong>{dataUtama?.nama}</Typography.Text>
             <Typography.Text type="secondary">
               NIP {dataUtama?.nipBaru}
             </Typography.Text>
             <Typography.Text type="secondary">
-              {dataUtama?.instansiIndukNama}
+              {dataUtama?.unorIndukNama} - {dataUtama?.unorNama}
             </Typography.Text>
             <Space
               size="small"

@@ -7,7 +7,7 @@ import {
   unregisterWebinar,
 } from "@/services/webinar.services";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Breadcrumb, message } from "antd";
+import { Breadcrumb, Grid, message } from "antd";
 import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
@@ -16,6 +16,7 @@ function Detail() {
   const queryClient = useQueryClient();
   const router = useRouter();
   const id = router?.query?.id;
+  const breakPoint = Grid.useBreakpoint();
 
   const { mutateAsync: register, isLoading: isLoadingRegister } = useMutation(
     (data) => registerWebinar(data),
@@ -59,6 +60,9 @@ function Detail() {
         <title>Rumah ASN - Detail Webinar</title>
       </Head>
       <PageContainer
+        childrenContentStyle={{
+          padding: breakPoint.xs ? 0 : null,
+        }}
         loading={isLoading}
         onBack={handleBack}
         title="Detail Webinar Series"

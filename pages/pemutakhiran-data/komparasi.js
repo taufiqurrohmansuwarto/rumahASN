@@ -1,7 +1,11 @@
 import Layout from "@/components/Layout";
 import PageContainer from "@/components/PageContainer";
 import { MenuMySAPK } from "@/components/PemutakhiranData/MenuMySAPK";
-import { dataUtamaSIASN } from "@/services/siasn-services";
+import {
+  dataNilaiIPASN,
+  dataUtamaSIASN,
+  fotoSiasn,
+} from "@/services/siasn-services";
 import { Center } from "@mantine/core";
 import { useQuery } from "@tanstack/react-query";
 import { Breadcrumb, Button, Col, Empty, Row, Modal } from "antd";
@@ -12,11 +16,29 @@ import Link from "next/link";
 // base64 to image
 
 function Komparasi() {
-  const {
-    data: dataUtama,
-    isLoading,
-    error,
-  } = useQuery(["data-utama-siasn"], () => dataUtamaSIASN(), {});
+  const { data: dataUtama, isLoading } = useQuery(
+    ["data-utama-siasn"],
+    () => dataUtamaSIASN(),
+    {
+      refetchOnWindowFocus: false,
+    }
+  );
+
+  const { data: foto, isLoading: isLoadingFoto } = useQuery(
+    ["foto-pns"],
+    () => fotoSiasn(),
+    {
+      refetchOnWindowFocus: false,
+    }
+  );
+
+  const { data: nilaiIPASN, isLoading: isLoadingNilaiIPASN } = useQuery(
+    ["nilai-ipasn"],
+    () => dataNilaiIPASN(),
+    {
+      refetchOnWindowFocus: false,
+    }
+  );
 
   const showModal = () => {
     Modal.info({
@@ -53,7 +75,7 @@ function Komparasi() {
         <Row gutter={[16, 16]}>
           <Col md={16} xs={24}>
             {dataUtama ? (
-              <MenuMySAPK dataUtama={dataUtama} />
+              <MenuMySAPK foto={foto} dataUtama={dataUtama} />
             ) : (
               <Center>
                 <Empty

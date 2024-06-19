@@ -2,15 +2,15 @@ import Layout from "@/components/Layout";
 import PageContainer from "@/components/PageContainer";
 import CompareDataPendidikan from "@/components/PemutakhiranData/CompareDataPendidikan";
 import CustomSelectMenu from "@/components/PemutakhiranData/CustomSelectMenu";
-import { Breadcrumb, Card } from "antd";
+import { Breadcrumb, Card, Grid } from "antd";
 import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
 
 const RiwayatPendidikan = () => {
   const router = useRouter();
-
   const handleBack = () => router.push("/pemutakhiran-data/komparasi");
+  const breakPoint = Grid.useBreakpoint();
 
   return (
     <>
@@ -18,6 +18,9 @@ const RiwayatPendidikan = () => {
         <title>Rumah ASN - Peremajaan SIASN - Data Pendidikan</title>
       </Head>
       <PageContainer
+        childrenContentStyle={{
+          padding: breakPoint.xs ? 0 : null,
+        }}
         extra={[<CustomSelectMenu key="menu" />]}
         header={{
           breadcrumbRender: () => (
@@ -37,7 +40,7 @@ const RiwayatPendidikan = () => {
           ),
         }}
         onBack={handleBack}
-        title="Riwayat Golongan"
+        title="Riwayat Pendidikan"
         content="Komparasi Data Pendidikan SIASN dan SIMASTER"
       >
         <Card>

@@ -2,7 +2,7 @@ import PageContainer from "@/components/PageContainer";
 import Watermark from "@/components/WaterMark";
 import { webinarUserDetail } from "@/services/webinar.services";
 import { useQuery } from "@tanstack/react-query";
-import { Breadcrumb, Skeleton, Space, Tag, Typography } from "antd";
+import { Breadcrumb, Grid, Skeleton, Space, Tag, Typography } from "antd";
 import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
@@ -39,6 +39,7 @@ function WebinarUserDetailLayout({
 }) {
   const router = useRouter();
   const { id } = router.query;
+  const breakPoint = Grid.useBreakpoint();
 
   const handleBack = () => router.push(`/webinar-series/my-webinar`);
 
@@ -58,6 +59,9 @@ function WebinarUserDetailLayout({
         </title>
       </Head>
       <PageContainer
+        childrenContentStyle={{
+          padding: breakPoint.xs ? 0 : null,
+        }}
         loading={loading}
         onBack={handleBack}
         header={{

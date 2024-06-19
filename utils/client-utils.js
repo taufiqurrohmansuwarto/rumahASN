@@ -134,14 +134,7 @@ export const mysapkMenu = [
     color: "yellow",
     path: "/kinerja-periodik",
   },
-  {
-    title: "Riwayat Organisasi",
-    icon: IconFileAnalytics,
-    color: "gray",
-    path: "/organisasi",
-  },
   { title: "Riwayat CLTN", icon: IconBriefcase, color: "gray", path: "/cltn" },
-
   {
     title: "Riwayat Hukuman Disiplin",
     icon: IconSchool,

@@ -11,12 +11,18 @@ module.exports.fotoPns = async (req, res) => {
     const { siasnRequest: fetcher } = req;
     const { employee_number: nip } = req?.user;
     const hasil = await dataUtama(fetcher, nip);
-    const dataPns = hasil?.data?.data;
 
-    const result = await foto(fetcher, dataPns?.id);
+    const result = await foto(fetcher, hasil?.id);
     const data = result?.data;
 
-    res.json(data);
+    // blob to base64
+    const base64 = Buffer.from(data, "binary").toString("base64");
+    const photos = `data:image/png;base64,${base64}`;
+    const payload = {
+      data: photos,
+    };
+
+    res.json(payload);
     // custom headers for image png
   } catch (error) {
     console.log(error);
