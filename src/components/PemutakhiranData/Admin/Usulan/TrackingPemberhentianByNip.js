@@ -1,4 +1,5 @@
 import TableUsulan from "@/components/RiwayatUsulan/TableUsulan";
+import { trackingPemberhentianByNipFasilitator } from "@/services/siasn-services";
 import { ActionIcon } from "@mantine/core";
 import { IconBarrierBlock } from "@tabler/icons";
 import { useQuery } from "@tanstack/react-query";
@@ -14,7 +15,8 @@ const ModalUsulan = ({ open, onClose, nip }) => {
 
   return (
     <Modal
-      width={800}
+      width={850}
+      footer={null}
       open={open}
       onCancel={onClose}
       title={"Usulan Pemberhentian"}
