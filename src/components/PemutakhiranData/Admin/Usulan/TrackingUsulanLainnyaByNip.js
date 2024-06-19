@@ -6,7 +6,13 @@ import { useState } from "react";
 
 const ModalUsulan = ({ open, onClose, nip }) => {
   return (
-    <Modal width={800} open={open} onCancel={onClose} title={"Usulan Lainnya"}>
+    <Modal
+      footer={null}
+      width={850}
+      open={open}
+      onCancel={onClose}
+      title={"Usulan Lainnya"}
+    >
       <RefJenisUsulan nip={nip} />
     </Modal>
   );

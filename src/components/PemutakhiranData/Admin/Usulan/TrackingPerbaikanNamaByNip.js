@@ -15,10 +15,11 @@ const ModalUsulan = ({ open, onClose, nip }) => {
 
   return (
     <Modal
-      width={800}
+      width={850}
       open={open}
       onCancel={onClose}
       title={"Usulan Perbaikan Nama"}
+      footer={null}
     >
       <TableUsulan data={data} isLoading={isLoading} />
     </Modal>
