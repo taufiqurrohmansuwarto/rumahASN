@@ -16,12 +16,11 @@ const listKenaikanPangkat = async (req, res) => {
     let periodePangkat = dayjs().format("YYYY-MM-DD");
 
     if (req?.query?.periode) {
-      periodePangkat = dayjs(req?.query?.periode, "DD-MM-YYYY").format(
-        "YYYY-MM-DD"
-      );
+      periodePangkat = dayjs(req?.query?.periode, "2020-10-01");
     }
 
-    const result = await daftarKenaikanPangkat(request, periodePangkat);
+    const result = await daftarKenaikanPangkat(request, "2020-10-01");
+    console.log(result);
 
     const data = result?.data?.data;
 

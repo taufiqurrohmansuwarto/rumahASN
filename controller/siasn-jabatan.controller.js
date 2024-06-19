@@ -24,10 +24,15 @@ const hapusJabatan = async (req, res) => {
   const resultPegawai = await request.get(`/pns/data-utama/${nip}`);
   const Pppk = resultPegawai.data.data.kedudukanPnsNama === "PPPK Aktif";
 
-  const dataJabatan = result.data.data;
-  if (dataJabatan.length === 1 || Pppk) {
+  const { current_role } = user;
+
+  const admin = current_role === "admin";
+
+  // Jika hanya ada satu jabatan atau pegawai adalah PPPK Aktif dan bukan admin, akses dilarang
+  if (dataJabatan.length === 1 || (!admin && Pppk)) {
     res.status(403).json({ message: "Forbidden" });
   } else {
+    // Log SIASN dan hapus jabatan
     await createLogSIASN({
       userId: user.custom_id,
       type: "delete",
