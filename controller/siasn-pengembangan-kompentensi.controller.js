@@ -7,6 +7,7 @@ const {
   postDataDiklat,
   riwayatKursus,
   riwayatDiklat,
+  IPASNBaru,
 } = require("@/utils/siasn-utils");
 const { toString, upperCase } = require("lodash");
 
@@ -161,6 +162,21 @@ const getIpAsn = async (req, res) => {
   }
 };
 
+const getNilaiIPASN = async (req, res) => {
+  try {
+    const { siasnRequest: fetcher } = req;
+    const { employee_number: nip } = req?.user;
+
+    const nilaiIPASN = await IPASNBaru(fetcher, nip);
+    res.json(nilaiIPASN);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      message: "Internal Server Error",
+    });
+  }
+};
+
 const getIpAsnByNip = async (req, res) => {
   try {
     const { fetcher } = req;
@@ -270,5 +286,6 @@ module.exports = {
   postRiwayatKursus,
   postRiwayatKursusByNip,
   getIpAsn,
+  getNilaiIPASN,
   getIpAsnByNip,
 };
