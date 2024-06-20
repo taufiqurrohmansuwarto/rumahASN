@@ -4,6 +4,7 @@ import { trim } from "lodash";
 import AdministrasiByNip from "../Berkas/AdministrasiByNip";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { updateDataUtamaByNip } from "@/services/siasn-services";
+import TextSensor from "../TextSensor";
 
 function InformationDetail({ data }) {
   const queryClient = useQueryClient();
@@ -62,7 +63,7 @@ function InformationDetail({ data }) {
           {data?.tempatLahir}
         </Descriptions.Item>
         <Descriptions.Item label="Tanggal Lahir">
-          {data?.tglLahir}
+          <TextSensor text={data?.tglLahir} />
         </Descriptions.Item>
         <Descriptions.Item label="Agama">{data?.agama}</Descriptions.Item>
         <Descriptions.Item label="Status">
@@ -71,9 +72,15 @@ function InformationDetail({ data }) {
         <Descriptions.Item label="Status Hidup">
           {data?.statusHidup}
         </Descriptions.Item>
-        <Descriptions.Item label="NIK">{data?.nik}</Descriptions.Item>
-        <Descriptions.Item label="NPWP">{data?.noNpwp}</Descriptions.Item>
-        <Descriptions.Item label="BPJS">{data?.bpjs}</Descriptions.Item>
+        <Descriptions.Item label="NIK">
+          <TextSensor text={data?.nik} />
+        </Descriptions.Item>
+        <Descriptions.Item label="NPWP">
+          <TextSensor text={data?.noNpwp} />
+        </Descriptions.Item>
+        <Descriptions.Item label="BPJS">
+          <TextSensor text={data?.bpjs} />
+        </Descriptions.Item>
       </Descriptions>
       <Divider />
       <Descriptions
@@ -94,11 +101,13 @@ function InformationDetail({ data }) {
           </Typography.Text>
         </Descriptions.Item>
         <Descriptions.Item label="Email Kantor">
-          {data?.emailGov}
+          <TextSensor text={data?.emailGov} />
         </Descriptions.Item>
-        <Descriptions.Item label="No. HP">{data?.noHp}</Descriptions.Item>
+        <Descriptions.Item label="No. HP">
+          <TextSensor text={data?.noHp} />
+        </Descriptions.Item>
         <Descriptions.Item label="No. Telepon">
-          {data?.noTelp}
+          <TextSensor text={data?.noTelp} />
         </Descriptions.Item>
       </Descriptions>
       <Divider />

@@ -24,6 +24,7 @@ import {
 import { useEffect } from "react";
 import SyncJabatan from "./Sync/SyncJabatan";
 import SyncGolongan from "./Sync/SyncGolongan";
+import TextSensor from "../TextSensor";
 
 const dataTabel = (siasn, simaster) => {
   return [
@@ -302,12 +303,34 @@ function CompareDataUtama() {
     },
     {
       title: "SIASN",
-      dataIndex: "siasn",
+      key: "siasn",
+      render: (_, row) => {
+        if (
+          row?.id === "nik" ||
+          row?.id === "tanggal_lahir" ||
+          row?.id === "email"
+        ) {
+          return <TextSensor text={row?.siasn} />;
+        } else {
+          return <div>{row?.siasn}</div>;
+        }
+      },
       responsive: ["sm"],
     },
     {
       title: "SIMASTER",
-      dataIndex: "master",
+      key: "master",
+      render: (_, row) => {
+        if (
+          row?.id === "nik" ||
+          row?.id === "tanggal_lahir" ||
+          row?.id === "email"
+        ) {
+          return <TextSensor text={row?.siasn} />;
+        } else {
+          return <div>{row?.master}</div>;
+        }
+      },
       responsive: ["sm"],
     },
     {
