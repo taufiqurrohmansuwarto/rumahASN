@@ -14,6 +14,7 @@ import {
   Tag,
 } from "antd";
 import InformationDetail from "../InformationDetail";
+import TextSensor from "@/components/TextSensor";
 
 const dataTabel = (siasn, simaster) => {
   return [
@@ -184,12 +185,34 @@ function CompareDataUtamaByNip({ nip }) {
     },
     {
       title: "SIASN",
-      dataIndex: "siasn",
+      key: "siasn",
+      render: (_, row) => {
+        if (
+          row?.id === "nik" ||
+          row?.id === "tanggal_lahir" ||
+          row?.id === "email"
+        ) {
+          return <TextSensor text={row?.siasn} />;
+        } else {
+          return <div>{row?.siasn}</div>;
+        }
+      },
       responsive: ["sm"],
     },
     {
       title: "SIMASTER",
-      dataIndex: "master",
+      key: "master",
+      render: (_, row) => {
+        if (
+          row?.id === "nik" ||
+          row?.id === "tanggal_lahir" ||
+          row?.id === "email"
+        ) {
+          return <TextSensor text={row?.master} />;
+        } else {
+          return <div>{row?.master}</div>;
+        }
+      },
       responsive: ["sm"],
     },
     {
