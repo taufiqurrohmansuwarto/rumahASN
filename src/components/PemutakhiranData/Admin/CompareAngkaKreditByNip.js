@@ -253,7 +253,12 @@ const FormAngkaKredit = ({ visible, onCancel, nip }) => {
             </Form.Item>
           </>
         ) : null}
-        <Form.Item required name="kreditBaruTotal" label="Kredit Baru Total">
+        <Form.Item
+          required
+          name="kreditBaruTotal"
+          label="Kredit Baru Total"
+          help="Untuk Konversi entri Jumlah nilai PAK Konversi (lembar/lampiran ke-2)"
+        >
           <InputNumber />
         </Form.Item>
         <FormRiwayatJabatanByNip nip={nip} name="rwJabatanId" />
