@@ -14,6 +14,7 @@ import {
   Card,
   Col,
   Divider,
+  FloatButton,
   Input,
   List,
   Row,
@@ -86,6 +87,7 @@ function MyWebinar() {
       <Head>
         <title>Rumah ASN - Webinar Saya</title>
       </Head>
+      <FloatButton.BackTop />
       <WebinarUserLayout
         title="Rumah ASN"
         content="Webinar Saya"
