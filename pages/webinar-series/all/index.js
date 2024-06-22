@@ -16,6 +16,7 @@ import {
   Card,
   Col,
   Divider,
+  FloatButton,
   Input,
   List,
   Row,
@@ -89,6 +90,7 @@ function WebinarAll() {
         <title>Rumah ASN - Semua Webinar</title>
       </Head>
       <WebinarUserLayout title="Rumah ASN" content="Daftar Webinar">
+        <FloatButton.BackTop />
         <Card>
           <SearchWebinarByCode />
           <Row
@@ -140,7 +142,7 @@ function WebinarAll() {
             }}
             pagination={{
               current: router?.query?.page || 1,
-              position: ["bottomRight", "topRight"],
+              // position: ["bottomRight", "topRight"],
               defaultPageSize: 10,
               total: data?.total,
               showTotal: (total, range) =>
