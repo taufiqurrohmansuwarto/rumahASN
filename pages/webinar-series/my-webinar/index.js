@@ -24,11 +24,21 @@ import Head from "next/head";
 import { useRouter } from "next/router";
 import { useState } from "react";
 import Image from "next/image";
+import useScrollRestoration from "@/hooks/useScrollRestoration";
 
 function MyWebinar() {
   const router = useRouter();
+  useScrollRestoration();
 
   const [query, setQuery] = useState(router?.query);
+  const { data, isLoading, isFetching } = useQuery(
+    ["webinar-user", query],
+    () => webinarUser(query),
+    {
+      keepPreviousData: true,
+      enabled: !!query,
+    }
+  );
 
   const handleSearch = (value) => {
     if (!value) {
@@ -67,14 +77,6 @@ function MyWebinar() {
       page: page,
     });
   };
-
-  const { data, isLoading } = useQuery(
-    ["webinar-user", query],
-    () => webinarUser(query),
-    {
-      keepPreviousData: true,
-    }
-  );
 
   const gotoDetail = (id) =>
     router.push(`/webinar-series/my-webinar/${id}/detail`);
@@ -194,7 +196,7 @@ function MyWebinar() {
                 </Card>
               </List.Item>
             )}
-            loading={isLoading}
+            loading={isLoading || isFetching}
           />
         </Card>
       </WebinarUserLayout>
