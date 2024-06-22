@@ -3,13 +3,14 @@ import PageContainer from "@/components/PageContainer";
 import CustomSelectMenu from "@/components/PemutakhiranData/CustomSelectMenu";
 import RiwayatUbahData from "@/components/PemutakhiranData/RiwayatUbahData";
 import { Alert, Stack } from "@mantine/core";
-import { Breadcrumb } from "antd";
+import { Breadcrumb, Grid } from "antd";
 import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
 
 const DataUtama = () => {
   const router = useRouter();
+  const breakPoint = Grid.useBreakpoint();
 
   const handleBack = () => router.push("/pemutakhiran-data/komparasi");
 
@@ -19,6 +20,9 @@ const DataUtama = () => {
         <title>Rumah ASN - Peremajaan SIASN - Riwayat Ubah Data</title>
       </Head>
       <PageContainer
+        childrenContentStyle={{
+          padding: breakPoint.xs ? 0 : null,
+        }}
         extra={[<CustomSelectMenu key="menu" />]}
         header={{
           breadcrumbRender: () => (

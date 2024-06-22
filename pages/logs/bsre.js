@@ -236,12 +236,7 @@ function LogBSRE() {
                   <a>Beranda</a>
                 </Link>
               </Breadcrumb.Item>
-              <Breadcrumb.Item>
-                <Link href="/apps-managements/webinar-series">
-                  <a>Webinar Series</a>
-                </Link>
-              </Breadcrumb.Item>
-              <Breadcrumb.Item>Log</Breadcrumb.Item>
+              <Breadcrumb.Item>Log BSRE</Breadcrumb.Item>
             </Breadcrumb>
           ),
         }}
@@ -272,6 +267,8 @@ function LogBSRE() {
     </>
   );
 }
+
+LogBSRE.getLayout = (page) => <Layout active="/logs/bsre">{page}</Layout>;
 
 LogBSRE.Auth = {
   action: "manage",

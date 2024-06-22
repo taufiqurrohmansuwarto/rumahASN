@@ -75,12 +75,12 @@ function SiasnTab({ nip }) {
           <Tabs.TabPane tab="Masa Kerja" key="masa-kerja">
             <CompareMasaKerjaByNip nip={nip} />
           </Tabs.TabPane>
-          <Tabs.TabPane tab="Pindah Instansi" key="pindah-instansi">
+          {/* <Tabs.TabPane tab="Pindah Instansi" key="pindah-instansi">
             <ComparePindahInstansiByNip nip={nip} />
           </Tabs.TabPane>
           <Tabs.TabPane tab="Pindah Wilayah Kerja" key="pindah-wilayah-kerja">
             <ComparePwkByNip nip={nip} />
-          </Tabs.TabPane>
+          </Tabs.TabPane> */}
           <Tabs.TabPane tab="Hukuman Disiplin" key="hukuman-disiplin">
             <CompareHukdisByNip nip={nip} />
           </Tabs.TabPane>
@@ -90,9 +90,9 @@ function SiasnTab({ nip }) {
           <Tabs.TabPane tab="Penghargaan" key="penghargaan">
             <ComparePenghargaanByNip nip={nip} />
           </Tabs.TabPane>
-          <Tabs.TabPane tab="Usulan SIASN" key="tracking-siasn">
+          {/* <Tabs.TabPane tab="Usulan SIASN" key="tracking-siasn">
             <SiasnTrackingLayanan nip={nip} />
-          </Tabs.TabPane>
+          </Tabs.TabPane> */}
         </Tabs>
       </ActiveTabProvider>
     </>
