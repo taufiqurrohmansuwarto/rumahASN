@@ -1,5 +1,4 @@
 import {
-  AppstoreOutlined,
   AudioOutlined,
   BarChartOutlined,
   BookOutlined,
@@ -13,7 +12,6 @@ import {
   SnippetsOutlined,
   UserOutlined,
   VideoCameraAddOutlined,
-  YoutubeOutlined,
 } from "@ant-design/icons";
 
 export const userRoutes = {

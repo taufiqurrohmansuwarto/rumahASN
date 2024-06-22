@@ -14,6 +14,7 @@ import {
   Button,
   Col,
   DatePicker,
+  Descriptions,
   Form,
   Input,
   Modal,
@@ -341,8 +342,8 @@ function CompareJabatan() {
       key: "jabatan_xs",
       render: (_, row) => {
         return (
-          <Stack>
-            <div>
+          <Descriptions>
+            <Descriptions.Item label="File Jabatan">
               {row?.path?.[872] && (
                 <a
                   href={`/helpdesk/api/siasn/ws/download?filePath=${row?.path?.[872]?.dok_uri}`}
@@ -352,15 +353,21 @@ function CompareJabatan() {
                   File
                 </a>
               )}
-            </div>
-            <Text>{checkJenisJabatan(row)}</Text>
-            <Text>{namaJabatan(row)}</Text>
-            <Text>{row?.unorNama}</Text>
-            <Text>
+            </Descriptions.Item>
+            <Descriptions.Item label="Jenis Jabatan">
+              {checkJenisJabatan(row)}
+            </Descriptions.Item>
+            <Descriptions.Item label="Jabatan">
+              {namaJabatan(row)}
+            </Descriptions.Item>
+            <Descriptions.Item label="Unor">{row?.unorNama}</Descriptions.Item>
+            <Descriptions.Item label="No. SK & Tgl. SK">
               {row?.nomorSk} - {row?.tanggalSk}
-            </Text>
-            <Text>TMT Jab : {row?.tmtJabatan}</Text>
-          </Stack>
+            </Descriptions.Item>
+            <Descriptions.Item label="TMT Jabatan">
+              {row?.tmtJabatan}
+            </Descriptions.Item>
+          </Descriptions>
         );
       },
     },

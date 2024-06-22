@@ -23,6 +23,7 @@ import {
   Popconfirm,
   Row,
   Skeleton,
+  Space,
   Table,
   Typography,
   Upload,
@@ -288,7 +289,40 @@ function CompareAngkaKredit() {
 
   const columns = [
     {
+      title: "Data",
+      responsive: ["xs"],
+      key: "data",
+      render: (_, record) => {
+        return (
+          <Space direction="vertical">
+            <div>
+              {record?.path?.[879] && (
+                <a
+                  href={`/helpdesk/api/siasn/ws/download?filePath=${record?.path?.[879]?.dok_uri}`}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  File
+                </a>
+              )}
+            </div>
+            <Text>Nomor SK : {record?.nomorSk}</Text>
+            <Text>
+              Bulan Mulai Penilaian
+              {record?.bulanMulaiPenailan} {record?.tahunMulaiPenilaian} -{" "}
+              {record?.bulanSelesaiPenailan} {record?.tahunSelesaiPenilaian}
+            </Text>
+            <Text>Kredit Utama Baru : {record?.kreditUtamaBaru}</Text>
+            <Text>Kredit Penunjang Baru : {record?.kreditPenunjangBaru}</Text>
+            <Text>Kredit Baru Total : {record?.kreditBaruTotal}</Text>
+            <Text>Kredit Nama Jabatan : {record?.namaJabatan}</Text>
+          </Space>
+        );
+      },
+    },
+    {
       title: "File",
+      responsive: ["sm"],
       key: "path",
       render: (_, record) => {
         return (
@@ -309,38 +343,47 @@ function CompareAngkaKredit() {
     {
       title: "Nomor SK",
       dataIndex: "nomorSk",
+      responsive: ["sm"],
     },
     {
       title: "Bulan Mulai Penilaian",
       dataIndex: "bulanMulaiPenailan",
+      responsive: ["sm"],
     },
     {
       title: "Tahun Mulai Penilaian",
       dataIndex: "tahunMulaiPenailan",
+      responsive: ["sm"],
     },
     {
       title: "Bulan Selesai Penilaian",
       dataIndex: "bulanSelesaiPenailan",
+      responsive: ["sm"],
     },
     {
       title: "Tahun Selesai Penilaian",
       dataIndex: "tahunSelesaiPenailan",
+      responsive: ["sm"],
     },
     {
       title: "Kredit Utama Baru",
       dataIndex: "kreditUtamaBaru",
+      responsive: ["sm"],
     },
     {
       title: "Kredit Penunjang Baru",
       dataIndex: "kreditPenunjangBaru",
+      responsive: ["sm"],
     },
     {
       title: "Kredit Baru Total",
       dataIndex: "kreditBaruTotal",
+      responsive: ["sm"],
     },
     {
       title: "Nama Jabatan",
       dataIndex: "namaJabatan",
+      responsive: ["sm"],
     },
     // {
     //   title: "Hapus",
@@ -360,6 +403,24 @@ function CompareAngkaKredit() {
 
   const columnsMaster = [
     {
+      title: "Data",
+      key: "data",
+      render: (_, record) => {
+        return (
+          <Space direction="vertical">
+            <div>
+              <a href={record?.file_pak} target="_blank" rel="noreferrer">
+                File
+              </a>
+            </div>
+            <Text>Nomor SK : {record?.no_sk}</Text>
+            <Text> Kredit Utama Baru : {record?.nilai_unsur_utama_baru}</Text>
+            <Text>Nilai PAK : {record?.nilai_pak}</Text>
+          </Space>
+        );
+      },
+    },
+    {
       title: "File",
       key: "file",
       render: (_, record) => {
@@ -369,19 +430,23 @@ function CompareAngkaKredit() {
           </a>
         );
       },
+      responsive: ["sm"],
     },
     {
       title: "Nomor SK",
       dataIndex: "no_sk",
+      responsive: ["sm"],
     },
     {
       title: "Kredit Utama Baru",
       dataIndex: "nilai_unsur_utama_baru",
+      responsive: ["sm"],
     },
 
     {
       title: "Kredit Baru Total",
       dataIndex: "nilai_pak",
+      responsive: ["sm"],
     },
   ];
 

@@ -8,7 +8,7 @@ import {
 } from "@/services/siasn-services";
 import { Center } from "@mantine/core";
 import { useQuery } from "@tanstack/react-query";
-import { Breadcrumb, Button, Col, Empty, Row, Modal } from "antd";
+import { Breadcrumb, Button, Col, Empty, Row, Modal, Grid } from "antd";
 import { useSession } from "next-auth/react";
 import Head from "next/head";
 import Link from "next/link";
@@ -16,6 +16,8 @@ import Link from "next/link";
 // base64 to image
 
 function Komparasi() {
+  const breakPoint = Grid.useBreakpoint();
+
   const { data: dataUtama, isLoading } = useQuery(
     ["data-utama-siasn"],
     () => dataUtamaSIASN(),
@@ -54,6 +56,9 @@ function Komparasi() {
         <title>Rumah ASN - Integrasi - MyASN dan SIMASTER</title>
       </Head>
       <PageContainer
+        childrenContentStyle={{
+          padding: breakPoint.xs ? 0 : null,
+        }}
         title="Integrasi MyASN dan SIMASTER"
         content="Layanan Komparasi Data MyASN dan SIMASTER"
         loading={isLoading}

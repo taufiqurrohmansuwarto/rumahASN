@@ -138,7 +138,7 @@ function WebinarAll() {
             }}
             pagination={{
               current: router?.query?.page || 1,
-              defaultPageSize: 25,
+              defaultPageSize: 10,
               total: data?.total,
               showTotal: (total, range) =>
                 `${range[0]}-${range[1]} of ${total} items`,

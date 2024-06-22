@@ -1,15 +1,15 @@
 import Layout from "@/components/Layout";
 import PageContainer from "@/components/PageContainer";
-import CompareAngkaKredit from "@/components/PemutakhiranData/CompareAngkaKredit";
 import CompareSKP22 from "@/components/PemutakhiranData/CompareSKP22";
 import CustomSelectMenu from "@/components/PemutakhiranData/CustomSelectMenu";
-import { Breadcrumb, Card } from "antd";
+import { Breadcrumb, Card, Grid } from "antd";
 import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
 
 const RiwayatLaporanKinerja = () => {
   const router = useRouter();
+  const breakPoint = Grid.useBreakpoint();
 
   const handleBack = () => router.push("/pemutakhiran-data/komparasi");
 
@@ -19,6 +19,9 @@ const RiwayatLaporanKinerja = () => {
         <title>Rumah ASN - Peremajaan SIASN - Data Laporan Kinerja</title>
       </Head>
       <PageContainer
+        childrenContentStyle={{
+          padding: breakPoint.xs ? 0 : null,
+        }}
         extra={[<CustomSelectMenu key="menu" />]}
         header={{
           breadcrumbRender: () => (

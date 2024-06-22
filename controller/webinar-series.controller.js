@@ -339,7 +339,7 @@ const deleteWebinar = async (req, res) => {
 };
 
 const allWebinars = async (req, res) => {
-  const limit = req.query.limit || 25;
+  const limit = req.query.limit || 10;
   const page = req.query.page || 1;
   const search = req.query.search || "";
 
@@ -528,7 +528,7 @@ const listUser = async (req, res) => {
         .page(page - 1, limit);
     }
 
-    const result = await query;
+    const result = await query.orderBy("created_at", "desc");
 
     const data = {
       data: result.results,

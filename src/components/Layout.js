@@ -340,7 +340,7 @@ const changeRoutes = (user) => {
 
             { path: "/apps-managements/podcasts", name: "Podcast" },
             { path: "/apps-managements/announcements", name: "Pengumuman" },
-            { path: "/apps-managements/discussions", name: "Diskusi" },
+            // { path: "/apps-managements/discussions", name: "Diskusi" },
           ],
         },
         {

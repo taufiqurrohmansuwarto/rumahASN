@@ -2,13 +2,14 @@ import Layout from "@/components/Layout";
 import PageContainer from "@/components/PageContainer";
 import CompareDataUtama from "@/components/PemutakhiranData/CompareDataUtama";
 import CustomSelectMenu from "@/components/PemutakhiranData/CustomSelectMenu";
-import { Breadcrumb } from "antd";
+import { Breadcrumb, Grid } from "antd";
 import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
 
 const DataUtama = () => {
   const router = useRouter();
+  const breakPoint = Grid.useBreakpoint();
 
   const handleBack = () => router.push("/pemutakhiran-data/komparasi");
 
@@ -18,6 +19,9 @@ const DataUtama = () => {
         <title>Rumah ASN - Peremajaan SIASN - Data Utama</title>
       </Head>
       <PageContainer
+        childrenContentStyle={{
+          padding: breakPoint.xs ? 0 : null,
+        }}
         extra={[<CustomSelectMenu key="menu" />]}
         header={{
           breadcrumbRender: () => (
