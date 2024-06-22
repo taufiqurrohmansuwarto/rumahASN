@@ -27,11 +27,22 @@ import Head from "next/head";
 import { useRouter } from "next/router";
 import { useState } from "react";
 import SearchWebinarByCode from "@/components/WebinarSeries/SearchWebinarByCode";
+import useScrollRestoration from "@/hooks/useScrollRestoration";
 
 function WebinarAll() {
   const router = useRouter();
+  useScrollRestoration();
 
   const [query, setQuery] = useState(router?.query);
+
+  const { data, isLoading, isFetching } = useQuery(
+    ["webinar-series-all", query],
+    () => allWebinars(query),
+    {
+      keepPreviousData: true,
+      enabled: !!query,
+    }
+  );
 
   const handleSearch = (value) => {
     if (!value) {
@@ -67,15 +78,6 @@ function WebinarAll() {
 
     setQuery({ ...query, page });
   };
-
-  const { data, isLoading } = useQuery(
-    ["webinar-series-all", query],
-    () => allWebinars(query),
-    {
-      keepPreviousData: true,
-      enabled: !!query,
-    }
-  );
 
   const handleClick = (id) => {
     router.push(`/webinar-series/all/${id}/detail`);
@@ -138,13 +140,14 @@ function WebinarAll() {
             }}
             pagination={{
               current: router?.query?.page || 1,
+              position: ["bottomRight", "topRight"],
               defaultPageSize: 10,
               total: data?.total,
               showTotal: (total, range) =>
                 `${range[0]}-${range[1]} of ${total} items`,
               onChange: handleChangePage,
             }}
-            loading={isLoading}
+            loading={isLoading || isFetching}
             dataSource={data?.data}
             renderItem={(item) => (
               <List.Item>
