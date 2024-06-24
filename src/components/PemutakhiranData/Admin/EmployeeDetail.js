@@ -1,23 +1,19 @@
 import IPAsnByNip from "@/components/LayananSIASN/IPASNByNip";
+import { anomaliUserByNip } from "@/services/anomali.services";
 import { dataUtamaMasterByNip } from "@/services/master.services";
 import { dataUtamSIASNByNip, getPnsAllByNip } from "@/services/siasn-services";
 import { getUmur } from "@/utils/client-utils";
-import { ActionIcon } from "@mantine/core";
-import {
-  IconBadges,
-  IconBarrierBlock,
-  IconEyeCheck,
-  IconHistory,
-} from "@tabler/icons";
 import { useQuery } from "@tanstack/react-query";
 import {
   Alert as AlertAntd,
   Avatar,
+  Button,
   Card,
   Col,
   Descriptions,
   Flex,
   Grid,
+  Modal,
   Row,
   Space,
   Spin,
@@ -25,14 +21,15 @@ import {
   Tooltip,
   Typography,
 } from "antd";
+import { useRouter } from "next/router";
 import SyncGolonganByNip from "../Sync/SyncGolonganByNip";
 import SyncJabatanByNip from "../Sync/SyncJabatanByNip";
 import TrackingKenaikanPangkatByNip from "./Usulan/TrackingKenaikanPangkatByNip";
-import { useRouter } from "next/router";
 import TrackingPemberhentianByNip from "./Usulan/TrackingPemberhentianByNip";
 import TrackingPerbaikanNamaByNip from "./Usulan/TrackingPerbaikanNamaByNip";
 import TrackingUsulanLainnyaByNip from "./Usulan/TrackingUsulanLainnyaByNip";
-import { anomaliUserByNip } from "@/services/anomali.services";
+import { LockOutlined } from "@ant-design/icons";
+import { useState } from "react";
 
 // import { patchAnomali2023 } from "@/services/anomali.services";
 
@@ -133,7 +130,6 @@ const EmployeeContent = ({ data, loading }) => {
                   : "NIK Belum Terverifikasi"}
               </Tag>
             </Tooltip>
-            <CheckAnomali />
           </Flex>
           <Flex gap={20} justify="space-between">
             <Space direction="vertical" align="center">
@@ -153,8 +149,21 @@ const EmployeeContent = ({ data, loading }) => {
   );
 };
 
+const ModalAnomali = ({ open, onCancel }) => {
+  return (
+    <Modal title="Update Data Anomali" open={open} onCancel={onCancel}>
+      <div>Hello world</div>
+    </Modal>
+  );
+};
+
 const CheckAnomali = () => {
   const router = useRouter();
+  const [open, setOpen] = useState(false);
+
+  const handleOpen = () => setOpen(true);
+  const handleClose = () => setOpen(false);
+
   const { nip } = router.query;
   const { data: anomali, isLoading: isLoadingAnomali } = useQuery(
     ["anomali-user-by-nip", nip],
@@ -166,9 +175,19 @@ const CheckAnomali = () => {
 
   return (
     <div>
+      <ModalAnomali open={open} onCancel={handleClose} />
       {anomali && (
         <Tooltip title="Anomali">
-          <Tag color="black">{anomali?.jenis_anomali_nama}</Tag>
+          <Tag
+            onClick={handleOpen}
+            icon={<LockOutlined />}
+            style={{
+              cursor: "pointer",
+            }}
+            color={anomali?.is_repaired ? "green" : "#f50"}
+          >
+            {anomali?.jenis_anomali_nama}
+          </Tag>
         </Tooltip>
       )}
     </div>
@@ -205,7 +224,7 @@ function EmployeeDetail({ nip }) {
   );
 
   return (
-    <Card title="Informasi Pegawai">
+    <Card title="Informasi Pegawai" extra={<CheckAnomali />}>
       <EmployeeContent
         loading={isLoadingDataSimaster}
         data={{

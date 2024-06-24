@@ -12,7 +12,7 @@ const TextSensor = ({ text }) => {
   return (
     <div style={{ display: "flex", alignItems: "center" }}>
       <span style={{ marginRight: 8 }}>
-        {isHidden ? "•".repeat(text.length) : text}
+        {isHidden ? "•".repeat(text?.length) : text}
       </span>
       <Tooltip title={isHidden ? "Show" : "Hide"}>
         {isHidden ? (
