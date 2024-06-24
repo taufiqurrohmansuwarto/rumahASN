@@ -16,6 +16,12 @@ export const uploadDataAnomali2023 = async (data) => {
     .then((res) => res?.data);
 };
 
+export const anomaliUserByNip = async (nip) => {
+  return api
+    .get(`/2023/admin/users?employee_number=${nip}`)
+    .then((res) => res?.data);
+};
+
 export const daftarAnomali23 = async (query) => {
   const queryStr = queryString.stringify(query, {
     skipEmptyString: true,

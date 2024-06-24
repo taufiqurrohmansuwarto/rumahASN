@@ -146,17 +146,13 @@ const patchAnomali2022 = async (req, res) => {
 
 const userAnomali2022 = async (req, res) => {
   try {
-    const { employee_number } = req?.user;
+    const { employee_number } = req?.query;
     const data = await Anomali23.query()
       .where({
         nip_baru: employee_number,
       })
       .andWhere("is_repaired", false)
-      .andWhere((builder) => {
-        builder
-          .where("jenis_anomali_nama", "FORMASI_JF_BELUMDIANGKAT")
-          .orWhere("jenis_anomali_nama", "UNOR_NONAKTIF");
-      });
+      .first();
 
     res.json(data);
   } catch (error) {
@@ -257,6 +253,41 @@ const patchUserAnomali = async (req, res) => {
   }
 };
 
+const patchUserAnomaliByNip = async (req, res) => {
+  try {
+    const id = req?.query?.id;
+    const { customId, employee_number } = req?.user;
+
+    const reset = req?.body?.reset;
+
+    const payload = {
+      is_repaired: req?.body?.is_repaired,
+      description: req?.body?.description,
+      user_id: customId,
+      updated_at: new Date(),
+    };
+
+    if (reset) {
+      await Anomali23.query().findById(id).patch({
+        is_repaired: false,
+        description: null,
+        user_id: null,
+        updated_at: new Date(),
+      });
+      res.json({ message: "success" });
+    } else {
+      await Anomali23.query()
+        .where("id", id)
+        .andWhere("nip_baru", employee_number)
+        .patch(payload);
+      res.json({ message: "success" });
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
 const userAnomaliByDate = async (req, res) => {
   try {
     let date = req?.query?.date;
@@ -282,6 +313,23 @@ const userAnomaliByDate = async (req, res) => {
   }
 };
 
+const checkAnomaliByNip = async (req, res) => {
+  try {
+    const { nip } = req?.query?.nip;
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+const updateAnomaliByNip = async (req, res) => {
+  try {
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
 module.exports = {
   userAnomaliByDate,
   patchUserAnomali,
@@ -291,4 +339,5 @@ module.exports = {
   patchAnomali2022,
   userAnomali2022,
   downloadReportAnomali,
+  patchUserAnomaliByNip,
 };

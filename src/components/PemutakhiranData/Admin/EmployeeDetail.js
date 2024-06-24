@@ -32,6 +32,7 @@ import { useRouter } from "next/router";
 import TrackingPemberhentianByNip from "./Usulan/TrackingPemberhentianByNip";
 import TrackingPerbaikanNamaByNip from "./Usulan/TrackingPerbaikanNamaByNip";
 import TrackingUsulanLainnyaByNip from "./Usulan/TrackingUsulanLainnyaByNip";
+import { anomaliUserByNip } from "@/services/anomali.services";
 
 // import { patchAnomali2023 } from "@/services/anomali.services";
 
@@ -132,6 +133,7 @@ const EmployeeContent = ({ data, loading }) => {
                   : "NIK Belum Terverifikasi"}
               </Tag>
             </Tooltip>
+            <CheckAnomali />
           </Flex>
           <Flex gap={20} justify="space-between">
             <Space direction="vertical" align="center">
@@ -148,6 +150,28 @@ const EmployeeContent = ({ data, loading }) => {
         </Flex>
       </Col>
     </Row>
+  );
+};
+
+const CheckAnomali = () => {
+  const router = useRouter();
+  const { nip } = router.query;
+  const { data: anomali, isLoading: isLoadingAnomali } = useQuery(
+    ["anomali-user-by-nip", nip],
+    () => anomaliUserByNip(nip),
+    {
+      enabled: !!nip,
+    }
+  );
+
+  return (
+    <div>
+      {anomali && (
+        <Tooltip title="Anomali">
+          <Tag color="black">{anomali?.jenis_anomali_nama}</Tag>
+        </Tooltip>
+      )}
+    </div>
   );
 };
 
