@@ -9,6 +9,7 @@ import {
 import { API_URL } from "@/utils/client-utils";
 import { FileAddOutlined } from "@ant-design/icons";
 import { Alert, Stack, Text } from "@mantine/core";
+import { IconAlertCircle } from "@tabler/icons";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Button,
@@ -20,20 +21,16 @@ import {
   Input,
   InputNumber,
   Modal,
-  Popconfirm,
   Row,
   Skeleton,
   Space,
   Table,
-  Typography,
   Upload,
   message,
 } from "antd";
 import axios from "axios";
 import { useState } from "react";
-import AlertAngkaKredit from "./AlertAngkaKredit";
 import FormRiwayatJabatan from "./FormRiwayatJabatan";
-import { IconAlertCircle } from "@tabler/icons";
 
 // const data = {
 //     bulanMulaiPenilaian: "string",
