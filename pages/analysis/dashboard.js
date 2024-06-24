@@ -4,23 +4,31 @@ import PlotAgeUsers from "@/components/Dashboards/PlotAgeUsers";
 import UserByGroup from "@/components/Dashboards/UserByGroupCard";
 import Layout from "@/components/Layout";
 import PageContainer from "@/components/PageContainer";
-import { Card, Col, Row } from "antd";
+import { Card, Col, Grid, Row } from "antd";
 import Head from "next/head";
 
 function DashboardAnalysis() {
+  const breakPoint = Grid.useBreakpoint();
+
   return (
     <>
       <Head>
         <title>Rumah ASN - Analisis - Dashboard</title>
       </Head>
-      <PageContainer title="Dashboard" subTitle="Analisis Data Rumah ASN">
+      <PageContainer
+        childrenContentStyle={{
+          padding: breakPoint?.xs ? 0 : null,
+        }}
+        title="Dashboard"
+        subTitle="Analisis Data Rumah ASN"
+      >
         <Row gutter={[16, 16]} style={{ marginBottom: 16 }}>
-          <Col md={8} xs={24}>
+          <Col md={12} xs={24}>
             <Card title="Statistik Pertanyaan">
               <DataTickets />
             </Card>
           </Col>
-          <Col md={8} xs={24}>
+          <Col md={12} xs={24}>
             <Card title="Statistik Pengguna">
               <UserByGroup />
             </Card>

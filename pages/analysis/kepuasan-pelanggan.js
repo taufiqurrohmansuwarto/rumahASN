@@ -1,15 +1,24 @@
+import PlotKepuasanPelanggan from "@/components/Dashboards/PlotKepuasanPelanggan";
 import Layout from "@/components/Layout";
 import PageContainer from "@/components/PageContainer";
+import { Grid } from "antd";
 import Head from "next/head";
 
 function KepuasanPelanggan() {
+  const breakPoint = Grid.useBreakpoint();
   return (
     <>
       <Head>
         <title>Rumah ASN - Analisis - Kepuasan Pelanggan</title>
       </Head>
-      <PageContainer title="Analisis" subTitle="Kepuasan Pelanggan">
-        {/* <PlotKepuasanPelanggan /> */}
+      <PageContainer
+        childrenContentStyle={{
+          padding: breakPoint?.xs ? 0 : null,
+        }}
+        title="Analisis"
+        subTitle="Kepuasan Pelanggan"
+      >
+        <PlotKepuasanPelanggan />
       </PageContainer>
     </>
   );
