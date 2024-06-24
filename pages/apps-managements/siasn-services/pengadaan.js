@@ -1,7 +1,9 @@
 import Layout from "@/components/Layout";
 import PageContainer from "@/components/PageContainer";
 import DaftarPengadaan from "@/components/SiasnServicesAdmin/DaftarPengadaan";
+import { Breadcrumb } from "antd";
 import Head from "next/head";
+import Link from "next/link";
 
 const LayananSiasnPengadaan = () => {
   return (
@@ -9,7 +11,23 @@ const LayananSiasnPengadaan = () => {
       <Head>
         <title>Layanan SIASN - Pengadaan</title>
       </Head>
-      <PageContainer title="Pengadaan" subTitle="Daftar Pengadaan">
+      <PageContainer
+        header={{
+          breadcrumbRender: () => (
+            <Breadcrumb>
+              <Breadcrumb.Item>
+                <Link href="/feeds">
+                  <a>Beranda</a>
+                </Link>
+              </Breadcrumb.Item>
+              <Breadcrumb.Item>Layanan SIASN</Breadcrumb.Item>
+              <Breadcrumb.Item>Pengadaan</Breadcrumb.Item>
+            </Breadcrumb>
+          ),
+        }}
+        title="Pengadaan"
+        subTitle="Daftar Pengadaan"
+      >
         <DaftarPengadaan />
       </PageContainer>
     </>

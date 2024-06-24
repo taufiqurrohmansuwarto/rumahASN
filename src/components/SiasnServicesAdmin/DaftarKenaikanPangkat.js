@@ -1,19 +1,30 @@
 import { daftarKenaikanPangkat } from "@/services/siasn-services";
 import { FilePdfOutlined, FilePdfTwoTone } from "@ant-design/icons";
 import { useQuery } from "@tanstack/react-query";
-import { Card, DatePicker, Form, Space, Table, Tooltip } from "antd";
+import { Card, DatePicker, Form, Select, Space, Table, Tooltip } from "antd";
 import dayjs from "dayjs";
 import { useRouter } from "next/router";
 import React, { useState } from "react";
 
 const format = "DD-MM-YYYY";
 
+const periodeKenaikanPangkat = [
+  { label: "Februari", value: "01-02" },
+  { label: "April", value: "01-04" },
+  { label: "Juni", value: "01-06" },
+  { label: "Agustus", value: "01-08" },
+  { label: "Oktober", value: "01-10" },
+  { label: "Desember", value: "01-12" },
+];
+
 function DaftarKenaikanPangkat() {
   const router = useRouter();
   const [query, setQuery] = useState({
     page: 1,
     limit: 10,
-    periode: router.query.periode || dayjs().format(format),
+    periode:
+      router.query.periode ||
+      `01-${dayjs().format("MM")}-${dayjs().format("YYYY")}`,
   });
 
   const gotoDetail = (row) => {
@@ -88,25 +99,39 @@ function DaftarKenaikanPangkat() {
     () => daftarKenaikanPangkat(router?.query),
     {
       enabled: !!router?.query,
-      refetchOnWindowFocus: false,
       keepPreviousData: true,
+      refetchOnWindowFocus: false,
     }
   );
 
   return (
     <Card>
       <Form.Item label="Periode">
+        {/* <Select showSearch optionFilterProp="name" allowClear>
+          {periodeKenaikanPangkat.map((item) => (
+            <Select.Option
+              name={item?.label}
+              key={item.value}
+              value={item.value}
+            >
+              {item.label}
+            </Select.Option>
+          ))}
+        </Select> */}
         <DatePicker
+          picker="month"
           format={format}
           onChange={handleChangePeriode}
           value={dayjs(query.periode, format)}
         />
       </Form.Item>
       <Table
-        size="small"
+        size="middle"
         pagination={{
+          position: ["bottomRight", "topRight"],
           total: data?.length,
           showTotal: (total) => `Total ${total} data`,
+          showSizeChanger: false,
           pageSize: 25,
         }}
         columns={columns}

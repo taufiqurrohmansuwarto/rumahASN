@@ -6,29 +6,27 @@ const dayjs = require("dayjs");
 require("dayjs/locale/id");
 
 const relativeTime = require("dayjs/plugin/relativeTime");
+const { reverse } = require("lodash");
 dayjs.locale("id");
 dayjs.extend(relativeTime);
 
 const listKenaikanPangkat = async (req, res) => {
   try {
     const { siasnRequest: request } = req;
+    const myPeriode = req?.query?.periode?.split("-").reverse().join("-");
 
-    let periodePangkat = dayjs().format("YYYY-MM-DD");
+    const result = await daftarKenaikanPangkat(request, myPeriode);
+    const data = result?.data;
 
-    if (req?.query?.periode) {
-      periodePangkat = dayjs(req?.query?.periode, "2020-10-01");
+    let jsonData = [];
+
+    if (data?.count === 0) {
+      jsonData = [];
+    } else if (data?.count !== 0) {
+      jsonData = data?.data;
     }
 
-    const result = await daftarKenaikanPangkat(request, "2020-10-01");
-    console.log(result);
-
-    const data = result?.data?.data;
-
-    if (data?.code === 1) {
-      res.json([]);
-    } else {
-      res.json(data);
-    }
+    res.json(jsonData);
   } catch (error) {
     console.log(error);
     res.status(400).json({
