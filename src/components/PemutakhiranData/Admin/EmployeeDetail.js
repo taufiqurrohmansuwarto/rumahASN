@@ -218,8 +218,17 @@ const CheckAnomali = () => {
   const [open, setOpen] = useState(false);
   const queryClient = useQueryClient();
 
-  const handleOpen = () => setOpen(true);
-  const handleClose = () => setOpen(false);
+  const [currentAnomali, setCurrentAnomali] = useState(null);
+
+  const handleOpen = (anomali) => {
+    setOpen(true);
+    setCurrentAnomali(anomali);
+  };
+
+  const handleClose = () => {
+    setOpen(false);
+    setCurrentAnomali(null);
+  };
 
   const { nip } = router.query;
   const { data: anomali, isLoading: isLoadingAnomali } = useQuery(
@@ -254,23 +263,25 @@ const CheckAnomali = () => {
         open={open}
         onCancel={handleClose}
         nip={nip}
-        initialData={anomali}
+        initialData={currentAnomali}
       />
-      {anomali && (
+      {anomali?.length && (
         <>
-          <Tooltip title="Anomali">
-            <Tag
-              onClick={handleOpen}
-              icon={<LockOutlined />}
-              style={{
-                cursor: "pointer",
-              }}
-              color={anomali?.is_repaired ? "green" : "#f50"}
-            >
-              {anomali?.jenis_anomali_nama}
-              {anomali?.is_repaired ? `${anomali?.user?.username}` : null}
-            </Tag>
-          </Tooltip>
+          {anomali?.map((a) => (
+            <Tooltip key={a.id} title="Anomali">
+              <Tag
+                onClick={() => handleOpen(a)}
+                icon={<LockOutlined />}
+                style={{
+                  cursor: "pointer",
+                }}
+                color={a?.is_repaired ? "green" : "#f50"}
+              >
+                {a?.jenis_anomali_nama}
+                {a?.is_repaired ? `${a?.user?.username}` : null}
+              </Tag>
+            </Tooltip>
+          ))}
         </>
       )}
     </div>

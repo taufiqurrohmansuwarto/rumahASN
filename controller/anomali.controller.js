@@ -151,9 +151,9 @@ const userAnomali2022 = async (req, res) => {
       .where({
         nip_baru: employee_number,
       })
-      .withGraphFetched("[user(simpleSelect)]")
-      // .andWhere("is_repaired", false)
-      .first();
+      .withGraphFetched("[user(simpleSelect)]");
+    // .andWhere("is_repaired", false)
+    // .first();
 
     res.json(data);
   } catch (error) {
