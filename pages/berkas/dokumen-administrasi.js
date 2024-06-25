@@ -1,7 +1,9 @@
 import Administrasi from "@/components/Berkas/Administrasi";
+import AdministrasiPerbaikan from "@/components/Berkas/AdministrasiPerbaikan";
 import BerkasPNS from "@/components/Berkas/BerkasPNS";
 import Layout from "@/components/Layout";
 import PageContainer from "@/components/PageContainer";
+import { Stack } from "@mantine/core";
 import { Breadcrumb } from "antd";
 import Head from "next/head";
 import Link from "next/link";
@@ -28,7 +30,10 @@ const DokumenAdministrasi = () => {
         title="Dokumen Administrasi"
         content="Dokumen Administrasi"
       >
-        <Administrasi />
+        <Stack>
+          <Administrasi />
+          <AdministrasiPerbaikan />
+        </Stack>
       </PageContainer>
     </>
   );

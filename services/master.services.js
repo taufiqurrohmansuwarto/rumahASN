@@ -181,3 +181,27 @@ export const checkDocumentByNip = (query) => {
     .get(`/admin/${query?.nip}/dokumen-administrasi-check?${params}`)
     .then((res) => res?.data);
 };
+
+// perbaikan
+export const downloadDokumenPerbaikanNip = (query) => {
+  const params = queryString.stringify(query, {
+    skipEmptyString: true,
+    skipNull: true,
+  });
+
+  return api
+    .get(`/admin/${query?.nip}/perbaikan/download?${params}`)
+    .then((res) => res?.data);
+};
+
+// check
+export const checkDokumenPerbaikanByNip = (query) => {
+  const params = queryString.stringify(query, {
+    skipEmptyString: true,
+    skipNull: true,
+  });
+
+  return api
+    .get(`/admin/${query?.nip}/perbaikan/check?${params}`)
+    .then((res) => res?.data);
+};

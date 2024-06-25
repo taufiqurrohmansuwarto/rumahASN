@@ -17,6 +17,8 @@ import ComparePindahInstansiByNip from "./ComparePindahInstansiByNip";
 import ComparePwkByNip from "./ComparePwkByNip";
 import CompareSKP22ByNip from "./CompareSKP22ByNip";
 import SiasnTrackingLayanan from "./SiasnTrackingLayanan";
+import AdministrasiPerbaikanByNip from "@/components/Berkas/AdministrasiPerbaikanByNip";
+import { Stack } from "@mantine/core";
 
 function SiasnTab({ nip }) {
   const breakPoint = Grid.useBreakpoint();
@@ -46,7 +48,10 @@ function SiasnTab({ nip }) {
             <CompareDataUtamaByNip nip={nip} />
           </Tabs.TabPane>
           <Tabs.TabPane tab="Berkas" key="berkas">
-            <AdministrasiByNip />
+            <Stack>
+              <AdministrasiByNip />
+              <AdministrasiPerbaikanByNip />
+            </Stack>
           </Tabs.TabPane>
           <Tabs.TabPane tab="Jab, Pend, & Pangkat" key="jab-pend-pangkat">
             <CompareJabatanByNip nip={nip} />
