@@ -12,7 +12,19 @@ module.exports.foto = (fetcher, pnsId) => {
 };
 
 module.exports.IPASNBaru = (fetcher, nip) => {
-  return fetcher.get(`/pns/nilaiipasn/${nip}`).then((res) => res?.data);
+  return new Promise(async (resolve, reject) => {
+    try {
+      const result = await fetcher.get(`/pns/nilaiipasn/${nip}`);
+      resolve(result?.data);
+    } catch (error) {
+      if (error?.code === 0) {
+        resolve(null);
+      } else {
+        reject(error);
+      }
+    }
+  });
+  // return fetcher.get(`/pns/nilaiipasn/${nip}`).then((res) => res?.data);
 };
 
 module.exports.saveUnorJabatan = (fetcher, data) => {

@@ -8,6 +8,7 @@ const {
   riwayatKursus,
   riwayatDiklat,
   IPASNBaru,
+  dataUtama,
 } = require("@/utils/siasn-utils");
 const { toString, upperCase } = require("lodash");
 
@@ -165,8 +166,7 @@ const getIpAsn = async (req, res) => {
 const getNilaiIPASN = async (req, res) => {
   try {
     const { siasnRequest: fetcher } = req;
-    const { employee_number: nip } = req?.user;
-
+    const { nip } = req?.query;
     const nilaiIPASN = await IPASNBaru(fetcher, nip);
     res.json(nilaiIPASN);
   } catch (error) {

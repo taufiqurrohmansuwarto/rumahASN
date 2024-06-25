@@ -1,5 +1,5 @@
 import {
-  patchUserAnomaliByNip,
+  updateAnomaliByNip,
   userAnomali2022,
 } from "@/controller/anomali.controller";
 import adminFasilitatorMiddleware from "@/middleware/admin-fasilitator.middleware";
@@ -12,6 +12,6 @@ router
   .use(auth)
   .use(adminFasilitatorMiddleware)
   .get(userAnomali2022)
-  .patch(patchUserAnomaliByNip);
+  .patch(updateAnomaliByNip);
 
 export default router.handler({});
