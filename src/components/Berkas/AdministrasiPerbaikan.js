@@ -14,7 +14,7 @@ const dokumen = ["PK"];
 
 const Tombol = ({ tmt, file }) => {
   const { data, isLoading } = useQuery(
-    ["check-document", `${tmt}-${file}`],
+    ["check-document-perbaikan", `${tmt}-${file}`],
     () => checkDocumentPerbaikan({ formasi: tmt, file }),
     {
       refetchOnWindowFocus: false,

@@ -190,7 +190,7 @@ export const downloadDokumenPerbaikanNip = (query) => {
   });
 
   return api
-    .get(`/admin/${query?.nip}/perbaikan/download?${params}`)
+    .get(`/admin/${query?.nip}/dokumen-perbaikan/download?${params}`)
     .then((res) => res?.data);
 };
 
@@ -202,6 +202,6 @@ export const checkDokumenPerbaikanByNip = (query) => {
   });
 
   return api
-    .get(`/admin/${query?.nip}/perbaikan/check?${params}`)
+    .get(`/admin/${query?.nip}/dokumen-perbaikan/check?${params}`)
     .then((res) => res?.data);
 };

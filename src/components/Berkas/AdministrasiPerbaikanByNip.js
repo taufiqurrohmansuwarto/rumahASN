@@ -1,21 +1,20 @@
 import {
   checkDokumenPerbaikanByNip,
-  downloadDocumentByNip,
+  downloadDokumenPerbaikanNip,
 } from "@/services/master.services";
 import { useQuery } from "@tanstack/react-query";
 import { Button, Space, Typography } from "antd";
 import { useRouter } from "next/router";
 import { useState } from "react";
-
 const list_tmt = ["2021"];
 const dokumen = ["PK"];
 
-const Tombol = ({ tmt, file }) => {
+const Tombol = ({ tmt, file, nip }) => {
   const { data, isLoading } = useQuery(
-    ["check-document", `${tmt}-${file}`],
+    ["check-document-perbaikan", `${tmt}-${file}-${nip}`],
     () => checkDokumenPerbaikanByNip({ formasi: tmt, file, nip }),
     {
-      refetchOnWindowFocus: false,
+      // refetchOnWindowFocus: false,
     }
   );
 
@@ -24,7 +23,7 @@ const Tombol = ({ tmt, file }) => {
   const downloadFile = async () => {
     try {
       setLoading(true);
-      const result = await downloadDocumentByNip({
+      const result = await downloadDokumenPerbaikanNip({
         nip,
         formasi: tmt,
         file,
@@ -57,11 +56,11 @@ const Tombol = ({ tmt, file }) => {
   );
 };
 
-const Dokumen = ({ tmt }) => {
+const Dokumen = ({ tmt, nip }) => {
   return (
     <Space>
       {dokumen?.map((dok) => {
-        return <Tombol key={tmt} tmt={tmt} file={dok} />;
+        return <Tombol nip={nip} key={tmt} tmt={tmt} file={dok} />;
       })}
     </Space>
   );
