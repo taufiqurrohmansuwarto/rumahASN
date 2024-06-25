@@ -286,6 +286,10 @@ const changeRoutes = (user) => {
                   path: "/apps-managements/siasn-services/kenaikan-pangkat",
                   name: "Kenaikan Pangkat",
                 },
+                {
+                  path: "/apps-managements/siasn-services/diparitas-unor",
+                  name: "Disparitas Unor",
+                },
               ],
             },
             {
