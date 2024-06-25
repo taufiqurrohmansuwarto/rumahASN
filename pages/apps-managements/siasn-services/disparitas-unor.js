@@ -1,6 +1,6 @@
 import Layout from "@/components/Layout";
 import PageContainer from "@/components/PageContainer";
-import DaftarKenaikanPangkat from "@/components/SiasnServicesAdmin/DaftarKenaikanPangkat";
+import DisparitasDataUnor from "@/components/SiasnServicesAdmin/DisparitasDataUnor";
 import { Breadcrumb } from "antd";
 import Head from "next/head";
 import Link from "next/link";
@@ -28,7 +28,9 @@ const DisparitasUnor = () => {
             </Breadcrumb>
           ),
         }}
-      ></PageContainer>
+      >
+        <DisparitasDataUnor />
+      </PageContainer>
     </>
   );
 };
