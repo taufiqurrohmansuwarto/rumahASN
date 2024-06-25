@@ -1,18 +1,24 @@
 import IPAsnByNip from "@/components/LayananSIASN/IPASNByNip";
-import { anomaliUserByNip } from "@/services/anomali.services";
+import {
+  anomaliUserByNip,
+  updateAnomaliUserByNip,
+} from "@/services/anomali.services";
 import { dataUtamaMasterByNip } from "@/services/master.services";
 import { dataUtamSIASNByNip, getPnsAllByNip } from "@/services/siasn-services";
 import { getUmur } from "@/utils/client-utils";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Alert as AlertAntd,
   Avatar,
   Button,
   Card,
+  Checkbox,
   Col,
   Descriptions,
   Flex,
+  Form,
   Grid,
+  Input,
   Modal,
   Row,
   Space,
@@ -20,6 +26,7 @@ import {
   Tag,
   Tooltip,
   Typography,
+  message,
 } from "antd";
 import { useRouter } from "next/router";
 import SyncGolonganByNip from "../Sync/SyncGolonganByNip";
@@ -29,7 +36,7 @@ import TrackingPemberhentianByNip from "./Usulan/TrackingPemberhentianByNip";
 import TrackingPerbaikanNamaByNip from "./Usulan/TrackingPerbaikanNamaByNip";
 import TrackingUsulanLainnyaByNip from "./Usulan/TrackingUsulanLainnyaByNip";
 import { LockOutlined } from "@ant-design/icons";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 // import { patchAnomali2023 } from "@/services/anomali.services";
 
@@ -149,10 +156,59 @@ const EmployeeContent = ({ data, loading }) => {
   );
 };
 
-const ModalAnomali = ({ open, onCancel }) => {
+const ModalAnomali = ({
+  open,
+  onCancel,
+  update,
+  loadingUpdate,
+  nip,
+  initialData,
+}) => {
+  const [form] = Form.useForm();
+
+  useEffect(() => {
+    if (initialData) {
+      form.setFieldsValue(initialData);
+    }
+  }, [form, initialData]);
+
+  const handleUpdate = async () => {
+    try {
+      const result = await form.validateFields();
+      console.log(result);
+      const payload = {
+        employee_number: nip,
+        data: result,
+      };
+      await update(payload);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   return (
-    <Modal title="Update Data Anomali" open={open} onCancel={onCancel}>
-      <div>Hello world</div>
+    <Modal
+      confirmLoading={loadingUpdate}
+      onOk={handleUpdate}
+      title="Update Data Anomali"
+      open={open}
+      onCancel={onCancel}
+    >
+      <Form layout="vertical" form={form}>
+        <Form.Item name="Deskripsi" label="Deskripsi">
+          <Input.TextArea />
+        </Form.Item>
+        <Form.Item
+          valuePropName="checked"
+          name="is_repaired"
+          label="Sudah diperbaiki?"
+        >
+          <Checkbox />
+        </Form.Item>
+        <Form.Item valuePropName="checked" name="reset" label="Reset">
+          <Checkbox />
+        </Form.Item>
+      </Form>
     </Modal>
   );
 };
@@ -160,6 +216,7 @@ const ModalAnomali = ({ open, onCancel }) => {
 const CheckAnomali = () => {
   const router = useRouter();
   const [open, setOpen] = useState(false);
+  const queryClient = useQueryClient();
 
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
@@ -173,22 +230,48 @@ const CheckAnomali = () => {
     }
   );
 
+  const { mutateAsync: update, isloading: isLoadingUpdate } = useMutation(
+    (data) => updateAnomaliUserByNip(data),
+    {
+      onSuccess: () => {
+        message.success("Berhasil memperbarui data");
+        handleClose();
+      },
+      onError: () => {
+        message.error("Gagal memperbarui data");
+      },
+      onSettled: () => {
+        queryClient.invalidateQueries(["anomali-user-by-nip", nip]);
+      },
+    }
+  );
+
   return (
     <div>
-      <ModalAnomali open={open} onCancel={handleClose} />
+      <ModalAnomali
+        loadingUpdate={isLoadingUpdate}
+        update={update}
+        open={open}
+        onCancel={handleClose}
+        nip={nip}
+        initialData={anomali}
+      />
       {anomali && (
-        <Tooltip title="Anomali">
-          <Tag
-            onClick={handleOpen}
-            icon={<LockOutlined />}
-            style={{
-              cursor: "pointer",
-            }}
-            color={anomali?.is_repaired ? "green" : "#f50"}
-          >
-            {anomali?.jenis_anomali_nama}
-          </Tag>
-        </Tooltip>
+        <>
+          <Tooltip title="Anomali">
+            <Tag
+              onClick={handleOpen}
+              icon={<LockOutlined />}
+              style={{
+                cursor: "pointer",
+              }}
+              color={anomali?.is_repaired ? "green" : "#f50"}
+            >
+              {anomali?.jenis_anomali_nama}
+              {anomali?.is_repaired ? `${anomali?.user?.username}` : null}
+            </Tag>
+          </Tooltip>
+        </>
       )}
     </div>
   );

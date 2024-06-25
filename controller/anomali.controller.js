@@ -151,7 +151,8 @@ const userAnomali2022 = async (req, res) => {
       .where({
         nip_baru: employee_number,
       })
-      .andWhere("is_repaired", false)
+      .withGraphFetched("[user(simpleSelect)]")
+      // .andWhere("is_repaired", false)
       .first();
 
     res.json(data);
@@ -288,6 +289,38 @@ const patchUserAnomaliByNip = async (req, res) => {
   }
 };
 
+const updateAnomaliByNip = async (req, res) => {
+  try {
+    const { employee_number } = req?.query;
+    const { customId } = req?.user;
+
+    const reset = req?.body?.reset;
+
+    const payload = {
+      is_repaired: req?.body?.is_repaired,
+      description: req?.body?.description,
+      user_id: customId,
+      updated_at: new Date(),
+    };
+
+    if (reset) {
+      await Anomali23.query().where("nip_baru", employee_number).patch({
+        is_repaired: false,
+        description: null,
+        user_id: null,
+        updated_at: new Date(),
+      });
+      res.json({ message: "success" });
+    } else {
+      await Anomali23.query().where("nip_baru", employee_number).patch(payload);
+      res.json({ message: "success" });
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
 const userAnomaliByDate = async (req, res) => {
   try {
     let date = req?.query?.date;
@@ -322,14 +355,6 @@ const checkAnomaliByNip = async (req, res) => {
   }
 };
 
-const updateAnomaliByNip = async (req, res) => {
-  try {
-  } catch (error) {
-    console.log(error);
-    res.status(500).json({ message: "Internal server error" });
-  }
-};
-
 module.exports = {
   userAnomaliByDate,
   patchUserAnomali,
@@ -340,4 +365,5 @@ module.exports = {
   userAnomali2022,
   downloadReportAnomali,
   patchUserAnomaliByNip,
+  updateAnomaliByNip,
 };

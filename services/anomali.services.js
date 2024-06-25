@@ -16,9 +16,16 @@ export const uploadDataAnomali2023 = async (data) => {
     .then((res) => res?.data);
 };
 
+// baru
 export const anomaliUserByNip = async (nip) => {
   return api
     .get(`/2023/admin/users?employee_number=${nip}`)
+    .then((res) => res?.data);
+};
+
+export const updateAnomaliUserByNip = async ({ employee_number, data }) => {
+  return api
+    .patch(`/2023/admin/users?employee_number=${employee_number}`, data)
     .then((res) => res?.data);
 };
 

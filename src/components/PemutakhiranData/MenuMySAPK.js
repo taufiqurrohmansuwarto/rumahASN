@@ -111,7 +111,7 @@ export function MenuMySAPK({ dataUtama, foto }) {
                   : "NIK Belum Terverifikasi"}
               </Tag>
             </Space>
-            <AnomaliUser />
+            {/* <AnomaliUser /> */}
           </Space>
         </Card>
       </Group>
