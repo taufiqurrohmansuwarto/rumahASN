@@ -195,7 +195,7 @@ const ModalAnomali = ({
       onCancel={onCancel}
     >
       <Form layout="vertical" form={form}>
-        <Form.Item name="Deskripsi" label="Deskripsi">
+        <Form.Item name="description" label="Deskripsi">
           <Input.TextArea />
         </Form.Item>
         <Form.Item
