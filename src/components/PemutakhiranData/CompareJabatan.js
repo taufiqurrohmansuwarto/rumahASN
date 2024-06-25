@@ -531,9 +531,9 @@ function CompareJabatan() {
         onClose={handleCloseEdit}
         user={currentUser}
       />
-      <div style={{ marginBottom: 16 }}>
+      {/* <div style={{ marginBottom: 16 }}>
         <AnomaliUser />
-      </div>
+      </div> */}
       <Stack>
         <Alert
           color="red"

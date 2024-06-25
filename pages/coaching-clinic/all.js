@@ -1,7 +1,9 @@
 import LayoutParticipant from "@/components/CoachingClinic/Participant/LayoutParticipant";
+import SearchCochingClinicByCode from "@/components/CoachingClinic/Participant/SearchCochingClinicByCode";
 import UpcomingMeetings from "@/components/CoachingClinic/Participant/UpcomingMeetings";
 import Layout from "@/components/Layout";
-import { Card } from "antd";
+import { Stack } from "@mantine/core";
+import { Card, Space } from "antd";
 import Head from "next/head";
 
 const CoachingClinic = () => {
@@ -11,11 +13,14 @@ const CoachingClinic = () => {
         <title>Rumah ASN - Coaching Clinic</title>
       </Head>
       <LayoutParticipant
-        content="Jadwal Coaching Clinic Kepegawaian BKD Jatim"
+        content="Jadwal Coaching Clinic Rumah ASN"
         active="all"
       >
         <Card>
-          <UpcomingMeetings />
+          <Space direction="vertical">
+            <SearchCochingClinicByCode />
+            <UpcomingMeetings />
+          </Space>
         </Card>
       </LayoutParticipant>
     </>
