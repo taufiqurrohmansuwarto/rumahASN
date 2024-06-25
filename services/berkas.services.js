@@ -22,3 +22,21 @@ export const downloadDocument = (query) => {
 
   return api.get(`/download?${params}`).then((res) => res?.data);
 };
+
+export const checkDocumentPerbaikan = (query) => {
+  const params = queryString.stringify(query, {
+    skipEmptyString: true,
+    skipNull: true,
+  });
+
+  return api.get(`/perbaikan/check?${params}`).then((res) => res?.data);
+};
+
+export const downloadDocumentPerbaikan = (query) => {
+  const params = queryString.stringify(query, {
+    skipEmptyString: true,
+    skipNull: true,
+  });
+
+  return api.get(`/perbaikan/download?${params}`).then((res) => res?.data);
+};
