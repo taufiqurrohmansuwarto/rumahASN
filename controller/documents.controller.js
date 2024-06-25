@@ -27,6 +27,112 @@ const downloadDocument = async (req, res) => {
   }
 };
 
+const downloadDokumenPerbaikan = async (req, res) => {
+  try {
+    const { employee_number } = req?.user;
+    const file = req?.query?.file || "";
+    const formasi = req?.query?.formasi || "";
+
+    const filename = `PERBAIKAN_${file}_${employee_number}_${formasi}.pdf`;
+
+    const mc = req.mc;
+
+    let folder = "sk_pns";
+
+    const path = `${folder}/${filename}`;
+    const result = await checkFileMinioSK(mc, path);
+
+    if (!result) {
+      res.json(null);
+    } else {
+      const hasil = await downloadFileSK(mc, path);
+      res.json(hasil);
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({ message: "Error checking document" });
+  }
+};
+
+const checkDocumentPerbaikan = async (req, res) => {
+  try {
+    const { employee_number } = req?.user;
+    const file = req?.query?.file || "";
+    const formasi = req?.query?.formasi || "";
+
+    const filename = `PERBAIKAN_${file}_${employee_number}_${formasi}.pdf`;
+
+    const mc = req.mc;
+
+    let folder = "sk_pns";
+
+    const path = `${folder}/${filename}`;
+    const result = await checkFileMinioSK(mc, path);
+
+    if (!result) {
+      res.json(null);
+    } else {
+      res.json(true);
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({ message: "Error checking document" });
+  }
+};
+
+const downloadDokumenPerbaikanByNip = async (req, res) => {
+  try {
+    const { nip: employee_number } = req?.query;
+    const file = req?.query?.file || "";
+    const formasi = req?.query?.formasi || "";
+
+    const filename = `PERBAIKAN_${file}_${employee_number}_${formasi}.pdf`;
+
+    const mc = req.mc;
+
+    let folder = "sk_pns";
+
+    const path = `${folder}/${filename}`;
+    const result = await checkFileMinioSK(mc, path);
+
+    if (!result) {
+      res.json(null);
+    } else {
+      const hasil = await downloadFileSK(mc, path);
+      res.json(hasil);
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({ message: "Error checking document" });
+  }
+};
+
+const checkDocumentPerbaikanByNip = async (req, res) => {
+  try {
+    const { nip: employee_number } = req?.query;
+    const file = req?.query?.file || "";
+    const formasi = req?.query?.formasi || "";
+
+    const filename = `PERBAIKAN_${file}_${employee_number}_${formasi}.pdf`;
+
+    const mc = req.mc;
+
+    let folder = "sk_pns";
+
+    const path = `${folder}/${filename}`;
+    const result = await checkFileMinioSK(mc, path);
+
+    if (!result) {
+      res.json(null);
+    } else {
+      res.json(true);
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({ message: "Error checking document" });
+  }
+};
+
 const checkDocument = async (req, res) => {
   try {
     const { employee_number } = req?.user;
@@ -112,4 +218,10 @@ module.exports = {
   downloadDocument,
   downloadDocumentByNip,
   checkDocumentByNip,
+
+  // perbaikan
+  checkDocumentPerbaikan,
+  downloadDokumenPerbaikan,
+  checkDocumentPerbaikanByNip,
+  downloadDokumenPerbaikanByNip,
 };
