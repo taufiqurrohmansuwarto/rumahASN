@@ -512,3 +512,7 @@ export const trackingPerbaikanNamaByNipFasilitator = async (nip) => {
     .get(`/admin/${nip}/layanan-siasn/perbaikan-nama`)
     .then((res) => res.data);
 };
+
+export const getDetailUnor = async (id) => {
+  return api.get(`/ref/unor/${id}/detail`).then((res) => res.data);
+};

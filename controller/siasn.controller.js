@@ -49,6 +49,7 @@ const { createLogSIASN } = require("@/utils/logs");
 const BackupSIASN = require("@/models/backup-siasn.model");
 const RefSIASNUnor = require("@/models/ref-siasn-unor.model");
 const { getSession } = require("next-auth/react");
+const { getQueryChildrenPerangkatDaerah } = require("@/utils/query-utils");
 
 const updateEmployeeInformation = async (req, res) => {
   try {
@@ -294,6 +295,38 @@ const getTreeRef = async (req, res) => {
       customID: "id",
     });
     res.json(tree);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "error" });
+  }
+};
+
+const serializeData = (data) => {
+  if (data?.length) {
+    return data?.map((d) => ({
+      id: d?.Id,
+      key: d?.Id,
+      parentId: d?.DiatasanId,
+      label: d?.NamaUnor,
+      title: d?.NamaUnor,
+    }));
+  } else {
+    return [];
+  }
+};
+
+const getSubTreeRef = async (req, res) => {
+  try {
+    const { id } = req?.query;
+    const result = await getQueryChildrenPerangkatDaerah(id);
+    const data = serializeData(result);
+
+    const json = arrayToTree(data, {
+      parentProperty: "parentId",
+      customID: "id",
+    });
+
+    res.json(json);
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: "error" });
@@ -620,7 +653,7 @@ const postAngkaKreditByNip = async (req, res) => {
 
     const hasil = await request.post(`/angkakredit/save`, data);
 
-    if (!(hasil?.data?.success)) {
+    if (!hasil?.data?.success) {
       res.status(500).json({ message: hasil?.data?.message });
     } else {
       await createLogSIASN({
@@ -638,7 +671,7 @@ const postAngkaKreditByNip = async (req, res) => {
     }
   } catch (error) {
     console.log(error);
-    res.status(400).json({code : 400, messsage : "Internal Server Error"});
+    res.status(400).json({ code: 400, messsage: "Internal Server Error" });
   }
 };
 
@@ -1479,4 +1512,6 @@ module.exports = {
   postUnorJabatanByNip,
   getRwCltnByNip,
   getRwPenghargaanByNip,
+
+  getSubTreeRef,
 };
