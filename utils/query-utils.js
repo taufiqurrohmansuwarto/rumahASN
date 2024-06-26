@@ -441,3 +441,24 @@ limit 10
     value: parseInt(row.value, 10),
   }));
 };
+
+module.exports.getQueryChildrenPerangkatDaerah = async (id) => {
+  const raw = `WITH RECURSIVE sub_tree AS (
+    -- Anchor member: starting point of the recursion
+    SELECT "Id", "DiatasanId", "NamaUnor"
+    FROM ref_siasn_unor
+    WHERE "Id" = '${id}'
+
+    UNION ALL
+
+    -- Recursive member: gets the children of the nodes in the previous result set
+    SELECT c."Id", c."DiatasanId", c."NamaUnor"
+    FROM ref_siasn_unor c
+             INNER JOIN sub_tree p ON p."Id" = c."DiatasanId")
+SELECT *
+FROM sub_tree;`;
+
+  const results = await knex.raw(raw);
+
+  return results.rows;
+};

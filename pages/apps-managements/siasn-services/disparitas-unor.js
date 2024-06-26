@@ -10,11 +10,11 @@ const DisparitasUnor = () => {
     <>
       <Head>
         <title>Disparitas Unor</title>
-        <meta name="description" content="Daftar Kenaikan Pangkat" />
+        <meta name="description" content="Disparitas Data Unor" />
       </Head>
       <PageContainer
-        title="Daftar Kenaikan Pangkat"
-        content="Daftar Kenaikan Pangkat"
+        title="Manajemen Data Unor"
+        content="Padanan Unit Organisasi"
         header={{
           breadcrumbRender: () => (
             <Breadcrumb>
@@ -24,7 +24,7 @@ const DisparitasUnor = () => {
                 </Link>
               </Breadcrumb.Item>
               <Breadcrumb.Item>Layanan SIASN</Breadcrumb.Item>
-              <Breadcrumb.Item>Kenaikan Pangkat</Breadcrumb.Item>
+              <Breadcrumb.Item>Manajemen Unor</Breadcrumb.Item>
             </Breadcrumb>
           ),
         }}
