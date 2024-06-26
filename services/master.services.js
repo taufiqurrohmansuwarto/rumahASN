@@ -5,6 +5,10 @@ const api = axios.create({
   baseURL: "/helpdesk/api/master/ws",
 });
 
+export const getUnorMasterDetail = (id) => {
+  return api.get(`/unor/${id}/detail`).then((res) => res.data);
+};
+
 // download ip-asn
 export const downloadDataIPASN = () => {
   return api

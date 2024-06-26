@@ -1,7 +1,7 @@
-import { unorASN } from "@/services/master.services";
+import { getUnorMasterDetail, unorASN } from "@/services/master.services";
 import { Stack } from "@mantine/core";
 import { useQuery } from "@tanstack/react-query";
-import { Button, TreeSelect } from "antd";
+import { Button, TreeSelect, Tree } from "antd";
 import { useState } from "react";
 
 function DisparitasUnorSIMASTER() {
@@ -14,15 +14,41 @@ function DisparitasUnorSIMASTER() {
     refetchOnWindowFocus: false,
   });
 
+  const {
+    data: detailUnor,
+    isLoading: loadingDetailUnor,
+    refetch,
+    isFetching,
+  } = useQuery(
+    ["detail-unor-master", treeId],
+    () => getUnorMasterDetail(treeId),
+    {
+      refetchOnWindowFocus: false,
+      enabled: false,
+    }
+  );
+
   return (
     <Stack>
-      <TreeSelect
-        treeNodeFilterProp="title"
-        showSearch
-        style={{ width: "100%" }}
-        treeData={data}
-      />
-      <Button>Cari</Button>
+      {data && (
+        <>
+          <TreeSelect
+            value={treeId}
+            treeNodeFilterProp="title"
+            onChange={handleChange}
+            showSearch
+            style={{ width: "100%" }}
+            treeData={data}
+          />
+          <Button disabled={isFetching} loading={isFetching} onClick={refetch}>
+            Cari
+          </Button>
+        </>
+      )}
+
+      {detailUnor && (
+        <Tree showLine height={600} defaultExpandAll treeData={detailUnor} />
+      )}
     </Stack>
   );
 }
