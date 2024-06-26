@@ -1,4 +1,5 @@
 import {
+  departmentDetail,
   getKelengkapanDokumen,
   getRwAnak,
   getRwDiklat,
@@ -456,6 +457,20 @@ const getRwPenghargaanByNip = async (req, res) => {
   }
 };
 
+const getDepartmentDetail = async (req, res) => {
+  try {
+    const { id } = req?.query;
+    const fetcher = req?.fetcher;
+
+    const result = await departmentDetail(fetcher, id);
+    const data = result?.data;
+    res.json(data);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ code: 500, message: "Internal Server Error" });
+  }
+};
+
 module.exports = {
   unorASN,
   unorPTTPK,
@@ -477,4 +492,5 @@ module.exports = {
   getRwPenghargaanByNip,
   kelengkapanDokumen,
   kelengkapanDokumenByNip,
+  getDepartmentDetail,
 };

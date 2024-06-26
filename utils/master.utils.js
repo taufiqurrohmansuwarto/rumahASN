@@ -21,6 +21,17 @@ module.exports.getRwPasangan = async (fetcher, nip) => {
   }
 };
 
+module.exports.departmentDetail = async (fetcher, id) => {
+  try {
+    const result = await fetcher.get(
+      `/master-ws/operator/departments/${id}/detail`
+    );
+    return result;
+  } catch (error) {
+    console.log(error);
+  }
+};
+
 // kelengkapan dokumen pppk
 module.exports.getKelengkapanDokumen = async (fetcher, nip) => {
   try {
