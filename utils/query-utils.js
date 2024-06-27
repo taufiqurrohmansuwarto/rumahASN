@@ -445,17 +445,17 @@ limit 10
 module.exports.getQueryChildrenPerangkatDaerah = async (id) => {
   const raw = `WITH RECURSIVE sub_tree AS (
     -- Anchor member: starting point of the recursion
-    SELECT "Id", "DiatasanId", "NamaUnor"
+    SELECT "Id", "DiatasanId", "NamaUnor", 1 as level
     FROM ref_siasn_unor
     WHERE "Id" = '${id}'
 
     UNION ALL
 
     -- Recursive member: gets the children of the nodes in the previous result set
-    SELECT c."Id", c."DiatasanId", c."NamaUnor"
+    SELECT c."Id", c."DiatasanId", c."NamaUnor", p.level + 1
     FROM ref_siasn_unor c
              INNER JOIN sub_tree p ON p."Id" = c."DiatasanId")
-SELECT *
+SELECT *, ROW_NUMBER() OVER (ORDER BY "NamaUnor") as urutan
 FROM sub_tree;`;
 
   const results = await knex.raw(raw);

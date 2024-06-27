@@ -1,7 +1,8 @@
 import { getUnorMasterDetail, unorASN } from "@/services/master.services";
+import { SearchOutlined } from "@ant-design/icons";
 import { Stack } from "@mantine/core";
 import { useQuery } from "@tanstack/react-query";
-import { Button, TreeSelect, Tree } from "antd";
+import { Button, Tree, TreeSelect } from "antd";
 import { useState } from "react";
 
 function DisparitasUnorSIMASTER() {
@@ -39,8 +40,15 @@ function DisparitasUnorSIMASTER() {
             showSearch
             style={{ width: "100%" }}
             treeData={data}
+            allowClear
           />
-          <Button disabled={isFetching} loading={isFetching} onClick={refetch}>
+          <Button
+            icon={<SearchOutlined />}
+            type="primary"
+            disabled={isFetching}
+            loading={isFetching}
+            onClick={refetch}
+          >
             Cari
           </Button>
         </>

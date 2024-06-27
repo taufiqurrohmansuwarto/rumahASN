@@ -1,10 +1,11 @@
+import { Card } from "antd";
 import DisparitasUnorSIASN from "../Disparitas/DisparitasUnorSIASN";
 
 function DisparitasDataUnor() {
   return (
-    <div>
+    <Card title="Disparitas Data Unit Organisasi">
       <DisparitasUnorSIASN />
-    </div>
+    </Card>
   );
 }
 
