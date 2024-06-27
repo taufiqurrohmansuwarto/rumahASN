@@ -516,3 +516,11 @@ export const trackingPerbaikanNamaByNipFasilitator = async (nip) => {
 export const getDetailUnor = async (id) => {
   return api.get(`/ref/unor/${id}/detail`).then((res) => res.data);
 };
+
+export const getDetailDisparitasUnor = async (id) => {
+  return api.get(`/ref/unor/${id}/disparitas`).then((res) => res.data);
+};
+
+export const updateDisparitasUnor = async ({ id, data }) => {
+  return api.patch(`/ref/unor/${id}/disparitas`, data).then((res) => res.data);
+};
