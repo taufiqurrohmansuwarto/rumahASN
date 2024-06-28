@@ -41,29 +41,36 @@ const TransferModal = ({ open, handleClose, data }) => {
   );
 
   const handleFinish = async () => {
-    const result = await form.validateFields();
+    try {
+      const result = await form.validateFields();
 
-    const type = result?.jenisDiklatId === 1 ? "diklat" : "kursus";
+      const type = result?.jenisDiklatId === 1 ? "diklat" : "kursus";
 
-    const payload = {
-      ...result,
-      type,
-      tanggalKursus: result?.tanggalKursus?.format("DD-MM-YYYY"),
-      tanggalSelesaiKursus: result?.tanggalSelesaiKursus?.format("DD-MM-YYYY"),
-    };
-
-    if (!filePath) {
-      tambah(payload);
-    } else {
-      const data = {
-        ...payload,
-        path: [filePath],
+      const payload = {
+        ...result,
+        type,
+        tanggalKursus: result?.tanggalKursus?.format("DD-MM-YYYY"),
+        tanggalSelesaiKursus:
+          result?.tanggalSelesaiKursus?.format("DD-MM-YYYY"),
       };
 
-      tambah(data);
-    }
+      if (!filePath) {
+        tambah(payload);
+      } else {
+        const currentPath = filePath?.data?.data;
+        const data = {
+          ...payload,
+          path: [currentPath],
+        };
 
-    // tambah(payload);
+        tambah(data);
+        // console.log(data);
+      }
+
+      // tambah(payload);
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   useEffect(() => {
@@ -85,25 +92,34 @@ const TransferModal = ({ open, handleClose, data }) => {
 
       const formData = new FormData();
       formData.append("file", file);
-      formData.append("id_ref_dokumen", "881");
+      const jenisDiklatId = form.getFieldValue("jenisDiklatId");
 
-      const config = {
-        headers: {
-          "Content-Type": "multipart/form-data",
-          Authorization: `Bearer ${wso2}`, // Gunakan token yang sesuai
-          Auth: `bearer ${sso}`, // Contoh lain penggunaan token, sesuaikan dengan kebutuhan
-        },
-      };
+      if (!jenisDiklatId) {
+        onError("Jenis Diklat tidak boleh kosong");
+      } else {
+        const type = jenisDiklatId === 1 ? "diklat" : "kursus";
+        const id_ref_dokumen = type === "diklat" ? "874" : "881";
 
-      // Kemudian, unggah file dengan axios
-      const response = await axios.post(
-        `${API_URL}/upload-dok`,
-        formData,
-        config
-      );
+        formData.append("id_ref_dokumen", id_ref_dokumen);
 
-      // Jika berhasil, panggil onSuccess
-      onSuccess(response, file);
+        const config = {
+          headers: {
+            "Content-Type": "multipart/form-data",
+            Authorization: `Bearer ${wso2}`, // Gunakan token yang sesuai
+            Auth: `bearer ${sso}`, // Contoh lain penggunaan token, sesuaikan dengan kebutuhan
+          },
+        };
+
+        // Kemudian, unggah file dengan axios
+        const response = await axios.post(
+          `${API_URL}/upload-dok`,
+          formData,
+          config
+        );
+
+        // Jika berhasil, panggil onSuccess
+        onSuccess(response, file);
+      }
     } catch (error) {
       // Jika terjadi error, panggil onError
       onError(error);
@@ -227,16 +243,17 @@ function CompareDataDiklatMaster() {
       title: "Aksi",
       key: "aksi",
       render: (_, row) => {
-        if (
-          row?.jenis_diklat_id === "1231" ||
-          row?.jenis_diklat_id === "1232" ||
-          row?.jenis_diklat_id === "1233" ||
-          row?.jenis_diklat_id === "1237"
-        ) {
-          return <a onClick={() => handleOpen(row)}>Transfer</a>;
-        } else {
-          return null;
-        }
+        // if (
+        //   row?.jenis_diklat_id === "1231" ||
+        //   row?.jenis_diklat_id === "1232" ||
+        //   row?.jenis_diklat_id === "1233" ||
+        //   row?.jenis_diklat_id === "1237"
+        // ) {
+        //   return <a onClick={() => handleOpen(row)}>Transfer</a>;
+        // } else {
+        //   return null;
+        // }
+        return <a onClick={() => handleOpen(row)}>Transfer</a>;
       },
     },
   ];
