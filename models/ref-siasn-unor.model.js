@@ -1,5 +1,6 @@
 const { Model } = require("objection");
 const knex = require("../db");
+const DisparitasUnor = require("@/models/disparitas-unor.model");
 
 Model.knex(knex);
 
