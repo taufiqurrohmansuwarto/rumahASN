@@ -191,7 +191,6 @@ function CompareDataDiklat() {
     <Card title="Data Riwayat Diklat dan Kursus SIASN">
       <FormDiklat />
       <Tabs
-        type="card"
         style={{
           marginTop: 16,
         }}

@@ -314,7 +314,7 @@ function FormDiklat() {
   return (
     <Space direction="vertical">
       <Button type="primary" onClick={handleOpen}>
-        Tambah Data
+        Tambah Data Diklat
       </Button>
       <IPAsn tahun={2023} />
       <ModalFormDiklat
