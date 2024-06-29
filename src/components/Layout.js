@@ -119,6 +119,10 @@ const changeRoutes = (user) => {
               name: "Master Data",
             },
             {
+              path: "/fasilitator-employees/disparitas-unor",
+              name: "Disparitas Unor",
+            },
+            {
               path: "/fasilitator-employees/peta-jabatan",
               name: "Peta Jabatan SIASN",
             },

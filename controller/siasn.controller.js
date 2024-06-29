@@ -309,6 +309,10 @@ const serializeData = (data) => {
       parentId: d?.DiatasanId,
       label: d?.NamaUnor,
       title: d?.NamaUnor,
+      unor_sekolah: d?.unor_sekolah,
+      duplikasi_unor: d?.duplikasi_unor,
+      aktif: d?.aktif,
+      NSPN: d?.NSPN,
     }));
   } else {
     return [];

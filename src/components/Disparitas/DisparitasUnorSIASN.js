@@ -1,12 +1,13 @@
 import {
   getDetailDisparitasUnor,
   getDetailUnor,
+  reportDisparitasUnorById,
   unitOrganisasi,
   updateDisparitasUnor,
 } from "@/services/siasn-services";
-import { SearchOutlined } from "@ant-design/icons";
+import { DownloadOutlined, SearchOutlined } from "@ant-design/icons";
 import { Stack } from "@mantine/core";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Button,
   Checkbox,
@@ -16,15 +17,25 @@ import {
   Modal,
   Row,
   Skeleton,
+  Tag,
+  Tooltip,
   Tree,
   TreeSelect,
+  Typography,
   message,
 } from "antd";
 import { useEffect, useState } from "react";
 import DisparitasUnorSIMASTER from "./DisparitasUnorSIMASTER";
 
-const ModalDisparitasUnor = ({ open, onClose, selectedKey }) => {
+const ModalDisparitasUnor = ({
+  open,
+  onClose,
+  selectedKey,
+  treeId,
+  refetch,
+}) => {
   const [form] = Form.useForm();
+  const queryClient = useQueryClient();
 
   const { data: detailDisparitas, isLoading: isLoadingDetailDisparitas } =
     useQuery(
@@ -53,7 +64,15 @@ const ModalDisparitasUnor = ({ open, onClose, selectedKey }) => {
     {
       onSuccess: () => {
         message.success("Disparitas berhasil diubah");
+        refetch();
         onClose();
+      },
+      onError: () => {
+        message.error("Disparitas gagal diubah");
+      },
+      onSettled: () => {
+        queryClient.invalidateQueries(["detail-disparitas", selectedKey]);
+        queryClient.invalidateQueries(["detail-unor", treeId]);
       },
     }
   );
@@ -64,7 +83,6 @@ const ModalDisparitasUnor = ({ open, onClose, selectedKey }) => {
       data,
       id: selectedKey,
     };
-    console.log(payload);
     update(payload);
   };
 
@@ -113,11 +131,38 @@ function DisparitasUnorSIASN() {
 
   const handleClose = () => {
     setOpen(false);
-    setSelectedKey(null);
   };
 
   const handleChange = (value) => {
     setTreeId(value);
+  };
+
+  const renderLabel = (node) => {
+    return (
+      <span>
+        {node.title}
+        {node.unor_sekolah && (
+          <Tag color="green" style={{ marginLeft: 8 }}>
+            Sekolah
+          </Tag>
+        )}
+        {node.duplikasi_unor && (
+          <Tag color="red" style={{ marginLeft: 8 }}>
+            Duplikasi
+          </Tag>
+        )}
+        {node.aktif && (
+          <Tag color="blue" style={{ marginLeft: 8 }}>
+            Aktif
+          </Tag>
+        )}
+        {node.NSPN && (
+          <Tooltip title={`NSPN: ${node?.NSPN}`}>
+            <Tag color="gold">NSPN</Tag>
+          </Tooltip>
+        )}
+      </span>
+    );
   };
 
   const { data, isLoading } = useQuery(
@@ -142,10 +187,32 @@ function DisparitasUnorSIASN() {
     refetch();
   };
 
-  const handleSelect = (selectedKeys, info) => {
-    const key = selectedKeys[0];
+  const handleSelect = (selectedKeys, info, e) => {
+    const key = info?.node?.id;
     setSelectedKey(key);
     setOpen(true);
+  };
+
+  const handleDownload = () => {
+    Modal.confirm({
+      title: "Unduh Data",
+      content: "Apakah anda yakin ingin mengunduh data?",
+      onOk: async () => {
+        // donwload excel
+        const data = await reportDisparitasUnorById(treeId);
+        const blob = new Blob([data], {
+          type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+
+        link.href = url;
+        link.download = "data_disparitas_unor_siasn.xlsx";
+        link.click();
+
+        URL.revokeObjectURL(url);
+      },
+    });
   };
 
   return (
@@ -154,22 +221,26 @@ function DisparitasUnorSIASN() {
         open={open}
         onClose={handleClose}
         selectedKey={selectedKey}
+        treeId={treeId}
+        refetch={refetch}
       />
       {/* {JSON.stringify(detailUnor)} */}
-      <Row gutter={[8, 16]}>
-        <Col md={12}>
+      <Row gutter={[16, 32]}>
+        <Col md={12} xs={24}>
           <Stack>
             {data && (
               <>
-                <TreeSelect
-                  onChange={handleChange}
-                  value={treeId}
-                  showSearch
-                  treeNodeFilterProp="label"
-                  style={{ width: "100%" }}
-                  allowClear
-                  treeData={data}
-                />
+                <Form.Item help="Unit Organisasi SIASN">
+                  <TreeSelect
+                    onChange={handleChange}
+                    value={treeId}
+                    showSearch
+                    treeNodeFilterProp="label"
+                    style={{ width: "100%" }}
+                    allowClear
+                    treeData={data}
+                  />
+                </Form.Item>
                 <Button
                   disabled={isFetching}
                   loading={isFetching}
@@ -182,17 +253,29 @@ function DisparitasUnorSIASN() {
               </>
             )}
             {detailUnor && (
-              <Tree
-                showLine
-                onSelect={handleSelect}
-                height={600}
-                defaultExpandAll
-                treeData={detailUnor}
-              />
+              <Stack>
+                <Button
+                  onClick={handleDownload}
+                  icon={<DownloadOutlined />}
+                  type="primary"
+                >
+                  Unduh
+                </Button>
+                <Tree
+                  blockNode
+                  titleRender={renderLabel}
+                  onChange={(e) => console.log(e)}
+                  showLine
+                  onSelect={handleSelect}
+                  height={600}
+                  defaultExpandAll
+                  treeData={detailUnor}
+                />
+              </Stack>
             )}
           </Stack>
         </Col>
-        <Col md={12}>
+        <Col md={12} xs={24}>
           <DisparitasUnorSIMASTER />
         </Col>
       </Row>
