@@ -517,6 +517,14 @@ export const getDetailUnor = async (id) => {
   return api.get(`/ref/unor/${id}/detail`).then((res) => res.data);
 };
 
+export const reportDisparitasUnorById = async (id) => {
+  return api
+    .get(`/ref/unor/${id}/report`, {
+      responseType: "blob",
+    })
+    .then((res) => res.data);
+};
+
 export const getDetailDisparitasUnor = async (id) => {
   return api.get(`/ref/unor/${id}/disparitas`).then((res) => res.data);
 };

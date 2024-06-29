@@ -455,10 +455,40 @@ module.exports.getQueryChildrenPerangkatDaerah = async (id) => {
     SELECT c."Id", c."DiatasanId", c."NamaUnor", p.level + 1
     FROM ref_siasn_unor c
              INNER JOIN sub_tree p ON p."Id" = c."DiatasanId")
-SELECT *, ROW_NUMBER() OVER (ORDER BY "NamaUnor") as urutan
-FROM sub_tree;`;
+SELECT sub_tree.*, d.unor_sekolah, d.duplikasi_unor, d.aktif, d."NSPN",
+       ROW_NUMBER() OVER (ORDER BY 
+            REGEXP_REPLACE(sub_tree."NamaUnor", '\\s+', '', 'g'), 
+            COALESCE(NULLIF(REGEXP_REPLACE(REGEXP_REPLACE(sub_tree."NamaUnor", '\\s+', '', 'g'), '\\D', '', 'g'), '')::INTEGER, 0)
+        ) as urutan
+FROM sub_tree
+LEFT JOIN disparitas_unor d ON sub_tree."Id" = d.id
+ORDER BY urutan;`;
 
   const results = await knex.raw(raw);
 
   return results.rows;
+};
+
+module.exports.getResultPerangkatDaerahXls = async (id) => {
+  const raw = `WITH RECURSIVE sub_tree AS (
+    -- Anchor member: starting point of the recursion
+    SELECT "Id", "DiatasanId", "NamaUnor", 1 as level, "NamaUnor" as display_name, "Id"::varchar(255) as path
+    FROM ref_siasn_unor
+    WHERE "Id" = '${id}'
+
+    UNION ALL
+
+    -- Recursive member: gets the children of the nodes in the previous result set
+    SELECT c."Id", c."DiatasanId", c."NamaUnor", p.level + 1,
+           (REPEAT('-', p.level) || ' ' || c."NamaUnor")::varchar(255) as display_name,
+           (p.path || '>' || c."Id")::varchar(255) as path
+    FROM ref_siasn_unor c
+             INNER JOIN sub_tree p ON p."Id" = c."DiatasanId")
+SELECT sub_tree.*, d.unor_sekolah, d.duplikasi_unor, d.aktif, d."NSPN"
+FROM sub_tree
+LEFT JOIN disparitas_unor d ON sub_tree."Id" = d.id
+ORDER BY path`;
+
+  const result = await knex.raw(raw);
+  return result.rows;
 };

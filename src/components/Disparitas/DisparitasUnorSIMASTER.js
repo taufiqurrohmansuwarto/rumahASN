@@ -2,7 +2,7 @@ import { getUnorMasterDetail, unorASN } from "@/services/master.services";
 import { SearchOutlined } from "@ant-design/icons";
 import { Stack } from "@mantine/core";
 import { useQuery } from "@tanstack/react-query";
-import { Button, Tree, TreeSelect } from "antd";
+import { Button, Form, Tree, TreeSelect } from "antd";
 import { useState } from "react";
 
 function DisparitasUnorSIMASTER() {
@@ -33,15 +33,17 @@ function DisparitasUnorSIMASTER() {
     <Stack>
       {data && (
         <>
-          <TreeSelect
-            value={treeId}
-            treeNodeFilterProp="title"
-            onChange={handleChange}
-            showSearch
-            style={{ width: "100%" }}
-            treeData={data}
-            allowClear
-          />
+          <Form.Item help="Unit Organisasi SIMASTER">
+            <TreeSelect
+              value={treeId}
+              treeNodeFilterProp="title"
+              onChange={handleChange}
+              showSearch
+              style={{ width: "100%" }}
+              treeData={data}
+              allowClear
+            />
+          </Form.Item>
           <Button
             icon={<SearchOutlined />}
             type="primary"

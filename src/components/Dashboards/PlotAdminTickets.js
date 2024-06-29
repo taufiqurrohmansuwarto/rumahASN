@@ -79,7 +79,7 @@ function PlotAdminTickets() {
   return (
     <>
       <Row gutter={[8, 8]}>
-        <Col md={24}>
+        <Col md={24} xs={24}>
           <Card title="Total pertanyaan 7 hari terakhir" loading={isLoading}>
             {data && (
               <Line
@@ -92,14 +92,14 @@ function PlotAdminTickets() {
             )}
           </Card>
         </Col>
-        <Col md={24}>
+        <Col md={24} xs={24}>
           {dataTicket && (
             <Card title="Total Tiket 12 Bulan Terakhir" loading={loadingTicket}>
               <Line {...configTotalTiket} />
             </Card>
           )}
         </Col>
-        <Col md={24}>
+        <Col md={24} xs={24}>
           {visitors && (
             <>
               <Card
