@@ -1,3 +1,4 @@
+import ModalUserAnomali from "@/components/Anomali/ModalUserAnomali";
 import Layout from "@/components/Layout";
 import LayoutASNConnect from "@/components/Socmed/LayoutASNConnect";
 import SocmedTabs from "@/components/Socmed/SocmedTabs";
@@ -17,6 +18,7 @@ const AsnUpdates = () => {
         <title>Rumah ASN - Smart ASN Connect Update</title>
       </Head>
       <LayoutASNConnect>
+        <ModalUserAnomali />
         <SocmedTabs />
         <FloatButton.BackTop />
         <EletterBKD />

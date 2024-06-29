@@ -144,6 +144,24 @@ const patchAnomali2022 = async (req, res) => {
   }
 };
 
+const anomaliByUser = async (req, res) => {
+  try {
+    const { employee_number } = req?.user;
+
+    const data = await Anomali23.query()
+      .where({
+        nip_baru: employee_number,
+      })
+      .withGraphFetched("[user(simpleSelect)]")
+      .andWhere("is_repaired", false);
+
+    res.json(data);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
 const userAnomali2022 = async (req, res) => {
   try {
     const { employee_number } = req?.query;
@@ -151,8 +169,8 @@ const userAnomali2022 = async (req, res) => {
       .where({
         nip_baru: employee_number,
       })
-      .withGraphFetched("[user(simpleSelect)]");
-    // .andWhere("is_repaired", false)
+      .withGraphFetched("[user(simpleSelect)]")
+      .andWhere("is_repaired", false);
     // .first();
 
     res.json(data);
@@ -366,4 +384,5 @@ module.exports = {
   downloadReportAnomali,
   patchUserAnomaliByNip,
   updateAnomaliByNip,
+  anomaliByUser,
 };
