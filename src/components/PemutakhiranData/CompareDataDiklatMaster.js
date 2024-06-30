@@ -206,6 +206,7 @@ function CompareDataDiklatMaster() {
   const columns = [
     {
       title: "Data",
+      responsive: ["xs"],
       key: "data",
       render: (_, row) => {
         return (
