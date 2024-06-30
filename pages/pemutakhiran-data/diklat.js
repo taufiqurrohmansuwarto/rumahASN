@@ -2,7 +2,7 @@ import Layout from "@/components/Layout";
 import PageContainer from "@/components/PageContainer";
 import CompareDataDiklat from "@/components/PemutakhiranData/CompareDataDiklat";
 import CustomSelectMenu from "@/components/PemutakhiranData/CustomSelectMenu";
-import { Breadcrumb, Card } from "antd";
+import { Breadcrumb, Card, Grid } from "antd";
 import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
@@ -11,6 +11,7 @@ const RiwayatDiklat = () => {
   const router = useRouter();
 
   const handleBack = () => router.push("/pemutakhiran-data/komparasi");
+  const breakPoint = Grid.useBreakpoint();
 
   return (
     <>
@@ -18,6 +19,9 @@ const RiwayatDiklat = () => {
         <title>Rumah ASN - Peremajaan SIASN - Data Diklat</title>
       </Head>
       <PageContainer
+        childrenContentStyle={{
+          padding: breakPoint.xs ? 0 : null,
+        }}
         extra={[<CustomSelectMenu key="menu" />]}
         header={{
           breadcrumbRender: () => (

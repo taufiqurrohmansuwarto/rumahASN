@@ -3,7 +3,15 @@ import { rwDiklatMaster } from "@/services/master.services";
 import { getTokenSIASNService, postRwKursus } from "@/services/siasn-services";
 import { InboxOutlined } from "@ant-design/icons";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Form, Modal, Table, Upload, message } from "antd";
+import {
+  Button,
+  Descriptions,
+  Form,
+  Modal,
+  Table,
+  Upload,
+  message,
+} from "antd";
 import axios from "axios";
 import { useEffect, useState } from "react";
 
@@ -197,6 +205,38 @@ function CompareDataDiklatMaster() {
 
   const columns = [
     {
+      title: "Data",
+      key: "data",
+      render: (_, row) => {
+        return (
+          <Descriptions layout="vertical">
+            <Descriptions.Item label="Nama">
+              {row?.nama_diklat}
+            </Descriptions.Item>
+            <Descriptions.Item label="No. Sertifikat">
+              {row?.no_sertifikat}
+            </Descriptions.Item>
+            <Descriptions.Item label="Tahun">{row?.tahun}</Descriptions.Item>
+            <Descriptions.Item label="Institusi Penyelenggara">
+              {row?.penyelenggara}
+            </Descriptions.Item>
+            <Descriptions.Item label="Tanggal Mulai">
+              {row?.tanggal_mulai}
+            </Descriptions.Item>
+            <Descriptions.Item label="Jumlah Jam">{row?.jml}</Descriptions.Item>
+            <Descriptions.Item label="Jenis">
+              {row?.diklat?.name}
+            </Descriptions.Item>
+            <Descriptions.Item label="Aksi">
+              <Button type="primary" onClick={() => handleOpen(row)}>
+                Transfer
+              </Button>
+            </Descriptions.Item>
+          </Descriptions>
+        );
+      },
+    },
+    {
       title: "File",
       key: "file",
       render: (_, row) => {
@@ -208,36 +248,44 @@ function CompareDataDiklatMaster() {
           </div>
         );
       },
+      responsive: ["sm"],
     },
     {
       title: "Nama",
       dataIndex: "nama_diklat",
+      responsive: ["sm"],
     },
     {
       title: "No. Sertifikat",
       dataIndex: "no_sertifikat",
+      responsive: ["sm"],
     },
     {
       title: "Tahun",
       dataIndex: "tahun",
+      responsive: ["sm"],
     },
     {
       title: "Institusi Penyelenggara",
       dataIndex: "penyelenggara",
+      responsive: ["sm"],
     },
     {
       title: "Tanggal Mulai",
       dataIndex: "tanggal_mulai",
+      responsive: ["sm"],
     },
 
     {
       title: "Jenis",
       key: "jenis",
       render: (_, row) => <>{row?.diklat?.name}</>,
+      responsive: ["sm"],
     },
     {
       title: "Jumlah Jam",
       dataIndex: "jml",
+      responsive: ["sm"],
     },
     {
       title: "Aksi",
@@ -255,6 +303,7 @@ function CompareDataDiklatMaster() {
         // }
         return <a onClick={() => handleOpen(row)}>Transfer</a>;
       },
+      responsive: ["sm"],
     },
   ];
 

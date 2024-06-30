@@ -11,6 +11,8 @@ import { IconAlertCircle } from "@tabler/icons";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Button,
+  Descriptions,
+  FloatButton,
   Form,
   Modal,
   Select,
@@ -222,8 +224,8 @@ function CompareSKP22({ nip, id }) {
       responsive: ["xs"],
       render: (_, record) => {
         return (
-          <Stack spacing="xs">
-            <div>
+          <Descriptions size="small" layout="vertical">
+            <Descriptions.Item label="File">
               {record?.path?.[873] && (
                 <a
                   href={`/helpdesk/api/siasn/ws/download?filePath=${record?.path?.[873]?.dok_uri}`}
@@ -233,19 +235,30 @@ function CompareSKP22({ nip, id }) {
                   File
                 </a>
               )}
-            </div>
-            <Text>{record?.tahun}</Text>
-            <Text>Hasil Kerja : {record?.hasilKinerja}</Text>
-            <Text>Kuadran : {record?.kuadranKinerja}</Text>
-            <Text>
-              {record?.namaPenilai} - {record?.penilaiUnorNm} -{" "}
+            </Descriptions.Item>
+            <Descriptions.Item label="Tahun">{record?.tahun}</Descriptions.Item>
+            <Descriptions.Item label="Hasil Kinerja">
+              {record?.hasilKinerja}
+            </Descriptions.Item>
+            <Descriptions.Item label="Kuadran Kinerja">
+              {record?.kuadranKinerja}
+            </Descriptions.Item>
+            <Descriptions.Item label="NIP Penilai">
+              {record?.nipNrpPenilai}
+            </Descriptions.Item>
+            <Descriptions.Item label="Nama Penilai">
+              {record?.namaPenilai}
+            </Descriptions.Item>
+            <Descriptions.Item label="Unor Penilai">
+              {record?.penilaiUnorNm}
+            </Descriptions.Item>
+            <Descriptions.Item label="Status Penilai">
               {record?.statusPenilai}
-            </Text>
-            <Text>
-              Perilaku Kerja : {record?.perilakuKerja} -{" "}
-              {record?.PerilakuKerjaNilai}
-            </Text>
-          </Stack>
+            </Descriptions.Item>
+            <Descriptions.Item label="Perilaku Kerja">
+              {record?.perilakuKerja}
+            </Descriptions.Item>
+          </Descriptions>
         );
       },
     },
@@ -328,16 +341,20 @@ function CompareSKP22({ nip, id }) {
       responsive: ["xs"],
       render: (_, record) => {
         return (
-          <Stack spacing="xs">
-            <div>
+          <Descriptions size="small" layout="vertical">
+            <Descriptions.Item label="File">
               <a href={record?.file_skp} target="_blank" rel="noreferrer">
                 File
               </a>
-            </div>
-            <Text>{record?.tahun}</Text>
-            <Text>Hasil Kerja : {record?.hasil_kerja}</Text>
-            <Text>Perilaku : {record?.perilaku}</Text>
-          </Stack>
+            </Descriptions.Item>
+            <Descriptions.Item label="Tahun">{record?.tahun}</Descriptions.Item>
+            <Descriptions.Item label="Hasil Kerja">
+              {record?.hasil_kerja}
+            </Descriptions.Item>
+            <Descriptions.Item label="Perilaku Kerja">
+              {record?.perilaku}
+            </Descriptions.Item>
+          </Descriptions>
         );
       },
     },
@@ -371,6 +388,7 @@ function CompareSKP22({ nip, id }) {
 
   return (
     <Skeleton loading={isLoading || isLoadingMaster}>
+      <FloatButton.BackTop />
       <Alert
         color="yellow"
         title="Harap diperhatikan"
