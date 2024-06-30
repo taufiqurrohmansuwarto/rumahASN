@@ -15,6 +15,7 @@ import Announcement from "../Announcement";
 import SocmedCreatePost from "./SocmedCreatePost";
 import SocmedMyPosts from "./SocmedMyPosts";
 import SocmedPosts from "./SocmedPosts";
+import UserPolls from "../Polls/UserPolls";
 
 function SocmedTabs() {
   useScrollRestoration();
@@ -32,8 +33,8 @@ function SocmedTabs() {
 
   return (
     <>
-      <Row justify="center" gutter={[8, 8]}>
-        <Col md={12} xs={24}>
+      <Row gutter={[8, 8]}>
+        <Col md={16} xs={24}>
           <Row gutter={[8, 16]}>
             <Col md={24} xs={24}>
               <Stack spacing="sm">
@@ -203,6 +204,11 @@ function SocmedTabs() {
               </Stack>
             </Col>
           </Row>
+        </Col>
+        <Col md={8} xs={24}>
+          <Stack>
+            <UserPolls />
+          </Stack>
         </Col>
       </Row>
     </>

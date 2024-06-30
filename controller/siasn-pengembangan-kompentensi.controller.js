@@ -166,7 +166,8 @@ const getIpAsn = async (req, res) => {
 const getNilaiIPASN = async (req, res) => {
   try {
     const { siasnRequest: fetcher } = req;
-    const { nip } = req?.query;
+    // const { nip } = req?.query;
+    const { employee_number: nip } = req?.user;
     const nilaiIPASN = await IPASNBaru(fetcher, nip);
     res.json(nilaiIPASN);
   } catch (error) {
