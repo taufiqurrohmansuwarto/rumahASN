@@ -3,7 +3,7 @@ import { getRwGolongan } from "@/services/siasn-services";
 import { formatDateLL } from "@/utils/client-utils";
 import { Stack } from "@mantine/core";
 import { useQuery } from "@tanstack/react-query";
-import { Table } from "antd";
+import { Descriptions, Table } from "antd";
 import { orderBy } from "lodash";
 
 import dayjs from "dayjs";
@@ -21,6 +21,34 @@ const DataGolonganSIMASTER = () => {
 
   const columns = [
     {
+      title: "Data",
+      key: "data",
+      responsive: ["xs"],
+      render: (_, record) => {
+        return (
+          <Descriptions size="small" layout="vertical">
+            <Descriptions.Item label="File">
+              <a href={record?.file_pangkat} target="_blank" rel="noreferrer">
+                File
+              </a>
+            </Descriptions.Item>
+            <Descriptions.Item label="Golongan">
+              {record?.pangkat?.gol_ruang}
+            </Descriptions.Item>
+            <Descriptions.Item label="Jenis Kenaikan Pangkat">
+              {record?.jenis_kp?.name}
+            </Descriptions.Item>
+            <Descriptions.Item label="TMT Golongan">
+              {formatDateLL(record?.tmt_pangkat)}
+            </Descriptions.Item>
+            <Descriptions.Item label="Tanggal SK">
+              {record?.tgl_sk}
+            </Descriptions.Item>
+          </Descriptions>
+        );
+      },
+    },
+    {
       title: "File",
       key: "file",
       render: (text) => (
@@ -28,26 +56,31 @@ const DataGolonganSIMASTER = () => {
           File
         </a>
       ),
+      responsive: ["sm"],
     },
     {
       title: "Golongan",
       key: "Golongan",
       render: (text) => text?.pangkat?.gol_ruang,
+      responsive: ["sm"],
     },
     ,
     {
       title: "Jenis Kenaikan Pangkat",
       key: "jenis_kp",
       render: (text) => text?.jenis_kp?.name,
+      responsive: ["sm"],
     },
     {
       title: "TMT Golongan",
       key: "tmt_golongan",
       render: (text) => <>{text?.tmt_pangkat}</>,
+      responsive: ["sm"],
     },
     {
       title: "Tanggal SK",
       dataIndex: "tgl_sk",
+      responsive: ["sm"],
     },
   ];
 
@@ -82,6 +115,46 @@ function CompareDataGolongan() {
 
   const columns = [
     {
+      title: "Data",
+      key: "data",
+      responsive: ["xs"],
+      render: (_, record) => {
+        return (
+          <Descriptions layout="vertical" size="small">
+            <Descriptions.Item label="File">
+              {record?.path?.[858] && (
+                <a
+                  href={`/helpdesk/api/siasn/ws/download?filePath=${record?.path?.[858]?.dok_uri}`}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  File
+                </a>
+              )}
+            </Descriptions.Item>
+            <Descriptions.Item label="Golongan">
+              {record?.golongan}
+            </Descriptions.Item>
+            <Descriptions.Item label="Jenis Kenaikan Pangkat">
+              {record?.jenisKPNama}
+            </Descriptions.Item>
+            <Descriptions.Item label="Nomer SK">
+              {record?.skNomor} - {record?.skTanggal}
+            </Descriptions.Item>
+            <Descriptions.Item label="Masa Kerja (Tahun)">
+              {record?.masaKerjaGolonganTahun}
+            </Descriptions.Item>
+            <Descriptions.Item label="TMT Golongan">
+              {formatDateLL(record?.tmtGolongan)}
+            </Descriptions.Item>
+            <Descriptions.Item label="Tanggal SK">
+              {record?.skTanggal}
+            </Descriptions.Item>
+          </Descriptions>
+        );
+      },
+    },
+    {
       title: "File",
       key: "file",
       render: (_, record) => {
@@ -99,31 +172,38 @@ function CompareDataGolongan() {
           </>
         );
       },
+      responsive: ["sm"],
     },
     {
       title: "Golongan",
       dataIndex: "golongan",
+      responsive: ["sm"],
     },
     {
       title: "Jenis Kenaikan Pangkat",
       dataIndex: "jenisKPNama",
+      responsive: ["sm"],
     },
     {
       title: "Nomer SK",
       dataIndex: "skNomor",
+      responsive: ["sm"],
     },
     {
       title: "Masa Kerja (Tahun)",
       dataIndex: "masaKerjaGolonganTahun",
+      responsive: ["sm"],
     },
     {
       title: "TMT Golongan",
       key: "tmt_golongan",
       render: (text) => formatDateLL(text?.tmtGolongan),
+      responsive: ["sm"],
     },
     {
       title: "Tanggal SK",
       dataIndex: "skTanggal",
+      responsive: ["sm"],
     },
   ];
 

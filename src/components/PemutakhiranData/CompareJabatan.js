@@ -342,7 +342,7 @@ function CompareJabatan() {
       key: "jabatan_xs",
       render: (_, row) => {
         return (
-          <Descriptions>
+          <Descriptions layout="vertical" size="small">
             <Descriptions.Item label="File Jabatan">
               {row?.path?.[872] && (
                 <a
@@ -457,21 +457,29 @@ function CompareJabatan() {
       title: "Jabatan",
       responsive: ["xs"],
       key: "jabatan_xs",
-      render: (_, row) => {
+      render: (_, record) => {
         return (
-          <Stack>
-            <div>
-              <a href={row?.file} target="_blank" rel="noreferrer">
-                {row?.jenis_jabatan}
+          <Descriptions size="small" layout="vertical">
+            <Descriptions.Item label="File Jabatan">
+              <a href={record?.file} target="_blank" rel="noreferrer">
+                {record?.jenis_jabatan}
               </a>
-            </div>
-            <Text>{row?.jabatan}</Text>
-            <Text>{row?.unor}</Text>
-            <Text>
-              {row?.nomor_sk} - {row?.tgl_sk}
-            </Text>
-            <Text>TMT Jab : {row?.tmt_jabatan}</Text>
-          </Stack>
+            </Descriptions.Item>
+            <Descriptions.Item label="Jabatan">
+              {record?.jabatan}
+            </Descriptions.Item>
+            <Descriptions.Item label="Unor">{record?.unor}</Descriptions.Item>
+            <Descriptions.Item label="No. SK">
+              {record?.nomor_sk} - {record?.tgl_sk}
+            </Descriptions.Item>
+            <Descriptions.Item label="TMT Jab">
+              {record?.tmt_jabatan}
+            </Descriptions.Item>
+            <Descriptions.Item label="Tgl SK">
+              {record?.tgl_sk}
+            </Descriptions.Item>
+            <Descriptions.Item label="Aktif">{record?.aktif}</Descriptions.Item>
+          </Descriptions>
         );
       },
     },

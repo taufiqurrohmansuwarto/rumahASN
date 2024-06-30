@@ -19,6 +19,7 @@ import {
   Col,
   Descriptions,
   Divider,
+  Grid,
   Image,
   Input,
   List,
@@ -128,7 +129,7 @@ const DetailInformation = ({ user }) => {
       <div>
         <CreateModal receiver={user} open={open} onCancel={handleCancel} />
         <Image height={100} src={user?.image} alt="User Photo" />
-        <Descriptions>
+        <Descriptions layout="vertical">
           <Descriptions.Item label="Nama">{user?.username}</Descriptions.Item>
           <Descriptions.Item label="Jumlah Pertanyaan">
             {user?.total_post}
@@ -222,7 +223,7 @@ const DetailInformation = ({ user }) => {
                         }
                         author={item?.customer?.username}
                         avatar={item?.customer?.image}
-                        datetime={dayjs(item?.created_at).format("LL")}
+                        datetime={dayjs(item?.created_at).format("DD-MM-YYYY")}
                       />
                     </>
                   )}
@@ -266,12 +267,17 @@ const Users = () => {
     router.back();
   };
 
+  const breakPoint = Grid.useBreakpoint();
+
   return (
     <>
       <Head>
         <title>{data?.username} </title>
       </Head>
       <PageContainer
+        childrenContentStyle={{
+          padding: breakPoint.xs ? 0 : null,
+        }}
         loading={
           isLoading || status === "loading" || currentUserStatus === "loading"
         }

@@ -68,6 +68,14 @@ const TableDiklat = ({ data }) => {
             <Descriptions.Item label="Jumlah Jam">
               {row?.jumlahJam}
             </Descriptions.Item>
+            <Descriptions.Item label="Aksi">
+              <Popconfirm
+                onConfirm={async () => await hapus(row?.id)}
+                title="Apakah anda yakin ingin menghapus data?"
+              >
+                <a>Hapus</a>
+              </Popconfirm>
+            </Descriptions.Item>
           </Descriptions>
         );
       },
