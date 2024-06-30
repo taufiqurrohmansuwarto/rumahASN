@@ -403,19 +403,9 @@ function getKuadran(a, b) {
 
 const postSkp2022 = async (req, res) => {
   try {
-    const { siasnRequest } = req;
+    const { siasnRequest, fetcher } = req;
     const { pns_penilai, ...body } = req?.body?.data;
     const { employee_number: nip } = req?.user;
-
-    const apiGateway = process.env.APIGATEWAY_URL;
-    const hasil = await getSession({ req });
-
-    const fetcher = axios.create({
-      baseURL: apiGateway,
-      headers: {
-        Authorization: `Bearer ${hasil?.accessToken}`,
-      },
-    });
 
     const dataCurrent = await siasnRequest.get(`/pns/data-utama/${nip}`);
     const dataPenilai = await cariPnsKinerja(fetcher, pns_penilai);

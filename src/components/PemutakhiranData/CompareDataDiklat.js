@@ -3,6 +3,8 @@ import { Stack } from "@mantine/core";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Card,
+  Descriptions,
+  FloatButton,
   Popconfirm,
   Skeleton,
   Table,
@@ -10,11 +12,45 @@ import {
   Typography,
   message,
 } from "antd";
-import FormDiklat from "./FormDiklat";
 import CompareDataDiklatMaster from "./CompareDataDiklatMaster";
+import FormDiklat from "./FormDiklat";
 
 const TableDiklat = ({ data }) => {
   const columns = [
+    {
+      title: "Data",
+      key: "file",
+      render: (_, row) => {
+        return (
+          <Descriptions layout="vertical">
+            <Descriptions.Item label="File">
+              {row?.path?.[874] && (
+                <a
+                  href={`/helpdesk/api/siasn/ws/download?filePath=${row?.path?.[874]?.dok_uri}`}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  File
+                </a>
+              )}
+            </Descriptions.Item>
+            <Descriptions.Item label="Nama">
+              {row?.latihanStrukturalNama}
+            </Descriptions.Item>
+            <Descriptions.Item label="Nomor">{row?.nomor}</Descriptions.Item>
+            <Descriptions.Item label="Penyelenggara">
+              {row?.institusiPenyelenggara}
+            </Descriptions.Item>
+            <Descriptions.Item label="Tgl. Selesai">
+              {row?.tanggalSelesai}
+            </Descriptions.Item>
+            <Descriptions.Item label="Jumlah Jam">
+              {row?.jumlahJam}
+            </Descriptions.Item>
+          </Descriptions>
+        );
+      },
+    },
     {
       title: "File",
       key: "file",
@@ -38,22 +74,27 @@ const TableDiklat = ({ data }) => {
     {
       title: "Nama Diklat",
       dataIndex: "latihanStrukturalNama",
+      responsive: ["sm"],
     },
     {
       title: "Nomor",
       dataIndex: "nomor",
+      responsive: ["sm"],
     },
     {
       title: "Penyelenggara",
       dataIndex: "institusiPenyelenggara",
+      responsive: ["sm"],
     },
     {
       title: "Tgl. Selesai",
       dataIndex: "tanggalSelesai",
+      responsive: ["sm"],
     },
     {
       title: "Jumlah Jam",
       dataIndex: "jumlahJam",
+      responsive: ["sm"],
     },
   ];
   return (
@@ -86,6 +127,60 @@ const TableKursus = ({ data }) => {
   );
   const columns = [
     {
+      title: "Data",
+      key: "data",
+      responsive: ["xs"],
+      render: (_, row) => {
+        return (
+          <Descriptions layout="vertical">
+            <Descriptions.Item label="File">
+              {row?.path?.[881] && (
+                <a
+                  href={`/helpdesk/api/siasn/ws/download?filePath=${row?.path?.[881]?.dok_uri}`}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  File
+                </a>
+              )}
+            </Descriptions.Item>
+            <Descriptions.Item label="Nama Kursus">
+              {row?.namaKursus}
+            </Descriptions.Item>
+            <Descriptions.Item label="Tahun Kursus">
+              {row?.tahunKursus}
+            </Descriptions.Item>
+            <Descriptions.Item label="Nomer Sertifikat">
+              {row?.noSertipikat}
+            </Descriptions.Item>
+            <Descriptions.Item label="Tanggal Kursus">
+              {row?.tanggalKursus}
+            </Descriptions.Item>
+            <Descriptions.Item label="Tanggal Selesai Kursus">
+              {row?.tanggalSelesaiKursus}
+            </Descriptions.Item>
+            <Descriptions.Item label="Jenis">
+              {row?.jenisKursusSertifikat}
+            </Descriptions.Item>
+            <Descriptions.Item label="Penyelenggara">
+              {row?.institusiPenyelenggara}
+            </Descriptions.Item>
+            <Descriptions.Item label="Jumlah Jam">
+              {row?.jumlahJam}
+            </Descriptions.Item>
+            <Descriptions.Item label="Aksi">
+              <Popconfirm
+                onConfirm={async () => await hapus(row?.id)}
+                title="Apakah anda yakin ingin menghapus data?"
+              >
+                <a>Hapus</a>
+              </Popconfirm>
+            </Descriptions.Item>
+          </Descriptions>
+        );
+      },
+    },
+    {
       title: "File",
       key: "file",
       render: (_, row) => {
@@ -105,20 +200,7 @@ const TableKursus = ({ data }) => {
       },
       responsive: ["sm"],
     },
-    {
-      title: "Nama Kursus, Jenis, Penyelenggara",
-      key: "kursusJenisPenyelenggara",
-      responsive: ["xs"],
-      render: (text) => {
-        return (
-          <Stack>
-            <div>{text?.namaKursus}</div>
-            <div>{text?.jenisKursusSertifikat}</div>
-            <div>{text?.institusiPenyelenggara}</div>
-          </Stack>
-        );
-      },
-    },
+
     {
       title: "Nama Kursus",
       dataIndex: "namaKursus",
@@ -127,18 +209,22 @@ const TableKursus = ({ data }) => {
     {
       title: "Tahun Kursus",
       dataIndex: "tahunKursus",
+      responsive: ["sm"],
     },
     {
       title: "Nomer Sertifikat",
       dataIndex: "noSertipikat",
+      responsive: ["sm"],
     },
     {
       title: "Tanggal Kursus",
       dataIndex: "tanggalKursus",
+      responsive: ["sm"],
     },
     {
       title: "Tanggal Selesai Kursus",
       dataIndex: "tanggalSelesaiKursus",
+      responsive: ["sm"],
     },
     {
       title: "Jenis",
@@ -153,6 +239,7 @@ const TableKursus = ({ data }) => {
     {
       title: "Jumlah Jam",
       dataIndex: "jumlahJam",
+      responsive: ["sm"],
     },
     {
       title: "Aksi",
@@ -167,6 +254,7 @@ const TableKursus = ({ data }) => {
           </Popconfirm>
         );
       },
+      responsive: ["sm"],
     },
   ];
   return (
@@ -189,6 +277,7 @@ function CompareDataDiklat() {
 
   return (
     <Card title="Data Riwayat Diklat dan Kursus SIASN">
+      <FloatButton.BackTop />
       <FormDiklat />
       <Tabs
         style={{
