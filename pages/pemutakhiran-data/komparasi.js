@@ -61,7 +61,6 @@ function Komparasi() {
         }}
         title="Integrasi MyASN dan SIMASTER"
         content="Layanan Komparasi Data MyASN dan SIMASTER"
-        loading={isLoading}
         header={{
           breadcrumbRender: () => (
             <Breadcrumb>
