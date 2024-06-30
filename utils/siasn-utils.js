@@ -187,6 +187,10 @@ module.exports.removeKursusSiasn = (fetcher, id) => {
   return fetcher.delete(`/kursus/delete/${id}`);
 };
 
+module.exports.removeDiklatSiasn = (fetcher, id) => {
+  return fetcher.delete(`/diklat/delete/${id}`);
+};
+
 // kinerja periodik
 module.exports.rwKinerjaPeriodik = (fetcher, nip) => {
   return new Promise((resolve, reject) => {
