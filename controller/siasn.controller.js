@@ -35,6 +35,7 @@ const {
   hapusKinerjaPeriodik,
   createKinerjaPeriodik,
   dataUtama,
+  removeDiklatSiasn,
 } = require("@/utils/siasn-utils");
 
 const {
@@ -1373,8 +1374,36 @@ const removeKursus = async (req, res) => {
   try {
     const { siasnRequest: request } = req;
     const { id } = req?.query;
-
     await removeKursusSiasn(request, id);
+
+    await createLogSIASN({
+      userId: req?.user?.customId,
+      type: "DELETE",
+      siasnService: "KURSUS",
+      employeeNumber: req?.user?.employee_number,
+      request_data: JSON.stringify(id),
+    });
+
+    res.json({ code: 200, message: "success" });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ code: 500, message: "Internal Server Error" });
+  }
+};
+
+const removeDiklat = async (req, res) => {
+  try {
+    const { siasnRequest: request } = req;
+    const { id } = req?.query;
+    await removeDiklatSiasn(request, id);
+
+    await createLogSIASN({
+      userId: req?.user?.customId,
+      type: "DELETE",
+      siasnService: "DIKLAT",
+      employeeNumber: req?.user?.employee_number,
+      request_data: JSON.stringify(id),
+    });
 
     res.json({ code: 200, message: "success" });
   } catch (error) {
@@ -1508,4 +1537,5 @@ module.exports = {
   getRwPenghargaanByNip,
 
   getSubTreeRef,
+  removeDiklat,
 };

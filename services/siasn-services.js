@@ -217,6 +217,10 @@ export const deleteKursus = (id) => {
   return api.delete(`/pns/rw-diklat/${id}`).then((res) => res?.data);
 };
 
+export const deleteDiklat = (id) => {
+  return api.delete(`/pns/rw-diklat/struktural/${id}`).then((res) => res?.data);
+};
+
 export const ipAsnByNip = (nip, tahun) => {
   return api.get(`/admin/${nip}/ip-asn?tahun=${tahun}`).then((res) => res.data);
 };

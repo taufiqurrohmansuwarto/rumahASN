@@ -1,4 +1,8 @@
-import { dataDiklat, deleteKursus } from "@/services/siasn-services";
+import {
+  dataDiklat,
+  deleteDiklat,
+  deleteKursus,
+} from "@/services/siasn-services";
 import { Stack } from "@mantine/core";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
@@ -16,6 +20,23 @@ import CompareDataDiklatMaster from "./CompareDataDiklatMaster";
 import FormDiklat from "./FormDiklat";
 
 const TableDiklat = ({ data }) => {
+  const queryClient = useQueryClient();
+  const { mutateAsync: hapus, isLoading } = useMutation(
+    (id) => deleteDiklat(id),
+    {
+      onSuccess: () => {
+        message.success("Data berhasil dihapus");
+      },
+      onError: (error) => {
+        console.log(error);
+        message.error(error?.response?.data?.message);
+      },
+      onSettled: () => {
+        queryClient.invalidateQueries("riwayat-diklat");
+      },
+    }
+  );
+
   const columns = [
     {
       title: "Data",
@@ -94,6 +115,21 @@ const TableDiklat = ({ data }) => {
     {
       title: "Jumlah Jam",
       dataIndex: "jumlahJam",
+      responsive: ["sm"],
+    },
+    {
+      title: "Aksi",
+      key: "aksi",
+      render: (_, row) => {
+        return (
+          <Popconfirm
+            onConfirm={async () => await hapus(row?.id)}
+            title="Apakah anda yakin ingin menghapus data?"
+          >
+            <a>Hapus</a>
+          </Popconfirm>
+        );
+      },
       responsive: ["sm"],
     },
   ];
