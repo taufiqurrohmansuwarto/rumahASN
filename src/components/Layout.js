@@ -126,6 +126,10 @@ const changeRoutes = (user) => {
               path: "/fasilitator-employees/peta-jabatan",
               name: "Peta Jabatan SIASN",
             },
+            {
+              path: "/fasilitator-employees/daftar-usulan-kenaikan-pangkat",
+              name: "Daftar Usulan Kenaikan Pangkat",
+            },
           ],
         },
         {
