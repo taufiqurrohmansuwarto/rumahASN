@@ -74,7 +74,7 @@ function AdministrasiPerbaikan() {
       {list_tmt?.map((tmt) => (
         <>
           <Typography.Text strong>
-            Download Perbaikan Dokumen PPPK Gol VII Formasi {tmt}
+            Download Perbaikan Dokumen PPPK Gol VII
           </Typography.Text>
           <Dokumen key={tmt} tmt={tmt} />
         </>
