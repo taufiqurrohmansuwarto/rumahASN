@@ -8,7 +8,16 @@ import {
 } from "@/services/siasn-services";
 import { Center } from "@mantine/core";
 import { useQuery } from "@tanstack/react-query";
-import { Breadcrumb, Button, Col, Empty, Row, Modal, Grid } from "antd";
+import {
+  Breadcrumb,
+  Button,
+  Col,
+  Empty,
+  Row,
+  Modal,
+  Grid,
+  Skeleton,
+} from "antd";
 import { useSession } from "next-auth/react";
 import Head from "next/head";
 import Link from "next/link";
@@ -78,24 +87,26 @@ function Komparasi() {
       >
         <Row gutter={[16, 16]}>
           <Col md={16} xs={24}>
-            {dataUtama ? (
-              <MenuMySAPK foto={foto} dataUtama={dataUtama} />
-            ) : (
-              <Center>
-                <Empty
-                  description={
-                    <span>
-                      Oops! Data pegawai tidak ditemukan atau data pegawai masih
-                      pengentrian di SIASN.
-                    </span>
-                  }
-                >
-                  <Button onClick={showModal} type="primary">
-                    Apa yang harus dilakukan?
-                  </Button>
-                </Empty>
-              </Center>
-            )}
+            <Skeleton loading={isLoading}>
+              {dataUtama ? (
+                <MenuMySAPK foto={foto} dataUtama={dataUtama} />
+              ) : (
+                <Center>
+                  <Empty
+                    description={
+                      <span>
+                        Oops! Data pegawai tidak ditemukan atau data pegawai
+                        masih pengentrian di SIASN.
+                      </span>
+                    }
+                  >
+                    <Button onClick={showModal} type="primary">
+                      Apa yang harus dilakukan?
+                    </Button>
+                  </Empty>
+                </Center>
+              )}
+            </Skeleton>
           </Col>
           {/* <Col md={12} xs={24}>
               {data?.user?.group === "MASTER" && <SIASNTracking />}
