@@ -23,9 +23,12 @@ export const anomaliUserByNip = async (nip) => {
     .then((res) => res?.data);
 };
 
-export const updateAnomaliUserByNip = async ({ employee_number, data }) => {
+export const updateAnomaliUserByNip = async ({ employee_number, data, id }) => {
   return api
-    .patch(`/2023/admin/users?employee_number=${employee_number}`, data)
+    .patch(
+      `/2023/admin/users?employee_number=${employee_number}&id=${id}`,
+      data
+    )
     .then((res) => res?.data);
 };
 

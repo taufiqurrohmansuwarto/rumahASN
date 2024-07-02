@@ -86,7 +86,7 @@ const BarChart2 = ({ data }) => {
 
 const anomaliTypes = [
   "BELUM SKP TH SEBELUMNYA",
-  "BUP masih Aktif",
+  "BUP Masih Aktif",
   "CPNS LEBIH 2TH",
   "FORMASI JF BELUM DIANGKAT",
   "UNOR NONAKTIF",
