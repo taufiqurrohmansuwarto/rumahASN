@@ -169,8 +169,8 @@ const userAnomali2022 = async (req, res) => {
       .where({
         nip_baru: employee_number,
       })
-      .withGraphFetched("[user(simpleSelect)]")
-      .andWhere("is_repaired", false);
+      .withGraphFetched("[user(simpleSelect)]");
+    // .andWhere("is_repaired", false);
     // .first();
 
     res.json(data);
@@ -309,7 +309,7 @@ const patchUserAnomaliByNip = async (req, res) => {
 
 const updateAnomaliByNip = async (req, res) => {
   try {
-    const { employee_number } = req?.query;
+    const { employee_number, id } = req?.query;
     const { customId } = req?.user;
 
     const reset = req?.body?.reset;
@@ -330,7 +330,10 @@ const updateAnomaliByNip = async (req, res) => {
       });
       res.json({ message: "success" });
     } else {
-      await Anomali23.query().where("nip_baru", employee_number).patch(payload);
+      await Anomali23.query()
+        .where("nip_baru", employee_number)
+        .andWhere("id", id)
+        .patch(payload);
       res.json({ message: "success" });
     }
   } catch (error) {

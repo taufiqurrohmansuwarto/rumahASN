@@ -175,8 +175,8 @@ const ModalAnomali = ({
   const handleUpdate = async () => {
     try {
       const result = await form.validateFields();
-      console.log(result);
       const payload = {
+        id: initialData?.id,
         employee_number: nip,
         data: result,
       };
@@ -217,6 +217,8 @@ const CheckAnomali = () => {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const queryClient = useQueryClient();
+
+  const [currentId, setCurrentId] = useState(null);
 
   const [currentAnomali, setCurrentAnomali] = useState(null);
 
@@ -263,6 +265,7 @@ const CheckAnomali = () => {
         open={open}
         onCancel={handleClose}
         nip={nip}
+        id={currentId}
         initialData={currentAnomali}
       />
       {anomali?.length && (
