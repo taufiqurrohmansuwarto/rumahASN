@@ -484,7 +484,7 @@ module.exports.getResultPerangkatDaerahXls = async (id) => {
            (p.path || '>' || c."Id")::varchar(255) as path
     FROM ref_siasn_unor c
              INNER JOIN sub_tree p ON p."Id" = c."DiatasanId")
-SELECT sub_tree.*, d.unor_sekolah, d.duplikasi_unor, d.aktif, d."NSPN"
+SELECT sub_tree.*, d.unor_sekolah, d.duplikasi_unor, d.aktif, d."NSPN", d.description
 FROM sub_tree
 LEFT JOIN disparitas_unor d ON sub_tree."Id" = d.id
 ORDER BY path`;

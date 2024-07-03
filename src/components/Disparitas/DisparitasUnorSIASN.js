@@ -10,19 +10,17 @@ import { Stack } from "@mantine/core";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Button,
-  Checkbox,
   Col,
   Form,
   Input,
   Modal,
+  Radio,
   Row,
-  Select,
   Skeleton,
   Tag,
   Tooltip,
   Tree,
   TreeSelect,
-  Typography,
   message,
 } from "antd";
 import { useEffect, useState } from "react";
@@ -56,6 +54,7 @@ const ModalDisparitasUnor = ({
         duplikasi_unor: disparitas?.duplikasi_unor,
         aktif: disparitas?.aktif,
         NSPN: disparitas?.NSPN,
+        description: disparitas?.description,
       });
     }
   }, [detailDisparitas, form]);
@@ -99,25 +98,28 @@ const ModalDisparitasUnor = ({
       <Skeleton loading={isLoadingDetailDisparitas}>
         <Form form={form} layout="vertical">
           <Form.Item name="unor_sekolah" label="Unor Sekolah">
-            <Select>
-              <Select.Option value="true">YA</Select.Option>
-              <Select.Option value="false">TIDAK</Select.Option>
-            </Select>
+            <Radio.Group>
+              <Radio.Button value={true}>YA</Radio.Button>
+              <Radio.Button value={false}>TIDAK</Radio.Button>
+            </Radio.Group>
           </Form.Item>
-          <Form.Item name="unor_sekolah" label="Unor Sekolah">
-            <Select>
-              <Select.Option value="true">YA</Select.Option>
-              <Select.Option value="false">TIDAK</Select.Option>
-            </Select>
+          <Form.Item name="aktif" label="Aktif">
+            <Radio.Group>
+              <Radio.Button value={true}>YA</Radio.Button>
+              <Radio.Button value={false}>TIDAK</Radio.Button>
+            </Radio.Group>
           </Form.Item>
           <Form.Item name="duplikasi_unor" label="Duplikasi Unor">
-            <Select>
-              <Select.Option value="true">YA</Select.Option>
-              <Select.Option value="false">TIDAK</Select.Option>
-            </Select>
+            <Radio.Group>
+              <Radio.Button value={true}>YA</Radio.Button>
+              <Radio.Button value={false}>TIDAK</Radio.Button>
+            </Radio.Group>
           </Form.Item>
           <Form.Item name="NSPN" label="NPSN">
             <Input />
+          </Form.Item>
+          <Form.Item name="description" label="Keterangan">
+            <Input.TextArea />
           </Form.Item>
         </Form>
       </Skeleton>
@@ -143,18 +145,24 @@ function DisparitasUnorSIASN() {
     return (
       <span>
         {node.title}
-        {node.unor_sekolah && (
-          <Tag color="green" style={{ marginLeft: 8 }}>
-            Sekolah
+        {(node.unor_sekolah === true || node.unor_sekolah === false) && (
+          <Tag
+            color={node.unor_sekolah ? "green" : "red"}
+            style={{ marginLeft: 8 }}
+          >
+            Unor Sekolah
           </Tag>
         )}
-        {node.duplikasi_unor && (
-          <Tag color="red" style={{ marginLeft: 8 }}>
+        {(node.duplikasi_unor === true || node.duplikasi_unor === false) && (
+          <Tag
+            color={node.duplikasi_unor ? "green" : "red"}
+            style={{ marginLeft: 8 }}
+          >
             Duplikasi
           </Tag>
         )}
-        {node.aktif && (
-          <Tag color="blue" style={{ marginLeft: 8 }}>
+        {(node.aktif === true || node.aktif === false) && (
+          <Tag color={node.aktif ? "green" : "red"} style={{ marginLeft: 8 }}>
             Aktif
           </Tag>
         )}
