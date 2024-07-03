@@ -1,4 +1,4 @@
-import { getNilaiIPASN } from "@/controller/siasn-pengembangan-kompentensi.controller";
+import { getNilaiIPASNByNip } from "@/controller/siasn-pengembangan-kompentensi.controller";
 import adminFasilitatorAsnMiddleware from "@/middleware/admin-fasilitator-asn.middleware";
 import auth from "@/middleware/auth.middleware";
 import { siasnMiddleware } from "@/middleware/siasn.middleware";
@@ -9,6 +9,6 @@ router
   .use(auth)
   .use(adminFasilitatorAsnMiddleware)
   .use(siasnMiddleware)
-  .get(getNilaiIPASN);
+  .get(getNilaiIPASNByNip);
 
 export default router.handler();

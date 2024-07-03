@@ -178,6 +178,21 @@ const getNilaiIPASN = async (req, res) => {
   }
 };
 
+const getNilaiIPASNByNip = async (req, res) => {
+  try {
+    const { siasnRequest: fetcher } = req;
+    const { nip } = req?.query;
+    // const { employee_number: nip } = req?.user;
+    const nilaiIPASN = await IPASNBaru(fetcher, nip);
+    res.json(nilaiIPASN);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      message: "Internal Server Error",
+    });
+  }
+};
+
 const getIpAsnByNip = async (req, res) => {
   try {
     const { fetcher } = req;
@@ -289,4 +304,5 @@ module.exports = {
   getIpAsn,
   getNilaiIPASN,
   getIpAsnByNip,
+  getNilaiIPASNByNip,
 };
