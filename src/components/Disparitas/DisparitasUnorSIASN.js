@@ -16,6 +16,7 @@ import {
   Input,
   Modal,
   Row,
+  Select,
   Skeleton,
   Tag,
   Tooltip,
@@ -97,24 +98,25 @@ const ModalDisparitasUnor = ({
     >
       <Skeleton loading={isLoadingDetailDisparitas}>
         <Form form={form} layout="vertical">
-          <Form.Item
-            valuePropName="checked"
-            name="unor_sekolah"
-            label="Unor Sekolah"
-          >
-            <Checkbox />
+          <Form.Item name="unor_sekolah" label="Unor Sekolah">
+            <Select>
+              <Select.Option value="true">YA</Select.Option>
+              <Select.Option value="false">TIDAK</Select.Option>
+            </Select>
           </Form.Item>
-          <Form.Item
-            valuePropName="checked"
-            name="duplikasi_unor"
-            label="Duplikasi Unor"
-          >
-            <Checkbox />
+          <Form.Item name="unor_sekolah" label="Unor Sekolah">
+            <Select>
+              <Select.Option value="true">YA</Select.Option>
+              <Select.Option value="false">TIDAK</Select.Option>
+            </Select>
           </Form.Item>
-          <Form.Item valuePropName="checked" name="aktif" label="Aktif">
-            <Checkbox />
+          <Form.Item name="duplikasi_unor" label="Duplikasi Unor">
+            <Select>
+              <Select.Option value="true">YA</Select.Option>
+              <Select.Option value="false">TIDAK</Select.Option>
+            </Select>
           </Form.Item>
-          <Form.Item name="NSPN" label="NSPN">
+          <Form.Item name="NSPN" label="NPSN">
             <Input />
           </Form.Item>
         </Form>
