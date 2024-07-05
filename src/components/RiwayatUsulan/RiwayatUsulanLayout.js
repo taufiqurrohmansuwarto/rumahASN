@@ -64,6 +64,16 @@ function RiwayatUsulanLayout({
           key: "pemberhentian",
           href: "/pemutakhiran-data/usulan-siasn/pemberhentian",
         },
+        {
+          tab: "Pencantuman Gelar",
+          key: "pencantuman-gelar",
+          href: "/pemutakhiran-data/usulan-siasn/pencantuman-gelar",
+        },
+        {
+          tab: "Penyesuaian Masa Kerja",
+          key: "masa-kerja",
+          href: "/pemutakhiran-data/usulan-siasn/masa-kerja",
+        },
       ]}
       tabActiveKey={active}
       tabProps={{
