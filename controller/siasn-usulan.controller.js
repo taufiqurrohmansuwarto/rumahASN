@@ -64,10 +64,22 @@ const usulanPenyesuaianMasaKerjaByNip = async (req, res) => {
   fetchDataUsulan(req, res, fetcher, "pmk", employeeNumber);
 };
 
+const usulanPenyesuaianMasaKerjaByNipFasilitator = async (req, res) => {
+  const { nip } = req?.query;
+  const { fetcher } = req;
+  fetchDataUsulan(req, res, fetcher, "pmk", nip);
+};
+
 const usulanPencantumanGelarByNip = async (req, res) => {
   const { employee_number: employeeNumber } = req?.query;
   const { fetcher } = req;
   fetchDataUsulan(req, res, fetcher, "pg", employeeNumber);
+};
+
+const usulanPencantumanGelarByNipFasilitator = async (req, res) => {
+  const { nip } = req?.query;
+  const { fetcher } = req;
+  fetchDataUsulan(req, res, fetcher, "pg", nip);
 };
 
 export {
@@ -80,4 +92,6 @@ export {
   usulanKenaikanPangkatByNipFasilitator,
   usulanPerbaikanNamaByNipFasilitator,
   usulanPemberhentianByNipFasilitator,
+  usulanPenyesuaianMasaKerjaByNipFasilitator,
+  usulanPencantumanGelarByNipFasilitator,
 };
