@@ -1,6 +1,7 @@
 import { parseMarkdown, uploadFiles } from "@/services/index";
 import { createPost } from "@/services/socmed.services";
 import { Comment } from "@ant-design/compatible";
+import { Stack, Text } from "@mantine/core";
 import { MarkdownEditor } from "@primer/react/drafts";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Avatar, Input, Modal, message } from "antd";
@@ -52,7 +53,11 @@ const ModalCreate = ({
       open={open}
       onCancel={onCancel}
     >
-      <>
+      <Stack>
+        <Text>
+          Apabila ingin bertanya tentang kepegawaian gunakan fitur tanya BKD
+          ya..
+        </Text>
         <MarkdownEditor
           acceptedFileTypes={[
             "image/png",
@@ -80,7 +85,7 @@ const ModalCreate = ({
             </MarkdownEditor.ActionButton>
           </MarkdownEditor.Actions>
         </MarkdownEditor>
-      </>
+      </Stack>
     </Modal>
   );
 };

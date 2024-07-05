@@ -38,19 +38,21 @@ function RefJenisUsulan({ nip }) {
         <>
           <Stack>
             <Space>
-              <Select
-                showSearch
-                allowClear
-                value={dataInbox}
-                onChange={(value) => setDataInbox(value)}
-                style={{ width: 350 }}
-                optionFilterProp="label"
-                placeholder="Pilih Jenis Usulan"
-                options={data?.map((item) => ({
-                  label: item?.nama,
-                  value: item?.id,
-                }))}
-              />
+              {dataUsulan && (
+                <Select
+                  showSearch
+                  allowClear
+                  value={dataInbox}
+                  onChange={(value) => setDataInbox(value)}
+                  style={{ width: 350 }}
+                  optionFilterProp="label"
+                  placeholder="Pilih Jenis Usulan"
+                  options={data?.map((item) => ({
+                    label: item?.nama,
+                    value: item?.id,
+                  }))}
+                />
+              )}
               <Button
                 loading={isLoadingUsulan}
                 type="primary"
