@@ -37,6 +37,8 @@ import TrackingPerbaikanNamaByNip from "./Usulan/TrackingPerbaikanNamaByNip";
 import TrackingUsulanLainnyaByNip from "./Usulan/TrackingUsulanLainnyaByNip";
 import { LockOutlined } from "@ant-design/icons";
 import { useEffect, useState } from "react";
+import TrackingPencantumanGelarByNip from "./Usulan/TrackingPencantumanGelarByNip";
+import TrackingPenyesuaianMasaKerjaByNip from "./Usulan/TrackingPenyesuaianMasaKerjaByNip";
 
 // import { patchAnomali2023 } from "@/services/anomali.services";
 
@@ -146,6 +148,10 @@ const EmployeeContent = ({ data, loading }) => {
                 <TrackingPemberhentianByNip nip={router.query.nip} />
                 <TrackingPerbaikanNamaByNip nip={router.query.nip} />
                 <TrackingUsulanLainnyaByNip nip={router.query.nip} />
+              </Space>
+              <Space align="center">
+                <TrackingPencantumanGelarByNip nip={router?.query?.nip} />
+                <TrackingPenyesuaianMasaKerjaByNip nip={router?.query?.nip} />
               </Space>
             </Space>
             <EmployeeDescriptionMaster loading={loading} data={data?.master} />

@@ -28,19 +28,21 @@ function RwInboxUsulan() {
   return (
     <Stack>
       <Space>
-        <Select
-          showSearch
-          allowClear
-          value={dataInbox}
-          onChange={setDataInbox}
-          style={{ width: 350 }}
-          optionFilterProp="label"
-          placeholder="Pilih Jenis Usulan"
-          options={data?.map((item) => ({
-            label: item.nama,
-            value: item.id,
-          }))}
-        />
+        {data && (
+          <Select
+            showSearch
+            allowClear
+            value={dataInbox}
+            onChange={setDataInbox}
+            style={{ width: 350 }}
+            optionFilterProp="label"
+            placeholder="Pilih Jenis Usulan"
+            options={data?.map((item) => ({
+              label: item.nama,
+              value: item.id,
+            }))}
+          />
+        )}
       </Space>
       <TableUsulan data={dataUsulan} isLoading={isLoadingUsulan} />
     </Stack>

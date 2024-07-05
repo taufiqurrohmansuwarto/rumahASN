@@ -517,6 +517,18 @@ export const trackingPerbaikanNamaByNipFasilitator = async (nip) => {
     .then((res) => res.data);
 };
 
+export const trackingPencantumanGelarByNipFasilitator = async (nip) => {
+  return api
+    .get(`/admin/${nip}/layanan-siasn/pencantuman-gelar`)
+    .then((res) => res.data);
+};
+
+export const trackingPenyesuaianMasaKerjaByNip = async (nip) => {
+  return api
+    .get(`/admin/${nip}/layanan-siasn/penyesuaian-masa-kerja`)
+    .then((res) => res.data);
+};
+
 export const getDetailUnor = async (id) => {
   return api.get(`/ref/unor/${id}/detail`).then((res) => res.data);
 };
