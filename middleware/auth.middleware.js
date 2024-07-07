@@ -1,5 +1,5 @@
 import axios from "axios";
-import { getServerSession } from "next-auth";
+import { unstable_getServerSession } from "next-auth/next";
 const User = require("../models/users.model");
 const Minio = require("minio");
 import { authOptions } from "pages/api/auth/[...nextauth]";
@@ -16,7 +16,7 @@ const mc = new Minio.Client(minioConfig);
 
 const auth = async (req, res, next) => {
   try {
-    const data = await getServerSession(req, res, authOptions);
+    const data = await unstable_getServerSession(req, res, authOptions);
     if (data) {
       const userId = data?.user?.id?.split("|")?.[1];
       const customId = data?.user?.id;
