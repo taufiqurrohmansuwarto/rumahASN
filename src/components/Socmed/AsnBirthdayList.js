@@ -16,6 +16,7 @@ const ModalShowAll = ({ data, close, open }) => {
     >
       <List
         itemLayout="horizontal"
+        rowKey={(row) => row?.pegawai_id}
         dataSource={data}
         renderItem={(item) => (
           <List.Item actions={[<Button type="link">Kirim Pesan</Button>]}>
@@ -74,6 +75,7 @@ const ASNBirthdayList = () => {
           itemLayout="horizontal"
           size="small"
           loading={isLoading}
+          rowKey={(row) => row?.pegawai_id}
           dataSource={take(data, 5)}
           footer={
             <Button type="link" onClick={handleShowAll}>
