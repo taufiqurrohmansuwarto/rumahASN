@@ -1,5 +1,5 @@
 import axios from "axios";
-import { getServerSession } from "next-auth/next";
+import { getServerSession } from "next-auth";
 const User = require("../models/users.model");
 const Minio = require("minio");
 import { authOptions } from "pages/api/auth/[...nextauth]";
