@@ -16,13 +16,17 @@ const ModalShowAll = ({ data, close, open }) => {
     >
       <List
         itemLayout="horizontal"
-        key="id"
+        key="list-ulang-tahun-modal"
         rowKey={(row) => row?.id}
         dataSource={data}
         renderItem={(item) => (
           <List.Item
             key={item?.id}
-            actions={[<Button type="link">Kirim Pesan</Button>]}
+            actions={[
+              <Button key="button-kirim-pesan" type="link">
+                Kirim Pesan
+              </Button>,
+            ]}
           >
             <List.Item.Meta
               avatar={
@@ -36,8 +40,12 @@ const ModalShowAll = ({ data, close, open }) => {
                   />
                 </Tooltip>
               }
-              title={<Text size="xs">{item?.nama}</Text>}
-              description={<Text>{item?.jabatan}</Text>}
+              title={
+                <Text key="text-nama" size="xs">
+                  {item?.nama}
+                </Text>
+              }
+              description={<Text key="text-jabatan">{item?.jabatan}</Text>}
             />
           </List.Item>
         )}
@@ -66,8 +74,9 @@ const ASNBirthdayList = () => {
   return (
     <>
       <Card
+        key="card-ulang-tahun"
         title={
-          <Group>
+          <Group key="group-ulang-tahun">
             <ThemeIcon size="md" color="lime.4">
               <IconCake size={20} />
             </ThemeIcon>
@@ -79,7 +88,7 @@ const ASNBirthdayList = () => {
           itemLayout="horizontal"
           size="small"
           loading={isLoading}
-          key="id"
+          key="list-ulang-tahun"
           rowKey={(row) => row?.id}
           dataSource={take(data, 5)}
           footer={
@@ -94,7 +103,11 @@ const ASNBirthdayList = () => {
             >
               <List.Item.Meta
                 avatar={
-                  <Tooltip color="green" title={item?.skpd}>
+                  <Tooltip
+                    key="tooltip-ulang-tahun"
+                    color="green"
+                    title={item?.skpd}
+                  >
                     <Avatar
                       style={{
                         cursor: "pointer",
@@ -104,8 +117,14 @@ const ASNBirthdayList = () => {
                     />
                   </Tooltip>
                 }
-                title={<Text size="xs">{item?.nama}</Text>}
-                description={<Text>{item?.jabatan}</Text>}
+                title={
+                  <Text key="text-nama-ulang-tahun" size="xs">
+                    {item?.nama}
+                  </Text>
+                }
+                description={
+                  <Text key="text-jabatan-ulang-tahun">{item?.jabatan}</Text>
+                }
               />
             </List.Item>
           )}
