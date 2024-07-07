@@ -32,6 +32,17 @@ module.exports.departmentDetail = async (fetcher, id) => {
   }
 };
 
+module.exports.employeeTodayBirthdayDetail = async (fetcher) => {
+  try {
+    const result = await fetcher.get(
+      `/master-ws/operator/employees-birthday-today`
+    );
+    return result;
+  } catch (error) {
+    console.log(error);
+  }
+};
+
 // kelengkapan dokumen pppk
 module.exports.getKelengkapanDokumen = async (fetcher, nip) => {
   try {

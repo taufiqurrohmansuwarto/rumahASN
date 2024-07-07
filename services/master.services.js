@@ -5,6 +5,10 @@ const api = axios.create({
   baseURL: "/helpdesk/api/master/ws",
 });
 
+export const employeeBirthdayTodayServices = () => {
+  return api.get("/employee-birthday").then((res) => res.data);
+};
+
 export const getUnorMasterDetail = (id) => {
   return api.get(`/unor/${id}/detail`).then((res) => res.data);
 };

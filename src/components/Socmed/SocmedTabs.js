@@ -16,6 +16,7 @@ import SocmedCreatePost from "./SocmedCreatePost";
 import SocmedMyPosts from "./SocmedMyPosts";
 import SocmedPosts from "./SocmedPosts";
 import UserPolls from "../Polls/UserPolls";
+import ASNBirthdayList from "./AsnBirthdayList";
 
 function SocmedTabs() {
   useScrollRestoration();
@@ -91,7 +92,7 @@ function SocmedTabs() {
                           <Flex align="center" gap={8}>
                             <IconHistory color="red" size={18} />
                             <Text size="sm" fw={700}>
-                              Tracking Usulan
+                              Lacak Usulan SIASN
                             </Text>
                           </Flex>
                         </Flex>
@@ -207,6 +208,7 @@ function SocmedTabs() {
         </Col>
         <Col md={8} xs={24}>
           <Stack>
+            <ASNBirthdayList />
             <UserPolls />
           </Stack>
         </Col>
