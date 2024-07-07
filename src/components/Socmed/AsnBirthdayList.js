@@ -20,7 +20,10 @@ const ModalShowAll = ({ data, close, open }) => {
         rowKey={(row) => row?.id}
         dataSource={data}
         renderItem={(item) => (
-          <List.Item actions={[<Button type="link">Kirim Pesan</Button>]}>
+          <List.Item
+            key={item?.id}
+            actions={[<Button type="link">Kirim Pesan</Button>]}
+          >
             <List.Item.Meta
               avatar={
                 <Tooltip color="green" title={item?.skpd}>
@@ -85,7 +88,10 @@ const ASNBirthdayList = () => {
             </Button>
           }
           renderItem={(item) => (
-            <List.Item actions={[<Button type="link">Kirim Pesan</Button>]}>
+            <List.Item
+              key={item?.id}
+              actions={[<Button type="link">Kirim Pesan</Button>]}
+            >
               <List.Item.Meta
                 avatar={
                   <Tooltip color="green" title={item?.skpd}>
