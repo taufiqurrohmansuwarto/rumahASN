@@ -130,6 +130,7 @@ const upsertUser = async (currentUser) => {
       email,
       birthdate,
       organization_id,
+      status_kepegawaian,
     } = currentUser;
 
     const data = {
@@ -145,6 +146,7 @@ const upsertUser = async (currentUser) => {
       birthdate: birthdate ? new Date(birthdate) : null,
       from,
       organization_id,
+      status_kepegawaian,
       last_login: new Date(),
     };
 
@@ -192,6 +194,7 @@ export const authOptions = {
           birthdate: profile.birthdate || null,
           email: profile.email || null,
           organization_id: profile.organization_id || null,
+          status_kepegawaian: profile.status_kepegawaian || null,
         };
 
         const accessToken = token?.access_token;
@@ -245,6 +248,7 @@ export const authOptions = {
           birthdate: profile.birthdate || null,
           email: profile.email || null,
           organization_id: profile.organization_id || null,
+          status_kepegawaian: profile.status_kepegawaian || null,
         };
 
         const info = await getInformation("MASTER", token?.access_token);
@@ -288,6 +292,7 @@ export const authOptions = {
           birthdate: profile.birthdate || null,
           email: profile.email || null,
           organization_id: profile.organization_id || null,
+          status_kepegawaian: profile.status_kepegawaian || null,
         };
 
         const info = await getInformation("PTTPK", token?.access_token);
@@ -330,6 +335,7 @@ export const authOptions = {
           birthdate: profile.birthdate || null,
           email: profile.email || null,
           organization_id: profile.organization_id || null,
+          status_kepegawaian: profile.status_kepegawaian || null,
         };
 
         const result = await upsertUser({ ...currentUser });
