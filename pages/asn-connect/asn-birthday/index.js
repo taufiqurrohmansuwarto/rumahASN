@@ -1,3 +1,5 @@
+import Layout from "@/components/Layout";
+
 const AsnBirthday = () => {
   return <div>hello world</div>;
 };
