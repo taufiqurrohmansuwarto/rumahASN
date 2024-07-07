@@ -20,6 +20,7 @@ import {
   List,
   Row,
   Space,
+  Tooltip,
   Typography,
   message,
 } from "antd";
@@ -88,15 +89,19 @@ const DiscussionCard = ({ item }) => {
             }}
           />
         </Flex>
-        <Flex style={{ flexGrow: 1 }} gap={14} vertical>
-          <Flex align="center" gap={4}>
+        <Flex style={{ flexGrow: 1 }} gap={12} vertical>
+          <Flex align="center" gap={8}>
             <Flex>
               <Avatar size={36} src={item?.user?.image} />
             </Flex>
             <Flex vertical>
               <Text fz="xs">{item?.user?.username}</Text>
               <Text fz="xs">
-                {dayjs(item?.created_at).locale("id").fromNow()}
+                <Tooltip
+                  title={dayjs(item?.created_at).format("DD MMM YYYY HH:mm")}
+                >
+                  {dayjs(item?.created_at).locale("id").fromNow()}
+                </Tooltip>
               </Text>
             </Flex>
           </Flex>
@@ -142,7 +147,13 @@ const CreateDiscussionButton = () => {
       {data && (
         <>
           {data?.user?.current_role === "admin" && (
-            <Button type="primary" onClick={gotoCreateDiscussion}>
+            <Button
+              style={{
+                marginLeft: 18,
+              }}
+              type="primary"
+              onClick={gotoCreateDiscussion}
+            >
               Buat Diskusi
             </Button>
           )}
@@ -160,8 +171,8 @@ const Discussions = () => {
   return (
     <>
       <Stack>
-        <Row justify="center" gutter={[0, 16]}>
-          <Col md={18}>
+        <Row justify="start">
+          <Col md={18} xs={24}>
             <CreateDiscussionButton />
             <List
               loading={isLoading}
@@ -173,9 +184,9 @@ const Discussions = () => {
               )}
               size="large"
               pagination={{
+                align: "start",
                 pageSize: 10,
-
-                position: "both",
+                position: "bottom",
                 total: posts?.pagination?.total || 0,
                 showTotal: (total, range) =>
                   `Menampilkan ${range[0]}-${range[1]} dari ${total} diskusi`,
