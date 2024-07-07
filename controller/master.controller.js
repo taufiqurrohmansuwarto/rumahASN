@@ -477,10 +477,8 @@ const employeeTodayBirthday = async (req, res) => {
     const { fetcher } = req;
 
     const result = await employeeTodayBirthdayDetail(fetcher);
-    console.log(result);
-    console.log(result?.data);
 
-    res.json(result);
+    res.json(result?.data);
   } catch (error) {
     console.log(error);
     res.status(500).json({ code: 500, message: "Internal Server Error" });
