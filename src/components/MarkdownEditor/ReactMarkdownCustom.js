@@ -59,7 +59,7 @@ function ReactMarkdownCustom({ children }) {
       return (
         <Image
           style={{
-            maxWidth: "500px",
+            maxWidth: "300px",
             width: "100%",
           }}
           alt={props.alt || "Image"}
