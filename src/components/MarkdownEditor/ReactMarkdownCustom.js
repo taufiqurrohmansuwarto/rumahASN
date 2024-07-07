@@ -56,7 +56,16 @@ function ReactMarkdownCustom({ children }) {
       return <a {...props} target="_blank" />;
     },
     img({ node, ...props }) {
-      return <Image width="100%" alt={props.alt || "Image"} {...props} />;
+      return (
+        <Image
+          style={{
+            maxWidth: "500px",
+            width: "100%",
+          }}
+          alt={props.alt || "Image"}
+          {...props}
+        />
+      );
     },
     blockquote({ node, ...props }) {
       return (
