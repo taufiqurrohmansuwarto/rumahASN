@@ -477,6 +477,8 @@ const employeeTodayBirthday = async (req, res) => {
     const { fetcher } = req;
 
     const result = await employeeTodayBirthdayDetail(fetcher);
+    console.log(result);
+    console.log(result?.data);
 
     res.json(result);
   } catch (error) {
