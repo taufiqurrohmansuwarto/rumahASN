@@ -1,5 +1,6 @@
 import {
   departmentDetail,
+  employeeTodayBirthdayDetail,
   getKelengkapanDokumen,
   getRwAnak,
   getRwDiklat,
@@ -471,7 +472,21 @@ const getDepartmentDetail = async (req, res) => {
   }
 };
 
+const employeeTodayBirthday = async (req, res) => {
+  try {
+    const { fetcher } = req;
+
+    const result = await employeeTodayBirthdayDetail(fetcher);
+
+    res.json(result);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ code: 500, message: "Internal Server Error" });
+  }
+};
+
 module.exports = {
+  employeeTodayBirthday,
   unorASN,
   unorPTTPK,
   rwDiklatMaster,
