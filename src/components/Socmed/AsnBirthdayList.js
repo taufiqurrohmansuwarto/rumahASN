@@ -11,6 +11,7 @@ const ModalShowAll = ({ data, close, open }) => {
     <Modal
       footer={null}
       title="Daftar Ulang Tahun ASN"
+      key="modal-ulang-tahun"
       open={open}
       onCancel={close}
     >
@@ -32,6 +33,7 @@ const ModalShowAll = ({ data, close, open }) => {
               avatar={
                 <Tooltip color="green" title={item?.skpd}>
                   <Avatar
+                    key="avatar-ulang-tahun-modal"
                     style={{
                       cursor: "pointer",
                     }}
@@ -112,6 +114,7 @@ const ASNBirthdayList = () => {
                       style={{
                         cursor: "pointer",
                       }}
+                      key="avatar-ulang-tahun"
                       shape="circle"
                       src={item?.fileDiri?.foto}
                     />
