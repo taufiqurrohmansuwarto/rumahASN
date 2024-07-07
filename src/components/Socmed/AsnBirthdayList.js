@@ -94,14 +94,22 @@ const ASNBirthdayList = () => {
           rowKey={(row) => row?.id}
           dataSource={take(data, 5)}
           footer={
-            <Button type="link" onClick={handleShowAll}>
+            <Button
+              key="button-lihat-semua"
+              type="link"
+              onClick={handleShowAll}
+            >
               Lihat Semua ({data?.length})
             </Button>
           }
           renderItem={(item) => (
             <List.Item
               key={item?.id}
-              actions={[<Button type="link">Kirim Pesan</Button>]}
+              actions={[
+                <Button key="button-kirim-pesan-ulang-tahun" type="link">
+                  Kirim Pesan
+                </Button>,
+              ]}
             >
               <List.Item.Meta
                 avatar={
@@ -133,7 +141,12 @@ const ASNBirthdayList = () => {
           )}
         />
       </Card>
-      <ModalShowAll data={data} close={closeShowAll} open={showAll} />
+      <ModalShowAll
+        key="modal-ulang-tahun-all"
+        data={data}
+        close={closeShowAll}
+        open={showAll}
+      />
     </>
   );
 };
