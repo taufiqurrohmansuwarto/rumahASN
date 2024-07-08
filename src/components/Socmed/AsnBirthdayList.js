@@ -2,9 +2,36 @@ import { employeeBirthdayTodayServices } from "@/services/master.services";
 import { Group, Text, ThemeIcon } from "@mantine/core";
 import { IconCake } from "@tabler/icons";
 import { useQuery } from "@tanstack/react-query";
-import { Avatar, Button, Card, List, Tooltip, Modal } from "antd";
+import { Avatar, Button, Card, List, Tooltip, Modal, Form, Input } from "antd";
 import { take } from "lodash";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+
+const ModalMessage = ({ data, close, open }) => {
+  const [form] = Form.useForm();
+
+  useEffect(() => {
+    if (open) {
+      form.setFieldsValue({
+        pesan: `Hai ${data?.nama}, Ulang tahun `,
+      });
+    }
+  }, [open]);
+
+  const handleSubmit = async () => {
+    const values = await form.validateFields();
+    console.log(values);
+  };
+
+  return (
+    <Modal title="Kirim Pesan" open={open} onCancel={close}>
+      <Form form={form} onFinish={handleSubmit}>
+        <Form.Item name="pesan">
+          <Input.TextArea />
+        </Form.Item>
+      </Form>
+    </Modal>
+  );
+};
 
 const ModalShowAll = ({ data, close, open }) => {
   return (
@@ -61,11 +88,22 @@ const ModalShowAll = ({ data, close, open }) => {
 const ASNBirthdayList = () => {
   const [showKirimPesan, setShowKirimPesan] = useState(false);
   const [showAll, setShowAll] = useState(false);
+  const [data, setData] = useState(null);
 
   const handleShowAll = () => setShowAll(!showAll);
   const closeShowAll = () => setShowAll(false);
 
-  const { data, isLoading } = useQuery(
+  const handleShowMessage = (data) => {
+    setData(data);
+    setShowKirimPesan(true);
+  };
+
+  const closeShowMessage = () => {
+    setData(null);
+    setShowKirimPesan(false);
+  };
+
+  const { data: dataUlangTahun, isLoading } = useQuery(
     ["employee-today-birthday"],
     () => employeeBirthdayTodayServices(),
     {
@@ -92,7 +130,7 @@ const ASNBirthdayList = () => {
           loading={isLoading}
           key="list-ulang-tahun"
           rowKey={(row) => row?.id}
-          dataSource={take(data, 5)}
+          dataSource={take(dataUlangTahun, 5)}
           footer={
             <Button
               key="button-lihat-semua"
@@ -106,7 +144,11 @@ const ASNBirthdayList = () => {
             <List.Item
               key={item?.id}
               actions={[
-                <Button key="button-kirim-pesan-ulang-tahun" type="link">
+                <Button
+                  key="button-kirim-pesan-ulang-tahun"
+                  type="link"
+                  onClick={() => handleShowMessage(item)}
+                >
                   Kirim Pesan
                 </Button>,
               ]}
@@ -143,9 +185,15 @@ const ASNBirthdayList = () => {
       </Card>
       <ModalShowAll
         key="modal-ulang-tahun-all"
-        data={data}
+        data={dataUlangTahun}
         close={closeShowAll}
         open={showAll}
+      />
+      <ModalMessage
+        key="modal-kirim-pesan"
+        data={data}
+        close={closeShowMessage}
+        open={showKirimPesan}
       />
     </>
   );
