@@ -12,11 +12,12 @@ import {
 import { Affix, Card, Col, Flex, Row, Tabs } from "antd";
 import { useRouter } from "next/router";
 import Announcement from "../Announcement";
+import DiskusiTerhangat from "./DiskusiTerhangat";
+import KegiatanMendatang from "./KegiatanMendatang";
 import SocmedCreatePost from "./SocmedCreatePost";
 import SocmedMyPosts from "./SocmedMyPosts";
 import SocmedPosts from "./SocmedPosts";
-import UserPolls from "../Polls/UserPolls";
-import ASNBirthdayList from "./AsnBirthdayList";
+import KomunitasPopuler from "./KomunitasPopuler";
 
 function SocmedTabs() {
   useScrollRestoration();
@@ -208,8 +209,12 @@ function SocmedTabs() {
         </Col>
         <Col md={8} xs={24}>
           <Stack>
-            <ASNBirthdayList />
-            <UserPolls />
+            <DiskusiTerhangat />
+            <KegiatanMendatang />
+            <KomunitasPopuler />
+            {/* <KalenderRumahASN /> */}
+            {/* <ASNBirthdayList /> */}
+            {/* <UserPolls /> */}
           </Stack>
         </Col>
       </Row>
