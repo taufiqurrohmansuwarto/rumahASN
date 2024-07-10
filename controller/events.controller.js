@@ -1,6 +1,14 @@
 const Events = require("@/models/events.model");
 const EventParticipants = require("@/models/event-participants.model");
 
+const allEvents = async (req, res) => {
+  try {
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
 const userEvents = async (req, res) => {
   try {
     const result = await EventParticipants.query()
@@ -87,6 +95,6 @@ module.exports = {
   getEvent,
   updateEvent,
   deleteEvent,
-
+  allEvents,
   userEvents,
 };
