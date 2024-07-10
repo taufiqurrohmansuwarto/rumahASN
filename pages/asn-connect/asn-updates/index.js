@@ -18,7 +18,7 @@ const AsnUpdates = () => {
         <title>Rumah ASN - Smart ASN Connect Update</title>
       </Head>
       <LayoutASNConnect>
-        <ModalUserAnomali />
+        {/* <ModalUserAnomali /> */}
         <SocmedTabs />
         <FloatButton.BackTop />
         <EletterBKD />
