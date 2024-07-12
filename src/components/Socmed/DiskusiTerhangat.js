@@ -1,14 +1,5 @@
 import React, { useState } from "react";
-import {
-  Card,
-  Typography,
-  List,
-  Space,
-  Button,
-  Avatar,
-  Tooltip,
-  Tag,
-} from "antd";
+import { Card, Typography, List, Space, Button, Avatar, Tooltip } from "antd";
 import {
   MessageOutlined,
   LikeOutlined,
@@ -105,19 +96,19 @@ const DiskusiTerhangat = () => {
           <List.Item
             key={item.id}
             actions={[
-              <Tooltip title="Komentar">
+              <Tooltip title="Komentar" key="komentar">
                 <Space>
                   <MessageOutlined style={{ fontSize: "14px" }} />
                   <Text style={{ fontSize: "12px" }}>{item.comments}</Text>
                 </Space>
               </Tooltip>,
-              <Tooltip title="Upvote">
+              <Tooltip title="Upvote" key="upvote">
                 <Space>
                   <LikeOutlined style={{ fontSize: "14px" }} />
                   <Text style={{ fontSize: "12px" }}>{item.upvotes}</Text>
                 </Space>
               </Tooltip>,
-              <Tooltip title="Downvote">
+              <Tooltip title="Downvote" key="downvote">
                 <Space>
                   <DislikeOutlined style={{ fontSize: "14px" }} />
                   <Text style={{ fontSize: "12px" }}>{item.downvotes}</Text>

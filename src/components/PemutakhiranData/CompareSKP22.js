@@ -85,25 +85,23 @@ const FormSKP22 = ({ visible, onCancel, nip }) => {
 
         const formData = new FormData();
 
-        formData.append("file", currentFile);
-        formData.append("id_ref_dokumen", "873");
+        const dataSkp = await postRwSkp22({
+          nip,
+          data,
+        });
 
-        const hasil = await axios.post(`${API_URL}/upload-dok`, formData, {
+        const idRiwayat = dataSkp?.id;
+
+        formData.append("file", currentFile);
+        formData.append("id_ref_dokumen", "891");
+        formData.append("id_riwayat", idRiwayat);
+
+        await axios.post(`${API_URL}/upload-dok-rw`, formData, {
           headers: {
             "Content-Type": "multipart/form-data",
             Authorization: `Bearer ${wso2}`,
             Auth: `bearer ${sso}`,
           },
-        });
-
-        const hasilAkhir = {
-          ...data,
-          path: [hasil?.data?.data],
-        };
-
-        await postRwSkp22({
-          nip,
-          data: hasilAkhir,
         });
 
         message.success("Berhasil menambahkan SKP");
@@ -226,9 +224,9 @@ function CompareSKP22({ nip, id }) {
         return (
           <Descriptions size="small" layout="vertical">
             <Descriptions.Item label="File">
-              {record?.path?.[873] && (
+              {record?.path?.["891"] && (
                 <a
-                  href={`/helpdesk/api/siasn/ws/download?filePath=${record?.path?.[873]?.dok_uri}`}
+                  href={`/helpdesk/api/siasn/ws/download?filePath=${record?.path?.["891"]?.dok_uri}`}
                   target="_blank"
                   rel="noreferrer"
                 >
@@ -268,9 +266,9 @@ function CompareSKP22({ nip, id }) {
       render: (_, record) => {
         return (
           <>
-            {record?.path?.[873] && (
+            {record?.path?.["891"] && (
               <a
-                href={`/helpdesk/api/siasn/ws/download?filePath=${record?.path?.[873]?.dok_uri}`}
+                href={`/helpdesk/api/siasn/ws/download?filePath=${record?.path?.["891"]?.dok_uri}`}
                 target="_blank"
                 rel="noreferrer"
               >

@@ -9,6 +9,10 @@ const MyDocument = () => {
     <Html>
       <Head />
       <body>
+        <meta
+          name="google-site-verification"
+          content="23oHq4sRPvLXyv0aFcsyESbDTnwpKdGvEVFSow4JIoE"
+        />
         <Main />
         <NextScript />
         <Script

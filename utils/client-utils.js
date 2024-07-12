@@ -29,6 +29,8 @@ import { toLower } from "lodash";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import "dayjs/locale/id";
+import { getTokenSIASNService } from "@/services/siasn-services";
+import axios from "axios";
 
 dayjs.extend(relativeTime);
 dayjs.locale("id");
@@ -545,6 +547,24 @@ export const arrayToTree = (
 };
 
 export const API_URL = "https://apimws.bkn.go.id:8243/apisiasn/1.0";
+
+export const uploadDokumenRiwayat = async (formData) => {
+  try {
+    const result = await getTokenSIASNService();
+    const wso2 = result?.accessToken?.wso2;
+    const sso = result?.accessToken?.sso;
+
+    return axios.post(`${API_URL}/upload-dok-rw`, formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+        Authorization: `Bearer ${wso2}`,
+        Auth: `bearer ${sso}`,
+      },
+    });
+  } catch (error) {
+    console.log(error);
+  }
+};
 
 // buat fungsi pembanding teks
 export const compareText = (text1, text2) => {
@@ -1105,4 +1125,14 @@ export const getKuadran = (a, b) => {
 export const serializeCommentText = (item) => {
   const text = `${item?.user?.username} telah berkomentar pada postingan anda`;
   return text;
+};
+
+export const fetchPdf = async (url) => {
+  const response = await axios.get(url, {
+    responseType: "blob",
+  });
+  const file = new File([response.data], "file.pdf", {
+    type: response.data.type,
+  });
+  return file;
 };
