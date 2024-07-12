@@ -10,7 +10,10 @@ const ModalUsulan = ({ open, onClose, nip }) => {
   const { data, isLoading } = useQuery(
     ["usulan-kp-by-nip", nip],
     () => trackingKenaikanPangkatByNipFasilitator(nip),
-    { enabled: !!nip }
+    {
+      enabled: !!nip,
+      refetchOnWindowFocus: false,
+    }
   );
 
   return (

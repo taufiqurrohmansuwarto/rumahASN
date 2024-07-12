@@ -137,8 +137,12 @@ const PangkatSimaster = ({ data, isLoading }) => {
 };
 
 function ComparePangkatByNip({ nip }) {
-  const { data, isLoading } = useQuery(["data-riwayat-pangkat", nip], () =>
-    dataPangkatByNip(nip)
+  const { data, isLoading } = useQuery(
+    ["data-riwayat-pangkat", nip],
+    () => dataPangkatByNip(nip),
+    {
+      refetchOnWindowFocus: false,
+    }
   );
 
   return (

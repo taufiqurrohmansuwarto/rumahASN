@@ -548,3 +548,13 @@ export const getDetailDisparitasUnor = async (id) => {
 export const updateDisparitasUnor = async ({ id, data }) => {
   return api.patch(`/ref/unor/${id}/disparitas`, data).then((res) => res.data);
 };
+
+export const uploadDokRiwayat = async (data) => {
+  return api
+    .post(`/upload-dok-rw`, data, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    })
+    .then((res) => res.data);
+};

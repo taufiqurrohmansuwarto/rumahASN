@@ -4,8 +4,12 @@ import { Card, Table } from "antd";
 import React from "react";
 
 function CompareJabatanGuruByNip({ nip }) {
-  const { data, isLoading } = useQuery(["rw-jabatan-guru", nip], () =>
-    rwJabGuruByNip(nip)
+  const { data, isLoading } = useQuery(
+    ["rw-jabatan-guru", nip],
+    () => rwJabGuruByNip(nip),
+    {
+      refetchOnWindowFocus: false,
+    }
   );
 
   const columns = [

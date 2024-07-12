@@ -10,7 +10,10 @@ const ModalUsulan = ({ open, onClose, nip }) => {
   const { data, isLoading } = useQuery(
     ["usulan-penyesuaian-masa-kerja-by-nip", nip],
     () => trackingPenyesuaianMasaKerjaByNip(nip),
-    { enabled: !!nip }
+    {
+      enabled: !!nip,
+      refetchOnWindowFocus: false,
+    }
   );
 
   return (

@@ -10,7 +10,10 @@ const ModalUsulan = ({ open, onClose, nip }) => {
   const { data, isLoading } = useQuery(
     ["usulan-perbaikan-nama-by-nip", nip],
     () => trackingPerbaikanNamaByNipFasilitator(nip),
-    { enabled: !!nip }
+    {
+      enabled: !!nip,
+      refetchOnWindowFocus: false,
+    }
   );
 
   return (

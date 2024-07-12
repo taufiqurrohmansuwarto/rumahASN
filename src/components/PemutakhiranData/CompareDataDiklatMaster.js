@@ -38,8 +38,6 @@ const TransferModal = ({ open, handleClose, data }) => {
           type: "application/pdf",
         });
 
-        console.log(file);
-
         setFile(file);
       };
       fetchAndSetFile();

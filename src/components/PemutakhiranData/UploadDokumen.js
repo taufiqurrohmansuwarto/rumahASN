@@ -1,8 +1,11 @@
-import { getTokenSIASNService } from "@/services/siasn-services";
+import {
+  getTokenSIASNService,
+  uploadDokRiwayat,
+} from "@/services/siasn-services";
 import { API_URL, uploadDokumenRiwayat } from "@/utils/client-utils";
 import { CloudUploadOutlined } from "@ant-design/icons";
 import { Alert, Stack } from "@mantine/core";
-import { useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   Button,
   Form,
@@ -25,8 +28,23 @@ const ModalUploadDokumen = ({
 }) => {
   const [fileList, setFileList] = useState([]);
   const [loading, setLoading] = useState(false);
-
   const queryClient = useQueryClient();
+
+  const { mutateAsync: uploadBerkasRiwayat, isLoading: loadingUpload } =
+    useMutation((data) => uploadDokRiwayat(data), {
+      onSuccess: () => {
+        message.success("Berhasil mengunggah file.");
+        queryClient.invalidateQueries(invalidateQueries);
+        onCancel();
+      },
+      onSettled: () => {
+        setLoading(false);
+        queryClient.invalidateQueries(invalidateQueries);
+      },
+      onError: () => {
+        message.error("Gagal mengunggah file.");
+      },
+    });
 
   const handleUpload = async () => {
     try {
@@ -42,16 +60,12 @@ const ModalUploadDokumen = ({
         formData.append("file", currentFile);
         formData.append("id_riwayat", id);
         formData.append("id_ref_dokumen", idRefDokumen);
-        await uploadDokumenRiwayat(formData);
-        message.success("Berhasil mengunggah file.");
-        onCancel();
+        await uploadBerkasRiwayat(formData);
       }
     } catch (error) {
       console.log(error);
       message.error("Gagal mengunggah file.");
     } finally {
-      setLoading(false);
-      queryClient.invalidateQueries(invalidateQueries);
     }
   };
 
