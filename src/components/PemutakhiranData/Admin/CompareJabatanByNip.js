@@ -54,6 +54,7 @@ import ComparePendidikanByNip from "./ComparePendidikanByNip";
 import ComparePindahInstansiByNip from "./ComparePindahInstansiByNip";
 import ComparePwkByNip from "./ComparePwkByNip";
 import HapusJabatan from "./HapusJabatan";
+import UploadDokumen from "../UploadDokumen";
 dayjs.locale("id");
 
 const format = "DD-MM-YYYY";
@@ -742,6 +743,7 @@ function CompareJabatanByNip({ nip }) {
             : null,
           nomorSk: row?.nomor_sk,
           jenis_jabatan: row?.jenis_jabatan,
+          file: row?.file,
         };
 
         return (
@@ -881,9 +883,23 @@ function CompareJabatanByNip({ nip }) {
         } else {
           return (
             <Space>
-              <FormUnorJabatanTransfer data={payload} kata="Edit" />
+              {/* <FormUnorJabatanTransfer data={payload} kata="Edit" /> */}
               <Divider type="vertical" />
               <HapusJabatan id={row?.id} />
+              <Divider type="vertical" />
+              <UploadDokumen
+                id={row?.id}
+                idRefDokumen={872}
+                nama="SK"
+                invalidateQueries={["data-rw-jabatan-master-by-nip"]}
+              />
+              <Divider type="vertical" />
+              <UploadDokumen
+                id={row?.id}
+                idRefDokumen={873}
+                nama="Pelantikan"
+                invalidateQueries={["data-rw-jabatan-master-by-nip"]}
+              />
             </Space>
           );
         }

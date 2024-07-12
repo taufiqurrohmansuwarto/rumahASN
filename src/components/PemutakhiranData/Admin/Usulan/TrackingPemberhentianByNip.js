@@ -10,7 +10,10 @@ const ModalUsulan = ({ open, onClose, nip }) => {
   const { data, isLoading } = useQuery(
     ["usulan-pemberhentian-by-nip", nip],
     () => trackingPemberhentianByNipFasilitator(nip),
-    { enabled: !!nip }
+    {
+      enabled: !!nip,
+      refetchOnWindowFocus: false,
+    }
   );
 
   return (

@@ -1,9 +1,9 @@
 import {
-  getTokenSIASNService,
   postUnorJabatanByNip,
+  uploadDokRiwayat,
 } from "@/services/siasn-services";
 import { getJenisJabatanId } from "@/utils/client-utils";
-import { InboxOutlined } from "@ant-design/icons";
+import { Loading3QuartersOutlined, SendOutlined } from "@ant-design/icons";
 import { Text } from "@mantine/core";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
@@ -15,10 +15,9 @@ import {
   Row,
   Select,
   Space,
-  Upload,
+  Tooltip,
   message,
 } from "antd";
-import axios from "axios";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import DetailJabatanGuruDokter from "./Admin/DetailJabatanGuruDokter";
@@ -30,62 +29,29 @@ import FormStruktural from "./FormStruktural";
 import FormSubJabatan from "./FormSubJabatan";
 import FormUnorSIASN from "./FormUnorSIASN";
 
+import { urlToPdf } from "@/services/master.services";
 import dayjs from "dayjs";
 import "dayjs/locale/id";
 dayjs.locale("id");
-
-export const API_URL = "https://apimws.bkn.go.id:8243/apisiasn/1.0";
 
 const dateFormat = "DD-MM-YYYY";
 
 function ModalFormJabatanUnor({
   kata,
+  file,
   open,
   handleClose,
   handleOk,
-  isLoading,
   data,
 }) {
   const router = useRouter();
+  const queryClient = useQueryClient();
 
-  const [filePath, setFilePath] = useState(null);
-
-  const customRequest = async ({ file, onSuccess, onError }) => {
-    // Pertama, dapatkan token
-    try {
-      const tokenResult = await getTokenSIASNService(); // Asumsikan ini adalah fungsi async Anda untuk mendapatkan token
-      const { wso2, sso } = tokenResult.accessToken;
-
-      const formData = new FormData();
-      formData.append("file", file);
-      formData.append("id_ref_dokumen", "872");
-
-      const config = {
-        headers: {
-          "Content-Type": "multipart/form-data",
-          Authorization: `Bearer ${wso2}`, // Gunakan token yang sesuai
-          Auth: `bearer ${sso}`, // Contoh lain penggunaan token, sesuaikan dengan kebutuhan
-        },
-      };
-
-      // Kemudian, unggah file dengan axios
-      const response = await axios.post(
-        `${API_URL}/upload-dok`,
-        formData,
-        config
-      );
-
-      // Jika berhasil, panggil onSuccess
-      onSuccess(response.data?.data, file);
-    } catch (error) {
-      // Jika terjadi error, panggil onError
-      onError(error);
-      console.error("Upload error:", error);
-    }
-  };
+  const [loading, setLoading] = useState(false);
 
   const handleFinish = async () => {
     try {
+      setLoading(true);
       const {
         tmtJabatan,
         tanggalSk,
@@ -120,27 +86,32 @@ function ModalFormJabatanUnor({
         jenisJabatan: jenis_jabatan_id,
       };
 
-      let payload = {};
-
-      if (filePath) {
-        payload = {
-          ...data,
-          path: [filePath],
-        };
-      } else {
-        payload = data;
-      }
-
       const myPayload = {
         nip: router.query.nip,
-        data: payload,
+        data,
       };
 
-      await handleOk(myPayload);
-
-      console.log(myPayload);
+      if (!file) {
+        await handleOk(myPayload);
+        message.success("Berhasil menyimpan data tanpa file");
+        handleClose();
+      } else {
+        console.log(file);
+        const resultJabatan = await handleOk(myPayload);
+        const formData = new FormData();
+        formData.append("file", file);
+        formData.append("id_riwayat", resultJabatan.id);
+        formData.append("id_ref_dokumen", "872");
+        await uploadDokRiwayat(formData);
+        queryClient.invalidateQueries("unor-jabatan");
+        message.success("Berhasil menyimpan data dengan file");
+        handleClose();
+      }
     } catch (error) {
+      message.error("Gagal menyimpan data");
       console.log(error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -162,33 +133,11 @@ function ModalFormJabatanUnor({
         </Space>
       }
       width={800}
-      confirmLoading={isLoading}
+      confirmLoading={loading}
       onOk={handleFinish}
       open={open}
       onCancel={handleClose}
     >
-      <Upload.Dragger
-        onChange={(info) => {
-          if (info.file.status === "done") {
-            const currentFilePath = info?.file?.response;
-            setFilePath(currentFilePath);
-            message.success(`${info.file.name} file uploaded successfully.`);
-          } else if (info.file.status === "error") {
-            setFilePath(null);
-            message.error(`${info.file.name} file upload failed.`);
-          }
-        }}
-        customRequest={customRequest}
-        maxCount={1}
-        accept=".pdf"
-        multiple={false}
-        onRemove={() => setFilePath(null)}
-      >
-        <p className="ant-upload-drag-icon">
-          <InboxOutlined />
-        </p>
-        <p className="ant-upload-text">Uggah SK Jabatan</p>
-      </Upload.Dragger>
       <Form form={form} layout="vertical">
         <Form.Item
           rules={[{ required: true, message: "Tidak boleh kosong" }]}
@@ -281,6 +230,9 @@ function ModalFormJabatanUnor({
               <DatePicker format={dateFormat} />
             </Form.Item>
           </Col>
+          <a href={data?.file} target="_blank" rel="noreferrer">
+            {data?.file}
+          </a>
         </Row>
       </Form>
     </Modal>
@@ -289,32 +241,53 @@ function ModalFormJabatanUnor({
 
 const FormUnorJabatanTransfer = ({ data, kata = "Edit" }) => {
   const queryClient = useQueryClient();
+  const [file, setFile] = useState(null);
+  const [loading, setLoading] = useState(false);
 
   const [open, setOpen] = useState(false);
-  const handleOpen = () => setOpen(true);
+  const handleOpen = async () => {
+    setLoading(true);
+    const currentFile = data?.file;
+    if (!currentFile) {
+      setOpen(true);
+    } else {
+      const response = await urlToPdf({ url: currentFile });
+      const file = new File([response], "file.pdf", {
+        type: "application/pdf",
+      });
+      setFile(file);
+      setOpen(true);
+    }
+    setLoading(false);
+  };
   const handleClose = () => setOpen(false);
 
   const { mutateAsync: addJabatanUnor, isLoading: isLoadingAddJabatanUnor } =
     useMutation((data) => postUnorJabatanByNip(data), {
       onSuccess: () => {
         queryClient.invalidateQueries("unor-jabatan");
-        message.success("Data berhasil disimpan");
-        handleClose();
       },
       onError: (error) => {
-        message.error(error?.response?.data?.message);
+        console.log(error);
+      },
+      onSettled: () => {
+        queryClient.invalidateQueries("unor-jabatan");
       },
     });
 
   return (
     <>
-      <a onClick={handleOpen}>{kata}</a>
+      <Tooltip title="Transfer">
+        <a onClick={handleOpen}>
+          {loading ? <Loading3QuartersOutlined /> : <SendOutlined />}
+        </a>
+      </Tooltip>
       <ModalFormJabatanUnor
         kata={kata}
         data={data}
         handleOk={addJabatanUnor}
-        isLoading={isLoadingAddJabatanUnor}
         open={open}
+        file={file}
         handleClose={handleClose}
       />
     </>

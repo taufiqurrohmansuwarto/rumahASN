@@ -6,7 +6,10 @@ function ComparePwkByNip({ nip }) {
   const { data, isLoading } = useQuery(
     ["pns-pwk", nip],
     () => getRwPwkByNip(nip),
-    { enabled: !!nip }
+    {
+      enabled: !!nip,
+      refetchOnWindowFocus: false,
+    }
   );
 
   const columns = [

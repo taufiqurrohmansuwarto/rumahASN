@@ -8,7 +8,10 @@ function ComparePindahInstansiByNip({ nip }) {
   const { data, isLoading } = useQuery(
     ["rw-pindah-instansi", nip],
     () => getRwPindahInstansiByNip(nip),
-    { enabled: !!nip }
+    {
+      enabled: !!nip,
+      refetchOnWindowFocus: false,
+    }
   );
 
   const { data: pindahSimaster, isLoading: isLoadingPindahSimaster } = useQuery(
@@ -16,6 +19,7 @@ function ComparePindahInstansiByNip({ nip }) {
     () => rwPindahByNip(nip),
     {
       enabled: !!nip,
+      refetchOnWindowFocus: false,
     }
   );
 

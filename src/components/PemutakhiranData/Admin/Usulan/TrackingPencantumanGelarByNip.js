@@ -13,7 +13,10 @@ const ModalUsulan = ({ open, onClose, nip }) => {
   const { data, isLoading } = useQuery(
     ["usulan-pencantuman-gelar-by-nip", nip],
     () => trackingPencantumanGelarByNipFasilitator(nip),
-    { enabled: !!nip }
+    {
+      enabled: !!nip,
+      refetchOnWindowFocus: false,
+    }
   );
 
   return (

@@ -162,7 +162,9 @@ function IPAsnByNip({ tahun, nip }) {
   const { data: dataIPAsn, isLoading: isLoadingDataIPAsn } = useQuery(
     ["ip-asn-by-nip", `${tahun}-${nip}`],
     () => ipAsnByNip(nip, tahun),
-    {}
+    {
+      refetchOnWindowFocus: false,
+    }
   );
 
   return (

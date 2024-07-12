@@ -664,8 +664,7 @@ const postAngkaKreditByNip = async (req, res) => {
       });
 
       res.json({
-        code: 200,
-        message: "success",
+        id: hasil?.data?.mapData?.rwAngkaKreditId,
       });
     }
   } catch (error) {
@@ -846,7 +845,7 @@ const postUnorJabatanByNip = async (req, res) => {
       request_data: JSON.stringify(data),
     });
 
-    res.json({ success: true });
+    res.json({ id: result?.data?.mapData?.rwJabatanId });
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: "error" });

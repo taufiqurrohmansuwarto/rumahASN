@@ -6,7 +6,9 @@ function CompareJabatanDokterByNip({ nip }) {
   const { data, isLoading } = useQuery(
     ["rw-jabatan-dokter", nip],
     () => rwJabDokterByNip(nip),
-    {}
+    {
+      refetchOnWindowFocus: false,
+    }
   );
 
   const columns = [

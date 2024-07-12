@@ -5,8 +5,14 @@ import {
   getRwAngkakreditByNip,
   getTokenSIASNService,
   postRwAngkakreditByNip,
+  uploadDokRiwayat,
 } from "@/services/siasn-services";
-import { FileAddOutlined } from "@ant-design/icons";
+import {
+  DeleteOutlined,
+  FileAddOutlined,
+  FileOutlined,
+  FilePdfOutlined,
+} from "@ant-design/icons";
 import { Stack, Text } from "@mantine/core";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
@@ -21,6 +27,7 @@ import {
   Button,
   Card,
   DatePicker,
+  Divider,
   Empty,
   Form,
   Input,
@@ -29,13 +36,16 @@ import {
   Popconfirm,
   Radio,
   Skeleton,
+  Space,
   Table,
+  Tooltip,
   Upload,
   message,
 } from "antd";
 import axios from "axios";
 import { useState } from "react";
 import FormRiwayatJabatanByNip from "../FormRiwayatJabatanByNip";
+import UploadDokumen from "../UploadDokumen";
 
 const FormAngkaKredit = ({ visible, onCancel, nip }) => {
   const [form] = Form.useForm();
@@ -84,33 +94,16 @@ const FormAngkaKredit = ({ visible, onCancel, nip }) => {
       const currentFile = fileList[0]?.originFileObj;
 
       if (currentFile) {
-        const result = await getTokenSIASNService();
-
-        const wso2 = result?.accessToken?.wso2;
-        const sso = result?.accessToken?.sso;
-
-        const formData = new FormData();
-
-        formData.append("file", currentFile);
-        formData.append("id_ref_dokumen", "879");
-        const hasil = await axios.post(`${API_URL}/upload-dok`, formData, {
-          headers: {
-            "Content-Type": "multipart/form-data",
-            Authorization: `Bearer ${wso2}`,
-            Auth: `bearer ${sso}`,
-          },
-        });
-
-        const postData = {
-          ...data,
-          path: [hasil?.data?.data],
-        };
-
-        await postRwAngkakreditByNip({
-          data: postData,
+        const angkaKredit = await postRwAngkakreditByNip({
+          data,
           nip,
         });
 
+        const formData = new FormData();
+        formData.append("file", currentFile);
+        formData.append("id_ref_dokumen", "879");
+        formData.append("id_riwayat", angkaKredit?.id);
+        await uploadDokRiwayat(formData);
         queryClient.invalidateQueries("angka-kredit");
         setLoading(false);
         onCancel();
@@ -319,17 +312,30 @@ function CompareAngkaKreditByNip({ nip }) {
       key: "path",
       render: (_, record) => {
         return (
-          <>
-            {record?.path?.[879] && (
-              <a
-                href={`/helpdesk/api/siasn/ws/download?filePath=${record?.path?.[879]?.dok_uri}`}
-                target="_blank"
-                rel="noreferrer"
-              >
-                File
-              </a>
-            )}
-          </>
+          <Space>
+            <Tooltip title="SK PAK">
+              {record?.path?.[880] && (
+                <a
+                  href={`/helpdesk/api/siasn/ws/download?filePath=${record?.path?.[880]?.dok_uri}`}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  <FilePdfOutlined />
+                </a>
+              )}
+            </Tooltip>
+            <Tooltip title="Dok PAK">
+              {record?.path?.[879] && (
+                <a
+                  href={`/helpdesk/api/siasn/ws/download?filePath=${record?.path?.[879]?.dok_uri}`}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  <FilePdfOutlined />
+                </a>
+              )}
+            </Tooltip>
+          </Space>
         );
       },
       responsive: ["sm"],
@@ -397,12 +403,32 @@ function CompareAngkaKreditByNip({ nip }) {
       key: "hapus",
       render: (_, row) => {
         return (
-          <Popconfirm
-            title="Apakah kamu ingin menghapus data riwayat angka kredit?"
-            onConfirm={async () => await handleHapus(row)}
-          >
-            <a>Hapus</a>
-          </Popconfirm>
+          <Space direction="horizontal">
+            <Popconfirm
+              title="Apakah kamu ingin menghapus data riwayat angka kredit?"
+              onConfirm={async () => await handleHapus(row)}
+            >
+              <Tooltip title="Hapus">
+                <a>
+                  <DeleteOutlined />
+                </a>
+              </Tooltip>
+            </Popconfirm>
+            <Divider type="vertical" />
+            <UploadDokumen
+              id={row?.id}
+              invalidateQueries={["angka-kredit", nip]}
+              idRefDokumen="879"
+              nama="PAK"
+            />
+            <Divider type="vertical" />
+            <UploadDokumen
+              id={row?.id}
+              invalidateQueries={["angka-kredit", nip]}
+              idRefDokumen="880"
+              nama="SK PAK"
+            />
+          </Space>
         );
       },
       responsive: ["sm"],

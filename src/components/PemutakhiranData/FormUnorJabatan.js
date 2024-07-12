@@ -1,9 +1,10 @@
 import {
   getTokenSIASNService,
   postUnorJabatanByNip,
+  uploadDokRiwayat,
 } from "@/services/siasn-services";
 import { getJenisJabatanId } from "@/utils/client-utils";
-import { InboxOutlined } from "@ant-design/icons";
+import { FileAddOutlined, InboxOutlined } from "@ant-design/icons";
 import { Text } from "@mantine/core";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
@@ -44,6 +45,24 @@ function ModalFormJabatanUnor({ open, handleClose, handleOk, isLoading }) {
 
   const [filePath, setFilePath] = useState(null);
 
+  const [fileList, setFileList] = useState([]);
+  const [loading, setLoading] = useState(false);
+
+  const handleChange = (info) => {
+    let fileList = [...info.fileList];
+
+    fileList = fileList.slice(-1);
+
+    fileList = fileList.map((file) => {
+      if (file.response) {
+        file.url = file.response.url;
+      }
+      return file;
+    });
+
+    setFileList(fileList);
+  };
+
   const customRequest = async ({ file, onSuccess, onError }) => {
     // Pertama, dapatkan token
     try {
@@ -80,6 +99,7 @@ function ModalFormJabatanUnor({ open, handleClose, handleOk, isLoading }) {
 
   const handleFinish = async () => {
     try {
+      setLoading(true);
       const {
         tmtJabatan,
         tanggalSk,
@@ -114,27 +134,30 @@ function ModalFormJabatanUnor({ open, handleClose, handleOk, isLoading }) {
         jenisJabatan: jenis_jabatan_id,
       };
 
-      let payload = {};
-
-      if (filePath) {
-        payload = {
-          ...data,
-          path: [filePath],
-        };
-      } else {
-        payload = data;
-      }
+      const file = fileList[0]?.originFileObj;
 
       const myPayload = {
         nip: router.query.nip,
-        data: payload,
+        data,
       };
 
-      await handleOk(myPayload);
-
-      console.log(myPayload);
+      if (file) {
+        const result = await handleOk(myPayload);
+        const formData = new FormData();
+        formData.append("file", file);
+        formData.append("id_ref_dokumen", "872");
+        formData.append("id_riwayat", result?.id);
+        await uploadDokRiwayat(formData);
+        message.success("Data berhasil disimpan");
+      } else {
+        await handleOk(myPayload);
+        message.success("Data berhasil disimpan");
+      }
     } catch (error) {
       console.log(error);
+    } finally {
+      setLoading(false);
+      handleClose();
     }
   };
 
@@ -150,34 +173,22 @@ function ModalFormJabatanUnor({ open, handleClose, handleOk, isLoading }) {
         </Space>
       }
       width={800}
-      confirmLoading={isLoading}
+      confirmLoading={loading}
       onOk={handleFinish}
       open={open}
       onCancel={handleClose}
     >
-      <Upload.Dragger
-        onChange={(info) => {
-          if (info.file.status === "done") {
-            const currentFilePath = info?.file?.response;
-            setFilePath(currentFilePath);
-            message.success(`${info.file.name} file uploaded successfully.`);
-          } else if (info.file.status === "error") {
-            setFilePath(null);
-            message.error(`${info.file.name} file upload failed.`);
-          }
-        }}
-        customRequest={customRequest}
-        maxCount={1}
-        accept=".pdf"
-        multiple={false}
-        onRemove={() => setFilePath(null)}
-      >
-        <p className="ant-upload-drag-icon">
-          <InboxOutlined />
-        </p>
-        <p className="ant-upload-text">Uggah SK Jabatan</p>
-      </Upload.Dragger>
       <Form form={form} layout="vertical">
+        <Upload
+          beforeUpload={() => false}
+          maxCount={1}
+          accept=".pdf"
+          onChange={handleChange}
+          fileList={fileList}
+        >
+          <Button icon={<FileAddOutlined />}>Upload SK Jabatan</Button>
+        </Upload>
+
         <Form.Item
           rules={[{ required: true, message: "Tidak boleh kosong" }]}
           name="jenis_jabatan"
@@ -286,11 +297,9 @@ const FormUnorJabatan = () => {
     useMutation((data) => postUnorJabatanByNip(data), {
       onSuccess: () => {
         queryClient.invalidateQueries("unor-jabatan");
-        message.success("Data berhasil disimpan");
-        handleClose();
       },
-      onError: (error) => {
-        message.error(error?.response?.data?.message);
+      onSettled: () => {
+        queryClient.invalidateQueries("unor-jabatan");
       },
     });
 
