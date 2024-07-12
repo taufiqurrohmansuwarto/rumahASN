@@ -213,3 +213,11 @@ export const checkDokumenPerbaikanByNip = (query) => {
     .get(`/admin/${query?.nip}/dokumen-perbaikan/check?${params}`)
     .then((res) => res?.data);
 };
+
+export const urlToPdf = (data) => {
+  return api
+    .post("/download-file", data, {
+      responseType: "blob",
+    })
+    .then((res) => res.data);
+};

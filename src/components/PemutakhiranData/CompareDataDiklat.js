@@ -8,9 +8,11 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Card,
   Descriptions,
+  Divider,
   FloatButton,
   Popconfirm,
   Skeleton,
+  Space,
   Table,
   Tabs,
   Typography,
@@ -18,6 +20,8 @@ import {
 } from "antd";
 import CompareDataDiklatMaster from "./CompareDataDiklatMaster";
 import FormDiklat from "./FormDiklat";
+import UploadDokumen from "./UploadDokumen";
+import { DeleteOutlined } from "@ant-design/icons";
 
 const TableDiklat = ({ data }) => {
   const queryClient = useQueryClient();
@@ -217,8 +221,17 @@ const TableKursus = ({ data }) => {
                 onConfirm={async () => await hapus(row?.id)}
                 title="Apakah anda yakin ingin menghapus data?"
               >
-                <a>Hapus</a>
+                <a>
+                  <DeleteOutlined />
+                </a>
               </Popconfirm>
+              <Divider type="vertical" />
+              <UploadDokumen
+                invalidateQueries={["riwayat-diklat"]}
+                id={row?.id}
+                nama="Kursus"
+                idRefDokumen={881}
+              />
             </Descriptions.Item>
           </Descriptions>
         );
@@ -290,12 +303,22 @@ const TableKursus = ({ data }) => {
       key: "aksi",
       render: (_, row) => {
         return (
-          <Popconfirm
-            onConfirm={async () => await hapus(row?.id)}
-            title="Apakah anda yakin ingin menghapus data?"
-          >
-            <a>Hapus</a>
-          </Popconfirm>
+          <Space>
+            <Popconfirm
+              onConfirm={async () => await hapus(row?.id)}
+              title="Apakah anda yakin ingin menghapus data?"
+            >
+              <a>
+                <DeleteOutlined />
+              </a>
+            </Popconfirm>
+            <UploadDokumen
+              invalidateQueries={["riwayat-diklat"]}
+              id={row?.id}
+              nama="Kursus"
+              idRefDokumen={881}
+            />
+          </Space>
         );
       },
       responsive: ["sm"],
@@ -327,6 +350,7 @@ function CompareDataDiklat() {
         style={{
           marginTop: 16,
         }}
+        type="card"
       >
         <Tabs.TabPane key="diklat-master" tab="SIMASTER">
           <CompareDataDiklatMaster />

@@ -21,6 +21,7 @@ const postRiwayatKursus = async (req, res) => {
     const pnsOrangId = dataUtama?.data?.data?.id;
     const instansiId = "A5EB03E23CCCF6A0E040640A040252AD";
     const type = req?.body?.type;
+    let id;
 
     const data = {
       ...body,
@@ -34,6 +35,7 @@ const postRiwayatKursus = async (req, res) => {
     //     karena ada 2 post maka saya beri toggle untuk membedakan antara kursus dan diklat
     if (type === "kursus") {
       result = await postDataKursus(request, data);
+      id = result?.data?.mapData?.rwKursusId;
     } else if (type === "diklat") {
       // data yang di post ke siasn berbeda antara kursus dan diklat
       const payload = {
@@ -64,8 +66,7 @@ const postRiwayatKursus = async (req, res) => {
         request_data: JSON.stringify(data),
       });
       res.json({
-        message: "OK",
-        data,
+        id: result?.data?.mapData?.rwKursusId,
       });
     }
   } catch (error) {

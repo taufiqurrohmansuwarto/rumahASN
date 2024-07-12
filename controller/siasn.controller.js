@@ -435,7 +435,7 @@ const postSkp2022 = async (req, res) => {
         tahun: toNumber(body?.tahun) || 2022,
       };
 
-      await siasnRequest.post("/skp22/save", data);
+      const result = await siasnRequest.post("/skp22/save", data);
 
       await createLogSIASN({
         userId: req?.user?.customId,
@@ -444,7 +444,11 @@ const postSkp2022 = async (req, res) => {
         siasnService: "skp22",
       });
 
-      res.json({ code: 200 });
+      const payload = {
+        id: result?.data?.mapData,
+      };
+
+      res.json(payload);
     }
   } catch (error) {
     console.log(error);

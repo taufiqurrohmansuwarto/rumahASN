@@ -1,3 +1,4 @@
+import { fetchPdf } from "@/utils/client-utils";
 import {
   departmentDetail,
   employeeTodayBirthdayDetail,
@@ -11,6 +12,7 @@ import {
   getRwPendidikanMaster,
 } from "@/utils/master.utils";
 import arrayToTree from "array-to-tree";
+import axios from "axios";
 import dayjs from "dayjs";
 import "dayjs/locale/id";
 import relativeTime from "dayjs/plugin/relativeTime";
@@ -485,7 +487,25 @@ const employeeTodayBirthday = async (req, res) => {
   }
 };
 
+const urlToPdf = async (req, res) => {
+  try {
+    const pdfUrl = req?.body?.url;
+    const response = await axios.get(pdfUrl, {
+      responseType: "arraybuffer",
+    });
+
+    const buffer = Buffer.from(response?.data, "binary");
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader("Content-Disposition", "inline; filename=file.pdf");
+    res.send(buffer);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ code: 500, message: "Internal Server Error" });
+  }
+};
+
 module.exports = {
+  urlToPdf,
   employeeTodayBirthday,
   unorASN,
   unorPTTPK,

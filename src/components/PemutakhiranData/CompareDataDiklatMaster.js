@@ -1,7 +1,7 @@
 import FormTransferDiklat from "@/components/PemutakhiranData/FormTransferDiklat";
-import { rwDiklatMaster } from "@/services/master.services";
-import { getTokenSIASNService, postRwKursus } from "@/services/siasn-services";
-import { InboxOutlined } from "@ant-design/icons";
+import { rwDiklatMaster, urlToPdf } from "@/services/master.services";
+import { postRwKursus } from "@/services/siasn-services";
+import { SendOutlined } from "@ant-design/icons";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Button,
@@ -9,12 +9,12 @@ import {
   Form,
   Modal,
   Table,
-  Upload,
+  Tooltip,
   message,
 } from "antd";
-import axios from "axios";
 import { useEffect, useState } from "react";
 
+import { uploadDokumenRiwayat } from "@/utils/client-utils";
 import dayjs from "dayjs";
 import "dayjs/locale/id";
 import relativeTime from "dayjs/plugin/relativeTime";
@@ -27,23 +27,40 @@ const TransferModal = ({ open, handleClose, data }) => {
   const [form] = Form.useForm();
   const queryClient = useQueryClient();
 
-  const [filePath, setFilePath] = useState(null);
+  const [file, setFile] = useState(null);
 
-  const { mutate: tambah, isLoading } = useMutation(
+  useEffect(() => {
+    if (data) {
+      const fetchAndSetFile = async () => {
+        const response = await urlToPdf({ url: data?.file_diklat });
+
+        const file = new File([response], "file.pdf", {
+          type: "application/pdf",
+        });
+
+        console.log(file);
+
+        setFile(file);
+      };
+      fetchAndSetFile();
+    }
+  }, [data]);
+
+  const { mutateAsync: tambah, isLoading } = useMutation(
     (data) => postRwKursus(data),
     {
       onSuccess: () => {
         message.success("Data berhasil disimpan");
         form.resetFields();
         handleClose();
-        setFilePath(null);
+        setFile(null);
       },
       onError: (error) => {
         message.error(error?.response?.data?.message);
       },
       onSettled: () => {
         queryClient.invalidateQueries("riwayat-diklat");
-        setFilePath(null);
+        setFile(null);
       },
     }
   );
@@ -53,6 +70,7 @@ const TransferModal = ({ open, handleClose, data }) => {
       const result = await form.validateFields();
 
       const type = result?.jenisDiklatId === 1 ? "diklat" : "kursus";
+      const id_ref_dokumen = type === "diklat" ? "874" : "881";
 
       const payload = {
         ...result,
@@ -62,20 +80,16 @@ const TransferModal = ({ open, handleClose, data }) => {
           result?.tanggalSelesaiKursus?.format("DD-MM-YYYY"),
       };
 
-      if (!filePath) {
-        tambah(payload);
+      if (!!file) {
+        const result = await tambah(payload);
+        const formData = new FormData();
+        formData.append("id_riwayat", result?.id);
+        formData.append("id_ref_dokumen", id_ref_dokumen);
+        formData.append("file", file);
+        await uploadDokumenRiwayat(formData);
       } else {
-        const currentPath = filePath?.data?.data;
-        const data = {
-          ...payload,
-          path: [currentPath],
-        };
-
-        tambah(data);
-        // console.log(data);
+        await tambah(payload);
       }
-
-      // tambah(payload);
     } catch (error) {
       console.log(error);
     }
@@ -91,49 +105,6 @@ const TransferModal = ({ open, handleClose, data }) => {
       tanggalKursus: dayjs(data?.tanggal_mulai, "DD-MM-YYYY"),
     });
   }, [form, data]);
-
-  const customRequest = async ({ file, onSuccess, onError }) => {
-    // Pertama, dapatkan token
-    try {
-      const tokenResult = await getTokenSIASNService(); // Asumsikan ini adalah fungsi async Anda untuk mendapatkan token
-      const { wso2, sso } = tokenResult.accessToken;
-
-      const formData = new FormData();
-      formData.append("file", file);
-      const jenisDiklatId = form.getFieldValue("jenisDiklatId");
-
-      if (!jenisDiklatId) {
-        onError("Jenis Diklat tidak boleh kosong");
-      } else {
-        const type = jenisDiklatId === 1 ? "diklat" : "kursus";
-        const id_ref_dokumen = type === "diklat" ? "874" : "881";
-
-        formData.append("id_ref_dokumen", id_ref_dokumen);
-
-        const config = {
-          headers: {
-            "Content-Type": "multipart/form-data",
-            Authorization: `Bearer ${wso2}`, // Gunakan token yang sesuai
-            Auth: `bearer ${sso}`, // Contoh lain penggunaan token, sesuaikan dengan kebutuhan
-          },
-        };
-
-        // Kemudian, unggah file dengan axios
-        const response = await axios.post(
-          `${API_URL}/upload-dok`,
-          formData,
-          config
-        );
-
-        // Jika berhasil, panggil onSuccess
-        onSuccess(response, file);
-      }
-    } catch (error) {
-      // Jika terjadi error, panggil onError
-      onError(error);
-      console.error("Upload error:", error);
-    }
-  };
 
   return (
     <Modal
@@ -151,34 +122,11 @@ const TransferModal = ({ open, handleClose, data }) => {
         data={data}
         handleClose={handleClose}
       />
-      <Upload.Dragger
-        onChange={(info) => {
-          if (info.file.status === "done") {
-            const currentFilePath = info?.file?.response;
-            setFilePath(currentFilePath);
-            message.success(`${info.file.name} file uploaded successfully.`);
-          } else if (info.file.status === "error") {
-            setFilePath(null);
-            message.error(`${info.file.name} file upload failed.`);
-          }
-        }}
-        customRequest={customRequest}
-        maxCount={1}
-        accept=".pdf"
-        multiple={false}
-        onRemove={() => setFilePath(null)}
-      >
-        <p className="ant-upload-drag-icon">
-          <InboxOutlined />
-        </p>
-        <p className="ant-upload-text">
-          Click or drag file to this area to upload
-        </p>
-        <p className="ant-upload-hint">
-          Support for a single or bulk upload. Strictly prohibit from uploading
-          company data or other band files
-        </p>
-      </Upload.Dragger>
+      {file && (
+        <a href={data?.file_diklat} target="_blank" rel="noreferrer">
+          {data?.file_diklat}
+        </a>
+      )}
     </Modal>
   );
 };
@@ -302,7 +250,13 @@ function CompareDataDiklatMaster() {
         // } else {
         //   return null;
         // }
-        return <a onClick={() => handleOpen(row)}>Transfer</a>;
+        return (
+          <Tooltip title="Transfer">
+            <a onClick={() => handleOpen(row)}>
+              <SendOutlined />
+            </a>
+          </Tooltip>
+        );
       },
       responsive: ["sm"],
     },

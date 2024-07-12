@@ -99,30 +99,23 @@ const ModalFormDiklat = ({
 
         const wso2 = result?.accessToken?.wso2;
         const sso = result?.accessToken?.sso;
-
+        const currentPayload = await tambah(payload);
         const formData = new FormData();
-
         formData.append("file", file);
         formData.append("id_ref_dokumen", id_ref_dokumen);
-        const hasil = await axios.post(`${API_URL}/upload-dok`, formData, {
+        formData.append("id_riwayat", currentPayload?.id);
+
+        await axios.post(`${API_URL}/upload-dok-rw`, formData, {
           headers: {
             "Content-Type": "multipart/form-data",
             Authorization: `Bearer ${wso2}`,
             Auth: `bearer ${sso}`,
           },
         });
-
-        payloadData = {
-          ...payload,
-          path: [hasil?.data?.data],
-        };
       } else {
-        payloadData = {
-          ...payload,
-        };
+        await tambah(payload);
       }
-
-      await tambah(payloadData);
+      message.success("Data berhasil disimpan");
     } catch (error) {
       console.log(error);
     } finally {
