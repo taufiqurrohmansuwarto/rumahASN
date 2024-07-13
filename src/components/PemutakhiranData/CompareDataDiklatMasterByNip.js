@@ -1,13 +1,12 @@
 import FormTransferDiklat from "@/components/PemutakhiranData/FormTransferDiklat";
-import { rwDiklatMasterByNip } from "@/services/master.services";
+import { rwDiklatMasterByNip, urlToPdf } from "@/services/master.services";
 import {
-  getTokenSIASNService,
   postRiwayatKursusByNip,
+  uploadDokRiwayat,
 } from "@/services/siasn-services";
-import { InboxOutlined } from "@ant-design/icons";
+import { SendOutlined } from "@ant-design/icons";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Form, Modal, Table, Upload, message } from "antd";
-import axios from "axios";
+import { Form, Modal, Spin, Table, Tooltip, message } from "antd";
 import { useEffect, useState } from "react";
 
 import dayjs from "dayjs";
@@ -18,60 +17,65 @@ dayjs.extend(relativeTime);
 
 export const API_URL = "https://apimws.bkn.go.id:8243/apisiasn/1.0";
 
-const TransferModal = ({ open, handleClose, data, nip }) => {
+const TransferModal = ({ open, handleClose, data, nip, file }) => {
   const [form] = Form.useForm();
   const queryClient = useQueryClient();
 
-  const [filePath, setFilePath] = useState(null);
+  const [loading, setLoading] = useState(false);
 
-  const { mutate: tambah, isLoading } = useMutation(
+  const { mutateAsync: tambah } = useMutation(
     (data) => postRiwayatKursusByNip(data),
-    {
-      onSuccess: () => {
-        message.success("Data berhasil disimpan");
-        form.resetFields();
-        handleClose();
-        setFilePath(null);
-      },
-      onError: (error) => {
-        message.error(error?.response?.data?.message);
-      },
-      onSettled: () => {
-        queryClient.invalidateQueries(["riwayat-diklat-by-nip", nip]);
-      },
-    }
+    {}
   );
 
   const handleFinish = async () => {
-    const result = await form.validateFields();
+    setLoading(true);
+    try {
+      const result = await form.validateFields();
 
-    const type = result?.jenisDiklatId === 1 ? "diklat" : "kursus";
+      const type = result?.jenisDiklatId === 1 ? "diklat" : "kursus";
+      const id_ref_dokumen = type === "diklat" ? "874" : "881";
 
-    const payload = {
-      ...result,
-      type,
-      tanggalKursus: result?.tanggalKursus?.format("DD-MM-YYYY"),
-      tanggalSelesaiKursus: result?.tanggalSelesaiKursus?.format("DD-MM-YYYY"),
-    };
-
-    if (!filePath) {
-      message.error("File belum diupload");
-      return;
-    } else {
-      const data = {
-        ...payload,
-        path: [filePath],
+      const payload = {
+        ...result,
+        type,
+        tanggalKursus: result?.tanggalKursus?.format("DD-MM-YYYY"),
+        tanggalSelesaiKursus:
+          result?.tanggalSelesaiKursus?.format("DD-MM-YYYY"),
       };
 
-      const payloads = {
-        nip,
-        data,
+      const dataPayload = {
+        data: payload,
+        nip: nip,
       };
 
-      tambah(payloads);
+      if (file) {
+        const responseDiklat = await tambah(dataPayload);
+        const id_riwayat = responseDiklat?.id;
+
+        const formData = new FormData();
+        formData.append("id_ref_dokumen", id_ref_dokumen);
+        formData.append("id_riwayat", id_riwayat);
+        formData.append("file", file);
+
+        await uploadDokRiwayat(formData);
+
+        message.success("Data berhasil disimpan");
+        form.resetFields();
+        handleClose();
+      } else {
+        await tambah(dataPayload);
+        message.success("Data berhasil disimpan");
+        form.resetFields();
+        handleClose();
+      }
+    } catch (error) {
+      message.error("Gagal mengirim data");
+      console.error(error);
+    } finally {
+      queryClient.invalidateQueries(["riwayat-diklat-by-nip", nip]);
+      setLoading(false);
     }
-
-    // tambah(payload);
   };
 
   useEffect(() => {
@@ -83,41 +87,7 @@ const TransferModal = ({ open, handleClose, data, nip }) => {
       jumlahJam: data?.jml,
       tanggalKursus: dayjs(data?.tanggal_mulai, "DD-MM-YYYY"),
     });
-  }, [form, data]);
-
-  const customRequest = async ({ file, onSuccess, onError }) => {
-    // Pertama, dapatkan token
-    try {
-      const tokenResult = await getTokenSIASNService(); // Asumsikan ini adalah fungsi async Anda untuk mendapatkan token
-      const { wso2, sso } = tokenResult.accessToken;
-
-      const formData = new FormData();
-      formData.append("file", file);
-      formData.append("id_ref_dokumen", "881");
-
-      const config = {
-        headers: {
-          "Content-Type": "multipart/form-data",
-          Authorization: `Bearer ${wso2}`, // Gunakan token yang sesuai
-          Auth: `bearer ${sso}`, // Contoh lain penggunaan token, sesuaikan dengan kebutuhan
-        },
-      };
-
-      // Kemudian, unggah file dengan axios
-      const response = await axios.post(
-        `${API_URL}/upload-dok`,
-        formData,
-        config
-      );
-
-      // Jika berhasil, panggil onSuccess
-      onSuccess(response.data?.data, file);
-    } catch (error) {
-      // Jika terjadi error, panggil onError
-      onError(error);
-      console.error("Upload error:", error);
-    }
-  };
+  }, [form, data, file]);
 
   return (
     <Modal
@@ -125,7 +95,7 @@ const TransferModal = ({ open, handleClose, data, nip }) => {
       title="Transfer Data"
       onOk={handleFinish}
       open={open}
-      confirmLoading={isLoading}
+      confirmLoading={loading}
       onCancel={handleClose}
     >
       <FormTransferDiklat
@@ -133,37 +103,14 @@ const TransferModal = ({ open, handleClose, data, nip }) => {
         form={form}
         onFinish={handleFinish}
         data={data}
+        file={file}
         handleClose={handleClose}
       />
-
-      <Upload.Dragger
-        onChange={(info) => {
-          if (info.file.status === "done") {
-            const currentFilePath = info?.file?.response;
-            setFilePath(currentFilePath);
-            message.success(`${info.file.name} file uploaded successfully.`);
-          } else if (info.file.status === "error") {
-            setFilePath(null);
-            message.error(`${info.file.name} file upload failed.`);
-          }
-        }}
-        customRequest={customRequest}
-        maxCount={1}
-        accept=".pdf"
-        multiple={false}
-        onRemove={() => setFilePath(null)}
-      >
-        <p className="ant-upload-drag-icon">
-          <InboxOutlined />
-        </p>
-        <p className="ant-upload-text">
-          Click or drag file to this area to upload
-        </p>
-        <p className="ant-upload-hint">
-          Support for a single or bulk upload. Strictly prohibit from uploading
-          company data or other band files
-        </p>
-      </Upload.Dragger>
+      {file && (
+        <a href={data?.file_diklat} target="_blank" rel="noreferrer">
+          {data?.file_diklat}
+        </a>
+      )}
     </Modal>
   );
 };
@@ -172,20 +119,43 @@ function CompareDataDiklatMasterByNip({ nip }) {
   const { data, isLoading } = useQuery(
     ["rw-diklat-master", nip],
     () => rwDiklatMasterByNip(nip),
-    {}
+    {
+      refetchOnWindowFocus: false,
+    }
   );
 
   const [open, setOpen] = useState(false);
   const [selectedRow, setSelectedRow] = useState(null);
 
-  const handleOpen = (data) => {
-    setOpen(true);
-    setSelectedRow(data);
+  const [loading, setLoading] = useState(false);
+  const [file, setFile] = useState(null);
+
+  const handleOpenModal = async (data) => {
+    setLoading(true);
+    try {
+      if (data?.file_diklat) {
+        const response = await urlToPdf({ url: data?.file_diklat });
+        const currentFile = new File([response], data?.file_diklat, {
+          type: "application/pdf",
+        });
+        setFile(currentFile);
+      } else {
+        setFile(null);
+      }
+      setOpen(true);
+      setSelectedRow(data);
+    } catch (error) {
+      console.error("Error processing file:", error);
+      setFile(null);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleClose = () => {
     setOpen(false);
     setSelectedRow(null);
+    setFile(null);
   };
 
   const columns = [
@@ -236,22 +206,20 @@ function CompareDataDiklatMasterByNip({ nip }) {
       title: "Aksi",
       key: "aksi",
       render: (_, row) => {
-        if (
-          row?.jenis_diklat_id === "1231" ||
-          row?.jenis_diklat_id === "1232" ||
-          row?.jenis_diklat_id === "1233" ||
-          row?.jenis_diklat_id === "1237"
-        ) {
-          return <a onClick={() => handleOpen(row)}>Transfer</a>;
-        } else {
-          return null;
-        }
+        return (
+          <Tooltip title="Transfer Diklat">
+            <a onClick={async () => await handleOpenModal(row)}>
+              <SendOutlined />
+            </a>
+          </Tooltip>
+        );
       },
     },
   ];
 
   return (
     <div>
+      <Spin spinning={loading} fullscreen />
       <Table
         pagination={false}
         dataSource={data}
@@ -262,6 +230,7 @@ function CompareDataDiklatMasterByNip({ nip }) {
       <TransferModal
         nip={nip}
         open={open}
+        file={file}
         handleClose={handleClose}
         data={selectedRow}
       />

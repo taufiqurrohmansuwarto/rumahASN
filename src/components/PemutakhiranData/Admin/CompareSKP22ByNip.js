@@ -23,6 +23,7 @@ import {
 import axios from "axios";
 import { useState } from "react";
 import FormCariPNSKinerja from "../FormCariPNSKinerja";
+import UploadDokumen from "../UploadDokumen";
 
 // const data = {
 //     hasilKinerjaNilai: 0,
@@ -207,13 +208,20 @@ function CompareSKP22ByNip({ nip }) {
     setVisible(false);
   };
 
-  const { data, isLoading } = useQuery(["data-skp-22", nip], () =>
-    getRwSkp22ByNip(nip)
+  const { data, isLoading } = useQuery(
+    ["data-skp-22", nip],
+    () => getRwSkp22ByNip(nip),
+    {
+      refetchOnWindowFocus: false,
+    }
   );
 
   const { data: dataMaster, isLoading: isLoadingMaster } = useQuery(
     ["data-master-skp-by-nip", nip],
-    () => rwSkpMasterByNip(nip)
+    () => rwSkpMasterByNip(nip),
+    {
+      refetchOnWindowFocus: false,
+    }
   );
 
   const columns = [
@@ -223,9 +231,9 @@ function CompareSKP22ByNip({ nip }) {
       render: (_, record) => {
         return (
           <>
-            {record?.path?.[873] && (
+            {record?.path?.[890] && (
               <a
-                href={`/helpdesk/api/siasn/ws/download?filePath=${record?.path?.[873]?.dok_uri}`}
+                href={`/helpdesk/api/siasn/ws/download?filePath=${record?.path?.[890]?.dok_uri}`}
                 target="_blank"
                 rel="noreferrer"
               >
@@ -276,6 +284,20 @@ function CompareSKP22ByNip({ nip }) {
     {
       title: "Tahun",
       dataIndex: "tahun",
+    },
+    {
+      title: "Aksi",
+      key: "aksi",
+      render: (_, row) => {
+        return (
+          <UploadDokumen
+            id={row?.id}
+            idRefDokumen={"891"}
+            invalidateQueries={["data-skp-22"]}
+            nama="Kinerja"
+          />
+        );
+      },
     },
   ];
 

@@ -1382,7 +1382,7 @@ const removeKursus = async (req, res) => {
     await createLogSIASN({
       userId: req?.user?.customId,
       type: "DELETE",
-      siasnService: "KURSUS",
+      siasnService: "DIKLAT dan KURSUS",
       employeeNumber: req?.user?.employee_number,
       request_data: JSON.stringify(id),
     });

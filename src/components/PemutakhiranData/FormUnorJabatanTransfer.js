@@ -15,6 +15,7 @@ import {
   Row,
   Select,
   Space,
+  Spin,
   Tooltip,
   message,
 } from "antd";
@@ -277,9 +278,10 @@ const FormUnorJabatanTransfer = ({ data, kata = "Edit" }) => {
 
   return (
     <>
+      <Spin spinning={loading} fullscreen />
       <Tooltip title="Transfer">
         <a onClick={handleOpen}>
-          {loading ? <Loading3QuartersOutlined /> : <SendOutlined />}
+          <SendOutlined />
         </a>
       </Tooltip>
       <ModalFormJabatanUnor

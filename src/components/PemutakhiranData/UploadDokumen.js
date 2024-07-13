@@ -1,21 +1,8 @@
-import {
-  getTokenSIASNService,
-  uploadDokRiwayat,
-} from "@/services/siasn-services";
-import { API_URL, uploadDokumenRiwayat } from "@/utils/client-utils";
+import { uploadDokRiwayat } from "@/services/siasn-services";
 import { CloudUploadOutlined } from "@ant-design/icons";
 import { Alert, Stack } from "@mantine/core";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import {
-  Button,
-  Form,
-  Modal,
-  Tooltip,
-  Typography,
-  Upload,
-  message,
-} from "antd";
-import axios from "axios";
+import { Button, Modal, Tooltip, Typography, Upload, message } from "antd";
 import { useState } from "react";
 
 const ModalUploadDokumen = ({
@@ -38,7 +25,6 @@ const ModalUploadDokumen = ({
         onCancel();
       },
       onSettled: () => {
-        setLoading(false);
         queryClient.invalidateQueries(invalidateQueries);
       },
       onError: () => {
@@ -48,7 +34,6 @@ const ModalUploadDokumen = ({
 
   const handleUpload = async () => {
     try {
-      setLoading(true);
       if (fileList.length === 0) {
         message.error("Please upload a file.");
         return;
@@ -102,7 +87,7 @@ const ModalUploadDokumen = ({
       open={open}
       onCancel={onCancel}
       onOk={handleUpload}
-      confirmLoading={loading}
+      confirmLoading={loadingUpload}
     >
       <Stack>
         <Alert color="blue">
@@ -131,6 +116,7 @@ function UploadDokumen({ id, nama, idRefDokumen, invalidateQueries }) {
         </Tooltip>
       </Typography.Link>
       <ModalUploadDokumen
+        invalidateQueries={invalidateQueries}
         nama={nama}
         idRefDokumen={idRefDokumen}
         id={id}
