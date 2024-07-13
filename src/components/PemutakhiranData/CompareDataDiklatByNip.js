@@ -1,8 +1,25 @@
-import { getRwDiklatByNip } from "@/services/siasn-services";
+import {
+  getRwDiklatByNip,
+  removeDiklatKursusById,
+} from "@/services/siasn-services";
+import { DeleteOutlined } from "@ant-design/icons";
 import { Stack } from "@mantine/core";
-import { useQuery } from "@tanstack/react-query";
-import { Card, Skeleton, Table, Tabs, Typography } from "antd";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  Card,
+  Divider,
+  Popconfirm,
+  Skeleton,
+  Space,
+  Table,
+  Tabs,
+  Tooltip,
+  Typography,
+  message,
+} from "antd";
+import { useRouter } from "next/router";
 import CompareDataDiklatMasterByNip from "./CompareDataDiklatMasterByNip";
+import UploadDokumen from "./UploadDokumen";
 
 const TableDiklat = ({ data }) => {
   const columns = [
@@ -59,6 +76,34 @@ const TableDiklat = ({ data }) => {
 };
 
 const TableKursus = ({ data }) => {
+  const router = useRouter();
+  const nip = router.query?.nip;
+
+  const queryClient = useQueryClient();
+  const { mutateAsync: hapus, isLoading: isLoadingHapus } = useMutation(
+    (data) => removeDiklatKursusById(data),
+    {
+      onSuccess: () => {
+        message.success("Berhasil menghapus data");
+        queryClient.invalidateQueries(["riwayat-diklat-by-nip"]);
+      },
+      onSettled: () => {
+        queryClient.invalidateQueries(["riwayat-diklat-by-nip"]);
+      },
+      onError: () => {
+        message.error("Gagal menghapus data");
+      },
+    }
+  );
+
+  const handleHapus = async (data) => {
+    const payload = {
+      nip,
+      id: data?.id,
+    };
+    await hapus(payload);
+  };
+
   const columns = [
     {
       title: "File",
@@ -131,6 +176,33 @@ const TableKursus = ({ data }) => {
       title: "Jumlah Jam",
       dataIndex: "jumlahJam",
     },
+    {
+      title: "Aksi",
+      key: "aksi",
+      render: (_, row) => {
+        return (
+          <Space direction="horizontal">
+            <Tooltip title="Hapus">
+              <Popconfirm
+                title="Apakah anda yakin ingin menghapus data ini?"
+                onConfirm={() => handleHapus(row)}
+              >
+                <a>
+                  <DeleteOutlined />
+                </a>
+              </Popconfirm>
+            </Tooltip>
+            <Divider type="vertical" />
+            <UploadDokumen
+              id={row?.id}
+              invalidateQueries={["riwayat-diklat-by-nip"]}
+              idRefDokumen={"881"}
+              nama={"Kursus"}
+            />
+          </Space>
+        );
+      },
+    },
   ];
   return (
     <Table
@@ -147,7 +219,9 @@ function CompareDataDiklatByNip({ nip }) {
   const { data, isLoading } = useQuery(
     ["riwayat-diklat-by-nip", nip],
     () => getRwDiklatByNip(nip),
-    {}
+    {
+      refetchOnWindowFocus: false,
+    }
   );
 
   return (

@@ -1,5 +1,6 @@
 import {
   getTokenSIASNService,
+  postRwDiklatByNip,
   postRwKursus,
   refDiklatStruktural,
   refJenisDiklat,
@@ -26,43 +27,15 @@ const ModalFormDiklat = ({
   form,
   onFinish,
   namaDiklat,
+  file,
 }) => {
   const queryClient = useQueryClient();
 
-  const [fileList, setFileList] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  const handleChange = (info) => {
-    let fileList = [...info.fileList];
-
-    fileList = fileList.slice(-1);
-
-    fileList = fileList.map((file) => {
-      if (file.response) {
-        file.url = file.response.url;
-      }
-      return file;
-    });
-
-    setFileList(fileList);
-  };
-
   const { mutateAsync: tambah, isLoading } = useMutation(
-    (data) => postRwKursus(data),
-    {
-      onSuccess: () => {
-        message.success("Data berhasil disimpan");
-        form.resetFields();
-        setFileList([]);
-        onCancel();
-      },
-      onError: (error) => {
-        message.error(error?.response?.data?.message);
-      },
-      onSettled: () => {
-        queryClient.invalidateQueries("riwayat-diklat");
-      },
-    }
+    (data) => postRwDiklatByNip(data),
+    {}
   );
 
   const handleOk = async () => {
@@ -70,9 +43,7 @@ const ModalFormDiklat = ({
       setLoading(true);
       const result = await form.validateFields();
       const type = result?.jenisDiklatId === 1 ? "diklat" : "kursus";
-
-      let payloadData;
-      let id_ref_dokumen;
+      const id_ref_dokumen = type === "diklat" ? "874" : "881";
 
       const payload = {
         ...result,
@@ -82,38 +53,13 @@ const ModalFormDiklat = ({
           result?.tanggalSelesaiKursus?.format("DD-MM-YYYY"),
       };
 
-      const file = fileList[0]?.originFileObj;
-      id_ref_dokumen = type === "diklat" ? "874" : "881";
-
       if (file) {
-        const result = await getTokenSIASNService();
-
-        const wso2 = result?.accessToken?.wso2;
-        const sso = result?.accessToken?.sso;
-
-        const formData = new FormData();
-
-        formData.append("file", file);
-        formData.append("id_ref_dokumen", id_ref_dokumen);
-        const hasil = await axios.post(`${API_URL}/upload-dok`, formData, {
-          headers: {
-            "Content-Type": "multipart/form-data",
-            Authorization: `Bearer ${wso2}`,
-            Auth: `bearer ${sso}`,
-          },
-        });
-
-        payloadData = {
-          ...payload,
-          path: [hasil?.data?.data],
-        };
+        console.log(payload);
+        setLoading(false);
       } else {
-        payloadData = {
-          ...payload,
-        };
+        setLoading(false);
+        console.log(payload);
       }
-
-      await tambah(payloadData);
     } catch (error) {
       console.log(error);
     } finally {
@@ -248,7 +194,14 @@ const ModalFormDiklat = ({
   );
 };
 
-function FormTransferDiklat({ data, onClose, form, onFinish, namaDiklat }) {
+function FormTransferDiklat({
+  data,
+  onClose,
+  form,
+  onFinish,
+  namaDiklat,
+  file,
+}) {
   const { data: jenisDiklat, isLoading: loadingJenisDiklat } = useQuery(
     ["ref-jenis-diklat"],
     () => refJenisDiklat(),
@@ -265,6 +218,7 @@ function FormTransferDiklat({ data, onClose, form, onFinish, namaDiklat }) {
   return (
     <>
       <ModalFormDiklat
+        file={file}
         form={form}
         onFinish={onFinish}
         jenisDiklat={jenisDiklat}

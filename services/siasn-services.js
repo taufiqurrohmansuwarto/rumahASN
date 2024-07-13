@@ -238,6 +238,14 @@ export const getRwDiklatByNip = (nip) => {
   return api.get(`/admin/${nip}/rw-diklat`).then((res) => res.data);
 };
 
+export const postRwDiklatByNip = ({ nip, data }) => {
+  return api.post(`/admin/${nip}/rw-diklat`, data).then((res) => res.data);
+};
+
+export const removeDiklatKursusById = ({ nip, id }) => {
+  return api.delete(`/admin/${nip}/rw-diklat/${id}`).then((res) => res.data);
+};
+
 // angkakredit
 export const getRwAngkakredit = () => {
   return api.get("/pns/rw-angkakredit").then((res) => res.data);

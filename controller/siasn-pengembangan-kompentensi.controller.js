@@ -129,8 +129,7 @@ const postRiwayatKursusByNip = async (req, res) => {
         request_data: JSON.stringify(data),
       });
       res.json({
-        message: "OK",
-        data,
+        id: result?.data?.mapData?.rwKursusId,
       });
     }
   } catch (error) {
