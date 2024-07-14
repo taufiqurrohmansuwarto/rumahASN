@@ -1,7 +1,7 @@
 import create from "zustand";
 
 const useFileStore = create((set) => ({
-  fileList: null,
+  fileList: [],
   setFileList: (fileList) => set({ fileList }),
 }));
 

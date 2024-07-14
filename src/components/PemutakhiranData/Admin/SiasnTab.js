@@ -56,14 +56,14 @@ function SiasnTab({ nip }) {
           <Tabs.TabPane tab="Jab, Pend, & Pangkat" key="jab-pend-pangkat">
             <CompareJabatanByNip nip={nip} />
           </Tabs.TabPane>
+          <Tabs.TabPane tab="Kinerja (SKP)" key="kinerja">
+            <CompareSKP22ByNip nip={nip} />
+          </Tabs.TabPane>
           <Tabs.TabPane tab="Kinerja Periodik" key="kinerja-periodik">
             <CompareKinerjaPeriodikNip nip={nip} />
           </Tabs.TabPane>
           <Tabs.TabPane tab="Angka Kredit" key="angka-kredit">
             <CompareAngkaKreditByNip nip={nip} />
-          </Tabs.TabPane>
-          <Tabs.TabPane tab="Kinerja" key="kinerja">
-            <CompareSKP22ByNip nip={nip} />
           </Tabs.TabPane>
           <Tabs.TabPane tab="Diklat dan Kursus" key="diklat-dan-kursus">
             <CompareDataDiklatByNip nip={nip} />

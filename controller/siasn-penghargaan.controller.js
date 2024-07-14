@@ -35,9 +35,7 @@ const handlePenghargaanCreate = async (req, res, nip) => {
       employeeNumber: req.query?.nip,
       request_data: JSON.stringify(req.body),
     });
-    res.json({
-      message: "Berhasil menambahkan penghargaan",
-    });
+    res.json({ id: data?.data?.mapData?.rwPenghargaanId });
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: "Internal server error" });

@@ -2,7 +2,6 @@ const FormData = require("form-data");
 
 const uplaodDokRwSIASN = async (req, res) => {
   try {
-    const body = req?.body;
     const request = req?.siasnRequest;
     const file = req?.file;
     const id_ref_dokumen = req?.body?.id_ref_dokumen;
@@ -19,12 +18,12 @@ const uplaodDokRwSIASN = async (req, res) => {
       },
     });
 
-    res.json({
-      message: "Berhasil upload dokumen",
-    });
+    const responseMessage =
+      response?.data?.message || "Berhasil Upload Dokumen";
+    res.json(responseMessage);
   } catch (error) {
-    console.log(error);
-    res.status(500).json({ message: "Internal server error" });
+    const errorMessage = error?.message || "Internal server error";
+    res.status(500).json({ message: errorMessage });
   }
 };
 

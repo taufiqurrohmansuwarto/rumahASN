@@ -2,8 +2,18 @@ import {
   getRwKinerjaPeriodikByNip,
   removeKinerjaPeriodikByNip,
 } from "@/services/siasn-services";
+import { DeleteOutlined } from "@ant-design/icons";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Card, Flex, Popconfirm, Table, message } from "antd";
+import {
+  Card,
+  Divider,
+  Flex,
+  Popconfirm,
+  Space,
+  Table,
+  Tooltip,
+  message,
+} from "antd";
 import CreateKinerjaPeriodik from "./CreateKinerjaPeriodik";
 
 const CompareKinerjaPeriodikNip = ({ nip }) => {
@@ -12,7 +22,9 @@ const CompareKinerjaPeriodikNip = ({ nip }) => {
   const { data, isLoading } = useQuery(
     ["kinerja-periodik", nip],
     () => getRwKinerjaPeriodikByNip(nip),
-    {}
+    {
+      refetchOnWindowFocus: false,
+    }
   );
 
   const { mutateAsync: hapus, isLoading: isLoadingHapus } = useMutation(
@@ -51,12 +63,19 @@ const CompareKinerjaPeriodikNip = ({ nip }) => {
       title: "Aksi",
       key: "aksi",
       render: (_, row) => (
-        <Popconfirm
-          title="Are you sure you want to delete this item?"
-          onConfirm={() => handleHapus(row)}
-        >
-          <a>Hapus</a>
-        </Popconfirm>
+        <Space direction="horizontal">
+          <Popconfirm
+            title="Are you sure you want to delete this item?"
+            onConfirm={() => handleHapus(row)}
+          >
+            <Tooltip title="Hapus">
+              <a>
+                <DeleteOutlined />
+              </a>
+            </Tooltip>
+          </Popconfirm>
+          <Divider type="vertical" />
+        </Space>
       ),
     },
   ];

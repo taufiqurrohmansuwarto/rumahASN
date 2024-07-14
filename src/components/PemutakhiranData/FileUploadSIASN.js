@@ -1,9 +1,9 @@
-mport React from 'react';
-import { Upload, Button } from 'antd';
-import { FileAddOutlined } from '@ant-design/icons';
-import useFileStore from '@/store/useFileStore';
+import React from "react";
+import { Upload, Button } from "antd";
+import { FileAddOutlined } from "@ant-design/icons";
+import useFileStore from "@/store/useFileStore";
 
-const FileUploadSIASN = ({name = 'Upload Dokumen'}) => {
+const FileUploadSIASN = ({ name = "Upload Dokumen" }) => {
   const fileList = useFileStore((state) => state.fileList);
   const setFileList = useFileStore((state) => state.setFileList);
 
@@ -27,9 +27,7 @@ const FileUploadSIASN = ({name = 'Upload Dokumen'}) => {
       onChange={handleChange}
       fileList={fileList}
     >
-      <Button icon={<FileAddOutlined />}>
-	{name}
-      </Button>
+      <Button icon={<FileAddOutlined />}>{name}</Button>
     </Upload>
   );
 };

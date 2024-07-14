@@ -23,14 +23,15 @@ function ComparePenghargaanByNip({ nip }) {
   const { data, isLoading } = useQuery(
     ["riwayat-penghargaan-nip", nip],
     () => penghargaanByNip(nip),
-    {}
+    {
+      refetchOnWindowFocus: false,
+    }
   );
 
   const { mutateAsync: create, isLoading: isLoadingCreate } = useMutation(
     (data) => createPenghargaanByNip(data),
     {
       onSuccess: () => {
-        message.success("Berhasil menambahkan penghargaan");
         queryClient.invalidateQueries(["riwayat-penghargaan-nip", nip]);
       },
       onError: (error) => {
