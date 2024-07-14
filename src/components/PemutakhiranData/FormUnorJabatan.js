@@ -1,10 +1,9 @@
 import {
-  getTokenSIASNService,
   postUnorJabatanByNip,
   uploadDokRiwayat,
 } from "@/services/siasn-services";
 import { getJenisJabatanId } from "@/utils/client-utils";
-import { FileAddOutlined, InboxOutlined } from "@ant-design/icons";
+import { FileAddOutlined } from "@ant-design/icons";
 import { Text } from "@mantine/core";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
@@ -20,7 +19,6 @@ import {
   Upload,
   message,
 } from "antd";
-import axios from "axios";
 import { useRouter } from "next/router";
 import { useState } from "react";
 import DetailJabatanGuruDokter from "./Admin/DetailJabatanGuruDokter";
@@ -36,14 +34,11 @@ import dayjs from "dayjs";
 import "dayjs/locale/id";
 dayjs.locale("id");
 
-export const API_URL = "https://apimws.bkn.go.id:8243/apisiasn/1.0";
-
 const dateFormat = "DD-MM-YYYY";
 
-function ModalFormJabatanUnor({ open, handleClose, handleOk, isLoading }) {
+function ModalFormJabatanUnor({ open, handleClose, handleOk }) {
   const router = useRouter();
-
-  const [filePath, setFilePath] = useState(null);
+  const queryClient = useQueryClient();
 
   const [fileList, setFileList] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -61,40 +56,6 @@ function ModalFormJabatanUnor({ open, handleClose, handleOk, isLoading }) {
     });
 
     setFileList(fileList);
-  };
-
-  const customRequest = async ({ file, onSuccess, onError }) => {
-    // Pertama, dapatkan token
-    try {
-      const tokenResult = await getTokenSIASNService(); // Asumsikan ini adalah fungsi async Anda untuk mendapatkan token
-      const { wso2, sso } = tokenResult.accessToken;
-
-      const formData = new FormData();
-      formData.append("file", file);
-      formData.append("id_ref_dokumen", "872");
-
-      const config = {
-        headers: {
-          "Content-Type": "multipart/form-data",
-          Authorization: `Bearer ${wso2}`, // Gunakan token yang sesuai
-          Auth: `bearer ${sso}`, // Contoh lain penggunaan token, sesuaikan dengan kebutuhan
-        },
-      };
-
-      // Kemudian, unggah file dengan axios
-      const response = await axios.post(
-        `${API_URL}/upload-dok`,
-        formData,
-        config
-      );
-
-      // Jika berhasil, panggil onSuccess
-      onSuccess(response.data?.data, file);
-    } catch (error) {
-      // Jika terjadi error, panggil onError
-      onError(error);
-      console.error("Upload error:", error);
-    }
   };
 
   const handleFinish = async () => {
@@ -153,6 +114,7 @@ function ModalFormJabatanUnor({ open, handleClose, handleOk, isLoading }) {
         await handleOk(myPayload);
         message.success("Data berhasil disimpan");
       }
+      queryClient.invalidateQueries(["unor-jabatan"]);
     } catch (error) {
       console.log(error);
     } finally {

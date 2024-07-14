@@ -1,15 +1,49 @@
 import { dataRiwayatMasaKerja } from "@/services/siasn-services";
 import { useQuery } from "@tanstack/react-query";
-import { Card, Table } from "antd";
+import { Card, Space, Table } from "antd";
 
 function CompareMasaKerjaByNip({ nip }) {
   const { data, isLoading } = useQuery(
     ["rw-masa-kerja", nip],
     () => dataRiwayatMasaKerja(nip),
-    {}
+    {
+      refetchOnWindowFocus: false,
+    }
   );
 
   const columns = [
+    {
+      title: "File",
+      key: "file",
+      render: (_, record) => {
+        return (
+          <Space direction="horizontal">
+            <div>
+              {record?.path?.[1643] && (
+                <a
+                  href={`/helpdesk/api/siasn/ws/download?filePath=${record?.path?.[1643]?.dok_uri}`}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  Pertek
+                </a>
+              )}
+            </div>
+            <div>
+              {record?.path?.[1644] && (
+                <a
+                  href={`/helpdesk/api/siasn/ws/download?filePath=${record?.path?.[1644]?.dok_uri}`}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  SK
+                </a>
+              )}
+            </div>
+          </Space>
+        );
+      },
+    },
     {
       title: "Pengalaman",
       dataIndex: "pengalaman",
@@ -40,10 +74,6 @@ function CompareMasaKerjaByNip({ nip }) {
           </>
         );
       },
-    },
-    {
-      title: "Nilai",
-      dataIndex: "dinilai",
     },
   ];
 

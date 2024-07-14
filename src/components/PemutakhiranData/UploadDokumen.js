@@ -27,8 +27,10 @@ const ModalUploadDokumen = ({
       onSettled: () => {
         queryClient.invalidateQueries(invalidateQueries);
       },
-      onError: () => {
-        message.error("Gagal mengunggah file.");
+      onError: (error) => {
+        message.error(
+          error?.response?.data?.message || "Gagal mengunggah file."
+        );
       },
     });
 
@@ -48,8 +50,6 @@ const ModalUploadDokumen = ({
         await uploadBerkasRiwayat(formData);
       }
     } catch (error) {
-      console.log(error);
-      message.error("Gagal mengunggah file.");
     } finally {
     }
   };
