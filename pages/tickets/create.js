@@ -1,23 +1,26 @@
 import Layout from "@/components/Layout";
+import EletterBKD from "@/components/Utils/EletterBKD";
 import { recommendationFaq } from "@/services/index";
 import { renderMarkdown, uploadFile } from "@/utils/client-utils";
-import { Grid, Stack, Text, TypographyStylesProvider } from "@mantine/core";
+import { QuestionCircleFilled } from "@ant-design/icons";
+import { Stack, Text, TypographyStylesProvider } from "@mantine/core";
 import { useDebouncedValue } from "@mantine/hooks";
 import { MarkdownEditor } from "@primer/react/drafts";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import {
   Breadcrumb,
   Button,
+  Card,
+  Col,
+  Form,
+  Grid,
   Input,
   List,
   Modal,
+  Row,
+  Space,
   Typography,
   message,
-  Card,
-  Form,
-  Space,
-  Row,
-  Col,
 } from "antd";
 import { useSession } from "next-auth/react";
 import Head from "next/head";
@@ -26,8 +29,6 @@ import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { createTickets } from "../../services/users.services";
 import PageContainer from "../../src/components/PageContainer";
-import { QuestionCircleFilled } from "@ant-design/icons";
-import EletterBKD from "@/components/Utils/EletterBKD";
 
 // peremajaan data
 const TextPeremajaanData = () => {
@@ -126,6 +127,8 @@ const CreateTicket = () => {
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
 
+  const breakPoint = Grid.useBreakpoint();
+
   const [title, setTitle] = useState(null);
   const [content, setContent] = useState();
 
@@ -181,6 +184,9 @@ const CreateTicket = () => {
         <title>Rumah ASN - Buat Pertanyaan Baru</title>
       </Head>
       <PageContainer
+        childrenContentStyle={{
+          padding: breakPoint.xs ? 0 : null,
+        }}
         title="Tanya BKD"
         content="Buat Pertanyaan Baru"
         onBack={() => router.back()}

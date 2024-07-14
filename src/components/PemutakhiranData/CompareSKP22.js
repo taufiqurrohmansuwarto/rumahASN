@@ -17,6 +17,7 @@ import {
   Modal,
   Select,
   Skeleton,
+  Space,
   Table,
   Upload,
   message,
@@ -24,6 +25,7 @@ import {
 import axios from "axios";
 import { useState } from "react";
 import FormCariPNSKinerja from "./FormCariPNSKinerja";
+import UploadDokumen from "./UploadDokumen";
 
 // const data = {
 //     hasilKinerjaNilai: 0,
@@ -224,9 +226,9 @@ function CompareSKP22({ nip, id }) {
         return (
           <Descriptions size="small" layout="vertical">
             <Descriptions.Item label="File">
-              {record?.path?.["891"] && (
+              {record?.path?.["890"] && (
                 <a
-                  href={`/helpdesk/api/siasn/ws/download?filePath=${record?.path?.["891"]?.dok_uri}`}
+                  href={`/helpdesk/api/siasn/ws/download?filePath=${record?.path?.["890"]?.dok_uri}`}
                   target="_blank"
                   rel="noreferrer"
                 >
@@ -266,9 +268,9 @@ function CompareSKP22({ nip, id }) {
       render: (_, record) => {
         return (
           <>
-            {record?.path?.["891"] && (
+            {record?.path?.["890"] && (
               <a
-                href={`/helpdesk/api/siasn/ws/download?filePath=${record?.path?.["891"]?.dok_uri}`}
+                href={`/helpdesk/api/siasn/ws/download?filePath=${record?.path?.["890"]?.dok_uri}`}
                 target="_blank"
                 rel="noreferrer"
               >
@@ -281,33 +283,8 @@ function CompareSKP22({ nip, id }) {
       responsive: ["sm"],
     },
     {
-      title: "Hasil Kinerja",
+      title: "Hasil Kerja",
       dataIndex: "hasilKinerja",
-      responsive: ["sm"],
-    },
-    {
-      title: "Hasil Kinerja Nilai",
-      dataIndex: "hasilKinerjaNilai",
-      responsive: ["sm"],
-    },
-    {
-      title: "Kuadran Kinerja",
-      dataIndex: "kuadranKinerja",
-      responsive: ["sm"],
-    },
-    {
-      title: "NIP Penilai",
-      dataIndex: "nipNrpPenilai",
-      responsive: ["sm"],
-    },
-    {
-      title: "Nama Penilai",
-      dataIndex: "namaPenilai",
-      responsive: ["sm"],
-    },
-    {
-      title: "Unor Penilai",
-      dataIndex: "penilaiUnorNm",
       responsive: ["sm"],
     },
     {
@@ -315,20 +292,63 @@ function CompareSKP22({ nip, id }) {
       dataIndex: "perilakuKerja",
       responsive: ["sm"],
     },
+    // {
+    //   title: "Hasil Kinerja Nilai",
+    //   dataIndex: "hasilKinerjaNilai",
+    //   responsive: ["sm"],
+    // },
     {
-      title: "Perilaku Kerja Nilai",
-      dataIndex: "PerilakuKerjaNilai",
-      responsive: ["sm"],
+      title: "Penilai",
+      key: "penilai",
+      // width: 200,
+      render: (_, row) => (
+        <Descriptions size="small" layout="vertical">
+          <Descriptions.Item label="NIP" span={3}>
+            {row?.nipNrpPenilai}
+          </Descriptions.Item>
+          <Descriptions.Item label="Nama" span={3}>
+            {row?.namaPenilai}
+          </Descriptions.Item>
+          <Descriptions.Item label="Unor" span={3}>
+            {row?.penilaiUnorNm}
+          </Descriptions.Item>
+        </Descriptions>
+      ),
     },
-    {
-      title: "Status Penilai",
-      dataIndex: "statusPenilai",
-      responsive: ["sm"],
-    },
+    // {
+    //   title: "Kuadran Kinerja",
+    //   dataIndex: "kuadranKinerja",
+    //   responsive: ["sm"],
+    // },
+
+    // {
+    //   title: "Perilaku Kerja Nilai",
+    //   dataIndex: "PerilakuKerjaNilai",
+    //   responsive: ["sm"],
+    // },
+    // {
+    //   title: "Status Penilai",
+    //   dataIndex: "statusPenilai",
+    //   responsive: ["sm"],
+    // },
     {
       title: "Tahun",
       dataIndex: "tahun",
       responsive: ["sm"],
+    },
+    {
+      title: "Aksi",
+      key: "aksi",
+      render: (_, row) => (
+        <Space direction="horizontal">
+          <UploadDokumen
+            id={row?.id}
+            idRefDokumen={"890"}
+            invalidateQueries={["data-skp-22"]}
+            nama={"SKP"}
+          />
+        </Space>
+      ),
     },
   ];
 
