@@ -4,8 +4,18 @@ import {
   penghargaanByNip,
 } from "@/services/siasn-services";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Card, Popconfirm, Table, message } from "antd";
+import {
+  Card,
+  Divider,
+  Popconfirm,
+  Space,
+  Table,
+  Tooltip,
+  message,
+} from "antd";
 import CreatePenghargaan from "./CreatePenghargaan";
+import { DeleteOutlined } from "@ant-design/icons";
+import UploadDokumen from "./UploadDokumen";
 
 function ComparePenghargaanByNip({ nip }) {
   const queryClient = useQueryClient();
@@ -95,12 +105,25 @@ function ComparePenghargaanByNip({ nip }) {
       key: "aksi",
       render: (text) => {
         return (
-          <Popconfirm
-            title="Apakah anda yakin ingin menghapus penghargaan ini?"
-            onConfirm={async () => await handleHapus(text?.ID)}
-          >
-            <a>Hapus</a>
-          </Popconfirm>
+          <Space direction="horizontal">
+            <Popconfirm
+              title="Apakah anda yakin ingin menghapus penghargaan ini?"
+              onConfirm={async () => await handleHapus(text?.ID)}
+            >
+              <Tooltip title="Hapus">
+                <a>
+                  <DeleteOutlined />
+                </a>
+              </Tooltip>
+            </Popconfirm>
+            <Divider type="vertical" />
+            <UploadDokumen
+              id={text?.ID}
+              idRefDokumen={"892"}
+              invalidateQueries={["riwayat-penghargaan-nip", nip]}
+              nama="Penghargaan"
+            />
+          </Space>
         );
       },
     },

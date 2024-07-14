@@ -150,7 +150,9 @@ const CompareHukdisByNip = ({ nip }) => {
   const { data, isLoading } = useQuery(
     ["hukdis", nip],
     () => getHukdisByNip(nip),
-    {}
+    {
+      refetchOnWindowFocus: false,
+    }
   );
 
   const handleOpen = () => {
@@ -214,7 +216,15 @@ const CompareHukdisByNip = ({ nip }) => {
   return (
     <Card title="Hukuman Disiplin">
       <FormModalHukdis open={open} onClose={handleClose} />
-      <Button onClick={handleOpen}>Tambah</Button>
+      <Button
+        style={{
+          marginBottom: 10,
+        }}
+        onClick={handleOpen}
+        type="primary"
+      >
+        Tambah Hukuman Disiplin
+      </Button>
       <Table
         columns={columns}
         isLoading={isLoading}

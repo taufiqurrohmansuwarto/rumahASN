@@ -9,7 +9,8 @@
       "@/models/*": ["models/*"],
       "@/services/*": ["services/*"],
       "@/utils/*": ["utils/*"],
-      "@/context/*": ["context/*"]
+      "@/context/*": ["context/*"],
+      "@/store/*": ["store/*"]
     }
   }
 }
