@@ -3,6 +3,7 @@ import {
   getRwSkp22ByNip,
   getTokenSIASNService,
   postRwSkp22ByNip,
+  uploadDokRiwayat,
 } from "@/services/siasn-services";
 import { API_URL } from "@/utils/client-utils";
 import { FileAddOutlined, PlusOutlined } from "@ant-design/icons";
@@ -24,6 +25,8 @@ import axios from "axios";
 import { useState } from "react";
 import FormCariPNSKinerja from "../FormCariPNSKinerja";
 import UploadDokumen from "../UploadDokumen";
+import FileUploadSIASN from "../FileUploadSIASN";
+import useFileStore from "@/store/useFileStore";
 
 // const data = {
 //     hasilKinerjaNilai: 0,
@@ -52,76 +55,39 @@ import UploadDokumen from "../UploadDokumen";
 const FormSKP22 = ({ visible, onCancel, nip }) => {
   const [form] = Form.useForm();
   const queryClient = useQueryClient();
-  const [fileList, setFileList] = useState([]);
+
+  const fileList = useFileStore((state) => state.fileList);
+
   const [loading, setLoading] = useState(false);
-
-  const handleChange = (info) => {
-    let fileList = [...info.fileList];
-
-    fileList = fileList.slice(-1);
-
-    fileList = fileList.map((file) => {
-      if (file.response) {
-        file.url = file.response.url;
-      }
-      return file;
-    });
-
-    setFileList(fileList);
-  };
 
   const handleFinish = async () => {
     try {
       setLoading(true);
       const data = await form.validateFields();
 
-      const currentFile = fileList[0]?.originFileObj;
+      const payload = {
+        nip,
+        data,
+      };
 
-      if (currentFile) {
-        const result = await getTokenSIASNService();
+      const file = fileList?.[0]?.originFileObj;
 
-        const wso2 = result?.accessToken?.wso2;
-        const sso = result?.accessToken?.sso;
-
+      if (file) {
+        const responseSkp = await postRwSkp22ByNip(payload);
+        const idSkp = responseSkp?.id;
         const formData = new FormData();
-
-        formData.append("file", currentFile);
-        formData.append("id_ref_dokumen", "873");
-
-        const hasil = await axios.post(`${API_URL}/upload-dok`, formData, {
-          headers: {
-            "Content-Type": "multipart/form-data",
-            Authorization: `Bearer ${wso2}`,
-            Auth: `bearer ${sso}`,
-          },
-        });
-
-        const hasilAkhir = {
-          ...data,
-          path: [hasil?.data?.data],
-        };
-
-        await postRwSkp22ByNip({
-          nip,
-          data: hasilAkhir,
-        });
-
-        message.success("Berhasil menambahkan SKP ");
-        setFileList([]);
+        formData.append("file", file);
+        formData.append("id_ref_dokumen", "890");
+        formData.append("id_riwayat", idSkp);
+        await uploadDokRiwayat(formData);
+        message.success("Berhasil menambahkan SKP");
+        queryClient.invalidateQueries(["data-skp-22", nip]);
         onCancel();
-        setLoading(false);
-        queryClient.invalidateQueries(["data-skp-22"]);
       } else {
-        await postRwSkp22ByNip({
-          nip,
-          data,
-        });
-
-        message.success("Berhasil menambahkan SKP ");
-        setFileList([]);
+        await postRwSkp22ByNip(payload);
+        message.success("Berhasil menambahkan SKP");
+        queryClient.invalidateQueries(["data-skp-22", nip]);
         onCancel();
-        setLoading(false);
-        queryClient.invalidateQueries(["data-skp-22"]);
       }
     } catch (error) {
       console.log(error);
@@ -131,7 +97,7 @@ const FormSKP22 = ({ visible, onCancel, nip }) => {
 
   const handleConfirmModal = async () => {
     try {
-      const result = await form.validateFields();
+      await form.validateFields();
       Modal.confirm({
         centered: true,
         title: "Apakah anda yakin?",
@@ -153,15 +119,7 @@ const FormSKP22 = ({ visible, onCancel, nip }) => {
       onOk={handleConfirmModal}
       width={1000}
     >
-      <Upload
-        beforeUpload={() => false}
-        maxCount={1}
-        accept=".pdf"
-        onChange={handleChange}
-        fileList={fileList}
-      >
-        <Button icon={<FileAddOutlined />}>Upload</Button>
-      </Upload>
+      <FileUploadSIASN />
       <Form layout="vertical" form={form}>
         <Form.Item name="hasilKinerjaNilai" label="Hasil Kerja Nilai" required>
           <Select>
@@ -292,7 +250,7 @@ function CompareSKP22ByNip({ nip }) {
         return (
           <UploadDokumen
             id={row?.id}
-            idRefDokumen={"891"}
+            idRefDokumen={"890"}
             invalidateQueries={["data-skp-22"]}
             nama="Kinerja"
           />

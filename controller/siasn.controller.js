@@ -490,7 +490,7 @@ const postSkp2022ByNip = async (req, res) => {
         tahun: toNumber(body?.tahun) || 2022,
       };
 
-      await siasnRequest.post("/skp22/save", data);
+      const result = await siasnRequest.post("/skp22/save", data);
 
       // create log
       await createLogSIASN({
@@ -501,7 +501,7 @@ const postSkp2022ByNip = async (req, res) => {
         request_data: JSON.stringify(data),
       });
 
-      res.json({ code: 200 });
+      res.json({ id: result?.data?.mapData });
     }
   } catch (error) {
     console.log(error);

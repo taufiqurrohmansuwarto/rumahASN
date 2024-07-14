@@ -1,11 +1,19 @@
-import { Button, DatePicker, Form, Input, Modal, Select } from "antd";
+import { Button, DatePicker, Form, Input, Modal, Select, message } from "antd";
 import { useState } from "react";
 import dayjs from "dayjs";
 import FormPenghargaan from "./FormPenghargaan";
+import FileUploadSIASN from "./FileUploadSIASN";
+import useFileStore from "@/store/useFileStore";
+import { uploadDokRiwayat } from "@/services/siasn-services";
+import { useQueryClient } from "@tanstack/react-query";
 
 function ModalCreatePenghargaan({ open, onCancel, onSubmit, loading, nip }) {
+  const queryClient = useQueryClient();
+
   const format = "DD-MM-YYYY";
   const [form] = Form.useForm();
+
+  const fileList = useFileStore((state) => state.fileList);
 
   const handleOk = async () => {
     const value = await form.validateFields();
@@ -20,8 +28,27 @@ function ModalCreatePenghargaan({ open, onCancel, onSubmit, loading, nip }) {
       data,
     };
 
-    await onSubmit(payload);
-    onCancel();
+    const file = fileList[0]?.originFileObj;
+
+    if (file) {
+      const responsePenghargaan = await onSubmit(payload);
+      const idPenghargaan = responsePenghargaan?.id;
+
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("id_riwayat", idPenghargaan);
+      formData.append("id_ref_dokumen", "892");
+
+      await uploadDokRiwayat(formData);
+      queryClient.invalidateQueries(["riwayat-penghargaan-nip", nip]);
+      message.success("Berhasil menambahkan penghargaan");
+      onCancel();
+    } else {
+      await onSubmit(payload);
+      queryClient.invalidateQueries(["riwayat-penghargaan-nip", nip]);
+      message.success("Berhasil menambahkan penghargaan");
+      onCancel();
+    }
   };
 
   return (
@@ -34,6 +61,7 @@ function ModalCreatePenghargaan({ open, onCancel, onSubmit, loading, nip }) {
         confirmLoading={loading}
       >
         <Form form={form} layout="vertical">
+          <FileUploadSIASN />
           <FormPenghargaan name="hargaId" label="Jenis Penghargaan" />
           <Form.Item
             rules={[
