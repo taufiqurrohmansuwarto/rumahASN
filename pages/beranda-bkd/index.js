@@ -17,14 +17,13 @@ import {
   MessageOutlined,
   SearchOutlined,
 } from "@ant-design/icons";
-import { Stack } from "@mantine/core";
+import { Grid as GridMantineCore, Stack } from "@mantine/core";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import {
   Avatar,
   Breadcrumb,
   Button,
   Card,
-  Col,
   Divider,
   FloatButton,
   Form,
@@ -34,7 +33,6 @@ import {
   Popover,
   Radio,
   Rate,
-  Row,
   Select,
   Space,
   Tabs,
@@ -464,10 +462,11 @@ const BerandaBKD = () => {
           ),
         }}
         title="Beranda Staff BKD"
+        content="Yuk Selesaikan Tugasmu"
       >
         <FloatButton.BackTop />
-        <Row gutter={[16, 16]}>
-          <Col md={18} xs={24}>
+        <GridMantineCore justify="start">
+          <GridMantineCore.Col md={8} xs={12}>
             <Card
               title="Daftar Pertanyaan"
               extra={
@@ -484,8 +483,8 @@ const BerandaBKD = () => {
                 <TabsJobs />
               </Stack>
             </Card>
-          </Col>
-        </Row>
+          </GridMantineCore.Col>
+        </GridMantineCore>
       </PageContainer>
     </>
   );
