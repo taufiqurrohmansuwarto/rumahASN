@@ -181,13 +181,13 @@ const DetailDiscussion = () => {
       <FloatButton.BackTop />
       {data && (
         <>
-          <Row justify="center">
-            <Col md={12}>
+          <Row justify="start">
+            <Col md={16} xs={24}>
               <Detail item={data} />
             </Col>
           </Row>
-          <Row justify="center">
-            <Col md={12}>
+          <Row justify="start">
+            <Col md={16} xs={24}>
               <Divider />
               <DiscussionsComments />
             </Col>

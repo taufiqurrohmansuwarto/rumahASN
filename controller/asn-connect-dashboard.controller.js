@@ -1,5 +1,7 @@
 const Discussions = require("@/models/discussions.model");
 const CCMeetings = require("@/models/cc_meetings.model");
+const Events = require("@/models/events.model");
+const WebinarSeries = require("@/models/webinar-series.model");
 
 const serialize = (data) => {
   return {
@@ -12,6 +14,54 @@ const serialize = (data) => {
     author: data.user.username,
     avatar: data.user.image,
   };
+};
+
+const serializeCoachingClinic = (data) => {
+  return {
+    id: data?.id,
+    title: data?.title,
+    type: "coaching-clinic",
+    date: data?.start_date,
+    creator: data?.coach?.username,
+    avatar: data?.coach?.image,
+  };
+};
+
+const serializeWebinarSeries = (data) => {
+  return {
+    id: data?.id,
+    title: data?.title,
+    type: "webinar",
+    date: data?.start_date,
+    creator: data?.organizer,
+    avatar: data?.author?.image,
+  };
+};
+
+const serializeEevents = (data) => {
+  return {};
+};
+
+const getEvents = async () => {
+  const coachingClinic = await CCMeetings.query()
+    .where("status", "upcoming")
+    .andWhere("start_date", ">=", new Date())
+    .withGraphFetched("[coach(simpleSelect)]");
+
+  const webinarSeries = await WebinarSeries.query()
+    .andWhere("start_date", ">=", new Date())
+    .andWhere("status", "published")
+    .withGraphFetched("[author(simpleSelect)]");
+
+  const events = await Events.query()
+    .where("start_datetime", ">=", new Date())
+    .andWhere("is_publish", true);
+
+  return [
+    ...coachingClinic?.map(serializeCoachingClinic),
+    ...webinarSeries?.map(serializeWebinarSeries),
+    ...events?.map(serializeEevents),
+  ];
 };
 
 const asnConnectDashboard = async (req, res) => {
@@ -29,11 +79,15 @@ const asnConnectDashboard = async (req, res) => {
       )
       .orderBy("total_comment", "asc")
       .where("is_active", true)
+      .andWhere("type", "discussion")
       .withGraphFetched("[user]")
       .limit(5);
 
+    const events = await getEvents();
+
     const data = {
       discussions: result?.length ? result?.map(serialize) : [],
+      kegiatan: events,
     };
 
     res.json(data);
