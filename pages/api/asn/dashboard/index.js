@@ -1,3 +1,4 @@
+import { asnConnectDashboard } from "@/controller/asn-connect-dashboard.controller";
 import {
   createDiscussion,
   getDisccusions,
@@ -7,6 +8,6 @@ import auth from "@/middleware/auth.middleware";
 import { createRouter } from "next-connect";
 const router = createRouter();
 
-router.use(auth).use(asnMiddleware).get();
+router.use(auth).use(asnMiddleware).get(asnConnectDashboard);
 
 export default router.handler();
