@@ -1,9 +1,11 @@
+import { dashboarAsnConnect } from "@/services/asn-connect-dashboard";
 import {
   CalendarOutlined,
   DownOutlined,
   TeamOutlined,
   VideoCameraOutlined,
 } from "@ant-design/icons";
+import { useQuery } from "@tanstack/react-query";
 import {
   Avatar,
   Button,
@@ -68,6 +70,12 @@ const allEvents = [
 ];
 
 const KegiatanMendatang = () => {
+  const { data, isLoading } = useQuery(
+    ["asn-connect-dashboard"],
+    () => dashboarAsnConnect(),
+    {}
+  );
+
   const [visibleEvents, setVisibleEvents] = useState(3);
 
   const getEventIcon = (type) => {
@@ -116,6 +124,11 @@ const KegiatanMendatang = () => {
   return (
     <Card
       size="small"
+      extra={
+        <Button type="link" size="small">
+          Lihat Semua
+        </Button>
+      }
       title={
         <Space>
           <CalendarOutlined style={{ color: "#fa8c16" }} />
@@ -127,7 +140,7 @@ const KegiatanMendatang = () => {
     >
       <List
         size="small"
-        dataSource={allEvents.slice(0, visibleEvents)}
+        dataSource={data?.kegiatan}
         renderItem={(item) => (
           <List.Item
             extra={
@@ -172,17 +185,6 @@ const KegiatanMendatang = () => {
           </List.Item>
         )}
       />
-      {visibleEvents < allEvents.length && (
-        <Button
-          type="link"
-          block
-          onClick={handleViewMore}
-          icon={<DownOutlined />}
-          style={{ marginTop: 8 }}
-        >
-          Lihat lebih banyak
-        </Button>
-      )}
     </Card>
   );
 };

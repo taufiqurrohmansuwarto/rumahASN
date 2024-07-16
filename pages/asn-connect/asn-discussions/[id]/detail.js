@@ -1,7 +1,8 @@
 import DetailDiscussion from "@/components/Discussions/DetailDiscussion";
 import Layout from "@/components/Layout";
 import PageContainer from "@/components/PageContainer";
-import { Card, Grid } from "antd";
+import { Card, Grid, Breadcrumb } from "antd";
+import Link from "next/link";
 import Head from "next/head";
 import { useRouter } from "next/router";
 
@@ -18,7 +19,25 @@ const AsnDiscussions = () => {
           padding: breakPoint.xs ? 0 : null,
         }}
         onBack={() => router.push("/asn-connect/asn-discussions")}
-        title="ASN Discussion Detail"
+        title="Diskusi ASN"
+        content="Detail Diskusi"
+        header={{
+          breadcrumbRender: () => (
+            <Breadcrumb>
+              <Breadcrumb.Item>
+                <Link href="/asn-connect/asn-updates">
+                  <a>Beranda</a>
+                </Link>
+              </Breadcrumb.Item>
+              <Breadcrumb.Item>
+                <Link href="/asn-connect/asn-discussions">
+                  <a>Diskusi ASN</a>
+                </Link>
+              </Breadcrumb.Item>
+              <Breadcrumb.Item>Detail Diskusi</Breadcrumb.Item>
+            </Breadcrumb>
+          ),
+        }}
       >
         <Card>
           <DetailDiscussion />

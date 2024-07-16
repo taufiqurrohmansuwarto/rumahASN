@@ -26,12 +26,17 @@ const DiskusiTerhangat = () => {
 
   const router = useRouter();
 
-  const gotoDiscussions = () => router.push(`/asn-connect/asn-discussions`);
-  const gotoDetail = (id) => router.push(`/asn-connect/asn-discussions/${id}`);
+  const gotoDetail = (id) =>
+    router.push(`/asn-connect/asn-discussions/${id}/detail`);
 
   return (
     <Card
       size="small"
+      extra={
+        <Button type="link" size="small">
+          Lihat Semua
+        </Button>
+      }
       title={
         <Space>
           <FireOutlined style={{ color: "#fa8c16" }} />
@@ -98,14 +103,6 @@ const DiskusiTerhangat = () => {
           </List.Item>
         )}
       />
-      <Button
-        onClick={gotoDiscussions}
-        type="link"
-        block
-        style={{ marginTop: 8 }}
-      >
-        Lihat lebih banyak
-      </Button>
     </Card>
   );
 };

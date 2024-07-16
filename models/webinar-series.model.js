@@ -1,6 +1,7 @@
 const { Model } = require("objection");
 const knex = require("../db");
 const { nanoid } = require("nanoid");
+const User = require("./users.model");
 Model.knex(knex);
 
 class WebinarSeries extends Model {
@@ -29,6 +30,14 @@ class WebinarSeries extends Model {
         join: {
           from: "webinar_series.id",
           to: "webinar_series_participates.webinar_series_id",
+        },
+      },
+      author: {
+        relation: Model.BelongsToOneRelation,
+        modelClass: User,
+        join: {
+          from: "webinar_series.created_by",
+          to: "users.custom_id",
         },
       },
     };
