@@ -81,7 +81,7 @@ const asnConnectDashboard = async (req, res) => {
       .where("is_active", true)
       .andWhere("type", "discussion")
       .withGraphFetched("[user]")
-      .limit(5);
+      .limit(3);
 
     const events = await getEvents();
 
