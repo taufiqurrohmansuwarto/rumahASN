@@ -350,7 +350,7 @@ const DetailTicketPublish = ({ id }) => {
                   {data?.data?.map((item, index) => {
                     return (
                       <CommentTicket
-                        key={item?.custom_id}
+                        key={item?.id || item?.custom_id}
                         customer={data?.customer}
                         agent={data?.agent}
                         admin={data?.admin}

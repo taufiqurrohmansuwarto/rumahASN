@@ -1,80 +1,33 @@
-import React, { useState } from "react";
-import { Card, Typography, List, Space, Button, Avatar, Tooltip } from "antd";
+import { dashboarAsnConnect } from "@/services/asn-connect-dashboard";
 import {
-  MessageOutlined,
-  LikeOutlined,
   DislikeOutlined,
   FireOutlined,
-  DownOutlined,
+  LikeOutlined,
+  MessageOutlined,
 } from "@ant-design/icons";
+import { useQuery } from "@tanstack/react-query";
+import { Avatar, Button, Card, List, Space, Tooltip, Typography } from "antd";
 import dayjs from "dayjs";
 import "dayjs/locale/id";
 import relativeTime from "dayjs/plugin/relativeTime";
+import { useRouter } from "next/router";
 
-const { Title, Text } = Typography;
+const { Title, Text, Link } = Typography;
 
 dayjs.extend(relativeTime);
 dayjs.locale("id");
 
-const allDiscussions = [
-  {
-    id: 1,
-    title: "Cara meningkatkan produktivitas ASN di era digital",
-    author: "Budi Santoso",
-    avatar: "https://xsgames.co/randomusers/avatar.php?g=male&key=1",
-    date: "2024-07-18T10:30:00",
-    comments: 23,
-    upvotes: 45,
-    downvotes: 3,
-  },
-  {
-    id: 2,
-    title: "Diskusi tentang perubahan sistem penilaian kinerja ASN",
-    author: "Siti Rahayu",
-    avatar: "https://xsgames.co/randomusers/avatar.php?g=female&key=2",
-    date: "2024-07-17T14:15:00",
-    comments: 17,
-    upvotes: 38,
-    downvotes: 5,
-  },
-  {
-    id: 3,
-    title: "Peluang dan tantangan Work From Home bagi ASN",
-    author: "Ahmad Yani",
-    avatar: "https://xsgames.co/randomusers/avatar.php?g=male&key=3",
-    date: "2024-07-16T09:45:00",
-    comments: 31,
-    upvotes: 52,
-    downvotes: 2,
-  },
-  {
-    id: 4,
-    title: "Inovasi pelayanan publik: Berbagi pengalaman sukses",
-    author: "Dewi Lestari",
-    avatar: "https://xsgames.co/randomusers/avatar.php?g=female&key=4",
-    date: "2024-07-15T11:20:00",
-    comments: 28,
-    upvotes: 41,
-    downvotes: 4,
-  },
-  {
-    id: 5,
-    title: "Pengembangan kompetensi digital untuk ASN",
-    author: "Rudi Hartono",
-    avatar: "https://xsgames.co/randomusers/avatar.php?g=male&key=5",
-    date: "2024-07-14T16:00:00",
-    comments: 19,
-    upvotes: 33,
-    downvotes: 1,
-  },
-];
-
 const DiskusiTerhangat = () => {
-  const [visibleDiscussions, setVisibleDiscussions] = useState(3);
+  const { data, isLoading } = useQuery(
+    ["asn-connect-dashboard"],
+    () => dashboarAsnConnect(),
+    {}
+  );
 
-  const handleViewMore = () => {
-    setVisibleDiscussions((prevVisible) => prevVisible + 3);
-  };
+  const router = useRouter();
+
+  const gotoDiscussions = () => router.push(`/asn-connect/asn-discussions`);
+  const gotoDetail = (id) => router.push(`/asn-connect/asn-discussions/${id}`);
 
   return (
     <Card
@@ -91,7 +44,8 @@ const DiskusiTerhangat = () => {
       <List
         itemLayout="vertical"
         size="small"
-        dataSource={allDiscussions.slice(0, visibleDiscussions)}
+        loading={isLoading}
+        dataSource={data?.discussions}
         renderItem={(item) => (
           <List.Item
             key={item.id}
@@ -120,9 +74,13 @@ const DiskusiTerhangat = () => {
               avatar={<Avatar src={item.avatar} />}
               title={
                 <Space direction="vertical" size={0}>
-                  <Text strong style={{ fontSize: "14px" }}>
+                  <Link
+                    onClick={() => gotoDetail(item?.id)}
+                    strong
+                    style={{ fontSize: "14px" }}
+                  >
                     {item.title}
-                  </Text>
+                  </Link>
                   <Space size={4}>
                     <Text type="secondary" style={{ fontSize: "12px" }}>
                       {item.author}
@@ -140,17 +98,14 @@ const DiskusiTerhangat = () => {
           </List.Item>
         )}
       />
-      {visibleDiscussions < allDiscussions.length && (
-        <Button
-          type="link"
-          block
-          onClick={handleViewMore}
-          icon={<DownOutlined />}
-          style={{ marginTop: 8 }}
-        >
-          Lihat lebih banyak
-        </Button>
-      )}
+      <Button
+        onClick={gotoDiscussions}
+        type="link"
+        block
+        style={{ marginTop: 8 }}
+      >
+        Lihat lebih banyak
+      </Button>
     </Card>
   );
 };
