@@ -18,7 +18,7 @@ const AsnDiscussions = () => {
         childrenContentStyle={{
           padding: breakPoint.xs ? 0 : null,
         }}
-        onBack={() => router.push("/asn-connect/asn-discussions")}
+        onBack={() => router.back()}
         title="Diskusi ASN"
         content="Detail Diskusi"
         header={{

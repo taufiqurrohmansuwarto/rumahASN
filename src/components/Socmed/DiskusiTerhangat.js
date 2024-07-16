@@ -29,11 +29,13 @@ const DiskusiTerhangat = () => {
   const gotoDetail = (id) =>
     router.push(`/asn-connect/asn-discussions/${id}/detail`);
 
+  const gotoDiscussions = () => router.push("/asn-connect/asn-discussions");
+
   return (
     <Card
       size="small"
       extra={
-        <Button type="link" size="small">
+        <Button type="link" size="small" onClick={gotoDiscussions}>
           Lihat Semua
         </Button>
       }
