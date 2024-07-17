@@ -91,7 +91,16 @@ module.exports.riwayatPendidikan = (fetcher, nip) => {
 };
 
 module.exports.riwayatDiklat = (fetcher, nip) => {
-  return fetcher.get(`/pns/rw-diklat/${nip}`);
+  return new Promise(async (resolve, reject) => {
+    try {
+      const result = await fetcher.get(`/pns/rw-diklat/${nip}`);
+      resolve(result?.data);
+    } catch (error) {
+      console.log(error);
+      resolve([]);
+    }
+  });
+  // return fetcher.get(`/pns/rw-diklat/${nip}`);
 };
 
 module.exports.riwayatKursus = (fetcher, nip) => {

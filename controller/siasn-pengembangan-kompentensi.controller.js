@@ -225,15 +225,16 @@ const getRwDiklatByNip = async (req, res) => {
     const kursus = await riwayatKursus(request, nip);
     const diklat = await riwayatDiklat(request, nip);
 
-    const dataKursus = kursus?.data?.data;
-    const dataDiklat = diklat?.data?.data;
+    const dataKursus = kursus?.data?.data || [];
+    const dataDiklat = diklat?.data?.data || [];
 
-    res.json({
+    const data = {
       kursus: dataKursus,
       diklat: dataDiklat,
-    });
+    };
+
+    res.json(data);
   } catch (error) {
-    console.log(error);
     res.status(500).json({
       message: "Internal Server Error",
     });
