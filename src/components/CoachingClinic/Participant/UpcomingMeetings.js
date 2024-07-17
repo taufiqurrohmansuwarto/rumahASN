@@ -29,12 +29,19 @@ import { useState } from "react";
 
 import dayjs from "dayjs";
 import "dayjs/locale/id";
+import { toNumber } from "lodash";
 
 dayjs.locale("id");
 
 const { Panel } = Collapse;
 
-const ButtonKonsultasi = ({ item, handleBatal, gotoDetail, handleGabung }) => {
+const ButtonKonsultasi = ({
+  item,
+  handleBatal,
+  gotoDetail,
+  handleGabung,
+  disabled,
+}) => {
   if (item?.is_join) {
     return (
       <Space>
@@ -52,7 +59,11 @@ const ButtonKonsultasi = ({ item, handleBatal, gotoDetail, handleGabung }) => {
 
   if (!item?.is_join && item?.status === "upcoming") {
     return (
-      <Button type="primary" onClick={() => handleGabung(item)}>
+      <Button
+        type="primary"
+        onClick={() => handleGabung(item)}
+        // disabled={disabled}
+      >
         Ikuti Coaching Clinic
       </Button>
     );
@@ -204,6 +215,10 @@ const PickCoachingModal = ({ open, onCancel, onOk, row }) => {
                 </Descriptions>
                 <Space>
                   <ButtonKonsultasi
+                    disabled={
+                      toNumber(item?.participants_count) ===
+                      toNumber(item?.max_participants)
+                    }
                     item={item}
                     handleBatal={handleBatal}
                     gotoDetail={gotoDetail}
