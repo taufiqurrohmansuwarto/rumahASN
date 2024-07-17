@@ -375,7 +375,12 @@ const joinMeeting = async (req, res) => {
     const { id } = req?.query;
     const { customId } = req?.user;
 
-    const currentMeeting = await CCMeetings.query().findById(id);
+    const currentMeeting = await CCMeetings.query()
+      .findById(id)
+      .withGraphFetched("[participants]");
+
+    const maxParticipants = currentMeeting?.max_participants;
+    const participantsCount = currentMeeting?.participants?.length;
 
     if (!currentMeeting) {
       res.status(404).json({ message: "Not found" });
@@ -392,7 +397,11 @@ const joinMeeting = async (req, res) => {
         })
         .first();
 
-      if (alreadyJoin) {
+      if (maxParticipants === participantsCount) {
+        res.status(403).json({
+          message: "The meeting is full",
+        });
+      } else if (alreadyJoin) {
         res.status(403).json({
           message: "You already join this meeting",
         });
