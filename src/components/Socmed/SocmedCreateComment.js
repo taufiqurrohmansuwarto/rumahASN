@@ -49,13 +49,17 @@ const SocmedCreateComment = ({ parentId, withBatal = false, onCancel }) => {
       onSuccess: () => {
         message.success("Comment posted");
         queryClient.invalidateQueries(["socmed-comments", router.query.id]);
+        queryClient.invalidateQueries(["socmed-posts"]);
         setValue("");
         if (withBatal) onCancel();
       },
       onError: (error) => {
         message.error(error.message);
       },
-      onSettled: () => {},
+      onSettled: () => {
+        queryClient.invalidateQueries(["socmed-comments", router.query.id]);
+        queryClient.invalidateQueries(["socmed-posts"]);
+      },
     }
   );
 

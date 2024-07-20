@@ -469,6 +469,8 @@ function Layout({ children, active, collapsed = true }) {
             return (
               <Button
                 style={{
+                  display: "flex",
+                  justifyContent: "center",
                   marginBottom: 8,
                   marginTop: 8,
                 }}
@@ -483,18 +485,22 @@ function Layout({ children, active, collapsed = true }) {
             );
           else {
             return (
-              <Button
-                style={{
-                  marginBottom: 10,
-                }}
-                onClick={handlePertanyan}
-                shape="round"
-                icon={<QuestionCircleFilled />}
-                block
-                type="primary"
-              >
-                Tanya BKD
-              </Button>
+              <Center>
+                <Button
+                  style={{
+                    marginBottom: 10,
+                    display: "flex",
+                    justifyContent: "center",
+                  }}
+                  onClick={handlePertanyan}
+                  shape="round"
+                  icon={<QuestionCircleFilled />}
+                  block
+                  type="primary"
+                >
+                  Tanya BKD
+                </Button>
+              </Center>
             );
           }
         } else {
@@ -517,9 +523,8 @@ function Layout({ children, active, collapsed = true }) {
         const defaultDom = (
           <>
             <Link href="/feeds">
-              <a>{logo}</a>
+              <a>{title}</a>
             </Link>
-            {title}
           </>
         );
 
