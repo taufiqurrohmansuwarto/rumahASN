@@ -1,7 +1,4 @@
-import { Breadcrumb, Card, Grid, Tabs } from "antd";
-import { useRouter } from "next/router";
-import PageContainer from "@/components/PageContainer";
-import Link from "next/link";
+import dynamic from "next/dynamic";
 
 const ProLayout = dynamic(
   () => import("@ant-design/pro-components").then((mod) => mod?.ProLayout),
