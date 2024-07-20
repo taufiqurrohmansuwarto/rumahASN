@@ -17,6 +17,8 @@ const handleLike = async (userId, postId) => {
       })
       .first();
 
+    const currentPost = await SocmedPosts.query().findById(postId);
+
     if (existingLike) {
       await SocmedLikes.query()
         .where({
@@ -32,6 +34,13 @@ const handleLike = async (userId, postId) => {
         post_id: postId,
       });
 
+      const data = {
+        user_id: userId,
+        trigger_user_id: currentPost?.user_id,
+        type: "like_asn_update",
+        reference_id: postId,
+      };
+      await SocmedNotifications.query().insert(data);
       await SocmedPosts.query().findById(postId).increment("likes_count", 1);
     }
   } catch (error) {
@@ -300,23 +309,32 @@ const createComment = async (req, res) => {
 
       const allUserPostIdUnique = allUserInPost.map((item) => item?.user_id);
 
+      // send all user in post
       if (allUserPostIdUnique.length > 0) {
         const payload = allUserPostIdUnique.map((item) => {
           return {
             user_id: userId,
             trigger_user_id: item,
-            type: "comment",
+            type: "comment_asn_update",
             reference_id: postId,
           };
         });
         await SocmedNotifications.query().insert(payload);
-      }
-    } else {
-      if (currentUserPost !== userId && !payload?.parent_id) {
+      } else {
         await SocmedNotifications.query().insert({
           user_id: userId,
           trigger_user_id: currentUserPost,
-          type: "comment",
+          type: "comment_asn_update",
+          reference_id: postId,
+        });
+      }
+    } else {
+      const isNotSelfComment = currentUserPost !== userId;
+      if (isNotSelfComment && !payload?.parent_id) {
+        await SocmedNotifications.query().insert({
+          user_id: userId,
+          trigger_user_id: currentUserPost,
+          type: "comment_asn_update",
           reference_id: postId,
         });
       }
@@ -389,7 +407,11 @@ const allActivities = async (req, res) => {
     const result = await SocmedNotifications.query()
       .orderBy("created_at", "desc")
       .whereNot(function () {
-        this.where("type", "like").andWhere("user_id", "<>", "trigger_user_id");
+        this.where("type", "like_asn_update").andWhere(
+          "user_id",
+          "<>",
+          "trigger_user_id"
+        );
       })
       .withGraphFetched(
         "[user(simpleSelect), trigger_user(simpleSelect), post]"

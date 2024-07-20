@@ -11,17 +11,8 @@ class SocmedNotifications extends Model {
 
   static get relationMappings() {
     const User = require("./users.model");
-    const Posts = require("./socmed-posts.model");
 
     return {
-      post: {
-        relation: Model.BelongsToOneRelation,
-        modelClass: Posts,
-        join: {
-          from: "socmed_notifications.reference_id",
-          to: "socmed_posts.id",
-        },
-      },
       user: {
         relation: Model.BelongsToOneRelation,
         modelClass: User,

@@ -3,7 +3,7 @@ import PageContainer from "@/components/PageContainer";
 import Bar from "@/components/Plots/Bar";
 import { detailPolling } from "@/services/polls.services";
 import { useQuery } from "@tanstack/react-query";
-import { Breadcrumb, Card, Col, Row, Skeleton } from "antd";
+import { Breadcrumb, Card, Col, Grid, Row, Skeleton } from "antd";
 import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
@@ -12,6 +12,8 @@ const DetailVote = () => {
   const router = useRouter();
 
   const { id } = router.query;
+
+  const breakPoint = Grid.useBreakpoint();
 
   const handleBack = () => router?.back();
 
@@ -38,6 +40,9 @@ const DetailVote = () => {
         <title>Detail Voting</title>
       </Head>
       <PageContainer
+        childrenContentStyle={{
+          padding: breakPoint.xs ? 0 : null,
+        }}
         header={{
           breadcrumbRender: () => (
             <Breadcrumb>
@@ -46,9 +51,11 @@ const DetailVote = () => {
                   <a>Beranda</a>
                 </Link>
               </Breadcrumb.Item>
-              <Link href="/apps-managements/votes">
-                <a>Polling</a>
-              </Link>
+              <Breadcrumb>
+                <Link href="/apps-managements/votes">
+                  <a>Polling</a>
+                </Link>
+              </Breadcrumb>
               <Breadcrumb.Item>Detail Polling</Breadcrumb.Item>
             </Breadcrumb>
           ),

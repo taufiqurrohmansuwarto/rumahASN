@@ -13,6 +13,14 @@ class Discussions extends Model {
     this.id = uuid.v4();
   }
 
+  static get modifiers() {
+    return {
+      simple(builder) {
+        builder.select("id", "title", "created_by");
+      },
+    };
+  }
+
   static get relationMappings() {
     const DiscussionVote = require("@/models/discussion-votes.model");
     const User = require("@/models/users.model");

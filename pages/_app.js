@@ -91,7 +91,7 @@ function MyApp({ Component, pageProps: { session, ...pageProps } }) {
             },
           },
           token: {
-            colorPrimary: "#faad14",
+            colorPrimary: "#FA8C16",
           },
         }}
         locale={id}

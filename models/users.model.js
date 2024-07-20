@@ -14,6 +14,9 @@ class User extends Model {
 
   static get modifiers() {
     return {
+      username(query) {
+        query.select("custom_id", "username");
+      },
       simpleSelect(query) {
         query.select(
           "custom_id",

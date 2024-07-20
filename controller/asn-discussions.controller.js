@@ -4,6 +4,47 @@ const { transaction } = require("objection");
 const { cutMarkdown } = require("../utils");
 const arrayToTree = require("array-to-tree");
 const { parseMarkdown } = require("@/utils/parsing");
+const NotificationASNConnect = require("@/models/socmed-notifications.model");
+
+const sendNotification = async (discussionId, userId) => {
+  // cari dulu baris diskusinya
+  const currentDiscussion = await Discussion.query().findById(discussionId);
+  // menggunakan discussion_id karena setiap baris bisa saja komentar / postingan disebabkan hanya satu tabel saja
+  const currentDisccussionId = currentDiscussion?.id;
+
+  // kita cari kreatornya
+  const parentDiscussion = await Discussion.query()
+    .findById(currentDisccussionId)
+    .first();
+
+  const author = parentDiscussion?.created_by;
+
+  const getAllUserInDiscussion = await Discussion.query()
+    .where("discussion_id", currentDisccussionId)
+    .orWhere("id", currentDisccussionId)
+    .select("created_by")
+    .distinct("created_by");
+
+  if (userId === author) {
+    return;
+  } else {
+    console.log(getAllUserInDiscussion);
+    const usersWithoutAuthor = getAllUserInDiscussion.filter(
+      (item) => item.created_by !== userId
+    );
+
+    if (usersWithoutAuthor?.length > 0) {
+      const data = usersWithoutAuthor.map((item) => ({
+        user_id: userId,
+        trigger_user_id: item?.created_by,
+        type: "comment_asn_discussion",
+        reference_id: discussionId,
+      }));
+
+      await NotificationASNConnect.query().insert(data);
+    }
+  }
+};
 
 const createCommentTree = async ({
   discussion_id,
@@ -342,6 +383,7 @@ const createComment = async (req, res) => {
     };
 
     await createCommentTree(payload);
+    await sendNotification(discussionId, customId);
     res.json({ message: "Comment created" });
   } catch (error) {
     console.log(error);

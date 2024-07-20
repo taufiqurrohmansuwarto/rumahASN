@@ -29,7 +29,11 @@ class SocmedPosts extends Model {
 
   // custom filter function
   static get modifiers() {
-    return {};
+    return {
+      simple: (builder) => {
+        builder.select("id", "user_id", "content", "created_at");
+      },
+    };
   }
 
   static get relationMappings() {
