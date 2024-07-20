@@ -14,6 +14,7 @@ import {
   Button,
   Card,
   Divider,
+  Grid,
   Popconfirm,
   Space,
   Table,
@@ -192,12 +193,17 @@ function Votes() {
     },
   ];
 
+  const breakPoint = Grid.useBreakpoint();
+
   return (
     <>
       <Head>
         <title>Polling</title>
       </Head>
       <PageContainer
+        childrenContentStyle={{
+          padding: breakPoint.xs ? 0 : null,
+        }}
         header={{
           breadcrumbRender: () => (
             <Breadcrumb>

@@ -1,5 +1,4 @@
-import Layout from "@/components/Layout";
-import MailLayout from "@/components/MailLayout";
+import GmailLayout from "@/components/GmailLayout";
 import PageContainer from "@/components/PageContainer";
 import { getPrivateMessages } from "@/services/index";
 import { useQuery } from "@tanstack/react-query";
@@ -29,11 +28,7 @@ const Mail = () => {
 };
 
 Mail.getLayout = function getLayout(page) {
-  return (
-    <Layout>
-      <MailLayout>{page}</MailLayout>
-    </Layout>
-  );
+  return <GmailLayout>{page}</GmailLayout>;
 };
 
 Mail.Auth = {

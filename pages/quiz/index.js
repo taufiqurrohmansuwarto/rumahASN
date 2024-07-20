@@ -2,17 +2,21 @@ import Layout from "@/components/Layout";
 import PageContainer from "@/components/PageContainer";
 import LeaderBoard from "@/components/Quiz/LeaderBoard";
 import UserQuiz from "@/components/Quiz/UserQuiz";
-import { Breadcrumb, Col, Row } from "antd";
+import { Breadcrumb, Col, Grid, Row } from "antd";
 import Head from "next/head";
 import Link from "next/link";
 
 function QuizKepegawaian() {
+  const breakPoint = Grid.useBreakpoint();
   return (
     <>
       <Head>
         <title>Rumah ASN - Quiz Kepegawaian</title>
       </Head>
       <PageContainer
+        childrenContentStyle={{
+          padding: breakPoint.xs ? 0 : null,
+        }}
         header={{
           breadcrumbRender: () => (
             <Breadcrumb>

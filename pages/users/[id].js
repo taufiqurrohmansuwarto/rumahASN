@@ -1,6 +1,5 @@
 import Layout from "@/components/Layout";
 import PageContainer from "@/components/PageContainer";
-import UserTickets from "@/components/Ticket/UserTickets";
 import { getProfile, sendPrivateMessage } from "@/services/index";
 import {
   renderMarkdown,
@@ -15,7 +14,6 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Breadcrumb,
   Button,
-  Card,
   Col,
   Descriptions,
   Divider,
@@ -27,7 +25,6 @@ import {
   Rate,
   Row,
   Space,
-  Tabs,
   message as messageantd,
 } from "antd";
 import { useSession } from "next-auth/react";
@@ -36,6 +33,7 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import { useState } from "react";
 
+import UserProfile from "@/components/Profile/UserProfile";
 import dayjs from "dayjs";
 import "dayjs/locale/id";
 import relativeTime from "dayjs/plugin/relativeTime";
@@ -292,13 +290,22 @@ const Users = () => {
             <Breadcrumb.Item>Detail User</Breadcrumb.Item>
           </Breadcrumb>
         )}
-        title="User"
-        subTitle="Detail User"
+        title="Detail Informasi Pengguna"
       >
-        <Card>
-          <Tabs defaultActiveKey="1" type="card">
+        <Row gutter={[16, 16]}>
+          <Col md={16} xs={24}>
+            <UserProfile
+              user={data}
+              isAdmin={currentUser?.user?.current_role === "admin"}
+              isPegawaiBKD={
+                data?.current_role === "agent" || data?.current_role === "admin"
+              }
+            />
+          </Col>
+        </Row>
+        {/* <Tabs defaultActiveKey="1" type="card">
             <Tabs.TabPane tab="Informasi" key="1">
-              <DetailInformation user={data} />
+              <UserProfile />
             </Tabs.TabPane>
             <>
               {currentUser?.user?.current_role === "admin" && (
@@ -307,8 +314,7 @@ const Users = () => {
                 </Tabs.TabPane>
               )}
             </>
-          </Tabs>
-        </Card>
+          </Tabs> */}
       </PageContainer>
     </>
   );
