@@ -442,25 +442,24 @@ function Layout({ children, active, collapsed = true }) {
       }}
       theme="light"
       token={{
-        // bgLayout: "#ECEEF1",
         bgLayout: "#FFFFFF",
+        colorPrimary: "#FA8C16", // Warna oranye utama Ant Design
         sider: {
-          // colorBgCollapsedButton: "#d46b08", // Oranye gelap untuk tombol collapse
-          colorBgMenuItemActive: "#d46b08", // Oranye gelap untuk item menu yang aktif
-          colorTextCollapsedButton: "#d46b08", // Putih untuk tombol collapse
-          colorTextCollapsedButtonHover: "#d46b08", // Putih untuk tombol collapse saat di-hover
-          // colorTextMenuSecondary: "#9E9E9E", // Abu-abu untuk teks menu sekunder
-          // colorTextSubMenuSelected: "#E65100", // Oranye gelap untuk teks sub-menu yang dipilih
-          // colorMenuBackground: "#424242", // Abu-abu gelap untuk latar belakang menu
-          colorTextMenuTitle: "#FFFFFF", // Putih untuk judul menu
-          // colorMenuItemDivider: "rgba(255, 255, 255, 0.12)", // Pembatas menu dengan transparansi
-          // colorTextMenu: "#FFFFFF", // Putih untuk teks menu
-          colorTextMenuItemHover: "#d46b08", // Putih untuk teks menu saat di-hover
-          colorTextMenuSelected: "#d46b08", // Putih untuk teks menu saat dipilih
-          colorTextMenuActive: "#d46b08", // Putih untuk teks menu saat aktif
-          colorBgMenuItemHover: "rgba(255, 180, 0, 0.2)", // Transparan oranye saat item menu di-hover
-          colorBgMenuItemSelected: "rgba(255, 180, 0, 0.3)", // Transparan oranye lebih terang untuk item menu yang dipilih
-          colorBgMenuItemCollapsedElevated: "#424242", // Abu-abu gelap untuk menu yang tertutup namun ditinggikan
+          colorBgCollapsedButton: "#FA8C16", // Oranye untuk tombol collapse
+          colorBgMenuItemActive: "#FFF7E6", // Oranye sangat muda untuk item menu yang aktif
+          colorTextCollapsedButton: "#FFFFFF", // Putih untuk teks tombol collapse
+          colorTextCollapsedButtonHover: "#FFF7E6", // Oranye sangat muda untuk teks tombol collapse saat di-hover
+          colorTextMenuTitle: "#FA8C16", // Oranye untuk judul menu
+          colorTextMenuItemHover: "#FA8C16", // Oranye untuk teks menu saat di-hover
+          colorTextMenuSelected: "#FA8C16", // Oranye untuk teks menu saat dipilih
+          colorTextMenuActive: "#FA8C16", // Oranye untuk teks menu saat aktif
+          colorBgMenuItemHover: "rgba(250, 140, 22, 0.1)", // Transparan oranye saat item menu di-hover
+          colorBgMenuItemSelected: "rgba(250, 140, 22, 0.2)", // Transparan oranye lebih terang untuk item menu yang dipilih
+          colorBgMenuItemCollapsedElevated: "#FFFFFF", // Putih untuk menu yang tertutup namun ditinggikan
+          colorTextMenu: "#595959", // Abu-abu gelap untuk teks menu biasa
+          colorBgMenu: "#FFFFFF", // Putih untuk latar belakang menu
+          colorTextMenuSecondary: "#8C8C8C", // Abu-abu medium untuk teks menu sekunder
+          colorMenuItemDivider: "#F0F0F0", // Abu-abu sangat muda untuk pembatas menu
         },
       }}
       selectedKeys={[active ? active : router.pathname]}
@@ -564,11 +563,11 @@ function Layout({ children, active, collapsed = true }) {
             url="kepegawaian"
             title="Inbox Kepegawaian"
           />,
-          <NotifikasiUsulan
-            key="submission"
-            url="submission"
-            title="Inbox Usulan"
-          />,
+          // <NotifikasiUsulan
+          //   key="submission"
+          //   url="submission"
+          //   title="Inbox Usulan"
+          // />,
           <NotifikasiPrivateMessage
             key="private-message"
             url="private-message"

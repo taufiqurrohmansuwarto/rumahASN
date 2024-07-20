@@ -16,11 +16,11 @@ function NotificationLayout({ children, active }) {
       key: "asn-connect",
       title: "ASN Connect",
     },
-    {
-      path: "/notifications/submission",
-      key: "submission",
-      title: "Usulan",
-    },
+    // {
+    //   path: "/notifications/submission",
+    //   key: "submission",
+    //   title: "Usulan",
+    // },
     {
       path: "/notifications/private-message",
       key: "private-message",
@@ -39,7 +39,15 @@ function NotificationLayout({ children, active }) {
   };
 
   return (
-    <Tabs type="card" activeKey={active} onChange={handleTabChange}>
+    <Tabs
+      tabBarStyle={{
+        padding: 0,
+        // margin: 0,
+      }}
+      type="card"
+      activeKey={active}
+      onChange={handleTabChange}
+    >
       {routes.map((route) => (
         <Tabs.TabPane key={route.key} tab={route.title}>
           {children}

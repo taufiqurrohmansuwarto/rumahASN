@@ -41,12 +41,12 @@ class SocmedLikes extends Model {
   async $afterInsert(queryContext) {
     await super.$afterInsert(queryContext);
 
-    await SocmedNotification.query().insert({
-      user_id: this.user_id,
-      trigger_user_id: this.user_id,
-      type: "like",
-      reference_id: this.id,
-    });
+    // await SocmedNotification.query().insert({
+    //   user_id: this.user_id,
+    //   trigger_user_id: this.user_id,
+    //   type: "like",
+    //   reference_id: this.id,
+    // });
   }
 }
 

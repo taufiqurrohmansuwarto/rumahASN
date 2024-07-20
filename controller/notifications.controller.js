@@ -1,5 +1,8 @@
+const { toNumber } = require("lodash");
 const Notifications = require("../models/notifications.model");
 const ASNConnectNotification = require("@/models/socmed-notifications.model");
+const Discussions = require("@/models/discussions.model");
+const SocmedPosts = require("@/models/socmed-posts.model");
 
 const index = async (req, res) => {
   try {
@@ -85,19 +88,48 @@ const asnConnectNotifications = async (req, res) => {
         .page(parseInt(page) - 1, parseInt(limit))
         .orderBy("created_at", "desc");
 
+      const myResults = await Promise.all(
+        result?.results?.map(async (r) => {
+          let data = {};
+          if (
+            r?.type === "comment_asn_update" ||
+            r?.type === "like_asn_update"
+          ) {
+            data = await SocmedPosts.query()
+              .findById(r?.reference_id)
+              .select("id", "user_id")
+              .withGraphFetched("[user(username)]");
+          } else if (r?.type === "comment_asn_discussion") {
+            data = await Discussions.query()
+              .findById(r?.reference_id)
+              .select("id", "title", "created_by");
+          }
+
+          return {
+            ...r,
+            data,
+          };
+        })
+      );
       const data = {
-        results: result.results,
+        results: myResults,
         total: result.total,
         limit: parseInt(limit),
         page: parseInt(page),
       };
+
       res.json(data);
     } else if (symbol === "yes") {
       const result = await ASNConnectNotification.query().count().where({
         trigger_user_id: customId,
         is_read: false,
       });
-      res.json(result[0]);
+
+      const data = {
+        total: toNumber(result[0]?.count),
+      };
+
+      res.json(data);
     }
   } catch (error) {
     console.log(error);
@@ -110,7 +142,21 @@ const asnConnectClearNotifications = async (req, res) => {
     const { customId } = req?.user;
     await ASNConnectNotification.query()
       .patch({ is_read: true })
-      .where("user_id", customId);
+      .where("trigger_user_id", customId);
+    res.status(200).json({ code: 200, message: "success" });
+  } catch (error) {
+    console.log(error);
+    res.status(400).json({ code: 400, message: "Internal Server Error" });
+  }
+};
+
+const asnConnectReadNotification = async (req, res) => {
+  try {
+    const { id } = req?.query;
+    const { customId } = req?.user;
+    await ASNConnectNotification.query()
+      .patch({ is_read: true })
+      .where({ id, trigger_user_id: customId });
     res.status(200).json({ code: 200, message: "success" });
   } catch (error) {
     console.log(error);
@@ -125,4 +171,5 @@ module.exports = {
   readNotification,
   asnConnectClearNotifications,
   asnConnectNotifications,
+  asnConnectReadNotification,
 };
