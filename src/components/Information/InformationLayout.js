@@ -1,6 +1,7 @@
 import React from "react";
 import PageContainer from "@/components/PageContainer";
 import { useRouter } from "next/router";
+import { Grid } from "antd";
 
 function InformationLayout({
   children,
@@ -10,9 +11,13 @@ function InformationLayout({
   content,
 }) {
   const router = useRouter();
+  const breakPoint = Grid.useBreakpoint();
 
   return (
     <PageContainer
+      childrenContentStyle={{
+        padding: breakPoint.xs ? 0 : null,
+      }}
       loading={loading}
       title={title}
       content={content}
@@ -23,6 +28,11 @@ function InformationLayout({
           href: "/information/faq",
         },
         {
+          tab: "Layanan",
+          key: "layanan",
+          href: "/information/layanan",
+        },
+        {
           tab: "Tutorial",
           key: "tutorials",
           href: "/information/tutorials",
@@ -30,8 +40,8 @@ function InformationLayout({
       ]}
       tabActiveKey={active}
       tabProps={{
-        type: "card",
         size: "small",
+        color: "primary",
         onChange: (key) => {
           router.push(key);
         },

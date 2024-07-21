@@ -1,9 +1,8 @@
 import { getStandarLayanan } from "@/services/layanan.services";
 import { useQuery } from "@tanstack/react-query";
-import { Table, Space, Button, Divider } from "antd";
-import React from "react";
-import CreateStandarLayanan from "./CreateStandarLayanan";
+import { Button, Card, Divider, Table, Tag } from "antd";
 import { useRouter } from "next/router";
+import CreateStandarLayanan from "./CreateStandarLayanan";
 
 function DaftarStandarPelayanan() {
   const router = useRouter();
@@ -26,40 +25,38 @@ function DaftarStandarPelayanan() {
     {
       title: "Status",
       dataIndex: "is_active",
-      render: (row) => (row ? "Aktif" : "Tidak Aktif"),
+      render: (row) =>
+        row ? (
+          <Tag color="green">Aktif</Tag>
+        ) : (
+          <Tag color="red">Tidak Aktif</Tag>
+        ),
     },
     {
       title: "Aksi",
       key: "aksi",
       render: (row) => (
-        <Space>
+        <>
           <Button type="link" onClick={() => gotoDetail(row)}>
             Detail
           </Button>
           <Divider type="vertical" />
           <Button type="link">Hapus</Button>
-        </Space>
+        </>
       ),
     },
   ];
 
   return (
-    <div>
-      {JSON.stringify(data)}
+    <Card>
       <CreateStandarLayanan />
       <Table
         columns={columns}
-        dataSource={data?.data}
+        dataSource={data}
         loading={isLoading}
-        pagination={{
-          total: data?.total,
-          showTotal: (total, range) =>
-            `${range[0]}-${range[1]} of ${total} items`,
-          pageSize: data?.limit,
-          current: data?.page,
-        }}
+        pagination={false}
       />
-    </div>
+    </Card>
   );
 }
 

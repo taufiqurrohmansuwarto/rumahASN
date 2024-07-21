@@ -30,7 +30,7 @@ function ASNConnectNotification() {
           ),
         }}
         title="Notifikasi"
-        content="Notifikasi ASN Connect"
+        content="ASN Connect"
       >
         <NotificationLayout active="asn-connect">
           <SocmedNotifications />

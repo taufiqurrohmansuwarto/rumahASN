@@ -1,28 +1,9 @@
 const StandarPelayanan = require("@/models/standar_pelayanan.model");
-const { toNumber } = require("lodash");
 
 const findStandarPelayanan = async (req, res) => {
   try {
-    const page = req?.query?.page || 1;
-    const limit = req?.query?.limit || 25;
-    const search = req?.query?.search || "";
-
-    const result = await StandarPelayanan.query()
-      .where((builder) => {
-        if (search) {
-          builder.where("name", "ilike", `%${search}%`);
-        }
-      })
-      .page(toNumber(page) - 1, toNumber(limit));
-
-    const data = {
-      data: result?.results,
-      total: result?.total,
-      page: toNumber(page),
-      limit: toNumber(limit),
-    };
-
-    res.json(data);
+    const result = await StandarPelayanan.query();
+    res.json(result);
   } catch (error) {
     console.log(error);
     res.status(500).json({
@@ -34,11 +15,12 @@ const findStandarPelayanan = async (req, res) => {
 const findStandarPelayananById = async (req, res) => {
   try {
     const { id } = req?.query;
-    const result = await StandarPelayanan.query()
-      .where("id", id)
-      .first()
-      .withGraphFetched("[user]");
-    res.json(result);
+    const result = await StandarPelayanan.query().findById(id);
+    if (!result) {
+      res.json(null);
+    } else {
+      res.json(result);
+    }
   } catch (error) {
     console.log(error);
     res.status(500).json({

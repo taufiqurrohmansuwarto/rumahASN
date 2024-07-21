@@ -79,6 +79,19 @@ const DiskusiTerhangat = () => {
           >
             <List.Item.Meta
               avatar={<Avatar src={item.avatar} />}
+              description={
+                <Space size={4}>
+                  <Text type="secondary" style={{ fontSize: "12px" }}>
+                    {item.author}
+                  </Text>
+                  <Text type="secondary" style={{ fontSize: "12px" }}>
+                    •
+                  </Text>
+                  <Text type="secondary" style={{ fontSize: "12px" }}>
+                    {dayjs(item.date).format("DD MMM YYYY")}
+                  </Text>
+                </Space>
+              }
               title={
                 <Space direction="vertical" size={0}>
                   <Link
@@ -88,17 +101,6 @@ const DiskusiTerhangat = () => {
                   >
                     {item.title}
                   </Link>
-                  <Space size={4}>
-                    <Text type="secondary" style={{ fontSize: "12px" }}>
-                      {item.author}
-                    </Text>
-                    <Text type="secondary" style={{ fontSize: "12px" }}>
-                      •
-                    </Text>
-                    <Text type="secondary" style={{ fontSize: "12px" }}>
-                      {dayjs(item.date).format("DD MMM YYYY")}
-                    </Text>
-                  </Space>
                 </Space>
               }
             />

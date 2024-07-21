@@ -21,11 +21,11 @@ function NotificationLayout({ children, active }) {
     //   key: "submission",
     //   title: "Usulan",
     // },
-    {
-      path: "/notifications/private-message",
-      key: "private-message",
-      title: "Pesan Pribadi",
-    },
+    // {
+    //   path: "/notifications/private-message",
+    //   key: "private-message",
+    //   title: "Pesan Pribadi",
+    // },
     {
       path: "/notifications/kepegawaian",
       key: "kepegawaian",
@@ -44,7 +44,6 @@ function NotificationLayout({ children, active }) {
         padding: 0,
         // margin: 0,
       }}
-      type="card"
       activeKey={active}
       onChange={handleTabChange}
     >

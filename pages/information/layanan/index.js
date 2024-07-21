@@ -1,32 +1,32 @@
 import InformationLayout from "@/components/Information/InformationLayout";
 import Layout from "@/components/Layout";
-import Tutorials from "@/components/PusatBantuan/Tutorials";
+import InformasiDaftarLayanan from "@/components/PusatBantuan/InformasiDaftarLayanan";
 import Head from "next/head";
 
-function Tutorial() {
+function Layanan() {
   return (
     <>
       <Head>
-        <title>Rumah ASN - Informasi - Tutorial</title>
+        <title>Rumah ASN - Informasi - Layanan</title>
       </Head>
       <InformationLayout
-        active="tutorials"
+        active="layanan"
         title="Informasi Rumah ASN"
-        content="Tutorial yang tersedia di Rumah ASN"
+        content="Layanan yang tersedia"
       >
-        <Tutorials />
+        <InformasiDaftarLayanan />
       </InformationLayout>
     </>
   );
 }
 
-Tutorial.Auth = {
+Layanan.Auth = {
   action: "manage",
   subject: "Feeds",
 };
 
-Tutorial.getLayout = function getLayout(page) {
+Layanan.getLayout = function getLayout(page) {
   return <Layout active="/information/faq">{page}</Layout>;
 };
 
-export default Tutorial;
+export default Layanan;

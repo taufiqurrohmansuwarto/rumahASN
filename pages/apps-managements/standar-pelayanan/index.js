@@ -10,7 +10,10 @@ const StandarPelayanan = () => {
       <Head>
         <title>Rumah ASN - Standar Pelayanan</title>
       </Head>
-      <PageContainer>
+      <PageContainer
+        title="Standar Pelayanan"
+        content="Daftar Standar Pelayanan"
+      >
         <DaftarStandarPelayanan />
       </PageContainer>
     </>

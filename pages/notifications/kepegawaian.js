@@ -25,7 +25,7 @@ function KepegawaianNotification() {
           ),
         }}
         title="Notifikasi"
-        content="Notifikasi Pertanyaan"
+        content="Kepegawaian"
       >
         <NotificationLayout active="kepegawaian">
           <div>Not Yet Implemented</div>
