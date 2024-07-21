@@ -1,12 +1,10 @@
-import { useQuery } from "@tanstack/react-query";
-import { Breadcrumb, Card } from "antd";
-import Link from "next/link";
-import { getFaqs } from "@/services/index";
 import FAQMenu from "@/components/FAQMenu";
-import Layout from "@/components/Layout";
-import PageContainer from "@/components/PageContainer";
-import Head from "next/head";
 import InformationLayout from "@/components/Information/InformationLayout";
+import Layout from "@/components/Layout";
+import { getFaqs } from "@/services/index";
+import { useQuery } from "@tanstack/react-query";
+import { Card } from "antd";
+import Head from "next/head";
 
 function FAQPage() {
   const { data, isLoading } = useQuery(["faqs"], () => getFaqs());
@@ -14,10 +12,10 @@ function FAQPage() {
   return (
     <>
       <Head>
-        <title>Rumah ASN - Pertanyaan Umum</title>
+        <title>Rumah ASN - Informasi - Pertanyaan Umum</title>
       </Head>
       <InformationLayout
-        title="Pertanyaan Umum"
+        title="Informasi Rumah ASN"
         content="Pertanyaan yang sering diajukan"
       >
         <Card style={{ minHeight: "80vh" }}>

@@ -63,7 +63,13 @@ export default function CreateStandarLayanan() {
         open={open}
         onClose={() => setOpen(false)}
       />
-      <Button type="primary" onClick={() => setOpen(true)}>
+      <Button
+        style={{
+          marginBottom: 10,
+        }}
+        type="primary"
+        onClick={() => setOpen(true)}
+      >
         Layanan
       </Button>
     </div>

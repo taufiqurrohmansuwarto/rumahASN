@@ -50,7 +50,7 @@ function ForumKepegawaianNotification() {
           ),
         }}
         title="Notifikasi"
-        content="Notifikasi Pertanyaan"
+        content="Forum Kepegawaian"
       >
         <NotificationLayout active="forum-kepegawaian">
           <Grid align="center" justify="center">

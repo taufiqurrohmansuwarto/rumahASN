@@ -14,7 +14,7 @@ const DetailStandarPelayanan = () => {
         <title>Rumah ASN - Standar Pelayanan - Detail Standar Pelayanan</title>
       </Head>
       <PageContainer
-        title="Detail Standar Pelayanan"
+        title="Detail Pelayanan"
         content="Standar Pelayanan"
         onBack={() => router.back()}
       >
