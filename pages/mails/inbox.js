@@ -1,10 +1,7 @@
-import Layout from "@/components/Layout";
-import MailLayout from "@/components/MailLayout";
-import ListPrivateMessages from "@/components/PrivateMessages/ListPrivateMessages";
-import { PageContainer } from "@ant-design/pro-layout";
-import { Breadcrumb } from "antd";
+import GmailLayout from "@/components/GmailLayout";
+import PageContainer from "@/components/PageContainer";
+import DetailMail from "@/components/PrivateMessages/DetailMail";
 import Head from "next/head";
-import Link from "next/link";
 
 const InboxMail = () => {
   const handleBack = () => router?.back();
@@ -14,17 +11,13 @@ const InboxMail = () => {
       <Head>
         <title>Rumah ASN - Pesan Pribadi</title>
       </Head>
-      <ListPrivateMessages type="inbox" />
+      <DetailMail />
     </>
   );
 };
 
 InboxMail.getLayout = function getLayout(page) {
-  return (
-    <Layout>
-      <MailLayout active="inbox">{page}</MailLayout>
-    </Layout>
-  );
+  return <GmailLayout active="/mails/inbox">{page}</GmailLayout>;
 };
 
 InboxMail.Auth = {

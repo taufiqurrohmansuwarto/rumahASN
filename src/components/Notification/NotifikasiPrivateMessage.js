@@ -7,7 +7,7 @@ function NotifikasiPrivateMessage({ url, title }) {
   const router = useRouter();
 
   const changePageNotification = () => {
-    router.push(`/notifications/${url}`);
+    router.push(`/${url}`);
   };
 
   return (

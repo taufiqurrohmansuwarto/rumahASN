@@ -1,15 +1,9 @@
 import { sendPrivateMessage } from "@/services/index";
-import {
-  formatDateFromNow,
-  renderMarkdown,
-  timeFormat,
-  uploadFile,
-} from "@/utils/client-utils";
-import { Avatar, Group, Stack, Text, ThemeIcon, Title } from "@mantine/core";
+import { renderMarkdown, uploadFile } from "@/utils/client-utils";
+import { Stack, Text, Title } from "@mantine/core";
 import { MarkdownEditor } from "@primer/react/drafts";
-import { IconPhone } from "@tabler/icons";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Input, Modal, Space, message as messageantd } from "antd";
+import { Input, Modal, message as messageantd } from "antd";
 import { useRouter } from "next/router";
 import { useState } from "react";
 import PageContainer from "../PageContainer";
@@ -92,59 +86,11 @@ function DetailPrivateMessage({ data }) {
 
   return (
     <>
-      <PageContainer
-        onBack={() => router?.back()}
-        subTitle="Detail Pesan Pribadi"
-      >
-        <SendModal
-          receiver={data?.sender}
-          onCancel={handleCancel}
-          visible={visible}
-        />
-        <Title mb="lg" order={2}>{`"${data?.title}"`}</Title>
-        <Group position="apart">
-          <Group spacing="sm">
-            <Avatar size="lg" radius={100} src={data?.sender?.image} />
-            <Stack spacing="xs">
-              <Text>{data?.sender?.username}</Text>
-              <Text>Kepada saya :</Text>
-            </Stack>
-          </Group>
-          <Space align="center" size="large">
-            <Text fz={12}>
-              {timeFormat(data?.created_at)} -{" "}
-              {formatDateFromNow(data?.created_at)}
-            </Text>
-            <ThemeIcon
-              onClick={handleOpen}
-              size="xl"
-              style={{
-                cursor: "pointer",
-              }}
-              variant="gradient"
-              gradient={{ from: "indigo", to: "cyan" }}
-            >
-              <IconPhone size="1.2rem" />
-            </ThemeIcon>
-          </Space>
-        </Group>
-        <div
-          style={{
-            marginBottom: "1rem",
-            marginTop: "1rem",
-            borderRadius: "5px",
-            backgroundColor: "#eee",
-            width: "100%",
-            minHeight: "200px",
-            padding: "1rem",
-          }}
-        >
-          <div
-            dangerouslySetInnerHTML={{
-              __html: data?.message,
-            }}
-          />
-        </div>
+      <PageContainer onBack={() => router.back()} title="Detail Pesan">
+        <Stack>
+          <Title order={3}>{data?.title}</Title>
+          <Text>{data?.message}</Text>
+        </Stack>
       </PageContainer>
     </>
   );

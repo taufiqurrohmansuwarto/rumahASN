@@ -578,7 +578,7 @@ function Layout({ children, active, collapsed = true }) {
           // />,
           <NotifikasiPrivateMessage
             key="private-message"
-            url="private-message"
+            url="/mails/inbox"
             title="Inbox Pesan Pribadi"
           />,
           <NotifikasiASNConnect
