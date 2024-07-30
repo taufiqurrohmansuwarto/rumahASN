@@ -833,6 +833,7 @@ const postUnorJabatanByNip = async (req, res) => {
       pnsId: id,
       instansiId: "A5EB03E23CCCF6A0E040640A040252AD",
       satuanKerjaId: "A5EB03E24213F6A0E040640A040252AD",
+      instansiIndukId: "A5EB03E23CCCF6A0E040640A040252AD",
     };
 
     const result = await request.post(`/jabatan/unorjabatan/save`, data);
