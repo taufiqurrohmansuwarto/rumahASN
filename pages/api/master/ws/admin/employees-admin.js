@@ -1,7 +1,4 @@
-import {
-  getAllEmployeesFullDownload,
-  getAllEmployeesMasterPagingAdmin,
-} from "@/controller/master-fasilitator.controller";
+import { getAllEmployeesMasterPagingAdmin } from "@/controller/master-fasilitator.controller";
 import adminMiddleware from "@/middleware/admin.middleware";
 import auth from "@/middleware/auth.middleware";
 import clientCredentialsMiddleware from "@/middleware/client-credentials.middleware";
@@ -14,6 +11,6 @@ router
   .use(adminMiddleware)
   .use(siasnMiddleware)
   .use(clientCredentialsMiddleware)
-  .get(getAllEmployeesFullDownload);
+  .get(getAllEmployeesMasterPagingAdmin);
 
 export default router.handler();

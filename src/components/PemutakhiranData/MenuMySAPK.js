@@ -13,6 +13,7 @@ import {
 } from "@mantine/core";
 import { Avatar, Grid, Space, Tag, Typography } from "antd";
 import { useRouter } from "next/router";
+import IPASNWs from "../LayananSIASN/IPASNWs";
 
 const mockdata = mysapkMenu;
 
@@ -104,6 +105,7 @@ export function MenuMySAPK({ dataUtama, foto }) {
               direction={screens.xl ? "horizontal" : "vertical"}
             >
               <IPAsn tahun={2023} />
+              <IPASNWs />
               <Tag color="yellow">{dataUtama?.kedudukanPnsNama}</Tag>
               <Tag color={dataUtama?.validNik ? "green" : "red"}>
                 {dataUtama?.validNik

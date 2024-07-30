@@ -15,7 +15,7 @@ module.exports.IPASNBaru = (fetcher, nip) => {
   return new Promise(async (resolve, reject) => {
     try {
       const result = await fetcher.get(`/pns/nilaiipasn/${nip}`);
-      resolve(result?.data);
+      resolve(result?.data?.data);
     } catch (error) {
       if (error?.code === 0) {
         resolve(null);

@@ -146,6 +146,32 @@ function calculateMaxWidthOfColumns(data) {
   return maxWidths;
 }
 
+const getAllEmployeesFullDownload = async (req, res) => {
+  try {
+    const fetcher = req?.clientCredentialsFetcher;
+    const result = await fetcher.get(`/master-ws/pemprov/opd/1/employees`);
+
+    const wb = xlsx.utils.book_new();
+    const ws = xlsx.utils.json_to_sheet(result);
+
+    xlsx.utils.book_append_sheet(wb, ws, "Sheet1");
+    xlsx.writeFile(wb, "ipasn.xlsx");
+
+    res.setHeader(
+      "Content-Type",
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    );
+    res.setHeader(
+      "Content-Disposition",
+      "attachment; filename=" + "ipasn.xlsx"
+    );
+    res.end(xlsx.write(wb, { type: "buffer", bookType: "xlsx" }));
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
 const getAllEmployeesMaster = async (req, res) => {
   try {
     const fetcher = req?.clientCredentialsFetcher;
@@ -512,4 +538,5 @@ module.exports = {
   getAllEmployeesMasterPaging,
   getAllEmployeesMasterPagingAdmin,
   getOpdAdmin,
+  getAllEmployeesFullDownload,
 };
