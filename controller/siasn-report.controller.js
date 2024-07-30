@@ -1,6 +1,7 @@
 const siasnIPASN = require("@/models/siasn-ipasn.model");
 const siasnEmployees = require("@/models/siasn-employees.model");
 const xlsx = require("xlsx");
+const syncIPASN = require("@/models/sync-ip-asn.model");
 
 const showIPASN = async (req, res) => {
   try {

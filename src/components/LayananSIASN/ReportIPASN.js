@@ -85,41 +85,24 @@ function ReportIPASN() {
       dataIndex: "nama",
     },
     {
-      title: "Unor",
-      dataIndex: "unor",
-    },
-    {
       title: "Kualifikasi",
       dataIndex: "kualifikasi",
-    },
-    {
-      title: "Keterangan Kualifikasi",
-      dataIndex: "keterangan_kualifikasi",
     },
     {
       title: "Kompetensi",
       dataIndex: "kompetensi",
     },
-    {
-      title: "Keterangan Kompetensi",
-      dataIndex: "keterangan_kompetensi",
-    },
+
     {
       title: "Kinerja",
       dataIndex: "kinerja",
     },
-    {
-      title: "Keterangan Kinerja",
-      dataIndex: "keterangan_kinerja",
-    },
+
     {
       title: "Disiplin",
       dataIndex: "disiplin",
     },
-    {
-      title: "Keterangan Disiplin",
-      dataIndex: "keterangan_disiplin",
-    },
+
     {
       title: "Total",
       dataIndex: "total",
@@ -127,10 +110,6 @@ function ReportIPASN() {
     {
       title: "Tahun",
       dataIndex: "tahun",
-    },
-    {
-      title: "Updated",
-      dataIndex: "updated",
     },
   ];
 
