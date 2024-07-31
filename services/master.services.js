@@ -49,7 +49,7 @@ export const getAllEmployeesPaging = (query) => {
 export const getAllEmployeesPagingAdmin = (query) => {
   return api
     .get(
-      `/admin/employees?${queryString.stringify(query, {
+      `/admin/employees-admin?${queryString.stringify(query, {
         skipNull: true,
         skipEmptyString: true,
       })}`
