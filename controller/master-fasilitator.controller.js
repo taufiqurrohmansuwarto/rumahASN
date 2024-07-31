@@ -34,12 +34,12 @@ const fetchEmployeeData = (fetcher, idOpd, query) => {
 
 // Helper function to fetch detailed employee data asynchronously using Promise.allSettled
 const fetchDetailedEmployeeData = async (siasnFetcher, nips) => {
-  const promises = nips.map((nip) => proxyDataUtamaASN(siasnFetcher, nip));
+  const promises = nips.map((nip) => dataUtama(siasnFetcher, nip));
   const results = await Promise.allSettled(promises);
 
   // Process results, considering both fulfilled and rejected promises
   return results.map((result) =>
-    result.status === "fulfilled" ? result.value.data.data : {}
+    result.status === "fulfilled" ? result.value : {}
   );
 };
 
@@ -415,7 +415,7 @@ const getAllEmployeesMasterPaging = async (req, res) => {
 
     const nips = employeeData?.data?.results?.map((item) => item?.nip_master);
     const detailedEmployeeData = await fetchDetailedEmployeeData(
-      proxyFetcher,
+      siasnFetcher,
       nips
     );
 
@@ -448,7 +448,7 @@ const getAllEmployeesMasterPagingAdmin = async (req, res) => {
 
     const nips = employeeData?.data?.results?.map((item) => item?.nip_master);
     const detailedEmployeeData = await fetchDetailedEmployeeData(
-      proxyFetcher,
+      siasnFetcher,
       nips
     );
 

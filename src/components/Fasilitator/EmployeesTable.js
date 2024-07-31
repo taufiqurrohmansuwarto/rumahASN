@@ -313,21 +313,24 @@ function EmployeesTable() {
         <EmployeesTableFilter />
         <Flex gap="small">
           <DownloadASN />
-          <Button type="primary">Unduh IP ASN</Button>
+          <Button disabled type="primary">
+            Unduh IP ASN
+          </Button>
         </Flex>
       </div>
       <Table
-        size="middle"
         columns={columns}
         dataSource={data?.results}
         pagination={{
+          size: "small",
           total: data?.total,
           showTotal: (total) => `Total ${total} pegawai`,
           showSizeChanger: false,
           current: parseInt(router?.query?.page),
           defaultCurrent: 1,
           onChange: handleChangePage,
-          position: ["topRight", "bottomRight", "topLeft", "bottomLeft"],
+          pageSize: 10,
+          position: ["topRight", "bottomRight"],
         }}
         loading={isLoading || isFetching}
         rowKey={(row) => row?.id}
