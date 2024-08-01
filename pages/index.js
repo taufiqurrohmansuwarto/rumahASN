@@ -21,12 +21,15 @@ export default function Home() {
     const userPttpk =
       currentUser?.group === "PTTPK" && currentUser?.role === "USER";
 
+    const fasilitatorMaster =
+      currentUser?.group === "MASTER" && currentUser?.role === "FASILITATOR";
+
     const pegawaiBKD = asnBkd || pttBkd;
     const pegawaiPemda = userPns || userPttpk;
 
     if (pegawaiBKD) {
       router.push("/beranda-bkd?tab=my-task");
-    } else if (pegawaiPemda) {
+    } else if (pegawaiPemda || fasilitatorMaster) {
       router.push("/asn-connect/asn-updates");
     } else {
       router.push("/feeds");

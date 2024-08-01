@@ -5,6 +5,14 @@ const api = axios.create({
   baseURL: "/helpdesk/api/admins",
 });
 
+export const reportSimasterEmployees = async () => {
+  return api
+    .get(`/reports/simaster/employees`, {
+      responseType: "arraybuffer",
+    })
+    .then((res) => res?.data);
+};
+
 export const updateKategories = async ({ id, data }) => {
   return await api
     .patch(`/tickets/${id}/properties`, data)

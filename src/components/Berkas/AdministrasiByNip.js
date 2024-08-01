@@ -8,7 +8,7 @@ import { Button, Space, Typography } from "antd";
 import { useRouter } from "next/router";
 import { useState } from "react";
 
-const list_tmt = ["01042024", "01052024", "01062024", "01072024"];
+const list_tmt = ["01042024", "01052024", "01062024", "01072024", "01082024"];
 const dokumen = ["SK", "PERTEK", "SPMT", "PK"];
 
 const Tombol = ({ tmt, file, nip }) => {
