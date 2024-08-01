@@ -66,7 +66,7 @@ const changeRoutes = (user) => {
     const adminFasilitator = admin || fasilitatorMaster;
 
     // persiapan ini seharusnya ditambahkan halaman dashboard seperti analisis dsb tapi jangan data
-    if (pegawaiPemda) {
+    if (pegawaiPemda || fasilitatorMaster) {
       userRoutes.routes.push({
         path: "/asn-connect/asn-updates",
         name: "Smart ASN Connect",

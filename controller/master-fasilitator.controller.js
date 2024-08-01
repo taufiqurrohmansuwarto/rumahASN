@@ -152,10 +152,10 @@ const getAllEmployeesFullDownload = async (req, res) => {
     const result = await fetcher.get(`/master-ws/pemprov/opd/1/employees`);
 
     const wb = xlsx.utils.book_new();
-    const ws = xlsx.utils.json_to_sheet(result);
+    const ws = xlsx.utils.json_to_sheet(result?.data);
 
-    xlsx.utils.book_append_sheet(wb, ws, "Sheet1");
-    xlsx.writeFile(wb, "ipasn.xlsx");
+    xlsx.utils.book_append_sheet(wb, ws, "data semua");
+    xlsx.writeFile(wb, "rekap-full.xlsx");
 
     res.setHeader(
       "Content-Type",
@@ -163,7 +163,7 @@ const getAllEmployeesFullDownload = async (req, res) => {
     );
     res.setHeader(
       "Content-Disposition",
-      "attachment; filename=" + "ipasn.xlsx"
+      "attachment; filename=" + "rekap-full.xlsx"
     );
     res.end(xlsx.write(wb, { type: "buffer", bookType: "xlsx" }));
   } catch (error) {
@@ -530,7 +530,23 @@ const getOpdAdmin = async (req, res) => {
   }
 };
 
+const getAllEmployeeReportAdmin = async (req, res) => {
+  try {
+    const fetcher = req?.clientCredentialsFetcher;
+    const opdId = "1";
+
+    const result = await fetcher.get(
+      `/master-ws/pemprov/opd/${opdId}/employees`
+    );
+    res.json(result?.data);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
 module.exports = {
+  getAllEmployeeReportAdmin,
   getAllEmployeesMaster,
   getAllEmployeesAnomali23Report,
   getIPAsnReport,

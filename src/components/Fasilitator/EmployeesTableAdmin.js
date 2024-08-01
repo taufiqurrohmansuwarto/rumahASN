@@ -9,6 +9,7 @@ import { Avatar, Space, Table, Tag, Tooltip, Typography } from "antd";
 import { useRouter } from "next/router";
 import EmployeesTableFilterAdmin from "../Filter/EmployeesTableFilterAdmin";
 import { useSession } from "next-auth/react";
+import ReportEmployeeMaster from "../Admin/ReportEmployeeMaster";
 
 const TagKomparasi = ({ komparasi, nama }) => {
   return (
@@ -210,6 +211,7 @@ function EmployeesTableAdmin() {
         }}
       >
         <EmployeesTableFilterAdmin />
+        <ReportEmployeeMaster />
       </div>
       <Table
         size="small"
