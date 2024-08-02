@@ -78,3 +78,9 @@ export const customerSatisafactionsScore = async () => {
 export const ticketStatisticsScore = async () => {
   return api.get(`/analysis/statistik-tiket`).then((res) => res?.data);
 };
+
+export const comparePegawaiAdmin = async () => {
+  return api.get(`/dashboard-komparasi`).then((res) => res?.data);
+};
+
+

@@ -6,14 +6,15 @@ import { PageContainer } from '@ant-design/pro-layout';
 import Head from 'next/head';
 import { Breadcrumb } from 'antd';
 import Link from 'next/link';
+import { comparePegawaiAdmin } from '@/services/admin.services';
 
-function Dashboard() {
+function DashboardKomparasiAdmin() {
   const { data, isLoading } = useQuery(
-    ["dashboard-compare-siasn"],
-    () => compareEmployeesSimasterSiasn()
+    ["dashboard-compare-siasn-admin"],
+    () => comparePegawaiAdmin()
   );
   
   return <div>{data && <ReactJson src={data} />}</div>;
 }
 
-export default Dashboard
+export default DashboardKomparasiAdmin;
