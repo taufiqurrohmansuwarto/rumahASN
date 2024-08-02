@@ -60,7 +60,7 @@ const uploadIPASN = async (req, res) => {
 
 const showEmployees = async (req, res) => {
   try {
-    const limit = req.query.limit || 25;
+    const limit = req.query.limit || 10;
     const page = req.query.page || 1;
     const search = req.query.search || "";
 

@@ -507,6 +507,10 @@ export const daftarPemberhentian = async (query) => {
     .then((res) => res.data);
 };
 
+export const rwPemberhentianByNip = async (nip) => {
+  return api.get(`/admin/${nip}/rw-pemberhentian`).then((res) => res.data);
+};
+
 export const trackingKenaikanPangkatByNipFasilitator = async (nip) => {
   return api
     .get(`/admin/${nip}/layanan-siasn/kenaikan-pangkat`)

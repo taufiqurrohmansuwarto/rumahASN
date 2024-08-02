@@ -1,257 +1,255 @@
 const SiasnEmployees = require("@/models/siasn-employees.model");
 const SyncPegawai = require("@/models/sync-pegawai.model");
 const { referensiJenjang } = require("@/utils/master.utils");
-const { difference, trim, toLower, defaults, countBy, toNumber } = require("lodash");
+const { trim, toLower, toNumber, differenceBy } = require("lodash");
+
+// Helper function to compare attributes
+const compareAttributes = (attr1, attr2) => (attr1 === attr2 ? 1 : 0);
+
+// Fetch employees from SyncPegawai based on skpd_id
+const fetchEmployees = async (opdId) => {
+  return await SyncPegawai.query().where("skpd_id", "ilike", `${opdId}%`);
+};
+
+// Fetch all SiasnEmployees
+const fetchAllSiasnEmployees = async () => {
+  return await SiasnEmployees.query().select("nip_baru as nip_master");
+};
+
+// Fetch SiasnEmployees that match nip_baru in nipEmployeesMaster
+const fetchMatchingSiasnEmployees = async (nipEmployeesMaster) => {
+  return await SiasnEmployees.query().whereIn("nip_baru", nipEmployeesMaster);
+};
+
+// Generate anomaly data
+const generateAnomalies = (employees, allSiasnEmployees) => {
+  const anomaliSimater = differenceBy(
+    employees,
+    allSiasnEmployees,
+    "nip_master"
+  );
+  const anomaliSiasn = differenceBy(allSiasnEmployees, employees, "nip_master");
+  return { anomaliSimater, anomaliSiasn };
+};
+
+// Map siasnEmployees by nip_baru
+const mapSiasnEmployees = (siasnEmployees) => {
+  return new Map(
+    siasnEmployees.map((employee) => [employee.nip_baru, employee])
+  );
+};
+
+// Compare employee data and generate result
+const compareEmployees = (employees, siasnEmployeeMap, referensiJenjang) => {
+  return employees
+    .map((employee, index) => {
+      const currentEmployees = siasnEmployeeMap.get(employee.nip_master);
+      if (!currentEmployees) return null;
+
+      const referensiJenjangId = referensiJenjang?.find(
+        (item) =>
+          String(item?.kode_bkn) === currentEmployees?.tingkat_pendidikan_id
+      );
+
+      const { id, foto, ...allData } = employee;
+      return {
+        id: index + 1,
+        nip_master: employee.nip_master,
+        valid_nik: toNumber(currentEmployees?.is_valid_nik) === 1 ? 1 : 0,
+        nama: compareAttributes(allData?.nama_master, currentEmployees?.nama),
+        nip: compareAttributes(allData?.nip_master, currentEmployees?.nip_baru),
+        tgl_lahir: compareAttributes(
+          allData?.tgl_lahir_master,
+          currentEmployees?.tanggal_lahir
+        ),
+        email: compareAttributes(
+          allData?.email_master,
+          currentEmployees?.email
+        ),
+        pangkat: compareAttributes(
+          allData?.kode_golongan_bkn,
+          currentEmployees?.gol_akhir_id
+        ),
+        jenis_jabatan: compareAttributes(
+          allData?.kode_jenis_jabatan_bkn,
+          currentEmployees?.jenis_jabatan_id
+        ),
+        jenjang_pendidikan: compareAttributes(
+          referensiJenjangId?.kode_master,
+          allData?.kode_jenjang_master
+        ),
+        jenjang_jabatan: compareAttributes(),
+      };
+    })
+    .filter(Boolean);
+};
+
+// Filter results based on a key
+const filterResults = (result, key) => {
+  return result.filter((r) => r[key] === 0).map((i) => i?.nip_master);
+};
 
 const comparePegawai = async (req, res) => {
-    try {
-        const user = req.user;
-        const opdId = user.organization_id;
-
-        const employees = await SyncPegawai.query().where('skpd_id', 'ilike', `${opdId}%`);
-        const nipEmployeesMaster = employees.map((employee) => employee.nip_master);
-        const siasnEmployees = await SiasnEmployees.query().whereIn(
-          "nip_baru",
-          nipEmployeesMaster
-        );
-        const nipEmployeesSiasn = siasnEmployees.map(siasnEmployee => siasnEmployee.nip_baru)
-
-        const diff = difference(nipEmployeesMaster, nipEmployeesSiasn);
-
-        const result = employees.map((employee, index) => {
-            const currentEmployees = siasnEmployees.find(siasnEmployees => siasnEmployees.nip_baru === employee.nip_master);
-            const referensiJenjangId = referensiJenjang?.find(
-              (item) =>
-                String(item?.kode_bkn) ===
-                currentEmployees?.tingkat_pendidikan_id
-            );
-
-            if (currentEmployees) {
-                const { id, foto, ...allData } = employee;
-    
-                const namaMaster = allData?.nama_master;
-                const namaSiasn = currentEmployees?.nama;
-    
-                const tglLahirMaster = allData?.tgl_lahir_master;
-                const tglLahirSiasn = currentEmployees?.tanggal_lahir;
-    
-                const nipMaster = allData?.nip_master;
-                const nipSiasn = currentEmployees?.nip_baru;
-    
-                const emailMaster = allData?.email_master;
-                const emailSiasn = currentEmployees?.email;
-    
-                const pangkatMaster = allData?.kode_golongan_bkn;
-                const pangkatSiasn = currentEmployees?.gol_akhir_id;
-    
-                const jenisJabatanMaster = allData?.kode_jenis_jabatan_bkn;
-                const jenisJabatanSiasn = currentEmployees?.jenis_jabatan_id;
-    
-                const jenjangPendidikanMaster = referensiJenjangId?.kode_master;
-                const jenjangPendidikanSiasn = allData?.kode_jenjang_master;
-
-                return {
-                    id: index + 1,
-                    nip_master: employee.nip_master,
-                  valid_nik: toNumber(currentEmployees?.is_valid_nik) == 1 ? 1 : 0,
-                  nama: compareString(namaMaster, namaSiasn) ? 1 : 0,
-                  nip: compareString(nipMaster, nipSiasn) ? 1 : 0,
-                  tgl_lahir: compareString(tglLahirMaster, tglLahirSiasn) ? 1 : 0,
-                  email: compareString(emailMaster, emailSiasn) ? 1 : 0,
-                  pangkat: compareString(pangkatMaster, pangkatSiasn) ? 1 : 0,
-                  jenis_jabatan: compareString(
-                    jenisJabatanMaster,
-                    jenisJabatanSiasn
-                  )
-                    ? 1
-                    : 0,
-                  jenjang_pendidikan: compareString(
-                    jenjangPendidikanMaster,
-                    jenjangPendidikanSiasn
-                  )
-                    ? 1
-                    : 0,
-                };
-            } else {
-                return;
-            }
-
-        });       
-
-        const filteredNik = result.filter(r => r?.valid_nik === 0).map(i => i?.nip_master);
-        const filteredNama = result
-          .filter((r) => r?.nama === 0)
-          .map((i) => i?.nip_master);
-        const filteredNip = result.filter(r => r?.nip === 0).map(i => i?.nip_master);
-        const filteredEmail = result.filter(r => r?.email === 0).map(i => i?.nip_master);
-        const filteredPangkat = result
-        .filter((r) => r?.pangkat === 0)
-        .map((i) => i?.nip_master);
-        const filteredJenisJabatan = result
-          .filter((r) => r?.jenis_jabatan === 0)
-          .map((i) => i?.nip_master);
-        const filteredJenjangPendidikan = result
-          .filter((r) => r?.jenjang_pendidikan === 0)
-          .map((i) => i?.nip_master);
-
-        res.json({
-          pegawaiSimaster: employees.length,
-          pegawaiSiAsn: siasnEmployees.length,
-          // diff,
-          result: result.length,
-          nikBelumValid: filteredNik.length,
-          nikBelumValidDetail: filteredNik,
-          namaBelumValid: filteredNama.length,
-          namaBelumValidDetail: filteredNama,
-          nipBelumValid: filteredNip.length,
-          nipBelumValidDetail: filteredNip,
-          filteredNip: filteredNip?.length,
-          filteredNipDetail: filteredNip,
-          filteredEmail: filteredEmail?.length,
-          filteredEmailDetail: filteredEmail,
-          filteredPangkat: filteredPangkat?.length,
-          filteredPangkatDetail: filteredPangkat,
-          filteredJenisJabatan: filteredJenisJabatan?.length,
-          filteredJenisJabatanDetail: filteredJenisJabatan,
-          filteredJenjangPendidikan: filteredJenjangPendidikan?.length,
-          filteredJenjangPendidikanDetail: filteredJenjangPendidikan
-        });
-    } catch (error) {
-        console.log(error)
-        res.status(400).json({code: 400, message: 'internal server error'})
-    }
-}
-
-const comparePegawaiAdmin = async (req, res) => {
   try {
     const user = req.user;
-    const opdId = "123";
+    const opdId = user.organization_id;
 
+    // Fetch all employees from SyncPegawai with the given skpd_id
     const employees = await SyncPegawai.query().where(
       "skpd_id",
       "ilike",
       `${opdId}%`
     );
     const nipEmployeesMaster = employees.map((employee) => employee.nip_master);
+
+    // Fetch SiasnEmployees that match nip_baru in nipEmployeesMaster
     const siasnEmployees = await SiasnEmployees.query().whereIn(
       "nip_baru",
       nipEmployeesMaster
     );
-    const nipEmployeesSiasn = siasnEmployees.map(
-      (siasnEmployee) => siasnEmployee.nip_baru
+    const siasnEmployeeMap = new Map(
+      siasnEmployees.map((employee) => [employee.nip_baru, employee])
     );
 
-    const diff = difference(nipEmployeesMaster, nipEmployeesSiasn);
+    // Calculate differences and prepare result
+    const result = employees
+      .map((employee, index) => {
+        const currentEmployees = siasnEmployeeMap.get(employee.nip_master);
+        if (!currentEmployees) return null;
 
-    const result = employees.map((employee, index) => {
-      const currentEmployees = siasnEmployees.find(
-        (siasnEmployees) => siasnEmployees.nip_baru === employee.nip_master
-      );
-      const referensiJenjangId = referensiJenjang?.find(
-        (item) =>
-          String(item?.kode_bkn) === currentEmployees?.tingkat_pendidikan_id
-      );
+        const referensiJenjangId = referensiJenjang?.find(
+          (item) =>
+            String(item?.kode_bkn) === currentEmployees?.tingkat_pendidikan_id
+        );
 
-      if (currentEmployees) {
         const { id, foto, ...allData } = employee;
-
-        const namaMaster = allData?.nama_master;
-        const namaSiasn = currentEmployees?.nama;
-
-        const tglLahirMaster = allData?.tgl_lahir_master;
-        const tglLahirSiasn = currentEmployees?.tanggal_lahir;
-
-        const nipMaster = allData?.nip_master;
-        const nipSiasn = currentEmployees?.nip_baru;
-
-        const emailMaster = allData?.email_master;
-        const emailSiasn = currentEmployees?.email;
-
-        const pangkatMaster = allData?.kode_golongan_bkn;
-        const pangkatSiasn = currentEmployees?.gol_akhir_id;
-
-        const jenisJabatanMaster = allData?.kode_jenis_jabatan_bkn;
-        const jenisJabatanSiasn = currentEmployees?.jenis_jabatan_id;
-
-        const jenjangPendidikanMaster = referensiJenjangId?.kode_master;
-        const jenjangPendidikanSiasn = allData?.kode_jenjang_master;
-
         return {
           id: index + 1,
           nip_master: employee.nip_master,
-          valid_nik: toNumber(currentEmployees?.is_valid_nik) == 1 ? 1 : 0,
-          nama: compareString(namaMaster, namaSiasn) ? 1 : 0,
-          nip: compareString(nipMaster, nipSiasn) ? 1 : 0,
-          tgl_lahir: compareString(tglLahirMaster, tglLahirSiasn) ? 1 : 0,
-          email: compareString(emailMaster, emailSiasn) ? 1 : 0,
-          pangkat: compareString(pangkatMaster, pangkatSiasn) ? 1 : 0,
-          jenis_jabatan: compareString(jenisJabatanMaster, jenisJabatanSiasn)
+          valid_nik: toNumber(currentEmployees?.is_valid_nik) === 1 ? 1 : 0,
+          nama: compareString(allData?.nama_master, currentEmployees?.nama)
+            ? 1
+            : 0,
+          nip: compareString(allData?.nip_master, currentEmployees?.nip_baru)
+            ? 1
+            : 0,
+          tgl_lahir: compareString(
+            allData?.tgl_lahir_master,
+            currentEmployees?.tanggal_lahir
+          )
+            ? 1
+            : 0,
+          email: compareString(allData?.email_master, currentEmployees?.email)
+            ? 1
+            : 0,
+          pangkat: compareString(
+            allData?.kode_golongan_bkn,
+            currentEmployees?.gol_akhir_id
+          )
+            ? 1
+            : 0,
+          jenis_jabatan: compareString(
+            allData?.kode_jenis_jabatan_bkn,
+            currentEmployees?.jenis_jabatan_id
+          )
             ? 1
             : 0,
           jenjang_pendidikan: compareString(
-            jenjangPendidikanMaster,
-            jenjangPendidikanSiasn
+            referensiJenjangId?.kode_master,
+            allData?.kode_jenjang_master
           )
             ? 1
             : 0,
         };
-      } else {
-        return;
-      }
-    });
+      })
+      .filter(Boolean);
 
-    const filteredNik = result
-      .filter((r) => r?.valid_nik === 0)
-      .map((i) => i?.nip_master);
-    const filteredNama = result
-      .filter((r) => r?.nama === 0)
-      .map((i) => i?.nip_master);
-    const filteredNip = result
-      .filter((r) => r?.nip === 0)
-      .map((i) => i?.nip_master);
-    const filteredEmail = result
-      .filter((r) => r?.email === 0)
-      .map((i) => i?.nip_master);
-    const filteredPangkat = result
-      .filter((r) => r?.pangkat === 0)
-      .map((i) => i?.nip_master);
-    const filteredJenisJabatan = result
-      .filter((r) => r?.jenis_jabatan === 0)
-      .map((i) => i?.nip_master);
-    const filteredJenjangPendidikan = result
-      .filter((r) => r?.jenjang_pendidikan === 0)
-      .map((i) => i?.nip_master);
-    
-    const data = {
+    const filteredResults = (key) =>
+      result.filter((r) => r[key] === 0).map((i) => i?.nip_master);
+
+    res.json({
       pegawaiSimaster: employees.length,
       pegawaiSiAsn: siasnEmployees.length,
-      // diff,
       result: result.length,
-      nikBelumValid: filteredNik.length,
-      nikBelumValidDetail: filteredNik,
-      namaBelumValid: filteredNama.length,
-      namaBelumValidDetail: filteredNama,
-      nipBelumValid: filteredNip.length,
-      nipBelumValidDetail: filteredNip,
-      filteredNip: filteredNip?.length,
-      filteredNipDetail: filteredNip,
-      filteredEmail: filteredEmail?.length,
-      filteredEmailDetail: filteredEmail,
-      filteredPangkat: filteredPangkat?.length,
-      filteredPangkatDetail: filteredPangkat,
-      filteredJenisJabatan: filteredJenisJabatan?.length,
-      filteredJenisJabatanDetail: filteredJenisJabatan,
-      filteredJenjangPendidikan: filteredJenjangPendidikan?.length,
-      filteredJenjangPendidikanDetail: filteredJenjangPendidikan,
-    }
+      nikBelumValid: filteredResults("valid_nik").length,
+      nikBelumValidDetail: filteredResults("valid_nik"),
+      namaBelumValid: filteredResults("nama").length,
+      namaBelumValidDetail: filteredResults("nama"),
+      nipBelumValid: filteredResults("nip").length,
+      nipBelumValidDetail: filteredResults("nip"),
+      filteredEmail: filteredResults("email").length,
+      filteredEmailDetail: filteredResults("email"),
+      filteredPangkat: filteredResults("pangkat").length,
+      filteredPangkatDetail: filteredResults("pangkat"),
+      filteredJenisJabatan: filteredResults("jenis_jabatan").length,
+      filteredJenisJabatanDetail: filteredResults("jenis_jabatan"),
+      filteredJenjangPendidikan: filteredResults("jenjang_pendidikan").length,
+      filteredJenjangPendidikanDetail: filteredResults("jenjang_pendidikan"),
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(400).json({ code: 400, message: "internal server error" });
+  }
+};
 
-    console.log(data)
+const comparePegawaiAdmin = async (req, res) => {
+  try {
+    const opdId = "1";
+
+    const employees = await fetchEmployees(opdId);
+    const nipEmployeesMaster = employees.map((employee) => employee.nip_master);
+
+    const allSiasnEmployees = await fetchAllSiasnEmployees();
+    const { anomaliSimater, anomaliSiasn } = generateAnomalies(
+      employees,
+      allSiasnEmployees
+    );
+
+    const siasnEmployees = await fetchMatchingSiasnEmployees(
+      nipEmployeesMaster
+    );
+    const siasnEmployeeMap = mapSiasnEmployees(siasnEmployees);
+
+    const result = compareEmployees(
+      employees,
+      siasnEmployeeMap,
+      referensiJenjang
+    );
+
+    const data = {
+      anomaliSimater: anomaliSimater.length,
+      detailAnomaliSimater: anomaliSimater.map((item) => item?.nip_master),
+      anomaliSiasn: anomaliSiasn.length,
+      detailAnomaliSiasn: anomaliSiasn.map((item) => item?.nip_master),
+      totalPegawaiSimaster: employees.length,
+      totalPegawaiSIASN: allSiasnEmployees.length,
+      result: result.length,
+      nikBelumValid: filterResults(result, "valid_nik").length,
+      nikBelumValidDetail: filterResults(result, "valid_nik"),
+      namaBelumValid: filterResults(result, "nama").length,
+      namaBelumValidDetail: filterResults(result, "nama"),
+      nipBelumValid: filterResults(result, "nip").length,
+      nipBelumValidDetail: filterResults(result, "nip"),
+      filteredEmail: filterResults(result, "email").length,
+      filteredEmailDetail: filterResults(result, "email"),
+      filteredPangkat: filterResults(result, "pangkat").length,
+      filteredPangkatDetail: filterResults(result, "pangkat"),
+      filteredJenisJabatan: filterResults(result, "jenis_jabatan").length,
+      filteredJenisJabatanDetail: filterResults(result, "jenis_jabatan"),
+      filteredJenjangPendidikan: filterResults(result, "jenjang_pendidikan")
+        .length,
+      filteredJenjangPendidikanDetail: filterResults(
+        result,
+        "jenjang_pendidikan"
+      ),
+    };
+
     res.json(data);
   } catch (error) {
     console.log(error);
     res.status(400).json({ code: 400, message: "internal server error" });
   }
-}
+};
 
 const compareString = (a, b) => {
   const text1 = trim(toLower(a));
@@ -260,4 +258,4 @@ const compareString = (a, b) => {
   return text1 === text2;
 };
 
-module.exports = {comparePegawai, comparePegawaiAdmin}
+module.exports = { comparePegawai, comparePegawaiAdmin };
