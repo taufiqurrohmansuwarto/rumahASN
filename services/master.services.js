@@ -5,6 +5,10 @@ const api = axios.create({
   baseURL: "/helpdesk/api/master/ws",
 });
 
+export const compareEmployeesSimasterSiasn = () => {
+  return api.get("/fasilitator/dashboard-compare-siasn").then(res => res.data);
+}
+
 export const employeeBirthdayTodayServices = () => {
   return api.get("/employee-birthday").then((res) => res.data);
 };

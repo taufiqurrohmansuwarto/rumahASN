@@ -130,6 +130,10 @@ const changeRoutes = (user) => {
               path: "/fasilitator-employees/daftar-usulan-kenaikan-pangkat",
               name: "Daftar Usulan Kenaikan Pangkat",
             },
+            {
+              path: "/fasilitator-employees/dashboard-rekap",
+              name: "Dashboard Rekap",
+            },
           ],
         },
         {
@@ -299,6 +303,10 @@ const changeRoutes = (user) => {
                   name: "Disparitas Unor",
                 },
               ],
+            },
+            {
+              path: "/apps-managements/sync",
+              name: "Sinkron Data",
             },
             {
               path: "/apps-managements/integrasi",
