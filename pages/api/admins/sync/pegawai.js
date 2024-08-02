@@ -10,7 +10,6 @@ router
   .use(auth)
   .use(adminMiddleware)
   .use(clientCredentialsMiddleware)
-  .use(siasnMiddleware)
   .get(syncPegawai);
 
 export default router.handler({});
