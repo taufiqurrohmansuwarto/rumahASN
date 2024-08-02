@@ -1,12 +1,11 @@
-import { dataRiwayatPemberhentian } from "@/services/siasn-services";
+import { rwPemberhentianByNip } from "@/services/siasn-services";
 import { useQuery } from "@tanstack/react-query";
 import { Card, Table } from "antd";
-import React from "react";
 
 function ComparePemberhentianByNip({ nip }) {
   const { data, isLoading } = useQuery(
     ["rw-pemberhentian", nip],
-    () => dataRiwayatPemberhentian(nip),
+    () => rwPemberhentianByNip(nip),
     {
       enabled: !!nip,
     }

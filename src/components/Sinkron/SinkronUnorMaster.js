@@ -1,20 +1,20 @@
-import { syncPegawaiMaster } from "@/services/sync.services";
+import { syncUnorMaster } from "@/services/sync.services";
 import { SyncOutlined } from "@ant-design/icons";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button, message } from "antd";
 
-const SinkronMaster = () => {
-  const queryCLient = useQueryClient();
-  const { mutate, isLoading } = useMutation(() => syncPegawaiMaster(), {
+const SinkronUnorMaster = () => {
+  const queryClient = useQueryClient();
+  const { mutate, isLoading } = useMutation(() => syncUnorMaster(), {
     onSuccess: () => {
-      message.success("berhasil");
-      queryCLient.invalidateQueries(["daftar-sinkron"]);
+      message.success("Berhasil Sinkron Unor Master");
+      queryClient.invalidateQueries(["daftar-sinkron"]);
     },
     onError: () => {
       message.error("gagal");
     },
     onSettled: () => {
-      queryCLient.invalidateQueries(["daftar-sinkron"]);
+      queryClient.invalidateQueries(["daftar-sinkron"]);
     },
   });
 
@@ -30,9 +30,9 @@ const SinkronMaster = () => {
       disabled={isLoading}
       icon={<SyncOutlined />}
     >
-      Sync Pegawai
+      Sync Unor
     </Button>
   );
 };
 
-export default SinkronMaster;
+export default SinkronUnorMaster;

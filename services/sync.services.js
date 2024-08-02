@@ -6,6 +6,21 @@ const api = axios.create({
 });
 
 export const syncPegawaiMaster = () => {
-    return api.get('/pegawai').then((res) => res.data);
-}
+  return api.put("/pegawai").then((res) => res.data);
+};
 
+export const pegawaiMaster = (query) => {
+  const qs = queryString.stringify(query, {
+    skipNull: true,
+    skipEmptyString: true,
+  });
+  return api.get(`/pegawai?${qs}`).then((res) => res.data);
+};
+
+export const syncUnorMaster = () => {
+  return api.put("/unor-master").then((res) => res.data);
+};
+
+export const refSinkronisasi = () => {
+  return api.get("/").then((res) => res.data);
+};

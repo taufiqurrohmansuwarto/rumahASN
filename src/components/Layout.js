@@ -305,7 +305,7 @@ const changeRoutes = (user) => {
               ],
             },
             {
-              path: "/apps-managements/sync",
+              path: "/apps-managements/sync/data",
               name: "Sinkron Data",
             },
             {

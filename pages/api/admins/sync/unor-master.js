@@ -9,6 +9,6 @@ router
   .use(auth)
   .use(adminMiddleware)
   .use(clientCredentialsMiddleware)
-  .get(syncUnorSimaster);
+  .put(syncUnorSimaster);
 
 export default router.handler({});

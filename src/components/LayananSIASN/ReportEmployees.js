@@ -1,3 +1,4 @@
+import useScrollRestoration from "@/hooks/useScrollRestoration";
 import {
   showEmployees,
   showIPASN,
@@ -82,6 +83,7 @@ const UploadExcel = () => {
 };
 
 function ReportEmployees() {
+  useScrollRestoration();
   const columns = [
     {
       title: "NIP",
@@ -137,7 +139,7 @@ function ReportEmployees() {
     <>
       <UploadExcel />
       <Table
-        title={() => <Input.Search onSearch={handleSearch} />}
+        // title={() => <Input.Search onSearch={handleSearch} />}
         columns={columns}
         pagination={{
           showSizeChanger: false,

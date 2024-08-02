@@ -66,13 +66,46 @@ const syncIpASN = async (req, res) => {
   }
 };
 
+const pegawaiMaster = async (req, res) => {
+  try {
+    const page = req?.query?.page || 1;
+    const limit = req?.query?.limit || 10;
+
+    const result = await SyncPegawai.query().page(
+      parseInt(page) - 1,
+      parseInt(limit)
+    );
+
+    const data = {
+      data: result?.results,
+      total: result?.total,
+      page: parseInt(page),
+      limit: parseInt(limit),
+    };
+
+    res.json(data);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
 const syncPegawai = async (req, res) => {
   try {
-    const { clientCredentialsFetcher: fetcher } = req;
     const opdId = "1";
+    const { clientCredentialsFetcher: fetcher } = req;
     const { data: employees } = await fetcher.get(
       `/master-ws/pemprov/opd/${opdId}/employees`
     );
+    await Sinkronisasi.query()
+      .insert({
+        aplikasi: "simaster",
+        layanan: "pegawai",
+        updated_at: new Date(),
+      })
+      .onConflict(["aplikasi", "layanan"])
+      .merge(["updated_at"]);
+
     const knex = await SyncPegawai.knex();
     await knex.delete().from("sync_pegawai");
     await knex.batchInsert("sync_pegawai", employees);
@@ -83,8 +116,20 @@ const syncPegawai = async (req, res) => {
   }
 };
 
+const RefSinkronisasi = async (req, res) => {
+  try {
+    const result = await Sinkronisasi.query().select("*");
+    res.json(result);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
 module.exports = {
   syncIpASN,
   syncUnorSimaster,
   syncPegawai,
+  RefSinkronisasi,
+  pegawaiMaster,
 };

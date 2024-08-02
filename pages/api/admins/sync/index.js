@@ -1,4 +1,4 @@
-import { pegawaiMaster, syncPegawai } from "@/controller/sync.controller";
+import { RefSinkronisasi } from "@/controller/sync.controller";
 import adminMiddleware from "@/middleware/admin.middleware";
 import auth from "@/middleware/auth.middleware";
 import clientCredentialsMiddleware from "@/middleware/client-credentials.middleware";
@@ -9,7 +9,6 @@ router
   .use(auth)
   .use(adminMiddleware)
   .use(clientCredentialsMiddleware)
-  .get(pegawaiMaster)
-  .put(syncPegawai);
+  .get(RefSinkronisasi);
 
 export default router.handler({});
