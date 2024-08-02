@@ -9,7 +9,7 @@ function DashboardRekap() {
   return (
     <>
       <Head>
-        <title>Disparitas Unor - Fasilitator</title>
+        <title>Rumah ASN - Dashboard Rekap - Fasilitator</title>
       </Head>
       <PageContainer title="Dashboard Rekap">
         <Card>
