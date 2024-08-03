@@ -1,4 +1,4 @@
-import { comparePegawaiAdmin } from "@/services/admin.services";
+import { compareEmployeesSimasterSiasn } from "@/services/master.services";
 import { QuestionCircleOutlined } from "@ant-design/icons";
 import { Alert, Stack } from "@mantine/core";
 import { useQuery } from "@tanstack/react-query";
@@ -6,7 +6,7 @@ import { Card, Space, Table, Tooltip, Typography } from "antd";
 import { useRouter } from "next/router";
 import * as XLSX from "xlsx";
 
-const GrafikAnomali = ({ data }) => {
+const GrafikFasilitatorKomparasi = ({ data }) => {
   const router = useRouter();
 
   const gotoDetailEmployee = (nip) => {
@@ -102,16 +102,6 @@ const GrafikAnomali = ({ data }) => {
             ),
             rowExpandable: (record) => record.detail.length > 0,
           }}
-          footer={() => (
-            <Space direction="vertical">
-              <Typography.Text strong>
-                Total Pegawai SIMASTER : {data?.totalPegawaiSimaster}
-              </Typography.Text>
-              <Typography.Text strong>
-                Total Pegawai SIASN : {data?.totalPegawaiSIASN}
-              </Typography.Text>
-            </Space>
-          )}
           size="middle"
           pagination={false}
           dataSource={data?.grafik}
@@ -122,16 +112,14 @@ const GrafikAnomali = ({ data }) => {
   );
 };
 
-function DashboardKomparasiAdmin() {
+function DashboardKompareFasilitator() {
   const { data, isLoading } = useQuery(
-    ["dashboard-compare-siasn-admin"],
-    () => comparePegawaiAdmin(),
-    {
-      refetchOnWindowFocus: false,
-    }
+    ["dashboard-compare-siasn"],
+    () => compareEmployeesSimasterSiasn(),
+    {}
   );
 
-  return <div>{data && <GrafikAnomali data={data} />}</div>;
+  return <div>{data && <GrafikFasilitatorKomparasi data={data} />}</div>;
 }
 
-export default DashboardKomparasiAdmin;
+export default DashboardKompareFasilitator;

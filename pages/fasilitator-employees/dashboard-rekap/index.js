@@ -1,5 +1,5 @@
 import DisparitasUnorSIASN from "@/components/Disparitas/DisparitasUnorSIASN";
-import Dashboard from "@/components/Fasilitator/Dashboard";
+import Dashboard from "@/components/Fasilitator/DashboardKompareFasilitator";
 import Layout from "@/components/Layout";
 import PageContainer from "@/components/PageContainer";
 import { Card } from "antd";
@@ -27,9 +27,7 @@ DashboardRekap.Auth = {
 
 DashboardRekap.getLayout = function getLayout(page) {
   return (
-    <Layout active="/fasilitator-employees/dashboard-rekap">
-      {page}
-    </Layout>
+    <Layout active="/fasilitator-employees/dashboard-rekap">{page}</Layout>
   );
 };
 

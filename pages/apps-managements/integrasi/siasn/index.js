@@ -1,8 +1,10 @@
+import DashboardKomparasiAdmin from "@/components/Fasilitator/DashboardKomparasiAdmin";
 import EmployeesTableAdmin from "@/components/Fasilitator/EmployeesTableAdmin";
 import Layout from "@/components/Layout";
 import PageContainer from "@/components/PageContainer";
 import useScrollRestoration from "@/hooks/useScrollRestoration";
-import { Breadcrumb, Button, Card, Form, Input } from "antd";
+import { Stack } from "@mantine/core";
+import { Breadcrumb, Button, Card, Divider, Form, Input } from "antd";
 import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
@@ -45,34 +47,36 @@ const IntegrasiSIASN = () => {
           ),
         }}
       >
-        <Card>
-          <Form
-            layout="vertical"
-            form={form}
-            name="form cari siasn"
-            onFinish={handleFinish}
-          >
-            <Form.Item
-              normalize={(values) => values.replace(/\s/g, "")}
-              rules={[
-                { min: 18, message: "NIP harus 18 karakter" },
-                { required: true, message: "Harus diisi" },
-              ]}
-              name="nip"
-              label="Nomer Induk Pegawai"
+        <Stack>
+          <DashboardKomparasiAdmin />
+          <Card>
+            <Form
+              layout="vertical"
+              form={form}
+              name="form cari siasn"
+              onFinish={handleFinish}
             >
-              <Input />
-            </Form.Item>
-            <Form.Item>
-              <Button htmlType="submit" type="primary">
-                Cari
-              </Button>
-            </Form.Item>
-          </Form>
-          <EmployeesTableAdmin />
-          {/* <Divider>Cari Berdasarkan Perangkat Daerah</Divider>
-          <HRWithEmployees /> */}
-        </Card>
+              <Form.Item
+                normalize={(values) => values.replace(/\s/g, "")}
+                rules={[
+                  { min: 18, message: "NIP harus 18 karakter" },
+                  { required: true, message: "Harus diisi" },
+                ]}
+                name="nip"
+                label="Nomer Induk Pegawai"
+              >
+                <Input />
+              </Form.Item>
+              <Form.Item>
+                <Button htmlType="submit" type="primary">
+                  Cari
+                </Button>
+              </Form.Item>
+            </Form>
+            <Divider />
+            <EmployeesTableAdmin />
+          </Card>
+        </Stack>
       </PageContainer>
     </>
   );

@@ -51,11 +51,11 @@ const DetailVote = () => {
                   <a>Beranda</a>
                 </Link>
               </Breadcrumb.Item>
-              <Breadcrumb>
+              <Breadcrumb.Item>
                 <Link href="/apps-managements/votes">
                   <a>Polling</a>
                 </Link>
-              </Breadcrumb>
+              </Breadcrumb.Item>
               <Breadcrumb.Item>Detail Polling</Breadcrumb.Item>
             </Breadcrumb>
           ),
