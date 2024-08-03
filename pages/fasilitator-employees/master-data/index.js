@@ -1,3 +1,4 @@
+import DashboardKompareFasilitator from "@/components/Fasilitator/DashboardKompareFasilitator";
 import EmployeesTable from "@/components/Fasilitator/EmployeesTable";
 import Layout from "@/components/Layout";
 import PageContainer from "@/components/PageContainer";
@@ -7,6 +8,7 @@ import {
   downloadDataIPASN,
   downloadEmployees,
 } from "@/services/master.services";
+import { Stack } from "@mantine/core";
 import { useMutation } from "@tanstack/react-query";
 import { Card, FloatButton, Form, Grid, Space, message } from "antd";
 import Head from "next/head";
@@ -116,16 +118,19 @@ const FasilitatorEmployees = () => {
         content="Integrasi SIASN dan SIMASTER"
       >
         <FloatButton.BackTop />
-        <Card>
-          {/* <Button
+
+        <Stack>
+          <DashboardKompareFasilitator />
+          <Card>
+            {/* <Button
           disabled={isLoadingDownload}
           loading={isLoadingDownload}
           onClick={handleDownload}
         >
           Unduh Data Anomali
         </Button> */}
-          <Space>
-            {/* <Button
+            <Space>
+              {/* <Button
               disabled={isLoadingDownloadIPASN}
               loading={isLoadingDownloadIPASN}
               onClick={handleDownloadIPASN}
@@ -141,8 +146,8 @@ const FasilitatorEmployees = () => {
             >
               Unduh Data Komparasi
             </Button> */}
-          </Space>
-          {/* <Form
+            </Space>
+            {/* <Form
             layout="vertical"
             form={form}
             name="form cari siasn"
@@ -166,8 +171,9 @@ const FasilitatorEmployees = () => {
               </Button>
             </Form.Item>
           </Form> */}
-          <EmployeesTable />
-        </Card>
+            <EmployeesTable />
+          </Card>
+        </Stack>
       </PageContainer>
     </>
   );

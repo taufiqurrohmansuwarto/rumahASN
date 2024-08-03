@@ -1,7 +1,7 @@
 const SiasnEmployees = require("@/models/siasn-employees.model");
 const SyncPegawai = require("@/models/sync-pegawai.model");
 const { referensiJenjang } = require("@/utils/master.utils");
-const { trim, toLower, toNumber, differenceBy } = require("lodash");
+const { trim, toLower, toNumber, differenceBy, round } = require("lodash");
 
 // Helper function to compare attributes
 const compareAttributes = (attr1, attr2) => (attr1 === attr2 ? 1 : 0);
@@ -52,8 +52,10 @@ const compareEmployees = (employees, siasnEmployeeMap, referensiJenjang) => {
       );
 
       const { id, foto, ...allData } = employee;
+
       return {
         id: index + 1,
+        nama_master: currentEmployees?.nama,
         nip_master: employee.nip_master,
         valid_nik: toNumber(currentEmployees?.is_valid_nik) === 1 ? 1 : 0,
         nama: compareAttributes(allData?.nama_master, currentEmployees?.nama),
@@ -70,15 +72,17 @@ const compareEmployees = (employees, siasnEmployeeMap, referensiJenjang) => {
           allData?.kode_golongan_bkn,
           currentEmployees?.gol_akhir_id
         ),
-        jenis_jabatan: compareAttributes(
-          allData?.kode_jenis_jabatan_bkn,
-          currentEmployees?.jenis_jabatan_id
-        ),
+        jenis_jabatan:
+          allData?.status_master === "PPPK"
+            ? 1
+            : compareAttributes(
+                allData?.kode_jenis_jabatan_bkn,
+                currentEmployees?.jenis_jabatan_id
+              ),
         jenjang_pendidikan: compareAttributes(
-          referensiJenjangId?.kode_master,
-          allData?.kode_jenjang_master
+          toNumber(referensiJenjangId?.kode_master),
+          toNumber(allData?.kode_jenjang_master)
         ),
-        jenjang_jabatan: compareAttributes(),
       };
     })
     .filter(Boolean);
@@ -86,7 +90,12 @@ const compareEmployees = (employees, siasnEmployeeMap, referensiJenjang) => {
 
 // Filter results based on a key
 const filterResults = (result, key) => {
-  return result.filter((r) => r[key] === 0).map((i) => i?.nip_master);
+  return result.filter((r) => r[key] === 0);
+  // .map((i) => ({
+  //   nip: i?.nip_master,
+  //   nama: i?.nama,
+  //   foto: i?.foto,
+  // }));
 };
 
 const comparePegawai = async (req, res) => {
@@ -94,98 +103,111 @@ const comparePegawai = async (req, res) => {
     const user = req.user;
     const opdId = user.organization_id;
 
-    // Fetch all employees from SyncPegawai with the given skpd_id
-    const employees = await SyncPegawai.query().where(
-      "skpd_id",
-      "ilike",
-      `${opdId}%`
-    );
+    const employees = await fetchEmployees(opdId);
     const nipEmployeesMaster = employees.map((employee) => employee.nip_master);
 
-    // Fetch SiasnEmployees that match nip_baru in nipEmployeesMaster
-    const siasnEmployees = await SiasnEmployees.query().whereIn(
-      "nip_baru",
+    const allSiasnEmployees = await fetchAllSiasnEmployees();
+    const { anomaliSimater, anomaliSiasn } = generateAnomalies(
+      employees,
+      allSiasnEmployees
+    );
+
+    const siasnEmployees = await fetchMatchingSiasnEmployees(
       nipEmployeesMaster
     );
-    const siasnEmployeeMap = new Map(
-      siasnEmployees.map((employee) => [employee.nip_baru, employee])
+    const siasnEmployeeMap = mapSiasnEmployees(siasnEmployees);
+
+    const result = compareEmployees(
+      employees,
+      siasnEmployeeMap,
+      referensiJenjang
     );
 
-    // Calculate differences and prepare result
-    const result = employees
-      .map((employee, index) => {
-        const currentEmployees = siasnEmployeeMap.get(employee.nip_master);
-        if (!currentEmployees) return null;
+    const data = {
+      totalPegawaiSimaster: employees.length,
+      grafik: [
+        {
+          type: "NIK Belum Valid",
+          value: filterResults(result, "valid_nik").length,
+          detail: filterResults(result, "valid_nik"),
+          description: "Belum melakukan aktivasi / verifikasi NIK di MyASN",
+          presentase: round(
+            filterResults(result, "valid_nik").length / employees.length || 0,
+            2
+          ),
+        },
+        {
+          type: "Perbedaan Nama",
+          value: filterResults(result, "nama").length,
+          description:
+            "Terjadi ketidak sesuaian nama antara data SIMASTER dan SIASN",
+          detail: filterResults(result, "nama"),
+          presentase: round(
+            filterResults(result, "nama").length / employees.length || 0,
+            2
+          ),
+        },
+        {
+          type: "Perbedaan NIP",
+          description:
+            "Terjadi ketidak sesuaian NIP antara data SIMASTER dan SIASN",
+          value: filterResults(result, "nip").length,
+          detail: filterResults(result, "nip"),
+          presentase: round(
+            filterResults(result, "nip").length / employees.length || 0,
+            2
+          ),
+        },
+        {
+          type: "Perbedaan Email",
+          description:
+            "Terjadi ketidak sesuaian email antara data SIMASTER dan SIASN",
+          value: filterResults(result, "email").length,
+          detail: filterResults(result, "email"),
+          presentase: round(
+            filterResults(result, "email").length / employees.length || 0,
+            2
+          ),
+        },
+        {
+          type: "Perbedaan Pangkat",
+          description:
+            "Terjadi ketidak sesuaian pangkat antara data SIMASTER dan SIASN",
+          value: filterResults(result, "pangkat").length,
+          detail: filterResults(result, "pangkat"),
+          presentase: round(
+            filterResults(result, "pangkat").length / employees.length || 0,
+            2
+          ),
+        },
+        {
+          type: "Perbedaan Jenis Jabatan",
+          description:
+            "Terjadi ketidak sesuaian jenis jabatan antara data SIMASTER dan SIASN",
+          value: filterResults(result, "jenis_jabatan").length,
+          detail: filterResults(result, "jenis_jabatan"),
+          presentase: round(
+            filterResults(result, "jenis_jabatan").length / employees.length ||
+              0,
+            2
+          ),
+        },
+        {
+          type: "Perbedaan Jenjang Pendidikan",
+          description:
+            "Terjadi ketidak sesuaian jenjang pendidikan antara data SIMASTER dan SIASN",
+          value: filterResults(result, "jenjang_pendidikan").length,
+          detail: filterResults(result, "jenjang_pendidikan"),
+          presentase: round(
+            filterResults(result, "jenjang_pendidikan").length /
+              employees.length || 0,
+            2
+          ),
+        },
+      ],
+    };
 
-        const referensiJenjangId = referensiJenjang?.find(
-          (item) =>
-            String(item?.kode_bkn) === currentEmployees?.tingkat_pendidikan_id
-        );
-
-        const { id, foto, ...allData } = employee;
-        return {
-          id: index + 1,
-          nip_master: employee.nip_master,
-          valid_nik: toNumber(currentEmployees?.is_valid_nik) === 1 ? 1 : 0,
-          nama: compareString(allData?.nama_master, currentEmployees?.nama)
-            ? 1
-            : 0,
-          nip: compareString(allData?.nip_master, currentEmployees?.nip_baru)
-            ? 1
-            : 0,
-          tgl_lahir: compareString(
-            allData?.tgl_lahir_master,
-            currentEmployees?.tanggal_lahir
-          )
-            ? 1
-            : 0,
-          email: compareString(allData?.email_master, currentEmployees?.email)
-            ? 1
-            : 0,
-          pangkat: compareString(
-            allData?.kode_golongan_bkn,
-            currentEmployees?.gol_akhir_id
-          )
-            ? 1
-            : 0,
-          jenis_jabatan: compareString(
-            allData?.kode_jenis_jabatan_bkn,
-            currentEmployees?.jenis_jabatan_id
-          )
-            ? 1
-            : 0,
-          jenjang_pendidikan: compareString(
-            referensiJenjangId?.kode_master,
-            allData?.kode_jenjang_master
-          )
-            ? 1
-            : 0,
-        };
-      })
-      .filter(Boolean);
-
-    const filteredResults = (key) =>
-      result.filter((r) => r[key] === 0).map((i) => i?.nip_master);
-
-    res.json({
-      pegawaiSimaster: employees.length,
-      pegawaiSiAsn: siasnEmployees.length,
-      result: result.length,
-      nikBelumValid: filteredResults("valid_nik").length,
-      nikBelumValidDetail: filteredResults("valid_nik"),
-      namaBelumValid: filteredResults("nama").length,
-      namaBelumValidDetail: filteredResults("nama"),
-      nipBelumValid: filteredResults("nip").length,
-      nipBelumValidDetail: filteredResults("nip"),
-      filteredEmail: filteredResults("email").length,
-      filteredEmailDetail: filteredResults("email"),
-      filteredPangkat: filteredResults("pangkat").length,
-      filteredPangkatDetail: filteredResults("pangkat"),
-      filteredJenisJabatan: filteredResults("jenis_jabatan").length,
-      filteredJenisJabatanDetail: filteredResults("jenis_jabatan"),
-      filteredJenjangPendidikan: filteredResults("jenjang_pendidikan").length,
-      filteredJenjangPendidikanDetail: filteredResults("jenjang_pendidikan"),
-    });
+    res.json(data);
   } catch (error) {
     console.log(error);
     res.status(400).json({ code: 400, message: "internal server error" });
@@ -223,25 +245,86 @@ const comparePegawaiAdmin = async (req, res) => {
       detailAnomaliSiasn: anomaliSiasn.map((item) => item?.nip_master),
       totalPegawaiSimaster: employees.length,
       totalPegawaiSIASN: allSiasnEmployees.length,
-      result: result.length,
-      nikBelumValid: filterResults(result, "valid_nik").length,
-      nikBelumValidDetail: filterResults(result, "valid_nik"),
-      namaBelumValid: filterResults(result, "nama").length,
-      namaBelumValidDetail: filterResults(result, "nama"),
-      nipBelumValid: filterResults(result, "nip").length,
-      nipBelumValidDetail: filterResults(result, "nip"),
-      filteredEmail: filterResults(result, "email").length,
-      filteredEmailDetail: filterResults(result, "email"),
-      filteredPangkat: filterResults(result, "pangkat").length,
-      filteredPangkatDetail: filterResults(result, "pangkat"),
-      filteredJenisJabatan: filterResults(result, "jenis_jabatan").length,
-      filteredJenisJabatanDetail: filterResults(result, "jenis_jabatan"),
-      filteredJenjangPendidikan: filterResults(result, "jenjang_pendidikan")
-        .length,
-      filteredJenjangPendidikanDetail: filterResults(
-        result,
-        "jenjang_pendidikan"
-      ),
+      grafik: [
+        {
+          type: "NIK Belum Valid",
+          value: filterResults(result, "valid_nik").length,
+          detail: filterResults(result, "valid_nik"),
+          description: "Belum melakukan aktivasi / verifikasi NIK di MyASN",
+          presentase: round(
+            filterResults(result, "valid_nik").length / employees.length || 0,
+            2
+          ),
+        },
+        {
+          type: "Perbedaan Nama",
+          value: filterResults(result, "nama").length,
+          description:
+            "Terjadi ketidak sesuaian nama antara data SIMASTER dan SIASN",
+          detail: filterResults(result, "nama"),
+          presentase: round(
+            filterResults(result, "nama").length / employees.length || 0,
+            2
+          ),
+        },
+        {
+          type: "Perbedaan NIP",
+          description:
+            "Terjadi ketidak sesuaian NIP antara data SIMASTER dan SIASN",
+          value: filterResults(result, "nip").length,
+          detail: filterResults(result, "nip"),
+          presentase: round(
+            filterResults(result, "nip").length / employees.length || 0,
+            2
+          ),
+        },
+        {
+          type: "Perbedaan Email",
+          description:
+            "Terjadi ketidak sesuaian email antara data SIMASTER dan SIASN",
+          value: filterResults(result, "email").length,
+          detail: filterResults(result, "email"),
+          presentase: round(
+            filterResults(result, "email").length / employees.length || 0,
+            2
+          ),
+        },
+        {
+          type: "Perbedaan Pangkat",
+          description:
+            "Terjadi ketidak sesuaian pangkat antara data SIMASTER dan SIASN",
+          value: filterResults(result, "pangkat").length,
+          detail: filterResults(result, "pangkat"),
+          presentase: round(
+            filterResults(result, "pangkat").length / employees.length || 0,
+            2
+          ),
+        },
+        {
+          type: "Perbedaan Jenis Jabatan",
+          description:
+            "Terjadi ketidak sesuaian jenis jabatan antara data SIMASTER dan SIASN",
+          value: filterResults(result, "jenis_jabatan").length,
+          detail: filterResults(result, "jenis_jabatan"),
+          presentase: round(
+            filterResults(result, "jenis_jabatan").length / employees.length ||
+              0,
+            2
+          ),
+        },
+        {
+          type: "Perbedaan Jenjang Pendidikan",
+          description:
+            "Terjadi ketidak sesuaian jenjang pendidikan antara data SIMASTER dan SIASN",
+          value: filterResults(result, "jenjang_pendidikan").length,
+          detail: filterResults(result, "jenjang_pendidikan"),
+          presentase: round(
+            filterResults(result, "jenjang_pendidikan").length /
+              employees.length || 0,
+            2
+          ),
+        },
+      ],
     };
 
     res.json(data);

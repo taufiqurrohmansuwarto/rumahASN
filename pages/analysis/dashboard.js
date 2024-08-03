@@ -2,7 +2,6 @@ import DataTickets from "@/components/Dashboards/DataTickets";
 import PlotAdminTickets from "@/components/Dashboards/PlotAdminTickets";
 import PlotAgeUsers from "@/components/Dashboards/PlotAgeUsers";
 import UserByGroup from "@/components/Dashboards/UserByGroupCard";
-import DashboardKomparasiAdmin from "@/components/Fasilitator/DashboardKomparasiAdmin";
 import Layout from "@/components/Layout";
 import PageContainer from "@/components/PageContainer";
 import { Card, Col, Grid, Row } from "antd";
@@ -23,7 +22,6 @@ function DashboardAnalysis() {
         title="Dashboard"
         subTitle="Analisis Data Rumah ASN"
       >
-        <DashboardKomparasiAdmin />
         <Row gutter={[16, 16]} style={{ marginBottom: 16 }}>
           <Col md={12} xs={24}>
             <Card title="Statistik Pertanyaan">
