@@ -14,8 +14,8 @@ import {
   message,
 } from "antd";
 import dayjs from "dayjs";
-import React from "react";
 import { nanoid } from "nanoid";
+import React from "react";
 
 dayjs.locale("id");
 

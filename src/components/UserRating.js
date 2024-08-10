@@ -53,7 +53,7 @@ function CarouselRating({ data }) {
       withIndicators
       height="auto"
       dragFree
-      slideGap="md"
+      slideGap="lg"
       align="start"
     >
       {data?.map((item) => {
