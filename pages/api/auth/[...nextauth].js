@@ -194,7 +194,7 @@ export const authOptions = {
           birthdate: profile.birthdate || null,
           email: profile.email || null,
           organization_id: profile.organization_id || null,
-          status_kepegawaian: profile.status_kepegawaian || null,
+          status_kepegawaian: profile.status_kepegawaian || "UMUM",
         };
 
         const accessToken = token?.access_token;

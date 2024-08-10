@@ -30,6 +30,11 @@ import NotifikasiForumKepegawaian from "./Notification/NotifikasiForumKepegawaia
 import NotifikasiKepegawaian from "./Notification/NotifikasiKepegawaian";
 import NotifikasiPrivateMessage from "./Notification/NotifikasiPrivateMessage";
 import NotifikasiUsulan from "./Notification/NotifikasiUsulan";
+import {
+  IconMessageUser,
+  IconUsersGroup,
+  IconUserStar,
+} from "@tabler/icons-react";
 
 const ProLayout = dynamic(
   () => import("@ant-design/pro-components").then((mod) => mod?.ProLayout),
@@ -70,7 +75,7 @@ const changeRoutes = (user) => {
       userRoutes.routes.push({
         path: "/asn-connect/asn-updates",
         name: "Smart ASN Connect",
-        icon: <UserOutlined />,
+        icon: <IconMessageUser size={18} />,
       });
     }
 
@@ -97,12 +102,12 @@ const changeRoutes = (user) => {
         {
           path: "/beranda-bkd?tab=my-task",
           name: "Beranda BKD",
-          icon: <TeamOutlined />,
+          icon: <IconUserStar size={18} />,
         },
         {
           path: "/coaching-clinic-consultant",
-          name: "Instruktur",
-          icon: <UsergroupAddOutlined />,
+          name: "Coaching & Mentoring",
+          icon: <IconUsersGroup size={18} />,
         }
       );
     }
@@ -139,7 +144,7 @@ const changeRoutes = (user) => {
         {
           path: "/fasilitator/smart-asn-connect",
           name: "Smart ASN Connect",
-          icon: <IdcardOutlined />,
+          icon: <IconMessageUser size={18} />,
           routes: [
             {
               path: "/fasilitator/smart-asn-connect/events",
@@ -454,7 +459,7 @@ function Layout({ children, active, collapsed = true }) {
       theme="light"
       token={{
         bgLayout: "#FFFFFF",
-        colorPrimary: "#FA8C16", // Warna oranye utama Ant Design
+        colorPrimary: "#16", // Warna oranye utama Ant Design
         sider: {
           colorBgCollapsedButton: "#FA8C16", // Oranye untuk tombol collapse
           colorBgMenuItemActive: "#FFF7E6", // Oranye sangat muda untuk item menu yang aktif

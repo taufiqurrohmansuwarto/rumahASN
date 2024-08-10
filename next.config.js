@@ -72,7 +72,7 @@ module.exports = withAntdLess({
   },
   experimental: {
     scrollRestoration: true,
-    // esmExternals: "loose",
+    esmExternals: "loose",
   },
   images: {
     domains: ["siasn.bkd.jatimprov.go.id", "master.bkd.jatimprov.go.id"],

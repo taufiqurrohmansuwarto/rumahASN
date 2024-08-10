@@ -1,10 +1,9 @@
 import CoachingMeetings from "@/components/CoachingClinic/Consultant/CoachingMeetings";
-import CreateCoaching from "@/components/CoachingClinic/Consultant/CreateCoaching";
 import Layout from "@/components/Layout";
 import PageContainer from "@/components/PageContainer";
 import { checkStatus, findMeeting } from "@/services/coaching-clinics.services";
 import { useQuery } from "@tanstack/react-query";
-import { Breadcrumb, Empty } from "antd";
+import { Breadcrumb, Empty, Grid } from "antd";
 import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
@@ -24,12 +23,17 @@ const CoachingClinic = () => {
     () => findMeeting(router?.query)
   );
 
+  const breakPoint = Grid.useBreakpoint();
+
   return (
     <>
       <Head>
-        <title>Rumah ASN - Instruktur Coaching Clinic</title>
+        <title>Rumah ASN - Coaching & Mentoring</title>
       </Head>
       <PageContainer
+        childrenContentStyle={{
+          padding: breakPoint.xs ? 0 : null,
+        }}
         header={{
           breadcrumbRender: () => (
             <Breadcrumb>
@@ -38,13 +42,13 @@ const CoachingClinic = () => {
                   <a>Beranda</a>
                 </Link>
               </Breadcrumb.Item>
-              <Breadcrumb.Item>Consultant Coaching Clinic</Breadcrumb.Item>
+              <Breadcrumb.Item>Mentoring</Breadcrumb.Item>
             </Breadcrumb>
           ),
         }}
         loading={isLoading}
-        title="Coaching Clinic"
-        content="Jadwal Konsultasi Online"
+        title="Coaching & Mentoring"
+        content="Coaching Clinic"
       >
         {!data ? (
           <>

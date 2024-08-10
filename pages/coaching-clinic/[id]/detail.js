@@ -40,14 +40,14 @@ const DetailCoachingClinic = () => {
             </Breadcrumb.Item>
             <Breadcrumb.Item>
               <Link href="/coaching-clinic">
-                <a>Coaching Clinic</a>
+                <a>Daftar Mentoring</a>
               </Link>
             </Breadcrumb.Item>
             <Breadcrumb.Item>Detail Coaching Clinic</Breadcrumb.Item>
           </Breadcrumb>
         )}
         loading={isLoading}
-        title="Coaching Clinic"
+        title="Detail Mentoring"
       >
         <DetailMeetingParticipant />
       </PageContainer>
