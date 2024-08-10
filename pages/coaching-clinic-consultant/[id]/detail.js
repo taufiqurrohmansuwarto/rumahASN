@@ -29,13 +29,13 @@ const DetailCoachingClinic = () => {
             </Breadcrumb.Item>
             <Breadcrumb.Item>
               <Link href="/coaching-clinic-consultant">
-                <a>Coaching Clinic</a>
+                <a>Mentoring</a>
               </Link>
             </Breadcrumb.Item>
           </Breadcrumb>
         )}
-        title="Coaching Clinic"
-        content="Detail Konsultasi Coaching Clinic"
+        title="Coaching & Mentoring"
+        content="Detail Coaching & Mentoring"
       >
         <DetailCoachingMeeting />
       </PageContainer>

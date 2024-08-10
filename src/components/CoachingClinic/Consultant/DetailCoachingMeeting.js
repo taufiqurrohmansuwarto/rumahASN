@@ -17,13 +17,13 @@ import { Group, ScrollArea, Stack } from "@mantine/core";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Avatar,
-  BackTop,
   Button,
   Card,
   Col,
   Descriptions,
   Drawer,
   Empty,
+  FloatButton,
   Form,
   Input,
   List,
@@ -308,8 +308,8 @@ function DetailCoachingMeeting() {
 
   const handleStartMeeting = () => {
     Modal.confirm({
-      title: "Mulai Coaching Clinic",
-      content: "Apakah anda yakin ingin memulai coaching clinic ini?",
+      title: "Mulai Coaching & Mentoring",
+      content: "Apakah anda yakin ingin memulai coaching & mentoring ini?",
       okText: "Ya",
       cancelText: "Tidak",
       centered: true,
@@ -358,7 +358,7 @@ function DetailCoachingMeeting() {
 
   return (
     <>
-      <BackTop />
+      <FloatButton.BackTop />
       <EditCoachingClinicModal
         id={router?.query?.id}
         open={openEditModal}
@@ -402,7 +402,7 @@ function DetailCoachingMeeting() {
         <ModalInformation open={open} item={data} onClose={handleClose} />
         {data?.status === "live" ? (
           <Row gutter={[16, 16]}>
-            <Col md={24}>
+            <Col md={24} xs={24}>
               <JitsiMeeting
                 key={renderKey}
                 domain="coaching-online.site"

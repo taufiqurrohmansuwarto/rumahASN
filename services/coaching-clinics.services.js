@@ -70,6 +70,11 @@ export const upcomingMeetings = (query) => {
   return coachingClinicApi.get(url).then((res) => res?.data);
 };
 
+export const searchMentoringByCode = (code) => {
+  const url = `/participants/search-by-code?code=${code}`;
+  return coachingClinicApi.get(url).then((res) => res?.data);
+};
+
 export const requestMeeting = (id) => {
   const url = `/participants/meetings/${id}/request`;
   return coachingClinicApi.put(url).then((res) => res?.data);

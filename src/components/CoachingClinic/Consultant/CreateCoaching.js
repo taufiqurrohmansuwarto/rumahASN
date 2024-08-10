@@ -10,11 +10,12 @@ import {
   InputNumber,
   Modal,
   Row,
+  Select,
   message,
 } from "antd";
-import React from "react";
-import { PlusOutlined } from "@ant-design/icons";
 import dayjs from "dayjs";
+import React from "react";
+import { nanoid } from "nanoid";
 
 dayjs.locale("id");
 
@@ -50,10 +51,10 @@ const ModalCoaching = ({ open, onCancel }) => {
   return (
     <Modal
       centered
-      width={600}
+      width={800}
       onOk={handleFinish}
       confirmLoading={isLoadingCreate}
-      title="Buat Jadwal Coaching"
+      title="Jadwalkan Mentoring"
       open={open}
       onCancel={onCancel}
     >
@@ -83,7 +84,46 @@ const ModalCoaching = ({ open, onCancel }) => {
           name="is_private"
           label="Privat?"
         >
-          <Checkbox />
+          <Checkbox
+            onChange={(e) => {
+              if (e.target.checked) {
+                form.setFieldsValue({ code: nanoid(10) });
+              } else {
+                form.setFieldsValue({ code: null });
+              }
+            }}
+          />
+        </Form.Item>
+        <Form.Item
+          noStyle
+          shouldUpdate={(prevValues, currentValues) => {
+            return prevValues.is_private !== currentValues.is_private;
+          }}
+        >
+          {({ getFieldValue }) => {
+            if (getFieldValue("is_private")) {
+              return (
+                <Form.Item name="code" label="Kode">
+                  <Input disabled readOnly />
+                </Form.Item>
+              );
+            }
+            return null;
+          }}
+        </Form.Item>
+        <Form.Item
+          label="Tipe Pengguna"
+          help="Pilih tipe pengguna yang dapat mengikuti mentoring"
+          name="participants_type"
+        >
+          <Select mode="multiple">
+            <Select.Option value="PNS">PNS</Select.Option>
+            <Select.Option value="PPPK">PPPK</Select.Option>
+            <Select.Option value="NON ASN">NON ASN</Select.Option>
+            <Select.Option value="CPNS">CPNS</Select.Option>
+            <Select.Option value="FASILITATOR">Fasilitator</Select.Option>
+            <Select.Option value="UMUM">Masyarakat Umum</Select.Option>
+          </Select>
         </Form.Item>
         <Row gutter={[16, 16]}>
           <Col md={8} xs={24}>
@@ -156,14 +196,14 @@ function CreateCoaching() {
       <ModalCoaching open={open} onCancel={handleClose} />
       <Button
         type="primary"
-        icon={<PlusOutlined />}
+        // icon={<PlusOutlined />}
         onClick={handleOpen}
         style={{
           marginBottom: 20,
         }}
         // shape="round"
       >
-        Buat Coaching
+        Jadwalkan Mentoring
       </Button>
     </div>
   );

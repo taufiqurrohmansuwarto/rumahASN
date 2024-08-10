@@ -25,13 +25,14 @@ import {
   message,
 } from "antd";
 import dayjs from "dayjs";
+import "dayjs/locale/id";
 import { upperCase } from "lodash";
+import { nanoid } from "nanoid";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import CreateCoaching from "./CreateCoaching";
 import FilterConsultantMeetings from "./FilterConsultantMeetings";
-import "dayjs/locale/id";
 
 dayjs.locale("id");
 
@@ -90,6 +91,8 @@ const ModalUpdate = ({ open, handleClose, data, handleUpdate, loading }) => {
         ? dayjs(data.start_hours, "HH:mm:ss")
         : null,
       end_hours: data?.end_hours ? dayjs(data.end_hours, "HH:mm:ss") : null,
+      participants_type: data?.participants_type || [],
+      code: data?.code || null,
       max_participants: data?.max_participants,
     });
   }, [data, form]);
@@ -150,7 +153,42 @@ const ModalUpdate = ({ open, handleClose, data, handleUpdate, loading }) => {
           name="is_private"
           label="Privat?"
         >
-          <Checkbox />
+          <Checkbox
+            onChange={(e) => {
+              if (e.target.checked) {
+                form.setFieldsValue({ code: nanoid(10) });
+              } else {
+                form.setFieldsValue({ code: null });
+              }
+            }}
+          />
+        </Form.Item>
+        <Form.Item
+          noStyle
+          shouldUpdate={(prevValues, currentValues) => {
+            return prevValues.is_private !== currentValues.is_private;
+          }}
+        >
+          {({ getFieldValue }) => {
+            if (getFieldValue("is_private")) {
+              return (
+                <Form.Item name="code" label="Kode">
+                  <Input disabled readOnly />
+                </Form.Item>
+              );
+            }
+            return null;
+          }}
+        </Form.Item>
+        <Form.Item help="Tipe pengguna" name="participants_type">
+          <Select mode="multiple">
+            <Select.Option value="PNS">PNS</Select.Option>
+            <Select.Option value="PPPK">PPPK</Select.Option>
+            <Select.Option value="NON ASN">NON ASN</Select.Option>
+            <Select.Option value="CPNS">CPNS</Select.Option>
+            <Select.Option value="FASILITATOR">Fasilitator</Select.Option>
+            <Select.Option value="UMUM">Masyarakat Umum</Select.Option>
+          </Select>
         </Form.Item>
         <Row gutter={[16, 16]}>
           <Col md={8} xs={24}>
@@ -324,27 +362,34 @@ function CoachingMeetings() {
       },
     },
     {
-      title: "Judul",
+      title: "Deskripsi",
       key: "title",
+      width: 500,
       render: (_, row) => (
-        <Link href={`/coaching-clinic-consultant/${row?.id}/detail`}>
-          {row?.title}
-        </Link>
+        <>
+          <Space direction="vertical">
+            <Link href={`/coaching-clinic-consultant/${row?.id}/detail`}>
+              {row?.title}
+            </Link>
+            <Space direction="vertical">
+              {dayjs(row?.start_date).format("DD MMMM YYYY")}
+              <div>Pukul. {`${row?.start_hours} - ${row?.end_hours}`}</div>
+            </Space>
+            <Space size="small">
+              {row?.participants_type?.length && (
+                <>
+                  {row?.participants_type.map((item) => (
+                    <Tag color="blue" key={item}>
+                      {item}
+                    </Tag>
+                  ))}
+                </>
+              )}
+            </Space>
+          </Space>
+        </>
       ),
       responsive: ["sm"],
-    },
-    {
-      title: "Tanggal",
-      dataIndex: "start_date",
-      responsive: ["sm"],
-      render: (_, row) => {
-        return (
-          <Space direction="vertical">
-            {dayjs(row?.start_date).format("DD MMMM YYYY")}
-            <div>Pukul. {`${row?.start_hours} - ${row?.end_hours}`}</div>
-          </Space>
-        );
-      },
     },
     {
       title: "Maximal Peserta",
@@ -415,7 +460,7 @@ function CoachingMeetings() {
   ];
 
   return (
-    <Card title="Daftar Riwayat Instruktur Coaching Clinic">
+    <Card title="Daftar Mentoring Anda">
       <ModalChangeStatus
         open={openModalStatus}
         handleClose={handleCloseModalStatus}

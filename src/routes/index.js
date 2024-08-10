@@ -3,24 +3,33 @@ import {
   BarChartOutlined,
   BookOutlined,
   CarOutlined,
-  CustomerServiceOutlined,
   DashboardFilled,
-  HomeOutlined,
   QuestionCircleOutlined,
   SettingOutlined,
   SmileOutlined,
   SnippetsOutlined,
   UserOutlined,
-  VideoCameraAddOutlined,
 } from "@ant-design/icons";
+import {
+  IconBrandZoom,
+  IconInfoCircle,
+  IconMailQuestion,
+  IconMessages,
+  IconMessageUser,
+  IconMicrophone,
+} from "@tabler/icons-react";
 
 export const userRoutes = {
   routes: [
-    { path: "/feeds", name: "Forum Kepegawaian", icon: <HomeOutlined /> },
+    {
+      path: "/feeds",
+      name: "Forum Kepegawaian",
+      icon: <IconMessages size={18} />,
+    },
     {
       path: "/tickets",
       name: "Pertanyaan saya",
-      icon: <SnippetsOutlined />,
+      icon: <IconMailQuestion size={18} />,
       routes: [
         {
           path: "/tickets/semua",
@@ -68,17 +77,17 @@ export const userRoutes = {
     {
       path: "/webinar-series/all",
       name: "Webinar",
-      icon: <VideoCameraAddOutlined />,
+      icon: <IconBrandZoom size={18} />,
     },
     {
       path: "/coaching-clinic/all",
-      name: "Coaching Clinic",
-      icon: <CustomerServiceOutlined />,
+      name: "Mentoring",
+      icon: <IconMessageUser size={18} />,
     },
     {
       path: "/edukasi/podcasts",
       name: "Podcast",
-      icon: <AudioOutlined />,
+      icon: <IconMicrophone size={18} />,
     },
     // {
     //   path: "/layanan-kepegawaian",
@@ -89,7 +98,7 @@ export const userRoutes = {
     {
       path: "/information/faq",
       name: "Informasi",
-      icon: <QuestionCircleOutlined />,
+      icon: <IconInfoCircle size={18} />,
     },
   ],
 };

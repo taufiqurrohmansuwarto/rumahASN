@@ -6,7 +6,7 @@ const CCMeetingsParticipants = require("@/models/cc_meetings_participants.model"
 const CCRatings = require("@/models/cc_ratings.model");
 
 const jsonwebtoken = require("jsonwebtoken");
-const { isArray, toNumber, round } = require("lodash");
+const { isArray, toNumber, round, trim } = require("lodash");
 
 const appId = process.env.APP_ID;
 const appSecret = process.env.APP_SECRET;
@@ -559,13 +559,22 @@ const upcomingMeetings = async (req, res) => {
     const month = req?.query?.month || dayjs().format("MM");
     const year = req?.query?.year || dayjs().format("YYYY");
     const day = req?.query?.day;
+    const user = req?.user;
+    const statusKepegawaian = user?.status_kepegawaian;
 
     const result = await CCMeetings.query()
       .select(
         "*",
         CCMeetings.relatedQuery("participants").count().as("participants_count")
       )
+
       .where((builder) => {
+        builder
+          .whereRaw("?? @> ?::text[]", [
+            "participants_type",
+            [statusKepegawaian],
+          ])
+          .orWhereNull("participants_type");
         if (day) {
           builder.whereRaw(
             `extract(year from start_date) = ${year} and extract(month from start_date) = ${month} and extract(day from start_date) = ${day}`
@@ -690,6 +699,57 @@ const getRatingMeetingConsultant = async (req, res) => {
   }
 };
 
+const searchByCode = async (req, res) => {
+  try {
+    const code = req?.query?.code;
+    const currentUser = req?.user;
+    const statusKepegawaian = currentUser?.status_kepegawaian;
+    const result = await CCMeetings.query()
+      .where("code", trim(code))
+      .andWhere("is_private", true)
+      .andWhere((builder) => {
+        builder
+          .whereRaw("?? @> ?::text[]", [
+            "participants_type",
+            [statusKepegawaian],
+          ])
+          .orWhereNull("participants_type");
+      })
+      .withGraphFetched("[coach(simpleSelect)]")
+      .first();
+
+    if (!result) {
+      res.json(null);
+    } else {
+      const currentMeetingParticipants =
+        await CCMeetingsParticipants.query().where({
+          meeting_id: result?.id,
+          user_id: currentUser?.customId,
+        });
+
+      const isJoin = currentMeetingParticipants?.filter((item) => {
+        return (
+          item?.meeting_id === result?.id &&
+          item?.user_id === currentUser?.customId
+        );
+      });
+
+      const data = {
+        ...result,
+        currentMeetingParticipants: currentMeetingParticipants?.length,
+        is_join: isJoin?.length > 0,
+      };
+
+      console.log(data);
+
+      res.json(data);
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
 module.exports = {
   alterUserCoach,
   dropUserCoach,
@@ -704,6 +764,7 @@ module.exports = {
   endMeeting,
   getRatingMeetingConsultant,
   // participant
+  searchByCode,
   meetingsParticipants,
   detailMeetingParticipant,
   joinMeeting,
