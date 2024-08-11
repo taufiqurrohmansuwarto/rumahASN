@@ -39,7 +39,7 @@ const DetailCoachingClinic = () => {
               </Link>
             </Breadcrumb.Item>
             <Breadcrumb.Item>
-              <Link href="/coaching-clinic">
+              <Link href="/coaching-clinic/all">
                 <a>Daftar Mentoring</a>
               </Link>
             </Breadcrumb.Item>

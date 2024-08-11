@@ -8,6 +8,7 @@ import {
 } from "@/services/coaching-clinics.services";
 import {
   DeleteOutlined,
+  DragOutlined,
   EditOutlined,
   QuestionCircleTwoTone,
   UserAddOutlined,
@@ -37,12 +38,15 @@ import {
 } from "antd";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import EditCoachingClinicModal from "./EditCoachingClinicModal";
 import FormParticipants from "./FormParticipants";
 
+import useVideoConferenceStore from "@/store/useVideoConference";
 import dayjs from "dayjs";
 import "dayjs/locale/id";
 import relativeTime from "dayjs/plugin/relativeTime";
+import Draggable from "react-draggable";
 dayjs.locale("id");
 dayjs.extend(relativeTime);
 
@@ -274,6 +278,104 @@ const ModalInformation = ({ open, onClose, item }) => {
   );
 };
 
+function FloatingVideoConference({ data, closeMeeting }) {
+  const {
+    isOpen,
+    position,
+    size,
+    isMinimized,
+    updatePosition,
+    updateSize,
+    toggleMinimize,
+  } = useVideoConferenceStore();
+  const [renderKey, setRenderKey] = useState(0);
+
+  const handleDrag = (e, data) => {
+    updatePosition({ x: data.x, y: data.y });
+  };
+
+  if (!isOpen) return null;
+
+  return createPortal(
+    <Draggable position={position} onStop={handleDrag} handle=".drag-handle">
+      <div
+        style={{
+          position: "fixed",
+          zIndex: 1000,
+          width: size.width,
+          height: size.height,
+          transition: "width 0.3s, height 0.3s",
+          boxShadow: "0 4px 8px rgba(0,0,0,0.1)",
+          border: "1px solid #d9d9d9",
+          borderRadius: "4px",
+          overflow: "hidden",
+          resize: isMinimized ? "none" : "both",
+        }}
+      >
+        <div
+          className="drag-handle"
+          style={{
+            padding: "8px",
+            background: "#f0f0f0",
+            cursor: "move",
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+          }}
+        >
+          <Space>
+            <DragOutlined style={{ cursor: "move" }} />
+            <Typography.Text strong>Coaching & Mentoring</Typography.Text>
+          </Space>
+          <Space>
+            <Button size="small" onClick={toggleMinimize}>
+              {isMinimized ? "Maximize" : "Minimize"}
+            </Button>
+            <Button size="small" onClick={closeMeeting}>
+              Close
+            </Button>
+          </Space>
+        </div>
+        <div style={{ height: "calc(100% - 40px)", overflow: "hidden" }}>
+          <JitsiMeeting
+            key={renderKey}
+            domain="coaching-online.site"
+            jwt={data?.jwt}
+            roomName={data?.id}
+            getIFrameRef={(iframeRef) => {
+              iframeRef.style.height = "100%";
+              iframeRef.style.width = "100%";
+            }}
+            configOverwrite={{
+              prejoinPageEnabled: false,
+              startWithAudioMuted: true,
+              startScreenSharing: true,
+              enableEmailInStats: false,
+              whiteboard: {
+                enabled: true,
+                collabServerBaseUrl:
+                  "https://siasn.bkd.jatimprov.go.id/whiteboard",
+              },
+            }}
+            interfaceConfigOverwrite={{
+              DISABLE_JOIN_LEAVE_NOTIFICATIONS: false,
+              APP_NAME: "Coaching & Mentoring",
+            }}
+            userInfo={{
+              displayName: data?.coach?.username,
+              role: "moderator",
+            }}
+            onReadyToClose={() => {
+              closeMeeting();
+            }}
+          />
+        </div>
+      </div>
+    </Draggable>,
+    document.body
+  );
+}
+
 function DetailCoachingMeeting() {
   const router = useRouter();
   const { id } = router.query;
@@ -285,8 +387,18 @@ function DetailCoachingMeeting() {
   const { data, isLoading } = useQuery(
     ["meeting", id],
     () => detailMeeting(id),
-    {}
+    {
+      enabled: !!id,
+      onSuccess: () => {
+        if (data?.status === "live") {
+          openVideoConference();
+        }
+      },
+    }
   );
+
+  const { openVideoConference, closeVideoConference } =
+    useVideoConferenceStore();
 
   const { mutateAsync: start, isLoading: isLoadingStart } = useMutation(
     (data) => startMeeting(data),
@@ -295,6 +407,7 @@ function DetailCoachingMeeting() {
         message.success("Meeting started");
         queryClient.invalidateQueries(["meeting", id]);
         setRenderKey((prev) => prev + 1);
+        openVideoConference();
       },
       onSettled: () => {
         queryClient.invalidateQueries(["meeting", id]);
@@ -341,6 +454,7 @@ function DetailCoachingMeeting() {
             status: "end",
           },
         });
+        closeVideoConference();
       },
     });
   };
@@ -359,45 +473,6 @@ function DetailCoachingMeeting() {
 
   const handleEditModalClose = () => {
     setOpenEditModal(false);
-  };
-
-  const interfaceConfig = {
-    TOOLBAR_BUTTONS: [
-      "microphone",
-      "camera",
-      "closedcaptions",
-      "desktop",
-      "fullscreen",
-      "fodeviceselection",
-      "hangup",
-      "profile",
-      "chat",
-      "recording",
-      "livestreaming",
-      "etherpad",
-      "sharedvideo",
-      "settings",
-      "raisehand",
-      "videoquality",
-      "filmstrip",
-      "invite",
-      "feedback",
-      "stats",
-      "shortcuts",
-      "tileview",
-      "videobackgroundblur",
-      "download",
-      "help",
-      "mute-everyone",
-    ],
-    SETTINGS_SECTIONS: [
-      "devices",
-      "language",
-      "moderator",
-      "profile",
-      "calendar",
-    ],
-    SHOW_JITSI_WATERMARK: false,
   };
 
   const handleOpen = () => setOpen(true);
@@ -423,7 +498,6 @@ function DetailCoachingMeeting() {
             <Button type="primary" onClick={handleOpenDrawer}>
               Peserta
             </Button>
-            {/* <ConsultantRatingMeeting /> */}
           </Space>
         }
         title={
@@ -435,13 +509,6 @@ function DetailCoachingMeeting() {
                 cursor: "pointer",
               }}
             />
-            {/* <Divider type="vertical" />
-            <Tag color={data?.is_private ? "red" : "green"}>
-              {data?.is_private ? "Privat" : "Publik"}
-            </Tag>
-            <Tag color={setColorStatusCoachingClinic(data?.status)}>
-              {capitalize(data?.status)}
-            </Tag> */}
           </Space>
         }
         loading={isLoading}
@@ -450,41 +517,9 @@ function DetailCoachingMeeting() {
         {data?.status === "live" ? (
           <Row gutter={[16, 16]}>
             <Col md={24} xs={24}>
-              <JitsiMeeting
-                key={renderKey}
-                domain="coaching-online.site"
-                jwt={data?.jwt}
-                roomName={data?.id}
-                getIFrameRef={(iframeRef) => {
-                  iframeRef.style.height = "800px";
-                }}
-                configOverwrite={{
-                  prejoinPageEnabled: false,
-                  startWithAudioMuted: true,
-                  startScreenSharing: true,
-                  enableEmailInStats: false,
-                  whiteboard: {
-                    enabled: true,
-                    collabServerBaseUrl:
-                      "https://siasn.bkd.jatimprov.go.id/whiteboard",
-                  },
-                }}
-                interfaceConfigOverwrite={{
-                  DISABLE_JOIN_LEAVE_NOTIFICATIONS: false,
-                  APP_NAME: "Coaching & Mentoring",
-                }}
-                userInfo={{
-                  displayName: data?.coach?.username,
-                  role: "moderator",
-                }}
-                onReadyToClose={() => {
-                  closeMeeting();
-                }}
-                onApiReady={(api) => {
-                  setApi(api);
-                  // here you can attach custom event listeners to the Jitsi Meet External API
-                  // you can also store it locally to execute commands
-                }}
+              <FloatingVideoConference
+                data={data}
+                closeMeeting={closeMeeting}
               />
             </Col>
             <Col md={6} xs={24}>
