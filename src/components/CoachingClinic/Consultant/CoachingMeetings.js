@@ -359,9 +359,53 @@ function CoachingMeetings() {
       responsive: ["xs"],
       render: (_, row) => {
         return (
-          <>
-            <a onClick={() => gotoDetail(row?.id)}>Detail</a>
-          </>
+          <Space direction="vertical">
+            <Link href={`/coaching-clinic-consultant/${row?.id}/detail`}>
+              {row?.title}
+            </Link>
+            {row?.code && <TextSensor text={row?.code} />}
+            <Space direction="vertical">
+              {dayjs(row?.start_date).format("DD MMMM YYYY")}
+              <div>Pukul. {`${row?.start_hours} - ${row?.end_hours}`}</div>
+            </Space>
+            <Space size="small">
+              {row?.participants_type?.length && (
+                <>
+                  {row?.participants_type.map((item) => (
+                    <Tag color="blue" key={item}>
+                      {item}
+                    </Tag>
+                  ))}
+                </>
+              )}
+            </Space>
+            <Tag>
+              {row?.participants_count} / {row?.max_participants}
+            </Tag>
+            <Tag
+              onClick={() => handleOpenModalStatus(row)}
+              style={{
+                cursor: "pointer",
+              }}
+              color={setColorStatusCoachingClinic(row?.status)}
+            >
+              {upperCase(row?.status)}
+            </Tag>
+            <Space
+              style={{
+                marginTop: 10,
+              }}
+            >
+              <a onClick={() => handleOpen(row)}>Update</a>
+              <Divider type="vertical" />
+              <Popconfirm
+                onConfirm={async () => await hapus(row?.id)}
+                title="Apakah anda yakin ingin menghapus coaching clinic?"
+              >
+                <a>Hapus</a>
+              </Popconfirm>
+            </Space>
+          </Space>
         );
       },
     },
