@@ -8,14 +8,16 @@ import {
   ClockCircleOutlined,
   SearchOutlined,
   TeamOutlined,
+  UsergroupAddOutlined,
   UserOutlined,
 } from "@ant-design/icons";
-import { Center, Stack } from "@mantine/core";
-import { useMutation } from "@tanstack/react-query";
+import { Center } from "@mantine/core";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Avatar,
   Button,
   Card,
+  Empty,
   Form,
   Input,
   message,
@@ -46,6 +48,8 @@ const getStatusColor = (status) => {
 };
 
 const MentoringCard = ({
+  currentMeetingId,
+  jenisPeserta,
   judul,
   deskripsi,
   status,
@@ -60,39 +64,38 @@ const MentoringCard = ({
   onViewDetails,
 }) => {
   const statusColor = getStatusColor(status);
-  const pesertaPercentage = (pesertaSaatIni / maksimumPeserta) * 100;
+  const pesertaPercentage =
+    (parseInt(pesertaSaatIni) / parseInt(maksimumPeserta)) * 100;
 
   const renderActionButton = () => {
     if (isRegistered) {
-      return (
-        <Stack>
-          <Button onClick={onViewDetails} block>
-            Lihat Detail
-          </Button>
-          <Button onClick={onUnregister} danger block>
-            Batal Daftar
-          </Button>
-        </Stack>
-      );
+      return [
+        <Button key="detail" onClick={onViewDetails}>
+          Lihat Detail
+        </Button>,
+        <Button key="batal" onClick={onUnregister} danger>
+          Batal Daftar
+        </Button>,
+      ];
     } else if (status === "upcoming" || status === "live") {
       if (isRegistered) {
-        return (
-          <Button onClick={onUnregister} danger block>
+        return [
+          <Button key="batal" onClick={onUnregister} danger>
             Batal Daftar
-          </Button>
-        );
+          </Button>,
+        ];
       } else if (pesertaSaatIni < maksimumPeserta || !isRegistered) {
-        return (
-          <Button onClick={onRegister} type="primary" block>
-            Daftar
-          </Button>
-        );
+        return [
+          <Button key="daftar" onClick={onRegister} type="primary">
+            Daftar Mentoring
+          </Button>,
+        ];
       } else {
-        return (
-          <Button disabled block>
+        return [
+          <Button key="penuh" disabled>
             Pendaftaran Penuh
-          </Button>
-        );
+          </Button>,
+        ];
       }
     }
   };
@@ -100,8 +103,9 @@ const MentoringCard = ({
   return (
     <Center>
       <Card
+        actions={renderActionButton()}
         hoverable
-        style={{ width: 400, height: 450, overflow: "hidden" }}
+        style={{ width: 400, height: "auto", overflow: "hidden" }}
         cover={
           <div
             style={{
@@ -156,19 +160,27 @@ const MentoringCard = ({
           <Space>
             <ClockCircleOutlined /> {jam}
           </Space>
+          <Space>
+            <TeamOutlined />{" "}
+            {
+              <>
+                {jenisPeserta?.map((peserta) => (
+                  <Tag key="peserta" color="yellow">
+                    {peserta}
+                  </Tag>
+                ))}
+              </>
+            }
+          </Space>
+
           <Tooltip title={`${pesertaSaatIni} dari ${maksimumPeserta} peserta`}>
             <Space>
-              <TeamOutlined />
-              <Progress
-                percent={pesertaPercentage}
-                size="small"
-                showInfo={false}
-              />
+              <UsergroupAddOutlined />
+              <Progress percent={10} size="small" showInfo={false} />
               {pesertaSaatIni}/{maksimumPeserta}
             </Space>
           </Tooltip>
         </Space>
-        <div style={{ marginTop: 16 }}>{renderActionButton()}</div>
       </Card>
     </Center>
   );
@@ -178,14 +190,33 @@ const ModalPencarian = ({ open, onCancel }) => {
   const [form] = Form.useForm();
   const router = useRouter();
 
+  const queryClient = useQueryClient();
+
+  const [code, setCode] = useState("");
+
+  const {
+    data: dataMentoring,
+    isLoading: isLoadingDataMentoring,
+    isFetching: isFetchingDataMentoring,
+    refetch,
+  } = useQuery(["mentoring", code], () => searchMentoringByCode(code), {
+    enabled: !!code,
+    refetchOnWindowFocus: false,
+  });
+
   const { mutateAsync: gabungMentoring, isLoading: isLoadingGabungMentoring } =
     useMutation((data) => requestMeeting(data), {
       onSuccess: () => {
+        queryClient.invalidateQueries(["mentoring", code]);
         message.success("Berhasil mengikuti mentoring");
-        onCancel();
       },
-      onError: () => {
-        message.error("Gagal mengikuti mentoring");
+      onError: (error) => {
+        message.error(
+          `Gagal mengikuti mentoring: ${error?.response?.data?.message}`
+        );
+      },
+      onSettled: () => {
+        queryClient.invalidateQueries(["meetings", code]);
       },
     });
 
@@ -193,10 +224,13 @@ const ModalPencarian = ({ open, onCancel }) => {
     useMutation((data) => cancelRequestMeeting(data), {
       onSuccess: () => {
         message.success("Berhasil membatalkan mentoring");
-        onCancel();
+        queryClient.invalidateQueries(["mentoring", code]);
       },
       onError: () => {
         message.error("Gagal membatalkan mentoring");
+      },
+      onSettled: () => {
+        queryClient.invalidateQueries(["meetings", code]);
       },
     });
 
@@ -216,69 +250,18 @@ const ModalPencarian = ({ open, onCancel }) => {
       content: "Apakah anda yakin ingin membatalkan mentoring ini?",
       onOk: async () => {
         await lepasMentoring(data?.id);
-        // await gabungMentoring(data?.id);
       },
     });
   };
 
-  const showDetail = (data) => {
-    router.push(`/coaching-clinic/${data?.id}/detail`);
+  const showDetail = (id) => {
+    router.push(`/coaching-clinic/${id}/detail`);
   };
-
-  const showModalError = () => {
-    Modal.error({
-      title: "Data tidak ditemukan",
-      content: "Tidak ada mentoring dengan kode tersebut",
-    });
-  };
-
-  const showModalSuccess = (data) => {
-    Modal.success({
-      title: "Data mentoring ditemukan",
-      width: 600,
-      closable: true,
-      onCancel: onCancel,
-      footer: null,
-      centered: true,
-      content: (
-        <MentoringCard
-          judul={data?.title}
-          deskripsi={data?.description}
-          status={data?.status}
-          tanggal={dayjs(data?.start_date).format("DD MMMM YYYY")}
-          jam={`${data?.start_hours} - ${data?.end_hours}`}
-          maksimumPeserta={data?.max_participants}
-          pesertaSaatIni={data?.currentMeetingParticipants}
-          mentor={{
-            name: data?.coach?.username,
-            avatar: data?.coach?.image,
-          }}
-          isRegistered={data?.is_join}
-          onRegister={() => joinMeeting(data)}
-          onUnregister={() => unregisterMeeting(data)}
-          onViewDetails={() => showDetail(data)}
-        />
-      ),
-    });
-  };
-
-  const { mutate: searchByCode, isLoading } = useMutation(
-    (code) => searchMentoringByCode(code),
-    {
-      onSuccess: (data) => {
-        onCancel();
-        if (!data) {
-          showModalError();
-        } else {
-          showModalSuccess(data);
-        }
-      },
-    }
-  );
 
   const handleOk = async () => {
     const value = await form.validateFields();
-    searchByCode(value.code);
+    setCode(value.code);
+    refetch();
   };
 
   return (
@@ -286,14 +269,44 @@ const ModalPencarian = ({ open, onCancel }) => {
       open={open}
       onCancel={onCancel}
       title="Cari Berdasarkan Kode Mentoring"
-      confirmLoading={isLoading}
+      confirmLoading={isFetchingDataMentoring}
       onOk={handleOk}
+      okText="Cari"
     >
       <Form form={form}>
         <Form.Item name="code" label="Kode">
           <Input />
         </Form.Item>
       </Form>
+      {!dataMentoring ? (
+        <>
+          <Empty
+            description="Tidak ada mentoring dengan kode tersebut"
+            image={Empty.PRESENTED_IMAGE_SIMPLE}
+          />
+        </>
+      ) : (
+        <>
+          <MentoringCard
+            judul={dataMentoring?.title}
+            deskripsi={dataMentoring?.description}
+            status={dataMentoring?.status || "upcoming"}
+            tanggal={dayjs(dataMentoring?.start_date).format("DD MMMM YYYY")}
+            jam={`${dataMentoring?.start_hours} - ${dataMentoring?.end_hours}`}
+            jenisPeserta={dataMentoring?.participants_type}
+            maksimumPeserta={dataMentoring?.max_participants}
+            pesertaSaatIni={dataMentoring?.currentMeetingParticipants}
+            mentor={{
+              name: dataMentoring?.coach?.username,
+              avatar: dataMentoring?.coach?.image,
+            }}
+            isRegistered={dataMentoring?.is_join}
+            onRegister={() => joinMeeting(dataMentoring)}
+            onUnregister={() => unregisterMeeting(dataMentoring)}
+            onViewDetails={() => showDetail(dataMentoring?.current_meeting_id)}
+          />
+        </>
+      )}
     </Modal>
   );
 };

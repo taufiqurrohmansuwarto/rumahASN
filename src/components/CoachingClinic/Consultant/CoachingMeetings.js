@@ -33,6 +33,7 @@ import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import CreateCoaching from "./CreateCoaching";
 import FilterConsultantMeetings from "./FilterConsultantMeetings";
+import TextSensor from "@/components/TextSensor";
 
 dayjs.locale("id");
 
@@ -99,12 +100,15 @@ const ModalUpdate = ({ open, handleClose, data, handleUpdate, loading }) => {
 
   const handleSubmit = async () => {
     const result = await form.validateFields();
+
     const hasil = {
       ...result,
+      code: result?.is_private ? result?.code : null,
       start_date: dayjs(result.start_date).format("YYYY-MM-DD"),
       start_hours: dayjs(result.start_hours).format("HH:mm:ss"),
       end_hours: dayjs(result.end_hours).format("HH:mm:ss"),
     };
+
     const payload = {
       id: data?.id,
       data: hasil,
@@ -371,6 +375,7 @@ function CoachingMeetings() {
             <Link href={`/coaching-clinic-consultant/${row?.id}/detail`}>
               {row?.title}
             </Link>
+            {row?.code && <TextSensor text={row?.code} />}
             <Space direction="vertical">
               {dayjs(row?.start_date).format("DD MMMM YYYY")}
               <div>Pukul. {`${row?.start_hours} - ${row?.end_hours}`}</div>

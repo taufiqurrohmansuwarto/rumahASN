@@ -30,6 +30,7 @@ import {
   Modal,
   Row,
   Space,
+  Tag,
   Tooltip,
   Typography,
   message,
@@ -239,16 +240,23 @@ const ModalInformation = ({ open, onClose, item }) => {
   return (
     <Modal
       centered
-      title="Informasi Coaching Clinic"
+      title="Informasi Coaching & Mentoring"
       open={open}
       onCancel={onClose}
+      footer={null}
+      closable={true}
     >
       <Descriptions layout="vertical" size="small">
         <Descriptions.Item label="Judul">{item?.title}</Descriptions.Item>
-        <Descriptions.Item label="Deskripsi">
+        <Descriptions.Item label="Deskripsi" span={2}>
           {item?.description}
         </Descriptions.Item>
-        <Descriptions.Item label="Status">{item?.status}</Descriptions.Item>
+        <Descriptions.Item label="Private">
+          {item?.is_private ? "Privat" : "Publik"}
+        </Descriptions.Item>
+        <Descriptions.Item label="Status">
+          <Tag color="blue">{item?.status}</Tag>
+        </Descriptions.Item>
         <Descriptions.Item label="Tanggal" span={3}>
           {dayjs(item?.start_date).format("DD MMMM YYYY")}
         </Descriptions.Item>
@@ -353,6 +361,45 @@ function DetailCoachingMeeting() {
     setOpenEditModal(false);
   };
 
+  const interfaceConfig = {
+    TOOLBAR_BUTTONS: [
+      "microphone",
+      "camera",
+      "closedcaptions",
+      "desktop",
+      "fullscreen",
+      "fodeviceselection",
+      "hangup",
+      "profile",
+      "chat",
+      "recording",
+      "livestreaming",
+      "etherpad",
+      "sharedvideo",
+      "settings",
+      "raisehand",
+      "videoquality",
+      "filmstrip",
+      "invite",
+      "feedback",
+      "stats",
+      "shortcuts",
+      "tileview",
+      "videobackgroundblur",
+      "download",
+      "help",
+      "mute-everyone",
+    ],
+    SETTINGS_SECTIONS: [
+      "devices",
+      "language",
+      "moderator",
+      "profile",
+      "calendar",
+    ],
+    SHOW_JITSI_WATERMARK: false,
+  };
+
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
 
@@ -412,8 +459,8 @@ function DetailCoachingMeeting() {
                   iframeRef.style.height = "800px";
                 }}
                 configOverwrite={{
+                  prejoinPageEnabled: false,
                   startWithAudioMuted: true,
-                  disableModeratorIndicator: false,
                   startScreenSharing: true,
                   enableEmailInStats: false,
                   whiteboard: {
@@ -424,7 +471,11 @@ function DetailCoachingMeeting() {
                 }}
                 interfaceConfigOverwrite={{
                   DISABLE_JOIN_LEAVE_NOTIFICATIONS: false,
-                  APP_NAME: "Coaching Clinic",
+                  APP_NAME: "Coaching & Mentoring",
+                }}
+                userInfo={{
+                  displayName: data?.coach?.username,
+                  role: "moderator",
                 }}
                 onReadyToClose={() => {
                   closeMeeting();

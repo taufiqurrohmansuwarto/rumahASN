@@ -1,5 +1,7 @@
 import AdministrasiByNip from "@/components/Berkas/AdministrasiByNip";
+import AdministrasiPerbaikanByNip from "@/components/Berkas/AdministrasiPerbaikanByNip";
 import { ActiveTabProvider, useActiveTab } from "@/context/TabContext";
+import { Stack } from "@mantine/core";
 import { Alert, FloatButton, Grid, Tabs } from "antd";
 import CompareDataDiklatByNip from "../CompareDataDiklatByNip";
 import ComparePenghargaanByNip from "../ComparePenghargaanByNip";
@@ -13,12 +15,7 @@ import CompareKeluargaByNip from "./CompareKeluargaByNip";
 import CompareKinerjaPeriodikNip from "./CompareKinerjaPeriodikNip";
 import CompareMasaKerjaByNip from "./CompareMasaKerjaByNip";
 import ComparePemberhentianByNip from "./ComparePemberhentianByNip";
-import ComparePindahInstansiByNip from "./ComparePindahInstansiByNip";
-import ComparePwkByNip from "./ComparePwkByNip";
 import CompareSKP22ByNip from "./CompareSKP22ByNip";
-import SiasnTrackingLayanan from "./SiasnTrackingLayanan";
-import AdministrasiPerbaikanByNip from "@/components/Berkas/AdministrasiPerbaikanByNip";
-import { Stack } from "@mantine/core";
 
 function SiasnTab({ nip }) {
   const breakPoint = Grid.useBreakpoint();

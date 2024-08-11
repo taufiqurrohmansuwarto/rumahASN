@@ -1,14 +1,15 @@
 import LayoutParticipant from "@/components/CoachingClinic/Participant/LayoutParticipant";
 import MyMeetings from "@/components/CoachingClinic/Participant/MyMeetings";
 import Layout from "@/components/Layout";
-import { Card } from "antd";
 import Head from "next/head";
 
 const MyCoachingClinic = () => {
   return (
     <>
       <Head>
-        <title>Rumah ASN - Coaching Clinic</title>
+        <title>
+          Rumah ASN - Coaching & Mentoring - Daftar Coaching dan Mentoring
+        </title>
       </Head>
       <LayoutParticipant
         content="Daftar Jadwal Coaching Clinic Saya"

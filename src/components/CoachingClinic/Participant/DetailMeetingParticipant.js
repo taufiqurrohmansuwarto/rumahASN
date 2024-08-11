@@ -208,6 +208,7 @@ function DetailMeetingParticipant() {
                   }}
                   configOverwrite={{
                     startWithAudioMuted: true,
+                    prejoinPageEnabled: false,
                     startScreenSharing: true,
                     enableEmailInStats: false,
                   }}

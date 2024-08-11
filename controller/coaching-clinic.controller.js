@@ -411,9 +411,9 @@ const joinMeeting = async (req, res) => {
         res.status(403).json({
           message: "The meeting is full",
         });
-      } else if (currentMeeting?.status !== "upcoming") {
+      } else if (currentMeeting?.status === "end") {
         res.status(403).json({
-          message: "The meeting is already started or ended",
+          message: "The meeting is ended",
         });
       } else {
         const result = await CCMeetingsParticipants.query()
@@ -738,9 +738,8 @@ const searchByCode = async (req, res) => {
         ...result,
         currentMeetingParticipants: currentMeetingParticipants?.length,
         is_join: isJoin?.length > 0,
+        current_meeting_id: isJoin?.[0]?.id,
       };
-
-      console.log(data);
 
       res.json(data);
     }
