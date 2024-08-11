@@ -59,7 +59,7 @@ export const MOCKDATA = [
   },
   {
     icon: IconBrandZoom,
-    title: "Coaching Clinic",
+    title: "Coaching & Mentoring",
     description:
       "Pelatihan virtual tentang kepegawaian daerah di platform digital. Setiap sesi dirancang sesuai tema untuk diskusi mendalam dengan ahli BKD. Tujuannya adalah mempermudah informasi dan meningkatkan kualitas pelayanan BKD.",
   },

@@ -36,12 +36,12 @@ function LayoutParticipant({
       }}
       tabList={[
         {
-          tab: "Coaching Clinic",
+          tab: "Coaching & Mentoring",
           key: "all",
           href: "/coaching-clinic",
         },
         {
-          tab: "Coaching Clinic Saya",
+          tab: "Daftar Mentoring Saya",
           key: "my-coaching-clinic",
           href: "/coaching-clinic/my-coaching-clinic",
         },

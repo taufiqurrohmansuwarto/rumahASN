@@ -137,7 +137,7 @@ function MyMeetings() {
           <Tag color={setColorStatusCoachingClinic(row?.meeting?.status)}>
             {upperCase(row?.meeting?.status)}
           </Tag>
-          <Tag>{upperCase(row?.is_private ? "Private" : "Public")}</Tag>
+          <Tag>{row?.meeting?.is_private ? "Private" : "Public"}</Tag>
         </Space>
       ),
       responsive: ["sm"],
