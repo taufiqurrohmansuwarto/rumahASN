@@ -46,6 +46,7 @@ const getEvents = async () => {
   const coachingClinic = await CCMeetings.query()
     .where("status", "upcoming")
     .andWhere("start_date", ">=", new Date())
+    .andWhere("is_private", false)
     .withGraphFetched("[coach(simpleSelect)]");
 
   const webinarSeries = await WebinarSeries.query()
