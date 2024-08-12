@@ -97,19 +97,20 @@ const changeRoutes = (user) => {
       // });
     }
 
+    if (pegawaiBKD || fasilitatorMaster) {
+      userRoutes.routes.push({
+        path: "/coaching-clinic-consultant",
+        name: "Coaching & Mentoring",
+        icon: <IconUsersGroup size={18} />,
+      });
+    }
+
     if (pegawaiBKD) {
-      userRoutes.routes.push(
-        {
-          path: "/beranda-bkd?tab=my-task",
-          name: "Beranda BKD",
-          icon: <IconUserStar size={18} />,
-        },
-        {
-          path: "/coaching-clinic-consultant",
-          name: "Coaching & Mentoring",
-          icon: <IconUsersGroup size={18} />,
-        }
-      );
+      userRoutes.routes.push({
+        path: "/beranda-bkd?tab=my-task",
+        name: "Beranda BKD",
+        icon: <IconUserStar size={18} />,
+      });
     }
 
     if (fasilitatorMaster) {
