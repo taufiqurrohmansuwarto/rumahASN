@@ -170,13 +170,14 @@ const dropUserCoach = async (req, res) => {
 
 const checkStatusCoaching = async (req, res) => {
   try {
-    const { customId } = req?.user;
+    const { customId, group, role } = req?.user;
     const result = await User.query().findById(customId);
+    const fasilitatorMaster = group === "MASTER" && role === "FASILITATOR";
 
-    if (!result || !result?.is_consultant) {
-      res.json(null);
-    } else {
+    if (result?.is_consultant || fasilitatorMaster) {
       res.json(true);
+    } else {
+      res.json(null);
     }
   } catch (error) {
     console.log(error);
@@ -233,13 +234,12 @@ const findMeeting = async (req, res) => {
 
 const createMeeting = async (req, res) => {
   try {
-    const { customId } = req?.user;
+    const { customId, group, role } = req?.user;
 
     const currentUser = await User.query().findById(customId);
+    const fasilitatorMaster = group === "MASTER" && role === "FASILITATOR";
 
-    if (!currentUser?.is_consultant) {
-      res.status(403).json({ message: "Kamu bukan konsultan" });
-    } else {
+    if (currentUser?.is_consultant || fasilitatorMaster) {
       const body = req?.body;
       await CCMeetings.query().insert({
         ...body,
@@ -248,6 +248,8 @@ const createMeeting = async (req, res) => {
       });
 
       res.status(201).json({ message: "Success" });
+    } else {
+      res.status(403).json({ message: "Kamu bukan konsultan" });
     }
   } catch (error) {
     console.log(error);

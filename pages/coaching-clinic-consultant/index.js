@@ -1,7 +1,7 @@
 import CoachingMeetings from "@/components/CoachingClinic/Consultant/CoachingMeetings";
 import Layout from "@/components/Layout";
 import PageContainer from "@/components/PageContainer";
-import { checkStatus, findMeeting } from "@/services/coaching-clinics.services";
+import { checkStatus } from "@/services/coaching-clinics.services";
 import { useQuery } from "@tanstack/react-query";
 import { Breadcrumb, Empty, Grid } from "antd";
 import Head from "next/head";
@@ -14,13 +14,6 @@ const CoachingClinic = () => {
     ["status-coaching"],
     () => checkStatus(),
     {}
-  );
-
-  const handleCreate = () => router.push("/coaching-clinic/consults");
-
-  const { data: meetings, isLoading: isloadingMeeting } = useQuery(
-    ["meetings", router?.query],
-    () => findMeeting(router?.query)
   );
 
   const breakPoint = Grid.useBreakpoint();

@@ -4,7 +4,7 @@ module.exports = (req, res, next) => {
   const group = user?.group;
   const role = user?.role;
 
-  const fasilitatorMaster = group === "FASILITATOR" && role === "MASTER";
+  const fasilitatorMaster = group === "MASTER" && role === "FASILITATOR";
 
   if (user?.is_consultant || fasilitatorMaster) {
     next();
