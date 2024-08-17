@@ -5,9 +5,15 @@ const api = axios.create({
   baseURL: "/helpdesk/api/master/ws",
 });
 
+const masterApi = axios.create({
+  baseURL: "/helpdesk/api/master",
+});
+
 export const compareEmployeesSimasterSiasn = () => {
-  return api.get("/fasilitator/dashboard-compare-siasn").then(res => res.data);
-}
+  return api
+    .get("/fasilitator/dashboard-compare-siasn")
+    .then((res) => res.data);
+};
 
 export const employeeBirthdayTodayServices = () => {
   return api.get("/employee-birthday").then((res) => res.data);
@@ -224,4 +230,8 @@ export const urlToPdf = (data) => {
       responseType: "blob",
     })
     .then((res) => res.data);
+};
+
+export const masterUnorBackup = () => {
+  return masterApi.get("/unor-backup").then((res) => res.data);
 };

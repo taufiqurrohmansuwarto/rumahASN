@@ -1,72 +1,102 @@
-import { daftarKenaikanPangkat } from "@/services/siasn-services";
-import { FilePdfOutlined, FilePdfTwoTone } from "@ant-design/icons";
-import { useQuery } from "@tanstack/react-query";
-import { Card, DatePicker, Form, Select, Space, Table, Tooltip } from "antd";
-import dayjs from "dayjs";
+import React, { useState, useCallback } from "react";
 import { useRouter } from "next/router";
-import React, { useState } from "react";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import {
+  Button,
+  Card,
+  DatePicker,
+  Form,
+  message,
+  Space,
+  Table,
+  Tooltip,
+} from "antd";
+import { FilePdfTwoTone, SyncOutlined } from "@ant-design/icons";
+import dayjs from "dayjs";
+import {
+  daftarKenaikanPangkat,
+  syncKenaikanPangkat,
+} from "@/services/siasn-services";
 
-const format = "DD-MM-YYYY";
-
-const periodeKenaikanPangkat = [
-  { label: "Februari", value: "01-02" },
-  { label: "April", value: "01-04" },
-  { label: "Juni", value: "01-06" },
-  { label: "Agustus", value: "01-08" },
-  { label: "Oktober", value: "01-10" },
-  { label: "Desember", value: "01-12" },
-];
+const FORMAT = "DD-MM-YYYY";
+const PAGE_SIZE = 25;
 
 function DaftarKenaikanPangkat() {
   const router = useRouter();
-  const [query, setQuery] = useState({
-    page: 1,
-    limit: 10,
-    periode:
-      router.query.periode ||
-      `01-${dayjs().format("MM")}-${dayjs().format("YYYY")}`,
+  const [periode, setPeriode] = useState(() => {
+    const today = dayjs();
+    const defaultPeriode = today.startOf("month").format(FORMAT);
+    return router.query.periode || defaultPeriode;
   });
 
-  const gotoDetail = (row) => {
-    router.push(`/apps-managements/integrasi/siasn/${row.nipBaru}`);
-  };
+  const { data, isLoading, isFetching, error, refetch } = useQuery(
+    ["kenaikan-pangkat", periode],
+    () => daftarKenaikanPangkat({ periode }),
+    {
+      keepPreviousData: true,
+      refetchOnWindowFocus: false,
+    }
+  );
+
+  const handleChangePeriode = useCallback(
+    (value) => {
+      const newPeriode = value.startOf("month").format(FORMAT);
+      setPeriode(newPeriode);
+      router.push({
+        pathname: "/apps-managements/siasn-services/kenaikan-pangkat",
+        query: { periode: newPeriode },
+      });
+    },
+    [router]
+  );
+
+  const { mutate: sync, isLoading: isLoadingSync } = useMutation(
+    (data) => syncKenaikanPangkat(data),
+    {
+      onSuccess: () => message.success("Data berhasil disinkronisasi"),
+      onError: (error) => message.error(error?.response?.data?.message),
+    }
+  );
+
+  const handleSync = () => sync({ periode });
+
+  const gotoDetail = useCallback(
+    (row) => {
+      router.push(`/apps-managements/integrasi/siasn/${row.nipBaru}`);
+    },
+    [router]
+  );
 
   const columns = [
     {
       title: "File",
       key: "path",
-      render: (_, record) => {
-        return (
-          <Space>
-            <div>
-              {record?.path_ttd_sk && (
-                <Tooltip title="File SK">
-                  <a
-                    href={`/helpdesk/api/siasn/ws/download?filePath=${record?.path_ttd_sk}`}
-                    target="_blank"
-                    rel="noreferrer"
-                  >
-                    <FilePdfTwoTone color="gray" />
-                  </a>
-                </Tooltip>
-              )}
-            </div>
-            <div>
-              {record?.path_ttd_pertek && (
-                <Tooltip title="File Pertek">
-                  <a
-                    href={`/helpdesk/api/siasn/ws/download?filePath=${record?.path_ttd_pertek}`}
-                    target="_blank"
-                    rel="noreferrer"
-                  >
-                    <FilePdfTwoTone color="gray" />
-                  </a>
-                </Tooltip>
-              )}
-            </div>
-          </Space>
-        );
-      },
+      render: (_, record) => (
+        <Space>
+          {record?.path_ttd_sk && (
+            <Tooltip title="File SK">
+              <a
+                href={`/helpdesk/api/siasn/ws/download?filePath=${record.path_ttd_sk}`}
+                target="_blank"
+                rel="noreferrer"
+              >
+                <FilePdfTwoTone />
+              </a>
+            </Tooltip>
+          )}
+          {record?.path_ttd_pertek && (
+            <Tooltip title="File Pertek">
+              <a
+                href={`/helpdesk/api/siasn/ws/download?filePath=${record.path_ttd_pertek}`}
+                target="_blank"
+                rel="noreferrer"
+              >
+                <FilePdfTwoTone />
+              </a>
+            </Tooltip>
+          )}
+        </Space>
+      ),
       responsive: ["sm"],
     },
     { title: "NIP", dataIndex: "nipBaru" },
@@ -79,60 +109,45 @@ function DaftarKenaikanPangkat() {
     {
       title: "Aksi",
       key: "aksi",
-      render: (row) => <a onClick={() => gotoDetail(row)}>Detail</a>,
+      render: (_, row) => <a onClick={() => gotoDetail(row)}>Detail</a>,
     },
   ];
 
-  const handleChangePeriode = (value) => {
-    setQuery({
-      ...query,
-      periode: value.format(format),
-    });
-    router.push({
-      pathname: "/apps-managements/siasn-services/kenaikan-pangkat",
-      query: { periode: value.format(format) },
-    });
-  };
-
-  const { data, isLoading, isFetching } = useQuery(
-    ["kenaikan-pangkat", router?.query],
-    () => daftarKenaikanPangkat(router?.query),
-    {
-      enabled: !!router?.query,
-      keepPreviousData: true,
-      refetchOnWindowFocus: false,
-    }
-  );
+  if (error) {
+    return <div>Error: {error.message}</div>;
+  }
 
   return (
     <Card>
       <Form.Item label="Periode">
-        {/* <Select showSearch optionFilterProp="name" allowClear>
-          {periodeKenaikanPangkat.map((item) => (
-            <Select.Option
-              name={item?.label}
-              key={item.value}
-              value={item.value}
-            >
-              {item.label}
-            </Select.Option>
-          ))}
-        </Select> */}
         <DatePicker
           picker="month"
-          format={format}
+          format={FORMAT}
           onChange={handleChangePeriode}
-          value={dayjs(query.periode, format)}
+          value={dayjs(periode, FORMAT)}
         />
       </Form.Item>
+      <Space>
+        <Button loading={isFetching} type="primary" onClick={() => refetch()}>
+          Reload
+        </Button>
+        <Button
+          onClick={handleSync}
+          loading={isLoadingSync}
+          type="primary"
+          icon={<SyncOutlined />}
+        >
+          Sinkron
+        </Button>
+      </Space>
       <Table
         size="middle"
         pagination={{
           position: ["bottomRight", "topRight"],
-          total: data?.length,
+          total: data?.length ?? 0,
           showTotal: (total) => `Total ${total} data`,
           showSizeChanger: false,
-          pageSize: 25,
+          pageSize: PAGE_SIZE,
         }}
         columns={columns}
         rowKey={(row) => row?.id}

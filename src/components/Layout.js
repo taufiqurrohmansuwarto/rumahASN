@@ -134,25 +134,25 @@ const changeRoutes = (user) => {
             },
             {
               path: "/fasilitator-employees/daftar-usulan-kenaikan-pangkat",
-              name: "Daftar Usulan Kenaikan Pangkat",
+              name: "Daftar Usulan KP",
             },
-            {
-              path: "/fasilitator-employees/dashboard-rekap",
-              name: "Dashboard Rekap",
-            },
-          ],
-        },
-        {
-          path: "/fasilitator/smart-asn-connect",
-          name: "Smart ASN Connect",
-          icon: <IconMessageUser size={18} />,
-          routes: [
-            {
-              path: "/fasilitator/smart-asn-connect/events",
-              name: "Kegiatan",
-            },
+            // {
+            //   path: "/fasilitator-employees/dashboard-rekap",
+            //   name: "Dashboard Rekap",
+            // },
           ],
         }
+        // {
+        //   path: "/fasilitator/smart-asn-connect",
+        //   name: "Smart ASN Connect",
+        //   icon: <IconMessageUser size={18} />,
+        //   routes: [
+        //     {
+        //       path: "/fasilitator/smart-asn-connect/events",
+        //       name: "Kegiatan",
+        //     },
+        //   ],
+        // }
       );
     }
 
@@ -301,7 +301,7 @@ const changeRoutes = (user) => {
                   name: "Pemberhentian",
                 },
                 {
-                  path: "/apps-managements/siasn-services/kenaikan-pangkat",
+                  path: "/apps-managements/siasn-services/kenaikan-pangkat/sync",
                   name: "Kenaikan Pangkat",
                 },
                 {

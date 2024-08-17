@@ -486,13 +486,29 @@ export const daftarPengadaan = async (query) => {
 };
 
 export const daftarKenaikanPangkat = async (query) => {
+  const currentQuery = queryString.stringify(query, {
+    skipEmptyString: true,
+    skipNull: true,
+  });
+
+  return api.get(`/admin/kp?${currentQuery}`).then((res) => res.data);
+};
+
+export const daftarKenaikanPerangkatDaerah = async (query) => {
+  const currentQuery = queryString.stringify(query, {
+    skipEmptyString: true,
+    skipNull: true,
+  });
+  console.log("currentQuery", currentQuery);
+
   return api
-    .get(
-      `/admin/kp?${queryString.stringify(query, {
-        skipEmptyString: true,
-        skipNull: true,
-      })}`
-    )
+    .get(`/admin/kp/perangkat-daerah?${currentQuery}`)
+    .then((res) => res.data);
+};
+
+export const syncKenaikanPangkat = async (query) => {
+  return api
+    .get(`/admin/kp/sync?${queryString.stringify(query)}`)
     .then((res) => res.data);
 };
 
