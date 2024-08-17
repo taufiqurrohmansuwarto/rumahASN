@@ -1,11 +1,14 @@
 import Layout from "@/components/Layout";
 import PageContainer from "@/components/PageContainer";
+import CariKPPerangkatDaerah from "@/components/SiasnServicesAdmin/CariKPPerangkatDaerah";
 import DaftarKenaikanPangkat from "@/components/SiasnServicesAdmin/DaftarKenaikanPangkat";
+import KenaikanPangkatLayout from "@/components/SiasnServicesAdmin/KenaikanPangkatLayout";
+import UnorAdmin from "@/components/SiasnServicesAdmin/UnorAdmin";
 import { Breadcrumb } from "antd";
 import Head from "next/head";
 import Link from "next/link";
 
-const LayananSiasnKenaikanPangkat = () => {
+const LayananSiasnKenaikanPangkatPerangkatDaerah = () => {
   return (
     <>
       <Head>
@@ -29,23 +32,25 @@ const LayananSiasnKenaikanPangkat = () => {
           ),
         }}
       >
-        <DaftarKenaikanPangkat />
+        <KenaikanPangkatLayout active="perangkat-daerah">
+          <CariKPPerangkatDaerah />
+        </KenaikanPangkatLayout>
       </PageContainer>
     </>
   );
 };
 
-LayananSiasnKenaikanPangkat.getLayout = function (page) {
+LayananSiasnKenaikanPangkatPerangkatDaerah.getLayout = function (page) {
   return (
-    <Layout active="/apps-managements/siasn-services/kenaikan-pangkat">
+    <Layout active="/apps-managements/siasn-services/kenaikan-pangkat/sync">
       {page}
     </Layout>
   );
 };
 
-LayananSiasnKenaikanPangkat.Auth = {
+LayananSiasnKenaikanPangkatPerangkatDaerah.Auth = {
   action: "manage",
   subject: "DashboardAdmin",
 };
 
-export default LayananSiasnKenaikanPangkat;
+export default LayananSiasnKenaikanPangkatPerangkatDaerah;

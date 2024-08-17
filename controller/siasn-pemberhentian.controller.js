@@ -10,6 +10,11 @@ const daftarPemberhentianSIASN = async (req, res) => {
     const tglAwal = req?.query?.tglAwal || dayjs().format("DD-MM-YYYY");
     const tglAkhir = req?.query?.tglAkhir || dayjs().format("DD-MM-YYYY");
 
+    console.log({
+      tglAwal,
+      tglAkhir,
+    });
+
     const result = await listPemberhentianSIASN(request, tglAwal, tglAkhir);
     const hasil = result?.data;
 
