@@ -43,7 +43,7 @@ function DaftarKenaikanPangkat() {
       const newPeriode = value.startOf("month").format(FORMAT);
       setPeriode(newPeriode);
       router.push({
-        pathname: "/apps-managements/siasn-services/kenaikan-pangkat",
+        pathname: "/apps-managements/siasn-services/kenaikan-pangkat/sync",
         query: { periode: newPeriode },
       });
     },
