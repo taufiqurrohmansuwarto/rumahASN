@@ -105,7 +105,6 @@ export function MenuMySAPK({ dataUtama, foto }) {
               direction={screens.xl ? "horizontal" : "vertical"}
             >
               <IPAsn tahun={2023} />
-              <IPASNWs />
               <Tag color="yellow">{dataUtama?.kedudukanPnsNama}</Tag>
               <Tag color={dataUtama?.validNik ? "green" : "red"}>
                 {dataUtama?.validNik
