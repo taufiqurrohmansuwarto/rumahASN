@@ -135,15 +135,22 @@ const TagResult = ({ record }) => {
 };
 
 function CompareDataUtamaByNip({ nip }) {
-  const { data, isLoading } = useQuery(["data-utama-siasn", nip], () =>
-    dataUtamSIASNByNip(nip)
+  const { data, isLoading } = useQuery(
+    ["data-utama-siasn", nip],
+    () => dataUtamSIASNByNip(nip),
+    {
+      refetchOnWindowFocus: false,
+    }
   );
 
   const breakPoint = Grid.useBreakpoint();
 
   const { data: dataSimaster, isLoading: isLoadingDataSimaster } = useQuery(
     ["data-utama-simaster-by-nip", nip],
-    () => dataUtamaMasterByNip(nip)
+    () => dataUtamaMasterByNip(nip),
+    {
+      refetchOnWindowFocus: false,
+    }
   );
 
   const columns = [

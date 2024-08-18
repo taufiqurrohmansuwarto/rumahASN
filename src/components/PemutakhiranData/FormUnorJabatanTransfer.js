@@ -3,8 +3,8 @@ import {
   uploadDokRiwayat,
 } from "@/services/siasn-services";
 import { getJenisJabatanId } from "@/utils/client-utils";
-import { Loading3QuartersOutlined, SendOutlined } from "@ant-design/icons";
-import { Text } from "@mantine/core";
+import { SendOutlined } from "@ant-design/icons";
+import { Alert, Text } from "@mantine/core";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   Col,
@@ -12,6 +12,7 @@ import {
   Form,
   Input,
   Modal,
+  Radio,
   Row,
   Select,
   Space,
@@ -33,11 +34,19 @@ import FormUnorSIASN from "./FormUnorSIASN";
 import { urlToPdf } from "@/services/master.services";
 import dayjs from "dayjs";
 import "dayjs/locale/id";
+import { toLower, trim } from "lodash";
 dayjs.locale("id");
 
 const dateFormat = "DD-MM-YYYY";
 
+const findJabatanExists = (data, jabatan) => {
+  return data?.find(
+    (item) => trim(toLower(item?.namaJabatan)) === trim(toLower(jabatan))
+  );
+};
+
 function ModalFormJabatanUnor({
+  siasn,
   kata,
   file,
   open,
@@ -139,13 +148,20 @@ function ModalFormJabatanUnor({
       open={open}
       onCancel={handleClose}
     >
+      <>
+        {!!findJabatanExists(siasn, data?.jabatan) && (
+          <Alert title="Peringatan" color="red" style={{ marginBottom: 10 }}>
+            {data?.jabatan} sudah ada di data SIASN
+          </Alert>
+        )}
+      </>
       <Form form={form} layout="vertical">
         <Form.Item
           rules={[{ required: true, message: "Tidak boleh kosong" }]}
           name="jenis_jabatan"
           label="Jenis Jabatan"
         >
-          <Select
+          <Radio.Group
             onChange={() => {
               form.setFieldsValue({
                 fungsional_id: null,
@@ -154,10 +170,10 @@ function ModalFormJabatanUnor({
               });
             }}
           >
-            <Select.Option value="Pelaksana">Pelaksana</Select.Option>
-            <Select.Option value="Fungsional">Fungsional</Select.Option>
-            <Select.Option value="Struktural">Struktural</Select.Option>
-          </Select>
+            <Radio.Button value="Pelaksana">Pelaksana</Radio.Button>
+            <Radio.Button value="Fungsional">Fungsional</Radio.Button>
+            <Radio.Button value="Struktural">Struktural</Radio.Button>
+          </Radio.Group>
         </Form.Item>
         <FormJenisMutasi name="jenisMutasiId" />
         <Form.Item
@@ -181,11 +197,14 @@ function ModalFormJabatanUnor({
         >
           {({ getFieldValue }) =>
             getFieldValue("jenis_jabatan") === "Fungsional" ? (
-              <FormJFT name="fungsional_id" />
+              <FormJFT jabatan={`(${data?.jabatan})`} name="fungsional_id" />
             ) : getFieldValue("jenis_jabatan") === "Pelaksana" ? (
-              <FormJFU name="fungsional_umum_id" />
+              <FormJFU
+                jabatan={`(${data?.jabatan})`}
+                name="fungsional_umum_id"
+              />
             ) : getFieldValue("jenis_jabatan") === "Struktural" ? (
-              <FormStruktural name="eselon_id" />
+              <FormStruktural jabatan={`(${data?.jabatan})`} name="eselon_id" />
             ) : null
           }
         </Form.Item>
@@ -206,7 +225,7 @@ function ModalFormJabatanUnor({
             ) : null
           }
         </Form.Item>
-        <FormUnorSIASN name="unorId" />
+        <FormUnorSIASN unor={`(${data?.unor})`} name="unorId" />
         <Form.Item required name="nomorSk" label="Nomor SK">
           <Input />
         </Form.Item>
@@ -240,7 +259,7 @@ function ModalFormJabatanUnor({
   );
 }
 
-const FormUnorJabatanTransfer = ({ data, kata = "Edit" }) => {
+const FormUnorJabatanTransfer = ({ data, kata = "Edit", dataSiasn = [] }) => {
   const queryClient = useQueryClient();
   const [file, setFile] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -285,6 +304,7 @@ const FormUnorJabatanTransfer = ({ data, kata = "Edit" }) => {
         </a>
       </Tooltip>
       <ModalFormJabatanUnor
+        siasn={dataSiasn}
         kata={kata}
         data={data}
         handleOk={addJabatanUnor}

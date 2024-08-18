@@ -1,7 +1,7 @@
 import { daftarStruktural } from "@/utils/client-utils";
 import { Form, Select } from "antd";
 
-const FormStruktural = ({ name }) => {
+const FormStruktural = ({ name, jabatan }) => {
   return (
     <>
       <Form.Item label="Pilih Eselon" rules={[{ required: true }]} name={name}>
@@ -9,7 +9,7 @@ const FormStruktural = ({ name }) => {
           optionFilterProp="nama"
           allowClear
           showSearch
-          placeholder="Pilih Eselon"
+          placeholder={`Pilih Eselon ${jabatan}`}
         >
           {daftarStruktural?.map((item) => (
             <Select.Option

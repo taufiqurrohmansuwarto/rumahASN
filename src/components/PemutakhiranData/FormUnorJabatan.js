@@ -4,7 +4,7 @@ import {
 } from "@/services/siasn-services";
 import { getJenisJabatanId } from "@/utils/client-utils";
 import { FileAddOutlined } from "@ant-design/icons";
-import { Text } from "@mantine/core";
+import { Button as ButtonMantine, Text } from "@mantine/core";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   Button,
@@ -16,6 +16,8 @@ import {
   Row,
   Select,
   Space,
+  Tooltip,
+  Tour,
   Upload,
   message,
 } from "antd";
@@ -30,6 +32,7 @@ import FormStruktural from "./FormStruktural";
 import FormSubJabatan from "./FormSubJabatan";
 import FormUnorSIASN from "./FormUnorSIASN";
 
+import { IconBulb } from "@tabler/icons";
 import dayjs from "dayjs";
 import "dayjs/locale/id";
 dayjs.locale("id");
@@ -255,6 +258,10 @@ const FormUnorJabatan = () => {
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
 
+  const [openTour, setOpenTour] = useState(false);
+  const handleOpenTour = () => setOpenTour(true);
+  const handleCloseTour = () => setOpenTour(false);
+
   const { mutateAsync: addJabatanUnor, isLoading: isLoadingAddJabatanUnor } =
     useMutation((data) => postUnorJabatanByNip(data), {
       onSuccess: () => {
@@ -265,11 +272,62 @@ const FormUnorJabatan = () => {
       },
     });
 
+  const steps = [
+    {
+      title: "Gunakan Riwayat Jabatan Terbaru",
+      description:
+        "Pastikan Jabatan terakhir (paling atas) merupakan jabatan terbaru. Jika belum, gunakan tombol tambah jabatan atau transfer data pada tabel SIMASTER",
+      cover: (
+        <img
+          alt="tour.png"
+          src="https://siasn.bkd.jatimprov.go.id:9000/public/tutorial-jabatan-1.png"
+        />
+      ),
+      target: null,
+    },
+    {
+      title: "Lengkapi Data",
+      description:
+        "Jika data SIASN tidak lengkap, maka hapus kemudian entri kembali.",
+      cover: (
+        <img
+          alt="tour.png"
+          src="https://siasn.bkd.jatimprov.go.id:9000/public/tutorial-jabatan-2.png"
+        />
+      ),
+      target: null,
+    },
+    {
+      title: "Kelengkapan Dokumen",
+      description:
+        "Pastikan kembali dokumen yang diunggah ada dan benar. Penambahan dokumen yang kurang dapat mempercepat proses verifikasi. Gunakan tombol unggah di sebelah kanan untuk mengunggah dokumen.",
+      cover: (
+        <img
+          alt="tour.png"
+          src="https://siasn.bkd.jatimprov.go.id:9000/public/tutorial-jabatan-3.png"
+        />
+      ),
+      target: null,
+    },
+  ];
+
   return (
     <>
-      <Button type="primary" onClick={handleOpen}>
-        Tambah Jabatan
-      </Button>
+      <Space>
+        <Tour steps={steps} open={openTour} onClose={handleCloseTour} />
+        <Button type="primary" onClick={handleOpen}>
+          Tambah Jabatan
+        </Button>
+        <Tooltip title="Lolos Kenaikan Pangkat">
+          <ButtonMantine
+            onClick={handleOpenTour}
+            variant="light"
+            leftIcon={<IconBulb size={14} />}
+          >
+            Tips dan Trik
+          </ButtonMantine>
+        </Tooltip>
+      </Space>
       <ModalFormJabatanUnor
         handleOk={addJabatanUnor}
         isLoading={isLoadingAddJabatanUnor}

@@ -14,7 +14,7 @@ const Tombol = ({ tmt, file, nip }) => {
     ["check-document-perbaikan", `${tmt}-${file}-${nip}`],
     () => checkDokumenPerbaikanByNip({ formasi: tmt, file, nip }),
     {
-      // refetchOnWindowFocus: false,
+      refetchOnWindowFocus: false,
     }
   );
 
