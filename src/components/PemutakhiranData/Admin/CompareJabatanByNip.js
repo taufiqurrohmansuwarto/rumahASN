@@ -554,27 +554,16 @@ const namaJabatan = (data) => {
   return result;
 };
 
-const jenisJabatanSiasn = (data) => {
-  const { jenis_jabatan_nama } = data;
-  let result = "";
-  if (jenis_jabatan_nama === "Jabatan Struktural") {
-    result = "Struktural";
-  } else if (jenis_jabatan_nama === "Jabatan Fungsional Tertentu") {
-    result = "Fungsional";
-  } else if (jenis_jabatan_nama === "Jabatan Fungsional Umum") {
-    result = "Pelaksana";
-  }
-
-  return result;
-};
-
 function CompareJabatanByNip({ nip }) {
   const { data: dataUser, status } = useSession();
   const breakPoint = Grid.useBreakpoint();
 
   const { data: dataSiasn, isLoading: loadingDataSiasn } = useQuery(
     ["data-utama-siasn", nip],
-    () => dataUtamSIASNByNip(nip)
+    () => dataUtamSIASNByNip(nip),
+    {
+      refetchOnWindowFocus: false,
+    }
   );
 
   const [visible, setVisible] = useState(false);
@@ -584,11 +573,6 @@ function CompareJabatanByNip({ nip }) {
   const [visibleEdit, setVisibleEdit] = useState(false);
   const [currentDataEdit, setCurrentDataEdit] = useState(null);
 
-  const handleOpenEdit = (data) => {
-    setVisibleEdit(true);
-    setCurrentDataEdit(data);
-  };
-
   const handleCloseEdit = () => {
     setVisibleEdit(false);
     setCurrentDataEdit(null);
@@ -596,40 +580,25 @@ function CompareJabatanByNip({ nip }) {
 
   // formKosong
   const [visibleKosong, setVisibleKosong] = useState(false);
-  const handleOpenKosong = () => setVisibleKosong(true);
   const handleCloseKosong = () => setVisibleKosong(false);
 
-  const handleOpen = () => setVisible(true);
   const handleClose = () => {
     setVisible(false);
     setCurrentData(null);
   };
 
-  const { data, isLoading } = useQuery(["data-jabatan", nip], () =>
-    getRwJabatanByNip(nip)
+  const { data, isLoading } = useQuery(
+    ["data-jabatan", nip],
+    () => getRwJabatanByNip(nip),
+    {
+      refetchOnWindowFocus: false,
+    }
   );
 
   const { data: dataMaster, isLoading: loadingMasterJabatan } = useQuery(
     ["data-rw-jabatan-master-by-nip", nip],
     () => rwJabatanMasterByNip(nip)
   );
-
-  const handlePakai = (row) => {
-    const tmt_jabatan = dayjs(row?.tmt_jabatan, "DD-MM-YYYY");
-    const tgl_sk = dayjs(row?.tgl_sk, "DD-MM-YYYY");
-    const tmt_pelantikan = dayjs(row?.tmt_jabatan, "DD-MM-YYYY");
-
-    const data = {
-      tmt_jabatan,
-      tgl_sk,
-      tmt_pelantikan,
-      nomor_sk: row?.nomor_sk,
-      jenis_jabatan: row?.jenis_jabatan,
-    };
-
-    setCurrentData(data);
-    setVisible(true);
-  };
 
   const columnsMaster = [
     {
@@ -733,7 +702,9 @@ function CompareJabatanByNip({ nip }) {
       key: "aksi",
       responsive: ["sm"],
       render: (_, row) => {
-        const data = {
+        const payload = {
+          unor: row?.unor,
+          jabatan: row?.jabatan,
           tmtJabatan: row?.tmt_jabatan
             ? dayjs(row?.tmt_jabatan, "DD-MM-YYYY")
             : null,
@@ -748,7 +719,11 @@ function CompareJabatanByNip({ nip }) {
 
         return (
           <Space>
-            <FormUnorJabatanTransfer data={data} kata="Pakai" />
+            <FormUnorJabatanTransfer
+              dataSiasn={data}
+              data={payload}
+              kata="Pakai"
+            />
           </Space>
         );
       },

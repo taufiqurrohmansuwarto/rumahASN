@@ -71,7 +71,9 @@ function ComparePendidikanByNip({ nip }) {
   const { data, isLoading } = useQuery(
     ["riwayat-pendidikan-by-nip", nip],
     () => dataPendidikanByNip(nip),
-    {}
+    {
+      refetchOnWindowFocus: false,
+    }
   );
 
   const columns = [

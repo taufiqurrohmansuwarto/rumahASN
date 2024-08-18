@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Form, Select, Spin } from "antd";
 import { useState } from "react";
 
-const FormJFT = ({ name, help }) => {
+const FormJFT = ({ name, help, jabatan = "" }) => {
   const [jfu, setJfu] = useState(undefined);
   const [debounceValue] = useDebouncedValue(jfu, 500);
 
@@ -19,7 +19,7 @@ const FormJFT = ({ name, help }) => {
   return (
     <>
       <Form.Item
-        label={`Jabatan Fungsional Terampil`}
+        label={`Jabatan Fungsional Terampil ${jabatan}`}
         rules={[{ required: true }]}
         name={name}
         help="Ketik nama jabatan kemudian tunggu.."

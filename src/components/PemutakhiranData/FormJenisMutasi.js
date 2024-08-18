@@ -1,6 +1,6 @@
 import { refJenisMutasi, refJenisPenugasan } from "@/services/siasn-services";
 import { useQuery } from "@tanstack/react-query";
-import { Form, Select } from "antd";
+import { Form, Radio, Select } from "antd";
 
 function FormJenisMutasi({ name }) {
   const { data, isLoading } = useQuery(
@@ -12,14 +12,19 @@ function FormJenisMutasi({ name }) {
   return (
     <>
       {data && (
-        <Form.Item required name={name} label="Jenis Mutasi">
-          <Select>
+        <Form.Item
+          required
+          help="Gunakan Mutasi Unor jika unor yang berubah bukan jabatan"
+          name={name}
+          label="Jenis Mutasi"
+        >
+          <Radio.Group>
             {data?.map((item) => (
-              <Select.Option key={item?.id} value={item?.id}>
+              <Radio.Button key={item?.id} value={item?.id}>
                 {item?.nama}
-              </Select.Option>
+              </Radio.Button>
             ))}
-          </Select>
+          </Radio.Group>
         </Form.Item>
       )}
     </>
