@@ -3,6 +3,7 @@ import {
   cleanQuery,
   formatDateLL,
   setColorStatus,
+  setColorStatusTooltip,
   setStatusIcon,
 } from "@/utils/client-utils";
 import { MessageOutlined } from "@ant-design/icons";
@@ -19,6 +20,7 @@ import {
   Skeleton,
   Space,
   Tag,
+  Tooltip,
   Typography,
 } from "antd";
 import Link from "next/link";
@@ -53,12 +55,15 @@ const Assignee = ({ item }) => {
 
 const Status = ({ item }) => {
   return (
-    <Tag
-      icon={setStatusIcon(item?.status_code)}
-      color={setColorStatus(item?.status_code)}
+    <Tooltip
+      color={setColorStatusTooltip(item?.status_code)}
+      title={item?.status_code}
     >
-      {item?.status_code}
-    </Tag>
+      <Tag
+        icon={setStatusIcon(item?.status_code)}
+        color={setColorStatus(item?.status_code)}
+      />
+    </Tooltip>
   );
 };
 
@@ -90,6 +95,16 @@ const FilterUser = ({ handleChange, value }) => {
   );
 };
 
+const SubCategory = ({ item }) => {
+  return (
+    <>
+      {item?.sub_category && (
+        <Tag color="orange">{item?.sub_category?.name}</Tag>
+      )}
+    </>
+  );
+};
+
 // create item like github issue with primer UI
 const TitleLink = ({ item }) => {
   const screens = useBreakpoint();
@@ -109,6 +124,7 @@ const TitleLink = ({ item }) => {
       {screens?.xs && <br />}
       <Published item={item} />
       <Status item={item} key="status" />
+      <SubCategory item={item} key="sub_category" />
     </div>
   );
 };

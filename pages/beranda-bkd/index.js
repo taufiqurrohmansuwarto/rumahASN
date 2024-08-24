@@ -8,6 +8,7 @@ import { refCategories } from "@/services/index";
 import {
   formatDateFull,
   setColorStatus,
+  setColorStatusTooltip,
   setStatusIcon,
 } from "@/utils/client-utils";
 import {
@@ -37,6 +38,7 @@ import {
   Space,
   Tabs,
   Tag,
+  Tooltip,
   Typography,
   message,
 } from "antd";
@@ -89,12 +91,15 @@ const DownloadData = () => {
 
 const Status = ({ item }) => {
   return (
-    <Tag
-      icon={setStatusIcon(item?.status_code)}
-      color={setColorStatus(item?.status_code)}
+    <Tooltip
+      title={item?.status_code}
+      color={setColorStatusTooltip(item?.status_code)}
     >
-      {item?.status_code}
-    </Tag>
+      <Tag
+        icon={setStatusIcon(item?.status_code)}
+        color={setColorStatus(item?.status_code)}
+      />
+    </Tooltip>
   );
 };
 
@@ -104,6 +109,16 @@ const Published = ({ item }) => {
   } else {
     return null;
   }
+};
+
+const SubCategory = ({ item }) => {
+  return (
+    <>
+      {item?.sub_category && (
+        <Tag color="orange">{item?.sub_category?.name}</Tag>
+      )}
+    </>
+  );
 };
 
 const TitleLink = ({ item }) => {
@@ -124,6 +139,7 @@ const TitleLink = ({ item }) => {
       {screens?.xs && <br />}
       <Published item={item} />
       <Status item={item} key="status" />
+      <SubCategory item={item} />
     </div>
   );
 };

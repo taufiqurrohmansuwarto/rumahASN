@@ -42,7 +42,9 @@ const publishedTickets = async (req, res) => {
           builder.where({ is_published: true });
         }
       })
-      .withGraphFetched("[customer(simpleSelect), agent(simpleSelect)]")
+      .withGraphFetched(
+        "[customer(simpleSelect), agent(simpleSelect), sub_category]"
+      )
       .andWhere((builder) => {
         if (search) {
           builder.where("title", "ilike", `%${search}%`);

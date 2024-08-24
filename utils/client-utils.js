@@ -433,6 +433,18 @@ export const setColorStatus = (status) => {
   }
 };
 
+export const setColorStatusTooltip = (status) => {
+  if (status === "DIAJUKAN") {
+    return "orange";
+  } else if (status === "SELESAI") {
+    return "green";
+  } else if (status === "DIKERJAKAN") {
+    return "blue";
+  } else {
+    return "#000";
+  }
+};
+
 export const setStatusIcon = (status) => {
   if (status === "DIAJUKAN") {
     return <SyncOutlined />;

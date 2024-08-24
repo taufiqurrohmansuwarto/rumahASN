@@ -159,12 +159,15 @@ const indexPetugasBKD = async (req, res) => {
     const sub_category_id = req.query.sub_category_id || "";
     const assignee = req.query.assignee || "";
     const group = req.query.group || "";
+    const uncategorized = req.query.uncategorized || false;
 
     let query = {};
 
     query = Ticket.query()
       .select("*", Ticket.relatedQuery("comments").count().as("comments_count"))
-      .withGraphFetched("[customer(simpleSelect), agent(simpleSelect)]")
+      .withGraphFetched(
+        "[customer(simpleSelect), agent(simpleSelect), sub_category]"
+      )
       .where((builder) => {
         if (tabQuery === "my-task") {
           builder.where("assignee", customId);
@@ -189,6 +192,9 @@ const indexPetugasBKD = async (req, res) => {
         }
         if (assignee) {
           builder.where("assignee", assignee);
+        }
+        if (uncategorized === "true") {
+          builder.whereNull("sub_category_id");
         }
       });
 

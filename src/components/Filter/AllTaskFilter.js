@@ -2,7 +2,7 @@ import QueryFilter from "@/components/QueryFilter";
 import { refAgents, refCategories } from "@/services/index";
 import { CaretDownOutlined, CaretUpOutlined } from "@ant-design/icons";
 import { useQuery } from "@tanstack/react-query";
-import { Form, Input, Radio, Rate, Select, Space } from "antd";
+import { Checkbox, Form, Input, Radio, Rate, Select, Space } from "antd";
 import { useRouter } from "next/router";
 import { useEffect } from "react";
 
@@ -61,7 +61,7 @@ function AllTaskFilter() {
       search: query?.search || "",
       status: query?.status || "",
       star: query?.star || "",
-      sub_category_id: query?.sub_category_id || "",
+      sub_category_id: parseInt(query?.sub_category_id) || "",
       group: query?.group || "",
       assignee: query?.assignee || "",
     });
@@ -115,20 +115,22 @@ function AllTaskFilter() {
         <Form.Item name="star" label="Bintang">
           <Rate />
         </Form.Item>
-        <Form.Item name="sub_category_id" label="Kategori">
-          <Select showSearch optionFilterProp="name">
-            {data?.map((category) => {
-              return (
-                <Select.Option
-                  key={category.id}
-                  name={category?.name}
-                  value={category.id}
-                >
-                  <span>{category?.name}</span>
-                </Select.Option>
-              );
-            })}
-          </Select>
+        <Form.Item name="sub_category_id" label="Sub Kategori">
+          {data && (
+            <Select showSearch optionFilterProp="name">
+              {data?.map((category) => {
+                return (
+                  <Select.Option
+                    key={category.id}
+                    name={category?.name}
+                    value={category.id}
+                  >
+                    <span>{category?.name}</span>
+                  </Select.Option>
+                );
+              })}
+            </Select>
+          )}
         </Form.Item>
         <Form.Item name="group" label="Asal">
           <Radio.Group optionType="button" buttonStyle="solid">
@@ -149,6 +151,13 @@ function AllTaskFilter() {
               </Select.Option>
             ))}
           </Select>
+        </Form.Item>
+        <Form.Item
+          name="uncategorized"
+          label="Belum Dikategorisasikan"
+          valuePropName="checked"
+        >
+          <Checkbox />
         </Form.Item>
       </QueryFilter>
     </div>
