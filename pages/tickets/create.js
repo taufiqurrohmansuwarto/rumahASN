@@ -11,6 +11,7 @@ import {
   Breadcrumb,
   Button,
   Card,
+  Checkbox,
   Col,
   Form,
   Grid,
@@ -107,6 +108,7 @@ const Bantuan = ({ open, onCancel }) => {
 
   return (
     <Modal
+      footer={null}
       title="Bantuan"
       open={open}
       centered
@@ -131,6 +133,7 @@ const CreateTicket = () => {
 
   const [title, setTitle] = useState(null);
   const [content, setContent] = useState();
+  const [isAgree, setIsAgree] = useState(false);
 
   const [modal] = Modal.useModal();
 
@@ -164,18 +167,50 @@ const CreateTicket = () => {
   );
 
   const handleFinish = async () => {
-    if (!title || !content) {
-      message.error("Mohon isi judul dan deskripsi tiket");
+    if (!title || !content || !isAgree) {
+      message.error(
+        "Judul, deskripsi, dan persetujuan aturan pengajuan pertanyaan harus diisi"
+      );
       return;
     } else {
       if (!isLoading) {
         const data = {
           title,
           content,
+          is_agree: isAgree,
         };
         create(data);
       }
     }
+  };
+
+  const showModalAgreement = () => {
+    Modal.info({
+      title: "Aturan Pengajuan Pertanyaan",
+      width: 800,
+      content: (
+        <div>
+          <p>Dengan mengajukan pertanyaan, Anda menyetujui:</p>
+          <ol>
+            <li>Pertanyaan Anda mungkin akan dijawab secara publik.</li>
+            <li>Anda tidak akan membagikan informasi pribadi atau sensitif.</li>
+            <li>Anda akan menggunakan bahasa yang sopan dan pantas.</li>
+            <li>
+              Anda tidak akan menggunakan layanan ini untuk tujuan ilegal atau
+              merugikan pihak lain.
+            </li>
+            <li>
+              Kami berhak untuk mengedit atau menghapus pertanyaan yang
+              melanggar aturan.
+            </li>
+          </ol>
+          <p>
+            Untuk informasi lebih lanjut, silakan baca{" "}
+            <a>Perjanjian Penggunaan Lengkap</a>.
+          </p>
+        </div>
+      ),
+    });
   };
 
   return (
@@ -250,13 +285,40 @@ const CreateTicket = () => {
                     mentionSuggestions={null}
                   />
                 </Form.Item>
+                <Form.Item
+                  valuePropName="checked"
+                  rules={[
+                    {
+                      validator: (_, value) =>
+                        value
+                          ? Promise.resolve()
+                          : Promise.reject(
+                              new Error(
+                                "Anda harus menyetujui aturan pengajuan pertanyaan"
+                              )
+                            ),
+                    },
+                  ]}
+                >
+                  <Checkbox
+                    value={isAgree}
+                    onChange={(e) => setIsAgree(e?.target?.checked)}
+                  >
+                    Saya menyetujui{" "}
+                    <a onClick={showModalAgreement}>
+                      aturan pengajuan pertanyaan
+                    </a>
+                  </Checkbox>
+                </Form.Item>
                 <Space align="center">
                   <Button
+                    style={{
+                      marginTop: 10,
+                    }}
                     disabled={isLoading}
                     loading={isLoading}
                     onClick={handleFinish}
                     type="primary"
-                    shape="round"
                   >
                     Submit
                   </Button>
