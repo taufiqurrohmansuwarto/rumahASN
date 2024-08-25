@@ -132,6 +132,10 @@ export const updateSubCategory = async ({ id, data }) => {
     .then((res) => res.data);
 };
 
+export const getPopularSubCategories = async () => {
+  return await api.get("/ref/sub-categories/popular").then((res) => res.data);
+};
+
 export const deleteSubCategory = async (id) => {
   return await api.delete(`/ref/sub-categories/${id}`).then((res) => res.data);
 };

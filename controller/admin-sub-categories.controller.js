@@ -1,4 +1,5 @@
 const SubCategories = require("../models/sub-categories.model");
+const Tickets = require("@/models/tickets.model");
 const { raw } = require("objection");
 
 const index = async (req, res) => {
@@ -24,6 +25,27 @@ const index = async (req, res) => {
       page,
       limit,
     });
+  } catch (error) {
+    console.log(error);
+    res.status(400).json({ code: 400, message: "Internal Server Errror" });
+  }
+};
+
+const popularSubCategory = async (req, res) => {
+  try {
+    const popularSubCategories = await Tickets.query()
+      .select("sub_category_id")
+      .count("sub_category_id")
+      .groupBy("sub_category_id")
+      .orderBy("count", "desc")
+      .limit(10);
+
+    const subCategories = await SubCategories.query()
+      .select("id", "name")
+      .withGraphFetched("category(simple)")
+      .findByIds(popularSubCategories.map((item) => item.sub_category_id));
+
+    res.json(subCategories);
   } catch (error) {
     console.log(error);
     res.status(400).json({ code: 400, message: "Internal Server Errror" });
@@ -93,4 +115,5 @@ module.exports = {
   create,
   update,
   remove,
+  popularSubCategory,
 };

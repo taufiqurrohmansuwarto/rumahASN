@@ -30,6 +30,8 @@ import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { createTickets } from "../../services/users.services";
 import PageContainer from "../../src/components/PageContainer";
+import PopularSubcategories from "@/components/Ticket/PopularSubcategories";
+import AlertCASN2024Jatim from "@/components/Ticket/AlertCASN2024Jatim";
 
 // peremajaan data
 const TextPeremajaanData = () => {
@@ -134,6 +136,11 @@ const CreateTicket = () => {
   const [title, setTitle] = useState(null);
   const [content, setContent] = useState();
   const [isAgree, setIsAgree] = useState(false);
+  const [subCategoryId, setSubCategoryId] = useState(null);
+
+  const handleChangeSubCategoryId = (value) => {
+    setSubCategoryId(value);
+  };
 
   const [modal] = Modal.useModal();
 
@@ -178,6 +185,7 @@ const CreateTicket = () => {
           title,
           content,
           is_agree: isAgree,
+          sub_category_id: subCategoryId || null,
         };
         create(data);
       }
@@ -244,6 +252,7 @@ const CreateTicket = () => {
         <EletterBKD />
         <Row gutter={[8, 16]}>
           <Col md={16} xs={24}>
+            <AlertCASN2024Jatim />
             <Bantuan open={open} onCancel={handleClose} />
             <Card
               title="Form Pertanyaan"
@@ -264,6 +273,10 @@ const CreateTicket = () => {
                     onChange={(e) => setTitle(e?.target?.value)}
                   />
                 </Form.Item>
+                <PopularSubcategories
+                  value={subCategoryId}
+                  onChange={handleChangeSubCategoryId}
+                />
                 <Form.Item label="Deskripsi">
                   <MarkdownEditor
                     value={content}

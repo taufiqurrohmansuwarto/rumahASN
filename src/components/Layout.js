@@ -6,16 +6,18 @@ import {
   BarChartOutlined,
   BookOutlined,
   GroupOutlined,
-  IdcardOutlined,
   LogoutOutlined,
   ProfileOutlined,
   QuestionCircleFilled,
   SolutionOutlined,
-  TeamOutlined,
   UserOutlined,
-  UsergroupAddOutlined,
 } from "@ant-design/icons";
 import { Center } from "@mantine/core";
+import {
+  IconMessageUser,
+  IconUsersGroup,
+  IconUserStar,
+} from "@tabler/icons-react";
 import { AccessControl } from "accesscontrol";
 import { Button, Dropdown, Grid, Typography } from "antd";
 import { uniqBy } from "lodash";
@@ -29,12 +31,6 @@ import NotifikasiASNConnect from "./Notification/NotifikasiASNConnect";
 import NotifikasiForumKepegawaian from "./Notification/NotifikasiForumKepegawaian";
 import NotifikasiKepegawaian from "./Notification/NotifikasiKepegawaian";
 import NotifikasiPrivateMessage from "./Notification/NotifikasiPrivateMessage";
-import NotifikasiUsulan from "./Notification/NotifikasiUsulan";
-import {
-  IconMessageUser,
-  IconUsersGroup,
-  IconUserStar,
-} from "@tabler/icons-react";
 
 const ProLayout = dynamic(
   () => import("@ant-design/pro-components").then((mod) => mod?.ProLayout),
@@ -585,11 +581,6 @@ function Layout({ children, active, collapsed = true }) {
             url="kepegawaian"
             title="Inbox Kepegawaian"
           />,
-          // <NotifikasiUsulan
-          //   key="submission"
-          //   url="submission"
-          //   title="Inbox Usulan"
-          // />,
           <NotifikasiPrivateMessage
             key="private-message"
             url="/mails/inbox"

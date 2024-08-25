@@ -422,7 +422,6 @@ const TabsJobs = () => {
       defaultActiveKey="my-task"
       activeKey={currentRouter ? currentRouter : "my-task"}
       onChange={handleChange}
-      type="card"
       items={items}
     />
   );
