@@ -7,6 +7,14 @@ class Categories extends Model {
     return "categories";
   }
 
+  static get modifiers() {
+    return {
+      simple(builder) {
+        builder.select("id", "name");
+      },
+    };
+  }
+
   // realation with user
   static get relationMappings() {
     const Users = require("./users.model");
