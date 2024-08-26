@@ -71,7 +71,8 @@ const usulanPenyesuaianMasaKerjaByNipFasilitator = async (req, res) => {
 };
 
 const usulanPencantumanGelarByNip = async (req, res) => {
-  const { employee_number: employeeNumber } = req?.query;
+  const { employee_number: employeeNumber } = req?.user;
+
   const { fetcher } = req;
   fetchDataUsulan(req, res, fetcher, "pg", employeeNumber);
 };
