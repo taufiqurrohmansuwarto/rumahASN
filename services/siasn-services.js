@@ -561,6 +561,14 @@ export const getDetailUnor = async (id) => {
   return api.get(`/ref/unor/${id}/detail`).then((res) => res.data);
 };
 
+export const getDataKppn = async () => {
+  return api.get(`/ref/kpkn`).then((res) => res.data);
+};
+
+export const updateKpkn = async (nip) => {
+  return api.patch(`/`);
+};
+
 export const reportDisparitasUnorById = async (id) => {
   return api
     .get(`/ref/unor/${id}/report`, {
