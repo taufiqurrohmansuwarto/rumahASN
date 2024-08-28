@@ -4,7 +4,12 @@ import {
   updateAnomaliUserByNip,
 } from "@/services/anomali.services";
 import { dataUtamaMasterByNip } from "@/services/master.services";
-import { dataUtamSIASNByNip, getPnsAllByNip } from "@/services/siasn-services";
+import {
+  dataUtamSIASNByNip,
+  getDataKppn,
+  getPnsAllByNip,
+  updateDataUtamaByNip,
+} from "@/services/siasn-services";
 import { getUmur } from "@/utils/client-utils";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
@@ -20,6 +25,7 @@ import {
   Grid,
   Input,
   Modal,
+  Popconfirm,
   Row,
   Space,
   Spin,
@@ -309,6 +315,73 @@ const StatusMaster = ({ status }) => {
   return <Tag color={status === "Aktif" ? "green" : "red"}>{status}</Tag>;
 };
 
+const Kppn = ({ id }) => {
+  const router = useRouter();
+  const nip = router?.query?.nip;
+  const queryClient = useQueryClient();
+  const { data, isLoading } = useQuery(["data-kppn"], () => getDataKppn(), {
+    refetchOnWindowFocus: false,
+  });
+
+  const { mutateAsync: update, isLoading: isLoadingUpdate } = useMutation(
+    (data) => updateDataUtamaByNip(data),
+    {
+      onSuccess: () => message.success("Berhasil memperbarui data"),
+      onError: () => message.error("Gagal memperbarui data"),
+      onSettled: () => {
+        queryClient.invalidateQueries(["data-utama-siasn", nip]);
+      },
+    }
+  );
+
+  const handleUpdate = async () => {
+    const payload = {
+      nip,
+      data: {
+        type: "KPKN",
+      },
+    };
+
+    await update(payload);
+  };
+
+  const dataKppn = (id) => {
+    return data?.find((d) => d.id === id);
+  };
+
+  return (
+    <Spin spinning={isLoading}>
+      {data ? (
+        <Popconfirm onConfirm={handleUpdate} title="Update KPPN menjadi BPKAD?">
+          <Tooltip title="KPPN">
+            <Tag
+              style={{
+                cursor: "pointer",
+              }}
+              color="blue"
+            >
+              {dataKppn(id)?.nama}
+            </Tag>
+          </Tooltip>
+        </Popconfirm>
+      ) : (
+        <Popconfirm onConfirm={handleUpdate} title="Update KPPN menjadi BPKAD?">
+          <Tooltip title="KPPN">
+            <Tag
+              style={{
+                cursor: "pointer",
+              }}
+              color="red"
+            >
+              KPPN Tidak Ditemukan
+            </Tag>
+          </Tooltip>
+        </Popconfirm>
+      )}
+    </Spin>
+  );
+};
+
 function EmployeeDetail({ nip }) {
   const breakPoint = Grid.useBreakpoint();
   const { data: dataSimaster, isLoading: isLoadingDataSimaster } = useQuery(
@@ -342,6 +415,8 @@ function EmployeeDetail({ nip }) {
         align={breakPoint?.xs ? "start" : "center"}
       >
         <IPAsnByNip tahun={2023} nip={dataSimaster?.nip_baru} />
+        {/* {JSON.stringify(siasn)} */}
+        <Kppn id={siasn?.kppnId} />
       </Space>
     </Card>
   );
