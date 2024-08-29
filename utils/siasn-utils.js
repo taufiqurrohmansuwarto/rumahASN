@@ -238,3 +238,8 @@ module.exports.kenaikanPangkatPeriode = (fetcher, periode) => {
 module.exports.createHukdis = (fetcher, data) => {
   return fetcher.post(`/hukdis/save`, data);
 };
+
+// integrated mutasi
+module.exports.fetchIntegratedMutasi = (fetcher, data) => {
+  return fetcher.post(`/imut/simpeg/usulan/list`, data);
+};
