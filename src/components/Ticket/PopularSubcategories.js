@@ -17,6 +17,12 @@ function PopularSubcategories({ value, onChange }) {
       help="Gunakan kategori untuk memudahkan penjawab"
       name="sub_category_id"
       label="Kategori Pertanyaan"
+      rules={[
+        {
+          required: true,
+          message: "Kategori pertanyaan harus diisi",
+        },
+      ]}
     >
       <Select
         loading={isLoading}

@@ -931,6 +931,18 @@ const getRefJfu = async (req, res) => {
   }
 };
 
+const getRefKpkn = async (req, res) => {
+  try {
+    const result = await axios.get(
+      `https://siasn.bkd.jatimprov.go.id/pemprov-api/vendor/reference/kpkn`
+    );
+    res.json(result?.data);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "error" });
+  }
+};
+
 const getRefJenisDikalt = async (req, res) => {
   try {
     const result = await axios.get(
@@ -1543,4 +1555,5 @@ module.exports = {
 
   getSubTreeRef,
   removeDiklat,
+  getRefKpkn,
 };
