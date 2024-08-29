@@ -174,9 +174,9 @@ const CreateTicket = () => {
   );
 
   const handleFinish = async () => {
-    if (!title || !content || !isAgree) {
+    if (!title || !content || !isAgree || !subCategoryId) {
       message.error(
-        "Judul, deskripsi, dan persetujuan aturan pengajuan pertanyaan harus diisi"
+        "Judul, deskripsi, kategori dan persetujuan aturan pengajuan pertanyaan harus diisi"
       );
       return;
     } else {
