@@ -3,6 +3,7 @@ import { capitalizeWords } from "@/utils/client-utils";
 import {
   CheckCircleOutlined,
   ExclamationCircleOutlined,
+  SearchOutlined,
 } from "@ant-design/icons";
 import { useQuery } from "@tanstack/react-query";
 import { Avatar, Space, Table, Tag, Tooltip, Typography } from "antd";
@@ -60,15 +61,17 @@ function EmployeesTableAdmin() {
       render: (row) => (
         <Avatar size={100} shape="square" src={row?.foto} alt="foto" />
       ),
+      fixed: true,
     },
     {
       title: "Informasi",
       key: "informasi",
+      fixed: true,
       width: 200,
       render: (_, row) => {
         return (
           <Space direction="vertical" size="small">
-            <Typography.Text>{row?.nama_master}</Typography.Text>
+            <Typography.Text strong>{row?.nama_master}</Typography.Text>
             <Typography.Text>{row?.nip_master}</Typography.Text>
             <Tooltip title="Pembetulan dilakukan di SIASN">
               <Tag color="yellow">{row?.siasn?.status}</Tag>
@@ -91,8 +94,9 @@ function EmployeesTableAdmin() {
               {row?.jenis_jabatan}
               {row?.golongan_master}
             </Space>
-            <div>{row?.jabatan_master}</div>
-            <div>{capitalizeWords(row?.siasn?.nama_jabatan)}</div>
+            {JSON.stringify(row)}
+            <Tag>{row?.jabatan_master || "Tidak ada"}</Tag>
+            <Tag>{capitalizeWords(row?.siasn?.nama_jabatan)}</Tag>
           </Space>
         );
       },
@@ -110,21 +114,21 @@ function EmployeesTableAdmin() {
         </Space>
       ),
     },
-    {
-      title: "Perangkat Daerah",
-      dataIndex: "opd_master",
-      width: 200,
-    },
-    {
-      title: "Unor SIASN",
-      key: "unor_siasn",
-      width: 200,
-      render: (row) => <div>{row?.siasn?.unor}</div>,
-    },
+    // {
+    //   title: "Perangkat Daerah",
+    //   dataIndex: "opd_master",
+    //   width: 200,
+    // },
+    // {
+    //   title: "Unor SIASN",
+    //   key: "unor_siasn",
+    //   width: 200,
+    //   render: (row) => <div>{row?.siasn?.unor}</div>,
+    // },
     {
       title: "Hasil Validasi",
       key: "hasil",
-      width: 100,
+      // width: 100,
       render: (row) => {
         return (
           <Space direction="vertical" size="small">
@@ -197,7 +201,13 @@ function EmployeesTableAdmin() {
       title: "Aksi",
       key: "action",
       render: (row) => {
-        return <a onClick={() => gotoDetail(row?.nip_master)}>Detail</a>;
+        return (
+          <a onClick={() => gotoDetail(row?.nip_master)}>
+            <Tooltip title="Lihat">
+              <SearchOutlined />
+            </Tooltip>
+          </a>
+        );
       },
     },
   ];
