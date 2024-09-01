@@ -9,17 +9,22 @@ function SinkronLayout({ children, active }) {
     {
       path: "/apps-managements/sync/data",
       key: "data",
-      title: "Data",
+      title: "Data Referensi",
     },
     {
       path: "/apps-managements/sync/pegawai-master",
       key: "pegawai-master",
-      title: "SIMASTER",
+      title: "Aplikasi SIMASTER",
     },
     {
       path: "/apps-managements/sync/pegawai-siasn",
       key: "pegawai-siasn",
-      title: "SIASN",
+      title: "Aplikasi SIASN",
+    },
+    {
+      path: "/apps-managements/sync/bezzeting-jf",
+      key: "bezzeting-jf",
+      title: "Bezzeting JF",
     },
   ];
 
@@ -34,6 +39,7 @@ function SinkronLayout({ children, active }) {
         padding: 0,
         // margin: 0,
       }}
+      type="card"
       activeKey={active}
       onChange={handleTabChange}
     >
