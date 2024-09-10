@@ -132,6 +132,16 @@ const changeRoutes = (user) => {
               path: "/fasilitator-employees/daftar-usulan-kenaikan-pangkat",
               name: "Daftar Usulan KP",
             },
+            {
+              path: "/fasilitator-employees/perencanaan",
+              name: "Perencanaan",
+              routes: [
+                {
+                  path: "/fasilitator-employees/perencanaan/usulan-formasi",
+                  name: "Usulan Formasi",
+                },
+              ],
+            },
             // {
             //   path: "/fasilitator-employees/dashboard-rekap",
             //   name: "Dashboard Rekap",
