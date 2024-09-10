@@ -1,3 +1,6 @@
-1. download excel kenaikan pangkat
-2. tour untuk semua jabatan,skp, angka kredit
-3. inbox layanan kepegawaian
+
+id  varchar(20)
+pId varchar(20)
+name varchar(255)
+aktif enum(Y,N)
+kelas_jab integer
