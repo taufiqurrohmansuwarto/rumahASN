@@ -1,28 +1,33 @@
 import GmailLayout from "@/components/GmailLayout";
 import PageContainer from "@/components/PageContainer";
-import DetailMail from "@/components/PrivateMessages/DetailMail";
+import InboxMessageDetail from "@/components/PrivateMessages/InboxMessageDetail";
 import Head from "next/head";
 
-const InboxMail = () => {
+import { useRouter } from "next/router";
+
+const InboxMailDetail = () => {
   const handleBack = () => router?.back();
+  const router = useRouter();
 
   return (
     <>
       <Head>
         <title>Rumah ASN - Pesan Pribadi</title>
       </Head>
-      <DetailMail />
+      <PageContainer onBack={handleBack}>
+        <InboxMessageDetail />
+      </PageContainer>
     </>
   );
 };
 
-InboxMail.getLayout = function getLayout(page) {
+InboxMailDetail.getLayout = function getLayout(page) {
   return <GmailLayout active="/mails/inbox">{page}</GmailLayout>;
 };
 
-InboxMail.Auth = {
+InboxMailDetail.Auth = {
   action: "manage",
   subject: "Tickets",
 };
 
-export default InboxMail;
+export default InboxMailDetail;

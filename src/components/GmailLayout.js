@@ -22,10 +22,10 @@ const ProLayout = dynamic(
 
 function GmailLayout({ children, active = "inbox" }) {
   const menuItems = [
-    { key: "inbox", icon: <InboxOutlined />, label: "Inbox" },
-    { key: "sent", icon: <SendOutlined />, label: "Sent" },
-    { key: "starred", icon: <StarOutlined />, label: "Starred" },
-    { key: "trash", icon: <DeleteOutlined />, label: "Trash" },
+    { key: "inbox", icon: <InboxOutlined />, label: "Kotak Masuk" },
+    { key: "sent", icon: <SendOutlined />, label: "Pesan Terkirim" },
+    { key: "starred", icon: <StarOutlined />, label: "Ditandai" },
+    { key: "trash", icon: <DeleteOutlined />, label: "Sampah" },
   ];
 
   const token = {
@@ -66,7 +66,7 @@ function GmailLayout({ children, active = "inbox" }) {
     >
       <ProConfigProvider>
         <ProLayout
-          title="RMail"
+          title="Mail ASN"
           defaultCollapsed={collapsed}
           collapsed={collapsed}
           onCollapse={setCollapsed}
