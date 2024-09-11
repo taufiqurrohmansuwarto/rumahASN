@@ -235,3 +235,11 @@ export const urlToPdf = (data) => {
 export const masterUnorBackup = () => {
   return masterApi.get("/unor-backup").then((res) => res.data);
 };
+
+export const simasterJftBackup = () => {
+  return masterApi.get("/simaster-jft").then((res) => res.data);
+};
+
+export const simasterJfuBackup = () => {
+  return masterApi.get("/simaster-jfu").then((res) => res.data);
+};

@@ -5,9 +5,17 @@ const api = axios.create({
   baseURL: "/helpdesk/api/siasn/ws",
 });
 
+const siasnBaseUrl = axios.create({
+  baseURL: "/helpdesk/api/siasn",
+});
+
 // referensi
 export const refJenisDiklat = () => {
   return api.get("/ref/jenis-diklat").then((res) => res.data);
+};
+
+export const refPendidikan = () => {
+  return siasnBaseUrl.get("/pendidikan").then((res) => res.data);
 };
 
 export const refJenisRiwayat = () => {

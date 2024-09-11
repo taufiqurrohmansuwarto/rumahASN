@@ -9,8 +9,23 @@ const SimasterJft = require("@/models/simaster-jft.model");
 
 const syncSimasterJfu = async (req, res) => {
   try {
-    const result = await SimasterJfu.query();
-    res.json(result);
+    const fetcher = req?.clientCredentialsFetcher;
+    const result = await fetcher.get("/refs/jfu-all");
+    console.log(result?.data[0]);
+    await Sinkronisasi.query()
+      .insert({
+        aplikasi: "simaster",
+        layanan: "ref_jfu",
+        updated_at: new Date(),
+      })
+      .onConflict(["aplikasi", "layanan"])
+      .merge(["updated_at"]);
+
+    const knex = await SimasterJfu.knex();
+    await knex.delete().from("simaster_jfu");
+    await knex.batchInsert("simaster_jfu", result?.data);
+
+    res.json({ message: "success" });
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: "Internal Server Error" });
@@ -19,8 +34,22 @@ const syncSimasterJfu = async (req, res) => {
 
 const syncSimasterJft = async (req, res) => {
   try {
-    const result = await SimasterJft.query();
-    res.json(result);
+    const fetcher = req?.clientCredentialsFetcher;
+    const result = await fetcher.get("/refs/jft-all");
+    await Sinkronisasi.query()
+      .insert({
+        aplikasi: "simaster",
+        layanan: "ref_jft",
+        updated_at: new Date(),
+      })
+      .onConflict(["aplikasi", "layanan"])
+      .merge(["updated_at"]);
+
+    const knex = await SimasterJft.knex();
+    await knex.delete().from("simaster_jft");
+    await knex.batchInsert("simaster_jft", result?.data);
+
+    res.json({ message: "success" });
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: "Internal Server Error" });

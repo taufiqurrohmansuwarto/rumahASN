@@ -41,28 +41,20 @@ const DetailInformation = ({ data }) => {
             <Row gutter={[16, 16]}>
               <Col xs={24} md={12}>
                 <Form layout="vertical">
-                  <Form.Item label="Di Tandatangani oleh:">
+                  <Form.Item label="Disegel secara elektronik oleh:">
                     <Input value={item?.signerName} readOnly />
                   </Form.Item>
                   <Form.Item label="Lokasi">
                     <Input value={item?.location} readOnly />
                   </Form.Item>
-                  <Form.Item label="Alasan">
+                  <Form.Item label="Diterbitkan melalui">
                     <Input.TextArea value={item?.reason} readOnly />
                   </Form.Item>
-                  <Form.Item label="Ditandatangani pada">
+                  <Form.Item label="Disegel secara Elektronik pada">
                     <Input
                       value={dayjs(item?.signatureDate).format(
                         "DD-MM-YYYY HH:mm:ss"
                       )}
-                      readOnly
-                    />
-                  </Form.Item>
-                  <Form.Item label="Stempel Waktu">
-                    <Input
-                      value={dayjs(
-                        item?.timestampInfomation?.timestampDate
-                      ).format("DD-MM-YYYY HH:mm:ss")}
                       readOnly
                     />
                   </Form.Item>

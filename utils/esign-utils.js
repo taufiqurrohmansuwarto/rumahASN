@@ -154,7 +154,7 @@ module.exports.sealPdf = async ({ totp, file, idSubscriber }) => {
       {
         tampilan: "INVISIBLE",
         location: "Surabaya",
-        reason: "Sertifikat dibuat di aplikasi Rumah ASN BKD Jatim",
+        reason: "Aplikasi Rumah ASN BKD Provinsi Jawa Timur",
         contactInfo: "bkd@jatimprov.go.id",
       },
     ],

@@ -1,6 +1,8 @@
-import { Button, Form, Input, Modal } from "antd";
-import { useState } from "react";
 import FormUnorFasilitator from "@/components/Perencanaan/FormUnorFasilitator";
+import { Button, Form, Modal } from "antd";
+import { useState } from "react";
+import FormSiasnPendidikan from "./FormSiasnPendidikan";
+import FormSimasterJFU from "./FormSimasterJFU";
 
 const ModalUsulanFormasi = ({ open, onClose }) => {
   const [form] = Form.useForm();
@@ -8,10 +10,9 @@ const ModalUsulanFormasi = ({ open, onClose }) => {
   return (
     <Modal open={open} onCancel={onClose} title="Tambah Usulan Formasi">
       <Form layout="vertical" form={form}>
-        <Form.Item label="Nama Pegawai" name="nama">
-          <Input />
-        </Form.Item>
         <FormUnorFasilitator />
+        <FormSimasterJFU />
+        <FormSiasnPendidikan />
       </Form>
     </Modal>
   );
