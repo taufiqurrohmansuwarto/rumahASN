@@ -4,7 +4,7 @@ import { Form, Select } from "antd";
 
 import React from "react";
 
-function FormSiasnPendidikan() {
+function FormSiasnPendidikan({ name }) {
   const { data, isLoading } = useQuery(
     ["ref-pendidikan-siasn"],
     () => refPendidikan(),
@@ -16,7 +16,7 @@ function FormSiasnPendidikan() {
   return (
     <div>
       {data && (
-        <Form.Item name="pendidikan_id" label="Pendidikan">
+        <Form.Item name={name} label="Pendidikan">
           <Select showSearch optionFilterProp="name" allowClear>
             {data?.map((item) => (
               <Select.Option name={item.name} value={item.id} key={item.id}>

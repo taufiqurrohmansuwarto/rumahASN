@@ -73,11 +73,10 @@ const simasterJfuBackup = async (req, res) => {
 
 const siasnPendBackup = async (req, res) => {
   try {
-    const result = await SiasnPendidikan.query().select(
-      "*",
-      "nama as name",
-      "nama as label"
-    );
+    const result = await SiasnPendidikan.query()
+      .select("*", "nama as name", "nama as label")
+      .where("status", 1);
+
     res.json(result);
   } catch (error) {
     console.log(error);

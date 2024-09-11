@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { getOpdFasilitator } from "@/services/master.services";
 import { Form, TreeSelect } from "antd";
 
-function FormUnorFasilitator() {
+function FormUnorFasilitator({ name }) {
   const { data: unor } = useQuery(
     ["unor-fasilitator"],
     () => getOpdFasilitator(),
@@ -14,7 +14,7 @@ function FormUnorFasilitator() {
   return (
     <>
       {unor && (
-        <Form.Item name="skpd_id" label="Perangkat Daerah">
+        <Form.Item name={name} label="Perangkat Daerah">
           <TreeSelect treeNodeFilterProp="label" treeData={unor} showSearch />
         </Form.Item>
       )}

@@ -2,7 +2,7 @@ import { simasterJfuBackup } from "@/services/master.services";
 import { useQuery } from "@tanstack/react-query";
 import { Form, TreeSelect } from "antd";
 
-function FormSimasterJFU() {
+function FormSimasterJFU({ name }) {
   const { data, isLoading } = useQuery(
     ["simaster-jfu"],
     () => simasterJfuBackup(),
@@ -14,7 +14,7 @@ function FormSimasterJFU() {
   return (
     <>
       {data && (
-        <Form.Item label="Jabatan Pelaksana" name="jfu_id">
+        <Form.Item label="Jabatan Pelaksana" name={name}>
           <TreeSelect treeNodeFilterProp="label" showSearch treeData={data} />
         </Form.Item>
       )}
