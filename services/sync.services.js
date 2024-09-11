@@ -24,3 +24,11 @@ export const syncUnorMaster = () => {
 export const refSinkronisasi = () => {
   return api.get("/").then((res) => res.data);
 };
+
+export const syncSimasterJfu = () => {
+  return api.put("/simaster-jfu").then((res) => res.data);
+};
+
+export const syncSimasterJft = () => {
+  return api.put("/simaster-jft").then((res) => res.data);
+};

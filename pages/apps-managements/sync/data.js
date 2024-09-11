@@ -1,6 +1,8 @@
 import Layout from "@/components/Layout";
 import PageContainer from "@/components/PageContainer";
 import DaftarSinkron from "@/components/Sinkron/DaftarSinkron";
+import SinkronJft from "@/components/Sinkron/SinkronJft";
+import SinkronJfu from "@/components/Sinkron/SinkronJfu";
 import SinkronLayout from "@/components/Sinkron/SinkronLayout";
 import SinkronMaster from "@/components/Sinkron/SinkronMaster";
 import SinkronUnorMaster from "@/components/Sinkron/SinkronUnorMaster";
@@ -17,10 +19,14 @@ const Sync = () => {
         <SinkronLayout active="data">
           <Card>
             <DaftarSinkron />
-            <Space>
-              <SinkronMaster />
-              <SinkronUnorMaster />
-            </Space>
+            <div style={{ marginTop: 10 }}>
+              <Space>
+                <SinkronMaster />
+                <SinkronUnorMaster />
+                <SinkronJfu />
+                <SinkronJft />
+              </Space>
+            </div>
           </Card>
         </SinkronLayout>
       </PageContainer>
