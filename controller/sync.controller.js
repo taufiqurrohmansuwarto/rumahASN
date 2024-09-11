@@ -4,6 +4,29 @@ const { round } = require("lodash");
 const siasnIPASN = require("@/models/siasn-ipasn.model");
 const SyncPegawai = require("@/models/sync-pegawai.model");
 
+const SimasterJfu = require("@/models/simaster-jfu.model");
+const SimasterJft = require("@/models/simaster-jft.model");
+
+const syncSimasterJfu = async (req, res) => {
+  try {
+    const result = await SimasterJfu.query();
+    res.json(result);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+const syncSimasterJft = async (req, res) => {
+  try {
+    const result = await SimasterJft.query();
+    res.json(result);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
 const syncUnorSimaster = async (req, res) => {
   try {
     const fetcher = req?.clientCredentialsFetcher;
@@ -132,4 +155,6 @@ module.exports = {
   syncPegawai,
   RefSinkronisasi,
   pegawaiMaster,
+  syncSimasterJfu,
+  syncSimasterJft,
 };
