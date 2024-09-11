@@ -321,6 +321,16 @@ const changeRoutes = (user) => {
               name: "Sinkron Data",
             },
             {
+              path: "/apps-managements/perencanaan",
+              name: "Perencanaan",
+              routes: [
+                {
+                  path: "/apps-managements/perencanaan/usulan",
+                  name: "Usulan Formasi",
+                },
+              ],
+            },
+            {
               path: "/apps-managements/integrasi",
               name: "Integrasi Aplikasi",
               routes: [

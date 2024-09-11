@@ -5,7 +5,7 @@ import UsulanFormasiFasilitator from "@/components/Perencanaan/UsulanFormasiFasi
 
 function UsulanFormasi() {
   return (
-    <PageContainer title="Usulan Formasi">
+    <PageContainer title="Usulan Formasi" subTitle="Usulan Formasi Perencanaan">
       <UsulanFormasiFasilitator />
     </PageContainer>
   );
