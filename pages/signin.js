@@ -7,9 +7,9 @@ import {
   LoginOutlined,
   YoutubeOutlined,
 } from "@ant-design/icons";
-import { Center } from "@mantine/core";
+import { Center, Button as MantineButton } from "@mantine/core";
 import { useSpring } from "@react-spring/web";
-import { IconKey } from "@tabler/icons";
+import { IconExclamationCircle, IconKey } from "@tabler/icons";
 import {
   Button,
   Col,
@@ -141,13 +141,21 @@ const SignIn = ({ providers }) => {
                     )}
                   </Col>
                 ))}
-                <Button block onClick={gotoNetralitas}>
-                  Lapor Netralitas
-                </Button>
               </Row>
             </Col>
           </Row>
           <Divider />
+          <MantineButton
+            mb="sm"
+            leftIcon={<IconExclamationCircle />}
+            fullWidth
+            variant="gradient"
+            gradient={{ from: "teal", to: "blue" }}
+            onClick={gotoNetralitas}
+          >
+            Lapor Netralitas!
+          </MantineButton>
+
           <Row
             justify="center"
             style={{
