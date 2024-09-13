@@ -73,3 +73,23 @@ export const uploadUsulanDetailByUser = ({ id, detailId, file }) => {
     })
     .then((res) => res.data);
 };
+
+export const findUsulanVerifUser = (id) => {
+  return userApi.get(`/usulan/${id}/verif`).then((res) => res.data);
+};
+
+export const createUsulanVerifUser = ({ id, data }) => {
+  return userApi.post(`/usulan/${id}/verif`, data).then((res) => res.data);
+};
+
+export const updateUsulanVerifUser = ({ id, verifId, data }) => {
+  return userApi
+    .patch(`/usulan/${id}/verif/${verifId}`, data)
+    .then((res) => res.data);
+};
+
+export const deleteUsulanVerifUser = ({ id, verifId }) => {
+  return userApi
+    .delete(`/usulan/${id}/verif/${verifId}`)
+    .then((res) => res.data);
+};
