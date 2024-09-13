@@ -1,5 +1,5 @@
 import FormUnorFasilitator from "@/components/Perencanaan/FormUnorFasilitator";
-import { Button, Form, Modal } from "antd";
+import { Button, Card, Form, Modal } from "antd";
 import { useState } from "react";
 import FormSiasnPendidikan from "./FormSiasnPendidikan";
 import FormSimasterJFU from "./FormSimasterJFU";
@@ -91,12 +91,14 @@ function UsulanFormasiFasilitator() {
     {
       title: "Aksi",
       key: "aksi",
-      render: (_, record) => <a onClick={() => handleDetail(record)}>Detail</a>,
+      render: (_, record) => (
+        <a onClick={() => handleDetail(record)}>Daftar Usulan</a>
+      ),
     },
   ];
 
   return (
-    <div>
+    <Card>
       <Table
         columns={columns}
         dataSource={data}
@@ -106,7 +108,7 @@ function UsulanFormasiFasilitator() {
       />
       {/* <Button onClick={handleOpen}>Tambah Usulan Formasi</Button> */}
       {/* <ModalUsulanFormasi open={open} onClose={handleClose} /> */}
-    </div>
+    </Card>
   );
 }
 
