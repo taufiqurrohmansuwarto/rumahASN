@@ -60,6 +60,7 @@ const deletePerencanaanUsulan = async (req, res) => {
     await PerencanaanUsulan.query().delete().where("id", req?.query?.id);
     res.json({ message: "Perencanaan usulan deleted successfully" });
   } catch (error) {
+    console.log(error);
     res.status(500).json({ error: error.message });
   }
 };
