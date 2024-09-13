@@ -19,6 +19,7 @@ import {
   Switch,
   Table,
 } from "antd";
+import dayjs from "dayjs";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 
@@ -195,7 +196,20 @@ function UsulanPerencanaan() {
     },
     {
       title: "Dibuat oleh",
-      dataIndex: "user_id",
+      key: "user_id",
+      render: (text, record) => record?.user?.username,
+    },
+    {
+      title: "Dibuat pada",
+      key: "created_at",
+      render: (text, record) =>
+        dayjs(record.created_at).format("DD MMM YYYY HH:mm:ss"),
+    },
+    {
+      title: "Diperbaharui pada",
+      key: "updated_at",
+      render: (text, record) =>
+        dayjs(record.updated_at).format("DD MMM YYYY HH:mm:ss"),
     },
     {
       title: "Aksi",

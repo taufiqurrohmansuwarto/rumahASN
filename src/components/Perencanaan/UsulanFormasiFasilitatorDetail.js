@@ -1,26 +1,37 @@
 import FormUnorFasilitator from "@/components/Perencanaan/FormUnorFasilitator";
 import {
+  createUsulanDetailByUser,
   deleteUsulanDetailByUser,
   findUsulanDetailByUser,
   updateUsulanDetailByUser,
-  createUsulanDetailByUser,
+  uploadUsulanDetailByUser,
 } from "@/services/perencanaan.services";
+import {
+  CloudUploadOutlined,
+  DeleteOutlined,
+  EditOutlined,
+  FilePdfOutlined,
+} from "@ant-design/icons";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
-  Table,
-  Form,
-  Modal,
   Button,
-  message,
-  Space,
-  Popconfirm,
+  Card,
   Divider,
+  Form,
+  message,
+  Modal,
+  Popconfirm,
+  Space,
+  Switch,
+  Table,
+  Tag,
+  Upload,
 } from "antd";
 import { useRouter } from "next/router";
+import { useEffect, useState } from "react";
 import FormSiasnPendidikan from "./FormSiasnPendidikan";
 import FormSimasterJFU from "./FormSimasterJFU";
-import { useEffect, useState } from "react";
-import { DownloadOutlined } from "@ant-design/icons";
+import dayjs from "dayjs";
 
 const ModalUsulanFormasi = ({
   open,
@@ -67,12 +78,77 @@ const ModalUsulanFormasi = ({
       open={open}
       onCancel={onClose}
       title="Tambah Usulan Formasi"
+      width={800}
     >
       <Form layout="vertical" form={form}>
         <FormUnorFasilitator name="simaster_skpd_id" />
         <FormSimasterJFU name="simaster_jfu_id" />
+        <Form.Item
+          name="sudah_menduduki_jabatan"
+          label="Sudah Menduduki Jabatan Tersebut"
+        >
+          <Switch />
+        </Form.Item>
+
         <FormSiasnPendidikan name="siasn_pend_id" />
       </Form>
+    </Modal>
+  );
+};
+
+const ModalUploadDokumen = ({ open, onClose, id, upload, loading }) => {
+  const [fileList, setFileList] = useState([]);
+  const handleChange = (info) => {
+    let fileList = [...info.fileList];
+
+    fileList = fileList.slice(-1);
+
+    fileList = fileList.map((file) => {
+      if (file.response) {
+        file.url = file.response.url;
+      }
+      return file;
+    });
+
+    setFileList(fileList);
+  };
+
+  const handleSubmit = async () => {
+    const formData = new FormData();
+    const file = fileList[0]?.originFileObj;
+    formData.append("file", file);
+    const payload = {
+      id: id,
+      detailId: id,
+      file: formData,
+    };
+
+    upload(payload);
+  };
+
+  const props = {
+    onRemove: () => {
+      setFileList([]);
+    },
+    beforeUpload: () => {
+      return false;
+    },
+    maxCount: 1,
+    accept: ".pdf",
+    onChange: handleChange,
+  };
+
+  return (
+    <Modal
+      onOk={handleSubmit}
+      confirmLoading={loading}
+      open={open}
+      onCancel={onClose}
+      title="Upload Dokumen"
+    >
+      <Upload {...props}>
+        <Button>Upload</Button>
+      </Upload>
     </Modal>
   );
 };
@@ -81,6 +157,17 @@ function UsulanFormasiFasilitatorDetail() {
   const [open, setOpen] = useState(false);
   const [type, setType] = useState("create");
   const [currentData, setCurrentData] = useState(null);
+
+  const [showModalUpload, setShowModalUpload] = useState(false);
+  const [key, setKey] = useState(null);
+  const handleShowModalUpload = (key) => {
+    setKey(key);
+    setShowModalUpload(true);
+  };
+  const handleCloseModalUpload = () => {
+    setKey(null);
+    setShowModalUpload(false);
+  };
 
   const queryClient = useQueryClient();
   const router = useRouter();
@@ -101,6 +188,20 @@ function UsulanFormasiFasilitatorDetail() {
     () => findUsulanDetailByUser(id),
     {
       enabled: !!id,
+    }
+  );
+
+  const { mutate: upload, isLoading: isLoadingUpload } = useMutation(
+    (data) => uploadUsulanDetailByUser(data),
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries(["usulan-perencanaan-detail", id]);
+        handleCloseModalUpload();
+        message.success("Berhasil mengupload usulan");
+      },
+      onError: () => {
+        message.error("Gagal mengupload usulan");
+      },
     }
   );
 
@@ -167,6 +268,23 @@ function UsulanFormasiFasilitatorDetail() {
       render: (_, record, index) => index + 1,
     },
     {
+      title: "File",
+      key: "file",
+      render: (_, record) => (
+        <>
+          {record?.dokumen_usulan ? (
+            <a
+              href={`https://siasn.bkd.jatimprov.go.id:9000/public/${record?.dokumen_usulan}`}
+              target="_blank"
+              rel="noreferrer"
+            >
+              <FilePdfOutlined />
+            </a>
+          ) : null}
+        </>
+      ),
+    },
+    {
       title: "Nama Jabatan",
       key: "jabatan",
       render: (_, record) => record?.pelaksana?.name,
@@ -182,23 +300,53 @@ function UsulanFormasiFasilitatorDetail() {
       render: (_, record) => record?.pendidikan?.nama,
     },
     {
+      title: "Sudah Menduduki di Jabatan tersebut",
+      key: "sudah_menduduki_jabatan",
+      render: (_, record) =>
+        record?.sudah_menduduki_jabatan ? (
+          <Tag color="green">Sudah</Tag>
+        ) : (
+          <Tag color="red">Belum</Tag>
+        ),
+    },
+    {
       title: "Perangkat Daerah",
       key: "opd",
       render: (_, record) =>
         record?.detailOpd?.detail?.map((d) => d?.name)?.join("-"),
     },
     {
+      title: "Dibuat pada",
+      key: "created_at",
+      render: (_, record) =>
+        dayjs(record.created_at).format("DD MMM YYYY HH:mm:ss"),
+    },
+    {
+      title: "Diedit pada",
+      key: "updated_at",
+      render: (_, record) =>
+        dayjs(record.updated_at).format("DD MMM YYYY HH:mm:ss"),
+    },
+    {
       title: "Aksi",
       key: "aksi",
       render: (_, record) => (
         <Space direction="horizontal">
-          <a onClick={() => handleUpdate(record)}>Edit</a>
+          <a onClick={() => handleUpdate(record)}>
+            <EditOutlined />
+          </a>
+          <Divider type="vertical" />
+          <a onClick={() => handleShowModalUpload(record.id)}>
+            <CloudUploadOutlined />
+          </a>
           <Divider type="vertical" />
           <Popconfirm
             title="Apakah anda yakin ingin menghapus usulan ini?"
             onConfirm={() => handleRemove(record.id)}
           >
-            <a>Hapus</a>
+            <a>
+              <DeleteOutlined />
+            </a>
           </Popconfirm>
         </Space>
       ),
@@ -206,7 +354,7 @@ function UsulanFormasiFasilitatorDetail() {
   ];
 
   return (
-    <div>
+    <Card>
       <Space>
         <Button
           style={{ marginBottom: 16 }}
@@ -223,6 +371,13 @@ function UsulanFormasiFasilitatorDetail() {
         loading={isLoading}
         columns={columns}
       />
+      <ModalUploadDokumen
+        upload={upload}
+        loading={isLoadingUpload}
+        open={showModalUpload}
+        onClose={handleCloseModalUpload}
+        id={key}
+      />
       <ModalUsulanFormasi
         open={open}
         onClose={handleClose}
@@ -233,7 +388,7 @@ function UsulanFormasiFasilitatorDetail() {
         update={update}
         loading={isLoadingCreate || isLoadingUpdate}
       />
-    </div>
+    </Card>
   );
 }
 

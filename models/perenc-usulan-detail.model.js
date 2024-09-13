@@ -1,10 +1,19 @@
 const { Model } = require("objection");
 const knex = require("../db");
+const { nanoid } = require("nanoid");
 Model.knex(knex);
 
 class PerencUsulanDetail extends Model {
   static get tableName() {
     return "perenc_usulan_detail";
+  }
+
+  $beforeInsert() {
+    this.key = nanoid();
+  }
+
+  $beforeUpdate() {
+    this.updated_at = new Date();
   }
 
   static get relationMappings() {
