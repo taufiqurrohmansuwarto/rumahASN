@@ -63,3 +63,13 @@ export const deleteUsulanDetailByUser = ({ id, detailId }) => {
     .delete(`/usulan/${id}/detail/${detailId}`)
     .then((res) => res.data);
 };
+
+export const uploadUsulanDetailByUser = ({ id, detailId, file }) => {
+  return userApi
+    .put(`/usulan/${id}/detail/${detailId}/upload`, file, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    })
+    .then((res) => res.data);
+};

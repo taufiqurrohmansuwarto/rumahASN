@@ -1,13 +1,14 @@
 const PerencanaanUsulan = require("@/models/perenc-usulan.model");
 const PerencanaanUsulanDetail = require("@/models/perenc-usulan-detail.model");
 const { getDetailOpd } = require("@/utils/server-utils");
+const { filename } = require("gotenberg-js-client");
+const { uploadFileUsulan } = require("../utils");
 
 const getPerencanaanUsulan = async (req, res) => {
   try {
-    const perencanaanUsulan = await PerencanaanUsulan.query().orderBy(
-      "created_at",
-      "desc"
-    );
+    const perencanaanUsulan = await PerencanaanUsulan.query()
+      .orderBy("created_at", "desc")
+      .withGraphFetched("[user(simpleSelect)]");
 
     res.json(perencanaanUsulan);
   } catch (error) {
@@ -93,6 +94,7 @@ const userPerencanaan = async (req, res) => {
   try {
     const perencanaanUsulanDetail = await PerencanaanUsulan.query()
       .where("is_active", true)
+      .withGraphFetched("[user(simpleSelect)]")
       .orderBy("created_at", "desc");
     res.json(perencanaanUsulanDetail);
   } catch (error) {
@@ -179,8 +181,34 @@ const deletePerencanaanUsulanDetail = async (req, res) => {
   }
 };
 
+const uploadPerencanaanUsulanDetail = async (req, res) => {
+  try {
+    const { file, mc } = req;
+    const { id, detailId } = req?.query;
+
+    const currentResult = await PerencanaanUsulanDetail.query().findById(
+      detailId
+    );
+
+    const fileFormat = file?.mimetype?.split("/")[1];
+
+    const fileName = `usulan-${currentResult?.key}.${fileFormat}`;
+    await uploadFileUsulan(mc, fileName, file);
+    await PerencanaanUsulanDetail.query()
+      .patch({
+        dokumen_usulan: fileName,
+      })
+      .where("id", detailId);
+
+    res.json({ message: "Perencanaan usulan detail uploaded successfully" });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
 module.exports = {
   getPerencanaanUsulan,
+  uploadPerencanaanUsulanDetail,
   createPerencanaanUsulan,
   updatePerencanaanUsulan,
   deletePerencanaanUsulan,

@@ -7,6 +7,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Table, Tag } from "antd";
 import { findUsulanByUser } from "@/services/perencanaan.services";
 import { useRouter } from "next/router";
+import dayjs from "dayjs";
 
 const ModalUsulanFormasi = ({ open, onClose }) => {
   const [form] = Form.useForm();
@@ -56,6 +57,21 @@ function UsulanFormasiFasilitator() {
     {
       title: "Deskripsi",
       dataIndex: "deskripsi",
+    },
+    {
+      title: "Tahun",
+      dataIndex: "tahun",
+    },
+    {
+      title: "Dibuat oleh",
+      key: "user_id",
+      render: (_, record) => record?.user?.username,
+    },
+    {
+      title: "Dibuat pada",
+      key: "created_at",
+      render: (_, record) =>
+        dayjs(record.created_at).format("DD MMM YYYY HH:mm:ss"),
     },
     {
       title: "Status",
