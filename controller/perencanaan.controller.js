@@ -1,8 +1,9 @@
 const PerencanaanUsulan = require("@/models/perenc-usulan.model");
 const PerencanaanUsulanDetail = require("@/models/perenc-usulan-detail.model");
 const { getDetailOpd } = require("@/utils/server-utils");
-const { filename } = require("gotenberg-js-client");
 const { uploadFileUsulan } = require("../utils");
+
+const PerencanaanUsulanVerif = require("@/models/perenc-usulan-verif.model");
 
 const getPerencanaanUsulan = async (req, res) => {
   try {
@@ -207,6 +208,82 @@ const uploadPerencanaanUsulanDetail = async (req, res) => {
   }
 };
 
+// untuk verifikasi
+const findPerencanaanUsulanVerif = async (req, res) => {
+  try {
+    const { id, verifId } = req?.query;
+    const userId = req?.user?.customId;
+
+    const perencanaanUsulanVerif = await PerencanaanUsulanVerif.query()
+      .where("perenc_usulan_id", id)
+      .andWhere("user_id", userId)
+      .andWhere("id", verifId)
+      .first();
+
+    res.json(perencanaanUsulanVerif);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+const createPerencanaanUsulanVerif = async (req, res) => {
+  try {
+    const { id, verifId } = req?.query;
+    const userId = req?.user?.customId;
+    const payload = {
+      perenc_usulan_id: id,
+      user_id: userId,
+      id: verifId,
+    };
+
+    const perencanaanUsulanVerif = await PerencanaanUsulanVerif.query().insert(
+      payload
+    );
+    res.json(perencanaanUsulanVerif);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+const updatePerencanaanUsulanVerif = async (req, res) => {
+  try {
+    const { id, verifId } = req?.query;
+    const userId = req?.user?.customId;
+    const payload = {
+      ...req.body,
+      user_id: userId,
+    };
+
+    const perencanaanUsulanVerif = await PerencanaanUsulanVerif.query()
+      .patch(payload)
+      .where("perenc_usulan_id", id)
+      .andWhere("user_id", userId)
+      .andWhere("id", verifId)
+      .first();
+
+    res.json(perencanaanUsulanVerif);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+const deletePerencanaanUsulanVerif = async (req, res) => {
+  try {
+    const { id, verifId } = req?.query;
+    const userId = req?.user?.customId;
+
+    await PerencanaanUsulanVerif.query()
+      .delete()
+      .where("perenc_usulan_id", id)
+      .andWhere("user_id", userId)
+      .andWhere("id", verifId);
+
+    res.json({ message: "Perencanaan usulan verif deleted successfully" });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
 module.exports = {
   getPerencanaanUsulan,
   uploadPerencanaanUsulanDetail,
@@ -219,4 +296,8 @@ module.exports = {
   deletePerencanaanUsulanDetail,
   adminPerencanaanUsulanDetail,
   userPerencanaan,
+  findPerencanaanUsulanVerif,
+  createPerencanaanUsulanVerif,
+  updatePerencanaanUsulanVerif,
+  deletePerencanaanUsulanVerif,
 };
