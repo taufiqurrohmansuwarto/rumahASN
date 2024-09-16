@@ -1,15 +1,17 @@
 import {
   DeleteOutlined,
+  EditOutlined,
   InboxOutlined,
   MailOutlined,
   SendOutlined,
   StarOutlined,
 } from "@ant-design/icons";
-import { ConfigProvider, Layout } from "antd";
+import { Button, ConfigProvider, Layout, Space } from "antd";
 import dynamic from "next/dynamic";
 import { useState } from "react";
 import frFR from "antd/lib/locale/id_ID";
 import { ProConfigProvider } from "@ant-design/pro-components";
+import { Center } from "@mantine/core";
 
 const { Header, Content, Sider } = Layout;
 
@@ -77,6 +79,60 @@ function GmailLayout({ children, active = "inbox" }) {
           contentWidth="Fluid"
           fixedHeader
           fixSiderbar
+          menuExtraRender={({ collapsed, isMobile }) => {
+            if (!collapsed) {
+              if (isMobile)
+                return (
+                  <Button
+                    style={{
+                      display: "flex",
+                      justifyContent: "center",
+                      marginBottom: 8,
+                      marginTop: 8,
+                    }}
+                    onClick={() => {}}
+                    size="middle"
+                    shape="round"
+                    type="primary"
+                    icon={<EditOutlined />}
+                  >
+                    Compose
+                  </Button>
+                );
+              else {
+                return (
+                  <Center>
+                    <Button
+                      style={{
+                        marginBottom: 10,
+                        display: "flex",
+                        justifyContent: "center",
+                      }}
+                      onClick={() => {}}
+                      shape="round"
+                      icon={<EditOutlined />}
+                      block
+                      type="primary"
+                    >
+                      Compose
+                    </Button>
+                  </Center>
+                );
+              }
+            } else {
+              return (
+                <Center>
+                  <Button
+                    onClick={() => {}}
+                    shape="circle"
+                    size="middle"
+                    icon={<EditOutlined />}
+                    type="primary"
+                  />
+                </Center>
+              );
+            }
+          }}
           token={token}
           route={{
             routes: menuItems.map((item) => ({
