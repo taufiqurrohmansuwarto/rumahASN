@@ -211,29 +211,29 @@ const uploadPerencanaanUsulanDetail = async (req, res) => {
 // untuk verifikasi
 const findPerencanaanUsulanVerif = async (req, res) => {
   try {
-    const { id, verifId } = req?.query;
+    const { id } = req?.query;
     const userId = req?.user?.customId;
 
     const perencanaanUsulanVerif = await PerencanaanUsulanVerif.query()
       .where("perenc_usulan_id", id)
       .andWhere("user_id", userId)
-      .andWhere("id", verifId)
+      .withGraphFetched("[perenc_detail]")
       .first();
 
     res.json(perencanaanUsulanVerif);
   } catch (error) {
+    console.log(error);
     res.status(500).json({ error: error.message });
   }
 };
 
 const createPerencanaanUsulanVerif = async (req, res) => {
   try {
-    const { id, verifId } = req?.query;
+    const { id } = req?.query;
     const userId = req?.user?.customId;
     const payload = {
       perenc_usulan_id: id,
       user_id: userId,
-      id: verifId,
     };
 
     const perencanaanUsulanVerif = await PerencanaanUsulanVerif.query().insert(

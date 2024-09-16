@@ -10,6 +10,7 @@ import {
   CloudUploadOutlined,
   DeleteOutlined,
   EditOutlined,
+  FileAddOutlined,
   FilePdfOutlined,
 } from "@ant-design/icons";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -27,13 +28,14 @@ import {
   Tag,
   Upload,
 } from "antd";
+import dayjs from "dayjs";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import FormSiasnPendidikan from "./FormSiasnPendidikan";
 import FormSimasterJFU from "./FormSimasterJFU";
-import dayjs from "dayjs";
 
 const ModalUsulanFormasi = ({
+  verifId,
   open,
   onClose,
   id,
@@ -56,7 +58,10 @@ const ModalUsulanFormasi = ({
     if (type === "create") {
       const payload = {
         id,
-        data,
+        data: {
+          ...data,
+          perencanaan_verif_id: verifId,
+        },
       };
 
       create(payload);
@@ -153,7 +158,7 @@ const ModalUploadDokumen = ({ open, onClose, id, upload, loading }) => {
   );
 };
 
-function UsulanFormasiFasilitatorDetail() {
+function UsulanFormasiFasilitatorDetail({ verifId }) {
   const [open, setOpen] = useState(false);
   const [type, setType] = useState("create");
   const [currentData, setCurrentData] = useState(null);
@@ -196,6 +201,10 @@ function UsulanFormasiFasilitatorDetail() {
     {
       onSuccess: () => {
         queryClient.invalidateQueries(["usulan-perencanaan-detail", id]);
+        queryClient.invalidateQueries([
+          "perencanaan-usulan-formasi-verifier",
+          id,
+        ]);
         handleCloseModalUpload();
         message.success("Berhasil mengupload usulan");
       },
@@ -210,6 +219,10 @@ function UsulanFormasiFasilitatorDetail() {
     {
       onSuccess: () => {
         queryClient.invalidateQueries(["usulan-perencanaan-detail", id]);
+        queryClient.invalidateQueries([
+          "perencanaan-usulan-formasi-verifier",
+          id,
+        ]);
         message.success("Berhasil membuat usulan");
         handleClose();
       },
@@ -224,6 +237,10 @@ function UsulanFormasiFasilitatorDetail() {
     {
       onSuccess: () => {
         queryClient.invalidateQueries(["usulan-perencanaan-detail", id]);
+        queryClient.invalidateQueries([
+          "perencanaan-usulan-formasi-verifier",
+          id,
+        ]);
         handleClose();
         message.success("Berhasil mengubah usulan");
       },
@@ -238,6 +255,10 @@ function UsulanFormasiFasilitatorDetail() {
     {
       onSuccess: () => {
         queryClient.invalidateQueries(["usulan-perencanaan-detail", id]);
+        queryClient.invalidateQueries([
+          "perencanaan-usulan-formasi-verifier",
+          id,
+        ]);
         message.success("Berhasil menghapus usulan");
         handleClose();
       },
@@ -354,14 +375,15 @@ function UsulanFormasiFasilitatorDetail() {
   ];
 
   return (
-    <Card>
+    <Card title="Daftar Usulan">
       <Space>
         <Button
           style={{ marginBottom: 16 }}
+          icon={<FileAddOutlined />}
           type="primary"
           onClick={() => handleOpen("create")}
         >
-          Tambah Usulan
+          Usulan
         </Button>
       </Space>
       <Table
@@ -380,6 +402,7 @@ function UsulanFormasiFasilitatorDetail() {
       />
       <ModalUsulanFormasi
         open={open}
+        verifId={verifId}
         onClose={handleClose}
         currentData={currentData}
         id={id}

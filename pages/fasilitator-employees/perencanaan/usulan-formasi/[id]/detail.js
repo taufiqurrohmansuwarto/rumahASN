@@ -1,7 +1,8 @@
 import Layout from "@/components/Layout";
 import PageContainer from "@/components/PageContainer";
+import UsulanFormasiFasilitatorVerifier from "@/components/Perencanaan/UsulanFormasiFasilitatorVerifier";
+import { Card } from "antd";
 import { useRouter } from "next/router";
-import UsulanFormasiFasilitatorDetail from "@/components/Perencanaan/UsulanFormasiFasilitatorDetail";
 
 function UsulanFormasiDetail() {
   const router = useRouter();
@@ -12,7 +13,7 @@ function UsulanFormasiDetail() {
       title="Usulan Formasi Detail"
       subTitle="Detail Usulan Formasi"
     >
-      <UsulanFormasiFasilitatorDetail />
+      <UsulanFormasiFasilitatorVerifier />
     </PageContainer>
   );
 }

@@ -22,6 +22,17 @@ const allAppList = [
   },
 ];
 
+const apps = [
+  {
+    icon: "https://siasn.bkd.jatimprov.go.id:9000/public/logo-simaster.png",
+    title: "PERENCANAAN",
+    desc: "Perencanaan ASN",
+    url: "",
+    target: "_blank",
+    role: ["admin", "fasilitator-master"],
+  },
+];
+
 // pegawai (asn dan non asn) apps
 const pegawaiPemprovAppList = [
   {
@@ -67,6 +78,7 @@ export const appList = (user) => {
   const bkd = user?.organization_id?.startsWith("123");
   const pttBkd = user?.organization_id?.startsWith("134");
 
+  // ada fasilitator simaster, asn, pttpk, non asn
   const admin = (role === "admin" && bkd) || (role === "admin" && pttBkd);
   const agent = (role === "agent" && bkd) || (role === "agent" && pttBkd);
   const userPns = user?.group === "MASTER" && user?.role === "USER";
