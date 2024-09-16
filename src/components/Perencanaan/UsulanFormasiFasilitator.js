@@ -1,27 +1,8 @@
-import FormUnorFasilitator from "@/components/Perencanaan/FormUnorFasilitator";
-import { Button, Card, Form, Modal } from "antd";
-import { useState } from "react";
-import FormSiasnPendidikan from "./FormSiasnPendidikan";
-import FormSimasterJFU from "./FormSimasterJFU";
-import { useQuery } from "@tanstack/react-query";
-import { Table, Tag } from "antd";
 import { findUsulanByUser } from "@/services/perencanaan.services";
-import { useRouter } from "next/router";
+import { useQuery } from "@tanstack/react-query";
+import { Card, Table, Tag } from "antd";
 import dayjs from "dayjs";
-
-const ModalUsulanFormasi = ({ open, onClose }) => {
-  const [form] = Form.useForm();
-
-  return (
-    <Modal open={open} onCancel={onClose} title="Tambah Usulan Formasi">
-      <Form layout="vertical" form={form}>
-        <FormUnorFasilitator />
-        <FormSimasterJFU />
-        <FormSiasnPendidikan />
-      </Form>
-    </Modal>
-  );
-};
+import { useRouter } from "next/router";
 
 function UsulanFormasiFasilitator() {
   const { data, isLoading } = useQuery(
@@ -31,10 +12,6 @@ function UsulanFormasiFasilitator() {
       refetchOnWindowFocus: false,
     }
   );
-
-  const [open, setOpen] = useState(false);
-  const handleOpen = () => setOpen(true);
-  const handleClose = () => setOpen(false);
 
   const router = useRouter();
 
@@ -106,8 +83,6 @@ function UsulanFormasiFasilitator() {
         pagination={false}
         rowKey={(row) => row?.id}
       />
-      {/* <Button onClick={handleOpen}>Tambah Usulan Formasi</Button> */}
-      {/* <ModalUsulanFormasi open={open} onClose={handleClose} /> */}
     </Card>
   );
 }

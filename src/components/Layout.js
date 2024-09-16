@@ -475,22 +475,22 @@ function Layout({ children, active, collapsed = true }) {
       }}
       theme="light"
       token={{
-        bgLayout: "#FFFFFF",
+        bgLayout: "#fafafa",
         colorPrimary: "#16", // Warna oranye utama Ant Design
         sider: {
           colorBgCollapsedButton: "#FA8C16", // Oranye untuk tombol collapse
-          colorBgMenuItemActive: "#FFF7E6", // Oranye sangat muda untuk item menu yang aktif
-          colorTextCollapsedButton: "#FFFFFF", // Putih untuk teks tombol collapse
-          colorTextCollapsedButtonHover: "#FFF7E6", // Oranye sangat muda untuk teks tombol collapse saat di-hover
+          colorBgMenuItemActive: "#fafafa", // Oranye sangat muda untuk item menu yang aktif
+          colorTextCollapsedButton: "#fafafa", // Putih untuk teks tombol collapse
+          colorTextCollapsedButtonHover: "#fafafa", // Oranye sangat muda untuk teks tombol collapse saat di-hover
           colorTextMenuTitle: "#FA8C16", // Oranye untuk judul menu
           colorTextMenuItemHover: "#FA8C16", // Oranye untuk teks menu saat di-hover
           colorTextMenuSelected: "#FA8C16", // Oranye untuk teks menu saat dipilih
           colorTextMenuActive: "#FA8C16", // Oranye untuk teks menu saat aktif
           colorBgMenuItemHover: "rgba(250, 140, 22, 0.1)", // Transparan oranye saat item menu di-hover
           colorBgMenuItemSelected: "rgba(250, 140, 22, 0.2)", // Transparan oranye lebih terang untuk item menu yang dipilih
-          colorBgMenuItemCollapsedElevated: "#FFFFFF", // Putih untuk menu yang tertutup namun ditinggikan
+          colorBgMenuItemCollapsedElevated: "#fafafa", // Putih untuk menu yang tertutup namun ditinggikan
           colorTextMenu: "#595959", // Abu-abu gelap untuk teks menu biasa
-          colorBgMenu: "#FFFFFF", // Putih untuk latar belakang menu
+          colorBgMenu: "#fafafa", // Putih untuk latar belakang menu
           colorTextMenuSecondary: "#8C8C8C", // Abu-abu medium untuk teks menu sekunder
           colorMenuItemDivider: "#F0F0F0", // Abu-abu sangat muda untuk pembatas menu
         },
