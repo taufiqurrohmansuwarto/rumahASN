@@ -2,6 +2,7 @@ import { createHistory } from "@/utils/utility";
 import axios from "axios";
 import NextAuth from "next-auth/next";
 import GoogleProvider from "next-auth/providers/google";
+import KeycloakProvider from "next-auth/providers/keycloak";
 const User = require("../../../models/users.model");
 const apigateway = process.env.APIGATEWAY_URL;
 
@@ -217,6 +218,13 @@ export const authOptions = {
         const lastData = { ...data, ...last, id: last?.custom_id };
         return lastData;
       },
+    }),
+    KeycloakProvider({
+      clientId: process.env.PEMPROV_CLIENT_ID,
+      name: "Pemprov Jatim",
+      id: "sso-pemprov",
+      clientSecret: process.env.PEMPROV_CLIENT_SECRET,
+      issuer: process.env.PEMPROV_ISSUER,
     }),
     {
       name: "SIMASTER",
