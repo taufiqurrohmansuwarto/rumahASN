@@ -219,13 +219,7 @@ export const authOptions = {
         return lastData;
       },
     }),
-    KeycloakProvider({
-      clientId: process.env.PEMPROV_CLIENT_ID,
-      name: "Pemprov Jatim",
-      id: "sso-pemprov",
-      clientSecret: process.env.PEMPROV_CLIENT_SECRET,
-      issuer: process.env.PEMPROV_ISSUER,
-    }),
+
     {
       name: "SIMASTER",
       id: "helpdesk-user",
@@ -355,6 +349,13 @@ export const authOptions = {
         return lastData;
       },
     },
+    KeycloakProvider({
+      clientId: process.env.PEMPROV_CLIENT_ID,
+      name: "Pemprov Jatim",
+      id: "sso-pemprov",
+      clientSecret: process.env.PEMPROV_CLIENT_SECRET,
+      issuer: process.env.PEMPROV_ISSUER,
+    }),
   ],
   events: {
     signOut: async ({ token }) => {
