@@ -355,6 +355,35 @@ export const authOptions = {
       id: "sso-pemprov",
       clientSecret: process.env.PEMPROV_CLIENT_SECRET,
       issuer: process.env.PEMPROV_ISSUER,
+      authorization: {
+        params: {
+          prompt: "login",
+          scope: "openid profile email",
+        },
+      },
+      profile: async (profile, token) => {
+        let currentUser = {
+          id: profile.sub,
+          username: profile.name,
+          image: profile.picture,
+          email: profile.email,
+          role: "USER",
+          group: "PEMPROV",
+          employee_number: profile.nip || "",
+          birthdate: profile.tgl_lahir || null,
+          email: profile.email || null,
+          organization_id: profile.organization_id || null,
+          status_kepegawaian: profile.status_kepegawaian || "UMUM",
+        };
+
+        const result = await upsertUser(currentUser);
+
+        const data = { ...currentUser, current_role: result?.current_role };
+
+        const last = await updateUser(currentUser?.id);
+        const lastData = { ...data, ...last, id: last?.custom_id };
+        return lastData;
+      },
     }),
   ],
   events: {
