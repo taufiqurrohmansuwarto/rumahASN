@@ -28,6 +28,31 @@ function CarouselBanner() {
         style={{
           cursor: "pointer",
         }}
+      >
+        <div
+          style={{
+            height: "100%",
+          }}
+        >
+          <a
+            href="https://sscasn.bkn.go.id/"
+            target={"_blank"}
+            rel={"noreferrer"}
+          >
+            <Image
+              src={
+                "https://siasn.bkd.jatimprov.go.id:9000/public/banner-sscasn.png"
+              }
+              alt="banner-sscasn.webp"
+            />
+          </a>
+        </div>
+      </Carousel.Slide>
+
+      <Carousel.Slide
+        style={{
+          cursor: "pointer",
+        }}
         onClick={() => router.push("/coaching-clinic/all")}
       >
         <div
@@ -43,6 +68,7 @@ function CarouselBanner() {
           />
         </div>
       </Carousel.Slide>
+
       <Carousel.Slide
         style={{
           cursor: "pointer",
