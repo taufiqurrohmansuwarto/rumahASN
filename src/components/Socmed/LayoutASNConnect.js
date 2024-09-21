@@ -1,5 +1,5 @@
 import PageContainer from "@/components/PageContainer";
-import { Grid, Layout } from "antd";
+import { Grid } from "antd";
 import { useRouter } from "next/router";
 
 function LayoutASNConnect({ children, active = "asn-updates" }) {
@@ -19,12 +19,14 @@ function LayoutASNConnect({ children, active = "asn-updates" }) {
       // }}
       childrenContentStyle={{
         padding: breakPoint.xs ? 0 : 24,
-        margin: 0,
+        // margin: 0,
       }}
-      style={{
-        backgroundColor: "white",
-        padding: 0,
-      }}
+      style={
+        {
+          // backgroundColor: "white",
+          // padding: 0,
+        }
+      }
       tabActiveKey={active}
       onTabChange={handleChangeTab}
       tabList={[
@@ -48,8 +50,8 @@ function LayoutASNConnect({ children, active = "asn-updates" }) {
       tabPosition="top"
       tabProps={{
         tabBarStyle: {
-          padding: 0,
-          margin: 0,
+          // padding: 0,
+          // margin: 0,
           accentColor: "yellow",
           borderColor: "yellow",
           color: "yellow",

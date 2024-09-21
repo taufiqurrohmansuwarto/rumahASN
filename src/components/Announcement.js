@@ -18,7 +18,7 @@ function Announcement() {
           variant="outline"
           icon={<IconAlertCircle />}
           title={data?.title}
-          color="yellow"
+          color="orange"
         >
           <ReactMarkdownCustom>{data?.content}</ReactMarkdownCustom>
         </Alert>
