@@ -1,10 +1,11 @@
 import Features from "@/components/Features";
 import Footer from "@/components/Outer/Footer";
+import LoginSimaster from "@/components/TombolLogin/LoginSimaster";
+import TombolLoginSimaster from "@/components/TombolLogin/TombolLoginSimaster";
 import UserRating from "@/components/UserRating";
 import {
   GlobalOutlined,
   InstagramOutlined,
-  LoginOutlined,
   YoutubeOutlined,
 } from "@ant-design/icons";
 import { Center } from "@mantine/core";
@@ -19,6 +20,7 @@ import {
   Row,
   Space,
   Tooltip,
+  Typography,
 } from "antd";
 import { getProviders, signIn } from "next-auth/react";
 import Head from "next/head";
@@ -123,21 +125,21 @@ const SignIn = ({ providers }) => {
               </Divider>
             </Col>
             <Col xs={24}>
-              <Row gutter={[4, 8]}>
+              <Row gutter={[16, 10]}>
                 {Object?.values(providers).map((provider) => (
                   <Col xs={24} md={24} key={provider.id}>
                     {provider?.id !== "google" && (
-                      <Button
-                        icon={<LoginOutlined />}
+                      <TombolLoginSimaster
+                        size="large"
+                        icon={<LoginSimaster />}
                         type="primary"
                         onClick={(e) => {
                           e?.preventDefault();
                           signIn(provider.id);
                         }}
                         block
-                      >
-                        Masuk dengan akun {provider.name}
-                      </Button>
+                        text={`Masuk dengan ${provider.name}`}
+                      />
                     )}
                   </Col>
                 ))}

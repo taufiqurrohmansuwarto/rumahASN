@@ -265,7 +265,7 @@ export const authOptions = {
       },
     },
     {
-      name: "PTTPK",
+      name: "NON ASN",
       id: "helpdesk-pttpk",
       type: "oauth",
       wellKnown: pttpkWellknown,
