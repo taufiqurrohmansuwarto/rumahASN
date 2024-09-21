@@ -14,10 +14,10 @@ import { useRouter } from "next/router";
 import Announcement from "../Announcement";
 import DiskusiTerhangat from "./DiskusiTerhangat";
 import KegiatanMendatang from "./KegiatanMendatang";
+import KomunitasPopuler from "./KomunitasPopuler";
 import SocmedCreatePost from "./SocmedCreatePost";
 import SocmedMyPosts from "./SocmedMyPosts";
 import SocmedPosts from "./SocmedPosts";
-import KomunitasPopuler from "./KomunitasPopuler";
 
 function SocmedTabs() {
   useScrollRestoration();
@@ -35,9 +35,9 @@ function SocmedTabs() {
 
   return (
     <>
-      <Row gutter={[8, 8]}>
+      <Row gutter={[16, 16]}>
         <Col md={16} xs={24}>
-          <Row gutter={[8, 16]}>
+          <Row gutter={[16, 16]}>
             <Col md={24} xs={24}>
               <Stack spacing="sm">
                 <Announcement />
@@ -182,7 +182,7 @@ function SocmedTabs() {
                 <Card>
                   <SocmedCreatePost />
                 </Card>
-                <Card>
+                <Card title="Postingan">
                   <Tabs
                     defaultActiveKey="all"
                     activeKey={activeKey}
@@ -208,14 +208,21 @@ function SocmedTabs() {
           </Row>
         </Col>
         <Col md={8} xs={24}>
-          <Stack>
-            <DiskusiTerhangat />
-            <KegiatanMendatang />
-            <KomunitasPopuler />
-            {/* <KalenderRumahASN /> */}
-            {/* <ASNBirthdayList /> */}
-            {/* <UserPolls /> */}
-          </Stack>
+          <Row gutter={[16, 16]}>
+            <Col md={24} xs={24}>
+              <DiskusiTerhangat />
+            </Col>
+
+            <Col md={24} xs={24}>
+              <KegiatanMendatang />
+            </Col>
+            <Col md={24} xs={24}>
+              <KomunitasPopuler />
+            </Col>
+          </Row>
+          {/* <KalenderRumahASN /> */}
+          {/* <ASNBirthdayList /> */}
+          {/* <UserPolls /> */}
         </Col>
       </Row>
     </>
