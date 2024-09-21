@@ -49,6 +49,19 @@
     rc-util "^5.35.0"
     stylis "^4.0.13"
 
+"@ant-design/cssinjs@^1.18.5":
+  version "1.21.1"
+  resolved "https://registry.yarnpkg.com/@ant-design/cssinjs/-/cssinjs-1.21.1.tgz#7320813c5f747e0cde52c388eff5198d78d57230"
+  integrity sha512-tyWnlK+XH7Bumd0byfbCiZNK43HEubMoCcu9VxwsAwiHdHTgWa+tMN0/yvxa+e8EzuFP1WdUNNPclRpVtD33lg==
+  dependencies:
+    "@babel/runtime" "^7.11.1"
+    "@emotion/hash" "^0.8.0"
+    "@emotion/unitless" "^0.7.5"
+    classnames "^2.3.1"
+    csstype "^3.1.3"
+    rc-util "^5.35.0"
+    stylis "^4.3.3"
+
 "@ant-design/fast-color@^2.0.6":
   version "2.0.6"
   resolved "https://registry.yarnpkg.com/@ant-design/fast-color/-/fast-color-2.0.6.tgz#ab4d4455c1542c9017d367c2fa8ca3e4215d0ba2"
@@ -549,6 +562,13 @@
   dependencies:
     regenerator-runtime "^0.14.0"
 
+"@babel/runtime@^7.24.1":
+  version "7.25.6"
+  resolved "https://registry.yarnpkg.com/@babel/runtime/-/runtime-7.25.6.tgz#9afc3289f7184d8d7f98b099884c26317b9264d2"
+  integrity sha512-VBj9MYyDb9tuLq7yzqjgzt6Q+IBQLrGZfdjOekyEirZPHxXWoTSGUTMrpsfi58Up73d13NfYLv8HT9vmznjzhQ==
+  dependencies:
+    regenerator-runtime "^0.14.0"
+
 "@babel/template@^7.25.0":
   version "7.25.0"
   resolved "https://registry.yarnpkg.com/@babel/template/-/template-7.25.0.tgz#e733dc3134b4fede528c15bc95e89cb98c52592a"
@@ -661,7 +681,7 @@
     source-map "^0.5.7"
     stylis "4.2.0"
 
-"@emotion/cache@^11.13.0":
+"@emotion/cache@^11.11.0", "@emotion/cache@^11.13.0":
   version "11.13.1"
   resolved "https://registry.yarnpkg.com/@emotion/cache/-/cache-11.13.1.tgz#fecfc54d51810beebf05bf2a161271a1a91895d7"
   integrity sha512-iqouYkuEblRcXmylXIwwOodiEK5Ifl7JcX7o6V4jI3iW4mLXX3dmt5xwBtIkJiQEXFAI+pC8X0i67yiPkH9Ucw==
@@ -671,6 +691,17 @@
     "@emotion/utils" "^1.4.0"
     "@emotion/weak-memoize" "^0.4.0"
     stylis "4.2.0"
+
+"@emotion/css@^11.11.2":
+  version "11.13.0"
+  resolved "https://registry.yarnpkg.com/@emotion/css/-/css-11.13.0.tgz#3b44f008ce782dafa7cecff75b263af174d0c702"
+  integrity sha512-BUk99ylT+YHl+W/HN7nv1RCTkDYmKKqa1qbvM/qLSQEg61gipuBF5Hptk/2/ERmX2DCv0ccuFGhz9i0KSZOqPg==
+  dependencies:
+    "@emotion/babel-plugin" "^11.12.0"
+    "@emotion/cache" "^11.13.0"
+    "@emotion/serialize" "^1.3.0"
+    "@emotion/sheet" "^1.4.0"
+    "@emotion/utils" "^1.4.0"
 
 "@emotion/hash@^0.8.0":
   version "0.8.0"
@@ -708,6 +739,31 @@
     "@emotion/weak-memoize" "^0.4.0"
     hoist-non-react-statics "^3.3.1"
 
+"@emotion/react@^11.11.4":
+  version "11.13.3"
+  resolved "https://registry.yarnpkg.com/@emotion/react/-/react-11.13.3.tgz#a69d0de2a23f5b48e0acf210416638010e4bd2e4"
+  integrity sha512-lIsdU6JNrmYfJ5EbUCf4xW1ovy5wKQ2CkPRM4xogziOxH1nXxBSjpC9YqbFAP7circxMfYp+6x676BqWcEiixg==
+  dependencies:
+    "@babel/runtime" "^7.18.3"
+    "@emotion/babel-plugin" "^11.12.0"
+    "@emotion/cache" "^11.13.0"
+    "@emotion/serialize" "^1.3.1"
+    "@emotion/use-insertion-effect-with-fallbacks" "^1.1.0"
+    "@emotion/utils" "^1.4.0"
+    "@emotion/weak-memoize" "^0.4.0"
+    hoist-non-react-statics "^3.3.1"
+
+"@emotion/serialize@^1.1.3", "@emotion/serialize@^1.3.1":
+  version "1.3.1"
+  resolved "https://registry.yarnpkg.com/@emotion/serialize/-/serialize-1.3.1.tgz#490b660178f43d2de8e92b278b51079d726c05c3"
+  integrity sha512-dEPNKzBPU+vFPGa+z3axPRn8XVDetYORmDC0wAiej+TNcOZE70ZMJa0X7JdeoM6q/nWTMZeLpN/fTnD9o8MQBA==
+  dependencies:
+    "@emotion/hash" "^0.9.2"
+    "@emotion/memoize" "^0.9.0"
+    "@emotion/unitless" "^0.10.0"
+    "@emotion/utils" "^1.4.0"
+    csstype "^3.0.2"
+
 "@emotion/serialize@^1.2.0", "@emotion/serialize@^1.3.0":
   version "1.3.0"
   resolved "https://registry.yarnpkg.com/@emotion/serialize/-/serialize-1.3.0.tgz#e07cadfc967a4e7816e0c3ffaff4c6ce05cb598d"
@@ -719,7 +775,7 @@
     "@emotion/utils" "^1.4.0"
     csstype "^3.0.2"
 
-"@emotion/server@^11.10.0":
+"@emotion/server@^11.10.0", "@emotion/server@^11.11.0":
   version "11.11.0"
   resolved "https://registry.yarnpkg.com/@emotion/server/-/server-11.11.0.tgz#35537176a2a5ed8aed7801f254828e636ec3bd6e"
   integrity sha512-6q89fj2z8VBTx9w93kJ5n51hsmtYuFPtZgnc1L8VzRx9ti4EU6EyvF6Nn1H1x3vcCQCF7u2dB2lY4AYJwUW4PA==
@@ -738,6 +794,11 @@
   version "0.8.5"
   resolved "https://registry.yarnpkg.com/@emotion/stylis/-/stylis-0.8.5.tgz#deacb389bd6ee77d1e7fcaccce9e16c5c7e78e04"
   integrity sha512-h6KtPihKFn3T9fuIrwvXXUOwlx3rfUvfZIcP5a6rh8Y7zjE3O06hT5Ss4S/YI1AYhuZ1kjaE/5EaOOI2NqSylQ==
+
+"@emotion/unitless@^0.10.0":
+  version "0.10.0"
+  resolved "https://registry.yarnpkg.com/@emotion/unitless/-/unitless-0.10.0.tgz#2af2f7c7e5150f497bdabd848ce7b218a27cf745"
+  integrity sha512-dFoMUuQA20zvtVTuxZww6OHoJYgrzfKM1t52mVySDJnMSEa08ruEvdYQbhvyu6soU+NeLVd3yKfTfT0NeV6qGg==
 
 "@emotion/unitless@^0.7.4", "@emotion/unitless@^0.7.5":
   version "0.7.5"
@@ -2006,6 +2067,21 @@ ansi-styles@^4.0.0, ansi-styles@^4.1.0:
   integrity sha512-zbB9rCJAT1rbjiVDb2hqKFHNYLxgtk8NURxZ3IZwD3F6NtxbXZQCnnSi1Lkx+IDohdPlFp222wVALIheZJQSEg==
   dependencies:
     color-convert "^2.0.1"
+
+antd-style@^3.6.3:
+  version "3.6.3"
+  resolved "https://registry.yarnpkg.com/antd-style/-/antd-style-3.6.3.tgz#d240cb37b47dbdc6b410febe00696c00d4f7d59d"
+  integrity sha512-Rxt93D7axfV5c9XqzeE0ZG8stIbFdXfyuZtgnWnh1/FR04sKayrmu4YnotEyueq9e77vziU8vizq+qRbWZjCqg==
+  dependencies:
+    "@ant-design/cssinjs" "^1.18.5"
+    "@babel/runtime" "^7.24.1"
+    "@emotion/cache" "^11.11.0"
+    "@emotion/css" "^11.11.2"
+    "@emotion/react" "^11.11.4"
+    "@emotion/serialize" "^1.1.3"
+    "@emotion/server" "^11.11.0"
+    "@emotion/utils" "^1.2.1"
+    use-merge-value "^1.2.0"
 
 antd@^5.20.6:
   version "5.20.6"
@@ -8252,6 +8328,11 @@ stylis@^4.0.13:
   resolved "https://registry.yarnpkg.com/stylis/-/stylis-4.3.2.tgz#8f76b70777dd53eb669c6f58c997bf0a9972e444"
   integrity sha512-bhtUjWd/z6ltJiQwg0dUfxEJ+W+jdqQd8TbWLWyeIJHlnsqmGLRFFd8e5mA0AZi/zx90smXRlN66YMTcaSFifg==
 
+stylis@^4.3.3:
+  version "4.3.4"
+  resolved "https://registry.yarnpkg.com/stylis/-/stylis-4.3.4.tgz#ca5c6c4a35c4784e4e93a2a24dc4e9fa075250a4"
+  integrity sha512-osIBl6BGUmSfDkyH2mB7EFvCJntXDrLhKjHTRj/rK6xLH0yuPrHULDRQzKokSOD4VoorhtKpfcfW1GAntu8now==
+
 supports-color@^2.0.0:
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/supports-color/-/supports-color-2.0.0.tgz#535d045ce6b6363fa40117084629995e9df324c7"
@@ -8756,6 +8837,11 @@ use-latest@^1.2.1:
   integrity sha512-xA+AVm/Wlg3e2P/JiItTziwS7FK92LWrDB0p+hgXloIMuVCeJJ8v6f0eeHyPZaJrM+usM1FkFfbNCrJGs8A/zw==
   dependencies:
     use-isomorphic-layout-effect "^1.1.1"
+
+use-merge-value@^1.2.0:
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/use-merge-value/-/use-merge-value-1.2.0.tgz#45410846c23e490f404c9cbd17d67db9c8c0efcd"
+  integrity sha512-DXgG0kkgJN45TcyoXL49vJnn55LehnrmoHc7MbKi+QDBvr8dsesqws8UlyIWGHMR+JXgxc1nvY+jDGMlycsUcw==
 
 use-sidecar@^1.1.2:
   version "1.1.2"
