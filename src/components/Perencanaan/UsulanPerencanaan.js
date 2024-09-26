@@ -8,6 +8,7 @@ import { FileAddOutlined } from "@ant-design/icons";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Button,
+  Card,
   Divider,
   Form,
   Input,
@@ -232,7 +233,7 @@ function UsulanPerencanaan() {
   ];
 
   return (
-    <div>
+    <Card>
       <Button
         style={{ marginBottom: 16 }}
         type="primary"
@@ -256,7 +257,7 @@ function UsulanPerencanaan() {
         update={update}
         loading={isLoadingCreate || isLoadingUpdate}
       />
-    </div>
+    </Card>
   );
 }
 
