@@ -36,7 +36,6 @@ const FormUsulanVerif = ({ data, update, isLoadingUpdate, id }) => {
   const [form] = Form.useForm();
   return (
     <Card title="Dokumen Usulan">
-      {JSON.stringify(data)}
       <Form form={form} layout="vertical" onFinish={handleSubmit}>
         <Form.Item
           name="link_surat_usulan"

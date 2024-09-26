@@ -2,7 +2,7 @@ import React from "react";
 import { useRouter } from "next/router";
 import { useQuery } from "@tanstack/react-query";
 import { findUsulanDetailByAdmin } from "@/services/perencanaan.services";
-import { Table, Button } from "antd";
+import { Table, Button, Card } from "antd";
 import { DownloadOutlined } from "@ant-design/icons";
 import * as XLSX from "xlsx";
 
@@ -65,7 +65,7 @@ function UsulanPerencanaanDetailAdmin() {
   };
 
   return (
-    <div>
+    <Card>
       <Button
         type="primary"
         style={{ marginBottom: 16 }}
@@ -80,7 +80,7 @@ function UsulanPerencanaanDetailAdmin() {
         dataSource={data}
         loading={isLoading}
       />
-    </div>
+    </Card>
   );
 }
 
