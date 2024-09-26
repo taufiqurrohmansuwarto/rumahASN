@@ -88,6 +88,7 @@ const anomaliTypes = [
   "BELUM SKP TH SEBELUMNYA",
   "BUP Masih Aktif",
   "CPNS LEBIH 2TH",
+  "CPNS LEBIH 1TH",
   "FORMASI JF BELUM DIANGKAT",
   "UNOR NONAKTIF",
   "JABATAN KOSONG",
