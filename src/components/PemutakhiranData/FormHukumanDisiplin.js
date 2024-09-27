@@ -1,8 +1,5 @@
-import {
-  dataHukumanDisiplin,
-  dataRiwayatPenghargaan,
-} from "@/utils/client-data";
-import { Form, Input, Select } from "antd";
+import { dataHukumanDisiplin } from "@/utils/client-data";
+import { Form, Select } from "antd";
 
 const FormHukumanDisiplin = ({ name, label }) => {
   const [form] = Form.useForm();

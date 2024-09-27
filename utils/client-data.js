@@ -69,6 +69,16 @@ export const dataHukumanDisiplin = [
     nama: "PENURUNAN PANGKAT 1 TINGKAT 3 THN",
     jenis_tingkat_hukuman_id: "B",
   },
+  {
+    id: "21",
+    nama: "SANKSI MORAL TERBUKA",
+    jenis_tingkat_hukuman_id: "R",
+  },
+  {
+    id: "22",
+    nama: "SANKSI MORAL TERTUTUP",
+    jenis_tingkat_hukuman_id: "R",
+  },
 ];
 
 export const dataRiwayatPenghargaan = [
@@ -417,3 +427,48 @@ export const dataAlasanHukumanDisiplin = [
     keterangan: "KEWAJIBAN",
   },
 ];
+
+export const ppHukumanDisiplin = {
+  results: [
+    {
+      id: "01",
+      nama: "PP 11 TAHUN 2017",
+      ncsistime: "",
+    },
+    {
+      id: "02",
+      nama: "UU 5 TAHUN 2014",
+      ncsistime: "",
+    },
+    {
+      id: "03",
+      nama: "PP 53 TAHUN 2010",
+      ncsistime: "",
+    },
+    {
+      id: "04",
+      nama: "PP 45 TAHUN 1990",
+      ncsistime: "",
+    },
+    {
+      id: "05",
+      nama: "PP 10 TAHUN 1983",
+      ncsistime: "",
+    },
+    {
+      id: "06",
+      nama: "PP 30 TAHUN 1980",
+      ncsistime: "",
+    },
+    {
+      id: "07",
+      nama: "PP 94 TAHUN 2021",
+      ncsistime: "",
+    },
+    {
+      id: "08",
+      nama: "PERKA BKN 32 2011",
+      ncsistime: "",
+    },
+  ],
+};
