@@ -2,6 +2,7 @@ import { getHukdisByNip } from "@/services/siasn-services";
 import {
   dataAlasanHukumanDisiplin,
   dataHukumanDisiplin,
+  ppHukumanDisiplin,
 } from "@/utils/client-data";
 import { useQuery } from "@tanstack/react-query";
 import {
@@ -19,17 +20,29 @@ import {
   Table,
 } from "antd";
 import { useState } from "react";
+import dayjs from "dayjs";
 
 const FormModalHukdis = ({ open, onClose, create }) => {
   const [form] = Form.useForm();
   const [dataTingkatHukdis, setDataTingkatHukdis] =
     useState(dataHukumanDisiplin);
 
+  const handleFinish = async (values) => {
+    const value = await form.validateFields();
+    const payload = {
+      ...value,
+      hukumanTanggal: dayjs(value?.hukumanTanggal).format("YYYY-MM-DD"),
+      tanggalSk: dayjs(value?.tanggalSk).format("YYYY-MM-DD"),
+    };
+    console.log(payload);
+  };
+
   return (
     <Modal
       width={800}
       open={open}
       onCancel={onClose}
+      onOk={handleFinish}
       title={"Tambah Hukuman Disiplin"}
     >
       <Form form={form} layout="vertical">
@@ -65,8 +78,6 @@ const FormModalHukdis = ({ open, onClose, create }) => {
               }
             }}
           >
-            <Radio.Button value="berat">Berat</Radio.Button>
-            <Radio.Button value="sedang">Sedang</Radio.Button>
             <Radio.Button value="ringan">Ringan</Radio.Button>
           </Radio.Group>
         </Form.Item>
@@ -88,12 +99,6 @@ const FormModalHukdis = ({ open, onClose, create }) => {
             })}
           </Select>
         </Form.Item>
-        <Form.Item name={"skNomor"} label={"Nomor SK"}>
-          <Input />
-        </Form.Item>
-        <Form.Item name={"nomorPp"} label={"Nomor Peraturan"}>
-          <Input />
-        </Form.Item>
         <Form.Item name="alasanHukumanDisiplinId" label={"Alasan Hukuman"}>
           <Select showSearch allowClear optionFilterProp="nama">
             {dataAlasanHukumanDisiplin.map((alasan) => {
@@ -109,13 +114,28 @@ const FormModalHukdis = ({ open, onClose, create }) => {
             })}
           </Select>
         </Form.Item>
+        <Form.Item name={"nomorPp"} label={"Nomor Peraturan"}>
+          <Select showSearch allowClear optionFilterProp="nama">
+            {ppHukumanDisiplin.results.map((pp) => {
+              return (
+                <Select.Option nama={pp.nama} key={pp.id} value={pp.id}>
+                  {pp.nama}
+                </Select.Option>
+              );
+            })}
+          </Select>
+        </Form.Item>
+
+        <Form.Item name={"skNomor"} label={"Nomor SK"}>
+          <Input />
+        </Form.Item>
         <Row>
-          <Col md={12}>
+          <Col md={6}>
             <Form.Item required name="tanggalSk" label="Tanggal SK">
               <DatePicker format={"DD-MM-YYYY"} />
             </Form.Item>
           </Col>
-          <Col md={12}>
+          <Col md={6}>
             <Form.Item
               required
               name="hukumanTanggal"
@@ -124,14 +144,12 @@ const FormModalHukdis = ({ open, onClose, create }) => {
               <DatePicker format={"DD-MM-YYYY"} />
             </Form.Item>
           </Col>
-        </Row>
-        <Row>
-          <Col md={12}>
+          <Col md={6}>
             <Form.Item required name="masaTahun" label="Masa Hukuman Tahun">
               <InputNumber />
             </Form.Item>
           </Col>
-          <Col md={12}>
+          <Col md={6}>
             <Form.Item required name="masaBulan" label="Masa Hukuman Bulan">
               <InputNumber />
             </Form.Item>
