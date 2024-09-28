@@ -243,9 +243,24 @@ const getEmployeesBKD = async (req, res) => {
 
 const getAllScheduleVisits = async (req, res) => {
   try {
-    const scheduleVisits = await ScheduleVisits.query().withGraphFetched(
-      "guest"
+    const scheduleVisits = await ScheduleVisits.query()
+      .orderBy("visit_date", "desc")
+      .withGraphFetched("guest");
+    res.json(scheduleVisits);
+  } catch (error) {
+    console.log(error);
+    res.status(400).json({ message: "Internal Server Error" });
+  }
+};
+
+const myGuest = async (req, res) => {
+  try {
+    const { customId } = req.user;
+    const scheduleVisits = await ScheduleVisits.query().whereRaw(
+      `employee_visited @> ?::jsonb`,
+      JSON.stringify([{ customid: customId }])
     );
+
     res.json(scheduleVisits);
   } catch (error) {
     console.log(error);
@@ -255,6 +270,7 @@ const getAllScheduleVisits = async (req, res) => {
 
 module.exports = {
   getAllScheduleVisits,
+  myGuest,
   getGuests,
   getEmployeesBKD,
   updateGuest,

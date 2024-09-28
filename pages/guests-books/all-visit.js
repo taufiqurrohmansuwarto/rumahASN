@@ -1,5 +1,6 @@
 import GuestBookLayout from "@/components/GuestBook/GuestBookLayout";
 import PageContainer from "@/components/PageContainer";
+import GuestBookVisitAll from "@/components/GuestBook/GuestBookVisitAll";
 import { Grid } from "antd";
 import Head from "next/head";
 
@@ -16,7 +17,9 @@ function GuestBookAllVisited() {
         }}
         title="Semua Kunjungan"
         content="Semua Kunjungan"
-      ></PageContainer>
+      >
+        <GuestBookVisitAll />
+      </PageContainer>
     </>
   );
 }
