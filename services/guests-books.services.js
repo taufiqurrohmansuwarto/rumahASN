@@ -29,7 +29,7 @@ export const updateScheduleVisit = ({ id, data }) => {
   return api.patch(`/user/schedule-visits/${id}`, data).then((res) => res.data);
 };
 
-export const deleteScheduleVisit = ({ id }) => {
+export const deleteScheduleVisit = (id) => {
   return api.delete(`/user/schedule-visits/${id}`).then((res) => res.data);
 };
 

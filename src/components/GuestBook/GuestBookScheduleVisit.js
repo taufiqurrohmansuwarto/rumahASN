@@ -1,7 +1,9 @@
 import {
   createScheduleVisit,
+  deleteScheduleVisit,
   getEmployeesBKD,
   getScheduleVisits,
+  updateScheduleVisit,
 } from "@/services/guests-books.services";
 import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
 import {
@@ -16,10 +18,24 @@ import {
   Space,
   Typography,
   Avatar,
+  QRCode,
+  Divider,
+  Popconfirm,
+  Descriptions,
+  Card,
+  Row,
+  Col,
+  Tag,
 } from "antd";
 import { toUpper } from "lodash";
 import { useState } from "react";
 import dayjs from "dayjs";
+import { PlusOutlined } from "@ant-design/icons";
+import {
+  CalendarOutlined,
+  InfoCircleOutlined,
+  UserOutlined,
+} from "@ant-design/icons";
 
 const FormEmployees = ({ name }) => {
   const { data, isLoading } = useQuery(
@@ -48,7 +64,7 @@ const FormEmployees = ({ name }) => {
             <Select.Option
               name={item?.name}
               key={item?.value}
-              value={JSON.stringify(item?.label)}
+              value={JSON.stringify(item)}
             >
               <Space>
                 <Avatar size="small" src={item?.avatar} />
@@ -138,9 +154,55 @@ const FormModalCreate = ({ open, onCancel, submit, loading }) => {
   );
 };
 
+const DetailModal = ({ open, onCancel, data }) => {
+  return (
+    <Modal
+      width={800}
+      open={open}
+      onCancel={onCancel}
+      title="Detail Jadwal Kunjungan"
+      footer={null}
+    >
+      <Card bordered={false}>
+        <Row justify="center" align="middle">
+          <Col>
+            <h3 style={{ textAlign: "center", color: "#1890ff" }}>
+              Kode QR Kunjungan
+            </h3>
+            <Space
+              direction="vertical"
+              align="center"
+              style={{ marginTop: "10px" }}
+            >
+              <QRCode errorLevel="H" size={200} value={data?.id} />
+              <p>
+                ID Kunjungan: <strong>{data?.id}</strong>
+              </p>
+            </Space>
+          </Col>
+        </Row>
+      </Card>
+    </Modal>
+  );
+};
+
 function GuestBookScheduleVisit() {
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
+
+  const [showDetail, setShowDetail] = useState(false);
+  const [dataDetail, setDataDetail] = useState(null);
+
+  const handleOpenDetail = (data) => {
+    setDataDetail(data);
+    setShowDetail(true);
+  };
+
+  const handleCloseDetail = () => {
+    setDataDetail(null);
+    setShowDetail(false);
+  };
+
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
 
@@ -161,17 +223,172 @@ function GuestBookScheduleVisit() {
     }
   );
 
+  const { mutate: update, isLoading: isLoadingUpdate } = useMutation(
+    (data) => updateScheduleVisit(data),
+    {
+      onSettled: () => {
+        queryClient.invalidateQueries(["guest-book-schedule-visits"]);
+      },
+      onSuccess: () => {
+        message.success("Berhasil mengubah jadwal kunjungan");
+        handleClose();
+      },
+      onError: (error) => {
+        message.error("Gagal mengubah jadwal kunjungan");
+        console.log(error);
+      },
+    }
+  );
+
+  const { mutateAsync: deleteSchedule, isLoading: isLoadingDelete } =
+    useMutation((data) => deleteScheduleVisit(data), {
+      onSettled: () => {
+        queryClient.invalidateQueries(["guest-book-schedule-visits"]);
+      },
+      onSuccess: () => {
+        message.success("Berhasil menghapus jadwal kunjungan");
+        handleClose();
+      },
+      onError: (error) => {
+        message.error("Gagal menghapus jadwal kunjungan");
+        console.log(error);
+      },
+    });
+
   const { data, isLoading } = useQuery(
     ["guest-book-schedule-visits"],
     () => getScheduleVisits(),
     {}
   );
 
+  const handleDelete = async (id) => {
+    await deleteSchedule(id);
+  };
+
+  const columns = [
+    {
+      title: "Kunjungan",
+      key: "kunjungan",
+      render: (_, row) => (
+        <>
+          <Descriptions layout="vertical" size="small">
+            <Descriptions.Item label="Rencana Tanggal Kunjungan">
+              {dayjs(row?.visit_date).format("DD MMMM YYYY HH:mm:ss")}
+            </Descriptions.Item>
+            <Descriptions.Item label="Kategori">
+              {toUpper(row?.category)}
+            </Descriptions.Item>
+            <Descriptions.Item label="Pegawai yang dikunjungi">
+              {row?.employee_visited?.map((item) => (
+                <Tag color="geekblue" key={item?.id}>
+                  <Space>
+                    <Avatar size="small" src={item?.avatar} />
+                    <Typography.Text strong>{item?.name}</Typography.Text>
+                  </Space>
+                </Tag>
+              ))}
+            </Descriptions.Item>
+            <Descriptions.Item label="Alasan Kunjungan">
+              {row?.purpose}
+            </Descriptions.Item>
+            <Descriptions.Item label="Keterangan">
+              {row?.description}
+            </Descriptions.Item>
+          </Descriptions>
+          <Space>
+            <a onClick={() => handleOpenDetail(row)}>Detail</a>
+            <Divider type="vertical" />
+            <a>Edit</a>
+            <Divider type="vertical" />
+            <Popconfirm
+              title="Apakah anda yakin ingin menghapus jadwal kunjungan ini?"
+              onConfirm={() => handleDelete(row?.id)}
+              okText="Hapus"
+              cancelText="Batal"
+            >
+              <a>Hapus</a>
+            </Popconfirm>
+          </Space>
+        </>
+      ),
+      responsive: ["xs"],
+    },
+    {
+      title: "Rencana Tanggal Kunjungan",
+      dataIndex: "visit_date",
+      render: (value) => dayjs(value).format("DD MMMM YYYY HH:mm:ss"),
+      responsive: ["sm"],
+    },
+    {
+      title: "Kategori",
+      dataIndex: "category",
+      render: (value) => toUpper(value),
+      responsive: ["sm"],
+    },
+    {
+      title: "Pegawai yang dikunjungi",
+      dataIndex: "employee_visited",
+      render: (value) => (
+        <Space>
+          {value?.map((v) => (
+            <>
+              <Avatar size="small" key={v?.id} src={v?.avatar} />
+              <Typography.Text>{v?.name}</Typography.Text>
+            </>
+          ))}
+        </Space>
+      ),
+      responsive: ["sm"],
+    },
+    {
+      title: "Alasan Kunjungan",
+      dataIndex: "purpose",
+      responsive: ["sm"],
+    },
+    {
+      title: "Keterangan",
+      dataIndex: "description",
+      responsive: ["sm"],
+    },
+    {
+      title: "Aksi",
+      key: "aksi",
+      render: (_, row) => (
+        <Space>
+          <a onClick={() => handleOpenDetail(row)}>Detail</a>
+          <Divider type="vertical" />
+          <a>Edit</a>
+          <Divider type="vertical" />
+          <Popconfirm
+            title="Apakah anda yakin ingin menghapus jadwal kunjungan ini?"
+            onConfirm={() => handleDelete(row?.id)}
+            okText="Hapus"
+            cancelText="Batal"
+          >
+            <a>Hapus</a>
+          </Popconfirm>
+        </Space>
+      ),
+      responsive: ["sm"],
+    },
+  ];
+
   return (
     <div>
-      {JSON.stringify(data)}
-      <Button type="primary" onClick={handleOpen}>
-        Tambah
+      <DetailModal
+        data={dataDetail}
+        open={showDetail}
+        onCancel={handleCloseDetail}
+      />
+      <Button
+        style={{
+          marginBottom: 16,
+        }}
+        icon={<PlusOutlined />}
+        type="primary"
+        onClick={handleOpen}
+      >
+        Kunjungan
       </Button>
       <FormModalCreate
         open={open}
@@ -179,7 +396,12 @@ function GuestBookScheduleVisit() {
         submit={create}
         loading={isLoadingCreate}
       />
-      <Table loading={isLoading} dataSource={data} rowKey={(row) => row?.id} />
+      <Table
+        loading={isLoading}
+        columns={columns}
+        dataSource={data}
+        rowKey={(row) => row?.id}
+      />
     </div>
   );
 }
