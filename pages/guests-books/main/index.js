@@ -1,15 +1,23 @@
 import GuestBookLayout from "@/components/GuestBook/GuestBookLayout";
 import GuestsBookUser from "@/components/GuestBook/GuestsBookUser";
 import PageContainer from "@/components/PageContainer";
+import { Grid } from "antd";
 import Head from "next/head";
 
 function GuestBook() {
+  const breakPoint = Grid.useBreakpoint();
   return (
     <>
       <Head>
         <title>Rumah ASN - Buku Tamu</title>
       </Head>
-      <PageContainer>
+      <PageContainer
+        childrenContentStyle={{
+          padding: breakPoint?.xs ? 0 : null,
+        }}
+        title="Buku Tamu"
+        content="Buku Tamu"
+      >
         <GuestsBookUser />
       </PageContainer>
     </>

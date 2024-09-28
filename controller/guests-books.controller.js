@@ -54,48 +54,79 @@ const createScheduleVisit = async (req, res) => {
 };
 
 const getScheduleVisits = async (req, res) => {
-  const { customId } = req.user;
-  const guest = await Guests.query().where("user_id", customId).first();
-  const scheduleVisits = await ScheduleVisits.query().where(
-    "guest_id",
-    guest.id
-  );
-  res.json(scheduleVisits);
+  try {
+    const { customId } = req.user;
+    const guest = await Guests.query().where("user_id", customId).first();
+    const scheduleVisits = await ScheduleVisits.query().where(
+      "guest_id",
+      guest.id
+    );
+    res.json(scheduleVisits);
+  } catch (error) {
+    console.log(error);
+    res.status(400).json({ message: "Internal Server Error" });
+  }
 };
 
 const getScheduleVisitById = async (req, res) => {
-  const { customId } = req.user;
-  const guest = await Guests.query().where("user_id", customId).first();
-  const { id } = req.query;
-  const scheduleVisit = await ScheduleVisits.query()
-    .where("guest_id", guest.id)
-    .findById(id);
-  res.json(scheduleVisit);
+  try {
+    const { customId } = req.user;
+    const guest = await Guests.query().where("user_id", customId).first();
+    const { id } = req.query;
+
+    const scheduleVisit = await ScheduleVisits.query()
+      .where("guest_id", guest.id)
+      .findById(id);
+    res.json(scheduleVisit);
+  } catch (error) {
+    console.log(error);
+    res.status(400).json({ message: "Internal Server Error" });
+  }
 };
 
 const updateScheduleVisit = async (req, res) => {
-  const { body } = req;
-  const { id } = req.query;
-  const { customId } = req.user;
-  const guest = await Guests.query().where("user_id", customId).first();
-  const scheduleVisit = await ScheduleVisits.query()
-    .where("guest_id", guest.id)
-    .findById(id)
-    .patch({
-      ...body,
-    });
-  res.json(scheduleVisit);
+  try {
+    const { body } = req;
+    const { id } = req.query;
+    const { customId } = req.user;
+    const guest = await Guests.query().where("user_id", customId).first();
+    if (!guest) {
+      res.status(404).json({ message: "Guest not found" });
+    } else {
+      const scheduleVisit = await ScheduleVisits.query()
+        .where("guest_id", guest.id)
+        .findById(id)
+        .patch({
+          ...body,
+        });
+      res.json(scheduleVisit);
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(400).json({ message: "Internal Server Error" });
+  }
 };
 
 const deleteScheduleVisit = async (req, res) => {
-  const { id } = req.query;
-  const { customId } = req.user;
-  const guest = await Guests.query().where("user_id", customId).first();
-  await ScheduleVisits.query()
-    .where("guest_id", guest.id)
-    .findById(id)
-    .delete();
-  res.json({ message: "Schedule visit deleted" });
+  try {
+    const { id } = req.query;
+    const { customId } = req.user;
+    console.log({ id, customId });
+    const guest = await Guests.query().where("user_id", customId).first();
+
+    if (!guest) {
+      res.status(404).json({ message: "Guest not found" });
+    } else {
+      await ScheduleVisits.query()
+        .where("guest_id", guest.id)
+        .findById(id)
+        .delete();
+      res.json({ message: "Schedule visit deleted" });
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(400).json({ message: "Internal Server Error" });
+  }
 };
 
 const getEmployeesBKD = async (req, res) => {
@@ -110,21 +141,7 @@ const getEmployeesBKD = async (req, res) => {
       .where("skpd_id", "ilike", "123%")
       .orderBy("nama_master");
 
-    const hasil = result?.map((r) => ({
-      value: r?.value,
-      name: r?.name,
-      avatar: r?.avatar,
-      organization: r?.organization,
-      label: {
-        pegawai_id: r?.value,
-        value: r?.value,
-        name: r?.name,
-        avatar: r?.avatar,
-        organization: r?.organization,
-      },
-    }));
-
-    res.json(hasil);
+    res.json(result);
   } catch (error) {
     console.log(error);
     res.status(400).json({ message: "Internal Server Error" });
