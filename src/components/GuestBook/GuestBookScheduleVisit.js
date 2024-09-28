@@ -5,75 +5,60 @@ import {
   getScheduleVisits,
   updateScheduleVisit,
 } from "@/services/guests-books.services";
-import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
+import { PlusOutlined } from "@ant-design/icons";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
+  Avatar,
   Button,
-  Table,
-  Modal,
-  Form,
+  Card,
+  Col,
   DatePicker,
+  Descriptions,
+  Divider,
+  Form,
   Input,
   message,
+  Modal,
+  Popconfirm,
+  QRCode,
+  Row,
   Select,
   Space,
-  Typography,
-  Avatar,
-  QRCode,
-  Divider,
-  Popconfirm,
-  Descriptions,
-  Card,
-  Row,
-  Col,
+  Table,
   Tag,
+  Typography,
 } from "antd";
-import { toUpper } from "lodash";
-import { useState } from "react";
 import dayjs from "dayjs";
-import { PlusOutlined } from "@ant-design/icons";
-import {
-  CalendarOutlined,
-  InfoCircleOutlined,
-  UserOutlined,
-} from "@ant-design/icons";
+import { toUpper } from "lodash";
+import { useEffect, useState } from "react";
 
-const FormEmployees = ({ name }) => {
-  const { data, isLoading } = useQuery(
-    ["pegawai_bkd"],
-    () => getEmployeesBKD(),
-    {
-      refetchOnWindowFocus: false,
-    }
-  );
-
+const FormEmployees = ({ name, data }) => {
   return (
     <div>
-      <Form.Item
-        rules={[{ required: true, message: "Pilih Pegawai yang dikunjungi" }]}
-        name={name}
-        label="Pegawai yang dikunjungi"
-      >
-        <Select
-          mode="multiple"
-          labelInValue
-          showSearch
-          allowClear
-          optionFilterProp="name"
+      {data && (
+        <Form.Item
+          rules={[{ required: true, message: "Pilih Pegawai yang dikunjungi" }]}
+          name={name}
+          label="Pegawai yang dikunjungi"
         >
-          {data?.map((item) => (
-            <Select.Option
-              name={item?.name}
-              key={item?.value}
-              value={JSON.stringify(item)}
-            >
-              <Space>
-                <Avatar size="small" src={item?.avatar} />
-                <Typography.Text>{item?.name}</Typography.Text>
-              </Space>
-            </Select.Option>
-          ))}
-        </Select>
-      </Form.Item>
+          <Select
+            mode="multiple"
+            labelInValue
+            showSearch
+            allowClear
+            optionFilterProp="name"
+          >
+            {data?.map((item) => (
+              <Select.Option name={item?.name} key={item?.id} value={item?.id}>
+                <Space>
+                  <Avatar size="small" src={item?.avatar} />
+                  <Typography.Text>{item?.name}</Typography.Text>
+                </Space>
+              </Select.Option>
+            ))}
+          </Select>
+        </Form.Item>
+      )}
     </div>
   );
 };
@@ -88,14 +73,46 @@ const kategoriKunjungan = [
   "peminjaman aset",
 ];
 
-const FormModalCreate = ({ open, onCancel, submit, loading }) => {
+const FormModalCreate = ({
+  open,
+  onCancel,
+  submit,
+  loading,
+  action = "create",
+  data,
+  edit,
+  editLoading,
+}) => {
   const [form] = Form.useForm();
+
+  const { data: dataEmployees, isLoading: isLoadingEmployees } = useQuery(
+    ["pegawai_bkd"],
+    () => getEmployeesBKD(),
+    {
+      refetchOnWindowFocus: false,
+    }
+  );
+
+  useEffect(() => {
+    if (action === "edit" && data) {
+      form.setFieldsValue({
+        visit_date: data.visit_date ? dayjs(data.visit_date) : null,
+        category: data.category || null,
+        purpose: data.purpose || "",
+        employee_visited: data.employee_visited?.map((item) => item?.id),
+        description: data.description || "",
+      });
+    } else {
+      form.resetFields();
+    }
+  }, [action, form, data]);
 
   const handleSubmit = async () => {
     const values = await form.validateFields();
-    const employeeVisited = values?.employee_visited?.map((item) =>
-      JSON.parse(item?.value)
-    );
+    const employeeVisited = dataEmployees?.filter((item) => {
+      const val = values?.employee_visited?.map((v) => v?.value);
+      return val.includes(item?.id);
+    });
 
     const payload = {
       ...values,
@@ -103,15 +120,37 @@ const FormModalCreate = ({ open, onCancel, submit, loading }) => {
       visit_date: dayjs(values?.visit_date).format("YYYY-MM-DD HH:mm:ss"),
     };
 
-    console.log(payload);
+    if (action === "edit") {
+      const employeeVisitedEdit = dataEmployees?.filter((item) => {
+        const val = form.getFieldValue("employee_visited");
 
-    submit(payload);
+        // if every val has property label
+        if (val.every((v) => v.label)) {
+          const currentValue = val.map((v) => v.value);
+          return currentValue.includes(item?.id);
+        } else {
+          return val.includes(item?.id);
+        }
+      });
+
+      const dataEdit = {
+        id: data?.id,
+        data: {
+          ...payload,
+          employee_visited: JSON.stringify(employeeVisitedEdit),
+        },
+      };
+
+      edit(dataEdit);
+    } else {
+      submit(payload);
+    }
   };
 
   return (
     <Modal
       width={800}
-      confirmLoading={loading}
+      confirmLoading={loading || editLoading}
       open={open}
       onCancel={onCancel}
       onOk={handleSubmit}
@@ -138,7 +177,11 @@ const FormModalCreate = ({ open, onCancel, submit, loading }) => {
             ))}
           </Select>
         </Form.Item>
-        <FormEmployees name="employee_visited" />
+        <FormEmployees
+          name="employee_visited"
+          data={dataEmployees}
+          isLoading={isLoadingEmployees}
+        />
         <Form.Item
           rules={[{ required: true, message: "Masukkan Alasan Kunjungan" }]}
           name="purpose"
@@ -174,7 +217,7 @@ const DetailModal = ({ open, onCancel, data }) => {
               align="center"
               style={{ marginTop: "10px" }}
             >
-              <QRCode errorLevel="H" size={200} value={data?.id} />
+              <QRCode errorLevel="H" size={300} value={data?.qrCode?.qr_code} />
               <p>
                 ID Kunjungan: <strong>{data?.id}</strong>
               </p>
@@ -192,6 +235,14 @@ function GuestBookScheduleVisit() {
 
   const [showDetail, setShowDetail] = useState(false);
   const [dataDetail, setDataDetail] = useState(null);
+  const [action, setAction] = useState("create");
+  const [dataEdit, setDataEdit] = useState(null);
+
+  const handleOpenEdit = (data) => {
+    setAction("edit");
+    setDataEdit(data);
+    setOpen(true);
+  };
 
   const handleOpenDetail = (data) => {
     setDataDetail(data);
@@ -201,10 +252,21 @@ function GuestBookScheduleVisit() {
   const handleCloseDetail = () => {
     setDataDetail(null);
     setShowDetail(false);
+    setAction("create");
+    setDataEdit(null);
   };
 
-  const handleOpen = () => setOpen(true);
-  const handleClose = () => setOpen(false);
+  const handleOpen = () => {
+    setAction("create");
+    setOpen(true);
+    setDataEdit(null);
+  };
+
+  const handleClose = () => {
+    setAction("create");
+    setDataEdit(null);
+    setOpen(false);
+  };
 
   const { mutate: create, isLoading: isLoadingCreate } = useMutation(
     (data) => createScheduleVisit(data),
@@ -223,7 +285,7 @@ function GuestBookScheduleVisit() {
     }
   );
 
-  const { mutate: update, isLoading: isLoadingUpdate } = useMutation(
+  const { mutate: editSchedule, isLoading: isLoadingUpdate } = useMutation(
     (data) => updateScheduleVisit(data),
     {
       onSettled: () => {
@@ -357,7 +419,7 @@ function GuestBookScheduleVisit() {
         <Space>
           <a onClick={() => handleOpenDetail(row)}>Detail</a>
           <Divider type="vertical" />
-          <a>Edit</a>
+          <a onClick={() => handleOpenEdit(row)}>Edit</a>
           <Divider type="vertical" />
           <Popconfirm
             title="Apakah anda yakin ingin menghapus jadwal kunjungan ini?"
@@ -395,6 +457,10 @@ function GuestBookScheduleVisit() {
         onCancel={handleClose}
         submit={create}
         loading={isLoadingCreate}
+        action={action}
+        data={dataEdit}
+        edit={editSchedule}
+        editLoading={isLoadingUpdate}
       />
       <Table
         loading={isLoading}

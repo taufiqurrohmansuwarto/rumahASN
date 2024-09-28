@@ -36,3 +36,19 @@ export const deleteScheduleVisit = (id) => {
 export const getEmployeesBKD = () => {
   return api.get("/employees").then((res) => res.data);
 };
+
+export const getAllScheduleVisits = () => {
+  return api.get("/admin/schedule-visits").then((res) => res.data);
+};
+
+export const checkIn = (data) => {
+  return api.post("/admin/checkin", data).then((res) => res.data);
+};
+
+export const checkOut = (data) => {
+  return api.post("/admin/checkout", data).then((res) => res.data);
+};
+
+export const getMyGuest = () => {
+  return api.get("/admin/my-guest").then((res) => res.data);
+};
