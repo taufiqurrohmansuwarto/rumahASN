@@ -1,17 +1,23 @@
+import MegaMenu from "@/components/MegaMenu/MegaMenu";
+import NotifikasiASNConnect from "@/components/Notification/NotifikasiASNConnect";
+import NotifikasiForumKepegawaian from "@/components/Notification/NotifikasiForumKepegawaian";
+import NotifikasiKepegawaian from "@/components/Notification/NotifikasiKepegawaian";
+import NotifikasiPrivateMessage from "@/components/Notification/NotifikasiPrivateMessage";
 import {
-  DeleteOutlined,
+  BookOutlined,
   EditOutlined,
   InboxOutlined,
-  MailOutlined,
-  SendOutlined,
-  StarOutlined,
+  SettingOutlined,
+  CheckCircleOutlined,
+  CloseCircleOutlined,
 } from "@ant-design/icons";
 import { ProConfigProvider } from "@ant-design/pro-components";
 import { Center } from "@mantine/core";
 import { Button, ConfigProvider, Layout } from "antd";
-import frFR from "antd/lib/locale/id_ID";
+import idID from "antd/lib/locale/id_ID";
 import dynamic from "next/dynamic";
 import { useState } from "react";
+import { GuestBookToken } from "./GuestBookToken";
 
 const ProLayout = dynamic(
   () => import("@ant-design/pro-components").then((mod) => mod?.ProLayout),
@@ -20,58 +26,31 @@ const ProLayout = dynamic(
   }
 );
 
-function GmailLayout({ children, active = "inbox" }) {
+function GuestBookLayout({ children, active = "main" }) {
   const menuItems = [
-    { key: "inbox", icon: <InboxOutlined />, label: "Kotak Masuk" },
-    { key: "sent", icon: <SendOutlined />, label: "Pesan Terkirim" },
-    { key: "starred", icon: <StarOutlined />, label: "Ditandai" },
-    { key: "trash", icon: <DeleteOutlined />, label: "Sampah" },
+    { key: "main", icon: <InboxOutlined />, label: "Kunjungan" },
+    { key: "check-in", icon: <CheckCircleOutlined />, label: "Check In" },
+    { key: "check-out", icon: <CloseCircleOutlined />, label: "Check Out" },
+    { key: "setting", icon: <SettingOutlined />, label: "Pengaturan" },
   ];
-
-  const token = {
-    header: {
-      colorBgHeader: "#FFFFFF",
-      colorHeaderTitle: "#5F6368",
-    },
-    bgLayout: "#FFFFFF",
-    colorPrimary: "#EA4335", // Gmail red
-    sider: {
-      colorBgCollapsedButton: "#FFFFFF",
-      colorTextCollapsedButton: "#5F6368",
-      colorTextCollapsedButtonHover: "#202124",
-      colorBgMenuItemActive: "#FCE8E6", // Light red for active item
-      colorTextMenuTitle: "#5F6368",
-      colorTextMenuItemHover: "#202124",
-      colorTextMenuSelected: "#D93025", // Darker red for selected text
-      colorTextMenuActive: "#D93025",
-      colorBgMenuItemHover: "#F1F3F4",
-      colorBgMenuItemSelected: "#FCE8E6",
-      colorBgMenuItemCollapsedElevated: "#FFFFFF",
-      colorTextMenu: "#5F6368",
-      colorBgMenu: "#FFFFFF",
-      colorTextMenuSecondary: "#5F6368",
-      colorMenuItemDivider: "#E8EAED",
-    },
-    Button: {},
-  };
 
   const [collapsed, setCollapsed] = useState(true);
 
   return (
     <ConfigProvider
-      locale={frFR}
+      locale={idID}
       theme={{
-        token: token,
+        token: GuestBookToken,
       }}
     >
       <ProConfigProvider>
         <ProLayout
-          title="Mail ASN"
+          title="TemuBKD"
           defaultCollapsed={collapsed}
           collapsed={collapsed}
           onCollapse={setCollapsed}
           selectedKeys={[active]}
-          logo={<MailOutlined style={{ color: "#EA4335" }} />}
+          logo={<BookOutlined style={{ color: "#2E7D32" }} />}
           layout="mix"
           navTheme="light"
           contentWidth="Fluid"
@@ -94,7 +73,7 @@ function GmailLayout({ children, active = "inbox" }) {
                     type="primary"
                     icon={<EditOutlined />}
                   >
-                    Compose
+                    Tulis Pesan
                   </Button>
                 );
               else {
@@ -112,7 +91,7 @@ function GmailLayout({ children, active = "inbox" }) {
                       block
                       type="primary"
                     >
-                      Compose
+                      Tulis Pesan
                     </Button>
                   </Center>
                 );
@@ -131,13 +110,39 @@ function GmailLayout({ children, active = "inbox" }) {
               );
             }
           }}
-          token={token}
+          token={GuestBookToken}
           route={{
             routes: menuItems.map((item) => ({
-              path: `/mails/${item.key}`,
+              path: `/guest-book/${item.key}`,
               name: item.label,
               icon: item.icon,
             })),
+          }}
+          actionsRender={(props) => {
+            // if (props.isMobile) return [];
+            return [
+              <NotifikasiKepegawaian
+                key="kepegawaian"
+                url="kepegawaian"
+                title="Inbox Kepegawaian"
+              />,
+              <NotifikasiPrivateMessage
+                key="private-message"
+                url="/mails/inbox"
+                title="Inbox Pesan Pribadi"
+              />,
+              <NotifikasiASNConnect
+                key="asn-connect"
+                url="asn-connect"
+                title="Inbox ASN Connect"
+              />,
+              <NotifikasiForumKepegawaian
+                key="forum-kepegawaian"
+                url="forum-kepegawaian"
+                title="Inbox Forum Kepegawaian"
+              />,
+              <MegaMenu key="mega-menu" />,
+            ];
           }}
           menuItemRender={(item, dom) => (
             <a
@@ -156,4 +161,4 @@ function GmailLayout({ children, active = "inbox" }) {
   );
 }
 
-export default GmailLayout;
+export default GuestBookLayout;

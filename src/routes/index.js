@@ -1,10 +1,8 @@
 import {
-  AudioOutlined,
   BarChartOutlined,
   BookOutlined,
   CarOutlined,
   DashboardFilled,
-  QuestionCircleOutlined,
   SettingOutlined,
   SmileOutlined,
   SnippetsOutlined,

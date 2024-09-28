@@ -1,0 +1,54 @@
+.mega-menu {
+  display: grid !important;
+  grid-template-columns: repeat(2, 1fr) !important;
+  width: 500px !important;
+  padding: 16px !important;
+  background-color: #fff !important;
+  border-radius: 8px !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15) !important;
+}
+
+.mega-menu .ant-menu-item {
+  height: auto !important;
+  line-height: 1.2 !important;
+  margin: 8px !important;
+  padding: 12px !important;
+  text-align: left !important;
+  display: flex !important;
+  align-items: center !important;
+}
+
+.mega-menu .ant-menu-item .anticon {
+  font-size: 32px !important;
+  margin-right: 16px !important;
+}
+
+.mega-menu .ant-menu-item-icon + span {
+  display: flex !important;
+  flex-direction: column !important;
+}
+
+.menu-item-label {
+  font-size: 16px !important;
+  font-weight: bold !important;
+  margin-bottom: 4px !important;
+}
+
+.menu-item-description {
+  font-size: 12px !important;
+  color: #666 !important;
+}
+
+.mega-menu-trigger {
+  display: flex !important;
+  align-items: center !important;
+  background: none !important;
+  border: none !important;
+  box-shadow: none !important;
+  font-size: 16px !important;
+  color: #000 !important;
+}
+
+.mega-menu-trigger .anticon {
+  margin-right: 8px !important;
+}
