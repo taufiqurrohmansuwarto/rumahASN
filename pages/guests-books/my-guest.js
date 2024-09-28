@@ -2,8 +2,8 @@ import GuestBookLayout from "@/components/GuestBook/GuestBookLayout";
 import PageContainer from "@/components/PageContainer";
 import { Grid } from "antd";
 import Head from "next/head";
-
-function GuestBookMyGuest() {
+import GuestBookMyGuest from "@/components/GuestBook/GuestBookMyGuest";
+function GuestBookMyGuests() {
   const breakPoint = Grid.useBreakpoint();
   return (
     <>
@@ -16,18 +16,20 @@ function GuestBookMyGuest() {
         }}
         title="Kunjungan Saya"
         content="Kunjungan Saya"
-      ></PageContainer>
+      >
+        <GuestBookMyGuest />
+      </PageContainer>
     </>
   );
 }
 
-GuestBookMyGuest.Auth = {
+GuestBookMyGuests.Auth = {
   action: "manage",
   subject: "GuestBook",
 };
 
-GuestBookMyGuest.getLayout = function getLayout(page) {
+GuestBookMyGuests.getLayout = function getLayout(page) {
   return <GuestBookLayout active="my-guest">{page}</GuestBookLayout>;
 };
 
-export default GuestBookMyGuest;
+export default GuestBookMyGuests;
