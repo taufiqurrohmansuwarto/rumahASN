@@ -1,5 +1,4 @@
 import { currentUserRole } from "@/services/current-user.services";
-import { appList } from "@/utils/app-lists";
 import {
   AntDesignOutlined,
   ApiOutlined,
@@ -19,7 +18,7 @@ import {
   IconUserStar,
 } from "@tabler/icons-react";
 import { AccessControl } from "accesscontrol";
-import { Button, Dropdown, Grid, Typography } from "antd";
+import { Button, Dropdown, Grid, Space, Typography } from "antd";
 import { uniqBy } from "lodash";
 import { signOut, useSession } from "next-auth/react";
 import dynamic from "next/dynamic";
@@ -27,6 +26,7 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import { useState } from "react";
 import { userRoutes } from "../routes";
+import MegaMenu from "./MegaMenu/MegaMenu";
 import NotifikasiASNConnect from "./Notification/NotifikasiASNConnect";
 import NotifikasiForumKepegawaian from "./Notification/NotifikasiForumKepegawaian";
 import NotifikasiKepegawaian from "./Notification/NotifikasiKepegawaian";
@@ -616,40 +616,43 @@ function Layout({ children, active, collapsed = true }) {
             url="forum-kepegawaian"
             title="Inbox Forum Kepegawaian"
           />,
+          <MegaMenu key="mega-menu" />,
         ];
       }}
-      appList={appList(data?.user)}
+      // appList={appList(data?.user)}
       avatarProps={{
         src: data?.user?.image,
-        size: "small",
+        size: "large",
         render: (props, dom) => {
           return (
-            <Dropdown
-              menu={{
-                onClick: (e) => {
-                  if (e.key === "logout") {
-                    signOut();
-                  }
-                  if (e.key === "profile") {
-                    router.push("/settings/profile");
-                  }
-                },
-                items: [
-                  {
-                    key: "profile",
-                    icon: <UserOutlined />,
-                    label: "Profil",
+            <Space>
+              <Dropdown
+                menu={{
+                  onClick: (e) => {
+                    if (e.key === "logout") {
+                      signOut();
+                    }
+                    if (e.key === "profile") {
+                      router.push("/settings/profile");
+                    }
                   },
-                  {
-                    key: "logout",
-                    icon: <LogoutOutlined />,
-                    label: "Keluar",
-                  },
-                ],
-              }}
-            >
-              {dom}
-            </Dropdown>
+                  items: [
+                    {
+                      key: "profile",
+                      icon: <UserOutlined />,
+                      label: "Profil",
+                    },
+                    {
+                      key: "logout",
+                      icon: <LogoutOutlined />,
+                      label: "Keluar",
+                    },
+                  ],
+                }}
+              >
+                {dom}
+              </Dropdown>
+            </Space>
           );
         },
       }}
