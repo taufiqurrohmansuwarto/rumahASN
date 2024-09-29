@@ -110,9 +110,9 @@ const MegaMenu = () => {
       }}
     >
       <IconGridDots
-        color="black"
-        size={30}
-        style={{ cursor: "pointer", marginLeft: 10 }}
+        color="#5f6368"
+        size={36}
+        style={{ cursor: "pointer", marginLeft: 16 }}
       />
     </Popover>
   );

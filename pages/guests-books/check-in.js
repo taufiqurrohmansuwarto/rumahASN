@@ -2,8 +2,9 @@ import GuestBookLayout from "@/components/GuestBook/GuestBookLayout";
 import PageContainer from "@/components/PageContainer";
 import { Grid } from "antd";
 import Head from "next/head";
+import GuestBookCheckIn from "@/components/GuestBook/GuestBookCheckIn";
 
-function GuestBookCheckIn() {
+function CheckIn() {
   const breakPoint = Grid.useBreakpoint();
   return (
     <>
@@ -14,20 +15,22 @@ function GuestBookCheckIn() {
         childrenContentStyle={{
           padding: breakPoint?.xs ? 0 : null,
         }}
-        title="Semua Kunjungan"
-        content="Semua Kunjungan"
-      ></PageContainer>
+        title="Check In"
+        content="Check In"
+      >
+        <GuestBookCheckIn />
+      </PageContainer>
     </>
   );
 }
 
-GuestBookCheckIn.Auth = {
+CheckIn.Auth = {
   action: "manage",
-  subject: "GuestBook",
+  subject: "CheckIn",
 };
 
-GuestBookCheckIn.getLayout = function getLayout(page) {
+CheckIn.getLayout = function getLayout(page) {
   return <GuestBookLayout active="check-in">{page}</GuestBookLayout>;
 };
 
-export default GuestBookCheckIn;
+export default CheckIn;
