@@ -79,6 +79,7 @@ function GuestBookVisitAll() {
   return (
     <Card title="Daftar Kunjungan">
       <Table
+        size="small"
         columns={columns}
         rowKey={(row) => row?.id}
         dataSource={data?.data}

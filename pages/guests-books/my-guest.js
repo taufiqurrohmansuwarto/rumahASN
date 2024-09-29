@@ -14,8 +14,7 @@ function GuestBookMyGuests() {
         childrenContentStyle={{
           padding: breakPoint?.xs ? 0 : null,
         }}
-        title="Kunjungan Saya"
-        content="Kunjungan Saya"
+        title="Daftar Tamu"
       >
         <GuestBookMyGuest />
       </PageContainer>

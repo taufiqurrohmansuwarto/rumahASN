@@ -348,12 +348,24 @@ const getAllScheduleVisits = async (req, res) => {
 const myGuest = async (req, res) => {
   try {
     const { customId } = req.user;
-    const scheduleVisits = await ScheduleVisits.query().whereRaw(
-      `employee_visited @> ?::jsonb`,
-      JSON.stringify([{ customid: customId }])
-    );
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const scheduleVisits = await ScheduleVisits.query()
+      .page(page - 1, limit)
+      .whereRaw(
+        `employee_visited @> ?::jsonb`,
+        JSON.stringify([{ customid: customId }])
+      )
+      .withGraphFetched("[guest, visits]");
 
-    res.json(scheduleVisits);
+    const data = {
+      data: scheduleVisits.results,
+      total: scheduleVisits.total,
+      page,
+      limit,
+    };
+
+    res.json(data);
   } catch (error) {
     console.log(error);
     res.status(400).json({ message: "Internal Server Error" });
