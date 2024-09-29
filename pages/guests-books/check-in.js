@@ -16,7 +16,6 @@ function CheckIn() {
           padding: breakPoint?.xs ? 0 : null,
         }}
         title="Check In"
-        content="Check In"
       >
         <GuestBookCheckIn />
       </PageContainer>

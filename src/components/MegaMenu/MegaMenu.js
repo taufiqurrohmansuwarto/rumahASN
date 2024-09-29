@@ -110,7 +110,7 @@ const MegaMenu = () => {
       }}
     >
       <IconGridDots
-        color="#5f6368"
+        color="black"
         size={36}
         style={{ cursor: "pointer", marginLeft: 16 }}
       />
