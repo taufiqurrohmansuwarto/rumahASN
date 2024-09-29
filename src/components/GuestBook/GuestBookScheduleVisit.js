@@ -5,7 +5,13 @@ import {
   getScheduleVisits,
   updateScheduleVisit,
 } from "@/services/guests-books.services";
-import { PlusOutlined } from "@ant-design/icons";
+import {
+  EditOutlined,
+  PlusOutlined,
+  QrcodeOutlined,
+  DeleteOutlined,
+} from "@ant-design/icons";
+import { Text } from "@mantine/core";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Avatar,
@@ -341,14 +347,16 @@ function GuestBookScheduleVisit() {
               {toUpper(row?.category)}
             </Descriptions.Item>
             <Descriptions.Item label="Pegawai yang dikunjungi">
-              {row?.employee_visited?.map((item) => (
-                <Tag color="geekblue" key={item?.id}>
-                  <Space>
-                    <Avatar size="small" src={item?.avatar} />
-                    <Typography.Text strong>{item?.name}</Typography.Text>
-                  </Space>
-                </Tag>
-              ))}
+              <Space direction="vertical">
+                {row?.employee_visited?.map((item) => (
+                  <Tag color="geekblue" key={item?.id}>
+                    <Space>
+                      <Avatar size="small" src={item?.avatar} />
+                      <Text color="black">{item?.name}</Text>
+                    </Space>
+                  </Tag>
+                ))}
+              </Space>
             </Descriptions.Item>
             <Descriptions.Item label="Alasan Kunjungan">
               {row?.purpose}
@@ -356,11 +364,14 @@ function GuestBookScheduleVisit() {
             <Descriptions.Item label="Keterangan">
               {row?.description}
             </Descriptions.Item>
+            <Descriptions.Item label="Dibuat pada">
+              {dayjs(row?.created_at).format("DD MMMM YYYY HH:mm:ss")}
+            </Descriptions.Item>
           </Descriptions>
-          <Space>
-            <a onClick={() => handleOpenDetail(row)}>Detail</a>
+          <Space style={{ marginTop: 10 }}>
+            <a onClick={() => handleOpenDetail(row)}>QR Code</a>
             <Divider type="vertical" />
-            <a>Edit</a>
+            <a onClick={() => handleOpenEdit(row)}>Edit</a>
             <Divider type="vertical" />
             <Popconfirm
               title="Apakah anda yakin ingin menghapus jadwal kunjungan ini?"
@@ -413,13 +424,23 @@ function GuestBookScheduleVisit() {
       responsive: ["sm"],
     },
     {
+      title: "Dibuat pada",
+      dataIndex: "created_at",
+      render: (value) => dayjs(value).format("DD MMMM YYYY HH:mm:ss"),
+      responsive: ["sm"],
+    },
+    {
       title: "Aksi",
       key: "aksi",
       render: (_, row) => (
         <Space>
-          <a onClick={() => handleOpenDetail(row)}>Detail</a>
+          <a onClick={() => handleOpenDetail(row)}>
+            <QrcodeOutlined />
+          </a>
           <Divider type="vertical" />
-          <a onClick={() => handleOpenEdit(row)}>Edit</a>
+          <a onClick={() => handleOpenEdit(row)}>
+            <EditOutlined />
+          </a>
           <Divider type="vertical" />
           <Popconfirm
             title="Apakah anda yakin ingin menghapus jadwal kunjungan ini?"
@@ -427,7 +448,9 @@ function GuestBookScheduleVisit() {
             okText="Hapus"
             cancelText="Batal"
           >
-            <a>Hapus</a>
+            <a>
+              <DeleteOutlined />
+            </a>
           </Popconfirm>
         </Space>
       ),

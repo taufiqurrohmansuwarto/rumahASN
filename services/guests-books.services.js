@@ -52,3 +52,17 @@ export const checkOut = (data) => {
 export const getMyGuest = () => {
   return api.get("/admin/my-guest").then((res) => res.data);
 };
+
+export const findByQrCode = async (data) => {
+  return api.post(`/admin/qr-code`, data).then((res) => res.data);
+};
+
+export const findCheckIn = async (query) => {
+  const qs = query ? `?${queryString.stringify(query)}` : "";
+  return api.get(`/admin/checkin${qs}`).then((res) => res.data);
+};
+
+export const findCheckOut = async (query) => {
+  const qs = query ? `?${queryString.stringify(query)}` : "";
+  return api.get(`/admin/checkout${qs}`).then((res) => res.data);
+};

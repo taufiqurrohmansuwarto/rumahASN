@@ -5,6 +5,8 @@ const SyncPegawai = require("@/models/sync-pegawai.model");
 const Visits = require("@/models/guests_books/visits.model");
 const QrCode = require("@/models/guests_books/qr-code.model");
 const Notifications = require("@/models/guests_books/notifications.model");
+const User = require("@/models/users.model");
+
 const { raw } = require("objection");
 
 const createQrCode = async ({ guestId, scheduleVisitId }) => {
@@ -24,16 +26,17 @@ const createQrCode = async ({ guestId, scheduleVisitId }) => {
 const checkIn = async (req, res) => {
   try {
     const { qrCode } = req.body;
-    const qrCodeData = await QrCode.query().findById(qrCode);
+    const qrCodeData = await QrCode.query().where("qr_code", qrCode).first();
 
     if (!qrCodeData) {
-      return res.status(404).json({ message: "QR Code not found" });
+      return res.status(404).json({ message: "Kode QR tidak ditemukan" });
     }
 
-    const { guestId, scheduleVisitId } = qrCodeData;
+    const { guest_id: guestId, schedule_visit_id: scheduleVisitId } =
+      qrCodeData;
 
     if (qrCodeData.expired_at < new Date()) {
-      return res.status(400).json({ message: "QR Code expired" });
+      return res.status(400).json({ message: "Kode QR sudah kadaluarsa" });
     }
 
     const scheduleVisit = await ScheduleVisits.query().findById(
@@ -41,7 +44,19 @@ const checkIn = async (req, res) => {
     );
 
     if (!scheduleVisit) {
-      return res.status(404).json({ message: "Schedule visit not found" });
+      return res
+        .status(404)
+        .json({ message: "Jadwal kunjungan tidak ditemukan" });
+    }
+
+    const findVisit = await Visits.query()
+      .where("guest_id", guestId)
+      .where("schedule_visit_id", scheduleVisitId)
+      .where("status", "check-in")
+      .first();
+
+    if (findVisit) {
+      return res.status(400).json({ message: "Sudah melakukan check in" });
     }
 
     const visit = await Visits.query().insert({
@@ -58,43 +73,108 @@ const checkIn = async (req, res) => {
   }
 };
 
-const checkOut = async (req, res) => {
+const findByQrCode = async (req, res) => {
   try {
     const { qrCode } = req.body;
-    const qrCodeData = await QrCode.query().findById(qrCode);
+    const qrCodeData = await QrCode.query().where("qr_code", qrCode).first();
 
     if (!qrCodeData) {
-      return res.status(404).json({ message: "QR Code not found" });
+      return res.status(404).json({ message: "Kode QR tidak ditemukan" });
     }
 
-    const { guestId, scheduleVisitId } = qrCodeData;
-
-    const visit = await Visits.query().findById(qrCode);
-
-    if (!visit) {
-      return res.status(404).json({ message: "Visit not found" });
-    } else {
-      const checkOutDate = new Date();
-      await Visits.query().findById(qrCode).patch({
-        check_out_date: checkOutDate,
-        status: "check-out",
-      });
-      res.json({ message: "Check out success" });
+    if (qrCodeData.expired_at < new Date()) {
+      return res.status(400).json({ message: "Kode QR sudah kadaluarsa" });
     }
+
+    const scheduleVisit = await ScheduleVisits.query()
+      .findById(qrCodeData.schedule_visit_id)
+      .withGraphFetched("[guest.[user]]");
+
+    const data = {
+      qrCode: qrCodeData,
+      scheduleVisit,
+    };
+
+    res.json(data);
   } catch (error) {
     console.log(error);
     res.status(400).json({ message: "Internal Server Error" });
   }
 };
 
+const checkOut = async (req, res) => {
+  try {
+    const { qrCode } = req.body;
+    const qrCodeData = await QrCode.query().where("qr_code", qrCode).first();
+
+    if (!qrCodeData) {
+      return res.status(404).json({ message: "Kode QR tidak ditemukan" });
+    }
+
+    const { guest_id: guestId, schedule_visit_id: scheduleVisitId } =
+      qrCodeData;
+
+    const visit = await Visits.query()
+      .where("guest_id", guestId)
+      .where("schedule_visit_id", scheduleVisitId)
+      .first();
+
+    if (!visit) {
+      return res.status(404).json({ message: "Kunjungan tidak ditemukan" });
+    }
+
+    if (visit.status === "check-out") {
+      return res.status(400).json({ message: "Sudah melakukan check out" });
+    }
+
+    if (visit.status !== "check-in") {
+      return res.status(400).json({ message: "Belum melakukan check in" });
+    }
+
+    const result = await Visits.query().insert({
+      guest_id: guestId,
+      schedule_visit_id: scheduleVisitId,
+      check_out_date: new Date(),
+      status: "check-out",
+    });
+
+    res.json({ message: "Check out berhasil" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Gagal melakukan check out" });
+  }
+};
+
+// get guest
 const getGuests = async (req, res) => {
   const { customId } = req.user;
-  const guest = await Guests.query().where("user_id", customId).first();
-  if (!guest) {
-    res.json(null);
-  } else {
-    res.json(guest);
-  }
+  const [guest, currentUser] = await Promise.all([
+    Guests.query().where("user_id", customId).first(),
+    User.query()
+      .findById(customId)
+      .select(
+        "username as name",
+        "image as photo",
+        "status_kepegawaian as visitor_type",
+        "email",
+        "info"
+      ),
+  ]);
+
+  const helperData = {
+    name: currentUser.name,
+    photo: currentUser.photo,
+    visitor_type: currentUser?.visitor_type || null,
+    email: currentUser?.email || null,
+    institution: currentUser?.info?.perangkat_daerah?.detail || null,
+  };
+
+  const responseData = {
+    guest: guest || null,
+    helper: helperData,
+  };
+
+  res.json(responseData);
 };
 
 // upsert
@@ -243,10 +323,22 @@ const getEmployeesBKD = async (req, res) => {
 
 const getAllScheduleVisits = async (req, res) => {
   try {
+    const limit = parseInt(req.query.limit) || 10;
+    const page = parseInt(req.query.page) || 1;
+
     const scheduleVisits = await ScheduleVisits.query()
-      .orderBy("visit_date", "desc")
-      .withGraphFetched("guest");
-    res.json(scheduleVisits);
+      .page(page - 1, limit)
+      .orderBy("created_at", "desc")
+      .withGraphFetched("[guest.[user]]");
+
+    const data = {
+      data: scheduleVisits.results,
+      total: scheduleVisits.total,
+      page,
+      limit,
+    };
+
+    res.json(data);
   } catch (error) {
     console.log(error);
     res.status(400).json({ message: "Internal Server Error" });
@@ -268,6 +360,51 @@ const myGuest = async (req, res) => {
   }
 };
 
+const findCheckIn = async (req, res) => {
+  try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const result = await Visits.query()
+      .page(page - 1, limit)
+      .orderBy("created_at", "desc")
+      .where("status", "check-in");
+    const data = {
+      data: result.results,
+      total: result.total,
+      page,
+      limit,
+    };
+
+    res.json(data);
+  } catch (error) {
+    console.log(error);
+    res.status(400).json({ message: "Internal Server Error" });
+  }
+};
+
+const findCheckOut = async (req, res) => {
+  try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const result = await Visits.query()
+      .page(page - 1, limit)
+      .orderBy("created_at", "desc")
+      .where("status", "check-out")
+      .withGraphFetched("[guest.[user]]");
+    const data = {
+      data: result.results,
+      total: result.total,
+      page,
+      limit,
+    };
+
+    res.json(data);
+  } catch (error) {
+    console.log(error);
+    res.status(400).json({ message: "Internal Server Error" });
+  }
+};
+
 module.exports = {
   getAllScheduleVisits,
   myGuest,
@@ -281,4 +418,7 @@ module.exports = {
   deleteScheduleVisit,
   checkIn,
   checkOut,
+  findByQrCode,
+  findCheckIn,
+  findCheckOut,
 };
