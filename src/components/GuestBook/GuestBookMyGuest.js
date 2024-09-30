@@ -2,7 +2,7 @@ import { getMyGuest } from "@/services/guests-books.services";
 import { SyncOutlined } from "@ant-design/icons";
 import { Stack, Text } from "@mantine/core";
 import { useQuery } from "@tanstack/react-query";
-import { Button, Card, Flex, Space, Table, Tag, Tooltip } from "antd";
+import { Button, Card, Col, Flex, Row, Space, Table, Tag, Tooltip } from "antd";
 import dayjs from "dayjs";
 
 function GuestBookMyGuest() {
@@ -53,37 +53,44 @@ function GuestBookMyGuest() {
   ];
 
   return (
-    <Card title="Daftar Tamu">
-      <Stack>
-        <Flex align="baseline" justify="space-between">
-          <Text size={16}>Tabel Tamu</Text>
-          <Space>
-            <Tooltip title="Segarkan">
-              <Button
-                type="text"
-                icon={<SyncOutlined />}
-                iconPosition="end"
-                onClick={refetch}
-                loading={isRefetching}
-              />
-            </Tooltip>
-          </Space>
-        </Flex>
-        <Table
-          dataSource={data?.data}
-          pagination={{
-            total: data?.total,
-            pageSize: data?.limit,
-            current: data?.page,
-            showTotal: (total, range) =>
-              `${range[0]}-${range[1]} of ${total} items`,
-          }}
-          columns={columns}
-          loading={isLoading || isRefetching}
-          rowKey={(row) => row.id}
-        />
-      </Stack>
-    </Card>
+    <Row gutter={[16, 16]}>
+      <Col md={24} xs={24}>
+        <Card></Card>
+      </Col>
+      <Col md={24} xs={24}>
+        <Card>
+          <Stack>
+            <Flex align="baseline" justify="space-between">
+              <Text size={16}>Tabel Tamu</Text>
+              <Space>
+                <Tooltip title="Segarkan">
+                  <Button
+                    type="text"
+                    icon={<SyncOutlined />}
+                    iconPosition="end"
+                    onClick={refetch}
+                    loading={isRefetching}
+                  />
+                </Tooltip>
+              </Space>
+            </Flex>
+            <Table
+              dataSource={data?.data}
+              pagination={{
+                total: data?.total,
+                pageSize: data?.limit,
+                current: data?.page,
+                showTotal: (total, range) =>
+                  `${range[0]}-${range[1]} of ${total} items`,
+              }}
+              columns={columns}
+              loading={isLoading || isRefetching}
+              rowKey={(row) => row.id}
+            />
+          </Stack>
+        </Card>
+      </Col>
+    </Row>
   );
 }
 

@@ -1,11 +1,11 @@
-import React, { useState } from "react";
-import GuestBookFindQrCode from "./GuestBookFindQrCode";
+import { findCheckOut } from "@/services/guests-books.services";
 import { useQuery } from "@tanstack/react-query";
-import { findCheckIn } from "@/services/guests-books.services";
 import { Card, Col, Row, Table, Tag } from "antd";
 import dayjs from "dayjs";
+import { useState } from "react";
+import GuestBookFindQrCodeCheckout from "@/components/GuestBook/GuestBookFindQrCodeCheckout";
 
-const ListCheckIn = ({ data, isLoading }) => {
+const ListCheckOut = ({ data, isLoading }) => {
   const columns = [
     {
       title: "Nama",
@@ -27,7 +27,7 @@ const ListCheckIn = ({ data, isLoading }) => {
   ];
 
   return (
-    <Card title="Daftar Check In">
+    <Card title="Daftar Check Out">
       <Table
         rowKey={(row) => row.id}
         loading={isLoading}
@@ -49,9 +49,9 @@ function GuestBookCheckIn() {
     limit: 10,
   });
 
-  const { data: checkIn, isLoading: isLoadingCheckIn } = useQuery(
-    ["checkin", query],
-    () => findCheckIn(query),
+  const { data: checkOut, isLoading: isLoadingCheckOut } = useQuery(
+    ["checkout", query],
+    () => findCheckOut(query),
     {
       enabled: !!query,
     }
@@ -60,10 +60,10 @@ function GuestBookCheckIn() {
   return (
     <Row gutter={[16, 16]}>
       <Col md={24} xs={24}>
-        <GuestBookFindQrCode />
+        <GuestBookFindQrCodeCheckout />
       </Col>
       <Col md={24} xs={24}>
-        <ListCheckIn data={checkIn} isLoading={isLoadingCheckIn} />
+        <ListCheckOut data={checkOut} isLoading={isLoadingCheckOut} />
       </Col>
     </Row>
   );

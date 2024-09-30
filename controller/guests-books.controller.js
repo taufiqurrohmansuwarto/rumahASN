@@ -114,20 +114,35 @@ const checkOut = async (req, res) => {
     const { guest_id: guestId, schedule_visit_id: scheduleVisitId } =
       qrCodeData;
 
-    const visit = await Visits.query()
-      .where("guest_id", guestId)
-      .where("schedule_visit_id", scheduleVisitId)
-      .first();
+    const [scheduleVisit, alreadyCheckOut, alreadyCheckIn] = await Promise.all([
+      ScheduleVisits.query().findById(scheduleVisitId).first(),
+      Visits.query()
+        .where({
+          guest_id: guestId,
+          schedule_visit_id: scheduleVisitId,
+          status: "check-out",
+        })
+        .first(),
+      Visits.query()
+        .where({
+          guest_id: guestId,
+          schedule_visit_id: scheduleVisitId,
+          status: "check-in",
+        })
+        .first(),
+    ]);
 
-    if (!visit) {
-      return res.status(404).json({ message: "Kunjungan tidak ditemukan" });
+    if (!scheduleVisit) {
+      return res
+        .status(404)
+        .json({ message: "Jadwal kunjungan tidak ditemukan" });
     }
 
-    if (visit.status === "check-out") {
+    if (alreadyCheckOut) {
       return res.status(400).json({ message: "Sudah melakukan check out" });
     }
 
-    if (visit.status !== "check-in") {
+    if (!alreadyCheckIn) {
       return res.status(400).json({ message: "Belum melakukan check in" });
     }
 
@@ -138,7 +153,7 @@ const checkOut = async (req, res) => {
       status: "check-out",
     });
 
-    res.json({ message: "Check out berhasil" });
+    res.json(result);
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Gagal melakukan check out" });
@@ -326,10 +341,27 @@ const getAllScheduleVisits = async (req, res) => {
     const limit = parseInt(req.query.limit) || 10;
     const page = parseInt(req.query.page) || 1;
 
-    const scheduleVisits = await ScheduleVisits.query()
+    const range = req.query.range || [];
+    const name = req?.query?.name || "";
+
+    let query = ScheduleVisits.query()
       .page(page - 1, limit)
       .orderBy("created_at", "desc")
-      .withGraphFetched("[guest.[user]]");
+      .where((builder) => {
+        if (range && range.length === 2) {
+          builder.whereRaw("DATE(visit_date) BETWEEN ? AND ?", range);
+        }
+      });
+
+    if (!name) {
+      query.withGraphFetched("[guest.[user]]");
+    } else {
+      query
+        .withGraphJoined("[guest.[user]]")
+        .whereRaw("LOWER(guest.name) LIKE ?", `%${name.toLowerCase()}%`);
+    }
+
+    const scheduleVisits = await query.orderBy("created_at", "desc");
 
     const data = {
       data: scheduleVisits.results,
@@ -379,7 +411,9 @@ const findCheckIn = async (req, res) => {
     const result = await Visits.query()
       .page(page - 1, limit)
       .orderBy("created_at", "desc")
-      .where("status", "check-in");
+      .where("status", "check-in")
+      .withGraphFetched("[schedule, guest.[user]]");
+
     const data = {
       data: result.results,
       total: result.total,
@@ -402,7 +436,8 @@ const findCheckOut = async (req, res) => {
       .page(page - 1, limit)
       .orderBy("created_at", "desc")
       .where("status", "check-out")
-      .withGraphFetched("[guest.[user]]");
+      .withGraphFetched("[guest.[user], schedule]");
+
     const data = {
       data: result.results,
       total: result.total,

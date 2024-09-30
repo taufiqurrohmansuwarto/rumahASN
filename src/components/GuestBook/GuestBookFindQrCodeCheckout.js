@@ -1,4 +1,4 @@
-import { checkIn, findByQrCode } from "@/services/guests-books.services";
+import { checkOut, findByQrCode } from "@/services/guests-books.services";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   Avatar,
@@ -17,23 +17,23 @@ const ModalScanQrCode = ({
   onCancel,
   data,
   qrCode,
-  onCheckIn,
+  onCheckOut,
   isLoading,
 }) => {
-  const handleCheckIn = () => {
+  const handleCheckOut = () => {
     const payload = {
       qrCode: qrCode,
     };
-    onCheckIn(payload);
+    onCheckOut(payload);
   };
 
   return (
     <Modal
       title="Data Kunjungan Tamu"
-      okText="Check In"
+      okText="Check Out"
       okType="primary"
       confirmLoading={isLoading}
-      onOk={handleCheckIn}
+      onOk={handleCheckOut}
       open={open}
       onCancel={onCancel}
       centered
@@ -66,7 +66,7 @@ const ModalScanQrCode = ({
   );
 };
 
-function GuestBookFindQrCode() {
+function GuestBookFindQrCodeCheckout() {
   const [qrCode, setQrCode] = useState("");
   const [result, setResult] = useState(null);
   const [showModal, setShowModal] = useState(false);
@@ -105,11 +105,11 @@ function GuestBookFindQrCode() {
     }
   );
 
-  const { mutateAsync: guestCheckIn, isLoading: isLoadingGuestCheckIn } =
-    useMutation((data) => checkIn(data), {
+  const { mutateAsync: guestCheckOut, isLoading: isLoadingGuestCheckOut } =
+    useMutation((data) => checkOut(data), {
       onSuccess: (data) => {
-        queryClient.invalidateQueries(["checkin"]);
-        message.success("Check In Berhasil");
+        queryClient.invalidateQueries(["checkout"]);
+        message.success("Check Out Berhasil");
         handleCloseModal();
         setResult(null);
       },
@@ -148,11 +148,11 @@ function GuestBookFindQrCode() {
         onCancel={handleCloseModal}
         data={result?.scheduleVisit}
         qrCode={result?.qrCode?.qr_code}
-        isLoading={isLoadingGuestCheckIn}
-        onCheckIn={guestCheckIn}
+        isLoading={isLoadingGuestCheckOut}
+        onCheckOut={guestCheckOut}
       />
     </Card>
   );
 }
 
-export default GuestBookFindQrCode;
+export default GuestBookFindQrCodeCheckout;

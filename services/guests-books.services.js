@@ -37,8 +37,9 @@ export const getEmployeesBKD = () => {
   return api.get("/employees").then((res) => res.data);
 };
 
-export const getAllScheduleVisits = () => {
-  return api.get("/admin/schedule-visits").then((res) => res.data);
+export const getAllScheduleVisits = (query) => {
+  const qs = query ? `?${queryString.stringify(query)}` : "";
+  return api.get(`/admin/schedule-visits${qs}`).then((res) => res.data);
 };
 
 export const checkIn = (data) => {
