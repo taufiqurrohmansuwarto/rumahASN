@@ -5,6 +5,6 @@ import { createRouter } from "next-connect";
 
 const router = createRouter();
 
-router.use(auth).use(agentAdminMiddleware).post(checkOut).get(findCheckOut);
+router.use(auth).use(agentAdminMiddleware).get(findCheckOut).post(checkOut);
 
 export default router.handler({});

@@ -1,9 +1,6 @@
 const { Model } = require("objection");
 const knex = require("../../db");
 const { nanoid } = require("nanoid");
-const Guest = require("@/models/guests_books/guests.model");
-const Visits = require("@/models/guests_books/visits.model");
-const QrCode = require("@/models/guests_books/qr-code.model");
 
 Model.knex(knex);
 
@@ -17,6 +14,10 @@ class ScheduleVisits extends Model {
   }
 
   static get relationMappings() {
+    const Guest = require("@/models/guests_books/guests.model");
+    const Visits = require("@/models/guests_books/visits.model");
+    const QrCode = require("@/models/guests_books/qr-code.model");
+
     return {
       guest: {
         relation: Model.HasOneRelation,

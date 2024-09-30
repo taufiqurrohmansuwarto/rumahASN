@@ -459,22 +459,12 @@ function GuestBookScheduleVisit() {
   ];
 
   return (
-    <div>
+    <Row gutter={[16, 16]}>
       <DetailModal
         data={dataDetail}
         open={showDetail}
         onCancel={handleCloseDetail}
       />
-      <Button
-        style={{
-          marginBottom: 16,
-        }}
-        icon={<PlusOutlined />}
-        type="primary"
-        onClick={handleOpen}
-      >
-        Kunjungan
-      </Button>
       <FormModalCreate
         open={open}
         onCancel={handleClose}
@@ -485,13 +475,31 @@ function GuestBookScheduleVisit() {
         edit={editSchedule}
         editLoading={isLoadingUpdate}
       />
-      <Table
-        loading={isLoading}
-        columns={columns}
-        dataSource={data}
-        rowKey={(row) => row?.id}
-      />
-    </div>
+      <Col md={24} xs={24}>
+        <Card></Card>
+      </Col>
+      <Col md={24} xs={24}>
+        <Card>
+          <Button
+            style={{
+              marginBottom: 16,
+            }}
+            icon={<PlusOutlined />}
+            type="primary"
+            onClick={handleOpen}
+          >
+            Kunjungan
+          </Button>
+
+          <Table
+            loading={isLoading}
+            columns={columns}
+            dataSource={data}
+            rowKey={(row) => row?.id}
+          />
+        </Card>
+      </Col>
+    </Row>
   );
 }
 

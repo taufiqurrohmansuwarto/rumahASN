@@ -230,10 +230,7 @@ const GuestsBookUser = () => {
   });
 
   return (
-    <Card
-      title="Daftar Kunjungan"
-      extra={<a onClick={handleOpen}>Ubah Data Diri</a>}
-    >
+    <>
       <FormUserModal
         open={open}
         onCancel={handleClose}
@@ -246,7 +243,7 @@ const GuestsBookUser = () => {
       <Skeleton active loading={isLoading}>
         {data?.guest ? <GuestBookScheduleVisit /> : <UserEmpty data={data} />}
       </Skeleton>
-    </Card>
+    </>
   );
 };
 
