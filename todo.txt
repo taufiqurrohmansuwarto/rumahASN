@@ -1,6 +1,2 @@
-
-id  varchar(20)
-pId varchar(20)
-name varchar(255)
-aktif enum(Y,N)
-kelas_jab integer
+todo 
+1. kebutuhan download

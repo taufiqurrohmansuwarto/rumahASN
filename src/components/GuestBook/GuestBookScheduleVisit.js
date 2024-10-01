@@ -10,6 +10,8 @@ import {
   PlusOutlined,
   QrcodeOutlined,
   DeleteOutlined,
+  CaretDownOutlined,
+  CaretUpOutlined,
 } from "@ant-design/icons";
 import { Text } from "@mantine/core";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -37,6 +39,49 @@ import {
 import dayjs from "dayjs";
 import { toUpper } from "lodash";
 import { useEffect, useState } from "react";
+import QueryFilter from "../QueryFilter";
+
+const Filter = ({ onFinish, onReset, form }) => {
+  return (
+    <QueryFilter
+      onFinish={onFinish}
+      onReset={onReset}
+      span={{
+        sm: 24,
+        md: 24,
+        xl: 24,
+        lg: 24,
+        xxl: 6,
+        xs: 24,
+      }}
+      layout="vertical"
+      form={form}
+      submitter={{
+        searchConfig: {
+          resetText: "Reset",
+          submitText: "Cari",
+        },
+      }}
+      collapseRender={(collapsed) =>
+        collapsed ? (
+          <Space>
+            <span>More</span>
+            <CaretDownOutlined />
+          </Space>
+        ) : (
+          <Space>
+            <span>Collapse</span>
+            <CaretUpOutlined />
+          </Space>
+        )
+      }
+    >
+      <Form.Item name="visit_date" label="Tanggal Kunjungan">
+        <DatePicker.RangePicker />
+      </Form.Item>
+    </QueryFilter>
+  );
+};
 
 const FormEmployees = ({ name, data }) => {
   return (
@@ -235,7 +280,7 @@ const DetailModal = ({ open, onCancel, data }) => {
   );
 };
 
-function GuestBookScheduleVisit() {
+function GuestBookScheduleVisit({ edit }) {
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
 
@@ -323,10 +368,18 @@ function GuestBookScheduleVisit() {
       },
     });
 
-  const { data, isLoading } = useQuery(
-    ["guest-book-schedule-visits"],
-    () => getScheduleVisits(),
-    {}
+  const [query, setQuery] = useState({
+    page: 1,
+    limit: 10,
+  });
+  const { data, isLoading, isFetching } = useQuery(
+    ["guest-book-schedule-visits", query],
+    () => getScheduleVisits(query),
+    {
+      refetchOnWindowFocus: false,
+      enabled: !!query,
+      keepPreviousData: true,
+    }
   );
 
   const handleDelete = async (id) => {
@@ -458,6 +511,24 @@ function GuestBookScheduleVisit() {
     },
   ];
 
+  const [form] = Form.useForm();
+
+  const onReset = () => {
+    form.resetFields();
+    setQuery({
+      page: 1,
+      limit: 10,
+    });
+  };
+
+  const onSubmit = (values) => {
+    setQuery({
+      ...values,
+      page: 1,
+      limit: 10,
+    });
+  };
+
   return (
     <Row gutter={[16, 16]}>
       <DetailModal
@@ -476,10 +547,12 @@ function GuestBookScheduleVisit() {
         editLoading={isLoadingUpdate}
       />
       <Col md={24} xs={24}>
-        <Card></Card>
+        <Card>
+          <Filter onFinish={onSubmit} onReset={onReset} form={form} />
+        </Card>
       </Col>
       <Col md={24} xs={24}>
-        <Card>
+        <Card extra={<a onClick={edit}>Edit Profile</a>}>
           <Button
             style={{
               marginBottom: 16,
@@ -492,10 +565,24 @@ function GuestBookScheduleVisit() {
           </Button>
 
           <Table
-            loading={isLoading}
+            loading={isLoading || isFetching}
             columns={columns}
-            dataSource={data}
+            dataSource={data?.data}
             rowKey={(row) => row?.id}
+            pagination={{
+              total: data?.total,
+              showTotal: (total, range) =>
+                `${range[0]}-${range[1]} of ${total} items`,
+              onChange: (page, pageSize) => {
+                setQuery({
+                  ...query,
+                  page,
+                  limit: pageSize,
+                });
+              },
+              pageSize: data?.limit,
+              current: data?.page,
+            }}
           />
         </Card>
       </Col>

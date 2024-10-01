@@ -33,31 +33,31 @@ const applist = [
     icon: <IconMailbox />,
     title: "ASN Mail",
     color: "#1A73E8",
-    link: "/guests-books",
+    link: "#",
   },
   {
     icon: <IconBrain />,
     title: "Inovasi",
     color: "#EA4335",
-    link: "/guests-books",
+    link: "#",
   },
   {
     icon: <IconUserSquareRounded />,
     title: "Klinik ASN",
     color: "#34A853",
-    link: "/guests-books",
+    link: "#",
   },
   {
     icon: <IconUserSquareRounded />,
     title: "Time Capsule",
     color: "#FBBC05",
-    link: "/guests-books",
+    link: "#",
   },
   {
     icon: <IconMapPin />,
     title: "Peta Inspirasi",
     color: "#FBBC05",
-    link: "/guests-books",
+    link: "#",
   },
 ];
 
