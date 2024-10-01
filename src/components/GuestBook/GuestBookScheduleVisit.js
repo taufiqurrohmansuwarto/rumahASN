@@ -28,7 +28,6 @@ import {
   message,
   Modal,
   Popconfirm,
-  QRCode,
   Row,
   Select,
   Space,
@@ -40,6 +39,7 @@ import dayjs from "dayjs";
 import { toUpper } from "lodash";
 import { useEffect, useState } from "react";
 import QueryFilter from "../QueryFilter";
+import { QRCodeCanvas } from "qrcode.react";
 
 const Filter = ({ onFinish, onReset, form }) => {
   return (
@@ -268,7 +268,11 @@ const DetailModal = ({ open, onCancel, data }) => {
               align="center"
               style={{ marginTop: "10px" }}
             >
-              <QRCode errorLevel="H" size={300} value={data?.qrCode?.qr_code} />
+              <QRCodeCanvas
+                level="H"
+                size={300}
+                value={data?.qrCode?.qr_code}
+              />
               <p>
                 ID Kunjungan: <strong>{data?.id}</strong>
               </p>
