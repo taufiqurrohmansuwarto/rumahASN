@@ -14,6 +14,7 @@ import {
 } from "antd";
 import { useEffect, useState } from "react";
 import GuestBookScheduleVisit from "./GuestBookScheduleVisit";
+import QueryFilter from "../QueryFilter";
 
 const FormUserModal = ({
   open,
@@ -241,7 +242,11 @@ const GuestsBookUser = () => {
         dataHelper={data?.helper}
       />
       <Skeleton active loading={isLoading}>
-        {data?.guest ? <GuestBookScheduleVisit /> : <UserEmpty data={data} />}
+        {data?.guest ? (
+          <GuestBookScheduleVisit edit={handleOpen} />
+        ) : (
+          <UserEmpty data={data} />
+        )}
       </Skeleton>
     </>
   );

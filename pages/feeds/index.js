@@ -56,6 +56,7 @@ function Feeds() {
         <Grid.Col md={8} sm={12}>
           <CarouselBanner />
           <Card
+            title="Daftar Pertanyaan BKD"
             style={{
               marginTop: 14,
             }}

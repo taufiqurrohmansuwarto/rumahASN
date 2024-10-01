@@ -242,11 +242,33 @@ const createScheduleVisit = async (req, res) => {
 const getScheduleVisits = async (req, res) => {
   try {
     const { customId } = req.user;
+
+    const limit = parseInt(req.query.limit) || 10;
+    const page = parseInt(req.query.page) || 1;
+    const visit_date = req.query.visit_date || [];
+
+    console.log(req.query);
+
     const guest = await Guests.query().where("user_id", customId).first();
     const scheduleVisits = await ScheduleVisits.query()
       .where("guest_id", guest.id)
-      .withGraphFetched("qrCode");
-    res.json(scheduleVisits);
+      .andWhere((builder) => {
+        if (visit_date && visit_date.length === 2) {
+          builder.whereRaw("DATE(visit_date) BETWEEN ? AND ?", visit_date);
+        }
+      })
+      .withGraphFetched("[qrCode]")
+      .orderBy("created_at", "desc")
+      .page(page - 1, limit);
+
+    const data = {
+      data: scheduleVisits.results,
+      total: scheduleVisits.total,
+      page,
+      limit,
+    };
+
+    res.json(data);
   } catch (error) {
     console.log(error);
     res.status(400).json({ message: "Internal Server Error" });
@@ -382,12 +404,20 @@ const myGuest = async (req, res) => {
     const { customId } = req.user;
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
+
+    const visit_date = req.query.visit_date || [];
+
     const scheduleVisits = await ScheduleVisits.query()
       .page(page - 1, limit)
       .whereRaw(
         `employee_visited @> ?::jsonb`,
         JSON.stringify([{ customid: customId }])
       )
+      .andWhere((builder) => {
+        if (visit_date && visit_date.length === 2) {
+          builder.whereRaw("DATE(visit_date) BETWEEN ? AND ?", visit_date);
+        }
+      })
       .withGraphFetched("[guest, visits]");
 
     const data = {

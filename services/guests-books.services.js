@@ -13,8 +13,9 @@ export const updateUser = (data) => {
   return api.patch("/user", data).then((res) => res.data);
 };
 
-export const getScheduleVisits = () => {
-  return api.get("/user/schedule-visits").then((res) => res.data);
+export const getScheduleVisits = (query) => {
+  const qs = query ? `?${queryString.stringify(query)}` : "";
+  return api.get(`/user/schedule-visits${qs}`).then((res) => res.data);
 };
 
 export const createScheduleVisit = (data) => {
@@ -50,8 +51,9 @@ export const checkOut = (data) => {
   return api.post("/admin/checkout", data).then((res) => res.data);
 };
 
-export const getMyGuest = () => {
-  return api.get("/admin/my-guest").then((res) => res.data);
+export const getMyGuest = (query) => {
+  const qs = query ? `?${queryString.stringify(query)}` : "";
+  return api.get(`/admin/my-guest${qs}`).then((res) => res.data);
 };
 
 export const findByQrCode = async (data) => {
