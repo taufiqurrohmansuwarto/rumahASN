@@ -27,7 +27,7 @@ const applist = [
     icon: <IconCalendarUser />,
     title: "TemuBKD",
     color: "#4285F4",
-    link: "/guests-books/main",
+    link: "/guests-books/my-visit/visits",
   },
   {
     icon: <IconMailbox />,

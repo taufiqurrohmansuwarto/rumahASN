@@ -33,6 +33,7 @@ import {
   Space,
   Table,
   Tag,
+  Tooltip,
   Typography,
 } from "antd";
 import dayjs from "dayjs";
@@ -40,6 +41,9 @@ import { toUpper } from "lodash";
 import { useEffect, useState } from "react";
 import QueryFilter from "../QueryFilter";
 import { QRCodeCanvas } from "qrcode.react";
+import "dayjs/locale/id";
+
+dayjs.locale("id");
 
 const Filter = ({ onFinish, onReset, form }) => {
   return (
@@ -249,6 +253,17 @@ const FormModalCreate = ({
 };
 
 const DetailModal = ({ open, onCancel, data }) => {
+  const columns = [
+    {
+      title: "Status",
+      dataIndex: "status",
+      render: (value) => {
+        if (value === "checkin") {
+          return <Tag color="green">Check In</Tag>;
+        }
+      },
+    },
+  ];
   return (
     <Modal
       width={800}
@@ -273,9 +288,6 @@ const DetailModal = ({ open, onCancel, data }) => {
                 size={300}
                 value={data?.qrCode?.qr_code}
               />
-              <p>
-                ID Kunjungan: <strong>{data?.id}</strong>
-              </p>
             </Space>
           </Col>
         </Row>
@@ -459,14 +471,13 @@ function GuestBookScheduleVisit({ edit }) {
       title: "Pegawai yang dikunjungi",
       dataIndex: "employee_visited",
       render: (value) => (
-        <Space>
+        <Avatar.Group>
           {value?.map((v) => (
-            <>
-              <Avatar size="small" key={v?.id} src={v?.avatar} />
-              <Typography.Text>{v?.name}</Typography.Text>
-            </>
+            <Tooltip key={v?.id} title={v?.name}>
+              <Avatar size="large" src={v?.avatar} />
+            </Tooltip>
           ))}
-        </Space>
+        </Avatar.Group>
       ),
       responsive: ["sm"],
     },
@@ -569,6 +580,45 @@ function GuestBookScheduleVisit({ edit }) {
           </Button>
 
           <Table
+            expandable={{
+              expandedRowRender: (record) => (
+                <Table
+                  columns={[
+                    {
+                      title: "Status",
+                      dataIndex: "status",
+                      render: (value) => {
+                        if (value === "check-in") {
+                          return <Tag color="green">CHECK IN</Tag>;
+                        }
+                        if (value === "check-out") {
+                          return <Tag color="red">CHECK OUT</Tag>;
+                        }
+                      },
+                    },
+                    {
+                      title: "Waktu",
+                      key: "waktu",
+                      render: (_, row) => {
+                        if (row?.status === "check-in") {
+                          return dayjs(row?.checkin_date).format(
+                            "DD MMMM YYYY HH:mm:ss"
+                          );
+                        }
+                        if (row?.status === "check-out") {
+                          return dayjs(row?.checkout_date).format(
+                            "DD MMMM YYYY HH:mm:ss"
+                          );
+                        }
+                      },
+                    },
+                  ]}
+                  dataSource={record?.visits}
+                  rowKey={(row) => row?.id}
+                />
+              ),
+              rowExpandable: (record) => record.name !== "Not Expandable",
+            }}
             loading={isLoading || isFetching}
             columns={columns}
             dataSource={data?.data}

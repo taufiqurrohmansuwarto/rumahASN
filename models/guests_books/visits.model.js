@@ -9,6 +9,14 @@ class Visits extends Model {
     return "guests_books.visits";
   }
 
+  static get modifiers() {
+    return {
+      orderByDate(builder) {
+        builder.orderBy("created_at", "desc");
+      },
+    };
+  }
+
   static get relationMappings() {
     const Guest = require("@/models/guests_books/guests.model");
     const User = require("@/models/users.model");

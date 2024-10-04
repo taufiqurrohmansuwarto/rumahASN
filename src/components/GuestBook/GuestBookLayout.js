@@ -4,6 +4,7 @@ import {
   CheckCircleOutlined,
   CloseCircleOutlined,
   InboxOutlined,
+  LoginOutlined,
   LogoutOutlined,
   SettingOutlined,
   UsergroupAddOutlined,
@@ -18,6 +19,7 @@ import Link from "next/link";
 import { useState } from "react";
 import ActionSettings from "../ActionSettings";
 import { GuestBookToken } from "./GuestBookToken";
+import { useRouter } from "next/router";
 
 const ProLayout = dynamic(
   () => import("@ant-design/pro-components").then((mod) => mod?.ProLayout),
@@ -35,12 +37,36 @@ const menuItemRender = (options, element) => {
 };
 
 const menuItems = [
+  // {
+  //   key: "main",
+  //   icon: <InboxOutlined />,
+  //   name: "Kunjungan",
+  //   role: null,
+  //   path: "/guests-books/main",
+  // },
   {
-    key: "main",
-    icon: <InboxOutlined />,
-    name: "Kunjungan",
+    key: "my-visit",
+    icon: <LoginOutlined />,
+    name: "Kunjungan Saya",
+    path: "/guests-books/my-visit",
     role: null,
-    path: "/guests-books/main",
+    routes: [
+      {
+        key: "visits",
+        path: "/guests-books/my-visit/visits",
+        name: "Kunjungan Saya",
+      },
+      {
+        key: "my-checkin",
+        path: "/guests-books/my-visit/my-checkin",
+        name: "Check In",
+      },
+      {
+        key: "my-checkout",
+        path: "/guests-books/my-visit/my-checkout",
+        name: "Check Out",
+      },
+    ],
   },
   {
     key: "all-visit",
@@ -59,14 +85,14 @@ const menuItems = [
   {
     key: "check-in",
     icon: <CheckCircleOutlined />,
-    name: "Check In",
+    name: "Tamu Check In",
     role: ["admin", "agent"],
     path: "/guests-books/check-in",
   },
   {
     key: "check-out",
     icon: <CloseCircleOutlined />,
-    name: "Check Out",
+    name: "Tamu Check Out",
     role: ["admin", "agent"],
     path: "/guests-books/check-out",
   },
@@ -131,10 +157,13 @@ const FooterRender = () => {
   );
 };
 
-function GuestBookLayout({ children, active = "main" }) {
+function GuestBookLayout({ children, active }) {
   const [collapsed, setCollapsed] = useState(true);
   const breakPoint = Grid.useBreakpoint();
   const { data, status } = useSession();
+  const router = useRouter();
+  const curentActive = active ? active : router.pathname;
+  console.log(curentActive);
 
   return (
     <ConfigProvider
@@ -150,7 +179,7 @@ function GuestBookLayout({ children, active = "main" }) {
           defaultCollapsed={collapsed}
           collapsed={collapsed}
           onCollapse={setCollapsed}
-          selectedKeys={[active ? active : router.pathname]}
+          selectedKeys={[curentActive]}
           layout="mix"
           navTheme="light"
           contentWidth="Fluid"

@@ -1,34 +1,33 @@
 import GuestBookLayout from "@/components/GuestBook/GuestBookLayout";
-import GuestsBookUser from "@/components/GuestBook/GuestsBookUser";
 import PageContainer from "@/components/PageContainer";
 import { Grid } from "antd";
 import Head from "next/head";
 
-function GuestBook() {
+function MyCheckout() {
   const breakPoint = Grid.useBreakpoint();
   return (
     <>
       <Head>
-        <title>Rumah ASN - Buku Tamu</title>
+        <title>Rumah ASN - Tamu Check Out</title>
       </Head>
       <PageContainer
         childrenContentStyle={{
           padding: breakPoint?.xs ? 0 : null,
         }}
-        title="Buku Tamu"
-        content="Buku Tamu"
+        title="Tamu Check Out"
+        content="Tamu Check Out"
       ></PageContainer>
     </>
   );
 }
 
-GuestBook.Auth = {
+MyCheckout.Auth = {
   action: "manage",
   subject: "GuestBook",
 };
 
-GuestBook.getLayout = function getLayout(page) {
-  return <GuestBookLayout active="main">{page}</GuestBookLayout>;
+MyCheckout.getLayout = function getLayout(page) {
+  return <GuestBookLayout active="my-checkout">{page}</GuestBookLayout>;
 };
 
-export default GuestBook;
+export default MyCheckout;
