@@ -17,7 +17,9 @@ function GuestBook() {
         }}
         title="Buku Tamu"
         content="Buku Tamu"
-      ></PageContainer>
+      >
+        <GuestsBookUser />
+      </PageContainer>
     </>
   );
 }
@@ -28,7 +30,7 @@ GuestBook.Auth = {
 };
 
 GuestBook.getLayout = function getLayout(page) {
-  return <GuestBookLayout active="main">{page}</GuestBookLayout>;
+  return <GuestBookLayout active="visits">{page}</GuestBookLayout>;
 };
 
 export default GuestBook;

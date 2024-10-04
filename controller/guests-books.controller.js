@@ -257,7 +257,7 @@ const getScheduleVisits = async (req, res) => {
           builder.whereRaw("DATE(visit_date) BETWEEN ? AND ?", visit_date);
         }
       })
-      .withGraphFetched("[qrCode]")
+      .withGraphFetched("[qrCode, visits(orderByDate)]")
       .orderBy("created_at", "desc")
       .page(page - 1, limit);
 
