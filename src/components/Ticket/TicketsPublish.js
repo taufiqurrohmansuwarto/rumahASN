@@ -9,9 +9,10 @@ import {
 import {
   CalendarOutlined,
   MessageOutlined,
+  SyncOutlined,
   UserOutlined,
 } from "@ant-design/icons";
-import { Grid } from "@mantine/core";
+import { Badge, Grid } from "@mantine/core";
 import { useQuery } from "@tanstack/react-query";
 import {
   Grid as AntdGrid,
@@ -30,6 +31,7 @@ import {
 import Link from "next/link";
 import { useRouter } from "next/router";
 import RestrictedContent from "../RestrictedContent";
+import { IconClock, IconFileUpload, IconShieldCheck } from "@tabler/icons";
 
 const { useBreakpoint } = AntdGrid;
 
@@ -57,16 +59,30 @@ const Assignee = ({ item }) => {
   }
 };
 
+const SetItem = ({ item }) => {
+  const diajukan = item?.status_code === "DIAJUKAN";
+  const dikerjakan = item?.status_code === "DIKERJAKAN";
+  const selesai = item?.status_code === "SELESAI";
+  const size = 20;
+
+  if (diajukan) {
+    return <IconFileUpload color="#ffa500" size={size} />;
+  } else if (dikerjakan) {
+    return <IconClock color="#3498db" size={size} />;
+  } else if (selesai) {
+    return <IconShieldCheck color="#28a745" size={size} />;
+  } else {
+    return null;
+  }
+};
+
 const Status = ({ item }) => {
   return (
     <Tooltip
       color={setColorStatusTooltip(item?.status_code)}
       title={item?.status_code}
     >
-      <Tag
-        icon={setStatusIcon(item?.status_code)}
-        color={setColorStatus(item?.status_code)}
-      />
+      <SetItem item={item} />
     </Tooltip>
   );
 };
@@ -103,7 +119,7 @@ const SubCategory = ({ item }) => {
   return (
     <>
       {item?.sub_category && (
-        <Tag color="orange">{item?.sub_category?.name}</Tag>
+        <Badge color="orange">{item?.sub_category?.name}</Badge>
       )}
     </>
   );
@@ -118,7 +134,8 @@ const TitleLink = ({ item }) => {
   };
 
   return (
-    <div>
+    <Space align="center">
+      <Status item={item} key="status" />
       <Typography.Text
         onClick={handleClick}
         style={{ marginRight: 8, cursor: "pointer" }}
@@ -127,9 +144,8 @@ const TitleLink = ({ item }) => {
       </Typography.Text>
       {screens?.xs && <br />}
       <Published item={item} />
-      <Status item={item} key="status" />
       <SubCategory item={item} key="sub_category" />
-    </div>
+    </Space>
   );
 };
 
