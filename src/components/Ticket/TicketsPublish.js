@@ -134,7 +134,7 @@ const TitleLink = ({ item }) => {
   };
 
   return (
-    <Space align="center">
+    <Space>
       <Status item={item} key="status" />
       <Typography.Text
         onClick={handleClick}
