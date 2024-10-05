@@ -134,7 +134,7 @@ const TitleLink = ({ item }) => {
   };
 
   return (
-    <Space>
+    <Space wrap>
       <Status item={item} key="status" />
       <Typography.Text
         onClick={handleClick}
@@ -339,7 +339,7 @@ const TicketsPublish = () => {
                     fontSize: 13,
                   }}
                 >
-                  <Space>
+                  <Space wrap>
                     <CalendarOutlined />
                     Ditanyakan tanggal {formatDateLL(item?.created_at)}
                     <Link href={`/users/${item?.customer?.custom_id}`}>
