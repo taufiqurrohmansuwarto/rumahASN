@@ -6,7 +6,11 @@ import {
   setColorStatusTooltip,
   setStatusIcon,
 } from "@/utils/client-utils";
-import { MessageOutlined } from "@ant-design/icons";
+import {
+  CalendarOutlined,
+  MessageOutlined,
+  UserOutlined,
+} from "@ant-design/icons";
 import { Grid } from "@mantine/core";
 import { useQuery } from "@tanstack/react-query";
 import {
@@ -287,6 +291,7 @@ const TicketsPublish = () => {
         dataSource={data?.results}
         rowKey={(row) => row?.id}
         loading={isFetching || isLoading}
+        size="large"
         pagination={{
           showSizeChanger: false,
           position: "both",
@@ -302,12 +307,7 @@ const TicketsPublish = () => {
           <List.Item
             actions={[
               <Space size="small" key="total_comments">
-                <MessageOutlined
-                  style={{
-                    color: "#1890ff",
-                  }}
-                  size={10}
-                />
+                <MessageOutlined style={{ fontSize: 16, color: "#1890ff" }} />
                 <Typography.Text type="secondary">
                   {parseInt(item?.comments_count)}
                 </Typography.Text>
@@ -323,12 +323,16 @@ const TicketsPublish = () => {
                     fontSize: 13,
                   }}
                 >
-                  Ditanyakan tanggal {formatDateLL(item?.created_at)} oleh{" "}
-                  <Link href={`/users/${item?.customer?.custom_id}`}>
-                    <Typography.Link>
-                      {item?.customer?.username}
-                    </Typography.Link>
-                  </Link>
+                  <Space>
+                    <CalendarOutlined />
+                    Ditanyakan tanggal {formatDateLL(item?.created_at)}
+                    <Link href={`/users/${item?.customer?.custom_id}`}>
+                      <Typography.Link>
+                        {item?.customer?.username}
+                      </Typography.Link>
+                    </Link>
+                    <UserOutlined />
+                  </Space>
                 </Typography.Text>
               }
             />
