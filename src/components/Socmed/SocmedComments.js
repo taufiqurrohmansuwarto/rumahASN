@@ -25,6 +25,7 @@ import SocmedEditComment from "./SocmedEditComment";
 import dayjs from "dayjs";
 import "dayjs/locale/id";
 import relativeTime from "dayjs/plugin/relativeTime";
+import AvatarUser from "../Users/AvatarUser";
 dayjs.locale("id");
 dayjs.extend(relativeTime);
 
@@ -126,7 +127,11 @@ const UserComment = ({ comment }) => {
       <Comment
         actions={selectedEditId === comment?.id ? null : actions}
         avatar={
-          <Avatar src={comment?.user?.image} alt={comment?.user?.username} />
+          <AvatarUser
+            src={comment?.user?.image}
+            userId={comment?.user?.custom_id}
+            user={comment?.user}
+          />
         }
         content={
           <>
@@ -145,7 +150,7 @@ const UserComment = ({ comment }) => {
           <Tooltip
             title={dayjs(comment?.created_at).format("DD-MM-YYYY HH:mm:ss")}
           >
-            {dayjs(comment?.created_at).fromNow()}
+            &#x2022; {dayjs(comment?.created_at).fromNow()}
           </Tooltip>
         }
         author={
@@ -218,7 +223,13 @@ function SocmedComments({ post, id }) {
                 </Link>
               </Stack>
             }
-            avatar={<Avatar src={post?.user?.image} />}
+            avatar={
+              <AvatarUser
+                src={post?.user?.image}
+                userId={post?.user?.custom_id}
+                user={post?.user}
+              />
+            }
             datetime={
               <Tooltip
                 title={dayjs(post?.created_at).format("DD-MM-YYYY HH:mm:ss")}

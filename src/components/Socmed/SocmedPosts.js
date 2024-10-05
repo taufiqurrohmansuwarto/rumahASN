@@ -305,6 +305,7 @@ const Post = ({ post, currentUser }) => {
               <AvatarUser
                 src={post?.user?.image}
                 userId={post?.user?.custom_id}
+                user={post?.user}
               />
             </>
           }

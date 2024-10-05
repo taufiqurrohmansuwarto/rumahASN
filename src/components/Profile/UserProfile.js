@@ -209,7 +209,7 @@ const ProfileHeader = ({ user, isAdmin = false, isPegawaiBKD = false }) => {
 
         <Space wrap style={{ marginTop: "16px" }}>
           <Button icon={<MessageOutlined />}>Pesan Pribadi</Button>
-          {isAdmin && (
+          {isAdmin && user?.group === "MASTER" && (
             <Button
               onClick={gotoDetailInformation}
               type="primary"
