@@ -25,7 +25,8 @@ class User extends Model {
           "is_online",
           "group",
           "current_role",
-          "info"
+          "info",
+          "status_kepegawaian"
         );
       },
       fullSelect(query) {

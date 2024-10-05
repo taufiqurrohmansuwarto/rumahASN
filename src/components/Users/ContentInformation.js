@@ -3,7 +3,7 @@ import { Spin } from "antd";
 import { useQuery } from "@tanstack/react-query";
 import DetailUser from "./DetailUser";
 
-function ContentInformation({ userId }) {
+function ContentInformation({ userId, status }) {
   const { data, isLoading } = useQuery(
     ["user-info-detail", userId],
     () => getUserInformationDetail(userId),
@@ -12,7 +12,7 @@ function ContentInformation({ userId }) {
 
   return (
     <Spin spinning={isLoading}>
-      <DetailUser user={data} />
+      <DetailUser user={data} status={status} />
     </Spin>
   );
 }

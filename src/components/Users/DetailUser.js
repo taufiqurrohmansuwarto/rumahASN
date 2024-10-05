@@ -3,7 +3,7 @@ import { Text } from "@mantine/core";
 import { Avatar, Button, Flex, Typography } from "antd";
 import React from "react";
 
-function DetailUser({ user }) {
+function DetailUser({ user, status }) {
   return (
     <Flex vertical gap={10}>
       <Flex gap={10}>
@@ -14,7 +14,9 @@ function DetailUser({ user }) {
           <Text size="xs" fw={700}>
             {user?.username}
           </Text>
-          <Text size="xs">{user?.information?.jabatan?.jabatan}</Text>
+          <Text size="xs">
+            {user?.information?.jabatan?.jabatan} - {status}
+          </Text>
         </Flex>
       </Flex>
       <Flex>
