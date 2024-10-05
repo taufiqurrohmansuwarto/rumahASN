@@ -7,18 +7,21 @@ import { downloadTicketBKD, pegawaiBkdTickets } from "@/services/bkd.services";
 import { refCategories } from "@/services/index";
 import {
   formatDateFull,
+  formatDateLL,
   setColorStatus,
   setColorStatusTooltip,
   setStatusIcon,
 } from "@/utils/client-utils";
 import {
+  CalendarOutlined,
   CaretDownOutlined,
   CaretUpOutlined,
   CloudDownloadOutlined,
   MessageOutlined,
   SearchOutlined,
 } from "@ant-design/icons";
-import { Grid as GridMantineCore, Stack } from "@mantine/core";
+import { Badge, Grid as GridMantineCore, Stack } from "@mantine/core";
+import { IconClock, IconFileUpload, IconShieldCheck } from "@tabler/icons";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import {
   Avatar,
@@ -89,23 +92,37 @@ const DownloadData = () => {
   );
 };
 
+const SetItem = ({ item }) => {
+  const diajukan = item?.status_code === "DIAJUKAN";
+  const dikerjakan = item?.status_code === "DIKERJAKAN";
+  const selesai = item?.status_code === "SELESAI";
+  const size = 16;
+
+  if (diajukan) {
+    return <IconFileUpload color="#ffa500" size={size} />;
+  } else if (dikerjakan) {
+    return <IconClock color="#3498db" size={size} />;
+  } else if (selesai) {
+    return <IconShieldCheck color="#28a745" size={size} />;
+  } else {
+    return null;
+  }
+};
+
 const Status = ({ item }) => {
   return (
     <Tooltip
       title={item?.status_code}
       color={setColorStatusTooltip(item?.status_code)}
     >
-      <Tag
-        icon={setStatusIcon(item?.status_code)}
-        color={setColorStatus(item?.status_code)}
-      />
+      <SetItem item={item} />
     </Tooltip>
   );
 };
 
 const Published = ({ item }) => {
   if (item?.is_published) {
-    return <Tag color="yellow">PUBLIKASI</Tag>;
+    return <Badge color="yellow">PUBLIKASI</Badge>;
   } else {
     return null;
   }
@@ -115,7 +132,7 @@ const SubCategory = ({ item }) => {
   return (
     <>
       {item?.sub_category && (
-        <Tag color="orange">{item?.sub_category?.name}</Tag>
+        <Badge color="orange">{item?.sub_category?.name}</Badge>
       )}
     </>
   );
@@ -129,7 +146,8 @@ const TitleLink = ({ item }) => {
   };
 
   return (
-    <div>
+    <Space wrap>
+      <Status item={item} key="status" />
       <Typography.Text
         onClick={handleClick}
         style={{ marginRight: 8, cursor: "pointer" }}
@@ -138,9 +156,8 @@ const TitleLink = ({ item }) => {
       </Typography.Text>
       {screens?.xs && <br />}
       <Published item={item} />
-      <Status item={item} key="status" />
       <SubCategory item={item} />
-    </div>
+    </Space>
   );
 };
 
@@ -333,6 +350,7 @@ const TicketsTable = ({ query }) => {
         rowKey={(row) => row?.id}
         dataSource={data?.data}
         loading={isLoading || isFetching}
+        size="large"
         pagination={{
           onChange: handleChangePage,
           showSizeChanger: false,
@@ -369,12 +387,15 @@ const TicketsTable = ({ query }) => {
                     fontSize: 13,
                   }}
                 >
-                  {formatDateFull(item?.created_at)} oleh{" "}
-                  <Link href={`/users/${item?.customer?.custom_id}`}>
-                    <Typography.Link>
-                      {item?.customer?.username}
-                    </Typography.Link>
-                  </Link>
+                  <Space wrap>
+                    <CalendarOutlined />
+                    Ditanyakan tanggal {formatDateLL(item?.created_at)}
+                    <Link href={`/users/${item?.customer?.custom_id}`}>
+                      <Typography.Link>
+                        {item?.customer?.username}
+                      </Typography.Link>
+                    </Link>
+                  </Space>
                 </Typography.Text>
               }
             />
