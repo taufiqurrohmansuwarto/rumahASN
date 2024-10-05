@@ -39,6 +39,7 @@ const serialize = (data) => {
       deskripsi: convert(r?.content, {
         wordwrap: 130,
       }),
+      asal_instansi: r?.customer?.info?.perangkat_daerah?.detail,
       berasal_dari: checkUndefined(r?.customer?.group),
       employee_number: checkUndefined(r?.customer?.employee_number),
       pembuat: r?.customer?.username,
