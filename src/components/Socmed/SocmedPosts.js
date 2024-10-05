@@ -356,6 +356,7 @@ function SocmedPosts() {
         </Col>
       </Row>
       <List
+        size="small"
         loadMore={
           hasNextPage ? (
             <div
@@ -378,7 +379,11 @@ function SocmedPosts() {
         rowKey={(item) => item.id}
         loading={isLoading || isFetching}
         renderItem={(item) => {
-          return <Post post={item} currentUser={currentUser} />;
+          return (
+            <List.Item>
+              <Post post={item} currentUser={currentUser} />
+            </List.Item>
+          );
         }}
       />
     </>
