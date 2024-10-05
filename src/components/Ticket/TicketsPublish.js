@@ -63,7 +63,7 @@ const SetItem = ({ item }) => {
   const diajukan = item?.status_code === "DIAJUKAN";
   const dikerjakan = item?.status_code === "DIKERJAKAN";
   const selesai = item?.status_code === "SELESAI";
-  const size = 20;
+  const size = 16;
 
   if (diajukan) {
     return <IconFileUpload color="#ffa500" size={size} />;
@@ -89,7 +89,7 @@ const Status = ({ item }) => {
 
 const Published = ({ item }) => {
   if (item?.is_published) {
-    return <Tag color="yellow">PUBLIKASI</Tag>;
+    return <Badge color="yellow">PUBLIKASI</Badge>;
   } else {
     return null;
   }
@@ -347,7 +347,6 @@ const TicketsPublish = () => {
                         {item?.customer?.username}
                       </Typography.Link>
                     </Link>
-                    <UserOutlined />
                   </Space>
                 </Typography.Text>
               }
