@@ -13,7 +13,7 @@ import {
   CaretDownOutlined,
   CaretUpOutlined,
 } from "@ant-design/icons";
-import { Text } from "@mantine/core";
+import { Badge, Text } from "@mantine/core";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Avatar,
@@ -24,7 +24,9 @@ import {
   Descriptions,
   Divider,
   Form,
+  Grid,
   Input,
+  List,
   message,
   Modal,
   Popconfirm,
@@ -202,6 +204,8 @@ const FormModalCreate = ({
     }
   };
 
+  const breakPoint = Grid.useBreakpoint();
+
   return (
     <Modal
       width={800}
@@ -217,7 +221,12 @@ const FormModalCreate = ({
           name="visit_date"
           label="Tanggal Rencana Kunjungan"
         >
-          <DatePicker showTime />
+          <DatePicker
+            style={{
+              width: breakPoint?.xs ? "100%" : "50%",
+            }}
+            showTime
+          />
         </Form.Item>
         <Form.Item
           rules={[{ required: true, message: "Pilih Kategori Kunjungan" }]}
@@ -578,6 +587,28 @@ function GuestBookScheduleVisit({ edit }) {
           >
             Kunjungan
           </Button>
+
+          <List
+            itemLayout="horizontal"
+            dataSource={data?.data}
+            renderItem={(item) => (
+              <List.Item>
+                <List.Item.Meta
+                  avatar={
+                    <Avatar.Group size="small">
+                      {item?.employee_visited?.map((employee) => (
+                        <Tooltip title={employee?.name} key={employee?.id}>
+                          <Avatar src={employee?.avatar} />
+                        </Tooltip>
+                      ))}
+                    </Avatar.Group>
+                  }
+                  title={<Badge color="green">{item?.purpose}</Badge>}
+                  description={item?.description}
+                />
+              </List.Item>
+            )}
+          />
 
           <Table
             expandable={{

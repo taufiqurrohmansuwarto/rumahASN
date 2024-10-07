@@ -1,15 +1,18 @@
 import { getMyGuest } from "@/services/guests-books.services";
 import { SyncOutlined } from "@ant-design/icons";
 import { CaretDownOutlined, CaretUpOutlined } from "@ant-design/icons";
-import { Stack, Text } from "@mantine/core";
+import { Badge, Stack, Text } from "@mantine/core";
 import { useQuery } from "@tanstack/react-query";
 import {
+  Avatar,
   Button,
   Card,
   Col,
   DatePicker,
   Flex,
   Form,
+  Grid,
+  List,
   Row,
   Space,
   Table,
@@ -135,6 +138,8 @@ function GuestBookMyGuest() {
     form.resetFields();
   };
 
+  const breakPoint = Grid.useBreakpoint();
+
   return (
     <Row gutter={[16, 16]}>
       <Col md={24} xs={24}>
@@ -146,7 +151,7 @@ function GuestBookMyGuest() {
         <Card>
           <Stack>
             <Flex align="baseline" justify="space-between">
-              <Text size={16}>Tabel Tamu</Text>
+              <Text size={16}>Daftar Tamu Saya</Text>
               <Space>
                 <Tooltip title="Segarkan">
                   <Button
@@ -159,7 +164,61 @@ function GuestBookMyGuest() {
                 </Tooltip>
               </Space>
             </Flex>
-            <Table
+            {/* {JSON.stringify(data)} */}
+            <List
+              dataSource={data?.data}
+              pagination={{
+                total: data?.total,
+                pageSize: data?.limit,
+                current: data?.page,
+                showTotal: (total, range) =>
+                  `${range[0]}-${range[1]} of ${total} items`,
+                onChange: (page, pageSize) => {
+                  setQuery({
+                    ...query,
+                    page,
+                    limit: pageSize,
+                  });
+                },
+              }}
+              renderItem={(item) => (
+                <List.Item>
+                  <List.Item.Meta
+                    avatar={<Avatar src={item?.guest?.user?.image} />}
+                    title={item?.guest?.name}
+                    description={
+                      <Space
+                        direction={breakPoint?.xs ? "vertical" : "horizontal"}
+                        wrap
+                      >
+                        <Tooltip title="Alasan Kunjungan">
+                          <Badge color="green">{item?.purpose}</Badge>
+                        </Tooltip>
+                        <Tooltip title="Tanggal Kunjungan">
+                          <Badge>
+                            {dayjs(item?.visit_date).format(
+                              "DD MMM YYYY HH:mm:ss"
+                            )}
+                          </Badge>
+                        </Tooltip>
+                        <Avatar.Group>
+                          {item?.employee_visited?.map((employee) => (
+                            <Avatar
+                              size="small"
+                              key={employee?.id}
+                              src={employee?.avatar}
+                            />
+                          ))}
+                        </Avatar.Group>
+                      </Space>
+                    }
+                  />
+                  <a>Detail</a>
+                </List.Item>
+              )}
+              loading={isLoading || isRefetching}
+            />
+            {/* <Table
               dataSource={data?.data}
               pagination={{
                 total: data?.total,
@@ -171,7 +230,7 @@ function GuestBookMyGuest() {
               columns={columns}
               loading={isLoading || isRefetching}
               rowKey={(row) => row.id}
-            />
+            /> */}
           </Stack>
         </Card>
       </Col>
