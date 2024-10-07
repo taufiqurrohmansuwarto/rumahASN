@@ -418,7 +418,8 @@ const myGuest = async (req, res) => {
           builder.whereRaw("DATE(visit_date) BETWEEN ? AND ?", visit_date);
         }
       })
-      .withGraphFetched("[guest, visits]");
+      .withGraphFetched("[guest.[user(simpleSelect)], visits]")
+      .orderBy("created_at", "desc");
 
     const data = {
       data: scheduleVisits.results,
