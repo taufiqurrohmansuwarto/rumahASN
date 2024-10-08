@@ -20,8 +20,8 @@ const useStyle = createStyles(({ prefixCls, css }) => ({
         content: "";
         background: linear-gradient(
           135deg,
-          #ff9800,
-          #f44336
+          #fa8c16,
+          #fa541c
         ); /* Warna gradasi oranye ke merah */
         position: absolute;
         inset: 0;

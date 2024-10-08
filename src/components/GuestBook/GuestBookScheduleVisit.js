@@ -13,7 +13,7 @@ import {
   CaretDownOutlined,
   CaretUpOutlined,
 } from "@ant-design/icons";
-import { Badge, Text } from "@mantine/core";
+import { Badge, rem, Text } from "@mantine/core";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Avatar,
@@ -44,6 +44,7 @@ import { useEffect, useState } from "react";
 import QueryFilter from "../QueryFilter";
 import { QRCodeCanvas } from "qrcode.react";
 import "dayjs/locale/id";
+import { IconClock } from "@tabler/icons";
 
 dayjs.locale("id");
 
@@ -588,28 +589,73 @@ function GuestBookScheduleVisit({ edit }) {
             Kunjungan
           </Button>
 
-          <List
+          {/* <List
+            rowKey={(row) => row?.id}
             itemLayout="horizontal"
             dataSource={data?.data}
+            loading={isLoading || isFetching}
+            pagination={{
+              pageSize: data?.limit,
+              current: data?.page,
+              total: data?.total,
+              showTotal: (total, range) =>
+                `${range[0]}-${range[1]} of ${total} items`,
+              onChange: (page, pageSize) => {
+                setQuery({
+                  ...query,
+                  page,
+                  limit: pageSize,
+                });
+              },
+            }}
             renderItem={(item) => (
               <List.Item>
                 <List.Item.Meta
-                  avatar={
-                    <Avatar.Group size="small">
-                      {item?.employee_visited?.map((employee) => (
-                        <Tooltip title={employee?.name} key={employee?.id}>
-                          <Avatar src={employee?.avatar} />
-                        </Tooltip>
-                      ))}
-                    </Avatar.Group>
+                  title={
+                    <Space wrap>
+                      <Badge color="green">{item?.category}</Badge>
+                      <Badge
+                        color="yellow"
+                        leftSection={
+                          <IconClock
+                            style={{ width: rem(12), height: rem(12) }}
+                          />
+                        }
+                      >
+                        {dayjs(item?.visit_date).format("DD MMM YYYY HH:mm:ss")}
+                      </Badge>
+                    </Space>
                   }
-                  title={<Badge color="green">{item?.purpose}</Badge>}
-                  description={item?.description}
+                  description={
+                    <Space wrap>
+                      <Badge color="red">{item?.description}</Badge>
+                      <Avatar.Group size="small">
+                        {item?.employee_visited?.map((employee) => (
+                          <Tooltip title={employee?.name} key={employee?.id}>
+                            <Avatar src={employee?.avatar} />
+                          </Tooltip>
+                        ))}
+                      </Avatar.Group>
+                    </Space>
+                  }
                 />
+                <Space>
+                  <a onClick={() => handleOpenDetail(item)}>
+                    <QrcodeOutlined />
+                  </a>
+                  <Divider type="vertical" />
+                  <a onClick={() => handleOpenEdit(item)}>
+                    <EditOutlined />
+                  </a>
+                  <Divider type="vertical" />
+                  <a onClick={() => handleDelete(item?.id)}>
+                    <DeleteOutlined />
+                  </a>
+                </Space>
               </List.Item>
             )}
           />
-
+ */}
           <Table
             expandable={{
               expandedRowRender: (record) => (

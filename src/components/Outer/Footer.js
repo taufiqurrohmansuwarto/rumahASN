@@ -74,7 +74,7 @@ const zonaIntegritas = [
 
 const styles = {
   footer: {
-    backgroundColor: "#141414",
+    backgroundColor: "#2f54eb",
     color: "white",
     padding: 80,
   },
