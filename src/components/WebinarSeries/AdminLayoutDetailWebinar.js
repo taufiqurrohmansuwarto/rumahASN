@@ -2,12 +2,13 @@ import PageContainer from "@/components/PageContainer";
 import { detailWebinar } from "@/services/webinar.services";
 import { formatDateWebinar } from "@/utils/client-utils";
 import { useQuery } from "@tanstack/react-query";
-import { Breadcrumb, Skeleton, Tag } from "antd";
+import { Breadcrumb, Skeleton, Tag, Grid } from "antd";
 import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
 
 function AdminLayoutDetailWebinar({ children, active = "detail", loading }) {
+  const breakPoint = Grid.useBreakpoint();
   const router = useRouter();
   const { id } = router.query;
 
@@ -32,6 +33,9 @@ function AdminLayoutDetailWebinar({ children, active = "detail", loading }) {
         loading={isLoading}
         onBack={handleBack}
         title={data?.title}
+        childrenContentStyle={{
+          padding: breakPoint.xs ? 0 : null,
+        }}
         content={
           <>
             {formatDateWebinar(data?.start_date)} -{" "}
