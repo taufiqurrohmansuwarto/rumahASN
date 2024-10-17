@@ -1,4 +1,5 @@
 import PageContainer from "@/components/PageContainer";
+import { Grid } from "antd";
 import { useRouter } from "next/router";
 
 function AdminLayoutWebinar({
@@ -9,10 +10,14 @@ function AdminLayoutWebinar({
   content,
 }) {
   const router = useRouter();
+  const breakPoint = Grid.useBreakpoint();
 
   return (
     <PageContainer
       loading={loading}
+      childrenContentStyle={{
+        padding: breakPoint.xs ? 0 : null,
+      }}
       title={title}
       content={content}
       tabList={[

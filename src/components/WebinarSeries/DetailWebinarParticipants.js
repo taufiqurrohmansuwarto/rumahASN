@@ -187,7 +187,7 @@ function DetailWebinarParticipants() {
               size="default"
               src={text?.participant?.image}
             />
-            <Space size="small" direction="vertical">
+            <Space>
               <span
                 style={{
                   fontSize: 12,
@@ -197,6 +197,9 @@ function DetailWebinarParticipants() {
               </span>
               <Tag color={participantColor(text?.participant?.group)}>
                 {text?.participant?.group}
+              </Tag>
+              <Tag color={text?.is_generate_certificate ? "green" : "red"}>
+                {text?.is_generate_certificate ? "Sudah" : "Belum"}
               </Tag>
             </Space>
           </Space>
