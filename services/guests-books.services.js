@@ -69,3 +69,25 @@ export const findCheckOut = async (query) => {
   const qs = query ? `?${queryString.stringify(query)}` : "";
   return api.get(`/admin/checkout${qs}`).then((res) => res.data);
 };
+
+export const checkInPublic = async (data) => {
+  return api.post(`/public/checkin`, data).then((res) => res.data);
+};
+
+export const checkOutPublic = async (data) => {
+  return api.post(`/public/checkout`, data).then((res) => res.data);
+};
+
+export const findCheckInPublic = async (query) => {
+  const qs = query ? `?${queryString.stringify(query)}` : "";
+  return api.get(`/public/checkin${qs}`).then((res) => res.data);
+};
+
+export const findCheckOutPublic = async (query) => {
+  const qs = query ? `?${queryString.stringify(query)}` : "";
+  return api.get(`/public/checkout${qs}`).then((res) => res.data);
+};
+
+export const findByQrCodePublic = async (data) => {
+  return api.post(`/public/qr-code`, data).then((res) => res.data);
+};
