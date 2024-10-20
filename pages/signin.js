@@ -10,7 +10,7 @@ import {
 } from "@ant-design/icons";
 import { Center } from "@mantine/core";
 import { useSpring } from "@react-spring/web";
-import { IconKey } from "@tabler/icons";
+import { IconBarcode, IconKey } from "@tabler/icons";
 import {
   Button,
   Col,
@@ -150,7 +150,7 @@ const SignIn = ({ providers }) => {
             </Col>
           </Row>
           <Divider />
-          <Row
+          {/* <Row
             justify="center"
             style={{
               marginBottom: 20,
@@ -204,14 +204,20 @@ const SignIn = ({ providers }) => {
                 </a>
               </Tooltip>
             </Space>
-          </Row>
+          </Row> */}
           <Center>
-            <Link href="/public/verify-pdf">
-              {/* <Typography.Link>Verifikasi PDF</Typography.Link> */}
-              <Button size="small" icon={<IconKey size={14} />}>
-                Verifikasi PDF
-              </Button>
-            </Link>
+            <Space>
+              <Link href="/public/verify-pdf">
+                <Button size="small" icon={<IconKey size={14} />}>
+                  Verifikasi PDF
+                </Button>
+              </Link>
+              <Link href="/guest-book-barcode/checkin">
+                <Button size="small" icon={<IconBarcode size={14} />}>
+                  Kedatangan Tamu
+                </Button>
+              </Link>
+            </Space>
           </Center>
         </Col>
       </Row>
