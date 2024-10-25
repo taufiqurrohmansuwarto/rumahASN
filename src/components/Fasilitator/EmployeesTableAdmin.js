@@ -11,6 +11,7 @@ import { useRouter } from "next/router";
 import EmployeesTableFilterAdmin from "../Filter/EmployeesTableFilterAdmin";
 import { useSession } from "next-auth/react";
 import ReportEmployeeMaster from "../Admin/ReportEmployeeMaster";
+import { Badge } from "@mantine/core";
 
 const TagKomparasi = ({ komparasi, nama }) => {
   return (
@@ -74,10 +75,10 @@ function EmployeesTableAdmin() {
             <Typography.Text strong>{row?.nama_master}</Typography.Text>
             <Typography.Text>{row?.nip_master}</Typography.Text>
             <Tooltip title="Pembetulan dilakukan di SIASN">
-              <Tag color="yellow">{row?.siasn?.status}</Tag>
+              <Badge color="yellow">{row?.siasn?.status}</Badge>
             </Tooltip>
             <Tooltip title="Perbaikan dilakukan dengan menambahkan riwayat jabatan SIASN">
-              <Tag color="cyan">{row?.siasn?.jenjang_jabatan}</Tag>
+              <Badge color="cyan">{row?.siasn?.jenjang_jabatan}</Badge>
             </Tooltip>
           </Space>
         );
@@ -94,7 +95,6 @@ function EmployeesTableAdmin() {
               {row?.jenis_jabatan}
               {row?.golongan_master}
             </Space>
-            {JSON.stringify(row)}
             <Tag>{row?.jabatan_master || "Tidak ada"}</Tag>
             <Tag>{capitalizeWords(row?.siasn?.nama_jabatan)}</Tag>
           </Space>
@@ -114,17 +114,17 @@ function EmployeesTableAdmin() {
         </Space>
       ),
     },
-    // {
-    //   title: "Perangkat Daerah",
-    //   dataIndex: "opd_master",
-    //   width: 200,
-    // },
-    // {
-    //   title: "Unor SIASN",
-    //   key: "unor_siasn",
-    //   width: 200,
-    //   render: (row) => <div>{row?.siasn?.unor}</div>,
-    // },
+    {
+      title: "Perangkat Daerah",
+      dataIndex: "opd_master",
+      width: 200,
+    },
+    {
+      title: "Unor SIASN",
+      key: "unor_siasn",
+      width: 200,
+      render: (row) => <div>{row?.siasn?.unor}</div>,
+    },
     {
       title: "Hasil Validasi",
       key: "hasil",
