@@ -1,9 +1,10 @@
 import { listNotifications, removeNotification } from "@/services/index";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Avatar, Card, FloatButton, List, Tag } from "antd";
+import { Avatar, Card, FloatButton, List, Tag, Tooltip } from "antd";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import { formatDate } from "../../utils";
+import { SearchOutlined } from "@ant-design/icons";
 
 function ListNotifications() {
   const queryClient = useQueryClient();
@@ -72,7 +73,7 @@ function ListNotifications() {
 
   return (
     <Card>
-      <FloatButton.BackTop />
+      <FloatButton.BackTop visibilityHeight={100} />
       <List
         pagination={{
           showSizeChanger: false,
@@ -95,7 +96,9 @@ function ListNotifications() {
                   await handleRouting(item, userData?.user?.current_role)
                 }
               >
-                Lihat
+                <Tooltip title="Lihat">
+                  <SearchOutlined />
+                </Tooltip>
               </a>,
               <div key="check-read">
                 {item?.read_at === null && <Tag color="red">Baru</Tag>}
