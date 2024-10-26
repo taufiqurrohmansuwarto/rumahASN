@@ -58,101 +58,107 @@ function GmailLayout({ children, active = "inbox" }) {
   const [collapsed, setCollapsed] = useState(true);
 
   return (
-    <ConfigProvider
-      locale={frFR}
-      theme={{
-        token: token,
+    <div
+      style={{
+        height: "100vh",
+        overflow: "auto",
       }}
     >
-      <ProConfigProvider>
-        <ProLayout
-          title="Mail ASN"
-          defaultCollapsed={collapsed}
-          collapsed={collapsed}
-          onCollapse={setCollapsed}
-          selectedKeys={[active]}
-          logo={<MailOutlined style={{ color: "#EA4335" }} />}
-          layout="mix"
-          navTheme="light"
-          contentWidth="Fluid"
-          fixedHeader
-          fixSiderbar
-          menuExtraRender={({ collapsed, isMobile }) => {
-            if (!collapsed) {
-              if (isMobile)
-                return (
-                  <Button
-                    style={{
-                      display: "flex",
-                      justifyContent: "center",
-                      marginBottom: 8,
-                      marginTop: 8,
-                    }}
-                    onClick={() => {}}
-                    size="middle"
-                    shape="round"
-                    type="primary"
-                    icon={<EditOutlined />}
-                  >
-                    Compose
-                  </Button>
-                );
-              else {
-                return (
-                  <Center>
+      <ConfigProvider
+        locale={frFR}
+        theme={{
+          token: token,
+        }}
+      >
+        <ProConfigProvider>
+          <ProLayout
+            title="Mail ASN"
+            defaultCollapsed={collapsed}
+            collapsed={collapsed}
+            onCollapse={setCollapsed}
+            selectedKeys={[active]}
+            logo={<MailOutlined style={{ color: "#EA4335" }} />}
+            layout="mix"
+            navTheme="light"
+            fixedHeader
+            fixSiderbar
+            menuExtraRender={({ collapsed, isMobile }) => {
+              if (!collapsed) {
+                if (isMobile)
+                  return (
                     <Button
                       style={{
-                        marginBottom: 10,
                         display: "flex",
                         justifyContent: "center",
+                        marginBottom: 8,
+                        marginTop: 8,
                       }}
                       onClick={() => {}}
+                      size="middle"
                       shape="round"
-                      icon={<EditOutlined />}
-                      block
                       type="primary"
+                      icon={<EditOutlined />}
                     >
                       Compose
                     </Button>
+                  );
+                else {
+                  return (
+                    <Center>
+                      <Button
+                        style={{
+                          marginBottom: 10,
+                          display: "flex",
+                          justifyContent: "center",
+                        }}
+                        onClick={() => {}}
+                        shape="round"
+                        icon={<EditOutlined />}
+                        block
+                        type="primary"
+                      >
+                        Compose
+                      </Button>
+                    </Center>
+                  );
+                }
+              } else {
+                return (
+                  <Center>
+                    <Button
+                      onClick={() => {}}
+                      shape="circle"
+                      size="middle"
+                      icon={<EditOutlined />}
+                      type="primary"
+                    />
                   </Center>
                 );
               }
-            } else {
-              return (
-                <Center>
-                  <Button
-                    onClick={() => {}}
-                    shape="circle"
-                    size="middle"
-                    icon={<EditOutlined />}
-                    type="primary"
-                  />
-                </Center>
-              );
-            }
-          }}
-          token={token}
-          route={{
-            routes: menuItems.map((item) => ({
-              path: `/mails/${item.key}`,
-              name: item.label,
-              icon: item.icon,
-            })),
-          }}
-          menuItemRender={(item, dom) => (
-            <a
-              onClick={() => {
-                console.log("Clicked:", item.name);
-              }}
-            >
-              {dom}
-            </a>
-          )}
-        >
-          <Layout>{children}</Layout>
-        </ProLayout>
-      </ProConfigProvider>
-    </ConfigProvider>
+            }}
+            token={token}
+            route={{
+              routes: menuItems.map((item) => ({
+                path: `/mails/${item.key}`,
+                name: item.label,
+                icon: item.icon,
+              })),
+            }}
+            menuItemRender={(item, dom) => (
+              <a
+                onClick={() => {
+                  console.log("Clicked:", item.name);
+                }}
+              >
+                {dom}
+              </a>
+            )}
+          >
+            <Layout>{children}</Layout>
+          </ProLayout>
+        </ProConfigProvider>
+      </ConfigProvider>
+    </div>
   );
 }
 
