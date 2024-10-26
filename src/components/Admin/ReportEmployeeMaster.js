@@ -1,4 +1,5 @@
 import { reportSimasterEmployees } from "@/services/admin.services";
+import { CloudDownloadOutlined } from "@ant-design/icons";
 import { useMutation } from "@tanstack/react-query";
 import { Button, message } from "antd";
 import FileSaver from "file-saver";
@@ -28,8 +29,9 @@ function ReportEmployeeMaster() {
       onClick={handleClick}
       loading={loadingDownload}
       disabled={loadingDownload}
+      icon={<CloudDownloadOutlined />}
     >
-      Unduh Rekap Full SIMASTER
+      SIMASTER
     </Button>
   );
 }

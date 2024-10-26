@@ -468,249 +468,255 @@ function Layout({ children, active, collapsed = true }) {
   };
 
   return (
-    <ProLayout
-      contentStyle={{
-        padding: breakPoint.xs ? 0 : null,
-        margin: breakPoint.xs ? 0 : null,
+    <div
+      style={{
+        height: "100vh",
+        overflow: "auto",
       }}
-      theme="light"
-      token={{
-        bgLayout: "#fafafa",
-        colorPrimary: "#16", // Warna oranye utama Ant Design
-        sider: {
-          colorBgCollapsedButton: "#FA8C16", // Oranye untuk tombol collapse
-          colorBgMenuItemActive: "#fafafa", // Oranye sangat muda untuk item menu yang aktif
-          colorTextCollapsedButton: "#fafafa", // Putih untuk teks tombol collapse
-          colorTextCollapsedButtonHover: "#fafafa", // Oranye sangat muda untuk teks tombol collapse saat di-hover
-          colorTextMenuTitle: "#FA8C16", // Oranye untuk judul menu
-          colorTextMenuItemHover: "#FA8C16", // Oranye untuk teks menu saat di-hover
-          colorTextMenuSelected: "#FA8C16", // Oranye untuk teks menu saat dipilih
-          colorTextMenuActive: "#FA8C16", // Oranye untuk teks menu saat aktif
-          colorBgMenuItemHover: "rgba(250, 140, 22, 0.1)", // Transparan oranye saat item menu di-hover
-          colorBgMenuItemSelected: "rgba(250, 140, 22, 0.2)", // Transparan oranye lebih terang untuk item menu yang dipilih
-          colorBgMenuItemCollapsedElevated: "#fafafa", // Putih untuk menu yang tertutup namun ditinggikan
-          colorTextMenu: "#595959", // Abu-abu gelap untuk teks menu biasa
-          colorBgMenu: "#fafafa", // Putih untuk latar belakang menu
-          colorTextMenuSecondary: "#8C8C8C", // Abu-abu medium untuk teks menu sekunder
-          colorMenuItemDivider: "#F0F0F0", // Abu-abu sangat muda untuk pembatas menu
-        },
-      }}
-      selectedKeys={[active ? active : router.pathname]}
-      menuExtraRender={({ collapsed, isMobile }) => {
-        if (!collapsed) {
-          if (isMobile)
-            return (
-              <Button
-                style={{
-                  display: "flex",
-                  justifyContent: "center",
-                  marginBottom: 8,
-                  marginTop: 8,
-                }}
-                onClick={handlePertanyan}
-                size="middle"
-                shape="round"
-                type="primary"
-                icon={<QuestionCircleFilled />}
-              >
-                Tanya BKD
-              </Button>
-            );
-          else {
-            return (
-              <Center>
+    >
+      <ProLayout
+        contentStyle={{
+          padding: breakPoint.xs ? 0 : null,
+          // margin: breakPoint.xs ? 0 : null,
+        }}
+        theme="light"
+        token={{
+          bgLayout: "#fafafa",
+          colorPrimary: "#16", // Warna oranye utama Ant Design
+          sider: {
+            colorBgCollapsedButton: "#FA8C16", // Oranye untuk tombol collapse
+            colorBgMenuItemActive: "#fafafa", // Oranye sangat muda untuk item menu yang aktif
+            colorTextCollapsedButton: "#fafafa", // Putih untuk teks tombol collapse
+            colorTextCollapsedButtonHover: "#fafafa", // Oranye sangat muda untuk teks tombol collapse saat di-hover
+            colorTextMenuTitle: "#FA8C16", // Oranye untuk judul menu
+            colorTextMenuItemHover: "#FA8C16", // Oranye untuk teks menu saat di-hover
+            colorTextMenuSelected: "#FA8C16", // Oranye untuk teks menu saat dipilih
+            colorTextMenuActive: "#FA8C16", // Oranye untuk teks menu saat aktif
+            colorBgMenuItemHover: "rgba(250, 140, 22, 0.1)", // Transparan oranye saat item menu di-hover
+            colorBgMenuItemSelected: "rgba(250, 140, 22, 0.2)", // Transparan oranye lebih terang untuk item menu yang dipilih
+            colorBgMenuItemCollapsedElevated: "#fafafa", // Putih untuk menu yang tertutup namun ditinggikan
+            colorTextMenu: "#595959", // Abu-abu gelap untuk teks menu biasa
+            colorBgMenu: "#fafafa", // Putih untuk latar belakang menu
+            colorTextMenuSecondary: "#8C8C8C", // Abu-abu medium untuk teks menu sekunder
+            colorMenuItemDivider: "#F0F0F0", // Abu-abu sangat muda untuk pembatas menu
+          },
+        }}
+        selectedKeys={[active ? active : router.pathname]}
+        menuExtraRender={({ collapsed, isMobile }) => {
+          if (!collapsed) {
+            if (isMobile)
+              return (
                 <Button
                   style={{
-                    marginBottom: 10,
                     display: "flex",
                     justifyContent: "center",
+                    marginBottom: 8,
+                    marginTop: 8,
                   }}
                   onClick={handlePertanyan}
+                  size="middle"
                   shape="round"
-                  icon={<QuestionCircleFilled />}
-                  block
                   type="primary"
+                  icon={<QuestionCircleFilled />}
                 >
                   Tanya BKD
                 </Button>
+              );
+            else {
+              return (
+                <Center>
+                  <Button
+                    style={{
+                      marginBottom: 10,
+                      display: "flex",
+                      justifyContent: "center",
+                    }}
+                    onClick={handlePertanyan}
+                    shape="round"
+                    icon={<QuestionCircleFilled />}
+                    block
+                    type="primary"
+                  >
+                    Tanya BKD
+                  </Button>
+                </Center>
+              );
+            }
+          } else {
+            return (
+              <Center>
+                <Button
+                  onClick={handlePertanyan}
+                  shape="circle"
+                  size="middle"
+                  icon={<QuestionCircleFilled />}
+                  type="primary"
+                />
               </Center>
             );
           }
-        } else {
-          return (
-            <Center>
-              <Button
-                onClick={handlePertanyan}
-                shape="circle"
-                size="middle"
-                icon={<QuestionCircleFilled />}
-                type="primary"
-              />
-            </Center>
+        }}
+        title="Rumah ASN"
+        logo={null}
+        headerTitleRender={(logo, title) => {
+          const defaultDom = (
+            <>
+              <Link href="/feeds">
+                <a>{title}</a>
+              </Link>
+            </>
           );
-        }
-      }}
-      title="Rumah ASN"
-      logo={null}
-      headerTitleRender={(logo, title) => {
-        const defaultDom = (
-          <>
-            <Link href="/feeds">
-              <a>{title}</a>
-            </Link>
-          </>
-        );
 
-        return defaultDom;
-      }}
-      menuFooterRender={(props) => {
-        if (props?.collapsed) return undefined;
-        return (
-          <div
-            style={{
-              textAlign: "center",
-              paddingBlockStart: 12,
-            }}
-          >
-            <Typography.Text
+          return defaultDom;
+        }}
+        menuFooterRender={(props) => {
+          if (props?.collapsed) return undefined;
+          return (
+            <div
               style={{
-                fontSize: breakPoint.xs ? 12 : 14,
+                textAlign: "center",
+                paddingBlockStart: 12,
               }}
-              type="secondary"
             >
-              © 2022 Rumah ASN
-            </Typography.Text>
-            <div>
               <Typography.Text
                 style={{
                   fontSize: breakPoint.xs ? 12 : 14,
                 }}
                 type="secondary"
               >
-                BKD Provinsi Jawa Timur
+                © 2022 Rumah ASN
               </Typography.Text>
+              <div>
+                <Typography.Text
+                  style={{
+                    fontSize: breakPoint.xs ? 12 : 14,
+                  }}
+                  type="secondary"
+                >
+                  BKD Provinsi Jawa Timur
+                </Typography.Text>
+              </div>
             </div>
-          </div>
-        );
-      }}
-      actionsRender={(props) => {
-        // if (props.isMobile) return [];
-        return [
-          <NotifikasiKepegawaian
-            key="kepegawaian"
-            url="kepegawaian"
-            title="Inbox Kepegawaian"
-          />,
-          <NotifikasiPrivateMessage
-            key="private-message"
-            url="/mails/inbox"
-            title="Inbox Pesan Pribadi"
-          />,
-          <NotifikasiASNConnect
-            key="asn-connect"
-            url="asn-connect"
-            title="Inbox ASN Connect"
-          />,
-          <NotifikasiForumKepegawaian
-            key="forum-kepegawaian"
-            url="forum-kepegawaian"
-            title="Inbox Forum Kepegawaian"
-          />,
-          <MegaMenu key="mega-menu" />,
-        ];
-      }}
-      // appList={appList(data?.user)}
-      avatarProps={{
-        src: data?.user?.image,
-        size: "large",
-        render: (props, dom) => {
-          return (
-            <Space>
-              <Dropdown
-                menu={{
-                  onClick: (e) => {
-                    if (e.key === "logout") {
-                      signOut();
-                    }
-                    if (e.key === "profile") {
-                      router.push("/settings/profile");
-                    }
-                  },
-                  items: [
-                    {
-                      key: "profile",
-                      icon: <UserOutlined />,
-                      label: "Profil",
-                    },
-                    {
-                      key: "logout",
-                      icon: <LogoutOutlined />,
-                      label: "Keluar",
-                    },
-                  ],
-                }}
-              >
-                {dom}
-              </Dropdown>
-            </Space>
           );
-        },
-      }}
-      menu={{
-        request: async () => {
-          try {
-            const userRole = await currentUserRole();
-            const payload = {
-              ...data?.user,
-              app_role: userRole,
-            };
-            const user = await changeRoutes(payload);
-            return user;
-          } catch (e) {
-            console.log(e);
-          }
-        },
-        defaultOpenAll: false,
-      }}
-      collapsed={!tutup}
-      inlineCollapsed={!tutup}
-      defaultCollapsed={!tutup}
-      onCollapse={onCollapsed}
-      menuItemRender={menuItemRender}
-      layout="mix"
-      loading={status === "loading"}
-      footerRender={() => {
-        return (
-          <div
-            style={{
-              textAlign: "center",
-              marginBottom: 20,
-            }}
-          >
-            <Typography.Text
+        }}
+        actionsRender={(props) => {
+          // if (props.isMobile) return [];
+          return [
+            <NotifikasiKepegawaian
+              key="kepegawaian"
+              url="kepegawaian"
+              title="Inbox Kepegawaian"
+            />,
+            <NotifikasiPrivateMessage
+              key="private-message"
+              url="/mails/inbox"
+              title="Inbox Pesan Pribadi"
+            />,
+            <NotifikasiASNConnect
+              key="asn-connect"
+              url="asn-connect"
+              title="Inbox ASN Connect"
+            />,
+            <NotifikasiForumKepegawaian
+              key="forum-kepegawaian"
+              url="forum-kepegawaian"
+              title="Inbox Forum Kepegawaian"
+            />,
+            <MegaMenu key="mega-menu" />,
+          ];
+        }}
+        // appList={appList(data?.user)}
+        avatarProps={{
+          src: data?.user?.image,
+          size: "large",
+          render: (props, dom) => {
+            return (
+              <Space>
+                <Dropdown
+                  menu={{
+                    onClick: (e) => {
+                      if (e.key === "logout") {
+                        signOut();
+                      }
+                      if (e.key === "profile") {
+                        router.push("/settings/profile");
+                      }
+                    },
+                    items: [
+                      {
+                        key: "profile",
+                        icon: <UserOutlined />,
+                        label: "Profil",
+                      },
+                      {
+                        key: "logout",
+                        icon: <LogoutOutlined />,
+                        label: "Keluar",
+                      },
+                    ],
+                  }}
+                >
+                  {dom}
+                </Dropdown>
+              </Space>
+            );
+          },
+        }}
+        menu={{
+          request: async () => {
+            try {
+              const userRole = await currentUserRole();
+              const payload = {
+                ...data?.user,
+                app_role: userRole,
+              };
+              const user = await changeRoutes(payload);
+              return user;
+            } catch (e) {
+              console.log(e);
+            }
+          },
+        }}
+        collapsed={!tutup}
+        inlineCollapsed={!tutup}
+        defaultCollapsed={!tutup}
+        onCollapse={onCollapsed}
+        menuItemRender={menuItemRender}
+        layout="mix"
+        loading={status === "loading"}
+        footerRender={() => {
+          return (
+            <div
               style={{
-                fontSize: breakPoint.xs ? 13 : 14,
+                textAlign: "center",
+                marginBottom: 20,
               }}
-              type="secondary"
             >
-              Desain dan Pengembangan
-            </Typography.Text>
-            <div>
               <Typography.Text
                 style={{
                   fontSize: breakPoint.xs ? 13 : 14,
                 }}
                 type="secondary"
               >
-                © 2022 BKD Provinsi Jawa Timur
+                Desain dan Pengembangan
               </Typography.Text>
+              <div>
+                <Typography.Text
+                  style={{
+                    fontSize: breakPoint.xs ? 13 : 14,
+                  }}
+                  type="secondary"
+                >
+                  © 2022 BKD Provinsi Jawa Timur
+                </Typography.Text>
+              </div>
             </div>
-          </div>
-        );
-      }}
-    >
-      {children}
-    </ProLayout>
+          );
+        }}
+      >
+        {children}
+      </ProLayout>
+    </div>
   );
 }
 

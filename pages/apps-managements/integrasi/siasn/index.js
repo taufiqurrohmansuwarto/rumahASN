@@ -4,7 +4,7 @@ import Layout from "@/components/Layout";
 import PageContainer from "@/components/PageContainer";
 import useScrollRestoration from "@/hooks/useScrollRestoration";
 import { Stack } from "@mantine/core";
-import { Breadcrumb, Button, Card, Divider, Form, Input } from "antd";
+import { Breadcrumb, Button, Card, Divider, Form, Grid, Input } from "antd";
 import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
@@ -12,6 +12,8 @@ import { useRouter } from "next/router";
 const IntegrasiSIASN = () => {
   const router = useRouter();
   const [form] = Form.useForm();
+
+  const breakPoint = Grid.useBreakpoint();
 
   useScrollRestoration();
 
@@ -26,6 +28,9 @@ const IntegrasiSIASN = () => {
         <title>Integrasi SIASN</title>
       </Head>
       <PageContainer
+        childrenContentStyle={{
+          padding: breakPoint.xs ? 0 : null,
+        }}
         title="Data Integrasi SIASN"
         subTitle="Integrasi SIASN - SIMASTER"
         onBack={() => router.back()}

@@ -2,25 +2,25 @@ import { getAllEmployeesPagingAdmin } from "@/services/master.services";
 import { capitalizeWords } from "@/utils/client-utils";
 import {
   CheckCircleOutlined,
-  ExclamationCircleOutlined,
+  CloseOutlined,
   SearchOutlined,
 } from "@ant-design/icons";
+import { Badge } from "@mantine/core";
 import { useQuery } from "@tanstack/react-query";
 import { Avatar, Space, Table, Tag, Tooltip, Typography } from "antd";
-import { useRouter } from "next/router";
-import EmployeesTableFilterAdmin from "../Filter/EmployeesTableFilterAdmin";
 import { useSession } from "next-auth/react";
+import { useRouter } from "next/router";
 import ReportEmployeeMaster from "../Admin/ReportEmployeeMaster";
-import { Badge } from "@mantine/core";
+import EmployeesTableFilterAdmin from "../Filter/EmployeesTableFilterAdmin";
 
 const TagKomparasi = ({ komparasi, nama }) => {
   return (
-    <Tag
-      icon={komparasi ? <CheckCircleOutlined /> : <ExclamationCircleOutlined />}
-      color={komparasi ? "success" : "error"}
+    <Badge
+      leftSection={komparasi ? <CheckCircleOutlined /> : <CloseOutlined />}
+      color={komparasi ? "green" : "red"}
     >
       {nama}
-    </Tag>
+    </Badge>
   );
 };
 
@@ -224,17 +224,17 @@ function EmployeesTableAdmin() {
         <ReportEmployeeMaster />
       </div>
       <Table
-        size="small"
+        size="middle"
         columns={columns}
         dataSource={data?.results}
         pagination={{
           total: data?.total,
           showTotal: (total) => `Total ${total} pegawai`,
           showSizeChanger: false,
+          position: ["bottomRight", "topRight"],
           current: parseInt(router?.query?.page),
           defaultCurrent: 1,
           onChange: handleChangePage,
-          position: ["topRight", "bottomRight", "topLeft", "bottomLeft"],
         }}
         loading={isLoading || isFetching}
         rowKey={(row) => row?.id}
