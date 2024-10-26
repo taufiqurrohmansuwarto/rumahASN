@@ -46,6 +46,7 @@ function NotificationLayout({ children, active }) {
       }}
       activeKey={active}
       onChange={handleTabChange}
+      type="card"
     >
       {routes.map((route) => (
         <Tabs.TabPane key={route.key} tab={route.title}>

@@ -1,14 +1,20 @@
 import Layout from "@/components/Layout";
 import ListNotifications from "@/components/ListNotifications";
+import NotificationLayout from "@/components/Notification/NotificationLayout";
 import PageContainer from "@/components/PageContainer";
-import { DeleteOutlined } from "@ant-design/icons";
+import { clearChatsNotificatoins } from "@/services/index";
+import { ClearOutlined } from "@ant-design/icons";
 import { Grid, Stack } from "@mantine/core";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Breadcrumb, Button, message, Grid as GridAntd } from "antd";
+import {
+  Breadcrumb,
+  Button,
+  FloatButton,
+  Grid as GridAntd,
+  message,
+} from "antd";
 import Head from "next/head";
 import Link from "next/link";
-import { clearChatsNotificatoins } from "@/services/index";
-import NotificationLayout from "@/components/Notification/NotificationLayout";
 
 function ForumKepegawaianNotification() {
   const queryClient = useQueryClient();
@@ -56,12 +62,8 @@ function ForumKepegawaianNotification() {
           <Grid align="center" justify="center">
             <Grid.Col md={8} sm={12}>
               <Stack>
-                <Button
-                  type="primary"
-                  icon={<DeleteOutlined />}
-                  onClick={handleClearNotif}
-                >
-                  Hapus Notifikasi
+                <Button type="primary" onClick={handleClearNotif}>
+                  Hapus Semua Notifikasi
                 </Button>
                 <ListNotifications />
               </Stack>

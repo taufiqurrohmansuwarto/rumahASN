@@ -131,7 +131,7 @@ function SocmedNotifications() {
 
   return (
     <Row justify={"center"}>
-      <Col md={14}>
+      <Col md={14} xs={24}>
         <Card
           title={
             <Space>
