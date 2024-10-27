@@ -1,27 +1,13 @@
+import FormTest from "@/components/ChatAI/FormTest";
 import Features from "@/components/Features";
 import Footer from "@/components/Outer/Footer";
 import LoginSimaster from "@/components/TombolLogin/LoginSimaster";
 import TombolLoginSimaster from "@/components/TombolLogin/TombolLoginSimaster";
 import UserRating from "@/components/UserRating";
-import {
-  GlobalOutlined,
-  InstagramOutlined,
-  YoutubeOutlined,
-} from "@ant-design/icons";
 import { Center } from "@mantine/core";
 import { useSpring } from "@react-spring/web";
 import { IconBarcode, IconKey } from "@tabler/icons";
-import {
-  Button,
-  Col,
-  Divider,
-  FloatButton,
-  Grid,
-  Row,
-  Space,
-  Tooltip,
-  Typography,
-} from "antd";
+import { Button, Col, Divider, FloatButton, Grid, Row, Space } from "antd";
 import { getProviders, signIn } from "next-auth/react";
 import Head from "next/head";
 import Image from "next/image";
@@ -227,6 +213,7 @@ const SignIn = ({ providers }) => {
       <UserRating />
       <Footer />
       <FloatButton.BackTop />
+      <FormTest height={300} />
     </>
   );
 };
