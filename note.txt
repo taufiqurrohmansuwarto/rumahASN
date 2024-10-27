@@ -1,6 +1,1 @@
-dokumen sk
-
-- pilih format dokumen
-- pilih excel untuk data
-- entri variabel
-
+https://sdk.vercel.ai/examples/rsc/assistants/stream-assistant-responses-with-tools

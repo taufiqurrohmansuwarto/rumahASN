@@ -20,7 +20,8 @@ import "../styles/globals.css";
 import dayjs from "dayjs";
 import "dayjs/locale/id";
 import relativeTime from "dayjs/plugin/relativeTime";
-
+import "@assistant-ui/react/styles/index.css";
+import "@assistant-ui/react/styles/modal.css";
 // check user role and organization start with 123
 function Auth({ children, action, subject }) {
   dayjs.locale("id");
