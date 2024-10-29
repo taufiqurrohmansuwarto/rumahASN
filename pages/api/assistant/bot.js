@@ -1,5 +1,7 @@
 import { getChat } from "@/controller/chat-ai.controller";
 import { createRouter } from "next-connect";
+import asnNonAsnFasilitatorMiddleware from "@/middleware/asn-non-asn-fasilitator.middleware";
+import auth from "@/middleware/auth.middleware";
 
 export const config = {
   api: {
@@ -12,6 +14,6 @@ export const config = {
 
 const router = createRouter();
 
-router.post(getChat);
+router.use(auth).use(auth).use(asnNonAsnFasilitatorMiddleware).post(getChat);
 
 export default router.handler({});

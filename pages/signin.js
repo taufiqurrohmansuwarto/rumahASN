@@ -213,7 +213,6 @@ const SignIn = ({ providers }) => {
       <UserRating />
       <Footer />
       <FloatButton.BackTop />
-      <FormTest height={300} />
     </>
   );
 };
