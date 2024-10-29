@@ -6,24 +6,25 @@ const SyncPegawai = require("@/models/sync-pegawai.model");
 const availableFunctions = {
   // Fungsi untuk mencari data karyawan
   search_employee: async (args) => {
-    const employeeNumber = trim(args.employee_number);
-    const name = trim(args.name);
-    const employee = SyncPegawai.query()
-      .where((builder) => {
-        if (employeeNumber) {
-          builder.where("nip_master", "ilike", `%${employeeNumber}%`);
-        }
-        if (name) {
-          builder.where("nama_master", "ilike", `%${name}%`);
-        }
-      })
-      .first();
+    // const employeeNumber = trim(args.employee_number);
+    // const name = trim(args.name);
+    // const employee = SyncPegawai.query()
+    //   .where((builder) => {
+    //     if (employeeNumber) {
+    //       builder.where("nip_master", "ilike", `%${employeeNumber}%`);
+    //     }
+    //     if (name) {
+    //       builder.where("nama_master", "ilike", `%${name}%`);
+    //     }
+    //   })
+    //   .first();
 
-    if (!employee) {
-      throw new Error("Employee not found");
-    } else {
-      return employee;
-    }
+    // if (!employee) {
+    //   throw new Error("Employee not found");
+    // } else {
+    //   return employee;
+    // }
+    return null;
   },
 
   // Fungsi untuk mengecek sisa cuti
