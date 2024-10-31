@@ -1,11 +1,30 @@
-import { AssistantModal, useEdgeRuntime } from "@assistant-ui/react";
+import { useAssistant } from "ai/react";
 
-const AssistantAI = () => {
-  const runtime = useEdgeRuntime({
-    api: "/api/chat",
-  });
+export default function AssistantAI() {
+  const { status, messages, input, submitMessage, handleInputChange } =
+    useAssistant({ api: "/helpdesk/api/assistant/chat" });
 
-  return <AssistantModal runtime={runtime} />;
-};
+  return (
+    <div className="flex flex-col gap-2">
+      <div className="p-2">status: {status}</div>
 
-export default AssistantAI;
+      <div className="flex flex-col p-2 gap-2">
+        {messages.map((message) => (
+          <div key={message.id} className="flex flex-row gap-2">
+            <div className="w-24 text-zinc-500">{`${message.role}: `}</div>
+            <div className="w-full">{message.content}</div>
+          </div>
+        ))}
+      </div>
+
+      <form onSubmit={submitMessage} className="fixed bottom-0 p-2 w-full">
+        <input
+          disabled={status !== "awaiting_message"}
+          value={input}
+          onChange={handleInputChange}
+          className="bg-zinc-100 w-full p-2"
+        />
+      </form>
+    </div>
+  );
+}
