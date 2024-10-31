@@ -9,6 +9,7 @@ import { executeToolCall } from "@/utils/toolservice";
 import { ChatError } from "@/utils/errors";
 
 import OpenAI from "openai";
+import { chatHistoryService } from "@/utils/chatHistoryService";
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -23,8 +24,29 @@ export const handleChat = async (req, res) => {
     // Initialize or get thread
     const currentThreadId = await initializeThread(threadId);
 
+    // save thread if new
+    if (!threadId) {
+      await chatHistoryService.saveThread(
+        currentThreadId,
+        user.customId,
+        message
+      );
+    }
+
+    // save message
+    await chatHistoryService.saveMessage(currentThreadId, message, "user");
+
     // Process the chat
     const result = await processChatInteraction(currentThreadId, message, user);
+    console.log(JSON.stringify(result));
+
+    // save assistant response
+    await chatHistoryService.saveMessage(
+      currentThreadId,
+      result.message.content,
+      "assistant",
+      result?.message?.attachments
+    );
 
     return res.json(result);
   } catch (error) {

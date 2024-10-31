@@ -1,4 +1,4 @@
-import { cariSeluruhRekanKerja } from "";
+import { cariSeluruhRekanKerja } from "@/utils/ai-utils";
 
 export const executeToolCall = async (functionName, args) => {
   const { organization_id } = args?.user;

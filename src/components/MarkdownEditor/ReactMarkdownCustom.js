@@ -50,7 +50,7 @@ const remarkMentions = () => {
   };
 };
 
-function ReactMarkdownCustom({ children }) {
+function ReactMarkdownCustom({ children, withCustom = true }) {
   const components = {
     a({ node, ...props }) {
       return <a {...props} target="_blank" />;
@@ -126,7 +126,7 @@ function ReactMarkdownCustom({ children }) {
         rehypePlugins={[rehypeRaw]}
         components={components}
       >
-        {custom(children)}
+        {withCustom ? custom(children) : children}
       </ReactMarkdown>
     </Stack>
   );
