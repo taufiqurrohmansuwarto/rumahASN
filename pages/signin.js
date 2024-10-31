@@ -1,3 +1,4 @@
+import AssistantAI from "@/components/ChatAI/AssistantAI";
 import FormTest from "@/components/ChatAI/FormTest";
 import Features from "@/components/Features";
 import Footer from "@/components/Outer/Footer";
@@ -213,6 +214,7 @@ const SignIn = ({ providers }) => {
       <UserRating />
       <Footer />
       <FloatButton.BackTop />
+      <AssistantAI />
     </>
   );
 };

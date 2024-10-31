@@ -1,4 +1,6 @@
+import { AssistantResponse } from "ai";
 import { trim } from "lodash";
+import { NextResponse } from "next/server";
 import OpenAI from "openai";
 const SyncPegawai = require("@/models/sync-pegawai.model");
 
@@ -190,6 +192,16 @@ const getChat = async (req, res) => {
   }
 };
 
+const chatCompletion = async (req, res) => {
+  try {
+    return NextResponse.json({ test: "test" });
+  } catch (error) {
+    console.log(error);
+    res.status(500).send(error);
+  }
+};
+
 module.exports = {
   getChat,
+  chatCompletion,
 };
