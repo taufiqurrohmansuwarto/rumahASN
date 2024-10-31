@@ -21,11 +21,17 @@ module.exports.cariSeluruhRekanKerja = async (currentOpdId) => {
   try {
     // 12301 menjadi 123
     const currentUserDepartmentCode = currentOpdId.substring(0, 3);
-    const employees = await SyncPegawai.query().where(
-      "skpd_id",
-      "ilike",
-      `${currentUserDepartmentCode}%`
-    );
+    const employees = await SyncPegawai.query()
+      .where("skpd_id", "ilike", `${currentUserDepartmentCode}%`)
+      .select(
+        "id as id",
+        "nama_master as nama",
+        "nip_master as nip",
+        "status_master as status",
+        "jabatan_master as jabatan",
+        "golongan_master as golongan",
+        "pangkat_master as pangkat"
+      );
 
     if (!employees) {
       throw new Error("Employee not found");
