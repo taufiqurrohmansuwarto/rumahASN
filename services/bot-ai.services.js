@@ -16,3 +16,7 @@ export const sendMessagesAI = (params) => {
     })
     .then((res) => res?.data);
 };
+
+export const getAssistants = () => {
+  return api.get("/list").then((res) => res?.data);
+};

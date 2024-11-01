@@ -9,7 +9,6 @@ import { Avatar, Button, Card, Input, Typography } from "antd";
 import { useEffect, useRef } from "react";
 import styled from "styled-components";
 import ReactMarkdownCustom from "../MarkdownEditor/ReactMarkdownCustom";
-
 const { Text } = Typography;
 
 // Animasi untuk loading dots
@@ -110,127 +109,131 @@ const AssistantChat = ({ height = 600 }) => {
   const chatHeight = height - inputAreaHeight;
 
   return (
-    <Card
-      style={{
-        height: `${height}px`,
-        display: "flex",
-        flexDirection: "column",
-        padding: 0,
-      }}
-      bodyStyle={{
-        padding: 0,
-        flex: 1,
-        display: "flex",
-        flexDirection: "column",
-        overflow: "hidden",
-      }}
-    >
-      {/* Chat Container */}
-      <div
-        ref={chatContainerRef}
+    <>
+      <Card
         style={{
-          height: `${chatHeight}px`,
-          overflowY: "auto",
-          padding: "24px",
-          backgroundColor: "#f5f5f5",
+          height: `${height}px`,
+          display: "flex",
+          flexDirection: "column",
+          padding: 0,
+        }}
+        bodyStyle={{
+          padding: 0,
           flex: 1,
+          display: "flex",
+          flexDirection: "column",
+          overflow: "hidden",
         }}
       >
-        {messages.map((msg, index) => (
-          <MessageContainer key={index} isUser={msg.role === "user"}>
-            <Avatar
-              className="avatar"
-              size="small"
-              icon={msg.role === "user" ? <UserOutlined /> : <OpenAIOutlined />}
-              style={{
-                backgroundColor: msg.role === "user" ? "#1890ff" : "#52c41a",
-              }}
-            />
-            <div className="message-content">
-              <ChatBubble isUser={msg.role === "user"}>
-                <ReactMarkdownCustom>{msg.content}</ReactMarkdownCustom>
-              </ChatBubble>
-            </div>
-          </MessageContainer>
-        ))}
-
-        {/* Loading Indicator */}
-        {isLoading && (
-          <MessageContainer>
-            <Avatar
-              className="avatar"
-              size="small"
-              icon={<OpenAIOutlined />}
-              style={{ backgroundColor: "#52c41a" }}
-            />
-            <LoadingDots>
-              <div className="dot" />
-              <div className="dot" />
-              <div className="dot" />
-            </LoadingDots>
-          </MessageContainer>
-        )}
-
-        <div ref={messagesEndRef} />
-      </div>
-
-      {/* Input Area */}
-      <div
-        style={{
-          padding: "16px 24px",
-          borderTop: "1px solid #f0f0f0",
-          backgroundColor: "#fff",
-        }}
-      >
+        {/* Chat Container */}
         <div
+          ref={chatContainerRef}
           style={{
-            display: "flex",
-            gap: "8px",
+            height: `${chatHeight}px`,
+            overflowY: "auto",
+            padding: "24px",
+            backgroundColor: "#f5f5f5",
+            flex: 1,
           }}
         >
-          <Input
-            value={input}
-            onChange={handleInputChange}
-            placeholder="Silahkan masukkan pesan..."
-            onPressEnter={(e) => {
-              if (!e.shiftKey) {
-                e.preventDefault();
-                submitMessage(e);
-              }
-            }}
-            disabled={isLoading}
-            style={{
-              borderRadius: "20px",
-              padding: "8px 16px",
-            }}
-          />
-          <Button
-            type="primary"
-            onClick={submitMessage}
-            disabled={!input.trim() || isLoading}
-            icon={<SendOutlined />}
-            style={{
-              borderRadius: "20px",
-              width: "50px",
-              height: "40px",
-              padding: 0,
-              minWidth: "50px",
-            }}
-          />
-          <Button
-            onClick={clearMessages}
-            icon={<DeleteOutlined />}
-            style={{
-              borderRadius: "20px",
-              width: "40px",
-              height: "40px",
-              padding: 0,
-              minWidth: "40px",
-            }}
-          />
+          {messages.map((msg, index) => (
+            <MessageContainer key={index} isUser={msg.role === "user"}>
+              <Avatar
+                className="avatar"
+                size="small"
+                icon={
+                  msg.role === "user" ? <UserOutlined /> : <OpenAIOutlined />
+                }
+                style={{
+                  backgroundColor: msg.role === "user" ? "#1890ff" : "#52c41a",
+                }}
+              />
+              <div className="message-content">
+                <ChatBubble isUser={msg.role === "user"}>
+                  <ReactMarkdownCustom>{msg.content}</ReactMarkdownCustom>
+                </ChatBubble>
+              </div>
+            </MessageContainer>
+          ))}
+
+          {/* Loading Indicator */}
+          {isLoading && (
+            <MessageContainer>
+              <Avatar
+                className="avatar"
+                size="small"
+                icon={<OpenAIOutlined />}
+                style={{ backgroundColor: "#52c41a" }}
+              />
+              <LoadingDots>
+                <div className="dot" />
+                <div className="dot" />
+                <div className="dot" />
+              </LoadingDots>
+            </MessageContainer>
+          )}
+
+          <div ref={messagesEndRef} />
         </div>
-      </div>
-    </Card>
+
+        {/* Input Area */}
+        <div
+          style={{
+            padding: "16px 24px",
+            borderTop: "1px solid #f0f0f0",
+            backgroundColor: "#fff",
+          }}
+        >
+          <div
+            style={{
+              display: "flex",
+              gap: "8px",
+            }}
+          >
+            <Input
+              value={input}
+              onChange={handleInputChange}
+              placeholder="Silahkan masukkan pesan..."
+              onPressEnter={(e) => {
+                if (!e.shiftKey) {
+                  e.preventDefault();
+                  submitMessage(e);
+                }
+              }}
+              disabled={isLoading}
+              style={{
+                borderRadius: "20px",
+                padding: "8px 16px",
+              }}
+            />
+            <Button
+              type="primary"
+              onClick={submitMessage}
+              disabled={!input.trim() || isLoading}
+              icon={<SendOutlined />}
+              style={{
+                borderRadius: "20px",
+                width: "50px",
+                height: "40px",
+                padding: 0,
+                minWidth: "50px",
+              }}
+            />
+            <Button
+              onClick={clearMessages}
+              icon={<DeleteOutlined />}
+              style={{
+                borderRadius: "20px",
+                width: "40px",
+                height: "40px",
+                padding: 0,
+                minWidth: "40px",
+              }}
+            />
+          </div>
+        </div>
+      </Card>
+    </>
   );
 };
 
