@@ -1,4 +1,5 @@
 import BotAssistantsLayout from "@/components/ChatAI/BotAssistantsLayout";
+import FormTest from "@/components/ChatAI/FormTest";
 import Layout from "@/components/Layout";
 import LayoutASNConnect from "@/components/Socmed/LayoutASNConnect";
 import useScrollRestoration from "@/hooks/useScrollRestoration";
@@ -15,9 +16,7 @@ const AsnUpdates = () => {
         <title>Rumah ASN - Smart ASN Connect Update</title>
       </Head>
       <LayoutASNConnect active="asn-ai-chat">
-        <BotAssistantsLayout>
-          <div>Hello world</div>
-        </BotAssistantsLayout>
+        <BotAssistantsLayout></BotAssistantsLayout>
       </LayoutASNConnect>
     </>
   );
