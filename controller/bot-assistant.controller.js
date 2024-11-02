@@ -23,29 +23,42 @@ export const handleChat = async (req, res) => {
 
     // Initialize or get thread
     const currentThreadId = await initializeThread(threadId);
+    const assistantId = req?.query?.assistantId || process.env.ASSISTANT_ID;
 
     // save thread if new
     if (!threadId) {
       await chatHistoryService.saveThread(
         currentThreadId,
         user.customId,
-        message
+        message,
+        assistantId
       );
     }
 
     // save message
-    await chatHistoryService.saveMessage(currentThreadId, message, "user");
+    await chatHistoryService.saveMessage(
+      currentThreadId,
+      message,
+      "user",
+      null,
+      user.customId
+    );
 
     // Process the chat
-    const result = await processChatInteraction(currentThreadId, message, user);
-    console.log(JSON.stringify(result));
+    const result = await processChatInteraction(
+      currentThreadId,
+      message,
+      user,
+      assistantId
+    );
 
     // save assistant response
     await chatHistoryService.saveMessage(
       currentThreadId,
       result.message.content,
       "assistant",
-      result?.message?.attachments
+      result?.message?.attachments,
+      user?.customId
     );
 
     return res.json(result);
@@ -65,13 +78,13 @@ const initializeThread = async (threadId) => {
 };
 
 // Process the chat interaction
-const processChatInteraction = async (threadId, message, user) => {
+const processChatInteraction = async (threadId, message, user, assistantId) => {
   try {
     // Create message
     await createMessage(threadId, message);
 
     // Create and process run
-    const run = await createRun(threadId, process.env.ASSISTANT_ID);
+    const run = await createRun(threadId, assistantId);
     await processRun(threadId, run.id, user);
 
     // Get and format final message

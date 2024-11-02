@@ -7,7 +7,6 @@ import {
   QueryClientProvider,
 } from "@tanstack/react-query";
 import { ConfigProvider, Grid } from "antd";
-// import "antd/dist/antd.css";
 import id from "antd/locale/id_ID";
 import { RBACProvider } from "context/RBACContext";
 import { SessionProvider, signIn, useSession } from "next-auth/react";
@@ -20,8 +19,8 @@ import "../styles/globals.css";
 import dayjs from "dayjs";
 import "dayjs/locale/id";
 import relativeTime from "dayjs/plugin/relativeTime";
-import "@assistant-ui/react/styles/index.css";
-import "@assistant-ui/react/styles/modal.css";
+import "antd/dist/reset.css";
+
 // check user role and organization start with 123
 function Auth({ children, action, subject }) {
   dayjs.locale("id");

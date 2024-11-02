@@ -468,12 +468,7 @@ function Layout({ children, active, collapsed = true }) {
   };
 
   return (
-    <div
-      style={{
-        height: "100vh",
-        overflow: "auto",
-      }}
-    >
+    <div>
       <ProLayout
         contentStyle={{
           padding: breakPoint.xs ? 0 : null,

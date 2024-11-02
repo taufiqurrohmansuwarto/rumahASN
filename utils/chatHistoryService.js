@@ -9,7 +9,7 @@ const generateTitle = (message) => {
 
 export const chatHistoryService = {
   // save thread
-  async saveThread(threadId, userId, firstMessage) {
+  async saveThread(threadId, userId, firstMessage, assistantId) {
     try {
       const title = generateTitle(firstMessage);
 
@@ -19,6 +19,7 @@ export const chatHistoryService = {
           user_id: userId,
           title,
           status: "active",
+          assistant_id: assistantId,
         })
         .onConflict("id")
         .merge();
@@ -28,13 +29,14 @@ export const chatHistoryService = {
   },
 
   //   save message
-  async saveMessage(threadId, content, role, metadata) {
+  async saveMessage(threadId, content, role, metadata, userId) {
     try {
       await BotAssistantMessages.query().insert({
         thread_id: threadId,
         content,
         role,
         metadata,
+        user_id: userId,
       });
     } catch (error) {
       console.log(error);
@@ -51,14 +53,25 @@ export const chatHistoryService = {
     }
   },
 
-  async getUserThreads(userId, params = {}) {
-    const { limit = 10, offset = 0 } = params;
+  async getUserThreads(userId, assistantId) {
     try {
       const threads = await BotAssistantChatThreads.query()
         .where("user_id", userId)
-        .limit(limit)
-        .offset(offset);
+        .andWhere("assistant_id", assistantId)
+        .orderBy("created_at", "desc");
       return threads;
+    } catch (error) {
+      console.log(error);
+    }
+  },
+
+  async getThreadMessages(userId, threadId) {
+    try {
+      const messages = await BotAssistantMessages.query()
+        .where("user_id", userId)
+        .andWhere("thread_id", threadId);
+
+      return messages;
     } catch (error) {
       console.log(error);
     }
