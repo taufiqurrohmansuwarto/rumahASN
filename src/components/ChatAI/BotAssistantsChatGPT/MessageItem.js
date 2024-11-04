@@ -1,6 +1,8 @@
 import React from "react";
 import { Flex, Typography } from "antd";
 import dayjs from "dayjs";
+import MarkdownReact from "@/components/MarkdownEditor/MarkdownReact";
+import ReactMarkdownCustom from "@/components/MarkdownEditor/ReactMarkdownCustom";
 
 const { Text } = Typography;
 
@@ -33,7 +35,9 @@ export const MessageItem = ({ message }) => {
             wordBreak: "break-word",
           }}
         >
-          {content}
+          <ReactMarkdownCustom withCustom={false}>
+            {content}
+          </ReactMarkdownCustom>
         </Text>
         <Text
           style={{

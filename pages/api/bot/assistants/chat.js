@@ -1,7 +1,8 @@
 import { handleChat } from "@/controller/bot-assistant.controller";
-import { createRouter } from "next-connect";
-import auth from "@/middleware/auth.middleware";
 import asnMiddleware from "@/middleware/asn.middleware";
+import auth from "@/middleware/auth.middleware";
+import { siasnMiddleware } from "@/middleware/siasn.middleware";
+import { createRouter } from "next-connect";
 
 export const config = {
   api: {
@@ -16,6 +17,7 @@ const router = createRouter();
 
 router
   .use(auth)
+  .use(siasnMiddleware)
   .use(asnMiddleware)
   .post(async (req, res) => await handleChat(req, res));
 

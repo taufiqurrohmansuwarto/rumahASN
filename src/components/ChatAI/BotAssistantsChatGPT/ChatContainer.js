@@ -1,10 +1,25 @@
-import React, { useState, useRef, useEffect, useCallback } from "react";
+import React, { useState, useRef, useEffect, useCallback, memo } from "react";
 import { Flex, Input, Button, Typography } from "antd";
 import { SendOutlined } from "@ant-design/icons";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { AssistantAIServices } from "@/services/assistant-ai.services";
 import { MessageItem } from "./MessageItem";
 import { MessageItemSkeleton } from "./MessageItemSkeleton";
+
+const MessagesList = memo(({ messages, sendMessageMutation }) => {
+  return (
+    <>
+      {messages?.map((msg) => (
+        <MessageItem key={msg.id} message={msg} />
+      ))}
+      {sendMessageMutation.isLoading && <MessageItemSkeleton isUser={false} />}
+    </>
+  );
+});
+
+MessagesList.displayName = "MessagesList";
+
+// Tambahkan useCallback untuk memoize handler
 
 export const ChatContainer = ({ assistantId, threadId, firstMessage }) => {
   const [message, setMessage] = useState("");
@@ -165,12 +180,11 @@ export const ChatContainer = ({ assistantId, threadId, firstMessage }) => {
             </Flex>
           ) : (
             <>
-              {messages?.map((msg) => (
-                <MessageItem key={msg.id} message={msg} />
-              ))}
-              {sendMessageMutation.isLoading && (
-                <MessageItemSkeleton isUser={false} />
-              )}
+              <MessagesList
+                messages={messages}
+                isLoading={isLoading}
+                sendMessageMutation={sendMessageMutation}
+              />
             </>
           )}
           <div ref={messagesEndRef} />

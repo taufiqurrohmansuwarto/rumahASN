@@ -1,6 +1,8 @@
 // services/openaiService.js
 import OpenAI from "openai";
 
+import { ChatError } from "@/utils/errors";
+
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
@@ -20,6 +22,7 @@ export const createMessage = async (threadId, content) => {
       content,
     });
   } catch (error) {
+    console.log(error);
     throw new ChatError("Failed to create message", error);
   }
 };

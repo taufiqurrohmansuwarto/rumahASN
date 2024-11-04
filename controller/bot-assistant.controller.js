@@ -19,7 +19,13 @@ const openai = new OpenAI({
 export const handleChat = async (req, res) => {
   try {
     const { threadId, message } = req.body;
-    const user = req?.user;
+    const currentUser = req?.user;
+
+    const user = {
+      ...currentUser,
+      fetcher: req?.fetcher,
+      siasnRequest: req?.siasnRequest,
+    };
 
     // Initialize or get thread
     const currentThreadId = await initializeThread(threadId);

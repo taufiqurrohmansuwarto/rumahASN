@@ -9,6 +9,17 @@ module.exports.getRwPendidikanMaster = async (fetcher, nip) => {
   }
 };
 
+module.exports.getDataUtamaMaster = async (fetcher, nip) => {
+  try {
+    const result = await fetcher.get(
+      `/master-ws/operator/employees/${nip}/data-utama-master`
+    );
+    return result?.data;
+  } catch (error) {
+    console.log(error);
+  }
+};
+
 // keluarga, pasangan, dan anak
 module.exports.getRwPasangan = async (fetcher, nip) => {
   try {
