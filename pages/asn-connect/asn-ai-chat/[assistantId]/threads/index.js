@@ -1,5 +1,4 @@
 import ChatApp from "@/components/ChatAI/BotAssistants/ChatApp";
-import BotAssistantsLayout from "@/components/ChatAI/BotAssistantsLayout";
 import Layout from "@/components/Layout";
 import LayoutASNConnect from "@/components/Socmed/LayoutASNConnect";
 import useScrollRestoration from "@/hooks/useScrollRestoration";
