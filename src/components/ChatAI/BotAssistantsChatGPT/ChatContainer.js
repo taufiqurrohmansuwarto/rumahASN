@@ -1,8 +1,8 @@
-import { AssistantAIServices } from "@/services/assistant-ai.services";
+import React, { useState, useRef, useEffect, useCallback } from "react";
+import { Flex, Input, Button, Typography } from "antd";
 import { SendOutlined } from "@ant-design/icons";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Button, Flex, Input, Typography } from "antd";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { AssistantAIServices } from "@/services/assistant-ai.services";
 import { MessageItem } from "./MessageItem";
 import { MessageItemSkeleton } from "./MessageItemSkeleton";
 
@@ -53,6 +53,7 @@ export const ChatContainer = ({ assistantId, threadId, firstMessage }) => {
     }
   }, []);
 
+  // Scroll to bottom only for new messages
   const scrollToBottom = useCallback(() => {
     if (shouldScrollToBottom && messagesEndRef.current) {
       messagesEndRef.current.scrollIntoView({
@@ -74,12 +75,6 @@ export const ChatContainer = ({ assistantId, threadId, firstMessage }) => {
     scrollToBottom();
   }, [messages, scrollToBottom]);
 
-  useEffect(() => {
-    if (messagesEndRef.current) {
-      messagesEndRef.current.scrollIntoView();
-    }
-  }, []);
-
   const sendMessageMutation = useMutation(
     (newMessage) =>
       AssistantAIServices.sendMessage({
@@ -89,17 +84,13 @@ export const ChatContainer = ({ assistantId, threadId, firstMessage }) => {
       }),
     {
       onMutate: async (newMessage) => {
-        // Cancel any outgoing refetches
         await queryClient.cancelQueries(["messages", assistantId, threadId]);
-
-        // Snapshot the previous value
         const previousMessages = queryClient.getQueryData([
           "messages",
           assistantId,
           threadId,
         ]);
 
-        // Optimistically update to the new value
         const optimisticMessage = {
           id: Date.now().toString(),
           content: newMessage,
@@ -112,7 +103,6 @@ export const ChatContainer = ({ assistantId, threadId, firstMessage }) => {
           (old = []) => [...old, optimisticMessage]
         );
 
-        // Return a context object with the snapshotted value
         return { previousMessages };
       },
       onError: (err, newMessage, context) => {
@@ -131,7 +121,7 @@ export const ChatContainer = ({ assistantId, threadId, firstMessage }) => {
   const handleSend = () => {
     if (message.trim() && !sendMessageMutation.isLoading) {
       const messageToSend = message;
-      setMessage(""); // Clear input immediately
+      setMessage("");
       sendMessageMutation.mutate(messageToSend);
       setShouldScrollToBottom(true);
     }
@@ -166,26 +156,24 @@ export const ChatContainer = ({ assistantId, threadId, firstMessage }) => {
             maxWidth: 850,
             margin: "0 auto",
             width: "100%",
-            minHeight: "100%",
           }}
         >
-          {isLoading && !firstMessage ? (
-            <Flex vertical gap="middle" style={{ padding: "20px 0" }}>
-              <MessageItemSkeleton isUser={false} />
+          {isLoading && !messages?.length ? (
+            <Flex vertical gap="middle">
               <MessageItemSkeleton isUser={true} />
               <MessageItemSkeleton isUser={false} />
             </Flex>
           ) : (
-            <Flex vertical style={{ marginTop: "auto" }}>
+            <>
               {messages?.map((msg) => (
                 <MessageItem key={msg.id} message={msg} />
               ))}
               {sendMessageMutation.isLoading && (
                 <MessageItemSkeleton isUser={false} />
               )}
-              <div ref={messagesEndRef} style={{ height: 1 }} />
-            </Flex>
+            </>
           )}
+          <div ref={messagesEndRef} />
         </Flex>
       </Flex>
 
