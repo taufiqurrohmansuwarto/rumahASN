@@ -1,54 +1,17 @@
-import { Blockquote, Code, Stack, Table, Text, Title } from "@mantine/core";
+import {
+  Blockquote,
+  Code,
+  List,
+  Stack,
+  Table,
+  Text,
+  Title,
+} from "@mantine/core";
 import { Image } from "antd";
 import ReactMarkdown from "react-markdown";
-import remarkGfm from "remark-gfm";
-import remarkBreaks from "remark-breaks";
-import { visit } from "unist-util-visit";
 import rehypeRaw from "rehype-raw";
-
-const remarkMentions = () => {
-  return (tree) => {
-    visit(tree, "text", (node, index, parent) => {
-      if (!node.value.includes("@")) return; // No mentions, skip
-
-      const matches = node.value.match(/@\w+/g);
-      if (matches) {
-        const newNodes = [];
-        let lastIndex = 0;
-
-        matches.forEach((match) => {
-          const startPos = node.value.indexOf(match, lastIndex);
-          const endPos = startPos + match.length;
-
-          // Text before the mention
-          if (startPos > lastIndex) {
-            newNodes.push({
-              type: "text",
-              value: node.value.slice(lastIndex, startPos),
-            });
-          }
-
-          // The mention link
-          newNodes.push({
-            type: "link",
-            url: `/helpdesk/user/${match.slice(1)}`, // Assuming username without '@'
-            title: null,
-            children: [{ type: "text", value: match }],
-          });
-
-          lastIndex = endPos;
-        });
-
-        // Text after the last mention
-        if (lastIndex < node.value.length) {
-          newNodes.push({ type: "text", value: node.value.slice(lastIndex) });
-        }
-
-        parent.children.splice(index, 1, ...newNodes);
-      }
-    });
-  };
-};
+import remarkBreaks from "remark-breaks";
+import remarkGfm from "remark-gfm";
 
 function ReactMarkdownCustom({ children, withCustom = true }) {
   const components = {
@@ -107,14 +70,53 @@ function ReactMarkdownCustom({ children, withCustom = true }) {
     table({ node, ...props }) {
       return <Table {...props} />;
     },
+    ol({ node, ...props }) {
+      return (
+        <ol
+          style={{
+            whiteSpace: "nowrap",
+          }}
+        >
+          {props.children}
+        </ol>
+      );
+    },
+    // Tambahan komponen ul dan li
+    ul({ node, ...props }) {
+      return (
+        <ul
+          style={{
+            whiteSpace: "nowrap",
+          }}
+        >
+          {props.children}
+        </ul>
+      );
+    },
+    li({ node, ...props }) {
+      return (
+        <li
+          style={{
+            whiteSpace: "nowrap",
+          }}
+        >
+          {props.children}
+        </li>
+      );
+    },
   };
 
   const custom = (markdownSource) => {
     let md = markdownSource;
+    // Handle code blocks
     md = markdownSource.replace(/```[\s\S]*?```/g, (m) =>
       m.replace(/\n/g, "\n ")
     );
-    md = md.replace(/(?<=\n\n)(?![*-])\n/g, "&nbsp;\n ");
+    // Mengurangi multiple newlines
+    md = md.replace(/\n{3,}/g, "\n\n");
+    // Handle list items agar tidak terlalu lebar spacing-nya
+    md = md.replace(/(\n\s*[-*+])/g, "\n$1");
+    // Add proper line endings
     md = md.replace(/(\n)/gm, "  \n");
     return md;
   };

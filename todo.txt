@@ -1,2 +1,87 @@
-todo 
-1. kebutuhan download
+Berdasarkan pengalaman, berikut beberapa jenis pertanyaan yang sering ditanyakan ke bot kepegawaian (SIASN):
+
+1. Informasi Data Pribadi:
+- "Berapa NIP saya?"
+- "Tolong tampilkan data pribadi saya"
+- "Apa jabatan saya saat ini?"
+- "Di unit kerja mana saya ditugaskan?"
+- "Kapan TMT jabatan saya?"
+
+2. Riwayat Kepegawaian:
+- "Tampilkan riwayat pendidikan saya"
+- "Bagaimana riwayat jabatan saya?"
+- "Lihat riwayat pangkat saya"
+- "Kapan kenaikan pangkat terakhir saya?"
+- "Berapa lama saya sudah bekerja?"
+
+3. Informasi Layanan:
+- "Bagaimana cara mengajukan kenaikan pangkat?"
+- "Apa syarat untuk mutasi?"
+- "Dokumen apa saja yang dibutuhkan untuk pensiun?"
+- "Bagaimana prosedur pengajuan cuti?"
+- "Kapan jadwal DIKTAT berikutnya?"
+
+4. Status Layanan:
+- "Bagaimana status usulan KP saya?"
+- "Apakah berkas cuti saya sudah disetujui?"
+- "Sampai mana proses mutasi saya?"
+- "Status pengajuan pensiun saya?"
+- "Apakah SK saya sudah terbit?"
+
+5. Jadwal dan Agenda:
+- "Kapan jadwal ujian dinas?"
+- "Berapa lama lagi saya bisa naik pangkat?"
+- "Kapan saya bisa pensiun?"
+- "Ada diklat apa bulan depan?"
+- "Kapan batas akhir pengajuan cuti?"
+
+6. Dokumen dan Berkas:
+- "Tolong download SK terakhir saya"
+- "Dimana saya bisa dapat format SK?"
+- "Bagaimana cara upload dokumen?"
+- "File apa saja yang harus dilengkapi?"
+- "Tolong tunjukkan berkas kepegawaian saya"
+
+7. Perhitungan dan Simulasi:
+- "Hitung masa kerja saya"
+- "Berapa tunjangan yang saya terima?"
+- "Simulasi pensiun saya"
+- "Kapan saya bisa naik pangkat lagi?"
+- "Hitung cuti saya yang tersisa"
+
+8. Bantuan Teknis:
+- "Bagaimana cara update data?"
+- "Kenapa SIASN tidak bisa dibuka?"
+- "Cara reset password SIASN?"
+- "Dimana menu untuk upload berkas?"
+- "Bagaimana cara cetak kartu pegawai?"
+
+9. Informasi Peraturan:
+- "Apa dasar hukum kenaikan pangkat?"
+- "Berapa batas usia pensiun?"
+- "Peraturan tentang cuti melahirkan?"
+- "Syarat mendapat tunjangan kinerja?"
+- "Aturan tentang WFH?"
+
+10. Rekomendasi:
+- "Diklat apa yang cocok untuk saya?"
+- "Jabatan apa yang bisa saya ambil?"
+- "Bagaimana cara percepat kenaikan pangkat?"
+- "Apa yang harus saya siapkan untuk promosi?"
+- "Saran pengembangan karir saya?"
+
+Tips penanganan pertanyaan:
+1. Kategorisasi pertanyaan untuk respons yang tepat
+2. Siapkan template jawaban standar
+3. Identifikasi kata kunci penting
+4. Sediakan opsi eskalasi ke human operator
+5. Update database pertanyaan secara berkala
+
+Fitur bot yang perlu disiapkan:
+1. Natural Language Processing
+2. Intent Recognition
+3. Context Management
+4. Data Integration
+5. Document Handling
+
+Apakah ada jenis pertanyaan spesifik yang ingin didiskusikan lebih detail?
