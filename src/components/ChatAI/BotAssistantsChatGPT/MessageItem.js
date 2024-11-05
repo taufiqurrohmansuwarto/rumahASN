@@ -1,8 +1,6 @@
-import React from "react";
+import ReactMarkdownCustom from "@/components/MarkdownEditor/ReactMarkdownCustom";
 import { Flex, Typography } from "antd";
 import dayjs from "dayjs";
-import MarkdownReact from "@/components/MarkdownEditor/MarkdownReact";
-import ReactMarkdownCustom from "@/components/MarkdownEditor/ReactMarkdownCustom";
 
 const { Text } = Typography;
 
@@ -13,7 +11,7 @@ export const MessageItem = ({ message }) => {
   return (
     <Flex
       justify={isUser ? "flex-end" : "flex-start"}
-      style={{ marginBottom: 16 }}
+      style={{ marginBottom: 24, marginTop: 8 }}
     >
       <Flex
         vertical
@@ -45,6 +43,7 @@ export const MessageItem = ({ message }) => {
             color: isUser ? "rgba(255, 255, 255, 0.6)" : "rgba(0, 0, 0, 0.45)",
             alignSelf: isUser ? "flex-end" : "flex-start",
             marginTop: 4,
+            marginBottom: 8,
           }}
         >
           {dayjs(created_at).format("HH:mm")}

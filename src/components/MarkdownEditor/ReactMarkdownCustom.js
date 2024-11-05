@@ -74,19 +74,22 @@ function ReactMarkdownCustom({ children, withCustom = true }) {
       return (
         <ol
           style={{
-            whiteSpace: "nowrap",
+            whiteSpace: "normal",
+            overflowWrap: "break-word",
+            wordWrap: "break-word",
           }}
         >
           {props.children}
         </ol>
       );
     },
-    // Tambahan komponen ul dan li
     ul({ node, ...props }) {
       return (
         <ul
           style={{
-            whiteSpace: "nowrap",
+            whiteSpace: "normal",
+            overflowWrap: "break-word",
+            wordWrap: "break-word",
           }}
         >
           {props.children}
@@ -97,7 +100,9 @@ function ReactMarkdownCustom({ children, withCustom = true }) {
       return (
         <li
           style={{
-            whiteSpace: "nowrap",
+            whiteSpace: "normal",
+            overflowWrap: "break-word",
+            wordWrap: "break-word",
           }}
         >
           {props.children}
