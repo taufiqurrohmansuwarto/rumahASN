@@ -2,30 +2,24 @@ import React, { useState, useRef, useEffect, useCallback, memo } from "react";
 import { Flex, Input, Button, Typography } from "antd";
 import { SendOutlined } from "@ant-design/icons";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { AutoSizer, List } from "react-virtualized";
 import { AssistantAIServices } from "@/services/assistant-ai.services";
 import { MessageItem } from "./MessageItem";
 import { MessageItemSkeleton } from "./MessageItemSkeleton";
 
-const MessagesList = memo(({ messages, sendMessageMutation }) => {
-  return (
-    <>
-      {messages?.map((msg) => (
-        <MessageItem key={msg.id} message={msg} />
-      ))}
-      {sendMessageMutation.isLoading && <MessageItemSkeleton isUser={false} />}
-    </>
-  );
-});
+const MessageRow = memo(({ item, style }) => (
+  <div style={style}>
+    <MessageItem message={item} />
+  </div>
+));
 
-MessagesList.displayName = "MessagesList";
-
-// Tambahkan useCallback untuk memoize handler
+MessageRow.displayName = "MessageRow";
 
 export const ChatContainer = ({ assistantId, threadId, firstMessage }) => {
   const [message, setMessage] = useState("");
-  const messagesEndRef = useRef(null);
-  const chatContainerRef = useRef(null);
-  const [shouldScrollToBottom, setShouldScrollToBottom] = useState(true);
+  const listRef = useRef(null);
+  const [isNearBottom, setIsNearBottom] = useState(true);
+  const [initialScrollDone, setInitialScrollDone] = useState(false);
   const queryClient = useQueryClient();
 
   const {
@@ -38,7 +32,6 @@ export const ChatContainer = ({ assistantId, threadId, firstMessage }) => {
     {
       enabled: !!assistantId && !!threadId,
       refetchInterval: (data) => {
-        // Stop polling jika sudah ada response dari assistant
         if (data?.some((msg) => msg.role === "assistant")) {
           return false;
         }
@@ -46,12 +39,9 @@ export const ChatContainer = ({ assistantId, threadId, firstMessage }) => {
       },
       select: (data) => {
         let allMessages = [...(data || [])];
-
-        // Jika ini adalah thread baru dan ada firstMessage
         if (firstMessage && allMessages.length === 0) {
           allMessages = [firstMessage];
         }
-
         return allMessages.sort(
           (a, b) => new Date(a.created_at) - new Date(b.created_at)
         );
@@ -59,36 +49,33 @@ export const ChatContainer = ({ assistantId, threadId, firstMessage }) => {
     }
   );
 
-  const handleScroll = useCallback(() => {
-    if (chatContainerRef.current) {
-      const { scrollTop, scrollHeight, clientHeight } =
-        chatContainerRef.current;
-      const isNearBottom = scrollHeight - scrollTop - clientHeight < 100;
-      setShouldScrollToBottom(isNearBottom);
-    }
-  }, []);
-
-  // Scroll to bottom only for new messages
   const scrollToBottom = useCallback(() => {
-    if (shouldScrollToBottom && messagesEndRef.current) {
-      messagesEndRef.current.scrollIntoView({
-        behavior: "smooth",
-        block: "end",
-      });
+    if (listRef.current && messages?.length) {
+      listRef.current.scrollToRow(messages.length - 1);
     }
-  }, [shouldScrollToBottom]);
+  }, [messages?.length]);
 
+  // Initial scroll effect
   useEffect(() => {
-    const currentContainer = chatContainerRef.current;
-    if (currentContainer) {
-      currentContainer.addEventListener("scroll", handleScroll);
-      return () => currentContainer.removeEventListener("scroll", handleScroll);
+    if (messages?.length && !initialScrollDone && !isLoading) {
+      setTimeout(() => {
+        scrollToBottom();
+        setInitialScrollDone(true);
+      }, 100);
     }
-  }, [handleScroll]);
+  }, [messages, isLoading, initialScrollDone, scrollToBottom]);
 
+  // Scroll on new messages if near bottom
   useEffect(() => {
-    scrollToBottom();
-  }, [messages, scrollToBottom]);
+    if (isNearBottom && initialScrollDone) {
+      scrollToBottom();
+    }
+  }, [messages?.length, isNearBottom, initialScrollDone, scrollToBottom]);
+
+  const handleScroll = ({ clientHeight, scrollHeight, scrollTop }) => {
+    const distanceFromBottom = scrollHeight - scrollTop - clientHeight;
+    setIsNearBottom(distanceFromBottom < 100);
+  };
 
   const sendMessageMutation = useMutation(
     (newMessage) =>
@@ -128,7 +115,8 @@ export const ChatContainer = ({ assistantId, threadId, firstMessage }) => {
       },
       onSettled: () => {
         queryClient.invalidateQueries(["messages", assistantId, threadId]);
-        setShouldScrollToBottom(true);
+        setIsNearBottom(true);
+        scrollToBottom();
       },
     }
   );
@@ -138,8 +126,80 @@ export const ChatContainer = ({ assistantId, threadId, firstMessage }) => {
       const messageToSend = message;
       setMessage("");
       sendMessageMutation.mutate(messageToSend);
-      setShouldScrollToBottom(true);
+      setIsNearBottom(true);
     }
+  };
+
+  // Function to calculate row height based on content
+  const getRowHeight = ({ index }) => {
+    const message = messages[index];
+    const content = message.content || "";
+
+    // Base height untuk konten dan padding
+    let baseHeight = 60;
+
+    // Hitung perkiraan jumlah baris berdasarkan panjang konten dan lebar container
+    const avgCharsPerLine = 60; // Perkiraan jumlah karakter per baris
+    const estimatedLines = Math.ceil(content.length / avgCharsPerLine);
+
+    // Tinggi per baris text
+    const lineHeight = 24;
+
+    // Tambahkan tinggi untuk setiap baris text
+    let contentHeight = estimatedLines * lineHeight;
+
+    // Jika pesan dari assistant, biasanya lebih kompleks (bisa ada code block, etc)
+    if (message.role === "assistant") {
+      contentHeight *= 1.5;
+    }
+
+    // Tambahkan padding dan minimum height
+    return Math.max(baseHeight, contentHeight + 40);
+  };
+
+  const renderContent = () => {
+    if (isLoading && !messages?.length) {
+      return (
+        <Flex
+          vertical
+          gap="middle"
+          style={{
+            padding: "24px 16px",
+            height: "100%",
+            overflow: "auto",
+          }}
+        >
+          <MessageItemSkeleton isUser={true} />
+          <MessageItemSkeleton isUser={false} />
+          <MessageItemSkeleton isUser={true} />
+        </Flex>
+      );
+    }
+
+    return (
+      <AutoSizer>
+        {({ height, width }) => (
+          <List
+            ref={listRef}
+            height={height}
+            width={width}
+            rowCount={messages?.length || 0}
+            rowHeight={getRowHeight}
+            rowRenderer={({ index, style }) => (
+              <MessageRow
+                item={messages[index]}
+                style={{
+                  ...style,
+                  padding: "8px 16px",
+                }}
+              />
+            )}
+            onScroll={handleScroll}
+            scrollToAlignment="end"
+          />
+        )}
+      </AutoSizer>
+    );
   };
 
   if (error) {
@@ -156,13 +216,9 @@ export const ChatContainer = ({ assistantId, threadId, firstMessage }) => {
     <Flex vertical style={{ height: "100%" }}>
       <Flex
         vertical
-        ref={chatContainerRef}
         style={{
           flex: 1,
-          overflow: "auto",
-          padding: "24px 16px",
           background: "#ffffff",
-          scrollBehavior: "smooth",
         }}
       >
         <Flex
@@ -171,23 +227,17 @@ export const ChatContainer = ({ assistantId, threadId, firstMessage }) => {
             maxWidth: 850,
             margin: "0 auto",
             width: "100%",
+            height: "100%",
           }}
         >
-          {isLoading && !messages?.length ? (
-            <Flex vertical gap="middle">
-              <MessageItemSkeleton isUser={true} />
+          <div style={{ flex: 1, height: "calc(100vh - 140px)" }}>
+            {renderContent()}
+          </div>
+          {sendMessageMutation.isLoading && (
+            <div style={{ padding: "0 24px" }}>
               <MessageItemSkeleton isUser={false} />
-            </Flex>
-          ) : (
-            <>
-              <MessagesList
-                messages={messages}
-                isLoading={isLoading}
-                sendMessageMutation={sendMessageMutation}
-              />
-            </>
+            </div>
           )}
-          <div ref={messagesEndRef} />
         </Flex>
       </Flex>
 
