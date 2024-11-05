@@ -18,32 +18,16 @@ export const MessageItem = ({ message }) => {
         gap="small"
         style={{
           maxWidth: "85%",
-          background: isUser ? "#1677ff" : "#f5f5f5",
+          background: isUser ? "#d9d9d9" : "#f0f0f0",
           padding: "12px 16px",
           borderRadius: isUser ? "16px 16px 4px 16px" : "16px 16px 16px 4px",
           position: "relative",
         }}
       >
-        <Text
-          style={{
-            color: isUser ? "#fff" : "#000000d9",
-            fontSize: 14,
-            lineHeight: 1.6,
-            whiteSpace: "pre-wrap",
-            wordBreak: "break-word",
-          }}
-        >
-          <ReactMarkdownCustom withCustom={false}>
-            {content}
-          </ReactMarkdownCustom>
-        </Text>
+        <ReactMarkdownCustom withCustom={false}>{content}</ReactMarkdownCustom>
         <Text
           style={{
             fontSize: 11,
-            color: isUser ? "rgba(255, 255, 255, 0.6)" : "rgba(0, 0, 0, 0.45)",
-            alignSelf: isUser ? "flex-end" : "flex-start",
-            marginTop: 4,
-            marginBottom: 8,
           }}
         >
           {dayjs(created_at).format("HH:mm")}
