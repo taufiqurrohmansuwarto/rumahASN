@@ -1,10 +1,9 @@
-import AssistantAI from "@/components/ChatAI/AssistantAI";
-import FormTest from "@/components/ChatAI/FormTest";
 import Features from "@/components/Features";
 import Footer from "@/components/Outer/Footer";
 import LoginSimaster from "@/components/TombolLogin/LoginSimaster";
 import TombolLoginSimaster from "@/components/TombolLogin/TombolLoginSimaster";
 import UserRating from "@/components/UserRating";
+import { IdcardOutlined } from "@ant-design/icons";
 import { Center } from "@mantine/core";
 import { useSpring } from "@react-spring/web";
 import { IconBarcode, IconKey } from "@tabler/icons";
@@ -204,6 +203,11 @@ const SignIn = ({ providers }) => {
                   Kedatangan Tamu
                 </Button>
               </Link>
+              <Link href="/public/cek-meja-verif">
+                <Button size="small" icon={<IdcardOutlined size={14} />}>
+                  Cek Meja Verifikasi
+                </Button>
+              </Link>
             </Space>
           </Center>
         </Col>
@@ -214,7 +218,6 @@ const SignIn = ({ providers }) => {
       <UserRating />
       <Footer />
       <FloatButton.BackTop />
-      <AssistantAI />
     </>
   );
 };

@@ -85,8 +85,12 @@ function MejaRegistrasiAdmin() {
       dataIndex: "no",
     },
     {
-      title: "no_peserta",
-      dataIndex: "Nomor Peserta",
+      title: "Nomor Peserta",
+      dataIndex: "nomor_peserta",
+    },
+    {
+      title: "Nama",
+      dataIndex: "nama",
     },
   ];
 
@@ -102,11 +106,9 @@ function MejaRegistrasiAdmin() {
       <Table
         // title={() => <Input.Search onSearch={handleSearch} />}
         columns={columns}
-        pagination={{
-          showSizeChanger: false,
-        }}
+        pagination={false}
         rowKey={(row) => row?.id}
-        dataSource={data?.data}
+        dataSource={data}
         loading={isLoading}
       />
     </>
