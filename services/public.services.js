@@ -7,3 +7,7 @@ const api = axios.create({
 export const verifyPdfService = (data) => {
   return api.post(`/verify-pdf`, data).then((res) => res?.data);
 };
+
+export const checkMejaVerif = (noPeserta) => {
+  return api.get(`/meja-registrasi/${noPeserta}`).then((res) => res?.data);
+};

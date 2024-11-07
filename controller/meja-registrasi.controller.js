@@ -6,9 +6,14 @@ export const findMejaRegistrasi = async (req, res) => {
   try {
     const { noPeserta: no_peserta } = req?.query;
     const result = await MejaRegistrasi.query()
-      .where("no_peserta", no_peserta)
+      .where("nomor_peserta", no_peserta)
       .first();
-    res.json(result);
+
+    if (!result) {
+      res.status(404).json({ message: "Data not found" });
+    } else {
+      res.json(result);
+    }
   } catch (error) {
     console.log(error);
     res.status(500).send({ message: "Error" });
@@ -53,7 +58,7 @@ export const batchInsertMejaRegistrasi = async (req, res) => {
       const knex = await MejaRegistrasi.knex();
 
       //       const xlData = xlsx.utils.sheet_to_json(result);
-      knex.delete().from("seleksi_pengadaan_asn.meja_registrasi");
+      await MejaRegistrasi.query().delete();
       knex.batchInsert("seleksi_pengadaan_asn.meja_registrasi", result);
       res.status(200).json({ message: "success" });
     }
