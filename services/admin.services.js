@@ -83,4 +83,17 @@ export const comparePegawaiAdmin = async () => {
   return api.get(`/dashboard-komparasi`).then((res) => res?.data);
 };
 
+// pengadaan asn
+export const getMejaRegistrasi = async () => {
+  return api.get(`/pengadaan-asn/meja-registrasi`).then((res) => res?.data);
+};
 
+export const uploadMejaRegistrasi = async (data) => {
+  return api
+    .post(`/pengadaan-asn/meja-registrasi`, data, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    })
+    .then((res) => res?.data);
+};

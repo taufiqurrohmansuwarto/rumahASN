@@ -26,6 +26,11 @@ function SinkronLayout({ children, active }) {
       key: "bezzeting-jf",
       title: "Bezzeting JF",
     },
+    {
+      path: "/apps-managements/sync/meja-registrasi",
+      key: "meja-registrasi",
+      title: "Meja Registrasi",
+    },
   ];
 
   const handleTabChange = (key) => {
