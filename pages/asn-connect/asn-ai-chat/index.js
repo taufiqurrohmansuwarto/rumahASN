@@ -1,7 +1,5 @@
-import ChatApp from "@/components/ChatAI/BotAssistantsChatGPT/ChatApp";
 import Layout from "@/components/Layout";
 import useScrollRestoration from "@/hooks/useScrollRestoration";
-import { PageContainer } from "@ant-design/pro-components";
 import Head from "next/head";
 
 const AsnUpdates = () => {
@@ -12,7 +10,6 @@ const AsnUpdates = () => {
       <Head>
         <title>Rumah ASN - Smart ASN Connect Update</title>
       </Head>
-      <ChatApp height="800px" />
     </>
   );
 };
