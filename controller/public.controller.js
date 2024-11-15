@@ -29,7 +29,7 @@ const landingPageData = async (req, res) => {
       .distinct("requester")
       .where("stars", "=", 5)
       // requester comment character length > 15
-      .andWhere(raw("LENGTH(requester_comment)"), ">", 50)
+      .andWhere(raw("LENGTH(requester_comment)"), ">", 10)
       .andWhereNot("requester_comment", null)
       .select("id", "stars", "requester_comment", "requester", "updated_at")
       .withGraphFetched("[customer(simpleSelect)]")
