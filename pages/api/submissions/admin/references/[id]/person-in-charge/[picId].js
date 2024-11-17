@@ -15,4 +15,4 @@ router
   .patch(updateSubmissionPersonInCharge)
   .delete(deleteSubmissionPersonInCharge);
 
-module.exports = router.handler({});
+export default router.handler({});

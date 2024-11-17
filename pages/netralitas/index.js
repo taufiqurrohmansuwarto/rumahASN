@@ -83,14 +83,10 @@ function Netralitas({ data }) {
           breadcrumbRender: () => (
             <Breadcrumb>
               <Breadcrumb.Item>
-                <Link href="/">
-                  <a>Beranda</a>
-                </Link>
+                <Link href="/">Beranda</Link>
               </Breadcrumb.Item>
               <Breadcrumb.Item>
-                <Link href="/netralitas/check">
-                  <a>Cek Laporan Netralitas</a>
-                </Link>
+                <Link href="/netralitas/check">Cek Laporan Netralitas</Link>
               </Breadcrumb.Item>
               <Breadcrumb.Item>Buat Laporan Netralitas</Breadcrumb.Item>
             </Breadcrumb>

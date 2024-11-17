@@ -89,7 +89,7 @@ function MyMeetings() {
                 onConfirm={async () => await handleBatal(row)}
                 title="Apakah anda yakin ingin membatalkan coaching clinic ini?"
               >
-                <a>Batal</a>
+                Batal
               </Popconfirm>
             </Space>
           </Stack>
@@ -162,7 +162,7 @@ function MyMeetings() {
                 onConfirm={async () => await handleBatal(row)}
                 title="Apakah anda yakin ingin membatalkan coaching clinic ini?"
               >
-                <a>Batal</a>
+                Batal
               </Popconfirm>
             </Space>
           </>

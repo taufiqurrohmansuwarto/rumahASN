@@ -8,4 +8,4 @@ const router = createRouter();
 
 router.use(auth).patch(addCommentsReactions).put(removeCommentsReactions);
 
-module.exports = router.handler({});
+export default router.handler({});

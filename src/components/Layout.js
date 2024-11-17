@@ -445,11 +445,7 @@ const changeRoutes = (user) => {
 
 // when click menu, it will redirect to the page
 const menuItemRender = (options, element) => {
-  return (
-    <Link href={`${options.path}`}>
-      <a>{element}</a>
-    </Link>
-  );
+  return <Link href={`${options.path}`}>{element}</Link>;
 };
 
 function Layout({ children, active, collapsed = true }) {
@@ -556,9 +552,7 @@ function Layout({ children, active, collapsed = true }) {
         headerTitleRender={(logo, title) => {
           const defaultDom = (
             <>
-              <Link href="/feeds">
-                <a>{title}</a>
-              </Link>
+              <Link href="/feeds">{title}</Link>
             </>
           );
 

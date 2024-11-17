@@ -88,15 +88,13 @@ function Podcast() {
       key: "id",
       render: (_, record) => (
         <div>
-          <Link href={`/apps-managements/podcasts/${record?.id}`}>
-            <a>Detail</a>
-          </Link>
+          <Link href={`/apps-managements/podcasts/${record?.id}`}>Detail</Link>
           <Divider type="vertical" />
           <Popconfirm
             title="Apakah anda yakin ingin menghapus podcast ini?"
             onConfirm={() => remove(record?.id)}
           >
-            <a>Hapus</a>
+            Hapus
           </Popconfirm>
         </div>
       ),

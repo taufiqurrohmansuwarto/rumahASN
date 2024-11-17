@@ -134,7 +134,7 @@ const CommentPodcast = ({ item, currentUserId }) => {
                   })
                 }
               >
-                <a>Hapus</a>
+                Hapus
               </Popconfirm>
               <Divider type="vertical" />
               <a onClick={handleChangeId}>Edit</a>

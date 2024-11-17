@@ -297,7 +297,7 @@ function ReferensiSubCategories() {
               onConfirm={() => handleHapus(record?.id)}
               title="Apakah anda yakin ingin menghapus?"
             >
-              <a>Hapus</a>
+              Hapus
             </Popconfirm>
           </Space>
         );

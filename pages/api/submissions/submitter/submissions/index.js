@@ -6,4 +6,4 @@ const { createRouter } = require("next-connect");
 const router = createRouter();
 router.use(auth).use(asnFasilitatorMiddleware).get(submitterSubmissions);
 
-module.exports = router.handler({});
+export default router.handler({});

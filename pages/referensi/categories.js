@@ -295,7 +295,7 @@ function ReferensiCategories() {
             onConfirm={() => handleDelete(record?.id)}
             title="Apakah anda ingin menghapus data?"
           >
-            <a>Hapus</a>
+            Hapus
           </Popconfirm>
         </Space>
       ),

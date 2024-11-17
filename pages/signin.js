@@ -217,7 +217,6 @@ const SignIn = ({ providers }) => {
       <Features title={title} description={description} />
       <UserRating />
       <Footer />
-      <FormTest />
       <FloatButton.BackTop />
     </>
   );
