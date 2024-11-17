@@ -1,3 +1,4 @@
+import FormTest from "@/components/ChatAI/FormTest";
 import CoachingMeetings from "@/components/CoachingClinic/Consultant/CoachingMeetings";
 import Layout from "@/components/Layout";
 import PageContainer from "@/components/PageContainer";
@@ -51,6 +52,7 @@ const CoachingClinic = () => {
         ) : (
           <>
             {/* <CreateCoaching /> */}
+            <FormTest />
             <CoachingMeetings />
           </>
         )}
