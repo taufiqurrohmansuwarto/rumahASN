@@ -192,7 +192,7 @@ function EventExhibitors() {
             title="Apakah anda yakin?"
             onConfirm={async () => await handleRemove(row.id)}
           >
-            <a>Hapus</a>
+            Hapus
           </Popconfirm>
         </Space>
       ),

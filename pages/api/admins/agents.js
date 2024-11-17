@@ -6,4 +6,4 @@ const router = createRouter();
 
 router.use(auth).get(index);
 
-module.exports = router.handler({});
+export default router.handler({});

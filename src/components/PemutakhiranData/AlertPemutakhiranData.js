@@ -53,9 +53,7 @@ function AlertPemutakhiranData() {
         <Typography.Text>
           Halo sobat ASN sebelum bertanya tentang peremajaan data SIASN, yuk
           baca dulu di tutorial peremajaan data SIASN khususnya para Guru :){" "}
-          <Link href="/layanan/pemutakhiran-data-siasn">
-            <a>disini</a>
-          </Link>
+          <Link href="/layanan/pemutakhiran-data-siasn">disini</Link>
         </Typography.Text>
       </Modal>
     </div>

@@ -14,4 +14,4 @@ router
   .get(getSubmissionPersonInCharge)
   .post(createSubmissionPersonInCharge);
 
-module.exports = router.handler({});
+export default router.handler({});

@@ -13,4 +13,4 @@ router
   .get(getSubmissionReference)
   .post(createSubmissionReference);
 
-module.exports = router.handler({});
+export default router.handler({});

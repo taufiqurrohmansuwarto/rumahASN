@@ -4,16 +4,11 @@ import { openai } from "@ai-sdk/openai";
 export const maxDuration = 300;
 
 export const botChat = async (req, res) => {
-  const { messages } = req.body;
+  const { messages } = await req.json();
   const result = await streamText({
     model: openai("gpt-4-turbo"),
     messages,
   });
-  console.log({
-    result,
-    messages,
-  });
-
   const hasil = result.toDataStreamResponse();
   return hasil;
 };

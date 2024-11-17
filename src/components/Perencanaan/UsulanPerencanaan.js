@@ -225,7 +225,7 @@ function UsulanPerencanaan() {
             title="Apakah anda yakin ingin menghapus usulan ini?"
             onConfirm={() => handleRemove(record.id)}
           >
-            <a>Hapus</a>
+            Hapus
           </Popconfirm>
         </Space>
       ),

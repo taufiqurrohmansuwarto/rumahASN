@@ -54,17 +54,15 @@ const Tickets = () => {
       render: (text, record) => {
         return (
           <Space>
-            <Link href={`/tickets/${record?.id}/detail`}>
-              <a>Detail</a>
-            </Link>
+            <Link href={`/tickets/${record?.id}/detail`}>Detail</Link>
             <Divider type="vertical" />
-            <a>Update</a>
+            Update
             <Divider type="vertical" />
             <Popconfirm
               onConfirm={() => handleRemove(record?.id)}
               title="Apakah anda yakin ingin menghapus?"
             >
-              <a>Hapus</a>
+              Hapus
             </Popconfirm>
           </Space>
         );

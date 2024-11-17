@@ -16,9 +16,7 @@ function KepegawaianNotification() {
           breadcrumbRender: () => (
             <Breadcrumb>
               <Breadcrumb.Item>
-                <Link href="/feeds">
-                  <a>Beranda</a>
-                </Link>
+                <Link href="/feeds">Beranda</Link>
               </Breadcrumb.Item>
               <Breadcrumb.Item>Notifikasi Pertanyaan</Breadcrumb.Item>
             </Breadcrumb>

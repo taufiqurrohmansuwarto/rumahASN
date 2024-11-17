@@ -115,7 +115,7 @@ function GuestBookMyGuest() {
       title: "Aksi",
       key: "action",
       render: (_, text) => {
-        return <a>Detail</a>;
+        return Detail;
       },
     },
   ];
@@ -213,7 +213,7 @@ function GuestBookMyGuest() {
                       </Space>
                     }
                   />
-                  <a>Detail</a>
+                  Detail
                 </List.Item>
               )}
               loading={isLoading || isRefetching}

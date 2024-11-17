@@ -100,9 +100,7 @@ const CustomersTickets = ({ status = "all", title = "Semua Tiket" }) => {
       render: (_, record) => {
         return (
           <Space>
-            <Link href={`/tickets/${record?.id}/detail`}>
-              <a>Detail</a>
-            </Link>
+            <Link href={`/tickets/${record?.id}/detail`}>Detail</Link>
           </Space>
         );
       },
@@ -120,9 +118,7 @@ const CustomersTickets = ({ status = "all", title = "Semua Tiket" }) => {
       breadcrumbRender={() => (
         <Breadcrumb>
           <Breadcrumb.Item>
-            <Link href="/feeds">
-              <a>Beranda</a>
-            </Link>
+            <Link href="/feeds">Beranda</Link>
           </Breadcrumb.Item>
           <Breadcrumb.Item>Pertanyaan</Breadcrumb.Item>
         </Breadcrumb>

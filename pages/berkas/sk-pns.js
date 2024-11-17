@@ -16,14 +16,13 @@ const SkPNS = () => {
           breadcrumbRender: () => (
             <Breadcrumb>
               <Breadcrumb.Item>
-                <Link href="/feeds">
-                  <a>Forum Kepegawaian</a>
-                </Link>
+                <Link href="/feeds">Forum Kepegawaian</Link>
               </Breadcrumb.Item>
               <Breadcrumb.Item>ASN Connect</Breadcrumb.Item>
             </Breadcrumb>
           ),
-        }}ggggbbb
+        }}
+        ggggbbb
         title="Berkas"
         content="Berkas Kepegawaian PNS"
       >

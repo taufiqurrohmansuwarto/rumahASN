@@ -68,18 +68,14 @@ function WebinarUserDetailLayout({
           breadcrumbRender: () => (
             <Breadcrumb>
               <Breadcrumb.Item>
-                <Link href="/feeds">
-                  <a>Beranda</a>
-                </Link>
+                <Link href="/feeds">Beranda</Link>
               </Breadcrumb.Item>
               <Breadcrumb.Item>
-                <Link href="/webinar-series/all">
-                  <a>Daftar Webinar</a>
-                </Link>
+                <Link href="/webinar-series/all">Daftar Webinar</Link>
               </Breadcrumb.Item>
               <Breadcrumb.Item>
                 <Link href="/webinar-series/my-webinar">
-                  <a>Daftar Webinar Saya</a>
+                  Daftar Webinar Saya
                 </Link>
               </Breadcrumb.Item>
               <Breadcrumb.Item>Detail Webinar</Breadcrumb.Item>
