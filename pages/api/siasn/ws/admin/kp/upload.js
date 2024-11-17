@@ -13,10 +13,7 @@ export const config = {
 
 const router = createRouter();
 
-router
-  .use(auth)
-  .use(adminFasilitatorAsnMiddleware)
-  .use(siasnMiddleware)
-  .post(multer().single("file"), uploadDokumenKenaikanPangkat);
+router.use(auth).use(adminFasilitatorAsnMiddleware).use(siasnMiddleware);
+// .post(multer().single("file"), uploadDokumenKenaikanPangkat);
 
 export default router.handler();
