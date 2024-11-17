@@ -1,24 +1,42 @@
-import { useChat } from "ai/react";
+import { useAssistant } from "ai/react";
+import { Spin } from "antd";
+import { useSession } from "next-auth/react";
 
 export default function FormTest() {
-  const { messages, input, handleInputChange, handleSubmit } = useChat({
-    api: "/helpdesk/api/assistant/test",
-  });
-
+  const { data: session } = useSession();
+  const { status, messages, input, submitMessage, handleInputChange } =
+    useAssistant({
+      api: "/helpdesk/api/assistant/test",
+      body: {
+        user_id: session?.user?.id,
+      },
+      credentials: "same-origin",
+    });
   return (
-    <div className="flex flex-col w-full max-w-md py-24 mx-auto stretch">
+    <div>
       {messages.map((m) => (
-        <div key={m.id} className="whitespace-pre-wrap">
-          {m.role === "user" ? "User: " : "AI: "}
-          {m.content}
+        <div key={m.id}>
+          <strong>{`${m.role}: `}</strong>
+          {m.role !== "data" && m.content}
+          {m.role === "data" && (
+            <>
+              {m.data.description}
+              <br />
+              <pre className={"bg-gray-200"}>
+                {JSON.stringify(m.data, null, 2)}
+              </pre>
+            </>
+          )}
         </div>
       ))}
 
-      <form onSubmit={handleSubmit}>
+      {status === "in_progress" && <Spin />}
+
+      <form onSubmit={submitMessage}>
         <input
-          className="fixed bottom-0 w-full max-w-md p-2 mb-8 border border-gray-300 rounded shadow-xl"
+          disabled={status !== "awaiting_message"}
           value={input}
-          placeholder="Say something..."
+          placeholder="What is the temperature in the living room?"
           onChange={handleInputChange}
         />
       </form>
