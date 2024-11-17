@@ -1,10 +1,14 @@
 import { AssistantResponse, streamText } from "ai";
-import { openai } from "@ai-sdk/openai";
+import { createOpenAI } from "@ai-sdk/openai";
+
+const openai = createOpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+});
 
 export const maxDuration = 300;
 
 export const botChat = async (req, res) => {
-  const { messages } = req.body;
+  const { messages } = await req.json();
   const result = await streamText({
     model: openai("gpt-4-turbo"),
     messages,
