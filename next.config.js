@@ -108,10 +108,17 @@ module.exports = withAntdLess({
 
   // Other Config Here...
 
-  webpack(config, { buildId, dev, isServer, defaultLoaders, webpack }) {
+  webpack(
+    config,
+    { buildId, dev, isServer, defaultLoaders, webpack, nextRuntime }
+  ) {
     const rules = config.module.rules
       .find((rule) => typeof rule.oneOf === "object")
       .oneOf.filter((rule) => Array.isArray(rule.use));
+
+    if (nextRuntime === "nodejs") {
+      return config;
+    }
 
     if (isProd)
       rules.forEach((rule) => {
