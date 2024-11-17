@@ -1,3 +1,4 @@
+import FormTest from "@/components/ChatAI/FormTest";
 import Features from "@/components/Features";
 import Footer from "@/components/Outer/Footer";
 import LoginSimaster from "@/components/TombolLogin/LoginSimaster";
@@ -214,9 +215,9 @@ const SignIn = ({ providers }) => {
       </Row>
 
       <Features title={title} description={description} />
-      {/* <AppRating /> */}
       <UserRating />
       <Footer />
+      <FormTest />
       <FloatButton.BackTop />
     </>
   );
