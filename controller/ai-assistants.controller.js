@@ -8,13 +8,17 @@ const openai = createOpenAI({
 export const maxDuration = 300;
 
 export const botChat = async (req, res) => {
-  const { messages } = await req.json();
-  const result = await streamText({
-    model: openai("gpt-4-turbo"),
-    messages,
-  });
-  const hasil = result.toDataStreamResponse();
-  return hasil;
+  try {
+    const { messages } = await req.json();
+    const result = await streamText({
+      model: openai("gpt-4-turbo"),
+      messages,
+    });
+    const hasil = result.toDataStreamResponse();
+    return hasil;
+  } catch (error) {
+    console.log(error);
+  }
 };
 
 export const assistant = async (req, res) => {
