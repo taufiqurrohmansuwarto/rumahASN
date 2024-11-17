@@ -16,9 +16,7 @@ function Privacy() {
       breadcrumbRender={() => (
         <Breadcrumb>
           <Breadcrumb.Item>
-            <Link href="/">
-              <a>Beranda</a>
-            </Link>
+            <Link href="/">Beranda</Link>
           </Breadcrumb.Item>
           <Breadcrumb.Item>Kebijakan dan Privasi</Breadcrumb.Item>
         </Breadcrumb>

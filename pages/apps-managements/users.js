@@ -149,7 +149,7 @@ const Dashboard = () => {
               record?.current_role === "agent" ? "Admin" : "Agent"
             }. Apakah anda yakin?`}
           >
-            <a>Ubah Kewenangan</a>
+            Ubah Kewenangan
           </Popconfirm>
           <Divider type="vertical" />
           <Popconfirm
@@ -158,7 +158,7 @@ const Dashboard = () => {
               record?.is_consultant ? "Coaching" : "User Biasa"
             }. Apakah anda yakin?`}
           >
-            <a>Ubah Coaching?</a>
+            Ubah Coaching?
           </Popconfirm>
         </>
       ),
@@ -175,9 +175,7 @@ const Dashboard = () => {
           breadcrumbRender: () => (
             <Breadcrumb>
               <Breadcrumb.Item>
-                <Link href="/feeds">
-                  <a>Beranda</a>
-                </Link>
+                <Link href="/feeds">Beranda</Link>
               </Breadcrumb.Item>
               <Breadcrumb.Item>Manajemen Pengguna</Breadcrumb.Item>
             </Breadcrumb>

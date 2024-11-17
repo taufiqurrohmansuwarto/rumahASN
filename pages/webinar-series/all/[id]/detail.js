@@ -71,19 +71,13 @@ function Detail() {
           breadcrumbRender: () => (
             <Breadcrumb>
               <Breadcrumb.Item>
-                <Link href="/feeds">
-                  <a>Beranda</a>
-                </Link>
+                <Link href="/feeds">Beranda</Link>
               </Breadcrumb.Item>
               <Breadcrumb.Item>
-                <Link href="/webinar-series/all">
-                  <a>Daftar Semua Webinar</a>
-                </Link>
+                <Link href="/webinar-series/all">Daftar Semua Webinar</Link>
               </Breadcrumb.Item>
               <Breadcrumb.Item>
-                <Link href="/webinar-series/my-webinar">
-                  <a>Webinar Saya</a>
-                </Link>
+                <Link href="/webinar-series/my-webinar">Webinar Saya</Link>
               </Breadcrumb.Item>
               <Breadcrumb.Item>Detail Webinar</Breadcrumb.Item>
             </Breadcrumb>

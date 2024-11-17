@@ -229,7 +229,7 @@ function WebinarSeriesSurveys() {
             }}
             title="Apakah anda yakin ingin menghapus data?"
           >
-            <a>Hapus</a>
+            Hapus
           </Popconfirm>
         </Space>
       ),

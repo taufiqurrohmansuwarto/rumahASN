@@ -5,4 +5,4 @@ const { createRouter } = require("next-connect");
 const router = createRouter();
 router.use(auth).get(publishedTickets);
 
-module.exports = router.handler({});
+export default router.handler({});

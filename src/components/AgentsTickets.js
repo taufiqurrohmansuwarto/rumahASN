@@ -56,9 +56,7 @@ const AgentsTickets = ({ status = "SEMUA", title = "SEMUA" }) => {
       render: (_, record) => {
         return (
           <Space>
-            <Link href={`/agent/tickets/${record?.id}/detail`}>
-              <a>Detail</a>
-            </Link>
+            <Link href={`/agent/tickets/${record?.id}/detail`}>Detail</Link>
           </Space>
         );
       },

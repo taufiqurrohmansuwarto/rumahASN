@@ -25,14 +25,10 @@ const AsnDiscussions = () => {
           breadcrumbRender: () => (
             <Breadcrumb>
               <Breadcrumb.Item>
-                <Link href="/asn-connect/asn-updates">
-                  <a>Beranda</a>
-                </Link>
+                <Link href="/asn-connect/asn-updates">Beranda</Link>
               </Breadcrumb.Item>
               <Breadcrumb.Item>
-                <Link href="/asn-connect/asn-discussions">
-                  <a>Diskusi ASN</a>
-                </Link>
+                <Link href="/asn-connect/asn-discussions">Diskusi ASN</Link>
               </Breadcrumb.Item>
               <Breadcrumb.Item>Detail Diskusi</Breadcrumb.Item>
             </Breadcrumb>

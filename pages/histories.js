@@ -26,7 +26,7 @@ const LinkTicket = ({ item }) => {
           {" "}
           <Typography.Text>pada pertanyaan dengan judul</Typography.Text>{" "}
           <Link href={`/customers-tickets/${item?.ticket?.id}`}>
-            <a>{item?.ticket?.title}</a>
+            {item?.ticket?.title}
           </Link>
         </>
       )}
@@ -94,14 +94,10 @@ function Histories() {
           breadcrumbRender: () => (
             <Breadcrumb>
               <Breadcrumb.Item>
-                <Link href="/feeds">
-                  <a>Beranda</a>
-                </Link>
+                <Link href="/feeds">Beranda</Link>
               </Breadcrumb.Item>
               <Breadcrumb.Item>
-                <Link href="/tickets/semua">
-                  <a>Pertanyaan Saya</a>
-                </Link>
+                <Link href="/tickets/semua">Pertanyaan Saya</Link>
               </Breadcrumb.Item>
               <Breadcrumb.Item>Riwayat</Breadcrumb.Item>
             </Breadcrumb>

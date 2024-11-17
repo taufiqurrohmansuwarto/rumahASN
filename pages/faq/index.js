@@ -23,9 +23,7 @@ function Feeds() {
         breadcrumbRender={() => (
           <Breadcrumb>
             <Breadcrumb.Item>
-              <Link href="/feeds">
-                <a>Beranda</a>
-              </Link>
+              <Link href="/feeds">Beranda</Link>
             </Breadcrumb.Item>
             <Breadcrumb.Item>Pertanyaan Umum</Breadcrumb.Item>
           </Breadcrumb>

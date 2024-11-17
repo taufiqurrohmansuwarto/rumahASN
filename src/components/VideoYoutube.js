@@ -19,11 +19,7 @@ function VideoYoutube() {
         <List
           size="small"
           dataSource={data}
-          footer={
-            <div>
-              <a>Lihat Semua</a>
-            </div>
-          }
+          footer={<div>Lihat Semua</div>}
           loading={isLoading}
           renderItem={(item) => (
             <List.Item>

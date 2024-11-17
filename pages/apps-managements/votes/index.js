@@ -91,7 +91,7 @@ function Votes() {
       render: (text) => (
         <>
           <Link href={`/apps-managements/votes/${text?.id}/detail`}>
-            <a>{text?.question}</a>
+            {text?.question}
           </Link>
           <br />
           <Tag color={text?.is_active ? "green" : "red"}>
@@ -122,7 +122,7 @@ function Votes() {
               title="Apakah anda yakin menghapus voting ini?"
               onConfirm={() => handleRemove(row?.id)}
             >
-              <a>Hapus</a>
+              Hapus
             </Popconfirm>
           </Stack>
         );
@@ -138,7 +138,7 @@ function Votes() {
             /apps-managements/votes/${row.id}/detail
           `}
           >
-            <a>{row.question}</a>
+            {row.question}
           </Link>
         );
       },
@@ -186,7 +186,7 @@ function Votes() {
             title="Apakah anda yakin menghapus voting ini?"
             onConfirm={() => handleRemove(row?.id)}
           >
-            <a>Hapus</a>
+            Hapus
           </Popconfirm>
         </Space>
       ),
@@ -208,9 +208,7 @@ function Votes() {
           breadcrumbRender: () => (
             <Breadcrumb>
               <Breadcrumb.Item>
-                <Link href="/feeds">
-                  <a>Beranda</a>
-                </Link>
+                <Link href="/feeds">Beranda</Link>
               </Breadcrumb.Item>
               <Breadcrumb.Item>Polling</Breadcrumb.Item>
             </Breadcrumb>

@@ -105,13 +105,11 @@ const CreateLayananKepegawaian = () => {
           breadcrumbRender: () => (
             <Breadcrumb>
               <Breadcrumb.Item>
-                <Link href="/feeds">
-                  <a>Beranda</a>
-                </Link>
+                <Link href="/feeds">Beranda</Link>
               </Breadcrumb.Item>
               <Breadcrumb.Item>
                 <Link href="/apps-managements/layanan-kepegawaian">
-                  <a>Layanan Kepegawaian</a>
+                  Layanan Kepegawaian
                 </Link>
               </Breadcrumb.Item>
               <Breadcrumb.Item>Buat Layanan Kepegawaian</Breadcrumb.Item>

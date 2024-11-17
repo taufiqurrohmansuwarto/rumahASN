@@ -24,12 +24,9 @@ const MyText = ({ user }) => {
         }}
       >
         <Typography.Text>
-          Kunjungi menu{" "}
-          <Link href={`/helpdesk/faq`}>
-            <a>Pertanyaan Umum</a>
-          </Link>{" "}
-          atau periksa daftar pertanyaan yang telah ada sebelum mengajukan
-          pertanyaan baru.
+          Kunjungi menu <Link href={`/helpdesk/faq`}>Pertanyaan Umum</Link> atau
+          periksa daftar pertanyaan yang telah ada sebelum mengajukan pertanyaan
+          baru.
         </Typography.Text>
         {user?.group === "MASTER" && (
           <Typography.Paragraph strong>
@@ -41,12 +38,10 @@ const MyText = ({ user }) => {
             /pemutakhiran-data/data-utama
             `}
             >
-              <a>di sini.</a>
+              di sini.
             </Link>{" "}
             Atau cek status layanan kepegawaian SIASN{" "}
-            <Link href={`/pemutakhiran-data/komparasi`}>
-              <a>di sini.</a>
-            </Link>
+            <Link href={`/pemutakhiran-data/komparasi`}>di sini.</Link>
           </Typography.Paragraph>
         )}
       </div>

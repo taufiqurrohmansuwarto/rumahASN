@@ -23,14 +23,10 @@ const DetailCoachingClinic = () => {
         breadcrumbRender={() => (
           <Breadcrumb>
             <Breadcrumb.Item>
-              <Link href="/feeds">
-                <a>Beranda</a>
-              </Link>
+              <Link href="/feeds">Beranda</Link>
             </Breadcrumb.Item>
             <Breadcrumb.Item>
-              <Link href="/coaching-clinic-consultant">
-                <a>Mentoring</a>
-              </Link>
+              <Link href="/coaching-clinic-consultant">Mentoring</Link>
             </Breadcrumb.Item>
           </Breadcrumb>
         )}

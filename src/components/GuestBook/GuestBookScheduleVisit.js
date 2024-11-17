@@ -458,7 +458,7 @@ function GuestBookScheduleVisit({ edit }) {
               okText="Hapus"
               cancelText="Batal"
             >
-              <a>Hapus</a>
+              Hapus
             </Popconfirm>
           </Space>
         </>

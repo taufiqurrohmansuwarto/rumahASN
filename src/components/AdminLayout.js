@@ -16,11 +16,7 @@ const ProLayout = dynamic(
 
 // when click menu, it will redirect to the page
 const menuItemRender = (options, element) => {
-  return (
-    <Link href={`${options.path}`}>
-      <a>{element}</a>
-    </Link>
-  );
+  return <Link href={`${options.path}`}>{element}</Link>;
 };
 
 function AdminLayout({ children, active }) {
@@ -35,9 +31,7 @@ function AdminLayout({ children, active }) {
       headerTitleRender={(logo, title) => {
         return (
           <>
-            <Link href="/feeds">
-              <a>{logo}</a>
-            </Link>
+            <Link href="/feeds">{logo}</Link>
             {title}
           </>
         );

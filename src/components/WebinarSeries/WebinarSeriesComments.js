@@ -89,7 +89,7 @@ const NestedComment = ({
               handleReply(item);
             }}
           >
-            <a>Balas</a>
+            Balas
           </span>,
           <span key="edit">
             {item?.participant?.custom_id === userId && (
@@ -102,7 +102,7 @@ const NestedComment = ({
                 onConfirm={async () => await handleHapus(item)}
                 title="Apakah anda yakin akan menghapus komentar?"
               >
-                <a>Hapus</a>
+                Hapus
               </Popconfirm>
             )}
           </span>,

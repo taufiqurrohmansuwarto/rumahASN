@@ -122,7 +122,7 @@ const RoleTable = ({
               title="Apakah anda yakin ingin menghapus role"
               onConfirm={async () => await handleConfirm(record?.id)}
             >
-              <a>Delete</a>
+              Delete
             </Popconfirm>
           </Space>
         );
@@ -248,7 +248,7 @@ const PermissionTable = ({
               onConfirm={async () => await remove(record?.id)}
               title="Apakah anda yakin ingin menghapus permission"
             >
-              <a>Delete</a>
+              Delete
             </Popconfirm>
           </Space>
         );

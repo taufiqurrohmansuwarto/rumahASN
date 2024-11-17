@@ -101,7 +101,7 @@ const WebinarSeries = () => {
       render: (text) => {
         return (
           <Link href={`/apps-managements/webinar-series/${text?.id}/detail`}>
-            <a>{text?.title}</a>
+            {text?.title}
           </Link>
         );
       },

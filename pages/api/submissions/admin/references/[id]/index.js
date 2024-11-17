@@ -15,4 +15,4 @@ router
   .patch(updateSubmissionReference)
   .delete(deleteSubmissionReference);
 
-module.exports = router.handler({});
+export default router.handler({});

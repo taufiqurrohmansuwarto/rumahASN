@@ -27,11 +27,7 @@ function PublikasiCASN() {
         <List
           loading={isLoading}
           dataSource={data?.results}
-          footer={
-            <div>
-              <a>Lihat Semua</a>
-            </div>
-          }
+          footer={<div>Lihat Semua</div>}
           renderItem={(item) => {
             return (
               <List.Item>

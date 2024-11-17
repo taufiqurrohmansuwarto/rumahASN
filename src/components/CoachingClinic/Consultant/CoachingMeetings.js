@@ -402,7 +402,7 @@ function CoachingMeetings() {
                 onConfirm={async () => await hapus(row?.id)}
                 title="Apakah anda yakin ingin menghapus coaching clinic?"
               >
-                <a>Hapus</a>
+                Hapus
               </Popconfirm>
             </Space>
           </Space>
@@ -500,7 +500,7 @@ function CoachingMeetings() {
               onConfirm={async () => await hapus(row?.id)}
               title="Apakah anda yakin ingin menghapus coaching clinic?"
             >
-              <a>Hapus</a>
+              Hapus
             </Popconfirm>
           </>
         );

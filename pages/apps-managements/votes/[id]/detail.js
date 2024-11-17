@@ -47,14 +47,10 @@ const DetailVote = () => {
           breadcrumbRender: () => (
             <Breadcrumb>
               <Breadcrumb.Item>
-                <Link href="/feeds">
-                  <a>Beranda</a>
-                </Link>
+                <Link href="/feeds">Beranda</Link>
               </Breadcrumb.Item>
               <Breadcrumb.Item>
-                <Link href="/apps-managements/votes">
-                  <a>Polling</a>
-                </Link>
+                <Link href="/apps-managements/votes">Polling</Link>
               </Breadcrumb.Item>
               <Breadcrumb.Item>Detail Polling</Breadcrumb.Item>
             </Breadcrumb>

@@ -119,9 +119,7 @@ const ChangeLog = () => {
       <Content style={{ padding: "0 50px", marginTop: 64 }}>
         <Breadcrumb style={{ margin: "16px 0" }}>
           <Breadcrumb.Item>
-            <Link href="/">
-              <a>Beranda</a>
-            </Link>
+            <Link href="/">Beranda</Link>
           </Breadcrumb.Item>
           <Breadcrumb.Item>Changelog</Breadcrumb.Item>
         </Breadcrumb>

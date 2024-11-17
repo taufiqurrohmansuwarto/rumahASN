@@ -11,4 +11,4 @@ router
   .use(asnFasilitatorMiddleware)
   .get(detailSubmissionReferenceSubmitter);
 
-module.exports = router.handler({});
+export default router.handler({});

@@ -176,7 +176,7 @@ function ReferensiStatus() {
             title="Apakah anda yakin ingin menghapus"
             onConfirm={() => handleHapus(record?.id)}
           >
-            <a>Hapus</a>
+            Hapus
           </Popconfirm>
         </Space>
       ),

@@ -237,13 +237,11 @@ const CreateWebinarSeries = () => {
           breadcrumbRender: () => (
             <Breadcrumb>
               <Breadcrumb.Item>
-                <Link href="/feeds">
-                  <a>Beranda</a>
-                </Link>
+                <Link href="/feeds">Beranda</Link>
               </Breadcrumb.Item>
               <Breadcrumb.Item>
                 <Link href="/apps-managements/webinar-series">
-                  <a>Webinar Series Admin</a>
+                  Webinar Series Admin
                 </Link>
               </Breadcrumb.Item>
               <Breadcrumb.Item>Buat Webinar</Breadcrumb.Item>

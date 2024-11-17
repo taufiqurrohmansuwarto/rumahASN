@@ -22,9 +22,7 @@ function DetailSubmissionReferences() {
           breadcrumbRender: () => (
             <Breadcrumb>
               <Breadcrumb.Item>
-                <Link href="/feeds">
-                  <a>Beranda</a>
-                </Link>
+                <Link href="/feeds">Beranda</Link>
               </Breadcrumb.Item>
               <Breadcrumb.Item>Usulan</Breadcrumb.Item>
             </Breadcrumb>

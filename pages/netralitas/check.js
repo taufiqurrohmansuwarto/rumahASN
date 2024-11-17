@@ -55,14 +55,10 @@ const CheckNetralitas = ({ data }) => {
           breadcrumbRender: () => (
             <Breadcrumb>
               <Breadcrumb.Item>
-                <Link href="/">
-                  <a>Beranda</a>
-                </Link>
+                <Link href="/">Beranda</Link>
               </Breadcrumb.Item>
               <Breadcrumb.Item>
-                <Link href="/netralitas">
-                  <a>Buat Laporan Netralitas</a>
-                </Link>
+                <Link href="/netralitas">Buat Laporan Netralitas</Link>
               </Breadcrumb.Item>
               <Breadcrumb.Item>Cek Laporan Netralitas</Breadcrumb.Item>
             </Breadcrumb>

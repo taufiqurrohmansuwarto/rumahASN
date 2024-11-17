@@ -229,7 +229,7 @@ function EventMaps() {
             title="Yakin untuk menghapus lokasi ini?"
             onConfirm={() => handleRemove(row?.id)}
           >
-            <a>Hapus</a>
+            Hapus
           </Popconfirm>
         </Space>
       ),

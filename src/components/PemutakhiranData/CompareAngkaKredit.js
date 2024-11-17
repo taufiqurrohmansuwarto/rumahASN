@@ -391,7 +391,7 @@ function CompareAngkaKredit() {
     //         title="Apakah kamu ingin menghapus data riwayat angka kredit?"
     //         onConfirm={async () => await handleHapus(row)}
     //       >
-    //         <a>Hapus</a>
+    //         Hapus
     //       </Popconfirm>
     //     );
     //   },

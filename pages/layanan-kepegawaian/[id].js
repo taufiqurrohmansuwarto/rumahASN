@@ -38,14 +38,10 @@ const DetailLayananKepegawaian = () => {
         breadcrumbRender={() => (
           <Breadcrumb>
             <Breadcrumb.Item>
-              <Link href="/">
-                <a>Beranda</a>
-              </Link>
+              <Link href="/">Beranda</Link>
             </Breadcrumb.Item>
             <Breadcrumb.Item>
-              <Link href="/layanan-kepegawaian">
-                <a>Layanan Kepegawaian</a>
-              </Link>
+              <Link href="/layanan-kepegawaian">Layanan Kepegawaian</Link>
             </Breadcrumb.Item>
             <Breadcrumb.Item>Detail Layanan</Breadcrumb.Item>
           </Breadcrumb>

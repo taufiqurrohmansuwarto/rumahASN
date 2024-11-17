@@ -5,4 +5,4 @@ const router = createRouter();
 
 router.use(auth).post(createComments);
 
-module.exports = router.handler({});
+export default router.handler({});

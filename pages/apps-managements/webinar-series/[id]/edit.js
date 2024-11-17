@@ -114,9 +114,7 @@ const UploadFileTemplate = ({ data, type = "image", title = "test" }) => {
           {title}
         </Button>
       </Upload>
-      <Link href="google.com">
-        <a>Contoh Template</a>
-      </Link>
+      <Link href="google.com">Contoh Template</Link>
     </Space>
   );
 };
@@ -188,9 +186,7 @@ const UploadFileImage = ({ data, type = "image", title = "test" }) => {
           {title}
         </Button>
       </Upload>
-      <Link href="google.com">
-        <a>Contoh Poster</a>
-      </Link>
+      <Link href="google.com">Contoh Poster</Link>
     </Space>
   );
 };

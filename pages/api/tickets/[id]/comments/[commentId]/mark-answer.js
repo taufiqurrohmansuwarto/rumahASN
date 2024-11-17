@@ -8,4 +8,4 @@ const router = createRouter();
 
 router.use(auth).put(markAsAnswer).delete(unMarkAsAnswer);
 
-module.exports = router.handler({});
+export default router.handler({});

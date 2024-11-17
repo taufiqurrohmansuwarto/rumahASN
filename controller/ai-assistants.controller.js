@@ -13,11 +13,6 @@ export const botChat = async (req, res) => {
     model: openai("gpt-4-turbo"),
     messages,
   });
-  console.log({
-    result,
-    messages,
-  });
-
   const hasil = result.toDataStreamResponse();
   return hasil;
 };

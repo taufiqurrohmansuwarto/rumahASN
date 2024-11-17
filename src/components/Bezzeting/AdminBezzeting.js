@@ -241,7 +241,7 @@ function AdminBezzeting() {
             onConfirm={() => handleRemove(record?.kode)}
             title="Apakah anda yakin ingin menghapus?"
           >
-            <a>Hapus</a>
+            Hapus
           </Popconfirm>
         </Space>
       ),

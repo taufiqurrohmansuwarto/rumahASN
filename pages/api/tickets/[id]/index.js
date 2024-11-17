@@ -13,4 +13,4 @@ router
   .delete(removeTicket)
   .patch(editTicket);
 
-module.exports = router.handler({});
+export default router.handler({});

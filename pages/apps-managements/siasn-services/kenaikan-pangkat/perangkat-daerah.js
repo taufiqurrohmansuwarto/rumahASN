@@ -22,9 +22,7 @@ const LayananSiasnKenaikanPangkatPerangkatDaerah = () => {
           breadcrumbRender: () => (
             <Breadcrumb>
               <Breadcrumb.Item>
-                <Link href="/feeds">
-                  <a>Beranda</a>
-                </Link>
+                <Link href="/feeds">Beranda</Link>
               </Breadcrumb.Item>
               <Breadcrumb.Item>Layanan SIASN</Breadcrumb.Item>
               <Breadcrumb.Item>Kenaikan Pangkat</Breadcrumb.Item>

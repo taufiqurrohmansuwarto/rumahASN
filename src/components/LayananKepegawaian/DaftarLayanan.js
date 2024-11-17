@@ -20,9 +20,7 @@ const DaftarLayanan = () => {
         rowKey={(row) => row?.slug}
         renderItem={(item) => (
           <List.Item>
-            <Link href={`/layanan/${item?.slug}`}>
-              <a>{item?.name}</a>
-            </Link>
+            <Link href={`/layanan/${item?.slug}`}>{item?.name}</Link>
           </List.Item>
         )}
       />

@@ -25,14 +25,10 @@ function TTECertificatesDetail() {
           breadcrumbRender: () => (
             <Breadcrumb>
               <Breadcrumb.Item>
-                <Link href="/feeds">
-                  <a>Beranda</a>
-                </Link>
+                <Link href="/feeds">Beranda</Link>
               </Breadcrumb.Item>
               <Breadcrumb.Item>
-                <Link href="/tte/certificates">
-                  <a>Sertifikat</a>
-                </Link>
+                <Link href="/tte/certificates">Sertifikat</Link>
               </Breadcrumb.Item>
               <Breadcrumb.Item>Detail Daftar Sertifikat</Breadcrumb.Item>
             </Breadcrumb>

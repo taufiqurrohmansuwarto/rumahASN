@@ -29,11 +29,7 @@ const ProLayout = dynamic(
 );
 
 const menuItemRender = (options, element) => {
-  return (
-    <Link href={`${options.path}`}>
-      <a>{element}</a>
-    </Link>
-  );
+  return <Link href={`${options.path}`}>{element}</Link>;
 };
 
 const menuItems = [

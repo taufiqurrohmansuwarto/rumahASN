@@ -1,3 +1,4 @@
+import FormTest from "@/components/ChatAI/FormTest";
 import CoachingMeetings from "@/components/CoachingClinic/Consultant/CoachingMeetings";
 import Layout from "@/components/Layout";
 import PageContainer from "@/components/PageContainer";
@@ -31,9 +32,7 @@ const CoachingClinic = () => {
           breadcrumbRender: () => (
             <Breadcrumb>
               <Breadcrumb.Item>
-                <Link href="/feeds">
-                  <a>Beranda</a>
-                </Link>
+                <Link href="/feeds">Beranda</Link>
               </Breadcrumb.Item>
               <Breadcrumb.Item>Mentoring</Breadcrumb.Item>
             </Breadcrumb>
@@ -53,6 +52,7 @@ const CoachingClinic = () => {
         ) : (
           <>
             {/* <CreateCoaching /> */}
+            <FormTest />
             <CoachingMeetings />
           </>
         )}

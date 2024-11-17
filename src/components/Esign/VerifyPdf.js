@@ -186,9 +186,7 @@ function VerifyPdf() {
         breadcrumbRender: () => (
           <Breadcrumb>
             <Breadcrumb.Item>
-              <Link href="/">
-                <a>Halaman Utama</a>
-              </Link>
+              <Link href="/">Halaman Utama</Link>
             </Breadcrumb.Item>
             <Breadcrumb.Item>Verifikasi PDF</Breadcrumb.Item>
           </Breadcrumb>

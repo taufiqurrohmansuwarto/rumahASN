@@ -77,7 +77,7 @@ const TableDiklat = ({ data }) => {
                 onConfirm={async () => await hapus(row?.id)}
                 title="Apakah anda yakin ingin menghapus data?"
               >
-                <a>Hapus</a>
+                Hapus
               </Popconfirm>
             </Descriptions.Item>
           </Descriptions>
@@ -138,7 +138,7 @@ const TableDiklat = ({ data }) => {
             onConfirm={async () => await hapus(row?.id)}
             title="Apakah anda yakin ingin menghapus data?"
           >
-            <a>Hapus</a>
+            Hapus
           </Popconfirm>
         );
       },

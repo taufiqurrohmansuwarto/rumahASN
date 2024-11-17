@@ -184,19 +184,13 @@ function EmployeesLayout({ children, active }) {
           breadcrumbRender: () => (
             <Breadcrumb>
               <Breadcrumb.Item>
-                <Link href="/feeds">
-                  <a>Beranda</a>
-                </Link>
+                <Link href="/feeds">Beranda</Link>
               </Breadcrumb.Item>
               <Breadcrumb.Item>
-                <Link href="/apps-managements/integrasi/siasn">
-                  <a>Integrasi</a>
-                </Link>
+                <Link href="/apps-managements/integrasi/siasn">Integrasi</Link>
               </Breadcrumb.Item>
               <Breadcrumb.Item>
-                <Link href="/apps-managements/anomali-data-2023">
-                  <a>Anomali</a>
-                </Link>
+                <Link href="/apps-managements/anomali-data-2023">Anomali</Link>
               </Breadcrumb.Item>
               <Breadcrumb.Item>Detail Integrasi</Breadcrumb.Item>
             </Breadcrumb>

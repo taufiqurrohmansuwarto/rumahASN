@@ -58,9 +58,7 @@ const LayananKepegawaian = () => {
         breadcrumbRender={() => (
           <Breadcrumb>
             <Breadcrumb.Item>
-              <Link href="/">
-                <a>Beranda</a>
-              </Link>
+              <Link href="/">Beranda</Link>
             </Breadcrumb.Item>
             <Breadcrumb.Item>Layanan Kepegawaian</Breadcrumb.Item>
           </Breadcrumb>

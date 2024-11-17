@@ -241,13 +241,11 @@ const EmployeeNumberFasilitator = () => {
           breadcrumbRender: () => (
             <Breadcrumb>
               <Breadcrumb.Item>
-                <Link href="/feeds">
-                  <a>Forum Kepegawaian</a>
-                </Link>
+                <Link href="/feeds">Forum Kepegawaian</Link>
               </Breadcrumb.Item>
               <Breadcrumb.Item>
                 <Link href="/fasilitator-employees/master-data">
-                  <a>Master Data</a>
+                  Master Data
                 </Link>
               </Breadcrumb.Item>
               <Breadcrumb.Item>Detail Informasi</Breadcrumb.Item>

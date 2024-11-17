@@ -38,14 +38,10 @@ const IntegrasiSIASN = () => {
           breadcrumbRender: () => (
             <Breadcrumb>
               <Breadcrumb.Item>
-                <Link href="/feeds">
-                  <a>Beranda</a>
-                </Link>
+                <Link href="/feeds">Beranda</Link>
               </Breadcrumb.Item>
               <Breadcrumb.Item>
-                <Link href="/apps-managements/logs/siasn">
-                  <a>Log SIASN</a>
-                </Link>
+                <Link href="/apps-managements/logs/siasn">Log SIASN</Link>
               </Breadcrumb.Item>
               <Breadcrumb.Item>Integrasi SIASN</Breadcrumb.Item>
             </Breadcrumb>

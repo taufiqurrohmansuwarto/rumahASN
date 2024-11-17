@@ -90,9 +90,7 @@ function Podcast() {
         breadcrumbRender={() => (
           <Breadcrumb>
             <Breadcrumb.Item>
-              <Link href="/">
-                <a>Forum Kepegawaian</a>
-              </Link>
+              <Link href="/">Forum Kepegawaian</Link>
             </Breadcrumb.Item>
             <Breadcrumb.Item>Podcast</Breadcrumb.Item>
           </Breadcrumb>
