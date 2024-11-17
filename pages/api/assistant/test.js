@@ -1,4 +1,4 @@
-import { botChat } from "@/controller/ai-assistants.controller";
+import { assistant } from "@/controller/ai-assistants.controller";
 import { createEdgeRouter } from "next-connect";
 
 export const config = {
@@ -7,6 +7,6 @@ export const config = {
 
 const router = createEdgeRouter();
 
-router.post(botChat);
+router.post(assistant);
 
 export default router.handler({});

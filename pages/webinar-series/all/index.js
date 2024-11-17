@@ -161,7 +161,7 @@ function WebinarAll() {
                       {item?.image_url && (
                         <Image
                           width={500}
-                          height={300}
+                          height={180}
                           src={item?.image_url}
                           alt="images"
                         />
