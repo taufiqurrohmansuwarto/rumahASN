@@ -41,7 +41,7 @@ const TextPeremajaanData = () => {
         Sebelum membuat pertanyaan tentang peremajaan Data SIASN, pastikan anda
         membaca terlebih dahulu membaca tutorial yang telah kami buat{" "}
         <Link href={"/layanan/pemutakhiran-data-siasn"}>
-          <a>Tutorial Layanan Peremajaan Data SIASN</a>
+          Tutorial Layanan Peremajaan Data SIASN
         </Link>{" "}
       </Typography.Text>
     </>
@@ -213,8 +213,8 @@ const CreateTicket = () => {
             </li>
           </ol>
           <p>
-            Untuk informasi lebih lanjut, silakan baca{" "}
-            <a>Perjanjian Penggunaan Lengkap</a>.
+            Untuk informasi lebih lanjut, silakan baca Perjanjian Penggunaan
+            Lengkap.
           </p>
         </div>
       ),
@@ -236,14 +236,10 @@ const CreateTicket = () => {
         breadcrumbRender={() => (
           <Breadcrumb>
             <Breadcrumb.Item>
-              <Link href="/feeds">
-                <a>Beranda</a>
-              </Link>
+              <Link href="/feeds">Beranda</Link>
             </Breadcrumb.Item>
             <Breadcrumb.Item>
-              <Link href="/tickets/semua">
-                <a>Daftar Pertanyaan</a>
-              </Link>
+              <Link href="/tickets/semua">Daftar Pertanyaan</Link>
             </Breadcrumb.Item>
             <Breadcrumb.Item>Pertanyaan Baru</Breadcrumb.Item>
           </Breadcrumb>

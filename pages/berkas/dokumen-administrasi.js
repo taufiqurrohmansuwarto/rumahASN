@@ -19,9 +19,7 @@ const DokumenAdministrasi = () => {
           breadcrumbRender: () => (
             <Breadcrumb>
               <Breadcrumb.Item>
-                <Link href="/feeds">
-                  <a>Forum Kepegawaian</a>
-                </Link>
+                <Link href="/feeds">Forum Kepegawaian</Link>
               </Breadcrumb.Item>
               <Breadcrumb.Item>Dokumen Administrasi</Breadcrumb.Item>
             </Breadcrumb>

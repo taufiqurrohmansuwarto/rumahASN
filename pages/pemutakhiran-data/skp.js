@@ -23,14 +23,10 @@ const RiwayatSKP = () => {
           breadcrumbRender: () => (
             <Breadcrumb>
               <Breadcrumb.Item>
-                <Link href="/feeds">
-                  <a>Beranda</a>
-                </Link>
+                <Link href="/feeds">Beranda</Link>
               </Breadcrumb.Item>
               <Breadcrumb.Item>
-                <Link href="/pemutakhiran-data/komparasi">
-                  <a>Peremajaan Data</a>
-                </Link>
+                <Link href="/pemutakhiran-data/komparasi">Peremajaan Data</Link>
               </Breadcrumb.Item>
               <Breadcrumb.Item>Data Riwayat SKP</Breadcrumb.Item>
             </Breadcrumb>

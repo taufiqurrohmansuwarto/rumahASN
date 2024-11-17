@@ -79,10 +79,10 @@ const columns = [
       return (
         <Space>
           <Link href={`/admin/tickets-managements/${row?.id}/detail`}>
-            <a>Detail</a>
+            Detail
           </Link>
           <Divider />
-          <a>Sub Kategori</a>
+          Sub Kategori
         </Space>
       );
     },

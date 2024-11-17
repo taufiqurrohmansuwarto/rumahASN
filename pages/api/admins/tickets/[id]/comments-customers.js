@@ -9,4 +9,4 @@ const router = createRouter();
 // and delete for remove assignee
 router.use(auth).get(index);
 
-module.exports = router.handler({});
+export default router.handler({});

@@ -223,7 +223,7 @@ const ListAnomali = () => {
       key: "nip_baru",
       render: (text) => (
         <Link href={`/apps-managements/integrasi/siasn/${text?.nip_baru}`}>
-          <a>{text.nip_baru}</a>
+          {text.nip_baru}
         </Link>
       ),
     },
@@ -461,14 +461,10 @@ function AnomaliData2023() {
           breadcrumbRender: () => (
             <Breadcrumb>
               <Breadcrumb.Item>
-                <Link href="/feeds">
-                  <a>Beranda</a>
-                </Link>
+                <Link href="/feeds">Beranda</Link>
               </Breadcrumb.Item>
               <Breadcrumb.Item>
-                <Link href="/apps-managements/integrasi/siasn">
-                  <a>Integrasi</a>
-                </Link>
+                <Link href="/apps-managements/integrasi/siasn">Integrasi</Link>
               </Breadcrumb.Item>
               <Breadcrumb.Item>Anomali 2023</Breadcrumb.Item>
             </Breadcrumb>

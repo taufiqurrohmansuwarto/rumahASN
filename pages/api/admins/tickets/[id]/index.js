@@ -11,4 +11,4 @@ const router = createRouter();
 // and delete for remove assignee
 router.use(auth).get(detail).patch(addAgents).delete(removeAgents);
 
-module.exports = router.handler({});
+export default router.handler({});

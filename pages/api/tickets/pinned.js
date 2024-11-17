@@ -5,4 +5,4 @@ const router = createRouter();
 
 router.use(auth).get(pinnedTickets);
 
-module.exports = router.handler({});
+export default router.handler({});

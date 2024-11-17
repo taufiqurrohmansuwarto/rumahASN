@@ -165,7 +165,7 @@ const TableAbseceEntries = ({
             onConfirm={async () => await handleHapus(text?.id)}
             title="Apakah anda yakin ingin menghapus data?. Ingat apabila menghapus data presensi maka semua yang terkait dengan data tersebut akan terhapus"
           >
-            <a>Hapus</a>
+            Hapus
           </Popconfirm>
           <Divider type="vertical" />
           <a onClick={async () => await handleDownload(text?.id)}>Unduh</a>

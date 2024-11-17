@@ -292,7 +292,7 @@ function DetailWebinarParticipants() {
             }
             title="Apakah anda yakin ingin menggenerate ulang sertifikat?"
           >
-            <a>Reset</a>
+            Reset
           </Popconfirm>
         );
       },

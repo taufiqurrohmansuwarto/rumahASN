@@ -173,7 +173,7 @@ const AdminTickets = ({ status = "all" }) => {
     //     return (
     //       <Space>
     //         <Link href={`/admin/tickets-managements/${row?.id}/detail`}>
-    //           <a>Detail</a>
+    //           Detail
     //         </Link>
     //       </Space>
     //     );

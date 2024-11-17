@@ -73,7 +73,7 @@ const LayananKepegawaian = () => {
       key: "aksi",
       render: (_, row) => (
         <Space>
-          <a>Detail</a>
+          Detail
           <Divider type="vertical" />
           <a onClick={() => handleEdit(row?.id)}>Edit</a>
           <Divider type="vertical" />
@@ -81,7 +81,7 @@ const LayananKepegawaian = () => {
             onConfirm={async () => await handleHapus(row?.id)}
             title="Apakah anda yakin ingin menghapus data?"
           >
-            <a>Hapus</a>
+            Hapus
           </Popconfirm>
         </Space>
       ),
@@ -98,13 +98,9 @@ const LayananKepegawaian = () => {
           breadcrumbRender: () => (
             <Breadcrumb>
               <Breadcrumb.Item>
-                <Link href="/feeds">
-                  <a>Beranda</a>
-                </Link>
+                <Link href="/feeds">Beranda</Link>
               </Breadcrumb.Item>
-              <Breadcrumb.Item>
-                <a>Layanan Kepegawaian</a>
-              </Breadcrumb.Item>
+              <Breadcrumb.Item>Layanan Kepegawaian</Breadcrumb.Item>
             </Breadcrumb>
           ),
         }}

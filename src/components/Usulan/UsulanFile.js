@@ -211,7 +211,7 @@ function UsulanFile() {
               title="apakah anda yakin menghapus"
               onConfirm={async () => hapusFile(row.id)}
             >
-              <a>Hapus</a>
+              Hapus
             </Popconfirm>
             <a onClick={() => handleEditOpen(row)}>Edit</a>
           </Space>
