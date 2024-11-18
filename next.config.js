@@ -62,7 +62,8 @@ const hashOnlyIdent = (context, _, exportName) =>
     )
     .replace(/^(-?\d|--)/, "_$1");
 
-module.exports = withAntdLess({
+module.exports = {
+  transpilePackages: ["@ant-design/pro-editor", "@ant-design/pro-chat"],
   eslint: {
     ignoreDuringBuilds: true,
   },
@@ -137,4 +138,4 @@ module.exports = withAntdLess({
 
     return config;
   },
-});
+};

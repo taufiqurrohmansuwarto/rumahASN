@@ -19,6 +19,8 @@ const getoken = async () => {
     wso_token: wso2,
   };
 
+  console.log(result);
+
   return result;
 };
 
@@ -67,10 +69,12 @@ const errorHandler = async (error) => {
   const invalidJwt =
     error?.response?.data?.message === "invalid or expired jwt";
 
+  const tokenError = error?.response?.data?.data === "Token SSO mismatch";
+
   const invalidCredentials =
     error?.response?.data?.message === "Invalid Credentials";
 
-  const notValid = invalidJwt || invalidCredentials;
+  const notValid = invalidJwt || invalidCredentials || tokenError;
 
   if (ifExists && notValid) {
     // hapus file token.json

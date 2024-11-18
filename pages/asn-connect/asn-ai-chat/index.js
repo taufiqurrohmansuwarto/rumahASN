@@ -1,3 +1,4 @@
+import NewChat from "@/components/ChatAI/ChatGPT/NewChat";
 import Layout from "@/components/Layout";
 import useScrollRestoration from "@/hooks/useScrollRestoration";
 import Head from "next/head";
@@ -10,6 +11,9 @@ const AsnUpdates = () => {
       <Head>
         <title>Rumah ASN - Smart ASN Connect Update</title>
       </Head>
+      <div>
+        <NewChat />
+      </div>
     </>
   );
 };
