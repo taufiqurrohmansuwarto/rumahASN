@@ -15,10 +15,10 @@ import {
   IconCashBanknote,
   IconClipboardData,
   IconClock,
-  IconFileAnalytics,
   IconFileCertificate,
   IconReport,
   IconSchool,
+  IconUser,
   IconUserExclamation,
   IconUserSearch,
   IconUsers,
@@ -26,11 +26,11 @@ import {
 import { Tag } from "antd";
 import { toLower } from "lodash";
 
-import dayjs from "dayjs";
-import relativeTime from "dayjs/plugin/relativeTime";
-import "dayjs/locale/id";
 import { getTokenSIASNService } from "@/services/siasn-services";
 import axios from "axios";
+import dayjs from "dayjs";
+import "dayjs/locale/id";
+import relativeTime from "dayjs/plugin/relativeTime";
 
 dayjs.extend(relativeTime);
 dayjs.locale("id");
@@ -91,6 +91,18 @@ export const mysapkMenu = [
     icon: IconCashBanknote,
     color: "yellow",
     path: "/laporan-kinerja",
+  },
+  {
+    title: "Riwayat Kompetensi",
+    icon: IconUser,
+    color: "green",
+    path: "/rw-kompetensi",
+  },
+  {
+    title: "Riwayat Potensi",
+    icon: IconUser,
+    color: "yellow",
+    path: "/rw-potensi",
   },
   {
     title: "Riwayat Diklat/Kursus",
