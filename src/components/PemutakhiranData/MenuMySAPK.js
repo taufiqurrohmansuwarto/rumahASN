@@ -1,5 +1,4 @@
 import IPAsn from "@/components/LayananSIASN/IPAsn";
-import AnomaliUser from "@/components/PemutakhiranData/AnomaliUser";
 import { mysapkMenu } from "@/utils/client-utils";
 import {
   Card,
@@ -13,7 +12,6 @@ import {
 } from "@mantine/core";
 import { Avatar, Grid, Space, Tag, Typography } from "antd";
 import { useRouter } from "next/router";
-import IPASNWs from "../LayananSIASN/IPASNWs";
 
 const mockdata = mysapkMenu;
 

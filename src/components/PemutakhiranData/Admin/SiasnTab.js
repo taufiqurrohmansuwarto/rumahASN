@@ -6,6 +6,8 @@ import { Alert, FloatButton, Grid, Tabs } from "antd";
 import React, { useCallback, useMemo } from "react";
 import CompareDataDiklatByNip from "../CompareDataDiklatByNip";
 import ComparePenghargaanByNip from "../ComparePenghargaanByNip";
+import CompareRwKompetensiByNip from "../CompareRwKompetensiByNip";
+import CompareRwPotensiByNip from "../CompareRwPotensiByNip";
 import CompareAngkaKreditByNip from "./CompareAngkaKreditByNip";
 import CompareCLTNByNip from "./CompareCLTNByNip";
 import CompareDataUtamaByNip from "./CompareDataUtamaByNip";
@@ -103,6 +105,16 @@ function SiasnTab({ nip }) {
         key: "penghargaan",
         tab: "Penghargaan",
         content: <ComparePenghargaanByNip nip={nip} />,
+      },
+      {
+        key: "rw-potensi",
+        tab: "Riwayat Potensi",
+        content: <CompareRwPotensiByNip nip={nip} />,
+      },
+      {
+        key: "rw-kompetensi",
+        tab: "Riwayat Kompetensi",
+        content: <CompareRwKompetensiByNip nip={nip} />,
       },
     ],
     [nip]

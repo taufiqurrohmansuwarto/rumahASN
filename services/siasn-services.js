@@ -602,3 +602,19 @@ export const uploadDokRiwayat = async (data) => {
     })
     .then((res) => res.data);
 };
+
+export const getRwPotensi = async () => {
+  return api.get(`/pns/rw-potensi`).then((res) => res.data);
+};
+
+export const getRwKompetensi = async () => {
+  return api.get(`/pns/rw-kompetensi`).then((res) => res.data);
+};
+
+export const getRwKompetensiByNip = async (nip) => {
+  return api.get(`/admin/${nip}/rw-kompetensi`).then((res) => res.data);
+};
+
+export const getRwPotensiByNip = async (nip) => {
+  return api.get(`/admin/${nip}/rw-potensi`).then((res) => res.data);
+};
