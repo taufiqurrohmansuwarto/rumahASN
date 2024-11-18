@@ -1,5 +1,4 @@
-import { Center, Stack, Image, Loader, Text } from "@mantine/core";
-import React from "react";
+import { Center, Image, Loader, Stack } from "@mantine/core";
 
 function Loading() {
   return (

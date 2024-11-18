@@ -52,6 +52,7 @@ export const ssoFetcher = async () => {
       url,
     });
 
+    console.log(result?.data);
     const token = result?.data?.access_token;
 
     return token;

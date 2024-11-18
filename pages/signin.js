@@ -1,4 +1,3 @@
-import FormTest from "@/components/ChatAI/FormTest";
 import Features from "@/components/Features";
 import Footer from "@/components/Outer/Footer";
 import LoginSimaster from "@/components/TombolLogin/LoginSimaster";
