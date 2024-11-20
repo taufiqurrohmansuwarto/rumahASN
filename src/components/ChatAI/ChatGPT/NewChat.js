@@ -1,44 +1,78 @@
-import { Form, Input } from "antd";
+import { Button, Input, Typography } from "antd";
+import { SendOutlined } from "@ant-design/icons";
+import { useState } from "react";
+import { useMutation } from "@tanstack/react-query";
+import { AssistantAIServices } from "@/services/assistant-ai.services";
+import { useRouter } from "next/router";
 
-function NewChat() {
-  const [form] = Form.useForm();
-
-  const handleKeyDown = (e) => {
-    if (e.key === "Enter") {
-      e.preventDefault();
-
-      if (e.ctrlKey) {
-        insertNewLine(e.target);
-      } else {
-        form.submit();
-      }
+function NewChat({ selectedAssistant, selectedThread }) {
+  const router = useRouter();
+  const [message, setMessage] = useState("");
+  const queryClient = useQueryClient();
+  const { mutate, isLoading } = useMutation(
+    (data) => AssistantAIServices.sendMessage(data),
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries(["threads"]);
+        if (selectedThread) {
+          router.push(`/asn-connect/asn-ai-chat?threadId=${selectedThread}`);
+        } else if (selectedAssistant) {
+          router.push(
+            `/asn-connect/asn-ai-chat?assistantId=${selectedAssistant}`
+          );
+        }
+      },
     }
+  );
+
+  const sendingMessage = () => {
+    const payload = {
+      assistantId: selectedAssistant,
+      message,
+    };
+    mutate(payload);
   };
 
-  const insertNewLine = (target) => {
-    const { selectionStart, selectionEnd, value } = target;
-    const newValue =
-      value.substring(0, selectionStart) + "\n" + value.substring(selectionEnd);
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (!message.trim()) return;
 
-    form.setFieldValue("message", newValue);
-
-    // Update cursor position after form value change
-    setTimeout(() => {
-      target.selectionStart = target.selectionEnd = selectionStart + 1;
-    }, 0);
+    // TODO: Handle sending message
+    setMessage("");
   };
 
   return (
-    <Form form={form} style={{ width: "100%" }}>
-      <Form.Item name="message" style={{ width: "100%" }}>
+    <div style={{ height: "100%" }}>
+      <Typography.Title level={4}>Assistant</Typography.Title>
+
+      <div
+        style={{
+          bottom: 24,
+          left: 300,
+          right: 24,
+          display: "flex",
+          gap: 8,
+        }}
+      >
         <Input.TextArea
-          autoSize={{ minRows: 1, maxRows: 6 }}
-          onKeyDown={handleKeyDown}
-          placeholder="Type a message... (Press Enter to send, Ctrl+Enter for new line)"
-          style={{ width: "100%" }}
+          value={message}
+          onChange={(e) => setMessage(e.target.value)}
+          placeholder="Type your message here..."
+          autoSize={{ minRows: 1, maxRows: 4 }}
+          style={{ flex: 1 }}
+          onPressEnter={sendingMessage}
+          disabled={isLoading}
         />
-      </Form.Item>
-    </Form>
+        <Button
+          type="primary"
+          onClick={handleSubmit}
+          icon={<SendOutlined />}
+          disabled={isLoading}
+        >
+          Send
+        </Button>
+      </div>
+    </div>
   );
 }
 
