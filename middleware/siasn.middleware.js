@@ -1,7 +1,8 @@
-const { ssoFetcher, wso2Fetcher } = require("@/utils/siasn-fetcher");
+const { wso2Fetcher } = require("@/utils/siasn-fetcher");
 const { default: axios } = require("axios");
 const fs = require("fs");
 const path = require("path");
+const ssoToken = require("../sso-token.json");
 
 const baseUrl = "https://apimws.bkn.go.id:8243/apisiasn/1.0";
 const CURRENT_DIRECTORY = process.cwd();
@@ -11,15 +12,13 @@ const siasnWsAxios = axios.create({
 });
 
 const getoken = async () => {
-  const sso = await ssoFetcher();
   const wso2 = await wso2Fetcher();
+  const sso = ssoToken?.token;
 
   const result = {
     sso_token: sso,
     wso_token: wso2,
   };
-
-  console.log(result);
 
   return result;
 };

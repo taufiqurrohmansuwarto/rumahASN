@@ -212,7 +212,6 @@ const SignIn = ({ providers }) => {
           </Center>
         </Col>
       </Row>
-
       <Features title={title} description={description} />
       <UserRating />
       <Footer />

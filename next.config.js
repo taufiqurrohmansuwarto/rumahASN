@@ -62,7 +62,7 @@ const hashOnlyIdent = (context, _, exportName) =>
     )
     .replace(/^(-?\d|--)/, "_$1");
 
-module.exports = {
+const nextConfig = {
   transpilePackages: ["@ant-design/pro-editor", "@ant-design/pro-chat"],
   eslint: {
     ignoreDuringBuilds: true,
@@ -84,58 +84,7 @@ module.exports = {
   publicRuntimeConfig: {
     basePath: getBasePath(),
   },
-  // modifyVars: { "@primary-color": "#52c41a" }, // optional
-  // lessVarsFilePath: "./src/styles/variables.less", // optional
   lessVarsFilePathAppendToEndOfContent: false, // optional
-  cssLoaderOptions: {
-    // ...
-    mode: "local",
-    localIdentName:
-      process.env.NODE_ENV === "development"
-        ? "[local]--[hash:base64:4]"
-        : "[hash:base64:8]", // invalid! for Unify getLocalIdent (Next.js / CRA), Cannot set it, but you can rewritten getLocalIdentFn
-    exportLocalsConvention: "camelCase",
-    exportOnlyLocals: false,
-    // ...
-    getLocalIdent: (context, localIdentName, localName, options) => {
-      return "whatever_random_class_name";
-    },
-  },
-
-  // for Next.js ONLY
-  nextjs: {
-    localIdentNameFollowDev: true, // default false, for easy to debug on PROD mode
-  },
-
-  // Other Config Here...
-
-  webpack(
-    config,
-    { buildId, dev, isServer, defaultLoaders, webpack, nextRuntime }
-  ) {
-    const rules = config.module.rules
-      .find((rule) => typeof rule.oneOf === "object")
-      .oneOf.filter((rule) => Array.isArray(rule.use));
-
-    if (nextRuntime === "nodejs") {
-      return config;
-    }
-
-    if (isProd)
-      rules.forEach((rule) => {
-        rule.use.forEach((moduleLoader) => {
-          if (
-            moduleLoader.loader?.includes("css-loader") &&
-            !moduleLoader.loader?.includes("postcss-loader")
-          )
-            moduleLoader.options.modules.getLocalIdent = hashOnlyIdent;
-
-          // earlier below statements were sufficient:
-          // delete moduleLoader.options.modules.getLocalIdent;
-          // moduleLoader.options.modules.localIdentName = '[hash:base64:6]';
-        });
-      });
-
-    return config;
-  },
 };
+
+module.exports = nextConfig;
