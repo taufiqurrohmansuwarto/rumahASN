@@ -29,6 +29,7 @@ yarn-error.log*
 .env
 .env*.local
 token.json
+sso_token.json
 
 # vercel
 .vercel
