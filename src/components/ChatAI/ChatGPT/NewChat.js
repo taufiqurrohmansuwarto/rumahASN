@@ -1,7 +1,7 @@
-import { Button, Input, Typography } from "antd";
+import { Button, Input, Typography, message } from "antd";
 import { SendOutlined } from "@ant-design/icons";
 import { useState } from "react";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { AssistantAIServices } from "@/services/assistant-ai.services";
 import { useRouter } from "next/router";
 
@@ -12,22 +12,23 @@ function NewChat({ selectedAssistant, selectedThread }) {
   const { mutate, isLoading } = useMutation(
     (data) => AssistantAIServices.sendMessage(data),
     {
-      onSuccess: () => {
+      onSuccess: (data) => {
+        router.push(`/asn-connect/asn-ai-chat?threadId=${data?.threadId}`);
+      },
+      onError: () => {
+        message.error("Failed to send message");
+      },
+      onSettled: () => {
         queryClient.invalidateQueries(["threads"]);
-        if (selectedThread) {
-          router.push(`/asn-connect/asn-ai-chat?threadId=${selectedThread}`);
-        } else if (selectedAssistant) {
-          router.push(
-            `/asn-connect/asn-ai-chat?assistantId=${selectedAssistant}`
-          );
-        }
+        setMessage("");
       },
     }
   );
 
   const sendingMessage = () => {
     const payload = {
-      assistantId: selectedAssistant,
+      assistantId: selectedAssistant || null,
+      threadId: selectedThread || null,
       message,
     };
     mutate(payload);
@@ -37,8 +38,7 @@ function NewChat({ selectedAssistant, selectedThread }) {
     e.preventDefault();
     if (!message.trim()) return;
 
-    // TODO: Handle sending message
-    setMessage("");
+    sendingMessage();
   };
 
   return (

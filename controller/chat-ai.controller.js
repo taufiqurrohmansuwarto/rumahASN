@@ -39,6 +39,7 @@ export const userThreadMessages = async (req, res) => {
       customId,
       threadId
     );
+
     res.json(result);
   } catch (error) {
     console.log(error);
