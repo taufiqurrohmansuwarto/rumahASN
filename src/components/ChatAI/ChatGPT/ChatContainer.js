@@ -3,10 +3,21 @@ import { useQuery } from "@tanstack/react-query";
 import { Layout, List, Menu, Spin, Typography } from "antd";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
+import Messages from "./Messages";
 import NewChat from "./NewChat";
 
 const { Sider, Content } = Layout;
 const { Title } = Typography;
+
+const Container = ({ selectedAssistant, selectedThread }) => {
+  if (selectedThread) {
+    return <Messages />;
+  } else if (selectedAssistant) {
+    return <NewChat selectedAssistant={selectedAssistant} />;
+  }
+
+  return <div>No assistant or thread selected</div>;
+};
 
 function ChatContainer() {
   const router = useRouter();
@@ -132,14 +143,10 @@ function ChatContainer() {
       </Sider>
 
       <Content style={{ padding: "24px", backgroundColor: "#fff" }}>
-        {selectedThread ? (
-          <div>Thread</div>
-        ) : (
-          <NewChat
-            selectedAssistant={selectedAssistant}
-            selectedThread={selectedThread}
-          />
-        )}
+        <Container
+          selectedAssistant={selectedAssistant}
+          selectedThread={selectedThread}
+        />
       </Content>
     </Layout>
   );

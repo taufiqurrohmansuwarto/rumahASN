@@ -15,8 +15,17 @@ class AssistantBotMesssages extends Model {
 
   static get relationMappings() {
     const ChatThreads = require("./chat-threads.model");
+    const Users = require("@/models/users.model");
 
     return {
+      user: {
+        relation: Model.BelongsToOneRelation,
+        modelClass: Users,
+        join: {
+          from: "assistant_bot.messages.user_id",
+          to: "users.custom_id",
+        },
+      },
       thread: {
         relation: Model.BelongsToOneRelation,
         modelClass: ChatThreads,

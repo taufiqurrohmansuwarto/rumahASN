@@ -69,7 +69,8 @@ export const chatHistoryService = {
     try {
       const messages = await BotAssistantMessages.query()
         .where("user_id", userId)
-        .andWhere("thread_id", threadId);
+        .andWhere("thread_id", threadId)
+        .withGraphFetched("user");
 
       return messages;
     } catch (error) {
