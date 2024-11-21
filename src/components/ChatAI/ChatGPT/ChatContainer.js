@@ -82,7 +82,7 @@ function ChatContainer() {
   }, [router.query]);
 
   return (
-    <Layout style={{ minHeight: "100vh" }}>
+    <Layout style={{ minHeight: "60vh" }}>
       <Sider
         collapsible
         collapsed={collapsed}
@@ -120,6 +120,10 @@ function ChatContainer() {
               <List
                 size="small"
                 dataSource={threads}
+                style={{
+                  maxHeight: "300px",
+                  overflowY: "auto",
+                }}
                 renderItem={(thread) => (
                   <List.Item
                     onClick={() => changeSelectedThread(thread.id)}
