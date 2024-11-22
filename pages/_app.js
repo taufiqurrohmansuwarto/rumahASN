@@ -16,10 +16,10 @@ import { useState } from "react";
 import Loading from "../src/components/Loading";
 import "../styles/globals.css";
 
+import "antd/dist/reset.css";
 import dayjs from "dayjs";
 import "dayjs/locale/id";
 import relativeTime from "dayjs/plugin/relativeTime";
-import "antd/dist/reset.css";
 
 // check user role and organization start with 123
 function Auth({ children, action, subject }) {
@@ -82,7 +82,6 @@ function MyApp({ Component, pageProps: { session, ...pageProps } }) {
   gtag('config', 'G-Q1GNKXN1MQ');
                   `}
       </Script>
-
       <ConfigProvider
         theme={{
           components: {
