@@ -2,6 +2,7 @@ import {
   IconBrain,
   IconMailbox,
   IconMapPin,
+  IconRobot,
   IconZoomQuestion,
 } from "@tabler/icons";
 import {
@@ -28,6 +29,12 @@ const applist = [
     title: "TemuBKD",
     color: "#4285F4",
     link: "/guests-books/my-visit/visits",
+  },
+  {
+    icon: <IconRobot />,
+    title: "Bot AI",
+    color: "#1A73E8",
+    link: "/chat-ai",
   },
   {
     icon: <IconMailbox />,

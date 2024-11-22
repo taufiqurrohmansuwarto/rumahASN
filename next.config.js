@@ -63,7 +63,9 @@ const hashOnlyIdent = (context, _, exportName) =>
     .replace(/^(-?\d|--)/, "_$1");
 
 const nextConfig = {
-  transpilePackages: ["@ant-design/pro-editor", "@ant-design/pro-chat"],
+  experimental: {
+    forceSwcTransforms: true,
+  },
   eslint: {
     ignoreDuringBuilds: true,
   },
@@ -84,7 +86,6 @@ const nextConfig = {
   publicRuntimeConfig: {
     basePath: getBasePath(),
   },
-  lessVarsFilePathAppendToEndOfContent: false, // optional
 };
 
 module.exports = nextConfig;
