@@ -1,27 +1,17 @@
 import { AssistantAIServices } from "@/services/assistant-ai.services";
 import { useQuery } from "@tanstack/react-query";
-import { Layout, Typography } from "antd";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
-import Conversations from "../Conversations";
-
-const { Sider, Content } = Layout;
-const { Title } = Typography;
-
-const Container = ({ selectedAssistant, selectedThread }) => {
-  if (selectedThread) {
-    return <div>Messages</div>;
-  } else if (selectedAssistant) {
-    return <div>NewChat</div>;
-  }
-
-  return <div>No assistant or thread selected</div>;
-};
+import AntdChatSider from "./AntdChatSider";
+import AntdChatSender from "./AntdChatSender";
+import useStyle from "./AntdChatStyle";
+import AntdChatMessages from "./AntdChatMessages";
 
 function AntDChatContainer() {
   const router = useRouter();
   const [selectedAssistant, setSelectedAssistant] = useState(null);
   const [selectedThread, setSelectedThread] = useState(null);
+  const { styles } = useStyle();
 
   const [collapsed, setCollapsed] = useState(false);
 
@@ -81,22 +71,23 @@ function AntDChatContainer() {
   }, [router.query]);
 
   return (
-    <Layout>
-      <>
-        {assistants && (
-          <Conversations
-            onActiveChange={changeSelectedAssistant}
-            items={assistants}
-          />
-        )}
-        {threads && (
-          <Conversations
-            onActiveChange={changeSelectedThread}
-            items={threads}
-          />
-        )}
-      </>
-    </Layout>
+    <div className={styles.layout}>
+      <div className={styles.menu}>
+        <AntdChatSider
+          style={styles}
+          assistants={assistants}
+          threads={threads}
+          selectedAssistant={selectedAssistant}
+          selectedThread={selectedThread}
+          changeSelectedAssistant={changeSelectedAssistant}
+          changeSelectedThread={changeSelectedThread}
+        />
+      </div>
+      <div className={styles.chat}>
+        <AntdChatMessages style={styles} />
+        <AntdChatSender style={styles} />
+      </div>
+    </div>
   );
 }
 
