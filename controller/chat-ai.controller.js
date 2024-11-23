@@ -51,6 +51,28 @@ export const userThreadMessages = async (req, res) => {
       threadId
     );
 
+    console.log(result);
+
+    res.json(result);
+  } catch (error) {
+    console.log(error);
+    res.status(400).json({ code: 400, message: "Internal Server Error" });
+  }
+};
+
+export const deleteThreadMessages = async (req, res) => {
+  try {
+    const { customId } = req?.user;
+    const { threadId } = req?.query;
+
+    const payload = {
+      userId: customId,
+      threadId,
+    };
+
+    console.log(payload);
+
+    const result = await chatHistoryService.deleteThreadMessages(payload);
     res.json(result);
   } catch (error) {
     console.log(error);

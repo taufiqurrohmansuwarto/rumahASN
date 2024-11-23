@@ -1,24 +1,20 @@
 "use client";
-import React from "react";
 
 import AntDChatBot from "@/components/AI/AntDChatBot";
 import PageContainer from "@/components/PageContainer";
-import { Card } from "antd";
 import Head from "next/head";
 
 const ChatAI = () => {
   return (
     <>
       <Head>
-        <title>Rumah ASN - Coaching Clinic</title>
+        <title>Chat AI</title>
       </Head>
       <PageContainer
-        title="Coaching Clinic"
-        content="Daftar Coaching Clinic Saya"
+        title="Chat AI"
+        content="Artificial Intelligence untuk Pelayanan yang Responsif, Inovatif, Modern dan Akuntabel"
       >
-        <Card>
-          <AntDChatBot />
-        </Card>
+        <AntDChatBot />
       </PageContainer>
     </>
   );

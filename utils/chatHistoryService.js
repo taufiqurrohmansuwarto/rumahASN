@@ -1,3 +1,5 @@
+import { toLower } from "lodash";
+
 const BotAssistantChatThreads = require("@/models/assistant_bot/chat-threads.model");
 const BotAssistantMessages = require("@/models/assistant_bot/messages.model");
 
@@ -65,14 +67,37 @@ export const chatHistoryService = {
     }
   },
 
+  async deleteThreadMessages(payload) {
+    try {
+      await BotAssistantChatThreads.query()
+        .where("user_id", payload?.userId)
+        .andWhere("id", payload?.threadId)
+        .delete();
+      await BotAssistantMessages.query()
+        .where("user_id", payload?.userId)
+        .andWhere("thread_id", payload?.threadId)
+        .delete();
+    } catch (error) {
+      console.log(error);
+    }
+  },
+
   async getThreadMessages(userId, threadId) {
     try {
       const messages = await BotAssistantMessages.query()
         .where("user_id", userId)
         .andWhere("thread_id", threadId)
+        .orderBy("created_at", "asc")
         .withGraphFetched("user");
 
-      return messages;
+      const result = messages.map((item) => ({
+        ...item,
+        key: item.id,
+        role: toLower(item.role) === "user" ? "user" : "ai",
+        loading: false,
+      }));
+
+      return result;
     } catch (error) {
       console.log(error);
     }

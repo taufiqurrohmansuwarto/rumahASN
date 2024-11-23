@@ -31,9 +31,16 @@ const getThreadMessages = async ({ assistantId, threadId }) => {
     .then((res) => res?.data);
 };
 
+export const deleteThreadMessages = async ({ assistantId, threadId }) => {
+  return api
+    .delete(`/assistants/${assistantId}/threads/${threadId}/messages`)
+    .then((res) => res?.data);
+};
+
 export const AssistantAIServices = {
   getAssistants,
   getThreads,
   sendMessage,
   getThreadMessages,
+  deleteThreadMessages,
 };
