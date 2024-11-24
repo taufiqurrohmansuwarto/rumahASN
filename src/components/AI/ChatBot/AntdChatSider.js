@@ -63,7 +63,11 @@ function AntdChatSider({
   });
   return (
     <>
-      <Divider orientation="left">🤖 Assistants</Divider>
+      <Divider orientation="left">
+        <Typography.Text strong>
+          🤖 Assistants ({assistants?.length})
+        </Typography.Text>
+      </Divider>
       {assistants && (
         <Conversations
           className={style?.assistants}
@@ -73,7 +77,9 @@ function AntdChatSider({
         />
       )}
       <Divider orientation="left">
-        <Typography.Text>💬 Riwayat Chat</Typography.Text>
+        <Typography.Text strong>
+          💬 Riwayat Chat ({threads?.length})
+        </Typography.Text>
       </Divider>
       {threads && (
         <Conversations

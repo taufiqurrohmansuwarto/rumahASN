@@ -51,8 +51,6 @@ export const userThreadMessages = async (req, res) => {
       threadId
     );
 
-    console.log(result);
-
     res.json(result);
   } catch (error) {
     console.log(error);
@@ -69,8 +67,6 @@ export const deleteThreadMessages = async (req, res) => {
       userId: customId,
       threadId,
     };
-
-    console.log(payload);
 
     const result = await chatHistoryService.deleteThreadMessages(payload);
     res.json(result);

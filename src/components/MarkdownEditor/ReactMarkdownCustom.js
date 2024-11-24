@@ -47,22 +47,22 @@ function ReactMarkdownCustom({ children, withCustom = true }) {
       return <Text>{props.children}</Text>;
     },
     h1({ node, ...props }) {
-      return <Title order={1} {...props} />;
+      return <Title m={0} p={0} order={1} {...props} />;
     },
     h2({ node, ...props }) {
-      return <Title order={2} {...props} />;
+      return <Title m={0} p={0} order={2} {...props} />;
     },
     h3({ node, ...props }) {
-      return <Title order={3} {...props} />;
+      return <Title m={0} p={0} order={3} {...props} />;
     },
     h4({ node, ...props }) {
-      return <Title order={4} {...props} />;
+      return <Title m={0} p={0} order={4} {...props} />;
     },
     h5({ node, ...props }) {
-      return <Title order={5} {...props} />;
+      return <Title m={0} p={0} order={5} {...props} />;
     },
     h6({ node, ...props }) {
-      return <Title order={6} {...props} />;
+      return <Title m={0} p={0} order={6} {...props} />;
     },
     code({ node, inline, className, children, ...props }) {
       return <Code>{children}</Code>;
@@ -90,6 +90,8 @@ function ReactMarkdownCustom({ children, withCustom = true }) {
             whiteSpace: "normal",
             overflowWrap: "break-word",
             wordWrap: "break-word",
+            margin: 0,
+            paddingTop: 0,
           }}
         >
           {props.children}
@@ -103,6 +105,8 @@ function ReactMarkdownCustom({ children, withCustom = true }) {
             whiteSpace: "normal",
             overflowWrap: "break-word",
             wordWrap: "break-word",
+            margin: 0,
+            paddingTop: 0,
           }}
         >
           {props.children}
