@@ -1,9 +1,17 @@
 import ReactMarkdownCustom from "@/components/MarkdownEditor/ReactMarkdownCustom";
 import { AssistantAIServices } from "@/services/assistant-ai.services";
 import useChatStore from "@/store/useChat";
-import { UserOutlined } from "@ant-design/icons";
+import {
+  CopyOutlined,
+  DislikeOutlined,
+  FrownOutlined,
+  LikeOutlined,
+  SmileOutlined,
+  SyncOutlined,
+  UserOutlined,
+} from "@ant-design/icons";
 import { useQuery } from "@tanstack/react-query";
-import { Avatar, Skeleton } from "antd";
+import { Avatar, Button, Flex, Skeleton } from "antd";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import { useRef } from "react";
@@ -28,7 +36,6 @@ function AntdChatMessages({ style }) {
   const roles = {
     ai: {
       placement: "start",
-      header: "AI Assistant",
       typing: {
         step: 100,
         interval: 1000,
@@ -43,15 +50,15 @@ function AntdChatMessages({ style }) {
         header: {},
       },
       style: {
-        maxWidth: 900,
+        maxWidth: "100%",
         marginInlineEnd: 44,
       },
     },
     user: {
       variant: "shadow",
-      placement: "start",
+      placement: "end",
       style: {
-        maxWidth: 900,
+        maxWidth: "100%",
       },
       avatar: {
         icon: <Avatar src={user?.user?.image} />,
@@ -70,8 +77,29 @@ function AntdChatMessages({ style }) {
             items={data?.map((item) => ({
               ...item,
               content: (
-                <ReactMarkdownCustom>{item.content}</ReactMarkdownCustom>
+                <ReactMarkdownCustom withCustom>
+                  {item.content}
+                </ReactMarkdownCustom>
               ),
+              footer:
+                item.role === "user" ? null : (
+                  <Flex>
+                    <Button
+                      size="small"
+                      type="text"
+                      icon={<CopyOutlined />}
+                      style={{
+                        marginInlineEnd: "auto",
+                      }}
+                    />
+                    <Button size="small" type="text" icon={<LikeOutlined />} />
+                    <Button
+                      size="small"
+                      type="text"
+                      icon={<DislikeOutlined />}
+                    />
+                  </Flex>
+                ),
             }))}
           />
         </Skeleton>

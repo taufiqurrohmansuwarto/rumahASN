@@ -1,19 +1,35 @@
 import { AssistantAIServices } from "@/services/assistant-ai.services";
+import { MenuOutlined } from "@ant-design/icons";
 import { useQuery } from "@tanstack/react-query";
+import { Button, Drawer, Grid } from "antd";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
-import AntdChatSider from "./AntdChatSider";
-import AntdChatSender from "./AntdChatSender";
-import useStyle from "./AntdChatStyle";
 import AntdChatMessages from "./AntdChatMessages";
+import AntdChatSender from "./AntdChatSender";
+import AntdChatSider from "./AntdChatSider";
+import useStyle from "./AntdChatStyle";
 
 function AntDChatContainer() {
   const router = useRouter();
   const [selectedAssistant, setSelectedAssistant] = useState(null);
   const [selectedThread, setSelectedThread] = useState(null);
   const { styles } = useStyle();
+  const breakPoint = Grid.useBreakpoint();
+
+  const logoNode = (
+    <div className={styles?.logo}>
+      <img
+        src="https://mdn.alipayobjects.com/huamei_iwk9zp/afts/img/A*eco6RrQhxbMAAAAAAAAAAAAADgCCAQ/original"
+        draggable={false}
+        alt="logo"
+      />
+      <span>AI Assistant BKD</span>
+    </div>
+  );
 
   const [collapsed, setCollapsed] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+  const [drawerVisible, setDrawerVisible] = useState(false);
 
   // Get assistants list
   const { data: assistants, isLoading: loadingAssistants } = useQuery(
@@ -29,12 +45,22 @@ function AntDChatContainer() {
     if (assistantId) {
       changeSelectedAssistant(assistantId);
     }
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
   }, [router.query.assistantId]);
 
   const changeSelectedAssistant = (assistantId) => {
     setSelectedAssistant(assistantId);
     setSelectedThread(null);
     router.push(`/chat-ai?assistantId=${assistantId}`);
+  };
+
+  const toggleCollapsed = () => {
+    setCollapsed(!collapsed);
   };
 
   const changeSelectedThread = (threadId) => {
@@ -72,17 +98,62 @@ function AntDChatContainer() {
 
   return (
     <div className={styles.layout}>
-      <div className={styles.menu}>
-        <AntdChatSider
-          style={styles}
-          assistants={assistants}
-          threads={threads}
-          selectedAssistant={selectedAssistant}
-          selectedThread={selectedThread}
-          changeSelectedAssistant={changeSelectedAssistant}
-          changeSelectedThread={changeSelectedThread}
-        />
-      </div>
+      {breakPoint?.xs ? (
+        <>
+          <Button
+            type="text"
+            icon={<MenuOutlined />}
+            onClick={() => setDrawerVisible(true)}
+            className={styles.menuButton}
+          />
+          <Drawer
+            width={300}
+            title={logoNode}
+            placement="left"
+            onClose={() => setDrawerVisible(false)}
+            open={drawerVisible}
+            styles={{
+              body: {
+                padding: 0,
+              },
+            }}
+          >
+            <AntdChatSider
+              style={styles}
+              assistants={assistants}
+              threads={threads}
+              selectedAssistant={selectedAssistant}
+              selectedThread={selectedThread}
+              changeSelectedAssistant={(id) => {
+                changeSelectedAssistant(id);
+                isMobile && setDrawerVisible(false);
+              }}
+              changeSelectedThread={(id) => {
+                changeSelectedThread(id);
+                isMobile && setDrawerVisible(false);
+              }}
+            />
+          </Drawer>
+        </>
+      ) : (
+        <div className={styles.menu}>
+          <AntdChatSider
+            style={styles}
+            assistants={assistants}
+            threads={threads}
+            selectedAssistant={selectedAssistant}
+            selectedThread={selectedThread}
+            changeSelectedAssistant={(id) => {
+              changeSelectedAssistant(id);
+              isMobile && setDrawerVisible(false);
+            }}
+            changeSelectedThread={(id) => {
+              changeSelectedThread(id);
+              isMobile && setDrawerVisible(false);
+            }}
+          />
+        </div>
+      )}
       <div className={styles.chat}>
         <AntdChatMessages style={styles} />
         <AntdChatSender style={styles} />

@@ -94,17 +94,17 @@ function AntdChatSender({ style }) {
   };
 
   return (
-    <>
+    <div style={{ paddingBottom: "16px" }}>
       <Sender
         ref={senderRef}
         onSubmit={handleSubmit}
         loading={isLoading}
-        placeholder="Type a message..."
+        placeholder="Ketik pesan disini..."
         value={message}
         onChange={handleChange}
         className={style?.sender}
       />
-    </>
+    </div>
   );
 }
 
