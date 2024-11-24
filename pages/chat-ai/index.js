@@ -1,28 +1,21 @@
 "use client";
-
+import ChatBotLayout from "@/components/AI/ChatBot/ChatBotLayout";
 import AntDChatBot from "@/components/AI/AntDChatBot";
-import PageContainer from "@/components/PageContainer";
-import { Grid } from "antd";
 import Head from "next/head";
 
 const ChatAI = () => {
-  const breakPoint = Grid.useBreakpoint();
-
   return (
     <>
       <Head>
-        <title>Chat AI</title>
+        <title>BESTIE AI BKD</title>
       </Head>
-      <PageContainer
-        childrenContentStyle={{
-          padding: breakPoint?.xs ? 0 : null,
-        }}
-        title="Chat AI"
-      >
-        <AntDChatBot />
-      </PageContainer>
+      <AntDChatBot />
     </>
   );
+};
+
+ChatAI.getLayout = (page) => {
+  return <ChatBotLayout active="/chat-ai">{page}</ChatBotLayout>;
 };
 
 ChatAI.Auth = {

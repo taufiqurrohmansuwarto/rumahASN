@@ -18,13 +18,13 @@ function AntdNewChat() {
   );
 
   return (
-    <>
+    <div style={{ paddingTop: "24px" }}>
       <Welcome
         icon="https://mdn.alipayobjects.com/huamei_iwk9zp/afts/img/A*s5sNRo5LjfQAAAAAAAAAAAAADgCCAQ/fmt.webp"
-        title={currentAssistant?.name}
-        description="Artificial Intelligence untuk Pelayanan yang Responsif, Inovatif, Modern dan Akuntabel"
+        title="BESTIE (BKD Expert System & Technical Intelligence Engine)"
+        description="Your HR Bestie, Always Ready!"
       />
-    </>
+    </div>
   );
 }
 

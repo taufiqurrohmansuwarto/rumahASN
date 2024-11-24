@@ -10,7 +10,7 @@ const useStyle = createStyles(({ token, css }) => {
     `,
     layout: css`
       width: 100%;
-      height: 85vh;
+      height: 83vh;
       border-radius: 12px;
       display: flex;
       background: ${token.colorBgContainer};
@@ -138,8 +138,8 @@ const useStyle = createStyles(({ token, css }) => {
       box-sizing: border-box;
       display: flex;
       flex-direction: column;
-      padding: 0px 0px;
-      gap: 20px;
+      padding-top: 20px;
+      gap: 40px;
       transition: all 0.3s ease;
 
       &.chatExpanded {
@@ -209,12 +209,6 @@ const useStyle = createStyles(({ token, css }) => {
         color: ${token.colorText};
         font-size: 16px;
       }
-    `,
-    addBtn: css`
-      background: #1677ff0f;
-      border: 1px solid #1677ff34;
-      width: calc(100% - 24px);
-      margin: 0 12px 24px 12px;
     `,
   };
 });

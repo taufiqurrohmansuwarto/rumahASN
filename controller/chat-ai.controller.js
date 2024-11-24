@@ -24,18 +24,23 @@ export const userThreads = async (req, res) => {
   try {
     const { customId } = req?.user;
     const { assistantId } = req?.query;
-    const result = await chatHistoryService.getUserThreads(
-      customId,
-      assistantId
-    );
 
-    const threads = result?.map((item) => ({
-      ...item,
-      label: item.title,
-      key: item.id,
-    }));
+    if (!assistantId) {
+      res.json([]);
+    } else {
+      const result = await chatHistoryService.getUserThreads(
+        customId,
+        assistantId
+      );
 
-    res.json(threads);
+      const threads = result?.map((item) => ({
+        ...item,
+        label: item.title,
+        key: item.id,
+      }));
+
+      res.json(threads);
+    }
   } catch (error) {
     console.log(error);
     res.status(400).json({ code: 400, message: "Internal Server Error" });
