@@ -1,5 +1,5 @@
 import Conversations from "../Conversations";
-import { Divider, Typography, message } from "antd";
+import { Divider, Spin, Typography, message } from "antd";
 import {
   EditOutlined,
   DeleteOutlined,
@@ -14,6 +14,8 @@ function AntdChatSider({
   style,
   assistants,
   threads,
+  loadingAssistants,
+  loadingThreads,
   selectedAssistant,
   selectedThread,
   changeSelectedAssistant,
@@ -39,7 +41,7 @@ function AntdChatSider({
     removeThreadMessages({ assistantId, threadId });
   };
 
-  const menuConfig = (conversation) => ({
+  const menuConfig = () => ({
     items: [
       { label: "Share", key: "share", icon: <ShareAltOutlined /> },
       { label: "Rename", key: "rename", icon: <EditOutlined /> },
@@ -68,28 +70,34 @@ function AntdChatSider({
           🤖 Assistants ({assistants?.length})
         </Typography.Text>
       </Divider>
-      {assistants && (
+      <Spin spinning={loadingAssistants}>
         <Conversations
           className={style?.assistants}
-          onActiveChange={changeSelectedAssistant}
+          onActiveChange={(id) => {
+            changeSelectedAssistant(id);
+          }}
+          activeKey={selectedAssistant}
           items={assistants}
           defaultActiveKey={selectedAssistant}
         />
-      )}
+      </Spin>
       <Divider orientation="left">
         <Typography.Text strong>
           💬 Riwayat Chat ({threads?.length})
         </Typography.Text>
       </Divider>
-      {threads && (
+      <Spin spinning={loadingThreads}>
         <Conversations
+          onActiveChange={(id) => {
+            changeSelectedThread(id);
+          }}
           menu={menuConfig}
           className={style?.conversations}
-          onActiveChange={changeSelectedThread}
           items={threads}
+          activeKey={selectedThread}
           defaultActiveKey={selectedThread}
         />
-      )}
+      </Spin>
     </>
   );
 }

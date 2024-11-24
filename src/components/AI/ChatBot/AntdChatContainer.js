@@ -8,6 +8,8 @@ import AntdChatMessages from "./AntdChatMessages";
 import AntdChatSender from "./AntdChatSender";
 import AntdChatSider from "./AntdChatSider";
 import useStyle from "./AntdChatStyle";
+import AntdChatEmpty from "./AntdChatEmpty";
+import { useSearchParams } from "next/navigation";
 
 function AntDChatContainer() {
   const router = useRouter();
@@ -23,7 +25,7 @@ function AntDChatContainer() {
         draggable={false}
         alt="logo"
       />
-      <span>AI Assistant BKD</span>
+      <span>BESTIE AI BKD</span>
     </div>
   );
 
@@ -40,8 +42,10 @@ function AntDChatContainer() {
     }
   );
 
+  const searchParams = useSearchParams();
+
   useEffect(() => {
-    const assistantId = router.query.assistantId;
+    const assistantId = searchParams.get("assistantId");
     if (assistantId) {
       changeSelectedAssistant(assistantId);
     }
@@ -51,16 +55,12 @@ function AntDChatContainer() {
     handleResize();
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
-  }, [router.query.assistantId]);
+  }, [searchParams.get("assistantId")]);
 
   const changeSelectedAssistant = (assistantId) => {
     setSelectedAssistant(assistantId);
     setSelectedThread(null);
     router.push(`/chat-ai?assistantId=${assistantId}`);
-  };
-
-  const toggleCollapsed = () => {
-    setCollapsed(!collapsed);
   };
 
   const changeSelectedThread = (threadId) => {
@@ -74,7 +74,7 @@ function AntDChatContainer() {
   };
 
   // Get threads for selected assistant
-  const { data: threads, isLoading: loadingThreads } = useQuery(
+  const { data: threads, isFetching: loadingThreads } = useQuery(
     ["threads", selectedAssistant],
     () => AssistantAIServices.getThreads(selectedAssistant),
     {
@@ -137,7 +137,10 @@ function AntDChatContainer() {
         </>
       ) : (
         <div className={styles.menu}>
+          {logoNode}
           <AntdChatSider
+            loadingAssistants={loadingAssistants}
+            loadingThreads={loadingThreads}
             style={styles}
             assistants={assistants}
             threads={threads}
@@ -155,8 +158,14 @@ function AntDChatContainer() {
         </div>
       )}
       <div className={styles.chat}>
-        <AntdChatMessages style={styles} />
-        <AntdChatSender style={styles} />
+        {router?.query?.assistantId ? (
+          <>
+            <AntdChatMessages style={styles} />
+            <AntdChatSender style={styles} />
+          </>
+        ) : (
+          <AntdChatEmpty />
+        )}
       </div>
     </div>
   );

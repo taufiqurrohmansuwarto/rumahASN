@@ -47,6 +47,11 @@ const SignIn = ({ providers }) => {
     router.push("/netralitas");
   };
 
+  const loginWithGoogle = (e) => {
+    e?.preventDefault();
+    signIn("google");
+  };
+
   const title = "Rumah ASN: Sobat Kepegawaian #1 di Jatim";
   const description =
     "Dengerin nih, brosis! Rumah ASN tuh jawabannya buat semua pertanyaan seru seputar dunia kepegawaian di Jawa Timur. Mulai dari info terkini, diskusi hangat, sampe ngobrol santai via podcast, semuanya ada di sini. Kita juga punya fitur unik buat catat segala aktivitas dan data kamu, biar kamu makin mantap jadi ASN yang oke. So, yuk gabung dan rasain serunya jadi bagian dari Rumah ASN!";
@@ -96,13 +101,8 @@ const SignIn = ({ providers }) => {
               <Divider plain>Anda masyarakat umum?</Divider>
               <GoogleButton
                 label="Masuk dengan Google"
-                onClick={(e) => {
-                  e.preventDefault();
-                  signIn("google");
-                }}
-                style={{
-                  width: "100%",
-                }}
+                onClick={loginWithGoogle}
+                style={{ width: "100%" }}
               />
             </Col>
             <Col xs={24}>
