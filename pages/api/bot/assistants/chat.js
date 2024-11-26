@@ -1,5 +1,5 @@
 import { handleChat } from "@/controller/bot-assistant.controller";
-import asnMiddleware from "@/middleware/asn.middleware";
+import agentAdminMiddleware from "@/middleware/agent-admin.middleware";
 import auth from "@/middleware/auth.middleware";
 import { siasnMiddleware } from "@/middleware/siasn.middleware";
 import { createRouter } from "next-connect";
@@ -18,7 +18,7 @@ const router = createRouter();
 router
   .use(auth)
   .use(siasnMiddleware)
-  .use(asnMiddleware)
+  .use(agentAdminMiddleware)
   .post(async (req, res) => await handleChat(req, res));
 
 export default router.handler({});

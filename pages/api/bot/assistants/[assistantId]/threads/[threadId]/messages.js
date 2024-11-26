@@ -1,15 +1,15 @@
 import {
-  userThreadMessages,
   deleteThreadMessages,
+  userThreadMessages,
 } from "@/controller/chat-ai.controller";
-import asnMiddleware from "@/middleware/asn.middleware";
+import agentAdminMiddleware from "@/middleware/agent-admin.middleware";
 import auth from "@/middleware/auth.middleware";
 import { createRouter } from "next-connect";
 const router = createRouter();
 
 router
   .use(auth)
-  .use(asnMiddleware)
+  .use(agentAdminMiddleware)
   .get(userThreadMessages)
   .delete(deleteThreadMessages);
 
