@@ -14,6 +14,9 @@ function AntdChatSender({ style }) {
   const [message, setMessage] = useState("");
   const queryClient = useQueryClient();
   const senderRef = useRef(null);
+  const [isSuggestionOpen, setIsSuggestionOpen] = useState(false);
+
+  const { threadId } = router.query;
 
   const { setSendSuccess, setLastId } = useChatStore();
 
@@ -21,76 +24,61 @@ function AntdChatSender({ style }) {
     (data) => AssistantAIServices.sendMessage(data),
     {
       onMutate: async ({ message }) => {
-        if (threadId && assistantId) {
-          await queryClient.cancelQueries([
-            "chat-messages",
-            threadId,
-            assistantId,
-          ]);
+        if (threadId) {
+          await queryClient.cancelQueries(["chat-messages", threadId]);
           const previousMessages = queryClient.getQueryData([
             "chat-messages",
             threadId,
-            assistantId,
           ]);
           const lastId = previousMessages[previousMessages.length - 1].id;
-          queryClient.setQueryData(
-            ["chat-messages", threadId, assistantId],
-            (old) => [
-              ...old,
-              {
-                id: Date.now(),
-                content: message,
-                role: "user",
-                loading: false,
-              },
-              {
-                id: Date.now(),
-                content: "Typing...",
-                role: "ai",
-                loading: true,
-              },
-            ]
-          );
+          queryClient.setQueryData(["chat-messages", threadId], (old) => [
+            ...old,
+            {
+              id: Date.now(),
+              content: message,
+              role: "user",
+              loading: false,
+            },
+            {
+              id: Date.now(),
+              content: "Typing...",
+              role: "ai",
+              loading: true,
+            },
+          ]);
           setLastId(lastId);
           return { previousMessages };
         }
       },
       onError: (err, newMessage, context) => {
         queryClient.setQueryData(
-          ["chat-messages", threadId, assistantId],
+          ["chat-messages", threadId],
           context.previousMessages
         );
       },
       onSettled: () => {
-        if (threadId && assistantId) {
-          queryClient.invalidateQueries([
-            "chat-messages",
-            threadId,
-            assistantId,
-          ]);
+        if (threadId) {
+          queryClient.invalidateQueries(["chat-messages", threadId]);
           setSendSuccess(false);
         }
       },
       onSuccess: (data) => {
-        if (threadId && assistantId) {
+        if (threadId) {
           setSendSuccess(true);
           setLastId(data.id);
         } else {
           queryClient.invalidateQueries(["threads"]);
-          router.push(
-            `/chat-ai?assistantId=${assistantId}&threadId=${data?.threadId}`
-          );
+          router.push(`/chat-ai/${data?.threadId}`);
         }
       },
     }
   );
 
-  const { threadId } = router.query;
-  const { assistantId } = router.query;
-
-  const handleSubmit = () => {
-    send({ message, threadId, assistantId });
-    setMessage("");
+  const handleSubmit = (msg) => {
+    if (!isSuggestionOpen) {
+      send({ message: msg, threadId });
+      setMessage("");
+    }
   };
 
   const handleSelect = (value) => {
@@ -99,11 +87,13 @@ function AntdChatSender({ style }) {
 
   return (
     <div style={{ paddingBottom: "16px" }}>
-      <Suggestion block items={suggestions} onSelect={handleSelect}>
+      <Suggestion items={suggestions} onSelect={handleSelect}>
         {({ onTrigger, onKeyDown }) => {
           return (
             <Sender
-              submitType="shiftEnter"
+              placeholder="Tulis pesan..."
+              className={style?.sender}
+              submitType="enter"
               ref={senderRef}
               onSubmit={handleSubmit}
               loading={isLoading}
@@ -111,24 +101,21 @@ function AntdChatSender({ style }) {
               onChange={(nextVal) => {
                 if (nextVal === "/") {
                   onTrigger();
+                  setIsSuggestionOpen(true);
                 } else if (!nextVal) {
                   onTrigger(false);
+                  setIsSuggestionOpen(false);
                 }
                 setMessage(nextVal);
               }}
-              onKeyDown={onKeyDown}
-              actions={(_, info) => {
-                const { SendButton, LoadingButton, ClearButton } =
-                  info.components;
-                return (
-                  <Space size="small">
-                    <Typography.Text type="secondary">
-                      <small>`Shift + Enter` untuk mengirim pesan</small>
-                    </Typography.Text>
-                    <ClearButton />
-                    {isLoading ? <LoadingButton /> : <SendButton />}
-                  </Space>
-                );
+              onKeyDown={(e) => {
+                onKeyDown(e);
+                if (e.key === "Enter" && !e.shiftKey) {
+                  if (isSuggestionOpen) {
+                    e.preventDefault();
+                    setIsSuggestionOpen(false);
+                  }
+                }
               }}
             />
           );

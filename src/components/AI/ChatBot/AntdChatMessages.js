@@ -13,22 +13,19 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import { useRef, useState } from "react";
 import BubbleList from "../BubbleList";
-import AntdNewChat from "./AntdNewChat";
 
 function AntdChatMessages({ style }) {
   const router = useRouter();
   const { threadId } = router.query;
-  const { assistantId } = router.query;
   const itemRef = useRef(null);
   const { data: user } = useSession();
 
   const [copySuccess, setCopySuccess] = useState({});
 
   const { data, isLoading } = useQuery({
-    queryKey: ["chat-messages", threadId, assistantId],
-    queryFn: () =>
-      AssistantAIServices.getThreadMessages({ threadId, assistantId }),
-    enabled: !!threadId && !!assistantId,
+    queryKey: ["chat-messages", threadId],
+    queryFn: () => AssistantAIServices.getThreadMessages({ threadId }),
+    enabled: !!threadId,
   });
 
   const roles = {
@@ -77,67 +74,56 @@ function AntdChatMessages({ style }) {
 
   return (
     <>
-      {threadId && assistantId && (
-        <Skeleton active loading={isLoading}>
-          <BubbleList
-            ref={itemRef}
-            className={style?.messages}
-            roles={roles}
-            items={data?.map((item) => ({
-              ...item,
-              content: (
-                <ReactMarkdownCustom withCustom>
-                  {item.content}
-                </ReactMarkdownCustom>
+      <Skeleton active loading={isLoading}>
+        <BubbleList
+          ref={itemRef}
+          className={style?.messages}
+          roles={roles}
+          items={data?.map((item) => ({
+            ...item,
+            content: (
+              <ReactMarkdownCustom withCustom>
+                {item.content}
+              </ReactMarkdownCustom>
+            ),
+            footer:
+              item.role === "user" ? null : (
+                <Flex>
+                  <Tooltip title={copySuccess[item.id] ? "Copied" : "Copy"}>
+                    <Button
+                      size="small"
+                      type="text"
+                      icon={
+                        copySuccess[item.id] ? (
+                          <CheckOutlined style={{ color: "green" }} />
+                        ) : (
+                          <CopyOutlined />
+                        )
+                      }
+                      onClick={() => handleCopy(item)}
+                      style={{
+                        marginInlineEnd: "auto",
+                      }}
+                    />
+                  </Tooltip>
+                  <Tooltip title="Like">
+                    <Button size="small" type="text" icon={<LikeOutlined />} />
+                  </Tooltip>
+                  <Tooltip title="Dislike">
+                    <Button
+                      size="small"
+                      type="text"
+                      icon={<DislikeOutlined />}
+                    />
+                  </Tooltip>
+                  <Tooltip title="Refresh">
+                    <Button size="small" type="text" icon={<SyncOutlined />} />
+                  </Tooltip>
+                </Flex>
               ),
-              footer:
-                item.role === "user" ? null : (
-                  <Flex>
-                    <Tooltip title={copySuccess[item.id] ? "Copied" : "Copy"}>
-                      <Button
-                        size="small"
-                        type="text"
-                        icon={
-                          copySuccess[item.id] ? (
-                            <CheckOutlined style={{ color: "green" }} />
-                          ) : (
-                            <CopyOutlined />
-                          )
-                        }
-                        onClick={() => handleCopy(item)}
-                        style={{
-                          marginInlineEnd: "auto",
-                        }}
-                      />
-                    </Tooltip>
-                    <Tooltip title="Like">
-                      <Button
-                        size="small"
-                        type="text"
-                        icon={<LikeOutlined />}
-                      />
-                    </Tooltip>
-                    <Tooltip title="Dislike">
-                      <Button
-                        size="small"
-                        type="text"
-                        icon={<DislikeOutlined />}
-                      />
-                    </Tooltip>
-                    <Tooltip title="Refresh">
-                      <Button
-                        size="small"
-                        type="text"
-                        icon={<SyncOutlined />}
-                      />
-                    </Tooltip>
-                  </Flex>
-                ),
-            }))}
-          />
-        </Skeleton>
-      )}
-      {assistantId && !threadId && <AntdNewChat />}
+          }))}
+        />
+      </Skeleton>
     </>
   );
 }

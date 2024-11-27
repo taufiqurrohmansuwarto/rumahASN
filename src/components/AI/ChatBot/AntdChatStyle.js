@@ -105,6 +105,7 @@ const useStyle = createStyles(({ token, css }) => {
       margin: 20px 12px 24px 12px;
     `,
     conversations: css`
+      font-size: 12px;
       padding: 0 12px;
       overflow-y: auto;
       margin-top: 12px;
@@ -137,7 +138,7 @@ const useStyle = createStyles(({ token, css }) => {
     chat: css`
       height: 100%;
       width: 100%;
-      max-width: 50%;
+      max-width: 45%;
       margin: 0 auto;
       box-sizing: border-box;
       display: flex;
@@ -189,6 +190,7 @@ const useStyle = createStyles(({ token, css }) => {
       padding-top: 32px;
     `,
     sender: css`
+      box-shadow: ${token.boxShadow};
       @media (max-width: 768px) {
       }
     `,

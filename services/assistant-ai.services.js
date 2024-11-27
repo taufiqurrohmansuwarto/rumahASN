@@ -15,9 +15,9 @@ const getThreads = async (assistantId) => {
 };
 
 // chat with assistant
-const sendMessage = async ({ assistantId, threadId, message }) => {
+const sendMessage = async ({ threadId, message }) => {
   return api
-    .post(`/assistants/chat?assistantId=${assistantId}`, {
+    .post(`/assistants/chat`, {
       threadId,
       message,
     })
@@ -25,9 +25,9 @@ const sendMessage = async ({ assistantId, threadId, message }) => {
 };
 
 // get all messages in a thread
-const getThreadMessages = async ({ assistantId, threadId }) => {
+const getThreadMessages = async ({ threadId }) => {
   return api
-    .get(`/assistants/${assistantId}/threads/${threadId}/messages`)
+    .get(`/assistants/threads/${threadId}/messages`)
     .then((res) => res?.data);
 };
 
@@ -37,10 +37,15 @@ export const deleteThreadMessages = async ({ assistantId, threadId }) => {
     .then((res) => res?.data);
 };
 
+export const getAssistantThreads = async () => {
+  return api.get(`/assistants/threads`).then((res) => res?.data);
+};
+
 export const AssistantAIServices = {
   getAssistants,
   getThreads,
   sendMessage,
   getThreadMessages,
   deleteThreadMessages,
+  getAssistantThreads,
 };
