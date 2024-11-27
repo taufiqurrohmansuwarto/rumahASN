@@ -1,5 +1,41 @@
 const SyncPegawai = require("@/models/sync-pegawai.model");
 
+function getParentCodes(code) {
+  let codes = [];
+  let currentCode = code.toString();
+
+  while (currentCode.length > 3) {
+    // Minimal 3 digit
+    currentCode = currentCode.slice(0, -2); // Potong 2 digit dari belakang
+    codes.push(currentCode);
+  }
+
+  return codes;
+}
+
+module.exports.cariPejabat = async (currentOpdId) => {
+  // misal kode 1230101 looping menjadi 12301 dan 123
+  const parentCodes = getParentCodes(currentOpdId);
+  try {
+    const pejabat = await SyncPegawai.query()
+      .whereIn("skpd_id", parentCodes)
+      .select(
+        "id as id",
+        "nama_master as nama",
+        "nip_master as nip",
+        "jabatan_master as jabatan"
+      );
+
+    if (!pejabat) {
+      throw new Error("Pejabat not found");
+    } else {
+      return pejabat;
+    }
+  } catch (error) {
+    throw new Error(error);
+  }
+};
+
 module.exports.cariAtasanLangsung = async (currentOpdId) => {
   try {
     const currentUserDepartmentCode = currentOpdId.substring(0, 3);

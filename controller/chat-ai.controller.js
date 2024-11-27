@@ -96,6 +96,7 @@ export const deleteThreadMessages = async (req, res) => {
       threadId,
     };
 
+    await openai.beta.threads.del(threadId);
     const result = await chatHistoryService.deleteThreadMessages(payload);
     res.json(result);
   } catch (error) {

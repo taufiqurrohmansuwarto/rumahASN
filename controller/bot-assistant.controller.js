@@ -25,6 +25,7 @@ export const handleChat = async (req, res) => {
       ...currentUser,
       fetcher: req?.fetcher,
       siasnRequest: req?.siasnRequest,
+      minio: req?.mc,
     };
 
     // Initialize or get thread

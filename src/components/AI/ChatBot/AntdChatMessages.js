@@ -26,6 +26,7 @@ function AntdChatMessages({ style }) {
     queryKey: ["chat-messages", threadId],
     queryFn: () => AssistantAIServices.getThreadMessages({ threadId }),
     enabled: !!threadId,
+    refetchOnWindowFocus: false,
   });
 
   const roles = {
@@ -88,38 +89,50 @@ function AntdChatMessages({ style }) {
             ),
             footer:
               item.role === "user" ? null : (
-                <Flex>
-                  <Tooltip title={copySuccess[item.id] ? "Copied" : "Copy"}>
-                    <Button
-                      size="small"
-                      type="text"
-                      icon={
-                        copySuccess[item.id] ? (
-                          <CheckOutlined style={{ color: "green" }} />
-                        ) : (
-                          <CopyOutlined />
-                        )
-                      }
-                      onClick={() => handleCopy(item)}
-                      style={{
-                        marginInlineEnd: "auto",
-                      }}
-                    />
-                  </Tooltip>
-                  <Tooltip title="Like">
-                    <Button size="small" type="text" icon={<LikeOutlined />} />
-                  </Tooltip>
-                  <Tooltip title="Dislike">
-                    <Button
-                      size="small"
-                      type="text"
-                      icon={<DislikeOutlined />}
-                    />
-                  </Tooltip>
-                  <Tooltip title="Refresh">
-                    <Button size="small" type="text" icon={<SyncOutlined />} />
-                  </Tooltip>
-                </Flex>
+                <>
+                  {item?.loading ? null : (
+                    <Flex>
+                      <Tooltip title={copySuccess[item.id] ? "Copied" : "Copy"}>
+                        <Button
+                          size="small"
+                          type="text"
+                          icon={
+                            copySuccess[item.id] ? (
+                              <CheckOutlined style={{ color: "green" }} />
+                            ) : (
+                              <CopyOutlined />
+                            )
+                          }
+                          onClick={() => handleCopy(item)}
+                          style={{
+                            marginInlineEnd: "auto",
+                          }}
+                        />
+                      </Tooltip>
+                      <Tooltip title="Like">
+                        <Button
+                          size="small"
+                          type="text"
+                          icon={<LikeOutlined />}
+                        />
+                      </Tooltip>
+                      <Tooltip title="Dislike">
+                        <Button
+                          size="small"
+                          type="text"
+                          icon={<DislikeOutlined />}
+                        />
+                      </Tooltip>
+                      <Tooltip title="Refresh">
+                        <Button
+                          size="small"
+                          type="text"
+                          icon={<SyncOutlined />}
+                        />
+                      </Tooltip>
+                    </Flex>
+                  )}
+                </>
               ),
           }))}
         />
