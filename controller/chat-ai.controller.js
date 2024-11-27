@@ -20,10 +20,33 @@ export const getAssistants = async (req, res) => {
   }
 };
 
+export const getAssistantThreads = async (req, res) => {
+  try {
+    const { customId } = req?.user;
+    const assistantId = process.env.ASSISTANT_ID;
+
+    const result = await chatHistoryService.getUserThreads(
+      customId,
+      assistantId
+    );
+
+    const threads = result?.map((item) => ({
+      ...item,
+      label: item.title,
+      key: item.id,
+    }));
+
+    res.json(threads);
+  } catch (error) {
+    console.log(error);
+    res.status(400).json({ code: 400, message: "Internal Server Error" });
+  }
+};
+
 export const userThreads = async (req, res) => {
   try {
     const { customId } = req?.user;
-    const { assistantId } = req?.query;
+    const { assistantId } = req?.query || process.env.ASSISTANT_ID;
 
     if (!assistantId) {
       res.json([]);

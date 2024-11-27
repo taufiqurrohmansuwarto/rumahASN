@@ -1,3 +1,4 @@
+import { AssistantAIServices } from "@/services/assistant-ai.services";
 import {
   BulbOutlined,
   EllipsisOutlined,
@@ -5,9 +6,12 @@ import {
   ShareAltOutlined,
   WarningOutlined,
 } from "@ant-design/icons";
-import { Button, Flex, Space } from "antd";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { Button, Flex, Space, Spin, message } from "antd";
+import { useRouter } from "next/router";
 import Prompts from "../Prompts";
 import Welcome from "../Welcome";
+import ChatSenderWelcome from "./ChatSenderWelcome";
 
 const items = [
   {
@@ -31,43 +35,60 @@ const items = [
         }}
       />
     ),
-    label: "Uncover Background Info",
-    description: "Help me understand the background of this topic.",
-  },
-  {
-    key: "5",
-    icon: (
-      <WarningOutlined
-        style={{
-          color: "#FF4D4F",
-        }}
-      />
-    ),
-    label: "Common Issue Solutions",
-    description: "How to solve common issues? Share some tips!",
+    label: "Siapa Kamu?",
+    description: "Siapa kamu? Apa profesimu? Apa tugasmu?",
   },
 ];
 
 function AntdNewChat() {
+  const queryClient = useQueryClient();
+  const router = useRouter();
+
+  const { mutate: chat, isLoading: isLoadingChat } = useMutation(
+    (data) => AssistantAIServices.sendMessage(data),
+    {
+      onSuccess: (data) => {
+        console.log(data);
+        router.push(`/chat-ai/${data.threadId}`);
+      },
+      onError: () => {
+        message.error("Gagal mengirim pesan");
+      },
+      onSettled: () => {
+        queryClient.invalidateQueries(["threads"]);
+      },
+    }
+  );
+
+  const handleItemClick = (item) => {
+    const threadId = null;
+    const message = item.data?.label;
+    chat({ threadId, message });
+  };
+
   return (
-    <Flex vertical gap={40}>
-      <Welcome
-        extra={
-          <Space>
-            <Button icon={<ShareAltOutlined />} />
-            <Button icon={<EllipsisOutlined />} />
-          </Space>
-        }
-        icon="https://siasn.bkd.jatimprov.go.id:9000/public/bestie-ai-rect-avatar.png"
-        title="Bestie (BKD Expert System & Technical Intelligence Engine)"
-        description="Your HR Bestie, Always Ready!"
-      />
-      <Prompts
-        wrap
-        title="✨ Inspirational Sparks and Marvelous Tips"
-        items={items}
-      />
-    </Flex>
+    <Spin spinning={isLoadingChat}>
+      <Flex vertical gap={40}>
+        <Welcome
+          extra={
+            <Space>
+              <Button icon={<ShareAltOutlined />} />
+              <Button icon={<EllipsisOutlined />} />
+            </Space>
+          }
+          icon="https://siasn.bkd.jatimprov.go.id:9000/public/bestie-ai-rect-avatar.png"
+          title="Bestie (BKD Expert System & Technical Intelligence Engine)"
+          description="Your HR Bestie, Always Ready!"
+        />
+        <Prompts
+          onItemClick={handleItemClick}
+          wrap
+          title="✨ Inspirational Sparks and Marvelous Tips"
+          items={items}
+        />
+        <ChatSenderWelcome send={chat} loading={isLoadingChat} />
+      </Flex>
+    </Spin>
   );
 }
 

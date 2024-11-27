@@ -32,3 +32,7 @@ export const deleteThreadMessages = async ({ assistantId, threadId }) => {
     .delete(`/assistants/${assistantId}/threads/${threadId}/messages`)
     .then((res) => res?.data);
 };
+
+export const getAssistantThreads = async () => {
+  return api.get(`/assistants/threads`).then((res) => res?.data);
+};

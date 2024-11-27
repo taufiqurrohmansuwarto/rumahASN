@@ -1,7 +1,8 @@
 "use client";
 import ChatBotLayout from "@/components/AI/ChatBot/ChatBotLayout";
-import AntDChatBot from "@/components/AI/AntDChatBot";
 import Head from "next/head";
+import AntDChatLayoutContainer from "@/components/AI/ChatBot/AntdChatLayoutContainer";
+import AntdNewChat from "@/components/AI/ChatBot/AntdNewChat";
 
 const ChatAI = () => {
   return (
@@ -9,7 +10,9 @@ const ChatAI = () => {
       <Head>
         <title>Rumah ASN - Bestie AI BKD</title>
       </Head>
-      <AntDChatBot />
+      <AntDChatLayoutContainer>
+        <AntdNewChat />
+      </AntDChatLayoutContainer>
     </>
   );
 };
