@@ -3,7 +3,7 @@ import { GuestBookToken } from "@/components/GuestBook/GuestBookToken";
 import { LogoutOutlined } from "@ant-design/icons";
 import { ProConfigProvider } from "@ant-design/pro-components";
 import { Text } from "@mantine/core";
-import { ConfigProvider, Dropdown, Grid, Layout } from "antd";
+import { ConfigProvider, Dropdown, Grid, Image, Layout } from "antd";
 import idID from "antd/lib/locale/id_ID";
 import { signOut, useSession } from "next-auth/react";
 import dynamic from "next/dynamic";
@@ -69,7 +69,8 @@ function ChatBotLayout({ children, active }) {
       <ProConfigProvider>
         <ProLayout
           loading={status === "loading"}
-          title="BESTIE AI"
+          title=""
+          logo="https://siasn.bkd.jatimprov.go.id:9000/public/bestie-ai-title.png"
           defaultCollapsed={collapsed}
           collapsed={collapsed}
           onCollapse={setCollapsed}

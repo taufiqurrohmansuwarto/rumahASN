@@ -1,5 +1,5 @@
 import Conversations from "../Conversations";
-import { Divider, Spin, Typography, message } from "antd";
+import { Button, Divider, Spin, Typography, message } from "antd";
 import {
   EditOutlined,
   DeleteOutlined,
@@ -65,27 +65,6 @@ function AntdChatSider({
   });
   return (
     <>
-      <Divider orientation="left">
-        <Typography.Text strong>
-          🤖 Assistants ({assistants?.length})
-        </Typography.Text>
-      </Divider>
-      <Spin spinning={loadingAssistants}>
-        <Conversations
-          className={style?.assistants}
-          onActiveChange={(id) => {
-            changeSelectedAssistant(id);
-          }}
-          activeKey={selectedAssistant}
-          items={assistants}
-          defaultActiveKey={selectedAssistant}
-        />
-      </Spin>
-      <Divider orientation="left">
-        <Typography.Text strong>
-          💬 Riwayat Chat ({threads?.length})
-        </Typography.Text>
-      </Divider>
       <Spin spinning={loadingThreads}>
         <Conversations
           onActiveChange={(id) => {
