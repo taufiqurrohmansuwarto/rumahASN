@@ -3,7 +3,7 @@ import ChatBotLayout from "@/components/AI/ChatBot/ChatBotLayout";
 import AntDChatBot from "@/components/AI/AntDChatBot";
 import Head from "next/head";
 
-const ChatAI = () => {
+const ChatAINew = () => {
   return (
     <>
       <Head>
@@ -14,13 +14,13 @@ const ChatAI = () => {
   );
 };
 
-ChatAI.getLayout = (page) => {
+ChatAINew.getLayout = (page) => {
   return <ChatBotLayout active="/chat-ai">{page}</ChatBotLayout>;
 };
 
-ChatAI.Auth = {
+ChatAINew.Auth = {
   action: "manage",
   subject: "tickets",
 };
 
-export default ChatAI;
+export default ChatAINew;

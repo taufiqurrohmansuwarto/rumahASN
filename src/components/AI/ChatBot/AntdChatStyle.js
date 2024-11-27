@@ -100,6 +100,10 @@ const useStyle = createStyles(({ token, css }) => {
         background-clip: padding-box;
       }
     `,
+    addBtn: css`
+      width: calc(100% - 24px);
+      margin: 20px 12px 24px 12px;
+    `,
     conversations: css`
       padding: 0 12px;
       overflow-y: auto;

@@ -1,9 +1,13 @@
 import { AssistantAIServices } from "@/services/assistant-ai.services";
 import useChatStore from "@/store/useChat";
+import { InfoCircleOutlined } from "@ant-design/icons";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { Flex, Space, Typography } from "antd";
 import { useRouter } from "next/router";
 import { useRef, useState } from "react";
 import Sender from "../Sender";
+import Suggestion from "../Suggestion";
+import suggestions from "./suggestions";
 
 function AntdChatSender({ style }) {
   const router = useRouter();
@@ -84,26 +88,64 @@ function AntdChatSender({ style }) {
   const { threadId } = router.query;
   const { assistantId } = router.query;
 
-  const handleChange = (e) => {
-    setMessage(e);
-  };
-
   const handleSubmit = () => {
     send({ message, threadId, assistantId });
     setMessage("");
   };
 
+  const handleSelect = (value) => {
+    setMessage(`[${value}]: `);
+  };
+
   return (
     <div style={{ paddingBottom: "16px" }}>
-      <Sender
-        ref={senderRef}
-        onSubmit={handleSubmit}
-        loading={isLoading}
-        placeholder="Ketik pesan disini..."
-        value={message}
-        onChange={handleChange}
-        className={style?.sender}
-      />
+      <Suggestion block items={suggestions} onSelect={handleSelect}>
+        {({ onTrigger, onKeyDown }) => {
+          return (
+            <Sender
+              submitType="shiftEnter"
+              ref={senderRef}
+              onSubmit={handleSubmit}
+              loading={isLoading}
+              value={message}
+              onChange={(nextVal) => {
+                if (nextVal === "/") {
+                  onTrigger();
+                } else if (!nextVal) {
+                  onTrigger(false);
+                }
+                setMessage(nextVal);
+              }}
+              onKeyDown={onKeyDown}
+              actions={(_, info) => {
+                const { SendButton, LoadingButton, ClearButton } =
+                  info.components;
+                return (
+                  <Space size="small">
+                    <Typography.Text type="secondary">
+                      <small>`Shift + Enter` untuk mengirim pesan</small>
+                    </Typography.Text>
+                    <ClearButton />
+                    {isLoading ? <LoadingButton /> : <SendButton />}
+                  </Space>
+                );
+              }}
+            />
+          );
+        }}
+      </Suggestion>
+
+      <Flex justify="center" align="center" style={{ marginTop: "8px" }}>
+        <Typography.Text type="secondary">
+          <Space>
+            <InfoCircleOutlined />
+            <span>
+              BestieAI dapat melakukan kesalahan. Mohon periksa ulang setiap
+              informasi penting secara mandiri.
+            </span>
+          </Space>
+        </Typography.Text>
+      </Flex>
     </div>
   );
 }
