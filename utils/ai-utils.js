@@ -1,4 +1,5 @@
 const SyncPegawai = require("@/models/sync-pegawai.model");
+const { raw } = require("objection");
 
 function getParentCodes(code) {
   let codes = [];
@@ -23,8 +24,12 @@ module.exports.cariPejabat = async (currentOpdId) => {
         "id as id",
         "nama_master as nama",
         "nip_master as nip",
+        raw(
+          "pangkat_master || '/' || '(' || golongan_master || ')' as golongan"
+        ),
         "jabatan_master as jabatan"
-      );
+      )
+      .withGraphFetched("skpd");
 
     if (!pejabat) {
       throw new Error("Pejabat not found");
@@ -64,9 +69,10 @@ module.exports.cariSeluruhRekanKerja = async (currentOpdId) => {
         "nama_master as nama",
         "nip_master as nip",
         "status_master as status",
-        "jabatan_master as jabatan",
-        "golongan_master as golongan",
-        "pangkat_master as pangkat"
+        raw(
+          "pangkat_master || '/' || '(' || golongan_master || ')' as golongan"
+        ),
+        "jabatan_master as jabatan"
       );
 
     if (!employees) {

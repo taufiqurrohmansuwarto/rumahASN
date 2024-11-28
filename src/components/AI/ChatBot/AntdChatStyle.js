@@ -46,26 +46,41 @@ const useStyle = createStyles(({ token, css }) => {
       z-index: 1;
     `,
     menu: css`
-      background: ${token.colorBgLayout}80;
+      background: ${token.colorBgLayout}90;
       width: 300px;
       min-height: 100%;
       display: flex;
       flex-direction: column;
-      backdrop-filter: blur(10px);
-      border-right: 1px solid ${token.colorBorder}15;
-      box-shadow: inset -1px 0 0 ${token.colorBorder}10;
-      transition: all 0.1s ease;
-      position: relative;
+    `,
+    conversations: css`
+      font-size: 12px;
+      padding: 0 12px;
+      overflow-y: auto;
+      margin-top: 12px;
+      scrollbar-width: thin;
+      scrollbar-color: ${token.colorBorder} transparent;
 
-      &.menuCollapsed {
-        width: 0;
-        padding: 0;
+      &::-webkit-scrollbar {
+        width: 8px;
       }
 
-      @media (max-width: 768px) {
-        position: fixed;
-        z-index: 999;
-        height: 100%;
+      &::-webkit-scrollbar-track {
+        background: transparent;
+        border-radius: 4px;
+      }
+
+      &::-webkit-scrollbar-thumb {
+        background: ${token.colorBorder}80;
+        border-radius: 4px;
+        border: 2px solid transparent;
+        background-clip: padding-box;
+        transition: background-color 0.2s ease;
+      }
+
+      &::-webkit-scrollbar-thumb:hover {
+        background: ${token.colorBorder};
+        border: 2px solid transparent;
+        background-clip: padding-box;
       }
     `,
     assistants: css`
@@ -104,37 +119,7 @@ const useStyle = createStyles(({ token, css }) => {
       width: calc(100% - 24px);
       margin: 20px 12px 24px 12px;
     `,
-    conversations: css`
-      font-size: 12px;
-      padding: 0 12px;
-      overflow-y: auto;
-      margin-top: 12px;
-      scrollbar-width: thin;
-      scrollbar-color: ${token.colorBorder} transparent;
 
-      &::-webkit-scrollbar {
-        width: 8px;
-      }
-
-      &::-webkit-scrollbar-track {
-        background: transparent;
-        border-radius: 4px;
-      }
-
-      &::-webkit-scrollbar-thumb {
-        background: ${token.colorBorder}80;
-        border-radius: 4px;
-        border: 2px solid transparent;
-        background-clip: padding-box;
-        transition: background-color 0.2s ease;
-      }
-
-      &::-webkit-scrollbar-thumb:hover {
-        background: ${token.colorBorder};
-        border: 2px solid transparent;
-        background-clip: padding-box;
-      }
-    `,
     chat: css`
       height: 100%;
       width: 100%;
