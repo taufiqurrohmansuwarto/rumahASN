@@ -12,6 +12,20 @@ class SyncPegawai extends Model {
     return "sync_pegawai";
   }
 
+  static get relationMappings() {
+    const syncUnorMaster = require("@/models/sync-unor-master.model");
+    return {
+      skpd: {
+        relation: Model.BelongsToOneRelation,
+        modelClass: syncUnorMaster,
+        join: {
+          from: "sync_pegawai.skpd_id",
+          to: "sync_unor_master.id",
+        },
+      },
+    };
+  }
+
   static get relationMappings() {}
 }
 
