@@ -8,6 +8,7 @@ import {
 import {
   IconCalendarUser,
   IconGridDots,
+  IconUserCircle,
   IconUserSquareRounded,
 } from "@tabler/icons-react";
 import { Col, Grid, Popover, Row, Typography } from "antd";
@@ -59,6 +60,13 @@ const applist = [
     title: "Klinik ASN",
     color: "#34A853",
     link: "#",
+    userType: ["PNS", "PPPK"],
+  },
+  {
+    icon: <IconUserCircle />,
+    title: "Pengadaan",
+    color: "#34A853",
+    link: "/pengadaan-asn/main",
     userType: ["PNS", "PPPK"],
   },
   {
