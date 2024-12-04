@@ -2,6 +2,48 @@ import MejaRegistrasi from "@/models/pengadaan_asn/meja_registrasi.model";
 import { toString } from "lodash";
 const xlsx = require("xlsx");
 
+export const tandaiPesertaHadir = async (req, res) => {
+  try {
+    const { noPeserta } = req?.query;
+    const { customId } = req?.user;
+
+    if (!noPeserta) {
+      res.status(400).json({ message: "No peserta is required" });
+    } else {
+      await MejaRegistrasi.query().where("nomor_peserta", noPeserta).update({
+        status: "hadir",
+        updated_by: customId,
+      });
+
+      res.status(200).json({ message: "success" });
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+export const tandaiPesertaTidakHadir = async (req, res) => {
+  try {
+    const { noPeserta } = req?.query;
+    const { customId } = req?.user;
+
+    if (!noPeserta) {
+      res.status(400).json({ message: "No peserta is required" });
+    } else {
+      await MejaRegistrasi.query().where("nomor_peserta", noPeserta).update({
+        status: "tidak_hadir",
+        updated_by: customId,
+      });
+
+      res.status(200).json({ message: "success" });
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
 export const findMejaRegistrasi = async (req, res) => {
   try {
     const { noPeserta: no_peserta } = req?.query;
@@ -22,7 +64,19 @@ export const findMejaRegistrasi = async (req, res) => {
 
 export const findAllMejaRegistrasi = async (req, res) => {
   try {
-    const result = await MejaRegistrasi.query().limit(10);
+    const { limit, page, keyword, status } = req?.query;
+
+    const result = await MejaRegistrasi.query()
+      .where((builder) => {
+        if (keyword) {
+          builder.where("nomor_peserta", "like", `%${keyword}%`);
+        }
+        if (status) {
+          builder.where("status", status);
+        }
+      })
+      .page(page - 1, limit);
+
     res.json(result);
   } catch (error) {
     console.log(error);
