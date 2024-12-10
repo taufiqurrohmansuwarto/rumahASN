@@ -800,7 +800,14 @@ function CompareJabatanByNip({ nip }) {
       title: "Jabatan",
       key: "nama_jabatan",
       responsive: ["sm"],
-      render: (row) => <div>{namaJabatan(row)}</div>,
+      render: (row) => (
+        <div>
+          <Space>
+            {namaJabatan(row)}
+            {row?.subJabatanDetail?.nama}
+          </Space>
+        </div>
+      ),
     },
 
     {
