@@ -83,7 +83,7 @@ const applist = [
   },
 ];
 
-const MegaMenu = () => {
+function MegaMenu() {
   const screens = useBreakpoint();
   const router = useRouter();
   const { data: session } = useSession();
@@ -149,6 +149,6 @@ const MegaMenu = () => {
       />
     </Popover>
   );
-};
+}
 
 export default MegaMenu;
