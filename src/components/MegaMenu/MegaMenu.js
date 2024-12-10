@@ -1,3 +1,4 @@
+import { AppstoreOutlined } from "@ant-design/icons";
 import {
   IconBrain,
   IconMailbox,
@@ -7,7 +8,6 @@ import {
 } from "@tabler/icons";
 import {
   IconCalendarUser,
-  IconGridDots,
   IconUserCircle,
   IconUserSquareRounded,
 } from "@tabler/icons-react";
@@ -138,7 +138,7 @@ const MegaMenu = () => {
         padding: 16,
       }}
     >
-      <IconGridDots
+      <AppstoreOutlined
         color="black"
         size={36}
         style={{ cursor: "pointer", marginLeft: 16 }}
