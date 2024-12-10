@@ -23,8 +23,8 @@ const items = [
         }}
       />
     ),
-    label: "Cek Status Usulan SIASN",
-    description: "Yuk cek status usulan SIASN kamu sekarang!",
+    label: "Status Usulan SIASN",
+    description: "Apakah usulan SIASN saya sudah selesai?",
   },
   {
     key: "2",
@@ -47,15 +47,15 @@ const items = [
         }}
       />
     ),
-    label: "Buat SPT!",
+    label: "Surat Peritah Tugas",
     description: "Buatkan SPT/Surat Perintah Tugas",
   },
   {
     key: "4",
     icon: (
-      <BulbOutlined
+      <WarningOutlined
         style={{
-          color: "#FFD700",
+          color: "#FF0000",
         }}
       />
     ),
@@ -65,9 +65,9 @@ const items = [
   {
     key: "5",
     icon: (
-      <BulbOutlined
+      <InfoCircleOutlined
         style={{
-          color: "#FFD700",
+          color: "#1890FF",
         }}
       />
     ),
@@ -99,7 +99,7 @@ function AntdNewChat() {
 
   const handleItemClick = (item) => {
     const threadId = null;
-    const message = item.data?.label;
+    const message = item.data?.description;
     chat({ threadId, message });
   };
 
