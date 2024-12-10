@@ -88,49 +88,53 @@ const MegaMenu = () => {
   const router = useRouter();
   const { data: session } = useSession();
 
-  const userType = session?.user?.status_kepegawaian;
-
   const handleLink = (link) => {
     router.push(link);
   };
 
-  const content = (
-    <Row gutter={[16, 16]}>
-      {applist.map((app, index) => (
-        <Col key={index} xs={6} sm={6} md={6} lg={6} xl={6}>
-          <a
-            style={{ textDecoration: "none" }}
-            onClick={() => handleLink(app.link)}
-          >
-            <div
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-              }}
-            >
-              <span style={{ fontSize: 24, color: app.color, marginBottom: 4 }}>
-                {app.icon}
-              </span>
-              <Text
-                style={{
-                  fontSize: 12,
-                  color: "#5f6368",
-                  textAlign: "center",
-                }}
-              >
-                {app.title}
-              </Text>
-            </div>
-          </a>
-        </Col>
-      ))}
-    </Row>
-  );
-
   return (
     <Popover
-      content={content}
+      content={
+        <>
+          <Row gutter={[16, 16]}>
+            {applist.map((app, index) => (
+              <Col key={index} xs={6} sm={6} md={6} lg={6} xl={6}>
+                <a
+                  style={{ textDecoration: "none" }}
+                  onClick={() => handleLink(app.link)}
+                >
+                  <div
+                    style={{
+                      display: "flex",
+                      flexDirection: "column",
+                      alignItems: "center",
+                    }}
+                  >
+                    <span
+                      style={{
+                        fontSize: 24,
+                        color: app.color,
+                        marginBottom: 4,
+                      }}
+                    >
+                      {app.icon}
+                    </span>
+                    <Text
+                      style={{
+                        fontSize: 12,
+                        color: "#5f6368",
+                        textAlign: "center",
+                      }}
+                    >
+                      {app.title}
+                    </Text>
+                  </div>
+                </a>
+              </Col>
+            ))}
+          </Row>
+        </>
+      }
       trigger="click"
       placement={screens.xs ? "bottom" : "bottomLeft"}
       overlayInnerStyle={{
