@@ -85,7 +85,6 @@ function AntdNewChat() {
     (data) => AssistantAIServices.sendMessage(data),
     {
       onSuccess: (data) => {
-        console.log(data);
         router.push(`/chat-ai/${data.threadId}`);
       },
       onError: () => {

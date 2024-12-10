@@ -1,3 +1,4 @@
+import AntdCallToActionAI from "@/components/AI/ChatBot/AntdCallToActionAI";
 import AllTaskFilter from "@/components/Filter/AllTaskFilter";
 import UnAnswerFilter from "@/components/Filter/UnAnswerFilter";
 import Layout from "@/components/Layout";
@@ -514,6 +515,7 @@ const BerandaBKD = () => {
               }
             >
               <Stack>
+                <AntdCallToActionAI />
                 <TabsJobs />
               </Stack>
             </Card>
