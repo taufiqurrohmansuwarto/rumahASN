@@ -1,3 +1,4 @@
+import MegaMenuTop from "@/components/MegaMenu/MegaMenuTop";
 import { currentUserRole } from "@/services/current-user.services";
 import {
   AntDesignOutlined,
@@ -26,12 +27,10 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import { useState } from "react";
 import { userRoutes } from "../routes";
-import MegaMenu from "@/components/MegaMenu/MegaMenuTop";
 import NotifikasiASNConnect from "./Notification/NotifikasiASNConnect";
 import NotifikasiForumKepegawaian from "./Notification/NotifikasiForumKepegawaian";
 import NotifikasiKepegawaian from "./Notification/NotifikasiKepegawaian";
 import NotifikasiPrivateMessage from "./Notification/NotifikasiPrivateMessage";
-
 const ProLayout = dynamic(
   () => import("@ant-design/pro-components").then((mod) => mod?.ProLayout),
   {
@@ -611,7 +610,7 @@ function Layout({ children, active, collapsed = true }) {
               url="forum-kepegawaian"
               title="Inbox Forum Kepegawaian"
             />,
-            <MegaMenu key="mega-menu" />,
+            <MegaMenuTop key="mega-menu" />,
           ];
         }}
         // appList={appList(data?.user)}
