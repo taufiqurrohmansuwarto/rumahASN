@@ -4,18 +4,112 @@ import axios from "axios";
 import { TemplateHandler } from "easy-template-x";
 import { uploadFileUsulan } from "./index";
 import { dataUtama } from "./siasn-utils";
+// nanoid
+import { nanoid } from "nanoid";
+
+// mendapatkan file docx dari minio
+// terdapat 3 file pada spt, individu, pasangan, dan kelompok
+
+const getUrlDocx = async (dataPeserta) => {
+  let url = "";
+  if (dataPeserta?.length === 1) {
+    url = `https://siasn.bkd.jatimprov.go.id:9000/public/spt-personal.docx`;
+  } else if (dataPeserta?.length === 2) {
+    url = `https://siasn.bkd.jatimprov.go.id:9000/public/spt-pasangan.docx`;
+  } else if (dataPeserta?.length > 2) {
+    url = `https://siasn.bkd.jatimprov.go.id:9000/public/spt-kelompok.docx`;
+  }
+
+  return url;
+};
+
+const serializeData = (data) => {
+  let dataSerialized = {};
+  const peserta = data?.peserta;
+  const pejabat = data?.pejabat;
+
+  if (peserta?.length === 1) {
+    dataSerialized = {
+      nomorSPT: data?.nomorSPT,
+      dsr: data?.dasarSPT?.map((item, index) => ({
+        ...item,
+        no: index + 1 + 4,
+      })),
+      deskripsiKegiatanSPT: data?.deskripsiKegiatanSPT,
+      judulKegiatanSPT: data?.judulKegiatanSPT,
+      namaPertama: peserta[0]?.nama,
+      nipPertama: peserta[0]?.nip,
+      jabatanPertama: peserta[0]?.jabatan,
+      golPertama: peserta[0]?.golongan,
+      tglSPT: data?.tglSPT,
+      jabatanPenandatangan: pejabat?.jabatan,
+      unorPenandatangan: pejabat?.unor || pejabat?.skpd,
+      namaPenandatangan: pejabat?.nama,
+      golPenandatangan: pejabat?.golongan,
+      nipPenandatangan: pejabat?.nip,
+    };
+  } else if (peserta?.length === 2) {
+    dataSerialized = {
+      nomorSPT: data?.nomorSPT,
+      dsr: data?.dasarSPT?.map((item, index) => ({
+        ...item,
+        no: index + 1 + 4,
+      })),
+      deskripsiKegiatanSPT: data?.deskripsiKegiatanSPT,
+      judulKegiatanSPT: data?.judulKegiatanSPT,
+      namaPertama: peserta[0]?.nama,
+      nipPertama: peserta[0]?.nip,
+      jabatanPertama: peserta[0]?.jabatan,
+      golPertama: peserta[0]?.golongan,
+      namaKedua: peserta[1]?.nama,
+      nipKedua: peserta[1]?.nip,
+      jabatanKedua: peserta[1]?.jabatan,
+      golKedua: peserta[1]?.golongan,
+      tglSPT: data?.tglSPT,
+      jabatanPenandatangan: pejabat?.jabatan,
+      unorPenandatangan: pejabat?.unor || pejabat?.skpd,
+      namaPenandatangan: pejabat?.nama,
+      golPenandatangan: pejabat?.golongan,
+      nipPenandatangan: pejabat?.nip,
+    };
+  } else if (peserta?.length > 2) {
+    dataSerialized = {
+      nomorSPT: data?.nomorSPT,
+      dsr: data?.dasarSPT?.map((item, index) => ({
+        ...item,
+        no: index + 1 + 4,
+      })),
+      deskripsiKegiatanSPT: data?.deskripsiKegiatanSPT,
+      judulKegiatanSPT: data?.judulKegiatanSPT,
+      peserta: peserta?.map((item, index) => ({
+        no: index + 1,
+        ...item,
+      })),
+      tglSPT: data?.tglSPT,
+      jabatanPenandatangan: pejabat?.jabatan,
+      unorPenandatangan: pejabat?.unor || pejabat?.skpd,
+      namaPenandatangan: pejabat?.nama,
+      golPenandatangan: pejabat?.golongan,
+      nipPenandatangan: pejabat?.nip,
+    };
+  }
+
+  return dataSerialized;
+};
 
 export const generateDocument = async (data, minio) => {
   try {
-    const doc = await axios.get(
-      "https://siasn.bkd.jatimprov.go.id:9000/public/docx-something.docx",
-      {
-        responseType: "arraybuffer",
-      }
-    );
+    console.log("generate document spt");
+    const dataSerialized = serializeData(data);
+
+    const urlDocx = await getUrlDocx(data?.peserta);
+
+    const doc = await axios.get(urlDocx, {
+      responseType: "arraybuffer",
+    });
 
     const template = new TemplateHandler();
-    const result = await template.process(doc.data, data);
+    const result = await template.process(doc.data, dataSerialized);
 
     // file must containt file size and mimetype
     const fileBuffer = Buffer.from(result, "utf-8");
@@ -29,7 +123,7 @@ export const generateDocument = async (data, minio) => {
       size: fileSize,
     };
 
-    const filename = `testing.docx`;
+    const filename = `${nanoid()}.docx`;
 
     await uploadFileUsulan(minio, filename, file);
     return `https://siasn.bkd.jatimprov.go.id:9000/public/${filename}`;
@@ -61,9 +155,9 @@ export const executeToolCall = async (functionName, args) => {
           throw new Error("Failed to get pejabat");
         }
       },
-      generate_document_spt: async ({ type, data }) => {
+      generate_document_spt: async ({ data }) => {
         try {
-          console.log(data);
+          console.log("execute generate document spt");
           const url = await generateDocument(data, minio);
           return {
             url,

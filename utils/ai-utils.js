@@ -22,14 +22,17 @@ module.exports.cariPejabat = async (currentOpdId) => {
       .whereIn("skpd_id", parentCodes)
       .select(
         "id as id",
-        "nama_master as nama",
+        raw(
+          "nama_master || ' ' || gelar_depan_master || ' ' || gelar_belakang_master as nama"
+        ),
         "nip_master as nip",
         raw(
           "pangkat_master || '/' || '(' || golongan_master || ')' as golongan"
         ),
-        "jabatan_master as jabatan"
+        "jabatan_master as jabatan",
+        "opd_master as unor"
       )
-      .withGraphFetched("skpd");
+      .andWhere("jabatan_asn", "=", "JABATAN ADMINISTRATOR");
 
     if (!pejabat) {
       throw new Error("Pejabat not found");
@@ -37,6 +40,7 @@ module.exports.cariPejabat = async (currentOpdId) => {
       return pejabat;
     }
   } catch (error) {
+    console.log(error);
     throw new Error(error);
   }
 };
@@ -66,7 +70,9 @@ module.exports.cariSeluruhRekanKerja = async (currentOpdId) => {
       .where("skpd_id", "ilike", `${currentUserDepartmentCode}%`)
       .select(
         "id as id",
-        "nama_master as nama",
+        raw(
+          "gelar_depan_master || ' ' || nama_master || ' ' || gelar_belakang_master as nama"
+        ),
         "nip_master as nip",
         "status_master as status",
         raw(
