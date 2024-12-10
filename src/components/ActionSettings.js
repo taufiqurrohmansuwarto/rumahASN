@@ -1,4 +1,4 @@
-import MegaMenu from "@/components/MegaMenu/MegaMenu";
+import MegaMenu from "@/components/MegaMenu/MegaMenuTop";
 import NotifikasiASNConnect from "@/components/Notification/NotifikasiASNConnect";
 import NotifikasiForumKepegawaian from "@/components/Notification/NotifikasiForumKepegawaian";
 import NotifikasiKepegawaian from "@/components/Notification/NotifikasiKepegawaian";
