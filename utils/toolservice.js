@@ -3,6 +3,7 @@ import { getDataUtamaMaster } from "@/utils/master.utils";
 import axios from "axios";
 import { TemplateHandler } from "easy-template-x";
 import { uploadFileUsulan } from "./index";
+import { dataUtama } from "./siasn-utils";
 
 export const generateDocument = async (data, minio) => {
   try {
@@ -73,7 +74,10 @@ export const executeToolCall = async (functionName, args) => {
       },
       get_data_utama_siasn: async () => {
         try {
+          console.log("kesini");
+          const siasn = await dataUtama(siasnRequest, employee_number);
           const result = await getDataUtamaMaster(fetcher, employee_number);
+          console.log({ siasn, result });
           return result;
         } catch (error) {
           console.log(error);

@@ -746,6 +746,7 @@ const getJabatan = async (req, res) => {
         ],
         ["desc"]
       );
+
       res.json(hasil);
     }
   } catch (error) {
@@ -777,7 +778,37 @@ const getJabatanByNip = async (req, res) => {
         ],
         ["desc"]
       );
-      res.json(hasil);
+
+      // empty string should be eliminated and '0' should be eliminated
+      const subJabatanId = hasil
+        ?.map((d) => d?.subJabatanId)
+        ?.filter((d) => d !== "" && d !== "0");
+
+      let promise = [];
+
+      subJabatanId?.forEach((d) => {
+        promise.push(
+          axios
+            .get(
+              `https://siasn.bkd.jatimprov.go.id/pemprov-api/vendor/reference/detail-sub-jabatan/${d}`
+            )
+            .then((res) => res?.data)
+        );
+      });
+
+      const result = await Promise.all(promise);
+
+      const mappingAkhir = hasil?.map((d) => {
+        const subJabatan = result?.find(
+          (x) => x?.id?.toString() === d?.subJabatanId?.toString()
+        );
+        return {
+          ...d,
+          subJabatanDetail: subJabatan || null,
+        };
+      });
+
+      res.json(mappingAkhir);
     }
   } catch (error) {
     console.log(error);
