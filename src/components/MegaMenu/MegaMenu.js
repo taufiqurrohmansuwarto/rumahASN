@@ -14,8 +14,6 @@ import {
 import { Col, Grid, Popover, Row, Typography } from "antd";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
-import React from "react";
-
 const { useBreakpoint } = Grid;
 const { Text } = Typography;
 
@@ -98,40 +96,35 @@ const MegaMenu = () => {
 
   const content = (
     <Row gutter={[16, 16]}>
-      {applist.map((app, index) => {
-        const isVisible = app.userType.includes(userType);
-
-        if (!isVisible) return null;
-        return (
-          <Col key={index} xs={6} sm={6} md={6} lg={6} xl={6}>
-            <a
-              style={{ textDecoration: "none" }}
-              onClick={() => handleLink(app.link)}
+      {applist.map((app, index) => (
+        <Col key={index} xs={6} sm={6} md={6} lg={6} xl={6}>
+          <a
+            style={{ textDecoration: "none" }}
+            onClick={() => handleLink(app.link)}
+          >
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+              }}
             >
-              <div
+              <span style={{ fontSize: 24, color: app.color, marginBottom: 4 }}>
+                {app.icon}
+              </span>
+              <Text
                 style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center",
+                  fontSize: 12,
+                  color: "#5f6368",
+                  textAlign: "center",
                 }}
               >
-                {React.cloneElement(app.icon, {
-                  style: { fontSize: 24, color: app.color, marginBottom: 4 },
-                })}
-                <Text
-                  style={{
-                    fontSize: 12,
-                    color: "#5f6368",
-                    textAlign: "center",
-                  }}
-                >
-                  {app.title}
-                </Text>
-              </div>
-            </a>
-          </Col>
-        );
-      })}
+                {app.title}
+              </Text>
+            </div>
+          </a>
+        </Col>
+      ))}
     </Row>
   );
 
