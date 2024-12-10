@@ -29,14 +29,51 @@ const items = [
   {
     key: "2",
     icon: (
-      <InfoCircleOutlined
+      <BulbOutlined
         style={{
-          color: "#1890FF",
+          color: "#FFD700",
         }}
       />
     ),
-    label: "Siapa Kamu?",
-    description: "Siapa kamu? Apa profesimu? Apa tugasmu?",
+    label: "Pangkat",
+    description: "Berapa kali periodesasi kenaikan pangkat?",
+  },
+  {
+    key: "3",
+    icon: (
+      <BulbOutlined
+        style={{
+          color: "#FFD700",
+        }}
+      />
+    ),
+    label: "Buat SPT!",
+    description: "Buatkan SPT/Surat Perintah Tugas",
+  },
+  {
+    key: "4",
+    icon: (
+      <BulbOutlined
+        style={{
+          color: "#FFD700",
+        }}
+      />
+    ),
+    label: "Hukuman Disiplin",
+    description: "Apakah selingkuh itu termasuk hukuman disiplin berat?",
+  },
+  {
+    key: "5",
+    icon: (
+      <BulbOutlined
+        style={{
+          color: "#FFD700",
+        }}
+      />
+    ),
+    label: "Usulan Formasi",
+    description:
+      "Berapa usulan formasi Pranata Komputer di Pemerintah Provinsi Jawa Timur?",
   },
 ];
 
