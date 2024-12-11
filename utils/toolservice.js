@@ -179,6 +179,13 @@ export const executeToolCall = async (functionName, args) => {
           throw new Error("Failed to generate peserta spt");
         }
       },
+      generate_document_lupa_absen: async ({ data }) => {
+        try {
+          return "https://siasn.bkd.jatimprov.go.id:9000/public/dokumen-lupa_absen.docx";
+        } catch (error) {
+          throw new Error("Failed to generate document lupa absen");
+        }
+      },
       get_data_pengguna: async () => {
         try {
           const result = await getPengguna(employee_number);
