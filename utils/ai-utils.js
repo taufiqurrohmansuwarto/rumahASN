@@ -14,6 +14,30 @@ function getParentCodes(code) {
   return codes;
 }
 
+module.exports.getPengguna = async (employeeNumber) => {
+  try {
+    const result = await SyncPegawai.query()
+      .where("nip_master", employeeNumber)
+      .select(
+        "id as id",
+        raw(
+          "nama_master || ' ' || gelar_depan_master || ' ' || gelar_belakang_master as nama"
+        ),
+        "nip_master as nip",
+        raw(
+          "pangkat_master || '/' || '(' || golongan_master || ')' as golongan"
+        ),
+        "jabatan_master as jabatan",
+        "opd_master as unor"
+      )
+      .first();
+    return result;
+  } catch (error) {
+    console.log(error);
+    throw new Error(error);
+  }
+};
+
 module.exports.cariPejabat = async (currentOpdId) => {
   // misal kode 1230101 looping menjadi 12301 dan 123
   const parentCodes = getParentCodes(currentOpdId);
@@ -50,6 +74,18 @@ module.exports.cariAtasanLangsung = async (currentOpdId) => {
     const currentUserDepartmentCode = currentOpdId.substring(0, 3);
     const dataAtasan = await SyncPegawai.query()
       .where("skpd_id", currentUserDepartmentCode)
+      .select(
+        "id as id",
+        raw(
+          "gelar_depan_master || ' ' || nama_master || ' ' || gelar_belakang_master as nama"
+        ),
+        "nip_master as nip",
+        "status_master as status",
+        raw(
+          "pangkat_master || '/' || '(' || golongan_master || ')' as golongan"
+        ),
+        "jabatan_master as jabatan"
+      )
       .first();
 
     if (!dataAtasan) {

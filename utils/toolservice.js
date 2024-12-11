@@ -1,4 +1,9 @@
-import { cariPejabat, cariSeluruhRekanKerja } from "@/utils/ai-utils";
+import {
+  cariAtasanLangsung,
+  cariPejabat,
+  cariSeluruhRekanKerja,
+  getPengguna,
+} from "@/utils/ai-utils";
 import { getDataUtamaMaster } from "@/utils/master.utils";
 import axios from "axios";
 import { TemplateHandler } from "easy-template-x";
@@ -139,6 +144,14 @@ export const executeToolCall = async (functionName, args) => {
 
   try {
     const availableFunctions = {
+      get_atasan_langsung: async () => {
+        try {
+          const result = await cariAtasanLangsung(organization_id);
+          return result;
+        } catch (error) {
+          throw new Error("Failed to get atasan langsung");
+        }
+      },
       get_peserta_spt: async ({ names }) => {
         try {
           const result = await cariSeluruhRekanKerja(organization_id);
@@ -166,12 +179,17 @@ export const executeToolCall = async (functionName, args) => {
           throw new Error("Failed to generate peserta spt");
         }
       },
+      get_data_pengguna: async () => {
+        try {
+          const result = await getPengguna(employee_number);
+          return result;
+        } catch (error) {
+          throw new Error("Failed to get data pengguna");
+        }
+      },
       get_data_utama_siasn: async () => {
         try {
-          console.log("kesini");
-          const siasn = await dataUtama(siasnRequest, employee_number);
           const result = await getDataUtamaMaster(fetcher, employee_number);
-          console.log({ siasn, result });
           return result;
         } catch (error) {
           console.log(error);
