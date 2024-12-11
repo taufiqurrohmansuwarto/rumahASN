@@ -233,6 +233,7 @@ export const executeToolCall = async (functionName, args) => {
       generate_document_lupa_absen: async ({ data }) => {
         try {
           console.log("execute generate document lupa absen");
+          console.log(data);
           let promises = [];
           data?.dataLupaAbsen.forEach((item) => {
             promises.push(
