@@ -11,6 +11,57 @@ import { uploadFileUsulan } from "./index";
 import { dataUtama } from "./siasn-utils";
 // nanoid
 import { nanoid } from "nanoid";
+import dayjs from "dayjs";
+dayjs.locale("id");
+
+const urlDocxLupaAbsen =
+  "https://siasn.bkd.jatimprov.go.id:9000/public/dokumen-lupa_absen.docx";
+
+const generateDocumentLupaAbsen = async (
+  minio,
+  tglPembuatan,
+  pembuat,
+  atasan,
+  tanggalLupaAbsen
+) => {
+  const urlDocx = urlDocxLupaAbsen;
+
+  const currentData = {
+    tglPembuatan: dayjs(tglPembuatan).format("DD MMMM YYYY"),
+    hari: dayjs(tanggalLupaAbsen).format("dddd"),
+    tanggal: dayjs(tanggalLupaAbsen).format("DD MMMM YYYY"),
+    nama: pembuat?.nama,
+    nip: pembuat?.nip,
+    jabatan: pembuat?.jabatan,
+    unitKerja: pembuat?.unit_organisasi,
+    namaAtasan: atasan?.nama,
+    nipAtasan: atasan?.nip,
+    jabatanAtasan: atasan?.jabatan,
+    unitKerjaAtasan: atasan?.unit_organisasi,
+  };
+
+  const doc = await axios.get(urlDocx, {
+    responseType: "arraybuffer",
+  });
+
+  const template = new TemplateHandler();
+  const result = await template.process(doc.data, currentData);
+
+  const fileBuffer = Buffer.from(result, "utf-8");
+  const fileMimeType =
+    "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+  const fileSize = fileBuffer.length;
+
+  const file = {
+    buffer: fileBuffer,
+    mimetype: fileMimeType,
+    size: fileSize,
+  };
+
+  const filename = `temp_${nanoid()}-lupa-absen.docx`;
+  await uploadFileUsulan(minio, filename, file);
+  return `https://siasn.bkd.jatimprov.go.id:9000/public/${filename}`;
+};
 
 // mendapatkan file docx dari minio
 // terdapat 3 file pada spt, individu, pasangan, dan kelompok
@@ -128,7 +179,7 @@ export const generateDocument = async (data, minio) => {
       size: fileSize,
     };
 
-    const filename = `${nanoid()}.docx`;
+    const filename = `temp_${nanoid()}-spt.docx`;
 
     await uploadFileUsulan(minio, filename, file);
     return `https://siasn.bkd.jatimprov.go.id:9000/public/${filename}`;
@@ -181,7 +232,23 @@ export const executeToolCall = async (functionName, args) => {
       },
       generate_document_lupa_absen: async ({ data }) => {
         try {
-          return "https://siasn.bkd.jatimprov.go.id:9000/public/dokumen-lupa_absen.docx";
+          console.log("execute generate document lupa absen");
+          let promises = [];
+          data?.dataLupaAbsen.forEach((item) => {
+            promises.push(
+              generateDocumentLupaAbsen(
+                minio,
+                data?.tglPembuatan,
+                data?.informasiPengguna,
+                data?.informasiAtasan,
+                item?.tanggal
+              )
+            );
+          });
+
+          const result = await Promise.all(promises);
+
+          return result;
         } catch (error) {
           throw new Error("Failed to generate document lupa absen");
         }
