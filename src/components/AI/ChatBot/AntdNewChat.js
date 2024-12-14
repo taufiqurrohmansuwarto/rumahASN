@@ -11,6 +11,7 @@ import { Button, Flex, Space, Spin, message } from "antd";
 import { useRouter } from "next/router";
 import Prompts from "../Prompts";
 import Welcome from "../Welcome";
+import AntdTesting from "./AntdTesting";
 import ChatSenderWelcome from "./ChatSenderWelcome";
 
 const items = [
@@ -122,6 +123,7 @@ function AntdNewChat() {
           title="✨ Inspirational Sparks and Marvelous Tips"
           items={items}
         />
+        <AntdTesting />
         <ChatSenderWelcome send={chat} loading={isLoadingChat} />
       </Flex>
     </Spin>

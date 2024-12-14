@@ -4,6 +4,11 @@ const api = axios.create({
   baseURL: "/helpdesk/api/bot",
 });
 
+const fetchApi = axios.create({
+  baseURL: "/helpdesk/api",
+  adapter: "fetch",
+});
+
 // list all assistants
 const getAssistants = async () => {
   return api.get("/assistants").then((res) => res?.data);
@@ -41,6 +46,14 @@ export const getAssistantThreads = async () => {
   return api.get(`/assistants/threads`).then((res) => res?.data);
 };
 
+export const testChatCompletion = async () => {
+  return await fetchApi
+    .get(`/testing`, {
+      responseType: "stream",
+    })
+    .then((res) => res?.data);
+};
+
 export const AssistantAIServices = {
   getAssistants,
   getThreads,
@@ -48,4 +61,5 @@ export const AssistantAIServices = {
   getThreadMessages,
   deleteThreadMessages,
   getAssistantThreads,
+  testChatCompletion,
 };

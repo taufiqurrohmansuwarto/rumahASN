@@ -1,5 +1,6 @@
 import { cachedDataPegawai } from "@/utils/cached-data";
 import { createRedisInstance } from "@/utils/redis";
+import OpenAI from "openai";
 
 export const testGenerate = async (req, res) => {
   try {
@@ -42,6 +43,32 @@ export const testGenerate = async (req, res) => {
     } else {
       res.json(JSON.parse(dataPegawai));
     }
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: error.message });
+  }
+};
+
+export const testChatCompletion = async (req, res) => {
+  try {
+    const openai = new OpenAI();
+    const stream = await openai.chat.completions.create({
+      model: "gpt-3.5-turbo",
+      messages: [{ role: "user", content: "Bagaimana cara menghitung gaji?" }],
+      stream: true,
+    });
+
+    res.setHeader("Content-Type", "text/event-stream");
+    res.setHeader("Cache-Control", "no-cache");
+    res.setHeader("Connection", "keep-alive");
+
+    for await (const chunk of stream) {
+      const text = chunk.choices[0]?.delta?.content;
+      if (text) {
+        res.write(text);
+      }
+    }
+    res.end();
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: error.message });

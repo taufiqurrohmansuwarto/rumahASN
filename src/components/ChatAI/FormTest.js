@@ -8,12 +8,13 @@ export default function FormTest() {
     useAssistant({
       api: "/helpdesk/api/assistant/test",
       body: {
-        user_id: session?.user?.id,
+        user: session?.user,
       },
-      credentials: "same-origin",
     });
+
   return (
     <div>
+      {JSON.stringify({ messages, status })}
       {messages.map((m) => (
         <div key={m.id}>
           <strong>{`${m.role}: `}</strong>

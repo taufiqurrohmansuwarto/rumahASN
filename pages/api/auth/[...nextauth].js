@@ -440,6 +440,7 @@ export const authOptions = {
     },
   },
   theme: "light",
+
   secret: process.env.SECRET,
   jwt: {
     secret: process.env.SECRET,
