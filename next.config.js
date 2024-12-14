@@ -63,9 +63,6 @@ const hashOnlyIdent = (context, _, exportName) =>
     .replace(/^(-?\d|--)/, "_$1");
 
 const nextConfig = {
-  experimental: {
-    forceSwcTransforms: true,
-  },
   eslint: {
     ignoreDuringBuilds: true,
   },
@@ -74,6 +71,8 @@ const nextConfig = {
     defaultLocale: "en",
   },
   experimental: {
+    runtime: "experimental-edge",
+    forceSwcTransforms: true,
     scrollRestoration: true,
     esmExternals: "loose",
   },
