@@ -104,20 +104,16 @@ export const assistant = async (req, res) => {
   const input = await req.json();
   const assistantId = process.env.ASSISTANT_ID;
 
-  // Ambil token NextAuth
-  const currentToken = await getToken({
-    req,
-    cookieName: prod
-      ? "__Secure-next-auth.session-token"
-      : "next-auth.session-token",
-    secret: process.env.SECRET,
-    raw: true,
-  });
+  const cookies = req?.headers?.get("cookie");
+  const sessionToken = getCookieValue(
+    cookies,
+    prod ? "__Secure-next-auth.session-token" : "next-auth.session-token"
+  );
 
-  console.log({ currentToken });
+  console.log({ sessionToken });
 
   const token = await decode({
-    token: currentToken,
+    token: sessionToken,
     secret: process.env.SECRET,
   });
 
