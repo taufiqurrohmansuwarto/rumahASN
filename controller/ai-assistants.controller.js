@@ -78,15 +78,26 @@ export const assistant = async (req, res) => {
   // Parse the request body
   const input = await req.json();
   const assistantId = process.env.ASSISTANT_ID;
-
-  const token = await getToken({
+  let params = {
     req,
     cookieName:
       process.env.NODE_ENV === "development"
         ? "next-auth.session-token"
         : "__Secure-next-auth.session-token",
     secret: process.env.NEXTAUTH_SECRET,
-  });
+  };
+
+  if (prod) {
+    params = {
+      req,
+      cookieName: "__Secure-next-auth.session-token",
+      secret: process.env.NEXTAUTH_SECRET,
+    };
+  }
+
+  console.log(req?.headers?.cookie);
+
+  const token = await getToken(params);
 
   if (!token) {
     throw new Error("Unauthorized");
