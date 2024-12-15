@@ -79,22 +79,14 @@ export const assistant = async (req, res) => {
   const input = await req.json();
   const assistantId = process.env.ASSISTANT_ID;
 
-  let paramsToken = {
+  const token = await getToken({
     req,
-    secret: process.env.SECRET,
-  };
-
-  if (prod) {
-    paramsToken = {
-      req,
-      secret: process.env.SECRET,
-      cookieName: "__Secure-next-auth.session-token",
-    };
-  }
-
-  console.log(paramsToken);
-
-  const token = await getToken(paramsToken);
+    cookieName:
+      process.env.VERCEL_ENV === "development"
+        ? "next-auth.session-token"
+        : "__Secure-next-auth.session-token",
+    secret: process.env.NEXTAUTH_SECRET,
+  });
 
   console.log({
     token,
