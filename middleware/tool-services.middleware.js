@@ -25,3 +25,13 @@ export const checkOrigin = (req, res, next) => {
 
   next();
 };
+
+export const checkRole = (req, res, next) => {
+  const currentData = JSON.parse(req?.body);
+  const currentRole = currentData?.current_role;
+  if (currentRole !== "admin" && currentRole !== "user") {
+    res.status(403).json({ success: false, message: "Forbidden" });
+  } else {
+    next();
+  }
+};

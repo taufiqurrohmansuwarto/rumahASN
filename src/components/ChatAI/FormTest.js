@@ -57,7 +57,7 @@ export default function FormTest() {
       <BubbleList
         roles={roles}
         items={
-          status !== "awaiting_message"
+          status !== ""
             ? [
                 ...messages?.map((m) => ({
                   key: m.id,

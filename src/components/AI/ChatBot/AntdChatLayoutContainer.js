@@ -37,7 +37,7 @@ const NewButton = ({ styles }) => {
   );
 };
 
-function AntDChatLayoutContainer({ children }) {
+function AntDChatLayoutContainer({ children, setThreadId }) {
   const router = useRouter();
   const [selectedThread, setSelectedThread] = useState(null);
   const { styles } = useStyle();
@@ -49,6 +49,7 @@ function AntDChatLayoutContainer({ children }) {
 
   const changeSelectedThread = (threadId) => {
     setSelectedThread(threadId);
+    setThreadId(threadId);
     router.push(`/chat-ai/${threadId}`);
   };
 

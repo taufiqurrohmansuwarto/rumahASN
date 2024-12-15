@@ -1,8 +1,9 @@
 import { saveMessageAssistant } from "@/controller/tool-services.controller";
 import { createRouter } from "next-connect";
+import { checkRole } from "@/middleware/tool-services.middleware";
 const router = createRouter();
 
-router.post(saveMessageAssistant);
+router.use(checkRole).post(saveMessageAssistant);
 
 export default router.handler({
   onError: (err, req, res, next) => {
