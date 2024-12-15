@@ -110,4 +110,5 @@ const siasnMiddleware = async (req, res, next) => {
 
 module.exports = {
   siasnMiddleware,
+  siasnWsAxios,
 };

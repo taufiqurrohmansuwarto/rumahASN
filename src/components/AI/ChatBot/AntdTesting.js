@@ -53,11 +53,13 @@ function AntdTesting() {
     }
   };
   const mockStream = async () => {
-    const response = await AssistantAIServices.testChatCompletion();
-    for await (const chunk of response) {
-      // decode chunk
-      const text = new TextDecoder().decode(chunk);
-      setLines((prev) => [...prev, text]);
+    try {
+      const response = await AssistantAIServices.testChatCompletion();
+      response.data.on("data", (data) => {
+        console.log(data);
+      });
+    } catch (error) {
+      console.error("Error in mockStream:", error);
     }
   };
 

@@ -123,6 +123,7 @@ function AntdNewChat() {
           title="✨ Inspirational Sparks and Marvelous Tips"
           items={items}
         />
+        <AntdTesting />
         <ChatSenderWelcome send={chat} loading={isLoadingChat} />
       </Flex>
     </Spin>

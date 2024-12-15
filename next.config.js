@@ -71,7 +71,6 @@ const nextConfig = {
     defaultLocale: "en",
   },
   experimental: {
-    runtime: "experimental-edge",
     forceSwcTransforms: true,
     scrollRestoration: true,
     esmExternals: "loose",
