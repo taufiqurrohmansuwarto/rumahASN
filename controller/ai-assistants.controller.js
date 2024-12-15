@@ -1,5 +1,6 @@
 import { AssistantResponse, streamText } from "ai";
-import { getToken } from "next-auth/jwt";
+import { decode, getToken } from "next-auth/jwt";
+
 // import { createOpenAI } from "@ai-sdk/openai";
 import OpenAI from "openai";
 const prod = process.env.NODE_ENV === "production";
@@ -74,30 +75,53 @@ export const botChat = async (req, res) => {
   }
 };
 
+// Helper function untuk parsing cookie
+function getCookieValue(cookieHeader, key) {
+  return cookieHeader
+    ?.split("; ")
+    .find((row) => row.startsWith(key))
+    ?.split("=")[1];
+}
+
+function parseCookies(cookieHeader) {
+  const cookies = {};
+
+  if (cookieHeader) {
+    // Pisahkan berdasarkan ';' untuk mendapatkan setiap pasangan cookie
+    cookieHeader.split(";").forEach((cookie) => {
+      const [name, value] = cookie.split("="); // Pisahkan nama dan nilai cookie
+      if (name && value) {
+        cookies[name.trim()] = decodeURIComponent(value.trim());
+      }
+    });
+  }
+
+  return cookies;
+}
+
 export const assistant = async (req, res) => {
   // Parse the request body
   const input = await req.json();
   const assistantId = process.env.ASSISTANT_ID;
-  let params = {
+
+  // Ambil token NextAuth
+  const currentToken = await getToken({
     req,
-    cookieName:
-      process.env.NODE_ENV === "development"
-        ? "next-auth.session-token"
-        : "__Secure-next-auth.session-token",
-    secret: process.env.NEXTAUTH_SECRET,
-  };
+    cookieName: prod
+      ? "__Secure-next-auth.session-token"
+      : "next-auth.session-token",
+    secret: process.env.SECRET,
+    raw: true,
+  });
 
-  if (prod) {
-    params = {
-      req,
-      cookieName: "__Secure-next-auth.session-token",
-      secret: process.env.NEXTAUTH_SECRET,
-    };
-  }
+  console.log({ currentToken });
 
-  console.log(req?.headers?.cookie);
+  const token = await decode({
+    token: currentToken,
+    secret: process.env.SECRET,
+  });
 
-  const token = await getToken(params);
+  console.log({ token });
 
   if (!token) {
     throw new Error("Unauthorized");
