@@ -17,7 +17,7 @@ dayjs.locale("id");
 const urlDocxLupaAbsen =
   "https://siasn.bkd.jatimprov.go.id:9000/public/dokumen-lupa_absen.docx";
 
-const generateDocumentLupaAbsen = async (
+export const generateDocumentLupaAbsen = async (
   minio,
   tglPembuatan,
   pembuat,

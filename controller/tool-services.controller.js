@@ -1,7 +1,27 @@
 const BotAssistantChatThreads = require("@/models/assistant_bot/chat-threads.model");
 const BotAssistantMessages = require("@/models/assistant_bot/messages.model");
+import {
+  cariPejabat,
+  cariSeluruhRekanKerja,
+  getPengguna,
+} from "@/utils/ai-utils";
 import { chatHistoryService } from "@/utils/chatHistoryService";
+import { getDataUtamaMaster } from "@/utils/master.utils";
+import {
+  generateDocument,
+  generateDocumentLupaAbsen,
+} from "@/utils/toolservice";
 import axios from "axios";
+const Minio = require("minio");
+const minioConfig = {
+  port: parseInt(process.env.MINIO_PORT),
+  useSSL: true,
+  accessKey: process.env.MINIO_ACCESS_KEY,
+  secretKey: process.env.MINIO_SECRET_KEY,
+  endPoint: process.env.MINIO_ENDPOINT,
+};
+
+const mc = new Minio.Client(minioConfig);
 
 const fetchDataUsulan = async (fetcher, tipeUsulan, employeeNumber) => {
   const url = `/siasn-ws/layanan/${tipeUsulan}/${employeeNumber}`;
@@ -108,6 +128,10 @@ export const getAtasanLangsung = async (req, res) => {
 
 export const getPesertaSpt = async (req, res) => {
   try {
+    const data = req?.body;
+    const currentData = JSON.parse(data);
+    const result = await cariSeluruhRekanKerja(currentData?.organization_id);
+    res.json(result);
   } catch (error) {
     console.log(error);
     res.status(500).json({ success: false, message: error.message });
@@ -116,6 +140,33 @@ export const getPesertaSpt = async (req, res) => {
 
 export const getPejabat = async (req, res) => {
   try {
+    const data = req?.body;
+    const currentData = JSON.parse(data);
+    const organizationId = currentData?.organization_id;
+    const result = await cariPejabat(organizationId);
+    res.json(result);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+export const getDataUtamaSiasn = async (req, res) => {
+  try {
+    const data = req?.body;
+    const currentData = JSON.parse(data);
+    const fetcher = axios.create({
+      baseURL: process.env.APIGATEWAY_URL,
+      headers: {
+        Authorization: `Bearer ${currentData?.accessToken}`,
+      },
+    });
+
+    const result = await getDataUtamaMaster(
+      fetcher,
+      currentData?.employee_number
+    );
+    res.json(result);
   } catch (error) {
     console.log(error);
     res.status(500).json({ success: false, message: error.message });
@@ -124,14 +175,50 @@ export const getPejabat = async (req, res) => {
 
 export const generateDocumentSpt = async (req, res) => {
   try {
+    const data = req?.body;
+    const currentData = JSON.parse(data);
+    const result = await generateDocument(currentData?.data, mc);
+    res.json(result);
   } catch (error) {
     console.log(error);
     res.status(500).json({ success: false, message: error.message });
   }
 };
 
-export const getPegawai = async (req, res) => {
+export const generateDocLupaAbsen = async (req, res) => {
   try {
+    const data = req?.body;
+    const currentData = JSON.parse(data);
+    const parameter = currentData?.data;
+
+    let promises = [];
+    parameter?.dataLupaAbsen?.forEach((item) => {
+      promises.push(
+        generateDocumentLupaAbsen(
+          mc,
+          parameter?.tglPembuatan,
+          parameter?.informasiPengguna,
+          parameter?.informasiAtasan,
+          item?.tanggal
+        )
+      );
+    });
+
+    const result = await Promise.all(promises);
+
+    res.json(result);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+export const getDataPengguna = async (req, res) => {
+  try {
+    const data = req?.body;
+    const currentData = JSON.parse(data);
+    const result = await getPengguna(currentData?.employee_number);
+    res.json(result);
   } catch (error) {
     console.log(error);
     res.status(500).json({ success: false, message: error.message });

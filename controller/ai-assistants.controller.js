@@ -3,47 +3,54 @@ import { getToken } from "next-auth/jwt";
 // import { createOpenAI } from "@ai-sdk/openai";
 import OpenAI from "openai";
 
-const cariUsulanSiasn = async (data) => {
+const makeRequest = async (endpoint, data) => {
   try {
-    const url = `${process.env.NEXT_PUBLIC_API_URL}/tool-services/status-usulan-siasn`;
-    const result = await fetch(url, {
+    const url = `${process.env.NEXT_PUBLIC_API_URL}${endpoint}`;
+    const response = await fetch(url, {
       method: "POST",
       body: JSON.stringify(data),
     });
-    const hasil = await result.json();
-    return hasil;
+    return await response.json();
   } catch (error) {
-    console.log(error);
-    throw new Error("Failed to cari usulan siasn");
+    console.error(error);
+    throw new Error(`Failed to make request to ${endpoint}`);
   }
+};
+
+const cariUsulanSiasn = async (data) => {
+  return makeRequest("/tool-services/status-usulan-siasn", data);
 };
 
 const saveMessage = async (data) => {
-  try {
-    const url = `${process.env.NEXT_PUBLIC_API_URL}/tool-services/messages`;
-    const result = await fetch(url, {
-      method: "POST",
-      body: JSON.stringify(data),
-    });
-    const hasil = await result.json();
-    return hasil;
-  } catch (error) {
-    console.log(error);
-  }
+  return makeRequest("/tool-services/messages", data);
 };
 
 const saveThread = async (data) => {
-  try {
-    const url = `${process.env.NEXT_PUBLIC_API_URL}/tool-services/threads`;
-    const result = await fetch(url, {
-      method: "POST",
-      body: JSON.stringify(data),
-    });
-    const hasil = await result.json();
-    return hasil;
-  } catch (error) {
-    console.log(error);
-  }
+  return makeRequest("/tool-services/threads", data);
+};
+
+const cariPejabat = async (data) => {
+  return makeRequest("/tool-services/get-pejabat", data);
+};
+
+const getDataUtamaSiasn = async (data) => {
+  return makeRequest("/tool-services/get-data-utama-siasn", data);
+};
+
+const getPesertaSpt = async (data) => {
+  return makeRequest("/tool-services/get-peserta-spt", data);
+};
+
+const generateDocumentSpt = async (data) => {
+  return makeRequest("/tool-services/generate-document-spt", data);
+};
+
+const generateDocumentLupaAbsen = async (data) => {
+  return makeRequest("/tool-services/generate-document-lupa-absen", data);
+};
+
+const getDataPengguna = async (data) => {
+  return makeRequest("/tool-services/get-data-pengguna", data);
 };
 
 const openai = new OpenAI({
@@ -158,11 +165,62 @@ export const assistant = async (req, res) => {
               };
 
               switch (toolCall.function.name) {
+                // cari usulan siasn
                 case "cari_usulan_siasn":
                   const status = await cariUsulanSiasn(params);
                   return {
                     tool_call_id: toolCall.id,
                     output: JSON.stringify(status),
+                  };
+
+                // dapatkan data pengguna
+                case "get_data_utama_siasn":
+                  const dataUtama = await getDataUtamaSiasn(params);
+                  return {
+                    tool_call_id: toolCall.id,
+                    output: JSON.stringify(dataUtama),
+                  };
+
+                // peserta spt di organisasinya
+                case "get_peserta_spt":
+                  const pesertaSpt = await getPesertaSpt(params);
+                  return {
+                    tool_call_id: toolCall.id,
+                    output: JSON.stringify(pesertaSpt),
+                  };
+
+                // pejabat di organisasinya
+                case "get_pejabat":
+                  const pejabat = await cariPejabat(params);
+                  return {
+                    tool_call_id: toolCall.id,
+                    output: JSON.stringify(pejabat),
+                  };
+
+                // generate document spt
+                case "generate_document_spt":
+                  const documentSpt = await generateDocumentSpt(params);
+                  return {
+                    tool_call_id: toolCall.id,
+                    output: JSON.stringify(documentSpt),
+                  };
+
+                // generate document lupa absen
+                case "generate_document_lupa_absen":
+                  const documentLupaAbsen = await generateDocumentLupaAbsen(
+                    params
+                  );
+                  return {
+                    tool_call_id: toolCall.id,
+                    output: JSON.stringify(documentLupaAbsen),
+                  };
+
+                // get data pengguna
+                case "get_data_pengguna":
+                  const dataPengguna = await getDataPengguna(params);
+                  return {
+                    tool_call_id: toolCall.id,
+                    output: JSON.stringify(dataPengguna),
                   };
 
                 default:

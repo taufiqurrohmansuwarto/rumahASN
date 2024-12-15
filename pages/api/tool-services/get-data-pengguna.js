@@ -1,9 +1,8 @@
-import { checkUsulan } from "@/controller/tool-services.controller";
-import { checkRole } from "@/middleware/tool-services.middleware";
+import { getDataPengguna } from "@/controller/tool-services.controller";
 import { createRouter } from "next-connect";
 const router = createRouter();
 
-router.use(checkRole).post(checkUsulan);
+router.use(checkRole).post(getDataPengguna);
 
 export default router.handler({
   onError: (err, req, res, next) => {
