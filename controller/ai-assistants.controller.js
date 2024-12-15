@@ -13,8 +13,9 @@ const makeRequest = async (endpoint, data) => {
       method: "POST",
       body: JSON.stringify(data),
     });
-    console.log("response", response);
-    return await response.json();
+    const result = await response.json();
+    console.log(`${endpoint} result`, result);
+    return result;
   } catch (error) {
     console.error(error);
     throw new Error(`Failed to make request to ${endpoint}`);
@@ -143,23 +144,21 @@ export const assistant = async (req, res) => {
   );
 
   await saveThread({
+    ...currentUser,
     id: threadId,
     user_id: currentUser?.sub,
     title: input.message,
     assistant_id: assistantId,
   });
 
-  console.log(createdMessage);
-
   await saveMessage({
+    ...currentUser,
     id: createdMessage.id,
     threadId: threadId,
     content: createdMessage.content[0]?.text?.value,
     role: createdMessage.role,
     user_id: currentUser?.sub,
   });
-
-  console.log(createdMessage);
 
   return AssistantResponse(
     { threadId, messageId: createdMessage.id },
@@ -183,6 +182,7 @@ export const assistant = async (req, res) => {
         const messages = await openai.beta.threads.messages.list(threadId);
         const lastMessage = messages.data[0];
         await saveMessage({
+          ...currentUser,
           id: lastMessage?.id,
           threadId: threadId,
           content: lastMessage?.content[0]?.text?.value,
@@ -288,6 +288,7 @@ export const assistant = async (req, res) => {
           const messages = await openai.beta.threads.messages.list(threadId);
           const lastMessage = messages.data[0];
           await saveMessage({
+            ...currentUser,
             id: lastMessage?.id,
             threadId: threadId,
             content: lastMessage?.content[0]?.text?.value,
