@@ -89,7 +89,7 @@ export const assistant = async (req, res) => {
   });
 
   if (!token) {
-    res.status(401).json({ success: false, message: "Unauthorized" });
+    throw new Error("Unauthorized");
   }
 
   const currentUser = {
