@@ -14,6 +14,8 @@ class SyncPegawai extends Model {
 
   static get relationMappings() {
     const syncUnorMaster = require("@/models/sync-unor-master.model");
+    const siasnEmployee = require("@/models/siasn-employees.model");
+
     return {
       skpd: {
         relation: Model.BelongsToOneRelation,
@@ -23,10 +25,16 @@ class SyncPegawai extends Model {
           to: "sync_unor_master.id",
         },
       },
+      siasn: {
+        relation: Model.BelongsToOneRelation,
+        modelClass: siasnEmployee,
+        join: {
+          from: "sync_pegawai.nip_master",
+          to: "siasn_employees.nip_baru",
+        },
+      },
     };
   }
-
-  static get relationMappings() {}
 }
 
 module.exports = SyncPegawai;

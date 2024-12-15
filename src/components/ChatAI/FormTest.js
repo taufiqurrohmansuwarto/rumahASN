@@ -1,46 +1,101 @@
+import { UserOutlined } from "@ant-design/icons";
 import { useAssistant } from "ai/react";
-import { Spin } from "antd";
 import { useSession } from "next-auth/react";
 
-export default function FormTest() {
-  const { data: session } = useSession();
-  const { status, messages, input, submitMessage, handleInputChange } =
-    useAssistant({
-      api: "/helpdesk/api/assistant/test",
-      body: {
-        user: session?.user,
+import BubbleList from "../AI/BubbleList";
+import Sender from "../AI/Sender";
+import ReactMarkdownCustom from "../MarkdownEditor/ReactMarkdownCustom";
+
+const roles = {
+  assistant: {
+    placement: "start",
+    avatar: {
+      icon: <UserOutlined />,
+      style: {
+        background: "#fde3cf",
       },
-    });
+    },
+    style: {
+      maxWidth: 600,
+    },
+  },
+  user: {
+    placement: "end",
+    avatar: {
+      icon: <UserOutlined />,
+      style: {
+        background: "#87d068",
+      },
+    },
+  },
+};
+
+export default function FormTest() {
+  const {
+    status,
+    messages,
+    input,
+    submitMessage,
+    handleInputChange,
+    setMessages,
+    setThreadId,
+    threadId,
+    append,
+    error,
+    setInput,
+    stop,
+  } = useAssistant({
+    api: "/helpdesk/api/assistant/test",
+  });
+
+  const handleChangeText = (e) => {
+    setInput(e);
+  };
 
   return (
     <div>
-      {JSON.stringify({ messages, status })}
-      {messages.map((m) => (
-        <div key={m.id}>
-          <strong>{`${m.role}: `}</strong>
-          {m.role !== "data" && m.content}
-          {m.role === "data" && (
-            <>
-              {m.data.description}
-              <br />
-              <pre className={"bg-gray-200"}>
-                {JSON.stringify(m.data, null, 2)}
-              </pre>
-            </>
-          )}
-        </div>
-      ))}
+      <BubbleList
+        roles={roles}
+        items={
+          status !== "awaiting_message"
+            ? [
+                ...messages?.map((m) => ({
+                  key: m.id,
+                  role: m.role,
+                  content: (
+                    <ReactMarkdownCustom withCustom>
+                      {m.content}
+                    </ReactMarkdownCustom>
+                  ),
+                })),
+                {
+                  id: Date.now(),
+                  content: "Typing...",
+                  role: "assistant",
+                  loading: true,
+                },
+              ]
+            : messages?.map((m) => ({
+                key: m.id,
+                role: m.role,
+                content: (
+                  <ReactMarkdownCustom withCustom>
+                    {m.content}
+                  </ReactMarkdownCustom>
+                ),
+              }))
+        }
+      />
 
-      {status === "in_progress" && <Spin />}
-
-      <form onSubmit={submitMessage}>
-        <input
-          disabled={status !== "awaiting_message"}
-          value={input}
-          placeholder="What is the temperature in the living room?"
-          onChange={handleInputChange}
-        />
-      </form>
+      <Sender
+        loading={status !== "awaiting_message"}
+        onClick={submitMessage}
+        value={input}
+        placeholder="What is the temperature in the living room?"
+        onChange={handleChangeText}
+        onSubmit={submitMessage}
+        onCancel={stop}
+      />
     </div>
   );
 }

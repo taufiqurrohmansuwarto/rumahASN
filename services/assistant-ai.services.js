@@ -47,11 +47,16 @@ export const getAssistantThreads = async () => {
 };
 
 export const testChatCompletion = async () => {
-  return await fetchApi
-    .get(`/testing`, {
-      responseType: "stream",
-    })
-    .then((res) => res?.data);
+  const response = await fetchApi.get(`/testing`, {
+    responseType: "stream",
+    headers: {
+      Accept: "text/event-stream",
+      "Cache-Control": "no-cache",
+      Connection: "keep-alive",
+    },
+  });
+
+  return response;
 };
 
 export const AssistantAIServices = {

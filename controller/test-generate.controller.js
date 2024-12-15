@@ -51,7 +51,10 @@ export const testGenerate = async (req, res) => {
 
 export const testChatCompletion = async (req, res) => {
   try {
-    const openai = new OpenAI();
+    const openai = new OpenAI({
+      apiKey: process.env.OPENAI_API_KEY,
+    });
+
     const stream = await openai.chat.completions.create({
       model: "gpt-3.5-turbo",
       messages: [{ role: "user", content: "Bagaimana cara menghitung gaji?" }],
@@ -59,15 +62,15 @@ export const testChatCompletion = async (req, res) => {
     });
 
     res.setHeader("Content-Type", "text/event-stream");
-    res.setHeader("Cache-Control", "no-cache");
+    res.setHeader("Cache-Control", "no-cache, no-store");
     res.setHeader("Connection", "keep-alive");
 
-    for await (const chunk of stream) {
-      const text = chunk.choices[0]?.delta?.content;
-      if (text) {
-        res.write(text);
+    for await (const chunk of stream?.toReadableStream()) {
+      if (chunk) {
+        res.write(chunk);
       }
     }
+    res.write("data: [DONE]\n\n");
     res.end();
   } catch (error) {
     console.log(error);
