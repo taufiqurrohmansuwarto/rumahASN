@@ -1,14 +1,14 @@
 import XProvider from "@/components/AI/XProvider";
 import { AssistantAIServices } from "@/services/assistant-ai.services";
-import { MenuOutlined } from "@ant-design/icons";
+import { MenuOutlined, MessageOutlined } from "@ant-design/icons";
 import { useQuery } from "@tanstack/react-query";
-import { useAssistant } from "ai/react/dist";
 import { Avatar, Button, ConfigProvider, Drawer, Grid } from "antd";
 import { useSearchParams } from "next/navigation";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import AntdChatEmpty from "./AntdChatEmpty";
-import AntdChatMessagesNew from "./AntdChatMesssagesNew";
+import AntdChatMessages from "./AntdChatMessages";
+import AntdChatSender from "./AntdChatSender";
 import AntdChatSider from "./AntdChatSider";
 import useStyle from "./AntdChatStyle";
 
@@ -50,23 +50,6 @@ function AntDChatContainer() {
   const [selectedThread, setSelectedThread] = useState(null);
   const { styles } = useStyle();
   const breakPoint = Grid.useBreakpoint();
-
-  const {
-    append,
-    error,
-    handleInputChange,
-    input,
-    messages,
-    setInput,
-    setMessages,
-    setThreadId,
-    status,
-    stop,
-    submitMessage,
-    threadId,
-  } = useAssistant({
-    api: "/helpdesk/api/assistant/test",
-  });
 
   const logoNode = (
     <div className={styles?.logo}>
@@ -217,12 +200,8 @@ function AntDChatContainer() {
         <div className={styles.chat}>
           {router?.query?.assistantId ? (
             <>
-              <AntdChatMessagesNew
-                setMessages={setMessages}
-                setThreadId={setThreadId}
-                messages={messages}
-                style={styles}
-              />
+              <AntdChatMessages style={styles} />
+              <AntdChatSender style={styles} />
             </>
           ) : (
             <AntdChatEmpty />
