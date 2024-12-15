@@ -2,6 +2,7 @@ import { AssistantResponse, streamText } from "ai";
 import { getToken } from "next-auth/jwt";
 // import { createOpenAI } from "@ai-sdk/openai";
 import OpenAI from "openai";
+const prod = process.env.NODE_ENV === "production";
 
 const makeRequest = async (endpoint, data) => {
   try {
@@ -78,7 +79,21 @@ export const assistant = async (req, res) => {
   const input = await req.json();
   const assistantId = process.env.ASSISTANT_ID;
 
-  const token = await getToken({ req, secret: process.env.SECRET });
+  let paramsToken = {
+    req,
+    secret: process.env.SECRET,
+  };
+
+  if (prod) {
+    paramsToken = {
+      req,
+      secret: process.env.SECRET,
+      cookieName: "__Secure-next-auth.session-token",
+    };
+  }
+
+  const token = await getToken(paramsToken);
+
   console.log({
     token,
     secret: process.env.SECRET,
