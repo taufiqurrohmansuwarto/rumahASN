@@ -8,10 +8,12 @@ const prod = process.env.NODE_ENV === "production";
 const makeRequest = async (endpoint, data) => {
   try {
     const url = `${process.env.NEXT_PUBLIC_API_URL}${endpoint}`;
+    console.log("url", url);
     const response = await fetch(url, {
       method: "POST",
       body: JSON.stringify(data),
     });
+    console.log("response", response);
     return await response.json();
   } catch (error) {
     console.error(error);
@@ -110,14 +112,10 @@ export const assistant = async (req, res) => {
     prod ? "__Secure-next-auth.session-token" : "next-auth.session-token"
   );
 
-  console.log({ sessionToken });
-
   const token = await decode({
     token: sessionToken,
     secret: process.env.SECRET,
   });
-
-  console.log({ token });
 
   if (!token) {
     throw new Error("Unauthorized");
@@ -151,6 +149,8 @@ export const assistant = async (req, res) => {
     assistant_id: assistantId,
   });
 
+  console.log(createdMessage);
+
   await saveMessage({
     id: createdMessage.id,
     threadId: threadId,
@@ -158,6 +158,8 @@ export const assistant = async (req, res) => {
     role: createdMessage.role,
     user_id: currentUser?.sub,
   });
+
+  console.log(createdMessage);
 
   return AssistantResponse(
     { threadId, messageId: createdMessage.id },
