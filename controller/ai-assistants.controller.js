@@ -79,6 +79,11 @@ export const assistant = async (req, res) => {
   const assistantId = process.env.ASSISTANT_ID;
 
   const token = await getToken({ req, secret: process.env.SECRET });
+  console.log({
+    token,
+    secret: process.env.SECRET,
+    public_api: process.env.NEXT_PUBLIC_API_URL,
+  });
 
   if (!token) {
     res.status(401).json({ success: false, message: "Unauthorized" });
