@@ -92,6 +92,8 @@ export const assistant = async (req, res) => {
     };
   }
 
+  console.log(paramsToken);
+
   const token = await getToken(paramsToken);
 
   console.log({
