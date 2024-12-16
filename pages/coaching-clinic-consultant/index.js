@@ -1,4 +1,3 @@
-import FormTest from "@/components/ChatAI/FormTest";
 import CoachingMeetings from "@/components/CoachingClinic/Consultant/CoachingMeetings";
 import Layout from "@/components/Layout";
 import PageContainer from "@/components/PageContainer";
@@ -7,10 +6,8 @@ import { useQuery } from "@tanstack/react-query";
 import { Breadcrumb, Empty, Grid } from "antd";
 import Head from "next/head";
 import Link from "next/link";
-import { useRouter } from "next/router";
 
 const CoachingClinic = () => {
-  const router = useRouter();
   const { data, isLoading } = useQuery(
     ["status-coaching"],
     () => checkStatus(),
