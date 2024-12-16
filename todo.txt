@@ -50,7 +50,7 @@ BEGIN
         CAST(similarity(LOWER(TRIM(sp.nama_master)), LOWER(nama_input)) AS DOUBLE PRECISION) AS similarity_score,
         levenshtein(LOWER(TRIM(sp.nama_master)), LOWER(nama_input)) AS distance
     FROM sync_pegawai sp
-    WHERE sp.skpd_id ILIKE skpd_input || '%' and (sp.jabatan_asn = 'JABATAN ADMINISTRATOR' or sp.jabatan_asn = 'JABATAN PIMPINAN TINGGI PRATAMA')
+    WHERE sp.skpd_id ILIKE skpd_input || '%' and (sp.jabatan_asn = 'JABATAN ADMINISTRATOR' or sp.jabatan_asn = 'JABATAN PIMPINAN TINGGI PRATAMA' or sp.jabatan_asn = 'PENGAWAS')
       AND (
            sp.nama_master ILIKE '%' || nama_input || '%'
         OR LOWER(TRIM(sp.nama_master)) % LOWER(nama_input)
