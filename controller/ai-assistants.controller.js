@@ -1,5 +1,5 @@
 import { AssistantResponse, streamText } from "ai";
-import { decode, getToken } from "next-auth/jwt";
+import { decode } from "next-auth/jwt";
 
 // import { createOpenAI } from "@ai-sdk/openai";
 import OpenAI from "openai";
@@ -162,7 +162,7 @@ export const assistant = async (req, res) => {
 
   return AssistantResponse(
     { threadId, messageId: createdMessage.id },
-    async ({ forwardStream, sendDataMessage, sendMessage }) => {
+    async ({ forwardStream }) => {
       // Run the assistant on the thread
       const runStream = openai.beta.threads.runs.stream(
         threadId,
