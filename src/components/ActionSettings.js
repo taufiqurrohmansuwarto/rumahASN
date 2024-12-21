@@ -1,4 +1,4 @@
-import MegaMenu from "@/components/MegaMenu/MegaMenuTop";
+import MegaMenuTop from "@/components/MegaMenu/MegaMenuTop";
 import NotifikasiASNConnect from "@/components/Notification/NotifikasiASNConnect";
 import NotifikasiForumKepegawaian from "@/components/Notification/NotifikasiForumKepegawaian";
 import NotifikasiKepegawaian from "@/components/Notification/NotifikasiKepegawaian";
@@ -26,7 +26,7 @@ const ActionSettings = () => {
       url="forum-kepegawaian"
       title="Inbox Forum Kepegawaian"
     />,
-    <MegaMenu key="mega-menu" />,
+    <MegaMenuTop key="mega-menu" />,
   ];
 };
 

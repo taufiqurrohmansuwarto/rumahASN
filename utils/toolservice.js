@@ -8,11 +8,24 @@ import { getDataUtamaMaster } from "@/utils/master.utils";
 import axios from "axios";
 import { TemplateHandler } from "easy-template-x";
 import { uploadFileUsulan } from "./index";
-import { dataUtama } from "./siasn-utils";
 // nanoid
-import { nanoid } from "nanoid";
 import dayjs from "dayjs";
+import { nanoid } from "nanoid";
+import { trim } from "lodash";
 dayjs.locale("id");
+
+export const serializeDataUtama = (data) => {
+  const nama = `${data?.gelar_depan} ${data?.nama} ${data?.gelar_belakang}`;
+  return {
+    n: trim(nama),
+    nip: data?.nip_baru,
+    jp: data?.jenis_kepegawaian,
+    jj: data?.jabatan?.jenis_jabatan,
+    j: data?.jabatan?.jabatan,
+    g: `${data?.pangkat?.golongan}-${data?.pangkat?.pangkat}`,
+    uk: data?.skpd?.detail,
+  };
+};
 
 const urlDocxLupaAbsen =
   "https://siasn.bkd.jatimprov.go.id:9000/public/dokumen-lupa_absen.docx";
