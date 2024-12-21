@@ -10,6 +10,7 @@ import { getDataUtamaMaster } from "@/utils/master.utils";
 import {
   generateDocument,
   generateDocumentLupaAbsen,
+  serializeDataUtama,
 } from "@/utils/toolservice";
 import axios from "axios";
 const Minio = require("minio");
@@ -166,7 +167,10 @@ export const getDataUtamaSiasn = async (req, res) => {
       fetcher,
       currentData?.employee_number
     );
-    res.json(result);
+
+    const resultJson = serializeDataUtama(result);
+
+    res.json(resultJson);
   } catch (error) {
     console.log(error);
     res.status(500).json({ success: false, message: error.message });

@@ -81,6 +81,13 @@ const applist = [
     link: "#",
     userType: ["PNS", "PPPK", "UMUM", "NONASN"],
   },
+  {
+    icon: <IconMailbox />,
+    title: "Persuratan",
+    color: "#FBBC05",
+    link: "/letter-managements/headers",
+    userType: ["PNS", "PPPK", "UMUM", "NONASN"],
+  },
 ];
 
 function MegaMenuTop() {
