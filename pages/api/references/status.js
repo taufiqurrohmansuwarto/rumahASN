@@ -1,6 +1,6 @@
-const { status } = require("@/controller/references.controller");
-const { default: auth } = require("@/middleware/auth.middleware");
-const { createRouter } = require("next-connect");
+import { status } from "@/controller/references.controller";
+import auth from "@/middleware/auth.middleware";
+import { createRouter } from "next-connect";
 
 const router = createRouter();
 router.use(auth).get(status);

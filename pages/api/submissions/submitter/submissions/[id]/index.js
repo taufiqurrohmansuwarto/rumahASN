@@ -1,9 +1,7 @@
-const {
-  detailSubmissionReferenceSubmitter,
-} = require("@/controller/submissions.controller");
-const asnFasilitatorMiddleware = require("@/middleware/asn-fasilitator.middleware");
-const { default: auth } = require("@/middleware/auth.middleware");
-const { createRouter } = require("next-connect");
+import { detailSubmissionReferenceSubmitter } from "@/controller/submissions.controller";
+import asnFasilitatorMiddleware from "@/middleware/asn-fasilitator.middleware";
+import auth from "@/middleware/auth.middleware";
+import { createRouter } from "next-connect";
 
 const router = createRouter();
 router

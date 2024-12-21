@@ -1,6 +1,6 @@
-const { createRouter } = require("next-connect");
-const { index } = require("../../../../controller/admin-ticket.controller");
-const { default: auth } = require("../../../../middleware/auth.middleware");
+import auth from "@/middleware/auth.middleware";
+import { createRouter } from "next-connect";
+import { index } from "@/controller/admin-ticket.controller";
 
 const router = createRouter();
 router.use(auth).get(index);

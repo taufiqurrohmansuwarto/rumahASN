@@ -1,10 +1,10 @@
-const { createRouter } = require("next-connect");
-const {
+import { createRouter } from "next-connect";
+import {
   addAgents,
   removeAgents,
   detail,
-} = require("../../../../../controller/admin-ticket-agent.controller");
-const { default: auth } = require("../../../../../middleware/auth.middleware");
+} from "@/controller/admin-ticket-agent.controller";
+import auth from "@/middleware/auth.middleware";
 
 const router = createRouter();
 // patch for add assigne
