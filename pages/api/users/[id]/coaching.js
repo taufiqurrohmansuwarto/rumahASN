@@ -4,8 +4,7 @@ import {
 } from "@/controller/coaching-clinic.controller";
 import adminMiddleware from "@/middleware/admin.middleware";
 import auth from "@/middleware/auth.middleware";
-
-const { createRouter } = require("next-connect");
+import { createRouter } from "next-connect";
 
 const router = createRouter();
 

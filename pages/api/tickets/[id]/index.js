@@ -1,10 +1,10 @@
-const {
+import {
   detailPublishTickets,
   removeTicket,
   editTicket,
-} = require("@/controller/tickets-props.controller");
-const { default: auth } = require("@/middleware/auth.middleware");
-const { createRouter } = require("next-connect");
+} from "@/controller/tickets-props.controller";
+import auth from "@/middleware/auth.middleware";
+import { createRouter } from "next-connect";
 
 const router = createRouter();
 router

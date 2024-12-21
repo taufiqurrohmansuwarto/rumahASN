@@ -1,11 +1,11 @@
-const {
+import {
   detailSubmissionReference,
   updateSubmissionPersonInCharge,
   deleteSubmissionPersonInCharge,
-} = require("@/controller/submissions.controller");
-const adminMiddleware = require("@/middleware/admin.middleware");
-const { default: auth } = require("@/middleware/auth.middleware");
-const { createRouter } = require("next-connect");
+} from "@/controller/submissions.controller";
+import adminMiddleware from "@/middleware/admin.middleware";
+import auth from "@/middleware/auth.middleware";
+import { createRouter } from "next-connect";
 
 const router = createRouter();
 router
