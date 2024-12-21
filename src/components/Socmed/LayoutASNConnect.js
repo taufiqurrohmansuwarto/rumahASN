@@ -35,10 +35,6 @@ function LayoutASNConnect({ children, active = "asn-updates" }) {
           tab: "Beranda",
         },
         {
-          key: "asn-ai-chat",
-          tab: "Chat AI",
-        },
-        {
           key: "asn-discussions",
           tab: "Diskusi",
         },
