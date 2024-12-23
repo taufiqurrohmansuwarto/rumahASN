@@ -1,8 +1,8 @@
-const { wso2Fetcher } = require("@/utils/siasn-fetcher");
 const { default: axios } = require("axios");
 const fs = require("fs");
 const path = require("path");
 const ssoToken = require("../sso_token.json");
+const a = require("../utils/siasn-fetcher");
 
 const baseUrl = "https://apimws.bkn.go.id:8243/apisiasn/1.0";
 const CURRENT_DIRECTORY = process.cwd();
@@ -12,7 +12,8 @@ const siasnWsAxios = axios.create({
 });
 
 const getoken = async () => {
-  const wso2 = await wso2Fetcher();
+  const wso2 = await a.wso2Fetcher();
+
   const sso = ssoToken?.token;
 
   const result = {
@@ -24,34 +25,36 @@ const getoken = async () => {
 };
 
 const requestHandler = async (request) => {
-  // cek kalau ada file token.json
-  const filePath = path.join(CURRENT_DIRECTORY, "token.json");
+  try {
+    // cek kalau ada file token.json
+    const filePath = path.join(CURRENT_DIRECTORY, "token.json");
 
-  const ifExists = fs.existsSync(filePath);
+    const ifExists = fs.existsSync(filePath);
 
-  // console.log("file token.json ada?", ifExists);
+    if (ifExists) {
+      const token = JSON.parse(fs.readFileSync(filePath, "utf8"));
+      const sso_token = token?.sso_token;
+      const wso_token = token?.wso_token;
 
-  if (ifExists) {
-    const token = JSON.parse(fs.readFileSync(filePath, "utf8"));
-    const sso_token = token?.sso_token;
-    const wso_token = token?.wso_token;
+      request.headers.Authorization = `Bearer ${wso_token}`;
+      request.headers.Auth = `bearer ${sso_token}`;
 
-    request.headers.Authorization = `Bearer ${wso_token}`;
-    request.headers.Auth = `bearer ${sso_token}`;
+      return request;
+    } else {
+      const token = await getoken();
+      const sso_token = token?.sso_token;
+      const wso_token = token?.wso_token;
 
-    return request;
-  } else {
-    const token = await getoken();
-    const sso_token = token?.sso_token;
-    const wso_token = token?.wso_token;
+      request.headers.Authorization = `Bearer ${wso_token}`;
+      request.headers.Auth = `bearer ${sso_token}`;
 
-    request.headers.Authorization = `Bearer ${wso_token}`;
-    request.headers.Auth = `bearer ${sso_token}`;
+      console.log("token.json created, di request handler");
+      fs.writeFileSync(filePath, JSON.stringify(token));
 
-    console.log("token.json created, di request handler");
-    fs.writeFileSync(filePath, JSON.stringify(token));
-
-    return request;
+      return request;
+    }
+  } catch (error) {
+    console.log("error", error);
   }
 };
 

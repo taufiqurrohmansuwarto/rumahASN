@@ -98,6 +98,16 @@ module.exports.cariAtasanLangsung = async (currentOpdId) => {
   }
 };
 
+const cariOrang = async (nama, currentOpdId) => {
+  ``;
+};
+
+// cari rekan kerja
+module.exports.cariRekanKerja = async (nama, currentOpdId) => {
+  const currentDepartmentCode =
+    currentOpdId?.length > 3 ? currentOpdId?.substring(0, 3) : currentOpdId;
+};
+
 module.exports.cariSeluruhRekanKerja = async (currentOpdId) => {
   try {
     // 12301 menjadi 123

@@ -95,3 +95,8 @@ export const wso2Fetcher = async () => {
     console.log(error);
   }
 };
+
+module.exports = {
+  ssoFetcher,
+  wso2Fetcher,
+};
