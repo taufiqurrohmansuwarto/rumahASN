@@ -20,7 +20,7 @@ export const serializeDataUtama = (data) => {
   return {
     n: trim(nama),
     nip: data?.nip_baru,
-    jp: data?.jenis_kepegawaian,
+    jp: data?.status,
     jj: data?.jabatan?.jenis_jabatan,
     j: data?.jabatan?.jabatan,
     g: `${data?.pangkat?.golongan}-${data?.pangkat?.pangkat}`,

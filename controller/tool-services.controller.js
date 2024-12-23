@@ -112,11 +112,27 @@ export const checkUsulan = async (req, res) => {
 
     const result = await fetchDataUsulan(fetcher, tipeUsulan, employeeNumber);
 
-    res.json({
-      success: true,
-      message: "Usulan berhasil di cek",
-      data: result,
-    });
+    // seralize data biar ndak terlalu lebar ke mana
+    const serializeData = (result) => {
+      if (!result?.length) {
+        return [];
+      } else {
+        return result?.map((item) => {
+          return {
+            id: item?.id,
+            nama: item?.nama,
+            nip: item?.nip,
+            status_usulan: item?.status_usulan,
+            type: item?.type,
+            jenis_layanan_nama: item?.jenis_layanan_nama,
+            tanggal_usulan: item?.tanggal_usulan,
+            keterangan: item?.keterangan,
+          };
+        });
+      }
+    };
+
+    res.json(serializeData(result));
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
@@ -172,26 +188,23 @@ export const getDataUtamaSiasn = async (req, res) => {
     );
 
     const dataPegawai = await SIASNEmployee.query()
-      .where("nip_baru", result?.nip)
+      .where("nip_baru", currentData?.employee_number)
       .first();
 
     const resultJson = serializeDataUtama(result);
     const hasil = {
       ...resultJson,
       // masa kerja tahun
-      mkt: dataPegawai?.mk_tahun,
+      mkt: `${dataPegawai?.mk_tahun} Tahun`,
       // masa kerja bulan
-      mkb: dataPegawai?.mk_bulan,
+      mkb: `${dataPegawai?.mk_bulan} Bulan`,
       // tingkat pendidikan nama
       tpn: dataPegawai?.tingkat_pendidikan_nama,
       // pendidikan nama
       tpb: dataPegawai?.pendidikan_nama,
     };
 
-    console.log("get_data_utama_siasn result", data);
-
-    console.log("get_data_utama_siasn result", resultJson);
-    res.json(resultJson);
+    res.json(hasil);
   } catch (error) {
     console.log(error);
     res.status(500).json({ success: false, message: error.message });
