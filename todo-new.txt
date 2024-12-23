@@ -1,0 +1,4 @@
+1. perbaiki format dokumen 
+   tambahkan 1. footer
+             2. headers
+2. tambahkan fitur tambahan headers

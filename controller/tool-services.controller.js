@@ -1,5 +1,8 @@
 const BotAssistantChatThreads = require("@/models/assistant_bot/chat-threads.model");
 const BotAssistantMessages = require("@/models/assistant_bot/messages.model");
+const SyncPegawai = require("@/models/sync-pegawai.model");
+const SIASNEmployee = require("@/models/siasn-employees.model");
+
 import {
   cariPejabat,
   cariSeluruhRekanKerja,
@@ -168,8 +171,26 @@ export const getDataUtamaSiasn = async (req, res) => {
       currentData?.employee_number
     );
 
-    const resultJson = serializeDataUtama(result);
+    const dataPegawai = await SIASNEmployee.query()
+      .where("nip_baru", result?.nip)
+      .first();
 
+    const resultJson = serializeDataUtama(result);
+    const hasil = {
+      ...resultJson,
+      // masa kerja tahun
+      mkt: dataPegawai?.mk_tahun,
+      // masa kerja bulan
+      mkb: dataPegawai?.mk_bulan,
+      // tingkat pendidikan nama
+      tpn: dataPegawai?.tingkat_pendidikan_nama,
+      // pendidikan nama
+      tpb: dataPegawai?.pendidikan_nama,
+    };
+
+    console.log("get_data_utama_siasn result", data);
+
+    console.log("get_data_utama_siasn result", resultJson);
     res.json(resultJson);
   } catch (error) {
     console.log(error);

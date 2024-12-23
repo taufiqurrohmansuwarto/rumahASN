@@ -15,6 +15,7 @@ import { trim } from "lodash";
 dayjs.locale("id");
 
 export const serializeDataUtama = (data) => {
+  console.log("serializeDataUtama", data);
   const nama = `${data?.gelar_depan} ${data?.nama} ${data?.gelar_belakang}`;
   return {
     n: trim(nama),
