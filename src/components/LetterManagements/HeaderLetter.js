@@ -3,10 +3,12 @@ import {
   deleteHeaderSurat,
   updateHeaderSurat,
   getHeaderSurat,
+  checkHeaderSurat,
 } from "@/services/letter-managements.services";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Button, Table, Modal, Form, Input, message } from "antd";
+import { Button, Table, Modal, Form, Input, message, Card, Space } from "antd";
 import { useState, useEffect } from "react";
+import FormUnorMaster from "../Utils/UnorMaster";
 
 // Modal component for creating/updating headers
 const HeaderModal = ({
@@ -43,13 +45,7 @@ const HeaderModal = ({
       title={type === "create" ? "Tambah Header" : "Edit Header"}
     >
       <Form form={form} layout="vertical">
-        <Form.Item
-          label="Nama Instansi / Perangkat Daerah"
-          name="nama_instansi"
-          rules={[{ required: true, message: "Nama instansi harus diisi" }]}
-        >
-          <Input />
-        </Form.Item>
+        <FormUnorMaster name="skpd_id" type="fasilitator" />
         <Form.Item
           label="Nama Perangkat Daerah"
           name="nama_perangkat_daerah"
@@ -130,6 +126,24 @@ const HeaderLetter = () => {
     }
   );
 
+  const { mutateAsync: checkHeader, isLoading: isChecking } = useMutation(
+    (id) => checkHeaderSurat(id),
+    {
+      onSuccess: (data) => {
+        const file = data.data;
+        // download file as docx
+        const url = `data:application/vnd.openxmlformats-officedocument.wordprocessingml.document;base64,${file}`;
+        // rename file as cek_header.docx
+        const filename = `cek_header.docx`;
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = filename;
+        a.click();
+        message.success("Header berhasil di cek");
+      },
+    }
+  );
+
   const { mutateAsync: updateHeader, isLoading: isUpdating } = useMutation(
     updateHeaderSurat,
     {
@@ -171,11 +185,6 @@ const HeaderLetter = () => {
   // Table columns
   const columns = [
     {
-      title: "Nama Instansi / Perangkat Daerah",
-      dataIndex: "nama_instansi",
-      key: "nama_instansi",
-    },
-    {
       title: "Nama Perangkat Daerah",
       dataIndex: "nama_perangkat_daerah",
       key: "nama_perangkat_daerah",
@@ -201,27 +210,40 @@ const HeaderLetter = () => {
       key: "email",
     },
     {
+      title: "ID SKPD",
+      dataIndex: "skpd_id",
+      key: "skpd_id",
+    },
+    {
       title: "Aksi",
       key: "action",
       render: (_, record) => (
-        <>
-          <Button onClick={() => handleOpenModal("update", record)}>
+        <Space>
+          <Button type="link" onClick={() => handleOpenModal("update", record)}>
             Edit
           </Button>
           <Button
-            danger
+            type="link"
+            onClick={() => checkHeader(record.id)}
+            style={{ marginLeft: 8 }}
+          >
+            Cek
+          </Button>
+
+          <Button
+            type="link"
             onClick={() => deleteHeader(record.id)}
             style={{ marginLeft: 8 }}
           >
             Hapus
           </Button>
-        </>
+        </Space>
       ),
     },
   ];
 
   return (
-    <div>
+    <Card>
       <Button
         type="primary"
         onClick={() => handleOpenModal("create")}
@@ -246,7 +268,7 @@ const HeaderLetter = () => {
         pagination={false}
         loading={isLoadingHeaders}
       />
-    </div>
+    </Card>
   );
 };
 

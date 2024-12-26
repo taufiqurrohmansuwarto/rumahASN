@@ -466,8 +466,11 @@ const getAllEmployeesMasterPagingAdmin = async (req, res) => {
 
 const getOpd = async (req, res) => {
   try {
+    const currentRole = req?.user?.current_role;
+    const admin = currentRole === "admin";
+
     const fetcher = req?.clientCredentialsFetcher;
-    const opdId = req?.user?.organization_id;
+    const opdId = admin ? "1" : req?.user?.organization_id;
 
     if (!opdId) {
       res.status(400).json({ message: "Organization ID is required" });

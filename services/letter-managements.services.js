@@ -21,3 +21,7 @@ export const updateHeaderSurat = async ({ id, data }) => {
 export const deleteHeaderSurat = async (id) => {
   return api.delete(`/headers/${id}`).then((res) => res.data);
 };
+
+export const checkHeaderSurat = async (id) => {
+  return api.get(`/headers/${id}/cek`).then((res) => res.data);
+};
