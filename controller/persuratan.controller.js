@@ -1,4 +1,27 @@
 const Headers = require("@/models/letter_managements/headers.model");
+import axios from "axios";
+import { TemplateHandler } from "easy-template-x";
+
+const url = "https://siasn.bkd.jatimprov.go.id:9000/public/cek_header.docx";
+
+export const checkHeaderSurat = async (req, res) => {
+  try {
+    const { id } = req.query;
+    const header = await Headers.query().findById(id);
+    const template = await axios.get(url, { responseType: "arraybuffer" });
+    const templateHandler = new TemplateHandler();
+    const result = await templateHandler.process(template.data, header);
+
+    const fileBuffer = Buffer.from(result, "utf-8");
+    // to base64
+    const fileBase64 = fileBuffer.toString("base64");
+
+    res.json({ success: true, data: fileBase64 });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
 
 export const getHeaderSurat = async (req, res) => {
   try {
@@ -33,9 +56,8 @@ export const createHeaderSurat = async (req, res) => {
     const payload = {
       ...data,
       user_id: customId,
+      nama_instansi: "Pemerintah Provinsi Jawa Timur",
     };
-
-    console.log(payload);
 
     const header = await Headers.query().insert(payload);
     res.json(header);
