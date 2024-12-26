@@ -14,7 +14,10 @@ export const getHeaderSurat = async (req, res) => {
 export const findHeaderSurat = async (req, res) => {
   try {
     const { customId } = req?.user;
-    const headers = await Headers.query().where("user_id", customId);
+    const headers = await Headers.query()
+      .where("user_id", customId)
+      .withGraphFetched("user(simpleSelect)")
+      .orderBy("created_at", "desc");
     res.json(headers);
   } catch (error) {
     console.log(error);
@@ -25,25 +28,16 @@ export const findHeaderSurat = async (req, res) => {
 export const createHeaderSurat = async (req, res) => {
   try {
     const { customId } = req?.user;
-    const {
-      skpdId,
-      namaInstansi,
-      namaPerangkatDaerah,
-      alamat,
-      telepon,
-      lamanWeb,
-      email,
-    } = req?.body;
-    const header = await Headers.query().insert({
-      skpdId,
-      namaInstansi,
-      namaPerangkatDaerah,
-      alamat,
-      telepon,
-      lamanWeb,
-      email,
+    const data = req?.body;
+
+    const payload = {
+      ...data,
       user_id: customId,
-    });
+    };
+
+    console.log(payload);
+
+    const header = await Headers.query().insert(payload);
     res.json(header);
   } catch (error) {
     console.log(error);
@@ -55,27 +49,18 @@ export const updateHeaderSurat = async (req, res) => {
   try {
     const { id } = req.query;
     const { customId } = req?.user;
-    const {
-      skpdId,
-      namaInstansi,
-      namaPerangkatDaerah,
-      alamat,
-      telepon,
-      lamanWeb,
-      email,
-    } = req?.body;
+    const data = req?.body;
+
+    const payload = {
+      ...data,
+      user_id: customId,
+    };
+
     const header = await Headers.query()
       .findById(id)
       .where("user_id", customId)
-      .patch({
-        skpdId,
-        namaInstansi,
-        namaPerangkatDaerah,
-        alamat,
-        telepon,
-        lamanWeb,
-        email,
-      });
+      .patch(payload);
+
     res.json(header);
   } catch (error) {
     console.log(error);

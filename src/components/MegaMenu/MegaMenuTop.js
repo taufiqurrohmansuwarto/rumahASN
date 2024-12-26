@@ -86,7 +86,7 @@ const applist = [
     icon: <IconMailbox />,
     title: "Persuratan",
     color: "#FBBC05",
-    link: "/letter-managements/headers",
+    link: "/letter-managements/letter-header",
     userType: ["fasilitator", "admin"],
   },
 ];

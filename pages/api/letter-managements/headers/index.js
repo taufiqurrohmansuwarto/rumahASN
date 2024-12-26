@@ -3,7 +3,7 @@ import {
   findHeaderSurat,
 } from "@/controller/persuratan.controller";
 import adminFasilitatorMiddleware from "@/middleware/admin-fasilitator.middleware";
-import { auth } from "middleware/auth.middleware";
+import auth from "@/middleware/auth.middleware";
 import { createRouter } from "next-connect";
 
 const router = createRouter();
@@ -14,4 +14,4 @@ router
   .get(findHeaderSurat)
   .post(createHeaderSurat);
 
-export default router.handler();
+export default router.handler({});
