@@ -15,16 +15,15 @@ import { trim } from "lodash";
 dayjs.locale("id");
 
 export const serializeDataUtama = (data) => {
-  console.log("serializeDataUtama", data);
   const nama = `${data?.gelar_depan} ${data?.nama} ${data?.gelar_belakang}`;
   return {
-    n: trim(nama),
+    nama: trim(nama),
     nip: data?.nip_baru,
-    jp: data?.status,
-    jj: data?.jabatan?.jenis_jabatan,
-    j: data?.jabatan?.jabatan,
-    g: `${data?.pangkat?.golongan}-${data?.pangkat?.pangkat}`,
-    uk: data?.skpd?.detail,
+    status_kepegawaian: data?.status,
+    jenis_jabatan: data?.jabatan?.jenis_jabatan,
+    jabatan: data?.jabatan?.jabatan,
+    pangkat: `${data?.pangkat?.golongan}-${data?.pangkat?.pangkat}`,
+    unit_kerja: data?.skpd?.detail,
   };
 };
 

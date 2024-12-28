@@ -1,13 +1,13 @@
 import {
+  checkHeaderSurat,
   createHeaderSurat,
   deleteHeaderSurat,
-  updateHeaderSurat,
   getHeaderSurat,
-  checkHeaderSurat,
+  updateHeaderSurat,
 } from "@/services/letter-managements.services";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Button, Table, Modal, Form, Input, message, Card, Space } from "antd";
-import { useState, useEffect } from "react";
+import { Button, Card, Form, Input, message, Modal, Space, Table } from "antd";
+import { useEffect, useState } from "react";
 import FormUnorMaster from "../Utils/UnorMaster";
 
 // Modal component for creating/updating headers
@@ -45,13 +45,14 @@ const HeaderModal = ({
       title={type === "create" ? "Tambah Header" : "Edit Header"}
     >
       <Form form={form} layout="vertical">
-        <FormUnorMaster name="skpd_id" type="fasilitator" />
+        <FormUnorMaster name="skpd_id" type="fasilitator" required={true} />
         <Form.Item
           label="Nama Perangkat Daerah"
           name="nama_perangkat_daerah"
           rules={[
             { required: true, message: "Nama perangkat daerah harus diisi" },
           ]}
+          tooltip="Contoh: Badan Kepegawaian Daerah"
         >
           <Input />
         </Form.Item>
@@ -59,6 +60,7 @@ const HeaderModal = ({
           label="Alamat"
           name="alamat"
           rules={[{ required: true, message: "Alamat harus diisi" }]}
+          tooltip="contoh: Jalan Siwalankerto Utara II / 42 Wonocolo, Surabaya, Jawa Timur 60236"
         >
           <Input.TextArea />
         </Form.Item>
@@ -67,6 +69,7 @@ const HeaderModal = ({
           name="telepon"
           // contoh format (031) 8477551
           rules={[{ required: true, message: "Telepon harus diisi" }]}
+          tooltip="contoh: (031) 8477551"
         >
           <Input />
         </Form.Item>
@@ -74,6 +77,7 @@ const HeaderModal = ({
         <Form.Item
           label="Laman Web"
           name="laman_web"
+          tooltip="contoh: bkd.jatimprov.go.id"
           rules={[
             { required: true, message: "Laman web harus diisi" },
             {
@@ -91,6 +95,7 @@ const HeaderModal = ({
             { required: true, message: "Email harus diisi" },
             { type: "email", message: "Email tidak valid" },
           ]}
+          tooltip="contoh: bkd@jatimprov.go.id"
         >
           <Input />
         </Form.Item>
@@ -243,7 +248,7 @@ const HeaderLetter = () => {
   ];
 
   return (
-    <Card>
+    <Card title="Header Surat">
       <Button
         type="primary"
         onClick={() => handleOpenModal("create")}

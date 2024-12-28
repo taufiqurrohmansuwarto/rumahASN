@@ -37,7 +37,7 @@ const fetchDataUsulan = async (fetcher, tipeUsulan, employeeNumber) => {
 export const saveMessageAssistant = async (req, res) => {
   try {
     const data = req?.body;
-    const currentData = JSON.parse(data);
+    const currentData = data;
     await chatHistoryService.saveMessage(
       currentData?.threadId,
       currentData?.content,
@@ -58,8 +58,7 @@ export const saveMessageAssistant = async (req, res) => {
 export const saveThreadAssistant = async (req, res) => {
   try {
     const data = req?.body;
-    const currentData = JSON.parse(data);
-
+    const currentData = data;
     const getThread = await BotAssistantChatThreads.query().findById(
       currentData?.id
     );
@@ -97,7 +96,7 @@ export const checkUsulan = async (req, res) => {
   try {
     const data = req?.body;
 
-    const currentData = JSON.parse(data);
+    const currentData = data;
 
     const accessToken = currentData?.accessToken;
     const employeeNumber = currentData?.employee_number;
@@ -149,7 +148,7 @@ export const getAtasanLangsung = async (req, res) => {
 export const getPesertaSpt = async (req, res) => {
   try {
     const data = req?.body;
-    const currentData = JSON.parse(data);
+    const currentData = data;
     const result = await cariSeluruhRekanKerja(currentData?.organization_id);
     res.json(result);
   } catch (error) {
@@ -161,7 +160,7 @@ export const getPesertaSpt = async (req, res) => {
 export const getPejabat = async (req, res) => {
   try {
     const data = req?.body;
-    const currentData = JSON.parse(data);
+    const currentData = data;
     const organizationId = currentData?.organization_id;
     const result = await cariPejabat(organizationId);
     res.json(result);
@@ -173,8 +172,7 @@ export const getPejabat = async (req, res) => {
 
 export const getDataUtamaSiasn = async (req, res) => {
   try {
-    const data = req?.body;
-    const currentData = JSON.parse(data);
+    const currentData = req?.currentUser;
     const fetcher = axios.create({
       baseURL: process.env.APIGATEWAY_URL,
       headers: {
@@ -191,30 +189,36 @@ export const getDataUtamaSiasn = async (req, res) => {
       .where("nip_baru", currentData?.employee_number)
       .first();
 
-    const resultJson = serializeDataUtama(result);
-    const hasil = {
-      ...resultJson,
-      // masa kerja tahun
-      mkt: `${dataPegawai?.mk_tahun} Tahun`,
-      // masa kerja bulan
-      mkb: `${dataPegawai?.mk_bulan} Bulan`,
-      // tingkat pendidikan nama
-      tpn: dataPegawai?.tingkat_pendidikan_nama,
-      // pendidikan nama
-      tpb: dataPegawai?.pendidikan_nama,
-    };
+    if (!dataPegawai) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Pegawai tidak ditemukan" });
+    } else {
+      const resultJson = serializeDataUtama(result);
+      const hasil = {
+        ...resultJson,
+        // masa kerja tahun
+        masa_kerja_tahun: `${dataPegawai?.mk_tahun} Tahun`,
+        // masa kerja bulan
+        masa_kerja_bulan: `${dataPegawai?.mk_bulan} Bulan`,
+        // tingkat pendidikan nama
+        tingkat_pendidikan_nama: dataPegawai?.tingkat_pendidikan_nama,
+        // pendidikan nama
+        pendidikan_nama: dataPegawai?.pendidikan_nama,
+      };
 
-    res.json(hasil);
+      res.json(hasil);
+    }
   } catch (error) {
     console.log(error);
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: "Internal server error" });
   }
 };
 
 export const generateDocumentSpt = async (req, res) => {
   try {
     const data = req?.body;
-    const currentData = JSON.parse(data);
+    const currentData = data;
     const result = await generateDocument(currentData?.data, mc);
     res.json(result);
   } catch (error) {
@@ -226,7 +230,7 @@ export const generateDocumentSpt = async (req, res) => {
 export const generateDocLupaAbsen = async (req, res) => {
   try {
     const data = req?.body;
-    const currentData = JSON.parse(data);
+    const currentData = data;
     const parameter = currentData?.data;
 
     let promises = [];
@@ -254,7 +258,7 @@ export const generateDocLupaAbsen = async (req, res) => {
 export const getDataPengguna = async (req, res) => {
   try {
     const data = req?.body;
-    const currentData = JSON.parse(data);
+    const currentData = data;
     const result = await getPengguna(currentData?.employee_number);
     res.json(result);
   } catch (error) {

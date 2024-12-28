@@ -4,13 +4,18 @@ import { decode } from "next-auth/jwt";
 // import { createOpenAI } from "@ai-sdk/openai";
 import OpenAI from "openai";
 const prod = process.env.NODE_ENV === "production";
+const API_KEY = process.env.API_KEY;
 
 const makeRequest = async (endpoint, data) => {
   try {
     const url = `${process.env.NEXT_PUBLIC_API_URL}${endpoint}`;
-    console.log("url", url);
     const response = await fetch(url, {
       method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        // use api key
+        Authorization: `Bearer ${API_KEY}`,
+      },
       body: JSON.stringify(data),
     });
     const result = await response.json();
@@ -216,6 +221,7 @@ export const assistant = async (req, res) => {
 
                 // dapatkan data pengguna
                 case "get_data_utama_siasn":
+                  console.log("masuk ke get data utama siasn");
                   const dataUtama = await getDataUtamaSiasn(params);
                   return {
                     tool_call_id: toolCall.id,
@@ -224,6 +230,7 @@ export const assistant = async (req, res) => {
 
                 // peserta spt di organisasinya
                 case "get_peserta_spt":
+                  console.log("masuk ke get peserta spt");
                   const pesertaSpt = await getPesertaSpt(params);
                   return {
                     tool_call_id: toolCall.id,
@@ -232,6 +239,7 @@ export const assistant = async (req, res) => {
 
                 // pejabat di organisasinya
                 case "get_pejabat":
+                  console.log("masuk ke get pejabat");
                   const pejabat = await cariPejabat(params);
                   return {
                     tool_call_id: toolCall.id,
@@ -240,6 +248,7 @@ export const assistant = async (req, res) => {
 
                 // generate document spt
                 case "generate_document_spt":
+                  console.log("masuk ke generate document spt");
                   const documentSpt = await generateDocumentSpt(params);
                   return {
                     tool_call_id: toolCall.id,
@@ -248,6 +257,7 @@ export const assistant = async (req, res) => {
 
                 // generate document lupa absen
                 case "generate_document_lupa_absen":
+                  console.log("masuk ke generate document lupa absen");
                   const documentLupaAbsen = await generateDocumentLupaAbsen(
                     params
                   );
@@ -258,6 +268,7 @@ export const assistant = async (req, res) => {
 
                 // get data pengguna
                 case "get_data_pengguna":
+                  console.log("masuk ke get data pengguna");
                   const dataPengguna = await getDataPengguna(params);
                   return {
                     tool_call_id: toolCall.id,

@@ -27,12 +27,13 @@ export const checkOrigin = (req, res, next) => {
 };
 
 export const checkRole = (req, res, next) => {
-  const currentData = JSON.parse(req?.body);
+  const currentData = req?.body;
   const currentRole = currentData?.current_role;
   const pegawaiBKD = currentRole === "admin" || currentRole === "user";
   if (!pegawaiBKD) {
     res.status(403).json({ success: false, message: "Forbidden" });
   } else {
+    req.currentUser = currentData;
     next();
   }
 };
