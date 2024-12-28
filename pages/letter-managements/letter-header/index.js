@@ -4,7 +4,7 @@ import PageContainer from "@/components/PageContainer";
 
 const LetterHeader = () => {
   return (
-    <PageContainer>
+    <PageContainer title="Letter Header" subTitle="Letter Header">
       <HeaderLetter />
     </PageContainer>
   );
