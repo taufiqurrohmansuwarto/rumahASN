@@ -1,9 +1,9 @@
 import { getPejabat } from "@/controller/tool-services.controller";
+import { checkApiKey, checkRole } from "@/middleware/tool-services.middleware";
 import { createRouter } from "next-connect";
-import { checkRole } from "@/middleware/tool-services.middleware";
 const router = createRouter();
 
-router.use(checkRole).post(getPejabat);
+router.use(checkApiKey).use(checkRole).post(getPejabat);
 
 export default router.handler({
   onError: (err, req, res, next) => {

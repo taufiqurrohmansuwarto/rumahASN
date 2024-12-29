@@ -98,13 +98,14 @@ const serializeData = (data) => {
   let dataSerialized = {};
   const peserta = data?.peserta;
   const pejabat = data?.pejabat;
+  const header = data?.header;
 
   if (peserta?.length === 1) {
     dataSerialized = {
       nomorSPT: data?.nomorSPT,
       dsr: data?.dasarSPT?.map((item, index) => ({
         ...item,
-        no: index + 1 + 4,
+        no: index + 1 + 3,
       })),
       deskripsiKegiatanSPT: data?.deskripsiKegiatanSPT,
       judulKegiatanSPT: data?.judulKegiatanSPT,
@@ -165,13 +166,25 @@ const serializeData = (data) => {
     };
   }
 
-  return dataSerialized;
+  const result = {
+    ...dataSerialized,
+    namaInstansi: header?.nama_instansi,
+    namaPerangkatDaerah: header?.nama_perangkat_daerah,
+    alamat: header?.alamat,
+    telepon: header?.telepon,
+    alamatWeb: header?.laman_web,
+    email: header?.email,
+    tglSPT: dayjs(data?.tglSPT).format("DD MMMM YYYY"),
+  };
+
+  return result;
 };
 
 export const generateDocument = async (data, minio) => {
   try {
     console.log("generate document spt");
     const dataSerialized = serializeData(data);
+    console.log("data nya", dataSerialized);
 
     const urlDocx = await getUrlDocx(data?.peserta);
 

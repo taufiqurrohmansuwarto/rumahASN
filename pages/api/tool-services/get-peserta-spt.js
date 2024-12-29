@@ -1,9 +1,9 @@
 import { getPesertaSpt } from "@/controller/tool-services.controller";
+import { checkApiKey, checkRole } from "@/middleware/tool-services.middleware";
 import { createRouter } from "next-connect";
-import { checkRole } from "@/middleware/tool-services.middleware";
 const router = createRouter();
 
-router.use(checkRole).post(getPesertaSpt);
+router.use(checkApiKey).use(checkRole).post(getPesertaSpt);
 
 export default router.handler({
   onError: (err, req, res, next) => {
