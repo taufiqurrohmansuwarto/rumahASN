@@ -1,5 +1,6 @@
 const SyncPegawai = require("@/models/sync-pegawai.model");
 const { raw } = require("objection");
+const HeaderModel = require("@/models/letter_managements/headers.model");
 
 function getParentCodes(code) {
   let codes = [];
@@ -13,6 +14,34 @@ function getParentCodes(code) {
 
   return codes;
 }
+
+module.exports.getHeaderSuratUnitKerja = async (currentOpdId) => {
+  try {
+    // ambil 3 digit saja dari currentOpdId
+    const organizationId = currentOpdId?.substring(0, 3);
+    const result = await HeaderModel.query()
+      .where("skpd_id", organizationId)
+      .first();
+    return result;
+  } catch (error) {
+    console.log(error);
+    throw new Error("Header surat tidak dapat ditemukan");
+  }
+};
+
+module.exports.cariPejabatNew = async (currentOpdId, nama) => {
+  try {
+    const organizationId = currentOpdId?.substring(0, 3);
+    const knex = HeaderModel.knex();
+    const result = await knex.raw(
+      `select * from cari_pejabat_dinamis(${organizationId}, ${nama})`
+    );
+    return result;
+  } catch (error) {
+    console.log(error);
+    throw new Error("Pejabat tidak ditemukan");
+  }
+};
 
 module.exports.getPengguna = async (employeeNumber) => {
   try {
