@@ -34,9 +34,35 @@ module.exports.cariPejabatNew = async (currentOpdId, nama) => {
     const organizationId = currentOpdId?.substring(0, 3);
     const knex = HeaderModel.knex();
     const result = await knex.raw(
-      `select * from cari_pejabat_dinamis(${organizationId}, ${nama})`
+      `select * from cari_pejabat_dinamis('${organizationId}', '${nama}')`
     );
-    return result;
+
+    const hasil = result?.rows[0];
+    console.log("pejabat", hasil);
+
+    if (!hasil) {
+      throw new Error("Pejabat tidak ditemukan");
+    } else {
+      const { nip_master } = hasil;
+      const pejabat = await SyncPegawai.query()
+        .where("nip_master", nip_master)
+        .select(
+          "id as id",
+          raw(
+            "nama_master || ' ' || gelar_depan_master || ' ' || gelar_belakang_master as nama"
+          )
+        )
+        .withGraphFetched("siasn")
+        .first();
+
+      const result = {
+        atasan_id: pejabat?.id,
+        nama: pejabat?.nama,
+        jabatan: pejabat?.siasn?.jabatan_nama,
+      };
+
+      return result;
+    }
   } catch (error) {
     console.log(error);
     throw new Error("Pejabat tidak ditemukan");

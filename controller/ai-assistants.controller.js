@@ -261,7 +261,10 @@ export const assistant = async (req, res) => {
 
                 // generate document spt
                 case "generate_document_spt":
-                  console.log("masuk ke generate document spt");
+                  console.log(
+                    "masuk ke generate document spt dengan params",
+                    params
+                  );
                   const documentSpt = await generateDocumentSpt(params);
                   return {
                     tool_call_id: toolCall.id,
@@ -270,7 +273,11 @@ export const assistant = async (req, res) => {
 
                 // generate document lupa absen
                 case "generate_document_lupa_absen":
-                  console.log("masuk ke generate document lupa absen");
+                  console.log(
+                    "masuk ke generate document lupa absen dengan params",
+                    params
+                  );
+
                   const documentLupaAbsen = await generateDocumentLupaAbsen(
                     params
                   );
