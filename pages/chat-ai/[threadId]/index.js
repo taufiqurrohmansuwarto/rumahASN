@@ -8,11 +8,17 @@ import ChatBotLayout from "@/components/AI/ChatBot/ChatBotLayout";
 import { useAssistant } from "ai/react";
 import Head from "next/head";
 import { useRouter } from "next/router";
+import { useSession } from "next-auth/react";
 
 const ChatAIThread = () => {
   const { styles } = useStyle();
   const router = useRouter();
   const { threadId: currentThreadId } = router.query;
+
+  const { data } = useSession();
+  const asn =
+    data?.user?.status_kepegawaian === "PNS" ||
+    data?.user?.status_kepegawaian === "PPPK";
 
   const {
     status,
@@ -37,24 +43,26 @@ const ChatAIThread = () => {
       <Head>
         <title>Rumah ASN - Bestie AI BKD</title>
       </Head>
-      <AntDChatLayoutContainer>
-        <AntdChatMessagesNew
-          status={status}
-          setMessages={setMessages}
-          messages={messages}
-          style={styles}
-        />
-        <AntdChatSenderNew
-          style={styles}
-          status={status}
-          submitMessage={submitMessage}
-          stop={stop}
-          append={append}
-          setInput={setInput}
-          input={input}
-          handleInputChange={handleInputChange}
-        />
-      </AntDChatLayoutContainer>
+      {asn ? (
+        <AntDChatLayoutContainer>
+          <AntdChatMessagesNew
+            status={status}
+            setMessages={setMessages}
+            messages={messages}
+            style={styles}
+          />
+          <AntdChatSenderNew
+            style={styles}
+            status={status}
+            submitMessage={submitMessage}
+            stop={stop}
+            append={append}
+            setInput={setInput}
+            input={input}
+            handleInputChange={handleInputChange}
+          />
+        </AntDChatLayoutContainer>
+      ) : null}
     </>
   );
 };

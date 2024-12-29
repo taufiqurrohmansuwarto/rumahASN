@@ -1,8 +1,9 @@
 import { getDataPengguna } from "@/controller/tool-services.controller";
+import { checkApiKey, checkRole } from "@/middleware/tool-services.middleware";
 import { createRouter } from "next-connect";
 const router = createRouter();
 
-router.use(checkRole).post(getDataPengguna);
+router.use(checkApiKey).use(checkRole).post(getDataPengguna);
 
 export default router.handler({
   onError: (err, req, res, next) => {
