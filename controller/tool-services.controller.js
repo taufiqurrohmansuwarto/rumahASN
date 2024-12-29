@@ -9,7 +9,10 @@ import {
   cariPejabatNew,
   cariSeluruhRekanKerja,
   getHeaderSuratUnitKerja,
+  getPegawaiById,
+  getPegawaiByIds,
   getPengguna,
+  getTemanKerja,
 } from "@/utils/ai-utils";
 import { chatHistoryService } from "@/utils/chatHistoryService";
 import { getDataUtamaMaster } from "@/utils/master.utils";
@@ -153,7 +156,10 @@ export const getPesertaSpt = async (req, res) => {
   try {
     const data = req?.body;
     const currentData = data;
-    const result = await cariSeluruhRekanKerja(currentData?.organization_id);
+    const result = await getTemanKerja(
+      currentData?.names,
+      currentData?.organization_id
+    );
     res.json(result);
   } catch (error) {
     console.log(error);
@@ -223,7 +229,25 @@ export const generateDocumentSpt = async (req, res) => {
   try {
     const data = req?.body;
     const currentData = data;
-    const result = await generateDocument(currentData?.data, mc);
+    const parameter = currentData?.data;
+    const parameterPeserta = parameter?.peserta?.map(
+      (item) => item?.pegawai_id
+    );
+
+    const pejabat = await getPegawaiById(parameter?.pejabat_id);
+    const peserta = await getPegawaiByIds(parameterPeserta);
+    const header = await HeaderSurat.query().findById(parameter?.header_id);
+
+    const payload = {
+      ...parameter,
+      pejabat,
+      peserta,
+      header,
+    };
+
+    console.log("payload", payload);
+
+    const result = await generateDocument(payload, mc);
     res.json(result);
   } catch (error) {
     console.log(error);
@@ -256,7 +280,7 @@ export const generateDocLupaAbsen = async (req, res) => {
       .findById(parameter?.atasan_id)
       .select(
         raw(
-          "gelar_depan_master || ' ' || nama_master || ' ' || gelar_belakang_master as nama"
+          "trim(concat(gelar_depan_master, ' ', nama_master, ' ', gelar_belakang_master)) as nama"
         ),
         "nip_master as nip",
         raw("golongan_master || '-' || pangkat_master as pangkat"),
