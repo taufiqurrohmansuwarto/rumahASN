@@ -35,7 +35,8 @@ export const generateDocumentLupaAbsen = async (
   tglPembuatan,
   pembuat,
   atasan,
-  tanggalLupaAbsen
+  tanggalLupaAbsen,
+  headerProperties
 ) => {
   const urlDocx = urlDocxLupaAbsen;
 
@@ -43,14 +44,15 @@ export const generateDocumentLupaAbsen = async (
     tglPembuatan: dayjs(tglPembuatan).format("DD MMMM YYYY"),
     hari: dayjs(tanggalLupaAbsen).format("dddd"),
     tanggal: dayjs(tanggalLupaAbsen).format("DD MMMM YYYY"),
-    nama: pembuat?.nama,
+    nama: trim(pembuat?.nama),
     nip: pembuat?.nip,
-    jabatan: pembuat?.jabatan,
-    unitKerja: pembuat?.unit_organisasi,
-    namaAtasan: atasan?.nama,
+    jabatan: trim(pembuat?.jabatan),
+    unitKerja: trim(pembuat?.unit_organisasi),
+    namaAtasan: trim(atasan?.nama),
     nipAtasan: atasan?.nip,
-    jabatanAtasan: atasan?.jabatan,
-    unitKerjaAtasan: atasan?.unit_organisasi,
+    jabatanAtasan: trim(atasan?.jabatan),
+    unitKerjaAtasan: trim(atasan?.unit_organisasi),
+    ...headerProperties,
   };
 
   const doc = await axios.get(urlDocx, {

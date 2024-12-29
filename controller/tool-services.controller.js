@@ -2,9 +2,11 @@ const BotAssistantChatThreads = require("@/models/assistant_bot/chat-threads.mod
 const BotAssistantMessages = require("@/models/assistant_bot/messages.model");
 const SyncPegawai = require("@/models/sync-pegawai.model");
 const SIASNEmployee = require("@/models/siasn-employees.model");
+const HeaderSurat = require("@/models/letter_managements/headers.model");
 
+import SiasnEmployees from "@/models/siasn-employees.model";
 import {
-  cariPejabat,
+  cariPejabatNew,
   cariSeluruhRekanKerja,
   getHeaderSuratUnitKerja,
   getPengguna,
@@ -17,6 +19,7 @@ import {
   serializeDataUtama,
 } from "@/utils/toolservice";
 import axios from "axios";
+import { raw } from "objection";
 const Minio = require("minio");
 const minioConfig = {
   port: parseInt(process.env.MINIO_PORT),
@@ -163,7 +166,7 @@ export const getPejabat = async (req, res) => {
     const data = req?.body;
     const currentData = data;
     const organizationId = currentData?.organization_id;
-    const result = await cariPejabat(organizationId);
+    const result = await cariPejabatNew(organizationId, currentData?.nama);
     res.json(result);
   } catch (error) {
     console.log(error);
@@ -233,6 +236,59 @@ export const generateDocLupaAbsen = async (req, res) => {
     const data = req?.body;
     const currentData = data;
     const parameter = currentData?.data;
+    console.log("parameter", parameter);
+
+    const header = await HeaderSurat.query().findById(parameter?.header_id);
+    const currentUser = await SyncPegawai.query()
+      .where("nip_master", currentData?.employee_number)
+      .select(
+        raw(
+          "gelar_depan_master || ' ' || nama_master || ' ' || gelar_belakang_master as nama"
+        ),
+        "nip_master as nip",
+        raw("golongan_master || '-' || pangkat_master as pangkat"),
+        "opd_master as unit_organisasi"
+      )
+      .withGraphFetched("siasn")
+      .first();
+
+    const currentAtasan = await SyncPegawai.query()
+      .findById(parameter?.atasan_id)
+      .select(
+        raw(
+          "gelar_depan_master || ' ' || nama_master || ' ' || gelar_belakang_master as nama"
+        ),
+        "nip_master as nip",
+        raw("golongan_master || '-' || pangkat_master as pangkat"),
+        "opd_master as unit_organisasi"
+      )
+      .withGraphFetched("siasn")
+      .first();
+
+    const pegawai = {
+      nama: currentUser?.nama,
+      nip: currentUser?.nip,
+      pangkat: currentUser?.pangkat,
+      jabatan: currentUser?.siasn?.jabatan_nama,
+      unit_organisasi: currentUser?.unit_organisasi,
+    };
+
+    const atasan = {
+      nama: currentAtasan?.nama,
+      nip: currentAtasan?.nip,
+      pangkat: currentAtasan?.pangkat,
+      jabatan: currentAtasan?.siasn?.jabatan_nama,
+      unit_organisasi: currentAtasan?.unit_organisasi,
+    };
+
+    const headerProperties = {
+      namaInstansi: header?.nama_instansi,
+      namaPerangkatDaerah: header?.nama_perangkat_daerah,
+      alamat: header?.alamat,
+      telepon: header?.telepon,
+      lamanWeb: header?.laman_web,
+      email: header?.email,
+    };
 
     let promises = [];
     parameter?.dataLupaAbsen?.forEach((item) => {
@@ -240,14 +296,16 @@ export const generateDocLupaAbsen = async (req, res) => {
         generateDocumentLupaAbsen(
           mc,
           parameter?.tglPembuatan,
-          parameter?.informasiPengguna,
-          parameter?.informasiAtasan,
-          item?.tanggal
+          pegawai,
+          atasan,
+          item?.tanggal,
+          headerProperties
         )
       );
     });
 
     const result = await Promise.all(promises);
+    console.log("result", result);
 
     res.json(result);
   } catch (error) {
@@ -278,7 +336,7 @@ export const getHeaderSurat = async (req, res) => {
         .status(404)
         .json({ success: false, message: "Header surat tidak ditemukan" });
     } else {
-      res.json({ id: result?.id });
+      res.json({ header_id: result?.id });
     }
   } catch (error) {
     console.log(error);
