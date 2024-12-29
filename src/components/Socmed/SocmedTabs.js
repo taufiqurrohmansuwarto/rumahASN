@@ -7,6 +7,7 @@ import {
   IconHistory,
   IconMapPin,
   IconMessage,
+  IconRobot,
   IconUsers,
 } from "@tabler/icons";
 import { Affix, Card, Col, Flex, Row, Tabs } from "antd";
@@ -52,6 +53,26 @@ function SocmedTabs() {
                       controlSize={23}
                       dragFree
                     >
+                      <Carousel.Slide>
+                        <Flex
+                          align="center"
+                          justify="center"
+                          style={{
+                            height: "100%",
+                            borderRadius: 18,
+                            border: "1px solid #d9d9d9",
+                            cursor: "pointer",
+                          }}
+                          onClick={() => router.push("/chat-ai")}
+                        >
+                          <Flex align="center" gap={8}>
+                            <IconRobot color="orange" size={18} />
+                            <Text size="sm" fw={700}>
+                              Bestie AI
+                            </Text>
+                          </Flex>
+                        </Flex>
+                      </Carousel.Slide>
                       <Carousel.Slide>
                         <Flex
                           align="center"

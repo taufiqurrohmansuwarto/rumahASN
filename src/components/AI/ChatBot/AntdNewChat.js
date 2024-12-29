@@ -25,7 +25,7 @@ const items = [
       />
     ),
     label: "Status Usulan SIASN",
-    description: "Apakah usulan SIASN saya sudah selesai?",
+    description: "Tolong cek status usulan saya di SIASN",
   },
   {
     key: "2",
@@ -37,7 +37,7 @@ const items = [
       />
     ),
     label: "Pangkat",
-    description: "Berapa kali periodesasi kenaikan pangkat?",
+    description: "Berapa kali periodisasi kenaikan pangkat?",
   },
   {
     key: "3",
@@ -50,6 +50,18 @@ const items = [
     ),
     label: "Surat Peritah Tugas",
     description: "Buatkan SPT/Surat Perintah Tugas",
+  },
+  {
+    key: "5",
+    icon: (
+      <BulbOutlined
+        style={{
+          color: "#1890FF",
+        }}
+      />
+    ),
+    label: "Lupa Absen",
+    description: "Tolong buatkan surat keterangan lupa absen saya",
   },
   {
     key: "4",
