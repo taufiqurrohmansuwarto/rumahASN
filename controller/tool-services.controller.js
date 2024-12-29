@@ -6,6 +6,7 @@ const SIASNEmployee = require("@/models/siasn-employees.model");
 import {
   cariPejabat,
   cariSeluruhRekanKerja,
+  getHeaderSuratUnitKerja,
   getPengguna,
 } from "@/utils/ai-utils";
 import { chatHistoryService } from "@/utils/chatHistoryService";
@@ -264,5 +265,23 @@ export const getDataPengguna = async (req, res) => {
   } catch (error) {
     console.log(error);
     res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+export const getHeaderSurat = async (req, res) => {
+  try {
+    const currentUser = req?.body;
+    const skpdId = currentUser?.organization_id;
+    const result = await getHeaderSuratUnitKerja(skpdId);
+    if (!result) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Header surat tidak ditemukan" });
+    } else {
+      res.json({ id: result?.id });
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ success: false, message: error });
   }
 };

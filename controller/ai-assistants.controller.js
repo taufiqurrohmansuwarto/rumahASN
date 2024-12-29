@@ -27,6 +27,10 @@ const makeRequest = async (endpoint, data) => {
   }
 };
 
+const getHeaderSurat = async (data) => {
+  return makeRequest("/tool-services/get-header-surat", data);
+};
+
 const cariUsulanSiasn = async (data) => {
   return makeRequest("/tool-services/status-usulan-siasn", data);
 };
@@ -226,6 +230,15 @@ export const assistant = async (req, res) => {
                   return {
                     tool_call_id: toolCall.id,
                     output: JSON.stringify(dataUtama),
+                  };
+
+                //mendapatkan header surat dari unit kerja pengguna
+                case "get_header_surat":
+                  console.log("masuk ke get header surat");
+                  const headerSurat = await getHeaderSurat(params);
+                  return {
+                    tool_call_id: toolCall.id,
+                    output: JSON.stringify(headerSurat),
                   };
 
                 // peserta spt di organisasinya
