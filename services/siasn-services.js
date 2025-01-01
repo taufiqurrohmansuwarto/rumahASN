@@ -624,10 +624,14 @@ export const getGelar = async () => {
   return api.get(`/pns/gelar`).then((res) => res.data);
 };
 
-export const checkGelar = async (gelarId) => {
-  return api.get(`/pns/gelar/${gelarId}/check`).then((res) => res.data);
+export const checkGelar = async ({ gelarId, loc }) => {
+  return api
+    .get(`/pns/gelar/${gelarId}/check?loc=${loc}`)
+    .then((res) => res.data);
 };
 
-export const uncheckGelar = async (gelarId) => {
-  return api.get(`/pns/gelar/${gelarId}/uncheck`).then((res) => res.data);
+export const uncheckGelar = async ({ gelarId, loc }) => {
+  return api
+    .get(`/pns/gelar/${gelarId}/uncheck?loc=${loc}`)
+    .then((res) => res.data);
 };

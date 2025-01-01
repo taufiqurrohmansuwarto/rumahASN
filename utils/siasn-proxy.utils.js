@@ -32,12 +32,12 @@ module.exports.proxyGelar = async (fetcher, nip) => {
   return fetcher.get(`${BASE_URL}/data-gelar/${nip}`);
 };
 
-module.exports.proxyGelarCheck = async (fetcher, nip, gelarId) => {
-  return fetcher.get(`${BASE_URL}/data-gelar/${nip}/${gelarId}/check`);
+module.exports.proxyGelarCheck = async (fetcher, nip, gelarId, loc) => {
+  return fetcher.get(`${BASE_URL}/data-gelar/${nip}/${gelarId}/check/${loc}`);
 };
 
-module.exports.proxyGelarUncheck = async (fetcher, nip, gelarId) => {
-  return fetcher.get(`${BASE_URL}/data-gelar/${nip}/${gelarId}/uncheck`);
+module.exports.proxyGelarUncheck = async (fetcher, nip, gelarId, loc) => {
+  return fetcher.get(`${BASE_URL}/data-gelar/${nip}/${gelarId}/uncheck/${loc}`);
 };
 
 module.exports.getDataUtamaASNProxy = (fetcher, nip) => {
