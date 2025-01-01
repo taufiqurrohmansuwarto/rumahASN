@@ -28,6 +28,18 @@ module.exports.proxyDataUtamaASN = async (fetcher, nip) => {
   return fetcher.get(`/siasn-ws/proxy/asn/${nip}/data-utama`);
 };
 
+module.exports.proxyGelar = async (fetcher, nip) => {
+  return fetcher.get(`${BASE_URL}/data-gelar/${nip}`);
+};
+
+module.exports.proxyGelarCheck = async (fetcher, nip, gelarId) => {
+  return fetcher.get(`${BASE_URL}/data-gelar/${nip}/${gelarId}/check`);
+};
+
+module.exports.proxyGelarUncheck = async (fetcher, nip, gelarId) => {
+  return fetcher.get(`${BASE_URL}/data-gelar/${nip}/${gelarId}/uncheck`);
+};
+
 module.exports.getDataUtamaASNProxy = (fetcher, nip) => {
   return new Promise(async (resolve, reject) => {
     try {
