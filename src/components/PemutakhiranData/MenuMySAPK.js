@@ -12,6 +12,7 @@ import {
 } from "@mantine/core";
 import { Avatar, Grid, Space, Tag, Typography } from "antd";
 import { useRouter } from "next/router";
+import PengaturanGelar from "../LayananSIASN/PengaturanGelar";
 
 const mockdata = mysapkMenu;
 
@@ -109,6 +110,7 @@ export function MenuMySAPK({ dataUtama, foto }) {
                   ? "NIK Terverifikasi"
                   : "NIK Belum Terverifikasi"}
               </Tag>
+              <PengaturanGelar />
             </Space>
             {/* <AnomaliUser /> */}
           </Space>

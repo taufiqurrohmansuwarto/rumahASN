@@ -618,3 +618,16 @@ export const getRwKompetensiByNip = async (nip) => {
 export const getRwPotensiByNip = async (nip) => {
   return api.get(`/admin/${nip}/rw-potensi`).then((res) => res.data);
 };
+
+// gelar
+export const getGelar = async () => {
+  return api.get(`/pns/gelar`).then((res) => res.data);
+};
+
+export const checkGelar = async (gelarId) => {
+  return api.get(`/pns/gelar/${gelarId}/check`).then((res) => res.data);
+};
+
+export const uncheckGelar = async (gelarId) => {
+  return api.get(`/pns/gelar/${gelarId}/uncheck`).then((res) => res.data);
+};
