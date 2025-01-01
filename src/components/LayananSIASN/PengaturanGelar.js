@@ -19,6 +19,7 @@ const castToBoolean = (value) => (value === "true" ? true : false);
 
 const ModalPengaturanGelar = ({ open, onCancel, onOk }) => {
   const [idGelar, setIdGelar] = useState(null);
+  const [loc, setLoc] = useState(null);
   const { data, isLoading } = useQuery(["daftar-gelar"], () => getGelar(), {});
   const queryClient = useQueryClient();
 
@@ -50,13 +51,17 @@ const ModalPengaturanGelar = ({ open, onCancel, onOk }) => {
       },
     });
 
-  const handleCheck = async (id, event) => {
+  const handleCheck = async (id, event, loc) => {
     const isChecked = event.target.checked;
     setIdGelar(id);
+    const payload = {
+      gelarId: id,
+      loc: loc,
+    };
     if (isChecked) {
-      await gelarCheck(id);
+      await gelarCheck(payload);
     } else {
-      await gelarUncheck(id);
+      await gelarUncheck(payload);
     }
   };
 
@@ -83,7 +88,7 @@ const ModalPengaturanGelar = ({ open, onCancel, onOk }) => {
               <Space key={gelar.id}>
                 <Checkbox
                   disabled={idGelar === gelar.id}
-                  onChange={(checked) => handleCheck(gelar.id, checked)}
+                  onChange={(checked) => handleCheck(gelar.id, checked, "D")}
                   defaultChecked={castToBoolean(gelar.checked)}
                 />
                 <Tag key={gelar.id}>{gelar.glr_depan}</Tag>
@@ -98,7 +103,7 @@ const ModalPengaturanGelar = ({ open, onCancel, onOk }) => {
               <Space key={gelar?.id}>
                 <Checkbox
                   disabled={idGelar === gelar.id}
-                  onChange={(checked) => handleCheck(gelar.id, checked)}
+                  onChange={(checked) => handleCheck(gelar.id, checked, "B")}
                   defaultChecked={castToBoolean(gelar.checked)}
                 />
                 <Tag key={gelar.id}>{gelar.glr_belakang}</Tag>

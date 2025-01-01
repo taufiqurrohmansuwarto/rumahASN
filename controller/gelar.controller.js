@@ -24,9 +24,16 @@ export const uncheckGelar = async (req, res) => {
   try {
     const { employee_number } = req?.user;
     const fetcher = req?.fetcher;
-    const { gelarId } = req?.query;
+    const { gelarId, loc } = req?.query;
 
-    const response = await proxyGelarUncheck(fetcher, employee_number, gelarId);
+    console.log("uncheck", gelarId, loc);
+
+    const response = await proxyGelarUncheck(
+      fetcher,
+      employee_number,
+      gelarId,
+      loc
+    );
 
     res.json(response?.data);
   } catch (error) {
@@ -41,9 +48,15 @@ export const checkGelar = async (req, res) => {
   try {
     const { employee_number } = req?.user;
     const fetcher = req?.fetcher;
-    const { gelarId } = req?.query;
+    const { gelarId, loc } = req?.query;
+    console.log("check", gelarId, loc);
 
-    const response = await proxyGelarCheck(fetcher, employee_number, gelarId);
+    const response = await proxyGelarCheck(
+      fetcher,
+      employee_number,
+      gelarId,
+      loc
+    );
 
     res.json(response?.data);
   } catch (error) {
