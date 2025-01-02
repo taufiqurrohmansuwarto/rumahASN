@@ -492,3 +492,41 @@ ORDER BY path`;
   const result = await knex.raw(raw);
   return result.rows;
 };
+
+module.exports.getUnorSiasnInformation = async (id) => {
+  const raw = `WITH RECURSIVE unor_hierarchy AS (
+    -- Langkah awal: Mulai dari "Id" tertentu
+    SELECT
+        "Id",
+        "NamaUnor",
+        "DiatasanId",
+        1 AS level  -- Level awal adalah 1
+    FROM
+        ref_siasn_unor
+    WHERE
+        "Id" = '${id}'  -- Ganti dengan ID yang diinginkan
+
+    UNION ALL
+
+    -- Langkah rekursif: Dapatkan data di atasnya
+    SELECT
+        r."Id",
+        r."NamaUnor",
+        r."DiatasanId",
+        uh.level + 1 AS level  -- Tambahkan level setiap naik hierarki
+    FROM
+        ref_siasn_unor r
+    INNER JOIN
+        unor_hierarchy uh
+    ON
+        r."Id" = uh."DiatasanId"
+)
+-- Ambil semua data hierarki
+SELECT
+    STRING_AGG("NamaUnor", ' - ' ORDER BY level ASC) AS hierarchy
+FROM
+    unor_hierarchy;`;
+
+  const result = await knex.raw(raw);
+  return result.rows;
+};
