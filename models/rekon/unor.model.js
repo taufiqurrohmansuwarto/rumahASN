@@ -1,11 +1,16 @@
 const { Model } = require("objection");
 const knex = require("../../db");
+const { nanoid } = require("nanoid");
 
 Model.knex(knex);
 
 class Unor extends Model {
   static get tableName() {
     return "rekon.unor";
+  }
+
+  $beforeInsert() {
+    this.id = nanoid();
   }
 
   static get relationMappings() {

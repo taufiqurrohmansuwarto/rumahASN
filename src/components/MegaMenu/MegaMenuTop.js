@@ -8,6 +8,7 @@ import {
 } from "@tabler/icons";
 import {
   IconCalendarUser,
+  IconTransfer,
   IconUserCircle,
   IconUserSquareRounded,
 } from "@tabler/icons-react";
@@ -87,6 +88,13 @@ const applist = [
     title: "Persuratan",
     color: "#FBBC05",
     link: "/letter-managements/letter-header",
+    userType: ["fasilitator", "admin"],
+  },
+  {
+    icon: <IconTransfer />,
+    title: "Rekon SIASN",
+    color: "#FBBC05",
+    link: "/rekon/rekon-unor",
     userType: ["fasilitator", "admin"],
   },
 ];
