@@ -1,4 +1,8 @@
-import { checkGelar, getGelar, uncheckGelar } from "@/services/siasn-services";
+import {
+  checkGelarByNip,
+  getGelarByNip,
+  uncheckGelarByNip,
+} from "@/services/siasn-services";
 import { SettingOutlined } from "@ant-design/icons";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
@@ -12,23 +16,31 @@ import {
   Tag,
   Typography,
 } from "antd";
+import { useRouter } from "next/router";
 import { useState } from "react";
 
 // cast 'true' to true
 const castToBoolean = (value) => (value === "true" ? true : false);
 
 const ModalPengaturanGelar = ({ open, onCancel, onOk }) => {
-  const [idGelar, setIdGelar] = useState(null);
-  const { data, isLoading } = useQuery(["daftar-gelar"], () => getGelar(), {
-    refetchOnWindowFocus: false,
-  });
+  const router = useRouter();
 
+  const nip = router?.query?.nip;
+
+  const [idGelar, setIdGelar] = useState(null);
+  const { data, isLoading } = useQuery(
+    ["gelar-by-nip", nip],
+    () => getGelarByNip(nip),
+    {
+      refetchOnWindowFocus: false,
+    }
+  );
   const queryClient = useQueryClient();
 
   const { mutateAsync: gelarCheck, isLoading: isLoadingGelarCheck } =
-    useMutation((data) => checkGelar(data), {
+    useMutation((data) => checkGelarByNip(data), {
       onSuccess: () => {
-        queryClient.invalidateQueries(["daftar-gelar"]);
+        queryClient.invalidateQueries(["gelar-by-nip", nip]);
         message.success("Update gelar berhasil");
       },
       onError: () => {
@@ -40,9 +52,9 @@ const ModalPengaturanGelar = ({ open, onCancel, onOk }) => {
     });
 
   const { mutateAsync: gelarUncheck, isLoading: isLoadingGelarUncheck } =
-    useMutation((data) => uncheckGelar(data), {
+    useMutation((data) => uncheckGelarByNip(data), {
       onSuccess: () => {
-        queryClient.invalidateQueries(["daftar-gelar"]);
+        queryClient.invalidateQueries(["gelar-by-nip", nip]);
         message.success("Update gelar berhasil");
       },
       onError: () => {
@@ -118,7 +130,7 @@ const ModalPengaturanGelar = ({ open, onCancel, onOk }) => {
   );
 };
 
-function PengaturanGelar() {
+function PengaturanGelarByNip() {
   const [showModal, setShowModal] = useState(false);
   const handleShowModal = () => setShowModal(true);
   const handleCloseModal = () => setShowModal(false);
@@ -137,4 +149,4 @@ function PengaturanGelar() {
   );
 }
 
-export default PengaturanGelar;
+export default PengaturanGelarByNip;

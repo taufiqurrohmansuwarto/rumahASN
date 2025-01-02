@@ -635,3 +635,19 @@ export const uncheckGelar = async ({ gelarId, loc }) => {
     .get(`/pns/gelar/${gelarId}/uncheck?loc=${loc}`)
     .then((res) => res.data);
 };
+
+export const getGelarByNip = async (nip) => {
+  return api.get(`/admin/${nip}/gelar`).then((res) => res.data);
+};
+
+export const checkGelarByNip = async ({ nip, gelarId, loc }) => {
+  return api
+    .get(`/admin/${nip}/gelar/${gelarId}/check?loc=${loc}`)
+    .then((res) => res.data);
+};
+
+export const uncheckGelarByNip = async ({ nip, gelarId, loc }) => {
+  return api
+    .get(`/admin/${nip}/gelar/${gelarId}/uncheck?loc=${loc}`)
+    .then((res) => res.data);
+};
