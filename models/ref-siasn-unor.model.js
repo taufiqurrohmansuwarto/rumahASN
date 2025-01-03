@@ -10,6 +10,7 @@ class RefSIASNUnor extends Model {
   }
 
   static get relationMappings() {
+    const rekonUnor = require("@/models/rekon/unor.model");
     return {
       disparitas_unor: {
         relation: Model.HasOneRelation,
@@ -17,6 +18,18 @@ class RefSIASNUnor extends Model {
         join: {
           from: "ref_siasn_unor.Id",
           to: "disparitas_unor.id",
+        },
+      },
+      rekon_unor: {
+        relation: Model.HasManyRelation,
+        modelClass: rekonUnor,
+        join: {
+          from: "ref_siasn_unor.Id",
+          through: {
+            from: "rekon.unor.id_siasn",
+            to: "ref_siasn_unor.Id",
+          },
+          to: "rekon.unor.id_siasn",
         },
       },
     };
