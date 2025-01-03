@@ -63,6 +63,27 @@ export const getUnorSimaster = async (req, res) => {
   }
 };
 
+// detail unor simaster
+export const getDetailUnorSimaster = async (req, res) => {
+  try {
+    const { id } = req?.query;
+    const result = await UnorSimaster.query()
+      .findById(id)
+      .select(
+        "id",
+        "name",
+        "pId",
+        raw("get_hierarchy_simaster(id) as hierarchy")
+      );
+    res.json(result);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      message: "Internal server error",
+    });
+  }
+};
+
 // rekon
 export const getRekonUnor = async (req, res) => {
   try {
