@@ -173,3 +173,17 @@ export const deleteRekonUnor = async (req, res) => {
     });
   }
 };
+
+export const getRekonUnorReport = async (req, res) => {
+  const { userId } = req?.user;
+  const result = await RekonUnor.query().where("user_id", userId);
+  res.json(result);
+};
+
+
+export const getRekonUnorStatistics = async (req, res) => {
+  const { userId } = req?.user;
+  const result = await RekonUnor.query().where("user_id", userId);
+  res.json(result);
+};
+
