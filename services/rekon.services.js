@@ -20,6 +20,10 @@ export const getUnorRekonById = async (unorId) => {
   return api.get(`/unor/rekon/${unorId}`).then((res) => res?.data);
 };
 
+export const getDetailUnorSimaster = async (id) => {
+  return api.get(`/unor/simaster/${id}`).then((res) => res?.data);
+};
+
 export const postUnorRekon = async (payload) => {
   return api.post("/unor", payload).then((res) => res?.data);
 };
