@@ -139,65 +139,67 @@ function MegaMenuTop() {
   const userType = getUserType(data?.user);
   return (
     <>
-      <Popover
-        content={
-          <>
-            <Row gutter={[16, 16]}>
-              {applist
-                .filter((app) =>
-                  app.userType.some((type) => userType.includes(type))
-                )
-                .map((app, index) => (
-                  <Col key={index} xs={6} sm={6} md={6} lg={6} xl={6}>
-                    <a
-                      style={{ textDecoration: "none" }}
-                      onClick={() => handleLink(app.link)}
-                    >
-                      <div
-                        style={{
-                          display: "flex",
-                          flexDirection: "column",
-                          alignItems: "center",
-                        }}
+      {userType?.length > 0 && (
+        <Popover
+          content={
+            <>
+              <Row gutter={[16, 16]}>
+                {applist
+                  ?.filter((app) =>
+                    app?.userType?.some((type) => userType?.includes(type))
+                  )
+                  ?.map((app, index) => (
+                    <Col key={index} xs={6} sm={6} md={6} lg={6} xl={6}>
+                      <a
+                        style={{ textDecoration: "none" }}
+                        onClick={() => handleLink(app.link)}
                       >
-                        <span
+                        <div
                           style={{
-                            fontSize: 24,
-                            color: app.color,
-                            marginBottom: 4,
+                            display: "flex",
+                            flexDirection: "column",
+                            alignItems: "center",
                           }}
                         >
-                          {app.icon}
-                        </span>
-                        <Text
-                          style={{
-                            fontSize: 12,
-                            color: "#5f6368",
-                            textAlign: "center",
-                          }}
-                        >
-                          {app.title}
-                        </Text>
-                      </div>
-                    </a>
-                  </Col>
-                ))}
-            </Row>
-          </>
-        }
-        trigger="click"
-        placement={screens.xs ? "bottom" : "bottomLeft"}
-        overlayInnerStyle={{
-          width: screens.xs ? "100vw" : 400,
-          padding: 16,
-        }}
-      >
-        <AppstoreOutlined
-          color="black"
-          size={36}
-          style={{ cursor: "pointer", marginLeft: 16 }}
-        />
-      </Popover>
+                          <span
+                            style={{
+                              fontSize: 24,
+                              color: app.color,
+                              marginBottom: 4,
+                            }}
+                          >
+                            {app.icon}
+                          </span>
+                          <Text
+                            style={{
+                              fontSize: 12,
+                              color: "#5f6368",
+                              textAlign: "center",
+                            }}
+                          >
+                            {app.title}
+                          </Text>
+                        </div>
+                      </a>
+                    </Col>
+                  ))}
+              </Row>
+            </>
+          }
+          trigger="click"
+          placement={screens.xs ? "bottom" : "bottomLeft"}
+          overlayInnerStyle={{
+            width: screens.xs ? "100vw" : 400,
+            padding: 16,
+          }}
+        >
+          <AppstoreOutlined
+            color="black"
+            size={36}
+            style={{ cursor: "pointer", marginLeft: 16 }}
+          />
+        </Popover>
+      )}
     </>
   );
 }
