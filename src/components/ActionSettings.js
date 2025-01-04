@@ -26,7 +26,7 @@ const ActionSettings = () => {
       url="forum-kepegawaian"
       title="Inbox Forum Kepegawaian"
     />,
-    <MegaMenuTop key="mega-menu" />,
+    <MegaMenuTop key="mega-menu" url="" title="Menu" />,
   ];
 };
 

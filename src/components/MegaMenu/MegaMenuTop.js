@@ -1,16 +1,14 @@
 import { AppstoreOutlined } from "@ant-design/icons";
 import {
+  IconCalendarUser,
+  IconTransfer,
+  IconUserCircle,
+  IconUserSquareRounded,
   IconBrain,
   IconMailbox,
   IconMapPin,
   IconRobot,
   IconZoomQuestion,
-} from "@tabler/icons";
-import {
-  IconCalendarUser,
-  IconTransfer,
-  IconUserCircle,
-  IconUserSquareRounded,
 } from "@tabler/icons-react";
 import { Col, Grid, Popover, Row, Typography } from "antd";
 import { useSession } from "next-auth/react";
@@ -99,21 +97,25 @@ const applist = [
   },
 ];
 
-function MegaMenuTop() {
+const MegaMenuTop = ({ url, title }) => {
   const screens = useBreakpoint();
   const router = useRouter();
   const { data } = useSession();
 
   const handleLink = (link) => {
-    router.push(link);
+    if (link) {
+      router.push(link);
+    } else {
+      console.warn("Invalid link");
+    }
   };
 
   const getUserType = (user) => {
+    if (!user) return [];
     const statusKepegawaian = user?.status_kepegawaian;
-    const currentRole = data?.user?.current_role;
+    const currentRole = user?.current_role;
 
     const userTypes = [];
-
     if (statusKepegawaian === "PNS" || statusKepegawaian === "PPPK") {
       userTypes.push("asn");
     }
@@ -136,55 +138,59 @@ function MegaMenuTop() {
     return userTypes;
   };
 
-  const userType = getUserType(data?.user);
+  const userType = getUserType(data?.user || {});
+
+  const filteredApps = applist?.filter((app) =>
+    app?.userType?.some((type) => userType.includes(type))
+  );
+
   return (
     <>
       {userType?.length > 0 && (
         <Popover
           content={
-            <>
+            filteredApps?.length ? (
               <Row gutter={[16, 16]}>
-                {applist
-                  ?.filter((app) =>
-                    app?.userType?.some((type) => userType?.includes(type))
-                  )
-                  ?.map((app, index) => (
-                    <Col key={index} xs={6} sm={6} md={6} lg={6} xl={6}>
-                      <a
-                        style={{ textDecoration: "none" }}
-                        onClick={() => handleLink(app.link)}
+                {filteredApps.map((app, index) => (
+                  <Col key={index} xs={6} sm={6} md={6} lg={6} xl={6}>
+                    <a
+                      style={{ textDecoration: "none" }}
+                      onClick={() => handleLink(app.link)}
+                    >
+                      <div
+                        style={{
+                          display: "flex",
+                          flexDirection: "column",
+                          alignItems: "center",
+                          cursor: "pointer",
+                        }}
                       >
-                        <div
+                        <span
                           style={{
-                            display: "flex",
-                            flexDirection: "column",
-                            alignItems: "center",
+                            fontSize: 24,
+                            color: app.color,
+                            marginBottom: 4,
                           }}
                         >
-                          <span
-                            style={{
-                              fontSize: 24,
-                              color: app.color,
-                              marginBottom: 4,
-                            }}
-                          >
-                            {app.icon}
-                          </span>
-                          <Text
-                            style={{
-                              fontSize: 12,
-                              color: "#5f6368",
-                              textAlign: "center",
-                            }}
-                          >
-                            {app.title}
-                          </Text>
-                        </div>
-                      </a>
-                    </Col>
-                  ))}
+                          {app.icon || <AppstoreOutlined />}
+                        </span>
+                        <Text
+                          style={{
+                            fontSize: 12,
+                            color: "#5f6368",
+                            textAlign: "center",
+                          }}
+                        >
+                          {app.title}
+                        </Text>
+                      </div>
+                    </a>
+                  </Col>
+                ))}
               </Row>
-            </>
+            ) : (
+              <Text>No applications available</Text>
+            )
           }
           trigger="click"
           placement={screens.xs ? "bottom" : "bottomLeft"}
@@ -202,6 +208,6 @@ function MegaMenuTop() {
       )}
     </>
   );
-}
+};
 
 export default MegaMenuTop;

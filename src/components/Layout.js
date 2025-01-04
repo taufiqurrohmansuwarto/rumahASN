@@ -610,7 +610,7 @@ function Layout({ children, active, collapsed = true }) {
               url="forum-kepegawaian"
               title="Inbox Forum Kepegawaian"
             />,
-            <MegaMenuTop key="mega-menu" />,
+            <MegaMenuTop key="mega-menu" url="" title="Menu" />,
           ];
         }}
         // appList={appList(data?.user)}
