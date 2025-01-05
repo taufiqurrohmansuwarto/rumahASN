@@ -12,7 +12,7 @@ import {
 import { ProConfigProvider } from "@ant-design/pro-components";
 import { ConfigProvider, Dropdown, Layout, Space } from "antd";
 import frFR from "antd/lib/locale/id_ID";
-import { useSession } from "next-auth/react";
+import { signOut, useSession } from "next-auth/react";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/router";
 import { useState } from "react";
