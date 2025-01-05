@@ -43,3 +43,7 @@ export const deleteUnorRekon = async (unorId) => {
 export const getRekonUnorStatistics = async () => {
   return api.get("/unor/statistics").then((res) => res?.data);
 };
+
+export const reportRekonUnor = async () => {
+  return api.get(`/unor/report`).then((res) => res?.data);
+};

@@ -69,7 +69,7 @@ class SyncUnorMaster extends Model {
         0 AS level
       FROM sync_unor_master AS sm
       LEFT JOIN rekon.unor AS r ON sm.id = r.id_simaster
-      WHERE sm."pId" IS NULL -- Root node
+      WHERE sm."pId" = '0' -- Root node
 
       UNION ALL
 

@@ -173,7 +173,6 @@ export const getRekonUnorReport = async (req, res) => {
   const orgId = current_role === "admin" ? "1" : organization_id;
 
   const data = await UnorSimaster.getReport(orgId);
-  console.log(data);
   const rows = [];
   let no = 1;
 
@@ -187,8 +186,8 @@ export const getRekonUnorReport = async (req, res) => {
     // Gabungkan id_siasn ke dalam satu string dengan pemisah koma
     const idSiasnString = idsiasnList.join(", ");
 
-    // Tambahkan indentasi pada nama sesuai dengan level
-    const indentedName = `${" ".repeat(level * 2)}${name}`; // Menjorok sesuai level
+    // Tambahkan indentasi pada nama sesuai dengan level menggunakan "-"
+    const indentedName = `${"-".repeat(level * 2)}${name}`; // Menjorok sesuai level
 
     // Tambahkan data ke baris
     rows.push({
@@ -209,7 +208,7 @@ export const getRekonUnorReport = async (req, res) => {
   worksheet.columns = [
     { header: "No", key: "No", width: 10 },
     { header: "ID_SIMASTER", key: "ID_SIMASTER", width: 30 },
-    { header: "NAME", key: "NAME", width: 50 },
+    { header: "NAME", key: "NAME", width: 110 },
     { header: "ID_SIASN", key: "ID_SIASN", width: 50 },
     { header: "UNOR_SIASN", key: "UNOR_SIASN", width: 50 },
     { header: "JUMLAH_ID_SIASN", key: "JUMLAH_ID_SIASN", width: 20 },
@@ -233,6 +232,16 @@ export const getRekonUnorReport = async (req, res) => {
         };
       });
     }
+
+    // Tambahkan border pada semua sel di baris
+    excelRow.eachCell((cell) => {
+      cell.border = {
+        top: { style: "thin" },
+        left: { style: "thin" },
+        bottom: { style: "thin" },
+        right: { style: "thin" },
+      };
+    });
   });
 
   // Atur style header
@@ -247,6 +256,14 @@ export const getRekonUnorReport = async (req, res) => {
       type: "pattern",
       pattern: "solid",
       fgColor: { argb: "FFDDDDDD" }, // Warna abu-abu
+    };
+
+    // Tambahkan border pada header
+    cell.border = {
+      top: { style: "thin" },
+      left: { style: "thin" },
+      bottom: { style: "thin" },
+      right: { style: "thin" },
     };
   });
 

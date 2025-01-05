@@ -6,8 +6,9 @@ import {
   getUnorSiasn,
   getUnorSimaster,
   postUnorRekon,
+  reportRekonUnor,
 } from "@/services/rekon.services";
-import { LikeOutlined } from "@ant-design/icons";
+import { CloudDownloadOutlined } from "@ant-design/icons";
 import { Stack } from "@mantine/core";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
@@ -21,10 +22,11 @@ import {
   message,
   Row,
   Space,
+  Statistic,
   Tag,
   TreeSelect,
   Typography,
-  Statistic,
+  Popconfirm,
 } from "antd";
 import { toNumber } from "lodash";
 import { useRouter } from "next/router";
@@ -37,14 +39,19 @@ const ListUnor = ({ data, hapus }) => {
 
   return (
     <List
+      header={<Typography.Title level={5}>Unor SIASN</Typography.Title>}
       dataSource={data}
       rowKey={(row) => row?.id}
       renderItem={(item) => (
         <List.Item
           actions={[
-            <a key="hapus" onClick={() => handleHapus(item)}>
-              Hapus
-            </a>,
+            <Popconfirm
+              key="hapus"
+              title="Apakah Anda yakin ingin menghapus data ini?"
+              onConfirm={() => handleHapus(item)}
+            >
+              <a>Hapus</a>
+            </Popconfirm>,
           ]}
         >
           <Space>
@@ -72,7 +79,7 @@ const UnorSimaster = () => {
   return (
     <Stack>
       <Form layout="vertical">
-        <Form.Item label="Unor SIMASTER">
+        <Form.Item label="Unor SIMASTER" help="Pilih Unor SIMASTER">
           <TreeSelect
             treeNodeFilterProp="title"
             placeholder="Ketik nama unit organisasi"
@@ -88,9 +95,13 @@ const UnorSimaster = () => {
   );
 };
 
-const StatisticUnor = ({ data }) => {
+const StatisticUnor = ({ data, handleReport, isLoading }) => {
+  const handleDownload = async () => {
+    await handleReport();
+  };
+
   return (
-    <Row gutter={16}>
+    <Row gutter={16} style={{ marginBottom: 16 }}>
       <Col span={8}>
         <Card>
           <Statistic title="Total Unor" value={data?.total_unor} />
@@ -214,6 +225,30 @@ const RekonUnorSIASN = () => {
   const { master_id } = router?.query;
   const queryClient = useQueryClient();
 
+  const { mutateAsync: report, isLoading: isLoadingReport } = useMutation({
+    mutationFn: () => reportRekonUnor(),
+    onSuccess: () => {
+      message.success("Berhasil mengunduh report");
+    },
+    onError: (error) => {
+      message.error("Gagal mengunduh report");
+      console.log(error);
+    },
+  });
+
+  const handleReport = async () => {
+    const result = await report();
+    // save as excel
+    const file = new Blob([result], {
+      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    });
+    const url = URL.createObjectURL(file);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "rekon_unor_report.xlsx";
+    a.click();
+  };
+
   const { data: detailUnorSimaster, isLoading: isLoadingDetailUnorSimaster } =
     useQuery(
       ["detail-unor-simaster", master_id],
@@ -239,7 +274,7 @@ const RekonUnorSIASN = () => {
     }
   );
 
-  const { mutate: hapus, isLoading: isLoadingHapus } = useMutation({
+  const { mutateAsync: hapus, isLoading: isLoadingHapus } = useMutation({
     mutationFn: (id) => deleteUnorRekon(id),
     onSuccess: () => {
       message.success("Berhasil menghapus data");
@@ -270,35 +305,53 @@ const RekonUnorSIASN = () => {
     },
   });
 
-  const handleHapus = (item) => {
+  const handleHapus = async (item) => {
     const id = item?.id;
     if (id) {
-      hapus(id);
+      await hapus(id);
     } else {
       message.error("Silahkan pilih unit organisasi SIASN");
     }
   };
 
   return (
-    <Card title="Padanan Unit Organisasi">
+    <Card
+      title="Padanan Unit Organisasi"
+      extra={
+        <Button
+          icon={<CloudDownloadOutlined />}
+          type="primary"
+          onClick={handleReport}
+          loading={isLoadingReport}
+        >
+          Unduh Report
+        </Button>
+      }
+    >
       <Row>
-        <Col xs={24} md={16} lg={16} xl={16}>
+        <Col xs={24} md={18} lg={18} xl={18}>
           <Stack>
-            <StatisticUnor data={statistics} />
+            <StatisticUnor
+              data={statistics}
+              handleReport={handleReport}
+              isLoading={isLoadingReport}
+            />
             <UnorSimaster />
           </Stack>
-          {detailUnorSimaster && (
-            <Alert
-              description={detailUnorSimaster?.hierarchy}
-              type="success"
-              showIcon
-            />
-          )}
+
           <Divider />
           {master_id && (
             <Stack>
               <UnorSiasn />
-
+              {detailUnorSimaster && (
+                <Alert
+                  style={{ marginTop: 16 }}
+                  message="Unor SIMASTER dipilih"
+                  description={detailUnorSimaster?.hierarchy}
+                  type="success"
+                  showIcon
+                />
+              )}
               {rekonUnor?.length > 0 && (
                 <ListUnor hapus={handleHapus} data={rekonUnor} />
               )}
