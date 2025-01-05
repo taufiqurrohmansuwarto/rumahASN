@@ -4,6 +4,7 @@ const UnorSiasn = require("@/models/ref-siasn-unor.model");
 const UnorSimaster = require("@/models/sync-unor-master.model");
 const RekonUnor = require("@/models/rekon/unor.model");
 const arrayToTree = require("array-to-tree");
+const ExcelJS = require("exceljs");
 
 // unor siasn
 export const getUnorSiasn = async (req, res) => {
@@ -38,16 +39,7 @@ export const getUnorSimaster = async (req, res) => {
     const { current_role, organization_id } = req?.user;
     const orgId = current_role === "admin" ? "1" : organization_id;
 
-    const result = await UnorSimaster.query()
-      .where("id", "ilike", `${orgId}%`)
-      .select(
-        "id",
-        "pId as parentId",
-        "name as name",
-        "id as value",
-        "name as label",
-        "name as title"
-      );
+    const result = await UnorSimaster.getRelationCountsPerId(orgId);
 
     const tree = arrayToTree(result, {
       parentProperty: "parentId",
@@ -91,6 +83,7 @@ export const getRekonUnor = async (req, res) => {
     const result = await RekonUnor.query()
       .where("id_simaster", master_id)
       .select(
+        "id",
         "id_siasn",
         "id_simaster",
         raw("get_hierarchy_siasn(id_siasn) as unor_siasn")
@@ -161,6 +154,7 @@ export const deleteRekonUnor = async (req, res) => {
   try {
     const { unorId } = req?.query;
     const result = await RekonUnor.query().where("id", unorId).delete();
+    console.log(result);
 
     res.json({
       message: "Success",
@@ -175,15 +169,110 @@ export const deleteRekonUnor = async (req, res) => {
 };
 
 export const getRekonUnorReport = async (req, res) => {
-  const { userId } = req?.user;
-  const result = await RekonUnor.query().where("user_id", userId);
-  res.json(result);
-};
+  const { current_role, organization_id } = req?.user;
+  const orgId = current_role === "admin" ? "1" : organization_id;
 
+  const data = await UnorSimaster.getReport(orgId);
+  console.log(data);
+  const rows = [];
+  let no = 1;
+
+  // Proses data untuk laporan
+  data.forEach((record) => {
+    const { id_simaster, id_siasn, name, unor_siasn, level } = record; // Level berasal dari rekursi tree query
+
+    // Pecah id_siasn menjadi array jika ada lebih dari satu (misalnya dipisahkan koma)
+    const idsiasnList = id_siasn ? id_siasn.split(",") : [];
+
+    // Gabungkan id_siasn ke dalam satu string dengan pemisah koma
+    const idSiasnString = idsiasnList.join(", ");
+
+    // Tambahkan indentasi pada nama sesuai dengan level
+    const indentedName = `${" ".repeat(level * 2)}${name}`; // Menjorok sesuai level
+
+    // Tambahkan data ke baris
+    rows.push({
+      No: no++,
+      ID_SIMASTER: id_simaster,
+      NAME: indentedName,
+      ID_SIASN: idSiasnString || "", // Jika kosong, tetap kosong
+      UNOR_SIASN: unor_siasn || "",
+      JUMLAH_ID_SIASN: idsiasnList.length, // Hitung jumlah id_siasn
+    });
+  });
+
+  // Membuat workbook dan worksheet
+  const workbook = new ExcelJS.Workbook();
+  const worksheet = workbook.addWorksheet("Rekon Unor");
+
+  // Menambahkan header kolom
+  worksheet.columns = [
+    { header: "No", key: "No", width: 10 },
+    { header: "ID_SIMASTER", key: "ID_SIMASTER", width: 30 },
+    { header: "NAME", key: "NAME", width: 50 },
+    { header: "ID_SIASN", key: "ID_SIASN", width: 50 },
+    { header: "UNOR_SIASN", key: "UNOR_SIASN", width: 50 },
+    { header: "JUMLAH_ID_SIASN", key: "JUMLAH_ID_SIASN", width: 20 },
+  ];
+
+  // Menambahkan baris ke worksheet
+  rows.forEach((row) => {
+    const excelRow = worksheet.addRow(row);
+
+    // Wrap text untuk kolom NAME dan UNOR_SIASN
+    excelRow.getCell("NAME").alignment = { wrapText: true };
+    excelRow.getCell("UNOR_SIASN").alignment = { wrapText: true };
+
+    // Beri warna merah jika ID_SIASN kosong
+    if (!row.ID_SIASN) {
+      excelRow.eachCell((cell) => {
+        cell.fill = {
+          type: "pattern",
+          pattern: "solid",
+          fgColor: { argb: "FFFF0000" }, // Warna merah
+        };
+      });
+    }
+  });
+
+  // Atur style header
+  worksheet.getRow(1).eachCell((cell) => {
+    cell.font = { bold: true };
+    cell.alignment = {
+      vertical: "middle",
+      horizontal: "center",
+      wrapText: true,
+    };
+    cell.fill = {
+      type: "pattern",
+      pattern: "solid",
+      fgColor: { argb: "FFDDDDDD" }, // Warna abu-abu
+    };
+  });
+
+  // Set header respon
+  const fileName = `rekon_unor_report_${orgId}.xlsx`;
+  res.setHeader(
+    "Content-Type",
+    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+  );
+  res.setHeader("Content-Disposition", `attachment; filename=${fileName}`);
+
+  // Kirim file Excel
+  await workbook.xlsx.write(res);
+};
 
 export const getRekonUnorStatistics = async (req, res) => {
-  const { userId } = req?.user;
-  const result = await RekonUnor.query().where("user_id", userId);
-  res.json(result);
-};
+  const { current_role, organization_id } = req?.user;
+  const orgId = current_role === "admin" ? "1" : organization_id;
 
+  try {
+    const statistics = await UnorSimaster.getProgress(orgId);
+    res.json(statistics);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      message: "Gagal mendapatkan statistik rekon unor",
+    });
+  }
+};
