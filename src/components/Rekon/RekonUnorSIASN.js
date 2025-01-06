@@ -95,11 +95,7 @@ const UnorSimaster = () => {
   );
 };
 
-const StatisticUnor = ({ data, handleReport, isLoading }) => {
-  const handleDownload = async () => {
-    await handleReport();
-  };
-
+const StatisticUnor = ({ data, handleReport }) => {
   return (
     <Row gutter={16} style={{ marginBottom: 16 }}>
       <Col span={8}>
