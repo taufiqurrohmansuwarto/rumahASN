@@ -1,0 +1,110 @@
+[
+  { "perangkat_daerah": "BADAN KEPEGAWAIAN DAERAH", "L": 40, "P": 56 },
+  { "perangkat_daerah": "BADAN KESATUAN BANGSA DAN POLITIK", "L": 37, "P": 19 },
+  {
+    "perangkat_daerah": "BADAN KOORDINASI WILAYAH BOJONEGORO",
+    "L": 31,
+    "P": 10
+  },
+  { "perangkat_daerah": "BADAN KOORDINASI WILAYAH JEMBER", "L": 18, "P": 7 },
+  { "perangkat_daerah": "BADAN KOORDINASI WILAYAH MADIUN", "L": 35, "P": 16 },
+  { "perangkat_daerah": "BADAN KOORDINASI WILAYAH MALANG", "L": 28, "P": 13 },
+  { "perangkat_daerah": "BADAN KOORDINASI WILAYAH PAMEKASAN", "L": 21, "P": 5 },
+  {
+    "perangkat_daerah": "BADAN PENANGGULANGAN BENCANA DAERAH",
+    "L": 25,
+    "P": 18
+  },
+  { "perangkat_daerah": "BADAN PENDAPATAN DAERAH", "L": 366, "P": 178 },
+  { "perangkat_daerah": "BADAN PENELITIAN DAN PENGEMBANGAN", "L": 41, "P": 28 },
+  {
+    "perangkat_daerah": "BADAN PENGELOLA KEUANGAN DAN ASET DAERAH",
+    "L": 62,
+    "P": 55
+  },
+  {
+    "perangkat_daerah": "BADAN PENGEMBANGAN SUMBER DAYA MANUSIA",
+    "L": 88,
+    "P": 49
+  },
+  { "perangkat_daerah": "BADAN PENGHUBUNG DAERAH PROVINSI", "L": 26, "P": 11 },
+  {
+    "perangkat_daerah": "BADAN PERENCANAAN PEMBANGUNAN DAERAH",
+    "L": 83,
+    "P": 43
+  },
+  {
+    "perangkat_daerah": "DINAS ENERGI DAN SUMBER DAYA MINERAL",
+    "L": 40,
+    "P": 25
+  },
+  { "perangkat_daerah": "DINAS KEBUDAYAAN DAN PARIWISATA", "L": 94, "P": 56 },
+  { "perangkat_daerah": "DINAS KEHUTANAN", "L": 456, "P": 188 },
+  { "perangkat_daerah": "DINAS KELAUTAN DAN PERIKANAN", "L": 196, "P": 133 },
+  { "perangkat_daerah": "DINAS KEPEMUDAAN DAN OLAHRAGA", "L": 89, "P": 39 },
+  { "perangkat_daerah": "DINAS KESEHATAN", "L": 706, "P": 1048 },
+  { "perangkat_daerah": "DINAS KOMUNIKASI DAN INFORMATIKA", "L": 63, "P": 33 },
+  {
+    "perangkat_daerah": "DINAS KOPERASI USAHA KECIL DAN MENENGAH",
+    "L": 52,
+    "P": 33
+  },
+  { "perangkat_daerah": "DINAS LINGKUNGAN HIDUP", "L": 52, "P": 52 },
+  { "perangkat_daerah": "DINAS PEKERJAAN UMUM BINA MARGA", "L": 344, "P": 118 },
+  {
+    "perangkat_daerah": "DINAS PEKERJAAN UMUM SUMBER DAYA AIR",
+    "L": 387,
+    "P": 115
+  },
+  {
+    "perangkat_daerah": "DINAS PEMBERDAYAAN MASYARAKAT DAN DESA",
+    "L": 44,
+    "P": 21
+  },
+  {
+    "perangkat_daerah": "DINAS PEMBERDAYAAN PEREMPUAN, PERLINDUNGAN ANAK DAN KEPENDUDUKAN",
+    "L": 20,
+    "P": 39
+  },
+  {
+    "perangkat_daerah": "DINAS PENANAMAN MODAL DAN PELAYANAN TERPADU SATU PINTU",
+    "L": 45,
+    "P": 22
+  },
+  { "perangkat_daerah": "DINAS PENDIDIKAN", "L": 10812, "P": 13105 },
+  { "perangkat_daerah": "DINAS PERHUBUNGAN", "L": 411, "P": 109 },
+  {
+    "perangkat_daerah": "DINAS PERINDUSTRIAN DAN PERDAGANGAN",
+    "L": 150,
+    "P": 79
+  },
+  { "perangkat_daerah": "DINAS PERKEBUNAN", "L": 35, "P": 46 },
+  { "perangkat_daerah": "DINAS PERPUSTAKAAN DAN KEARSIPAN", "L": 72, "P": 66 },
+  {
+    "perangkat_daerah": "DINAS PERTANIAN DAN KETAHANAN PANGAN",
+    "L": 312,
+    "P": 284
+  },
+  {
+    "perangkat_daerah": "DINAS PERUMAHAN RAKYAT, KAWASAN PERMUKIMAN DAN CIPTA KARYA",
+    "L": 75,
+    "P": 72
+  },
+  { "perangkat_daerah": "DINAS PETERNAKAN", "L": 65, "P": 91 },
+  { "perangkat_daerah": "DINAS SOSIAL", "L": 368, "P": 274 },
+  {
+    "perangkat_daerah": "DINAS TENAGA KERJA DAN TRANSMIGRASI",
+    "L": 395,
+    "P": 206
+  },
+  { "perangkat_daerah": "INSPEKTORAT PROVINSI", "L": 67, "P": 57 },
+  { "perangkat_daerah": "RS JIWA MENUR SURABAYA", "L": 124, "P": 194 },
+  { "perangkat_daerah": "RSUD DR. SAIFUL ANWAR MALANG", "L": 396, "P": 653 },
+  { "perangkat_daerah": "RSUD DR. SOEDONO MADIUN", "L": 248, "P": 427 },
+  { "perangkat_daerah": "RSUD DR. SOETOMO SURABAYA", "L": 586, "P": 1210 },
+  { "perangkat_daerah": "RSUD HAJI PROVINSI JAWA TIMUR", "L": 271, "P": 467 },
+  { "perangkat_daerah": "SATUAN POLISI PAMONG PRAJA", "L": 107, "P": 9 },
+  { "perangkat_daerah": "SEKRETARIAT DAERAH", "L": 266, "P": 171 },
+  { "perangkat_daerah": "SEKRETARIAT DPRD", "L": 65, "P": 39 },
+  { "perangkat_daerah": null, "L": 18314, "P": 19989 }
+]

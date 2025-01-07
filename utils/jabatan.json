@@ -1,0 +1,472 @@
+[
+    {
+        "perangkat_daerah":"BADAN KEPEGAWAIAN DAERAH",
+        "eselon_i":0.0,
+        "eselon_ii":1,
+        "eselon_iii":5,
+        "eselon_iv":5,
+        "fungsional":39,
+        "pelaksana":46,
+        "grand_total":96
+    },
+    {
+        "perangkat_daerah":"BADAN KESATUAN BANGSA DAN POLITIK",
+        "eselon_i":0.0,
+        "eselon_ii":1,
+        "eselon_iii":5,
+        "eselon_iv":1,
+        "fungsional":6,
+        "pelaksana":43,
+        "grand_total":56
+    },
+    {
+        "perangkat_daerah":"BADAN KOORDINASI WILAYAH BOJONEGORO",
+        "eselon_i":0.0,
+        "eselon_ii":1,
+        "eselon_iii":4,
+        "eselon_iv":10,
+        "fungsional":0,
+        "pelaksana":26,
+        "grand_total":41
+    },
+    {
+        "perangkat_daerah":"BADAN KOORDINASI WILAYAH JEMBER",
+        "eselon_i":0.0,
+        "eselon_ii":1,
+        "eselon_iii":4,
+        "eselon_iv":8,
+        "fungsional":0,
+        "pelaksana":12,
+        "grand_total":25
+    },
+    {
+        "perangkat_daerah":"BADAN KOORDINASI WILAYAH MADIUN",
+        "eselon_i":0.0,
+        "eselon_ii":1,
+        "eselon_iii":5,
+        "eselon_iv":10,
+        "fungsional":1,
+        "pelaksana":34,
+        "grand_total":51
+    },
+    {
+        "perangkat_daerah":"BADAN KOORDINASI WILAYAH MALANG",
+        "eselon_i":0.0,
+        "eselon_ii":1,
+        "eselon_iii":4,
+        "eselon_iv":11,
+        "fungsional":2,
+        "pelaksana":23,
+        "grand_total":41
+    },
+    {
+        "perangkat_daerah":"BADAN KOORDINASI WILAYAH PAMEKASAN",
+        "eselon_i":0.0,
+        "eselon_ii":1,
+        "eselon_iii":3,
+        "eselon_iv":11,
+        "fungsional":0,
+        "pelaksana":11,
+        "grand_total":26
+    },
+    {
+        "perangkat_daerah":"BADAN PENANGGULANGAN BENCANA DAERAH",
+        "eselon_i":0.0,
+        "eselon_ii":1,
+        "eselon_iii":2,
+        "eselon_iv":1,
+        "fungsional":13,
+        "pelaksana":26,
+        "grand_total":43
+    },
+    {
+        "perangkat_daerah":"BADAN PENDAPATAN DAERAH",
+        "eselon_i":0.0,
+        "eselon_ii":1,
+        "eselon_iii":38,
+        "eselon_iv":103,
+        "fungsional":19,
+        "pelaksana":383,
+        "grand_total":544
+    },
+    {
+        "perangkat_daerah":"BADAN PENELITIAN DAN PENGEMBANGAN",
+        "eselon_i":0.0,
+        "eselon_ii":1,
+        "eselon_iii":4,
+        "eselon_iv":1,
+        "fungsional":35,
+        "pelaksana":28,
+        "grand_total":69
+    },
+    {
+        "perangkat_daerah":"BADAN PENGELOLA KEUANGAN DAN ASET DAERAH",
+        "eselon_i":0.0,
+        "eselon_ii":1,
+        "eselon_iii":7,
+        "eselon_iv":14,
+        "fungsional":14,
+        "pelaksana":81,
+        "grand_total":117
+    },
+    {
+        "perangkat_daerah":"BADAN PENGEMBANGAN SUMBER DAYA MANUSIA",
+        "eselon_i":0.0,
+        "eselon_ii":1,
+        "eselon_iii":6,
+        "eselon_iv":5,
+        "fungsional":52,
+        "pelaksana":73,
+        "grand_total":137
+    },
+    {
+        "perangkat_daerah":"BADAN PENGHUBUNG DAERAH PROVINSI",
+        "eselon_i":0.0,
+        "eselon_ii":0,
+        "eselon_iii":1,
+        "eselon_iv":4,
+        "fungsional":4,
+        "pelaksana":28,
+        "grand_total":37
+    },
+    {
+        "perangkat_daerah":"BADAN PERENCANAAN PEMBANGUNAN DAERAH",
+        "eselon_i":0.0,
+        "eselon_ii":1,
+        "eselon_iii":3,
+        "eselon_iv":2,
+        "fungsional":37,
+        "pelaksana":83,
+        "grand_total":126
+    },
+    {
+        "perangkat_daerah":"DINAS ENERGI DAN SUMBER DAYA MINERAL",
+        "eselon_i":0.0,
+        "eselon_ii":1,
+        "eselon_iii":6,
+        "eselon_iv":5,
+        "fungsional":10,
+        "pelaksana":43,
+        "grand_total":65
+    },
+    {
+        "perangkat_daerah":"DINAS KEBUDAYAAN DAN PARIWISATA",
+        "eselon_i":0.0,
+        "eselon_ii":1,
+        "eselon_iii":9,
+        "eselon_iv":12,
+        "fungsional":27,
+        "pelaksana":101,
+        "grand_total":150
+    },
+    {
+        "perangkat_daerah":"DINAS KEHUTANAN",
+        "eselon_i":0.0,
+        "eselon_ii":1,
+        "eselon_iii":18,
+        "eselon_iv":38,
+        "fungsional":354,
+        "pelaksana":233,
+        "grand_total":644
+    },
+    {
+        "perangkat_daerah":"DINAS KELAUTAN DAN PERIKANAN",
+        "eselon_i":0.0,
+        "eselon_ii":1,
+        "eselon_iii":20,
+        "eselon_iv":46,
+        "fungsional":38,
+        "pelaksana":224,
+        "grand_total":329
+    },
+    {
+        "perangkat_daerah":"DINAS KEPEMUDAAN DAN OLAHRAGA",
+        "eselon_i":0.0,
+        "eselon_ii":1,
+        "eselon_iii":5,
+        "eselon_iv":1,
+        "fungsional":44,
+        "pelaksana":77,
+        "grand_total":128
+    },
+    {
+        "perangkat_daerah":"DINAS KESEHATAN",
+        "eselon_i":0.0,
+        "eselon_ii":2,
+        "eselon_iii":38,
+        "eselon_iv":64,
+        "fungsional":1291,
+        "pelaksana":359,
+        "grand_total":1754
+    },
+    {
+        "perangkat_daerah":"DINAS KOMUNIKASI DAN INFORMATIKA",
+        "eselon_i":0.0,
+        "eselon_ii":1,
+        "eselon_iii":5,
+        "eselon_iv":1,
+        "fungsional":35,
+        "pelaksana":54,
+        "grand_total":96
+    },
+    {
+        "perangkat_daerah":"DINAS KOPERASI USAHA KECIL DAN MENENGAH",
+        "eselon_i":0.0,
+        "eselon_ii":1,
+        "eselon_iii":6,
+        "eselon_iv":5,
+        "fungsional":24,
+        "pelaksana":49,
+        "grand_total":85
+    },
+    {
+        "perangkat_daerah":"DINAS LINGKUNGAN HIDUP",
+        "eselon_i":0.0,
+        "eselon_ii":0,
+        "eselon_iii":6,
+        "eselon_iv":4,
+        "fungsional":51,
+        "pelaksana":43,
+        "grand_total":104
+    },
+    {
+        "perangkat_daerah":"DINAS PEKERJAAN UMUM BINA MARGA",
+        "eselon_i":0.0,
+        "eselon_ii":1,
+        "eselon_iii":15,
+        "eselon_iv":38,
+        "fungsional":43,
+        "pelaksana":365,
+        "grand_total":462
+    },
+    {
+        "perangkat_daerah":"DINAS PEKERJAAN UMUM SUMBER DAYA AIR",
+        "eselon_i":0.0,
+        "eselon_ii":1,
+        "eselon_iii":10,
+        "eselon_iv":27,
+        "fungsional":14,
+        "pelaksana":450,
+        "grand_total":502
+    },
+    {
+        "perangkat_daerah":"DINAS PEMBERDAYAAN MASYARAKAT DAN DESA",
+        "eselon_i":0.0,
+        "eselon_ii":1,
+        "eselon_iii":4,
+        "eselon_iv":2,
+        "fungsional":9,
+        "pelaksana":49,
+        "grand_total":65
+    },
+    {
+        "perangkat_daerah":"DINAS PEMBERDAYAAN PEREMPUAN, PERLINDUNGAN ANAK DAN KEPENDUDUKAN",
+        "eselon_i":0.0,
+        "eselon_ii":1,
+        "eselon_iii":7,
+        "eselon_iv":4,
+        "fungsional":17,
+        "pelaksana":30,
+        "grand_total":59
+    },
+    {
+        "perangkat_daerah":"DINAS PENANAMAN MODAL DAN PELAYANAN TERPADU SATU PINTU",
+        "eselon_i":0.0,
+        "eselon_ii":1,
+        "eselon_iii":1,
+        "eselon_iv":1,
+        "fungsional":27,
+        "pelaksana":37,
+        "grand_total":67
+    },
+    {
+        "perangkat_daerah":"DINAS PENDIDIKAN",
+        "eselon_i":0.0,
+        "eselon_ii":1,
+        "eselon_iii":27,
+        "eselon_iv":73,
+        "fungsional":22003,
+        "pelaksana":1813,
+        "grand_total":23917
+    },
+    {
+        "perangkat_daerah":"DINAS PERHUBUNGAN",
+        "eselon_i":0.0,
+        "eselon_ii":1,
+        "eselon_iii":18,
+        "eselon_iv":48,
+        "fungsional":13,
+        "pelaksana":440,
+        "grand_total":520
+    },
+    {
+        "perangkat_daerah":"DINAS PERINDUSTRIAN DAN PERDAGANGAN",
+        "eselon_i":0.0,
+        "eselon_ii":1,
+        "eselon_iii":19,
+        "eselon_iv":42,
+        "fungsional":43,
+        "pelaksana":124,
+        "grand_total":229
+    },
+    {
+        "perangkat_daerah":"DINAS PERKEBUNAN",
+        "eselon_i":0.0,
+        "eselon_ii":1,
+        "eselon_iii":6,
+        "eselon_iv":7,
+        "fungsional":31,
+        "pelaksana":36,
+        "grand_total":81
+    },
+    {
+        "perangkat_daerah":"DINAS PERPUSTAKAAN DAN KEARSIPAN",
+        "eselon_i":0.0,
+        "eselon_ii":1,
+        "eselon_iii":5,
+        "eselon_iv":0,
+        "fungsional":79,
+        "pelaksana":53,
+        "grand_total":138
+    },
+    {
+        "perangkat_daerah":"DINAS PERTANIAN DAN KETAHANAN PANGAN",
+        "eselon_i":0.0,
+        "eselon_ii":1,
+        "eselon_iii":11,
+        "eselon_iv":19,
+        "fungsional":394,
+        "pelaksana":171,
+        "grand_total":596
+    },
+    {
+        "perangkat_daerah":"DINAS PERUMAHAN RAKYAT, KAWASAN PERMUKIMAN DAN CIPTA KARYA",
+        "eselon_i":0.0,
+        "eselon_ii":1,
+        "eselon_iii":6,
+        "eselon_iv":10,
+        "fungsional":32,
+        "pelaksana":98,
+        "grand_total":147
+    },
+    {
+        "perangkat_daerah":"DINAS PETERNAKAN",
+        "eselon_i":0.0,
+        "eselon_ii":1,
+        "eselon_iii":11,
+        "eselon_iv":26,
+        "fungsional":71,
+        "pelaksana":47,
+        "grand_total":156
+    },
+    {
+        "perangkat_daerah":"DINAS SOSIAL",
+        "eselon_i":0.0,
+        "eselon_ii":1,
+        "eselon_iii":28,
+        "eselon_iv":77,
+        "fungsional":103,
+        "pelaksana":433,
+        "grand_total":642
+    },
+    {
+        "perangkat_daerah":"DINAS TENAGA KERJA DAN TRANSMIGRASI",
+        "eselon_i":0.0,
+        "eselon_ii":1,
+        "eselon_iii":20,
+        "eselon_iv":63,
+        "fungsional":377,
+        "pelaksana":140,
+        "grand_total":601
+    },
+    {
+        "perangkat_daerah":"INSPEKTORAT PROVINSI",
+        "eselon_i":0.0,
+        "eselon_ii":1,
+        "eselon_iii":6,
+        "eselon_iv":1,
+        "fungsional":77,
+        "pelaksana":39,
+        "grand_total":124
+    },
+    {
+        "perangkat_daerah":"RS JIWA MENUR",
+        "eselon_i":0.0,
+        "eselon_ii":1,
+        "eselon_iii":8,
+        "eselon_iv":0,
+        "fungsional":248,
+        "pelaksana":61,
+        "grand_total":318
+    },
+    {
+        "perangkat_daerah":"RSUD DR. SAIFUL ANWAR",
+        "eselon_i":0.0,
+        "eselon_ii":5,
+        "eselon_iii":7,
+        "eselon_iv":0,
+        "fungsional":872,
+        "pelaksana":165,
+        "grand_total":1049
+    },
+    {
+        "perangkat_daerah":"RSUD DR. SOEDONO MADIUN",
+        "eselon_i":0.0,
+        "eselon_ii":3,
+        "eselon_iii":7,
+        "eselon_iv":0,
+        "fungsional":564,
+        "pelaksana":101,
+        "grand_total":675
+    },
+    {
+        "perangkat_daerah":"RSUD DR. SOETOMO",
+        "eselon_i":0.0,
+        "eselon_ii":5,
+        "eselon_iii":11,
+        "eselon_iv":0,
+        "fungsional":1359,
+        "pelaksana":421,
+        "grand_total":1796
+    },
+    {
+        "perangkat_daerah":"RSUD HAJI PROVINSI JAWA TIMUR",
+        "eselon_i":0.0,
+        "eselon_ii":3,
+        "eselon_iii":10,
+        "eselon_iv":0,
+        "fungsional":548,
+        "pelaksana":177,
+        "grand_total":738
+    },
+    {
+        "perangkat_daerah":"SATUAN POLISI PAMONG PRAJA",
+        "eselon_i":0.0,
+        "eselon_ii":1,
+        "eselon_iii":5,
+        "eselon_iv":9,
+        "fungsional":39,
+        "pelaksana":62,
+        "grand_total":116
+    },
+    {
+        "perangkat_daerah":"SEKRETARIAT DAERAH",
+        "eselon_i":1.0,
+        "eselon_ii":11,
+        "eselon_iii":15,
+        "eselon_iv":9,
+        "fungsional":105,
+        "pelaksana":296,
+        "grand_total":437
+    },
+    {
+        "perangkat_daerah":"SEKRETARIAT DPRD",
+        "eselon_i":null,
+        "eselon_ii":1,
+        "eselon_iii":4,
+        "eselon_iv":1,
+        "fungsional":11,
+        "pelaksana":87,
+        "grand_total":104
+    }
+]

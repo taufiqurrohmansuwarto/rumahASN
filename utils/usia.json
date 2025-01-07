@@ -1,0 +1,472 @@
+[
+  {
+    "perangkat_daerah": "BADAN KEPEGAWAIAN DAERAH",
+    "kurang_20": 0,
+    "20_29": 14,
+    "30_39": 39,
+    "40_49": 20,
+    "50_55": 9,
+    "lebih_55": 14,
+    "total": 96
+  },
+  {
+    "perangkat_daerah": "BADAN KESATUAN BANGSA DAN POLITIK",
+    "kurang_20": 0,
+    "20_29": 4,
+    "30_39": 12,
+    "40_49": 16,
+    "50_55": 17,
+    "lebih_55": 7,
+    "total": 56
+  },
+  {
+    "perangkat_daerah": "BADAN KOORDINASI WILAYAH BOJONEGORO",
+    "kurang_20": 0,
+    "20_29": 2,
+    "30_39": 6,
+    "40_49": 13,
+    "50_55": 13,
+    "lebih_55": 7,
+    "total": 41
+  },
+  {
+    "perangkat_daerah": "BADAN KOORDINASI WILAYAH JEMBER",
+    "kurang_20": 0,
+    "20_29": 3,
+    "30_39": 6,
+    "40_49": 7,
+    "50_55": 7,
+    "lebih_55": 2,
+    "total": 25
+  },
+  {
+    "perangkat_daerah": "BADAN KOORDINASI WILAYAH MADIUN",
+    "kurang_20": 0,
+    "20_29": 3,
+    "30_39": 6,
+    "40_49": 18,
+    "50_55": 20,
+    "lebih_55": 4,
+    "total": 51
+  },
+  {
+    "perangkat_daerah": "BADAN KOORDINASI WILAYAH MALANG",
+    "kurang_20": 0,
+    "20_29": 1,
+    "30_39": 12,
+    "40_49": 7,
+    "50_55": 13,
+    "lebih_55": 8,
+    "total": 41
+  },
+  {
+    "perangkat_daerah": "BADAN KOORDINASI WILAYAH PAMEKASAN",
+    "kurang_20": 0,
+    "20_29": 0,
+    "30_39": 3,
+    "40_49": 3,
+    "50_55": 14,
+    "lebih_55": 6,
+    "total": 26
+  },
+  {
+    "perangkat_daerah": "BADAN PENANGGULANGAN BENCANA DAERAH",
+    "kurang_20": 0,
+    "20_29": 8,
+    "30_39": 14,
+    "40_49": 13,
+    "50_55": 3,
+    "lebih_55": 5,
+    "total": 43
+  },
+  {
+    "perangkat_daerah": "BADAN PENDAPATAN DAERAH",
+    "kurang_20": 0,
+    "20_29": 87,
+    "30_39": 65,
+    "40_49": 147,
+    "50_55": 174,
+    "lebih_55": 71,
+    "total": 544
+  },
+  {
+    "perangkat_daerah": "BADAN PENELITIAN DAN PENGEMBANGAN",
+    "kurang_20": 0,
+    "20_29": 4,
+    "30_39": 12,
+    "40_49": 17,
+    "50_55": 19,
+    "lebih_55": 17,
+    "total": 69
+  },
+  {
+    "perangkat_daerah": "BADAN PENGELOLA KEUANGAN DAN ASET DAERAH",
+    "kurang_20": 0,
+    "20_29": 21,
+    "30_39": 22,
+    "40_49": 38,
+    "50_55": 23,
+    "lebih_55": 13,
+    "total": 117
+  },
+  {
+    "perangkat_daerah": "BADAN PENGEMBANGAN SUMBER DAYA MANUSIA",
+    "kurang_20": 0,
+    "20_29": 8,
+    "30_39": 22,
+    "40_49": 27,
+    "50_55": 41,
+    "lebih_55": 39,
+    "total": 137
+  },
+  {
+    "perangkat_daerah": "BADAN PENGHUBUNG DAERAH PROVINSI",
+    "kurang_20": 0,
+    "20_29": 1,
+    "30_39": 6,
+    "40_49": 18,
+    "50_55": 5,
+    "lebih_55": 7,
+    "total": 37
+  },
+  {
+    "perangkat_daerah": "BADAN PERENCANAAN PEMBANGUNAN DAERAH",
+    "kurang_20": 0,
+    "20_29": 11,
+    "30_39": 20,
+    "40_49": 32,
+    "50_55": 43,
+    "lebih_55": 20,
+    "total": 126
+  },
+  {
+    "perangkat_daerah": "DINAS ENERGI DAN SUMBER DAYA MINERAL",
+    "kurang_20": 0,
+    "20_29": 6,
+    "30_39": 7,
+    "40_49": 25,
+    "50_55": 14,
+    "lebih_55": 13,
+    "total": 65
+  },
+  {
+    "perangkat_daerah": "DINAS KEBUDAYAAN DAN PARIWISATA",
+    "kurang_20": 0,
+    "20_29": 11,
+    "30_39": 20,
+    "40_49": 39,
+    "50_55": 46,
+    "lebih_55": 34,
+    "total": 150
+  },
+  {
+    "perangkat_daerah": "DINAS KEHUTANAN",
+    "kurang_20": 0,
+    "20_29": 113,
+    "30_39": 54,
+    "40_49": 200,
+    "50_55": 206,
+    "lebih_55": 71,
+    "total": 644
+  },
+  {
+    "perangkat_daerah": "DINAS KELAUTAN DAN PERIKANAN",
+    "kurang_20": 0,
+    "20_29": 25,
+    "30_39": 41,
+    "40_49": 142,
+    "50_55": 87,
+    "lebih_55": 34,
+    "total": 329
+  },
+  {
+    "perangkat_daerah": "DINAS KEPEMUDAAN DAN OLAHRAGA",
+    "kurang_20": 0,
+    "20_29": 5,
+    "30_39": 23,
+    "40_49": 61,
+    "50_55": 30,
+    "lebih_55": 9,
+    "total": 128
+  },
+  {
+    "perangkat_daerah": "DINAS KESEHATAN",
+    "kurang_20": 0,
+    "20_29": 229,
+    "30_39": 681,
+    "40_49": 458,
+    "50_55": 278,
+    "lebih_55": 108,
+    "total": 1754
+  },
+  {
+    "perangkat_daerah": "DINAS KOMUNIKASI DAN INFORMATIKA",
+    "kurang_20": 0,
+    "20_29": 4,
+    "30_39": 22,
+    "40_49": 33,
+    "50_55": 26,
+    "lebih_55": 11,
+    "total": 96
+  },
+  {
+    "perangkat_daerah": "DINAS KOPERASI USAHA KECIL DAN MENENGAH",
+    "kurang_20": 0,
+    "20_29": 5,
+    "30_39": 23,
+    "40_49": 34,
+    "50_55": 13,
+    "lebih_55": 10,
+    "total": 85
+  },
+  {
+    "perangkat_daerah": "DINAS LINGKUNGAN HIDUP",
+    "kurang_20": 0,
+    "20_29": 16,
+    "30_39": 18,
+    "40_49": 38,
+    "50_55": 24,
+    "lebih_55": 8,
+    "total": 104
+  },
+  {
+    "perangkat_daerah": "DINAS PEKERJAAN UMUM BINA MARGA",
+    "kurang_20": 0,
+    "20_29": 47,
+    "30_39": 59,
+    "40_49": 112,
+    "50_55": 132,
+    "lebih_55": 112,
+    "total": 462
+  },
+  {
+    "perangkat_daerah": "DINAS PEKERJAAN UMUM SUMBER DAYA AIR",
+    "kurang_20": 0,
+    "20_29": 18,
+    "30_39": 46,
+    "40_49": 269,
+    "50_55": 116,
+    "lebih_55": 53,
+    "total": 502
+  },
+  {
+    "perangkat_daerah": "DINAS PEMBERDAYAAN MASYARAKAT DAN DESA",
+    "kurang_20": 0,
+    "20_29": 4,
+    "30_39": 11,
+    "40_49": 13,
+    "50_55": 26,
+    "lebih_55": 11,
+    "total": 65
+  },
+  {
+    "perangkat_daerah": "DINAS PEMBERDAYAAN PEREMPUAN, PERLINDUNGAN ANAK DAN KEPENDUDUKAN",
+    "kurang_20": 0,
+    "20_29": 11,
+    "30_39": 13,
+    "40_49": 10,
+    "50_55": 14,
+    "lebih_55": 11,
+    "total": 59
+  },
+  {
+    "perangkat_daerah": "DINAS PENANAMAN MODAL DAN PELAYANAN TERPADU SATU PINTU",
+    "kurang_20": 0,
+    "20_29": 6,
+    "30_39": 19,
+    "40_49": 21,
+    "50_55": 9,
+    "lebih_55": 12,
+    "total": 67
+  },
+  {
+    "perangkat_daerah": "DINAS PENDIDIKAN",
+    "kurang_20": 0,
+    "20_29": 394,
+    "30_39": 2548,
+    "40_49": 7562,
+    "50_55": 7030,
+    "lebih_55": 6383,
+    "total": 23917
+  },
+  {
+    "perangkat_daerah": "DINAS PERHUBUNGAN",
+    "kurang_20": 0,
+    "20_29": 66,
+    "30_39": 55,
+    "40_49": 155,
+    "50_55": 167,
+    "lebih_55": 77,
+    "total": 520
+  },
+  {
+    "perangkat_daerah": "DINAS PERINDUSTRIAN DAN PERDAGANGAN",
+    "kurang_20": 0,
+    "20_29": 21,
+    "30_39": 26,
+    "40_49": 92,
+    "50_55": 60,
+    "lebih_55": 30,
+    "total": 229
+  },
+  {
+    "perangkat_daerah": "DINAS PERKEBUNAN",
+    "kurang_20": 0,
+    "20_29": 10,
+    "30_39": 23,
+    "40_49": 23,
+    "50_55": 14,
+    "lebih_55": 11,
+    "total": 81
+  },
+  {
+    "perangkat_daerah": "DINAS PERPUSTAKAAN DAN KEARSIPAN",
+    "kurang_20": 0,
+    "20_29": 13,
+    "30_39": 17,
+    "40_49": 35,
+    "50_55": 44,
+    "lebih_55": 29,
+    "total": 138
+  },
+  {
+    "perangkat_daerah": "DINAS PERTANIAN DAN KETAHANAN PANGAN",
+    "kurang_20": 0,
+    "20_29": 130,
+    "30_39": 109,
+    "40_49": 86,
+    "50_55": 129,
+    "lebih_55": 142,
+    "total": 596
+  },
+  {
+    "perangkat_daerah": "DINAS PERUMAHAN RAKYAT, KAWASAN PERMUKIMAN DAN CIPTA KARYA",
+    "kurang_20": 0,
+    "20_29": 15,
+    "30_39": 50,
+    "40_49": 37,
+    "50_55": 26,
+    "lebih_55": 19,
+    "total": 147
+  },
+  {
+    "perangkat_daerah": "DINAS PETERNAKAN",
+    "kurang_20": 0,
+    "20_29": 17,
+    "30_39": 56,
+    "40_49": 31,
+    "50_55": 32,
+    "lebih_55": 20,
+    "total": 156
+  },
+  {
+    "perangkat_daerah": "DINAS SOSIAL",
+    "kurang_20": 0,
+    "20_29": 60,
+    "30_39": 58,
+    "40_49": 197,
+    "50_55": 187,
+    "lebih_55": 140,
+    "total": 642
+  },
+  {
+    "perangkat_daerah": "DINAS TENAGA KERJA DAN TRANSMIGRASI",
+    "kurang_20": 0,
+    "20_29": 79,
+    "30_39": 134,
+    "40_49": 182,
+    "50_55": 115,
+    "lebih_55": 91,
+    "total": 601
+  },
+  {
+    "perangkat_daerah": "INSPEKTORAT PROVINSI",
+    "kurang_20": 0,
+    "20_29": 13,
+    "30_39": 26,
+    "40_49": 43,
+    "50_55": 28,
+    "lebih_55": 14,
+    "total": 124
+  },
+  {
+    "perangkat_daerah": "RS JIWA MENUR SURABAYA",
+    "kurang_20": 0,
+    "20_29": 21,
+    "30_39": 113,
+    "40_49": 128,
+    "50_55": 37,
+    "lebih_55": 19,
+    "total": 318
+  },
+  {
+    "perangkat_daerah": "RSUD DR. SAIFUL ANWAR MALANG",
+    "kurang_20": 0,
+    "20_29": 58,
+    "30_39": 269,
+    "40_49": 274,
+    "50_55": 336,
+    "lebih_55": 112,
+    "total": 1049
+  },
+  {
+    "perangkat_daerah": "RSUD DR. SOEDONO MADIUN",
+    "kurang_20": 0,
+    "20_29": 44,
+    "30_39": 156,
+    "40_49": 243,
+    "50_55": 176,
+    "lebih_55": 56,
+    "total": 675
+  },
+  {
+    "perangkat_daerah": "RSUD DR. SOETOMO SURABAYA",
+    "kurang_20": 0,
+    "20_29": 80,
+    "30_39": 317,
+    "40_49": 496,
+    "50_55": 517,
+    "lebih_55": 386,
+    "total": 1796
+  },
+  {
+    "perangkat_daerah": "RSUD HAJI PROVINSI JAWA TIMUR",
+    "kurang_20": 0,
+    "20_29": 39,
+    "30_39": 172,
+    "40_49": 204,
+    "50_55": 247,
+    "lebih_55": 76,
+    "total": 738
+  },
+  {
+    "perangkat_daerah": "SATUAN POLISI PAMONG PRAJA",
+    "kurang_20": 0,
+    "20_29": 3,
+    "30_39": 10,
+    "40_49": 47,
+    "50_55": 41,
+    "lebih_55": 15,
+    "total": 116
+  },
+  {
+    "perangkat_daerah": "SEKRETARIAT DAERAH",
+    "kurang_20": 0,
+    "20_29": 57,
+    "30_39": 94,
+    "40_49": 121,
+    "50_55": 109,
+    "lebih_55": 56,
+    "total": 437
+  },
+  {
+    "perangkat_daerah": "SEKRETARIAT DPRD",
+    "kurang_20": 0,
+    "20_29": 6,
+    "30_39": 14,
+    "40_49": 34,
+    "50_55": 35,
+    "lebih_55": 15,
+    "total": 104
+  }
+]

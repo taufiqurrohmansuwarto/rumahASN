@@ -38,6 +38,7 @@ const serializeRwJabatanMaster = (data) => {
     nomor_sk: strutkural?.no_sk,
     aktif: strutkural?.aktif,
     file: `${url}${strutkural?.file_struktural}`,
+    jenis_mutasi: "MJ",
   }));
 
   const rwytJabatanPelaksana = jabatanPelaksana?.map((strutkural) => ({
@@ -50,6 +51,7 @@ const serializeRwJabatanMaster = (data) => {
     nomor_sk: strutkural?.no_sk,
     aktif: strutkural?.aktif,
     file: `${url}${strutkural?.file_jfu}`,
+    jenis_mutasi: "MJ",
   }));
 
   const rwytJabatanFungsional = jabatanFungsional?.map((strutkural) => ({
@@ -62,6 +64,7 @@ const serializeRwJabatanMaster = (data) => {
     nomor_sk: strutkural?.no_sk,
     aktif: strutkural?.aktif,
     file: `${url}${strutkural?.file_jft}`,
+    jenis_mutasi: "MJ",
   }));
 
   if (data) {
