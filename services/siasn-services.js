@@ -428,6 +428,23 @@ export const uploadIPASN = async (data) => {
     .then((res) => res?.data);
 };
 
+// ref jft
+export const showRefJft = (query) => {
+  return api
+    .get(`/report/ref-jft?${queryString.stringify(query)}`)
+    .then((res) => res.data);
+};
+
+export const uploadRefJft = async (data) => {
+  return api
+    .post(`/report/ref-jft`, data, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    })
+    .then((res) => res?.data);
+};
+
 // peta jabatan
 export const petaJabatan = async () => {
   return api.get(`/perencanaan/peta-jabatan`).then((res) => res.data);
