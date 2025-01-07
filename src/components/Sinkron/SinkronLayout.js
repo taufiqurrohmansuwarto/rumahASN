@@ -31,6 +31,11 @@ function SinkronLayout({ children, active }) {
       key: "meja-registrasi",
       title: "Meja Registrasi",
     },
+    {
+      path: "/apps-managements/sync/ref-jft",
+      key: "ref-jft",
+      title: "Ref SIASN JFT",
+    },
   ];
 
   const handleTabChange = (key) => {
