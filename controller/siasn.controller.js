@@ -491,6 +491,7 @@ const postSkp2022ByNip = async (req, res) => {
         tahun: toNumber(body?.tahun) || 2022,
       };
 
+      console.log(data);
       const result = await siasnRequest.post("/skp22/save", data);
 
       // create log
