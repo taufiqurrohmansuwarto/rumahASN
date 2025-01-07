@@ -2,6 +2,7 @@ const siasnIPASN = require("@/models/siasn-ipasn.model");
 const siasnEmployees = require("@/models/siasn-employees.model");
 const xlsx = require("xlsx");
 const syncIPASN = require("@/models/sync-ip-asn.model");
+const Jft = require("@/models/ref_siasn/jft.model");
 
 const showIPASN = async (req, res) => {
   try {
@@ -113,9 +114,64 @@ const uploadEmployees = async (req, res) => {
   }
 };
 
+const showRefJft = async (req, res) => {
+  try {
+    const limit = req.query.limit || 10;
+    const page = req.query.page || 1;
+    const search = req.query.search || "";
+
+    const result = await Jft.query()
+      .page(page - 1, limit)
+      .where((builder) => {
+        if (search) {
+          builder.where("nama", "ilike", `%${search}%`);
+        }
+      });
+    res.json({
+      data: result.results,
+      pagination: {
+        total: result.total,
+        limit: parseInt(limit),
+        page: parseInt(page),
+      },
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+const uploadRefJft = async (req, res) => {
+  const knex = await Jft.knex();
+  try {
+    const file = req?.file;
+
+    if (!file) {
+      res.status(400).json({ message: "File is required" });
+    } else {
+      await siasnIPASN.transaction(async (trx) => {
+        const workbook = xlsx.read(file?.buffer);
+        const sheet_name_list = workbook.SheetNames;
+        const xlData = xlsx.utils.sheet_to_json(
+          workbook.Sheets[sheet_name_list[0]]
+        );
+        await knex.delete().from("ref_siasn.jft").transacting(trx);
+        await knex.batchInsert("ref_siasn.jft", xlData).transacting(trx);
+        res.status(200).json({ message: "success" });
+      });
+      // read file from buffer
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
 module.exports = {
   showIPASN,
   uploadIPASN,
   showEmployees,
   uploadEmployees,
+  showRefJft,
+  uploadRefJft,
 };
