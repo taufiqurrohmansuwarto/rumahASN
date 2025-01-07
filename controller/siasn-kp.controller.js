@@ -51,6 +51,10 @@ const listKenaikanPangkat = async (req, res) => {
       res.json(hasil);
     } else {
       const result = await daftarKenaikanPangkat(request, myPeriode);
+      console.log({
+        result: result?.data,
+        myPeriode,
+      });
       const data = result?.data;
 
       let jsonData = [];

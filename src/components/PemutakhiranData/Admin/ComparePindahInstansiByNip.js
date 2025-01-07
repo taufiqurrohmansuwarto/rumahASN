@@ -129,7 +129,7 @@ function ComparePindahInstansiByNip({ nip }) {
           columns={masterColumn}
           pagination={false}
           dataSource={pindahSimaster}
-          loading={isLoading}
+          loading={isLoadingPindahSimaster}
           rowKey={(row) => row?.pindah_id}
         />
       </Stack>
