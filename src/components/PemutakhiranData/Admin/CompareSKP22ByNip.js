@@ -251,7 +251,7 @@ function CompareSKP22ByNip({ nip }) {
         return (
           <UploadDokumen
             id={row?.id}
-            idRefDokumen={"1179"}
+            idRefDokumen={"890"}
             invalidateQueries={["data-skp-22"]}
             nama="Kinerja"
           />

@@ -293,3 +293,41 @@ export const getRekonUnorStatistics = async (req, res) => {
     });
   }
 };
+
+export const getSIASNUnor = async (req, res) => {
+  try {
+    const result = await UnorSiasn.query().select(
+      raw("get_hierarchy_siasn('Id')").as("nama_unor")
+    );
+
+    console.log(result[0]);
+
+    // save to excel
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet("SIASN Unor");
+    worksheet.columns = [
+      { header: "Id", key: "Id", width: 10 },
+      { header: "Nama Unor", key: "nama_unor", width: 100 },
+      { header: "Nama Unor Atasan", key: "nama_unor_atasan", width: 100 },
+    ];
+
+    result.forEach((row) => {
+      worksheet.addRow(row);
+    });
+
+    res.setHeader(
+      "Content-Type",
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    );
+    res.setHeader(
+      "Content-Disposition",
+      `attachment; filename=SIASN_Unor.xlsx`
+    );
+    await workbook.xlsx.write(res);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      message: "Internal server error",
+    });
+  }
+};

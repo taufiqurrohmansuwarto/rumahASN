@@ -45,5 +45,9 @@ export const getRekonUnorStatistics = async () => {
 };
 
 export const reportRekonUnor = async () => {
-  return api.get(`/unor/report`).then((res) => res?.data);
+  return api
+    .get(`/unor/report`, {
+      responseType: "blob",
+    })
+    .then((res) => res?.data);
 };
