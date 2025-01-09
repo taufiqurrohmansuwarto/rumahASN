@@ -45,5 +45,46 @@ export const getRekonUnorStatistics = async () => {
 };
 
 export const reportRekonUnor = async () => {
-  return api.get(`/unor/report`).then((res) => res?.data);
+  return api
+    .get(`/unor/report`, {
+      responseType: "blob",
+    })
+    .then((res) => res?.data);
+};
+
+// jft
+export const getJftSimaster = async () => {
+  return api.get("/jft/simaster").then((res) => res?.data);
+};
+
+export const getJftSiasn = async () => {
+  return api.get("/jft/siasn").then((res) => res?.data);
+};
+
+export const getDetailJftSimaster = async (id) => {
+  return api.get(`/jft/simaster/${id}`).then((res) => res?.data);
+};
+
+export const postJftRekon = async (payload) => {
+  return api.post("/jft", payload).then((res) => res?.data);
+};
+
+export const getJftRekon = async (masterId) => {
+  return api.get(`/jft?master_id=${masterId}`).then((res) => res?.data);
+};
+
+export const deleteJftRekon = async (jftId) => {
+  return api.delete(`/jft/${jftId}`).then((res) => res?.data);
+};
+
+export const getRekonJftStatistics = async () => {
+  return api.get("/jft/statistics").then((res) => res?.data);
+};
+
+export const reportJftUnor = async () => {
+  return api
+    .get(`/jft/report`, {
+      responseType: "blob",
+    })
+    .then((res) => res?.data);
 };
