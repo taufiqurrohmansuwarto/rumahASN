@@ -41,6 +41,7 @@ const ModalPengaturanGelar = ({ open, onCancel, onOk }) => {
     useMutation((data) => checkGelarByNip(data), {
       onSuccess: () => {
         queryClient.invalidateQueries(["gelar-by-nip", nip]);
+        queryClient.invalidateQueries(["data-utama-siasn", nip]);
         message.success("Update gelar berhasil");
       },
       onError: () => {
@@ -55,6 +56,7 @@ const ModalPengaturanGelar = ({ open, onCancel, onOk }) => {
     useMutation((data) => uncheckGelarByNip(data), {
       onSuccess: () => {
         queryClient.invalidateQueries(["gelar-by-nip", nip]);
+        queryClient.invalidateQueries(["data-utama-siasn", nip]);
         message.success("Update gelar berhasil");
       },
       onError: () => {
@@ -69,6 +71,7 @@ const ModalPengaturanGelar = ({ open, onCancel, onOk }) => {
     const isChecked = event.target.checked;
     setIdGelar(id);
     const payload = {
+      nip,
       gelarId: id,
       loc: loc,
     };

@@ -23,6 +23,7 @@ const uplaodDokRwSIASN = async (req, res) => {
     res.json(responseMessage);
   } catch (error) {
     const errorMessage = error?.message || "Internal server error";
+    console.log(errorMessage);
     res.status(500).json({ message: errorMessage });
   }
 };

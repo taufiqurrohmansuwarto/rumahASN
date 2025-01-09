@@ -10,6 +10,7 @@ import { FileAddOutlined, PlusOutlined } from "@ant-design/icons";
 import { Stack } from "@mantine/core";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
+  Alert,
   Button,
   Card,
   Flex,
@@ -141,9 +142,9 @@ const FormSKP22 = ({ visible, onCancel, nip }) => {
         </Form.Item>
         <Form.Item name="tahun" label="Tahun Penilaian" required>
           <Select>
-            <Select.Option value="2022">TAHUN PENILAIAN 2022</Select.Option>
-            <Select.Option value="2023">TAHUN PENILAIAN 2023</Select.Option>
             <Select.Option value="2024">TAHUN PENILAIAN 2024</Select.Option>
+            <Select.Option value="2023">TAHUN PENILAIAN 2023</Select.Option>
+            <Select.Option value="2022">TAHUN PENILAIAN 2022</Select.Option>
           </Select>
         </Form.Item>
         <FormCariPNSKinerja
@@ -290,10 +291,16 @@ function CompareSKP22ByNip({ nip }) {
       <Stack>
         <FormSKP22 visible={visible} onCancel={handleCancel} nip={nip} />
         <div id="kinerja-siasn">
+          <Alert
+            showIcon
+            type="info"
+            description="Jika terjadi kesalahan pada data SKP SIASN, gunakan tahun yang sama dengan data yang baru. Data yang lama akan direplace dengan data yang baru."
+            style={{ marginBottom: 12 }}
+          />
           <Flex justify="space-between">
             <div>
               <Typography.Title level={5} strong>
-                SKP SIASN
+                SKP (KINERJA) SIASN{" "}
               </Typography.Title>
             </div>
             <Button
