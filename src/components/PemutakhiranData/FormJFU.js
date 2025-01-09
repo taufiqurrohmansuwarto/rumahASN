@@ -27,7 +27,7 @@ const FormJFU = ({ name, help, jabatan = "" }) => {
         <Select
           showSearch
           filterOption={false}
-          placeholder="Pilih Jabatan Fungsional Terampil"
+          placeholder="Pilih Jabatan Fungsional"
           loading={isLoadingJfu}
           notFoundContent={
             isLoadingJfu && debounceValue ? <Spin size="small" /> : null

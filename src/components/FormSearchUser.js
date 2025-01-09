@@ -27,7 +27,7 @@ const FormSearchUser = ({ name, help }) => {
         <Select
           showSearch
           filterOption={false}
-          placeholder="Pilih Jabatan Fungsional Terampil"
+          placeholder="Pilih Jabatan Fungsional"
           loading={isLoadingUser}
           notFoundContent={
             isLoadingUser && debounceValue ? <Spin size="small" /> : null
