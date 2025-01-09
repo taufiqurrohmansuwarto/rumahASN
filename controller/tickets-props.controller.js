@@ -635,13 +635,15 @@ const removeTicket = async (req, res) => {
     const { id } = req?.query;
     const { current_role, customId } = req?.user;
 
-    if (current_role !== "admin" || !id) {
+    if (!id) {
+      res.status(404).json({ message: "Ticket not found." });
+    } else if (current_role !== "admin") {
       res
         .status(403)
         .json({ message: "You don't have permission to do this action." });
     } else {
       await Ticket.query().deleteById(id);
-      await insertTicketHistory(id, customId, "deleted", "Ticket deleted");
+      await insertTicketHistory(null, customId, "deleted", "Ticket deleted");
       res.status(200).json({ message: "Ticket deleted successfully." });
     }
   } catch (error) {

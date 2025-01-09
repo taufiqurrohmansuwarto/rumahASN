@@ -19,7 +19,7 @@ const FormJFT = ({ name, help, jabatan = "" }) => {
   return (
     <>
       <Form.Item
-        label={`Jabatan Fungsional '${jabatan}'`}
+        label={`Jabatan Fungsional ${jabatan}`}
         rules={[{ required: true }]}
         name={name}
         help="Ketik nama jabatan kemudian tunggu.."
@@ -28,9 +28,9 @@ const FormJFT = ({ name, help, jabatan = "" }) => {
           showSearch
           filterOption={false}
           placeholder="Pilih Jabatan Fungsional"
-          loading={isLoadingJft}
+          loading={isLoadingJfu}
           notFoundContent={
-            isLoadingJft && debounceValue ? <Spin size="small" /> : null
+            isLoadingJfu && debounceValue ? <Spin size="small" /> : null
           }
           onSearch={(value) => setJfu(value)}
         >
