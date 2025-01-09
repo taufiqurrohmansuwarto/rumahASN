@@ -590,9 +590,16 @@ export const uploadDokumenRiwayat = async (formData) => {
   }
 };
 
+// const normalize string
+export const normalizeString = (str) => {
+  return str?.trim().toUpperCase().replace(/'/g, "`").replace(/\s+/g, " "); // Mengganti spasi berturut-turut dengan satu spasi;
+};
+
 // buat fungsi pembanding teks
 export const compareText = (text1, text2) => {
-  return text1?.trim()?.toLowerCase() === text2?.trim()?.toLowerCase();
+  const str1 = normalizeString(text1);
+  const str2 = normalizeString(text2);
+  return str1 === str2;
 };
 
 const normalisasiGelar = (gelar) => {

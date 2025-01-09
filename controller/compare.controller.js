@@ -1,10 +1,24 @@
 const SiasnEmployees = require("@/models/siasn-employees.model");
 const SyncPegawai = require("@/models/sync-pegawai.model");
+const { compareText } = require("@/utils/client-utils");
 const { referensiJenjang } = require("@/utils/master.utils");
 const { trim, toLower, toNumber, differenceBy, round } = require("lodash");
 
+const normalizeString = (str) => {
+  const castToString = String(str);
+  return castToString
+    ?.trim()
+    .toUpperCase()
+    .replace(/'/g, "`")
+    .replace(/\s+/g, " "); // Mengganti spasi berturut-turut dengan satu spasi;
+};
+
 // Helper function to compare attributes
-const compareAttributes = (attr1, attr2) => (attr1 === attr2 ? 1 : 0);
+const compareAttributes = (attr1, attr2) => {
+  const str1 = normalizeString(attr1);
+  const str2 = normalizeString(attr2);
+  return str1 === str2 ? 1 : 0;
+};
 
 // Fetch employees from SyncPegawai based on skpd_id
 const fetchEmployees = async (opdId) => {
