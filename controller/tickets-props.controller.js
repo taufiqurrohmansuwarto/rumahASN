@@ -22,6 +22,7 @@ const { uniqBy } = require("lodash");
 const { sendReminder } = require("./mailer.controller");
 const { ticketRecomendationById } = require("@/utils/query-utils");
 const { createHistory } = require("@/utils/utility");
+const TicketsHistories = require("@/models/tickets_histories.model");
 
 const publishedTickets = async (req, res) => {
   try {
@@ -643,6 +644,7 @@ const removeTicket = async (req, res) => {
         .json({ message: "You don't have permission to do this action." });
     } else {
       await Ticket.query().deleteById(id);
+      await TicketsHistories.query().delete().where({ ticket_id: id });
       await insertTicketHistory(null, customId, "deleted", "Ticket deleted");
       res.status(200).json({ message: "Ticket deleted successfully." });
     }
