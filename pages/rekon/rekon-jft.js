@@ -1,4 +1,5 @@
 import PageContainer from "@/components/PageContainer";
+import RekonJftSIASN from "@/components/Rekon/RekonJftSIASN";
 import RekonLayout from "@/components/Rekon/RekonLayout";
 import Head from "next/head";
 
@@ -9,7 +10,7 @@ const RekonJft = () => {
         <title>Rumah ASN - Rekon - Rekon JFT</title>
       </Head>
       <PageContainer title="Rekon JFT">
-        <div>Rekon JFT</div>
+        <RekonJftSIASN />
       </PageContainer>
     </>
   );

@@ -31,7 +31,7 @@ class Jft extends Model {
         modelClass: JftSimaster,
         join: {
           from: "rekon.jft.id_simaster",
-          to: "simaster-jft.id",
+          to: "simaster_jft.id",
         },
       },
     };
