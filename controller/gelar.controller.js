@@ -60,10 +60,10 @@ export const uncheckGelar = async (req, res) => {
 
 export const uncheckGelarByNip = async (req, res) => {
   try {
-    const { nip } = req?.query;
+    const { nip, gelarId, loc } = req?.query;
     const fetcher = req?.fetcher;
 
-    const response = await proxyGelarUncheck(fetcher, nip);
+    const response = await proxyGelarUncheck(fetcher, nip, gelarId, loc);
 
     res.json(response?.data);
   } catch (error) {
@@ -98,10 +98,10 @@ export const checkGelar = async (req, res) => {
 
 export const checkGelarByNip = async (req, res) => {
   try {
-    const { nip } = req?.query;
+    const { nip, gelarId, loc } = req?.query;
     const fetcher = req?.fetcher;
 
-    const response = await proxyGelarCheck(fetcher, nip);
+    const response = await proxyGelarCheck(fetcher, nip, gelarId, loc);
 
     res.json(response?.data);
   } catch (error) {

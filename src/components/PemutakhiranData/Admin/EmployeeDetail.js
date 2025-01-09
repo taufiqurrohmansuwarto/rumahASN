@@ -1,4 +1,5 @@
 import IPAsnByNip from "@/components/LayananSIASN/IPASNByNip";
+import PengaturanGelarByNip from "@/components/LayananSIASN/PengaturanGelarByNip";
 import {
   anomaliUserByNip,
   updateAnomaliUserByNip,
@@ -11,11 +12,11 @@ import {
   updateDataUtamaByNip,
 } from "@/services/siasn-services";
 import { getUmur } from "@/utils/client-utils";
+import { LockOutlined } from "@ant-design/icons";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Alert as AlertAntd,
   Avatar,
-  Button,
   Card,
   Checkbox,
   Col,
@@ -35,16 +36,15 @@ import {
   message,
 } from "antd";
 import { useRouter } from "next/router";
+import { useEffect, useState } from "react";
 import SyncGolonganByNip from "../Sync/SyncGolonganByNip";
 import SyncJabatanByNip from "../Sync/SyncJabatanByNip";
 import TrackingKenaikanPangkatByNip from "./Usulan/TrackingKenaikanPangkatByNip";
 import TrackingPemberhentianByNip from "./Usulan/TrackingPemberhentianByNip";
-import TrackingPerbaikanNamaByNip from "./Usulan/TrackingPerbaikanNamaByNip";
-import TrackingUsulanLainnyaByNip from "./Usulan/TrackingUsulanLainnyaByNip";
-import { LockOutlined } from "@ant-design/icons";
-import { useEffect, useState } from "react";
 import TrackingPencantumanGelarByNip from "./Usulan/TrackingPencantumanGelarByNip";
 import TrackingPenyesuaianMasaKerjaByNip from "./Usulan/TrackingPenyesuaianMasaKerjaByNip";
+import TrackingPerbaikanNamaByNip from "./Usulan/TrackingPerbaikanNamaByNip";
+import TrackingUsulanLainnyaByNip from "./Usulan/TrackingUsulanLainnyaByNip";
 
 // import { patchAnomali2023 } from "@/services/anomali.services";
 
@@ -417,6 +417,7 @@ function EmployeeDetail({ nip }) {
         <IPAsnByNip tahun={2023} nip={dataSimaster?.nip_baru} />
         {/* {JSON.stringify(siasn)} */}
         <Kppn id={siasn?.kppnId} />
+        <PengaturanGelarByNip nip={nip} />
       </Space>
     </Card>
   );

@@ -185,9 +185,9 @@ const FormSKP22 = ({ visible, onCancel, nip }) => {
         </Form.Item>
         <Form.Item name="tahun" label="Tahun Penilaian" required>
           <Select>
-            <Select.Option value="2022">TAHUN PENILAIAN 2022</Select.Option>
-            <Select.Option value="2023">TAHUN PENILAIAN 2023</Select.Option>
             <Select.Option value="2024">TAHUN PENILAIAN 2024</Select.Option>
+            <Select.Option value="2023">TAHUN PENILAIAN 2023</Select.Option>
+            <Select.Option value="2022">TAHUN PENILAIAN 2022</Select.Option>
           </Select>
         </Form.Item>
         <FormCariPNSKinerja
@@ -409,13 +409,14 @@ function CompareSKP22({ nip, id }) {
     <Skeleton loading={isLoading || isLoadingMaster}>
       <FloatButton.BackTop />
       <Alert
-        color="yellow"
+        color="blue"
         title="Harap diperhatikan"
         icon={<IconAlertCircle />}
         style={{ marginBottom: 16 }}
       >
-        Gunakan data dukung dari SIMASTER yang sesuai untuk melakukan
-        pengentrian Kinerja SIASN. Jangan Lupa untuk mengupload file Kinerja
+        Jika terjadi kesalahan pada data SKP SIASN, gunakan tahun yang sama
+        dengan data yang baru. Data yang lama akan direplace dengan data yang
+        baru.
       </Alert>
 
       <Button onClick={handleVisible} type="primary" icon={<PlusOutlined />}>
