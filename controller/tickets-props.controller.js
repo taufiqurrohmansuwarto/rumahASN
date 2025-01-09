@@ -643,8 +643,8 @@ const removeTicket = async (req, res) => {
         .status(403)
         .json({ message: "You don't have permission to do this action." });
     } else {
-      await Ticket.query().deleteById(id);
       await TicketsHistories.query().delete().where({ ticket_id: id });
+      await Ticket.query().deleteById(id);
       await insertTicketHistory(null, customId, "deleted", "Ticket deleted");
       res.status(200).json({ message: "Ticket deleted successfully." });
     }
