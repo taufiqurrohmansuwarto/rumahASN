@@ -1,4 +1,3 @@
-import DashboardKomparasiAdmin from "@/components/Fasilitator/DashboardKomparasiAdmin";
 import EmployeesTableAdmin from "@/components/Fasilitator/EmployeesTableAdmin";
 import Layout from "@/components/Layout";
 import PageContainer from "@/components/PageContainer";
@@ -32,7 +31,7 @@ const IntegrasiSIASN = () => {
           padding: breakPoint.xs ? 0 : null,
         }}
         title="Data Integrasi SIASN"
-        subTitle="Integrasi SIASN - SIMASTER"
+        content="Integrasi SIASN - SIMASTER"
         onBack={() => router.back()}
         header={{
           breadcrumbRender: () => (
@@ -49,7 +48,6 @@ const IntegrasiSIASN = () => {
         }}
       >
         <Stack>
-          <DashboardKomparasiAdmin />
           <Card>
             <Form
               layout="vertical"
