@@ -8,6 +8,7 @@ const { toLower, trim } = require("lodash");
 const { dataUtama } = require("@/utils/siasn-utils");
 const arrayToTree = require("array-to-tree");
 const { proxyDataUtamaASN } = require("@/utils/siasn-proxy.utils");
+const { createRedisInstance } = require("@/utils/redis");
 
 // keperluan komparasi
 const validateOpdId = (opdId) => {
@@ -447,23 +448,35 @@ const getAllEmployeesMasterPagingAdmin = async (req, res) => {
 
     validateOpdId(opdId);
     const idOpd = determineOpdId(opd, opdId);
-    const employeeData = await fetchEmployeeData(fetcher, idOpd, {
-      ...query,
-      limit: 5,
-    });
+    const redis = await createRedisInstance();
+    // query ada search, page, limit. Jadikan key redis
+    const redisKey = `master-fasilitator:${idOpd}:${query?.search}:${query?.page}:${query?.limit}`;
+    const cachedData = await redis.get(redisKey);
 
-    const nips = employeeData?.data?.results?.map((item) => item?.nip_master);
-    const detailedEmployeeData = await fetchDetailedEmployeeData(
-      siasnFetcher,
-      nips
-    );
+    if (cachedData) {
+      res.json(JSON.parse(cachedData));
+    } else {
+      const employeeData = await fetchEmployeeData(fetcher, idOpd, {
+        ...query,
+        limit: 5,
+      });
 
-    const responsePayload = constructResponsePayload(
-      employeeData,
-      detailedEmployeeData
-    );
+      const nips = employeeData?.data?.results?.map((item) => item?.nip_master);
+      const detailedEmployeeData = await fetchDetailedEmployeeData(
+        siasnFetcher,
+        nips
+      );
 
-    res.json(responsePayload);
+      const responsePayload = constructResponsePayload(
+        employeeData,
+        detailedEmployeeData
+      );
+
+      // 45 seconds
+      await redis.set(redisKey, JSON.stringify(responsePayload), "EX", 30);
+
+      res.json(responsePayload);
+    }
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: "Internal server error" });

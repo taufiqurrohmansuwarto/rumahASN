@@ -1,8 +1,17 @@
 import { comparePegawaiAdmin } from "@/services/admin.services";
-import { QuestionCircleOutlined } from "@ant-design/icons";
+import { InfoCircleOutlined, QuestionCircleOutlined } from "@ant-design/icons";
 import { Alert, Stack } from "@mantine/core";
 import { useQuery } from "@tanstack/react-query";
-import { Card, Space, Table, Tooltip, Typography } from "antd";
+import {
+  Card,
+  Col,
+  Row,
+  Space,
+  Statistic,
+  Table,
+  Tooltip,
+  Typography,
+} from "antd";
 import { useRouter } from "next/router";
 import * as XLSX from "xlsx";
 
@@ -51,17 +60,6 @@ const GrafikAnomali = ({ data }) => {
       title: "Jumlah",
       dataIndex: "value",
     },
-    // {
-    //   title: "Presentase",
-    //   dataIndex: "presentase",
-    // },
-    // {
-    //   title: "Detail",
-    //   dataIndex: "detail",
-    //   render: (_, record) => {
-    //     return <a onClick={() => handleClick(record)}>Detail</a>;
-    //   },
-    // },
   ];
 
   const downloadData = (type, data) => {
@@ -76,49 +74,77 @@ const GrafikAnomali = ({ data }) => {
   };
 
   return (
-    <Card title="Daftar Anomali SIASN dan SIMASTER">
-      <Stack>
-        <Alert title="Perhatian" color="indigo">
-          Data akan diupdate setiap hari oleh BKD Provinsi Jawa Timur dan tidak
-          realtime. Perbaikan data bisa jadi tidak langsung terlihat.
-        </Alert>
-        <Table
-          rowKey={(record) => record.type}
-          expandable={{
-            expandedRowRender: (record) => (
-              <Card
-                extra={
-                  <a onClick={() => downloadData(record?.type, record?.detail)}>
-                    Unduh
-                  </a>
-                }
-              >
-                <Table
-                  rowKey={(record) => record.nip_master}
-                  dataSource={record.detail}
-                  columns={detailColumns}
-                />
-              </Card>
-            ),
-            rowExpandable: (record) => record.detail.length > 0,
-          }}
-          footer={() => (
-            <Space direction="vertical">
-              <Typography.Text strong>
-                Total Pegawai SIMASTER : {data?.totalPegawaiSimaster}
-              </Typography.Text>
-              <Typography.Text strong>
-                Total Pegawai SIASN : {data?.totalPegawaiSIASN}
-              </Typography.Text>
-            </Space>
-          )}
-          size="middle"
-          pagination={false}
-          dataSource={data?.grafik}
-          columns={columns}
-        />
-      </Stack>
-    </Card>
+    <Row gutter={[16, 16]}>
+      <Col md={12}>
+        <Card>
+          <Statistic
+            title="Total Pegawai SIASN"
+            value={data?.totalPegawaiSIASN}
+          />
+        </Card>
+      </Col>
+      <Col md={12}>
+        <Card>
+          <Statistic
+            title="Total Pegawai SIMASTER"
+            value={data?.totalPegawaiSimaster}
+          />
+        </Card>
+      </Col>
+      <Col md={24}>
+        <Card>
+          <Stack>
+            <Alert
+              title="Perhatian"
+              color="indigo"
+              icon={<InfoCircleOutlined />}
+            >
+              Data akan diupdate setiap hari oleh BKD Provinsi Jawa Timur dan
+              tidak realtime. Perbaikan data bisa jadi tidak langsung terlihat.
+            </Alert>
+            <Table
+              rowKey={(record) => record.type}
+              expandable={{
+                expandedRowRender: (record) => (
+                  <Card
+                    extra={
+                      <a
+                        onClick={() =>
+                          downloadData(record?.type, record?.detail)
+                        }
+                      >
+                        Unduh
+                      </a>
+                    }
+                  >
+                    <Table
+                      rowKey={(record) => record.nip_master}
+                      dataSource={record.detail}
+                      columns={detailColumns}
+                    />
+                  </Card>
+                ),
+                rowExpandable: (record) => record.detail.length > 0,
+              }}
+              // footer={() => (
+              //   <Space direction="vertical">
+              //     <Typography.Text strong>
+              //       Total Pegawai SIMASTER : {data?.totalPegawaiSimaster}
+              //     </Typography.Text>
+              //     <Typography.Text strong>
+              //       Total Pegawai SIASN : {data?.totalPegawaiSIASN}
+              //     </Typography.Text>
+              //   </Space>
+              // )}
+              size="middle"
+              pagination={false}
+              dataSource={data?.grafik}
+              columns={columns}
+            />
+          </Stack>
+        </Card>
+      </Col>
+    </Row>
   );
 };
 

@@ -9,6 +9,7 @@ import {
   BuildOutlined,
   TeamOutlined,
   BookOutlined,
+  WarningOutlined,
 } from "@ant-design/icons";
 import { ProConfigProvider } from "@ant-design/pro-components";
 import { ConfigProvider, Dropdown, Layout, Space } from "antd";
@@ -32,33 +33,34 @@ function RekonLayout({ children, active = "rekon-unor" }) {
     { key: "rekon-unor", icon: <BuildOutlined />, label: "Unit Organisasi" },
     { key: "rekon-jft", icon: <TeamOutlined />, label: "Jabatan Fungsional" },
     { key: "rekon-diklat", icon: <BookOutlined />, label: "Diklat" },
+    { key: "anomali", icon: <WarningOutlined />, label: "Disparitas Data" },
   ];
 
   const router = useRouter();
 
   const token = {
     header: {
-      colorBgHeader: "#FFFFFF",
-      colorHeaderTitle: "#8A2BE2", // Ungu untuk judul header
+      colorBgHeader: "#FAFAFA",
+      colorHeaderTitle: "#8A2BE2",
     },
-    bgLayout: "#FFFFFF",
-    colorPrimary: "#8A2BE2", // Warna ungu utama
+    bgLayout: "#FAFAFA",
+    colorPrimary: "#8A2BE2",
     sider: {
-      colorBgCollapsedButton: "#FFFFFF",
+      colorBgCollapsedButton: "#FAFAFA",
       colorTextCollapsedButton: "#8A2BE2",
-      colorTextCollapsedButtonHover: "#9370DB", // Ungu lebih terang saat hover
-      colorBgMenuItemActive: "#E6E6FA", // Ungu muda untuk item aktif
+      colorTextCollapsedButtonHover: "#9370DB",
+      colorBgMenuItemActive: "#F0E6FA", // Diubah ke warna ungu yang lebih muda
       colorTextMenuTitle: "#8A2BE2",
       colorTextMenuItemHover: "#9370DB",
-      colorTextMenuSelected: "#8A2BE2", // Ungu untuk teks terpilih
+      colorTextMenuSelected: "#8A2BE2",
       colorTextMenuActive: "#8A2BE2",
-      colorBgMenuItemHover: "#E6E6FA", // Ungu sangat muda saat hover
-      colorBgMenuItemSelected: "#F0E6FF",
-      colorBgMenuItemCollapsedElevated: "#FFFFFF",
+      colorBgMenuItemHover: "#F0E6FA", // Diubah ke warna ungu yang lebih muda
+      colorBgMenuItemSelected: "#F0E6FA", // Diubah ke warna ungu yang lebih muda
+      colorBgMenuItemCollapsedElevated: "#FAFAFA",
       colorTextMenu: "#8A2BE2",
-      colorBgMenu: "#FFFFFF",
-      colorTextMenuSecondary: "#4B0082", // Ungu tua untuk teks sekunder
-      colorMenuItemDivider: "#F0E6FF",
+      colorBgMenu: "#FAFAFA",
+      colorTextMenuSecondary: "#4B0082",
+      colorMenuItemDivider: "#F5F5F5",
     },
     Button: {
       colorPrimary: "#8A2BE2",
