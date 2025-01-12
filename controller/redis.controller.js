@@ -4,6 +4,7 @@ const { createRedisInstance } = require("@/utils/redis");
 export const getAllRedisKeys = async (req, res) => {
   const redis = await createRedisInstance();
   const keys = await redis.keys("*");
+
   const data = keys.map((key) => ({
     key,
   }));

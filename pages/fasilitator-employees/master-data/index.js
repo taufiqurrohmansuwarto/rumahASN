@@ -120,8 +120,7 @@ const FasilitatorEmployees = () => {
         <FloatButton.BackTop />
 
         <Stack>
-          <DashboardKompareFasilitator />
-          <Card>
+          <Card title="Dashboard Komparasi Fasilitator">
             {/* <Button
           disabled={isLoadingDownload}
           loading={isLoadingDownload}
