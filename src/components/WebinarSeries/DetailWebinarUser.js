@@ -38,9 +38,12 @@ import { useEffect, useState } from "react";
 import FormUserInformation from "./FormUserInformation";
 import InformasiTTE from "./InformasiTTE";
 import SyaratMendapatkanSertifikat from "./SyaratMendapatkanSertifikat";
-import WebinarTransferToSIASN from "./WebinarTransferToSIASN";
+import ReactMarkdownCustom from "../MarkdownEditor/ReactMarkdownCustom";
 
 const ModalRating = ({ open, onCancel, initialValues }) => {
+  const [form] = Form.useForm();
+  const queryClient = useQueryClient();
+
   const router = useRouter();
 
   const id = router?.query?.id;
@@ -50,9 +53,6 @@ const ModalRating = ({ open, onCancel, initialValues }) => {
       form.setFieldsValue(initialValues);
     }
   }, [initialValues, form]);
-
-  const [form] = Form.useForm();
-  const queryClient = useQueryClient();
 
   const { mutate: ratingWebinar, isLoading: isLoadingRatingWebinar } =
     useMutation((data) => createRating(data), {
@@ -282,13 +282,9 @@ function DetailWebinarNew({
           <Card>
             <Typography.Title level={4}>{data?.title}</Typography.Title>
             <Divider />
-            <TypographyStylesProvider>
-              <div
-                dangerouslySetInnerHTML={{
-                  __html: data?.description_markdown,
-                }}
-              />
-            </TypographyStylesProvider>
+            <ReactMarkdownCustom>
+              {data?.description_markdown}
+            </ReactMarkdownCustom>
           </Card>
         </Col>
         <Col md={7} xs={24}>
