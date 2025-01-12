@@ -411,7 +411,10 @@ const getAllEmployeesMasterPaging = async (req, res) => {
 
     validateOpdId(opdId);
     const idOpd = determineOpdId(opd, opdId);
-    const employeeData = await fetchEmployeeData(fetcher, idOpd, query);
+    const employeeData = await fetchEmployeeData(fetcher, idOpd, {
+      ...query,
+      limit: 5,
+    });
 
     const nips = employeeData?.data?.results?.map((item) => item?.nip_master);
     const detailedEmployeeData = await fetchDetailedEmployeeData(
@@ -444,7 +447,10 @@ const getAllEmployeesMasterPagingAdmin = async (req, res) => {
 
     validateOpdId(opdId);
     const idOpd = determineOpdId(opd, opdId);
-    const employeeData = await fetchEmployeeData(fetcher, idOpd, query);
+    const employeeData = await fetchEmployeeData(fetcher, idOpd, {
+      ...query,
+      limit: 5,
+    });
 
     const nips = employeeData?.data?.results?.map((item) => item?.nip_master);
     const detailedEmployeeData = await fetchDetailedEmployeeData(

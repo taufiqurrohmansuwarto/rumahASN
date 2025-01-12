@@ -9,6 +9,7 @@ const CURRENT_DIRECTORY = process.cwd();
 
 const siasnWsAxios = axios.create({
   baseURL: baseUrl,
+  timeout: 10000,
 });
 
 const getoken = async () => {
