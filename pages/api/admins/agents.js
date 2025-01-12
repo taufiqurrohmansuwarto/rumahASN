@@ -1,6 +1,6 @@
 import { createRouter } from "next-connect";
 import { index } from "../../../controller/list-agents.controller";
-import auth from "../../../middleware/auth.middleware";
+import auth from "@/middleware/auth.middleware";
 
 const router = createRouter();
 

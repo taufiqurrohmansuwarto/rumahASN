@@ -4,10 +4,11 @@ import NotifikasiForumKepegawaian from "@/components/Notification/NotifikasiForu
 import NotifikasiKepegawaian from "@/components/Notification/NotifikasiKepegawaian";
 import NotifikasiPrivateMessage from "@/components/Notification/NotifikasiPrivateMessage";
 import {
-  FolderOutlined,
   LogoutOutlined,
-  SyncOutlined,
   UserOutlined,
+  BuildOutlined,
+  TeamOutlined,
+  BookOutlined,
 } from "@ant-design/icons";
 import { ProConfigProvider } from "@ant-design/pro-components";
 import { ConfigProvider, Dropdown, Layout, Space } from "antd";
@@ -26,26 +27,44 @@ const ProLayout = dynamic(
 
 function RekonLayout({ children, active = "rekon-unor" }) {
   const { data } = useSession();
+
   const menuItems = [
-    { key: "rekon-unor", icon: <FolderOutlined />, label: "Unit Organisasi" },
-    { key: "rekon-jft", icon: <FolderOutlined />, label: "Jabatan Fungsional" },
-    {
-      key: "rekon-jfu",
-      icon: <FolderOutlined />,
-      label: "Jabatan Pelaksana",
-    },
-    { key: "rekon-diklat", icon: <FolderOutlined />, label: "Diklat" },
-    {
-      key: "rekon-pendidikan",
-      icon: <FolderOutlined />,
-      label: "Pendidikan",
-    },
-    { key: "rekon-pangkat", icon: <FolderOutlined />, label: "Pangkat" },
+    { key: "rekon-unor", icon: <BuildOutlined />, label: "Unit Organisasi" },
+    { key: "rekon-jft", icon: <TeamOutlined />, label: "Jabatan Fungsional" },
+    { key: "rekon-diklat", icon: <BookOutlined />, label: "Diklat" },
   ];
 
   const router = useRouter();
 
-  const token = {};
+  const token = {
+    header: {
+      colorBgHeader: "#FFFFFF",
+      colorHeaderTitle: "#8A2BE2", // Ungu untuk judul header
+    },
+    bgLayout: "#FFFFFF",
+    colorPrimary: "#8A2BE2", // Warna ungu utama
+    sider: {
+      colorBgCollapsedButton: "#FFFFFF",
+      colorTextCollapsedButton: "#8A2BE2",
+      colorTextCollapsedButtonHover: "#9370DB", // Ungu lebih terang saat hover
+      colorBgMenuItemActive: "#E6E6FA", // Ungu muda untuk item aktif
+      colorTextMenuTitle: "#8A2BE2",
+      colorTextMenuItemHover: "#9370DB",
+      colorTextMenuSelected: "#8A2BE2", // Ungu untuk teks terpilih
+      colorTextMenuActive: "#8A2BE2",
+      colorBgMenuItemHover: "#E6E6FA", // Ungu sangat muda saat hover
+      colorBgMenuItemSelected: "#F0E6FF",
+      colorBgMenuItemCollapsedElevated: "#FFFFFF",
+      colorTextMenu: "#8A2BE2",
+      colorBgMenu: "#FFFFFF",
+      colorTextMenuSecondary: "#4B0082", // Ungu tua untuk teks sekunder
+      colorMenuItemDivider: "#F0E6FF",
+    },
+    Button: {
+      colorPrimary: "#8A2BE2",
+      colorPrimaryHover: "#9370DB",
+    },
+  };
 
   const [collapsed, setCollapsed] = useState(true);
 
@@ -69,7 +88,7 @@ function RekonLayout({ children, active = "rekon-unor" }) {
             collapsed={collapsed}
             onCollapse={setCollapsed}
             selectedKeys={[active]}
-            logo={<SyncOutlined style={{ color: "#FAAD14" }} />}
+            logo={null}
             layout="mix"
             navTheme="light"
             fixedHeader
