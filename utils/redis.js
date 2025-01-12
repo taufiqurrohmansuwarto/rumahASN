@@ -3,9 +3,9 @@ import Redis from "ioredis";
 
 export const createRedisInstance = async () => {
   const configuration = {
-    host: process.env.REDIS_URL,
-    password: process.env.REDIS_PASSWORD,
-    port: process.env.REDIS_PORT,
+    host: process.env.REDIS_URL || "localhost",
+    password: process.env.REDIS_PASSWORD || "",
+    port: process.env.REDIS_PORT || 6379,
   };
   try {
     const options = {

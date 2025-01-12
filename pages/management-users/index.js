@@ -1,3 +1,4 @@
+import RedisManagement from "@/components/LayananSIASN/RedisManagement";
 import RemoveTreeSIASN from "@/components/LayananSIASN/RemoveTreeSIASN";
 import Layout from "@/components/Layout";
 import UserManagements from "@/components/Managements/UserManagements";
@@ -17,6 +18,7 @@ const ManagementUsers = () => {
         <Card>
           <UserManagements />
           <RemoveTreeSIASN />
+          <RedisManagement />
         </Card>
       </PageContainer>
     </>

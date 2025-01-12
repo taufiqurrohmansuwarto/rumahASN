@@ -44,11 +44,11 @@ const UpdateQuestion = ({ open, handleCancel, data }) => {
     }
   );
 
+  const [form] = Form.useForm();
+
   useEffect(() => {
     form.setFieldsValue(data);
   }, [data, form]);
-
-  const [form] = Form.useForm();
 
   const handleFinish = async () => {
     const values = await form.validateFields();
