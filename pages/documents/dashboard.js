@@ -6,7 +6,7 @@ const DocumentDashboard = () => {
   return (
     <>
       <Head>
-        <title>Rumah ASN - Dokumen TTE</title>
+        <title>Rumah ASN - Dokumen</title>
       </Head>
       <PageContainer>
         <div>index</div>
@@ -16,7 +16,7 @@ const DocumentDashboard = () => {
 };
 
 DocumentDashboard.getLayout = (page) => {
-  return <DocumentLayout>{page}</DocumentLayout>;
+  return <DocumentLayout active="/documents/dashboard">{page}</DocumentLayout>;
 };
 
 DocumentDashboard.Auth = {
