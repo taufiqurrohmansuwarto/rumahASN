@@ -3,26 +3,26 @@ import PageContainer from "@/components/PageContainer";
 import RekonUnorSIASN from "@/components/Rekon/RekonUnorSIASN";
 import RekonLayout from "@/components/Rekon/RekonLayout";
 
-const RekonUnor = () => {
+const RekonDiklat = () => {
   return (
     <>
       <Head>
-        <title>Rumah ASN - Rekon - Rekon Unor</title>
+        <title>Rumah ASN - Rekon - Rekon Diklat</title>
       </Head>
-      <PageContainer title="Rekon" content="Unit Organisasi">
-        <RekonUnorSIASN />
+      <PageContainer title="Rekon" content="Kamus Diklat">
+        <div>Rekon Diklat</div>
       </PageContainer>
     </>
   );
 };
 
-RekonUnor.getLayout = (page) => {
-  return <RekonLayout active="/rekon/rekon-unor">{page}</RekonLayout>;
+RekonDiklat.getLayout = (page) => {
+  return <RekonLayout active="/rekon/rekon-diklat">{page}</RekonLayout>;
 };
 
-RekonUnor.Auth = {
+RekonDiklat.Auth = {
   action: "manage",
   subject: "Tickets",
 };
 
-export default RekonUnor;
+export default RekonDiklat;
