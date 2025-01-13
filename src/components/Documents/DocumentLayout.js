@@ -5,11 +5,9 @@ import NotifikasiKepegawaian from "@/components/Notification/NotifikasiKepegawai
 import NotifikasiPrivateMessage from "@/components/Notification/NotifikasiPrivateMessage";
 import {
   BookOutlined,
-  BuildOutlined,
+  DashboardOutlined,
   LogoutOutlined,
-  TeamOutlined,
   UserOutlined,
-  WarningOutlined,
 } from "@ant-design/icons";
 import { ProConfigProvider } from "@ant-design/pro-components";
 import { ConfigProvider, Dropdown, Layout, Space } from "antd";
@@ -30,11 +28,11 @@ function DocumentLayout({ children, active = "rekon-unor" }) {
   const { data } = useSession();
 
   const menuItems = [
-    { key: "dashboard", icon: <BuildOutlined />, label: "Dashboard" },
+    { key: "dashboard", icon: <DashboardOutlined />, label: "Dashboard" },
     {
-      key: "pengajuan-tte-webinar",
+      key: "tte-webinar",
       icon: <BookOutlined />,
-      label: "Pengajuan TTE Webinar",
+      label: "TTE Webinar",
     },
   ];
 
@@ -42,31 +40,31 @@ function DocumentLayout({ children, active = "rekon-unor" }) {
 
   const token = {
     header: {
-      colorBgHeader: "#FAFAFA",
-      colorHeaderTitle: "#2E8B57",
+      colorBgHeader: "#FFFFFF",
+      colorHeaderTitle: "#2563EB",
     },
-    bgLayout: "#FAFAFA",
-    colorPrimary: "#2E8B57",
+    bgLayout: "#FFFFFF",
+    colorPrimary: "#2563EB",
     sider: {
-      colorBgCollapsedButton: "#FAFAFA",
-      colorTextCollapsedButton: "#2E8B57",
-      colorTextCollapsedButtonHover: "#3CB371",
-      colorBgMenuItemActive: "#E8F5E9", // Warna hijau muda
-      colorTextMenuTitle: "#2E8B57",
-      colorTextMenuItemHover: "#3CB371",
-      colorTextMenuSelected: "#2E8B57",
-      colorTextMenuActive: "#2E8B57",
-      colorBgMenuItemHover: "#E8F5E9", // Warna hijau muda
-      colorBgMenuItemSelected: "#E8F5E9", // Warna hijau muda
-      colorBgMenuItemCollapsedElevated: "#FAFAFA",
-      colorTextMenu: "#2E8B57",
-      colorBgMenu: "#FAFAFA",
-      colorTextMenuSecondary: "#006400",
-      colorMenuItemDivider: "#F5F5F5",
+      colorBgCollapsedButton: "#FFFFFF",
+      colorTextCollapsedButton: "#2563EB",
+      colorTextCollapsedButtonHover: "#3B82F6",
+      colorBgMenuItemActive: "#EFF6FF",
+      colorTextMenuTitle: "#2563EB",
+      colorTextMenuItemHover: "#3B82F6",
+      colorTextMenuSelected: "#2563EB",
+      colorTextMenuActive: "#2563EB",
+      colorBgMenuItemHover: "#EFF6FF",
+      colorBgMenuItemSelected: "#EFF6FF",
+      colorBgMenuItemCollapsedElevated: "#FFFFFF",
+      colorTextMenu: "#2563EB",
+      colorBgMenu: "#FFFFFF",
+      colorTextMenuSecondary: "#1D4ED8",
+      colorMenuItemDivider: "#F3F4F6",
     },
     Button: {
-      colorPrimary: "#2E8B57",
-      colorPrimaryHover: "#3CB371",
+      colorPrimary: "#2563EB",
+      colorPrimaryHover: "#3B82F6",
     },
   };
 
@@ -162,7 +160,7 @@ function DocumentLayout({ children, active = "rekon-unor" }) {
             }}
             route={{
               routes: menuItems.map((item) => ({
-                path: `/rekon/${item.key}`,
+                path: `/documents/${item.key}`,
                 name: item.label,
                 icon: item.icon,
               })),
