@@ -3,14 +3,12 @@ import {
   dataUtamSIASNByNip,
   deleteAkByNip,
   getRwAngkakreditByNip,
-  getTokenSIASNService,
   postRwAngkakreditByNip,
   uploadDokRiwayat,
 } from "@/services/siasn-services";
 import {
   DeleteOutlined,
   FileAddOutlined,
-  FileOutlined,
   FilePdfOutlined,
 } from "@ant-design/icons";
 import { Stack, Text } from "@mantine/core";
@@ -22,7 +20,7 @@ import relativeTime from "dayjs/plugin/relativeTime";
 dayjs.locale("id");
 dayjs.extend(relativeTime);
 
-import { API_URL, checkKonversiIntegrasiPertama } from "@/utils/client-utils";
+import { checkKonversiIntegrasiPertama } from "@/utils/client-utils";
 import {
   Button,
   Card,
@@ -42,10 +40,10 @@ import {
   Upload,
   message,
 } from "antd";
-import axios from "axios";
 import { useState } from "react";
 import FormRiwayatJabatanByNip from "../FormRiwayatJabatanByNip";
 import UploadDokumen from "../UploadDokumen";
+import TransferAngkaKredit from "./TransferAngkaKredit";
 
 const FormAngkaKredit = ({ visible, onCancel, nip }) => {
   const [form] = Form.useForm();
@@ -435,6 +433,20 @@ function CompareAngkaKreditByNip({ nip }) {
     },
   ];
 
+  const [visibleTransfer, setVisibleTransfer] = useState(false);
+
+  const [dataTransfer, setDataTransfer] = useState(null);
+
+  const handleVisibleTransfer = (record) => {
+    setDataTransfer(record);
+    setVisibleTransfer(true);
+  };
+
+  const handleCancelTransfer = () => {
+    setVisibleTransfer(false);
+    setDataTransfer(null);
+  };
+
   const columnsMaster = [
     {
       title: "File",
@@ -451,6 +463,14 @@ function CompareAngkaKreditByNip({ nip }) {
     {
       title: "Nomor SK",
       dataIndex: "no_sk",
+      responsive: ["sm"],
+    },
+    {
+      title: "Jenis AK",
+      dataIndex: "jenis_ak",
+      render: (_, record) => {
+        return <>{record?.jenisPak?.jenis_pak}</>;
+      },
       responsive: ["sm"],
     },
     {
@@ -474,25 +494,40 @@ function CompareAngkaKreditByNip({ nip }) {
       responsive: ["sm"],
     },
     {
-      title: "Periode Awal",
-      key: "tgl_awal",
+      title: "Periode Awal / Akhir",
+      key: "periode",
       render: (_, record) => {
-        return <>{dayjs(record?.periode_awal).format("YYYY-MM")}</>;
+        return (
+          <>
+            {record?.periode_awal} / {record?.periode_akhir}
+          </>
+        );
       },
       responsive: ["sm"],
     },
     {
-      title: "Periode Akhir",
-      key: "tgl_akhir",
+      title: "Aksi",
+      key: "transfer",
       render: (_, record) => {
-        return <>{dayjs(record?.periode_akhir).format("YYYY-MM")}</>;
+        return (
+          <>
+            {record?.jenis_pak_id === 3 || record?.jenis_pak_id === 4 ? (
+              <a onClick={() => handleVisibleTransfer(record)}>Tranfer</a>
+            ) : null}
+          </>
+        );
       },
-      responsive: ["sm"],
     },
   ];
 
   return (
     <Card title="Komparasi Angka Kredit">
+      <TransferAngkaKredit
+        data={dataTransfer}
+        onCancel={handleCancelTransfer}
+        nip={nip}
+        open={visibleTransfer}
+      />
       <Skeleton loading={loadingDataSiasn}>
         {dataSiasn?.jenisJabatanId !== "2" ||
         dataSiasn?.kedudukanPnsNama === "PPPK Aktif" ? (
