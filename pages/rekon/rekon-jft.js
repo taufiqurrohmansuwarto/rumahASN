@@ -9,7 +9,7 @@ const RekonJft = () => {
       <Head>
         <title>Rumah ASN - Rekon - Rekon JFT</title>
       </Head>
-      <PageContainer title="Rekon JFT">
+      <PageContainer title="Rekon" content="Jabatan Fungsional">
         <RekonJftSIASN />
       </PageContainer>
     </>

@@ -1,4 +1,5 @@
 import { AppstoreOutlined } from "@ant-design/icons";
+import { IconBook2 } from "@tabler/icons";
 import {
   IconCalendarUser,
   IconTransfer,
@@ -37,6 +38,13 @@ const applist = [
     title: "Bestie AI",
     color: "#1A73E8",
     link: "/chat-ai",
+    userType: ["asn"],
+  },
+  {
+    icon: <IconBook2 />,
+    title: "Dokumen",
+    color: "#FBBC05",
+    link: "/documents/dashboard",
     userType: ["asn"],
   },
   // {

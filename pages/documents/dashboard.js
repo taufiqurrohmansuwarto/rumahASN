@@ -1,8 +1,8 @@
-import Layout from "@/components/Layout";
+import DocumentLayout from "@/components/Documents/DocumentLayout";
 import PageContainer from "@/components/PageContainer";
 import Head from "next/head";
 
-const Documents = () => {
+const DocumentDashboard = () => {
   return (
     <>
       <Head>
@@ -15,13 +15,13 @@ const Documents = () => {
   );
 };
 
-Documents.getLayout = (page) => {
-  return <Layout>{page}</Layout>;
+DocumentDashboard.getLayout = (page) => {
+  return <DocumentLayout>{page}</DocumentLayout>;
 };
 
-Documents.Auth = {
+DocumentDashboard.Auth = {
   action: "manage",
   subject: "DashboardAdmin",
 };
 
-export default Documents;
+export default DocumentDashboard;

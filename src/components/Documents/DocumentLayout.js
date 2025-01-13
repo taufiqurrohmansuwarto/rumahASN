@@ -26,14 +26,16 @@ const ProLayout = dynamic(
   }
 );
 
-function RekonLayout({ children, active = "rekon-unor" }) {
+function DocumentLayout({ children, active = "rekon-unor" }) {
   const { data } = useSession();
 
   const menuItems = [
-    { key: "rekon-unor", icon: <BuildOutlined />, label: "Unit Organisasi" },
-    { key: "rekon-jft", icon: <TeamOutlined />, label: "Jabatan Fungsional" },
-    { key: "rekon-diklat", icon: <BookOutlined />, label: "Diklat" },
-    { key: "anomali", icon: <WarningOutlined />, label: "Disparitas Data" },
+    { key: "dashboard", icon: <BuildOutlined />, label: "Dashboard" },
+    {
+      key: "pengajuan-tte-webinar",
+      icon: <BookOutlined />,
+      label: "Pengajuan TTE Webinar",
+    },
   ];
 
   const router = useRouter();
@@ -41,30 +43,30 @@ function RekonLayout({ children, active = "rekon-unor" }) {
   const token = {
     header: {
       colorBgHeader: "#FAFAFA",
-      colorHeaderTitle: "#8A2BE2",
+      colorHeaderTitle: "#2E8B57",
     },
     bgLayout: "#FAFAFA",
-    colorPrimary: "#8A2BE2",
+    colorPrimary: "#2E8B57",
     sider: {
       colorBgCollapsedButton: "#FAFAFA",
-      colorTextCollapsedButton: "#8A2BE2",
-      colorTextCollapsedButtonHover: "#9370DB",
-      colorBgMenuItemActive: "#F0E6FA", // Diubah ke warna ungu yang lebih muda
-      colorTextMenuTitle: "#8A2BE2",
-      colorTextMenuItemHover: "#9370DB",
-      colorTextMenuSelected: "#8A2BE2",
-      colorTextMenuActive: "#8A2BE2",
-      colorBgMenuItemHover: "#F0E6FA", // Diubah ke warna ungu yang lebih muda
-      colorBgMenuItemSelected: "#F0E6FA", // Diubah ke warna ungu yang lebih muda
+      colorTextCollapsedButton: "#2E8B57",
+      colorTextCollapsedButtonHover: "#3CB371",
+      colorBgMenuItemActive: "#E8F5E9", // Warna hijau muda
+      colorTextMenuTitle: "#2E8B57",
+      colorTextMenuItemHover: "#3CB371",
+      colorTextMenuSelected: "#2E8B57",
+      colorTextMenuActive: "#2E8B57",
+      colorBgMenuItemHover: "#E8F5E9", // Warna hijau muda
+      colorBgMenuItemSelected: "#E8F5E9", // Warna hijau muda
       colorBgMenuItemCollapsedElevated: "#FAFAFA",
-      colorTextMenu: "#8A2BE2",
+      colorTextMenu: "#2E8B57",
       colorBgMenu: "#FAFAFA",
-      colorTextMenuSecondary: "#4B0082",
+      colorTextMenuSecondary: "#006400",
       colorMenuItemDivider: "#F5F5F5",
     },
     Button: {
-      colorPrimary: "#8A2BE2",
-      colorPrimaryHover: "#9370DB",
+      colorPrimary: "#2E8B57",
+      colorPrimaryHover: "#3CB371",
     },
   };
 
@@ -183,4 +185,4 @@ function RekonLayout({ children, active = "rekon-unor" }) {
   );
 }
 
-export default RekonLayout;
+export default DocumentLayout;
