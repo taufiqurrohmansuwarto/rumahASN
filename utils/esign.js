@@ -11,3 +11,4 @@ export const checkUserByNik = async (nik) => {
     console.log(error);
   }
 };
+
