@@ -85,7 +85,7 @@ function DocumentLayout({ children, active = "rekon-unor" }) {
       >
         <ProConfigProvider>
           <ProLayout
-            title={"Rekon SIASN"}
+            title={"Dokumen"}
             defaultCollapsed={collapsed}
             collapsed={collapsed}
             onCollapse={setCollapsed}
