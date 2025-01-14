@@ -1,3 +1,4 @@
+import Dashboard from "@/components/Documents/Dashboard";
 import DocumentLayout from "@/components/Documents/DocumentLayout";
 import PageContainer from "@/components/PageContainer";
 import Head from "next/head";
@@ -8,8 +9,8 @@ const DocumentDashboard = () => {
       <Head>
         <title>Rumah ASN - Dokumen</title>
       </Head>
-      <PageContainer>
-        <div>index</div>
+      <PageContainer title="Dashboard" content="Dashboard Dokumen">
+        <Dashboard />
       </PageContainer>
     </>
   );
