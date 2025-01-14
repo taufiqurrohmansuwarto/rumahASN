@@ -1,4 +1,4 @@
-import { rwAngkakreditMasterByNip } from "@/services/master.services";
+import { rwAngkakreditMasterByNip, urlToPdf } from "@/services/master.services";
 import {
   dataUtamSIASNByNip,
   deleteAkByNip,
@@ -436,15 +436,36 @@ function CompareAngkaKreditByNip({ nip }) {
   const [visibleTransfer, setVisibleTransfer] = useState(false);
 
   const [dataTransfer, setDataTransfer] = useState(null);
+  const [file, setFile] = useState(null);
+  const [loadingFile, setLoadingFile] = useState(false);
 
-  const handleVisibleTransfer = (record) => {
-    setDataTransfer(record);
-    setVisibleTransfer(true);
+  const handleVisibleTransfer = async (record) => {
+    setLoadingFile(true);
+    try {
+      const currentFile = record?.file_pak;
+
+      if (!currentFile) {
+        setVisibleTransfer(true);
+        setDataTransfer(record);
+      } else {
+        const response = await urlToPdf({ url: currentFile });
+        const file = new File([response], "file.pdf", {
+          type: "application/pdf",
+        });
+        setFile(file);
+        setVisibleTransfer(true);
+        setDataTransfer(record);
+      }
+      setLoadingFile(false);
+    } catch (error) {
+      setLoadingFile(false);
+    }
   };
 
   const handleCancelTransfer = () => {
     setVisibleTransfer(false);
     setDataTransfer(null);
+    setFile(null);
   };
 
   const columnsMaster = [
@@ -524,9 +545,11 @@ function CompareAngkaKreditByNip({ nip }) {
     <Card title="Komparasi Angka Kredit">
       <TransferAngkaKredit
         data={dataTransfer}
+        file={file}
         onCancel={handleCancelTransfer}
         nip={nip}
         open={visibleTransfer}
+        loadingFile={loadingFile}
       />
       <Skeleton loading={loadingDataSiasn}>
         {dataSiasn?.jenisJabatanId !== "2" ||
