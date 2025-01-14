@@ -1,8 +1,14 @@
 import React, { useEffect } from "react";
-import { Modal, Form } from "antd";
+import { Modal, Form, message, Spin } from "antd";
 import FormAngkaKredit from "./FormAngkaKredit";
 import dayjs from "dayjs";
 import customParseFormat from "dayjs/plugin/customParseFormat";
+import { serializeAngkaKredit } from "@/utils/transfer-siasn.utils";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import {
+  postRwAngkakreditByNip,
+  uploadDokRiwayat,
+} from "@/services/siasn-services";
 
 dayjs.extend(customParseFormat);
 
@@ -64,6 +70,9 @@ const serializeJenisAK = (data) => {
       isIntegrasi: "0",
       isKonversi: "1",
       kreditBaruTotal: data?.nilai_pak,
+      tahun: dayjs(data?.periode_awal).isValid()
+        ? dayjs(data?.periode_awal)
+        : "",
       jenisAngkaKredit: "isKonversi",
     };
   }
@@ -71,7 +80,27 @@ const serializeJenisAK = (data) => {
   return payload;
 };
 
-function TransferAngkaKredit({ data, onCancel, open, nip }) {
+function TransferAngkaKredit({ data, onCancel, open, nip, file, loadingFile }) {
+  const queryClient = useQueryClient();
+
+  const { mutateAsync: tambah, isLoading: isLoadingTambah } = useMutation(
+    (data) => postRwAngkakreditByNip(data),
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries("angka-kredit");
+        onCancel();
+        message.success("Berhasil menambahkan angka kredit");
+      },
+      onSettled: () => {
+        queryClient.invalidateQueries("angka-kredit");
+        onCancel();
+      },
+      onError: () => {
+        message.error("Gagal menambahkan angka kredit");
+      },
+    }
+  );
+
   const [form] = Form.useForm();
 
   useEffect(() => {
@@ -81,16 +110,51 @@ function TransferAngkaKredit({ data, onCancel, open, nip }) {
     }
   }, [data, form]);
 
+  const handleFinish = async () => {
+    const values = await form.validateFields();
+    const data = serializeAngkaKredit(values);
+
+    const payload = {
+      nip,
+      data,
+    };
+
+    if (!file) {
+      await tambah(payload);
+    } else {
+      const result = await tambah(payload);
+      const id = result?.id;
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("id_riwayat", id);
+      formData.append("id_ref_dokumen", "879");
+      await uploadDokRiwayat(formData);
+      queryClient.invalidateQueries("angka-kredit");
+    }
+  };
+
   return (
-    <Modal
-      open={open}
-      onCancel={onCancel}
-      title="Transfer Angka Kredit"
-      footer={null}
-      width={800}
-    >
-      <FormAngkaKredit nip={nip} form={form} />
-    </Modal>
+    <>
+      <Spin spinning={loadingFile} fullscreen />
+      <Modal
+        destroyOnClose
+        open={open}
+        onCancel={onCancel}
+        title="Transfer Angka Kredit"
+        width={800}
+        onOk={handleFinish}
+        confirmLoading={isLoadingTambah}
+      >
+        {data && (
+          <>
+            <FormAngkaKredit nip={nip} form={form} />
+            <a href={data?.file_pak} target="_blank" rel="noreferrer">
+              {data?.file_pak}
+            </a>
+          </>
+        )}
+      </Modal>
+    </>
   );
 }
 
