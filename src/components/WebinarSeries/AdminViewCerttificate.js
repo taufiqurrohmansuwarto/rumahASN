@@ -10,6 +10,8 @@ import React, { useEffect } from "react";
 const FormSettingSertificate = ({ id }) => {
   const queryClient = useQueryClient();
 
+  const [form] = Form.useForm();
+
   const { data, isLoading } = useQuery(
     ["setting-template", id],
     () => getSettingTemplate(id),
@@ -52,8 +54,6 @@ const FormSettingSertificate = ({ id }) => {
   const handleOk = async (values) => {
     await edit({ id, data: values });
   };
-
-  const [form] = Form.useForm();
 
   return (
     <div>
