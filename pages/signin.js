@@ -129,9 +129,9 @@ const SignIn = ({ providers }) => {
                     )}
                   </Col>
                 ))}
-                <Button block onClick={gotoNetralitas}>
+                {/* <Button block onClick={gotoNetralitas}>
                   Lapor Netralitas
-                </Button>
+                </Button> */}
               </Row>
             </Col>
           </Row>

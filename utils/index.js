@@ -185,6 +185,26 @@ export const uploadSertifikatToMinio = (mc, filename, base64Pdf) => {
   });
 };
 
+export const uploadMinioWithFolder = (mc, filename, base64Pdf, folder) => {
+  return new Promise((resolve, reject) => {
+    mc.putObject(
+      folder,
+      `${filename}`,
+      Buffer.from(base64Pdf, "base64"),
+      base64Pdf.length,
+      { "Content-Type": "application/pdf" },
+      function (err, info) {
+        if (err) {
+          reject(err);
+          console.log(err);
+        } else {
+          resolve(info);
+        }
+      }
+    );
+  });
+};
+
 export const fromNow = (date) => {
   return dayjs(date).fromNow();
 };

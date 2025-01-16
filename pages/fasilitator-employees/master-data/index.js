@@ -1,4 +1,3 @@
-import DashboardKompareFasilitator from "@/components/Fasilitator/DashboardKompareFasilitator";
 import EmployeesTable from "@/components/Fasilitator/EmployeesTable";
 import Layout from "@/components/Layout";
 import PageContainer from "@/components/PageContainer";

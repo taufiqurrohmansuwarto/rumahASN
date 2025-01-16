@@ -18,7 +18,7 @@ const { default: axios } = require("axios");
 
 const { TemplateHandler, MimeType } = require("easy-template-x");
 const { round } = require("lodash");
-const { createQrFromId } = require("./bsre-fetcher");
+const { createQrFromId, createTest } = require("@/utils/bsre-fetcher");
 
 const GOTENBERG_URL = process.env.GOTENBERG_URL;
 
@@ -114,9 +114,11 @@ module.exports.viewCertificateWithUserInformation = async ({
       nomer_sertifikat: "123456",
     };
     const { nama, employee_number, jabatan, instansi, nomer_sertifikat } = user;
+
     const qrCode = await createQrFromId("abcedfghijklmnopqrstuvwxyz");
     const pdfBytes = await axios.get(url, { responseType: "arraybuffer" });
     const pdfDoc = await PDFDocument.load(pdfBytes.data);
+
     const font = await pdfDoc.embedFont(StandardFonts.HelveticaBoldOblique);
 
     const pages = pdfDoc.getPages();
