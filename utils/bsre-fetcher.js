@@ -87,7 +87,7 @@ export const createSignature = async ({ id, file, userId }) => {
   }
 };
 
-export const createQrFromId = async (id) => {
+module.exports.createQrFromId = async (id) => {
   try {
     const qr = `${webinar_certificate_url}/${id}`;
 
