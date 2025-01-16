@@ -6,7 +6,7 @@ import UserRating from "@/components/UserRating";
 import { IdcardOutlined } from "@ant-design/icons";
 import { Center } from "@mantine/core";
 import { useSpring } from "@react-spring/web";
-import { IconBarcode, IconKey } from "@tabler/icons";
+import { IconBarcode, IconKey, IconUserPlus } from "@tabler/icons";
 import { Button, Col, Divider, FloatButton, Grid, Row, Space } from "antd";
 import { getProviders, signIn } from "next-auth/react";
 import Head from "next/head";
@@ -206,6 +206,15 @@ const SignIn = ({ providers }) => {
               <Link href="/public/cek-meja-verif">
                 <Button size="small" icon={<IdcardOutlined size={14} />}>
                   Cek Meja Verifikasi
+                </Button>
+              </Link>
+            </Space>
+          </Center>
+          <Center style={{ marginTop: 10 }}>
+            <Space>
+              <Link href="/public/pendataan-fasilitator">
+                <Button size="small" icon={<IconUserPlus size={14} />}>
+                  Pendataan Fasilitator
                 </Button>
               </Link>
             </Space>
