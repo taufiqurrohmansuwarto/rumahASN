@@ -1,10 +1,52 @@
 import React, { useEffect } from "react";
-import { Modal, Form, Select, Spin } from "antd";
+import { Modal, Form, Select, Spin, message } from "antd";
 import FormCariPNSKinerja from "../FormCariPNSKinerja";
 import { serializeKinerja } from "@/utils/transfer-siasn.utils";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { postRwSkp22ByNip, uploadDokRiwayat } from "@/services/siasn-services";
 
-function ModalTransferSKP22({ open, onCancel, data, loadingFile }) {
+function ModalTransferSKP22({ open, onCancel, data, loadingFile, nip, file }) {
+  const queryClient = useQueryClient();
+
+  const { mutateAsync: transfer, isLoading: isLoadingTransfer } = useMutation(
+    (data) => postRwSkp22ByNip(data),
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries(["data-skp-22", nip]);
+        message.success("Berhasil menambahkan SKP");
+        onCancel();
+      },
+      onError: () => {
+        message.error("Gagal menambahkan SKP");
+      },
+      onSettled: () => {
+        queryClient.invalidateQueries(["data-skp-22", nip]);
+      },
+    }
+  );
+
   const [form] = Form.useForm();
+
+  const handleSubmit = async () => {
+    const values = await form.validateFields();
+    const payload = {
+      nip,
+      data: values,
+    };
+
+    if (!file) {
+      await transfer(payload);
+    } else {
+      const result = await transfer(payload);
+      const id = result?.id;
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("id_riwayat", id);
+      formData.append("id_ref_dokumen", "890");
+      await uploadDokRiwayat(formData);
+      queryClient.invalidateQueries(["data-skp-22", nip]);
+    }
+  };
 
   useEffect(() => {
     if (data) {
@@ -24,7 +66,8 @@ function ModalTransferSKP22({ open, onCancel, data, loadingFile }) {
         open={open}
         width={750}
         onCancel={onCancel}
-        onOk={() => null}
+        confirmLoading={isLoadingTransfer}
+        onOk={handleSubmit}
       >
         <Form layout="vertical" form={form}>
           <Form.Item
