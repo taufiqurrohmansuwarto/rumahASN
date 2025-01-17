@@ -1,12 +1,11 @@
-import { rwSkpMasterByNip } from "@/services/master.services";
+import { rwSkpMasterByNip, urlToPdf } from "@/services/master.services";
 import {
   getRwSkp22ByNip,
-  getTokenSIASNService,
   postRwSkp22ByNip,
   uploadDokRiwayat,
 } from "@/services/siasn-services";
-import { API_URL } from "@/utils/client-utils";
-import { FileAddOutlined, PlusOutlined } from "@ant-design/icons";
+import useFileStore from "@/store/useFileStore";
+import { PlusOutlined, SendOutlined } from "@ant-design/icons";
 import { Stack } from "@mantine/core";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
@@ -19,15 +18,14 @@ import {
   Select,
   Table,
   Typography,
-  Upload,
   message,
+  Tooltip,
 } from "antd";
-import axios from "axios";
 import { useState } from "react";
+import FileUploadSIASN from "../FileUploadSIASN";
 import FormCariPNSKinerja from "../FormCariPNSKinerja";
 import UploadDokumen from "../UploadDokumen";
-import FileUploadSIASN from "../FileUploadSIASN";
-import useFileStore from "@/store/useFileStore";
+import ModalTransferSKP22 from "./ModalTransferSKP22";
 
 // const data = {
 //     hasilKinerjaNilai: 0,
@@ -160,6 +158,39 @@ const FormSKP22 = ({ visible, onCancel, nip }) => {
 function CompareSKP22ByNip({ nip }) {
   const [visible, setVisible] = useState(false);
 
+  const [openTransfer, setOpenTransfer] = useState(false);
+  const [currentData, setCurrentData] = useState(null);
+  const [file, setFile] = useState(null);
+  const [loadingFile, setLoadingFile] = useState(false);
+
+  const handleOpenTransfer = async (data) => {
+    setLoadingFile(true);
+    try {
+      const currentFile = data?.file_skp;
+
+      if (!currentFile) {
+        setOpenTransfer(true);
+        setCurrentData(data);
+      } else {
+        const response = await urlToPdf({ url: currentFile });
+        const file = new File([response], "file.pdf", {
+          type: "application/pdf",
+        });
+        setFile(file);
+        setOpenTransfer(true);
+        setCurrentData(data);
+      }
+      setLoadingFile(false);
+    } catch (error) {
+      setLoadingFile(false);
+    }
+  };
+
+  const handleCloseTransfer = () => {
+    setOpenTransfer(false);
+    setCurrentData(null);
+  };
+
   const handleVisible = () => {
     setVisible(true);
   };
@@ -284,10 +315,39 @@ function CompareSKP22ByNip({ nip }) {
       title: "Perilaku Kerja",
       dataIndex: "perilaku",
     },
+    {
+      title: "Aksi",
+      key: "aksi",
+      render: (_, row) => {
+        const tahun = row?.tahun;
+        const tahunTransfer =
+          tahun === 2024 || tahun === 2023 || tahun === 2022;
+
+        if (tahunTransfer) {
+          return (
+            <Tooltip title="Transfer">
+              <a onClick={() => handleOpenTransfer(row)}>
+                <SendOutlined />
+              </a>
+            </Tooltip>
+          );
+        } else {
+          return null;
+        }
+      },
+    },
   ];
 
   return (
     <Card title="Komparasi Kinerja" id="kinerja">
+      <ModalTransferSKP22
+        open={openTransfer}
+        data={currentData}
+        onCancel={handleCloseTransfer}
+        file={file}
+        loadingFile={loadingFile}
+        // onOk={handleTransfer}
+      />
       <Stack>
         <FormSKP22 visible={visible} onCancel={handleCancel} nip={nip} />
         <div id="kinerja-siasn">

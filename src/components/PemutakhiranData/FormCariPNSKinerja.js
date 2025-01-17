@@ -23,6 +23,7 @@ const FormCariPNSKinerja = ({ name, label = "Cari Pegawai", help = "" }) => {
         help={help}
         rules={[{ required: true }]}
         name={name}
+        normalize={(values) => values.replace(/\s/g, "")}
       >
         <Select
           showSearch
@@ -31,7 +32,11 @@ const FormCariPNSKinerja = ({ name, label = "Cari Pegawai", help = "" }) => {
           notFoundContent={
             isLoading && debounceValue ? <Spin size="small" /> : null
           }
-          onSearch={(value) => setNip(value)}
+          onSearch={(value) => {
+            // remove space
+            const cleanValue = value.replace(/\s/g, "");
+            setNip(cleanValue);
+          }}
         >
           <Select.Option key={data?.nip_baru} value={data?.nip_baru}>
             {data?.nama} - {data?.unor_nm}

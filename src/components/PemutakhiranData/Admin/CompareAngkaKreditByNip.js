@@ -434,7 +434,6 @@ function CompareAngkaKreditByNip({ nip }) {
   ];
 
   const [visibleTransfer, setVisibleTransfer] = useState(false);
-
   const [dataTransfer, setDataTransfer] = useState(null);
   const [file, setFile] = useState(null);
   const [loadingFile, setLoadingFile] = useState(false);
