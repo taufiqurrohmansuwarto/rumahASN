@@ -341,6 +341,7 @@ function CompareSKP22ByNip({ nip }) {
   return (
     <Card title="Komparasi Kinerja" id="kinerja">
       <ModalTransferSKP22
+        nip={nip}
         open={openTransfer}
         data={currentData}
         onCancel={handleCloseTransfer}
