@@ -19,15 +19,17 @@ const knex = User.knex();
 
 module.exports.getUsersByDepartment = async () => {
   const result = await knex.raw(
-    `SELECT
+    `SELECT 
     SUBSTRING(info->'perangkat_daerah'->>'id' FOR 3) AS perangkat_daerah_id,
     get_hierarchy_simaster(SUBSTRING(info->'perangkat_daerah'->>'id' FOR 3)) AS perangkat_daerah,
     COUNT(*) AS total
-FROM
+FROM 
     users
-GROUP BY
+WHERE 
+    info IS NOT NULL -- Memastikan kolom info tidak NULL
+GROUP BY 
     SUBSTRING(info->'perangkat_daerah'->>'id' FOR 3)
-ORDER BY
+ORDER BY 
     total DESC
 LIMIT 8;`
   );
@@ -36,34 +38,36 @@ LIMIT 8;`
 
 module.exports.getTopDepartmentQuestion = async () => {
   const result = await knex.raw(`WITH recent_tickets AS (
-    SELECT
+    SELECT 
         requester,
         COUNT(*) AS total_tickets
-    FROM
+    FROM 
         tickets
-    WHERE
-        created_at >= NOW() - INTERVAL '1 month'
-    GROUP BY
+    WHERE 
+        created_at >= NOW() - INTERVAL '2 months' -- Menggunakan interval 2 bulan
+    GROUP BY 
         requester
 ),
 users_with_tickets AS (
-    SELECT
+    SELECT 
         SUBSTRING(u.info->'perangkat_daerah'->>'id' FOR 3) AS perangkat_daerah_id,
         COUNT(rt.total_tickets) AS total_tickets
-    FROM
+    FROM 
         users u
-    JOIN
+    JOIN 
         recent_tickets rt ON u.custom_id = rt.requester
-    GROUP BY
+    WHERE 
+        u.info IS NOT NULL -- Memastikan kolom info tidak NULL
+    GROUP BY 
         SUBSTRING(u.info->'perangkat_daerah'->>'id' FOR 3)
 )
-SELECT
+SELECT 
     perangkat_daerah_id,
     get_hierarchy_simaster(perangkat_daerah_id) AS perangkat_daerah_name,
     total_tickets
-FROM
+FROM 
     users_with_tickets
-ORDER BY
+ORDER BY 
     total_tickets DESC
 LIMIT 8;`);
 
