@@ -242,7 +242,14 @@ from (select status_code, count(status_code)
       res.json(data);
     } else if (type === "top-department-question") {
       const result = await getTopDepartmentQuestion();
-      res.json(result);
+      const data = result?.map((r) => ({
+        ...r,
+        perangkat_daerah: startCase(
+          toLower(r?.perangkat_daerah_name?.split("-")?.[0])
+        ),
+        total: parseInt(r?.total_tickets, 10),
+      }));
+      res.json(data);
     }
   } catch (error) {
     console.log(error);

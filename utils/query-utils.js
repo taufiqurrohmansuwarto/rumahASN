@@ -31,7 +31,7 @@ GROUP BY
     SUBSTRING(info->'perangkat_daerah'->>'id' FOR 3)
 ORDER BY 
     total DESC
-LIMIT 8;`
+LIMIT 10;`
   );
   return result.rows;
 };
@@ -69,7 +69,7 @@ FROM
     users_with_tickets
 ORDER BY 
     total_tickets DESC
-LIMIT 8;`);
+LIMIT 10;`);
 
   return result?.rows;
 };
