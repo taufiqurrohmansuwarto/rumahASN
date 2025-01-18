@@ -1,5 +1,5 @@
-import { Card, Col, Row } from "antd";
 import CheckUser from "@/components/Documents/CheckUser";
+import { Card, Col, Row } from "antd";
 import { useSession } from "next-auth/react";
 
 const CurrentUser = () => {

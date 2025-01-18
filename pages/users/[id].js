@@ -37,6 +37,7 @@ import UserProfile from "@/components/Profile/UserProfile";
 import dayjs from "dayjs";
 import "dayjs/locale/id";
 import relativeTime from "dayjs/plugin/relativeTime";
+import UserTickets from "@/components/Ticket/UserTickets";
 dayjs.locale("id");
 dayjs.extend(relativeTime);
 
@@ -291,7 +292,7 @@ const Users = () => {
         title="Detail Informasi Pengguna"
       >
         <Row gutter={[16, 16]}>
-          <Col md={16} xs={24}>
+          <Col md={24} xs={24}>
             <UserProfile
               user={data}
               isAdmin={currentUser?.user?.current_role === "admin"}
@@ -299,6 +300,9 @@ const Users = () => {
                 data?.current_role === "agent" || data?.current_role === "admin"
               }
             />
+          </Col>
+          <Col md={24} xs={24}>
+            {currentUser?.user?.current_role === "admin" && <UserTickets />}
           </Col>
         </Row>
         {/* <Tabs defaultActiveKey="1" type="card">
