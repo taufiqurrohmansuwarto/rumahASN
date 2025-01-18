@@ -1,6 +1,6 @@
 import { getUsersTickets } from "@/services/index";
 import { useQuery } from "@tanstack/react-query";
-import { Table } from "antd";
+import { Card, Table } from "antd";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { useState } from "react";
@@ -32,7 +32,7 @@ function UserTickets() {
 
   const columns = [
     {
-      title: "Judul Pertanyaan",
+      title: "Judul",
       key: "title",
       render: (_, record) => {
         return (
@@ -41,16 +41,16 @@ function UserTickets() {
       },
     },
     {
-      title: "Tgl. Dibuat",
+      title: "Tanggal",
       key: "created_at",
       render: (_, record) => {
-        return dayjs(record?.created_at).format("DD-MM-YYYY HH:mm:ss");
+        return dayjs(record?.created_at).format("DD MMM YYYY HH:mm");
       },
     },
   ];
 
   return (
-    <div>
+    <Card title="Daftar Pertanyaan">
       <Table
         loading={isLoading}
         pagination={{
@@ -70,7 +70,7 @@ function UserTickets() {
         dataSource={tickets?.result}
         rowKey={(row) => row?.id}
       />
-    </div>
+    </Card>
   );
 }
 

@@ -1,6 +1,8 @@
 import DataTickets from "@/components/Dashboards/DataTickets";
 import PlotAdminTickets from "@/components/Dashboards/PlotAdminTickets";
 import PlotAgeUsers from "@/components/Dashboards/PlotAgeUsers";
+import QuestionByDepartment from "@/components/Dashboards/QuestionByDepartment";
+import UserByDepartment from "@/components/Dashboards/UserByDepartment";
 import UserByGroup from "@/components/Dashboards/UserByGroupCard";
 import Layout from "@/components/Layout";
 import PageContainer from "@/components/PageContainer";
@@ -33,7 +35,15 @@ function DashboardAnalysis() {
               <UserByGroup />
             </Card>
           </Col>
+
+          <Col md={24} xs={24}>
+            <UserByDepartment />
+          </Col>
+          <Col md={24} xs={24}>
+            <QuestionByDepartment />
+          </Col>
         </Row>
+
         <PlotAgeUsers />
         <PlotAdminTickets />
       </PageContainer>

@@ -17,6 +17,58 @@ const preProcessText = (text) => {
 
 const knex = User.knex();
 
+module.exports.getUsersByDepartment = async () => {
+  const result = await knex.raw(
+    `SELECT info -> 'perangkat_daerah' ->> 'id'                         AS perangkat_daerah_id,
+       get_hierarchy_simaster(info -> 'perangkat_daerah' ->> 'id') AS perangkat_daerah,
+       COUNT(*)                                                    AS total
+
+FROM users
+where length(info -> 'perangkat_daerah' ->> 'id') = 3
+GROUP BY info -> 'perangkat_daerah' ->> 'id'
+order by 3 desc limit 8;`
+  );
+  return result.rows;
+};
+
+module.exports.getTopDepartmentQuestion = async () => {
+  const result = await knex.raw(`WITH recent_tickets AS (
+    SELECT
+        requester,
+        COUNT(*) AS total_tickets
+    FROM
+        tickets
+    WHERE
+        created_at >= NOW() - INTERVAL '1 month'
+    GROUP BY
+        requester
+),
+users_with_tickets AS (
+    SELECT
+        u.info->'perangkat_daerah'->>'id' AS perangkat_daerah_id,
+        COUNT(rt.total_tickets) AS total_tickets
+    FROM
+        users u
+    JOIN
+        recent_tickets rt ON u.custom_id = rt.requester
+    WHERE
+        LENGTH(u.info->'perangkat_daerah'->>'id') = 3
+    GROUP BY
+        u.info->'perangkat_daerah'->>'id'
+)
+SELECT
+    perangkat_daerah_id,
+    get_hierarchy_simaster(perangkat_daerah_id) AS perangkat_daerah_name,
+    total_tickets
+FROM
+    users_with_tickets
+ORDER BY
+    total_tickets DESC
+LIMIT 8;`);
+
+  return result?.rows;
+};
+
 module.exports.ticketRecomendationById = async (ticketId, role) => {
   const allTickets = await Ticket.query()
     .select("id", "title")

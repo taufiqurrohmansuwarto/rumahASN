@@ -2,9 +2,15 @@ const Status = require("../models/status.model");
 const Tickets = require("../models/tickets.model");
 const knex = Status.knex();
 const { raw } = require("objection");
-const { getUsersAge, getTotalCaraMasuk } = require("@/utils/query-utils");
+const {
+  getUsersAge,
+  getTotalCaraMasuk,
+  getUsersByDepartment,
+  getTopDepartmentQuestion,
+} = require("@/utils/query-utils");
 
 const dayjs = require("dayjs");
+const { startCase, toLower } = require("lodash");
 require("dayjs/locale/id");
 dayjs.locale("id");
 
@@ -222,6 +228,20 @@ from (select status_code, count(status_code)
     } else if (type === "aggregateSubCategories") {
       const result = await aggregateBySubCategories();
 
+      res.json(result);
+    } else if (type === "departments") {
+      const result = await getUsersByDepartment();
+      const data = result?.map((r) => ({
+        ...r,
+        perangkat_daerah: startCase(
+          toLower(r?.perangkat_daerah?.split("-")?.[0])
+        ),
+        total: parseInt(r?.total, 10),
+      }));
+
+      res.json(data);
+    } else if (type === "top-department-question") {
+      const result = await getTopDepartmentQuestion();
       res.json(result);
     }
   } catch (error) {
