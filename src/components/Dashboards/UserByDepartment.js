@@ -1,19 +1,12 @@
 import { adminDashboard } from "@/services/admin.services";
 import { useQuery } from "@tanstack/react-query";
-import { Card, Table } from "antd";
+import { Card } from "antd";
 import Bar from "../Plots/Bar";
 
 function UserByDepartment() {
   const { data, isLoading } = useQuery(["analysis-user-by-department"], () =>
     adminDashboard("departments")
   );
-  const columns = [
-    {
-      title: "Departemen",
-      dataIndex: "perangkat_daerah",
-      key: "perangkat_daerah",
-    },
-  ];
 
   const config = {
     data: data,
