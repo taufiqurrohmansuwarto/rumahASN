@@ -22,6 +22,7 @@ const uplaodDokRwSIASN = async (req, res) => {
       response?.data?.message || "Berhasil Upload Dokumen";
     res.json(responseMessage);
   } catch (error) {
+    console.log("error", error);
     const errorMessage = error?.message || "Internal server error";
     console.log(errorMessage);
     res.status(500).json({ message: errorMessage });
