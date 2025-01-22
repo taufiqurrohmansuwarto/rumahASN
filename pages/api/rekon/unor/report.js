@@ -1,14 +1,10 @@
-import { createRouter } from "next-connect";
-import auth from "@/middleware/auth.middleware";
+import { getRekonUnorReport } from "@/controller/rekon.controller";
 import adminFasilitatorMiddleware from "@/middleware/admin-fasilitator.middleware";
-import {
-  getRekonUnorReport,
-  getSIASNUnor,
-} from "@/controller/rekon.controller";
+import auth from "@/middleware/auth.middleware";
+import { createRouter } from "next-connect";
 
 const router = createRouter();
 
-// router.use(auth).use(adminFasilitatorMiddleware).get(getRekonUnorReport);
-router.use(auth).use(adminFasilitatorMiddleware).get(getSIASNUnor);
+router.use(auth).use(adminFasilitatorMiddleware).get(getRekonUnorReport);
 
 export default router.handler();
