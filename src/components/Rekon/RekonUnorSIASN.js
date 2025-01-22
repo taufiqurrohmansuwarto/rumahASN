@@ -83,6 +83,7 @@ const UnorSimaster = () => {
           <TreeSelect
             treeNodeFilterProp="title"
             placeholder="Ketik nama unit organisasi"
+            listHeight={400}
             showSearch
             style={{ width: "100%" }}
             treeData={data}
@@ -197,6 +198,7 @@ const UnorSiasn = () => {
             treeNodeFilterProp="title"
             showSearch
             style={{ width: "100%" }}
+            listHeight={500}
             treeData={data}
             value={selectedUnor}
             onSelect={handleSelect}
