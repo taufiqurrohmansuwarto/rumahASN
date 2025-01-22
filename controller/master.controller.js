@@ -512,6 +512,7 @@ const getAtasan = async (req, res) => {
     if (!req?.query?.nip) {
       res.status(400).json({ code: 400, message: "NIP is required" });
     } else {
+      let nipAtasan = null;
       const { nip } = req?.query;
 
       const currentUser = await SyncPegawaiMaster.query()
@@ -519,16 +520,28 @@ const getAtasan = async (req, res) => {
         .first()
         .select("skpd_id");
 
-      // misal currentUser.skpd_id = hasilnya 12301 unor atasan menjadi 123 hapus 01
-      const unorAtasan = currentUser?.skpd_id?.slice(0, -2);
+      if (currentUser?.skpd_id) {
+        let unorAtasan = currentUser.skpd_id;
 
-      const atasan = await SyncPegawaiMaster.query()
-        .where("skpd_id", unorAtasan)
-        .andWhere("jenis_jabatan", "Struktural")
-        .select("nip_master")
-        .first();
+        // Iterasi untuk mencari atasan dengan memotong 2 karakter terakhir setiap kali
+        while (unorAtasan.length >= 3) {
+          const atasan = await SyncPegawaiMaster.query()
+            .where("skpd_id", unorAtasan)
+            .andWhere("jenis_jabatan", "Struktural")
+            .select("nip_master")
+            .first();
 
-      res.json(atasan);
+          if (atasan) {
+            nipAtasan = atasan.nip_master;
+            break;
+          }
+
+          // Potong 2 karakter terakhir
+          unorAtasan = unorAtasan.slice(0, -2);
+        }
+      }
+
+      res.json({ nip_master: nipAtasan });
     }
   } catch (error) {
     console.log(error);
