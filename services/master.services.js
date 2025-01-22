@@ -243,3 +243,7 @@ export const simasterJftBackup = () => {
 export const simasterJfuBackup = () => {
   return masterApi.get("/simaster-jfu").then((res) => res.data);
 };
+
+export const getAtasan = (nip) => {
+  return masterApi.get(`/get-atasan?nip=${nip}`).then((res) => res.data);
+};

@@ -2,11 +2,20 @@ import React, { useEffect } from "react";
 import { Modal, Form, Select, Spin, message } from "antd";
 import FormCariPNSKinerja from "../FormCariPNSKinerja";
 import { serializeKinerja } from "@/utils/transfer-siasn.utils";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { postRwSkp22ByNip, uploadDokRiwayat } from "@/services/siasn-services";
+import { getAtasan } from "@/services/master.services";
 
 function ModalTransferSKP22({ open, onCancel, data, loadingFile, nip, file }) {
   const queryClient = useQueryClient();
+
+  const { data: dataAtasan, isLoading: isLoadingAtasan } = useQuery(
+    ["data-atasan", nip],
+    () => getAtasan(nip),
+    {
+      refetchOnWindowFocus: false,
+    }
+  );
 
   const { mutateAsync: transfer, isLoading: isLoadingTransfer } = useMutation(
     (data) => postRwSkp22ByNip(data),
@@ -102,6 +111,7 @@ function ModalTransferSKP22({ open, onCancel, data, loadingFile, nip, file }) {
           <a href={data?.file_skp} target="_blank" rel="noreferrer">
             Lihat Penilai
           </a>
+          {dataAtasan && <span> ({dataAtasan?.nip_master})</span>}
           <FormCariPNSKinerja
             help="ketik NIP Tanpa Spasi dan tunggu..."
             label="Atasan Penilai"

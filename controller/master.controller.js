@@ -1,4 +1,3 @@
-import { fetchPdf } from "@/utils/client-utils";
 import {
   departmentDetail,
   employeeTodayBirthdayDetail,
@@ -20,6 +19,7 @@ dayjs.locale("id");
 dayjs.extend(relativeTime);
 const { orderBy, sortBy, toString } = require("lodash");
 const Anomali23 = require("@/models/anomali23.model");
+const SyncPegawaiMaster = require("@/models/sync-pegawai.model");
 
 const url = "https://master.bkd.jatimprov.go.id/files_jatimprov/";
 
@@ -507,7 +507,37 @@ const urlToPdf = async (req, res) => {
   }
 };
 
+const getAtasan = async (req, res) => {
+  try {
+    if (!req?.query?.nip) {
+      res.status(400).json({ code: 400, message: "NIP is required" });
+    } else {
+      const { nip } = req?.query;
+
+      const currentUser = await SyncPegawaiMaster.query()
+        .where("nip_master", nip)
+        .first()
+        .select("skpd_id");
+
+      // misal currentUser.skpd_id = hasilnya 12301 unor atasan menjadi 123 hapus 01
+      const unorAtasan = currentUser?.skpd_id?.slice(0, -2);
+
+      const atasan = await SyncPegawaiMaster.query()
+        .where("skpd_id", unorAtasan)
+        .andWhere("jenis_jabatan", "Struktural")
+        .select("nip_master")
+        .first();
+
+      res.json(atasan);
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ code: 500, message: "Internal Server Error" });
+  }
+};
+
 module.exports = {
+  getAtasan,
   urlToPdf,
   employeeTodayBirthday,
   unorASN,
