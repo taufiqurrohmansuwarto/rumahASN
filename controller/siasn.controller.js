@@ -270,6 +270,7 @@ const getTreeRef = async (req, res) => {
 
     if (!checkUpdate) {
       const result = await request.get("/referensi/ref-unor");
+
       await RefSIASNUnor.query().delete();
       await RefSIASNUnor.query().insertGraph(result?.data?.data);
       await BackupSIASN.query().insert({

@@ -50,7 +50,7 @@ export const postPendataan = async (req, res) => {
       req.body;
 
     if (kode !== "fasilitatorjatim2025") {
-      return res.status(400).json({ code: 400, message: "Kode tidak sesuai" });
+      res.status(400).json({ code: 400, message: "Kode tidak sesuai" });
     }
 
     if (asn_id && !nama) {
@@ -73,7 +73,7 @@ export const postPendataan = async (req, res) => {
         .first();
 
       if (checkDuplicate) {
-        return res.status(409).json({ code: 409, message: "Data sudah ada" });
+        res.status(409).json({ code: 409, message: "Data sudah ada" });
       }
     }
 
