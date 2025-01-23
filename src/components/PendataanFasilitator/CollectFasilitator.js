@@ -11,6 +11,7 @@ import {
   Form,
   Input,
   message,
+  Radio,
   Row,
   Select,
   TreeSelect,
@@ -42,7 +43,7 @@ function CollectFasilitator() {
       form.resetFields();
     },
     onError: (error) => {
-      message.error("Gagal menyimpan data");
+      message.error(error?.response?.data?.message || "Gagal menyimpan data");
       // console.log(error);
     },
   });
@@ -57,21 +58,7 @@ function CollectFasilitator() {
       <Head>
         <title>Rumah ASN - Pendataan Fasilitator</title>
       </Head>
-      <PageContainer
-        title="Pendataan Fasilitator"
-        header={{
-          breadcrumbRender: () => (
-            <Breadcrumb>
-              <Breadcrumb.Item>
-                <Link href="/">Beranda</Link>
-              </Breadcrumb.Item>
-              <Breadcrumb.Item>
-                Pendataan Fasilitator SIMASTER dan SIASN
-              </Breadcrumb.Item>
-            </Breadcrumb>
-          ),
-        }}
-      >
+      <PageContainer title="Pendataan Fasilitator">
         <Form layout="vertical" form={form} onFinish={handleSubmit}>
           <Row gutter={[32, 32]}>
             <Col md={12} xs={24}>
@@ -85,13 +72,10 @@ function CollectFasilitator() {
                   },
                 ]}
               >
-                <Select
-                  options={[
-                    { value: "asn", label: <span>ASN</span> },
-                    { value: "nonasn", label: <span>Non ASN</span> },
-                  ]}
-                  onChange={(value) => setJenisPegawai(value)}
-                />
+                <Radio.Group onChange={(e) => setJenisPegawai(e.target.value)}>
+                  <Radio.Button value="asn">ASN</Radio.Button>
+                  <Radio.Button value="nonasn">Non ASN</Radio.Button>
+                </Radio.Group>
               </Form.Item>
 
               {jenisPegawai === "nonasn" && (
