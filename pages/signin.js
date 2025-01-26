@@ -7,7 +7,16 @@ import { IdcardOutlined } from "@ant-design/icons";
 import { Center } from "@mantine/core";
 import { useSpring } from "@react-spring/web";
 import { IconBarcode, IconKey, IconUserPlus } from "@tabler/icons";
-import { Button, Col, Divider, FloatButton, Grid, Row, Space } from "antd";
+import {
+  Button,
+  Col,
+  Divider,
+  FloatButton,
+  Grid,
+  Row,
+  Space,
+  Typography,
+} from "antd";
 import { getProviders, signIn } from "next-auth/react";
 import Head from "next/head";
 import Image from "next/image";
@@ -79,15 +88,15 @@ const SignIn = ({ providers }) => {
           >
             <Col md={24} xs={24}>
               <Center>
-                <Space align="center" direction="vertical">
-                  <Image
+                <Space align="center" style={{ marginTop: 32 }}>
+                  {/* <Image
                     alt="Logo Rumah ASN"
                     src={
                       "https://siasn.bkd.jatimprov.go.id:9000/public/signin_logo.png"
                     }
                     height={120}
                     width={350}
-                  />
+                  /> */}
                   {/* <Image
                     alt="Logo Rumah ASN"
                     src={
@@ -96,6 +105,17 @@ const SignIn = ({ providers }) => {
                     height={30}
                     width={80}
                   /> */}
+                  <span style={{ marginTop: 12 }}>
+                    <Typography.Title
+                      style={{ margin: 0, fontWeight: "bold" }}
+                      level={1}
+                    >
+                      RUMAH ASN
+                    </Typography.Title>
+                    <Typography.Text style={{ margin: 0 }}>
+                      &quot;Kolaborasi Cerdas Pelayanan Tuntas&quot;
+                    </Typography.Text>
+                  </span>
                 </Space>
               </Center>
               <Divider plain>Anda masyarakat umum?</Divider>
@@ -117,14 +137,13 @@ const SignIn = ({ providers }) => {
                     {provider?.id !== "google" && (
                       <TombolLoginSimaster
                         size="large"
-                        icon={<LoginSimaster />}
-                        type="primary"
+                        // style={{ width: "100%" }}
+                        // icon={<LoginSimaster />}
                         onClick={(e) => {
                           e?.preventDefault();
                           signIn(provider.id);
                         }}
-                        block
-                        text={`Masuk dengan ${provider.name}`}
+                        text={`Masuk dengan akun ${provider.name}`}
                       />
                     )}
                   </Col>
@@ -135,7 +154,7 @@ const SignIn = ({ providers }) => {
               </Row>
             </Col>
           </Row>
-          <Divider />
+          {/* <Divider /> */}
           {/* <Row
             justify="center"
             style={{
