@@ -25,55 +25,55 @@ export const MOCKDATA = [
     icon: IconMessages,
     title: "Forum Kepegawaian",
     description:
-      "Fitur Forum Kepegawaian Rumah ASN memberikan ruang bagi pengguna untuk berinteraksi, berdiskusi, dan bertukar informasi mengenai berbagai hal yang berkaitan dengan kepegawaian, langsung dengan pejabat BKD yang berkompeten di bidangnya",
+      "Fitur Forum Kepegawaian Rumah ASN memungkinkan pengguna berdiskusi langsung dengan pejabat BKD tentang kepegawaian.",
   },
   {
     icon: IconStar,
     title: "Penilaian Layanan",
     description:
-      "Fitur Penilaian Layanan memungkinkan pengguna untuk memberikan penilaian dan umpan balik terhadap layanan yang diterima dari BKD Provinsi Jawa Timur, yang akan menjadi acuan bagi peningkatan kualitas layanan kami.",
+      "Fitur Penilaian Layanan memungkinkan pengguna memberikan feedback untuk meningkatkan layanan BKD Provinsi Jawa Timur.",
   },
   {
     icon: IconMicrophone,
     title: "Podcast",
     description:
-      "Fitur Podcast Rumah ASN menyajikan berbagai topik menarik dan terkini seputar kepegawaian, yang disampaikan langsung oleh pejabat dan staf BKD. Edukasi kepegawaian yang informatif dan menyenangkan.",
+      "Fitur Podcast Rumah ASN menyajikan topik menarik seputar kepegawaian dari pejabat dan staf BKD secara informatif dan menyenangkan.",
   },
   {
     icon: IconDatabaseImport,
     title: "Integrasi Sistem SIASN",
     description:
-      "Melalui fitur Integrasi Sistem, pengguna dapat melacak layanan kepegawaian seperti pensiun, perbaikan nama/NIP, dan kenaikan pangkat dengan lebih mudah dan praktis.",
+      "Fitur Integrasi Sistem memudahkan pengguna melacak layanan kepegawaian seperti pensiun, perbaikan nama/NIP, dan kenaikan pangkat.",
   },
   {
     icon: IconUserPlus,
     title: "Single Sign-On",
     description:
-      "Fitur Single Sign-On memudahkan pengguna untuk mengakses Rumah ASN, baik menggunakan akun Gmail untuk masyarakat umum, maupun Single Sign On Kepegawaian untuk pegawai pemerintah Provinsi Jawa Timur.",
+      "Fitur Single Sign-On mempermudah akses Rumah ASN dengan akun Gmail untuk masyarakat umum atau SSO Kepegawaian bagi pegawai Pemprov Jawa Timur.",
   },
   {
     icon: IconCertificate,
     title: "Webinar Series",
     description:
-      "Fitur Webinar dari Rumah ASN menawarkan penyampaian edukatif yang tersistemasi. Keunggulan ini diperkuat dengan sertifikat menggunakan TTE, memastikan keabsahan dan kemudahan bagi pengguna. Ini tidak hanya meningkatkan kualitas edukasi, tetapi juga memberikan kepraktisan dan kepercayaan bagi setiap peserta.",
+      "Fitur Webinar Rumah ASN menyajikan edukasi terstruktur dengan sertifikat TTE yang valid, memberikan kemudahan dan kepercayaan bagi peserta.",
   },
   {
     icon: IconBrandZoom,
     title: "Coaching & Mentoring",
     description:
-      "Pelatihan virtual tentang kepegawaian daerah di platform digital. Setiap sesi dirancang sesuai tema untuk diskusi mendalam dengan ahli BKD. Tujuannya adalah mempermudah informasi dan meningkatkan kualitas pelayanan BKD.",
+      "Pelatihan virtual kepegawaian daerah di platform digital menghadirkan diskusi mendalam dengan ahli BKD untuk memudahkan informasi dan meningkatkan pelayanan.",
   },
   {
     icon: IconBrand4chan,
-    title: "Smart ASN Connect - ASN Updates",
+    title: "ASN Updates",
     description:
-      "Hayo, siapa yang pengen eksis? Fitur ini mirip kayak Facebook atau Twitter, tapi khusus buat kalian, para ASN. Di sini bisa loh update status yang informatif dan inspiratif. Share pengalaman atau info bermanfaat yang bisa memotivasi teman-teman ASN lainnya. Jangan lupa, tetap keep it professional ya!",
+      "Fitur ini seperti Facebook atau Twitter, tapi khusus untuk ASN. Update status informatif, bagikan pengalaman, atau info yang bisa memotivasi rekan ASN. Tetap profesional, ya!",
   },
   {
     icon: IconBrandAirbnb,
-    title: "Smart ASN Connect - ASN Discussions",
+    title: "ASN Discussions",
     description:
-      "Udah siap diskusi yang lebih seru dan fokus? Di fitur ini, BKD kasih tema-tema panas untuk dibahas. Dari mulai strategi kerja sampe perkembangan terbaru di sektor pemerintahan, semua bisa jadi topik diskusi. Fitur ini bener-bener designed buat memfasilitasi diskusi yang konstruktif dan menghasilkan ide-ide cemerlang untuk kemajuan bersama.",
+      "Siap diskusi seru dan fokus? Fitur ini menghadirkan tema menarik dari BKD, seperti strategi kerja hingga perkembangan di sektor pemerintahan, untuk diskusi konstruktif dan ide-ide cemerlang.",
   },
 ];
 
