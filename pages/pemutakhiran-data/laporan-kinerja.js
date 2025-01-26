@@ -30,7 +30,7 @@ const RiwayatLaporanKinerja = () => {
                 <Link href="/feeds">Beranda</Link>
               </Breadcrumb.Item>
               <Breadcrumb.Item>
-                <Link href="/pemutakhiran-data/komparasi">Peremajaan Data</Link>
+                <Link href="/pemutakhiran-data/komparasi">Integrasi MyASN</Link>
               </Breadcrumb.Item>
               <Breadcrumb.Item>Data Laporan Kinerja</Breadcrumb.Item>
             </Breadcrumb>

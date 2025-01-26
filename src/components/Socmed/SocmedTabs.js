@@ -63,16 +63,19 @@ function SocmedTabs() {
                             border: "1px solid #d9d9d9",
                             cursor: "pointer",
                           }}
-                          onClick={() => router.push("/chat-ai")}
+                          onClick={() =>
+                            router.push("/pemutakhiran-data/komparasi")
+                          }
                         >
                           <Flex align="center" gap={8}>
-                            <IconRobot color="orange" size={18} />
+                            <IconDatabase color="blue" size={18} />
                             <Text size="sm" fw={700}>
-                              Bestie AI
+                              Integrasi MyASN
                             </Text>
                           </Flex>
                         </Flex>
                       </Carousel.Slide>
+
                       <Carousel.Slide>
                         <Flex
                           align="center"
@@ -83,14 +86,12 @@ function SocmedTabs() {
                             border: "1px solid #d9d9d9",
                             cursor: "pointer",
                           }}
-                          onClick={() =>
-                            router.push("/pemutakhiran-data/komparasi")
-                          }
+                          onClick={() => router.push("/chat-ai")}
                         >
                           <Flex align="center" gap={8}>
-                            <IconDatabase color="blue" size={18} />
+                            <IconRobot color="orange" size={18} />
                             <Text size="sm" fw={700}>
-                              Data MyASN
+                              Bestie AI
                             </Text>
                           </Flex>
                         </Flex>
@@ -114,7 +115,7 @@ function SocmedTabs() {
                           <Flex align="center" gap={8}>
                             <IconHistory color="red" size={18} />
                             <Text size="sm" fw={700}>
-                              Lacak Usulan SIASN
+                              Usulan SIASN
                             </Text>
                           </Flex>
                         </Flex>
@@ -230,16 +231,16 @@ function SocmedTabs() {
         </Col>
         <Col md={8} xs={24}>
           <Row gutter={[16, 16]}>
-            <Col md={24} xs={24}>
+            {/* <Col md={24} xs={24}>
               <DiskusiTerhangat />
-            </Col>
+            </Col> */}
 
             <Col md={24} xs={24}>
               <KegiatanMendatang />
             </Col>
-            <Col md={24} xs={24}>
+            {/* <Col md={24} xs={24}>
               <KomunitasPopuler />
-            </Col>
+            </Col> */}
           </Row>
           {/* <KalenderRumahASN /> */}
           {/* <ASNBirthdayList /> */}

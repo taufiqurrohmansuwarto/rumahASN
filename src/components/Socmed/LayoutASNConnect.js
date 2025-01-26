@@ -60,8 +60,8 @@ function LayoutASNConnect({ children, active = "asn-updates" }) {
           color: "black",
         },
       }}
-      title="Smart ASN Connect"
-      content="Berjejaring, Berkolaborasi, Berinovasi Bersama ASN Connect."
+      title="ASN Connect"
+      content="Berjejaring, Berkolaborasi, Berinovasi Bersama."
     >
       {children}
     </PageContainer>

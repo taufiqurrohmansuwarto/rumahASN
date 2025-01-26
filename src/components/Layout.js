@@ -69,7 +69,7 @@ const changeRoutes = (user) => {
     if (pegawaiPemda || fasilitatorMaster) {
       userRoutes.routes.push({
         path: "/asn-connect/asn-updates",
-        name: "Smart ASN Connect",
+        name: "ASN Connect",
         icon: <IconMessageUser size={18} />,
       });
     }

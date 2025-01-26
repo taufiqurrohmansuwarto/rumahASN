@@ -21,7 +21,7 @@ const AsnUpdates = () => {
         {/* <ModalUserAnomali /> */}
         <SocmedTabs />
         <FloatButton.BackTop />
-        <EletterBKD />
+        {/* <EletterBKD /> */}
       </LayoutASNConnect>
     </>
   );
