@@ -3,8 +3,8 @@ import Icon from "@ant-design/icons";
 
 const SimasterSvg = () => (
   <svg
-    width="2em"
-    height="2em"
+    width="1.5em"
+    height="1.5em"
     fill="currentColor"
     viewBox="0 0 1217.32 646.08"
   >

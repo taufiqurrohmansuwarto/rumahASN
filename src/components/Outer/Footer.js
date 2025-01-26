@@ -74,15 +74,15 @@ const zonaIntegritas = [
 
 const styles = {
   footer: {
-    backgroundColor: "#2f54eb",
+    background: "linear-gradient(135deg, #FA8C16, #d4380d)",
     color: "white",
     padding: 80,
   },
   textFont: {
-    color: "white",
+    color: "#fafafa",
   },
   text: {
-    color: "white",
+    color: "#fafafa",
     fontSize: 14,
   },
   credit: {
