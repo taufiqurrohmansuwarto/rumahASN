@@ -245,10 +245,10 @@ const CreateTicket = () => {
           </Breadcrumb>
         )}
       >
-        <EletterBKD />
+        {/* <EletterBKD /> */}
         <Row gutter={[8, 16]}>
           <Col md={16} xs={24}>
-            <AlertCASN2024Jatim />
+            {/* <AlertCASN2024Jatim /> */}
             <Bantuan open={open} onCancel={handleClose} />
             <Card
               title="Form Pertanyaan"

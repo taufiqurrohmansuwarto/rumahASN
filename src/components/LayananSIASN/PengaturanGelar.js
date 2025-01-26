@@ -1,8 +1,9 @@
 import { checkGelar, getGelar, uncheckGelar } from "@/services/siasn-services";
 import { SettingOutlined } from "@ant-design/icons";
+import { Alert } from "@mantine/core";
+import { IconInfoCircle, IconLamp } from "@tabler/icons";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
-  Alert,
   Checkbox,
   Col,
   message,
@@ -69,19 +70,32 @@ const ModalPengaturanGelar = ({ open, onCancel, onOk }) => {
 
   return (
     <Modal
+      width={600}
       title="Pengaturan Gelar"
       open={open}
       onCancel={onCancel}
       footer={null}
     >
-      <Alert
-        message="Centang gelar yang ingin ditampilkan pada profil ASN. Jika gelar tidak berubah pada ekinerja, pergi ke menu profile kemudian lakukan sinkro"
-        showIcon
-        type="info"
-        style={{
-          marginBottom: 16,
-        }}
-      />
+      <Alert my={18} color="blue" variant="light" icon={<IconInfoCircle />}>
+        <Space direction="vertical">
+          <Typography.Text>
+            Pilih gelar yang sesuai dengan Anda.{" "}
+          </Typography.Text>
+          <Typography.Text>
+            Gelar anda tidak sesuai?{" "}
+            <a href="/helpdesk/pemutakhiran-data/pendidikan">
+              Cek data Pendidikan SIASN
+            </a>{" "}
+            atau{" "}
+            <a
+              href="https://bkd.jatimprov.go.id/penyesuaiangelar"
+              target="_blank"
+            >
+              Lihat Panduan Pencantuman Gelar.
+            </a>
+          </Typography.Text>
+        </Space>
+      </Alert>
       <Row gutter={[16, 16]}>
         <Col span={12}>
           <Space direction="vertical" size="small">
@@ -130,7 +144,13 @@ function PengaturanGelar() {
         onCancel={handleCloseModal}
         onOk={handleCloseModal}
       />
-      <Tag onClick={handleShowModal} icon={<SettingOutlined />}>
+      <Tag
+        style={{
+          cursor: "pointer",
+        }}
+        onClick={handleShowModal}
+        icon={<SettingOutlined />}
+      >
         Pengaturan Gelar
       </Tag>
     </>
