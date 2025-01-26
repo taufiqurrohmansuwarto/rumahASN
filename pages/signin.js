@@ -192,7 +192,7 @@ const SignIn = ({ providers }) => {
             </Space>
           </Row> */}
           <Center>
-            <Space>
+            {/* <Space>
               <Link href="/public/verify-pdf">
                 <Button size="small" icon={<IconKey size={14} />}>
                   Verifikasi PDF
@@ -202,13 +202,13 @@ const SignIn = ({ providers }) => {
                 <Button size="small" icon={<IconBarcode size={14} />}>
                   Kedatangan Tamu
                 </Button>
-              </Link>
-              {/* <Link href="/public/cek-meja-verif">
+              </Link> */}
+            {/* <Link href="/public/cek-meja-verif">
                 <Button size="small" icon={<IdcardOutlined size={14} />}>
                   Cek Meja Verifikasi
                 </Button>
               </Link> */}
-            </Space>
+            {/* </Space> */}
           </Center>
           {/* <Center style={{ marginTop: 10 }}>
             <Space>
