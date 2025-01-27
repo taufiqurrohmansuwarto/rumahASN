@@ -1,12 +1,4 @@
-import {
-  Blockquote,
-  Code,
-  List,
-  Stack,
-  Table,
-  Text,
-  Title,
-} from "@mantine/core";
+import { Blockquote, Code, Table, Title } from "@mantine/core";
 import { Image, Typography } from "antd";
 import ReactMarkdown from "react-markdown";
 import rehypeRaw from "rehype-raw";
@@ -75,7 +67,7 @@ function ReactMarkdownCustom({ children, withCustom = true }) {
       return <Title m={0} p={0} order={6} {...props} />;
     },
     code({ node, inline, className, children, ...props }) {
-      return <Code>{children}</Code>;
+      return <Typography.Text code>{children}</Typography.Text>;
     },
     table({ node, ...props }) {
       return <Table {...props} />;
