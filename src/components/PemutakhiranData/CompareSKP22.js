@@ -26,6 +26,8 @@ import axios from "axios";
 import { useState } from "react";
 import FormCariPNSKinerja from "./FormCariPNSKinerja";
 import UploadDokumen from "./UploadDokumen";
+import ModalTransferSKP22Personal from "./Admin/ModalTransferSKP22Personal";
+import { urlToPdf } from "@/services/master.services";
 
 // const data = {
 //     hasilKinerjaNilai: 0,
@@ -202,6 +204,40 @@ const FormSKP22 = ({ visible, onCancel, nip }) => {
 
 function CompareSKP22({ nip, id }) {
   const [visible, setVisible] = useState(false);
+  const [openTransfer, setOpenTransfer] = useState(false);
+  const [dataTransfer, setDataTransfer] = useState(null);
+  const [loadingFile, setLoadingFile] = useState(false);
+  const [file, setFile] = useState(null);
+
+  const handleModalTransfer = async (data) => {
+    setLoadingFile(true);
+    try {
+      const currentFile = data?.file_skp;
+
+      if (!currentFile) {
+        setOpenTransfer(true);
+        setDataTransfer(data);
+      } else {
+        const response = await urlToPdf({ url: currentFile });
+        const file = new File([response], "file.pdf", {
+          type: "application/pdf",
+        });
+        setFile(file);
+        setOpenTransfer(true);
+        setDataTransfer(data);
+      }
+      setLoadingFile(false);
+    } catch (error) {
+      console.log(error);
+      setLoadingFile(false);
+    }
+  };
+
+  const handleCloseModalTransfer = () => {
+    setOpenTransfer(false);
+    setDataTransfer(null);
+    setFile(null);
+  };
 
   const handleVisible = () => {
     setVisible(true);
@@ -298,11 +334,7 @@ function CompareSKP22({ nip, id }) {
       dataIndex: "perilakuKerja",
       responsive: ["sm"],
     },
-    // {
-    //   title: "Hasil Kinerja Nilai",
-    //   dataIndex: "hasilKinerjaNilai",
-    //   responsive: ["sm"],
-    // },
+
     {
       title: "Penilai",
       key: "penilai",
@@ -313,23 +345,6 @@ function CompareSKP22({ nip, id }) {
         </Space>
       ),
     },
-    // {
-    //   title: "Kuadran Kinerja",
-    //   dataIndex: "kuadranKinerja",
-    //   responsive: ["sm"],
-    // },
-
-    // {
-    //   title: "Perilaku Kerja Nilai",
-    //   dataIndex: "PerilakuKerjaNilai",
-    //   responsive: ["sm"],
-    // },
-    // {
-    //   title: "Status Penilai",
-    //   dataIndex: "statusPenilai",
-    //   responsive: ["sm"],
-    // },
-
     {
       title: "Aksi",
       key: "aksi",
@@ -406,7 +421,7 @@ function CompareSKP22({ nip, id }) {
           row?.tahun === 2024 || row?.tahun === 2023 || row?.tahun === 2022;
 
         if (tahunAktif) {
-          return <a>Sinkro SIASN</a>;
+          return <a onClick={() => handleModalTransfer(row)}>Transfer SIASN</a>;
         }
       },
     },
@@ -414,6 +429,13 @@ function CompareSKP22({ nip, id }) {
 
   return (
     <Skeleton loading={isLoading || isLoadingMaster}>
+      <ModalTransferSKP22Personal
+        open={openTransfer}
+        onCancel={handleCloseModalTransfer}
+        data={dataTransfer}
+        loadingFile={loadingFile}
+        file={file}
+      />
       <FloatButton.BackTop />
       <Alert
         color="blue"
