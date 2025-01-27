@@ -1,18 +1,27 @@
 import IPAsn from "@/components/LayananSIASN/IPAsn";
 import { mysapkMenu } from "@/utils/client-utils";
 import {
+  CheckCircleFilled,
+  CloseCircleFilled,
+  TagOutlined,
+} from "@ant-design/icons";
+import {
+  ActionIcon,
   Card,
   Group,
   Image,
   SimpleGrid,
+  Stack,
   Text,
   UnstyledButton,
   createStyles,
   rem,
 } from "@mantine/core";
-import { Avatar, Grid, Space, Tag, Typography } from "antd";
+import { IconInfoCircleFilled } from "@tabler/icons-react";
+import { Avatar, Flex, Grid, Space, Tag, Typography } from "antd";
 import { useRouter } from "next/router";
 import PengaturanGelar from "../LayananSIASN/PengaturanGelar";
+import GantiEmail from "../LayananSIASN/GantiEmail";
 
 const mockdata = mysapkMenu;
 
@@ -90,30 +99,58 @@ export function MenuMySAPK({ dataUtama, foto }) {
     >
       <Group position="apart" mb={14}>
         <Card w={"100%"}>
-          <Space direction="vertical" size="small">
-            <Avatar size={50} src={`${foto?.data}`} alt="Foto-SIASN" />
-            <Typography.Text strong>{dataUtama?.nama}</Typography.Text>
-            <Typography.Text type="secondary">
-              NIP {dataUtama?.nipBaru}
-            </Typography.Text>
-            <Typography.Text type="secondary">
-              {dataUtama?.unorIndukNama} - {dataUtama?.unorNama}
-            </Typography.Text>
-            <Space
-              size="small"
-              direction={screens.xl ? "horizontal" : "vertical"}
-            >
-              <IPAsn tahun={2023} />
-              <Tag color="yellow">{dataUtama?.kedudukanPnsNama}</Tag>
-              <Tag color={dataUtama?.validNik ? "green" : "red"}>
+          <Stack spacing={8}>
+            <Flex justify="space-between">
+              <Stack spacing={6} mb={10}>
+                <Avatar
+                  shape="square"
+                  size={60}
+                  src={`${foto?.data}`}
+                  alt="Foto-SIASN"
+                />
+                <Typography.Text style={{ margin: 0 }} strong>
+                  {dataUtama?.nama}
+                </Typography.Text>
+                <Typography.Text type="secondary" style={{ margin: 0 }}>
+                  {dataUtama?.nipBaru}
+                </Typography.Text>
+                <Typography.Text type="secondary" style={{ margin: 0 }}>
+                  {dataUtama?.jabatanNama}
+                </Typography.Text>
+                <Typography.Text type="secondary" style={{ margin: 0 }}>
+                  {dataUtama?.unorIndukNama} - {dataUtama?.unorNama}
+                </Typography.Text>
+              </Stack>
+              <div>
+                <ActionIcon variant="light" size="sm" color="yellow">
+                  <IconInfoCircleFilled />
+                </ActionIcon>
+              </div>
+            </Flex>
+            <Flex gap={0}>
+              {/* <IPAsn tahun={2023} /> */}
+              <Tag icon={<TagOutlined />} color="yellow">
+                {dataUtama?.kedudukanPnsNama}
+              </Tag>
+              <Tag
+                icon={
+                  dataUtama?.validNik ? (
+                    <CheckCircleFilled />
+                  ) : (
+                    <CloseCircleFilled />
+                  )
+                }
+                color={dataUtama?.validNik ? "green" : "red"}
+              >
                 {dataUtama?.validNik
                   ? "NIK Terverifikasi"
                   : "NIK Belum Terverifikasi"}
               </Tag>
               <PengaturanGelar />
-            </Space>
+              <GantiEmail />
+            </Flex>
             {/* <AnomaliUser /> */}
-          </Space>
+          </Stack>
         </Card>
       </Group>
       <SimpleGrid

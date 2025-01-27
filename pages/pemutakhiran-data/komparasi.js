@@ -61,23 +61,21 @@ function Komparasi() {
   return (
     <>
       <Head>
-        <title>Rumah ASN - Integrasi - MyASN dan SIMASTER</title>
+        <title>Rumah ASN - Integrasi MyASN</title>
       </Head>
       <PageContainer
         childrenContentStyle={{
           padding: breakPoint.xs ? 0 : null,
         }}
-        title="Integrasi MyASN dan SIMASTER"
-        content="Layanan Komparasi Data MyASN dan SIMASTER"
+        title="Integrasi MyASN"
+        content="Layanan Komparasi Data SIASN dan SIMASTER"
         header={{
           breadcrumbRender: () => (
             <Breadcrumb>
               <Breadcrumb.Item>
                 <Link href="/feeds">Beranda</Link>
               </Breadcrumb.Item>
-              <Breadcrumb.Item>
-                Integrasi Data MyASN dan SIMASTER
-              </Breadcrumb.Item>
+              <Breadcrumb.Item>Integrasi MyASN</Breadcrumb.Item>
             </Breadcrumb>
           ),
         }}

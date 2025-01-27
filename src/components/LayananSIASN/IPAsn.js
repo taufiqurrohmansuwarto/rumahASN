@@ -191,7 +191,8 @@ function IPAsn({ tahun }) {
             color={
               dataKategoriIPASN(dataIPAsn?.subtotal) === "Sangat Tinggi"
                 ? "#a0d911"
-                : "#f5222d"
+                : // yellow
+                  "#f5222d"
             }
             style={{ cursor: "pointer" }}
             onClick={handleOpen}

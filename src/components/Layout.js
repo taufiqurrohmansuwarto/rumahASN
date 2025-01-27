@@ -472,12 +472,12 @@ function Layout({ children, active, collapsed = true }) {
         theme="light"
         token={{
           bgLayout: "#fafafa",
-          colorPrimary: "#16", // Warna oranye utama Ant Design
+          colorPrimary: "#FA8C16", // Warna oranye utama Ant Design
           sider: {
             colorBgCollapsedButton: "#FA8C16", // Oranye untuk tombol collapse
-            colorBgMenuItemActive: "#fafafa", // Oranye sangat muda untuk item menu yang aktif
+            colorBgMenuItemActive: "#FFF7E6", // Oranye sangat muda untuk item menu yang aktif
             colorTextCollapsedButton: "#fafafa", // Putih untuk teks tombol collapse
-            colorTextCollapsedButtonHover: "#fafafa", // Oranye sangat muda untuk teks tombol collapse saat di-hover
+            colorTextCollapsedButtonHover: "#FFF7E6", // Oranye sangat muda untuk teks tombol collapse saat di-hover
             colorTextMenuTitle: "#FA8C16", // Oranye untuk judul menu
             colorTextMenuItemHover: "#FA8C16", // Oranye untuk teks menu saat di-hover
             colorTextMenuSelected: "#FA8C16", // Oranye untuk teks menu saat dipilih

@@ -284,6 +284,11 @@ function CompareSKP22({ nip, id }) {
       responsive: ["sm"],
     },
     {
+      title: "Tahun",
+      dataIndex: "tahun",
+      responsive: ["sm"],
+    },
+    {
       title: "Hasil Kerja",
       dataIndex: "hasilKinerja",
       responsive: ["sm"],
@@ -303,17 +308,9 @@ function CompareSKP22({ nip, id }) {
       key: "penilai",
       // width: 200,
       render: (_, row) => (
-        <Descriptions size="small" layout="vertical">
-          <Descriptions.Item label="NIP" span={3}>
-            {row?.nipNrpPenilai}
-          </Descriptions.Item>
-          <Descriptions.Item label="Nama" span={3}>
-            {row?.namaPenilai}
-          </Descriptions.Item>
-          <Descriptions.Item label="Unor" span={3}>
-            {row?.penilaiUnorNm}
-          </Descriptions.Item>
-        </Descriptions>
+        <Space direction="vertical" size={0}>
+          {row?.namaPenilai} {row?.penilaiUnorNm}
+        </Space>
       ),
     },
     // {
@@ -332,11 +329,7 @@ function CompareSKP22({ nip, id }) {
     //   dataIndex: "statusPenilai",
     //   responsive: ["sm"],
     // },
-    {
-      title: "Tahun",
-      dataIndex: "tahun",
-      responsive: ["sm"],
-    },
+
     {
       title: "Aksi",
       key: "aksi",
@@ -395,13 +388,27 @@ function CompareSKP22({ nip, id }) {
     },
     {
       title: "Hasil Kerja",
-      dataIndex: "hasil_kerja",
+      key: "hasil_kerja",
+      render: (_, row) => row?.hasil_kerja?.toUpperCase(),
       responsive: ["sm"],
     },
     {
       title: "Perilaku Kerja",
-      dataIndex: "perilaku",
+      key: "perilaku",
+      render: (_, row) => row?.perilaku?.toUpperCase(),
       responsive: ["sm"],
+    },
+    {
+      title: "Aksi",
+      key: "aksi",
+      render: (_, row) => {
+        const tahunAktif =
+          row?.tahun === 2024 || row?.tahun === 2023 || row?.tahun === 2022;
+
+        if (tahunAktif) {
+          return <a>Sinkro SIASN</a>;
+        }
+      },
     },
   ];
 
@@ -415,8 +422,7 @@ function CompareSKP22({ nip, id }) {
         style={{ marginBottom: 16 }}
       >
         Jika terjadi kesalahan pada data SKP SIASN, gunakan tahun yang sama
-        dengan data yang baru. Data yang lama akan direplace dengan data yang
-        baru.
+        dengan data yang baru.
       </Alert>
 
       <Button onClick={handleVisible} type="primary" icon={<PlusOutlined />}>
@@ -425,20 +431,20 @@ function CompareSKP22({ nip, id }) {
       <Stack>
         <FormSKP22 nip={nip} visible={visible} onCancel={handleCancel} />
         <Table
-          title={() => <Text fw="bold">SIASN</Text>}
-          pagination={false}
-          columns={columns}
-          loading={isLoading}
-          rowKey={(row) => row?.id}
-          dataSource={data}
-        />
-        <Table
           title={() => <Text fw="bold">SIMASTER</Text>}
           pagination={false}
           columns={columnMaster}
           loading={isLoadingMaster}
           rowKey={(row) => row?.skp_id}
           dataSource={dataMaster}
+        />
+        <Table
+          title={() => <Text fw="bold">SIASN</Text>}
+          pagination={false}
+          columns={columns}
+          loading={isLoading}
+          rowKey={(row) => row?.id}
+          dataSource={data}
         />
       </Stack>
     </Skeleton>
