@@ -316,7 +316,13 @@ const Post = ({ post, currentUser }) => {
               &#x2022; {dayjs(post?.created_at).fromNow()}
             </Tooltip>
           }
-          content={<ReactMarkdownCustom>{post?.content}</ReactMarkdownCustom>}
+          content={
+            <div style={{ whiteSpace: "pre-wrap" }}>
+              <ReactMarkdownCustom withCustom={false}>
+                {post?.content}
+              </ReactMarkdownCustom>
+            </div>
+          }
         />
       )}
     </>
@@ -380,7 +386,7 @@ function SocmedPosts() {
         loading={isLoading || isFetching}
         renderItem={(item) => {
           return (
-            <List.Item>
+            <List.Item key={item?.id} style={{ whiteSpace: "pre-wrap" }}>
               <Post post={item} currentUser={currentUser} />
             </List.Item>
           );

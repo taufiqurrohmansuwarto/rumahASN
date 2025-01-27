@@ -313,7 +313,11 @@ function SocmedMyPosts() {
         rowKey={(item) => item.id}
         loading={isLoading || isFetching}
         renderItem={(item) => {
-          return <Post currentUser={currentUser?.user} post={item} />;
+          return (
+            <List.Item key={item?.id}>
+              <Post currentUser={currentUser?.user} post={item} />
+            </List.Item>
+          );
         }}
       />
     </>

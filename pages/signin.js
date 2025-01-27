@@ -1,26 +1,13 @@
 import Features from "@/components/Features";
 import Footer from "@/components/Outer/Footer";
-import LoginSimaster from "@/components/TombolLogin/LoginSimaster";
 import TombolLoginSimaster from "@/components/TombolLogin/TombolLoginSimaster";
 import UserRating from "@/components/UserRating";
-import { IdcardOutlined } from "@ant-design/icons";
 import { Center } from "@mantine/core";
 import { useSpring } from "@react-spring/web";
-import { IconBarcode, IconKey, IconUserPlus } from "@tabler/icons";
-import {
-  Button,
-  Col,
-  Divider,
-  FloatButton,
-  Grid,
-  Row,
-  Space,
-  Typography,
-} from "antd";
+import { Col, Divider, FloatButton, Grid, Row, Space, Typography } from "antd";
 import { getProviders, signIn } from "next-auth/react";
 import Head from "next/head";
 import Image from "next/image";
-import Link from "next/link";
 import { useRouter } from "next/router";
 import GoogleButton from "react-google-button";
 
@@ -42,8 +29,8 @@ const BAComponent = () => {
     <Image
       alt="Rumah ASN Brand Ambassador"
       src={"https://siasn.bkd.jatimprov.go.id:9000/public/signin_ba.png"}
-      width={500}
-      height={680}
+      width={350}
+      height={400}
     />
   );
 };
@@ -68,16 +55,14 @@ const SignIn = ({ providers }) => {
     <>
       <Head>
         <title>
-          Rumah ASN by BKD Provinsi Jawa Timur - Ruang Menjawab Keluhan ASN Jawa
-          Timur dan Masyarakat UMUM
+          Rumah ASN by BKD Provinsi Jawa Timur - Kolaborasi Cerdas, Pelayanan
+          Tuntas
         </title>
         <meta name="description" content="Rumah ASN" />
       </Head>
-      <Row justify="center" align="center">
+      <Row justify="center" style={{ marginBottom: 100 }}>
         <Col md={12} xxl={6} lg={8} xs={24} sm={24}>
-          <Center>
-            <BAComponent />
-          </Center>
+          {/* <BAComponent /> */}
         </Col>
         <Col md={12} xxl={5} lg={10} xs={24} sm={24}>
           <Row
@@ -89,22 +74,6 @@ const SignIn = ({ providers }) => {
             <Col md={24} xs={24}>
               <Center>
                 <Space align="center" style={{ marginTop: 32 }}>
-                  {/* <Image
-                    alt="Logo Rumah ASN"
-                    src={
-                      "https://siasn.bkd.jatimprov.go.id:9000/public/signin_logo.png"
-                    }
-                    height={120}
-                    width={350}
-                  /> */}
-                  {/* <Image
-                    alt="Logo Rumah ASN"
-                    src={
-                      "https://siasn.bkd.jatimprov.go.id:9000/public/signin_bsre.png"
-                    }
-                    height={30}
-                    width={80}
-                  /> */}
                   <span style={{ marginTop: 12 }}>
                     <Typography.Title
                       style={{ margin: 0, fontWeight: "bold" }}
@@ -137,8 +106,6 @@ const SignIn = ({ providers }) => {
                     {provider?.id !== "google" && (
                       <TombolLoginSimaster
                         size="large"
-                        // style={{ width: "100%" }}
-                        // icon={<LoginSimaster />}
                         onClick={(e) => {
                           e?.preventDefault();
                           signIn(provider.id);
@@ -148,96 +115,9 @@ const SignIn = ({ providers }) => {
                     )}
                   </Col>
                 ))}
-                {/* <Button block onClick={gotoNetralitas}>
-                  Lapor Netralitas
-                </Button> */}
               </Row>
             </Col>
           </Row>
-          {/* <Divider /> */}
-          {/* <Row
-            justify="center"
-            style={{
-              marginBottom: 20,
-            }}
-          >
-            <Space size="large">
-              <Tooltip title="Web BKD Jatim">
-                <a
-                  target="_blank"
-                  href="https://bkd.jatimprov.go.id"
-                  rel="noreferrer"
-                >
-                  <GlobalOutlined
-                    style={{
-                      fontSize: 32,
-                      color: "#d9d9d9",
-                      cursor: "pointer",
-                    }}
-                  />
-                </a>
-              </Tooltip>
-              <Tooltip title="Instagram BKD Jatim">
-                <a
-                  href="https://www.instagram.com/bkdjatim/?hl=en"
-                  target="_blank"
-                  rel="noreferrer"
-                >
-                  <InstagramOutlined
-                    style={{
-                      fontSize: 32,
-                      color: "#d9d9d9",
-                      cursor: "pointer",
-                    }}
-                  />
-                </a>
-              </Tooltip>
-
-              <Tooltip title="Youtube BKD Jatim">
-                <a
-                  href="https://www.youtube.com/channel/UCokkbWw9VaJxGp3xqOjbcKg"
-                  target="_blank"
-                  rel="noreferrer"
-                >
-                  <YoutubeOutlined
-                    style={{
-                      fontSize: 32,
-                      color: "#d9d9d9",
-                      cursor: "pointer",
-                    }}
-                  />
-                </a>
-              </Tooltip>
-            </Space>
-          </Row> */}
-          <Center>
-            {/* <Space>
-              <Link href="/public/verify-pdf">
-                <Button size="small" icon={<IconKey size={14} />}>
-                  Verifikasi PDF
-                </Button>
-              </Link>
-              <Link href="/guest-book-barcode/checkin">
-                <Button size="small" icon={<IconBarcode size={14} />}>
-                  Kedatangan Tamu
-                </Button>
-              </Link> */}
-            {/* <Link href="/public/cek-meja-verif">
-                <Button size="small" icon={<IdcardOutlined size={14} />}>
-                  Cek Meja Verifikasi
-                </Button>
-              </Link> */}
-            {/* </Space> */}
-          </Center>
-          {/* <Center style={{ marginTop: 10 }}>
-            <Space>
-              <Link href="/public/pendataan-fasilitator">
-                <Button size="small" icon={<IconUserPlus size={14} />}>
-                  Pendataan Fasilitator
-                </Button>
-              </Link>
-            </Space>
-          </Center> */}
         </Col>
       </Row>
       <Features title={title} description={description} />

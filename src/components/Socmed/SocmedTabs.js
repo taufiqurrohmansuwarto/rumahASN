@@ -13,9 +13,7 @@ import {
 import { Affix, Card, Col, Flex, Row, Tabs } from "antd";
 import { useRouter } from "next/router";
 import Announcement from "../Announcement";
-import DiskusiTerhangat from "./DiskusiTerhangat";
 import KegiatanMendatang from "./KegiatanMendatang";
-import KomunitasPopuler from "./KomunitasPopuler";
 import SocmedCreatePost from "./SocmedCreatePost";
 import SocmedMyPosts from "./SocmedMyPosts";
 import SocmedPosts from "./SocmedPosts";
@@ -231,20 +229,10 @@ function SocmedTabs() {
         </Col>
         <Col md={8} xs={24}>
           <Row gutter={[16, 16]}>
-            {/* <Col md={24} xs={24}>
-              <DiskusiTerhangat />
-            </Col> */}
-
             <Col md={24} xs={24}>
               <KegiatanMendatang />
             </Col>
-            {/* <Col md={24} xs={24}>
-              <KomunitasPopuler />
-            </Col> */}
           </Row>
-          {/* <KalenderRumahASN /> */}
-          {/* <ASNBirthdayList /> */}
-          {/* <UserPolls /> */}
         </Col>
       </Row>
     </>

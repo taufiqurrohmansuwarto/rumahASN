@@ -7,7 +7,7 @@ import {
   Text,
   Title,
 } from "@mantine/core";
-import { Image } from "antd";
+import { Image, Typography } from "antd";
 import ReactMarkdown from "react-markdown";
 import rehypeRaw from "rehype-raw";
 import remarkBreaks from "remark-breaks";
@@ -39,12 +39,22 @@ function ReactMarkdownCustom({ children, withCustom = true }) {
           fz={16}
           bg="#dce4f5"
         >
-          <Text>{props.children}</Text>
+          <Typography.Text>{props.children}</Typography.Text>
         </Blockquote>
       );
     },
     p({ node, ...props }) {
-      return <Text>{props.children}</Text>;
+      return (
+        <Typography.Paragraph
+          style={{
+            whiteSpace: "normal",
+            overflowWrap: "break-word",
+            wordWrap: "break-word",
+          }}
+        >
+          {props.children}
+        </Typography.Paragraph>
+      );
     },
     h1({ node, ...props }) {
       return <Title m={0} p={0} order={1} {...props} />;
@@ -131,7 +141,7 @@ function ReactMarkdownCustom({ children, withCustom = true }) {
   };
 
   return (
-    <Stack>
+    <>
       <ReactMarkdown
         remarkPlugins={[remarkGfm, remarkBreaks]}
         rehypePlugins={[rehypeRaw]}
@@ -139,7 +149,7 @@ function ReactMarkdownCustom({ children, withCustom = true }) {
       >
         {withCustom ? custom(children) : children}
       </ReactMarkdown>
-    </Stack>
+    </>
   );
 }
 
