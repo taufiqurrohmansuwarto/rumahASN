@@ -18,7 +18,7 @@ import {
   rem,
 } from "@mantine/core";
 import { IconInfoCircleFilled } from "@tabler/icons-react";
-import { Avatar, Flex, Grid, Space, Tag, Typography } from "antd";
+import { Avatar, Flex, Grid, Space, Tag, Tooltip, Typography } from "antd";
 import { useRouter } from "next/router";
 import PengaturanGelar from "../LayananSIASN/PengaturanGelar";
 import GantiEmail from "../LayananSIASN/GantiEmail";
@@ -122,30 +122,36 @@ export function MenuMySAPK({ dataUtama, foto }) {
                 </Typography.Text>
               </Stack>
               <div>
-                <ActionIcon variant="light" size="sm" color="yellow">
-                  <IconInfoCircleFilled />
-                </ActionIcon>
+                <Space>
+                  <Tooltip title="Kedudukan PNS">
+                    <Tag icon={<TagOutlined />} color="yellow">
+                      {dataUtama?.kedudukanPnsNama}
+                    </Tag>
+                  </Tooltip>
+                  <Tooltip title="Status Verifikasi NIK dengan NIP">
+                    <Tag
+                      icon={
+                        dataUtama?.validNik ? (
+                          <CheckCircleFilled />
+                        ) : (
+                          <CloseCircleFilled />
+                        )
+                      }
+                      color={dataUtama?.validNik ? "green" : "red"}
+                    >
+                      {dataUtama?.validNik
+                        ? "NIK Terverifikasi"
+                        : "NIK Belum Terverifikasi"}
+                    </Tag>
+                  </Tooltip>
+                  <ActionIcon variant="light" size="sm" color="yellow">
+                    <IconInfoCircleFilled />
+                  </ActionIcon>
+                </Space>
               </div>
             </Flex>
-            <Flex gap={0}>
+            <Flex gap={10}>
               {/* <IPAsn tahun={2023} /> */}
-              <Tag icon={<TagOutlined />} color="yellow">
-                {dataUtama?.kedudukanPnsNama}
-              </Tag>
-              <Tag
-                icon={
-                  dataUtama?.validNik ? (
-                    <CheckCircleFilled />
-                  ) : (
-                    <CloseCircleFilled />
-                  )
-                }
-                color={dataUtama?.validNik ? "green" : "red"}
-              >
-                {dataUtama?.validNik
-                  ? "NIK Terverifikasi"
-                  : "NIK Belum Terverifikasi"}
-              </Tag>
               <PengaturanGelar />
               <GantiEmail />
             </Flex>

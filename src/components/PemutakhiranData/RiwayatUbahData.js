@@ -11,6 +11,7 @@ import {
   Modal,
   Skeleton,
   Space,
+  Typography,
   message,
 } from "antd";
 import { useEffect } from "react";
@@ -99,6 +100,7 @@ const RiwayatUbahData = () => {
               ]}
               label="Email SIASN"
               name="email"
+              help="Pastikan email yang anda masukkan aktif"
             >
               <Input />
             </Form.Item>
@@ -108,10 +110,15 @@ const RiwayatUbahData = () => {
                   type: "email",
                 },
               ]}
-              label="Email Instansi"
+              label={
+                <>
+                  <Typography.Text>Email Government </Typography.Text> (
+                  <a>https://webmail.mail.go.id/</a>)
+                </>
+              }
               name="email_gov"
             >
-              <Input />
+              <Input disabled />
             </Form.Item>
             {/* <Form.Item
             rules={[

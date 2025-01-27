@@ -11,7 +11,7 @@ dayjs.locale("id");
 dayjs.extend(relativeTime);
 
 const arrayToTree = require("array-to-tree");
-const { orderBy, trim, toString, toNumber } = require("lodash");
+const { orderBy, trim, toString, toNumber, sortBy } = require("lodash");
 const {
   riwayatPendidikan,
   riwayatGolonganPangkat,
@@ -361,7 +361,8 @@ const getSkp = async (req, res) => {
     const { siasnRequest: request } = req;
     const { employee_number: nip } = req?.user;
     const result = await request.get(`/pns/rw-skp/${nip}`);
-    res.json(result?.data);
+    const data = sortBy(result?.data, "tahun", "desc");
+    res.json(data);
   } catch (error) {
     console.log(error);
   }
@@ -372,7 +373,8 @@ const getSkp2022 = async (req, res) => {
     const { siasnRequest: request } = req;
     const { employee_number: nip } = req?.user;
     const result = await request.get(`/pns/rw-skp22/${nip}`);
-    res.json(result?.data?.data);
+    const data = orderBy(result?.data?.data, "tahun", "desc");
+    res.json(data);
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: "error" });
