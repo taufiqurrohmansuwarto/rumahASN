@@ -22,6 +22,8 @@ import { Avatar, Flex, Grid, Space, Tag, Tooltip, Typography } from "antd";
 import { useRouter } from "next/router";
 import PengaturanGelar from "../LayananSIASN/PengaturanGelar";
 import GantiEmail from "../LayananSIASN/GantiEmail";
+import DisparitasData from "../LayananSIASN/DisparitasData";
+import { IconAlertTriangle } from "@tabler/icons";
 
 const mockdata = mysapkMenu;
 
@@ -144,13 +146,11 @@ export function MenuMySAPK({ dataUtama, foto }) {
                         : "NIK Belum Terverifikasi"}
                     </Tag>
                   </Tooltip>
-                  <ActionIcon variant="light" size="sm" color="yellow">
-                    <IconInfoCircleFilled />
-                  </ActionIcon>
+                  <DisparitasData />
                 </Space>
               </div>
             </Flex>
-            <Flex gap={10}>
+            <Flex gap={2} style={{ marginBottom: 16 }}>
               {/* <IPAsn tahun={2023} /> */}
               <PengaturanGelar />
               <GantiEmail />

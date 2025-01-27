@@ -1,4 +1,4 @@
-import { MailOutlined } from "@ant-design/icons";
+import { MailOutlined, SyncOutlined } from "@ant-design/icons";
 import { Alert, Stack } from "@mantine/core";
 import { Form, Input, Modal, Skeleton, Tag, message } from "antd";
 import { useState } from "react";
@@ -110,8 +110,7 @@ function GantiEmail() {
       <Tag
         style={{ cursor: "pointer" }}
         onClick={handleShowModal}
-        icon={<MailOutlined />}
-        color="blue"
+        icon={<SyncOutlined />}
       >
         Ganti Email SIASN
       </Tag>
