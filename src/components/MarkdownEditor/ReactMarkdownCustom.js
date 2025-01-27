@@ -67,7 +67,18 @@ function ReactMarkdownCustom({ children, withCustom = true }) {
       return <Title m={0} p={0} order={6} {...props} />;
     },
     code({ node, inline, className, children, ...props }) {
-      return <Typography.Text code>{children}</Typography.Text>;
+      return (
+        <Typography.Text
+          code
+          style={{
+            whiteSpace: "normal",
+            overflowWrap: "break-word",
+            wordWrap: "break-word",
+          }}
+        >
+          {children}
+        </Typography.Text>
+      );
     },
     table({ node, ...props }) {
       return <Table {...props} />;
