@@ -1,6 +1,6 @@
-import { ActionIcon, Indicator, Tooltip } from "@mantine/core";
+import { ActionIcon, Indicator, Tooltip, Badge, Text } from "@mantine/core";
 import { IconAlertTriangle } from "@tabler/icons";
-import { Modal, Typography } from "antd";
+import { Modal } from "antd";
 import { useRouter } from "next/router";
 import { useState } from "react";
 
@@ -50,6 +50,11 @@ const ModalDisparitasData = ({ open, onCancel, onOk }) => {
   );
 };
 
+const disparitasButton = (
+  <ActionIcon radius="xs" onClick={null} variant="light" size="xs" color="red">
+    <IconAlertTriangle />
+  </ActionIcon>
+);
 function DisparitasData() {
   const [showModal, setShowModal] = useState(false);
   const handleShowModal = () => setShowModal(true);
@@ -62,17 +67,21 @@ function DisparitasData() {
         onCancel={handleCloseModal}
         onOk={handleCloseModal}
       />
-      <Tooltip label="Disparitas Data">
+      <Tooltip label="Anda memiliki data yang tidak sesuai dengan SIASN">
         <div>
           <Indicator label="6" size={16} color="red">
-            <ActionIcon
+            <Badge
               onClick={handleShowModal}
-              variant="light"
-              size="sm"
+              sx={{
+                cursor: "pointer",
+              }}
               color="red"
+              variant="outline"
+              pr={3}
+              leftSection={disparitasButton}
             >
-              <IconAlertTriangle />
-            </ActionIcon>
+              <Text mr="sm">Disparitas Data </Text>
+            </Badge>
           </Indicator>
         </div>
       </Tooltip>
