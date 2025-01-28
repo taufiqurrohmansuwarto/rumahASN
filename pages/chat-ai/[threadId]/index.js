@@ -1,4 +1,3 @@
-"use client";
 import AntDChatLayoutContainer from "@/components/AI/ChatBot/AntdChatLayoutContainer";
 import AntdChatMessagesNew from "@/components/AI/ChatBot/AntdChatMesssagesNew";
 import AntdChatSenderNew from "@/components/AI/ChatBot/AntdChatSenderNew";
@@ -6,10 +5,12 @@ import useStyle from "@/components/AI/ChatBot/AntdChatStyle";
 import ChatBotLayout from "@/components/AI/ChatBot/ChatBotLayout";
 import PageContainer from "@/components/PageContainer";
 import { useAssistant } from "ai/react";
-import { Card, Col, Grid, Row } from "antd";
+import { Card, Col, Grid, Row, Affix, Button } from "antd";
 import { useSession } from "next-auth/react";
 import Head from "next/head";
 import { useRouter } from "next/router";
+import { useEffect, useRef, useState } from "react";
+import { DownOutlined } from "@ant-design/icons";
 
 const ChatAIThread = () => {
   const { styles } = useStyle();
@@ -44,17 +45,38 @@ const ChatAIThread = () => {
 
   const height = breakPoint?.xs ? "90vh" : `calc(100vh - ${HEIGHT_CHAT})`;
 
-  // Fungsi untuk scroll ke bawah
-  const scrollToBottom = (element) => {
-    if (element) {
-      setTimeout(() => {
-        element.scrollTo({
-          top: element.scrollHeight,
-          behavior: "smooth",
-        });
-      }, 100);
+  const [showScrollButton, setShowScrollButton] = useState(false);
+  const chatContainerRef = useRef(null);
+
+  const scrollToBottom = () => {
+    if (chatContainerRef.current) {
+      chatContainerRef.current.scrollTo({
+        top: chatContainerRef.current.scrollHeight,
+        behavior: "smooth",
+      });
     }
   };
+
+  const handleScroll = () => {
+    if (chatContainerRef.current) {
+      const { scrollTop, scrollHeight, clientHeight } =
+        chatContainerRef.current;
+      const shouldShow = scrollHeight - scrollTop - clientHeight > 100;
+      setShowScrollButton(shouldShow);
+    }
+  };
+
+  useEffect(() => {
+    const container = chatContainerRef.current;
+    if (container) {
+      container.addEventListener("scroll", handleScroll);
+      return () => container.removeEventListener("scroll", handleScroll);
+    }
+  }, []);
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
 
   return (
     <>
@@ -77,8 +99,9 @@ const ChatAIThread = () => {
                 scrollBehavior: "smooth",
                 scrollbarWidth: "thin",
                 scrollbarColor: "rgba(0,0,0,0.2) transparent",
+                position: "relative",
               }}
-              ref={scrollToBottom}
+              ref={chatContainerRef}
             >
               <Row justify="center">
                 <Col md={14} xs={24}>
@@ -97,6 +120,30 @@ const ChatAIThread = () => {
                       marginTop: "10px",
                     }}
                   >
+                    {showScrollButton && (
+                      <div
+                        style={{
+                          display: "flex",
+                          justifyContent: "center",
+                          marginBottom: 8,
+                          position: "absolute",
+                          left: 0,
+                          right: 0,
+                          bottom: 60,
+                          pointerEvents: "none",
+                        }}
+                      >
+                        <Button
+                          type="default"
+                          shape="circle"
+                          icon={<DownOutlined />}
+                          onClick={scrollToBottom}
+                          style={{
+                            pointerEvents: "auto",
+                          }}
+                        />
+                      </div>
+                    )}
                     <AntdChatSenderNew
                       style={styles}
                       status={status}
