@@ -28,29 +28,14 @@ function AntdChatSenderNew({
   };
 
   return (
-    <div style={{ paddingBottom: "16px" }}>
-      <Sender
-        className={style?.sender}
-        loading={status !== "awaiting_message"}
-        placeholder="Ketik Pesan..."
-        onSubmit={handleSubmit}
-        value={text}
-        onChange={handleChangeText}
-        onCancel={stop}
-      />
-
-      <Flex justify="center" align="center" style={{ marginTop: "8px" }}>
-        <Typography.Text type="secondary">
-          <Space>
-            <InfoCircleOutlined />
-            <span>
-              BestieAI may make mistakes. Please independently verify any
-              important information.
-            </span>
-          </Space>
-        </Typography.Text>
-      </Flex>
-    </div>
+    <Sender
+      loading={status !== "awaiting_message"}
+      placeholder="Tanya BestieAI"
+      onSubmit={handleSubmit}
+      value={text}
+      onChange={handleChangeText}
+      onCancel={stop}
+    />
   );
 }
 

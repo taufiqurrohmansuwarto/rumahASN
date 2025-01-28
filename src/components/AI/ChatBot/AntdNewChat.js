@@ -7,7 +7,7 @@ import {
   WarningOutlined,
 } from "@ant-design/icons";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Button, Flex, Space, Spin, message } from "antd";
+import { Button, Card, Col, Flex, Grid, Row, Space, Spin, message } from "antd";
 import { useRouter } from "next/router";
 import Prompts from "../Prompts";
 import Welcome from "../Welcome";
@@ -94,6 +94,8 @@ function AntdNewChat() {
   const queryClient = useQueryClient();
   const router = useRouter();
 
+  const breakPoint = Grid.useBreakpoint();
+
   const { mutate: chat, isLoading: isLoadingChat } = useMutation(
     (data) => AssistantAIServices.sendMessage(data),
     {
@@ -117,26 +119,38 @@ function AntdNewChat() {
 
   return (
     <Spin spinning={isLoadingChat}>
-      <Flex vertical gap={40}>
-        <Welcome
-          extra={
-            <Space>
-              <Button icon={<ShareAltOutlined />} />
-              <Button icon={<EllipsisOutlined />} />
-            </Space>
-          }
-          icon="https://siasn.bkd.jatimprov.go.id:9000/public/bestie-ai-rect-avatar.png"
-          title="Bestie (BKD Expert System & Technical Intelligence Engine)"
-          description="Your HR Bestie, Always Ready!"
-        />
-        <Prompts
-          onItemClick={handleItemClick}
-          wrap
-          title="✨ Inspirational Sparks and Marvelous Tips"
-          items={items}
-        />
-        <ChatSenderWelcome send={chat} loading={isLoadingChat} />
-      </Flex>
+      <Card
+        style={{
+          minHeight: "86vh",
+          display: "flex",
+          alignItems: breakPoint?.xs ? "flex-start" : "center",
+          justifyContent: breakPoint?.xs ? "flex-start" : "center",
+        }}
+      >
+        <Row
+          justify={breakPoint?.xs ? "start" : "center"}
+          style={{ width: "100%" }}
+        >
+          <Col md={14}>
+            <Flex vertical gap={40}>
+              <Welcome
+                icon="https://siasn.bkd.jatimprov.go.id:9000/public/bestie-ai-rect-avatar.png"
+                title="BestieAI (BKD Expert System & Technical Intelligence Engine)"
+                description="Your HR Bestie, Always Ready!"
+              />
+              <Prompts
+                onItemClick={handleItemClick}
+                wrap
+                // bahasa indonesia saja
+                title="💡 Pilih Topik"
+                // ketika xs maka hanya tampil 3 item saja
+                items={items.slice(0, breakPoint?.xs ? 3 : items.length)}
+              />
+              <ChatSenderWelcome send={chat} loading={isLoadingChat} />
+            </Flex>
+          </Col>
+        </Row>
+      </Card>
     </Spin>
   );
 }

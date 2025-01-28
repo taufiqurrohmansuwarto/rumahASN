@@ -2,7 +2,7 @@ import XProvider from "@/components/AI/XProvider";
 import { AssistantAIServices } from "@/services/assistant-ai.services";
 import { EditOutlined, MenuOutlined } from "@ant-design/icons";
 import { useQuery } from "@tanstack/react-query";
-import { Button, ConfigProvider, Drawer, Grid } from "antd";
+import { Button, Card, ConfigProvider, Drawer, Grid } from "antd";
 import { useRouter } from "next/router";
 import { useState } from "react";
 import AntdChatSider from "./AntdChatSider";
@@ -31,7 +31,7 @@ const NewButton = ({ styles }) => {
         onClick={handleNewChat}
         className={styles?.addBtn}
       >
-        Chat Baru
+        Percakapan Baru
       </Button>
     </ConfigProvider>
   );
@@ -67,59 +67,13 @@ function AntDChatLayoutContainer({ children, setThreadId }) {
       theme={{
         token: {
           colorPrimary: "#FF5500",
-          fontSize: 15,
         },
       }}
     >
-      <div className={styles.layout}>
-        {breakPoint?.xs ? (
-          <>
-            <Button
-              type="text"
-              icon={<MenuOutlined />}
-              onClick={() => setDrawerVisible(true)}
-              className={styles.menuButton}
-            />
-            <Drawer
-              width={300}
-              placement="left"
-              onClose={() => setDrawerVisible(false)}
-              open={drawerVisible}
-              styles={{
-                body: {
-                  padding: 0,
-                },
-              }}
-            >
-              <AntdChatSider
-                loadingThreads={loadingThreads}
-                style={styles}
-                threads={threads}
-                selectedThread={selectedThread}
-                changeSelectedThread={(id) => {
-                  changeSelectedThread(id);
-                  isMobile && setDrawerVisible(false);
-                }}
-              />
-            </Drawer>
-          </>
-        ) : (
-          <div className={styles.menu}>
-            <NewButton styles={styles} />
-            <AntdChatSider
-              loadingThreads={loadingThreads}
-              style={styles}
-              threads={threads}
-              selectedThread={selectedThread}
-              changeSelectedThread={(id) => {
-                changeSelectedThread(id);
-                isMobile && setDrawerVisible(false);
-              }}
-            />
-          </div>
-        )}
+      {children}
+      {/* <div className={styles.layout}>
         <div className={styles.chat}>{children}</div>
-      </div>
+      </div> */}
     </XProvider>
   );
 }
