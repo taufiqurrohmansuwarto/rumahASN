@@ -28,6 +28,7 @@ import FormCariPNSKinerja from "./FormCariPNSKinerja";
 import UploadDokumen from "./UploadDokumen";
 import ModalTransferSKP22Personal from "./Admin/ModalTransferSKP22Personal";
 import { urlToPdf } from "@/services/master.services";
+import FormCariAtasanKinerja from "./FormCariAtasanKinerja";
 
 // const data = {
 //     hasilKinerjaNilai: 0,
@@ -192,8 +193,13 @@ const FormSKP22 = ({ visible, onCancel, nip }) => {
             <Select.Option value="2022">TAHUN PENILAIAN 2022</Select.Option>
           </Select>
         </Form.Item>
-        <FormCariPNSKinerja
+        {/* <FormCariPNSKinerja
           help="ketik NIP Tanpa Spasi dan tunggu..."
+          label="Atasan Penilai"
+          name="pns_penilai"
+        /> */}
+        <FormCariAtasanKinerja
+          help="Ketik Nama Atasan Penilai lalu tunggu..."
           label="Atasan Penilai"
           name="pns_penilai"
         />

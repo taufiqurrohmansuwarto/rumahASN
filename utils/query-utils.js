@@ -587,3 +587,34 @@ FROM
   const result = await knex.raw(raw);
   return result.rows;
 };
+
+module.exports.cariPegawaiAtasan = async (text, skpdId) => {
+  const raw = `WITH RECURSIVE skpd_priority AS (
+    -- Memulai dari skpd_id penuh
+    SELECT '${skpdId}'::varchar AS skpd_id, 1 AS priority
+    UNION ALL
+    -- Memotong 2 karakter terakhir setiap iterasi, dan menaikkan prioritas
+    SELECT SUBSTRING(skpd_id FROM 1 FOR LENGTH(skpd_id) - 2), priority + 1
+    FROM skpd_priority
+    WHERE LENGTH(skpd_id) > 1
+)
+SELECT DISTINCT ON (sp.nama_master) -- Mengambil satu hasil per nama_master
+    sp.id,
+    sp.nip_master,
+    sp.nama_master,
+    sp.opd_master,
+    sp.skpd_id
+FROM skpd_priority spd
+         JOIN public.sync_pegawai sp
+              ON sp.skpd_id ILIKE spd.skpd_id || '%'
+WHERE sp.nama_master ILIKE '%${text}%' -- Nama yang dicari
+ORDER BY
+    sp.nama_master, -- Untuk memastikan DISTINCT ON hanya membedakan nama_master
+    spd.priority ASC, -- Prioritas paling tinggi berdasarkan skpd_priority
+    LENGTH(spd.skpd_id) DESC, -- Panjang skpd_id untuk memperjelas urutan dalam prioritas
+    sp.nama_master ASC -- Urutkan nama sebagai fallback
+LIMIT 5`;
+
+  const result = await knex.raw(raw);
+  return result.rows;
+};
