@@ -60,7 +60,7 @@ function AntdChatMessagesNew({ style, setMessages, messages, status }) {
       loadingRender: () => (
         <Space>
           <Spin size="small" />
-          Bestie AI is thinking...
+          BestieAI sedang berpikir...
         </Space>
       ),
     },
@@ -128,7 +128,23 @@ function AntdChatMessagesNew({ style, setMessages, messages, status }) {
                 <>
                   {item?.loading ? null : (
                     <Flex>
-                      <Tooltip title={copySuccess[item.id] ? "Copied" : "Copy"}>
+                      <Tooltip title="Respons yang baik">
+                        <Button
+                          size="small"
+                          type="text"
+                          icon={<LikeOutlined />}
+                        />
+                      </Tooltip>
+                      <Tooltip title="Respons yang buruk">
+                        <Button
+                          size="small"
+                          type="text"
+                          icon={<DislikeOutlined />}
+                        />
+                      </Tooltip>
+                      <Tooltip
+                        title={copySuccess[item.id] ? "Tersalin" : "Salin"}
+                      >
                         <Button
                           size="small"
                           type="text"
@@ -143,27 +159,6 @@ function AntdChatMessagesNew({ style, setMessages, messages, status }) {
                           style={{
                             marginInlineEnd: "auto",
                           }}
-                        />
-                      </Tooltip>
-                      <Tooltip title="Like">
-                        <Button
-                          size="small"
-                          type="text"
-                          icon={<LikeOutlined />}
-                        />
-                      </Tooltip>
-                      <Tooltip title="Dislike">
-                        <Button
-                          size="small"
-                          type="text"
-                          icon={<DislikeOutlined />}
-                        />
-                      </Tooltip>
-                      <Tooltip title="Refresh">
-                        <Button
-                          size="small"
-                          type="text"
-                          icon={<SyncOutlined />}
                         />
                       </Tooltip>
                     </Flex>

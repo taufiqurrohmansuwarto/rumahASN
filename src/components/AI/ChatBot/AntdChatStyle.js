@@ -10,7 +10,7 @@ const useStyle = createStyles(({ token, css }) => {
     `,
     layout: css`
       width: 100%;
-      height: 83vh;
+      height: 85vh;
       border-radius: 12px;
       display: flex;
       background: ${token.colorBgContainer};
@@ -123,7 +123,7 @@ const useStyle = createStyles(({ token, css }) => {
     chat: css`
       height: 100%;
       width: 100%;
-      max-width: 45%;
+      max-width: 60%;
       margin: 0 auto;
       box-sizing: border-box;
       display: flex;

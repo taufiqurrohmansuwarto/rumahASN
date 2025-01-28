@@ -4,6 +4,8 @@ import Head from "next/head";
 import AntDChatLayoutContainer from "@/components/AI/ChatBot/AntdChatLayoutContainer";
 import AntdNewChat from "@/components/AI/ChatBot/AntdNewChat";
 import { useSession } from "next-auth/react";
+import PageContainer from "@/components/PageContainer";
+import { Grid } from "antd";
 
 const ChatAI = () => {
   const { data } = useSession();
@@ -11,14 +13,22 @@ const ChatAI = () => {
     data?.user?.status_kepegawaian === "PNS" ||
     data?.user?.status_kepegawaian === "PPPK";
 
+  const breakPoint = Grid.useBreakpoint();
+
   return (
     <>
       <Head>
         <title>Rumah ASN - Bestie AI BKD</title>
       </Head>
-      <AntDChatLayoutContainer>
-        {asn ? <AntdNewChat /> : null}
-      </AntDChatLayoutContainer>
+      <PageContainer
+        childrenContentStyle={{
+          padding: breakPoint?.xs ? 0 : null,
+        }}
+      >
+        <AntDChatLayoutContainer>
+          {asn ? <AntdNewChat /> : null}
+        </AntDChatLayoutContainer>
+      </PageContainer>
     </>
   );
 };
