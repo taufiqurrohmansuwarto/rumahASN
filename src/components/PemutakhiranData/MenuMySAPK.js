@@ -110,21 +110,11 @@ export function MenuMySAPK({ dataUtama, foto }) {
                   src={`${foto?.data}`}
                   alt="Foto-SIASN"
                 />
-                <Typography.Text style={{ margin: 0 }} strong>
-                  {dataUtama?.nama}
-                </Typography.Text>
-                <Typography.Text type="secondary" style={{ margin: 0 }}>
-                  {dataUtama?.nipBaru}
-                </Typography.Text>
-                <Typography.Text type="secondary" style={{ margin: 0 }}>
-                  {dataUtama?.jabatanNama}
-                </Typography.Text>
-                <Typography.Text type="secondary" style={{ margin: 0 }}>
-                  {dataUtama?.unorIndukNama} - {dataUtama?.unorNama}
-                </Typography.Text>
-              </Stack>
-              <div>
-                <Space>
+                <Space direction={screens.xl ? "horizontal" : "vertical"}>
+                  <Typography.Text style={{ margin: 0 }} strong>
+                    {dataUtama?.nama}
+                  </Typography.Text>
+
                   <Tooltip title="Kedudukan PNS">
                     <Tag icon={<TagOutlined />} color="yellow">
                       {dataUtama?.kedudukanPnsNama}
@@ -146,6 +136,20 @@ export function MenuMySAPK({ dataUtama, foto }) {
                         : "NIK Belum Terverifikasi"}
                     </Tag>
                   </Tooltip>
+                </Space>
+
+                <Typography.Text type="secondary" style={{ margin: 0 }}>
+                  {dataUtama?.nipBaru}
+                </Typography.Text>
+                <Typography.Text type="secondary" style={{ margin: 0 }}>
+                  {dataUtama?.jabatanNama}
+                </Typography.Text>
+                <Typography.Text type="secondary" style={{ margin: 0 }}>
+                  {dataUtama?.unorIndukNama} - {dataUtama?.unorNama}
+                </Typography.Text>
+              </Stack>
+              <div>
+                <Space>
                   <DisparitasData />
                 </Space>
               </div>

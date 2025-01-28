@@ -1,9 +1,9 @@
-import FormCariPNSKinerja from "@/components/PemutakhiranData/FormCariPNSKinerja";
+import FormCariAtasanKinerja from "@/components/PemutakhiranData/FormCariAtasanKinerja";
+import { postRwSkp22, uploadDokRiwayat } from "@/services/siasn-services";
+import { serializeKinerja } from "@/utils/transfer-siasn.utils";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Form, Modal, Select, Spin, message } from "antd";
 import { useEffect } from "react";
-import { serializeKinerja } from "@/utils/transfer-siasn.utils";
-import { postRwSkp22, uploadDokRiwayat } from "@/services/siasn-services";
-import { useQueryClient, useMutation } from "@tanstack/react-query";
 
 function ModalTransferSKP22Personal({
   open,
@@ -107,11 +107,7 @@ function ModalTransferSKP22Personal({
           <a href={data?.file_skp} target="_blank" rel="noreferrer">
             Lihat Penilai
           </a>
-          <FormCariPNSKinerja
-            help="ketik NIP Tanpa Spasi dan tunggu..."
-            label="Atasan Penilai"
-            name="pns_penilai"
-          />
+          <FormCariAtasanKinerja label="Atasan Penilai" name="pns_penilai" />
         </Form>
       </Modal>
     </>

@@ -38,6 +38,18 @@ export const dataKinerjaPns = (nip) => {
   return api.get(`/pns-kinerja/${nip}`).then((res) => res.data);
 };
 
+export const atasanKinerja = (search) => {
+  return api
+    .get(`/pns/cari-atasan-kinerja?search=${search}`)
+    .then((res) => res.data);
+};
+
+export const atasanKinerjaByNip = ({ nip, search }) => {
+  return api
+    .get(`/cari-atasan-kinerja?nip=${nip}&search=${search}`)
+    .then((res) => res.data);
+};
+
 export const dataUtamaSIASN = () => {
   return api.get("/pns/data-utama").then((res) => res.data);
 };
