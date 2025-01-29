@@ -2,26 +2,19 @@ import ActionSettings from "@/components/ActionSettings";
 import { BestieAIToken } from "@/components/GuestBook/GuestBookToken";
 import { AssistantAIServices } from "@/services/assistant-ai.services";
 import {
-  CommentOutlined,
   DeleteOutlined,
   EditOutlined,
   EllipsisOutlined,
-  FrownOutlined,
   LogoutOutlined,
-  MehOutlined,
-  SmileOutlined,
 } from "@ant-design/icons";
 import { Center, Group } from "@mantine/core";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Button,
   Dropdown,
-  Form,
   Grid,
-  Input,
   message,
   Modal,
-  Rate,
   Space,
   Typography,
 } from "antd";
@@ -30,6 +23,7 @@ import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { useState } from "react";
+import ChatBotFeedback from "./ChatBotFeedback";
 
 const ellipsisText = (text) => {
   if (text.length > 15) {
@@ -119,47 +113,9 @@ const menuItemRender = (options, element) => {
   return <MenuItem options={options} element={element} />;
 };
 
-const ModalFeedback = ({ open, onClose }) => {
-  const customIcons = {
-    1: <FrownOutlined />,
-    2: <FrownOutlined />,
-    3: <MehOutlined />,
-    4: <SmileOutlined />,
-    5: <SmileOutlined />,
-  };
-  const [form] = Form.useForm();
-  return (
-    <Modal
-      open={open}
-      onCancel={onClose}
-      title="Rating Pengalaman kamu"
-      centered
-    >
-      <Form form={form} layout="vertical">
-        <Form.Item name="rating">
-          <Rate character={({ index }) => customIcons[index + 1]} />
-        </Form.Item>
-
-        <Form.Item name="feedback">
-          <Input.TextArea placeholder="Berikan feedback anda" rows={4} />
-        </Form.Item>
-      </Form>
-    </Modal>
-  );
-};
-
 const FooterRender = (props) => {
-  const [openModalFeedback, setOpenModalFeedback] = useState(false);
-
-  const handleOpenModalFeedback = () => {
-    setOpenModalFeedback(true);
-  };
-
-  const handleCloseModalFeedback = () => {
-    setOpenModalFeedback(false);
-  };
-
   const breakPoint = Grid.useBreakpoint();
+
   if (props?.collapsed) return undefined;
   return (
     <div
@@ -168,18 +124,8 @@ const FooterRender = (props) => {
         paddingBlockStart: 12,
       }}
     >
-      <ModalFeedback
-        open={openModalFeedback}
-        onClose={handleCloseModalFeedback}
-      />
       <Space direction="vertical">
-        <Button
-          icon={<CommentOutlined />}
-          type="primary"
-          onClick={handleOpenModalFeedback}
-        >
-          Beri Feedback
-        </Button>
+        <ChatBotFeedback />
         <Typography.Text
           style={{
             fontSize: breakPoint.xs ? 12 : 14,
