@@ -153,3 +153,23 @@ export const getFeedback = async (req, res) => {
     res.status(400).json({ code: 400, message: "Internal Server Error" });
   }
 };
+
+export const sendResponse = async (req, res) => {
+  try {
+    const { customId } = req?.user;
+    const { messageId, threadId } = req?.query;
+    const { response } = req?.body;
+
+    const result = await chatHistoryService.updateResponse(
+      customId,
+      threadId,
+      messageId,
+      response
+    );
+
+    res.json(result);
+  } catch (error) {
+    console.log(error);
+    res.status(400).json({ code: 400, message: "Internal Server Error" });
+  }
+};
