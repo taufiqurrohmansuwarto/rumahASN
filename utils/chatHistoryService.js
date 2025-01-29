@@ -10,6 +10,15 @@ const generateTitle = (message) => {
 };
 
 export const chatHistoryService = {
+  // update response
+  async updateResponse(userId, threadId, messageId, response) {
+    const result = await BotAssistantMessages.query()
+      .where({ user_id: userId, thread_id: threadId, id: messageId })
+      .patch({ response });
+
+    return result;
+  },
+
   // save thread
   async saveThread(threadId, userId, firstMessage, assistantId) {
     try {

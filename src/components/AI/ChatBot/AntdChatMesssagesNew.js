@@ -1,22 +1,34 @@
 import ReactMarkdownCustom from "@/components/MarkdownEditor/ReactMarkdownCustom";
 
-import { AssistantAIServices } from "@/services/assistant-ai.services";
+import {
+  AssistantAIServices,
+  updateResponse,
+} from "@/services/assistant-ai.services";
 import {
   CheckOutlined,
   CopyOutlined,
   DislikeOutlined,
   LikeOutlined,
-  SyncOutlined,
 } from "@ant-design/icons";
-import { useQuery } from "@tanstack/react-query";
-import { Avatar, Button, Flex, Skeleton, Tooltip } from "antd";
+import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
+import {
+  Avatar,
+  Button,
+  Flex,
+  Skeleton,
+  Space,
+  Spin,
+  Tooltip,
+  message,
+} from "antd";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import { useRef, useState } from "react";
 import BubbleList from "../BubbleList";
-import { Space, Spin } from "antd";
 
 function AntdChatMessagesNew({ style, setMessages, messages, status }) {
+  const queryClient = useQueryClient();
+
   const router = useRouter();
   const { threadId } = router.query;
   const itemRef = useRef(null);
@@ -33,6 +45,71 @@ function AntdChatMessagesNew({ style, setMessages, messages, status }) {
       setMessages([...data]);
     },
   });
+
+  const { mutate: update, isLoading: updateLoading } = useMutation(
+    (data) => updateResponse(data),
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries({
+          queryKey: ["chat-messages", threadId],
+        });
+      },
+      onError: (error) => {
+        message.error(error?.message);
+      },
+      onSettled: () => {
+        queryClient.invalidateQueries({
+          queryKey: ["chat-messages", threadId],
+        });
+      },
+    }
+  );
+
+  const handleRespons = (item, type) => {
+    const response = type === "like" ? 1 : -1;
+    const payload = {
+      id: item.id,
+      threadId: item.thread_id,
+      response,
+    };
+
+    update(payload);
+  };
+
+  const Response = ({ item }) => {
+    const netral = item?.response === 0;
+    const like = item?.response === 1;
+    const dislike = item?.response === -1;
+
+    return (
+      <>
+        {(netral || like) && (
+          <Tooltip title="Respons yang baik">
+            <Button
+              size="small"
+              type="text"
+              icon={<LikeOutlined />}
+              onClick={() => handleRespons(item, "like")}
+              loading={updateLoading}
+              disabled={like}
+            />
+          </Tooltip>
+        )}
+        {(netral || dislike) && (
+          <Tooltip title="Respons yang buruk">
+            <Button
+              size="small"
+              type="text"
+              icon={<DislikeOutlined />}
+              onClick={() => handleRespons(item, "dislike")}
+              loading={updateLoading}
+              disabled={dislike}
+            />
+          </Tooltip>
+        )}
+      </>
+    );
+  };
 
   const roles = {
     assistant: {
@@ -128,20 +205,7 @@ function AntdChatMessagesNew({ style, setMessages, messages, status }) {
                 <>
                   {item?.loading ? null : (
                     <Flex>
-                      <Tooltip title="Respons yang baik">
-                        <Button
-                          size="small"
-                          type="text"
-                          icon={<LikeOutlined />}
-                        />
-                      </Tooltip>
-                      <Tooltip title="Respons yang buruk">
-                        <Button
-                          size="small"
-                          type="text"
-                          icon={<DislikeOutlined />}
-                        />
-                      </Tooltip>
+                      <Response item={item} />
                       <Tooltip
                         title={copySuccess[item.id] ? "Tersalin" : "Salin"}
                       >

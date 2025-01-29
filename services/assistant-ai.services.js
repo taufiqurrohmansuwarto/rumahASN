@@ -67,6 +67,14 @@ export const getFeedback = async () => {
   return api.get(`/assistants/feedback`).then((res) => res?.data);
 };
 
+export const updateResponse = async ({ threadId, id, response }) => {
+  return api
+    .patch(`/assistants/threads/${threadId}/messages/${id}`, {
+      response,
+    })
+    .then((res) => res?.data);
+};
+
 export const AssistantAIServices = {
   getAssistants,
   getThreads,
