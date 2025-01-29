@@ -59,6 +59,14 @@ export const testChatCompletion = async () => {
   return response;
 };
 
+export const sendFeedback = async (data) => {
+  return api.post(`/assistants/feedback`, data).then((res) => res?.data);
+};
+
+export const getFeedback = async () => {
+  return api.get(`/assistants/feedback`).then((res) => res?.data);
+};
+
 export const AssistantAIServices = {
   getAssistants,
   getThreads,

@@ -1,5 +1,7 @@
 import { chatHistoryService } from "@/utils/chatHistoryService";
+
 import OpenAI from "openai";
+const Feedback = require("@/models/assistant_bot/feedbacks.model");
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -98,6 +100,53 @@ export const deleteThreadMessages = async (req, res) => {
 
     await openai.beta.threads.del(threadId);
     const result = await chatHistoryService.deleteThreadMessages(payload);
+    res.json(result);
+  } catch (error) {
+    console.log(error);
+    res.status(400).json({ code: 400, message: "Internal Server Error" });
+  }
+};
+
+export const sendFeedback = async (req, res) => {
+  try {
+    const { customId } = req?.user;
+    const { feedback, rating } = req?.body;
+
+    const checkFeedback = await Feedback.query()
+      .where("user_id", customId)
+      .first();
+
+    if (!checkFeedback) {
+      const result = await Feedback.query().insert({
+        user_id: customId,
+        feedback,
+        rating,
+      });
+      res.json(result);
+    } else {
+      const result = await Feedback.query()
+        .patch({
+          feedback,
+          rating,
+        })
+        .where("user_id", customId);
+
+      res.json(result);
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(400).json({ code: 400, message: "Internal Server Error" });
+  }
+};
+
+export const getFeedback = async (req, res) => {
+  try {
+    const { customId } = req?.user;
+    const result = await Feedback.query()
+      .where("user_id", customId)
+      .orderBy("created_at", "desc")
+      .first();
+
     res.json(result);
   } catch (error) {
     console.log(error);

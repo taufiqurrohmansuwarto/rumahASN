@@ -505,6 +505,7 @@ function Layout({ children, active, collapsed = true }) {
                   }}
                   onClick={handlePertanyan}
                   size="middle"
+                  block
                   shape="round"
                   type="primary"
                   icon={<QuestionCircleFilled />}
