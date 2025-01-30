@@ -1,6 +1,10 @@
 import { AssistantResponse, streamText } from "ai";
-import { isEmpty } from "lodash";
 import { decode } from "next-auth/jwt";
+
+// mimic lodash isEmpty
+const isEmpty = (value) => {
+  return value === null || value === undefined || value === "";
+};
 
 // import { createOpenAI } from "@ai-sdk/openai";
 import OpenAI from "openai";
