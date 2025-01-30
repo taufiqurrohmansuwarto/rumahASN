@@ -48,7 +48,29 @@ const disparitasKinerja = (skpMaster, skpSiasn) => {
   };
 };
 
-const rekonUnor = (simaster, siasn) => {};
+const rekonUnor = async (simaster, siasn) => {
+  const unorMaster = simaster?.skpd?.id;
+  const unorSiasn = siasn?.unorId;
+
+  const checkUnorMaster = await RekonUnor.query()
+    .where({
+      id_simaster: unorMaster,
+    })
+    .select("id_siasn")
+    .first();
+
+  const checkSiasn = checkUnorMaster?.id_siasn === unorSiasn;
+
+  return {
+    jenis: "unor",
+    deskripsi: `Unor SIASN dan SIMASTER`,
+    simaster: true,
+    siasn: checkSiasn,
+    result: checkSiasn,
+  };
+};
+
+const rekonUnorJabatan = (simaster, siasn) => {};
 
 /**
  *
@@ -111,6 +133,12 @@ export const getDisparitas = async (req, res) => {
       data?.simaster?.kinerja,
       data?.siasn?.kinerja
     );
+
+    const disparitasUnor = await rekonUnor(
+      data?.simaster?.data,
+      data?.siasn?.data
+    );
+    console.log(disparitasUnor);
 
     const disparitas = [disparitasSKP];
 
