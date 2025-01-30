@@ -131,15 +131,15 @@ function ReactMarkdownCustom({ children, withCustom = true }) {
   const custom = (markdownSource) => {
     let md = markdownSource;
     // Handle code blocks
-    md = markdownSource.replace(/```[\s\S]*?```/g, (m) =>
-      m.replace(/\n/g, "\n ")
+    md = markdownSource?.replace(/```[\s\S]*?```/g, (m) =>
+      m?.replace(/\n/g, "\n ")
     );
     // Mengurangi multiple newlines
-    md = md.replace(/\n{3,}/g, "\n\n");
+    md = md?.replace(/\n{3,}/g, "\n\n");
     // Handle list items agar tidak terlalu lebar spacing-nya
-    md = md.replace(/(\n\s*[-*+])/g, "\n$1");
+    md = md?.replace(/(\n\s*[-*+])/g, "\n$1");
     // Add proper line endings
-    md = md.replace(/(\n)/gm, "  \n");
+    md = md?.replace(/(\n)/gm, "  \n");
     return md;
   };
 

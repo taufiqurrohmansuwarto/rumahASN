@@ -1,4 +1,5 @@
 import { AssistantResponse, streamText } from "ai";
+import { isEmpty } from "lodash";
 import { decode } from "next-auth/jwt";
 
 // import { createOpenAI } from "@ai-sdk/openai";
@@ -116,6 +117,8 @@ export const assistant = async (req, res) => {
   const input = await req.json();
   const assistantId = process.env.ASSISTANT_ID;
 
+  const data = !isEmpty(input?.data);
+
   const cookies = req?.headers?.get("cookie");
   const sessionToken = getCookieValue(
     cookies,
@@ -140,31 +143,52 @@ export const assistant = async (req, res) => {
   // Create a thread if needed
   const threadId = input.threadId ?? (await openai.beta.threads.create({})).id;
 
+  // content kalau ada image
+  const content = data
+    ? [
+        {
+          type: "image_url",
+          image_url: { url: input.data?.imageUrl },
+        },
+        {
+          type: "text",
+          text: input.message,
+        },
+      ]
+    : input.message;
+
   // Add message to OpenAI thread
   const createdMessage = await openai.beta.threads.messages.create(
     threadId,
     {
       role: "user",
-      content: input.message,
+      content,
     },
     {
       signal: req?.signal,
     }
   );
 
+  // title kalau ada image
+
   await saveThread({
     ...currentUser,
     id: threadId,
     user_id: currentUser?.sub,
-    title: input.message,
+    title: input?.message,
     assistant_id: assistantId,
   });
+
+  const currentContent = data
+    ? `![Image](${createdMessage?.content[0]?.image_url?.url}) 
+    ${createdMessage?.content[1]?.text?.value}`
+    : createdMessage?.content[0]?.text?.value;
 
   await saveMessage({
     ...currentUser,
     id: createdMessage.id,
     threadId: threadId,
-    content: createdMessage.content[0]?.text?.value,
+    content: currentContent,
     role: createdMessage.role,
     user_id: currentUser?.sub,
   });
