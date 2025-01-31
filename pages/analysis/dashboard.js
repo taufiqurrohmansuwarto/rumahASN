@@ -6,8 +6,24 @@ import UserByDepartment from "@/components/Dashboards/UserByDepartment";
 import UserByGroup from "@/components/Dashboards/UserByGroupCard";
 import Layout from "@/components/Layout";
 import PageContainer from "@/components/PageContainer";
+import { cekTotalPenggunaBestie } from "@/services/assistant-ai.services";
+import { useQuery } from "@tanstack/react-query";
 import { Card, Col, Grid, Row } from "antd";
 import Head from "next/head";
+
+const TotalPenggunaBestie = () => {
+  const { data, isLoading } = useQuery({
+    queryKey: ["total-pengguna-bestie"],
+    queryFn: cekTotalPenggunaBestie,
+  });
+
+  return (
+    <div>
+      <h1>Total Pengguna Bestie</h1>
+      <p>{data?.total}</p>
+    </div>
+  );
+};
 
 function DashboardAnalysis() {
   const breakPoint = Grid.useBreakpoint();
@@ -46,6 +62,7 @@ function DashboardAnalysis() {
 
         <PlotAgeUsers />
         <PlotAdminTickets />
+        <TotalPenggunaBestie />
       </PageContainer>
     </>
   );
