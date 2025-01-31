@@ -1,4 +1,4 @@
-import { cekTotalPenggunaBestie } from "@/controller/ai-assistants.controller";
+import { cekTotalPenggunaBestie } from "@/controller/dashboard.controller";
 import adminMiddleware from "@/middleware/admin.middleware";
 import auth from "@/middleware/auth.middleware";
 import { createRouter } from "next-connect";
