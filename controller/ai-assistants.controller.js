@@ -1,28 +1,9 @@
 import { AssistantResponse, streamText } from "ai";
 import { decode } from "next-auth/jwt";
-import { raw } from "objection";
-const AssitantBotMessages = require("@/models/assistant_bot/messages.model");
 
 // mimic lodash isEmpty
 const isEmpty = (value) => {
   return value === null || value === undefined || value === "";
-};
-
-export const cekTotalPenggunaBestie = async (req, res) => {
-  try {
-    // select count(distinct (user_id)) from assistant_bot.messages
-    const result = await AssitantBotMessages.query().select(
-      raw("count(distinct (user_id))")
-    );
-
-    const total = result[0]?.count;
-    res.json({ total: parseInt(total) });
-  } catch (error) {
-    console.log(error);
-    res.status(500).json({
-      message: "Internal server error",
-    });
-  }
 };
 
 // import { createOpenAI } from "@ai-sdk/openai";

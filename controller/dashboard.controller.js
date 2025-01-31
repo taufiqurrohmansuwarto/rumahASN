@@ -9,6 +9,25 @@ const {
   getTopDepartmentQuestion,
 } = require("@/utils/query-utils");
 
+const AssitantBotMessages = require("@/models/assistant_bot/messages.model");
+
+export const cekTotalPenggunaBestie = async (req, res) => {
+  try {
+    // select count(distinct (user_id)) from assistant_bot.messages
+    const result = await AssitantBotMessages.query().select(
+      raw("count(distinct (user_id))")
+    );
+
+    const total = result[0]?.count;
+    res.json({ total: parseInt(total) });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      message: "Internal server error",
+    });
+  }
+};
+
 const dayjs = require("dayjs");
 const { startCase, toLower } = require("lodash");
 require("dayjs/locale/id");
