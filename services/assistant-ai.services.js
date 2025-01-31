@@ -75,6 +75,10 @@ export const updateResponse = async ({ threadId, id, response }) => {
     .then((res) => res?.data);
 };
 
+export const cekTotalPenggunaBestie = async () => {
+  return api.get(`/assistants/dashboard`).then((res) => res?.data);
+};
+
 export const AssistantAIServices = {
   getAssistants,
   getThreads,
