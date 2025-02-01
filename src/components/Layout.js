@@ -31,6 +31,7 @@ import NotifikasiASNConnect from "./Notification/NotifikasiASNConnect";
 import NotifikasiForumKepegawaian from "./Notification/NotifikasiForumKepegawaian";
 import NotifikasiKepegawaian from "./Notification/NotifikasiKepegawaian";
 import NotifikasiPrivateMessage from "./Notification/NotifikasiPrivateMessage";
+import { appList } from "@/utils/app-lists";
 const ProLayout = dynamic(
   () => import("@ant-design/pro-components").then((mod) => mod?.ProLayout),
   {
@@ -614,7 +615,7 @@ function Layout({ children, active, collapsed = true }) {
             <MegaMenuTop key="mega-menu" url="" title="Menu" />,
           ];
         }}
-        // appList={appList(data?.user)}
+        appList={appList(data?.user)}
         avatarProps={{
           src: data?.user?.image,
           size: "large",

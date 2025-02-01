@@ -1,16 +1,6 @@
+import { getUserType } from "@/utils/appLists";
 import { AppstoreOutlined } from "@ant-design/icons";
-import { IconBook2 } from "@tabler/icons";
-import {
-  IconCalendarUser,
-  IconTransfer,
-  IconUserCircle,
-  IconUserSquareRounded,
-  IconBrain,
-  IconMailbox,
-  IconMapPin,
-  IconRobot,
-  IconZoomQuestion,
-} from "@tabler/icons-react";
+import { IconGridDots } from "@tabler/icons-react";
 import { Col, Grid, Popover, Row, Typography } from "antd";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
@@ -18,97 +8,14 @@ import { useRouter } from "next/router";
 const { useBreakpoint } = Grid;
 const { Text } = Typography;
 
-const applist = [
-  {
-    icon: <IconZoomQuestion />,
-    title: "Tanya BKD",
-    color: "#1A73E8",
-    link: "/",
-    userType: ["asn", "non_asn", "umum", "fasilitator"],
-  },
-  {
-    icon: <IconCalendarUser />,
-    title: "TemuBKD",
-    color: "#4285F4",
-    link: "/guests-books/my-visit/visits",
-    userType: ["asn", "umum", "non_asn"],
-  },
-  {
-    icon: <IconRobot />,
-    title: "Bestie AI",
-    color: "#1A73E8",
-    link: "/chat-ai",
-    userType: ["asn"],
-  },
-  {
-    icon: <IconBook2 />,
-    title: "Dokumen",
-    color: "#FBBC05",
-    link: "/documents/dashboard",
-    userType: ["asn"],
-  },
-  // {
-  //   icon: <IconMailbox />,
-  //   title: "ASN Mail",
-  //   color: "#1A73E8",
-  //   link: "#",
-  //   userType: ["asn", "umum", "non_asn", "fasilitator"],
-  // },
-  // {
-  //   icon: <IconBrain />,
-  //   title: "Inovasi",
-  //   color: "#EA4335",
-  //   link: "#",
-  //   userType: ["asn"],
-  // },
-  // {
-  //   icon: <IconUserSquareRounded />,
-  //   title: "Klinik ASN",
-  //   color: "#34A853",
-  //   link: "#",
-  //   userType: ["asn"],
-  // },
-  // {
-  //   icon: <IconUserCircle />,
-  //   title: "Pengadaan",
-  //   color: "#34A853",
-  //   link: "/pengadaan-asn/main",
-  //   userType: ["asn"],
-  // },
-  // {
-  //   icon: <IconUserSquareRounded />,
-  //   title: "Time Capsule",
-  //   color: "#FBBC05",
-  //   link: "#",
-  //   userType: ["asn"],
-  // },
-  // {
-  //   icon: <IconMapPin />,
-  //   title: "Peta Inspirasi",
-  //   color: "#FBBC05",
-  //   link: "#",
-  //   userType: ["asn"],
-  // },
-  {
-    icon: <IconMailbox />,
-    title: "Persuratan",
-    color: "#FBBC05",
-    link: "/letter-managements/letter-header",
-    userType: ["fasilitator", "admin"],
-  },
-  {
-    icon: <IconTransfer />,
-    title: "Rekon SIASN",
-    color: "#FBBC05",
-    link: "/rekon/rekon-unor",
-    userType: ["fasilitator", "admin"],
-  },
-];
-
 const MegaMenuTop = ({ url, title }) => {
   const screens = useBreakpoint();
   const router = useRouter();
   const { data } = useSession();
+
+  const breakPoint = Grid.useBreakpoint();
+
+  const { userType, filteredApps } = getUserType(data?.user || {});
 
   const handleLink = (link) => {
     if (link) {
@@ -118,43 +25,11 @@ const MegaMenuTop = ({ url, title }) => {
     }
   };
 
-  const getUserType = (user) => {
-    if (!user) return [];
-    const statusKepegawaian = user?.status_kepegawaian;
-    const currentRole = user?.current_role;
-
-    const userTypes = [];
-    if (statusKepegawaian === "PNS" || statusKepegawaian === "PPPK") {
-      userTypes.push("asn");
-    }
-    if (statusKepegawaian === "NONASN") {
-      userTypes.push("nonasn");
-    }
-    if (statusKepegawaian === "FASILITATOR") {
-      userTypes.push("fasilitator");
-    }
-    if (statusKepegawaian === "UMUM") {
-      userTypes.push("umum");
-    }
-    if (currentRole === "admin") {
-      userTypes.push("admin");
-    }
-    if (currentRole === "agent") {
-      userTypes.push("agent");
-    }
-
-    return userTypes;
-  };
-
-  const userType = getUserType(data?.user || {});
-
-  const filteredApps = applist?.filter((app) =>
-    app?.userType?.some((type) => userType.includes(type))
-  );
+  const isMobile = breakPoint.xs || breakPoint.sm;
 
   return (
     <>
-      {userType?.length > 0 && (
+      {userType?.length > 0 && isMobile && (
         <Popover
           content={
             filteredApps?.length ? (
@@ -163,7 +38,7 @@ const MegaMenuTop = ({ url, title }) => {
                   <Col key={index} xs={6} sm={6} md={6} lg={6} xl={6}>
                     <a
                       style={{ textDecoration: "none" }}
-                      onClick={() => handleLink(app.link)}
+                      onClick={() => handleLink(app.url)}
                     >
                       <div
                         style={{
@@ -180,7 +55,7 @@ const MegaMenuTop = ({ url, title }) => {
                             marginBottom: 4,
                           }}
                         >
-                          {app.icon || <AppstoreOutlined />}
+                          {app.rightIcon || <AppstoreOutlined />}
                         </span>
                         <Text
                           style={{
@@ -207,9 +82,9 @@ const MegaMenuTop = ({ url, title }) => {
             padding: 16,
           }}
         >
-          <AppstoreOutlined
+          <IconGridDots
             color="black"
-            size={36}
+            size={32}
             style={{ cursor: "pointer", marginLeft: 16 }}
           />
         </Popover>
