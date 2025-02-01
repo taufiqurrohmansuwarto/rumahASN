@@ -14,6 +14,7 @@ export const appLists = [
     desc: "Beranda",
     color: "#1A73E8",
     url: "/",
+    icon: "https://siasn.bkd.jatimprov.go.id:9000/public/home-icon.png",
     userType: ["asn", "non_asn", "umum", "fasilitator"],
     target: "_blank",
   },
