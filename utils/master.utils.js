@@ -9,6 +9,22 @@ module.exports.getRwPendidikanMaster = async (fetcher, nip) => {
   }
 };
 
+module.exports.daftarUpdateJabatan = async (
+  opdId,
+  fetcher,
+  tglAwal,
+  tglAkhir
+) => {
+  try {
+    const result = await fetcher.get(
+      `/master-ws/operator/departments/${opdId}/update-jabatan?tgl_awal=${tglAwal}&tgl_akhir=${tglAkhir}`
+    );
+    return result;
+  } catch (error) {
+    console.log(error);
+  }
+};
+
 module.exports.getDataUtamaMaster = async (fetcher, nip) => {
   try {
     const result = await fetcher.get(
