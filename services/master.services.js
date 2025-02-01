@@ -9,6 +9,10 @@ const masterApi = axios.create({
   baseURL: "/helpdesk/api/master",
 });
 
+export const getDisparitas = () => {
+  return api.get("/disparitas").then((res) => res.data);
+};
+
 export const compareEmployeesSimasterSiasn = () => {
   return api
     .get("/fasilitator/dashboard-compare-siasn")

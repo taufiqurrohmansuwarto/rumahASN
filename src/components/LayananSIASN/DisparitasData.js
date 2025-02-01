@@ -1,11 +1,19 @@
-import { ActionIcon, Indicator, Tooltip, Badge, Text } from "@mantine/core";
+import { getDisparitas } from "@/services/master.services";
+import { ActionIcon, Badge, Indicator, Text, Tooltip } from "@mantine/core";
 import { IconAlertTriangle } from "@tabler/icons";
+import { useQuery } from "@tanstack/react-query";
 import { Modal } from "antd";
 import { useRouter } from "next/router";
 import { useState } from "react";
 
 const ModalDisparitasData = ({ open, onCancel, onOk }) => {
   const router = useRouter();
+
+  const { data, isLoading } = useQuery(
+    ["disparitas-personal"],
+    () => getDisparitas(),
+    {}
+  );
 
   const handleLihat = (type) => {
     if (type === "SKP") {
@@ -22,30 +30,7 @@ const ModalDisparitasData = ({ open, onCancel, onOk }) => {
       onOk={onOk}
       title="Disparitas Data"
     >
-      <ol>
-        <li onClick={() => handleLihat("SKP")}>
-          Anda belum mengisi SKP Tahun 2024 <a>lihat</a>
-        </li>
-
-        <li>
-          Nama anda tidak sesuai dengan SIASN <a>lihat</a>
-        </li>
-        <li>
-          Jabatan anda tidak sesuai dengan SIASN <a>lihat</a>
-        </li>
-        <li>
-          Pangkat tidak sesuai sesuai dengan SIASN <a>lihat</a>
-        </li>
-        <li>
-          Pendidikan tidak sesuai dengan SIASN <a>lihat</a>
-        </li>
-        <li>
-          Unit Organisasi tidak sesuai dengan SIASN <a>lihat</a>
-        </li>
-        <li>
-          KPPN tidak sesuai <a>lihat</a>
-        </li>
-      </ol>
+      {JSON.stringify(data)}
     </Modal>
   );
 };

@@ -1,7 +1,56 @@
 import { dataUtama } from "@/utils/siasn-utils";
 import dayjs from "dayjs";
+import { trim, upperCase } from "lodash";
+import { raw } from "objection";
 const RekonJFT = require("@/models/rekon/jft.model");
 const RekonUnor = require("@/models/rekon/unor.model");
+
+const UnorSIASN = require("@/models/ref-siasn-unor.model");
+const UnorSimaster = require("@/models/sync-unor-master.model");
+
+const formatUnorHierarchy = (data) => {
+  if (!data) return "";
+  const formattedData = trim(data.split("-").reverse().join(" - "));
+  return formattedData.replace(/^-|-$/g, "");
+};
+
+const getUnorHierarchy = async (model, id, queryOptions) => {
+  try {
+    if (!id) return "";
+
+    const result = await model
+      .query()
+      .where(queryOptions.idField, id)
+      .select(raw(queryOptions.hierarchyFunction))
+      .first();
+
+    if (!result?.data) return "";
+
+    return formatUnorHierarchy(result.data);
+  } catch (error) {
+    console.error(
+      `Error saat mengambil data unor ${queryOptions.system}:`,
+      error
+    );
+    return "";
+  }
+};
+
+const showUnorSimaster = async (id) => {
+  return getUnorHierarchy(UnorSimaster, id, {
+    idField: "id",
+    hierarchyFunction: "get_hierarchy_simaster(id) as data",
+    system: "Simaster",
+  });
+};
+
+const showUnorSiasn = async (id) => {
+  return getUnorHierarchy(UnorSIASN, id, {
+    idField: "Id",
+    hierarchyFunction: "get_hierarchy_siasn(?) as data",
+    system: "SIASN",
+  });
+};
 
 // disparitas kinerja
 /**
@@ -37,36 +86,49 @@ const disparitasKinerja = (skpMaster, skpSiasn) => {
   const siasn = kinerjaSiasn?.length === 2;
 
   // hasil akhir - true jika data lengkap di kedua sistem
-  const result = simaster && siasn;
+  const result = simaster && siasn ? "Benar" : "Salah";
 
   return {
     jenis: "skp",
     deskripsi: `SKP ${tahunKemarin} dan ${duaTahunKemarin} pada aplikasi SIASN dan SIMASTER`,
-    simaster,
-    siasn,
+    simaster: kinerjaMaster?.map((item) => item?.tahun).join(", "),
+    siasn: kinerjaSiasn?.map((item) => item?.tahun).join(", "),
     result,
   };
 };
 
 const rekonUnor = async (simaster, siasn) => {
-  const unorMaster = simaster?.skpd?.id;
-  const unorSiasn = siasn?.unorId;
+  const idMaster = simaster?.skpd?.id;
+  const idSiasn = siasn?.unorId;
+
+  let status = "";
 
   const checkUnorMaster = await RekonUnor.query()
     .where({
-      id_simaster: unorMaster,
+      id_simaster: idMaster,
     })
     .select("id_siasn")
     .first();
 
-  const checkSiasn = checkUnorMaster?.id_siasn === unorSiasn;
+  const checkSiasn = checkUnorMaster?.id_siasn === idSiasn;
+
+  if (!checkUnorMaster) {
+    status = "Belum direkon";
+  } else if (checkSiasn) {
+    status = "Benar";
+  } else if (!checkSiasn) {
+    status = "Salah";
+  }
+
+  const unorMaster = await showUnorSimaster(idMaster);
+  const unorSiasn = await showUnorSiasn(idSiasn);
 
   return {
     jenis: "unor",
     deskripsi: `Unor SIASN dan SIMASTER`,
-    simaster: true,
-    siasn: checkSiasn,
-    result: checkSiasn,
+    simaster: unorMaster,
+    siasn: unorSiasn,
+    status,
   };
 };
 
@@ -129,6 +191,8 @@ export const getDisparitas = async (req, res) => {
       employee_number
     );
 
+    if (!data) return res.json([]);
+
     const disparitasSKP = disparitasKinerja(
       data?.simaster?.kinerja,
       data?.siasn?.kinerja
@@ -138,11 +202,10 @@ export const getDisparitas = async (req, res) => {
       data?.simaster?.data,
       data?.siasn?.data
     );
-    console.log(disparitasUnor);
 
-    const disparitas = [disparitasSKP];
+    const disparitas = [disparitasSKP, disparitasUnor];
 
-    res.json({ data, disparitas });
+    res.json(disparitas);
   } catch (error) {
     console.log(error);
     res.status(500).json({
