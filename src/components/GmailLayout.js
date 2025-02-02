@@ -52,7 +52,6 @@ function GmailLayout({ children, active = "inbox" }) {
       colorTextMenuSecondary: "#5F6368",
       colorMenuItemDivider: "#E8EAED",
     },
-    Button: {},
   };
 
   const [collapsed, setCollapsed] = useState(true);
