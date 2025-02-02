@@ -3,10 +3,12 @@ import NotifikasiASNConnect from "@/components/Notification/NotifikasiASNConnect
 import NotifikasiForumKepegawaian from "@/components/Notification/NotifikasiForumKepegawaian";
 import NotifikasiKepegawaian from "@/components/Notification/NotifikasiKepegawaian";
 import NotifikasiPrivateMessage from "@/components/Notification/NotifikasiPrivateMessage";
+import { appList } from "@/utils/app-lists";
 import {
   BookOutlined,
   BuildOutlined,
   LogoutOutlined,
+  SunOutlined,
   SyncOutlined,
   TeamOutlined,
   UserOutlined,
@@ -33,6 +35,7 @@ function RekonLayout({ children, active = "rekon-unor" }) {
     { key: "pegawai", icon: <UserOutlined />, label: "Daftar Pegawai" },
     { key: "rekon-unor", icon: <BuildOutlined />, label: "Unit Organisasi" },
     { key: "rekon-jft", icon: <TeamOutlined />, label: "Jabatan Fungsional" },
+    { key: "rekon-jfu", icon: <SunOutlined />, label: "Jabatan Pelaksana" },
     { key: "rekon-diklat", icon: <BookOutlined />, label: "Diklat" },
     { key: "anomali", icon: <WarningOutlined />, label: "Disparitas Data" },
     { key: "update-data", icon: <SyncOutlined />, label: "Update Data" },
@@ -170,6 +173,7 @@ function RekonLayout({ children, active = "rekon-unor" }) {
               {dom}
             </a>
           )}
+          appList={appList(data?.user)}
         >
           <Layout>{children}</Layout>
         </ProLayout>

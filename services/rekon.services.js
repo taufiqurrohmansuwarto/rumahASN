@@ -4,6 +4,24 @@ const api = axios.create({
   baseURL: "/helpdesk/api/rekon",
 });
 
+// jfu and sync
+export const getJfuSimaster = async () => {
+  return api.get("/jfu/simaster").then((res) => res?.data);
+};
+
+export const getJfuSiasn = async () => {
+  return api.get("/jfu/siasn").then((res) => res?.data);
+};
+
+export const syncJfuSimaster = async () => {
+  return api.get("/jfu/simaster/sync").then((res) => res?.data);
+};
+
+export const syncJfuSiasn = async () => {
+  return api.get("/jfu/siasn/sync").then((res) => res?.data);
+};
+
+// unor
 export const getUnorSimaster = async () => {
   return api.get("/unor/simaster").then((res) => res?.data);
 };

@@ -1,5 +1,4 @@
 1. rekon data
-   - jabatan fungsional
    - jabatan pelaksana
    - jabatan strutkural
    - jenis jabatan
