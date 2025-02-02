@@ -9,6 +9,14 @@ const masterApi = axios.create({
   baseURL: "/helpdesk/api/master",
 });
 
+export const searchUpdateJabatan = (query) => {
+  const params = queryString.stringify(query, {
+    skipEmptyString: true,
+    skipNull: true,
+  });
+  return api.get(`/tasks/jabatan?${params}`).then((res) => res.data);
+};
+
 export const getDisparitas = () => {
   return api.get("/disparitas").then((res) => res.data);
 };

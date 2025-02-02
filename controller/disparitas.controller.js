@@ -1,6 +1,6 @@
 import { dataUtama } from "@/utils/siasn-utils";
 import dayjs from "dayjs";
-import { trim, upperCase } from "lodash";
+import { toUpper, trim, upperCase } from "lodash";
 import { raw } from "objection";
 const RekonJFT = require("@/models/rekon/jft.model");
 const RekonUnor = require("@/models/rekon/unor.model");
@@ -11,7 +11,8 @@ const UnorSimaster = require("@/models/sync-unor-master.model");
 const formatUnorHierarchy = (data) => {
   if (!data) return "";
   const formattedData = trim(data.split("-").reverse().join(" - "));
-  return formattedData.replace(/^-|-$/g, "");
+  const hasil = toUpper(formattedData.replace(/^-|-$/g, ""));
+  return hasil;
 };
 
 const getUnorHierarchy = async (model, id, queryOptions) => {
@@ -26,7 +27,9 @@ const getUnorHierarchy = async (model, id, queryOptions) => {
 
     if (!result?.data) return "";
 
-    return formatUnorHierarchy(result.data);
+    const hasil = formatUnorHierarchy(result.data);
+
+    return hasil;
   } catch (error) {
     console.error(
       `Error saat mengambil data unor ${queryOptions.system}:`,
@@ -47,7 +50,7 @@ const showUnorSimaster = async (id) => {
 const showUnorSiasn = async (id) => {
   return getUnorHierarchy(UnorSIASN, id, {
     idField: "Id",
-    hierarchyFunction: "get_hierarchy_siasn(?) as data",
+    hierarchyFunction: `get_hierarchy_siasn('${id}') as data`,
     system: "SIASN",
   });
 };
@@ -90,7 +93,7 @@ const disparitasKinerja = (skpMaster, skpSiasn) => {
 
   return {
     jenis: "skp",
-    deskripsi: `SKP ${tahunKemarin} dan ${duaTahunKemarin} pada aplikasi SIASN dan SIMASTER`,
+    deskripsi: `SKP ${tahunKemarin} dan ${duaTahunKemarin}`,
     simaster: kinerjaMaster?.map((item) => item?.tahun).join(", "),
     siasn: kinerjaSiasn?.map((item) => item?.tahun).join(", "),
     result,
@@ -125,10 +128,10 @@ const rekonUnor = async (simaster, siasn) => {
 
   return {
     jenis: "unor",
-    deskripsi: `Unor SIASN dan SIMASTER`,
+    deskripsi: `Kesamaan Unor`,
     simaster: unorMaster,
     siasn: unorSiasn,
-    status,
+    result: status,
   };
 };
 
