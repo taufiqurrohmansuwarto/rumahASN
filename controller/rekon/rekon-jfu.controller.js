@@ -54,7 +54,7 @@ export const syncJabatanPelaksanaSimaster = async (req, res) => {
 
 export const refJabatanPelaksanaSiasn = async (req, res) => {
   try {
-    const hasil = await JfuSiasn.query();
+    const hasil = await JfuSiasn.query().where("status", "1");
     res.json(hasil);
   } catch (error) {
     handleError(res, error);
@@ -83,6 +83,65 @@ export const refJabatanPelaksanaSimaster = async (req, res) => {
 };
 
 export const getRekonJfu = async (req, res) => {
-  const hasil = await RekonJfu.query().where({ status: "1" });
-  res.json(hasil);
+  try {
+    const { master_id } = req?.query;
+    const result = await RekonJfu.query()
+      .withGraphFetched("[JfuSiasn,JfuSimaster]")
+      .where("id_simaster", master_id)
+      .select("id", "id_siasn", "id_simaster");
+
+    res.json(result);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      message: "Internal server error",
+    });
+  }
+};
+
+export const postRekonJfu = async (req, res) => {
+  try {
+    const payload = req?.body;
+    const { custom_id: customId } = req?.user;
+
+    const check = await RekonJfu.query()
+      .where("id_siasn", payload?.id_siasn)
+      .andWhere("id_simaster", payload?.id_simaster);
+
+    if (check?.length > 0) {
+      res.json(null);
+    } else {
+      const result = await RekonJfu.query().insert({
+        ...payload,
+        user_id: customId,
+      });
+      res.json({
+        message: "Success",
+        data: result,
+      });
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      message: "Internal server error",
+    });
+  }
+};
+
+export const deleteRekonJfu = async (req, res) => {
+  try {
+    const { jfuId } = req?.query;
+    const result = await RekonJfu.query().where("id", jfuId).delete();
+    console.log(result);
+
+    res.json({
+      message: "Success",
+      data: result,
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      message: "Internal server error",
+    });
+  }
 };

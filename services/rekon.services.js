@@ -21,6 +21,18 @@ export const syncJfuSiasn = async () => {
   return api.get("/jfu/siasn/sync").then((res) => res?.data);
 };
 
+export const deleteJfuRekon = async (jfuId) => {
+  return api.delete(`/jfu/${jfuId}`).then((res) => res?.data);
+};
+
+export const getRekonJfu = async (masterId) => {
+  return api.get(`/jfu?master_id=${masterId}`).then((res) => res?.data);
+};
+
+export const postJfuRekon = async (payload) => {
+  return api.post("/jfu", payload).then((res) => res?.data);
+};
+
 // unor
 export const getUnorSimaster = async () => {
   return api.get("/unor/simaster").then((res) => res?.data);
