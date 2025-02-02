@@ -162,7 +162,7 @@ const RekonJfuSIASN = () => {
 
   const handleSearch = debounce((value) => {
     setSearchText(value);
-  }, 3000);
+  }, 500);
 
   const filteredOptions = jfuSiasn?.filter((item) =>
     item.nama.toLowerCase().includes(searchText.toLowerCase())
