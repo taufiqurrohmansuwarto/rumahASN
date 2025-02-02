@@ -82,17 +82,15 @@ const JfuSimasterSelect = ({
       </>
     }
   >
-    {defaultValue && (
-      <TreeSelect
-        onSelect={onSelect}
-        treeNodeFilterProp="title"
-        placeholder="Ketik nama Jabatan Pelaksana"
-        showSearch
-        style={{ width: "100%" }}
-        treeData={data}
-        defaultValue={defaultValue}
-      />
-    )}
+    <TreeSelect
+      onSelect={onSelect}
+      treeNodeFilterProp="title"
+      placeholder="Ketik nama Jabatan Pelaksana"
+      showSearch
+      style={{ width: "100%" }}
+      treeData={data}
+      defaultValue={defaultValue}
+    />
   </Form.Item>
 );
 
