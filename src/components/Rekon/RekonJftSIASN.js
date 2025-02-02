@@ -1,18 +1,17 @@
 import {
-  getJftSimaster,
-  getJftSiasn,
-  postJftRekon,
+  deleteJftRekon,
   getDetailJftSimaster,
   getJftRekon,
-  deleteJftRekon,
+  getJftSiasn,
+  getJftSimaster,
   getRekonJftStatistics,
+  postJftRekon,
   reportJftUnor,
 } from "@/services/rekon.services";
 import { CloudDownloadOutlined } from "@ant-design/icons";
 import { Stack } from "@mantine/core";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
-  Alert,
   Button,
   Card,
   Col,
@@ -20,13 +19,13 @@ import {
   Form,
   List,
   message,
+  Popconfirm,
   Row,
   Space,
   Statistic,
   Tag,
   TreeSelect,
   Typography,
-  Popconfirm,
 } from "antd";
 import { toNumber } from "lodash";
 import { useRouter } from "next/router";
@@ -339,15 +338,6 @@ const RekonJftSIASN = () => {
           {master_id && (
             <Stack>
               <JftSiasn />
-              {/* {detailJftSimaster && (
-                <Alert
-                  style={{ marginTop: 16 }}
-                  message="JFT SIMASTER dipilih"
-                  description={detailJftSimaster?.hierarchy}
-                  type="success"
-                  showIcon
-                />
-              )} */}
               {rekonJft?.length > 0 && (
                 <ListJft hapus={handleHapus} data={rekonJft} />
               )}
