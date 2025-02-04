@@ -90,6 +90,8 @@ function ReactMarkdownCustom({ children, withCustom = true }) {
             whiteSpace: "normal",
             overflowWrap: "break-word",
             wordWrap: "break-word",
+            margin: 0,
+            paddingTop: 0,
           }}
         >
           {props.children}
