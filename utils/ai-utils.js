@@ -108,6 +108,60 @@ async function getPegawai(nama, currentOpdId) {
   }
 }
 
+async function getKolega(nama, currentOpdId) {
+  try {
+    const organizationId = currentOpdId?.substring(0, 3);
+    const knex = SyncPegawai.knex();
+    const result = await knex.raw(
+      `select * from cari_pegawai_dinamis('${organizationId}', '${nama}')`
+    );
+
+    const hasil = result?.rows[0];
+
+    if (!hasil) {
+      return;
+    } else {
+      const currentPegawai = await SyncPegawai.query()
+        .where("nip_master", hasil?.nip_master)
+        .select(
+          "id as id",
+          raw(
+            "nama_master || ' ' || gelar_depan_master || ' ' || gelar_belakang_master as nama"
+          ),
+          "nip_master as nip",
+          raw(
+            "pangkat_master || '/' || '(' || golongan_master || ')' as golongan"
+          ),
+          "jabatan_master as jabatan"
+        )
+        .first();
+
+      const result = {
+        id: currentPegawai?.id,
+        nama: currentPegawai?.nama,
+        pangkat: currentPegawai?.golongan,
+        jabatan: currentPegawai?.jabatan,
+      };
+
+      return result;
+    }
+  } catch (error) {
+    console.log(error);
+    throw new Error(error);
+  }
+}
+
+module.exports.getKolega = async (names, currentOpdId) => {
+  let promises = [];
+  for (const name of names) {
+    promises.push(getKolega(name, currentOpdId));
+  }
+  const results = await Promise.allSettled(promises);
+  const hasil = results.filter((result) => result.status === "fulfilled");
+  const data = hasil.map((item) => item.value);
+  return data;
+};
+
 module.exports.getTemanKerja = async (names, currentOpdId) => {
   let promises = [];
   for (const name of names) {

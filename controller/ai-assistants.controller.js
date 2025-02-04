@@ -60,6 +60,10 @@ const getPesertaSpt = async (data) => {
   return makeRequest("/tool-services/get-peserta-spt", data);
 };
 
+const getKolega = async (data) => {
+  return makeRequest("/tool-services/get-kolega", data);
+};
+
 const generateDocumentSpt = async (data) => {
   return makeRequest("/tool-services/generate-document-spt", data);
 };
@@ -267,6 +271,15 @@ export const assistant = async (req, res) => {
                   return {
                     tool_call_id: toolCall.id,
                     output: JSON.stringify(headerSurat),
+                  };
+
+                // mendapatkan kolega
+                case "get_kolega":
+                  console.log("masuk ke get kolega");
+                  const kolega = await getKolega(params);
+                  return {
+                    tool_call_id: toolCall.id,
+                    output: JSON.stringify(kolega),
                   };
 
                 // peserta spt di organisasinya
