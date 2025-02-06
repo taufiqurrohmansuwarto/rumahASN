@@ -69,6 +69,8 @@ const errorHandler = async (error) => {
   // cek kalau ada file token.json
   const ifExists = fs.existsSync(filePath);
 
+  console.log("error", error);
+
   const invalidJwt =
     error?.response?.data?.message === "invalid or expired jwt";
 
@@ -108,6 +110,7 @@ const siasnMiddleware = async (req, res, next) => {
     req.siasnRequest = siasnWsAxios;
     next();
   } catch (error) {
+    console.log("error", error);
     res.status(500).json({ message: "error" });
   }
 };
