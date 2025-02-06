@@ -11,7 +11,7 @@ const CURRENT_DIRECTORY = process.cwd();
 const siasnWsAxios = axios.create({
   baseURL: baseUrl,
   httpsAgent: new https.Agent({
-    rejectUnauthorized: false,
+    secureProtocol: "TLS_method",
   }),
 });
 
@@ -58,7 +58,7 @@ const requestHandler = async (request) => {
       return request;
     }
   } catch (error) {
-    console.log("error", error);
+    console.log({ error: error?.response });
   }
 };
 
@@ -72,7 +72,7 @@ const errorHandler = async (error) => {
   // cek kalau ada file token.json
   const ifExists = fs.existsSync(filePath);
 
-  console.log("error", error);
+  console.log({ error: error?.response });
 
   const invalidJwt =
     error?.response?.data?.message === "invalid or expired jwt";
@@ -113,7 +113,6 @@ const siasnMiddleware = async (req, res, next) => {
     req.siasnRequest = siasnWsAxios;
     next();
   } catch (error) {
-    console.log("error", error);
     res.status(500).json({ message: "error" });
   }
 };
