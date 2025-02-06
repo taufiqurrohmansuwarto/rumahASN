@@ -3,13 +3,16 @@ const fs = require("fs");
 const path = require("path");
 const ssoToken = require("../sso_token.json");
 const a = require("../utils/siasn-fetcher");
+const https = require("https");
 
 const baseUrl = "https://apimws.bkn.go.id:8243/apisiasn/1.0";
 const CURRENT_DIRECTORY = process.cwd();
 
 const siasnWsAxios = axios.create({
   baseURL: baseUrl,
-  timeout: 10000,
+  httpsAgent: new https.Agent({
+    rejectUnauthorized: false,
+  }),
 });
 
 const getoken = async () => {
