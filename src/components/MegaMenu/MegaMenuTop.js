@@ -3,6 +3,7 @@ import { AppstoreOutlined } from "@ant-design/icons";
 import { IconGridDots } from "@tabler/icons-react";
 import { Col, Grid, Popover, Row, Typography } from "antd";
 import { useSession } from "next-auth/react";
+import Image from "next/image";
 import { useRouter } from "next/router";
 
 const { useBreakpoint } = Grid;
@@ -46,17 +47,30 @@ const MegaMenuTop = ({ url, title }) => {
                           flexDirection: "column",
                           alignItems: "center",
                           cursor: "pointer",
+                          padding: "8px",
+                          transition: "all 0.3s ease",
+                          borderRadius: "8px",
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.backgroundColor = "#f0f0f0";
+                          e.currentTarget.style.transform = "translateY(-2px)";
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.backgroundColor = "transparent";
+                          e.currentTarget.style.transform = "translateY(0)";
                         }}
                       >
-                        <span
+                        <Image
+                          width={24}
+                          height={24}
+                          src={app.icon}
+                          alt={app.title}
                           style={{
-                            fontSize: 24,
-                            color: app.color,
+                            width: 24,
+                            height: 24,
                             marginBottom: 4,
                           }}
-                        >
-                          {app.rightIcon || <AppstoreOutlined />}
-                        </span>
+                        />
                         <Text
                           style={{
                             fontSize: 12,
