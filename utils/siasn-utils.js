@@ -1,4 +1,36 @@
-const { OrderedListOutlined } = require("@ant-design/icons");
+const fs = require("fs");
+const { trim } = require("lodash");
+const paparse = require("papaparse");
+const path = require("path");
+
+const parseCSV = (filePath) => {
+  const file = fs.readFileSync(filePath, "utf8");
+  return paparse.parse(file, {
+    header: true,
+    skipEmptyLines: true,
+    delimiter: ",",
+  }).data;
+};
+
+const getFilePath = (filename) => path.join(process.cwd(), `docs/${filename}`);
+
+// ----------Sub Bagian TATA USAHA SMKN 8 MALANG remove ------------
+const removeDash = (text) => {
+  return text.replace(/-/g, " ");
+};
+
+module.exports.refSiasnUnor = () => {
+  const data = parseCSV(getFilePath("siasn/unor.csv"));
+
+  const result = data.map((item) => {
+    return {
+      ...item,
+      NamaUnor: trim(removeDash(item?.NamaUnor)),
+    };
+  });
+
+  return result;
+};
 
 module.exports.riwayatGolonganPangkat = (fetcher, nip) => {
   return fetcher.get(`/pns/rw-golongan/${nip}`);
