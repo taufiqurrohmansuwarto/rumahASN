@@ -36,6 +36,7 @@ const {
   createKinerjaPeriodik,
   dataUtama,
   removeDiklatSiasn,
+  refSiasnUnor,
 } = require("@/utils/siasn-utils");
 
 const {
@@ -269,10 +270,11 @@ const getTreeRef = async (req, res) => {
       .first();
 
     if (!checkUpdate) {
-      const result = await request.get("/referensi/ref-unor");
+      // const result = await request.get("/referensi/ref-unor");
+      const result = refSiasnUnor();
 
       await RefSIASNUnor.query().delete();
-      await RefSIASNUnor.query().insertGraph(result?.data?.data);
+      await RefSIASNUnor.query().insertGraph(result);
       await BackupSIASN.query().insert({
         backup_date: currentTime,
         type: "ref_unor",
