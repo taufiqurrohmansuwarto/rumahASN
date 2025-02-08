@@ -78,7 +78,10 @@ const JftSimaster = () => {
   return (
     <Stack>
       <Form layout="vertical">
-        <Form.Item label="JFT SIMASTER" help="Pilih JFT SIMASTER">
+        <Form.Item
+          label="Jabatan Fungsional SIMASTER"
+          help="Pilih Jabatan Fungsional SIMASTER"
+        >
           <TreeSelect
             treeNodeFilterProp="title"
             placeholder="Ketik nama jabatan fungsional"
@@ -96,13 +99,13 @@ const JftSimaster = () => {
 
 const StatisticJft = ({ data, handleReport }) => {
   return (
-    <Row gutter={16} style={{ marginBottom: 16 }}>
-      <Col span={8}>
+    <Row gutter={[16, 16]} style={{ marginBottom: 16 }}>
+      <Col xs={24} md={8}>
         <Card>
           <Statistic title="Total JFT" value={data?.total_jft} />
         </Card>
       </Col>
-      <Col span={8}>
+      <Col xs={24} md={8}>
         <Card>
           <Statistic
             title="Terselesaikan"
@@ -111,7 +114,7 @@ const StatisticJft = ({ data, handleReport }) => {
           />
         </Card>
       </Col>
-      <Col span={8}>
+      <Col xs={24} md={8}>
         <Card>
           <Statistic
             title="Presentase"
@@ -189,8 +192,8 @@ const JftSiasn = () => {
     <Stack>
       <Form layout="vertical">
         <Form.Item
-          label="JFT SIASN"
-          help="Pilih dan padankan sesuai dengan JFT di SIMASTER"
+          label="Jabatan Fungsional SIASN"
+          help="Pilih dan padankan sesuai dengan Jabatan Fungsional di SIASN"
         >
           <TreeSelect
             treeNodeFilterProp="title"
@@ -311,7 +314,7 @@ const RekonJftSIASN = () => {
 
   return (
     <Card
-      title="Padanan JFT"
+      title="Padanan Jabatan Fungsional"
       extra={
         <Button
           icon={<CloudDownloadOutlined />}
@@ -319,7 +322,7 @@ const RekonJftSIASN = () => {
           onClick={handleReport}
           loading={isLoadingReport}
         >
-          Unduh Report
+          Hasil Rekon
         </Button>
       }
     >

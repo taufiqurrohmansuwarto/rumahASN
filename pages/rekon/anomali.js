@@ -4,6 +4,7 @@ import PageContainer from "@/components/PageContainer";
 import RekonLayout from "@/components/Rekon/RekonLayout";
 import { useSession } from "next-auth/react";
 import Head from "next/head";
+import { Grid } from "antd";
 
 const RekonAnomali = () => {
   const { data: session } = useSession();
@@ -11,12 +12,17 @@ const RekonAnomali = () => {
   const admin = session?.user?.current_role === "admin";
   const fasilitator = session?.user?.role === "FASILITATOR";
 
+  const breakPoint = Grid.useBreakpoint();
+
   return (
     <>
       <Head>
         <title>Rumah ASN - Rekon - Disparitas Data</title>
       </Head>
       <PageContainer
+        childrenContentStyle={{
+          padding: breakPoint.xs ? 0 : null,
+        }}
         title="Disparitas Data"
         content="Disparitas data antara SIASN dan SIMASTER"
       >

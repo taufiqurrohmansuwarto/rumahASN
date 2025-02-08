@@ -151,12 +151,15 @@ export function MenuMySAPK({ dataUtama, foto }) {
                 </Space>
               </div>
             </Flex>
-            <Flex gap={2} style={{ marginBottom: 16 }}>
+            <Flex
+              vertical={screens.xl ? false : true}
+              gap={2}
+              style={{ marginBottom: 16 }}
+            >
               <IPAsn tahun={2024} />
               <PengaturanGelar />
               <GantiEmail />
             </Flex>
-            {/* <AnomaliUser /> */}
           </Stack>
         </Card>
       </Group>

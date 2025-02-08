@@ -75,7 +75,7 @@ const GrafikAnomali = ({ data }) => {
 
   return (
     <Row gutter={[16, 16]}>
-      <Col md={12}>
+      <Col md={12} xs={24}>
         <Card>
           <Statistic
             title="Total Pegawai SIASN"
@@ -83,7 +83,7 @@ const GrafikAnomali = ({ data }) => {
           />
         </Card>
       </Col>
-      <Col md={12}>
+      <Col md={12} xs={24}>
         <Card>
           <Statistic
             title="Total Pegawai SIMASTER"
@@ -96,11 +96,11 @@ const GrafikAnomali = ({ data }) => {
           <Stack>
             <Alert
               title="Perhatian"
-              color="indigo"
+              color="yellow"
               icon={<InfoCircleOutlined />}
             >
-              Data akan diupdate setiap hari oleh BKD Provinsi Jawa Timur dan
-              tidak realtime. Perbaikan data bisa jadi tidak langsung terlihat.
+              Data diupdate setiap hari oleh BKD Jatim. Perubahan tidak
+              realtime.
             </Alert>
             <Table
               rowKey={(record) => record.type}
