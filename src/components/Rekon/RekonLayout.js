@@ -33,11 +33,11 @@ function RekonLayout({ children, active = "rekon-unor" }) {
 
   const menuItems = [
     { key: "pegawai", icon: <UserOutlined />, label: "Daftar Pegawai" },
+    { key: "anomali", icon: <WarningOutlined />, label: "Disparitas Data" },
     { key: "rekon-unor", icon: <BuildOutlined />, label: "Unit Organisasi" },
     { key: "rekon-jft", icon: <TeamOutlined />, label: "Jabatan Fungsional" },
     { key: "rekon-jfu", icon: <SunOutlined />, label: "Jabatan Pelaksana" },
-    { key: "rekon-diklat", icon: <BookOutlined />, label: "Diklat" },
-    { key: "anomali", icon: <WarningOutlined />, label: "Disparitas Data" },
+    // { key: "rekon-diklat", icon: <BookOutlined />, label: "Diklat" },
     { key: "update-data", icon: <SyncOutlined />, label: "Update Data" },
   ];
 

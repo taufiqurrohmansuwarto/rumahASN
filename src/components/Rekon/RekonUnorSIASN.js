@@ -98,13 +98,13 @@ const UnorSimaster = () => {
 
 const StatisticUnor = ({ data, handleReport }) => {
   return (
-    <Row gutter={16} style={{ marginBottom: 16 }}>
-      <Col span={8}>
+    <Row gutter={[16, 16]} style={{ marginBottom: 16 }}>
+      <Col xs={24} md={8}>
         <Card>
           <Statistic title="Total Unor" value={data?.total_unor} />
         </Card>
       </Col>
-      <Col span={8}>
+      <Col xs={24} md={8}>
         <Card>
           <Statistic
             title="Terselesaikan"
@@ -113,7 +113,7 @@ const StatisticUnor = ({ data, handleReport }) => {
           />
         </Card>
       </Col>
-      <Col span={8}>
+      <Col xs={24} md={8}>
         <Card>
           <Statistic
             title="Presentase"
@@ -322,7 +322,7 @@ const RekonUnorSIASN = () => {
           onClick={handleReport}
           loading={isLoadingReport}
         >
-          Unduh Report
+          Hasil Rekon
         </Button>
       }
     >
