@@ -1,7 +1,7 @@
 import { dataIpAsn, dataUtamaSIASN } from "@/services/siasn-services";
 import { dataKategoriIPASN } from "@/utils/client-utils";
 import { useQuery } from "@tanstack/react-query";
-import { Col, Form, Input, Modal, Row, Skeleton, Tag } from "antd";
+import { Col, Form, Input, Modal, Row, Skeleton, Spin, Tag } from "antd";
 import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
 
@@ -11,7 +11,7 @@ import relativeTime from "dayjs/plugin/relativeTime";
 dayjs.locale("id");
 dayjs.extend(relativeTime);
 
-const ModalDataIPAsn = ({ data, open, onCancel, tahun }) => {
+const ModalDataIPAsn = ({ data, open, onCancel, tahun, loading }) => {
   const [form] = Form.useForm();
 
   useEffect(() => {
@@ -32,10 +32,11 @@ const ModalDataIPAsn = ({ data, open, onCancel, tahun }) => {
       footer={null}
       width={800}
       centered
-      title="IP ASN Tahun 2023"
+      title={`IP ASN Tahun ${tahun}`}
       open={open}
       onCancel={onCancel}
     >
+      <Spin spinning={loading} fullScreen />
       <Tag
         style={{
           marginBottom: 16,
@@ -164,7 +165,9 @@ function IPAsn({ tahun }) {
   const { data: dataUtama, isLoading } = useQuery(
     ["data-utama-siasn"],
     () => dataUtamaSIASN(),
-    {}
+    {
+      refetchOnWindowFocus: false,
+    }
   );
 
   const {
@@ -184,8 +187,8 @@ function IPAsn({ tahun }) {
   }, [data, refetch]);
 
   return (
-    <Skeleton loading={isLoading || isLoadingDataIPAsn}>
-      {dataUtama?.kedudukanPnsNama === "Aktif" && dataIPAsn && (
+    <>
+      {dataUtama?.kedudukanPnsNama === "Aktif" && dataIPAsn ? (
         <>
           <Tag
             color={
@@ -200,10 +203,16 @@ function IPAsn({ tahun }) {
             IP ASN tahun {tahun} {dataIPAsn?.subtotal} (
             {dataKategoriIPASN(dataIPAsn?.subtotal)})
           </Tag>
-          <ModalDataIPAsn open={open} onCancel={handleClose} data={dataIPAsn} />
+          <ModalDataIPAsn
+            tahun={tahun}
+            open={open}
+            onCancel={handleClose}
+            data={dataIPAsn}
+            loading={isLoadingDataIPAsn}
+          />
         </>
-      )}
-    </Skeleton>
+      ) : null}
+    </>
   );
 }
 
