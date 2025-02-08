@@ -6,7 +6,6 @@ import {
   TagOutlined,
 } from "@ant-design/icons";
 import {
-  ActionIcon,
   Card,
   Group,
   Image,
@@ -17,13 +16,11 @@ import {
   createStyles,
   rem,
 } from "@mantine/core";
-import { IconInfoCircleFilled } from "@tabler/icons-react";
 import { Avatar, Flex, Grid, Space, Tag, Tooltip, Typography } from "antd";
 import { useRouter } from "next/router";
-import PengaturanGelar from "../LayananSIASN/PengaturanGelar";
-import GantiEmail from "../LayananSIASN/GantiEmail";
 import DisparitasData from "../LayananSIASN/DisparitasData";
-import { IconAlertTriangle } from "@tabler/icons";
+import GantiEmail from "../LayananSIASN/GantiEmail";
+import PengaturanGelar from "../LayananSIASN/PengaturanGelar";
 
 const mockdata = mysapkMenu;
 
@@ -155,7 +152,7 @@ export function MenuMySAPK({ dataUtama, foto }) {
               </div>
             </Flex>
             <Flex gap={2} style={{ marginBottom: 16 }}>
-              {/* <IPAsn tahun={2023} /> */}
+              <IPAsn tahun={2024} />
               <PengaturanGelar />
               <GantiEmail />
             </Flex>

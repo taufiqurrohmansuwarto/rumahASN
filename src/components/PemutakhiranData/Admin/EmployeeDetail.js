@@ -414,7 +414,7 @@ function EmployeeDetail({ nip }) {
         direction={breakPoint?.xs ? "vertical" : "horizontal"}
         align={breakPoint?.xs ? "start" : "center"}
       >
-        <IPAsnByNip tahun={2023} nip={dataSimaster?.nip_baru} />
+        <IPAsnByNip tahun={2024} nip={dataSimaster?.nip_baru} />
         {/* {JSON.stringify(siasn)} */}
         <Kppn id={siasn?.kppnId} />
         <PengaturanGelarByNip nip={nip} />
