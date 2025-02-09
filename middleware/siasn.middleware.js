@@ -7,24 +7,21 @@ const { default: Redlock } = require("redlock");
 
 const baseUrl = "https://apimws.bkn.go.id:8243/apisiasn/1.0";
 const TOKEN_KEY = "siasn_token";
+const REFRESH_FLAG_KEY = "refresh:token";
 
 let redisClient;
 let redlock;
 
-/**
- * Inisialisasi Redis dan Redlock.
- * Pastikan kedua objek diinisialisasi sebelum digunakan.
- */
 const initRedis = async () => {
   if (!redisClient) {
     redisClient = await createRedisInstance();
   }
   if (!redlock) {
     redlock = new Redlock([redisClient], {
-      driftFactor: 0.01, // faktor drift (default: 0.01)
-      retryCount: 3, // jumlah maksimal percobaan
-      retryDelay: 200, // delay antar percobaan (ms)
-      retryJitter: 200, // jitter untuk menghindari pola yang sama (ms)
+      driftFactor: 0.01,
+      retryCount: 3,
+      retryDelay: 200,
+      retryJitter: 200,
     });
     console.log("Redis dan Redlock telah diinisialisasi");
   }
@@ -37,67 +34,48 @@ const siasnWsAxios = axios.create({
   }),
 });
 
-/**
- * Fungsi untuk mendapatkan token baru.
- */
 const getoken = async () => {
   const wso2 = await a.wso2Fetcher();
   const sso = ssoToken?.token;
-  return {
-    sso_token: sso,
-    wso_token: wso2,
-  };
+  return { sso_token: sso, wso_token: wso2 };
 };
 
-/**
- * Fungsi untuk mendapatkan token dari Redis atau membuat token baru jika belum ada.
- * Menggunakan mekanisme locking via Redlock untuk menghindari race condition.
- */
 const getOrCreateToken = async () => {
-  await initRedis(); // Pastikan Redis dan Redlock sudah diinisialisasi
+  await initRedis();
 
   let tokenData = await redisClient.get(TOKEN_KEY);
   if (tokenData) {
     return JSON.parse(tokenData);
   }
 
-  // Mendefinisikan key untuk lock
-  const LOCK_KEY = "locks:token";
-  let lock;
+  // Coba set refresh flag dengan SETNX dan TTL 5 detik
+  const setResult = await redisClient.set(REFRESH_FLAG_KEY, "1", "NX", "EX", 5);
+  if (!setResult) {
+    console.log("Refresh token sedang berjalan, menunggu token baru...");
+    const maxRetries = 10;
+    for (let i = 0; i < maxRetries; i++) {
+      await new Promise((resolve) => setTimeout(resolve, 500));
+      tokenData = await redisClient.get(TOKEN_KEY);
+      if (tokenData) {
+        return JSON.parse(tokenData);
+      }
+    }
+    throw new Error("Timeout menunggu token baru");
+  }
 
   try {
-    // Mengakuisisi lock selama 1000 ms
-    lock = await redlock.acquire([LOCK_KEY], 1000);
-
-    // Periksa kembali apakah token sudah ada setelah mendapatkan lock
-    tokenData = await redisClient.get(TOKEN_KEY);
-    if (tokenData) {
-      return JSON.parse(tokenData);
-    }
-
-    // Jika token belum ada, buat token baru
     const token = await getoken();
-    // Simpan token ke Redis (tambahkan opsi EX jika token memiliki masa berlaku)
     await redisClient.set(TOKEN_KEY, JSON.stringify(token));
     console.log("Token baru dibuat dan disimpan di Redis");
     return token;
   } catch (err) {
-    console.error("Gagal mendapatkan lock atau membuat token:", err);
+    console.error("Gagal membuat token:", err);
     throw err;
   } finally {
-    if (lock) {
-      try {
-        await lock.release();
-      } catch (releaseErr) {
-        console.error("Gagal melepaskan lock:", releaseErr);
-      }
-    }
+    await redisClient.del(REFRESH_FLAG_KEY);
   }
 };
 
-/**
- * Interceptor request: Menambahkan header otentikasi menggunakan token dari Redis.
- */
 const requestHandler = async (request) => {
   try {
     const token = await getOrCreateToken();
@@ -111,21 +89,16 @@ const requestHandler = async (request) => {
   }
 };
 
-/**
- * Interceptor response: Mengoper response tanpa modifikasi.
- */
 const responseHandler = async (response) => response;
 
-/**
- * Interceptor error: Jika terjadi error terkait token (misalnya token expired atau tidak valid),
- * token dihapus dari Redis agar pada request berikutnya dibuat token baru.
- */
 const errorHandler = async (error) => {
   const errorData = error?.response?.data || {};
   const invalidJwt = errorData.message === "invalid or expired jwt";
-  const runtimeError = errorData.message === "Runtime Error";
   const tokenError = errorData.data === "Token SSO mismatch";
   const invalidCredentials = errorData.message === "Invalid Credentials";
+  const runtimeError =
+    errorData.message === "Runtime Error" &&
+    !(errorData.description && errorData.description.includes("SUSPENDED"));
 
   const notValid =
     invalidJwt || runtimeError || tokenError || invalidCredentials;
@@ -140,13 +113,9 @@ const errorHandler = async (error) => {
   }
 };
 
-// Pasang interceptor pada instance Axios
 siasnWsAxios.interceptors.request.use(requestHandler, errorHandler);
 siasnWsAxios.interceptors.response.use(responseHandler, errorHandler);
 
-/**
- * Middleware Express untuk menyuntikkan instance Axios ke objek request.
- */
 const siasnMiddleware = async (req, res, next) => {
   try {
     req.siasnRequest = siasnWsAxios;
