@@ -13,10 +13,10 @@ import {
 import { Affix, Card, Col, Flex, Row, Tabs } from "antd";
 import { useRouter } from "next/router";
 import Announcement from "../Announcement";
-import KegiatanMendatang from "./KegiatanMendatang";
 import SocmedCreatePost from "./SocmedCreatePost";
 import SocmedMyPosts from "./SocmedMyPosts";
 import SocmedPosts from "./SocmedPosts";
+import UserPolls from "../Polls/UserPolls";
 
 function SocmedTabs() {
   useScrollRestoration();
@@ -230,7 +230,7 @@ function SocmedTabs() {
         <Col md={8} xs={24}>
           <Row gutter={[16, 16]}>
             <Col md={24} xs={24}>
-              <KegiatanMendatang />
+              <UserPolls />
             </Col>
           </Row>
         </Col>

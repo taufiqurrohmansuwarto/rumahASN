@@ -72,17 +72,18 @@ const errorHandler = async (error) => {
   // cek kalau ada file token.json
   const ifExists = fs.existsSync(filePath);
 
-  console.log({ error: error?.response });
-
   const invalidJwt =
     error?.response?.data?.message === "invalid or expired jwt";
+
+  const runtimeError = error?.response?.data?.message === "Runtime Error";
 
   const tokenError = error?.response?.data?.data === "Token SSO mismatch";
 
   const invalidCredentials =
     error?.response?.data?.message === "Invalid Credentials";
 
-  const notValid = invalidJwt || invalidCredentials || tokenError;
+  const notValid =
+    invalidJwt || invalidCredentials || tokenError || runtimeError;
 
   if (ifExists && notValid) {
     // hapus file token.json
