@@ -1,0 +1,215 @@
+-- ===============================================================
+-- 1. Tabel Pengguna (Users)
+-- ===============================================================
+CREATE TABLE users (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    username VARCHAR(100) NOT NULL UNIQUE,
+    email VARCHAR(255) NOT NULL UNIQUE,
+    password VARCHAR(255) NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+-- ===============================================================
+-- 2. Tabel Komunitas (Communities)
+-- ===============================================================
+CREATE TABLE communities (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL UNIQUE,
+    description TEXT,
+    created_by BIGINT NOT NULL,
+    is_private BOOLEAN DEFAULT FALSE,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    CONSTRAINT fk_communities_created_by FOREIGN KEY (created_by) REFERENCES users(id)
+);
+
+-- ===============================================================
+-- 3. Tabel Keanggotaan Komunitas (Community Members)
+-- ===============================================================
+CREATE TABLE community_members (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    community_id BIGINT NOT NULL,
+    user_id BIGINT NOT NULL,
+    role ENUM('member', 'moderator', 'admin') DEFAULT 'member',
+    joined_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE KEY uk_community_user (community_id, user_id),
+    CONSTRAINT fk_community_members_community FOREIGN KEY (community_id) REFERENCES communities(id) ON DELETE CASCADE,
+    CONSTRAINT fk_community_members_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+-- ===============================================================
+-- 4. Tabel Moderator Komunitas (Community Moderators)
+-- ===============================================================
+CREATE TABLE community_moderators (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    community_id BIGINT NOT NULL,
+    user_id BIGINT NOT NULL,
+    role ENUM('moderator', 'admin') NOT NULL,
+    assigned_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE KEY uk_community_moderator (community_id, user_id),
+    CONSTRAINT fk_community_mod_community FOREIGN KEY (community_id) REFERENCES communities(id) ON DELETE CASCADE,
+    CONSTRAINT fk_community_mod_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+-- ===============================================================
+-- 5. Tabel Highlights Komunitas (Community Highlights)
+-- ===============================================================
+CREATE TABLE community_highlights (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    community_id BIGINT NOT NULL,
+    highlight_text TEXT NOT NULL,
+    display_order INT DEFAULT 0,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    INDEX idx_highlight_community (community_id),
+    CONSTRAINT fk_highlights_community FOREIGN KEY (community_id) REFERENCES communities(id) ON DELETE CASCADE
+);
+
+-- ===============================================================
+-- 6. Tabel Rules Komunitas (Community Rules)
+-- ===============================================================
+CREATE TABLE community_rules (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    community_id BIGINT NOT NULL,
+    rule_text TEXT NOT NULL,
+    rule_order INT DEFAULT 0,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    INDEX idx_rules_community (community_id),
+    CONSTRAINT fk_rules_community FOREIGN KEY (community_id) REFERENCES communities(id) ON DELETE CASCADE
+);
+
+-- ===============================================================
+-- 7. Tabel Diskusi/Posting (Posts)
+-- ===============================================================
+CREATE TABLE posts (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    community_id BIGINT NOT NULL,   -- Posting harus berada di sebuah komunitas
+    user_id BIGINT NOT NULL,        -- Pembuat posting
+    post_type ENUM('text', 'image', 'video', 'link', 'poll') NOT NULL,
+    title VARCHAR(255),
+    text_content TEXT,              -- Untuk posting teks/deskripsi
+    link_url VARCHAR(255),          -- Untuk posting link
+    upvote_count INT DEFAULT 0,
+    downvote_count INT DEFAULT 0,
+    comment_count INT DEFAULT 0,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    INDEX idx_posts_user (user_id),
+    INDEX idx_posts_created (created_at),
+    INDEX idx_posts_community (community_id),
+    CONSTRAINT fk_posts_community FOREIGN KEY (community_id) REFERENCES communities(id) ON DELETE CASCADE,
+    CONSTRAINT fk_posts_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+-- ===============================================================
+-- 8. Tabel Vote untuk Postingan (Post Votes)
+-- ===============================================================
+CREATE TABLE post_votes (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    post_id BIGINT NOT NULL,
+    user_id BIGINT NOT NULL,
+    vote TINYINT NOT NULL,  -- 1 untuk upvote, -1 untuk downvote
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE KEY uk_post_vote (post_id, user_id),
+    INDEX idx_post_votes_post (post_id),
+    CONSTRAINT fk_post_votes_post FOREIGN KEY (post_id) REFERENCES posts(id) ON DELETE CASCADE,
+    CONSTRAINT fk_post_votes_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+-- ===============================================================
+-- 9. Tabel Komentar (Comments) dengan Upvote/Downvote Count
+-- ===============================================================
+CREATE TABLE comments (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    post_id BIGINT NOT NULL,
+    user_id BIGINT NOT NULL,
+    parent_id BIGINT DEFAULT NULL,  -- Untuk komentar reply (bersarang)
+    comment TEXT NOT NULL,
+    upvote_count INT DEFAULT 0,
+    downvote_count INT DEFAULT 0,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    INDEX idx_comments_post (post_id),
+    INDEX idx_comments_user (user_id),
+    INDEX idx_comments_parent (parent_id),
+    CONSTRAINT fk_comments_post FOREIGN KEY (post_id) REFERENCES posts(id) ON DELETE CASCADE,
+    CONSTRAINT fk_comments_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+-- ===============================================================
+-- 10. Tabel Vote untuk Komentar (Comment Votes)
+-- ===============================================================
+CREATE TABLE comment_votes (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    comment_id BIGINT NOT NULL,
+    user_id BIGINT NOT NULL,
+    vote TINYINT NOT NULL,  -- 1 untuk upvote, -1 untuk downvote
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE KEY uk_comment_vote (comment_id, user_id),
+    INDEX idx_comment_votes_comment (comment_id),
+    CONSTRAINT fk_comment_votes_comment FOREIGN KEY (comment_id) REFERENCES comments(id) ON DELETE CASCADE,
+    CONSTRAINT fk_comment_votes_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+-- ===============================================================
+-- 11. Tabel Lampiran Media (Media Attachments)
+-- ===============================================================
+CREATE TABLE media_attachments (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    post_id BIGINT NOT NULL,
+    media_type ENUM('image', 'video') NOT NULL,
+    media_url VARCHAR(255) NOT NULL,
+    display_order INT DEFAULT 0,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_media_post (post_id),
+    CONSTRAINT fk_media_post FOREIGN KEY (post_id) REFERENCES posts(id) ON DELETE CASCADE
+);
+
+-- ===============================================================
+-- 12. Tabel Opsi Polling (Poll Options)
+-- ===============================================================
+CREATE TABLE poll_options (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    post_id BIGINT NOT NULL,
+    option_text VARCHAR(255) NOT NULL,
+    vote_count INT DEFAULT 0,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    INDEX idx_poll_options_post (post_id),
+    CONSTRAINT fk_poll_options_post FOREIGN KEY (post_id) REFERENCES posts(id) ON DELETE CASCADE
+);
+
+-- ===============================================================
+-- 13. Tabel Vote untuk Polling (Poll Votes)
+-- ===============================================================
+CREATE TABLE poll_votes (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    poll_option_id BIGINT NOT NULL,
+    user_id BIGINT NOT NULL,
+    voted_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE KEY uk_poll_vote (poll_option_id, user_id),
+    INDEX idx_poll_votes_option (poll_option_id),
+    CONSTRAINT fk_poll_votes_option FOREIGN KEY (poll_option_id) REFERENCES poll_options(id) ON DELETE CASCADE,
+    CONSTRAINT fk_poll_votes_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+-- ===============================================================
+-- 14. Tabel Laporan (Reports) untuk Postingan dan Komentar
+-- ===============================================================
+CREATE TABLE reports (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    reportable_type ENUM('post', 'comment') NOT NULL,  -- Jenis konten yang dilaporkan
+    reportable_id BIGINT NOT NULL,                      -- ID konten (post atau comment)
+    user_id BIGINT NOT NULL,                            -- Pengguna yang melaporkan
+    reason VARCHAR(255) NOT NULL,                       -- Alasan singkat laporan
+    details TEXT,                                       -- Keterangan tambahan (opsional)
+    status ENUM('pending', 'reviewed', 'resolved') DEFAULT 'pending',
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    INDEX idx_reports_target (reportable_type, reportable_id),
+    INDEX idx_reports_user (user_id),
+    CONSTRAINT fk_reports_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+

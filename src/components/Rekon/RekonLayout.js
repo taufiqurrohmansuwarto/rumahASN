@@ -37,7 +37,16 @@ function RekonLayout({ children, active = "rekon-unor" }) {
     { key: "rekon-unor", icon: <BuildOutlined />, label: "Unit Organisasi" },
     { key: "rekon-jft", icon: <TeamOutlined />, label: "Jabatan Fungsional" },
     { key: "rekon-jfu", icon: <SunOutlined />, label: "Jabatan Pelaksana" },
+    { key: "rekon-jenjang", icon: <BookOutlined />, label: "Jenjang" },
+    { key: "rekon-pangkat", icon: <BookOutlined />, label: "Pangkat" },
+    {
+      key: "rekon-jenis_jabatan",
+      icon: <BookOutlined />,
+      label: "Jenis Jabatan",
+    },
+    { key: "rekon-eselon", icon: <BookOutlined />, label: "Eselon" },
     // { key: "rekon-diklat", icon: <BookOutlined />, label: "Diklat" },
+
     { key: "update-data", icon: <SyncOutlined />, label: "Update Data" },
   ];
 
