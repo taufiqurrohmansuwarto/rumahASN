@@ -8,20 +8,27 @@ import Layout from "@/components/Layout";
 import PageContainer from "@/components/PageContainer";
 import { cekTotalPenggunaBestie } from "@/services/assistant-ai.services";
 import { useQuery } from "@tanstack/react-query";
-import { Card, Col, Grid, Row } from "antd";
+import { Card, Col, Grid, Row, Spin } from "antd";
 import Head from "next/head";
 
 const TotalPenggunaBestie = () => {
   const { data, isLoading } = useQuery({
     queryKey: ["total-pengguna-bestie"],
     queryFn: cekTotalPenggunaBestie,
+    refetchOnWindowFocus: false,
   });
 
   return (
-    <div>
-      <h1>Total Pengguna Bestie</h1>
-      <p>{data?.total}</p>
-    </div>
+    <Row gutter={[16, 16]} style={{ marginTop: 8 }}>
+      <Col md={12} xs={24}>
+        <Card title="Pengguna BestieAI">
+          <Spin spinning={isLoading} fullscreen />
+
+          <p>{data?.total}</p>
+          {JSON.stringify(data?.feedback)}
+        </Card>
+      </Col>
+    </Row>
   );
 };
 

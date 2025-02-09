@@ -10,16 +10,19 @@ const {
 } = require("@/utils/query-utils");
 
 const AssitantBotMessages = require("@/models/assistant_bot/messages.model");
+const AssistantBotFeedback = require("@/models/assistant_bot/feedbacks.model");
 
-export const cekTotalPenggunaBestie = async (req, res) => {
+const cekTotalPenggunaBestie = async (req, res) => {
   try {
-    // select count(distinct (user_id)) from assistant_bot.messages
     const result = await AssitantBotMessages.query().select(
       raw("count(distinct (user_id))")
     );
 
-    const total = result[0]?.count;
-    res.json({ total: parseInt(total) });
+    const feedback = await AssistantBotFeedback.query();
+
+    const total = parseInt(result[0]?.count);
+
+    res.json({ total, feedback });
   } catch (error) {
     console.log(error);
     res.status(500).json({
@@ -280,4 +283,5 @@ module.exports = {
   customerDashboard,
   agentDashboard,
   adminDashboard,
+  cekTotalPenggunaBestie,
 };

@@ -1,8 +1,6 @@
-import ModalUserAnomali from "@/components/Anomali/ModalUserAnomali";
 import Layout from "@/components/Layout";
 import LayoutASNConnect from "@/components/Socmed/LayoutASNConnect";
 import SocmedTabs from "@/components/Socmed/SocmedTabs";
-import EletterBKD from "@/components/Utils/EletterBKD";
 import useScrollRestoration from "@/hooks/useScrollRestoration";
 import { FloatButton } from "antd";
 import Head from "next/head";
