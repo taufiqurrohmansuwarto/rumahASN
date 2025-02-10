@@ -92,6 +92,8 @@ const requestHandler = async (request) => {
 const responseHandler = async (response) => response;
 
 const errorHandler = async (error) => {
+  console.log(error);
+  const ECONRESET = error?.code === "ECONNRESET";
   const errorData = error?.response?.data || {};
   const invalidJwt = errorData.message === "invalid or expired jwt";
   const tokenError = errorData.data === "Token SSO mismatch";
