@@ -1,18 +1,16 @@
-import {
-  checkDocumentPerbaikan,
-  downloadDocumentPerbaikan,
-} from "@/services/berkas.services";
+import { checkDocument, downloadDocument } from "@/services/berkas.services";
+import { CloudDownloadOutlined } from "@ant-design/icons";
 import { useQuery } from "@tanstack/react-query";
 import { Button, Space, Typography } from "antd";
 import { useState } from "react";
 
-const list_tmt = ["2021"];
-const dokumen = ["PK"];
+const list_tmt = ["PELAKSANA25"];
+const dokumen = ["SK"];
 
 const Tombol = ({ tmt, file }) => {
   const { data, isLoading } = useQuery(
     ["check-document-perbaikan", `${tmt}-${file}`],
-    () => checkDocumentPerbaikan({ formasi: tmt, file }),
+    () => checkDocument({ tmt, file }),
     {
       refetchOnWindowFocus: false,
     }
@@ -23,16 +21,17 @@ const Tombol = ({ tmt, file }) => {
   const downloadFile = async () => {
     try {
       setLoading(true);
-      const result = await downloadDocumentPerbaikan({
-        formasi: tmt,
+      const payload = {
+        tmt,
         file,
-      });
+      };
+      const result = await downloadDocument(payload);
 
       if (result) {
         const url = `data:application/pdf;base64,${result}`;
         const link = document.createElement("a");
         link.href = url;
-        link.download = `PERBAIKAN_${file}_${tmt}.pdf`;
+        link.download = `${file}_${tmt}.pdf`;
         link.click();
       }
     } catch (error) {
@@ -48,8 +47,9 @@ const Tombol = ({ tmt, file }) => {
         disabled={isLoading || !data}
         loading={loading}
         type="primary"
+        icon={<CloudDownloadOutlined />}
       >
-        Download {file}
+        Unduh {file}
       </Button>
     </>
   );
@@ -65,14 +65,12 @@ const Dokumen = ({ tmt }) => {
   );
 };
 
-function AdministrasiPerbaikan() {
+function BerkasJabatanPelaksanaBaru() {
   return (
     <Space direction="vertical" size="large">
       {list_tmt?.map((tmt) => (
         <>
-          <Typography.Text strong>
-            Download Perbaikan Dokumen PPPK Gol VII
-          </Typography.Text>
+          <Typography.Text strong>SK Jabatan Pelaksana 2025</Typography.Text>
           <Dokumen key={tmt} tmt={tmt} />
         </>
       ))}
@@ -80,4 +78,4 @@ function AdministrasiPerbaikan() {
   );
 }
 
-export default AdministrasiPerbaikan;
+export default BerkasJabatanPelaksanaBaru;

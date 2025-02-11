@@ -19,6 +19,7 @@ import CompareKinerjaPeriodikNip from "./CompareKinerjaPeriodikNip";
 import CompareMasaKerjaByNip from "./CompareMasaKerjaByNip";
 import ComparePemberhentianByNip from "./ComparePemberhentianByNip";
 import CompareSKP22ByNip from "./CompareSKP22ByNip";
+import BerkasJabatanPelaksanaBaruByNip from "@/components/Berkas/BerkasJabatanPelaksanaBaruByNip";
 
 const DEFAULT_ACTIVE_KEY = "data-utama";
 
@@ -47,6 +48,7 @@ function SiasnTab({ nip }) {
           <Stack>
             <AdministrasiByNip />
             <AdministrasiPerbaikanByNip />
+            <BerkasJabatanPelaksanaBaruByNip />
           </Stack>
         ),
       },
