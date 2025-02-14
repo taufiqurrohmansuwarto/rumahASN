@@ -4,7 +4,7 @@ module.exports = {
       name: "next-app",
       script: "node_modules/next/dist/bin/next",
       args: "start",
-      instances: 5,
+      instances: 2,
       exec_mode: "cluster",
       env: {
         NODE_ENV: "development",
