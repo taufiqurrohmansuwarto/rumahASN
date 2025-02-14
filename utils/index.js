@@ -131,6 +131,11 @@ export const uploadFileUsulan = (mc, filename, file) => {
   });
 };
 
+export const downloadDokumenSK = async (mc, filename) => {
+  const stream = await mc.getObject("bkd", `sk_pns/${filename}`);
+  return stream;
+};
+
 export const downloadFileSK = (mc, filename) => {
   return new Promise((resolve, reject) => {
     mc.getObject("bkd", `${filename}`, function (err, dataStream) {

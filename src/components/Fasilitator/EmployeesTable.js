@@ -19,6 +19,7 @@ import {
 import { useRouter } from "next/router";
 import EmployeesTableFilter from "../Filter/EmployeesTableFilter";
 import DownloadASN from "./DownloadASN";
+import DownloadDokumenFasilitator from "./DownloadDokumenFasilitator";
 
 const TagKomparasi = ({ komparasi, nama }) => {
   return (
@@ -313,9 +314,7 @@ function EmployeesTable() {
         <EmployeesTableFilter />
         <Flex gap="small">
           <DownloadASN />
-          <Button disabled type="primary">
-            Unduh IP ASN
-          </Button>
+          <DownloadDokumenFasilitator />
         </Flex>
       </div>
       <Table

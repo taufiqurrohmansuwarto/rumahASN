@@ -5,6 +5,12 @@ const api = axios.create({
   baseURL: "/helpdesk/api/master/ws",
 });
 
+export const getDokumenFasilitator = () => {
+  return api.get("/fasilitator/download-sk", {
+    responseType: "arraybuffer",
+  });
+};
+
 const masterApi = axios.create({
   baseURL: "/helpdesk/api/master",
 });
