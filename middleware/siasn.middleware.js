@@ -30,7 +30,10 @@ const initRedis = async () => {
 const siasnWsAxios = axios.create({
   baseURL: baseUrl,
   httpsAgent: new https.Agent({
-    secureProtocol: "TLS_method",
+    keepAlive: true, // Menjaga koneksi tetap hidup
+    keepAliveMsecs: 30000, // Waktu idle 30 detik
+    maxSockets: 100, // Maksimal 100 koneksi bersamaan
+    maxFreeSockets: 10,
   }),
 });
 
