@@ -59,13 +59,13 @@ const ModalDisparitasData = ({
         return <>{record?.result}</>;
       },
     },
-    {
-      title: "Aksi",
-      key: "aksi",
-      render: (_, record) => {
-        return <a onClick={() => handleDetail(record)}>Detail</a>;
-      },
-    },
+    // {
+    //   title: "Aksi",
+    //   key: "aksi",
+    //   render: (_, record) => {
+    //     return <a onClick={() => handleDetail(record)}>Detail</a>;
+    //   },
+    // },
   ];
 
   return (
