@@ -1,228 +1,195 @@
 import { dataUtama } from "@/utils/siasn-utils";
 import dayjs from "dayjs";
-import { toUpper, trim, upperCase } from "lodash";
+import { toUpper, trim } from "lodash";
 import { raw } from "objection";
 const RekonJFT = require("@/models/rekon/jft.model");
 const RekonUnor = require("@/models/rekon/unor.model");
-
 const UnorSIASN = require("@/models/ref-siasn-unor.model");
 const UnorSimaster = require("@/models/sync-unor-master.model");
 
+// Fungsi untuk memformat hierarki unor
 const formatUnorHierarchy = (data) => {
   if (!data) return "";
   const formattedData = trim(data.split("-").reverse().join(" - "));
-  const hasil = toUpper(formattedData.replace(/^-|-$/g, ""));
-  return hasil;
+  return toUpper(formattedData.replace(/^-|-$/g, ""));
 };
 
-const getUnorHierarchy = async (model, id, queryOptions) => {
+// Fungsi untuk mendapatkan hierarki unor
+const getUnorHierarchy = async (
+  model,
+  id,
+  { idField, hierarchyFunction, system }
+) => {
   try {
     if (!id) return "";
 
     const result = await model
       .query()
-      .where(queryOptions.idField, id)
-      .select(raw(queryOptions.hierarchyFunction))
+      .where(idField, id)
+      .select(raw(hierarchyFunction))
       .first();
 
-    if (!result?.data) return "";
-
-    const hasil = formatUnorHierarchy(result.data);
-
-    return hasil;
+    return result?.data ? formatUnorHierarchy(result.data) : "";
   } catch (error) {
-    console.error(
-      `Error saat mengambil data unor ${queryOptions.system}:`,
-      error
-    );
+    console.error(`Error saat mengambil data unor ${system}:`, error);
     return "";
   }
 };
 
-const showUnorSimaster = async (id) => {
-  return getUnorHierarchy(UnorSimaster, id, {
+// Fungsi untuk menampilkan unor Simaster
+const getUnorSimaster = (id) =>
+  getUnorHierarchy(UnorSimaster, id, {
     idField: "id",
     hierarchyFunction: "get_hierarchy_simaster(id) as data",
     system: "Simaster",
   });
-};
 
-const showUnorSiasn = async (id) => {
-  return getUnorHierarchy(UnorSIASN, id, {
+// Fungsi untuk menampilkan unor SIASN
+const getUnorSiasn = (id) =>
+  getUnorHierarchy(UnorSIASN, id, {
     idField: "Id",
     hierarchyFunction: `get_hierarchy_siasn('${id}') as data`,
     system: "SIASN",
   });
-};
 
-// disparitas kinerja
-/**
- *
- * @param {*} simaster
- * @param {*} siasn
- *
- */
-
-const disparitasKinerja = (skpMaster, skpSiasn) => {
-  // tahun sekarang dengan format YYYY
+// Fungsi untuk mengecek disparitas kinerja
+const checkKinerjaDisparitas = (skpMaster, skpSiasn) => {
   const tahunKemarin = dayjs().subtract(1, "year").format("YYYY");
   const duaTahunKemarin = dayjs().subtract(2, "year").format("YYYY");
 
-  // filter data kinerja 2 tahun terakhir dari simaster
-  const kinerjaMaster = skpMaster?.filter((item) => {
-    const tahun = parseInt(item?.tahun);
-    return (
-      tahun === parseInt(tahunKemarin) || tahun === parseInt(duaTahunKemarin)
-    );
-  });
+  const filterKinerja = (data) => {
+    return data?.filter((item) => {
+      const tahun = parseInt(item?.tahun);
+      return (
+        tahun === parseInt(tahunKemarin) || tahun === parseInt(duaTahunKemarin)
+      );
+    });
+  };
 
-  // filter data kinerja 2 tahun terakhir dari siasn
-  const kinerjaSiasn = skpSiasn?.filter((item) => {
-    const tahun = parseInt(item?.tahun);
-    return (
-      tahun === parseInt(tahunKemarin) || tahun === parseInt(duaTahunKemarin)
-    );
-  });
+  const kinerjaMaster = filterKinerja(skpMaster);
+  const kinerjaSiasn = filterKinerja(skpSiasn);
 
-  // cek apakah data lengkap (2 tahun)
-  const simaster = kinerjaMaster?.length === 2;
-  const siasn = kinerjaSiasn?.length === 2;
-
-  // hasil akhir - true jika data lengkap di kedua sistem
-  const result = simaster && siasn ? "Benar" : "Salah";
+  const isComplete = (data) => data?.length === 2;
 
   return {
     jenis: "skp",
     deskripsi: `SKP ${tahunKemarin} dan ${duaTahunKemarin}`,
     simaster: kinerjaMaster?.map((item) => item?.tahun).join(", "),
     siasn: kinerjaSiasn?.map((item) => item?.tahun).join(", "),
-    result,
+    result:
+      isComplete(kinerjaMaster) && isComplete(kinerjaSiasn) ? "Benar" : "Salah",
   };
 };
 
-const rekonUnor = async (simaster, siasn) => {
+// Fungsi untuk mengecek rekon unor
+const checkUnorRekon = async (simaster, siasn) => {
   const idMaster = simaster?.skpd?.id;
   const idSiasn = siasn?.unorId;
 
-  let status = "";
-
   const checkUnorMaster = await RekonUnor.query()
-    .where({
-      id_simaster: idMaster,
-    })
+    .where({ id_simaster: idMaster })
     .select("id_siasn")
     .first();
 
-  const checkSiasn = checkUnorMaster?.id_siasn === idSiasn;
-
+  let status = "";
   if (!checkUnorMaster) {
     status = "Belum direkon";
-  } else if (checkSiasn) {
+  } else if (checkUnorMaster?.id_siasn === idSiasn) {
     status = "Benar";
-  } else if (!checkSiasn) {
+  } else {
     status = "Salah";
   }
 
-  const unorMaster = await showUnorSimaster(idMaster);
-  const unorSiasn = await showUnorSiasn(idSiasn);
+  const [unorMaster, unorSiasn] = await Promise.all([
+    getUnorSimaster(idMaster),
+    getUnorSiasn(idSiasn),
+  ]);
 
   return {
     jenis: "unor",
-    deskripsi: `Kesamaan Unor`,
+    deskripsi: "Kesamaan Unor",
     simaster: unorMaster,
     siasn: unorSiasn,
     result: status,
   };
 };
 
-const rekonUnorJabatan = (simaster, siasn) => {};
-
-/**
- *
- * @param {*} nip
- * disparitas data meliputi
- * 1. SKP 2 tahun terakhir
- * 2. Jabatan
- * 3. Unit Organisasi
- * 4. Nama, NIP, dan Tanggal Lahir
- * 5. Pangkat
- * 6. Masa Kerja
- *
- * attribut object jenis, keterangan
- */
-const getDataUtama = async (fetcherMaster, fetcherSIASN, nip) => {
+// Fungsi untuk mendapatkan data utama
+const fetchDataUtama = async (fetcherMaster, fetcherSIASN, nip) => {
   try {
-    const dataUtamaMaster = await fetcherMaster.get(
-      `/master-ws/operator/employees/${nip}/data-utama-master`
-    );
+    const [dataUtamaMaster, rwSkpMaster] = await Promise.all([
+      fetcherMaster.get(
+        `/master-ws/operator/employees/${nip}/data-utama-master`
+      ),
+      fetcherMaster.get(`/master-ws/operator/employees/${nip}/rw-skp`),
+    ]);
 
-    const simaster = dataUtamaMaster?.data;
-    const rwSkpMaster = await fetcherMaster.get(
-      `/master-ws/operator/employees/${nip}/rw-skp`
-    );
-
-    const kinerjaMaster = rwSkpMaster?.data;
-
-    const siasn = await dataUtama(fetcherSIASN, nip);
-    const rwSkp22 = await fetcherSIASN.get(`/pns/rw-skp22/${nip}`);
-    const kinerjaSiasn = rwSkp22?.data?.data;
+    const [siasn, rwSkp22] = await Promise.all([
+      dataUtama(fetcherSIASN, nip),
+      fetcherSIASN.get(`/pns/rw-skp22/${nip}`),
+    ]);
 
     return {
       simaster: {
-        data: simaster,
-        kinerja: kinerjaMaster,
+        data: dataUtamaMaster?.data,
+        kinerja: rwSkpMaster?.data,
       },
       siasn: {
         data: siasn,
-        kinerja: kinerjaSiasn,
+        kinerja: rwSkp22?.data?.data,
       },
     };
   } catch (error) {
-    console.log(error);
+    console.error("Error fetching data utama:", error);
     return null;
   }
 };
 
+// Controller untuk mendapatkan disparitas
 export const getDisparitas = async (req, res) => {
   try {
     const { employee_number } = req?.user;
     const { fetcher: fetcherMaster, siasnRequest: fetcherSIASN } = req;
 
-    const data = await getDataUtama(
+    const data = await fetchDataUtama(
       fetcherMaster,
       fetcherSIASN,
       employee_number
     );
-
     if (!data) return res.json([]);
 
-    const disparitasSKP = disparitasKinerja(
-      data?.simaster?.kinerja,
-      data?.siasn?.kinerja
-    );
+    const [disparitasSKP, disparitasUnor] = await Promise.all([
+      checkKinerjaDisparitas(data?.simaster?.kinerja, data?.siasn?.kinerja),
+      checkUnorRekon(data?.simaster?.data, data?.siasn?.data),
+    ]);
 
-    const disparitasUnor = await rekonUnor(
-      data?.simaster?.data,
-      data?.siasn?.data
-    );
-
-    const disparitas = [disparitasSKP, disparitasUnor];
-
-    res.json(disparitas);
+    res.json([disparitasSKP, disparitasUnor]);
   } catch (error) {
-    console.log(error);
-    res.status(500).json({
-      message: "Internal server error",
-    });
+    console.error("Error in getDisparitas:", error);
+    res.status(500).json({ message: "Internal server error" });
   }
 };
 
+// Controller untuk mendapatkan disparitas berdasarkan NIP
 export const getDisparitasByNip = async (req, res) => {
   try {
+    const { nip: employeeNumber } = req?.query;
+    const { fetcher: fetcherMaster, siasnRequest: fetcherSIASN } = req;
+
+    const data = await fetchDataUtama(
+      fetcherMaster,
+      fetcherSIASN,
+      employeeNumber
+    );
+
+    const [disparitasSKP, disparitasUnor] = await Promise.all([
+      checkKinerjaDisparitas(data?.simaster?.kinerja, data?.siasn?.kinerja),
+      checkUnorRekon(data?.simaster?.data, data?.siasn?.data),
+    ]);
+
+    res.json([disparitasSKP, disparitasUnor]);
   } catch (error) {
-    console.log(error);
-    res.status(500).json({
-      message: "Internal server error",
-    });
+    console.error("Error in getDisparitasByNip:", error);
+    res.status(500).json({ message: "Internal server error" });
   }
 };
