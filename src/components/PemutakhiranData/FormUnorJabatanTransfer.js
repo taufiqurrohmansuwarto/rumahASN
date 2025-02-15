@@ -34,6 +34,9 @@ import { urlToPdf } from "@/services/master.services";
 import dayjs from "dayjs";
 import "dayjs/locale/id";
 import { toLower, trim } from "lodash";
+import FormJFTV2 from "./FormSIASN/FormJFTV2";
+import FormJFUV2 from "./FormSIASN/FormJFUV2";
+import FormSubJabatanV2 from "./FormSIASN/FormSubJabatanV2";
 dayjs.locale("id");
 
 const dateFormat = "DD-MM-YYYY";
@@ -196,9 +199,9 @@ function ModalFormJabatanUnor({
         >
           {({ getFieldValue }) =>
             getFieldValue("jenis_jabatan") === "Fungsional" ? (
-              <FormJFT jabatan={`(${data?.jabatan})`} name="fungsional_id" />
+              <FormJFTV2 jabatan={`(${data?.jabatan})`} name="fungsional_id" />
             ) : getFieldValue("jenis_jabatan") === "Pelaksana" ? (
-              <FormJFU
+              <FormJFUV2
                 jabatan={`(${data?.jabatan})`}
                 name="fungsional_umum_id"
               />
@@ -217,7 +220,7 @@ function ModalFormJabatanUnor({
         >
           {({ getFieldValue }) =>
             getFieldValue("jenis_jabatan") === "Fungsional" ? (
-              <FormSubJabatan
+              <FormSubJabatanV2
                 name="subJabatanId"
                 kelJabatanId={getFieldValue("fungsional_id")}
               />

@@ -9,6 +9,20 @@ const JftSimaster = require("@/models/simaster-jft.model");
 const JftSiasn = require("@/models/ref_siasn/jft.model");
 const RekonJft = require("@/models/rekon/jft.model");
 
+import fs from "fs";
+import paparse from "papaparse";
+import path from "path";
+const parseCSV = (filePath) => {
+  const file = fs.readFileSync(filePath, "utf8");
+  return paparse.parse(file, {
+    header: true,
+    skipEmptyLines: true,
+    delimiter: ",",
+  }).data;
+};
+
+const getFilePath = (filename) => path.join(process.cwd(), `docs/${filename}`);
+
 // unor siasn
 export const getUnorSiasn = async (req, res) => {
   try {
@@ -293,6 +307,24 @@ export const getRekonUnorStatistics = async (req, res) => {
     console.log(error);
     res.status(500).json({
       message: "Gagal mendapatkan statistik rekon unor",
+    });
+  }
+};
+
+export const syncJftSiasn = async (req, res) => {
+  try {
+    const data = parseCSV(getFilePath("siasn/jab_fungsional_siasn.csv"));
+    const knex = JftSiasn.knex();
+    await knex("ref_siasn.jft").delete();
+    await knex.batchInsert("ref_siasn.jft", data);
+
+    res.json({
+      message: "Success",
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      message: "Internal server error",
     });
   }
 };

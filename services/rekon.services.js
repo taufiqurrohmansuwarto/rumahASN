@@ -91,6 +91,10 @@ export const getJftSiasn = async () => {
   return api.get("/jft/siasn").then((res) => res?.data);
 };
 
+export const syncJftSiasn = async () => {
+  return api.get("/jft/siasn/sync").then((res) => res?.data);
+};
+
 export const getDetailJftSimaster = async (id) => {
   return api.get(`/jft/simaster/${id}`).then((res) => res?.data);
 };
@@ -117,4 +121,13 @@ export const reportJftUnor = async () => {
       responseType: "blob",
     })
     .then((res) => res?.data);
+};
+
+// sub jabatan
+export const getSubJabatanSiasn = async () => {
+  return api.get("/sub-jabatan/siasn").then((res) => res?.data);
+};
+
+export const syncSubJabatanSiasn = async () => {
+  return api.get("/sub-jabatan/siasn/sync").then((res) => res?.data);
 };

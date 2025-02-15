@@ -216,6 +216,21 @@ export const refSubJabatan = (jabatan) => {
   return api.get(`/ref/sub-jabatan?jabatan=${jabatan}`).then((res) => res.data);
 };
 
+// version 2
+export const getRefJftV2 = () => {
+  return api.get("/ref/v2/jft").then((res) => res.data);
+};
+
+export const getRefJfuV2 = () => {
+  return api.get("/ref/v2/jfu").then((res) => res.data);
+};
+
+export const getSubJabatanV2 = (fungsionalId) => {
+  return api
+    .get(`/ref/v2/sub-jabatan?fungsional_id=${fungsionalId}`)
+    .then((res) => res.data);
+};
+
 // jabatan
 export const getRwJabatan = () => {
   return api.get("/pns/rw-jabatan").then((res) => res.data);
