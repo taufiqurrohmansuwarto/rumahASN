@@ -24,6 +24,7 @@ import {
   Flex,
   Form,
   Grid,
+  Image,
   Input,
   Modal,
   Popconfirm,
@@ -64,12 +65,15 @@ const EmployeeUnor = ({ data, loading, nip }) => {
       description={
         <Spin spinning={loading}>
           {data ? (
-            <Row>
+            <Row gutter={[8, 8]}>
               <Col span={24}>
                 {data?.nama} ({data?.nip_baru}) - {data?.unor_nm}
               </Col>
               <Col span={24}>
                 {data?.jabatan_nama} - {data?.golongan_nm}
+              </Col>
+              <Col span={24}>
+                <Tracking nip={nip} />
               </Col>
             </Row>
           ) : (
@@ -91,6 +95,7 @@ const EmployeeDescriptionMaster = ({ data, loading }) => {
         size="small"
         column={1}
         layout={breakPoint?.xs ? "vertical" : "horizontal"}
+        style={{ marginBottom: 16 }}
       >
         <Descriptions.Item label="Nama">
           <Typography.Text copyable>{data?.nama}</Typography.Text>
@@ -149,23 +154,37 @@ const EmployeeContent = ({ data, loading }) => {
           </Flex>
           <Flex gap={20} justify="space-between">
             <Space direction="vertical" align="center">
-              <Avatar size={110} shape="circle" src={data?.master?.foto} />
-              <Space align="center">
-                <TrackingKenaikanPangkatByNip nip={router.query.nip} />
-                <TrackingPemberhentianByNip nip={router.query.nip} />
-                <TrackingPerbaikanNamaByNip nip={router.query.nip} />
-                <TrackingUsulanLainnyaByNip nip={router.query.nip} />
-              </Space>
-              <Space align="center">
-                <TrackingPencantumanGelarByNip nip={router?.query?.nip} />
-                <TrackingPenyesuaianMasaKerjaByNip nip={router?.query?.nip} />
-              </Space>
+              <Image
+                alt="Foto"
+                style={{
+                  borderRadius: 8,
+                }}
+                width={210}
+                height={210}
+                shape="square"
+                src={data?.master?.foto}
+              />
             </Space>
             <EmployeeDescriptionMaster loading={loading} data={data?.master} />
           </Flex>
         </Flex>
       </Col>
     </Row>
+  );
+};
+
+const Tracking = ({ nip }) => {
+  return (
+    <>
+      <Space align="center">
+        <TrackingKenaikanPangkatByNip nip={nip} />
+        <TrackingPemberhentianByNip nip={nip} />
+        <TrackingPerbaikanNamaByNip nip={nip} />
+        <TrackingUsulanLainnyaByNip nip={nip} />
+        <TrackingPencantumanGelarByNip nip={nip} />
+        <TrackingPenyesuaianMasaKerjaByNip nip={nip} />
+      </Space>
+    </>
   );
 };
 
@@ -416,7 +435,6 @@ function EmployeeDetail({ nip }) {
         align={breakPoint?.xs ? "start" : "center"}
       >
         <IPAsnByNip tahun={2024} nip={dataSimaster?.nip_baru} />
-        {/* {JSON.stringify(siasn)} */}
         <Kppn id={siasn?.kppnId} />
         <PengaturanGelarByNip nip={nip} />
       </Space>

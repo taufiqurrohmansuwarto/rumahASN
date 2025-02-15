@@ -1,6 +1,7 @@
 import Layout from "@/components/Layout";
 import PageContainer from "@/components/PageContainer";
 import { MenuMySAPK } from "@/components/PemutakhiranData/MenuMySAPK";
+import { dataUtamaSimaster } from "@/services/master.services";
 import {
   dataNilaiIPASN,
   dataUtamaSIASN,
@@ -22,6 +23,18 @@ import Head from "next/head";
 import Link from "next/link";
 
 // base64 to image
+
+const useDataUtamaMaster = () => {
+  const { data, isLoading, refetch, isFetching } = useQuery(
+    ["data-utama-simaster"],
+    () => dataUtamaSimaster(),
+    {
+      refetchOnWindowFocus: false,
+    }
+  );
+
+  return { data, isLoading, refetch, isFetching };
+};
 
 function Komparasi() {
   const breakPoint = Grid.useBreakpoint();
@@ -58,6 +71,9 @@ function Komparasi() {
     });
   };
 
+  const { data: dataUtamaMaster, isLoading: isLoadingUtamaMaster } =
+    useDataUtamaMaster();
+
   return (
     <>
       <Head>
@@ -84,7 +100,11 @@ function Komparasi() {
           <Col md={16} xs={24}>
             <Skeleton loading={isLoading}>
               {dataUtama ? (
-                <MenuMySAPK foto={foto} dataUtama={dataUtama} />
+                <MenuMySAPK
+                  simaster={dataUtamaMaster}
+                  foto={foto}
+                  dataUtama={dataUtama}
+                />
               ) : (
                 <Center>
                   <Empty
