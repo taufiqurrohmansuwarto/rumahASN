@@ -39,6 +39,7 @@ import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import SyncGolonganByNip from "../Sync/SyncGolonganByNip";
 import SyncJabatanByNip from "../Sync/SyncJabatanByNip";
+import DisparitasByNip from "./DisparitasByNip";
 import TrackingKenaikanPangkatByNip from "./Usulan/TrackingKenaikanPangkatByNip";
 import TrackingPemberhentianByNip from "./Usulan/TrackingPemberhentianByNip";
 import TrackingPencantumanGelarByNip from "./Usulan/TrackingPencantumanGelarByNip";
@@ -400,7 +401,7 @@ function EmployeeDetail({ nip }) {
   );
 
   return (
-    <Card title="Informasi Pegawai" extra={<CheckAnomali />}>
+    <Card title="Informasi Pegawai" extra={<DisparitasByNip />}>
       <EmployeeContent
         loading={isLoadingDataSimaster}
         data={{

@@ -21,6 +21,8 @@ import { useRouter } from "next/router";
 import DisparitasData from "../LayananSIASN/DisparitasData";
 import GantiEmail from "../LayananSIASN/GantiEmail";
 import PengaturanGelar from "../LayananSIASN/PengaturanGelar";
+import { getDisparitas } from "@/services/master.services";
+import { useQuery } from "@tanstack/react-query";
 
 const mockdata = mysapkMenu;
 
@@ -62,10 +64,23 @@ const Base64Image = ({ data }) => {
   return <Image maw={200} src={`data:image/png;base64,${data}`} alt="base64" />;
 };
 
+const useDisparitasPersonal = () => {
+  const { data, isLoading, refetch, isFetching } = useQuery(
+    ["disparitas-personal"],
+    () => getDisparitas(),
+    {
+      refetchOnWindowFocus: false,
+    }
+  );
+
+  return { disparitas: data, loading: isLoading, refetch, isFetching };
+};
+
 export function MenuMySAPK({ dataUtama, foto }) {
   const router = useRouter();
   const { useBreakpoint } = Grid;
   const screens = useBreakpoint();
+  const { disparitas, loading, refetch, isFetching } = useDisparitasPersonal();
 
   const { classes, theme } = useStyles();
 
@@ -147,7 +162,12 @@ export function MenuMySAPK({ dataUtama, foto }) {
               </Stack>
               <div>
                 <Space>
-                  <DisparitasData />
+                  <DisparitasData
+                    data={disparitas}
+                    isLoading={loading}
+                    refetch={refetch}
+                    isFetching={isFetching}
+                  />
                 </Space>
               </div>
             </Flex>

@@ -5,6 +5,10 @@ const api = axios.create({
   baseURL: "/helpdesk/api/master/ws",
 });
 
+export const getDisparitasByNip = (nip) => {
+  return api.get(`/admin/${nip}/disparitas`).then((res) => res.data);
+};
+
 export const getDokumenFasilitator = () => {
   return api.get("/fasilitator/download-sk", {
     responseType: "arraybuffer",

@@ -2,7 +2,7 @@ import { getDisparitas } from "@/services/master.services";
 import { ActionIcon, Badge, Indicator, Text, Tooltip } from "@mantine/core";
 import { IconAlertTriangle, IconCheck } from "@tabler/icons";
 import { useQuery } from "@tanstack/react-query";
-import { Button, Modal, Spin, Table, Tag, Typography } from "antd";
+import { Button, Modal, Table, Tag, Typography } from "antd";
 import { upperCase } from "lodash";
 import { useRouter } from "next/router";
 import { useState } from "react";
@@ -56,15 +56,7 @@ const ModalDisparitasData = ({
       title: "Hasil",
       key: "hasil",
       render: (_, record) => {
-        return (
-          <>
-            {record?.result === "Benar" ? (
-              <Tag color="green">Benar</Tag>
-            ) : (
-              <Tag color="red">Salah</Tag>
-            )}
-          </>
-        );
+        return <>{record?.result}</>;
       },
     },
     {
@@ -94,7 +86,7 @@ const ModalDisparitasData = ({
           loading={loading}
           rowKey={(row) => row?.jenis}
           pagination={false}
-          dataSource={data}
+          dataSource={data?.filter((item) => item?.result !== "Benar")}
           columns={columns}
         />
       </Modal>
@@ -113,15 +105,7 @@ const disparitasButton = (data) => (
     {totalDisparitas(data) > 0 ? <IconAlertTriangle /> : <IconCheck />}
   </ActionIcon>
 );
-function DisparitasData() {
-  const { data, isLoading, refetch, isFetching } = useQuery(
-    ["disparitas-personal"],
-    () => getDisparitas(),
-    {
-      refetchOnWindowFocus: false,
-    }
-  );
-
+function DisparitasData({ data, isLoading, refetch, isFetching }) {
   const handleLihat = (type) => {
     if (type === "SKP") {
       router.push("/pemutakhiran-data/laporan-kinerja");
