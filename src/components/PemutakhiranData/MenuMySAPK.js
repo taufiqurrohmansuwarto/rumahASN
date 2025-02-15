@@ -76,7 +76,7 @@ const useDisparitasPersonal = () => {
   return { disparitas: data, loading: isLoading, refetch, isFetching };
 };
 
-export function MenuMySAPK({ dataUtama, foto }) {
+export function MenuMySAPK({ dataUtama, foto, simaster }) {
   const router = useRouter();
   const { useBreakpoint } = Grid;
   const screens = useBreakpoint();
@@ -116,12 +116,24 @@ export function MenuMySAPK({ dataUtama, foto }) {
           <Stack spacing={8}>
             <Flex justify="space-between">
               <Stack spacing={6} mb={10}>
-                <Avatar
-                  shape="square"
-                  size={60}
-                  src={`${foto?.data}`}
-                  alt="Foto-SIASN"
-                />
+                <Space>
+                  <Tooltip title="Foto SIMASTER">
+                    <Avatar
+                      shape="square"
+                      size={60}
+                      src={`${simaster?.foto}`}
+                      alt="Foto-SIMASTER"
+                    />
+                  </Tooltip>
+                  <Tooltip title="Foto SIASN">
+                    <Avatar
+                      shape="square"
+                      size={60}
+                      src={`${foto?.data}`}
+                      alt="Foto-SIASN"
+                    />
+                  </Tooltip>
+                </Space>
                 <Space direction={screens.xl ? "horizontal" : "vertical"}>
                   <Typography.Text style={{ margin: 0 }} strong>
                     {dataUtama?.nama}
