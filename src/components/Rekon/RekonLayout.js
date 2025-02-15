@@ -21,6 +21,95 @@ import dynamic from "next/dynamic";
 import { useRouter } from "next/router";
 import { useState } from "react";
 
+const menuItems = [
+  {
+    key: "pegawai",
+    icon: <UserOutlined />,
+    label: "Daftar Pegawai",
+    role: ["admin", "fasilitator"],
+  },
+  {
+    key: "anomali",
+    icon: <WarningOutlined />,
+    label: "Disparitas Data",
+    role: ["admin", "fasilitator"],
+  },
+  {
+    key: "rekon-unor",
+    icon: <BuildOutlined />,
+    label: "Unit Organisasi",
+    role: ["admin", "fasilitator"],
+  },
+  {
+    key: "rekon-jft",
+    icon: <TeamOutlined />,
+    label: "Jabatan Fungsional",
+    role: ["admin"],
+  },
+  {
+    key: "rekon-jfu",
+    icon: <SunOutlined />,
+    label: "Jabatan Pelaksana",
+    role: ["admin"],
+  },
+  {
+    key: "rekon-jenjang",
+    icon: <BookOutlined />,
+    label: "Jenjang",
+    role: ["admin"],
+  },
+  {
+    key: "rekon-pangkat",
+    icon: <BookOutlined />,
+    label: "Pangkat",
+    role: ["admin"],
+  },
+  {
+    key: "rekon-jenis_jabatan",
+    icon: <BookOutlined />,
+    label: "Jenis Jabatan",
+    role: ["admin"],
+  },
+  {
+    key: "rekon-eselon",
+    icon: <BookOutlined />,
+    label: "Eselon",
+    role: ["admin"],
+  },
+  {
+    key: "rekon-subjabatan",
+    icon: <BookOutlined />,
+    label: "Sub Jabatan",
+    role: ["admin"],
+  },
+  // { key: "rekon-diklat", icon: <BookOutlined />, label: "Diklat" },
+
+  {
+    key: "update-data",
+    icon: <SyncOutlined />,
+    label: "Update Data",
+    role: ["admin"],
+  },
+];
+
+const getMenuItems = (user) => {
+  const admin =
+    user?.role === "USER" &&
+    user?.group === "MASTER" &&
+    user?.current_role === "admin";
+
+  const fasilitator =
+    user?.role === "FASILITATOR" &&
+    user?.group === "MASTER" &&
+    user?.current_role === "user";
+
+  return menuItems.filter((item) => {
+    if (admin) return item.role.includes("admin");
+    if (fasilitator) return item.role.includes("fasilitator");
+    return false;
+  });
+};
+
 const ProLayout = dynamic(
   () => import("@ant-design/pro-components").then((mod) => mod?.ProLayout),
   {
@@ -30,25 +119,6 @@ const ProLayout = dynamic(
 
 function RekonLayout({ children, active = "rekon-unor" }) {
   const { data } = useSession();
-
-  const menuItems = [
-    { key: "pegawai", icon: <UserOutlined />, label: "Daftar Pegawai" },
-    { key: "anomali", icon: <WarningOutlined />, label: "Disparitas Data" },
-    { key: "rekon-unor", icon: <BuildOutlined />, label: "Unit Organisasi" },
-    { key: "rekon-jft", icon: <TeamOutlined />, label: "Jabatan Fungsional" },
-    { key: "rekon-jfu", icon: <SunOutlined />, label: "Jabatan Pelaksana" },
-    { key: "rekon-jenjang", icon: <BookOutlined />, label: "Jenjang" },
-    { key: "rekon-pangkat", icon: <BookOutlined />, label: "Pangkat" },
-    {
-      key: "rekon-jenis_jabatan",
-      icon: <BookOutlined />,
-      label: "Jenis Jabatan",
-    },
-    { key: "rekon-eselon", icon: <BookOutlined />, label: "Eselon" },
-    // { key: "rekon-diklat", icon: <BookOutlined />, label: "Diklat" },
-
-    { key: "update-data", icon: <SyncOutlined />, label: "Update Data" },
-  ];
 
   const router = useRouter();
 
@@ -167,7 +237,7 @@ function RekonLayout({ children, active = "rekon-unor" }) {
             },
           }}
           route={{
-            routes: menuItems.map((item) => ({
+            routes: getMenuItems(data?.user).map((item) => ({
               path: `/rekon/${item.key}`,
               name: item.label,
               icon: item.icon,

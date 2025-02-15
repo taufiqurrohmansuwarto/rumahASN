@@ -24,17 +24,17 @@ import {
 import { useRouter } from "next/router";
 import { useState } from "react";
 import DetailJabatanGuruDokter from "./Admin/DetailJabatanGuruDokter";
-import FormJFT from "./FormJFT";
-import FormJFU from "./FormJFU";
 import FormJenisMutasi from "./FormJenisMutasi";
 import FormJenisPenugasan from "./FormJenisPenugasan";
 import FormStruktural from "./FormStruktural";
-import FormSubJabatan from "./FormSubJabatan";
 import FormUnorSIASN from "./FormUnorSIASN";
 
 import { IconBulb } from "@tabler/icons";
 import dayjs from "dayjs";
 import "dayjs/locale/id";
+import FormJFTV2 from "./FormSIASN/FormJFTV2";
+import FormJFUV2 from "./FormSIASN/FormJFUV2";
+import FormSubJabatanV2 from "./FormSIASN/FormSubJabatanV2";
 dayjs.locale("id");
 
 const dateFormat = "DD-MM-YYYY";
@@ -195,9 +195,9 @@ function ModalFormJabatanUnor({ open, handleClose, handleOk }) {
         >
           {({ getFieldValue }) =>
             getFieldValue("jenis_jabatan") === "Fungsional" ? (
-              <FormJFT name="fungsional_id" />
+              <FormJFTV2 name="fungsional_id" />
             ) : getFieldValue("jenis_jabatan") === "Pelaksana" ? (
-              <FormJFU name="fungsional_umum_id" />
+              <FormJFUV2 name="fungsional_umum_id" />
             ) : getFieldValue("jenis_jabatan") === "Struktural" ? (
               <FormStruktural name="eselon_id" />
             ) : null
@@ -213,9 +213,9 @@ function ModalFormJabatanUnor({ open, handleClose, handleOk }) {
         >
           {({ getFieldValue }) =>
             getFieldValue("jenis_jabatan") === "Fungsional" ? (
-              <FormSubJabatan
+              <FormSubJabatanV2
                 name="subJabatanId"
-                kelJabatanId={getFieldValue("fungsional_id")}
+                fungsionalId={getFieldValue("fungsional_id")}
               />
             ) : null
           }

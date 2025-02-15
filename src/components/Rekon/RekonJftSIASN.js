@@ -7,8 +7,9 @@ import {
   getRekonJftStatistics,
   postJftRekon,
   reportJftUnor,
+  syncJftSiasn,
 } from "@/services/rekon.services";
-import { CloudDownloadOutlined } from "@ant-design/icons";
+import { CloudDownloadOutlined, SyncOutlined } from "@ant-design/icons";
 import { Stack } from "@mantine/core";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
@@ -312,18 +313,46 @@ const RekonJftSIASN = () => {
     }
   };
 
+  const { mutate: sync, isLoading: isLoadingSync } = useMutation({
+    mutationFn: () => syncJftSiasn(),
+    onSuccess: () => {
+      message.success("Berhasil menyinkronisasi data");
+      queryClient.invalidateQueries({
+        queryKey: ["rekon-jft-siasn"],
+      });
+    },
+    onError: (error) => {
+      message.error("Gagal menyinkronisasi data");
+      console.log(error);
+    },
+  });
+
+  const handleSync = () => {
+    sync();
+  };
+
   return (
     <Card
       title="Padanan Jabatan Fungsional"
       extra={
-        <Button
-          icon={<CloudDownloadOutlined />}
-          type="primary"
-          onClick={handleReport}
-          loading={isLoadingReport}
-        >
-          Hasil Rekon
-        </Button>
+        <Space>
+          <Button
+            icon={<CloudDownloadOutlined />}
+            type="primary"
+            onClick={handleReport}
+            loading={isLoadingReport}
+          >
+            Hasil Rekon
+          </Button>
+          <Button
+            icon={<SyncOutlined />}
+            onClick={handleSync}
+            loading={isLoadingSync}
+            disabled={isLoadingSync}
+          >
+            Sinkronisasi
+          </Button>
+        </Space>
       }
     >
       <Row>
