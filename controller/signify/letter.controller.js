@@ -4,7 +4,6 @@ const LetterWorkflow = require("@/models/signify/letter-workflow.model");
 const AuditLog = require("@/models/signify/audit-log.model");
 const Notification = require("@/models/signify/notifications.model");
 
-const bcrypt = require("bcrypt");
 const axios = require("axios");
 const fs = require("fs");
 const path = require("path");
@@ -280,10 +279,7 @@ export const LetterController = {
             .status(400)
             .json({ error: "Passphrase is required for signing." });
         }
-        const valid = await bcrypt.compare(
-          passphrase,
-          req.user.passphraseHash || ""
-        );
+        const valid = null;
         if (!valid) {
           return res.status(403).json({ error: "Invalid passphrase." });
         }
