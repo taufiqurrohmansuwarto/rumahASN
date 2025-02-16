@@ -220,10 +220,12 @@ function ModalFormJabatanUnor({
         >
           {({ getFieldValue }) =>
             getFieldValue("jenis_jabatan") === "Fungsional" ? (
-              <FormSubJabatanV2
-                name="subJabatanId"
-                kelJabatanId={getFieldValue("fungsional_id")}
-              />
+              <>
+                <FormSubJabatanV2
+                  name="subJabatanId"
+                  fungsionalId={getFieldValue("fungsional_id")}
+                />
+              </>
             ) : null
           }
         </Form.Item>
@@ -287,13 +289,13 @@ const FormUnorJabatanTransfer = ({ data, kata = "Edit", dataSiasn = [] }) => {
   const { mutateAsync: addJabatanUnor, isLoading: isLoadingAddJabatanUnor } =
     useMutation((data) => postUnorJabatanByNip(data), {
       onSuccess: () => {
-        queryClient.invalidateQueries("unor-jabatan");
+        queryClient.invalidateQueries(["unor-jabatan"]);
       },
       onError: (error) => {
         console.log(error);
       },
       onSettled: () => {
-        queryClient.invalidateQueries("unor-jabatan");
+        queryClient.invalidateQueries(["unor-jabatan"]);
       },
     });
 
