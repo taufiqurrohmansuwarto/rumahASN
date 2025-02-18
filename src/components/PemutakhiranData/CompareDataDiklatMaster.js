@@ -130,6 +130,7 @@ const TransferModal = ({ open, handleClose, data }) => {
 };
 
 function CompareDataDiklatMaster() {
+  const queryClient = useQueryClient();
   const { data, isLoading } = useQuery(
     ["rw-diklat-master"],
     () => rwDiklatMaster(),
@@ -147,6 +148,61 @@ function CompareDataDiklatMaster() {
   const handleClose = () => {
     setOpen(false);
     setSelectedRow(null);
+  };
+
+  const handleTransfer = async () => {
+    const data2024 = data?.filter(
+      (item) =>
+        item?.tahun === 2024 &&
+        (item?.diklat?.kode_jenis_bkn !== null ||
+          item?.diklat?.kode_jenis_bkn !== 1) &&
+        item?.diklat?.kode_pim_bkn === null
+    );
+
+    if (data2024.length === 0) {
+      message.error("Data diklat tahun 2024 tidak ditemukan");
+      return;
+    }
+
+    const payload = data2024.map((item) => {
+      return {
+        type: "kursus",
+        jenisDiklatId: item?.diklat?.kode_jenis_bkn,
+        namaKursus: item?.nama_diklat,
+        institusiPenyelenggara: item?.penyelenggara,
+        nomorSertipikat: item?.no_sertifikat,
+        tahunKursus: item?.tahun,
+        jumlahJam: item?.jml,
+        tanggalKursus: item?.tgl_sertifikat,
+        tanggalSelesaiKursus: item?.tgl_sertifikat,
+        fileDiklat: item?.file_diklat,
+      };
+    });
+
+    // console.log(payload);
+    const id_ref_dokumen = "881";
+
+    for (const item of payload) {
+      try {
+        const result = await postRwKursus(item);
+        if (item.fileDiklat) {
+          const response = await urlToPdf({ url: item.fileDiklat });
+
+          const file = new File([response], "file.pdf", {
+            type: "application/pdf",
+          });
+
+          const formData = new FormData();
+          formData.append("id_riwayat", result?.id);
+          formData.append("id_ref_dokumen", id_ref_dokumen);
+          formData.append("file", file);
+          await uploadDokumenRiwayat(formData);
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    }
+    queryClient.invalidateQueries("riwayat-diklat");
   };
 
   const columns = [
@@ -262,6 +318,10 @@ function CompareDataDiklatMaster() {
 
   return (
     <div>
+      <Button type="default" onClick={handleTransfer}>
+        Transfer Diklat 2024
+      </Button>
+      {/* {JSON.stringify(data)} */}
       <Table
         pagination={false}
         dataSource={data}
