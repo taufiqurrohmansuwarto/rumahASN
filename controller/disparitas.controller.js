@@ -1,4 +1,5 @@
 import { dataUtama } from "@/utils/siasn-utils";
+import { ConsoleSqlOutlined } from "@ant-design/icons";
 import dayjs from "dayjs";
 import { toUpper, trim } from "lodash";
 import { raw } from "objection";
@@ -55,29 +56,32 @@ const getUnorSiasn = (id) =>
 // Fungsi untuk mengecek disparitas kinerja
 const checkKinerjaDisparitas = (skpMaster, skpSiasn) => {
   const tahunKemarin = dayjs().subtract(1, "year").format("YYYY");
-  const duaTahunKemarin = dayjs().subtract(2, "year").format("YYYY");
 
-  const filterKinerja = (data) => {
-    return data?.filter((item) => {
+  const filterKinerja = (data, type) => {
+    return data?.find((item) => {
       const tahun = parseInt(item?.tahun);
-      return (
-        tahun === parseInt(tahunKemarin) || tahun === parseInt(duaTahunKemarin)
-      );
+
+      if (type === "SIMASTER") {
+        return tahun === parseInt(tahunKemarin) && item?.aktif === "Y";
+      } else {
+        return tahun === parseInt(tahunKemarin);
+      }
     });
   };
 
-  const kinerjaMaster = filterKinerja(skpMaster);
-  const kinerjaSiasn = filterKinerja(skpSiasn);
+  const kinerjaMaster = filterKinerja(skpMaster, "SIMASTER");
+  const kinerjaSiasn = filterKinerja(skpSiasn, "SIASN");
 
-  const isComplete = (data) => data?.length === 2;
+  const sudahSemuaTahun2024 =
+    parseInt(kinerjaMaster?.tahun) === 2024 &&
+    parseInt(kinerjaSiasn?.tahun) === 2024;
 
   return {
     jenis: "skp",
-    deskripsi: `SKP ${tahunKemarin} dan ${duaTahunKemarin}`,
-    simaster: kinerjaMaster?.map((item) => item?.tahun).join(", "),
-    siasn: kinerjaSiasn?.map((item) => item?.tahun).join(", "),
-    result:
-      isComplete(kinerjaMaster) && isComplete(kinerjaSiasn) ? "Benar" : "Salah",
+    deskripsi: `SKP ${tahunKemarin}`,
+    simaster: kinerjaMaster?.tahun,
+    siasn: kinerjaSiasn?.tahun,
+    result: sudahSemuaTahun2024 ? "Benar" : "Salah",
   };
 };
 
