@@ -41,7 +41,7 @@ function CarouselBanner() {
           >
             <Image
               src={
-                "https://siasn.bkd.jatimprov.go.id:9000/public/banner-sscasn.png"
+                "https://siasn.bkd.jatimprov.go.id:9000/public/banner-sscasn_test.png"
               }
               alt="banner-sscasn.webp"
             />
