@@ -278,11 +278,11 @@ const TableKursus = ({ data }) => {
       dataIndex: "tanggalKursus",
       responsive: ["sm"],
     },
-    {
-      title: "Tanggal Selesai Kursus",
-      dataIndex: "tanggalSelesaiKursus",
-      responsive: ["sm"],
-    },
+    // {
+    //   title: "Tanggal Selesai Kursus",
+    //   dataIndex: "tanggalSelesaiKursus",
+    //   responsive: ["sm"],
+    // },
     {
       title: "Jenis",
       dataIndex: "jenisKursusSertifikat",

@@ -6,7 +6,7 @@ import {
 } from "@/services/siasn-services";
 import { SendOutlined } from "@ant-design/icons";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Form, Modal, Spin, Table, Tooltip, message } from "antd";
+import { Button, Flex, Form, Modal, Spin, Table, Tooltip, message } from "antd";
 import { useEffect, useState } from "react";
 
 import dayjs from "dayjs";
@@ -115,7 +115,18 @@ const TransferModal = ({ open, handleClose, data, nip, file }) => {
   );
 };
 
+const data2024 = (data) => {
+  return data?.filter(
+    (item) =>
+      item?.tahun === 2024 &&
+      item?.diklat?.kode_jenis_bkn !== null &&
+      item?.diklat?.kode_jenis_bkn !== 1 &&
+      item?.diklat?.kode_pim_bkn === null
+  );
+};
+
 function CompareDataDiklatMasterByNip({ nip }) {
+  const queryClient = useQueryClient();
   const { data, isLoading } = useQuery(
     ["rw-diklat-master", nip],
     () => rwDiklatMasterByNip(nip),
@@ -129,6 +140,8 @@ function CompareDataDiklatMasterByNip({ nip }) {
 
   const [loading, setLoading] = useState(false);
   const [file, setFile] = useState(null);
+  const [isLoadingTransfer, setIsLoadingTransfer] = useState(false);
+  const lastYear = new Date().getFullYear() - 1;
 
   const handleOpenModal = async (data) => {
     setLoading(true);
@@ -217,9 +230,81 @@ function CompareDataDiklatMasterByNip({ nip }) {
     },
   ];
 
+  const delay = (ms) => {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+  };
+
+  const handleTransfer = async () => {
+    setIsLoadingTransfer(true);
+    const dataLastYear = data2024(data);
+
+    // console.log(dataLastYear);
+
+    const payload = dataLastYear.map((item) => {
+      return {
+        type: "kursus",
+        jenisDiklatId: item?.diklat?.kode_jenis_bkn,
+        namaKursus: item?.nama_diklat,
+        institusiPenyelenggara: item?.penyelenggara,
+        nomorSertipikat: item?.no_sertifikat,
+        tahunKursus: item?.tahun,
+        jumlahJam: item?.jml,
+        tanggalKursus: item?.tgl_sertifikat,
+        tanggalSelesaiKursus: item?.tgl_sertifikat,
+        fileDiklat: item?.file_diklat,
+      };
+    });
+
+    const id_ref_dokumen = "881";
+    try {
+      for (const item of payload) {
+        const requestBody = { nip, data: item };
+        const result = await postRiwayatKursusByNip(requestBody);
+        await delay(2000);
+
+        if (item.fileDiklat) {
+          const response = await urlToPdf({ url: item.fileDiklat });
+          const file = new File([response], "file.pdf", {
+            type: "application/pdf",
+          });
+
+          const formData = new FormData();
+          formData.append("id_riwayat", result?.id);
+          formData.append("id_ref_dokumen", id_ref_dokumen);
+          formData.append("file", file);
+          await uploadDokRiwayat(formData);
+        }
+      }
+      message.success("Data berhasil disimpan");
+      queryClient.invalidateQueries(["riwayat-diklat-by-nip", nip]);
+    } catch (error) {
+      console.log(error);
+      const messageError =
+        error?.response?.data?.message || "Gagal mengirim data";
+      message.error(messageError);
+    } finally {
+      setIsLoadingTransfer(false);
+    }
+  };
+
   return (
     <div>
       <Spin spinning={loading} fullscreen />
+      <>
+        {data && data2024(data)?.length && (
+          <Flex justify="flex-end">
+            <Button
+              style={{ marginBottom: 8 }}
+              type="primary"
+              onClick={handleTransfer}
+              loading={isLoadingTransfer}
+              disabled={isLoadingTransfer}
+            >
+              Transfer Diklat 2024
+            </Button>
+          </Flex>
+        )}
+      </>
       <Table
         pagination={false}
         dataSource={data}

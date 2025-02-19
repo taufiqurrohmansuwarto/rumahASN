@@ -52,6 +52,7 @@ const BackupSIASN = require("@/models/backup-siasn.model");
 const RefSIASNUnor = require("@/models/ref-siasn-unor.model");
 const { getSession } = require("next-auth/react");
 const { getQueryChildrenPerangkatDaerah } = require("@/utils/query-utils");
+const { createRedisInstance } = require("@/utils/redis");
 
 const updateEmployeeInformation = async (req, res) => {
   try {
@@ -1117,18 +1118,15 @@ const downloadDocument = async (req, res) => {
 };
 
 const getTokenSIASN = async (req, res) => {
-  const CURRENT_DIRECTORY = process.cwd();
-  const filePath = path.join(CURRENT_DIRECTORY, "token.json");
+  const redisClient = await createRedisInstance();
 
   try {
-    const token = JSON.parse(fs.readFileSync(filePath, "utf8"));
-    const sso_token = token?.sso_token;
-    const wso_token = token?.wso_token;
-
+    const tokenRedis = await redisClient.get("siasn_token");
+    const token = JSON.parse(tokenRedis);
     res.json({
       accessToken: {
-        sso: sso_token,
-        wso2: wso_token,
+        sso: token.sso_token,
+        wso2: token.wso_token,
       },
     });
   } catch (error) {

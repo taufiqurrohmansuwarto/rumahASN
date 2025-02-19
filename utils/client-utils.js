@@ -577,7 +577,6 @@ export const uploadDokumenRiwayat = async (formData) => {
     const result = await getTokenSIASNService();
     const wso2 = result?.accessToken?.wso2;
     const sso = result?.accessToken?.sso;
-
     return axios.post(`${API_URL}/upload-dok-rw`, formData, {
       headers: {
         "Content-Type": "multipart/form-data",
