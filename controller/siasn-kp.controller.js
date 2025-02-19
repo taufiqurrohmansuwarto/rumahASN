@@ -32,7 +32,7 @@ const syncKenaikanPangkat = async (req, res) => {
       res.json({ success: true, message: "Data berhasil disinkronisasi" });
     }
   } catch (error) {
-    console.log(error);
+    // console.log(error);
     res.status(400).json({
       message: "Internal Server Error",
     });

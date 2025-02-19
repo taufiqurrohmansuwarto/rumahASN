@@ -23,6 +23,7 @@ const daftarPemberhentianSIASN = async (req, res) => {
     if (!hasData) {
       res.json([]);
     } else {
+      console.log(hasil?.data);
       res.json(hasil?.data);
     }
   } catch (error) {
