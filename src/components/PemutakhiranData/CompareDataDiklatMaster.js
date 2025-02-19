@@ -6,6 +6,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Button,
   Descriptions,
+  Flex,
   Form,
   Modal,
   Table,
@@ -129,6 +130,17 @@ const TransferModal = ({ open, handleClose, data }) => {
   );
 };
 
+const data2024 = (data) => {
+  // const lastYear = new Date().getFullYear() - 1;
+  return data?.filter(
+    (item) =>
+      item?.tahun === 2024 &&
+      item?.diklat?.kode_jenis_bkn !== null &&
+      item?.diklat?.kode_jenis_bkn !== 1 &&
+      item?.diklat?.kode_pim_bkn === null
+  );
+};
+
 function CompareDataDiklatMaster() {
   const queryClient = useQueryClient();
   const { data, isLoading } = useQuery(
@@ -139,6 +151,7 @@ function CompareDataDiklatMaster() {
 
   const [open, setOpen] = useState(false);
   const [selectedRow, setSelectedRow] = useState(null);
+  const [isLoadingTransfer, setIsLoadingTransfer] = useState(false);
 
   const handleOpen = (data) => {
     setOpen(true);
@@ -150,21 +163,15 @@ function CompareDataDiklatMaster() {
     setSelectedRow(null);
   };
 
+  const delay = (ms) => {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+  };
+
   const handleTransfer = async () => {
-    const data2024 = data?.filter(
-      (item) =>
-        item?.tahun === 2024 &&
-        (item?.diklat?.kode_jenis_bkn !== null ||
-          item?.diklat?.kode_jenis_bkn !== 1) &&
-        item?.diklat?.kode_pim_bkn === null
-    );
+    setIsLoadingTransfer(true);
+    const dataLastYear = data2024(data);
 
-    if (data2024.length === 0) {
-      message.error("Data diklat tahun 2024 tidak ditemukan");
-      return;
-    }
-
-    const payload = data2024.map((item) => {
+    const payload = dataLastYear.map((item) => {
       return {
         type: "kursus",
         jenisDiklatId: item?.diklat?.kode_jenis_bkn,
@@ -182,9 +189,11 @@ function CompareDataDiklatMaster() {
     // console.log(payload);
     const id_ref_dokumen = "881";
 
-    for (const item of payload) {
-      try {
+    try {
+      for (const item of payload) {
         const result = await postRwKursus(item);
+        await delay(2000);
+
         if (item.fileDiklat) {
           const response = await urlToPdf({ url: item.fileDiklat });
 
@@ -198,11 +207,17 @@ function CompareDataDiklatMaster() {
           formData.append("file", file);
           await uploadDokumenRiwayat(formData);
         }
-      } catch (error) {
-        console.log(error);
       }
+      message.success("Data berhasil disimpan");
+      queryClient.invalidateQueries("riwayat-diklat");
+    } catch (error) {
+      console.log(error);
+      const messageError =
+        error?.response?.data?.message || "Gagal mengirim data";
+      message.error(messageError);
+    } finally {
+      setIsLoadingTransfer(false);
     }
-    queryClient.invalidateQueries("riwayat-diklat");
   };
 
   const columns = [
@@ -318,10 +333,21 @@ function CompareDataDiklatMaster() {
 
   return (
     <div>
-      <Button type="default" onClick={handleTransfer}>
-        Transfer Diklat 2024
-      </Button>
-      {/* {JSON.stringify(data)} */}
+      <>
+        {data && data2024(data)?.length && (
+          <Flex justify="flex-end">
+            <Button
+              type="primary"
+              onClick={handleTransfer}
+              loading={isLoadingTransfer}
+              disabled={isLoadingTransfer}
+              style={{ marginBottom: 8 }}
+            >
+              Transfer Diklat 2024
+            </Button>
+          </Flex>
+        )}
+      </>
       <Table
         pagination={false}
         dataSource={data}
