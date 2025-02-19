@@ -137,7 +137,9 @@ const data2024 = (data) => {
       item?.tahun === 2024 &&
       item?.diklat?.kode_jenis_bkn !== null &&
       item?.diklat?.kode_jenis_bkn !== 1 &&
-      item?.diklat?.kode_pim_bkn === null
+      item?.diklat?.kode_pim_bkn === null &&
+      item?.jml !== 0 &&
+      !!item?.no_sertifikat
   );
 };
 
