@@ -9,8 +9,17 @@ import {
 } from "@/services/master.services";
 import { Stack } from "@mantine/core";
 import { useMutation } from "@tanstack/react-query";
-import { Card, FloatButton, Form, Grid, Space, message } from "antd";
+import {
+  Breadcrumb,
+  Card,
+  FloatButton,
+  Form,
+  Grid,
+  Space,
+  message,
+} from "antd";
 import Head from "next/head";
+import Link from "next/link";
 import { useRouter } from "next/router";
 
 const FasilitatorEmployees = () => {
@@ -110,16 +119,30 @@ const FasilitatorEmployees = () => {
         <title>Rumah ASN - Master Data - Fasilitator SIMASTER</title>
       </Head>
       <PageContainer
+        header={{
+          breadcrumbRender: () => (
+            <Breadcrumb>
+              <Breadcrumb.Item>
+                <Link href="/feeds">Forum Kepegawaian</Link>
+              </Breadcrumb.Item>
+              <Breadcrumb.Item>Data ASN</Breadcrumb.Item>
+              <Breadcrumb.Item>
+                <Link href="/fasilitator-employees/daftar-usulan-kenaikan-pangkat">
+                  Usulan Kenaikan Pangkat
+                </Link>
+              </Breadcrumb.Item>
+            </Breadcrumb>
+          ),
+        }}
         childrenContentStyle={{
           padding: breakPoint.xs ? 0 : null,
         }}
-        title="Fasilitator SIMASTER"
-        content="Integrasi SIASN dan SIMASTER"
+        title={null}
       >
         <FloatButton.BackTop />
 
         <Stack>
-          <Card title="Dashboard Komparasi Fasilitator">
+          <Card title="Data ASN Perangkat Daerah">
             {/* <Button
           disabled={isLoadingDownload}
           loading={isLoadingDownload}

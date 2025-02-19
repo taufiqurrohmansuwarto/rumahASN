@@ -1,5 +1,9 @@
 import { daftarKenaikanPerangkatDaerah } from "@/services/siasn-services";
-import { FilePdfTwoTone } from "@ant-design/icons";
+import {
+  CloudDownloadOutlined,
+  FilePdfFilled,
+  FilePdfOutlined,
+} from "@ant-design/icons";
 import { useMutation } from "@tanstack/react-query";
 import {
   Avatar,
@@ -9,6 +13,8 @@ import {
   DatePicker,
   FloatButton,
   Form,
+  Grid,
+  message,
   Row,
   Space,
   Table,
@@ -16,18 +22,76 @@ import {
   Typography,
 } from "antd";
 import dayjs from "dayjs";
+import ExcelJS from "exceljs";
+import FileSaver from "file-saver";
 import { useState } from "react";
 import UnorAdmin from "./UnorAdmin";
 
 function CariKPPerangkatDaerah() {
+  const breakPoint = Grid.useBreakpoint();
   const [form] = Form.useForm();
 
+  const [loadingDownload, setLoadingDownload] = useState(false);
+
   const [data, setData] = useState([]);
+
+  const handleDownload = async () => {
+    try {
+      setLoadingDownload(true);
+      const workbook = new ExcelJS.Workbook();
+      const worksheet = workbook.addWorksheet("Data Usulan KP");
+
+      // Tambahkan header
+      worksheet.columns = [
+        { header: "Nama", key: "nama" },
+        { header: "NIP", key: "nip" },
+        { header: "Perangkat Daerah", key: "perangkat_daerah" },
+        { header: "Tgl. Pertek", key: "tgl_pertek" },
+        { header: "Jenis KP", key: "jenis_kp" },
+        { header: "TMT KP", key: "tmt_kp" },
+      ];
+
+      // Tambahkan data
+      data.forEach((item) => {
+        console.log(item);
+        worksheet.addRow({
+          nama: item?.nama_master,
+          nip: item?.nip_master,
+          jenis_kp: item?.jenis_kp,
+          perangkat_daerah: item?.opd_master,
+          tgl_pertek: item?.tgl_pertek,
+          tmt_kp: item?.tmtKp,
+        });
+      });
+
+      // Atur lebar kolom
+      worksheet.columns.forEach((column) => {
+        column.width = 20;
+      });
+
+      // Generate file
+      const buffer = await workbook.xlsx.writeBuffer();
+      const fileType =
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+      const blob = new Blob([buffer], { type: fileType });
+      FileSaver.saveAs(blob, "data_usulan_kp.xlsx");
+
+      message.success("Berhasil mengunduh data");
+      setLoadingDownload(false);
+    } catch (error) {
+      message.error("Gagal mengunduh data");
+      setLoadingDownload(false);
+    }
+  };
 
   const { mutate: cariPegawai, isLoading: isLoadingDaftarPegawai } =
     useMutation((data) => daftarKenaikanPerangkatDaerah(data), {
       onSuccess: (data) => {
+        message.success("Berhasil mengambil data");
         setData(data);
+      },
+      onError: (error) => {
+        message.error("Gagal mengambil data");
       },
     });
 
@@ -47,6 +111,46 @@ function CariKPPerangkatDaerah() {
 
   const columns = [
     {
+      title: "Data",
+      key: "data",
+      render: (_, record) => {
+        return (
+          <Space direction="vertical">
+            <Avatar shape="square" size={50} src={record?.foto} />
+            <>
+              {record?.path_ttd_sk && (
+                <Tooltip title="File SK">
+                  <a
+                    href={`/helpdesk/api/siasn/ws/download?filePath=${record.path_ttd_sk}`}
+                  >
+                    <FilePdfOutlined />
+                  </a>
+                </Tooltip>
+              )}
+              {record?.path_ttd_pertek && (
+                <Tooltip title="File Pertek">
+                  <a
+                    href={`/helpdesk/api/siasn/ws/download?filePath=${record.path_ttd_pertek}`}
+                  >
+                    <FilePdfOutlined />
+                  </a>
+                </Tooltip>
+              )}
+            </>
+            <Typography.Text strong>{record?.nama_master}</Typography.Text>
+            <Typography.Text strong>{record?.nip_master}</Typography.Text>
+            <Typography.Text type="secondary">
+              {record?.jabatan_master}
+            </Typography.Text>
+            <Typography.Text type="secondary">
+              {record?.opd_master}
+            </Typography.Text>
+          </Space>
+        );
+      },
+      responsive: ["xs"],
+    },
+    {
       title: "File",
       key: "path",
       render: (_, record) => (
@@ -58,7 +162,7 @@ function CariKPPerangkatDaerah() {
                 target="_blank"
                 rel="noreferrer"
               >
-                <FilePdfTwoTone />
+                <FilePdfOutlined />
               </a>
             </Tooltip>
           )}
@@ -69,7 +173,7 @@ function CariKPPerangkatDaerah() {
                 target="_blank"
                 rel="noreferrer"
               >
-                <FilePdfTwoTone />
+                <FilePdfOutlined />
               </a>
             </Tooltip>
           )}
@@ -83,6 +187,7 @@ function CariKPPerangkatDaerah() {
       render: (_, record) => {
         return <Avatar shape="square" size={80} src={record?.foto} />;
       },
+      responsive: ["sm"],
     },
     {
       title: "Pegawai",
@@ -97,29 +202,30 @@ function CariKPPerangkatDaerah() {
           </Space>
         );
       },
+      responsive: ["sm"],
     },
     {
       title: "Perangkat Daerah",
       dataIndex: "opd_master",
+      responsive: ["sm"],
     },
-    { title: "No. Pertek", dataIndex: "no_pertek" },
-    { title: "No. SK", dataIndex: "no_sk" },
-    { title: "TMT KP", dataIndex: "tmtKp" },
-    { title: "Jenis KP", dataIndex: "jenis_kp" },
-    { title: "Status", dataIndex: "statusUsulanNama" },
+    { title: "Jenis KP", dataIndex: "jenis_kp", responsive: ["sm"] },
+    { title: "Status", dataIndex: "statusUsulanNama", responsive: ["sm"] },
   ];
 
   return (
-    <Card title="Cari KP Perangkat Daerah">
+    <Card title="Daftar Usulan Kenaikan Pangkat">
       <FloatButton.BackTop />
       <Form onFinish={handleSubmit} form={form} layout="vertical">
-        <Row gutter={[8, 16]}>
-          <Col md={12}>
+        <Row gutter={[8, 8]}>
+          <Col md={12} xs={24}>
             <UnorAdmin />
           </Col>
-          <Col md={12}>
+          <Col md={12} xs={24}>
             <Form.Item label="Tanggal TMT KP" name="tmtKp">
-              <DatePicker.MonthPicker />
+              <DatePicker.MonthPicker
+                style={{ width: breakPoint.xs ? "100%" : null }}
+              />
             </Form.Item>
           </Col>
         </Row>
@@ -130,12 +236,28 @@ function CariKPPerangkatDaerah() {
         </Form.Item>
       </Form>
       <Table
+        title={() => {
+          return (
+            <>
+              {data?.length ? (
+                <Button
+                  icon={<CloudDownloadOutlined />}
+                  type="primary"
+                  onClick={handleDownload}
+                  loading={loadingDownload}
+                >
+                  Unduh Data
+                </Button>
+              ) : null}
+            </>
+          );
+        }}
         columns={columns}
         loading={isLoadingDaftarPegawai}
         pagination={{
           position: ["bottomRight", "topRight"],
           showTotal: (total, range) =>
-            `${range[0]}-${range[1]} of ${total} items`,
+            `${range[0]}-${range[1]} dari ${total} pegawai`,
           showSizeChanger: false,
           pageSize: 25,
         }}
