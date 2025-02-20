@@ -564,6 +564,12 @@ export const syncKenaikanPangkat = async (query) => {
     .then((res) => res.data);
 };
 
+export const syncPemberhentianSIASN = async (query) => {
+  return api
+    .get(`/admin/pemberhentian/sync?${queryString.stringify(query)}`)
+    .then((res) => res.data);
+};
+
 export const daftarPemberhentian = async (query) => {
   return api
     .get(

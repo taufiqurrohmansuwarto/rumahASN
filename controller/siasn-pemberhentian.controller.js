@@ -14,29 +14,17 @@ const serializeData = (data) => {
 
 const daftarPemberhentianSIASN = async (req, res) => {
   try {
-    const { siasnRequest: request } = req;
     const month = req?.query?.month || dayjs().format("MM-YYYY");
 
     const tglAwal = dayjs(month, "MM-YYYY")
       .startOf("month")
       .format("DD-MM-YYYY");
 
-    const tglAkhir = dayjs(month, "MM-YYYY")
-      .endOf("month")
-      .format("DD-MM-YYYY");
-
-    const result = await listPemberhentianSIASN(request, tglAwal, tglAkhir);
-    const hasil = result?.data;
-
-    const hasData = hasil?.code === 1 && hasil?.count !== 0;
-
-    if (!hasData) {
-      res.json([]);
-    } else {
-      const result = serializeData(hasil?.data);
-      console.log(result);
-      res.json(result);
-    }
+    const result = await SiasnPemberhentian.query().where(
+      "tmtPensiun",
+      tglAwal
+    );
+    res.json(result);
   } catch (error) {
     console.log(error);
     res.status(400).json({
@@ -67,11 +55,13 @@ const syncPemberhentianSIASN = async (req, res) => {
       res.json([]);
     } else {
       const knex = SiasnPemberhentian.knex();
+      const currentData = serializeData(hasil?.data);
+      console.log(currentData);
       await knex
         .delete()
         .from("siasn_pemberhentian")
         .where("tmtPensiun", tglAwal);
-      await knex.batchInsert("siasn_pemberhentian", hasil?.data);
+      await knex.batchInsert("siasn_pemberhentian", currentData);
       res.json({
         success: true,
         message: "Data berhasil disinkronisasi",
@@ -82,6 +72,9 @@ const syncPemberhentianSIASN = async (req, res) => {
     }
   } catch (error) {
     console.log(error);
+    res.status(400).json({
+      message: "Internal Server Error",
+    });
   }
 };
 
