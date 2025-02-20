@@ -1,9 +1,12 @@
-import { Card, DatePicker, Form, Table } from "antd";
+import { Button, Card, DatePicker, Form, message, Space, Table } from "antd";
 import { useRouter } from "next/router";
 import React, { useState } from "react";
 import dayjs from "dayjs";
-import { useQuery } from "@tanstack/react-query";
-import { daftarPemberhentian } from "@/services/siasn-services";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  daftarPemberhentian,
+  syncPemberhentianSIASN,
+} from "@/services/siasn-services";
 
 const format = "DD-MM-YYYY";
 
@@ -11,6 +14,7 @@ const montFormat = "MM-YYYY";
 
 function DaftarPemberhentian() {
   const router = useRouter();
+  const queryClient = useQueryClient();
 
   const [query, setQuery] = useState({
     // tglAwal: router?.query?.tgl_awal || dayjs().format(format),
@@ -61,6 +65,19 @@ function DaftarPemberhentian() {
     }
   );
 
+  const { mutate: syncPemberhentian, isLoading: isSyncLoading } = useMutation({
+    mutationFn: () => syncPemberhentianSIASN(router?.query),
+    onSuccess: () => {
+      message.success("Data berhasil disinkronisasi");
+      queryClient.invalidateQueries({
+        queryKey: ["daftar-pemberhentian", router?.query],
+      });
+    },
+    onError: () => {
+      message.error("Data gagal disinkronisasi");
+    },
+  });
+
   const columns = [
     {
       title: "Nama",
@@ -82,13 +99,22 @@ function DaftarPemberhentian() {
 
   return (
     <Card>
-      <Form.Item label="Pilih Bulan">
-        <DatePicker.MonthPicker
-          onChange={handleMonthChange}
-          format={montFormat}
-          value={dayjs(query.month, montFormat)}
-        />
-      </Form.Item>
+      <Space direction="vertical" style={{ marginBottom: 16 }}>
+        <Form.Item label="Pilih Bulan">
+          <DatePicker.MonthPicker
+            onChange={handleMonthChange}
+            format={montFormat}
+            value={dayjs(query.month, montFormat)}
+          />
+        </Form.Item>
+        <Button
+          type="primary"
+          onClick={() => syncPemberhentian()}
+          loading={isSyncLoading}
+        >
+          Sinkronisasi
+        </Button>
+      </Space>
 
       <Table
         pagination={{
