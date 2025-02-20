@@ -133,6 +133,10 @@ const changeRoutes = (user) => {
               name: "Daftar Usulan KP",
             },
             {
+              path: "/fasilitator-employees/daftar-usulan-pensiun",
+              name: "Daftar Usulan Pensiun",
+            },
+            {
               path: "/fasilitator-employees/perencanaan",
               name: "Perencanaan",
               routes: [

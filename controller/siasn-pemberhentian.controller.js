@@ -1,5 +1,6 @@
 const { listPemberhentianSIASN } = require("@/utils/siasn-utils");
 const SiasnPemberhentian = require("@/models/siasn/siasn-pemberhentian.model");
+const SyncPegawai = require("@/models/sync-pegawai.model");
 
 const dayjs = require("dayjs");
 dayjs.locale("id");
@@ -78,7 +79,52 @@ const syncPemberhentianSIASN = async (req, res) => {
   }
 };
 
+const pemberhentianBerdasarkanPerangkatDaerah = async (req, res) => {
+  try {
+    const { skpd_id, tmtPensiun } = req?.query;
+
+    const result = await SyncPegawai.query()
+      .select({
+        nip_master: "sync_pegawai.nip_master",
+        nama_master: "sync_pegawai.nama_master",
+        skpd_id: "sync_pegawai.skpd_id",
+        jabatan_master: "sync_pegawai.jabatan_master",
+        opd_master: "sync_pegawai.opd_master",
+        foto: "sync_pegawai.foto",
+      })
+      .select({
+        statusUsulan: "siasn_pemberhentian.statusUsulan",
+        statusUsulanNama: "siasn_pemberhentian.statusUsulanNama",
+        no_pertek: "siasn_pemberhentian.pertekNomor",
+        no_sk: "siasn_pemberhentian.skNomor",
+        path_sk: "siasn_pemberhentian.pathSk",
+        path_pertek: "siasn_pemberhentian.pathPertek",
+        tgl_pertek: "siasn_pemberhentian.pertekTgl",
+        tgl_sk: "siasn_pemberhentian.skTgl",
+        detail_layanan_nama: "siasn_pemberhentian.detailLayananNama",
+        path_sk_preview: "siasn_pemberhentian.pathSkPreview",
+        tmt_pensiun: "siasn_pemberhentian.tmtPensiun",
+      })
+      .leftJoin(
+        "siasn_pemberhentian",
+        "sync_pegawai.nip_master",
+        "siasn_pemberhentian.nipBaru"
+      )
+      .where("sync_pegawai.skpd_id", "ilike", `${skpd_id}%`)
+      .where("siasn_pemberhentian.tmtPensiun", `${tmtPensiun}`)
+      .orderBy("sync_pegawai.skpd_id");
+
+    res.json(result);
+  } catch (error) {
+    console.log(error);
+    res.status(400).json({
+      message: error?.message || "Internal Server Error",
+    });
+  }
+};
+
 module.exports = {
   daftarPemberhentianSIASN,
   syncPemberhentianSIASN,
+  pemberhentianBerdasarkanPerangkatDaerah,
 };
