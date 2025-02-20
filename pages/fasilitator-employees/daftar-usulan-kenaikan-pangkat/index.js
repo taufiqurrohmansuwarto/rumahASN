@@ -26,6 +26,11 @@ function DaftarUsulanKenaikanPangkat() {
                 <Link href="/fasilitator-employees/master-data">Data ASN</Link>
               </Breadcrumb.Item>
               <Breadcrumb.Item>Usulan Kenaikan Pangkat</Breadcrumb.Item>
+              <Breadcrumb.Item>
+                <Link href="/fasilitator-employees/daftar-usulan-pensiun">
+                  Usulan Pensiun
+                </Link>
+              </Breadcrumb.Item>
             </Breadcrumb>
           ),
         }}

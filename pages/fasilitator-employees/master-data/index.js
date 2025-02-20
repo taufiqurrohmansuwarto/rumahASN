@@ -131,6 +131,11 @@ const FasilitatorEmployees = () => {
                   Usulan Kenaikan Pangkat
                 </Link>
               </Breadcrumb.Item>
+              <Breadcrumb.Item>
+                <Link href="/fasilitator-employees/daftar-usulan-pensiun">
+                  Usulan Pensiun
+                </Link>
+              </Breadcrumb.Item>
             </Breadcrumb>
           ),
         }}
