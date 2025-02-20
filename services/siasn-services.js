@@ -558,6 +558,17 @@ export const daftarKenaikanPerangkatDaerah = async (query) => {
     .then((res) => res.data);
 };
 
+export const daftarPemberhentianPerangkatDaerah = async (query) => {
+  const currentQuery = queryString.stringify(query, {
+    skipEmptyString: true,
+    skipNull: true,
+  });
+
+  return api
+    .get(`/admin/pemberhentian/perangkat-daerah?${currentQuery}`)
+    .then((res) => res.data);
+};
+
 export const syncKenaikanPangkat = async (query) => {
   return api
     .get(`/admin/kp/sync?${queryString.stringify(query)}`)
