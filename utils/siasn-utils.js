@@ -8,7 +8,7 @@ const parseCSV = (filePath) => {
   return paparse.parse(file, {
     header: true,
     skipEmptyLines: true,
-    delimiter: ",",
+    delimiter: ";",
   }).data;
 };
 
@@ -20,7 +20,7 @@ const removeDash = (text) => {
 };
 
 module.exports.refSiasnUnor = () => {
-  const data = parseCSV(getFilePath("siasn/unor.csv"));
+  const data = parseCSV(getFilePath("siasn/unor-new.csv"));
 
   const result = data.map((item) => {
     return {
