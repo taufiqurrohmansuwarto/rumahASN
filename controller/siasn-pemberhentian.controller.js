@@ -1,19 +1,29 @@
 const { listPemberhentianSIASN } = require("@/utils/siasn-utils");
+const SiasnPemberhentian = require("@/models/siasn/siasn-pemberhentian.model");
 
 const dayjs = require("dayjs");
 dayjs.locale("id");
 require("dayjs/locale/id");
 
+const serializeData = (data) => {
+  return data?.map((item) => ({
+    ...item,
+    tmtPensiun: dayjs(item?.tmtPensiun).format("DD-MM-YYYY"),
+  }));
+};
+
 const daftarPemberhentianSIASN = async (req, res) => {
   try {
-    const { siasnRequest: request, user } = req;
-    const tglAwal = req?.query?.tglAwal || dayjs().format("DD-MM-YYYY");
-    const tglAkhir = req?.query?.tglAkhir || dayjs().format("DD-MM-YYYY");
+    const { siasnRequest: request } = req;
+    const month = req?.query?.month || dayjs().format("MM-YYYY");
 
-    console.log({
-      tglAwal,
-      tglAkhir,
-    });
+    const tglAwal = dayjs(month, "MM-YYYY")
+      .startOf("month")
+      .format("DD-MM-YYYY");
+
+    const tglAkhir = dayjs(month, "MM-YYYY")
+      .endOf("month")
+      .format("DD-MM-YYYY");
 
     const result = await listPemberhentianSIASN(request, tglAwal, tglAkhir);
     const hasil = result?.data;
@@ -23,8 +33,9 @@ const daftarPemberhentianSIASN = async (req, res) => {
     if (!hasData) {
       res.json([]);
     } else {
-      console.log(hasil?.data);
-      res.json(hasil?.data);
+      const result = serializeData(hasil?.data);
+      console.log(result);
+      res.json(result);
     }
   } catch (error) {
     console.log(error);
@@ -34,6 +45,47 @@ const daftarPemberhentianSIASN = async (req, res) => {
   }
 };
 
+const syncPemberhentianSIASN = async (req, res) => {
+  try {
+    const { siasnRequest: request } = req;
+    const month = req?.query?.month || dayjs().format("MM-YYYY");
+
+    const tglAwal = dayjs(month, "MM-YYYY")
+      .startOf("month")
+      .format("DD-MM-YYYY");
+
+    const tglAkhir = dayjs(month, "MM-YYYY")
+      .endOf("month")
+      .format("DD-MM-YYYY");
+
+    const result = await listPemberhentianSIASN(request, tglAwal, tglAkhir);
+    const hasil = result?.data;
+
+    const hasData = hasil?.code === 1 && hasil?.count !== 0;
+
+    if (!hasData) {
+      res.json([]);
+    } else {
+      const knex = SiasnPemberhentian.knex();
+      await knex
+        .delete()
+        .from("siasn_pemberhentian")
+        .where("tmtPensiun", tglAwal);
+      await knex.batchInsert("siasn_pemberhentian", hasil?.data);
+      res.json({
+        success: true,
+        message: "Data berhasil disinkronisasi",
+      });
+      // const result = serializeData(hasil?.data);
+      // console.log(result);
+      // res.json(result);
+    }
+  } catch (error) {
+    console.log(error);
+  }
+};
+
 module.exports = {
   daftarPemberhentianSIASN,
+  syncPemberhentianSIASN,
 };

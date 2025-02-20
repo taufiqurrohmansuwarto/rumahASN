@@ -7,12 +7,15 @@ import { daftarPemberhentian } from "@/services/siasn-services";
 
 const format = "DD-MM-YYYY";
 
+const montFormat = "MM-YYYY";
+
 function DaftarPemberhentian() {
   const router = useRouter();
 
   const [query, setQuery] = useState({
-    tglAwal: router?.query?.tgl_awal || dayjs().format(format),
-    tglAkhir: router?.query?.tgl_akhir || dayjs().format(format),
+    // tglAwal: router?.query?.tgl_awal || dayjs().format(format),
+    // tglAkhir: router?.query?.tgl_akhir || dayjs().format(format),
+    month: router?.query?.month || dayjs(new Date()).format(montFormat),
   });
 
   const [pageSize, setPageSize] = useState(25);
@@ -31,6 +34,19 @@ function DaftarPemberhentian() {
       query: {
         tglAwal: value[0].format(format),
         tglAkhir: value[1].format(format),
+      },
+    });
+  };
+
+  const handleMonthChange = (value) => {
+    console.log(value?.format(montFormat));
+    setQuery({
+      month: value?.format(montFormat),
+    });
+    router.push({
+      pathname: "/apps-managements/siasn-services/pemberhentian",
+      query: {
+        month: value?.format(montFormat),
       },
     });
   };
@@ -66,11 +82,11 @@ function DaftarPemberhentian() {
 
   return (
     <Card>
-      <Form.Item label="Pilih Tanggal">
-        <DatePicker.RangePicker
-          onChange={handleChange}
-          value={[dayjs(query.tglAwal, format), dayjs(query.tglAkhir, format)]}
-          format={format}
+      <Form.Item label="Pilih Bulan">
+        <DatePicker.MonthPicker
+          onChange={handleMonthChange}
+          format={montFormat}
+          value={dayjs(query.month, montFormat)}
         />
       </Form.Item>
 
