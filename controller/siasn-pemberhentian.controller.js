@@ -72,9 +72,10 @@ const syncPemberhentianSIASN = async (req, res) => {
       // res.json(result);
     }
   } catch (error) {
-    console.log(error);
+    const message = error?.response?.data?.message || "Internal Server Error";
+    console.log(message);
     res.status(400).json({
-      message: "Internal Server Error",
+      message,
     });
   }
 };
