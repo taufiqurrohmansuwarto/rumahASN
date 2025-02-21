@@ -4,6 +4,7 @@ import {
   IconFileDots,
   IconFileOff,
 } from "@tabler/icons";
+import stream from "stream";
 
 import { toLower } from "lodash";
 
@@ -188,6 +189,27 @@ export const uploadSertifikatToMinio = (mc, filename, base64Pdf) => {
       }
     );
   });
+};
+
+export const uploadDokumenSiasnToMinio = async (mc, filename, arrayBuffer) => {
+  try {
+    const buffer = Buffer.from(arrayBuffer);
+    const readableStream = new stream.PassThrough();
+    readableStream.end(buffer);
+
+    const info = await mc.putObject(
+      "bkd",
+      `sk_pns/${filename}`,
+      readableStream,
+      buffer.length,
+      { "Content-Type": "application/pdf" }
+    );
+
+    return info;
+  } catch (err) {
+    console.error("Error saat mengunggah ke MinIO:", err);
+    throw err; // Melempar error agar bisa ditangkap di tempat pemanggilan
+  }
 };
 
 export const uploadMinioWithFolder = (mc, filename, base64Pdf, folder) => {

@@ -537,6 +537,18 @@ export const daftarPengadaan = async (query) => {
     .then((res) => res.data);
 };
 
+// download dokumen pengadaan
+export const downloadDokumenPengadaan = async (query) => {
+  return api
+    .get(
+      `/admin/pengadaan/download?${queryString.stringify(query, {
+        skipEmptyString: true,
+        skipNull: true,
+      })}`
+    )
+    .then((res) => res.data);
+};
+
 export const daftarKenaikanPangkat = async (query) => {
   const currentQuery = queryString.stringify(query, {
     skipEmptyString: true,

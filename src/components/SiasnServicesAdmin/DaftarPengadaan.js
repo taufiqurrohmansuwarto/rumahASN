@@ -1,11 +1,24 @@
 import useScrollRestoration from "@/hooks/useScrollRestoration";
-import { daftarPengadaan } from "@/services/siasn-services";
-import { useQueries, useQuery } from "@tanstack/react-query";
-import { Button, Card, DatePicker, FloatButton, Space, Table } from "antd";
+import {
+  daftarPengadaan,
+  downloadDokumenPengadaan,
+} from "@/services/siasn-services";
+import { useMutation, useQueries, useQuery } from "@tanstack/react-query";
+import {
+  Button,
+  Card,
+  DatePicker,
+  FloatButton,
+  message,
+  Space,
+  Table,
+  Tooltip,
+} from "antd";
 import dayjs from "dayjs";
 import { useRouter } from "next/router";
 import React, { useState } from "react";
 import PengadaanFilter from "../Filter/PengadaanFilter";
+import { FilePdfOutlined } from "@ant-design/icons";
 
 const formatYear = "YYYY";
 
@@ -65,6 +78,38 @@ function DaftarPengadaan() {
 
   const columns = [
     {
+      title: "File",
+      key: "file",
+      render: (_, record) => {
+        return (
+          <Space>
+            {record?.path_ttd_sk && (
+              <Tooltip title="File SK">
+                <a
+                  href={`/helpdesk/api/siasn/ws/download?filePath=${record.path_ttd_sk}`}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  <FilePdfOutlined />
+                </a>
+              </Tooltip>
+            )}
+            {record?.path_ttd_pertek && (
+              <Tooltip title="File Pertek">
+                <a
+                  href={`/helpdesk/api/siasn/ws/download?filePath=${record.path_ttd_pertek}`}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  <FilePdfOutlined />
+                </a>
+              </Tooltip>
+            )}
+          </Space>
+        );
+      },
+    },
+    {
       title: "No. Peserta",
       dataIndex: "no_peserta",
     },
@@ -81,12 +126,8 @@ function DaftarPengadaan() {
       dataIndex: "jenis_formasi_nama",
     },
     {
-      title: "No. Pertek",
-      dataIndex: "no_pertek",
-    },
-    {
-      title: "No. SK",
-      dataIndex: "no_sk",
+      title: "Periode",
+      dataIndex: "periode",
     },
     {
       title: "Aksi",
@@ -110,6 +151,20 @@ function DaftarPengadaan() {
     });
   };
 
+  const { mutateAsync: download, isLoading: isDownloading } = useMutation({
+    mutationFn: () => downloadDokumenPengadaan(router?.query),
+    onSuccess: () => {
+      message.success("Berhasil mengunduh dokumen");
+    },
+    onError: () => {
+      message.error("Gagal mengunduh dokumen");
+    },
+  });
+
+  const handleDownload = async () => {
+    await download();
+  };
+
   return (
     <Card title="Daftar Pengadaan Instansi">
       <FloatButton.BackTop />
@@ -127,6 +182,15 @@ function DaftarPengadaan() {
             <h3>Daftar Pengadaan</h3>
             <Button size="small" type="primary" onClick={handleSync}>
               Sync
+            </Button>
+            <Button
+              size="small"
+              type="primary"
+              onClick={handleDownload}
+              disabled={isDownloading}
+              loading={isDownloading}
+            >
+              Download
             </Button>
           </Space>
         )}
