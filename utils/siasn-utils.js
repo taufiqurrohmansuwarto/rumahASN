@@ -275,3 +275,13 @@ module.exports.createHukdis = (fetcher, data) => {
 module.exports.fetchIntegratedMutasi = (fetcher, data) => {
   return fetcher.post(`/imut/simpeg/usulan/list`, data);
 };
+
+module.exports.downloadDokumenAPI = (fetcher, path) => {
+  return fetcher
+    .get(`/download-dok?filePath=${path}`, {
+      responseType: "arraybuffer",
+    })
+    .then((res) => {
+      return res?.data;
+    });
+};

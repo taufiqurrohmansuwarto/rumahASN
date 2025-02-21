@@ -1,8 +1,8 @@
 import axios from "axios";
 import { unstable_getServerSession } from "next-auth/next";
+import { authOptions } from "pages/api/auth/[...nextauth]";
 const User = require("../models/users.model");
 const Minio = require("minio");
-import { authOptions } from "pages/api/auth/[...nextauth]";
 
 const minioConfig = {
   port: parseInt(process.env.MINIO_PORT),
