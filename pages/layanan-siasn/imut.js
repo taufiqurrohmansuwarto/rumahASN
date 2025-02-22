@@ -1,18 +1,15 @@
 import LayananSIASNLayout from "@/components/LayananSIASNAdmin/LayananSIASNLayout";
 import LayananKenaikanPangkat from "@/components/LayananSIASNAdmin/LayananKenaikanPangkat";
 import PageContainer from "@/components/PageContainer";
-import { Breadcrumb, FloatButton } from "antd";
+import { Breadcrumb } from "antd";
 import Head from "next/head";
 import Link from "next/link";
 import { Grid } from "antd";
-import useScrollRestoration from "@/hooks/useScrollRestoration";
 
-function KenaikanPangkatLayananSIASN() {
-  useScrollRestoration();
+function ImutLayananSIASN() {
   const breakPoint = Grid.useBreakpoint();
   return (
     <>
-      <FloatButton.BackTop />
       <Head>
         <title>Layanan SIASN - Daftar Kenaikan Pangkat</title>
       </Head>
@@ -38,23 +35,21 @@ function KenaikanPangkatLayananSIASN() {
           ),
         }}
       >
-        <LayananKenaikanPangkat />
+        <div>Imut</div>
       </PageContainer>
     </>
   );
 }
 
-KenaikanPangkatLayananSIASN.getLayout = function getLayout(page) {
+ImutLayananSIASN.getLayout = function getLayout(page) {
   return (
-    <LayananSIASNLayout active="/layanan-siasn/kenaikan-pangkat">
-      {page}
-    </LayananSIASNLayout>
+    <LayananSIASNLayout active="/layanan-siasn/imut">{page}</LayananSIASNLayout>
   );
 };
 
-KenaikanPangkatLayananSIASN.Auth = {
+ImutLayananSIASN.Auth = {
   action: "manage",
   subject: "Tickets",
 };
 
-export default KenaikanPangkatLayananSIASN;
+export default ImutLayananSIASN;

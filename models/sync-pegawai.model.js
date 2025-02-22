@@ -12,6 +12,14 @@ class SyncPegawai extends Model {
     return "sync_pegawai";
   }
 
+  static get modifiers() {
+    return {
+      simpleSelect(query) {
+        query.select("foto", "nip_master", "nama_master", "opd_master");
+      },
+    };
+  }
+
   static get relationMappings() {
     const syncUnorMaster = require("@/models/sync-unor-master.model");
     const siasnEmployee = require("@/models/siasn-employees.model");

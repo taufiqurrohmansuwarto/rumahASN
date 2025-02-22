@@ -537,6 +537,12 @@ export const daftarPengadaan = async (query) => {
     .then((res) => res.data);
 };
 
+export const syncPengadaan = async (query) => {
+  return api
+    .get(`/admin/pengadaan/sync?${queryString.stringify(query)}`)
+    .then((res) => res.data);
+};
+
 // download dokumen pengadaan
 export const downloadDokumenPengadaan = async (query) => {
   return api

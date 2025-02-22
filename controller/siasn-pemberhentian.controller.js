@@ -67,9 +67,6 @@ const syncPemberhentianSIASN = async (req, res) => {
         success: true,
         message: "Data berhasil disinkronisasi",
       });
-      // const result = serializeData(hasil?.data);
-      // console.log(result);
-      // res.json(result);
     }
   } catch (error) {
     const message = error?.response?.data?.message || "Internal Server Error";
