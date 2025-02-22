@@ -74,6 +74,15 @@ export const appLists = [
 
     target: "_blank",
   },
+  {
+    rightIcon: <IconTransfer />,
+    title: "SIASN",
+    desc: "Integrasi Layanan SIASN",
+    color: "#FBBC05",
+    url: "/layanan-siasn/dashboard",
+    icon: "https://siasn.bkd.jatimprov.go.id:9000/public/siasn-instansi-logo.png",
+    userType: ["admin"],
+  },
 ];
 
 export const getUserType = (user) => {
@@ -109,4 +118,41 @@ export const getUserType = (user) => {
     userType: userTypes,
     filteredApps,
   };
+};
+
+export const getMenuItems = (menuItems, user) => {
+  // Cek role user
+  const isAdmin =
+    user?.role === "USER" &&
+    user?.group === "MASTER" &&
+    user?.current_role === "admin";
+
+  const isFasilitator =
+    user?.role === "FASILITATOR" &&
+    user?.group === "MASTER" &&
+    user?.current_role === "user";
+
+  const isPrakom =
+    user?.role === "USER" &&
+    user?.group === "MASTER" &&
+    user?.id === "master|56543";
+
+  // Filter menu berdasarkan role
+  const filteredMenuItems = menuItems.filter((item) => {
+    const { role } = item;
+
+    // Jika user memiliki role prakom dan admin
+    if (isPrakom && isAdmin) {
+      return role.includes("admin") || role.includes("prakom");
+    }
+
+    // Filter berdasarkan single role
+    if (isAdmin) return role.includes("admin");
+    if (isFasilitator) return role.includes("fasilitator");
+    if (isPrakom) return role.includes("prakom");
+
+    return false;
+  });
+
+  return filteredMenuItems;
 };
