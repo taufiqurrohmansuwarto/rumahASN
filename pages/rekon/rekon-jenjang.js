@@ -1,4 +1,5 @@
 import RedditPost from "@/components/Discussions/RedditPost";
+import DisparitasSKP from "@/components/Rekon/DisparitasSKP";
 import PageContainer from "@/components/PageContainer";
 import RekonLayout from "@/components/Rekon/RekonLayout";
 import { Grid } from "antd";
@@ -19,6 +20,7 @@ const RekonJenjang = () => {
         content="Jenjang"
       >
         <RedditPost />
+        <DisparitasSKP />
       </PageContainer>
     </>
   );

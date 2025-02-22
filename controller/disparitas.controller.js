@@ -7,6 +7,7 @@ const RekonUnor = require("@/models/rekon/unor.model");
 const UnorSIASN = require("@/models/ref-siasn-unor.model");
 const UnorSimaster = require("@/models/sync-unor-master.model");
 const SyncPegawai = require("@/models/sync-pegawai.model");
+const RekonSKP = require("@/models/rekon/skp.model");
 
 // Fungsi untuk memformat hierarki unor
 const formatUnorHierarchy = (data) => {
@@ -210,6 +211,15 @@ export const disparitasDataSKP = async (req, res) => {
     } else {
       opdId = user?.skpd_id;
     }
+
+    const result = await SyncPegawai.query()
+      .select("nip_master")
+      .leftJoin("rekon.skp", "rekon.skp.nip", "sync_pegawai.nip_master")
+      .whereNull("rekon.skp.nip")
+      .where("sync_pegawai.skpd_id", "ILIKE", `${opdId}%`)
+      .andWhere("sync_pegawai.status_master", "PNS");
+
+    res.json(result);
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: "Internal server error" });

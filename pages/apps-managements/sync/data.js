@@ -5,6 +5,7 @@ import SinkronJft from "@/components/Sinkron/SinkronJft";
 import SinkronJfu from "@/components/Sinkron/SinkronJfu";
 import SinkronLayout from "@/components/Sinkron/SinkronLayout";
 import SinkronMaster from "@/components/Sinkron/SinkronMaster";
+import SinkronSKP from "@/components/Sinkron/SinkronSKP";
 import SinkronUnorMaster from "@/components/Sinkron/SinkronUnorMaster";
 import { Card, Space } from "antd";
 import Head from "next/head";
@@ -25,6 +26,7 @@ const Sync = () => {
                 <SinkronUnorMaster />
                 <SinkronJfu />
                 <SinkronJft />
+                <SinkronSKP />
               </Space>
             </div>
           </Card>

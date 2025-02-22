@@ -131,3 +131,12 @@ export const getSubJabatanSiasn = async () => {
 export const syncSubJabatanSiasn = async () => {
   return api.get("/sub-jabatan/siasn/sync").then((res) => res?.data);
 };
+
+// skp
+export const syncSKPSIASN = async () => {
+  return api.get("/skp/sync").then((res) => res?.data);
+};
+
+export const getRekonSKP = async () => {
+  return api.get("/skp").then((res) => res?.data);
+};
