@@ -298,28 +298,28 @@ const changeRoutes = (user) => {
           name: "Manajemen Aplikasi",
           icon: <SolutionOutlined />,
           routes: [
-            {
-              path: "/apps-managements/siasn-services",
-              name: "Layanan SIASN",
-              routes: [
-                {
-                  path: "/apps-managements/siasn-services/pengadaan",
-                  name: "Pengadaan",
-                },
-                {
-                  path: "/apps-managements/siasn-services/pemberhentian",
-                  name: "Pemberhentian",
-                },
-                {
-                  path: "/apps-managements/siasn-services/kenaikan-pangkat/sync",
-                  name: "Kenaikan Pangkat",
-                },
-                {
-                  path: "/apps-managements/siasn-services/disparitas-unor",
-                  name: "Disparitas Unor",
-                },
-              ],
-            },
+            // {
+            //   path: "/apps-managements/siasn-services",
+            //   name: "Layanan SIASN",
+            //   routes: [
+            //     {
+            //       path: "/apps-managements/siasn-services/pengadaan",
+            //       name: "Pengadaan",
+            //     },
+            //     {
+            //       path: "/apps-managements/siasn-services/pemberhentian",
+            //       name: "Pemberhentian",
+            //     },
+            //     {
+            //       path: "/apps-managements/siasn-services/kenaikan-pangkat/sync",
+            //       name: "Kenaikan Pangkat",
+            //     },
+            //     {
+            //       path: "/apps-managements/siasn-services/disparitas-unor",
+            //       name: "Disparitas Unor",
+            //     },
+            //   ],
+            // },
             {
               path: "/apps-managements/sync/data",
               name: "Sinkron Data",

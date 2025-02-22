@@ -1,5 +1,4 @@
 import { dataUtama } from "@/utils/siasn-utils";
-import { ConsoleSqlOutlined } from "@ant-design/icons";
 import dayjs from "dayjs";
 import { toUpper, trim } from "lodash";
 import { raw } from "objection";
@@ -7,6 +6,7 @@ const RekonJFT = require("@/models/rekon/jft.model");
 const RekonUnor = require("@/models/rekon/unor.model");
 const UnorSIASN = require("@/models/ref-siasn-unor.model");
 const UnorSimaster = require("@/models/sync-unor-master.model");
+const SyncPegawai = require("@/models/sync-pegawai.model");
 
 // Fungsi untuk memformat hierarki unor
 const formatUnorHierarchy = (data) => {
@@ -194,6 +194,24 @@ export const getDisparitasByNip = async (req, res) => {
     res.json([disparitasSKP, disparitasUnor]);
   } catch (error) {
     console.error("Error in getDisparitasByNip:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+// export const disparitas Data SKP
+export const disparitasDataSKP = async (req, res) => {
+  try {
+    const { user } = req;
+    const currentRole = user?.current_role;
+    let opdId;
+
+    if (currentRole === "admin") {
+      opdId = "1";
+    } else {
+      opdId = user?.skpd_id;
+    }
+  } catch (error) {
+    console.log(error);
     res.status(500).json({ message: "Internal server error" });
   }
 };
