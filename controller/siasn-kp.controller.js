@@ -19,7 +19,7 @@ const syncKenaikanPangkat = async (req, res) => {
     const myPeriode = req?.query?.periode?.split("-").reverse().join("-");
     const periode = req?.query?.periode;
 
-    const knex = await SiasnKP.knex();
+    const knex = SiasnKP.knex();
     const result = await daftarKenaikanPangkat(request, myPeriode);
     const data = result?.data;
 
@@ -32,9 +32,11 @@ const syncKenaikanPangkat = async (req, res) => {
       res.json({ success: true, message: "Data berhasil disinkronisasi" });
     }
   } catch (error) {
+    const errorMessage =
+      error?.response?.data?.message || "Internal Server Error";
     // console.log(error);
     res.status(400).json({
-      message: "Internal Server Error",
+      message: errorMessage,
     });
   }
 };
@@ -45,7 +47,10 @@ const listKenaikanPangkat = async (req, res) => {
     const myPeriode = req?.query?.periode?.split("-").reverse().join("-");
     const periode = req?.query?.periode;
 
-    const hasil = await SiasnKP.query().where("tmtKp", periode);
+    const hasil = await SiasnKP.query()
+      .where("tmtKp", periode)
+      .orderBy("nama", "asc")
+      .withGraphFetched("pegawai(simpleSelect)");
 
     if (hasil?.length) {
       res.json(hasil);

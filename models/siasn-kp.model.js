@@ -10,7 +10,7 @@ class SiasnKp extends Model {
 
   static get relationMappings() {
     return {
-      sync_pegawai: {
+      pegawai: {
         relation: Model.BelongsToOneRelation,
         modelClass: SyncPegawaiMaster,
         join: {

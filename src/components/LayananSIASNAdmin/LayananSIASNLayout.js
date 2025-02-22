@@ -4,6 +4,7 @@ import NotifikasiForumKepegawaian from "@/components/Notification/NotifikasiForu
 import NotifikasiKepegawaian from "@/components/Notification/NotifikasiKepegawaian";
 import NotifikasiPrivateMessage from "@/components/Notification/NotifikasiPrivateMessage";
 import { appList } from "@/utils/app-lists";
+import { getMenuItems } from "@/utils/appLists";
 import {
   ArrowUpOutlined,
   DashboardOutlined,
@@ -11,7 +12,6 @@ import {
   StopOutlined,
   UserAddOutlined,
   UserOutlined,
-  ArrowsAltOutlined,
 } from "@ant-design/icons";
 import { ProConfigProvider } from "@ant-design/pro-components";
 import { Dropdown, Layout, Space } from "antd";
@@ -19,7 +19,6 @@ import { signOut, useSession } from "next-auth/react";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/router";
 import { useState } from "react";
-import { getMenuItems } from "@/utils/appLists";
 
 const token = {};
 
