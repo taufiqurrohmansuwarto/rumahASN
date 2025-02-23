@@ -13,10 +13,12 @@ import {
   Button,
   Card,
   DatePicker,
+  FloatButton,
   Form,
   message,
   Space,
   Table,
+  Tag,
   Tooltip,
   Typography,
 } from "antd";
@@ -105,10 +107,28 @@ function LayananKenaikanPangkat() {
       render: (_, row) => (
         <Avatar shape="square" size={100} src={row?.pegawai?.foto} />
       ),
+      responsive: ["sm"],
     },
     {
-      width: 700,
-      title: "NIP",
+      title: "Informasi",
+      key: "nipBaru",
+      render: (_, row) => (
+        <Space direction="vertical">
+          <Avatar shape="square" size={100} src={row?.pegawai?.foto} />
+          <Typography.Text>{row?.nipBaru}</Typography.Text>
+          <Typography.Text strong>{row?.nama}</Typography.Text>
+          <Typography.Text type="secondary">
+            {row?.pegawai?.opd_master}
+          </Typography.Text>
+          <Typography.Text type="secondary">{row?.tmtKp}</Typography.Text>
+          <Tag color="blue">{row?.jenis_kp}</Tag>
+          <Tag color="yellow">{row?.statusUsulanNama}</Tag>
+        </Space>
+      ),
+      responsive: ["xs"],
+    },
+    {
+      title: "Informasi",
       key: "nipBaru",
       render: (_, row) => (
         <Space direction="vertical">
@@ -117,13 +137,13 @@ function LayananKenaikanPangkat() {
           <Typography.Text type="secondary">
             {row?.pegawai?.opd_master}
           </Typography.Text>
+          <Typography.Text type="secondary">{row?.tmtKp}</Typography.Text>
+          <Tag color="blue">{row?.jenis_kp}</Tag>
+          <Tag color="yellow">{row?.statusUsulanNama}</Tag>
         </Space>
       ),
       responsive: ["sm"],
     },
-    { title: "TMT KP", dataIndex: "tmtKp", responsive: ["sm"] },
-    { title: "Jenis KP", dataIndex: "jenis_kp", responsive: ["sm"] },
-    { title: "Status", dataIndex: "statusUsulanNama", responsive: ["sm"] },
     {
       title: "Aksi",
       key: "aksi",
@@ -138,8 +158,9 @@ function LayananKenaikanPangkat() {
 
   return (
     <>
+      <FloatButton.BackTop />
       <Card title="Integrasi Kenaikan Pangkat">
-        <Space>
+        <Form layout="inline">
           <Form.Item label="Periode">
             <DatePicker
               picker="month"
@@ -153,8 +174,8 @@ function LayananKenaikanPangkat() {
               Reload
             </Button>
           </Form.Item>
-        </Space>
-        <div>
+        </Form>
+        <div style={{ marginTop: 16 }}>
           <Space>
             <Tooltip title="Ambil data dari SIASN">
               <Button

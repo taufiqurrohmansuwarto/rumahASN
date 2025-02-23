@@ -1,17 +1,21 @@
 import PlotTrendQuestion from "@/components/Dashboards/PlotTrendQuestion";
 import PageContainer from "@/components/PageContainer";
 import StatistikLayout from "@/components/Statistik/StatistikLayout";
-import { Breadcrumb } from "antd";
+import { Breadcrumb, Grid } from "antd";
 import Head from "next/head";
 import Link from "next/link";
 
 function Trend() {
+  const breakPoint = Grid.useBreakpoint();
   return (
     <>
       <Head>
         <title>Rumah ASN - Statistik - Trend Pertanyaan</title>
       </Head>
       <PageContainer
+        childrenContentStyle={{
+          padding: breakPoint?.xs ? 0 : null,
+        }}
         header={{
           breadcrumbRender: () => (
             <Breadcrumb>

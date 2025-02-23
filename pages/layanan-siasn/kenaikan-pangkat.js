@@ -18,7 +18,7 @@ function KenaikanPangkatLayananSIASN() {
       </Head>
       <PageContainer
         childrenContentStyle={{
-          padding: breakPoint.xs ? null : "24px",
+          padding: breakPoint?.xs ? 0 : null,
         }}
         title="Kenaikan Pangkat SIASN"
         header={{

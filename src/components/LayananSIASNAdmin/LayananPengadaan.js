@@ -10,7 +10,9 @@ import {
   message,
   Space,
   Table,
+  Tag,
   Tooltip,
+  Typography,
 } from "antd";
 import dayjs from "dayjs";
 import { useRouter } from "next/router";
@@ -73,6 +75,24 @@ function LayananPengadaan() {
 
   const columns = [
     {
+      title: "Informasi",
+      key: "informasi",
+      render: (_, record) => {
+        return (
+          <Space direction="vertical">
+            <Typography.Text>{record?.nama}</Typography.Text>
+            <Typography.Text>{record?.nip}</Typography.Text>
+            <Typography.Text type="secondary">
+              {record?.no_peserta}
+            </Typography.Text>
+            <Tag color="blue">{record?.periode}</Tag>
+            <Tag color="yellow">{record?.jenis_formasi_nama}</Tag>
+          </Space>
+        );
+      },
+      responsive: ["xs"],
+    },
+    {
       title: "File",
       key: "file",
       render: (_, record) => {
@@ -103,26 +123,32 @@ function LayananPengadaan() {
           </Space>
         );
       },
+      responsive: ["sm"],
     },
     {
       title: "No. Peserta",
       dataIndex: "no_peserta",
+      responsive: ["sm"],
     },
     {
       title: "NIP",
       dataIndex: "nip",
+      responsive: ["sm"],
     },
     {
       title: "Nama",
       dataIndex: "nama",
+      responsive: ["sm"],
     },
     {
       title: "Jenis Formasi Nama",
       dataIndex: "jenis_formasi_nama",
+      responsive: ["sm"],
     },
     {
       title: "Periode",
       dataIndex: "periode",
+      responsive: ["sm"],
     },
     {
       title: "Aksi",
@@ -130,12 +156,13 @@ function LayananPengadaan() {
       render: (row) => {
         return <a onClick={() => gotoDetail(row)}>Detail</a>;
       },
+      responsive: ["sm"],
     },
   ];
 
   return (
     <Card title="Integrasi Pengadaan">
-      <Space>
+      <Form layout="inline">
         <Form.Item label="Tahun Pengadaan">
           <DatePicker
             value={dayjs(query?.tahun, formatYear)}
@@ -149,9 +176,9 @@ function LayananPengadaan() {
             Reload
           </Button>
         </Form.Item>
-      </Space>
+      </Form>
 
-      <div style={{ marginBottom: 16 }}>
+      <div style={{ marginBottom: 16, marginTop: 16 }}>
         <Space>
           <Button type="primary" loading={isSyncing} onClick={() => sync()}>
             Sinkronisasi
