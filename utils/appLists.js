@@ -83,6 +83,15 @@ export const appLists = [
     icon: "https://siasn.bkd.jatimprov.go.id:9000/public/siasn-instansi-logo.png",
     userType: ["admin"],
   },
+  {
+    rightIcon: <IconTransfer />,
+    title: "Statistik",
+    desc: "Rumah ASN",
+    color: "#FBBC05",
+    url: "/statistik/dashboard",
+    icon: "https://siasn.bkd.jatimprov.go.id:9000/public/icon-maping.png",
+    userType: ["admin"],
+  },
 ];
 
 export const getUserType = (user) => {

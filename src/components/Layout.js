@@ -214,57 +214,57 @@ const changeRoutes = (user) => {
 
     if (admin) {
       userRoutes.routes.push(
-        {
-          path: "/analysis",
-          name: "Analisis",
-          icon: <BarChartOutlined />,
-          routes: [
-            canDownload?.granted && {
-              path: "/analysis/download",
-              name: "Download Data",
-              routes: [
-                {
-                  path: "/analysis/download/ip-asn",
-                  name: "IP ASN",
-                },
-              ],
-            },
-            {
-              path: "/analysis/report",
-              name: "Report",
-              routes: [
-                {
-                  path: "/analysis/report/employees",
-                  name: "Report Pegawai",
-                },
-                {
-                  path: "/analysis/report/ip-asn",
-                  name: "Report IP ASN",
-                },
-              ],
-            },
-            {
-              path: "/analysis/dashboard",
-              name: "Dashboard",
-            },
-            {
-              path: "/analysis/kecepatan-respon",
-              name: "Kecepatan Respon",
-            },
-            {
-              path: "/analysis/kepuasan-pelanggan",
-              name: "Kepuasan Pelanggan",
-            },
-            {
-              path: "/analysis/performa-pegawai",
-              name: "Performa Pegawai",
-            },
-            {
-              path: "/analysis/trend",
-              name: "Trend",
-            },
-          ],
-        },
+        // {
+        //   path: "/analysis",
+        //   name: "Analisis",
+        //   icon: <BarChartOutlined />,
+        //   routes: [
+        //     canDownload?.granted && {
+        //       path: "/analysis/download",
+        //       name: "Download Data",
+        //       routes: [
+        //         {
+        //           path: "/analysis/download/ip-asn",
+        //           name: "IP ASN",
+        //         },
+        //       ],
+        //     },
+        //     {
+        //       path: "/analysis/report",
+        //       name: "Report",
+        //       routes: [
+        //         {
+        //           path: "/analysis/report/employees",
+        //           name: "Report Pegawai",
+        //         },
+        //         {
+        //           path: "/analysis/report/ip-asn",
+        //           name: "Report IP ASN",
+        //         },
+        //       ],
+        //     },
+        //     {
+        //       path: "/analysis/dashboard",
+        //       name: "Dashboard",
+        //     },
+        //     {
+        //       path: "/analysis/kecepatan-respon",
+        //       name: "Kecepatan Respon",
+        //     },
+        //     {
+        //       path: "/analysis/kepuasan-pelanggan",
+        //       name: "Kepuasan Pelanggan",
+        //     },
+        //     {
+        //       path: "/analysis/performa-pegawai",
+        //       name: "Performa Pegawai",
+        //     },
+        //     {
+        //       path: "/analysis/trend",
+        //       name: "Trend",
+        //     },
+        //   ],
+        // },
         {
           path: "/referensi",
           name: "Referensi",
