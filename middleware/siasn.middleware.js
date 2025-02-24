@@ -5,7 +5,10 @@ const a = require("../utils/siasn-fetcher");
 const { createRedisInstance } = require("../utils/redis");
 const { default: Redlock } = require("redlock");
 
-const baseUrl = "https://apimws.bkn.go.id:8243/apisiasn/1.0";
+const dotenv = require("dotenv");
+dotenv.config();
+
+const baseUrl = process.env.API_SIASN;
 const TOKEN_KEY = "siasn_token";
 const REFRESH_FLAG_KEY = "refresh:token";
 
