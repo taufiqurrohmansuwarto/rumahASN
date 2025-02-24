@@ -80,7 +80,7 @@ export const appLists = [
     desc: "Integrasi Layanan SIASN",
     color: "#FBBC05",
     url: "/layanan-siasn/dashboard",
-    icon: "https://siasn.bkd.jatimprov.go.id:9000/public/siasn-instansi-logo.png",
+    icon: "https://siasn.bkd.jatimprov.go.id:9000/public/icon-siasn.png",
     userType: ["admin"],
   },
   {
@@ -89,7 +89,7 @@ export const appLists = [
     desc: "Rumah ASN",
     color: "#FBBC05",
     url: "/statistik/dashboard",
-    icon: "https://siasn.bkd.jatimprov.go.id:9000/public/icon-maping.png",
+    icon: "https://siasn.bkd.jatimprov.go.id:9000/public/icon-statistik.png",
     userType: ["admin"],
   },
 ];
