@@ -1,4 +1,3 @@
-import ExcelJS from "exceljs";
 import {
   Button,
   Card,
@@ -10,17 +9,18 @@ import {
   Tag,
   Typography,
 } from "antd";
+import ExcelJS from "exceljs";
 
 import { saveAs } from "file-saver";
 
 import { logSIASN } from "@/services/log.services";
 
+import { FileExcelFilled, SearchOutlined } from "@ant-design/icons";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import dayjs from "dayjs";
 import { upperCase } from "lodash";
 import { useRouter } from "next/router";
 import LogSIASNFilter from "../Filter/LogSIASNFilter";
-import { CloudDownloadOutlined } from "@ant-design/icons";
 
 const showModalInformation = (item, title = "BsRE") => {
   Modal.info({
@@ -80,6 +80,9 @@ function LogHistorySIASN() {
           <Space direction="vertical">
             <Typography.Text>{text?.user?.username}</Typography.Text>
             <Typography.Text>{text?.employee_number}</Typography.Text>
+            <Typography.Text type="secondary">
+              {dayjs(text?.created_at).format("DD MMM YYYY HH:mm:ss")}
+            </Typography.Text>
             <Tag color="yellow">
               {text?.type} {upperCase(text?.siasn_service)}
             </Tag>
@@ -132,11 +135,24 @@ function LogHistorySIASN() {
       title: "Aksi",
       key: "aksi",
       render: (text) => (
-        <a onClick={() => gotoDetail(text?.employee_number)}>Detail</a>
+        // <a onClick={() => gotoDetail(text?.employee_number)}>Detail</a>
+        <a>
+          <SearchOutlined />
+        </a>
       ),
       responsive: ["sm"],
     },
   ];
+
+  const { mutateAsync: unduh, isLoading: isLoadingUnduh } = useMutation({
+    mutationFn: (data) => logSIASN(data),
+    onSuccess: async (data) => {
+      message.success("Berhasil mengunduh data");
+    },
+    onError: (error) => {
+      message.error("Gagal mengunduh data");
+    },
+  });
 
   const saveAsExcel = async (data) => {
     const workbook = new ExcelJS.Workbook();
@@ -165,33 +181,38 @@ function LogHistorySIASN() {
     saveAs(excelBlob, "Log SIASN.xlsx");
   };
 
-  const { mutateAsync: unduh, isLoading: isLoadingUnduh } = useMutation({
-    mutationFn: () =>
-      logSIASN({
-        ...query,
-        limit: 0,
-      }),
-    onSuccess: async (data) => {
-      await saveAsExcel(data?.data);
-      message.success("Berhasil mengunduh data");
-    },
-    onError: (error) => {
-      message.error("Gagal mengunduh data");
-    },
-  });
-
   const handleUnduh = async () => {
     try {
-      const result = await unduh();
+      const payload = {
+        ...router?.query,
+        bulan:
+          dayjs(query?.bulan).format("YYYY-MM") || dayjs().format("YYYY-MM"),
+        limit: 0,
+        mandiri: true,
+      };
+      const result = await unduh(payload);
+      await saveAsExcel(result?.data);
     } catch (error) {
       console.log(error);
     }
   };
 
   return (
-    <Card title="Tabel Log SIASN">
+    <Card
+      title="Tabel Riwayat SIASN"
+      extra={
+        <Button
+          icon={<FileExcelFilled />}
+          disabled={isLoadingUnduh}
+          loading={isLoadingUnduh}
+          onClick={handleUnduh}
+        >
+          Export
+        </Button>
+      }
+    >
       <LogSIASNFilter />
-      <Button
+      {/* <Button
         icon={<CloudDownloadOutlined />}
         type="primary"
         disabled={isLoadingUnduh}
@@ -199,7 +220,7 @@ function LogHistorySIASN() {
         onClick={handleUnduh}
       >
         Unduh
-      </Button>
+      </Button> */}
       <Table
         size="small"
         pagination={{

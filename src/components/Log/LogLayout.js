@@ -69,32 +69,24 @@ function LogLayout({ children, active = "dashboard" }) {
   const router = useRouter();
 
   const token = {
-    header: {
-      colorBgHeader: "#FAFAFA",
-      colorHeaderTitle: "#4B0082", // Indigo
-    },
-    bgLayout: "#FAFAFA",
-    colorPrimary: "#4B0082", // Indigo
+    bgLayout: "#fafafa",
+    colorPrimary: "#1890FF", // Warna biru utama Ant Design
     sider: {
-      colorBgCollapsedButton: "#FAFAFA",
-      colorTextCollapsedButton: "#4B0082", // Indigo
-      colorTextCollapsedButtonHover: "#5D1A91", // Indigo hover
-      colorBgMenuItemActive: "#E6E6FA", // Indigo muda
-      colorTextMenuTitle: "#4B0082", // Indigo
-      colorTextMenuItemHover: "#5D1A91", // Indigo hover
-      colorTextMenuSelected: "#4B0082", // Indigo
-      colorTextMenuActive: "#4B0082", // Indigo
-      colorBgMenuItemHover: "#E6E6FA", // Indigo muda
-      colorBgMenuItemSelected: "#E6E6FA", // Indigo muda
-      colorBgMenuItemCollapsedElevated: "#FAFAFA",
-      colorTextMenu: "#4B0082", // Indigo
-      colorBgMenu: "#FAFAFA",
-      colorTextMenuSecondary: "#2E0050", // Indigo sangat gelap
-      colorMenuItemDivider: "#F5F5F5",
-    },
-    button: {
-      colorPrimary: "#4B0082", // Indigo
-      colorPrimaryHover: "#5D1A91", // Indigo hover
+      colorBgCollapsedButton: "#1890FF", // Biru untuk tombol collapse
+      colorBgMenuItemActive: "#E6F7FF", // Biru sangat muda untuk item menu yang aktif
+      colorTextCollapsedButton: "#fafafa", // Putih untuk teks tombol collapse
+      colorTextCollapsedButtonHover: "#E6F7FF", // Biru sangat muda untuk teks tombol collapse saat di-hover
+      colorTextMenuTitle: "#1890FF", // Biru untuk judul menu
+      colorTextMenuItemHover: "#1890FF", // Biru untuk teks menu saat di-hover
+      colorTextMenuSelected: "#1890FF", // Biru untuk teks menu saat dipilih
+      colorTextMenuActive: "#1890FF", // Biru untuk teks menu saat aktif
+      colorBgMenuItemHover: "rgba(24, 144, 255, 0.1)", // Transparan biru saat item menu di-hover
+      colorBgMenuItemSelected: "rgba(24, 144, 255, 0.2)", // Transparan biru lebih terang untuk item menu yang dipilih
+      colorBgMenuItemCollapsedElevated: "#fafafa", // Putih untuk menu yang tertutup namun ditinggikan
+      colorTextMenu: "#595959", // Abu-abu gelap untuk teks menu biasa
+      colorBgMenu: "#fafafa", // Putih untuk latar belakang menu
+      colorTextMenuSecondary: "#8C8C8C", // Abu-abu medium untuk teks menu sekunder
+      colorMenuItemDivider: "#F0F0F0", // Abu-abu sangat muda untuk pembatas menu
     },
   };
 
@@ -109,7 +101,7 @@ function LogLayout({ children, active = "dashboard" }) {
     >
       <ProConfigProvider token={token}>
         <ProLayout
-          title={"Rekon SIASN"}
+          title={"History Log User"}
           defaultCollapsed={collapsed}
           collapsed={collapsed}
           onCollapse={setCollapsed}

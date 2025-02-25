@@ -391,22 +391,22 @@ const changeRoutes = (user) => {
               name: "Standar Pelayanan",
             },
           ],
-        },
-        {
-          path: "/logs",
-          name: "Riwayat Log",
-          icon: <ProfileOutlined />,
-          routes: [
-            {
-              path: "/logs/siasn",
-              name: "Riwayat Log SIASN",
-            },
-            {
-              path: "/logs/bsre",
-              name: "Riwayat Log BSrE",
-            },
-          ],
         }
+        // {
+        //   path: "/logs",
+        //   name: "Riwayat Log",
+        //   icon: <ProfileOutlined />,
+        //   routes: [
+        //     {
+        //       path: "/logs/siasn",
+        //       name: "Riwayat Log SIASN",
+        //     },
+        //     {
+        //       path: "/logs/bsre",
+        //       name: "Riwayat Log BSrE",
+        //     },
+        //   ],
+        // }
       );
     }
 

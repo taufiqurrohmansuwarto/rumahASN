@@ -1,7 +1,12 @@
+import { Card, Col, Row } from "antd";
 import React from "react";
 
 function LogDashboard() {
-  return <div>Dashboard</div>;
+  return (
+    <Card>
+      <div>dashboard</div>
+    </Card>
+  );
 }
 
 export default LogDashboard;
