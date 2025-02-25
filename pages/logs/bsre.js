@@ -1,4 +1,4 @@
-import Layout from "@/components/Layout";
+import LogLayout from "@/components/Log/LogLayout";
 import PageContainer from "@/components/PageContainer";
 import ReactJson from "@/components/ReactJson";
 import { dataSealById, logBsreSeal } from "@/services/log.services";
@@ -266,7 +266,7 @@ function LogBSRE() {
   );
 }
 
-LogBSRE.getLayout = (page) => <Layout active="/logs/bsre">{page}</Layout>;
+LogBSRE.getLayout = (page) => <LogLayout active="/logs/bsre">{page}</LogLayout>;
 
 LogBSRE.Auth = {
   action: "manage",

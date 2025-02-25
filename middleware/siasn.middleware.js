@@ -98,8 +98,12 @@ const requestHandler = async (request) => {
 const responseHandler = async (response) => response;
 
 const errorHandler = async (error) => {
-  // const ECONRESET = error?.code === "ECONNRESET";
   const errorData = error?.response?.data || {};
+
+  // typeo errorData is buffer
+  const isBuffer = Buffer.isBuffer(errorData);
+
+  const ECONRESET = error?.code === "ECONNRESET";
   const invalidJwt = errorData.message === "invalid or expired jwt";
   const tokenError = errorData.data === "Token SSO mismatch";
   const invalidCredentials = errorData.message === "Invalid Credentials";
@@ -108,7 +112,12 @@ const errorHandler = async (error) => {
     !(errorData.description && errorData.description.includes("SUSPENDED"));
 
   const notValid =
-    invalidJwt || runtimeError || tokenError || invalidCredentials;
+    invalidJwt ||
+    runtimeError ||
+    tokenError ||
+    invalidCredentials ||
+    ECONRESET ||
+    isBuffer;
   if (notValid) {
     if (redisClient) {
       await redisClient.del(TOKEN_KEY);

@@ -1,5 +1,5 @@
 import { CaretDownOutlined, CaretUpOutlined } from "@ant-design/icons";
-import { Checkbox, DatePicker, Form, Input, Space } from "antd";
+import { DatePicker, Form, Input, Space } from "antd";
 import { useRouter } from "next/router";
 import { useEffect } from "react";
 import QueryFilter from "../QueryFilter";
@@ -49,10 +49,10 @@ function LogSIASNFilter() {
       <QueryFilter
         span={{
           sm: 24,
-          md: 24,
-          xl: 24,
-          lg: 24,
-          xxl: 12,
+          md: 8,
+          xl: 8,
+          lg: 8,
+          xxl: 8,
           xs: 24,
         }}
         layout="vertical"
@@ -90,9 +90,9 @@ function LogSIASNFilter() {
             }}
           />
         </Form.Item>
-        <Form.Item valuePropName="checked" name="mandiri" label="Mandiri">
+        {/* <Form.Item valuePropName="checked" name="mandiri" label="Mandiri">
           <Checkbox />
-        </Form.Item>
+        </Form.Item> */}
       </QueryFilter>
     </div>
   );

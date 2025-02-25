@@ -1,7 +1,7 @@
 import LogDashboard from "@/components/Log/LogDashboard";
 import PageContainer from "@/components/PageContainer";
 import LogLayout from "@/components/Log/LogLayout";
-import { Grid } from "antd";
+import { Grid, Breadcrumb } from "antd";
 import Head from "next/head";
 
 function DashboardLogs() {
@@ -9,14 +9,19 @@ function DashboardLogs() {
   return (
     <>
       <Head>
-        <title>Logs</title>
+        <title>History Log User</title>
       </Head>
       <PageContainer
         childrenContentStyle={{
           padding: breakPoint?.xs ? 0 : null,
         }}
-        title="Logs"
-        subTitle="Log Rumah ASN"
+        title="History Log User"
+        subTitle="History Log User"
+        breadcrumbRender={() => (
+          <Breadcrumb>
+            <Breadcrumb.Item>Dashboard</Breadcrumb.Item>
+          </Breadcrumb>
+        )}
       >
         <LogDashboard />
       </PageContainer>

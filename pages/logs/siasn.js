@@ -22,20 +22,14 @@ function LogSIASN() {
         childrenContentStyle={{
           padding: breakPoint.xs ? 0 : null,
         }}
-        title="Log"
-        subTitle="Layanan SIASN"
+        title={null}
         header={{
           breadcrumbRender: () => (
             <Breadcrumb>
               <Breadcrumb.Item>
-                <Link href="/feeds">Beranda</Link>
+                <Link href="/logs/dashboard">Dashboard</Link>
               </Breadcrumb.Item>
-              <Breadcrumb.Item>
-                <Link href="/apps-managements/integrasi/siasn">
-                  Integrasi SIASN
-                </Link>
-              </Breadcrumb.Item>
-              <Breadcrumb.Item>Log</Breadcrumb.Item>
+              <Breadcrumb.Item>History User SIASN</Breadcrumb.Item>
             </Breadcrumb>
           ),
         }}
