@@ -2,6 +2,8 @@ const LogSIASN = require("@/models/log-siasn.model");
 const LogBsre = require("@/models/log-bsre.model");
 const LogSealBsre = require("@/models/log-seal-bsre.model");
 
+const dayjs = require("dayjs");
+
 const indexLogBsre = async (req, res) => {
   try {
     const page = req?.query?.page || 1;
@@ -34,11 +36,20 @@ const indexLogSiasn = async (req, res) => {
     const siasnService = req?.query?.siasn_service || "";
     const employeeNumber = req?.query?.employeeNumber || "";
     const action = req?.query?.action || "";
+    const bulan = req?.query?.bulan || "";
+    const mandiri = req?.query?.mandiri || false;
+    const {
+      user: { customId },
+    } = req;
 
     const page = req?.query?.page || 1;
     const limit = req?.query?.limit || 10;
+    console.log(req?.query);
 
-    const result = await LogSIASN.query()
+    const startDate = dayjs(bulan, "YYYY-MM").startOf("month").toDate();
+    const endDate = dayjs(bulan, "YYYY-MM").endOf("month").toDate();
+
+    let query = LogSIASN.query()
       .where((builder) => {
         if (type) {
           builder.where("type", "ilike", `%${type}%`);
@@ -52,19 +63,43 @@ const indexLogSiasn = async (req, res) => {
         if (action) {
           builder.where("action", "ilike", `%${action}%`);
         }
+        if (bulan) {
+          builder
+            .where("created_at", ">=", startDate)
+            .where("created_at", "<=", endDate);
+        }
+        if (mandiri === "true" || mandiri === true) {
+          builder.where("user_id", customId);
+        }
       })
-      .page(parseInt(page) - 1, parseInt(limit))
       .withGraphFetched("user(fullSelect)")
       .orderBy("created_at", "desc");
 
-    const data = {
-      data: result.results,
-      total: result.total,
-      page,
-      limit,
-    };
+    let result;
 
-    res.json(data);
+    if (parseInt(limit) === 0) {
+      // Get all data without pagination
+      result = await query;
+
+      const data = {
+        data: result,
+        total: result.length,
+      };
+
+      res.json(data);
+    } else {
+      // Use pagination
+      result = await query.page(parseInt(page) - 1, parseInt(limit));
+
+      const data = {
+        data: result.results,
+        total: result.total,
+        page,
+        limit,
+      };
+
+      res.json(data);
+    }
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: "Internal server error" });
