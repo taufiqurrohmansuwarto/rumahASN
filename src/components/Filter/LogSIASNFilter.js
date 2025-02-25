@@ -1,5 +1,5 @@
 import { CaretDownOutlined, CaretUpOutlined } from "@ant-design/icons";
-import { Form, Input, Space } from "antd";
+import { Checkbox, DatePicker, Form, Input, Space } from "antd";
 import { useRouter } from "next/router";
 import { useEffect } from "react";
 import QueryFilter from "../QueryFilter";
@@ -81,6 +81,17 @@ function LogSIASNFilter() {
       >
         <Form.Item name="employeeNumber" label="NIP">
           <Input />
+        </Form.Item>
+        <Form.Item name="bulan" label="Bulan">
+          <DatePicker.MonthPicker
+            format={{
+              format: "YYYY-MM",
+              type: "mask",
+            }}
+          />
+        </Form.Item>
+        <Form.Item valuePropName="checked" name="mandiri" label="Mandiri">
+          <Checkbox />
         </Form.Item>
       </QueryFilter>
     </div>

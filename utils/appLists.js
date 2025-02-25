@@ -92,6 +92,15 @@ export const appLists = [
     icon: "https://siasn.bkd.jatimprov.go.id:9000/public/icon-statistik.png",
     userType: ["admin"],
   },
+  {
+    rightIcon: <IconTransfer />,
+    title: "Logs",
+    desc: "Log Rumah ASN",
+    color: "#FBBC05",
+    url: "/logs/dashboard",
+    icon: "https://siasn.bkd.jatimprov.go.id:9000/public/icon-log.png",
+    userType: ["admin"],
+  },
 ];
 
 export const getUserType = (user) => {
@@ -133,7 +142,7 @@ export const getMenuItems = (menuItems, user) => {
   // Cek role user
   const isAdmin =
     user?.role === "USER" &&
-    user?.group === "MASTER" &&
+    (user?.group === "MASTER" || user?.group === "NON ASN") &&
     user?.current_role === "admin";
 
   const isFasilitator =
