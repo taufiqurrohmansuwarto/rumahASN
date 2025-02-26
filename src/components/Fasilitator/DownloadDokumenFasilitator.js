@@ -1,4 +1,5 @@
 import { getDokumenFasilitator } from "@/services/master.services";
+import { FileExcelOutlined } from "@ant-design/icons";
 import { useMutation } from "@tanstack/react-query";
 import { Button } from "antd";
 
@@ -20,11 +21,12 @@ function DownloadDokumenFasilitator() {
 
   return (
     <Button
+      icon={<FileExcelOutlined />}
       type="primary"
       loading={mutation.isLoading}
       onClick={() => mutation.mutate()}
     >
-      SK Pelaksana 25
+      SK Pelaksana
     </Button>
   );
 }

@@ -4,18 +4,26 @@ import NotifikasiForumKepegawaian from "@/components/Notification/NotifikasiForu
 import NotifikasiKepegawaian from "@/components/Notification/NotifikasiKepegawaian";
 import NotifikasiPrivateMessage from "@/components/Notification/NotifikasiPrivateMessage";
 import { appList } from "@/utils/app-lists";
+import { getMenuItems, mappingItems } from "@/utils/appLists";
 import {
   BookOutlined,
-  BuildOutlined,
   LogoutOutlined,
+  SearchOutlined,
   SunOutlined,
   SyncOutlined,
   TeamOutlined,
   UserOutlined,
-  WarningOutlined,
 } from "@ant-design/icons";
 import { ProConfigProvider } from "@ant-design/pro-components";
-import { Dropdown, Layout, Space } from "antd";
+import {
+  IconBandage,
+  IconBuilding,
+  IconLayoutDashboard,
+  IconRotateRectangle,
+  IconUserSearch,
+} from "@tabler/icons-react";
+import { Dropdown, Input, Layout, Space } from "antd";
+import { trim } from "lodash";
 import { signOut, useSession } from "next-auth/react";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/router";
@@ -23,65 +31,81 @@ import { useState } from "react";
 
 const menuItems = [
   {
-    key: "pegawai",
-    icon: <UserOutlined />,
+    key: "/dashboard",
+    icon: <IconLayoutDashboard size={16} />,
+    label: "Dashboard",
+    role: ["admin", "fasilitator"],
+  },
+
+  {
+    key: "/pegawai",
+    icon: <IconUserSearch size={16} />,
     label: "Daftar Pegawai",
     role: ["admin", "fasilitator"],
   },
   {
-    key: "anomali",
-    icon: <WarningOutlined />,
+    key: "/anomali",
+    icon: <IconBandage size={16} />,
     label: "Disparitas Data",
     role: ["admin", "fasilitator"],
   },
   {
-    key: "rekon-unor",
-    icon: <BuildOutlined />,
+    key: "/unor",
+    icon: <IconBuilding size={16} />,
     label: "Unit Organisasi",
     role: ["admin", "fasilitator"],
   },
   {
-    key: "rekon-jft",
-    icon: <TeamOutlined />,
-    label: "Jabatan Fungsional",
+    key: "/rekon-ref",
+    icon: <IconRotateRectangle size={16} />,
+    label: "Rekon Referensi",
     role: ["admin"],
+    children: [
+      {
+        key: "/rekon-ref/rekon-jft",
+        icon: <TeamOutlined />,
+        label: "Jabatan Fungsional",
+        role: ["admin"],
+      },
+      {
+        key: "/rekon-ref/rekon-jfu",
+        icon: <SunOutlined />,
+        label: "Jabatan Pelaksana",
+        role: ["admin"],
+      },
+      {
+        key: "/rekon-ref/rekon-jenjang",
+        icon: <BookOutlined />,
+        label: "Jenjang",
+        role: ["admin"],
+      },
+      {
+        key: "/rekon-ref/rekon-pangkat",
+        icon: <BookOutlined />,
+        label: "Pangkat",
+        role: ["admin"],
+      },
+      {
+        key: "/rekon-ref/rekon-jenis_jabatan",
+        icon: <BookOutlined />,
+        label: "Jenis Jabatan",
+        role: ["admin"],
+      },
+      {
+        key: "/rekon-ref/rekon-eselon",
+        icon: <BookOutlined />,
+        label: "Eselon",
+        role: ["admin"],
+      },
+      {
+        key: "/rekon-ref/rekon-subjabatan",
+        icon: <BookOutlined />,
+        label: "Sub Jabatan",
+        role: ["admin"],
+      },
+    ],
   },
-  {
-    key: "rekon-jfu",
-    icon: <SunOutlined />,
-    label: "Jabatan Pelaksana",
-    role: ["admin"],
-  },
-  {
-    key: "rekon-jenjang",
-    icon: <BookOutlined />,
-    label: "Jenjang",
-    role: ["admin"],
-  },
-  {
-    key: "rekon-pangkat",
-    icon: <BookOutlined />,
-    label: "Pangkat",
-    role: ["admin"],
-  },
-  {
-    key: "rekon-jenis_jabatan",
-    icon: <BookOutlined />,
-    label: "Jenis Jabatan",
-    role: ["admin"],
-  },
-  {
-    key: "rekon-eselon",
-    icon: <BookOutlined />,
-    label: "Eselon",
-    role: ["admin"],
-  },
-  {
-    key: "rekon-subjabatan",
-    icon: <BookOutlined />,
-    label: "Sub Jabatan",
-    role: ["admin"],
-  },
+
   // { key: "rekon-diklat", icon: <BookOutlined />, label: "Diklat" },
 
   {
@@ -91,24 +115,6 @@ const menuItems = [
     role: ["admin"],
   },
 ];
-
-const getMenuItems = (user) => {
-  const admin =
-    user?.role === "USER" &&
-    user?.group === "MASTER" &&
-    user?.current_role === "admin";
-
-  const fasilitator =
-    user?.role === "FASILITATOR" &&
-    user?.group === "MASTER" &&
-    user?.current_role === "user";
-
-  return menuItems.filter((item) => {
-    if (admin) return item.role.includes("admin");
-    if (fasilitator) return item.role.includes("fasilitator");
-    return false;
-  });
-};
 
 const ProLayout = dynamic(
   () => import("@ant-design/pro-components").then((mod) => mod?.ProLayout),
@@ -123,36 +129,37 @@ function RekonLayout({ children, active = "rekon-unor" }) {
   const router = useRouter();
 
   const token = {
-    header: {
-      colorBgHeader: "#FAFAFA",
-      colorHeaderTitle: "#4B0082", // Indigo
-    },
-    bgLayout: "#FAFAFA",
-    colorPrimary: "#4B0082", // Indigo
+    bgLayout: "#fafafa",
+    colorPrimary: "#52C41A", // Warna hijau utama Ant Design
     sider: {
-      colorBgCollapsedButton: "#FAFAFA",
-      colorTextCollapsedButton: "#4B0082", // Indigo
-      colorTextCollapsedButtonHover: "#5D1A91", // Indigo hover
-      colorBgMenuItemActive: "#E6E6FA", // Indigo muda
-      colorTextMenuTitle: "#4B0082", // Indigo
-      colorTextMenuItemHover: "#5D1A91", // Indigo hover
-      colorTextMenuSelected: "#4B0082", // Indigo
-      colorTextMenuActive: "#4B0082", // Indigo
-      colorBgMenuItemHover: "#E6E6FA", // Indigo muda
-      colorBgMenuItemSelected: "#E6E6FA", // Indigo muda
-      colorBgMenuItemCollapsedElevated: "#FAFAFA",
-      colorTextMenu: "#4B0082", // Indigo
-      colorBgMenu: "#FAFAFA",
-      colorTextMenuSecondary: "#2E0050", // Indigo sangat gelap
-      colorMenuItemDivider: "#F5F5F5",
-    },
-    button: {
-      colorPrimary: "#4B0082", // Indigo
-      colorPrimaryHover: "#5D1A91", // Indigo hover
+      colorBgCollapsedButton: "#52C41A", // Hijau untuk tombol collapse
+      colorBgMenuItemActive: "#F6FFED", // Hijau sangat muda untuk item menu yang aktif
+      colorTextCollapsedButton: "#fafafa", // Putih untuk teks tombol collapse
+      colorTextCollapsedButtonHover: "#F6FFED", // Hijau sangat muda untuk teks tombol collapse saat di-hover
+      colorTextMenuTitle: "#52C41A", // Hijau untuk judul menu
+      colorTextMenuItemHover: "#52C41A", // Hijau untuk teks menu saat di-hover
+      colorTextMenuSelected: "#52C41A", // Hijau untuk teks menu saat dipilih
+      colorTextMenuActive: "#52C41A", // Hijau untuk teks menu saat aktif
+      colorBgMenuItemHover: "rgba(82, 196, 26, 0.1)", // Transparan hijau saat item menu di-hover
+      colorBgMenuItemSelected: "rgba(82, 196, 26, 0.2)", // Transparan hijau lebih terang untuk item menu yang dipilih
+      colorBgMenuItemCollapsedElevated: "#fafafa", // Putih untuk menu yang tertutup namun ditinggikan
+      colorTextMenu: "#595959", // Abu-abu gelap untuk teks menu biasa
+      colorBgMenu: "#fafafa", // Putih untuk latar belakang menu
+      colorTextMenuSecondary: "#8C8C8C", // Abu-abu medium untuk teks menu sekunder
+      colorMenuItemDivider: "#F0F0F0", // Abu-abu sangat muda untuk pembatas menu
     },
   };
 
   const [collapsed, setCollapsed] = useState(true);
+
+  const handleSearch = (value) => {
+    const query = trim(value);
+    if (query.length > 0) {
+      router.push(`/rekon/pegawai?search=${query}&page=1`);
+    } else {
+      router.push(`/rekon/pegawai?page=1`);
+    }
+  };
 
   return (
     <div
@@ -177,6 +184,21 @@ function RekonLayout({ children, active = "rekon-unor" }) {
           actionsRender={(props) => {
             // if (props.isMobile) return [];
             return [
+              <Input.Search
+                onClear={() => handleSearch("")}
+                allowClear
+                key="search"
+                style={{
+                  borderRadius: 8,
+                  marginInlineEnd: 40,
+                  width: 350,
+                  transition: "all 0.3s ease",
+                }}
+                placeholder="Cari Pegawai..."
+                size="middle"
+                onSearch={handleSearch}
+                className="search-input-professional"
+              />,
               <NotifikasiKepegawaian
                 key="kepegawaian"
                 url="kepegawaian"
@@ -237,11 +259,7 @@ function RekonLayout({ children, active = "rekon-unor" }) {
             },
           }}
           route={{
-            routes: getMenuItems(data?.user).map((item) => ({
-              path: `/rekon/${item.key}`,
-              name: item.label,
-              icon: item.icon,
-            })),
+            routes: mappingItems(getMenuItems(menuItems, data?.user), "/rekon"),
           }}
           menuItemRender={(item, dom) => (
             <a

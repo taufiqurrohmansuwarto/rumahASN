@@ -4,11 +4,13 @@ import { capitalizeWords } from "@/utils/client-utils";
 import {
   CheckCircleOutlined,
   ExclamationCircleOutlined,
+  UserOutlined,
 } from "@ant-design/icons";
 import { useQuery } from "@tanstack/react-query";
 import {
   Avatar,
   Button,
+  Card,
   Flex,
   Space,
   Table,
@@ -20,6 +22,8 @@ import { useRouter } from "next/router";
 import EmployeesTableFilter from "../Filter/EmployeesTableFilter";
 import DownloadASN from "./DownloadASN";
 import DownloadDokumenFasilitator from "./DownloadDokumenFasilitator";
+import { useSession } from "next-auth/react";
+import React from "react";
 
 const TagKomparasi = ({ komparasi, nama }) => {
   return (
@@ -32,9 +36,63 @@ const TagKomparasi = ({ komparasi, nama }) => {
   );
 };
 
+const mappingPerangkatDaerah = (daftarPerangkatDaerah, organizationId) => {
+  const result = daftarPerangkatDaerah?.map((item) => {
+    const id = item?.id;
+    const currentUserOrganizationId = organizationId;
+
+    const regexOrgIdMatch = new RegExp(`^${currentUserOrganizationId}`);
+
+    const isMatch = regexOrgIdMatch.test(id);
+
+    return { ...item, isMatch };
+  });
+
+  return result;
+};
+
+const ExampleComponent = ({ data }) => {
+  const router = useRouter();
+
+  const handleClick = (item) => {
+    if (item.isMatch) {
+      router.push({
+        pathname: router.pathname,
+        query: { ...router.query, opd_id: item?.id },
+      });
+    } else {
+      return;
+    }
+  };
+
+  return (
+    <div>
+      {data.map((item, index) => {
+        // Tentukan komponen Typography sesuai nilai isMatch
+        const Element = item.isMatch ? Typography.Text : Typography.Text;
+
+        return (
+          <React.Fragment key={item.id}>
+            <Element
+              onClick={() => handleClick(item)}
+              style={{
+                cursor: item.isMatch ? "pointer" : "default",
+              }}
+            >
+              {item.name}
+            </Element>
+            {index < data.length - 1 && " - "}
+          </React.Fragment>
+        );
+      })}
+    </div>
+  );
+};
+
 function EmployeesTable() {
   const router = useRouter();
   useScrollRestoration();
+  const { data: session } = useSession();
 
   const { data, isLoading, isFetching } = useQuery(
     ["employees-paging", router?.query],
@@ -147,82 +205,105 @@ function EmployeesTable() {
     {
       title: "Foto",
       key: "foto",
-      responsive: ["sm"],
       width: 100,
+      responsive: ["sm"],
       render: (row) => (
-        <Avatar size={100} shape="square" src={row?.foto} alt="foto" />
+        <Avatar
+          style={{ cursor: "pointer" }}
+          size={100}
+          shape="square"
+          src={row?.foto}
+          alt="foto"
+        />
       ),
     },
     {
-      title: "Informasi",
-      key: "informasi",
+      title: "Nama dan Jabatan",
+      key: "nama_dan_jabatan",
       responsive: ["sm"],
       width: 200,
       render: (_, row) => {
         return (
           <Space direction="vertical" size="small">
-            <Typography.Text>{row?.nama_master}</Typography.Text>
+            <Typography.Link>{row?.nama_lengkap_master}</Typography.Link>
             <Typography.Text>{row?.nip_master}</Typography.Text>
-            <Tooltip title="Pembetulan dilakukan di SIASN">
-              <Tag color="yellow">{row?.siasn?.status}</Tag>
-            </Tooltip>
-            <Tooltip title="Perbaikan dilakukan dengan menambahkan riwayat jabatan SIASN">
-              <Tag color="cyan">{row?.siasn?.jenjang_jabatan}</Tag>
+            <Typography.Text>{row?.jabatan_master}</Typography.Text>
+            <Tooltip title="Status Pegawai">
+              <Tag color="yellow" icon={<UserOutlined />}>
+                {row?.siasn?.status}
+              </Tag>
             </Tooltip>
           </Space>
         );
       },
     },
-
     {
-      title: "Jabatan",
-      key: "jabatan",
+      title: "Unit Kerja",
+      key: "unit_kerja",
+      width: 500,
       responsive: ["sm"],
       render: (row) => {
         return (
           <Space direction="vertical" size="small">
-            <Space size="small">
-              {row?.jenis_jabatan}
-              {row?.golongan_master}
-            </Space>
-            <div>{row?.jabatan_master}</div>
-            <div>{capitalizeWords(row?.siasn?.nama_jabatan)}</div>
+            <ExampleComponent
+              data={mappingPerangkatDaerah(
+                row?.opd_master_full,
+                session?.user?.organization_id
+              )}
+            />
           </Space>
         );
       },
     },
+    // {
+    //   title: "Jabatan",
+    //   key: "jabatan",
+    //   responsive: ["sm"],
+    //   render: (row) => {
+    //     return (
+    //       <Space direction="vertical" size="small">
+    //         <Space size="small">
+    //           {row?.jenis_jabatan}
+    //           {row?.golongan_master}
+    //         </Space>
+    //         <div>{row?.jabatan_master}</div>
+    //         <div>{capitalizeWords(row?.siasn?.nama_jabatan)}</div>
+    //       </Space>
+    //     );
+    //   },
+    // },
+    // {
+    //   title: "Jenjang/Pendidikan",
+    //   key: "jenjang_pendidikan_master",
+    //   responsive: ["sm"],
+    //   render: (row) => (
+    //     <Space direction="vertical" size="small">
+    //       {row?.jenjang_master || "SIMASTER Kosong"}
+    //       <div>
+    //         {row?.jenjang_master} {row?.prodi_master}
+    //       </div>
+    //       <div>{row?.siasn?.jenjang}</div>
+    //     </Space>
+    //   ),
+    // },
+    // {
+    //   title: "Perangkat Daerah",
+    //   dataIndex: "opd_master",
+    //   responsive: ["sm"],
+    //   width: 200,
+    // },
+    // {
+    //   title: "Unor SIASN",
+    //   key: "unor_siasn",
+    //   responsive: ["sm"],
+    //   width: 200,
+    //   render: (row) => <div>{row?.siasn?.unor}</div>,
+    // },
     {
-      title: "Jenjang/Pendidikan",
-      key: "jenjang_pendidikan_master",
-      responsive: ["sm"],
-      render: (row) => (
-        <Space direction="vertical" size="small">
-          {row?.jenjang_master || "SIMASTER Kosong"}
-          <div>
-            {row?.jenjang_master} {row?.prodi_master}
-          </div>
-          <div>{row?.siasn?.jenjang}</div>
-        </Space>
-      ),
-    },
-    {
-      title: "Perangkat Daerah",
-      dataIndex: "opd_master",
-      responsive: ["sm"],
-      width: 200,
-    },
-    {
-      title: "Unor SIASN",
-      key: "unor_siasn",
-      responsive: ["sm"],
-      width: 200,
-      render: (row) => <div>{row?.siasn?.unor}</div>,
-    },
-    {
-      title: "Hasil Validasi",
+      title: "Hasil Integrasi SIASN",
       key: "hasil",
+      width: 200,
       responsive: ["sm"],
-      width: 100,
       render: (row) => {
         return (
           <Space direction="vertical" size="small">
@@ -291,37 +372,21 @@ function EmployeesTable() {
         );
       },
     },
-    {
-      title: "Aksi",
-      key: "action",
-      responsive: ["sm"],
-      render: (row) => {
-        return <a onClick={() => gotoDetail(row?.nip_master)}>Detail</a>;
-      },
-    },
   ];
 
   return (
-    <div>
-      <div
-        style={{
-          border: "1px solid #f0f0f0",
-          padding: 16,
-          marginTop: 16,
-          marginBottom: 16,
-        }}
-      >
+    <Card title="Data Pegawai" extra={<DownloadDokumenFasilitator />}>
+      <div>
         <EmployeesTableFilter />
-        <Flex gap="small">
+        {/* <Flex gap="small">
           <DownloadASN />
           <DownloadDokumenFasilitator />
-        </Flex>
+        </Flex> */}
       </div>
       <Table
         columns={columns}
         dataSource={data?.results}
         pagination={{
-          size: "small",
           total: data?.total,
           showTotal: (total) => `Total ${total} pegawai`,
           showSizeChanger: false,
@@ -329,12 +394,12 @@ function EmployeesTable() {
           defaultCurrent: 1,
           onChange: handleChangePage,
           pageSize: 10,
-          position: ["topRight", "bottomRight"],
+          position: ["topRight", "bottomRight", "bottomLeft", "topLeft"],
         }}
         loading={isLoading || isFetching}
         rowKey={(row) => row?.id}
       />
-    </div>
+    </Card>
   );
 }
 

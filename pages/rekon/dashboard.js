@@ -1,17 +1,22 @@
 import PageContainer from "@/components/PageContainer";
 import RekonLayout from "@/components/Rekon/RekonLayout";
-import DaftarPegawai from "@/components/Rekon/DaftarPegawai";
+import { Grid, Breadcrumb } from "antd";
 import Head from "next/head";
-import { Breadcrumb } from "antd";
-const Pegawai = () => {
+
+const RekonDashboard = () => {
+  const breakPoint = Grid.useBreakpoint();
+
   return (
     <>
       <Head>
-        <title>Rumah ASN - Rekon - Daftar Pegawai</title>
+        <title>Rumah ASN - Rekon - Dashboard</title>
       </Head>
       <PageContainer
-        title="Rekon"
-        content="Daftar Pegawai"
+        childrenContentStyle={{
+          padding: breakPoint.xs ? 0 : null,
+        }}
+        title="Dashboard"
+        content="Dashboard Rekon"
         breadcrumbRender={() => {
           return (
             <Breadcrumb>
@@ -21,20 +26,18 @@ const Pegawai = () => {
             </Breadcrumb>
           );
         }}
-      >
-        <DaftarPegawai />
-      </PageContainer>
+      ></PageContainer>
     </>
   );
 };
 
-Pegawai.getLayout = (page) => {
-  return <RekonLayout active="/rekon/pegawai">{page}</RekonLayout>;
+RekonDashboard.getLayout = (page) => {
+  return <RekonLayout active="/rekon/dashboard">{page}</RekonLayout>;
 };
 
-Pegawai.Auth = {
+RekonDashboard.Auth = {
   action: "manage",
   subject: "Tickets",
 };
 
-export default Pegawai;
+export default RekonDashboard;
