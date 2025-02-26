@@ -155,8 +155,8 @@ export const getMenuItems = (menuItems, user) => {
     user?.group === "MASTER" &&
     user?.id === "master|56543";
 
-  // Filter menu berdasarkan role
-  const filteredMenuItems = menuItems.filter((item) => {
+  // Fungsi untuk memeriksa apakah item menu sesuai dengan role user
+  const checkItemRole = (item) => {
     const { role } = item;
 
     // Jika user memiliki role prakom dan admin
@@ -170,7 +170,42 @@ export const getMenuItems = (menuItems, user) => {
     if (isPrakom) return role.includes("prakom");
 
     return false;
+  };
+
+  // Filter menu berdasarkan role
+  const filteredMenuItems = menuItems.filter((item) => {
+    // Periksa role pada item menu
+    const isRoleMatch = checkItemRole(item);
+
+    // Jika item memiliki children, filter children berdasarkan role juga
+    if (item.children && isRoleMatch) {
+      item.children = item.children.filter((child) => checkItemRole(child));
+      // Jika setelah filtering tidak ada children yang tersisa, kembalikan false
+      return item.children.length > 0;
+    }
+
+    return isRoleMatch;
   });
 
   return filteredMenuItems;
+};
+
+export const mappingItems = (items, prefix = "") => {
+  return items.map((item) => {
+    const path = prefix ? `${prefix}${item.key}` : item.key;
+
+    const mappedItem = {
+      path: path,
+      name: item.label,
+      icon: item.icon,
+      key: path,
+    };
+
+    // Jika item memiliki children, lakukan mapping secara rekursif
+    if (item.children && item.children.length > 0) {
+      mappedItem.children = mappingItems(item.children, path);
+    }
+
+    return mappedItem;
+  });
 };

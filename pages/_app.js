@@ -127,23 +127,7 @@ function Auth({ children, action, subject }) {
 }
 
 function MyApp({ Component, pageProps: { session, ...pageProps } }) {
-  const [queryClient] = useState(
-    () =>
-      new QueryClient({
-        defaultOptions: {
-          queries: {
-            staleTime: 1000 * 60 * 5,
-            cacheTime: 1000 * 60 * 5,
-            refetchOnWindowFocus: false,
-            refetchOnMount: false,
-            refetchOnReconnect: false,
-            refetchInterval: false,
-            refetchIntervalInBackground: false,
-            refetchIntervalInBackground: false,
-          },
-        },
-      })
-  );
+  const [queryClient] = useState(() => new QueryClient());
   const getLayout = Component.getLayout || ((page) => page);
 
   const breakPoint = Grid.useBreakpoint();

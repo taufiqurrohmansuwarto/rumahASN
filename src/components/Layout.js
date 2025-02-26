@@ -1,13 +1,12 @@
 import MegaMenuTop from "@/components/MegaMenu/MegaMenuTop";
 import { currentUserRole } from "@/services/current-user.services";
+import { appList } from "@/utils/app-lists";
 import {
   AntDesignOutlined,
   ApiOutlined,
-  BarChartOutlined,
   BookOutlined,
   GroupOutlined,
   LogoutOutlined,
-  ProfileOutlined,
   QuestionCircleFilled,
   SolutionOutlined,
   UserOutlined,
@@ -31,7 +30,6 @@ import NotifikasiASNConnect from "./Notification/NotifikasiASNConnect";
 import NotifikasiForumKepegawaian from "./Notification/NotifikasiForumKepegawaian";
 import NotifikasiKepegawaian from "./Notification/NotifikasiKepegawaian";
 import NotifikasiPrivateMessage from "./Notification/NotifikasiPrivateMessage";
-import { appList } from "@/utils/app-lists";
 const ProLayout = dynamic(
   () => import("@ant-design/pro-components").then((mod) => mod?.ProLayout),
   {

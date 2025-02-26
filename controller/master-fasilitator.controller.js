@@ -10,6 +10,8 @@ const arrayToTree = require("array-to-tree");
 const { proxyDataUtamaASN } = require("@/utils/siasn-proxy.utils");
 const { createRedisInstance } = require("@/utils/redis");
 
+const LIMIT = 10;
+
 // keperluan komparasi
 const validateOpdId = (opdId) => {
   if (!opdId) {
@@ -414,7 +416,7 @@ const getAllEmployeesMasterPaging = async (req, res) => {
     const idOpd = determineOpdId(opd, opdId);
     const employeeData = await fetchEmployeeData(fetcher, idOpd, {
       ...query,
-      limit: 5,
+      limit: LIMIT,
     });
 
     const nips = employeeData?.data?.results?.map((item) => item?.nip_master);
@@ -458,7 +460,7 @@ const getAllEmployeesMasterPagingAdmin = async (req, res) => {
     } else {
       const employeeData = await fetchEmployeeData(fetcher, idOpd, {
         ...query,
-        limit: 5,
+        limit: LIMIT,
       });
 
       const nips = employeeData?.data?.results?.map((item) => item?.nip_master);
