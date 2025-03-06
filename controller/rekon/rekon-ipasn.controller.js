@@ -48,6 +48,30 @@ async function getAverageTotalForUnorMaster(opdId = "1") {
         ),
         knex.raw(
           `COALESCE(ROUND(AVG(CASE WHEN p.status_master = 'PPPK' THEN i.total END), 2), 0) AS rerata_total_pppk`
+        ),
+        knex.raw(
+          `COALESCE(ROUND(AVG(CASE WHEN p.status_master = 'PNS' THEN i.kualifikasi END), 2), 0) AS rerata_kualifikasi_pns`
+        ),
+        knex.raw(
+          `COALESCE(ROUND(AVG(CASE WHEN p.status_master = 'PPPK' THEN i.kualifikasi END), 2), 0) AS rerata_kualifikasi_pppk`
+        ),
+        knex.raw(
+          `COALESCE(ROUND(AVG(CASE WHEN p.status_master = 'PNS' THEN i.kompetensi END), 2), 0) AS rerata_kompetensi_pns`
+        ),
+        knex.raw(
+          `COALESCE(ROUND(AVG(CASE WHEN p.status_master = 'PPPK' THEN i.kompetensi END), 2), 0) AS rerata_kompetensi_pppk`
+        ),
+        knex.raw(
+          `COALESCE(ROUND(AVG(CASE WHEN p.status_master = 'PNS' THEN i.kinerja END), 2), 0) AS rerata_kinerja_pns`
+        ),
+        knex.raw(
+          `COALESCE(ROUND(AVG(CASE WHEN p.status_master = 'PPPK' THEN i.kinerja END), 2), 0) AS rerata_kinerja_pppk`
+        ),
+        knex.raw(
+          `COALESCE(ROUND(AVG(CASE WHEN p.status_master = 'PNS' THEN i.disiplin END), 2), 0) AS rerata_disiplin_pns`
+        ),
+        knex.raw(
+          `COALESCE(ROUND(AVG(CASE WHEN p.status_master = 'PPPK' THEN i.disiplin END), 2), 0) AS rerata_disiplin_pppk`
         )
       )
       .where("u.pId", "=", opdId) // Filter hanya untuk pId = opdId

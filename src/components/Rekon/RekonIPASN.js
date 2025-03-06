@@ -4,7 +4,7 @@ import {
   getUnorSimaster,
   syncRekonIPASN,
 } from "@/services/rekon.services";
-import { CloudDownloadOutlined, FileExcelOutlined } from "@ant-design/icons";
+import { CloudSyncOutlined, FileExcelOutlined } from "@ant-design/icons";
 import { Stack } from "@mantine/core";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Button, Card, Col, Form, Row, Table, TreeSelect, message } from "antd";
@@ -124,12 +124,12 @@ function RekonIPASN() {
         title="IPASN Pemprov Jatim"
         extra={
           <Button
-            icon={<CloudDownloadOutlined />}
-            type="primary"
+            icon={<CloudSyncOutlined />}
             loading={isSyncRekonIpasnLoading}
+            disabled={isSyncRekonIpasnLoading}
             onClick={handleSyncRekonIpasn}
           >
-            Sync
+            Sinkronkan Data
           </Button>
         }
       >
