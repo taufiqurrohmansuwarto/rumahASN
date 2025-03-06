@@ -20,3 +20,7 @@ module.exports.parseCSV = (filePath, options) => {
     ...options,
   }).data;
 };
+
+module.exports.checkOpdEntrian = (opdId, entrian) => {
+  return entrian?.includes(opdId);
+};

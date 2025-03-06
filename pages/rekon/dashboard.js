@@ -2,6 +2,7 @@ import PageContainer from "@/components/PageContainer";
 import RekonLayout from "@/components/Rekon/RekonLayout";
 import { Grid, Breadcrumb } from "antd";
 import Head from "next/head";
+import RekonDashboardDetail from "@/components/Rekon/RekonDashboardDetail";
 
 const RekonDashboard = () => {
   const breakPoint = Grid.useBreakpoint();
@@ -20,13 +21,13 @@ const RekonDashboard = () => {
         breadcrumbRender={() => {
           return (
             <Breadcrumb>
-              <Breadcrumb.Item>Home</Breadcrumb.Item>
-              <Breadcrumb.Item>List</Breadcrumb.Item>
-              <Breadcrumb.Item>App</Breadcrumb.Item>
+              <Breadcrumb.Item>Dashboard</Breadcrumb.Item>
             </Breadcrumb>
           );
         }}
-      ></PageContainer>
+      >
+        <RekonDashboardDetail />
+      </PageContainer>
     </>
   );
 };
