@@ -68,7 +68,7 @@ export const appLists = [
     title: "Rekon",
     desc: "Mapping Data SIASN & SIMASTER",
     color: "#FBBC05",
-    url: "/rekon/rekon-unor",
+    url: "/rekon/dashboard",
     icon: "https://siasn.bkd.jatimprov.go.id:9000/public/icon-maping.png",
     userType: ["fasilitator", "admin"],
 

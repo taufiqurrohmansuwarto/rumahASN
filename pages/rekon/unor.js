@@ -25,7 +25,7 @@ const RekonUnor = () => {
 };
 
 RekonUnor.getLayout = (page) => {
-  return <RekonLayout active="/rekon/rekon-unor">{page}</RekonLayout>;
+  return <RekonLayout active="/rekon/unor">{page}</RekonLayout>;
 };
 
 RekonUnor.Auth = {
