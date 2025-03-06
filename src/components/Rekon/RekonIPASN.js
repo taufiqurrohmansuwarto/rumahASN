@@ -4,7 +4,7 @@ import {
   getUnorSimaster,
   syncRekonIPASN,
 } from "@/services/rekon.services";
-import { CloudDownloadOutlined } from "@ant-design/icons";
+import { CloudDownloadOutlined, FileExcelOutlined } from "@ant-design/icons";
 import { Stack } from "@mantine/core";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Button, Card, Col, Form, Row, Table, TreeSelect, message } from "antd";
@@ -48,20 +48,20 @@ const UnorSimaster = () => {
             showSearch
             style={{ width: "100%" }}
             treeData={data}
-            value={router?.query?.master_id}
+            value={router?.query?.skpd_id}
             onSelect={handleChange}
           />
         </Form.Item>
       </Col>
       <Col span={12}>
         <Button
-          icon={<CloudDownloadOutlined />}
+          icon={<FileExcelOutlined />}
           type="primary"
           loading={isRekonIpasnLoading}
           disabled={isRekonIpasnLoading}
           onClick={handleDownload}
         >
-          Download
+          Unduh Data
         </Button>
       </Col>
     </Row>
@@ -97,6 +97,13 @@ function RekonIPASN() {
     {
       title: "Perangkat Daerah",
       dataIndex: "name",
+      filterSearch: true,
+      filters: data?.data?.map((item) => ({
+        text: item?.name,
+        value: item?.name,
+      })),
+      onFilter: (value, record) =>
+        record.name.toLowerCase().includes(value.toLowerCase()),
       sorter: (a, b) => a.name.localeCompare(b.name),
     },
     {
@@ -131,7 +138,10 @@ function RekonIPASN() {
           <Table
             size="small"
             rowKey={(row) => row?.id}
-            pagination={false}
+            pagination={{
+              pageSize: 15,
+              position: ["bottomRight", "topRight"],
+            }}
             loading={isLoading}
             dataSource={data?.data}
             columns={columns}
