@@ -31,6 +31,9 @@ yarn-error.log*
 token.json
 sso_token.json
 
+/docs-internal/*
+!/docs-internal/.gitkeep
+
 # vercel
 .vercel
 
