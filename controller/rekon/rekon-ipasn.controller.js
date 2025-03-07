@@ -161,13 +161,34 @@ async function getAverageTotalForUnorMaster(opdId = "1") {
 // [fasilitator, admin]
 export const dashboardSiasnIPASN = async (req, res) => {
   try {
-    const opdId = req?.query?.skpd_id || "1";
+    const { organization_id, current_role } = req?.user;
+    let skpdId;
+
+    if (current_role === "admin") {
+      skpdId = "1";
+    } else {
+      skpdId = organization_id;
+    }
+
+    const opdId = "1";
     const type = req?.query?.type || "unor";
-    const data =
-      type === "unor"
-        ? await getAverageTotalForUnorMaster(opdId)
-        : await getAverageByUnor(opdId);
-    res.json({ data });
+    const orgId = req?.query?.skpd_id || skpdId;
+
+    const checkOpd = checkOpdEntrian(skpdId, orgId);
+
+    if (!checkOpd) {
+      res.status(403).json({
+        message: "Anda tidak memiliki akses ke OPD ini",
+      });
+    } else {
+      if (type === "unor") {
+        const data = await getAverageTotalForUnorMaster(opdId);
+        res.json({ data });
+      } else {
+        const data = await getAverageByUnor(orgId);
+        res.json({ data });
+      }
+    }
   } catch (error) {
     handleError(res, error);
   }

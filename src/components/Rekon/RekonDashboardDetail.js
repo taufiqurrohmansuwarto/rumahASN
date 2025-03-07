@@ -1,11 +1,15 @@
 import React from "react";
 import RekonIPASN from "./RekonIPASN";
-
+import { Stack } from "@mantine/core";
+import RekonLayananPangkat from "./RekonLayananPangkat";
+import RekonLayananPensiun from "./RekonLayananPensiun";
 function RekonDashboardDetail() {
   return (
-    <div>
+    <Stack>
+      <RekonLayananPangkat />
+      <RekonLayananPensiun />
       <RekonIPASN />
-    </div>
+    </Stack>
   );
 }
 

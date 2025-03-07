@@ -164,3 +164,27 @@ export const getRekonIPASNDashboard = async (query) => {
 
   return api.get(`/ipasn/dashboard?${queryParams}`).then((res) => res?.data);
 };
+
+// kenaikan pangkat
+export const dashboardKPJatim = async (query) => {
+  const queryParams = queryString.stringify(query, {
+    skipNull: true,
+    skipEmptyString: true,
+  });
+
+  return api
+    .get(`/layanan/pangkat/dashboard?${queryParams}`)
+    .then((res) => res?.data);
+};
+
+// pensiun
+export const dashboardPensiunJatim = async (query) => {
+  const queryParams = queryString.stringify(query, {
+    skipNull: true,
+    skipEmptyString: true,
+  });
+
+  return api
+    .get(`/layanan/pemberhentian/dashboard?${queryParams}`)
+    .then((res) => res?.data);
+};

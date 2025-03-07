@@ -1,10 +1,11 @@
 import PageContainer from "@/components/PageContainer";
+import RekonIPASNDetail from "@/components/Rekon/RekonIPASNDetail";
 import RekonLayout from "@/components/Rekon/RekonLayout";
-import { Grid, Breadcrumb } from "antd";
+import { Breadcrumb, Grid } from "antd";
 import Head from "next/head";
-import RekonDashboardDetail from "@/components/Rekon/RekonDashboardDetail";
+import Link from "next/link";
 
-const RekonDashboard = () => {
+const RekonIPASN = () => {
   const breakPoint = Grid.useBreakpoint();
 
   return (
@@ -20,25 +21,30 @@ const RekonDashboard = () => {
         content="Dashboard Rekon"
         breadcrumbRender={() => {
           return (
-            <Breadcrumb>
-              <Breadcrumb.Item>Dashboard</Breadcrumb.Item>
-            </Breadcrumb>
+            <>
+              <Breadcrumb>
+                <Breadcrumb.Item>
+                  <Link href="/rekon/dashboard">Dashboard</Link>
+                </Breadcrumb.Item>
+                <Breadcrumb.Item>Dashboard IPASN</Breadcrumb.Item>
+              </Breadcrumb>
+            </>
           );
         }}
       >
-        <RekonDashboardDetail />
+        <RekonIPASNDetail />
       </PageContainer>
     </>
   );
 };
 
-RekonDashboard.getLayout = (page) => {
+RekonIPASN.getLayout = (page) => {
   return <RekonLayout active="/rekon/dashboard">{page}</RekonLayout>;
 };
 
-RekonDashboard.Auth = {
+RekonIPASN.Auth = {
   action: "manage",
   subject: "Tickets",
 };
 
-export default RekonDashboard;
+export default RekonIPASN;

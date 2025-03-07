@@ -16,7 +16,13 @@ const DaftarPegawai = () => {
   const admin = session?.user?.current_role === "admin";
   const fasilitator = session?.user?.role === "FASILITATOR";
 
-  return <>{admin ? <EmployeesTableAdmin /> : <EmployeesTable />}</>;
+  if (admin) {
+    return <EmployeesTableAdmin />;
+  } else if (fasilitator) {
+    return <EmployeesTable />;
+  } else {
+    return <></>;
+  }
 };
 
 export default DaftarPegawai;

@@ -3,6 +3,8 @@ import RekonLayout from "@/components/Rekon/RekonLayout";
 import DaftarPegawai from "@/components/Rekon/DaftarPegawai";
 import Head from "next/head";
 import { Breadcrumb } from "antd";
+import Link from "next/link";
+
 const Pegawai = () => {
   return (
     <>
@@ -15,9 +17,10 @@ const Pegawai = () => {
         breadcrumbRender={() => {
           return (
             <Breadcrumb>
-              <Breadcrumb.Item>Home</Breadcrumb.Item>
-              <Breadcrumb.Item>List</Breadcrumb.Item>
-              <Breadcrumb.Item>App</Breadcrumb.Item>
+              <Breadcrumb.Item>
+                <Link href="/rekon/dashboard">Dashboard</Link>
+              </Breadcrumb.Item>
+              <Breadcrumb.Item>Daftar Pegawai</Breadcrumb.Item>
             </Breadcrumb>
           );
         }}

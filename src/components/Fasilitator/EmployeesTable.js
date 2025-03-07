@@ -4,6 +4,7 @@ import { capitalizeWords } from "@/utils/client-utils";
 import {
   CheckCircleOutlined,
   ExclamationCircleOutlined,
+  SearchOutlined,
   UserOutlined,
 } from "@ant-design/icons";
 import { useQuery } from "@tanstack/react-query";
@@ -210,7 +211,7 @@ function EmployeesTable() {
         <Avatar
           onClick={() => gotoDetail(row?.nip_master)}
           style={{ cursor: "pointer" }}
-          size={150}
+          size={100}
           shape="square"
           src={row?.foto}
           alt="foto"
@@ -228,7 +229,7 @@ function EmployeesTable() {
               {row?.nama_lengkap_master}
             </Typography.Link>
             <Typography.Text>{row?.nip_master}</Typography.Text>
-            <Typography.Text>{row?.jabatan_master}</Typography.Text>
+            <Tag color="cyan">{row?.jabatan_master}</Tag>
             <Tooltip title="Status Pegawai">
               <Tag color="yellow" icon={<UserOutlined />}>
                 {row?.siasn?.status}
@@ -371,6 +372,17 @@ function EmployeesTable() {
         );
       },
     },
+    {
+      title: "Aksi",
+      key: "aksi",
+      render: (row) => {
+        return (
+          <a onClick={() => gotoDetail(row?.nip_master)}>
+            <SearchOutlined />
+          </a>
+        );
+      },
+    },
   ];
 
   return (
@@ -392,7 +404,7 @@ function EmployeesTable() {
           current: parseInt(router?.query?.page),
           defaultCurrent: 1,
           onChange: handleChangePage,
-          pageSize: 10,
+          pageSize: 5,
           position: ["topRight", "bottomRight", "bottomLeft", "topLeft"],
         }}
         loading={isLoading || isFetching}

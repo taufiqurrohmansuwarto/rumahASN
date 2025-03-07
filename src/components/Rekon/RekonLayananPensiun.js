@@ -1,0 +1,118 @@
+import { dashboardPensiunJatim } from "@/services/rekon.services";
+import {
+  Button,
+  Card,
+  DatePicker,
+  Form,
+  Space,
+  Table,
+  Tooltip,
+  Typography,
+} from "antd";
+import React, { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import dayjs from "dayjs";
+import { SearchOutlined } from "@ant-design/icons";
+
+const format = "MM-YYYY";
+const queryFormat = "DD-MM-YYYY";
+
+const DEFAULT_PERIODE = "01-04-2025";
+
+const getFirstDayOfMonth = (date) => {
+  return dayjs(date).startOf("month").format(queryFormat);
+};
+
+function RekonLayananPensiun() {
+  const [period, setPeriod] = useState(null);
+
+  const { data, isLoading } = useQuery({
+    queryKey: ["dashboardPensiunJatim", period],
+    queryFn: () =>
+      dashboardPensiunJatim({
+        periode: period ? getFirstDayOfMonth(period) : DEFAULT_PERIODE,
+      }),
+    refetchOnWindowFocus: false,
+  });
+
+  const handleChange = (value) => {
+    setPeriod(value);
+  };
+
+  const columns = [
+    {
+      title: "Perangkat Daerah",
+      dataIndex: "nama_unor",
+      filterSearch: true,
+      filters: data?.data?.map((item) => ({
+        text: item?.nama_unor,
+        value: item?.nama_unor,
+      })),
+      onFilter: (value, record) =>
+        record.nama_unor.toLowerCase().includes(value.toLowerCase()),
+      sorter: (a, b) => a.nama_unor.localeCompare(b.nama_unor),
+      width: "30%",
+      ellipsis: true,
+    },
+    {
+      title: "Jumlah Usulan",
+      dataIndex: "jumlah_usulan",
+      sorter: (a, b) => a.jumlah_usulan - b.jumlah_usulan,
+    },
+    {
+      title: "TTD Pertek",
+      dataIndex: "jumlah_ttd_pertek",
+      sorter: (a, b) => a.jumlah_ttd_pertek - b.jumlah_ttd_pertek,
+    },
+    {
+      title: "SK Berhasil",
+      dataIndex: "jumlah_sk_berhasil",
+      sorter: (a, b) => a.jumlah_sk_berhasil - b.jumlah_sk_berhasil,
+    },
+  ];
+
+  const title = () => {
+    return (
+      <Space>
+        <Typography.Text strong>Pensiun</Typography.Text>
+        <Tooltip title="Detail Data">
+          <Button type="link" icon={<SearchOutlined />} />
+        </Tooltip>
+      </Space>
+    );
+  };
+
+  return (
+    <Card title={title()}>
+      <Space direction="vertical">
+        <Form.Item label="Periode">
+          <DatePicker.MonthPicker
+            format={{
+              format,
+              type: "mask",
+            }}
+            onChange={handleChange}
+            defaultValue={dayjs(DEFAULT_PERIODE, queryFormat)}
+          />
+        </Form.Item>
+        <Typography.Text>
+          {data?.jumlah_usulan_keseluruhan} Usulan
+        </Typography.Text>
+      </Space>
+      <Table
+        size="small"
+        rowKey={(row) => row?.id_unor}
+        dataSource={data?.data}
+        loading={isLoading}
+        columns={columns}
+        pagination={{
+          pageSize: 15,
+          position: ["bottomRight", "topRight"],
+        }}
+        sortDirections={["ascend", "descend"]}
+      />
+    </Card>
+  );
+}
+
+export default RekonLayananPensiun;
