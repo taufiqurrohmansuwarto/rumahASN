@@ -7,9 +7,42 @@ import {
 import { CloudSyncOutlined, FileExcelOutlined } from "@ant-design/icons";
 import { Stack } from "@mantine/core";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Button, Card, Col, Form, Row, Table, TreeSelect, message } from "antd";
+import {
+  Button,
+  Card,
+  Col,
+  Form,
+  Row,
+  Statistic,
+  Table,
+  TreeSelect,
+  message,
+} from "antd";
 import { useRouter } from "next/router";
 import * as XLSX from "xlsx";
+
+const DetailIPASN = () => {
+  const router = useRouter();
+
+  const { data, isLoading } = useQuery({
+    queryKey: ["rekon-ipasn-detail", router?.query?.skpd_id],
+    queryFn: () =>
+      getRekonIPASNDashboard({
+        skpd_id: router?.query?.skpd_id,
+        type: "test",
+      }),
+  });
+
+  return (
+    <Row gutter={[12, 12]}>
+      <Col md={12} xs={24}>
+        <Card title="IPASN">
+          <Statistic title="IPASN" value={data?.rerata_total_pns} />
+        </Card>
+      </Col>
+    </Row>
+  );
+};
 
 const UnorSimaster = () => {
   const router = useRouter();
@@ -39,7 +72,7 @@ const UnorSimaster = () => {
 
   return (
     <Row gutter={[12, 12]}>
-      <Col span={12}>
+      <Col md={12} xs={24}>
         <Form.Item>
           <TreeSelect
             treeNodeFilterProp="title"
@@ -53,7 +86,7 @@ const UnorSimaster = () => {
           />
         </Form.Item>
       </Col>
-      <Col span={12}>
+      <Col md={12} xs={24}>
         <Button
           icon={<FileExcelOutlined />}
           type="primary"
@@ -63,6 +96,9 @@ const UnorSimaster = () => {
         >
           Unduh Data
         </Button>
+      </Col>
+      <Col md={24} xs={24}>
+        <DetailIPASN />
       </Col>
     </Row>
   );
@@ -119,37 +155,43 @@ function RekonIPASN() {
   ];
 
   return (
-    <>
-      <Card
-        title="IPASN Pemprov Jatim"
-        extra={
-          <Button
-            icon={<CloudSyncOutlined />}
-            loading={isSyncRekonIpasnLoading}
-            disabled={isSyncRekonIpasnLoading}
-            onClick={handleSyncRekonIpasn}
-          >
-            Sinkronkan Data
-          </Button>
-        }
-      >
-        <Stack>
+    <Row gutter={[12, 12]}>
+      <Col md={24} xs={24}>
+        <Card title="Unduh IPASN">
           <UnorSimaster />
-          <Table
-            size="small"
-            rowKey={(row) => row?.id}
-            pagination={{
-              pageSize: 15,
-              position: ["bottomRight", "topRight"],
-            }}
-            loading={isLoading}
-            dataSource={data?.data}
-            columns={columns}
-            sortDirections={["ascend", "descend"]}
-          />
-        </Stack>
-      </Card>
-    </>
+        </Card>
+      </Col>
+      <Col md={24} xs={24}>
+        <Card
+          title="IPASN Pemprov Jatim"
+          extra={
+            <Button
+              icon={<CloudSyncOutlined />}
+              loading={isSyncRekonIpasnLoading}
+              disabled={isSyncRekonIpasnLoading}
+              onClick={handleSyncRekonIpasn}
+            >
+              Sinkronkan Data
+            </Button>
+          }
+        >
+          <Stack>
+            <Table
+              size="small"
+              rowKey={(row) => row?.id}
+              pagination={{
+                pageSize: 15,
+                position: ["bottomRight", "topRight"],
+              }}
+              loading={isLoading}
+              dataSource={data?.data}
+              columns={columns}
+              sortDirections={["ascend", "descend"]}
+            />
+          </Stack>
+        </Card>
+      </Col>
+    </Row>
   );
 }
 

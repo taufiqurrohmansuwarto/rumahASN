@@ -148,7 +148,7 @@ export const getRekonIPASN = async (query) => {
     skipNull: true,
     skipEmptyString: true,
   });
-  console.log(queryParams);
+
   return api.get(`/ipasn?${queryParams}`).then((res) => res?.data);
 };
 
@@ -156,6 +156,11 @@ export const syncRekonIPASN = async () => {
   return api.get("/ipasn/sync").then((res) => res?.data);
 };
 
-export const getRekonIPASNDashboard = async () => {
-  return api.get("/ipasn/dashboard").then((res) => res?.data);
+export const getRekonIPASNDashboard = async (query) => {
+  const queryParams = queryString.stringify(query, {
+    skipNull: true,
+    skipEmptyString: true,
+  });
+
+  return api.get(`/ipasn/dashboard?${queryParams}`).then((res) => res?.data);
 };

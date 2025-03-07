@@ -107,6 +107,12 @@ const menuItems = [
   },
 
   // { key: "rekon-diklat", icon: <BookOutlined />, label: "Diklat" },
+  {
+    key: "logs",
+    icon: <SyncOutlined />,
+    label: "Logs",
+    role: ["admin", "fasilitator"],
+  },
 
   {
     key: "update-data",
