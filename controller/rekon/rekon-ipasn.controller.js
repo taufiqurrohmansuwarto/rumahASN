@@ -19,15 +19,89 @@ async function getAverageTotalBySkpdId(skpd_id) {
         ),
         knex.raw(
           `COALESCE(ROUND(AVG(CASE WHEN sync_pegawai.status_master = 'PPPK' THEN siasn_ipasn.total END), 2), 0) AS rerata_total_pppk`
+        ),
+        knex.raw(
+          `COALESCE(ROUND(AVG(CASE WHEN sync_pegawai.status_master = 'PNS' THEN siasn_ipasn.kualifikasi END), 2), 0) AS rerata_kualifikasi_pns`
+        ),
+        knex.raw(
+          `COALESCE(ROUND(AVG(CASE WHEN sync_pegawai.status_master = 'PPPK' THEN siasn_ipasn.kualifikasi END), 2), 0) AS rerata_kualifikasi_pppk`
+        ),
+        knex.raw(
+          `COALESCE(ROUND(AVG(CASE WHEN sync_pegawai.status_master = 'PNS' THEN siasn_ipasn.kompetensi END), 2), 0) AS rerata_kompetensi_pns`
+        ),
+        knex.raw(
+          `COALESCE(ROUND(AVG(CASE WHEN sync_pegawai.status_master = 'PPPK' THEN siasn_ipasn.kompetensi END), 2), 0) AS rerata_kompetensi_pppk`
+        ),
+        knex.raw(
+          `COALESCE(ROUND(AVG(CASE WHEN sync_pegawai.status_master = 'PNS' THEN siasn_ipasn.kinerja END), 2), 0) AS rerata_kinerja_pns`
+        ),
+        knex.raw(
+          `COALESCE(ROUND(AVG(CASE WHEN sync_pegawai.status_master = 'PPPK' THEN siasn_ipasn.kinerja END), 2), 0) AS rerata_kinerja_pppk`
+        ),
+        knex.raw(
+          `COALESCE(ROUND(AVG(CASE WHEN sync_pegawai.status_master = 'PNS' THEN siasn_ipasn.disiplin END), 2), 0) AS rerata_disiplin_pns`
+        ),
+        knex.raw(
+          `COALESCE(ROUND(AVG(CASE WHEN sync_pegawai.status_master = 'PPPK' THEN siasn_ipasn.disiplin END), 2), 0) AS rerata_disiplin_pppk`
         )
       )
       .where("sync_pegawai.skpd_id", "ilike", `${skpd_id}%`);
 
     const data = result[0];
-    console.log(data);
     return data;
   } catch (error) {
     console.error("Error fetching average total by skpd_id:", error);
+  }
+}
+
+async function getAverageByUnor(opdId) {
+  try {
+    const knex = SiasnIPASN.knex();
+    const result = await knex("sync_unor_master as u")
+      .leftJoin("sync_pegawai as p", function () {
+        this.on("p.skpd_id", "ilike", knex.raw("u.id || '%'"));
+      })
+      .leftJoin("siasn_ipasn as i", "p.nip_master", "i.nip")
+      .select(
+        knex.raw(
+          `COALESCE(ROUND(AVG(CASE WHEN p.status_master = 'PNS' THEN i.total END), 2), 0) AS rerata_total_pns`
+        ),
+        knex.raw(
+          `COALESCE(ROUND(AVG(CASE WHEN p.status_master = 'PPPK' THEN i.total END), 2), 0) AS rerata_total_pppk`
+        ),
+        knex.raw(
+          `COALESCE(ROUND(AVG(CASE WHEN p.status_master = 'PNS' THEN i.kualifikasi END), 2), 0) AS rerata_kualifikasi_pns`
+        ),
+        knex.raw(
+          `COALESCE(ROUND(AVG(CASE WHEN p.status_master = 'PPPK' THEN i.kualifikasi END), 2), 0) AS rerata_kualifikasi_pppk`
+        ),
+        knex.raw(
+          `COALESCE(ROUND(AVG(CASE WHEN p.status_master = 'PNS' THEN i.kompetensi END), 2), 0) AS rerata_kompetensi_pns`
+        ),
+        knex.raw(
+          `COALESCE(ROUND(AVG(CASE WHEN p.status_master = 'PPPK' THEN i.kompetensi END), 2), 0) AS rerata_kompetensi_pppk`
+        ),
+        knex.raw(
+          `COALESCE(ROUND(AVG(CASE WHEN p.status_master = 'PNS' THEN i.kinerja END), 2), 0) AS rerata_kinerja_pns`
+        ),
+        knex.raw(
+          `COALESCE(ROUND(AVG(CASE WHEN p.status_master = 'PPPK' THEN i.kinerja END), 2), 0) AS rerata_kinerja_pppk`
+        ),
+        knex.raw(
+          `COALESCE(ROUND(AVG(CASE WHEN p.status_master = 'PNS' THEN i.disiplin END), 2), 0) AS rerata_disiplin_pns`
+        ),
+        knex.raw(
+          `COALESCE(ROUND(AVG(CASE WHEN p.status_master = 'PPPK' THEN i.disiplin END), 2), 0) AS rerata_disiplin_pppk`
+        )
+      )
+      .where("u.id", "=", opdId) // Filter hanya untuk pId = opdId
+      .groupBy("u.id", "u.pId", "u.name")
+      .orderBy("u.id");
+
+    const data = result[0];
+    return data;
+  } catch (error) {
+    console.error("Error fetching average by unor:", error);
   }
 }
 
@@ -87,8 +161,12 @@ async function getAverageTotalForUnorMaster(opdId = "1") {
 // [fasilitator, admin]
 export const dashboardSiasnIPASN = async (req, res) => {
   try {
-    const opdId = req?.query?.opdId || "1";
-    const data = await getAverageTotalForUnorMaster(opdId);
+    const opdId = req?.query?.skpd_id || "1";
+    const type = req?.query?.type || "unor";
+    const data =
+      type === "unor"
+        ? await getAverageTotalForUnorMaster(opdId)
+        : await getAverageByUnor(opdId);
     res.json({ data });
   } catch (error) {
     handleError(res, error);
