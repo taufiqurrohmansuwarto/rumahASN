@@ -1,110 +1,24 @@
 import {
-  getRekonIPASN,
   getRekonIPASNDashboard,
-  getUnorSimaster,
   syncRekonIPASN,
 } from "@/services/rekon.services";
-import { CloudSyncOutlined, FileExcelOutlined } from "@ant-design/icons";
+import { CloudSyncOutlined, SearchOutlined } from "@ant-design/icons";
 import { Stack } from "@mantine/core";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Button,
   Card,
   Col,
-  Form,
   Row,
-  Statistic,
+  Space,
   Table,
-  TreeSelect,
+  Typography,
   message,
 } from "antd";
 import { useRouter } from "next/router";
-import * as XLSX from "xlsx";
-
-const DetailIPASN = () => {
-  const router = useRouter();
-
-  const { data, isLoading } = useQuery({
-    queryKey: ["rekon-ipasn-detail", router?.query?.skpd_id],
-    queryFn: () =>
-      getRekonIPASNDashboard({
-        skpd_id: router?.query?.skpd_id,
-        type: "test",
-      }),
-  });
-
-  return (
-    <Row gutter={[12, 12]}>
-      <Col md={12} xs={24}>
-        <Card title="IPASN">
-          <Statistic title="IPASN" value={data?.rerata_total_pns} />
-        </Card>
-      </Col>
-    </Row>
-  );
-};
-
-const UnorSimaster = () => {
-  const router = useRouter();
-  const { data, isLoading } = useQuery(
-    ["rekon-unor-simaster"],
-    () => getUnorSimaster(),
-    {}
-  );
-
-  const { mutateAsync: rekonIpasn, isLoading: isRekonIpasnLoading } =
-    useMutation({
-      mutationFn: () => getRekonIPASN({ skpd_id: router?.query?.skpd_id }),
-    });
-
-  const handleDownload = async () => {
-    const result = await rekonIpasn();
-    const { data, averageTotal } = result;
-    const workbook = XLSX.utils.book_new();
-    const worksheet = XLSX.utils.json_to_sheet(data);
-    XLSX.utils.book_append_sheet(workbook, worksheet, "IPASN");
-    XLSX.writeFile(workbook, "IPASN.xlsx");
-  };
-
-  const handleChange = (value) => {
-    router.push(`/rekon/dashboard?skpd_id=${value}`);
-  };
-
-  return (
-    <Row gutter={[12, 12]}>
-      <Col md={12} xs={24}>
-        <Form.Item>
-          <TreeSelect
-            treeNodeFilterProp="title"
-            placeholder="Ketik nama unit organisasi"
-            listHeight={400}
-            showSearch
-            style={{ width: "100%" }}
-            treeData={data}
-            value={router?.query?.skpd_id}
-            onSelect={handleChange}
-          />
-        </Form.Item>
-      </Col>
-      <Col md={12} xs={24}>
-        <Button
-          icon={<FileExcelOutlined />}
-          type="primary"
-          loading={isRekonIpasnLoading}
-          disabled={isRekonIpasnLoading}
-          onClick={handleDownload}
-        >
-          Unduh Data
-        </Button>
-      </Col>
-      <Col md={24} xs={24}>
-        <DetailIPASN />
-      </Col>
-    </Row>
-  );
-};
 
 function RekonIPASN() {
+  const router = useRouter();
   const queryClient = useQueryClient();
   const { data, isLoading } = useQuery({
     queryKey: ["rekon-ipasn"],
@@ -154,16 +68,24 @@ function RekonIPASN() {
     },
   ];
 
+  const title = (router) => {
+    return (
+      <Space>
+        <Typography.Text strong>IPASN Pemprov Jatim</Typography.Text>
+        <Button
+          type="link"
+          icon={<SearchOutlined />}
+          onClick={() => router.push("/rekon/dashboard/ipasn")}
+        />
+      </Space>
+    );
+  };
+
   return (
     <Row gutter={[12, 12]}>
       <Col md={24} xs={24}>
-        <Card title="Unduh IPASN">
-          <UnorSimaster />
-        </Card>
-      </Col>
-      <Col md={24} xs={24}>
         <Card
-          title="IPASN Pemprov Jatim"
+          title={title(router)}
           extra={
             <Button
               icon={<CloudSyncOutlined />}

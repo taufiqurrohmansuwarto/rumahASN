@@ -10,7 +10,7 @@ const arrayToTree = require("array-to-tree");
 const { proxyDataUtamaASN } = require("@/utils/siasn-proxy.utils");
 const { createRedisInstance } = require("@/utils/redis");
 
-const LIMIT = 10;
+const LIMIT = 5;
 
 // keperluan komparasi
 const validateOpdId = (opdId) => {
@@ -414,23 +414,36 @@ const getAllEmployeesMasterPaging = async (req, res) => {
 
     validateOpdId(opdId);
     const idOpd = determineOpdId(opd, opdId);
-    const employeeData = await fetchEmployeeData(fetcher, idOpd, {
-      ...query,
-      limit: LIMIT,
-    });
+    const redis = await createRedisInstance();
+    const redisKey = `master-fasilitator:${opd}:${req?.query?.search}:${req?.query?.page}:${req?.query?.limit}`;
+    const cachedData = await redis.get(redisKey);
 
-    const nips = employeeData?.data?.results?.map((item) => item?.nip_master);
-    const detailedEmployeeData = await fetchDetailedEmployeeData(
-      siasnFetcher,
-      nips
-    );
+    if (cachedData) {
+      console.log("cachedData");
+      const data = JSON.parse(cachedData);
+      res.json(data);
+    } else {
+      console.log("fetching data");
+      const employeeData = await fetchEmployeeData(fetcher, idOpd, {
+        ...query,
+        limit: LIMIT,
+      });
 
-    const responsePayload = constructResponsePayload(
-      employeeData,
-      detailedEmployeeData
-    );
+      const nips = employeeData?.data?.results?.map((item) => item?.nip_master);
+      const detailedEmployeeData = await fetchDetailedEmployeeData(
+        siasnFetcher,
+        nips
+      );
 
-    res.json(responsePayload);
+      const responsePayload = constructResponsePayload(
+        employeeData,
+        detailedEmployeeData
+      );
+
+      await redis.set(redisKey, JSON.stringify(responsePayload), "EX", 30);
+
+      res.json(responsePayload);
+    }
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: "Internal server error" });
@@ -452,7 +465,7 @@ const getAllEmployeesMasterPagingAdmin = async (req, res) => {
     const idOpd = determineOpdId(opd, opdId);
     const redis = await createRedisInstance();
     // query ada search, page, limit. Jadikan key redis
-    const redisKey = `master-fasilitator:${idOpd}:${query?.search}:${query?.page}:${query?.limit}`;
+    const redisKey = `master-fasilitator:${opd}:${req?.query?.search}:${req?.query?.page}:${req?.query?.limit}`;
     const cachedData = await redis.get(redisKey);
 
     if (cachedData) {
