@@ -205,12 +205,12 @@ function EmployeesTable() {
     {
       title: "Foto",
       key: "foto",
-      width: 100,
       responsive: ["sm"],
       render: (row) => (
         <Avatar
+          onClick={() => gotoDetail(row?.nip_master)}
           style={{ cursor: "pointer" }}
-          size={100}
+          size={150}
           shape="square"
           src={row?.foto}
           alt="foto"
@@ -221,11 +221,12 @@ function EmployeesTable() {
       title: "Nama dan Jabatan",
       key: "nama_dan_jabatan",
       responsive: ["sm"],
-      width: 200,
       render: (_, row) => {
         return (
           <Space direction="vertical" size="small">
-            <Typography.Link>{row?.nama_lengkap_master}</Typography.Link>
+            <Typography.Link onClick={() => gotoDetail(row?.nip_master)}>
+              {row?.nama_lengkap_master}
+            </Typography.Link>
             <Typography.Text>{row?.nip_master}</Typography.Text>
             <Typography.Text>{row?.jabatan_master}</Typography.Text>
             <Tooltip title="Status Pegawai">
@@ -240,7 +241,6 @@ function EmployeesTable() {
     {
       title: "Unit Kerja",
       key: "unit_kerja",
-      width: 500,
       responsive: ["sm"],
       render: (row) => {
         return (
@@ -302,7 +302,6 @@ function EmployeesTable() {
     {
       title: "Hasil Integrasi SIASN",
       key: "hasil",
-      width: 200,
       responsive: ["sm"],
       render: (row) => {
         return (
