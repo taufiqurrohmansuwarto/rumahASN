@@ -1,19 +1,10 @@
 import { dashboardKPJatim } from "@/services/rekon.services";
-import {
-  Button,
-  Card,
-  DatePicker,
-  Form,
-  Space,
-  Table,
-  Tooltip,
-  Typography,
-} from "antd";
-import React, { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
-import dayjs from "dayjs";
 import { SearchOutlined } from "@ant-design/icons";
+import { useQuery } from "@tanstack/react-query";
+import { Button, Card, DatePicker, Form, Space, Table, Typography } from "antd";
+import dayjs from "dayjs";
 import { useRouter } from "next/router";
+import { useState } from "react";
 
 const format = "MM-YYYY";
 const queryFormat = "DD-MM-YYYY";
