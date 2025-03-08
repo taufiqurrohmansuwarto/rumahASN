@@ -1,18 +1,10 @@
 import { dashboardPensiunJatim } from "@/services/rekon.services";
-import {
-  Button,
-  Card,
-  DatePicker,
-  Form,
-  Space,
-  Table,
-  Tooltip,
-  Typography,
-} from "antd";
-import React, { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
-import dayjs from "dayjs";
 import { SearchOutlined } from "@ant-design/icons";
+import { useQuery } from "@tanstack/react-query";
+import { Button, Card, DatePicker, Form, Space, Table, Typography } from "antd";
+import dayjs from "dayjs";
+import { useRouter } from "next/router";
+import { useState } from "react";
 
 const format = "MM-YYYY";
 const queryFormat = "DD-MM-YYYY";
@@ -25,6 +17,7 @@ const getFirstDayOfMonth = (date) => {
 
 function RekonLayananPensiun() {
   const [period, setPeriod] = useState(null);
+  const router = useRouter();
 
   const { data, isLoading } = useQuery({
     queryKey: ["dashboardPensiunJatim", period],
@@ -71,19 +64,21 @@ function RekonLayananPensiun() {
     },
   ];
 
-  const title = () => {
+  const title = (router) => {
     return (
       <Space>
         <Typography.Text strong>Pensiun</Typography.Text>
-        <Tooltip title="Detail Data">
-          <Button type="link" icon={<SearchOutlined />} />
-        </Tooltip>
+        <Button
+          type="link"
+          icon={<SearchOutlined />}
+          onClick={() => router.push("/rekon/dashboard/pemberhentian")}
+        />
       </Space>
     );
   };
 
   return (
-    <Card title={title()}>
+    <Card title={title(router)}>
       <Space direction="vertical">
         <Form.Item label="Periode">
           <DatePicker.MonthPicker

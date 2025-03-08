@@ -13,6 +13,7 @@ import React, { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import dayjs from "dayjs";
 import { SearchOutlined } from "@ant-design/icons";
+import { useRouter } from "next/router";
 
 const format = "MM-YYYY";
 const queryFormat = "DD-MM-YYYY";
@@ -25,6 +26,7 @@ const getFirstDayOfMonth = (date) => {
 
 function RekonLayananPangkat() {
   const [period, setPeriod] = useState(null);
+  const router = useRouter();
 
   const { data, isLoading } = useQuery({
     queryKey: ["dashboardKPJatim", period],
@@ -71,19 +73,21 @@ function RekonLayananPangkat() {
     },
   ];
 
-  const title = () => {
+  const title = (router) => {
     return (
       <Space>
         <Typography.Text strong>Kenaikan Pangkat</Typography.Text>
-        <Tooltip title="Detail Data">
-          <Button type="link" icon={<SearchOutlined />} />
-        </Tooltip>
+        <Button
+          type="link"
+          icon={<SearchOutlined />}
+          onClick={() => router.push("/rekon/dashboard/kenaikan-pangkat")}
+        />
       </Space>
     );
   };
 
   return (
-    <Card title={title()}>
+    <Card title={title(router)}>
       <Space direction="vertical">
         <Form.Item label="Periode">
           <DatePicker.MonthPicker
