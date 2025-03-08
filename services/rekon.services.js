@@ -206,3 +206,13 @@ export const dashboardPensiunJatim = async (query) => {
     .get(`/layanan/pemberhentian/dashboard?${queryParams}`)
     .then((res) => res?.data);
 };
+
+export const getPemberhentianByPegawai = async (query) => {
+  const queryParams = queryString.stringify(query, {
+    skipNull: true,
+    skipEmptyString: true,
+  });
+  return api
+    .get(`/layanan/pemberhentian/employees?${queryParams}`)
+    .then((res) => res?.data);
+};
