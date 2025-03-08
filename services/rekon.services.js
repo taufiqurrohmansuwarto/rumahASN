@@ -165,6 +165,14 @@ export const getRekonIPASNDashboard = async (query) => {
   return api.get(`/ipasn/dashboard?${queryParams}`).then((res) => res?.data);
 };
 
+export const getEmployeeIPASN = async (query) => {
+  const queryParams = queryString.stringify(query, {
+    skipNull: true,
+    skipEmptyString: true,
+  });
+  return api.get(`/ipasn/employees?${queryParams}`).then((res) => res?.data);
+};
+
 // kenaikan pangkat
 export const dashboardKPJatim = async (query) => {
   const queryParams = queryString.stringify(query, {

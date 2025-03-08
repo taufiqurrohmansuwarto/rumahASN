@@ -31,6 +31,7 @@ import axios from "axios";
 import dayjs from "dayjs";
 import "dayjs/locale/id";
 import relativeTime from "dayjs/plugin/relativeTime";
+import queryString from "query-string";
 
 dayjs.extend(relativeTime);
 dayjs.locale("id");
@@ -1165,4 +1166,11 @@ export const fetchPdf = async (url) => {
     type: response.data.type,
   });
   return file;
+};
+
+export const clearQuery = (query) => {
+  return queryString.stringify(query, {
+    skipNull: true,
+    skipEmptyString: true,
+  });
 };

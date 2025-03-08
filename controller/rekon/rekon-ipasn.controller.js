@@ -8,6 +8,137 @@ const {
 
 const SyncPegawai = require("@/models/sync-pegawai.model");
 
+async function getIpasnWithPegawai({
+  search = "",
+  skpd_id = "%",
+  min_kualifikasi = 0,
+  min_kompetensi = 0,
+  min_kinerja = 0,
+  min_disiplin = 0,
+  min_total = 0,
+  page = 1,
+  perPage = 10,
+  sortBy = "nama_master", // Default sorting berdasarkan nama_master
+  sortOrder = "ascend", // Default ascending
+} = {}) {
+  try {
+    const knex = SiasnIPASN.knex();
+
+    // Pastikan sortOrder hanya "asc" atau "desc" untuk keamanan query
+    const validSortOrder =
+      sortOrder.toLowerCase() === "descend" ? "desc" : "asc";
+
+    // Pastikan sortBy adalah kolom yang valid agar tidak ada SQL Injection
+    const validColumns = [
+      "nip",
+      "foto_master",
+      "nama_master",
+      "nip_master",
+      "opd_master",
+      "kualifikasi",
+      "kompetensi",
+      "kinerja",
+      "disiplin",
+      "total",
+      "updated",
+    ];
+    const sortColumn = validColumns.includes(sortBy) ? sortBy : "nama_master";
+
+    // Query utama dengan filter
+    const query = knex("siasn_ipasn as ip")
+      .leftJoin("sync_pegawai as peg", "ip.nip", "peg.nip_master")
+      .select(
+        "ip.nip",
+        "peg.foto as foto_master",
+        "peg.nama_master",
+        "peg.jabatan_master",
+        "peg.status_master",
+        "peg.nip_master",
+        "peg.opd_master",
+        "ip.kualifikasi",
+        "ip.kompetensi",
+        "ip.kinerja",
+        "ip.disiplin",
+        "ip.total",
+        "ip.updated"
+      )
+      .where("peg.skpd_id", "ilike", `${skpd_id}%`);
+
+    // Filter pencarian nama atau NIP
+    if (search) {
+      query.andWhere((builder) => {
+        builder
+          .where("peg.nama_master", "ilike", `%${search}%`)
+          .orWhere("peg.nip_master", "ilike", `%${search}%`);
+      });
+    }
+
+    // Filter berdasarkan nilai minimal kualifikasi, kompetensi, kinerja, disiplin, total
+    if (min_kualifikasi > 0)
+      query.andWhere("ip.kualifikasi", ">=", min_kualifikasi);
+    if (min_kompetensi > 0)
+      query.andWhere("ip.kompetensi", ">=", min_kompetensi);
+    if (min_kinerja > 0) query.andWhere("ip.kinerja", ">=", min_kinerja);
+    if (min_disiplin > 0) query.andWhere("ip.disiplin", ">=", min_disiplin);
+    if (min_total > 0) query.andWhere("ip.total", ">=", min_total);
+
+    // Sorting
+    query.orderBy(sortColumn, validSortOrder);
+
+    // Pagination
+    const result = await query.limit(perPage).offset((page - 1) * perPage);
+
+    // Query total data tanpa pagination
+    const totalDataQuery = knex("siasn_ipasn as ip")
+      .leftJoin("sync_pegawai as peg", "ip.nip", "peg.nip_master")
+      .where("peg.skpd_id", "ilike", `${skpd_id}%`);
+
+    // Terapkan filter yang sama ke totalDataQuery
+    if (search) {
+      totalDataQuery.andWhere((builder) => {
+        builder
+          .where("peg.nama_master", "ilike", `%${search}%`)
+          .orWhere("peg.nip_master", "ilike", `%${search}%`);
+      });
+    }
+    if (min_kualifikasi > 0)
+      totalDataQuery.andWhere("ip.kualifikasi", ">=", min_kualifikasi);
+    if (min_kompetensi > 0)
+      totalDataQuery.andWhere("ip.kompetensi", ">=", min_kompetensi);
+    if (min_kinerja > 0)
+      totalDataQuery.andWhere("ip.kinerja", ">=", min_kinerja);
+    if (min_disiplin > 0)
+      totalDataQuery.andWhere("ip.disiplin", ">=", min_disiplin);
+    if (min_total > 0) totalDataQuery.andWhere("ip.total", ">=", min_total);
+
+    // Pastikan query total count dieksekusi
+    const totalCount = await totalDataQuery.count("* as total").first();
+
+    return {
+      data: result,
+      filters: {
+        search,
+        skpd_id,
+        min_kualifikasi,
+        min_kompetensi,
+        min_kinerja,
+        min_disiplin,
+        min_total,
+      },
+      sorting: {
+        sortBy,
+        sortOrder: validSortOrder,
+      },
+      page,
+      perPage,
+      totalData: totalCount?.total || 0,
+      totalPages: Math.ceil((totalCount?.total || 0) / perPage),
+    };
+  } catch (error) {
+    console.error("Error fetching IPASN data:", error);
+  }
+}
+
 async function getAverageTotalBySkpdId(skpd_id) {
   try {
     const knex = SiasnIPASN.knex();
@@ -269,6 +400,57 @@ export const syncRekonIPASN = async (req, res) => {
     await knex.batchInsert("siasn_ipasn", processedData);
 
     res.json({ success: true, message: "Data berhasil disinkronisasi" });
+  } catch (error) {
+    handleError(res, error);
+  }
+};
+
+export const getEmployeeIPASN = async (req, res) => {
+  try {
+    const { organization_id, current_role } = req?.user;
+    let opdId;
+
+    if (current_role === "admin") {
+      opdId = "1";
+    } else {
+      opdId = organization_id;
+    }
+    const {
+      skpd_id = opdId,
+      page = 1,
+      perPage = 10,
+      search = "",
+      min_kualifikasi = 0,
+      min_kompetensi = 0,
+      min_kinerja = 0,
+      min_disiplin = 0,
+      min_total = 0,
+      sort = "nama_master",
+      order = "asc",
+    } = req?.query;
+
+    const checkOpd = checkOpdEntrian(opdId, skpd_id);
+
+    if (!checkOpd) {
+      res.status(403).json({
+        message: "Anda tidak memiliki akses ke OPD ini",
+      });
+    } else {
+      const data = await getIpasnWithPegawai({
+        skpd_id,
+        page,
+        perPage,
+        search,
+        min_kualifikasi,
+        min_kompetensi,
+        min_kinerja,
+        min_disiplin,
+        min_total,
+        sortBy: sort,
+        sortOrder: order,
+      });
+      res.json(data);
+    }
   } catch (error) {
     handleError(res, error);
   }
