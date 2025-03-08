@@ -185,6 +185,16 @@ export const dashboardKPJatim = async (query) => {
     .then((res) => res?.data);
 };
 
+export const getRekonPangkatByPegawai = async (query) => {
+  const queryParams = queryString.stringify(query, {
+    skipNull: true,
+    skipEmptyString: true,
+  });
+  return api
+    .get(`/layanan/pangkat/employees?${queryParams}`)
+    .then((res) => res?.data);
+};
+
 // pensiun
 export const dashboardPensiunJatim = async (query) => {
   const queryParams = queryString.stringify(query, {
