@@ -3,6 +3,7 @@ import RekonLayout from "@/components/Rekon/RekonLayout";
 import { Breadcrumb, Grid } from "antd";
 import Head from "next/head";
 import Link from "next/link";
+import RekonLayanaPensiunDetail from "@/components/Rekon/RekonLayanaPensiunDetail";
 
 const RekonPemberhentian = () => {
   const breakPoint = Grid.useBreakpoint();
@@ -16,8 +17,8 @@ const RekonPemberhentian = () => {
         childrenContentStyle={{
           padding: breakPoint.xs ? 0 : null,
         }}
-        title="Dashboard"
-        content="Dashboard Rekon"
+        title="Layanan Pemberhentian"
+        content="Layanan Pemberhentian"
         breadcrumbRender={() => {
           return (
             <>
@@ -25,12 +26,14 @@ const RekonPemberhentian = () => {
                 <Breadcrumb.Item>
                   <Link href="/rekon/dashboard">Dashboard</Link>
                 </Breadcrumb.Item>
-                <Breadcrumb.Item>Dashboard IPASN</Breadcrumb.Item>
+                <Breadcrumb.Item>Layanan Pemberhentian</Breadcrumb.Item>
               </Breadcrumb>
             </>
           );
         }}
-      ></PageContainer>
+      >
+        <RekonLayanaPensiunDetail />
+      </PageContainer>
     </>
   );
 };
