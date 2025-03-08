@@ -81,7 +81,7 @@ const Filter = () => {
           }}
           onChange={handleChangePeriode}
           allowClear={false}
-          defaultValue={dayjs(router?.query?.tmtPensiun, queryFormat)}
+          defaultValue={dayjs(DEFAULT_PERIODE, queryFormat)}
         />
       </Col>
     </Row>

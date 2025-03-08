@@ -3,7 +3,7 @@ import RekonLayout from "@/components/Rekon/RekonLayout";
 import { Breadcrumb, Grid } from "antd";
 import Head from "next/head";
 import Link from "next/link";
-import RekonLayanaPensiunDetail from "@/components/Rekon/RekonLayanaPensiunDetail";
+import RekonLayananPensiunDetail from "@/components/Rekon/RekonLayananPensiunDetail";
 
 const RekonPemberhentian = () => {
   const breakPoint = Grid.useBreakpoint();
@@ -32,7 +32,7 @@ const RekonPemberhentian = () => {
           );
         }}
       >
-        <RekonLayanaPensiunDetail />
+        <RekonLayananPensiunDetail />
       </PageContainer>
     </>
   );
