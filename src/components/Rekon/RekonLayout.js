@@ -18,6 +18,7 @@ import { ProConfigProvider } from "@ant-design/pro-components";
 import {
   IconBandage,
   IconBuilding,
+  IconHistory,
   IconLayoutDashboard,
   IconRotateRectangle,
   IconUserSearch,
@@ -109,7 +110,7 @@ const menuItems = [
   // { key: "rekon-diklat", icon: <BookOutlined />, label: "Diklat" },
   {
     key: "logs",
-    icon: <SyncOutlined />,
+    icon: <IconHistory size={16} />,
     label: "Logs",
     role: ["admin", "fasilitator"],
   },
