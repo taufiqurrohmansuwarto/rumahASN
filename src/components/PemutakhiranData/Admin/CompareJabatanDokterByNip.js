@@ -8,6 +8,8 @@ function CompareJabatanDokterByNip({ nip }) {
     () => rwJabDokterByNip(nip),
     {
       refetchOnWindowFocus: false,
+      keepPreviousData: true,
+      staleTime: 500000,
     }
   );
 

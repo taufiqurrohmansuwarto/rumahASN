@@ -9,6 +9,8 @@ function CompareJabatanGuruByNip({ nip }) {
     () => rwJabGuruByNip(nip),
     {
       refetchOnWindowFocus: false,
+      keepPreviousData: true,
+      staleTime: 500000,
     }
   );
 

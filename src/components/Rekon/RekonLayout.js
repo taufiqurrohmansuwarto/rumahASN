@@ -109,10 +109,10 @@ const menuItems = [
 
   // { key: "rekon-diklat", icon: <BookOutlined />, label: "Diklat" },
   {
-    key: "logs",
+    key: "/logs",
     icon: <IconHistory size={16} />,
     label: "Logs",
-    role: ["admin", "fasilitator"],
+    role: ["admin"],
   },
 
   {
@@ -196,12 +196,9 @@ function RekonLayout({ children, active = "rekon-unor" }) {
                 allowClear
                 key="search"
                 style={{
-                  borderRadius: 8,
-                  marginInlineEnd: 40,
-                  width: 350,
-                  transition: "all 0.3s ease",
+                  width: 400,
                 }}
-                placeholder="Cari Pegawai..."
+                placeholder="Ketik NIP atau Nama..."
                 size="middle"
                 onSearch={handleSearch}
                 className="search-input-professional"

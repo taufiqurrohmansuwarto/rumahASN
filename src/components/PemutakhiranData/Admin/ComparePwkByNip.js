@@ -9,6 +9,8 @@ function ComparePwkByNip({ nip }) {
     {
       enabled: !!nip,
       refetchOnWindowFocus: false,
+      keepPreviousData: true,
+      staleTime: 500000,
     }
   );
 

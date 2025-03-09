@@ -11,6 +11,8 @@ function ComparePindahInstansiByNip({ nip }) {
     {
       enabled: !!nip,
       refetchOnWindowFocus: false,
+      keepPreviousData: true,
+      staleTime: 500000,
     }
   );
 
@@ -20,6 +22,8 @@ function ComparePindahInstansiByNip({ nip }) {
     {
       enabled: !!nip,
       refetchOnWindowFocus: false,
+      keepPreviousData: true,
+      staleTime: 500000,
     }
   );
 

@@ -173,7 +173,12 @@ function CompareKeluargaByNip({ nip }) {
   const { data, isLoading } = useQuery(
     ["pns-rw-keluarga", nip],
     () => getRiwayatKeluargaByNip(nip),
-    { enabled: !!nip }
+    {
+      enabled: !!nip,
+      refetchOnWindowFocus: false,
+      keepPreviousData: true,
+      staleTime: 500000,
+    }
   );
 
   const { data: dataPasanganMaster, isLoading: isLoadingPasanganMaster } =

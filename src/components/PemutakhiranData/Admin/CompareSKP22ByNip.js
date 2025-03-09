@@ -204,6 +204,8 @@ function CompareSKP22ByNip({ nip }) {
     () => getRwSkp22ByNip(nip),
     {
       refetchOnWindowFocus: false,
+      keepPreviousData: true,
+      staleTime: 500000,
     }
   );
 
@@ -212,6 +214,8 @@ function CompareSKP22ByNip({ nip }) {
     () => rwSkpMasterByNip(nip),
     {
       refetchOnWindowFocus: false,
+      keepPreviousData: true,
+      staleTime: 500000,
     }
   );
 

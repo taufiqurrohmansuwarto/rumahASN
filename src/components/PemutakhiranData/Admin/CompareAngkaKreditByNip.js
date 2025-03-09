@@ -261,18 +261,34 @@ const FormAngkaKredit = ({ visible, onCancel, nip }) => {
 function CompareAngkaKreditByNip({ nip }) {
   const queryClient = useQueryClient();
 
-  const { data, isLoading } = useQuery(["angka-kredit", nip], () =>
-    getRwAngkakreditByNip(nip)
+  const { data, isLoading } = useQuery(
+    ["angka-kredit", nip],
+    () => getRwAngkakreditByNip(nip),
+    {
+      refetchOnWindowFocus: false,
+      keepPreviousData: true,
+      staleTime: 500000,
+    }
   );
 
   const { data: dataSiasn, isLoading: loadingDataSiasn } = useQuery(
     ["data-utama-siasn", nip],
-    () => dataUtamSIASNByNip(nip)
+    () => dataUtamSIASNByNip(nip),
+    {
+      refetchOnWindowFocus: false,
+      keepPreviousData: true,
+      staleTime: 500000,
+    }
   );
 
   const { data: dataRwAngkakredit, isLoading: isLoadingAngkaKredit } = useQuery(
     ["angkat-kredit-master-by-nip", nip],
-    () => rwAngkakreditMasterByNip(nip)
+    () => rwAngkakreditMasterByNip(nip),
+    {
+      refetchOnWindowFocus: false,
+      keepPreviousData: true,
+      staleTime: 500000,
+    }
   );
 
   const { mutateAsync: hapusAk, isLoading: isLoadingRemoveAk } = useMutation(

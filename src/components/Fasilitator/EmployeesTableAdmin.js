@@ -8,7 +8,6 @@ import {
 import { Badge } from "@mantine/core";
 import { useQuery } from "@tanstack/react-query";
 import { Avatar, Space, Table, Tag, Tooltip, Typography } from "antd";
-import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import ReportEmployeeMaster from "../Admin/ReportEmployeeMaster";
 import EmployeesTableFilterAdmin from "../Filter/EmployeesTableFilterAdmin";
@@ -26,7 +25,6 @@ const TagKomparasi = ({ komparasi, nama }) => {
 
 function EmployeesTableAdmin() {
   const router = useRouter();
-  const { data: currentUser } = useSession();
 
   const { data, isLoading, isFetching } = useQuery(
     ["employees-paging-admin", router?.query],
@@ -45,13 +43,7 @@ function EmployeesTableAdmin() {
   };
 
   const gotoDetail = (nip) => {
-    const currentRole = currentUser?.user?.current_role;
-
-    if (currentRole === "admin") {
-      router.push(`/apps-managements/integrasi/siasn/${nip}`);
-    } else {
-      router.push(`/fasilitator-employees/master-data/${nip}`);
-    }
+    router.push(`/rekon/pegawai/${nip}/detail`);
   };
 
   const columns = [
@@ -72,7 +64,14 @@ function EmployeesTableAdmin() {
       render: (_, row) => {
         return (
           <Space direction="vertical" size="small">
-            <Typography.Text strong>{row?.nama_master}</Typography.Text>
+            <Typography.Link
+              strong
+              onClick={() =>
+                router.push(`/rekon/pegawai/${row?.nip_master}/detail`)
+              }
+            >
+              {row?.nama_master}
+            </Typography.Link>
             <Typography.Text>{row?.nip_master}</Typography.Text>
             <Tooltip title="Pembetulan dilakukan di SIASN">
               <Badge color="yellow">{row?.siasn?.status}</Badge>

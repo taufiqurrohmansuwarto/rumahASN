@@ -1,28 +1,29 @@
-import { Card, Form } from "antd";
 import { useSession } from "next-auth/react";
-import { useRouter } from "next/router";
-import EmployeesTableAdmin from "../Fasilitator/EmployeesTableAdmin";
 import EmployeesTable from "../Fasilitator/EmployeesTable";
+import EmployeesTableAdmin from "../Fasilitator/EmployeesTableAdmin";
 
+/**
+ * Komponen untuk menampilkan daftar pegawai berdasarkan peran pengguna
+ * Admin melihat tabel admin, fasilitator melihat tabel fasilitator
+ */
 const DaftarPegawai = () => {
-  const router = useRouter();
   const { data: session } = useSession();
 
-  const handleFinish = (values) => {
-    // router.push(`/rekon/pegawai/${values.nip}`);
-  };
+  // Menentukan peran pengguna
+  const isAdmin = session?.user?.current_role === "admin";
+  const isFasilitator = session?.user?.role === "FASILITATOR";
 
-  const [form] = Form.useForm();
-  const admin = session?.user?.current_role === "admin";
-  const fasilitator = session?.user?.role === "FASILITATOR";
-
-  if (admin) {
+  // Render komponen berdasarkan peran
+  if (isAdmin) {
     return <EmployeesTableAdmin />;
-  } else if (fasilitator) {
-    return <EmployeesTable />;
-  } else {
-    return <></>;
   }
+
+  if (isFasilitator) {
+    return <EmployeesTable />;
+  }
+
+  // Jika bukan admin atau fasilitator, tampilkan kosong
+  return null;
 };
 
 export default DaftarPegawai;

@@ -112,7 +112,7 @@ function EmployeesTable() {
   };
 
   const gotoDetail = (nip) => {
-    router.push(`/fasilitator-employees/master-data/${nip}`);
+    router.push(`/rekon/pegawai/${nip}/detail`);
   };
 
   const columns = [
@@ -404,7 +404,7 @@ function EmployeesTable() {
           current: parseInt(router?.query?.page),
           defaultCurrent: 1,
           onChange: handleChangePage,
-          pageSize: 5,
+          pageSize: 10,
           position: ["topRight", "bottomRight", "bottomLeft", "topLeft"],
         }}
         loading={isLoading || isFetching}

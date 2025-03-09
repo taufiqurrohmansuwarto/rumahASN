@@ -8,6 +8,9 @@ function ComparePemberhentianByNip({ nip }) {
     () => rwPemberhentianByNip(nip),
     {
       enabled: !!nip,
+      refetchOnWindowFocus: false,
+      keepPreviousData: true,
+      staleTime: 500000,
     }
   );
 

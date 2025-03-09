@@ -12,7 +12,7 @@ const checkEmployee = async (req, res, next) => {
     const opdId = current_role === "admin" ? "1" : organization_id;
 
     // Mendapatkan data pegawai dari cache Redis atau dari API
-    const cacheKey = `employee:${nip}`;
+    const cacheKey = `rasn:employee:${nip}`;
     let employeeData = null;
 
     // Cek apakah data ada di cache

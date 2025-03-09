@@ -57,12 +57,12 @@ function LogHistorySIASN() {
   );
 
   const gotoDetail = (nip) => {
-    router.push(`/apps-managements/integrasi/siasn/${nip}`);
+    router.push(`/rekon/pegawai/${nip}/detail`);
   };
 
   const handleChangePage = (page, limit) => {
     router.push({
-      pathname: "/logs/siasn",
+      pathname: "/rekon/logs",
       query: {
         ...query,
         page,
@@ -136,7 +136,11 @@ function LogHistorySIASN() {
       key: "aksi",
       render: (text) => (
         // <a onClick={() => gotoDetail(text?.employee_number)}>Detail</a>
-        <a>
+        <a
+          onClick={() =>
+            router.push(`/rekon/pegawai/${text?.employee_number}/detail`)
+          }
+        >
           <SearchOutlined />
         </a>
       ),

@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Col, Form, Input, Modal, Row, Spin, Tag } from "antd";
 import { useEffect, useState } from "react";
 
+import { KeyOutlined } from "@ant-design/icons";
 import dayjs from "dayjs";
 import "dayjs/locale/id";
 import relativeTime from "dayjs/plugin/relativeTime";
@@ -173,10 +174,11 @@ function IPAsnByNip({ tahun, nip }) {
       {dataIPAsn ? (
         <>
           <Tag
+            icon={<KeyOutlined />}
             color={
               dataKategoriIPASN(dataIPAsn?.subtotal) === "Sangat Tinggi"
                 ? "#a0d911"
-                : "#f5222d"
+                : "#ff7875"
             }
             style={{ cursor: "pointer", marginBottom: 16, marginTop: 16 }}
             onClick={handleOpen}
@@ -192,7 +194,9 @@ function IPAsnByNip({ tahun, nip }) {
             data={dataIPAsn}
           />
         </>
-      ) : null}
+      ) : (
+        <div></div>
+      )}
     </>
   );
 }

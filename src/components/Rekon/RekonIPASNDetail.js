@@ -21,6 +21,7 @@ import { Form, TreeSelect, Button } from "antd";
 import { FileExcelOutlined, SearchOutlined } from "@ant-design/icons";
 import XLSX from "xlsx";
 import { clearQuery } from "@/utils/client-utils";
+import useScrollRestoration from "@/hooks/useScrollRestoration";
 
 const DetailIPASN = () => {
   const router = useRouter();
@@ -47,7 +48,7 @@ const DetailIPASN = () => {
             <Statistic
               title="Kompetensi (PNS)"
               value={data?.data?.rerata_kompetensi_pns}
-              suffix="/ 35"
+              suffix="/ 40"
             />
           </Card>
         </Col>
@@ -88,7 +89,7 @@ const DetailIPASN = () => {
             <Statistic
               title="Kompetensi (PPPK)"
               value={data?.data?.rerata_kompetensi_pppk}
-              suffix="/ 35"
+              suffix="/ 40"
             />
           </Card>
         </Col>
@@ -125,6 +126,7 @@ const DetailIPASN = () => {
 };
 
 const EmployeeIPASN = () => {
+  useScrollRestoration();
   const router = useRouter();
   const { data, isLoading, isFetching } = useQuery({
     queryKey: ["rekon-ipasn-employees", router?.query],
@@ -222,7 +224,13 @@ const EmployeeIPASN = () => {
       width: 250,
       render: (_, record) => (
         <Space direction="vertical">
-          <Typography.Text>{record?.nama_master}</Typography.Text>
+          <Typography.Link
+            onClick={() =>
+              router.push(`/rekon/pegawai/${record?.nip_master}/detail`)
+            }
+          >
+            {record?.nama_master}
+          </Typography.Link>
           <Typography.Text>{record?.nip}</Typography.Text>
           <Typography.Text strong>{record?.jabatan_master}</Typography.Text>
         </Space>
@@ -254,7 +262,7 @@ const EmployeeIPASN = () => {
       title: "Kompetensi",
       dataIndex: "kompetensi",
       sorter: true,
-      render: (value) => renderValue(value, 35),
+      render: (value) => renderValue(value, 40),
     },
     {
       title: "Kinerja",
@@ -279,7 +287,11 @@ const EmployeeIPASN = () => {
       title: "Aksi",
       key: "aksi",
       render: () => (
-        <a>
+        <a
+          onClick={() =>
+            router.push(`/rekon/pegawai/${record?.nip_master}/detail`)
+          }
+        >
           <SearchOutlined />
         </a>
       ),

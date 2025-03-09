@@ -1,9 +1,5 @@
 import IPAsnByNip from "@/components/LayananSIASN/IPASNByNip";
 import PengaturanGelarByNip from "@/components/LayananSIASN/PengaturanGelarByNip";
-import {
-  anomaliUserByNip,
-  updateAnomaliUserByNip,
-} from "@/services/anomali.services";
 import { dataUtamaMasterByNip } from "@/services/master.services";
 import {
   dataUtamSIASNByNip,
@@ -12,7 +8,7 @@ import {
   updateDataUtamaByNip,
 } from "@/services/siasn-services";
 import { getUmur } from "@/utils/client-utils";
-import { LockOutlined } from "@ant-design/icons";
+import { TagOutlined, UserOutlined } from "@ant-design/icons";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Alert as AlertAntd,
@@ -24,7 +20,6 @@ import {
   Flex,
   Form,
   Grid,
-  Image,
   Input,
   Modal,
   Popconfirm,
@@ -37,7 +32,7 @@ import {
   message,
 } from "antd";
 import { useRouter } from "next/router";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import SyncGolonganByNip from "../Sync/SyncGolonganByNip";
 import SyncJabatanByNip from "../Sync/SyncJabatanByNip";
 import DisparitasByNip from "./DisparitasByNip";
@@ -125,48 +120,51 @@ const EmployeeDescriptionMaster = ({ data, loading }) => {
 };
 
 const EmployeeContent = ({ data, loading }) => {
-  const router = useRouter();
   return (
-    <Row gutter={[8, 16]}>
-      <Col sm={24} md={24}>
-        <Flex gap={10} vertical>
-          <Flex>
+    <Row gutter={[16, 16]}>
+      <Col span={24}>
+        <Flex vertical gap={16}>
+          {/* Status Pegawai */}
+          <Flex gap={2} wrap="wrap" justify="flex-start">
             <Tooltip title="Status Kepegawaian SIMASTER">
-              <div>
-                <StatusMaster status={data?.master?.status} />
-              </div>
+              <StatusMaster status={data?.master?.status} />
             </Tooltip>
             <Tooltip title="Status Kepegawaian SIASN">
-              <div>
-                <StatusSIASN
-                  status={data?.siasn?.statusPegawai}
-                  kedudukanNama={data?.siasn?.kedudukanPnsNama}
-                />
-              </div>
+              <StatusSIASN
+                status={data?.siasn?.statusPegawai}
+                kedudukanNama={data?.siasn?.kedudukanPnsNama}
+              />
             </Tooltip>
             <Tooltip title="Status Verifikasi NIK">
-              <Tag color={data?.siasn?.validNik ? "green" : "red"}>
+              <Tag
+                icon={<TagOutlined />}
+                color={data?.siasn?.validNik ? "green" : "red"}
+              >
                 {data?.siasn?.validNik
                   ? "NIK Terverifikasi"
                   : "NIK Belum Terverifikasi"}
               </Tag>
             </Tooltip>
           </Flex>
-          <Flex gap={20} justify="space-between">
-            <Space direction="vertical" align="center">
-              <Image
-                alt="Foto"
-                style={{
-                  borderRadius: 8,
-                }}
-                width={210}
-                height={210}
-                shape="square"
+
+          {/* Informasi Pegawai */}
+          <Row gutter={[4, 4]} style={{ marginBottom: 16 }}>
+            <Col xs={24} sm={6} md={5} lg={4} xl={3}>
+              <Avatar
                 src={data?.master?.foto}
+                size={180}
+                shape="square"
+                style={{ width: "100%", height: "auto", maxWidth: 180 }}
+                icon={!data?.master?.foto && <UserOutlined />}
               />
-            </Space>
-            <EmployeeDescriptionMaster loading={loading} data={data?.master} />
-          </Flex>
+            </Col>
+            <Col xs={24} sm={18} md={19} lg={20} xl={21}>
+              <EmployeeDescriptionMaster
+                loading={loading}
+                data={data?.master}
+              />
+            </Col>
+          </Row>
         </Flex>
       </Col>
     </Row>
@@ -245,94 +243,20 @@ const ModalAnomali = ({
   );
 };
 
-const CheckAnomali = () => {
-  const router = useRouter();
-  const [open, setOpen] = useState(false);
-  const queryClient = useQueryClient();
-
-  const [currentId, setCurrentId] = useState(null);
-
-  const [currentAnomali, setCurrentAnomali] = useState(null);
-
-  const handleOpen = (anomali) => {
-    setOpen(true);
-    setCurrentAnomali(anomali);
-  };
-
-  const handleClose = () => {
-    setOpen(false);
-    setCurrentAnomali(null);
-  };
-
-  const { nip } = router.query;
-  const { data: anomali, isLoading: isLoadingAnomali } = useQuery(
-    ["anomali-user-by-nip", nip],
-    () => anomaliUserByNip(nip),
-    {
-      enabled: !!nip,
-    }
-  );
-
-  const { mutateAsync: update, isloading: isLoadingUpdate } = useMutation(
-    (data) => updateAnomaliUserByNip(data),
-    {
-      onSuccess: () => {
-        message.success("Berhasil memperbarui data");
-        handleClose();
-      },
-      onError: () => {
-        message.error("Gagal memperbarui data");
-      },
-      onSettled: () => {
-        queryClient.invalidateQueries(["anomali-user-by-nip", nip]);
-      },
-    }
-  );
-
-  return (
-    <div>
-      <ModalAnomali
-        loadingUpdate={isLoadingUpdate}
-        update={update}
-        open={open}
-        onCancel={handleClose}
-        nip={nip}
-        id={currentId}
-        initialData={currentAnomali}
-      />
-      {anomali?.length && (
-        <>
-          {anomali?.map((a) => (
-            <Tooltip key={a.id} title="Anomali">
-              <Tag
-                onClick={() => handleOpen(a)}
-                icon={<LockOutlined />}
-                style={{
-                  cursor: "pointer",
-                }}
-                color={a?.is_repaired ? "green" : "#f50"}
-              >
-                {a?.jenis_anomali_nama}
-                {a?.is_repaired ? `${a?.user?.username}` : null}
-              </Tag>
-            </Tooltip>
-          ))}
-        </>
-      )}
-    </div>
-  );
-};
-
 const StatusSIASN = ({ status, kedudukanNama }) => {
   return (
-    <Tag color="orange">
+    <Tag icon={<TagOutlined />} color="orange">
       {status} - {kedudukanNama}
     </Tag>
   );
 };
 
 const StatusMaster = ({ status }) => {
-  return <Tag color={status === "Aktif" ? "green" : "red"}>{status}</Tag>;
+  return (
+    <Tag icon={<TagOutlined />} color={status === "Aktif" ? "green" : "red"}>
+      {status}
+    </Tag>
+  );
 };
 
 const Kppn = ({ id }) => {
@@ -406,17 +330,32 @@ function EmployeeDetail({ nip }) {
   const breakPoint = Grid.useBreakpoint();
   const { data: dataSimaster, isLoading: isLoadingDataSimaster } = useQuery(
     ["data-utama-simaster-by-nip", nip],
-    () => dataUtamaMasterByNip(nip)
+    () => dataUtamaMasterByNip(nip),
+    {
+      refetchOnWindowFocus: false,
+      keepPreviousData: true,
+      staleTime: 500000,
+    }
   );
 
   const { data: dataPnsAll, isLoading: isLoadingDataPns } = useQuery(
     ["data-pns-all", nip],
-    () => getPnsAllByNip(nip)
+    () => getPnsAllByNip(nip),
+    {
+      refetchOnWindowFocus: false,
+      keepPreviousData: true,
+      staleTime: 500000,
+    }
   );
 
   const { data: siasn, isLoading: loadingSiasn } = useQuery(
     ["data-utama-siasn", nip],
-    () => dataUtamSIASNByNip(nip)
+    () => dataUtamSIASNByNip(nip),
+    {
+      refetchOnWindowFocus: false,
+      keepPreviousData: true,
+      staleTime: 500000,
+    }
   );
 
   return (
@@ -433,6 +372,7 @@ function EmployeeDetail({ nip }) {
       <Space
         direction={breakPoint?.xs ? "vertical" : "horizontal"}
         align={breakPoint?.xs ? "start" : "center"}
+        size={"small"}
       >
         <IPAsnByNip tahun={2024} nip={dataSimaster?.nip_baru} />
         <Kppn id={siasn?.kppnId} />

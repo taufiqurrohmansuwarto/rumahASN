@@ -141,14 +141,14 @@ export const getUserType = (user) => {
 export const getMenuItems = (menuItems, user) => {
   // Cek role user
   const isAdmin =
-    user?.role === "USER" &&
+    (user?.role === "USER" || user?.role === "FASILITATOR") &&
     (user?.group === "MASTER" || user?.group === "NON ASN") &&
     user?.current_role === "admin";
 
   const isFasilitator =
     user?.role === "FASILITATOR" &&
     user?.group === "MASTER" &&
-    user?.current_role === "user";
+    (user?.current_role === "user" || user?.current_role === "FASILITATOR");
 
   const isPrakom =
     user?.role === "USER" &&

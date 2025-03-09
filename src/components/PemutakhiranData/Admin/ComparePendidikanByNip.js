@@ -73,6 +73,8 @@ function ComparePendidikanByNip({ nip }) {
     () => dataPendidikanByNip(nip),
     {
       refetchOnWindowFocus: false,
+      keepPreviousData: true,
+      staleTime: 500000,
     }
   );
 

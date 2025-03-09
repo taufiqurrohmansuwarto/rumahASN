@@ -140,6 +140,8 @@ function CompareDataUtamaByNip({ nip }) {
     () => dataUtamSIASNByNip(nip),
     {
       refetchOnWindowFocus: false,
+      keepPreviousData: true,
+      staleTime: 500000,
     }
   );
 
@@ -150,6 +152,8 @@ function CompareDataUtamaByNip({ nip }) {
     () => dataUtamaMasterByNip(nip),
     {
       refetchOnWindowFocus: false,
+      keepPreviousData: true,
+      staleTime: 500000,
     }
   );
 

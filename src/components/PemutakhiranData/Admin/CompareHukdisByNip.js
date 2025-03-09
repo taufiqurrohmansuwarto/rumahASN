@@ -170,6 +170,8 @@ const CompareHukdisByNip = ({ nip }) => {
     () => getHukdisByNip(nip),
     {
       refetchOnWindowFocus: false,
+      keepPreviousData: true,
+      staleTime: 500000,
     }
   );
 

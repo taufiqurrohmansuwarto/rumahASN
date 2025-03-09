@@ -2,12 +2,14 @@ import { usulanPerbaikanNamaByNipFasilitator } from "@/controller/siasn-usulan.c
 import adminFasilitatorAsnMiddleware from "@/middleware/admin-fasilitator-asn.middleware";
 import auth from "@/middleware/auth.middleware";
 import { createRouter } from "next-connect";
+import checkEmployee from "@/middleware/check-employee.middleware";
 
 const router = createRouter();
 
 router
   .use(auth)
   .use(adminFasilitatorAsnMiddleware)
+  .use(checkEmployee)
   .get(usulanPerbaikanNamaByNipFasilitator);
 
 export default router.handler();

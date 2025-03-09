@@ -67,7 +67,7 @@ const ProfileHeader = ({ user, isAdmin = false, isPegawaiBKD = false }) => {
   const router = useRouter();
 
   const gotoDetailInformation = () => {
-    router.push(`/apps-managements/integrasi/siasn/${user?.employee_number}`);
+    router.push(`/rekon/pegawai/${user?.employee_number}/detail`);
   };
 
   const userData = {
