@@ -221,6 +221,8 @@ function CompareDataDiklatByNip({ nip }) {
     () => getRwDiklatByNip(nip),
     {
       refetchOnWindowFocus: false,
+      keepPreviousData: true,
+      staleTime: 500000,
     }
   );
 

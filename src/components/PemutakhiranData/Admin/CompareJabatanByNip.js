@@ -563,6 +563,8 @@ function CompareJabatanByNip({ nip }) {
     () => dataUtamSIASNByNip(nip),
     {
       refetchOnWindowFocus: false,
+      keepPreviousData: true,
+      staleTime: 500000,
     }
   );
 
@@ -592,12 +594,20 @@ function CompareJabatanByNip({ nip }) {
     () => getRwJabatanByNip(nip),
     {
       refetchOnWindowFocus: false,
+      keepPreviousData: true,
+      staleTime: 500000,
+      enabled: !!nip,
     }
   );
 
   const { data: dataMaster, isLoading: loadingMasterJabatan } = useQuery(
     ["data-rw-jabatan-master-by-nip", nip],
-    () => rwJabatanMasterByNip(nip)
+    () => rwJabatanMasterByNip(nip),
+    {
+      refetchOnWindowFocus: false,
+      keepPreviousData: true,
+      staleTime: 500000,
+    }
   );
 
   const columnsMaster = [

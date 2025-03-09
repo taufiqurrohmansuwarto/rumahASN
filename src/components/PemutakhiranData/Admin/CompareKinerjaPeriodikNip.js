@@ -24,6 +24,8 @@ const CompareKinerjaPeriodikNip = ({ nip }) => {
     () => getRwKinerjaPeriodikByNip(nip),
     {
       refetchOnWindowFocus: false,
+      keepPreviousData: true,
+      staleTime: 500000,
     }
   );
 

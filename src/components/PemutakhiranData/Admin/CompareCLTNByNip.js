@@ -4,8 +4,11 @@ import { Card, Table, Typography } from "antd";
 import React from "react";
 
 function CompareCLTNByNip({ nip }) {
-  const { data, isLoading } = useQuery(["cltn", nip], () => cltnByNip(nip), {});
-
+  const { data, isLoading } = useQuery(["cltn", nip], () => cltnByNip(nip), {
+    refetchOnWindowFocus: false,
+    keepPreviousData: true,
+    staleTime: 500000,
+  });
   const columns = [
     {
       title: "Nomer SK",

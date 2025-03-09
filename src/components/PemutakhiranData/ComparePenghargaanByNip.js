@@ -25,6 +25,8 @@ function ComparePenghargaanByNip({ nip }) {
     () => penghargaanByNip(nip),
     {
       refetchOnWindowFocus: false,
+      keepPreviousData: true,
+      staleTime: 500000,
     }
   );
 

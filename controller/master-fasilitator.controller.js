@@ -10,7 +10,7 @@ const arrayToTree = require("array-to-tree");
 const { proxyDataUtamaASN } = require("@/utils/siasn-proxy.utils");
 const { createRedisInstance } = require("@/utils/redis");
 
-const LIMIT = 5;
+const LIMIT = 10;
 
 // keperluan komparasi
 const validateOpdId = (opdId) => {

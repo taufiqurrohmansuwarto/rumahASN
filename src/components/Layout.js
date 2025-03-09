@@ -108,60 +108,43 @@ const changeRoutes = (user) => {
     }
 
     if (fasilitatorMaster) {
-      userRoutes.routes.push(
-        {
-          path: "/fasilitator-employees",
-          name: "Layanan Fasilitator",
-          icon: <AntDesignOutlined />,
-          routes: [
-            {
-              path: "/fasilitator-employees/master-data",
-              name: "Master Data",
-            },
-            {
-              path: "/fasilitator-employees/disparitas-unor",
-              name: "Disparitas Unor",
-            },
-            {
-              path: "/fasilitator-employees/peta-jabatan",
-              name: "Peta Jabatan SIASN",
-            },
-            {
-              path: "/fasilitator-employees/daftar-usulan-kenaikan-pangkat",
-              name: "Daftar Usulan KP",
-            },
-            {
-              path: "/fasilitator-employees/daftar-usulan-pensiun",
-              name: "Daftar Usulan Pensiun",
-            },
-            {
-              path: "/fasilitator-employees/perencanaan",
-              name: "Perencanaan",
-              routes: [
-                {
-                  path: "/fasilitator-employees/perencanaan/usulan-formasi",
-                  name: "Usulan Formasi",
-                },
-              ],
-            },
-            // {
-            //   path: "/fasilitator-employees/dashboard-rekap",
-            //   name: "Dashboard Rekap",
-            // },
-          ],
-        }
-        // {
-        //   path: "/fasilitator/smart-asn-connect",
-        //   name: "Smart ASN Connect",
-        //   icon: <IconMessageUser size={18} />,
-        //   routes: [
-        //     {
-        //       path: "/fasilitator/smart-asn-connect/events",
-        //       name: "Kegiatan",
-        //     },
-        //   ],
-        // }
-      );
+      // userRoutes.routes.push({
+      //   path: "/fasilitator-employees",
+      //   name: "Layanan Fasilitator",
+      //   icon: <AntDesignOutlined />,
+      //   routes: [
+      //     {
+      //       path: "/fasilitator-employees/master-data",
+      //       name: "Master Data",
+      //     },
+      //     {
+      //       path: "/fasilitator-employees/disparitas-unor",
+      //       name: "Disparitas Unor",
+      //     },
+      //     {
+      //       path: "/fasilitator-employees/peta-jabatan",
+      //       name: "Peta Jabatan SIASN",
+      //     },
+      //     {
+      //       path: "/fasilitator-employees/daftar-usulan-kenaikan-pangkat",
+      //       name: "Daftar Usulan KP",
+      //     },
+      //     {
+      //       path: "/fasilitator-employees/daftar-usulan-pensiun",
+      //       name: "Daftar Usulan Pensiun",
+      //     },
+      //     {
+      //       path: "/fasilitator-employees/perencanaan",
+      //       name: "Perencanaan",
+      //       routes: [
+      //         {
+      //           path: "/fasilitator-employees/perencanaan/usulan-formasi",
+      //           name: "Usulan Formasi",
+      //         },
+      //       ],
+      //     },
+      //   ],
+      // });
     }
 
     if (userPns) {

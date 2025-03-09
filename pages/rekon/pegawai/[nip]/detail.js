@@ -1,13 +1,13 @@
 import PageContainer from "@/components/PageContainer";
 import RekonLayout from "@/components/Rekon/RekonLayout";
-import DaftarPegawai from "@/components/Rekon/DaftarPegawai";
+import RekonPegawaiDetail from "@/components/Rekon/RekonPegawaiDetail";
+import { Breadcrumb } from "antd";
 import Head from "next/head";
-import { Breadcrumb, FloatButton } from "antd";
 import Link from "next/link";
-import useScrollRestoration from "@/hooks/useScrollRestoration";
+import { useRouter } from "next/router";
 
 const Pegawai = () => {
-  useScrollRestoration();
+  const router = useRouter();
 
   return (
     <>
@@ -15,21 +15,24 @@ const Pegawai = () => {
         <title>Rumah ASN - Rekon - Daftar Pegawai</title>
       </Head>
       <PageContainer
-        title="Rekon"
-        content="Daftar Pegawai"
+        title="Informasi Pegawai"
+        content="Detail informasi pegawai"
+        onBack={() => router.back()}
         breadcrumbRender={() => {
           return (
             <Breadcrumb>
               <Breadcrumb.Item>
                 <Link href="/rekon/dashboard">Dashboard</Link>
               </Breadcrumb.Item>
-              <Breadcrumb.Item>Daftar Pegawai</Breadcrumb.Item>
+              <Breadcrumb.Item>
+                <Link href="/rekon/pegawai">Daftar Pegawai</Link>
+              </Breadcrumb.Item>
+              <Breadcrumb.Item>Detail Pegawai</Breadcrumb.Item>
             </Breadcrumb>
           );
         }}
       >
-        <FloatButton.BackTop />
-        <DaftarPegawai />
+        <RekonPegawaiDetail />
       </PageContainer>
     </>
   );

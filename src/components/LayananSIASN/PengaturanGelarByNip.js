@@ -33,6 +33,8 @@ const ModalPengaturanGelar = ({ open, onCancel, onOk }) => {
     () => getGelarByNip(nip),
     {
       refetchOnWindowFocus: false,
+      keepPreviousData: true,
+      staleTime: 500000,
     }
   );
   const queryClient = useQueryClient();

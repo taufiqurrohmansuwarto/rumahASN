@@ -8,6 +8,9 @@ const useDisparitasByNip = (nip) => {
     queryKey: ["disparitasByNip", nip],
     queryFn: () => getDisparitasByNip(nip),
     enabled: !!nip,
+    refetchOnWindowFocus: false,
+    keepPreviousData: true,
+    staleTime: 500000,
   });
 
   return { data, isLoading, refetch, isFetching };

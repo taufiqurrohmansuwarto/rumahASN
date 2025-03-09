@@ -22,6 +22,7 @@ import {
 import { FilePdfOutlined, SearchOutlined } from "@ant-design/icons";
 import { clearQuery } from "@/utils/client-utils";
 import dayjs from "dayjs";
+import useScrollRestoration from "@/hooks/useScrollRestoration";
 
 const DEFAULT_PERIODE = "01-04-2025";
 const queryFormat = "DD-MM-YYYY";
@@ -100,6 +101,7 @@ const Filter = () => {
 };
 
 function RekonLayananPangkatDetail() {
+  useScrollRestoration();
   const router = useRouter();
   const { data, isLoading, isFetching } = useQuery({
     queryKey: ["rekon-pangkat-by-pegawai", router?.query],
@@ -223,7 +225,13 @@ function RekonLayananPangkatDetail() {
       key: "nama_master",
       render: (_, record) => (
         <Space direction="vertical">
-          <Typography.Text>{record?.nama_master}</Typography.Text>
+          <Typography.Link
+            onClick={() =>
+              router.push(`/rekon/pegawai/${record?.nip_master}/detail`)
+            }
+          >
+            {record?.nama_master}
+          </Typography.Link>
           <Typography.Text>{record?.nip_master}</Typography.Text>
           <Typography.Text strong>{record?.jabatan_master}</Typography.Text>
         </Space>
@@ -255,7 +263,11 @@ function RekonLayananPangkatDetail() {
       title: "Aksi",
       key: "aksi",
       render: (_, record) => (
-        <a>
+        <a
+          onClick={() =>
+            router.push(`/rekon/pegawai/${record?.nip_master}/detail`)
+          }
+        >
           <SearchOutlined />
         </a>
       ),

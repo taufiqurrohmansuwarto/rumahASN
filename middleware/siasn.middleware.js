@@ -34,9 +34,10 @@ const siasnWsAxios = axios.create({
   baseURL: baseUrl,
   httpsAgent: new https.Agent({
     keepAlive: true, // Menjaga koneksi tetap hidup
-    keepAliveMsecs: 30000, // Waktu idle 30 detik
-    maxSockets: 100, // Maksimal 100 koneksi bersamaan
-    maxFreeSockets: 10,
+    keepAliveMsecs: 60000, // Waktu idle 60 detik
+    maxSockets: 150, // Maksimal 150 koneksi bersamaan
+    maxFreeSockets: 20,
+    timeout: 60000, // Timeout 60 detik
   }),
 });
 

@@ -142,6 +142,8 @@ function ComparePangkatByNip({ nip }) {
     () => dataPangkatByNip(nip),
     {
       refetchOnWindowFocus: false,
+      keepPreviousData: true,
+      staleTime: 500000,
     }
   );
 

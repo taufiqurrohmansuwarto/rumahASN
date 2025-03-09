@@ -8,6 +8,8 @@ function CompareMasaKerjaByNip({ nip }) {
     () => dataRiwayatMasaKerja(nip),
     {
       refetchOnWindowFocus: false,
+      keepPreviousData: true,
+      staleTime: 500000,
     }
   );
 

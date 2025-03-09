@@ -6,7 +6,12 @@ function CompareKedudukanHukumByNip({ nip }) {
   const { data, isLoading } = useQuery(
     ["kedudukan-hukum", nip],
     () => rwKedudukanHukumByNip(nip),
-    { enabled: !!nip }
+    {
+      enabled: !!nip,
+      refetchOnWindowFocus: false,
+      keepPreviousData: true,
+      staleTime: 500000,
+    }
   );
 
   const columns = [
