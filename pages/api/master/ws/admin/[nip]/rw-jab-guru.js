@@ -1,12 +1,15 @@
-import {
-  rwDiklatMasterByNip,
-  rwJabGuruByNip,
-} from "@/controller/master.controller";
+import { rwJabGuruByNip } from "@/controller/master.controller";
 import adminFasilitatorMiddleware from "@/middleware/admin-fasilitator.middleware";
 import auth from "@/middleware/auth.middleware";
+import checkEmployee from "@/middleware/check-employee.middleware";
 import { createRouter } from "next-connect";
+
 const router = createRouter();
 
-router.use(auth).use(adminFasilitatorMiddleware).get(rwJabGuruByNip);
+router
+  .use(auth)
+  .use(adminFasilitatorMiddleware)
+  .use(checkEmployee)
+  .get(rwJabGuruByNip);
 
 export default router.handler();
