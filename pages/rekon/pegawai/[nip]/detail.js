@@ -1,13 +1,14 @@
 import PageContainer from "@/components/PageContainer";
 import RekonLayout from "@/components/Rekon/RekonLayout";
 import RekonPegawaiDetail from "@/components/Rekon/RekonPegawaiDetail";
-import { Breadcrumb } from "antd";
+import { Breadcrumb, Grid } from "antd";
 import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
 
 const Pegawai = () => {
   const router = useRouter();
+  const breakPoint = Grid.useBreakpoint();
 
   return (
     <>
@@ -15,6 +16,9 @@ const Pegawai = () => {
         <title>Rumah ASN - Rekon - Daftar Pegawai</title>
       </Head>
       <PageContainer
+        childrenContentStyle={{
+          padding: breakPoint.xs ? 0 : null,
+        }}
         title="Informasi Pegawai"
         content="Detail informasi pegawai"
         onBack={() => router.back()}

@@ -111,7 +111,7 @@ function RekonLayananPangkatDetail() {
   });
 
   const handleChange = (pagination, filters, sorter, extra) => {
-    console.log(sorter?.columnKey);
+    console.log(sorter);
     const query = clearQuery({
       ...router?.query,
       page: pagination?.current,
@@ -259,6 +259,13 @@ function RekonLayananPangkatDetail() {
       title: "Jenis KP",
       dataIndex: "jenis_kp",
     },
+    {
+      title: "Alasan tolak",
+      key: "alasan_tolak_tambahan",
+      dataIndex: "alasan_tolak_tambahan",
+      sorter: true,
+    },
+
     {
       title: "Aksi",
       key: "aksi",

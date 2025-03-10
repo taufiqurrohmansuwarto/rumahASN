@@ -38,6 +38,7 @@ async function getKpWithPegawai({
       "tgl_sk",
       "tmtKp",
       "jenis_kp",
+      "alasan_tolak_tambahan",
     ];
     const sortColumn = validColumns.includes(sortBy) ? sortBy : "nama_master";
 
@@ -59,7 +60,8 @@ async function getKpWithPegawai({
         "kp.tgl_sk",
         "kp.tmtKp",
         "kp.path_preview_sk",
-        "kp.jenis_kp"
+        "kp.jenis_kp",
+        "kp.alasan_tolak_tambahan"
       )
       .where("peg.skpd_id", "ilike", `${skpd_id}%`);
 
