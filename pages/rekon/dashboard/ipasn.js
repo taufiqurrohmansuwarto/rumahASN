@@ -4,9 +4,15 @@ import RekonLayout from "@/components/Rekon/RekonLayout";
 import { Breadcrumb, Grid } from "antd";
 import Head from "next/head";
 import Link from "next/link";
+import { useRouter } from "next/router";
 
 const RekonIPASN = () => {
+  const router = useRouter();
   const breakPoint = Grid.useBreakpoint();
+
+  const handleBack = () => {
+    router.push("/rekon/dashboard");
+  };
 
   return (
     <>
@@ -17,8 +23,9 @@ const RekonIPASN = () => {
         childrenContentStyle={{
           padding: breakPoint.xs ? 0 : null,
         }}
-        title="Dashboard"
-        content="Dashboard Rekon"
+        onBack={handleBack}
+        title="Dashboard IPASN"
+        content="Dashboard IPASN"
         breadcrumbRender={() => {
           return (
             <>

@@ -25,6 +25,7 @@ import {
   Button,
   Card,
   DatePicker,
+  Descriptions,
   Divider,
   Empty,
   Form,
@@ -322,6 +323,104 @@ function CompareAngkaKreditByNip({ nip }) {
 
   const columns = [
     {
+      title: "Data",
+      responsive: ["xs"],
+      key: "data",
+      render: (_, record) => {
+        return (
+          <Descriptions column={1} size="small" layout="vertical">
+            <Descriptions.Item label="Nomor SK">
+              {record?.nomorSk}
+            </Descriptions.Item>
+            <Descriptions.Item label="Bulan Mulai Penilaian">
+              {record?.bulanMulaiPenailan}
+            </Descriptions.Item>
+            <Descriptions.Item label="Tahun Mulai Penilaian">
+              {record?.tahunMulaiPenailan}
+            </Descriptions.Item>
+            <Descriptions.Item label="Bulan Selesai Penilaian">
+              {record?.bulanSelesaiPenilaian}
+            </Descriptions.Item>
+            <Descriptions.Item label="Tahun Selesai Penilaian">
+              {record?.tahunSelesaiPenilaian}
+            </Descriptions.Item>
+            <Descriptions.Item label="Kredit Utama Baru">
+              {record?.kreditUtamaBaru}
+            </Descriptions.Item>
+            <Descriptions.Item label="Kredit Penunjang Baru">
+              {record?.kreditPenunjangBaru}
+            </Descriptions.Item>
+            <Descriptions.Item label="Kredit Baru Total">
+              {record?.kreditBaruTotal}
+            </Descriptions.Item>
+            <Descriptions.Item label="Jenis AK">
+              {checkKonversiIntegrasiPertama(record)}
+            </Descriptions.Item>
+            <Descriptions.Item label="Sumber">
+              {record?.Sumber}
+            </Descriptions.Item>
+            <Descriptions.Item label="Nama Jabatan">
+              {record?.namaJabatan}
+            </Descriptions.Item>
+            <Descriptions.Item label="File">
+              <Space>
+                {record?.path?.[880] && (
+                  <Tooltip title="SK PAK">
+                    <a
+                      href={`/helpdesk/api/siasn/ws/download?filePath=${record?.path?.[880]?.dok_uri}`}
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      <FilePdfOutlined />
+                    </a>
+                  </Tooltip>
+                )}
+                {record?.path?.[879] && (
+                  <Tooltip title="Dok PAK">
+                    <a
+                      href={`/helpdesk/api/siasn/ws/download?filePath=${record?.path?.[879]?.dok_uri}`}
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      <FilePdfOutlined />
+                    </a>
+                  </Tooltip>
+                )}
+              </Space>
+            </Descriptions.Item>
+            <Descriptions.Item label="Aksi">
+              <Space direction="horizontal">
+                <Popconfirm
+                  title="Apakah kamu ingin menghapus data riwayat angka kredit?"
+                  onConfirm={async () => await handleHapus(record)}
+                >
+                  <Tooltip title="Hapus">
+                    <a>
+                      <DeleteOutlined />
+                    </a>
+                  </Tooltip>
+                </Popconfirm>
+                <Divider type="vertical" />
+                <UploadDokumen
+                  id={record?.id}
+                  invalidateQueries={["angka-kredit", nip]}
+                  idRefDokumen="879"
+                  nama="PAK"
+                />
+                <Divider type="vertical" />
+                <UploadDokumen
+                  id={record?.id}
+                  invalidateQueries={["angka-kredit", nip]}
+                  idRefDokumen="880"
+                  nama="SK PAK"
+                />
+              </Space>
+            </Descriptions.Item>
+          </Descriptions>
+        );
+      },
+    },
+    {
       title: "File",
       key: "path",
       render: (_, record) => {
@@ -485,6 +584,48 @@ function CompareAngkaKreditByNip({ nip }) {
 
   const columnsMaster = [
     {
+      title: "Data",
+      responsive: ["xs"],
+      key: "data",
+      render: (_, record) => {
+        return (
+          <Descriptions column={1} size="small" layout="vertical">
+            <Descriptions.Item label="File">
+              <a href={record?.file_pak} target="_blank" rel="noreferrer">
+                File
+              </a>
+            </Descriptions.Item>
+            <Descriptions.Item label="Nomor SK">
+              {record?.no_sk}
+            </Descriptions.Item>
+            <Descriptions.Item label="Jenis AK">
+              {record?.jenisPak?.jenis_pak}
+            </Descriptions.Item>
+            <Descriptions.Item label="Kredit Utama Baru">
+              {record?.nilai_unsur_utama_baru}
+            </Descriptions.Item>
+            <Descriptions.Item label="Kredit Unsur Penunjang">
+              {record?.nilai_unsur_penunjang_baru}
+            </Descriptions.Item>
+            <Descriptions.Item label="Kredit Baru Total">
+              {record?.nilai_pak}
+            </Descriptions.Item>
+            <Descriptions.Item label="Tgl SK">
+              {record?.tgl_sk}
+            </Descriptions.Item>
+            <Descriptions.Item label="Periode Awal / Akhir">
+              {record?.periode_awal} / {record?.periode_akhir}
+            </Descriptions.Item>
+            <Descriptions.Item label="Aksi">
+              {record?.jenis_pak_id === 3 || record?.jenis_pak_id === 4 ? (
+                <a onClick={() => handleVisibleTransfer(record)}>Tranfer</a>
+              ) : null}
+            </Descriptions.Item>
+          </Descriptions>
+        );
+      },
+    },
+    {
       title: "File",
       key: "file",
       render: (_, record) => {
@@ -553,6 +694,7 @@ function CompareAngkaKreditByNip({ nip }) {
           </>
         );
       },
+      responsive: ["sm"],
     },
   ];
 
