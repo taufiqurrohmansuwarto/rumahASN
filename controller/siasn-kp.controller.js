@@ -34,7 +34,7 @@ const syncKenaikanPangkat = async (req, res) => {
   } catch (error) {
     const errorMessage =
       error?.response?.data?.message || "Internal Server Error";
-    // console.log(error);
+    console.log(error);
     res.status(400).json({
       message: errorMessage,
     });
