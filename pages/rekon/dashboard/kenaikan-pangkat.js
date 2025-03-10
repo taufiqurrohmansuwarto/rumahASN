@@ -4,9 +4,15 @@ import RekonLayout from "@/components/Rekon/RekonLayout";
 import { Breadcrumb, Grid } from "antd";
 import Head from "next/head";
 import Link from "next/link";
+import { useRouter } from "next/router";
 
 const RekonKenaikanPangkat = () => {
+  const router = useRouter();
   const breakPoint = Grid.useBreakpoint();
+
+  const handleBack = () => {
+    router.push("/rekon/dashboard");
+  };
 
   return (
     <>
@@ -17,6 +23,7 @@ const RekonKenaikanPangkat = () => {
         childrenContentStyle={{
           padding: breakPoint.xs ? 0 : null,
         }}
+        onBack={handleBack}
         title="Layanan Kenaikan Pangkat"
         content="Layanan Kenaikan Pangkat"
         breadcrumbRender={() => {

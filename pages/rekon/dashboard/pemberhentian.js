@@ -4,9 +4,14 @@ import { Breadcrumb, Grid } from "antd";
 import Head from "next/head";
 import Link from "next/link";
 import RekonLayananPensiunDetail from "@/components/Rekon/RekonLayananPensiunDetail";
-
+import { useRouter } from "next/router";
 const RekonPemberhentian = () => {
+  const router = useRouter();
   const breakPoint = Grid.useBreakpoint();
+
+  const handleBack = () => {
+    router.push("/rekon/dashboard");
+  };
 
   return (
     <>
@@ -17,6 +22,7 @@ const RekonPemberhentian = () => {
         childrenContentStyle={{
           padding: breakPoint.xs ? 0 : null,
         }}
+        onBack={handleBack}
         title="Layanan Pemberhentian"
         content="Layanan Pemberhentian"
         breadcrumbRender={() => {
