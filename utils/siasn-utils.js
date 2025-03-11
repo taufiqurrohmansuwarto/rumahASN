@@ -88,8 +88,15 @@ module.exports.orangTua = (fetcher, nip) => {
 
 // end of keluarga
 
-module.exports.daftarKenaikanPangkat = (fetcher, periode) => {
-  return fetcher.get(`/pns/list-kp-instansi?periode=${periode}`);
+module.exports.daftarKenaikanPangkat = (
+  fetcher,
+  periode,
+  limit = 100,
+  offset = 0
+) => {
+  return fetcher.get(
+    `/pns/list-kp-instansi?periode=${periode}&limit=${limit}&offset=${offset}`
+  );
 };
 
 module.exports.daftarPengadaanInstansi = (fetcher, tahunAnggaran) => {
