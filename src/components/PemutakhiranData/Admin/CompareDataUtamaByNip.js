@@ -238,9 +238,9 @@ function CompareDataUtamaByNip({ nip }) {
     <div>
       <Skeleton loading={isLoading || isLoadingDataSimaster}>
         <Row gutter={[16, 16]}>
-          <Col md={20}>
+          <Col md={20} xs={24}>
             <Row gutter={[16, 16]}>
-              <Col md={24}>
+              <Col md={24} xs={24}>
                 <Card
                   title="Komparasi Data SIMASTER dan MyASN"
                   id="komparasi-data"
@@ -254,14 +254,14 @@ function CompareDataUtamaByNip({ nip }) {
                   </Stack>
                 </Card>
               </Col>
-              <Col md={24}>
+              <Col md={24} xs={24}>
                 <Card id="status-pegawai">
                   <InformationDetail data={data} />
                 </Card>
               </Col>
             </Row>
           </Col>
-          <Col md={4}>
+          <Col md={4} xs={24}>
             {breakPoint.md && (
               <Anchor
                 offsetTop={70}
