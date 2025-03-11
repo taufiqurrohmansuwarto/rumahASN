@@ -15,26 +15,57 @@ dayjs.extend(relativeTime);
 const syncKenaikanPangkat = async (req, res) => {
   try {
     const { siasnRequest: request } = req;
-
     const myPeriode = req?.query?.periode?.split("-").reverse().join("-");
     const periode = req?.query?.periode;
+    const limit = req?.query?.limit || 100;
+    let offset = req?.query?.offset || 0;
 
     const knex = SiasnKP.knex();
-    const result = await daftarKenaikanPangkat(request, myPeriode);
-    const data = result?.data;
+    let totalDataInserted = 0;
+    let isFirstIteration = true;
 
-    if (data?.count === 0) {
-      res.json({ success: true, message: "Data tidak ditemukan" });
-    } else if (data?.count !== 0) {
-      // langsung hapus dan insert tmtKp dengan format DD-MM-YYYY
-      await knex.delete().from("siasn_kp").where("tmtKp", periode);
-      await knex.batchInsert("siasn_kp", data?.data);
-      res.json({ success: true, message: "Data berhasil disinkronisasi" });
+    while (true) {
+      const result = await daftarKenaikanPangkat(
+        request,
+        myPeriode,
+        limit,
+        offset
+      );
+      const data = result?.data;
+
+      // Jika data tidak ditemukan pada iterasi pertama, kembalikan pesan
+      if (data?.count === 0) {
+        if (isFirstIteration) {
+          return res.json({ success: true, message: "Data tidak ditemukan" });
+        }
+        break;
+      }
+
+      // Pada iterasi pertama, hapus data yang sudah ada berdasarkan periode
+      if (isFirstIteration) {
+        await knex.delete().from("siasn_kp").where("tmtKp", periode);
+        isFirstIteration = false;
+      }
+
+      // Lakukan penyisipan batch data ke database
+      await knex.batchInsert("siasn_kp", data.data);
+      totalDataInserted += data.data.length;
+
+      // Update offset untuk iterasi berikutnya
+      offset += limit;
     }
+
+    const message = `Data berhasil disinkronisasi. Total data yang disinkronisasi: ${totalDataInserted}`;
+    console.log(message);
+
+    res.json({
+      success: true,
+      message,
+    });
   } catch (error) {
+    console.log(error);
     const errorMessage =
       error?.response?.data?.message || "Internal Server Error";
-    console.log(error);
     res.status(400).json({
       message: errorMessage,
     });
