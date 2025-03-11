@@ -12,7 +12,7 @@ router
   .use(adminFasilitatorMiddleware)
   .use(siasnMiddleware)
   .use(checkEmployee)
-  .post(updateDataUtamaByNip)
-  .get(siasnEmployeeDetailByNip);
+  .get(siasnEmployeeDetailByNip)
+  .post(updateDataUtamaByNip);
 
 export default router.handler();

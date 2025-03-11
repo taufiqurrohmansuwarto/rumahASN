@@ -160,24 +160,13 @@ const allPnsByNip = async (req, res) => {
 
 const siasnEmployeeDetailByNip = async (req, res) => {
   try {
-    const { organization_id, current_role } = req?.user;
     const { nip } = req?.query;
     const siasnRequest = req.siasnRequest;
-    const fetcher = req?.fetcher;
-
-    const resultMaster = await fetcher.get(
-      `/master-ws/operator/employees/${nip}/data-utama-master`
-    );
-
-    if (!resultMaster) {
-      return res.json(null);
-    } else {
-      const result = await dataUtama(siasnRequest, nip);
-      res.json(result);
-    }
+    const result = await dataUtama(siasnRequest, nip);
+    res.json(result);
   } catch (error) {
     console.log(error);
-    res.status(500).json({ code: 500, message: "Internal Server Error" });
+    res.status(500).json({ code: 500, message: "Data tidak ditemukan" });
   }
 };
 

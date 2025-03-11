@@ -8,6 +8,11 @@ const checkEmployee = async (req, res, next) => {
     const fetcher = req?.fetcher;
     const redis = await createRedisInstance();
 
+    // Validasi NIP
+    if (!nip) {
+      return res.status(400).json({ code: 400, message: "NIP is required" });
+    }
+
     // Menentukan ID organisasi berdasarkan peran pengguna
     const opdId = current_role === "admin" ? "1" : organization_id;
 
@@ -33,7 +38,9 @@ const checkEmployee = async (req, res, next) => {
     } else {
       employeeData = result?.data;
       // Simpan data ke cache untuk penggunaan berikutnya selama 3 menit
-      await redis.set(cacheKey, JSON.stringify(result?.data), "EX", 180);
+      if (result?.data) {
+        await redis.set(cacheKey, JSON.stringify(result.data), "EX", 180);
+      }
     }
 
     // Verifikasi akses berdasarkan SKPD pegawai
