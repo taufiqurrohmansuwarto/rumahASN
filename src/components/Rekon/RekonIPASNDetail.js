@@ -217,6 +217,7 @@ const EmployeeIPASN = () => {
       title: "Foto",
       dataIndex: "foto_master",
       render: (text) => <Avatar size={90} shape="square" src={text} />,
+      responsive: ["md"],
     },
     {
       title: "Nama",
@@ -247,34 +248,40 @@ const EmployeeIPASN = () => {
       dataIndex: "opd_master",
       sorter: true,
       render: (text) => text || "-",
+      responsive: ["sm"],
     },
     {
       title: "Status Kepegawaian",
       dataIndex: "status_master",
+      responsive: ["md"],
     },
     {
       title: "Kualifikasi",
       dataIndex: "kualifikasi",
       sorter: true,
       render: (value) => renderValue(value, 25),
+      responsive: ["sm"],
     },
     {
       title: "Kompetensi",
       dataIndex: "kompetensi",
       sorter: true,
       render: (value) => renderValue(value, 40),
+      responsive: ["sm"],
     },
     {
       title: "Kinerja",
       dataIndex: "kinerja",
       sorter: true,
       render: (value) => renderValue(value, 30),
+      responsive: ["sm"],
     },
     {
       title: "Disiplin",
       dataIndex: "disiplin",
       sorter: true,
       render: (value) => renderValue(value, 5),
+      responsive: ["md"],
     },
     {
       title: "Total",
@@ -286,7 +293,7 @@ const EmployeeIPASN = () => {
     {
       title: "Aksi",
       key: "aksi",
-      render: () => (
+      render: (_, record) => (
         <a
           onClick={() =>
             router.push(`/rekon/pegawai/${record?.nip_master}/detail`)

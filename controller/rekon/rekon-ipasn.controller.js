@@ -19,12 +19,12 @@ async function getIpasnWithPegawai({
   page = 1,
   perPage = 10,
   sortBy = "nama_master", // Default sorting berdasarkan nama_master
-  sortOrder = "ascend", // Default ascending
+  sortOrder = "ascend", // Default Ant Design order
 } = {}) {
   try {
     const knex = SiasnIPASN.knex();
 
-    // Pastikan sortOrder hanya "asc" atau "desc" untuk keamanan query
+    // Konversi sortOrder dari "ascend"/"descend" ke "asc"/"desc"
     const validSortOrder =
       sortOrder.toLowerCase() === "descend" ? "desc" : "asc";
 
@@ -82,8 +82,11 @@ async function getIpasnWithPegawai({
     if (min_disiplin > 0) query.andWhere("ip.disiplin", ">=", min_disiplin);
     if (min_total > 0) query.andWhere("ip.total", ">=", min_total);
 
-    // Sorting
-    query.orderBy(sortColumn, validSortOrder);
+    // Sorting lebih stabil dengan tambahan "nip_master" agar tidak berubah tiap halaman
+    query.orderBy([
+      { column: sortColumn, order: validSortOrder },
+      { column: "nip_master", order: "asc" }, // Sorting tambahan untuk kestabilan
+    ]);
 
     // Pagination
     const result = await query.limit(perPage).offset((page - 1) * perPage);
