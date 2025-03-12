@@ -851,7 +851,7 @@ const postUnorJabatan = async (req, res) => {
 
 const postUnorJabatanByNip = async (req, res) => {
   try {
-    const { siasnRequest: request } = req;
+    const { siasnRequest: request, user } = req;
     const { nip } = req?.query;
     const body = req?.body;
 
@@ -867,17 +867,25 @@ const postUnorJabatanByNip = async (req, res) => {
       instansiIndukId: "A5EB03E23CCCF6A0E040640A040252AD",
     };
 
-    const result = await request.post(`/jabatan/unorjabatan/save`, data);
+    const resultPegawai = await request.get(`/pns/data-utama/${nip}`);
+    const p3k = resultPegawai?.data?.data?.kedudukanPnsNama === "PPPK Aktif";
+    const admin = user?.current_role === "admin";
 
-    await createLogSIASN({
-      userId: req?.user?.customId,
-      type: "CREATE",
-      employeeNumber: nip,
-      siasnService: "jabatan",
-      request_data: JSON.stringify(data),
-    });
+    if (p3k && !admin) {
+      res.status(403).json({ message: "Forbidden" });
+    } else {
+      const result = await request.post(`/jabatan/unorjabatan/save`, data);
 
-    res.json({ id: result?.data?.mapData?.rwJabatanId });
+      await createLogSIASN({
+        userId: req?.user?.customId,
+        type: "CREATE",
+        employeeNumber: nip,
+        siasnService: "jabatan",
+        request_data: JSON.stringify(data),
+      });
+
+      res.json({ id: result?.data?.mapData?.rwJabatanId });
+    }
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: "error" });
