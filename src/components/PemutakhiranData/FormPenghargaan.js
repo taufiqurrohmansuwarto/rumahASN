@@ -1,7 +1,7 @@
 import { dataRiwayatPenghargaan } from "@/utils/client-data";
 import { Form, Input, Select } from "antd";
 
-const FormPenghargaan = ({ name, label }) => {
+const FormPenghargaan = ({ name, label, disabled }) => {
   return (
     <Form.Item
       rules={[
@@ -13,7 +13,7 @@ const FormPenghargaan = ({ name, label }) => {
       name={name}
       label={label}
     >
-      <Select showSearch allowClear optionFilterProp="nama">
+      <Select showSearch allowClear optionFilterProp="nama" disabled={disabled}>
         {dataRiwayatPenghargaan.map((item) => (
           <Select.Option nama={item?.nama} key={item?.id} value={item?.id}>
             {item?.nama}

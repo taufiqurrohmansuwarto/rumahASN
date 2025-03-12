@@ -1,41 +1,63 @@
+import { getRwSatyaLencanaByNip, urlToPdf } from "@/services/master.services";
 import {
   createPenghargaanByNip,
   hapusPenghargaanByNip,
   penghargaanByNip,
 } from "@/services/siasn-services";
+import { DeleteOutlined, SendOutlined } from "@ant-design/icons";
+import { Stack } from "@mantine/core";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
+  Button,
   Card,
   Divider,
   Popconfirm,
   Space,
+  Spin,
   Table,
   Tooltip,
+  Typography,
   message,
 } from "antd";
 import CreatePenghargaan from "./CreatePenghargaan";
-import { DeleteOutlined } from "@ant-design/icons";
 import UploadDokumen from "./UploadDokumen";
-import { getRwPenghargaanByNip } from "@/services/master.services";
+import ModalTransferPenghargaan from "./ModalTransferPenghargaan";
+import { useState } from "react";
+import dayjs from "dayjs";
+
+const serializeSatyaLencanaId = (value) => {
+  // jika 1 kembalian 201
+  // jika 2 kembalian 202
+  // jika 3 kembalian 203
+  // yang lainnya
+  switch (value) {
+    case 1:
+      return "201";
+    case 2:
+      return "202";
+    case 3:
+      return "203";
+    default:
+      return null;
+  }
+};
 
 function ComparePenghargaanByNip({ nip }) {
   const queryClient = useQueryClient();
 
   const { data, isLoading } = useQuery(
-    ["riwayat-penghargaan-nip", nip],
+    ["riwayat-penghargaan-nip-siasn", nip],
     () => penghargaanByNip(nip),
-    {
-      refetchOnWindowFocus: false,
-      keepPreviousData: true,
-      staleTime: 500000,
-    }
+    {}
   );
 
   const { data: dataMaster, isLoading: isLoadingMaster } = useQuery(
-    ["riwayat-penghargaan-nip-master", nip],
-    () => getRwPenghargaanByNip(nip),
+    ["riwayat-satyalencana-nip-master", nip],
+    () => getRwSatyaLencanaByNip(nip),
     {
       refetchOnWindowFocus: false,
+      keepPreviousData: true,
+      staleTime: 1000,
     }
   );
 
@@ -43,13 +65,13 @@ function ComparePenghargaanByNip({ nip }) {
     (data) => createPenghargaanByNip(data),
     {
       onSuccess: () => {
-        queryClient.invalidateQueries(["riwayat-penghargaan-nip", nip]);
+        queryClient.invalidateQueries(["riwayat-penghargaan-nip-siasn"]);
       },
       onError: (error) => {
         message.error(error?.response?.data?.message || error?.message);
       },
       onSettled: () =>
-        queryClient.invalidateQueries(["riwayat-penghargaan-nip", nip]),
+        queryClient.invalidateQueries(["riwayat-penghargaan-nip-siasn"]),
     }
   );
 
@@ -58,13 +80,13 @@ function ComparePenghargaanByNip({ nip }) {
     {
       onSuccess: () => {
         message.success("Berhasil menghapus penghargaan");
-        queryClient.invalidateQueries(["riwayat-penghargaan-nip", nip]);
+        queryClient.invalidateQueries(["riwayat-penghargaan-nip-siasn"]);
       },
       onError: (error) => {
         message.error(error?.response?.data?.message || error?.message);
       },
       onSettled: () =>
-        queryClient.invalidateQueries(["riwayat-penghargaan-nip", nip]),
+        queryClient.invalidateQueries(["riwayat-penghargaan-nip-siasn"]),
     }
   );
 
@@ -132,7 +154,7 @@ function ComparePenghargaanByNip({ nip }) {
             <UploadDokumen
               id={text?.ID}
               idRefDokumen={"892"}
-              invalidateQueries={["riwayat-penghargaan-nip", nip]}
+              invalidateQueries={["riwayat-penghargaan-nip-siasn"]}
               nama="Penghargaan"
             />
           </Space>
@@ -141,23 +163,124 @@ function ComparePenghargaanByNip({ nip }) {
     },
   ];
 
+  const [value, setValue] = useState();
+  const [open, setOpen] = useState(false);
+  const [loadingFile, setLoadingFile] = useState(false);
+  const [file, setFile] = useState(null);
+
+  const handleOpen = async (value) => {
+    try {
+      setLoadingFile(true);
+      const response = await urlToPdf({ url: value?.file_satyalencana });
+      const file = new File([response], "file.pdf", {
+        type: "application/pdf",
+      });
+      setFile(file);
+      const serializeValue = {
+        hargaId: serializeSatyaLencanaId(
+          value?.satyalencana?.jenis_satyalencana_id
+        ),
+        skDate: value?.tgl_sk,
+        skNomor: value?.no_sk,
+        tahun: value?.tgl_sk,
+        file: value?.file_satyalencana,
+      };
+
+      setValue(serializeValue);
+      setOpen(true);
+      setLoadingFile(false);
+    } catch (error) {
+      setLoadingFile(false);
+    }
+  };
+
+  const handleClose = () => {
+    setValue(null);
+    setOpen(false);
+    setFile(null);
+  };
+
+  const columnsMaster = [
+    {
+      title: "File",
+      key: "file",
+      render: (_, row) => (
+        <>
+          <a target="_blank" href={row?.file_satyalencana} rel="noreferrer">
+            File
+          </a>
+        </>
+      ),
+    },
+    {
+      title: "Nama Penghargaan",
+      key: "nama",
+      render: (_, row) => <>{row?.satyalencana?.satyalencana}</>,
+    },
+    {
+      title: "Nomor SK",
+      key: "skNomor",
+      render: (_, row) => <>{row?.no_sk}</>,
+    },
+    {
+      title: "Tanggal SK",
+      key: "skDate",
+      render: (_, row) => <>{row?.tgl_sk}</>,
+    },
+    {
+      title: "Aksi",
+      key: "aksi",
+      render: (_, row) => (
+        <div>
+          <Button
+            type="primary"
+            icon={<SendOutlined />}
+            onClick={async () => await handleOpen(row)}
+            loading={loadingFile}
+          >
+            Transfer
+          </Button>
+        </div>
+      ),
+    },
+  ];
+
   return (
     <Card title="Penghargaan">
-      <Table
-        title={() => (
-          <CreatePenghargaan
-            loading={isLoadingCreate}
-            nip={nip}
-            onSubmit={create}
-          />
-        )}
-        pagination={false}
-        columns={columns}
-        dataSource={data}
-        loading={isLoading}
-        rowKey={(row) => row?.id}
-      />
-      {JSON.stringify(dataMaster)}
+      <Stack>
+        <Table
+          title={() => (
+            <CreatePenghargaan
+              loading={isLoadingCreate}
+              nip={nip}
+              onSubmit={create}
+            />
+          )}
+          pagination={false}
+          columns={columns}
+          dataSource={data}
+          loading={isLoading}
+          rowKey={(row) => row?.id}
+        />
+        <Table
+          title={() => <Typography.Text strong>SIMASTER</Typography.Text>}
+          rowKey={(row) => row?.satylencana_id}
+          pagination={false}
+          columns={columnsMaster}
+          dataSource={dataMaster}
+          loading={isLoadingMaster}
+        />
+        <Spin spinning={loadingFile} fullscreen />
+        <ModalTransferPenghargaan
+          file={file}
+          nip={nip}
+          onSubmit={create}
+          loading={isLoadingCreate}
+          open={open}
+          onCancel={handleClose}
+          value={value}
+        />
+      </Stack>
     </Card>
   );
 }

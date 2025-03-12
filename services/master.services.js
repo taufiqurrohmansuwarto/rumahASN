@@ -93,6 +93,10 @@ export const getRwPenghargaanByNip = (nip) => {
   return api.get(`/admin/${nip}/rw-penghargaan`).then((res) => res.data);
 };
 
+export const getRwSatyaLencanaByNip = (nip) => {
+  return api.get(`/admin/${nip}/rw-satyalencana`).then((res) => res.data);
+};
+
 export const getOpdFasilitator = () => {
   return api.get(`/fasilitator/unor`).then((res) => res.data);
 };

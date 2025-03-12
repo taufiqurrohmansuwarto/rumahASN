@@ -94,6 +94,17 @@ module.exports.getRwPenghargaan = async (fetcher, nip) => {
   }
 };
 
+// satya lencana
+module.exports.getRwSatyaLencana = async (fetcher, nip) => {
+  try {
+    const result = await fetcher.get(
+      `/master-ws/operator/employees/${nip}/rw-satyalencana`
+    );
+    return result;
+  } catch (error) {
+    console.log(error);
+  }
+};
 module.exports.getRwAnak = async (fetcher, nip) => {
   try {
     const result = await fetcher.get(
