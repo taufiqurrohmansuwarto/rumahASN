@@ -10,6 +10,7 @@ import {
   getRwPasangan,
   getRwPendidikanMaster,
   getRwPenghargaan,
+  getRwSatyaLencana,
 } from "@/utils/master.utils";
 import arrayToTree from "array-to-tree";
 import axios from "axios";
@@ -468,6 +469,18 @@ const getRwPenghargaanByNip = async (req, res) => {
   }
 };
 
+const getRwSatyaLencanaByNip = async (req, res) => {
+  try {
+    const { fetcher } = req;
+    const { nip } = req.query;
+    const result = await getRwSatyaLencana(fetcher, nip);
+    res.json(result?.data);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ code: 500, message: "Internal Server Error" });
+  }
+};
+
 const getDepartmentDetail = async (req, res) => {
   try {
     const { id } = req?.query;
@@ -579,4 +592,5 @@ module.exports = {
   kelengkapanDokumen,
   kelengkapanDokumenByNip,
   getDepartmentDetail,
+  getRwSatyaLencanaByNip,
 };
