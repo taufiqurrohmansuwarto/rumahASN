@@ -63,16 +63,7 @@ function ComparePenghargaanByNip({ nip }) {
 
   const { mutateAsync: create, isLoading: isLoadingCreate } = useMutation(
     (data) => createPenghargaanByNip(data),
-    {
-      onSuccess: () => {
-        queryClient.invalidateQueries(["riwayat-penghargaan-nip-siasn"]);
-      },
-      onError: (error) => {
-        message.error(error?.response?.data?.message || error?.message);
-      },
-      onSettled: () =>
-        queryClient.invalidateQueries(["riwayat-penghargaan-nip-siasn"]),
-    }
+    {}
   );
 
   const { mutateAsync: hapus, isLoadsing: isLoadingHapus } = useMutation(
