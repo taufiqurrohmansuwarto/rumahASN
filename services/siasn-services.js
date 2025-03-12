@@ -42,6 +42,11 @@ export const dataKinerjaPns = (nip) => {
   return api.get(`/pns-kinerja/${nip}`).then((res) => res.data);
 };
 
+// cpns
+export const createCpns = ({ nip, data }) => {
+  return api.post(`/admin/${nip}/cpns`, data).then((res) => res.data);
+};
+
 export const atasanKinerja = (search) => {
   return api
     .get(`/pns/cari-atasan-kinerja?search=${search}`)

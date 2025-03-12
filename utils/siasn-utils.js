@@ -266,6 +266,11 @@ module.exports.hapusKinerjaPeriodik = (fetcher, id) => {
   return fetcher.delete(`/kinerjaperiodik/delete/${id}`);
 };
 
+// create cpns / pns
+module.exports.createCpnsPns = (fetcher, data) => {
+  return fetcher.post(`/cpns/save`, data);
+};
+
 // admin
 module.exports.kenaikanPangkatPeriode = (fetcher, periode) => {
   return fetcher
