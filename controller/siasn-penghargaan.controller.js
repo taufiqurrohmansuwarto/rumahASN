@@ -46,7 +46,7 @@ const handlePenghargaanDelete = async (req, res) => {
   try {
     const fetcher = req?.siasnRequest;
     const { id } = req.query;
-    const data = await hapusRiwayatPenghargaan(fetcher, id);
+    await hapusRiwayatPenghargaan(fetcher, id);
     await createLogSIASN({
       userId: req?.user?.customId,
       type: "Hapus Penghargaan",

@@ -44,10 +44,10 @@ function ModalTransfer({
         data,
       };
 
+      const responsePenghargaan = await onSubmit(payload);
+
       if (file) {
-        const responsePenghargaan = await onSubmit(payload);
         const idPenghargaan = responsePenghargaan?.id;
-        console.log(idPenghargaan);
 
         const formData = new FormData();
         formData.append("file", file);
@@ -55,15 +55,14 @@ function ModalTransfer({
         formData.append("id_ref_dokumen", "892");
 
         await uploadDokRiwayat(formData);
-        message.success("Berhasil menambahkan penghargaan");
-      } else {
-        await onSubmit(payload);
-        message.success("Berhasil menambahkan penghargaan");
       }
+
+      message.success("Berhasil menambahkan penghargaan");
     } catch (error) {
-      setCurrentLoading(false);
-      queryClient.invalidateQueries(["riwayat-penghargaan-nip-siasn"]);
+      console.error("Error saat menambahkan penghargaan:", error);
+      message.error("Gagal menambahkan penghargaan");
     } finally {
+      setCurrentLoading(false);
       queryClient.invalidateQueries(["riwayat-penghargaan-nip-siasn"]);
       onCancel();
     }
@@ -78,7 +77,7 @@ function ModalTransfer({
         destroyOnClose
         onCancel={onCancel}
         onOk={handleOk}
-        confirmLoading={loading || currentLoading}
+        confirmLoading={currentLoading}
       >
         <a href={`${value?.file}`} target="_blank" rel="noreferrer">
           File
