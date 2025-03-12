@@ -171,11 +171,17 @@ function ComparePenghargaanByNip({ nip }) {
   const handleOpen = async (value) => {
     try {
       setLoadingFile(true);
+
+      // Mengambil file PDF dari URL
       const response = await urlToPdf({ url: value?.file_satyalencana });
+
+      // Membuat objek File dari response
       const file = new File([response], "file.pdf", {
         type: "application/pdf",
       });
       setFile(file);
+
+      // Menyiapkan data yang akan digunakan
       const serializeValue = {
         hargaId: serializeSatyaLencanaId(
           value?.satyalencana?.jenis_satyalencana_id
@@ -186,10 +192,12 @@ function ComparePenghargaanByNip({ nip }) {
         file: value?.file_satyalencana,
       };
 
+      // Mengatur state
       setValue(serializeValue);
       setOpen(true);
-      setLoadingFile(false);
     } catch (error) {
+      console.error("Error saat membuka file:", error);
+    } finally {
       setLoadingFile(false);
     }
   };
