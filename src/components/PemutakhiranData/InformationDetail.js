@@ -1,9 +1,8 @@
+import { updateDataUtamaByNip } from "@/services/siasn-services";
 import { formatCurrency } from "@/utils/client-utils";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Descriptions, Divider, Typography, message } from "antd";
 import { trim } from "lodash";
-import AdministrasiByNip from "../Berkas/AdministrasiByNip";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { updateDataUtamaByNip } from "@/services/siasn-services";
 import TextSensor from "../TextSensor";
 
 function InformationDetail({ data }) {

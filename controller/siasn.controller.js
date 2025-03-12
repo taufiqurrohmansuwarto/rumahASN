@@ -2,6 +2,7 @@ const { default: axios } = require("axios");
 const apiGateway = process.env.APIGATEWAY_URL;
 const fs = require("fs");
 const path = require("path");
+const Pegawai = require("@/models/siasn-employees.model");
 
 const dayjs = require("dayjs");
 require("dayjs/locale/id");
@@ -37,6 +38,7 @@ const {
   dataUtama,
   removeDiklatSiasn,
   refSiasnUnor,
+  createCpnsPns,
 } = require("@/utils/siasn-utils");
 
 const {
@@ -1522,10 +1524,56 @@ const tambahKinerjaPeridoikByNip = async (req, res) => {
   }
 };
 
+const createCpns = async (req, res) => {
+  try {
+    const { siasnRequest: request } = req;
+    const { nip } = req?.query;
+    const { current_role: role, customId: userId } = req?.user;
+
+    // Cek apakah pengguna adalah admin
+    if (role !== "admin") {
+      return res.status(403).json({
+        code: 403,
+        message: "Forbidden",
+      });
+    }
+
+    // Ambil data pegawai
+    const pegawai = await Pegawai.query()
+      .where("nip_baru", nip)
+      .first()
+      .select("nip_baru", "pns_id");
+
+    // Siapkan payload
+    const payload = {
+      ...req.body,
+      pns_orang_id: pegawai?.pns_id,
+    };
+
+    // Kirim data ke SIASN
+    await createCpnsPns(request, payload);
+
+    // Catat log aktivitas
+    await createLogSIASN({
+      userId,
+      type: "create",
+      siasnService: "cpns",
+      employeeNumber: nip,
+      request_data: JSON.stringify(payload),
+    });
+
+    res.json({ code: 200, message: "success" });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ code: 500, message: "Internal Server Error" });
+  }
+};
+
 module.exports = {
   kinerjaPeriodikByNip,
   hapusKinerjaPeriodikByNip,
   tambahKinerjaPeridoikByNip,
+  createCpns,
 
   removeKursus,
   getRwPwkByNip,

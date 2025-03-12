@@ -15,6 +15,7 @@ import {
 } from "antd";
 import InformationDetail from "../InformationDetail";
 import TextSensor from "@/components/TextSensor";
+import CreateCPNS from "./CreateCPNS";
 
 const dataTabel = (siasn, simaster) => {
   return [
@@ -257,6 +258,7 @@ function CompareDataUtamaByNip({ nip }) {
               <Col md={24} xs={24}>
                 <Card id="status-pegawai">
                   <InformationDetail data={data} />
+                  <CreateCPNS nip={nip} data={data} />
                 </Card>
               </Col>
             </Row>

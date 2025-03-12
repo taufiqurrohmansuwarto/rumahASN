@@ -57,7 +57,6 @@ const syncPemberhentianSIASN = async (req, res) => {
     } else {
       const knex = SiasnPemberhentian.knex();
       const currentData = serializeData(hasil?.data);
-      console.log(currentData);
       await knex
         .delete()
         .from("siasn_pemberhentian")
