@@ -16,6 +16,7 @@ import {
 import CreatePenghargaan from "./CreatePenghargaan";
 import { DeleteOutlined } from "@ant-design/icons";
 import UploadDokumen from "./UploadDokumen";
+import { getRwPenghargaanByNip } from "@/services/master.services";
 
 function ComparePenghargaanByNip({ nip }) {
   const queryClient = useQueryClient();
@@ -27,6 +28,14 @@ function ComparePenghargaanByNip({ nip }) {
       refetchOnWindowFocus: false,
       keepPreviousData: true,
       staleTime: 500000,
+    }
+  );
+
+  const { data: dataMaster, isLoading: isLoadingMaster } = useQuery(
+    ["riwayat-penghargaan-nip-master", nip],
+    () => getRwPenghargaanByNip(nip),
+    {
+      refetchOnWindowFocus: false,
     }
   );
 
@@ -148,6 +157,7 @@ function ComparePenghargaanByNip({ nip }) {
         loading={isLoading}
         rowKey={(row) => row?.id}
       />
+      {JSON.stringify(dataMaster)}
     </Card>
   );
 }

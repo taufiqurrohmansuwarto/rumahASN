@@ -9,6 +9,7 @@ import {
   getRwPangkat,
   getRwPasangan,
   getRwPendidikanMaster,
+  getRwPenghargaan,
 } from "@/utils/master.utils";
 import arrayToTree from "array-to-tree";
 import axios from "axios";
@@ -457,6 +458,10 @@ export const unorPTTPK = async (req, res) => {
 
 const getRwPenghargaanByNip = async (req, res) => {
   try {
+    const { fetcher } = req;
+    const { nip } = req.query;
+    const result = await getRwPenghargaan(fetcher, nip);
+    res.json(result?.data);
   } catch (error) {
     console.log(error);
     res.status(500).json({ code: 500, message: "Internal Server Error" });

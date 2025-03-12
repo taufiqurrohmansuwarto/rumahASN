@@ -89,6 +89,10 @@ export const getAllEmployeesPagingAdmin = (query) => {
     .then((res) => res.data);
 };
 
+export const getRwPenghargaanByNip = (nip) => {
+  return api.get(`/admin/${nip}/rw-penghargaan`).then((res) => res.data);
+};
+
 export const getOpdFasilitator = () => {
   return api.get(`/fasilitator/unor`).then((res) => res.data);
 };
