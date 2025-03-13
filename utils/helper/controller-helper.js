@@ -1,6 +1,7 @@
 const fs = require("fs");
 const path = require("path");
 const paparse = require("papaparse");
+const Sinkronisasi = require("@/models/sinkronisasi.model");
 
 module.exports.handleError = (res, error) => {
   console.log(error);
@@ -23,4 +24,14 @@ module.exports.parseCSV = (filePath, options) => {
 
 module.exports.checkOpdEntrian = (opdId, entrian) => {
   return entrian?.includes(opdId);
+};
+
+module.exports.insertSyncHistories = async (aplikasi, layanan) => {
+  return await Sinkronisasi.query()
+    .insert({
+      aplikasi,
+      layanan,
+    })
+    .onConflict("aplikasi, layanan")
+    .merge();
 };
