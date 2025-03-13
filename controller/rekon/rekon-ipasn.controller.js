@@ -401,6 +401,7 @@ export const syncRekonIPASN = async (req, res) => {
     const knex = SiasnIPASN.knex();
     await knex.delete().from("siasn_ipasn");
     await knex.batchInsert("siasn_ipasn", processedData);
+    await insertSyncHistories("siasn", "ipasn");
 
     res.json({ success: true, message: "Data berhasil disinkronisasi" });
   } catch (error) {

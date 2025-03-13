@@ -52,3 +52,9 @@ module.exports.getDataUtamaASNProxy = (fetcher, nip) => {
     }
   });
 };
+
+module.exports.proxyLayananRekapPG = async (fetcher, query) => {
+  return fetcher.get(`/siasn-ws/proxy/layanan/rekap/pg`, {
+    params: query,
+  });
+};
