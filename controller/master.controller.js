@@ -1,6 +1,8 @@
+import { handleError } from "@/utils/helper/controller-helper";
 import {
   departmentDetail,
   employeeTodayBirthdayDetail,
+  getHukdis,
   getKelengkapanDokumen,
   getRwAnak,
   getRwDiklat,
@@ -567,7 +569,30 @@ const getAtasan = async (req, res) => {
   }
 };
 
+const rwHukdis = async (req, res) => {
+  try {
+    const { fetcher, employee_number: nip } = req;
+    const result = await getHukdis(fetcher, nip);
+    res.json(result?.data);
+  } catch (error) {
+    handleError(res, error);
+  }
+};
+
+const rwHukdisByNip = async (req, res) => {
+  try {
+    const { fetcher } = req;
+    const { nip } = req.query;
+    const result = await getHukdis(fetcher, nip);
+    res.json(result?.data);
+  } catch (error) {
+    handleError(res, error);
+  }
+};
+
 module.exports = {
+  rwHukdis,
+  rwHukdisByNip,
   getAtasan,
   urlToPdf,
   employeeTodayBirthday,

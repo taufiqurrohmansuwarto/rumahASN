@@ -21,6 +21,8 @@ import {
 } from "antd";
 import { useState } from "react";
 import dayjs from "dayjs";
+import { getRwHukdisByNip } from "@/services/master.services";
+import { Stack } from "@mantine/core";
 
 const FormModalHukdis = ({ open, onClose, create }) => {
   const [form] = Form.useForm();
@@ -79,6 +81,8 @@ const FormModalHukdis = ({ open, onClose, create }) => {
             }}
           >
             <Radio.Button value="ringan">Ringan</Radio.Button>
+            <Radio.Button value="sedang">Sedang</Radio.Button>
+            <Radio.Button value="berat">Berat</Radio.Button>
           </Radio.Group>
         </Form.Item>
         <Form.Item
@@ -175,6 +179,16 @@ const CompareHukdisByNip = ({ nip }) => {
     }
   );
 
+  const { data: hukdisMaster, isLoading: isLoadingMaster } = useQuery(
+    ["hukdis-master", nip],
+    () => getRwHukdisByNip(nip),
+    {
+      refetchOnWindowFocus: false,
+      keepPreviousData: true,
+      staleTime: 500000,
+    }
+  );
+
   const handleOpen = () => {
     setOpen(true);
   };
@@ -233,6 +247,48 @@ const CompareHukdisByNip = ({ nip }) => {
     },
   ];
 
+  const columnsMaster = [
+    {
+      title: "File",
+      key: "file",
+      render: (_, row) => {
+        return (
+          <a href={row?.file_disiplin} target="_blank" rel="noreferrer">
+            File
+          </a>
+        );
+      },
+    },
+    {
+      title: "Jenis",
+      key: "jenis",
+      render: (_, row) => {
+        return row?.hukdis?.name;
+      },
+    },
+
+    {
+      title: "Nomor SK",
+      dataIndex: "no_sk",
+    },
+    {
+      title: "Tgl. SK",
+      dataIndex: "tgl_sk",
+    },
+    {
+      title: "TMT Awal",
+      dataIndex: "tmt_awal",
+    },
+    {
+      title: "TMT Akhir",
+      dataIndex: "tmt_akhir",
+    },
+    {
+      title: "Keterangan",
+      dataIndex: "keterangan",
+    },
+  ];
+
   return (
     <Card title="Hukuman Disiplin">
       <FormModalHukdis open={open} onClose={handleClose} />
@@ -243,15 +299,26 @@ const CompareHukdisByNip = ({ nip }) => {
         onClick={handleOpen}
         type="primary"
       >
-        Tambah Hukuman Disiplin
+        Tambah
       </Button>
-      <Table
-        columns={columns}
-        isLoading={isLoading}
-        dataSource={data}
-        rowKey={(row) => row?.id}
-        pagination={false}
-      />
+      <Stack>
+        <Table
+          title={() => "SIASN"}
+          columns={columns}
+          isLoading={isLoading}
+          dataSource={data}
+          rowKey={(row) => row?.id}
+          pagination={false}
+        />
+        <Table
+          title={() => "SIMASTER"}
+          columns={columnsMaster}
+          isLoading={isLoadingMaster}
+          dataSource={hukdisMaster}
+          rowKey={(row) => row?.disiplin_id}
+          pagination={false}
+        />
+      </Stack>
     </Card>
   );
 };
