@@ -1,27 +1,29 @@
+import useScrollRestoration from "@/hooks/useScrollRestoration";
+import {
+  getEmployeeIPASN,
+  getRekonIPASN,
+  getRekonIPASNDashboard,
+  getUnorSimaster,
+} from "@/services/rekon.services";
+import { clearQuery } from "@/utils/client-utils";
+import { FileExcelOutlined, SearchOutlined } from "@ant-design/icons";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import {
   Avatar,
+  Button,
   Card,
   Col,
+  Form,
   Input,
   Row,
   Space,
   Statistic,
   Table,
-  Tag,
+  TreeSelect,
   Typography,
 } from "antd";
-import { useQuery, useMutation } from "@tanstack/react-query";
 import { useRouter } from "next/router";
-import {
-  getEmployeeIPASN,
-  getRekonIPASNDashboard,
-  getUnorSimaster,
-} from "@/services/rekon.services";
-import { Form, TreeSelect, Button } from "antd";
-import { FileExcelOutlined, SearchOutlined } from "@ant-design/icons";
-import XLSX from "xlsx";
-import { clearQuery } from "@/utils/client-utils";
-import useScrollRestoration from "@/hooks/useScrollRestoration";
+import * as XLSX from "xlsx";
 
 const DetailIPASN = () => {
   const router = useRouter();
