@@ -292,7 +292,7 @@ function CompareDataDiklatMasterByNip({ nip }) {
   return (
     <div>
       <Spin spinning={loading} fullscreen />
-      <>
+      {/* <>
         {data && data2024(data)?.length && (
           <Flex justify="flex-end">
             <Button
@@ -306,7 +306,7 @@ function CompareDataDiklatMasterByNip({ nip }) {
             </Button>
           </Flex>
         )}
-      </>
+      </> */}
       <Table
         pagination={false}
         dataSource={data}
