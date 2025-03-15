@@ -4,6 +4,8 @@ import RekonLayananPangkat from "./RekonLayananPangkat";
 import RekonLayananPensiun from "./RekonLayananPensiun";
 import { FloatButton } from "antd";
 import useScrollRestoration from "@/hooks/useScrollRestoration";
+import RekonPG from "./RekonPG";
+
 function RekonDashboardDetail() {
   useScrollRestoration();
 
@@ -13,6 +15,7 @@ function RekonDashboardDetail() {
       <RekonLayananPangkat />
       <RekonLayananPensiun />
       <RekonIPASN />
+      <RekonPG />
     </Stack>
   );
 }
