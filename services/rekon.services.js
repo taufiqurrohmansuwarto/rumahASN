@@ -216,3 +216,30 @@ export const getPemberhentianByPegawai = async (query) => {
     .get(`/layanan/pemberhentian/employees?${queryParams}`)
     .then((res) => res?.data);
 };
+
+// pencantuman gelar
+export const syncPencantumanGelar = async (query) => {
+  const queryParams = queryString.stringify(query, {
+    skipNull: true,
+    skipEmptyString: true,
+  });
+  return api.get(`/pg/sync?${queryParams}`).then((res) => res?.data);
+};
+
+// pg dashboard
+export const getRekonPGDashboard = async (query) => {
+  const queryParams = queryString.stringify(query, {
+    skipNull: true,
+    skipEmptyString: true,
+  });
+  return api.get(`/pg/dashboard?${queryParams}`).then((res) => res?.data);
+};
+
+// pg employees
+export const getRekonPGEmployees = async (query) => {
+  const queryParams = queryString.stringify(query, {
+    skipNull: true,
+    skipEmptyString: true,
+  });
+  return api.get(`/pg/employees?${queryParams}`).then((res) => res?.data);
+};

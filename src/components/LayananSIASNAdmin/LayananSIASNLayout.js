@@ -7,6 +7,7 @@ import { appList } from "@/utils/app-lists";
 import { getMenuItems } from "@/utils/appLists";
 import {
   ArrowUpOutlined,
+  BookOutlined,
   DashboardOutlined,
   LogoutOutlined,
   StopOutlined,
@@ -45,6 +46,12 @@ const menuItems = [
     key: "pengadaan",
     icon: <UserAddOutlined />,
     label: "Pengadaan",
+    role: ["admin"],
+  },
+  {
+    key: "pencantuman-gelar",
+    icon: <BookOutlined />,
+    label: "Pencantuman Gelar",
     role: ["admin"],
   },
   {
