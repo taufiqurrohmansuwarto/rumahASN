@@ -335,7 +335,7 @@ function CompareDataDiklatMaster() {
 
   return (
     <div>
-      <>
+      {/* <>
         {data && data2024(data)?.length && (
           <Flex justify="flex-end">
             <Button
@@ -349,7 +349,7 @@ function CompareDataDiklatMaster() {
             </Button>
           </Flex>
         )}
-      </>
+      </> */}
       <Table
         pagination={false}
         dataSource={data}

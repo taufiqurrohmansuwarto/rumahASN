@@ -1,7 +1,6 @@
 import PageContainer from "@/components/PageContainer";
 import RekonLayout from "@/components/Rekon/RekonLayout";
 import RekonPegawaiDetail from "@/components/Rekon/RekonPegawaiDetail";
-import { IconBadges } from "@tabler/icons-react";
 import { Breadcrumb, Button, Grid } from "antd";
 import Head from "next/head";
 import Link from "next/link";
