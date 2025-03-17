@@ -100,6 +100,7 @@ async function getPGWithPegawai({
       "tgl_usulan",
       "dokumen_usulan",
     ];
+
     const sortColumn = validColumns.includes(sortBy) ? sortBy : "tgl_usulan";
 
     // Query utama dengan filter
