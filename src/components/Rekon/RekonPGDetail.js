@@ -14,13 +14,110 @@ import {
   Space,
   Table,
   TreeSelect,
+  Modal,
   Typography,
+  Tooltip,
 } from "antd";
 import { useRouter } from "next/router";
-import { SearchOutlined } from "@ant-design/icons";
+import { BookOutlined, SearchOutlined } from "@ant-design/icons";
 import dayjs from "dayjs";
 import { clearQuery } from "@/utils/client-utils";
 import useScrollRestoration from "@/hooks/useScrollRestoration";
+import { useState } from "react";
+
+const getFilePath = (record, kode) => {
+  const path = record?.dokumen_usulan?.[`${kode}`]?.dok_uri;
+  return `/helpdesk/api/siasn/ws/download?filePath=${path}`;
+};
+
+const ModalFileUsulan = ({ open, onClose, record }) => {
+  return (
+    <Modal title="File Usulan" open={open} onCancel={onClose} width={800}>
+      <Space direction="vertical">
+        <Space>
+          <BookOutlined />
+          <a
+            href={getFilePath(record, "1166")}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Dokumen Tugas Belajar / Surat Pengganti Belajar
+          </a>
+        </Space>
+        <Space>
+          <BookOutlined />
+          <a
+            href={getFilePath(record, "1167")}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Dokumen SK CPNS
+          </a>
+        </Space>
+        <Space>
+          <BookOutlined />
+          <a
+            href={getFilePath(record, "1168")}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Dokumen SK PNS
+          </a>
+        </Space>
+        <Space>
+          <BookOutlined />
+          <a
+            href={getFilePath(record, "1169")}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Dokumen SK Jabatan Fungsional
+          </a>
+        </Space>
+        <Space>
+          <BookOutlined />
+          <a
+            href={getFilePath(record, "1171")}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Dokumen Sertifikat Akreditasi Jurusan
+          </a>
+        </Space>
+        <Space>
+          <BookOutlined />
+          <a
+            href={getFilePath(record, "1172")}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Dokumen Kenaikan Pangkat Terakhir
+          </a>
+        </Space>
+        <Space>
+          <BookOutlined />
+          <a
+            href={getFilePath(record, "1173")}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Dokumen Ijazah
+          </a>
+        </Space>
+        <Space>
+          <BookOutlined />
+          <a
+            href={getFilePath(record, "1174")}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Dokumen Transkrip
+          </a>
+        </Space>
+      </Space>
+    </Modal>
+  );
+};
 
 const Filter = () => {
   const router = useRouter();
@@ -117,6 +214,19 @@ function RekonPGDetail() {
     </div>
   );
 
+  const [openModal, setOpenModal] = useState(false);
+  const [record, setRecord] = useState(null);
+
+  const handleOpenModal = (record) => {
+    setOpenModal(true);
+    setRecord(record);
+  };
+
+  const handleCloseModal = () => {
+    setOpenModal(false);
+    setRecord(null);
+  };
+
   const columns = [
     {
       title: "Foto",
@@ -182,17 +292,27 @@ function RekonPGDetail() {
       dataIndex: "alasan_tolak_nama",
       sorter: true,
     },
+
     {
       title: "Aksi",
       key: "aksi",
       render: (_, record) => (
-        <a
-          onClick={() =>
-            router.push(`/rekon/pegawai/${record?.nip_master}/detail`)
-          }
-        >
-          <SearchOutlined />
-        </a>
+        <Space>
+          <a
+            onClick={() =>
+              router.push(`/rekon/pegawai/${record?.nip_master}/detail`)
+            }
+          >
+            <Tooltip title="Detail">
+              <SearchOutlined />
+            </Tooltip>
+          </a>
+          <a onClick={() => handleOpenModal(record)}>
+            <Tooltip title="File Usulan">
+              <BookOutlined />
+            </Tooltip>
+          </a>
+        </Space>
       ),
     },
   ];
@@ -240,6 +360,11 @@ function RekonPGDetail() {
           total: data?.totalData,
           showTotal: (total, range) => `${range[0]}-${range[1]} of ${total}`,
         }}
+      />
+      <ModalFileUsulan
+        open={openModal}
+        onClose={handleCloseModal}
+        record={record}
       />
     </Card>
   );
