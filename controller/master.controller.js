@@ -362,6 +362,17 @@ export const rwJabGuruByNip = async (req, res) => {
   }
 };
 
+export const rwPasanganMaster = async (req, res) => {
+  try {
+    const { fetcher } = req;
+    const { employee_number: nip } = req.user;
+    const result = await getRwPasangan(fetcher, nip);
+    res.json(result?.data);
+  } catch (error) {
+    handleError(res, error);
+  }
+};
+
 export const rwPasanganMasterByNip = async (req, res) => {
   try {
     const { fetcher } = req;
@@ -618,4 +629,5 @@ module.exports = {
   kelengkapanDokumenByNip,
   getDepartmentDetail,
   getRwSatyaLencanaByNip,
+  rwPasanganMaster,
 };

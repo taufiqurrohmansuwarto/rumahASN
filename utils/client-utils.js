@@ -20,6 +20,7 @@ import {
   IconSchool,
   IconUser,
   IconUserExclamation,
+  IconUserPlus,
   IconUserSearch,
   IconUsers,
 } from "@tabler/icons";
@@ -68,6 +69,12 @@ export const mysapkMenu = [
     icon: IconUserExclamation,
     color: "orange",
     path: "/ubah-data",
+  },
+  {
+    title: "Pasangan",
+    icon: IconUserPlus,
+    color: "cyan",
+    path: "/pasangan",
   },
   {
     title: "Jabatan",
@@ -131,12 +138,13 @@ export const mysapkMenu = [
     color: "gray",
     path: "/pmk",
   },
-  {
-    title: "Keluarga",
-    icon: IconUsers,
-    color: "gray",
-    path: "/keluarga",
-  },
+  // {
+  //   title: "Keluarga",
+  //   icon: IconUsers,
+  //   color: "gray",
+  //   path: "/keluarga",
+  // },
+
   {
     title: "Penghargaan",
     icon: IconFileCertificate,
