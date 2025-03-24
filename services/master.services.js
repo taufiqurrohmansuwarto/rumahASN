@@ -123,6 +123,10 @@ export const rwJabatanMaster = () => {
   return api.get("/rw-jabatan").then((res) => res.data);
 };
 
+export const rwPasanganMaster = async () => {
+  return api.get("/rw-pasangan").then((res) => res.data);
+};
+
 export const rwDiklatMaster = () => {
   return api.get("/rw-diklat").then((res) => res.data);
 };
