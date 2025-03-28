@@ -1,7 +1,7 @@
-const fs = require("fs");
 const { trim } = require("lodash");
 const paparse = require("papaparse");
 const path = require("path");
+const fs = require("fs");
 
 const parseCSV = (filePath) => {
   const file = fs.readFileSync(filePath, "utf8");
@@ -80,6 +80,10 @@ module.exports.anak = (fetcher, nip) => {
 
 module.exports.pasangan = (fetcher, nip) => {
   return fetcher.get(`/pns/data-pasangan/${nip}`);
+};
+
+module.exports.tambahPasangan = (fetcher, data) => {
+  return fetcher.post(`/keluarga/pasangan/save`, data);
 };
 
 module.exports.orangTua = (fetcher, nip) => {

@@ -1,3 +1,5 @@
+import { tambahPasanganSIASN } from "@/services/siasn-services";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   Button,
   Col,
@@ -5,11 +7,13 @@ import {
   Form,
   Input,
   InputNumber,
+  message,
   Modal,
   Radio,
   Row,
   Select,
 } from "antd";
+import dayjs from "dayjs";
 import { useEffect, useState } from "react";
 
 const jenisIdentitas = [
@@ -37,51 +41,259 @@ const statusNikah = [
  * @param {Object} props - Props komponen
  * @param {boolean} props.open - Status modal terbuka atau tertutup
  * @param {Function} props.onCancel - Fungsi yang dipanggil saat modal dibatalkan
- * @param {Object} props.initalValue - Data awal pasangan dengan properti berikut:
- * @param {string} props.initalValue.agamaId - ID agama pasangan
- * @param {string} props.initalValue.alamat - Alamat pasangan
- * @param {string} props.initalValue.email - Email pasangan
- * @param {string} props.initalValue.id - ID pasangan
- * @param {string} props.initalValue.jenisIdentitas - Jenis identitas pasangan
- * @param {string} props.initalValue.nama - Nama pasangan
- * @param {string} props.initalValue.noAktaCerai - Nomor akta cerai
- * @param {string} props.initalValue.noAktaMenikah - Nomor akta menikah
- * @param {string} props.initalValue.noAktaMeninggal - Nomor akta meninggal
- * @param {string} props.initalValue.noHp - Nomor HP pasangan
- * @param {string} props.initalValue.nomorIdentitas - Nomor identitas pasangan
- * @param {number} props.initalValue.pasanganKe - Urutan pasangan
- * @param {string} props.initalValue.pnsOrangId - ID PNS
- * @param {string} props.initalValue.statusHidup - Status hidup pasangan
- * @param {string} props.initalValue.statusPekerjaanPasangan - Status pekerjaan pasangan
- * @param {string} props.initalValue.statusPernikahan - Status pernikahan
- * @param {string} props.initalValue.tglAktaMenikah - Tanggal akta menikah
- * @param {string} props.initalValue.tglLahir - Tanggal lahir pasangan
+ * @param {Object} props.initalValue - Data awal pasangan
  * @returns {JSX.Element} Komponen modal form pasangan
  */
 
 const formatTanggal = "DD-MM-YYYY";
 
 const ModalFormKeluarga = ({ open, onCancel, initalValue }) => {
+  const queryClient = useQueryClient();
+
   const [form] = Form.useForm();
   const [statusPekerjaan, setStatusPekerjaan] = useState(null);
   const [statusPernikahan, setStatusPernikahan] = useState(null);
   const [statusHidup, setStatusHidup] = useState(null);
+  const [formValues, setFormValues] = useState({});
+  const [hiddenFields, setHiddenFields] = useState({});
+
+  const { mutate: tambahPasangan, isLoading: loadingTambahPasangan } =
+    useMutation({
+      mutationFn: (data) => tambahPasanganSIASN(data),
+      onSuccess: () => {
+        message.success("Berhasil menambahkan pasangan");
+        queryClient.invalidateQueries({ queryKey: ["pasangan"] });
+        onCancel();
+        form.resetFields();
+        setFormValues({});
+        setHiddenFields({});
+      },
+      onError: (error) => {
+        message.error(error.response.data.message);
+      },
+    });
 
   // Mengatur nilai awal form ketika data tersedia
   useEffect(() => {
     if (initalValue) {
-      form.setFieldsValue(initalValue);
-      setStatusPekerjaan(initalValue.statusPekerjaan);
-      setStatusPernikahan(initalValue.statusPernikahan);
-      setStatusHidup(initalValue.statusHidup);
+      // Konversi string tanggal ke objek dayjs untuk DatePicker
+      const initialFormValues = { ...initalValue };
+      if (initialFormValues.tglLahir) {
+        initialFormValues.tglLahir = dayjs(
+          initialFormValues.tglLahir,
+          formatTanggal
+        );
+      }
+      if (initialFormValues.tglAktaMenikah) {
+        initialFormValues.tglAktaMenikah = dayjs(
+          initialFormValues.tglAktaMenikah,
+          formatTanggal
+        );
+      }
+      if (initialFormValues.tglMenikah) {
+        initialFormValues.tglMenikah = dayjs(
+          initialFormValues.tglMenikah,
+          formatTanggal
+        );
+      }
+
+      form.setFieldsValue(initialFormValues);
+      setStatusPekerjaan(initialFormValues.statusPekerjaan);
+      setStatusPernikahan(initialFormValues.statusPernikahan);
+      setStatusHidup(initialFormValues.statusHidup);
+      setFormValues(initialFormValues);
+      setHiddenFields(initialFormValues);
     }
   }, [initalValue, form]);
 
-  // Handler untuk perubahan status
-  const handleStatusPekerjaanChange = (e) => setStatusPekerjaan(e.target.value);
-  const handleStatusPernikahanChange = (e) =>
-    setStatusPernikahan(e.target.value);
-  const handleStatusHidupChange = (e) => setStatusHidup(e.target.value);
+  // Helper untuk mengonversi tanggal dayjs ke string format
+  const formatDayjsToString = (value) => {
+    if (!value) return undefined;
+    return typeof value === "object" && value.format
+      ? value.format(formatTanggal)
+      : value;
+  };
+
+  const handleSubmit = async () => {
+    try {
+      const visible = await form.validateFields();
+
+      // Gabungkan nilai form yang visible dengan nilai yang tersembunyi
+      const allValues = { ...hiddenFields, ...visible };
+
+      // Format semua nilai tanggal
+      const payload = {
+        ...allValues,
+        tglLahir: formatDayjsToString(allValues.tglLahir) || "",
+        tglAktaMenikah: formatDayjsToString(allValues.tglAktaMenikah) || "",
+        tglMenikah: formatDayjsToString(allValues.tglMenikah) || "",
+      };
+
+      // Di sini Anda bisa menambahkan kode untuk mengirim data ke server
+      console.log("Submit payload:", payload);
+
+      // Tutup modal setelah sukses
+      tambahPasangan(payload);
+    } catch (error) {
+      console.error("Form validation error:", error);
+    }
+  };
+
+  // Handler untuk perubahan status dengan menyimpan semua nilai form saat ini
+  const handleStatusPekerjaanChange = (e) => {
+    // Dapatkan semua nilai form yang saat ini terlihat
+    const currentValues = form.getFieldsValue(true);
+
+    // Simpan nilai-nilai yang tidak akan terlihat setelah perubahan
+    const formType = e.target.value;
+    const oldFields = { ...hiddenFields };
+
+    if (formType === "ASN") {
+      // Jika beralih ke ASN, simpan field-field Non ASN
+      Object.keys(currentValues).forEach((key) => {
+        if (
+          ![
+            "pasanganKe",
+            "statusPekerjaan",
+            "statusPernikahan",
+            "noAktaMenikah",
+            "tglAktaMenikah",
+            "noAktaCerai",
+            "tglMenikah",
+          ].includes(key)
+        ) {
+          oldFields[key] = currentValues[key];
+        }
+      });
+    } else {
+      // Jika beralih ke Non ASN, simpan field-field ASN
+      Object.keys(currentValues).forEach((key) => {
+        if (
+          [
+            "statusPernikahan",
+            "noAktaMenikah",
+            "tglAktaMenikah",
+            "noAktaCerai",
+            "tglMenikah",
+          ].includes(key)
+        ) {
+          oldFields[key] = currentValues[key];
+        }
+      });
+    }
+
+    setHiddenFields(oldFields);
+    setFormValues({ ...formValues, ...currentValues });
+    setStatusPekerjaan(formType);
+
+    // Set nilai-nilai yang masih relevan untuk tipe form baru
+    setTimeout(() => {
+      const visibleFields = { statusPekerjaan: formType };
+
+      // Tambahkan field umum
+      if (currentValues.pasanganKe)
+        visibleFields.pasanganKe = currentValues.pasanganKe;
+
+      // Tambahkan field spesifik tipe
+      if (formType === "ASN") {
+        if (oldFields.statusPernikahan)
+          visibleFields.statusPernikahan = oldFields.statusPernikahan;
+        if (oldFields.statusPernikahan === "1") {
+          if (oldFields.noAktaMenikah)
+            visibleFields.noAktaMenikah = oldFields.noAktaMenikah;
+          if (oldFields.tglAktaMenikah)
+            visibleFields.tglAktaMenikah = oldFields.tglAktaMenikah;
+        } else if (oldFields.statusPernikahan === "2") {
+          if (oldFields.noAktaCerai)
+            visibleFields.noAktaCerai = oldFields.noAktaCerai;
+          if (oldFields.tglMenikah)
+            visibleFields.tglMenikah = oldFields.tglMenikah;
+        }
+      } else {
+        // Restore Non ASN fields
+        const nonAsnFields = [
+          "nama",
+          "tglLahir",
+          "jenisIdentitas",
+          "nomorIdentitas",
+          "agamaId",
+          "statusHidup",
+          "alamat",
+          "noHp",
+          "email",
+        ];
+        nonAsnFields.forEach((field) => {
+          if (oldFields[field] !== undefined)
+            visibleFields[field] = oldFields[field];
+        });
+
+        // Restore fields berdasarkan status hidup
+        if (oldFields.statusHidup === 0 || oldFields.statusHidup === "0") {
+          if (oldFields.noAktaMeninggal)
+            visibleFields.noAktaMeninggal = oldFields.noAktaMeninggal;
+        }
+        if (oldFields.noAktaMenikah)
+          visibleFields.noAktaMenikah = oldFields.noAktaMenikah;
+        if (oldFields.tglAktaMenikah)
+          visibleFields.tglAktaMenikah = oldFields.tglAktaMenikah;
+      }
+
+      form.setFieldsValue(visibleFields);
+    }, 0);
+  };
+
+  // Handler untuk perubahan status pernikahan
+  const handleStatusPernikahanChange = (e) => {
+    const currentValues = form.getFieldsValue(true);
+    const newStatus = e.target.value;
+
+    // Simpan nilai field yang akan disembunyikan
+    const oldFields = { ...hiddenFields };
+    if (newStatus === "1") {
+      // Simpan field untuk status cerai
+      if (currentValues.noAktaCerai)
+        oldFields.noAktaCerai = currentValues.noAktaCerai;
+      if (currentValues.tglMenikah)
+        oldFields.tglMenikah = currentValues.tglMenikah;
+    } else {
+      // Simpan field untuk status menikah
+      if (currentValues.noAktaMenikah)
+        oldFields.noAktaMenikah = currentValues.noAktaMenikah;
+      if (currentValues.tglAktaMenikah)
+        oldFields.tglAktaMenikah = currentValues.tglAktaMenikah;
+    }
+
+    setHiddenFields(oldFields);
+    setFormValues({ ...formValues, ...currentValues });
+    setStatusPernikahan(newStatus);
+  };
+
+  // Handler untuk perubahan status hidup
+  const handleStatusHidupChange = (e) => {
+    const currentValues = form.getFieldsValue(true);
+    const newStatus = e.target.value;
+
+    // Simpan nilai field yang akan disembunyikan
+    const oldFields = { ...hiddenFields };
+    if (newStatus === 0 || newStatus === "0") {
+      // Simpan field untuk status hidup
+      // (tidak ada field yang perlu disimpan khusus)
+    } else {
+      // Simpan field untuk status meninggal
+      if (currentValues.noAktaMeninggal)
+        oldFields.noAktaMeninggal = currentValues.noAktaMeninggal;
+    }
+
+    setHiddenFields(oldFields);
+    setFormValues({ ...formValues, ...currentValues });
+    setStatusHidup(newStatus);
+  };
+
+  // Handler untuk perubahan nilai form apapun
+  const handleValuesChange = (changedValues, allValues) => {
+    // Update formValues state dengan nilai yang berubah
+    setFormValues({ ...formValues, ...changedValues });
+  };
 
   // Render komponen form untuk ASN
   const renderAsnForm = () => (
@@ -106,7 +318,7 @@ const ModalFormKeluarga = ({ open, onCancel, initalValue }) => {
             </Form.Item>
           </Col>
           <Col span={12}>
-            <Form.Item name="tglMenikah" label="Tanggal Menikah">
+            <Form.Item name="tglAktaMenikah" label="Tanggal Akta Menikah">
               <DatePicker format={formatTanggal} />
             </Form.Item>
           </Col>
@@ -215,7 +427,7 @@ const ModalFormKeluarga = ({ open, onCancel, initalValue }) => {
       </Row>
 
       {/* Form untuk status meninggal */}
-      {statusHidup === 0 && (
+      {statusHidup === 0 || statusHidup === "0" ? (
         <Row gutter={[16, 0]}>
           <Col span={8}>
             <Form.Item name="noAktaMeninggal" label="No Akta Meninggal">
@@ -233,10 +445,7 @@ const ModalFormKeluarga = ({ open, onCancel, initalValue }) => {
             </Form.Item>
           </Col>
         </Row>
-      )}
-
-      {/* Form untuk status hidup */}
-      {statusHidup === 1 && (
+      ) : (
         <Row gutter={[16, 0]}>
           <Col span={12}>
             <Form.Item name="noAktaMenikah" label="No Akta Menikah">
@@ -254,8 +463,36 @@ const ModalFormKeluarga = ({ open, onCancel, initalValue }) => {
   );
 
   return (
-    <Modal width={800} title="Tambah Pasangan" open={open} onCancel={onCancel}>
-      <Form layout="vertical" form={form}>
+    <Modal
+      width={800}
+      title="Tambah Pasangan"
+      open={open}
+      confirmLoading={loadingTambahPasangan}
+      onOk={handleSubmit}
+      onCancel={() => {
+        onCancel();
+        form.resetFields();
+        setFormValues({});
+        setHiddenFields({});
+        setStatusPekerjaan(null);
+        setStatusPernikahan(null);
+        setStatusHidup(null);
+      }}
+      footer={[
+        <Button key="back" onClick={onCancel}>
+          Batal
+        </Button>,
+        <Button key="submit" type="primary" onClick={handleSubmit}>
+          Simpan
+        </Button>,
+      ]}
+    >
+      <Form
+        layout="vertical"
+        form={form}
+        onValuesChange={handleValuesChange}
+        preserve={false}
+      >
         {/* Pasangan Ke */}
         <Form.Item
           name="pasanganKe"
