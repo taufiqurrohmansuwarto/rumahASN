@@ -36,3 +36,27 @@ Coba apa yang ditawarkan oleh kompetitor
 Kenali bagaimana kompetitor mencari pengguna
 - apakah mereka menggunakan ppc (pay per click) dan apa website mereka relevan dengan yang diiklankan?
 - berapa follower dari pengguna (kompetitor) berapa kali mereka memposting, dan lihat komentar dari pengguna apakah positif / negatif?
+- berapa sering mereka di liput oleh media?
+
+Menganalisa kompetitor
+
+- lihat fitur dan fungsionalitas
+   a. apa yang mereka tawarkan
+- perhatikan apa yang menjadi fitur unik yang ditawarkan
+- integrasi 
+  - bagaimana user merasa apa aplikasi itu teritegrasi satu sama dengan yang lain
+- user experience
+   - apakah itu mudah bagi pengguna / cepat?
+   - apakah itu selalu digunakan apakah itu meresahkan?
+   - apakah platform tersebut bisa diakses oleh berbagai macam platform dan gawai?
+- Posisi Market
+   - Cari pengguna utama mereka 
+   - Analisa pricing model mereka 
+   - Brand -> highlight dari apa yang menguntungkan
+- Strategi Marketing
+   - Lihat tampilan digital mereka (website, landing pages, dsb)
+   - Content Marketing mereka seperti apa dan bagaimana cara mereka mendekati pengguna
+   - Promosi berbayar: Apakah mereka menggunakan google advertising atau social media advertising
+- Umpan balik pengguna
+   - reviews dan rating dari pengguna : cari like dan disklike dari pengguna
+   - cari studi kasus dan pengalaman pengguna
