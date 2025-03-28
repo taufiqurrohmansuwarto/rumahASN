@@ -1,4 +1,4 @@
-import { Blockquote, Code, Table, Title } from "@mantine/core";
+import { Blockquote, Table, Title } from "@mantine/core";
 import { Image, Typography } from "antd";
 import ReactMarkdown from "react-markdown";
 import rehypeRaw from "rehype-raw";

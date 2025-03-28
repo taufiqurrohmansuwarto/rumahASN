@@ -151,6 +151,10 @@ export const dataPasangan = () => {
   return api.get(`/pns/rw-pasangan`).then((res) => res.data);
 };
 
+export const tambahPasanganSIASN = (data) => {
+  return api.post(`/pns/rw-pasangan`, data).then((res) => res.data);
+};
+
 export const dataOrtu = () => {
   return api.get(`/pns/rw-ortu`).then((res) => res.data);
 };

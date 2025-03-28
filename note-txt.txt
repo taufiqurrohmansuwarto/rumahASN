@@ -1,0 +1,38 @@
+catatan untuk pembuatan aplikasi
+
+1. harus menyelesaikan problem untuk semua orang
+2. teknik promosi yang bagus
+3. harus ada perbedaan dari aplikasi yang sedang dibuat
+
+market riset
+
+1. definisikan pengguna
+2. definisikan apa yang kita tawarkan
+3. defisinikan tantangan apa saja yang kita hadapi
+4. strategy untuk mendapatkan market dan mendapatkan pengguna
+
+note : kebanyakan perusahaan gagal karena tidak melihat kebutuhan market
+
+a. batasi pangsa pasar yang dibutuhkan 
+   - apa saja yang bisa kamu tawarkan dari aplikasi yang kamu buat dan apa fungsionalitas yang menarik
+   - tentukan audience/pengguna
+b. hindari keinginan yang terlalu melebar
+   - semakin lebar keinginan maka semakin juga usaha yang dilakukan. Mulai dengan audience yang lebih kecil untuk menambah peluang sukses
+
+
+Cari kompetitor
+- google it (gunakan google)
+- product hunt
+- social media / forum
+- laporan dari industri
+- SEO and SEM tools
+- dari event / kegiatan
+- tanyakan dari sisi pengguna
+- berita dan publikasi 
+
+Coba apa yang ditawarkan oleh kompetitor
+- bisa mencoba masuk dalam website mereka, fitur, helpdesk, untuk kita mengerti.
+
+Kenali bagaimana kompetitor mencari pengguna
+- apakah mereka menggunakan ppc (pay per click) dan apa website mereka relevan dengan yang diiklankan?
+- berapa follower dari pengguna (kompetitor) berapa kali mereka memposting, dan lihat komentar dari pengguna apakah positif / negatif?

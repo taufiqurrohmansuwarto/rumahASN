@@ -1,16 +1,65 @@
-const { pasangan, anak, orangTua } = require("@/utils/siasn-utils");
+const {
+  pasangan,
+  anak,
+  orangTua,
+  tambahPasangan,
+} = require("@/utils/siasn-utils");
+const DataSIASN = require("@/models/siasn-employees.model");
+const metanip = "199303302019032011";
 
 const daftarPasangan = async (req, res) => {
   try {
     const { siasnRequest } = req;
     const { employee_number: nip } = req?.user;
 
-    const hasilPasangan = await pasangan(siasnRequest, nip);
+    const hasilPasangan = await pasangan(siasnRequest, metanip);
 
     res.json(hasilPasangan?.data?.data);
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+const tambahPasanganSIASN = async (req, res) => {
+  try {
+    const { siasnRequest } = req;
+    const { employee_number: nip } = req?.user;
+
+    const body = req?.body;
+
+    const pegawaiId = await DataSIASN.query()
+      .where("nip_baru", metanip)
+      .first();
+
+    if (!pegawaiId) {
+      res.status(404).json({ message: "Pegawai tidak ditemukan" });
+    } else {
+      const pnsOrangId = pegawaiId?.pns_id;
+      const payload = {
+        pnsOrangId,
+        statusPekerjaanPasangan: "0",
+        nama: "123",
+        orangId: "7E85A2746583BD8DE050640A3C036B36",
+        jenisIdentitas: "123",
+        nomorIdentitas: "123",
+        agamaId: "1",
+        statusHidup: "1",
+        ...body,
+      };
+
+      console.log(payload);
+
+      const result = await tambahPasangan(siasnRequest, payload);
+      console.log(result);
+
+      res.json({ message: "Success" });
+    }
+  } catch (error) {
+    console.error(error);
+    const errorMessage = error?.message;
+    console.log(errorMessage);
+    res.status(500).json({ message: errorMessage });
   }
 };
 
@@ -73,4 +122,5 @@ module.exports = {
   daftarPasanganByNip,
   daftarAnakByNip,
   daftarOrtuByNip,
+  tambahPasanganSIASN,
 };
