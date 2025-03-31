@@ -17,7 +17,6 @@ async function getKpWithPegawai({
   sortBy = "nama_master", // Default sorting berdasarkan nama_master
   sortOrder = "ascend", // Default sorting order
 } = {}) {
-  console.log(sortOrder, sortBy);
   try {
     const knex = KenaikanPangkat.knex();
 
