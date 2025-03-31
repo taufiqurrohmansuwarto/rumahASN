@@ -10,6 +10,7 @@ import {
   Breadcrumb,
   Button,
   Card,
+  Checkbox,
   Col,
   DatePicker,
   Form,
@@ -25,6 +26,8 @@ import { useRouter } from "next/router";
 
 import dayjs from "dayjs";
 import "dayjs/locale/id";
+import FormUnorASN from "@/components/WebinarSeries/FormUnorASN";
+import FormUnorPTTPK from "@/components/WebinarSeries/FormUnorPTTPK";
 dayjs.locale("id");
 
 const format = "DD-MM-YYYY";
@@ -63,7 +66,7 @@ const FormWebinarSeries = () => {
 
     const data = {
       ...rest,
-      type_sign,
+      type_sign: "SEAL",
       status: status || "draft",
       employee_number_signer:
         type_sign === "SEAL" ? null : rest.employee_number_signer,
@@ -77,29 +80,28 @@ const FormWebinarSeries = () => {
   return (
     <Form onFinish={handleFinish} form={form} layout="vertical">
       <Form.Item
-        rules={[{ required: true, message: "Tidak boleh kosong" }]}
-        name="type_sign"
-        label="Tanda Tangan Elektronik"
+        help="Jika dipilih, maka tanda tangan akan diambil dari tanda tangan personal"
+        name="use_personal_signer"
+        valuePropName="checked"
       >
-        <Select
-          onChange={() => {
-            form.setFieldsValue({ employee_number_signer: null });
+        <Checkbox
+          onChange={(e) => {
+            if (e.target.checked) {
+              form.setFieldsValue({ employee_number_signer: null });
+            }
           }}
         >
-          <Select.Option value="SEAL">Segel Elektronik</Select.Option>
-          <Select.Option value="PERSONAL_SIGN">
-            Tanda Tangan Personal
-          </Select.Option>
-        </Select>
+          Use Personal Signer
+        </Checkbox>
       </Form.Item>
       <Form.Item
         noStyle
         shouldUpdate={(prevValues, currentValues) =>
-          prevValues.type_sign !== currentValues.type_sign
+          prevValues.use_personal_signer !== currentValues.use_personal_signer
         }
       >
         {({ getFieldValue }) =>
-          getFieldValue("type_sign") === "PERSONAL_SIGN" ? (
+          getFieldValue("use_personal_signer") ? (
             <FormPersonalSign name="employee_number_signer" />
           ) : null
         }
@@ -202,11 +204,25 @@ const FormWebinarSeries = () => {
           <Select.Option value="umum">Umum</Select.Option>
         </Select>
       </Form.Item>
-      <Form.Item name="status" label="Status">
-        <Select defaultValue="draft" placeholder="Status Webinar">
-          <Select.Option value="draft">DRAFT</Select.Option>
-          <Select.Option value="published">PUBLISH</Select.Option>
-        </Select>
+      <Form.Item
+        noStyle
+        shouldUpdate={(prevValues, currentValues) =>
+          prevValues.type_participant !== currentValues.type_participant
+        }
+      >
+        {({ getFieldValue }) => {
+          const typeParticipant = getFieldValue("type_participant");
+          return (
+            <>
+              {typeParticipant?.includes("asn") && (
+                <FormUnorASN name="unor_asn" />
+              )}
+              {typeParticipant?.includes("non_asn") && (
+                <FormUnorPTTPK name="unor_nonasn" />
+              )}
+            </>
+          );
+        }}
       </Form.Item>
       <Form.Item>
         <Button

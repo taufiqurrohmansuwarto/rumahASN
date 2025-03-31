@@ -5,76 +5,172 @@ const {
 } = require("@/utils/esign-utils");
 const DSSegelTOTP = require("@/models/ds-segel-totp.model");
 const LogSealBsre = require("@/models/log-seal-bsre.model");
-const { dataUtama } = require("@/utils/siasn-utils");
+const Pegawai = require("@/models/siasn-employees.model");
+const PegawaiSimaster = require("@/models/sync-pegawai.model");
 
-// admin request totp confirmation
+/**
+ * Menghapus karakter petik tunggal dari string
+ * @param {string} str - String yang akan diproses
+ * @returns {string} - String tanpa karakter petik tunggal
+ */
+const removeChar = (str) => {
+  return str.replace(/'/g, "");
+};
+
+/**
+ * Fungsi helper untuk verifikasi pengguna TTE
+ * @param {Object} params - Parameter verifikasi
+ * @param {string} params.nik - NIK pengguna yang akan diverifikasi
+ * @param {string} params.nip - NIP pengguna untuk mendapatkan data tambahan
+ * @param {Object} params.userData - Data pengguna tambahan (opsional)
+ * @returns {Promise<Object>} - Hasil verifikasi {success, data, message}
+ */
+const verifyTTEUser = async ({ nik, nip, userData = null }) => {
+  try {
+    // Verifikasi pengguna dengan NIK
+    const verifyResult = await verifyUserWithNik({ nik: removeChar(nik) });
+
+    if (!verifyResult?.success) {
+      return {
+        success: false,
+        message: verifyResult?.data?.message || "Verifikasi TTE gagal",
+      };
+    }
+
+    // Jika userData tidak disediakan, cari data dari database
+    if (!userData) {
+      userData = await PegawaiSimaster.query().where("nip_master", nip).first();
+    }
+
+    if (!userData) {
+      return { success: false, message: "Data pengguna tidak ditemukan" };
+    }
+
+    // Kembalikan data pengguna terformat
+    return {
+      success: true,
+      data: {
+        nama: userData?.nama || userData?.nama_master,
+        nip: userData?.nip_baru || userData?.nip_master,
+        foto: userData?.foto,
+      },
+    };
+  } catch (error) {
+    console.error("Error verifying TTE user:", error);
+    return { success: false, message: "Terjadi kesalahan saat verifikasi TTE" };
+  }
+};
+
+/**
+ * Mencatat log aktivitas seal BSRE
+ * @param {string} userId - ID pengguna
+ * @param {string} action - Jenis aksi
+ * @param {string} status - Status aksi (SUCCESS/ERROR)
+ * @param {Object} requestData - Data permintaan
+ * @param {Object} responseData - Data respons
+ * @param {string} description - Deskripsi aksi
+ * @returns {Promise<Object>} - Hasil pencatatan log
+ */
+const logSealActivity = async (
+  userId,
+  action,
+  status,
+  requestData = {},
+  responseData,
+  description
+) => {
+  try {
+    return await LogSealBsre.query().insert({
+      user_id: userId,
+      action,
+      status,
+      request_data: JSON.stringify(requestData),
+      response_data: JSON.stringify(responseData),
+      description,
+    });
+  } catch (error) {
+    console.error("Error logging seal activity:", error);
+    return null;
+  }
+};
+
+/**
+ * Meminta konfirmasi TOTP untuk aktivasi seal
+ */
 const requestTotpConfirmation = async (req, res) => {
   try {
     const result = await getSealActivationOTP();
     const { customId: userId } = req?.user;
+    const description = "Request TOTP Seal Activation";
 
     if (result?.success) {
-      const dataSuccessLog = {
-        user_id: userId,
-        action: "REQUEST_TOTP",
-        status: "SUCCESS",
-        request_data: JSON.stringify({}),
-        response_data: JSON.stringify(result),
-        description: "Request TOTP Seal Activation",
-      };
-
-      await LogSealBsre.query().insert(dataSuccessLog);
+      await logSealActivity(
+        userId,
+        "REQUEST_TOTP",
+        "SUCCESS",
+        {},
+        result,
+        description
+      );
       res.json(result?.data);
     } else {
-      const dataErrorLog = {
-        user_id: userId,
-        action: "REQUEST_TOTP",
-        status: "ERROR",
-        request_data: JSON.stringify({}),
-        response_data: JSON.stringify(result),
-        description: "Request TOTP Seal Activation",
-      };
-
-      await LogSealBsre.query().insert(dataErrorLog);
+      await logSealActivity(
+        userId,
+        "REQUEST_TOTP",
+        "ERROR",
+        {},
+        result,
+        description
+      );
       res.status(500).json({ code: 500, message: result?.data?.message });
     }
   } catch (error) {
-    console.log(error);
+    console.error("Error in requestTotpConfirmation:", error);
     res.status(500).json({ message: "Internal server error" });
   }
 };
 
-// admin save totp confirmation
+/**
+ * Menyimpan konfirmasi TOTP
+ */
 const saveTotpConfirmation = async (req, res) => {
   try {
     const { customId: userId } = req?.user;
-
     const { totp } = req?.body;
+
     const result = await DSSegelTOTP.query().insert({
       totp,
       type: "SEAL_ACTIVATION",
       user_id: userId,
     });
+
     res.json(result);
   } catch (error) {
-    console.log(error);
+    console.error("Error in saveTotpConfirmation:", error);
     res.status(500).json({ message: "Internal server error" });
   }
 };
 
+/**
+ * Mendapatkan konfirmasi TOTP terakhir
+ */
 const getLastTotpConfirmation = async (req, res) => {
   try {
     const result = await DSSegelTOTP.query()
       .where("type", "SEAL_ACTIVATION")
       .orderBy("created_at", "desc")
       .first();
+
     res.json(result);
   } catch (error) {
-    console.log(error);
+    console.error("Error in getLastTotpConfirmation:", error);
     res.status(500).json({ message: "Internal server error" });
   }
 };
 
+/**
+ * Memverifikasi file PDF
+ */
 const verifyPdfController = async (req, res) => {
   try {
     const { file } = req?.body;
@@ -86,92 +182,71 @@ const verifyPdfController = async (req, res) => {
       res.status(500).json({ success: false, data: result?.data });
     }
   } catch (error) {
-    console.log(error);
+    console.error("Error in verifyPdfController:", error);
     res.status(500).json({ message: "Internal server error" });
   }
 };
 
+/**
+ * Memeriksa status TTE pengguna berdasarkan data sesi
+ */
 const checkTTEUser = async (req, res) => {
   try {
     const { employee_number } = req?.user;
-    const { fetcher } = req;
-    const request = req?.siasnRequest;
 
-    // ini menggunakan web service siasn
-    // const result = await dataUtama(request, employee_number);
+    const currentEmployee = await Pegawai.query()
+      .where("nip_baru", employee_number)
+      .first();
 
-    // ini menggunakan web service simaster
-    const simasterEmployee = await fetcher.get(
-      `/master-ws/operator/employees/${employee_number}/data-utama-master`
-    );
+    if (!currentEmployee) {
+      return res.status(404).json({ code: 404, message: "User not found" });
+    }
 
-    // const currentUser = result?.data?.data;
-    const currentUserSimaster = simasterEmployee?.data;
+    const nik = currentEmployee?.nik;
+    const verificationResult = await verifyTTEUser({
+      nik,
+      nip: employee_number,
+    });
 
-    if (!currentUserSimaster) {
-      res.status(404).json({ code: 404, message: "User not found" });
+    if (verificationResult.success) {
+      res.json(verificationResult.data);
     } else {
-      // const { nik: nikSiasn } = currentUser;
-      const { nik: nikSimaster } = currentUserSimaster;
-
-      // verify nik
-      const hasil = await verifyUserWithNik({ nik: nikSimaster });
-
-      if (hasil?.success) {
-        const userTTEData = hasil?.data;
-        res.json(userTTEData);
-      } else {
-        res.status(400).json({ code: 400, message: hasil?.data?.message });
-      }
+      res.status(400).json({ code: 400, message: verificationResult.message });
     }
   } catch (error) {
-    console.log(error);
+    console.error("Error in checkTTEUser:", error);
     res.status(500).json({ message: "Internal server error" });
   }
 };
 
+/**
+ * Memeriksa status TTE pengguna berdasarkan NIP
+ */
 const checkTTEUserByNip = async (req, res) => {
   try {
-    const { nip } = req?.query;
-    const { fetcher } = req;
+    const { nip: employee_number } = req?.query;
 
-    // ini menggunakan web service simaster
-    const simasterEmployee = await fetcher.get(
-      `/master-ws/operator/employees/${nip}/data-utama-master`
-    );
+    const currentEmployee = await Pegawai.query()
+      .where("nip_baru", employee_number)
+      .first();
 
-    // const currentUser = result?.data?.data;
-    const currentUserSimaster = simasterEmployee?.data;
+    if (!currentEmployee) {
+      return res.status(404).json({ code: 404, message: "User not found" });
+    }
 
-    if (!currentUserSimaster) {
-      res.json(null);
+    const nik = currentEmployee?.nik;
+    const verificationResult = await verifyTTEUser({
+      nik,
+      nip: employee_number,
+    });
+
+    if (verificationResult.success) {
+      res.json(verificationResult.data);
     } else {
-      // const { nik: nikSiasn } = currentUser;
-      const { nik: nikSimaster } = currentUserSimaster;
-
-      // verify nik
-      const hasil = await verifyUserWithNik({ nik: nikSimaster });
-
-      if (hasil?.success) {
-        const userTTEData = hasil?.data;
-
-        if (userTTEData?.status === "NOT_REGISTERED") {
-          res.json(null);
-        } else {
-          const data = {
-            nama: currentUserSimaster?.nama,
-            nip: currentUserSimaster?.nip_baru,
-            foto: currentUserSimaster?.foto,
-          };
-
-          res.json(data);
-        }
-      } else {
-        res.status(400).json({ code: 400, message: hasil?.data?.message });
-      }
+      res.status(400).json({ code: 400, message: verificationResult.message });
     }
   } catch (error) {
-    console.log(error);
+    console.error("Error in checkTTEUserByNip:", error);
     res.status(500).json({ message: "Internal server error" });
   }
 };
@@ -183,4 +258,5 @@ module.exports = {
   saveTotpConfirmation,
   getLastTotpConfirmation,
   verifyPdfController,
+  verifyTTEUser,
 };

@@ -1,16 +1,24 @@
 import DocumentLayout from "@/components/Documents/DocumentLayout";
 import PageContainer from "@/components/PageContainer";
 import Head from "next/head";
-import SignTest from "@/components/Documents/SignTest";
-
+import WebinarSigner from "@/components/Documents/WebinarSigner";
+import { Grid } from "antd";
 const DocumentTteWebinar = () => {
+  const breakPoint = Grid.useBreakpoint();
+
   return (
     <>
       <Head>
         <title>Rumah ASN - Dokumen</title>
       </Head>
-      <PageContainer title="TTE Webinar" content="TTE Webinar">
-        <SignTest />
+      <PageContainer
+        childrenContentStyle={{
+          padding: breakPoint.xs ? 0 : null,
+        }}
+        title="TTE Webinar"
+        content="TTE Webinar"
+      >
+        <WebinarSigner />
       </PageContainer>
     </>
   );

@@ -1,6 +1,5 @@
 import FormPersonalSign from "@/components/Esign/FormPersonalSign";
 import Layout from "@/components/Layout";
-import FormJenisDiklat from "@/components/PemutakhiranData/FormJenisDiklat";
 import AdminLayoutDetailWebinar from "@/components/WebinarSeries/AdminLayoutDetailWebinar";
 import FormUnorASN from "@/components/WebinarSeries/FormUnorASN";
 import FormUnorPTTPK from "@/components/WebinarSeries/FormUnorPTTPK";
@@ -15,12 +14,12 @@ import { Stack } from "@mantine/core";
 import { MarkdownEditor } from "@primer/react/drafts";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
-  BackTop,
   Button,
   Card,
   Checkbox,
   Col,
   DatePicker,
+  FloatButton,
   Form,
   Input,
   InputNumber,
@@ -238,7 +237,7 @@ const FormEditWebinarSeries = ({ data }) => {
 
   return (
     <>
-      <BackTop />
+      <FloatButton.BackTop />
       <Stack mb={10}>
         <UploadFileTemplate
           title="Template Sertifikat"
@@ -254,30 +253,28 @@ const FormEditWebinarSeries = ({ data }) => {
         layout="vertical"
       >
         <Form.Item
-          rules={[{ required: true, message: "Tidak boleh kosong" }]}
-          name="type_sign"
-          label="Tanda Tangan Elektronik"
+          help="Jika dipilih, maka tanda tangan akan diambil dari tanda tangan personal"
+          name="use_personal_signer"
+          valuePropName="checked"
         >
-          <Select
-            onChange={() => {
-              form.setFieldsValue({ employee_number_signer: null });
+          <Checkbox
+            onChange={(e) => {
+              if (e.target.checked) {
+                form.setFieldsValue({ employee_number_signer: null });
+              }
             }}
           >
-            <Select.Option value="SEAL">Segel Elektronik</Select.Option>
-            <Select.Option value="PERSONAL_SIGN">
-              Tanda Tangan Personal
-            </Select.Option>
-          </Select>
+            Use Personal Signer
+          </Checkbox>
         </Form.Item>
-        <FormJenisDiklat name="type" />
         <Form.Item
           noStyle
           shouldUpdate={(prevValues, currentValues) =>
-            prevValues.type_sign !== currentValues.type_sign
+            prevValues.use_personal_signer !== currentValues.use_personal_signer
           }
         >
           {({ getFieldValue }) =>
-            getFieldValue("type_sign") === "PERSONAL_SIGN" ? (
+            getFieldValue("use_personal_signer") ? (
               <FormPersonalSign name="employee_number_signer" />
             ) : null
           }

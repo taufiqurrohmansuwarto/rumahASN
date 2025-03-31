@@ -77,12 +77,7 @@ function DocumentLayout({ children, active = "rekon-unor" }) {
         overflow: "auto",
       }}
     >
-      <ConfigProvider
-        locale={frFR}
-        theme={{
-          token: token,
-        }}
-      >
+      <ConfigProvider locale={frFR}>
         <ProConfigProvider>
           <ProLayout
             title={"Dokumen"}
@@ -95,7 +90,6 @@ function DocumentLayout({ children, active = "rekon-unor" }) {
             navTheme="light"
             fixedHeader
             fixSiderbar
-            token={token}
             actionsRender={(props) => {
               // if (props.isMobile) return [];
               return [
