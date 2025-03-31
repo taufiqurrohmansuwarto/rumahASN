@@ -67,10 +67,6 @@ const ModalForm = ({ open, onCancel, onSubmit, loading, data, id }) => {
                 message: "Nama harus diisi",
               },
             ]}
-            normalize={
-              // automatic capitalize
-              (value) => value?.toUpperCase()
-            }
             extra="ex: DONIE S.H."
             label="Nama"
             name="name"

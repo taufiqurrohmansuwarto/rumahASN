@@ -25,95 +25,106 @@ const generateSealActivation = async (req, res) => {
     const seal = await AppBsreSeal.query().first();
 
     if (!seal) {
-      res.status(404).json({ message: "Seal Information not found" });
-    } else {
-      if (seal?.id_subscriber && seal?.totp_activation_code) {
+      return res.status(404).json({ message: "Seal Information not found" });
+    }
+
+    // Jika id_subscriber dan totp_activation_code sudah ada, refresh TOTP
+    if (seal?.id_subscriber && seal?.totp_activation_code) {
+      try {
         const response = await refreshSealActivationTotp({
-          idSubscriber: seal?.id_subscriber,
-          totp: seal?.totp_activation_code,
+          idSubscriber: seal.id_subscriber,
+          totp: seal.totp_activation_code,
         });
 
-        if (response.success) {
-          // create log
-          await LogSealBsre.query().insert({
-            user_id: req?.user?.customId,
-            action: "REFRESH_SEAL_OTP",
-            status: "SUCCESS",
-            request_data: JSON.stringify({
-              idSubscriber: seal?.id_subscriber,
-              totp: seal?.totp_activation_code,
-            }),
-            response_data: JSON.stringify(response),
-            description: "Refresh Seal OTP",
-          });
+        // Log untuk tracking
+        const logData = {
+          user_id: req?.user?.customId,
+          action: "REFRESH_SEAL_OTP",
+          status: response.success ? "SUCCESS" : "ERROR",
+          request_data: JSON.stringify({
+            idSubscriber: seal.id_subscriber,
+            totp: seal.totp_activation_code,
+          }),
+          response_data: JSON.stringify(response),
+          description: "Refresh Seal OTP",
+        };
+        await LogSealBsre.query().insert(logData);
 
-          const data = response?.data;
-          await AppBsreSeal.query().patchAndFetchById(seal.id, {
-            totp_activation_code: trim(data?.totp),
-          });
-
-          const result = {
-            ...data,
-            expired_at: dayjs(data?.expires).format("DD-MM-YYYY HH:mm:ss"),
-            expire_from_now_in_hours: dayjs(data?.expires).diff(
-              dayjs(),
-              "hours"
-            ),
-          };
-
-          res.json(result);
-        } else {
-          console.log({
+        if (!response.success) {
+          console.error({
             type: "ERROR REFRESH_SEAL_OTP",
             response,
           });
-          await LogSealBsre.query().insert({
-            user_id: req?.user?.customId,
-            action: "REFRESH_SEAL_OTP",
-            status: "ERROR",
-            request_data: JSON.stringify({
-              idSubscriber: seal?.id_subscriber,
-              totp: seal?.totp_activation_code,
-            }),
-            response_data: JSON.stringify(response),
-            description: "Refresh Seal OTP",
-          });
-          res.status(500).json({ message: response.data });
+          return res
+            .status(500)
+            .json({ message: response.data || "Gagal refresh TOTP" });
         }
-      } else {
-        const subscriberId = seal?.id_subscriber;
+
+        const data = response.data;
+        await AppBsreSeal.query().patchAndFetchById(seal.id, {
+          totp_activation_code: trim(data?.totp),
+        });
+
+        const result = {
+          ...data,
+          expired_at: dayjs(data?.expires).format("DD-MM-YYYY HH:mm:ss"),
+          expire_from_now_in_hours: dayjs(data?.expires).diff(dayjs(), "hours"),
+        };
+
+        return res.json(result);
+      } catch (refreshError) {
+        console.error("Error refreshing TOTP:", refreshError);
+        return res.status(500).json({ message: "Gagal memperbarui TOTP" });
+      }
+    } else {
+      // Jika belum ada TOTP, generate baru
+      if (!seal?.id_subscriber) {
+        return res
+          .status(400)
+          .json({ message: "ID Subscriber tidak ditemukan" });
+      }
+
+      try {
+        const subscriberId = seal.id_subscriber;
         const response = await getSealActivationOTP(subscriberId);
-        if (response.success) {
-          // create log
-          await LogSealBsre.query().insert({
-            user_id: req?.user?.customId,
-            action: "GENERATE_SEAL_OTP",
-            status: "SUCCESS",
-            request_data: JSON.stringify({ subscriberId }),
-            response_data: JSON.stringify(response),
-            description: "Generate Seal OTP",
-          });
-          res.json(response?.data);
-        } else {
-          console.log({
+
+        // Log untuk tracking
+        const logData = {
+          user_id: req?.user?.customId,
+          action: "GENERATE_SEAL_OTP",
+          status: response.success ? "SUCCESS" : "ERROR",
+          request_data: JSON.stringify({ subscriberId }),
+          response_data: JSON.stringify(response),
+          description: "Generate Seal OTP",
+        };
+        await LogSealBsre.query().insert(logData);
+
+        if (!response.success) {
+          console.error({
             type: "ERROR GENERATE_SEAL_OTP",
             response,
           });
-          await LogSealBsre.query().insert({
-            user_id: req?.user?.customId,
-            action: "GENERATE_SEAL_OTP",
-            status: "ERROR",
-            request_data: JSON.stringify({ subscriberId }),
-            response_data: JSON.stringify(response),
-            description: "Generate Seal OTP",
-          });
-          res.status(500).json({ message: response.data });
+          return res
+            .status(500)
+            .json({ message: response.data || "Gagal generate OTP" });
         }
+
+        // Simpan TOTP yang baru dibuat
+        if (response.data?.totp) {
+          await AppBsreSeal.query().patchAndFetchById(seal.id, {
+            totp_activation_code: trim(response.data.totp),
+          });
+        }
+
+        return res.json(response.data);
+      } catch (generateError) {
+        console.error("Error generating OTP:", generateError);
+        return res.status(500).json({ message: "Gagal membuat OTP baru" });
       }
     }
   } catch (error) {
-    console.log(error);
-    res.status(500).json({ error: "Internal Server Error" });
+    console.error("Error in generateSealActivation:", error);
+    return res.status(500).json({ error: "Internal Server Error" });
   }
 };
 
