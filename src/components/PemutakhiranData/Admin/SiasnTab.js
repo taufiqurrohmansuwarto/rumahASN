@@ -1,5 +1,6 @@
 import AdministrasiByNip from "@/components/Berkas/AdministrasiByNip";
 import AdministrasiPerbaikanByNip from "@/components/Berkas/AdministrasiPerbaikanByNip";
+import CompareDataPasanganByNip from "@/components/PemutakhiranData/CompareDataPasanganByNip";
 import { ActiveTabProvider, useActiveTab } from "@/context/TabContext";
 import { Stack } from "@mantine/core";
 import { Alert, FloatButton, Grid, Tabs } from "antd";
@@ -83,6 +84,11 @@ function SiasnTab({ nip }) {
         content: <ComparePemberhentianByNip nip={nip} />,
       },
       {
+        key: "pasangan",
+        tab: "Pasangan",
+        content: <CompareDataPasanganByNip nip={nip} />,
+      },
+      {
         key: "kedudukan-hukum",
         tab: "Kedudukan Hukum",
         content: <CompareKedudukanHukumByNip nip={nip} />,
@@ -92,6 +98,7 @@ function SiasnTab({ nip }) {
         tab: "Keluarga",
         content: <CompareKeluargaByNip nip={nip} />,
       },
+
       {
         key: "masa-kerja",
         tab: "Masa Kerja",

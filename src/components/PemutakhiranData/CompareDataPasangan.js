@@ -157,7 +157,6 @@ const DataPasanganView = () => {
           locale={locale}
         />
       </Card>
-      {JSON.stringify(pasanganData)}
       <Divider />
 
       <Card title="Form Keluarga">

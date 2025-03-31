@@ -5,6 +5,7 @@ const {
   tambahPasangan,
 } = require("@/utils/siasn-utils");
 const DataSIASN = require("@/models/siasn-employees.model");
+const { handleError } = require("@/utils/helper/controller-helper");
 const metanip = "199303302019032011";
 
 const daftarPasangan = async (req, res) => {
@@ -16,8 +17,20 @@ const daftarPasangan = async (req, res) => {
 
     res.json(hasilPasangan?.data?.data);
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Internal Server Error" });
+    handleError(res, error);
+  }
+};
+
+const daftarPasanganByNip = async (req, res) => {
+  try {
+    const { siasnRequest } = req;
+    const { nip } = req?.query;
+
+    const hasilPasangan = await pasangan(siasnRequest, nip);
+
+    res.json(hasilPasangan?.data?.data);
+  } catch (error) {
+    handleError(res, error);
   }
 };
 
@@ -111,7 +124,6 @@ const daftarOrtu = async (req, res) => {
   }
 };
 
-const daftarPasanganByNip = async (req, res) => {};
 const daftarAnakByNip = async (req, res) => {};
 const daftarOrtuByNip = async (req, res) => {};
 

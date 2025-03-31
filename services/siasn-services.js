@@ -189,6 +189,10 @@ export const dataPencantumanGelarSKByNip = ({ nip, id }) => {
     .then((res) => res?.data);
 };
 
+export const dataPasanganByNip = (nip) => {
+  return api.get(`/admin/${nip}/rw-pasangan`).then((res) => res?.data);
+};
+
 export const dataUtamSIASNByNip = (nip) => {
   return api.get(`/admin/${nip}/data-utama`).then((res) => res.data);
 };
