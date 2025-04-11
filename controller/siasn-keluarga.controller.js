@@ -13,7 +13,7 @@ const daftarPasangan = async (req, res) => {
     const { siasnRequest } = req;
     const { employee_number: nip } = req?.user;
 
-    const hasilPasangan = await pasangan(siasnRequest, metanip);
+    const hasilPasangan = await pasangan(siasnRequest, nip);
 
     res.json(hasilPasangan?.data?.data);
   } catch (error) {

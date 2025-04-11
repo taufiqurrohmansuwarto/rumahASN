@@ -70,12 +70,12 @@ export const mysapkMenu = [
     color: "orange",
     path: "/ubah-data",
   },
-  {
-    title: "Pasangan",
-    icon: IconUserPlus,
-    color: "cyan",
-    path: "/pasangan",
-  },
+  // {
+  //   title: "Pasangan",
+  //   icon: IconUserPlus,
+  //   color: "cyan",
+  //   path: "/pasangan",
+  // },
   {
     title: "Jabatan",
     icon: IconBadge,
@@ -138,12 +138,12 @@ export const mysapkMenu = [
     color: "gray",
     path: "/pmk",
   },
-  // {
-  //   title: "Keluarga",
-  //   icon: IconUsers,
-  //   color: "gray",
-  //   path: "/keluarga",
-  // },
+  {
+    title: "Keluarga",
+    icon: IconUsers,
+    color: "gray",
+    path: "/keluarga",
+  },
 
   {
     title: "Penghargaan",
