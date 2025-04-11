@@ -1,0 +1,28 @@
+kode_indikator,bobot_dimensi,indikator,deskripsi,bobot_indikator,dimensi
+COM_1,0.28,Belum SKP Tahun Berjalan,Sasaran Kinerja Pegawai (SKP) tahun berjalan kosong (Belum SKP Tahun Berjalan) yaitu data laporan kinerja Pegawai ASN belum diisikan ke SIASN dalam periode 2 (dua) tahun sebelumnya,20,completeness
+COM_2,0.28,Jabatan Kosong,"Pegawai ASN yang memiliki jenis jabatan fungsional atau pelaksana, namun data id referensi jabatan tidak ditemukan pada kolom id jabatan fungsional/pelaksana",25,completeness
+COM_3,0.28,Pendidikan Kosong,Pendidikan Terkahir Pegawai ASN pada data utama dan riwayat pendidikan di SIASN Kosong,20,completeness
+COM_4,0.28,TMT PNS Kosong,Data TMT bekerja PNS tidak ditemukan di SIASN,12.5,completeness
+COM_5,0.28,Gelar Kosong,Data Gelar depan dan/atau gelar belakang Pegawai ASN masih kosong padahal memiliki tingka pendidikan Diploman ke atas.,17.5,completeness
+COM_6,0.28,Email Pribadi Kosong/Salah Format,Data Email Pribadi Pegawai ASN belum terisi/format tidak sesuai,2.5,completeness
+COM_7,0.28,Nomor HP Kosong,"Data nomor telepon genggam pegawai yang terhubung dengan akun whatsapp belum terlengkapi. Nomor handphone ini diperuntukkan untuk mengirim notifikasi,verifikasi dan sebaginya dari aplikasi MyASN",2.5,completeness
+TIM_1,0.31,Unor Tidak Aktif,Data pegawai ASN yang ditempatkan pada unor yang sudah tidak aktif di SIASN,22.73,timeliness
+TIM_2,0.31,Format Jabatan Fungsional Belum Diangkat,Data PNS calon JF yang belum diangkat JF lebih dari 2 (dua) tahun sejak TMT Pengangkatan Calon Pegawai Negeri Sipil (CPNS),18.18,timeliness
+TIM_3,0.31,Masa CPNS Lebih dari 1 Tahun,Data CPNS yang belum dilantik menjadi PNS lebih dari 1 (satu) tahun dari TMT CPNS,13.64,timeliness
+TIM_4,0.31,Struktural Ganda,Data Unor Jabatan Struktural yang diduduki oleh lebih dari 1 (satu) ASN pada saat yang bersamaan.,15.91,timeliness
+TIM_5,0.31,Telah Masuk BUP tetapi Masih Aktif,"Pegawai ASN yang terdata sebagai ASN aktif, namun berdasarkan jabatan terakhirnya yang bersangkutan telah mencapai BUP",15.91,timeliness
+TIM_6,0.31,Cuti di Luar Tanggungan Negara Setelah Tanggal Berakhir,"Data kedudukan hukum PNS yang masih berstatus CLTN, sedangkan masa CLTN sudah berakhir.",13.64,timeliness
+ACC_1,0.3,TMT CPNS Lebih Besar dari TMT PNS,Data TMT CPNS lebih akhir waktunya dibandingkan dengan TMT PNS,9.52,accuracy
+ACC_2,0.3,Jenis Pegawai Diperkejakan / Diperbantukan tidak sesuai,Data PNS dengan status jenis pegawai DPK/DPB namun data instansi kerja sesuai dengan instansi asal atau data PNS dengan status jenis pegawai bukan DPK/DPB namun data instansi kerja tidak sesuai dengan instansi asal,21.43,accuracy
+ACC_3,0.3,Masa Kerja Kurang dari 2 tahun di Jabatan Struktural,"Data  PNS dengan masa kerja kurang dari 2 (dua) tahun, namun sudah menduduki jabatan sebagai pejabat struktural",7.14,accuracy
+ACC_4,0.3,PPPK Salah Kedhuk,Data kedudukan hukum PPPK tidak sesuai dengan kedudukan hukum PPPK yang seharusnya,9.52,accuracy
+ACC_5,0.3,NIK Belum Valid,"Kondisi Data pegawai yang belum dilengkapi dengan data NIK atau sudah dilengkapi, namun belum tervalidasi",4.76,accuracy
+ACC_6,0.3,Tingkat Pendidikan Eselon Tidak Memenuhi Syarat,Data Pegawai ASN yang menduduki jabatan struktural memiliki tingkat pendidikan dibawah kualifikasi minimal,11.9,accuracy
+ACC_7,0.3,Tahun Pengangkatan PPPK,Data TMT PPPK yang tercantum pada NIPPPK diluar tahun pengangkatan PPPK,7.14,accuracy
+ACC_8,0.3,Tingkat Pendidikan Jabatan Fungsional Tidak memenuhi Syarat,Data Pegawai ASN yang menduduki JF memiliki tingkat pendidikan di bawah kualifikasi minimal,14.29,accuracy
+ACC_9,0.3,Pelaksana Nama Jabatan Fungsional,Data Pegawai Jabatan Pelaksana yang mengandung unsur penamaan jabatan fungsional,4.76,accuracy
+ACC_10,0.3,Jabatan Pimpinan Tinggi di bawah Pangkat minimal,Data PNS yang menjabat sebagai pejabat struktural namum memiliki pangkat di bawah kualifikasi minimal,9.52,accuracy
+CON_1,0.11,Komponen TMT CPNS pada NIP PNS,Data TMT CPNS tidak sesuai dengan 6 (enam) digit NIP yang memuat elemen tahun dan bulan pengangkatan sebagai CPNS,25,consistency
+CON_2,0.11,Komponen Tanggal Lahir pada NIP ASN,"Data tanggal lahir ASN tidak sesuai dengan 8 (delapan) digit NIP yang memuat elemen tahun,bulan, dan tanggal lahir",25,consistency
+CON_3,0.11,Komponen Jenis Kelamin pada NIP ASN,Data Jenis Kelamin ASN tidak sesuai dengan 1 (satu) digit NIP yang memuat elemen kode jenis kelamin,25,consistency
+CON_4,0.11,Komponen Tahun Pengangkatan NIPPPK,Data TMT PPPK tidak sesuai dengan 4 (empat) digit NIPPPK yang memuat elemen tahun pengangkatan pertama sebagai calon PPPK,25,consistency

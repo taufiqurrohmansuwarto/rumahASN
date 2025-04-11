@@ -1,4 +1,7 @@
-import { handleError } from "@/utils/helper/controller-helper";
+import {
+  checkTotalPegawai,
+  handleError,
+} from "@/utils/helper/controller-helper";
 const SyncPegawai = require("@/models/sync-pegawai.model");
 const { checkOpdEntrian } = require("@/utils/helper/controller-helper");
 
@@ -58,9 +61,11 @@ const countingTmtPnsKosong = async (opdId) => {
   return createCountingQuery(
     opdId,
     function () {
-      this.where("siasn.kedudukan_hukum_id", "!=", "71").andWhere(function () {
-        this.whereNull("siasn.tmt_pns").orWhere("siasn.tmt_pns", "");
-      });
+      this.where("siasn.kedudukan_hukum_id", "!=", "71")
+        .andWhere("siasn.status_cpns_pns", "!=", "C")
+        .andWhere(function () {
+          this.whereNull("siasn.tmt_pns").orWhere("siasn.tmt_pns", "");
+        });
     },
     "tmt_pns_kosong"
   );
@@ -173,6 +178,34 @@ const createDataQuery = (skpd_id, condition, limit, page) => {
 };
 
 /**
+ * Fungsi untuk menambahkan filter pencarian nama jika diperlukan
+ * @param {string} search - Kata kunci pencarian
+ * @param {object} builder - Query builder
+ */
+const addSearchFilter = (search, builder) => {
+  if (search) {
+    builder.where("sync.nama_master", "ILIKE", `%${search}%`);
+  }
+};
+
+/**
+ * Fungsi untuk memformat hasil query ke format respons API
+ * @param {number} page - Halaman saat ini
+ * @param {number} limit - Batas jumlah data per halaman
+ * @param {object} total - Hasil query total data
+ * @param {array} result - Hasil query data
+ * @returns {object} - Format respons API
+ */
+const formatApiResponse = (page, limit, total, result) => {
+  return {
+    page,
+    limit,
+    total: total.total,
+    data: result,
+  };
+};
+
+/**
  * API untuk mendapatkan data dashboard kelengkapan data
  */
 export const dashboardCompleteness = async (req, res) => {
@@ -181,6 +214,8 @@ export const dashboardCompleteness = async (req, res) => {
     const { skpd_id = opdId } = req?.query;
 
     if (!validateOpd(res, opdId, skpd_id)) return;
+
+    const totalPegawai = await checkTotalPegawai(SyncPegawai.knex(), opdId);
 
     const result = await Promise.all([
       countingJabatanKosong(skpd_id),
@@ -205,31 +240,43 @@ export const dashboardCompleteness = async (req, res) => {
         id: "jabatan-kosong",
         label: "Jabatan Kosong",
         value: data.jabatan_kosong,
+        total_pegawai: totalPegawai,
+        bobot: 25.0,
       },
       {
         id: "pendidikan-kosong",
         label: "Pendidikan Kosong",
         value: data.pendidikan_kosong,
+        total_pegawai: totalPegawai,
+        bobot: 20.0,
       },
       {
         id: "tmt-pns-kosong",
         label: "TMT PNS Kosong",
         value: data.tmt_pns_kosong,
+        total_pegawai: totalPegawai,
+        bobot: 12.5,
       },
       {
         id: "gelar-kosong",
         label: "Gelar Kosong",
         value: data.gelar_kosong,
+        total_pegawai: totalPegawai,
+        bobot: 17.5,
       },
       {
         id: "email-invalid",
         label: "Email Invalid",
         value: data.email_invalid,
+        total_pegawai: totalPegawai,
+        bobot: 2.5,
       },
       {
         id: "nomor-hp-invalid",
         label: "Nomor HP Invalid",
         value: data.nomor_hp_invalid,
+        total_pegawai: totalPegawai,
+        bobot: 2.5,
       },
     ];
 
@@ -252,13 +299,8 @@ export const jabatanKosong = async (req, res) => {
     const result = await createDataQuery(
       skpd_id,
       function () {
-        this.whereNull("siasn.jabatan_id")
-          .orWhere("siasn.jabatan_id", "")
-          .where((builder) => {
-            if (search) {
-              builder.where("sync.nama_master", "ILIKE", `%${search}%`);
-            }
-          });
+        this.whereNull("siasn.jabatan_id").orWhere("siasn.jabatan_id", "");
+        addSearchFilter(search, this);
       },
       limit,
       page
@@ -267,25 +309,13 @@ export const jabatanKosong = async (req, res) => {
     const total = await createCountingQuery(
       skpd_id,
       function () {
-        this.whereNull("siasn.jabatan_id")
-          .orWhere("siasn.jabatan_id", "")
-          .where((builder) => {
-            if (search) {
-              builder.where("sync.nama_master", "ILIKE", `%${search}%`);
-            }
-          });
+        this.whereNull("siasn.jabatan_id").orWhere("siasn.jabatan_id", "");
+        addSearchFilter(search, this);
       },
       "total"
     );
 
-    const data = {
-      page,
-      limit,
-      total: total.total,
-      data: result,
-    };
-
-    return res.json(data);
+    return res.json(formatApiResponse(page, limit, total, result));
   } catch (error) {
     handleError(res, error);
   }
@@ -308,6 +338,7 @@ export const pendidikanKosong = async (req, res) => {
           "siasn.pendidikan_id",
           ""
         );
+        addSearchFilter(search, this);
       },
       limit,
       page
@@ -320,18 +351,12 @@ export const pendidikanKosong = async (req, res) => {
           "siasn.pendidikan_id",
           ""
         );
+        addSearchFilter(search, this);
       },
       "total"
     );
 
-    const data = {
-      page,
-      limit,
-      total: total.total,
-      data: result,
-    };
-
-    return res.json(data);
+    return res.json(formatApiResponse(page, limit, total, result));
   } catch (error) {
     handleError(res, error);
   }
@@ -347,39 +372,20 @@ export const tmtPnsKosong = async (req, res) => {
 
     if (!validateOpd(res, opdId, skpd_id)) return;
 
-    const result = await createDataQuery(
-      skpd_id,
-      function () {
-        this.where("siasn.kedudukan_hukum_id", "!=", "71").andWhere(
-          function () {
-            this.whereNull("siasn.tmt_pns").orWhere("siasn.tmt_pns", "");
-          }
-        );
-      },
-      limit,
-      page
-    );
-
-    const total = await createCountingQuery(
-      skpd_id,
-      function () {
-        this.where("siasn.kedudukan_hukum_id", "!=", "71").andWhere(
-          function () {
-            this.whereNull("siasn.tmt_pns").orWhere("siasn.tmt_pns", "");
-          }
-        );
-      },
-      "total"
-    );
-
-    const data = {
-      page,
-      limit,
-      total: total.total,
-      data: result,
+    const tmtPnsCondition = function () {
+      this.where("siasn.kedudukan_hukum_id", "!=", "71")
+        .andWhere("siasn.status_cpns_pns", "!=", "C")
+        .andWhere(function () {
+          this.whereNull("siasn.tmt_pns").orWhere("siasn.tmt_pns", "");
+        });
+      addSearchFilter(search, this);
     };
 
-    return res.json(data);
+    const result = await createDataQuery(skpd_id, tmtPnsCondition, limit, page);
+
+    const total = await createCountingQuery(skpd_id, tmtPnsCondition, "total");
+
+    return res.json(formatApiResponse(page, limit, total, result));
   } catch (error) {
     handleError(res, error);
   }
@@ -395,61 +401,35 @@ export const gelarKosong = async (req, res) => {
 
     if (!validateOpd(res, opdId, skpd_id)) return;
 
+    const gelarKosongCondition = function () {
+      this.whereIn("siasn.tingkat_pendidikan_id", [
+        "20",
+        "25",
+        "30",
+        "35",
+        "40",
+        "45",
+        "50",
+      ])
+        .andWhere("siasn.gelar_depan", "")
+        .andWhere("siasn.gelar_belakang", "");
+      addSearchFilter(search, this);
+    };
+
     const result = await createDataQuery(
       skpd_id,
-      function () {
-        this.whereIn("siasn.tingkat_pendidikan_id", [
-          "20",
-          "25",
-          "30",
-          "35",
-          "40",
-          "45",
-          "50",
-        ])
-          .andWhere("siasn.gelar_depan", "")
-          .andWhere("siasn.gelar_belakang", "")
-          .where((builder) => {
-            if (search) {
-              builder.where("sync.nama_master", "ILIKE", `%${search}%`);
-            }
-          });
-      },
+      gelarKosongCondition,
       limit,
       page
     );
 
     const total = await createCountingQuery(
       skpd_id,
-      function () {
-        this.whereIn("siasn.tingkat_pendidikan_id", [
-          "20",
-          "25",
-          "30",
-          "35",
-          "40",
-          "45",
-          "50",
-        ])
-          .andWhere("siasn.gelar_depan", "")
-          .andWhere("siasn.gelar_belakang", "")
-          .where((builder) => {
-            if (search) {
-              builder.where("sync.nama_master", "ILIKE", `%${search}%`);
-            }
-          });
-      },
+      gelarKosongCondition,
       "total"
     );
 
-    const data = {
-      page,
-      limit,
-      total: total.total,
-      data: result,
-    };
-
-    return res.json(data);
+    return res.json(formatApiResponse(page, limit, total, result));
   } catch (error) {
     handleError(res, error);
   }
@@ -465,49 +445,29 @@ export const emailKosong = async (req, res) => {
 
     if (!validateOpd(res, opdId, skpd_id)) return;
 
+    const emailInvalidCondition = function () {
+      this.whereNull("siasn.email")
+        .orWhere("siasn.email", "")
+        .orWhereRaw(
+          "siasn.email NOT LIKE '%@%.%' OR siasn.email NOT LIKE '%_@%_.%'"
+        );
+      addSearchFilter(search, this);
+    };
+
     const result = await createDataQuery(
       skpd_id,
-      function () {
-        this.whereNull("siasn.email")
-          .orWhere("siasn.email", "")
-          .orWhereRaw(
-            "siasn.email NOT LIKE '%@%.%' OR siasn.email NOT LIKE '%_@%_.%'"
-          )
-          .where((builder) => {
-            if (search) {
-              builder.where("sync.nama_master", "ILIKE", `%${search}%`);
-            }
-          });
-      },
+      emailInvalidCondition,
       limit,
       page
     );
 
     const total = await createCountingQuery(
       skpd_id,
-      function () {
-        this.whereNull("siasn.email")
-          .orWhere("siasn.email", "")
-          .orWhereRaw(
-            "siasn.email NOT LIKE '%@%.%' OR siasn.email NOT LIKE '%_@%_.%'"
-          )
-          .where((builder) => {
-            if (search) {
-              builder.where("sync.nama_master", "ILIKE", `%${search}%`);
-            }
-          });
-      },
+      emailInvalidCondition,
       "total"
     );
 
-    const data = {
-      page,
-      limit,
-      total: total.total,
-      data: result,
-    };
-
-    return res.json(data);
+    return res.json(formatApiResponse(page, limit, total, result));
   } catch (error) {
     handleError(res, error);
   }
@@ -523,35 +483,27 @@ export const noHpKosong = async (req, res) => {
 
     if (!validateOpd(res, opdId, skpd_id)) return;
 
+    const noHpInvalidCondition = function () {
+      this.whereNull("siasn.nomor_hp")
+        .orWhere("siasn.nomor_hp", "")
+        .orWhereRaw("siasn.nomor_hp !~ '^08[0-9]{8,11}$'");
+      addSearchFilter(search, this);
+    };
+
     const result = await createDataQuery(
       skpd_id,
-      function () {
-        this.whereNull("siasn.nomor_hp")
-          .orWhere("siasn.nomor_hp", "")
-          .orWhereRaw("siasn.nomor_hp !~ '^08[0-9]{8,11}$'");
-      },
+      noHpInvalidCondition,
       limit,
       page
     );
 
     const total = await createCountingQuery(
       skpd_id,
-      function () {
-        this.whereNull("siasn.nomor_hp")
-          .orWhere("siasn.nomor_hp", "")
-          .orWhereRaw("siasn.nomor_hp !~ '^08[0-9]{8,11}$'");
-      },
+      noHpInvalidCondition,
       "total"
     );
 
-    const data = {
-      page,
-      limit,
-      total: total.total,
-      data: result,
-    };
-
-    return res.json(data);
+    return res.json(formatApiResponse(page, limit, total, result));
   } catch (error) {
     handleError(res, error);
   }
