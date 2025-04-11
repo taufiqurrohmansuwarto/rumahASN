@@ -31,6 +31,7 @@ const updateDataUtama = (fetcher, nip, data) => {
         ...data,
         pns_orang_id: currentPns?.id,
       };
+
       const result = await fetcher.post(url, payload);
       resolve(result?.data);
     } catch (error) {

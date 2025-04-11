@@ -43,6 +43,23 @@ function InformationDetail({ data }) {
     }
   };
 
+  const handleUpdateNoHp = (noHp) => {
+    const payload = {
+      nip: data.nipBaru,
+      data: {
+        nomor_hp: noHp,
+      },
+    };
+
+    const noHpRegex = /^08[0-9]{8,11}$/;
+
+    if (!noHpRegex.test(noHp)) {
+      message.error("Nomor HP tidak valid");
+      return;
+    } else {
+      updateData(payload);
+    }
+  };
   return (
     <>
       <Descriptions
@@ -103,7 +120,13 @@ function InformationDetail({ data }) {
           <TextSensor text={data?.emailGov} />
         </Descriptions.Item>
         <Descriptions.Item label="No. HP">
-          <TextSensor text={data?.noHp} />
+          <Typography.Text
+            editable={{
+              onChange: (value) => handleUpdateNoHp(value),
+            }}
+          >
+            {data?.noHp}
+          </Typography.Text>
         </Descriptions.Item>
         <Descriptions.Item label="No. Telepon">
           <TextSensor text={data?.noTelp} />
