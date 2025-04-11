@@ -350,7 +350,9 @@ export const tmtPnsKosong = async (req, res) => {
     const result = await createDataQuery(
       skpd_id,
       function () {
-        this.whereNull("siasn.tmt_pns").orWhere("siasn.tmt_pns", "");
+        this.whereNull("siasn.tmt_pns")
+          .orWhere("siasn.tmt_pns", "")
+          .andWhere("siasn.kedudukan_hukum_id", "!=", "71");
       },
       limit,
       page
@@ -359,7 +361,9 @@ export const tmtPnsKosong = async (req, res) => {
     const total = await createCountingQuery(
       skpd_id,
       function () {
-        this.whereNull("siasn.tmt_pns").orWhere("siasn.tmt_pns", "");
+        this.whereNull("siasn.tmt_pns")
+          .orWhere("siasn.tmt_pns", "")
+          .andWhere("siasn.kedudukan_hukum_id", "!=", "71");
       },
       "total"
     );
