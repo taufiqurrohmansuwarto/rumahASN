@@ -58,9 +58,9 @@ const countingTmtPnsKosong = async (opdId) => {
   return createCountingQuery(
     opdId,
     function () {
-      this.whereNull("siasn.tmt_pns")
-        .orWhere("siasn.tmt_pns", "")
-        .andWhere("siasn.kedudukan_hukum_id", "!=", "71");
+      this.where("siasn.kedudukan_hukum_id", "!=", "71").andWhere(function () {
+        this.whereNull("siasn.tmt_pns").orWhere("siasn.tmt_pns", "");
+      });
     },
     "tmt_pns_kosong"
   );
@@ -350,9 +350,11 @@ export const tmtPnsKosong = async (req, res) => {
     const result = await createDataQuery(
       skpd_id,
       function () {
-        this.whereNull("siasn.tmt_pns")
-          .orWhere("siasn.tmt_pns", "")
-          .andWhere("siasn.kedudukan_hukum_id", "!=", "71");
+        this.where("siasn.kedudukan_hukum_id", "!=", "71").andWhere(
+          function () {
+            this.whereNull("siasn.tmt_pns").orWhere("siasn.tmt_pns", "");
+          }
+        );
       },
       limit,
       page
@@ -361,9 +363,11 @@ export const tmtPnsKosong = async (req, res) => {
     const total = await createCountingQuery(
       skpd_id,
       function () {
-        this.whereNull("siasn.tmt_pns")
-          .orWhere("siasn.tmt_pns", "")
-          .andWhere("siasn.kedudukan_hukum_id", "!=", "71");
+        this.where("siasn.kedudukan_hukum_id", "!=", "71").andWhere(
+          function () {
+            this.whereNull("siasn.tmt_pns").orWhere("siasn.tmt_pns", "");
+          }
+        );
       },
       "total"
     );
