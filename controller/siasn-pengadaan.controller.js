@@ -53,6 +53,20 @@ const listPengadaanInstansi = async (req, res) => {
   }
 };
 
+const dokumenPengadaan = async (req, res) => {
+  try {
+    const { siasnRequest: request } = req;
+    const tahun = req?.query?.tahun || dayjs().format("YYYY");
+    const result = await daftarPengadaanDokumen(request, tahun);
+    res.json(result?.data);
+  } catch (error) {
+    const errorMessage = error?.data || "Internal Server Error";
+    res.status(400).json({
+      message: errorMessage,
+    });
+  }
+};
+
 const listPengadaanDokumen = async (req, res) => {
   try {
     const { siasnRequest: request } = req;
@@ -121,4 +135,5 @@ module.exports = {
   downloadDokumen,
   downloadToMaster,
   syncPengadaan,
+  dokumenPengadaan,
 };

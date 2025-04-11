@@ -112,7 +112,12 @@ module.exports.daftarPengadaanInstansi = (fetcher, tahunAnggaran) => {
 module.exports.daftarPengadaanDokumen = (fetcher, tahunAnggaran) => {
   return fetcher
     .get(`/pengadaan/dokumen-pengadaan?tahun=${tahunAnggaran}`)
-    .then((res) => res?.data);
+    .then((res) => res?.data?.data);
+};
+
+module.exports.daftarPengadaanDokumen = (fetcher, tahunAnggaran) => {
+  const url = `/pengadaan/dokumen-pengadaan?tahun=${tahunAnggaran}`;
+  return fetcher.get(url).then((res) => res?.data);
 };
 
 module.exports.listPemberhentianSIASN = (fetcher, tglAwal, tglAkhir) => {
