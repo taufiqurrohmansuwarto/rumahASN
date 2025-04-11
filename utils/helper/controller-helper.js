@@ -3,6 +3,16 @@ const path = require("path");
 const paparse = require("papaparse");
 const Sinkronisasi = require("@/models/sinkronisasi.model");
 
+// melihat total pegawai berdasarkan perangkat daerah di table rekon (sync_pegawai) bukan realtime
+module.exports.checkTotalPegawai = async (knex, opdId) => {
+  const result = await knex("sync_pegawai")
+    .where("skpd_id", "ilike", `${opdId}%`)
+    .count("* as total")
+    .first();
+
+  return result?.total || 0;
+};
+
 module.exports.handleError = (res, error) => {
   console.log(error);
   const message = error?.response?.data?.message || "Internal server error";

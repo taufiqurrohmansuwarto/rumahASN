@@ -19,8 +19,16 @@ function DashboardDimensiCompleteness() {
       dataIndex: "label",
     },
     {
-      title: "Jumlah",
+      title: "Total Pegawai",
+      dataIndex: "total_pegawai",
+    },
+    {
+      title: "Data Bermasalah",
       dataIndex: "value",
+    },
+    {
+      title: "Bobot Indikator",
+      dataIndex: "bobot",
     },
     {
       title: "Aksi",
@@ -33,16 +41,19 @@ function DashboardDimensiCompleteness() {
   ];
 
   return (
-    <Table
-      style={{
-        marginTop: 16,
-      }}
-      loading={isLoading}
-      pagination={false}
-      title={() => <h3>Dimensi Completeness</h3>}
-      dataSource={data}
-      columns={columns}
-    />
+    <>
+      {JSON.stringify(data)}
+      <Table
+        style={{
+          marginTop: 16,
+        }}
+        loading={isLoading}
+        pagination={false}
+        title={() => <h3>Dimensi Completeness</h3>}
+        dataSource={data}
+        columns={columns}
+      />
+    </>
   );
 }
 
