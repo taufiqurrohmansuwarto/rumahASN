@@ -58,7 +58,9 @@ const countingTmtPnsKosong = async (opdId) => {
   return createCountingQuery(
     opdId,
     function () {
-      this.whereNull("siasn.tmt_pns").orWhere("siasn.tmt_pns", "");
+      this.whereNull("siasn.tmt_pns")
+        .orWhere("siasn.tmt_pns", "")
+        .andWhere("siasn.kedudukan_hukum_id", "!=", "71");
     },
     "tmt_pns_kosong"
   );
