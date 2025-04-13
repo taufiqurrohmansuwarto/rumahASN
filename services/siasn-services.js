@@ -747,3 +747,16 @@ export const uncheckGelarByNip = async ({ nip, gelarId, loc }) => {
     .get(`/admin/${nip}/gelar/${gelarId}/uncheck?loc=${loc}`)
     .then((res) => res.data);
 };
+
+// pengadaan proxy
+export const getPengadaanProxy = async (query) => {
+  return api
+    .get(`/admin/pengadaan/proxy?${queryString.stringify(query)}`)
+    .then((res) => res.data);
+};
+
+export const syncPengadaanProxy = async (query) => {
+  return api
+    .get(`/admin/pengadaan/proxy/sync?${queryString.stringify(query)}`)
+    .then((res) => res.data);
+};

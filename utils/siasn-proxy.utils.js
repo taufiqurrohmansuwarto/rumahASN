@@ -58,3 +58,9 @@ module.exports.proxyLayananRekapPG = async (fetcher, query) => {
     params: query,
   });
 };
+
+module.exports.proxyLayananRekapPengadaan = async (fetcher, query) => {
+  return fetcher.get(`/siasn-ws/proxy/layanan/rekap/pengadaan`, {
+    params: query,
+  });
+};
