@@ -1177,8 +1177,33 @@ export const fetchPdf = async (url) => {
 };
 
 export const clearQuery = (query) => {
-  return queryString.stringify(query, {
+  // Mengubah query dengan key yang sama menjadi array
+  const processedQuery = {};
+
+  Object.keys(query).forEach((key) => {
+    // Jika nilai adalah array, gunakan langsung
+    if (Array.isArray(query[key])) {
+      // Filter nilai kosong atau null dari array
+      const filteredArray = query[key].filter(
+        (item) => item !== null && item !== undefined && item !== ""
+      );
+      if (filteredArray.length > 0) {
+        processedQuery[key] = filteredArray;
+      }
+    } else if (
+      query[key] !== null &&
+      query[key] !== undefined &&
+      query[key] !== ""
+    ) {
+      // Jika nilai bukan array dan tidak kosong, tambahkan ke query
+      processedQuery[key] = query[key];
+    }
+  });
+
+  // Gunakan format comma untuk array dalam query string (contoh: usul_id=2,4)
+  return queryString.stringify(processedQuery, {
     skipNull: true,
     skipEmptyString: true,
+    arrayFormat: "comma",
   });
 };

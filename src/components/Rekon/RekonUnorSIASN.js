@@ -73,7 +73,7 @@ const UnorSimaster = () => {
   );
 
   const handleChange = (value) => {
-    router.push(`/rekon/rekon-unor?master_id=${value}`);
+    router.push(`/rekon/unor?master_id=${value}`);
   };
 
   return (

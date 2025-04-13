@@ -26,6 +26,10 @@ export const refJenisRiwayat = () => {
   return api.get("/ref/jenis-riwayat").then((res) => res.data);
 };
 
+export const refStatusUsul = () => {
+  return api.get("/ref/status-usul").then((res) => res.data);
+};
+
 export const refUrusanPemerintahan = () => {
   return api.get("/ref/urusan-pemerintahan").then((res) => res.data);
 };
