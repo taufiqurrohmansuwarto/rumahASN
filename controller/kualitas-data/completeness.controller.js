@@ -126,7 +126,9 @@ const countingNoHpKosong = async (opdId) => {
     function () {
       this.whereNull("siasn.nomor_hp")
         .orWhere("siasn.nomor_hp", "")
-        .orWhereRaw("siasn.nomor_hp !~ '^08[0-9]{8,11}$'");
+        .orWhereRaw(
+          "REGEXP_REPLACE(siasn.nomor_hp, '\\s+', '', 'g') !~ '^08[1-9][0-9]{7,10}$'"
+        );
     },
     "nomor_hp_invalid"
   );
@@ -486,7 +488,9 @@ export const noHpKosong = async (req, res) => {
     const noHpInvalidCondition = function () {
       this.whereNull("siasn.nomor_hp")
         .orWhere("siasn.nomor_hp", "")
-        .orWhereRaw("siasn.nomor_hp !~ '^08[0-9]{8,11}$'");
+        .orWhereRaw(
+          "REGEXP_REPLACE(siasn.nomor_hp, '\\s+', '', 'g') !~ '^08[1-9][0-9]{7,10}$'"
+        );
       addSearchFilter(search, this);
     };
 
