@@ -146,6 +146,11 @@ function LayananPengadaan() {
       responsive: ["sm"],
     },
     {
+      title: "Status Usulan",
+      key: "status_usulan",
+      render: (_, row) => row?.status_usulan_nama?.nama,
+    },
+    {
       title: "NIP",
       dataIndex: "nip",
       responsive: ["sm"],

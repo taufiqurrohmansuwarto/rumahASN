@@ -169,6 +169,7 @@ const proxyRekapPengadaan = async (req, res) => {
       limit = 10,
       name = "",
       nip = "",
+      no_peserta = "",
     } = req.query;
 
     // Membuat query dasar untuk mengambil data berdasarkan periode/tahun
@@ -187,7 +188,13 @@ const proxyRekapPengadaan = async (req, res) => {
         if (nip) {
           builder.where("nip", "like", `%${nip}%`);
         }
+        if (no_peserta) {
+          builder.whereRaw(
+            "JSON_CONTAINS(status_usulan, '\"data\":{\"no_peserta\":', '$') = 1"
+          );
+        }
       })
+      .withGraphFetched("status_usulan_nama")
       .page(parseInt(page) - 1, parseInt(limit));
 
     const hasil = {
