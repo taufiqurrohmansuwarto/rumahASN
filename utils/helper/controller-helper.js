@@ -36,6 +36,10 @@ module.exports.checkOpdEntrian = (opdId, entrian) => {
   return entrian?.includes(opdId);
 };
 
+const checkOpdEntri = (opdId, entrian) => {
+  return entrian?.includes(opdId);
+};
+
 module.exports.insertSyncHistories = async (aplikasi, layanan) => {
   return await Sinkronisasi.query()
     .insert({
@@ -44,4 +48,18 @@ module.exports.insertSyncHistories = async (aplikasi, layanan) => {
     })
     .onConflict("aplikasi, layanan")
     .merge();
+};
+
+module.exports.getOpdId = (user) => {
+  const { organization_id, current_role } = user;
+  return current_role === "admin" ? "1" : organization_id;
+};
+
+module.exports.validateOpd = (res, opdId, skpd_id) => {
+  const checkOpd = checkOpdEntri(opdId, skpd_id);
+  if (!checkOpd) {
+    res.status(400).json({ message: "OPD tidak ditemukan" });
+    return false;
+  }
+  return true;
 };

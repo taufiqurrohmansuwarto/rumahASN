@@ -1,5 +1,8 @@
 import useScrollRestoration from "@/hooks/useScrollRestoration";
-import { daftarPengadaan, syncPengadaan } from "@/services/siasn-services";
+import {
+  getPengadaanProxy,
+  syncPengadaanProxy,
+} from "@/services/siasn-services";
 import { CloudDownloadOutlined, FilePdfOutlined } from "@ant-design/icons";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
@@ -32,7 +35,7 @@ function LayananPengadaan() {
   });
 
   const { mutate: sync, isLoading: isSyncing } = useMutation({
-    mutationFn: () => syncPengadaan(router?.query),
+    mutationFn: () => syncPengadaanProxy(router?.query),
     onSuccess: () => {
       message.success("Data berhasil disinkronkan");
       queryClient.invalidateQueries({
@@ -52,16 +55,17 @@ function LayananPengadaan() {
   const handleChange = (value) => {
     setQuery({
       tahun: value.format(formatYear),
+      page: 1,
     });
     router.push({
       pathname: "/layanan-siasn/pengadaan",
-      query: { tahun: value.format(formatYear) },
+      query: { tahun: value.format(formatYear), page: 1 },
     });
   };
 
   const { data, isLoading, isFetching, refetch } = useQuery(
     ["daftar-pengadaan", router?.query],
-    () => daftarPengadaan(router?.query),
+    () => getPengadaanProxy(router?.query),
     {
       keepPreviousData: true,
       enabled: !!router?.query,
@@ -69,6 +73,16 @@ function LayananPengadaan() {
     }
   );
 
+  const handleChangePage = ({ current, pageSize }) => {
+    setQuery({
+      tahun: router?.query?.tahun,
+      page: current,
+    });
+    router.push({
+      pathname: "/layanan-siasn/pengadaan",
+      query: { tahun: router?.query?.tahun, page: current },
+    });
+  };
   const gotoDetail = (row) => {
     router.push(`/apps-managements/integrasi/siasn/${row.nip}`);
   };
@@ -127,7 +141,8 @@ function LayananPengadaan() {
     },
     {
       title: "No. Peserta",
-      dataIndex: "no_peserta",
+      key: "no_peserta",
+      render: (_, row) => row?.usulan_data?.data?.no_peserta,
       responsive: ["sm"],
     },
     {
@@ -191,14 +206,15 @@ function LayananPengadaan() {
         rowKey={(row) => row?.id}
         pagination={{
           position: ["bottomRight", "topRight"],
-          total: data?.length ?? 0,
+          total: data?.total ?? 0,
           showTotal: (total) => `Total ${total} data`,
           showSizeChanger: false,
-          pageSize: PAGE_SIZE,
+          current: query?.page ?? 1,
         }}
-        dataSource={data}
+        dataSource={data?.data}
         columns={columns}
         loading={isLoading || isFetching}
+        onChange={handleChangePage}
       />
     </Card>
   );
