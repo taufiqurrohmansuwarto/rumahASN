@@ -1,0 +1,74 @@
+[
+  {
+    "id": "50",
+    "layanan_id": "2",
+    "alasan": "BTS - Data tidak sesuai",
+    "keterangan": "BTS"
+  },
+  {
+    "id": "51",
+    "layanan_id": "2",
+    "alasan": "BTS - Dokumen Tidak Lengkap",
+    "keterangan": "BTS"
+  },
+  {
+    "id": "52",
+    "layanan_id": "2",
+    "alasan": "TMS - Kualifikasi Pendidikan tidak sesuai dengan Penetapan Kebutuhan Menpan",
+    "keterangan": "TMS"
+  },
+  {
+    "id": "54",
+    "layanan_id": "2",
+    "alasan": "TMS - Yang bersangkutan meninggal dunia",
+    "keterangan": "TMS"
+  },
+  {
+    "id": "55",
+    "layanan_id": "2",
+    "alasan": "TMS - Yang bersangkutan mengundurkan diri",
+    "keterangan": "TMS"
+  },
+  {
+    "id": "60",
+    "layanan_id": "2",
+    "alasan": "TMS - Lain-lain",
+    "keterangan": "TMS"
+  },
+  {
+    "id": "61",
+    "layanan_id": "2",
+    "alasan": "Pembatalan NIP/Pertek - Kualifikasi Pendidikan tidak sesuai dengan Penetapan Kebutuhan Menpan",
+    "keterangan": "Pembatalan"
+  },
+  {
+    "id": "62",
+    "layanan_id": "2",
+    "alasan": "Pembatalan NIP/Pertek - Yang bersangkutan meninggal dunia",
+    "keterangan": "Pembatalan"
+  },
+  {
+    "id": "63",
+    "layanan_id": "2",
+    "alasan": "Pembatalan NIP/Pertek - Yang bersangkutan mengundurkan diri atau dianggap mengundurkan diri",
+    "keterangan": "Pembatalan"
+  },
+  {
+    "id": "64",
+    "layanan_id": "2",
+    "alasan": "Pembatalan NIP/Pertek - Lain-lain",
+    "keterangan": "Pembatalan"
+  },
+  {
+    "id": "67",
+    "layanan_id": "2",
+    "alasan": "Perbaikan NIP/Pertek - Data atau Dokumen Pertek Tidak Sesuai",
+    "keterangan": "BTS"
+  },
+  {
+    "id": "68",
+    "layanan_id": "2",
+    "alasan": "Perbaikan NIP/Pertek - Alasan Perbaikan Unor Khusus untuk PPPK Guru",
+    "keterangan": "BTS"
+  }
+]
