@@ -162,46 +162,103 @@ const syncPengadaanProxy = async (req, res) => {
 
 const proxyRekapPengadaan = async (req, res) => {
   try {
+    const knex = SiasnPengadaanProxy.knex();
     // Mendapatkan parameter dari query, dengan nilai default
     const {
       tahun = dayjs().format("YYYY"),
       page = 1,
-      limit = 10,
-      name = "",
+      limit = 25,
+      nama = "",
       nip = "",
       no_peserta = "",
+      status_usulan,
     } = req.query;
 
     // Membuat query dasar untuk mengambil data berdasarkan periode/tahun
-    const result = SiasnPengadaanProxy.query().where("periode", tahun);
+    const baseQuery = knex("siasn_pengadaan_proxy as sp")
+      .where("sp.periode", tahun)
+      .leftJoin("ref_siasn.status_usul as rsu", "sp.status_usulan", "rsu.id")
+      .leftJoin(
+        "rekon.unor as ru",
+        knex.raw("sp.usulan_data->'data'->>'unor_id'"),
+        "ru.id_siasn"
+      )
+      .select(
+        "sp.*",
+        knex.raw(
+          "get_hierarchy_siasn(sp.usulan_data->'data'->>'unor_id') as unor_siasn"
+        ),
+        knex.raw(
+          "CASE WHEN ru.id_simaster IS NOT NULL THEN get_hierarchy_simaster(ru.id_simaster) ELSE NULL END as unor_simaster"
+        ),
+        "rsu.id as status_usulan_id",
+        "rsu.nama as status_usulan_nama",
+        "rsu.nama as nama_status_usulan"
+      );
 
-    // Menghitung total data yang ada
-    const total = await result.clone().count("id as total").first();
+    // Menambahkan filter ke query
+    if (nama) {
+      baseQuery.where("sp.nama", "ilike", `%${nama}%`);
+    }
+    if (nip) {
+      baseQuery.where("sp.nip", "like", `%${nip}%`);
+    }
+    if (no_peserta) {
+      baseQuery.whereRaw("CAST(sp.usulan_data->>'data' AS TEXT) ILIKE ?", [
+        `%${no_peserta}%`,
+      ]);
+    }
+    // status_usulan 1,2
+    if (status_usulan) {
+      const statusArray = status_usulan.split(",").map(Number);
+      baseQuery.whereIn("sp.status_usulan", statusArray);
+    }
 
-    // Mengambil data dengan pagination
-    const data = await result
-      .clone()
-      .where((builder) => {
-        if (name) {
-          builder.where("nama", "like", `%${name}%`);
-        }
-        if (nip) {
-          builder.where("nip", "like", `%${nip}%`);
-        }
-        if (no_peserta) {
-          builder.whereRaw(
-            "JSON_CONTAINS(status_usulan, '\"data\":{\"no_peserta\":', '$') = 1"
-          );
-        }
-      })
-      .withGraphFetched("status_usulan_nama")
-      .page(parseInt(page) - 1, parseInt(limit));
+    // Menghitung total data
+    const countQuery = knex
+      .count("* as total")
+      .from(baseQuery.clone().as("count_query"));
+    const totalResult = await countQuery.first();
+    const total = parseInt(totalResult.total);
+
+    let dataResult;
+    // Jika limit = -1, tampilkan semua data tanpa paging
+    if (parseInt(limit) === -1) {
+      dataResult = await baseQuery;
+    } else {
+      // Mengambil data dengan pagination
+      const offset = (parseInt(page) - 1) * parseInt(limit);
+      dataResult = await baseQuery.limit(parseInt(limit)).offset(offset);
+    }
+
+    // Memformat data untuk respons
+    const data = dataResult.map((item) => {
+      // Memisahkan data status_usulan dari hasil query
+      const {
+        status_usulan_id,
+        status_usulan_nama,
+        status_usulan_color,
+        ...pengadaanData
+      } = item;
+
+      // Mengembalikan format yang sesuai dengan yang diharapkan komponen frontend
+      return {
+        ...pengadaanData,
+        status_usulan_nama: status_usulan_id
+          ? {
+              id: status_usulan_id,
+              nama: status_usulan_nama,
+              color: status_usulan_color,
+            }
+          : null,
+      };
+    });
 
     const hasil = {
-      total: parseInt(total?.total),
-      page: parseInt(page),
+      total: total,
+      page: parseInt(limit) === -1 ? 1 : parseInt(page),
       limit: parseInt(limit),
-      data: data?.results,
+      data: data,
     };
 
     res.json(hasil);

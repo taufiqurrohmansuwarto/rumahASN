@@ -53,7 +53,6 @@ function CariKPPerangkatDaerah() {
 
       // Tambahkan data
       data.forEach((item) => {
-        console.log(item);
         worksheet.addRow({
           nama: item?.nama_master,
           nip: item?.nip_master,
