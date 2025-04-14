@@ -214,10 +214,33 @@ const proxyRekapPengadaan = async (req, res) => {
       baseQuery.whereIn("sp.status_usulan", statusArray);
     }
 
-    // Menghitung total data
-    const countQuery = knex
-      .count("* as total")
-      .from(baseQuery.clone().as("count_query"));
+    // Membuat query untuk menghitung total data dengan filter yang sama
+    const countQuery = knex.count("* as total").from(
+      knex
+        .select("sp.id")
+        .from("siasn_pengadaan_proxy as sp")
+        .where("sp.periode", tahun)
+        .modify(function () {
+          // Menerapkan filter yang sama dengan baseQuery
+          if (nama) {
+            this.where("sp.nama", "ilike", `%${nama}%`);
+          }
+          if (nip) {
+            this.where("sp.nip", "like", `%${nip}%`);
+          }
+          if (no_peserta) {
+            this.whereRaw("CAST(sp.usulan_data->>'data' AS TEXT) ILIKE ?", [
+              `%${no_peserta}%`,
+            ]);
+          }
+          if (status_usulan) {
+            const statusArray = status_usulan.split(",").map(Number);
+            this.whereIn("sp.status_usulan", statusArray);
+          }
+        })
+        .as("count_query")
+    );
+
     const totalResult = await countQuery.first();
     const total = parseInt(totalResult.total);
 
