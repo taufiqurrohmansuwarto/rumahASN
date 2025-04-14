@@ -177,8 +177,8 @@ const proxyRekapPengadaan = async (req, res) => {
     // Membuat query dasar untuk mengambil data berdasarkan periode/tahun
     const baseQuery = knex("siasn_pengadaan_proxy as sp")
       .where("sp.periode", tahun)
-      .leftJoin("ref_siasn.status_usul as rsu", "sp.status_usulan", "rsu.id")
-      .leftJoin(
+      .join("ref_siasn.status_usul as rsu", "sp.status_usulan", "rsu.id")
+      .join(
         "rekon.unor as ru",
         knex.raw("sp.usulan_data->'data'->>'unor_id'"),
         "ru.id_siasn"
