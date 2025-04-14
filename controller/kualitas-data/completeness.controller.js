@@ -124,11 +124,11 @@ const countingNoHpKosong = async (opdId) => {
   return createCountingQuery(
     opdId,
     function () {
-      this.whereNull("siasn.nomor_hp")
-        .orWhere("siasn.nomor_hp", "")
-        .orWhereRaw(
-          "REGEXP_REPLACE(siasn.nomor_hp, '\\s+', '', 'g') !~ '^08[1-9][0-9]{7,10}$'"
-        );
+      this.whereNull("siasn.nomor_hp").orWhere("siasn.nomor_hp", "")
+        .orWhereRaw(`
+      REGEXP_REPLACE(siasn.nomor_hp, '\\s+', '', 'g') !~ 
+      '^(08[1-9][0-9]{7,10}|62[1-9][0-9]{7,11})$'
+    `);
     },
     "nomor_hp_invalid"
   );
@@ -486,11 +486,12 @@ export const noHpKosong = async (req, res) => {
     if (!validateOpd(res, opdId, skpd_id)) return;
 
     const noHpInvalidCondition = function () {
-      this.whereNull("siasn.nomor_hp")
-        .orWhere("siasn.nomor_hp", "")
-        .orWhereRaw(
-          "REGEXP_REPLACE(siasn.nomor_hp, '\\s+', '', 'g') !~ '^08[1-9][0-9]{7,10}$'"
-        );
+      this.whereNull("siasn.nomor_hp").orWhere("siasn.nomor_hp", "")
+        .orWhereRaw(`
+      REGEXP_REPLACE(siasn.nomor_hp, '\\s+', '', 'g') !~ 
+      '^(08[1-9][0-9]{7,10}|62[1-9][0-9]{7,11})$'
+    `);
+
       addSearchFilter(search, this);
     };
 
