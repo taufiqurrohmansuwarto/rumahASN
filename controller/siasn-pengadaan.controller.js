@@ -192,8 +192,7 @@ const proxyRekapPengadaan = async (req, res) => {
           "CASE WHEN ru.id_simaster IS NOT NULL THEN get_hierarchy_simaster(ru.id_simaster) ELSE NULL END as unor_simaster"
         ),
         "rsu.id as status_usulan_id",
-        "rsu.nama as status_usulan_nama",
-        "rsu.nama as nama_status_usulan"
+        "rsu.nama as status_usulan_nama"
       );
 
     // Menambahkan filter ke query
@@ -204,11 +203,12 @@ const proxyRekapPengadaan = async (req, res) => {
       baseQuery.where("sp.nip", "ilike", `%${nip}%`);
     }
     if (no_peserta) {
-      baseQuery.whereRaw("CAST(sp.usulan_data->>'data' AS TEXT) ILIKE ?", [
-        `%${no_peserta}%`,
-      ]);
+      baseQuery.whereRaw(
+        "CAST(sp.usulan_data->'data' AS JSONB)::TEXT ILIKE ?",
+        [`%${no_peserta}%`]
+      );
     }
-    // status_usulan 1,2
+    // Filter status_usulan jika ada
     if (status_usulan) {
       const statusArray = status_usulan.split(",").map(Number);
       baseQuery.whereIn("sp.status_usulan", statusArray);
@@ -229,9 +229,10 @@ const proxyRekapPengadaan = async (req, res) => {
             this.where("sp.nip", "ilike", `%${nip}%`);
           }
           if (no_peserta) {
-            this.whereRaw("CAST(sp.usulan_data->>'data' AS TEXT) ILIKE ?", [
-              `%${no_peserta}%`,
-            ]);
+            this.whereRaw(
+              "CAST(sp.usulan_data->'data' AS JSONB)::TEXT ILIKE ?",
+              [`%${no_peserta}%`]
+            );
           }
           if (status_usulan) {
             const statusArray = status_usulan.split(",").map(Number);
