@@ -201,7 +201,7 @@ const proxyRekapPengadaan = async (req, res) => {
       baseQuery.where("sp.nama", "ilike", `%${nama}%`);
     }
     if (nip) {
-      baseQuery.where("sp.nip", "like", `%${nip}%`);
+      baseQuery.where("sp.nip", "ilike", `%${nip}%`);
     }
     if (no_peserta) {
       baseQuery.whereRaw("CAST(sp.usulan_data->>'data' AS TEXT) ILIKE ?", [
@@ -226,7 +226,7 @@ const proxyRekapPengadaan = async (req, res) => {
             this.where("sp.nama", "ilike", `%${nama}%`);
           }
           if (nip) {
-            this.where("sp.nip", "like", `%${nip}%`);
+            this.where("sp.nip", "ilike", `%${nip}%`);
           }
           if (no_peserta) {
             this.whereRaw("CAST(sp.usulan_data->>'data' AS TEXT) ILIKE ?", [
