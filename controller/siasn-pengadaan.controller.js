@@ -177,8 +177,8 @@ const proxyRekapPengadaan = async (req, res) => {
     // Membuat query dasar untuk mengambil data berdasarkan periode/tahun
     const baseQuery = knex("siasn_pengadaan_proxy as sp")
       .where("sp.periode", tahun)
-      .join("ref_siasn.status_usul as rsu", "sp.status_usulan", "rsu.id")
-      .join(
+      .leftJoin("ref_siasn.status_usul as rsu", "sp.status_usulan", "rsu.id")
+      .leftJoin(
         "rekon.unor as ru",
         knex.raw("sp.usulan_data->'data'->>'unor_id'"),
         "ru.id_siasn"
@@ -193,56 +193,43 @@ const proxyRekapPengadaan = async (req, res) => {
         ),
         "rsu.id as status_usulan_id",
         "rsu.nama as status_usulan_nama"
-      );
+      )
+      .orderBy("sp.nama", "asc"); // Default ordering by created_at descending
 
-    // Menambahkan filter ke query
+    // Membuat subquery untuk menghitung total dengan filter yang sama persis
+    const subQuery = knex("siasn_pengadaan_proxy as sp").where(
+      "sp.periode",
+      tahun
+    );
+
+    // Menambahkan filter ke query utama dan subquery dengan cara yang sama
     if (nama) {
       baseQuery.where("sp.nama", "ilike", `%${nama}%`);
+      subQuery.where("sp.nama", "ilike", `%${nama}%`);
     }
     if (nip) {
       baseQuery.where("sp.nip", "ilike", `%${nip}%`);
+      subQuery.where("sp.nip", "ilike", `%${nip}%`);
     }
     if (no_peserta) {
+      const likePattern = `%${no_peserta}%`;
       baseQuery.whereRaw(
         "CAST(sp.usulan_data->'data' AS JSONB)::TEXT ILIKE ?",
-        [`%${no_peserta}%`]
+        [likePattern]
       );
+      subQuery.whereRaw("CAST(sp.usulan_data->'data' AS JSONB)::TEXT ILIKE ?", [
+        likePattern,
+      ]);
     }
     // Filter status_usulan jika ada
     if (status_usulan) {
       const statusArray = status_usulan.split(",").map(Number);
       baseQuery.whereIn("sp.status_usulan", statusArray);
+      subQuery.whereIn("sp.status_usulan", statusArray);
     }
 
-    // Membuat query untuk menghitung total data dengan filter yang sama
-    const countQuery = knex.count("* as total").from(
-      knex
-        .select("sp.id")
-        .from("siasn_pengadaan_proxy as sp")
-        .where("sp.periode", tahun)
-        .modify(function () {
-          // Menerapkan filter yang sama dengan baseQuery
-          if (nama) {
-            this.where("sp.nama", "ilike", `%${nama}%`);
-          }
-          if (nip) {
-            this.where("sp.nip", "ilike", `%${nip}%`);
-          }
-          if (no_peserta) {
-            this.whereRaw(
-              "CAST(sp.usulan_data->'data' AS JSONB)::TEXT ILIKE ?",
-              [`%${no_peserta}%`]
-            );
-          }
-          if (status_usulan) {
-            const statusArray = status_usulan.split(",").map(Number);
-            this.whereIn("sp.status_usulan", statusArray);
-          }
-        })
-        .as("count_query")
-    );
-
-    const totalResult = await countQuery.first();
+    // Menghitung total data dengan filter yang sama
+    const totalResult = await subQuery.count("* as total").first();
     const total = parseInt(totalResult.total);
 
     let dataResult;
