@@ -78,17 +78,13 @@ function LayananPengadaan() {
     mutationFn: () => syncPengadaanProxy(router?.query),
     onSuccess: () => {
       message.success("Data berhasil disinkronkan");
-      queryClient.invalidateQueries({
-        queryKey: ["daftar-pengadaan", router?.query],
-      });
+      queryClient.invalidateQueries("daftar-pengadaan-proxy");
     },
     onError: (error) => {
       message.error(error?.message || "Gagal menyinkronkan data");
     },
     onSettled: () => {
-      queryClient.invalidateQueries({
-        queryKey: ["daftar-pengadaan", router?.query],
-      });
+      queryClient.invalidateQueries("daftar-pengadaan-proxy");
     },
   });
 
@@ -104,7 +100,7 @@ function LayananPengadaan() {
   };
 
   const { data, isLoading, isFetching, refetch } = useQuery(
-    ["daftar-pengadaan", router?.query],
+    ["daftar-pengadaan-proxy", router?.query],
     () => getPengadaanProxy(router?.query),
     {
       keepPreviousData: true,
