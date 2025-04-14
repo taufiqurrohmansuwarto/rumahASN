@@ -1,3 +1,4 @@
+import BezzetingFungsional from "@/components/Bezzeting/BezzetingFungsional";
 import Features from "@/components/Features";
 import Footer from "@/components/Outer/Footer";
 import TombolLoginSimaster from "@/components/TombolLogin/TombolLoginSimaster";
@@ -122,6 +123,7 @@ const SignIn = ({ providers }) => {
       </Row>
       <Features title={title} description={description} />
       <UserRating />
+      <BezzetingFungsional />
       <Footer />
       <FloatButton.BackTop />
     </>
