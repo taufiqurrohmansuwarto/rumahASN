@@ -194,7 +194,7 @@ const proxyRekapPengadaan = async (req, res) => {
         "rsu.id as status_usulan_id",
         "rsu.nama as status_usulan_nama"
       )
-      .orderBy("sp.nama", "asc"); // Default ordering by created_at descending
+      .orderBy(knex.raw('sp.nama collate "C"'), "asc"); // Pengurutan berdasarkan nama dengan collation C
 
     // Membuat subquery untuk menghitung total dengan filter yang sama persis
     const subQuery = knex("siasn_pengadaan_proxy as sp").where(
