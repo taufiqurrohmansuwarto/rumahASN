@@ -179,7 +179,11 @@ const proxyRekapPengadaan = async (req, res) => {
       .where("sp.periode", tahun)
       .leftJoin("ref_siasn.status_usul as rsu", "sp.status_usulan", "rsu.id")
       .leftJoin(
-        "rekon.unor as ru",
+        knex.raw(`(
+          SELECT DISTINCT ON (id_siasn) id_siasn, id_simaster
+          FROM rekon.unor
+          ORDER BY id_siasn, id_simaster
+        ) as ru`),
         knex.raw("sp.usulan_data->'data'->>'unor_id'"),
         "ru.id_siasn"
       )
@@ -196,20 +200,12 @@ const proxyRekapPengadaan = async (req, res) => {
       )
       .orderBy(knex.raw('sp.nama collate "C"'), "asc"); // Pengurutan berdasarkan nama dengan collation C
 
-    // Membuat subquery untuk menghitung total dengan filter yang sama persis
-    const subQuery = knex("siasn_pengadaan_proxy as sp").where(
-      "sp.periode",
-      tahun
-    );
-
-    // Menambahkan filter ke query utama dan subquery dengan cara yang sama
+    // Menambahkan filter ke query
     if (nama) {
       baseQuery.where("sp.nama", "ilike", `%${nama}%`);
-      subQuery.where("sp.nama", "ilike", `%${nama}%`);
     }
     if (nip) {
       baseQuery.where("sp.nip", "ilike", `%${nip}%`);
-      subQuery.where("sp.nip", "ilike", `%${nip}%`);
     }
     if (no_peserta) {
       const likePattern = `%${no_peserta}%`;
@@ -217,19 +213,22 @@ const proxyRekapPengadaan = async (req, res) => {
         "CAST(sp.usulan_data->'data' AS JSONB)::TEXT ILIKE ?",
         [likePattern]
       );
-      subQuery.whereRaw("CAST(sp.usulan_data->'data' AS JSONB)::TEXT ILIKE ?", [
-        likePattern,
-      ]);
     }
+
     // Filter status_usulan jika ada
     if (status_usulan) {
       const statusArray = status_usulan.split(",").map(Number);
       baseQuery.whereIn("sp.status_usulan", statusArray);
-      subQuery.whereIn("sp.status_usulan", statusArray);
     }
 
-    // Menghitung total data dengan filter yang sama
-    const totalResult = await subQuery.count("* as total").first();
+    // Membuat clone dari query untuk menghitung total
+    const countQuery = baseQuery
+      .clone()
+      .clearSelect()
+      .clearOrder()
+      .count("* as total")
+      .first();
+    const totalResult = await countQuery;
     const total = parseInt(totalResult.total);
 
     let dataResult;
