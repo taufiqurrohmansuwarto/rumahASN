@@ -277,6 +277,93 @@ const proxyRekapPengadaan = async (req, res) => {
   }
 };
 
+const cekPertekByNomerPeserta = async (req, res) => {
+  try {
+    const knex = SiasnPengadaanProxy.knex();
+    const { no_peserta, nip, ket_kelakuanbaik_nomor, tahun } = req?.body;
+
+    // buat syarat untuk req?.body beserta format
+    if (!no_peserta || !nip || !ket_kelakuanbaik_nomor || !tahun) {
+      return res.status(400).json({
+        message: "Data tidak boleh kosong",
+      });
+    }
+
+    if (
+      typeof no_peserta !== "string" ||
+      typeof nip !== "string" ||
+      typeof ket_kelakuanbaik_nomor !== "string" ||
+      typeof tahun !== "string"
+    ) {
+      return res.status(400).json({
+        message: "Data harus berupa string",
+      });
+    }
+
+    const baseQuery = knex("siasn_pengadaan_proxy as sp")
+      .where("sp.periode", tahun)
+      .leftJoin("ref_siasn.status_usul as rsu", "sp.status_usulan", "rsu.id")
+      .leftJoin(
+        knex.raw(`(
+          SELECT DISTINCT ON (id_siasn) id_siasn, id_simaster
+          FROM rekon.unor
+          ORDER BY id_siasn, id_simaster
+        ) as ru`),
+        knex.raw("sp.usulan_data->'data'->>'unor_id'"),
+        "ru.id_siasn"
+      )
+      .select(
+        "sp.id",
+        "sp.nip",
+        "sp.nama",
+        "sp.path_ttd_pertek",
+        "sp.jenis_formasi_nama",
+        knex.raw("sp.usulan_data->'data'->>'no_peserta' as no_peserta"),
+        knex.raw(
+          "get_hierarchy_siasn(sp.usulan_data->'data'->>'unor_id') as unor_siasn"
+        ),
+        knex.raw(
+          "CASE WHEN ru.id_simaster IS NOT NULL THEN get_hierarchy_simaster(ru.id_simaster) ELSE NULL END as unor_simaster"
+        ),
+        "rsu.id as status_usulan_id",
+        "rsu.nama as status_usulan_nama"
+      )
+      .whereRaw("sp.usulan_data->'data'->>'no_peserta' = ?", [no_peserta])
+      .andWhereRaw("sp.nip = ?", [nip])
+      .andWhereRaw("sp.usulan_data->'data'->>'ket_kelakuanbaik_nomor' = ?", [
+        ket_kelakuanbaik_nomor,
+      ])
+      .limit(1);
+
+    const { siasnRequest: request } = req;
+
+    const result = await baseQuery;
+
+    if (result?.length) {
+      const url = result[0].path_ttd_pertek;
+
+      const file = await request.get(`/download-dok?filePath=${url}`, {
+        responseType: "arraybuffer",
+      });
+      const fileBuffer = Buffer.from(file.data, "binary");
+      const fileBase64 = fileBuffer.toString("base64");
+
+      const data = {
+        ...result[0],
+        file: fileBase64,
+      };
+
+      res.json(data);
+    } else {
+      res.status(404).json({
+        message: "Data tidak ditemukan",
+      });
+    }
+  } catch (error) {
+    handleError(res, error);
+  }
+};
+
 module.exports = {
   listPengadaanInstansi,
   listPengadaanDokumen,
@@ -286,4 +373,5 @@ module.exports = {
   dokumenPengadaan,
   proxyRekapPengadaan,
   syncPengadaanProxy,
+  cekPertekByNomerPeserta,
 };
