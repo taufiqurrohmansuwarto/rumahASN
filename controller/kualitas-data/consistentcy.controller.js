@@ -67,7 +67,7 @@ const countingTmtCpnsNipPNS = async (opdId) => {
     opdId,
     function () {
       this.whereRaw(
-        `TO_CHAR(siasn.tmt_cpns::date, 'YYYYMM') != SUBSTRING(siasn.nip_baru, 9, 6)`
+        `TO_CHAR(TO_DATE(siasn.tmt_cpns, 'DD-MM-YYYY'), 'YYYYMM') != SUBSTRING(siasn.nip_baru, 9, 6)`
       ).andWhereRaw(
         `siasn.kedudukan_hukum_id != '71' and siasn.kedudukan_hukum_id != '72'`
       );
@@ -81,7 +81,7 @@ const countingTglLahirNipASN = async (opdId) => {
     opdId,
     function () {
       this.whereRaw(
-        `TO_CHAR(siasn.tanggal_lahir::date, 'YYYYMMDD') != SUBSTRING(siasn.nip_baru, 1, 8)`
+        `TO_CHAR(TO_DATE(siasn.tanggal_lahir, 'DD-MM-YYYY'), 'YYYYMMDD') != SUBSTRING(siasn.nip_baru, 1, 8)`
       );
     },
     "tgl_lahir_nip_asn"
@@ -93,7 +93,7 @@ const countingTahunPengangkatanPPPK = async (opdId) => {
     opdId,
     function () {
       this.whereRaw(
-        `TO_CHAR(siasn.tmt_cpns::date, 'YYYY') != SUBSTRING(siasn.nip_baru, 9, 4)`
+        `TO_CHAR(TO_DATE(siasn.tmt_cpns, 'DD-MM-YYYY'), 'YYYY') != SUBSTRING(siasn.nip_baru, 9, 4)`
       ).andWhereRaw(
         `siasn.kedudukan_hukum_id = '71' or siasn.kedudukan_hukum_id = '72'`
       );
@@ -193,7 +193,7 @@ export const tmtCpnsNipPNS = async (req, res) => {
       skpd_id,
       function () {
         this.whereRaw(
-          `TO_CHAR(siasn.tmt_cpns::date, 'YYYYMM') != SUBSTRING(siasn.nip_baru, 9, 6)`
+          `TO_CHAR(TO_DATE(siasn.tmt_cpns, 'DD-MM-YYYY'), 'YYYYMM') != SUBSTRING(siasn.nip_baru, 9, 6)`
         ).andWhereRaw(
           `siasn.kedudukan_hukum_id != '71' and siasn.kedudukan_hukum_id != '72'`
         );
@@ -206,7 +206,7 @@ export const tmtCpnsNipPNS = async (req, res) => {
       skpd_id,
       function () {
         this.whereRaw(
-          `TO_CHAR(siasn.tmt_cpns::date, 'YYYYMM') != SUBSTRING(siasn.nip_baru, 9, 6)`
+          `TO_CHAR(TO_DATE(siasn.tmt_cpns, 'DD-MM-YYYY'), 'YYYYMM') != SUBSTRING(siasn.nip_baru, 9, 6)`
         ).andWhereRaw(
           `siasn.kedudukan_hukum_id != '71' and siasn.kedudukan_hukum_id != '72'`
         );
@@ -242,7 +242,7 @@ export const tglLahirNipASN = async (req, res) => {
       skpd_id,
       function () {
         this.whereRaw(
-          `TO_CHAR(siasn.tanggal_lahir::date, 'YYYYMMDD') != SUBSTRING(siasn.nip_baru, 1, 8)`
+          `TO_CHAR(TO_DATE(siasn.tanggal_lahir, 'DD-MM-YYYY'), 'YYYYMMDD') != SUBSTRING(siasn.nip_baru, 1, 8)`
         );
       },
       "total"
@@ -263,7 +263,7 @@ export const tahunPengangkatanPPPK = async (req, res) => {
       skpd_id,
       function () {
         this.whereRaw(
-          `TO_CHAR(siasn.tmt_cpns::date, 'YYYY') != SUBSTRING(siasn.nip_baru, 9, 4)`
+          `TO_CHAR(TO_DATE(siasn.tmt_cpns, 'DD-MM-YYYY'), 'YYYY') != SUBSTRING(siasn.nip_baru, 9, 4)`
         );
       },
       limit,
@@ -274,7 +274,7 @@ export const tahunPengangkatanPPPK = async (req, res) => {
       skpd_id,
       function () {
         this.whereRaw(
-          `TO_CHAR(siasn.tmt_cpns::date, 'YYYY') != SUBSTRING(siasn.nip_baru, 9, 4)`
+          `TO_CHAR(TO_DATE(siasn.tmt_cpns, 'DD-MM-YYYY'), 'YYYY') != SUBSTRING(siasn.nip_baru, 9, 4)`
         );
       },
       "total"
