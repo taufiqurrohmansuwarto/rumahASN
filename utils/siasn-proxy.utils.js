@@ -1,6 +1,22 @@
 // base url for proxy
 const BASE_URL = `/siasn-ws/proxy/pns`;
 
+const { default: axios } = require("axios");
+
+const api = axios.create({
+  baseURL: "https://siasn.bkd.jatimprov.go.id/pemprov-api",
+});
+
+module.exports.getFileAsn = async (filePath) => {
+  const response = await api.get(
+    `/vendor/download-file-asn?file_path=${filePath}`,
+    {
+      responseType: "arraybuffer",
+    }
+  );
+  return response.data;
+};
+
 module.exports.proxyDownloadFoto = async (fetcher, nip) => {
   return fetcher.get(`${BASE_URL}/foto/${nip}`, {
     responseType: "arraybuffer",
