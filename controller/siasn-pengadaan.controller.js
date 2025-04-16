@@ -11,9 +11,13 @@ require("dayjs/locale/id");
 const SiasnPengadaan = require("@/models/siasn-pengadaan.model");
 const SiasnPengadaanProxy = require("@/models/siasn-pengadaan-proxy.model");
 const { uploadDokumenSiasnToMinio } = require("../utils");
+
 const { upperCase, trim } = require("lodash");
 const { handleError } = require("@/utils/helper/controller-helper");
-const { proxyLayananRekapPengadaan } = require("@/utils/siasn-proxy.utils");
+const {
+  proxyLayananRekapPengadaan,
+  getFileAsn,
+} = require("@/utils/siasn-proxy.utils");
 
 const syncPengadaan = async (req, res) => {
   const knex = SiasnPengadaan.knex();
@@ -335,18 +339,13 @@ const cekPertekByNomerPeserta = async (req, res) => {
       ])
       .limit(1);
 
-    const { siasnRequest: request } = req;
-
     const result = await baseQuery;
 
     if (result?.length) {
       const url = result[0].path_ttd_pertek;
 
-      const file = await request.get(`/download-dok?filePath=${url}`, {
-        responseType: "arraybuffer",
-      });
-      const fileBuffer = Buffer.from(file.data, "binary");
-      const fileBase64 = fileBuffer.toString("base64");
+      const file = await getFileAsn(url);
+      const fileBase64 = file.toString("base64");
 
       const data = {
         ...result[0],
