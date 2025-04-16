@@ -278,16 +278,19 @@ function LayananPengadaan() {
   };
 
   const handleChangePage = ({ current, pageSize }) => {
-    setQuery({
-      tahun: router?.query?.tahun,
+    const updatedQuery = {
+      ...router?.query,
       page: current,
       limit: pageSize,
-    });
+    };
+
+    setQuery(updatedQuery);
     router.push({
       pathname: "/layanan-siasn/pengadaan",
-      query: { tahun: router?.query?.tahun, page: current, limit: pageSize },
+      query: updatedQuery,
     });
   };
+
   const gotoDetail = (row) => {
     router.push(`/apps-managements/integrasi/siasn/${row.nip}`);
   };
