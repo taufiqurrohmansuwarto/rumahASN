@@ -1,6 +1,7 @@
 import Layout from "@/components/Layout";
 import PageContainer from "@/components/PageContainer";
 import UserPolls from "@/components/Polls/UserPolls";
+import CekPertek from "@/components/Public/CekPertek";
 import UserQuiz from "@/components/Quiz/UserQuiz";
 import ShowRatings from "@/components/ShowRatings";
 import TicketsPublish from "@/components/Ticket/TicketsPublish";
@@ -60,6 +61,7 @@ function Feeds() {
             style={{
               marginTop: 14,
             }}
+            extra={<CekPertek />}
           >
             <Stack>
               <TicketsPublish />
