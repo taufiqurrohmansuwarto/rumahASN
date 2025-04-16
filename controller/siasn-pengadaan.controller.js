@@ -11,7 +11,7 @@ require("dayjs/locale/id");
 const SiasnPengadaan = require("@/models/siasn-pengadaan.model");
 const SiasnPengadaanProxy = require("@/models/siasn-pengadaan-proxy.model");
 const { uploadDokumenSiasnToMinio } = require("../utils");
-const { upperCase } = require("lodash");
+const { upperCase, trim } = require("lodash");
 const { handleError } = require("@/utils/helper/controller-helper");
 const { proxyLayananRekapPengadaan } = require("@/utils/siasn-proxy.utils");
 
@@ -328,10 +328,10 @@ const cekPertekByNomerPeserta = async (req, res) => {
         "rsu.id as status_usulan_id",
         "rsu.nama as status_usulan_nama"
       )
-      .whereRaw("sp.usulan_data->'data'->>'no_peserta' = ?", [no_peserta])
+      .whereRaw("sp.usulan_data->'data'->>'no_peserta' = ?", [trim(no_peserta)])
       .andWhereRaw("sp.nip = ?", [nip])
       .andWhereRaw("sp.usulan_data->'data'->>'ket_kelakuanbaik_nomor' = ?", [
-        ket_kelakuanbaik_nomor,
+        trim(ket_kelakuanbaik_nomor),
       ])
       .limit(1);
 

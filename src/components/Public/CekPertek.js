@@ -108,6 +108,7 @@ const ModalCekPertek = ({ open, onCancel }) => {
           <Col span={12}>
             <Form.Item
               rules={[{ required: true, message: "No Peserta harus diisi" }]}
+              normalize={(values) => values.replace(/\s/g, "")}
               name="no_peserta"
               label="No Peserta"
               style={{ marginBottom: 16 }}
@@ -118,6 +119,7 @@ const ModalCekPertek = ({ open, onCancel }) => {
 
           <Col span={12}>
             <Form.Item
+              normalize={(values) => values.replace(/\s/g, "")}
               rules={[{ required: true, message: "NIP harus diisi" }]}
               name="nip"
               label="NIP"
