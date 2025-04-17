@@ -764,3 +764,16 @@ export const syncPengadaanProxy = async (query) => {
     .get(`/admin/pengadaan/proxy/sync?${queryString.stringify(query)}`)
     .then((res) => res.data);
 };
+
+export const getListMfa = async (query) => {
+  const currentQuery = queryString.stringify(query, {
+    skipEmptyString: true,
+    skipNull: true,
+  });
+
+  return api.get(`/mfa?${currentQuery}`).then((res) => res.data);
+};
+
+export const syncMfa = async () => {
+  return api.get(`/mfa/sync`).then((res) => res.data);
+};

@@ -5,6 +5,7 @@ import RekonLayananPensiun from "./RekonLayananPensiun";
 import { FloatButton } from "antd";
 import useScrollRestoration from "@/hooks/useScrollRestoration";
 import RekonPG from "./RekonPG";
+import RekonMFA from "./RekonMFA";
 
 function RekonDashboardDetail() {
   useScrollRestoration();
@@ -12,6 +13,7 @@ function RekonDashboardDetail() {
   return (
     <Stack>
       <FloatButton.BackTop />
+      <RekonMFA />
       <RekonLayananPangkat />
       <RekonLayananPensiun />
       <RekonIPASN />
