@@ -323,6 +323,15 @@ const cekPertekByNomerPeserta = async (req, res) => {
         "sp.path_ttd_pertek",
         "sp.jenis_formasi_nama",
         knex.raw("sp.usulan_data->'data'->>'no_peserta' as no_peserta"),
+        knex.raw("sp.usulan_data->'data'->>'tempat_lahir' as tempat_lahir"),
+        knex.raw("sp.usulan_data->'data'->>'tgl_lahir' as tgl_lahir"),
+        knex.raw(
+          "sp.usulan_data->'data'->>'pendidikan_ijazah_nama' as pendidikan_ijazah_nama"
+        ),
+        knex.raw(
+          "sp.usulan_data->'data'->>'pendidikan_pertama_nama' as pendidikan_pertama_nama"
+        ),
+        knex.raw("sp.usulan_data->'data'->>'golongan_nama' as golongan_nama"),
         knex.raw(
           "get_hierarchy_siasn(sp.usulan_data->'data'->>'unor_id') as unor_siasn"
         ),
