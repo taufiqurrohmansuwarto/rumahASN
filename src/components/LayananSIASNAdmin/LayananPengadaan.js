@@ -2,11 +2,13 @@ import useScrollRestoration from "@/hooks/useScrollRestoration";
 import {
   getPengadaanProxy,
   refStatusUsul,
+  syncPengadaan,
   syncPengadaanProxy,
 } from "@/services/siasn-services";
 import { clearQuery } from "@/utils/client-utils";
 import {
   CloudDownloadOutlined,
+  FileExcelOutlined,
   FilePdfOutlined,
   FilterOutlined,
   SearchOutlined,
@@ -30,7 +32,9 @@ import dayjs from "dayjs";
 import { useRouter } from "next/router";
 import { useState } from "react";
 import * as XLSX from "xlsx";
+import ExcelJS from "exceljs";
 import { saveAs } from "file-saver";
+import { trim } from "lodash";
 
 const formatYear = "YYYY";
 const PAGE_SIZE = 25;
@@ -51,6 +55,141 @@ function LayananPengadaan() {
       message.error(error?.message || "Gagal mengunduh data");
     },
   });
+
+  const jenisJabatan = (data) => {
+    if (data?.jenis_jabatan_id === 2) {
+      return `${trim(data?.jabatan_fungsional_nama)} ${
+        data?.sub_jabatan_fungsional_nama
+      }`;
+    } else if (data?.jenis_jabatan_id === 4) {
+      return data?.jabatan_fungsional_umum_nama;
+    } else {
+      return "";
+    }
+  };
+
+  const handleDownloadWithExcelJS = async () => {
+    try {
+      const data = await download();
+      const workbook = new ExcelJS.Workbook();
+      const worksheet = workbook.addWorksheet("Data Pengadaan");
+
+      // Menambahkan header dengan format yang lebih baik
+      const headers = [
+        "NIP",
+        "Nama Lengkap",
+        "Gelar Depan",
+        "Gelar Belakang",
+        "Nama Lengkap (Gelar)",
+        "Tanggal Lahir",
+        "Tempat Lahir",
+        "Gaji",
+        "Nomor Peserta",
+        "Periode",
+        "Jenis Formasi",
+        "Pendidikan",
+        "Tanggal Lulus",
+        "TMT CPNS",
+        "Pangkat/Golongan",
+        "Unit Kerja SIASN",
+        "Unit Kerja SIMASTER",
+        "Unor Pertek",
+        "Nomer Pertek",
+        "Tanggal Pertek",
+        "Jabatan",
+        "Status Usulan",
+      ];
+
+      // Menambahkan header ke worksheet
+      const headerRow = worksheet.addRow(headers);
+
+      // Mempercantik header
+      headerRow.eachCell((cell) => {
+        cell.font = { bold: true, size: 12 };
+        cell.fill = {
+          type: "pattern",
+          pattern: "solid",
+          fgColor: { argb: "FFD3D3D3" },
+        };
+        cell.border = {
+          top: { style: "thin" },
+          left: { style: "thin" },
+          bottom: { style: "thin" },
+          right: { style: "thin" },
+        };
+        cell.alignment = {
+          vertical: "middle",
+          horizontal: "center",
+          wrapText: true,
+        };
+      });
+
+      // Mengatur lebar kolom agar lebih optimal
+      worksheet.columns = headers.map((header) => ({
+        header,
+        width:
+          header === "Nama Lengkap"
+            ? 25
+            : header === "Pendidikan"
+            ? 30
+            : header === "Jenis Formasi"
+            ? 20
+            : 15,
+      }));
+
+      // Menambahkan data
+      data?.data?.forEach((row) => {
+        const dataRow = worksheet.addRow([
+          row.nip,
+          row.nama,
+          row?.usulan_data?.data?.glr_depan,
+          row?.usulan_data?.data?.glr_belakang,
+          trim(
+            `${row?.usulan_data?.data?.glr_depan || ""} ${row?.nama || ""} ${
+              row?.usulan_data?.data?.glr_belakang || ""
+            }`
+          ),
+          row?.usulan_data?.data?.tgl_lahir,
+          row?.usulan_data?.data?.tempat_lahir,
+          row?.usulan_data?.data?.gaji_pokok,
+          row?.usulan_data?.data?.no_peserta,
+          row.periode,
+          row.jenis_formasi_nama,
+          row?.usulan_data?.data?.pendidikan_pertama_nama,
+          row?.usulan_data?.data?.tgl_tahun_lulus,
+          row?.usulan_data?.data?.tmt_cpns,
+          row?.usulan_data?.data?.golongan_nama,
+          row?.unor_siasn,
+          row?.unor_simaster,
+          `${row?.usulan_data?.data?.unor_nama} - ${row?.usulan_data?.data?.unor_induk_nama}`,
+          row?.no_pertek,
+          row?.tgl_pertek ? dayjs(row?.tgl_pertek).format("DD-MM-YYYY") : "-",
+          jenisJabatan(row?.usulan_data?.data),
+          row.status_usulan_nama.nama,
+        ]);
+
+        // Menambahkan border untuk setiap sel data
+        dataRow.eachCell((cell) => {
+          cell.border = {
+            top: { style: "thin" },
+            left: { style: "thin" },
+            bottom: { style: "thin" },
+            right: { style: "thin" },
+          };
+        });
+      });
+
+      // Membuat buffer dan menyimpan file
+      const excelBuffer = await workbook.xlsx.writeBuffer();
+      const fileName = `Data_Pengadaan_${
+        router?.query?.tahun || dayjs().format(formatYear)
+      }.xlsx`;
+
+      saveAs(new Blob([excelBuffer]), fileName);
+    } catch (error) {
+      message.error("Error");
+    }
+  };
 
   const handleDownload = async () => {
     const data = await download();
@@ -74,7 +213,7 @@ function LayananPengadaan() {
     limit: PAGE_SIZE,
   });
 
-  const { mutate: sync, isLoading: isSyncing } = useMutation({
+  const { mutate: syncProxy, isLoading: isSyncingProxy } = useMutation({
     mutationFn: () => syncPengadaanProxy(router?.query),
     onSuccess: () => {
       message.success("Data berhasil disinkronkan");
@@ -85,6 +224,17 @@ function LayananPengadaan() {
     },
     onSettled: () => {
       queryClient.invalidateQueries("daftar-pengadaan-proxy");
+    },
+  });
+
+  const { mutate: sync, isLoading: isSyncing } = useMutation({
+    mutationFn: () => syncPengadaan(router?.query),
+    onSuccess: () => {
+      message.success("Data berhasil disinkronkan");
+      queryClient.invalidateQueries("daftar-pengadaan");
+    },
+    onError: (error) => {
+      message.error(error?.message || "Gagal menyinkronkan data");
     },
   });
 
@@ -472,15 +622,28 @@ function LayananPengadaan() {
 
       <div style={{ marginBottom: 16, marginTop: 16 }}>
         <Space>
-          <Button type="primary" loading={isSyncing} onClick={() => sync()}>
+          <Button
+            type="primary"
+            loading={isSyncingProxy}
+            onClick={() => syncProxy()}
+          >
+            Sinkronisasi Proxy
+          </Button>
+          <Button
+            disabled
+            type="primary"
+            loading={isSyncing}
+            onClick={() => sync()}
+          >
             Sinkronisasi
           </Button>
           <Button
-            icon={<CloudDownloadOutlined />}
+            type="primary"
+            icon={<FileExcelOutlined />}
             loading={isDownloading}
-            onClick={handleDownload}
+            onClick={handleDownloadWithExcelJS}
           >
-            Unduh Data
+            Ekspor
           </Button>
         </Space>
       </div>
