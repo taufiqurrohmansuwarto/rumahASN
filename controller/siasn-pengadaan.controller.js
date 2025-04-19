@@ -3,6 +3,8 @@ const {
   daftarPengadaanDokumen,
   downloadDokumenAPI,
 } = require("@/utils/siasn-utils");
+const { z } = require("zod");
+const archiver = require("archiver");
 
 const dayjs = require("dayjs");
 dayjs.locale("id");
@@ -10,7 +12,12 @@ require("dayjs/locale/id");
 
 const SiasnPengadaan = require("@/models/siasn-pengadaan.model");
 const SiasnPengadaanProxy = require("@/models/siasn-pengadaan-proxy.model");
-const { uploadDokumenSiasnToMinio } = require("../utils");
+const SiasnDownload = require("@/models/siasn-download.model");
+const {
+  uploadDokumenSiasnToMinio,
+  uploadMinioWithFolder,
+  downloadDokumenSK,
+} = require("../utils");
 
 const { upperCase, trim } = require("lodash");
 const { handleError } = require("@/utils/helper/controller-helper");
@@ -372,7 +379,196 @@ const cekPertekByNomerPeserta = async (req, res) => {
   }
 };
 
+const downloadDokumenPengadaan = async (req, res) => {
+  try {
+    const { mc } = req;
+    const querySchema = z.object({
+      tahun: z.string().optional().default(dayjs().format("YYYY")),
+      type: z.string().optional().default("pertek"),
+    });
+
+    try {
+      const { tahun, type } = querySchema.parse(req.query);
+      const knex = SiasnPengadaan.knex();
+
+      // Ambil data pengadaan dari database
+      const dataPengadaan = await fetchDataPengadaan(knex, tahun);
+
+      if (!dataPengadaan?.length) {
+        return res.json([]);
+      }
+
+      // Siapkan payload untuk upload
+      const payload = preparePayloadForUpload(dataPengadaan, type);
+
+      // Proses upload dokumen ke Minio satu persatu
+      const hasilUpload = [];
+      for (const item of payload) {
+        try {
+          await uploadDokumenToMinio(mc, item);
+          console.log(`Berhasil mengupload dokumen: ${item.nama_file}`);
+
+          await SiasnDownload.query().insert({
+            siasn_layanan: "pengadaan",
+            siasn_layanan_id: item.siasn_layanan_id,
+            nama_file: item.nama_file,
+          });
+
+          hasilUpload.push({
+            ...item,
+            status: "success",
+            message: "Berhasil diupload",
+          });
+        } catch (error) {
+          console.error(`Gagal mengupload dokumen: ${item.nama_file}`, error);
+          hasilUpload.push({
+            ...item,
+            status: "failed",
+            message: "Gagal diupload",
+          });
+        }
+      }
+
+      res.json(hasilUpload);
+    } catch (zodError) {
+      if (zodError instanceof z.ZodError) {
+        return res.status(400).json({
+          message: "Parameter tidak valid",
+          errors: zodError.errors,
+        });
+      }
+      throw zodError;
+    }
+
+    // Fungsi untuk mengambil data pengadaan
+    function fetchDataPengadaan(knex, tahun) {
+      return knex("siasn_pengadaan_proxy as sp")
+        .select(
+          "sp.id as siasn_layanan_id",
+          "sp.nip as nip",
+          "sp.path_ttd_pertek as path_ttd_pertek",
+          knex.raw("sp.usulan_data->'data'->>'tmt_cpns' as tmt")
+        )
+        .leftJoin("siasn_download as sd", function () {
+          this.on("sp.id", "=", "sd.siasn_layanan_id").andOn(
+            "sd.siasn_layanan",
+            "=",
+            knex.raw("'pengadaan'")
+          );
+        })
+        .whereNull("sd.id")
+        .andWhere("sp.periode", tahun)
+        .andWhereNot("sp.nip", "")
+        .andWhere("sp.path_ttd_pertek", "!=", "");
+    }
+
+    // Fungsi untuk menyiapkan payload
+    function preparePayloadForUpload(dataPengadaan, type) {
+      return dataPengadaan.map((item) => ({
+        siasn_layanan: "pengadaan",
+        siasn_layanan_id: item.siasn_layanan_id,
+        path: item.path_ttd_pertek,
+        nama_file: `${type.toUpperCase()}_${dayjs(item.tmt).format(
+          "DDMMYYYY"
+        )}_${item.nip}.pdf`,
+      }));
+    }
+
+    // Fungsi untuk upload dokumen ke Minio
+    async function uploadDokumenToMinio(mc, item) {
+      const file = await getFileAsn(item.path);
+      const fileBase64 = file.toString("base64");
+      await uploadMinioWithFolder(
+        mc,
+        `sk_pns/${item?.nama_file}`,
+        fileBase64,
+        "bkd"
+      );
+    }
+  } catch (error) {
+    handleError(res, error);
+  }
+};
+
+const downloadAllDokumenPengadaan = async (req, res) => {
+  try {
+    // Ambil objek Minio client dan koneksi database
+    const { mc } = req;
+    const knex = SiasnPengadaan.knex();
+
+    // Ambil parameter tahun dari query, default ke tahun sekarang
+    const { tahun = dayjs().format("YYYY") } = req.query;
+
+    // Ambil data dokumen pengadaan dari database
+    // Join tabel siasn_download dengan siasn_pengadaan_proxy untuk mendapatkan informasi lengkap
+    const data = await knex("siasn_download as sd")
+      .select(
+        "sp.id as siasn_layanan_id",
+        "sp.nip",
+        "sp.path_ttd_pertek",
+        "sd.nama_file",
+        knex.raw("sp.usulan_data->'data'->>'tmt_cpns' as tmt")
+      )
+      .join("siasn_pengadaan_proxy as sp", function () {
+        this.on("sd.siasn_layanan_id", "=", "sp.id").andOn(
+          "sd.siasn_layanan",
+          "=",
+          knex.raw("'pengadaan'")
+        );
+      })
+      .where("sp.periode", tahun);
+
+    // Jika tidak ada data, kembalikan array kosong
+    if (!data?.length) {
+      return res.json([]);
+    } else {
+      console.log("kesini");
+      // Buat arsip ZIP dengan kompresi level 9 (maksimum)
+      const archive = archiver("zip", { zlib: { level: 9 } });
+
+      // Tangani peringatan dan error pada proses pembuatan arsip
+      archive.on("warning", (err) => console.warn(err));
+      archive.on("error", (err) =>
+        res.status(500).send({ error: err.message })
+      );
+
+      // Atur header respons untuk download file
+      res.setHeader(
+        "Content-Disposition",
+        `attachment; filename="dokumen_pengadaan_${tahun}.zip"`
+      );
+      res.setHeader("Content-Type", "application/zip");
+
+      // Hubungkan arsip ke response stream
+      archive.pipe(res);
+
+      // Tambahkan setiap file ke dalam arsip
+      for (const item of data) {
+        try {
+          const filename = `${item.nama_file}`;
+          const stream = await downloadDokumenSK(mc, filename);
+          archive.append(stream, { name: filename });
+        } catch (err) {
+          if (err.code === "NoSuchKey") {
+            console.log(`${item.nama_file} tidak ditemukan, dilewati.`);
+            continue;
+          } else {
+            console.error(`Gagal mengunduh ${item.nama_file}:`, err);
+          }
+        }
+      }
+
+      // Finalisasi arsip dan kirim ke client
+      archive.finalize();
+    }
+  } catch (error) {
+    handleError(res, error);
+  }
+};
+
 module.exports = {
+  downloadDokumenPengadaan,
+  downloadAllDokumenPengadaan,
   listPengadaanInstansi,
   listPengadaanDokumen,
   downloadDokumen,
