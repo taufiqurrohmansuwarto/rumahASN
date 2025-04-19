@@ -1,16 +1,23 @@
 import useScrollRestoration from "@/hooks/useScrollRestoration";
 import {
+  downloadAllDokumenPengadaanProxy,
   getPengadaanProxy,
   refStatusUsul,
+  resetUploadDokumenPengadaanProxy,
   syncPengadaan,
   syncPengadaanProxy,
+  uploadDokumenPengadaanProxy,
 } from "@/services/siasn-services";
 import { clearQuery } from "@/utils/client-utils";
 import {
   CloudDownloadOutlined,
+  CloudUploadOutlined,
+  DatabaseOutlined,
+  DownOutlined,
   FileExcelOutlined,
   FilePdfOutlined,
   FilterOutlined,
+  ReloadOutlined,
   SearchOutlined,
 } from "@ant-design/icons";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -18,9 +25,12 @@ import {
   Button,
   Card,
   DatePicker,
+  Divider,
+  Dropdown,
   Form,
   Input,
   message,
+  Modal,
   Select,
   Space,
   Table,
@@ -29,15 +39,148 @@ import {
   Typography,
 } from "antd";
 import dayjs from "dayjs";
-import { useRouter } from "next/router";
-import { useState } from "react";
-import * as XLSX from "xlsx";
 import ExcelJS from "exceljs";
 import { saveAs } from "file-saver";
 import { trim } from "lodash";
+import { useRouter } from "next/router";
+import { useState } from "react";
+import * as XLSX from "xlsx";
 
 const formatYear = "YYYY";
 const PAGE_SIZE = 25;
+
+const ResetButton = ({ id, type }) => {
+  const router = useRouter();
+  const { mutate: resetUploadDokumen, isLoading: isResettingUploadDokumen } =
+    useMutation((data) => resetUploadDokumenPengadaanProxy(data), {
+      onSuccess: () => {
+        message.success("Data berhasil direset");
+      },
+      onError: (error) => {
+        message.error(error?.message || "Gagal mereset data");
+      },
+    });
+
+  return (
+    <Button
+      type="primary"
+      icon={<CloudUploadOutlined />}
+      loading={isResettingUploadDokumen}
+      onClick={() =>
+        resetUploadDokumen({
+          id,
+          query: { tahun: router?.query?.tahun, type },
+        })
+      }
+    >
+      {type === "pertek" ? "Pertek" : "SK"}
+    </Button>
+  );
+};
+
+const UnduhSemuaDokumen = () => {
+  const router = useRouter();
+  const { mutateAsync: downloadAll, isLoading: isDownloadingAll } = useMutation(
+    (data) => downloadAllDokumenPengadaanProxy(data),
+    {
+      onSuccess: () => {
+        message.success("Data berhasil diunduh");
+      },
+      onError: (error) => {
+        message.error(error?.message || "Gagal mengunduh data");
+      },
+    }
+  );
+
+  const handleDownload = (selectedType) => {
+    Modal.confirm({
+      title: `Unduh Semua ${selectedType === "pertek" ? "Pertek" : "SK"}`,
+      content: "Apakah anda yakin ingin mengunduh semua dokumen?",
+      onOk: async () => {
+        const result = await downloadAll({
+          tahun: router?.query?.tahun || dayjs().format(formatYear),
+          type: selectedType,
+        });
+        saveAs(
+          result,
+          `Dokumen ${selectedType === "pertek" ? "Pertek" : "SK"}-${
+            router?.query?.tahun || dayjs().format(formatYear)
+          }.zip`
+        );
+      },
+    });
+  };
+
+  const items = [
+    {
+      key: "1",
+      label: "Pertek",
+      onClick: () => handleDownload("pertek"),
+    },
+    {
+      key: "2",
+      label: "SK",
+      onClick: () => handleDownload("sk"),
+    },
+  ];
+
+  return (
+    <Dropdown menu={{ items }} placement="bottomRight">
+      <Button icon={<CloudDownloadOutlined />} loading={isDownloadingAll}>
+        Unduh Semua <DownOutlined />
+      </Button>
+    </Dropdown>
+  );
+};
+
+const AmbilSemuaDokumen = () => {
+  const router = useRouter();
+  const { mutateAsync: uploadAll, isLoading: isUploadingAll } = useMutation(
+    (data) => uploadDokumenPengadaanProxy(data),
+    {
+      onSuccess: () => {
+        message.success("Data berhasil diambil");
+      },
+      onError: (error) => {
+        message.error(error?.message || "Gagal mengambil data");
+      },
+    }
+  );
+
+  const handleDownload = (selectedType) => {
+    Modal.confirm({
+      title: `Ambil Semua ${selectedType === "pertek" ? "Pertek" : "SK"}`,
+      content: "Apakah anda yakin ingin mengambil semua dokumen?",
+      onOk: async () => {
+        await uploadAll({
+          tahun: router?.query?.tahun || dayjs().format(formatYear),
+          type: selectedType,
+        });
+      },
+    });
+  };
+
+  const items = [
+    {
+      key: "1",
+      label: "Pertek",
+      onClick: () => handleDownload("pertek"),
+    },
+    {
+      key: "2",
+      label: "SK",
+      onClick: () => handleDownload("sk"),
+    },
+  ];
+
+  return (
+    <Dropdown menu={{ items }} placement="bottomRight">
+      <Button icon={<CloudUploadOutlined />} loading={isUploadingAll}>
+        Ambil Semua <DownOutlined />
+      </Button>
+    </Dropdown>
+  );
+};
 
 function LayananPengadaan() {
   const router = useRouter();
@@ -67,6 +210,27 @@ function LayananPengadaan() {
       return "";
     }
   };
+
+  // unduh semua dokumen berdasarkan tahun per layanna (pengadaan)
+  const { mutateAsync: downloadAll, isLoading: isDownloadingAll } = useMutation(
+    {
+      mutationFn: () =>
+        downloadAllDokumenPengadaanProxy({
+          tahun: router?.query?.tahun || dayjs().format(formatYear),
+        }),
+    }
+  );
+
+  // ambil semua dokumen berdasarkan tahun ke minio
+  const {
+    mutateAsync: uploadDokumenPengadaan,
+    isLoading: isUploadingDokumenPengadaan,
+  } = useMutation({
+    mutationFn: () =>
+      uploadDokumenPengadaanProxy({
+        tahun: router?.query?.tahun || dayjs().format(formatYear),
+      }),
+  });
 
   const handleDownloadWithExcelJS = async () => {
     try {
@@ -213,7 +377,7 @@ function LayananPengadaan() {
     limit: PAGE_SIZE,
   });
 
-  const { mutate: syncProxy, isLoading: isSyncingProxy } = useMutation({
+  const { mutateAsync: syncProxy, isLoading: isSyncingProxy } = useMutation({
     mutationFn: () => syncPengadaanProxy(router?.query),
     onSuccess: () => {
       message.success("Data berhasil disinkronkan");
@@ -441,10 +605,6 @@ function LayananPengadaan() {
     });
   };
 
-  const gotoDetail = (row) => {
-    router.push(`/apps-managements/integrasi/siasn/${row.nip}`);
-  };
-
   const columns = [
     {
       title: "Informasi",
@@ -596,7 +756,13 @@ function LayananPengadaan() {
       title: "Aksi",
       key: "aksi",
       render: (row) => {
-        return <a onClick={() => gotoDetail(row)}>Detail</a>;
+        return (
+          <Space>
+            {row?.path_ttd_pertek && <ResetButton id={row?.id} type="pertek" />}
+            <Divider orientation="vertical" />
+            {row?.path_ttd_sk && <ResetButton id={row?.id} type="sk" />}
+          </Space>
+        );
       },
       responsive: ["sm"],
     },
@@ -614,8 +780,30 @@ function LayananPengadaan() {
           />
         </Form.Item>
         <Form.Item>
-          <Button loading={isFetching} onClick={reload}>
-            Reload
+          <Button
+            icon={<ReloadOutlined />}
+            loading={isFetching}
+            onClick={reload}
+          >
+            Reset Filter
+          </Button>
+        </Form.Item>
+        <Form.Item>
+          <Button
+            type="primary"
+            icon={<DatabaseOutlined />}
+            loading={isSyncingProxy}
+            onClick={() => {
+              Modal.confirm({
+                title: "Sinkron Data SIASN",
+                content: "Apakah anda yakin ingin sinkron data SIASN?",
+                onOk: async () => {
+                  await syncProxy();
+                },
+              });
+            }}
+          >
+            Sinkro SIASN
           </Button>
         </Form.Item>
       </Form>
@@ -624,27 +812,14 @@ function LayananPengadaan() {
         <Space>
           <Button
             type="primary"
-            loading={isSyncingProxy}
-            onClick={() => syncProxy()}
-          >
-            Sinkronisasi Proxy
-          </Button>
-          <Button
-            disabled
-            type="primary"
-            loading={isSyncing}
-            onClick={() => sync()}
-          >
-            Sinkronisasi
-          </Button>
-          <Button
-            type="primary"
             icon={<FileExcelOutlined />}
             loading={isDownloading}
             onClick={handleDownloadWithExcelJS}
           >
             Ekspor
           </Button>
+          <AmbilSemuaDokumen />
+          <UnduhSemuaDokumen />
         </Space>
       </div>
 

@@ -765,6 +765,35 @@ export const syncPengadaanProxy = async (query) => {
     .then((res) => res.data);
 };
 
+// download
+export const uploadDokumenPengadaanProxy = async (query) => {
+  return api
+    .get(`/admin/pengadaan/proxy/download?${queryString.stringify(query)}`)
+    .then((res) => res.data);
+};
+
+export const downloadAllDokumenPengadaanProxy = async (query) => {
+  return api
+    .get(
+      `/admin/pengadaan/proxy/download/all?${queryString.stringify(query)}`,
+      {
+        responseType: "blob",
+      }
+    )
+    .then((res) => res.data);
+};
+
+export const resetUploadDokumenPengadaanProxy = async ({ id, query }) => {
+  const currentQuery = queryString.stringify(query, {
+    skipEmptyString: true,
+    skipNull: true,
+  });
+
+  return api
+    .get(`/admin/pengadaan/proxy/download/${id}/reset?${currentQuery}`)
+    .then((res) => res.data);
+};
+
 export const getListMfa = async (query) => {
   const currentQuery = queryString.stringify(query, {
     skipEmptyString: true,

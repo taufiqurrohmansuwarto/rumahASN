@@ -198,6 +198,40 @@ const proxyRekapPengadaan = async (req, res) => {
         knex.raw("sp.usulan_data->'data'->>'unor_id'"),
         "ru.id_siasn"
       )
+      .leftJoin(
+        knex.raw(`(
+          SELECT 
+            siasn_layanan_id,
+            json_object_agg(type, nama_file) as download_status
+          FROM siasn_download
+          WHERE siasn_layanan = 'pengadaan'
+          GROUP BY siasn_layanan_id
+        ) as sd`),
+        "sp.id",
+        "sd.siasn_layanan_id"
+      )
+      .leftJoin(
+        knex.raw(`(
+          SELECT 
+            siasn_layanan_id,
+            nama_file as sk_diunduh
+          FROM siasn_download
+          WHERE siasn_layanan = 'pengadaan' AND type = 'sk'
+        ) as sd_sk`),
+        "sp.id",
+        "sd_sk.siasn_layanan_id"
+      )
+      .leftJoin(
+        knex.raw(`(
+          SELECT 
+            siasn_layanan_id,
+            nama_file as pertek_diunduh
+          FROM siasn_download
+          WHERE siasn_layanan = 'pengadaan' AND type = 'pertek'
+        ) as sd_pertek`),
+        "sp.id",
+        "sd_pertek.siasn_layanan_id"
+      )
       .select(
         "sp.*",
         knex.raw(
@@ -207,7 +241,10 @@ const proxyRekapPengadaan = async (req, res) => {
           "CASE WHEN ru.id_simaster IS NOT NULL THEN get_hierarchy_simaster(ru.id_simaster) ELSE NULL END as unor_simaster"
         ),
         "rsu.id as status_usulan_id",
-        "rsu.nama as status_usulan_nama"
+        "rsu.nama as status_usulan_nama",
+        "sd.download_status",
+        "sd_sk.sk_diunduh",
+        "sd_pertek.pertek_diunduh"
       )
       .orderBy(knex.raw('sp.nama collate "C"'), "asc"); // Pengurutan berdasarkan nama dengan collation C
 
@@ -379,6 +416,22 @@ const cekPertekByNomerPeserta = async (req, res) => {
   }
 };
 
+// Fungsi untuk upload dokumen ke Minio
+async function uploadDokumenToMinio(mc, item) {
+  try {
+    const file = await getFileAsn(item.path);
+    const fileBase64 = file.toString("base64");
+    const result = await uploadMinioWithFolder(
+      mc,
+      `sk_pns/${item?.nama_file}`,
+      fileBase64,
+      "bkd"
+    );
+  } catch (error) {
+    console.error(error);
+  }
+}
+
 const downloadDokumenPengadaan = async (req, res) => {
   try {
     const { mc } = req;
@@ -392,7 +445,7 @@ const downloadDokumenPengadaan = async (req, res) => {
       const knex = SiasnPengadaan.knex();
 
       // Ambil data pengadaan dari database
-      const dataPengadaan = await fetchDataPengadaan(knex, tahun);
+      const dataPengadaan = await fetchDataPengadaan(knex, tahun, type);
 
       if (!dataPengadaan?.length) {
         return res.json([]);
@@ -412,6 +465,7 @@ const downloadDokumenPengadaan = async (req, res) => {
             siasn_layanan: "pengadaan",
             siasn_layanan_id: item.siasn_layanan_id,
             nama_file: item.nama_file,
+            type: type,
           });
 
           hasilUpload.push({
@@ -441,25 +495,31 @@ const downloadDokumenPengadaan = async (req, res) => {
     }
 
     // Fungsi untuk mengambil data pengadaan
-    function fetchDataPengadaan(knex, tahun) {
+    function fetchDataPengadaan(knex, tahun, type) {
       return knex("siasn_pengadaan_proxy as sp")
         .select(
           "sp.id as siasn_layanan_id",
           "sp.nip as nip",
-          "sp.path_ttd_pertek as path_ttd_pertek",
+          type === "pertek"
+            ? "sp.path_ttd_pertek as path_ttd_pertek"
+            : "sp.path_ttd_sk as path_ttd_pertek",
           knex.raw("sp.usulan_data->'data'->>'tmt_cpns' as tmt")
         )
         .leftJoin("siasn_download as sd", function () {
-          this.on("sp.id", "=", "sd.siasn_layanan_id").andOn(
-            "sd.siasn_layanan",
-            "=",
-            knex.raw("'pengadaan'")
-          );
+          this.on("sp.id", "=", "sd.siasn_layanan_id")
+            .andOn("sd.siasn_layanan", "=", knex.raw("'pengadaan'"))
+            .andOn("sd.type", "=", knex.raw("?", [type]));
         })
         .whereNull("sd.id")
         .andWhere("sp.periode", tahun)
         .andWhereNot("sp.nip", "")
-        .andWhere("sp.path_ttd_pertek", "!=", "");
+        .andWhere(function () {
+          if (type === "pertek") {
+            this.where("sp.path_ttd_pertek", "!=", "");
+          } else if (type === "sk") {
+            this.where("sp.path_ttd_sk", "!=", "");
+          }
+        });
     }
 
     // Fungsi untuk menyiapkan payload
@@ -473,18 +533,6 @@ const downloadDokumenPengadaan = async (req, res) => {
         )}_${item.nip}.pdf`,
       }));
     }
-
-    // Fungsi untuk upload dokumen ke Minio
-    async function uploadDokumenToMinio(mc, item) {
-      const file = await getFileAsn(item.path);
-      const fileBase64 = file.toString("base64");
-      await uploadMinioWithFolder(
-        mc,
-        `sk_pns/${item?.nama_file}`,
-        fileBase64,
-        "bkd"
-      );
-    }
   } catch (error) {
     handleError(res, error);
   }
@@ -497,7 +545,7 @@ const downloadAllDokumenPengadaan = async (req, res) => {
     const knex = SiasnPengadaan.knex();
 
     // Ambil parameter tahun dari query, default ke tahun sekarang
-    const { tahun = dayjs().format("YYYY") } = req.query;
+    const { tahun = dayjs().format("YYYY"), type = "pertek" } = req.query;
 
     // Ambil data dokumen pengadaan dari database
     // Join tabel siasn_download dengan siasn_pengadaan_proxy untuk mendapatkan informasi lengkap
@@ -516,13 +564,13 @@ const downloadAllDokumenPengadaan = async (req, res) => {
           knex.raw("'pengadaan'")
         );
       })
-      .where("sp.periode", tahun);
+      .where("sp.periode", tahun)
+      .andWhere("sd.type", type);
 
     // Jika tidak ada data, kembalikan array kosong
     if (!data?.length) {
       return res.json([]);
     } else {
-      console.log("kesini");
       // Buat arsip ZIP dengan kompresi level 9 (maksimum)
       const archive = archiver("zip", { zlib: { level: 9 } });
 
@@ -566,7 +614,85 @@ const downloadAllDokumenPengadaan = async (req, res) => {
   }
 };
 
+const resetUploadDokumen = async (req, res) => {
+  try {
+    const { mc } = req;
+    const {
+      tahun = dayjs().format("YYYY"),
+      id: usulanId,
+      type = "pertek",
+    } = req.query;
+
+    if (!tahun || !usulanId) {
+      return res.status(400).json({
+        message: "Tahun dan ID usulan harus diisi",
+      });
+    }
+
+    const knex = SiasnPengadaan.knex();
+
+    const result = await knex("siasn_pengadaan_proxy as sp")
+      .select(
+        "sp.path_ttd_pertek as pertek",
+        "sp.path_ttd_sk as sk",
+        "sp.nip as nip",
+        knex.raw("sp.usulan_data->'data'->>'tmt_cpns' as tmt")
+      )
+      .where("sp.periode", tahun)
+      .where("sp.id", usulanId)
+      .first();
+
+    const fileName = `${type.toUpperCase()}_${dayjs(result.tmt).format(
+      "DDMMYYYY"
+    )}_${result.nip}.pdf`;
+
+    if (!result) {
+      return res.status(404).json({
+        message: "Data tidak ditemukan",
+      });
+    }
+
+    await knex("siasn_download")
+      .where("siasn_layanan", "pengadaan")
+      .andWhere("siasn_layanan_id", usulanId)
+      .andWhere("type", type)
+      .delete();
+
+    const item = {
+      nama_file: fileName,
+      path: type === "pertek" ? result.pertek : result.sk,
+    };
+
+    if (type === "pertek") {
+      await uploadDokumenToMinio(mc, item);
+      await SiasnDownload.query().insert({
+        siasn_layanan: "pengadaan",
+        siasn_layanan_id: usulanId,
+        nama_file: fileName,
+        type: "pertek",
+      });
+      res.json({
+        message: "Berhasil mereset dokumen pertek",
+      });
+    } else if (type === "sk") {
+      await uploadDokumenToMinio(mc, item);
+      await SiasnDownload.query().insert({
+        siasn_layanan: "pengadaan",
+        siasn_layanan_id: usulanId,
+        nama_file: fileName,
+        type: "sk",
+      });
+      res.json({
+        message: "Berhasil mereset dokumen sk",
+      });
+    }
+  } catch (error) {
+    handleError(res, error);
+  }
+};
+
 module.exports = {
+  resetUploadDokumen,
   downloadDokumenPengadaan,
   downloadAllDokumenPengadaan,
   listPengadaanInstansi,
