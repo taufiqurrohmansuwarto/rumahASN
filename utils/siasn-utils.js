@@ -78,6 +78,10 @@ module.exports.anak = (fetcher, nip) => {
   return fetcher.get(`/pns/data-anak/${nip}`);
 };
 
+module.exports.tambahAnak = (fetcher, data) => {
+  return fetcher.post(`/keluarga/anak/save`, data);
+};
+
 module.exports.pasangan = (fetcher, nip) => {
   return fetcher.get(`/pns/data-pasangan/${nip}`);
 };
