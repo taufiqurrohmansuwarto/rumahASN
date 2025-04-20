@@ -15,8 +15,10 @@ module.exports.checkTotalPegawai = async (knex, opdId) => {
 
 module.exports.handleError = (res, error) => {
   console.log(error);
+  const errorCode = error?.code || 500;
+
   const message = error?.response?.data?.message || "Internal server error";
-  res.status(500).json({
+  res.status(errorCode).json({
     message,
   });
 };
