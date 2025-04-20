@@ -2,8 +2,10 @@ import { rwPasanganByNip } from "@/services/master.services";
 import { dataPasanganByNip } from "@/services/siasn-services";
 import { Stack } from "@mantine/core";
 import { useQuery } from "@tanstack/react-query";
-import { Button, Image, Space, Table, Typography, Modal } from "antd";
+import { Button, Image, Modal, Space, Table, Typography } from "antd";
 import { useState } from "react";
+import CompareAnakByNip from "./CompareAnakByNip";
+import FormAnakByNip from "./FormAnakByNip";
 
 const DetailPasanganModal = ({ showModal, handleCloseModal, dataModal }) => {
   return (
@@ -134,6 +136,11 @@ function CompareDataPasanganByNip({ nip }) {
       key: "akta_menikah",
       render: (_, row) => row?.dataPernikahan?.aktaMenikah,
     },
+    {
+      title: "Aksi",
+      key: "aksi",
+      render: (_, row) => <FormAnakByNip nip={nip} pasangan={row} />,
+    },
   ];
 
   return (
@@ -152,6 +159,7 @@ function CompareDataPasanganByNip({ nip }) {
         columns={columnsSiasn}
         dataSource={dataPasanganSiasn?.listPasangan}
       />
+      <CompareAnakByNip nip={nip} />
       <DetailPasanganModal
         showModal={showModal}
         handleCloseModal={handleCloseModal}
