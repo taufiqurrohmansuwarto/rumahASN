@@ -517,16 +517,19 @@ function CompareAngkaKreditByNip({ nip }) {
       render: (_, row) => {
         return (
           <Space direction="horizontal">
-            <Popconfirm
-              title="Apakah kamu ingin menghapus data riwayat angka kredit?"
-              onConfirm={async () => await handleHapus(row)}
-            >
-              <Tooltip title="Hapus">
-                <a>
-                  <DeleteOutlined />
-                </a>
-              </Tooltip>
-            </Popconfirm>
+            {row?.Sumber === "WSSIMPEG" && (
+              <Popconfirm
+                title="Apakah kamu ingin menghapus data riwayat angka kredit?"
+                onConfirm={async () => await handleHapus(row)}
+                disabled={row?.sumber === "WSSIMPEG"}
+              >
+                <Tooltip title="Hapus">
+                  <a>
+                    <DeleteOutlined />
+                  </a>
+                </Tooltip>
+              </Popconfirm>
+            )}
             <Divider type="vertical" />
             <UploadDokumen
               id={row?.id}
