@@ -12,13 +12,13 @@ import {
   IconBrandAirbnb,
   IconBrandZoom,
   IconCertificate,
-  IconChartInfographic,
   IconDatabaseImport,
   IconMessages,
   IconMicrophone,
   IconStar,
   IconUserPlus,
 } from "@tabler/icons";
+import Kuesioner from "./Public/Kuesioner";
 
 export const MOCKDATA = [
   {
@@ -132,6 +132,7 @@ const Features = ({ title, description, data = MOCKDATA }) => {
         backgroundColor: "#f5f5f5",
       }}
     >
+      <Kuesioner />
       <Container className={classes.wrapper}>
         <Title className={classes.title}>{title}</Title>
 

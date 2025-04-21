@@ -1,6 +1,7 @@
 import BezzetingFungsional from "@/components/Bezzeting/BezzetingFungsional";
 import Features from "@/components/Features";
 import Footer from "@/components/Outer/Footer";
+import Kuesioner from "@/components/Public/Kuesioner";
 import TombolLoginSimaster from "@/components/TombolLogin/TombolLoginSimaster";
 import UserRating from "@/components/UserRating";
 import { Center } from "@mantine/core";
