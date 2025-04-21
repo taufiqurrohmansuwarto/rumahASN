@@ -5,7 +5,7 @@ import {
   refJenisAnak,
   refJenisKawin,
 } from "@/utils/data-utils";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   Button,
   Col,
@@ -30,6 +30,7 @@ const handleUndefined = (value) => {
 };
 
 const FormModalAnak = ({ nip, pasangan, isOpen, onClose }) => {
+  const queryClient = useQueryClient();
   const [form] = Form.useForm();
   const [statusHidupAnak, setStatusHidupAnak] = useState("1");
 
@@ -44,10 +45,18 @@ const FormModalAnak = ({ nip, pasangan, isOpen, onClose }) => {
         message.success("Berhasil menambahkan anak");
         onClose();
         form.resetFields();
+        queryClient.invalidateQueries({
+          queryKey: ["anak-siasn"],
+        });
       },
       onError: (error) => {
         const msg = error?.response?.data?.message;
         message.error(msg || "Gagal menambahkan anak");
+      },
+      onSettled: () => {
+        queryClient.invalidateQueries({
+          queryKey: ["anak-siasn"],
+        });
       },
     }
   );
@@ -64,7 +73,7 @@ const FormModalAnak = ({ nip, pasangan, isOpen, onClose }) => {
 
       // Memformat tanggal ke format YYYY-MM-DD
       const formatTanggal = (tanggal) =>
-        tanggal ? dayjs(tanggal).format("YYYY-MM-DD") : "";
+        tanggal ? dayjs(tanggal).format("DD-MM-YYYY") : "";
 
       const payload = {
         ...hasilValidasi,
@@ -151,7 +160,7 @@ const FormModalAnak = ({ nip, pasangan, isOpen, onClose }) => {
           </Col>
           <Col span={12}>
             <Form.Item
-              name="statusAnakId"
+              name="jenisAnakId"
               label="Status Anak"
               rules={[{ required: true, message: "Status anak wajib dipilih" }]}
             >
@@ -174,8 +183,8 @@ const FormModalAnak = ({ nip, pasangan, isOpen, onClose }) => {
               rules={[{ required: true, message: "Status PNS wajib dipilih" }]}
             >
               <Radio.Group>
-                <Radio value={true}>Ya</Radio>
-                <Radio value={false}>Tidak</Radio>
+                <Radio value={"1"}>Ya</Radio>
+                <Radio value={"0"}>Tidak</Radio>
               </Radio.Group>
             </Form.Item>
           </Col>

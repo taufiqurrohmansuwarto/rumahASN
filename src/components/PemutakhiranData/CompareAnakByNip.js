@@ -15,7 +15,6 @@ function CompareAnakByNip() {
     queryFn: () => dataAnakByNip(nip),
     enabled: !!nip,
     keepPreviousData: true,
-    refetchOnWindowFocus: false,
   });
 
   const { data: dataAnakSimaster, isLoading: loadingAnakSimaster } = useQuery({
@@ -23,7 +22,6 @@ function CompareAnakByNip() {
     queryFn: () => rwAnakByNip(nip),
     enabled: !!nip,
     keepPreviousData: true,
-    refetchOnWindowFocus: false,
   });
 
   const columns = [
@@ -65,6 +63,7 @@ function CompareAnakByNip() {
         dataSource={dataAnakSimaster}
         loading={loadingAnakSimaster}
       />
+      {JSON.stringify(dataAnak)}
       <Table
         pagination={false}
         columns={columns}

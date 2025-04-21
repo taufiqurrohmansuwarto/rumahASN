@@ -36,12 +36,21 @@ export const postAnakByNip = async (req, res) => {
     const { siasnRequest } = req;
     const body = req?.body;
     const { data } = body;
-    await tambahAnak(siasnRequest, data);
+    const result = await tambahAnak(siasnRequest, data);
 
-    res.json({
-      code: 200,
-      message: "Berhasil menambahkan anak",
-    });
+    const response = result?.data;
+
+    if (response?.success) {
+      res.json({
+        code: 200,
+        message: response?.message,
+      });
+    } else {
+      res.json({
+        code: 400,
+        message: response?.message,
+      });
+    }
   } catch (error) {
     handleError(res, error);
   }
