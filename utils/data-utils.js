@@ -6,8 +6,8 @@ export const refDokumen = [
 
 export const refJenisKawin = [
   { id: "1", label: "Menikah" },
-  { id: "2", label: "Cerai" },
-  { id: "3", label: "Janda/Duda" },
+  { id: "2", label: "Cerai Hidup" },
+  { id: "3", label: "Cerai Mati" },
   { id: "4", label: "Belum Menikah" },
 ];
 

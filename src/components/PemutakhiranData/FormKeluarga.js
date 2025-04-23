@@ -527,7 +527,9 @@ function FormKeluarga({ value = {} }) {
 
   return (
     <>
-      <Button onClick={() => setShowModal(true)}>Tambah Keluarga</Button>
+      <Button type="primary" onClick={() => setShowModal(true)}>
+        Tambah Pasangan
+      </Button>
       <ModalFormKeluarga
         initalValue={value}
         open={showModal}

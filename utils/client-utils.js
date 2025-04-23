@@ -932,6 +932,21 @@ export const daftarStruktural = [
     jabatan_asn: "JABATAN PENGAWAS",
     level_kompetensi_jabatan: "",
   },
+  {
+    id: "51",
+    nama: "V.a",
+    jabatan_asn: "",
+  },
+  {
+    id: "52",
+    jabatan_asn: "",
+    nama: "V.b",
+  },
+  {
+    id: "99",
+    jabatan_asn: "",
+    nama: "Non",
+  },
 ];
 
 export const dokumenMaster = [

@@ -6,6 +6,7 @@ import { Button, Image, Modal, Space, Table, Typography } from "antd";
 import { useState } from "react";
 import CompareAnakByNip from "./CompareAnakByNip";
 import FormAnakByNip from "./FormAnakByNip";
+import FormPasanganByNip from "./FormPasanganByNip";
 
 const DetailPasanganModal = ({ showModal, handleCloseModal, dataModal }) => {
   return (
@@ -33,8 +34,13 @@ function CompareDataPasanganByNip({ nip }) {
   const { data: dataPasanganMaster, isLoading: isLoadingPasanganMaster } =
     useQuery(["data-pasangan-master", nip], () => rwPasanganByNip(nip), {});
 
-  const { data: dataPasanganSiasn, isLoading: isLoadingPasanganSiasn } =
-    useQuery(["data-pasangan-siasn", nip], () => dataPasanganByNip(nip), {});
+  const {
+    data: dataPasanganSiasn,
+    isLoading: isLoadingPasanganSiasn,
+    isFetching: isFetchingPasanganSiasn,
+  } = useQuery(["data-pasangan-siasn", nip], () => dataPasanganByNip(nip), {
+    enabled: !!nip,
+  });
 
   const columns = [
     {
@@ -108,33 +114,27 @@ function CompareDataPasanganByNip({ nip }) {
   const columnsSiasn = [
     {
       title: "Pasangan ke",
-      key: "pasangan_ke",
-      render: (_, row) => row?.dataPernikahan?.posisi,
+      dataIndex: "posisi",
     },
     {
       title: "Nama",
-      key: "nama",
-      render: (_, row) => row?.orang?.nama,
+      dataIndex: "nama",
     },
     {
       title: "Tgl. Lahir",
-      key: "tgl_lahir",
-      render: (_, row) => row?.orang?.tglLahir,
+      dataIndex: "tanggal_lahir",
     },
     {
       title: "Status Menikah",
-      key: "status_menikah",
-      render: (_, row) => row?.statusNikah,
+      dataIndex: "jenis_kawin_nama",
     },
     {
       title: "Tgl. Menikah",
-      key: "tgl_menikah",
-      render: (_, row) => row?.dataPernikahan?.tgglMenikah,
+      dataIndex: "tanggal_menikah",
     },
     {
       title: "Akta Menikah",
-      key: "akta_menikah",
-      render: (_, row) => row?.dataPernikahan?.aktaMenikah,
+      dataIndex: "akta_menikah",
     },
     {
       title: "Aksi",
@@ -145,6 +145,7 @@ function CompareDataPasanganByNip({ nip }) {
 
   return (
     <Stack>
+      <FormPasanganByNip />
       <Table
         title={() => <Typography.Title level={5}>SIMASTER</Typography.Title>}
         pagination={false}
@@ -155,9 +156,9 @@ function CompareDataPasanganByNip({ nip }) {
       <Table
         title={() => <Typography.Title level={5}>SIASN</Typography.Title>}
         pagination={false}
-        loading={isLoadingPasanganSiasn}
+        loading={isLoadingPasanganSiasn || isFetchingPasanganSiasn}
         columns={columnsSiasn}
-        dataSource={dataPasanganSiasn?.listPasangan}
+        dataSource={dataPasanganSiasn}
       />
       <CompareAnakByNip nip={nip} />
       <DetailPasanganModal

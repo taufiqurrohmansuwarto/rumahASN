@@ -84,8 +84,8 @@ const FormModalAnak = ({ nip, pasangan, isOpen, onClose }) => {
       // Menambahkan data pasangan
       const dataLengkap = {
         ...payload,
-        pasanganId: pasangan?.dataPernikahan?.orangId,
-        pnsOrangId: pasangan?.dataPernikahan?.pnsOrangId,
+        pasanganId: pasangan?.orang_id,
+        pnsOrangId: pasangan?.pns_orang_id,
       };
 
       await postAnak({ nip, data: dataLengkap });

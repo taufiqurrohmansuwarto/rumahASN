@@ -6,6 +6,7 @@ const {
 } = require("@/utils/siasn-utils");
 const DataSIASN = require("@/models/siasn-employees.model");
 const { handleError } = require("@/utils/helper/controller-helper");
+const { proxyKeluargaPasangan } = require("@/utils/siasn-proxy.utils");
 const metanip = "199303302019032011";
 
 const daftarPasangan = async (req, res) => {
@@ -23,12 +24,12 @@ const daftarPasangan = async (req, res) => {
 
 const daftarPasanganByNip = async (req, res) => {
   try {
-    const { siasnRequest } = req;
+    const { siasnRequest: request, fetcher } = req;
     const { nip } = req?.query;
 
-    const hasilPasangan = await pasangan(siasnRequest, nip);
+    const hasilPasangan = await proxyKeluargaPasangan(fetcher, nip);
 
-    res.json(hasilPasangan?.data?.data);
+    res.json(hasilPasangan?.data);
   } catch (error) {
     handleError(res, error);
   }
