@@ -63,7 +63,6 @@ function CompareAnakByNip() {
         dataSource={dataAnakSimaster}
         loading={loadingAnakSimaster}
       />
-      {JSON.stringify(dataAnak)}
       <Table
         pagination={false}
         columns={columns}

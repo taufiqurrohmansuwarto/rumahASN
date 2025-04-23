@@ -1,4 +1,5 @@
 import { daftarPasanganByNip } from "@/controller/siasn-keluarga.controller";
+import { postPasanganByNip } from "@/controller/siasn/rw-keluarga.controller";
 import adminFasilitatorMiddleware from "@/middleware/admin-fasilitator.middleware";
 import auth from "@/middleware/auth.middleware";
 import checkEmployee from "@/middleware/check-employee.middleware";
@@ -11,6 +12,7 @@ router
   .use(adminFasilitatorMiddleware)
   .use(checkEmployee)
   .use(siasnMiddleware)
-  .get(daftarPasanganByNip);
+  .get(daftarPasanganByNip)
+  .post(postPasanganByNip);
 
 export default router.handler();

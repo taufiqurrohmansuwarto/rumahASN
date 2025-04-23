@@ -175,6 +175,10 @@ export const postAnakByNip = ({ nip, data }) => {
   return api.post(`/admin/${nip}/rw-anak`, data).then((res) => res.data);
 };
 
+export const postPasanganByNip = ({ nip, data }) => {
+  return api.post(`/admin/${nip}/rw-pasangan`, data).then((res) => res.data);
+};
+
 export const dataIpAsn = (tahun) => {
   const currentTahun = tahun || new Date().getFullYear();
   return api.get(`/pns/ip-asn?tahun=${currentTahun}`).then((res) => res.data);
