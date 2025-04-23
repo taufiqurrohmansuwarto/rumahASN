@@ -86,25 +86,13 @@ export const rwJabatanMaster = async (req, res) => {
   try {
     const { fetcher } = req;
     const { employee_number: nip } = req.user;
+
     const result = await fetcher.get(
-      `/master-ws/operator/employees/${nip}/rw-jabatan`
+      `/master-ws/operator/employees/${nip}/rw-jab`
     );
 
-    const hasilku = serializeRwJabatanMaster(result?.data);
-
-    if (hasilku?.length) {
-      const sorting = orderBy(
-        hasilku,
-        [
-          (obj) => {
-            const [day, month, year] = obj?.tmt_jabatan.split("-");
-            return new Date(year, month - 1, day);
-          },
-        ],
-        ["asc"]
-      );
-
-      res.json(sorting);
+    if (result?.data?.length) {
+      res.json(result?.data);
     } else {
       res.json(null);
     }
@@ -119,24 +107,11 @@ export const rwJabatanMasterByNip = async (req, res) => {
     const { fetcher } = req;
     const { nip } = req.query;
     const result = await fetcher.get(
-      `/master-ws/operator/employees/${nip}/rw-jabatan`
+      `/master-ws/operator/employees/${nip}/rw-jab`
     );
 
-    const hasilku = serializeRwJabatanMaster(result?.data);
-
-    if (hasilku?.length) {
-      const sorting = orderBy(
-        hasilku,
-        [
-          (obj) => {
-            const [day, month, year] = obj?.tmt_jabatan.split("-");
-            return new Date(year, month - 1, day);
-          },
-        ],
-        ["desc"]
-      );
-
-      res.json(sorting);
+    if (result?.data?.length) {
+      res.json(result?.data);
     } else {
       res.json(null);
     }
