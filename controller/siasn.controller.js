@@ -265,7 +265,8 @@ const getTreeRef = async (req, res) => {
       .first();
 
     if (!checkUpdate) {
-      // const result = await request.get("/referensi/ref-unor");
+      // const data = await request.get("/referensi/ref-unor");
+      // console.log(data);
       const result = refSiasnUnor();
 
       await RefSIASNUnor.query().delete();
