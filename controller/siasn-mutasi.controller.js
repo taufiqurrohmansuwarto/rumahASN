@@ -1,23 +1,16 @@
-const { fetchIntegratedMutasi } = require("@/utils/siasn-utils");
+const { handleError } = require("@/utils/helper/controller-helper");
+const { listImut } = require("@/utils/siasn-utils");
 
-const integratedMutasi = async (req, res) => {
+const listImutController = async (req, res) => {
   try {
-    const body = req.body;
-    const { siasnRequest: request } = req;
-    const payload = {
-      nip: body.nip,
-      instansi_id: body.instansi_id,
-    };
-    const result = await fetchIntegratedMutasi(request, payload);
-    res.json(result);
+    const { siasnRequest: fetcher } = req;
+    const result = await listImut(fetcher, req.query);
+    res.json(result?.data);
   } catch (error) {
-    console.log(error);
-    res.status(500).json({
-      message: "Internal Server Error",
-    });
+    handleError(res, error);
   }
 };
 
 module.exports = {
-  integratedMutasi,
+  listImutController,
 };

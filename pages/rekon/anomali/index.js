@@ -2,6 +2,7 @@ import DashboardKomparasiAdmin from "@/components/Fasilitator/DashboardKomparasi
 import DashboardKompareFasilitator from "@/components/Fasilitator/DashboardKompareFasilitator";
 import DashboardDimensiCompleteness from "@/components/Fasilitator/KualitasData/DashboardDimensiCompleteness";
 import DashboardDimensiConsistency from "@/components/Fasilitator/KualitasData/DasboardDimenisConsistency";
+import DashboardDimensiAccuracy from "@/components/Fasilitator/KualitasData/DashboardDimensiAccuracy";
 import PageContainer from "@/components/PageContainer";
 import RekonLayout from "@/components/Rekon/RekonLayout";
 import { useSession } from "next-auth/react";
@@ -32,6 +33,7 @@ const RekonAnomali = () => {
         {fasilitator && <DashboardKompareFasilitator />}
         <DashboardDimensiCompleteness />
         <DashboardDimensiConsistency />
+        <DashboardDimensiAccuracy />
       </PageContainer>
     </>
   );

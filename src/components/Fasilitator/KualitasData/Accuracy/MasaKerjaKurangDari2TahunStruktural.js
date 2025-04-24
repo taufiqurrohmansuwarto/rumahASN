@@ -1,19 +1,19 @@
 import { useRouter } from "next/router";
 import { useQuery } from "@tanstack/react-query";
-import { gelarKosong } from "@/services/dimensi-completeness.services";
 import { useState } from "react";
 import { Table, Button } from "antd";
+import { masaKerjaKurangDari2TahunStruktural } from "@/services/dimensi-accuracy.services";
 
-const GelarKosong = () => {
+const MasaKerjaKurangDari2TahunStruktural = () => {
   const router = useRouter();
   const [query, setQuery] = useState({
     page: router?.query?.page || 1,
     limit: router?.query?.limit || 10,
   });
 
-  const { data, isLoading } = useQuery(
-    ["gelar-kosong", query],
-    () => gelarKosong(query),
+  const { data, isLoading, isFetching } = useQuery(
+    ["masa-kerja-kurang-dari-2-tahun-struktural", query],
+    () => masaKerjaKurangDari2TahunStruktural(query),
     {
       enabled: !!query,
       keepPreviousData: true,
@@ -50,22 +50,20 @@ const GelarKosong = () => {
   };
 
   return (
-    <>
-      <Table
-        pagination={{
-          total: data?.total,
-          pageSize: query?.limit,
-          current: router?.query?.page || 1,
-          onChange: handleChange,
-          showTotal: (total, range) =>
-            `${range[0]}-${range[1]} of ${total} items`,
-        }}
-        loading={isLoading}
-        columns={columns}
-        dataSource={data?.data}
-      />
-    </>
+    <Table
+      pagination={{
+        total: data?.total,
+        pageSize: query?.limit,
+        current: router?.query?.page || 1,
+        onChange: handleChange,
+        showTotal: (total, range) =>
+          `${range[0]}-${range[1]} of ${total} items`,
+      }}
+      loading={isLoading || isFetching}
+      columns={columns}
+      dataSource={data?.data}
+    />
   );
 };
 
-export default GelarKosong;
+export default MasaKerjaKurangDari2TahunStruktural;
