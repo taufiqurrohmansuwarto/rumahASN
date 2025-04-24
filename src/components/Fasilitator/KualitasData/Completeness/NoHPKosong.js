@@ -51,7 +51,6 @@ const NoHpKosong = () => {
 
   return (
     <>
-      {JSON.stringify(router?.query)}
       <Table
         pagination={{
           total: data?.total,
