@@ -1,19 +1,19 @@
 import { useRouter } from "next/router";
 import { useQuery } from "@tanstack/react-query";
-import { gelarKosong } from "@/services/dimensi-completeness.services";
+import { nikBelumValid } from "@/services/dimensi-accuracy.services";
 import { useState } from "react";
 import { Table, Button } from "antd";
 
-const GelarKosong = () => {
+const NikBelumValid = () => {
   const router = useRouter();
   const [query, setQuery] = useState({
     page: router?.query?.page || 1,
     limit: router?.query?.limit || 10,
   });
 
-  const { data, isLoading } = useQuery(
-    ["gelar-kosong", query],
-    () => gelarKosong(query),
+  const { data, isLoading, isFetching } = useQuery(
+    ["nik-belum-valid", query],
+    () => nikBelumValid(query),
     {
       enabled: !!query,
       keepPreviousData: true,
@@ -50,22 +50,20 @@ const GelarKosong = () => {
   };
 
   return (
-    <>
-      <Table
-        pagination={{
-          total: data?.total,
-          pageSize: query?.limit,
-          current: router?.query?.page || 1,
-          onChange: handleChange,
-          showTotal: (total, range) =>
-            `${range[0]}-${range[1]} of ${total} items`,
-        }}
-        loading={isLoading}
-        columns={columns}
-        dataSource={data?.data}
-      />
-    </>
+    <Table
+      pagination={{
+        total: data?.total,
+        pageSize: query?.limit,
+        current: router?.query?.page || 1,
+        onChange: handleChange,
+        showTotal: (total, range) =>
+          `${range[0]}-${range[1]} of ${total} items`,
+      }}
+      loading={isLoading || isFetching}
+      columns={columns}
+      dataSource={data?.data}
+    />
   );
 };
 
-export default GelarKosong;
+export default NikBelumValid;

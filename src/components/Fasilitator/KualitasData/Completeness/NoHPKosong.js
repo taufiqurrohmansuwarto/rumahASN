@@ -7,11 +7,11 @@ import { Table, Button } from "antd";
 const NoHpKosong = () => {
   const router = useRouter();
   const [query, setQuery] = useState({
-    page: 1,
-    limit: 10,
+    page: router?.query?.page || 1,
+    limit: router?.query?.limit || 10,
   });
 
-  const { data, isLoading } = useQuery(
+  const { data, isLoading, isFetching } = useQuery(
     ["no-hp-kosong", query],
     () => noHpKosong(query),
     {
@@ -60,7 +60,7 @@ const NoHpKosong = () => {
           showTotal: (total, range) =>
             `${range[0]}-${range[1]} of ${total} items`,
         }}
-        loading={isLoading}
+        loading={isLoading || isFetching}
         columns={columns}
         dataSource={data?.data}
       />
