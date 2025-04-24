@@ -7,8 +7,8 @@ import { Table, Button } from "antd";
 const EmailKosong = () => {
   const router = useRouter();
   const [query, setQuery] = useState({
-    page: 1,
-    limit: 10,
+    page: router?.query?.page || 1,
+    limit: router?.query?.limit || 10,
   });
 
   const { data, isLoading } = useQuery(

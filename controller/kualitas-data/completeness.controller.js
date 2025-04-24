@@ -170,13 +170,24 @@ const validateOpd = (res, opdId, skpd_id) => {
  */
 const createDataQuery = (skpd_id, condition, limit, page) => {
   const knex = SyncPegawai.knex();
-  return knex("sync_pegawai as sync")
+  const currentLimit = Number(limit);
+  const offset = (page - 1) * currentLimit;
+
+  const query = knex("sync_pegawai as sync")
+    .select(
+      "sync.nip_master",
+      "sync.nama_master",
+      "siasn.email",
+      "siasn.nomor_hp"
+    )
     .join("siasn_employees as siasn", "sync.nip_master", "siasn.nip_baru")
     .whereRaw("sync.skpd_id ILIKE ?", [`${skpd_id}%`])
     .andWhere(condition)
     .orderBy("sync.nama_master", "asc")
-    .limit(limit)
-    .offset((page - 1) * limit);
+    .limit(currentLimit)
+    .offset(offset);
+
+  return query;
 };
 
 /**
