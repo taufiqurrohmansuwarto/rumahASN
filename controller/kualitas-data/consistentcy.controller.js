@@ -224,6 +224,7 @@ export const tglLahirNipASN = async (req, res) => {
   try {
     const opdId = getOpdId(req?.user);
     const { skpd_id = opdId, limit = 10, page = 1 } = req?.query;
+    console.log(req?.query);
 
     if (!validateOpd(res, opdId, skpd_id)) return;
 
@@ -231,7 +232,7 @@ export const tglLahirNipASN = async (req, res) => {
       skpd_id,
       function () {
         this.whereRaw(
-          `TO_CHAR(siasn.tanggal_lahir::date, 'YYYYMMDD') != SUBSTRING(siasn.nip_baru, 1, 8)`
+          `TO_CHAR(TO_DATE(siasn.tanggal_lahir, 'DD-MM-YYYY'), 'YYYYMMDD') != SUBSTRING(siasn.nip_baru, 1, 8)`
         );
       },
       limit,

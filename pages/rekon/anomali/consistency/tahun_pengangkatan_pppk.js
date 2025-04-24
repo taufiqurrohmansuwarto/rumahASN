@@ -32,11 +32,11 @@ const ConsistencyTahunPengangkatanPPPK = () => {
   );
 };
 
-CompletenessEmailInvalid.getLayout = (page) => {
+ConsistencyTahunPengangkatanPPPK.getLayout = (page) => {
   return <RekonLayout active="/rekon/anomali">{page}</RekonLayout>;
 };
 
-ConsistencyJenisKelaminPadaAsn.Auth = {
+ConsistencyTahunPengangkatanPPPK.Auth = {
   action: "manage",
   subject: "Tickets",
 };
