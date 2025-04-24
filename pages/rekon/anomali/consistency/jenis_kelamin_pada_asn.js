@@ -32,7 +32,7 @@ const ConsistencyJenisKelaminPadaAsn = () => {
   );
 };
 
-CompletenessEmailInvalid.getLayout = (page) => {
+ConsistencyJenisKelaminPadaAsn.getLayout = (page) => {
   return <RekonLayout active="/rekon/anomali">{page}</RekonLayout>;
 };
 
