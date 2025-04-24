@@ -58,7 +58,9 @@ const countingTmtCpnsLebihBesarDariTMTPNS = async (opdId) => {
   return createCountingQuery(
     opdId,
     function () {
-      this.whereRaw("DATE(siasn.tmt_cpns) > DATE(siasn.tmt_pns)")
+      this.whereRaw(
+        "to_date(siasn.tmt_cpns, 'DD-MM-YYYY') > to_date(siasn.tmt_pns, 'DD-MM-YYYY')"
+      )
         .andWhere("siasn.status_cpns_pns", "!=", "C")
         .andWhere("siasn.kedudukan_hukum_id", "!=", "71");
     },
@@ -167,7 +169,9 @@ export const tmtCpnsLebihBesarDariTMTPNS = async (req, res) => {
     if (!validateOpd(res, opdId, skpd_id)) return;
 
     const tmtCpnsLebihBesarDariTMTPNSCondition = function () {
-      this.whereRaw("DATE(siasn.tmt_cpns) > DATE(siasn.tmt_pns)")
+      this.whereRaw(
+        "to_date(siasn.tmt_cpns, 'DD-MM-YYYY') > to_date(siasn.tmt_pns, 'DD-MM-YYYY')"
+      )
         .andWhere("siasn.status_cpns_pns", "!=", "C")
         .andWhere("siasn.kedudukan_hukum_id", "!=", "71");
       addSearchFilter(search, this);
