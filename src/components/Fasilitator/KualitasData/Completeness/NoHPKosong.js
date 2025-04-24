@@ -50,19 +50,22 @@ const NoHpKosong = () => {
   };
 
   return (
-    <Table
-      pagination={{
-        total: data?.total,
-        pageSize: query?.limit,
-        current: query?.page,
-        onChange: handleChange,
-        showTotal: (total, range) =>
-          `${range[0]}-${range[1]} of ${total} items`,
-      }}
-      loading={isLoading}
-      columns={columns}
-      dataSource={data?.data}
-    />
+    <>
+      {JSON.stringify(router?.query)}
+      <Table
+        pagination={{
+          total: data?.total,
+          pageSize: query?.limit,
+          current: router?.query?.page || 1,
+          onChange: handleChange,
+          showTotal: (total, range) =>
+            `${range[0]}-${range[1]} of ${total} items`,
+        }}
+        loading={isLoading}
+        columns={columns}
+        dataSource={data?.data}
+      />
+    </>
   );
 };
 

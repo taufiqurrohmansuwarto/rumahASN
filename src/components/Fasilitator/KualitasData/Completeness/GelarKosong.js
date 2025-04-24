@@ -50,19 +50,21 @@ const GelarKosong = () => {
   };
 
   return (
-    <Table
-      pagination={{
-        total: data?.total,
-        pageSize: query?.limit,
-        current: router?.query?.page || 1,
-        onChange: handleChange,
-        showTotal: (total, range) =>
-          `${range[0]}-${range[1]} of ${total} items`,
-      }}
-      loading={isLoading}
-      columns={columns}
-      dataSource={data?.data}
-    />
+    <>
+      <Table
+        pagination={{
+          total: data?.total,
+          pageSize: query?.limit,
+          current: router?.query?.page || 1,
+          onChange: handleChange,
+          showTotal: (total, range) =>
+            `${range[0]}-${range[1]} of ${total} items`,
+        }}
+        loading={isLoading}
+        columns={columns}
+        dataSource={data?.data}
+      />
+    </>
   );
 };
 
