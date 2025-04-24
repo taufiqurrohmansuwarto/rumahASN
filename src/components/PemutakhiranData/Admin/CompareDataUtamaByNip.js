@@ -72,6 +72,13 @@ const dataTabel = (siasn, simaster) => {
       result: compareText(siasn?.email, simaster?.email),
     },
     {
+      id: "no_hp",
+      siasn: siasn?.noHp,
+      master: simaster?.no_hp,
+      label: "No HP",
+      result: compareText(siasn?.noHp, simaster?.no_hp),
+    },
+    {
       id: "nik",
       siasn: siasn?.nik,
       master: simaster?.nik,
@@ -202,7 +209,8 @@ function CompareDataUtamaByNip({ nip }) {
         if (
           row?.id === "nik" ||
           row?.id === "tanggal_lahir" ||
-          row?.id === "email"
+          row?.id === "email" ||
+          row?.id === "no_hp"
         ) {
           return <TextSensor text={row?.siasn} />;
         } else {

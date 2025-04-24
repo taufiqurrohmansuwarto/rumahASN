@@ -42,7 +42,6 @@ function DashboardDimensiCompleteness() {
 
   return (
     <>
-      {JSON.stringify(data)}
       <Table
         style={{
           marginTop: 16,

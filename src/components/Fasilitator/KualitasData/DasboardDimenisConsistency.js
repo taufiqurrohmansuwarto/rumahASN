@@ -42,7 +42,6 @@ function DashboardDimensiConsistency() {
 
   return (
     <>
-      {JSON.stringify(data)}
       <Table
         style={{
           marginTop: 16,
