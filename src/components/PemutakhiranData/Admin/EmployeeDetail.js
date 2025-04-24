@@ -145,6 +145,9 @@ const EmployeeContent = ({ data, loading }) => {
                   : "NIK Belum Terverifikasi"}
               </Tag>
             </Tooltip>
+            <Tooltip title="Jenis Pegawai SIASN">
+              <Tag color="blue">{data?.siasn?.jenisPegawaiNama}</Tag>
+            </Tooltip>
           </Flex>
 
           {/* Informasi Pegawai */}
