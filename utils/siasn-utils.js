@@ -301,6 +301,12 @@ module.exports.fetchIntegratedMutasi = (fetcher, data) => {
   return fetcher.post(`/imut/simpeg/usulan/list`, data);
 };
 
+module.exports.listImut = (fetcher, query) => {
+  return fetcher.get("/imut/simpeg/usulan/list", { params: query });
+};
+
+// end of integrated mutasi
+
 module.exports.downloadDokumenAPI = (fetcher, path) => {
   return fetcher
     .get(`/download-dok?filePath=${path}`, {
