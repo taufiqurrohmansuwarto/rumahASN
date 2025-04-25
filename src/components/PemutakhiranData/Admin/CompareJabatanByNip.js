@@ -11,7 +11,7 @@ import {
   getNamaJabatan,
   setJenisJabatanColor,
 } from "@/utils/client-utils";
-import { FileAddOutlined } from "@ant-design/icons";
+import { FileAddOutlined, SyncOutlined } from "@ant-design/icons";
 import { Alert, Stack, Text } from "@mantine/core";
 import { IconAlertCircle } from "@tabler/icons";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -22,6 +22,7 @@ import {
   Col,
   DatePicker,
   Divider,
+  Flex,
   Form,
   Grid,
   Input,
@@ -589,7 +590,7 @@ function CompareJabatanByNip({ nip }) {
     setCurrentData(null);
   };
 
-  const { data, isLoading } = useQuery(
+  const { data, isLoading, refetch, isFetching } = useQuery(
     ["data-jabatan", nip],
     () => getRwJabatanByNip(nip),
     {
@@ -939,10 +940,22 @@ function CompareJabatanByNip({ nip }) {
                   visible={visible}
                 />
                 <Table
-                  title={() => <Text fw="bold">SIASN</Text>}
+                  title={() => (
+                    <Flex justify="space-between">
+                      <Text fw="bold">SIASN</Text>
+                      <Button
+                        onClick={() => refetch()}
+                        type="link"
+                        icon={<SyncOutlined />}
+                        loading={isFetching}
+                      >
+                        Refresh
+                      </Button>
+                    </Flex>
+                  )}
                   columns={columns}
                   dataSource={data}
-                  loading={isLoading}
+                  loading={isLoading || isFetching}
                   rowKey={(row) => row?.id}
                   pagination={false}
                 />
