@@ -1,40 +1,23 @@
-import { config } from "dotenv";
+import { config as loadEnv } from "dotenv";
+loadEnv(); // ☑️ load env vars
+
 import Redis from "ioredis";
 
-export const createRedisInstance = async () => {
-  const configuration = {
-    host: process.env.REDIS_URL || "localhost",
-    password: process.env.REDIS_PASSWORD || "",
-    port: process.env.REDIS_PORT || 6379,
-  };
-  try {
-    const options = {
-      host: configuration.host,
-      port: configuration.port,
-      password: configuration.password,
-      showFriendlyErrorStack: true,
-      enableAutoPipelining: true,
-      maxRetriesPerRequest: 0,
-      retryStrategy: (times) => {
-        if (times > 3) {
-          throw new Error(`[Redis] Could not connect after ${times} attempts`);
-        }
-        return Math.min(times * 200, 1000);
-      },
-    };
+export const createRedisInstance = () => {
+  const host = process.env.REDIS_URL ?? "127.0.0.1";
+  const port = parseInt(process.env.REDIS_PORT ?? "6379", 10);
+  const password = process.env.REDIS_PASSWORD ?? "";
 
-    if (config.port) {
-      options.port = configuration.port;
-    }
+  return new Redis({
+    host,
+    port,
+    password,
 
-    if (configuration.password) {
-      options.password = configuration.password;
-    }
+    // retry sampai 5 kali dengan backoff
+    maxRetriesPerRequest: 5,
+    retryStrategy: (times) => Math.min(times * 200, 1000),
 
-    const redis = new Redis(options);
-
-    return redis;
-  } catch (error) {
-    throw new Error(error);
-  }
+    showFriendlyErrorStack: true,
+    enableAutoPipelining: true,
+  });
 };
