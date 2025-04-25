@@ -55,3 +55,14 @@ export const nikBelumValid = async (query) => {
 
   return await api.get(`/nik-belum-valid?${params}`).then((res) => res.data);
 };
+
+export const pelaksanaNamaJabatanFungsional = async (query) => {
+  const params = queryString.stringify(query, {
+    skipEmptyString: true,
+    skipNull: true,
+  });
+
+  return await api
+    .get(`/pelaksana-nama-jabatan-fungsional?${params}`)
+    .then((res) => res.data);
+};
