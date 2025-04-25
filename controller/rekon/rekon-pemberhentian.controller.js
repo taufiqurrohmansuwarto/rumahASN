@@ -174,7 +174,6 @@ async function getPemberhentianCount(tmtPensiun = "01-04-2025", opdId = "1") {
 export const getRekonPemberhentianJatim = async (req, res) => {
   try {
     const periode = req?.query?.periode || "01-04-2025";
-    console.log(periode);
     const redis = await createRedisInstance();
     const cacheKey = `rekon-pemberhentian-jatim-${periode}`;
     const cachedResult = await redis.get(cacheKey);
