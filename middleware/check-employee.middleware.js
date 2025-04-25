@@ -1,4 +1,4 @@
-import { checkOpdEntrian } from "@/utils/helper/controller-helper";
+import { checkOpdEntrian, handleError } from "@/utils/helper/controller-helper";
 import { createRedisInstance } from "@/utils/redis";
 
 const checkEmployee = async (req, res, next) => {
@@ -23,39 +23,58 @@ const checkEmployee = async (req, res, next) => {
     // Cek apakah data ada di cache
     const cachedEmployee = await redis.get(cacheKey);
 
-    // Ambil data dari API jika tidak ada di cache
-    const result = await fetcher.get(
-      `/master-ws/operator/employees/${nip}/data-utama-master`
-    );
-
-    if (!result) {
-      return res.status(404).json({ code: 404, message: "Employee not found" });
-    }
-
-    // Gunakan data dari cache jika tersedia, jika tidak gunakan hasil API
     if (cachedEmployee) {
       employeeData = JSON.parse(cachedEmployee);
     } else {
-      employeeData = result?.data;
-      // Simpan data ke cache untuk penggunaan berikutnya selama 3 menit
-      if (result?.data) {
-        await redis.set(cacheKey, JSON.stringify(result.data), "EX", 180);
+      // Ambil data dari API jika tidak ada di cache
+      try {
+        const result = await fetcher.get(
+          `/master-ws/operator/employees/${nip}/data-utama-master`
+        );
+
+        if (!result) {
+          return res
+            .status(404)
+            .json({ code: 404, message: "Employee not found" });
+        }
+
+        employeeData = result?.data;
+        // Simpan data ke cache untuk penggunaan berikutnya selama 3 menit
+        if (result?.data) {
+          await redis.set(cacheKey, JSON.stringify(result.data), "EX", 180);
+        }
+      } catch (fetchError) {
+        return res
+          .status(404)
+          .json({ code: 404, message: "Employee not found" });
       }
     }
 
     // Verifikasi akses berdasarkan SKPD pegawai
     const employeeOpdId = employeeData?.skpd?.id;
+
+    if (!employeeOpdId) {
+      return res
+        .status(404)
+        .json({ code: 404, message: "Employee SKPD not found" });
+    }
+
     const hasAccess = checkOpdEntrian(opdId, employeeOpdId);
 
     if (!hasAccess) {
       return res.status(403).json({ code: 403, message: "Forbidden" });
     }
 
+    // Tambahkan data pegawai ke request untuk digunakan di controller
+    req.employeeData = employeeData;
+
     // Lanjutkan ke middleware berikutnya jika semua pemeriksaan berhasil
     next();
   } catch (error) {
     console.error("Error in checkEmployee middleware:", error);
-    res.status(500).json({ code: 500, message: "Internal Server Error" });
+    return res
+      .status(500)
+      .json({ code: 500, message: "Internal Server Error" });
   }
 };
 
