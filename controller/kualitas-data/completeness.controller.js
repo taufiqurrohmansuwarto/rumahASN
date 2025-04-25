@@ -15,7 +15,7 @@ const { checkOpdEntrian } = require("@/utils/helper/controller-helper");
 const createCountingQuery = (opdId, condition, countAlias) => {
   const knex = SyncPegawai.knex();
   return knex("sync_pegawai as sync")
-    .join("siasn_employees as siasn", "sync.nip_master", "siasn.nip_baru")
+    .innerJoin("siasn_employees as siasn", "sync.nip_master", "siasn.nip_baru")
     .whereRaw("sync.skpd_id ILIKE ?", [`${opdId}%`])
     .andWhere(condition)
     .count(`* as ${countAlias}`)

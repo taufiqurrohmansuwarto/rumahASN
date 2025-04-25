@@ -18,7 +18,7 @@ const createDataQuery = async (skpd_id, condition, limit, page) => {
       "siasn.email",
       "siasn.nomor_hp"
     )
-    .join("siasn_employees as siasn", "sync.nip_master", "siasn.nip_baru")
+    .innerJoin("siasn_employees as siasn", "sync.nip_master", "siasn.nip_baru")
     .whereRaw("sync.skpd_id ILIKE ?", [`${skpd_id}%`])
     .andWhere(condition)
     .orderBy("sync.nama_master", "asc")
@@ -31,7 +31,7 @@ const createDataQuery = async (skpd_id, condition, limit, page) => {
 const createCountingQuery = async (skpd_id, condition, countAlias) => {
   const knex = SyncPegawai.knex();
   return knex("sync_pegawai as sync")
-    .join("siasn_employees as siasn", "sync.nip_master", "siasn.nip_baru")
+    .innerJoin("siasn_employees as siasn", "sync.nip_master", "siasn.nip_baru")
     .whereRaw("sync.skpd_id ILIKE ?", [`${skpd_id}%`])
     .andWhere(condition)
     .count(`* as ${countAlias}`)

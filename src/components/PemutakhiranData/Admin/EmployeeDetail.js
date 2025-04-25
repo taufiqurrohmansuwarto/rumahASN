@@ -146,7 +146,14 @@ const EmployeeContent = ({ data, loading }) => {
               </Tag>
             </Tooltip>
             <Tooltip title="Jenis Pegawai SIASN">
-              <Tag color="blue">{data?.siasn?.jenisPegawaiNama}</Tag>
+              <Tag icon={<TagOutlined />} color="blue">
+                {data?.siasn?.jenisPegawaiNama}
+              </Tag>
+            </Tooltip>
+            <Tooltip title="Jenis Jabatan">
+              <Tag icon={<TagOutlined />} color="purple">
+                {data?.siasn?.asnJenjangJabatan}
+              </Tag>
             </Tooltip>
           </Flex>
 
