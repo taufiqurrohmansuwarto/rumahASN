@@ -419,11 +419,9 @@ const getAllEmployeesMasterPaging = async (req, res) => {
     const cachedData = await redis.get(redisKey);
 
     if (cachedData) {
-      console.log("cachedData");
       const data = JSON.parse(cachedData);
       res.json(data);
     } else {
-      console.log("fetching data");
       const employeeData = await fetchEmployeeData(fetcher, idOpd, {
         ...query,
         limit: LIMIT,

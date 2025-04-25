@@ -22,12 +22,9 @@ import {
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import DetailJabatanGuruDokter from "./Admin/DetailJabatanGuruDokter";
-import FormJFT from "./FormJFT";
-import FormJFU from "./FormJFU";
 import FormJenisMutasi from "./FormJenisMutasi";
 import FormJenisPenugasan from "./FormJenisPenugasan";
 import FormStruktural from "./FormStruktural";
-import FormSubJabatan from "./FormSubJabatan";
 import FormUnorSIASN from "./FormUnorSIASN";
 
 import { urlToPdf } from "@/services/master.services";
@@ -108,7 +105,6 @@ function ModalFormJabatanUnor({
         message.success("Berhasil menyimpan data tanpa file");
         handleClose();
       } else {
-        console.log(file);
         const resultJabatan = await handleOk(myPayload);
         const formData = new FormData();
         formData.append("file", file);
