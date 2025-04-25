@@ -124,37 +124,28 @@ const EmployeeContent = ({ data, loading }) => {
     <Row gutter={[16, 16]}>
       <Col span={24}>
         <Flex vertical gap={16}>
-          {/* Status Pegawai */}
           <Flex gap={2} wrap="wrap" justify="flex-start">
-            <Tooltip title="Status Kepegawaian SIMASTER">
+            <Tooltip title="Status SIMASTER">
               <StatusMaster status={data?.master?.status} />
             </Tooltip>
-            <Tooltip title="Status Kepegawaian SIASN">
+            <Tooltip title="Status SIASN">
               <StatusSIASN
                 status={data?.siasn?.statusPegawai}
                 kedudukanNama={data?.siasn?.kedudukanPnsNama}
               />
             </Tooltip>
-            <Tooltip title="Status Verifikasi NIK">
-              <Tag
-                icon={<TagOutlined />}
-                color={data?.siasn?.validNik ? "green" : "red"}
-              >
-                {data?.siasn?.validNik
-                  ? "NIK Terverifikasi"
-                  : "NIK Belum Terverifikasi"}
-              </Tag>
-            </Tooltip>
-            <Tooltip title="Jenis Pegawai SIASN">
-              <Tag icon={<TagOutlined />} color="blue">
-                {data?.siasn?.jenisPegawaiNama}
-              </Tag>
-            </Tooltip>
-            <Tooltip title="Jenis Jabatan">
-              <Tag icon={<TagOutlined />} color="purple">
-                {data?.siasn?.asnJenjangJabatan}
-              </Tag>
-            </Tooltip>
+            <Tag
+              icon={<TagOutlined />}
+              color={data?.siasn?.validNik ? "green" : "red"}
+            >
+              {data?.siasn?.validNik ? "NIK Valid" : "NIK Belum Valid"}
+            </Tag>
+            <Tag icon={<TagOutlined />} color="blue">
+              {data?.siasn?.jenisPegawaiNama || "Jenis Pegawai Tidak Tersedia"}
+            </Tag>
+            <Tag icon={<TagOutlined />} color="purple">
+              {data?.siasn?.asnJenjangJabatan || "Jenjang Tidak Tersedia"}
+            </Tag>
           </Flex>
 
           {/* Informasi Pegawai */}

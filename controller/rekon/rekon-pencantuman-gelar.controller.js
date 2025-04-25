@@ -82,7 +82,6 @@ async function getPGWithPegawai({
 } = {}) {
   try {
     const knex = SiasnPg.knex();
-    console.log(sortBy);
 
     // Pastikan sortOrder hanya "asc" atau "desc" untuk keamanan query
     const validSortOrder =
@@ -178,7 +177,6 @@ async function getStatusUsulanPGCount({
   tgl_usulan = dayjs().format("DD-MM-YYYY"),
 } = {}) {
   try {
-    console.log(tgl_usulan);
     const knex = Pegawai.knex();
 
     // Konversi `tgl_usulan` ke format database (YYYY-MM-DD)

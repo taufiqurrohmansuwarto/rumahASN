@@ -83,7 +83,7 @@ function ModalFormJabatanUnor({
         tmtJabatan: dayjs(tmtJabatan).format("DD-MM-YYYY"),
         tanggalSk: dayjs(tanggalSk).format("DD-MM-YYYY"),
         tmtPelantikan: dayjs(tmtPelantikan).format("DD-MM-YYYY"),
-        tmtMutasi: dayjs(tmtMutasi).format("DD-MM-YYYY"),
+        tmtMutasi: tmtMutasi ? dayjs(tmtMutasi).format("DD-MM-YYYY") : "",
         jabatanFungsionalId: fungsional_id ? fungsional_id : "",
         jabatanFungsionalUmumId: fungsional_umum_id ? fungsional_umum_id : "",
         jenisMutasiId: jenisMutasiId ? jenisMutasiId : "",
@@ -162,7 +162,9 @@ function ModalFormJabatanUnor({
       </>
       <Form form={form} layout="vertical">
         <Form.Item
-          rules={[{ required: true, message: "Tidak boleh kosong" }]}
+          rules={[
+            { required: true, message: "Jenis jabatan tidak boleh kosong" },
+          ]}
           name="jenis_jabatan"
           label="Jenis Jabatan"
         >
@@ -248,12 +250,12 @@ function ModalFormJabatanUnor({
             </Form.Item>
           </Col>
           <Col span={6}>
-            <Form.Item required name="tmtMutasi" label="TMT Mutasi">
+            <Form.Item required name="tmtPelantikan" label="TMT Pelantikan">
               <DatePicker format={dateFormat} />
             </Form.Item>
           </Col>
           <Col span={6}>
-            <Form.Item required name="tmtPelantikan" label="TMT Pelantikan">
+            <Form.Item name="tmtMutasi" label="TMT Mutasi">
               <DatePicker format={dateFormat} />
             </Form.Item>
           </Col>

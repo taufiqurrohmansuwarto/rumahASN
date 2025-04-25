@@ -53,7 +53,6 @@ const syncJabatan = async (req, res) => {
 const syncJabatanByNip = async (req, res) => {
   try {
     const { nip } = req.query;
-    console.log("nip", nip);
     const result = await refreshAttributeByNip(req.fetcher, "jabatan", nip);
     res.json(result);
   } catch (error) {
