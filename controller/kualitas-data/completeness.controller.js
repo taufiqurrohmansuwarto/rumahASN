@@ -180,7 +180,7 @@ const createDataQuery = (skpd_id, condition, limit, page) => {
       "siasn.email",
       "siasn.nomor_hp"
     )
-    .join("siasn_employees as siasn", "sync.nip_master", "siasn.nip_baru")
+    .innerJoin("siasn_employees as siasn", "sync.nip_master", "siasn.nip_baru")
     .whereRaw("sync.skpd_id ILIKE ?", [`${skpd_id}%`])
     .andWhere(condition)
     .orderBy("sync.nama_master", "asc")
