@@ -106,6 +106,7 @@ function ModalFormJabatanUnor({
         handleClose();
       } else {
         const resultJabatan = await handleOk(myPayload);
+        handleClose();
         const formData = new FormData();
         formData.append("file", file);
         formData.append("id_riwayat", resultJabatan.id);
@@ -113,7 +114,6 @@ function ModalFormJabatanUnor({
         await uploadDokRiwayat(formData);
         queryClient.invalidateQueries("unor-jabatan");
         message.success("Berhasil menyimpan data dengan file");
-        handleClose();
       }
     } catch (error) {
       message.error("Gagal menyimpan data");
