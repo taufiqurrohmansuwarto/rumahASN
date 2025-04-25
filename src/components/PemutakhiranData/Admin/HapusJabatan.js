@@ -15,17 +15,17 @@ function HapusJabatan({ id }) {
     {
       onSuccess: () => {
         message.success("Berhasil menghapus jabatan");
+        queryClient.invalidateQueries(["data-jabatan"]);
       },
-      onError: () => {
-        message.error("Gagal menghapus jabatan");
+      onError: (error) => {
+        const msg = error?.response?.data?.message || "Gagal menghapus jabatan";
+        message.error(msg);
       },
       onSettled: () => {
         queryClient.invalidateQueries(["data-jabatan"]);
       },
     }
   );
-
-  const { data } = useSession();
 
   return (
     <>

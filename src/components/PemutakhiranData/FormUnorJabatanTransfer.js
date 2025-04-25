@@ -103,22 +103,25 @@ function ModalFormJabatanUnor({
       if (!file) {
         await handleOk(myPayload);
         message.success("Berhasil menyimpan data tanpa file");
+        queryClient.invalidateQueries("data-jabatan");
         handleClose();
       } else {
         const resultJabatan = await handleOk(myPayload);
+        queryClient.invalidateQueries("data-jabatan");
         handleClose();
         const formData = new FormData();
         formData.append("file", file);
         formData.append("id_riwayat", resultJabatan.id);
         formData.append("id_ref_dokumen", "872");
         await uploadDokRiwayat(formData);
-        queryClient.invalidateQueries("unor-jabatan");
         message.success("Berhasil menyimpan data dengan file");
+        queryClient.invalidateQueries("data-jabatan");
       }
     } catch (error) {
-      message.error("Gagal menyimpan data");
-      console.log(error);
+      const msg = error?.response?.data?.message || "Gagal menyimpan data";
+      message.error(msg);
     } finally {
+      queryClient.invalidateQueries("data-jabatan");
       setLoading(false);
     }
   };
@@ -127,7 +130,11 @@ function ModalFormJabatanUnor({
 
   useEffect(() => {
     if (data) {
-      form.setFieldsValue(data);
+      form.setFieldsValue({
+        ...data,
+        tmtPelantikan: dayjs(data?.tmtJabatan),
+        tmtMutasi: dayjs(data?.tmtJabatan),
+      });
     }
   }, [data, form]);
 
