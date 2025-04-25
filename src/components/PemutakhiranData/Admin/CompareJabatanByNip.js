@@ -876,7 +876,6 @@ function CompareJabatanByNip({ nip }) {
         } else {
           return (
             <Space>
-              {/* <FormUnorJabatanTransfer data={payload} kata="Edit" /> */}
               <Divider type="vertical" />
               <HapusJabatan id={row?.id} />
               <Divider type="vertical" />

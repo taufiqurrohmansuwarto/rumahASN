@@ -8,8 +8,11 @@ import RekonLayout from "@/components/Rekon/RekonLayout";
 import { useSession } from "next-auth/react";
 import Head from "next/head";
 import { Grid } from "antd";
+import useScrollRestoration from "@/hooks/useScrollRestoration";
 
 const RekonAnomali = () => {
+  useScrollRestoration();
+
   const { data: session } = useSession();
 
   const admin = session?.user?.current_role === "admin";

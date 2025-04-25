@@ -14,8 +14,10 @@ function FormJenisMutasi({ name }) {
       {data && (
         <Form.Item
           required
-          help="Gunakan Mutasi Unor jika unor yang berubah bukan jabatan"
           name={name}
+          rules={[
+            { required: true, message: "Jenis mutasi tidak boleh kosong" },
+          ]}
           label="Jenis Mutasi"
         >
           <Radio.Group>

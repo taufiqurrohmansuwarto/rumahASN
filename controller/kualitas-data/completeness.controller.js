@@ -172,20 +172,47 @@ const createDataQuery = (skpd_id, condition, limit, page) => {
   const knex = SyncPegawai.knex();
   const currentLimit = Number(limit);
   const offset = (page - 1) * currentLimit;
+  let query;
 
-  const query = knex("sync_pegawai as sync")
-    .select(
-      "sync.nip_master",
-      "sync.nama_master",
-      "siasn.email",
-      "siasn.nomor_hp"
-    )
-    .innerJoin("siasn_employees as siasn", "sync.nip_master", "siasn.nip_baru")
-    .whereRaw("sync.skpd_id ILIKE ?", [`${skpd_id}%`])
-    .andWhere(condition)
-    .orderBy("sync.nama_master", "asc")
-    .limit(currentLimit)
-    .offset(offset);
+  if (currentLimit === -1) {
+    query = knex("sync_pegawai as sync")
+      .select(
+        "sync.nip_master",
+        "sync.foto",
+        "sync.nama_master",
+        "sync.opd_master",
+        "siasn.email",
+        "siasn.nomor_hp"
+      )
+      .innerJoin(
+        "siasn_employees as siasn",
+        "sync.nip_master",
+        "siasn.nip_baru"
+      )
+      .whereRaw("sync.skpd_id ILIKE ?", [`${skpd_id}%`])
+      .andWhere(condition)
+      .orderBy("sync.nama_master", "asc");
+  } else {
+    query = knex("sync_pegawai as sync")
+      .select(
+        "sync.nip_master",
+        "sync.foto",
+        "sync.nama_master",
+        "sync.opd_master",
+        "siasn.email",
+        "siasn.nomor_hp"
+      )
+      .innerJoin(
+        "siasn_employees as siasn",
+        "sync.nip_master",
+        "siasn.nip_baru"
+      )
+      .whereRaw("sync.skpd_id ILIKE ?", [`${skpd_id}%`])
+      .andWhere(condition)
+      .orderBy("sync.nama_master", "asc")
+      .limit(currentLimit)
+      .offset(offset);
+  }
 
   return query;
 };
