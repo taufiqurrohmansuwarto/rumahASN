@@ -16,28 +16,6 @@ const Pegawai = () => {
         <title>Rumah ASN - Rekon - Daftar Pegawai</title>
       </Head>
       <PageContainer
-        extra={[
-          <Link key="1" href={`/rekon/dashboard/kenaikan-pangkat`} passHref>
-            <Button key="1" type="link">
-              KP Instansi
-            </Button>
-          </Link>,
-          <Link key="2" href={`/rekon/dashboard/pg`} passHref>
-            <Button key="2" type="link">
-              PG Instansi
-            </Button>
-          </Link>,
-          <Link key="3" href={`/rekon/dashboard/pemberhentian`} passHref>
-            <Button key="4" type="link">
-              Pemberhentian Instansi
-            </Button>
-          </Link>,
-          <Link key="4" href={`/rekon/dashboard/ip-asn`} passHref>
-            <Button key="5" type="link">
-              IP ASN Instansi
-            </Button>
-          </Link>,
-        ]}
         childrenContentStyle={{
           padding: breakPoint.xs ? 0 : null,
         }}

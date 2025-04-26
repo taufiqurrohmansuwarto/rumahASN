@@ -243,3 +243,12 @@ export const getRekonPGEmployees = async (query) => {
   });
   return api.get(`/pg/employees?${queryParams}`).then((res) => res?.data);
 };
+
+// imut
+export const getImut = async (query = { limit: 10, offset: 0 }) => {
+  const queryParams = queryString.stringify(query, {
+    skipNull: true,
+    skipEmptyString: true,
+  });
+  return api.get(`/imut?${queryParams}`).then((res) => res?.data);
+};
