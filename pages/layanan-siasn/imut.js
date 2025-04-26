@@ -1,10 +1,9 @@
 import LayananSIASNLayout from "@/components/LayananSIASNAdmin/LayananSIASNLayout";
-import LayananKenaikanPangkat from "@/components/LayananSIASNAdmin/LayananKenaikanPangkat";
 import PageContainer from "@/components/PageContainer";
-import { Breadcrumb } from "antd";
+import RekonImut from "@/components/Rekon/RekonImut";
+import { Breadcrumb, Grid } from "antd";
 import Head from "next/head";
 import Link from "next/link";
-import { Grid } from "antd";
 
 function ImutLayananSIASN() {
   const breakPoint = Grid.useBreakpoint();
@@ -35,7 +34,7 @@ function ImutLayananSIASN() {
           ),
         }}
       >
-        <div>Imut</div>
+        <RekonImut />
       </PageContainer>
     </>
   );

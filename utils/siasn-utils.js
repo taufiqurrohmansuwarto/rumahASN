@@ -302,7 +302,9 @@ module.exports.fetchIntegratedMutasi = (fetcher, data) => {
 };
 
 module.exports.listImut = (fetcher, query) => {
-  return fetcher.get("/imut/simpeg/usulan/list", { params: query });
+  const url = `/imut/simpeg/usulan/list?${query}`;
+  console.log("ini url", url);
+  return fetcher.get(url);
 };
 
 // end of integrated mutasi
