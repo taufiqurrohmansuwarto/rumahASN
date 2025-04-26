@@ -246,9 +246,6 @@ export const getRekonPGEmployees = async (query) => {
 
 // imut
 export const getImut = async (query = { limit: 10, offset: 0 }) => {
-  const queryParams = queryString.stringify(query, {
-    skipNull: true,
-    skipEmptyString: true,
-  });
+  const queryParams = queryString.stringify(query, {});
   return api.get(`/imut?${queryParams}`).then((res) => res?.data);
 };
