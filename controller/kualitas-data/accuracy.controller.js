@@ -110,8 +110,15 @@ const countingJabatanPelaksanaNamaJabatanFungsional = async (opdId) => {
     opdId,
     function () {
       this.where("siasn.jenis_jabatan_id", "=", "4")
-        .andWhere("siasn.jabatan_nama", "ilike", "%ahli%")
-        .andWhere("siasn.status_cpns_pns", "!=", "C");
+        .andWhere(function () {
+          this.where("siasn.jabatan_nama", "ilike", "%ahli%")
+            .orWhere("siasn.jabatan_nama", "ilike", "%terampil%")
+            .orWhere("siasn.jabatan_nama", "ilike", "%penyelia%")
+            .orWhere("siasn.jabatan_nama", "ilike", "%mahir%");
+        })
+        .andWhere("siasn.status_cpns_pns", "!=", "C")
+        .andWhere("siasn.kedudukan_hukum_id", "!=", "71")
+        .andWhere("siasn.kedudukan_hukum_id", "!=", "72");
     },
     "total"
   );
@@ -338,7 +345,12 @@ export const pelaksanaNamaJabatanFungsional = async (req, res) => {
 
     const pelaksanaNamaJabatanFungsionalCondition = function () {
       this.where("siasn.jenis_jabatan_id", "=", "4")
-        .andWhere("siasn.jabatan_nama", "ilike", "%ahli%")
+        .andWhere(function () {
+          this.where("siasn.jabatan_nama", "ilike", "%ahli%")
+            .orWhere("siasn.jabatan_nama", "ilike", "%terampil%")
+            .orWhere("siasn.jabatan_nama", "ilike", "%penyelia%")
+            .orWhere("siasn.jabatan_nama", "ilike", "%mahir%");
+        })
         .andWhere("siasn.status_cpns_pns", "!=", "C")
         .andWhere("siasn.kedudukan_hukum_id", "!=", "71")
         .andWhere("siasn.kedudukan_hukum_id", "!=", "72");

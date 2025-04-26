@@ -13,17 +13,13 @@ function InformationDetail({ data }) {
     {
       onSuccess: (data) => {
         message.success(data?.message);
-        queryClient.invalidateQueries({
-          queryKey: ["data-utama-siasn"],
-        });
+        queryClient.invalidateQueries(["data-utama-siasn"]);
       },
       onError: (error) => {
         message.error(error?.message);
       },
       onSettled: () => {
-        queryClient.invalidateQueries({
-          queryKey: ["data-utama-siasn"],
-        });
+        queryClient.invalidateQueries(["data-utama-siasn"]);
       },
     }
   );
