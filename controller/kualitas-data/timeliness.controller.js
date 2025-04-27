@@ -6,9 +6,10 @@ const {
   checkTotalPegawai,
 } = require("@/utils/helper/controller-helper");
 
-// Default pagination parameters
+// Default pagination and source parameters
 const DEFAULT_LIMIT = 10;
 const DEFAULT_PAGE = 1;
+const DEFAULT_SOURCE = "simaster";
 
 // Standard API response formatter
 const formatApiResponse = (page, limit, total, data) => ({
@@ -19,36 +20,86 @@ const formatApiResponse = (page, limit, total, data) => ({
 });
 
 // Adds a name-based search filter if provided
-const addSearchFilter = (search, query) => {
-  if (search) {
+const addSearchFilter = (search, query, source) => {
+  if (!search) return;
+  if (source === DEFAULT_SOURCE) {
     query.where("sync.nama_master", "ILIKE", `%${search}%`);
+  } else {
+    query.where("siasn.nama", "ILIKE", `%${search}%`);
   }
 };
 
-// Builds the base data query
-const createBaseQuery = (skpdId, conditionBuilder) => {
+/**
+ * Builds the base data query.
+ *
+ * @param {string} skpdId - skpd filter prefix (ignored if source = 'siasn').
+ * @param {function} conditionBuilder - Knex condition builder callback.
+ * @param {string} source - 'simaster' (default) or 'siasn'.
+ */
+const createBaseQuery = (skpdId, conditionBuilder, source = DEFAULT_SOURCE) => {
   const knex = SyncPegawai.knex();
-  return knex("sync_pegawai as sync")
+
+  if (source === DEFAULT_SOURCE) {
+    return knex("sync_pegawai as sync")
+      .select(
+        "sync.nip_master",
+        "sync.foto",
+        "sync.nama_master",
+        "sync.opd_master"
+      )
+      .innerJoin(
+        "siasn_employees as siasn",
+        "sync.nip_master",
+        "siasn.nip_baru"
+      )
+      .innerJoin("ref_siasn.jft as jft", "siasn.jabatan_id", "jft.id")
+      .whereRaw("sync.skpd_id ILIKE ?", [`${skpdId}%`])
+      .andWhere(conditionBuilder)
+      .orderBy("sync.nama_master", "asc");
+  }
+
+  return knex("siasn_employees as siasn")
     .select(
-      "sync.nip_master",
-      "sync.foto",
-      "sync.nama_master",
-      "sync.opd_master"
+      "siasn.nip_baru as nip_master",
+      "siasn.foto",
+      "siasn.nama as nama_master",
+      "siasn.opd_master"
     )
-    .innerJoin("siasn_employees as siasn", "sync.nip_master", "siasn.nip_baru")
     .innerJoin("ref_siasn.jft as jft", "siasn.jabatan_id", "jft.id")
-    .whereRaw("sync.skpd_id ILIKE ?", [`${skpdId}%`])
     .andWhere(conditionBuilder)
-    .orderBy("sync.nama_master", "asc");
+    .orderBy("siasn.nama", "asc");
 };
 
-// Builds the counting query
-const createCountingQuery = (skpdId, conditionBuilder) => {
+/**
+ * Builds the counting query.
+ *
+ * @param {string} skpdId - skpd filter prefix (ignored if source = 'siasn').
+ * @param {function} conditionBuilder - Knex condition builder callback.
+ * @param {string} source - 'simaster' (default) or 'siasn'.
+ */
+const createCountingQuery = (
+  skpdId,
+  conditionBuilder,
+  source = DEFAULT_SOURCE
+) => {
   const knex = SyncPegawai.knex();
-  return knex("sync_pegawai as sync")
-    .innerJoin("siasn_employees as siasn", "sync.nip_master", "siasn.nip_baru")
+
+  if (source === DEFAULT_SOURCE) {
+    return knex("sync_pegawai as sync")
+      .innerJoin(
+        "siasn_employees as siasn",
+        "sync.nip_master",
+        "siasn.nip_baru"
+      )
+      .innerJoin("ref_siasn.jft as jft", "siasn.jabatan_id", "jft.id")
+      .whereRaw("sync.skpd_id ILIKE ?", [`${skpdId}%`])
+      .andWhere(conditionBuilder)
+      .count("* as total")
+      .first();
+  }
+
+  return knex("siasn_employees as siasn")
     .innerJoin("ref_siasn.jft as jft", "siasn.jabatan_id", "jft.id")
-    .whereRaw("sync.skpd_id ILIKE ?", [`${skpdId}%`])
     .andWhere(conditionBuilder)
     .count("* as total")
     .first();
@@ -63,30 +114,33 @@ const listController = (conditionBuilder) => async (req, res) => {
       search = "",
       limit = DEFAULT_LIMIT,
       page = DEFAULT_PAGE,
+      source = DEFAULT_SOURCE,
     } = req.query;
 
-    if (!validateOpd(res, opdId, skpd_id)) return;
+    if (source === DEFAULT_SOURCE && !validateOpd(res, opdId, skpd_id)) return;
 
     // Build condition with optional search filter
     const condition = function () {
       conditionBuilder.call(this);
-      addSearchFilter(search, this);
+      addSearchFilter(search, this, source);
     };
 
     // Prepare data and count queries
     const pageNum = Number(page);
     const lim = Number(limit);
-    const queryBuilder = createBaseQuery(skpd_id, condition);
-    if (lim !== -1) {
-      queryBuilder.limit(lim).offset((pageNum - 1) * lim);
-    }
+
+    const dataQuery = createBaseQuery(skpd_id, condition, source);
+    if (lim !== -1) dataQuery.limit(lim).offset((pageNum - 1) * lim);
 
     const [data, total] = await Promise.all([
-      queryBuilder,
-      createCountingQuery(skpd_id, condition),
+      dataQuery,
+      createCountingQuery(skpd_id, condition, source),
     ]);
 
-    return res.json(formatApiResponse(pageNum, lim, total, data));
+    if (source === DEFAULT_SOURCE) {
+      return res.json(formatApiResponse(pageNum, lim, total, data));
+    }
+    return res.json({ data, total: total.total });
   } catch (error) {
     handleError(res, error);
   }
@@ -94,9 +148,9 @@ const listController = (conditionBuilder) => async (req, res) => {
 
 // Specific condition builders
 const cpnsCondition = function () {
-  // More than one year since CPNS without appointment
+  // More than one year + 1 month since CPNS without appointment
   this.whereRaw(
-    "DATE_PART('year', now()::date) - DATE_PART('year', siasn.tmt_cpns::date) > 1"
+    "siasn.tmt_cpns::date <= NOW() - INTERVAL '1 year 1 month'"
   ).andWhere("status_cpns_pns", "C");
 };
 
@@ -121,7 +175,7 @@ const bupCondition = function () {
     // Fungsional (2): BUP = jft.bup_usia tahun + 1 bulan
     .orWhere(function () {
       this.whereRaw("siasn.jenis_jabatan_id = '2'").whereRaw(
-        "to_date(siasn.tanggal_lahir, 'DD-MM-YYYY') <= NOW() - ((COALESCE(jft.bup_usia,0) || ' years')::interval + INTERVAL '1 month')"
+        "to_date(siasn.tanggal_lahir, 'DD-MM-YYYY') <= NOW() - ((COALESCE(jft.bup_usia,0)|| ' years')::interval + INTERVAL '1 month')"
       );
     });
 };
@@ -171,27 +225,36 @@ module.exports = {
         createCountingQuery(skpd_id, bupCondition),
       ]);
 
+      const [cpnsSiasn, strukturalSiasn, bupSiasn] = await Promise.all([
+        createCountingQuery(skpd_id, cpnsCondition, "siasn"),
+        createCountingQuery(skpd_id, strukturalCondition, "siasn"),
+        createCountingQuery(skpd_id, bupCondition, "siasn"),
+      ]);
+
       const result = [
         {
-          id: "cpns-lebih-dari-satu-tahun",
+          id: "cpns_lebih_dari_satu_tahun",
           label: "CPNS Lebih Dari Satu Tahun",
           value: cpns.total,
+          siasn: cpnsSiasn.total,
           totalPegawai,
-          bobot: 13.64,
+          bobot: 10,
         },
         {
-          id: "struktural-ganda",
+          id: "struktural_ganda",
           label: "Struktural Ganda",
           value: struktural.total,
+          siasn: strukturalSiasn.total,
           totalPegawai,
-          bobot: 15.91,
+          bobot: 15,
         },
         {
-          id: "bup-masih-aktif",
+          id: "bup_masih_aktif",
           label: "BUP Masih Aktif",
           value: bup.total,
+          siasn: bupSiasn.total,
           totalPegawai,
-          bobot: 15.91,
+          bobot: 20,
         },
       ];
 

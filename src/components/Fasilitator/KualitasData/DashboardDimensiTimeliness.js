@@ -1,6 +1,7 @@
 import { dashboardTimeliness } from "@/services/dimensi-timeliness.services";
 import {
   BarChartOutlined,
+  ExclamationCircleOutlined,
   EyeOutlined,
   InfoCircleOutlined,
 } from "@ant-design/icons";
@@ -60,13 +61,20 @@ function DashboardDimensiTimeliness() {
           <span>Data Bermasalah</span>
         </Space>
       ),
-      dataIndex: "value",
       key: "value",
+      dataIndex: "value",
       align: "right",
-      render: (value) => (
-        <Tag color={value > 0 ? "error" : "success"}>
-          {value?.toLocaleString("id-ID")}
-        </Tag>
+      render: (_, record) => (
+        <Tooltip title={`SIMASTER: ${record.value} | SIASN: ${record.siasn}`}>
+          <Tag color={record.value > 0 ? "error" : "success"}>
+            <Space>
+              <ExclamationCircleOutlined />
+              <span>{record.value}</span>
+              <span>/</span>
+              <span>{record.siasn}</span>
+            </Space>
+          </Tag>
+        </Tooltip>
       ),
     },
     {
