@@ -233,7 +233,7 @@ module.exports = {
 
       const result = [
         {
-          id: "cpns_lebih_dari_satu_tahun",
+          id: "cpns-lebih-dari-satu-tahun",
           label: "CPNS Lebih Dari Satu Tahun",
           value: cpns.total,
           siasn: cpnsSiasn.total,
@@ -241,7 +241,7 @@ module.exports = {
           bobot: 10,
         },
         {
-          id: "struktural_ganda",
+          id: "struktural-ganda",
           label: "Struktural Ganda",
           value: struktural.total,
           siasn: strukturalSiasn.total,
@@ -249,7 +249,7 @@ module.exports = {
           bobot: 15,
         },
         {
-          id: "bup_masih_aktif",
+          id: "bup-masih-aktif",
           label: "BUP Masih Aktif",
           value: bup.total,
           siasn: bupSiasn.total,
