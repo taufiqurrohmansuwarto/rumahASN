@@ -112,17 +112,18 @@ const strukturalCondition = function () {
 };
 
 const bupCondition = function () {
-  // BUP still active for structural (1) & pelaksana (4)
+  // Structural (1) & Pelaksana (4): BUP = 58 tahun + 1 bulan
   this.where(function () {
     this.whereIn("siasn.jenis_jabatan_id", ["1", "4"]).whereRaw(
-      "siasn.tanggal_lahir::date <= NOW() - INTERVAL '58 years'"
+      "to_date(siasn.tanggal_lahir, 'DD-MM-YYYY') <= NOW() - INTERVAL '58 years 1 month'"
     );
-  }).orWhere(function () {
-    // Fungsional (2): custom BUP age
-    this.whereRaw("siasn.jenis_jabatan_id = '2'").whereRaw(
-      "siasn.tanggal_lahir::date <= NOW() - (COALESCE(jft.bup_usia,0)|| ' years')::interval"
-    );
-  });
+  })
+    // Fungsional (2): BUP = jft.bup_usia tahun + 1 bulan
+    .orWhere(function () {
+      this.whereRaw("siasn.jenis_jabatan_id = '2'").whereRaw(
+        "to_date(siasn.tanggal_lahir, 'DD-MM-YYYY') <= NOW() - ((COALESCE(jft.bup_usia,0) || ' years')::interval + INTERVAL '1 month')"
+      );
+    });
 };
 
 // Exported controllers
