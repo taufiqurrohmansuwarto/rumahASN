@@ -1,5 +1,5 @@
 import useScrollRestoration from "@/hooks/useScrollRestoration";
-import { masaKerjaKurangDari2TahunStruktural } from "@/services/dimensi-accuracy.services";
+import { tingkatPendidikanJabatanFungsionalTidakMemenuhiSyarat } from "@/services/dimensi-accuracy.services";
 import { useQuery } from "@tanstack/react-query";
 import { Button, Card, Row, Table } from "antd";
 import { saveAs } from "file-saver";
@@ -18,7 +18,7 @@ const DownloadButton = ({ onDownload, loading }) => (
   </Row>
 );
 
-const MasaKerjaKurangDari2TahunStruktural = () => {
+const PendidikanJabatanFungsionalTidakMemenuhiSyarat = () => {
   useScrollRestoration();
   const router = useRouter();
   const [query, setQuery] = useState({
@@ -27,8 +27,8 @@ const MasaKerjaKurangDari2TahunStruktural = () => {
   });
 
   const { data, isLoading, isFetching } = useQuery(
-    ["masa-kerja-kurang-dari-2-tahun-struktural", query],
-    () => masaKerjaKurangDari2TahunStruktural(query),
+    ["tingkat-pendidikan-jabatan-fungsional-tidak-memenuhi-syarat", query],
+    () => tingkatPendidikanJabatanFungsionalTidakMemenuhiSyarat(query),
     {
       enabled: !!query,
       keepPreviousData: true,
@@ -39,13 +39,16 @@ const MasaKerjaKurangDari2TahunStruktural = () => {
 
   const handleDownload = async () => {
     setIsDownloading(true);
-    const result = await masaKerjaKurangDari2TahunStruktural({ limit: -1 });
+    const result = await tingkatPendidikanJabatanFungsionalTidakMemenuhiSyarat({
+      limit: -1,
+    });
     const workbook = XLSX.utils.book_new();
 
     const sheetData = result?.data?.map((item) => ({
       NIP: item.nip_master,
       Nama: item.nama_master,
       OPD: item.opd_master,
+      Jabatan: item.jabatan_master,
       Status: item.status,
     }));
 
@@ -53,7 +56,7 @@ const MasaKerjaKurangDari2TahunStruktural = () => {
     XLSX.utils.book_append_sheet(
       workbook,
       sheet,
-      "Masa Kerja Kurang Dari 2 Tahun Struktural"
+      "Pendidikan Jabatan Fungsional Tidak Memenuhi Syarat"
     );
 
     const excelBuffer = XLSX.write(workbook, {
@@ -63,7 +66,7 @@ const MasaKerjaKurangDari2TahunStruktural = () => {
 
     saveAs(
       new Blob([excelBuffer]),
-      "masa-kerja-kurang-dari-2-tahun-struktural.xlsx"
+      "pendidikan-jabatan-fungsional-tidak-memenuhi-syarat.xlsx"
     );
     setIsDownloading(false);
   };
@@ -114,4 +117,4 @@ const MasaKerjaKurangDari2TahunStruktural = () => {
   );
 };
 
-export default MasaKerjaKurangDari2TahunStruktural;
+export default PendidikanJabatanFungsionalTidakMemenuhiSyarat;

@@ -82,7 +82,7 @@ function DashboardDimensiAccuracy() {
       align: "center",
       render: (value) => (
         <Tooltip title={`Bobot indikator: ${value}`}>
-          <Tag color="blue">{value}%</Tag>
+          <Tag color="blue">{value}</Tag>
         </Tooltip>
       ),
     },
@@ -113,45 +113,6 @@ function DashboardDimensiAccuracy() {
           <InfoCircleOutlined />
         </Tooltip>
       </Space>
-
-      <Row gutter={[16, 16]}>
-        <Col xs={24} sm={8}>
-          <Statistic
-            title={<Text strong>Total Pegawai</Text>}
-            value={totalPegawai}
-            formatter={(value) => value.toLocaleString("id-ID")}
-            prefix={<BarChartOutlined />}
-          />
-        </Col>
-        <Col xs={24} sm={8}>
-          <Statistic
-            title={<Text strong>Data Bermasalah</Text>}
-            value={totalBermasalah}
-            prefix={
-              totalBermasalah > 0 ? (
-                <ExclamationCircleOutlined />
-              ) : (
-                <CheckCircleOutlined />
-              )
-            }
-            formatter={(value) => value.toLocaleString("id-ID")}
-          />
-        </Col>
-        <Col xs={24} sm={8}>
-          <Statistic
-            title={<Text strong>Persentase Masalah</Text>}
-            value={persentaseBermasalah.toFixed(2)}
-            suffix="%"
-            prefix={
-              persentaseBermasalah > 5 ? (
-                <ExclamationCircleOutlined />
-              ) : (
-                <CheckCircleOutlined />
-              )
-            }
-          />
-        </Col>
-      </Row>
 
       <Divider>
         <Space>

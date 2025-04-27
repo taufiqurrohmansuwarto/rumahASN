@@ -9,6 +9,7 @@ import { saveAs } from "file-saver";
 import * as XLSX from "xlsx";
 import useScrollRestoration from "@/hooks/useScrollRestoration";
 import { FileExcelOutlined } from "@ant-design/icons";
+
 // Komponen tombol download
 const DownloadButton = ({ onDownload, loading }) => (
   <Row justify="end">
@@ -25,7 +26,6 @@ const DownloadButton = ({ onDownload, loading }) => (
 
 const EmailKosong = () => {
   useScrollRestoration();
-  const [isDownloading, setIsDownloading] = useState(false);
   const router = useRouter();
   const [query, setQuery] = useState({
     page: router?.query?.page || 1,
@@ -41,20 +41,13 @@ const EmailKosong = () => {
     }
   );
 
-  const columns = [
-    {
-      title: "Informasi Pegawai",
-      dataIndex: "nip_master",
-      render: (_, record) => (
-        <InformasiPegawai record={record} onClick={handleClick} />
-      ),
-    },
-  ];
+  const [isDownloading, setIsDownloading] = useState(false);
 
   const handleDownload = async () => {
     setIsDownloading(true);
     const result = await emailKosong({ limit: -1 });
     const workbook = XLSX.utils.book_new();
+
     const sheetData = result?.data?.map((item) => ({
       NIP: item.nip_master,
       Nama: item.nama_master,
@@ -69,8 +62,14 @@ const EmailKosong = () => {
       bookType: "xlsx",
       type: "array",
     });
+
     saveAs(new Blob([excelBuffer]), "email-kosong.xlsx");
     setIsDownloading(false);
+  };
+
+  const handleClick = (nip) => {
+    const url = `/rekon/pegawai/${nip}/detail`;
+    router.push(url);
   };
 
   const handleChange = (page, pageSize) => {
@@ -81,13 +80,18 @@ const EmailKosong = () => {
     });
   };
 
-  const handleClick = (nip) => {
-    const url = `/rekon/pegawai/${nip}/detail`;
-    router.push(url);
-  };
+  const columns = [
+    {
+      title: "Informasi Pegawai",
+      dataIndex: "nip_master",
+      render: (_, record) => (
+        <InformasiPegawai record={record} onClick={handleClick} />
+      ),
+    },
+  ];
 
   return (
-    <Card title="Email Kosong">
+    <Card>
       <DownloadButton onDownload={handleDownload} loading={isDownloading} />
       <TableKualitasData
         data={data?.data}
@@ -98,11 +102,10 @@ const EmailKosong = () => {
           total: data?.total,
           position: ["bottomRight", "topRight"],
           pageSize: query?.limit,
-          current: router?.query?.page || 1,
-          showSizeChanger: false,
+          current: query?.page,
           onChange: handleChange,
           showTotal: (total, range) =>
-            `${range[0]}-${range[1]} of ${total} items`,
+            `${range[0]}-${range[1]} dari ${total} data`,
         }}
       />
     </Card>
