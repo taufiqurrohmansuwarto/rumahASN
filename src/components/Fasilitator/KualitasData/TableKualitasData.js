@@ -8,7 +8,10 @@ const TableKualitasData = ({
   pagination,
 }) => (
   <Table
-    pagination={pagination}
+    pagination={{
+      ...pagination,
+      showSizeChanger: false,
+    }}
     loading={isLoading || isFetching}
     columns={columns}
     dataSource={data}

@@ -12,8 +12,10 @@ import useScrollRestoration from "@/hooks/useScrollRestoration";
 import {
   BarChartOutlined,
   CheckCircleOutlined,
+  ClockCircleOutlined,
   ExclamationCircleOutlined,
 } from "@ant-design/icons";
+import DashboardDimensiTimeliness from "@/components/Fasilitator/KualitasData/DashboardDimensiTimeliness";
 
 const RekonAnomali = () => {
   useScrollRestoration();
@@ -112,6 +114,27 @@ const RekonAnomali = () => {
                   }
                 >
                   <DashboardDimensiAccuracy />
+                </Card>
+              </Col>
+            </Row>
+
+            <Row gutter={[0, 16]}>
+              <Col xs={24}>
+                <Card
+                  hoverable
+                  bordered={false}
+                  style={{
+                    borderRadius: "8px",
+                    boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
+                  }}
+                  bodyStyle={{ padding: "16px 24px" }}
+                  extra={
+                    <ClockCircleOutlined
+                      style={{ fontSize: "24px", color: "#13c2c2" }}
+                    />
+                  }
+                >
+                  <DashboardDimensiTimeliness />
                 </Card>
               </Col>
             </Row>

@@ -1,4 +1,4 @@
-import { dashboardAccuracy } from "@/services/dimensi-accuracy.services";
+import { dashboardTimeliness } from "@/services/dimensi-timeliness.services";
 import {
   BarChartOutlined,
   EyeOutlined,
@@ -19,10 +19,10 @@ import { useRouter } from "next/router";
 
 const { Text, Title } = Typography;
 
-function DashboardDimensiAccuracy() {
+function DashboardDimensiTimeliness() {
   const router = useRouter();
-  const { data, isLoading } = useQuery(["dashboard-dimensi-accuracy"], () =>
-    dashboardAccuracy()
+  const { data, isLoading } = useQuery(["dashboard-dimensi-timeliness"], () =>
+    dashboardTimeliness()
   );
 
   // Menghitung total data bermasalah dan total pegawai
@@ -33,7 +33,7 @@ function DashboardDimensiAccuracy() {
     : 0;
 
   const handleClick = (key) => {
-    router.push(`/rekon/anomali/accuracy/${key}`);
+    router.push(`/rekon/anomali/timeliness/${key}`);
   };
 
   const columns = [
@@ -101,9 +101,9 @@ function DashboardDimensiAccuracy() {
       <Space align="center" style={{ marginBottom: 16 }}>
         <BarChartOutlined />
         <Title level={4} style={{ margin: 0 }}>
-          Dimensi Accuracy
+          Dimensi Timeliness
         </Title>
-        <Tooltip title="Dimensi Accuracy mengukur ketepatan data ASN">
+        <Tooltip title="Dimensi Timeliness mengukur kecepatan pengiriman data ASN">
           <InfoCircleOutlined />
         </Tooltip>
       </Space>
@@ -111,7 +111,7 @@ function DashboardDimensiAccuracy() {
       <Divider>
         <Space>
           <InfoCircleOutlined />
-          <Text strong>Detail Indikator Accuracy</Text>
+          <Text strong>Detail Indikator Timeliness</Text>
         </Space>
       </Divider>
 
@@ -137,4 +137,4 @@ function DashboardDimensiAccuracy() {
   );
 }
 
-export default DashboardDimensiAccuracy;
+export default DashboardDimensiTimeliness;
