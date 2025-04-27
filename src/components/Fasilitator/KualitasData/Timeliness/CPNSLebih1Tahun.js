@@ -1,13 +1,13 @@
+import InformasiPegawai from "@/components/Fasilitator/KualitasData/InformasiPegawai";
+import TableKualitasData from "@/components/Fasilitator/KualitasData/TableKualitasData";
 import useScrollRestoration from "@/hooks/useScrollRestoration";
-import { cpnsLebih1Tahun } from "@/services/dimensi-timeliness.services";
+import { cpnsLebihDariSatuTahun } from "@/services/dimensi-timeliness.services";
 import { useQuery } from "@tanstack/react-query";
-import { Button, Card, Row, Table } from "antd";
+import { Button, Card, Row } from "antd";
 import { saveAs } from "file-saver";
 import { useRouter } from "next/router";
 import { useState } from "react";
 import * as XLSX from "xlsx";
-import InformasiPegawai from "@/components/Fasilitator/KualitasData/InformasiPegawai";
-import TableKualitasData from "@/components/Fasilitator/KualitasData/TableKualitasData";
 
 const DownloadButton = ({ onDownload, loading }) => (
   <Row justify="end">
@@ -27,7 +27,7 @@ const CPNSLebih1Tahun = () => {
 
   const { data, isLoading, isFetching } = useQuery(
     ["cpns-lebih-1-tahun", query],
-    () => cpnsLebih1Tahun(query),
+    () => cpnsLebihDariSatuTahun(query),
     {
       enabled: !!query,
       keepPreviousData: true,

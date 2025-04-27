@@ -16,15 +16,15 @@ const TimelinessCpnsLebihDariSatuTahun = () => {
   return (
     <>
       <Head>
-        <title>Rumah ASN - Kualitas Data - Jenis Kelamin Pada ASN</title>
+        <title>Rumah ASN - Kualitas Data - CPNS Lebih Dari Satu Tahun</title>
       </Head>
       <PageContainer
         childrenContentStyle={{
           padding: breakPoint.xs ? 0 : null,
         }}
         onBack={gotoRekonAnomali}
-        title="Dimensi Consistency - Jenis Kelamin Pada ASN"
-        content="Jenis Kelamin Pada ASN"
+        title="Dimensi Timeliness - CPNS Lebih Dari Satu Tahun"
+        content="CPNS Lebih Dari Satu Tahun"
       >
         <CPNSLebih1Tahun />
       </PageContainer>
