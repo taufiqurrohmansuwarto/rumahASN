@@ -185,7 +185,7 @@ export const dashboardConsistency = async (req, res) => {
 
     const hasil = [
       {
-        id: "tmt-cpns-nip-pns",
+        id: "tmt_cpns_nip_pns",
         label: "TMT CPNS vs NIP PNS",
         value: sims[0].total,
         siasn: sis[0].total,
@@ -193,7 +193,7 @@ export const dashboardConsistency = async (req, res) => {
         bobot: 25,
       },
       {
-        id: "tgl-lahir-nip-asn",
+        id: "tgl_lahir_nip_asn",
         label: "Tgl Lahir vs NIP ASN",
         value: sims[1].total,
         siasn: sis[1].total,
@@ -201,7 +201,7 @@ export const dashboardConsistency = async (req, res) => {
         bobot: 25,
       },
       {
-        id: "tahun-pengangkatan-pppk",
+        id: "tahun_pengangkatan_pppk",
         label: "Tahun Pengangkatan PPPK",
         value: sims[2].total,
         siasn: sis[2].total,
@@ -209,7 +209,7 @@ export const dashboardConsistency = async (req, res) => {
         bobot: 25,
       },
       {
-        id: "jenis-kelamin-pada-asn",
+        id: "jenis_kelamin_pada_asn",
         label: "Jenis Kelamin pada ASN",
         value: sims[3].total,
         siasn: sis[3].total,

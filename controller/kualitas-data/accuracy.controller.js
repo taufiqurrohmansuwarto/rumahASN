@@ -283,7 +283,7 @@ export const dashboardAccuracy = async (req, res) => {
 
     const hasil = [
       {
-        id: "tmt-cpns-vs-tmt-pns",
+        id: "tmt-cpns-lebih-besar-dari-tmt-pns",
         label: "TMT CPNS > TMT PNS",
         value: tmtCpns.total,
         siasn: tmtCpnsSiasn.total,
@@ -297,7 +297,7 @@ export const dashboardAccuracy = async (req, res) => {
         bobot: 21.43,
       },
       {
-        id: "masa-kerja-struktural-kurang-2-tahun",
+        id: "masa-kerja-kurang-dari-2-tahun-struktural",
         label: "Masa Kerja < 2 Tahun (Struktural)",
         value: masaKerja.total,
         siasn: masaKerjaSiasn.total,
@@ -311,14 +311,14 @@ export const dashboardAccuracy = async (req, res) => {
         bobot: 4.76,
       },
       {
-        id: "pelaksana-jabatan-fungsional",
+        id: "pelaksana-nama-jabatan-fungsional",
         label: "Pelaksana Nama Jabatan Fungsional",
         value: pelaksanaFungsi.total,
         siasn: pelaksanaFungsiSiasn.total,
         bobot: 4.76,
       },
       {
-        id: "pendidikan-fungsional-tidak-memenuhi",
+        id: "tingkat-pendidikan-jabatan-fungsional-tidak-memenuhi-syarat",
         label: "Pendidikan Jabatan Fungsional Tidak Memenuhi",
         value: pendidikanFungsi.total,
         siasn: pendidikanFungsiSiasn.total,
