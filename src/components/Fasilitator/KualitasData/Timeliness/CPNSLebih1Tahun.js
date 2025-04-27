@@ -1,5 +1,5 @@
 import useScrollRestoration from "@/hooks/useScrollRestoration";
-import { unorTidakAktif } from "@/services/dimensi-timeliness.services";
+import { cpnsLebih1Tahun } from "@/services/dimensi-timeliness.services";
 import { useQuery } from "@tanstack/react-query";
 import { Button, Card, Row, Table } from "antd";
 import { saveAs } from "file-saver";
@@ -17,7 +17,7 @@ const DownloadButton = ({ onDownload, loading }) => (
   </Row>
 );
 
-const UnorTidakAktif = () => {
+const CPNSLebih1Tahun = () => {
   useScrollRestoration();
   const router = useRouter();
   const [query, setQuery] = useState({
@@ -26,8 +26,8 @@ const UnorTidakAktif = () => {
   });
 
   const { data, isLoading, isFetching } = useQuery(
-    ["unor-tidak-aktif", query],
-    () => unorTidakAktif(query),
+    ["cpns-lebih-1-tahun", query],
+    () => cpnsLebih1Tahun(query),
     {
       enabled: !!query,
       keepPreviousData: true,
@@ -38,7 +38,7 @@ const UnorTidakAktif = () => {
 
   const handleDownload = async () => {
     setIsDownloading(true);
-    const result = await unorTidakAktif({ limit: -1 });
+    const result = await cpnsLebih1Tahun({ limit: -1 });
     const workbook = XLSX.utils.book_new();
 
     const sheetData = result?.data?.map((item) => ({
@@ -49,14 +49,14 @@ const UnorTidakAktif = () => {
     }));
 
     const sheet = XLSX.utils.json_to_sheet(sheetData);
-    XLSX.utils.book_append_sheet(workbook, sheet, "Unor Tidak Aktif");
+    XLSX.utils.book_append_sheet(workbook, sheet, "CPNS Lebih 1 Tahun");
 
     const excelBuffer = XLSX.write(workbook, {
       bookType: "xlsx",
       type: "array",
     });
 
-    saveAs(new Blob([excelBuffer]), "unor-tidak-aktif.xlsx");
+    saveAs(new Blob([excelBuffer]), "cpns-lebih-1-tahun.xlsx");
     setIsDownloading(false);
   };
 
@@ -105,4 +105,4 @@ const UnorTidakAktif = () => {
   );
 };
 
-export default UnorTidakAktif;
+export default CPNSLebih1Tahun;
