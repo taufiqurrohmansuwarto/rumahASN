@@ -1,330 +1,225 @@
+// consistency.controller.js
 import {
   getOpdId,
-  handleError,
   validateOpd,
+  handleError,
+  checkTotalPegawai,
 } from "@/utils/helper/controller-helper";
-
 const SyncPegawai = require("@/models/sync-pegawai.model");
 
-const formatApiResponse = (page, limit, total, result) => {
-  return {
-    page,
-    limit,
-    total: total.total,
-    data: result,
-  };
+const DEFAULT_LIMIT = 10;
+const DEFAULT_PAGE = 1;
+const DEFAULT_SOURCE = "simaster";
+
+const formatApiResponse = (page, limit, total, data) => ({
+  page,
+  limit,
+  total: total.total,
+  data,
+});
+
+const addSearchFilter = (search, query, source) => {
+  if (!search) return;
+  if (source === DEFAULT_SOURCE) {
+    query.where("sync.nama_master", "ILIKE", `%${search}%`);
+  } else {
+    query.where("siasn.nama", "ILIKE", `%${search}%`);
+  }
 };
 
-const totalPegawaiPNS = async (opdId) => {
+const createBaseQuery = (skpdId, conditionBuilder, source = DEFAULT_SOURCE) => {
   const knex = SyncPegawai.knex();
-  return knex("sync_pegawai as sync")
-    .whereRaw("sync.skpd_id ILIKE ?", [`${opdId}%`])
-    .andWhereRaw("sync.status_master = 'PNS'")
-    .count(`* as total_pegawai`)
+  if (source === DEFAULT_SOURCE) {
+    return knex("sync_pegawai as sync")
+      .select(
+        "sync.nip_master",
+        "sync.nama_master",
+        "sync.foto",
+        "sync.opd_master",
+        "siasn.email",
+        "siasn.nomor_hp"
+      )
+      .innerJoin(
+        "siasn_employees as siasn",
+        "sync.nip_master",
+        "siasn.nip_baru"
+      )
+      .whereRaw("sync.skpd_id ILIKE ?", [`${skpdId}%`])
+      .andWhere(conditionBuilder)
+      .orderBy("sync.nama_master", "asc");
+  }
+  return knex("siasn_employees as siasn")
+    .select(
+      "siasn.nip_baru as nip_master",
+      "siasn.nama as nama_master",
+      "siasn.foto",
+      "siasn.opd_master",
+      "siasn.email",
+      "siasn.nomor_hp"
+    )
+    .andWhere(conditionBuilder)
+    .orderBy("siasn.nama", "asc");
+};
+
+const createCountingQuery = (
+  skpdId,
+  conditionBuilder,
+  source = DEFAULT_SOURCE
+) => {
+  const knex = SyncPegawai.knex();
+  if (source === DEFAULT_SOURCE) {
+    return knex("sync_pegawai as sync")
+      .innerJoin(
+        "siasn_employees as siasn",
+        "sync.nip_master",
+        "siasn.nip_baru"
+      )
+      .whereRaw("sync.skpd_id ILIKE ?", [`${skpdId}%`])
+      .andWhere(conditionBuilder)
+      .count("* as total")
+      .first();
+  }
+  return knex("siasn_employees as siasn")
+    .andWhere(conditionBuilder)
+    .count("* as total")
     .first();
 };
 
-const totalPegawaiPPPK = async (opdId) => {
-  const knex = SyncPegawai.knex();
-  return knex("sync_pegawai as sync")
-    .whereRaw("sync.skpd_id ILIKE ?", [`${opdId}%`])
-    .andWhereRaw("sync.status_master = 'PPPK'")
-    .count(`* as total_pegawai`)
-    .first();
-};
-
-const totalPegawaiASN = async (opdId) => {
-  const knex = SyncPegawai.knex();
-  return knex("sync_pegawai as sync")
-    .whereRaw("sync.skpd_id ILIKE ?", [`${opdId}%`])
-    .count(`* as total_pegawai`)
-    .first();
-};
-
-const createCountingQuery = (opdId, condition, countAlias) => {
-  const knex = SyncPegawai.knex();
-  return knex("sync_pegawai as sync")
-    .join("siasn_employees as siasn", "sync.nip_master", "siasn.nip_baru")
-    .whereRaw("sync.skpd_id ILIKE ?", [`${opdId}%`])
-    .andWhere(condition)
-    .count(`* as ${countAlias}`)
-    .first();
-};
-
-const createDataQuery = (skpd_id, condition, limit, page) => {
-  const knex = SyncPegawai.knex();
-  return knex("sync_pegawai as sync")
-    .join("siasn_employees as siasn", "sync.nip_master", "siasn.nip_baru")
-    .whereRaw("sync.skpd_id ILIKE ?", [`${skpd_id}%`])
-    .andWhere(condition)
-    .orderBy("sync.nama_master", "asc")
-    .limit(limit)
-    .offset((page - 1) * limit);
-};
-
-const countingTmtCpnsNipPNS = async (opdId) => {
-  return createCountingQuery(
-    opdId,
-    function () {
-      this.whereRaw(
-        `TO_CHAR(TO_DATE(siasn.tmt_cpns, 'DD-MM-YYYY'), 'YYYYMM') != SUBSTRING(siasn.nip_baru, 9, 6)`
-      ).andWhereRaw(
-        `siasn.kedudukan_hukum_id != '71' and siasn.kedudukan_hukum_id != '72'`
-      );
-    },
-    "tmt_cpns_nip_pns"
-  );
-};
-
-const countingTglLahirNipASN = async (opdId) => {
-  return createCountingQuery(
-    opdId,
-    function () {
-      this.whereRaw(
-        `TO_CHAR(TO_DATE(siasn.tanggal_lahir, 'DD-MM-YYYY'), 'YYYYMMDD') != SUBSTRING(siasn.nip_baru, 1, 8)`
-      );
-    },
-    "tgl_lahir_nip_asn"
-  );
-};
-
-const countingTahunPengangkatanPPPK = async (opdId) => {
-  return createCountingQuery(
-    opdId,
-    function () {
-      this.whereRaw(
-        `TO_CHAR(TO_DATE(siasn.tmt_cpns, 'DD-MM-YYYY'), 'YYYY') != SUBSTRING(siasn.nip_baru, 9, 4)`
-      ).andWhereRaw(
-        `siasn.kedudukan_hukum_id = '71' or siasn.kedudukan_hukum_id = '72'`
-      );
-    },
-    "tahun_pengangkatan_pppk"
-  );
-};
-
-const countingJenisKelaminPadaASN = async (opdId) => {
-  return createCountingQuery(
-    opdId,
-    function () {
-      this.whereRaw(
-        ` SUBSTRING(siasn.nip_baru, 15, 1) != CASE 
-    WHEN siasn.jenis_kelamin = 'M' THEN '1'
-    WHEN siasn.jenis_kelamin = 'F' THEN '2'
-    ELSE NULL
-  END`
-      );
-    },
-    "jenis_kelamin_pada_asn"
-  );
-};
-
-export const dashboardConsistentcy = async (req, res) => {
+const listController = (conditionBuilder) => async (req, res) => {
   try {
-    const opdId = getOpdId(req?.user);
-    const { skpd_id = opdId } = req?.query;
+    const opdId = getOpdId(req.user);
+    const {
+      skpd_id = opdId,
+      search = "",
+      limit = DEFAULT_LIMIT,
+      page = DEFAULT_PAGE,
+      source = DEFAULT_SOURCE,
+    } = req.query;
 
-    if (!validateOpd(res, opdId, skpd_id)) return;
+    if (source === DEFAULT_SOURCE && !validateOpd(res, opdId, skpd_id)) return;
 
-    const result = await Promise.all([
-      countingTmtCpnsNipPNS(opdId),
-      countingTglLahirNipASN(opdId),
-      countingTahunPengangkatanPPPK(opdId),
-      countingJenisKelaminPadaASN(opdId),
-    ]);
-
-    const data = {
-      tmt_cpns_nip_pns: result[0].tmt_cpns_nip_pns,
-      tgl_lahir_nip_asn: result[1].tgl_lahir_nip_asn,
-      tahun_pengangkatan_pppk: result[2].tahun_pengangkatan_pppk,
-      jenis_kelamin_pada_asn: result[3].jenis_kelamin_pada_asn,
+    const condition = function () {
+      conditionBuilder.call(this);
+      addSearchFilter(search, this, source);
     };
 
-    const totalPegawai = await Promise.all([
-      totalPegawaiPNS(opdId),
-      totalPegawaiASN(opdId),
-      totalPegawaiPPPK(opdId),
+    const lim = Number(limit),
+      pg = Number(page);
+
+    const dataQ = createBaseQuery(skpd_id, condition, source);
+    if (lim !== -1) dataQ.limit(lim).offset((pg - 1) * lim);
+
+    const [data, total] = await Promise.all([
+      dataQ,
+      createCountingQuery(skpd_id, condition, source),
+    ]);
+
+    if (source === DEFAULT_SOURCE) {
+      return res.json(formatApiResponse(pg, lim, total, data));
+    }
+    return res.json({ total: total.total, data });
+  } catch (err) {
+    handleError(res, err);
+  }
+};
+
+/** Condition builders **/
+const tmtCpnsNipPNSCondition = function () {
+  this.whereRaw(
+    "TO_CHAR(TO_DATE(siasn.tmt_cpns, 'DD-MM-YYYY'),'YYYYMM') != SUBSTRING(siasn.nip_baru,9,6)"
+  ).andWhereRaw(
+    `siasn.kedudukan_hukum_id != '71' and siasn.kedudukan_hukum_id != '72'`
+  );
+};
+
+const tglLahirNipASNCondition = function () {
+  this.whereRaw(
+    "TO_CHAR(TO_DATE(siasn.tanggal_lahir,'DD-MM-YYYY'),'YYYYMMDD') != SUBSTRING(siasn.nip_baru,1,8)"
+  );
+};
+
+const tahunPengangkatanPPPKCondition = function () {
+  this.whereRaw(
+    "TO_CHAR(TO_DATE(siasn.tmt_cpns,'DD-MM-YYYY'),'YYYY') != SUBSTRING(siasn.nip_baru,9,4)"
+  ).andWhereRaw("siasn.kedudukan_hukum_id IN ('71','72')");
+};
+
+const jenisKelaminPadaASNCondition = function () {
+  this.whereRaw(
+    `SUBSTRING(siasn.nip_baru,15,1) != CASE 
+      WHEN siasn.jenis_kelamin = 'M' THEN '1'
+      WHEN siasn.jenis_kelamin = 'F' THEN '2'
+      ELSE NULL END`
+  );
+};
+
+/** List endpoints **/
+export const tmtCpnsNipPNS = listController(tmtCpnsNipPNSCondition);
+export const tglLahirNipASN = listController(tglLahirNipASNCondition);
+export const tahunPengangkatanPPPK = listController(
+  tahunPengangkatanPPPKCondition
+);
+export const jenisKelaminPadaASN = listController(jenisKelaminPadaASNCondition);
+
+/** Dashboard Consistency **/
+export const dashboardConsistency = async (req, res) => {
+  try {
+    const opdId = getOpdId(req.user);
+    const { skpd_id = opdId } = req.query;
+    if (!validateOpd(res, opdId, skpd_id)) return;
+
+    const totalPegawai = await checkTotalPegawai(SyncPegawai.knex(), skpd_id);
+
+    const sims = await Promise.all([
+      createCountingQuery(skpd_id, tmtCpnsNipPNSCondition),
+      createCountingQuery(skpd_id, tglLahirNipASNCondition),
+      createCountingQuery(skpd_id, tahunPengangkatanPPPKCondition),
+      createCountingQuery(skpd_id, jenisKelaminPadaASNCondition),
+    ]);
+    const sis = await Promise.all([
+      createCountingQuery(skpd_id, tmtCpnsNipPNSCondition, "siasn"),
+      createCountingQuery(skpd_id, tglLahirNipASNCondition, "siasn"),
+      createCountingQuery(skpd_id, tahunPengangkatanPPPKCondition, "siasn"),
+      createCountingQuery(skpd_id, jenisKelaminPadaASNCondition, "siasn"),
     ]);
 
     const hasil = [
       {
-        id: "tmt_cpns_nip_pns",
-        label: "TMT CPNS NIP PNS",
-        value: data.tmt_cpns_nip_pns,
-        total_pegawai: totalPegawai[0].total_pegawai,
+        id: "tmt-cpns-nip-pns",
+        label: "TMT CPNS vs NIP PNS",
+        value: sims[0].total,
+        siasn: sis[0].total,
+        totalPegawai,
         bobot: 25,
       },
       {
-        id: "tgl_lahir_nip_asn",
-        label: "TGL LAHIR NIP ASN",
-        value: data.tgl_lahir_nip_asn,
-        total_pegawai: totalPegawai[1].total_pegawai,
+        id: "tgl-lahir-nip-asn",
+        label: "Tgl Lahir vs NIP ASN",
+        value: sims[1].total,
+        siasn: sis[1].total,
+        totalPegawai,
         bobot: 25,
       },
       {
-        id: "tahun_pengangkatan_pppk",
-        label: "TAHUN PENGANGKATAN PPPK",
-        value: data.tahun_pengangkatan_pppk,
-        total_pegawai: totalPegawai[2].total_pegawai,
+        id: "tahun-pengangkatan-pppk",
+        label: "Tahun Pengangkatan PPPK",
+        value: sims[2].total,
+        siasn: sis[2].total,
+        totalPegawai,
         bobot: 25,
       },
       {
-        id: "jenis_kelamin_pada_asn",
-        label: "JENIS KELAMIN PADA ASN",
-        value: data.jenis_kelamin_pada_asn,
-        total_pegawai: totalPegawai[2].total_pegawai,
+        id: "jenis-kelamin-pada-asn",
+        label: "Jenis Kelamin pada ASN",
+        value: sims[3].total,
+        siasn: sis[3].total,
+        totalPegawai,
         bobot: 25,
       },
     ];
 
     res.json(hasil);
-  } catch (error) {
-    handleError(res, error);
-  }
-};
-
-export const tmtCpnsNipPNS = async (req, res) => {
-  try {
-    const opdId = getOpdId(req?.user);
-    const { skpd_id = opdId, limit = 10, page = 1 } = req?.query;
-
-    if (!validateOpd(res, opdId, skpd_id)) return;
-
-    const result = await createDataQuery(
-      skpd_id,
-      function () {
-        this.whereRaw(
-          `TO_CHAR(TO_DATE(siasn.tmt_cpns, 'DD-MM-YYYY'), 'YYYYMM') != SUBSTRING(siasn.nip_baru, 9, 6)`
-        ).andWhereRaw(
-          `siasn.kedudukan_hukum_id != '71' and siasn.kedudukan_hukum_id != '72'`
-        );
-      },
-      limit,
-      page
-    );
-
-    const total = await createCountingQuery(
-      skpd_id,
-      function () {
-        this.whereRaw(
-          `TO_CHAR(TO_DATE(siasn.tmt_cpns, 'DD-MM-YYYY'), 'YYYYMM') != SUBSTRING(siasn.nip_baru, 9, 6)`
-        ).andWhereRaw(
-          `siasn.kedudukan_hukum_id != '71' and siasn.kedudukan_hukum_id != '72'`
-        );
-      },
-      "total"
-    );
-
-    return res.json(formatApiResponse(page, limit, total, result));
-  } catch (error) {
-    handleError(res, error);
-  }
-};
-
-export const tglLahirNipASN = async (req, res) => {
-  try {
-    const opdId = getOpdId(req?.user);
-    const { skpd_id = opdId, limit = 10, page = 1 } = req?.query;
-    console.log(req?.query);
-
-    if (!validateOpd(res, opdId, skpd_id)) return;
-
-    const result = await createDataQuery(
-      skpd_id,
-      function () {
-        this.whereRaw(
-          `TO_CHAR(TO_DATE(siasn.tanggal_lahir, 'DD-MM-YYYY'), 'YYYYMMDD') != SUBSTRING(siasn.nip_baru, 1, 8)`
-        );
-      },
-      limit,
-      page
-    );
-
-    const total = await createCountingQuery(
-      skpd_id,
-      function () {
-        this.whereRaw(
-          `TO_CHAR(TO_DATE(siasn.tanggal_lahir, 'DD-MM-YYYY'), 'YYYYMMDD') != SUBSTRING(siasn.nip_baru, 1, 8)`
-        );
-      },
-      "total"
-    );
-
-    return res.json(formatApiResponse(page, limit, total, result));
-  } catch (error) {
-    handleError(res, error);
-  }
-};
-
-export const tahunPengangkatanPPPK = async (req, res) => {
-  try {
-    const opdId = getOpdId(req?.user);
-    const { skpd_id = opdId, limit = 10, page = 1 } = req?.query;
-
-    const result = await createDataQuery(
-      skpd_id,
-      function () {
-        this.whereRaw(
-          `TO_CHAR(TO_DATE(siasn.tmt_cpns, 'DD-MM-YYYY'), 'YYYY') != SUBSTRING(siasn.nip_baru, 9, 4)`
-        );
-      },
-      limit,
-      page
-    );
-
-    const total = await createCountingQuery(
-      skpd_id,
-      function () {
-        this.whereRaw(
-          `TO_CHAR(TO_DATE(siasn.tmt_cpns, 'DD-MM-YYYY'), 'YYYY') != SUBSTRING(siasn.nip_baru, 9, 4)`
-        );
-      },
-      "total"
-    );
-
-    return res.json(formatApiResponse(page, limit, total, result));
-  } catch (error) {
-    handleError(res, error);
-  }
-};
-
-export const jenisKelaminPadaASN = async (req, res) => {
-  try {
-    const opdId = getOpdId(req?.user);
-    const { skpd_id = opdId, limit = 10, page = 1 } = req?.query;
-
-    if (!validateOpd(res, opdId, skpd_id)) return;
-
-    const result = await createDataQuery(
-      skpd_id,
-      function () {
-        this.whereRaw(
-          ` SUBSTRING(siasn.nip_baru, 15, 1) != CASE 
-    WHEN siasn.jenis_kelamin = 'M' THEN '1'
-    WHEN siasn.jenis_kelamin = 'F' THEN '2'
-    ELSE NULL
-  END`
-        );
-      },
-      limit,
-      page
-    );
-
-    const total = await createCountingQuery(
-      skpd_id,
-      function () {
-        this.whereRaw(
-          ` SUBSTRING(siasn.nip_baru, 15, 1) != CASE 
-    WHEN siasn.jenis_kelamin = 'M' THEN '1'
-    WHEN siasn.jenis_kelamin = 'F' THEN '2'
-    ELSE NULL
-  END`
-        );
-      },
-      "total"
-    );
-
-    return res.json(formatApiResponse(page, limit, total, result));
-  } catch (error) {
-    handleError(res, error);
+  } catch (err) {
+    handleError(res, err);
   }
 };
