@@ -66,3 +66,16 @@ export const pelaksanaNamaJabatanFungsional = async (query) => {
     .get(`/pelaksana-nama-jabatan-fungsional?${params}`)
     .then((res) => res.data);
 };
+
+export const tingkatPendidikanJabatanFungsionalTidakMemenuhiSyarat = async (
+  query
+) => {
+  const params = queryString.stringify(query, {
+    skipEmptyString: true,
+    skipNull: true,
+  });
+
+  return await api
+    .get(`/pendidikan-jf-tidak-memenuhi-syarat?${params}`)
+    .then((res) => res.data);
+};

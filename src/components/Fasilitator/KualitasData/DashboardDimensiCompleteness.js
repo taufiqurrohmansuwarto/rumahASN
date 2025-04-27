@@ -83,7 +83,9 @@ function DashboardDimensiCompleteness() {
       dataIndex: "value",
       key: "value",
       align: "right",
-      render: (value) => <Tag color={value > 0 ? "error" : "success"}>0</Tag>,
+      render: (value) => (
+        <Tag color={value > 0 ? "error" : "success"}>{value}</Tag>
+      ),
     },
     {
       title: "Bobot",
@@ -92,7 +94,7 @@ function DashboardDimensiCompleteness() {
       align: "center",
       render: (value) => (
         <Tooltip title={`Bobot indikator: ${value}`}>
-          <Tag color="blue">{value}%</Tag>
+          <Tag color="blue">{value}</Tag>
         </Tooltip>
       ),
     },
@@ -124,52 +126,12 @@ function DashboardDimensiCompleteness() {
         </Tooltip>
       </Space>
 
-      <Row gutter={[16, 16]}>
-        <Col xs={24} sm={8}>
-          <Statistic
-            title={<Text strong>Total Pegawai</Text>}
-            value={totalPegawai}
-            formatter={(value) => value.toLocaleString("id-ID")}
-            prefix={<TeamOutlined />}
-          />
-        </Col>
-        <Col xs={24} sm={8}>
-          <Statistic
-            title={<Text strong>Data Bermasalah</Text>}
-            value={0}
-            prefix={
-              totalBermasalah > 0 ? (
-                <ExclamationCircleOutlined />
-              ) : (
-                <CheckCircleOutlined />
-              )
-            }
-            formatter={(value) => value.toLocaleString("id-ID")}
-          />
-        </Col>
-        <Col xs={24} sm={8}>
-          <Statistic
-            title={<Text strong>Persentase Masalah</Text>}
-            value={0}
-            suffix="%"
-            prefix={
-              persentaseBermasalah > 5 ? (
-                <ExclamationCircleOutlined />
-              ) : (
-                <CheckCircleOutlined />
-              )
-            }
-          />
-        </Col>
-      </Row>
-
       <Divider>
         <Space>
           <InfoCircleOutlined />
           <Text strong>Detail Indikator Completeness</Text>
         </Space>
       </Divider>
-
       <Table
         loading={isLoading}
         pagination={false}

@@ -11,19 +11,47 @@ const createDataQuery = async (skpd_id, condition, limit, page) => {
   const currentLimit = Number(limit);
   const offset = (page - 1) * currentLimit;
 
-  const query = knex("sync_pegawai as sync")
-    .select(
-      "sync.nip_master",
-      "sync.nama_master",
-      "siasn.email",
-      "siasn.nomor_hp"
-    )
-    .innerJoin("siasn_employees as siasn", "sync.nip_master", "siasn.nip_baru")
-    .whereRaw("sync.skpd_id ILIKE ?", [`${skpd_id}%`])
-    .andWhere(condition)
-    .orderBy("sync.nama_master", "asc")
-    .limit(currentLimit)
-    .offset(offset);
+  let query;
+
+  if (currentLimit === -1) {
+    query = knex("sync_pegawai as sync")
+      .select(
+        "sync.nip_master",
+        "sync.nama_master",
+        "sync.foto",
+        "sync.opd_master",
+        "siasn.email",
+        "siasn.nomor_hp"
+      )
+      .innerJoin(
+        "siasn_employees as siasn",
+        "sync.nip_master",
+        "siasn.nip_baru"
+      )
+      .whereRaw("sync.skpd_id ILIKE ?", [`${skpd_id}%`])
+      .andWhere(condition)
+      .orderBy("sync.nama_master", "asc");
+  } else {
+    query = knex("sync_pegawai as sync")
+      .select(
+        "sync.nip_master",
+        "sync.nama_master",
+        "sync.foto",
+        "sync.opd_master",
+        "siasn.email",
+        "siasn.nomor_hp"
+      )
+      .innerJoin(
+        "siasn_employees as siasn",
+        "sync.nip_master",
+        "siasn.nip_baru"
+      )
+      .whereRaw("sync.skpd_id ILIKE ?", [`${skpd_id}%`])
+      .andWhere(condition)
+      .orderBy("sync.nama_master", "asc")
+      .limit(currentLimit)
+      .offset(offset);
+  }
 
   return query;
 };
@@ -52,6 +80,140 @@ const addSearchFilter = (search, builder) => {
     builder.where("sync.nama_master", "ILIKE", `%${search}%`);
   }
 };
+
+const createQueryTingkatPendidikanJabatanFungsionalTidakMemenuhiSyarat = async (
+  skpd_id,
+  limit,
+  page
+) => {
+  const knex = SyncPegawai.knex();
+  const currentLimit = Number(limit);
+  const offset = (page - 1) * currentLimit;
+
+  let query;
+
+  // CASE expression untuk mapping minimal tingkat_pendidikan_id
+  const caseExpr = `
+    CASE
+      WHEN siasn.jabatan_nama ILIKE '%Ahli Utama%'   THEN '35'  /* minimal D-IV */
+      WHEN siasn.jabatan_nama ILIKE '%Ahli Madya%'   THEN '30'  /* minimal D-III */
+      WHEN siasn.jabatan_nama ILIKE '%Ahli Muda%'    THEN '30'  /* minimal D-III */
+      WHEN siasn.jabatan_nama ILIKE '%Ahli Pertama%' THEN '30'  /* minimal D-III */
+      WHEN siasn.jabatan_nama ILIKE '%Penyelia%'     THEN '15'  /* minimal SMA */
+      WHEN siasn.jabatan_nama ILIKE '%Mahir%'        THEN '15'  /* minimal SMA */
+      WHEN siasn.jabatan_nama ILIKE '%Terampil%'     THEN '05'  /* minimal SD */
+      WHEN siasn.jabatan_nama ILIKE '%Pemula%'       THEN '05'  /* minimal SD */
+      ELSE NULL
+          END
+  `;
+
+  if (currentLimit === -1) {
+    query = knex("sync_pegawai as sync")
+      .select(
+        "sync.nip_master",
+        "sync.nama_master",
+        "sync.foto",
+        "sync.opd_master",
+        "sync.jabatan_master",
+        "siasn.email",
+        "siasn.nomor_hp",
+        "siasn.jabatan_nama",
+        "siasn.tingkat_pendidikan_id"
+      )
+      .innerJoin(
+        "siasn_employees as siasn",
+        "sync.nip_master",
+        "siasn.nip_baru"
+      )
+      .where("sync.skpd_id", "ILIKE", `${skpd_id}%`)
+      // hanya fungsional
+      .andWhere("siasn.jenis_jabatan_id", "2")
+      // tidak p3k
+      .andWhereNot("siasn.kedudukan_hukum_id", ["71", "72"])
+      // pastikan CASE bukan NULL (hanya level yang kita definisikan)
+      .andWhereRaw(`${caseExpr} IS NOT NULL`)
+      // actual < minimal → belum memenuhi syarat
+      .andWhereRaw(`siasn.tingkat_pendidikan_id < ${caseExpr}`)
+      // kondisi filter tambahan dari param
+      .orderBy("sync.nama_master", "asc");
+  } else {
+    query = knex("sync_pegawai as sync")
+      .select(
+        "sync.nip_master",
+        "sync.nama_master",
+        "sync.foto",
+        "sync.opd_master",
+        "sync.jabatan_master",
+        "siasn.email",
+        "siasn.nomor_hp",
+        "siasn.jabatan_nama",
+        "siasn.tingkat_pendidikan_id"
+      )
+      .innerJoin(
+        "siasn_employees as siasn",
+        "sync.nip_master",
+        "siasn.nip_baru"
+      )
+      .where("sync.skpd_id", "ILIKE", `${skpd_id}%`)
+      // hanya fungsional
+      .andWhere("siasn.jenis_jabatan_id", "2")
+      // tidak p3k
+      .andWhereNot("siasn.kedudukan_hukum_id", ["71", "72"])
+      // pastikan CASE bukan NULL (hanya level yang kita definisikan)
+      .andWhereRaw(`${caseExpr} IS NOT NULL`)
+      // actual < minimal → belum memenuhi syarat
+      .andWhereRaw(`siasn.tingkat_pendidikan_id < ${caseExpr}`)
+      // kondisi filter tambahan dari param
+      .orderBy("sync.nama_master", "asc")
+      .limit(currentLimit)
+      .offset(offset);
+  }
+
+  return query;
+};
+
+export const createCountingQueryTingkatPendidikanJabatanFungsionalTidakMemenuhiSyarat =
+  async (skpd_id, countAlias) => {
+    const knex = SyncPegawai.knex();
+
+    // CASE expression untuk mapping minimal tingkat_pendidikan_id
+    const caseExpr = `
+    CASE
+      WHEN siasn.jabatan_nama ILIKE '%Ahli Utama%'   THEN '35'  /* minimal D-IV */
+      WHEN siasn.jabatan_nama ILIKE '%Ahli Madya%'   THEN '30'  /* minimal D-III */
+      WHEN siasn.jabatan_nama ILIKE '%Ahli Muda%'    THEN '30'  /* minimal D-III */
+      WHEN siasn.jabatan_nama ILIKE '%Ahli Pertama%' THEN '30'  /* minimal D-III */
+      WHEN siasn.jabatan_nama ILIKE '%Penyelia%'     THEN '15'  /* minimal SMA */
+      WHEN siasn.jabatan_nama ILIKE '%Mahir%'        THEN '15'  /* minimal SMA */
+      WHEN siasn.jabatan_nama ILIKE '%Terampil%'     THEN '05'  /* minimal SD */
+      WHEN siasn.jabatan_nama ILIKE '%Pemula%'       THEN '05'  /* minimal SD */
+      ELSE NULL
+    END
+  `;
+
+    return (
+      knex("sync_pegawai as sync")
+        .innerJoin(
+          "siasn_employees as siasn",
+          "sync.nip_master",
+          "siasn.nip_baru"
+        )
+        // filter SKPD
+        .where("sync.skpd_id", "ILIKE", `${skpd_id}%`)
+        // hanya fungsional
+        .andWhere("siasn.jenis_jabatan_id", "2")
+        // tidak p3k
+        .andWhereNot("siasn.kedudukan_hukum_id", ["71", "72"])
+        // hanya jabatan yang kita definisikan di CASE
+        .andWhereRaw(`${caseExpr} IS NOT NULL`)
+        // actual < minimal → belum memenuhi
+        .andWhereRaw(`siasn.tingkat_pendidikan_id < ${caseExpr}`)
+        // kondisi tambahan
+        // hitung total
+        .count(`* as ${countAlias}`)
+        .first()
+    );
+  };
 
 const countingTmtCpnsLebihBesarDariTMTPNS = async (opdId) => {
   const knex = SyncPegawai.knex();
@@ -136,6 +298,10 @@ export const dashboardAccuracy = async (req, res) => {
       countingMasaKerjaKurangDari2TahunStruktural(skpd_id),
       countingNikBelumValid(skpd_id),
       countingJabatanPelaksanaNamaJabatanFungsional(skpd_id),
+      createCountingQueryTingkatPendidikanJabatanFungsionalTidakMemenuhiSyarat(
+        skpd_id,
+        "total"
+      ),
     ]);
 
     const data = {
@@ -144,6 +310,8 @@ export const dashboardAccuracy = async (req, res) => {
       masa_kerja_kurang_dari_2_tahun_struktural: result[2].total,
       nik_belum_valid: result[3].total,
       pelaksana_nama_jabatan_fungsional: result[4].total,
+      tingkat_pendidikan_jabatan_fungsional_tidak_memenuhi_syarat:
+        result[5].total,
     };
 
     const hasil = [
@@ -176,6 +344,12 @@ export const dashboardAccuracy = async (req, res) => {
         label: "Pelaksana Nama Jabatan Fungsional",
         value: data.pelaksana_nama_jabatan_fungsional,
         bobot: 4.76,
+      },
+      {
+        id: "tingkat-pendidikan-jabatan-fungsional-tidak-memenuhi-syarat",
+        label: "Tingkat Pendidikan Jabatan Fungsional Tidak Memenuhi Syarat",
+        value: data.tingkat_pendidikan_jabatan_fungsional_tidak_memenuhi_syarat,
+        bobot: 14.29,
       },
     ];
 
@@ -369,6 +543,35 @@ export const pelaksanaNamaJabatanFungsional = async (req, res) => {
       limit,
       page
     );
+
+    return res.json(formatApiResponse(page, limit, total, result));
+  } catch (error) {
+    handleError(res, error);
+  }
+};
+
+export const tingkatPendidikanJabatanFungsionalTidakMemenuhiSyarat = async (
+  req,
+  res
+) => {
+  try {
+    const opdId = getOpdId(req?.user);
+    const { skpd_id = opdId, search = "", limit = 10, page = 1 } = req?.query;
+
+    if (!validateOpd(res, opdId, skpd_id)) return;
+
+    const result =
+      await createQueryTingkatPendidikanJabatanFungsionalTidakMemenuhiSyarat(
+        skpd_id,
+        limit,
+        page
+      );
+
+    const total =
+      await createCountingQueryTingkatPendidikanJabatanFungsionalTidakMemenuhiSyarat(
+        skpd_id,
+        "total"
+      );
 
     return res.json(formatApiResponse(page, limit, total, result));
   } catch (error) {
