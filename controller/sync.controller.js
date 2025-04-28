@@ -158,7 +158,7 @@ const syncPegawai = async (req, res) => {
       .onConflict(["aplikasi", "layanan"])
       .merge(["updated_at"]);
 
-    const knex = await SyncPegawai.knex();
+    const knex = SyncPegawai.knex();
     await knex.delete().from("sync_pegawai");
     await knex.batchInsert("sync_pegawai", employees);
     res.json({ message: "Success" });
