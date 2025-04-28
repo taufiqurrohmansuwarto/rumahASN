@@ -44,15 +44,13 @@ const createBaseQuery = (skpdId, conditionBuilder, source = DEFAULT_SOURCE) => {
       .select(
         "sync.nip_master",
         "sync.foto",
+        "siasn.nip_baru",
+        "siasn.unor_id",
         "sync.nama_master",
         "sync.opd_master"
       )
-      .innerJoin(
-        "siasn_employees as siasn",
-        "sync.nip_master",
-        "siasn.nip_baru"
-      )
-      .innerJoin("ref_siasn.jft as jft", "siasn.jabatan_id", "jft.id")
+      .leftJoin("siasn_employees as siasn", "sync.nip_master", "siasn.nip_baru")
+      .leftJoin("ref_siasn.jft as jft", "siasn.jabatan_id", "jft.id")
       .whereRaw("sync.skpd_id ILIKE ?", [`${skpdId}%`])
       .andWhere(conditionBuilder)
       .orderBy("sync.nama_master", "asc");
@@ -65,7 +63,7 @@ const createBaseQuery = (skpdId, conditionBuilder, source = DEFAULT_SOURCE) => {
       "siasn.nama as nama_master",
       "siasn.opd_master"
     )
-    .innerJoin("ref_siasn.jft as jft", "siasn.jabatan_id", "jft.id")
+    .leftJoin("ref_siasn.jft as jft", "siasn.jabatan_id", "jft.id")
     .andWhere(conditionBuilder)
     .orderBy("siasn.nama", "asc");
 };
@@ -86,12 +84,8 @@ const createCountingQuery = (
 
   if (source === DEFAULT_SOURCE) {
     return knex("sync_pegawai as sync")
-      .innerJoin(
-        "siasn_employees as siasn",
-        "sync.nip_master",
-        "siasn.nip_baru"
-      )
-      .innerJoin("ref_siasn.jft as jft", "siasn.jabatan_id", "jft.id")
+      .leftJoin("siasn_employees as siasn", "sync.nip_master", "siasn.nip_baru")
+      .leftJoin("ref_siasn.jft as jft", "siasn.jabatan_id", "jft.id")
       .whereRaw("sync.skpd_id ILIKE ?", [`${skpdId}%`])
       .andWhere(conditionBuilder)
       .count("* as total")
@@ -99,7 +93,7 @@ const createCountingQuery = (
   }
 
   return knex("siasn_employees as siasn")
-    .innerJoin("ref_siasn.jft as jft", "siasn.jabatan_id", "jft.id")
+    .leftJoin("ref_siasn.jft as jft", "siasn.jabatan_id", "jft.id")
     .andWhere(conditionBuilder)
     .count("* as total")
     .first();
@@ -155,13 +149,19 @@ const cpnsCondition = function () {
 };
 
 const strukturalCondition = function () {
-  // Duplicate structural positions
-  this.whereRaw("siasn.jenis_jabatan_id = '1'").whereExists(function () {
+  // pertama: filter yang struktural saja
+  this.where("siasn.jenis_jabatan_id", "1");
+
+  // kemudian: hanya ambil jika ada “saudara” lain di unor yang sama
+  this.whereExists(function () {
     this.select(1)
       .from("siasn_employees as se2")
-      .whereRaw("siasn.unor_id = se2.unor_id")
-      .whereRaw("siasn.nip_baru != se2.nip_baru")
-      .whereRaw("se2.jenis_jabatan_id = '1'");
+      // cocokkan kolom unor_id
+      .whereColumn("se2.unor_id", "siasn.unor_id")
+      // pastikan juga struktural
+      .andWhere("se2.jenis_jabatan_id", "1")
+      // pastikan bukan baris yang sama
+      .andWhereColumn("se2.nip_baru", "<>", "siasn.nip_baru");
   });
 };
 

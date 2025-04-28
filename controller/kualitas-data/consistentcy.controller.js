@@ -39,11 +39,7 @@ const createBaseQuery = (skpdId, conditionBuilder, source = DEFAULT_SOURCE) => {
         "siasn.email",
         "siasn.nomor_hp"
       )
-      .innerJoin(
-        "siasn_employees as siasn",
-        "sync.nip_master",
-        "siasn.nip_baru"
-      )
+      .leftJoin("siasn_employees as siasn", "sync.nip_master", "siasn.nip_baru")
       .whereRaw("sync.skpd_id ILIKE ?", [`${skpdId}%`])
       .andWhere(conditionBuilder)
       .orderBy("sync.nama_master", "asc");
@@ -69,11 +65,7 @@ const createCountingQuery = (
   const knex = SyncPegawai.knex();
   if (source === DEFAULT_SOURCE) {
     return knex("sync_pegawai as sync")
-      .innerJoin(
-        "siasn_employees as siasn",
-        "sync.nip_master",
-        "siasn.nip_baru"
-      )
+      .leftJoin("siasn_employees as siasn", "sync.nip_master", "siasn.nip_baru")
       .whereRaw("sync.skpd_id ILIKE ?", [`${skpdId}%`])
       .andWhere(conditionBuilder)
       .count("* as total")
