@@ -153,7 +153,7 @@ const listController = (conditionBuilder) => async (req, res) => {
 const cpnsCondition = function () {
   // More than one year + 1 month since CPNS without appointment
   this.whereRaw(
-    "siasn.tmt_cpns::date <= NOW() - INTERVAL '1 year 1 month'"
+    "to_date(siasn.tmt_cpns, 'DD-MM-YYYY') <= CURRENT_DATE - INTERVAL '1 year 1 month'"
   ).andWhere("status_cpns_pns", "C");
 };
 
@@ -178,13 +178,13 @@ const bupCondition = function () {
   // Structural (1) & Pelaksana (4): BUP = 58 tahun + 1 bulan
   this.where(function () {
     this.whereIn("siasn.jenis_jabatan_id", ["1", "4"]).whereRaw(
-      "to_date(siasn.tanggal_lahir, 'DD-MM-YYYY') <= NOW() - INTERVAL '58 years 1 month'"
+      "to_date(siasn.tanggal_lahir, 'DD-MM-YYYY') <= CURRENT_DATE  - INTERVAL '58 years 1 month'"
     );
   })
     // Fungsional (2): BUP = jft.bup_usia tahun + 1 bulan
     .orWhere(function () {
       this.whereRaw("siasn.jenis_jabatan_id = '2'").whereRaw(
-        "to_date(siasn.tanggal_lahir, 'DD-MM-YYYY') <= NOW() - ((COALESCE(jft.bup_usia,0)|| ' years')::interval + INTERVAL '1 month')"
+        "to_date(siasn.tanggal_lahir, 'DD-MM-YYYY') <= CURRENT_DATE - ((COALESCE(jft.bup_usia,0)|| ' years')::interval + INTERVAL '1 month')"
       );
     });
 };
