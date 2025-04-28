@@ -27,28 +27,42 @@ const addSearchFilter = (search, query, source) => {
   }
 };
 
-const createBaseQuery = (skpdId, conditionBuilder, source = DEFAULT_SOURCE) => {
+/**
+ * Bangun query data dengan subquery (simaster) atau join langsung (siasn)
+ */
+const createBaseQuery = (
+  skpdId,
+  conditionBuilder,
+  search = "",
+  source = DEFAULT_SOURCE
+) => {
   const knex = SyncPegawai.knex();
   if (source === DEFAULT_SOURCE) {
-    return knex("sync_pegawai as sync")
+    const main = knex("sync_pegawai as sync")
       .select(
         "sync.nip_master",
         "sync.nama_master",
         "sync.foto",
-        "sync.opd_master",
-        "siasn.email",
-        "siasn.nomor_hp"
+        "sync.opd_master"
       )
-      .innerJoin(
-        "siasn_employees as siasn",
-        "sync.nip_master",
-        "siasn.nip_baru"
-      )
-      .whereRaw("sync.skpd_id ILIKE ?", [`${skpdId}%`])
-      .andWhere(conditionBuilder)
+      .whereRaw("sync.skpd_id ILIKE ?", [`${skpdId}%`]);
+
+    // subquery: filter berdasar conditionBuilder pada siasn_employees
+    const query = main
+      .whereIn("sync.nip_master", function () {
+        this.select("nip_baru")
+          .from("siasn_employees as siasn")
+          .where(function () {
+            conditionBuilder.call(this);
+          });
+      })
       .orderBy("sync.nama_master", "asc");
+
+    return query;
   }
-  return knex("siasn_employees as siasn")
+
+  // mode langsung pada siasn_employees
+  const query = knex("siasn_employees as siasn")
     .select(
       "siasn.nip_baru as nip_master",
       "siasn.nama as nama_master",
@@ -57,10 +71,17 @@ const createBaseQuery = (skpdId, conditionBuilder, source = DEFAULT_SOURCE) => {
       "siasn.email",
       "siasn.nomor_hp"
     )
-    .andWhere(conditionBuilder)
+    .andWhere(function () {
+      conditionBuilder.call(this);
+    })
     .orderBy("siasn.nama", "asc");
+
+  return query;
 };
 
+/**
+ * Bangun query hitung total dengan subquery (simaster) atau langsung (siasn)
+ */
 const createCountingQuery = (
   skpdId,
   conditionBuilder,
@@ -69,22 +90,28 @@ const createCountingQuery = (
   const knex = SyncPegawai.knex();
   if (source === DEFAULT_SOURCE) {
     return knex("sync_pegawai as sync")
-      .innerJoin(
-        "siasn_employees as siasn",
-        "sync.nip_master",
-        "siasn.nip_baru"
-      )
-      .whereRaw("sync.skpd_id ILIKE ?", [`${skpdId}%`])
-      .andWhere(conditionBuilder)
       .count("* as total")
+      .whereRaw("sync.skpd_id ILIKE ?", [`${skpdId}%`])
+      .whereIn("sync.nip_master", function () {
+        this.select("nip_baru")
+          .from("siasn_employees as siasn")
+          .where(function () {
+            conditionBuilder.call(this);
+          });
+      })
       .first();
   }
+
   return knex("siasn_employees as siasn")
-    .andWhere(conditionBuilder)
     .count("* as total")
+    .where(function () {
+      conditionBuilder.call(this);
+    })
     .first();
 };
-
+/**
+ * HOF untuk list-based endpoints
+ */
 const listController = (conditionBuilder) => async (req, res) => {
   try {
     const opdId = getOpdId(req.user);
@@ -98,28 +125,31 @@ const listController = (conditionBuilder) => async (req, res) => {
 
     if (source === DEFAULT_SOURCE && !validateOpd(res, opdId, skpd_id)) return;
 
+    // build kondisi + search
     const condition = function () {
       conditionBuilder.call(this);
-      addSearchFilter(search, this, source);
     };
 
-    const lim = Number(limit),
-      pg = Number(page);
+    const pageNum = Number(page);
+    const lim = Number(limit);
 
-    const dataQ = createBaseQuery(skpd_id, condition, source);
-    if (lim !== -1) dataQ.limit(lim).offset((pg - 1) * lim);
+    // data dan total
+    const dataQuery = createBaseQuery(skpd_id, condition, source);
+    if (lim !== -1) dataQuery.limit(lim).offset((pageNum - 1) * lim);
 
     const [data, total] = await Promise.all([
-      dataQ,
+      dataQuery,
       createCountingQuery(skpd_id, condition, source),
     ]);
 
+    // kirim response
     if (source === DEFAULT_SOURCE) {
-      return res.json(formatApiResponse(pg, lim, total, data));
+      return res.json(formatApiResponse(pageNum, lim, total, data));
+    } else {
+      return res.json({ total: total.total, data });
     }
-    return res.json({ total: total.total, data });
-  } catch (err) {
-    handleError(res, err);
+  } catch (error) {
+    handleError(res, error);
   }
 };
 
