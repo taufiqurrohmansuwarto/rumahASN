@@ -163,6 +163,30 @@ const masaKerjaStrukturalCondition = function () {
   );
 };
 
+const caseEselonPendidikan = `
+  case
+     when siasn.eselon_id = '1' then '40'
+     when siasn.eselon_id = '2' then '40'
+     when siasn.eselon_id = '3' then '15'
+     when siasn.eselon_id = '4' then '15'
+     when siasn.eselon_id = '5' then '15'
+     else null
+  end
+`;
+
+const tingkatPendidikanEselonTidakMemenuhiSyaratCondition = function () {
+  this.where("siasn.jenis_jabatan_id", "1")
+    .andWhere("siasn.eselon_id", "<=", "22")
+    .andWhereRaw(`${caseEselonPendidikan} IS NOT NULL`)
+    .andWhereRaw(`siasn.tingkat_pendidikan_id < ${caseEselonPendidikan}`);
+};
+
+const jabatanPimpinanTinggiDibawahPangkatMinimalCondition = function () {
+  this.where("siasn.jenis_jabatan_id", "1")
+    .andWhere("siasn.eselon_id", "<=", "22")
+    .andWhere("siasn.gol_akhir_id", "<", "42");
+};
+
 const nikBelumValidCondition = function () {
   this.where(
     SyncPegawai.knex().raw("cast(siasn.is_valid_nik as boolean)"),
@@ -233,7 +257,11 @@ export const tingkatPendidikanJabatanFungsionalTidakMemenuhiSyarat =
   listController(pendidikanFungsionalCondition);
 export const PPPKSalahKedhuk = listController(pppkSalahKedhukCondition);
 export const tingkatPendidikanEselonTidakMemenuhiSyarat = listController(
-  eselonPendidikanCondition
+  tingkatPendidikanEselonTidakMemenuhiSyaratCondition
+);
+
+export const jabatanPimpinanTinggiDibawahPangkatMinimal = listController(
+  jabatanPimpinanTinggiDibawahPangkatMinimalCondition
 );
 
 /**
@@ -252,6 +280,8 @@ export const dashboardAccuracy = async (req, res) => {
       nikInvalid,
       pelaksanaFungsi,
       pendidikanFungsi,
+      jabatanPimpinanTinggiDibawahPangkatMinimal,
+      tingkatPendidikanEselonTidakMemenuhiSyarat,
     ] = await Promise.all([
       createCountingQuery(skpd_id, tmtCpnsVsPnsCondition),
       createCountingQuery(skpd_id, jenisPegawaiDPKCondition),
@@ -259,6 +289,14 @@ export const dashboardAccuracy = async (req, res) => {
       createCountingQuery(skpd_id, nikBelumValidCondition),
       createCountingQuery(skpd_id, pelaksanaJabatanFungsionalCondition),
       createCountingQuery(skpd_id, pendidikanFungsionalCondition),
+      createCountingQuery(
+        skpd_id,
+        jabatanPimpinanTinggiDibawahPangkatMinimalCondition
+      ),
+      createCountingQuery(
+        skpd_id,
+        tingkatPendidikanEselonTidakMemenuhiSyaratCondition
+      ),
     ]);
 
     const [
@@ -268,6 +306,8 @@ export const dashboardAccuracy = async (req, res) => {
       nikInvalidSiasn,
       pelaksanaFungsiSiasn,
       pendidikanFungsiSiasn,
+      jabatanPimpinanTinggiDibawahPangkatMinimalSiasn,
+      tingkatPendidikanEselonTidakMemenuhiSyaratSiasn,
     ] = await Promise.all([
       createCountingQuery(skpd_id, tmtCpnsVsPnsCondition, "siasn"),
       createCountingQuery(skpd_id, jenisPegawaiDPKCondition, "siasn"),
@@ -279,6 +319,16 @@ export const dashboardAccuracy = async (req, res) => {
         "siasn"
       ),
       createCountingQuery(skpd_id, pendidikanFungsionalCondition, "siasn"),
+      createCountingQuery(
+        skpd_id,
+        jabatanPimpinanTinggiDibawahPangkatMinimalCondition,
+        "siasn"
+      ),
+      createCountingQuery(
+        skpd_id,
+        tingkatPendidikanEselonTidakMemenuhiSyaratCondition,
+        "siasn"
+      ),
     ]);
 
     const hasil = [
@@ -322,6 +372,20 @@ export const dashboardAccuracy = async (req, res) => {
         label: "Pendidikan Jabatan Fungsional Tidak Memenuhi",
         value: pendidikanFungsi.total,
         siasn: pendidikanFungsiSiasn.total,
+        bobot: 14.29,
+      },
+      {
+        id: "jpt-dibawah-pangkat-minimal",
+        label: "Jabatan Pimpinan Tinggi Dibawah Pangkat Minimal",
+        value: jabatanPimpinanTinggiDibawahPangkatMinimal.total,
+        siasn: jabatanPimpinanTinggiDibawahPangkatMinimalSiasn.total,
+        bobot: 14.29,
+      },
+      {
+        id: "tk-pendidikan-eselon-tdk-memenuhi-syarat",
+        label: "Tingkat Pendidikan Eselon Tidak Memenuhi Syarat",
+        value: tingkatPendidikanEselonTidakMemenuhiSyarat.total,
+        siasn: tingkatPendidikanEselonTidakMemenuhiSyaratSiasn.total,
         bobot: 14.29,
       },
     ];

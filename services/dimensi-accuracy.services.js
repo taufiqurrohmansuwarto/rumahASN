@@ -79,3 +79,25 @@ export const tingkatPendidikanJabatanFungsionalTidakMemenuhiSyarat = async (
     .get(`/pendidikan-jf-tidak-memenuhi-syarat?${params}`)
     .then((res) => res.data);
 };
+
+export const jabatanPimpinanTinggiDibawahPangkatMinimal = async (query) => {
+  const params = queryString.stringify(query, {
+    skipEmptyString: true,
+    skipNull: true,
+  });
+
+  return await api
+    .get(`/jpt-dibawah-pangkat-minimal?${params}`)
+    .then((res) => res.data);
+};
+
+export const tingkatPendidikanEselonTidakMemenuhiSyarat = async (query) => {
+  const params = queryString.stringify(query, {
+    skipEmptyString: true,
+    skipNull: true,
+  });
+
+  return await api
+    .get(`/tk-pendidikan-eselon-tdk-memenuhi-syarat?${params}`)
+    .then((res) => res.data);
+};
