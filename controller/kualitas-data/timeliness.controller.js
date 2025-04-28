@@ -19,61 +19,62 @@ const formatApiResponse = (page, limit, total, data) => ({
   data,
 });
 
-// Adds a name-based search filter if provided
-const addSearchFilter = (search, query, source) => {
-  if (!search) return;
-  if (source === DEFAULT_SOURCE) {
-    query.where("sync.nama_master", "ILIKE", `%${search}%`);
-  } else {
-    query.where("siasn.nama", "ILIKE", `%${search}%`);
-  }
-};
-
 /**
- * Builds the base data query.
- *
- * @param {string} skpdId - skpd filter prefix (ignored if source = 'siasn').
- * @param {function} conditionBuilder - Knex condition builder callback.
- * @param {string} source - 'simaster' (default) or 'siasn'.
+ * Bangun query data dengan subquery (simaster) atau join langsung (siasn)
  */
-const createBaseQuery = (skpdId, conditionBuilder, source = DEFAULT_SOURCE) => {
+const createBaseQuery = (
+  skpdId,
+  conditionBuilder,
+  search = "",
+  source = DEFAULT_SOURCE
+) => {
   const knex = SyncPegawai.knex();
-
   if (source === DEFAULT_SOURCE) {
-    return knex("sync_pegawai as sync")
+    const main = knex("sync_pegawai as sync")
       .select(
         "sync.nip_master",
-        "sync.foto",
-        "siasn.nip_baru",
-        "siasn.unor_id",
         "sync.nama_master",
+        "sync.foto",
         "sync.opd_master"
       )
-      .leftJoin("siasn_employees as siasn", "sync.nip_master", "siasn.nip_baru")
-      .leftJoin("ref_siasn.jft as jft", "siasn.jabatan_id", "jft.id")
-      .whereRaw("sync.skpd_id ILIKE ?", [`${skpdId}%`])
-      .andWhere(conditionBuilder)
+      .whereRaw("sync.skpd_id ILIKE ?", [`${skpdId}%`]);
+
+    // subquery: filter berdasar conditionBuilder pada siasn_employees
+    const query = main
+      .whereIn("sync.nip_master", function () {
+        this.select("nip_baru")
+          .from("siasn_employees as siasn")
+          .leftJoin("ref_siasn.jft as jft", "siasn.jabatan_id", "jft.id")
+          .where(function () {
+            conditionBuilder.call(this);
+          });
+      })
       .orderBy("sync.nama_master", "asc");
+
+    return query;
   }
 
-  return knex("siasn_employees as siasn")
+  // mode langsung pada siasn_employees
+  const query = knex("siasn_employees as siasn")
     .select(
       "siasn.nip_baru as nip_master",
-      "siasn.foto",
       "siasn.nama as nama_master",
-      "siasn.opd_master"
+      "siasn.foto",
+      "siasn.opd_master",
+      "siasn.email",
+      "siasn.nomor_hp"
     )
     .leftJoin("ref_siasn.jft as jft", "siasn.jabatan_id", "jft.id")
-    .andWhere(conditionBuilder)
+    .andWhere(function () {
+      conditionBuilder.call(this);
+    })
     .orderBy("siasn.nama", "asc");
+
+  return query;
 };
 
 /**
- * Builds the counting query.
- *
- * @param {string} skpdId - skpd filter prefix (ignored if source = 'siasn').
- * @param {function} conditionBuilder - Knex condition builder callback.
- * @param {string} source - 'simaster' (default) or 'siasn'.
+ * Bangun query hitung total dengan subquery (simaster) atau langsung (siasn)
  */
 const createCountingQuery = (
   skpdId,
@@ -81,25 +82,32 @@ const createCountingQuery = (
   source = DEFAULT_SOURCE
 ) => {
   const knex = SyncPegawai.knex();
-
   if (source === DEFAULT_SOURCE) {
     return knex("sync_pegawai as sync")
-      .leftJoin("siasn_employees as siasn", "sync.nip_master", "siasn.nip_baru")
-      .leftJoin("ref_siasn.jft as jft", "siasn.jabatan_id", "jft.id")
-      .whereRaw("sync.skpd_id ILIKE ?", [`${skpdId}%`])
-      .andWhere(conditionBuilder)
       .count("* as total")
+      .whereRaw("sync.skpd_id ILIKE ?", [`${skpdId}%`])
+      .whereIn("sync.nip_master", function () {
+        this.select("nip_baru")
+          .from("siasn_employees as siasn")
+          .leftJoin("ref_siasn.jft as jft", "siasn.jabatan_id", "jft.id")
+          .where(function () {
+            conditionBuilder.call(this);
+          });
+      })
       .first();
   }
 
   return knex("siasn_employees as siasn")
-    .leftJoin("ref_siasn.jft as jft", "siasn.jabatan_id", "jft.id")
-    .andWhere(conditionBuilder)
     .count("* as total")
+    .leftJoin("ref_siasn.jft as jft", "siasn.jabatan_id", "jft.id")
+    .where(function () {
+      conditionBuilder.call(this);
+    })
     .first();
 };
-
-// Higher-order function to create list endpoints
+/**
+ * HOF untuk list-based endpoints
+ */
 const listController = (conditionBuilder) => async (req, res) => {
   try {
     const opdId = getOpdId(req.user);
@@ -113,16 +121,15 @@ const listController = (conditionBuilder) => async (req, res) => {
 
     if (source === DEFAULT_SOURCE && !validateOpd(res, opdId, skpd_id)) return;
 
-    // Build condition with optional search filter
+    // build kondisi + search
     const condition = function () {
       conditionBuilder.call(this);
-      addSearchFilter(search, this, source);
     };
 
-    // Prepare data and count queries
     const pageNum = Number(page);
     const lim = Number(limit);
 
+    // data dan total
     const dataQuery = createBaseQuery(skpd_id, condition, source);
     if (lim !== -1) dataQuery.limit(lim).offset((pageNum - 1) * lim);
 
@@ -131,10 +138,12 @@ const listController = (conditionBuilder) => async (req, res) => {
       createCountingQuery(skpd_id, condition, source),
     ]);
 
+    // kirim response
     if (source === DEFAULT_SOURCE) {
       return res.json(formatApiResponse(pageNum, lim, total, data));
+    } else {
+      return res.json({ total: total.total, data });
     }
-    return res.json({ data, total: total.total });
   } catch (error) {
     handleError(res, error);
   }
