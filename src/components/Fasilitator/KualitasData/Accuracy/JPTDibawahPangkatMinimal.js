@@ -8,6 +8,7 @@ import { saveAs } from "file-saver";
 import { useRouter } from "next/router";
 import { useState } from "react";
 import * as XLSX from "xlsx";
+import FilterSource from "@/components/Fasilitator/KualitasData/FilterSource";
 
 // Komponen tombol download
 const DownloadButton = ({ onDownload, loading }) => (
@@ -27,10 +28,10 @@ const JPTDibawahPangkatMinimal = () => {
   });
 
   const { data, isLoading, isFetching } = useQuery(
-    ["jpt-dibawah-pangkat-minimal", query],
-    () => jabatanPimpinanTinggiDibawahPangkatMinimal(query),
+    ["jpt-dibawah-pangkat-minimal", router?.query],
+    () => jabatanPimpinanTinggiDibawahPangkatMinimal(router?.query),
     {
-      enabled: !!query,
+      enabled: !!router?.query,
       keepPreviousData: true,
     }
   );
@@ -93,6 +94,7 @@ const JPTDibawahPangkatMinimal = () => {
 
   return (
     <Card>
+      <FilterSource query={query} setQuery={setQuery} />
       <DownloadButton onDownload={handleDownload} loading={isDownloading} />
       <TableKualitasData
         data={data?.data}
@@ -102,9 +104,6 @@ const JPTDibawahPangkatMinimal = () => {
         pagination={{
           total: data?.total,
           position: ["bottomRight", "topRight"],
-          pageSize: query?.limit,
-          current: query?.page,
-          showSizeChanger: false,
           onChange: handleChange,
           showTotal: (total, range) =>
             `${range[0]}-${range[1]} dari ${total} data`,

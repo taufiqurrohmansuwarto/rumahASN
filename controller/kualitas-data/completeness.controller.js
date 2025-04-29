@@ -30,20 +30,16 @@ const addSearchFilter = (search, query, source) => {
 /**
  * Bangun query data dengan subquery (simaster) atau join langsung (siasn)
  */
-const createBaseQuery = (
-  skpdId,
-  conditionBuilder,
-  search = "",
-  source = DEFAULT_SOURCE
-) => {
+const createBaseQuery = (skpdId, conditionBuilder, source = DEFAULT_SOURCE) => {
   const knex = SyncPegawai.knex();
   if (source === DEFAULT_SOURCE) {
     const main = knex("sync_pegawai as sync")
       .select(
-        "sync.nip_master",
-        "sync.nama_master",
-        "sync.foto",
-        "sync.opd_master"
+        "sync.nip_master as nip",
+        "sync.nama_master as nama",
+        "sync.foto as foto",
+        "sync.opd_master as unit_organisasi",
+        "sync.jabatan_master as jabatan"
       )
       .whereRaw("sync.skpd_id ILIKE ?", [`${skpdId}%`]);
 
@@ -64,12 +60,10 @@ const createBaseQuery = (
   // mode langsung pada siasn_employees
   const query = knex("siasn_employees as siasn")
     .select(
-      "siasn.nip_baru as nip_master",
-      "siasn.nama as nama_master",
-      "siasn.foto",
-      "siasn.opd_master",
-      "siasn.email",
-      "siasn.nomor_hp"
+      "siasn.nip_baru as nip",
+      "siasn.nama as nama",
+      "siasn.jabatan_nama as jabatan",
+      "siasn.unor_nama as unit_organisasi"
     )
     .andWhere(function () {
       conditionBuilder.call(this);
@@ -117,7 +111,6 @@ const listController = (conditionBuilder) => async (req, res) => {
     const opdId = getOpdId(req.user);
     const {
       skpd_id = opdId,
-      search = "",
       limit = DEFAULT_LIMIT,
       page = DEFAULT_PAGE,
       source = DEFAULT_SOURCE,
@@ -133,17 +126,25 @@ const listController = (conditionBuilder) => async (req, res) => {
     const pageNum = Number(page);
     const lim = Number(limit);
 
+    const isAdminRole = req?.user?.current_role === "admin";
+
+    let currentSource = source;
+
+    if (!isAdminRole) {
+      currentSource = DEFAULT_SOURCE;
+    }
+
     // data dan total
-    const dataQuery = createBaseQuery(skpd_id, condition, source);
+    const dataQuery = createBaseQuery(skpd_id, condition, currentSource);
     if (lim !== -1) dataQuery.limit(lim).offset((pageNum - 1) * lim);
 
     const [data, total] = await Promise.all([
       dataQuery,
-      createCountingQuery(skpd_id, condition, source),
+      createCountingQuery(skpd_id, condition, currentSource),
     ]);
 
     // kirim response
-    if (source === DEFAULT_SOURCE) {
+    if (currentSource === DEFAULT_SOURCE) {
       return res.json(formatApiResponse(pageNum, lim, total, data));
     } else {
       return res.json({ total: total.total, data });

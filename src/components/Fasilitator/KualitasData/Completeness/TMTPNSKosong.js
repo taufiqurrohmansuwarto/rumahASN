@@ -9,6 +9,7 @@ import { saveAs } from "file-saver";
 import * as XLSX from "xlsx";
 import useScrollRestoration from "@/hooks/useScrollRestoration";
 import { FileExcelOutlined } from "@ant-design/icons";
+import FilterSource from "@/components/Fasilitator/KualitasData/FilterSource";
 
 // Komponen tombol download
 const DownloadButton = ({ onDownload, loading }) => (
@@ -24,7 +25,7 @@ const DownloadButton = ({ onDownload, loading }) => (
   </Row>
 );
 
-const TmtPnsKosong = () => {
+const TMTPNSKosong = () => {
   useScrollRestoration();
   const router = useRouter();
   const [query, setQuery] = useState({
@@ -33,10 +34,10 @@ const TmtPnsKosong = () => {
   });
 
   const { data, isLoading, isFetching } = useQuery(
-    ["tmt-pns-kosong", query],
-    () => tmtPnsKosong(query),
+    ["tmt-pns-kosong", router?.query],
+    () => tmtPnsKosong(router?.query),
     {
-      enabled: !!query,
+      enabled: !!router?.query,
       keepPreviousData: true,
     }
   );
@@ -92,6 +93,7 @@ const TmtPnsKosong = () => {
 
   return (
     <Card>
+      <FilterSource query={query} setQuery={setQuery} />
       <DownloadButton onDownload={handleDownload} loading={isDownloading} />
       <TableKualitasData
         data={data?.data}
@@ -101,8 +103,6 @@ const TmtPnsKosong = () => {
         pagination={{
           total: data?.total,
           position: ["bottomRight", "topRight"],
-          pageSize: query?.limit,
-          current: query?.page,
           onChange: handleChange,
           showTotal: (total, range) =>
             `${range[0]}-${range[1]} dari ${total} data`,
@@ -112,4 +112,4 @@ const TmtPnsKosong = () => {
   );
 };
 
-export default TmtPnsKosong;
+export default TMTPNSKosong;

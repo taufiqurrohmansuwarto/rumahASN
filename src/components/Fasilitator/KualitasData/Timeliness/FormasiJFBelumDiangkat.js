@@ -8,6 +8,7 @@ import { useState } from "react";
 import * as XLSX from "xlsx";
 import InformasiPegawai from "@/components/Fasilitator/KualitasData/InformasiPegawai";
 import TableKualitasData from "@/components/Fasilitator/KualitasData/TableKualitasData";
+import FilterSource from "@/components/Fasilitator/KualitasData/FilterSource";
 
 const DownloadButton = ({ onDownload, loading }) => (
   <Row justify="end">
@@ -26,10 +27,10 @@ const FormasiJFBelumDiangkat = () => {
   });
 
   const { data, isLoading, isFetching } = useQuery(
-    ["formasi-jf-belum-diangkat", query],
-    () => formasiJFBelumDiangkat(query),
+    ["formasi-jf-belum-diangkat", router?.query],
+    () => formasiJFBelumDiangkat(router?.query),
     {
-      enabled: !!query,
+      enabled: !!router?.query,
       keepPreviousData: true,
     }
   );
@@ -85,6 +86,7 @@ const FormasiJFBelumDiangkat = () => {
 
   return (
     <Card>
+      <FilterSource query={query} setQuery={setQuery} />
       <DownloadButton onDownload={handleDownload} loading={isDownloading} />
       <TableKualitasData
         data={data?.data}
@@ -94,8 +96,7 @@ const FormasiJFBelumDiangkat = () => {
         pagination={{
           total: data?.total,
           position: ["bottomRight", "topRight"],
-          pageSize: query?.limit,
-          current: query?.page,
+          showSizeChanger: false,
           onChange: handleChange,
           showTotal: (total, range) =>
             `${range[0]}-${range[1]} dari ${total} data`,

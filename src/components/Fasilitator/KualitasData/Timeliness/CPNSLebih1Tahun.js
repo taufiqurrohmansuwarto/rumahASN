@@ -3,11 +3,12 @@ import TableKualitasData from "@/components/Fasilitator/KualitasData/TableKualit
 import useScrollRestoration from "@/hooks/useScrollRestoration";
 import { cpnsLebihDariSatuTahun } from "@/services/dimensi-timeliness.services";
 import { useQuery } from "@tanstack/react-query";
-import { Button, Card, Row } from "antd";
+import { Button, Card, Row, Table } from "antd";
 import { saveAs } from "file-saver";
 import { useRouter } from "next/router";
 import { useState } from "react";
 import * as XLSX from "xlsx";
+import FilterSource from "@/components/Fasilitator/KualitasData/FilterSource";
 
 const DownloadButton = ({ onDownload, loading }) => (
   <Row justify="end">
@@ -26,10 +27,10 @@ const CPNSLebih1Tahun = () => {
   });
 
   const { data, isLoading, isFetching } = useQuery(
-    ["cpns-lebih-1-tahun", query],
-    () => cpnsLebihDariSatuTahun(query),
+    ["cpns-lebih-1-tahun", router?.query],
+    () => cpnsLebihDariSatuTahun(router?.query),
     {
-      enabled: !!query,
+      enabled: !!router?.query,
       keepPreviousData: true,
     }
   );
@@ -85,6 +86,7 @@ const CPNSLebih1Tahun = () => {
 
   return (
     <Card>
+      <FilterSource query={query} setQuery={setQuery} />
       <DownloadButton onDownload={handleDownload} loading={isDownloading} />
       <TableKualitasData
         data={data?.data}
@@ -94,8 +96,7 @@ const CPNSLebih1Tahun = () => {
         pagination={{
           total: data?.total,
           position: ["bottomRight", "topRight"],
-          pageSize: query?.limit,
-          current: query?.page,
+          showSizeChanger: false,
           onChange: handleChange,
           showTotal: (total, range) =>
             `${range[0]}-${range[1]} dari ${total} data`,

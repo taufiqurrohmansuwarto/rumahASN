@@ -3,11 +3,12 @@ import TableKualitasData from "@/components/Fasilitator/KualitasData/TableKualit
 import useScrollRestoration from "@/hooks/useScrollRestoration";
 import { tingkatPendidikanEselonTidakMemenuhiSyarat } from "@/services/dimensi-accuracy.services";
 import { useQuery } from "@tanstack/react-query";
-import { Button, Card, Row } from "antd";
+import { Button, Card, Row, Table } from "antd";
 import { saveAs } from "file-saver";
 import { useRouter } from "next/router";
 import { useState } from "react";
 import * as XLSX from "xlsx";
+import FilterSource from "@/components/Fasilitator/KualitasData/FilterSource";
 
 // Komponen tombol download
 const DownloadButton = ({ onDownload, loading }) => (
@@ -27,10 +28,10 @@ const TingkatPendidikanEselonTidakMemenuhiSyarat = () => {
   });
 
   const { data, isLoading, isFetching } = useQuery(
-    ["tingkat-pendidikan-eselon-tdk-memenuhi-syarat", query],
-    () => tingkatPendidikanEselonTidakMemenuhiSyarat(query),
+    ["tingkat-pendidikan-eselon-tdk-memenuhi-syarat", router?.query],
+    () => tingkatPendidikanEselonTidakMemenuhiSyarat(router?.query),
     {
-      enabled: !!query,
+      enabled: !!router?.query,
       keepPreviousData: true,
     }
   );
@@ -96,6 +97,7 @@ const TingkatPendidikanEselonTidakMemenuhiSyarat = () => {
 
   return (
     <Card>
+      <FilterSource query={query} setQuery={setQuery} />
       <DownloadButton onDownload={handleDownload} loading={isDownloading} />
       <TableKualitasData
         data={data?.data}
@@ -105,9 +107,6 @@ const TingkatPendidikanEselonTidakMemenuhiSyarat = () => {
         pagination={{
           total: data?.total,
           position: ["bottomRight", "topRight"],
-          pageSize: query?.limit,
-          current: query?.page,
-          showSizeChanger: false,
           onChange: handleChange,
           showTotal: (total, range) =>
             `${range[0]}-${range[1]} dari ${total} data`,

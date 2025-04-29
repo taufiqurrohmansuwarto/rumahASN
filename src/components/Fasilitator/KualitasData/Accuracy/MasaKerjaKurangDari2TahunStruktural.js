@@ -8,6 +8,7 @@ import { useState } from "react";
 import * as XLSX from "xlsx";
 import InformasiPegawai from "@/components/Fasilitator/KualitasData/InformasiPegawai";
 import TableKualitasData from "@/components/Fasilitator/KualitasData/TableKualitasData";
+import FilterSource from "@/components/Fasilitator/KualitasData/FilterSource";
 
 // Komponen tombol download
 const DownloadButton = ({ onDownload, loading }) => (
@@ -27,10 +28,10 @@ const MasaKerjaKurangDari2TahunStruktural = () => {
   });
 
   const { data, isLoading, isFetching } = useQuery(
-    ["masa-kerja-kurang-dari-2-tahun-struktural", query],
-    () => masaKerjaKurangDari2TahunStruktural(query),
+    ["masa-kerja-kurang-dari-2-tahun-struktural", router?.query],
+    () => masaKerjaKurangDari2TahunStruktural(router?.query),
     {
-      enabled: !!query,
+      enabled: !!router?.query,
       keepPreviousData: true,
     }
   );
@@ -93,6 +94,7 @@ const MasaKerjaKurangDari2TahunStruktural = () => {
 
   return (
     <Card>
+      <FilterSource query={query} setQuery={setQuery} />
       <DownloadButton onDownload={handleDownload} loading={isDownloading} />
       <TableKualitasData
         data={data?.data}
@@ -102,9 +104,6 @@ const MasaKerjaKurangDari2TahunStruktural = () => {
         pagination={{
           total: data?.total,
           position: ["bottomRight", "topRight"],
-          pageSize: query?.limit,
-          current: query?.page,
-          showSizeChanger: false,
           onChange: handleChange,
           showTotal: (total, range) =>
             `${range[0]}-${range[1]} dari ${total} data`,

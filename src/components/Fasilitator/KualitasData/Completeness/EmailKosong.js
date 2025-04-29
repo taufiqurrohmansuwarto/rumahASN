@@ -9,6 +9,7 @@ import { saveAs } from "file-saver";
 import * as XLSX from "xlsx";
 import useScrollRestoration from "@/hooks/useScrollRestoration";
 import { FileExcelOutlined } from "@ant-design/icons";
+import FilterSource from "@/components/Fasilitator/KualitasData/FilterSource";
 
 // Komponen tombol download
 const DownloadButton = ({ onDownload, loading }) => (
@@ -33,10 +34,10 @@ const EmailKosong = () => {
   });
 
   const { data, isLoading, isFetching } = useQuery(
-    ["email-kosong", query],
-    () => emailKosong(query),
+    ["email-kosong", router?.query],
+    () => emailKosong(router?.query),
     {
-      enabled: !!query,
+      enabled: !!router?.query,
       keepPreviousData: true,
     }
   );
@@ -92,6 +93,7 @@ const EmailKosong = () => {
 
   return (
     <Card>
+      <FilterSource query={query} setQuery={setQuery} />
       <DownloadButton onDownload={handleDownload} loading={isDownloading} />
       <TableKualitasData
         data={data?.data}
@@ -101,8 +103,6 @@ const EmailKosong = () => {
         pagination={{
           total: data?.total,
           position: ["bottomRight", "topRight"],
-          pageSize: query?.limit,
-          current: query?.page,
           onChange: handleChange,
           showTotal: (total, range) =>
             `${range[0]}-${range[1]} dari ${total} data`,
