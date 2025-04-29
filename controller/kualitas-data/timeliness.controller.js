@@ -178,14 +178,40 @@ const bupCondition = function () {
   // Structural (1) & Pelaksana (4): BUP = 58 tahun + 1 bulan
   this.where(function () {
     this.whereIn("siasn.jenis_jabatan_id", ["1", "4"]).whereRaw(
-      "to_date(siasn.tanggal_lahir, 'DD-MM-YYYY') <= CURRENT_DATE  - INTERVAL '58 years 1 month'"
-    );
+      `date_part('year',age(to_date(siasn.tanggal_lahir,'DD-MM-YYYY'))) >= 58`
+    ).whereRaw(`
+        make_date(
+          EXTRACT(YEAR   FROM CURRENT_DATE)::int,
+          EXTRACT(MONTH  FROM to_date(siasn.tanggal_lahir,'DD-MM-YYYY'))::int,
+          CASE
+            WHEN EXTRACT(MONTH FROM to_date(siasn.tanggal_lahir,'DD-MM-YYYY')) = 2
+              AND EXTRACT(DAY   FROM to_date(siasn.tanggal_lahir,'DD-MM-YYYY')) = 29
+            THEN 28
+            ELSE EXTRACT(DAY FROM to_date(siasn.tanggal_lahir,'DD-MM-YYYY'))::int
+          END
+        )
+        + INTERVAL '1 month'
+        <= CURRENT_DATE
+      `);
   })
     // Fungsional (2): BUP = jft.bup_usia tahun + 1 bulan
     .orWhere(function () {
-      this.whereRaw("siasn.jenis_jabatan_id = '2'").whereRaw(
-        "to_date(siasn.tanggal_lahir, 'DD-MM-YYYY') <= CURRENT_DATE - ((COALESCE(jft.bup_usia,0)|| ' years')::interval + INTERVAL '1 month')"
-      );
+      this.where("siasn.jenis_jabatan_id", "2").whereRaw(
+        `date_part('year',age(to_date(siasn.tanggal_lahir,'DD-MM-YYYY'))) >= jft.bup_usia`
+      ).whereRaw(`
+        make_date(
+          EXTRACT(YEAR   FROM CURRENT_DATE)::int,
+          EXTRACT(MONTH  FROM to_date(siasn.tanggal_lahir,'DD-MM-YYYY'))::int,
+          CASE
+            WHEN EXTRACT(MONTH FROM to_date(siasn.tanggal_lahir,'DD-MM-YYYY')) = 2
+              AND EXTRACT(DAY   FROM to_date(siasn.tanggal_lahir,'DD-MM-YYYY')) = 29
+            THEN 28
+            ELSE EXTRACT(DAY FROM to_date(siasn.tanggal_lahir,'DD-MM-YYYY'))::int
+          END
+        )
+        + INTERVAL '1 month'
+        <= CURRENT_DATE
+      `);
     });
 };
 
