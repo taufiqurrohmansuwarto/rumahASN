@@ -8,6 +8,7 @@ import { useState } from "react";
 import * as XLSX from "xlsx";
 import InformasiPegawai from "@/components/Fasilitator/KualitasData/InformasiPegawai";
 import TableKualitasData from "@/components/Fasilitator/KualitasData/TableKualitasData";
+import FilterSource from "@/components/Fasilitator/KualitasData/FilterSource";
 
 // Komponen tombol download
 const DownloadButton = ({ onDownload, loading }) => (
@@ -27,10 +28,13 @@ const PendidikanJabatanFungsionalTidakMemenuhiSyarat = () => {
   });
 
   const { data, isLoading, isFetching } = useQuery(
-    ["tingkat-pendidikan-jabatan-fungsional-tidak-memenuhi-syarat", query],
-    () => tingkatPendidikanJabatanFungsionalTidakMemenuhiSyarat(query),
+    [
+      "tingkat-pendidikan-jabatan-fungsional-tidak-memenuhi-syarat",
+      router?.query,
+    ],
+    () => tingkatPendidikanJabatanFungsionalTidakMemenuhiSyarat(router?.query),
     {
-      enabled: !!query,
+      enabled: !!router?.query,
       keepPreviousData: true,
     }
   );
@@ -96,6 +100,7 @@ const PendidikanJabatanFungsionalTidakMemenuhiSyarat = () => {
 
   return (
     <Card>
+      <FilterSource query={query} setQuery={setQuery} />
       <DownloadButton onDownload={handleDownload} loading={isDownloading} />
       <TableKualitasData
         data={data?.data}
@@ -105,9 +110,6 @@ const PendidikanJabatanFungsionalTidakMemenuhiSyarat = () => {
         pagination={{
           total: data?.total,
           position: ["bottomRight", "topRight"],
-          pageSize: query?.limit,
-          current: query?.page,
-          showSizeChanger: false,
           onChange: handleChange,
           showTotal: (total, range) =>
             `${range[0]}-${range[1]} dari ${total} data`,

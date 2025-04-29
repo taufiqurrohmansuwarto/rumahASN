@@ -8,6 +8,7 @@ import { useState } from "react";
 import * as XLSX from "xlsx";
 import InformasiPegawai from "@/components/Fasilitator/KualitasData/InformasiPegawai";
 import TableKualitasData from "@/components/Fasilitator/KualitasData/TableKualitasData";
+import FilterSource from "@/components/Fasilitator/KualitasData/FilterSource";
 
 // Komponen tombol download
 const DownloadButton = ({ onDownload, loading }) => (
@@ -27,10 +28,10 @@ const JabatanKosong = () => {
   });
 
   const { data, isLoading, isFetching } = useQuery(
-    ["jabatan-kosong", query],
-    () => jabatanKosong(query),
+    ["jabatan-kosong", router?.query],
+    () => jabatanKosong(router?.query),
     {
-      enabled: !!query,
+      enabled: !!router?.query,
       keepPreviousData: true,
     }
   );
@@ -86,6 +87,7 @@ const JabatanKosong = () => {
 
   return (
     <Card>
+      <FilterSource query={query} setQuery={setQuery} />
       <DownloadButton onDownload={handleDownload} loading={isDownloading} />
       <TableKualitasData
         data={data?.data}
@@ -95,8 +97,6 @@ const JabatanKosong = () => {
         pagination={{
           total: data?.total,
           position: ["bottomRight", "topRight"],
-          pageSize: query?.limit,
-          current: query?.page,
           onChange: handleChange,
           showTotal: (total, range) =>
             `${range[0]}-${range[1]} dari ${total} data`,

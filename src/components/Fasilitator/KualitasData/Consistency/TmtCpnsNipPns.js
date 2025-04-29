@@ -1,8 +1,24 @@
+import useScrollRestoration from "@/hooks/useScrollRestoration";
 import { consistency1 } from "@/services/dimensi-consistency.services";
+import { tmtCpnsNipPns } from "@/services/dimensi-consistency.services";
 import { useQuery } from "@tanstack/react-query";
-import { useState } from "react";
-import { Table } from "antd";
+import { Button, Card, Row, Table } from "antd";
+import { saveAs } from "file-saver";
 import { useRouter } from "next/router";
+import { useState } from "react";
+import * as XLSX from "xlsx";
+import InformasiPegawai from "@/components/Fasilitator/KualitasData/InformasiPegawai";
+import TableKualitasData from "@/components/Fasilitator/KualitasData/TableKualitasData";
+import FilterSource from "@/components/Fasilitator/KualitasData/FilterSource";
+
+// Komponen tombol download
+const DownloadButton = ({ onDownload, loading }) => (
+  <Row justify="end">
+    <Button type="primary" onClick={onDownload} loading={loading}>
+      Download
+    </Button>
+  </Row>
+);
 
 function TmtCpnsNipPns() {
   const router = useRouter();
@@ -11,12 +27,12 @@ function TmtCpnsNipPns() {
     limit: router?.query?.limit || 10,
   });
 
-  const { data, isLoading } = useQuery(
-    ["con1", query],
-    () => consistency1(query),
+  const { data, isLoading, isFetching } = useQuery(
+    ["consistency1", router?.query],
+    () => consistency1(router?.query),
     {
       keepPreviousData: true,
-      enabled: !!query,
+      enabled: !!router?.query,
     }
   );
 
@@ -31,15 +47,35 @@ function TmtCpnsNipPns() {
     },
   ];
 
+  const handleDownload = () => {
+    // Implementasi handleDownload
+  };
+
+  const handleChange = (page) => {
+    setQuery({ ...query, page });
+  };
+
   return (
-    <div>
-      <Table
-        rowKey={(row) => row?.id}
+    <Card>
+      <FilterSource />
+      <DownloadButton onDownload={handleDownload} loading={isDownloading} />
+      <TableKualitasData
+        data={data?.data}
+        isLoading={isLoading}
+        isFetching={isFetching}
         columns={columns}
-        dataSource={data?.data}
-        loading={isLoading}
+        pagination={{
+          total: data?.total,
+          position: ["bottomRight", "topRight"],
+          pageSize: query?.limit,
+          current: query?.page,
+          showSizeChanger: false,
+          onChange: handleChange,
+          showTotal: (total, range) =>
+            `${range[0]}-${range[1]} dari ${total} data`,
+        }}
       />
-    </div>
+    </Card>
   );
 }
 

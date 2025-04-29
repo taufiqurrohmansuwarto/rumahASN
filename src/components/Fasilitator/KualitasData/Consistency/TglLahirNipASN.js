@@ -3,6 +3,13 @@ import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { Table } from "antd";
 import { useRouter } from "next/router";
+import useScrollRestoration from "@/hooks/useScrollRestoration";
+import { tglLahirNipASN } from "@/services/dimensi-consistency.services";
+import { Button, Card, Row } from "antd";
+import { saveAs } from "file-saver";
+import InformasiPegawai from "@/components/Fasilitator/KualitasData/InformasiPegawai";
+import TableKualitasData from "@/components/Fasilitator/KualitasData/TableKualitasData";
+import FilterSource from "@/components/Fasilitator/KualitasData/FilterSource";
 
 function TglLahirNipASN() {
   const router = useRouter();
@@ -18,10 +25,10 @@ function TglLahirNipASN() {
   };
 
   const { data, isLoading } = useQuery(
-    ["con2", query],
-    () => consistency2(query),
+    ["consistency2", router?.query],
+    () => consistency2(router?.query),
     {
-      enabled: !!query,
+      enabled: !!router?.query,
       keepPreviousData: true,
     }
   );
@@ -54,7 +61,6 @@ function TglLahirNipASN() {
 
   return (
     <div>
-      {JSON.stringify(data)}
       <Table
         rowKey={(row) => row?.id}
         pagination={{

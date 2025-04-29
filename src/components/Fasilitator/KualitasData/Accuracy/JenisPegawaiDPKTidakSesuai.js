@@ -1,13 +1,14 @@
 import useScrollRestoration from "@/hooks/useScrollRestoration";
 import { jenisDPKPegawaiTidakSesuai } from "@/services/dimensi-accuracy.services";
 import { useQuery } from "@tanstack/react-query";
-import { Button, Card, Row, Table } from "antd";
+import { Button, Card, Checkbox, Row, Table } from "antd";
 import { saveAs } from "file-saver";
 import { useRouter } from "next/router";
 import { useState } from "react";
 import * as XLSX from "xlsx";
 import InformasiPegawai from "@/components/Fasilitator/KualitasData/InformasiPegawai";
 import TableKualitasData from "@/components/Fasilitator/KualitasData/TableKualitasData";
+import FilterSource from "@/components/Fasilitator/KualitasData/FilterSource";
 
 // Komponen tombol download
 const DownloadButton = ({ onDownload, loading }) => (
@@ -27,10 +28,10 @@ const JenisPegawaiDPKTidakSesuai = () => {
   });
 
   const { data, isLoading, isFetching } = useQuery(
-    ["jenis-pegawai-dpk-tidak-sesuai", query],
-    () => jenisDPKPegawaiTidakSesuai(query),
+    ["jenis-pegawai-dpk-tidak-sesuai", router?.query],
+    () => jenisDPKPegawaiTidakSesuai(router?.query),
     {
-      enabled: !!query,
+      enabled: !!router?.query,
       keepPreviousData: true,
     }
   );
@@ -90,6 +91,7 @@ const JenisPegawaiDPKTidakSesuai = () => {
 
   return (
     <Card>
+      <FilterSource query={query} setQuery={setQuery} />
       <DownloadButton onDownload={handleDownload} loading={isDownloading} />
       <TableKualitasData
         data={data?.data}
@@ -99,9 +101,6 @@ const JenisPegawaiDPKTidakSesuai = () => {
         pagination={{
           total: data?.total,
           position: ["bottomRight", "topRight"],
-          pageSize: query?.limit,
-          current: query?.page,
-          showSizeChanger: false,
           onChange: handleChange,
           showTotal: (total, range) =>
             `${range[0]}-${range[1]} dari ${total} data`,

@@ -1,8 +1,23 @@
+import useScrollRestoration from "@/hooks/useScrollRestoration";
 import { consistency4 } from "@/services/dimensi-consistency.services";
 import { useQuery } from "@tanstack/react-query";
-import { Table } from "antd";
+import { Button, Card, Row, Table } from "antd";
+import { saveAs } from "file-saver";
 import { useRouter } from "next/router";
 import { useState } from "react";
+import * as XLSX from "xlsx";
+import InformasiPegawai from "@/components/Fasilitator/KualitasData/InformasiPegawai";
+import TableKualitasData from "@/components/Fasilitator/KualitasData/TableKualitasData";
+import FilterSource from "@/components/Fasilitator/KualitasData/FilterSource";
+
+// Komponen tombol download
+const DownloadButton = ({ onDownload, loading }) => (
+  <Row justify="end">
+    <Button type="primary" onClick={onDownload} loading={loading}>
+      Download
+    </Button>
+  </Row>
+);
 
 function TahunPengangkatanPPPK() {
   const router = useRouter();
@@ -18,10 +33,10 @@ function TahunPengangkatanPPPK() {
   };
 
   const { data, isLoading } = useQuery(
-    ["tahun-pengangkatan-pppk", query],
-    () => consistency4(query),
+    ["tahun-pengangkatan-pppk", router?.query],
+    () => consistency4(router?.query),
     {
-      enabled: !!query,
+      enabled: !!router?.query,
       keepPreviousData: true,
     }
   );
@@ -53,17 +68,26 @@ function TahunPengangkatanPPPK() {
   };
 
   return (
-    <Table
-      columns={columns}
-      dataSource={data?.data}
-      loading={isLoading}
-      pagination={{
-        total: data?.total,
-        pageSize: query?.limit,
-        current: query?.page,
-        onChange: handleChange,
-      }}
-    />
+    <Card>
+      <FilterSource query={query} setQuery={setQuery} />
+      <DownloadButton onDownload={handleDownload} loading={isDownloading} />
+      <TableKualitasData
+        data={data?.data}
+        isLoading={isLoading}
+        isFetching={isFetching}
+        columns={columns}
+        pagination={{
+          total: data?.total,
+          position: ["bottomRight", "topRight"],
+          pageSize: query?.limit,
+          current: query?.page,
+          showSizeChanger: false,
+          onChange: handleChange,
+          showTotal: (total, range) =>
+            `${range[0]}-${range[1]} dari ${total} data`,
+        }}
+      />
+    </Card>
   );
 }
 
