@@ -51,13 +51,16 @@ export const summarizeQuestion = async (req, res) => {
   try {
     const { id } = req.body;
     const ticket = await Tickets.query().findById(id).select("content");
+    console.log("ini ticket", ticket);
     const response = await openai.chat.completions.create({
-      model: "gpt-4o-mini",
+      model: "gpt-4o-mini", // Menggunakan model yang lebih murah
+      max_tokens: 100, // Membatasi jumlah token untuk mengurangi biaya
+      temperature: 0.7, // Mengatur temperature untuk hasil yang konsisten
       messages: [
         {
           role: "system",
           content:
-            "Ringkas pertanyaan dari user menjadi 1 kalimat, dan jangan ada kata-kata yang tidak perlu",
+            "Ringkas laporan berikut menjadi 1–2 kalimat yang menjelaskan inti masalah pelapor secara formal dan mudah dipahami. Jangan menyimpulkan di luar isi.",
         },
         {
           role: "user",
@@ -65,8 +68,12 @@ export const summarizeQuestion = async (req, res) => {
         },
       ],
     });
+    await Tickets.query().findById(id).patch({
+      summarize_ai: response.choices[0].message.content,
+    });
     res.status(200).json({ summary: response.choices[0].message.content });
   } catch (error) {
-    handleError(error, res);
+    console.log("ini error", error);
+    res.status(500).json({ summary: "Internal server error" });
   }
 };

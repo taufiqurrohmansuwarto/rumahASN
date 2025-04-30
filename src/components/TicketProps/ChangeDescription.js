@@ -9,6 +9,9 @@ import RestrictedContent from "../RestrictedContent";
 import NewTicket from "../Ticket/NewTicket";
 import Link from "next/link";
 import ReactMarkdownCustom from "@/components/MarkdownEditor/ReactMarkdownCustom";
+import TicketSummarize from "../Ticket/TicketSummarize";
+import { Stack } from "@mantine/core";
+import AISummarize from "../Ticket/AISummarize";
 
 function ChangeTicketDescription({ item }) {
   const [isEdit, setIsEdit] = useState();
@@ -81,6 +84,7 @@ function ChangeTicketDescription({ item }) {
             >
               <span onClick={selectEdit}>Edit</span>
             </RestrictedContent>,
+            <TicketSummarize key="ticket-summarize" ticket={item} />,
           ]}
           author={
             <Link href={`/users/${item?.customer?.custom_id}`}>
@@ -97,7 +101,12 @@ function ChangeTicketDescription({ item }) {
               <span>{formatDateFromNow(item?.created_at)}</span>
             </Tooltip>
           }
-          content={<ReactMarkdownCustom>{item?.content}</ReactMarkdownCustom>}
+          content={
+            <Stack>
+              <ReactMarkdownCustom>{item?.content}</ReactMarkdownCustom>
+              <AISummarize summarize={item?.summarize_ai} />
+            </Stack>
+          }
         />
       )}
     </>
