@@ -2,6 +2,7 @@ import RedisManagement from "@/components/LayananSIASN/RedisManagement";
 import RemoveTreeSIASN from "@/components/LayananSIASN/RemoveTreeSIASN";
 import Layout from "@/components/Layout";
 import UserManagements from "@/components/Managements/UserManagements";
+import FineTunning from "@/components/Managements/FineTunning";
 import { Card } from "antd";
 
 const { default: PageContainer } = require("@/components/PageContainer");
@@ -19,6 +20,7 @@ const ManagementUsers = () => {
           <UserManagements />
           <RemoveTreeSIASN />
           <RedisManagement />
+          <FineTunning />
         </Card>
       </PageContainer>
     </>

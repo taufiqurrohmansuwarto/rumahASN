@@ -5,6 +5,14 @@ const api = axios.create({
   baseURL: "/helpdesk/api/admins",
 });
 
+export const downloadFineTunning = async () => {
+  return api
+    .get(`/openai/download`, {
+      responseType: "blob",
+    })
+    .then((res) => res?.data);
+};
+
 export const reportSimasterEmployees = async () => {
   return api
     .get(`/reports/simaster/employees`, {
