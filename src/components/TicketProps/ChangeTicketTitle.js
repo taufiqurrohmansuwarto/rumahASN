@@ -7,7 +7,7 @@ import {
 } from "@/utils/client-utils";
 import { ArrowLeftOutlined } from "@ant-design/icons";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Card, Space, Tag, Typography, message } from "antd";
+import { Space, Tag, Typography, message } from "antd";
 import Link from "next/link";
 import { useRouter } from "next/router";
 

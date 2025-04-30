@@ -1,4 +1,10 @@
 import { handleError } from "@/utils/helper/controller-helper";
+import OpenAI from "openai";
+const Tickets = require("@/models/tickets.model");
+
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+});
 
 const SyncPegawai = require("@/models/sync-pegawai.model");
 
@@ -36,6 +42,30 @@ WHERE comments.is_answer = true
       .map((row) => JSON.stringify(row.message_json))
       .join("\n");
     res.status(200).send(jsonlData);
+  } catch (error) {
+    handleError(error, res);
+  }
+};
+
+export const summarizeQuestion = async (req, res) => {
+  try {
+    const { id } = req.body;
+    const ticket = await Tickets.query().findById(id).select("content");
+    const response = await openai.chat.completions.create({
+      model: "gpt-4o-mini",
+      messages: [
+        {
+          role: "system",
+          content:
+            "Ringkas pertanyaan dari user menjadi 1 kalimat, dan jangan ada kata-kata yang tidak perlu",
+        },
+        {
+          role: "user",
+          content: ticket?.content || "",
+        },
+      ],
+    });
+    res.status(200).json({ summary: response.choices[0].message.content });
   } catch (error) {
     handleError(error, res);
   }
