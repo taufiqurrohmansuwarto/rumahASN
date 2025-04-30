@@ -52,7 +52,12 @@ function TmtCpnsNipPns() {
   };
 
   const handleChange = (page) => {
-    setQuery({ ...query, page });
+    router.push({
+      pathname: router.pathname,
+      query: { ...router?.query, page, limit: pageSize },
+    });
+
+    setQuery({ ...router?.query, page, limit: pageSize });
   };
 
   return (

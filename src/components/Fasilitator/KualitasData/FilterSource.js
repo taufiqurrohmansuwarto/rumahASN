@@ -10,16 +10,20 @@ function FilterSource({ query, setQuery }) {
 
   const handleChangeCheckbox = (value) => {
     setSelected(value);
-    setQuery({ ...query, source: value });
     router.push({
       pathname: router.pathname,
       query: { ...query, page: 1, limit: 10, source: value },
     });
+
+    setQuery({ ...query, source: value });
   };
   return (
-    <Checkbox.Group defaultValue={selected} onChange={handleChangeCheckbox}>
-      <Checkbox value="siasn">SIASN</Checkbox>
-    </Checkbox.Group>
+    <>
+      {JSON.stringify(router?.query)}
+      <Checkbox.Group defaultValue={selected} onChange={handleChangeCheckbox}>
+        <Checkbox value="siasn">SIASN</Checkbox>
+      </Checkbox.Group>
+    </>
   );
 }
 

@@ -39,7 +39,10 @@ const CLTNSetelahTanggalBerakhir = () => {
 
   const handleDownload = async () => {
     setIsDownloading(true);
-    const result = await cltnSetelahTanggalBerakhir({ limit: -1 });
+    const result = await cltnSetelahTanggalBerakhir({
+      ...router?.query,
+      limit: -1,
+    });
     const workbook = XLSX.utils.book_new();
 
     const sheetData = result?.data?.map((item) => ({
@@ -71,11 +74,12 @@ const CLTNSetelahTanggalBerakhir = () => {
   };
 
   const handleChange = (page, pageSize) => {
-    setQuery({ ...query, page, limit: pageSize });
     router.push({
       pathname: router.pathname,
       query: { ...query, page, limit: pageSize },
     });
+
+    setQuery({ ...query, page, limit: pageSize });
   };
 
   const columns = [

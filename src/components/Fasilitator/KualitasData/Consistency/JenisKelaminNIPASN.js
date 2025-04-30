@@ -38,11 +38,12 @@ function JenisKelaminNIPASN() {
   ];
 
   const handleChange = (page, pageSize) => {
-    setQuery({ ...query, page, limit: pageSize });
     router.push({
       pathname: router.pathname,
       query: { ...query, page, limit: pageSize },
     });
+
+    setQuery({ ...query, page, limit: pageSize });
   };
 
   const handleDownload = async () => {

@@ -40,7 +40,11 @@ const MasaKerjaKurangDari2TahunStruktural = () => {
 
   const handleDownload = async () => {
     setIsDownloading(true);
-    const result = await masaKerjaKurangDari2TahunStruktural({ limit: -1 });
+    const result = await masaKerjaKurangDari2TahunStruktural({
+      ...router?.query,
+      limit: -1,
+    });
+
     const workbook = XLSX.utils.book_new();
 
     const sheetData = result?.data?.map((item) => ({
@@ -75,11 +79,12 @@ const MasaKerjaKurangDari2TahunStruktural = () => {
   };
 
   const handleChange = (page, pageSize) => {
-    setQuery({ ...query, page, limit: pageSize });
     router.push({
       pathname: router.pathname,
-      query: { ...query, page, limit: pageSize },
+      query: { ...router?.query, page, limit: pageSize },
     });
+
+    setQuery({ ...router?.query, page, limit: pageSize });
   };
 
   const columns = [
