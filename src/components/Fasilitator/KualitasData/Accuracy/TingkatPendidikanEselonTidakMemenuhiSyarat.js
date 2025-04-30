@@ -41,6 +41,7 @@ const TingkatPendidikanEselonTidakMemenuhiSyarat = () => {
   const handleDownload = async () => {
     setIsDownloading(true);
     const result = await tingkatPendidikanEselonTidakMemenuhiSyarat({
+      ...router?.query,
       limit: -1,
     });
     const workbook = XLSX.utils.book_new();
@@ -78,11 +79,12 @@ const TingkatPendidikanEselonTidakMemenuhiSyarat = () => {
   };
 
   const handleChange = (page, pageSize) => {
-    setQuery({ ...query, page, limit: pageSize });
     router.push({
       pathname: router.pathname,
       query: { ...query, page, limit: pageSize },
     });
+
+    setQuery({ ...query, page, limit: pageSize });
   };
 
   const columns = [
