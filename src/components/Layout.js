@@ -272,6 +272,10 @@ const changeRoutes = (user) => {
               path: "/referensi/sub-faq",
               name: "Kategori F.A.Q",
             },
+            {
+              path: "/referensi/faq-qna",
+              name: "FAQ Bot AI",
+            },
           ],
         },
         {
