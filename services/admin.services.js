@@ -13,6 +13,10 @@ export const downloadFineTunning = async () => {
     .then((res) => res?.data);
 };
 
+export const summarizeQuestion = async (id) => {
+  return api.post(`/openai/summarize`, { id }).then((res) => res?.data);
+};
+
 export const reportSimasterEmployees = async () => {
   return api
     .get(`/reports/simaster/employees`, {
