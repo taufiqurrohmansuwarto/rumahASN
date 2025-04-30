@@ -1,6 +1,7 @@
 import { handleError } from "@/utils/helper/controller-helper";
 import OpenAI from "openai";
 const Tickets = require("@/models/tickets.model");
+const FaqQna = require("@/models/faq-qna.model");
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -75,5 +76,47 @@ export const summarizeQuestion = async (req, res) => {
   } catch (error) {
     console.log("ini error", error);
     res.status(500).json({ summary: "Internal server error" });
+  }
+};
+
+export const getSolution = async (req, res) => {
+  try {
+    const { question, id } = req.body;
+    const faq = await FaqQna.query()
+      .where("is_active", true)
+      .andWhere("effective_date", "<=", new Date())
+      .andWhere("expired_date", ">=", new Date());
+
+    const fewShot = faq
+      .map((item) => `Q: ${item.question}\nA: ${item.answer}`)
+      .join("\n\n");
+
+    const finalPrompt = `${fewShot}\n\nQ: ${question}\nA:`;
+    console.log("ini final prompt", finalPrompt);
+
+    const solution = await openai.chat.completions.create({
+      model: "gpt-4o",
+      max_tokens: 1000,
+      temperature: 0.7,
+      messages: [
+        {
+          role: "system",
+          content:
+            "Anda adalah asisten kepegawaian BKD. Jawablah secara jelas dan sopan.",
+        },
+        { role: "user", content: finalPrompt },
+      ],
+    });
+
+    const answer = solution.choices[0].message.content;
+    console.log("ini answer", answer);
+    await Tickets.query().findById(id).patch({
+      recomendation_answer: answer,
+    });
+
+    res.status(200).json({ message: "Berhasil menambahkan jawaban" });
+  } catch (error) {
+    console.log("ini error", error);
+    res.status(500).json({ message: "Internal server error" });
   }
 };

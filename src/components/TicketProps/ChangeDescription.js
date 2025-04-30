@@ -104,7 +104,7 @@ function ChangeTicketDescription({ item }) {
           content={
             <Stack>
               <ReactMarkdownCustom>{item?.content}</ReactMarkdownCustom>
-              <AISummarize summarize={item?.summarize_ai} />
+              <AISummarize item={item} />
             </Stack>
           }
         />

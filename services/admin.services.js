@@ -17,6 +17,12 @@ export const summarizeQuestion = async (id) => {
   return api.post(`/openai/summarize`, { id }).then((res) => res?.data);
 };
 
+export const getSolution = async ({ question, id }) => {
+  return api
+    .post(`/openai/solution`, { question, id })
+    .then((res) => res?.data);
+};
+
 export const reportSimasterEmployees = async () => {
   return api
     .get(`/reports/simaster/employees`, {
