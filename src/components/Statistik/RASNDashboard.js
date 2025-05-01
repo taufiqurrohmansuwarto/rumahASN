@@ -6,10 +6,43 @@ import UserByDepartment from "@/components/Dashboards/UserByDepartment";
 import UserByGroup from "@/components/Dashboards/UserByGroupCard";
 import { cekTotalPenggunaBestie } from "@/services/assistant-ai.services";
 import { useQuery } from "@tanstack/react-query";
-import { Card, Col, Row, Spin } from "antd";
+import {
+  Button,
+  Card,
+  Col,
+  Flex,
+  Rate,
+  Row,
+  Spin,
+  Table,
+  Typography,
+} from "antd";
+import { ReloadOutlined } from "@ant-design/icons";
 
 const TotalPenggunaBestie = () => {
-  const { data, isLoading } = useQuery({
+  const columns = [
+    {
+      title: "Nama",
+      key: "name",
+      render: (_, record) => {
+        return <Typography.Text>{record?.user?.username}</Typography.Text>;
+      },
+    },
+    {
+      title: "Rating",
+      key: "rating",
+      render: (_, record) => {
+        return <Rate disabled value={record?.rating} />;
+      },
+    },
+    {
+      title: "Feedback",
+      key: "feedback",
+      dataIndex: "feedback",
+    },
+  ];
+
+  const { data, isLoading, refetch, isFetching } = useQuery({
     queryKey: ["total-pengguna-bestie"],
     queryFn: cekTotalPenggunaBestie,
     refetchOnWindowFocus: false,
@@ -21,8 +54,31 @@ const TotalPenggunaBestie = () => {
         <Card title="Pengguna BestieAI">
           <Spin spinning={isLoading} fullscreen />
 
-          <p>{data?.total}</p>
-          {JSON.stringify(data?.feedback)}
+          <Table
+            title={() => {
+              return (
+                <Flex justify="space-between">
+                  <Typography.Text>Daftar Pengguna</Typography.Text>
+                  <Button
+                    type="text"
+                    onClick={() => refetch()}
+                    icon={<ReloadOutlined />}
+                  />
+                </Flex>
+              );
+            }}
+            size="small"
+            loading={isFetching || isLoading}
+            dataSource={data?.feedback}
+            pagination={{
+              pageSize: 25,
+              total: data?.feedback?.length,
+              showTotal: (total, range) =>
+                `${range[0]}-${range[1]} of ${total}`,
+            }}
+            columns={columns}
+            rowKey="id"
+          />
         </Card>
       </Col>
     </Row>

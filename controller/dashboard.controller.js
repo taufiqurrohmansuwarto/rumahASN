@@ -18,7 +18,9 @@ const cekTotalPenggunaBestie = async (req, res) => {
       raw("count(distinct (user_id))")
     );
 
-    const feedback = await AssistantBotFeedback.query();
+    const feedback = await AssistantBotFeedback.query().withGraphFetched(
+      "user(simpleNoAvatar)"
+    );
 
     const total = parseInt(result[0]?.count);
 
