@@ -64,7 +64,7 @@ export const getFaqQna = async (req, res) => {
       sub_category_id,
     } = req.query;
 
-    let query = FaqQna.query();
+    let query = FaqQna.query().withGraphFetched("sub_category.[category]");
 
     if (search) {
       query = query.where((builder) => {
@@ -82,20 +82,27 @@ export const getFaqQna = async (req, res) => {
       query = query.where("sub_category_id", sub_category_id);
     }
 
-    const offset = (page - 1) * limit;
+    const total = await query.clone().resultSize();
+    let data;
 
-    const [total, data] = await Promise.all([
-      query.clone().resultSize(),
-      query.offset(offset).limit(limit).orderBy("created_at", "desc"),
-    ]);
+    if (parseInt(limit) === -1) {
+      // Tampilkan semua data tanpa paging
+      data = await query.orderBy("created_at", "desc");
+    } else {
+      const offset = (page - 1) * limit;
+      data = await query
+        .offset(offset)
+        .limit(limit)
+        .orderBy("created_at", "desc");
+    }
 
     res.status(200).json({
       data,
       meta: {
         total,
-        page: parseInt(page),
+        page: parseInt(limit) === -1 ? 1 : parseInt(page),
         limit: parseInt(limit),
-        totalPages: Math.ceil(total / limit),
+        totalPages: parseInt(limit) === -1 ? 1 : Math.ceil(total / limit),
       },
     });
   } catch (error) {

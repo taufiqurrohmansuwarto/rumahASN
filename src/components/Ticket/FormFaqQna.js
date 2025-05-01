@@ -1,19 +1,36 @@
+import { useQuery } from "@tanstack/react-query";
 import { Button, DatePicker, Form, Input, Select, Switch } from "antd";
 import dayjs from "dayjs";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+
+import { subCategories } from "@/services/index";
 
 const { TextArea } = Input;
 
 function FormFaqQna({ type = "create", data, onSubmit, isLoading }) {
   const [form] = Form.useForm();
+  const [query, setQuery] = useState({
+    page: 1,
+    limit: 10,
+  });
+
+  const { data: dataSubCategories, isLoading: isLoadingSubCategories } =
+    useQuery(["sub-categories", query], () => subCategories(query), {
+      enabled: !!query,
+      keepPreviousData: true,
+    });
 
   useEffect(() => {
-    form.setFieldsValue({
-      ...data,
-      effective_date: data?.effective_date ? dayjs(data.effective_date) : null,
-      expired_date: data?.expired_date ? dayjs(data.expired_date) : null,
-      is_active: data?.is_active ?? true,
-    });
+    if (data) {
+      form.setFieldsValue({
+        ...data,
+        effective_date: data?.effective_date
+          ? dayjs(data.effective_date)
+          : null,
+        expired_date: data?.expired_date ? dayjs(data.expired_date) : null,
+        is_active: data?.is_active ?? true,
+      });
+    }
   }, [data, form]);
 
   const handleFinish = (values) => {
@@ -27,7 +44,12 @@ function FormFaqQna({ type = "create", data, onSubmit, isLoading }) {
   };
 
   return (
-    <Form form={form} layout="vertical" onFinish={handleFinish}>
+    <Form
+      form={form}
+      layout="vertical"
+      onFinish={handleFinish}
+      initialValues={{ is_active: true }}
+    >
       <Form.Item
         name="question"
         label="Pertanyaan"
@@ -52,25 +74,38 @@ function FormFaqQna({ type = "create", data, onSubmit, isLoading }) {
         <Input placeholder="Masukkan referensi peraturan" />
       </Form.Item>
 
-      {/* <Form.Item
+      <Form.Item
         name="sub_category_id"
         label="Sub Kategori"
         rules={[{ required: true, message: "Sub kategori harus dipilih" }]}
       >
-        <Select placeholder="Pilih sub kategori">
-        </Select>
-      </Form.Item> */}
+        <Select
+          placeholder="Pilih sub kategori"
+          showSearch
+          filterOption={(input, option) =>
+            option.label.toLowerCase().indexOf(input.toLowerCase()) >= 0
+          }
+          onSearch={(value) => {
+            setQuery({ ...query, search: value });
+          }}
+          loading={isLoadingSubCategories}
+          options={(dataSubCategories?.data || []).map((item) => ({
+            label: `${item.name} (${item.category.name})`,
+            value: item.id,
+          }))}
+        />
+      </Form.Item>
 
       <Form.Item
         name="effective_date"
         label="Tanggal Efektif"
         rules={[{ required: true, message: "Tanggal efektif harus diisi" }]}
       >
-        <DatePicker style={{ width: "100%" }} />
+        <DatePicker style={{ width: "100%" }} format="DD-MM-YYYY" />
       </Form.Item>
 
       <Form.Item name="expired_date" label="Tanggal Kadaluarsa">
-        <DatePicker style={{ width: "100%" }} />
+        <DatePicker style={{ width: "100%" }} format="DD-MM-YYYY" />
       </Form.Item>
 
       <Form.Item name="is_active" label="Status" valuePropName="checked">

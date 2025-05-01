@@ -13,7 +13,20 @@ class FaqQna extends Model {
     return "id";
   }
 
-  static get relationMappings() {}
+  static get relationMappings() {
+    const SubCategory = require("@/models/sub-categories.model");
+
+    return {
+      sub_category: {
+        relation: Model.HasOneRelation,
+        modelClass: SubCategory,
+        join: {
+          from: "faq_qna.sub_category_id",
+          to: "sub_categories.id",
+        },
+      },
+    };
+  }
 }
 
 module.exports = FaqQna;

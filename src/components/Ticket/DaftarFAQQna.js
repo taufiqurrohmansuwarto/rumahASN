@@ -8,25 +8,28 @@ import {
 import {
   DeleteOutlined,
   EditOutlined,
+  FileExcelOutlined,
   PlusOutlined,
-  QuestionCircleOutlined,
 } from "@ant-design/icons";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Button,
-  Col,
+  Card,
+  Flex,
   Modal,
-  Row,
   Space,
   Table,
   Tag,
   Typography,
   message,
 } from "antd";
+import dayjs from "dayjs";
 import { useRouter } from "next/router";
 import { useState } from "react";
 
 const { Title, Text } = Typography;
+import { saveAs } from "file-saver";
+import * as XLSX from "xlsx";
 
 const ModalForm = ({ open, onCancel, isLoading, onSubmit, type, data }) => {
   return (
@@ -53,6 +56,8 @@ function DaftarFAQQna() {
   const [open, setOpen] = useState(false);
   const [selectedData, setSelectedData] = useState(null);
   const [modalType, setModalType] = useState("create");
+
+  const [isDownloading, setIsDownloading] = useState(false);
 
   const handleCancel = () => {
     setOpen(false);
@@ -140,6 +145,42 @@ function DaftarFAQQna() {
     });
   };
 
+  const handleDownload = async () => {
+    try {
+      setIsDownloading(true);
+      const response = await getFaqQna({ limit: -1 });
+      const workbook = XLSX.utils.book_new();
+      if (response?.data?.length > 0) {
+        const hasil = response?.data?.map((item) => ({
+          pertanyaan: item?.question,
+          jawaban: item?.answer,
+          status: item?.is_active ? "Aktif" : "Tidak Aktif",
+          sub_kategori: item?.sub_category?.name,
+          kategori: item?.sub_category?.category?.name,
+          tanggal_efektif: dayjs(item?.effective_date).format("DD-MM-YYYY"),
+          tanggal_kadaluarsa: dayjs(item?.expired_date).format("DD-MM-YYYY"),
+          referensi_peraturan: item?.regulation_ref,
+        }));
+        const worksheet = XLSX.utils.json_to_sheet(hasil);
+        XLSX.utils.book_append_sheet(workbook, worksheet, "FAQ");
+        const excelBuffer = XLSX.write(workbook, {
+          bookType: "xlsx",
+          type: "array",
+        });
+        const blob = new Blob([excelBuffer], {
+          type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        });
+        saveAs(blob, "FAQ.xlsx");
+      } else {
+        message.error("Tidak ada data untuk diunduh");
+      }
+    } catch (error) {
+      message.error("Gagal mengunduh data");
+    } finally {
+      setIsDownloading(false);
+    }
+  };
+
   const columns = [
     {
       title: "Pertanyaan",
@@ -160,6 +201,22 @@ function DaftarFAQQna() {
           {value ? "Aktif" : "Tidak Aktif"}
         </Tag>
       ),
+    },
+    {
+      title: "Sub Kategori",
+      key: "sub_category",
+      width: "15%",
+      render: (_, record) => {
+        const subCategoryName = record?.sub_category?.name || "";
+        const categoryName = record?.sub_category?.category?.name || "";
+        return (
+          <Text>
+            {subCategoryName && categoryName
+              ? `${subCategoryName} (${categoryName})`
+              : ""}
+          </Text>
+        );
+      },
     },
     {
       title: "Aksi",
@@ -190,45 +247,42 @@ function DaftarFAQQna() {
 
   return (
     <>
-      <Space direction="vertical" size="large" style={{ width: "100%" }}>
-        <Row justify="space-between" align="middle">
-          <Col>
-            <Title level={4} style={{ margin: 0 }}>
-              <QuestionCircleOutlined /> Daftar FAQ
-            </Title>
-            <Text type="secondary">
-              Kelola pertanyaan dan jawaban untuk Bot AI
-            </Text>
-          </Col>
-          <Col>
-            <Button
-              type="primary"
-              icon={<PlusOutlined />}
-              onClick={() => handleOpen()}
-            >
-              Tambah FAQ
-            </Button>
-          </Col>
-        </Row>
-        <>
-          <Table
-            pagination={{
-              current: Number(router?.query?.page) || 1,
-              pageSize: Number(router?.query?.limit) || 10,
-              total: data?.total,
-              showTotal: (total) => `Total ${total} item`,
-              onChange: handleChangePage,
-              showSizeChanger: false,
-            }}
-            columns={columns}
-            dataSource={data?.data}
-            rowKey={(row) => row?.id}
-            loading={isLoading || isFetching}
-            bordered
-            size="middle"
-          />
-        </>
-      </Space>
+      <Card title="Daftar FAQ">
+        <Flex justify="space-between">
+          <Button
+            type="primary"
+            style={{ marginBottom: 16 }}
+            icon={<PlusOutlined />}
+            onClick={() => handleOpen()}
+          >
+            Tambah FAQ
+          </Button>
+          <Button
+            type="primary"
+            icon={<FileExcelOutlined />}
+            onClick={handleDownload}
+            loading={isDownloading}
+          >
+            Download
+          </Button>
+        </Flex>
+        <Table
+          pagination={{
+            current: Number(router?.query?.page) || 1,
+            pageSize: Number(router?.query?.limit) || 10,
+            total: data?.total,
+            showTotal: (total) => `Total ${total} item`,
+            onChange: handleChangePage,
+            showSizeChanger: false,
+          }}
+          columns={columns}
+          dataSource={data?.data}
+          rowKey={(row) => row?.id}
+          loading={isLoading || isFetching}
+          bordered
+          size="middle"
+        />
+      </Card>
 
       <ModalForm
         open={open}
