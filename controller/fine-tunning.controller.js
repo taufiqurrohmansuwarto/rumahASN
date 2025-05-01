@@ -52,7 +52,6 @@ export const summarizeQuestion = async (req, res) => {
   try {
     const { id } = req.body;
     const ticket = await Tickets.query().findById(id).select("content");
-    console.log("ini ticket", ticket);
     const response = await openai.chat.completions.create({
       model: "gpt-4o-mini", // Menggunakan model yang lebih murah
       max_tokens: 100, // Membatasi jumlah token untuk mengurangi biaya
@@ -89,6 +88,9 @@ export const getSolution = async (req, res) => {
       return res.status(404).json({ message: "Ticket not found" });
     }
 
+    const { summarize_ai } = currentTicket;
+    const inputQuestion = summarize_ai || question;
+
     const faq = await FaqQna.query()
       .joinRelated("sub_categories")
       .where("faq_qna.is_active", true)
@@ -96,13 +98,17 @@ export const getSolution = async (req, res) => {
       .andWhere("faq_qna.expired_date", ">=", new Date())
       .andWhere("sub_categories.id", currentTicket.sub_category_id)
       .orderByRaw("RANDOM()") // 🔀 RANDOMIZED
-      .limit(10); // ⛔ Cegah token overflow
+      .limit(20); // ⛔ Cegah token overflow
+
+    if (faq.length === 0) {
+      return res.status(404).json({ message: "FAQ not found" });
+    }
 
     const fewShot = faq
       .map((item) => `Q: ${item.question}\nA: ${item.answer}`)
       .join("\n\n");
 
-    const finalPrompt = `${fewShot}\n\nQ: ${question}\nA:`;
+    const finalPrompt = `${fewShot}\n\nQ: ${inputQuestion}\nA:`;
     console.log("ini final prompt", finalPrompt);
 
     const solution = await openai.chat.completions.create({

@@ -76,6 +76,7 @@ function DaftarFAQQna() {
     () => getFaqQna(router?.query),
     {
       enabled: !!router?.query,
+      keepPreviousData: true,
     }
   );
 
@@ -275,7 +276,7 @@ function DaftarFAQQna() {
           pagination={{
             current: Number(router?.query?.page) || 1,
             pageSize: Number(router?.query?.limit) || 10,
-            total: data?.total,
+            total: data?.meta?.total,
             showTotal: (total) => `Total ${total} item`,
             onChange: handleChangePage,
             showSizeChanger: false,
