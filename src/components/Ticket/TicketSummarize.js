@@ -16,7 +16,8 @@ const TicketSummarize = ({ ticket }) => {
       queryClient.invalidateQueries(["publish-ticket"]);
     },
     onError: (error) => {
-      message.error(error.message);
+      const msg = error.response.data.message || "Gagal membuat summary";
+      message.error(msg);
     },
     onSettled: () => {
       queryClient.invalidateQueries(["publish-ticket"]);
