@@ -101,7 +101,9 @@ export const getSolution = async (req, res) => {
       .limit(20); // ⛔ Cegah token overflow
 
     if (faq.length === 0) {
-      return res.status(404).json({ message: "FAQ not found" });
+      return res.status(404).json({
+        message: "Tidak ditemukan jawaban untuk sub kategori pertanyaan ini!",
+      });
     }
 
     const fewShot = faq
