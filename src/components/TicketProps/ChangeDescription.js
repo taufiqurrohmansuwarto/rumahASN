@@ -2,7 +2,7 @@ import { editTicket } from "@/services/index";
 import { formatDateFromNow } from "@/utils/client-utils";
 import { formatDate } from "@/utils/index";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Tooltip, message, Avatar, Typography } from "antd";
+import { Tooltip, message, Avatar, Typography, Space } from "antd";
 import { Comment } from "@ant-design/compatible";
 import { useState } from "react";
 import RestrictedContent from "../RestrictedContent";
@@ -12,6 +12,7 @@ import ReactMarkdownCustom from "@/components/MarkdownEditor/ReactMarkdownCustom
 import TicketSummarize from "../Ticket/TicketSummarize";
 import { Stack } from "@mantine/core";
 import AISummarize from "../Ticket/AISummarize";
+import { EditOutlined } from "@ant-design/icons";
 
 function ChangeTicketDescription({ item }) {
   const [isEdit, setIsEdit] = useState();
@@ -82,9 +83,13 @@ function ChangeTicketDescription({ item }) {
               key="edit-ticket-description"
               attributes={{ ticket: item }}
             >
-              <span onClick={selectEdit}>Edit</span>
+              <span onClick={selectEdit}>
+                <Space>
+                  <EditOutlined />
+                  Edit
+                </Space>
+              </span>
             </RestrictedContent>,
-            <TicketSummarize key="ticket-summarize" ticket={item} />,
           ]}
           author={
             <Link href={`/users/${item?.customer?.custom_id}`}>
@@ -104,6 +109,7 @@ function ChangeTicketDescription({ item }) {
           content={
             <Stack>
               <ReactMarkdownCustom>{item?.content}</ReactMarkdownCustom>
+              <TicketSummarize ticket={item} />
               <AISummarize item={item} />
             </Stack>
           }

@@ -2,7 +2,8 @@ import { summarizeQuestion } from "@/services/admin.services";
 import { ActionIcon } from "@mantine/core";
 import { IconSparkles } from "@tabler/icons-react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { message, Tooltip } from "antd";
+import { Flex, message } from "antd";
+import { Tooltip } from "@mantine/core";
 import { useSession } from "next-auth/react";
 
 const TicketSummarize = ({ ticket }) => {
@@ -27,13 +28,13 @@ const TicketSummarize = ({ ticket }) => {
   };
 
   return (
-    <>
+    <Flex justify="flex-start">
       {data?.user?.current_role === "admin" && (
-        <Tooltip title="Ringkas dengan AI">
+        <Tooltip label="Ringkas dengan AI">
           <ActionIcon
             loading={isLoading}
             variant="light"
-            color="gray"
+            color="blue"
             size="sm"
             onClick={handleSummarize}
           >
@@ -41,7 +42,7 @@ const TicketSummarize = ({ ticket }) => {
           </ActionIcon>
         </Tooltip>
       )}
-    </>
+    </Flex>
   );
 };
 
