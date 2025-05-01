@@ -58,7 +58,9 @@ const TotalPenggunaBestie = () => {
             title={() => {
               return (
                 <Flex justify="space-between">
-                  <Typography.Text>Daftar Pengguna</Typography.Text>
+                  <Typography.Text>
+                    Daftar Pengguna BestieAI ({data?.total})
+                  </Typography.Text>
                   <Button
                     type="text"
                     onClick={() => refetch()}
