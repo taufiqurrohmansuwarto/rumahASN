@@ -9,14 +9,9 @@ const { TextArea } = Input;
 
 function FormFaqQna({ type = "create", data, onSubmit, isLoading }) {
   const [form] = Form.useForm();
-  const [query, setQuery] = useState({
-    page: 1,
-    limit: 10,
-  });
 
   const { data: dataSubCategories, isLoading: isLoadingSubCategories } =
-    useQuery(["sub-categories", query], () => subCategories(query), {
-      enabled: !!query,
+    useQuery(["sub-categories", "all"], () => subCategories({ limit: -1 }), {
       keepPreviousData: true,
     });
 
@@ -75,19 +70,17 @@ function FormFaqQna({ type = "create", data, onSubmit, isLoading }) {
       </Form.Item>
 
       <Form.Item
-        name="sub_category_id"
+        name="sub_category_ids"
         label="Sub Kategori"
         rules={[{ required: true, message: "Sub kategori harus dipilih" }]}
       >
         <Select
           placeholder="Pilih sub kategori"
           showSearch
+          mode="multiple"
           filterOption={(input, option) =>
             option.label.toLowerCase().indexOf(input.toLowerCase()) >= 0
           }
-          onSearch={(value) => {
-            setQuery({ ...query, search: value });
-          }}
           loading={isLoadingSubCategories}
           options={(dataSubCategories?.data || []).map((item) => ({
             label: `${item.name} (${item.category.name})`,

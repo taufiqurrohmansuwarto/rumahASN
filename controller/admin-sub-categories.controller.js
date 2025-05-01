@@ -8,7 +8,7 @@ const index = async (req, res) => {
     const limit = req.query.limit || 20;
     const search = req.query.search || "";
 
-    const result = await SubCategories.query()
+    let query = SubCategories.query()
       .select("*", raw("EXTRACT(EPOCH FROM durasi / 60) as durasi"))
       .where((builder) => {
         if (search) {
@@ -16,8 +16,20 @@ const index = async (req, res) => {
         }
       })
       .withGraphFetched("[category, created_by]")
-      .page(parseInt(page) - 1, parseInt(limit))
       .orderBy("created_at", "desc");
+
+    let result;
+
+    if (parseInt(limit) === -1) {
+      // Tanpa paging
+      const data = await query;
+      result = {
+        results: data,
+        total: data.length,
+      };
+    } else {
+      result = await query.page(parseInt(page) - 1, parseInt(limit));
+    }
 
     res.json({
       data: result.results,

@@ -106,7 +106,7 @@ function ReactMarkdownCustom({ children, withCustom = true }) {
             overflowWrap: "break-word",
             wordWrap: "break-word",
             margin: 0,
-            paddingTop: 0,
+            padding: 0,
           }}
         >
           {props.children}
@@ -121,7 +121,7 @@ function ReactMarkdownCustom({ children, withCustom = true }) {
             overflowWrap: "break-word",
             wordWrap: "break-word",
             margin: 0,
-            paddingTop: 0,
+            padding: 0,
           }}
         >
           {props.children}
