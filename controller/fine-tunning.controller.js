@@ -109,7 +109,6 @@ export const getSolution = async (req, res) => {
       .join("\n\n");
 
     const finalPrompt = `${fewShot}\n\nQ: ${inputQuestion}\nA:`;
-    console.log("ini final prompt", finalPrompt);
 
     const solution = await openai.chat.completions.create({
       model: "gpt-4o",
@@ -119,7 +118,7 @@ export const getSolution = async (req, res) => {
         {
           role: "system",
           content:
-            "Anda adalah asisten kepegawaian BKD. Jawablah secara jelas dan sopan.",
+            "Anda adalah petugas helpdesk kepegawaian BKD Provinsi Jawa Timur. Tugas Anda adalah memberikan jawaban yang jelas, sopan, dan sesuai prosedur kepada ASN yang mengalami kendala terkait layanan digital seperti ASN Digital, SIASN, MyASN, atau SIMASTER. Jawaban Anda harus menggunakan bahasa formal dan membantu pelapor memahami langkah yang perlu dilakukan.",
         },
         { role: "user", content: finalPrompt },
       ],
