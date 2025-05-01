@@ -3,14 +3,42 @@ const FaqQna = require("@/models/faq-qna.model");
 
 export const createFaqQna = async (req, res) => {
   try {
-    const { body } = req;
+    const {
+      question,
+      answer,
+      regulation_ref,
+      is_active,
+      effective_date,
+      expired_date,
+      sub_category_ids = [],
+    } = req.body;
+
+    if (
+      !question ||
+      !answer ||
+      !Array.isArray(sub_category_ids) ||
+      sub_category_ids.length === 0
+    ) {
+      return res.status(400).json({ message: "Data tidak lengkap." });
+    }
+
     const { customId } = req?.user;
     const payload = {
-      ...body,
+      question,
+      answer,
+      regulation_ref,
+      is_active,
+      effective_date,
+      expired_date,
       created_by: customId,
     };
-    const faqQna = await FaqQna.query().insert(payload);
-    res.status(201).json(faqQna);
+
+    // insert
+    const faq = await FaqQna.query().insert(payload);
+    // insert sub category
+    await faq.$relatedQuery("sub_categories").relate(sub_category_ids);
+
+    res.status(201).json({ message: "FAQ berhasil ditambahkan" });
   } catch (error) {
     handleError(res, error);
   }
@@ -19,20 +47,42 @@ export const createFaqQna = async (req, res) => {
 export const updateFaqQna = async (req, res) => {
   try {
     const { id } = req.query;
-    const { body } = req;
+    const {
+      question,
+      answer,
+      regulation_ref,
+      is_active,
+      effective_date,
+      expired_date,
+      sub_category_ids = [],
+    } = req.body;
     const { customId } = req?.user;
-    const payload = {
-      ...body,
-      updated_by: customId,
-    };
 
-    const faqQna = await FaqQna.query().patchAndFetchById(id, payload);
+    const faq = await FaqQna.query().findById(id);
 
-    if (!faqQna) {
+    if (!faq) {
       return res.status(404).json({ message: "FAQ tidak ditemukan" });
     }
 
-    res.status(200).json(faqQna);
+    const payload = {
+      question,
+      answer,
+      regulation_ref,
+      is_active,
+      effective_date,
+      expired_date,
+      updated_by: customId,
+    };
+
+    await faq.$query().patch(payload);
+
+    await faq.$relatedQuery("sub_categories").unrelate();
+
+    if (sub_category_ids.length > 0) {
+      await faq.$relatedQuery("sub_categories").relate(sub_category_ids);
+    }
+
+    res.status(200).json({ message: "FAQ berhasil diubah" });
   } catch (error) {
     handleError(res, error);
   }
@@ -64,7 +114,7 @@ export const getFaqQna = async (req, res) => {
       sub_category_id,
     } = req.query;
 
-    let query = FaqQna.query().withGraphFetched("sub_category.[category]");
+    let query = FaqQna.query().withGraphFetched("[sub_categories.[category]]");
 
     if (search) {
       query = query.where((builder) => {

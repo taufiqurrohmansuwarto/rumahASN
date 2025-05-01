@@ -155,8 +155,9 @@ function DaftarFAQQna() {
           pertanyaan: item?.question,
           jawaban: item?.answer,
           status: item?.is_active ? "Aktif" : "Tidak Aktif",
-          sub_kategori: item?.sub_category?.name,
-          kategori: item?.sub_category?.category?.name,
+          sub_kategori: item?.sub_categories
+            ?.map((item) => `${item?.name} (${item?.category?.name})`)
+            .join(", "),
           tanggal_efektif: dayjs(item?.effective_date).format("DD-MM-YYYY"),
           tanggal_kadaluarsa: dayjs(item?.expired_date).format("DD-MM-YYYY"),
           referensi_peraturan: item?.regulation_ref,
@@ -207,8 +208,12 @@ function DaftarFAQQna() {
       key: "sub_category",
       width: "15%",
       render: (_, record) => {
-        const subCategoryName = record?.sub_category?.name || "";
-        const categoryName = record?.sub_category?.category?.name || "";
+        const subCategoryName = record?.sub_categories?.map(
+          (item) => item?.name
+        );
+        const categoryName = record?.sub_categories?.map(
+          (item) => item?.category?.name
+        );
         return (
           <Text>
             {subCategoryName && categoryName

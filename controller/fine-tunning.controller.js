@@ -82,10 +82,21 @@ export const summarizeQuestion = async (req, res) => {
 export const getSolution = async (req, res) => {
   try {
     const { question, id } = req.body;
+
+    const currentTicket = await Tickets.query().findById(id);
+
+    if (!currentTicket) {
+      return res.status(404).json({ message: "Ticket not found" });
+    }
+
     const faq = await FaqQna.query()
-      .where("is_active", true)
-      .andWhere("effective_date", "<=", new Date())
-      .andWhere("expired_date", ">=", new Date());
+      .joinRelated("sub_categories")
+      .where("faq_qna.is_active", true)
+      .andWhere("faq_qna.effective_date", "<=", new Date())
+      .andWhere("faq_qna.expired_date", ">=", new Date())
+      .andWhere("sub_categories.id", currentTicket.sub_category_id)
+      .orderByRaw("RANDOM()") // 🔀 RANDOMIZED
+      .limit(10); // ⛔ Cegah token overflow
 
     const fewShot = faq
       .map((item) => `Q: ${item.question}\nA: ${item.answer}`)
@@ -109,7 +120,6 @@ export const getSolution = async (req, res) => {
     });
 
     const answer = solution.choices[0].message.content;
-    console.log("ini answer", answer);
     await Tickets.query().findById(id).patch({
       recomendation_answer: answer,
     });
