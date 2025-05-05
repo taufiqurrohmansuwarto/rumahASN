@@ -771,6 +771,15 @@ export const getPengadaanProxy = async (query) => {
     .then((res) => res.data);
 };
 
+// generate sk
+export const generateSK = async (query) => {
+  return api
+    .get(`/admin/pengadaan/proxy/generate/sk?${queryString.stringify(query)}`, {
+      responseType: "blob",
+    })
+    .then((res) => res.data);
+};
+
 export const syncPengadaanProxy = async (query) => {
   return api
     .get(`/admin/pengadaan/proxy/sync?${queryString.stringify(query)}`)

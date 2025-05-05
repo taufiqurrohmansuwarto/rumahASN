@@ -1,6 +1,7 @@
 import useScrollRestoration from "@/hooks/useScrollRestoration";
 import {
   downloadAllDokumenPengadaanProxy,
+  generateSK,
   getPengadaanProxy,
   refStatusUsul,
   resetUploadDokumenPengadaanProxy,
@@ -179,6 +180,40 @@ const AmbilSemuaDokumen = () => {
         Ambil Semua <DownOutlined />
       </Button>
     </Dropdown>
+  );
+};
+
+const DownloadDokumenSK = () => {
+  const router = useRouter();
+  const { mutateAsync: downloadSK, isLoading: isDownloadingSK } = useMutation({
+    mutationFn: () => generateSK(router?.query),
+    onSuccess: () => {
+      message.success("Data berhasil diunduh");
+    },
+    onError: (error) => {
+      message.error(error?.message || "Gagal mengunduh data");
+    },
+  });
+
+  const handleDownload = async () => {
+    const result = await downloadSK({
+      tahun: router?.query?.tahun || dayjs().format(formatYear),
+    });
+    saveAs(
+      result,
+      `SK_${router?.query?.tahun || dayjs().format(formatYear)}.zip`
+    );
+  };
+
+  return (
+    <Button
+      icon={<CloudDownloadOutlined />}
+      type="primary"
+      loading={isDownloadingSK}
+      onClick={handleDownload}
+    >
+      Download SK
+    </Button>
   );
 };
 
@@ -820,6 +855,7 @@ function LayananPengadaan() {
           </Button>
           <AmbilSemuaDokumen />
           <UnduhSemuaDokumen />
+          <DownloadDokumenSK />
         </Space>
       </div>
 
