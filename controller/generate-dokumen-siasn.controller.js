@@ -1,10 +1,31 @@
 const SiasnPengadaanProxy = require("@/models/siasn-pengadaan-proxy.model");
 const axios = require("axios");
 const dayjs = require("dayjs");
-const { TemplateHandler } = require("easy-template-x");
+const { TemplateHandler, MimeType } = require("easy-template-x");
 const { trim } = require("lodash");
 const archiver = require("archiver");
-const FILE_SK = "FORMAT_SK_CPNS_2024";
+const FILE_SK = "FORMAT_SK_CPNS_2024_NEW";
+const qrcode = require("qrcode");
+const FormData = require("form-data");
+
+const makeQrCode = async (id) => {
+  const url = `https://siasn.bkd.jatimprov.go.id/helpdesk/check-qr/pengadaan/${id}`;
+  try {
+    const qrCodeData = await qrcode.toDataURL(url, {
+      errorCorrectionLevel: "H",
+      margin: 1,
+      width: 200,
+      color: {
+        dark: "#000000",
+        light: "#FFFFFF",
+      },
+    });
+    return qrCodeData.split(",")[1]; // Menghapus prefix data URL untuk mendapatkan base64 murni
+  } catch (error) {
+    console.error("Error generating QR code:", error);
+    throw new Error("Gagal membuat QR code");
+  }
+};
 
 const generateDokumenSKPengadaan = async (req, res) => {
   try {
@@ -34,10 +55,11 @@ const generateDokumenSKPengadaan = async (req, res) => {
 
     // Process each record and add to archive
     for (const data of results) {
-      const templateData = prepareTemplateData(data);
+      const templateData = await prepareTemplateData(data);
       const docxResult = await processTemplate(wordFormat.data, templateData);
-      const fileName = `SK_01042025_${data.nip || data.no_peserta}.docx`;
-      archive.append(docxResult, { name: fileName });
+      const pdfResult = await wordToPdf(docxResult);
+      const fileName = `SK_01042025_${data.nip || data.no_peserta}.pdf`;
+      archive.append(pdfResult, { name: fileName });
     }
 
     // Finalize archive
@@ -109,7 +131,7 @@ const fetchPengadaanData = async (knex, tahun) => {
     .where("sp.periode", tahun)
     .whereIn("sp.jenis_formasi_id", ["0101", "0102", "0103", "0104"])
     .where("sp.status_usulan", "22")
-    .limit(1);
+    .limit(10);
 };
 
 const fetchTemplateFile = async () => {
@@ -133,26 +155,28 @@ function getGenderFromNIP(nip) {
 }
 
 const formatGajiPokok = (gajiPokok) => {
-  //  2465000 ->  2.465.000
-  return gajiPokok.toLocaleString("id-ID", {
-    style: "currency",
-    currency: "IDR",
-  });
+  const gapok = Number(gajiPokok);
+  return "Rp" + gapok.toLocaleString("id-ID");
 };
 
-const makeRichText = (text, fontSize = 11) => ({
-  text,
-  style: {
-    fontSize,
-  },
-});
+const makeRichText = (text, fontSize = 11) => text;
 
-const prepareTemplateData = (data) => {
+const prepareTemplateData = async (data) => {
   const longTextThreshold = 35;
 
   const getFontSize = (val) => (val?.length > longTextThreshold ? 10 : 11);
 
-  return {
+  const qrCodeData = await makeQrCode(data.id);
+  const qrCodeDataBuffer = Buffer.from(qrCodeData, "base64");
+
+  const result = {
+    qrCode: {
+      _type: "image",
+      source: qrCodeDataBuffer,
+      width: 100,
+      height: 100,
+      format: MimeType.Png,
+    },
     nama: makeRichText(trim(data.nama || ""), getFontSize(data.nama)),
     nip: data.nip || "",
     pangkat: data.pangkat || "",
@@ -163,10 +187,8 @@ const prepareTemplateData = (data) => {
     tempat_lahir: data.tempat_lahir || "",
     tgl_lahir: data.tgl_lahir ? dayjs(data.tgl_lahir).format("DD-MM-YYYY") : "",
     pendidikan: makeRichText(
-      data.pendidikan_ijazah_nama || data.pendidikan_pertama_nama || "",
-      getFontSize(
-        data.pendidikan_ijazah_nama || data.pendidikan_pertama_nama || ""
-      )
+      `${data.pendidikan_pertama_nama} ${data.tahun_lulus}` || "",
+      getFontSize(`${data.pendidikan_pertama_nama} ${data.tahun_lulus}` || "")
     ),
     golongan: data.golongan_nama || "",
     gaji_pokok: data.gaji_pokok ? formatGajiPokok(data.gaji_pokok) : "",
@@ -194,12 +216,45 @@ const prepareTemplateData = (data) => {
     ),
     jenis_kelamin: getGenderFromNIP(data.nip),
   };
+
+  return result;
 };
 
 const processTemplate = async (templateBuffer, data) => {
   const template = new TemplateHandler();
 
   return template.process(templateBuffer, data);
+};
+
+const wordToPdf = async (wordBuffer) => {
+  try {
+    const gotenbergUrl =
+      "https://siasn.bkd.jatimprov.go.id/gotenberg/forms/libreoffice/convert";
+
+    // Membuat form data untuk mengirim file
+    const formData = new FormData();
+    formData.append("files", wordBuffer, {
+      filename: "document.docx",
+      contentType:
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    });
+
+    // Menambahkan parameter konversi
+    formData.append("landscape", "false");
+    formData.append("export", "pdf");
+
+    const response = await axios.post(gotenbergUrl, formData, {
+      headers: {
+        ...formData.getHeaders(),
+      },
+      responseType: "arraybuffer",
+    });
+
+    return response.data;
+  } catch (error) {
+    console.error("Error converting Word to PDF:", error);
+    throw new Error("Gagal mengkonversi dokumen Word ke PDF");
+  }
 };
 
 const setResponseHeaders = (res, tahun) => {
