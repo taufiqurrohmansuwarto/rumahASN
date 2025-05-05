@@ -36,7 +36,7 @@ const generateDokumenSKPengadaan = async (req, res) => {
     for (const data of results) {
       const templateData = prepareTemplateData(data);
       const docxResult = await processTemplate(wordFormat.data, templateData);
-      const fileName = `SK_CPNS_${data.nip || data.no_peserta}.docx`;
+      const fileName = `SK_01042025_${data.nip || data.no_peserta}.docx`;
       archive.append(docxResult, { name: fileName });
     }
 
@@ -108,7 +108,8 @@ const fetchPengadaanData = async (knex, tahun) => {
     )
     .where("sp.periode", tahun)
     .whereIn("sp.jenis_formasi_id", ["0101", "0102", "0103", "0104"])
-    .where("sp.status_usulan", "22");
+    .where("sp.status_usulan", "22")
+    .limit(1);
 };
 
 const fetchTemplateFile = async () => {
@@ -139,9 +140,20 @@ const formatGajiPokok = (gajiPokok) => {
   });
 };
 
+const makeRichText = (text, fontSize = 11) => ({
+  text,
+  style: {
+    fontSize,
+  },
+});
+
 const prepareTemplateData = (data) => {
-  const templateData = {
-    nama: trim(data.nama || ""),
+  const longTextThreshold = 35;
+
+  const getFontSize = (val) => (val?.length > longTextThreshold ? 10 : 11);
+
+  return {
+    nama: makeRichText(trim(data.nama || ""), getFontSize(data.nama)),
     nip: data.nip || "",
     pangkat: data.pangkat || "",
     no_urut: data.no_urut || "",
@@ -150,45 +162,43 @@ const prepareTemplateData = (data) => {
     tahun_lulus: data.tahun_lulus || "",
     tempat_lahir: data.tempat_lahir || "",
     tgl_lahir: data.tgl_lahir ? dayjs(data.tgl_lahir).format("DD-MM-YYYY") : "",
-    pendidikan:
+    pendidikan: makeRichText(
       data.pendidikan_ijazah_nama || data.pendidikan_pertama_nama || "",
+      getFontSize(
+        data.pendidikan_ijazah_nama || data.pendidikan_pertama_nama || ""
+      )
+    ),
     golongan: data.golongan_nama || "",
     gaji_pokok: data.gaji_pokok ? formatGajiPokok(data.gaji_pokok) : "",
     gaji_pokok_calculated: data.gaji_pokok
       ? formatGajiPokok(data.gaji_pokok * 0.8)
       : "",
-    unit_kerja_pertek: data.unit_kerja_pertek || "",
-    jenis_formasi: data.jenis_formasi_nama || "",
+    unit_kerja_pertek: makeRichText(
+      data.unit_kerja_pertek || "",
+      getFontSize(data.unit_kerja_pertek)
+    ),
+    jenis_formasi: makeRichText(
+      data.jenis_formasi_nama || "",
+      getFontSize(data.jenis_formasi_nama)
+    ),
     tanggal_sk: dayjs().format("DD-MM-YYYY"),
-    jabatan:
+    jabatan: makeRichText(
       data?.jenis_jabatan_nama === "Jabatan Fungsional Umum"
         ? data?.jfu
         : data?.jft,
+      getFontSize(
+        data?.jenis_jabatan_nama === "Jabatan Fungsional Umum"
+          ? data?.jfu
+          : data?.jft
+      )
+    ),
     jenis_kelamin: getGenderFromNIP(data.nip),
   };
-
-  // Add font size property for fields that might exceed 35 characters
-  const fieldsToCheck = [
-    "nama",
-    "unit_kerja_pertek",
-    "jabatan",
-    "pendidikan",
-    "jenis_formasi",
-  ];
-
-  fieldsToCheck.forEach((field) => {
-    if (templateData[field] && templateData[field].length > 35) {
-      templateData[`${field}_fontSize`] = 10;
-    } else {
-      templateData[`${field}_fontSize`] = 11; // Default font size
-    }
-  });
-
-  return templateData;
 };
 
 const processTemplate = async (templateBuffer, data) => {
   const template = new TemplateHandler();
+
   return template.process(templateBuffer, data);
 };
 
