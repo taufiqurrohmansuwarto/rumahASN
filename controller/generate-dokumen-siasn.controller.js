@@ -130,8 +130,7 @@ const fetchPengadaanData = async (knex, tahun) => {
     )
     .where("sp.periode", tahun)
     .whereIn("sp.jenis_formasi_id", ["0101", "0102", "0103", "0104"])
-    .where("sp.status_usulan", "22")
-    .limit(10);
+    .where("sp.status_usulan", "22");
 };
 
 const fetchTemplateFile = async () => {
