@@ -69,16 +69,23 @@ export const listMfa = async (req, res) => {
 
         res.json(hasil);
       } else {
-        const result = await knex("sync_pegawai as peg")
+        const query = knex("sync_pegawai as peg")
           .leftJoin("siasn_mfa", "peg.nip_master", "siasn_mfa.nip")
           .where("peg.skpd_id", "ilike", `${skpd_id}%`)
-          .where("siasn_mfa.aktivasi", aktivasi)
           .select(
             "peg.nip_master as nip",
             "peg.nama_master as nama",
             "peg.opd_master as unit_organisasi",
             "siasn_mfa.aktivasi as aktivasi"
           );
+
+        if (aktivasi === "TIDAK TERDATA") {
+          query.whereNull("siasn_mfa.aktivasi");
+        } else {
+          query.where("siasn_mfa.aktivasi", aktivasi);
+        }
+
+        const result = await query;
 
         res.json(result);
       }
