@@ -57,9 +57,8 @@ const generateDokumenSKPengadaan = async (req, res) => {
     for (const data of results) {
       const templateData = await prepareTemplateData(data);
       const docxResult = await processTemplate(wordFormat.data, templateData);
-      const pdfResult = await wordToPdf(docxResult);
-      const fileName = `SK_01042025_${data.nip || data.no_peserta}.pdf`;
-      archive.append(pdfResult, { name: fileName });
+      const fileName = `SK_01042025_${data.nip || data.no_peserta}.docx`;
+      archive.append(docxResult, { name: fileName });
     }
 
     // Finalize archive
@@ -88,7 +87,7 @@ const fetchPengadaanData = async (knex, tahun) => {
       "ru.id_siasn"
     )
     .select(
-      knex.raw("ROW_NUMBER() OVER (ORDER BY sp.nip) as no_urut"),
+      knex.raw("ROW_NUMBER() OVER (ORDER BY sp.tgl_pertek) as no_urut"),
       "sp.id",
       "sp.nip",
       "sp.nama",
@@ -96,6 +95,8 @@ const fetchPengadaanData = async (knex, tahun) => {
       "sp.path_ttd_pertek",
       "sp.jenis_formasi_nama",
       knex.raw("sp.usulan_data->'data'->>'no_peserta' as no_peserta"),
+      knex.raw("sp.usulan_data->'data'->>'glr_depan' as gelar_depan"),
+      knex.raw("sp.usulan_data->'data'->>'glr_belakang' as gelar_belakang"),
       knex.raw("sp.usulan_data->'data'->>'tahun_lulus' as tahun_lulus"),
       knex.raw(
         "sp.usulan_data->'data'->>'pendidikan_pertama_nama' as pendidikan"
@@ -130,7 +131,8 @@ const fetchPengadaanData = async (knex, tahun) => {
     )
     .where("sp.periode", tahun)
     .whereIn("sp.jenis_formasi_id", ["0101", "0102", "0103", "0104"])
-    .where("sp.status_usulan", "22");
+    .where("sp.status_usulan", "22")
+    .limit(2);
 };
 
 const fetchTemplateFile = async () => {
