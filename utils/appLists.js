@@ -41,6 +41,16 @@ export const appLists = [
   },
 
   {
+    rightIcon: <IconRobot />,
+    title: "Usulan",
+    desc: "Usulan",
+    color: "#1A73E8",
+    url: "/usulan",
+    icon: "https://siasn.bkd.jatimprov.go.id:9000/public/icon-kppi.png",
+    userType: ["fasilitator", "admin"],
+  },
+
+  {
     rightIcon: <IconBook2 />,
     title: "Dokumen",
     desc: "Dokumen Digital",
