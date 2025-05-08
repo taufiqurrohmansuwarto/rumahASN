@@ -1,4 +1,5 @@
 import { createRedisInstance } from "@/utils/redis";
+import { cosineSimilarity } from "@/utils/utility";
 
 const Pegawai = require("@/models/sync-pegawai.model");
 const KenaikanPangkat = require("@/models/siasn-kp.model");
@@ -6,6 +7,13 @@ const {
   handleError,
   checkOpdEntrian,
 } = require("@/utils/helper/controller-helper");
+
+import OpenAI from "openai";
+
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+});
+
 const dayjs = require("dayjs");
 
 async function getKpWithPegawai({
@@ -236,6 +244,76 @@ export const getRekonPangkatByPegawai = async (req, res) => {
 
       return res.json(result);
     }
+  } catch (error) {
+    handleError(res, error);
+  }
+};
+
+export const ringkasAlasanTolak = async (req, res) => {
+  try {
+    const { organization_id, current_role } = req?.user;
+    let opdId = current_role === "admin" ? "1" : organization_id;
+    const { skpd_id = opdId, tmtKp = "01-06-2025" } = req?.query;
+
+    const checkOpd = checkOpdEntrian(opdId, skpd_id);
+    if (!checkOpd) {
+      return res.status(400).json({ message: "OPD tidak ditemukan" });
+    }
+
+    const knex = KenaikanPangkat.knex();
+    const result = await knex("siasn_kp as kp")
+      .leftJoin("sync_pegawai as peg", "kp.nipBaru", "peg.nip_master")
+      .where("peg.skpd_id", "ilike", `${skpd_id}%`)
+      .andWhere("kp.tmtKp", "=", tmtKp)
+      .whereNotNull("kp.alasan_tolak_tambahan")
+      .where("kp.alasan_tolak_tambahan", "!=", "")
+      .select("kp.alasan_tolak_tambahan")
+      .limit(20)
+      .groupBy("kp.alasan_tolak_tambahan");
+
+    const alasanList = result
+      .filter((x) => typeof x === "string" && x.trim() !== "")
+      .map((x) => x.replace(/\r?\n/g, "").trim());
+
+    // Get embedding from OpenAI
+    const embeddingRes = await openai.embeddings.create({
+      model: "text-embedding-3-small",
+      input: alasanList,
+    });
+
+    const embeddings = embeddingRes.data.map((d) => d.embedding);
+
+    // Clustering dengan DBSCAN
+    const distanceMatrix = (a, b) => 1 - cosineSimilarity(a, b);
+    const dbscan = new DBSCAN();
+    const clusters = dbscan.run(embeddings, 0.15, 2, distanceMatrix); // eps, minPts
+
+    // Ringkasan per cluster
+    const hasil = [];
+
+    for (const group of clusters) {
+      const alasanCluster = group.map((idx) => alasanList[idx]);
+
+      const prompt = `Berikut adalah sekelompok alasan penolakan usulan kenaikan pangkat:\n\n${alasanCluster
+        .map((x, i) => `${i + 1}. ${x}`)
+        .join(
+          "\n"
+        )}\n\nTolong berikan ringkasan inti dari permasalahan ini dan beri 1 saran umum.`;
+
+      const res = await openai.chat.completions.create({
+        model: "gpt-4o",
+        messages: [{ role: "user", content: prompt }],
+        temperature: 0.3,
+      });
+
+      hasil.push({
+        kategori: `Kategori ${hasil.length + 1}`,
+        alasan: alasanCluster,
+        ringkasan: res.choices[0].message.content,
+      });
+    }
+
+    return res.json({});
   } catch (error) {
     handleError(res, error);
   }

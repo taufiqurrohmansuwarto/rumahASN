@@ -1,7 +1,7 @@
 import { handleError } from "@/utils/helper/controller-helper";
-import OpenAI from "openai";
 const Tickets = require("@/models/tickets.model");
 const FaqQna = require("@/models/faq-qna.model");
+import OpenAI from "openai";
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
