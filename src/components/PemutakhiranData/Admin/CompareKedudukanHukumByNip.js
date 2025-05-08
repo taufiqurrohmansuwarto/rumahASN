@@ -1,6 +1,9 @@
 import { rwKedudukanHukumByNip } from "@/services/master.services";
+import { Stack } from "@mantine/core";
 import { useQuery } from "@tanstack/react-query";
-import { Card, Table } from "antd";
+import { Card, Table, Tooltip } from "antd";
+import { FilePdfOutlined } from "@ant-design/icons";
+import ComparePemberhentianByNip from "./ComparePemberhentianByNip";
 
 function CompareKedudukanHukumByNip({ nip }) {
   const { data, isLoading } = useQuery(
@@ -26,7 +29,9 @@ function CompareKedudukanHukumByNip({ nip }) {
               target="_blank"
               rel="noreferrer"
             >
-              File
+              <Tooltip title="File SK">
+                <FilePdfOutlined />
+              </Tooltip>
             </a>
           </div>
         );
@@ -64,7 +69,7 @@ function CompareKedudukanHukumByNip({ nip }) {
   ];
 
   return (
-    <>
+    <Stack>
       <Card title="Kedudukan Hukum SIMASTER">
         <Table
           columns={columns}
@@ -74,7 +79,8 @@ function CompareKedudukanHukumByNip({ nip }) {
           loading={isLoading}
         />
       </Card>
-    </>
+      <ComparePemberhentianByNip nip={nip} />
+    </Stack>
   );
 }
 

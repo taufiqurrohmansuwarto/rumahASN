@@ -180,7 +180,6 @@ const siasnRwPemberhentian = async (req, res) => {
     const result = await rwPemberhentian(siasnRequest, nip);
 
     const data = result?.data;
-    console.log(result?.data);
 
     if (data?.code === 0) {
       return res.json([]);

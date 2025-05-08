@@ -1,6 +1,7 @@
 import { rwPemberhentianByNip } from "@/services/siasn-services";
+import { FilePdfOutlined } from "@ant-design/icons";
 import { useQuery } from "@tanstack/react-query";
-import { Card, Table } from "antd";
+import { Card, Space, Table, Tooltip } from "antd";
 
 function ComparePemberhentianByNip({ nip }) {
   const { data, isLoading } = useQuery(
@@ -16,24 +17,60 @@ function ComparePemberhentianByNip({ nip }) {
 
   const columns = [
     {
-      title: "Jenis Henti",
-      dataIndex: "jenisHenti",
+      title: "File",
+      key: "file",
+      render: (_, row) => {
+        return (
+          <Space>
+            {row?.pathSkPreview && (
+              <a
+                href={`/helpdesk/api/siasn/ws/download?filePath=${row?.pathSkPreview}`}
+                target="_blank"
+                rel="noreferrer"
+              >
+                <Tooltip title="File SK">
+                  <FilePdfOutlined />
+                </Tooltip>
+              </a>
+            )}
+            {row?.pathPertek && (
+              <a
+                href={`/helpdesk/api/siasn/ws/download?filePath=${row?.pathPertek}`}
+                target="_blank"
+                rel="noreferrer"
+              >
+                <Tooltip title="File Pertek">
+                  <FilePdfOutlined />
+                </Tooltip>
+              </a>
+            )}
+          </Space>
+        );
+      },
     },
     {
-      title: "Kedudukan Hukum PNS",
-      dataIndex: "kedudukanHukumPns",
+      title: "Jenis Pensiun",
+      dataIndex: "detailLayananNama",
+      responsive: ["md"],
     },
     {
       title: "Nomor SK",
       dataIndex: "skNomor",
+      responsive: ["sm"],
     },
     {
       title: "Tanggal SK",
-      dataIndex: "skTanggal",
+      dataIndex: "skTgl",
+      responsive: ["md"],
     },
     {
-      title: "Asal Nama",
-      dataIndex: "asalNama",
+      title: "TMT Pensiun",
+      dataIndex: "tmtPensiun",
+    },
+    {
+      title: "Status Usulan",
+      dataIndex: "statusUsulanNama",
+      responsive: ["lg"],
     },
   ];
 
@@ -44,6 +81,8 @@ function ComparePemberhentianByNip({ nip }) {
         columns={columns}
         rowKey={(row) => row?.id}
         dataSource={data}
+        scroll={{ x: true }}
+        responsive
       />
     </Card>
   );
