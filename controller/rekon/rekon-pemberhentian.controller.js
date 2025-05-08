@@ -4,6 +4,7 @@ const {
   checkOpdEntrian,
 } = require("@/utils/helper/controller-helper");
 const { createRedisInstance } = require("@/utils/redis");
+const SiasnPemberhentian = require("@/models/siasn/siasn-pemberhentian.model");
 
 async function getPemberhentianWithPegawai({
   search = "",
@@ -230,6 +231,16 @@ export const getPemberhentianByPegawai = async (req, res) => {
 
       return res.json(result);
     }
+  } catch (error) {
+    handleError(res, error);
+  }
+};
+
+export const getPemberhentianByNip = async (req, res) => {
+  try {
+    const { nip } = req?.query;
+    const result = await SiasnPemberhentian.query().where("nipBaru", nip);
+    return res.json(result);
   } catch (error) {
     handleError(res, error);
   }
