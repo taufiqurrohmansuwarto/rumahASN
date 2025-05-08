@@ -46,10 +46,9 @@ export const appLists = [
     desc: "Usulan",
     color: "#1A73E8",
     url: "/usulan",
-    icon: "https://siasn.bkd.jatimprov.go.id:9000/public/icon-kppi.png",
+    icon: "https://siasn.bkd.jatimprov.go.id:9000/public/icon-usulan.png",
     userType: ["fasilitator", "admin"],
   },
-
   {
     rightIcon: <IconBook2 />,
     title: "Dokumen",
