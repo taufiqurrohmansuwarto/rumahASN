@@ -365,6 +365,7 @@ const cekPertekByNomerPeserta = async (req, res) => {
         "sp.nip",
         "sp.nama",
         "sp.path_ttd_pertek",
+        "sp.path_ttd_sk",
         "sp.jenis_formasi_nama",
         knex.raw("sp.usulan_data->'data'->>'no_peserta' as no_peserta"),
         knex.raw("sp.usulan_data->'data'->>'tempat_lahir' as tempat_lahir"),
@@ -395,14 +396,26 @@ const cekPertekByNomerPeserta = async (req, res) => {
     const result = await baseQuery;
 
     if (result?.length) {
-      const url = result[0].path_ttd_pertek;
+      let fileBase64 = null;
+      let fileSkBase64 = null;
 
-      const file = await getFileAsn(url);
-      const fileBase64 = file.toString("base64");
+      const url = result[0]?.path_ttd_pertek;
+      const urlSk = result[0]?.path_ttd_sk;
+
+      if (url) {
+        const file = await getFileAsn(url);
+        fileBase64 = file.toString("base64");
+      }
+
+      if (urlSk) {
+        const fileSk = await getFileAsn(urlSk);
+        fileSkBase64 = fileSk.toString("base64");
+      }
 
       const data = {
         ...result[0],
         file: fileBase64,
+        fileSk: fileSkBase64,
       };
 
       res.json(data);
