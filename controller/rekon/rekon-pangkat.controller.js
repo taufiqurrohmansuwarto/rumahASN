@@ -1,8 +1,10 @@
 import { createRedisInstance } from "@/utils/redis";
 import { cosineSimilarity } from "@/utils/utility";
 
+const { DBSCAN } = require("density-clustering");
 const Pegawai = require("@/models/sync-pegawai.model");
 const KenaikanPangkat = require("@/models/siasn-kp.model");
+const SiasnRingkasanAnalisis = require("@/models/siasn-ringkasan-analisis.model");
 const {
   handleError,
   checkOpdEntrian,
@@ -249,31 +251,48 @@ export const getRekonPangkatByPegawai = async (req, res) => {
   }
 };
 
+export const ringkasanAnalisisPangkat = async (req, res) => {
+  try {
+    const { tmtKp = "01-04-2025" } = req?.query;
+    const result = await SiasnRingkasanAnalisis.query()
+      .where("tgl_analisis", "=", tmtKp)
+      .andWhere("jenis_data", "=", "KP");
+
+    res.json(result);
+  } catch (error) {
+    handleError(res, error);
+  }
+};
+
 export const ringkasAlasanTolak = async (req, res) => {
   try {
-    const { organization_id, current_role } = req?.user;
-    let opdId = current_role === "admin" ? "1" : organization_id;
-    const { skpd_id = opdId, tmtKp = "01-06-2025" } = req?.query;
-
-    const checkOpd = checkOpdEntrian(opdId, skpd_id);
-    if (!checkOpd) {
-      return res.status(400).json({ message: "OPD tidak ditemukan" });
-    }
+    const defaultTmtKp = "01-06-2025";
+    const { tmtKp = defaultTmtKp } = req?.body;
 
     const knex = KenaikanPangkat.knex();
     const result = await knex("siasn_kp as kp")
       .leftJoin("sync_pegawai as peg", "kp.nipBaru", "peg.nip_master")
-      .where("peg.skpd_id", "ilike", `${skpd_id}%`)
       .andWhere("kp.tmtKp", "=", tmtKp)
       .whereNotNull("kp.alasan_tolak_tambahan")
       .where("kp.alasan_tolak_tambahan", "!=", "")
       .select("kp.alasan_tolak_tambahan")
-      .limit(20)
       .groupBy("kp.alasan_tolak_tambahan");
 
-    const alasanList = result
+    const items = result?.map((item) => item.alasan_tolak_tambahan);
+
+    await SiasnRingkasanAnalisis.query()
+      .where("tgl_analisis", "=", tmtKp)
+      .andWhere("jenis_data", "=", "KP")
+      .delete();
+
+    const alasanList = items
       .filter((x) => typeof x === "string" && x.trim() !== "")
       .map((x) => x.replace(/\r?\n/g, "").trim());
+
+    // Jika tidak ada alasan tolak, kembalikan array kosong
+    if (alasanList.length === 0) {
+      return res.json([]);
+    }
 
     // Get embedding from OpenAI
     const embeddingRes = await openai.embeddings.create({
@@ -289,31 +308,60 @@ export const ringkasAlasanTolak = async (req, res) => {
     const clusters = dbscan.run(embeddings, 0.15, 2, distanceMatrix); // eps, minPts
 
     // Ringkasan per cluster
+    // Step 3: Ringkasan per grup
     const hasil = [];
-
     for (const group of clusters) {
       const alasanCluster = group.map((idx) => alasanList[idx]);
 
-      const prompt = `Berikut adalah sekelompok alasan penolakan usulan kenaikan pangkat:\n\n${alasanCluster
+      // Prompt untuk label kategori
+      const labelPrompt = `Berikut adalah daftar alasan penolakan:
+${alasanCluster
+  .map((x, i) => `${i + 1}. ${x}`)
+  .join(
+    "\n"
+  )}\n\nBeri satu label pendek yang mewakili topik umum dari daftar ini ((PAK (Penilaian Angka Kredit), Pertek Wasdal, Ujikom, Jabatan, Unit Kerja, SKP (Sasaran Kinerja Pegawai))). Jawaban hanya satu kata atau frasa pendek.`;
+
+      const labelRes = await openai.chat.completions.create({
+        model: "gpt-4o-mini",
+        messages: [{ role: "user", content: labelPrompt }],
+        temperature: 0,
+      });
+
+      const label = labelRes.choices[0].message.content.trim();
+
+      const prompt = `Berikut adalah sejumlah alasan penolakan usulan kenaikan pangkat:\n\n${alasanCluster
         .map((x, i) => `${i + 1}. ${x}`)
         .join(
           "\n"
-        )}\n\nTolong berikan ringkasan inti dari permasalahan ini dan beri 1 saran umum.`;
+        )}\n\nBuat ringkasan dalam dua kalimat yang menjelaskan inti permasalahan. Tambahkan satu saran umum. Gunakan bahasa administratif dan jangan ulang alasan secara mentah.`;
 
       const res = await openai.chat.completions.create({
-        model: "gpt-4o",
+        model: "gpt-4o-mini",
         messages: [{ role: "user", content: prompt }],
         temperature: 0.3,
       });
 
-      hasil.push({
-        kategori: `Kategori ${hasil.length + 1}`,
+      const rekomendasi = {
+        kategori: label,
         alasan: alasanCluster,
-        ringkasan: res.choices[0].message.content,
+        ringkasan: res.choices[0].message.content.trim(),
+      };
+
+      console.log(rekomendasi);
+
+      await SiasnRingkasanAnalisis.query().insert({
+        jenis_data: "KP",
+        tgl_analisis: tmtKp,
+        kategori: label,
+        jumlah_alasan: alasanCluster.length,
+        daftar_alasan: alasanCluster,
+        ringkasan: res.choices[0].message.content.trim(),
       });
+
+      hasil.push(rekomendasi);
     }
 
-    return res.json({});
+    res.json(hasil);
   } catch (error) {
     handleError(res, error);
   }
