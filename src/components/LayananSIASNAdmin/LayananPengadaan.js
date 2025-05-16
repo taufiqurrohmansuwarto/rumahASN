@@ -842,6 +842,25 @@ function LayananPengadaan() {
           </Button>
         </Form.Item>
         <Form.Item>
+          {data?.sync_time && (
+            <Tag color="blue">
+              Terakhir Sinkron:{" "}
+              {dayjs(data?.sync_time).format("DD-MM-YYYY HH:mm:ss")}
+            </Tag>
+          )}
+        </Form.Item>
+      </Form>
+
+      <div style={{ marginBottom: 16, marginTop: 16 }}>
+        <Space>
+          <Button
+            type="primary"
+            icon={<FileExcelOutlined />}
+            loading={isDownloading}
+            onClick={handleDownloadWithExcelJS}
+          >
+            Ekspor
+          </Button>
           <Button
             type="primary"
             icon={<DatabaseOutlined />}
@@ -858,19 +877,7 @@ function LayananPengadaan() {
           >
             Sinkro SIASN
           </Button>
-        </Form.Item>
-      </Form>
 
-      <div style={{ marginBottom: 16, marginTop: 16 }}>
-        <Space>
-          <Button
-            type="primary"
-            icon={<FileExcelOutlined />}
-            loading={isDownloading}
-            onClick={handleDownloadWithExcelJS}
-          >
-            Ekspor
-          </Button>
           {/* Komponen untuk mengambil semua dokumen */}
           {/* Komponen untuk mengunduh semua dokumen */}
           {/* Komponen untuk mengunduh dokumen SK */}
