@@ -57,6 +57,7 @@ export const getUnorSimaster = async (req, res) => {
     const orgId = current_role === "admin" ? "1" : organization_id;
 
     const result = await UnorSimaster.getRelationCountsPerId(orgId);
+    console.log(result);
 
     const tree = arrayToTree(result, {
       parentProperty: "parentId",

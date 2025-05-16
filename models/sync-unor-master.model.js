@@ -22,7 +22,9 @@ class SyncUnorMaster extends Model {
         "sync_unor_master.name as label",
         "sync_unor_master.name as title",
         // concat label with related_count
-        raw("CONCAT(sync_unor_master.name, ' (', COUNT(unor.id), ')') as title")
+        raw(
+          "CONCAT(sync_unor_master.name, ' (', COUNT(unor.id), ') - ', sync_unor_master.id) as title"
+        )
       )
       .leftJoin("rekon.unor", "sync_unor_master.id", "unor.id_simaster")
       .groupBy("sync_unor_master.id");
