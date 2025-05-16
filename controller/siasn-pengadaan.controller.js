@@ -240,6 +240,8 @@ const proxyRekapPengadaan = async (req, res) => {
         knex.raw(
           "CASE WHEN ru.id_simaster IS NOT NULL THEN get_hierarchy_simaster(ru.id_simaster) ELSE NULL END as unor_simaster"
         ),
+        "ru.id_simaster as unor_simaster_id",
+        "ru.id_siasn as unor_siasn_id",
         "rsu.id as status_usulan_id",
         "rsu.nama as status_usulan_nama",
         "sd.download_status",
