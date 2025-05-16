@@ -20,7 +20,11 @@ const {
 } = require("../utils");
 
 const { upperCase, trim } = require("lodash");
-const { handleError } = require("@/utils/helper/controller-helper");
+const {
+  handleError,
+  setSinkronisasi,
+  getSinkronisasi,
+} = require("@/utils/helper/controller-helper");
 const {
   proxyLayananRekapPengadaan,
   getFileAsn,
@@ -160,6 +164,12 @@ const syncPengadaanProxy = async (req, res) => {
     if (meta?.total > 0) {
       await knex.delete().from("siasn_pengadaan_proxy").where("periode", tahun);
       await knex.batchInsert("siasn_pengadaan_proxy", data);
+      await setSinkronisasi({
+        aplikasi: "siasn",
+        layanan: "pengadaan",
+        periode: tahun,
+        query: null,
+      });
       res.json({
         message: `Berhasil mengambil data dari proxy tahun ${tahun}`,
       });
@@ -298,10 +308,17 @@ const proxyRekapPengadaan = async (req, res) => {
       dataResult = await baseQuery.limit(parseInt(limit)).offset(offset);
     }
 
+    let syncTime = await getSinkronisasi({
+      aplikasi: "siasn",
+      layanan: "pengadaan",
+      periode: tahun,
+    });
+
     const hasil = {
       total: total,
       page: parseInt(limit) === -1 ? 1 : parseInt(page),
       limit: parseInt(limit),
+      sync_time: syncTime,
       data: dataResult,
     };
 

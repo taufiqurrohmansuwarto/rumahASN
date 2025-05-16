@@ -65,3 +65,89 @@ module.exports.validateOpd = (res, opdId, skpd_id) => {
   }
   return true;
 };
+
+module.exports.setSinkronisasi = async (data = {}) => {
+  // Destructuring dengan nilai default null untuk setiap field
+  const {
+    aplikasi = null,
+    layanan = null,
+    periode = null,
+    query = null,
+  } = data;
+
+  // Upsert manual ke tabel Sinkronisasi berdasarkan aplikasi, layanan, dan periode (atau aplikasi, layanan saja jika periode null)
+  let sinkronisasi;
+
+  if (periode) {
+    sinkronisasi = await Sinkronisasi.query()
+      .where({
+        aplikasi,
+        layanan,
+        periode,
+      })
+      .first();
+  } else {
+    sinkronisasi = await Sinkronisasi.query()
+      .where({
+        aplikasi,
+        layanan,
+      })
+      .whereNull("periode")
+      .first();
+  }
+
+  if (sinkronisasi) {
+    // Jika sudah ada, update data
+    sinkronisasi = await Sinkronisasi.query().patchAndFetchById(
+      sinkronisasi.id,
+      {
+        query,
+        periode,
+        updated_at: new Date(),
+      }
+    );
+  } else {
+    // Jika belum ada, insert data baru
+    sinkronisasi = await Sinkronisasi.query().insert({
+      aplikasi,
+      layanan,
+      periode,
+      query,
+      created_at: new Date(),
+      updated_at: new Date(),
+    });
+  }
+
+  return sinkronisasi;
+};
+
+module.exports.getSinkronisasi = async (data = {}) => {
+  const {
+    aplikasi = null,
+    layanan = null,
+    periode = null,
+    query = null,
+  } = data;
+
+  // Ambil data sinkronisasi berdasarkan parameter yang diberikan
+  let sinkronisasiQuery = Sinkronisasi.query().where({
+    aplikasi,
+    layanan,
+  });
+
+  if (periode !== null) {
+    sinkronisasiQuery = sinkronisasiQuery.where("periode", periode);
+  } else {
+    sinkronisasiQuery = sinkronisasiQuery.whereNull("periode");
+  }
+
+  if (query !== null) {
+    sinkronisasiQuery = sinkronisasiQuery.where("query", query);
+  }
+
+  // Ambil hanya kolom updated_at
+  const sinkronisasi = await sinkronisasiQuery.select("updated_at").first();
+
+  // Jika ada, kembalikan updated_at, jika tidak, kembalikan null
+  return sinkronisasi ? sinkronisasi.updated_at : null;
+};
