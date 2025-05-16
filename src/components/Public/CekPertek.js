@@ -1,9 +1,19 @@
 import { cekPertekService } from "@/services/public.services";
 import { FileWordOutlined } from "@ant-design/icons";
 import { useMutation } from "@tanstack/react-query";
-import { Button, Col, Form, Input, message, Modal, Row, Skeleton } from "antd";
+import {
+  Button,
+  Col,
+  Form,
+  Input,
+  message,
+  Modal,
+  Row,
+  Skeleton,
+  Space,
+} from "antd";
 import { useState } from "react";
-import { saveAs } from "file-saver";
+
 const ShowData = ({ data, loading }) => {
   if (loading) {
     return <Skeleton active paragraph={{ rows: 6 }} />;
@@ -14,7 +24,6 @@ const ShowData = ({ data, loading }) => {
   }
 
   const handleDownload = () => {
-    console.log(data?.file);
     const base64String = `data:application/pdf;base64,${data?.file}`;
     const a = document.createElement("a");
     a.href = base64String;
@@ -22,6 +31,13 @@ const ShowData = ({ data, loading }) => {
     a.click();
   };
 
+  const handleDownloadSk = () => {
+    const base64String = `data:application/pdf;base64,${data?.fileSk}`;
+    const a = document.createElement("a");
+    a.href = base64String;
+    a.download = "sk.pdf";
+    a.click();
+  };
   return (
     <div className="result-container" style={{ marginTop: 20 }}>
       <h3 style={{ marginBottom: 16 }}>Informasi Pertek</h3>
@@ -48,17 +64,30 @@ const ShowData = ({ data, loading }) => {
           <div className="info-item">
             <strong>Unit Organisasi:</strong> {data.unor_siasn || "-"}
           </div>
-          {data?.file && (
-            <div className="info-item" style={{ marginTop: 16 }}>
-              <Button
-                type="primary"
-                icon={<FileWordOutlined />}
-                onClick={handleDownload}
-              >
-                Unduh Pertek
-              </Button>
-            </div>
-          )}
+          <Space>
+            {data?.file && (
+              <div className="info-item" style={{ marginTop: 16 }}>
+                <Button
+                  type="primary"
+                  icon={<FileWordOutlined />}
+                  onClick={handleDownload}
+                >
+                  Unduh Pertek
+                </Button>
+              </div>
+            )}
+            {data?.fileSk && (
+              <div className="info-item" style={{ marginTop: 16 }}>
+                <Button
+                  type="primary"
+                  icon={<FileWordOutlined />}
+                  onClick={handleDownloadSk}
+                >
+                  Unduh SK
+                </Button>
+              </div>
+            )}
+          </Space>
         </Col>
       </Row>
     </div>
