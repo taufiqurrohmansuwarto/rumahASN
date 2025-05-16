@@ -294,6 +294,8 @@ function LayananPengadaan() {
         "Unit Kerja SIASN ID",
         "Unit Kerja SIMASTER",
         "Unit Kerja SIMASTER ID",
+        "TMT CPNS",
+        "Tgl. Usulan",
         "Unor Pertek",
         "Nomer Pertek",
         "Tanggal Pertek",
@@ -364,6 +366,8 @@ function LayananPengadaan() {
           row?.unor_siasn_id,
           row?.unor_simaster,
           row?.unor_simaster_id,
+          row?.tmt_cpns,
+          row?.tgl_usulan,
           `${row?.usulan_data?.data?.unor_nama} - ${row?.usulan_data?.data?.unor_induk_nama}`,
           row?.no_pertek,
           row?.tgl_pertek ? dayjs(row?.tgl_pertek).format("DD-MM-YYYY") : "-",
@@ -382,11 +386,13 @@ function LayananPengadaan() {
         });
       });
 
+      const now = dayjs().format("DD-MM-YYYY");
+
       // Membuat buffer dan menyimpan file
       const excelBuffer = await workbook.xlsx.writeBuffer();
       const fileName = `Data_Pengadaan_${
         router?.query?.tahun || dayjs().format(formatYear)
-      }.xlsx`;
+      }_${now}.xlsx`;
 
       saveAs(new Blob([excelBuffer]), fileName);
     } catch (error) {
@@ -727,6 +733,14 @@ function LayananPengadaan() {
       render: (_, row) => <>{row?.unor_siasn}</>,
     },
     {
+      title: "TMT CPNS",
+      dataIndex: "tmt_cpns",
+    },
+    {
+      title: "Tgl. Usulan",
+      dataIndex: "tgl_usulan",
+    },
+    {
       title: "Nama",
       dataIndex: "nama",
       responsive: ["sm"],
@@ -783,7 +797,7 @@ function LayananPengadaan() {
       render: (_, row) => (
         <Space direction="vertical">
           <Tag color={row?.status_usulan_nama?.color}>
-            {row?.status_usulan_nama?.nama}
+            {row?.status_usulan_nama}
           </Tag>
           <Typography.Text type="secondary">
             {row?.alasan_tolak_tambahan}
@@ -857,9 +871,9 @@ function LayananPengadaan() {
           >
             Ekspor
           </Button>
-          <AmbilSemuaDokumen />
-          <UnduhSemuaDokumen />
-          <DownloadDokumenSK />
+          {/* Komponen untuk mengambil semua dokumen */}
+          {/* Komponen untuk mengunduh semua dokumen */}
+          {/* Komponen untuk mengunduh dokumen SK */}
         </Space>
       </div>
 

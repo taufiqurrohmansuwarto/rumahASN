@@ -240,6 +240,13 @@ const proxyRekapPengadaan = async (req, res) => {
         knex.raw(
           "CASE WHEN ru.id_simaster IS NOT NULL THEN get_hierarchy_simaster(ru.id_simaster) ELSE NULL END as unor_simaster"
         ),
+        "rsu.nama as status_usulan_nama",
+        knex.raw(
+          "COALESCE(to_char(sp.tgl_usulan::date, 'DD-MM-YYYY'), '-') as tgl_usulan"
+        ),
+        knex.raw(
+          "COALESCE(to_char(NULLIF(sp.usulan_data->'data'->>'tmt_cpns', '')::date, 'DD-MM-YYYY'), '-') as tmt_cpns"
+        ),
         "ru.id_simaster as unor_simaster_id",
         "ru.id_siasn as unor_siasn_id",
         "rsu.id as status_usulan_id",
@@ -291,34 +298,11 @@ const proxyRekapPengadaan = async (req, res) => {
       dataResult = await baseQuery.limit(parseInt(limit)).offset(offset);
     }
 
-    // Memformat data untuk respons
-    const data = dataResult.map((item) => {
-      // Memisahkan data status_usulan dari hasil query
-      const {
-        status_usulan_id,
-        status_usulan_nama,
-        status_usulan_color,
-        ...pengadaanData
-      } = item;
-
-      // Mengembalikan format yang sesuai dengan yang diharapkan komponen frontend
-      return {
-        ...pengadaanData,
-        status_usulan_nama: status_usulan_id
-          ? {
-              id: status_usulan_id,
-              nama: status_usulan_nama,
-              color: status_usulan_color,
-            }
-          : null,
-      };
-    });
-
     const hasil = {
       total: total,
       page: parseInt(limit) === -1 ? 1 : parseInt(page),
       limit: parseInt(limit),
-      data: data,
+      data: dataResult,
     };
 
     res.json(hasil);

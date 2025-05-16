@@ -18,10 +18,15 @@ export const syncStatusUsul = async (req, res) => {
 };
 
 export const getStatusUsul = async (req, res) => {
+  const knex = StatusUsul.knex();
   try {
-    const knex = StatusUsul.knex();
-    await knex.delete().from("ref_siasn.status_usul");
-    await knex.batchInsert("ref_siasn.status_usul", jsonStatusUsul);
+    const getAllStatusUsul = await StatusUsul.query();
+
+    if (getAllStatusUsul.length === 0) {
+      await knex.delete().from("ref_siasn.status_usul");
+      await knex.batchInsert("ref_siasn.status_usul", jsonStatusUsul);
+    }
+
     const result = await knex.select("*").from("ref_siasn.status_usul");
     res.json(result);
   } catch (error) {
