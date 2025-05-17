@@ -39,8 +39,10 @@ const createBaseQuery = (skpdId, conditionBuilder, source = DEFAULT_SOURCE) => {
         "sync.nama_master as nama",
         "sync.foto as foto",
         "sync.opd_master as unit_organisasi",
-        "sync.jabatan_master as jabatan"
+        "sync.jabatan_master as jabatan",
+        "siasn.*"
       )
+      .leftJoin("siasn_employees as siasn", "sync.nip_master", "siasn.nip_baru")
       .whereRaw("sync.skpd_id ILIKE ?", [`${skpdId}%`]);
 
     // subquery: filter berdasar conditionBuilder pada siasn_employees
@@ -63,7 +65,8 @@ const createBaseQuery = (skpdId, conditionBuilder, source = DEFAULT_SOURCE) => {
       "siasn.nip_baru as nip",
       "siasn.nama as nama",
       "siasn.jabatan_nama as jabatan",
-      "siasn.unor_nama as unit_organisasi"
+      "siasn.unor_nama as unit_organisasi",
+      "siasn.*"
     )
     .andWhere(function () {
       conditionBuilder.call(this);
