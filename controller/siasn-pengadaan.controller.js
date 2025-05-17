@@ -181,6 +181,12 @@ const syncPengadaanProxy = async (req, res) => {
   }
 };
 
+const getFoto = async (filePath) => {
+  const file = await getFileAsn(filePath);
+  const fileBase64 = file.toString("base64");
+  return fileBase64;
+};
+
 const proxyRekapPengadaan = async (req, res) => {
   try {
     const knex = SiasnPengadaanProxy.knex();
