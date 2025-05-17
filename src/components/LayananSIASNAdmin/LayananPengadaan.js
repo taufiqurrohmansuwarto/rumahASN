@@ -23,12 +23,14 @@ import {
 } from "@ant-design/icons";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
+  Avatar,
   Button,
   Card,
   DatePicker,
   Divider,
   Dropdown,
   Form,
+  Image,
   Input,
   message,
   Modal,
@@ -690,6 +692,20 @@ function LayananPengadaan() {
               <Tooltip title="File Pertek">
                 <a
                   href={`/helpdesk/api/siasn/ws/download?filePath=${record.path_ttd_pertek}`}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  <FilePdfOutlined />
+                </a>
+              </Tooltip>
+            )}
+            {record?.dokumen_usulan?.["2065"] && (
+              <Tooltip title="File SPRP">
+                <a
+                  href={`/helpdesk/api/siasn/ws/download?filePath=${
+                    record.dokumen_usulan?.["2065"]?.object ||
+                    record.dokumen_usulan?.["2066"]?.object
+                  }`}
                   target="_blank"
                   rel="noreferrer"
                 >
