@@ -1,30 +1,81 @@
 import { dataUtamaSimaster } from "@/services/master.services";
-import {
-  dataUtamaSIASN,
-  updateDataUtamaSIASN,
-} from "@/services/siasn-services";
+import { dataUtamaSIASN } from "@/services/siasn-services";
 import { compareText, komparasiGelar } from "@/utils/client-utils";
-import { Alert, Image, Stack, Text } from "@mantine/core";
+import { FilePdfOutlined } from "@ant-design/icons";
+import { Alert, Stack, Text } from "@mantine/core";
 import { IconAlertCircle } from "@tabler/icons";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import {
   Button,
   Card,
   Col,
-  Form,
-  Input,
-  Modal,
   Row,
   Skeleton,
   Space,
   Table as TableAntd,
   Tag,
-  message,
 } from "antd";
-import { useEffect } from "react";
-import SyncJabatan from "./Sync/SyncJabatan";
-import SyncGolongan from "./Sync/SyncGolongan";
 import TextSensor from "../TextSensor";
+
+const FileSPMT = ({ data }) => {
+  let path = {};
+  try {
+    path = data?.path ? JSON.parse(data.path) : {};
+  } catch (e) {
+    path = {};
+  }
+
+  const handleDownload = () => {
+    const filePath = path?.["888"]?.object;
+    if (filePath) {
+      window.open(
+        `/helpdesk/api/siasn/ws/download?filePath=${filePath}`,
+        "_blank",
+        "noopener,noreferrer"
+      );
+    }
+  };
+
+  return (
+    <>
+      {path?.["888"]?.object && (
+        <Button type="link" icon={<FilePdfOutlined />} onClick={handleDownload}>
+          Unduh File SPMT
+        </Button>
+      )}
+    </>
+  );
+};
+
+const FileSK = ({ data }) => {
+  let path = {};
+  try {
+    path = data?.path ? JSON.parse(data.path) : {};
+  } catch (e) {
+    path = {};
+  }
+
+  const handleDownload = () => {
+    const filePath = path?.["889"]?.object;
+    if (filePath) {
+      window.open(
+        `/helpdesk/api/siasn/ws/download?filePath=${filePath}`,
+        "_blank",
+        "noopener,noreferrer"
+      );
+    }
+  };
+
+  return (
+    <>
+      {path?.["889"]?.object && (
+        <Button type="link" icon={<FilePdfOutlined />} onClick={handleDownload}>
+          Unduh File SK
+        </Button>
+      )}
+    </>
+  );
+};
 
 const dataTabel = (siasn, simaster) => {
   return [
@@ -126,10 +177,6 @@ const dataTabel = (siasn, simaster) => {
   ];
 };
 
-const Base64Image = ({ data }) => {
-  return <Image maw={200} src={`data:image/png;base64,${data}`} alt="base64" />;
-};
-
 const TagResult = ({ record }) => {
   const id = record?.id;
   const cantCompare =
@@ -146,111 +193,6 @@ const TagResult = ({ record }) => {
     <Tag color={record?.result ? "green" : "red"}>
       {record?.result ? "Sama" : "Tidak Sama"}
     </Tag>
-  );
-};
-
-const FormEditBiodata = ({ data }) => {
-  const [form] = Form.useForm();
-  const queryClient = useQueryClient();
-
-  const { mutateAsync: update, isLoading: isLoadingUpdate } = useMutation(
-    (data) => updateDataUtamaSIASN(data),
-    {
-      onSuccess: () => {
-        message.success("Berhasil mengubah data");
-      },
-      onSettled: () => {
-        queryClient.invalidateQueries(["data-utama-siasn"]);
-      },
-    }
-  );
-
-  const handleSubmit = async () => {
-    try {
-      const value = await form.validateFields();
-
-      Modal.confirm({
-        title: "Apakah anda yakin?",
-        content: "Data yang anda masukkan adalah data yang benar",
-        centered: true,
-        onOk: async () => {
-          await update({
-            email: value?.email,
-          });
-        },
-      });
-    } catch (error) {
-      message.error("Gagal mengubah data");
-    }
-  };
-
-  useEffect(() => {
-    if (data) {
-      form.setFieldsValue({
-        email: data?.email,
-        email_gov: data?.emailGov,
-        alamat: data?.alamat,
-        nomor_hp: data?.noHp,
-        nomor_telepon: data?.noTelp,
-        nomor_bpjs: data?.bpjs,
-        nomor_npwp: data?.noNpwp,
-      });
-    }
-  }, [data, form]);
-
-  const handleReset = () => {
-    form.setFieldsValue({
-      email: data?.email,
-    });
-  };
-
-  return (
-    <Form form={form} layout="vertical">
-      {JSON.stringify(data)}{" "}
-      <Form.Item
-        rules={[
-          {
-            type: "email",
-          },
-        ]}
-        label="Email SIASN"
-        name="email"
-      >
-        <Input />
-      </Form.Item>
-      <Form.Item
-        rules={[
-          {
-            type: "email",
-          },
-        ]}
-        label="Email Instansi"
-        name="email_gov"
-      >
-        <Input />
-      </Form.Item>
-      <Form.Item label="No. HP" name="nomor_hp">
-        <Input.TextArea />
-      </Form.Item>
-      <Form.Item label="No. Telephone" name="nomor_telepon">
-        <Input.TextArea />
-      </Form.Item>
-      <Form.Item label="Alamat" name="alamat">
-        <Input.TextArea />
-      </Form.Item>
-      <Form.Item label="Nomor BPJS" name="nomor_bpjs">
-        <Input />
-      </Form.Item>
-      <Form.Item label="Nomor NPWP" name="nomor_npwp">
-        <Input />
-      </Form.Item>
-      <Space>
-        <Button onClick={handleSubmit} type="primary">
-          Submit
-        </Button>
-        <Button onClick={handleReset}>Reset</Button>
-      </Space>
-    </Form>
   );
 };
 
@@ -345,32 +287,21 @@ function CompareDataUtama() {
     <Card>
       <Stack>
         <Skeleton loading={isLoading || isLoadingDataSimaster}>
-          <Row
-            gutter={[
-              { xs: 8, sm: 16, md: 24, lg: 32 },
-              { xs: 8, sm: 16, md: 24, lg: 32 },
-            ]}
-          >
-            <Col md={24}>
-              <Space direction="vertical">
-                <Alert icon={<IconAlertCircle />} title="Perhatian" color="red">
-                  Jika ada perbedaan NIP, Nama, dan Tanggal Lahir antara SIASN
-                  dan SIMASTER silahkan melakukan perbaikan elemen tersebut ke
-                  BKD Provinsi Jawa Timur
-                </Alert>
-                <Space>
-                  <SyncJabatan />
-                  <SyncGolongan />
-                </Space>
-                <TableAntd
-                  rowKey={(row) => row?.id}
-                  columns={columns}
-                  dataSource={dataTabel(data, dataSimaster)}
-                  pagination={false}
-                />
-              </Space>
-            </Col>
-          </Row>
+          <Alert icon={<IconAlertCircle />} title="Perhatian" color="red">
+            Jika ada perbedaan NIP, Nama, dan Tanggal Lahir antara SIASN dan
+            SIMASTER silahkan melakukan perbaikan elemen tersebut ke BKD
+            Provinsi Jawa Timur
+          </Alert>
+          <Space>
+            <FileSPMT data={data} />
+            <FileSK data={data} />
+          </Space>
+          <TableAntd
+            rowKey={(row) => row?.id}
+            columns={columns}
+            dataSource={dataTabel(data, dataSimaster)}
+            pagination={false}
+          />
         </Skeleton>
       </Stack>
     </Card>
