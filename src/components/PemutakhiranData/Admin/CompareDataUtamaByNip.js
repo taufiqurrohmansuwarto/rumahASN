@@ -2,20 +2,83 @@ import { dataUtamaMasterByNip } from "@/services/master.services";
 import { dataUtamSIASNByNip } from "@/services/siasn-services";
 import { compareText, komparasiGelar } from "@/utils/client-utils";
 import { Stack, Text } from "@mantine/core";
+import { FilePdfOutlined } from "@ant-design/icons";
 import { useQuery } from "@tanstack/react-query";
 import {
   Anchor,
+  Button,
   Card,
   Col,
   Grid,
   Row,
   Skeleton,
+  Space,
   Table as TableAntd,
   Tag,
 } from "antd";
 import InformationDetail from "../InformationDetail";
 import TextSensor from "@/components/TextSensor";
 import CreateCPNS from "./CreateCPNS";
+
+const FileSPMT = ({ data }) => {
+  let path = {};
+  try {
+    path = data?.path ? JSON.parse(data.path) : {};
+  } catch (e) {
+    path = {};
+  }
+
+  const handleDownload = () => {
+    const filePath = path?.["888"]?.object;
+    if (filePath) {
+      window.open(
+        `/helpdesk/api/siasn/ws/download?filePath=${filePath}`,
+        "_blank",
+        "noopener,noreferrer"
+      );
+    }
+  };
+
+  return (
+    <>
+      {path?.["888"]?.object && (
+        <Button type="link" icon={<FilePdfOutlined />} onClick={handleDownload}>
+          Unduh File SPMT
+        </Button>
+      )}
+    </>
+  );
+};
+
+const FileSK = ({ data }) => {
+  let path = {};
+  try {
+    path = data?.path ? JSON.parse(data.path) : {};
+  } catch (e) {
+    path = {};
+  }
+
+  const handleDownload = () => {
+    const filePath = path?.["889"]?.object;
+    if (filePath) {
+      window.open(
+        `/helpdesk/api/siasn/ws/download?filePath=${filePath}`,
+        "_blank",
+        "noopener,noreferrer"
+      );
+    }
+  };
+
+  return (
+    <>
+      {path?.["889"]?.object && (
+        <Button type="link" icon={<FilePdfOutlined />} onClick={handleDownload}>
+          Unduh File SK
+        </Button>
+      )}
+    </>
+  );
+};
 
 const dataTabel = (siasn, simaster) => {
   return [
@@ -265,6 +328,10 @@ function CompareDataUtamaByNip({ nip }) {
                   id="komparasi-data"
                 >
                   <Stack>
+                    <Space>
+                      <FileSPMT data={data} />
+                      <FileSK data={data} />
+                    </Space>
                     <TableAntd
                       columns={columns}
                       dataSource={dataTabel(data, dataSimaster)}
