@@ -47,10 +47,11 @@ const JenisPegawaiDPKTidakSesuai = () => {
     const workbook = XLSX.utils.book_new();
 
     const sheetData = result?.data?.map((item) => ({
-      NIP: item.nip_master,
-      Nama: item.nama_master,
-      OPD: item.opd_master,
-      Status: item.status,
+      NIP: item.nip,
+      Nama: item.nama,
+      OPD: item.unit_organisasi,
+      Jabatan: item.jabatan,
+      "Jenis Pegawai": item.jenis_pegawai_nama,
     }));
 
     const sheet = XLSX.utils.json_to_sheet(sheetData);
