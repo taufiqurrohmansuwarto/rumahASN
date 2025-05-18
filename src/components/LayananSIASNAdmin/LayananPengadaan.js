@@ -713,6 +713,23 @@ function LayananPengadaan() {
                 </a>
               </Tooltip>
             )}
+            {(record?.dokumen_usulan?.["2123"] ||
+              record?.dokumen_usulan?.["2037"] ||
+              record?.dokumen_usulan?.["2112"]) && (
+              <Tooltip title="File SKCPPPK">
+                <a
+                  href={`/helpdesk/api/siasn/ws/download?filePath=${
+                    record.dokumen_usulan?.["2123"]?.object ||
+                    record.dokumen_usulan?.["2037"]?.object ||
+                    record.dokumen_usulan?.["2112"]?.object
+                  }`}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  <FilePdfOutlined />
+                </a>
+              </Tooltip>
+            )}
           </Space>
         );
       },
