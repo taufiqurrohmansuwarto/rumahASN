@@ -716,8 +716,15 @@ const resetUploadDokumen = async (req, res) => {
 const getRwPengadaanByNip = async (req, res) => {
   try {
     const { nip } = req.query;
-    const result = await SiasnPengadaanProxy.query().where("nip", nip);
-    res.json(result);
+    const result = await SiasnPengadaanProxy.query()
+      .where("nip", nip)
+      .first()
+      .withGraphFetched("status_usulan_nama");
+    if (!result) {
+      return null;
+    } else {
+      res.json(result);
+    }
   } catch (error) {
     handleError(res, error);
   }
@@ -727,8 +734,15 @@ const getRwPengadaanByNip = async (req, res) => {
 const getRwPengadaanPersonal = async (req, res) => {
   try {
     const { employee_number: nip } = req?.user;
-    const result = await SiasnPengadaanProxy.query().where("nip", nip);
-    res.json(result);
+    const result = await SiasnPengadaanProxy.query()
+      .where("nip", nip)
+      .first()
+      .withGraphFetched("status_usulan_nama");
+    if (!result) {
+      return null;
+    } else {
+      res.json(result);
+    }
   } catch (error) {
     handleError(res, error);
   }
