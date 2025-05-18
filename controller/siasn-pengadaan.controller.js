@@ -713,6 +713,27 @@ const resetUploadDokumen = async (req, res) => {
   }
 };
 
+const getRwPengadaanByNip = async (req, res) => {
+  try {
+    const { nip } = req.query;
+    const result = await SiasnPengadaanProxy.query().where("nip", nip);
+    res.json(result);
+  } catch (error) {
+    handleError(res, error);
+  }
+};
+
+// rw pengadaan untuk personal
+const getRwPengadaanPersonal = async (req, res) => {
+  try {
+    const { employee_number: nip } = req?.user;
+    const result = await SiasnPengadaanProxy.query().where("nip", nip);
+    res.json(result);
+  } catch (error) {
+    handleError(res, error);
+  }
+};
+
 module.exports = {
   resetUploadDokumen,
   downloadDokumenPengadaan,
@@ -726,4 +747,6 @@ module.exports = {
   proxyRekapPengadaan,
   syncPengadaanProxy,
   cekPertekByNomerPeserta,
+  getRwPengadaanByNip,
+  getRwPengadaanPersonal,
 };

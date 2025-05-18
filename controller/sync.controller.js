@@ -6,22 +6,19 @@ const SyncPegawai = require("@/models/sync-pegawai.model");
 
 const SimasterJfu = require("@/models/simaster-jfu.model");
 const SimasterJft = require("@/models/simaster-jft.model");
+const { setSinkronisasi } = require("@/utils/helper/controller-helper");
 
 const syncSimasterJfu = async (req, res) => {
   try {
     const fetcher = req?.clientCredentialsFetcher;
     const result = await fetcher.get("/refs/jfu-all");
-    console.log(result?.data[0]);
-    await Sinkronisasi.query()
-      .insert({
-        aplikasi: "simaster",
-        layanan: "ref_jfu",
-        updated_at: new Date(),
-      })
-      .onConflict(["aplikasi", "layanan"])
-      .merge(["updated_at"]);
 
-    const knex = await SimasterJfu.knex();
+    await setSinkronisasi({
+      aplikasi: "simaster",
+      layanan: "ref_jfu",
+    });
+
+    const knex = SimasterJfu.knex();
     await knex.delete().from("simaster_jfu");
     await knex.batchInsert("simaster_jfu", result?.data);
 
@@ -36,14 +33,11 @@ const syncSimasterJft = async (req, res) => {
   try {
     const fetcher = req?.clientCredentialsFetcher;
     const result = await fetcher.get("/refs/jft-all");
-    await Sinkronisasi.query()
-      .insert({
-        aplikasi: "simaster",
-        layanan: "ref_jft",
-        updated_at: new Date(),
-      })
-      .onConflict(["aplikasi", "layanan"])
-      .merge(["updated_at"]);
+
+    await setSinkronisasi({
+      aplikasi: "simaster",
+      layanan: "ref_jft",
+    });
 
     const knex = await SimasterJft.knex();
     await knex.delete().from("simaster_jft");
@@ -68,16 +62,12 @@ const syncUnorSimaster = async (req, res) => {
         `/master-ws/pemprov/opd/${opdId}/departments`
       );
 
-      await Sinkronisasi.query()
-        .insert({
-          aplikasi: "simaster",
-          layanan: "unor",
-          updated_at: new Date(),
-        })
-        .onConflict(["aplikasi", "layanan"])
-        .merge(["updated_at"]);
+      await setSinkronisasi({
+        aplikasi: "simaster",
+        layanan: "unor",
+      });
 
-      const knex = await UnorMaster.knex();
+      const knex = UnorMaster.knex();
 
       await knex.delete().from("sync_unor_master");
       await knex.batchInsert("sync_unor_master", result?.data);
@@ -149,14 +139,10 @@ const syncPegawai = async (req, res) => {
     const { data: employees } = await fetcher.get(
       `/master-ws/pemprov/opd/${opdId}/employees`
     );
-    await Sinkronisasi.query()
-      .insert({
-        aplikasi: "simaster",
-        layanan: "pegawai",
-        updated_at: new Date(),
-      })
-      .onConflict(["aplikasi", "layanan"])
-      .merge(["updated_at"]);
+    await setSinkronisasi({
+      aplikasi: "simaster",
+      layanan: "pegawai",
+    });
 
     const knex = SyncPegawai.knex();
     await knex.delete().from("sync_pegawai");

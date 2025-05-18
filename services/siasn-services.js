@@ -79,6 +79,14 @@ export const dataRiwayatKeluargaSIASN = () => {
   return api.get("/pns/rw-keluarga").then((res) => res.data);
 };
 
+export const dataRiwayatPengadaanPersonal = () => {
+  return api.get("/pns/rw-pengadaan").then((res) => res.data);
+};
+
+export const dataRiwayatPengadaanPersonalByNip = (nip) => {
+  return api.get(`/admin/${nip}/rw-pengadaan`).then((res) => res.data);
+};
+
 // data pendidikan
 export const dataPendidikan = () => {
   return api.get("/pns/rw-pendidikan").then((res) => res.data);
