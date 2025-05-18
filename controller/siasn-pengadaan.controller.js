@@ -721,7 +721,7 @@ const getRwPengadaanByNip = async (req, res) => {
       .first()
       .withGraphFetched("status_usulan_nama");
     if (!result) {
-      return null;
+      res.json({});
     } else {
       res.json(result);
     }
@@ -739,7 +739,7 @@ const getRwPengadaanPersonal = async (req, res) => {
       .first()
       .withGraphFetched("status_usulan_nama");
     if (!result) {
-      return null;
+      res.json({});
     } else {
       res.json(result);
     }

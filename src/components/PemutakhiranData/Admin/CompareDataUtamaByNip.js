@@ -365,7 +365,7 @@ function CompareDataUtamaByNip({ nip }) {
                       onClick={refetchRiwayatPengadaan}
                     />
                   }
-                  title="Riwayat Pengadaan (2022 ke atas)"
+                  title="Riwayat Pengadaan (khusus TMT 2022 ke atas)"
                   id="riwayat-pengadaan"
                 >
                   <RiwayatPengadaan
