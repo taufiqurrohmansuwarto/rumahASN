@@ -374,7 +374,7 @@ function LayananPengadaan() {
           row?.no_pertek,
           row?.tgl_pertek ? dayjs(row?.tgl_pertek).format("DD-MM-YYYY") : "-",
           jenisJabatan(row?.usulan_data?.data),
-          row.status_usulan_nama.nama,
+          row.status_usulan_nama,
         ]);
 
         // Menambahkan border untuk setiap sel data
@@ -719,6 +719,28 @@ function LayananPengadaan() {
       responsive: ["sm"],
     },
     {
+      title: "Nama",
+      dataIndex: "nama",
+      responsive: ["sm"],
+      filterSearch: true,
+      filterDropdown: ({
+        setSelectedKeys,
+        selectedKeys,
+        confirm,
+        clearFilters,
+      }) =>
+        renderSearchFilter({
+          setSelectedKeys,
+          selectedKeys,
+          confirm,
+          clearFilters,
+          dataIndex: "nama",
+        }),
+      filterIcon: (filtered) => (
+        <SearchOutlined style={{ color: filtered ? "#1890ff" : undefined }} />
+      ),
+    },
+    {
       title: "No. Peserta",
       key: "no_peserta",
       dataIndex: "no_peserta",
@@ -756,28 +778,7 @@ function LayananPengadaan() {
       title: "Tgl. Usulan",
       dataIndex: "tgl_usulan",
     },
-    {
-      title: "Nama",
-      dataIndex: "nama",
-      responsive: ["sm"],
-      filterSearch: true,
-      filterDropdown: ({
-        setSelectedKeys,
-        selectedKeys,
-        confirm,
-        clearFilters,
-      }) =>
-        renderSearchFilter({
-          setSelectedKeys,
-          selectedKeys,
-          confirm,
-          clearFilters,
-          dataIndex: "nama",
-        }),
-      filterIcon: (filtered) => (
-        <SearchOutlined style={{ color: filtered ? "#1890ff" : undefined }} />
-      ),
-    },
+
     {
       title: "Jenis Formasi Nama",
       dataIndex: "jenis_formasi_nama",
