@@ -1,8 +1,11 @@
 import { dataUtamaMasterByNip } from "@/services/master.services";
-import { dataUtamSIASNByNip } from "@/services/siasn-services";
+import {
+  dataRiwayatPengadaanPersonalByNip,
+  dataUtamSIASNByNip,
+} from "@/services/siasn-services";
 import { compareText, komparasiGelar } from "@/utils/client-utils";
 import { Stack, Text } from "@mantine/core";
-import { FilePdfOutlined } from "@ant-design/icons";
+import { FilePdfOutlined, ReloadOutlined } from "@ant-design/icons";
 import { useQuery } from "@tanstack/react-query";
 import {
   Anchor,
@@ -19,6 +22,7 @@ import {
 import InformationDetail from "../InformationDetail";
 import TextSensor from "@/components/TextSensor";
 import CreateCPNS from "./CreateCPNS";
+import RiwayatPengadaan from "../RiwayatPengadaan";
 
 const FileSPMT = ({ data }) => {
   let path = {};
@@ -223,6 +227,18 @@ function CompareDataUtamaByNip({ nip }) {
     }
   );
 
+  const {
+    data: riwayatPengadaan,
+    isLoading: isLoadingRiwayatPengadaan,
+    refetch: refetchRiwayatPengadaan,
+  } = useQuery(
+    ["riwayat-pengadaan", nip],
+    () => dataRiwayatPengadaanPersonalByNip(nip),
+    {
+      refetchOnWindowFocus: false,
+    }
+  );
+
   const breakPoint = Grid.useBreakpoint();
 
   const { data: dataSimaster, isLoading: isLoadingDataSimaster } = useQuery(
@@ -338,6 +354,25 @@ function CompareDataUtamaByNip({ nip }) {
                       pagination={false}
                     />
                   </Stack>
+                </Card>
+              </Col>
+              <Col md={24} xs={24}>
+                <Card
+                  extra={
+                    <Button
+                      type="link"
+                      icon={<ReloadOutlined />}
+                      onClick={refetchRiwayatPengadaan}
+                    />
+                  }
+                  title="Riwayat Pengadaan (2022 ke atas)"
+                  id="riwayat-pengadaan"
+                >
+                  <RiwayatPengadaan
+                    type="fasilitator"
+                    loading={isLoadingRiwayatPengadaan}
+                    data={riwayatPengadaan}
+                  />
                 </Card>
               </Col>
               <Col md={24} xs={24}>
