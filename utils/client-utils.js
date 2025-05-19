@@ -100,18 +100,18 @@ export const mysapkMenu = [
     color: "yellow",
     path: "/laporan-kinerja",
   },
-  {
-    title: "Kompetensi",
-    icon: IconUser,
-    color: "green",
-    path: "/rw-kompetensi",
-  },
-  {
-    title: "Potensi",
-    icon: IconUser,
-    color: "yellow",
-    path: "/rw-potensi",
-  },
+  // {
+  //   title: "Kompetensi",
+  //   icon: IconUser,
+  //   color: "green",
+  //   path: "/rw-kompetensi",
+  // },
+  // {
+  //   title: "Potensi",
+  //   icon: IconUser,
+  //   color: "yellow",
+  //   path: "/rw-potensi",
+  // },
   {
     title: "Diklat/Kursus",
     icon: IconReport,
@@ -164,12 +164,12 @@ export const mysapkMenu = [
     color: "gray",
     path: "/hukuman-disiplin",
   },
-  {
-    title: "Pindah Instansi",
-    icon: IconArrowsExchange,
-    color: "gray",
-    path: "/pindah-instansi",
-  },
+  // {
+  //   title: "Pindah Instansi",
+  //   icon: IconArrowsExchange,
+  //   color: "gray",
+  //   path: "/pindah-instansi",
+  // },
 ];
 
 export const StatusWebinar = ({ status }) => {
