@@ -188,7 +188,7 @@ function IPAsn({ tahun }) {
 
   return (
     <>
-      {dataUtama?.kedudukanPnsNama === "Aktif" && dataIPAsn ? (
+      {dataIPAsn ? (
         <>
           <Tag
             color={
