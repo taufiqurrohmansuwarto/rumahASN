@@ -8,7 +8,6 @@ import {
 import {
   Icon123,
   IconArrowFork,
-  IconArrowsExchange,
   IconBadge,
   IconBadges,
   IconBriefcase,
@@ -18,9 +17,7 @@ import {
   IconFileCertificate,
   IconReport,
   IconSchool,
-  IconUser,
   IconUserExclamation,
-  IconUserPlus,
   IconUserSearch,
   IconUsers,
 } from "@tabler/icons";
@@ -28,6 +25,7 @@ import { Tag } from "antd";
 import { toLower } from "lodash";
 
 import { getTokenSIASNService } from "@/services/siasn-services";
+import { IconReplaceUser } from "@tabler/icons-react";
 import axios from "axios";
 import dayjs from "dayjs";
 import "dayjs/locale/id";
@@ -63,6 +61,12 @@ export const mysapkMenu = [
     icon: IconUserSearch,
     color: "violet",
     path: "/data-utama",
+  },
+  {
+    title: "Riwayat Pengadaan",
+    icon: IconReplaceUser,
+    color: "blue",
+    path: "/rw-pengadaan",
   },
   {
     title: "Ubah Biodata",
