@@ -38,7 +38,7 @@ const RiwayatPengadaanPersonal = () => {
   return (
     <Skeleton loading={isLoading} active paragraph={{ rows: 10 }}>
       {!data ? (
-        <Empty />
+        <Empty description="Tidak ada data" />
       ) : (
         <Descriptions
           size="middle"
