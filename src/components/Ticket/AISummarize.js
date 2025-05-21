@@ -1,8 +1,21 @@
 import ReactMarkdownCustom from "@/components/MarkdownEditor/ReactMarkdownCustom";
-import { getSolution } from "@/services/admin.services";
-import { CopyOutlined, OpenAIOutlined } from "@ant-design/icons";
+import { deleteSummary, getSolution } from "@/services/admin.services";
+import {
+  CopyOutlined,
+  DeleteOutlined,
+  OpenAIOutlined,
+} from "@ant-design/icons";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Button, Col, Divider, message, Row, Space, Typography } from "antd";
+import {
+  Button,
+  Col,
+  Divider,
+  message,
+  Modal,
+  Row,
+  Space,
+  Typography,
+} from "antd";
 import { useSession } from "next-auth/react";
 
 function AISummarize({ item }) {
@@ -22,6 +35,34 @@ function AISummarize({ item }) {
       queryClient.invalidateQueries(["publish-ticket"]);
     },
   });
+
+  const { mutateAsync: removeSummary, isLoading: isDeleting } = useMutation(
+    (data) => deleteSummary(data),
+    {
+      onSuccess: () => {
+        message.success("Rekomendasi jawaban berhasil dihapus");
+        queryClient.invalidateQueries(["publish-ticket"]);
+      },
+      onError: () => {
+        message.error("Gagal menghapus rekomendasi jawaban");
+      },
+      onSettled: () => {
+        queryClient.invalidateQueries(["publish-ticket"]);
+      },
+    }
+  );
+
+  const handleRemoveSummary = () => {
+    Modal.confirm({
+      title: "Hapus Rekomendasi/Summary",
+      content: "Apakah anda yakin ingin menghapus rekomendasi/summary?",
+      onOk: async () => {
+        await removeSummary({
+          id: item?.id,
+        });
+      },
+    });
+  };
 
   if (!item?.summarize_ai) return null;
 
@@ -95,18 +136,30 @@ function AISummarize({ item }) {
             )}
 
             <Col span={24}>
-              <Button
-                type="text"
-                style={{
-                  backgroundColor: "#10a37f",
-                  color: "white",
-                }}
-                onClick={handleGetSolution}
-                loading={isLoading}
-                icon={<OpenAIOutlined />}
-              >
-                Buat Rekomendasi
-              </Button>
+              <Space>
+                <Button
+                  type="text"
+                  style={{
+                    backgroundColor: "#10a37f",
+                    color: "white",
+                  }}
+                  onClick={handleGetSolution}
+                  loading={isLoading}
+                  icon={<OpenAIOutlined />}
+                >
+                  Buat Rekomendasi
+                </Button>
+                <Button
+                  type="text"
+                  style={{
+                    backgroundColor: "red",
+                    color: "white",
+                  }}
+                  icon={<DeleteOutlined />}
+                  onClick={handleRemoveSummary}
+                  loading={isDeleting}
+                />
+              </Space>
             </Col>
           </Row>
         </div>
