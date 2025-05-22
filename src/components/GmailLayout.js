@@ -2,16 +2,27 @@ import {
   DeleteOutlined,
   EditOutlined,
   InboxOutlined,
+  LogoutOutlined,
   MailOutlined,
   SendOutlined,
   StarOutlined,
+  UserOutlined,
 } from "@ant-design/icons";
 import { ProConfigProvider } from "@ant-design/pro-components";
 import { Center } from "@mantine/core";
-import { Button, ConfigProvider, Layout } from "antd";
+import { Button, ConfigProvider, Dropdown, Layout, Space } from "antd";
 import frFR from "antd/lib/locale/id_ID";
+import { signOut } from "next-auth/react";
 import dynamic from "next/dynamic";
 import { useState } from "react";
+import MegaMenuTop from "./MegaMenu/MegaMenuTop";
+import NotifikasiASNConnect from "./Notification/NotifikasiASNConnect";
+import NotifikasiForumKepegawaian from "./Notification/NotifikasiForumKepegawaian";
+import NotifikasiKepegawaian from "./Notification/NotifikasiKepegawaian";
+import NotifikasiPrivateMessage from "./Notification/NotifikasiPrivateMessage";
+
+const { useSession } = require("next-auth/react");
+const { useRouter } = require("next/router");
 
 const ProLayout = dynamic(
   () => import("@ant-design/pro-components").then((mod) => mod?.ProLayout),
@@ -21,6 +32,8 @@ const ProLayout = dynamic(
 );
 
 function GmailLayout({ children, active = "inbox" }) {
+  const { data } = useSession();
+  const router = useRouter();
   const menuItems = [
     { key: "inbox", icon: <InboxOutlined />, label: "Kotak Masuk" },
     { key: "sent", icon: <SendOutlined />, label: "Pesan Terkirim" },
@@ -134,6 +147,68 @@ function GmailLayout({ children, active = "inbox" }) {
                   </Center>
                 );
               }
+            }}
+            actionsRender={(props) => {
+              // if (props.isMobile) return [];
+              return [
+                <NotifikasiKepegawaian
+                  key="kepegawaian"
+                  url="kepegawaian"
+                  title="Inbox Kepegawaian"
+                />,
+                <NotifikasiPrivateMessage
+                  key="private-message"
+                  url="/mails/inbox"
+                  title="Inbox Pesan Pribadi"
+                />,
+                <NotifikasiASNConnect
+                  key="asn-connect"
+                  url="asn-connect"
+                  title="Inbox ASN Connect"
+                />,
+                <NotifikasiForumKepegawaian
+                  key="forum-kepegawaian"
+                  url="forum-kepegawaian"
+                  title="Inbox Forum Kepegawaian"
+                />,
+                <MegaMenuTop key="mega-menu" url="" title="Menu" />,
+              ];
+            }}
+            avatarProps={{
+              src: data?.user?.image,
+              size: "large",
+              render: (props, dom) => {
+                return (
+                  <Space>
+                    <Dropdown
+                      menu={{
+                        onClick: (e) => {
+                          if (e.key === "logout") {
+                            signOut();
+                          }
+                          if (e.key === "profile") {
+                            router.push("/settings/profile");
+                          }
+                        },
+                        items: [
+                          {
+                            key: "profile",
+                            icon: <UserOutlined />,
+                            label: "Profil",
+                          },
+                          {
+                            key: "logout",
+                            icon: <LogoutOutlined />,
+                            label: "Keluar",
+                          },
+                        ],
+                      }}
+                    >
+                      {dom}
+                    </Dropdown>
+                  </Space>
+                );
+              },
             }}
             token={token}
             route={{
