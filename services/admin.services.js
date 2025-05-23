@@ -23,6 +23,10 @@ export const getSolution = async ({ question, id }) => {
     .then((res) => res?.data);
 };
 
+export const deleteSummary = async ({ id }) => {
+  return api.put(`/openai/summarize`, { id }).then((res) => res?.data);
+};
+
 export const reportSimasterEmployees = async () => {
   return api
     .get(`/reports/simaster/employees`, {

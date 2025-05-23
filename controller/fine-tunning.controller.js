@@ -78,6 +78,19 @@ export const summarizeQuestion = async (req, res) => {
   }
 };
 
+export const deleteSummary = async (req, res) => {
+  try {
+    const { id } = req.body;
+    await Tickets.query().findById(id).patch({
+      summarize_ai: null,
+      recomendation_answer: null,
+    });
+
+    res.status(200).json({ message: "Berhasil menghapus summary" });
+  } catch (error) {
+    handleError(error, res);
+  }
+};
 export const getSolution = async (req, res) => {
   try {
     const { question, id } = req.body;
