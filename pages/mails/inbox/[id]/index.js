@@ -1,6 +1,6 @@
 import GmailLayout from "@/components/GmailLayout";
 import PageContainer from "@/components/PageContainer";
-import InboxMessageDetail from "@/components/PrivateMessages/InboxMessageDetail";
+import EmailDetailComponent from "@/components/mail/EmailDetailComponent";
 import Head from "next/head";
 
 import { useRouter } from "next/router";
@@ -8,14 +8,15 @@ import { useRouter } from "next/router";
 const InboxMailDetail = () => {
   const handleBack = () => router?.back();
   const router = useRouter();
+  const { id } = router?.query;
 
   return (
     <>
       <Head>
         <title>Rumah ASN - Pesan Pribadi</title>
       </Head>
-      <PageContainer onBack={handleBack}>
-        <InboxMessageDetail />
+      <PageContainer title="Pesan Pribadi">
+        <EmailDetailComponent emailId={id} onBack={handleBack} />
       </PageContainer>
     </>
   );
