@@ -1,15 +1,25 @@
 import {
+  useBulkDelete,
+  useDeleteEmail,
+  useInboxEmails,
+  useMarkAsRead,
+  useToggleStar,
+} from "@/hooks/useEmails";
+import {
   DeleteOutlined,
+  EditOutlined,
   EyeOutlined,
+  FileOutlined,
+  ForwardOutlined,
   MailOutlined,
   MoreOutlined,
-  PaperClipOutlined,
   ReloadOutlined,
   SearchOutlined,
   SendOutlined,
-  ShareAltOutlined,
   StarFilled,
   StarOutlined,
+  FilterOutlined,
+  InboxOutlined,
   UserOutlined,
 } from "@ant-design/icons";
 import {
@@ -29,38 +39,55 @@ import {
   Tooltip,
   Typography,
   message,
+  Badge,
+  Divider,
 } from "antd";
-import { useRouter } from "next/router";
-import { useState } from "react";
 import dayjs from "dayjs";
-import {
-  useInboxEmails,
-  useMarkAsRead,
-  useToggleStar,
-  useBulkDelete,
-  useDeleteEmail,
-} from "@/hooks/useEmails";
+import { useRouter } from "next/router";
+import { useEffect, useState } from "react";
 
 const { Text, Title } = Typography;
 const { Search } = Input;
 
 const InboxComponent = () => {
   const router = useRouter();
-
-  // States
   const [selectedEmails, setSelectedEmails] = useState([]);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(25);
-  const [unreadOnly, setUnreadOnly] = useState(false);
   const [bulkDeleteModal, setBulkDeleteModal] = useState(false);
 
-  // Query params
+  // Extract query params with defaults
+  const { page = 1, limit = 25, search = "", unread = false } = router.query;
+
+  // Parse params to correct types
   const queryParams = {
-    page: currentPage,
-    limit: pageSize,
-    search: searchTerm,
-    unreadOnly,
+    page: parseInt(page),
+    limit: parseInt(limit),
+    search: search.toString(),
+    unreadOnly: unread === "true",
+  };
+
+  // Update URL helper
+  const updateQuery = (newParams) => {
+    const updatedQuery = { ...router.query, ...newParams };
+
+    // Remove empty values
+    Object.keys(updatedQuery).forEach((key) => {
+      if (
+        updatedQuery[key] === "" ||
+        updatedQuery[key] === false ||
+        updatedQuery[key] === "false"
+      ) {
+        delete updatedQuery[key];
+      }
+    });
+
+    router.push(
+      {
+        pathname: router.pathname,
+        query: updatedQuery,
+      },
+      undefined,
+      { shallow: true }
+    );
   };
 
   // Hooks
@@ -76,14 +103,16 @@ const InboxComponent = () => {
   const bulkDeleteMutation = useBulkDelete();
   const deleteMutation = useDeleteEmail();
 
+  // Reset selected emails when query changes
+  useEffect(() => {
+    setSelectedEmails([]);
+  }, [router.query]);
+
   // Handlers
   const handleEmailClick = async (email) => {
-    // Mark as read if unread
     if (!email.is_read) {
       await markReadMutation.mutateAsync(email.id);
     }
-
-    // Navigate to email detail
     router.push(`/mails/inbox/${email.id}`);
   };
 
@@ -110,6 +139,22 @@ const InboxComponent = () => {
     }
   };
 
+  const handleSearch = (value) => {
+    updateQuery({ search: value, page: 1 });
+  };
+
+  const handleUnreadFilter = (value) => {
+    updateQuery({ unread: value, page: 1 });
+  };
+
+  const handlePageSizeChange = (value) => {
+    updateQuery({ limit: value, page: 1 });
+  };
+
+  const handlePageChange = (newPage) => {
+    updateQuery({ page: newPage });
+  };
+
   const handleBulkDelete = () => {
     if (selectedEmails.length === 0) {
       message.warning("Pilih email yang ingin dihapus");
@@ -127,17 +172,12 @@ const InboxComponent = () => {
     });
   };
 
-  const handleSearch = (value) => {
-    setSearchTerm(value);
-    setCurrentPage(1);
-  };
-
   const handleRefresh = () => {
     refetch();
     message.success("Inbox diperbarui");
   };
 
-  // Email actions dropdown
+  // Email actions
   const getEmailActions = (email) => [
     {
       key: "read",
@@ -154,7 +194,7 @@ const InboxComponent = () => {
     {
       key: "forward",
       label: "Teruskan",
-      icon: <ShareAltOutlined />,
+      icon: <ForwardOutlined />,
       onClick: () => router.push(`/mails/compose?forward=${email.id}`),
     },
     {
@@ -169,197 +209,49 @@ const InboxComponent = () => {
     },
   ];
 
-  // Render email item
-  const renderEmailItem = (email) => {
-    const isSelected = selectedEmails.includes(email.id);
-    const isUnread = !email.is_read;
+  // Format time - simple and clear
+  const formatTime = (date) => {
+    const now = dayjs();
+    const emailDate = dayjs(date);
 
-    return (
-      <List.Item
-        key={email.id}
-        className={`email-item ${isUnread ? "unread" : ""} ${
-          isSelected ? "selected" : ""
-        }`}
-        style={{
-          padding: "12px 16px",
-          borderLeft: isUnread ? "3px solid #1890ff" : "3px solid transparent",
-          backgroundColor: isSelected
-            ? "#e6f7ff"
-            : isUnread
-            ? "#fafafa"
-            : "white",
-          cursor: "pointer",
-          transition: "all 0.2s",
-        }}
-        onClick={() => handleEmailClick(email)}
-        onMouseEnter={(e) => {
-          if (!isSelected) {
-            e.currentTarget.style.backgroundColor = "#f5f5f5";
-          }
-        }}
-        onMouseLeave={(e) => {
-          if (!isSelected) {
-            e.currentTarget.style.backgroundColor = isUnread
-              ? "#fafafa"
-              : "white";
-          }
-        }}
-      >
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            width: "100%",
-            gap: "12px",
-          }}
-        >
-          {/* Checkbox */}
-          <Checkbox
-            checked={isSelected}
-            onChange={(e) => {
-              e.stopPropagation();
-              handleSelectEmail(email.id, e.target.checked);
-            }}
-            onClick={(e) => e.stopPropagation()}
-          />
-
-          {/* Star */}
-          <Button
-            type="text"
-            size="small"
-            icon={
-              email.is_starred ? (
-                <StarFilled style={{ color: "#faad14" }} />
-              ) : (
-                <StarOutlined />
-              )
-            }
-            onClick={(e) => handleStarClick(e, email.id)}
-            style={{ padding: "4px" }}
-          />
-
-          {/* Sender Info */}
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              minWidth: "200px",
-              flex: "0 0 200px",
-            }}
-          >
-            <Avatar
-              src={email.sender?.image}
-              icon={<UserOutlined />}
-              size="small"
-              style={{ marginRight: "8px" }}
-            />
-            <Text
-              strong={isUnread}
-              ellipsis
-              style={{ fontSize: isUnread ? "14px" : "13px" }}
-            >
-              {email.sender_name || email.sender?.username}
-            </Text>
-          </div>
-
-          {/* Subject and Content Preview */}
-          <div style={{ flex: 1, minWidth: 0 }}>
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "8px",
-                marginBottom: "2px",
-              }}
-            >
-              <Text
-                strong={isUnread}
-                ellipsis
-                style={{
-                  fontSize: isUnread ? "14px" : "13px",
-                  color: isUnread ? "#262626" : "#595959",
-                }}
-              >
-                {email.subject || "(Tanpa Subjek)"}
-              </Text>
-              {email.attachment_count > 0 && (
-                <PaperClipOutlined
-                  style={{ color: "#8c8c8c", fontSize: "12px" }}
-                />
-              )}
-            </div>
-            <Text
-              type="secondary"
-              ellipsis
-              style={{ fontSize: "12px", lineHeight: "1.2" }}
-            >
-              {email.content?.substring(0, 100)}...
-            </Text>
-          </div>
-
-          {/* Date and Actions */}
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "8px",
-              flex: "0 0 120px",
-              justifyContent: "flex-end",
-            }}
-          >
-            <Text
-              type="secondary"
-              style={{ fontSize: "12px", whiteSpace: "nowrap" }}
-            >
-              {dayjs(email.created_at).format("DD/MM/YY")}
-            </Text>
-
-            <Dropdown
-              menu={{ items: getEmailActions(email) }}
-              trigger={["click"]}
-              onClick={(e) => e.stopPropagation()}
-            >
-              <Button
-                type="text"
-                size="small"
-                icon={<MoreOutlined />}
-                style={{ opacity: 0.6 }}
-                onClick={(e) => e.stopPropagation()}
-              />
-            </Dropdown>
-          </div>
-        </div>
-      </List.Item>
-    );
+    if (now.format("YYYY-MM-DD") === emailDate.format("YYYY-MM-DD")) {
+      return emailDate.format("HH:mm");
+    } else if (now.year() === emailDate.year()) {
+      return emailDate.format("DD MMM");
+    } else {
+      return emailDate.format("DD/MM/YY");
+    }
   };
 
   if (isError) {
     return (
-      <Card>
-        <Empty
-          description="Gagal memuat inbox"
-          image={Empty.PRESENTED_IMAGE_SIMPLE}
-        >
-          <Button type="primary" onClick={refetch}>
-            Coba Lagi
-          </Button>
-        </Empty>
-      </Card>
+      <div style={{ padding: "24px" }}>
+        <Card>
+          <Empty description="Gagal memuat inbox">
+            <Button type="primary" onClick={refetch}>
+              Coba Lagi
+            </Button>
+          </Empty>
+        </Card>
+      </div>
     );
   }
 
   const emails = emailsData?.data?.emails || [];
   const total = emailsData?.data?.total || 0;
   const hasSelectedEmails = selectedEmails.length > 0;
+  const unreadCount = emails.filter((email) => !email.is_read).length;
 
   return (
-    <div style={{ height: "100%", display: "flex", flexDirection: "column" }}>
-      {/* Header */}
-      <Card
-        size="small"
-        style={{ marginBottom: "16px", borderRadius: "8px" }}
-        bodyStyle={{ padding: "16px" }}
-      >
+    <div
+      style={{
+        padding: "16px",
+        backgroundColor: "#f5f5f5",
+        minHeight: "100vh",
+      }}
+    >
+      {/* Clear Header with obvious actions */}
+      <Card style={{ marginBottom: "16px" }}>
         <div
           style={{
             display: "flex",
@@ -368,28 +260,43 @@ const InboxComponent = () => {
             marginBottom: "16px",
           }}
         >
-          <Title level={4} style={{ margin: 0 }}>
-            <MailOutlined style={{ marginRight: "8px", color: "#1890ff" }} />
-            Inbox
+          <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+            <InboxOutlined style={{ fontSize: "20px", color: "#1890ff" }} />
+            <Title level={4} style={{ margin: 0 }}>
+              Inbox
+            </Title>
             {total > 0 && (
-              <Tag color="blue" style={{ marginLeft: "8px" }}>
-                {total}
-              </Tag>
+              <Badge
+                count={unreadCount}
+                style={{ backgroundColor: "#52c41a" }}
+                showZero={false}
+              />
             )}
-          </Title>
+            {total > 0 && <Text type="secondary">{total} email</Text>}
+          </div>
 
+          {/* Primary actions - most important first */}
           <Space>
-            <Tooltip title="Refresh">
+            <Button
+              type="primary"
+              icon={<EditOutlined />}
+              onClick={() => router.push("/mails/compose")}
+              size="large"
+            >
+              Tulis Email
+            </Button>
+            <Tooltip title="Perbarui inbox">
               <Button
                 icon={<ReloadOutlined />}
                 onClick={handleRefresh}
                 loading={isLoading}
+                size="large"
               />
             </Tooltip>
           </Space>
         </div>
 
-        {/* Search and Filters */}
+        {/* Clear filters with labels */}
         <div
           style={{
             display: "flex",
@@ -398,87 +305,131 @@ const InboxComponent = () => {
             flexWrap: "wrap",
           }}
         >
-          <Search
-            placeholder="Cari email..."
-            allowClear
-            onSearch={handleSearch}
-            onChange={(e) => !e.target.value && handleSearch("")}
-            style={{ width: "300px" }}
-            enterButton={<SearchOutlined />}
-          />
+          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+            <Text strong>Cari:</Text>
+            <Search
+              placeholder="Ketik untuk mencari email..."
+              allowClear
+              value={queryParams.search}
+              onSearch={handleSearch}
+              onChange={(e) => !e.target.value && handleSearch("")}
+              style={{ width: 300 }}
+              enterButton={<SearchOutlined />}
+            />
+          </div>
 
-          <Select
-            value={unreadOnly}
-            onChange={setUnreadOnly}
-            style={{ width: "120px" }}
-          >
-            <Select.Option value={false}>Semua</Select.Option>
-            <Select.Option value={true}>Belum Dibaca</Select.Option>
-          </Select>
+          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+            <Text strong>Filter:</Text>
+            <Select
+              value={queryParams.unreadOnly}
+              onChange={handleUnreadFilter}
+              style={{ width: 140 }}
+              suffixIcon={<FilterOutlined />}
+            >
+              <Select.Option value={false}>
+                <Space>
+                  <MailOutlined />
+                  Semua Email
+                </Space>
+              </Select.Option>
+              <Select.Option value={true}>
+                <Space>
+                  <Badge dot status="processing" />
+                  Belum Dibaca
+                </Space>
+              </Select.Option>
+            </Select>
+          </div>
 
-          <Select
-            value={pageSize}
-            onChange={(value) => {
-              setPageSize(value);
-              setCurrentPage(1);
-            }}
-            style={{ width: "100px" }}
-          >
-            <Select.Option value={10}>10/hal</Select.Option>
-            <Select.Option value={25}>25/hal</Select.Option>
-            <Select.Option value={50}>50/hal</Select.Option>
-          </Select>
+          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+            <Text strong>Tampilkan:</Text>
+            <Select
+              value={queryParams.limit}
+              onChange={handlePageSizeChange}
+              style={{ width: 120 }}
+            >
+              <Select.Option value={10}>10 per hal</Select.Option>
+              <Select.Option value={25}>25 per hal</Select.Option>
+              <Select.Option value={50}>50 per hal</Select.Option>
+            </Select>
+          </div>
         </div>
 
-        {/* Bulk Actions */}
+        {/* Clear bulk actions */}
         {hasSelectedEmails && (
-          <div
-            style={{
-              marginTop: "12px",
-              padding: "8px 12px",
-              backgroundColor: "#e6f7ff",
-              borderRadius: "6px",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-            }}
-          >
-            <Text>{selectedEmails.length} email dipilih</Text>
-            <Space>
-              <Button
-                size="small"
-                icon={<DeleteOutlined />}
-                onClick={handleBulkDelete}
-                loading={bulkDeleteMutation.isLoading}
-              >
-                Hapus Terpilih
-              </Button>
-              <Button size="small" onClick={() => setSelectedEmails([])}>
-                Batal
-              </Button>
-            </Space>
-          </div>
+          <>
+            <Divider style={{ margin: "16px 0 12px 0" }} />
+            <div
+              style={{
+                padding: "12px 16px",
+                backgroundColor: "#e6f7ff",
+                borderRadius: "6px",
+                border: "1px solid #91d5ff",
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+              }}
+            >
+              <Space>
+                <Badge
+                  count={selectedEmails.length}
+                  style={{ backgroundColor: "#1890ff" }}
+                />
+                <Text strong>{selectedEmails.length} email dipilih</Text>
+              </Space>
+              <Space>
+                <Button
+                  danger
+                  icon={<DeleteOutlined />}
+                  onClick={handleBulkDelete}
+                  loading={bulkDeleteMutation.isLoading}
+                >
+                  Hapus yang Dipilih
+                </Button>
+                <Button onClick={() => setSelectedEmails([])}>
+                  Batal Pilih
+                </Button>
+              </Space>
+            </div>
+          </>
         )}
       </Card>
 
-      {/* Email List */}
-      <Card
-        style={{ flex: 1, borderRadius: "8px" }}
-        bodyStyle={{ padding: 0 }}
-        loading={isLoading}
-      >
+      {/* Email List - Clean and scannable */}
+      <Card loading={isLoading}>
         {emails.length === 0 ? (
-          <div style={{ padding: "48px" }}>
+          <div style={{ padding: "48px 20px", textAlign: "center" }}>
             <Empty
               description={
-                searchTerm ? "Tidak ada email yang cocok" : "Inbox kosong"
+                queryParams.search
+                  ? "Tidak ada email yang cocok dengan pencarian Anda"
+                  : "Inbox Anda kosong"
               }
               image={Empty.PRESENTED_IMAGE_SIMPLE}
-            />
+            >
+              {!queryParams.search && (
+                <div style={{ marginTop: "16px" }}>
+                  <Text
+                    type="secondary"
+                    style={{ display: "block", marginBottom: "16px" }}
+                  >
+                    Mulai berkirim email dengan kolega Anda
+                  </Text>
+                  <Button
+                    type="primary"
+                    icon={<EditOutlined />}
+                    size="large"
+                    onClick={() => router.push("/mails/compose")}
+                  >
+                    Tulis Email Pertama
+                  </Button>
+                </div>
+              )}
+            </Empty>
           </div>
         ) : (
           <>
-            {/* Select All Header */}
+            {/* Clear select all header */}
             <div
               style={{
                 padding: "12px 16px",
@@ -491,62 +442,267 @@ const InboxComponent = () => {
                   selectedEmails.length > 0 &&
                   selectedEmails.length < emails.length
                 }
-                checked={selectedEmails.length === emails.length}
+                checked={
+                  selectedEmails.length === emails.length && emails.length > 0
+                }
                 onChange={(e) => handleSelectAll(e.target.checked)}
               >
-                <Text type="secondary">
+                <Text>
                   {selectedEmails.length > 0
-                    ? `${selectedEmails.length} dari ${emails.length} dipilih`
-                    : `Pilih semua (${emails.length})`}
+                    ? `${selectedEmails.length} dari ${emails.length} email dipilih`
+                    : `Pilih semua ${emails.length} email`}
                 </Text>
               </Checkbox>
             </div>
 
-            {/* Email List */}
+            {/* Email list with clear visual hierarchy */}
             <List
               dataSource={emails}
-              renderItem={renderEmailItem}
-              split={false}
-              style={{ maxHeight: "calc(100vh - 300px)", overflowY: "auto" }}
+              renderItem={(email) => {
+                const isSelected = selectedEmails.includes(email.id);
+                const isUnread = !email.is_read;
+
+                return (
+                  <List.Item
+                    style={{
+                      padding: "16px",
+                      borderBottom: "1px solid #f0f0f0",
+                      backgroundColor: isSelected
+                        ? "#e6f7ff"
+                        : isUnread
+                        ? "#fafbfc"
+                        : "white",
+                      borderLeft: isUnread
+                        ? "4px solid #1890ff"
+                        : "4px solid transparent",
+                      cursor: "pointer",
+                      transition: "all 0.2s ease",
+                    }}
+                    onClick={() => handleEmailClick(email)}
+                    onMouseEnter={(e) => {
+                      if (!isSelected) {
+                        e.currentTarget.style.backgroundColor = "#f8f9fa";
+                      }
+                    }}
+                    onMouseLeave={(e) => {
+                      if (!isSelected) {
+                        e.currentTarget.style.backgroundColor = isUnread
+                          ? "#fafbfc"
+                          : "white";
+                      }
+                    }}
+                  >
+                    <List.Item.Meta
+                      avatar={
+                        <Space size="middle">
+                          {/* Clear checkbox */}
+                          <Checkbox
+                            checked={isSelected}
+                            onChange={(e) => {
+                              e.stopPropagation();
+                              handleSelectEmail(email.id, e.target.checked);
+                            }}
+                            onClick={(e) => e.stopPropagation()}
+                          />
+
+                          {/* Clear star action */}
+                          <Tooltip
+                            title={
+                              email.is_starred
+                                ? "Hapus dari favorit"
+                                : "Tandai favorit"
+                            }
+                          >
+                            <Button
+                              type="text"
+                              size="small"
+                              icon={
+                                email.is_starred ? (
+                                  <StarFilled style={{ color: "#faad14" }} />
+                                ) : (
+                                  <StarOutlined style={{ color: "#d9d9d9" }} />
+                                )
+                              }
+                              onClick={(e) => handleStarClick(e, email.id)}
+                            />
+                          </Tooltip>
+
+                          {/* Clear sender avatar */}
+                          <Avatar
+                            src={email.sender_image}
+                            icon={<UserOutlined />}
+                            size="default"
+                          />
+                        </Space>
+                      }
+                      title={
+                        <div
+                          style={{
+                            display: "flex",
+                            justifyContent: "space-between",
+                            alignItems: "flex-start",
+                            gap: "16px",
+                          }}
+                        >
+                          <div style={{ flex: 1, minWidth: 0 }}>
+                            {/* Clear sender name */}
+                            <div style={{ marginBottom: "4px" }}>
+                              <Space>
+                                <Text
+                                  strong={isUnread}
+                                  style={{
+                                    fontSize: "14px",
+                                    color: isUnread ? "#262626" : "#595959",
+                                  }}
+                                >
+                                  {email.sender_name || email.sender?.username}
+                                </Text>
+                                {isUnread && (
+                                  <Tag color="blue" size="small">
+                                    BARU
+                                  </Tag>
+                                )}
+                              </Space>
+                            </div>
+
+                            {/* Clear subject */}
+                            <div style={{ marginBottom: "4px" }}>
+                              <Space>
+                                <Text
+                                  strong={isUnread}
+                                  style={{
+                                    fontSize: "16px",
+                                    color: isUnread ? "#262626" : "#595959",
+                                    fontWeight: isUnread ? 600 : 400,
+                                  }}
+                                >
+                                  {email.subject || "(Tanpa Subjek)"}
+                                </Text>
+                                {email.attachment_count > 0 && (
+                                  <Tooltip
+                                    title={`${email.attachment_count} lampiran`}
+                                  >
+                                    <FileOutlined
+                                      style={{ color: "#1890ff" }}
+                                    />
+                                  </Tooltip>
+                                )}
+                              </Space>
+                            </div>
+                          </div>
+
+                          {/* Clear time and actions */}
+                          <div
+                            style={{
+                              display: "flex",
+                              alignItems: "center",
+                              gap: "12px",
+                            }}
+                          >
+                            <Text
+                              type="secondary"
+                              style={{
+                                fontSize: "13px",
+                                whiteSpace: "nowrap",
+                                minWidth: "fit-content",
+                              }}
+                            >
+                              {formatTime(email.created_at)}
+                            </Text>
+
+                            <Dropdown
+                              menu={{ items: getEmailActions(email) }}
+                              trigger={["click"]}
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              <Button
+                                type="text"
+                                size="small"
+                                icon={<MoreOutlined />}
+                                onClick={(e) => e.stopPropagation()}
+                                style={{ opacity: 0.7 }}
+                              />
+                            </Dropdown>
+                          </div>
+                        </div>
+                      }
+                      description={
+                        <Text
+                          type="secondary"
+                          style={{
+                            fontSize: "13px",
+                            lineHeight: "1.4",
+                            display: "block",
+                            marginTop: "4px",
+                          }}
+                        >
+                          {email.content?.substring(0, 120)}...
+                        </Text>
+                      }
+                    />
+                  </List.Item>
+                );
+              }}
             />
           </>
         )}
       </Card>
 
-      {/* Pagination */}
-      {total > pageSize && (
+      {/* Clear pagination */}
+      {total > queryParams.limit && (
         <div style={{ marginTop: "16px", textAlign: "center" }}>
-          <Pagination
-            current={currentPage}
-            total={total}
-            pageSize={pageSize}
-            onChange={setCurrentPage}
-            showSizeChanger={false}
-            showQuickJumper
-            showTotal={(total, range) =>
-              `${range[0]}-${range[1]} dari ${total} email`
-            }
-          />
+          <Card>
+            <Space direction="vertical" size="small" style={{ width: "100%" }}>
+              <Text type="secondary">
+                Halaman {queryParams.page} dari{" "}
+                {Math.ceil(total / queryParams.limit)}
+              </Text>
+              <Pagination
+                current={queryParams.page}
+                total={total}
+                pageSize={queryParams.limit}
+                onChange={handlePageChange}
+                showSizeChanger={false}
+                showQuickJumper
+                showTotal={(total, range) =>
+                  `Menampilkan ${range[0]}-${range[1]} dari ${total} email`
+                }
+              />
+            </Space>
+          </Card>
         </div>
       )}
 
-      {/* Bulk Delete Confirmation Modal */}
+      {/* Clear confirmation modal */}
       <Modal
-        title="Konfirmasi Hapus"
+        title={
+          <Space>
+            <DeleteOutlined style={{ color: "#ff4d4f" }} />
+            Konfirmasi Hapus Email
+          </Space>
+        }
         open={bulkDeleteModal}
         onOk={confirmBulkDelete}
         onCancel={() => setBulkDeleteModal(false)}
-        okText="Hapus"
+        okText="Ya, Hapus Sekarang"
         cancelText="Batal"
         okButtonProps={{
           danger: true,
           loading: bulkDeleteMutation.isLoading,
         }}
       >
-        <p>
-          Apakah Anda yakin ingin menghapus {selectedEmails.length} email yang
-          dipilih? Email akan dipindahkan ke folder Trash.
-        </p>
+        <div style={{ padding: "16px 0" }}>
+          <Text style={{ fontSize: "16px" }}>
+            Anda akan menghapus{" "}
+            <Text strong>{selectedEmails.length} email</Text>.
+          </Text>
+          <br />
+          <br />
+          <Text type="secondary">
+            Email yang dihapus akan dipindahkan ke folder Trash dan dapat
+            dipulihkan dalam 30 hari.
+          </Text>
+        </div>
       </Modal>
     </div>
   );

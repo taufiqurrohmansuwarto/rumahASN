@@ -46,6 +46,9 @@ class User extends Model {
       simpleNoAvatar(query) {
         query.select("custom_id", "username");
       },
+      simpleWithImage(query) {
+        query.select("custom_id", "username", "image");
+      },
     };
   }
 
