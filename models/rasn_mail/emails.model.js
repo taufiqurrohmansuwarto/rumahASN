@@ -216,6 +216,7 @@ class Email extends Model {
         "rasn_mail.emails.*",
         "sender.username as sender_name",
         "sender.email as sender_email",
+        "sender.image as sender_image",
         "recipients.is_read",
         "recipients.read_at",
         "recipients.folder",
@@ -225,7 +226,7 @@ class Email extends Model {
         "rasn_mail.emails.sender_id",
         "sender.custom_id"
       )
-      .withGraphFetched("[attachments, recipients.[user]]");
+      .withGraphFetched("[attachments, recipients.[user(simpleWithImage)]]");
 
     // Apply folder logic
     if (folder === "inbox") {
