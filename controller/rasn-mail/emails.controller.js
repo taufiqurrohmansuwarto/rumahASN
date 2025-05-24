@@ -1,6 +1,7 @@
 import { handleError } from "@/utils/helper/controller-helper";
 import EmailService from "@/utils/services/EmailServices";
 const BroadcastGroup = require("@/models/rasn_mail/broadcast-groups.model");
+const User = require("@/models/users.model");
 
 export const getEmails = async (req, res) => {
   try {
@@ -438,6 +439,24 @@ export const sendDraft = async (req, res) => {
     const { id } = req?.query;
     const { customId: userId } = req?.user;
     const result = await EmailService.sendDraft(id, userId);
+    res.json({ success: true, data: result });
+  } catch (error) {
+    handleError(res, error);
+  }
+};
+
+export const searchUsers = async (req, res) => {
+  try {
+    const { q } = req.query;
+    const result = await User.query()
+      .where("name", "like", `%${q}%`)
+      .andWhere("group", "!=", "GOOGLE")
+      .select(
+        "custom_id as id",
+        "username",
+        "image",
+        "organization_id as org_id"
+      );
     res.json({ success: true, data: result });
   } catch (error) {
     handleError(res, error);
