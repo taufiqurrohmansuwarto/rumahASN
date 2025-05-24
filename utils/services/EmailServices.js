@@ -277,6 +277,114 @@ class EmailService {
 
     return threadEmails;
   }
+
+  // Soft delete email (move to trash)
+  static async deleteEmail(emailId, userId) {
+    const email = await Email.query().findById(emailId);
+    if (!email) {
+      throw new Error("Email not found");
+    }
+
+    return email.deleteForUser(userId, "trash");
+  }
+
+  // Permanent delete email
+  static async permanentDeleteEmail(emailId, userId) {
+    const email = await Email.query().findById(emailId);
+    if (!email) {
+      throw new Error("Email not found");
+    }
+
+    return email.permanentDeleteForUser(userId);
+  }
+
+  // Restore email from trash
+  static async restoreEmail(emailId, userId) {
+    const email = await Email.query().findById(emailId);
+    if (!email) {
+      throw new Error("Email not found");
+    }
+
+    return email.restoreForUser(userId);
+  }
+
+  // Bulk delete emails
+  static async bulkDeleteEmails(emailIds, userId, permanent = false) {
+    const deletionType = permanent ? "permanent" : "trash";
+    return Email.bulkDelete(emailIds, userId, deletionType);
+  }
+
+  // Get user's trash
+  static async getUserTrash(userId, options = {}) {
+    const { page = 1, limit = 25, search = "" } = options;
+
+    let query = Email.query()
+      .select([
+        "emails.*",
+        "sender.username as sender_name",
+        "ed.deleted_at as user_deleted_at",
+        "ed.deletion_type",
+      ])
+      .join("public.users as sender", "emails.sender_id", "sender.custom_id")
+      .join("rasn_mail.email_deletions as ed", function () {
+        this.on("emails.id", "=", "ed.email_id").andOn(
+          "ed.user_id",
+          "=",
+          Email.knex().raw("?", [userId])
+        );
+      })
+      .where("ed.deletion_type", "trash")
+      .whereNull("ed.restored_at")
+      .withGraphFetched("[sender, attachments]");
+
+    // Apply search
+    if (search) {
+      query = query.where(function () {
+        this.where("emails.subject", "ilike", `%${search}%`)
+          .orWhere("emails.content", "ilike", `%${search}%`)
+          .orWhere("sender.username", "ilike", `%${search}%`);
+      });
+    }
+
+    // Get total count
+    const countQuery = query.clone().clearSelect().count("* as total");
+    const [{ total }] = await countQuery;
+
+    // Apply pagination
+    const emails = await query
+      .orderBy("ed.deleted_at", "desc")
+      .limit(limit)
+      .offset((page - 1) * limit);
+
+    return {
+      emails,
+      total: parseInt(total),
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit),
+    };
+  }
+
+  // Empty trash (permanent delete all)
+  static async emptyTrash(userId) {
+    const trashEmails = await Email.query()
+      .join("rasn_mail.email_deletions as ed", "emails.id", "ed.email_id")
+      .where("ed.user_id", userId)
+      .where("ed.deletion_type", "trash")
+      .whereNull("ed.restored_at")
+      .pluck("emails.id");
+
+    if (trashEmails.length === 0) {
+      return 0;
+    }
+
+    return Email.bulkDelete(trashEmails, userId, "permanent");
+  }
+
+  // Auto cleanup old deleted emails (cron job)
+  static async autoCleanupDeleted(daysOld = 30) {
+    return Email.cleanupOldDeleted(daysOld);
+  }
 }
 
 module.exports = EmailService;

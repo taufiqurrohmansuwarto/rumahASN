@@ -242,3 +242,83 @@ export const createBroadcastGroup = async (req, res) => {
     handleError(res, error);
   }
 };
+
+export const deleteEmail = async (req, res) => {
+  try {
+    const { id } = req?.query;
+    const { customId: userId } = req?.user;
+    const { permanent = false } = req?.body;
+
+    if (permanent) {
+      const result = await EmailService.permanentDeleteEmail(id, userId);
+      res.json({ success: true, data: result });
+    } else {
+      const result = await EmailService.deleteEmail(id, userId);
+      res.json({ success: true, data: result });
+    }
+  } catch (error) {
+    handleError(res, error);
+  }
+};
+
+export const restoreEmail = async (req, res) => {
+  try {
+    const { id } = req?.query;
+    const { customId: userId } = req?.user;
+    const result = await EmailService.restoreEmail(id, userId);
+    res.json({ success: true, data: result });
+  } catch (error) {
+    handleError(res, error);
+  }
+};
+
+export const bulkDeleteEmail = async (req, res) => {
+  try {
+    const { emailIds, permanent = false } = req.body;
+    const { customId: userId } = req?.user;
+    if (!emailIds || !Array.isArray(emailIds) || emailIds.length === 0) {
+      return res.status(400).json({ error: "Email IDs required" });
+    }
+
+    const deletedCount = await EmailService.bulkDeleteEmails(
+      emailIds,
+      userId,
+      permanent
+    );
+
+    res.json({
+      success: true,
+      data: { deletedCount },
+      message: `${deletedCount} emails ${
+        permanent ? "permanently deleted" : "moved to trash"
+      }`,
+    });
+  } catch (error) {
+    handleError(res, error);
+  }
+};
+
+export const deleteTrash = async (req, res) => {
+  try {
+    const { customId: userId } = req?.user;
+    const result = await EmailService.emptyTrash(userId);
+    res.json({ success: true, data: result });
+  } catch (error) {
+    handleError(res, error);
+  }
+};
+
+export const getTrash = async (req, res) => {
+  try {
+    const { customId: userId } = req?.user;
+    const { page = 1, limit = 25, search = "" } = req.query;
+    const result = await EmailService.getUserTrash(userId, {
+      page: parseInt(page),
+      limit: parseInt(limit),
+      search,
+    });
+    res.json({ success: true, data: result });
+  } catch (error) {
+    handleError(res, error);
+  }
+};
