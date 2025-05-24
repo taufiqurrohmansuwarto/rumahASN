@@ -37,7 +37,7 @@ class BroadcastMember extends Model {
         modelClass: User,
         join: {
           from: "rasn_mail.broadcast_members.user_id",
-          to: "public.users.custom_id",
+          to: "users.custom_id",
         },
       },
     };

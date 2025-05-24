@@ -1,6 +1,5 @@
 import GmailLayout from "@/components/GmailLayout";
-import PageContainer from "@/components/PageContainer";
-import DetailMail from "@/components/PrivateMessages/InboxMessages";
+import InboxComponent from "@/components/mail/InboxComponent";
 import Head from "next/head";
 
 const InboxMail = () => {
@@ -11,7 +10,7 @@ const InboxMail = () => {
       <Head>
         <title>Rumah ASN - Pesan Pribadi</title>
       </Head>
-      <DetailMail />
+      <InboxComponent />
     </>
   );
 };

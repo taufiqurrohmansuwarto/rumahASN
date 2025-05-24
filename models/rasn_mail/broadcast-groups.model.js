@@ -29,7 +29,7 @@ class BroadcastGroup extends Model {
         modelClass: User,
         join: {
           from: "rasn_mail.broadcast_groups.created_by",
-          to: "public.users.custom_id",
+          to: "users.custom_id",
         },
       },
       members: {

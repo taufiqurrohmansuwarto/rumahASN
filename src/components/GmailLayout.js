@@ -139,7 +139,7 @@ function GmailLayout({
 
     // Navigate based on menu item
     const folderKey = item.path.split("/").pop();
-    router.push(`/mails?folder=${folderKey}`);
+    router.push(`/mails/${folderKey}`);
   };
 
   // Handle search

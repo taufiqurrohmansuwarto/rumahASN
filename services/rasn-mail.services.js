@@ -27,26 +27,61 @@ export const emptyTrash = async (userId) => {
     .then((res) => res?.data);
 };
 
-export const bulkDelete = async (userId, emailIds) => {
-  return api
-    .post(`/bulk-delete?${queryString.stringify({ userId })}`, { emailIds })
-    .then((res) => res?.data);
+export const bulkDelete = async (emailIds) => {
+  return api.post(`/bulk-delete`, { emailIds }).then((res) => res?.data);
 };
 
-export const restoreEmail = async (userId, emailId) => {
-  return api
-    .put(`/restore?${queryString.stringify({ userId, emailId })}`)
-    .then((res) => res?.data);
+export const restoreEmail = async (emailId) => {
+  return api.put(`/emails/${emailId}/delete`).then((res) => res?.data);
 };
 
-export const deleteEmail = async (userId, emailId) => {
-  return api
-    .delete(`/delete?${queryString.stringify({ userId, emailId })}`)
-    .then((res) => res?.data);
+export const deleteEmail = async (emailId) => {
+  return api.delete(`/emails/${emailId}/delete`).then((res) => res?.data);
 };
 
 export const sendEmail = async (data) => {
   return api.post("/emails", data).then((res) => res?.data);
+};
+
+// New functions for inbox
+export const getInboxEmails = async (params) => {
+  return api
+    .get(`/emails?${queryString.stringify({ ...params, folder: "inbox" })}`)
+    .then((res) => res?.data);
+};
+
+export const getSentEmails = async (params) => {
+  return api
+    .get(`/emails?${queryString.stringify({ ...params, folder: "sent" })}`)
+    .then((res) => res?.data);
+};
+
+export const getEmailById = async (emailId) => {
+  return api.get(`/emails/${emailId}`).then((res) => res?.data);
+};
+
+export const markAsRead = async (emailId) => {
+  return api
+    .put(`/emails/${emailId}`, { action: "read" })
+    .then((res) => res?.data);
+};
+
+export const toggleStar = async (emailId) => {
+  return api
+    .put(`/emails/${emailId}`, { action: "star" })
+    .then((res) => res?.data);
+};
+
+export const moveToFolder = async (emailId, folder) => {
+  return api
+    .put(`/emails/${emailId}`, { action: "move", value: folder })
+    .then((res) => res?.data);
+};
+
+export const searchEmails = async (params) => {
+  return api
+    .get(`/search?${queryString.stringify(params)}`)
+    .then((res) => res?.data);
 };
 
 // drafts
