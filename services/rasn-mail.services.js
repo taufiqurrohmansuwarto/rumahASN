@@ -75,3 +75,8 @@ export const getDraft = async (id) => {
 export const sendDraft = async (id) => {
   return api.post(`/drafts/${id}/send`).then((res) => res?.data);
 };
+
+// search users
+export const searchUsers = async (q) => {
+  return api.get(`/search/users?q=${q}`).then((res) => res?.data);
+};

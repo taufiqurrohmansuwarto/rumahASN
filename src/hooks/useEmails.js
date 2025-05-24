@@ -4,10 +4,11 @@ import {
   getEmailStats,
   saveDraft,
   sendEmail,
+  searchUsers,
   updateDraft,
 } from "@/services/rasn-mail.services";
+import { useDebouncedCallback } from "@mantine/hooks";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useDebounceEffect } from "ahooks";
 import { message } from "antd";
 import { useState } from "react";
 
@@ -73,25 +74,31 @@ export const useSendDraft = () => {
     },
   });
 };
-
 export const useAutoSaveDraft = (draftData, delay = 5000) => {
   const [lastSaved, setLastSaved] = useState(null);
   const saveDraft = useSaveDraft();
 
-  useDebounceEffect(
-    async () => {
-      if (draftData?.subject || draftData?.content) {
-        try {
-          await saveDraft.mutateAsync(draftData);
-          setLastSaved(new Date());
-        } catch (error) {
-          console.error("Auto-save failed:", error);
-        }
-      }
-    },
-    [draftData],
-    { wait: delay }
-  );
+  const performAutoSave = useDebouncedCallback(async (data) => {
+    try {
+      await saveDraft.mutateAsync(data);
+      setLastSaved(new Date());
+    } catch (error) {
+      console.error("Auto-save failed:", error);
+    }
+  }, delay);
+
+  useEffect(() => {
+    if (draftData?.subject || draftData?.content) {
+      performAutoSave(draftData);
+    }
+  }, [draftData, performAutoSave]);
 
   return { lastSaved, isAutoSaving: saveDraft.isLoading };
+};
+
+export const useSearchUsers = () => {
+  return useQuery({
+    queryKey: ["search-users", q],
+    queryFn: () => searchUsers(q),
+  });
 };
