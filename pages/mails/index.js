@@ -20,7 +20,6 @@ const Mail = () => {
         <title>Rumah ASN - Pesan Pribadi</title>
       </Head>
       <PageContainer>
-        {JSON.stringify(data)}
         <Button onClick={gotoCreate}>Buat Pesan</Button>
       </PageContainer>
     </>

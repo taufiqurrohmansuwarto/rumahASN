@@ -385,6 +385,295 @@ class EmailService {
   static async autoCleanupDeleted(daysOld = 30) {
     return Email.cleanupOldDeleted(daysOld);
   }
+
+  // Create new draft
+  static async createDraft({
+    senderId,
+    subject = "",
+    content = "",
+    recipients = { to: [], cc: [], bcc: [] },
+    attachments = [],
+    priority = "normal",
+  }) {
+    const trx = await Email.startTransaction();
+
+    try {
+      // Create draft email
+      const draft = await Email.query(trx).insert({
+        sender_id: senderId,
+        subject,
+        content,
+        priority,
+        is_draft: true,
+        type: "personal",
+      });
+
+      // Handle recipients
+      const allRecipients = [
+        ...recipients.to.map((id) => ({
+          email_id: draft.id,
+          recipient_id: id,
+          type: "to",
+        })),
+        ...recipients.cc.map((id) => ({
+          email_id: draft.id,
+          recipient_id: id,
+          type: "cc",
+        })),
+        ...recipients.bcc.map((id) => ({
+          email_id: draft.id,
+          recipient_id: id,
+          type: "bcc",
+        })),
+      ];
+
+      if (allRecipients.length > 0) {
+        const Recipient = require("@/models/rasn_mail/recipients.model");
+        await Recipient.query(trx).insert(allRecipients);
+      }
+
+      // Handle attachments
+      if (attachments.length > 0) {
+        const Attachment = require("@/models/rasn_mail/attachments.model");
+        await Attachment.query(trx)
+          .whereIn("id", attachments)
+          .patch({ email_id: draft.id });
+      }
+
+      await trx.commit();
+      return draft;
+    } catch (error) {
+      await trx.rollback();
+      throw error;
+    }
+  }
+
+  // Update existing draft
+  static async updateDraft({
+    draftId,
+    senderId,
+    subject,
+    content,
+    recipients,
+    attachments,
+    priority,
+  }) {
+    const trx = await Email.startTransaction();
+
+    try {
+      // Verify draft ownership
+      const draft = await Email.query(trx)
+        .findById(draftId)
+        .where("sender_id", senderId)
+        .where("is_draft", true);
+
+      if (!draft) {
+        throw new Error("Draft not found or access denied");
+      }
+
+      // Update email
+      await draft.$query(trx).patch({
+        subject,
+        content,
+        priority,
+        updated_at: new Date(),
+      });
+
+      // Update recipients - delete and recreate
+      const Recipient = require("@/models/rasn_mail/recipients.model");
+      await Recipient.query(trx).delete().where("email_id", draftId);
+
+      const allRecipients = [
+        ...recipients.to.map((id) => ({
+          email_id: draftId,
+          recipient_id: id,
+          type: "to",
+        })),
+        ...recipients.cc.map((id) => ({
+          email_id: draftId,
+          recipient_id: id,
+          type: "cc",
+        })),
+        ...recipients.bcc.map((id) => ({
+          email_id: draftId,
+          recipient_id: id,
+          type: "bcc",
+        })),
+      ];
+
+      if (allRecipients.length > 0) {
+        await Recipient.query(trx).insert(allRecipients);
+      }
+
+      // Update attachments
+      const Attachment = require("@/models/rasn_mail/attachments.model");
+
+      // Remove old attachments from this draft
+      await Attachment.query(trx)
+        .where("email_id", draftId)
+        .patch({ email_id: null });
+
+      // Attach new attachments
+      if (attachments.length > 0) {
+        await Attachment.query(trx)
+          .whereIn("id", attachments)
+          .patch({ email_id: draftId });
+      }
+
+      await trx.commit();
+
+      // Return updated draft with relations
+      return Email.query()
+        .findById(draftId)
+        .withGraphFetched("[recipients.[user], attachments]");
+    } catch (error) {
+      await trx.rollback();
+      throw error;
+    }
+  }
+
+  // Get user drafts
+  static async getUserDrafts(userId, options = {}) {
+    const { page = 1, limit = 25, search = "" } = options;
+
+    let query = Email.query()
+      .select([
+        "emails.*",
+        db.raw(
+          "(SELECT COUNT(*) FROM rasn_mail.attachments WHERE email_id = emails.id) as attachment_count"
+        ),
+      ])
+      .where("sender_id", userId)
+      .where("is_draft", true)
+      .withGraphFetched("[recipients.[user], attachments]");
+
+    // Apply search
+    if (search) {
+      query = query.where((builder) => {
+        builder
+          .where("subject", "ilike", `%${search}%`)
+          .orWhere("content", "ilike", `%${search}%`);
+      });
+    }
+
+    // Get total count
+    const countQuery = query.clone().clearSelect().count("* as total");
+    const [{ total }] = await countQuery;
+
+    // Apply pagination
+    const drafts = await query
+      .orderBy("updated_at", "desc")
+      .limit(limit)
+      .offset((page - 1) * limit);
+
+    return {
+      emails: drafts,
+      total: parseInt(total),
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit),
+    };
+  }
+
+  // Get draft by ID
+  static async getDraftById(draftId, userId) {
+    const draft = await Email.query()
+      .findById(draftId)
+      .where("sender_id", userId)
+      .where("is_draft", true)
+      .withGraphFetched("[recipients.[user], attachments]");
+
+    if (!draft) {
+      throw new Error("Draft not found or access denied");
+    }
+
+    return draft;
+  }
+
+  // Delete draft
+  static async deleteDraft(draftId, userId) {
+    const trx = await Email.startTransaction();
+
+    try {
+      // Verify ownership
+      const draft = await Email.query(trx)
+        .findById(draftId)
+        .where("sender_id", userId)
+        .where("is_draft", true);
+
+      if (!draft) {
+        throw new Error("Draft not found or access denied");
+      }
+
+      // Delete related data (cascading will handle most, but let's be explicit)
+      const Attachment = require("@/models/rasn_mail/attachments.model");
+      const Recipient = require("@/models/rasn_mail/recipients.model");
+
+      await Attachment.query(trx).delete().where("email_id", draftId);
+      await Recipient.query(trx).delete().where("email_id", draftId);
+      await Email.query(trx).deleteById(draftId);
+
+      await trx.commit();
+      return true;
+    } catch (error) {
+      await trx.rollback();
+      throw error;
+    }
+  }
+
+  // Send draft (convert to sent email)
+  static async sendDraft(draftId, userId) {
+    const trx = await Email.startTransaction();
+
+    try {
+      // Get draft with recipients
+      const draft = await Email.query(trx)
+        .findById(draftId)
+        .where("sender_id", userId)
+        .where("is_draft", true)
+        .withGraphFetched("[recipients]");
+
+      if (!draft) {
+        throw new Error("Draft not found or access denied");
+      }
+
+      if (draft.recipients.length === 0) {
+        throw new Error("Cannot send draft without recipients");
+      }
+
+      // Convert draft to sent email
+      await draft.$query(trx).patch({
+        is_draft: false,
+        sent_at: new Date(),
+        updated_at: new Date(),
+      });
+
+      // Log activity
+      await this.logEmailActivity(userId, "send", draftId);
+
+      await trx.commit();
+
+      return draft;
+    } catch (error) {
+      await trx.rollback();
+      throw error;
+    }
+  }
+
+  // Auto-save draft (debounced)
+  static async autoSaveDraft(draftData) {
+    try {
+      if (draftData.id) {
+        return await this.updateDraft(draftData);
+      } else {
+        return await this.createDraft(draftData);
+      }
+    } catch (error) {
+      console.error("Auto-save draft error:", error);
+      // Don't throw error for auto-save to avoid interrupting user
+      return null;
+    }
+  }
 }
 
 module.exports = EmailService;
