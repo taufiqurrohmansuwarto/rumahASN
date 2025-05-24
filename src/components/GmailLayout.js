@@ -1,28 +1,43 @@
+import { useEmailStats } from "@/hooks/useEmails";
 import {
+  BellOutlined,
   DeleteOutlined,
   EditOutlined,
+  FileOutlined,
+  FolderOutlined,
   InboxOutlined,
   LogoutOutlined,
   MailOutlined,
+  SearchOutlined,
   SendOutlined,
+  SettingOutlined,
   StarOutlined,
   UserOutlined,
 } from "@ant-design/icons";
 import { ProConfigProvider } from "@ant-design/pro-components";
 import { Center } from "@mantine/core";
-import { Button, ConfigProvider, Dropdown, Layout, Space } from "antd";
+import {
+  Badge,
+  Button,
+  ConfigProvider,
+  Dropdown,
+  Input,
+  Layout,
+  Space,
+} from "antd";
 import frFR from "antd/lib/locale/id_ID";
-import { signOut } from "next-auth/react";
+import { signOut, useSession } from "next-auth/react";
 import dynamic from "next/dynamic";
+import { useRouter } from "next/router";
 import { useState } from "react";
 import MegaMenuTop from "./MegaMenu/MegaMenuTop";
 import NotifikasiASNConnect from "./Notification/NotifikasiASNConnect";
 import NotifikasiForumKepegawaian from "./Notification/NotifikasiForumKepegawaian";
 import NotifikasiKepegawaian from "./Notification/NotifikasiKepegawaian";
 import NotifikasiPrivateMessage from "./Notification/NotifikasiPrivateMessage";
+// Tambahan import untuk email functionality
 
-const { useSession } = require("next-auth/react");
-const { useRouter } = require("next/router");
+const { Search } = Input;
 
 const ProLayout = dynamic(
   () => import("@ant-design/pro-components").then((mod) => mod?.ProLayout),
@@ -31,14 +46,55 @@ const ProLayout = dynamic(
   }
 );
 
-function GmailLayout({ children, active = "inbox" }) {
+function GmailLayout({
+  children,
+  active = "inbox",
+  onCompose, // Callback untuk compose
+  onSearch, // Callback untuk search
+  showSearchBar = true, // Toggle search bar
+}) {
   const { data } = useSession();
   const router = useRouter();
+  const [collapsed, setCollapsed] = useState(true);
+  const [showComposeModal, setShowComposeModal] = useState(false);
+
+  // Fetch email stats untuk unread counts
+  const { data: emailStats } = useEmailStats();
+
+  // Enhanced menu items dengan unread counts
   const menuItems = [
-    { key: "inbox", icon: <InboxOutlined />, label: "Kotak Masuk" },
-    { key: "sent", icon: <SendOutlined />, label: "Pesan Terkirim" },
-    { key: "starred", icon: <StarOutlined />, label: "Ditandai" },
-    { key: "trash", icon: <DeleteOutlined />, label: "Sampah" },
+    {
+      key: "inbox",
+      icon: <InboxOutlined />,
+      label: "Kotak Masuk",
+      count: emailStats?.unreadCount || 0,
+    },
+    {
+      key: "sent",
+      icon: <SendOutlined />,
+      label: "Pesan Terkirim",
+    },
+    {
+      key: "drafts",
+      icon: <FileOutlined />,
+      label: "Draft",
+      count: emailStats?.draftCount || 0,
+    },
+    {
+      key: "starred",
+      icon: <StarOutlined />,
+      label: "Ditandai",
+    },
+    {
+      key: "archive",
+      icon: <FolderOutlined />,
+      label: "Arsip",
+    },
+    {
+      key: "trash",
+      icon: <DeleteOutlined />,
+      label: "Sampah",
+    },
   ];
 
   const token = {
@@ -67,7 +123,36 @@ function GmailLayout({ children, active = "inbox" }) {
     },
   };
 
-  const [collapsed, setCollapsed] = useState(true);
+  // Handle compose button click
+  const handleCompose = () => {
+    if (onCompose) {
+      onCompose();
+    } else {
+      // Default behavior - navigate to compose page
+      router.push("/mails/compose");
+    }
+  };
+
+  // Handle menu item click
+  const handleMenuClick = (item) => {
+    console.log("Clicked:", item.name);
+
+    // Navigate based on menu item
+    const folderKey = item.path.split("/").pop();
+    router.push(`/mails?folder=${folderKey}`);
+  };
+
+  // Handle search
+  const handleSearch = (value) => {
+    if (onSearch) {
+      onSearch(value);
+    } else {
+      // Default behavior - navigate to search page
+      if (value.trim()) {
+        router.push(`/helpdesk/mails/search?q=${encodeURIComponent(value)}`);
+      }
+    }
+  };
 
   return (
     <div
@@ -94,6 +179,34 @@ function GmailLayout({ children, active = "inbox" }) {
             navTheme="light"
             fixedHeader
             fixSiderbar
+            // Enhanced header content dengan search
+            headerContentRender={() => {
+              if (showSearchBar) {
+                return (
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      width: "100%",
+                    }}
+                  >
+                    <Search
+                      placeholder="Cari email..."
+                      allowClear
+                      onSearch={handleSearch}
+                      style={{
+                        maxWidth: 400,
+                        marginLeft: 24,
+                        marginRight: "auto",
+                      }}
+                      enterButton={<SearchOutlined />}
+                    />
+                  </div>
+                );
+              }
+              return null;
+            }}
+            // Enhanced menu extra dengan compose button
             menuExtraRender={({ collapsed, isMobile }) => {
               if (!collapsed) {
                 if (isMobile)
@@ -105,7 +218,7 @@ function GmailLayout({ children, active = "inbox" }) {
                         marginBottom: 8,
                         marginTop: 8,
                       }}
-                      onClick={() => {}}
+                      onClick={handleCompose}
                       size="middle"
                       shape="round"
                       type="primary"
@@ -123,7 +236,7 @@ function GmailLayout({ children, active = "inbox" }) {
                           display: "flex",
                           justifyContent: "center",
                         }}
-                        onClick={() => {}}
+                        onClick={handleCompose}
                         shape="round"
                         icon={<EditOutlined />}
                         block
@@ -138,7 +251,7 @@ function GmailLayout({ children, active = "inbox" }) {
                 return (
                   <Center>
                     <Button
-                      onClick={() => {}}
+                      onClick={handleCompose}
                       shape="circle"
                       size="middle"
                       icon={<EditOutlined />}
@@ -148,8 +261,8 @@ function GmailLayout({ children, active = "inbox" }) {
                 );
               }
             }}
+            // Enhanced actions dengan mail-specific notifications
             actionsRender={(props) => {
-              // if (props.isMobile) return [];
               return [
                 <NotifikasiKepegawaian
                   key="kepegawaian"
@@ -158,7 +271,7 @@ function GmailLayout({ children, active = "inbox" }) {
                 />,
                 <NotifikasiPrivateMessage
                   key="private-message"
-                  url="/mails/inbox"
+                  url="/helpdesk/mails"
                   title="Inbox Pesan Pribadi"
                 />,
                 <NotifikasiASNConnect
@@ -171,9 +284,20 @@ function GmailLayout({ children, active = "inbox" }) {
                   url="forum-kepegawaian"
                   title="Inbox Forum Kepegawaian"
                 />,
+
+                // Tambahan: Mail Settings
+                <Button
+                  key="mail-settings"
+                  type="text"
+                  icon={<SettingOutlined />}
+                  onClick={() => router.push("/helpdesk/mails/settings")}
+                  title="Mail Settings"
+                />,
+
                 <MegaMenuTop key="mega-menu" url="" title="Menu" />,
               ];
             }}
+            // Enhanced avatar dengan mail-specific menu
             avatarProps={{
               src: data?.user?.image,
               size: "large",
@@ -189,6 +313,12 @@ function GmailLayout({ children, active = "inbox" }) {
                           if (e.key === "profile") {
                             router.push("/settings/profile");
                           }
+                          if (e.key === "mail-settings") {
+                            router.push("/helpdesk/mails/settings");
+                          }
+                          if (e.key === "broadcast") {
+                            router.push("/helpdesk/mails/broadcast");
+                          }
                         },
                         items: [
                           {
@@ -196,6 +326,22 @@ function GmailLayout({ children, active = "inbox" }) {
                             icon: <UserOutlined />,
                             label: "Profil",
                           },
+                          {
+                            key: "mail-settings",
+                            icon: <SettingOutlined />,
+                            label: "Pengaturan Mail",
+                          },
+                          // Kondisional untuk admin/moderator
+                          ...(data?.user?.current_role === "admin" ||
+                          data?.user?.current_role === "moderator"
+                            ? [
+                                {
+                                  key: "broadcast",
+                                  icon: <BellOutlined />,
+                                  label: "Broadcast Email",
+                                },
+                              ]
+                            : []),
                           {
                             key: "logout",
                             icon: <LogoutOutlined />,
@@ -211,18 +357,32 @@ function GmailLayout({ children, active = "inbox" }) {
               },
             }}
             token={token}
+            // Enhanced route dengan unread counts
             route={{
               routes: menuItems.map((item) => ({
-                path: `/mails/${item.key}`,
+                path: `/helpdesk/mails/${item.key}`,
                 name: item.label,
                 icon: item.icon,
+                // Tambah badge untuk unread count
+                ...(item.count > 0 && {
+                  name: (
+                    <Space>
+                      {item.label}
+                      <Badge
+                        count={item.count}
+                        size="small"
+                        style={{ backgroundColor: "#EA4335" }}
+                      />
+                    </Space>
+                  ),
+                }),
               })),
             }}
+            // Enhanced menu item render dengan proper navigation
             menuItemRender={(item, dom) => (
               <a
-                onClick={() => {
-                  console.log("Clicked:", item.name);
-                }}
+                onClick={() => handleMenuClick(item)}
+                style={{ textDecoration: "none" }}
               >
                 {dom}
               </a>

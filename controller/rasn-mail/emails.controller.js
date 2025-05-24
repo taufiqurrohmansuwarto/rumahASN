@@ -322,3 +322,124 @@ export const getTrash = async (req, res) => {
     handleError(res, error);
   }
 };
+
+export const getUserDrafts = async (req, res) => {
+  try {
+    const { page = 1, limit = 25, search = "" } = req.query;
+    const { customId: userId } = req?.user;
+    const result = await EmailService.getUserDrafts(userId, {
+      page: parseInt(page),
+      limit: parseInt(limit),
+      search,
+    });
+    res.json({ success: true, data: result });
+  } catch (error) {
+    handleError(res, error);
+  }
+};
+
+export const createOrUpdateDraft = async (req, res) => {
+  try {
+    const {
+      id = null, // draft ID for update
+      subject,
+      content,
+      recipients = { to: [], cc: [], bcc: [] },
+      attachments = [],
+      priority = "normal",
+    } = req.body;
+
+    const { customId: userId } = req?.user;
+
+    let draft;
+
+    if (id) {
+      draft = await EmailService.updateDraft({
+        draftId: id,
+        senderId: userId,
+        subject,
+        content,
+        recipients,
+        attachments,
+        priority,
+      });
+    } else {
+      // Create new draft
+      draft = await EmailService.createDraft({
+        senderId: userId,
+        subject,
+        content,
+        recipients,
+        attachments,
+        priority,
+      });
+    }
+
+    res.status(201).json({
+      success: true,
+      data: draft,
+      message: id ? "Draft updated successfully" : "Draft created successfully",
+    });
+  } catch (error) {
+    handleError(res, error);
+  }
+};
+
+export const getSingleDraft = async (req, res) => {
+  try {
+    const { id } = req?.query;
+    const { customId: userId } = req?.user;
+    const result = await EmailService.getDraftById(id, userId);
+    res.json({ success: true, data: result });
+  } catch (error) {
+    handleError(res, error);
+  }
+};
+
+export const updateDraft = async (req, res) => {
+  try {
+    const { id } = req?.query;
+    const { customId: userId } = req?.user;
+    const { subject, content, recipients, attachments, priority } = req.body;
+
+    const draft = await EmailService.updateDraft({
+      draftId: id,
+      senderId: userId,
+      subject,
+      content,
+      recipients,
+      attachments,
+      priority,
+    });
+
+    res.json({
+      success: true,
+      data: draft,
+      message: "Draft updated successfully",
+    });
+  } catch (error) {
+    handleError(res, error);
+  }
+};
+
+export const deleteDraft = async (req, res) => {
+  try {
+    const { id } = req?.query;
+    const { customId: userId } = req?.user;
+    const result = await EmailService.deleteDraft(id, userId);
+    res.json({ success: true, data: result });
+  } catch (error) {
+    handleError(res, error);
+  }
+};
+
+export const sendDraft = async (req, res) => {
+  try {
+    const { id } = req?.query;
+    const { customId: userId } = req?.user;
+    const result = await EmailService.sendDraft(id, userId);
+    res.json({ success: true, data: result });
+  } catch (error) {
+    handleError(res, error);
+  }
+};

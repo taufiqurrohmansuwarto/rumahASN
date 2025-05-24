@@ -83,7 +83,7 @@ class Email extends Model {
 
       if (type === "broadcast" && broadcastGroupId) {
         // Get broadcast recipients
-        const BroadcastGroup = require("./BroadcastGroup");
+        const BroadcastGroup = require("@/models/rasn_mail/broadcast-groups.model");
         const broadcastUsers = await BroadcastGroup.query(trx)
           .findById(broadcastGroupId)
           .withGraphFetched("members");
@@ -119,13 +119,13 @@ class Email extends Model {
 
       // 3. Insert recipients
       if (allRecipients.length > 0) {
-        const Recipient = require("./Recipient");
+        const Recipient = require("@/models/rasn_mail/recipients.model");
         await Recipient.query(trx).insert(allRecipients);
       }
 
       // 4. Handle attachments
       if (attachments.length > 0) {
-        const Attachment = require("./Attachment");
+        const Attachment = require("@/models/rasn_mail/attachments.model");
         const attachmentRecords = attachments.map((att) => ({
           email_id: email.id,
           file_name: att.file_name,
@@ -148,7 +148,7 @@ class Email extends Model {
     const User = require("@/models/users.model");
     const Recipient = require("@/models/rasn_mail/recipients.model");
     const Attachment = require("@/models/rasn_mail/attachments.model");
-    const EmailLabel = require("@/models/rasn_mail/email_labels.model");
+    const EmailLabel = require("@/models/rasn_mail/email-labels.model");
 
     return {
       sender: {
