@@ -16,6 +16,7 @@ import {
   Tabs,
   Switch,
   Modal,
+  Avatar,
 } from "antd";
 import {
   SendOutlined,
@@ -24,9 +25,12 @@ import {
   SaveOutlined,
   CloseOutlined,
   UserAddOutlined,
+  UserOutlined,
 } from "@ant-design/icons";
 import { useSendEmail, useSaveDraft } from "@/hooks/useEmails";
+import { searchUsers } from "@/services/rasn-mail.services";
 import ReactMarkdownCustom from "../MarkdownEditor/ReactMarkdownCustom";
+import { useCallback, useRef } from "react";
 
 const { TextArea } = Input;
 const { Title, Text } = Typography;
@@ -58,8 +62,63 @@ const EmailComposer = ({
   const [messageContent, setMessageContent] = useState("");
   const [isMarkdown, setIsMarkdown] = useState(false);
 
+  // User search states
+  const [userSearchResults, setUserSearchResults] = useState([]);
+  const [isSearchingUsers, setIsSearchingUsers] = useState(false);
+
   const sendEmail = useSendEmail();
   const saveDraft = useSaveDraft();
+
+  // Custom debounce hook implementation
+  const debounceRef = useRef(null);
+
+  const debouncedUserSearch = useCallback(async (searchText) => {
+    // Clear previous timeout
+    if (debounceRef.current) {
+      clearTimeout(debounceRef.current);
+    }
+
+    // Set new timeout
+    debounceRef.current = setTimeout(async () => {
+      if (!searchText || searchText.length < 2) {
+        setUserSearchResults([]);
+        setIsSearchingUsers(false);
+        return;
+      }
+
+      setIsSearchingUsers(true);
+      try {
+        const response = await searchUsers(searchText);
+        if (response.success) {
+          const formattedUsers = response.data.map((user) => ({
+            label: user.username,
+            value: user.id,
+            user: user,
+          }));
+          setUserSearchResults(formattedUsers);
+        }
+      } catch (error) {
+        console.error("Search users error:", error);
+        message.error("Gagal mencari pengguna");
+      } finally {
+        setIsSearchingUsers(false);
+      }
+    }, 300);
+  }, []);
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (debounceRef.current) {
+        clearTimeout(debounceRef.current);
+      }
+    };
+  }, []);
+
+  // Handle user search
+  const handleUserSearch = (searchText) => {
+    debouncedUserSearch(searchText);
+  };
 
   // Initialize form based on mode
   useEffect(() => {
@@ -164,27 +223,31 @@ const EmailComposer = ({
     }
   };
 
-  // Handle user search for recipients
-  const searchUsers = async (searchText) => {
-    if (!searchText || searchText.length < 2) return [];
-
-    try {
-      const response = await fetch(
-        `/api/mail/search/users?q=${encodeURIComponent(searchText)}`
-      );
-      const data = await response.json();
-
-      return data.success
-        ? data.data.map((user) => ({
-            label: `${user.username} <${user.email}>`,
-            value: user.id,
-            user: user,
-          }))
-        : [];
-    } catch (error) {
-      return [];
-    }
+  // Handle recipient change
+  const handleRecipientChange = (type, selectedOptions) => {
+    setRecipients((prev) => ({
+      ...prev,
+      [type]: selectedOptions || [],
+    }));
   };
+
+  // Custom option renderer for user search results
+  const renderUserOption = (user) => (
+    <div style={{ display: "flex", alignItems: "center", padding: "4px 0" }}>
+      <Avatar
+        src={user.user?.image}
+        size="small"
+        icon={<UserOutlined />}
+        style={{ marginRight: "8px" }}
+      />
+      <div style={{ flex: 1 }}>
+        <div style={{ fontWeight: "500" }}>{user.user?.username}</div>
+        <div style={{ fontSize: "12px", color: "#666" }}>
+          {user.user?.org_id || "No Organization"}
+        </div>
+      </div>
+    </div>
+  );
 
   // Handle attachment upload
   const uploadProps = {
@@ -210,6 +273,7 @@ const EmailComposer = ({
     setAttachments([]);
     setMessageContent("");
     setActiveTab("compose");
+    setUserSearchResults([]);
     onClose?.();
   };
 
@@ -249,18 +313,36 @@ const EmailComposer = ({
                 >
                   <Select
                     mode="multiple"
-                    placeholder="Tambahkan penerima..."
+                    placeholder="Ketik nama pengguna untuk mencari..."
                     value={recipients.to}
                     onChange={(value, options) =>
-                      setRecipients((prev) => ({ ...prev, to: options }))
+                      handleRecipientChange("to", options)
                     }
+                    onSearch={handleUserSearch}
+                    loading={isSearchingUsers}
                     showSearch
                     filterOption={false}
-                    onSearch={searchUsers}
-                    notFoundContent="Ketik untuk mencari pengguna..."
+                    notFoundContent={
+                      isSearchingUsers
+                        ? "Mencari pengguna..."
+                        : userSearchResults.length === 0
+                        ? "Ketik minimal 2 karakter untuk mencari"
+                        : "Tidak ada pengguna ditemukan"
+                    }
                     style={{ width: "100%" }}
                     suffixIcon={<UserAddOutlined />}
-                  />
+                    optionLabelProp="label"
+                  >
+                    {userSearchResults.map((user) => (
+                      <Select.Option
+                        key={user.value}
+                        value={user.value}
+                        label={user.label}
+                      >
+                        {renderUserOption(user)}
+                      </Select.Option>
+                    ))}
+                  </Select>
                 </Form.Item>
 
                 {/* CC Field */}
@@ -268,16 +350,33 @@ const EmailComposer = ({
                   <Form.Item label="CC" style={{ marginBottom: "12px" }}>
                     <Select
                       mode="multiple"
-                      placeholder="Tambahkan CC..."
+                      placeholder="Ketik nama pengguna untuk menambah CC..."
                       value={recipients.cc}
                       onChange={(value, options) =>
-                        setRecipients((prev) => ({ ...prev, cc: options }))
+                        handleRecipientChange("cc", options)
                       }
+                      onSearch={handleUserSearch}
+                      loading={isSearchingUsers}
                       showSearch
                       filterOption={false}
-                      onSearch={searchUsers}
+                      notFoundContent={
+                        isSearchingUsers
+                          ? "Mencari pengguna..."
+                          : "Ketik minimal 2 karakter untuk mencari"
+                      }
                       style={{ width: "100%" }}
-                    />
+                      optionLabelProp="label"
+                    >
+                      {userSearchResults.map((user) => (
+                        <Select.Option
+                          key={user.value}
+                          value={user.value}
+                          label={user.label}
+                        >
+                          {renderUserOption(user)}
+                        </Select.Option>
+                      ))}
+                    </Select>
                   </Form.Item>
                 )}
 
@@ -286,16 +385,34 @@ const EmailComposer = ({
                   <Form.Item label="BCC" style={{ marginBottom: "12px" }}>
                     <Select
                       mode="multiple"
-                      placeholder="Tambahkan BCC..."
+                      placeholder="Ketik nama pengguna untuk menambah BCC..."
                       value={recipients.bcc}
                       onChange={(value, options) =>
-                        setRecipients((prev) => ({ ...prev, bcc: options }))
+                        handleRecipientChange("bcc", options)
                       }
+                      onSearch={handleUserSearch}
+                      loading={isSearchingUsers}
                       showSearch
                       filterOption={false}
-                      onSearch={searchUsers}
+                      notFoundContent={
+                        isSearchingUsers
+                          ? "Mencari pengguna..."
+                          : "Ketik minimal 2 karakter untuk mencari"
+                      }
                       style={{ width: "100%" }}
-                    />
+                      optionLabelProp="label"
+                    >
+                      {userSearchResults.map((user) => (
+                        <Select.Option
+                          key={user.value}
+                          image={user?.image}
+                          value={user.id}
+                          label={user.username}
+                        >
+                          {renderUserOption(user)}
+                        </Select.Option>
+                      ))}
+                    </Select>
                   </Form.Item>
                 )}
 
@@ -472,7 +589,16 @@ const EmailComposer = ({
               <div style={{ marginBottom: "16px" }}>
                 <Text strong>Kepada: </Text>
                 {recipients.to.map((r) => (
-                  <Tag key={r.value}>{r.label}</Tag>
+                  <Tag key={r.value} style={{ margin: "2px" }}>
+                    <Space>
+                      <Avatar
+                        src={r?.image}
+                        size="small"
+                        icon={<UserOutlined />}
+                      />
+                      {r.label}
+                    </Space>
+                  </Tag>
                 ))}
               </div>
 
@@ -480,7 +606,34 @@ const EmailComposer = ({
                 <div style={{ marginBottom: "16px" }}>
                   <Text strong>CC: </Text>
                   {recipients.cc.map((r) => (
-                    <Tag key={r.value}>{r.label}</Tag>
+                    <Tag key={r.value} style={{ margin: "2px" }}>
+                      <Space>
+                        <Avatar
+                          src={r.user?.image}
+                          size="small"
+                          icon={<UserOutlined />}
+                        />
+                        {r.label}
+                      </Space>
+                    </Tag>
+                  ))}
+                </div>
+              )}
+
+              {recipients.bcc.length > 0 && (
+                <div style={{ marginBottom: "16px" }}>
+                  <Text strong>BCC: </Text>
+                  {recipients.bcc.map((r) => (
+                    <Tag key={r.value} style={{ margin: "2px" }}>
+                      <Space>
+                        <Avatar
+                          src={r.user?.image}
+                          size="small"
+                          icon={<UserOutlined />}
+                        />
+                        {r.label}
+                      </Space>
+                    </Tag>
                   ))}
                 </div>
               )}

@@ -449,8 +449,10 @@ export const searchUsers = async (req, res) => {
   try {
     const { q } = req.query;
     const result = await User.query()
-      .where("name", "like", `%${q}%`)
-      .andWhere("group", "!=", "GOOGLE")
+      .where("username", "ilike", `%${q}%`)
+      .andWhere("group", "=", "MASTER")
+      .andWhere("role", "=", "USER")
+
       .select(
         "custom_id as id",
         "username",

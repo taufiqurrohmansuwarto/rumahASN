@@ -46,7 +46,7 @@ export const deleteEmail = async (userId, emailId) => {
 };
 
 export const sendEmail = async (data) => {
-  return api.post("/email", data).then((res) => res?.data);
+  return api.post("/emails", data).then((res) => res?.data);
 };
 
 // drafts
