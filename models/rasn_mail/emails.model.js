@@ -303,6 +303,64 @@ class Email extends Model {
       totalPages: Math.ceil(total / limit),
     };
   }
+
+  // Check if email is deleted for specific user
+  async isDeletedForUser(userId) {
+    const EmailDeletion = require("@/models/rasn_mail/email-deletions.model");
+    const deletion = await EmailDeletion.query()
+      .findOne({
+        email_id: this.id,
+        user_id: userId,
+      })
+      .where("restored_at", null);
+
+    return !!deletion;
+  }
+
+  // Soft delete for user
+  async deleteForUser(userId, deletionType = "soft") {
+    const result = await Email.knex().raw(
+      "SELECT rasn_mail.delete_email_for_user(?, ?, ?) as success",
+      [this.id, userId, deletionType]
+    );
+    return result.rows[0].success;
+  }
+
+  // Restore for user
+  async restoreForUser(userId) {
+    const result = await Email.knex().raw(
+      "SELECT rasn_mail.restore_email_for_user(?, ?) as success",
+      [this.id, userId]
+    );
+    return result.rows[0].success;
+  }
+
+  // Permanent delete
+  async permanentDeleteForUser(userId) {
+    const result = await Email.knex().raw(
+      "SELECT rasn_mail.permanent_delete_email(?, ?) as success",
+      [this.id, userId]
+    );
+    return result.rows[0].success;
+  }
+
+  // Static method untuk bulk delete
+  static async bulkDelete(emailIds, userId, deletionType = "soft") {
+    const result = await Email.knex().raw(
+      "SELECT rasn_mail.bulk_delete_emails(?, ?, ?) as count",
+      [emailIds, userId, deletionType]
+    );
+    return parseInt(result.rows[0].count);
+  }
+
+  // Static method untuk cleanup old deleted emails
+  static async cleanupOldDeleted(daysOld = 30) {
+    const result = await Email.knex().raw(
+      "SELECT rasn_mail.cleanup_old_deleted_emails(?) as count",
+      [daysOld]
+    );
+    return parseInt(result.rows[0].count);
+  }
 }
 
 module.exports = Email;
