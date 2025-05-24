@@ -3,8 +3,8 @@ import {
   getDraft,
   getEmailStats,
   saveDraft,
-  sendEmail,
   searchUsers,
+  sendEmail,
   updateDraft,
 } from "@/services/rasn-mail.services";
 import { useDebouncedCallback } from "@mantine/hooks";
@@ -17,8 +17,12 @@ export const useEmailStats = () => {
 };
 
 export const useSendEmail = () => {
+  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (email) => sendEmail(email),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["emailStats"] });
+    },
   });
 };
 
