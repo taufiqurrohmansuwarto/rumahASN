@@ -28,7 +28,7 @@ class UserSettings extends Model {
         modelClass: User,
         join: {
           from: "rasn_mail.user_settings.user_id",
-          to: "public.users.custom_id",
+          to: "users.custom_id",
         },
       },
     };

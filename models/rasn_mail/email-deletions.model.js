@@ -37,7 +37,7 @@ class EmailDeletion extends Model {
         modelClass: User,
         join: {
           from: "rasn_mail.email_deletions.user_id",
-          to: "public.users.custom_id",
+          to: "users.custom_id",
         },
       },
     };
