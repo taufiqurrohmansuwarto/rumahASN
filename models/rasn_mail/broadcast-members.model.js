@@ -4,7 +4,7 @@ const nanoid = require("nanoid");
 
 Model.knex(knex);
 
-class EmailLabel extends Model {
+class BroadcastMember extends Model {
   $beforeInsert() {
     this.id = this.id || nanoid(25);
     this.created_at = new Date().toISOString();
@@ -16,36 +16,27 @@ class EmailLabel extends Model {
   }
 
   static get tableName() {
-    return "rasn_mail.email_labels";
+    return "rasn_mail.broadcast_members";
   }
 
   static get relationMappings() {
-    const Email = require("@/models/rasn_mail/emails.model");
-    const Label = require("@/models/rasn_mail/labels.model");
+    const BroadcastGroup = require("@/models/rasn_mail/broadcast-groups.model");
     const User = require("@/models/users.model");
 
     return {
-      email: {
+      group: {
         relation: Model.BelongsToOneRelation,
-        modelClass: Email,
+        modelClass: BroadcastGroup,
         join: {
-          from: "rasn_mail.email_labels.email_id",
-          to: "rasn_mail.emails.id",
-        },
-      },
-      label: {
-        relation: Model.BelongsToOneRelation,
-        modelClass: Label,
-        join: {
-          from: "rasn_mail.email_labels.label_id",
-          to: "rasn_mail.labels.id",
+          from: "rasn_mail.broadcast_members.group_id",
+          to: "rasn_mail.broadcast_groups.id",
         },
       },
       user: {
         relation: Model.BelongsToOneRelation,
         modelClass: User,
         join: {
-          from: "rasn_mail.email_labels.user_id",
+          from: "rasn_mail.broadcast_members.user_id",
           to: "public.users.custom_id",
         },
       },
@@ -53,4 +44,4 @@ class EmailLabel extends Model {
   }
 }
 
-module.exports = EmailLabel;
+module.exports = BroadcastMember;
