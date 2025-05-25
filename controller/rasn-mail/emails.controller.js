@@ -102,6 +102,7 @@ export const getEmailPersonal = async (req, res) => {
   try {
     const { id } = req?.query;
     const { customId: userId } = req?.user;
+
     const email = await EmailService.getEmailById(id, userId);
     res.json({
       success: true,

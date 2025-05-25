@@ -273,6 +273,33 @@ const SimpleAttachments = ({ attachments, onDownload }) => {
 
 // 5. Simple Content Component
 const SimpleContent = ({ content }) => {
+  // Fungsi untuk mendeteksi markdown dengan lebih mendalam
+  const isMarkdownContent = (text) => {
+    if (!text || typeof text !== "string") return false;
+
+    // Pola markdown yang lebih komprehensif
+    const markdownPatterns = [
+      /\*\*.*?\*\*/, // Bold text
+      /\*.*?\*/, // Italic text
+      /__.*?__/, // Bold with underscores
+      /_.*?_/, // Italic with underscores
+      /^#{1,6}\s/m, // Headers
+      /```[\s\S]*?```/, // Code blocks
+      /`.*?`/, // Inline code
+      /^\s*[-*+]\s/m, // Unordered lists
+      /^\s*\d+\.\s/m, // Ordered lists
+      /^\s*>\s/m, // Blockquotes
+      /\[.*?\]\(.*?\)/, // Links
+      /!\[.*?\]\(.*?\)/, // Images
+      /^\s*\|.*\|/m, // Tables
+      /^\s*---+\s*$/m, // Horizontal rules
+      /~~.*?~~/, // Strikethrough
+      /\n\s*\n/, // Multiple line breaks (markdown formatting)
+    ];
+
+    return markdownPatterns.some((pattern) => pattern.test(text));
+  };
+
   return (
     <div
       style={{
@@ -287,10 +314,10 @@ const SimpleContent = ({ content }) => {
     >
       {content ? (
         <div>
-          {content.includes("**") ||
-          content.includes("##") ||
-          content.includes("```") ? (
-            <ReactMarkdownCustom>{content}</ReactMarkdownCustom>
+          {isMarkdownContent(content) ? (
+            <>
+              <ReactMarkdownCustom withCustom>{content}</ReactMarkdownCustom>
+            </>
           ) : (
             <div
               style={{
@@ -304,7 +331,7 @@ const SimpleContent = ({ content }) => {
         </div>
       ) : (
         <Text type="secondary" style={{ fontStyle: "italic" }}>
-          This message has no content
+          Pesan ini tidak memiliki konten
         </Text>
       )}
     </div>
@@ -315,9 +342,9 @@ const SimpleContent = ({ content }) => {
 const SimpleRecipients = ({ recipients }) => {
   if (!recipients || recipients.length <= 1) return null;
 
-  const toRecipients = recipients.filter((r) => r.type === "to");
-  const ccRecipients = recipients.filter((r) => r.type === "cc");
-  const bccRecipients = recipients.filter((r) => r.type === "bcc");
+  const toRecipients = recipients.to;
+  const ccRecipients = recipients.cc;
+  const bccRecipients = recipients.bcc;
 
   return (
     <div

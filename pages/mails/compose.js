@@ -1,143 +1,76 @@
-import React, { useEffect, useState } from "react";
+import GmailLayout from "@/components/GmailLayout";
+import { useEmailById } from "@/hooks/useEmails";
+import { Spin, message } from "antd";
 import Head from "next/head";
 import { useRouter } from "next/router";
-import { Spin, Alert, Button } from "antd";
-import GmailLayout from "@/components/GmailLayout";
-import EmailComposer from "@/components/mail/EmailComposer";
-import { useEmailById } from "@/hooks/useEmails";
+import { useEffect, useState } from "react";
 
-const ComposePage = () => {
+// Import komponen yang sudah dibuat
+import ComposeModal from "@/components/mail/EmailCompose/ComposeModal";
+
+const ComposeMail = () => {
   const router = useRouter();
+  const [visible, setVisible] = useState(false);
 
-  // Get URL params for different compose modes
-  const { reply, replyAll, forward, draft } = router.query;
+  // Get query parameters
+  const { reply, forward, replyAll } = router.query;
+  const originalEmailId = reply || forward;
 
-  // State for original email
-  const [originalEmail, setOriginalEmail] = useState(null);
-
-  // Determine compose mode
-  let mode = "compose";
-  let originalEmailId = null;
-
-  if (reply) {
-    mode = "reply";
-    originalEmailId = reply;
-  } else if (forward) {
-    mode = "forward";
-    originalEmailId = forward;
-  }
-
-  // Load original email if needed for reply/forward
+  // Fetch original email jika ada ID
   const {
-    data: emailData,
-    isLoading: isLoadingEmail,
-    error: emailError,
-  } = useEmailById(originalEmailId, {
-    enabled: !!originalEmailId,
-  });
+    data: originalEmailData,
+    isLoading: isLoadingOriginal,
+    isError: isErrorOriginal,
+  } = useEmailById(originalEmailId);
 
-  // Set original email when data is loaded
   useEffect(() => {
-    if (emailData?.data) {
-      setOriginalEmail(emailData.data);
-    }
-  }, [emailData]);
+    setVisible(true);
+  }, []);
 
-  // Handle navigation
+  // Handle error loading original email
+  useEffect(() => {
+    if (isErrorOriginal && originalEmailId) {
+      message.error("Gagal memuat email asli");
+      // Tetap lanjut ke compose mode
+    }
+  }, [isErrorOriginal, originalEmailId]);
+
+  const handleClose = () => {
+    setVisible(false);
+    router.push("/mails/inbox");
+  };
+
   const handleSent = () => {
+    setVisible(false);
     router.push("/mails/sent");
   };
 
-  const handleDraft = () => {
-    router.push("/mails/drafts");
+  // Determine mode
+  const getMode = () => {
+    if (reply) return "reply";
+    if (forward) return "forward";
+    return "compose";
   };
 
-  const handleClose = () => {
-    router.back();
-  };
-
-  // Determine title based on mode
   const getTitle = () => {
-    switch (mode) {
-      case "reply":
-        return replyAll === "true" ? "Balas Semua" : "Balas Email";
-      case "forward":
-        return "Teruskan Email";
-      default:
-        return draft ? "Edit Draft" : "Tulis Email Baru";
-    }
+    if (reply) return replyAll === "true" ? "Balas Semua" : "Balas";
+    if (forward) return "Teruskan";
+    return "Tulis Email Baru";
   };
 
-  // Loading state for original email
-  if (isLoadingEmail) {
+  // Show loading jika sedang fetch original email
+  if (isLoadingOriginal && originalEmailId) {
     return (
-      <>
-        <Head>
-          <title>Rumah ASN - Memuat Email</title>
-        </Head>
-        <div
-          style={{
-            width: "100%",
-            height: "100vh",
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            backgroundColor: "#f5f5f5",
-          }}
-        >
-          <div style={{ textAlign: "center" }}>
-            <Spin size="large" />
-            <div style={{ marginTop: "16px", fontSize: "14px", color: "#666" }}>
-              Memuat email...
-            </div>
-          </div>
-        </div>
-      </>
-    );
-  }
-
-  // Error state for original email
-  if (emailError && originalEmailId) {
-    return (
-      <>
-        <Head>
-          <title>Rumah ASN - Error</title>
-        </Head>
-        <div
-          style={{
-            width: "100%",
-            height: "100vh",
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            backgroundColor: "#f5f5f5",
-            padding: "24px",
-          }}
-        >
-          <div style={{ maxWidth: "400px", width: "100%" }}>
-            <Alert
-              message="Gagal Memuat Email"
-              description="Tidak dapat memuat email yang ingin Anda balas atau teruskan. Silakan coba lagi atau kembali ke inbox."
-              type="error"
-              showIcon
-              action={
-                <div style={{ marginTop: "16px" }}>
-                  <Button
-                    type="primary"
-                    onClick={() => router.push("/mails/inbox")}
-                    style={{ marginRight: "8px" }}
-                  >
-                    Kembali ke Inbox
-                  </Button>
-                  <Button onClick={() => window.location.reload()}>
-                    Coba Lagi
-                  </Button>
-                </div>
-              }
-            />
-          </div>
-        </div>
-      </>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          height: "50vh",
+        }}
+      >
+        <Spin size="large" tip="Memuat email..." />
+      </div>
     );
   }
 
@@ -147,48 +80,26 @@ const ComposePage = () => {
         <title>Rumah ASN - {getTitle()}</title>
       </Head>
 
-      <div
-        style={{
-          width: "100%",
-          minHeight: "100vh",
-          backgroundColor: "#f5f5f5",
-          padding: "24px 16px",
-        }}
-      >
-        <div
-          style={{
-            maxWidth: "1000px",
-            margin: "0 auto",
-          }}
-        >
-          <EmailComposer
-            // Display props
-            standalone={true}
-            title={getTitle()}
-            // Mode props
-            mode={mode}
-            originalEmail={originalEmail}
-            replyAll={replyAll === "true"}
-            // Draft props
-            draftId={draft}
-            // Navigation callbacks
-            onSent={handleSent}
-            onDraft={handleDraft}
-            onClose={handleClose}
-          />
-        </div>
-      </div>
+      <ComposeModal
+        visible={visible}
+        onClose={handleClose}
+        onSent={handleSent}
+        mode={getMode()}
+        originalEmail={originalEmailData?.data || null}
+        replyAll={replyAll === "true"}
+        title={getTitle()}
+      />
     </>
   );
 };
 
-ComposePage.getLayout = function getLayout(page) {
+ComposeMail.getLayout = function getLayout(page) {
   return <GmailLayout active="/mails/compose">{page}</GmailLayout>;
 };
 
-ComposePage.Auth = {
+ComposeMail.Auth = {
   action: "manage",
   subject: "Tickets",
 };
 
-export default ComposePage;
+export default ComposeMail;
