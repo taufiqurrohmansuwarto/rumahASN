@@ -10,8 +10,10 @@ class EmailService {
     recipients = { to: [], cc: [], bcc: [] },
     attachments = [],
     parentId = null,
+    priority = "normal",
   }) {
     return Email.createAndSend({
+      priority,
       senderId,
       subject,
       content,
@@ -115,6 +117,20 @@ class EmailService {
 
     if (recipient) {
       await recipient.markAsRead();
+    }
+
+    return true;
+  }
+
+  // Mark email as unread
+  static async markAsUnread(emailId, userId) {
+    const recipient = await Recipient.query().findOne({
+      email_id: emailId,
+      recipient_id: userId,
+    });
+
+    if (recipient) {
+      await recipient.markAsUnread();
     }
 
     return true;

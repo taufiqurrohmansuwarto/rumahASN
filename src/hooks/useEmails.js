@@ -15,6 +15,7 @@ import {
   bulkDelete,
   deleteEmail,
   searchEmails,
+  markAsUnread,
 } from "@/services/rasn-mail.services";
 import { useCallback, useRef, useEffect } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -26,8 +27,12 @@ export const useEmailStats = () => {
 };
 
 export const useSendEmail = () => {
+  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (email) => sendEmail(email),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["emailStats"] });
+    },
   });
 };
 
@@ -161,6 +166,7 @@ export const useEmailById = (emailId) => {
     queryKey: ["email-detail", emailId],
     queryFn: () => getEmailById(emailId),
     enabled: !!emailId,
+    refetchOnWindowFocus: false,
   });
 };
 
@@ -172,6 +178,17 @@ export const useMarkAsRead = () => {
       queryClient.invalidateQueries(["inbox-emails"]);
       queryClient.invalidateQueries(["email-stats"]);
       queryClient.invalidateQueries(["email-detail"]);
+    },
+  });
+};
+
+export const useMarkAsUnread = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: markAsUnread,
+    onSuccess: () => {
+      queryClient.invalidateQueries(["inbox-emails"]);
+      queryClient.invalidateQueries(["email-stats"]);
     },
   });
 };

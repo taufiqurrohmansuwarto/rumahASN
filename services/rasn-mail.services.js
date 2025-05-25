@@ -66,6 +66,12 @@ export const markAsRead = async (emailId) => {
     .then((res) => res?.data);
 };
 
+export const markAsUnread = async (emailId) => {
+  return api
+    .put(`/emails/${emailId}`, { action: "unread" })
+    .then((res) => res?.data);
+};
+
 export const toggleStar = async (emailId) => {
   return api
     .put(`/emails/${emailId}`, { action: "star" })
