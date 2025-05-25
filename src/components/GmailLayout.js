@@ -13,21 +13,24 @@ import {
   SettingOutlined,
   StarOutlined,
   UserOutlined,
+  TagOutlined,
+  PlusOutlined,
+  DownOutlined,
+  UpOutlined,
 } from "@ant-design/icons";
-import { ProConfigProvider } from "@ant-design/pro-components";
-import { Center } from "@mantine/core";
+import { ProConfigProvider, ProLayout } from "@ant-design/pro-components";
 import {
   Badge,
   Button,
   ConfigProvider,
   Dropdown,
   Input,
-  Layout,
   Space,
+  Typography,
+  Divider,
 } from "antd";
 import frFR from "antd/lib/locale/id_ID";
 import { signOut, useSession } from "next-auth/react";
-import dynamic from "next/dynamic";
 import { useRouter } from "next/router";
 import { useState } from "react";
 import MegaMenuTop from "./MegaMenu/MegaMenuTop";
@@ -35,67 +38,188 @@ import NotifikasiASNConnect from "./Notification/NotifikasiASNConnect";
 import NotifikasiForumKepegawaian from "./Notification/NotifikasiForumKepegawaian";
 import NotifikasiKepegawaian from "./Notification/NotifikasiKepegawaian";
 import NotifikasiPrivateMessage from "./Notification/NotifikasiPrivateMessage";
-// Tambahan import untuk email functionality
 
 const { Search } = Input;
-
-const ProLayout = dynamic(
-  () => import("@ant-design/pro-components").then((mod) => mod?.ProLayout),
-  {
-    ssr: false,
-  }
-);
+const { Text } = Typography;
 
 function GmailLayout({
   children,
   active = "inbox",
-  onCompose, // Callback untuk compose
-  onSearch, // Callback untuk search
-  showSearchBar = true, // Toggle search bar
+  onCompose,
+  onSearch,
+  showSearchBar = true,
 }) {
   const { data } = useSession();
   const router = useRouter();
-  const [collapsed, setCollapsed] = useState(true);
-  const [showComposeModal, setShowComposeModal] = useState(false);
+  const [collapsed, setCollapsed] = useState(false);
+  const [showMoreItems, setShowMoreItems] = useState(false);
 
   // Fetch email stats untuk unread counts
   const { data: emailStats } = useEmailStats();
 
-  // Enhanced menu items dengan unread counts
-  const menuItems = [
-    {
-      key: "inbox",
-      icon: <InboxOutlined />,
-      label: "Kotak Masuk",
-      count: emailStats?.unreadCount || 0,
-    },
-    {
-      key: "sent",
-      icon: <SendOutlined />,
-      label: "Pesan Terkirim",
-    },
-    {
-      key: "drafts",
-      icon: <FileOutlined />,
-      label: "Draft",
-      count: emailStats?.draftCount || 0,
-    },
-    {
-      key: "starred",
-      icon: <StarOutlined />,
-      label: "Ditandai",
-    },
-    {
-      key: "archive",
-      icon: <FolderOutlined />,
-      label: "Arsip",
-    },
-    {
-      key: "trash",
-      icon: <DeleteOutlined />,
-      label: "Sampah",
-    },
+  // Custom labels (nanti bisa dari API)
+  const customLabels = [
+    { id: "work", name: "Pekerjaan", color: "#1890ff", count: 3 },
+    { id: "important", name: "Penting", color: "#ff4d4f", count: 1 },
+    { id: "personal", name: "Pribadi", color: "#52c41a", count: 0 },
   ];
+
+  // Handle compose button click
+  const handleCompose = () => {
+    if (onCompose) {
+      onCompose();
+    } else {
+      router.push("/mails/compose");
+    }
+  };
+
+  // Handle search
+  const handleSearch = (value) => {
+    if (onSearch) {
+      onSearch(value);
+    } else {
+      if (value.trim()) {
+        router.push(`/mails/search?q=${encodeURIComponent(value)}`);
+      }
+    }
+  };
+
+  // Menu items configuration dengan flat structure
+  const getAllRoutes = () => {
+    // Main items (selalu visible)
+    const mainRoutes = [
+      {
+        key: "/mails/inbox",
+        path: "/mails/inbox",
+        name:
+          emailStats?.data?.unreadCount > 0 ? (
+            <Space>
+              Inbox
+              <Badge
+                count={emailStats.data.unreadCount}
+                size="small"
+                style={{ backgroundColor: "#EA4335" }}
+              />
+            </Space>
+          ) : (
+            "Inbox"
+          ),
+        icon: <InboxOutlined />,
+      },
+      {
+        key: "/mails/starred",
+        path: "/mails/starred",
+        name: "Starred",
+        icon: <StarOutlined />,
+      },
+      {
+        key: "/mails/snoozed",
+        path: "/mails/snoozed",
+        name: "Snoozed",
+        icon: <BellOutlined />,
+      },
+      {
+        key: "/mails/sent",
+        path: "/mails/sent",
+        name: "Sent",
+        icon: <SendOutlined />,
+      },
+      {
+        key: "/mails/drafts",
+        path: "/mails/drafts",
+        name:
+          emailStats?.data?.draftCount > 0 ? (
+            <Space>
+              Drafts
+              <Badge
+                count={emailStats.data.draftCount}
+                size="small"
+                style={{ backgroundColor: "#1890ff" }}
+              />
+            </Space>
+          ) : (
+            "Drafts"
+          ),
+        icon: <FileOutlined />,
+      },
+      {
+        key: "/mails/trash",
+        path: "/mails/trash",
+        name: "Trash",
+        icon: <DeleteOutlined />,
+      },
+      {
+        key: "/mails/archive",
+        path: "/mails/archive",
+        name: "Archive",
+        icon: <FolderOutlined />,
+      },
+      {
+        key: "/mails/spam",
+        path: "/mails/spam",
+        name: "Spam",
+        icon: <BellOutlined />,
+      },
+    ];
+
+    // More section items (conditional)
+    const moreRoutes = [
+      {
+        key: "more-divider",
+        name: "More",
+        icon: showMoreItems ? <UpOutlined /> : <DownOutlined />,
+        path: "#",
+      },
+      ...(showMoreItems
+        ? [
+            {
+              key: "/mails/important",
+              path: "/mails/important",
+              name: "Important",
+              icon: <TagOutlined style={{ color: "#ff4d4f" }} />,
+            },
+            ...customLabels.map((label) => ({
+              key: `/mails/label/${label.id}`,
+              path: `/mails/label/${label.id}`,
+              name:
+                label.count > 0 ? (
+                  <Space>
+                    {label.name}
+                    <Badge count={label.count} size="small" />
+                  </Space>
+                ) : (
+                  label.name
+                ),
+              icon: <TagOutlined style={{ color: label.color }} />,
+            })),
+            {
+              key: "/mails/labels/create",
+              path: "/mails/labels/create",
+              name: "Create Label",
+              icon: <PlusOutlined />,
+            },
+          ]
+        : []),
+    ];
+
+    return [...mainRoutes, ...moreRoutes];
+  };
+
+  // Menu item click handler
+  const handleMenuClick = ({ key }) => {
+    console.log("Menu clicked:", key);
+
+    if (key === "more-divider") {
+      setShowMoreItems(!showMoreItems);
+      return;
+    }
+
+    // Find route and navigate
+    const route = getAllRoutes().find((r) => r.key === key);
+    if (route?.path && route.path !== "#") {
+      router.push(route.path);
+    }
+  };
 
   const token = {
     header: {
@@ -103,15 +227,15 @@ function GmailLayout({
       colorHeaderTitle: "#5F6368",
     },
     bgLayout: "#FFFFFF",
-    colorPrimary: "#EA4335", // Gmail red
+    colorPrimary: "#EA4335",
     sider: {
       colorBgCollapsedButton: "#FFFFFF",
       colorTextCollapsedButton: "#5F6368",
       colorTextCollapsedButtonHover: "#202124",
-      colorBgMenuItemActive: "#FCE8E6", // Light red for active item
+      colorBgMenuItemActive: "#FCE8E6",
       colorTextMenuTitle: "#5F6368",
       colorTextMenuItemHover: "#202124",
-      colorTextMenuSelected: "#D93025", // Darker red for selected text
+      colorTextMenuSelected: "#D93025",
       colorTextMenuActive: "#D93025",
       colorBgMenuItemHover: "#F1F3F4",
       colorBgMenuItemSelected: "#FCE8E6",
@@ -123,63 +247,34 @@ function GmailLayout({
     },
   };
 
-  // Handle compose button click
-  const handleCompose = () => {
-    if (onCompose) {
-      onCompose();
-    } else {
-      // Default behavior - navigate to compose page
-      router.push("/mails/compose");
-    }
-  };
-
-  // Handle menu item click
-  const handleMenuClick = (item) => {
-    console.log("Clicked:", item.name);
-
-    // Navigate based on menu item
-    const folderKey = item.path.split("/").pop();
-    router.push(`/mails/${folderKey}`);
-  };
-
-  // Handle search
-  const handleSearch = (value) => {
-    if (onSearch) {
-      onSearch(value);
-    } else {
-      // Default behavior - navigate to search page
-      if (value.trim()) {
-        router.push(`/helpdesk/mails/search?q=${encodeURIComponent(value)}`);
-      }
-    }
-  };
-
   return (
-    <div
-      style={{
-        height: "100vh",
-        overflow: "auto",
-      }}
-    >
-      <ConfigProvider
-        locale={frFR}
-        theme={{
-          token: token,
-        }}
-      >
+    <div style={{ height: "100vh", overflow: "auto" }}>
+      <ConfigProvider locale={frFR} theme={{ token }}>
         <ProConfigProvider>
           <ProLayout
             title="Mail ASN"
-            defaultCollapsed={collapsed}
-            collapsed={collapsed}
-            onCollapse={setCollapsed}
-            selectedKeys={[active]}
             logo={<MailOutlined style={{ color: "#EA4335" }} />}
+            // Layout configuration
             layout="mix"
             navTheme="light"
+            colorPrimary="#EA4335"
             fixedHeader
             fixSiderbar
-            // Enhanced header content dengan search
+            // Collapse configuration
+            collapsed={collapsed}
+            onCollapse={setCollapsed}
+            // Menu configuration dengan flat structure
+            route={{
+              routes: getAllRoutes(),
+            }}
+            selectedKeys={[active]}
+            onMenuHeaderClick={(e) => console.log("Menu header clicked", e)}
+            menuItemRender={(item, dom) => (
+              <div onClick={() => handleMenuClick({ key: item.key })}>
+                {dom}
+              </div>
+            )}
+            // Header content dengan search
             headerContentRender={() => {
               if (showSearchBar) {
                 return (
@@ -206,189 +301,112 @@ function GmailLayout({
               }
               return null;
             }}
-            // Enhanced menu extra dengan compose button
+            // Menu extra render untuk compose button
             menuExtraRender={({ collapsed, isMobile }) => {
-              if (!collapsed) {
-                if (isMobile)
-                  return (
-                    <Button
-                      style={{
-                        display: "flex",
-                        justifyContent: "center",
-                        marginBottom: 8,
-                        marginTop: 8,
-                      }}
-                      onClick={handleCompose}
-                      size="middle"
-                      shape="round"
-                      type="primary"
-                      icon={<EditOutlined />}
-                    >
-                      Compose
-                    </Button>
-                  );
-                else {
-                  return (
-                    <Center>
-                      <Button
-                        style={{
-                          marginBottom: 10,
-                          display: "flex",
-                          justifyContent: "center",
-                        }}
-                        onClick={handleCompose}
-                        shape="round"
-                        icon={<EditOutlined />}
-                        block
-                        type="primary"
-                      >
-                        Compose
-                      </Button>
-                    </Center>
-                  );
-                }
-              } else {
+              if (collapsed) {
                 return (
-                  <Center>
+                  <div style={{ textAlign: "center", marginBottom: 16 }}>
                     <Button
                       onClick={handleCompose}
                       shape="circle"
-                      size="middle"
+                      size="large"
                       icon={<EditOutlined />}
                       type="primary"
                     />
-                  </Center>
+                  </div>
+                );
+              } else {
+                return (
+                  <div style={{ padding: "0 16px", marginBottom: 16 }}>
+                    <Button
+                      onClick={handleCompose}
+                      shape="round"
+                      icon={<EditOutlined />}
+                      block
+                      type="primary"
+                      size="large"
+                      style={{ fontWeight: "500" }}
+                    >
+                      Tulis Email
+                    </Button>
+                  </div>
                 );
               }
             }}
-            // Enhanced actions dengan mail-specific notifications
-            actionsRender={(props) => {
-              return [
-                <NotifikasiKepegawaian
-                  key="kepegawaian"
-                  url="kepegawaian"
-                  title="Inbox Kepegawaian"
-                />,
-                <NotifikasiPrivateMessage
-                  key="private-message"
-                  url="/helpdesk/mails"
-                  title="Inbox Pesan Pribadi"
-                />,
-                <NotifikasiASNConnect
-                  key="asn-connect"
-                  url="asn-connect"
-                  title="Inbox ASN Connect"
-                />,
-                <NotifikasiForumKepegawaian
-                  key="forum-kepegawaian"
-                  url="forum-kepegawaian"
-                  title="Inbox Forum Kepegawaian"
-                />,
-
-                // Tambahan: Mail Settings
-                <Button
-                  key="mail-settings"
-                  type="text"
-                  icon={<SettingOutlined />}
-                  onClick={() => router.push("/helpdesk/mails/settings")}
-                  title="Mail Settings"
-                />,
-
-                <MegaMenuTop key="mega-menu" url="" title="Menu" />,
-              ];
-            }}
-            // Enhanced avatar dengan mail-specific menu
+            // Actions render
+            actionsRender={() => [
+              <NotifikasiKepegawaian
+                key="kepegawaian"
+                url="kepegawaian"
+                title="Inbox Kepegawaian"
+              />,
+              <NotifikasiPrivateMessage
+                key="private-message"
+                url="/mails"
+                title="Inbox Pesan Pribadi"
+              />,
+              <NotifikasiASNConnect
+                key="asn-connect"
+                url="asn-connect"
+                title="Inbox ASN Connect"
+              />,
+              <NotifikasiForumKepegawaian
+                key="forum-kepegawaian"
+                url="forum-kepegawaian"
+                title="Inbox Forum Kepegawaian"
+              />,
+              <Button
+                key="mail-settings"
+                type="text"
+                icon={<SettingOutlined />}
+                onClick={() => router.push("/mails/settings")}
+                title="Pengaturan Mail"
+              />,
+              <MegaMenuTop key="mega-menu" url="" title="Menu" />,
+            ]}
+            // Avatar props
             avatarProps={{
               src: data?.user?.image,
               size: "large",
-              render: (props, dom) => {
-                return (
-                  <Space>
-                    <Dropdown
-                      menu={{
-                        onClick: (e) => {
-                          if (e.key === "logout") {
-                            signOut();
-                          }
-                          if (e.key === "profile") {
-                            router.push("/settings/profile");
-                          }
-                          if (e.key === "mail-settings") {
-                            router.push("/helpdesk/mails/settings");
-                          }
-                          if (e.key === "broadcast") {
-                            router.push("/helpdesk/mails/broadcast");
-                          }
-                        },
-                        items: [
-                          {
-                            key: "profile",
-                            icon: <UserOutlined />,
-                            label: "Profil",
-                          },
-                          {
-                            key: "mail-settings",
-                            icon: <SettingOutlined />,
-                            label: "Pengaturan Mail",
-                          },
-                          // Kondisional untuk admin/moderator
-                          ...(data?.user?.current_role === "admin" ||
-                          data?.user?.current_role === "moderator"
-                            ? [
-                                {
-                                  key: "broadcast",
-                                  icon: <BellOutlined />,
-                                  label: "Broadcast Email",
-                                },
-                              ]
-                            : []),
-                          {
-                            key: "logout",
-                            icon: <LogoutOutlined />,
-                            label: "Keluar",
-                          },
-                        ],
-                      }}
-                    >
-                      {dom}
-                    </Dropdown>
-                  </Space>
-                );
-              },
+              render: (props, dom) => (
+                <Dropdown
+                  menu={{
+                    onClick: (e) => {
+                      if (e.key === "logout") signOut();
+                      if (e.key === "profile") router.push("/settings/profile");
+                      if (e.key === "mail-settings")
+                        router.push("/mails/settings");
+                    },
+                    items: [
+                      {
+                        key: "profile",
+                        icon: <UserOutlined />,
+                        label: "Profil",
+                      },
+                      {
+                        key: "mail-settings",
+                        icon: <SettingOutlined />,
+                        label: "Pengaturan Mail",
+                      },
+                      {
+                        type: "divider",
+                      },
+                      {
+                        key: "logout",
+                        icon: <LogoutOutlined />,
+                        label: "Keluar",
+                      },
+                    ],
+                  }}
+                >
+                  {dom}
+                </Dropdown>
+              ),
             }}
+            // Token untuk styling
             token={token}
-            // Enhanced route dengan unread counts
-            route={{
-              routes: menuItems.map((item) => ({
-                path: `/helpdesk/mails/${item.key}`,
-                name: item.label,
-                icon: item.icon,
-                // Tambah badge untuk unread count
-                ...(item.count > 0 && {
-                  name: (
-                    <Space>
-                      {item.label}
-                      <Badge
-                        count={item.count}
-                        size="small"
-                        style={{ backgroundColor: "#EA4335" }}
-                      />
-                    </Space>
-                  ),
-                }),
-              })),
-            }}
-            // Enhanced menu item render dengan proper navigation
-            menuItemRender={(item, dom) => (
-              <a
-                onClick={() => handleMenuClick(item)}
-                style={{ textDecoration: "none" }}
-              >
-                {dom}
-              </a>
-            )}
           >
-            <Layout>{children}</Layout>
+            {children}
           </ProLayout>
         </ProConfigProvider>
       </ConfigProvider>
