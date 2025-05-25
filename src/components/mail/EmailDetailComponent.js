@@ -8,46 +8,414 @@ import {
   ArrowLeftOutlined,
   DeleteOutlined,
   DownloadOutlined,
-  ForwardOutlined,
+  FlagOutlined,
   MoreOutlined,
   PaperClipOutlined,
   PrinterOutlined,
   SendOutlined,
+  ShareAltOutlined,
   StarFilled,
   StarOutlined,
   UserOutlined,
-  MailOutlined,
-  CalendarOutlined,
 } from "@ant-design/icons";
 import {
+  Alert,
   Avatar,
   Button,
-  Divider,
+  Col,
   Dropdown,
-  Empty,
-  Layout,
+  message,
+  Modal,
+  Row,
   Space,
   Spin,
   Tag,
-  Tooltip,
   Typography,
-  message,
-  Card,
-  Row,
-  Col,
-  Affix,
 } from "antd";
 import dayjs from "dayjs";
 import { useRouter } from "next/router";
 import { useState } from "react";
+import ReactMarkdownCustom from "../MarkdownEditor/ReactMarkdownCustom";
 
-const { Header, Content } = Layout;
 const { Title, Text, Paragraph } = Typography;
 
+// 1. Simple Header Component
+const SimpleHeader = ({ email, onBack, onStar, onDelete, starMutation }) => {
+  const moreActions = [
+    {
+      key: "print",
+      label: "Cetak",
+      icon: <PrinterOutlined />,
+      onClick: () => window.print(),
+    },
+    {
+      key: "spam",
+      label: "Tandai sebagai spam",
+      icon: <FlagOutlined />,
+      danger: true,
+    },
+    {
+      key: "delete",
+      label: "Hapus",
+      icon: <DeleteOutlined />,
+      danger: true,
+      onClick: onDelete,
+    },
+  ];
+
+  return (
+    <div
+      style={{
+        padding: "12px 16px",
+        borderBottom: "1px solid #f0f0f0",
+        backgroundColor: "#fff",
+        width: "100%",
+      }}
+    >
+      <Row justify="space-between" align="middle">
+        <Col xs={12} sm={8} md={6}>
+          <Space size={4}>
+            <Button
+              icon={<ArrowLeftOutlined />}
+              onClick={onBack}
+              type="text"
+              size="small"
+            />
+            <Button
+              icon={
+                email?.is_starred ? (
+                  <StarFilled style={{ color: "#faad14" }} />
+                ) : (
+                  <StarOutlined />
+                )
+              }
+              onClick={onStar}
+              loading={starMutation?.isLoading}
+              type="text"
+              size="small"
+            />
+            <Dropdown
+              menu={{ items: moreActions }}
+              trigger={["click"]}
+              placement="bottomLeft"
+            >
+              <Button icon={<MoreOutlined />} type="text" size="small" />
+            </Dropdown>
+          </Space>
+        </Col>
+        <Col xs={12} sm={16} md={18} style={{ textAlign: "right" }}>
+          <Text type="secondary" style={{ fontSize: "12px" }}>
+            {dayjs(email?.created_at).format("MMM D, h:mm A")}
+          </Text>
+        </Col>
+      </Row>
+    </div>
+  );
+};
+
+// 2. Simple Subject Component
+const SimpleSubject = ({ subject, priority }) => {
+  return (
+    <div
+      style={{
+        padding: "16px 8px 8px 8px",
+      }}
+    >
+      <Title
+        level={3}
+        style={{
+          margin: 0,
+          fontSize: "clamp(18px, 4vw, 24px)",
+          fontWeight: 400,
+          lineHeight: "1.3",
+          wordBreak: "break-word",
+        }}
+      >
+        {subject || "(no subject)"}
+      </Title>
+      {priority && priority !== "normal" && (
+        <Tag
+          color={priority === "high" ? "red" : "blue"}
+          size="small"
+          style={{ marginTop: "8px" }}
+        >
+          {priority === "high" ? "High priority" : "Low priority"}
+        </Tag>
+      )}
+    </div>
+  );
+};
+
+// 3. Simple Sender Component
+const SimpleSender = ({ sender }) => {
+  return (
+    <div
+      style={{
+        padding: "0 8px 16px 8px",
+      }}
+    >
+      <Row gutter={12} align="middle">
+        <Col xs={24} sm={24}>
+          <Space size={12} style={{ width: "100%" }}>
+            <Avatar
+              src={sender?.image}
+              icon={<UserOutlined />}
+              size={32}
+              style={{ backgroundColor: "#1890ff", flexShrink: 0 }}
+            />
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "2px",
+                }}
+              >
+                <div
+                  style={{
+                    display: "flex",
+                    flexWrap: "wrap",
+                    alignItems: "center",
+                    gap: "8px",
+                  }}
+                >
+                  <Text strong style={{ fontSize: "14px" }}>
+                    {sender?.username}
+                  </Text>
+                  <Text
+                    type="secondary"
+                    style={{
+                      fontSize: "13px",
+                      wordBreak: "break-all",
+                    }}
+                  >
+                    &lt;{sender?.email}&gt;
+                  </Text>
+                </div>
+                <Text type="secondary" style={{ fontSize: "12px" }}>
+                  to me
+                </Text>
+              </div>
+            </div>
+          </Space>
+        </Col>
+      </Row>
+    </div>
+  );
+};
+
+// 4. Simple Attachments Component
+const SimpleAttachments = ({ attachments, onDownload }) => {
+  if (!attachments || attachments.length === 0) return null;
+
+  return (
+    <div
+      style={{
+        padding: "16px 8px",
+        borderTop: "1px solid #f0f0f0",
+        borderBottom: "1px solid #f0f0f0",
+        backgroundColor: "#fafafa",
+        margin: "0 -16px",
+      }}
+    >
+      <Space direction="vertical" style={{ width: "100%" }}>
+        <Text type="secondary" style={{ fontSize: "12px", paddingLeft: "8px" }}>
+          {attachments.length} attachment{attachments.length > 1 ? "s" : ""}
+        </Text>
+        <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+          {attachments.map((attachment) => (
+            <div
+              key={attachment.id}
+              style={{
+                padding: "12px",
+                backgroundColor: "#fff",
+                border: "1px solid #e8e8e8",
+                borderRadius: "4px",
+                cursor: "pointer",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                flexWrap: "wrap",
+                gap: "8px",
+              }}
+              onClick={() => onDownload(attachment)}
+            >
+              <Space style={{ flex: 1, minWidth: 0 }}>
+                <PaperClipOutlined style={{ color: "#666" }} />
+                <div style={{ minWidth: 0 }}>
+                  <Text
+                    style={{
+                      fontSize: "13px",
+                      display: "block",
+                      wordBreak: "break-all",
+                    }}
+                  >
+                    {attachment.file_name}
+                  </Text>
+                  <Text type="secondary" style={{ fontSize: "11px" }}>
+                    {attachment.formatted_size || "Unknown size"}
+                  </Text>
+                </div>
+              </Space>
+              <Button
+                type="link"
+                size="small"
+                icon={<DownloadOutlined />}
+                style={{ padding: "4px 8px", flexShrink: 0 }}
+              />
+            </div>
+          ))}
+        </div>
+      </Space>
+    </div>
+  );
+};
+
+// 5. Simple Content Component
+const SimpleContent = ({ content }) => {
+  return (
+    <div
+      style={{
+        padding: "24px 8px",
+        lineHeight: "1.6",
+        fontSize: "14px",
+        color: "#202124",
+        fontFamily: "Arial, sans-serif",
+        wordWrap: "break-word",
+        overflowWrap: "break-word",
+      }}
+    >
+      {content ? (
+        <div>
+          {content.includes("**") ||
+          content.includes("##") ||
+          content.includes("```") ? (
+            <ReactMarkdownCustom>{content}</ReactMarkdownCustom>
+          ) : (
+            <div
+              style={{
+                whiteSpace: "pre-wrap",
+                wordBreak: "break-word",
+              }}
+            >
+              {content}
+            </div>
+          )}
+        </div>
+      ) : (
+        <Text type="secondary" style={{ fontStyle: "italic" }}>
+          This message has no content
+        </Text>
+      )}
+    </div>
+  );
+};
+
+// 6. Simple Recipients Component (Minimalist)
+const SimpleRecipients = ({ recipients }) => {
+  if (!recipients || recipients.length <= 1) return null;
+
+  const toRecipients = recipients.filter((r) => r.type === "to");
+  const ccRecipients = recipients.filter((r) => r.type === "cc");
+  const bccRecipients = recipients.filter((r) => r.type === "bcc");
+
+  return (
+    <div
+      style={{
+        padding: "12px 8px",
+        borderTop: "1px solid #f0f0f0",
+        backgroundColor: "#fafafa",
+        fontSize: "12px",
+        color: "#666",
+        margin: "0 -16px",
+      }}
+    >
+      {toRecipients.length > 1 && (
+        <div style={{ marginBottom: "4px", wordBreak: "break-all" }}>
+          <Text type="secondary" style={{ fontSize: "12px" }}>
+            to:{" "}
+            {toRecipients
+              .map((r) => r.user?.username || r.user?.email)
+              .join(", ")}
+          </Text>
+        </div>
+      )}
+      {ccRecipients.length > 0 && (
+        <div style={{ marginBottom: "4px", wordBreak: "break-all" }}>
+          <Text type="secondary" style={{ fontSize: "12px" }}>
+            cc:{" "}
+            {ccRecipients
+              .map((r) => r.user?.username || r.user?.email)
+              .join(", ")}
+          </Text>
+        </div>
+      )}
+      {bccRecipients.length > 0 && (
+        <div style={{ wordBreak: "break-all" }}>
+          <Text type="secondary" style={{ fontSize: "12px" }}>
+            bcc:{" "}
+            {bccRecipients
+              .map((r) => r.user?.username || r.user?.email)
+              .join(", ")}
+          </Text>
+        </div>
+      )}
+    </div>
+  );
+};
+
+// 7. Simple Actions Component
+const SimpleActions = ({ onReply, onForward, onDelete, isDeleting }) => {
+  return (
+    <div
+      style={{
+        padding: "16px 8px",
+        borderTop: "1px solid #f0f0f0",
+        backgroundColor: "#fff",
+      }}
+    >
+      <Row gutter={[8, 8]} justify="start">
+        <Col xs={24} sm={12} md={6}>
+          <Button
+            icon={<SendOutlined />}
+            onClick={onReply}
+            block
+            style={{
+              border: "1px solid #dadce0",
+              borderRadius: "24px",
+              height: "40px",
+              fontSize: "14px",
+            }}
+          >
+            Reply
+          </Button>
+        </Col>
+        <Col xs={24} sm={12} md={6}>
+          <Button
+            icon={<ShareAltOutlined />}
+            onClick={onForward}
+            block
+            style={{
+              border: "1px solid #dadce0",
+              borderRadius: "24px",
+              height: "40px",
+              fontSize: "14px",
+            }}
+          >
+            Forward
+          </Button>
+        </Col>
+      </Row>
+    </div>
+  );
+};
+
+// Main Component
 const EmailDetailComponent = ({ emailId, onBack }) => {
   const router = useRouter();
+  const [deleteModal, setDeleteModal] = useState(false);
 
-  // Hooks
+  // Queries
   const {
     data: emailData,
     isLoading,
@@ -59,28 +427,11 @@ const EmailDetailComponent = ({ emailId, onBack }) => {
   const starMutation = useToggleStar();
   const deleteMutation = useDeleteEmail();
 
-  // Auto mark as read when email loads
-  useState(() => {
-    if (emailData?.data && !emailData.data.is_read) {
-      markReadMutation.mutate(emailId);
-    }
-  }, [emailData]);
+  const email = emailData?.data;
 
   // Handlers
-  const handleBack = () => {
-    if (onBack) {
-      onBack();
-    } else {
-      router.back();
-    }
-  };
-
   const handleReply = () => {
     router.push(`/mails/compose?reply=${emailId}`);
-  };
-
-  const handleReplyAll = () => {
-    router.push(`/mails/compose?reply=${emailId}&all=true`);
   };
 
   const handleForward = () => {
@@ -92,538 +443,127 @@ const EmailDetailComponent = ({ emailId, onBack }) => {
   };
 
   const handleDelete = () => {
+    setDeleteModal(true);
+  };
+
+  const confirmDelete = () => {
     deleteMutation.mutate(emailId, {
       onSuccess: () => {
-        message.success("Email berhasil dihapus");
-        handleBack();
+        setDeleteModal(false);
+        onBack?.();
+        message.success("Email deleted");
       },
     });
   };
 
-  const handlePrint = () => {
-    window.print();
-  };
-
-  const downloadAttachment = (attachment) => {
-    const link = document.createElement("a");
-    link.href = attachment.file_url;
-    link.download = attachment.file_name;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+  const handleDownloadAttachment = (attachment) => {
+    window.open(attachment.file_url, "_blank");
   };
 
   // Loading state
   if (isLoading) {
     return (
-      <Layout style={{ minHeight: "100vh" }}>
-        <Content
-          style={{
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            flexDirection: "column",
-            gap: "16px",
-          }}
-        >
-          <Spin size="large" />
-          <Text type="secondary">Memuat email...</Text>
-        </Content>
-      </Layout>
+      <div style={{ textAlign: "center", padding: "48px" }}>
+        <Spin size="large" />
+      </div>
     );
   }
 
   // Error state
-  if (isError || !emailData?.success) {
+  if (isError || !email) {
     return (
-      <Layout style={{ minHeight: "100vh" }}>
-        <Content
-          style={{
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            padding: "24px",
-          }}
-        >
-          <Empty
-            description="Gagal memuat email atau email tidak ditemukan"
-            image={Empty.PRESENTED_IMAGE_SIMPLE}
-          >
+      <div style={{ padding: "24px" }}>
+        <Alert
+          message="Failed to load email"
+          description="Something went wrong while loading the email. Please try again."
+          type="error"
+          showIcon
+          action={
             <Space>
-              <Button onClick={refetch}>Coba Lagi</Button>
-              <Button type="primary" onClick={handleBack}>
-                Kembali
+              <Button size="small" onClick={refetch}>
+                Retry
+              </Button>
+              <Button size="small" onClick={onBack}>
+                Back
               </Button>
             </Space>
-          </Empty>
-        </Content>
-      </Layout>
+          }
+        />
+      </div>
     );
   }
 
-  const email = emailData.data;
-  const attachments = email.attachments || [];
-  const recipients = email.recipients || [];
-
-  // Group recipients by type
-  const toRecipients = recipients.filter((r) => r.type === "to");
-  const ccRecipients = recipients.filter((r) => r.type === "cc");
-  const bccRecipients = recipients.filter((r) => r.type === "bcc");
-
-  // Format date
-  const formatDate = (date) => {
-    const emailDate = dayjs(date);
-    const now = dayjs();
-
-    if (now.diff(emailDate, "day") === 0) {
-      return `Hari ini, ${emailDate.format("HH:mm")}`;
-    } else if (now.diff(emailDate, "day") === 1) {
-      return `Kemarin, ${emailDate.format("HH:mm")}`;
-    } else if (now.year() === emailDate.year()) {
-      return emailDate.format("DD MMMM, HH:mm");
-    } else {
-      return emailDate.format("DD MMMM YYYY, HH:mm");
-    }
-  };
-
-  // More actions menu
-  const moreActions = [
-    {
-      key: "mark-unread",
-      label: "Tandai belum dibaca",
-      onClick: () => message.info("Fitur akan segera tersedia"),
-    },
-    {
-      key: "archive",
-      label: "Arsipkan",
-      onClick: () => message.info("Fitur akan segera tersedia"),
-    },
-    {
-      key: "spam",
-      label: "Laporkan sebagai spam",
-      onClick: () => message.info("Fitur akan segera tersedia"),
-    },
-    {
-      type: "divider",
-    },
-    {
-      key: "source",
-      label: "Lihat sumber asli",
-      onClick: () => message.info("Fitur akan segera tersedia"),
-    },
-  ];
-
   return (
-    <Layout style={{ minHeight: "100vh", backgroundColor: "#ffffff" }}>
-      {/* Sticky Header */}
-      <Affix offsetTop={0}>
-        <Header
-          style={{
-            backgroundColor: "#ffffff",
-            borderBottom: "1px solid #f0f0f0",
-            padding: "0 24px",
-            height: "64px",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-          }}
-        >
-          {/* Left side - Back button and title */}
-          <Space size="large">
-            <Button
-              icon={<ArrowLeftOutlined />}
-              onClick={handleBack}
-              type="text"
-              size="large"
-            >
-              Kembali
-            </Button>
-            <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-              <MailOutlined style={{ fontSize: "20px", color: "#1890ff" }} />
-              <Title level={4} style={{ margin: 0, color: "#262626" }}>
-                Detail Email
-              </Title>
-            </div>
-          </Space>
+    <div
+      style={{
+        width: "100%",
+        backgroundColor: "#fff",
+      }}
+    >
+      {/* Header */}
+      <SimpleHeader
+        email={email}
+        onBack={onBack}
+        onStar={handleStar}
+        onDelete={handleDelete}
+        starMutation={starMutation}
+      />
 
-          {/* Right side - Primary actions */}
-          <Space>
-            <Tooltip
-              title={email.is_starred ? "Hapus dari favorit" : "Tandai favorit"}
-            >
-              <Button
-                icon={
-                  email.is_starred ? (
-                    <StarFilled style={{ color: "#faad14" }} />
-                  ) : (
-                    <StarOutlined />
-                  )
-                }
-                onClick={handleStar}
-                loading={starMutation.isLoading}
-                size="large"
-              />
-            </Tooltip>
+      {/* Content Area */}
+      <div
+        style={{
+          maxWidth: "1200px",
+          width: "100%",
+          margin: "0 auto",
+          padding: "0 16px",
+        }}
+      >
+        {/* Subject */}
+        <SimpleSubject subject={email.subject} priority={email.priority} />
 
-            <Button
-              icon={<SendOutlined />}
-              onClick={handleReply}
-              type="primary"
-              size="large"
-            >
-              Balas
-            </Button>
+        {/* Sender */}
+        <SimpleSender sender={email.sender} />
 
-            <Dropdown menu={{ items: moreActions }} trigger={["click"]}>
-              <Button icon={<MoreOutlined />} size="large" />
-            </Dropdown>
-          </Space>
-        </Header>
-      </Affix>
+        {/* Recipients (if multiple) */}
+        <SimpleRecipients recipients={email.recipients} />
 
-      {/* Main Content */}
-      <Content style={{ padding: "0" }}>
-        {/* Email Header Section */}
-        <div
-          style={{
-            backgroundColor: "#fafafa",
-            borderBottom: "1px solid #f0f0f0",
-            padding: "24px 48px",
-          }}
-        >
-          <Row gutter={[24, 16]} align="middle">
-            <Col xs={24}>
-              {/* Subject */}
-              <div style={{ marginBottom: "16px" }}>
-                <Title level={2} style={{ margin: 0, marginBottom: "8px" }}>
-                  {email.subject || "(Tanpa Subjek)"}
-                </Title>
-                <Space>
-                  {email.priority === "high" && (
-                    <Tag color="red">Prioritas Tinggi</Tag>
-                  )}
-                  {attachments.length > 0 && (
-                    <Tag icon={<PaperClipOutlined />} color="blue">
-                      {attachments.length} Lampiran
-                    </Tag>
-                  )}
-                </Space>
-              </div>
+        {/* Attachments */}
+        <SimpleAttachments
+          attachments={email.attachments}
+          onDownload={handleDownloadAttachment}
+        />
 
-              {/* Sender Info */}
-              <Row gutter={[24, 16]} align="middle">
-                <Col xs={24} lg={16}>
-                  <Space align="start" size="large">
-                    <Avatar
-                      size={64}
-                      src={email.sender?.image}
-                      icon={<UserOutlined />}
-                      style={{ flexShrink: 0 }}
-                    />
-                    <Space direction="vertical" size={4}>
-                      <Space wrap>
-                        <Text strong style={{ fontSize: "18px" }}>
-                          {email.sender?.username || email.sender_name}
-                        </Text>
-                        <Text type="secondary" style={{ fontSize: "14px" }}>
-                          {`<${email.sender?.email || "email@example.com"}>`}
-                        </Text>
-                      </Space>
-                      <div>
-                        <Text type="secondary">kepada </Text>
-                        <Text strong>
-                          {toRecipients.length === 1
-                            ? "saya"
-                            : `${toRecipients.length} penerima`}
-                        </Text>
-                        {ccRecipients.length > 0 && (
-                          <>
-                            <Text type="secondary">, cc: </Text>
-                            <Text strong>{ccRecipients.length} orang</Text>
-                          </>
-                        )}
-                      </div>
-                    </Space>
-                  </Space>
-                </Col>
-                <Col xs={24} lg={8} style={{ textAlign: "right" }}>
-                  <Space direction="vertical" align="end" size={4}>
-                    <Space>
-                      <CalendarOutlined style={{ color: "#8c8c8c" }} />
-                      <Text type="secondary" style={{ fontSize: "14px" }}>
-                        {formatDate(email.sent_at || email.created_at)}
-                      </Text>
-                    </Space>
-                  </Space>
-                </Col>
-              </Row>
-            </Col>
-          </Row>
-        </div>
+        {/* Content */}
+        <SimpleContent content={email.content} />
 
-        {/* Action Bar */}
-        <div
-          style={{
-            backgroundColor: "#ffffff",
-            borderBottom: "1px solid #f0f0f0",
-            padding: "16px 48px",
-          }}
-        >
-          <Space wrap size="middle">
-            {toRecipients.length > 1 || ccRecipients.length > 0 ? (
-              <Button icon={<SendOutlined />} onClick={handleReplyAll}>
-                Balas Semua
-              </Button>
-            ) : null}
+        {/* Actions */}
+        <SimpleActions
+          onReply={handleReply}
+          onForward={handleForward}
+          onDelete={handleDelete}
+          isDeleting={deleteMutation.isLoading}
+        />
+      </div>
 
-            <Button icon={<ForwardOutlined />} onClick={handleForward}>
-              Teruskan
-            </Button>
-
-            <Button icon={<PrinterOutlined />} onClick={handlePrint}>
-              Cetak
-            </Button>
-
-            <Button
-              icon={<DeleteOutlined />}
-              onClick={handleDelete}
-              danger
-              loading={deleteMutation.isLoading}
-            >
-              Hapus
-            </Button>
-          </Space>
-        </div>
-
-        {/* Email Content */}
-        <div style={{ padding: "32px 48px", backgroundColor: "#ffffff" }}>
-          <Row justify="center">
-            <Col xs={24} xl={16}>
-              {/* Main Content */}
-              <div
-                style={{
-                  fontSize: "16px",
-                  lineHeight: "1.8",
-                  whiteSpace: "pre-wrap",
-                  fontFamily: "system-ui, -apple-system, sans-serif",
-                  marginBottom: "32px",
-                }}
-              >
-                {email.content ? (
-                  email.content.split("\n").map((line, index) => (
-                    <Paragraph
-                      key={index}
-                      style={{ margin: "0 0 16px 0", fontSize: "16px" }}
-                    >
-                      {line || "\u00A0"}
-                    </Paragraph>
-                  ))
-                ) : (
-                  <Text
-                    type="secondary"
-                    style={{ fontStyle: "italic", fontSize: "16px" }}
-                  >
-                    Email ini tidak memiliki konten.
-                  </Text>
-                )}
-              </div>
-
-              {/* Attachments */}
-              {attachments.length > 0 && (
-                <div style={{ marginBottom: "32px" }}>
-                  <Divider />
-                  <Title level={4} style={{ marginBottom: "24px" }}>
-                    <PaperClipOutlined style={{ marginRight: "8px" }} />
-                    Lampiran ({attachments.length})
-                  </Title>
-
-                  <Row gutter={[16, 16]}>
-                    {attachments.map((attachment, index) => (
-                      <Col xs={24} sm={12} lg={8} key={index}>
-                        <Card
-                          size="small"
-                          hoverable
-                          style={{ borderRadius: "8px" }}
-                          actions={[
-                            <Tooltip title="Download">
-                              <Button
-                                type="text"
-                                icon={<DownloadOutlined />}
-                                onClick={() => downloadAttachment(attachment)}
-                                block
-                              >
-                                Download
-                              </Button>
-                            </Tooltip>,
-                          ]}
-                        >
-                          <Card.Meta
-                            avatar={
-                              <PaperClipOutlined
-                                style={{ fontSize: "32px", color: "#1890ff" }}
-                              />
-                            }
-                            title={
-                              <Text ellipsis style={{ fontSize: "14px" }}>
-                                {attachment.file_name}
-                              </Text>
-                            }
-                            description={
-                              <Text
-                                type="secondary"
-                                style={{ fontSize: "13px" }}
-                              >
-                                {attachment.formatted_size ||
-                                  `${Math.round(
-                                    attachment.file_size / 1024
-                                  )} KB`}
-                              </Text>
-                            }
-                          />
-                        </Card>
-                      </Col>
-                    ))}
-                  </Row>
-                </div>
-              )}
-
-              {/* Recipients Details */}
-              {(toRecipients.length > 1 ||
-                ccRecipients.length > 0 ||
-                bccRecipients.length > 0) && (
-                <div>
-                  <Divider />
-                  <Title level={4} style={{ marginBottom: "24px" }}>
-                    Detail Penerima
-                  </Title>
-
-                  {toRecipients.length > 0 && (
-                    <div style={{ marginBottom: "20px" }}>
-                      <Text
-                        strong
-                        style={{
-                          fontSize: "16px",
-                          display: "block",
-                          marginBottom: "12px",
-                        }}
-                      >
-                        Kepada:
-                      </Text>
-                      <Row gutter={[16, 8]}>
-                        {toRecipients.map((recipient, index) => (
-                          <Col xs={24} sm={12} lg={8} key={index}>
-                            <Space align="center" style={{ width: "100%" }}>
-                              <Avatar
-                                src={recipient.user?.image}
-                                icon={<UserOutlined />}
-                                size="default"
-                              />
-                              <div>
-                                <Text strong>
-                                  {recipient.user?.username ||
-                                    recipient.recipient_id}
-                                </Text>
-                                <br />
-                                <Text
-                                  type="secondary"
-                                  style={{ fontSize: "13px" }}
-                                >
-                                  {recipient.user?.email}
-                                </Text>
-                              </div>
-                            </Space>
-                          </Col>
-                        ))}
-                      </Row>
-                    </div>
-                  )}
-
-                  {ccRecipients.length > 0 && (
-                    <div style={{ marginBottom: "20px" }}>
-                      <Text
-                        strong
-                        style={{
-                          fontSize: "16px",
-                          display: "block",
-                          marginBottom: "12px",
-                        }}
-                      >
-                        CC:
-                      </Text>
-                      <Row gutter={[16, 8]}>
-                        {ccRecipients.map((recipient, index) => (
-                          <Col xs={24} sm={12} lg={8} key={index}>
-                            <Space align="center" style={{ width: "100%" }}>
-                              <Avatar
-                                src={recipient.user?.image}
-                                icon={<UserOutlined />}
-                                size="default"
-                              />
-                              <div>
-                                <Text strong>
-                                  {recipient.user?.username ||
-                                    recipient.recipient_id}
-                                </Text>
-                                <br />
-                                <Text
-                                  type="secondary"
-                                  style={{ fontSize: "13px" }}
-                                >
-                                  {recipient.user?.email}
-                                </Text>
-                              </div>
-                            </Space>
-                          </Col>
-                        ))}
-                      </Row>
-                    </div>
-                  )}
-                </div>
-              )}
-            </Col>
-          </Row>
-        </div>
-
-        {/* Bottom Action Bar */}
-        <div
-          style={{
-            backgroundColor: "#fafafa",
-            borderTop: "1px solid #f0f0f0",
-            padding: "24px 48px",
-            textAlign: "center",
-          }}
-        >
-          <Space size="large">
-            <Button
-              type="primary"
-              icon={<SendOutlined />}
-              size="large"
-              onClick={handleReply}
-            >
-              Balas Email
-            </Button>
-
-            {toRecipients.length > 1 || ccRecipients.length > 0 ? (
-              <Button
-                icon={<SendOutlined />}
-                size="large"
-                onClick={handleReplyAll}
-              >
-                Balas Semua
-              </Button>
-            ) : null}
-
-            <Button
-              icon={<ForwardOutlined />}
-              size="large"
-              onClick={handleForward}
-            >
-              Teruskan
-            </Button>
-          </Space>
-        </div>
-      </Content>
-    </Layout>
+      {/* Delete Modal */}
+      <Modal
+        title="Delete email"
+        open={deleteModal}
+        onOk={confirmDelete}
+        onCancel={() => setDeleteModal(false)}
+        okText="Delete"
+        cancelText="Cancel"
+        okButtonProps={{
+          danger: true,
+          loading: deleteMutation.isLoading,
+        }}
+      >
+        <p>
+          Are you sure you want to delete &quot;{email.subject || "no subject"}
+          &quot;?
+        </p>
+      </Modal>
+    </div>
   );
 };
 
