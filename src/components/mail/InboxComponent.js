@@ -45,6 +45,7 @@ import {
 import dayjs from "dayjs";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
+import ComposeButton from "./EmailCompose/ComposeButton";
 
 const { Text, Title } = Typography;
 const { Search } = Input;
@@ -277,14 +278,7 @@ const InboxComponent = () => {
 
           {/* Primary actions - most important first */}
           <Space>
-            <Button
-              type="primary"
-              icon={<EditOutlined />}
-              onClick={() => router.push("/mails/compose")}
-              size="large"
-            >
-              Tulis Email
-            </Button>
+            <ComposeButton />
             <Tooltip title="Perbarui inbox">
               <Button
                 icon={<ReloadOutlined />}

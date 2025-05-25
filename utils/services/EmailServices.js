@@ -70,11 +70,11 @@ class EmailService {
   // Get email by ID with user context
   static async getEmailById(emailId, userId) {
     const email = await Email.query().findById(emailId).withGraphFetched(`[
-        sender, 
-        recipients.[user], 
+        sender(simpleWithImage), 
+        recipients.[user(simpleWithImage)], 
         attachments,
-        parent.[sender],
-        replies.[sender]
+        parent.[sender(simpleWithImage)],
+        replies.[sender(simpleWithImage)]
       ]`);
 
     if (!email) {
@@ -95,6 +95,13 @@ class EmailService {
     if (userRecipient && !userRecipient.is_read) {
       await userRecipient.markAsRead();
     }
+
+    // recipients have many attributes type : to, cc, bcc
+    email.recipients = {
+      to: email.recipients.filter((r) => r.type === "to"),
+      cc: email.recipients.filter((r) => r.type === "cc"),
+      bcc: email.recipients.filter((r) => r.type === "bcc"),
+    };
 
     return email;
   }
