@@ -18,6 +18,7 @@ import AttachmentUploader from "./AttachmentUploader";
 import EmailEditor from "./EmailEditor";
 import EmailPreview from "./EmailPreview";
 import RecipientSelector from "./RecipientSelector";
+import { useSession } from "next-auth/react";
 
 const ComposeModal = ({
   visible = false,
@@ -38,6 +39,10 @@ const ComposeModal = ({
   const [isMarkdown, setIsMarkdown] = useState(false);
   const [isMinimized, setIsMinimized] = useState(false);
 
+  const {
+    data: { user },
+  } = useSession();
+
   const sendEmail = useSendEmail();
   const saveDraft = useSaveDraft();
 
@@ -52,7 +57,12 @@ const ComposeModal = ({
         const allOriginalRecipients = [
           ...(originalEmail.recipients?.to || []),
           ...(originalEmail.recipients?.cc || []),
-        ];
+        ]
+          ?.map((r) => ({
+            label: r.user?.username || r.recipient_name || "Unknown",
+            value: r.user?.custom_id || r.recipient_id,
+          }))
+          .filter((r) => r.value !== user?.id);
 
         // Tambahkan pengirim asli ke daftar penerima
         toRecipients = [
@@ -124,7 +134,7 @@ const ComposeModal = ({
     }
 
     try {
-      await sendEmail.mutateAsync({
+      const payload = {
         ...values,
         content: messageContent,
         recipients: {
@@ -136,8 +146,9 @@ const ComposeModal = ({
         type: "personal",
         parentId:
           mode === "reply" || mode === "forward" ? originalEmail?.id : null,
-      });
+      };
 
+      await sendEmail.mutateAsync(payload);
       message.success("Email berhasil dikirim!");
       handleClose();
       onSent?.();

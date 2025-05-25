@@ -66,6 +66,7 @@ export const createEmail = async (req, res) => {
       type = "personal",
       broadcastGroupId,
       parentId,
+      priority = "normal",
     } = req.body;
 
     let result;
@@ -85,6 +86,7 @@ export const createEmail = async (req, res) => {
         recipients,
         attachments,
         parentId,
+        priority,
       });
     }
 
@@ -121,6 +123,9 @@ export const changeActionEmail = async (req, res) => {
     switch (action) {
       case "read":
         await EmailService.markAsRead(id, userId);
+        break;
+      case "unread":
+        await EmailService.markAsUnread(id, userId);
         break;
       case "star":
         await EmailService.toggleStar(id, userId);

@@ -30,6 +30,16 @@ class Recipient extends Model {
     return this;
   }
 
+  async markAsUnread() {
+    if (this.is_read) {
+      await this.$query().patch({
+        is_read: false,
+        read_at: null,
+      });
+    }
+    return this;
+  }
+
   // Method untuk move to folder
   async moveToFolder(folder) {
     await this.$query().patch({
