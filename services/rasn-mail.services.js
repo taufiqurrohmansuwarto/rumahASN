@@ -121,3 +121,39 @@ export const sendDraft = async (id) => {
 export const searchUsers = async (q) => {
   return api.get(`/search/users?q=${q}`).then((res) => res?.data);
 };
+
+// labels
+export const getUserLabels = async () => {
+  return api.get("/labels").then((res) => res?.data);
+};
+
+export const createLabel = async (data) => {
+  return api.post("/labels", data).then((res) => res?.data);
+};
+
+export const deleteLabel = async (id) => {
+  return api.delete(`/labels/${id}`).then((res) => res?.data);
+};
+
+export const updateLabel = async (id, data) => {
+  return api.put(`/labels/${id}`, data).then((res) => res?.data);
+};
+
+// assign label to email
+export const assignLabelToEmail = async (emailId, labelId) => {
+  return api
+    .post(`/emails/${emailId}/labels/${labelId}`)
+    .then((res) => res?.data);
+};
+
+// get email labels
+export const getEmailLabels = async (emailId) => {
+  return api.get(`/emails/${emailId}/labels`).then((res) => res?.data);
+};
+
+// remove label from email
+export const removeLabelFromEmail = async (emailId, labelId) => {
+  return api
+    .delete(`/emails/${emailId}/labels/${labelId}`)
+    .then((res) => res?.data);
+};
