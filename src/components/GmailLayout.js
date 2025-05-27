@@ -2,21 +2,21 @@ import { useEmailStats } from "@/hooks/useEmails";
 import {
   BellOutlined,
   DeleteOutlined,
+  DownOutlined,
   EditOutlined,
   FileOutlined,
   FolderOutlined,
   InboxOutlined,
   LogoutOutlined,
   MailOutlined,
+  PlusOutlined,
   SearchOutlined,
   SendOutlined,
   SettingOutlined,
   StarOutlined,
-  UserOutlined,
   TagOutlined,
-  PlusOutlined,
-  DownOutlined,
   UpOutlined,
+  UserOutlined,
 } from "@ant-design/icons";
 import { ProConfigProvider, ProLayout } from "@ant-design/pro-components";
 import {
@@ -27,7 +27,6 @@ import {
   Input,
   Space,
   Typography,
-  Divider,
 } from "antd";
 import frFR from "antd/lib/locale/id_ID";
 import { signOut, useSession } from "next-auth/react";
@@ -94,7 +93,7 @@ function GmailLayout({
         name:
           emailStats?.data?.unreadCount > 0 ? (
             <Space>
-              Inbox
+              Kotak Masuk
               <Badge
                 count={emailStats.data.unreadCount}
                 size="small"
@@ -102,26 +101,26 @@ function GmailLayout({
               />
             </Space>
           ) : (
-            "Inbox"
+            "Kotak Masuk"
           ),
         icon: <InboxOutlined />,
       },
       {
         key: "/mails/starred",
         path: "/mails/starred",
-        name: "Starred",
+        name: "Ditandai",
         icon: <StarOutlined />,
       },
       {
         key: "/mails/snoozed",
         path: "/mails/snoozed",
-        name: "Snoozed",
+        name: "Ditunda",
         icon: <BellOutlined />,
       },
       {
         key: "/mails/sent",
         path: "/mails/sent",
-        name: "Sent",
+        name: "Terkirim",
         icon: <SendOutlined />,
       },
       {
@@ -130,7 +129,7 @@ function GmailLayout({
         name:
           emailStats?.data?.draftCount > 0 ? (
             <Space>
-              Drafts
+              Draft
               <Badge
                 count={emailStats.data.draftCount}
                 size="small"
@@ -138,20 +137,20 @@ function GmailLayout({
               />
             </Space>
           ) : (
-            "Drafts"
+            "Draft"
           ),
         icon: <FileOutlined />,
       },
       {
         key: "/mails/trash",
         path: "/mails/trash",
-        name: "Trash",
+        name: "Sampah",
         icon: <DeleteOutlined />,
       },
       {
         key: "/mails/archive",
         path: "/mails/archive",
-        name: "Archive",
+        name: "Arsip",
         icon: <FolderOutlined />,
       },
       {
@@ -166,7 +165,7 @@ function GmailLayout({
     const moreRoutes = [
       {
         key: "more-divider",
-        name: "More",
+        name: "Lainnya",
         icon: showMoreItems ? <UpOutlined /> : <DownOutlined />,
         path: "#",
       },
@@ -175,7 +174,7 @@ function GmailLayout({
             {
               key: "/mails/important",
               path: "/mails/important",
-              name: "Important",
+              name: "Penting",
               icon: <TagOutlined style={{ color: "#ff4d4f" }} />,
             },
             ...customLabels.map((label) => ({
@@ -195,7 +194,7 @@ function GmailLayout({
             {
               key: "/mails/labels/create",
               path: "/mails/labels/create",
-              name: "Create Label",
+              name: "Buat Label",
               icon: <PlusOutlined />,
             },
           ]
@@ -252,7 +251,7 @@ function GmailLayout({
       <ConfigProvider locale={frFR} theme={{ token }}>
         <ProConfigProvider>
           <ProLayout
-            title="Mail ASN"
+            title="Rumah ASN Mail"
             logo={<MailOutlined style={{ color: "#EA4335" }} />}
             // Layout configuration
             layout="mix"
@@ -274,33 +273,6 @@ function GmailLayout({
                 {dom}
               </div>
             )}
-            // Header content dengan search
-            headerContentRender={() => {
-              if (showSearchBar) {
-                return (
-                  <div
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      width: "100%",
-                    }}
-                  >
-                    <Search
-                      placeholder="Cari email..."
-                      allowClear
-                      onSearch={handleSearch}
-                      style={{
-                        maxWidth: 400,
-                        marginLeft: 24,
-                        marginRight: "auto",
-                      }}
-                      enterButton={<SearchOutlined />}
-                    />
-                  </div>
-                );
-              }
-              return null;
-            }}
             // Menu extra render untuk compose button
             menuExtraRender={({ collapsed, isMobile }) => {
               if (collapsed) {
