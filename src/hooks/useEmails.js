@@ -16,6 +16,15 @@ import {
   deleteEmail,
   searchEmails,
   markAsUnread,
+  // labels
+  getUserLabels,
+  createLabel,
+  updateLabel,
+  deleteLabel,
+  getEmailLabels,
+  // assign label to email
+  assignLabelToEmail,
+  removeLabelFromEmail,
 } from "@/services/rasn-mail.services";
 import { useCallback, useRef, useEffect } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -255,5 +264,119 @@ export const useSearchEmails = (params) => {
     queryFn: () => searchEmails(params),
     enabled: !!params.q && params.q.length >= 2,
     keepPreviousData: true,
+  });
+};
+
+// Get user labels
+export const useUserLabels = () => {
+  return useQuery({
+    queryKey: ["user-labels"],
+    queryFn: getUserLabels,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+  });
+};
+
+// Create label
+export const useCreateLabel = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: createLabel,
+    onSuccess: (data) => {
+      queryClient.invalidateQueries(["user-labels"]);
+      message.success(data.message || "Label berhasil dibuat");
+    },
+    onError: (error) => {
+      const errorMessage =
+        error.response?.data?.message || "Gagal membuat label";
+      message.error(errorMessage);
+    },
+  });
+};
+
+// Update label
+export const useUpdateLabel = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ labelId, ...labelData }) => updateLabel(labelId, labelData),
+    onSuccess: (data) => {
+      queryClient.invalidateQueries(["user-labels"]);
+      message.success(data.message || "Label berhasil diperbarui");
+    },
+    onError: (error) => {
+      const errorMessage =
+        error.response?.data?.message || "Gagal memperbarui label";
+      message.error(errorMessage);
+    },
+  });
+};
+
+// Delete label
+export const useDeleteLabel = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: deleteLabel,
+    onSuccess: (data) => {
+      queryClient.invalidateQueries(["user-labels"]);
+      message.success(data.message || "Label berhasil dihapus");
+    },
+    onError: (error) => {
+      const errorMessage =
+        error.response?.data?.message || "Gagal menghapus label";
+      message.error(errorMessage);
+    },
+  });
+};
+
+// Get email labels
+export const useEmailLabels = (emailId) => {
+  return useQuery({
+    queryKey: ["email-labels", emailId],
+    queryFn: () => getEmailLabels(emailId),
+    enabled: !!emailId,
+    staleTime: 2 * 60 * 1000, // 2 minutes
+  });
+};
+
+// Assign label to email
+export const useAssignLabel = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ emailId, labelId }) => assignLabelToEmail(emailId, labelId),
+    onSuccess: (data, variables) => {
+      queryClient.invalidateQueries(["email-labels", variables.emailId]);
+      queryClient.invalidateQueries(["inbox-emails"]);
+      queryClient.invalidateQueries(["email-detail"]);
+      message.success(data.message || "Label berhasil ditambahkan");
+    },
+    onError: (error) => {
+      const errorMessage =
+        error.response?.data?.message || "Gagal menambahkan label";
+      message.error(errorMessage);
+    },
+  });
+};
+
+// Remove label from email
+export const useRemoveLabel = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ emailId, labelId }) =>
+      removeLabelFromEmail(emailId, labelId),
+    onSuccess: (data, variables) => {
+      queryClient.invalidateQueries(["email-labels", variables.emailId]);
+      queryClient.invalidateQueries(["inbox-emails"]);
+      queryClient.invalidateQueries(["email-detail"]);
+      message.success(data.message || "Label berhasil dihapus");
+    },
+    onError: (error) => {
+      const errorMessage =
+        error.response?.data?.message || "Gagal menghapus label";
+      message.error(errorMessage);
+    },
   });
 };
