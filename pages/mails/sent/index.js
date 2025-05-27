@@ -18,7 +18,7 @@ const Sent = () => {
 };
 
 Sent.getLayout = function getLayout(page) {
-  return <GmailLayout active="sent">{page}</GmailLayout>;
+  return <GmailLayout active="/mails/sent">{page}</GmailLayout>;
 };
 
 Sent.Auth = {

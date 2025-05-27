@@ -18,7 +18,7 @@ const Spam = () => {
 };
 
 Spam.getLayout = function getLayout(page) {
-  return <GmailLayout active="spam">{page}</GmailLayout>;
+  return <GmailLayout active="/mails/spam">{page}</GmailLayout>;
 };
 
 Spam.Auth = {

@@ -18,7 +18,7 @@ const Archive = () => {
 };
 
 Archive.getLayout = function getLayout(page) {
-  return <GmailLayout active="archive">{page}</GmailLayout>;
+  return <GmailLayout active="/mails/archive">{page}</GmailLayout>;
 };
 
 Archive.Auth = {

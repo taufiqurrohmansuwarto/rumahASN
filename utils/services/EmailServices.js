@@ -150,6 +150,19 @@ class EmailService {
     return true;
   }
 
+  static async updatePriority(emailId, userId, priority) {
+    const email = await Email.query()
+      .where("id", emailId)
+      .where("sender_id", userId)
+      .first();
+
+    if (email) {
+      await email.$query().patch({ priority });
+    }
+
+    return true;
+  }
+
   // Toggle star
   static async toggleStar(emailId, userId) {
     const email = await Email.query().findById(emailId);

@@ -1,13 +1,10 @@
-import React, { useState } from "react";
-import { Typography, Button, Divider } from "antd";
 import {
-  FullscreenOutlined,
-  FullscreenExitOutlined,
   CopyOutlined,
+  FullscreenExitOutlined,
+  FullscreenOutlined,
 } from "@ant-design/icons";
-import { message } from "antd";
-
-const { Text } = Typography;
+import { Button, Flex, message } from "antd";
+import { useState } from "react";
 
 const EmailContentDisplay = ({ content, isMarkdown = false }) => {
   const [isExpanded, setIsExpanded] = useState(false);
@@ -51,55 +48,64 @@ const EmailContentDisplay = ({ content, isMarkdown = false }) => {
       .replace(/\n/g, "<br>");
   };
 
+  // Custom scrollbar styles
+  const scrollbarStyles = {
+    scrollbarWidth: "thin",
+    scrollbarColor: "#d9d9d9 #f5f5f5",
+    "&::-webkit-scrollbar": {
+      width: "8px",
+    },
+    "&::-webkit-scrollbar-track": {
+      background: "#f5f5f5",
+      borderRadius: "4px",
+    },
+    "&::-webkit-scrollbar-thumb": {
+      background: "#d9d9d9",
+      borderRadius: "4px",
+      transition: "background 0.2s ease",
+    },
+    "&::-webkit-scrollbar-thumb:hover": {
+      background: "#bfbfbf",
+    },
+  };
+
   return (
     <div style={{ marginBottom: "24px" }}>
       {/* Content Header */}
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          marginBottom: "16px",
-        }}
-      >
-        <Text strong>Isi Pesan</Text>
-
-        <div style={{ display: "flex", gap: "8px" }}>
+      <Flex align="flex-end" justify="flex-end">
+        <Button
+          type="text"
+          size="small"
+          icon={<CopyOutlined />}
+          onClick={handleCopyContent}
+          title="Salin konten"
+        />
+        {isMarkdown && (
           <Button
             type="text"
             size="small"
-            icon={<CopyOutlined />}
-            onClick={handleCopyContent}
-            title="Salin konten"
-          />
-
-          {isMarkdown && (
-            <Button
-              type="text"
-              size="small"
-              onClick={() => setShowRaw(!showRaw)}
-              title={showRaw ? "Tampilkan formatted" : "Tampilkan raw"}
-            >
-              {showRaw ? "Formatted" : "Raw"}
-            </Button>
-          )}
-
-          <Button
-            type="text"
-            size="small"
-            icon={
-              isExpanded ? <FullscreenExitOutlined /> : <FullscreenOutlined />
-            }
-            onClick={() => setIsExpanded(!isExpanded)}
-            title={isExpanded ? "Mode normal" : "Mode layar penuh"}
-          />
-        </div>
-      </div>
+            onClick={() => setShowRaw(!showRaw)}
+            title={showRaw ? "Tampilkan formatted" : "Tampilkan raw"}
+          >
+            {showRaw ? "Formatted" : "Raw"}
+          </Button>
+        )}
+        <Button
+          type="text"
+          size="small"
+          icon={
+            isExpanded ? <FullscreenExitOutlined /> : <FullscreenOutlined />
+          }
+          onClick={() => setIsExpanded(!isExpanded)}
+          title={isExpanded ? "Mode normal" : "Mode layar penuh"}
+        />
+      </Flex>
 
       {/* Content Body */}
       <div
+        className="email-content-container"
         style={{
-          border: "1px solid #d9d9d9",
+          // border: "1px solid #d9d9d9",
           borderRadius: "6px",
           backgroundColor: "#ffffff",
           padding: isExpanded ? "32px" : "20px",
@@ -115,6 +121,7 @@ const EmailContentDisplay = ({ content, isMarkdown = false }) => {
           bottom: isExpanded ? "50px" : "auto",
           zIndex: isExpanded ? 1000 : "auto",
           boxShadow: isExpanded ? "0 8px 32px rgba(0,0,0,0.2)" : "none",
+          ...(!isExpanded && scrollbarStyles),
         }}
       >
         {isMarkdown && !showRaw ? (
@@ -158,6 +165,33 @@ const EmailContentDisplay = ({ content, isMarkdown = false }) => {
           onClick={() => setIsExpanded(false)}
         />
       )}
+
+      {/* CSS untuk custom scrollbar */}
+      <style jsx>{`
+        .email-content-container::-webkit-scrollbar {
+          width: 8px;
+        }
+
+        .email-content-container::-webkit-scrollbar-track {
+          background: #f5f5f5;
+          border-radius: 4px;
+        }
+
+        .email-content-container::-webkit-scrollbar-thumb {
+          background: #d9d9d9;
+          border-radius: 4px;
+          transition: background 0.2s ease;
+        }
+
+        .email-content-container::-webkit-scrollbar-thumb:hover {
+          background: #bfbfbf;
+        }
+
+        .email-content-container {
+          scrollbar-width: thin;
+          scrollbar-color: #d9d9d9 #f5f5f5;
+        }
+      `}</style>
     </div>
   );
 };

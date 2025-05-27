@@ -18,7 +18,7 @@ const Important = () => {
 };
 
 Important.getLayout = function getLayout(page) {
-  return <GmailLayout active="important">{page}</GmailLayout>;
+  return <GmailLayout active="/mails/important">{page}</GmailLayout>;
 };
 
 Important.Auth = {
