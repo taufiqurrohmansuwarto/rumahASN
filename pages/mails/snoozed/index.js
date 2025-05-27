@@ -18,7 +18,7 @@ const Snoozed = () => {
 };
 
 Snoozed.getLayout = function getLayout(page) {
-  return <GmailLayout active="snoozed">{page}</GmailLayout>;
+  return <GmailLayout active="/mails/snoozed">{page}</GmailLayout>;
 };
 
 Snoozed.Auth = {

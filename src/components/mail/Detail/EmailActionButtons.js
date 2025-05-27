@@ -68,8 +68,10 @@ const EmailActionButtons = ({
         <Button
           icon={<SendOutlined />}
           onClick={() => onReply?.(false)}
+          shape="round"
           type="primary"
           loading={loading.reply}
+          size="large"
         >
           Balas
         </Button>
@@ -78,6 +80,8 @@ const EmailActionButtons = ({
           icon={<RetweetOutlined />}
           onClick={() => onReplyAll?.()}
           loading={loading.replyAll}
+          shape="round"
+          size="large"
         >
           Balas Semua
         </Button>
@@ -86,6 +90,8 @@ const EmailActionButtons = ({
           icon={<RollbackOutlined />}
           onClick={onForward}
           loading={loading.forward}
+          shape="round"
+          size="large"
         >
           Teruskan
         </Button>
@@ -96,7 +102,9 @@ const EmailActionButtons = ({
           trigger={["click"]}
           placement="topRight"
         >
-          <Button icon={<MoreOutlined />}>Lainnya</Button>
+          <Button icon={<MoreOutlined />} shape="round" size="large">
+            Lainnya
+          </Button>
         </Dropdown>
       </Space>
     </div>

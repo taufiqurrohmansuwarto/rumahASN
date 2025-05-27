@@ -59,6 +59,18 @@ const EmailDetailComponent = ({
     }
   };
 
+  const handleMoveToFolder = async (folder) => {
+    try {
+      await moveToFolderMutation.mutateAsync({
+        emailId: email.id,
+        folder,
+      });
+      onRefresh?.();
+    } catch (error) {
+      message.error("Gagal memindahkan email ke folder");
+    }
+  };
+
   const handleReply = (replyAll = false) => {
     const queryParams = new URLSearchParams({
       reply: email.id,
@@ -157,10 +169,10 @@ const EmailDetailComponent = ({
           isReadLoading={markAsReadMutation.isLoading}
           onToggleUnread={handleMarkAsUnread}
           isUnreadLoading={markAsUnreadMutation.isLoading}
+          onMoveToFolder={handleMoveToFolder}
+          isMoveToFolderLoading={moveToFolderMutation.isLoading}
+          recipients={email.recipients}
         />
-
-        {/* Recipients */}
-        <EmailRecipientsDisplay recipients={email.recipients} />
 
         {/* Email Content */}
         <EmailContentDisplay

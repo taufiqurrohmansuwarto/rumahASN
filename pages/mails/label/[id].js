@@ -18,7 +18,7 @@ const Label = () => {
 };
 
 Label.getLayout = function getLayout(page) {
-  return <GmailLayout active="label">{page}</GmailLayout>;
+  return <GmailLayout active="/mails/label">{page}</GmailLayout>;
 };
 
 Label.Auth = {

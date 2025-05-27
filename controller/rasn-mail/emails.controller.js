@@ -133,6 +133,9 @@ export const changeActionEmail = async (req, res) => {
       case "move":
         await EmailService.moveToFolder(id, userId, value);
         break;
+      case "priority":
+        await EmailService.updatePriority(id, userId, value);
+        break;
       default:
         return res.status(400).json({ error: "Invalid action" });
     }
@@ -470,3 +473,15 @@ export const searchUsers = async (req, res) => {
     handleError(res, error);
   }
 };
+
+export const getLabels = async (req, res) => {};
+
+export const createLabel = async (req, res) => {};
+
+export const deleteLabel = async (req, res) => {};
+
+export const updateLabel = async (req, res) => {};
+
+export const assignLabelToEmail = async (req, res) => {};
+
+export const removeLabelFromEmail = async (req, res) => {};
