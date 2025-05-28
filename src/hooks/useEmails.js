@@ -207,9 +207,9 @@ export const useToggleStar = () => {
   return useMutation({
     mutationFn: toggleStar,
     onSuccess: () => {
-      queryClient.invalidateQueries(["inbox-emails"]);
-      queryClient.invalidateQueries(["sent-emails"]);
+      queryClient.invalidateQueries(["emails"]);
       queryClient.invalidateQueries(["email-detail"]);
+      message.success("Email berhasil ditandai");
     },
   });
 };

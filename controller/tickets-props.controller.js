@@ -5,6 +5,8 @@ const TicketHistories = require("../models/tickets_histories.model");
 const Comments = require("../models/tickets_comments_customers.model");
 const Subscriptions = require("../models/tickets_subscriptions.model");
 const CommentReaction = require("../models/comments-reactions.model");
+const UserHistory = require("../models/users-histories.model");
+const TicketSubscriptions = require("../models/tickets_subscriptions.model");
 const { parseMarkdown } = require("../utils/parsing");
 const { raw } = require("objection");
 
@@ -643,6 +645,8 @@ const removeTicket = async (req, res) => {
         .status(403)
         .json({ message: "You don't have permission to do this action." });
     } else {
+      await TicketSubscriptions.query().delete().where({ ticket_id: id });
+      await UserHistory.query().delete().where({ ticket_id: id });
       await TicketsHistories.query().delete().where({ ticket_id: id });
       await Ticket.query().deleteById(id);
       await insertTicketHistory(null, customId, "deleted", "Ticket deleted");

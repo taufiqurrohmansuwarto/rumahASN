@@ -1,5 +1,6 @@
 import GmailLayout from "@/components/GmailLayout";
 import PageContainer from "@/components/PageContainer";
+import EmailListComponent from "@/components/mail/EmailList/EmailListComponent";
 import Head from "next/head";
 
 const Sent = () => {
@@ -9,9 +10,7 @@ const Sent = () => {
         <title>Rumah ASN - Pesan Terkirim</title>
       </Head>
       <PageContainer>
-        <div>
-          <h1>Pesan Terkirim</h1>
-        </div>
+        <EmailListComponent folder="sent" />
       </PageContainer>
     </>
   );

@@ -1,4 +1,6 @@
+const UserHistory = require("@/models/users-histories.model");
 const Tickets = require("../models/tickets.model");
+const TicketHistories = require("@/models/tickets_histories.model");
 
 module.exports.userTicket = async (req, res) => {
   try {
@@ -47,8 +49,10 @@ module.exports.remove = async (req, res) => {
   const { id } = req?.query;
   try {
     if (current_role === "admin") {
-      const result = await Tickets.query().deleteById(id);
-      res.json(result);
+      await TicketHistories.query().delete().where("ticket_id", id);
+      await UserHistory.query().delete().where("ticket_id", id);
+      await Tickets.query().deleteById(id);
+      res.json({ code: 200, message: "success" });
     } else if (current_role === "user") {
       const result = await Tickets.query()
         .delete()
