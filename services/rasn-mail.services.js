@@ -56,6 +56,48 @@ export const getSentEmails = async (params) => {
     .then((res) => res?.data);
 };
 
+export const getDraftsEmails = async (params) => {
+  return api
+    .get(`/emails?${queryString.stringify({ ...params, folder: "drafts" })}`)
+    .then((res) => res?.data);
+};
+
+export const getTrashEmails = async (params) => {
+  return api
+    .get(`/emails?${queryString.stringify({ ...params, folder: "trash" })}`)
+    .then((res) => res?.data);
+};
+
+export const getArchiveEmails = async (params) => {
+  return api
+    .get(`/emails?${queryString.stringify({ ...params, folder: "archive" })}`)
+    .then((res) => res?.data);
+};
+
+export const getSpamEmails = async (params) => {
+  return api
+    .get(`/emails?${queryString.stringify({ ...params, folder: "spam" })}`)
+    .then((res) => res?.data);
+};
+
+export const getSnoozedEmails = async (params) => {
+  return api
+    .get(`/emails?${queryString.stringify({ ...params, folder: "snoozed" })}`)
+    .then((res) => res?.data);
+};
+
+export const getStarredEmails = async (params) => {
+  return api
+    .get(`/emails?${queryString.stringify({ ...params, folder: "starred" })}`)
+    .then((res) => res?.data);
+};
+
+export const getImportantEmails = async (params) => {
+  return api
+    .get(`/emails?${queryString.stringify({ ...params, folder: "important" })}`)
+    .then((res) => res?.data);
+};
+
 export const getEmailById = async (emailId) => {
   return api.get(`/emails/${emailId}`).then((res) => res?.data);
 };

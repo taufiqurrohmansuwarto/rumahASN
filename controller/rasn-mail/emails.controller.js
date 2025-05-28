@@ -7,6 +7,29 @@ const Label = require("@/models/rasn_mail/labels.model");
 const EmailLabel = require("@/models/rasn_mail/email-labels.model");
 const Email = require("@/models/rasn_mail/emails.model");
 
+const serialize = (emails) => {
+  if (!emails?.recipients) return emails;
+
+  const mapRecipients = (type) =>
+    emails.recipients
+      ?.filter((e) => e.type === type)
+      ?.map((recipient) => ({
+        id: recipient.user?.custom_id,
+        name: recipient.user?.username,
+        email: recipient.user?.email,
+        image: recipient.user?.image,
+      })) || [];
+
+  return {
+    ...emails,
+    recipients: {
+      to: mapRecipients("to"),
+      cc: mapRecipients("cc"),
+      bcc: mapRecipients("bcc"),
+    },
+  };
+};
+
 export const getEmails = async (req, res) => {
   try {
     const { customId: userId } = req?.user;
@@ -17,43 +40,49 @@ export const getEmails = async (req, res) => {
       search = "",
       unreadOnly = false,
     } = req.query;
+
+    const options = {
+      page: parseInt(page),
+      limit: parseInt(limit),
+      search,
+    };
+
     let result;
     switch (folder) {
       case "inbox":
         result = await EmailService.getUserInbox(userId, {
-          page: parseInt(page),
-          limit: parseInt(limit),
-          search,
+          ...options,
           unreadOnly: unreadOnly === "true",
         });
         break;
       case "sent":
-        result = await EmailService.getUserSentEmails(userId, {
-          page: parseInt(page),
-          limit: parseInt(limit),
-          search,
-        });
+        result = await EmailService.getUserSentEmails(userId, options);
         break;
       case "drafts":
-        result = await EmailService.getUserDrafts(userId, {
-          page: parseInt(page),
-          limit: parseInt(limit),
-          search,
-        });
+        result = await EmailService.getUserDrafts(userId, options);
+        break;
+      case "archive":
+        result = await EmailService.getUserArchive(userId, options);
+        break;
+      case "starred":
+        result = await EmailService.getUserStarred(userId, options);
         break;
       default:
         result = await EmailService.getUserInbox(userId, {
+          ...options,
           folder,
-          page: parseInt(page),
-          limit: parseInt(limit),
-          search,
         });
     }
 
-    res.json({
+    const hasil = {
       success: true,
-      data: result,
-    });
+      data: {
+        ...result,
+        emails: result?.emails?.map(serialize) || [],
+      },
+    };
+
+    res.json(hasil);
   } catch (error) {
     handleError(res, error);
   }

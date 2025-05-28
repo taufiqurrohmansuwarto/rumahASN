@@ -1,6 +1,7 @@
 import GmailLayout from "@/components/GmailLayout";
 import PageContainer from "@/components/PageContainer";
 import Head from "next/head";
+import EmailListComponent from "@/components/mail/EmailList/EmailListComponent";
 
 const Starred = () => {
   return (
@@ -9,9 +10,7 @@ const Starred = () => {
         <title>Rumah ASN - Pesan Ditandai</title>
       </Head>
       <PageContainer>
-        <div>
-          <h1>Pesan Ditandai</h1>
-        </div>
+        <EmailListComponent folder="starred" />
       </PageContainer>
     </>
   );
