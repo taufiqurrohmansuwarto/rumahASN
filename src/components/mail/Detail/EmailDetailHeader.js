@@ -30,6 +30,7 @@ import {
 import dayjs from "dayjs";
 import "dayjs/locale/id";
 import relativeTime from "dayjs/plugin/relativeTime";
+import EmailLabelSelector from "./EmailLabelSelector";
 
 // Konfigurasi dayjs
 dayjs.extend(relativeTime);
@@ -480,7 +481,7 @@ const EmailDetailHeader = ({
   isUnreadLoading = false,
   onMoveToFolder,
   isMoveToFolderLoading = false,
-  recipients = [],
+  onRefresh,
 }) => {
   if (!email) return null;
 
@@ -535,6 +536,7 @@ const EmailDetailHeader = ({
             onChangePriority={null}
             isLoading={false}
           />
+          <EmailLabelSelector emailId={email.id} onRefresh={onRefresh} />
         </Space>
       </Flex>
     </div>
