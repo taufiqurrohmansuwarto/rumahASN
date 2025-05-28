@@ -705,7 +705,7 @@ export const assignLabelToEmail = async (req, res) => {
 export const getEmailLabels = async (req, res) => {
   try {
     const { customId: userId } = req?.user;
-    const { emailId } = req.query;
+    const { id: emailId } = req.query;
 
     // Verify user has access to email
     const email = await Email.query().findById(emailId);

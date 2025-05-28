@@ -1,4 +1,4 @@
-import { useEmailStats } from "@/hooks/useEmails";
+import { useEmailStats, useUserLabels } from "@/hooks/useEmails";
 import {
   BellOutlined,
   DeleteOutlined,
@@ -37,6 +37,7 @@ import NotifikasiASNConnect from "./Notification/NotifikasiASNConnect";
 import NotifikasiForumKepegawaian from "./Notification/NotifikasiForumKepegawaian";
 import NotifikasiKepegawaian from "./Notification/NotifikasiKepegawaian";
 import NotifikasiPrivateMessage from "./Notification/NotifikasiPrivateMessage";
+import LabelManager from "@/components/mail/LabelManager";
 
 const { Search } = Input;
 const { Text } = Typography;
@@ -52,16 +53,15 @@ function GmailLayout({
   const router = useRouter();
   const [collapsed, setCollapsed] = useState(false);
   const [showMoreItems, setShowMoreItems] = useState(false);
+  const [showLabelManager, setShowLabelManager] = useState(false);
 
   // Fetch email stats untuk unread counts
   const { data: emailStats } = useEmailStats();
 
-  // Custom labels (nanti bisa dari API)
-  const customLabels = [
-    { id: "work", name: "Pekerjaan", color: "#1890ff", count: 3 },
-    { id: "important", name: "Penting", color: "#ff4d4f", count: 1 },
-    { id: "personal", name: "Pribadi", color: "#52c41a", count: 0 },
-  ];
+  // Fetch user labels untuk sidebar
+  const { data: labelsData } = useUserLabels();
+  const customLabels =
+    labelsData?.data?.filter((label) => !label.is_system) || [];
 
   // Handle compose button click
   const handleCompose = () => {
@@ -93,7 +93,7 @@ function GmailLayout({
         name:
           emailStats?.data?.unreadCount > 0 ? (
             <Space>
-              Kotak Masuk
+              Inbox
               <Badge
                 count={emailStats.data.unreadCount}
                 size="small"
@@ -101,26 +101,26 @@ function GmailLayout({
               />
             </Space>
           ) : (
-            "Kotak Masuk"
+            "Inbox"
           ),
         icon: <InboxOutlined />,
       },
       {
         key: "/mails/starred",
         path: "/mails/starred",
-        name: "Ditandai",
+        name: "Starred",
         icon: <StarOutlined />,
       },
       {
         key: "/mails/snoozed",
         path: "/mails/snoozed",
-        name: "Ditunda",
+        name: "Snoozed",
         icon: <BellOutlined />,
       },
       {
         key: "/mails/sent",
         path: "/mails/sent",
-        name: "Terkirim",
+        name: "Sent",
         icon: <SendOutlined />,
       },
       {
@@ -129,7 +129,7 @@ function GmailLayout({
         name:
           emailStats?.data?.draftCount > 0 ? (
             <Space>
-              Draft
+              Drafts
               <Badge
                 count={emailStats.data.draftCount}
                 size="small"
@@ -137,20 +137,20 @@ function GmailLayout({
               />
             </Space>
           ) : (
-            "Draft"
+            "Drafts"
           ),
         icon: <FileOutlined />,
       },
       {
         key: "/mails/trash",
         path: "/mails/trash",
-        name: "Sampah",
+        name: "Trash",
         icon: <DeleteOutlined />,
       },
       {
         key: "/mails/archive",
         path: "/mails/archive",
-        name: "Arsip",
+        name: "Archive",
         icon: <FolderOutlined />,
       },
       {
@@ -165,7 +165,7 @@ function GmailLayout({
     const moreRoutes = [
       {
         key: "more-divider",
-        name: "Lainnya",
+        name: "More",
         icon: showMoreItems ? <UpOutlined /> : <DownOutlined />,
         path: "#",
       },
@@ -174,7 +174,7 @@ function GmailLayout({
             {
               key: "/mails/important",
               path: "/mails/important",
-              name: "Penting",
+              name: "Important",
               icon: <TagOutlined style={{ color: "#ff4d4f" }} />,
             },
             ...customLabels.map((label) => ({
@@ -194,7 +194,7 @@ function GmailLayout({
             {
               key: "/mails/labels/create",
               path: "/mails/labels/create",
-              name: "Buat Label",
+              name: "Create Label",
               icon: <PlusOutlined />,
             },
           ]
@@ -210,6 +210,11 @@ function GmailLayout({
 
     if (key === "more-divider") {
       setShowMoreItems(!showMoreItems);
+      return;
+    }
+
+    if (key === "create-label") {
+      setShowLabelManager(true);
       return;
     }
 
@@ -251,7 +256,7 @@ function GmailLayout({
       <ConfigProvider locale={frFR} theme={{ token }}>
         <ProConfigProvider>
           <ProLayout
-            title="Rumah ASN Mail"
+            title="Mail ASN"
             logo={<MailOutlined style={{ color: "#EA4335" }} />}
             // Layout configuration
             layout="mix"
@@ -273,6 +278,33 @@ function GmailLayout({
                 {dom}
               </div>
             )}
+            // Header content dengan search
+            headerContentRender={() => {
+              if (showSearchBar) {
+                return (
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      width: "100%",
+                    }}
+                  >
+                    <Search
+                      placeholder="Cari email..."
+                      allowClear
+                      onSearch={handleSearch}
+                      style={{
+                        maxWidth: 400,
+                        marginLeft: 24,
+                        marginRight: "auto",
+                      }}
+                      enterButton={<SearchOutlined />}
+                    />
+                  </div>
+                );
+              }
+              return null;
+            }}
             // Menu extra render untuk compose button
             menuExtraRender={({ collapsed, isMobile }) => {
               if (collapsed) {
@@ -379,6 +411,12 @@ function GmailLayout({
             token={token}
           >
             {children}
+
+            {/* Label Manager Modal */}
+            <LabelManager
+              visible={showLabelManager}
+              onClose={() => setShowLabelManager(false)}
+            />
           </ProLayout>
         </ProConfigProvider>
       </ConfigProvider>
