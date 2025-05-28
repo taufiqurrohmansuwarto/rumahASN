@@ -172,6 +172,7 @@ const EmailDetailComponent = ({
           onMoveToFolder={handleMoveToFolder}
           isMoveToFolderLoading={moveToFolderMutation.isLoading}
           recipients={email.recipients}
+          onRefresh={onRefresh}
         />
 
         {/* Email Content */}

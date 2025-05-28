@@ -69,6 +69,24 @@ class EmailService {
     });
   }
 
+  // Get user's archive
+  static async getUserArchive(userId, options = {}) {
+    return Email.getUserEmails({
+      userId,
+      folder: "archive",
+      ...options,
+    });
+  }
+
+  // Get user's starred emails
+  static async getUserStarred(userId, options = {}) {
+    return Email.getUserEmails({
+      userId,
+      folder: "starred",
+      ...options,
+    });
+  }
+
   // Get email by ID with user context
   static async getEmailById(emailId, userId) {
     const email = await Email.query().findById(emailId).withGraphFetched(`[
