@@ -1,32 +1,31 @@
-import { Descriptions, Empty, Skeleton, Space, Tooltip } from "antd";
 import { FilePdfOutlined } from "@ant-design/icons";
+import { Button, Descriptions, Empty, Skeleton, Space } from "antd";
 import dayjs from "dayjs";
-import { useSession } from "next-auth/react";
 import { isEmpty } from "lodash";
 
-const DokumenUsulan = ({ dokumen, type = "personal" }) => {
-  const { data: session } = useSession();
-
-  const isAdmin = session?.user?.current_role === "admin";
-  const hasDokumen = Boolean(dokumen);
-
-  if (!hasDokumen || !isAdmin) {
-    return null;
-  }
-
-  const renderDokumenLink = ([key, value]) => (
-    <Tooltip key={key} title={`File ${key}`}>
-      <a
-        href={`/helpdesk/api/siasn/ws/download?filePath=${value.object}`}
+const DokumenUsulan = ({ data }) => {
+  return (
+    <Space>
+      <Button
+        type="link"
+        icon={<FilePdfOutlined />}
+        href={`/helpdesk/api/siasn/ws/download?filePath=${data.path_ttd_pertek}`}
         target="_blank"
         rel="noreferrer"
       >
-        <FilePdfOutlined />
-      </a>
-    </Tooltip>
+        Pertek
+      </Button>
+      <Button
+        type="link"
+        icon={<FilePdfOutlined />}
+        href={`/helpdesk/api/siasn/ws/download?filePath=${data.path_ttd_sk}`}
+        target="_blank"
+        rel="noreferrer"
+      >
+        SK
+      </Button>
+    </Space>
   );
-
-  return <Space>{Object.entries(dokumen).map(renderDokumenLink)}</Space>;
 };
 
 const RiwayatPengadaan = ({ data, loading, type = "personal" }) => {
@@ -37,7 +36,7 @@ const RiwayatPengadaan = ({ data, loading, type = "personal" }) => {
       ) : (
         <Descriptions size="middle" column={3} layout="vertical">
           <Descriptions.Item label="Dokumen Usulan">
-            <DokumenUsulan dokumen={data?.dokumen_usulan} />
+            <DokumenUsulan data={data} />
           </Descriptions.Item>
           <Descriptions.Item label="Nama">
             {data?.usulan_data?.data?.nama}
