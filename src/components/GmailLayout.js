@@ -179,26 +179,26 @@ function GmailLayout({
               />
             </Space>
           ) : (
-            "Inbox"
+            "Kotak Masuk"
           ),
         icon: <InboxOutlined />,
       },
       {
         key: "/mails/starred",
         path: "/mails/starred",
-        name: "Starred",
+        name: "Ditandai",
         icon: <StarOutlined />,
       },
       {
         key: "/mails/snoozed",
         path: "/mails/snoozed",
-        name: "Snoozed",
+        name: "Ditunda",
         icon: <BellOutlined />,
       },
       {
         key: "/mails/sent",
         path: "/mails/sent",
-        name: "Sent",
+        name: "Terkirim",
         icon: <SendOutlined />,
       },
       {
@@ -215,20 +215,20 @@ function GmailLayout({
               />
             </Space>
           ) : (
-            "Drafts"
+            "Draf"
           ),
         icon: <FileOutlined />,
       },
       {
         key: "/mails/trash",
         path: "/mails/trash",
-        name: "Trash",
+        name: "Sampah",
         icon: <DeleteOutlined />,
       },
       {
         key: "/mails/archive",
         path: "/mails/archive",
-        name: "Archive",
+        name: "Arsip",
         icon: <FolderOutlined />,
       },
       {
