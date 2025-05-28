@@ -4,6 +4,8 @@ import { authOptions } from "pages/api/auth/[...nextauth]";
 const User = require("../models/users.model");
 const Minio = require("minio");
 
+const bannedUserId = ["100549038920214179600"];
+
 const minioConfig = {
   port: parseInt(process.env.MINIO_PORT),
   useSSL: true,
@@ -20,6 +22,10 @@ const auth = async (req, res, next) => {
     if (data) {
       const userId = data?.user?.id?.split("|")?.[1];
       const customId = data?.user?.id;
+
+      if (bannedUserId.includes(customId)) {
+        res.status(401).json({ code: 401, message: "Unauthorized" });
+      }
 
       const result = await User.query()
         .where("custom_id", customId)
