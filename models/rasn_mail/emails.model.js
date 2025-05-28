@@ -260,8 +260,7 @@ class Email extends Model {
         )
         .where("rasn_mail.emails.sender_id", userId)
         .where("rasn_mail.emails.is_draft", true);
-    } else {
-      // Other folders
+    } else if (folder === "archive") {
       query = query
         .join(
           "rasn_mail.recipients",
@@ -269,8 +268,16 @@ class Email extends Model {
           "rasn_mail.recipients.email_id"
         )
         .where("rasn_mail.recipients.recipient_id", userId)
-        .where("rasn_mail.recipients.folder", folder)
-        .where("rasn_mail.recipients.is_deleted", false);
+        .where("rasn_mail.emails.is_archived", true);
+    } else if (folder === "starred") {
+      query = query
+        .join(
+          "rasn_mail.recipients",
+          "rasn_mail.emails.id",
+          "rasn_mail.recipients.email_id"
+        )
+        .where("rasn_mail.recipients.recipient_id", userId)
+        .where("rasn_mail.emails.is_starred", true);
     }
 
     // Apply search

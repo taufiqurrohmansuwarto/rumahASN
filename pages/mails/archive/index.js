@@ -1,6 +1,7 @@
 import GmailLayout from "@/components/GmailLayout";
 import PageContainer from "@/components/PageContainer";
 import Head from "next/head";
+import EmailListComponent from "@/components/mail/EmailList/EmailListComponent";
 
 const Archive = () => {
   return (
@@ -9,9 +10,7 @@ const Archive = () => {
         <title>Rumah ASN - Arsip Pesan</title>
       </Head>
       <PageContainer>
-        <div>
-          <h1>Arsip Pesan</h1>
-        </div>
+        <EmailListComponent folder="archive" />
       </PageContainer>
     </>
   );
