@@ -25,6 +25,16 @@ import {
   // assign label to email
   assignLabelToEmail,
   removeLabelFromEmail,
+  // starred emails
+  getStarredEmails,
+  // archive emails
+  archiveEmail,
+  // spam emails
+  markAsSpam,
+  getArchiveEmails,
+  getSpamEmails,
+  markAsNotSpam,
+  // important emails
 } from "@/services/rasn-mail.services";
 import { useCallback, useRef, useEffect } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -377,6 +387,77 @@ export const useRemoveLabel = () => {
       const errorMessage =
         error.response?.data?.message || "Gagal menghapus label";
       message.error(errorMessage);
+    },
+  });
+};
+
+// ✅ TAMBAHKAN HOOKS INI
+export const useStarredEmails = (params) => {
+  return useQuery({
+    queryKey: ["starred-emails", params],
+    queryFn: () => getStarredEmails(params),
+    keepPreviousData: true,
+    staleTime: 30000,
+  });
+};
+
+export const useArchiveEmails = (params) => {
+  return useQuery({
+    queryKey: ["archive-emails", params],
+    queryFn: () => getArchiveEmails(params),
+    keepPreviousData: true,
+    staleTime: 30000,
+  });
+};
+
+export const useSpamEmails = (params) => {
+  return useQuery({
+    queryKey: ["spam-emails", params],
+    queryFn: () => getSpamEmails(params),
+    keepPreviousData: true,
+    staleTime: 30000,
+  });
+};
+
+// ✅ TAMBAHKAN ACTION HOOKS
+export const useArchiveEmail = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: archiveEmail,
+    onSuccess: () => {
+      queryClient.invalidateQueries(["inbox-emails"]);
+      queryClient.invalidateQueries(["archive-emails"]);
+      queryClient.invalidateQueries(["email-detail"]);
+      message.success("Email berhasil diarsipkan");
+    },
+    onError: () => {
+      message.error("Gagal mengarsipkan email");
+    },
+  });
+};
+
+export const useMarkAsSpam = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: markAsSpam,
+    onSuccess: () => {
+      queryClient.invalidateQueries(["inbox-emails"]);
+      queryClient.invalidateQueries(["spam-emails"]);
+      queryClient.invalidateQueries(["email-detail"]);
+      message.success("Email ditandai sebagai spam");
+    },
+  });
+};
+
+export const useMarkAsNotSpam = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: markAsNotSpam,
+    onSuccess: () => {
+      queryClient.invalidateQueries(["inbox-emails"]);
+      queryClient.invalidateQueries(["spam-emails"]);
+      queryClient.invalidateQueries(["email-detail"]);
+      message.success("Email berhasil dihapus dari spam");
     },
   });
 };

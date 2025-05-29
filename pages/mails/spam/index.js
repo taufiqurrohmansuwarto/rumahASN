@@ -1,4 +1,5 @@
 import GmailLayout from "@/components/GmailLayout";
+import EmailListComponent from "@/components/mail/EmailList/EmailListComponent";
 import PageContainer from "@/components/PageContainer";
 import Head from "next/head";
 
@@ -9,9 +10,7 @@ const Spam = () => {
         <title>Rumah ASN - Pesan Spam</title>
       </Head>
       <PageContainer>
-        <div>
-          <h1>Pesan Spam</h1>
-        </div>
+        <EmailListComponent folder="spam" />
       </PageContainer>
     </>
   );

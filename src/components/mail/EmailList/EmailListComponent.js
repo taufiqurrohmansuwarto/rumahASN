@@ -3,7 +3,9 @@ import {
   useBulkDelete,
   useDeleteEmail,
   useInboxEmails,
+  useMarkAsNotSpam,
   useMarkAsRead,
+  useMarkAsSpam,
   useMarkAsUnread,
   useMoveToFolder,
   useToggleStar,
@@ -111,6 +113,8 @@ const EmailListComponent = ({
   const moveToFolderMutation = useMoveToFolder();
   const bulkDeleteMutation = useBulkDelete();
   const deleteMutation = useDeleteEmail();
+  const markAsSpamMutation = useMarkAsSpam();
+  const markAsNotSpamMutation = useMarkAsNotSpam();
 
   // Reset selected emails when query changes
   useEffect(() => {
@@ -227,6 +231,12 @@ const EmailListComponent = ({
           emailId: email.id,
           folder: "archive",
         });
+        break;
+      case "spam":
+        await markAsSpamMutation.mutateAsync(email.id);
+        break;
+      case "not-spam":
+        await markAsNotSpamMutation.mutateAsync(email.id);
         break;
       case "delete":
         await deleteMutation.mutateAsync(email.id);

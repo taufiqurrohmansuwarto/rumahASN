@@ -78,13 +78,25 @@ class EmailService {
     });
   }
 
-  // Get user's starred emails
-  static async getUserStarred(userId, options = {}) {
+  static async getUserSpam(userId, options = {}) {
     return Email.getUserEmails({
       userId,
-      folder: "starred",
+      folder: "spam",
       ...options,
     });
+  }
+
+  static async getUserImportant(userId, options = {}) {
+    return Email.getUserEmails({
+      userId,
+      folder: "important",
+      ...options,
+    });
+  }
+
+  // Get user's starred emails
+  static async getUserStarred(userId, options = {}) {
+    return Email.getStarredEmails(userId, options);
   }
 
   // Get email by ID with user context
@@ -156,16 +168,45 @@ class EmailService {
 
   // Move email to folder
   static async moveToFolder(emailId, userId, folder) {
-    const recipient = await Recipient.query().findOne({
-      email_id: emailId,
-      recipient_id: userId,
-    });
+    try {
+      // Coba pakai stored function
+      const result = await Email.knex().raw(
+        "SELECT rasn_mail.safe_move_to_folder(?, ?, ?) as success",
+        [emailId, userId, folder]
+      );
+      return result.rows[0].success;
+    } catch (error) {
+      console.error("Function failed, using fallback:", error);
+      // Fallback ke update manual
+      const Recipient = require("@/models/rasn_mail/recipients.model");
+      const updated = await Recipient.query()
+        .where("email_id", emailId)
+        .where("recipient_id", userId)
+        .patch({
+          folder: folder,
+          is_deleted: folder === "trash",
+          deleted_at: folder === "trash" ? new Date() : null,
+          updated_at: new Date(),
+        });
 
-    if (recipient) {
-      await recipient.moveToFolder(folder);
+      // Update archived flag jika diperlukan
+      if (folder === "archive" && updated > 0) {
+        await Email.query().findById(emailId).patch({ is_archived: true });
+      } else if (folder !== "archive" && updated > 0) {
+        // Check if any recipients still in archive
+        const stillInArchive = await Recipient.query()
+          .where("email_id", emailId)
+          .where("folder", "archive")
+          .where("is_deleted", false)
+          .first();
+
+        if (!stillInArchive) {
+          await Email.query().findById(emailId).patch({ is_archived: false });
+        }
+      }
+
+      return updated > 0;
     }
-
-    return true;
   }
 
   static async updatePriority(emailId, userId, priority) {
@@ -183,11 +224,35 @@ class EmailService {
 
   // Toggle star
   static async toggleStar(emailId, userId) {
-    const email = await Email.query().findById(emailId);
-    if (email) {
-      await email.toggleStar(userId);
+    try {
+      // Coba pakai stored function dulu
+      const result = await Email.knex().raw(
+        "SELECT rasn_mail.safe_toggle_star(?, ?) as success",
+        [emailId, userId]
+      );
+      return result.rows[0].success;
+    } catch (error) {
+      console.error("Function failed, using fallback:", error);
+      // Fallback ke update manual
+      const email = await Email.query().findById(emailId);
+      if (email) {
+        // Check access - user must be sender or recipient
+        const hasAccess =
+          email.sender_id === userId ||
+          (await email
+            .$relatedQuery("recipients")
+            .where("recipient_id", userId)
+            .first());
+
+        if (hasAccess) {
+          await email.$query().patch({
+            is_starred: !email.is_starred,
+          });
+          return true;
+        }
+      }
+      return false;
     }
-    return true;
   }
 
   // Get unread count
