@@ -34,6 +34,7 @@ import {
   getArchiveEmails,
   getSpamEmails,
   markAsNotSpam,
+  getLabelEmails,
   // important emails
 } from "@/services/rasn-mail.services";
 import { useCallback, useRef, useEffect } from "react";
@@ -459,5 +460,15 @@ export const useMarkAsNotSpam = () => {
       queryClient.invalidateQueries(["email-detail"]);
       message.success("Email berhasil dihapus dari spam");
     },
+  });
+};
+
+export const useLabelEmails = (params) => {
+  return useQuery({
+    queryKey: ["label-emails", params],
+    queryFn: () => getLabelEmails(params),
+    keepPreviousData: true,
+    staleTime: 30000,
+    enabled: !!params.labelId, // Only fetch if labelId exists
   });
 };

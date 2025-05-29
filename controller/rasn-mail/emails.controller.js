@@ -39,12 +39,14 @@ export const getEmails = async (req, res) => {
       limit = 25,
       search = "",
       unreadOnly = false,
+      labelId = null,
     } = req.query;
 
     const options = {
       page: parseInt(page),
       limit: parseInt(limit),
       search,
+      labelId,
     };
 
     let result;
@@ -54,6 +56,19 @@ export const getEmails = async (req, res) => {
           ...options,
           unreadOnly: unreadOnly === "true",
         });
+        break;
+      case "label": // ✅ TAMBAHKAN CASE INI
+        if (!labelId) {
+          return res.status(400).json({
+            success: false,
+            message: "Label ID required",
+          });
+        }
+        result = await EmailService.getUserLabelEmails(
+          userId,
+          labelId,
+          options
+        );
         break;
       case "sent":
         result = await EmailService.getUserSentEmails(userId, options);
@@ -244,8 +259,8 @@ export const emailSearch = async (req, res) => {
 export const getStatsEmail = async (req, res) => {
   try {
     const { customId: userId } = req?.user;
-    const unreadCount = await EmailService.getUnreadCount(userId);
-    res.json({ success: true, data: { unreadCount } });
+    const stats = await EmailService.getEmailStats(userId);
+    res.json({ success: true, data: stats });
   } catch (error) {
     handleError(res, error);
   }

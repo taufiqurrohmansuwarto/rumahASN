@@ -218,3 +218,9 @@ export const markAsNotSpam = async (emailId) => {
     .put(`/emails/${emailId}`, { action: "move", value: "inbox" })
     .then((res) => res?.data);
 };
+
+export const getLabelEmails = async (params) => {
+  return api
+    .get(`/emails?${queryString.stringify({ ...params, folder: "label" })}`)
+    .then((res) => res?.data);
+};

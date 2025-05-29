@@ -95,12 +95,24 @@ const EmailListComponent = ({
     isError,
     refetch,
   } = useQuery({
-    queryKey: ["emails", folder, queryParams],
+    queryKey: ["emails", folder, queryParams, customConfig?.labelId],
     queryFn: () => {
       if (!config.apiFunction) {
         throw new Error(`API function not implemented for folder: ${folder}`);
       }
-      return config.apiFunction(queryParams);
+
+      // ✅ PERBAIKAN: Pass folder dan labelId dengan benar
+      const params = {
+        ...queryParams,
+        folder: folder, // ✅ TAMBAHKAN INI - explicit pass folder
+      };
+
+      // For label folder, add labelId
+      if (folder === "label" && customConfig?.labelId) {
+        params.labelId = customConfig.labelId;
+      }
+
+      return config.apiFunction(params);
     },
     keepPreviousData: true,
     staleTime: 30000,

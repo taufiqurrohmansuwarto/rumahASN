@@ -264,6 +264,43 @@ class EmailService {
     return parseInt(result.rows[0].count);
   }
 
+  // ✅ UPDATE METHOD INI untuk include semua counts
+  static async getEmailStats(userId) {
+    const stats = await Email.knex().raw(
+      `
+    SELECT 
+      -- Unread count
+      (SELECT COUNT(*) FROM rasn_mail.recipients r
+       JOIN rasn_mail.emails e ON r.email_id = e.id
+       WHERE r.recipient_id = ? AND r.folder = 'inbox'
+       AND r.is_read = false AND r.is_deleted = false) as unread_count,
+      
+      -- Starred count  
+      (SELECT COUNT(DISTINCT e.id) FROM rasn_mail.emails e
+       LEFT JOIN rasn_mail.recipients r ON e.id = r.email_id
+       WHERE e.is_starred = true
+       AND (e.sender_id = ? OR (r.recipient_id = ? AND r.is_deleted = false))) as starred_count,
+      
+      -- Archive count
+      (SELECT COUNT(*) FROM rasn_mail.recipients r
+       WHERE r.recipient_id = ? AND r.folder = 'archive' 
+       AND r.is_deleted = false) as archive_count,
+      
+      -- Spam count
+      (SELECT COUNT(*) FROM rasn_mail.recipients r
+       WHERE r.recipient_id = ? AND r.folder = 'spam'
+       AND r.is_deleted = false) as spam_count,
+       
+      -- Draft count
+      (SELECT COUNT(*) FROM rasn_mail.emails 
+       WHERE sender_id = ? AND is_draft = true) as draft_count
+  `,
+      [userId, userId, userId, userId, userId, userId]
+    );
+
+    return stats.rows[0];
+  }
+
   // Search emails
   static async searchEmails(userId, query, options = {}) {
     const { page = 1, limit = 25 } = options;
@@ -777,6 +814,16 @@ class EmailService {
       await trx.rollback();
       throw error;
     }
+  }
+
+  // ✅ TAMBAHKAN METHOD INI
+  static async getUserLabelEmails(userId, labelId, options = {}) {
+    return Email.getUserEmails({
+      userId,
+      folder: "label",
+      labelId, // Pass labelId as option
+      ...options,
+    });
   }
 
   // Auto-save draft (debounced)

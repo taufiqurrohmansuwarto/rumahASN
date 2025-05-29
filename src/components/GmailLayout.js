@@ -190,12 +190,6 @@ function GmailLayout({
         icon: <StarOutlined />,
       },
       {
-        key: "/mails/snoozed",
-        path: "/mails/snoozed",
-        name: "Ditunda",
-        icon: <BellOutlined />,
-      },
-      {
         key: "/mails/sent",
         path: "/mails/sent",
         name: "Terkirim",
