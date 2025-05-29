@@ -1,46 +1,44 @@
 import {
-  deleteDraft,
-  getDraft,
-  getEmailStats,
-  saveDraft,
-  sendEmail,
-  searchUsers,
-  updateDraft,
-  getInboxEmails,
-  getSentEmails,
-  getEmailById,
-  markAsRead,
-  toggleStar,
-  moveToFolder,
-  bulkDelete,
-  deleteEmail,
-  searchEmails,
-  markAsUnread,
-  // labels
-  getUserLabels,
-  createLabel,
-  updateLabel,
-  deleteLabel,
-  getEmailLabels,
-  // assign label to email
-  assignLabelToEmail,
-  removeLabelFromEmail,
-  // starred emails
-  getStarredEmails,
   // archive emails
   archiveEmail,
+  // assign label to email
+  assignLabelToEmail,
+  bulkDelete,
+  createLabel,
+  deleteDraft,
+  deleteEmail,
+  deleteLabel,
+  getArchiveEmails,
+  getDraft,
+  getEmailById,
+  getEmailLabels,
+  getEmailStats,
+  getInboxEmails,
+  getLabelEmails,
+  getSentEmails,
+  getSpamEmails,
+  // starred emails
+  getStarredEmails,
+  // labels
+  getUserLabels,
+  markAsNotSpam,
+  markAsRead,
   // spam emails
   markAsSpam,
-  getArchiveEmails,
-  getSpamEmails,
-  markAsNotSpam,
-  getLabelEmails,
-  // important emails
+  markAsUnread,
+  moveToFolder,
+  removeLabelFromEmail,
+  saveDraft,
+  searchEmails,
+  searchUsers,
+  sendEmail,
+  toggleStar,
+  updateDraft,
+  updateLabel,
 } from "@/services/rasn-mail.services";
-import { useCallback, useRef, useEffect } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { message } from "antd";
-import { useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 export const useEmailStats = () => {
   return useQuery(["email-stats"], () => getEmailStats());
@@ -51,7 +49,9 @@ export const useSendEmail = () => {
   return useMutation({
     mutationFn: (email) => sendEmail(email),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["emailStats"] });
+      // ✅ PERBAIKAN: Comprehensive invalidation untuk send email
+      queryClient.invalidateQueries({ queryKey: ["emails"] });
+      queryClient.invalidateQueries({ queryKey: ["email-stats"] });
     },
   });
 };
@@ -61,8 +61,8 @@ export const useSaveDraft = () => {
   return useMutation({
     mutationFn: (email) => saveDraft(email),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["drafts", "email"] });
-      queryClient.invalidateQueries({ queryKey: ["emailStats"] });
+      queryClient.invalidateQueries({ queryKey: ["emails", "drafts"] });
+      queryClient.invalidateQueries({ queryKey: ["email-stats"] });
     },
   });
 };
@@ -72,8 +72,8 @@ export const useUpdateDraft = () => {
   return useMutation({
     mutationFn: (email) => updateDraft(email),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["drafts", "email"] });
-      queryClient.invalidateQueries({ queryKey: ["emailStats"] });
+      queryClient.invalidateQueries({ queryKey: ["emails", "drafts"] });
+      queryClient.invalidateQueries({ queryKey: ["email-stats"] });
     },
   });
 };
@@ -83,8 +83,8 @@ export const useDeleteDraft = () => {
   return useMutation({
     mutationFn: (email) => deleteDraft(email),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["drafts", "email"] });
-      queryClient.invalidateQueries({ queryKey: ["emailStats"] });
+      queryClient.invalidateQueries({ queryKey: ["emails", "drafts"] });
+      queryClient.invalidateQueries({ queryKey: ["email-stats"] });
     },
   });
 };
@@ -102,8 +102,8 @@ export const useSendDraft = () => {
   return useMutation({
     mutationFn: (id) => sendDraft(id),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["drafts", "email"] });
-      queryClient.invalidateQueries({ queryKey: ["emailStats"] });
+      queryClient.invalidateQueries({ queryKey: ["emails"] });
+      queryClient.invalidateQueries({ queryKey: ["email-stats"] });
       message.success("Draft sent successfully");
     },
   });
@@ -113,17 +113,14 @@ export const useAutoSaveDraft = (draftData, delay = 5000) => {
   const [lastSaved, setLastSaved] = useState(null);
   const saveDraft = useSaveDraft();
 
-  // Custom debounce implementation
   const debounceRef = useRef(null);
 
   const performAutoSave = useCallback(
     async (data) => {
-      // Clear previous timeout
       if (debounceRef.current) {
         clearTimeout(debounceRef.current);
       }
 
-      // Set new timeout
       debounceRef.current = setTimeout(async () => {
         try {
           await saveDraft.mutateAsync(data);
@@ -136,7 +133,6 @@ export const useAutoSaveDraft = (draftData, delay = 5000) => {
     [saveDraft, delay]
   );
 
-  // Cleanup timeout on unmount
   useEffect(() => {
     return () => {
       if (debounceRef.current) {
@@ -165,16 +161,16 @@ export const useSearchUsers = (q) => {
 // New hooks for inbox functionality
 export const useInboxEmails = (params) => {
   return useQuery({
-    queryKey: ["inbox-emails", params],
+    queryKey: ["emails", "inbox", params],
     queryFn: () => getInboxEmails(params),
     keepPreviousData: true,
-    staleTime: 30000, // 30 seconds
+    staleTime: 30000,
   });
 };
 
 export const useSentEmails = (params) => {
   return useQuery({
-    queryKey: ["sent-emails", params],
+    queryKey: ["emails", "sent", params],
     queryFn: () => getSentEmails(params),
     keepPreviousData: true,
     staleTime: 30000,
@@ -195,9 +191,11 @@ export const useMarkAsRead = () => {
   return useMutation({
     mutationFn: markAsRead,
     onSuccess: () => {
-      queryClient.invalidateQueries(["inbox-emails"]);
-      queryClient.invalidateQueries(["email-stats"]);
-      queryClient.invalidateQueries(["email-detail"]);
+      // ✅ PERBAIKAN: Comprehensive invalidation dan HAPUS message duplicate
+      queryClient.invalidateQueries({ queryKey: ["emails"] });
+      queryClient.invalidateQueries({ queryKey: ["email-stats"] });
+      queryClient.invalidateQueries({ queryKey: ["email-detail"] });
+      // ❌ HAPUS: message.success() - biarkan component yang handle
     },
   });
 };
@@ -207,8 +205,10 @@ export const useMarkAsUnread = () => {
   return useMutation({
     mutationFn: markAsUnread,
     onSuccess: () => {
-      queryClient.invalidateQueries(["inbox-emails"]);
-      queryClient.invalidateQueries(["email-stats"]);
+      // ✅ PERBAIKAN: Comprehensive invalidation dan HAPUS message duplicate
+      queryClient.invalidateQueries({ queryKey: ["emails"] });
+      queryClient.invalidateQueries({ queryKey: ["email-stats"] });
+      // ❌ HAPUS: message.success() - biarkan component yang handle
     },
   });
 };
@@ -218,9 +218,10 @@ export const useToggleStar = () => {
   return useMutation({
     mutationFn: toggleStar,
     onSuccess: () => {
-      queryClient.invalidateQueries(["emails"]);
-      queryClient.invalidateQueries(["email-detail"]);
-      message.success("Email berhasil ditandai");
+      // ✅ PERBAIKAN: Comprehensive invalidation dan HAPUS message duplicate
+      queryClient.invalidateQueries({ queryKey: ["emails"] });
+      queryClient.invalidateQueries({ queryKey: ["email-detail"] });
+      // ❌ HAPUS: message.success() - biarkan component yang handle
     },
   });
 };
@@ -230,9 +231,11 @@ export const useMoveToFolder = () => {
   return useMutation({
     mutationFn: ({ emailId, folder }) => moveToFolder(emailId, folder),
     onSuccess: () => {
-      queryClient.invalidateQueries(["inbox-emails"]);
-      queryClient.invalidateQueries(["sent-emails"]);
-      queryClient.invalidateQueries(["email-detail"]);
+      // ✅ PERBAIKAN: Comprehensive invalidation untuk semua folder
+      queryClient.invalidateQueries({ queryKey: ["emails"] });
+      queryClient.invalidateQueries({ queryKey: ["email-stats"] });
+      queryClient.invalidateQueries({ queryKey: ["email-detail"] });
+      // ❌ HAPUS: message.success() - biarkan component yang handle
     },
   });
 };
@@ -242,10 +245,10 @@ export const useBulkDelete = () => {
   return useMutation({
     mutationFn: bulkDelete,
     onSuccess: (data) => {
-      message.success(`${data.data.deletedCount} email berhasil dihapus`);
-      queryClient.invalidateQueries(["inbox-emails"]);
-      queryClient.invalidateQueries(["sent-emails"]);
-      queryClient.invalidateQueries(["email-stats"]);
+      // ✅ PERBAIKAN: Comprehensive invalidation dan HAPUS message duplicate
+      queryClient.invalidateQueries({ queryKey: ["emails"] });
+      queryClient.invalidateQueries({ queryKey: ["email-stats"] });
+      // ❌ HAPUS: message.success() - biarkan component yang handle
     },
     onError: () => {
       message.error("Gagal menghapus email");
@@ -258,10 +261,10 @@ export const useDeleteEmail = () => {
   return useMutation({
     mutationFn: deleteEmail,
     onSuccess: () => {
-      message.success("Email berhasil dihapus");
-      queryClient.invalidateQueries(["inbox-emails"]);
-      queryClient.invalidateQueries(["sent-emails"]);
-      queryClient.invalidateQueries(["email-stats"]);
+      // ✅ PERBAIKAN: Comprehensive invalidation dan HAPUS message duplicate
+      queryClient.invalidateQueries({ queryKey: ["emails"] });
+      queryClient.invalidateQueries({ queryKey: ["email-stats"] });
+      // ❌ HAPUS: message.success() - biarkan component yang handle
     },
     onError: () => {
       message.error("Gagal menghapus email");
@@ -283,7 +286,7 @@ export const useUserLabels = () => {
   return useQuery({
     queryKey: ["user-labels"],
     queryFn: getUserLabels,
-    staleTime: 5 * 60 * 1000, // 5 minutes
+    staleTime: 5 * 60 * 1000,
   });
 };
 
@@ -347,7 +350,7 @@ export const useEmailLabels = (emailId) => {
     queryKey: ["email-labels", emailId],
     queryFn: () => getEmailLabels(emailId),
     enabled: !!emailId,
-    staleTime: 2 * 60 * 1000, // 2 minutes
+    staleTime: 2 * 60 * 1000,
   });
 };
 
@@ -359,7 +362,7 @@ export const useAssignLabel = () => {
     mutationFn: ({ emailId, labelId }) => assignLabelToEmail(emailId, labelId),
     onSuccess: (data, variables) => {
       queryClient.invalidateQueries(["email-labels", variables.emailId]);
-      queryClient.invalidateQueries(["inbox-emails"]);
+      queryClient.invalidateQueries({ queryKey: ["emails"] });
       queryClient.invalidateQueries(["email-detail"]);
       message.success(data.message || "Label berhasil ditambahkan");
     },
@@ -380,7 +383,7 @@ export const useRemoveLabel = () => {
       removeLabelFromEmail(emailId, labelId),
     onSuccess: (data, variables) => {
       queryClient.invalidateQueries(["email-labels", variables.emailId]);
-      queryClient.invalidateQueries(["inbox-emails"]);
+      queryClient.invalidateQueries({ queryKey: ["emails"] });
       queryClient.invalidateQueries(["email-detail"]);
       message.success(data.message || "Label berhasil dihapus");
     },
@@ -395,7 +398,7 @@ export const useRemoveLabel = () => {
 // ✅ TAMBAHKAN HOOKS INI
 export const useStarredEmails = (params) => {
   return useQuery({
-    queryKey: ["starred-emails", params],
+    queryKey: ["emails", "starred", params],
     queryFn: () => getStarredEmails(params),
     keepPreviousData: true,
     staleTime: 30000,
@@ -404,7 +407,7 @@ export const useStarredEmails = (params) => {
 
 export const useArchiveEmails = (params) => {
   return useQuery({
-    queryKey: ["archive-emails", params],
+    queryKey: ["emails", "archive", params],
     queryFn: () => getArchiveEmails(params),
     keepPreviousData: true,
     staleTime: 30000,
@@ -413,23 +416,24 @@ export const useArchiveEmails = (params) => {
 
 export const useSpamEmails = (params) => {
   return useQuery({
-    queryKey: ["spam-emails", params],
+    queryKey: ["emails", "spam", params],
     queryFn: () => getSpamEmails(params),
     keepPreviousData: true,
     staleTime: 30000,
   });
 };
 
-// ✅ TAMBAHKAN ACTION HOOKS
+// ✅ PERBAIKAN ACTION HOOKS
 export const useArchiveEmail = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: archiveEmail,
     onSuccess: () => {
-      queryClient.invalidateQueries(["inbox-emails"]);
-      queryClient.invalidateQueries(["archive-emails"]);
-      queryClient.invalidateQueries(["email-detail"]);
-      message.success("Email berhasil diarsipkan");
+      // ✅ PERBAIKAN: Comprehensive invalidation dan HAPUS message duplicate
+      queryClient.invalidateQueries({ queryKey: ["emails"] });
+      queryClient.invalidateQueries({ queryKey: ["email-stats"] });
+      queryClient.invalidateQueries({ queryKey: ["email-detail"] });
+      // ❌ HAPUS: message.success() - biarkan component yang handle
     },
     onError: () => {
       message.error("Gagal mengarsipkan email");
@@ -442,10 +446,14 @@ export const useMarkAsSpam = () => {
   return useMutation({
     mutationFn: markAsSpam,
     onSuccess: () => {
-      queryClient.invalidateQueries(["inbox-emails"]);
-      queryClient.invalidateQueries(["spam-emails"]);
-      queryClient.invalidateQueries(["email-detail"]);
-      message.success("Email ditandai sebagai spam");
+      // ✅ PERBAIKAN: Comprehensive invalidation dan HAPUS message duplicate
+      queryClient.invalidateQueries({ queryKey: ["emails"] });
+      queryClient.invalidateQueries({ queryKey: ["email-stats"] });
+      queryClient.invalidateQueries({ queryKey: ["email-detail"] });
+      // ❌ HAPUS: message.success() - biarkan component yang handle
+    },
+    onError: () => {
+      message.error("Gagal menandai sebagai spam");
     },
   });
 };
@@ -455,20 +463,24 @@ export const useMarkAsNotSpam = () => {
   return useMutation({
     mutationFn: markAsNotSpam,
     onSuccess: () => {
-      queryClient.invalidateQueries(["inbox-emails"]);
-      queryClient.invalidateQueries(["spam-emails"]);
-      queryClient.invalidateQueries(["email-detail"]);
-      message.success("Email berhasil dihapus dari spam");
+      // ✅ PERBAIKAN: Comprehensive invalidation dan HAPUS message duplicate
+      queryClient.invalidateQueries({ queryKey: ["emails"] });
+      queryClient.invalidateQueries({ queryKey: ["email-stats"] });
+      queryClient.invalidateQueries({ queryKey: ["email-detail"] });
+      // ❌ HAPUS: message.success() - biarkan component yang handle
+    },
+    onError: () => {
+      message.error("Gagal menghapus dari spam");
     },
   });
 };
 
 export const useLabelEmails = (params) => {
   return useQuery({
-    queryKey: ["label-emails", params],
+    queryKey: ["emails", "label", params],
     queryFn: () => getLabelEmails(params),
     keepPreviousData: true,
     staleTime: 30000,
-    enabled: !!params.labelId, // Only fetch if labelId exists
+    enabled: !!params.labelId,
   });
 };
