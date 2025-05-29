@@ -35,6 +35,7 @@ import {
   toggleStar,
   updateDraft,
   updateLabel,
+  deleteTrash,
 } from "@/services/rasn-mail.services";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { message } from "antd";
@@ -482,5 +483,16 @@ export const useLabelEmails = (params) => {
     keepPreviousData: true,
     staleTime: 30000,
     enabled: !!params.labelId,
+  });
+};
+
+export const useDeleteTrash = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: deleteTrash,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["emails"] });
+      queryClient.invalidateQueries({ queryKey: ["email-stats"] });
+    },
   });
 };

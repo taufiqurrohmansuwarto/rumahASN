@@ -337,6 +337,7 @@ export const restoreEmail = async (req, res) => {
 export const bulkDeleteEmail = async (req, res) => {
   try {
     const { emailIds, permanent = false } = req.body;
+
     const { customId: userId } = req?.user;
     if (!emailIds || !Array.isArray(emailIds) || emailIds.length === 0) {
       return res.status(400).json({ error: "Email IDs required" });

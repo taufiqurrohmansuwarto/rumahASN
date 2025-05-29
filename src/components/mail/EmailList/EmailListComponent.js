@@ -244,12 +244,16 @@ const EmailListComponent = ({
 
   const confirmBulkDelete = () => {
     // ✅ FIX: Use appropriate delete method based on folder
+    console.log(selectedEmails, folder);
     const deleteAction =
       folder === "drafts"
         ? Promise.all(
             selectedEmails.map((id) => deleteDraftMutation.mutateAsync(id))
           )
-        : bulkDeleteMutation.mutateAsync(selectedEmails);
+        : bulkDeleteMutation.mutateAsync({
+            emailIds: selectedEmails,
+            permanent: folder === "trash" ? true : false,
+          });
 
     deleteAction
       .then((data) => {
@@ -429,8 +433,17 @@ const EmailListComponent = ({
         icon: <DeleteOutlined />,
         danger: true,
         onClick: () => {
-          // TODO: Implement permanent delete
-          message.info("Fitur hapus permanen belum tersedia");
+          deleteMutation.mutate(
+            {
+              emailId: email.id,
+              permanent: true,
+            },
+            {
+              onSuccess: () =>
+                message.success("Email berhasil dihapus permanen"),
+              onError: () => message.error("Gagal menghapus email"),
+            }
+          );
         },
       });
     } else {
@@ -440,10 +453,16 @@ const EmailListComponent = ({
         icon: <DeleteOutlined />,
         danger: true,
         onClick: () => {
-          deleteMutation.mutate(email.id, {
-            onSuccess: () => message.success("Email dipindahkan ke sampah"),
-            onError: () => message.error("Gagal menghapus email"),
-          });
+          deleteMutation.mutate(
+            {
+              emailId: email.id,
+              permanent: false,
+            },
+            {
+              onSuccess: () => message.success("Email dipindahkan ke sampah"),
+              onError: () => message.error("Gagal menghapus email"),
+            }
+          );
         },
       });
     }
