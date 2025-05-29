@@ -16,6 +16,9 @@ const EmailListFilters = ({
   onUnreadFilter,
   onPageSizeChange,
 }) => {
+  // ✅ SAFETY CHECK untuk availableFilters
+  const availableFilters = config?.availableFilters || ["search"];
+
   const handleSearch = (value) => {
     onSearch?.(value);
   };

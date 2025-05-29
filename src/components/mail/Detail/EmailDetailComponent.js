@@ -1,20 +1,18 @@
-import React from "react";
-import { Card, Spin, Empty, message } from "antd";
-import { useRouter } from "next/router";
 import {
-  useToggleStar,
   useDeleteEmail,
-  useMoveToFolder,
-  useMarkAsUnread,
   useMarkAsRead,
+  useMarkAsUnread,
+  useMoveToFolder,
+  useToggleStar,
 } from "@/hooks/useEmails";
+import { Card, Empty, message, Spin } from "antd";
+import { useRouter } from "next/router";
 
 // Import komponen kecil
-import EmailDetailHeader from "./EmailDetailHeader";
-import EmailRecipientsDisplay from "./EmailRecipientsDisplay";
-import EmailContentDisplay from "./EmailContentDisplay";
-import EmailAttachmentsDisplay from "./EmailAttachmentsDisplay";
 import EmailActionButtons from "./EmailActionButtons";
+import EmailAttachmentsDisplay from "./EmailAttachmentsDisplay";
+import EmailContentDisplay from "./EmailContentDisplay";
+import EmailDetailHeader from "./EmailDetailHeader";
 
 const EmailDetailComponent = ({
   email,

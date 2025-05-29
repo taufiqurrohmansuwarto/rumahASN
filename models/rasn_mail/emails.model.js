@@ -212,6 +212,7 @@ class Email extends Model {
     limit = 25,
     search = "",
     unreadOnly = false,
+    labelId = null,
   }) {
     let query = Email.query()
       .select([
@@ -290,6 +291,47 @@ class Email extends Model {
         .where("rasn_mail.recipients.folder", "spam")
         .where("rasn_mail.recipients.is_deleted", false)
         .where("rasn_mail.emails.is_draft", false);
+    } else if (folder === "label") {
+      if (!labelId) {
+        throw new Error("Label ID required for label folder");
+      }
+
+      query = query
+        .addSelect([
+          "recipients.is_read",
+          "recipients.read_at",
+          "recipients.folder",
+          "recipients.is_deleted",
+        ])
+        .join(
+          "rasn_mail.email_labels as el",
+          "rasn_mail.emails.id",
+          "el.email_id"
+        )
+        .leftJoin("rasn_mail.recipients", function () {
+          this.on(
+            "rasn_mail.emails.id",
+            "=",
+            "rasn_mail.recipients.email_id"
+          ).andOn(
+            "rasn_mail.recipients.recipient_id",
+            "=",
+            Email.knex().raw("?", [userId])
+          );
+        })
+        .where("el.label_id", labelId)
+        .where("el.user_id", userId)
+        .where("rasn_mail.emails.is_draft", false)
+        .where((builder) => {
+          // User is sender OR recipient (and not deleted)
+          builder
+            .where("rasn_mail.emails.sender_id", userId)
+            .orWhere((subBuilder) => {
+              subBuilder
+                .where("rasn_mail.recipients.recipient_id", userId)
+                .where("rasn_mail.recipients.is_deleted", false);
+            });
+        });
     } else if (folder === "trash") {
       // ✅ FIXED: Trash berdasarkan recipients.is_deleted atau email_deletions
       query = query

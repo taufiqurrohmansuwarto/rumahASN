@@ -1,410 +1,314 @@
 // utils/emailFolderConfig.js
+
 import {
   InboxOutlined,
   SendOutlined,
   FileOutlined,
-  DeleteOutlined,
-  FolderOutlined,
-  BellOutlined,
   StarOutlined,
+  FolderOutlined,
+  DeleteOutlined,
+  ExclamationCircleOutlined,
+  FlagOutlined,
+  TagOutlined,
+  BellOutlined,
 } from "@ant-design/icons";
+
 import {
   getInboxEmails,
   getSentEmails,
   getDraftsEmails,
-  getTrashEmails,
+  getStarredEmails,
   getArchiveEmails,
   getSpamEmails,
-  getSnoozedEmails,
-  getStarredEmails,
+  getTrashEmails,
   getImportantEmails,
+  getLabelEmails,
 } from "@/services/rasn-mail.services";
 
-export const FOLDER_CONFIGS = {
-  inbox: {
-    key: "inbox",
-    title: "Inbox",
-    subtitle: "Kotak Masuk",
-    icon: <InboxOutlined />,
-    apiFunction: getInboxEmails,
-
-    // List behavior
-    showSender: true,
-    showRecipient: false,
-    allowMarkAsRead: true,
-    showUnreadBadge: true,
-    showDraftBadge: false,
-    clickAction: "view", // view | edit
-
-    // Actions available in list
-    itemActions: ["star", "read", "archive", "delete", "reply", "forward"],
-    bulkActions: ["read", "archive", "delete"],
-
-    // Filters available
-    availableFilters: ["unread", "starred", "important"],
-    defaultFilter: {},
-
-    // Empty state
-    emptyTitle: "Inbox Anda kosong",
-    emptyDescription: "Mulai berkirim email dengan kolega Anda",
-    emptyAction: {
-      label: "Tulis Email Pertama",
-      action: "compose",
+export const getFolderConfig = (folder) => {
+  const configs = {
+    inbox: {
+      title: "Inbox",
+      subtitle: "Kotak Masuk",
+      icon: <InboxOutlined />,
+      primaryColor: "#1890ff",
+      badgeColor: "#EA4335",
+      apiFunction: getInboxEmails,
+      showUnreadBadge: true,
+      showRecipient: false,
+      allowMarkAsRead: true,
+      clickAction: "view",
+      availableFilters: ["unread", "search"], // ✅ TAMBAHKAN INI
+      itemActions: [
+        "star",
+        "read",
+        "archive",
+        "spam",
+        "delete",
+        "reply",
+        "forward",
+      ],
+      bulkActions: ["delete", "archive", "spam"],
+      emptyTitle: "Inbox Anda kosong",
+      emptyDescription: "Mulai berkirim email dengan kolega Anda",
+      emptyAction: {
+        label: "Tulis Email Pertama",
+        action: "compose",
+      },
     },
 
-    // Colors and styling
-    primaryColor: "#1890ff",
-    badgeColor: "#EA4335",
-  },
-
-  sent: {
-    key: "sent",
-    title: "Sent",
-    subtitle: "Terkirim",
-    icon: <SendOutlined />,
-    apiFunction: getSentEmails,
-
-    showSender: false,
-    showRecipient: true,
-    allowMarkAsRead: false,
-    showUnreadBadge: false,
-    showDraftBadge: false,
-    clickAction: "view",
-
-    itemActions: ["star", "archive", "delete", "forward"],
-    bulkActions: ["archive", "delete"],
-
-    availableFilters: ["starred", "important"],
-    defaultFilter: {},
-
-    emptyTitle: "Belum ada email terkirim",
-    emptyDescription: "Email yang Anda kirim akan muncul di sini",
-    emptyAction: {
-      label: "Tulis Email Baru",
-      action: "compose",
+    sent: {
+      title: "Sent",
+      subtitle: "Terkirim",
+      icon: <SendOutlined />,
+      primaryColor: "#52c41a",
+      badgeColor: "#52c41a",
+      apiFunction: getSentEmails,
+      showUnreadBadge: false,
+      showRecipient: true,
+      allowMarkAsRead: false,
+      clickAction: "view",
+      availableFilters: ["search"], // ✅ TAMBAHKAN INI
+      itemActions: ["star", "delete", "forward"],
+      bulkActions: ["delete"],
+      emptyTitle: "Belum ada email terkirim",
+      emptyDescription: "Email yang Anda kirim akan muncul di sini",
+      emptyAction: {
+        label: "Tulis Email Baru",
+        action: "compose",
+      },
     },
 
-    primaryColor: "#52c41a",
-    badgeColor: "#52c41a",
-  },
-
-  drafts: {
-    key: "drafts",
-    title: "Drafts",
-    subtitle: "Draft",
-    icon: <FileOutlined />,
-    apiFunction: getDraftsEmails,
-
-    showSender: false,
-    showRecipient: true,
-    allowMarkAsRead: false,
-    showUnreadBadge: false,
-    showDraftBadge: true,
-    clickAction: "edit",
-
-    itemActions: ["edit", "send", "delete"],
-    bulkActions: ["delete", "send"],
-
-    availableFilters: [],
-    defaultFilter: {},
-
-    emptyTitle: "Tidak ada draft",
-    emptyDescription: "Draft email yang belum dikirim akan muncul di sini",
-    emptyAction: {
-      label: "Tulis Email Baru",
-      action: "compose",
+    drafts: {
+      title: "Drafts",
+      subtitle: "Draf",
+      icon: <FileOutlined />,
+      primaryColor: "#722ed1",
+      badgeColor: "#722ed1",
+      apiFunction: getDraftsEmails,
+      showUnreadBadge: false,
+      showRecipient: true,
+      allowMarkAsRead: false,
+      clickAction: "edit",
+      showDraftBadge: true,
+      availableFilters: ["search"], // ✅ TAMBAHKAN INI
+      itemActions: ["edit", "send", "delete"],
+      bulkActions: ["delete"],
+      emptyTitle: "Belum ada draft",
+      emptyDescription: "Draft email Anda akan tersimpan di sini",
+      emptyAction: {
+        label: "Tulis Email Baru",
+        action: "compose",
+      },
     },
 
-    primaryColor: "#722ed1",
-    badgeColor: "#722ed1",
-  },
+    starred: {
+      title: "Starred",
+      subtitle: "Berbintang",
+      icon: <StarOutlined />,
+      primaryColor: "#faad14",
+      badgeColor: "#faad14",
+      apiFunction: getStarredEmails,
+      showUnreadBadge: true,
+      showRecipient: false,
+      allowMarkAsRead: true,
+      clickAction: "view",
+      availableFilters: ["unread", "search"], // ✅ TAMBAHKAN INI
+      itemActions: ["star", "read", "archive", "delete", "reply", "forward"],
+      bulkActions: ["delete", "archive"],
+      emptyTitle: "Belum ada email berbintang",
+      emptyDescription:
+        "Email yang Anda tandai dengan bintang akan muncul di sini",
+      emptyAction: null,
+    },
 
-  trash: {
-    key: "trash",
-    title: "Trash",
-    subtitle: "Sampah",
-    icon: <DeleteOutlined />,
-    apiFunction: getTrashEmails,
+    archive: {
+      title: "Archive",
+      subtitle: "Arsip",
+      icon: <FolderOutlined />,
+      primaryColor: "#13c2c2",
+      badgeColor: "#13c2c2",
+      apiFunction: getArchiveEmails,
+      showUnreadBadge: true,
+      showRecipient: false,
+      allowMarkAsRead: true,
+      clickAction: "view",
+      availableFilters: ["unread", "search"], // ✅ TAMBAHKAN INI
+      itemActions: ["star", "read", "inbox", "delete", "reply", "forward"],
+      bulkActions: ["delete", "inbox"],
+      emptyTitle: "Belum ada email diarsipkan",
+      emptyDescription: "Email yang Anda arsipkan akan muncul di sini",
+      emptyAction: null,
+    },
 
-    showSender: true,
-    showRecipient: false,
-    allowMarkAsRead: false,
-    showUnreadBadge: false,
-    showDraftBadge: false,
-    clickAction: "view",
+    spam: {
+      title: "Spam",
+      subtitle: "Spam",
+      icon: <ExclamationCircleOutlined />,
+      primaryColor: "#fa8c16",
+      badgeColor: "#fa8c16",
+      apiFunction: getSpamEmails,
+      showUnreadBadge: true,
+      showRecipient: false,
+      allowMarkAsRead: true,
+      clickAction: "view",
+      availableFilters: ["unread", "search"], // ✅ TAMBAHKAN INI
+      itemActions: ["star", "read", "not-spam", "delete"],
+      bulkActions: ["delete", "not-spam"],
+      emptyTitle: "Belum ada email spam",
+      emptyDescription: "Email yang ditandai spam akan muncul di sini",
+      emptyAction: null,
+    },
 
-    itemActions: ["restore", "delete-permanent"],
-    bulkActions: ["restore", "delete-permanent", "empty-trash"],
+    trash: {
+      title: "Trash",
+      subtitle: "Sampah",
+      icon: <DeleteOutlined />,
+      primaryColor: "#ff4d4f",
+      badgeColor: "#ff4d4f",
+      apiFunction: getTrashEmails,
+      showUnreadBadge: false,
+      showRecipient: false,
+      allowMarkAsRead: false,
+      clickAction: "view",
+      availableFilters: ["search"], // ✅ TAMBAHKAN INI
+      itemActions: ["restore", "delete-permanent"],
+      bulkActions: ["restore", "delete-permanent"],
+      emptyTitle: "Sampah kosong",
+      emptyDescription: "Email yang dihapus akan muncul di sini selama 30 hari",
+      emptyAction: null,
+    },
 
-    availableFilters: [],
-    defaultFilter: {},
+    important: {
+      title: "Important",
+      subtitle: "Penting",
+      icon: <FlagOutlined />,
+      primaryColor: "#ff4d4f",
+      badgeColor: "#ff4d4f",
+      apiFunction: getImportantEmails,
+      showUnreadBadge: true,
+      showRecipient: false,
+      allowMarkAsRead: true,
+      clickAction: "view",
+      availableFilters: ["unread", "search"], // ✅ TAMBAHKAN INI
+      itemActions: ["star", "read", "archive", "delete", "reply", "forward"],
+      bulkActions: ["delete", "archive"],
+      emptyTitle: "Belum ada email penting",
+      emptyDescription: "Email dengan prioritas tinggi akan muncul di sini",
+      emptyAction: null,
+    },
 
-    emptyTitle: "Trash kosong",
-    emptyDescription: "Email yang dihapus akan muncul di sini selama 30 hari",
-    emptyAction: null,
+    label: {
+      title: "Label",
+      subtitle: "Label",
+      icon: <TagOutlined />,
+      primaryColor: "#722ed1",
+      badgeColor: "#722ed1",
+      apiFunction: getLabelEmails,
+      showUnreadBadge: true,
+      showRecipient: false,
+      allowMarkAsRead: true,
+      clickAction: "view",
+      availableFilters: ["unread", "search"], // ✅ TAMBAHKAN INI
+      itemActions: ["star", "read", "archive", "delete", "reply", "forward"],
+      bulkActions: ["delete", "archive"],
+      emptyTitle: "Belum ada email dengan label ini",
+      emptyDescription: "Email yang diberi label akan muncul di sini",
+      emptyAction: null,
+    },
 
-    primaryColor: "#ff4d4f",
-    badgeColor: "#ff4d4f",
-  },
+    snoozed: {
+      title: "Snoozed",
+      subtitle: "Ditunda",
+      icon: <BellOutlined />,
+      primaryColor: "#faad14",
+      badgeColor: "#faad14",
+      apiFunction: null, // Not implemented yet
+      showUnreadBadge: false,
+      showRecipient: false,
+      allowMarkAsRead: true,
+      clickAction: "view",
+      availableFilters: ["search"], // ✅ TAMBAHKAN INI
+      itemActions: ["unsnooze", "delete"],
+      bulkActions: ["unsnooze", "delete"],
+      emptyTitle: "Belum ada email ditunda",
+      emptyDescription: "Email yang di-snooze akan muncul di sini",
+      emptyAction: null,
+    },
+  };
 
-  archive: {
-    key: "archive",
-    title: "Archive",
-    subtitle: "Arsip",
-    icon: <FolderOutlined />,
-    apiFunction: getArchiveEmails,
-
-    showSender: true,
-    showRecipient: false,
-    allowMarkAsRead: true,
-    showUnreadBadge: true,
-    showDraftBadge: false,
-    clickAction: "view",
-
-    itemActions: ["star", "inbox", "delete"],
-    bulkActions: ["inbox", "delete"],
-
-    availableFilters: ["unread", "starred"],
-    defaultFilter: {},
-
-    emptyTitle: "Tidak ada email terarsip",
-    emptyDescription: "Email yang diarsipkan akan muncul di sini",
-    emptyAction: null,
-
-    primaryColor: "#fa8c16",
-    badgeColor: "#fa8c16",
-  },
-
-  spam: {
-    key: "spam",
-    title: "Spam",
-    subtitle: "Spam",
-    icon: <BellOutlined />,
-    apiFunction: getSpamEmails,
-
-    showSender: true,
-    showRecipient: false,
-    allowMarkAsRead: false,
-    showUnreadBadge: false,
-    showDraftBadge: false,
-    clickAction: "view",
-
-    itemActions: ["not-spam", "delete-permanent"],
-    bulkActions: ["not-spam", "delete-permanent"],
-
-    availableFilters: [],
-    defaultFilter: {},
-
-    emptyTitle: "Tidak ada spam",
-    emptyDescription: "Email spam akan muncul di sini",
-    emptyAction: null,
-
-    primaryColor: "#faad14",
-    badgeColor: "#faad14",
-  },
-
-  snoozed: {
-    key: "snoozed",
-    title: "Snoozed",
-    subtitle: "Ditunda",
-    icon: <StarOutlined />,
-    apiFunction: getSnoozedEmails,
-
-    showSender: true,
-    showRecipient: false,
-    allowMarkAsRead: true,
-    showUnreadBadge: true,
-    showDraftBadge: false,
-    clickAction: "view",
-
-    itemActions: ["unsnooze", "star", "delete"],
-    bulkActions: ["unsnooze", "delete"],
-
-    availableFilters: ["unread", "starred"],
-    defaultFilter: {},
-
-    emptyTitle: "Tidak ada email ditunda",
-    emptyDescription: "Email yang dijadwalkan akan muncul di sini",
-    emptyAction: null,
-
-    primaryColor: "#13c2c2",
-    badgeColor: "#13c2c2",
-  },
-
-  starred: {
-    key: "starred",
-    title: "Starred",
-    subtitle: "Berbintang",
-    icon: <StarOutlined />,
-    apiFunction: getStarredEmails,
-
-    showSender: true,
-    showRecipient: false,
-    allowMarkAsRead: true,
-    showUnreadBadge: true,
-    showDraftBadge: false,
-    clickAction: "view",
-
-    itemActions: ["unstar", "archive", "delete"],
-    bulkActions: ["unstar", "archive", "delete"],
-
-    availableFilters: ["unread"],
-    defaultFilter: {},
-
-    emptyTitle: "Tidak ada email berbintang",
-    emptyDescription: "Email yang diberi bintang akan muncul di sini",
-    emptyAction: null,
-
-    primaryColor: "#faad14",
-    badgeColor: "#faad14",
-  },
-
-  important: {
-    key: "important",
-    title: "Important",
-    subtitle: "Penting",
-    icon: <BellOutlined style={{ color: "#ff4d4f" }} />,
-    apiFunction: getImportantEmails,
-
-    showSender: true,
-    showRecipient: false,
-    allowMarkAsRead: true,
-    showUnreadBadge: true,
-    showDraftBadge: false,
-    clickAction: "view",
-
-    itemActions: ["star", "archive", "delete"],
-    bulkActions: ["archive", "delete"],
-
-    availableFilters: ["unread", "starred"],
-    defaultFilter: {},
-
-    emptyTitle: "Tidak ada email penting",
-    emptyDescription: "Email yang ditandai penting akan muncul di sini",
-    emptyAction: null,
-
-    primaryColor: "#ff4d4f",
-    badgeColor: "#ff4d4f",
-  },
+  return configs[folder] || configs.inbox;
 };
 
-// Helper functions
-export const getFolderConfig = (folderKey) => {
-  return FOLDER_CONFIGS[folderKey] || FOLDER_CONFIGS.inbox;
-};
+// ✅ TAMBAHKAN ACTION CONFIG
+export const getActionConfig = (action) => {
+  const actions = {
+    star: {
+      label: "Star",
+      icon: "StarOutlined",
+      danger: false,
+    },
+    read: {
+      label: "Mark as Read",
+      icon: "EyeOutlined",
+      danger: false,
+    },
+    archive: {
+      label: "Archive",
+      icon: "FolderOutlined",
+      danger: false,
+    },
+    spam: {
+      label: "Mark as Spam",
+      icon: "ExclamationCircleOutlined",
+      danger: false,
+    },
+    "not-spam": {
+      label: "Not Spam",
+      icon: "CheckOutlined",
+      danger: false,
+    },
+    inbox: {
+      label: "Move to Inbox",
+      icon: "InboxOutlined",
+      danger: false,
+    },
+    delete: {
+      label: "Delete",
+      icon: "DeleteOutlined",
+      danger: true,
+    },
+    reply: {
+      label: "Reply",
+      icon: "SendOutlined",
+      danger: false,
+    },
+    forward: {
+      label: "Forward",
+      icon: "ForwardOutlined",
+      danger: false,
+    },
+    edit: {
+      label: "Edit",
+      icon: "EditOutlined",
+      danger: false,
+    },
+    restore: {
+      label: "Restore",
+      icon: "UndoOutlined",
+      danger: false,
+    },
+    "delete-permanent": {
+      label: "Delete Forever",
+      icon: "DeleteOutlined",
+      danger: true,
+    },
+    unsnooze: {
+      label: "Unsnooze",
+      icon: "BellOutlined",
+      danger: false,
+    },
+  };
 
-export const getFolderTitle = (folderKey) => {
-  return getFolderConfig(folderKey).subtitle;
+  return actions[action];
 };
-
-export const getFolderIcon = (folderKey) => {
-  return getFolderConfig(folderKey).icon;
-};
-
-export const getFolderColor = (folderKey) => {
-  return getFolderConfig(folderKey).primaryColor;
-};
-
-// Action configurations
-export const ACTION_CONFIGS = {
-  star: {
-    key: "star",
-    label: "Tandai Bintang",
-    icon: "StarOutlined",
-    type: "toggle",
-  },
-  read: {
-    key: "read",
-    label: "Tandai Dibaca",
-    icon: "EyeOutlined",
-    type: "toggle",
-  },
-  archive: {
-    key: "archive",
-    label: "Arsipkan",
-    icon: "FolderOutlined",
-    type: "action",
-  },
-  delete: {
-    key: "delete",
-    label: "Hapus",
-    icon: "DeleteOutlined",
-    type: "action",
-    danger: true,
-  },
-  reply: {
-    key: "reply",
-    label: "Balas",
-    icon: "SendOutlined",
-    type: "action",
-  },
-  forward: {
-    key: "forward",
-    label: "Teruskan",
-    icon: "ForwardOutlined",
-    type: "action",
-  },
-  edit: {
-    key: "edit",
-    label: "Edit",
-    icon: "EditOutlined",
-    type: "action",
-  },
-  send: {
-    key: "send",
-    label: "Kirim",
-    icon: "SendOutlined",
-    type: "action",
-    primary: true,
-  },
-  restore: {
-    key: "restore",
-    label: "Pulihkan",
-    icon: "UndoOutlined",
-    type: "action",
-  },
-  "delete-permanent": {
-    key: "delete-permanent",
-    label: "Hapus Permanen",
-    icon: "DeleteOutlined",
-    type: "action",
-    danger: true,
-  },
-  "not-spam": {
-    key: "not-spam",
-    label: "Bukan Spam",
-    icon: "CheckOutlined",
-    type: "action",
-  },
-  unsnooze: {
-    key: "unsnooze",
-    label: "Batalkan Tunda",
-    icon: "UndoOutlined",
-    type: "action",
-  },
-  inbox: {
-    key: "inbox",
-    label: "Pindah ke Inbox",
-    icon: "InboxOutlined",
-    type: "action",
-  },
-  unstar: {
-    key: "unstar",
-    label: "Hapus Bintang",
-    icon: "StarOutlined",
-    type: "action",
-  },
-  "empty-trash": {
-    key: "empty-trash",
-    label: "Kosongkan Trash",
-    icon: "DeleteOutlined",
-    type: "bulk-only",
-    danger: true,
-  },
-};
-
-export const getActionConfig = (actionKey) => {
-  return ACTION_CONFIGS[actionKey];
-};
-
-export default FOLDER_CONFIGS;
