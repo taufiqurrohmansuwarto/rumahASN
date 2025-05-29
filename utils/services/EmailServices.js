@@ -688,49 +688,6 @@ class EmailService {
     }
   }
 
-  // Get user drafts
-  static async getUserDrafts(userId, options = {}) {
-    const { page = 1, limit = 25, search = "" } = options;
-
-    let query = Email.query()
-      .select([
-        "emails.*",
-        db.raw(
-          "(SELECT COUNT(*) FROM rasn_mail.attachments WHERE email_id = emails.id) as attachment_count"
-        ),
-      ])
-      .where("sender_id", userId)
-      .where("is_draft", true)
-      .withGraphFetched("[recipients.[user], attachments]");
-
-    // Apply search
-    if (search) {
-      query = query.where((builder) => {
-        builder
-          .where("subject", "ilike", `%${search}%`)
-          .orWhere("content", "ilike", `%${search}%`);
-      });
-    }
-
-    // Get total count
-    const countQuery = query.clone().clearSelect().count("* as total");
-    const [{ total }] = await countQuery;
-
-    // Apply pagination
-    const drafts = await query
-      .orderBy("updated_at", "desc")
-      .limit(limit)
-      .offset((page - 1) * limit);
-
-    return {
-      emails: drafts,
-      total: parseInt(total),
-      page,
-      limit,
-      totalPages: Math.ceil(total / limit),
-    };
-  }
-
   // Get draft by ID
   static async getDraftById(draftId, userId) {
     const draft = await Email.query()
