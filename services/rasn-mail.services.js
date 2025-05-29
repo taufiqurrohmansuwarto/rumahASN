@@ -199,3 +199,22 @@ export const removeLabelFromEmail = async (emailId, labelId) => {
     .delete(`/emails/${emailId}/labels/${labelId}`)
     .then((res) => res?.data);
 };
+
+// ✅ TAMBAHKAN ACTION SERVICES
+export const archiveEmail = async (emailId) => {
+  return api
+    .put(`/emails/${emailId}`, { action: "move", value: "archive" })
+    .then((res) => res?.data);
+};
+
+export const markAsSpam = async (emailId) => {
+  return api
+    .put(`/emails/${emailId}`, { action: "move", value: "spam" })
+    .then((res) => res?.data);
+};
+
+export const markAsNotSpam = async (emailId) => {
+  return api
+    .put(`/emails/${emailId}`, { action: "move", value: "inbox" })
+    .then((res) => res?.data);
+};

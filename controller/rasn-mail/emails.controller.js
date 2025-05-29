@@ -61,6 +61,10 @@ export const getEmails = async (req, res) => {
       case "drafts":
         result = await EmailService.getUserDrafts(userId, options);
         break;
+      case "move":
+        // Handle move to different folders
+        await EmailService.moveToFolder(id, userId, value);
+        break;
       case "archive":
         result = await EmailService.getUserArchive(userId, options);
         break;

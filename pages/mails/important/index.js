@@ -1,6 +1,7 @@
 import GmailLayout from "@/components/GmailLayout";
 import PageContainer from "@/components/PageContainer";
 import Head from "next/head";
+import EmailListComponent from "@/components/mail/EmailList/EmailListComponent";
 
 const Important = () => {
   return (
@@ -9,9 +10,7 @@ const Important = () => {
         <title>Rumah ASN - Pesan Penting</title>
       </Head>
       <PageContainer>
-        <div>
-          <h1>Pesan Penting</h1>
-        </div>
+        <EmailListComponent folder="important" />
       </PageContainer>
     </>
   );

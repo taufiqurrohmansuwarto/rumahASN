@@ -264,28 +264,8 @@ class Email extends Model {
         .where("rasn_mail.emails.sender_id", userId)
         .where("rasn_mail.emails.is_draft", true);
     } else if (folder === "starred") {
-      // ✅ FIXED: Starred emails dari semua folder (inbox, sent, archive)
-      query = query.where((builder) => {
-        // Email yang di-star dan user adalah sender
-        builder
-          .where((subBuilder) => {
-            subBuilder
-              .where("rasn_mail.emails.sender_id", userId)
-              .where("rasn_mail.emails.is_starred", true);
-          })
-          // ATAU email yang di-star dan user adalah recipient
-          .orWhere((subBuilder) => {
-            subBuilder
-              .join(
-                "rasn_mail.recipients as star_recipients",
-                "rasn_mail.emails.id",
-                "star_recipients.email_id"
-              )
-              .where("star_recipients.recipient_id", userId)
-              .where("rasn_mail.emails.is_starred", true)
-              .where("star_recipients.is_deleted", false);
-          });
-      });
+      // todo: fix starred emails dari semua folder (inbox, sent, archive)
+      return this.getStarredEmails(userId, { page, limit, search, unreadOnly });
     } else if (folder === "archive") {
       // ✅ FIXED: Archive berdasarkan recipients.folder
       query = query
@@ -473,6 +453,133 @@ class Email extends Model {
       [daysOld]
     );
     return parseInt(result.rows[0].count);
+  }
+
+  // ✅ TAMBAHKAN METHOD INI
+  static async getStarredEmails(userId, options = {}) {
+    const { page = 1, limit = 25, search = "" } = options;
+    const offset = (page - 1) * limit;
+
+    try {
+      // Gunakan stored function
+      const emails = await Email.knex().raw(
+        "SELECT * FROM rasn_mail.get_starred_for_user(?, ?, ?, ?)",
+        [userId, limit, offset, search || null]
+      );
+
+      const countResult = await Email.knex().raw(
+        "SELECT rasn_mail.count_starred_for_user(?, ?) as total",
+        [userId, search || null]
+      );
+
+      const total = parseInt(countResult.rows[0].total);
+
+      // Fetch relationships
+      const emailIds = emails.rows.map((email) => email.id);
+      const emailsWithRelations =
+        emailIds.length > 0
+          ? await Email.query()
+              .whereIn("id", emailIds)
+              .withGraphFetched(
+                "[attachments, recipients.[user(simpleWithImage)]]"
+              )
+          : [];
+
+      // Merge data
+      const finalEmails = emails.rows.map((starred) => {
+        const withRelations = emailsWithRelations.find(
+          (e) => e.id === starred.id
+        );
+        return {
+          ...starred,
+          // Convert PostgreSQL boolean
+          is_starred: starred.is_starred === true || starred.is_starred === "t",
+          is_draft: starred.is_draft === true || starred.is_draft === "t",
+          is_read: starred.is_read === true || starred.is_read === "t",
+          attachments: withRelations?.attachments || [],
+          recipients: withRelations?.recipients || [],
+        };
+      });
+
+      return {
+        emails: finalEmails,
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit),
+      };
+    } catch (error) {
+      console.error("Error getting starred emails:", error);
+      // Fallback jika function gagal
+      return this.getUserEmailsFallback(userId, "starred", options);
+    }
+  }
+
+  // ✅ TAMBAHKAN FALLBACK METHOD
+  static async getUserEmailsFallback(userId, folder, options = {}) {
+    const { page = 1, limit = 25, search = "" } = options;
+
+    if (folder === "starred") {
+      let query = Email.query()
+        .select([
+          "rasn_mail.emails.*",
+          "sender.username as sender_name",
+          "sender.email as sender_email",
+          "sender.image as sender_image",
+        ])
+        .join(
+          "public.users as sender",
+          "rasn_mail.emails.sender_id",
+          "sender.custom_id"
+        )
+        .where("rasn_mail.emails.is_starred", true)
+        .where("rasn_mail.emails.is_draft", false)
+        .where((builder) => {
+          builder
+            .where("rasn_mail.emails.sender_id", userId)
+            .orWhereExists((subBuilder) => {
+              subBuilder
+                .select(1)
+                .from("rasn_mail.recipients as r")
+                .whereRaw("r.email_id = rasn_mail.emails.id")
+                .where("r.recipient_id", userId)
+                .where("r.is_deleted", false);
+            });
+        })
+        .withGraphFetched("[attachments, recipients.[user(simpleWithImage)]]");
+
+      if (search) {
+        query = query.where((builder) => {
+          builder
+            .where("rasn_mail.emails.subject", "ilike", `%${search}%`)
+            .orWhere("rasn_mail.emails.content", "ilike", `%${search}%`)
+            .orWhere("sender.username", "ilike", `%${search}%`);
+        });
+      }
+
+      const totalQuery = query
+        .clone()
+        .clearSelect()
+        .count("* as total")
+        .first();
+      const { total } = await totalQuery;
+
+      const emails = await query
+        .orderBy("rasn_mail.emails.created_at", "desc")
+        .limit(limit)
+        .offset((page - 1) * limit);
+
+      return {
+        emails,
+        total: parseInt(total),
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit),
+      };
+    }
+
+    // Untuk folder lain, gunakan method getUserEmails biasa
+    return this.getUserEmails({ userId, folder, ...options });
   }
 }
 
