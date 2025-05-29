@@ -1,7 +1,8 @@
-// components/mail/EmailList/EmailListComponent.js
+// src/components/mail/EmailList/EmailListComponent.js
 import {
   useBulkDelete,
   useDeleteEmail,
+  useDeleteDraft,
   useInboxEmails,
   useMarkAsNotSpam,
   useMarkAsRead,
@@ -65,6 +66,7 @@ const EmailListComponent = ({
   const router = useRouter();
   const [selectedEmails, setSelectedEmails] = useState([]);
   const [bulkDeleteModal, setBulkDeleteModal] = useState(false);
+  const [searchValue, setSearchValue] = useState(""); // ✅ FIX: Local search state
 
   // Get folder configuration
   const config = { ...getFolderConfig(folder), ...customConfig };
@@ -80,6 +82,11 @@ const EmailListComponent = ({
     unreadOnly: unread === "true",
     ...config.defaultFilter,
   };
+
+  // ✅ FIX: Sync search value dengan URL
+  useEffect(() => {
+    setSearchValue(queryParams.search);
+  }, [queryParams.search]);
 
   // Update URL helper
   const updateQuery = (newParams) => {
@@ -142,6 +149,7 @@ const EmailListComponent = ({
   const moveToFolderMutation = useMoveToFolder();
   const bulkDeleteMutation = useBulkDelete();
   const deleteMutation = useDeleteEmail();
+  const deleteDraftMutation = useDeleteDraft(); // ✅ FIX: Add delete draft mutation
   const markAsSpamMutation = useMarkAsSpam();
   const markAsNotSpamMutation = useMarkAsNotSpam();
 
@@ -172,7 +180,11 @@ const EmailListComponent = ({
 
   const handleStarClick = (e, emailId) => {
     e.stopPropagation();
-    starMutation.mutate(emailId);
+    starMutation.mutate(emailId, {
+      onSuccess: () => {
+        message.success("Status bintang berhasil diubah");
+      },
+    });
   };
 
   const handleSelectEmail = (emailId, checked) => {
@@ -193,8 +205,19 @@ const EmailListComponent = ({
     }
   };
 
+  // ✅ FIX: Search handlers
   const handleSearch = (value) => {
     updateQuery({ search: value, page: 1 });
+  };
+
+  const handleSearchChange = (e) => {
+    const value = e.target.value;
+    setSearchValue(value);
+
+    // Auto search when cleared
+    if (!value) {
+      handleSearch("");
+    }
   };
 
   const handleUnreadFilter = (value) => {
@@ -220,19 +243,31 @@ const EmailListComponent = ({
   };
 
   const confirmBulkDelete = () => {
-    bulkDeleteMutation.mutate(selectedEmails, {
-      onSuccess: (data) => {
+    // ✅ FIX: Use appropriate delete method based on folder
+    const deleteAction =
+      folder === "drafts"
+        ? Promise.all(
+            selectedEmails.map((id) => deleteDraftMutation.mutateAsync(id))
+          )
+        : bulkDeleteMutation.mutateAsync(selectedEmails);
+
+    deleteAction
+      .then((data) => {
         setSelectedEmails([]);
         setBulkDeleteModal(false);
-        // ✅ AMBIL count dari response API
-        const deletedCount = data?.data?.deletedCount || selectedEmails.length;
-        message.success(`${deletedCount} email berhasil dihapus`);
-        // ❌ HAPUS auto-refresh message - sudah auto invalidate
-      },
-      onError: () => {
+
+        // ✅ FIX: Success message based on folder
+        const action =
+          folder === "drafts"
+            ? "dihapus"
+            : folder === "trash"
+            ? "dihapus permanen"
+            : "dipindahkan ke sampah";
+        message.success(`${selectedEmails.length} email berhasil ${action}`);
+      })
+      .catch(() => {
         message.error("Gagal menghapus email");
-      },
-    });
+      });
   };
 
   const handleRefresh = () => {
@@ -248,7 +283,7 @@ const EmailListComponent = ({
     }
   };
 
-  // ✅ IMPROVED: Email actions berdasarkan folder dan hooks yang tersedia
+  // ✅ IMPROVED: Email actions dengan proper success messages
   const getEmailActions = (email) => {
     const actions = [];
 
@@ -260,11 +295,13 @@ const EmailListComponent = ({
         icon: <EyeOutlined />,
         onClick: () => {
           if (email.is_read) {
-            markUnreadMutation.mutate(email.id);
-            // ❌ HAPUS message - sudah ada di hook
+            markUnreadMutation.mutate(email.id, {
+              onSuccess: () => message.success("Email ditandai belum dibaca"),
+            });
           } else {
-            markReadMutation.mutate(email.id);
-            // ❌ HAPUS message - sudah ada di hook
+            markReadMutation.mutate(email.id, {
+              onSuccess: () => message.success("Email ditandai sudah dibaca"),
+            });
           }
         },
       });
@@ -306,16 +343,20 @@ const EmailListComponent = ({
           icon: <FolderOutlined />,
           onClick: () =>
             moveToFolderMutation.mutate(
-              { emailId: email.id, folder: "archive" }
-              // ❌ HAPUS onSuccess - sudah auto invalidate di hook
+              { emailId: email.id, folder: "archive" },
+              {
+                onSuccess: () => message.success("Email berhasil diarsipkan"),
+              }
             ),
         },
         {
           key: "spam",
           label: "Tandai Spam",
           icon: <BellOutlined />,
-          onClick: () => markAsSpamMutation.mutate(email.id),
-          // ❌ HAPUS onSuccess - sudah auto invalidate di hook
+          onClick: () =>
+            markAsSpamMutation.mutate(email.id, {
+              onSuccess: () => message.success("Email ditandai sebagai spam"),
+            }),
         }
       );
     }
@@ -325,8 +366,10 @@ const EmailListComponent = ({
         key: "not-spam",
         label: "Bukan Spam",
         icon: <CheckOutlined />,
-        onClick: () => markAsNotSpamMutation.mutate(email.id),
-        // ❌ HAPUS onSuccess - sudah auto invalidate di hook
+        onClick: () =>
+          markAsNotSpamMutation.mutate(email.id, {
+            onSuccess: () => message.success("Email dikembalikan dari spam"),
+          }),
       });
     }
 
@@ -337,8 +380,10 @@ const EmailListComponent = ({
         icon: <InboxOutlined />,
         onClick: () =>
           moveToFolderMutation.mutate(
-            { emailId: email.id, folder: "inbox" }
-            // ❌ HAPUS onSuccess - sudah auto invalidate di hook
+            { emailId: email.id, folder: "inbox" },
+            {
+              onSuccess: () => message.success("Email dikembalikan ke inbox"),
+            }
           ),
       });
     }
@@ -350,8 +395,10 @@ const EmailListComponent = ({
         icon: <UndoOutlined />,
         onClick: () =>
           moveToFolderMutation.mutate(
-            { emailId: email.id, folder: "inbox" }
-            // ❌ HAPUS onSuccess - sudah auto invalidate di hook
+            { emailId: email.id, folder: "inbox" },
+            {
+              onSuccess: () => message.success("Email berhasil dipulihkan"),
+            }
           ),
       });
     }
@@ -361,8 +408,21 @@ const EmailListComponent = ({
       actions.push({ type: "divider" });
     }
 
-    // Delete action (berbeda untuk trash)
-    if (folder === "trash") {
+    // ✅ FIX: Delete action - different for drafts vs emails
+    if (folder === "drafts") {
+      actions.push({
+        key: "delete-draft",
+        label: "Hapus Draft",
+        icon: <DeleteOutlined />,
+        danger: true,
+        onClick: () => {
+          deleteDraftMutation.mutate(email.id, {
+            onSuccess: () => message.success("Draft berhasil dihapus"),
+            onError: () => message.error("Gagal menghapus draft"),
+          });
+        },
+      });
+    } else if (folder === "trash") {
       actions.push({
         key: "delete-permanent",
         label: "Hapus Permanen",
@@ -380,8 +440,10 @@ const EmailListComponent = ({
         icon: <DeleteOutlined />,
         danger: true,
         onClick: () => {
-          deleteMutation.mutate(email.id);
-          // ❌ HAPUS onSuccess - sudah auto invalidate di hook
+          deleteMutation.mutate(email.id, {
+            onSuccess: () => message.success("Email dipindahkan ke sampah"),
+            onError: () => message.error("Gagal menghapus email"),
+          });
         },
       });
     }
@@ -483,15 +545,16 @@ const EmailListComponent = ({
           </Space>
         </div>
 
-        {/* Simple Filters */}
+        {/* ✅ FIX: Improved Filters with controlled input */}
         <Space wrap>
           <Search
             placeholder="Cari email..."
             allowClear
-            value={queryParams.search}
+            value={searchValue}
             onSearch={handleSearch}
-            onChange={(e) => !e.target.value && handleSearch("")}
+            onChange={handleSearchChange}
             style={{ width: 250 }}
+            enterButton={<SearchOutlined />}
           />
           {config.availableFilters?.includes("unread") && (
             <Select
@@ -514,15 +577,22 @@ const EmailListComponent = ({
                 display: "flex",
                 justifyContent: "space-between",
                 alignItems: "center",
+                padding: "8px 12px",
+                backgroundColor: "#f0f8ff",
+                borderRadius: "6px",
+                border: "1px solid #91d5ff",
               }}
             >
-              <Text>{selectedEmails.length} email dipilih</Text>
+              <Text strong>{selectedEmails.length} email dipilih</Text>
               <Space>
                 <Button
                   danger
                   icon={<DeleteOutlined />}
                   onClick={handleBulkDelete}
-                  loading={bulkDeleteMutation.isLoading}
+                  loading={
+                    bulkDeleteMutation.isLoading ||
+                    deleteDraftMutation.isLoading
+                  }
                 >
                   Hapus
                 </Button>
@@ -598,8 +668,23 @@ const EmailListComponent = ({
                       ? `3px solid ${config.primaryColor}`
                       : "3px solid transparent",
                     cursor: "pointer",
+                    borderRadius: "4px",
+                    marginBottom: "4px",
+                    transition: "all 0.2s ease",
                   }}
                   onClick={() => handleEmailClick(email)}
+                  onMouseEnter={(e) => {
+                    if (!isSelected) {
+                      e.currentTarget.style.backgroundColor = "#f8f9fa";
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (!isSelected) {
+                      e.currentTarget.style.backgroundColor = isUnread
+                        ? "#fafafa"
+                        : "white";
+                    }
+                  }}
                 >
                   <div
                     style={{
@@ -682,6 +767,7 @@ const EmailListComponent = ({
                                   color: config.primaryColor,
                                   marginLeft: "4px",
                                 }}
+                                title={`${email.attachment_count} lampiran`}
                               />
                             )}
                           </div>
@@ -724,9 +810,7 @@ const EmailListComponent = ({
                           >
                             {formatTime(email.created_at)}
                           </Text>
-                          <div
-                            onClick={(e) => e.stopPropagation()} // ✅ PERBAIKAN: Stop propagation di wrapper
-                          >
+                          <div onClick={(e) => e.stopPropagation()}>
                             <Dropdown
                               menu={{ items: getEmailActions(email) }}
                               trigger={["click"]}
@@ -784,15 +868,41 @@ const EmailListComponent = ({
 
       {/* Simple Delete Modal */}
       <Modal
-        title="Konfirmasi Hapus"
+        title={
+          <Space>
+            <DeleteOutlined style={{ color: "#ff4d4f" }} />
+            Konfirmasi Hapus Email
+          </Space>
+        }
         open={bulkDeleteModal}
         onOk={confirmBulkDelete}
         onCancel={() => setBulkDeleteModal(false)}
-        okText="Hapus"
+        okText={folder === "drafts" ? "Ya, Hapus Draft" : "Ya, Hapus Sekarang"}
         cancelText="Batal"
-        okButtonProps={{ danger: true, loading: bulkDeleteMutation.isLoading }}
+        okButtonProps={{
+          danger: true,
+          loading:
+            bulkDeleteMutation.isLoading || deleteDraftMutation.isLoading,
+        }}
       >
-        <Text>Yakin ingin menghapus {selectedEmails.length} email?</Text>
+        <div style={{ padding: "16px 0" }}>
+          <Text style={{ fontSize: "16px" }}>
+            Anda akan menghapus{" "}
+            <Text strong>
+              {selectedEmails.length} {folder === "drafts" ? "draft" : "email"}
+            </Text>
+            .
+          </Text>
+          <br />
+          <br />
+          <Text type="secondary">
+            {folder === "drafts"
+              ? "Draft yang dihapus tidak dapat dipulihkan."
+              : folder === "trash"
+              ? "Email akan dihapus secara permanen dan tidak dapat dipulihkan."
+              : "Email yang dihapus akan dipindahkan ke folder Trash dan dapat dipulihkan dalam 30 hari."}
+          </Text>
+        </div>
       </Modal>
     </div>
   );
