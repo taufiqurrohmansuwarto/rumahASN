@@ -27,16 +27,20 @@ export const emptyTrash = async (userId) => {
     .then((res) => res?.data);
 };
 
-export const bulkDelete = async (emailIds) => {
-  return api.post(`/bulk-delete`, { emailIds }).then((res) => res?.data);
+export const bulkDelete = async ({ emailIds, permanent = false }) => {
+  return api
+    .post(`/bulk-delete`, { emailIds, permanent })
+    .then((res) => res?.data);
 };
 
 export const restoreEmail = async (emailId) => {
   return api.put(`/emails/${emailId}/delete`).then((res) => res?.data);
 };
 
-export const deleteEmail = async (emailId) => {
-  return api.delete(`/emails/${emailId}/delete`).then((res) => res?.data);
+export const deleteEmail = async ({ emailId, permanent = false }) => {
+  return api
+    .patch(`/emails/${emailId}/delete`, { permanent })
+    .then((res) => res?.data);
 };
 
 export const sendEmail = async (data) => {

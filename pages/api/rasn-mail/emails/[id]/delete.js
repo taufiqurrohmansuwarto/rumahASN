@@ -11,7 +11,7 @@ const router = createRouter();
 router
   .use(auth)
   .use(asnNonAsnFasilitatorMiddleware)
-  .delete(deleteEmail)
+  .patch(deleteEmail)
   .put(restoreEmail);
 
 export default router.handler({});
