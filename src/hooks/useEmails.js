@@ -36,6 +36,7 @@ import {
   updateDraft,
   updateLabel,
   deleteTrash,
+  updatePriority,
 } from "@/services/rasn-mail.services";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { message } from "antd";
@@ -197,6 +198,18 @@ export const useMarkAsRead = () => {
       queryClient.invalidateQueries({ queryKey: ["email-stats"] });
       queryClient.invalidateQueries({ queryKey: ["email-detail"] });
       // ❌ HAPUS: message.success() - biarkan component yang handle
+    },
+  });
+};
+
+export const useUpdatePriority = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ emailId, priority }) => updatePriority(emailId, priority),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["emails"] });
+      queryClient.invalidateQueries({ queryKey: ["email-stats"] });
+      queryClient.invalidateQueries({ queryKey: ["email-detail"] });
     },
   });
 };

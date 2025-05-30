@@ -79,13 +79,16 @@ const EmailLabelSelector = ({
             e.currentTarget.style.backgroundColor = "transparent";
           }
         }}
-        onClick={() => handleLabelToggle(label, !isAssigned)}
+        onClick={(e) => {
+          e.stopPropagation();
+          handleLabelToggle(label, !isAssigned);
+        }}
       >
         <Checkbox
           checked={isAssigned}
           onChange={(e) => {
             e.stopPropagation();
-            handleLabelToggle(label, e.target.checked);
+            // Jangan panggil handleLabelToggle di sini, biarkan onClick div yang handle
           }}
           style={{ marginRight: "12px" }}
         />

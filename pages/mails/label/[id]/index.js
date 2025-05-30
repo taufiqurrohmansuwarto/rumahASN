@@ -28,6 +28,9 @@ const LabelPage = () => {
       </Head>
       <EmailListComponent
         folder="label"
+        onEmailClick={(email) => {
+          router.push(`/mails/label/${id}/${email.id}`);
+        }}
         customConfig={{
           title: label.name,
           subtitle: label.name,

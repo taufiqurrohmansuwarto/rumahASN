@@ -86,6 +86,9 @@ export const getEmails = async (req, res) => {
       case "starred":
         result = await EmailService.getUserStarred(userId, options);
         break;
+      case "important":
+        result = await EmailService.getUserImportant(userId, options);
+        break;
       default:
         result = await EmailService.getUserInbox(userId, {
           ...options,
@@ -172,6 +175,7 @@ export const changeActionEmail = async (req, res) => {
     const { id } = req?.query;
     const { customId: userId } = req?.user;
     const { action, value } = req?.body;
+
     switch (action) {
       case "read":
         await EmailService.markAsRead(id, userId);
@@ -647,7 +651,7 @@ export const updateLabel = async (req, res) => {
 export const removeLabelFromEmail = async (req, res) => {
   try {
     const { customId: userId } = req?.user;
-    const { emailId, labelId } = req.query;
+    const { id: emailId, labelId } = req.query;
 
     const deleted = await EmailLabel.query()
       .delete()
@@ -674,8 +678,7 @@ export const removeLabelFromEmail = async (req, res) => {
 export const assignLabelToEmail = async (req, res) => {
   try {
     const { customId: userId } = req?.user;
-    const { emailId } = req.query;
-    const { labelId } = req.body;
+    const { id: emailId, labelId = null } = req.query;
 
     if (!labelId) {
       return res.status(400).json({

@@ -11,7 +11,7 @@ const router = createRouter();
 router
   .use(auth)
   .use(asnNonAsnFasilitatorMiddleware)
-  .post(assignLabelToEmail)
-  .get(getEmailLabels);
+  .get(getEmailLabels)
+  .post(assignLabelToEmail);
 
 export default router.handler({});
