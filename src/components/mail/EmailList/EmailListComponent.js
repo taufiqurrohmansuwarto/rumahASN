@@ -1,4 +1,53 @@
 // src/components/mail/EmailList/EmailListComponent.js
+import React, { useEffect, useState } from "react";
+import { useRouter } from "next/router";
+import { useQuery } from "@tanstack/react-query";
+import {
+  Button,
+  Card,
+  Checkbox,
+  Empty,
+  Input,
+  List,
+  Pagination,
+  Select,
+  Space,
+  Tag,
+  Typography,
+  message,
+  Modal,
+  Avatar,
+  Tooltip,
+  Dropdown,
+  Divider,
+  Badge,
+} from "antd";
+import {
+  EditOutlined,
+  ReloadOutlined,
+  SearchOutlined,
+  FilterOutlined,
+  MailOutlined,
+  FileOutlined,
+  StarFilled,
+  StarOutlined,
+  UserOutlined,
+  MoreOutlined,
+  DeleteOutlined,
+  EyeOutlined,
+  SendOutlined,
+  ForwardOutlined,
+  CheckOutlined,
+  UndoOutlined,
+  InboxOutlined,
+  FolderOutlined,
+  BellOutlined,
+  TagOutlined,
+  SyncOutlined,
+} from "@ant-design/icons";
+import dayjs from "dayjs";
+
+// Import hooks
 import {
   useBulkDelete,
   useDeleteDraft,
@@ -9,49 +58,11 @@ import {
   useMarkAsUnread,
   useMoveToFolder,
   useToggleStar,
+  useArchiveEmail,
 } from "@/hooks/useEmails";
+
+// Import utilities
 import { getFolderConfig } from "@/utils/emailFolderConfig";
-import {
-  BellOutlined,
-  CheckOutlined,
-  DeleteOutlined,
-  EditOutlined,
-  EyeOutlined,
-  FileOutlined,
-  FolderOutlined,
-  ForwardOutlined,
-  InboxOutlined,
-  MoreOutlined,
-  ReloadOutlined,
-  SearchOutlined,
-  SendOutlined,
-  StarFilled,
-  StarOutlined,
-  SyncOutlined,
-  UndoOutlined,
-  UserOutlined,
-} from "@ant-design/icons";
-import { useQuery } from "@tanstack/react-query";
-import {
-  Avatar,
-  Button,
-  Checkbox,
-  Divider,
-  Dropdown,
-  Empty,
-  Input,
-  List,
-  Modal,
-  Pagination,
-  Select,
-  Space,
-  Tag,
-  Typography,
-  message,
-} from "antd";
-import dayjs from "dayjs";
-import { useRouter } from "next/router";
-import { useEffect, useState } from "react";
 
 const { Text, Title } = Typography;
 const { Search } = Input;
@@ -66,7 +77,7 @@ const EmailListComponent = ({
   const router = useRouter();
   const [selectedEmails, setSelectedEmails] = useState([]);
   const [bulkDeleteModal, setBulkDeleteModal] = useState(false);
-  const [searchValue, setSearchValue] = useState(""); // ✅ FIX: Local search state
+  const [searchValue, setSearchValue] = useState("");
 
   // Get folder configuration
   const config = { ...getFolderConfig(folder), ...customConfig };
@@ -83,7 +94,7 @@ const EmailListComponent = ({
     ...config.defaultFilter,
   };
 
-  // ✅ FIX: Sync search value dengan URL
+  // Sync search value dengan URL
   useEffect(() => {
     setSearchValue(queryParams.search);
   }, [queryParams.search]);
@@ -149,9 +160,10 @@ const EmailListComponent = ({
   const moveToFolderMutation = useMoveToFolder();
   const bulkDeleteMutation = useBulkDelete();
   const deleteMutation = useDeleteEmail();
-  const deleteDraftMutation = useDeleteDraft(); // ✅ FIX: Add delete draft mutation
+  const deleteDraftMutation = useDeleteDraft();
   const markAsSpamMutation = useMarkAsSpam();
   const markAsNotSpamMutation = useMarkAsNotSpam();
+  const archiveEmailMutation = useArchiveEmail();
 
   // Reset selected emails when query changes
   useEffect(() => {
@@ -205,7 +217,7 @@ const EmailListComponent = ({
     }
   };
 
-  // ✅ FIX: Search handlers
+  // Search handlers
   const handleSearch = (value) => {
     updateQuery({ search: value, page: 1 });
   };
@@ -225,53 +237,11 @@ const EmailListComponent = ({
   };
 
   const handlePageSizeChange = (value) => {
-    console.log("handlePageSizeChange called with:", value);
     updateQuery({ limit: value, page: 1 });
   };
 
   const handlePageChange = (newPage) => {
-    console.log("handlePageChange called with:", newPage);
     updateQuery({ page: newPage });
-  };
-
-  const handleBulkDelete = () => {
-    if (selectedEmails.length === 0) {
-      message.warning("Pilih email yang ingin dihapus");
-      return;
-    }
-    setBulkDeleteModal(true);
-  };
-
-  const confirmBulkDelete = () => {
-    // ✅ FIX: Use appropriate delete method based on folder
-    console.log(selectedEmails, folder);
-    const deleteAction =
-      folder === "drafts"
-        ? Promise.all(
-            selectedEmails.map((id) => deleteDraftMutation.mutateAsync(id))
-          )
-        : bulkDeleteMutation.mutateAsync({
-            emailIds: selectedEmails,
-            permanent: folder === "trash" ? true : false,
-          });
-
-    deleteAction
-      .then((data) => {
-        setSelectedEmails([]);
-        setBulkDeleteModal(false);
-
-        // ✅ FIX: Success message based on folder
-        const action =
-          folder === "drafts"
-            ? "dihapus"
-            : folder === "trash"
-            ? "dihapus permanen"
-            : "dipindahkan ke sampah";
-        message.success(`${selectedEmails.length} email berhasil ${action}`);
-      })
-      .catch(() => {
-        message.error("Gagal menghapus email");
-      });
   };
 
   const handleRefresh = () => {
@@ -287,7 +257,456 @@ const EmailListComponent = ({
     }
   };
 
-  // ✅ IMPROVED: Email actions dengan proper success messages
+  // Bulk action handler
+  const handleBulkAction = async (actionKey, emailIds, actionData = null) => {
+    try {
+      switch (actionKey) {
+        case "archive":
+          await Promise.all(
+            emailIds.map((id) => archiveEmailMutation.mutateAsync(id))
+          );
+          message.success(`${emailIds.length} email berhasil diarsipkan`);
+          break;
+
+        case "spam":
+          await Promise.all(
+            emailIds.map((id) => markAsSpamMutation.mutateAsync(id))
+          );
+          message.success(`${emailIds.length} email ditandai sebagai spam`);
+          break;
+
+        case "not-spam":
+          await Promise.all(
+            emailIds.map((id) => markAsNotSpamMutation.mutateAsync(id))
+          );
+          message.success(`${emailIds.length} email dikembalikan dari spam`);
+          break;
+
+        case "delete":
+          setBulkDeleteModal(true);
+          return; // Don't clear selection yet
+
+        case "delete-permanent":
+          await Promise.all(
+            emailIds.map((id) =>
+              deleteMutation.mutateAsync({ emailId: id, permanent: true })
+            )
+          );
+          message.success(`${emailIds.length} email dihapus permanen`);
+          break;
+
+        case "discard":
+          await Promise.all(
+            emailIds.map((id) => deleteDraftMutation.mutateAsync(id))
+          );
+          message.success(`${emailIds.length} draft berhasil dihapus`);
+          break;
+
+        case "mark-read":
+          await Promise.all(
+            emailIds.map((id) => markReadMutation.mutateAsync(id))
+          );
+          message.success(`${emailIds.length} email ditandai sudah dibaca`);
+          break;
+
+        case "mark-unread":
+          await Promise.all(
+            emailIds.map((id) => markUnreadMutation.mutateAsync(id))
+          );
+          message.success(`${emailIds.length} email ditandai belum dibaca`);
+          break;
+
+        case "move-inbox":
+          await Promise.all(
+            emailIds.map((id) =>
+              moveToFolderMutation.mutateAsync({ emailId: id, folder: "inbox" })
+            )
+          );
+          message.success(`${emailIds.length} email dipindahkan ke inbox`);
+          break;
+
+        case "move-archive":
+          await Promise.all(
+            emailIds.map((id) =>
+              moveToFolderMutation.mutateAsync({
+                emailId: id,
+                folder: "archive",
+              })
+            )
+          );
+          message.success(`${emailIds.length} email dipindahkan ke arsip`);
+          break;
+
+        case "move-spam":
+          await Promise.all(
+            emailIds.map((id) =>
+              moveToFolderMutation.mutateAsync({ emailId: id, folder: "spam" })
+            )
+          );
+          message.success(`${emailIds.length} email dipindahkan ke spam`);
+          break;
+
+        case "move-trash":
+          await Promise.all(
+            emailIds.map((id) =>
+              moveToFolderMutation.mutateAsync({ emailId: id, folder: "trash" })
+            )
+          );
+          message.success(`${emailIds.length} email dipindahkan ke sampah`);
+          break;
+
+        case "restore-inbox":
+          await Promise.all(
+            emailIds.map((id) =>
+              moveToFolderMutation.mutateAsync({ emailId: id, folder: "inbox" })
+            )
+          );
+          message.success(`${emailIds.length} email dikembalikan ke inbox`);
+          break;
+
+        case "label":
+          message.info("Fitur pelabelan akan segera hadir");
+          break;
+
+        case "add-label":
+          message.info("Fitur tambah label akan segera hadir");
+          break;
+
+        case "remove-label":
+          message.info("Fitur hapus label akan segera hadir");
+          break;
+
+        default:
+          message.warning(`Aksi ${actionKey} belum diimplementasikan`);
+      }
+
+      // Clear selection after successful action
+      setSelectedEmails([]);
+    } catch (error) {
+      console.error(`Error performing bulk ${actionKey}:`, error);
+      message.error(`Gagal melakukan ${actionKey}`);
+    }
+  };
+
+  const confirmBulkDelete = () => {
+    const deleteAction =
+      folder === "drafts"
+        ? Promise.all(
+            selectedEmails.map((id) => deleteDraftMutation.mutateAsync(id))
+          )
+        : bulkDeleteMutation.mutateAsync({
+            emailIds: selectedEmails,
+            permanent: folder === "trash",
+          });
+
+    deleteAction
+      .then(() => {
+        setSelectedEmails([]);
+        setBulkDeleteModal(false);
+
+        const action =
+          folder === "drafts"
+            ? "dihapus"
+            : folder === "trash"
+            ? "dihapus permanen"
+            : "dipindahkan ke sampah";
+        message.success(`${selectedEmails.length} email berhasil ${action}`);
+      })
+      .catch(() => {
+        message.error("Gagal menghapus email");
+      });
+  };
+
+  // Gmail-style Bulk Action Toolbar
+  const renderBulkActionToolbar = () => {
+    if (selectedEmails.length === 0) {
+      return null;
+    }
+
+    const primaryActions = [];
+    const secondaryActions = [];
+
+    // Build primary actions based on config
+    if (config.bulkActions.primary?.includes("archive")) {
+      primaryActions.push({
+        key: "archive",
+        label: "Arsip",
+        icon: <FolderOutlined />,
+        onClick: () => handleBulkAction("archive", selectedEmails),
+      });
+    }
+
+    if (config.bulkActions.primary?.includes("spam")) {
+      primaryActions.push({
+        key: "spam",
+        label: "Tandai Spam",
+        icon: <BellOutlined />,
+        onClick: () => handleBulkAction("spam", selectedEmails),
+      });
+    }
+
+    if (config.bulkActions.primary?.includes("not-spam")) {
+      primaryActions.push({
+        key: "not-spam",
+        label: "Bukan Spam",
+        icon: <CheckOutlined />,
+        onClick: () => handleBulkAction("not-spam", selectedEmails),
+      });
+    }
+
+    if (config.bulkActions.primary?.includes("delete")) {
+      primaryActions.push({
+        key: "delete",
+        label: "Hapus",
+        icon: <DeleteOutlined />,
+        onClick: () => handleBulkAction("delete", selectedEmails),
+        danger: true,
+      });
+    }
+
+    if (config.bulkActions.primary?.includes("delete-permanent")) {
+      primaryActions.push({
+        key: "delete-permanent",
+        label: "Hapus Permanen",
+        icon: <DeleteOutlined />,
+        onClick: () => handleBulkAction("delete-permanent", selectedEmails),
+        danger: true,
+      });
+    }
+
+    if (config.bulkActions.primary?.includes("discard")) {
+      primaryActions.push({
+        key: "discard",
+        label: "Hapus Draft",
+        icon: <DeleteOutlined />,
+        onClick: () => handleBulkAction("discard", selectedEmails),
+        danger: true,
+      });
+    }
+
+    if (config.bulkActions.primary?.includes("restore-inbox")) {
+      primaryActions.push({
+        key: "restore-inbox",
+        label: "Kembalikan ke Inbox",
+        icon: <InboxOutlined />,
+        onClick: () => handleBulkAction("restore-inbox", selectedEmails),
+      });
+    }
+
+    // Build secondary actions
+    if (config.bulkActions.secondary?.includes("mark-read")) {
+      secondaryActions.push({
+        key: "mark-read",
+        label: "Tandai dibaca",
+        icon: <EyeOutlined />,
+        onClick: () => handleBulkAction("mark-read", selectedEmails),
+      });
+    }
+
+    if (config.bulkActions.secondary?.includes("mark-unread")) {
+      secondaryActions.push({
+        key: "mark-unread",
+        label: "Tandai belum dibaca",
+        icon: <EyeOutlined />,
+        onClick: () => handleBulkAction("mark-unread", selectedEmails),
+      });
+    }
+
+    if (config.bulkActions.secondary?.includes("move-inbox")) {
+      secondaryActions.push({
+        key: "move-inbox",
+        label: "Pindahkan ke inbox",
+        icon: <InboxOutlined />,
+        onClick: () => handleBulkAction("move-inbox", selectedEmails),
+      });
+    }
+
+    if (config.bulkActions.secondary?.includes("move-to-folder")) {
+      const moveToFolderActions = [
+        { key: "move-inbox", label: "Inbox", icon: <InboxOutlined /> },
+        { key: "move-archive", label: "Arsip", icon: <FolderOutlined /> },
+        { key: "move-spam", label: "Spam", icon: <BellOutlined /> },
+        { key: "move-trash", label: "Sampah", icon: <DeleteOutlined /> },
+      ];
+
+      secondaryActions.push({
+        key: "move-to-folder",
+        label: "Pindahkan ke folder",
+        icon: <FolderOutlined />,
+        type: "submenu",
+        children: moveToFolderActions,
+      });
+    }
+
+    const moreActions = [];
+    if (config.bulkActions.more?.includes("label")) {
+      moreActions.push({
+        key: "label",
+        label: "Tambah Label",
+        icon: <TagOutlined />,
+        onClick: () => handleBulkAction("label", selectedEmails),
+      });
+    }
+
+    return (
+      <>
+        <Divider style={{ margin: "12px 0" }} />
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "8px",
+            padding: "8px 12px",
+            backgroundColor: "#e8f4fd",
+            borderRadius: "6px",
+            border: "1px solid #1890ff",
+          }}
+        >
+          {/* Select All Checkbox */}
+          <Checkbox
+            indeterminate={
+              selectedEmails.length > 0 &&
+              selectedEmails.length < (emailsData?.data?.emails?.length || 0)
+            }
+            checked={
+              selectedEmails.length ===
+                (emailsData?.data?.emails?.length || 0) &&
+              (emailsData?.data?.emails?.length || 0) > 0
+            }
+            onChange={(e) => handleSelectAll(e.target.checked)}
+          />
+
+          {/* Refresh Button */}
+          <Button
+            type="text"
+            icon={<SyncOutlined />}
+            onClick={handleRefresh}
+            loading={isLoading}
+            title="Refresh"
+            style={{ minWidth: "auto", padding: "4px 8px" }}
+          />
+
+          <Divider type="vertical" style={{ margin: "0 4px" }} />
+
+          {/* Primary Actions */}
+          {primaryActions.map((action) => (
+            <Tooltip key={action.key} title={action.label}>
+              <Button
+                type="text"
+                icon={action.icon}
+                onClick={action.onClick}
+                style={{
+                  minWidth: "auto",
+                  padding: "4px 8px",
+                  ...(action.danger && { color: "#ff4d4f" }),
+                }}
+                title={action.label}
+              />
+            </Tooltip>
+          ))}
+
+          <Divider type="vertical" style={{ margin: "0 4px" }} />
+
+          {/* Secondary Actions */}
+          {secondaryActions.map((action) => {
+            if (action.type === "submenu") {
+              const submenuItems = action.children?.map((child) => ({
+                key: child.key,
+                label: child.label,
+                icon: child.icon,
+                onClick: () => handleBulkAction(child.key, selectedEmails),
+              }));
+
+              return (
+                <Dropdown
+                  key={action.key}
+                  menu={{ items: submenuItems }}
+                  trigger={["click"]}
+                >
+                  <Tooltip title={action.label}>
+                    <Button
+                      type="text"
+                      icon={action.icon}
+                      style={{
+                        minWidth: "auto",
+                        padding: "4px 8px",
+                      }}
+                      title={action.label}
+                    />
+                  </Tooltip>
+                </Dropdown>
+              );
+            }
+
+            return (
+              <Tooltip key={action.key} title={action.label}>
+                <Button
+                  type="text"
+                  icon={action.icon}
+                  onClick={action.onClick}
+                  style={{
+                    minWidth: "auto",
+                    padding: "4px 8px",
+                  }}
+                  title={action.label}
+                />
+              </Tooltip>
+            );
+          })}
+
+          {/* More Actions */}
+          {moreActions.length > 0 && (
+            <Dropdown
+              menu={{
+                items: [
+                  ...moreActions,
+                  { type: "divider" },
+                  {
+                    key: "select-all-page",
+                    label: `Pilih semua di halaman ini (${
+                      emailsData?.data?.emails?.length || 0
+                    })`,
+                    icon: <CheckOutlined />,
+                    onClick: () => handleSelectAll(true),
+                  },
+                  {
+                    key: "clear-selection",
+                    label: "Hapus pilihan",
+                    icon: <UndoOutlined />,
+                    onClick: () => setSelectedEmails([]),
+                  },
+                ],
+              }}
+              trigger={["click"]}
+              placement="bottomRight"
+            >
+              <Button
+                type="text"
+                icon={<MoreOutlined />}
+                title="Tindakan lainnya"
+                style={{ minWidth: "auto", padding: "4px 8px" }}
+              />
+            </Dropdown>
+          )}
+
+          {/* Selection Count */}
+          <div style={{ marginLeft: "auto" }}>
+            <Space size="small">
+              <Badge
+                count={selectedEmails.length}
+                style={{ backgroundColor: config.primaryColor }}
+              />
+              <Text type="secondary" style={{ fontSize: "12px" }}>
+                {selectedEmails.length} dipilih
+              </Text>
+            </Space>
+          </div>
+        </div>
+      </>
+    );
+  };
+
+  // Email actions
   const getEmailActions = (email) => {
     const actions = [];
 
@@ -412,7 +831,7 @@ const EmailListComponent = ({
       actions.push({ type: "divider" });
     }
 
-    // ✅ FIX: Delete action - different for drafts vs emails
+    // Delete action
     if (folder === "drafts") {
       actions.push({
         key: "delete-draft",
@@ -501,92 +920,10 @@ const EmailListComponent = ({
   const total = emailsData?.data?.total || 0;
   const unreadCount = emails.filter((email) => !email.is_read).length;
 
-  // Debug pagination data
-  console.log("Pagination Debug:", {
-    folder,
-    queryParams,
-    emailsReceived: emails.length,
-    totalFromAPI: total,
-    calculatedTotalPages: Math.ceil(total / queryParams.limit),
-    currentPage: queryParams.page,
-    pageSize: queryParams.limit,
-  });
-
-  const handleBulkMarkAsRead = () => {
-    Promise.all(selectedEmails.map((id) => markReadMutation.mutateAsync(id)))
-      .then(() => {
-        message.success(`${selectedEmails.length} email ditandai sudah dibaca`);
-        setSelectedEmails([]);
-      })
-      .catch(() => {
-        message.error("Gagal menandai email sebagai dibaca");
-      });
-  };
-
-  const handleBulkMarkAsUnread = () => {
-    Promise.all(selectedEmails.map((id) => markUnreadMutation.mutateAsync(id)))
-      .then(() => {
-        message.success(`${selectedEmails.length} email ditandai belum dibaca`);
-        setSelectedEmails([]);
-      })
-      .catch(() => {
-        message.error("Gagal menandai email sebagai belum dibaca");
-      });
-  };
-
-  const handleBulkArchive = () => {
-    Promise.all(
-      selectedEmails.map((id) =>
-        moveToFolderMutation.mutateAsync({ emailId: id, folder: "archive" })
-      )
-    )
-      .then(() => {
-        message.success(`${selectedEmails.length} email berhasil diarsipkan`);
-        setSelectedEmails([]);
-      })
-      .catch(() => {
-        message.error("Gagal mengarsipkan email");
-      });
-  };
-
-  const handleBulkMoveToFolder = (targetFolder) => {
-    Promise.all(
-      selectedEmails.map((id) =>
-        moveToFolderMutation.mutateAsync({ emailId: id, folder: targetFolder })
-      )
-    )
-      .then(() => {
-        const folderNames = {
-          inbox: "inbox",
-          archive: "arsip",
-          spam: "spam",
-          trash: "sampah",
-        };
-        message.success(
-          `${selectedEmails.length} email dipindahkan ke ${folderNames[targetFolder]}`
-        );
-        setSelectedEmails([]);
-      })
-      .catch(() => {
-        message.error("Gagal memindahkan email");
-      });
-  };
-
-  const handleBulkSpam = () => {
-    Promise.all(selectedEmails.map((id) => markAsSpamMutation.mutateAsync(id)))
-      .then(() => {
-        message.success(`${selectedEmails.length} email ditandai sebagai spam`);
-        setSelectedEmails([]);
-      })
-      .catch(() => {
-        message.error("Gagal menandai email sebagai spam");
-      });
-  };
-
   return (
     <div style={{ padding: "16px" }}>
-      {/* Simple Header */}
-      <div style={{ marginBottom: "16px" }}>
+      {/* Header */}
+      <Card style={{ marginBottom: "16px" }}>
         <div
           style={{
             display: "flex",
@@ -595,30 +932,22 @@ const EmailListComponent = ({
             marginBottom: "16px",
           }}
         >
-          <div>
-            <Title
-              level={4}
-              style={{
-                margin: 0,
-                display: "flex",
-                alignItems: "center",
-                gap: "8px",
-              }}
-            >
+          <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+            <span style={{ fontSize: "20px", color: config.primaryColor }}>
               {config.icon}
+            </span>
+            <Title level={4} style={{ margin: 0 }}>
               {config.subtitle}
-              {total > 0 && (
-                <Text type="secondary" style={{ fontWeight: "normal" }}>
-                  ({total} email)
-                </Text>
-              )}
-              {unreadCount > 0 && (
-                <Tag color={config.primaryColor} size="small">
-                  {unreadCount} baru
-                </Tag>
-              )}
             </Title>
+            {config.showUnreadBadge && total > 0 && unreadCount > 0 && (
+              <Tag color={config.primaryColor} size="small">
+                {unreadCount} baru
+              </Tag>
+            )}
+            {total > 0 && <Text type="secondary">({total} email)</Text>}
           </div>
+
+          {/* Primary actions */}
           <Space>
             <Button
               type="primary"
@@ -635,7 +964,7 @@ const EmailListComponent = ({
           </Space>
         </div>
 
-        {/* ✅ FIX: Improved Filters with controlled input */}
+        {/* Filters */}
         <Space wrap>
           <Search
             placeholder="Cari email..."
@@ -643,248 +972,63 @@ const EmailListComponent = ({
             value={searchValue}
             onSearch={handleSearch}
             onChange={handleSearchChange}
-            style={{ width: 250 }}
+            style={{ width: 300 }}
             enterButton={<SearchOutlined />}
           />
           {config.availableFilters?.includes("unread") && (
             <Select
               value={queryParams.unreadOnly ? "unread" : "all"}
               onChange={(value) => handleUnreadFilter(value === "unread")}
-              style={{ width: 120 }}
+              style={{ width: 180 }}
+              suffixIcon={<FilterOutlined />}
             >
-              <Select.Option value="all">Semua Email</Select.Option>
-              <Select.Option value="unread">Belum Dibaca</Select.Option>
+              <Select.Option value="all">
+                <Space>
+                  <MailOutlined />
+                  Semua Email
+                </Space>
+              </Select.Option>
+              <Select.Option value="unread">
+                <Space>
+                  <Tag color="processing" size="small">
+                    •
+                  </Tag>
+                  Belum Dibaca
+                </Space>
+              </Select.Option>
             </Select>
           )}
         </Space>
 
-        {/* Gmail-style Bulk Actions */}
-        {selectedEmails.length > 0 && (
-          <>
-            <Divider style={{ margin: "12px 0" }} />
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "8px",
-                padding: "8px 12px",
-                backgroundColor: "#e8f4fd",
-                borderRadius: "6px",
-                border: "1px solid #1890ff",
-              }}
-            >
-              {/* Select All Checkbox */}
-              <Checkbox
-                indeterminate={
-                  selectedEmails.length > 0 &&
-                  selectedEmails.length < emails.length
-                }
-                checked={
-                  selectedEmails.length === emails.length && emails.length > 0
-                }
-                onChange={(e) => handleSelectAll(e.target.checked)}
-              />
-
-              {/* Refresh Button */}
-              <Button
-                type="text"
-                icon={<SyncOutlined />}
-                onClick={handleRefresh}
-                loading={isLoading}
-                title="Refresh"
-                style={{ minWidth: "auto", padding: "4px 8px" }}
-              />
-
-              <Divider type="vertical" style={{ margin: "0 4px" }} />
-
-              {/* Archive (jika bukan folder archive/drafts/trash) */}
-              {!["archive", "drafts", "trash"].includes(folder) && (
-                <Button
-                  type="text"
-                  icon={<FolderOutlined />}
-                  onClick={handleBulkArchive}
-                  loading={moveToFolderMutation.isLoading}
-                  title="Arsipkan"
-                  style={{ minWidth: "auto", padding: "4px 8px" }}
-                />
-              )}
-
-              {/* Mark as Read/Unread */}
-              {config.allowMarkAsRead && (
-                <>
-                  <Button
-                    type="text"
-                    icon={<EyeOutlined />}
-                    onClick={handleBulkMarkAsRead}
-                    loading={markReadMutation.isLoading}
-                    title="Tandai sudah dibaca"
-                    style={{ minWidth: "auto", padding: "4px 8px" }}
-                  />
-                  <Button
-                    type="text"
-                    icon={<EyeOutlined />}
-                    onClick={handleBulkMarkAsUnread}
-                    loading={markUnreadMutation.isLoading}
-                    title="Tandai belum dibaca"
-                    style={{
-                      minWidth: "auto",
-                      padding: "4px 8px",
-                      opacity: 0.7,
-                    }}
-                  />
-                </>
-              )}
-
-              {/* Delete */}
-              <Button
-                type="text"
-                icon={<DeleteOutlined />}
-                onClick={handleBulkDelete}
-                loading={
-                  bulkDeleteMutation.isLoading || deleteDraftMutation.isLoading
-                }
-                title={
-                  folder === "drafts"
-                    ? "Hapus draft"
-                    : folder === "trash"
-                    ? "Hapus permanen"
-                    : "Hapus"
-                }
-                style={{ minWidth: "auto", padding: "4px 8px" }}
-              />
-
-              {/* More Actions Dropdown */}
-              <Dropdown
-                menu={{
-                  items: [
-                    // Move to Folder submenu
-                    {
-                      key: "move-to",
-                      label: "Pindahkan ke",
-                      icon: <FolderOutlined />,
-                      children: [
-                        folder !== "inbox" && {
-                          key: "move-inbox",
-                          label: "Inbox",
-                          icon: <InboxOutlined />,
-                          onClick: () => handleBulkMoveToFolder("inbox"),
-                        },
-                        folder !== "archive" && {
-                          key: "move-archive",
-                          label: "Arsip",
-                          icon: <FolderOutlined />,
-                          onClick: () => handleBulkMoveToFolder("archive"),
-                        },
-                        folder !== "spam" && {
-                          key: "move-spam",
-                          label: "Spam",
-                          icon: <BellOutlined />,
-                          onClick: () => handleBulkMoveToFolder("spam"),
-                        },
-                        folder !== "trash" && {
-                          key: "move-trash",
-                          label: "Sampah",
-                          icon: <DeleteOutlined />,
-                          onClick: () => handleBulkMoveToFolder("trash"),
-                        },
-                      ].filter(Boolean),
-                    },
-                    // Spam actions
-                    folder === "spam"
-                      ? {
-                          key: "not-spam",
-                          label: "Bukan spam",
-                          icon: <CheckOutlined />,
-                          onClick: () => {
-                            Promise.all(
-                              selectedEmails.map((id) =>
-                                markAsNotSpamMutation.mutateAsync(id)
-                              )
-                            ).then(() => {
-                              message.success(
-                                `${selectedEmails.length} email dikembalikan dari spam`
-                              );
-                              setSelectedEmails([]);
-                            });
-                          },
-                        }
-                      : {
-                          key: "mark-spam",
-                          label: "Tandai sebagai spam",
-                          icon: <BellOutlined />,
-                          onClick: handleBulkSpam,
-                        },
-                    // Divider
-                    { type: "divider" },
-                    // Add Label (placeholder)
-                    {
-                      key: "add-label",
-                      label: "Tambah label",
-                      icon: <Tag />,
-                      onClick: () => {
-                        message.info("Fitur label akan segera hadir");
-                      },
-                    },
-                    // Select All
-                    {
-                      key: "select-all-page",
-                      label: `Pilih semua di halaman ini (${emails.length})`,
-                      icon: <CheckOutlined />,
-                      onClick: () => handleSelectAll(true),
-                    },
-                    // Clear Selection
-                    {
-                      key: "clear-selection",
-                      label: "Hapus pilihan",
-                      icon: <UndoOutlined />,
-                      onClick: () => setSelectedEmails([]),
-                    },
-                  ],
-                }}
-                trigger={["click"]}
-              >
-                <Button
-                  type="text"
-                  icon={<MoreOutlined />}
-                  title="Tindakan lainnya"
-                  style={{ minWidth: "auto", padding: "4px 8px" }}
-                />
-              </Dropdown>
-
-              {/* Selection Count */}
-              <div style={{ marginLeft: "auto" }}>
-                <Text type="secondary" style={{ fontSize: "12px" }}>
-                  {selectedEmails.length} dipilih
-                </Text>
-              </div>
-            </div>
-          </>
-        )}
-      </div>
+        {/* Bulk Action Toolbar */}
+        {renderBulkActionToolbar()}
+      </Card>
 
       {/* Email List */}
       {emails.length === 0 ? (
-        <Empty
-          description={
-            queryParams.search
-              ? "Tidak ada email yang cocok dengan pencarian"
-              : config.emptyTitle || "Tidak ada email"
-          }
-          image={Empty.PRESENTED_IMAGE_SIMPLE}
-        >
-          {!queryParams.search && config.emptyAction && (
-            <Button
-              type="primary"
-              icon={<EditOutlined />}
-              onClick={handleCompose}
-            >
-              {config.emptyAction.label}
-            </Button>
-          )}
-        </Empty>
+        <Card>
+          <Empty
+            description={
+              queryParams.search
+                ? "Tidak ada email yang cocok dengan pencarian"
+                : config.emptyTitle || "Tidak ada email"
+            }
+            image={Empty.PRESENTED_IMAGE_SIMPLE}
+          >
+            {!queryParams.search && config.emptyAction && (
+              <Button
+                type="primary"
+                icon={<EditOutlined />}
+                onClick={handleCompose}
+              >
+                {config.emptyAction.label}
+              </Button>
+            )}
+          </Empty>
+        </Card>
       ) : (
-        <>
-          {/* Gmail-style Select All Row (hanya jika tidak ada yang dipilih) */}
+        <Card>
+          {/* Simple Select All Row */}
           {selectedEmails.length === 0 && (
             <div
               style={{
@@ -1099,42 +1243,31 @@ const EmailListComponent = ({
               );
             }}
           />
-        </>
+        </Card>
       )}
 
-      {/* Fixed Ant Design Pagination */}
+      {/* Pagination */}
       {total > queryParams.limit && (
         <div style={{ textAlign: "center", marginTop: "16px" }}>
           <Pagination
             current={queryParams.page}
             total={total}
             pageSize={queryParams.limit}
-            onChange={(page) => {
-              console.log("Page changed to:", page);
-              handlePageChange(page);
-            }}
+            onChange={handlePageChange}
             onShowSizeChange={(currentPage, size) => {
-              console.log("Size changed to:", size, "from page:", currentPage);
-              // Always reset to page 1 when changing page size
               updateQuery({ page: 1, limit: size });
             }}
             showSizeChanger
             showQuickJumper
-            showTotal={(total, range) => {
-              console.log("Pagination showTotal:", {
-                total,
-                range,
-                currentPage: queryParams.page,
-                pageSize: queryParams.limit,
-              });
-              return `${range[0]}-${range[1]} dari ${total} email`;
-            }}
+            showTotal={(total, range) =>
+              `${range[0]}-${range[1]} dari ${total} email`
+            }
             pageSizeOptions={["10", "25", "50", "100"]}
           />
         </div>
       )}
 
-      {/* Simple Delete Modal */}
+      {/* Delete Confirmation Modal */}
       <Modal
         title={
           <Space>

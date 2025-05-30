@@ -45,11 +45,15 @@ class Email extends Model {
     return this;
   }
 
-  // Method untuk mark as starred
-  async toggleStar(userId) {
-    return this.$query().patch({
-      is_starred: !this.is_starred,
-    });
+  async getStarStatusForUser(userId) {
+    const Recipient = require("@/models/rasn_mail/recipients.model");
+    return await Recipient.getStarStatus(this.id, userId);
+  }
+
+  // ✅ NEW: Method untuk toggle star for specific user
+  async toggleStarForUser(userId) {
+    const Recipient = require("@/models/rasn_mail/recipients.model");
+    return await Recipient.toggleStarForUser(this.id, userId);
   }
 
   // Static method untuk create dan send email
@@ -95,6 +99,7 @@ class Email extends Model {
             email_id: email.id,
             recipient_id: member.user_id,
             type: "to",
+            is_starred: false,
           }));
         }
       } else {
@@ -105,16 +110,19 @@ class Email extends Model {
             email_id: email.id,
             recipient_id: id,
             type: "to",
+            is_starred: false,
           })),
           ...cc.map((id) => ({
             email_id: email.id,
             recipient_id: id,
             type: "cc",
+            is_starred: false,
           })),
           ...bcc.map((id) => ({
             email_id: email.id,
             recipient_id: id,
             type: "bcc",
+            is_starred: false,
           })),
         ];
       }
@@ -578,57 +586,155 @@ class Email extends Model {
     const offset = (page - 1) * limit;
 
     try {
-      // Gunakan stored function
-      const emails = await Email.knex().raw(
-        "SELECT * FROM rasn_mail.get_starred_for_user(?, ?, ?, ?)",
-        [userId, limit, offset, search || null]
-      );
+      // ✅ STEP 1: Get count dengan query yang benar
+      let countQuery = Email.query()
+        .join(
+          "rasn_mail.recipients",
+          "rasn_mail.emails.id",
+          "rasn_mail.recipients.email_id"
+        )
+        .where("rasn_mail.recipients.recipient_id", userId)
+        .where("rasn_mail.recipients.is_starred", true)
+        .where("rasn_mail.recipients.is_deleted", false)
+        .where("rasn_mail.emails.is_draft", false)
+        .where("rasn_mail.emails.is_deleted", false);
 
-      const countResult = await Email.knex().raw(
-        "SELECT rasn_mail.count_starred_for_user(?, ?) as total",
-        [userId, search || null]
-      );
+      // Apply search filter untuk count
+      if (search) {
+        countQuery = countQuery
+          .join(
+            "public.users as sender",
+            "rasn_mail.emails.sender_id",
+            "sender.custom_id"
+          )
+          .where((builder) => {
+            builder
+              .where("rasn_mail.emails.subject", "ilike", `%${search}%`)
+              .orWhere("rasn_mail.emails.content", "ilike", `%${search}%`)
+              .orWhere("sender.username", "ilike", `%${search}%`);
+          });
+      }
 
-      const total = parseInt(countResult.rows[0].total);
+      // ✅ FIX: Use proper count without DISTINCT issues
+      const { count: total } = await countQuery
+        .count("rasn_mail.emails.id as count")
+        .first();
 
-      // Fetch relationships
-      const emailIds = emails.rows.map((email) => email.id);
-      const emailsWithRelations =
-        emailIds.length > 0
-          ? await Email.query()
-              .whereIn("id", emailIds)
-              .withGraphFetched(
-                "[attachments, recipients.[user(simpleWithImage)]]"
-              )
-          : [];
+      // ✅ STEP 2: Get actual data dengan query terpisah
+      let dataQuery = Email.query()
+        .select([
+          "rasn_mail.emails.*",
+          "sender.username as sender_name",
+          "sender.email as sender_email",
+          "sender.image as sender_image",
+          "recipients.is_read",
+          "recipients.read_at",
+          "recipients.folder as recipient_folder",
+          "recipients.is_deleted as recipient_deleted",
+          "recipients.is_starred",
+        ])
+        .join(
+          "public.users as sender",
+          "rasn_mail.emails.sender_id",
+          "sender.custom_id"
+        )
+        .join(
+          "rasn_mail.recipients",
+          "rasn_mail.emails.id",
+          "rasn_mail.recipients.email_id"
+        )
+        .where("rasn_mail.recipients.recipient_id", userId)
+        .where("rasn_mail.recipients.is_starred", true)
+        .where("rasn_mail.recipients.is_deleted", false)
+        .where("rasn_mail.emails.is_draft", false)
+        .where("rasn_mail.emails.is_deleted", false);
 
-      // Merge data
-      const finalEmails = emails.rows.map((starred) => {
-        const withRelations = emailsWithRelations.find(
-          (e) => e.id === starred.id
-        );
-        return {
-          ...starred,
-          // Convert PostgreSQL boolean
-          is_starred: starred.is_starred === true || starred.is_starred === "t",
-          is_draft: starred.is_draft === true || starred.is_draft === "t",
-          is_read: starred.is_read === true || starred.is_read === "t",
-          attachments: withRelations?.attachments || [],
-          recipients: withRelations?.recipients || [],
-        };
-      });
+      // Apply search filter
+      if (search) {
+        dataQuery = dataQuery.where((builder) => {
+          builder
+            .where("rasn_mail.emails.subject", "ilike", `%${search}%`)
+            .orWhere("rasn_mail.emails.content", "ilike", `%${search}%`)
+            .orWhere("sender.username", "ilike", `%${search}%`);
+        });
+      }
+
+      // Get basic email data
+      const emailResults = await dataQuery
+        .orderBy("rasn_mail.emails.created_at", "desc")
+        .limit(limit)
+        .offset(offset);
+
+      // ✅ STEP 3: Get email IDs and fetch dengan relations
+      const emailIds = emailResults.map((email) => email.id);
+
+      let emails = [];
+      if (emailIds.length > 0) {
+        emails = await Email.query()
+          .whereIn("id", emailIds)
+          .withGraphFetched("[attachments, recipients.[user(simpleWithImage)]]")
+          .orderBy("created_at", "desc");
+
+        // ✅ STEP 4: Merge basic data dengan relations
+        emails = emails.map((email) => {
+          const basicInfo = emailResults.find((r) => r.id === email.id);
+          return {
+            ...email,
+            sender_name: basicInfo?.sender_name,
+            sender_email: basicInfo?.sender_email,
+            sender_image: basicInfo?.sender_image,
+            is_read: basicInfo?.is_read,
+            read_at: basicInfo?.read_at,
+            recipient_folder: basicInfo?.recipient_folder,
+            recipient_deleted: basicInfo?.recipient_deleted,
+            is_starred: basicInfo?.is_starred, // ✅ Include star status
+          };
+        });
+      }
 
       return {
-        emails: finalEmails,
-        total,
+        emails,
+        total: parseInt(total),
         page,
         limit,
-        totalPages: Math.ceil(total / limit),
+        totalPages: Math.ceil(parseInt(total) / limit),
       };
     } catch (error) {
-      console.error("Error getting starred emails:", error);
-      // Fallback jika function gagal
-      return this.getUserEmailsFallback(userId, "starred", options);
+      console.error("Error in getStarredEmails:", error);
+
+      // ✅ FALLBACK: Simple query jika ada error
+      const fallbackQuery = Email.query()
+        .select("rasn_mail.emails.*")
+        .join(
+          "rasn_mail.recipients",
+          "rasn_mail.emails.id",
+          "rasn_mail.recipients.email_id"
+        )
+        .where("rasn_mail.recipients.recipient_id", userId)
+        .where("rasn_mail.recipients.is_starred", true)
+        .where("rasn_mail.recipients.is_deleted", false)
+        .where("rasn_mail.emails.is_draft", false)
+        .withGraphFetched(
+          "[sender, attachments, recipients.[user(simpleWithImage)]]"
+        )
+        .orderBy("rasn_mail.emails.created_at", "desc")
+        .page(page - 1, limit);
+
+      const result = await fallbackQuery;
+
+      // Add star status untuk fallback
+      const emails = result.results.map((email) => ({
+        ...email,
+        is_starred: true, // Karena sudah di-filter dari starred
+      }));
+
+      return {
+        emails,
+        total: result.total,
+        page,
+        limit,
+        totalPages: Math.ceil(result.total / limit),
+      };
     }
   }
 

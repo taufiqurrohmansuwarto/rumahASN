@@ -40,6 +40,49 @@ class Recipient extends Model {
     return this;
   }
 
+  async toggleStar() {
+    await this.$query().patch({
+      is_starred: !this.is_starred,
+      updated_at: new Date().toISOString(),
+    });
+    return this;
+  }
+
+  // ✅ NEW: Static method untuk toggle star by email and user
+  static async toggleStarForUser(emailId, userId) {
+    const recipient = await Recipient.query()
+      .where("email_id", emailId)
+      .where("recipient_id", userId)
+      .first();
+
+    if (recipient) {
+      await recipient.toggleStar();
+      return { success: true, is_starred: !recipient.is_starred };
+    }
+
+    // If no recipient record exists (for sent emails), create one
+    await Recipient.query().insert({
+      email_id: emailId,
+      recipient_id: userId,
+      type: "to", // Default type
+      is_starred: true,
+      folder: "inbox",
+      is_read: true, // Assume sender has read their own email
+    });
+
+    return { success: true, is_starred: true };
+  }
+
+  // ✅ NEW: Static method untuk check star status
+  static async getStarStatus(emailId, userId) {
+    const recipient = await Recipient.query()
+      .where("email_id", emailId)
+      .where("recipient_id", userId)
+      .first();
+
+    return recipient?.is_starred || false;
+  }
+
   // Method untuk move to folder
   async moveToFolder(folder) {
     await this.$query().patch({
