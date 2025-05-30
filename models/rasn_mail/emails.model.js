@@ -1,6 +1,7 @@
 const { Model } = require("objection");
 const knex = require("../../db");
 const { nanoid } = require("nanoid");
+const EmailUserAction = require("./email-user-actions.model");
 
 Model.knex(knex);
 
@@ -57,6 +58,7 @@ class Email extends Model {
   }
 
   // Static method untuk create dan send email
+  // Static method untuk create dan send email
   static async createAndSend({
     senderId,
     subject,
@@ -69,7 +71,6 @@ class Email extends Model {
     parentId = null,
   }) {
     const trx = await Email.startTransaction();
-
     try {
       // 1. Create email
       const email = await Email.query(trx).insert({
@@ -86,6 +87,7 @@ class Email extends Model {
 
       // 2. Handle recipients
       let allRecipients = [];
+      let allUserActions = [];
 
       if (type === "broadcast" && broadcastGroupId) {
         // Get broadcast recipients
@@ -95,42 +97,95 @@ class Email extends Model {
           .withGraphFetched("members");
 
         if (broadcastUsers && broadcastUsers.members) {
-          allRecipients = broadcastUsers.members.map((member) => ({
+          const broadcastRecipientIds = broadcastUsers.members.map(
+            (m) => m.user_id
+          );
+
+          // Create recipients records
+          allRecipients = broadcastRecipientIds.map((userId) => ({
             email_id: email.id,
-            recipient_id: member.user_id,
+            recipient_id: userId,
             type: "to",
-            is_starred: false,
           }));
+
+          // Create user actions for broadcast recipients
+          broadcastRecipientIds.forEach((userId) => {
+            allUserActions.push({
+              email_id: email.id,
+              user_id: userId,
+              folder: "inbox",
+              is_read: userId === senderId, // auto-read if sender
+              is_starred: false,
+            });
+          });
+
+          // Add sender action (only if not already included as recipient)
+          if (!broadcastRecipientIds.includes(senderId)) {
+            allUserActions.push({
+              email_id: email.id,
+              user_id: senderId,
+              folder: "sent",
+              is_read: true,
+              is_starred: false,
+            });
+          }
         }
       } else {
         // Personal email recipients
         const { to = [], cc = [], bcc = [] } = recipients;
+        const allRecipientIds = [...to, ...cc, ...bcc];
+
+        // Create recipients records
         allRecipients = [
           ...to.map((id) => ({
             email_id: email.id,
             recipient_id: id,
             type: "to",
-            is_starred: false,
           })),
           ...cc.map((id) => ({
             email_id: email.id,
             recipient_id: id,
             type: "cc",
-            is_starred: false,
           })),
           ...bcc.map((id) => ({
             email_id: email.id,
             recipient_id: id,
             type: "bcc",
-            is_starred: false,
           })),
         ];
+
+        // Create user actions for recipients
+        allRecipientIds.forEach((userId) => {
+          allUserActions.push({
+            email_id: email.id,
+            user_id: userId,
+            folder: "inbox",
+            is_read: userId === senderId, // auto-read if sender
+            is_starred: false,
+          });
+        });
+
+        // Add sender action (only if not already included as recipient)
+        if (!allRecipientIds.includes(senderId)) {
+          allUserActions.push({
+            email_id: email.id,
+            user_id: senderId,
+            folder: "sent",
+            is_read: true,
+            is_starred: false,
+          });
+        }
       }
 
-      // 3. Insert recipients
+      // 3. Insert recipients and user actions
       if (allRecipients.length > 0) {
         const Recipient = require("@/models/rasn_mail/recipients.model");
         await Recipient.query(trx).insert(allRecipients);
+      }
+
+      if (allUserActions.length > 0) {
+        const EmailUserAction = require("@/models/rasn_mail/email-user-actions.model");
+        await EmailUserAction.query(trx).insert(allUserActions);
       }
 
       // 4. Handle attachments
@@ -222,141 +277,126 @@ class Email extends Model {
     unreadOnly = false,
     labelId = null,
   }) {
-    // ✅ PERBAIKAN: Pisahkan query untuk count dan data untuk menghindari masalah JOIN
+    // Helper function untuk exclude deleted folders
+    const excludeDeletedFolders = (query) => {
+      return query.whereNotIn("eua.folder", ["trash", "spam"]);
+    };
 
-    // 1. Buat base query tanpa relations
-    let baseQuery = Email.query().join(
-      "public.users as sender",
-      "rasn_mail.emails.sender_id",
-      "sender.custom_id"
-    );
+    // 1. Base query dengan email_user_actions (unified pattern)
+    let baseQuery = Email.query()
+      .join(
+        "rasn_mail.email_user_actions as eua",
+        "rasn_mail.emails.id",
+        "eua.email_id"
+      )
+      .join(
+        "public.users as sender",
+        "rasn_mail.emails.sender_id",
+        "sender.custom_id"
+      )
+      .where("eua.user_id", userId)
+      .where("eua.deleted_at", null)
+      .where("rasn_mail.emails.is_deleted", false);
 
-    // 2. Apply folder logic ke base query
+    // 2. Apply folder-specific filters
     if (folder === "inbox") {
       baseQuery = baseQuery
-        .join(
-          "rasn_mail.recipients",
-          "rasn_mail.emails.id",
-          "rasn_mail.recipients.email_id"
-        )
-        .where("rasn_mail.recipients.recipient_id", userId)
-        .where("rasn_mail.recipients.folder", "inbox")
-        .where("rasn_mail.recipients.is_deleted", false)
-        .where("rasn_mail.emails.is_draft", false)
-        .where("rasn_mail.emails.is_deleted", false);
+        .where("eua.folder", "inbox")
+        .where("rasn_mail.emails.is_draft", false);
     } else if (folder === "sent") {
-      baseQuery = baseQuery
-        .where("rasn_mail.emails.sender_id", userId)
-        .where("rasn_mail.emails.is_draft", false)
-        .where("rasn_mail.emails.is_deleted", false)
-        .where((builder) => {
-          // Email benar-benar sudah dikirim (tidak dihapus dengan cara apapun oleh sender)
-          builder.whereNotExists((subBuilder) => {
+      baseQuery = baseQuery.where((builder) => {
+        builder
+          .where("eua.folder", "sent") // Normal sent emails
+          .orWhere((subBuilder) => {
+            // ALSO include self-sent emails from inbox
             subBuilder
-              .select(1)
-              .from("rasn_mail.email_deletions as ed")
-              .whereRaw("ed.email_id = rasn_mail.emails.id")
-              .where("ed.user_id", userId)
-              .whereIn("ed.deletion_type", ["trash", "permanent"])
-              .whereNull("ed.restored_at");
+              .where("eua.folder", "inbox")
+              .where("rasn_mail.emails.sender_id", userId)
+              .where("eua.user_id", userId);
           });
-        });
+      });
     } else if (folder === "drafts") {
-      baseQuery = baseQuery
+      // Special handling untuk drafts - fallback ke emails table jika email_user_actions belum ada
+      const draftQuery = Email.query()
+        .join(
+          "public.users as sender",
+          "rasn_mail.emails.sender_id",
+          "sender.custom_id"
+        )
         .where("rasn_mail.emails.sender_id", userId)
         .where("rasn_mail.emails.is_draft", true)
         .where("rasn_mail.emails.is_deleted", false);
-    } else if (folder === "starred") {
-      return this.getStarredEmails(userId, { page, limit, search, unreadOnly });
-    } else if (folder === "archive") {
-      baseQuery = baseQuery
-        .join(
-          "rasn_mail.recipients",
-          "rasn_mail.emails.id",
-          "rasn_mail.recipients.email_id"
-        )
-        .where("rasn_mail.recipients.recipient_id", userId)
-        .where("rasn_mail.recipients.folder", "archive")
-        .where("rasn_mail.recipients.is_deleted", false)
-        .where("rasn_mail.emails.is_draft", false)
-        .where("rasn_mail.emails.is_deleted", false);
-    } else if (folder === "spam") {
-      baseQuery = baseQuery
-        .join(
-          "rasn_mail.recipients",
-          "rasn_mail.emails.id",
-          "rasn_mail.recipients.email_id"
-        )
-        .where("rasn_mail.recipients.recipient_id", userId)
-        .where("rasn_mail.recipients.folder", "spam")
-        .where("rasn_mail.recipients.is_deleted", false)
-        .where("rasn_mail.emails.is_draft", false)
-        .where("rasn_mail.emails.is_deleted", false);
-    } else if (folder === "label") {
-      if (!labelId) {
-        throw new Error("Label ID required for label folder");
+
+      // Apply search dan pagination ke draft query
+      if (search) {
+        draftQuery.where((builder) => {
+          builder
+            .where("rasn_mail.emails.subject", "ilike", `%${search}%`)
+            .orWhere("rasn_mail.emails.content", "ilike", `%${search}%`)
+            .orWhere("sender.username", "ilike", `%${search}%`);
+        });
       }
 
+      // Count drafts
+      const draftCountQuery = draftQuery.clone().count("* as total").first();
+      const { total } = await draftCountQuery;
+
+      // Get draft data
+      const draftResults = await draftQuery
+        .select([
+          "rasn_mail.emails.*",
+          "sender.username as sender_name",
+          "sender.email as sender_email",
+          "sender.image as sender_image",
+        ])
+        .orderBy("rasn_mail.emails.created_at", "desc")
+        .limit(limit)
+        .offset((page - 1) * limit);
+
+      // Format draft results
+      const finalEmails = draftResults.map((email) => ({
+        ...email,
+        is_read: true, // Drafts considered read by sender
+        read_at: email.created_at,
+        user_folder: "drafts",
+        is_starred: false,
+        starred_at: null,
+      }));
+
+      return {
+        emails: finalEmails,
+        total: parseInt(total),
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit),
+      };
+    } else if (folder === "archive") {
       baseQuery = baseQuery
-        .join(
-          "rasn_mail.email_labels as el",
-          "rasn_mail.emails.id",
-          "el.email_id"
-        )
-        .where("el.label_id", labelId)
-        .where("el.user_id", userId)
-        .where("rasn_mail.emails.is_draft", false)
-        .where("rasn_mail.emails.is_deleted", false)
-        .where((builder) => {
-          builder
-            .where("rasn_mail.emails.sender_id", userId)
-            .orWhereExists((subBuilder) => {
-              subBuilder
-                .select(1)
-                .from("rasn_mail.recipients as r")
-                .whereRaw("r.email_id = rasn_mail.emails.id")
-                .where("r.recipient_id", userId)
-                .where("r.is_deleted", false);
-            });
-        });
+        .where("eua.folder", "archive")
+        .where("rasn_mail.emails.is_draft", false);
     } else if (folder === "trash") {
+      baseQuery = baseQuery.where("eua.folder", "trash");
+    } else if (folder === "spam") {
       baseQuery = baseQuery
-        .leftJoin(
-          "rasn_mail.recipients",
-          "rasn_mail.emails.id",
-          "rasn_mail.recipients.email_id"
-        )
-        .leftJoin("rasn_mail.email_deletions as ed", function () {
-          this.on("rasn_mail.emails.id", "=", "ed.email_id").andOn(
-            "ed.user_id",
+        .where("eua.folder", "spam")
+        .where("rasn_mail.emails.is_draft", false);
+    } else if (folder === "starred") {
+      // Starred dari semua folder (exclude deleted folders)
+      baseQuery = excludeDeletedFolders(
+        baseQuery
+          .where("eua.is_starred", true)
+          .where("rasn_mail.emails.is_draft", false)
+      );
+    } else if (folder === "important") {
+      // Important emails (high priority OR important label)
+      baseQuery = baseQuery
+        .leftJoin("rasn_mail.email_labels as el", function () {
+          this.on("rasn_mail.emails.id", "=", "el.email_id").andOn(
+            "el.user_id",
             "=",
             Email.knex().raw("?", [userId])
           );
         })
-        .where((builder) => {
-          builder
-            .where((subBuilder) => {
-              // Email di trash sebagai recipient
-              subBuilder
-                .where("rasn_mail.recipients.recipient_id", userId)
-                .where("rasn_mail.recipients.folder", "trash")
-                .where("rasn_mail.recipients.is_deleted", true);
-            })
-            .orWhere((subBuilder) => {
-              // ATAU email di trash berdasarkan email_deletions
-              subBuilder
-                .where("ed.user_id", userId)
-                .where("ed.deletion_type", "trash")
-                .whereNull("ed.restored_at");
-            });
-        });
-    } else if (folder === "important") {
-      baseQuery = baseQuery
-        .leftJoin(
-          "rasn_mail.email_labels as el",
-          "rasn_mail.emails.id",
-          "el.email_id"
-        )
         .leftJoin("rasn_mail.labels as l", function () {
           this.on("el.label_id", "=", "l.id").andOn(
             "l.name",
@@ -366,24 +406,31 @@ class Email extends Model {
         })
         .where((builder) => {
           builder
-            .where("rasn_mail.emails.sender_id", userId)
-            .orWhereExists((subBuilder) => {
-              subBuilder
-                .select(1)
-                .from("rasn_mail.recipients as r")
-                .whereRaw("r.email_id = rasn_mail.emails.id")
-                .where("r.recipient_id", userId)
-                .whereNotIn("r.folder", ["trash", "spam"])
-                .where("r.is_deleted", false);
-            });
-        })
-        .where((builder) => {
-          builder
             .where("rasn_mail.emails.priority", "high")
             .orWhere("l.name", "important");
+        });
+
+      baseQuery = excludeDeletedFolders(
+        baseQuery.where("rasn_mail.emails.is_draft", false)
+      );
+    } else if (folder === "label") {
+      // Specific label
+      if (!labelId) {
+        throw new Error("Label ID required for label folder");
+      }
+      baseQuery = baseQuery
+        .join("rasn_mail.email_labels as el", function () {
+          this.on("rasn_mail.emails.id", "=", "el.email_id").andOn(
+            "el.user_id",
+            "=",
+            Email.knex().raw("?", [userId])
+          );
         })
-        .where("rasn_mail.emails.is_draft", false)
-        .where("rasn_mail.emails.is_deleted", false);
+        .where("el.label_id", labelId);
+
+      baseQuery = excludeDeletedFolders(
+        baseQuery.where("rasn_mail.emails.is_draft", false)
+      );
     }
 
     // 3. Apply search filter
@@ -396,23 +443,12 @@ class Email extends Model {
       });
     }
 
-    // 4. Apply unread filter - hanya untuk folder yang relevan
-    if (unreadOnly && ["inbox", "archive", "spam"].includes(folder)) {
-      baseQuery = baseQuery.where("rasn_mail.recipients.is_read", false);
+    // 4. Apply unread filter
+    if (unreadOnly) {
+      baseQuery = baseQuery.where("eua.is_read", false);
     }
 
-    // ✅ KHUSUS: Handle unread filter untuk sent emails menggunakan subquery
-    if (unreadOnly && folder === "sent") {
-      baseQuery = baseQuery.whereExists((subBuilder) => {
-        subBuilder
-          .select(1)
-          .from("rasn_mail.recipients as r")
-          .whereRaw("r.email_id = rasn_mail.emails.id")
-          .where("r.is_read", false);
-      });
-    }
-
-    // ✅ PERBAIKAN: Count dengan DISTINCT untuk menghindari duplicate dari JOIN
+    // 5. Get count dengan DISTINCT untuk avoid duplicates dari JOINs
     const countQuery = baseQuery
       .clone()
       .clearSelect()
@@ -421,37 +457,31 @@ class Email extends Model {
 
     const { total } = await countQuery;
 
-    // ✅ PERBAIKAN: Data query dengan proper select dan distinct + recipient info
-    let selectColumns = [
+    // 6. Get data with user action info - DISTINCT untuk avoid duplicates
+    const selectColumns = [
       "rasn_mail.emails.*",
       "sender.username as sender_name",
       "sender.email as sender_email",
       "sender.image as sender_image",
+      "eua.is_read",
+      "eua.read_at",
+      "eua.folder as user_folder",
+      "eua.is_starred",
+      "eua.starred_at",
     ];
-
-    // ✅ TAMBAHAN: Include recipient info untuk folder yang membutuhkan
-    if (["inbox", "archive", "spam", "trash"].includes(folder)) {
-      selectColumns.push(
-        "rasn_mail.recipients.is_read",
-        "rasn_mail.recipients.read_at",
-        "rasn_mail.recipients.folder as recipient_folder",
-        "rasn_mail.recipients.is_deleted as recipient_deleted"
-      );
-    }
 
     const dataQuery = baseQuery
       .clone()
       .select(selectColumns)
-      .distinct("rasn_mail.emails.id", "rasn_mail.emails.created_at") // Include order by columns in distinct
+      .distinct("rasn_mail.emails.id", "rasn_mail.emails.created_at") // DISTINCT untuk avoid duplicates
       .orderBy("rasn_mail.emails.created_at", "desc")
       .limit(limit)
       .offset((page - 1) * limit);
 
-    // Get email IDs and basic info
     const emailResults = await dataQuery;
     const emailIds = emailResults.map((email) => email.id);
 
-    // ✅ PERBAIKAN: Fetch full email data dengan relations secara terpisah
+    // 7. Fetch full email data dengan relations
     const emails =
       emailIds.length > 0
         ? await Email.query()
@@ -462,55 +492,43 @@ class Email extends Model {
             .orderBy("created_at", "desc")
         : [];
 
-    // ✅ PERBAIKAN: Merge basic info + recipient status dari join query dengan full data
+    // 8. Merge user action data dengan email data
     const finalEmails = emails.map((email) => {
-      const basicInfo = emailResults.find((r) => r.id === email.id);
+      const userActionInfo = emailResults.find((r) => r.id === email.id);
 
-      // Merge recipient status untuk folder yang relevant
-      let mergedEmail = {
+      let result = {
         ...email,
-        sender_name: basicInfo?.sender_name,
-        sender_email: basicInfo?.sender_email,
-        sender_image: basicInfo?.sender_image,
+        sender_name: userActionInfo?.sender_name,
+        sender_email: userActionInfo?.sender_email,
+        sender_image: userActionInfo?.sender_image,
+        // User-specific data dari email_user_actions
+        is_read: userActionInfo?.is_read || false,
+        read_at: userActionInfo?.read_at,
+        user_folder: userActionInfo?.user_folder,
+        is_starred: userActionInfo?.is_starred || false,
+        starred_at: userActionInfo?.starred_at,
       };
 
-      // ✅ TAMBAHAN: Set recipient status dari join query untuk current user
-      if (["inbox", "archive", "spam", "trash"].includes(folder) && basicInfo) {
-        mergedEmail.is_read = basicInfo.is_read;
-        mergedEmail.read_at = basicInfo.read_at;
-        mergedEmail.recipient_folder = basicInfo.recipient_folder;
-        mergedEmail.recipient_deleted = basicInfo.recipient_deleted;
-      } else if (folder === "sent") {
-        // ✅ KHUSUS UNTUK SENT: Tambahkan delivery information
-        const recipients = email.recipients || [];
-        const totalRecipients = recipients.length;
-        const readCount = recipients.filter((r) => r.is_read).length;
-        const unreadCount = totalRecipients - readCount;
-
-        mergedEmail.delivery_status = {
-          total_recipients: totalRecipients,
-          read_count: readCount,
-          unread_count: unreadCount,
+      // Add delivery info untuk sent emails
+      if (folder === "sent") {
+        const activeRecipients =
+          email.recipients?.filter((r) => !r.is_deleted) || [];
+        result.delivery_status = {
+          total_recipients: activeRecipients.length,
+          read_count: activeRecipients.filter((r) => r.is_read).length,
+          unread_count: activeRecipients.filter((r) => !r.is_read).length,
           read_percentage:
-            totalRecipients > 0
-              ? Math.round((readCount / totalRecipients) * 100)
+            activeRecipients.length > 0
+              ? Math.round(
+                  (activeRecipients.filter((r) => r.is_read).length /
+                    activeRecipients.length) *
+                    100
+                )
               : 0,
         };
-
-        // Untuk sent emails, is_read menunjukkan apakah SEMUA recipient sudah baca
-        mergedEmail.is_read = unreadCount === 0 && totalRecipients > 0;
-        mergedEmail.read_at = email.sent_at || email.created_at;
-        mergedEmail.recipient_folder = folder;
-        mergedEmail.recipient_deleted = false;
-      } else if (["drafts"].includes(folder)) {
-        // ✅ TAMBAHAN: Untuk drafts, set default values karena tidak ada recipient info
-        mergedEmail.is_read = true; // Draft emails are considered "read" by sender
-        mergedEmail.read_at = email.created_at;
-        mergedEmail.recipient_folder = folder;
-        mergedEmail.recipient_deleted = false;
       }
 
-      return mergedEmail;
+      return result;
     });
 
     return {
