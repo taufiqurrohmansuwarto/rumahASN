@@ -1,3 +1,4 @@
+const EmailUserAction = require("@/models/rasn_mail/email-user-actions.model");
 const Email = require("@/models/rasn_mail/emails.model");
 const Recipient = require("@/models/rasn_mail/recipients.model");
 
@@ -97,35 +98,11 @@ class EmailService {
 
   // Get user's starred emails
   static async getUserStarred(userId, options = {}) {
-    try {
-      console.log(
-        "Getting starred emails for user:",
-        userId,
-        "options:",
-        options
-      );
-
-      const result = await Email.getStarredEmails(userId, options);
-
-      console.log("Starred emails result:", {
-        totalEmails: result.emails?.length || 0,
-        total: result.total,
-        page: result.page,
-      });
-
-      return result;
-    } catch (error) {
-      console.error("Error in getUserStarred:", error);
-
-      // ✅ FALLBACK: Return empty result instead of throwing
-      return {
-        emails: [],
-        total: 0,
-        page: options.page || 1,
-        limit: options.limit || 25,
-        totalPages: 0,
-      };
-    }
+    return Email.getUserEmails({
+      userId,
+      folder: "starred",
+      ...options,
+    });
   }
 
   // Get email by ID with user context
@@ -258,54 +235,23 @@ class EmailService {
   // Toggle star
   static async toggleStar(emailId, userId) {
     try {
-      // First check if user is sender or recipient
-      const email = await Email.query().findById(emailId);
-      if (!email) {
-        throw new Error("Email not found");
-      }
-
-      // Check if user is sender
-      const isSender = email.sender_id === userId;
-
-      // Check if user is recipient
-      const recipient = await Recipient.query()
-        .where("email_id", emailId)
-        .where("recipient_id", userId)
+      const userAction = await EmailUserAction.query()
+        .where({
+          email_id: emailId,
+          user_id: userId,
+        })
         .first();
 
-      if (!isSender && !recipient) {
-        throw new Error("User has no access to this email");
+      if (!userAction) {
+        throw new Error("User has no action on this email");
       }
 
-      // If user is recipient, toggle star on recipient record
-      if (recipient) {
-        await recipient.toggleStar();
-        return {
-          success: true,
-          is_starred: !recipient.is_starred,
-          message: !recipient.is_starred ? "Email starred" : "Email unstarred",
-        };
-      }
-
-      // If user is sender but not recipient (sent email), create recipient record
-      if (isSender && !recipient) {
-        await Recipient.query().insert({
-          email_id: emailId,
-          recipient_id: userId,
-          type: "to",
-          is_starred: true,
-          folder: "sent", // Sender sees it in sent folder
-          is_read: true,
-        });
-
-        return {
-          success: true,
-          is_starred: true,
-          message: "Email starred",
-        };
-      }
-
-      throw new Error("Unable to toggle star");
+      await userAction.toggleStar();
+      return {
+        success: true,
+        is_starred: !userAction.is_starred,
+        message: !userAction.is_starred ? "Email starred" : "Email unstarred",
+      };
     } catch (error) {
       console.error("Error toggling star:", error);
       throw error;
@@ -314,14 +260,14 @@ class EmailService {
 
   static async getStarStatus(emailId, userId) {
     try {
-      const recipient = await Recipient.query()
+      const userAction = await EmailUserAction.query()
         .where("email_id", emailId)
-        .where("recipient_id", userId)
+        .where("user_id", userId)
         .first();
 
       return {
         success: true,
-        is_starred: recipient?.is_starred || false,
+        is_starred: userAction?.is_starred || false,
       };
     } catch (error) {
       console.error("Error getting star status:", error);
