@@ -6,8 +6,7 @@ import {
   QueryClient,
   QueryClientProvider,
 } from "@tanstack/react-query";
-import { ConfigProvider, Grid } from "antd";
-import id from "antd/locale/id_ID";
+import { ConfigProvider } from "antd";
 import { RBACProvider } from "context/RBACContext";
 import { SessionProvider, signIn, useSession } from "next-auth/react";
 import Head from "next/head";
@@ -20,71 +19,9 @@ import "antd/dist/reset.css";
 import dayjs from "dayjs";
 import "dayjs/locale/id";
 import relativeTime from "dayjs/plugin/relativeTime";
-import { createStyles } from "antd-style";
-
-const useStyle = createStyles(({ prefixCls, css }) => ({
-  linearGradientButton: css`
-    &.${prefixCls}-btn-primary:not([disabled]):not(
-        .${prefixCls}-btn-dangerous
-      ) {
-      > span {
-        position: relative;
-      }
-
-      &::before {
-        content: "";
-        background: linear-gradient(135deg, #d4380d, #fa8c16);
-        position: absolute;
-        inset: -1px;
-        opacity: 1;
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        border-radius: inherit;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-      }
-
-      &:hover::before {
-        opacity: 0.9;
-        box-shadow: 0 4px 8px rgba(212, 56, 13, 0.4);
-        transform: translateY(-1px);
-      }
-
-      &:active::before {
-        transform: scale(0.98);
-        box-shadow: 0 1px 2px rgba(212, 56, 13, 0.3);
-      }
-
-      &::after {
-        content: "";
-        position: absolute;
-        inset: 0;
-        background: radial-gradient(
-          circle at center,
-          rgba(255, 255, 255, 0.3) 0%,
-          transparent 100%
-        );
-        opacity: 0;
-        transition: opacity 0.3s;
-        border-radius: inherit;
-      }
-
-      &:active::after {
-        opacity: 1;
-        animation: ripple 0.6s ease-out;
-      }
-
-      @keyframes ripple {
-        from {
-          transform: scale(0);
-          opacity: 1;
-        }
-        to {
-          transform: scale(2);
-          opacity: 0;
-        }
-      }
-    }
-  `,
-}));
+import { useAntdConfig } from "src/styles/rasn.theme";
+import { useGmailConfig } from "src/styles/gmail.styles";
+import { useRouter } from "next/router";
 
 // check user role and organization start with 123
 function Auth({ children, action, subject }) {
@@ -127,12 +64,19 @@ function Auth({ children, action, subject }) {
 }
 
 function MyApp({ Component, pageProps: { session, ...pageProps } }) {
+  const router = useRouter();
   const [queryClient] = useState(() => new QueryClient());
   const getLayout = Component.getLayout || ((page) => page);
 
-  const breakPoint = Grid.useBreakpoint();
+  const antdConfig = useAntdConfig();
+  const gmailConfig = useGmailConfig();
 
-  const { styles } = useStyle();
+  const getThemeConfig = () => {
+    if (router.pathname.includes("/mail")) {
+      return gmailConfig;
+    }
+    return antdConfig;
+  };
 
   return (
     <>
@@ -149,22 +93,7 @@ function MyApp({ Component, pageProps: { session, ...pageProps } }) {
   gtag('config', 'G-Q1GNKXN1MQ');
                   `}
       </Script>
-      <ConfigProvider
-        button={{
-          className: styles.linearGradientButton,
-        }}
-        theme={{
-          components: {
-            Card: {
-              paddingLG: breakPoint.xs ? 14 : 24,
-            },
-          },
-          token: {
-            colorPrimary: "#FA8C16",
-          },
-        }}
-        locale={id}
-      >
+      <ConfigProvider {...getThemeConfig()}>
         <SessionProvider
           session={session}
           baseUrl="/helpdesk"

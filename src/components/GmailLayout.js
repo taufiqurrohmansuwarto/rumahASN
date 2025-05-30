@@ -1,9 +1,9 @@
 import {
-  useEmailStats,
-  useUserLabels,
   useCreateLabel,
-  useUpdateLabel,
   useDeleteLabel,
+  useEmailStats,
+  useUpdateLabel,
+  useUserLabels,
 } from "@/hooks/useEmails";
 import {
   BellOutlined,
@@ -24,29 +24,29 @@ import {
   UpOutlined,
   UserOutlined,
 } from "@ant-design/icons";
-import { ProConfigProvider, ProLayout } from "@ant-design/pro-components";
+import { ProLayout } from "@ant-design/pro-components";
 import {
   Badge,
   Button,
+  ColorPicker,
   ConfigProvider,
   Dropdown,
-  Input,
-  Space,
-  Typography,
-  Modal,
-  Form,
-  ColorPicker,
-  message,
-  List,
-  Popconfirm,
-  Tabs,
   Empty,
+  Form,
+  Input,
+  List,
+  Modal,
+  Popconfirm,
+  Space,
+  Tabs,
   Tag,
+  Typography,
 } from "antd";
 import frFR from "antd/lib/locale/id_ID";
 import { signOut, useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import { useState } from "react";
+import { gmailToken } from "src/styles/gmail.styles";
 import MegaMenuTop from "./MegaMenu/MegaMenuTop";
 import NotifikasiASNConnect from "./Notification/NotifikasiASNConnect";
 import NotifikasiForumKepegawaian from "./Notification/NotifikasiForumKepegawaian";
@@ -175,7 +175,7 @@ function GmailLayout({
               <Badge
                 count={emailStats.data.unreadCount}
                 size="small"
-                style={{ backgroundColor: "#EA4335" }}
+                style={{ backgroundColor: "#1a73e8" }}
               />
             </Space>
           ) : (
@@ -296,614 +296,578 @@ function GmailLayout({
     }
   };
 
-  const token = {
-    header: {
-      colorBgHeader: "#FFFFFF",
-      colorHeaderTitle: "#5F6368",
-    },
-    bgLayout: "#FFFFFF",
-    colorPrimary: "#EA4335",
-    sider: {
-      colorBgCollapsedButton: "#FFFFFF",
-      colorTextCollapsedButton: "#5F6368",
-      colorTextCollapsedButtonHover: "#202124",
-      colorBgMenuItemActive: "#FCE8E6",
-      colorTextMenuTitle: "#5F6368",
-      colorTextMenuItemHover: "#202124",
-      colorTextMenuSelected: "#D93025",
-      colorTextMenuActive: "#D93025",
-      colorBgMenuItemHover: "#F1F3F4",
-      colorBgMenuItemSelected: "#FCE8E6",
-      colorBgMenuItemCollapsedElevated: "#FFFFFF",
-      colorTextMenu: "#5F6368",
-      colorBgMenu: "#FFFFFF",
-      colorTextMenuSecondary: "#5F6368",
-      colorMenuItemDivider: "#E8EAED",
-    },
-  };
-
   return (
     <div style={{ height: "100vh", overflow: "auto" }}>
-      <ConfigProvider locale={frFR} theme={{ token }}>
-        <ProConfigProvider>
-          <ProLayout
-            title="Mail ASN"
-            logo={<MailOutlined style={{ color: "#EA4335" }} />}
-            // Layout configuration
-            layout="mix"
-            navTheme="light"
-            colorPrimary="#EA4335"
-            fixedHeader
-            fixSiderbar
-            // Collapse configuration
-            collapsed={collapsed}
-            onCollapse={setCollapsed}
-            // Menu configuration dengan flat structure
-            route={{
-              routes: getAllRoutes(),
-            }}
-            selectedKeys={[active]}
-            onMenuHeaderClick={(e) => console.log("Menu header clicked", e)}
-            menuItemRender={(item, dom) => (
-              <div onClick={() => handleMenuClick({ key: item.key })}>
-                {dom}
-              </div>
-            )}
-            // Header content dengan search
-            headerContentRender={() => {
-              if (showSearchBar) {
-                return (
-                  <div
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      width: "100%",
-                    }}
-                  >
-                    <Search
-                      placeholder="Cari email..."
-                      allowClear
-                      onSearch={handleSearch}
-                      style={{
-                        maxWidth: 400,
-                        marginLeft: 24,
-                        marginRight: "auto",
-                      }}
-                      enterButton={<SearchOutlined />}
-                    />
-                  </div>
-                );
-              }
-              return null;
-            }}
-            // Menu extra render untuk compose button
-            menuExtraRender={({ collapsed, isMobile }) => {
-              if (collapsed) {
-                return (
-                  <div style={{ textAlign: "center", marginBottom: 16 }}>
-                    <Button
-                      onClick={handleCompose}
-                      shape="circle"
-                      size="large"
-                      icon={<EditOutlined />}
-                      type="primary"
-                    />
-                  </div>
-                );
-              } else {
-                return (
-                  <div style={{ padding: "0 16px", marginBottom: 16 }}>
-                    <Button
-                      onClick={handleCompose}
-                      shape="round"
-                      icon={<EditOutlined />}
-                      block
-                      type="primary"
-                      size="large"
-                      style={{ fontWeight: "500" }}
-                    >
-                      Tulis Email
-                    </Button>
-                  </div>
-                );
-              }
-            }}
-            // Actions render
-            actionsRender={() => [
-              <NotifikasiKepegawaian
-                key="kepegawaian"
-                url="kepegawaian"
-                title="Inbox Kepegawaian"
-              />,
-              <NotifikasiPrivateMessage
-                key="private-message"
-                url="/mails"
-                title="Inbox Pesan Pribadi"
-              />,
-              <NotifikasiASNConnect
-                key="asn-connect"
-                url="asn-connect"
-                title="Inbox ASN Connect"
-              />,
-              <NotifikasiForumKepegawaian
-                key="forum-kepegawaian"
-                url="forum-kepegawaian"
-                title="Inbox Forum Kepegawaian"
-              />,
-              <Button
-                key="mail-settings"
-                type="text"
-                icon={<SettingOutlined />}
-                onClick={() => router.push("/mails/settings")}
-                title="Pengaturan Mail"
-              />,
-              <MegaMenuTop key="mega-menu" url="" title="Menu" />,
-            ]}
-            // Avatar props
-            avatarProps={{
-              src: data?.user?.image,
-              size: "large",
-              render: (props, dom) => (
-                <Dropdown
-                  menu={{
-                    onClick: (e) => {
-                      if (e.key === "logout") signOut();
-                      if (e.key === "profile") router.push("/settings/profile");
-                      if (e.key === "mail-settings")
-                        router.push("/mails/settings");
-                    },
-                    items: [
-                      {
-                        key: "profile",
-                        icon: <UserOutlined />,
-                        label: "Profil",
-                      },
-                      {
-                        key: "mail-settings",
-                        icon: <SettingOutlined />,
-                        label: "Pengaturan Mail",
-                      },
-                      {
-                        type: "divider",
-                      },
-                      {
-                        key: "logout",
-                        icon: <LogoutOutlined />,
-                        label: "Keluar",
-                      },
-                    ],
+      <ConfigProvider locale={frFR}>
+        <ProLayout
+          token={gmailToken}
+          title="Mail ASN"
+          logo={<MailOutlined style={{ color: "#1a73e8" }} />}
+          // Layout configuration
+          layout="mix"
+          navTheme="light"
+          colorPrimary="#1a73e8"
+          fixedHeader
+          fixSiderbar
+          // Collapse configuration
+          collapsed={collapsed}
+          onCollapse={setCollapsed}
+          // Menu configuration dengan flat structure
+          route={{
+            routes: getAllRoutes(),
+          }}
+          selectedKeys={[active]}
+          onMenuHeaderClick={(e) => console.log("Menu header clicked", e)}
+          menuItemRender={(item, dom) => (
+            <div onClick={() => handleMenuClick({ key: item.key })}>{dom}</div>
+          )}
+          // Header content dengan search
+          headerContentRender={() => {
+            if (showSearchBar) {
+              return (
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    width: "100%",
                   }}
                 >
-                  {dom}
-                </Dropdown>
-              ),
-            }}
-            // Token untuk styling
-            token={token}
-          >
-            {children}
+                  <Search
+                    placeholder="Cari email..."
+                    allowClear
+                    onSearch={handleSearch}
+                    style={{
+                      maxWidth: 400,
+                      marginLeft: 24,
+                      marginRight: "auto",
+                    }}
+                    enterButton={<SearchOutlined />}
+                  />
+                </div>
+              );
+            }
+            return null;
+          }}
+          // Menu extra render untuk compose button
+          menuExtraRender={({ collapsed, isMobile }) => {
+            if (collapsed) {
+              return (
+                <div style={{ textAlign: "center", marginBottom: 16 }}>
+                  <Button
+                    onClick={handleCompose}
+                    shape="circle"
+                    size="large"
+                    icon={<EditOutlined />}
+                    type="primary"
+                  />
+                </div>
+              );
+            } else {
+              return (
+                <div style={{ padding: "0 16px", marginBottom: 16 }}>
+                  <Button
+                    onClick={handleCompose}
+                    shape="round"
+                    icon={<EditOutlined />}
+                    block
+                    type="primary"
+                    size="large"
+                    style={{ fontWeight: "500" }}
+                  >
+                    Tulis Email
+                  </Button>
+                </div>
+              );
+            }
+          }}
+          // Actions render
+          actionsRender={() => [
+            <NotifikasiKepegawaian
+              key="kepegawaian"
+              url="kepegawaian"
+              title="Inbox Kepegawaian"
+            />,
+            <NotifikasiPrivateMessage
+              key="private-message"
+              url="/mails"
+              title="Inbox Pesan Pribadi"
+            />,
+            <NotifikasiASNConnect
+              key="asn-connect"
+              url="asn-connect"
+              title="Inbox ASN Connect"
+            />,
+            <NotifikasiForumKepegawaian
+              key="forum-kepegawaian"
+              url="forum-kepegawaian"
+              title="Inbox Forum Kepegawaian"
+            />,
+            <Button
+              key="mail-settings"
+              type="text"
+              icon={<SettingOutlined />}
+              onClick={() => router.push("/mails/settings")}
+              title="Pengaturan Mail"
+            />,
+            <MegaMenuTop key="mega-menu" url="" title="Menu" />,
+          ]}
+          // Avatar props
+          avatarProps={{
+            src: data?.user?.image,
+            size: "large",
+            render: (props, dom) => (
+              <Dropdown
+                menu={{
+                  onClick: (e) => {
+                    if (e.key === "logout") signOut();
+                    if (e.key === "profile") router.push("/settings/profile");
+                    if (e.key === "mail-settings")
+                      router.push("/mails/settings");
+                  },
+                  items: [
+                    {
+                      key: "profile",
+                      icon: <UserOutlined />,
+                      label: "Profil",
+                    },
+                    {
+                      key: "mail-settings",
+                      icon: <SettingOutlined />,
+                      label: "Pengaturan Mail",
+                    },
+                    {
+                      type: "divider",
+                    },
+                    {
+                      key: "logout",
+                      icon: <LogoutOutlined />,
+                      label: "Keluar",
+                    },
+                  ],
+                }}
+              >
+                {dom}
+              </Dropdown>
+            ),
+          }}
+          // Token untuk styling
+        >
+          {children}
 
-            {/* Label Management Modal */}
-            <Modal
-              title={
-                <Space>
-                  <TagOutlined style={{ color: "#1890ff" }} />
-                  Kelola Label
-                </Space>
-              }
-              open={labelModal}
-              onCancel={handleLabelModalClose}
-              footer={null}
-              width={600}
-              destroyOnClose
-            >
-              <Tabs
-                activeKey={activeTab}
-                onChange={setActiveTab}
-                items={[
-                  {
-                    key: "create",
-                    label: (
-                      <Space>
-                        <PlusOutlined />
-                        Buat Label
-                      </Space>
-                    ),
-                    children: (
-                      <Form
-                        form={createLabelForm}
-                        layout="vertical"
-                        onFinish={handleCreateLabel}
-                        initialValues={{
-                          color: "#1890ff",
+          {/* Label Management Modal */}
+          <Modal
+            title={
+              <Space>
+                <TagOutlined style={{ color: "#1a73e8" }} />
+                Kelola Label
+              </Space>
+            }
+            open={labelModal}
+            onCancel={handleLabelModalClose}
+            footer={null}
+            width={600}
+            destroyOnClose
+          >
+            <Tabs
+              activeKey={activeTab}
+              onChange={setActiveTab}
+              items={[
+                {
+                  key: "create",
+                  label: (
+                    <Space>
+                      <PlusOutlined />
+                      Buat Label
+                    </Space>
+                  ),
+                  children: (
+                    <Form
+                      form={createLabelForm}
+                      layout="vertical"
+                      onFinish={handleCreateLabel}
+                      initialValues={{
+                        color: "#1a73e8",
+                      }}
+                    >
+                      <Form.Item
+                        name="name"
+                        label="Nama Label"
+                        rules={[
+                          {
+                            required: true,
+                            message: "Nama label harus diisi",
+                          },
+                          {
+                            min: 2,
+                            message: "Nama label minimal 2 karakter",
+                          },
+                          {
+                            max: 50,
+                            message: "Nama label maksimal 50 karakter",
+                          },
+                          {
+                            pattern: /^[a-zA-Z0-9\s\-_]+$/,
+                            message:
+                              "Nama label hanya boleh mengandung huruf, angka, spasi, dan tanda hubung",
+                          },
+                        ]}
+                      >
+                        <Input
+                          placeholder="Masukkan nama label..."
+                          size="large"
+                          style={{ borderRadius: "6px" }}
+                        />
+                      </Form.Item>
+
+                      <Form.Item
+                        name="color"
+                        label="Warna Label"
+                        help="Pilih warna yang mudah dibedakan untuk mengkategorikan email"
+                        getValueFromEvent={(color) => {
+                          return color?.toHexString
+                            ? color.toHexString()
+                            : color;
                         }}
                       >
-                        <Form.Item
-                          name="name"
-                          label="Nama Label"
-                          rules={[
+                        <ColorPicker
+                          showText
+                          format="hex"
+                          size="large"
+                          style={{ width: "100%" }}
+                          presets={[
                             {
-                              required: true,
-                              message: "Nama label harus diisi",
-                            },
-                            {
-                              min: 2,
-                              message: "Nama label minimal 2 karakter",
-                            },
-                            {
-                              max: 50,
-                              message: "Nama label maksimal 50 karakter",
-                            },
-                            {
-                              pattern: /^[a-zA-Z0-9\s\-_]+$/,
-                              message:
-                                "Nama label hanya boleh mengandung huruf, angka, spasi, dan tanda hubung",
+                              label: "Rekomendasi",
+                              colors: [
+                                "#ff4d4f",
+                                "#fa8c16",
+                                "#faad14",
+                                "#52c41a",
+                                "#1890ff",
+                                "#722ed1",
+                                "#eb2f96",
+                                "#13c2c2",
+                                "#f5222d",
+                                "#fa541c",
+                                "#a0d911",
+                                "#2f54eb",
+                              ],
                             },
                           ]}
-                        >
-                          <Input
-                            placeholder="Masukkan nama label..."
-                            size="large"
+                        />
+                      </Form.Item>
+
+                      <Form.Item dependencies={["name", "color"]} noStyle>
+                        {({ getFieldValue }) => (
+                          <div style={{ marginBottom: "16px" }}>
+                            <Text
+                              strong
+                              style={{
+                                marginBottom: "8px",
+                                display: "block",
+                              }}
+                            >
+                              Preview:
+                            </Text>
+                            <div
+                              style={{
+                                padding: "12px 16px",
+                                backgroundColor: "#f8f9fa",
+                                borderRadius: "6px",
+                                border: "1px solid #e8e8e8",
+                              }}
+                            >
+                              <Space>
+                                <TagOutlined
+                                  style={{
+                                    color: getFieldValue("color") || "#1a73e8",
+                                    fontSize: "14px",
+                                  }}
+                                />
+                                <Text>
+                                  {getFieldValue("name") || "Nama Label"}
+                                </Text>
+                              </Space>
+                            </div>
+                          </div>
+                        )}
+                      </Form.Item>
+
+                      <Form.Item
+                        style={{ marginBottom: 0, textAlign: "right" }}
+                      >
+                        <Space>
+                          <Button
+                            onClick={() => createLabelForm.resetFields()}
                             style={{ borderRadius: "6px" }}
-                          />
-                        </Form.Item>
-
-                        <Form.Item
-                          name="color"
-                          label="Warna Label"
-                          help="Pilih warna yang mudah dibedakan untuk mengkategorikan email"
-                          getValueFromEvent={(color) => {
-                            return color?.toHexString
-                              ? color.toHexString()
-                              : color;
-                          }}
-                        >
-                          <ColorPicker
-                            showText
-                            format="hex"
-                            size="large"
-                            style={{ width: "100%" }}
-                            presets={[
-                              {
-                                label: "Rekomendasi",
-                                colors: [
-                                  "#ff4d4f",
-                                  "#fa8c16",
-                                  "#faad14",
-                                  "#52c41a",
-                                  "#1890ff",
-                                  "#722ed1",
-                                  "#eb2f96",
-                                  "#13c2c2",
-                                  "#f5222d",
-                                  "#fa541c",
-                                  "#a0d911",
-                                  "#2f54eb",
-                                ],
-                              },
-                            ]}
-                          />
-                        </Form.Item>
-
-                        <Form.Item dependencies={["name", "color"]} noStyle>
-                          {({ getFieldValue }) => (
-                            <div style={{ marginBottom: "16px" }}>
-                              <Text
-                                strong
-                                style={{
-                                  marginBottom: "8px",
-                                  display: "block",
-                                }}
-                              >
-                                Preview:
-                              </Text>
-                              <div
-                                style={{
-                                  padding: "12px 16px",
-                                  backgroundColor: "#f8f9fa",
-                                  borderRadius: "6px",
-                                  border: "1px solid #e8e8e8",
-                                }}
-                              >
-                                <Space>
+                          >
+                            Reset
+                          </Button>
+                          <Button
+                            type="primary"
+                            htmlType="submit"
+                            loading={createLabelMutation.isLoading}
+                            icon={<PlusOutlined />}
+                            style={{ borderRadius: "6px" }}
+                          >
+                            Buat Label
+                          </Button>
+                        </Space>
+                      </Form.Item>
+                    </Form>
+                  ),
+                },
+                {
+                  key: "manage",
+                  label: (
+                    <Space>
+                      <TagOutlined />
+                      Kelola Label ({customLabels.length})
+                    </Space>
+                  ),
+                  children: (
+                    <div style={{ maxHeight: "400px", overflowY: "auto" }}>
+                      {customLabels.length > 0 ? (
+                        <List
+                          dataSource={customLabels}
+                          renderItem={(label) => (
+                            <List.Item
+                              actions={[
+                                <Button
+                                  key="edit"
+                                  type="text"
+                                  icon={<EditOutlined />}
+                                  onClick={() => startEditLabel(label)}
+                                  title="Edit label"
+                                />,
+                                <Popconfirm
+                                  key="delete"
+                                  title="Hapus label ini?"
+                                  description="Label akan dihapus dari semua email"
+                                  onConfirm={() => handleDeleteLabel(label.id)}
+                                  okText="Ya, Hapus"
+                                  cancelText="Batal"
+                                  okButtonProps={{ danger: true }}
+                                >
+                                  <Button
+                                    type="text"
+                                    icon={<DeleteOutlined />}
+                                    danger
+                                    title="Hapus label"
+                                    loading={deleteLabelMutation.isLoading}
+                                  />
+                                </Popconfirm>,
+                              ]}
+                            >
+                              <List.Item.Meta
+                                avatar={
                                   <TagOutlined
                                     style={{
-                                      color:
-                                        getFieldValue("color") || "#1890ff",
-                                      fontSize: "14px",
+                                      color: label.color,
+                                      fontSize: "16px",
                                     }}
                                   />
-                                  <Text>
-                                    {getFieldValue("name") || "Nama Label"}
+                                }
+                                title={
+                                  <Space>
+                                    <Text strong>{label.name}</Text>
+                                    <Tag
+                                      color={label.color}
+                                      style={{
+                                        fontSize: "12px",
+                                        borderRadius: "4px",
+                                      }}
+                                    >
+                                      {label.color}
+                                    </Tag>
+                                  </Space>
+                                }
+                                description={
+                                  <Text
+                                    type="secondary"
+                                    style={{ fontSize: "12px" }}
+                                  >
+                                    Dibuat{" "}
+                                    {new Date(
+                                      label.created_at
+                                    ).toLocaleDateString("id-ID")}
                                   </Text>
-                                </Space>
-                              </div>
-                            </div>
+                                }
+                              />
+                            </List.Item>
                           )}
-                        </Form.Item>
-
-                        <Form.Item
-                          style={{ marginBottom: 0, textAlign: "right" }}
+                        />
+                      ) : (
+                        <Empty
+                          image={Empty.PRESENTED_IMAGE_SIMPLE}
+                          description="Belum ada label custom"
+                          style={{ margin: "40px 0" }}
                         >
-                          <Space>
-                            <Button
-                              onClick={() => createLabelForm.resetFields()}
-                              style={{ borderRadius: "6px" }}
-                            >
-                              Reset
-                            </Button>
-                            <Button
-                              type="primary"
-                              htmlType="submit"
-                              loading={createLabelMutation.isLoading}
-                              icon={<PlusOutlined />}
-                              style={{ borderRadius: "6px" }}
-                            >
-                              Buat Label
-                            </Button>
-                          </Space>
-                        </Form.Item>
-                      </Form>
-                    ),
-                  },
-                  {
-                    key: "manage",
-                    label: (
-                      <Space>
-                        <TagOutlined />
-                        Kelola Label ({customLabels.length})
-                      </Space>
-                    ),
-                    children: (
-                      <div style={{ maxHeight: "400px", overflowY: "auto" }}>
-                        {customLabels.length > 0 ? (
-                          <List
-                            dataSource={customLabels}
-                            renderItem={(label) => (
-                              <List.Item
-                                actions={[
-                                  <Button
-                                    key="edit"
-                                    type="text"
-                                    icon={<EditOutlined />}
-                                    onClick={() => startEditLabel(label)}
-                                    title="Edit label"
-                                  />,
-                                  <Popconfirm
-                                    key="delete"
-                                    title="Hapus label ini?"
-                                    description="Label akan dihapus dari semua email"
-                                    onConfirm={() =>
-                                      handleDeleteLabel(label.id)
-                                    }
-                                    okText="Ya, Hapus"
-                                    cancelText="Batal"
-                                    okButtonProps={{ danger: true }}
-                                  >
-                                    <Button
-                                      type="text"
-                                      icon={<DeleteOutlined />}
-                                      danger
-                                      title="Hapus label"
-                                      loading={deleteLabelMutation.isLoading}
-                                    />
-                                  </Popconfirm>,
-                                ]}
-                              >
-                                <List.Item.Meta
-                                  avatar={
-                                    <TagOutlined
-                                      style={{
-                                        color: label.color,
-                                        fontSize: "16px",
-                                      }}
-                                    />
-                                  }
-                                  title={
-                                    <Space>
-                                      <Text strong>{label.name}</Text>
-                                      <Tag
-                                        color={label.color}
-                                        style={{
-                                          fontSize: "12px",
-                                          borderRadius: "4px",
-                                        }}
-                                      >
-                                        {label.color}
-                                      </Tag>
-                                    </Space>
-                                  }
-                                  description={
-                                    <Text
-                                      type="secondary"
-                                      style={{ fontSize: "12px" }}
-                                    >
-                                      Dibuat{" "}
-                                      {new Date(
-                                        label.created_at
-                                      ).toLocaleDateString("id-ID")}
-                                    </Text>
-                                  }
-                                />
-                              </List.Item>
-                            )}
-                          />
-                        ) : (
-                          <Empty
-                            image={Empty.PRESENTED_IMAGE_SIMPLE}
-                            description="Belum ada label custom"
-                            style={{ margin: "40px 0" }}
+                          <Button
+                            type="primary"
+                            icon={<PlusOutlined />}
+                            onClick={() => setActiveTab("create")}
                           >
-                            <Button
-                              type="primary"
-                              icon={<PlusOutlined />}
-                              onClick={() => setActiveTab("create")}
+                            Buat Label Pertama
+                          </Button>
+                        </Empty>
+                      )}
+                    </div>
+                  ),
+                },
+                ...(editingLabel
+                  ? [
+                      {
+                        key: "edit",
+                        label: (
+                          <Space>
+                            <EditOutlined />
+                            Edit &quot;{editingLabel.name}&quot;
+                          </Space>
+                        ),
+                        children: (
+                          <Form
+                            form={editLabelForm}
+                            layout="vertical"
+                            onFinish={handleEditLabel}
+                          >
+                            <Form.Item
+                              name="name"
+                              label="Nama Label"
+                              rules={[
+                                {
+                                  required: true,
+                                  message: "Nama label harus diisi",
+                                },
+                                {
+                                  min: 2,
+                                  message: "Nama label minimal 2 karakter",
+                                },
+                                {
+                                  max: 50,
+                                  message: "Nama label maksimal 50 karakter",
+                                },
+                                {
+                                  pattern: /^[a-zA-Z0-9\s\-_]+$/,
+                                  message:
+                                    "Nama label hanya boleh mengandung huruf, angka, spasi, dan tanda hubung",
+                                },
+                              ]}
                             >
-                              Buat Label Pertama
-                            </Button>
-                          </Empty>
-                        )}
-                      </div>
-                    ),
-                  },
-                  ...(editingLabel
-                    ? [
-                        {
-                          key: "edit",
-                          label: (
-                            <Space>
-                              <EditOutlined />
-                              Edit &quot;{editingLabel.name}&quot;
-                            </Space>
-                          ),
-                          children: (
-                            <Form
-                              form={editLabelForm}
-                              layout="vertical"
-                              onFinish={handleEditLabel}
+                              <Input
+                                placeholder="Masukkan nama label..."
+                                size="large"
+                                style={{ borderRadius: "6px" }}
+                              />
+                            </Form.Item>
+
+                            <Form.Item
+                              name="color"
+                              label="Warna Label"
+                              getValueFromEvent={(color) => {
+                                return color?.toHexString
+                                  ? color.toHexString()
+                                  : color;
+                              }}
                             >
-                              <Form.Item
-                                name="name"
-                                label="Nama Label"
-                                rules={[
+                              <ColorPicker
+                                showText
+                                format="hex"
+                                size="large"
+                                style={{ width: "100%" }}
+                                presets={[
                                   {
-                                    required: true,
-                                    message: "Nama label harus diisi",
-                                  },
-                                  {
-                                    min: 2,
-                                    message: "Nama label minimal 2 karakter",
-                                  },
-                                  {
-                                    max: 50,
-                                    message: "Nama label maksimal 50 karakter",
-                                  },
-                                  {
-                                    pattern: /^[a-zA-Z0-9\s\-_]+$/,
-                                    message:
-                                      "Nama label hanya boleh mengandung huruf, angka, spasi, dan tanda hubung",
+                                    label: "Rekomendasi",
+                                    colors: [
+                                      "#ff4d4f",
+                                      "#fa8c16",
+                                      "#faad14",
+                                      "#52c41a",
+                                      "#1890ff",
+                                      "#722ed1",
+                                      "#eb2f96",
+                                      "#13c2c2",
+                                      "#f5222d",
+                                      "#fa541c",
+                                      "#a0d911",
+                                      "#2f54eb",
+                                    ],
                                   },
                                 ]}
-                              >
-                                <Input
-                                  placeholder="Masukkan nama label..."
-                                  size="large"
-                                  style={{ borderRadius: "6px" }}
-                                />
-                              </Form.Item>
+                              />
+                            </Form.Item>
 
-                              <Form.Item
-                                name="color"
-                                label="Warna Label"
-                                getValueFromEvent={(color) => {
-                                  return color?.toHexString
-                                    ? color.toHexString()
-                                    : color;
-                                }}
-                              >
-                                <ColorPicker
-                                  showText
-                                  format="hex"
-                                  size="large"
-                                  style={{ width: "100%" }}
-                                  presets={[
-                                    {
-                                      label: "Rekomendasi",
-                                      colors: [
-                                        "#ff4d4f",
-                                        "#fa8c16",
-                                        "#faad14",
-                                        "#52c41a",
-                                        "#1890ff",
-                                        "#722ed1",
-                                        "#eb2f96",
-                                        "#13c2c2",
-                                        "#f5222d",
-                                        "#fa541c",
-                                        "#a0d911",
-                                        "#2f54eb",
-                                      ],
-                                    },
-                                  ]}
-                                />
-                              </Form.Item>
-
-                              <Form.Item
-                                dependencies={["name", "color"]}
-                                noStyle
-                              >
-                                {({ getFieldValue }) => (
-                                  <div style={{ marginBottom: "16px" }}>
-                                    <Text
-                                      strong
-                                      style={{
-                                        marginBottom: "8px",
-                                        display: "block",
-                                      }}
-                                    >
-                                      Preview:
-                                    </Text>
-                                    <div
-                                      style={{
-                                        padding: "12px 16px",
-                                        backgroundColor: "#f8f9fa",
-                                        borderRadius: "6px",
-                                        border: "1px solid #e8e8e8",
-                                      }}
-                                    >
-                                      <Space>
-                                        <TagOutlined
-                                          style={{
-                                            color:
-                                              getFieldValue("color") ||
-                                              editingLabel.color,
-                                            fontSize: "14px",
-                                          }}
-                                        />
-                                        <Text>
-                                          {getFieldValue("name") ||
-                                            editingLabel.name}
-                                        </Text>
-                                      </Space>
-                                    </div>
-                                  </div>
-                                )}
-                              </Form.Item>
-
-                              <Form.Item
-                                style={{ marginBottom: 0, textAlign: "right" }}
-                              >
-                                <Space>
-                                  <Button
-                                    onClick={() => {
-                                      setEditingLabel(null);
-                                      setActiveTab("manage");
+                            <Form.Item dependencies={["name", "color"]} noStyle>
+                              {({ getFieldValue }) => (
+                                <div style={{ marginBottom: "16px" }}>
+                                  <Text
+                                    strong
+                                    style={{
+                                      marginBottom: "8px",
+                                      display: "block",
                                     }}
-                                    style={{ borderRadius: "6px" }}
                                   >
-                                    Batal
-                                  </Button>
-                                  <Button
-                                    type="primary"
-                                    htmlType="submit"
-                                    loading={updateLabelMutation.isLoading}
-                                    icon={<EditOutlined />}
-                                    style={{ borderRadius: "6px" }}
+                                    Preview:
+                                  </Text>
+                                  <div
+                                    style={{
+                                      padding: "12px 16px",
+                                      backgroundColor: "#f8f9fa",
+                                      borderRadius: "6px",
+                                      border: "1px solid #e8e8e8",
+                                    }}
                                   >
-                                    Perbarui Label
-                                  </Button>
-                                </Space>
-                              </Form.Item>
-                            </Form>
-                          ),
-                        },
-                      ]
-                    : []),
-                ]}
-              />
-            </Modal>
-          </ProLayout>
-        </ProConfigProvider>
+                                    <Space>
+                                      <TagOutlined
+                                        style={{
+                                          color:
+                                            getFieldValue("color") ||
+                                            editingLabel.color,
+                                          fontSize: "14px",
+                                        }}
+                                      />
+                                      <Text>
+                                        {getFieldValue("name") ||
+                                          editingLabel.name}
+                                      </Text>
+                                    </Space>
+                                  </div>
+                                </div>
+                              )}
+                            </Form.Item>
+
+                            <Form.Item
+                              style={{ marginBottom: 0, textAlign: "right" }}
+                            >
+                              <Space>
+                                <Button
+                                  onClick={() => {
+                                    setEditingLabel(null);
+                                    setActiveTab("manage");
+                                  }}
+                                  style={{ borderRadius: "6px" }}
+                                >
+                                  Batal
+                                </Button>
+                                <Button
+                                  type="primary"
+                                  htmlType="submit"
+                                  loading={updateLabelMutation.isLoading}
+                                  icon={<EditOutlined />}
+                                  style={{ borderRadius: "6px" }}
+                                >
+                                  Perbarui Label
+                                </Button>
+                              </Space>
+                            </Form.Item>
+                          </Form>
+                        ),
+                      },
+                    ]
+                  : []),
+              ]}
+            />
+          </Modal>
+        </ProLayout>
       </ConfigProvider>
     </div>
   );
