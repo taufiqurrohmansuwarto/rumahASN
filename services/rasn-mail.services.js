@@ -130,6 +130,12 @@ export const moveToFolder = async (emailId, folder) => {
     .then((res) => res?.data);
 };
 
+export const updatePriority = async (emailId, priority) => {
+  return api
+    .put(`/emails/${emailId}`, { action: "priority", value: priority })
+    .then((res) => res?.data);
+};
+
 export const searchEmails = async (params) => {
   return api
     .get(`/search?${queryString.stringify(params)}`)

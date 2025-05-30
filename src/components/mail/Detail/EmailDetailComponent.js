@@ -4,6 +4,7 @@ import {
   useMarkAsUnread,
   useMoveToFolder,
   useToggleStar,
+  useUpdatePriority,
 } from "@/hooks/useEmails";
 import { Card, Empty, message, Spin } from "antd";
 import { useRouter } from "next/router";
@@ -28,6 +29,7 @@ const EmailDetailComponent = ({
   const moveToFolderMutation = useMoveToFolder();
   const markAsUnreadMutation = useMarkAsUnread();
   const markAsReadMutation = useMarkAsRead();
+  const updatePriorityMutation = useUpdatePriority();
 
   // Handlers
   const handleToggleStar = async () => {
@@ -39,10 +41,23 @@ const EmailDetailComponent = ({
     }
   };
 
+  const handleUpdatePriority = async (priority) => {
+    try {
+      await updatePriorityMutation.mutateAsync({
+        emailId: email.id,
+        priority,
+      });
+      message.success(`Berhasil mengubah prioritas email`);
+      onRefresh?.();
+    } catch (error) {
+      message.error("Gagal mengubah prioritas email");
+    }
+  };
+
   const handleMarkAsUnread = async () => {
     try {
       await markAsUnreadMutation.mutateAsync(email.id);
-      router.push("/mails/inbox");
+      message.success(`Berhasil menandai email belum dibaca`);
     } catch (error) {
       message.error("Gagal menandai email belum dibaca");
     }
@@ -51,6 +66,7 @@ const EmailDetailComponent = ({
   const handleMarkAsRead = async () => {
     try {
       await markAsReadMutation.mutateAsync(email.id);
+      message.success(`Berhasil menandai email sudah dibaca`);
       onRefresh?.();
     } catch (error) {
       message.error("Gagal menandai email sudah dibaca");
@@ -63,6 +79,8 @@ const EmailDetailComponent = ({
         emailId: email.id,
         folder,
       });
+      message.success(`Email dipindahkan ke ${folder}`);
+      router.push(`/mails/${folder}`);
       onRefresh?.();
     } catch (error) {
       message.error("Gagal memindahkan email ke folder");
@@ -83,9 +101,12 @@ const EmailDetailComponent = ({
 
   const handleDelete = async () => {
     try {
-      await deleteEmailMutation.mutateAsync(email.id);
+      await deleteEmailMutation.mutateAsync({
+        emailId: email.id,
+        permanent: false,
+      });
       message.success("Email dipindahkan ke trash");
-      router.push("/mails/inbox");
+      router.push("/mails/trash");
     } catch (error) {
       message.error("Gagal menghapus email");
     }
@@ -104,9 +125,17 @@ const EmailDetailComponent = ({
     }
   };
 
-  const handleFlag = () => {
-    // Implement flag functionality if needed
-    message.info("Fitur tandai penting belum tersedia");
+  const handleFlag = async () => {
+    try {
+      await updatePriorityMutation.mutateAsync({
+        emailId: email.id,
+        priority: "high",
+      });
+      message.success("Email ditandai sebagai penting");
+      onRefresh?.();
+    } catch (error) {
+      message.error("Gagal menandai email sebagai penting");
+    }
   };
 
   const handlePrint = () => {
@@ -171,6 +200,8 @@ const EmailDetailComponent = ({
           isMoveToFolderLoading={moveToFolderMutation.isLoading}
           recipients={email.recipients}
           onRefresh={onRefresh}
+          onUpdatePriority={handleUpdatePriority}
+          isUpdatePriorityLoading={updatePriorityMutation.isLoading}
         />
 
         {/* Email Content */}

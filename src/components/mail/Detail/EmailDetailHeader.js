@@ -10,7 +10,6 @@ import {
   MailOutlined,
   StarFilled,
   StarOutlined,
-  TagOutlined,
   UserOutlined,
 } from "@ant-design/icons";
 import {
@@ -31,6 +30,34 @@ import dayjs from "dayjs";
 import "dayjs/locale/id";
 import relativeTime from "dayjs/plugin/relativeTime";
 import EmailLabelSelector from "./EmailLabelSelector";
+
+// CSS untuk action buttons
+const actionButtonStyles = `
+  .action-button:hover {
+    background-color: #f5f5f5 !important;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+  .action-button:active {
+    transform: translateY(0);
+  }
+  .recipient-info-trigger:hover .anticon {
+    color: #1890ff !important;
+  }
+  .email-recipient-popover .ant-popover-content {
+    border-radius: 8px;
+  }
+`;
+
+// Inject styles
+if (typeof document !== "undefined") {
+  const styleElement = document.createElement("style");
+  styleElement.textContent = actionButtonStyles;
+  if (!document.head.querySelector("style[data-email-actions]")) {
+    styleElement.setAttribute("data-email-actions", "true");
+    document.head.appendChild(styleElement);
+  }
+}
 
 // Konfigurasi dayjs
 dayjs.extend(relativeTime);
@@ -82,6 +109,64 @@ const EmailPriority = ({ priority }) => {
   );
 };
 
+// Komponen untuk action buttons
+const EmailActionButtons = ({
+  email,
+  onToggleStar,
+  isStarLoading,
+  onToggleUnread,
+  isUnreadLoading,
+  onMoveToFolder,
+  isMoveToFolderLoading,
+  onRefresh,
+  onUpdatePriority,
+  isUpdatePriorityLoading,
+}) => {
+  return (
+    <div
+      style={{
+        background: "#fafafa",
+        borderRadius: "8px",
+        padding: "8px 12px",
+        marginBottom: "16px",
+        border: "1px solid #f0f0f0",
+      }}
+    >
+      <Flex justify="space-between" align="center">
+        <Space size={4}>
+          <StarButton
+            isStarred={email.is_starred}
+            onToggleStar={onToggleStar}
+            isLoading={isStarLoading}
+          />
+          <Divider
+            type="vertical"
+            style={{ height: "20px", margin: "0 4px" }}
+          />
+          <ReadStatusButton
+            onToggleUnread={onToggleUnread}
+            isUnreadLoading={isUnreadLoading}
+          />
+          <MoveToFolderButton
+            onMoveToFolder={onMoveToFolder}
+            isLoading={isMoveToFolderLoading}
+          />
+          <Divider
+            type="vertical"
+            style={{ height: "20px", margin: "0 4px" }}
+          />
+          <FlagPriorityButton
+            priority={email.priority}
+            onUpdatePriority={onUpdatePriority}
+            isLoading={isUpdatePriorityLoading}
+          />
+        </Space>
+        <EmailLabelSelector emailId={email.id} onRefresh={onRefresh} />
+      </Flex>
+    </div>
+  );
+};
+
 // Komponen untuk tombol bintang
 const StarButton = ({ isStarred, onToggleStar, isLoading }) => {
   return (
@@ -91,17 +176,20 @@ const StarButton = ({ isStarred, onToggleStar, isLoading }) => {
         size="small"
         icon={
           isStarred ? (
-            <StarFilled style={{ fontSize: "18px", color: "#faad14" }} />
+            <StarFilled style={{ fontSize: "16px", color: "#faad14" }} />
           ) : (
-            <StarOutlined style={{ fontSize: "18px" }} />
+            <StarOutlined style={{ fontSize: "16px", color: "#8c8c8c" }} />
           )
         }
         onClick={onToggleStar}
         loading={isLoading}
         style={{
-          padding: "8px",
-          borderRadius: "6px",
+          padding: "4px 6px",
+          height: "28px",
+          borderRadius: "4px",
+          transition: "all 0.2s ease",
         }}
+        className="action-button"
       />
     </Tooltip>
   );
@@ -114,13 +202,16 @@ const ReadStatusButton = ({ onToggleUnread, isUnreadLoading }) => {
       <Button
         type="text"
         size="small"
-        icon={<MailOutlined style={{ fontSize: "18px" }} />}
+        icon={<MailOutlined style={{ fontSize: "16px", color: "#8c8c8c" }} />}
         onClick={onToggleUnread}
         loading={isUnreadLoading}
         style={{
-          padding: "8px",
-          borderRadius: "6px",
+          padding: "4px 6px",
+          height: "28px",
+          borderRadius: "4px",
+          transition: "all 0.2s ease",
         }}
+        className="action-button"
       />
     </Tooltip>
   );
@@ -156,7 +247,10 @@ const MoveToFolderButton = ({ onMoveToFolder, isLoading }) => {
   };
 
   const menu = (
-    <Menu onClick={handleMenuClick} style={{ borderRadius: "8px" }}>
+    <Menu
+      onClick={handleMenuClick}
+      style={{ borderRadius: "6px", minWidth: "160px" }}
+    >
       {folderOptions.map((folder) => (
         <Menu.Item
           key={folder.key}
@@ -164,6 +258,7 @@ const MoveToFolderButton = ({ onMoveToFolder, isLoading }) => {
           style={{
             borderRadius: "4px",
             margin: "2px 4px",
+            fontSize: "14px",
           }}
         >
           {folder.label}
@@ -178,70 +273,17 @@ const MoveToFolderButton = ({ onMoveToFolder, isLoading }) => {
         <Button
           type="text"
           size="small"
-          icon={<FolderOutlined style={{ fontSize: "18px" }} />}
+          icon={
+            <FolderOutlined style={{ fontSize: "16px", color: "#8c8c8c" }} />
+          }
           loading={isLoading}
           style={{
-            padding: "8px",
-            borderRadius: "6px",
-          }}
-        />
-      </Tooltip>
-    </Dropdown>
-  );
-};
-
-// Komponen untuk add label
-const AddLabelButton = ({ labels = [], onAddLabel, isLoading }) => {
-  const labelOptions = [
-    { key: "important", label: "Penting", color: "red" },
-    { key: "work", label: "Pekerjaan", color: "blue" },
-    { key: "personal", label: "Pribadi", color: "green" },
-    { key: "urgent", label: "Mendesak", color: "orange" },
-    { key: "follow-up", label: "Tindak Lanjut", color: "purple" },
-  ];
-
-  const handleMenuClick = ({ key }) => {
-    if (onAddLabel) {
-      onAddLabel(key);
-    }
-  };
-
-  const menu = (
-    <Menu onClick={handleMenuClick} style={{ borderRadius: "8px" }}>
-      {labelOptions.map((label) => (
-        <Menu.Item
-          key={label.key}
-          style={{
+            padding: "4px 6px",
+            height: "28px",
             borderRadius: "4px",
-            margin: "2px 4px",
+            transition: "all 0.2s ease",
           }}
-        >
-          <Tag
-            color={label.color}
-            style={{
-              margin: 0,
-              borderRadius: "4px",
-            }}
-          >
-            {label.label}
-          </Tag>
-        </Menu.Item>
-      ))}
-    </Menu>
-  );
-
-  return (
-    <Dropdown overlay={menu} trigger={["click"]} placement="bottomLeft">
-      <Tooltip title="Tambah label">
-        <Button
-          type="text"
-          size="small"
-          icon={<TagOutlined style={{ fontSize: "18px" }} />}
-          loading={isLoading}
-          style={{
-            padding: "8px",
-            borderRadius: "6px",
-          }}
+          className="action-button"
         />
       </Tooltip>
     </Dropdown>
@@ -249,7 +291,7 @@ const AddLabelButton = ({ labels = [], onAddLabel, isLoading }) => {
 };
 
 // Komponen untuk flag priority
-const FlagPriorityButton = ({ priority, onChangePriority, isLoading }) => {
+const FlagPriorityButton = ({ priority, isLoading, onUpdatePriority }) => {
   const priorityOptions = [
     {
       key: "high",
@@ -272,13 +314,16 @@ const FlagPriorityButton = ({ priority, onChangePriority, isLoading }) => {
   ];
 
   const handleMenuClick = ({ key }) => {
-    if (onChangePriority) {
-      onChangePriority(key);
+    if (onUpdatePriority) {
+      onUpdatePriority(key);
     }
   };
 
   const menu = (
-    <Menu onClick={handleMenuClick} style={{ borderRadius: "8px" }}>
+    <Menu
+      onClick={handleMenuClick}
+      style={{ borderRadius: "6px", minWidth: "160px" }}
+    >
       {priorityOptions.map((option) => (
         <Menu.Item
           key={option.key}
@@ -286,6 +331,7 @@ const FlagPriorityButton = ({ priority, onChangePriority, isLoading }) => {
           style={{
             borderRadius: "4px",
             margin: "2px 4px",
+            fontSize: "14px",
           }}
         >
           <Tag
@@ -293,6 +339,7 @@ const FlagPriorityButton = ({ priority, onChangePriority, isLoading }) => {
             style={{
               margin: 0,
               borderRadius: "4px",
+              fontSize: "12px",
             }}
           >
             {option.label}
@@ -305,11 +352,11 @@ const FlagPriorityButton = ({ priority, onChangePriority, isLoading }) => {
   const getCurrentPriorityIcon = () => {
     switch (priority) {
       case "high":
-        return <FlagFilled style={{ fontSize: "18px", color: "#ff4d4f" }} />;
+        return <FlagFilled style={{ fontSize: "16px", color: "#ff4d4f" }} />;
       case "low":
-        return <FlagOutlined style={{ fontSize: "18px", color: "#1890ff" }} />;
+        return <FlagOutlined style={{ fontSize: "16px", color: "#1890ff" }} />;
       default:
-        return <FlagOutlined style={{ fontSize: "18px" }} />;
+        return <FlagOutlined style={{ fontSize: "16px", color: "#8c8c8c" }} />;
     }
   };
 
@@ -322,9 +369,12 @@ const FlagPriorityButton = ({ priority, onChangePriority, isLoading }) => {
           icon={getCurrentPriorityIcon()}
           loading={isLoading}
           style={{
-            padding: "8px",
-            borderRadius: "6px",
+            padding: "4px 6px",
+            height: "28px",
+            borderRadius: "4px",
+            transition: "all 0.2s ease",
           }}
+          className="action-button"
         />
       </Tooltip>
     </Dropdown>
@@ -481,13 +531,27 @@ const EmailDetailHeader = ({
   isUnreadLoading = false,
   onMoveToFolder,
   isMoveToFolderLoading = false,
+  onUpdatePriority,
+  isUpdatePriorityLoading = false,
   onRefresh,
 }) => {
   if (!email) return null;
 
   return (
     <div style={{ marginBottom: "24px" }}>
-      {/* Subject and Priority */}
+      {/* Action Buttons */}
+      <EmailActionButtons
+        email={email}
+        onToggleStar={onToggleStar}
+        isStarLoading={isStarLoading}
+        onToggleUnread={onToggleUnread}
+        isUnreadLoading={isUnreadLoading}
+        onMoveToFolder={onMoveToFolder}
+        isMoveToFolderLoading={isMoveToFolderLoading}
+        onUpdatePriority={onUpdatePriority}
+        isUpdatePriorityLoading={isUpdatePriorityLoading}
+        onRefresh={onRefresh}
+      />
 
       {/* Sender Info and Date */}
       <div
@@ -497,7 +561,6 @@ const EmailDetailHeader = ({
           justifyContent: "space-between",
           flexWrap: "wrap",
           gap: "16px",
-          marginBottom: "16px",
         }}
       >
         <SenderInfo
@@ -509,36 +572,6 @@ const EmailDetailHeader = ({
       </div>
 
       <Divider style={{ margin: "16px 0" }} />
-
-      {/* Action Buttons */}
-      <Flex justify="flex-start" align="center">
-        <Space size="small">
-          <StarButton
-            isStarred={email.is_starred}
-            onToggleStar={onToggleStar}
-            isLoading={isStarLoading}
-          />
-          <MoveToFolderButton
-            onMoveToFolder={onMoveToFolder}
-            isLoading={isMoveToFolderLoading}
-          />
-          <ReadStatusButton
-            onToggleUnread={onToggleUnread}
-            isUnreadLoading={isUnreadLoading}
-          />
-          <AddLabelButton
-            labels={email.labels}
-            onAddLabel={null}
-            isLoading={false}
-          />
-          <FlagPriorityButton
-            priority={email.priority}
-            onChangePriority={null}
-            isLoading={false}
-          />
-          <EmailLabelSelector emailId={email.id} onRefresh={onRefresh} />
-        </Space>
-      </Flex>
     </div>
   );
 };

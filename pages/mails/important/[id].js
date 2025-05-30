@@ -6,7 +6,7 @@ import Head from "next/head";
 
 import { useRouter } from "next/router";
 
-const InboxMailDetail = () => {
+const ImportantMailDetail = () => {
   const handleBack = () => router?.back();
   const router = useRouter();
   const { id } = router?.query;
@@ -16,10 +16,10 @@ const InboxMailDetail = () => {
   return (
     <>
       <Head>
-        <title>{email?.data?.subject} - Rumah ASN - Pesan Pribadi</title>
+        <title>{email?.data?.subject} - Rumah ASN - Pesan Penting</title>
       </Head>
       <PageContainer
-        title="Pesan Pribadi"
+        title="Pesan Penting"
         subTitle={email?.data?.subject}
         onBack={handleBack}
       >
@@ -34,13 +34,13 @@ const InboxMailDetail = () => {
   );
 };
 
-InboxMailDetail.getLayout = function getLayout(page) {
-  return <GmailLayout active="/mails/inbox">{page}</GmailLayout>;
+ImportantMailDetail.getLayout = function getLayout(page) {
+  return <GmailLayout active="/mails/important">{page}</GmailLayout>;
 };
 
-InboxMailDetail.Auth = {
+ImportantMailDetail.Auth = {
   action: "manage",
   subject: "Tickets",
 };
 
-export default InboxMailDetail;
+export default ImportantMailDetail;

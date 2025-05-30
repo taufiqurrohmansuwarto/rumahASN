@@ -6,20 +6,20 @@ import Head from "next/head";
 
 import { useRouter } from "next/router";
 
-const InboxMailDetail = () => {
+const LabelMailDetail = () => {
   const handleBack = () => router?.back();
   const router = useRouter();
-  const { id } = router?.query;
+  const { labelId: id } = router?.query;
 
   const { data: email, isLoading, error, refetch } = useEmailById(id);
 
   return (
     <>
       <Head>
-        <title>{email?.data?.subject} - Rumah ASN - Pesan Pribadi</title>
+        <title>{email?.data?.subject} - Rumah ASN - Pesan Penting</title>
       </Head>
       <PageContainer
-        title="Pesan Pribadi"
+        title="Pesan Penting"
         subTitle={email?.data?.subject}
         onBack={handleBack}
       >
@@ -34,13 +34,13 @@ const InboxMailDetail = () => {
   );
 };
 
-InboxMailDetail.getLayout = function getLayout(page) {
-  return <GmailLayout active="/mails/inbox">{page}</GmailLayout>;
+LabelMailDetail.getLayout = function getLayout(page) {
+  return <GmailLayout active="/mails/label">{page}</GmailLayout>;
 };
 
-InboxMailDetail.Auth = {
+LabelMailDetail.Auth = {
   action: "manage",
   subject: "Tickets",
 };
 
-export default InboxMailDetail;
+export default LabelMailDetail;

@@ -1,5 +1,7 @@
 import GmailLayout from "@/components/GmailLayout";
+import EmailDetailComponent from "@/components/mail/Detail/EmailDetailComponent";
 import PageContainer from "@/components/PageContainer";
+import { useEmailById } from "@/hooks/useEmails";
 import Head from "next/head";
 
 import { useRouter } from "next/router";
@@ -9,12 +11,25 @@ const StarredMailDetail = () => {
   const router = useRouter();
   const { id } = router?.query;
 
+  const { data: email, isLoading, error, refetch } = useEmailById(id);
+
   return (
     <>
       <Head>
-        <title>Rumah ASN - Pesan Arsip</title>
+        <title>{email?.data?.subject} - Rumah ASN - Pesan Tandai</title>
       </Head>
-      <PageContainer title="Pesan Tandai" onBack={handleBack}></PageContainer>
+      <PageContainer
+        title="Pesan Tandai"
+        subTitle={email?.data?.subject}
+        onBack={handleBack}
+      >
+        <EmailDetailComponent
+          email={email?.data}
+          loading={isLoading}
+          error={error}
+          onRefresh={refetch}
+        />
+      </PageContainer>
     </>
   );
 };
