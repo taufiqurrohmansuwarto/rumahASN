@@ -234,15 +234,30 @@ class Email extends Model {
         .where("rasn_mail.recipients.recipient_id", userId)
         .where("rasn_mail.recipients.folder", "inbox")
         .where("rasn_mail.recipients.is_deleted", false)
-        .where("rasn_mail.emails.is_draft", false);
+        .where("rasn_mail.emails.is_draft", false)
+        .where("rasn_mail.emails.is_deleted", false);
     } else if (folder === "sent") {
       baseQuery = baseQuery
         .where("rasn_mail.emails.sender_id", userId)
-        .where("rasn_mail.emails.is_draft", false);
+        .where("rasn_mail.emails.is_draft", false)
+        .where("rasn_mail.emails.is_deleted", false)
+        .where((builder) => {
+          // Email benar-benar sudah dikirim (tidak dihapus dengan cara apapun oleh sender)
+          builder.whereNotExists((subBuilder) => {
+            subBuilder
+              .select(1)
+              .from("rasn_mail.email_deletions as ed")
+              .whereRaw("ed.email_id = rasn_mail.emails.id")
+              .where("ed.user_id", userId)
+              .whereIn("ed.deletion_type", ["trash", "permanent"])
+              .whereNull("ed.restored_at");
+          });
+        });
     } else if (folder === "drafts") {
       baseQuery = baseQuery
         .where("rasn_mail.emails.sender_id", userId)
-        .where("rasn_mail.emails.is_draft", true);
+        .where("rasn_mail.emails.is_draft", true)
+        .where("rasn_mail.emails.is_deleted", false);
     } else if (folder === "starred") {
       return this.getStarredEmails(userId, { page, limit, search, unreadOnly });
     } else if (folder === "archive") {
@@ -255,7 +270,8 @@ class Email extends Model {
         .where("rasn_mail.recipients.recipient_id", userId)
         .where("rasn_mail.recipients.folder", "archive")
         .where("rasn_mail.recipients.is_deleted", false)
-        .where("rasn_mail.emails.is_draft", false);
+        .where("rasn_mail.emails.is_draft", false)
+        .where("rasn_mail.emails.is_deleted", false);
     } else if (folder === "spam") {
       baseQuery = baseQuery
         .join(
@@ -266,7 +282,8 @@ class Email extends Model {
         .where("rasn_mail.recipients.recipient_id", userId)
         .where("rasn_mail.recipients.folder", "spam")
         .where("rasn_mail.recipients.is_deleted", false)
-        .where("rasn_mail.emails.is_draft", false);
+        .where("rasn_mail.emails.is_draft", false)
+        .where("rasn_mail.emails.is_deleted", false);
     } else if (folder === "label") {
       if (!labelId) {
         throw new Error("Label ID required for label folder");
@@ -281,6 +298,7 @@ class Email extends Model {
         .where("el.label_id", labelId)
         .where("el.user_id", userId)
         .where("rasn_mail.emails.is_draft", false)
+        .where("rasn_mail.emails.is_deleted", false)
         .where((builder) => {
           builder
             .where("rasn_mail.emails.sender_id", userId)
@@ -356,7 +374,8 @@ class Email extends Model {
             .where("rasn_mail.emails.priority", "high")
             .orWhere("l.name", "important");
         })
-        .where("rasn_mail.emails.is_draft", false);
+        .where("rasn_mail.emails.is_draft", false)
+        .where("rasn_mail.emails.is_deleted", false);
     }
 
     // 3. Apply search filter
@@ -372,6 +391,17 @@ class Email extends Model {
     // 4. Apply unread filter - hanya untuk folder yang relevan
     if (unreadOnly && ["inbox", "archive", "spam"].includes(folder)) {
       baseQuery = baseQuery.where("rasn_mail.recipients.is_read", false);
+    }
+
+    // ✅ KHUSUS: Handle unread filter untuk sent emails menggunakan subquery
+    if (unreadOnly && folder === "sent") {
+      baseQuery = baseQuery.whereExists((subBuilder) => {
+        subBuilder
+          .select(1)
+          .from("rasn_mail.recipients as r")
+          .whereRaw("r.email_id = rasn_mail.emails.id")
+          .where("r.is_read", false);
+      });
     }
 
     // ✅ PERBAIKAN: Count dengan DISTINCT untuk menghindari duplicate dari JOIN
@@ -442,10 +472,32 @@ class Email extends Model {
         mergedEmail.read_at = basicInfo.read_at;
         mergedEmail.recipient_folder = basicInfo.recipient_folder;
         mergedEmail.recipient_deleted = basicInfo.recipient_deleted;
-      } else if (["sent", "drafts"].includes(folder)) {
-        // ✅ TAMBAHAN: Untuk sent/drafts, set default values karena tidak ada recipient info
-        mergedEmail.is_read = true; // Sent emails are considered "read" by sender
+      } else if (folder === "sent") {
+        // ✅ KHUSUS UNTUK SENT: Tambahkan delivery information
+        const recipients = email.recipients || [];
+        const totalRecipients = recipients.length;
+        const readCount = recipients.filter((r) => r.is_read).length;
+        const unreadCount = totalRecipients - readCount;
+
+        mergedEmail.delivery_status = {
+          total_recipients: totalRecipients,
+          read_count: readCount,
+          unread_count: unreadCount,
+          read_percentage:
+            totalRecipients > 0
+              ? Math.round((readCount / totalRecipients) * 100)
+              : 0,
+        };
+
+        // Untuk sent emails, is_read menunjukkan apakah SEMUA recipient sudah baca
+        mergedEmail.is_read = unreadCount === 0 && totalRecipients > 0;
         mergedEmail.read_at = email.sent_at || email.created_at;
+        mergedEmail.recipient_folder = folder;
+        mergedEmail.recipient_deleted = false;
+      } else if (["drafts"].includes(folder)) {
+        // ✅ TAMBAHAN: Untuk drafts, set default values karena tidak ada recipient info
+        mergedEmail.is_read = true; // Draft emails are considered "read" by sender
+        mergedEmail.read_at = email.created_at;
         mergedEmail.recipient_folder = folder;
         mergedEmail.recipient_deleted = false;
       }
@@ -599,6 +651,7 @@ class Email extends Model {
         )
         .where("rasn_mail.emails.is_starred", true)
         .where("rasn_mail.emails.is_draft", false)
+        .where("rasn_mail.emails.is_deleted", false)
         .where((builder) => {
           builder
             .where("rasn_mail.emails.sender_id", userId)
