@@ -1,11 +1,9 @@
 import GmailLayout from "@/components/GmailLayout";
 import PageContainer from "@/components/PageContainer";
-import EmailListComponent from "@/components/mail/EmailList/EmailListComponent";
 import Head from "next/head";
+import EmailListComponent from "@/components/mail/EmailList/EmailListComponent";
 
 const InboxMail = () => {
-  const handleBack = () => router?.back();
-
   return (
     <>
       <Head>

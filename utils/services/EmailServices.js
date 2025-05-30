@@ -3,6 +3,287 @@ const Email = require("@/models/rasn_mail/emails.model");
 const Recipient = require("@/models/rasn_mail/recipients.model");
 
 class EmailService {
+  // Get email thread (conversation)
+  static async getEmailThread(emailId, userId) {
+    try {
+      // 1. Get current email
+      const currentEmail = await Email.query()
+        .findById(emailId)
+        .withGraphFetched("[sender, recipients.[user]]");
+
+      if (!currentEmail) {
+        throw new Error("Email not found");
+      }
+
+      // 2. Find root email (original email in thread)
+      const rootId = currentEmail.parent_id || emailId;
+
+      // 3. Get all emails in thread (root + all replies)
+      // ✅ FIXED: Handle self-send dengan DISTINCT dan proper JOIN
+      const threadEmails = await Email.query()
+        .distinct("rasn_mail.emails.id")
+        .select([
+          "rasn_mail.emails.*",
+          "eua.is_read",
+          "eua.is_starred",
+          "eua.folder as user_folder",
+        ])
+        .where((builder) => {
+          builder
+            .where("rasn_mail.emails.id", rootId) // Root email
+            .orWhere("rasn_mail.emails.parent_id", rootId) // Direct replies to root
+            .orWhereExists((subBuilder) => {
+              // Nested replies
+              subBuilder
+                .select(1)
+                .from("rasn_mail.emails as parent")
+                .whereRaw("parent.parent_id = ?", [rootId])
+                .whereRaw("rasn_mail.emails.parent_id = parent.id");
+            });
+        })
+        .leftJoin("rasn_mail.email_user_actions as eua", function () {
+          this.on("rasn_mail.emails.id", "=", "eua.email_id").andOn(
+            "eua.user_id",
+            "=",
+            Email.knex().raw("?", [userId])
+          );
+        })
+        // ✅ FIXED: Filter permanently deleted, tapi allow missing user actions
+        .where(function () {
+          this.whereNull("eua.permanently_deleted").orWhere(
+            "eua.permanently_deleted",
+            false
+          );
+        })
+        .withGraphFetched(
+          `[
+          sender(simpleWithImage), 
+          recipients.[user(simpleWithImage)], 
+          attachments
+        ]`
+        )
+        .orderBy("rasn_mail.emails.created_at", "asc"); // Chronological order
+
+      // ✅ SAFETY CHECK: Pastikan ada hasil
+      if (!threadEmails || threadEmails.length === 0) {
+        // Fallback ke single email
+        return {
+          success: true,
+          data: {
+            current_email_id: emailId,
+            root_email_id: emailId,
+            thread_count: 1,
+            thread_emails: [currentEmail],
+            thread_subject: currentEmail.thread_subject || currentEmail.subject,
+          },
+        };
+      }
+
+      // 4. Build thread structure
+      const threadStructure = this.buildThreadStructure(threadEmails);
+
+      // 5. Mark thread as read (optional, dengan error handling)
+      try {
+        await this.markThreadAsRead(
+          threadEmails.map((e) => e.id),
+          userId
+        );
+      } catch (markReadError) {
+        console.warn("Could not mark thread as read:", markReadError);
+        // Continue without failing
+      }
+
+      return {
+        success: true,
+        data: {
+          current_email_id: emailId,
+          root_email_id: rootId,
+          thread_count: threadEmails.length,
+          thread_emails: threadStructure,
+          thread_subject: currentEmail.thread_subject || currentEmail.subject,
+        },
+      };
+    } catch (error) {
+      console.error("Error getting email thread:", error);
+      throw error;
+    }
+  }
+
+  // Build hierarchical thread structure
+  static buildThreadStructure(emails) {
+    // Create map for easy lookup
+    const emailMap = {};
+    emails.forEach((email) => {
+      emailMap[email.id] = {
+        ...email,
+        replies: [],
+      };
+    });
+
+    // Build hierarchy
+    const rootEmails = [];
+    emails.forEach((email) => {
+      if (email.parent_id && emailMap[email.parent_id]) {
+        // This is a reply, add to parent's replies
+        emailMap[email.parent_id].replies.push(emailMap[email.id]);
+      } else {
+        // This is root email or orphaned email
+        rootEmails.push(emailMap[email.id]);
+      }
+    });
+
+    return rootEmails;
+  }
+
+  // Mark entire thread as read
+  static async markThreadAsRead(emailIds, userId) {
+    try {
+      await EmailUserAction.query()
+        .whereIn("email_id", emailIds)
+        .where("user_id", userId)
+        .where("is_read", false)
+        .patch({
+          is_read: true,
+          read_at: new Date(),
+          updated_at: new Date(),
+        });
+
+      return true;
+    } catch (error) {
+      console.error("Error marking thread as read:", error);
+      return false;
+    }
+  }
+
+  // Reply to email (with threading)
+  static async replyToEmail({
+    originalEmailId,
+    senderId,
+    subject,
+    content,
+    recipients,
+    replyAll = false,
+    attachments = [],
+  }) {
+    try {
+      // Get original email untuk threading info
+      const originalEmail = await Email.query()
+        .findById(originalEmailId)
+        .withGraphFetched("[recipients.[user]]");
+
+      if (!originalEmail) {
+        throw new Error("Original email not found");
+      }
+
+      // Determine thread root
+      const threadRootId = originalEmail.parent_id || originalEmailId;
+
+      // Build recipients untuk reply
+      let replyRecipients = { to: [], cc: [], bcc: [] };
+
+      if (replyAll) {
+        // Reply All: include original sender + all recipients except current user
+        const allOriginalRecipients = [
+          originalEmail.sender_id,
+          ...originalEmail.recipients
+            .filter((r) => r.type !== "bcc") // Don't include BCC in reply all
+            .map((r) => r.recipient_id),
+        ].filter((id) => id !== senderId); // Exclude current user
+
+        replyRecipients.to = [originalEmail.sender_id];
+        replyRecipients.cc = allOriginalRecipients.filter(
+          (id) => id !== originalEmail.sender_id
+        );
+      } else {
+        // Regular Reply: only to original sender
+        replyRecipients.to = [originalEmail.sender_id];
+      }
+
+      // Override recipients if provided
+      if (recipients) {
+        replyRecipients = recipients;
+      }
+
+      // Create reply email dengan threading
+      const replyEmail = await Email.createAndSend({
+        senderId,
+        subject:
+          subject ||
+          (originalEmail.subject.startsWith("Re: ")
+            ? originalEmail.subject
+            : `Re: ${originalEmail.subject}`),
+        content,
+        recipients: replyRecipients,
+        attachments,
+        type: "personal",
+        parentId: originalEmailId, // ✅ Link to original email
+        priority: originalEmail.priority || "normal",
+      });
+
+      return {
+        success: true,
+        data: replyEmail,
+        message: "Reply sent successfully",
+        thread_root_id: threadRootId,
+      };
+    } catch (error) {
+      console.error("Error sending reply:", error);
+      throw error;
+    }
+  }
+
+  // Get email with thread context
+  static async getEmailWithThread(emailId, userId) {
+    try {
+      // Get email detail
+      const email = await this.getEmailById(emailId, userId);
+
+      // Get thread if this email is part of one
+      const threadResult = await this.getEmailThread(emailId, userId);
+
+      // ✅ FIXED: Safe access dengan fallback
+      const threadData = threadResult?.data || {
+        current_email_id: emailId,
+        root_email_id: emailId,
+        thread_count: 1,
+        thread_emails: [email],
+        thread_subject: email.subject,
+      };
+
+      return {
+        success: true,
+        data: {
+          email,
+          thread: threadData,
+          has_thread: threadData.thread_count > 1,
+        },
+      };
+    } catch (error) {
+      console.error("Error getting email with thread:", error);
+
+      // ✅ FALLBACK: Return email without thread on error
+      try {
+        const email = await this.getEmailById(emailId, userId);
+        return {
+          success: true,
+          data: {
+            email,
+            thread: {
+              current_email_id: emailId,
+              root_email_id: emailId,
+              thread_count: 1,
+              thread_emails: [email],
+              thread_subject: email.subject,
+            },
+            has_thread: false,
+          },
+        };
+      } catch (fallbackError) {
+        throw error; // Throw original error
+      }
+    }
+  }
+
   // Send personal email
   static async sendPersonalEmail({
     senderId,
@@ -150,72 +431,129 @@ class EmailService {
 
   // Mark email as read
   static async markAsRead(emailId, userId) {
-    const recipient = await Recipient.query().findOne({
-      email_id: emailId,
-      recipient_id: userId,
-    });
+    try {
+      // Get or create user action record
+      const userAction = await EmailUserAction.getOrCreateForUser(
+        emailId,
+        userId,
+        {
+          folder: "inbox",
+          is_read: false,
+          is_starred: false,
+        }
+      );
 
-    if (recipient) {
-      await recipient.markAsRead();
+      // Only update if currently unread
+      if (!userAction.is_read) {
+        await userAction.$query().patch({
+          is_read: true,
+          read_at: new Date(),
+          updated_at: new Date(),
+        });
+      }
+
+      return {
+        success: true,
+        message: "Email marked as read",
+        was_unread: !userAction.is_read,
+      };
+    } catch (error) {
+      console.error("Error marking email as read:", error);
+      throw new Error("Failed to mark email as read");
     }
-
-    return true;
   }
 
   // Mark email as unread
   static async markAsUnread(emailId, userId) {
-    const recipient = await Recipient.query().findOne({
-      email_id: emailId,
-      recipient_id: userId,
-    });
+    try {
+      // Get existing user action record
+      const userAction = await EmailUserAction.query()
+        .where({
+          email_id: emailId,
+          user_id: userId,
+          permanently_deleted: false,
+        })
+        .first();
 
-    if (recipient) {
-      await recipient.markAsUnread();
+      if (!userAction) {
+        throw new Error("Email not found or access denied");
+      }
+
+      // Only update if currently read
+      if (userAction.is_read) {
+        await userAction.$query().patch({
+          is_read: false,
+          read_at: null,
+          updated_at: new Date(),
+        });
+      }
+
+      return {
+        success: true,
+        message: "Email marked as unread",
+        was_read: userAction.is_read,
+      };
+    } catch (error) {
+      console.error("Error marking email as unread:", error);
+      throw new Error("Failed to mark email as unread");
     }
-
-    return true;
   }
 
   // Move email to folder
   static async moveToFolder(emailId, userId, folder) {
     try {
-      // Coba pakai stored function
-      const result = await Email.knex().raw(
-        "SELECT rasn_mail.safe_move_to_folder(?, ?, ?) as success",
-        [emailId, userId, folder]
-      );
-      return result.rows[0].success;
-    } catch (error) {
-      console.error("Function failed, using fallback:", error);
-      // Fallback ke update manual
-      const Recipient = require("@/models/rasn_mail/recipients.model");
-      const updated = await Recipient.query()
-        .where("email_id", emailId)
-        .where("recipient_id", userId)
-        .patch({
-          folder: folder,
-          is_deleted: folder === "trash",
-          deleted_at: folder === "trash" ? new Date() : null,
-          updated_at: new Date(),
-        });
-
-      // Update archived flag jika diperlukan
-      if (folder === "archive" && updated > 0) {
-        await Email.query().findById(emailId).patch({ is_archived: true });
-      } else if (folder !== "archive" && updated > 0) {
-        // Check if any recipients still in archive
-        const stillInArchive = await Recipient.query()
-          .where("email_id", emailId)
-          .where("folder", "archive")
-          .where("is_deleted", false)
-          .first();
-
-        if (!stillInArchive) {
-          await Email.query().findById(emailId).patch({ is_archived: false });
-        }
+      // Validate folder
+      const validFolders = ["inbox", "sent", "archive", "trash", "spam"];
+      if (!validFolders.includes(folder)) {
+        throw new Error(`Invalid folder: ${folder}`);
       }
 
-      return updated > 0;
+      // Get existing user action record
+      const userAction = await EmailUserAction.query()
+        .where({
+          email_id: emailId,
+          user_id: userId,
+          permanently_deleted: false,
+        })
+        .first();
+
+      if (!userAction) {
+        throw new Error("Email not found or access denied");
+      }
+
+      // Prepare update data based on folder
+      const updateData = {
+        folder: folder,
+        updated_at: new Date(),
+      };
+
+      // Handle trash folder - set deleted_at
+      if (folder === "trash") {
+        updateData.deleted_at = new Date();
+      } else {
+        // Moving out of trash - clear deleted_at
+        updateData.deleted_at = null;
+      }
+
+      // Special handling for archive
+      if (folder === "archive") {
+        updateData.is_archived = true;
+      } else if (userAction.folder === "archive" && folder !== "archive") {
+        updateData.is_archived = false;
+      }
+
+      // Update the user action
+      await userAction.$query().patch(updateData);
+
+      return {
+        success: true,
+        message: `Email moved to ${folder}`,
+        previous_folder: userAction.folder,
+        new_folder: folder,
+      };
+    } catch (error) {
+      console.error("Error moving email to folder:", error);
+      throw new Error(`Failed to move email to ${folder}`);
     }
   }
 
@@ -456,38 +794,113 @@ class EmailService {
 
   // Soft delete email (move to trash)
   static async deleteEmail(emailId, userId) {
-    const email = await Email.query().findById(emailId);
-    if (!email) {
-      throw new Error("Email not found");
-    }
+    const userAction = await EmailUserAction.getOrCreateForUser(
+      emailId,
+      userId
+    );
 
-    return email.deleteForUser(userId, "trash");
+    await userAction.$query().patch({
+      folder: "trash",
+      deleted_at: new Date(),
+      updated_at: new Date(),
+    });
+
+    return { success: true, message: "Email moved to trash" };
   }
 
   // Permanent delete email
   static async permanentDeleteEmail(emailId, userId) {
-    const email = await Email.query().findById(emailId);
-    if (!email) {
-      throw new Error("Email not found");
-    }
+    await EmailUserAction.query()
+      .where({ email_id: emailId, user_id: userId })
+      .patch({
+        permanently_deleted: true,
+        deleted_at: new Date(),
+        updated_at: new Date(),
+      });
 
-    return email.permanentDeleteForUser(userId);
+    return { success: true, message: "Email permanently deleted" };
   }
 
   // Restore email from trash
   static async restoreEmail(emailId, userId) {
-    const email = await Email.query().findById(emailId);
-    if (!email) {
-      throw new Error("Email not found");
-    }
+    try {
+      // Get existing user action record (including permanently deleted)
+      const userAction = await EmailUserAction.query()
+        .where({
+          email_id: emailId,
+          user_id: userId,
+        })
+        .first();
 
-    return email.restoreForUser(userId);
+      if (!userAction) {
+        throw new Error("Email not found or access denied");
+      }
+
+      // Check if permanently deleted
+      if (userAction.permanently_deleted) {
+        throw new Error("Cannot restore permanently deleted email");
+      }
+
+      // Restore to inbox
+      await userAction.$query().patch({
+        folder: "inbox",
+        deleted_at: null,
+        updated_at: new Date(),
+      });
+
+      return {
+        success: true,
+        message: "Email restored to inbox",
+      };
+    } catch (error) {
+      console.error("Error restoring email:", error);
+      throw new Error("Failed to restore email");
+    }
   }
 
   // Bulk delete emails
   static async bulkDeleteEmails(emailIds, userId, permanent = false) {
-    const deletionType = permanent ? "permanent" : "trash";
-    return Email.bulkDelete(emailIds, userId, deletionType);
+    try {
+      if (!emailIds || !Array.isArray(emailIds) || emailIds.length === 0) {
+        throw new Error("Email IDs required");
+      }
+
+      let updatedCount;
+
+      if (permanent) {
+        // Permanent delete - mark as permanently deleted
+        updatedCount = await EmailUserAction.query()
+          .whereIn("email_id", emailIds)
+          .where("user_id", userId)
+          .patch({
+            permanently_deleted: true,
+            deleted_at: new Date(),
+            updated_at: new Date(),
+          });
+      } else {
+        // Soft delete - move to trash
+        updatedCount = await EmailUserAction.query()
+          .whereIn("email_id", emailIds)
+          .where("user_id", userId)
+          .where("permanently_deleted", false)
+          .patch({
+            folder: "trash",
+            deleted_at: new Date(),
+            updated_at: new Date(),
+          });
+      }
+
+      return {
+        success: true,
+        deletedCount: updatedCount,
+        message: `${updatedCount} emails ${
+          permanent ? "permanently deleted" : "moved to trash"
+        }`,
+      };
+    } catch (error) {
+      console.error("Error bulk deleting emails:", error);
+      throw new Error("Failed to bulk delete emails");
+    }
   }
 
   // Get user's trash

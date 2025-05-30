@@ -814,3 +814,43 @@ export const getEmailLabels = async (req, res) => {
     handleError(res, error);
   }
 };
+
+export const getEmailWithThread = async (req, res) => {
+  try {
+    const { id } = req.query;
+    const { customId: userId } = req.user;
+
+    const result = await EmailService.getEmailWithThread(id, userId);
+    res.json(result);
+  } catch (error) {
+    handleError(res, error);
+  }
+};
+
+export const replyToEmail = async (req, res) => {
+  try {
+    const { id } = req.query;
+    const { customId: userId } = req.user;
+    const {
+      subject,
+      content,
+      recipients,
+      replyAll = false,
+      attachments = [],
+    } = req.body;
+
+    const result = await EmailService.replyToEmail({
+      originalEmailId: id,
+      senderId: userId,
+      subject,
+      content,
+      recipients,
+      replyAll,
+      attachments,
+    });
+
+    res.json(result);
+  } catch (error) {
+    handleError(res, error);
+  }
+};

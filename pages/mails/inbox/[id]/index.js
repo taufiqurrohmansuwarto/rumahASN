@@ -1,36 +1,65 @@
-import GmailLayout from "@/components/GmailLayout";
-import EmailDetailComponent from "@/components/mail/Detail/EmailDetailComponent";
+import {
+  useEmailWithThread,
+  useGetEmailWithThread,
+  useReplyToEmail,
+} from "@/hooks/useEmails";
+import { Empty, Spin } from "antd";
 import PageContainer from "@/components/PageContainer";
-import { useEmailById } from "@/hooks/useEmails";
-import Head from "next/head";
 
+import EmailDetailComponent from "@/components/mail/Detail/EmailDetailComponent";
+import EmailThreadComponent from "@/components/mail/Detail/EmailThreadComponent";
+import GmailLayout from "@/components/GmailLayout";
 import { useRouter } from "next/router";
 
 const InboxMailDetail = () => {
-  const handleBack = () => router?.back();
   const router = useRouter();
-  const { id } = router?.query;
+  const { id } = router.query;
 
-  const { data: email, isLoading, error, refetch } = useEmailById(id);
+  // ✅ Use thread-aware hook
+  const {
+    data: emailData,
+    isLoading,
+    error,
+    refetch,
+  } = useGetEmailWithThread(id);
+  const replyMutation = useReplyToEmail();
+
+  const handleReply = (originalEmail) => {
+    // Open compose modal with reply context
+    router.push(`/mails/compose?reply=${originalEmail.id}`);
+  };
+
+  const handleReplyAll = (originalEmail) => {
+    router.push(`/mails/compose?reply=${originalEmail.id}&replyAll=true`);
+  };
+
+  if (isLoading) return <Spin />;
+  if (error) return <Empty />;
+
+  const { email, thread, has_thread } = emailData.data;
 
   return (
-    <>
-      <Head>
-        <title>{email?.data?.subject} - Rumah ASN - Pesan Pribadi</title>
-      </Head>
-      <PageContainer
-        title="Pesan Pribadi"
-        subTitle={email?.data?.subject}
-        onBack={handleBack}
-      >
+    <PageContainer>
+      {/* Email Thread Component */}
+      {has_thread && (
+        <EmailThreadComponent
+          emailId={id}
+          threadData={thread}
+          onReply={handleReply}
+          onReplyAll={handleReplyAll}
+        />
+      )}
+
+      {/* Regular Email Detail - hanya jika tidak ada thread */}
+      {!has_thread && (
         <EmailDetailComponent
-          email={email?.data}
+          email={email}
           loading={isLoading}
           error={error}
           onRefresh={refetch}
         />
-      </PageContainer>
-    </>
+      )}
+    </PageContainer>
   );
 };
 

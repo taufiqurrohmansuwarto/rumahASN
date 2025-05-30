@@ -13,8 +13,8 @@ const ComposeMail = () => {
   const [visible, setVisible] = useState(false);
 
   // Get query parameters
-  const { reply, forward, replyAll } = router.query;
-  const originalEmailId = reply || forward;
+  const { reply, forward, replyAll, draft } = router.query;
+  const originalEmailId = reply || forward || draft;
 
   // Fetch original email jika ada ID
   const {
@@ -37,7 +37,7 @@ const ComposeMail = () => {
 
   const handleClose = () => {
     setVisible(false);
-    router.push("/mails/inbox");
+    router.back();
   };
 
   const handleSent = () => {
@@ -49,12 +49,14 @@ const ComposeMail = () => {
   const getMode = () => {
     if (reply) return "reply";
     if (forward) return "forward";
+    if (draft) return "draft";
     return "compose";
   };
 
   const getTitle = () => {
     if (reply) return replyAll === "true" ? "Balas Semua" : "Balas";
     if (forward) return "Teruskan";
+    if (draft) return "Edit Draft";
     return "Tulis Email Baru";
   };
 

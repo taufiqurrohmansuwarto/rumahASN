@@ -40,6 +40,7 @@ export const getFolderConfig = (folder) => {
       ...baseConfig,
       title: "Inbox",
       subtitle: "Kotak Masuk",
+      showRecipient: true,
       icon: <InboxOutlined />,
       primaryColor: "#1890ff",
       apiFunction: getInboxEmails,
@@ -61,6 +62,7 @@ export const getFolderConfig = (folder) => {
       ...baseConfig,
       title: "Starred",
       subtitle: "Pesan Ditandai",
+      showRecipient: true,
       icon: <StarOutlined />,
       primaryColor: "#faad14",
       apiFunction: getStarredEmails,
@@ -113,9 +115,7 @@ export const getFolderConfig = (folder) => {
       clickAction: "edit",
       itemActions: ["edit", "delete"],
       bulkActions: {
-        primary: ["discard", "spam"],
-        secondary: ["mark-unread", "move-inbox"],
-        more: ["label"],
+        primary: ["discard"],
       },
     },
 

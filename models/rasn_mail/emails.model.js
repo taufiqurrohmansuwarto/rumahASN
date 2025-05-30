@@ -277,9 +277,16 @@ class Email extends Model {
     unreadOnly = false,
     labelId = null,
   }) {
-    // Helper function untuk exclude deleted folders
+    // Helper function untuk active emails (not permanently deleted)
+    const excludePermanentlyDeleted = (query) => {
+      return query.where("eua.permanently_deleted", false);
+    };
+
+    // Helper function untuk exclude deleted folders dari non-trash views
     const excludeDeletedFolders = (query) => {
-      return query.whereNotIn("eua.folder", ["trash", "spam"]);
+      return query
+        .whereNotIn("eua.folder", ["trash", "spam"])
+        .whereNull("eua.deleted_at");
     };
 
     // 1. Base query dengan email_user_actions (unified pattern)
@@ -295,28 +302,22 @@ class Email extends Model {
         "sender.custom_id"
       )
       .where("eua.user_id", userId)
-      .where("eua.deleted_at", null)
+      .where("eua.permanently_deleted", false) // ✅ Global filter
       .where("rasn_mail.emails.is_deleted", false);
 
     // 2. Apply folder-specific filters
     if (folder === "inbox") {
       baseQuery = baseQuery
         .where("eua.folder", "inbox")
+        .whereNull("eua.deleted_at") // ✅ Not in trash
         .where("rasn_mail.emails.is_draft", false);
     } else if (folder === "sent") {
-      baseQuery = baseQuery.where((builder) => {
-        builder
-          .where("eua.folder", "sent") // Normal sent emails
-          .orWhere((subBuilder) => {
-            // ALSO include self-sent emails from inbox
-            subBuilder
-              .where("eua.folder", "inbox")
-              .where("rasn_mail.emails.sender_id", userId)
-              .where("eua.user_id", userId);
-          });
-      });
+      baseQuery = baseQuery
+        .where("eua.folder", "sent")
+        .whereNull("eua.deleted_at") // ✅ Not deleted
+        .where("rasn_mail.emails.is_draft", false);
     } else if (folder === "drafts") {
-      // Special handling untuk drafts - fallback ke emails table jika email_user_actions belum ada
+      // Special handling untuk drafts - fallback ke emails table
       const draftQuery = Email.query()
         .join(
           "public.users as sender",
@@ -373,15 +374,21 @@ class Email extends Model {
     } else if (folder === "archive") {
       baseQuery = baseQuery
         .where("eua.folder", "archive")
+        .whereNull("eua.deleted_at") // ✅ Not deleted
         .where("rasn_mail.emails.is_draft", false);
     } else if (folder === "trash") {
-      baseQuery = baseQuery.where("eua.folder", "trash");
+      // ✅ FIXED: Show only soft-deleted, not permanently deleted
+      baseQuery = baseQuery
+        .where("eua.folder", "trash")
+        .whereNotNull("eua.deleted_at") // ✅ Must be deleted
+        .where("eua.permanently_deleted", false); // ✅ Not permanent
     } else if (folder === "spam") {
       baseQuery = baseQuery
         .where("eua.folder", "spam")
+        .whereNull("eua.deleted_at") // ✅ Not deleted (spam != deleted)
         .where("rasn_mail.emails.is_draft", false);
     } else if (folder === "starred") {
-      // Starred dari semua folder (exclude deleted folders)
+      // Starred dari semua folder (exclude deleted)
       baseQuery = excludeDeletedFolders(
         baseQuery
           .where("eua.is_starred", true)
@@ -468,12 +475,13 @@ class Email extends Model {
       "eua.folder as user_folder",
       "eua.is_starred",
       "eua.starred_at",
+      "eua.deleted_at", // ✅ Include deleted_at info
     ];
 
     const dataQuery = baseQuery
       .clone()
       .select(selectColumns)
-      .distinct("rasn_mail.emails.id", "rasn_mail.emails.created_at") // DISTINCT untuk avoid duplicates
+      .distinct("rasn_mail.emails.id", "rasn_mail.emails.created_at")
       .orderBy("rasn_mail.emails.created_at", "desc")
       .limit(limit)
       .offset((page - 1) * limit);
@@ -507,6 +515,7 @@ class Email extends Model {
         user_folder: userActionInfo?.user_folder,
         is_starred: userActionInfo?.is_starred || false,
         starred_at: userActionInfo?.starred_at,
+        deleted_at: userActionInfo?.deleted_at, // ✅ Include delete info
       };
 
       // Add delivery info untuk sent emails

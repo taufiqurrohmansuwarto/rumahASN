@@ -1,4 +1,8 @@
 import {
+  // reply to email
+  replyToEmail,
+  // get email with thread
+  getEmailWithThread,
   // archive emails
   archiveEmail,
   // assign label to email
@@ -507,5 +511,29 @@ export const useDeleteTrash = () => {
       queryClient.invalidateQueries({ queryKey: ["emails"] });
       queryClient.invalidateQueries({ queryKey: ["email-stats"] });
     },
+  });
+};
+
+// reply to email
+export const useReplyToEmail = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: replyToEmail,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["emails"] });
+      queryClient.invalidateQueries({ queryKey: ["email-stats"] });
+      queryClient.invalidateQueries({ queryKey: ["email-detail"] });
+      queryClient.invalidateQueries({ queryKey: ["email-with-thread"] });
+    },
+  });
+};
+
+// get email with thread
+export const useGetEmailWithThread = (emailId) => {
+  return useQuery({
+    queryKey: ["email-with-thread", emailId],
+    queryFn: () => getEmailWithThread(emailId),
+    enabled: !!emailId,
+    staleTime: 30000,
   });
 };
