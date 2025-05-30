@@ -18,6 +18,7 @@ const serialize = (emails) => {
         name: recipient.user?.username,
         email: recipient.user?.email,
         image: recipient.user?.image,
+        is_starred: recipient.is_starred,
       })) || [];
 
   return {
@@ -27,6 +28,7 @@ const serialize = (emails) => {
       cc: mapRecipients("cc"),
       bcc: mapRecipients("bcc"),
     },
+    is_starred: emails.is_starred,
   };
 };
 
@@ -199,6 +201,23 @@ export const changeActionEmail = async (req, res) => {
     res.json({
       success: true,
       message: `Email ${action}ed successfully`,
+    });
+  } catch (error) {
+    handleError(res, error);
+  }
+};
+
+// ✅ NEW: getStarStatus endpoint
+export const getStarStatus = async (req, res) => {
+  try {
+    const { id } = req?.query;
+    const { customId: userId } = req?.user;
+
+    const result = await EmailService.getStarStatus(id, userId);
+
+    res.json({
+      success: true,
+      data: result,
     });
   } catch (error) {
     handleError(res, error);

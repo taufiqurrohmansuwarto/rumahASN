@@ -463,7 +463,9 @@ const SenderInfo = ({ sender, senderName, email }) => {
             className="recipient-info-trigger"
           >
             <Text type="secondary" style={{ fontSize: "14px" }}>
-              kepada saya
+              kepada {email?.recipients?.to?.length} orang{" "}
+              {email?.recipients?.cc?.length > 0 &&
+                `dan ${email?.recipients?.cc?.length} orang`}
             </Text>
             <Popover
               content={contentRecipient(email)}
