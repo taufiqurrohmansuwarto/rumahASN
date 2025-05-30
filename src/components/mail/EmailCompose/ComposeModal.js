@@ -75,13 +75,10 @@ const ComposeModal = ({
         ];
       } else {
         // Jika reply biasa, hanya balas ke pengirim asli
-        toRecipients = [
-          {
-            label:
-              originalEmail.sender?.username || originalEmail.sender?.email,
-            value: originalEmail.sender_id,
-          },
-        ];
+        toRecipients = originalEmail.recipients?.to.map((r) => ({
+          label: r.user?.username || r.recipient_name || "Unknown",
+          value: r.user?.custom_id || r.recipient_id,
+        }));
       }
 
       // Set penerima email
@@ -97,15 +94,6 @@ const ComposeModal = ({
           ? originalEmail.subject
           : `Re: ${originalEmail.subject}`,
       });
-
-      // Set konten pesan dengan format quote dari email asli
-      setMessageContent(
-        `\n\n--- Pesan Asli ---\nDari: ${
-          originalEmail.sender?.username
-        }\nTanggal: ${dayjs(originalEmail.created_at).format(
-          "DD MMMM YYYY HH:mm"
-        )}\nSubjek: ${originalEmail.subject}\n\n${originalEmail.content}`
-      );
     } else if (mode === "forward" && originalEmail) {
       form.setFieldsValue({
         subject: originalEmail.subject.startsWith("Fwd: ")
@@ -124,6 +112,33 @@ const ComposeModal = ({
       if (originalEmail.attachments) {
         setAttachments(originalEmail.attachments);
       }
+    } else if (mode === "draft" && originalEmail) {
+      const toRecipient = originalEmail.recipients?.to.map((r) => ({
+        label: r.user?.username || r.recipient_name || "Unknown",
+        value: r.user?.custom_id || r.recipient_id,
+      }));
+
+      const ccRecipient = originalEmail.recipients?.cc.map((r) => ({
+        label: r.user?.username || r.recipient_name || "Unknown",
+        value: r.user?.custom_id || r.recipient_id,
+      }));
+
+      const bccRecipient = originalEmail.recipients?.bcc.map((r) => ({
+        label: r.user?.username || r.recipient_name || "Unknown",
+        value: r.user?.custom_id || r.recipient_id,
+      }));
+
+      setRecipients({
+        to: toRecipient,
+        cc: ccRecipient,
+        bcc: bccRecipient,
+      });
+
+      form.setFieldsValue({
+        subject: originalEmail.subject,
+        content: originalEmail.content,
+        priority: originalEmail.priority,
+      });
     }
   }, [mode, originalEmail, replyAll, form]);
 
@@ -162,6 +177,7 @@ const ComposeModal = ({
 
     try {
       const payload = {
+        id: originalEmail?.id || null,
         ...values,
         content: messageContent,
         recipients: {
@@ -171,7 +187,9 @@ const ComposeModal = ({
         },
         attachments: attachments.map((att) => att.response?.id || att.id),
       };
+
       await saveDraft.mutateAsync(payload);
+      onClose?.();
       message.success("Draft tersimpan");
     } catch (error) {
       message.error("Gagal menyimpan draft");

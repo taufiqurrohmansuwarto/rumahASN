@@ -234,3 +234,13 @@ export const getLabelEmails = async (params) => {
     .get(`/emails?${queryString.stringify({ ...params, folder: "label" })}`)
     .then((res) => res?.data);
 };
+
+// reply to email
+export const replyToEmail = async (emailId, data) => {
+  return api.post(`/emails/${emailId}/reply`, data).then((res) => res?.data);
+};
+
+// get email with thread
+export const getEmailWithThread = async (emailId) => {
+  return api.get(`/emails/${emailId}/thread`).then((res) => res?.data);
+};

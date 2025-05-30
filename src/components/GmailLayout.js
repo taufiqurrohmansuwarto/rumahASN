@@ -6,10 +6,10 @@ import {
   useUserLabels,
 } from "@/hooks/useEmails";
 import {
-  BellOutlined,
   DeleteOutlined,
   DownOutlined,
   EditOutlined,
+  ExclamationCircleOutlined,
   FileOutlined,
   FolderOutlined,
   InboxOutlined,
@@ -229,7 +229,7 @@ function GmailLayout({
         key: "/mails/spam",
         path: "/mails/spam",
         name: "Spam",
-        icon: <BellOutlined />,
+        icon: <ExclamationCircleOutlined />,
       },
     ];
 

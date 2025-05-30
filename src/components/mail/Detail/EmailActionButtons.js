@@ -76,7 +76,7 @@ const EmailActionButtons = ({
           Balas
         </Button>
 
-        <Button
+        {/* <Button
           icon={<RetweetOutlined />}
           onClick={() => onReplyAll?.()}
           loading={loading.replyAll}
@@ -84,7 +84,7 @@ const EmailActionButtons = ({
           size="large"
         >
           Balas Semua
-        </Button>
+        </Button> */}
 
         <Button
           icon={<RollbackOutlined />}
@@ -97,7 +97,7 @@ const EmailActionButtons = ({
         </Button>
 
         {/* More Actions Dropdown */}
-        <Dropdown
+        {/* <Dropdown
           menu={{ items: moreActions }}
           trigger={["click"]}
           placement="topRight"
@@ -105,7 +105,7 @@ const EmailActionButtons = ({
           <Button icon={<MoreOutlined />} shape="round" size="large">
             Lainnya
           </Button>
-        </Dropdown>
+        </Dropdown> */}
       </Space>
     </div>
   );

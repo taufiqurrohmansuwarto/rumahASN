@@ -1,54 +1,53 @@
 // src/components/mail/EmailList/EmailListComponent.js
-import React, { useEffect, useState } from "react";
-import { useRouter } from "next/router";
+import {
+  BellOutlined,
+  CheckOutlined,
+  DeleteOutlined,
+  EditOutlined,
+  EyeOutlined,
+  FileOutlined,
+  FilterOutlined,
+  FolderOutlined,
+  ForwardOutlined,
+  InboxOutlined,
+  MailOutlined,
+  MoreOutlined,
+  ReloadOutlined,
+  SearchOutlined,
+  SendOutlined,
+  StarFilled,
+  StarOutlined,
+  SyncOutlined,
+  TagOutlined,
+  UndoOutlined,
+} from "@ant-design/icons";
 import { useQuery } from "@tanstack/react-query";
 import {
+  Badge,
   Button,
   Card,
   Checkbox,
+  Divider,
+  Dropdown,
   Empty,
   Input,
   List,
+  message,
+  Modal,
   Pagination,
   Select,
   Space,
   Tag,
-  Typography,
-  message,
-  Modal,
-  Avatar,
   Tooltip,
-  Dropdown,
-  Divider,
-  Badge,
+  Typography,
 } from "antd";
-import {
-  EditOutlined,
-  ReloadOutlined,
-  SearchOutlined,
-  FilterOutlined,
-  MailOutlined,
-  FileOutlined,
-  StarFilled,
-  StarOutlined,
-  UserOutlined,
-  MoreOutlined,
-  DeleteOutlined,
-  EyeOutlined,
-  SendOutlined,
-  ForwardOutlined,
-  CheckOutlined,
-  UndoOutlined,
-  InboxOutlined,
-  FolderOutlined,
-  BellOutlined,
-  TagOutlined,
-  SyncOutlined,
-} from "@ant-design/icons";
 import dayjs from "dayjs";
+import { useRouter } from "next/router";
+import { useEffect, useState } from "react";
 
 // Import hooks
 import {
+  useArchiveEmail,
   useBulkDelete,
   useDeleteDraft,
   useDeleteEmail,
@@ -58,11 +57,11 @@ import {
   useMarkAsUnread,
   useMoveToFolder,
   useToggleStar,
-  useArchiveEmail,
 } from "@/hooks/useEmails";
 
 // Import utilities
 import { getFolderConfig } from "@/utils/emailFolderConfig";
+import { useSession } from "next-auth/react";
 
 const { Text, Title } = Typography;
 const { Search } = Input;
@@ -164,6 +163,10 @@ const EmailListComponent = ({
   const markAsSpamMutation = useMarkAsSpam();
   const markAsNotSpamMutation = useMarkAsNotSpam();
   const archiveEmailMutation = useArchiveEmail();
+
+  const {
+    data: { user },
+  } = useSession();
 
   // Reset selected emails when query changes
   useEffect(() => {
@@ -1133,17 +1136,6 @@ const EmailListComponent = ({
                       />
                     )}
 
-                    {/* Avatar */}
-                    <Avatar
-                      src={
-                        config.showRecipient
-                          ? email.recipients?.to?.[0]?.image
-                          : email.sender_image
-                      }
-                      icon={<UserOutlined />}
-                      size="small"
-                    />
-
                     {/* Content */}
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <div
@@ -1160,7 +1152,18 @@ const EmailListComponent = ({
                               style={{ marginRight: "8px" }}
                             >
                               {config.showRecipient
-                                ? email.recipients?.to?.[0]?.name || "Unknown"
+                                ? email.recipients?.to?.map(
+                                    (recipient, index) => (
+                                      <span key={index}>
+                                        {recipient.name || "Unknown"}
+                                        {index < email.recipients.to.length - 1
+                                          ? ", "
+                                          : ""}
+                                      </span>
+                                    )
+                                  )
+                                : email?.sender_id === user?.id
+                                ? "Saya"
                                 : email.sender_name || email.sender?.username}
                             </Text>
                             {isUnread && config.showUnreadBadge && (
