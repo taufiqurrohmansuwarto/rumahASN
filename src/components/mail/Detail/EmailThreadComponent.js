@@ -1,25 +1,31 @@
 // src/components/mail/Detail/EmailThreadComponent.js
-import {
-  DownOutlined,
-  MoreOutlined,
-  SendOutlined,
-  UpOutlined,
-  UserOutlined,
-} from "@ant-design/icons";
+import { DownOutlined, UserOutlined } from "@ant-design/icons";
 import {
   Avatar,
   Badge,
   Button,
   Card,
   Collapse,
-  Divider,
+  message,
   Tag,
   Typography,
 } from "antd";
 import dayjs from "dayjs";
+import "dayjs/locale/id";
 import { useState } from "react";
+import EmailActionButtons from "./EmailActionButtons";
 import EmailAttachmentsDisplay from "./EmailAttachmentsDisplay";
 import EmailContentDisplay from "./EmailContentDisplay";
+import EmailDetailHeader from "./EmailDetailHeader";
+import useScrollRestoration from "@/hooks/useScrollRestoration";
+import {
+  useDeleteEmail,
+  useMarkAsRead,
+  useMarkAsUnread,
+  useMoveToFolder,
+  useToggleStar,
+  useUpdatePriority,
+} from "@/hooks/useEmails";
 
 const { Text, Title } = Typography;
 const { Panel } = Collapse;
@@ -31,8 +37,19 @@ const ThreadEmailItem = ({
   isLatest,
   onReply,
   onReplyAll,
+  onForward,
+  threadEmails,
+  currentIndex,
 }) => {
-  const [expanded, setExpanded] = useState(isCurrentEmail || isLatest);
+  // action
+  const toggleStarMutation = useToggleStar();
+  const deleteEmailMutation = useDeleteEmail();
+  const moveToFolderMutation = useMoveToFolder();
+  const markAsUnreadMutation = useMarkAsUnread();
+  const markAsReadMutation = useMarkAsRead();
+  const updatePriorityMutation = useUpdatePriority();
+
+  const [expanded, setExpanded] = useState(true);
 
   const formatTime = (date) => {
     return dayjs(date).format("DD MMM YYYY, HH:mm");
@@ -54,136 +71,304 @@ const ThreadEmailItem = ({
     return summary;
   };
 
+  // Function to get quoted content from previous messages
+  const getQuotedContent = () => {
+    if (currentIndex === 0) return ""; // First email has no previous messages
+
+    const previousEmails = threadEmails.slice(0, currentIndex);
+
+    return previousEmails
+      .map((prevEmail) => {
+        const senderName = prevEmail.sender?.username || "Unknown Sender";
+        const senderEmail = prevEmail.sender?.email || "unknown@email.com";
+        // Format tanggal menggunakan locale Indonesia
+        const formattedDate = dayjs(prevEmail.created_at)
+          .locale("id")
+          .format("ddd, DD MMM YYYY [pukul] HH:mm");
+
+        return `On ${formattedDate} ${senderName} wrote:
+
+${prevEmail.content || ""}
+
+`;
+      })
+      .join("\n");
+  };
+
+  // Combine current content with quoted content
+  const getFullContent = () => {
+    const currentContent = email.content || "";
+    const quotedContent = getQuotedContent();
+
+    if (!quotedContent) return currentContent;
+
+    return `${currentContent}
+
+${quotedContent}`;
+  };
+
+  // Handlers untuk actions (placeholder - bisa disesuaikan dengan kebutuhan)
+  const handleToggleStar = async () => {
+    try {
+      await toggleStarMutation.mutateAsync(email.id);
+      message.success("Berhasil mengubah status bintang");
+    } catch (error) {
+      message.error("Gagal mengubah status bintang");
+    }
+  };
+
+  const handleUpdatePriority = async (priority) => {
+    try {
+      await updatePriorityMutation.mutateAsync({
+        emailId: email.id,
+        priority,
+      });
+      message.success("Berhasil mengubah prioritas email");
+    } catch (error) {
+      message.error("Gagal mengubah prioritas email");
+    }
+  };
+
+  const handleMarkAsUnread = async () => {
+    try {
+      await markAsUnreadMutation.mutateAsync(email.id);
+      message.success("Berhasil mengubah status tidak terbaca");
+    } catch (error) {
+      message.error("Gagal mengubah status tidak terbaca");
+    }
+  };
+
+  const handleMarkAsRead = async () => {
+    try {
+      await markAsReadMutation.mutateAsync(email.id);
+      message.success("Berhasil mengubah status terbaca");
+    } catch (error) {
+      message.error("Gagal mengubah status terbaca");
+    }
+  };
+
+  const handleMoveToFolder = async (folder) => {
+    try {
+      await moveToFolderMutation.mutateAsync({
+        emailId: email.id,
+        folder,
+      });
+      message.success("Berhasil memindahkan email ke folder");
+    } catch (error) {
+      message.error("Gagal memindahkan email ke folder");
+    }
+  };
+
+  const handleReplyAction = (replyAll = false) => {
+    if (replyAll) {
+      onReplyAll?.(email);
+    } else {
+      onReply?.(email);
+    }
+  };
+
+  const handleForward = () => {
+    // Implement forward
+    onForward?.(email);
+  };
+
+  const handleDelete = () => {
+    // Implement delete
+    console.log("Delete email:", email.id);
+  };
+
+  const handleArchive = () => {
+    // Implement archive
+    console.log("Archive email:", email.id);
+  };
+
+  const handleFlag = () => {
+    // Implement flag
+    console.log("Flag email:", email.id);
+  };
+
+  const handlePrint = () => {
+    window.print();
+  };
+
   return (
     <Card
-      size="small"
       style={{
-        marginBottom: "8px",
+        marginBottom: "16px",
         border: isCurrentEmail ? "2px solid #1890ff" : "1px solid #f0f0f0",
         borderRadius: "8px",
+        boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+        transition: "all 0.3s ease",
       }}
     >
-      {/* Email Header */}
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          cursor: "pointer",
-          padding: "8px 0",
-        }}
-        onClick={() => setExpanded(!expanded)}
-      >
-        <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-          <Avatar
-            src={email.sender?.image}
-            icon={<UserOutlined />}
-            size="default"
-          />
+      {/* Collapsed Header */}
+      {!expanded && (
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            cursor: "pointer",
+            padding: "12px 16px",
+            borderRadius: "8px",
+            transition: "background-color 0.2s ease",
+          }}
+          onMouseEnter={(e) => (e.target.style.backgroundColor = "#f8f9fa")}
+          onMouseLeave={(e) => (e.target.style.backgroundColor = "transparent")}
+          onClick={() => setExpanded(true)}
+        >
+          <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+            <Avatar
+              src={email.sender?.image}
+              icon={<UserOutlined />}
+              size="default"
+            />
 
-          <div>
-            <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-              <Text strong style={{ fontSize: "14px" }}>
-                {email.sender?.username || "Unknown Sender"}
-              </Text>
-              {isCurrentEmail && (
-                <Tag color="blue" size="small">
-                  Current
-                </Tag>
-              )}
-              {!email.is_read && <Badge dot status="processing" />}
-            </div>
+            <div>
+              <div
+                style={{ display: "flex", alignItems: "center", gap: "8px" }}
+              >
+                <Text strong style={{ fontSize: "14px" }}>
+                  {email.sender?.username || "Unknown Sender"}
+                </Text>
+                {isCurrentEmail && (
+                  <Tag color="blue" size="small">
+                    Current
+                  </Tag>
+                )}
+                {!email.is_read && <Badge dot status="processing" />}
+              </div>
 
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "8px",
-                marginTop: "2px",
-              }}
-            >
-              <Text type="secondary" style={{ fontSize: "12px" }}>
-                {getRecipientSummary()}
-              </Text>
-              <Text type="secondary" style={{ fontSize: "12px" }}>
-                • {formatTime(email.created_at)}
-              </Text>
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "8px",
+                  marginTop: "2px",
+                }}
+              >
+                <Text type="secondary" style={{ fontSize: "12px" }}>
+                  {getRecipientSummary()}
+                </Text>
+                <Text type="secondary" style={{ fontSize: "12px" }}>
+                  • {formatTime(email.created_at)}
+                </Text>
+              </div>
             </div>
           </div>
+
+          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+            {email.attachments?.length > 0 && (
+              <Tag size="small">
+                {email.attachments.length} attachment
+                {email.attachments.length > 1 ? "s" : ""}
+              </Tag>
+            )}
+
+            <Button type="text" size="small" icon={<DownOutlined />} />
+          </div>
         </div>
+      )}
 
-        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-          {email.attachments?.length > 0 && (
-            <Tag size="small">
-              {email.attachments.length} attachment
-              {email.attachments.length > 1 ? "s" : ""}
-            </Tag>
-          )}
-
-          <Button
-            type="text"
-            size="small"
-            icon={expanded ? <UpOutlined /> : <DownOutlined />}
-          />
-        </div>
-      </div>
-
-      {/* Email Content (when expanded) */}
+      {/* Expanded Content */}
       {expanded && (
-        <>
-          <Divider style={{ margin: "12px 0" }} />
+        <div style={{ padding: "0" }}>
+          {/* Email Header - menggunakan komponen yang sama dengan EmailDetailComponent */}
+          <div style={{ padding: "24px 24px 16px 24px" }}>
+            <EmailDetailHeader
+              email={email}
+              onToggleStar={handleToggleStar}
+              isStarLoading={false}
+              onToggleRead={handleMarkAsRead}
+              isReadLoading={false}
+              onToggleUnread={handleMarkAsUnread}
+              isUnreadLoading={false}
+              onMoveToFolder={handleMoveToFolder}
+              isMoveToFolderLoading={false}
+              recipients={email.recipients}
+              onRefresh={() => {}}
+              onUpdatePriority={handleUpdatePriority}
+              isUpdatePriorityLoading={false}
+              showCollapseButton={true}
+              onCollapse={() => setExpanded(false)}
+            />
+          </div>
 
-          {/* Subject (if different from thread subject) */}
-          {email.subject && (
-            <div style={{ marginBottom: "16px" }}>
-              <Text strong style={{ fontSize: "16px" }}>
-                {email.subject}
-              </Text>
-            </div>
-          )}
-
-          {/* Content */}
-          <EmailContentDisplay content={email.content} isMarkdown={false} />
-
-          {/* Attachments */}
-          {email.attachments?.length > 0 && (
-            <EmailAttachmentsDisplay attachments={email.attachments} />
-          )}
-
-          {/* Action Buttons */}
+          {/* Email Content dengan quoted content - dengan scroll */}
           <div
             style={{
-              marginTop: "16px",
-              paddingTop: "12px",
-              borderTop: "1px solid #f0f0f0",
-              display: "flex",
-              gap: "8px",
+              padding: "0 24px 16px 24px",
+              maxHeight: "400px",
+              overflowY: "auto",
+              overflowX: "hidden",
+              scrollbarWidth: "thin",
+              scrollbarColor: "#d9d9d9 #f0f0f0",
             }}
           >
-            <Button
-              size="small"
-              icon={<SendOutlined />}
-              onClick={() => onReply?.(email)}
+            <div
+              style={{
+                border: "1px solid #f0f0f0",
+                borderRadius: "6px",
+                padding: "16px",
+                backgroundColor: "#fafafa",
+              }}
             >
-              Reply
-            </Button>
-
-            <Button size="small" onClick={() => onReplyAll?.(email)}>
-              Reply All
-            </Button>
-
-            <Button size="small" icon={<MoreOutlined />}>
-              More
-            </Button>
+              <EmailContentDisplay
+                content={getFullContent()}
+                isMarkdown={false}
+              />
+            </div>
           </div>
-        </>
+
+          {/* Attachments dengan scroll jika banyak */}
+          {email.attachments && email.attachments.length > 0 && (
+            <div
+              style={{
+                padding: "0 24px 16px 24px",
+                maxHeight: "200px",
+                overflowY: "auto",
+                overflowX: "hidden",
+                scrollbarWidth: "thin",
+                scrollbarColor: "#d9d9d9 #f0f0f0",
+              }}
+            >
+              <EmailAttachmentsDisplay attachments={email.attachments} />
+            </div>
+          )}
+
+          {/* Action Buttons - menggunakan komponen yang sama */}
+          <div style={{ padding: "0 24px 24px 24px" }}>
+            <EmailActionButtons
+              email={email}
+              onReply={handleReplyAction}
+              onReplyAll={() => handleReplyAction(true)}
+              onForward={handleForward}
+              onDelete={handleDelete}
+              onArchive={handleArchive}
+              onFlag={handleFlag}
+              onPrint={handlePrint}
+              loading={{
+                delete: false,
+                archive: false,
+              }}
+            />
+          </div>
+        </div>
       )}
     </Card>
   );
 };
 
 // Main thread component
-const EmailThreadComponent = ({ emailId, threadData, onReply, onReplyAll }) => {
+const EmailThreadComponent = ({
+  emailId,
+  threadData,
+  onReply,
+  onReplyAll,
+  onForward,
+}) => {
+  useScrollRestoration();
+
   if (!threadData || !threadData.thread_emails) {
     return null;
   }
@@ -211,37 +396,93 @@ const EmailThreadComponent = ({ emailId, threadData, onReply, onReplyAll }) => {
   const flatEmails = flattenThread(thread_emails);
 
   return (
-    <div style={{ marginBottom: "24px" }}>
+    <div
+      style={{
+        marginBottom: "24px",
+        maxHeight: "calc(100vh - 200px)", // Beri tinggi maksimal berdasarkan viewport
+        display: "flex",
+        flexDirection: "column",
+      }}
+    >
       {/* Thread Header */}
       {thread_count > 1 && (
         <div
           style={{
             marginBottom: "16px",
-            padding: "12px 16px",
+            padding: "16px 20px",
             backgroundColor: "#f8f9fa",
-            borderRadius: "6px",
+            borderRadius: "8px",
             border: "1px solid #e8e8e8",
+            boxShadow: "0 1px 4px rgba(0,0,0,0.05)",
+            flexShrink: 0, // Jangan biarkan header menyusut
           }}
         >
-          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-            <Title level={5} style={{ margin: 0 }}>
-              Conversation ({thread_count} messages)
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "12px",
+              marginBottom: "8px",
+            }}
+          >
+            <Title level={4} style={{ margin: 0, color: "#1890ff" }}>
+              💬 Percakapan ({thread_count} pesan)
             </Title>
-            <Tag color="blue" size="small">
+            <Tag color="blue" size="default">
               Thread
             </Tag>
           </div>
 
           {thread_subject && (
-            <Text type="secondary" style={{ fontSize: "12px" }}>
-              Subject: {thread_subject}
+            <Text
+              type="secondary"
+              style={{ fontSize: "13px", lineHeight: 1.4 }}
+            >
+              <strong>Subjek:</strong> {thread_subject}
             </Text>
           )}
         </div>
       )}
 
-      {/* Thread Emails */}
-      <div style={{ maxHeight: "600px", overflowY: "auto" }}>
+      {/* Thread Emails Container dengan scroll yang bagus */}
+      <div
+        style={{
+          flex: 1,
+          overflowY: "auto",
+          overflowX: "hidden",
+          paddingRight: "8px",
+          // Custom scrollbar styling
+          scrollbarWidth: "thin",
+          scrollbarColor: "#bfbfbf #f0f0f0",
+        }}
+        // CSS untuk webkit browsers (Chrome, Safari, Edge)
+        className="email-thread-scroll"
+      >
+        <style jsx>{`
+          .email-thread-scroll::-webkit-scrollbar {
+            width: 8px;
+          }
+
+          .email-thread-scroll::-webkit-scrollbar-track {
+            background: #f0f0f0;
+            border-radius: 10px;
+          }
+
+          .email-thread-scroll::-webkit-scrollbar-thumb {
+            background: #bfbfbf;
+            border-radius: 10px;
+            transition: background 0.2s ease;
+          }
+
+          .email-thread-scroll::-webkit-scrollbar-thumb:hover {
+            background: #8c8c8c;
+          }
+
+          .email-thread-scroll {
+            scroll-behavior: smooth;
+          }
+        `}</style>
+
         {flatEmails.map((email, index) => (
           <ThreadEmailItem
             key={email.id}
@@ -250,6 +491,9 @@ const EmailThreadComponent = ({ emailId, threadData, onReply, onReplyAll }) => {
             isLatest={index === flatEmails.length - 1}
             onReply={onReply}
             onReplyAll={onReplyAll}
+            onForward={onForward}
+            threadEmails={flatEmails}
+            currentIndex={index}
           />
         ))}
       </div>

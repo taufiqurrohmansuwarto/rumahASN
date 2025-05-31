@@ -10,6 +10,7 @@ import {
   MailOutlined,
   StarFilled,
   StarOutlined,
+  UpOutlined,
   UserOutlined,
 } from "@ant-design/icons";
 import {
@@ -205,6 +206,28 @@ const ReadStatusButton = ({ onToggleUnread, isUnreadLoading }) => {
         icon={<MailOutlined style={{ fontSize: "16px", color: "#8c8c8c" }} />}
         onClick={onToggleUnread}
         loading={isUnreadLoading}
+        style={{
+          padding: "4px 6px",
+          height: "28px",
+          borderRadius: "4px",
+          transition: "all 0.2s ease",
+        }}
+        className="action-button"
+      />
+    </Tooltip>
+  );
+};
+
+// untuk hapus
+const DeleteButton = ({ onDelete, isDeleting }) => {
+  return (
+    <Tooltip title="Hapus email">
+      <Button
+        type="text"
+        size="small"
+        icon={<DeleteOutlined style={{ fontSize: "16px", color: "#8c8c8c" }} />}
+        onClick={onDelete}
+        loading={isDeleting}
         style={{
           padding: "4px 6px",
           height: "28px",
@@ -536,6 +559,8 @@ const EmailDetailHeader = ({
   onUpdatePriority,
   isUpdatePriorityLoading = false,
   onRefresh,
+  showCollapseButton = false,
+  onCollapse,
 }) => {
   if (!email) return null;
 
@@ -570,7 +595,26 @@ const EmailDetailHeader = ({
           senderName={email.sender_name}
           email={email}
         />
-        <EmailDate createdAt={email.created_at} />
+        <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+          <EmailDate createdAt={email.created_at} />
+          {showCollapseButton && (
+            <Tooltip title="Tutup email">
+              <Button
+                type="text"
+                size="small"
+                icon={<UpOutlined />}
+                onClick={onCollapse}
+                style={{
+                  padding: "4px 6px",
+                  height: "28px",
+                  borderRadius: "4px",
+                  transition: "all 0.2s ease",
+                }}
+                className="action-button"
+              />
+            </Tooltip>
+          )}
+        </div>
       </div>
 
       <Divider style={{ margin: "16px 0" }} />

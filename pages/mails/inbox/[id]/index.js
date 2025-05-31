@@ -33,13 +33,17 @@ const InboxMailDetail = () => {
     router.push(`/mails/compose?reply=${originalEmail.id}&replyAll=true`);
   };
 
+  const handleForward = (originalEmail) => {
+    router.push(`/mails/compose?forward=${originalEmail.id}`);
+  };
+
   if (isLoading) return <Spin />;
   if (error) return <Empty />;
 
   const { email, thread, has_thread } = emailData.data;
 
   return (
-    <PageContainer>
+    <PageContainer onBack={() => router.back()}>
       {/* Email Thread Component */}
       {has_thread && (
         <EmailThreadComponent
@@ -47,6 +51,7 @@ const InboxMailDetail = () => {
           threadData={thread}
           onReply={handleReply}
           onReplyAll={handleReplyAll}
+          onForward={handleForward}
         />
       )}
 

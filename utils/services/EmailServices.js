@@ -73,7 +73,7 @@ class EmailService {
             current_email_id: emailId,
             root_email_id: emailId,
             thread_count: 1,
-            thread_emails: [currentEmail],
+            thread_emails: [this.serializeRecipients({ ...currentEmail })],
             thread_subject: currentEmail.thread_subject || currentEmail.subject,
           },
         };
@@ -81,6 +81,10 @@ class EmailService {
 
       // 4. Build thread structure
       const threadStructure = this.buildThreadStructure(threadEmails);
+
+      // ✅ NEW: Serialize recipients untuk semua email dalam thread
+      const serializedThreadStructure =
+        this.serializeThreadEmails(threadStructure);
 
       // 5. Mark thread as read (optional, dengan error handling)
       try {
@@ -99,7 +103,7 @@ class EmailService {
           current_email_id: emailId,
           root_email_id: rootId,
           thread_count: threadEmails.length,
-          thread_emails: threadStructure,
+          thread_emails: serializedThreadStructure,
           thread_subject: currentEmail.thread_subject || currentEmail.subject,
         },
       };
@@ -232,6 +236,37 @@ class EmailService {
     }
   }
 
+  // Helper method untuk serialize recipients
+  static serializeRecipients(email) {
+    if (email.recipients && Array.isArray(email.recipients)) {
+      email.recipients = {
+        to: email.recipients.filter((r) => r.type === "to"),
+        cc: email.recipients.filter((r) => r.type === "cc"),
+        bcc: email.recipients.filter((r) => r.type === "bcc"),
+      };
+    }
+    return email;
+  }
+
+  // Helper method untuk serialize recipients dalam thread
+  static serializeThreadEmails(threadEmails) {
+    if (!threadEmails || !Array.isArray(threadEmails)) {
+      return threadEmails;
+    }
+
+    return threadEmails.map((email) => {
+      // Serialize recipients untuk email utama
+      this.serializeRecipients(email);
+
+      // Serialize recipients untuk replies (jika ada)
+      if (email.replies && Array.isArray(email.replies)) {
+        email.replies = this.serializeThreadEmails(email.replies);
+      }
+
+      return email;
+    });
+  }
+
   // Get email with thread context
   static async getEmailWithThread(emailId, userId) {
     try {
@@ -249,6 +284,13 @@ class EmailService {
         thread_emails: [email],
         thread_subject: email.subject,
       };
+
+      // ✅ NEW: Serialize recipients untuk semua email dalam thread
+      if (threadData.thread_emails) {
+        threadData.thread_emails = this.serializeThreadEmails(
+          threadData.thread_emails
+        );
+      }
 
       return {
         success: true,
@@ -272,7 +314,7 @@ class EmailService {
               current_email_id: emailId,
               root_email_id: emailId,
               thread_count: 1,
-              thread_emails: [email],
+              thread_emails: [this.serializeRecipients({ ...email })],
               thread_subject: email.subject,
             },
             has_thread: false,
@@ -769,27 +811,6 @@ class EmailService {
       attachments: originalEmail.attachments, // Forward attachments
       parentId: originalEmailId,
     });
-  }
-
-  // Get email thread
-  static async getEmailThread(emailId) {
-    const email = await Email.query().findById(emailId);
-    if (!email) {
-      throw new Error("Email not found");
-    }
-
-    // Find root email
-    const rootId = email.parent_id || emailId;
-
-    // Get all emails in thread
-    const threadEmails = await Email.query()
-      .where((builder) => {
-        builder.where("id", rootId).orWhere("parent_id", rootId);
-      })
-      .withGraphFetched("[sender, recipients.[user], attachments]")
-      .orderBy("created_at", "asc");
-
-    return threadEmails;
   }
 
   // Soft delete email (move to trash)
