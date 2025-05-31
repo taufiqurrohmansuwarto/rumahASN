@@ -1,7 +1,7 @@
 import GmailLayout from "@/components/GmailLayout";
+import EmailListComponent from "@/components/mail/EmailList/EmailListComponent";
 import PageContainer from "@/components/PageContainer";
 import Head from "next/head";
-import EmailListComponent from "@/components/mail/EmailList/EmailListComponent";
 
 const InboxMail = () => {
   return (

@@ -40,7 +40,6 @@ export const getFolderConfig = (folder) => {
       ...baseConfig,
       title: "Inbox",
       subtitle: "Kotak Masuk",
-      showRecipient: true,
       icon: <InboxOutlined />,
       primaryColor: "#1890ff",
       apiFunction: getInboxEmails,

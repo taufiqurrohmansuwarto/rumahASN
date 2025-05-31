@@ -36,6 +36,39 @@ const EmailContentDisplay = ({ content, isMarkdown = false }) => {
       });
   };
 
+  // Process content to separate quoted content
+  const processContent = (text) => {
+    // Split content by Gmail-style quote markers
+    const parts = text.split(/(On .+? wrote:)/);
+    const processed = [];
+
+    for (let i = 0; i < parts.length; i++) {
+      const part = parts[i];
+
+      if (part.match(/On .+? wrote:/)) {
+        // This is a quote header
+        processed.push({
+          type: "quote-header",
+          content: part,
+        });
+      } else if (i > 0 && parts[i - 1]?.match(/On .+? wrote:/)) {
+        // This is quoted content (comes after quote header)
+        processed.push({
+          type: "quoted",
+          content: part,
+        });
+      } else {
+        // This is regular content
+        processed.push({
+          type: "regular",
+          content: part,
+        });
+      }
+    }
+
+    return processed;
+  };
+
   // Simple markdown to HTML converter (basic)
   const renderMarkdown = (text) => {
     return text
@@ -67,6 +100,58 @@ const EmailContentDisplay = ({ content, isMarkdown = false }) => {
     "&::-webkit-scrollbar-thumb:hover": {
       background: "#bfbfbf",
     },
+  };
+
+  const renderProcessedContent = (processedParts) => {
+    return processedParts.map((part, index) => {
+      if (part.type === "quote-header") {
+        return (
+          <div
+            key={index}
+            style={{
+              color: "#666666",
+              fontSize: "13px",
+              fontWeight: "500",
+              marginTop: index > 0 ? "20px" : "0",
+              marginBottom: "8px",
+            }}
+          >
+            {part.content}
+          </div>
+        );
+      } else if (part.type === "quoted") {
+        return (
+          <div
+            key={index}
+            style={{
+              borderLeft: "3px solid #cccccc",
+              paddingLeft: "16px",
+              marginLeft: "8px",
+              color: "#666666",
+              fontSize: "13px",
+              whiteSpace: "pre-wrap",
+              wordBreak: "break-word",
+              marginBottom: "16px",
+            }}
+          >
+            {part.content}
+          </div>
+        );
+      } else {
+        return (
+          <div
+            key={index}
+            style={{
+              whiteSpace: "pre-wrap",
+              wordBreak: "break-word",
+              marginBottom: part.content.trim() ? "16px" : "0",
+            }}
+          >
+            {part.content}
+          </div>
+        );
+      }
+    });
   };
 
   return (
@@ -134,19 +219,19 @@ const EmailContentDisplay = ({ content, isMarkdown = false }) => {
               whiteSpace: "pre-wrap",
             }}
           />
-        ) : (
+        ) : showRaw ? (
           <div
             style={{
               whiteSpace: "pre-wrap",
               wordBreak: "break-word",
-              fontFamily: showRaw
-                ? 'Monaco, "Courier New", monospace'
-                : "inherit",
-              fontSize: showRaw ? "13px" : "14px",
+              fontFamily: 'Monaco, "Courier New", monospace',
+              fontSize: "13px",
             }}
           >
             {content}
           </div>
+        ) : (
+          <div>{renderProcessedContent(processContent(content))}</div>
         )}
       </div>
 

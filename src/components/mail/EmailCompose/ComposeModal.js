@@ -74,11 +74,26 @@ const ComposeModal = ({
           ...allOriginalRecipients,
         ];
       } else {
-        // Jika reply biasa, hanya balas ke pengirim asli
-        toRecipients = originalEmail.recipients?.to.map((r) => ({
-          label: r.user?.username || r.recipient_name || "Unknown",
-          value: r.user?.custom_id || r.recipient_id,
-        }));
+        // jika dia ada parent maka kirim ke sender parent
+        if (originalEmail?.parent_id) {
+          toRecipients = [
+            {
+              label:
+                originalEmail.parent?.sender?.username ||
+                originalEmail.parent?.sender?.email,
+              value: originalEmail.parent?.sender_id,
+            },
+          ];
+        } else {
+          // Jika reply biasa, hanya balas ke pengirim asli
+          toRecipients = [
+            {
+              label:
+                originalEmail.sender?.username || originalEmail.sender?.email,
+              value: originalEmail.sender_id,
+            },
+          ];
+        }
       }
 
       // Set penerima email

@@ -201,6 +201,7 @@ export const useMarkAsRead = () => {
       queryClient.invalidateQueries({ queryKey: ["emails"] });
       queryClient.invalidateQueries({ queryKey: ["email-stats"] });
       queryClient.invalidateQueries({ queryKey: ["email-detail"] });
+      queryClient.invalidateQueries({ queryKey: ["email-with-thread"] });
       // ❌ HAPUS: message.success() - biarkan component yang handle
     },
   });
@@ -214,6 +215,7 @@ export const useUpdatePriority = () => {
       queryClient.invalidateQueries({ queryKey: ["emails"] });
       queryClient.invalidateQueries({ queryKey: ["email-stats"] });
       queryClient.invalidateQueries({ queryKey: ["email-detail"] });
+      queryClient.invalidateQueries({ queryKey: ["email-with-thread"] });
     },
   });
 };
@@ -226,6 +228,8 @@ export const useMarkAsUnread = () => {
       // ✅ PERBAIKAN: Comprehensive invalidation dan HAPUS message duplicate
       queryClient.invalidateQueries({ queryKey: ["emails"] });
       queryClient.invalidateQueries({ queryKey: ["email-stats"] });
+      queryClient.invalidateQueries({ queryKey: ["email-detail"] });
+      queryClient.invalidateQueries({ queryKey: ["email-with-thread"] });
       // ❌ HAPUS: message.success() - biarkan component yang handle
     },
   });
@@ -239,6 +243,8 @@ export const useToggleStar = () => {
       // ✅ PERBAIKAN: Comprehensive invalidation dan HAPUS message duplicate
       queryClient.invalidateQueries({ queryKey: ["emails"] });
       queryClient.invalidateQueries({ queryKey: ["email-detail"] });
+      queryClient.invalidateQueries({ queryKey: ["email-stats"] });
+      queryClient.invalidateQueries({ queryKey: ["email-with-thread"] });
       // ❌ HAPUS: message.success() - biarkan component yang handle
     },
   });
@@ -253,6 +259,7 @@ export const useMoveToFolder = () => {
       queryClient.invalidateQueries({ queryKey: ["emails"] });
       queryClient.invalidateQueries({ queryKey: ["email-stats"] });
       queryClient.invalidateQueries({ queryKey: ["email-detail"] });
+      queryClient.invalidateQueries({ queryKey: ["email-with-thread"] });
       // ❌ HAPUS: message.success() - biarkan component yang handle
     },
   });
@@ -282,6 +289,8 @@ export const useDeleteEmail = () => {
       // ✅ PERBAIKAN: Comprehensive invalidation dan HAPUS message duplicate
       queryClient.invalidateQueries({ queryKey: ["emails"] });
       queryClient.invalidateQueries({ queryKey: ["email-stats"] });
+      queryClient.invalidateQueries({ queryKey: ["email-detail"] });
+      queryClient.invalidateQueries({ queryKey: ["email-with-thread"] });
       // ❌ HAPUS: message.success() - biarkan component yang handle
     },
     onError: () => {
