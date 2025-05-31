@@ -291,6 +291,10 @@ const ComposeModal = ({
         <AttachmentUploader
           attachments={attachments}
           onChange={setAttachments}
+          maxFiles={10}
+          maxSize={25}
+          multiple={true}
+          disabled={false}
         />
       )}
     </Form>

@@ -1,43 +1,36 @@
 import {
-  // upload
-  uploadSingleFile,
-  uploadMultipleFiles,
-  getAttachment,
-  deleteAttachment,
-  getUserUploads,
-  getDownloadUrl,
-  getUploadStats,
-  cleanupUnusedFiles,
-  validateFileSize,
-  validateFileType,
-  DEFAULT_ALLOWED_TYPES,
-
-  // reply to email
-  replyToEmail,
-  // get email with thread
-  getEmailWithThread,
   // archive emails
   archiveEmail,
   // assign label to email
   assignLabelToEmail,
   bulkDelete,
+  cleanupUnusedFiles,
   createLabel,
+  DEFAULT_ALLOWED_TYPES,
+  deleteAttachment,
   deleteDraft,
   deleteEmail,
   deleteLabel,
+  deleteTrash,
   getArchiveEmails,
+  getAttachment,
+  getDownloadUrl,
   getDraft,
   getEmailById,
   getEmailLabels,
   getEmailStats,
+  // get email with thread
+  getEmailWithThread,
   getInboxEmails,
   getLabelEmails,
   getSentEmails,
   getSpamEmails,
   // starred emails
   getStarredEmails,
+  getUploadStats,
   // labels
   getUserLabels,
+  getUserUploads,
   markAsNotSpam,
   markAsRead,
   // spam emails
@@ -45,6 +38,8 @@ import {
   markAsUnread,
   moveToFolder,
   removeLabelFromEmail,
+  // reply to email
+  replyToEmail,
   saveDraft,
   searchEmails,
   searchUsers,
@@ -52,11 +47,15 @@ import {
   toggleStar,
   updateDraft,
   updateLabel,
-  deleteTrash,
   updatePriority,
+  uploadMultipleFiles,
+  // upload
+  uploadSingleFile,
+  validateFileSize,
+  validateFileType,
 } from "@/services/rasn-mail.services";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { message } from "antd";
+import { message, notification } from "antd";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 export const useEmailStats = () => {
@@ -123,7 +122,7 @@ export const useSendDraft = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["emails"] });
       queryClient.invalidateQueries({ queryKey: ["email-stats"] });
-      message.success("Draft sent successfully");
+      notification.success("Draft sent successfully");
     },
   });
 };
@@ -289,7 +288,7 @@ export const useBulkDelete = () => {
       // ❌ HAPUS: message.success() - biarkan component yang handle
     },
     onError: () => {
-      message.error("Gagal menghapus email");
+      notification.error("Gagal menghapus email");
     },
   });
 };
@@ -307,7 +306,7 @@ export const useDeleteEmail = () => {
       // ❌ HAPUS: message.success() - biarkan component yang handle
     },
     onError: () => {
-      message.error("Gagal menghapus email");
+      notification.error("Gagal menghapus email");
     },
   });
 };
@@ -338,12 +337,12 @@ export const useCreateLabel = () => {
     mutationFn: createLabel,
     onSuccess: (data) => {
       queryClient.invalidateQueries(["user-labels"]);
-      message.success(data.message || "Label berhasil dibuat");
+      notification.success(data.message || "Label berhasil dibuat");
     },
     onError: (error) => {
       const errorMessage =
         error.response?.data?.message || "Gagal membuat label";
-      message.error(errorMessage);
+      notification.error(errorMessage);
     },
   });
 };
@@ -356,12 +355,12 @@ export const useUpdateLabel = () => {
     mutationFn: ({ labelId, ...labelData }) => updateLabel(labelId, labelData),
     onSuccess: (data) => {
       queryClient.invalidateQueries(["user-labels"]);
-      message.success(data.message || "Label berhasil diperbarui");
+      notification.success(data.message || "Label berhasil diperbarui");
     },
     onError: (error) => {
       const errorMessage =
         error.response?.data?.message || "Gagal memperbarui label";
-      message.error(errorMessage);
+      notification.error(errorMessage);
     },
   });
 };
@@ -374,12 +373,12 @@ export const useDeleteLabel = () => {
     mutationFn: deleteLabel,
     onSuccess: (data) => {
       queryClient.invalidateQueries(["user-labels"]);
-      message.success(data.message || "Label berhasil dihapus");
+      notification.success(data.message || "Label berhasil dihapus");
     },
     onError: (error) => {
       const errorMessage =
         error.response?.data?.message || "Gagal menghapus label";
-      message.error(errorMessage);
+      notification.error(errorMessage);
     },
   });
 };
@@ -404,12 +403,12 @@ export const useAssignLabel = () => {
       queryClient.invalidateQueries(["email-labels", variables.emailId]);
       queryClient.invalidateQueries({ queryKey: ["emails"] });
       queryClient.invalidateQueries(["email-detail"]);
-      message.success(data.message || "Label berhasil ditambahkan");
+      notification.success(data.message || "Label berhasil ditambahkan");
     },
     onError: (error) => {
       const errorMessage =
         error.response?.data?.message || "Gagal menambahkan label";
-      message.error(errorMessage);
+      notification.error(errorMessage);
     },
   });
 };
@@ -425,12 +424,12 @@ export const useRemoveLabel = () => {
       queryClient.invalidateQueries(["email-labels", variables.emailId]);
       queryClient.invalidateQueries({ queryKey: ["emails"] });
       queryClient.invalidateQueries(["email-detail"]);
-      message.success(data.message || "Label berhasil dihapus");
+      notification.success(data.message || "Label berhasil dihapus");
     },
     onError: (error) => {
       const errorMessage =
         error.response?.data?.message || "Gagal menghapus label";
-      message.error(errorMessage);
+      notification.error(errorMessage);
     },
   });
 };
@@ -476,7 +475,7 @@ export const useArchiveEmail = () => {
       // ❌ HAPUS: message.success() - biarkan component yang handle
     },
     onError: () => {
-      message.error("Gagal mengarsipkan email");
+      notification.error("Gagal mengarsipkan email");
     },
   });
 };
@@ -493,7 +492,7 @@ export const useMarkAsSpam = () => {
       // ❌ HAPUS: message.success() - biarkan component yang handle
     },
     onError: () => {
-      message.error("Gagal menandai sebagai spam");
+      notification.error("Gagal menandai sebagai spam");
     },
   });
 };
@@ -510,7 +509,7 @@ export const useMarkAsNotSpam = () => {
       // ❌ HAPUS: message.success() - biarkan component yang handle
     },
     onError: () => {
-      message.error("Gagal menghapus dari spam");
+      notification.error("Gagal menghapus dari spam");
     },
   });
 };
@@ -560,6 +559,8 @@ export const useGetEmailWithThread = (emailId) => {
   });
 };
 
+// Tambahkan import ini ke bagian atas file useEmails.js
+
 // ==========================================
 // UPLOAD HOOKS - Tambahkan di bagian bawah file useEmails.js
 // ==========================================
@@ -569,7 +570,7 @@ export const useUploadSingleFile = () => {
   const queryClient = useQueryClient();
   const [uploadProgress, setUploadProgress] = useState(0);
 
-  const mutation = useMutation({
+  return useMutation({
     mutationFn: (file) => {
       // Validate file before upload
       if (!validateFileSize(file, 25)) {
@@ -599,11 +600,6 @@ export const useUploadSingleFile = () => {
       setUploadProgress(0);
     },
   });
-
-  return {
-    ...mutation,
-    uploadProgress,
-  };
 };
 
 // Upload multiple files hook
@@ -611,7 +607,7 @@ export const useUploadMultipleFiles = () => {
   const queryClient = useQueryClient();
   const [uploadProgress, setUploadProgress] = useState(0);
 
-  const mutation = useMutation({
+  return useMutation({
     mutationFn: (files) => {
       // Validate files before upload
       const invalidFiles = [];
@@ -648,11 +644,6 @@ export const useUploadMultipleFiles = () => {
       setUploadProgress(0);
     },
   });
-
-  return {
-    ...mutation,
-    uploadProgress,
-  };
 };
 
 // Get attachment hook
@@ -800,7 +791,6 @@ export const useFilePicker = (options = {}) => {
   };
 };
 
-// Antd Upload props helper hook
 export const useAntdUploadProps = (options = {}) => {
   const {
     multiple = false,
@@ -813,6 +803,37 @@ export const useAntdUploadProps = (options = {}) => {
 
   const uploadSingle = useUploadSingleFile();
   const uploadMultiple = useUploadMultipleFiles();
+  const [uploadingFiles, setUploadingFiles] = useState(new Set());
+
+  // Handle multiple files upload
+  const handleMultipleUpload = async (fileList) => {
+    try {
+      const validFiles = fileList.filter((file) => {
+        return (
+          validateFileSize(file, maxSize) &&
+          validateFileType(file, DEFAULT_ALLOWED_TYPES)
+        );
+      });
+
+      if (validFiles.length === 0) {
+        onError?.("Tidak ada file valid untuk di-upload");
+        return;
+      }
+
+      if (validFiles.length === 1) {
+        // Single file even in multiple mode
+        const result = await uploadSingle.mutateAsync(validFiles[0]);
+        onFilesChange?.([result.data]);
+      } else {
+        // Multiple files
+        const result = await uploadMultiple.mutateAsync(validFiles);
+        onFilesChange?.(result.data.uploaded || []);
+      }
+    } catch (error) {
+      const errorMessage = error.message || "Gagal mengunggah file";
+      onError?.(errorMessage);
+    }
+  };
 
   // Antd Upload props configuration
   const uploadProps = {
@@ -823,75 +844,21 @@ export const useAntdUploadProps = (options = {}) => {
     showUploadList: false,
     disabled: disabled || uploadSingle.isLoading || uploadMultiple.isLoading,
 
-    // Custom upload function
-    customRequest: async ({
-      file,
-      onSuccess,
-      onError: onUploadError,
-      onProgress,
-    }) => {
-      try {
-        // Validate file
-        if (!validateFileSize(file, maxSize)) {
-          throw new Error(
-            `${file.name}: File terlalu besar (max ${maxSize}MB)`
-          );
-        }
-
-        if (!validateFileType(file, DEFAULT_ALLOWED_TYPES)) {
-          throw new Error(`${file.name}: Tipe file tidak didukung`);
-        }
-
-        // Progress handler yang menggabungkan internal progress dan Antd progress
-        const progressHandler = (progress) => {
-          // Update progress ke Antd Upload
-          onProgress?.({ percent: progress });
-        };
-
-        // Upload file dengan progress handler
-        const result = await uploadSingleFile(file, progressHandler);
-        onSuccess(result.data, file);
-        onFilesChange?.([result.data]);
-      } catch (error) {
-        const errorMessage = error.message || "Gagal mengunggah file";
-        onUploadError(error);
-        onError?.(errorMessage);
-      }
-    },
-
-    // Multiple files handler
+    // Handle file selection
     onChange: async (info) => {
-      const { fileList, file } = info;
+      const { fileList } = info;
 
-      if (multiple && fileList.length > 1) {
-        // Handle multiple files upload
-        const filesToUpload = fileList
-          .filter((f) => f.status !== "done" && f.status !== "error")
-          .map((f) => f.originFileObj)
-          .filter(Boolean);
+      // Filter out files that are already uploaded or errored
+      const newFiles = fileList.filter(
+        (file) =>
+          file.status !== "done" &&
+          file.status !== "error" &&
+          file.originFileObj
+      );
 
-        if (filesToUpload.length > 0) {
-          try {
-            // Progress handler untuk multiple files
-            const progressHandler = (progress) => {
-              // Update progress untuk semua file yang sedang diupload
-              fileList.forEach((fileItem) => {
-                if (fileItem.status === "uploading") {
-                  fileItem.percent = progress;
-                }
-              });
-            };
-
-            const result = await uploadMultipleFiles(
-              filesToUpload,
-              progressHandler
-            );
-            onFilesChange?.(result.data.uploaded || []);
-          } catch (error) {
-            const errorMessage = error.message || "Gagal mengunggah file";
-            onError?.(errorMessage);
-          }
-        }
+      if (newFiles.length > 0) {
+        const filesToUpload = newFiles.map((file) => file.originFileObj);
+        await handleMultipleUpload(filesToUpload);
       }
     },
 
@@ -915,13 +882,19 @@ export const useAntdUploadProps = (options = {}) => {
         return false;
       }
 
-      return false; // Prevent default upload, use customRequest
+      // Always return false to prevent default upload behavior
+      // We handle upload in onChange
+      return false;
     },
   };
 
   return {
     uploadProps,
-    uploading: false, // Will be handled by Antd Upload internally
-    uploadProgress: 0, // Will be handled by Antd Upload internally
+    uploading:
+      uploadSingle.isLoading ||
+      uploadMultiple.isLoading ||
+      uploadingFiles.size > 0,
+    uploadProgress:
+      uploadSingle.uploadProgress || uploadMultiple.uploadProgress || 0,
   };
 };
