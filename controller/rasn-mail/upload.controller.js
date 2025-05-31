@@ -98,7 +98,7 @@ const deleteFromMinio = (mc, filename) => {
 const generateMinioUrl = (filename) => {
   const baseUrl =
     process.env.MINIO_PUBLIC_URL ||
-    `${process.env.MINIO_ENDPOINT}:${process.env.MINIO_PORT}`;
+    `https://${process.env.MINIO_ENDPOINT}:${process.env.MINIO_PORT}`;
   return `${baseUrl}/${UPLOAD_CONFIG.bucketName}/${filename}`;
 };
 
@@ -313,7 +313,7 @@ export const uploadMultipleFiles = async (req, res) => {
 // Delete attachment
 export const deleteAttachment = async (req, res) => {
   try {
-    const { id } = req.params;
+    const { id } = req.query;
     const { customId: userId } = req.user;
     const mc = req.mc; // MinIO client dari auth middleware
 
@@ -363,7 +363,7 @@ export const deleteAttachment = async (req, res) => {
 // Get attachment info
 export const getAttachment = async (req, res) => {
   try {
-    const { id } = req.params;
+    const { id } = req.query;
     const { customId: userId } = req.user;
 
     const Attachment = require("@/models/rasn_mail/attachments.model");
@@ -460,7 +460,7 @@ export const getUserUploads = async (req, res) => {
 // Generate presigned URL untuk download (optional, untuk security)
 export const getDownloadUrl = async (req, res) => {
   try {
-    const { id } = req.params;
+    const { id } = req.query;
     const { customId: userId } = req.user;
     const mc = req.mc;
 
