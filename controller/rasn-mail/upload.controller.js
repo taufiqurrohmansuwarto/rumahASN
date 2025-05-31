@@ -2,6 +2,7 @@
 import { handleError } from "@/utils/helper/controller-helper";
 import { nanoid } from "nanoid";
 import path from "path";
+const Attachment = require("@/models/rasn_mail/attachments.model");
 require("dotenv").config();
 
 // Konfigurasi upload
@@ -498,6 +499,70 @@ export const getDownloadUrl = async (req, res) => {
     });
   } catch (error) {
     console.error("Get download URL error:", error);
+    handleError(res, error);
+  }
+};
+
+export const cleanupUnusedFiles = async (req, res) => {
+  try {
+    const { days = 7 } = req.query;
+    const daysOld = parseInt(days);
+
+    const deletedCount = await Attachment.cleanupUnusedFiles(daysOld);
+
+    res.json({
+      success: true,
+      data: { deletedCount },
+      message: `${deletedCount} unused files cleaned up`,
+    });
+  } catch (error) {
+    console.error("Cleanup unused files error:", error);
+    handleError(res, error);
+  }
+};
+
+// Get upload statistics
+export const getUploadStats = async (req, res) => {
+  try {
+    const { customId: userId } = req.user;
+
+    const stats = await Attachment.query()
+      .where("uploaded_by", userId)
+      .select([
+        Attachment.raw("COUNT(*) as total_files"),
+        Attachment.raw("SUM(file_size) as total_size"),
+        Attachment.raw(
+          "COUNT(CASE WHEN email_id IS NULL THEN 1 END) as unused_files"
+        ),
+        Attachment.raw(
+          "COUNT(CASE WHEN email_id IS NOT NULL THEN 1 END) as used_files"
+        ),
+        Attachment.raw(
+          "COUNT(CASE WHEN mime_type LIKE 'image/%' THEN 1 END) as image_files"
+        ),
+        Attachment.raw(
+          "COUNT(CASE WHEN mime_type LIKE 'application/%' THEN 1 END) as document_files"
+        ),
+      ])
+      .first();
+
+    // Convert string counts to integers
+    Object.keys(stats).forEach((key) => {
+      if (key !== "total_size") {
+        stats[key] = parseInt(stats[key]) || 0;
+      } else {
+        stats[key] = parseInt(stats[key]) || 0;
+      }
+    });
+
+    // Add formatted size
+    stats.formatted_total_size = formatFileSize(stats.total_size);
+
+    res.json({
+      success: true,
+      data: stats,
+    });
+  } catch (error) {
     handleError(res, error);
   }
 };
