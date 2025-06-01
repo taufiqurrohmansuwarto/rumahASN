@@ -1,8 +1,14 @@
 import { uploadFile } from "@/controller/rasn-mail/upload.controller";
 import asnNonAsnFasilitatorMiddleware from "@/middleware/asn-non-asn-fasilitator.middleware";
 import auth from "@/middleware/auth.middleware";
-import { createRouter } from "next-connect";
 import multer from "multer";
+import { createRouter } from "next-connect";
+
+export const config = {
+  api: {
+    bodyParser: false,
+  },
+};
 
 // Konfigurasi multer untuk memory storage
 const upload = multer({
@@ -20,20 +26,4 @@ router
   .use(upload.single("file"))
   .post(uploadFile);
 
-export default router.handler({
-  onError: (err, req, res) => {
-    console.error("Upload API error:", err);
-    if (err instanceof multer.MulterError) {
-      if (err.code === "LIMIT_FILE_SIZE") {
-        return res.status(400).json({
-          success: false,
-          message: "File terlalu besar. Maksimal 25MB",
-        });
-      }
-    }
-    res.status(500).json({
-      success: false,
-      message: "Internal server error",
-    });
-  },
-});
+export default router.handler({});

@@ -301,7 +301,7 @@ function GmailLayout({
       <ConfigProvider locale={frFR}>
         <ProLayout
           token={gmailToken}
-          title="Mail ASN"
+          title="Rumah ASN Mail"
           logo={<MailOutlined style={{ color: "#1a73e8" }} />}
           // Layout configuration
           layout="mix"
@@ -321,33 +321,6 @@ function GmailLayout({
           menuItemRender={(item, dom) => (
             <div onClick={() => handleMenuClick({ key: item.key })}>{dom}</div>
           )}
-          // Header content dengan search
-          headerContentRender={() => {
-            if (showSearchBar) {
-              return (
-                <div
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    width: "100%",
-                  }}
-                >
-                  <Search
-                    placeholder="Cari email..."
-                    allowClear
-                    onSearch={handleSearch}
-                    style={{
-                      maxWidth: 400,
-                      marginLeft: 24,
-                      marginRight: "auto",
-                    }}
-                    enterButton={<SearchOutlined />}
-                  />
-                </div>
-              );
-            }
-            return null;
-          }}
           // Menu extra render untuk compose button
           menuExtraRender={({ collapsed, isMobile }) => {
             if (collapsed) {

@@ -19,6 +19,7 @@ const serialize = (emails) => {
         email: recipient.user?.email,
         image: recipient.user?.image,
         is_starred: recipient.is_starred,
+        department: recipient.user?.department,
       })) || [];
 
   return {
