@@ -8,7 +8,6 @@ import { getMenuItems, mappingItems } from "@/utils/appLists";
 import {
   BookOutlined,
   LogoutOutlined,
-  SearchOutlined,
   SunOutlined,
   SyncOutlined,
   TeamOutlined,
@@ -23,7 +22,7 @@ import {
   IconRotateRectangle,
   IconUserSearch,
 } from "@tabler/icons-react";
-import { Dropdown, Input, Layout, Space } from "antd";
+import { Dropdown, Input, Space } from "antd";
 import { trim } from "lodash";
 import { signOut, useSession } from "next-auth/react";
 import dynamic from "next/dynamic";

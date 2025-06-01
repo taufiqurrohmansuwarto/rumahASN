@@ -22,6 +22,7 @@ import relativeTime from "dayjs/plugin/relativeTime";
 import { useAntdConfig } from "src/styles/rasn.theme";
 import { useGmailConfig } from "src/styles/gmail.styles";
 import { useRouter } from "next/router";
+import { useLayananKeuanganConfig } from "src/styles/layanan-keuangan.styles";
 
 // check user role and organization start with 123
 function Auth({ children, action, subject }) {
@@ -70,10 +71,14 @@ function MyApp({ Component, pageProps: { session, ...pageProps } }) {
 
   const antdConfig = useAntdConfig();
   const gmailConfig = useGmailConfig();
+  const layananKeuanganConfig = useLayananKeuanganConfig();
 
   const getThemeConfig = () => {
     if (router.pathname.includes("/mail")) {
       return gmailConfig;
+    }
+    if (router.pathname.includes("/layanan-keuangan")) {
+      return layananKeuanganConfig;
     }
     return antdConfig;
   };
