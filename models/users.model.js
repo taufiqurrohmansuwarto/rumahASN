@@ -47,17 +47,7 @@ class User extends Model {
         query.select("custom_id", "username");
       },
       simpleWithImage(query) {
-        query
-          .select(
-            "users.custom_id",
-            "users.username",
-            "users.image",
-            raw(`string_agg(f->>'name', ' - ') as department`)
-          )
-          .joinRaw(
-            `JOIN LATERAL jsonb_array_elements(users.info->'perangkat_daerah'->'full') AS f ON TRUE`
-          )
-          .groupBy("users.custom_id", "users.username", "users.image");
+        query.select("users.custom_id", "users.username", "users.image");
       },
     };
   }
