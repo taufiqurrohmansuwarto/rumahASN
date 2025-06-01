@@ -19,6 +19,15 @@ export const appLists = [
     target: "_blank",
   },
   {
+    rightIcon: <IconTransfer />,
+    title: "Layanan Keuangan",
+    desc: "Layanan Keuangan",
+    color: "#FBBC05",
+    url: "/layanan-keuangan/dashboard",
+    icon: "https://siasn.bkd.jatimprov.go.id:9000/public/icon-log.png",
+    userType: ["asn", "admin"],
+  },
+  {
     rightIcon: <IconCalendarUser />,
     title: "TemuBKD",
     desc: "Buku Tamu Digital",
