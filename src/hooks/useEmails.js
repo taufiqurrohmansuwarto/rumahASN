@@ -59,6 +59,7 @@ export const useSendEmail = () => {
       // ✅ PERBAIKAN: Comprehensive invalidation untuk send email
       queryClient.invalidateQueries({ queryKey: ["emails"] });
       queryClient.invalidateQueries({ queryKey: ["email-stats"] });
+      queryClient.invalidateQueries({ queryKey: ["email-with-thread"] });
     },
   });
 };

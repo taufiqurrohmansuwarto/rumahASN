@@ -39,19 +39,22 @@ const EmailContentDisplay = ({ content, isMarkdown = false }) => {
   // Process content to separate quoted content
   const processContent = (text) => {
     // Split content by Gmail-style quote markers
-    const parts = text.split(/(On .+? wrote:)/);
+    const parts = text.split(/(Pada .+? menulis:|On .+? wrote:)/);
     const processed = [];
 
     for (let i = 0; i < parts.length; i++) {
       const part = parts[i];
 
-      if (part.match(/On .+? wrote:/)) {
+      if (part.match(/Pada .+? menulis:|On .+? wrote:/)) {
         // This is a quote header
         processed.push({
           type: "quote-header",
           content: part,
         });
-      } else if (i > 0 && parts[i - 1]?.match(/On .+? wrote:/)) {
+      } else if (
+        i > 0 &&
+        parts[i - 1]?.match(/Pada .+? menulis:|On .+? wrote:/)
+      ) {
         // This is quoted content (comes after quote header)
         processed.push({
           type: "quoted",
@@ -81,27 +84,6 @@ const EmailContentDisplay = ({ content, isMarkdown = false }) => {
       .replace(/\n/g, "<br>");
   };
 
-  // Custom scrollbar styles
-  const scrollbarStyles = {
-    scrollbarWidth: "thin",
-    scrollbarColor: "#d9d9d9 #f5f5f5",
-    "&::-webkit-scrollbar": {
-      width: "8px",
-    },
-    "&::-webkit-scrollbar-track": {
-      background: "#f5f5f5",
-      borderRadius: "4px",
-    },
-    "&::-webkit-scrollbar-thumb": {
-      background: "#d9d9d9",
-      borderRadius: "4px",
-      transition: "background 0.2s ease",
-    },
-    "&::-webkit-scrollbar-thumb:hover": {
-      background: "#bfbfbf",
-    },
-  };
-
   const renderProcessedContent = (processedParts) => {
     return processedParts.map((part, index) => {
       if (part.type === "quote-header") {
@@ -109,14 +91,28 @@ const EmailContentDisplay = ({ content, isMarkdown = false }) => {
           <div
             key={index}
             style={{
-              color: "#666666",
-              fontSize: "13px",
+              display: "flex",
+              alignItems: "center",
+              gap: "6px",
+              color: "#8c8c8c",
+              fontSize: "12px",
               fontWeight: "500",
-              marginTop: index > 0 ? "20px" : "0",
+              marginTop: index > 0 ? "16px" : "0",
               marginBottom: "8px",
+              paddingBottom: "4px",
+              borderBottom: "1px solid #f0f0f0",
+              position: "relative",
             }}
           >
-            {part.content}
+            <div
+              style={{
+                width: "3px",
+                height: "3px",
+                borderRadius: "50%",
+                backgroundColor: "#d9d9d9",
+              }}
+            />
+            <span style={{ fontStyle: "italic" }}>{part.content}</span>
           </div>
         );
       } else if (part.type === "quoted") {
@@ -124,16 +120,62 @@ const EmailContentDisplay = ({ content, isMarkdown = false }) => {
           <div
             key={index}
             style={{
-              borderLeft: "3px solid #cccccc",
-              paddingLeft: "16px",
+              position: "relative",
               marginLeft: "8px",
-              color: "#666666",
+              marginBottom: "12px",
+              paddingLeft: "12px",
+              paddingTop: "8px",
+              paddingBottom: "8px",
+              paddingRight: "12px",
+              backgroundColor: "#fafafa",
+              borderRadius: "6px",
+              border: "1px solid #f0f0f0",
               fontSize: "13px",
+              lineHeight: "1.4",
+              color: "#666666",
               whiteSpace: "pre-wrap",
               wordBreak: "break-word",
-              marginBottom: "16px",
+              boxShadow: "0 1px 2px rgba(0, 0, 0, 0.04)",
+              transition: "all 0.2s ease",
+            }}
+            onMouseEnter={(e) => {
+              e.target.style.backgroundColor = "#f5f5f5";
+              e.target.style.borderColor = "#e6e6e6";
+            }}
+            onMouseLeave={(e) => {
+              e.target.style.backgroundColor = "#fafafa";
+              e.target.style.borderColor = "#f0f0f0";
             }}
           >
+            {/* Quote indicator line */}
+            <div
+              style={{
+                position: "absolute",
+                left: "0",
+                top: "0",
+                bottom: "0",
+                width: "2px",
+                backgroundColor: "#1890ff",
+                borderRadius: "0 1px 1px 0",
+                opacity: "0.6",
+              }}
+            />
+
+            {/* Quote icon */}
+            <div
+              style={{
+                position: "absolute",
+                top: "4px",
+                right: "8px",
+                fontSize: "14px",
+                color: "#d9d9d9",
+                fontFamily: "serif",
+                fontWeight: "bold",
+              }}
+            >
+              &ldquo;
+            </div>
+
             {part.content}
           </div>
         );
@@ -144,7 +186,10 @@ const EmailContentDisplay = ({ content, isMarkdown = false }) => {
             style={{
               whiteSpace: "pre-wrap",
               wordBreak: "break-word",
-              marginBottom: part.content.trim() ? "16px" : "0",
+              marginBottom: part.content.trim() ? "12px" : "0",
+              lineHeight: "1.6",
+              fontSize: "14px",
+              color: "#262626",
             }}
           >
             {part.content}
@@ -195,8 +240,6 @@ const EmailContentDisplay = ({ content, isMarkdown = false }) => {
           backgroundColor: "#ffffff",
           padding: isExpanded ? "32px" : "20px",
           minHeight: isExpanded ? "60vh" : "200px",
-          maxHeight: isExpanded ? "none" : "500px",
-          overflowY: isExpanded ? "visible" : "auto",
           fontSize: "14px",
           lineHeight: "1.6",
           position: isExpanded ? "fixed" : "relative",
@@ -206,7 +249,6 @@ const EmailContentDisplay = ({ content, isMarkdown = false }) => {
           bottom: isExpanded ? "50px" : "auto",
           zIndex: isExpanded ? 1000 : "auto",
           boxShadow: isExpanded ? "0 8px 32px rgba(0,0,0,0.2)" : "none",
-          ...(!isExpanded && scrollbarStyles),
         }}
       >
         {isMarkdown && !showRaw ? (
@@ -250,33 +292,6 @@ const EmailContentDisplay = ({ content, isMarkdown = false }) => {
           onClick={() => setIsExpanded(false)}
         />
       )}
-
-      {/* CSS untuk custom scrollbar */}
-      <style jsx>{`
-        .email-content-container::-webkit-scrollbar {
-          width: 8px;
-        }
-
-        .email-content-container::-webkit-scrollbar-track {
-          background: #f5f5f5;
-          border-radius: 4px;
-        }
-
-        .email-content-container::-webkit-scrollbar-thumb {
-          background: #d9d9d9;
-          border-radius: 4px;
-          transition: background 0.2s ease;
-        }
-
-        .email-content-container::-webkit-scrollbar-thumb:hover {
-          background: #bfbfbf;
-        }
-
-        .email-content-container {
-          scrollbar-width: thin;
-          scrollbar-color: #d9d9d9 #f5f5f5;
-        }
-      `}</style>
     </div>
   );
 };
