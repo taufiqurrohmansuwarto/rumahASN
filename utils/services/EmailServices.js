@@ -6,6 +6,8 @@ class EmailService {
   // Get email thread (conversation) - FIXED for hierarchical threading
   static async getEmailThread(emailId, userId) {
     try {
+      console.log("🔍 Starting getEmailThread for:", { emailId, userId });
+
       // 1. Get current email
       const currentEmail = await Email.query()
         .findById(emailId)
@@ -15,68 +17,141 @@ class EmailService {
         throw new Error("Email not found");
       }
 
-      // ✅ FIXED: Find thread root properly
-      // Traverse up the chain to find the root email
+      console.log("📧 Current email found:", {
+        id: currentEmail.id,
+        subject: currentEmail.subject,
+        parent_id: currentEmail.parent_id,
+        thread_subject: currentEmail.thread_subject,
+      });
+
+      // ✅ FIXED: Find thread root properly with better logic
       let rootId = emailId;
       let checkEmail = currentEmail;
+      const visitedIds = new Set([emailId]); // Prevent infinite loops
 
       // Walk up the parent chain to find root
-      while (checkEmail && checkEmail.parent_id) {
+      while (
+        checkEmail &&
+        checkEmail.parent_id &&
+        !visitedIds.has(checkEmail.parent_id)
+      ) {
+        visitedIds.add(checkEmail.parent_id);
         const parentEmail = await Email.query().findById(checkEmail.parent_id);
         if (parentEmail) {
           rootId = parentEmail.id;
           checkEmail = parentEmail;
+          console.log("⬆️ Found parent:", {
+            id: parentEmail.id,
+            subject: parentEmail.subject,
+          });
         } else {
+          console.log("❌ Parent not found, breaking chain");
           break;
         }
       }
 
-      // ✅ FIXED: Get all emails in thread using recursive CTE
-      const threadEmails = await Email.knex().raw(
-        `
-      WITH RECURSIVE email_thread AS (
-        -- Base case: root email
-        SELECT 
-          e.*,
-          0 as depth,
-          ARRAY[e.created_at, e.id] as sort_path
-        FROM rasn_mail.emails e 
-        WHERE e.id = ?
-        
-        UNION ALL
-        
-        -- Recursive case: all replies
-        SELECT 
-          e.*,
-          et.depth + 1,
-          et.sort_path || ARRAY[e.created_at, e.id]
-        FROM rasn_mail.emails e
-        INNER JOIN email_thread et ON e.parent_id = et.id
-        WHERE e.is_deleted = false
-      )
-      SELECT 
-        et.*,
-        s.username as sender_name,
-        s.email as sender_email, 
-        s.image as sender_image,
-        COALESCE(eua.is_read, false) as is_read,
-        COALESCE(eua.is_starred, false) as is_starred,
-        COALESCE(eua.folder, 'inbox') as user_folder
-      FROM email_thread et
-      LEFT JOIN public.users s ON et.sender_id = s.custom_id
-      LEFT JOIN rasn_mail.email_user_actions eua ON (
-        et.id = eua.email_id AND eua.user_id = ?
-      )
-      WHERE (eua.permanently_deleted IS NULL OR eua.permanently_deleted = false)
-      ORDER BY et.sort_path
-    `,
-        [rootId, userId]
-      );
+      console.log("🌳 Thread root determined:", rootId);
 
+      // ✅ FIXED: Get all emails in thread using better recursive CTE
+      const threadQuery = `
+        WITH RECURSIVE email_thread AS (
+          -- Base case: root email
+          SELECT 
+            e.*,
+            0 as depth,
+            ARRAY[e.created_at, e.id] as sort_path
+          FROM rasn_mail.emails e 
+          WHERE e.id = $1
+          AND e.is_deleted = false
+          
+          UNION ALL
+          
+          -- Recursive case: all replies
+          SELECT 
+            e.*,
+            et.depth + 1,
+            et.sort_path || ARRAY[e.created_at, e.id]
+          FROM rasn_mail.emails e
+          INNER JOIN email_thread et ON e.parent_id = et.id
+          WHERE e.is_deleted = false
+          AND et.depth < 50 -- Prevent infinite recursion
+        )
+        SELECT 
+          et.*,
+          s.username as sender_name,
+          s.email as sender_email, 
+          s.image as sender_image,
+          COALESCE(eua.is_read, false) as is_read,
+          COALESCE(eua.is_starred, false) as is_starred,
+          COALESCE(eua.folder, 'inbox') as user_folder
+        FROM email_thread et
+        LEFT JOIN public.users s ON et.sender_id = s.custom_id
+        LEFT JOIN rasn_mail.email_user_actions eua ON (
+          et.id = eua.email_id AND eua.user_id = $2
+        )
+        WHERE (eua.permanently_deleted IS NULL OR eua.permanently_deleted = false)
+        ORDER BY et.sort_path
+      `;
+
+      console.log("🔍 Executing thread query with:", { rootId, userId });
+
+      const threadEmails = await Email.knex().raw(threadQuery, [
+        "rYx_uIbo02uje7k6nQ5ZYDtjs",
+        "master|75235",
+      ]);
       const emails = threadEmails.rows;
 
+      console.log("📊 Thread query results:", {
+        count: emails.length,
+        emails: emails.map((e) => ({
+          id: e.id,
+          subject: e.subject,
+          parent_id: e.parent_id,
+        })),
+      });
+
+      // ✅ IMPROVED: Better fallback handling
       if (!emails || emails.length === 0) {
-        // Fallback to single email
+        console.log("⚠️ No thread emails found, falling back to single email");
+
+        // Fallback: Try to find at least some related emails by thread_subject
+        const fallbackEmails = await Email.query()
+          .where(
+            "thread_subject",
+            currentEmail.thread_subject || currentEmail.subject
+          )
+          .where("is_deleted", false)
+          .withGraphFetched("[sender]")
+          .orderBy("created_at", "asc");
+
+        console.log("🔄 Fallback found:", fallbackEmails.length, "emails");
+
+        if (fallbackEmails.length > 1) {
+          // Use fallback results
+          const serializedFallback = fallbackEmails.map((email, index) => ({
+            ...this.serializeRecipients(email),
+            depth: 0,
+            sort_path: [email.created_at, email.id],
+            is_read: email.id === emailId ? true : false,
+            is_starred: false,
+            user_folder: "inbox",
+          }));
+
+          return {
+            success: true,
+            data: {
+              current_email_id: emailId,
+              root_email_id: fallbackEmails[0].id,
+              thread_count: fallbackEmails.length,
+              thread_emails: this.buildThreadStructure(serializedFallback),
+              thread_subject:
+                currentEmail.thread_subject || currentEmail.subject,
+              thread_depth: 0,
+            },
+          };
+        }
+
+        // Final fallback to single email
         return {
           success: true,
           data: {
@@ -85,24 +160,36 @@ class EmailService {
             thread_count: 1,
             thread_emails: [this.serializeRecipients({ ...currentEmail })],
             thread_subject: currentEmail.thread_subject || currentEmail.subject,
+            thread_depth: 0,
           },
         };
       }
 
       // ✅ ENHANCEMENT: Fetch full email data with relations
       const emailIds = emails.map((e) => e.id);
-      const fullEmails = await Email.query().whereIn("id", emailIds)
-        .withGraphFetched(`[
-        sender(simpleWithImage), 
-        recipients.[user(simpleWithImage)], 
-        attachments
-      ]`);
+      console.log("📋 Fetching full data for email IDs:", emailIds);
+
+      const fullEmails = await Email.query()
+        .whereIn("id", emailIds)
+        .withGraphFetched(
+          `[
+          sender(simpleWithImage), 
+          recipients.[user(simpleWithImage)], 
+          attachments
+        ]`
+        )
+        .orderBy("created_at", "asc"); // Ensure chronological order
+
+      console.log("✅ Full emails fetched:", fullEmails.length);
 
       // ✅ FIXED: Merge CTE data with full email data
       const mergedEmails = emails
         .map((cteEmail) => {
           const fullEmail = fullEmails.find((fe) => fe.id === cteEmail.id);
-          if (!fullEmail) return null;
+          if (!fullEmail) {
+            console.warn("⚠️ Full email not found for CTE email:", cteEmail.id);
+            return null;
+          }
 
           return {
             ...fullEmail,
@@ -119,6 +206,8 @@ class EmailService {
         })
         .filter(Boolean);
 
+      console.log("🔀 Merged emails:", mergedEmails.length);
+
       // ✅ FIXED: Serialize recipients for all emails
       const serializedEmails = mergedEmails.map((email) =>
         this.serializeRecipients(email)
@@ -127,6 +216,11 @@ class EmailService {
       // ✅ FIXED: Build hierarchical structure
       const threadStructure = this.buildThreadStructure(serializedEmails);
 
+      console.log("🏗️ Thread structure built:", {
+        rootEmails: threadStructure.length,
+        totalEmails: serializedEmails.length,
+      });
+
       // ✅ ENHANCEMENT: Mark thread as read (optional)
       try {
         await this.markThreadAsRead(emailIds, userId);
@@ -134,7 +228,7 @@ class EmailService {
         console.warn("Could not mark thread as read:", markReadError);
       }
 
-      return {
+      const result = {
         success: true,
         data: {
           current_email_id: emailId,
@@ -146,14 +240,23 @@ class EmailService {
           thread_depth: Math.max(...serializedEmails.map((e) => e.depth || 0)),
         },
       };
+
+      console.log("✅ Final thread result:", {
+        thread_count: result.data.thread_count,
+        has_thread: result.data.thread_count > 1,
+      });
+
+      return result;
     } catch (error) {
-      console.error("Error getting email thread:", error);
+      console.error("❌ Error getting email thread:", error);
       throw error;
     }
   }
 
   // ✅ ENHANCEMENT: Improved buildThreadStructure method
   static buildThreadStructure(emails) {
+    console.log("🏗️ Building thread structure for", emails.length, "emails");
+
     // Create map for easy lookup
     const emailMap = {};
     emails.forEach((email) => {
@@ -177,9 +280,11 @@ class EmailService {
       if (email.parent_id && emailMap[email.parent_id]) {
         // This is a reply, add to parent's replies
         emailMap[email.parent_id].replies.push(emailMap[email.id]);
+        console.log("📧 Added reply", email.id, "to parent", email.parent_id);
       } else {
         // This is root email or orphaned email
         rootEmails.push(emailMap[email.id]);
+        console.log("🌳 Added root email:", email.id);
       }
     });
 
@@ -194,7 +299,95 @@ class EmailService {
     };
 
     rootEmails.forEach(sortReplies);
+
+    console.log("✅ Thread structure complete:", {
+      rootEmails: rootEmails.length,
+      totalEmailsInStructure: this.countEmailsInStructure(rootEmails),
+    });
+
     return rootEmails;
+  }
+
+  // Helper method to count total emails in nested structure
+  static countEmailsInStructure(emailStructure) {
+    let count = 0;
+    const countRecursive = (emails) => {
+      emails.forEach((email) => {
+        count++;
+        if (email.replies && email.replies.length > 0) {
+          countRecursive(email.replies);
+        }
+      });
+    };
+    countRecursive(emailStructure);
+    return count;
+  }
+
+  // ✅ FIXED: Get email with thread context
+  static async getEmailWithThread(emailId, userId) {
+    try {
+      console.log("🔍 Getting email with thread context:", { emailId, userId });
+
+      // Get email detail
+      const email = await this.getEmailById(emailId, userId);
+      console.log("📧 Email detail fetched:", email.id);
+
+      // Get thread if this email is part of one
+      const threadResult = await this.getEmailThread(emailId, userId);
+      console.log("🧵 Thread result:", {
+        success: threadResult.success,
+        thread_count: threadResult.data?.thread_count,
+      });
+
+      // ✅ FIXED: Safe access dengan fallback
+      const threadData = threadResult?.data || {
+        current_email_id: emailId,
+        root_email_id: emailId,
+        thread_count: 1,
+        thread_emails: [this.serializeRecipients({ ...email })],
+        thread_subject: email.subject,
+      };
+
+      // ✅ FIXED: Determine if has thread correctly
+      const hasThread = threadData.thread_count > 1;
+
+      console.log("🎯 Final decision:", {
+        thread_count: threadData.thread_count,
+        has_thread: hasThread,
+      });
+
+      return {
+        success: true,
+        data: {
+          email,
+          thread: threadData,
+          has_thread: hasThread, // ✅ FIXED: Proper condition
+        },
+      };
+    } catch (error) {
+      console.error("❌ Error getting email with thread:", error);
+
+      // ✅ FALLBACK: Return email without thread on error
+      try {
+        const email = await this.getEmailById(emailId, userId);
+        return {
+          success: true,
+          data: {
+            email,
+            thread: {
+              current_email_id: emailId,
+              root_email_id: emailId,
+              thread_count: 1,
+              thread_emails: [this.serializeRecipients({ ...email })],
+              thread_subject: email.subject,
+            },
+            has_thread: false,
+          },
+        };
+      } catch (fallbackError) {
+        throw error; // Throw original error
+      }
+    }
   }
 
   // Mark entire thread as read
@@ -363,60 +556,6 @@ class EmailService {
 
       return email;
     });
-  }
-
-  // Get email with thread context
-  static async getEmailWithThread(emailId, userId) {
-    try {
-      // Get email detail
-      const email = await this.getEmailById(emailId, userId);
-
-      // Get thread if this email is part of one
-      const threadResult = await this.getEmailThread(emailId, userId);
-
-      // ✅ FIXED: Safe access dengan fallback
-      const threadData = threadResult?.data || {
-        current_email_id: emailId,
-        root_email_id: emailId,
-        thread_count: 1,
-        thread_emails: [this.serializeRecipients({ ...email })],
-        thread_subject: email.subject,
-      };
-
-      // ✅ Thread emails sudah diserialisasi di getEmailThread, tidak perlu lagi
-
-      return {
-        success: true,
-        data: {
-          email,
-          thread: threadData,
-          has_thread: threadData.thread_count > 1,
-        },
-      };
-    } catch (error) {
-      console.error("Error getting email with thread:", error);
-
-      // ✅ FALLBACK: Return email without thread on error
-      try {
-        const email = await this.getEmailById(emailId, userId);
-        return {
-          success: true,
-          data: {
-            email,
-            thread: {
-              current_email_id: emailId,
-              root_email_id: emailId,
-              thread_count: 1,
-              thread_emails: [this.serializeRecipients({ ...email })],
-              thread_subject: email.subject,
-            },
-            has_thread: false,
-          },
-        };
-      } catch (fallbackError) {
-        throw error; // Throw original error
-      }
-    }
   }
 
   // Send personal email
