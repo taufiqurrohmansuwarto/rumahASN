@@ -1,14 +1,10 @@
-import {
-  useEmailWithThread,
-  useGetEmailWithThread,
-  useReplyToEmail,
-} from "@/hooks/useEmails";
-import { Empty, Spin } from "antd";
 import PageContainer from "@/components/PageContainer";
+import { useGetEmailWithThread } from "@/hooks/useEmails";
+import { Empty, Spin } from "antd";
 
+import GmailLayout from "@/components/GmailLayout";
 import EmailDetailComponent from "@/components/mail/Detail/EmailDetailComponent";
 import EmailThreadComponent from "@/components/mail/Detail/EmailThreadComponent";
-import GmailLayout from "@/components/GmailLayout";
 import { useRouter } from "next/router";
 
 const InboxMailDetail = () => {
@@ -22,7 +18,6 @@ const InboxMailDetail = () => {
     error,
     refetch,
   } = useGetEmailWithThread(id);
-  const replyMutation = useReplyToEmail();
 
   const handleReply = (originalEmail) => {
     // Open compose modal with reply context

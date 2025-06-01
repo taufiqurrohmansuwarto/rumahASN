@@ -3,7 +3,7 @@ const Email = require("@/models/rasn_mail/emails.model");
 const Recipient = require("@/models/rasn_mail/recipients.model");
 
 class EmailService {
-  // Get email thread (conversation)
+  // Get email thread (conversation) - FIXED for hierarchical threading
   static async getEmailThread(emailId, userId) {
     try {
       // 1. Get current email
@@ -15,58 +15,68 @@ class EmailService {
         throw new Error("Email not found");
       }
 
-      // 2. Find root email (original email in thread)
-      const rootId = currentEmail.parent_id || emailId;
+      // ✅ FIXED: Find thread root properly
+      // Traverse up the chain to find the root email
+      let rootId = emailId;
+      let checkEmail = currentEmail;
 
-      // 3. Get all emails in thread (root + all replies)
-      // ✅ FIXED: Handle self-send dengan DISTINCT dan proper JOIN
-      const threadEmails = await Email.query()
-        .distinct("rasn_mail.emails.id")
-        .select([
-          "rasn_mail.emails.*",
-          "eua.is_read",
-          "eua.is_starred",
-          "eua.folder as user_folder",
-        ])
-        .where((builder) => {
-          builder
-            .where("rasn_mail.emails.id", rootId) // Root email
-            .orWhere("rasn_mail.emails.parent_id", rootId) // Direct replies to root
-            .orWhereExists((subBuilder) => {
-              // Nested replies
-              subBuilder
-                .select(1)
-                .from("rasn_mail.emails as parent")
-                .whereRaw("parent.parent_id = ?", [rootId])
-                .whereRaw("rasn_mail.emails.parent_id = parent.id");
-            });
-        })
-        .leftJoin("rasn_mail.email_user_actions as eua", function () {
-          this.on("rasn_mail.emails.id", "=", "eua.email_id").andOn(
-            "eua.user_id",
-            "=",
-            Email.knex().raw("?", [userId])
-          );
-        })
-        // ✅ FIXED: Filter permanently deleted, tapi allow missing user actions
-        .where(function () {
-          this.whereNull("eua.permanently_deleted").orWhere(
-            "eua.permanently_deleted",
-            false
-          );
-        })
-        .withGraphFetched(
-          `[
-          sender(simpleWithImage), 
-          recipients.[user(simpleWithImage)], 
-          attachments
-        ]`
-        )
-        .orderBy("rasn_mail.emails.created_at", "asc"); // Chronological order
+      // Walk up the parent chain to find root
+      while (checkEmail && checkEmail.parent_id) {
+        const parentEmail = await Email.query().findById(checkEmail.parent_id);
+        if (parentEmail) {
+          rootId = parentEmail.id;
+          checkEmail = parentEmail;
+        } else {
+          break;
+        }
+      }
 
-      // ✅ SAFETY CHECK: Pastikan ada hasil
-      if (!threadEmails || threadEmails.length === 0) {
-        // Fallback ke single email
+      // ✅ FIXED: Get all emails in thread using recursive CTE
+      const threadEmails = await Email.knex().raw(
+        `
+      WITH RECURSIVE email_thread AS (
+        -- Base case: root email
+        SELECT 
+          e.*,
+          0 as depth,
+          ARRAY[e.created_at, e.id] as sort_path
+        FROM rasn_mail.emails e 
+        WHERE e.id = ?
+        
+        UNION ALL
+        
+        -- Recursive case: all replies
+        SELECT 
+          e.*,
+          et.depth + 1,
+          et.sort_path || ARRAY[e.created_at, e.id]
+        FROM rasn_mail.emails e
+        INNER JOIN email_thread et ON e.parent_id = et.id
+        WHERE e.is_deleted = false
+      )
+      SELECT 
+        et.*,
+        s.username as sender_name,
+        s.email as sender_email, 
+        s.image as sender_image,
+        COALESCE(eua.is_read, false) as is_read,
+        COALESCE(eua.is_starred, false) as is_starred,
+        COALESCE(eua.folder, 'inbox') as user_folder
+      FROM email_thread et
+      LEFT JOIN public.users s ON et.sender_id = s.custom_id
+      LEFT JOIN rasn_mail.email_user_actions eua ON (
+        et.id = eua.email_id AND eua.user_id = ?
+      )
+      WHERE (eua.permanently_deleted IS NULL OR eua.permanently_deleted = false)
+      ORDER BY et.sort_path
+    `,
+        [rootId, userId]
+      );
+
+      const emails = threadEmails.rows;
+
+      if (!emails || emails.length === 0) {
+        // Fallback to single email
         return {
           success: true,
           data: {
@@ -79,25 +89,49 @@ class EmailService {
         };
       }
 
-      console.log("threadEmails", JSON.stringify(threadEmails, null, 2));
+      // ✅ ENHANCEMENT: Fetch full email data with relations
+      const emailIds = emails.map((e) => e.id);
+      const fullEmails = await Email.query().whereIn("id", emailIds)
+        .withGraphFetched(`[
+        sender(simpleWithImage), 
+        recipients.[user(simpleWithImage)], 
+        attachments
+      ]`);
 
-      // ✅ SERIALIZE recipients untuk semua email SEBELUM build thread structure
-      const serializedEmails = threadEmails.map((email) =>
+      // ✅ FIXED: Merge CTE data with full email data
+      const mergedEmails = emails
+        .map((cteEmail) => {
+          const fullEmail = fullEmails.find((fe) => fe.id === cteEmail.id);
+          if (!fullEmail) return null;
+
+          return {
+            ...fullEmail,
+            // Add user-specific data from CTE
+            is_read: cteEmail.is_read,
+            is_starred: cteEmail.is_starred,
+            user_folder: cteEmail.user_folder,
+            sender_name: cteEmail.sender_name,
+            sender_email: cteEmail.sender_email,
+            sender_image: cteEmail.sender_image,
+            depth: cteEmail.depth,
+            sort_path: cteEmail.sort_path,
+          };
+        })
+        .filter(Boolean);
+
+      // ✅ FIXED: Serialize recipients for all emails
+      const serializedEmails = mergedEmails.map((email) =>
         this.serializeRecipients(email)
       );
 
-      // 4. Build thread structure dengan email yang sudah diserialisasi
+      // ✅ FIXED: Build hierarchical structure
       const threadStructure = this.buildThreadStructure(serializedEmails);
 
-      // 5. Mark thread as read (optional, dengan error handling)
+      // ✅ ENHANCEMENT: Mark thread as read (optional)
       try {
-        await this.markThreadAsRead(
-          threadEmails.map((e) => e.id),
-          userId
-        );
+        await this.markThreadAsRead(emailIds, userId);
       } catch (markReadError) {
         console.warn("Could not mark thread as read:", markReadError);
-        // Continue without failing
       }
 
       return {
@@ -105,9 +139,11 @@ class EmailService {
         data: {
           current_email_id: emailId,
           root_email_id: rootId,
-          thread_count: threadEmails.length,
+          thread_count: serializedEmails.length,
           thread_emails: threadStructure,
-          thread_subject: currentEmail.thread_subject || currentEmail.subject,
+          thread_subject:
+            serializedEmails[0]?.thread_subject || serializedEmails[0]?.subject,
+          thread_depth: Math.max(...serializedEmails.map((e) => e.depth || 0)),
         },
       };
     } catch (error) {
@@ -116,14 +152,14 @@ class EmailService {
     }
   }
 
-  // Build hierarchical thread structure
+  // ✅ ENHANCEMENT: Improved buildThreadStructure method
   static buildThreadStructure(emails) {
-    // Create map for easy lookup dengan deep copy untuk avoid mutation
+    // Create map for easy lookup
     const emailMap = {};
     emails.forEach((email) => {
       emailMap[email.id] = {
         ...email,
-        // Deep copy recipients untuk mempertahankan user data
+        // Deep copy recipients
         recipients: email.recipients
           ? {
               to: [...(email.recipients.to || [])],
@@ -135,7 +171,7 @@ class EmailService {
       };
     });
 
-    // Build hierarchy
+    // Build hierarchy based on parent_id
     const rootEmails = [];
     emails.forEach((email) => {
       if (email.parent_id && emailMap[email.parent_id]) {
@@ -147,6 +183,17 @@ class EmailService {
       }
     });
 
+    // ✅ ENHANCEMENT: Sort replies chronologically within each level
+    const sortReplies = (email) => {
+      if (email.replies && email.replies.length > 0) {
+        email.replies.sort(
+          (a, b) => new Date(a.created_at) - new Date(b.created_at)
+        );
+        email.replies.forEach(sortReplies);
+      }
+    };
+
+    rootEmails.forEach(sortReplies);
     return rootEmails;
   }
 
@@ -184,55 +231,80 @@ class EmailService {
       // Get original email untuk threading info
       const originalEmail = await Email.query()
         .findById(originalEmailId)
-        .withGraphFetched("[recipients.[user]]");
+        .withGraphFetched("[recipients.[user], sender]");
 
       if (!originalEmail) {
         throw new Error("Original email not found");
       }
 
-      // Determine thread root
-      const threadRootId = originalEmail.parent_id || originalEmailId;
+      // ✅ FIXED: Determine proper thread structure
+      // Jika email ini adalah reply, maka parentId = originalEmailId
+      // Jika email ini adalah root, maka tetap parentId = originalEmailId
+      const threadRootId = originalEmail.parent_id || originalEmailId; // Find the root of thread
+      const parentId = originalEmailId; // ✅ ALWAYS point to email being replied to
 
       // Build recipients untuk reply
       let replyRecipients = { to: [], cc: [], bcc: [] };
 
       if (replyAll) {
         // Reply All: include original sender + all recipients except current user
-        const allOriginalRecipients = [
-          originalEmail.sender_id,
-          ...originalEmail.recipients
-            .filter((r) => r.type !== "bcc") // Don't include BCC in reply all
-            .map((r) => r.recipient_id),
-        ].filter((id) => id !== senderId); // Exclude current user
+        const originalSender = originalEmail.sender_id;
+        const allOriginalRecipients = originalEmail.recipients
+          .filter((r) => r.type !== "bcc") // Don't include BCC in reply all
+          .map((r) => r.recipient_id)
+          .filter((id) => id !== senderId); // Exclude current user
 
-        replyRecipients.to = [originalEmail.sender_id];
+        // Set recipients for reply all
+        replyRecipients.to = [originalSender].filter((id) => id !== senderId);
         replyRecipients.cc = allOriginalRecipients.filter(
-          (id) => id !== originalEmail.sender_id
+          (id) => id !== originalSender
         );
       } else {
-        // Regular Reply: only to original sender
-        replyRecipients.to = [originalEmail.sender_id];
+        // Regular Reply: only to original sender (unless sender is replying to own email)
+        if (originalEmail.sender_id !== senderId) {
+          replyRecipients.to = [originalEmail.sender_id];
+        } else {
+          // If replying to own email, send to original recipients
+          replyRecipients.to = originalEmail.recipients
+            .filter((r) => r.type === "to")
+            .map((r) => r.recipient_id);
+        }
       }
 
-      // Override recipients if provided
+      // Override recipients if provided explicitly
       if (recipients) {
         replyRecipients = recipients;
       }
 
-      // Create reply email dengan threading
+      // ✅ FIXED: Create proper thread subject
+      const threadSubject =
+        originalEmail.thread_subject ||
+        (originalEmail.parent_id
+          ? originalEmail.subject
+          : originalEmail.subject);
+
+      // Generate reply subject if not provided
+      const replySubject =
+        subject ||
+        (originalEmail.subject.startsWith("Re: ")
+          ? originalEmail.subject
+          : `Re: ${originalEmail.subject}`);
+
+      // ✅ FIXED: Create reply email dengan proper threading
       const replyEmail = await Email.createAndSend({
         senderId,
-        subject:
-          subject ||
-          (originalEmail.subject.startsWith("Re: ")
-            ? originalEmail.subject
-            : `Re: ${originalEmail.subject}`),
+        subject: replySubject,
         content,
         recipients: replyRecipients,
         attachments,
         type: "personal",
-        parentId: originalEmailId, // ✅ Link to original email
+        parentId: parentId, // ✅ Points to email being replied to (hierarchical)
         priority: originalEmail.priority || "normal",
+      });
+
+      // ✅ ENHANCEMENT: Update thread_subject pada reply email
+      await replyEmail.$query().patch({
+        thread_subject: threadSubject,
       });
 
       return {
@@ -240,6 +312,7 @@ class EmailService {
         data: replyEmail,
         message: "Reply sent successfully",
         thread_root_id: threadRootId,
+        parent_id: parentId, // ✅ Return proper parent info
       };
     } catch (error) {
       console.error("Error sending reply:", error);
@@ -767,46 +840,6 @@ class EmailService {
       .page(page - 1, limit);
 
     return emails;
-  }
-
-  // Reply to email
-  static async replyToEmail(
-    originalEmailId,
-    senderId,
-    content,
-    replyAll = false
-  ) {
-    const originalEmail = await Email.query()
-      .findById(originalEmailId)
-      .withGraphFetched("recipients.[user]");
-
-    if (!originalEmail) {
-      throw new Error("Original email not found");
-    }
-
-    // Build recipients list
-    const recipients = { to: [originalEmail.sender_id], cc: [], bcc: [] };
-
-    if (replyAll) {
-      // Add all original recipients except sender
-      const ccUsers = originalEmail.recipients
-        .filter((r) => r.recipient_id !== senderId && r.type !== "bcc")
-        .map((r) => r.recipient_id);
-      recipients.cc = ccUsers;
-    }
-
-    // Create reply email
-    const replySubject = originalEmail.subject.startsWith("Re: ")
-      ? originalEmail.subject
-      : `Re: ${originalEmail.subject}`;
-
-    return this.sendPersonalEmail({
-      senderId,
-      subject: replySubject,
-      content,
-      recipients,
-      parentId: originalEmailId,
-    });
   }
 
   // Forward email
