@@ -58,7 +58,6 @@ class Email extends Model {
   }
 
   // Static method untuk create dan send email
-  // Static method untuk create dan send email
   static async createAndSend({
     senderId,
     subject,
@@ -191,14 +190,11 @@ class Email extends Model {
       // 4. Handle attachments
       if (attachments.length > 0) {
         const Attachment = require("@/models/rasn_mail/attachments.model");
-        const attachmentRecords = attachments.map((att) => ({
-          email_id: email.id,
-          file_name: att.file_name,
-          file_url: att.file_url,
-          file_size: att.file_size,
-          mime_type: att.mime_type,
-        }));
-        await Attachment.query(trx).insert(attachmentRecords);
+        await Attachment.query(trx)
+          .update({
+            email_id: email.id,
+          })
+          .whereIn("id", attachments);
       }
 
       await trx.commit();
@@ -495,7 +491,7 @@ class Email extends Model {
         ? await Email.query()
             .whereIn("id", emailIds)
             .withGraphFetched(
-              "[attachments, recipients.[user(simpleWithImage)]]"
+              "[sender(simpleWithImage), attachments, recipients.[user(simpleWithImage)]]"
             )
             .orderBy("created_at", "desc")
         : [];
@@ -509,6 +505,7 @@ class Email extends Model {
         sender_name: userActionInfo?.sender_name,
         sender_email: userActionInfo?.sender_email,
         sender_image: userActionInfo?.sender_image,
+        sender_department: userActionInfo?.sender_department,
         // User-specific data dari email_user_actions
         is_read: userActionInfo?.is_read || false,
         read_at: userActionInfo?.read_at,

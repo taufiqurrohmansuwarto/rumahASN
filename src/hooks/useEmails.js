@@ -4,17 +4,13 @@ import {
   // assign label to email
   assignLabelToEmail,
   bulkDelete,
-  cleanupUnusedFiles,
   createLabel,
-  DEFAULT_ALLOWED_TYPES,
   deleteAttachment,
   deleteDraft,
   deleteEmail,
   deleteLabel,
   deleteTrash,
   getArchiveEmails,
-  getAttachment,
-  getDownloadUrl,
   getDraft,
   getEmailById,
   getEmailLabels,
@@ -27,10 +23,8 @@ import {
   getSpamEmails,
   // starred emails
   getStarredEmails,
-  getUploadStats,
   // labels
   getUserLabels,
-  getUserUploads,
   markAsNotSpam,
   markAsRead,
   // spam emails
@@ -48,11 +42,6 @@ import {
   updateDraft,
   updateLabel,
   updatePriority,
-  uploadMultipleFiles,
-  // upload
-  uploadSingleFile,
-  validateFileSize,
-  validateFileType,
 } from "@/services/rasn-mail.services";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { message, notification } from "antd";
@@ -559,104 +548,7 @@ export const useGetEmailWithThread = (emailId) => {
   });
 };
 
-// Tambahkan import ini ke bagian atas file useEmails.js
-
-// ==========================================
-// UPLOAD HOOKS - Tambahkan di bagian bawah file useEmails.js
-// ==========================================
-
-// Upload single file hook
-export const useUploadSingleFile = () => {
-  const queryClient = useQueryClient();
-  const [uploadProgress, setUploadProgress] = useState(0);
-
-  return useMutation({
-    mutationFn: (file) => {
-      // Validate file before upload
-      if (!validateFileSize(file, 25)) {
-        throw new Error("File terlalu besar. Maksimal 25MB");
-      }
-
-      if (!validateFileType(file, DEFAULT_ALLOWED_TYPES)) {
-        throw new Error("Tipe file tidak didukung");
-      }
-
-      return uploadSingleFile(file, setUploadProgress);
-    },
-    onSuccess: (data) => {
-      queryClient.invalidateQueries(["user-uploads"]);
-      setUploadProgress(0);
-      message.success(data.message || "File berhasil diunggah");
-    },
-    onError: (error) => {
-      setUploadProgress(0);
-      const errorMessage =
-        error.response?.data?.message ||
-        error.message ||
-        "Gagal mengunggah file";
-      message.error(errorMessage);
-    },
-    onMutate: () => {
-      setUploadProgress(0);
-    },
-  });
-};
-
-// Upload multiple files hook
-export const useUploadMultipleFiles = () => {
-  const queryClient = useQueryClient();
-  const [uploadProgress, setUploadProgress] = useState(0);
-
-  return useMutation({
-    mutationFn: (files) => {
-      // Validate files before upload
-      const invalidFiles = [];
-
-      files.forEach((file) => {
-        if (!validateFileSize(file, 25)) {
-          invalidFiles.push(`${file.name}: File terlalu besar`);
-        }
-        if (!validateFileType(file, DEFAULT_ALLOWED_TYPES)) {
-          invalidFiles.push(`${file.name}: Tipe file tidak didukung`);
-        }
-      });
-
-      if (invalidFiles.length > 0) {
-        throw new Error(`File tidak valid:\n${invalidFiles.join("\n")}`);
-      }
-
-      return uploadMultipleFiles(files, setUploadProgress);
-    },
-    onSuccess: (data) => {
-      queryClient.invalidateQueries(["user-uploads"]);
-      setUploadProgress(0);
-      message.success(data.message || "File berhasil diunggah");
-    },
-    onError: (error) => {
-      setUploadProgress(0);
-      const errorMessage =
-        error.response?.data?.message ||
-        error.message ||
-        "Gagal mengunggah file";
-      message.error(errorMessage);
-    },
-    onMutate: () => {
-      setUploadProgress(0);
-    },
-  });
-};
-
-// Get attachment hook
-export const useAttachment = (attachmentId) => {
-  return useQuery({
-    queryKey: ["attachment", attachmentId],
-    queryFn: () => getAttachment(attachmentId),
-    enabled: !!attachmentId,
-    staleTime: 5 * 60 * 1000, // 5 minutes
-  });
-};
-
-// Delete attachment hook
+// Delete attachment hook - digunakan di AttachmentUploader
 export const useDeleteAttachment = () => {
   const queryClient = useQueryClient();
 
@@ -665,7 +557,6 @@ export const useDeleteAttachment = () => {
     onSuccess: (data) => {
       queryClient.invalidateQueries(["user-uploads"]);
       queryClient.invalidateQueries(["attachment"]);
-      message.success(data.message || "File berhasil dihapus");
     },
     onError: (error) => {
       const errorMessage =
@@ -673,228 +564,4 @@ export const useDeleteAttachment = () => {
       message.error(errorMessage);
     },
   });
-};
-
-// Get user uploads hook
-export const useUserUploads = (params = {}) => {
-  return useQuery({
-    queryKey: ["user-uploads", params],
-    queryFn: () => getUserUploads(params),
-    keepPreviousData: true,
-    staleTime: 2 * 60 * 1000, // 2 minutes
-  });
-};
-
-// Get download URL hook
-export const useDownloadUrl = () => {
-  return useMutation({
-    mutationFn: getDownloadUrl,
-    onError: (error) => {
-      const errorMessage =
-        error.response?.data?.message || "Gagal mendapatkan link download";
-      message.error(errorMessage);
-    },
-  });
-};
-
-// Get upload statistics hook
-export const useUploadStats = () => {
-  return useQuery({
-    queryKey: ["upload-stats"],
-    queryFn: getUploadStats,
-    staleTime: 5 * 60 * 1000, // 5 minutes
-  });
-};
-
-// Cleanup unused files hook (admin)
-export const useCleanupUnusedFiles = () => {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: cleanupUnusedFiles,
-    onSuccess: (data) => {
-      queryClient.invalidateQueries(["user-uploads"]);
-      queryClient.invalidateQueries(["upload-stats"]);
-      message.success(data.message || "Cleanup berhasil");
-    },
-    onError: (error) => {
-      const errorMessage =
-        error.response?.data?.message || "Gagal melakukan cleanup";
-      message.error(errorMessage);
-    },
-  });
-};
-
-// File picker hook with validation
-export const useFilePicker = (options = {}) => {
-  const {
-    multiple = false,
-    accept = DEFAULT_ALLOWED_TYPES.join(","),
-    maxSize = 25, // MB
-    maxFiles = 10,
-    onSelect,
-    onError,
-  } = options;
-
-  const [selectedFiles, setSelectedFiles] = useState([]);
-
-  const pickFiles = useCallback(() => {
-    const input = document.createElement("input");
-    input.type = "file";
-    input.multiple = multiple;
-    input.accept = accept;
-
-    input.onchange = (event) => {
-      const files = Array.from(event.target.files || []);
-
-      // Check file count limit
-      if (multiple && files.length > maxFiles) {
-        onError?.([`Maksimal ${maxFiles} file dapat dipilih`]);
-        return;
-      }
-
-      // Validate files
-      const validFiles = [];
-      const errors = [];
-
-      files.forEach((file) => {
-        if (!validateFileSize(file, maxSize)) {
-          errors.push(`${file.name}: File terlalu besar (max ${maxSize}MB)`);
-        } else if (!validateFileType(file, DEFAULT_ALLOWED_TYPES)) {
-          errors.push(`${file.name}: Tipe file tidak didukung`);
-        } else {
-          validFiles.push(file);
-        }
-      });
-
-      if (errors.length > 0) {
-        onError?.(errors);
-        return;
-      }
-
-      setSelectedFiles(validFiles);
-      onSelect?.(validFiles);
-    };
-
-    input.click();
-  }, [multiple, accept, maxSize, maxFiles, onSelect, onError]);
-
-  const clearFiles = useCallback(() => {
-    setSelectedFiles([]);
-  }, []);
-
-  return {
-    pickFiles,
-    clearFiles,
-    selectedFiles,
-    hasFiles: selectedFiles.length > 0,
-  };
-};
-
-export const useAntdUploadProps = (options = {}) => {
-  const {
-    multiple = false,
-    maxFiles = 10,
-    maxSize = 25,
-    onFilesChange,
-    onError,
-    disabled = false,
-  } = options;
-
-  const uploadSingle = useUploadSingleFile();
-  const uploadMultiple = useUploadMultipleFiles();
-  const [uploadingFiles, setUploadingFiles] = useState(new Set());
-
-  // Handle multiple files upload
-  const handleMultipleUpload = async (fileList) => {
-    try {
-      const validFiles = fileList.filter((file) => {
-        return (
-          validateFileSize(file, maxSize) &&
-          validateFileType(file, DEFAULT_ALLOWED_TYPES)
-        );
-      });
-
-      if (validFiles.length === 0) {
-        onError?.("Tidak ada file valid untuk di-upload");
-        return;
-      }
-
-      if (validFiles.length === 1) {
-        // Single file even in multiple mode
-        const result = await uploadSingle.mutateAsync(validFiles[0]);
-        onFilesChange?.([result.data]);
-      } else {
-        // Multiple files
-        const result = await uploadMultiple.mutateAsync(validFiles);
-        onFilesChange?.(result.data.uploaded || []);
-      }
-    } catch (error) {
-      const errorMessage = error.message || "Gagal mengunggah file";
-      onError?.(errorMessage);
-    }
-  };
-
-  // Antd Upload props configuration
-  const uploadProps = {
-    name: "file",
-    multiple,
-    maxCount: multiple ? maxFiles : 1,
-    accept: DEFAULT_ALLOWED_TYPES.join(","),
-    showUploadList: false,
-    disabled: disabled || uploadSingle.isLoading || uploadMultiple.isLoading,
-
-    // Handle file selection
-    onChange: async (info) => {
-      const { fileList } = info;
-
-      // Filter out files that are already uploaded or errored
-      const newFiles = fileList.filter(
-        (file) =>
-          file.status !== "done" &&
-          file.status !== "error" &&
-          file.originFileObj
-      );
-
-      if (newFiles.length > 0) {
-        const filesToUpload = newFiles.map((file) => file.originFileObj);
-        await handleMultipleUpload(filesToUpload);
-      }
-    },
-
-    // Validation before upload
-    beforeUpload: (file, fileList) => {
-      // Check file count
-      if (multiple && fileList.length > maxFiles) {
-        onError?.(`Maksimal ${maxFiles} file dapat di-upload`);
-        return false;
-      }
-
-      // Check file size
-      if (!validateFileSize(file, maxSize)) {
-        onError?.(`${file.name}: File terlalu besar (max ${maxSize}MB)`);
-        return false;
-      }
-
-      // Check file type
-      if (!validateFileType(file, DEFAULT_ALLOWED_TYPES)) {
-        onError?.(`${file.name}: Tipe file tidak didukung`);
-        return false;
-      }
-
-      // Always return false to prevent default upload behavior
-      // We handle upload in onChange
-      return false;
-    },
-  };
-
-  return {
-    uploadProps,
-    uploading:
-      uploadSingle.isLoading ||
-      uploadMultiple.isLoading ||
-      uploadingFiles.size > 0,
-    uploadProgress:
-      uploadSingle.uploadProgress || uploadMultiple.uploadProgress || 0,
-  };
 };
