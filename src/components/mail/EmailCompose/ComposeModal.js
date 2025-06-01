@@ -1,14 +1,12 @@
-import { useSaveDraft, useSendEmail } from "@/hooks/useEmails";
+import { useReplyToEmail, useSaveDraft, useSendEmail } from "@/hooks/useEmails";
+import { debugUploadState, extractAttachmentIds } from "@/utils/debugUpload";
+import { EyeOutlined, SaveOutlined, SendOutlined } from "@ant-design/icons";
 import {
-  EyeOutlined,
-  SaveOutlined,
-  SendOutlined,
-  MinusOutlined,
-  PlusOutlined,
-} from "@ant-design/icons";
-import {
+  Badge,
   Button,
+  Card,
   Col,
+  Divider,
   Form,
   Input,
   Modal,
@@ -17,18 +15,14 @@ import {
   Space,
   Tabs,
   message,
-  Card,
-  Badge,
-  Divider,
 } from "antd";
 import dayjs from "dayjs";
+import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
 import AttachmentUploader from "./AttachmentUploader";
 import EmailEditor from "./EmailEditor";
 import EmailPreview from "./EmailPreview";
 import RecipientSelector from "./RecipientSelector";
-import { useSession } from "next-auth/react";
-import { debugUploadState, extractAttachmentIds } from "@/utils/debugUpload";
 
 const ComposeModal = ({
   visible = false,
@@ -54,6 +48,7 @@ const ComposeModal = ({
 
   const sendEmail = useSendEmail();
   const saveDraft = useSaveDraft();
+  const replyToEmail = useReplyToEmail();
 
   // ✅ FIXED: Initialize form based on mode
   useEffect(() => {
@@ -83,25 +78,31 @@ const ComposeModal = ({
           ...allOriginalRecipients,
         ];
       } else {
-        // jika dia ada parent maka kirim ke sender parent
-        if (originalEmail?.parent_id) {
-          toRecipients = [
-            {
-              label:
-                originalEmail.parent?.sender?.username ||
-                originalEmail.parent?.sender?.email,
-              value: originalEmail.parent?.sender_id,
-            },
-          ];
+        // jika terdapat 1 pengirim email
+        const toRecipientsTotal = originalEmail.recipients?.to?.length;
+
+        // kalau total penerima 1 maka kirim ke pengirim asli
+        if (toRecipientsTotal === 1) {
+          if (originalEmail.sender_id === user?.id) {
+            toRecipients = [
+              {
+                label: originalEmail.recipients?.to[0].user?.username,
+                value: originalEmail.recipients?.to[0].user?.custom_id,
+              },
+            ];
+          } else {
+            toRecipients = [
+              {
+                label: originalEmail.sender?.username,
+                value: originalEmail.sender?.custom_id,
+              },
+            ];
+          }
         } else {
-          // Jika reply biasa, hanya balas ke pengirim asli
-          toRecipients = [
-            {
-              label:
-                originalEmail.sender?.username || originalEmail.sender?.email,
-              value: originalEmail.sender_id,
-            },
-          ];
+          toRecipients = originalEmail.recipients?.to?.map((r) => ({
+            label: r.user?.username || r.recipient_name || "Unknown",
+            value: r.user?.custom_id || r.recipient_id,
+          }));
         }
       }
 
@@ -210,13 +211,20 @@ const ComposeModal = ({
         },
         attachments: attachmentIds,
         type: "personal",
-        parentId:
-          mode === "reply" || mode === "forward" ? originalEmail?.id : null,
+        originalEmailId: originalEmail?.id,
       };
 
       debugUploadState.logFormSubmit(payload);
 
-      await sendEmail.mutateAsync(payload);
+      if (mode === "reply") {
+        await replyToEmail.mutateAsync({
+          originalEmailId: originalEmail?.id,
+          ...payload,
+        });
+      } else {
+        await sendEmail.mutateAsync(payload);
+      }
+
       message.success("Email berhasil dikirim!");
       handleClose();
       onSent?.();

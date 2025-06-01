@@ -529,7 +529,8 @@ export const useDeleteTrash = () => {
 export const useReplyToEmail = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: replyToEmail,
+    mutationFn: ({ originalEmailId, ...payload }) =>
+      replyToEmail(originalEmailId, payload),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["emails"] });
       queryClient.invalidateQueries({ queryKey: ["email-stats"] });
