@@ -79,12 +79,15 @@ class EmailService {
         };
       }
 
-      // 4. Build thread structure
-      const threadStructure = this.buildThreadStructure(threadEmails);
+      console.log("threadEmails", JSON.stringify(threadEmails, null, 2));
 
-      // ✅ NEW: Serialize recipients untuk semua email dalam thread
-      const serializedThreadStructure =
-        this.serializeThreadEmails(threadStructure);
+      // ✅ SERIALIZE recipients untuk semua email SEBELUM build thread structure
+      const serializedEmails = threadEmails.map((email) =>
+        this.serializeRecipients(email)
+      );
+
+      // 4. Build thread structure dengan email yang sudah diserialisasi
+      const threadStructure = this.buildThreadStructure(serializedEmails);
 
       // 5. Mark thread as read (optional, dengan error handling)
       try {
@@ -103,7 +106,7 @@ class EmailService {
           current_email_id: emailId,
           root_email_id: rootId,
           thread_count: threadEmails.length,
-          thread_emails: serializedThreadStructure,
+          thread_emails: threadStructure,
           thread_subject: currentEmail.thread_subject || currentEmail.subject,
         },
       };
@@ -115,11 +118,19 @@ class EmailService {
 
   // Build hierarchical thread structure
   static buildThreadStructure(emails) {
-    // Create map for easy lookup
+    // Create map for easy lookup dengan deep copy untuk avoid mutation
     const emailMap = {};
     emails.forEach((email) => {
       emailMap[email.id] = {
         ...email,
+        // Deep copy recipients untuk mempertahankan user data
+        recipients: email.recipients
+          ? {
+              to: [...(email.recipients.to || [])],
+              cc: [...(email.recipients.cc || [])],
+              bcc: [...(email.recipients.bcc || [])],
+            }
+          : { to: [], cc: [], bcc: [] },
         replies: [],
       };
     });
@@ -238,14 +249,28 @@ class EmailService {
 
   // Helper method untuk serialize recipients
   static serializeRecipients(email) {
-    if (email.recipients && Array.isArray(email.recipients)) {
-      email.recipients = {
-        to: email.recipients.filter((r) => r.type === "to"),
-        cc: email.recipients.filter((r) => r.type === "cc"),
-        bcc: email.recipients.filter((r) => r.type === "bcc"),
+    // Clone email object untuk avoid mutation
+    const emailClone = { ...email };
+
+    if (emailClone.recipients && Array.isArray(emailClone.recipients)) {
+      // Pastikan semua data recipients termasuk user tetap ada dengan deep clone
+      const toRecipients = emailClone.recipients
+        .filter((r) => r.type === "to")
+        .map((r) => ({ ...r })); // Deep clone untuk preserve user data
+      const ccRecipients = emailClone.recipients
+        .filter((r) => r.type === "cc")
+        .map((r) => ({ ...r }));
+      const bccRecipients = emailClone.recipients
+        .filter((r) => r.type === "bcc")
+        .map((r) => ({ ...r }));
+
+      emailClone.recipients = {
+        to: toRecipients,
+        cc: ccRecipients,
+        bcc: bccRecipients,
       };
     }
-    return email;
+    return emailClone;
   }
 
   // Helper method untuk serialize recipients dalam thread
@@ -281,16 +306,11 @@ class EmailService {
         current_email_id: emailId,
         root_email_id: emailId,
         thread_count: 1,
-        thread_emails: [email],
+        thread_emails: [this.serializeRecipients({ ...email })],
         thread_subject: email.subject,
       };
 
-      // ✅ NEW: Serialize recipients untuk semua email dalam thread
-      if (threadData.thread_emails) {
-        threadData.thread_emails = this.serializeThreadEmails(
-          threadData.thread_emails
-        );
-      }
+      // ✅ Thread emails sudah diserialisasi di getEmailThread, tidak perlu lagi
 
       return {
         success: true,
@@ -435,7 +455,7 @@ class EmailService {
         sender(simpleWithImage), 
         recipients.[user(simpleWithImage)], 
         attachments,
-        parent.[sender(simpleWithImage)],
+        parent.[sender(simpleWithImage), recipients.[user(simpleWithImage)]],
         replies.[sender(simpleWithImage)]
       ]`);
 
@@ -450,11 +470,15 @@ class EmailService {
       (r) => r.recipient_id === userId
     );
 
+    const userRecipientInParent = email.parent?.recipients.find(
+      (r) => r.recipient_id === userId
+    );
+
     // Cek apakah user adalah pengirim email
     const isSender = email.sender_id === userId;
 
     // Jika bukan penerima dan bukan pengirim, tolak akses
-    if (!userRecipient && !isSender) {
+    if (!userRecipient && !isSender && !userRecipientInParent) {
       throw new Error("Access denied");
     }
 

@@ -74,22 +74,37 @@ const ThreadEmailItem = ({
   // Function to check if current email is a reply
   const isReplyEmail = () => {
     // Email dianggap reply jika:
-    // 1. Bukan email pertama dalam thread
-    // 2. Ada content yang menunjukkan ini adalah balasan (misalnya subject dimulai dengan "Re:")
-    // 3. Atau memiliki reference ke email sebelumnya
+    // 1. Memiliki parent_id
+    // 2. Memiliki in_reply_to
+    // 3. Memiliki references
+    // 4. Subject dimulai dengan "Re:" atau "RE:"
+    // 5. Bukan email pertama dalam thread dan memiliki pattern quoted text
 
-    if (currentIndex === 0) return false; // Email pertama bukan reply
+    // 1. Cek parent_id
+    if (email.parent_id) return true;
 
-    // Cek apakah subject mengandung "Re:" atau "RE:"
+    // 2. Cek in_reply_to
+    if (email.in_reply_to) return true;
+
+    // 3. Cek references
+    if (
+      email.references &&
+      (Array.isArray(email.references)
+        ? email.references.length > 0
+        : email.references)
+    ) {
+      return true;
+    }
+
+    // 4. Cek subject dengan "Re:"
     const subject = email.subject || "";
     if (subject.toLowerCase().includes("re:")) return true;
 
-    // Cek apakah email memiliki in_reply_to atau references
-    if (email.in_reply_to || email.references) return true;
-
-    // Cek apakah content mengandung quoted text pattern
-    const content = email.content || "";
-    if (content.match(/(Pada .+? menulis:|On .+? wrote:)/)) return true;
+    // 5. Cek content dengan quoted text pattern (hanya jika bukan email pertama)
+    if (currentIndex > 0) {
+      const content = email.content || "";
+      if (content.match(/(Pada .+? menulis:|On .+? wrote:)/)) return true;
+    }
 
     return false;
   };
@@ -98,21 +113,48 @@ const ThreadEmailItem = ({
   const getQuotedContent = () => {
     if (currentIndex === 0) return ""; // First email has no previous messages
 
-    // Hanya ambil email pertama (original) sebagai quote
-    const originalEmail = threadEmails[0];
+    // Cari email parent berdasarkan parent_id, in_reply_to, atau references
+    let parentEmail = null;
 
-    if (!originalEmail) return "";
+    // 1. Coba cari berdasarkan parent_id jika ada
+    if (email.parent_id) {
+      parentEmail = threadEmails.find((e) => e.id === email.parent_id);
+    }
 
-    const senderName = originalEmail.sender?.username || "Unknown Sender";
-    const senderEmail = originalEmail.sender?.email || "unknown@email.com";
+    // 2. Coba cari berdasarkan in_reply_to jika ada
+    if (!parentEmail && email.in_reply_to) {
+      parentEmail = threadEmails.find((e) => e.id === email.in_reply_to);
+    }
+
+    // 3. Coba cari berdasarkan references jika ada
+    if (!parentEmail && email.references) {
+      // references biasanya array atau string yang berisi ID email sebelumnya
+      const refs = Array.isArray(email.references)
+        ? email.references
+        : [email.references];
+      for (const ref of refs) {
+        parentEmail = threadEmails.find((e) => e.id === ref);
+        if (parentEmail) break;
+      }
+    }
+
+    // 4. Fallback: ambil email tepat sebelumnya dalam urutan kronologis
+    if (!parentEmail && currentIndex > 0) {
+      parentEmail = threadEmails[currentIndex - 1];
+    }
+
+    if (!parentEmail) return "";
+
+    const senderName = parentEmail.sender?.username || "Unknown Sender";
+    const senderEmail = parentEmail.sender?.email || "unknown@email.com";
     // Format tanggal menggunakan locale Indonesia
-    const formattedDate = dayjs(originalEmail.created_at)
+    const formattedDate = dayjs(parentEmail.created_at)
       .locale("id")
       .format("ddd, DD MMM YYYY [pukul] HH:mm");
 
     return `Pada ${formattedDate} ${senderName} menulis:
 
-${originalEmail.content || ""}`;
+${parentEmail.content || ""}`;
   };
 
   // Combine current content with quoted content (only for replies)
