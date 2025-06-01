@@ -430,6 +430,7 @@ class EmailService {
 
   // Get email by ID with user context
   static async getEmailById(emailId, userId) {
+    // Mengambil email berdasarkan ID dengan relasi terkait
     const email = await Email.query().findById(emailId).withGraphFetched(`[
         sender(simpleWithImage), 
         recipients.[user(simpleWithImage)], 
@@ -438,34 +439,41 @@ class EmailService {
         replies.[sender(simpleWithImage)]
       ]`);
 
+    // Jika email tidak ditemukan, lempar error
     if (!email) {
       throw new Error("Email not found");
     }
 
-    // Check if user has access to this email
+    // Cek apakah user memiliki akses ke email ini
+    // dengan memeriksa apakah dia penerima email
     const userRecipient = email.recipients.find(
       (r) => r.recipient_id === userId
     );
+
+    // Cek apakah user adalah pengirim email
     const isSender = email.sender_id === userId;
 
+    // Jika bukan penerima dan bukan pengirim, tolak akses
     if (!userRecipient && !isSender) {
       throw new Error("Access denied");
     }
 
-    // Auto mark as read if user is recipient
+    // Otomatis tandai sebagai telah dibaca jika user adalah penerima
     if (userRecipient && !userRecipient.is_read) {
       await userRecipient.markAsRead();
     }
 
+    // Dapatkan status berbintang email
     const starStatus = await this.getStarStatus(emailId, userId);
 
-    // recipients have many attributes type : to, cc, bcc
+    // Kelompokkan penerima berdasarkan tipe (to, cc, bcc)
     email.recipients = {
       to: email.recipients.filter((r) => r.type === "to"),
       cc: email.recipients.filter((r) => r.type === "cc"),
       bcc: email.recipients.filter((r) => r.type === "bcc"),
     };
 
+    // Tambahkan status berbintang ke objek email
     email.is_starred = starStatus.is_starred;
 
     return email;
