@@ -24,7 +24,7 @@ export const appLists = [
     desc: "Layanan Keuangan",
     color: "#FBBC05",
     url: "/layanan-keuangan/dashboard",
-    icon: "https://siasn.bkd.jatimprov.go.id:9000/public/icon-log.png",
+    icon: "https://siasn.bkd.jatimprov.go.id:9000/public/icon-layanan-keuangan.png",
     userType: ["asn", "admin"],
   },
   {

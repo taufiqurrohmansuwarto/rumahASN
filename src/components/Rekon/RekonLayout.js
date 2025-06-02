@@ -28,6 +28,7 @@ import { signOut, useSession } from "next-auth/react";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/router";
 import { useState } from "react";
+import { rekonToken } from "src/styles/rekon.styles";
 
 const menuItems = [
   {
@@ -134,28 +135,6 @@ function RekonLayout({ children, active = "rekon-unor" }) {
 
   const router = useRouter();
 
-  const token = {
-    bgLayout: "#fafafa",
-    colorPrimary: "#52C41A", // Warna hijau utama Ant Design
-    sider: {
-      colorBgCollapsedButton: "#52C41A", // Hijau untuk tombol collapse
-      colorBgMenuItemActive: "#F6FFED", // Hijau sangat muda untuk item menu yang aktif
-      colorTextCollapsedButton: "#fafafa", // Putih untuk teks tombol collapse
-      colorTextCollapsedButtonHover: "#F6FFED", // Hijau sangat muda untuk teks tombol collapse saat di-hover
-      colorTextMenuTitle: "#52C41A", // Hijau untuk judul menu
-      colorTextMenuItemHover: "#52C41A", // Hijau untuk teks menu saat di-hover
-      colorTextMenuSelected: "#52C41A", // Hijau untuk teks menu saat dipilih
-      colorTextMenuActive: "#52C41A", // Hijau untuk teks menu saat aktif
-      colorBgMenuItemHover: "rgba(82, 196, 26, 0.1)", // Transparan hijau saat item menu di-hover
-      colorBgMenuItemSelected: "rgba(82, 196, 26, 0.2)", // Transparan hijau lebih terang untuk item menu yang dipilih
-      colorBgMenuItemCollapsedElevated: "#fafafa", // Putih untuk menu yang tertutup namun ditinggikan
-      colorTextMenu: "#595959", // Abu-abu gelap untuk teks menu biasa
-      colorBgMenu: "#fafafa", // Putih untuk latar belakang menu
-      colorTextMenuSecondary: "#8C8C8C", // Abu-abu medium untuk teks menu sekunder
-      colorMenuItemDivider: "#F0F0F0", // Abu-abu sangat muda untuk pembatas menu
-    },
-  };
-
   const [collapsed, setCollapsed] = useState(true);
 
   const handleSearch = (value) => {
@@ -168,7 +147,7 @@ function RekonLayout({ children, active = "rekon-unor" }) {
   };
 
   return (
-    <ProConfigProvider token={token}>
+    <ProConfigProvider>
       <ProLayout
         title={"Rekon SIASN"}
         defaultCollapsed={collapsed}
@@ -180,7 +159,7 @@ function RekonLayout({ children, active = "rekon-unor" }) {
         navTheme="light"
         // fixedHeader
         // fixSiderbar
-        token={token}
+        token={rekonToken}
         actionsRender={(props) => {
           // if (props.isMobile) return [];
           return [
