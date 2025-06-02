@@ -2,7 +2,6 @@ import MegaMenuTop from "@/components/MegaMenu/MegaMenuTop";
 import { currentUserRole } from "@/services/current-user.services";
 import { appList } from "@/utils/app-lists";
 import {
-  AntDesignOutlined,
   ApiOutlined,
   BookOutlined,
   GroupOutlined,

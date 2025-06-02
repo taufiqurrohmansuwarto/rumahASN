@@ -501,7 +501,7 @@ const BerandaBKD = () => {
       >
         <FloatButton.BackTop />
         <GridMantineCore justify="start">
-          <GridMantineCore.Col md={8} xs={12}>
+          <GridMantineCore.Col md={10} xs={12}>
             <Card
               title="Daftar Pertanyaan"
               extra={

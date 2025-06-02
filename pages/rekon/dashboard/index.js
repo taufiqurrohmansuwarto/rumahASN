@@ -1,9 +1,8 @@
 import PageContainer from "@/components/PageContainer";
-import RekonLayout from "@/components/Rekon/RekonLayout";
-import { Grid, Breadcrumb, FloatButton } from "antd";
-import Head from "next/head";
 import RekonDashboardDetail from "@/components/Rekon/RekonDashboardDetail";
-import Link from "next/link";
+import RekonLayout from "@/components/Rekon/RekonLayout";
+import { Breadcrumb, Grid } from "antd";
+import Head from "next/head";
 
 const RekonDashboard = () => {
   const breakPoint = Grid.useBreakpoint();
