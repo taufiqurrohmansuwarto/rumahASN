@@ -19,10 +19,11 @@ import "antd/dist/reset.css";
 import dayjs from "dayjs";
 import "dayjs/locale/id";
 import relativeTime from "dayjs/plugin/relativeTime";
-import { useAntdConfig } from "src/styles/rasn.theme";
-import { useGmailConfig } from "src/styles/gmail.styles";
 import { useRouter } from "next/router";
+import { useGmailConfig } from "src/styles/gmail.styles";
 import { useLayananKeuanganConfig } from "src/styles/layanan-keuangan.styles";
+import { useAntdConfig } from "src/styles/rasn.theme";
+import { useRekonConfig } from "src/styles/rekon.styles";
 
 // check user role and organization start with 123
 function Auth({ children, action, subject }) {
@@ -72,14 +73,17 @@ function MyApp({ Component, pageProps: { session, ...pageProps } }) {
   const antdConfig = useAntdConfig();
   const gmailConfig = useGmailConfig();
   const layananKeuanganConfig = useLayananKeuanganConfig();
+  const rekonConfig = useRekonConfig();
 
   const getThemeConfig = () => {
     if (router.pathname.includes("/mail")) {
       return gmailConfig;
-    }
-    if (router.pathname.includes("/layanan-keuangan")) {
+    } else if (router.pathname.includes("/layanan-keuangan")) {
       return layananKeuanganConfig;
+    } else if (router.pathname.includes("/rekon")) {
+      return rekonConfig;
     }
+
     return antdConfig;
   };
 
