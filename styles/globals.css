@@ -10,3 +10,15 @@
 .ant-tree-node-content-wrapper {
   width: auto !important;
 }
+
+.ant-pro-layout,
+.ant-pro-layout .ant-layout,
+.ant-pro-layout .ant-layout-header,
+.ant-pro-layout .ant-layout-sider,
+.ant-pro-layout .ant-layout-content,
+.ant-pro-layout .ant-menu,
+.ant-pro-layout .ant-menu-item,
+.ant-pro-layout .ant-pro-global-header,
+.ant-pro-layout .ant-pro-sider-menu {
+  font-family: "Google Sans";
+}

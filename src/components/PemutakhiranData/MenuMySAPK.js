@@ -96,9 +96,9 @@ export function MenuMySAPK({ dataUtama, foto, simaster }) {
       className={classes.item}
     >
       <item.icon color={theme.colors[item.color][6]} size="2rem" />
-      <Text size="xs" mt={7}>
+      <Typography.Text style={{ fontSize: 12, fontWeight: 500, marginTop: 8 }}>
         {item.title}
-      </Text>
+      </Typography.Text>
     </UnstyledButton>
   ));
 

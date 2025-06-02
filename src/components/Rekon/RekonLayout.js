@@ -147,113 +147,111 @@ function RekonLayout({ children, active = "rekon-unor" }) {
   };
 
   return (
-    <ProConfigProvider>
-      <ProLayout
-        title={"Rekon SIASN"}
-        defaultCollapsed={collapsed}
-        collapsed={collapsed}
-        onCollapse={setCollapsed}
-        selectedKeys={[active]}
-        logo={null}
-        layout="mix"
-        navTheme="light"
-        // fixedHeader
-        // fixSiderbar
-        token={rekonToken}
-        actionsRender={(props) => {
-          // if (props.isMobile) return [];
-          return [
-            <div key="search" style={{ width: "100%", maxWidth: "300px" }}>
-              <Input.Search
-                onClear={() => handleSearch("")}
-                allowClear
-                placeholder="Ketik NIP atau Nama..."
-                size={props.isMobile ? "small" : "middle"}
-                onSearch={handleSearch}
-                className="search-input-professional"
-                style={{
-                  width: "100%",
-                  transition: "all 0.3s ease",
-                  display: props.collapsed && props.isMobile ? "none" : "block",
-                }}
-              />
-            </div>,
-            <NotifikasiKepegawaian
-              key="kepegawaian"
-              url="kepegawaian"
-              title="Inbox Kepegawaian"
-            />,
-            <NotifikasiPrivateMessage
-              key="private-message"
-              url="/mails/inbox"
-              title="Inbox Pesan Pribadi"
-            />,
-            <NotifikasiASNConnect
-              key="asn-connect"
-              url="asn-connect"
-              title="Inbox ASN Connect"
-            />,
-            <NotifikasiForumKepegawaian
-              key="forum-kepegawaian"
-              url="forum-kepegawaian"
-              title="Inbox Forum Kepegawaian"
-            />,
-            <MegaMenuTop key="mega-menu" url="" title="Menu" />,
-          ];
-        }}
-        avatarProps={{
-          src: data?.user?.image,
-          size: "large",
-          render: (props, dom) => {
-            return (
-              <Space>
-                <Dropdown
-                  menu={{
-                    onClick: (e) => {
-                      if (e.key === "logout") {
-                        signOut();
-                      }
-                      if (e.key === "profile") {
-                        router.push("/settings/profile");
-                      }
+    <ProLayout
+      title={"Rekon SIASN"}
+      defaultCollapsed={collapsed}
+      collapsed={collapsed}
+      onCollapse={setCollapsed}
+      selectedKeys={[active]}
+      logo={null}
+      layout="mix"
+      navTheme="light"
+      // fixedHeader
+      // fixSiderbar
+      token={rekonToken}
+      actionsRender={(props) => {
+        // if (props.isMobile) return [];
+        return [
+          <div key="search" style={{ width: "100%", maxWidth: "300px" }}>
+            <Input.Search
+              onClear={() => handleSearch("")}
+              allowClear
+              placeholder="Ketik NIP atau Nama..."
+              size={props.isMobile ? "small" : "middle"}
+              onSearch={handleSearch}
+              className="search-input-professional"
+              style={{
+                width: "100%",
+                transition: "all 0.3s ease",
+                display: props.collapsed && props.isMobile ? "none" : "block",
+              }}
+            />
+          </div>,
+          <NotifikasiKepegawaian
+            key="kepegawaian"
+            url="kepegawaian"
+            title="Inbox Kepegawaian"
+          />,
+          <NotifikasiPrivateMessage
+            key="private-message"
+            url="/mails/inbox"
+            title="Inbox Pesan Pribadi"
+          />,
+          <NotifikasiASNConnect
+            key="asn-connect"
+            url="asn-connect"
+            title="Inbox ASN Connect"
+          />,
+          <NotifikasiForumKepegawaian
+            key="forum-kepegawaian"
+            url="forum-kepegawaian"
+            title="Inbox Forum Kepegawaian"
+          />,
+          <MegaMenuTop key="mega-menu" url="" title="Menu" />,
+        ];
+      }}
+      avatarProps={{
+        src: data?.user?.image,
+        size: "large",
+        render: (props, dom) => {
+          return (
+            <Space>
+              <Dropdown
+                menu={{
+                  onClick: (e) => {
+                    if (e.key === "logout") {
+                      signOut();
+                    }
+                    if (e.key === "profile") {
+                      router.push("/settings/profile");
+                    }
+                  },
+                  items: [
+                    {
+                      key: "profile",
+                      icon: <UserOutlined />,
+                      label: "Profil",
                     },
-                    items: [
-                      {
-                        key: "profile",
-                        icon: <UserOutlined />,
-                        label: "Profil",
-                      },
-                      {
-                        key: "logout",
-                        icon: <LogoutOutlined />,
-                        label: "Keluar",
-                      },
-                    ],
-                  }}
-                >
-                  {dom}
-                </Dropdown>
-              </Space>
-            );
-          },
-        }}
-        route={{
-          routes: mappingItems(getMenuItems(menuItems, data?.user), "/rekon"),
-        }}
-        menuItemRender={(item, dom) => (
-          <a
-            onClick={() => {
-              router.push(`${item.key}`);
-            }}
-          >
-            {dom}
-          </a>
-        )}
-        appList={appList(data?.user)}
-      >
-        {children}
-      </ProLayout>
-    </ProConfigProvider>
+                    {
+                      key: "logout",
+                      icon: <LogoutOutlined />,
+                      label: "Keluar",
+                    },
+                  ],
+                }}
+              >
+                {dom}
+              </Dropdown>
+            </Space>
+          );
+        },
+      }}
+      route={{
+        routes: mappingItems(getMenuItems(menuItems, data?.user), "/rekon"),
+      }}
+      menuItemRender={(item, dom) => (
+        <a
+          onClick={() => {
+            router.push(`${item.key}`);
+          }}
+        >
+          {dom}
+        </a>
+      )}
+      appList={appList(data?.user)}
+    >
+      {children}
+    </ProLayout>
   );
 }
 

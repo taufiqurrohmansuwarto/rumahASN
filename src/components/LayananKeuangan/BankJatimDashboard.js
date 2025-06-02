@@ -48,7 +48,7 @@ function BankJatimDashboard() {
         </Button>
       </Space>
       <Row gutter={[24, 24]}>
-        <Col span={{ xs: 24, sm: 12, md: 8 }}>
+        <Col span={{ xs: 24, md: 8 }}>
           <ProductCard
             title="KKB (Kredit Kendaraan Bermotor)"
             image="https://siasn.bkd.jatimprov.go.id:9000/public/bankjatim-kkb.jpg"
@@ -59,7 +59,7 @@ function BankJatimDashboard() {
           />
         </Col>
 
-        <Col span={{ xs: 24, sm: 12, md: 8 }}>
+        <Col span={{ xs: 24, md: 8 }}>
           <ProductCard
             title="KPR (Kredit Pemilikan Rumah)"
             image="https://siasn.bkd.jatimprov.go.id:9000/public/bankjatim-kpr.jpg"
@@ -70,7 +70,7 @@ function BankJatimDashboard() {
           />
         </Col>
 
-        <Col span={{ xs: 24, sm: 12, md: 8 }}>
+        <Col span={{ xs: 24, md: 8 }}>
           <ProductCard
             title="Kredit Multiguna"
             image="https://siasn.bkd.jatimprov.go.id:9000/public/bankjatim-multiguna.jpg"
