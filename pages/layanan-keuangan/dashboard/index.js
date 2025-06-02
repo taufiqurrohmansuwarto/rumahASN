@@ -2,14 +2,20 @@ import LayananKeuanganLandingPage from "@/components/LayananKeuangan/LayananKeua
 import LayananKeuanganLayout from "@/components/LayananKeuangan/LayananKeuanganLayout";
 import PageContainer from "@/components/PageContainer";
 import Head from "next/head";
+import { Grid } from "antd";
 
 const Dashboard = () => {
+  const breakPoint = Grid.useBreakpoint();
   return (
     <>
       <Head>
         <title>Layanan Keuangan</title>
       </Head>
-      <PageContainer>
+      <PageContainer
+        childrenContentStyle={{
+          padding: breakPoint.xs ? null : 0,
+        }}
+      >
         <LayananKeuanganLandingPage />
       </PageContainer>
     </>
