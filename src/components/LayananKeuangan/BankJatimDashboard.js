@@ -51,7 +51,7 @@ function BankJatimDashboard() {
         <Col span={8}>
           <ProductCard
             title="KKB (Kredit Kendaraan Bermotor)"
-            image="/images/products/kkb-car.jpg"
+            image="https://siasn.bkd.jatimprov.go.id:9000/public/bankjatim-kkb.jpg"
             description="Solusi pembiayaan kendaraan bermotor dengan bunga kompetitif, proses cepat, dan tenor fleksibel hingga 6 tahun."
             onDetail={() =>
               router.push("/layanan-keuangan/bank-jatim/produk/kkb")
@@ -62,7 +62,7 @@ function BankJatimDashboard() {
         <Col span={8}>
           <ProductCard
             title="KPR (Kredit Pemilikan Rumah)"
-            image="/images/products/kpr-house.jpg"
+            image="https://siasn.bkd.jatimprov.go.id:9000/public/bankjatim-kpr.jpg"
             description="Wujudkan impian memiliki rumah dengan kredit pemilikan rumah yang mudah, bunga bersaing, dan tenor hingga 20 tahun."
             onDetail={() =>
               router.push("/layanan-keuangan/bank-jatim/produk/kpr")
@@ -73,7 +73,7 @@ function BankJatimDashboard() {
         <Col span={8}>
           <ProductCard
             title="Kredit Multiguna"
-            image="/images/products/multiguna-money.jpg"
+            image="https://siasn.bkd.jatimprov.go.id:9000/public/bankjatim-multiguna.jpg"
             description="Dana tunai siap pakai untuk berbagai kebutuhan dengan plafon hingga 500 juta dan proses persetujuan yang cepat."
             onDetail={() =>
               router.push("/layanan-keuangan/bank-jatim/produk/multiguna")

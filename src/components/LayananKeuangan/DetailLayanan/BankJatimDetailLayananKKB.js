@@ -30,7 +30,7 @@ function BankJatimDetailLayananKKB() {
       onSimulasi={handleSimulasi}
       onPengajuan={handlePengajuan}
       onCekStatus={handleCekStatus}
-      imageUrl="/images/kpr-banner.jpg" // Optional: gambar banner
+      imageUrl="https://siasn.bkd.jatimprov.go.id:9000/public/bankjatim-kkb.jpg" // Optional: gambar banner
     />
   );
 }
