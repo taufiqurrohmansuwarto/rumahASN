@@ -6,9 +6,11 @@ import GmailLayout from "@/components/GmailLayout";
 import EmailDetailComponent from "@/components/mail/Detail/EmailDetailComponent";
 import EmailThreadComponent from "@/components/mail/Detail/EmailThreadComponent";
 import { useRouter } from "next/router";
+import { Grid } from "antd";
 
 const InboxMailDetail = () => {
   const router = useRouter();
+  const breakPoint = Grid.useBreakpoint();
   const { id } = router.query;
 
   // ✅ Use thread-aware hook
@@ -38,7 +40,12 @@ const InboxMailDetail = () => {
   const { email, thread, has_thread } = emailData.data;
 
   return (
-    <PageContainer onBack={() => router.back()}>
+    <PageContainer
+      onBack={() => router.back()}
+      childrenContentStyle={{
+        padding: breakPoint.xs ? null : 0,
+      }}
+    >
       {/* Email Thread Component */}
       {has_thread && (
         <EmailThreadComponent

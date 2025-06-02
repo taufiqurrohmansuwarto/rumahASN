@@ -2,11 +2,13 @@ import GmailLayout from "@/components/GmailLayout";
 import EmailDetailComponent from "@/components/mail/Detail/EmailDetailComponent";
 import PageContainer from "@/components/PageContainer";
 import { useEmailById } from "@/hooks/useEmails";
+import { Grid } from "antd";
 import Head from "next/head";
 
 import { useRouter } from "next/router";
 
 const DraftMailDetail = () => {
+  const breakPoint = Grid.useBreakpoint();
   const handleBack = () => router?.back();
   const router = useRouter();
   const { id } = router?.query;
@@ -19,6 +21,9 @@ const DraftMailDetail = () => {
         <title>{email?.data?.subject} - Rumah ASN - Pesan Draf</title>
       </Head>
       <PageContainer
+        childrenContentStyle={{
+          padding: breakPoint.xs ? null : 0,
+        }}
         title="Pesan Draf"
         subTitle={email?.data?.subject}
         onBack={handleBack}
