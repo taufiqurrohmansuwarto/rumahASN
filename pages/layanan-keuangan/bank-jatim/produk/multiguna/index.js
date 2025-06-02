@@ -3,9 +3,11 @@ import LayananKeuanganLayout from "@/components/LayananKeuangan/LayananKeuanganL
 import PageContainer from "@/components/PageContainer";
 import Head from "next/head";
 import { useRouter } from "next/router";
+import { Grid } from "antd";
 
 const Multiguna = () => {
   const router = useRouter();
+  const breakPoint = Grid.useBreakpoint();
 
   const handleBack = () => {
     router.back();
@@ -20,6 +22,9 @@ const Multiguna = () => {
         title="Layanan Keuangan"
         subTitle="Bank Jatim - Multiguna"
         onBack={handleBack}
+        childrenContentStyle={{
+          padding: breakPoint.xs ? null : 0,
+        }}
       >
         <BankJatimDetailLayananMultiguna />
       </PageContainer>
