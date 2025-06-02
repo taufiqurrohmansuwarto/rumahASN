@@ -2,11 +2,13 @@ import GmailLayout from "@/components/GmailLayout";
 import PageContainer from "@/components/PageContainer";
 import { getPrivateMessages } from "@/services/index";
 import { useQuery } from "@tanstack/react-query";
-import { Button } from "antd";
+import { Button, Grid } from "antd";
 import Head from "next/head";
 import { useRouter } from "next/router";
 
 const Mail = () => {
+  const breakPoint = Grid.useBreakpoint();
+
   const router = useRouter();
   const { data, isLoading } = useQuery(["private-messages"], () =>
     getPrivateMessages({})
@@ -19,7 +21,11 @@ const Mail = () => {
       <Head>
         <title>Rumah ASN - Pesan Pribadi</title>
       </Head>
-      <PageContainer>
+      <PageContainer
+        childrenContentStyle={{
+          padding: breakPoint.xs ? null : 0,
+        }}
+      >
         <Button onClick={gotoCreate}>Buat Pesan</Button>
       </PageContainer>
     </>

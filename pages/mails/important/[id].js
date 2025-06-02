@@ -3,10 +3,12 @@ import EmailDetailComponent from "@/components/mail/Detail/EmailDetailComponent"
 import PageContainer from "@/components/PageContainer";
 import { useEmailById } from "@/hooks/useEmails";
 import Head from "next/head";
+import { Grid } from "antd";
 
 import { useRouter } from "next/router";
 
 const ImportantMailDetail = () => {
+  const breakPoint = Grid.useBreakpoint();
   const handleBack = () => router?.back();
   const router = useRouter();
   const { id } = router?.query;
@@ -19,6 +21,9 @@ const ImportantMailDetail = () => {
         <title>{email?.data?.subject} - Rumah ASN - Pesan Penting</title>
       </Head>
       <PageContainer
+        childrenContentStyle={{
+          padding: breakPoint.xs ? null : 0,
+        }}
         title="Pesan Penting"
         subTitle={email?.data?.subject}
         onBack={handleBack}

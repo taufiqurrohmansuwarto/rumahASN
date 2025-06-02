@@ -4,10 +4,12 @@ import { useUserLabels } from "@/hooks/useEmails";
 import { TagOutlined } from "@ant-design/icons";
 import Head from "next/head";
 import { useRouter } from "next/router";
+import { Grid } from "antd";
 
 const LabelPage = () => {
   const router = useRouter();
   const { id } = router.query;
+  const breakPoint = Grid.useBreakpoint();
 
   // Get label info
   const { data: labelsData } = useUserLabels();
