@@ -1,3 +1,4 @@
+import DashboardLogSiasn from "@/components/Log/DashboardLogSiasn";
 import LogHistorySIASN from "@/components/Log/LogHistorySIASN";
 import PageContainer from "@/components/PageContainer";
 import RekonLayout from "@/components/Rekon/RekonLayout";
@@ -27,6 +28,7 @@ const Logs = () => {
         title="Rekon"
         content="Riwayat Log"
       >
+        <DashboardLogSiasn />
         <LogHistorySIASN />
       </PageContainer>
     </>

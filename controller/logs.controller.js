@@ -3,6 +3,7 @@ const LogBsre = require("@/models/log-bsre.model");
 const LogSealBsre = require("@/models/log-seal-bsre.model");
 
 const dayjs = require("dayjs");
+const { raw } = require("objection");
 
 const indexLogBsre = async (req, res) => {
   try {
@@ -44,7 +45,6 @@ const indexLogSiasn = async (req, res) => {
 
     const page = req?.query?.page || 1;
     const limit = req?.query?.limit || 10;
-    console.log(req?.query);
 
     const startDate = dayjs(bulan, "YYYY-MM").startOf("month").toDate();
     const endDate = dayjs(bulan, "YYYY-MM").endOf("month").toDate();
@@ -153,9 +153,58 @@ const dataLogSealById = async (req, res) => {
   }
 };
 
+const indexLogSiasnDashboard = async (req, res) => {
+  try {
+    const { month } = req?.query;
+
+    const startDate = dayjs(month, "YYYY-MM").startOf("month").toDate();
+    const endDate = dayjs(month, "YYYY-MM").endOf("month").toDate();
+
+    const knex = LogSIASN.knex();
+
+    const result = await knex.raw(`SELECT
+    all_services.siasn_service,
+    COALESCE(monthly_count.total, 0) as total
+FROM (
+    SELECT DISTINCT siasn_service
+    FROM public.log_siasn
+    WHERE siasn_service IS NOT NULL
+) as all_services
+LEFT JOIN (
+    SELECT
+        siasn_service,
+        COUNT(*) as total
+    FROM public.log_siasn
+    WHERE
+        EXTRACT(YEAR FROM created_at) = ${dayjs(month, "YYYY-MM").year()}
+        AND EXTRACT(MONTH FROM created_at) = ${
+          dayjs(month, "YYYY-MM").month() + 1
+        }
+    GROUP BY siasn_service
+) as monthly_count ON all_services.siasn_service = monthly_count.siasn_service
+ORDER BY all_services.siasn_service;`);
+
+    const hasil = result?.rows?.map((item) => ({
+      label: item.siasn_service.toUpperCase(),
+      value: parseInt(item.total),
+    }));
+
+    const serialize = hasil.map((item) => ({
+      label: item.label.toUpperCase(),
+      value: parseInt(item.value),
+    }));
+
+    res.json(serialize);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
 module.exports = {
   indexLogSiasn,
   indexLogBsreSeal,
   indexLogBsre,
   dataLogSealById,
+  indexLogSiasnDashboard,
 };
