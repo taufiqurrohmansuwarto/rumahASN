@@ -324,7 +324,8 @@ const useStyle = createStyles(({ token, css }) => ({
   formHelpText: css`
     font-size: 12px;
     color: #6b7280;
-    margin-top: 4px;
+    margin-top: 12px;
+    margin-bottom: 12px;
   `,
   resultCard: css`
     border-radius: 12px;
