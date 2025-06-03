@@ -2,6 +2,7 @@
 import { Grid } from "antd";
 import id from "antd/locale/id_ID";
 import { createStyles } from "antd-style";
+import { useFontJakarta } from "./fonts";
 
 // Button styles
 export const useButtonStyle = createStyles(({ prefixCls, css }) => ({
@@ -112,7 +113,7 @@ export const useThemeConfig = () => {
       colorBgLayout: "#f8f9fa",
       borderRadius: 8,
       fontSize: 14,
-      fontFamily: "Google Sans, Roboto, Arial, sans-serif",
+      fontFamily: useFontJakarta(),
     },
   };
 };

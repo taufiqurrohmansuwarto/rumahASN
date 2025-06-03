@@ -2,6 +2,7 @@
 import { Grid } from "antd";
 import id from "antd/locale/id_ID";
 import { createStyles } from "antd-style";
+import { useFontJakarta } from "./fonts";
 
 // Button styles - Indigo Elegant Theme
 export const useButtonStyle = createStyles(({ prefixCls, css }) => ({
@@ -174,7 +175,7 @@ export const useThemeConfig = () => {
       colorError: "#dc2626",
       colorInfo: "#3b82f6",
       fontSize: 14,
-      fontFamily: "Google Sans, Roboto, Arial, sans-serif",
+      fontFamily: useFontJakarta(),
       fontWeightStrong: 600,
       borderRadius: 6,
       borderRadiusLG: 8,
