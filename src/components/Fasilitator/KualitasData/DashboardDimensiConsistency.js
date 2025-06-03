@@ -1,4 +1,4 @@
-import { dashboardCompleteness } from "@/services/dimensi-completeness.services";
+import { dashboardConsistency } from "@/services/dimensi-consistency.services";
 import {
   BarChartOutlined,
   ExclamationCircleOutlined,
@@ -24,19 +24,19 @@ import React from "react";
 
 const { Text, Title } = Typography;
 
-function DashboardDimensiCompleteness() {
+function DashboardDimensiConsistency() {
   const router = useRouter();
-  const { data, isLoading } = useQuery(["dashboard-dimensi-completeness"], () =>
-    dashboardCompleteness()
+  const { data, isLoading } = useQuery(["dashboard-dimensi-consistency"], () =>
+    dashboardConsistency()
   );
 
   const handleClick = (key) => {
-    router.push(`/rekon/anomali/completeness/${key}`);
+    router.push(`/rekon/anomali/consistency/${key}`);
   };
 
   const columns = [
     {
-      title: "Indikator Kelengkapan",
+      title: "Indikator Konsistensi",
       dataIndex: "label",
       key: "label",
       render: (text) => (
@@ -47,7 +47,7 @@ function DashboardDimensiCompleteness() {
       ellipsis: true,
     },
     {
-      title: "Data Tidak Lengkap",
+      title: "Data Inkonsisten",
       key: "value",
       dataIndex: "value",
       align: "center",
@@ -120,11 +120,11 @@ function DashboardDimensiCompleteness() {
           level={2}
           style={{ margin: 0, color: "#1F2937", fontWeight: 700 }}
         >
-          Dimensi Completeness
+          Dimensi Consistency
         </Title>
         <Text type="secondary" style={{ fontSize: "16px", lineHeight: "24px" }}>
-          Monitoring dan analisis kelengkapan data ASN untuk memastikan
-          integritas informasi
+          Monitoring dan analisis konsistensi data ASN untuk memastikan
+          keseragaman informasi
         </Text>
       </div>
 
@@ -154,7 +154,7 @@ function DashboardDimensiCompleteness() {
               <BarChartOutlined style={{ color: "white", fontSize: "18px" }} />
             </div>
             <Title level={4} style={{ margin: 0, color: "#1F2937" }}>
-              Detail Indikator Completeness
+              Detail Indikator Consistency
             </Title>
             <Badge
               count={data?.length || 0}
@@ -165,12 +165,12 @@ function DashboardDimensiCompleteness() {
           {/* Alert */}
           <Alert
             title="Informasi Penting"
-            color="green"
+            color="purple"
             icon={<InfoCircleOutlined />}
             style={{ marginBottom: "8px" }}
           >
-            Dimensi Completeness mengukur kelengkapan data ASN. Semakin tinggi
-            tingkat kelengkapan, semakin baik kualitas data.
+            Dimensi Consistency mengukur keseragaman dan konsistensi data ASN.
+            Semakin konsisten data, semakin reliable informasi yang dihasilkan.
           </Alert>
 
           {/* Table */}
@@ -207,4 +207,4 @@ function DashboardDimensiCompleteness() {
   );
 }
 
-export default DashboardDimensiCompleteness;
+export default DashboardDimensiConsistency;

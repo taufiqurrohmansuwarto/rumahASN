@@ -1,5 +1,4 @@
-import React from "react";
-import { comparePegawaiAdmin } from "@/services/admin.services";
+import { compareEmployeesSimasterSiasn } from "@/services/master.services";
 import {
   InfoCircleOutlined,
   QuestionCircleOutlined,
@@ -26,7 +25,7 @@ import * as XLSX from "xlsx";
 
 const { Title, Text } = Typography;
 
-const GrafikAnomali = ({ data }) => {
+const GrafikFasilitatorKomparasi = ({ data }) => {
   const router = useRouter();
 
   const gotoDetailEmployee = (nip) => {
@@ -297,13 +296,11 @@ const GrafikAnomali = ({ data }) => {
   );
 };
 
-function DashboardKomparasiAdmin() {
+function DashboardKomparasiFasilitator() {
   const { data, isLoading } = useQuery(
-    ["dashboard-compare-siasn-admin"],
-    () => comparePegawaiAdmin(),
-    {
-      refetchOnWindowFocus: false,
-    }
+    ["dashboard-compare-siasn"],
+    () => compareEmployeesSimasterSiasn(),
+    {}
   );
 
   return (
@@ -320,17 +317,16 @@ function DashboardKomparasiAdmin() {
           level={2}
           style={{ margin: 0, color: "#1F2937", fontWeight: 700 }}
         >
-          Dashboard Komparasi Admin
+          Dashboard Komparasi Fasilitator
         </Title>
         <Text type="secondary" style={{ fontSize: "16px", lineHeight: "24px" }}>
-          Perbandingan data pegawai antara SIASN dan SIMASTER untuk
-          administrator
+          Perbandingan data pegawai antara SIASN dan SIMASTER untuk fasilitator
         </Text>
       </div>
 
-      {data && <GrafikAnomali data={data} />}
+      {data && <GrafikFasilitatorKomparasi data={data} />}
     </div>
   );
 }
 
-export default DashboardKomparasiAdmin;
+export default DashboardKomparasiFasilitator;

@@ -1,21 +1,15 @@
 import DashboardKomparasiAdmin from "@/components/Fasilitator/DashboardKomparasiAdmin";
 import DashboardKompareFasilitator from "@/components/Fasilitator/DashboardKompareFasilitator";
-import DashboardDimensiCompleteness from "@/components/Fasilitator/KualitasData/DashboardDimensiCompleteness";
-import DashboardDimensiConsistency from "@/components/Fasilitator/KualitasData/DasboardDimenisConsistency";
 import DashboardDimensiAccuracy from "@/components/Fasilitator/KualitasData/DashboardDimensiAccuracy";
+import DashboardDimensiCompleteness from "@/components/Fasilitator/KualitasData/DashboardDimensiCompleteness";
+import DashboardDimensiConsistency from "@/components/Fasilitator/KualitasData/DashboardDimensiConsistency";
+import DashboardDimensiTimeliness from "@/components/Fasilitator/KualitasData/DashboardDimensiTimeliness";
 import PageContainer from "@/components/PageContainer";
 import RekonLayout from "@/components/Rekon/RekonLayout";
+import useScrollRestoration from "@/hooks/useScrollRestoration";
+import { Grid } from "antd";
 import { useSession } from "next-auth/react";
 import Head from "next/head";
-import { Grid, Card, Row, Col } from "antd";
-import useScrollRestoration from "@/hooks/useScrollRestoration";
-import {
-  BarChartOutlined,
-  CheckCircleOutlined,
-  ClockCircleOutlined,
-  ExclamationCircleOutlined,
-} from "@ant-design/icons";
-import DashboardDimensiTimeliness from "@/components/Fasilitator/KualitasData/DashboardDimensiTimeliness";
 
 const RekonAnomali = () => {
   useScrollRestoration();
@@ -41,105 +35,11 @@ const RekonAnomali = () => {
       >
         {admin && <DashboardKomparasiAdmin />}
         {fasilitator && <DashboardKompareFasilitator />}
-        <div style={{ padding: "16px" }}>
-          <Card
-            title="Dimensi Kualitas Data"
-            bordered={false}
-            style={{
-              marginBottom: "24px",
-              boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
-            }}
-            headStyle={{
-              backgroundColor: "#f0f5ff",
-              fontWeight: "bold",
-              borderBottom: "1px solid #e8e8e8",
-            }}
-          >
-            <Row gutter={[0, 16]}>
-              <Col xs={24}>
-                <Card
-                  hoverable
-                  bordered={false}
-                  style={{
-                    borderRadius: "8px",
-                    boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
-                  }}
-                  bodyStyle={{ padding: "16px 24px" }}
-                  extra={
-                    <BarChartOutlined
-                      style={{ fontSize: "24px", color: "#1890ff" }}
-                    />
-                  }
-                >
-                  <DashboardDimensiCompleteness />
-                </Card>
-              </Col>
-            </Row>
 
-            <Row gutter={[0, 16]}>
-              <Col xs={24}>
-                <Card
-                  hoverable
-                  bordered={false}
-                  style={{
-                    borderRadius: "8px",
-                    boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
-                  }}
-                  bodyStyle={{ padding: "16px 24px" }}
-                  extra={
-                    <CheckCircleOutlined
-                      style={{ fontSize: "24px", color: "#52c41a" }}
-                    />
-                  }
-                >
-                  <DashboardDimensiConsistency />
-                </Card>
-              </Col>
-            </Row>
-
-            <Row gutter={[0, 16]}>
-              <Col xs={24}>
-                <Card
-                  hoverable
-                  bordered={false}
-                  style={{
-                    borderRadius: "8px",
-                    boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
-                  }}
-                  bodyStyle={{ padding: "16px 24px" }}
-                  extra={
-                    <ExclamationCircleOutlined
-                      style={{ fontSize: "24px", color: "#fa8c16" }}
-                    />
-                  }
-                >
-                  <DashboardDimensiAccuracy />
-                </Card>
-              </Col>
-            </Row>
-
-            <Row gutter={[0, 16]}>
-              <Col xs={24}>
-                <Card
-                  hoverable
-                  bordered={false}
-                  style={{
-                    borderRadius: "8px",
-                    boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
-                  }}
-                  bodyStyle={{ padding: "16px 24px" }}
-                  extra={
-                    <ClockCircleOutlined
-                      style={{ fontSize: "24px", color: "#13c2c2" }}
-                    />
-                  }
-                >
-                  <DashboardDimensiTimeliness />
-                </Card>
-              </Col>
-            </Row>
-          </Card>
-        </div>
+        <DashboardDimensiAccuracy />
+        <DashboardDimensiCompleteness />
+        <DashboardDimensiConsistency />
+        <DashboardDimensiTimeliness />
       </PageContainer>
     </>
   );
