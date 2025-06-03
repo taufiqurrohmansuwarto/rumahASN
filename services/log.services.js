@@ -13,6 +13,14 @@ export const logSIASN = (query) => {
   return api.get(`/siasn?${queryStr}`).then((res) => res?.data);
 };
 
+export const logSIASNDashboard = async (query) => {
+  const queryStr = queryString.stringify(query, {
+    skipEmptyString: true,
+  });
+
+  return api.get(`/siasn/dashboard?${queryStr}`).then((res) => res?.data);
+};
+
 export const logBsre = (query) => {
   const queryStr = queryString.stringify(query, {
     skipEmptyString: true,

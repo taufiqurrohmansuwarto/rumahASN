@@ -1,10 +1,10 @@
 import PageContainer from "@/components/PageContainer";
-import RekonLayout from "@/components/Rekon/RekonLayout";
 import DaftarPegawai from "@/components/Rekon/DaftarPegawai";
-import Head from "next/head";
-import { Breadcrumb, FloatButton } from "antd";
-import Link from "next/link";
+import RekonLayout from "@/components/Rekon/RekonLayout";
 import useScrollRestoration from "@/hooks/useScrollRestoration";
+import { Breadcrumb, FloatButton } from "antd";
+import Head from "next/head";
+import Link from "next/link";
 
 const Pegawai = () => {
   useScrollRestoration();

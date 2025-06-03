@@ -3,7 +3,7 @@ import { getAllEmployeesPaging } from "@/services/master.services";
 import { capitalizeWords } from "@/utils/client-utils";
 import {
   CheckCircleOutlined,
-  ExclamationCircleOutlined,
+  CloseOutlined,
   SearchOutlined,
   UserOutlined,
   TeamOutlined,
@@ -29,19 +29,18 @@ import { useSession } from "next-auth/react";
 import React from "react";
 
 const { Title, Text } = Typography;
+
 const TagKomparasi = ({ komparasi, nama }) => {
   return (
     <Tag
-      icon={komparasi ? <CheckCircleOutlined /> : <ExclamationCircleOutlined />}
+      icon={komparasi ? <CheckCircleOutlined /> : <CloseOutlined />}
       color={komparasi ? "success" : "error"}
       style={{
         borderRadius: "6px",
-        fontSize: "11px",
+        fontSize: "10px",
         fontWeight: 500,
-        padding: "2px 8px",
-        margin: "2px",
-        border: komparasi ? "1px solid #52C41A" : "1px solid #FF4D4F",
-        backgroundColor: komparasi ? "#F6FFED" : "#FFF2F0",
+        padding: "1px 6px",
+        margin: "1px",
       }}
     >
       {nama}
@@ -87,15 +86,16 @@ const ExampleComponent = ({ data }) => {
             onClick={() => handleClick(item)}
             style={{
               cursor: item.isMatch ? "pointer" : "default",
-              fontSize: "13px",
+              fontSize: "12px",
               color: item.isMatch ? "#1E40AF" : "#6B7280",
               fontWeight: item.isMatch ? 500 : 400,
               display: "block",
-              padding: "4px 8px",
+              padding: "2px 4px",
               borderRadius: "4px",
               backgroundColor: item.isMatch ? "#EFF6FF" : "transparent",
               border: item.isMatch ? "1px solid #DBEAFE" : "none",
               transition: "all 0.2s ease",
+              wordBreak: "break-word",
             }}
             onMouseEnter={(e) => {
               if (item.isMatch) {
@@ -145,350 +145,153 @@ function EmployeesTable() {
 
   const columns = [
     {
-      title: "Informasi Pegawai",
-      dataIndex: "nama_master",
-      responsive: ["xs"],
-      render: (_, row) => {
-        return (
-          <div
-            style={{
-              padding: "12px",
-              backgroundColor: "#FAFAFB",
-              borderRadius: "12px",
-              border: "1px solid #F3F4F6",
-            }}
-          >
-            <Flex gap={12} vertical align="start">
-              <Flex gap={12} align="center">
-                <Avatar
-                  size={60}
-                  shape="square"
-                  src={row?.foto}
-                  alt="foto"
-                  style={{
-                    borderRadius: "8px",
-                    border: "2px solid #E5E7EB",
-                  }}
-                />
-                <Space direction="vertical" size={4}>
-                  <Typography.Text
-                    strong
-                    style={{
-                      fontSize: "16px",
-                      color: "#1F2937",
-                      cursor: "pointer",
-                    }}
-                    onClick={() => gotoDetail(row?.nip_master)}
-                  >
-                    {row?.nama_master}
-                  </Typography.Text>
-                  <Typography.Text
-                    style={{
-                      color: "#6B7280",
-                      fontSize: "14px",
-                    }}
-                  >
-                    {row?.nip_master}
-                  </Typography.Text>
-                </Space>
-              </Flex>
-
-              <Space wrap size={[8, 8]}>
-                <Tooltip title="Status Pegawai - Pembetulan dilakukan di SIASN">
-                  <Tag
-                    color="gold"
-                    icon={<UserOutlined />}
-                    style={{
-                      borderRadius: "6px",
-                      fontSize: "12px",
-                      fontWeight: 500,
-                    }}
-                  >
-                    {row?.siasn?.status}
-                  </Tag>
-                </Tooltip>
-                <Tooltip title="Jenjang Jabatan - Perbaikan dilakukan dengan menambahkan riwayat jabatan SIASN">
-                  <Tag
-                    color="cyan"
-                    style={{
-                      borderRadius: "6px",
-                      fontSize: "12px",
-                      fontWeight: 500,
-                    }}
-                  >
-                    {row?.siasn?.jenjang_jabatan}
-                  </Tag>
-                </Tooltip>
-              </Space>
-            </Flex>
-
-            <div style={{ marginTop: "12px" }}>
-              <Text
-                style={{
-                  fontSize: "13px",
-                  fontWeight: 500,
-                  color: "#374151",
-                  marginBottom: "8px",
-                  display: "block",
-                }}
-              >
-                Status Validasi:
-              </Text>
-              <Flex gap={4} wrap="wrap">
-                <Tooltip title="Perbaikan dapat dilakukan dengan usulan perubahan nama">
-                  <TagKomparasi
-                    komparasi={row?.komparasi?.nama}
-                    nama={"Nama"}
-                  />
-                </Tooltip>
-                <Tooltip title="Perbaikan dapat dilakukan dengan usulan perubahan nip">
-                  <TagKomparasi komparasi={row?.komparasi?.nip} nama={"NIP"} />
-                </Tooltip>
-                <Tooltip title="Perbaikan dapat dilakukan dengan usulan perubahan tanggal lahir">
-                  <TagKomparasi
-                    komparasi={row?.komparasi?.tanggal_lahir}
-                    nama={"Tanggal Lahir"}
-                  />
-                </Tooltip>
-                <Tooltip title="Perbaikan dapat dilakukan dengan melakukan verifikas NIK di SIASN atau MyASN Personal">
-                  <TagKomparasi komparasi={row?.siasn?.valid_nik} nama="NIK" />
-                </Tooltip>
-                <Tooltip title="Perbaikan dapat dilakukan dengan melakukan perubahan email di SIASN">
-                  <TagKomparasi
-                    komparasi={row?.komparasi?.email}
-                    nama="Email"
-                  />
-                </Tooltip>
-                <TagKomparasi
-                  komparasi={row?.komparasi?.pangkat}
-                  nama="Pangkat"
-                />
-                <Tooltip title="Apabila tidak sesuai dapat dilakukan usulan pencantuman gelar">
-                  <TagKomparasi
-                    komparasi={row?.komparasi?.pendidikan}
-                    nama="Pendidikan"
-                  />
-                </Tooltip>
-                {row?.status_master !== "PPPK" && (
-                  <Tooltip title="Dapat dilakukan pembetulan di peremajaan data SIASN/Rumah ASN">
-                    <TagKomparasi
-                      komparasi={row?.komparasi?.jenjang_jabatan}
-                      nama="Jenjang Jabatan"
-                    />
-                  </Tooltip>
-                )}
-              </Flex>
-            </div>
-          </div>
-        );
-      },
-    },
-    {
-      title: "Foto",
-      key: "foto",
-      responsive: ["sm"],
-      width: 120,
-      render: (row) => (
-        <div style={{ textAlign: "center" }}>
-          <Avatar
-            onClick={() => gotoDetail(row?.nip_master)}
-            style={{
-              cursor: "pointer",
-              borderRadius: "12px",
-              border: "2px solid #E5E7EB",
-              transition: "all 0.2s ease",
-            }}
-            size={100}
-            shape="square"
-            src={row?.foto}
-            alt="foto"
-            onMouseEnter={(e) => {
-              e.target.style.transform = "scale(1.05)";
-              e.target.style.borderColor = "#6366F1";
-            }}
-            onMouseLeave={(e) => {
-              e.target.style.transform = "scale(1)";
-              e.target.style.borderColor = "#E5E7EB";
-            }}
-          />
-        </div>
-      ),
-    },
-    {
-      title: "Nama dan Jabatan",
-      key: "nama_dan_jabatan",
-      responsive: ["sm"],
-      width: 280,
-      render: (_, row) => {
-        return (
-          <div
-            style={{
-              padding: "12px",
-              backgroundColor: "#F8FAFC",
-              borderRadius: "8px",
-              border: "1px solid #E2E8F0",
-            }}
-          >
-            <Space direction="vertical" size="small" style={{ width: "100%" }}>
+      title: "Pegawai",
+      key: "pegawai",
+      width: 320,
+      render: (_, row) => (
+        <div style={{ padding: "16px 12px" }}>
+          <Flex gap={16} align="center">
+            <Avatar
+              onClick={() => gotoDetail(row?.nip_master)}
+              style={{
+                cursor: "pointer",
+                borderRadius: "8px",
+                border: "2px solid #E5E7EB",
+                flexShrink: 0,
+              }}
+              size={64}
+              shape="square"
+              src={row?.foto}
+              alt="foto"
+            />
+            <div style={{ flex: 1, minWidth: 0 }}>
               <Typography.Link
+                strong
                 onClick={() => gotoDetail(row?.nip_master)}
                 style={{
                   fontSize: "15px",
                   fontWeight: 600,
-                  color: "#1E40AF",
+                  color: "#1F2937",
+                  display: "block",
+                  marginBottom: "6px",
+                  lineHeight: "1.4",
                 }}
               >
-                {row?.nama_lengkap_master}
+                {row?.nama_master}
               </Typography.Link>
-              <Typography.Text
+              <Text
                 style={{
                   fontSize: "13px",
                   color: "#6B7280",
                   fontFamily: "monospace",
+                  display: "block",
+                  marginBottom: "8px",
+                  lineHeight: "1.3",
                 }}
               >
                 {row?.nip_master}
-              </Typography.Text>
-              <Tag
-                color="processing"
-                style={{
-                  borderRadius: "6px",
-                  fontSize: "12px",
-                  fontWeight: 500,
-                  maxWidth: "100%",
-                  overflow: "hidden",
-                  textOverflow: "ellipsis",
-                  whiteSpace: "nowrap",
-                }}
-              >
-                {row?.jabatan_master || "Tidak ada jabatan"}
-              </Tag>
-              <Tooltip title="Status Pegawai">
-                <Tag
-                  color="warning"
-                  icon={<UserOutlined />}
-                  style={{
-                    borderRadius: "6px",
-                    fontSize: "12px",
-                    fontWeight: 500,
-                  }}
-                >
+              </Text>
+              <Space wrap size={[6, 4]}>
+                <Tag color="blue" size="small" style={{ fontSize: "11px" }}>
                   {row?.siasn?.status}
                 </Tag>
-              </Tooltip>
-            </Space>
-          </div>
-        );
-      },
+                <Tag color="cyan" size="small" style={{ fontSize: "11px" }}>
+                  {row?.siasn?.jenjang_jabatan}
+                </Tag>
+              </Space>
+            </div>
+          </Flex>
+        </div>
+      ),
     },
     {
-      title: "Unit Kerja",
-      key: "unit_kerja",
-      responsive: ["sm"],
-      width: 250,
-      render: (row) => {
-        return (
-          <div
-            style={{
-              padding: "12px",
-              backgroundColor: "#F0F9FF",
-              borderRadius: "8px",
-              border: "1px solid #E0F2FE",
-            }}
-          >
-            <ExampleComponent
-              data={mappingPerangkatDaerah(
-                row?.opd_master_full,
-                session?.user?.organization_id
-              )}
-            />
+      title: "Jabatan & Unit Kerja",
+      key: "jabatan_unit_kerja",
+      width: 300,
+      render: (_, row) => (
+        <div style={{ padding: "16px 12px" }}>
+          <div style={{ marginBottom: "8px" }}>
+            <Text
+              style={{ fontSize: "11px", color: "#6B7280", display: "block" }}
+            >
+              Jabatan:
+            </Text>
+            <Text
+              style={{
+                fontSize: "12px",
+                fontWeight: 500,
+                display: "block",
+                marginTop: "2px",
+                wordBreak: "break-word",
+              }}
+            >
+              {row?.jabatan_master || "Tidak ada"}
+            </Text>
           </div>
-        );
-      },
-    },
-    {
-      title: "Hasil Integrasi SIASN",
-      key: "hasil",
-      responsive: ["sm"],
-      width: 320,
-      render: (row) => {
-        return (
-          <div
-            style={{
-              padding: "12px",
-              backgroundColor: "#FEFFFE",
-              borderRadius: "8px",
-              border: "1px solid #ECFDF5",
-            }}
-          >
-            <Space direction="vertical" size="small" style={{ width: "100%" }}>
-              <Text
-                style={{
-                  fontSize: "13px",
-                  fontWeight: 500,
-                  color: "#374151",
-                  marginBottom: "4px",
-                }}
-              >
-                Validasi Data:
-              </Text>
-              <Flex gap={4} wrap="wrap">
-                <Tooltip title="Perbaikan dapat dilakukan dengan usulan perubahan nama">
-                  <TagKomparasi
-                    komparasi={row?.komparasi?.nama}
-                    nama={"Nama"}
-                  />
-                </Tooltip>
-                <Tooltip title="Perbaikan dapat dilakukan dengan usulan perubahan nip">
-                  <TagKomparasi komparasi={row?.komparasi?.nip} nama={"NIP"} />
-                </Tooltip>
-                <Tooltip title="Perbaikan dapat dilakukan dengan usulan perubahan tanggal lahir">
-                  <TagKomparasi
-                    komparasi={row?.komparasi?.tanggal_lahir}
-                    nama={"Tanggal Lahir"}
-                  />
-                </Tooltip>
-                <Tooltip title="Perbaikan dapat dilakukan dengan melakukan verifikas NIK di SIASN atau MyASN Personal">
-                  <TagKomparasi komparasi={row?.siasn?.valid_nik} nama="NIK" />
-                </Tooltip>
-              </Flex>
-              <Flex gap={4} wrap="wrap">
-                <Tooltip title="Perbaikan dapat dilakukan dengan melakukan perubahan email di SIASN">
-                  <TagKomparasi
-                    komparasi={row?.komparasi?.email}
-                    nama="Email"
-                  />
-                </Tooltip>
-                <TagKomparasi
-                  komparasi={row?.komparasi?.pangkat}
-                  nama="Pangkat"
-                />
-                <Tooltip title="Apabila tidak sesuai dapat dilakukan usulan pencantuman gelar">
-                  <TagKomparasi
-                    komparasi={row?.komparasi?.pendidikan}
-                    nama="Pendidikan"
-                  />
-                </Tooltip>
-                {row?.status_master !== "PPPK" && (
-                  <Tooltip title="Dapat dilakukan pembetulan di peremajaan data SIASN/Rumah ASN">
-                    <TagKomparasi
-                      komparasi={row?.komparasi?.jenjang_jabatan}
-                      nama="Jenjang Jabatan"
-                    />
-                  </Tooltip>
+          <div>
+            <Text
+              style={{ fontSize: "11px", color: "#6B7280", display: "block" }}
+            >
+              Unit Kerja:
+            </Text>
+            <div style={{ marginTop: "2px" }}>
+              <ExampleComponent
+                data={mappingPerangkatDaerah(
+                  row?.opd_master_full,
+                  session?.user?.organization_id
                 )}
-              </Flex>
-            </Space>
+              />
+            </div>
           </div>
-        );
-      },
+        </div>
+      ),
+    },
+    {
+      title: "Status Validasi",
+      key: "validasi",
+      width: 280,
+      render: (_, row) => (
+        <div style={{ padding: "16px 12px" }}>
+          <Text
+            style={{
+              fontSize: "11px",
+              fontWeight: 500,
+              color: "#374151",
+              display: "block",
+              marginBottom: "6px",
+            }}
+          >
+            Data Validasi:
+          </Text>
+          <div style={{ marginBottom: "4px" }}>
+            <TagKomparasi komparasi={row?.komparasi?.nama} nama="Nama" />
+            <TagKomparasi komparasi={row?.komparasi?.nip} nama="NIP" />
+            <TagKomparasi komparasi={row?.siasn?.valid_nik} nama="NIK" />
+            <TagKomparasi komparasi={row?.komparasi?.email} nama="Email" />
+          </div>
+          <div>
+            <TagKomparasi komparasi={row?.komparasi?.pangkat} nama="Pangkat" />
+            <TagKomparasi
+              komparasi={row?.komparasi?.pendidikan}
+              nama="Pendidikan"
+            />
+            {row?.status_master !== "PPPK" && (
+              <TagKomparasi
+                komparasi={row?.komparasi?.jenjang_jabatan}
+                nama="Jenjang"
+              />
+            )}
+          </div>
+        </div>
+      ),
     },
     {
       title: "Aksi",
-      key: "aksi",
+      key: "action",
       width: 80,
-      render: (row) => {
-        return (
+      align: "center",
+      render: (_, row) => (
+        <div style={{ padding: "16px 12px", textAlign: "center" }}>
           <Tooltip title="Lihat Detail">
             <Button
               type="primary"
@@ -498,12 +301,11 @@ function EmployeesTable() {
               style={{
                 backgroundColor: "#6366F1",
                 borderColor: "#6366F1",
-                boxShadow: "0 2px 4px rgba(99, 102, 241, 0.2)",
               }}
             />
           </Tooltip>
-        );
-      },
+        </div>
+      ),
     },
   ];
 
@@ -514,7 +316,6 @@ function EmployeesTable() {
         backgroundColor: "#FAFAFB",
         minHeight: "100vh",
       }}
-      className="employees-table-container"
     >
       {/* Header Section */}
       <div style={{ marginBottom: "32px" }}>
@@ -524,7 +325,6 @@ function EmployeesTable() {
             margin: 0,
             color: "#1F2937",
             fontWeight: 700,
-            fontSize: "clamp(20px, 4vw, 28px)",
           }}
         >
           Data Pegawai
@@ -532,7 +332,7 @@ function EmployeesTable() {
         <Text
           type="secondary"
           style={{
-            fontSize: "clamp(14px, 3vw, 16px)",
+            fontSize: "16px",
             lineHeight: "24px",
           }}
         >
@@ -595,7 +395,7 @@ function EmployeesTable() {
                   width: "40px",
                   height: "40px",
                   borderRadius: "12px",
-                  backgroundColor: "#22C55E",
+                  backgroundColor: "#6366F1",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
@@ -630,6 +430,7 @@ function EmployeesTable() {
             }}
           >
             <Table
+              size="middle"
               columns={columns}
               dataSource={data?.results}
               pagination={{
@@ -653,15 +454,13 @@ function EmployeesTable() {
                 position: ["topRight", "bottomRight"],
                 showQuickJumper: true,
                 style: { marginBottom: 0 },
-                responsive: true,
               }}
               loading={isLoading || isFetching}
               rowKey={(row) => row?.id}
               style={{
                 backgroundColor: "white",
               }}
-              size="large"
-              scroll={{ x: 1200 }}
+              scroll={{ x: 1000 }}
               sticky={{
                 offsetHeader: 64,
               }}
