@@ -1,3 +1,5 @@
+@import url("https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@200;300;400;500;600;700;800&family=Roboto:wght@100;300;400;500;700;900&display=swap");
+
 .dropdown-content {
   background: #fff;
   box-shadow: 0 3px 6px -4px rgb(0 0 0 / 12%), 0 6px 16px 0 rgb(0 0 0 / 8%),
@@ -20,5 +22,5 @@
 .ant-pro-layout .ant-menu-item,
 .ant-pro-layout .ant-pro-global-header,
 .ant-pro-layout .ant-pro-sider-menu {
-  font-family: "Google Sans";
+  font-family: "Plus Jakarta Sans", "Roboto", Arial, sans-serif;
 }

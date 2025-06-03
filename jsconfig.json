@@ -12,7 +12,8 @@
       "@/utils/*": ["utils/*"],
       "@/context/*": ["context/*"],
       "@/store/*": ["store/*"],
-      "@/docs/*": ["docs/*"]
+      "@/docs/*": ["docs/*"],
+      "@/styles/*": ["src/styles/*"]
     }
   }
 }

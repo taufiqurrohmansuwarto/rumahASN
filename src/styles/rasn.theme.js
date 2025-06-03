@@ -1,7 +1,8 @@
 // config/antd-config.js
 import { Grid } from "antd";
-import id from "antd/locale/id_ID";
 import { createStyles } from "antd-style";
+import id from "antd/locale/id_ID";
+import { useFontJakarta, useFontSourceSans3 } from "./fonts";
 
 // Global styles untuk komponen Ant Design
 export const useGlobalStyle = createStyles(({ prefixCls, css, token }) => ({
@@ -704,7 +705,7 @@ export const useThemeConfig = () => {
       colorError: "#dc2626",
       colorInfo: "#3b82f6",
       fontSize: 14,
-      fontFamily: "Google Sans, Roboto, Arial, sans-serif",
+      fontFamily: useFontJakarta(),
       fontWeightStrong: 600,
       borderRadius: 6,
       borderRadiusLG: 8,
