@@ -31,11 +31,15 @@ function BankJatimDashboard() {
     setShowModalStatus(false);
   };
 
+  const goToPengajuan = () => {
+    router.push("/layanan-keuangan/bank-jatim/pengajuan");
+  };
+
   return (
     <div style={{ padding: "24px 0" }}>
       <ModalCekStatus open={showModalStatus} onClose={handleCloseModalStatus} />
       <Space style={{ marginBottom: "24px" }}>
-        <Button icon={<PlusOutlined />} type="primary">
+        <Button icon={<PlusOutlined />} type="primary" onClick={goToPengajuan}>
           Pengajuan Baru
         </Button>
 
@@ -48,7 +52,14 @@ function BankJatimDashboard() {
         </Button>
       </Space>
       <Row gutter={[24, 24]}>
-        <Col span={{ xs: 24, md: 8 }}>
+        <Col
+          xs={24} // 1 kolom pada mobile
+          sm={24} // 1 kolom pada tablet kecil
+          md={12} // 2 kolom pada tablet
+          lg={8} // 3 kolom pada desktop
+          xl={8} // 3 kolom pada desktop besar
+          xxl={8} // 3 kolom pada desktop sangat besar
+        >
           <ProductCard
             title="KKB (Kredit Kendaraan Bermotor)"
             image="https://siasn.bkd.jatimprov.go.id:9000/public/bankjatim-kkb.jpg"
@@ -59,7 +70,14 @@ function BankJatimDashboard() {
           />
         </Col>
 
-        <Col span={{ xs: 24, md: 8 }}>
+        <Col
+          xs={24} // 1 kolom pada mobile
+          sm={24} // 1 kolom pada tablet kecil
+          md={12} // 2 kolom pada tablet
+          lg={8} // 3 kolom pada desktop
+          xl={8} // 3 kolom pada desktop besar
+          xxl={8} // 3 kolom pada desktop sangat besar
+        >
           <ProductCard
             title="KPR (Kredit Pemilikan Rumah)"
             image="https://siasn.bkd.jatimprov.go.id:9000/public/bankjatim-kpr.jpg"
@@ -70,7 +88,14 @@ function BankJatimDashboard() {
           />
         </Col>
 
-        <Col span={{ xs: 24, md: 8 }}>
+        <Col
+          xs={24} // 1 kolom pada mobile
+          sm={24} // 1 kolom pada tablet kecil
+          md={12} // 2 kolom pada tablet
+          lg={8} // 3 kolom pada desktop
+          xl={8} // 3 kolom pada desktop besar
+          xxl={8} // 3 kolom pada desktop sangat besar
+        >
           <ProductCard
             title="Kredit Multiguna"
             image="https://siasn.bkd.jatimprov.go.id:9000/public/bankjatim-multiguna.jpg"

@@ -10,6 +10,7 @@ function ProductCard({ title, image, description, onDetail }) {
       hoverable
       style={{
         height: "100%",
+        width: "100%",
         borderRadius: 20,
         border: "none",
         overflow: "hidden",
@@ -34,18 +35,28 @@ function ProductCard({ title, image, description, onDetail }) {
       <div
         style={{
           height: 200,
-          background: image
-            ? `url(${image})`
-            : "linear-gradient(135deg, #1890ff 0%, #096dd9 100%)",
-          backgroundSize: "cover",
-          backgroundPosition: "center",
           position: "relative",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
+          overflow: "hidden",
+          background: !image
+            ? "linear-gradient(135deg, #1890ff 0%, #096dd9 100%)"
+            : "transparent",
         }}
       >
-        {!image && (
+        {image ? (
+          <img
+            src={image}
+            alt={title}
+            style={{
+              width: "100%",
+              height: "100%",
+              objectFit: "cover",
+              objectPosition: "center",
+            }}
+          />
+        ) : (
           <div
             style={{
               color: "#ffffff",

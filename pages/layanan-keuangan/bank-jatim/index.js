@@ -11,13 +11,7 @@ const BankJatim = () => {
       <Head>
         <title>Layanan Keuangan - Bank Jatim</title>
       </Head>
-      <PageContainer
-        title="Layanan Keuangan"
-        subTitle="Bank Jatim"
-        childrenContentStyle={{
-          padding: breakPoint.xs ? null : 0,
-        }}
-      >
+      <PageContainer title="Layanan Keuangan" subTitle="Bank Jatim">
         <BankJatimDashboard />
       </PageContainer>
     </>
