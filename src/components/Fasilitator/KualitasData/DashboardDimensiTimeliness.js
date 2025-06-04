@@ -21,10 +21,12 @@ import {
 } from "antd";
 import { useRouter } from "next/router";
 import React from "react";
+import useScrollRestoration from "@/hooks/useScrollRestoration";
 
 const { Text, Title } = Typography;
 
 function DashboardDimensiTimeliness() {
+  useScrollRestoration();
   const router = useRouter();
   const { data, isLoading } = useQuery(["dashboard-dimensi-timeliness"], () =>
     dashboardTimeliness()

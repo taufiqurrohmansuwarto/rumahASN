@@ -1,3 +1,4 @@
+import useScrollRestoration from "@/hooks/useScrollRestoration";
 import { compareEmployeesSimasterSiasn } from "@/services/master.services";
 import { QuestionCircleOutlined } from "@ant-design/icons";
 import { Alert, Stack } from "@mantine/core";
@@ -135,6 +136,7 @@ const GrafikFasilitatorKomparasi = ({ data }) => {
 };
 
 function DashboardKompareFasilitator() {
+  useScrollRestoration();
   const { data, isLoading } = useQuery(
     ["dashboard-compare-siasn"],
     () => compareEmployeesSimasterSiasn(),

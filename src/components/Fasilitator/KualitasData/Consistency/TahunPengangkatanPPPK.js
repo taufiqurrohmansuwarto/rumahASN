@@ -1,14 +1,12 @@
-import useScrollRestoration from "@/hooks/useScrollRestoration";
+import FilterSource from "@/components/Fasilitator/KualitasData/FilterSource";
+import TableKualitasData from "@/components/Fasilitator/KualitasData/TableKualitasData";
 import { consistency4 } from "@/services/dimensi-consistency.services";
 import { useQuery } from "@tanstack/react-query";
-import { Button, Card, Row, Table } from "antd";
+import { Button, Card, Row } from "antd";
 import { saveAs } from "file-saver";
 import { useRouter } from "next/router";
 import { useState } from "react";
 import * as XLSX from "xlsx";
-import InformasiPegawai from "@/components/Fasilitator/KualitasData/InformasiPegawai";
-import TableKualitasData from "@/components/Fasilitator/KualitasData/TableKualitasData";
-import FilterSource from "@/components/Fasilitator/KualitasData/FilterSource";
 
 // Komponen tombol download
 const DownloadButton = ({ onDownload, loading }) => (
@@ -27,12 +25,14 @@ function TahunPengangkatanPPPK() {
     limit: router?.query?.limit || 10,
   });
 
+  const [isDownloading, setIsDownloading] = useState(false);
+
   const handleClick = (nip) => {
     const url = `/rekon/pegawai/${nip}/detail`;
     router.push(url);
   };
 
-  const { data, isLoading } = useQuery(
+  const { data, isLoading, isFetching } = useQuery(
     ["tahun-pengangkatan-pppk", router?.query],
     () => consistency4(router?.query),
     {
@@ -48,7 +48,7 @@ function TahunPengangkatanPPPK() {
     },
     {
       title: "NIP",
-      dataIndex: "nip_baru",
+      dataIndex: "nip",
     },
     {
       title: "Aksi",
@@ -66,6 +66,31 @@ function TahunPengangkatanPPPK() {
     });
 
     setQuery({ ...query, page, limit: pageSize });
+    setIsDownloading(false);
+  };
+
+  const handleDownload = async () => {
+    setIsDownloading(true);
+    const result = await consistency4({ ...router?.query, limit: -1 });
+    const workbook = XLSX.utils.book_new();
+
+    const sheetData = result?.data?.map((item) => ({
+      NIP: item.nip_master,
+      Nama: item.nama_master,
+      OPD: item.opd_master,
+      Jabatan: item.jabatan,
+    }));
+
+    const sheet = XLSX.utils.json_to_sheet(sheetData);
+    XLSX.utils.book_append_sheet(workbook, sheet, "BUP Masih Aktif");
+
+    const excelBuffer = XLSX.write(workbook, {
+      bookType: "xlsx",
+      type: "array",
+    });
+
+    saveAs(new Blob([excelBuffer]), "bup-masih-aktif.xlsx");
+    setIsDownloading(false);
   };
 
   return (
