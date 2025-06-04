@@ -23,6 +23,7 @@ import {
 } from "antd";
 import { useRouter } from "next/router";
 import * as XLSX from "xlsx";
+import useScrollRestoration from "@/hooks/useScrollRestoration";
 
 const { Title, Text } = Typography;
 
@@ -298,6 +299,7 @@ const GrafikAnomali = ({ data }) => {
 };
 
 function DashboardKomparasiAdmin() {
+  useScrollRestoration();
   const { data, isLoading } = useQuery(
     ["dashboard-compare-siasn-admin"],
     () => comparePegawaiAdmin(),

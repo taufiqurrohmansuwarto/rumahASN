@@ -20,11 +20,14 @@ import {
   Badge,
 } from "antd";
 import { useRouter } from "next/router";
+
 import React from "react";
+import useScrollRestoration from "@/hooks/useScrollRestoration";
 
 const { Text, Title } = Typography;
 
 function DashboardDimensiAccuracy() {
+  useScrollRestoration();
   const router = useRouter();
   const { data, isLoading } = useQuery(["dashboard-dimensi-accuracy"], () =>
     dashboardAccuracy()
