@@ -60,7 +60,11 @@ const syncPemberhentianSIASN = async (req, res) => {
       await knex
         .delete()
         .from("siasn_pemberhentian")
-        .where("tmtPensiun", tglAwal);
+        .whereIn(
+          "nipBaru",
+          currentData?.map((item) => item?.nipBaru)
+        );
+
       await knex.batchInsert("siasn_pemberhentian", currentData);
       res.json({
         success: true,
