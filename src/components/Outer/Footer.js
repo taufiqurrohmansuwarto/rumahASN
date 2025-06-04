@@ -74,7 +74,7 @@ const zonaIntegritas = [
 
 const styles = {
   footer: {
-    background: "linear-gradient(135deg, #FA8C16, #d4380d)",
+    background: "linear-gradient(135deg, #EA580C, #d4380d)",
     color: "white",
     padding: 80,
   },
@@ -199,7 +199,7 @@ function Footer() {
               fontSize: 14,
             }}
           >
-            @2022 Desain dan Pengembangan oleh Tim IT BKD Provinsi Jawa Timur
+            @2024 Desain dan Pengembangan oleh Tim IT BKD Provinsi Jawa Timur
           </Typography.Text>
         </Row>
       </div>
