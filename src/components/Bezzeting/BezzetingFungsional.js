@@ -1,12 +1,24 @@
 import React, { useMemo, useState, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { getBezzetingJf } from "@/services/bezzeting-siasn.services";
-import { Table, Input, Button, Space, Typography, Card } from "antd";
+import {
+  Table,
+  Input,
+  Button,
+  Space,
+  Typography,
+  Card,
+  Flex,
+  Badge,
+} from "antd";
 import {
   FilterOutlined,
   SearchOutlined,
   ReloadOutlined,
+  BarChartOutlined,
 } from "@ant-design/icons";
+
+const { Title, Text } = Typography;
 
 function BezzetingFungsional() {
   const { data, isLoading, refetch } = useQuery({
@@ -54,7 +66,11 @@ function BezzetingFungsional() {
             onClick={() => handleSearch(selectedKeys, confirm, dataIndex)}
             icon={<SearchOutlined />}
             size="small"
-            style={{ width: 90 }}
+            style={{
+              width: 90,
+              backgroundColor: "#EA580C",
+              borderColor: "#EA580C",
+            }}
           >
             Search
           </Button>
@@ -92,7 +108,7 @@ function BezzetingFungsional() {
       </div>
     ),
     filterIcon: (filtered) => (
-      <SearchOutlined style={{ color: filtered ? "#1677ff" : undefined }} />
+      <SearchOutlined style={{ color: filtered ? "#EA580C" : undefined }} />
     ),
     onFilter: (value, record) =>
       record[dataIndex]?.toString().toLowerCase().includes(value.toLowerCase()),
@@ -130,6 +146,9 @@ function BezzetingFungsional() {
       sorter: (a, b) => a?.rekom - b?.rekom,
       width: 150,
       align: "center",
+      render: (text) => (
+        <Badge count={text} style={{ backgroundColor: "#EA580C" }} showZero />
+      ),
     },
     {
       title: "Bezzeting",
@@ -137,6 +156,9 @@ function BezzetingFungsional() {
       sorter: (a, b) => a?.bezzeting - b?.bezzeting,
       width: 150,
       align: "center",
+      render: (text) => (
+        <Badge count={text} style={{ backgroundColor: "#52C41A" }} showZero />
+      ),
     },
     {
       title: "Kelebihan/Kekurangan",
@@ -147,61 +169,146 @@ function BezzetingFungsional() {
       render: (text) => {
         const value = parseInt(text);
         return (
-          <Typography.Text
+          <Text
             style={{
-              color: value > 0 ? "green" : value < 0 ? "red" : "inherit",
-              fontWeight: "bold",
+              color: value > 0 ? "#52C41A" : value < 0 ? "#FF4D4F" : "#8C8C8C",
+              fontWeight: 600,
+              fontSize: "14px",
             }}
           >
-            {text}
-          </Typography.Text>
+            {value > 0 ? `+${text}` : text}
+          </Text>
         );
       },
     },
   ];
 
   return (
-    <Card
-      title={
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-          }}
-        >
-          <Typography.Title level={4} style={{ margin: 0 }}>
-            Bezzeting Jabatan Fungsional
-          </Typography.Title>
-          <Button
-            type="primary"
-            icon={<ReloadOutlined />}
-            onClick={() => refetch()}
-            loading={isLoading}
-          >
-            Refresh Data
-          </Button>
-        </div>
-      }
-      style={{ margin: "20px 10px" }}
+    <div
+      style={{
+        padding: "24px",
+        backgroundColor: "#F5F5F5",
+        minHeight: "100vh",
+      }}
     >
-      <Table
-        rowKey={(record) => record.nama_jabatan}
-        pagination={{
-          showSizeChanger: true,
-          pageSizeOptions: ["10", "20", "50", "100"],
-          defaultPageSize: 10,
-          showTotal: (total, range) =>
-            `${range[0]}-${range[1]} dari ${total} data`,
+      {/* Header Section */}
+      <div style={{ marginBottom: "32px" }}>
+        <Title
+          level={2}
+          style={{ margin: 0, color: "#1F2937", fontWeight: 700 }}
+        >
+          Bezzeting Jabatan Fungsional
+        </Title>
+        <Text type="secondary" style={{ fontSize: "16px", lineHeight: "24px" }}>
+          Monitoring dan analisis kebutuhan jabatan fungsional
+        </Text>
+      </div>
+
+      {/* Main Content Card */}
+      <Card
+        style={{
+          borderRadius: "16px",
+          border: "1px solid #E5E7EB",
+          boxShadow: "0 1px 3px rgba(0, 0, 0, 0.1)",
+          backgroundColor: "white",
         }}
-        dataSource={data}
-        loading={isLoading}
-        columns={columns}
-        scroll={{ x: "max-content" }}
-        bordered
-        size="middle"
-      />
-    </Card>
+        bodyStyle={{ padding: "32px" }}
+      >
+        {/* Card Header */}
+        <Space direction="vertical" size={24} style={{ width: "100%" }}>
+          <Flex justify="space-between" align="center">
+            <Flex align="center" gap={12}>
+              <div
+                style={{
+                  width: "40px",
+                  height: "40px",
+                  borderRadius: "12px",
+                  backgroundColor: "#EA580C",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <BarChartOutlined
+                  style={{ color: "white", fontSize: "18px" }}
+                />
+              </div>
+              <Title level={4} style={{ margin: 0, color: "#1F2937" }}>
+                Data Bezzeting
+              </Title>
+              {data && (
+                <Badge
+                  count={data.length}
+                  style={{ backgroundColor: "#EA580C" }}
+                />
+              )}
+            </Flex>
+
+            <Button
+              type="primary"
+              icon={<ReloadOutlined />}
+              onClick={() => refetch()}
+              loading={isLoading}
+              style={{
+                borderRadius: "8px",
+                backgroundColor: "#EA580C",
+                borderColor: "#EA580C",
+                fontWeight: 500,
+                fontSize: "14px",
+                height: "40px",
+                padding: "0 20px",
+                boxShadow: "0 2px 4px rgba(234, 88, 12, 0.2)",
+              }}
+            >
+              Refresh Data
+            </Button>
+          </Flex>
+
+          {/* Table Section */}
+          <div style={{ padding: "16px 0" }}>
+            <Table
+              rowKey={(record) => record.nama_jabatan}
+              pagination={{
+                showSizeChanger: true,
+                pageSizeOptions: ["10", "20", "50", "100"],
+                defaultPageSize: 10,
+                showTotal: (total, range) =>
+                  `${range[0]}-${range[1]} dari ${total} data`,
+                style: {
+                  ".ant-pagination-item-active": {
+                    backgroundColor: "#EA580C",
+                    borderColor: "#EA580C",
+                  },
+                },
+              }}
+              dataSource={data}
+              loading={isLoading}
+              columns={columns}
+              scroll={{ x: "max-content" }}
+              bordered={false}
+              size="middle"
+              style={{
+                ".ant-table": {
+                  backgroundColor: "white",
+                },
+                ".ant-table-thead > tr > th": {
+                  backgroundColor: "#FFF7ED",
+                  borderBottom: "1px solid #E5E7EB",
+                  color: "#374151",
+                  fontWeight: 600,
+                },
+                ".ant-table-tbody > tr:hover > td": {
+                  backgroundColor: "#FFF7ED",
+                },
+                ".ant-table-tbody > tr > td": {
+                  borderBottom: "1px solid #F3F4F6",
+                },
+              }}
+            />
+          </div>
+        </Space>
+      </Card>
+    </div>
   );
 }
 
