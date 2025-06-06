@@ -1,106 +1,161 @@
 import {
+  getSavedRepliesById,
   createSavedReplies,
-  getSavedReplies,
-  parseMarkdown,
-  uploadFiles,
+  updateSavedReplies,
 } from "@/services/index";
-import { MarkdownEditor } from "@primer/react/drafts";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Button, Form, Input, message, Skeleton } from "antd";
+import {
+  Card,
+  Form,
+  Input,
+  message,
+  Button,
+  Row,
+  Col,
+  Typography,
+  theme,
+} from "antd";
+import { SaveOutlined } from "@ant-design/icons";
+import { useRouter } from "next/router";
+import { useEffect } from "react";
 
-const CreateSavedReplies = () => {
+const { Title } = Typography;
+const { useToken } = theme;
+
+function CreateSavedReplies() {
+  const { token } = useToken();
+  const router = useRouter();
+  const id = router?.query?.id;
   const queryClient = useQueryClient();
+
   const [form] = Form.useForm();
 
-  const uploadFile = async (file) => {
-    try {
-      const formData = new FormData();
-      formData.append("file", file);
-      const result = await uploadFiles(formData);
-      return {
-        url: result?.data,
-        file,
-      };
-    } catch (error) {
-      console.log(error);
+  const { data } = useQuery(
+    ["saved-replies", id],
+    () => getSavedRepliesById(id),
+    {
+      enabled: !!id,
+      refetchOnWindowFocus: false,
     }
-  };
+  );
 
-  const renderMarkdown = async (markdown) => {
-    if (!markdown) return;
-    const result = await parseMarkdown(markdown);
-    return result?.html;
-  };
-
-  const { mutate: create, isLoading } = useMutation(
+  const { mutate: create, isLoading: isLoadingCreate } = useMutation(
     (data) => createSavedReplies(data),
     {
       onSuccess: () => {
         queryClient.invalidateQueries("saved-replies");
-        message.success("Balasan disimpan berhasil dibuat");
-        form.resetFields();
+        message.success("Template berhasil dibuat");
+        router.push(`/settings/profile/saved-replies`);
       },
       onError: () => {
-        message.error(
-          "Gagal membuat balasan disimpan, silahkan coba lagi nanti"
-        );
-
-        form.resetFields();
+        message.error("Gagal membuat template");
       },
     }
   );
 
-  const handleFinish = async () => {
-    const result = await form.validateFields();
-    if (!isLoading) {
-      create(result);
+  const { mutate: update, isLoading: isLoadingUpdate } = useMutation(
+    (data) => updateSavedReplies(data),
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries("saved-replies");
+        message.success("Template berhasil diperbarui");
+        router.push(`/settings/profile/saved-replies`);
+      },
+      onError: () => {
+        message.error("Gagal memperbarui template");
+      },
+    }
+  );
+
+  const handleSubmit = async (values) => {
+    const payload = {
+      name: values?.name,
+      content: values?.content,
+    };
+
+    if (id) {
+      update({ ...payload, id });
+    } else {
+      create(payload);
     }
   };
 
-  const { data: savedReplies, isLoading: isLoadingSavedReplies } = useQuery(
-    ["saved-replies"],
-    () => getSavedReplies()
-  );
+  useEffect(() => {
+    if (data) {
+      form.setFieldsValue({
+        name: data?.name,
+        content: data?.content,
+      });
+    }
+  }, [data, form]);
 
   return (
-    <Skeleton loading={isLoadingSavedReplies}>
-      <Form onFinish={handleFinish} form={form} layout="vertical">
-        <Form.Item
-          rules={[{ required: true, message: "Judul tidak boleh kosong" }]}
-          name="name"
-          label="Judul"
-        >
-          <Input />
-        </Form.Item>
-        <Form.Item
-          required
-          name="content"
-          label="Balasan"
-          rules={[{ required: true, message: "Balasan tidak boleh kosong" }]}
-        >
-          <MarkdownEditor
-            onRenderPreview={renderMarkdown}
-            onUploadFile={uploadFile}
-            savedReplies={savedReplies}
-          >
-            <MarkdownEditor.Toolbar>
-              <MarkdownEditor.DefaultToolbarButtons />
-            </MarkdownEditor.Toolbar>
-          </MarkdownEditor>
-        </Form.Item>
-        <Form.Item>
-          <Button
-            style={{ marginTop: 10 }}
-            disabled={isLoading}
-            type="primary"
-            htmlType="submit"
-          >
-            Tambahkan Balasan Disimpan
-          </Button>
-        </Form.Item>
-      </Form>
-    </Skeleton>
+    <Row gutter={[24, 24]}>
+      <Col span={24}>
+        <Form form={form} layout="vertical" onFinish={handleSubmit}>
+          <Row gutter={[16, 16]}>
+            <Col span={24}>
+              <Form.Item
+                label="Nama Template"
+                name="name"
+                rules={[
+                  {
+                    required: true,
+                    message: "Nama template harus diisi",
+                  },
+                ]}
+              >
+                <Input
+                  placeholder="Masukkan nama template..."
+                  style={{
+                    borderRadius: "8px",
+                  }}
+                />
+              </Form.Item>
+            </Col>
+
+            <Col span={24}>
+              <Form.Item
+                label="Isi Template"
+                name="content"
+                rules={[
+                  {
+                    required: true,
+                    message: "Isi template harus diisi",
+                  },
+                ]}
+              >
+                <Input.TextArea
+                  rows={8}
+                  placeholder="Masukkan isi template balasan..."
+                  style={{
+                    borderRadius: "8px",
+                  }}
+                />
+              </Form.Item>
+            </Col>
+          </Row>
+
+          <div style={{ marginTop: "24px", textAlign: "right" }}>
+            <Button
+              type="primary"
+              htmlType="submit"
+              size="large"
+              icon={<SaveOutlined />}
+              loading={isLoadingCreate || isLoadingUpdate}
+              disabled={isLoadingCreate || isLoadingUpdate}
+              style={{
+                borderRadius: "8px",
+                fontWeight: 500,
+              }}
+            >
+              {id ? "Perbarui Template" : "Simpan Template"}
+            </Button>
+          </div>
+        </Form>
+      </Col>
+    </Row>
   );
-};
+}
 
 export default CreateSavedReplies;
