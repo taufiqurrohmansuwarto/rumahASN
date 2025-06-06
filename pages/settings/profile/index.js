@@ -2,24 +2,40 @@ import Layout from "@/components/Layout";
 import PageContainer from "@/components/PageContainer";
 import ProfileLayout from "@/components/ProfileSettings/ProfileLayout";
 import { ownProfile, updateOwnProfile } from "@/services/index";
-import { Stack } from "@mantine/core";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
-  Avatar,
   Button,
+  Card,
   Col,
   Form,
   Grid,
   Input,
   Row,
   Skeleton,
+  Space,
+  Typography,
+  Flex,
+  theme,
   message,
 } from "antd";
+import {
+  UserOutlined,
+  IdcardOutlined,
+  BankOutlined,
+  HomeOutlined,
+  EditOutlined,
+  SaveOutlined,
+  InfoCircleOutlined,
+} from "@ant-design/icons";
 import { useSession } from "next-auth/react";
 import Head from "next/head";
 
+const { Title, Text } = Typography;
+const { useToken } = theme;
+
 const ProfileForm = ({ data, user }) => {
   const queryClient = useQueryClient();
+  const { token } = useToken();
 
   const { mutate, isLoading } = useMutation(
     (values) => updateOwnProfile(values),
@@ -44,47 +60,119 @@ const ProfileForm = ({ data, user }) => {
   };
 
   return (
-    <Form
-      onFinish={handleFinish}
-      form={form}
-      layout="vertical"
-      initialValues={{
-        ...data,
-        jabatan: data?.info?.jabatan?.jabatan,
-        perangkat_daerah: data?.info?.perangkat_daerah?.detail,
-      }}
-    >
-      <Form.Item label="Nama" name="username">
-        <Input readOnly disabled />
-      </Form.Item>
-      {user?.group !== "GOOGLE" && (
-        <>
-          <Form.Item label="Nomer Pegawai" name="employee_number">
-            <Input readOnly disabled />
-          </Form.Item>
-          <Form.Item label="Jabatan" name="jabatan">
-            <Input readOnly disabled />
-          </Form.Item>
-          <Form.Item label="Perangkat Daerah" name="perangkat_daerah">
-            <Input.TextArea readOnly disabled />
-          </Form.Item>
-        </>
-      )}
-      <Form.Item label="Tentang Saya" name="about_me">
-        <Input.TextArea rows={5} />
-      </Form.Item>
+    <>
+      <Form
+        onFinish={handleFinish}
+        form={form}
+        layout="vertical"
+        initialValues={{
+          ...data,
+          jabatan: data?.info?.jabatan?.jabatan,
+          perangkat_daerah: data?.info?.perangkat_daerah?.detail,
+        }}
+      >
+        <Row gutter={[24, 24]}>
+          {/* Informasi Dasar */}
+          <Col span={24}>
+            <Title level={4} style={{ margin: "0 0 24px 0", color: "#1F2937" }}>
+              Informasi Dasar
+            </Title>
 
-      <Form.Item>
-        <Button
-          loading={isLoading}
-          disabled={isLoading}
-          htmlType="submit"
-          type="primary"
-        >
-          Ubah
-        </Button>
-      </Form.Item>
-    </Form>
+            <Row gutter={[16, 16]}>
+              <Col xs={24} md={12}>
+                <Form.Item label="Nama Lengkap" name="username">
+                  <Input
+                    readOnly
+                    disabled
+                    style={{
+                      backgroundColor: "#F9FAFB",
+                      borderColor: "#E5E7EB",
+                    }}
+                  />
+                </Form.Item>
+              </Col>
+
+              {user?.group !== "GOOGLE" && (
+                <>
+                  <Col xs={24} md={12}>
+                    <Form.Item label="Nomor Pegawai" name="employee_number">
+                      <Input
+                        readOnly
+                        disabled
+                        style={{
+                          backgroundColor: "#F9FAFB",
+                          borderColor: "#E5E7EB",
+                        }}
+                      />
+                    </Form.Item>
+                  </Col>
+
+                  <Col xs={24} md={12}>
+                    <Form.Item label="Jabatan" name="jabatan">
+                      <Input
+                        readOnly
+                        disabled
+                        style={{
+                          backgroundColor: "#F9FAFB",
+                          borderColor: "#E5E7EB",
+                        }}
+                      />
+                    </Form.Item>
+                  </Col>
+
+                  <Col xs={24} md={12}>
+                    <Form.Item label="Perangkat Daerah" name="perangkat_daerah">
+                      <Input.TextArea
+                        readOnly
+                        disabled
+                        rows={3}
+                        style={{
+                          backgroundColor: "#F9FAFB",
+                          borderColor: "#E5E7EB",
+                        }}
+                      />
+                    </Form.Item>
+                  </Col>
+                </>
+              )}
+            </Row>
+          </Col>
+
+          {/* Tentang Saya */}
+          <Col span={24}>
+            <Title level={4} style={{ margin: "0 0 24px 0", color: "#1F2937" }}>
+              Tentang Saya
+            </Title>
+
+            <Form.Item label="Deskripsi Pribadi" name="about_me">
+              <Input.TextArea
+                rows={5}
+                placeholder="Ceritakan tentang diri Anda..."
+                style={{
+                  borderRadius: "8px",
+                }}
+              />
+            </Form.Item>
+
+            <div style={{ marginTop: "24px", textAlign: "right" }}>
+              <Button
+                loading={isLoading}
+                disabled={isLoading}
+                htmlType="submit"
+                type="primary"
+                size="large"
+                style={{
+                  borderRadius: "8px",
+                  fontWeight: 500,
+                }}
+              >
+                Simpan Perubahan
+              </Button>
+            </div>
+          </Col>
+        </Row>
+      </Form>
+    </>
   );
 };
 
@@ -99,22 +187,14 @@ function Profile() {
       <Head>
         <title>Rumah ASN - Pengaturan - Profil</title>
       </Head>
-      <PageContainer
-        childrenContentStyle={{
-          padding: breakPoint.xs ? 0 : null,
-        }}
-      >
-        <Row>
-          <Col md={12} xs={24}>
-            <Stack>
-              <Skeleton loading={isLoading}>
-                <Avatar shape="square" size={80} src={data?.image} />
-                <ProfileForm user={dataUser?.user} data={data} />
-              </Skeleton>
-            </Stack>
-          </Col>
-        </Row>
-      </PageContainer>
+
+      <Row>
+        <Col md={24} xs={24}>
+          <Skeleton loading={isLoading}>
+            <ProfileForm user={dataUser?.user} data={data} />
+          </Skeleton>
+        </Col>
+      </Row>
     </>
   );
 }
