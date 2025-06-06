@@ -17,6 +17,8 @@ import {
   Flex,
   theme,
   message,
+  Avatar,
+  Upload,
 } from "antd";
 import {
   UserOutlined,
@@ -26,6 +28,7 @@ import {
   EditOutlined,
   SaveOutlined,
   InfoCircleOutlined,
+  CameraOutlined,
 } from "@ant-design/icons";
 import { useSession } from "next-auth/react";
 import Head from "next/head";
@@ -59,8 +62,91 @@ const ProfileForm = ({ data, user }) => {
     }
   };
 
+  const getInitials = (name) => {
+    if (!name) return "U";
+    const names = name.split(" ");
+    if (names.length === 1) return names[0].charAt(0).toUpperCase();
+    return (
+      names[0].charAt(0) + names[names.length - 1].charAt(0)
+    ).toUpperCase();
+  };
+
   return (
     <>
+      {/* Avatar Section */}
+      <Card
+        style={{
+          marginBottom: "32px",
+        }}
+        bodyStyle={{ padding: "32px" }}
+      >
+        <Flex align="center" gap={24}>
+          <div style={{ position: "relative" }}>
+            <Avatar
+              size={100}
+              style={{
+                backgroundColor: "#f56a00",
+                fontSize: "32px",
+                fontWeight: "600",
+              }}
+              src={data?.image}
+              icon={!data?.image && <UserOutlined />}
+            >
+              {!data?.image && data?.username && getInitials(data.username)}
+            </Avatar>
+
+            <Upload
+              name="avatar"
+              showUploadList={false}
+              beforeUpload={() => false}
+              style={{
+                position: "absolute",
+                bottom: 0,
+                right: 0,
+              }}
+            >
+              <Button
+                shape="circle"
+                size="small"
+                icon={<CameraOutlined />}
+                type="primary"
+              />
+            </Upload>
+          </div>
+
+          <div style={{ flex: 1 }}>
+            <Title
+              level={3}
+              style={{
+                margin: "0 0 8px 0",
+              }}
+            >
+              {data?.username || "Nama Pengguna"}
+            </Title>
+
+            <Text
+              style={{
+                fontSize: "16px",
+                display: "block",
+                marginBottom: "4px",
+              }}
+            >
+              {data?.info?.jabatan?.jabatan || "Jabatan tidak tersedia"}
+            </Text>
+
+            <Text
+              type="secondary"
+              style={{
+                fontSize: "14px",
+                display: "block",
+              }}
+            >
+              {data?.employee_number || "NIP tidak tersedia"}
+            </Text>
+          </div>
+        </Flex>
+      </Card>
+
       <Form
         onFinish={handleFinish}
         form={form}
@@ -160,11 +246,6 @@ const ProfileForm = ({ data, user }) => {
                 disabled={isLoading}
                 htmlType="submit"
                 type="primary"
-                size="large"
-                style={{
-                  borderRadius: "8px",
-                  fontWeight: 500,
-                }}
               >
                 Simpan Perubahan
               </Button>
@@ -202,7 +283,7 @@ function Profile() {
 Profile.getLayout = (page) => {
   return (
     <Layout>
-      <ProfileLayout>{page}</ProfileLayout>
+      <ProfileLayout title="Profil Saya">{page}</ProfileLayout>
     </Layout>
   );
 };

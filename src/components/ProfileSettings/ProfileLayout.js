@@ -75,10 +75,11 @@ function ProfileLayout({
 
   return (
     <PageContainer
+      title={currentTab.label}
+      subTitle={`Kelola dan pantau data Anda`}
       childrenContentStyle={{
-        padding: breakPoint.xs ? 16 : null,
-        backgroundColor: "#FAFAFB",
-        minHeight: "100vh",
+        paddingLeft: breakPoint.xs ? 16 : null,
+        paddingRight: breakPoint.xs ? 16 : null,
       }}
       breadcrumbRender={() => (
         <Breadcrumb style={{ marginBottom: "24px" }}>
@@ -89,19 +90,6 @@ function ProfileLayout({
         </Breadcrumb>
       )}
     >
-      {/* Header Section */}
-      <div style={{ marginBottom: "24px" }}>
-        <Title
-          level={2}
-          style={{ margin: 0, color: "#1F2937", fontWeight: 700 }}
-        >
-          {currentTab.label}
-        </Title>
-        <Text type="secondary" style={{ fontSize: "16px", lineHeight: "24px" }}>
-          Kelola dan pantau data Anda
-        </Text>
-      </div>
-
       {/* Navigation & Content */}
       {screens.md ? (
         <Row gutter={24}>
