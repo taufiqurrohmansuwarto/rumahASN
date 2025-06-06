@@ -35,9 +35,7 @@ const AsnDiscussions = () => {
           ),
         }}
       >
-        <Card>
-          <DetailDiscussion />
-        </Card>
+        <DetailDiscussion />
       </PageContainer>
     </>
   );

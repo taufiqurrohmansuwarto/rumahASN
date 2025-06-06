@@ -61,7 +61,7 @@ function LayoutASNConnect({ children, active = "asn-updates" }) {
         },
       }}
       title="ASN Connect"
-      content="Berjejaring, Berkolaborasi, Berinovasi Bersama."
+      content="Tempat ASN Jatim Saling Bantu & Berbagi"
     >
       {children}
     </PageContainer>
