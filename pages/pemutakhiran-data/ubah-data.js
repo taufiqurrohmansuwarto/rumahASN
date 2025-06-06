@@ -39,13 +39,8 @@ const DataUtama = () => {
         }}
         onBack={handleBack}
         title="Riwayat Ubah Data"
-        content="Ubah Data Utama"
       >
         <Stack>
-          <Alert color="yellow" title="Perlu diperhatikan">
-            Email yang telah diubah membutuhkan waktu 2x24 jam untuk
-            sinkronisasi data
-          </Alert>
           <RiwayatUbahData />
         </Stack>
       </PageContainer>
