@@ -17,6 +17,7 @@ import {
   Col,
   Divider,
   FloatButton,
+  Grid,
   Input,
   List,
   Row,
@@ -83,6 +84,8 @@ function WebinarAll() {
   const handleClick = (id) => {
     router.push(`/webinar-series/all/${id}/detail`);
   };
+
+  const breakpoint = Grid.useBreakpoint();
 
   return (
     <>
@@ -160,8 +163,8 @@ function WebinarAll() {
                     <>
                       {item?.image_url && (
                         <Image
-                          width={500}
-                          height={180}
+                          width={breakpoint.md ? 500 : 400}
+                          height={breakpoint.md ? 150 : 160}
                           src={item?.image_url}
                           alt="images"
                         />
@@ -204,13 +207,26 @@ function WebinarAll() {
                             </Typography.Text>
                           </Tooltip>
 
-                          <Typography.Text type="secondary">
-                            <CalendarTwoTone color="green" />{" "}
-                            {formatDateWebinar(item?.start_date)} -{" "}
-                            {formatDateWebinar(item?.end_date)}
-                            <Divider type="vertical" />
-                            <ClockCircleTwoTone /> {item?.hour} Jam Pelajaran
-                          </Typography.Text>
+                          <Tooltip
+                            title={`${formatDateWebinar(
+                              item?.start_date
+                            )} - ${formatDateWebinar(item?.end_date)} - ${
+                              item?.hour
+                            } Jam Pelajaran`}
+                          >
+                            <Typography.Text
+                              type="secondary"
+                              ellipsis={{
+                                rows: 1,
+                              }}
+                            >
+                              <CalendarTwoTone color="green" />{" "}
+                              {formatDateWebinar(item?.start_date)} -{" "}
+                              {formatDateWebinar(item?.end_date)}
+                              <Divider type="vertical" />
+                              <ClockCircleTwoTone /> {item?.hour} Jam Pelajaran
+                            </Typography.Text>
+                          </Tooltip>
                         </Stack>
                       </>
                     }

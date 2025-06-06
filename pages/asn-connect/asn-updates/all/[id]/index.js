@@ -54,7 +54,7 @@ const ASNUpdateDetail = () => {
           padding: breakPoint.xs ? 0 : null,
         }}
         title="ASN Connect"
-        content="Berjejaring, Berkolaborasi, Berinovasi Bersama ASN Connect"
+        content="Tempat ASN Jatim Saling Bantu & Berbagi"
         onBack={handleBack}
         loading={isLoading}
       >
