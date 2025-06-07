@@ -1,5 +1,7 @@
 import Layout from "@/components/Layout";
+import ASNHelperDashboard from "@/components/ASNHelper.js/ASNHelperDashboard";
 import LayoutASNConnect from "@/components/Socmed/LayoutASNConnect";
+import { asnHelperHomepage } from "@/data/mockup-asn-helper";
 import Head from "next/head";
 
 const AsnHelper = () => {
@@ -8,7 +10,9 @@ const AsnHelper = () => {
       <Head>
         <title>Rumah ASN - ASN Helper</title>
       </Head>
-      <LayoutASNConnect active="asn-helper">Hello world</LayoutASNConnect>
+      <LayoutASNConnect active="asn-helper">
+        <ASNHelperDashboard pageData={asnHelperHomepage.pageData} />
+      </LayoutASNConnect>
     </>
   );
 };
