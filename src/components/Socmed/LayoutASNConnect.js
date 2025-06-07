@@ -16,9 +16,14 @@ function LayoutASNConnect({ children, active = "asn-updates" }) {
       label: "Beranda",
     },
     {
+      key: "asn-helper",
+      label: "ASN Helper",
+    },
+    {
       key: "asn-discussions",
       label: "Diskusi",
     },
+
     {
       key: "asn-communities",
       label: "Komunitas",
