@@ -13,7 +13,8 @@
       "@/context/*": ["context/*"],
       "@/store/*": ["store/*"],
       "@/docs/*": ["docs/*"],
-      "@/styles/*": ["src/styles/*"]
+      "@/styles/*": ["src/styles/*"],
+      "@/data/*": ["src/data/*"]
     }
   }
 }

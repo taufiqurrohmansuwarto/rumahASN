@@ -1,3 +1,4 @@
+// asn-helper/index.js;
 export const asnHelperHomepage = {
   pageData: {
     meta: {
@@ -63,6 +64,7 @@ export const asnHelperHomepage = {
   },
 };
 
+// asn-helper/bantuan/buat.js;
 export const asnHelperCreateHelpRequest = {
   pageData: {
     meta: {
@@ -124,6 +126,7 @@ export const asnHelperCreateHelpRequest = {
   },
 };
 
+// asn-helper/bantuan/saya.js;
 export const asnHelperRequestMe = {
   pageData: {
     meta: {
@@ -177,6 +180,7 @@ export const asnHelperRequestMe = {
   },
 };
 
+// asn-helper/bantuan/beri.js;
 export const asnHelperBrowseRequestToHelp = {
   pageData: {
     meta: {
@@ -247,6 +251,7 @@ export const asnHelperBrowseRequestToHelp = {
   },
 };
 
+// asn-helper/bantuan/riwayat.js;
 export const asnHelperHistory = {
   pageData: {
     meta: {
@@ -308,6 +313,7 @@ export const asnHelperHistory = {
   },
 };
 
+// asn-helper/bantuan/detail.js;
 export const asnHelperHelpRequestDetail = {
   pageData: {
     meta: {
@@ -382,6 +388,7 @@ export const asnHelperHelpRequestDetail = {
   },
 };
 
+// asn-helper/bantuan/[id]/chat.js;
 export const asnHelperChatConversation = {
   pageData: {
     meta: {
@@ -462,6 +469,7 @@ export const asnHelperChatConversation = {
   },
 };
 
+// asn-helper/bantuan/[id]/selesai.js;
 export const asnHelperMarkComplete = {
   pageData: {
     meta: {
@@ -547,6 +555,7 @@ export const asnHelperMarkComplete = {
   },
 };
 
+// asn-helper/dashboard.js;
 export const asnHelperDashboard = {
   pageData: {
     meta: {
@@ -631,6 +640,7 @@ export const asnHelperDashboard = {
   },
 };
 
+// asn-helper/leaderboard.js;
 export const asnHelperLeaderBoard = {
   pageData: {
     meta: {
@@ -723,5 +733,91 @@ export const asnHelperLeaderBoard = {
         },
       },
     ],
+  },
+};
+
+// asn-helper/profil.js;
+export const asnHelperProfile = {
+  pageData: {
+    meta: {
+      title: "Profil Helper - ASN Helper",
+    },
+    currentProfile: {
+      id: "helper_001",
+      basicInfo: {
+        name: "Ahmad Fauzi",
+        title: "Kasubag Kepegawaian",
+        institution: "BKD Provinsi Jawa Timur",
+        location: "Surabaya",
+        workingHours: "08:00-16:00",
+        timeZone: "WIB",
+      },
+      expertise: [
+        {
+          category: "kepegawaian",
+          level: "expert",
+          yearsExperience: 12,
+          certifications: ["Brevet Kepegawaian Tingkat Lanjut"],
+          specificSkills: ["SK Pengangkatan", "Kenaikan Pangkat", "Mutasi PNS"],
+        },
+        {
+          category: "regulasi",
+          level: "advanced",
+          yearsExperience: 8,
+          certifications: [],
+          specificSkills: ["Permenpan RB", "PP Kepegawaian", "UU ASN"],
+        },
+      ],
+      availability: {
+        isHelper: true,
+        maxConcurrentHelps: 5,
+        preferredCategories: ["kepegawaian", "regulasi"],
+        workingDays: ["monday", "tuesday", "wednesday", "thursday", "friday"],
+        breakTimes: ["12:00-13:00"],
+        autoResponse: "Saya akan merespon dalam 10 menit selama jam kerja.",
+      },
+      communication: {
+        preferredMethods: ["chat", "voice_message"],
+        languages: ["indonesian", "javanese"],
+        responseStyle: "detail_oriented",
+        specializations: ["step_by_step_guidance", "template_sharing"],
+      },
+    },
+    formConfig: {
+      expertiseCategories: [
+        { id: "kepegawaian", name: "Kepegawaian", icon: "👥" },
+        { id: "keuangan", name: "Keuangan & SIPKD", icon: "💰" },
+        { id: "regulasi", name: "Regulasi & Kebijakan", icon: "📋" },
+        { id: "teknis", name: "Teknis & IT", icon: "⚙️" },
+        { id: "dokumen", name: "Dokumen & Template", icon: "📄" },
+      ],
+      experienceLevels: [
+        { id: "beginner", name: "Pemula", description: "0-2 tahun pengalaman" },
+        {
+          id: "intermediate",
+          name: "Menengah",
+          description: "3-7 tahun pengalaman",
+        },
+        {
+          id: "advanced",
+          name: "Lanjutan",
+          description: "8-15 tahun pengalaman",
+        },
+        { id: "expert", name: "Expert", description: "15+ tahun pengalaman" },
+      ],
+      communicationStyles: [
+        { id: "concise", name: "Ringkas & To the Point" },
+        { id: "detail_oriented", name: "Detail & Komprehensif" },
+        { id: "visual", name: "Visual dengan Screenshot" },
+        { id: "step_by_step", name: "Step-by-Step Guide" },
+      ],
+    },
+    profileStats: {
+      completeness: 85,
+      missingFields: ["certifications", "languages"],
+      lastUpdated: "2025-06-01T10:00:00Z",
+      profileViews: 234,
+      helpRequestsReceived: 89,
+    },
   },
 };
