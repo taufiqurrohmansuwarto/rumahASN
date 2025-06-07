@@ -7,35 +7,17 @@ import ShowRatings from "@/components/ShowRatings";
 import TicketsPublish from "@/components/Ticket/TicketsPublish";
 import CarouselBanner from "@/components/Utils/CarouselBanner";
 import EletterBKD from "@/components/Utils/EletterBKD";
+import useScrollRestoration from "@/hooks/useScrollRestoration";
 import { Grid, Stack } from "@mantine/core";
 import { Card, Grid as GridAntd } from "antd";
 import Head from "next/head";
 import { useRouter } from "next/router";
-import { useEffect } from "react";
 
 function Feeds() {
   const router = useRouter();
 
-  useEffect(() => {
-    // On before route change save scroll position
-    router.events.on("routeChangeStart", saveScrollPosition);
-    // On route change restore scroll position
-    router.events.on("routeChangeComplete", restoreScrollPosition);
-
-    return () => {
-      router.events.off("routeChangeStart", saveScrollPosition);
-      router.events.off("routeChangeComplete", restoreScrollPosition);
-    };
-  }, [router]);
-
-  function saveScrollPosition() {
-    window.sessionStorage.setItem("scrollPosition", window.scrollY.toString());
-  }
-
-  function restoreScrollPosition() {
-    const scrollY = window.sessionStorage.getItem("scrollPosition") ?? "0";
-    window.scrollTo(0, parseInt(scrollY));
-  }
+  // Gunakan scroll restoration hook dengan storage key khusus untuk feeds
+  useScrollRestoration("feedsScrollPosition");
 
   const breakPoint = GridAntd.useBreakpoint();
 

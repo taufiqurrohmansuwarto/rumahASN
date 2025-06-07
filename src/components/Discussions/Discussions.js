@@ -412,31 +412,6 @@ const Discussions = () => {
     >
       <Row justify="center">
         <Col xs={24} sm={22} md={20} lg={18} xl={16}>
-          {/* Header */}
-          <div style={{ marginBottom: "20px", padding: "0 4px" }}>
-            <Title
-              level={2}
-              style={{
-                margin: 0,
-                color: "#1A1A1B",
-                fontSize: "28px",
-                fontWeight: 400,
-              }}
-            >
-              ASN Connect
-            </Title>
-            <AntText
-              style={{
-                fontSize: "14px",
-                color: "#787C7E",
-                marginTop: "4px",
-                display: "block",
-              }}
-            >
-              Komunitas diskusi untuk Aparatur Sipil Negara
-            </AntText>
-          </div>
-
           <CreateDiscussionButton />
 
           {isLoading ? (

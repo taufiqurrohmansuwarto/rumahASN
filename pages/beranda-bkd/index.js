@@ -50,6 +50,7 @@ import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { useEffect } from "react";
+import useScrollRestoration from "@/hooks/useScrollRestoration";
 
 const { useBreakpoint } = Grid;
 
@@ -453,26 +454,8 @@ const BerandaBKD = () => {
   const router = useRouter();
   const breakPoint = Grid.useBreakpoint();
 
-  useEffect(() => {
-    // On before route change save scroll position
-    router.events.on("routeChangeStart", saveScrollPosition);
-    // On route change restore scroll position
-    router.events.on("routeChangeComplete", restoreScrollPosition);
-
-    return () => {
-      router.events.off("routeChangeStart", saveScrollPosition);
-      router.events.off("routeChangeComplete", restoreScrollPosition);
-    };
-  }, [router]);
-
-  function saveScrollPosition() {
-    window.sessionStorage.setItem("scrollPosition", window.scrollY.toString());
-  }
-
-  function restoreScrollPosition() {
-    const scrollY = window.sessionStorage.getItem("scrollPosition") ?? "0";
-    window.scrollTo(0, parseInt(scrollY));
-  }
+  // Gunakan scroll restoration hook dengan storage key khusus untuk beranda BKD
+  useScrollRestoration("berandaBKDScrollPosition");
 
   const handleCariPegawai = () =>
     router.push(`/apps-managements/integrasi/siasn`);
