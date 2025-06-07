@@ -9,6 +9,7 @@ import {
   UserOutlined,
 } from "@ant-design/icons";
 import {
+  IconBooks,
   IconBrandZoom,
   IconInfoCircle,
   IconMailQuestion,
@@ -21,8 +22,8 @@ export const userRoutes = {
   routes: [
     {
       path: "/feeds",
-      name: "Forum Kepegawaian",
-      icon: <IconMessages size={18} />,
+      name: "Knowledge Base",
+      icon: <IconBooks size={18} />,
     },
     {
       path: "/tickets",

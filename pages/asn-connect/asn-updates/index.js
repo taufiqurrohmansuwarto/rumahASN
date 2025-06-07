@@ -1,12 +1,18 @@
 import Layout from "@/components/Layout";
+import FloatChatButton from "@/components/Socmed/FloatChatButton";
 import LayoutASNConnect from "@/components/Socmed/LayoutASNConnect";
 import SocmedTabs from "@/components/Socmed/SocmedTabs";
 import useScrollRestoration from "@/hooks/useScrollRestoration";
-import { FloatButton } from "antd";
 import Head from "next/head";
+import { useRouter } from "next/router";
 
 const AsnUpdates = () => {
   useScrollRestoration();
+  const router = useRouter();
+
+  const gotoChatBot = () => {
+    router.push("/chat-ai");
+  };
 
   // create link whatssapmessage
 
@@ -18,7 +24,7 @@ const AsnUpdates = () => {
       <LayoutASNConnect>
         {/* <ModalUserAnomali /> */}
         <SocmedTabs />
-        <FloatButton.BackTop />
+        <FloatChatButton onClick={gotoChatBot} />
         {/* <EletterBKD /> */}
       </LayoutASNConnect>
     </>

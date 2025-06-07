@@ -1,6 +1,6 @@
-import PageContainer from "@/components/PageContainer";
-import { Grid } from "antd";
+import { Grid, Tabs } from "antd";
 import { useRouter } from "next/router";
+import ASNConnectHeader from "./ASNConnectHeader";
 
 function LayoutASNConnect({ children, active = "asn-updates" }) {
   const breakPoint = Grid.useBreakpoint();
@@ -10,61 +10,127 @@ function LayoutASNConnect({ children, active = "asn-updates" }) {
     router.push(`/asn-connect/${key}`);
   };
 
+  const tabItems = [
+    {
+      key: "asn-updates",
+      label: "Beranda",
+    },
+    {
+      key: "asn-discussions",
+      label: "Diskusi",
+    },
+    {
+      key: "asn-communities",
+      label: "Komunitas",
+    },
+    {
+      key: "asn-events",
+      label: "Kegiatan",
+    },
+  ];
+
   return (
-    <PageContainer
-      // header={{
-      //   avatar: {
-      //     src: "https://avatars.githubusercontent.com/u/8186664?v=4",
-      //   },
-      // }}
-      childrenContentStyle={{
-        padding: breakPoint.xs ? 0 : 24,
-        // margin: 0,
+    <div
+      style={{
+        backgroundColor: "#DAE0E6",
+        minHeight: "100vh",
       }}
-      style={
-        {
-          // backgroundColor: "white",
-          // padding: 0,
-        }
-      }
-      tabActiveKey={active}
-      onTabChange={handleChangeTab}
-      tabList={[
-        {
-          key: "asn-updates",
-          tab: "Beranda",
-        },
-        {
-          key: "asn-discussions",
-          tab: "Diskusi",
-        },
-        {
-          key: "asn-communities",
-          tab: "Komunitas",
-        },
-        {
-          key: "asn-events",
-          tab: "Kegiatan",
-        },
-      ]}
-      tabPosition="top"
-      tabProps={{
-        tabBarStyle: {
-          // padding: 0,
-          // margin: 0,
-          accentColor: "yellow",
-          borderColor: "yellow",
-          color: "yellow",
-        },
-        style: {
-          color: "black",
-        },
-      }}
-      title="ASN Connect"
-      content="Tempat ASN Jatim Saling Bantu & Berbagi"
     >
-      {children}
-    </PageContainer>
+      {/* Header Component */}
+      <ASNConnectHeader />
+
+      {/* Navigation Tabs */}
+      <div
+        style={{
+          backgroundColor: "#FFFFFF",
+          borderBottom: "1px solid #EDEFF1",
+          padding: "0 20px",
+        }}
+      >
+        <Tabs
+          activeKey={active}
+          onChange={handleChangeTab}
+          items={tabItems}
+          size="large"
+          style={{
+            marginBottom: 0,
+          }}
+          tabBarStyle={{
+            marginBottom: 0,
+            borderBottom: "none",
+          }}
+        />
+      </div>
+
+      {/* Content Area */}
+      <div
+        style={{
+          maxWidth: "1200px",
+          margin: "0 auto",
+          padding: breakPoint.xs ? "20px 12px" : "24px 20px",
+        }}
+      >
+        {children}
+      </div>
+
+      <style jsx global>{`
+        .ant-pro-page-container-children-content {
+          background-color: transparent !important;
+        }
+
+        .ant-tabs-tab {
+          color: #787c7e !important;
+          font-weight: 500 !important;
+          font-size: 14px !important;
+          padding: 12px 0 !important;
+          border-radius: 4px 4px 0 0 !important;
+          transition: all 0.2s ease !important;
+        }
+
+        .ant-tabs-tab:hover {
+          color: #ff4500 !important;
+        }
+
+        .ant-tabs-tab-active {
+          color: #ff4500 !important;
+          font-weight: 600 !important;
+        }
+
+        .ant-tabs-tab-active .ant-tabs-tab-btn {
+          color: #ff4500 !important;
+        }
+
+        .ant-tabs-ink-bar {
+          background: #ff4500 !important;
+          height: 3px !important;
+          border-radius: 2px !important;
+        }
+
+        .ant-tabs-content-holder {
+          background-color: transparent !important;
+        }
+
+        .ant-tabs-content {
+          background-color: transparent !important;
+        }
+
+        .ant-pro-page-container {
+          background-color: transparent !important;
+        }
+
+        .ant-pro-page-container-warp {
+          background-color: transparent !important;
+        }
+
+        .ant-tabs-nav::before {
+          border-bottom: 1px solid #edeff1 !important;
+        }
+
+        .ant-pro-page-container-detail .ant-pro-page-container-detail-content {
+          background-color: transparent !important;
+        }
+      `}</style>
+    </div>
   );
 }
 

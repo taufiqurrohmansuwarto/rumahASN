@@ -67,7 +67,7 @@ const changeRoutes = (user) => {
     if (pegawaiPemda || fasilitatorMaster) {
       userRoutes.routes.push({
         path: "/asn-connect/asn-updates",
-        name: "ASN Connect",
+        name: "ASN Connect (Saling Bantu)",
         icon: <IconMessageUser size={18} />,
       });
     }
@@ -580,11 +580,6 @@ function Layout({ children, active, collapsed = true }) {
         actionsRender={(props) => {
           // if (props.isMobile) return [];
           return [
-            <NotifikasiKepegawaian
-              key="kepegawaian"
-              url="kepegawaian"
-              title="Inbox Kepegawaian"
-            />,
             <NotifikasiPrivateMessage
               key="private-message"
               url="/mails/inbox"

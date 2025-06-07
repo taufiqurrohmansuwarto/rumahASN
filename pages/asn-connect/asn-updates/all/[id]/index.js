@@ -2,12 +2,12 @@ import Layout from "@/components/Layout";
 import PageContainer from "@/components/PageContainer";
 import SocmedComments from "@/components/Socmed/SocmedComments";
 import { getPost } from "@/services/socmed.services";
+import useScrollRestoration from "@/hooks/useScrollRestoration";
 import { useQuery } from "@tanstack/react-query";
 import { Breadcrumb, FloatButton, Grid } from "antd";
 import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { useEffect } from "react";
 
 const ASNUpdateDetail = () => {
   const router = useRouter();
@@ -21,26 +21,8 @@ const ASNUpdateDetail = () => {
     {}
   );
 
-  useEffect(() => {
-    // On before route change save scroll position
-    router.events.on("routeChangeStart", saveScrollPosition);
-    // On route change restore scroll position
-    router.events.on("routeChangeComplete", restoreScrollPosition);
-
-    return () => {
-      router.events.off("routeChangeStart", saveScrollPosition);
-      router.events.off("routeChangeComplete", restoreScrollPosition);
-    };
-  }, [router]);
-
-  function saveScrollPosition() {
-    window.sessionStorage.setItem("scrollPosition", window.scrollY.toString());
-  }
-
-  function restoreScrollPosition() {
-    const scrollY = window.sessionStorage.getItem("scrollPosition") ?? "0";
-    window.scrollTo(0, parseInt(scrollY));
-  }
+  // Gunakan scroll restoration hook
+  useScrollRestoration("asnUpdateDetailScroll");
 
   const breakPoint = Grid.useBreakpoint();
 
@@ -54,7 +36,7 @@ const ASNUpdateDetail = () => {
           padding: breakPoint.xs ? 0 : null,
         }}
         title="ASN Connect"
-        content="Tempat ASN Jatim Saling Bantu & Berbagi"
+        content="Tempat ASN Jatim Saling Bantu"
         onBack={handleBack}
         loading={isLoading}
       >
