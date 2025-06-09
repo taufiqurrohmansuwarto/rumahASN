@@ -1,25 +1,46 @@
 import Layout from "@/components/Layout";
+import PageContainer from "@/components/PageContainer";
 import RiwayatUsulanLayout from "@/components/RiwayatUsulan/RiwayatUsulanLayout";
 import RwUsulanPerbaikanNama from "@/components/RiwayatUsulan/RwUsulanPerbaikanNama";
-import { Card } from "antd";
+import { Breadcrumb } from "antd";
 import Head from "next/head";
+import Link from "next/link";
+import { useRouter } from "next/router";
 
 const PerbaikanNama = () => {
+  const router = useRouter();
   return (
     <>
       <Head>
         <title>Rumah ASN - Peremajaan SIASN - Data SKP</title>
       </Head>
-      <RiwayatUsulanLayout
+      <PageContainer
+        onBack={() => router.push("/pemutakhiran-data/komparasi")}
         title="Usulan SIASN"
-        content="Riwayat Usulan SIASN Perbaikan Nama"
-        active="perbaikan-nama"
-        breadcrumbTitle="Usulan Perbaikan Nama"
+        subTitle="Usulan Perbaikan Nama"
+        header={{
+          breadcrumbRender: () => (
+            <Breadcrumb>
+              <Breadcrumb.Item>
+                <Link href="/feeds">Beranda</Link>
+              </Breadcrumb.Item>
+              <Breadcrumb.Item>
+                <Link href="/pemutakhiran-data/komparasi">Integrasi MyASN</Link>
+              </Breadcrumb.Item>
+              <Breadcrumb.Item>Usulan Perbaikan Nama</Breadcrumb.Item>
+            </Breadcrumb>
+          ),
+        }}
       >
-        <Card>
+        <RiwayatUsulanLayout
+          title="Usulan SIASN"
+          content="Riwayat Usulan SIASN Perbaikan Nama"
+          active="perbaikan-nama"
+          breadcrumbTitle="Usulan Perbaikan Nama"
+        >
           <RwUsulanPerbaikanNama />
-        </Card>
-      </RiwayatUsulanLayout>
+        </RiwayatUsulanLayout>
+      </PageContainer>
     </>
   );
 };

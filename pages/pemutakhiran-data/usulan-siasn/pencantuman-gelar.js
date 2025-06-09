@@ -1,26 +1,46 @@
 import Layout from "@/components/Layout";
+import PageContainer from "@/components/PageContainer";
 import RiwayatUsulanLayout from "@/components/RiwayatUsulan/RiwayatUsulanLayout";
-import { Card } from "antd";
-import Head from "next/head";
-import RiwayatPencantumanGelar from "../pencantuman-gelar";
 import RwUsulanPencantumanGelar from "@/components/RiwayatUsulan/RwUsulanPencantumanGelar";
+import { Breadcrumb } from "antd";
+import Head from "next/head";
+import Link from "next/link";
+import { useRouter } from "next/router";
 
 const PencantumanGelar = () => {
+  const router = useRouter();
   return (
     <>
       <Head>
         <title>Rumah ASN - Peremajaan SIASN - Data SKP</title>
       </Head>
-      <RiwayatUsulanLayout
+      <PageContainer
+        onBack={() => router.push("/pemutakhiran-data/komparasi")}
         title="Usulan SIASN"
-        content="Riwayat Usulan SIASN Pencantuman Gelar"
-        active="pencantuman-gelar"
-        breadcrumbTitle="Usulan Pencantuman Gelar"
+        subTitle="Usulan Pencantuman Gelar"
+        header={{
+          breadcrumbRender: () => (
+            <Breadcrumb>
+              <Breadcrumb.Item>
+                <Link href="/feeds">Beranda</Link>
+              </Breadcrumb.Item>
+              <Breadcrumb.Item>
+                <Link href="/pemutakhiran-data/komparasi">Integrasi MyASN</Link>
+              </Breadcrumb.Item>
+              <Breadcrumb.Item>Usulan Pencantuman Gelar</Breadcrumb.Item>
+            </Breadcrumb>
+          ),
+        }}
       >
-        <Card>
+        <RiwayatUsulanLayout
+          title="Usulan SIASN"
+          content="Riwayat Usulan SIASN Pencantuman Gelar"
+          active="pencantuman-gelar"
+          breadcrumbTitle="Usulan Pencantuman Gelar"
+        >
           <RwUsulanPencantumanGelar />
-        </Card>
-      </RiwayatUsulanLayout>
+        </RiwayatUsulanLayout>
+      </PageContainer>
     </>
   );
 };

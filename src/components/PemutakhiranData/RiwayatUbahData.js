@@ -2,37 +2,33 @@ import {
   dataUtamaSIASN,
   updateDataUtamaSIASN,
 } from "@/services/siasn-services";
-import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
+import {
+  BankOutlined,
+  EditOutlined,
+  FileTextOutlined,
+  MailOutlined,
+  PhoneOutlined,
+  ReloadOutlined,
+  SaveOutlined,
+  StarOutlined,
+} from "@ant-design/icons";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Button,
   Card,
+  DatePicker,
+  Flex,
   Form,
   Input,
-  Modal,
-  Skeleton,
-  Space,
-  Typography,
-  Flex,
-  theme,
   message,
+  Modal,
   Select,
-  DatePicker,
+  Skeleton,
+  Tooltip,
+  Typography,
 } from "antd";
-import {
-  EditOutlined,
-  MailOutlined,
-  HomeOutlined,
-  IdcardOutlined,
-  InfoCircleOutlined,
-  SaveOutlined,
-  CalendarOutlined,
-  StarOutlined,
-  BankOutlined,
-  FileTextOutlined,
-  PhoneOutlined,
-} from "@ant-design/icons";
-import { useEffect } from "react";
 import dayjs from "dayjs";
+import { useEffect } from "react";
 
 const kelasJabatan = [
   "1",
@@ -53,21 +49,61 @@ const kelasJabatan = [
 ];
 
 const { Title, Text } = Typography;
-const { useToken } = theme;
+
+const LoadingSkeleton = ({ minHeight = "120px" }) => (
+  <Card
+    style={{
+      width: "100%",
+      backgroundColor: "#FFFFFF",
+      border: "1px solid #EDEFF1",
+      borderRadius: "4px",
+      marginBottom: "8px",
+    }}
+    bodyStyle={{ padding: 0 }}
+  >
+    <Flex>
+      <div
+        style={{
+          width: "40px",
+          backgroundColor: "#F8F9FA",
+          borderRight: "1px solid #EDEFF1",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          minHeight,
+        }}
+      >
+        <Skeleton.Avatar size={16} />
+      </div>
+      <Flex vertical style={{ flex: 1, padding: "12px" }} gap={8}>
+        <Skeleton.Input style={{ width: "40%" }} active size="small" />
+        <Skeleton
+          paragraph={{ rows: 2, width: ["100%", "80%"] }}
+          active
+          title={false}
+        />
+      </Flex>
+    </Flex>
+  </Card>
+);
 
 const RiwayatUbahData = () => {
-  const { data, isLoading } = useQuery(["data-utama-siasn"], () =>
-    dataUtamaSIASN()
+  const { data, isLoading, refetch, isFetching } = useQuery(
+    ["data-utama-siasn"],
+    () => dataUtamaSIASN(),
+    {
+      refetchOnWindowFocus: false,
+    }
   );
 
   const [form] = Form.useForm();
   const queryClient = useQueryClient();
-  const { token } = useToken();
 
   const { mutateAsync: update, isLoading: isLoadingUpdate } = useMutation(
     (data) => updateDataUtamaSIASN(data),
     {
       onSuccess: () => {
+        queryClient.invalidateQueries(["data-utama-siasn"]);
         message.success("Berhasil mengubah data");
       },
       onSettled: () => {
@@ -75,6 +111,11 @@ const RiwayatUbahData = () => {
       },
     }
   );
+
+  const handleRefetch = () => {
+    refetch();
+    message.info("Memuat ulang data...");
+  };
 
   const handleSubmit = async () => {
     try {
@@ -85,19 +126,26 @@ const RiwayatUbahData = () => {
         content: "Apakah anda yakin ingin mengubah data?",
         centered: true,
         onOk: async () => {
-          await update({
-            email_gov: value?.email_gov,
-            nomor_bpjs: value?.nomor_bpjs,
-            nomor_hp: value?.nomor_hp,
-            nomor_telepon: value?.nomor_telepon,
-            alamat: value?.alamat,
-            nomor_npwp: value?.nomor_npwp,
-            npwp_tanggal: dayjs(value?.npwp_tanggal).format("DD-MM-YYYY"),
-            kelas_jabatan: value?.kelas_jabatan,
-            tapera_nomor: value?.tapera_nomor,
-            taspen_nomor: value?.taspen_nomor,
-            tanggal_taspen: dayjs(value?.tanggal_taspen).format("DD-MM-YYYY"),
-          });
+          const payload = {
+            email_gov: value?.email_gov || "",
+            nomor_bpjs: value?.nomor_bpjs || "",
+            nomor_hp: value?.nomor_hp || "",
+            nomor_telepon: value?.nomor_telepon || "",
+            alamat: value?.alamat || "",
+            nomor_npwp: value?.nomor_npwp || "",
+            npwp_tanggal:
+              value?.npwp_tanggal && dayjs(value?.npwp_tanggal).isValid()
+                ? dayjs(value?.npwp_tanggal).format("DD-MM-YYYY")
+                : "",
+            kelas_jabatan: value?.kelas_jabatan?.toString() || "",
+            tapera_nomor: value?.tapera_nomor || "",
+            taspen_nomor: value?.taspen_nomor || "",
+            tanggal_taspen:
+              value?.tanggal_taspen && dayjs(value?.tanggal_taspen).isValid()
+                ? dayjs(value?.tanggal_taspen).format("DD-MM-YYYY")
+                : "",
+          };
+          await update(payload);
         },
       });
     } catch (error) {
@@ -132,346 +180,479 @@ const RiwayatUbahData = () => {
     }
   }, [data, form]);
 
+  if (isLoading) {
+    return (
+      <div
+        style={{
+          backgroundColor: "#DAE0E6",
+          minHeight: "100vh",
+          padding: "16px",
+        }}
+      >
+        <LoadingSkeleton minHeight="80px" />
+        <LoadingSkeleton minHeight="200px" />
+        <LoadingSkeleton minHeight="250px" />
+        <LoadingSkeleton minHeight="100px" />
+        <LoadingSkeleton minHeight="60px" />
+      </div>
+    );
+  }
+
   return (
-    <Skeleton loading={isLoading}>
+    <div
+      style={{
+        backgroundColor: "#DAE0E6",
+        minHeight: "100vh",
+        padding: "16px",
+      }}
+    >
       {data && (
-        <Card
-          style={{
-            borderRadius: token.borderRadiusLG,
-          }}
-        >
+        <>
           {/* Header */}
-          <div style={{ marginBottom: token.marginMD }}>
-            <Flex justify="space-between" align="center">
-              <div>
-                <Flex align="center" gap={token.marginXS}>
-                  <div
-                    style={{
-                      width: "24px",
-                      height: "24px",
-                      borderRadius: token.borderRadiusSM,
-                      backgroundColor: token.colorPrimary,
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                    }}
-                  >
-                    <EditOutlined
-                      style={{ color: "white", fontSize: "12px" }}
-                    />
-                  </div>
+          <Card
+            style={{
+              width: "100%",
+              backgroundColor: "#FFFFFF",
+              border: "1px solid #EDEFF1",
+              borderRadius: "4px",
+              marginBottom: "8px",
+            }}
+            bodyStyle={{ padding: 0 }}
+          >
+            <Flex>
+              {/* Icon Section */}
+              <div
+                style={{
+                  width: "40px",
+                  backgroundColor: "#F8F9FA",
+                  borderRight: "1px solid #EDEFF1",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  minHeight: "80px",
+                }}
+              >
+                <EditOutlined style={{ color: "#FF4500", fontSize: "16px" }} />
+              </div>
+
+              {/* Header Content */}
+              <div style={{ flex: 1, padding: "12px" }}>
+                <Flex justify="space-between" align="center">
                   <div>
-                    <Title level={5} style={{ margin: 0 }}>
+                    <Title level={4} style={{ margin: 0, color: "#1A1A1B" }}>
                       Pemutakhiran Data Kepegawaian
                     </Title>
-                    <Text type="secondary">
+                    <Text style={{ color: "#787C7E", fontSize: "14px" }}>
                       Perbarui data kepegawaian Anda di SIASN
                     </Text>
                   </div>
+                  <Tooltip title="Muat ulang data">
+                    <Button
+                      type="text"
+                      icon={<ReloadOutlined />}
+                      loading={isFetching}
+                      onClick={handleRefetch}
+                      style={{
+                        color: "#787C7E",
+                        border: "1px solid #EDEFF1",
+                        borderRadius: "4px",
+                      }}
+                    >
+                      {isFetching ? "Memuat..." : "Refresh"}
+                    </Button>
+                  </Tooltip>
                 </Flex>
               </div>
             </Flex>
-          </div>
+          </Card>
 
-          <Space direction="vertical" size="large" style={{ width: "100%" }}>
-            <Form form={form} layout="vertical">
-              {/* Informasi Kontak */}
-              <div
+          <Form form={form} layout="vertical">
+            {/* Informasi Kontak */}
+            {isFetching ? (
+              <LoadingSkeleton minHeight="200px" />
+            ) : (
+              <Card
                 style={{
-                  marginBottom: token.marginLG,
+                  width: "100%",
+                  backgroundColor: "#FFFFFF",
+                  border: "1px solid #EDEFF1",
+                  borderRadius: "4px",
+                  marginBottom: "8px",
                 }}
+                bodyStyle={{ padding: 0 }}
               >
-                <Title
-                  level={5}
-                  style={{
-                    margin: `0 0 ${token.marginMD}px 0`,
-                    color: token.colorTextHeading,
-                    borderBottom: `2px solid ${token.colorPrimary}`,
-                    paddingBottom: token.paddingXS,
-                    display: "inline-block",
-                  }}
-                >
-                  📧 Informasi Kontak
-                </Title>
-                <div
-                  style={{
-                    padding: token.paddingMD,
-                    borderRadius: token.borderRadius,
-                    backgroundColor: "white",
-                    border: `1px solid ${token.colorBorder}`,
-                  }}
-                >
-                  <Form.Item
-                    rules={[{ type: "email" }]}
-                    label={
-                      <Flex align="center" gap={token.marginXS}>
-                        <MailOutlined style={{ color: token.colorPrimary }} />
-                        <span>Email Government</span>
-                      </Flex>
-                    }
-                    name="email_gov"
-                    help={
-                      <span
-                        style={{
-                          fontSize: "12px",
-                          color: token.colorTextSecondary,
-                        }}
-                      >
-                        Akses melalui{" "}
-                        <a
-                          href="https://webmail.mail.go.id/"
-                          target="_blank"
-                          rel="noopener noreferrer"
-                        >
-                          webmail.mail.go.id
-                        </a>
-                      </span>
-                    }
+                <Flex>
+                  {/* Icon Section */}
+                  <div
+                    style={{
+                      width: "40px",
+                      backgroundColor: "#F8F9FA",
+                      borderRight: "1px solid #EDEFF1",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      minHeight: "120px",
+                    }}
                   >
-                    <Input
-                      disabled
-                      prefix={
-                        <MailOutlined
-                          style={{ color: token.colorTextSecondary }}
-                        />
+                    <MailOutlined
+                      style={{ color: "#FF4500", fontSize: "16px" }}
+                    />
+                  </div>
+
+                  {/* Content Section */}
+                  <div style={{ flex: 1, padding: "12px" }}>
+                    <Title
+                      level={5}
+                      style={{ marginBottom: "16px", color: "#1A1A1B" }}
+                    >
+                      📧 Informasi Kontak
+                    </Title>
+
+                    <Form.Item
+                      label={
+                        <span style={{ color: "#1A1A1B", fontSize: "14px" }}>
+                          Email Government
+                        </span>
                       }
-                    />
-                  </Form.Item>
+                      name="email_gov"
+                      rules={[{ type: "email" }]}
+                      help={
+                        <span style={{ fontSize: "12px", color: "#787C7E" }}>
+                          Akses melalui{" "}
+                          <a
+                            href="https://webmail.mail.go.id/"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            style={{ color: "#FF4500" }}
+                          >
+                            webmail.mail.go.id
+                          </a>
+                        </span>
+                      }
+                    >
+                      <Input
+                        disabled
+                        prefix={<MailOutlined style={{ color: "#787C7E" }} />}
+                        style={{ backgroundColor: "#F8F9FA" }}
+                      />
+                    </Form.Item>
 
-                  <Form.Item
-                    label={
-                      <Flex align="center" gap={token.marginXS}>
-                        <HomeOutlined style={{ color: token.colorPrimary }} />
-                        <span>Alamat Lengkap</span>
-                      </Flex>
-                    }
-                    name="alamat"
-                    help="Masukkan alamat sesuai KTP atau domisili saat ini"
-                  >
-                    <Input.TextArea
-                      rows={3}
-                      placeholder="Contoh: Jl. Sudirman No. 123, Kelurahan ABC, Kecamatan XYZ"
-                    />
-                  </Form.Item>
+                    <Form.Item
+                      label={
+                        <span style={{ color: "#1A1A1B", fontSize: "14px" }}>
+                          Alamat Lengkap
+                        </span>
+                      }
+                      name="alamat"
+                      help={
+                        <span style={{ fontSize: "12px", color: "#787C7E" }}>
+                          Masukkan alamat sesuai KTP atau domisili saat ini
+                        </span>
+                      }
+                    >
+                      <Input.TextArea
+                        rows={3}
+                        placeholder="Contoh: Jl. Sudirman No. 123, Kelurahan ABC, Kecamatan XYZ"
+                        style={{ borderColor: "#EDEFF1" }}
+                      />
+                    </Form.Item>
 
-                  <Form.Item
-                    label={
-                      <Flex align="center" gap={token.marginXS}>
-                        <PhoneOutlined style={{ color: token.colorPrimary }} />
-                        <span>Nomor HP</span>
-                      </Flex>
-                    }
-                    name="nomor_hp"
-                  >
-                    <Input />
-                  </Form.Item>
+                    <Form.Item
+                      label={
+                        <span style={{ color: "#1A1A1B", fontSize: "14px" }}>
+                          Nomor HP
+                        </span>
+                      }
+                      name="nomor_hp"
+                    >
+                      <Input
+                        prefix={<PhoneOutlined style={{ color: "#787C7E" }} />}
+                        style={{ borderColor: "#EDEFF1" }}
+                      />
+                    </Form.Item>
 
-                  <Form.Item
-                    label={
-                      <Flex align="center" gap={token.marginXS}>
-                        <PhoneOutlined style={{ color: token.colorPrimary }} />
-                        <span>Nomor Telepon</span>
-                      </Flex>
-                    }
-                    name="nomor_telepon"
-                  >
-                    <Input />
-                  </Form.Item>
-                </div>
-              </div>
+                    <Form.Item
+                      label={
+                        <span style={{ color: "#1A1A1B", fontSize: "14px" }}>
+                          Nomor Telepon
+                        </span>
+                      }
+                      name="nomor_telepon"
+                    >
+                      <Input
+                        prefix={<PhoneOutlined style={{ color: "#787C7E" }} />}
+                        style={{ borderColor: "#EDEFF1" }}
+                      />
+                    </Form.Item>
+                  </div>
+                </Flex>
+              </Card>
+            )}
 
-              {/* Informasi Finansial */}
-              <div
+            {/* Informasi Finansial */}
+            {isFetching ? (
+              <LoadingSkeleton minHeight="250px" />
+            ) : (
+              <Card
                 style={{
-                  marginBottom: token.marginLG,
+                  width: "100%",
+                  backgroundColor: "#FFFFFF",
+                  border: "1px solid #EDEFF1",
+                  borderRadius: "4px",
+                  marginBottom: "8px",
                 }}
+                bodyStyle={{ padding: 0 }}
               >
-                <Title
-                  level={5}
-                  style={{
-                    margin: `0 0 ${token.marginMD}px 0`,
-                    color: token.colorTextHeading,
-                    borderBottom: `2px solid ${token.colorPrimary}`,
-                    paddingBottom: token.paddingXS,
-                    display: "inline-block",
-                  }}
-                >
-                  💳 Informasi Finansial & Asuransi
-                </Title>
-                <div
-                  style={{
-                    padding: token.paddingMD,
-                    borderRadius: token.borderRadius,
-                    backgroundColor: "white",
-                    border: `1px solid ${token.colorBorder}`,
-                  }}
-                >
-                  <Form.Item
-                    label={
-                      <Flex align="center" gap={token.marginXS}>
-                        <BankOutlined style={{ color: token.colorPrimary }} />
-                        <span>Nomor BPJS Kesehatan</span>
-                      </Flex>
-                    }
-                    name="nomor_bpjs"
-                    help="13 digit nomor BPJS Kesehatan"
+                <Flex>
+                  {/* Icon Section */}
+                  <div
+                    style={{
+                      width: "40px",
+                      backgroundColor: "#F8F9FA",
+                      borderRight: "1px solid #EDEFF1",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      minHeight: "120px",
+                    }}
                   >
-                    <Input
-                      prefix={
-                        <BankOutlined
-                          style={{ color: token.colorTextSecondary }}
-                        />
+                    <BankOutlined
+                      style={{ color: "#FF4500", fontSize: "16px" }}
+                    />
+                  </div>
+
+                  {/* Content Section */}
+                  <div style={{ flex: 1, padding: "12px" }}>
+                    <Title
+                      level={5}
+                      style={{ marginBottom: "16px", color: "#1A1A1B" }}
+                    >
+                      💳 Informasi Finansial & Asuransi
+                    </Title>
+
+                    <Form.Item
+                      label={
+                        <span style={{ color: "#1A1A1B", fontSize: "14px" }}>
+                          Nomor BPJS Kesehatan
+                        </span>
                       }
-                      placeholder="Contoh: 0001234567890"
-                      maxLength={13}
-                    />
-                  </Form.Item>
-
-                  <Form.Item
-                    label={
-                      <Flex align="center" gap={token.marginXS}>
-                        <FileTextOutlined
-                          style={{ color: token.colorPrimary }}
-                        />
-                        <span>Nomor NPWP</span>
-                      </Flex>
-                    }
-                    name="nomor_npwp"
-                    help="15 digit nomor NPWP tanpa tanda titik atau strip"
-                  >
-                    <Input
-                      prefix={
-                        <FileTextOutlined
-                          style={{ color: token.colorTextSecondary }}
-                        />
+                      name="nomor_bpjs"
+                      help={
+                        <span style={{ fontSize: "12px", color: "#787C7E" }}>
+                          13 digit nomor BPJS Kesehatan
+                        </span>
                       }
-                      placeholder="Contoh: 123456789012345"
-                    />
-                  </Form.Item>
+                    >
+                      <Input
+                        prefix={<BankOutlined style={{ color: "#787C7E" }} />}
+                        placeholder="Contoh: 0001234567890"
+                        maxLength={13}
+                        style={{ borderColor: "#EDEFF1" }}
+                      />
+                    </Form.Item>
 
-                  <Form.Item
-                    label={
-                      <Flex align="center" gap={token.marginXS}>
-                        <CalendarOutlined
-                          style={{ color: token.colorPrimary }}
-                        />
-                        <span>Tanggal Terbit NPWP</span>
-                      </Flex>
-                    }
-                    name="npwp_tanggal"
-                  >
-                    <DatePicker
-                      format="DD-MM-YYYY"
-                      style={{ width: "100%" }}
-                      placeholder="Pilih tanggal terbit NPWP"
-                    />
-                  </Form.Item>
-
-                  <Form.Item
-                    label={
-                      <Flex align="center" gap={token.marginXS}>
-                        <BankOutlined style={{ color: token.colorPrimary }} />
-                        <span>Nomor Taspen</span>
-                      </Flex>
-                    }
-                    name="taspen_nomor"
-                    help="Nomor peserta Taspen (jika ada)"
-                  >
-                    <Input
-                      prefix={
-                        <BankOutlined
-                          style={{ color: token.colorTextSecondary }}
-                        />
+                    <Form.Item
+                      label={
+                        <span style={{ color: "#1A1A1B", fontSize: "14px" }}>
+                          Nomor NPWP
+                        </span>
                       }
-                      placeholder="Masukkan nomor Taspen"
-                    />
-                  </Form.Item>
+                      name="nomor_npwp"
+                      help={
+                        <span style={{ fontSize: "12px", color: "#787C7E" }}>
+                          15 digit nomor NPWP tanpa tanda titik atau strip
+                        </span>
+                      }
+                    >
+                      <Input
+                        prefix={
+                          <FileTextOutlined style={{ color: "#787C7E" }} />
+                        }
+                        placeholder="Contoh: 123456789012345"
+                        style={{ borderColor: "#EDEFF1" }}
+                      />
+                    </Form.Item>
 
-                  <Form.Item
-                    label={
-                      <Flex align="center" gap={token.marginXS}>
-                        <CalendarOutlined
-                          style={{ color: token.colorPrimary }}
-                        />
-                        <span>Tanggal Mulai Taspen</span>
-                      </Flex>
-                    }
-                    name="tanggal_taspen"
-                  >
-                    <DatePicker
-                      format="DD-MM-YYYY"
-                      style={{ width: "100%" }}
-                      placeholder="Pilih tanggal mulai Taspen"
-                    />
-                  </Form.Item>
-                </div>
-              </div>
+                    <Form.Item
+                      label={
+                        <span style={{ color: "#1A1A1B", fontSize: "14px" }}>
+                          Tanggal Terbit NPWP
+                        </span>
+                      }
+                      name="npwp_tanggal"
+                    >
+                      <DatePicker
+                        format="DD-MM-YYYY"
+                        style={{ width: "100%", borderColor: "#EDEFF1" }}
+                        placeholder="Pilih tanggal terbit NPWP"
+                      />
+                    </Form.Item>
 
-              {/* Informasi Kepegawaian */}
-              <div
+                    <Form.Item
+                      label={
+                        <span style={{ color: "#1A1A1B", fontSize: "14px" }}>
+                          Nomor Taspen
+                        </span>
+                      }
+                      name="taspen_nomor"
+                      help={
+                        <span style={{ fontSize: "12px", color: "#787C7E" }}>
+                          Nomor peserta Taspen (jika ada)
+                        </span>
+                      }
+                    >
+                      <Input
+                        prefix={<BankOutlined style={{ color: "#787C7E" }} />}
+                        placeholder="Masukkan nomor Taspen"
+                        style={{ borderColor: "#EDEFF1" }}
+                      />
+                    </Form.Item>
+
+                    <Form.Item
+                      label={
+                        <span style={{ color: "#1A1A1B", fontSize: "14px" }}>
+                          Tanggal Mulai Taspen
+                        </span>
+                      }
+                      name="tanggal_taspen"
+                    >
+                      <DatePicker
+                        format="DD-MM-YYYY"
+                        style={{ width: "100%", borderColor: "#EDEFF1" }}
+                        placeholder="Pilih tanggal mulai Taspen"
+                      />
+                    </Form.Item>
+                  </div>
+                </Flex>
+              </Card>
+            )}
+
+            {/* Informasi Kepegawaian */}
+            {isFetching ? (
+              <LoadingSkeleton minHeight="100px" />
+            ) : (
+              <Card
                 style={{
-                  marginBottom: token.marginLG,
+                  width: "100%",
+                  backgroundColor: "#FFFFFF",
+                  border: "1px solid #EDEFF1",
+                  borderRadius: "4px",
+                  marginBottom: "8px",
                 }}
+                bodyStyle={{ padding: 0 }}
               >
-                <Title
-                  level={5}
-                  style={{
-                    margin: `0 0 ${token.marginMD}px 0`,
-                    color: token.colorTextHeading,
-                    borderBottom: `2px solid ${token.colorPrimary}`,
-                    paddingBottom: token.paddingXS,
-                    display: "inline-block",
-                  }}
-                >
-                  🏛️ Informasi Kepegawaian
-                </Title>
-                <div
-                  style={{
-                    padding: token.paddingMD,
-                    borderRadius: token.borderRadius,
-                    backgroundColor: "white",
-                    border: `1px solid ${token.colorBorder}`,
-                  }}
-                >
-                  <Form.Item
-                    label={
-                      <Flex align="center" gap={token.marginXS}>
-                        <StarOutlined style={{ color: token.colorPrimary }} />
-                        <span>Kelas Jabatan</span>
-                      </Flex>
-                    }
-                    name="kelas_jabatan"
-                    help="Pilih kelas jabatan sesuai SK terakhir"
+                <Flex>
+                  {/* Icon Section */}
+                  <div
+                    style={{
+                      width: "40px",
+                      backgroundColor: "#F8F9FA",
+                      borderRight: "1px solid #EDEFF1",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      minHeight: "80px",
+                    }}
                   >
-                    <Select
-                      placeholder="Pilih kelas jabatan"
-                      options={kelasJabatan.map((item) => ({
-                        label: `Kelas ${item}`,
-                        value: item,
-                      }))}
+                    <StarOutlined
+                      style={{ color: "#FF4500", fontSize: "16px" }}
                     />
-                  </Form.Item>
-                </div>
-              </div>
+                  </div>
 
-              <div style={{ marginTop: token.marginMD }}>
-                <Button
-                  onClick={handleSubmit}
-                  type="primary"
-                  loading={isLoadingUpdate}
-                  icon={<SaveOutlined />}
-                  style={{
-                    borderRadius: token.borderRadius,
-                  }}
-                >
-                  Simpan
-                </Button>
-              </div>
-            </Form>
-          </Space>
-        </Card>
+                  {/* Content Section */}
+                  <div style={{ flex: 1, padding: "12px" }}>
+                    <Title
+                      level={5}
+                      style={{ marginBottom: "16px", color: "#1A1A1B" }}
+                    >
+                      🏛️ Informasi Kepegawaian
+                    </Title>
+
+                    <Form.Item
+                      label={
+                        <span style={{ color: "#1A1A1B", fontSize: "14px" }}>
+                          Kelas Jabatan
+                        </span>
+                      }
+                      name="kelas_jabatan"
+                      help={
+                        <span style={{ fontSize: "12px", color: "#787C7E" }}>
+                          Pilih kelas jabatan sesuai SK terakhir
+                        </span>
+                      }
+                    >
+                      <Select
+                        placeholder="Pilih kelas jabatan"
+                        style={{ borderColor: "#EDEFF1" }}
+                        options={kelasJabatan.map((item) => ({
+                          label: `Kelas ${item}`,
+                          value: item,
+                        }))}
+                      />
+                    </Form.Item>
+                  </div>
+                </Flex>
+              </Card>
+            )}
+
+            {/* Submit Button */}
+            {isFetching ? (
+              <LoadingSkeleton minHeight="60px" />
+            ) : (
+              <Card
+                style={{
+                  width: "100%",
+                  backgroundColor: "#FFFFFF",
+                  border: "1px solid #EDEFF1",
+                  borderRadius: "4px",
+                  marginBottom: "8px",
+                }}
+                bodyStyle={{ padding: 0 }}
+              >
+                <Flex>
+                  {/* Icon Section */}
+                  <div
+                    style={{
+                      width: "40px",
+                      backgroundColor: "#F8F9FA",
+                      borderRight: "1px solid #EDEFF1",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      minHeight: "60px",
+                    }}
+                  >
+                    <SaveOutlined
+                      style={{ color: "#FF4500", fontSize: "16px" }}
+                    />
+                  </div>
+
+                  {/* Button Section */}
+                  <div style={{ flex: 1, padding: "12px" }}>
+                    <Button
+                      onClick={handleSubmit}
+                      type="primary"
+                      loading={isLoadingUpdate}
+                      icon={<SaveOutlined />}
+                      style={{
+                        backgroundColor: "#FF4500",
+                        borderColor: "#FF4500",
+                        borderRadius: "20px",
+                        fontWeight: 600,
+                        height: "36px",
+                        padding: "0 24px",
+                      }}
+                    >
+                      {isLoadingUpdate ? "Menyimpan..." : "Simpan"}
+                    </Button>
+                  </div>
+                </Flex>
+              </Card>
+            )}
+          </Form>
+        </>
       )}
-    </Skeleton>
+    </div>
   );
 };
 

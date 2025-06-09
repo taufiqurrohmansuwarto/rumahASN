@@ -2,7 +2,7 @@ import Layout from "@/components/Layout";
 import PageContainer from "@/components/PageContainer";
 import CompareJabatan from "@/components/PemutakhiranData/CompareJabatan";
 import CustomSelectMenu from "@/components/PemutakhiranData/CustomSelectMenu";
-import { Breadcrumb, Card, Grid } from "antd";
+import { Breadcrumb, Grid } from "antd";
 import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
@@ -40,9 +40,7 @@ const Jabatan = () => {
         title="Riwayat Jabatan"
         content="Komparasi Data Jabatan SIASN dan SIMASTER"
       >
-        <Card>
-          <CompareJabatan />
-        </Card>
+        <CompareJabatan />
       </PageContainer>
     </>
   );

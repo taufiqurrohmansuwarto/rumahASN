@@ -10,9 +10,7 @@ const AsnHelper = () => {
       <Head>
         <title>Rumah ASN - ASN Helper</title>
       </Head>
-      <LayoutASNConnect active="asn-helper">
-        <ASNHelperDashboard pageData={asnHelperHomepage.pageData} />
-      </LayoutASNConnect>
+      <LayoutASNConnect active="asn-helper">Hello world</LayoutASNConnect>
     </>
   );
 };
