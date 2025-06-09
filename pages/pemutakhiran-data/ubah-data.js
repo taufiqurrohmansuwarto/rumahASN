@@ -2,7 +2,6 @@ import Layout from "@/components/Layout";
 import PageContainer from "@/components/PageContainer";
 import CustomSelectMenu from "@/components/PemutakhiranData/CustomSelectMenu";
 import RiwayatUbahData from "@/components/PemutakhiranData/RiwayatUbahData";
-import { Alert, Stack } from "@mantine/core";
 import { Breadcrumb, Grid } from "antd";
 import Head from "next/head";
 import Link from "next/link";
@@ -40,9 +39,7 @@ const DataUtama = () => {
         onBack={handleBack}
         title="Riwayat Ubah Data"
       >
-        <Stack>
-          <RiwayatUbahData />
-        </Stack>
+        <RiwayatUbahData />
       </PageContainer>
     </>
   );

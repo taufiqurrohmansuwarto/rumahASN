@@ -3,14 +3,14 @@ import {
   CommentOutlined,
   DatabaseOutlined,
   LoginOutlined,
-  SoundOutlined,
   SafetyCertificateOutlined,
+  SoundOutlined,
   StarOutlined,
   TeamOutlined,
   VideoCameraOutlined,
+  RobotOutlined,
 } from "@ant-design/icons";
-import { Card, Col, Flex, Row, Space, Typography } from "antd";
-import Kuesioner from "./Public/Kuesioner";
+import { Card, Col, Row, Space, Typography } from "antd";
 
 const { Title, Text } = Typography;
 
@@ -95,6 +95,15 @@ export const MOCKDATA = [
     color: "#6366F1",
     bgColor: "#EEF2FF",
     borderColor: "#C7D2FE",
+  },
+  {
+    icon: RobotOutlined,
+    title: "AI Chatbot",
+    description:
+      "BestieAI adalah fitur yang membantu pengguna menanyakan pertanyaan kepegawaian dengan cepat dan akurat, seperti status kenaikan pangkat dan lainnya.",
+    color: "#22C55E",
+    bgColor: "#F0FDF4",
+    borderColor: "#BBF7D0",
   },
 ];
 

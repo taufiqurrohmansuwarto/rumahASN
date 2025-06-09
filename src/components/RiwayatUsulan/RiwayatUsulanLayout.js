@@ -1,88 +1,139 @@
-import React from "react";
-import PageContainer from "@/components/PageContainer";
-import { Breadcrumb, Grid } from "antd";
-import Link from "next/link";
+import { Grid, Tabs } from "antd";
 import { useRouter } from "next/router";
 
-function RiwayatUsulanLayout({
+const RiwayatUsulanLayout = ({
   children,
   active = "all",
   loading,
   title,
   content,
   breadcrumbTitle,
-}) {
+}) => {
   const router = useRouter();
+  const { useBreakpoint } = Grid;
+  const screens = useBreakpoint();
 
-  const handleBack = () => router?.back();
+  const handleChangeTab = (key) => {
+    router.push(key);
+  };
 
-  const breakPoint = Grid.useBreakpoint();
+  const tabItems = [
+    {
+      key: "/pemutakhiran-data/usulan-siasn/inbox-usulan",
+      label: "📥 Inbox Usulan",
+    },
+    {
+      key: "/pemutakhiran-data/usulan-siasn/kenaikan-pangkat",
+      label: "📈 Kenaikan Pangkat",
+    },
+    {
+      key: "/pemutakhiran-data/usulan-siasn/perbaikan-nama",
+      label: "✏️ Perbaikan Nama",
+    },
+    {
+      key: "/pemutakhiran-data/usulan-siasn/pemberhentian",
+      label: "🚪 Pemberhentian",
+    },
+    {
+      key: "/pemutakhiran-data/usulan-siasn/pencantuman-gelar",
+      label: "🎓 Pencantuman Gelar",
+    },
+    {
+      key: "/pemutakhiran-data/usulan-siasn/masa-kerja",
+      label: "⏱️ Penyesuaian Masa Kerja",
+    },
+  ];
+
+  // Find the active key based on the active prop
+  const getActiveKey = () => {
+    const keyMap = {
+      "inbox-usulan": "/pemutakhiran-data/usulan-siasn/inbox-usulan",
+      "kenaikan-pangkat": "/pemutakhiran-data/usulan-siasn/kenaikan-pangkat",
+      "perbaikan-nama": "/pemutakhiran-data/usulan-siasn/perbaikan-nama",
+      pemberhentian: "/pemutakhiran-data/usulan-siasn/pemberhentian",
+      "pencantuman-gelar": "/pemutakhiran-data/usulan-siasn/pencantuman-gelar",
+      "masa-kerja": "/pemutakhiran-data/usulan-siasn/masa-kerja",
+    };
+    return keyMap[active] || tabItems[0].key;
+  };
 
   return (
-    <PageContainer
-      childrenContentStyle={{
-        padding: breakPoint.xs ? 0 : null,
-      }}
-      header={{
-        breadcrumbRender: () => (
-          <Breadcrumb>
-            <Breadcrumb.Item>
-              <Link href="/feeds">Beranda</Link>
-            </Breadcrumb.Item>
-            <Breadcrumb.Item>
-              <Link href="/pemutakhiran-data/komparasi">Peremajaan Data</Link>
-            </Breadcrumb.Item>
-            <Breadcrumb.Item>{breadcrumbTitle}</Breadcrumb.Item>
-          </Breadcrumb>
-        ),
-      }}
-      onBack={handleBack}
-      title={title}
-      content={content}
-      tabList={[
-        {
-          tab: "Inbox Usulan",
-          key: "inbox-usulan",
-          href: "/pemutakhiran-data/usulan-siasn/inbox-usulan",
-        },
-        {
-          tab: "Kenaikan Pangkat",
-          key: "kenaikan-pangkat",
-          href: "/pemutakhiran-data/usulan-siasn/kenaikan-pangkat",
-        },
-        {
-          tab: "Perbaikan Nama",
-          key: "perbaikan-nama",
-          href: "/pemutakhiran-data/usulan-siasn/perbaikan-nama",
-        },
-        {
-          tab: "Pemberhentian",
-          key: "pemberhentian",
-          href: "/pemutakhiran-data/usulan-siasn/pemberhentian",
-        },
-        {
-          tab: "Pencantuman Gelar",
-          key: "pencantuman-gelar",
-          href: "/pemutakhiran-data/usulan-siasn/pencantuman-gelar",
-        },
-        {
-          tab: "Penyesuaian Masa Kerja",
-          key: "masa-kerja",
-          href: "/pemutakhiran-data/usulan-siasn/masa-kerja",
-        },
-      ]}
-      tabActiveKey={active}
-      tabProps={{
-        type: "card",
-        size: "small",
-        onChange: (key) => {
-          router.push(key);
-        },
-      }}
-    >
-      {children}
-    </PageContainer>
+    <div style={{ backgroundColor: "#DAE0E6" }}>
+      {/* Navigation Tabs */}
+      <div
+        style={{
+          backgroundColor: "#FFFFFF",
+          borderBottom: "1px solid #EDEFF1",
+          padding: screens.xs ? "0 12px" : "0 24px",
+        }}
+      >
+        <Tabs
+          activeKey={getActiveKey()}
+          onChange={handleChangeTab}
+          items={tabItems}
+          size="large"
+          style={{ marginBottom: 0 }}
+          tabBarStyle={{
+            marginBottom: 0,
+            borderBottom: "none",
+          }}
+        />
+      </div>
+
+      {/* Content Area */}
+      <div
+        style={{
+          maxWidth: "1200px",
+          margin: "0 auto",
+          padding: screens.xs ? "20px 12px" : "24px 20px",
+        }}
+      >
+        {children}
+      </div>
+
+      <style jsx global>{`
+        .ant-tabs-tab {
+          color: #787c7e !important;
+          font-weight: 500 !important;
+          font-size: 14px !important;
+          padding: 12px 0 !important;
+          border-radius: 4px 4px 0 0 !important;
+          transition: all 0.2s ease !important;
+        }
+
+        .ant-tabs-tab:hover {
+          color: #ff4500 !important;
+        }
+
+        .ant-tabs-tab-active {
+          color: #ff4500 !important;
+          font-weight: 600 !important;
+        }
+
+        .ant-tabs-tab-active .ant-tabs-tab-btn {
+          color: #ff4500 !important;
+        }
+
+        .ant-tabs-ink-bar {
+          background: #ff4500 !important;
+          height: 3px !important;
+          border-radius: 2px !important;
+        }
+
+        .ant-tabs-content-holder {
+          background-color: transparent !important;
+        }
+
+        .ant-tabs-content {
+          background-color: transparent !important;
+        }
+
+        .ant-tabs-nav::before {
+          border-bottom: 1px solid #edeff1 !important;
+        }
+      `}</style>
+    </div>
   );
-}
+};
 
 export default RiwayatUsulanLayout;
