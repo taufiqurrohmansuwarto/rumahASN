@@ -7,28 +7,24 @@ import {
   dataUtamaSIASN,
   fotoSiasn,
 } from "@/services/siasn-services";
+import {
+  InfoCircleOutlined,
+  LoadingOutlined,
+  UserOutlined,
+} from "@ant-design/icons";
 import { useQuery } from "@tanstack/react-query";
 import {
   Breadcrumb,
   Button,
+  Card,
   Col,
-  Empty,
+  Flex,
   Grid,
   Modal,
   Row,
-  Card,
   Skeleton,
-  Flex,
   Typography,
-  Avatar,
-  Space,
 } from "antd";
-import {
-  UserOutlined,
-  CameraOutlined,
-  InfoCircleOutlined,
-  LoadingOutlined,
-} from "@ant-design/icons";
 import Head from "next/head";
 import Link from "next/link";
 
