@@ -2,6 +2,8 @@ const { trim } = require("lodash");
 const paparse = require("papaparse");
 const path = require("path");
 const fs = require("fs");
+const FormData = require("form-data");
+const { default: axios } = require("axios");
 
 const parseCSV = (filePath) => {
   const file = fs.readFileSync(filePath, "utf8");
@@ -41,6 +43,39 @@ module.exports.foto = (fetcher, pnsId) => {
   return fetcher.get(`/pns/photo/${pnsId}`, {
     responseType: "arraybuffer",
   });
+};
+
+module.exports.updateFotoSiasn = async (fetcher, data) => {
+  try {
+    const { pnsId, foto } = data;
+
+    // Mengambil file dari URL foto
+    const response = await axios.get(foto, {
+      responseType: "stream",
+    });
+
+    const formData = new FormData();
+    formData.append("pns_id", pnsId);
+    formData.append("file", response.data, {
+      filename: "foto.jpg",
+      contentType: "image/jpeg",
+    });
+
+    return new Promise(async (resolve, reject) => {
+      try {
+        const hasil = await fetcher.post("/upload-photo", formData, {
+          headers: {
+            ...formData.getHeaders(),
+          },
+        });
+        resolve(hasil);
+      } catch (error) {
+        reject(error?.message);
+      }
+    });
+  } catch (error) {
+    return null;
+  }
 };
 
 module.exports.IPASNBaru = (fetcher, nip) => {

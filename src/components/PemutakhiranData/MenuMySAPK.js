@@ -9,7 +9,7 @@ import {
   TagOutlined,
   UserOutlined,
 } from "@ant-design/icons";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Avatar,
   Button,
@@ -17,6 +17,7 @@ import {
   Col,
   Flex,
   Grid,
+  message,
   Row,
   Skeleton,
   Tag,
@@ -27,6 +28,7 @@ import { useRouter } from "next/router";
 import DisparitasData from "../LayananSIASN/DisparitasData";
 import GantiEmail from "../LayananSIASN/GantiEmail";
 import PengaturanGelar from "../LayananSIASN/PengaturanGelar";
+import { updateFotoSiasn } from "@/services/siasn-services";
 
 const { Title, Text } = Typography;
 
@@ -168,6 +170,27 @@ export function MenuMySAPK({
   const mainPadding = isMobile ? "12px" : "16px";
   const titleFontSize = isMobile ? "16px" : "18px";
   const iconSectionWidth = isMobile ? "0px" : "40px";
+
+  const queryClient = useQueryClient();
+
+  const { mutate: transferFoto, isLoading: isTransferFotoLoading } =
+    useMutation({
+      mutationFn: updateFotoSiasn,
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: ["foto-pns"] });
+        message.success("Foto berhasil ditransfer");
+      },
+      onError: () => {
+        message.error("Gagal menyalin foto");
+      },
+      onSettled: () => {
+        queryClient.invalidateQueries({ queryKey: ["foto-pns"] });
+      },
+    });
+
+  const handleTransferFoto = () => {
+    transferFoto();
+  };
 
   return (
     <div
@@ -389,6 +412,8 @@ export function MenuMySAPK({
                     width: isMobile ? "100%" : "auto",
                     minWidth: "140px",
                   }}
+                  loading={isTransferFotoLoading}
+                  onClick={handleTransferFoto}
                   onMouseEnter={(e) => {
                     e.currentTarget.style.backgroundColor = "#FF4500";
                     e.currentTarget.style.color = "#FFFFFF";
