@@ -71,6 +71,10 @@ export const fotoSiasn = () => {
   return api.get("/pns/foto").then((res) => res.data);
 };
 
+export const updateFotoSiasn = () => {
+  return api.put("/pns/foto").then((res) => res.data);
+};
+
 export const updateDataUtamaSIASN = (data) => {
   return api.post("/pns/data-utama", data).then((res) => res.data);
 };

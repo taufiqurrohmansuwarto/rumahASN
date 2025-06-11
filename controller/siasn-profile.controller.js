@@ -4,8 +4,11 @@ const {
   orangTua,
   pasangan,
   dataUtama,
+  updateFotoSiasn,
 } = require("@/utils/siasn-utils");
 const SiasnEmployees = require("@/models/siasn-employees.model");
+const { handleError } = require("@/utils/helper/controller-helper");
+const { default: axios } = require("axios");
 
 module.exports.fotoPns = async (req, res) => {
   try {
@@ -32,6 +35,45 @@ module.exports.fotoPns = async (req, res) => {
   } catch (error) {
     console.log(error);
     res.status(500).json(error);
+  }
+};
+
+module.exports.updateFotoPns = async (req, res) => {
+  try {
+    const { siasnRequest: siasnFetcher, fetcher: masterFetcher } = req;
+    const { employee_number: nip } = req?.user;
+
+    const currentPnsId = await SiasnEmployees.query()
+      .where("nip_baru", nip)
+      .first()
+      .select("pns_id");
+
+    if (!currentPnsId) {
+      res.status(404).json({
+        message: "PNS not found",
+      });
+    } else {
+      const result = await masterFetcher.get(
+        `/master-ws/operator/employees/${nip}/data-utama-master`
+      );
+
+      const foto = result?.data?.foto;
+
+      if (!foto || foto?.includes("foto_kosong")) {
+        res.status(400).json({
+          message: "Foto tidak ditemukan atau tidak valid",
+        });
+      } else {
+        await updateFotoSiasn(siasnFetcher, {
+          pnsId: currentPnsId?.pns_id,
+          foto,
+        });
+
+        res.json({ message: "success" });
+      }
+    }
+  } catch (error) {
+    handleError(res, error);
   }
 };
 
