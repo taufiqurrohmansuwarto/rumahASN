@@ -55,6 +55,7 @@ const RefSIASNUnor = require("@/models/ref-siasn-unor.model");
 const { getSession } = require("next-auth/react");
 const { getQueryChildrenPerangkatDaerah } = require("@/utils/query-utils");
 const { createRedisInstance } = require("@/utils/redis");
+const { handleError } = require("@/utils/helper/controller-helper");
 
 const updateEmployeeInformation = async (req, res) => {
   try {
@@ -250,6 +251,77 @@ const removeBackupSIASN = async (req, res) => {
   } catch (error) {
     console.log(error);
     res.status(500).json({ code: 500, message: "Internal Server Error" });
+  }
+};
+
+const getTreeRefSiasn = async (req, res) => {
+  try {
+    const { siasnRequest: request } = req;
+    const { limit = 10, offset = 0 } = req?.query;
+    const url = `/referensi/ref-unor?limit=${limit}&offset=${offset}`;
+
+    // Jika limit = -1, ambil semua data
+    if (limit === -1 || limit === "-1") {
+      // Ambil data pertama untuk mendapatkan total count
+      const currentUrl = `/referensi/ref-unor?limit=10&offset=0`;
+      const firstResult = await request.get(currentUrl);
+
+      if (firstResult?.data) {
+        const count = firstResult?.data?.count;
+        let allData = [...firstResult?.data?.data];
+
+        // Hitung total halaman yang diperlukan dengan limit 100
+        const totalPages = Math.ceil(count / 10);
+
+        // Loop untuk mengambil semua data
+        for (let page = 1; page < totalPages; page++) {
+          const pageOffset = page * 10;
+          const query = `/referensi/ref-unor?limit=10&offset=${pageOffset}`;
+
+          const result = await request.get(query);
+          console.log("Berhasil ambil data", page, totalPages);
+
+          if (result?.data?.data) {
+            allData = [...allData, ...result?.data?.data];
+          }
+        }
+
+        await RefSIASNUnor.query().delete();
+        await RefSIASNUnor.query().insertGraph(allData);
+        await BackupSIASN.query().insert({
+          backup_date: new Date().toISOString(),
+          type: "ref_unor",
+        });
+
+        res.json({
+          message: "success",
+          code: 200,
+        });
+      } else {
+        const data = await request.get(url);
+        res.json(data?.data);
+      }
+    } else {
+      // Tampilkan data dengan limit dan offset seperti biasa
+      const result = await request.get(
+        `/referensi/ref-unor?limit=${limit}&offset=${offset}`
+      );
+
+      if (result?.data) {
+        const count = result?.data?.count;
+        const totalPages = Math.ceil(count / limit);
+
+        res.json({
+          data: result?.data?.data,
+          count: count,
+          total_pages: totalPages,
+        });
+      } else {
+        res.json({ data: [], count: 0, total_pages: 0 });
+      }
+    }
+  } catch (error) {
+    handleError(res, error);
   }
 };
 
@@ -1639,4 +1711,6 @@ module.exports = {
   getSubTreeRef,
   removeDiklat,
   getRefKpkn,
+
+  getTreeRefSiasn,
 };

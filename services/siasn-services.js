@@ -233,6 +233,10 @@ export const unitOrganisasi = () => {
   return api.get("/ref/unor").then((res) => res.data);
 };
 
+export const resetUnor = () => {
+  return api.get(`/ref/unor-siasn?limit=-1`).then((res) => res.data);
+};
+
 export const employeesByUnitOrganisasi = (id) => {
   return api.get(`/ref/unor/${id}/employees`).then((res) => res?.data);
 };
