@@ -1,5 +1,5 @@
 import { cekPertekService } from "@/services/public.services";
-import { FileWordOutlined } from "@ant-design/icons";
+import { FilePdfOutlined, FileWordOutlined } from "@ant-design/icons";
 import { useMutation } from "@tanstack/react-query";
 import {
   Button,
@@ -200,7 +200,7 @@ function CekPertek() {
     <>
       <Button
         shape="round"
-        icon={<FileWordOutlined />}
+        icon={<FilePdfOutlined />}
         type="primary"
         onClick={handleOpenModal}
       >

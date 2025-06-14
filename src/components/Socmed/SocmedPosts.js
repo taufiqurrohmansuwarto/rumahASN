@@ -109,10 +109,7 @@ function SocmedEditPost({ post, edit, isLoading, cancel }) {
     <Card
       style={{
         width: "100%",
-        backgroundColor: "#FFFFFF",
-        border: "1px solid #EDEFF1",
-        borderRadius: "4px",
-        marginBottom: "8px",
+        marginBottom: "16px",
       }}
       bodyStyle={{ padding: 0 }}
     >
@@ -334,10 +331,7 @@ const PostCard = ({ post, currentUser }) => {
         <Card
           style={{
             width: "100%",
-            backgroundColor: "#FFFFFF",
-            border: "1px solid #EDEFF1",
-            borderRadius: "4px",
-            marginBottom: "8px",
+            marginBottom: "16px",
             padding: 0,
             overflow: "hidden",
             transition: "border-color 0.2s ease",
@@ -517,9 +511,7 @@ const LoadingSkeleton = () => (
         key={item}
         style={{
           width: "100%",
-          marginBottom: "8px",
-          border: "1px solid #EDEFF1",
-          borderRadius: "4px",
+          marginBottom: "16px",
         }}
         bodyStyle={{ padding: 0 }}
       >
@@ -578,12 +570,7 @@ function SocmedPosts() {
   const flatPosts = posts?.pages.flatMap((page) => page.data) || [];
 
   return (
-    <div
-      style={{
-        backgroundColor: "#DAE0E6",
-        minHeight: "100vh",
-      }}
-    >
+    <div>
       {/* Filter */}
       <Row justify="end" style={{ marginBottom: "20px" }}>
         <Col>
@@ -605,15 +592,12 @@ function SocmedPosts() {
             )}
             loadMore={
               hasNextPage ? (
-                <div
+                <Card
                   style={{
                     textAlign: "center",
                     marginTop: 16,
-                    padding: "16px",
-                    backgroundColor: "#FFFFFF",
-                    borderRadius: "4px",
-                    border: "1px solid #EDEFF1",
                   }}
+                  bodyStyle={{ padding: "16px" }}
                 >
                   {isFetching ? (
                     <Skeleton.Button active style={{ width: "120px" }} />
@@ -633,7 +617,7 @@ function SocmedPosts() {
                       Muat Lebih Banyak
                     </Button>
                   )}
-                </div>
+                </Card>
               ) : null
             }
           />
@@ -641,9 +625,6 @@ function SocmedPosts() {
       ) : (
         <Card
           style={{
-            border: "1px solid #EDEFF1",
-            borderRadius: "4px",
-            backgroundColor: "#FFFFFF",
             textAlign: "center",
           }}
           bodyStyle={{ padding: "64px 32px" }}

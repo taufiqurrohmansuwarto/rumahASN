@@ -4,25 +4,28 @@ import UnAnswerFilter from "@/components/Filter/UnAnswerFilter";
 import Layout from "@/components/Layout";
 import PageContainer from "@/components/PageContainer";
 import QueryFilter from "@/components/QueryFilter";
+import useScrollRestoration from "@/hooks/useScrollRestoration";
 import { downloadTicketBKD, pegawaiBkdTickets } from "@/services/bkd.services";
 import { refCategories } from "@/services/index";
 import {
-  formatDateFull,
-  formatDateLL,
-  setColorStatus,
+  formatDateLLWithTime,
   setColorStatusTooltip,
-  setStatusIcon,
 } from "@/utils/client-utils";
 import {
-  CalendarOutlined,
   CaretDownOutlined,
   CaretUpOutlined,
   CloudDownloadOutlined,
   MessageOutlined,
   SearchOutlined,
+  UserOutlined,
 } from "@ant-design/icons";
 import { Badge, Grid as GridMantineCore, Stack } from "@mantine/core";
-import { IconClock, IconFileUpload, IconShieldCheck } from "@tabler/icons";
+import {
+  IconCircleCheck,
+  IconClockHour4,
+  IconSend,
+  IconUser,
+} from "@tabler/icons-react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import {
   Avatar,
@@ -30,18 +33,17 @@ import {
   Button,
   Card,
   Divider,
+  Flex,
   FloatButton,
   Form,
   Grid,
   Input,
   List,
-  Popover,
   Radio,
   Rate,
   Select,
   Space,
   Tabs,
-  Tag,
   Tooltip,
   Typography,
   message,
@@ -50,7 +52,6 @@ import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { useEffect } from "react";
-import useScrollRestoration from "@/hooks/useScrollRestoration";
 
 const { useBreakpoint } = Grid;
 
@@ -98,16 +99,16 @@ const SetItem = ({ item }) => {
   const diajukan = item?.status_code === "DIAJUKAN";
   const dikerjakan = item?.status_code === "DIKERJAKAN";
   const selesai = item?.status_code === "SELESAI";
-  const size = 16;
+  const size = 14;
 
   if (diajukan) {
-    return <IconFileUpload color="#ffa500" size={size} />;
+    return <IconSend color="#FF4500" size={size} stroke={2} />;
   } else if (dikerjakan) {
-    return <IconClock color="#3498db" size={size} />;
+    return <IconClockHour4 color="#1890FF" size={size} stroke={2} />;
   } else if (selesai) {
-    return <IconShieldCheck color="#28a745" size={size} />;
+    return <IconCircleCheck color="#52C41A" size={size} stroke={2} />;
   } else {
-    return null;
+    return <IconUser color="#9CA3AF" size={size} stroke={2} />;
   }
 };
 
@@ -170,20 +171,60 @@ const Assignee = ({ item }) => {
 
   if (item?.assignee) {
     return (
-      <Popover title="Penerima Tugas" content={`${item?.agent?.username}`}>
-        <Avatar
-          onClick={gotoDetailUser}
-          style={{
-            cursor: "pointer",
-          }}
-          size="small"
-          src={item?.agent?.image}
-          alt={item?.agent?.username}
-        />
-      </Popover>
+      <Tooltip title={`Ditugaskan ke: ${item?.agent?.username}`}>
+        <div style={{ position: "relative", display: "inline-block" }}>
+          <Avatar
+            onClick={gotoDetailUser}
+            style={{
+              cursor: "pointer",
+              border: "2px solid #FFFFFF",
+              boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+              transition: "all 0.2s ease",
+            }}
+            size={32}
+            src={item?.agent?.image}
+            alt={item?.agent?.username}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.transform = "scale(1.1)";
+              e.currentTarget.style.boxShadow =
+                "0 4px 8px rgba(255, 69, 0, 0.3)";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = "scale(1)";
+              e.currentTarget.style.boxShadow = "0 2px 4px rgba(0,0,0,0.1)";
+            }}
+          />
+          {/* Online indicator */}
+          <div
+            style={{
+              position: "absolute",
+              bottom: "-2px",
+              right: "-2px",
+              width: "12px",
+              height: "12px",
+              backgroundColor: "#52C41A",
+              border: "2px solid #FFFFFF",
+              borderRadius: "50%",
+              boxShadow: "0 1px 2px rgba(0,0,0,0.2)",
+            }}
+          />
+        </div>
+      </Tooltip>
     );
   } else {
-    return null;
+    return (
+      <Tooltip title="Belum ditugaskan">
+        <Avatar
+          size={32}
+          style={{
+            backgroundColor: "#F3F4F6",
+            color: "#9CA3AF",
+            border: "2px solid #E5E7EB",
+          }}
+          icon={<UserOutlined />}
+        />
+      </Tooltip>
+    );
   }
 };
 
@@ -317,6 +358,9 @@ const FilterStatus = () => {
 
 const TicketsTable = ({ query }) => {
   const router = useRouter();
+  const screens = useBreakpoint();
+  const isMobile = !screens.md;
+
   const { data, isLoading, isFetching } = useQuery(
     ["bkd-tickets", query],
     () => pegawaiBkdTickets(query),
@@ -332,81 +376,341 @@ const TicketsTable = ({ query }) => {
     });
   };
 
+  const mainPadding = isMobile ? "12px" : "16px";
+  const iconSectionWidth = isMobile ? "0px" : "40px";
+
   return (
     <Stack mt={8}>
-      <div
+      {/* Filter Card */}
+      <Card
         style={{
-          padding: 8,
-          paddingTop: 16,
-          paddingBottom: 16,
-          border: "1px solid #e8e8e8",
+          width: "100%",
+          marginBottom: "16px",
         }}
+        bodyStyle={{ padding: 0 }}
       >
-        {router?.query?.tab === "my-task" && <FilterStatus />}
-        {router?.query?.tab === "unanswered-task" && <UnAnswerFilter />}
-        {router?.query?.tab === "all-task" && <AllTaskFilter />}
-        <Divider />
-        <DownloadData />
-      </div>
-      <List
-        rowKey={(row) => row?.id}
-        dataSource={data?.data}
-        loading={isLoading || isFetching}
-        size="large"
-        pagination={{
-          onChange: handleChangePage,
-          showSizeChanger: false,
-          position: "both",
-          current: parseInt(query?.page) || 1,
-          pageSize: parseInt(query?.limit) || 20,
-          total: data?.total,
-          showTotal: (total, range) =>
-            `${range[0]}-${range[1]} dari ${total} pertanyaan`,
-          size: "small",
+        <Flex>
+          {/* Icon Section - Hide on mobile */}
+          {!isMobile && (
+            <div
+              style={{
+                width: iconSectionWidth,
+                backgroundColor: "#F8F9FA",
+                borderRight: "1px solid #E5E7EB",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                minHeight: "200px",
+              }}
+            >
+              <SearchOutlined style={{ color: "#FF4500", fontSize: "18px" }} />
+            </div>
+          )}
+
+          {/* Content Section */}
+          <div style={{ flex: 1, padding: mainPadding }}>
+            <div style={{ marginBottom: "16px" }}>
+              <Typography.Title
+                level={5}
+                style={{
+                  margin: 0,
+                  color: "#1C1C1C",
+                  fontSize: isMobile ? "16px" : "18px",
+                  fontWeight: 600,
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "8px",
+                  marginBottom: "8px",
+                }}
+              >
+                🔍 Filter & Pencarian
+              </Typography.Title>
+              <Typography.Text
+                style={{
+                  color: "#878A8C",
+                  fontSize: isMobile ? "12px" : "14px",
+                }}
+              >
+                Filter pertanyaan berdasarkan kriteria tertentu
+              </Typography.Text>
+            </div>
+
+            <div>
+              {router?.query?.tab === "my-task" && <FilterStatus />}
+              {router?.query?.tab === "unanswered-task" && <UnAnswerFilter />}
+              {router?.query?.tab === "all-task" && <AllTaskFilter />}
+
+              <Divider style={{ margin: "16px 0" }} />
+              <DownloadData />
+            </div>
+          </div>
+        </Flex>
+      </Card>
+
+      {/* Tickets List Card */}
+      <Card
+        style={{
+          width: "100%",
         }}
-        renderItem={(item) => (
-          <List.Item
-            actions={[
-              <Space size="small" key="total_comments">
-                <MessageOutlined
-                  style={{
-                    color: "#1890ff",
-                  }}
-                  size={10}
-                />
-                <Typography.Text type="secondary">
-                  {parseInt(item?.comments_count)}
-                </Typography.Text>
-              </Space>,
-            ]}
-          >
-            <List.Item.Meta
-              title={<TitleLink item={item} />}
-              description={
-                <Typography.Text
-                  type="secondary"
-                  style={{
-                    fontSize: 13,
-                  }}
-                >
-                  <Space wrap>
-                    <CalendarOutlined />
-                    Ditanyakan tanggal {formatDateLL(item?.created_at)}
-                    <Link href={`/users/${item?.customer?.custom_id}`}>
-                      <Typography.Link>
-                        {item?.customer?.username}
-                      </Typography.Link>
-                    </Link>
-                  </Space>
-                </Typography.Text>
-              }
+        bodyStyle={{ padding: 0 }}
+      >
+        <Flex>
+          {/* Icon Section - Hide on mobile */}
+          {!isMobile && (
+            <div
+              style={{
+                width: iconSectionWidth,
+                backgroundColor: "#F8F9FA",
+                borderRight: "1px solid #E5E7EB",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                minHeight: "400px",
+              }}
+            >
+              <MessageOutlined style={{ color: "#FF4500", fontSize: "18px" }} />
+            </div>
+          )}
+
+          {/* Content Section */}
+          <div style={{ flex: 1, backgroundColor: "#FFFFFF" }}>
+            <List
+              rowKey={(row) => row?.id}
+              dataSource={data?.data}
+              loading={isLoading || isFetching}
+              size="large"
+              pagination={{
+                onChange: handleChangePage,
+                showSizeChanger: false,
+                position: "bottom",
+                current: parseInt(query?.page) || 1,
+                pageSize: parseInt(query?.limit) || 20,
+                total: data?.total,
+                showTotal: (total, range) =>
+                  isMobile
+                    ? `${range[0]}-${range[1]} dari ${total}`
+                    : `Menampilkan ${range[0]}-${range[1]} dari ${total} pertanyaan`,
+                size: isMobile ? "small" : "default",
+                simple: isMobile,
+                showQuickJumper: !isMobile,
+                responsive: true,
+                style: {
+                  padding: isMobile ? "12px 8px" : "16px",
+                  borderTop: "1px solid #F3F4F6",
+                  marginTop: "0",
+                  textAlign: "center",
+                  backgroundColor: "#FAFBFC",
+                  fontSize: isMobile ? "12px" : "14px",
+                },
+              }}
+              renderItem={(item, index) => {
+                const handleClick = () => {
+                  router.push(`/customers-tickets/${item?.id}`);
+                };
+
+                return (
+                  <div
+                    onClick={handleClick}
+                    style={{
+                      padding: isMobile ? "12px 16px" : "16px 20px",
+                      borderBottom:
+                        index < data?.data?.length - 1
+                          ? "1px solid #F3F4F6"
+                          : "none",
+                      transition: "background-color 0.15s ease",
+                      cursor: "pointer",
+                      minHeight: isMobile ? "70px" : "80px",
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.backgroundColor = "#F9FAFB";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.backgroundColor = "transparent";
+                    }}
+                  >
+                    <Flex
+                      justify="space-between"
+                      align="flex-start"
+                      gap={isMobile ? 8 : 12}
+                      style={{
+                        flexDirection: isMobile ? "column" : "row",
+                      }}
+                    >
+                      {/* Main Content */}
+                      <div style={{ flex: 1, minWidth: 0, width: "100%" }}>
+                        {/* Title with Status Icon */}
+                        <Flex
+                          align="center"
+                          gap={6}
+                          style={{ marginBottom: isMobile ? "6px" : "8px" }}
+                        >
+                          <Tooltip
+                            title={`Status: ${
+                              item?.status_code === "DIAJUKAN"
+                                ? "Diajukan"
+                                : item?.status_code === "DIKERJAKAN"
+                                ? "Dikerjakan"
+                                : item?.status_code === "SELESAI"
+                                ? "Selesai"
+                                : "Unknown"
+                            }`}
+                          >
+                            <div
+                              style={{
+                                display: "flex",
+                                alignItems: "center",
+                              }}
+                            >
+                              <SetItem item={item} />
+                            </div>
+                          </Tooltip>
+                          <Typography.Text
+                            style={{
+                              fontSize: isMobile ? "14px" : "16px",
+                              fontWeight: 500,
+                              color: "#1C1C1C",
+                              lineHeight: "1.5",
+                              flex: 1,
+                              overflow: "hidden",
+                              textOverflow: "ellipsis",
+                              whiteSpace: "nowrap",
+                              maxWidth: isMobile ? "200px" : "400px",
+                            }}
+                            title={item?.title}
+                          >
+                            {isMobile && item?.title?.length > 30
+                              ? `${item?.title?.substring(0, 30)}...`
+                              : item?.title?.length > 60
+                              ? `${item?.title?.substring(0, 60)}...`
+                              : item?.title}
+                          </Typography.Text>
+                          {item?.is_published && (
+                            <Tooltip title="Tiket Terpublikasi">
+                              <div
+                                style={{
+                                  backgroundColor: "#FF4500",
+                                  color: "#FFFFFF",
+                                  fontSize: isMobile ? "8px" : "9px",
+                                  fontWeight: 600,
+                                  borderRadius: "3px",
+                                  padding: isMobile ? "1px 4px" : "2px 5px",
+                                  textTransform: "uppercase",
+                                  letterSpacing: "0.5px",
+                                  flexShrink: 0,
+                                }}
+                              >
+                                PUB
+                              </div>
+                            </Tooltip>
+                          )}
+                        </Flex>
+
+                        {/* Meta Info */}
+                        <Typography.Text
+                          style={{
+                            fontSize: isMobile ? "11px" : "13px",
+                            color: "#9CA3AF",
+                            display: "block",
+                            lineHeight: "1.4",
+                          }}
+                        >
+                          {formatDateLLWithTime(item?.created_at)} • oleh{" "}
+                          <Link href={`/users/${item?.customer?.custom_id}`}>
+                            <Typography.Text
+                              style={{
+                                color: "#0079D3",
+                                fontWeight: 500,
+                              }}
+                            >
+                              {item?.customer?.username}
+                            </Typography.Text>
+                          </Link>
+                          {item?.sub_category && !isMobile && (
+                            <>
+                              {" • "}
+                              <span
+                                style={{
+                                  color: "#6B7280",
+                                  fontWeight: 500,
+                                  backgroundColor: "#F8F9FA",
+                                  border: "1px solid #E9ECEF",
+                                  borderRadius: "3px",
+                                  padding: "1px 4px",
+                                  fontSize: "11px",
+                                  marginLeft: "4px",
+                                }}
+                              >
+                                {item?.sub_category?.name}
+                              </span>
+                            </>
+                          )}
+                        </Typography.Text>
+
+                        {/* SubCategory on mobile - separate line */}
+                        {item?.sub_category && isMobile && (
+                          <div
+                            style={{
+                              display: "inline-block",
+                              fontSize: "10px",
+                              color: "#6B7280",
+                              fontWeight: 500,
+                              marginTop: "4px",
+                              backgroundColor: "#F3F4F6",
+                              border: "1px solid #E5E7EB",
+                              borderRadius: "4px",
+                              padding: "2px 6px",
+                            }}
+                          >
+                            {item?.sub_category?.name}
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Right Side Actions */}
+                      <Flex
+                        align="center"
+                        gap={isMobile ? 8 : 12}
+                        style={{
+                          marginTop: isMobile ? "4px" : "0",
+                          alignSelf: isMobile ? "flex-end" : "flex-start",
+                        }}
+                      >
+                        {/* Comments Count */}
+                        <Flex align="center" gap={3}>
+                          <MessageOutlined
+                            style={{
+                              fontSize: isMobile ? 12 : 14,
+                              color: "#9CA3AF",
+                            }}
+                          />
+                          <Typography.Text
+                            style={{
+                              fontSize: isMobile ? "10px" : "12px",
+                              color: "#9CA3AF",
+                              fontWeight: 500,
+                            }}
+                          >
+                            {parseInt(item?.comments_count)}
+                          </Typography.Text>
+                        </Flex>
+
+                        {/* Assignee */}
+                        <div
+                          style={{
+                            transform: isMobile ? "scale(0.9)" : "scale(1)",
+                          }}
+                        >
+                          <Assignee item={item} />
+                        </div>
+                      </Flex>
+                    </Flex>
+                  </div>
+                );
+              }}
             />
-            <Space>
-              <Assignee key="penerima_tugas" item={item} />
-            </Space>
-          </List.Item>
-        )}
-      />
+          </div>
+        </Flex>
+      </Card>
     </Stack>
   );
 };

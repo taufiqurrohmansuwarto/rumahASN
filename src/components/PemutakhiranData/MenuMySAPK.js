@@ -193,20 +193,12 @@ export function MenuMySAPK({
   };
 
   return (
-    <div
-      style={{
-        backgroundColor: "#DAE0E6",
-        padding: isMobile ? "12px" : "16px",
-      }}
-    >
+    <div>
       {/* Header Profile */}
       <Card
         style={{
           width: "100%",
-          backgroundColor: "#FFFFFF",
-          border: "1px solid #EDEFF1",
-          borderRadius: "4px",
-          marginBottom: "8px",
+          marginBottom: "16px",
         }}
         bodyStyle={{ padding: 0 }}
       >
@@ -575,10 +567,6 @@ export function MenuMySAPK({
       <Card
         style={{
           width: "100%",
-          backgroundColor: "#FFFFFF",
-          border: "1px solid #EDEFF1",
-          borderRadius: "4px",
-          marginBottom: "8px",
         }}
         bodyStyle={{ padding: 0 }}
       >
