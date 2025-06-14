@@ -271,6 +271,20 @@ export const formatDateLL = (data) => {
   return dayjs(data).format("DD, MMM YYYY");
 };
 
+export const formatDateLLWithTime = (data) => {
+  // jika sudah setahun, return DD, MMM YYYY
+  // selain itu, return from now
+  const now = dayjs();
+  const date = dayjs(data);
+  const diffInYears = now.diff(date, "year");
+
+  if (diffInYears >= 1) {
+    return date.format("DD, MMM YYYY");
+  } else {
+    return date.fromNow();
+  }
+};
+
 const allUser = ["admin", "agent", "user"];
 const noAdmin = ["agent", "user"];
 const noUser = ["admin", "agent"];

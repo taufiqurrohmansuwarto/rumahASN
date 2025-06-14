@@ -1,13 +1,12 @@
 import useScrollRestoration from "@/hooks/useScrollRestoration";
 import { Stack } from "@mantine/core";
-import { Affix, Card, Col, Row, Tabs } from "antd";
+import { Affix, Card, Col, Row } from "antd";
 import { useRouter } from "next/router";
 import Announcement from "../Announcement";
-import SocmedCreatePost from "./SocmedCreatePost";
-import SocmedMyPosts from "./SocmedMyPosts";
-import SocmedPosts from "./SocmedPosts";
 import UserPolls from "../Polls/UserPolls";
 import QuickAccessCarousel from "./QuickAccessCarousel";
+import SocmedCreatePost from "./SocmedCreatePost";
+import SocmedPosts from "./SocmedPosts";
 
 function SocmedTabs() {
   useScrollRestoration();
@@ -26,7 +25,7 @@ function SocmedTabs() {
   return (
     <>
       <Row gutter={[8, 8]}>
-        <Col md={18} xs={24}>
+        <Col md={16} xs={24}>
           <Row gutter={[8, 8]}>
             <Col md={24} xs={24}>
               <Stack spacing="xs">

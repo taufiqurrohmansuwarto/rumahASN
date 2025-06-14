@@ -35,12 +35,7 @@ function LayoutASNConnect({ children, active = "asn-updates" }) {
   ];
 
   return (
-    <div
-      style={{
-        backgroundColor: "#DAE0E6",
-        minHeight: "100vh",
-      }}
-    >
+    <div>
       {/* Header Component */}
       <ASNConnectHeader />
 
@@ -70,8 +65,8 @@ function LayoutASNConnect({ children, active = "asn-updates" }) {
       {/* Content Area */}
       <div
         style={{
-          maxWidth: "1200px",
-          margin: "0 auto",
+          // maxWidth: "1200px",
+          // margin: "0 auto",
           padding: breakPoint.xs ? "20px 12px" : "24px 20px",
         }}
       >

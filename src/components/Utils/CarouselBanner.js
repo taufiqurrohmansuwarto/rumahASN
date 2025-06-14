@@ -3,9 +3,13 @@ import { Box, Image } from "@mantine/core";
 import Autoplay from "embla-carousel-autoplay";
 import { useRouter } from "next/router";
 import { useRef } from "react";
+import { Grid as GridAntd } from "antd";
 
-function CarouselBanner() {
+const CarouselBanner = () => {
   const router = useRouter();
+  const breakPoint = GridAntd.useBreakpoint();
+  const isMobile = breakPoint.xs;
+
   const autoplay = useRef(
     Autoplay({
       delay: 4500,
@@ -19,9 +23,9 @@ function CarouselBanner() {
       onMouseLeave={() => autoplay.current.reset}
       mx="auto"
       withIndicators
-      height="auto"
+      height={isMobile ? "160px" : "180px"}
       dragFree
-      slideGap="md"
+      slideGap="xs"
       align="start"
     >
       <Carousel.Slide
@@ -44,6 +48,10 @@ function CarouselBanner() {
                 "https://siasn.bkd.jatimprov.go.id:9000/public/banner-sscasn_test.png"
               }
               alt="banner-sscasn.webp"
+              style={{
+                height: "100%",
+                objectFit: "cover",
+              }}
             />
           </a>
         </div>
@@ -65,6 +73,10 @@ function CarouselBanner() {
               "https://siasn.bkd.jatimprov.go.id:9000/public/banner-coaching-clinic.png"
             }
             alt="banner-coaching-clinic.webp"
+            style={{
+              height: "100%",
+              objectFit: "cover",
+            }}
           />
         </div>
       </Carousel.Slide>
@@ -85,6 +97,10 @@ function CarouselBanner() {
               "https://siasn.bkd.jatimprov.go.id:9000/public/banner-quiz.png"
             }
             alt="banner-sample.webp"
+            style={{
+              height: "100%",
+              objectFit: "cover",
+            }}
           />
         </div>
       </Carousel.Slide>
@@ -108,6 +124,10 @@ function CarouselBanner() {
                 "https://siasn.bkd.jatimprov.go.id:9000/public/banner-tracking-layanan.png"
               }
               alt="banner-sample.webp"
+              style={{
+                height: "100%",
+                objectFit: "cover",
+              }}
             />
           </a>
         </div>
@@ -118,10 +138,14 @@ function CarouselBanner() {
         }}
         onClick={() => router.push("/webinar-series/all")}
       >
-        <Box>
+        <Box style={{ height: "100%" }}>
           <Image
             src={"https://siasn.bkd.jatimprov.go.id:9000/public/banner2.png"}
             alt="banner-sample.webp"
+            style={{
+              height: "100%",
+              objectFit: "cover",
+            }}
           />
         </Box>
       </Carousel.Slide>
@@ -140,11 +164,15 @@ function CarouselBanner() {
           <Image
             src={"https://siasn.bkd.jatimprov.go.id:9000/public/banner-1.png"}
             alt="banner-sample.webp"
+            style={{
+              height: "100%",
+              objectFit: "cover",
+            }}
           />
         </div>
       </Carousel.Slide>
     </Carousel>
   );
-}
+};
 
 export default CarouselBanner;
