@@ -1,4 +1,5 @@
 import Layout from "@/components/Layout";
+import PageContainer from "@/components/PageContainer";
 import WebinarUserDetailLayout from "@/components/WebinarSeries/WebinarUserDetailLayout";
 import {
   getAbsenceUsers,
@@ -8,7 +9,8 @@ import {
 import { CheckOutlined, CloseOutlined } from "@ant-design/icons";
 import { Stack } from "@mantine/core";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Button, Card, List, Modal, Tag, message } from "antd";
+import { Button, Card, List, Modal, Tag, message, Breadcrumb } from "antd";
+import Link from "next/link";
 import { useRouter } from "next/router";
 
 import dayjs from "dayjs";
@@ -164,19 +166,55 @@ function WebinarAbsence() {
       },
     });
 
+  const breadcrumb = [
+    {
+      title: "Beranda",
+      href: "/",
+      isActive: true,
+    },
+    {
+      title: "Daftar Webinar Saya",
+      href: "/webinar-series/my-webinar",
+      isActive: true,
+    },
+    {
+      title: data?.webinar_series?.title || "Detail Webinar",
+      isActive: false,
+    },
+  ];
+
   return (
-    <WebinarUserDetailLayout loading={isLoading} active="absence">
-      <Card>
-        <RegisterUnregister
-          register={register}
-          isLoadingRegister={isLoadingRegister}
-          unregister={unregister}
-          isLoadingUnregister={isLoadingUnregister}
-          data={data}
-          id={id}
-        />
-      </Card>
-    </WebinarUserDetailLayout>
+    <PageContainer
+      onBack={() => router.push(`/webinar-series/my-webinar`)}
+      title="Presensi"
+      breadcrumbRender={() => (
+        <Breadcrumb>
+          {breadcrumb.map((item) => (
+            <Breadcrumb.Item key={item.title}>
+              {item.isActive ? (
+                <Link href={item.href}>{item.title}</Link>
+              ) : (
+                item.title
+              )}
+            </Breadcrumb.Item>
+          ))}
+        </Breadcrumb>
+      )}
+      loading={isLoading}
+    >
+      <WebinarUserDetailLayout loading={isLoading} active="absence">
+        <Card>
+          <RegisterUnregister
+            register={register}
+            isLoadingRegister={isLoadingRegister}
+            unregister={unregister}
+            isLoadingUnregister={isLoadingUnregister}
+            data={data}
+            id={id}
+          />
+        </Card>
+      </WebinarUserDetailLayout>
+    </PageContainer>
   );
 }
 

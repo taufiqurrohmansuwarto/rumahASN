@@ -14,7 +14,7 @@ import { Stack } from "@mantine/core";
 import AISummarize from "../Ticket/AISummarize";
 import { EditOutlined } from "@ant-design/icons";
 
-function ChangeTicketDescription({ item }) {
+const ChangeTicketDescription = ({ item }) => {
   const [isEdit, setIsEdit] = useState();
   const [value, setValue] = useState(item?.content);
 
@@ -117,6 +117,6 @@ function ChangeTicketDescription({ item }) {
       )}
     </>
   );
-}
+};
 
 export default ChangeTicketDescription;

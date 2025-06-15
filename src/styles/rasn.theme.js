@@ -278,7 +278,7 @@ export const useGlobalStyle = createStyles(({ prefixCls, css, token }) => ({
       .${prefixCls}-modal-footer {
         border-top: 1px solid #edeff1; // Light border
         padding: 16px 24px;
-        background: #f8f9fa; // Very light background
+        background: #ffffff; // White background
         border-radius: 0 0 8px 8px;
       }
     }
@@ -544,6 +544,150 @@ export const useGlobalStyle = createStyles(({ prefixCls, css, token }) => ({
         font-size: 14px;
       }
     }
+
+    // Enhanced Calendar Component Styling
+    .${prefixCls}-picker-calendar {
+      .${prefixCls}-picker-cell {
+        .${prefixCls}-picker-cell-inner {
+          border-radius: 6px;
+          transition: all 0.2s ease;
+          border: 2px solid transparent;
+        }
+
+        &:hover .${prefixCls}-picker-cell-inner {
+          background: #1c1c1c !important; // Black hover
+          color: #ffffff !important;
+        }
+
+        &.${prefixCls}-picker-cell-selected .${prefixCls}-picker-cell-inner {
+          background: transparent !important; // No background
+          border: 2px solid #ff4500 !important; // Orange border all sides
+          color: #ff4500 !important; // Orange text
+          font-weight: 600 !important;
+          box-sizing: border-box !important; // Ensure border is included in dimensions
+        }
+
+        &.${prefixCls}-picker-cell-in-view.${prefixCls}-picker-cell-selected
+          .${prefixCls}-picker-cell-inner {
+          background: transparent !important; // No background
+          border: 2px solid #ff4500 !important; // Orange border all sides
+          color: #ff4500 !important; // Orange text
+          font-weight: 600 !important;
+          box-sizing: border-box !important;
+        }
+
+        &.${prefixCls}-picker-cell-today .${prefixCls}-picker-cell-inner {
+          border: 1px solid #ff4500 !important; // Orange border all sides
+          color: #ff4500 !important;
+          background: rgba(255, 69, 0, 0.1) !important;
+          box-sizing: border-box; // Ensure border is included in dimensions
+        }
+      }
+
+      // Calendar Header (Month/Year Selectors)
+      .${prefixCls}-picker-header {
+        .${prefixCls}-picker-month-btn, .${prefixCls}-picker-year-btn {
+          color: #1c1c1c;
+          font-weight: 500;
+          border-radius: 4px;
+          transition: all 0.2s ease;
+
+          &:hover {
+            background: #f6f7f8 !important;
+            color: #ff4500 !important;
+          }
+        }
+      }
+
+      // Month/Year Panel Dropdowns
+      .${prefixCls}-picker-month-panel,
+        .${prefixCls}-picker-year-panel,
+        .${prefixCls}-picker-decade-panel {
+        .${prefixCls}-picker-cell {
+          .${prefixCls}-picker-cell-inner {
+            border-radius: 6px;
+            transition: all 0.2s ease;
+            color: #1c1c1c;
+          }
+
+          &:hover .${prefixCls}-picker-cell-inner {
+            background: #1c1c1c !important; // Black hover
+            color: #ffffff !important;
+          }
+
+          &.${prefixCls}-picker-cell-selected .${prefixCls}-picker-cell-inner {
+            background: #ff4500 !important; // Orange background for month/year
+            color: #ffffff !important; // White text
+            font-weight: 600 !important;
+          }
+
+          &.${prefixCls}-picker-cell-in-view.${prefixCls}-picker-cell-selected
+            .${prefixCls}-picker-cell-inner {
+            background: #ff4500 !important; // Orange background for month/year
+            color: #ffffff !important; // White text
+            font-weight: 600 !important;
+          }
+        }
+      }
+    }
+
+    // Calendar Component (not DatePicker)
+    .${prefixCls}-calendar {
+      .${prefixCls}-calendar-cell {
+        border-radius: 6px;
+        transition: all 0.2s ease;
+
+        &:hover {
+          background: #1c1c1c !important; // Black hover
+
+          .${prefixCls}-calendar-date {
+            color: #ffffff !important;
+          }
+        }
+      }
+
+      .${prefixCls}-calendar-cell-selected {
+        background: transparent !important; // No background
+        border: 2px solid #ff4500 !important; // Orange border all sides
+        box-sizing: border-box !important; // Ensure border is included in dimensions
+
+        .${prefixCls}-calendar-date {
+          color: #ff4500 !important; // Orange text
+          font-weight: 600 !important;
+        }
+      }
+
+      .${prefixCls}-calendar-cell-in-view.${prefixCls}-calendar-cell-selected {
+        background: transparent !important; // No background
+        border: 2px solid #ff4500 !important; // Orange border all sides
+        box-sizing: border-box !important;
+
+        .${prefixCls}-calendar-date {
+          color: #ff4500 !important; // Orange text
+          font-weight: 600 !important;
+        }
+      }
+
+      .${prefixCls}-calendar-today {
+        .${prefixCls}-calendar-date {
+          border: 1px solid #ff4500 !important; // Orange border all sides
+          color: #ff4500 !important;
+          background: rgba(255, 69, 0, 0.1) !important;
+          border-radius: 6px;
+          box-sizing: border-box; // Ensure border is included in dimensions
+        }
+      }
+
+      // Calendar Header Selectors
+      .${prefixCls}-calendar-header {
+        .${prefixCls}-calendar-month-select,
+          .${prefixCls}-calendar-year-select {
+          .${prefixCls}-select-selector {
+            border-radius: 4px;
+          }
+        }
+      }
+    }
   `,
 }));
 
@@ -702,54 +846,57 @@ export const useButtonStyle = createStyles(({ prefixCls, css }) => ({
       }
     }
 
-    // Danger Button - Reddit red gradient dengan Ant Design style
+    // Enhanced Danger Button - Clean & Modern
     &.${prefixCls}-btn-dangerous:not([disabled]) {
-      > span {
-        position: relative;
-        z-index: 1;
+      background: #ffffff !important;
+      border: 1px solid #dc2626 !important; // Clean red border
+      color: #dc2626 !important; // Red text
+      font-weight: 500 !important;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05) !important; // Subtle shadow
+      position: relative !important;
+      overflow: hidden !important;
+
+      // Remove pseudo elements
+      &::before,
+      &::after {
+        display: none !important;
       }
 
-      &::before {
-        content: "";
-        background: linear-gradient(
-          135deg,
-          #ea0027 0%,
-          #ff1744 50%,
-          #ea0027 100%
-        ); // Reddit red gradient
-        position: absolute;
-        inset: -1px;
-        opacity: 1;
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        border-radius: inherit; // Mengikuti border-radius Ant Design
-        box-shadow: 0 2px 8px rgba(234, 0, 39, 0.25);
+      &:hover {
+        background: #dc2626 !important; // Red background on hover
+        border-color: #dc2626 !important;
+        color: #ffffff !important; // White text on hover
+        transform: translateY(-1px) !important;
+        box-shadow: 0 4px 12px rgba(220, 38, 38, 0.25) !important;
       }
 
-      &:hover::before {
-        background: linear-gradient(
-          135deg,
-          #d10024 0%,
-          #e91e63 50%,
-          #d10024 100%
-        );
-        box-shadow: 0 4px 12px rgba(234, 0, 39, 0.35);
-        transform: translateY(-2px);
+      &:active {
+        background: #b91c1c !important; // Darker red on active
+        border-color: #b91c1c !important;
+        color: #ffffff !important;
+        transform: scale(0.98) !important;
+        box-shadow: 0 2px 4px rgba(220, 38, 38, 0.3) !important;
       }
 
-      &:active::before {
-        background: linear-gradient(
-          135deg,
-          #b80020 0%,
-          #c2185b 50%,
-          #b80020 100%
-        );
-        transform: scale(0.98);
-        box-shadow: 0 1px 4px rgba(234, 0, 39, 0.3);
+      &:focus {
+        outline: none !important;
+        box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.2),
+          0 1px 2px rgba(0, 0, 0, 0.05) !important;
+        border-color: #dc2626 !important;
       }
 
-      &:focus::before {
-        box-shadow: 0 0 0 3px rgba(234, 0, 39, 0.2),
-          0 2px 8px rgba(234, 0, 39, 0.25);
+      // Ghost style for less prominent danger actions
+      &.${prefixCls}-btn-ghost {
+        background: transparent !important;
+        border: 1px solid #dc2626 !important;
+        color: #dc2626 !important;
+
+        &:hover {
+          background: rgba(220, 38, 38, 0.1) !important;
+          border-color: #dc2626 !important;
+          color: #dc2626 !important;
+        }
       }
     }
   `,
@@ -786,6 +933,10 @@ export const useThemeConfig = () => {
         controlHeightLG: 44,
         controlHeightSM: 28,
         colorPrimary: "#FF4500", // Reddit orange
+        colorError: "#DC2626", // Clean red for error buttons
+        colorErrorHover: "#B91C1C", // Darker red for hover
+        colorErrorActive: "#991B1B", // Even darker for active
+        colorErrorOutline: "rgba(220, 38, 38, 0.2)", // Light red for focus outline
       },
       Input: {
         borderRadius: 4, // Reddit style
@@ -822,7 +973,7 @@ export const useThemeConfig = () => {
       Modal: {
         borderRadius: 8, // Slightly rounded untuk modal
         headerBg: "#FFFFFF", // White header
-        footerBg: "#F8F9FA", // Light footer
+        footerBg: "#FFFFFF", // White footer
         colorBorder: "#EDEFF1", // Light border
       },
       Drawer: {
@@ -865,13 +1016,24 @@ export const useThemeConfig = () => {
       Message: {
         borderRadius: 4, // Reddit style
       },
+      Calendar: {
+        borderRadius: 6, // Rounded for calendar cells
+        itemActiveBg: "transparent", // No background for selected dates
+        cellHoverBg: "#1C1C1C", // Black hover
+        cellHoverColor: "#FFFFFF", // White text on hover
+        itemActiveColor: "#FF4500", // Orange text for selected
+        cellActiveWithRangeBg: "transparent", // No range background
+        cellActiveBg: "transparent", // No active background
+        colorPrimary: "#FF4500", // Orange theme
+        colorBgContainer: "#FFFFFF", // White background
+      },
     },
     token: {
       // Reddit authentic colors
       colorPrimary: "#FF4500", // Reddit orange
       colorSuccess: "#46D160", // Reddit green
       colorWarning: "#FFB000", // Reddit warning yellow
-      colorError: "#EA0027", // Reddit error red
+      colorError: "#DC2626", // Clean modern red
       colorInfo: "#0079D3", // Reddit blue
 
       fontSize: 14,

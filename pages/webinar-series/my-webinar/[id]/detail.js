@@ -1,4 +1,5 @@
 import Layout from "@/components/Layout";
+import PageContainer from "@/components/PageContainer";
 import DetailWebinarUser from "@/components/WebinarSeries/DetailWebinarUser";
 import WebinarUserDetailLayout from "@/components/WebinarSeries/WebinarUserDetailLayout";
 import {
@@ -6,8 +7,9 @@ import {
   webinarUserDetail,
 } from "@/services/webinar.services";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { message } from "antd";
+import { Breadcrumb, message } from "antd";
 import Head from "next/head";
+import Link from "next/link";
 import { useRouter } from "next/router";
 import { useState } from "react";
 
@@ -59,19 +61,55 @@ function MyWebinarDetail() {
     }
   };
 
+  const breadcrumb = [
+    {
+      title: "Beranda",
+      href: "/",
+      isActive: true,
+    },
+    {
+      title: "Daftar Webinar Saya",
+      href: "/webinar-series/my-webinar",
+      isActive: true,
+    },
+    {
+      title: data?.webinar_series?.title,
+      isActive: false,
+    },
+  ];
+
   return (
     <>
       <Head>
         <title>Rumah ASN - Webinar Series - {data?.title}</title>
       </Head>
-      <WebinarUserDetailLayout loading={isLoading} active="detail">
-        <DetailWebinarUser
-          downloadCertificate={handleDownload}
-          loadingDownloadCertificate={isLoadingDownloadCertificate}
-          data={data?.webinar_series}
-          alreadyPoll={data?.result?.already_poll}
-        />
-      </WebinarUserDetailLayout>
+      <PageContainer
+        onBack={() => router.push(`/webinar-series/my-webinar`)}
+        title="Detail Webinar"
+        breadcrumbRender={() => (
+          <Breadcrumb>
+            {breadcrumb.map((item) => (
+              <Breadcrumb.Item key={item.title}>
+                {item.isActive ? (
+                  <Link href={item.href}>{item.title}</Link>
+                ) : (
+                  item.title
+                )}
+              </Breadcrumb.Item>
+            ))}
+          </Breadcrumb>
+        )}
+        loading={isLoading}
+      >
+        <WebinarUserDetailLayout loading={isLoading} active="detail">
+          <DetailWebinarUser
+            downloadCertificate={handleDownload}
+            loadingDownloadCertificate={isLoadingDownloadCertificate}
+            data={data?.webinar_series}
+            alreadyPoll={data?.result?.already_poll}
+          />
+        </WebinarUserDetailLayout>
+      </PageContainer>
     </>
   );
 }

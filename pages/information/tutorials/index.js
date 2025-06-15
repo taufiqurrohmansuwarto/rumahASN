@@ -4,7 +4,7 @@ import PageContainer from "@/components/PageContainer";
 import Tutorials from "@/components/PusatBantuan/Tutorials";
 import Head from "next/head";
 
-function Tutorial() {
+const Tutorial = () => {
   return (
     <>
       <Head>
@@ -24,7 +24,7 @@ function Tutorial() {
       </PageContainer>
     </>
   );
-}
+};
 
 Tutorial.Auth = {
   action: "manage",

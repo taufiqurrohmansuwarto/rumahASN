@@ -1,6 +1,7 @@
 import LayoutParticipant from "@/components/CoachingClinic/Participant/LayoutParticipant";
 import MyMeetings from "@/components/CoachingClinic/Participant/MyMeetings";
 import Layout from "@/components/Layout";
+import PageContainer from "@/components/PageContainer";
 import Head from "next/head";
 
 const MyCoachingClinic = () => {
@@ -11,12 +12,17 @@ const MyCoachingClinic = () => {
           Rumah ASN - Coaching & Mentoring - Daftar Coaching dan Mentoring
         </title>
       </Head>
-      <LayoutParticipant
-        content="Daftar Jadwal Coaching Clinic Saya"
-        active="my-coaching-clinic"
+      <PageContainer
+        title="Coaching Clinic"
+        content="Jadwal Coaching & Mentoring"
       >
-        <MyMeetings />
-      </LayoutParticipant>
+        <LayoutParticipant
+          content="Daftar Jadwal Coaching Clinic Saya"
+          active="my-coaching-clinic"
+        >
+          <MyMeetings />
+        </LayoutParticipant>
+      </PageContainer>
     </>
   );
 };
