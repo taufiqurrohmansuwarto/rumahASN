@@ -66,7 +66,7 @@ const MyPodcast = ({ item }) => {
   );
 };
 
-function Podcast() {
+const Podcast = () => {
   const { data, isLoading } = useQuery(
     ["podcasts-users"],
     () => podcastUsers(),
@@ -83,14 +83,11 @@ function Podcast() {
         <title>Rumah ASN - Edukasi - Podcast</title>
       </Head>
       <PageContainer
-        childrenContentStyle={{
-          padding: breakPoint.xs ? 0 : null,
-        }}
         loading={isLoading}
         breadcrumbRender={() => (
           <Breadcrumb>
             <Breadcrumb.Item>
-              <Link href="/">Forum Kepegawaian</Link>
+              <Link href="/">Knowledge Base</Link>
             </Breadcrumb.Item>
             <Breadcrumb.Item>Podcast</Breadcrumb.Item>
           </Breadcrumb>
@@ -116,7 +113,7 @@ function Podcast() {
       </PageContainer>
     </>
   );
-}
+};
 
 Podcast.getLayout = (page) => {
   return <Layout>{page}</Layout>;

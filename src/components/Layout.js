@@ -1,8 +1,8 @@
 import MegaMenuTop from "@/components/MegaMenu/MegaMenuTop";
 import { currentUserRole } from "@/services/current-user.services";
+import { layoutToken } from "@/styles/rasn.theme";
 import { appList } from "@/utils/app-lists";
 import {
-  ApiOutlined,
   BookOutlined,
   GroupOutlined,
   LogoutOutlined,
@@ -12,9 +12,10 @@ import {
 } from "@ant-design/icons";
 import { Center } from "@mantine/core";
 import {
-  IconMessageUser,
-  IconUsersGroup,
-  IconUserStar,
+  IconBuildingBank,
+  IconNetwork,
+  IconPlugConnected,
+  IconUserCog,
 } from "@tabler/icons-react";
 import { AccessControl } from "accesscontrol";
 import { Button, Dropdown, Grid, Space, Typography } from "antd";
@@ -28,7 +29,6 @@ import { userRoutes } from "../routes";
 import NotifikasiASNConnect from "./Notification/NotifikasiASNConnect";
 import NotifikasiForumKepegawaian from "./Notification/NotifikasiForumKepegawaian";
 import NotifikasiPrivateMessage from "./Notification/NotifikasiPrivateMessage";
-import { layoutToken } from "@/styles/rasn.theme";
 const ProLayout = dynamic(
   () => import("@ant-design/pro-components").then((mod) => mod?.ProLayout),
   {
@@ -68,7 +68,7 @@ const changeRoutes = (user) => {
       userRoutes.routes.push({
         path: "/asn-connect/asn-updates",
         name: "ASN Connect (Saling Bantu)",
-        icon: <IconMessageUser size={18} />,
+        icon: <IconNetwork size={18} />,
       });
     }
 
@@ -94,7 +94,7 @@ const changeRoutes = (user) => {
       userRoutes.routes.push({
         path: "/coaching-clinic-consultant",
         name: "Coaching & Mentoring",
-        icon: <IconUsersGroup size={18} />,
+        icon: <IconUserCog size={18} />,
       });
     }
 
@@ -102,7 +102,7 @@ const changeRoutes = (user) => {
       userRoutes.routes.push({
         path: "/beranda-bkd?tab=my-task",
         name: "Beranda BKD",
-        icon: <IconUserStar size={18} />,
+        icon: <IconBuildingBank size={18} />,
       });
     }
 
@@ -151,7 +151,7 @@ const changeRoutes = (user) => {
         {
           path: "/pemutakhiran-data/komparasi",
           name: "Integrasi MyASN",
-          icon: <ApiOutlined />,
+          icon: <IconPlugConnected size={18} />,
         },
         // {
         //   path: "/submissions/all",

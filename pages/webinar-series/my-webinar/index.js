@@ -26,6 +26,7 @@ import { useRouter } from "next/router";
 import { useState } from "react";
 import Image from "next/image";
 import useScrollRestoration from "@/hooks/useScrollRestoration";
+import PageContainer from "@/components/PageContainer";
 
 function MyWebinar() {
   const router = useRouter();
@@ -83,7 +84,7 @@ function MyWebinar() {
     router.push(`/webinar-series/my-webinar/${id}/detail`);
 
   return (
-    <>
+    <PageContainer title="Webinar Rumah ASN" content="Webinar Saya">
       <Head>
         <title>Rumah ASN - Webinar Saya</title>
       </Head>
@@ -202,7 +203,7 @@ function MyWebinar() {
           />
         </Card>
       </WebinarUserLayout>
-    </>
+    </PageContainer>
   );
 }
 

@@ -30,6 +30,7 @@ import { useRouter } from "next/router";
 import { useState } from "react";
 import SearchWebinarByCode from "@/components/WebinarSeries/SearchWebinarByCode";
 import useScrollRestoration from "@/hooks/useScrollRestoration";
+import PageContainer from "@/components/PageContainer";
 
 function WebinarAll() {
   const router = useRouter();
@@ -88,7 +89,7 @@ function WebinarAll() {
   const breakpoint = Grid.useBreakpoint();
 
   return (
-    <>
+    <PageContainer title="Webinar Rumah ASN" content="Semua Webinar">
       <Head>
         <title>Rumah ASN - Semua Webinar</title>
       </Head>
@@ -237,12 +238,12 @@ function WebinarAll() {
           />
         </Card>
       </WebinarUserLayout>
-    </>
+    </PageContainer>
   );
 }
 
 WebinarAll.getLayout = function getLayout(page) {
-  return <Layout>{page}</Layout>;
+  return <Layout active="/webinar-series/all">{page}</Layout>;
 };
 
 WebinarAll.Auth = {

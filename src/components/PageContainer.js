@@ -16,7 +16,7 @@ const PageContainer = forwardRef(({ children, style, ...props }, ref) => {
       ref={ref}
       style={combinedStyle}
       childrenContentStyle={{
-        padding: breakPoint.xs ? null : 0,
+        padding: breakPoint.xs ? 0 : null,
       }}
       {...props}
     >
