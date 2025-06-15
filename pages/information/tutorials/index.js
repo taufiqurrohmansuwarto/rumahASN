@@ -1,5 +1,6 @@
 import InformationLayout from "@/components/Information/InformationLayout";
 import Layout from "@/components/Layout";
+import PageContainer from "@/components/PageContainer";
 import Tutorials from "@/components/PusatBantuan/Tutorials";
 import Head from "next/head";
 
@@ -9,13 +10,18 @@ function Tutorial() {
       <Head>
         <title>Rumah ASN - Informasi - Tutorial</title>
       </Head>
-      <InformationLayout
-        active="tutorials"
+      <PageContainer
         title="Informasi Rumah ASN"
         content="Tutorial yang tersedia di Rumah ASN"
       >
-        <Tutorials />
-      </InformationLayout>
+        <InformationLayout
+          active="tutorials"
+          title="Informasi Rumah ASN"
+          content="Tutorial yang tersedia di Rumah ASN"
+        >
+          <Tutorials />
+        </InformationLayout>
+      </PageContainer>
     </>
   );
 }

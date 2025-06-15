@@ -1,6 +1,7 @@
 import FAQMenu from "@/components/FAQMenu";
 import InformationLayout from "@/components/Information/InformationLayout";
 import Layout from "@/components/Layout";
+import PageContainer from "@/components/PageContainer";
 import { getFaqs } from "@/services/index";
 import { useQuery } from "@tanstack/react-query";
 import { Card } from "antd";
@@ -14,14 +15,17 @@ function FAQPage() {
       <Head>
         <title>Rumah ASN - Informasi - Pertanyaan Umum</title>
       </Head>
-      <InformationLayout
+      <PageContainer
         title="Informasi Rumah ASN"
         content="Pertanyaan yang sering diajukan"
       >
-        <Card style={{ minHeight: "80vh" }}>
+        <InformationLayout
+          title="Informasi Rumah ASN"
+          content="Pertanyaan yang sering diajukan"
+        >
           <FAQMenu data={data} />
-        </Card>
-      </InformationLayout>
+        </InformationLayout>
+      </PageContainer>
     </>
   );
 }

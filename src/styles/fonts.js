@@ -18,18 +18,21 @@ const plusJakartaSans = Plus_Jakarta_Sans({
 
 const sourceSans3 = Source_Sans_3({
   subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
 });
 
 const openSans = Open_Sans({
   subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
 });
 
 const inter = Inter({
   subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
 });
 
 export const useFontJakarta = () => {
-  return `${plusJakartaSans.style.fontFamily}, ${roboto.style.fontFamily},-apple-system, BlinkMacSystemFont, 'Segoe UI', Oxygen, Ubuntu, Cantarell, Arial, sans-serif `;
+  return `${roboto.style.fontFamily}, ${roboto.style.fontFamily},-apple-system, BlinkMacSystemFont, 'Segoe UI', Oxygen, Ubuntu, Cantarell, Arial, sans-serif `;
 };
 
 export const useFontInterRoboto = () => {

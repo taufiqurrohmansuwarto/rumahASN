@@ -10,12 +10,12 @@ import {
 } from "@ant-design/icons";
 import {
   IconBooks,
-  IconBrandZoom,
   IconInfoCircle,
-  IconMailQuestion,
-  IconMessages,
-  IconMessageUser,
+  IconMessage2Share,
+  IconMessageQuestion,
   IconMicrophone,
+  IconNews,
+  IconVideo,
 } from "@tabler/icons-react";
 
 export const userRoutes = {
@@ -26,27 +26,9 @@ export const userRoutes = {
       icon: <IconBooks size={18} />,
     },
     {
-      path: "/tickets",
+      path: "/tickets/semua",
       name: "Pertanyaan saya",
-      icon: <IconMailQuestion size={18} />,
-      routes: [
-        {
-          path: "/tickets/semua",
-          name: "Semua",
-        },
-        {
-          path: "/tickets/diajukan",
-          name: "Diajukan",
-        },
-        {
-          path: "/tickets/dikerjakan",
-          name: "Dikerjakan",
-        },
-        {
-          path: "/tickets/selesai",
-          name: "Selesai",
-        },
-      ],
+      icon: <IconMessageQuestion size={18} />,
     },
     {
       path: "/tickets/create",
@@ -76,12 +58,12 @@ export const userRoutes = {
     {
       path: "/webinar-series/all",
       name: "Webinar",
-      icon: <IconBrandZoom size={18} />,
+      icon: <IconVideo size={18} />,
     },
     {
       path: "/coaching-clinic/all",
       name: "Mentoring",
-      icon: <IconMessageUser size={18} />,
+      icon: <IconMessage2Share size={18} />,
     },
     {
       path: "/edukasi/podcasts",
@@ -97,7 +79,7 @@ export const userRoutes = {
     {
       path: "/information/faq",
       name: "Informasi",
-      icon: <IconInfoCircle size={18} />,
+      icon: <IconNews size={18} />,
     },
   ],
 };

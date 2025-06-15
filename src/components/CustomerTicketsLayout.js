@@ -1,12 +1,16 @@
-import React from "react";
-import { useRouter } from "next/router";
+import {
+  CheckCircleOutlined,
+  ClockCircleOutlined,
+  PullRequestOutlined,
+  SendOutlined,
+} from "@ant-design/icons";
 import { Card, Flex, Grid, Tabs, Typography } from "antd";
-import { InfoCircleOutlined } from "@ant-design/icons";
+import { useRouter } from "next/router";
 
 const { useBreakpoint } = Grid;
 const { Title } = Typography;
 
-function InformationLayout({ children, active = "faq" }) {
+const CustomerTicketsLayout = ({ children, activeKey }) => {
   const router = useRouter();
   const screens = useBreakpoint();
   const isMobile = !screens.md;
@@ -16,54 +20,61 @@ function InformationLayout({ children, active = "faq" }) {
 
   const tabItems = [
     {
-      key: "faq",
-      label: <span>❓ Pertanyaan Umum</span>,
+      key: "semua",
+      label: <span>📋 Semua</span>,
       children: children,
     },
     {
-      key: "layanan",
-      label: <span>🛠️ Layanan</span>,
+      key: "diajukan",
+      label: (
+        <span>
+          <SendOutlined /> Diajukan
+        </span>
+      ),
       children: children,
     },
     {
-      key: "tutorials",
-      label: <span>📚 Tutorial</span>,
+      key: "dikerjakan",
+      label: (
+        <span>
+          <ClockCircleOutlined /> Dikerjakan
+        </span>
+      ),
+      children: children,
+    },
+    {
+      key: "selesai",
+      label: (
+        <span>
+          <CheckCircleOutlined /> Selesai
+        </span>
+      ),
       children: children,
     },
   ];
 
   const handleTabChange = (activeKey) => {
-    router.push(`/information/${activeKey}`);
+    router.push(`/tickets/${activeKey}`);
+  };
+
+  const getTabItems = () => {
+    return tabItems.map((item) => ({
+      ...item,
+      children: children,
+    }));
   };
 
   return (
-    <div>
+    <>
       <Flex>
         {/* Icon Section - Hide on mobile */}
-        {!isMobile && (
-          <div
-            style={{
-              width: iconSectionWidth,
-              backgroundColor: "#F8F9FA",
-              borderRight: "1px solid #E5E7EB",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              minHeight: "200px",
-            }}
-          >
-            <InfoCircleOutlined
-              style={{ color: "#FF4500", fontSize: "18px" }}
-            />
-          </div>
-        )}
 
         {/* Content Section */}
         <div style={{ flex: 1, backgroundColor: "#FFFFFF" }}>
           <Tabs
-            activeKey={active}
+            activeKey={activeKey}
             onChange={handleTabChange}
-            items={tabItems}
+            items={getTabItems()}
             size={isMobile ? "small" : "default"}
             tabBarStyle={{
               margin: 0,
@@ -129,6 +140,10 @@ function InformationLayout({ children, active = "faq" }) {
             font-size: 12px !important;
             padding: 8px 8px !important;
           }
+
+          .ant-tabs-nav-wrap {
+            padding: 0 12px !important;
+          }
         }
 
         /* Small mobile responsive */
@@ -136,11 +151,45 @@ function InformationLayout({ children, active = "faq" }) {
           .ant-tabs-tab {
             font-size: 11px !important;
             padding: 6px 6px !important;
+            margin-right: 4px !important;
+          }
+
+          .ant-tabs-nav-wrap {
+            padding: 0 8px !important;
+            overflow-x: auto !important;
+            scrollbar-width: none !important;
+            -ms-overflow-style: none !important;
+          }
+
+          .ant-tabs-nav-wrap::-webkit-scrollbar {
+            display: none !important;
+          }
+
+          .ant-tabs-nav-list {
+            display: flex !important;
+            white-space: nowrap !important;
+          }
+
+          .ant-tabs-tab {
+            flex-shrink: 0 !important;
+          }
+        }
+
+        /* Very small screens */
+        @media (max-width: 360px) {
+          .ant-tabs-tab {
+            font-size: 10px !important;
+            padding: 6px 4px !important;
+            margin-right: 2px !important;
+          }
+
+          .ant-tabs-nav-wrap {
+            padding: 0 4px !important;
           }
         }
       `}</style>
-    </div>
+    </>
   );
-}
+};
 
-export default InformationLayout;
+export default CustomerTicketsLayout;

@@ -331,8 +331,8 @@ export const useGlobalStyle = createStyles(({ prefixCls, css, token }) => ({
         }
 
         &.${prefixCls}-menu-item-selected {
-          background: #e3f2fd; // Light blue selected
-          color: #ff4500; // Reddit orange text
+          background: #ff4500; // Orange background
+          color: #1c1c1c; // Black text
           font-weight: 500;
         }
       }
@@ -435,8 +435,11 @@ export const useGlobalStyle = createStyles(({ prefixCls, css, token }) => ({
         }
 
         &.${prefixCls}-tabs-tab-active {
-          color: #ff4500; // Reddit orange
+          background: #ff4500; // Orange background
+          color: #1c1c1c; // Black text
           font-weight: 600;
+          padding: 12px 16px;
+          border-radius: 4px;
         }
       }
 
@@ -837,9 +840,9 @@ export const useThemeConfig = () => {
         itemMarginBlock: 2,
         itemMarginInline: 4,
         colorItemBgHover: "#F6F7F8", // Very light hover
-        colorItemBgSelected: "#E3F2FD", // Light blue selected
+        colorItemBgSelected: "#FF4500", // Orange background selected
         colorItemTextHover: "#1C1C1C", // Dark hover text
-        colorItemTextSelected: "#FF4500", // Orange selected text
+        colorItemTextSelected: "#1C1C1C", // Black selected text
         colorItemText: "#878A8C", // Reddit gray text
       },
       Steps: {
@@ -850,6 +853,8 @@ export const useThemeConfig = () => {
         colorPrimaryActive: "#FF4500", // Reddit orange
         colorPrimaryHover: "#FF4500", // Reddit orange
         inkBarColor: "#FF4500", // Reddit orange
+        colorTextActive: "#1C1C1C", // Black text for active
+        colorBgActive: "#FF4500", // Orange background for active
       },
       Alert: {
         borderRadius: 4, // Reddit style
@@ -973,27 +978,27 @@ export const layoutToken = {
     colorBgMenuItemCollapsedElevated: "#F8F9FA", // Very light gray
     colorMenuItemDivider: "rgba(135,138,140,0.2)", // Subtle divider seperti Reddit
     colorBgMenuItemHover: "#F6F7F8", // Very light hover background
-    colorBgMenuItemSelected: "#E3F2FD", // Light blue untuk selected (seperti Reddit)
-    colorTextMenuSelected: "#FF4500", // Reddit orange untuk selected text
+    colorBgMenuItemSelected: "#FF4500", // Orange background untuk selected
+    colorTextMenuSelected: "#FFFFFF", // Black text untuk selected
     colorTextMenuItemHover: "#1C1C1C", // Dark text saat hover
-    colorTextMenu: "#878A8C", // Reddit authentic gray untuk menu text
+    colorTextMenu: "#1C1C1C", // Lighter gray untuk secondary
     colorTextMenuSecondary: "#A5A4A4", // Lighter gray untuk secondary
     colorTextMenuTitle: "#1C1C1C", // Dark untuk menu title
-    colorTextMenuActive: "#FF4500", // Reddit orange untuk active
-    colorTextSubMenuSelected: "#FF4500", // Reddit orange untuk submenu
+    colorTextMenuActive: "#FFFFFF", // Black text untuk active
+    colorTextSubMenuSelected: "#FFFFFF", // Black text untuk submenu selected
   },
 
   header: {
     // Reddit authentic header
     colorBgHeader: "#FFFFFF", // Header putih bersih
     colorBgRightActionsItemHover: "rgba(255,69,0,0.1)", // Light orange hover
-    colorTextRightActionsItem: "#878A8C", // Gray untuk actions
+    colorTextRightActionsItem: "#1C1C1C", // Gray untuk actions
     colorHeaderTitle: "#1C1C1C", // Dark untuk title
     colorBgMenuItemHover: "#F6F7F8", // Light hover
-    colorBgMenuItemSelected: "#E3F2FD", // Light blue selected
-    colorTextMenuSelected: "#FF4500", // Orange selected
-    colorTextMenu: "#878A8C", // Gray menu text
-    colorTextMenuSecondary: "#A5A4A4", // Light gray secondary
+    colorBgMenuItemSelected: "#FF4500", // Orange background selected
+    colorTextMenuSelected: "#FFFFFF", // Black text selected
+    colorTextMenu: "#FFFFFF", // Gray menu text
+    colorTextMenuSecondary: "#1C1C1C", // Light gray secondary
     colorTextMenuActive: "#1C1C1C", // Dark active text
   },
 
@@ -1001,7 +1006,7 @@ export const layoutToken = {
   content: {
     colorBg: "#FFFFFF", // Content area putih bersih
     colorText: "#1C1C1C", // Dark text untuk readability
-    colorTextSecondary: "#878A8C", // Gray untuk secondary text
+    colorTextSecondary: "#1C1C1C", // Gray untuk secondary text
     colorBorder: "#EDEFF1", // Light border seperti Reddit
     colorBgElevated: "#FFFFFF", // Background untuk cards
     boxShadow: "0 1px 3px rgba(0,0,0,0.1)", // Subtle shadow
@@ -1013,8 +1018,8 @@ export const layoutToken = {
     colorBorder: "#E5E7EB", // Very light gray border seperti gambar
     colorBorderHover: "#D1D5DB", // Slightly darker on hover
     colorText: "#1C1C1C", // Dark text
-    colorTextSecondary: "#6B7280", // Softer gray secondary text
-    colorTextTertiary: "#9CA3AF", // Even lighter gray
+    colorTextSecondary: "#1C1C1C", // Softer gray secondary text
+    colorTextTertiary: "#1C1C1C", // Even lighter gray
     borderRadius: "8px", // Rounded seperti gambar
     boxShadow: "0 1px 2px rgba(0,0,0,0.05)", // Very subtle shadow
     boxShadowHover: "0 2px 4px rgba(0,0,0,0.08)", // Slight elevation on hover
@@ -1023,7 +1028,7 @@ export const layoutToken = {
   // Footer - minimal styling
   footer: {
     colorBg: "#F8F9FA", // Very light gray
-    colorText: "#878A8C", // Gray text
+    colorText: "#1C1C1C", // Gray text
     colorTextSecondary: "#A5A4A4", // Lighter gray
     borderTop: "1px solid #EDEFF1", // Subtle border
   },
