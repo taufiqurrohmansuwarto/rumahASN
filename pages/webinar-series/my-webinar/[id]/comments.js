@@ -1,6 +1,6 @@
 import Layout from "@/components/Layout";
 import WebinarUserDetailLayout from "@/components/WebinarSeries/WebinarUserDetailLayout";
-import { Card, message } from "antd";
+import { Breadcrumb, message } from "antd";
 import React from "react";
 import { useRouter } from "next/router";
 import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
@@ -11,6 +11,8 @@ import {
   commentUserUpdate,
 } from "@/services/webinar.services";
 import WebinarSeriesComments from "@/components/WebinarSeries/WebinarSeriesComments";
+import PageContainer from "@/components/PageContainer";
+import Link from "next/link";
 
 function WebinarComments() {
   const router = useRouter();
@@ -86,19 +88,56 @@ function WebinarComments() {
     }
   );
 
+  const breadcrumb = [
+    {
+      title: "Beranda",
+      href: "/",
+      isActive: true,
+    },
+    {
+      title: "Daftar Webinar Saya",
+      href: "/webinar-series/my-webinar",
+      isActive: true,
+    },
+    {
+      title: myWebinar?.webinar_series?.title || "Detail Webinar",
+      href: `/webinar-series/my-webinar/${router?.query?.id}/comments` || "/",
+      isActive: false,
+    },
+  ];
+
   return (
-    <WebinarUserDetailLayout loading={isLoading} active="comments">
-      <WebinarSeriesComments
-        youtubeUrl={myWebinar?.webinar_series?.youtube_url}
-        data={data}
-        create={create}
-        hapus={hapus}
-        isLoadingCreate={isLoadingCreate}
-        isLoadingHapus={isLoadingHapus}
-        isLoadingUpate={isLoadingUpdate}
-        update={update}
-      />
-    </WebinarUserDetailLayout>
+    <PageContainer
+      onBack={() => router.push(`/webinar-series/my-webinar`)}
+      title="Diskusi"
+      breadcrumbRender={() => (
+        <Breadcrumb>
+          {breadcrumb.map((item) => (
+            <Breadcrumb.Item key={item.title}>
+              {item.isActive ? (
+                <Link href={item.href}>{item.title}</Link>
+              ) : (
+                item.title
+              )}
+            </Breadcrumb.Item>
+          ))}
+        </Breadcrumb>
+      )}
+      loading={isLoading}
+    >
+      <WebinarUserDetailLayout loading={isLoading} active="comments">
+        <WebinarSeriesComments
+          youtubeUrl={myWebinar?.webinar_series?.youtube_url}
+          data={data}
+          create={create}
+          hapus={hapus}
+          isLoadingCreate={isLoadingCreate}
+          isLoadingHapus={isLoadingHapus}
+          isLoadingUpate={isLoadingUpdate}
+          update={update}
+        />
+      </WebinarUserDetailLayout>
+    </PageContainer>
   );
 }
 

@@ -7,9 +7,11 @@ import {
   Space,
   Tag,
   Typography,
+  Grid,
+  Card,
 } from "antd";
 import Link from "next/link";
-import React from "react";
+import React, { useMemo } from "react";
 import ChangeAssignee from "@/components/TicketProps/ChangeAssignee";
 import ChangeFeedback from "@/components/TicketProps/ChangeFeedback";
 import ChangeStatus from "@/components/TicketProps/ChangeStatus";
@@ -32,157 +34,228 @@ import {
   setStatusIcon,
 } from "@/utils/client-utils";
 
+const { useBreakpoint } = Grid;
+const { Text, Title } = Typography;
+
 const SideRight = ({ item }) => {
+  const screens = useBreakpoint();
+
+  // Memoize responsive config
+  const responsiveConfig = useMemo(() => {
+    const isMobile = !screens.md;
+
+    return {
+      isMobile,
+      spacing: isMobile ? 12 : 16,
+      fontSize: isMobile ? 12 : 13,
+      labelFontSize: isMobile ? 11 : 12,
+    };
+  }, [screens.md]);
+
   return (
-    <Row>
-      <Col span={24}>
-        <Space direction="vertical">
-          <Space align="start">
-            <Typography.Text type="secondary" style={{ fontSize: 12 }}>
-              Kategori dan Prioritas
-            </Typography.Text>
-            <RestrictedContent
-              name="change-priority-kategory"
-              attributes={{ ticket: item }}
+    <div>
+      <Space
+        direction="vertical"
+        size={responsiveConfig.spacing}
+        style={{ width: "100%" }}
+      >
+        {/* Kategori dan Prioritas */}
+        <Card size="small" title="🏷️ Kategori & Prioritas">
+          <Space direction="vertical" size={8} style={{ width: "100%" }}>
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+              }}
             >
-              <ChangeSubCategory
-                ticketId={item?.id}
-                subCategoryId={item?.sub_category_id}
-                priorityCode={item?.priority_code}
-              />
-            </RestrictedContent>
-          </Space>
-          <Space>
-            <Typography.Text style={{ fontSize: 13 }}>
-              {item?.sub_category_id ? item?.sub_category?.name : "Tidak ada"}
-            </Typography.Text>
+              <Text style={{ fontSize: responsiveConfig.fontSize }}>
+                {item?.sub_category_id
+                  ? item?.sub_category?.name
+                  : "Tidak ada kategori"}
+              </Text>
+              <RestrictedContent
+                name="change-priority-kategory"
+                attributes={{ ticket: item }}
+              >
+                <ChangeSubCategory
+                  ticketId={item?.id}
+                  subCategoryId={item?.sub_category_id}
+                  priorityCode={item?.priority_code}
+                />
+              </RestrictedContent>
+            </div>
             {item?.priority_code && (
-              <Tag color={setColorPrioritas(item?.priority_code)}>
+              <Tag
+                color={setColorPrioritas(item?.priority_code)}
+                style={{ fontWeight: 600, borderRadius: 4 }}
+              >
                 {item?.priority_code}
               </Tag>
             )}
           </Space>
-        </Space>
-        <Divider />
-      </Col>
-      <Col span={24}>
-        <Space direction="vertical">
-          <Space align="start">
-            <Typography.Text type="secondary" style={{ fontSize: 12 }}>
-              Status
-            </Typography.Text>
-            <RestrictedContent
-              name="change-status"
-              attributes={{ ticket: item }}
+        </Card>
+
+        {/* Status */}
+        <Card size="small" title="📊 Status Ticket">
+          <Space direction="vertical" size={8} style={{ width: "100%" }}>
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+              }}
             >
-              <ChangeStatus
-                ticket={item}
-                statusId={item?.status_code}
-                ticketId={item?.id}
-              />
-            </RestrictedContent>
-          </Space>
-          <Tag
-            icon={setStatusIcon(item?.status_code)}
-            color={setColorStatus(item?.status_code)}
-          >
-            {item?.status_code}
-          </Tag>
-        </Space>
-        <Divider />
-      </Col>
-      <Col span={24}>
-        <Space direction="vertical">
-          <Space>
-            <Typography.Text type="secondary" style={{ fontSize: 12 }}>
-              Penerima Tugas
-            </Typography.Text>
-            <RestrictedContent name="change-agent">
-              <ChangeAssignee ticketId={item?.id} agentId={item?.assignee} />
-            </RestrictedContent>
-          </Space>
-          {!item?.assignee ? (
-            <Typography.Text style={{ fontSize: 13 }}>
-              Belum Ada
-            </Typography.Text>
-          ) : (
-            <Space>
-              {/* <Link href={`/users/${item?.agent?.custom_id}`}> */}
-              <Tooltip title={item?.agent?.username}>
-                <Avatar
-                  style={{ cursor: "pointer" }}
-                  size="small"
-                  src={item?.agent?.image}
+              <Tag
+                icon={setStatusIcon(item?.status_code)}
+                color={setColorStatus(item?.status_code)}
+                style={{ fontWeight: 600, borderRadius: 4 }}
+              >
+                {item?.status_code}
+              </Tag>
+              <RestrictedContent
+                name="change-status"
+                attributes={{ ticket: item }}
+              >
+                <ChangeStatus
+                  ticket={item}
+                  statusId={item?.status_code}
+                  ticketId={item?.id}
                 />
-              </Tooltip>
-              {/* </Link> */}
-            </Space>
-          )}
-        </Space>
-        <Divider />
-      </Col>
-      <Col span={24}>
-        <ChangeFeedback item={item} />
-      </Col>
-      <Col span={24}>
-        <Space direction="vertical">
-          <Typography.Text type="secondary" style={{ fontSize: 12 }}>
-            Pemilih Penerima Tugas
-          </Typography.Text>
+              </RestrictedContent>
+            </div>
+          </Space>
+        </Card>
+
+        {/* Penerima Tugas */}
+        <Card size="small" title="👤 Penerima Tugas">
+          <Space direction="vertical" size={8} style={{ width: "100%" }}>
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+              }}
+            >
+              {!item?.assignee ? (
+                <Text
+                  type="secondary"
+                  style={{
+                    fontSize: responsiveConfig.fontSize,
+                    fontStyle: "italic",
+                  }}
+                >
+                  Belum ada yang ditugaskan
+                </Text>
+              ) : (
+                <Space>
+                  <Tooltip title={item?.agent?.username}>
+                    <Avatar
+                      size={responsiveConfig.isMobile ? 24 : 28}
+                      src={item?.agent?.image}
+                    >
+                      {item?.agent?.username?.charAt(0)?.toUpperCase()}
+                    </Avatar>
+                  </Tooltip>
+                  <Text
+                    style={{
+                      fontSize: responsiveConfig.fontSize,
+                      fontWeight: 500,
+                    }}
+                  >
+                    {item?.agent?.username}
+                  </Text>
+                </Space>
+              )}
+              <RestrictedContent name="change-agent">
+                <ChangeAssignee ticketId={item?.id} agentId={item?.assignee} />
+              </RestrictedContent>
+            </div>
+          </Space>
+        </Card>
+
+        {/* Feedback */}
+        <Card size="small" title="💬 Feedback">
+          <ChangeFeedback item={item} />
+        </Card>
+
+        {/* Pemilih Penerima Tugas */}
+        <Card size="small" title="👨‍💼 Pemilih Penerima Tugas">
           {!item?.chooser ? (
-            <Typography.Text style={{ fontSize: 13 }}>
-              Belum Ada
-            </Typography.Text>
+            <Text
+              type="secondary"
+              style={{
+                fontSize: responsiveConfig.fontSize,
+                fontStyle: "italic",
+              }}
+            >
+              Belum ada yang memilih
+            </Text>
           ) : (
             <Space>
-              {/* <Link href={`/users/${item?.admin?.custom_id}`}> */}
               <Tooltip title={item?.admin?.username}>
                 <Avatar
-                  style={{ cursor: "pointer" }}
-                  size="small"
+                  size={responsiveConfig.isMobile ? 24 : 28}
                   src={item?.admin?.image}
-                />
+                >
+                  {item?.admin?.username?.charAt(0)?.toUpperCase()}
+                </Avatar>
               </Tooltip>
-              {/* </Link> */}
+              <Text
+                style={{ fontSize: responsiveConfig.fontSize, fontWeight: 500 }}
+              >
+                {item?.admin?.username}
+              </Text>
             </Space>
           )}
-        </Space>
-        <Divider />
-      </Col>
-      <Col span={24}>
-        {item?.is_subscribe ? (
-          <Unsubscribe id={item?.id} />
-        ) : (
-          <Subscribe id={item?.id} />
-        )}
-      </Col>
-      <Divider />
-      <Col span={24}>
-        <Participants item={item} />
-        <Divider />
-      </Col>
-      <RestrictedContent name="options-ticket" attributes={{ ticket: item }}>
-        <Col span={24}>
-          {item?.is_published ? (
-            <Unpublish id={item?.id} />
+        </Card>
+
+        {/* Notifikasi */}
+        <Card size="small" title="🔔 Notifikasi">
+          {item?.is_subscribe ? (
+            <Unsubscribe id={item?.id} />
           ) : (
-            <Publish id={item?.id} />
+            <Subscribe id={item?.id} />
           )}
-          {item?.is_locked ? (
-            <UnlockConversation id={item?.id} />
-          ) : (
-            <LockConversation id={item?.id} />
-          )}
-          {item?.is_pinned ? (
-            <UnpinTicket id={item?.id} />
-          ) : (
-            <Pin id={item?.id} />
-          )}
-          <ReminderTicket id={item?.id} />
-          <RemoveTicket id={item?.id} />
-        </Col>
-      </RestrictedContent>
-    </Row>
+        </Card>
+
+        {/* Participants */}
+        <Card size="small" title="👥 Partisipan">
+          <Participants item={item} />
+        </Card>
+
+        {/* Actions - Vertical Layout */}
+        <RestrictedContent name="options-ticket" attributes={{ ticket: item }}>
+          <Card size="small" title="⚙️ Aksi Ticket">
+            <Space direction="vertical" size={8} style={{ width: "100%" }}>
+              {item?.is_published ? (
+                <Unpublish id={item?.id} />
+              ) : (
+                <Publish id={item?.id} />
+              )}
+
+              {item?.is_locked ? (
+                <UnlockConversation id={item?.id} />
+              ) : (
+                <LockConversation id={item?.id} />
+              )}
+
+              {item?.is_pinned ? (
+                <UnpinTicket id={item?.id} />
+              ) : (
+                <Pin id={item?.id} />
+              )}
+
+              <ReminderTicket id={item?.id} />
+
+              <Divider style={{ margin: "8px 0" }} />
+
+              <RemoveTicket id={item?.id} />
+            </Space>
+          </Card>
+        </RestrictedContent>
+      </Space>
+    </div>
   );
 };
 

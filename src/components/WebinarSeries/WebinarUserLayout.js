@@ -1,9 +1,8 @@
-import { useRouter } from "next/router";
-import { Card, Flex, Grid, Tabs, Typography } from "antd";
 import { VideoCameraOutlined } from "@ant-design/icons";
+import { Flex, Grid, Tabs, Typography } from "antd";
+import { useRouter } from "next/router";
 
 const { useBreakpoint } = Grid;
-const { Title } = Typography;
 
 function WebinarUserLayout({ children, active = "all" }) {
   const router = useRouter();
@@ -16,12 +15,12 @@ function WebinarUserLayout({ children, active = "all" }) {
   const tabItems = [
     {
       key: "all",
-      label: <span>📺 Semua Webinar</span>,
+      label: <Typography.Text>📺 Semua Webinar</Typography.Text>,
       children: children,
     },
     {
       key: "my-webinar",
-      label: <span>👤 Webinar Saya</span>,
+      label: <Typography.Text>👤 Webinar Saya</Typography.Text>,
       children: children,
     },
   ];
@@ -31,7 +30,7 @@ function WebinarUserLayout({ children, active = "all" }) {
   };
 
   return (
-    <div>
+    <Flex vertical style={{ width: "100%" }}>
       <Flex>
         {/* Icon Section - Hide on mobile */}
         {!isMobile && (
@@ -71,7 +70,7 @@ function WebinarUserLayout({ children, active = "all" }) {
       <style jsx global>{`
         .ant-tabs-tab {
           color: #787c7e !important;
-          font-weight: 500 !important;
+          font-weight: 400 !important;
           font-size: 14px !important;
           padding: 12px 16px !important;
           border-radius: 4px 4px 0 0 !important;
@@ -84,7 +83,7 @@ function WebinarUserLayout({ children, active = "all" }) {
 
         .ant-tabs-tab-active {
           color: #ff4500 !important;
-          font-weight: 600 !important;
+          font-weight: 400 !important;
         }
 
         .ant-tabs-tab-active .ant-tabs-tab-btn {
@@ -109,11 +108,21 @@ function WebinarUserLayout({ children, active = "all" }) {
           background-color: transparent !important;
         }
 
+        /* Responsive styles for children container */
+        @media (max-width: 1200px) {
+          .webinar-children-container {
+            padding: 16px !important;
+          }
+        }
+
         /* Tablet responsive */
         @media (max-width: 1024px) {
           .ant-tabs-tab {
             font-size: 13px !important;
             padding: 10px 12px !important;
+          }
+          .webinar-children-container {
+            padding: 14px !important;
           }
         }
 
@@ -123,6 +132,9 @@ function WebinarUserLayout({ children, active = "all" }) {
             font-size: 12px !important;
             padding: 8px 8px !important;
           }
+          .webinar-children-container {
+            padding: 12px !important;
+          }
         }
 
         /* Small mobile responsive */
@@ -131,9 +143,12 @@ function WebinarUserLayout({ children, active = "all" }) {
             font-size: 11px !important;
             padding: 6px 6px !important;
           }
+          .webinar-children-container {
+            padding: 8px !important;
+          }
         }
       `}</style>
-    </div>
+    </Flex>
   );
 }
 
