@@ -73,7 +73,6 @@ const ChangeTicketDescription = ({ item }) => {
       ) : (
         <Comment
           style={{
-            border: "1px solid #d9d9d9",
             padding: 10,
             borderRadius: 10,
           }}
