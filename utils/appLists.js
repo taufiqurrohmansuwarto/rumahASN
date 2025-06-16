@@ -163,6 +163,8 @@ export const getMenuItems = (menuItems, user) => {
     (user?.group === "MASTER" || user?.group === "NON ASN") &&
     user?.current_role === "admin";
 
+  const asn = user?.group === "MASTER";
+
   const isFasilitator =
     user?.role === "FASILITATOR" &&
     user?.group === "MASTER" &&
@@ -186,6 +188,7 @@ export const getMenuItems = (menuItems, user) => {
     if (isAdmin) return role.includes("admin");
     if (isFasilitator) return role.includes("fasilitator");
     if (isPrakom) return role.includes("prakom");
+    if (asn) return role.includes("asn");
 
     return false;
   };

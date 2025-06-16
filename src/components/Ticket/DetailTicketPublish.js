@@ -10,37 +10,35 @@ import { formatDateFromNow } from "@/utils/client-utils";
 import { formatDate } from "@/utils/index";
 import { Comment } from "@ant-design/compatible";
 import {
+  CheckCircleOutlined,
+  DeleteOutlined,
+  EditOutlined,
   EllipsisOutlined,
   FireOutlined,
-  CheckCircleOutlined,
-  EditOutlined,
-  DeleteOutlined,
 } from "@ant-design/icons";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Affix,
   Avatar,
-  FloatButton,
+  Button,
+  Card,
   Col,
-  Divider,
   Dropdown,
+  Flex,
+  FloatButton,
+  Grid,
   Menu,
   Row,
   Skeleton,
-  Space,
   Tag,
   Tooltip,
   Typography,
   message,
-  Card,
-  Flex,
-  Grid,
-  Button,
 } from "antd";
 import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { useState, useMemo } from "react";
+import { useMemo, useState } from "react";
 import ReactMarkdownCustom from "../MarkdownEditor/ReactMarkdownCustom";
 import RestrictedContent from "../RestrictedContent";
 import SimpleEmojiPicker from "../SimpleEmojiPicker";
@@ -182,9 +180,7 @@ const CommentTicket = ({ item, agent, customer, admin }) => {
         <Card
           size="small"
           style={{
-            marginTop: 16,
             borderRadius: 8,
-            boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
           }}
         >
           <NewTicket
@@ -202,35 +198,18 @@ const CommentTicket = ({ item, agent, customer, admin }) => {
             <Card
               size="small"
               style={{
-                marginTop: 16,
-                marginBottom: 16,
                 borderRadius: 8,
                 border: item?.is_answer
                   ? "2px solid #52c41a"
                   : "1px solid #f0f0f0",
                 background: item?.is_answer ? "#f6ffed" : "white",
-                boxShadow: item?.is_answer
-                  ? "0 4px 12px rgba(82, 196, 26, 0.15)"
-                  : "0 2px 8px rgba(0,0,0,0.06)",
                 transition: "all 0.2s ease",
               }}
-              onMouseEnter={(e) => {
-                if (!item?.is_answer) {
-                  e.currentTarget.style.boxShadow =
-                    "0 4px 12px rgba(0,0,0,0.1)";
-                }
-              }}
-              onMouseLeave={(e) => {
-                if (!item?.is_answer) {
-                  e.currentTarget.style.boxShadow =
-                    "0 2px 8px rgba(0,0,0,0.06)";
-                }
-              }}
             >
-              <Flex justify="space-between" align="flex-start" gap={12}>
+              <Flex justify="space-between" align="flex-start" gap={8}>
                 <Flex flex={1} vertical gap={8}>
                   {item?.is_answer && (
-                    <Flex align="center" gap={8} style={{ marginBottom: 8 }}>
+                    <Flex align="center" gap={8}>
                       <CheckCircleOutlined
                         style={{ color: "#52c41a", fontSize: 16 }}
                       />
@@ -333,7 +312,6 @@ const CommentTicket = ({ item, agent, customer, admin }) => {
                     <Menu
                       style={{
                         borderRadius: 8,
-                        boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
                       }}
                     >
                       <ActionWrapper
@@ -470,7 +448,6 @@ const DetailTicketPublish = ({ id }) => {
       style={{
         padding: responsiveConfig.isMobile ? "16px" : "24px",
         background: "#fafafa",
-        minHeight: "100vh",
       }}
     >
       <Skeleton loading={isLoading}>
@@ -483,12 +460,11 @@ const DetailTicketPublish = ({ id }) => {
             <div style={{ maxWidth: 1200, margin: "0 auto" }}>
               <Row gutter={[8, 16]}>
                 <Col span={24}>
-                  <Affix offsetTop={40}>
+                  <Affix offsetTop={54}>
                     <Card
                       size="small"
                       style={{
                         borderRadius: 8,
-                        boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
                         background: "white",
                       }}
                     >
@@ -502,18 +478,18 @@ const DetailTicketPublish = ({ id }) => {
                 </Col>
               </Row>
 
-              <Row gutter={responsiveConfig.gutter} style={{ marginTop: 24 }}>
+              <Row gutter={responsiveConfig.gutter}>
                 <Col
                   md={responsiveConfig.contentSpan}
                   xs={24}
                   order={responsiveConfig.isMobile ? 2 : 1}
                 >
-                  <Flex vertical gap={16}>
+                  <Flex vertical gap={8}>
                     <Card
                       size="small"
                       style={{
-                        borderRadius: 8,
-                        boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
+                        marginTop: 8,
+                        marginBottom: 8,
                       }}
                     >
                       <ChangeTicketDescription item={data} />
@@ -540,8 +516,6 @@ const DetailTicketPublish = ({ id }) => {
                         title="💬 Tambah Komentar"
                         style={{
                           borderRadius: 8,
-                          boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
-                          marginTop: 16,
                         }}
                       >
                         <NewTicket
