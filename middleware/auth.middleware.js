@@ -40,7 +40,11 @@ const auth = async (req, res, next) => {
         ...result,
       };
 
+      const ip =
+        req?.headers?.["x-forwarded-for"] || req?.connection?.remoteAddress;
+
       req.user = currentUser;
+      req.ip = ip;
 
       req.fetcher = axios.create({
         baseURL: process.env.APIGATEWAY_URL,

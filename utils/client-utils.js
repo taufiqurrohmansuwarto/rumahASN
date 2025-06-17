@@ -1209,6 +1209,8 @@ export const fetchPdf = async (url) => {
   return file;
 };
 
+export const getJenisKredit = ["KPR", "KMG", "KKB"];
+
 export const clearQuery = (query) => {
   // Mengubah query dengan key yang sama menjadi array
   const processedQuery = {};
@@ -1240,3 +1242,158 @@ export const clearQuery = (query) => {
     arrayFormat: "comma",
   });
 };
+
+export const getKodeKabkota = [
+  {
+    key: "3501",
+    label: "Kabupaten Pacitan\r",
+  },
+  {
+    key: "3502",
+    label: "Kabupaten Ponorogo\r",
+  },
+  {
+    key: "3503",
+    label: "Kabupaten Trenggalek\r",
+  },
+  {
+    key: "3504",
+    label: "Kabupaten Tulungagung\r",
+  },
+  {
+    key: "3505",
+    label: "Kabupaten Blitar\r",
+  },
+  {
+    key: "3506",
+    label: "Kabupaten Kediri\r",
+  },
+  {
+    key: "3507",
+    label: "Kabupaten Malang\r",
+  },
+  {
+    key: "3508",
+    label: "Kabupaten Lumajang\r",
+  },
+  {
+    key: "3509",
+    label: "Kabupaten Jember\r",
+  },
+  {
+    key: "3510",
+    label: "Kabupaten Banyuwangi\r",
+  },
+  {
+    key: "3511",
+    label: "Kabupaten Bondowoso\r",
+  },
+  {
+    key: "3512",
+    label: "Kabupaten Situbondo\r",
+  },
+  {
+    key: "3513",
+    label: "Kabupaten Probolinggo\r",
+  },
+  {
+    key: "3514",
+    label: "Kabupaten Pasuruan\r",
+  },
+  {
+    key: "3515",
+    label: "Kabupaten Sidoarjo\r",
+  },
+  {
+    key: "3516",
+    label: "Kabupaten Mojokerto\r",
+  },
+  {
+    key: "3517",
+    label: "Kabupaten Jombang\r",
+  },
+  {
+    key: "3518",
+    label: "Kabupaten Nganjuk\r",
+  },
+  {
+    key: "3519",
+    label: "Kabupaten Madiun\r",
+  },
+  {
+    key: "3520",
+    label: "Kabupaten Magetan\r",
+  },
+  {
+    key: "3521",
+    label: "Kabupaten Ngawi\r",
+  },
+  {
+    key: "3522",
+    label: "Kabupaten Bojonegoro\r",
+  },
+  {
+    key: "3523",
+    label: "Kabupaten Tuban\r",
+  },
+  {
+    key: "3524",
+    label: "Kabupaten Lamongan\r",
+  },
+  {
+    key: "3525",
+    label: "Kabupaten Gresik\r",
+  },
+  {
+    key: "3526",
+    label: "Kabupaten Bangkalan\r",
+  },
+  {
+    key: "3527",
+    label: "Kabupaten Sampang\r",
+  },
+  {
+    key: "3528",
+    label: "Kabupaten Pamekasan\r",
+  },
+  {
+    key: "3529",
+    label: "Kabupaten Sumenep\r",
+  },
+  {
+    key: "3571",
+    label: "Kota Kediri\r",
+  },
+  {
+    key: "3572",
+    label: "Kota Blitar\r",
+  },
+  {
+    key: "3573",
+    label: "Kota Malang\r",
+  },
+  {
+    key: "3574",
+    label: "Kota Probolinggo\r",
+  },
+  {
+    key: "3575",
+    label: "Kota Pasuruan\r",
+  },
+  {
+    key: "3576",
+    label: "Kota Mojokerto\r",
+  },
+  {
+    key: "3577",
+    label: "Kota Madiun\r",
+  },
+  {
+    key: "3578",
+    label: "Kota Surabaya\r",
+  },
+  {
+    key: "3579",
+    label: "Kota Batu\r",
+  },
+];
