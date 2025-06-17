@@ -1,5 +1,6 @@
 const LogSIASN = require("@/models/log-siasn.model");
 const LogBsre = require("@/models/log-bsre.model");
+const Logs = require("@/models/logs.model");
 
 module.exports.createLogSIASN = async ({
   userId,
@@ -34,5 +35,10 @@ module.exports.createLogBsre = async ({
     log,
     status,
   });
+  return result;
+};
+
+module.exports.createLog = async (data) => {
+  const result = await Logs.query().insert(data);
   return result;
 };
