@@ -1,3 +1,4 @@
+import { historiesKredit } from "@/services/bankjatim.services";
 import {
   BankOutlined,
   CalendarOutlined,
@@ -13,6 +14,7 @@ import {
   SearchOutlined,
   UserOutlined,
 } from "@ant-design/icons";
+import { useQuery } from "@tanstack/react-query";
 import {
   Badge,
   Button,
@@ -42,22 +44,14 @@ const BankJatimRiwayatPengajuan = () => {
   const [searchText, setSearchText] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
 
-  // Data riwayat pengajuan - contoh data
-  const riwayatData = [
-    {
-      nip: "199103052019031008",
-      no_ktp: "3515170503910000",
-      nama: "iput",
-      dinas: "badan kepegawaian daerah",
-      jns_pinjaman: "KMG",
-      plafon_pengajuan: 1000000.0,
-      jangka_waktu: 48,
-      status_pengajuan: "A1 - REVIEW DOKUMEN",
-      tgl_pengajuan: "2025-06-16T11:15:53Z",
-      no_pengajuan: "BKD01250616002",
-      kantor_cabang: "001 - CABANG UTAMA SURABAYA",
-    },
-  ];
+  const { data, isLoading } = useQuery({
+    queryKey: ["bank-jatim-histories"],
+    queryFn: () => historiesKredit(),
+    refetchOnWindowFocus: false,
+  });
+
+  // Data riwayat pengajuan dari API
+  const riwayatData = data?.data || [];
 
   // Status mapping
   const getStatusInfo = (status) => {
@@ -188,7 +182,11 @@ const BankJatimRiwayatPengajuan = () => {
             overflowY: "auto",
           }}
         >
-          {filteredData.length === 0 ? (
+          {isLoading ? (
+            <div style={{ textAlign: "center", marginTop: 60 }}>
+              <Text>Memuat data riwayat pengajuan...</Text>
+            </div>
+          ) : filteredData.length === 0 ? (
             <Empty
               description="Tidak ada data pengajuan ditemukan"
               style={{ marginTop: 60 }}

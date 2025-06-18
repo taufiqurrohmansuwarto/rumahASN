@@ -24,3 +24,9 @@ export const simulasiKredit = async (fetcher, data) => {
   const url = `${BASE_URL}/loans/simulation`;
   return fetcher.post(url, data);
 };
+
+// histories
+export const historiesKredit = async (fetcher, data) => {
+  const url = `${BASE_URL}/loans/histories`;
+  return fetcher.post(url, data);
+};
