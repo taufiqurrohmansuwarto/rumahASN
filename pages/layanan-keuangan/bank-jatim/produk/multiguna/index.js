@@ -1,34 +1,21 @@
 import BankJatimDetailLayananMultiguna from "@/components/LayananKeuangan/DetailLayanan/BankJatimDetailLayananMultiguna";
+import BankJatimLayout from "@/components/LayananKeuangan/BankJatim/BankJatimLayout";
 import LayananKeuanganLayout from "@/components/LayananKeuangan/LayananKeuanganLayout";
-import PageContainer from "@/components/PageContainer";
+import useScrollRestoration from "@/hooks/useScrollRestoration";
 import Head from "next/head";
-import { useRouter } from "next/router";
-import { Grid } from "antd";
+import PageContainer from "@/components/PageContainer";
 
 const Multiguna = () => {
-  const router = useRouter();
-  const breakPoint = Grid.useBreakpoint();
-
-  const handleBack = () => {
-    router.back();
-  };
-
+  useScrollRestoration();
   return (
-    <>
+    <PageContainer>
       <Head>
         <title>Layanan Keuangan - Bank Jatim - Multiguna</title>
       </Head>
-      <PageContainer
-        title="Layanan Keuangan"
-        subTitle="Bank Jatim - Multiguna"
-        onBack={handleBack}
-        childrenContentStyle={{
-          padding: breakPoint.xs ? null : 0,
-        }}
-      >
+      <BankJatimLayout active="multiguna">
         <BankJatimDetailLayananMultiguna />
-      </PageContainer>
-    </>
+      </BankJatimLayout>
+    </PageContainer>
   );
 };
 

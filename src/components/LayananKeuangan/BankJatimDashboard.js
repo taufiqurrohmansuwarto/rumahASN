@@ -37,20 +37,6 @@ function BankJatimDashboard() {
 
   return (
     <div style={{ padding: "24px 0" }}>
-      <ModalCekStatus open={showModalStatus} onClose={handleCloseModalStatus} />
-      <Space style={{ marginBottom: "24px" }}>
-        <Button icon={<PlusOutlined />} type="primary" onClick={goToPengajuan}>
-          Pengajuan Baru
-        </Button>
-
-        <Button
-          icon={<SearchOutlined />}
-          type="primary"
-          onClick={handleShowModalStatus}
-        >
-          Cek Status Pengajuan
-        </Button>
-      </Space>
       <Row gutter={[24, 24]}>
         <Col
           xs={24} // 1 kolom pada mobile

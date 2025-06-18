@@ -1,3 +1,4 @@
+import BankJatimLayout from "@/components/LayananKeuangan/BankJatim/BankJatimLayout";
 import FormCekPengajuanKredit from "@/components/LayananKeuangan/BankJatim/FormCekPengajuanKredit";
 import FormPengajuanKredit from "@/components/LayananKeuangan/BankJatim/FormPengajuanKredit";
 import FormSimulasi from "@/components/LayananKeuangan/BankJatim/FormSimulasi";
@@ -22,32 +23,7 @@ const BankJatim = () => {
         <title>Layanan Keuangan - Bank Jatim</title>
       </Head>
       <PageContainer title="Layanan Keuangan" subTitle="Bank Jatim">
-        <Row gutter={[16, 16]}>
-          {/* Dashboard - Full width */}
-          <Col span={24}>
-            <BankJatimDashboard />
-          </Col>
-
-          {/* Ping Connection - Full width on mobile, half on desktop */}
-          <Col xs={24} lg={12}>
-            <PingBankJatim />
-          </Col>
-
-          {/* Form Simulasi */}
-          <Col xs={24} lg={12}>
-            <FormSimulasi />
-          </Col>
-
-          {/* Form Cek Pengajuan */}
-          <Col xs={24} lg={12}>
-            <FormCekPengajuanKredit />
-          </Col>
-
-          {/* Form Pengajuan Kredit */}
-          <Col xs={24} lg={12}>
-            <FormPengajuanKredit />
-          </Col>
-        </Row>
+        <BankJatimLayout>test</BankJatimLayout>
       </PageContainer>
     </>
   );

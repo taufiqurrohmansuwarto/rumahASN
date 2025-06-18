@@ -1,34 +1,21 @@
+import BankJatimLayout from "@/components/LayananKeuangan/BankJatim/BankJatimLayout";
 import BankJatimDetailLayananKKB from "@/components/LayananKeuangan/DetailLayanan/BankJatimDetailLayananKKB";
 import LayananKeuanganLayout from "@/components/LayananKeuangan/LayananKeuanganLayout";
-import PageContainer from "@/components/PageContainer";
+import useScrollRestoration from "@/hooks/useScrollRestoration";
 import Head from "next/head";
-import { useRouter } from "next/router";
-import { Grid } from "antd";
+import PageContainer from "@/components/PageContainer";
 
 const KKB = () => {
-  const router = useRouter();
-  const breakPoint = Grid.useBreakpoint();
-
-  const handleBack = () => {
-    router.back();
-  };
-
+  useScrollRestoration();
   return (
-    <>
+    <PageContainer>
       <Head>
         <title>Layanan Keuangan - Bank Jatim - KKB</title>
       </Head>
-      <PageContainer
-        childrenContentStyle={{
-          padding: breakPoint.xs ? null : 0,
-        }}
-        title="Layanan Keuangan"
-        subTitle="Bank Jatim - KKB"
-        onBack={handleBack}
-      >
+      <BankJatimLayout active="kkb">
         <BankJatimDetailLayananKKB />
-      </PageContainer>
-    </>
+      </BankJatimLayout>
+    </PageContainer>
   );
 };
 

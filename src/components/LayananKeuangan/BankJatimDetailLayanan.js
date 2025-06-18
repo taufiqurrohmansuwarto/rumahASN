@@ -240,59 +240,6 @@ function BankJatimDetailLayanan({
           )}
         </Space>
       </Card>
-
-      {/* Action Cards */}
-      <Card
-        className="content-card"
-        title={
-          <Title level={4} style={{ margin: 0, color: "#1f2937" }}>
-            Pilihan Aksi
-          </Title>
-        }
-        bodyStyle={{ padding: "24px 32px 32px" }}
-      >
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: `repeat(auto-fit, minmax(280px, 1fr))`,
-            gap: 24,
-          }}
-        >
-          {actions.map((action) => (
-            <div
-              key={action.key}
-              className="action-card"
-              onClick={action.onClick}
-            >
-              <div className="action-icon">{action.icon}</div>
-              <Space direction="vertical" size="small">
-                <Title level={5} style={{ margin: 0, color: "#1f2937" }}>
-                  {action.label}
-                </Title>
-                <Paragraph
-                  style={{
-                    margin: 0,
-                    color: "#6b7280",
-                    fontSize: 14,
-                    lineHeight: 1.5,
-                  }}
-                >
-                  {action.description}
-                </Paragraph>
-              </Space>
-              <div style={{ marginTop: 16 }}>
-                <ArrowRightOutlined
-                  style={{
-                    color: "#dc2626",
-                    fontSize: 14,
-                    transition: "transform 0.3s",
-                  }}
-                />
-              </div>
-            </div>
-          ))}
-        </div>
-      </Card>
     </div>
   );
 }
