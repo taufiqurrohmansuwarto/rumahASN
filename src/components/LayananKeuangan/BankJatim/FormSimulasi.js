@@ -204,7 +204,7 @@ const FormSimulasi = () => {
                       <Descriptions.Item label="Biaya Asuransi">
                         {formatRupiah(by_asuransi)}
                       </Descriptions.Item>
-                      <Descriptions.Item label="Biaya Blokir Angsuran">
+                      <Descriptions.Item label="Blokir Angsuran">
                         {formatRupiah(by_blokir_angsuran)}
                       </Descriptions.Item>
                     </Descriptions>
