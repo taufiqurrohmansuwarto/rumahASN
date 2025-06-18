@@ -163,7 +163,9 @@ function LayananKeuanganLandingPage() {
                   </div>
                 </div>
               }
-              onClick={() => router.push("/layanan-keuangan/bank-jatim")}
+              onClick={() =>
+                router.push("/layanan-keuangan/bank-jatim/produk/kkb")
+              }
               onMouseEnter={(e) => {
                 Object.assign(e.currentTarget.style, hoverStyle);
               }}
