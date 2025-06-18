@@ -127,7 +127,11 @@ export const getUserType = (user) => {
   const currentRole = user?.current_role;
 
   const userTypes = [];
-  if (statusKepegawaian === "PNS" || statusKepegawaian === "PPPK") {
+  if (
+    statusKepegawaian === "PNS" ||
+    statusKepegawaian === "PPPK" ||
+    statusKepegawaian === "CPNS"
+  ) {
     userTypes.push("asn");
   }
   if (statusKepegawaian === "NONASN") {
