@@ -1,5 +1,6 @@
 import {
   cekPeminjamanKredit,
+  historiesKredit,
   pengajuanKredit,
   pingKoneksi,
   simulasiKredit,
@@ -39,7 +40,6 @@ const handleSuccessWithLog = async (
   returnData = false
 ) => {
   const { user, ip } = req;
-  console.log(result);
   const payload = createLogPayload(user, ip, req?.body, result, endpoint);
   await createLog(payload);
 
@@ -93,6 +93,18 @@ export const simulasi = async (req, res) => {
     const { fetcher, body } = req;
     const result = await simulasiKredit(fetcher, body);
     await handleSuccessWithLog(result?.data, req, "/simulasi", res, true);
+  } catch (error) {
+    handleErrorWithLog(error, res, false);
+  }
+};
+
+export const histories = async (req, res) => {
+  try {
+    const { fetcher, user } = req;
+    const { employee_number: nip } = user;
+    const payload = { nip };
+    const result = await historiesKredit(fetcher, payload);
+    await handleSuccessWithLog(result?.data, req, "/histories", res, true);
   } catch (error) {
     handleErrorWithLog(error, res, false);
   }

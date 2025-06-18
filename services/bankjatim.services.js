@@ -19,3 +19,7 @@ export const cekPeminjamanKredit = (data) => {
 export const simulasiKredit = (data) => {
   return api.post("/loans/simulasi", data).then((res) => res?.data);
 };
+
+export const historiesKredit = (data) => {
+  return api.post("/loans/histories", data).then((res) => res?.data);
+};
