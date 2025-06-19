@@ -4,7 +4,7 @@ import LayananKeuanganLayout from "@/components/LayananKeuangan/LayananKeuanganL
 import useScrollRestoration from "@/hooks/useScrollRestoration";
 import Head from "next/head";
 import PageContainer from "@/components/PageContainer";
-import { Breadcrumb } from "antd";
+import { Breadcrumb, FloatButton } from "antd";
 import Link from "next/link";
 
 const Multiguna = () => {
@@ -33,6 +33,7 @@ const Multiguna = () => {
         </title>
       </Head>
       <BankJatimLayout active="multiguna">
+        <FloatButton.BackTop />
         <BankJatimDetailLayananMultiguna />
       </BankJatimLayout>
     </PageContainer>

@@ -4,7 +4,7 @@ import LayananKeuanganLayout from "@/components/LayananKeuangan/LayananKeuanganL
 import useScrollRestoration from "@/hooks/useScrollRestoration";
 import Head from "next/head";
 import PageContainer from "@/components/PageContainer";
-import { Breadcrumb } from "antd";
+import { Breadcrumb, FloatButton } from "antd";
 import Link from "next/link";
 
 const KKB = () => {
@@ -33,6 +33,7 @@ const KKB = () => {
         </title>
       </Head>
       <BankJatimLayout active="kkb">
+        <FloatButton.BackTop />
         <BankJatimDetailLayananKKB />
       </BankJatimLayout>
     </PageContainer>

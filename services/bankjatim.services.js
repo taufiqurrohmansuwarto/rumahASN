@@ -1,4 +1,5 @@
 import axios from "axios";
+import queryString from "query-string";
 
 const api = axios.create({
   baseURL: "/helpdesk/api/partners/bankjatim",
@@ -22,4 +23,22 @@ export const simulasiKredit = (data) => {
 
 export const historiesKredit = (data) => {
   return api.post("/loans/histories", data).then((res) => res?.data);
+};
+
+export const localHistories = ({ page, limit, sort }) => {
+  const query = queryString.stringify(
+    {
+      page,
+      limit,
+      sort,
+    },
+    {
+      skipNull: true,
+      skipEmptyString: true,
+      skipEmptyObject: true,
+      skipUndefined: true,
+    }
+  );
+
+  return api.get(`/loans/local-histories?${query}`).then((res) => res?.data);
 };

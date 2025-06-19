@@ -49,6 +49,9 @@ class User extends Model {
       simpleWithImage(query) {
         query.select("users.custom_id", "users.username", "users.image");
       },
+      simpleWithEmployeeNumber(query) {
+        query.select("custom_id", "username", "employee_number", "image");
+      },
     };
   }
 

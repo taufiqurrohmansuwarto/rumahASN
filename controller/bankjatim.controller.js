@@ -6,6 +6,7 @@ import {
   simulasiKredit,
 } from "@/utils/bank-jatim.utils";
 import { createLog } from "@/utils/logs";
+const Log = require("@/models/logs.model");
 
 // Helper function untuk menangani error response
 const handleErrorResponse = (error) => {
@@ -104,6 +105,38 @@ export const histories = async (req, res) => {
     const payload = { nip };
     const result = await historiesKredit(fetcher, payload);
     await handleSuccessWithLog(result?.data, req, "/histories", res, true);
+  } catch (error) {
+    handleErrorWithLog(error, res, false);
+  }
+};
+
+export const localHistories = async (req, res) => {
+  try {
+    const { page = 1, limit = 10, sort = "desc" } = req.query;
+    let query = Log.query().withGraphFetched("user(simpleWithEmployeeNumber)");
+    if (sort) {
+      query = query.orderBy("created_at", sort);
+    }
+
+    // jika page  -1
+    if (page === -1 || page === "-1") {
+      const hasil = await query;
+      res.json(hasil);
+    } else {
+      const result = await query.page(parseInt(page - 1), parseInt(limit));
+      res.json(result);
+    }
+  } catch (error) {
+    handleErrorWithLog(error, res, false);
+  }
+};
+
+export const info = async (req, res) => {
+  try {
+    const { fetcher, user } = req;
+    const { employee_number: nip } = user;
+    const result = await infoKredit(fetcher, payload);
+    await handleSuccessWithLog(result?.data, req, "/info", res, true);
   } catch (error) {
     handleErrorWithLog(error, res, false);
   }

@@ -7,6 +7,20 @@ class Logs extends Model {
     return "logs";
   }
 
+  static get relationMappings() {
+    const User = require("@/models/users.model");
+    return {
+      user: {
+        relation: Model.BelongsToOneRelation,
+        modelClass: User,
+        join: {
+          from: "logs.user_id",
+          to: "users.custom_id",
+        },
+      },
+    };
+  }
+
   static get idColumn() {
     return "id";
   }

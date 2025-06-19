@@ -287,10 +287,14 @@ const FormPengajuanKredit = () => {
                   </Form.Item>
 
                   <Form.Item name="jns_kelamin" label="Jenis Kelamin">
-                    <Input
-                      readOnly
-                      disabled={isSynced}
-                      style={{ borderRadius: 8 }}
+                    <Select
+                      disabled
+                      placeholder="Pilih jenis kelamin"
+                      style={{ width: "100%", borderRadius: 8 }}
+                      options={[
+                        { value: "L", label: "Laki-laki" },
+                        { value: "P", label: "Perempuan" },
+                      ]}
                     />
                   </Form.Item>
 

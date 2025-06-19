@@ -10,7 +10,6 @@ import { ProConfigProvider } from "@ant-design/pro-components";
 import {
   IconBuildingSkyscraper,
   IconHistory,
-  IconRotateRectangle,
   IconWallet,
 } from "@tabler/icons-react";
 import { Dropdown, Space } from "antd";
@@ -32,6 +31,12 @@ const menuItems = [
     icon: <IconBuildingSkyscraper size={16} />,
     label: "Bank Jatim",
     role: ["asn", "admin"],
+  },
+  {
+    key: "/logs",
+    icon: <IconHistory size={16} />,
+    label: "Logs",
+    role: ["admin"],
   },
 ];
 
