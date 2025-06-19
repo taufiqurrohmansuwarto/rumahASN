@@ -68,6 +68,7 @@ export const ping = async (req, res) => {
 export const pengajuan = async (req, res) => {
   try {
     const { fetcher, body } = req;
+
     const result = await pengajuanKredit(fetcher, body);
     console.log(body);
     console.log(result?.data);

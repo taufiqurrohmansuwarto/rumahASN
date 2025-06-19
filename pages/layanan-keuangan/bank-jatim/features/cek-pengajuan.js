@@ -2,9 +2,10 @@ import FormCekPengajuanKredit from "@/components/LayananKeuangan/BankJatim/FormC
 import LayananKeuanganLayout from "@/components/LayananKeuangan/LayananKeuanganLayout";
 import PageContainer from "@/components/PageContainer";
 import useScrollRestoration from "@/hooks/useScrollRestoration";
-import { Col, Row } from "antd";
+import { Breadcrumb, Col, Row } from "antd";
 import Head from "next/head";
 import { useRouter } from "next/router";
+import Link from "next/link";
 
 const CekPengajuan = () => {
   useScrollRestoration();
@@ -14,7 +15,20 @@ const CekPengajuan = () => {
   return (
     <PageContainer
       title="Cek Status Pengajuan Kredit"
-      subTitle="Pantau perkembangan pengajuan kredit Anda secara real-time"
+      content="Pantau perkembangan pengajuan kredit Anda secara real-time"
+      breadcrumbRender={() => (
+        <Breadcrumb>
+          <Breadcrumb.Item>
+            <Link href="/layanan-keuangan/dashboard">Beranda</Link>
+          </Breadcrumb.Item>
+          <Breadcrumb.Item>
+            <Link href="/layanan-keuangan/bank-jatim/produk/kkb">
+              Bank Jatim
+            </Link>
+          </Breadcrumb.Item>
+          <Breadcrumb.Item>Cek Pengajuan</Breadcrumb.Item>
+        </Breadcrumb>
+      )}
       onBack={() => router.back()}
     >
       <Head>
@@ -31,7 +45,7 @@ const CekPengajuan = () => {
 
 CekPengajuan.getLayout = function getLayout(page) {
   return (
-    <LayananKeuanganLayout active="/layanan-keuangan/bank-jatim">
+    <LayananKeuanganLayout active="/layanan-keuangan/bank-jatim/produk/kkb">
       {page}
     </LayananKeuanganLayout>
   );
