@@ -307,7 +307,7 @@ function LayananKeuanganLandingPage() {
                   level={4}
                   style={{ color: "#64748b", marginBottom: "8px" }}
                 >
-                  Bank Partner Lainnya
+                  Partner Lainnya
                 </Title>
                 <Text type="secondary" style={{ fontSize: "16px" }}>
                   Segera hadir untuk melayani Anda

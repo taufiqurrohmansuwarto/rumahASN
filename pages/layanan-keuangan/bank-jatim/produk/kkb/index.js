@@ -4,13 +4,33 @@ import LayananKeuanganLayout from "@/components/LayananKeuangan/LayananKeuanganL
 import useScrollRestoration from "@/hooks/useScrollRestoration";
 import Head from "next/head";
 import PageContainer from "@/components/PageContainer";
+import { Breadcrumb } from "antd";
+import Link from "next/link";
 
 const KKB = () => {
   useScrollRestoration();
   return (
-    <PageContainer>
+    <PageContainer
+      title="Partner Bank Jatim - Kredit Kendaraan Bermotor"
+      content="Wujudkan impian memiliki kendaraan dengan kredit yang mudah dan terpercaya dari Bank Jatim"
+      breadcrumbRender={() => (
+        <Breadcrumb>
+          <Breadcrumb.Item>
+            <Link href="/layanan-keuangan/dashboard">Beranda</Link>
+          </Breadcrumb.Item>
+          <Breadcrumb.Item>
+            <Link href="/layanan-keuangan/bank-jatim/produk/kkb">
+              Bank Jatim
+            </Link>
+          </Breadcrumb.Item>
+          <Breadcrumb.Item>Kredit Kendaraan Bermotor</Breadcrumb.Item>
+        </Breadcrumb>
+      )}
+    >
       <Head>
-        <title>Layanan Keuangan - Bank Jatim - KKB</title>
+        <title>
+          Rumah ASN - Layanan Keuangan - Bank Jatim - Kredit Kendaraan Bermotor
+        </title>
       </Head>
       <BankJatimLayout active="kkb">
         <BankJatimDetailLayananKKB />
@@ -21,7 +41,7 @@ const KKB = () => {
 
 KKB.getLayout = function getLayout(page) {
   return (
-    <LayananKeuanganLayout active="/layanan-keuangan/bank-jatim">
+    <LayananKeuanganLayout active="/layanan-keuangan/bank-jatim/produk/kkb">
       {page}
     </LayananKeuanganLayout>
   );

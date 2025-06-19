@@ -28,7 +28,7 @@ const menuItems = [
     role: ["asn", "admin"],
   },
   {
-    key: "/bank-jatim",
+    key: "/bank-jatim/produk/kkb",
     icon: <IconBuildingSkyscraper size={16} />,
     label: "Bank Jatim",
     role: ["asn", "admin"],

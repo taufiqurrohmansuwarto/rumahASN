@@ -30,8 +30,8 @@ const { Title, Text } = Typography;
 const { Panel } = Collapse;
 
 const INITIAL_DATA = {
-  nip: "19910305201931008",
-  no_ktp: "351515170503109",
+  nip: "199103052019031008",
+  no_ktp: "3515170503900002",
   nama: "iput",
   tempat_lahir: "sidoarjo",
   tgl_lahir: "1991-03-05",
