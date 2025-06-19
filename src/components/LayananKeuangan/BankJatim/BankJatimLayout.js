@@ -1,33 +1,21 @@
 import {
-  Flex,
-  Grid,
-  Tabs,
-  Typography,
-  Button,
-  Space,
-  Card,
-  Row,
-  Col,
-} from "antd";
-import { useRouter } from "next/router";
-import {
-  IconCar,
-  IconHome,
-  IconCreditCard,
-  IconCalculator,
-  IconFileText,
-  IconClipboardCheck,
-  IconQuestionMark,
-  IconHistory,
-  IconPercentage,
-  IconCalendar,
-  IconCurrencyDollar,
-  IconBolt,
-  IconShield,
-  IconArrowsExchange,
   IconArrowRight,
+  IconArrowsExchange,
+  IconBolt,
+  IconCalendar,
+  IconCar,
+  IconClipboardCheck,
+  IconCreditCard,
+  IconCurrencyDollar,
+  IconHistory,
+  IconHome,
+  IconPercentage,
   IconPlayerPlay,
+  IconQuestionMark,
+  IconShield,
 } from "@tabler/icons-react";
+import { Button, Grid, Space, Tabs, Typography } from "antd";
+import { useRouter } from "next/router";
 
 const { useBreakpoint } = Grid;
 
