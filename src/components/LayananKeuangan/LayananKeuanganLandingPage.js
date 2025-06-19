@@ -157,7 +157,7 @@ function LayananKeuanganLandingPage() {
                   >
                     <img
                       alt="Bank Jatim"
-                      src="/images/bank-jatim-logo.png"
+                      src="https://siasn.bkd.jatimprov.go.id:9000/public/logo-bank-jatim.png"
                       style={{ height: "60px", objectFit: "contain" }}
                     />
                   </div>
