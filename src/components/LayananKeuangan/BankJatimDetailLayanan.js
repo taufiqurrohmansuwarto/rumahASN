@@ -1,20 +1,67 @@
 import React from "react";
-import { Card, Button, Typography, Space, Divider, Tag } from "antd";
+import { Card, Button, Typography, Space, Divider, Tag, List } from "antd";
 import {
   PlayCircleOutlined,
   FileTextOutlined,
   CheckCircleOutlined,
   ArrowRightOutlined,
   InfoCircleOutlined,
+  StarOutlined,
+  FileProtectOutlined,
+  ToolOutlined,
+  PhoneOutlined,
+  BankOutlined,
 } from "@ant-design/icons";
 
 const { Title, Paragraph } = Typography;
 
+/**
+ * BankJatimDetailLayanan - Komponen detail layanan Bank Jatim
+ *
+ * @example
+ * // Contoh penggunaan dengan persyaratan nested:
+ * const persyaratanExample = [
+ *   "Warga Negara Indonesia",
+ *   {
+ *     title: "Usia calon/debitur",
+ *     items: [
+ *       "Minimal 21 tahun atau telah menikah",
+ *       "Maksimal 65 tahun pada saat akhir jangka waktu kredit"
+ *     ]
+ *   },
+ *   "Calon/ debitur yang sudah pernah menerima fasilitas kredit maupun yang belum pernah menerima fasilitas kredit",
+ *   "Tidak memiliki tunggakan kredit dan tidak terdaftar dalam daftar hitam nasional",
+ *   {
+ *     title: "Persyaratan Wiraswasta",
+ *     items: [
+ *       "Usaha telah berjalan minimal 3(tiga) tahun, dibuktikan dengan SPT Tahunan",
+ *       "Memiliki tempat usaha sendiri"
+ *     ]
+ *   },
+ *   {
+ *     title: "Persyaratan Tenaga Alih Daya Bank, P3K dan Tenaga Kontrak",
+ *     items: [
+ *       "Berpenghasilan tetap dan payroll gaji melalui Bank Jatim",
+ *       "Lama bekerja di perusahaan sama minimal 2 tahun"
+ *     ]
+ *   }
+ * ];
+ *
+ * <BankJatimDetailLayanan
+ *   title="Kredit Multiguna"
+ *   persyaratan={persyaratanExample}
+ *   keuntungan={["Bunga kompetitif", "Proses cepat"]}
+ *   fitur={["Tanpa agunan", "Fleksibel"]}
+ * />
+ */
 function BankJatimDetailLayanan({
   title = "Layanan Bank Jatim",
   subtitle = "",
   description = "Deskripsi layanan akan ditampilkan di sini. Silakan gunakan props untuk mengisi konten yang sesuai.",
   features = [],
+  keuntungan = [],
+  persyaratan = [],
+  fitur = [],
   category = "",
   onSimulasi,
   onPengajuan,
@@ -52,6 +99,29 @@ function BankJatimDetailLayanan({
   ];
 
   const actions = customActions.length > 0 ? customActions : defaultActions;
+
+  // Function to render persyaratan with nested structure
+  const renderPersyaratan = (items) => {
+    return items.map((item, index) => {
+      if (typeof item === "string") {
+        return (
+          <li key={index} style={{ marginBottom: 8 }}>
+            {item}
+          </li>
+        );
+      } else if (item.title && item.items) {
+        return (
+          <li key={index} style={{ marginBottom: 12 }}>
+            <strong>{item.title}</strong>
+            <ul style={{ marginTop: 8, marginLeft: 20 }}>
+              {renderPersyaratan(item.items)}
+            </ul>
+          </li>
+        );
+      }
+      return null;
+    });
+  };
 
   return (
     <div className={`detail-layanan-container ${className}`} style={style}>
@@ -144,6 +214,78 @@ function BankJatimDetailLayanan({
           text-transform: uppercase;
           letter-spacing: 0.5px;
         }
+
+        .section-icon {
+          color: #dc2626;
+          font-size: 20px;
+          margin-right: 8px;
+        }
+
+        .persyaratan-list ul {
+          list-style-type: disc;
+          margin-left: 20px;
+          color: #4b5563;
+        }
+
+        .persyaratan-list li {
+          line-height: 1.6;
+          margin-bottom: 8px;
+        }
+
+        .keuntungan-item {
+          background: rgba(34, 197, 94, 0.1);
+          border: 1px solid rgba(34, 197, 94, 0.2);
+          border-radius: 8px;
+          padding: 12px 16px;
+          margin-bottom: 8px;
+          display: flex;
+          align-items: flex-start;
+          gap: 12px;
+        }
+
+        .keuntungan-icon {
+          color: #22c55e;
+          font-size: 16px;
+          margin-top: 2px;
+          flex-shrink: 0;
+        }
+
+        .fitur-item {
+          background: rgba(59, 130, 246, 0.1);
+          border: 1px solid rgba(59, 130, 246, 0.2);
+          border-radius: 8px;
+          padding: 12px 16px;
+          margin-bottom: 8px;
+          display: flex;
+          align-items: flex-start;
+          gap: 12px;
+        }
+
+        .fitur-icon {
+          color: #3b82f6;
+          font-size: 16px;
+          margin-top: 2px;
+          flex-shrink: 0;
+        }
+
+        .contact-info {
+          background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%);
+          border-radius: 12px;
+          padding: 20px;
+          color: white;
+          margin-top: 24px;
+        }
+
+        .contact-info .ant-typography {
+          color: white !important;
+        }
+
+        .contact-highlight {
+          background: rgba(255, 255, 255, 0.2);
+          padding: 2px 8px;
+          border-radius: 4px;
+          font-weight: 600;
+        }
       `}</style>
 
       {/* Hero Section */}
@@ -204,7 +346,7 @@ function BankJatimDetailLayanan({
         <Space direction="vertical" size="large" style={{ width: "100%" }}>
           <div>
             <Space style={{ marginBottom: 16 }}>
-              <InfoCircleOutlined style={{ color: "#dc2626", fontSize: 20 }} />
+              <InfoCircleOutlined className="section-icon" />
               <Title level={4} style={{ margin: 0, color: "#1f2937" }}>
                 Tentang Layanan
               </Title>
@@ -221,6 +363,96 @@ function BankJatimDetailLayanan({
             </Paragraph>
           </div>
 
+          {/* Keuntungan Section */}
+          {keuntungan.length > 0 && (
+            <>
+              <Divider style={{ margin: "16px 0" }} />
+              <div>
+                <Space style={{ marginBottom: 16 }}>
+                  <StarOutlined className="section-icon" />
+                  <Title level={4} style={{ margin: 0, color: "#1f2937" }}>
+                    Keuntungan
+                  </Title>
+                </Space>
+                <div>
+                  {keuntungan.map((item, index) => (
+                    <div key={index} className="keuntungan-item">
+                      <CheckCircleOutlined className="keuntungan-icon" />
+                      <span
+                        style={{
+                          color: "#374151",
+                          fontSize: 14,
+                          lineHeight: 1.6,
+                        }}
+                      >
+                        {item}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </>
+          )}
+
+          {/* Persyaratan Section */}
+          {persyaratan.length > 0 && (
+            <>
+              <Divider style={{ margin: "16px 0" }} />
+              <div>
+                <Space style={{ marginBottom: 16 }}>
+                  <FileProtectOutlined className="section-icon" />
+                  <Title level={4} style={{ margin: 0, color: "#1f2937" }}>
+                    Persyaratan
+                  </Title>
+                </Space>
+                <div className="persyaratan-list">
+                  <ul
+                    style={{
+                      paddingLeft: 20,
+                      color: "#4b5563",
+                      fontSize: 14,
+                      lineHeight: 1.6,
+                    }}
+                  >
+                    {renderPersyaratan(persyaratan)}
+                  </ul>
+                </div>
+              </div>
+            </>
+          )}
+
+          {/* Fitur Section */}
+          {fitur.length > 0 && (
+            <>
+              <Divider style={{ margin: "16px 0" }} />
+              <div>
+                <Space style={{ marginBottom: 16 }}>
+                  <ToolOutlined className="section-icon" />
+                  <Title level={4} style={{ margin: 0, color: "#1f2937" }}>
+                    Fitur
+                  </Title>
+                </Space>
+                <div>
+                  {fitur.map((item, index) => (
+                    <div key={index} className="fitur-item">
+                      <ToolOutlined className="fitur-icon" />
+                      <span
+                        style={{
+                          color: "#374151",
+                          fontSize: 14,
+                          lineHeight: 1.6,
+                        }}
+                      >
+                        {item}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </>
+          )}
+
+          {/* Legacy Features (keeping for backward compatibility) */}
           {features.length > 0 && (
             <>
               <Divider style={{ margin: "16px 0" }} />
@@ -238,6 +470,29 @@ function BankJatimDetailLayanan({
               </div>
             </>
           )}
+
+          {/* Contact Information */}
+          <div className="contact-info">
+            <Space align="start" style={{ width: "100%" }}>
+              <div style={{ display: "flex", gap: 8, marginTop: 4 }}>
+                <PhoneOutlined style={{ fontSize: 18, color: "white" }} />
+                <BankOutlined style={{ fontSize: 18, color: "white" }} />
+              </div>
+              <div style={{ flex: 1 }}>
+                <Paragraph style={{ margin: 0, fontSize: 15, lineHeight: 1.6 }}>
+                  Untuk persyaratan, ketentuan/keterangan lebih lanjut mengenai
+                  produk-produk kami, mohon menghubungi{" "}
+                  <span className="contact-highlight">
+                    Info Bank Jatim 14044
+                  </span>{" "}
+                  atau datang langsung ke{" "}
+                  <span className="contact-highlight">
+                    Kantor Cabang Bank Jatim
+                  </span>
+                </Paragraph>
+              </div>
+            </Space>
+          </div>
         </Space>
       </Card>
     </div>
