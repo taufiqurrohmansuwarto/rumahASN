@@ -131,6 +131,11 @@ const FormSimulasi = () => {
     }).format(value);
   };
 
+  const formatBunga = (value) => {
+    if (!value || isNaN(value)) return "-";
+    return `${value}%`;
+  };
+
   const { mutate, isLoading } = useMutation((data) => simulasiKredit(data), {
     onSuccess: (result) => {
       if (result?.data) {
@@ -184,7 +189,7 @@ const FormSimulasi = () => {
                         {formatRupiah(angsuran)}
                       </Descriptions.Item>
                       <Descriptions.Item label="Bunga">
-                        {formatRupiah(bunga)}
+                        {formatBunga(bunga)}
                       </Descriptions.Item>
                       <Descriptions.Item label="Tanggal Jatuh Tempo">
                         {tgl_jatuh_tempo || "-"}

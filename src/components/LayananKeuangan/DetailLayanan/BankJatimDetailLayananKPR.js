@@ -18,7 +18,7 @@ function BankJatimDetailLayananKPR() {
       title="Kredit Pemilikan Rumah (KPR)"
       subtitle="Wujudkan Impian Rumah Idaman Anda"
       category="Kredit Properti"
-      description="KPR Bank Jatim memberikan kemudahan bagi Anda untuk memiliki rumah impian dengan suku bunga kompetitif dan tenor yang fleksibel. Dilengkapi dengan proses yang mudah dan cepat, serta berbagai keunggulan yang memberikan nilai lebih untuk nasabah. Dapatkan rumah idaman Anda dengan cicilan yang terjangkau dan proses approval yang cepat."
+      description="Kredit Multiguna adalah fasilitas kredit yang diberikan kepada nasabah yang memiliki penghasilan maupun tunjungan tetap dan digunakan untuk memenuhi segala kebutuhan nasaba. Nasabah yang dapat menerima ini tidak hanya pegawai aktif namun juga tenaga kontrak hingga pensiunan termasuk janda/duda pensiuanan"
       features={[
         "Suku Bunga Kompetitif",
         "Tenor Hingga 25 Tahun",
