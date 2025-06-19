@@ -70,8 +70,6 @@ export const pengajuan = async (req, res) => {
     const { fetcher, body } = req;
 
     const result = await pengajuanKredit(fetcher, body);
-    console.log(body);
-    console.log(result?.data);
     await handleSuccessWithLog(result?.data, req, "/pengajuan", res);
     // Override response untuk mengembalikan data saja
   } catch (error) {

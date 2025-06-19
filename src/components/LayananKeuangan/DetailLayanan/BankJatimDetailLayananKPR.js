@@ -18,14 +18,58 @@ function BankJatimDetailLayananKPR() {
       title="Kredit Pemilikan Rumah (KPR)"
       subtitle="Wujudkan Impian Rumah Idaman Anda"
       category="Kredit Properti"
-      description="Kredit Multiguna adalah fasilitas kredit yang diberikan kepada nasabah yang memiliki penghasilan maupun tunjungan tetap dan digunakan untuk memenuhi segala kebutuhan nasaba. Nasabah yang dapat menerima ini tidak hanya pegawai aktif namun juga tenaga kontrak hingga pensiunan termasuk janda/duda pensiuanan"
+      description="KPR Bank Jatim adalah Kredit Pemilikan Rumah Bank Jatim yang diberikan kepada perorangan maupun non perorangan untuk pemilikan rumah tinggal atau apartemen atau ruko/rukan, baik melalui developer atau non developer"
       features={[
-        "Suku Bunga Kompetitif",
-        "Tenor Hingga 25 Tahun",
-        "DP Mulai 10%",
-        "Proses Cepat",
-        "Asuransi Jiwa & Kebakaran",
-        "Take Over dari Bank Lain",
+        "KPR",
+        "KPR Top Up",
+        "KPR Take Over",
+        "KPR Take Over dan Top Up",
+        "KPR Milia",
+        "KPR Lelang",
+        "KPR Renovasi/Pembangunan",
+        "Kredit Konsumsi Beragun Properti",
+      ]}
+      keuntungan={[
+        "Jangka waktu maksimal 20 tahun",
+        "Suku bunga murah dan bervariasi",
+        "Persyaratan mudah",
+        "Dapat dilunasi sebagaian secara keseluruhan",
+        "Program referral bagi nasabah Bank yang tidak memliki hubungan keluarga dengan pegawai Bank yang dapat mereferensikan realisasi KPR Bank Jatim dengan imbalan berupa reward hingga 1% dari plafond yang disetujui",
+      ]}
+      persyaratan={[
+        "Warga Negara Indonesia",
+        {
+          title: "Persyaratan Pegawai",
+          items: ["Telah menjadi pegawai tetap di perusahaan saat permohonan"],
+        },
+        {
+          title: "Persyaratan Pegawai Swasta",
+          items: [
+            "Status telah menjadi pegawai tetap di perusahaan saat permohonan",
+            "Masa kerja minimum 1 tahun (termasuk masa kerja sebelum diangkat menjadi pegawai tetap) di perusahaan yang sama saat ini",
+          ],
+        },
+        {
+          title: "Persyaratan Profesional",
+          items: [
+            "Memiliki pengalaman di bidang yang sama minimum 2 tahun berturut-turut, dibuktikan oleh ijin usaha/praktek atau surat kepengurusan perpanjangan ijin praktek",
+            "Memiliki penghasilan yang dapat diverifikasi",
+          ],
+        },
+        {
+          title: "Persyaratan Wiraswasta",
+          items: [
+            "Usaha telah berjalan minimal 3 (tiga) tahun, dibuktikan dengan SPT Tahunan",
+            "Memiliki tempat usaha sendiri",
+          ],
+        },
+        {
+          title: "Tenaga Alih Daya Bank, P3K dan Tenaga Kontrak",
+          items: [
+            "Berpenghasilan tetap dan payroll gaji melalui Bank Jatim",
+            "Lama bekerja di perusahaan sama minimal 2 tahun",
+          ],
+        },
       ]}
       onSimulasi={handleSimulasi}
       onPengajuan={handlePengajuan}

@@ -30,8 +30,8 @@ const { Title, Text } = Typography;
 const { Panel } = Collapse;
 
 const INITIAL_DATA = {
-  nip: "199103052019031008",
-  no_ktp: "3515170503900002",
+  nip: "199103052019031001",
+  no_ktp: "3515170503900001",
   nama: "iput",
   tempat_lahir: "sidoarjo",
   tgl_lahir: "1991-03-05",
@@ -57,19 +57,55 @@ const FormPengajuanKredit = () => {
   const { mutate, isLoading } = useMutation((data) => pengajuanKredit(data), {
     onSuccess: (result) => {
       if (result?.data) {
+        const { no_pengajuan, kantor_cabang } = result?.data;
         Modal.success({
-          title: "Pengajuan Berhasil",
+          title: "Pengajuan Berhasil Disubmit",
+          width: 500,
           content: (
-            <div style={{ textAlign: "center", padding: "20px 0" }}>
+            <div style={{ textAlign: "center", padding: "24px 0" }}>
               <CheckCircleOutlined
                 style={{ fontSize: 48, color: "#52c41a", marginBottom: 16 }}
               />
-              <Title level={4} style={{ marginBottom: 8 }}>
-                Pengajuan Kredit Berhasil
+              <Title level={4} style={{ marginBottom: 16, color: "#1f2937" }}>
+                Pengajuan Kredit Berhasil Disubmit
               </Title>
-              <Text type="secondary">
-                Pengajuan kredit Anda telah berhasil disimpan. Silahkan tunggu
-                informasi selanjutnya.
+              <div style={{ marginBottom: 20 }}>
+                <Text
+                  type="secondary"
+                  style={{
+                    fontSize: "14px",
+                    display: "block",
+                    marginBottom: 8,
+                  }}
+                >
+                  No. Pengajuan:
+                </Text>
+                <Text strong style={{ fontSize: "16px", color: "#dc2626" }}>
+                  {no_pengajuan}
+                </Text>
+              </div>
+              <div style={{ marginBottom: 20 }}>
+                <Text
+                  type="secondary"
+                  style={{
+                    fontSize: "14px",
+                    display: "block",
+                    marginBottom: 8,
+                  }}
+                >
+                  Kantor Cabang:
+                </Text>
+                <Text strong style={{ fontSize: "14px", color: "#1f2937" }}>
+                  {kantor_cabang}
+                </Text>
+              </div>
+              <Text
+                type="secondary"
+                style={{ fontSize: "14px", lineHeight: "1.6" }}
+              >
+                Pengajuan kredit Anda telah berhasil disubmit ke sistem Bank
+                Jatim. Silahkan simpan nomor pengajuan untuk keperluan
+                pengecekan status selanjutnya.
               </Text>
             </div>
           ),
