@@ -141,20 +141,39 @@ function BankJatimLayout({ children, active = "kkb" }) {
         />
 
         <div style={{ position: "relative", zIndex: 2 }}>
-          <Typography.Title
-            level={1}
+          <div
             style={{
-              color: "white",
-              margin: 0,
-              fontSize: isMobile ? "28px" : "36px",
-              fontWeight: 700,
-              textAlign: "center",
-              textShadow: "0 2px 8px rgba(0,0,0,0.3)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: "16px",
+              flexDirection: isMobile ? "column" : "row",
               marginBottom: "8px",
             }}
           >
-            🏛️ Layanan Bank Jatim
-          </Typography.Title>
+            <img
+              src="https://siasn.bkd.jatimprov.go.id:9000/public/logo-bank-jatim.png"
+              alt="Bank Jatim Logo"
+              style={{
+                height: isMobile ? "40px" : "48px",
+                objectFit: "contain",
+                filter: "brightness(0) invert(1)",
+              }}
+            />
+            <Typography.Title
+              level={1}
+              style={{
+                color: "white",
+                margin: 0,
+                fontSize: isMobile ? "28px" : "36px",
+                fontWeight: 700,
+                textAlign: "center",
+                textShadow: "0 2px 8px rgba(0,0,0,0.3)",
+              }}
+            >
+              Layanan Bank Jatim
+            </Typography.Title>
+          </div>
           <Typography.Text
             style={{
               color: "rgba(255,255,255,0.95)",
