@@ -41,7 +41,13 @@ const auth = async (req, res, next) => {
       };
 
       const ip =
-        req?.headers?.["x-forwarded-for"] || req?.connection?.remoteAddress;
+        req.headers["x-forwarded-for"]?.split(",")[0] ||
+        req.connection?.remoteAddress ||
+        req.socket?.remoteAddress ||
+        req.connection?.socket?.remoteAddress ||
+        "unknown";
+
+      console.log(ip);
 
       req.user = currentUser;
       req.ip = ip;
