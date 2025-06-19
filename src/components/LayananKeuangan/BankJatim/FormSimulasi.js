@@ -145,11 +145,12 @@ const FormSimulasi = () => {
           angsuran,
           bunga,
           tgl_jatuh_tempo,
-          by_provinsi,
           by_admin,
           by_asuransi,
           by_blokir_angsuran,
           nominal_yg_diterima,
+          by_provisi,
+          by_taksasi,
         } = result?.data;
 
         Modal.success({
@@ -200,11 +201,14 @@ const FormSimulasi = () => {
                 <Col span={12}>
                   <Card size="small" title="Biaya-biaya" bordered={false}>
                     <Descriptions column={1} size="small">
-                      <Descriptions.Item label="Biaya Provinsi">
-                        {formatRupiah(by_provinsi)}
+                      <Descriptions.Item label="Biaya Provisi">
+                        {formatRupiah(by_provisi)}
                       </Descriptions.Item>
                       <Descriptions.Item label="Biaya Admin">
                         {formatRupiah(by_admin)}
+                      </Descriptions.Item>
+                      <Descriptions.Item label="Biaya Taksasi">
+                        {formatRupiah(by_taksasi)}
                       </Descriptions.Item>
                       <Descriptions.Item label="Biaya Asuransi">
                         {formatRupiah(by_asuransi)}
