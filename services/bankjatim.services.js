@@ -25,6 +25,10 @@ export const historiesKredit = (data) => {
   return api.post("/loans/histories", data).then((res) => res?.data);
 };
 
+export const getUserInfo = () => {
+  return api.get("/info").then((res) => res?.data);
+};
+
 export const localHistories = ({ page, limit, sort }) => {
   const query = queryString.stringify(
     {

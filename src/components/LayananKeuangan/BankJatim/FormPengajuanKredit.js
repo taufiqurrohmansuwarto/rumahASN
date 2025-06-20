@@ -1,58 +1,50 @@
-import { pengajuanKredit } from "@/services/bankjatim.services";
+import { getUserInfo, pengajuanKredit } from "@/services/bankjatim.services";
 import { getJenisKredit, getKodeKabkota } from "@/utils/client-utils";
 import {
+  BankOutlined,
   CheckCircleOutlined,
   CloseCircleOutlined,
+  CreditCardOutlined,
   FileTextOutlined,
   SyncOutlined,
   UserOutlined,
-  BankOutlined,
-  CreditCardOutlined,
 } from "@ant-design/icons";
 import { useMutation } from "@tanstack/react-query";
 import {
   Button,
   Card,
+  Collapse,
   DatePicker,
   Form,
   Input,
   InputNumber,
   Modal,
   Select,
-  Typography,
   Space,
-  Collapse,
+  Typography,
 } from "antd";
-import { useState } from "react";
 import dayjs from "dayjs";
+import { useState } from "react";
 
 const { Title, Text } = Typography;
 const { Panel } = Collapse;
-
-const INITIAL_DATA = {
-  nip: "199103052019031001",
-  no_ktp: "3515170503900001",
-  nama: "iput",
-  tempat_lahir: "sidoarjo",
-  tgl_lahir: "1991-03-05",
-  jns_kelamin: "L",
-  no_hp: "082132365897",
-  tmt_pensiun: 58,
-  norek_gaji: "000828485",
-  kd_dinas: "123",
-  nama_dinas: "badan kepegawaian daerah",
-  alamat_kantor: "jl jemur andayani",
-  kota_kantor: "surabaya",
-  kode_kabkota: "3578",
-  jns_pinjaman: "KMG",
-  plafon_pengajuan: 100000000,
-  jangka_waktu: 48,
-};
 
 const FormPengajuanKredit = () => {
   const [form] = Form.useForm();
   const [isSynced, setIsSynced] = useState(false);
   const [activeKey, setActiveKey] = useState(["1", "2", "3"]); // Default semua terbuka
+
+  const { mutate: userInfo, isLoading: isUserInfoLoading } = useMutation({
+    mutationFn: getUserInfo,
+    onSuccess: (result) => {
+      form.setFieldsValue({
+        ...result,
+        tgl_lahir: dayjs(result.tgl_lahir),
+      });
+      setIsSynced(true);
+      setActiveKey(["3"]);
+    },
+  });
 
   const { mutate, isLoading } = useMutation((data) => pengajuanKredit(data), {
     onSuccess: (result) => {
@@ -145,16 +137,6 @@ const FormPengajuanKredit = () => {
     },
   });
 
-  const handleSinkron = () => {
-    form.setFieldsValue({
-      ...INITIAL_DATA,
-      tgl_lahir: dayjs(INITIAL_DATA.tgl_lahir),
-    });
-    setIsSynced(true);
-    // Setelah sinkron, fokus ke Data Kredit
-    setActiveKey(["3"]);
-  };
-
   const handleSubmit = (data) => {
     const payload = {
       ...data,
@@ -206,7 +188,7 @@ const FormPengajuanKredit = () => {
         >
           <Form form={form} layout="vertical" onFinish={handleSubmit}>
             <Button
-              onClick={handleSinkron}
+              onClick={() => userInfo()}
               icon={<SyncOutlined />}
               style={{
                 width: "100%",
@@ -218,7 +200,7 @@ const FormPengajuanKredit = () => {
                 color: isSynced ? "white" : undefined,
               }}
             >
-              {isSynced ? "Data Telah Disinkron" : "Sinkron Data"}
+              {isUserInfoLoading ? "Mengambil Data..." : "Ambil Data"}
             </Button>
 
             <Collapse
@@ -246,42 +228,26 @@ const FormPengajuanKredit = () => {
                   style={{ width: "100%" }}
                 >
                   <Form.Item name="nip" label="NIP">
-                    <Input
-                      readOnly
-                      disabled={isSynced}
-                      style={{ borderRadius: 8 }}
-                    />
+                    <Input readOnly disabled style={{ borderRadius: 8 }} />
                   </Form.Item>
 
                   <Form.Item name="no_ktp" label="No KTP">
-                    <Input
-                      readOnly
-                      disabled={isSynced}
-                      style={{ borderRadius: 8 }}
-                    />
+                    <Input readOnly disabled style={{ borderRadius: 8 }} />
                   </Form.Item>
 
                   <Form.Item name="nama" label="Nama">
-                    <Input
-                      readOnly
-                      disabled={isSynced}
-                      style={{ borderRadius: 8 }}
-                    />
+                    <Input readOnly disabled style={{ borderRadius: 8 }} />
                   </Form.Item>
 
                   <Form.Item name="tempat_lahir" label="Tempat Lahir">
-                    <Input
-                      readOnly
-                      disabled={isSynced}
-                      style={{ borderRadius: 8 }}
-                    />
+                    <Input readOnly disabled style={{ borderRadius: 8 }} />
                   </Form.Item>
 
                   <Form.Item name="tgl_lahir" label="Tanggal Lahir">
                     <DatePicker
                       format="YYYY-MM-DD"
                       readOnly
-                      disabled={isSynced}
+                      disabled
                       style={{ width: "100%", borderRadius: 8 }}
                     />
                   </Form.Item>
@@ -299,11 +265,7 @@ const FormPengajuanKredit = () => {
                   </Form.Item>
 
                   <Form.Item name="no_hp" label="No HP">
-                    <Input
-                      readOnly
-                      disabled={isSynced}
-                      style={{ borderRadius: 8 }}
-                    />
+                    <Input readOnly disabled style={{ borderRadius: 8 }} />
                   </Form.Item>
                 </Space>
               </Panel>
@@ -326,53 +288,65 @@ const FormPengajuanKredit = () => {
                   size="middle"
                   style={{ width: "100%" }}
                 >
-                  <Form.Item name="tmt_pensiun" label="TMT Pensiun">
-                    <InputNumber
-                      readOnly
-                      disabled={isSynced}
-                      style={{ width: "100%", borderRadius: 8 }}
-                    />
+                  <Form.Item
+                    name="tmt_pensiun"
+                    label="TMT Pensiun"
+                    rules={[
+                      { required: true, message: "Masukkan TMT Pensiun!" },
+                      {
+                        validator: (_, value) => {
+                          if (value > 70) {
+                            return Promise.reject(
+                              new Error(
+                                "TMT Pensiun tidak boleh lebih dari 70 tahun!"
+                              )
+                            );
+                          }
+                          return Promise.resolve();
+                        },
+                      },
+                    ]}
+                  >
+                    <InputNumber style={{ width: "100%", borderRadius: 8 }} />
                   </Form.Item>
 
-                  <Form.Item name="norek_gaji" label="No Rek Gaji">
-                    <Input
-                      readOnly
-                      disabled={isSynced}
-                      style={{ borderRadius: 8 }}
-                    />
+                  <Form.Item
+                    name="norek_gaji"
+                    label="No Rek Gaji"
+                    rules={[
+                      {
+                        pattern: /^[0-9]+$/,
+                        message: "No Rek Gaji hanya boleh berisi angka!",
+                      },
+                    ]}
+                  >
+                    <Input style={{ borderRadius: 8 }} />
                   </Form.Item>
 
                   <Form.Item name="kd_dinas" label="Kode Dinas">
-                    <Input
-                      readOnly
-                      disabled={isSynced}
-                      style={{ borderRadius: 8 }}
-                    />
+                    <Input readOnly disabled style={{ borderRadius: 8 }} />
                   </Form.Item>
 
                   <Form.Item name="nama_dinas" label="Nama Dinas">
-                    <Input
-                      readOnly
-                      disabled={isSynced}
-                      style={{ borderRadius: 8 }}
-                    />
+                    <Input readOnly disabled style={{ borderRadius: 8 }} />
                   </Form.Item>
 
-                  <Form.Item name="alamat_kantor" label="Alamat Kantor">
-                    <Input
-                      readOnly
-                      disabled={isSynced}
-                      style={{ borderRadius: 8 }}
-                    />
+                  <Form.Item
+                    name="alamat_kantor"
+                    label="Alamat Kantor"
+                    rules={[
+                      { required: true, message: "Masukkan Alamat Kantor!" },
+                    ]}
+                  >
+                    <Input readOnly style={{ borderRadius: 8 }} />
                   </Form.Item>
 
-                  <Form.Item name="kota_kantor" label="Kota Kantor">
-                    <Input disabled={isSynced} style={{ borderRadius: 8 }} />
-                  </Form.Item>
-
-                  <Form.Item name="kode_kabkota" label="Kode Kabkota">
+                  <Form.Item
+                    name="kode_kabkota"
+                    label="Kode Kabkota"
+                    rules={[{ required: true, message: "Pilih kode kabkota!" }]}
+                  >
                     <Select
-                      disabled={isSynced}
                       showSearch
                       optionFilterProp="label"
                       filterOption={(input, option) =>

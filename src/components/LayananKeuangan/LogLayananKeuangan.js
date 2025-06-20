@@ -32,8 +32,6 @@ const { Title, Text } = Typography;
 
 const useStyle = createStyles(({ token, css }) => ({
   container: css`
-    padding: 24px;
-    background: #f5f5f5;
     min-height: 100vh;
   `,
   headerCard: css`
@@ -386,21 +384,21 @@ const LogLayananKeuangan = () => {
           columns={columns}
           dataSource={tableData}
           rowKey="id"
-          loading={isLoading}
+          loading={isLoading || isFetching}
           className={styles.customTable}
           scroll={{ x: 1200 }}
           pagination={{
+            position: ["bottomRight", "topRight"],
             total: data?.total || 0,
             pageSize: limit || 10,
             current: page || 1,
+            showSizeChanger: false,
             onChange: (page, limit) => {
               router.push({
                 pathname: router.pathname,
                 query: { page, limit, sort },
               });
             },
-            showSizeChanger: true,
-            showQuickJumper: true,
             showTotal: (total, range) =>
               `${range[0]}-${range[1]} dari ${total} records`,
           }}
