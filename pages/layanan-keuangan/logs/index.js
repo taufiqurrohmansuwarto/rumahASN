@@ -2,8 +2,11 @@ import LayananKeuanganLayout from "@/components/LayananKeuangan/LayananKeuanganL
 import PageContainer from "@/components/PageContainer";
 import Head from "next/head";
 import LogLayananKeuangan from "@/components/LayananKeuangan/LogLayananKeuangan";
+import { FloatButton } from "antd";
+import useScrollRestoration from "@/hooks/useScrollRestoration";
 
 const LayananKeuangan = () => {
+  useScrollRestoration();
   return (
     <>
       <Head>
@@ -13,6 +16,7 @@ const LayananKeuangan = () => {
         title="Logs Sistem"
         content="Pantau dan kelola semua aktivitas sistem layanan keuangan untuk administrator"
       >
+        <FloatButton.BackTop />
         <LogLayananKeuangan />
       </PageContainer>
     </>

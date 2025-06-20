@@ -47,8 +47,6 @@ const auth = async (req, res, next) => {
         req.connection?.socket?.remoteAddress ||
         "unknown";
 
-      console.log(ip);
-
       req.user = currentUser;
       req.ip = ip;
 
