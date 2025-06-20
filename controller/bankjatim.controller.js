@@ -93,8 +93,8 @@ export const pengajuan = async (req, res) => {
       tgl_lahir: body?.tgl_lahir,
       jns_kelamin: body?.jns_kelamin,
       no_hp: body?.no_hp,
-      tmt_pensiun: body?.tmt_pensiun,
-      norek_gaji: body?.norek_gaji,
+      tmt_pensiun: body?.tmt_pensiun || 0,
+      norek_gaji: body?.norek_gaji || "-",
       kd_dinas: body?.kd_dinas,
       nama_dinas: body?.nama_dinas,
       alamat_kantor: body?.alamat_kantor,
@@ -184,7 +184,6 @@ export const info = async (req, res) => {
 
     const result = await getUserInfo(fetcher, nip);
     const dataSiasn = await dataUtama(siasnRequest, nip);
-    console.log({ dataSiasn });
 
     const data = result?.data;
 
@@ -199,7 +198,7 @@ export const info = async (req, res) => {
       tmt_pensiun: data?.tmt_pensiun,
       norek_gaji: "",
       kd_dinas: data?.kd_dinas,
-      nama_dinas: data?.nama_dinas,
+      nama_dinas: dataSiasn?.unorIndukNama || data?.nama_dinas,
       alamat_kantor: data?.alamat_kantor,
       kota_kantor: data?.kota_kantor,
       kode_kabkota: data?.kode_kabkota,

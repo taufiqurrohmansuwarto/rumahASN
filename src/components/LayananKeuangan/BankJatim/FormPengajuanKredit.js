@@ -26,26 +26,47 @@ import {
   Space,
   Steps,
   Typography,
+  message,
+  Flex,
+  Grid,
 } from "antd";
 import dayjs from "dayjs";
 import { useState } from "react";
 
 const { Title, Text } = Typography;
+const { useBreakpoint } = Grid;
 
 const FormPengajuanKredit = () => {
   const [form] = Form.useForm();
   const [currentStep, setCurrentStep] = useState(0);
   const [isSynced, setIsSynced] = useState(false);
 
+  // Responsive breakpoints
+  const screens = useBreakpoint();
+  const isMobile = !screens.md;
+
   const { mutate: userInfo, isLoading: isUserInfoLoading } = useMutation({
     mutationFn: getUserInfo,
     onSuccess: (result) => {
+      // Set kota_kantor based on kode_kabkota if available
+      let kotaKantor = result.kota_kantor;
+      if (!kotaKantor && result.kode_kabkota) {
+        const selectedKota = getKodeKabkota.find(
+          (item) => item.key === result.kode_kabkota
+        );
+        if (selectedKota) {
+          kotaKantor = selectedKota.label.replace("\r", "");
+        }
+      }
+
       form.setFieldsValue({
         ...result,
         tgl_lahir: dayjs(result.tgl_lahir),
+        kota_kantor: kotaKantor,
       });
       setIsSynced(true);
       setCurrentStep(1); // Auto move to next step
+      message.success("Data kepegawaian berhasil diambil");
     },
   });
 
@@ -55,6 +76,7 @@ const FormPengajuanKredit = () => {
         const { no_pengajuan, kantor_cabang } = result?.data;
         Modal.success({
           title: "Pengajuan Berhasil Disubmit",
+          centered: true,
           width: 500,
           content: (
             <div style={{ textAlign: "center", padding: "24px 0" }}>
@@ -112,6 +134,7 @@ const FormPengajuanKredit = () => {
       } else {
         Modal.error({
           title: "Pengajuan Gagal",
+          centered: true,
           content: (
             <div style={{ textAlign: "center", padding: "20px 0" }}>
               <CloseCircleOutlined
@@ -164,12 +187,25 @@ const FormPengajuanKredit = () => {
         // Validate form fields before moving to next step
         await form.validateFields([
           "tmt_pensiun",
+          "nama_dinas",
           "alamat_kantor",
           "kode_kabkota",
         ]);
+
+        // Additional validation for kota_kantor
+        const kotaKantor = form.getFieldValue("kota_kantor");
+        if (!kotaKantor) {
+          message.error(
+            "Kota kantor tidak boleh kosong! Pilih kode kabkota terlebih dahulu."
+          );
+          return;
+        }
         setCurrentStep(currentStep + 1);
       } catch (error) {
         // Form validation failed, don't move to next step
+        console.log("Validation failed:", error);
+        message.error("Mohon lengkapi semua field yang wajib diisi!");
+        // Antd will automatically show error messages for failed fields
       }
     } else {
       setCurrentStep(currentStep + 1);
@@ -182,20 +218,36 @@ const FormPengajuanKredit = () => {
 
   // Step 1: Fetching Data
   const renderStepOne = () => (
-    <div style={{ textAlign: "center", padding: "40px 20px" }}>
+    <Flex
+      vertical
+      align="center"
+      justify="center"
+      style={{
+        textAlign: "center",
+        padding: isMobile ? "20px 16px" : "40px 20px",
+      }}
+    >
       <SyncOutlined
         style={{
-          fontSize: 48,
+          fontSize: isMobile ? 40 : 48,
           color: isSynced ? "#52c41a" : "#dc2626",
-          marginBottom: 20,
+          marginBottom: isMobile ? 16 : 20,
         }}
       />
-      <Title level={3} style={{ marginBottom: 16 }}>
+      <Title
+        level={isMobile ? 4 : 3}
+        style={{ marginBottom: 16, textAlign: "center" }}
+      >
         {isSynced ? "Data Berhasil Diambil" : "Ambil Data Kepegawaian"}
       </Title>
       <Text
         type="secondary"
-        style={{ fontSize: 16, display: "block", marginBottom: 32 }}
+        style={{
+          fontSize: isMobile ? 14 : 16,
+          textAlign: "center",
+          marginBottom: 32,
+          maxWidth: isMobile ? "100%" : "80%",
+        }}
       >
         {isSynced
           ? "Data kepegawaian Anda telah berhasil diambil dari sistem SIASN"
@@ -205,14 +257,14 @@ const FormPengajuanKredit = () => {
       {!isSynced && (
         <Button
           type="primary"
-          size="large"
+          size={isMobile ? "middle" : "large"}
           icon={<SyncOutlined />}
           loading={isUserInfoLoading}
           onClick={() => userInfo()}
           style={{
-            height: 48,
-            paddingLeft: 24,
-            paddingRight: 24,
+            height: isMobile ? 40 : 48,
+            paddingLeft: isMobile ? 16 : 24,
+            paddingRight: isMobile ? 16 : 24,
             borderRadius: 8,
             background: "linear-gradient(135deg, #dc2626 0%, #ef4444 100%)",
             border: "none",
@@ -222,18 +274,37 @@ const FormPengajuanKredit = () => {
           {isUserInfoLoading ? "Mengambil Data..." : "Ambil Data Kepegawaian"}
         </Button>
       )}
-    </div>
+    </Flex>
   );
 
   // Step 2: Form Input (except credit data)
   const renderStepTwo = () => (
-    <div style={{ padding: "0 20px" }}>
-      <Title
-        level={4}
-        style={{ marginBottom: 24, textAlign: "center", color: "#dc2626" }}
+    <Flex vertical style={{ padding: isMobile ? "0 16px" : "0 20px" }}>
+      <Flex
+        justify="space-between"
+        align={isMobile ? "flex-start" : "middle"}
+        style={{ marginBottom: 24 }}
+        vertical={isMobile}
+        gap={isMobile ? 12 : 0}
       >
-        Lengkapi Data Kepegawaian
-      </Title>
+        <Title level={isMobile ? 5 : 4} style={{ margin: 0, color: "#dc2626" }}>
+          Lengkapi Data Kepegawaian
+        </Title>
+        <Button
+          type="primary"
+          icon={<SyncOutlined />}
+          loading={isUserInfoLoading}
+          onClick={() => userInfo()}
+          style={{
+            backgroundColor: "#dc2626",
+            borderColor: "#dc2626",
+            borderRadius: 8,
+          }}
+          size={isMobile ? "middle" : "small"}
+        >
+          Refetch Data
+        </Button>
+      </Flex>
 
       {/* Data Pribadi (Read Only Display) */}
       <Card
@@ -246,50 +317,50 @@ const FormPengajuanKredit = () => {
         style={{ marginBottom: 24 }}
         size="small"
       >
-        <Row gutter={16}>
-          <Col xs={24} md={12}>
-            <div style={{ marginBottom: 16 }}>
-              <Text type="secondary" style={{ fontSize: 12, display: "block" }}>
+        <Row gutter={[16, 16]}>
+          <Col xs={24} sm={12} md={8} lg={6}>
+            <Flex vertical style={{ marginBottom: 16 }}>
+              <Text type="secondary" style={{ fontSize: 12 }}>
                 NIP:
               </Text>
               <Text style={{ fontSize: 14, fontWeight: 500 }}>
                 {form.getFieldValue("nip")}
               </Text>
-            </div>
+            </Flex>
           </Col>
-          <Col xs={24} md={12}>
-            <div style={{ marginBottom: 16 }}>
-              <Text type="secondary" style={{ fontSize: 12, display: "block" }}>
+          <Col xs={24} sm={12} md={8} lg={6}>
+            <Flex vertical style={{ marginBottom: 16 }}>
+              <Text type="secondary" style={{ fontSize: 12 }}>
                 No KTP:
               </Text>
               <Text style={{ fontSize: 14, fontWeight: 500 }}>
                 {form.getFieldValue("no_ktp")}
               </Text>
-            </div>
+            </Flex>
           </Col>
-          <Col xs={24} md={12}>
-            <div style={{ marginBottom: 16 }}>
-              <Text type="secondary" style={{ fontSize: 12, display: "block" }}>
+          <Col xs={24} sm={12} md={8} lg={6}>
+            <Flex vertical style={{ marginBottom: 16 }}>
+              <Text type="secondary" style={{ fontSize: 12 }}>
                 Nama:
               </Text>
               <Text style={{ fontSize: 14, fontWeight: 500 }}>
                 {form.getFieldValue("nama")}
               </Text>
-            </div>
+            </Flex>
           </Col>
-          <Col xs={24} md={12}>
-            <div style={{ marginBottom: 16 }}>
-              <Text type="secondary" style={{ fontSize: 12, display: "block" }}>
+          <Col xs={24} sm={12} md={8} lg={6}>
+            <Flex vertical style={{ marginBottom: 16 }}>
+              <Text type="secondary" style={{ fontSize: 12 }}>
                 Tempat Lahir:
               </Text>
               <Text style={{ fontSize: 14, fontWeight: 500 }}>
                 {form.getFieldValue("tempat_lahir")}
               </Text>
-            </div>
+            </Flex>
           </Col>
-          <Col xs={24} md={12}>
-            <div style={{ marginBottom: 16 }}>
-              <Text type="secondary" style={{ fontSize: 12, display: "block" }}>
+          <Col xs={24} sm={12} md={8} lg={6}>
+            <Flex vertical style={{ marginBottom: 16 }}>
+              <Text type="secondary" style={{ fontSize: 12 }}>
                 Tanggal Lahir:
               </Text>
               <Text style={{ fontSize: 14, fontWeight: 500 }}>
@@ -297,11 +368,11 @@ const FormPengajuanKredit = () => {
                   ? dayjs(form.getFieldValue("tgl_lahir")).format("DD-MM-YYYY")
                   : "-"}
               </Text>
-            </div>
+            </Flex>
           </Col>
-          <Col xs={24} md={12}>
-            <div style={{ marginBottom: 16 }}>
-              <Text type="secondary" style={{ fontSize: 12, display: "block" }}>
+          <Col xs={24} sm={12} md={8} lg={6}>
+            <Flex vertical style={{ marginBottom: 16 }}>
+              <Text type="secondary" style={{ fontSize: 12 }}>
                 Jenis Kelamin:
               </Text>
               <Text style={{ fontSize: 14, fontWeight: 500 }}>
@@ -311,17 +382,17 @@ const FormPengajuanKredit = () => {
                   ? "Perempuan"
                   : "-"}
               </Text>
-            </div>
+            </Flex>
           </Col>
-          <Col xs={24} md={12}>
-            <div style={{ marginBottom: 16 }}>
-              <Text type="secondary" style={{ fontSize: 12, display: "block" }}>
+          <Col xs={24} sm={12} md={8} lg={6}>
+            <Flex vertical style={{ marginBottom: 16 }}>
+              <Text type="secondary" style={{ fontSize: 12 }}>
                 No HP:
               </Text>
               <Text style={{ fontSize: 14, fontWeight: 500 }}>
                 {form.getFieldValue("no_hp")}
               </Text>
-            </div>
+            </Flex>
           </Col>
         </Row>
       </Card>
@@ -336,11 +407,11 @@ const FormPengajuanKredit = () => {
         }
         size="small"
       >
-        <Row gutter={16}>
+        <Row gutter={[16, 16]}>
           <Col xs={24} md={12}>
             <Form.Item
               name="tmt_pensiun"
-              label="TMT Pensiun"
+              label="Usia Pensiun"
               rules={[
                 { required: true, message: "Masukkan TMT Pensiun!" },
                 {
@@ -375,39 +446,53 @@ const FormPengajuanKredit = () => {
             </Form.Item>
           </Col>
           <Col xs={24} md={12}>
-            <div style={{ marginBottom: 16 }}>
-              <Text type="secondary" style={{ fontSize: 12, display: "block" }}>
+            <Flex vertical style={{ marginBottom: 16 }}>
+              <Text type="secondary" style={{ fontSize: 12 }}>
                 Kode Dinas:
               </Text>
               <Text style={{ fontSize: 14, fontWeight: 500 }}>
                 {form.getFieldValue("kd_dinas")}
               </Text>
-            </div>
+            </Flex>
           </Col>
           <Col xs={24} md={12}>
-            <div style={{ marginBottom: 16 }}>
-              <Text type="secondary" style={{ fontSize: 12, display: "block" }}>
-                Nama Dinas:
-              </Text>
-              <Text style={{ fontSize: 14, fontWeight: 500 }}>
-                {form.getFieldValue("nama_dinas")}
-              </Text>
-            </div>
+            <Form.Item
+              name="nama_dinas"
+              label="Nama Dinas"
+              rules={[
+                { required: true, message: "Masukkan Nama Dinas!" },
+                { max: 100, message: "Nama Dinas maksimal 100 karakter!" },
+              ]}
+            >
+              <Input.TextArea
+                style={{ borderRadius: 8 }}
+                maxLength={100}
+                showCount
+                placeholder="Masukkan nama dinas"
+                rows={isMobile ? 2 : 3}
+              />
+            </Form.Item>
           </Col>
           <Col xs={24}>
             <Form.Item
               name="alamat_kantor"
               label="Alamat Kantor"
-              rules={[{ required: true, message: "Masukkan Alamat Kantor!" }]}
+              rules={[
+                { required: true, message: "Alamat kantor wajib diisi!" },
+                { min: 5, message: "Alamat kantor minimal 5 karakter!" },
+              ]}
             >
-              <Input style={{ borderRadius: 8 }} />
+              <Input
+                style={{ borderRadius: 8 }}
+                placeholder="Masukkan alamat kantor lengkap"
+              />
             </Form.Item>
           </Col>
           <Col xs={24}>
             <Form.Item
               name="kode_kabkota"
               label="Kode Kabkota"
-              rules={[{ required: true, message: "Pilih kode kabkota!" }]}
+              rules={[{ required: true, message: "Kode kabkota wajib diisi!" }]}
             >
               <Select
                 showSearch
@@ -421,19 +506,43 @@ const FormPengajuanKredit = () => {
                 }))}
                 placeholder="Pilih kode kabkota"
                 style={{ borderRadius: 8 }}
+                notFoundContent="Kode kabkota tidak ditemukan"
+                onChange={(value) => {
+                  // Auto-fill kota kantor based on selected kode kabkota
+                  const selectedKota = getKodeKabkota.find(
+                    (item) => item.key === value
+                  );
+                  if (selectedKota) {
+                    form.setFieldValue(
+                      "kota_kantor",
+                      selectedKota.label.replace("\r", "")
+                    );
+                  }
+                }}
               />
             </Form.Item>
           </Col>
+          <Col xs={24}>
+            <Flex vertical style={{ marginBottom: 16 }}>
+              <Text type="secondary" style={{ fontSize: 12 }}>
+                Kota Kantor:
+              </Text>
+              <Text style={{ fontSize: 14, fontWeight: 500, color: "#52c41a" }}>
+                {form.getFieldValue("kota_kantor") ||
+                  "Pilih kode kabkota terlebih dahulu"}
+              </Text>
+            </Flex>
+          </Col>
         </Row>
       </Card>
-    </div>
+    </Flex>
   );
 
   // Step 3: Review and Submit
   const renderStepThree = () => (
-    <div style={{ padding: "0 20px" }}>
+    <Flex vertical style={{ padding: isMobile ? "0 16px" : "0 20px" }}>
       <Title
-        level={4}
+        level={isMobile ? 5 : 4}
         style={{ marginBottom: 24, textAlign: "center", color: "#dc2626" }}
       >
         Review & Isi Data Kredit
@@ -504,7 +613,7 @@ const FormPengajuanKredit = () => {
         <Row gutter={[8, 8]}>
           <Col xs={12} md={6}>
             <Text type="secondary" style={{ fontSize: 12 }}>
-              TMT Pensiun:
+              Usia Pensiun:
             </Text>
             <Text style={{ display: "block", fontSize: 13, fontWeight: 500 }}>
               {form.getFieldValue("tmt_pensiun")} tahun
@@ -524,6 +633,29 @@ const FormPengajuanKredit = () => {
             </Text>
             <Text style={{ display: "block", fontSize: 13, fontWeight: 500 }}>
               {form.getFieldValue("nama_dinas")}
+            </Text>
+          </Col>
+          <Col xs={24} md={12}>
+            <Text type="secondary" style={{ fontSize: 12 }}>
+              Alamat Kantor:
+            </Text>
+            <Text style={{ display: "block", fontSize: 13, fontWeight: 500 }}>
+              {form.getFieldValue("alamat_kantor")}
+            </Text>
+          </Col>
+          <Col xs={24} md={12}>
+            <Text type="secondary" style={{ fontSize: 12 }}>
+              Kota Kantor:
+            </Text>
+            <Text
+              style={{
+                display: "block",
+                fontSize: 13,
+                fontWeight: 500,
+                color: "#52c41a",
+              }}
+            >
+              {form.getFieldValue("kota_kantor")}
             </Text>
           </Col>
         </Row>
@@ -597,133 +729,171 @@ const FormPengajuanKredit = () => {
           </Col>
         </Row>
       </Card>
-    </div>
+    </Flex>
   );
 
   return (
-    <div style={{ height: "100%", display: "flex", flexDirection: "column" }}>
+    <Flex justify="center" align={isMobile ? "flex-start" : "center"}>
       <Card
         style={{
-          flex: 1,
-          borderRadius: 12,
-          boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
+          width: "100%",
+          maxWidth: isMobile ? "100%" : "900px",
+          borderRadius: isMobile ? 8 : 12,
+          boxShadow: "0 4px 16px rgba(0, 0, 0, 0.1)",
           overflow: "hidden",
+          margin: isMobile ? "8px 0" : "16px 0",
         }}
-        bodyStyle={{ padding: 0, height: "100%" }}
+        bodyStyle={{ padding: 0 }}
       >
-        {/* Header */}
-        <div
-          style={{
-            background: "linear-gradient(135deg, #dc2626 0%, #ef4444 100%)",
-            color: "white",
-            padding: "20px 24px",
-            textAlign: "center",
-          }}
-        >
-          <FileTextOutlined style={{ fontSize: 24, marginBottom: 8 }} />
-          <Title level={4} style={{ color: "white", margin: "0 0 4px 0" }}>
-            Pengajuan Kredit
-          </Title>
-          <Text style={{ color: "rgba(255, 255, 255, 0.9)" }}>
-            Proses pengajuan kredit dalam 3 langkah mudah
-          </Text>
-        </div>
-
-        {/* Steps */}
-        <div style={{ padding: "24px 24px 16px 24px", background: "#fafafa" }}>
-          <Steps
-            current={currentStep}
-            size="small"
-            items={[
-              {
-                title: "Ambil Data",
-                description: "Sinkronisasi data kepegawaian",
-                icon: <SyncOutlined />,
-              },
-              {
-                title: "Isi Form",
-                description: "Lengkapi data kepegawaian",
-                icon: <UserOutlined />,
-              },
-              {
-                title: "Submit",
-                description: "Review dan isi data kredit",
-                icon: <CreditCardOutlined />,
-              },
-            ]}
-          />
-        </div>
-
-        {/* Form - Membungkus seluruh content */}
-        <Form form={form} layout="vertical" onFinish={handleSubmit}>
-          {/* Hidden Form Fields - Always present in form */}
-          {isSynced && (
-            <div style={{ display: "none" }}>
-              <Form.Item name="nip">
-                <Input />
-              </Form.Item>
-              <Form.Item name="no_ktp">
-                <Input />
-              </Form.Item>
-              <Form.Item name="nama">
-                <Input />
-              </Form.Item>
-              <Form.Item name="tempat_lahir">
-                <Input />
-              </Form.Item>
-              <Form.Item name="tgl_lahir">
-                <DatePicker />
-              </Form.Item>
-              <Form.Item name="jns_kelamin">
-                <Select />
-              </Form.Item>
-              <Form.Item name="no_hp">
-                <Input />
-              </Form.Item>
-              <Form.Item name="kd_dinas">
-                <Input />
-              </Form.Item>
-              <Form.Item name="nama_dinas">
-                <Input />
-              </Form.Item>
-            </div>
-          )}
-
-          {/* Content */}
-          <div
+        <Flex vertical style={{ minHeight: isMobile ? "auto" : "600px" }}>
+          {/* Header */}
+          <Flex
+            vertical
+            align="center"
+            justify="center"
             style={{
-              flex: 1,
-              padding: "24px 0",
-              overflowY: "auto",
-              background: "white",
+              background: "linear-gradient(135deg, #dc2626 0%, #ef4444 100%)",
+              color: "white",
+              padding: isMobile ? "16px 20px" : "20px 24px",
+              textAlign: "center",
             }}
           >
-            {currentStep === 0 && renderStepOne()}
-            {currentStep === 1 && renderStepTwo()}
-            {currentStep === 2 && renderStepThree()}
-          </div>
+            <FileTextOutlined
+              style={{ fontSize: isMobile ? 20 : 24, marginBottom: 8 }}
+            />
+            <Title
+              level={isMobile ? 5 : 4}
+              style={{ color: "white", margin: "0 0 4px 0" }}
+            >
+              Pengajuan Kredit
+            </Title>
+            <Text
+              style={{
+                color: "rgba(255, 255, 255, 0.9)",
+                fontSize: isMobile ? 12 : 14,
+              }}
+            >
+              Proses pengajuan kredit dalam 3 langkah mudah
+            </Text>
+          </Flex>
 
-          {/* Navigation */}
-          <div
+          {/* Steps */}
+          <Flex
+            justify="center"
             style={{
-              padding: "16px 24px",
-              borderTop: "1px solid #f0f0f0",
+              padding: isMobile ? "16px 16px 12px 16px" : "24px 24px 16px 24px",
               background: "#fafafa",
             }}
           >
-            <div style={{ display: "flex", justifyContent: "space-between" }}>
-              <div>
+            <Steps
+              current={currentStep}
+              size={isMobile ? "small" : "default"}
+              direction={isMobile ? "vertical" : "horizontal"}
+              style={{ width: "100%" }}
+              items={[
+                {
+                  title: "Ambil Data",
+                  description: isMobile
+                    ? null
+                    : "Sinkronisasi data kepegawaian",
+                  icon: <SyncOutlined />,
+                },
+                {
+                  title: "Isi Form",
+                  description: isMobile ? null : "Lengkapi data kepegawaian",
+                  icon: <UserOutlined />,
+                },
+                {
+                  title: "Submit",
+                  description: isMobile ? null : "Review dan isi data kredit",
+                  icon: <CreditCardOutlined />,
+                },
+              ]}
+            />
+          </Flex>
+
+          {/* Form - Membungkus seluruh content */}
+          <Form form={form} layout="vertical" onFinish={handleSubmit}>
+            {/* Hidden Form Fields - Always present in form */}
+            {isSynced && (
+              <Flex style={{ display: "none" }}>
+                <Form.Item name="nip">
+                  <Input />
+                </Form.Item>
+                <Form.Item name="no_ktp">
+                  <Input />
+                </Form.Item>
+                <Form.Item name="nama">
+                  <Input />
+                </Form.Item>
+                <Form.Item name="tempat_lahir">
+                  <Input />
+                </Form.Item>
+                <Form.Item name="tgl_lahir">
+                  <DatePicker />
+                </Form.Item>
+                <Form.Item name="jns_kelamin">
+                  <Select />
+                </Form.Item>
+                <Form.Item name="no_hp">
+                  <Input />
+                </Form.Item>
+                <Form.Item name="kd_dinas">
+                  <Input />
+                </Form.Item>
+                <Form.Item name="nama_dinas">
+                  <Input />
+                </Form.Item>
+                <Form.Item name="alamat_kantor">
+                  <Input />
+                </Form.Item>
+                <Form.Item name="kota_kantor">
+                  <Input />
+                </Form.Item>
+                <Form.Item name="kode_kabkota">
+                  <Select />
+                </Form.Item>
+              </Flex>
+            )}
+
+            {/* Content */}
+            <Flex
+              vertical
+              style={{
+                flex: 1,
+                padding: isMobile ? "16px 0" : "24px 0",
+                background: "white",
+                minHeight: "400px",
+              }}
+            >
+              {currentStep === 0 && renderStepOne()}
+              {currentStep === 1 && renderStepTwo()}
+              {currentStep === 2 && renderStepThree()}
+            </Flex>
+
+            {/* Navigation */}
+            <Flex
+              justify="space-between"
+              align="center"
+              style={{
+                padding: isMobile ? "12px 16px" : "16px 24px",
+                borderTop: "1px solid #f0f0f0",
+                background: "#fafafa",
+              }}
+            >
+              <Flex>
                 {currentStep > 0 && (
                   <Button
                     icon={<ArrowLeftOutlined />}
                     onClick={prevStep}
                     style={{ borderRadius: 8 }}
+                    size={isMobile ? "middle" : "default"}
                   >
-                    Sebelumnya
+                    {isMobile ? "" : "Sebelumnya"}
                   </Button>
                 )}
-              </div>
-              <div>
+              </Flex>
+              <Flex>
                 {currentStep < 2 && isSynced && (
                   <Button
                     type="primary"
@@ -735,8 +905,9 @@ const FormPengajuanKredit = () => {
                         "linear-gradient(135deg, #dc2626 0%, #ef4444 100%)",
                       border: "none",
                     }}
+                    size={isMobile ? "middle" : "default"}
                   >
-                    Selanjutnya
+                    {isMobile ? "" : "Selanjutnya"}
                   </Button>
                 )}
                 {currentStep === 2 && (
@@ -750,19 +921,24 @@ const FormPengajuanKredit = () => {
                         "linear-gradient(135deg, #dc2626 0%, #ef4444 100%)",
                       border: "none",
                       fontWeight: 600,
-                      paddingLeft: 24,
-                      paddingRight: 24,
+                      paddingLeft: isMobile ? 16 : 24,
+                      paddingRight: isMobile ? 16 : 24,
                     }}
+                    size={isMobile ? "middle" : "default"}
                   >
-                    {isLoading ? "Mengirim..." : "Submit Pengajuan"}
+                    {isLoading
+                      ? "Mengirim..."
+                      : isMobile
+                      ? "Submit"
+                      : "Submit Pengajuan"}
                   </Button>
                 )}
-              </div>
-            </div>
-          </div>
-        </Form>
+              </Flex>
+            </Flex>
+          </Form>
+        </Flex>
       </Card>
-    </div>
+    </Flex>
   );
 };
 
