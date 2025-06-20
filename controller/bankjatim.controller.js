@@ -8,6 +8,7 @@ import {
 import { getKodeKabkota } from "@/utils/client-utils";
 import { createLog } from "@/utils/logs";
 import { getUserInfo } from "@/utils/master.utils";
+import { dataUtama } from "@/utils/siasn-utils";
 import { raw } from "objection";
 const Log = require("@/models/logs.model");
 const Employee = require("@/models/siasn-employees.model");
@@ -166,7 +167,7 @@ export const localHistories = async (req, res) => {
 
 export const info = async (req, res) => {
   try {
-    const { fetcher, user } = req;
+    const { fetcher, user, siasnRequest } = req;
     const { employee_number: nip } = user;
     const hasil = await Employee.query()
       .select(
@@ -182,6 +183,9 @@ export const info = async (req, res) => {
       .first();
 
     const result = await getUserInfo(fetcher, nip);
+    const dataSiasn = await dataUtama(siasnRequest, nip);
+    console.log({ dataSiasn });
+
     const data = result?.data;
 
     const payload = {
