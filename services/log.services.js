@@ -5,6 +5,14 @@ const api = axios.create({
   baseURL: "/helpdesk/api/logs",
 });
 
+export const logUser = (query) => {
+  const queryStr = queryString.stringify(query, {
+    skipEmptyString: true,
+  });
+
+  return api.get(`/users/preferences?${queryStr}`).then((res) => res?.data);
+};
+
 export const logSIASN = (query) => {
   const queryStr = queryString.stringify(query, {
     skipEmptyString: true,

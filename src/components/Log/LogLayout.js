@@ -3,14 +3,15 @@ import NotifikasiASNConnect from "@/components/Notification/NotifikasiASNConnect
 import NotifikasiForumKepegawaian from "@/components/Notification/NotifikasiForumKepegawaian";
 import NotifikasiKepegawaian from "@/components/Notification/NotifikasiKepegawaian";
 import NotifikasiPrivateMessage from "@/components/Notification/NotifikasiPrivateMessage";
+import { layoutToken } from "@/styles/rasn.theme";
 import { appList } from "@/utils/app-lists";
 import {
   DashboardOutlined,
   LogoutOutlined,
   UserOutlined,
   WarningOutlined,
+  SettingOutlined,
 } from "@ant-design/icons";
-import { ProConfigProvider } from "@ant-design/pro-components";
 import { Dropdown, Layout, Space } from "antd";
 import { signOut, useSession } from "next-auth/react";
 import dynamic from "next/dynamic";
@@ -34,6 +35,12 @@ const menuItems = [
     key: "bsre",
     icon: <WarningOutlined />,
     label: "Riwayat BSRE",
+    role: ["admin"],
+  },
+  {
+    key: "user",
+    icon: <SettingOutlined />,
+    label: "Riwayat User",
     role: ["admin"],
   },
 ];
@@ -68,28 +75,6 @@ function LogLayout({ children, active = "dashboard" }) {
 
   const router = useRouter();
 
-  const token = {
-    bgLayout: "#fafafa",
-    colorPrimary: "#1890FF", // Warna biru utama Ant Design
-    sider: {
-      colorBgCollapsedButton: "#1890FF", // Biru untuk tombol collapse
-      colorBgMenuItemActive: "#E6F7FF", // Biru sangat muda untuk item menu yang aktif
-      colorTextCollapsedButton: "#fafafa", // Putih untuk teks tombol collapse
-      colorTextCollapsedButtonHover: "#E6F7FF", // Biru sangat muda untuk teks tombol collapse saat di-hover
-      colorTextMenuTitle: "#1890FF", // Biru untuk judul menu
-      colorTextMenuItemHover: "#1890FF", // Biru untuk teks menu saat di-hover
-      colorTextMenuSelected: "#1890FF", // Biru untuk teks menu saat dipilih
-      colorTextMenuActive: "#1890FF", // Biru untuk teks menu saat aktif
-      colorBgMenuItemHover: "rgba(24, 144, 255, 0.1)", // Transparan biru saat item menu di-hover
-      colorBgMenuItemSelected: "rgba(24, 144, 255, 0.2)", // Transparan biru lebih terang untuk item menu yang dipilih
-      colorBgMenuItemCollapsedElevated: "#fafafa", // Putih untuk menu yang tertutup namun ditinggikan
-      colorTextMenu: "#595959", // Abu-abu gelap untuk teks menu biasa
-      colorBgMenu: "#fafafa", // Putih untuk latar belakang menu
-      colorTextMenuSecondary: "#8C8C8C", // Abu-abu medium untuk teks menu sekunder
-      colorMenuItemDivider: "#F0F0F0", // Abu-abu sangat muda untuk pembatas menu
-    },
-  };
-
   const [collapsed, setCollapsed] = useState(true);
 
   return (
@@ -99,102 +84,100 @@ function LogLayout({ children, active = "dashboard" }) {
         overflow: "auto",
       }}
     >
-      <ProConfigProvider token={token}>
-        <ProLayout
-          title={"History Log User"}
-          defaultCollapsed={collapsed}
-          collapsed={collapsed}
-          onCollapse={setCollapsed}
-          selectedKeys={[active]}
-          logo={null}
-          layout="mix"
-          navTheme="light"
-          fixedHeader
-          fixSiderbar
-          token={token}
-          actionsRender={(props) => {
-            // if (props.isMobile) return [];
-            return [
-              <NotifikasiKepegawaian
-                key="kepegawaian"
-                url="kepegawaian"
-                title="Inbox Kepegawaian"
-              />,
-              <NotifikasiPrivateMessage
-                key="private-message"
-                url="/mails/inbox"
-                title="Inbox Pesan Pribadi"
-              />,
-              <NotifikasiASNConnect
-                key="asn-connect"
-                url="asn-connect"
-                title="Inbox ASN Connect"
-              />,
-              <NotifikasiForumKepegawaian
-                key="forum-kepegawaian"
-                url="forum-kepegawaian"
-                title="Inbox Forum Kepegawaian"
-              />,
-              <MegaMenuTop key="mega-menu" url="" title="Menu" />,
-            ];
-          }}
-          avatarProps={{
-            src: data?.user?.image,
-            size: "large",
-            render: (props, dom) => {
-              return (
-                <Space>
-                  <Dropdown
-                    menu={{
-                      onClick: (e) => {
-                        if (e.key === "logout") {
-                          signOut();
-                        }
-                        if (e.key === "profile") {
-                          router.push("/settings/profile");
-                        }
+      <ProLayout
+        title={"History Log User"}
+        defaultCollapsed={collapsed}
+        collapsed={collapsed}
+        onCollapse={setCollapsed}
+        selectedKeys={[active]}
+        logo={null}
+        layout="mix"
+        navTheme="light"
+        fixedHeader
+        fixSiderbar
+        token={layoutToken}
+        actionsRender={(props) => {
+          // if (props.isMobile) return [];
+          return [
+            <NotifikasiKepegawaian
+              key="kepegawaian"
+              url="kepegawaian"
+              title="Inbox Kepegawaian"
+            />,
+            <NotifikasiPrivateMessage
+              key="private-message"
+              url="/mails/inbox"
+              title="Inbox Pesan Pribadi"
+            />,
+            <NotifikasiASNConnect
+              key="asn-connect"
+              url="asn-connect"
+              title="Inbox ASN Connect"
+            />,
+            <NotifikasiForumKepegawaian
+              key="forum-kepegawaian"
+              url="forum-kepegawaian"
+              title="Inbox Forum Kepegawaian"
+            />,
+            <MegaMenuTop key="mega-menu" url="" title="Menu" />,
+          ];
+        }}
+        avatarProps={{
+          src: data?.user?.image,
+          size: "large",
+          render: (props, dom) => {
+            return (
+              <Space>
+                <Dropdown
+                  menu={{
+                    onClick: (e) => {
+                      if (e.key === "logout") {
+                        signOut();
+                      }
+                      if (e.key === "profile") {
+                        router.push("/settings/profile");
+                      }
+                    },
+                    items: [
+                      {
+                        key: "profile",
+                        icon: <UserOutlined />,
+                        label: "Profil",
                       },
-                      items: [
-                        {
-                          key: "profile",
-                          icon: <UserOutlined />,
-                          label: "Profil",
-                        },
-                        {
-                          key: "logout",
-                          icon: <LogoutOutlined />,
-                          label: "Keluar",
-                        },
-                      ],
-                    }}
-                  >
-                    {dom}
-                  </Dropdown>
-                </Space>
-              );
-            },
-          }}
-          route={{
-            routes: getMenuItems(data?.user).map((item) => ({
-              path: `/logs/${item.key}`,
-              name: item.label,
-              icon: item.icon,
-            })),
-          }}
-          menuItemRender={(item, dom) => (
-            <a
-              onClick={() => {
-                router.push(`${item.key}`);
-              }}
-            >
-              {dom}
-            </a>
-          )}
-          appList={appList(data?.user)}
-        >
-          <Layout>{children}</Layout>
-        </ProLayout>
-      </ProConfigProvider>
+                      {
+                        key: "logout",
+                        icon: <LogoutOutlined />,
+                        label: "Keluar",
+                      },
+                    ],
+                  }}
+                >
+                  {dom}
+                </Dropdown>
+              </Space>
+            );
+          },
+        }}
+        route={{
+          routes: getMenuItems(data?.user).map((item) => ({
+            path: `/logs/${item.key}`,
+            name: item.label,
+            icon: item.icon,
+          })),
+        }}
+        menuItemRender={(item, dom) => (
+          <a
+            onClick={() => {
+              router.push(`${item.key}`);
+            }}
+          >
+            {dom}
+          </a>
+        )}
+        appList={appList(data?.user)}
+      >
+        <Layout>{children}</Layout>
+      </ProLayout>
     </div>
   );
 }

@@ -1,12 +1,21 @@
 const UserHistory = require("@/models/users-histories.model");
 
-export const createHistory = async (userId, action, type, ticketId = null) => {
+export const createHistory = async (
+  userId,
+  action,
+  type,
+  ticketId = null,
+  ipAddress = null,
+  userAgent = null
+) => {
   try {
     await UserHistory.query().insert({
       user_id: userId,
       action,
       type,
       ticket_id: ticketId,
+      ip_address: ipAddress,
+      user_agent: userAgent,
     });
     return true;
   } catch (error) {
