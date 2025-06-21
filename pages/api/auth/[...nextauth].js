@@ -168,282 +168,323 @@ const upsertUser = async (currentUser) => {
     console.log(error);
   }
 };
-export const authOptions = {
-  pages: {
-    signIn: "/helpdesk/signin",
-  },
-  providers: [
-    GoogleProvider({
-      clientId: googleClientId,
-      clientSecret: googleClientSecret,
-      authorization: {
-        params: {
-          scope:
-            "https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/user.gender.read https://www.googleapis.com/auth/user.birthday.read",
-          prompt: "login",
+
+const options = (req, res) => {
+  const authOptions = {
+    pages: {
+      signIn: "/helpdesk/signin",
+    },
+    providers: [
+      GoogleProvider({
+        clientId: googleClientId,
+        clientSecret: googleClientSecret,
+        authorization: {
+          params: {
+            scope:
+              "https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/user.gender.read https://www.googleapis.com/auth/user.birthday.read",
+            prompt: "login",
+          },
+        },
+        profile: async (profile, token) => {
+          let currentUser = {
+            id: profile.sub,
+            username: profile.name,
+            image: profile.picture,
+            email: profile.email,
+            role: "USER",
+            group: "GOOGLE",
+            employee_number: profile.employee_number || "",
+            birthdate: profile.birthdate || null,
+            email: profile.email || null,
+            organization_id: profile.organization_id || null,
+            status_kepegawaian: profile.status_kepegawaian || "UMUM",
+          };
+
+          const accessToken = token?.access_token;
+          const tanggalLahir = await getUserBirtdahGoogle(accessToken);
+          const currentUserDate = tanggalLahir?.data?.birthdays?.[0]?.date;
+
+          if (currentUserDate) {
+            const birthdate = `${currentUserDate?.year}-${currentUserDate?.month}-${currentUserDate?.day}`;
+            currentUser = {
+              ...currentUser,
+              birthdate,
+            };
+          }
+
+          const result = await upsertUser(currentUser);
+
+          const data = { ...currentUser, current_role: result?.current_role };
+
+          const last = await updateUser(currentUser?.id);
+          const lastData = { ...data, ...last, id: last?.custom_id };
+          return lastData;
+        },
+      }),
+
+      {
+        name: "SIMASTER",
+        id: "helpdesk-user",
+        type: "oauth",
+        wellKnown: userWellknown,
+        clientId: userId,
+        clientSecret: userSecret,
+        authorization: {
+          params: {
+            scope: userScope,
+            prompt: "login",
+          },
+        },
+        httpOptions: {
+          timeout: 40000,
+        },
+        idToken: true,
+        checks: ["pkce", "state"],
+        profile: async (profile, token) => {
+          const currentUser = {
+            id: profile.sub,
+            username: profile.name,
+            image: profile.picture,
+            email: profile.email,
+            role: profile?.role,
+            group: profile?.group,
+            employee_number: profile.employee_number || "",
+            birthdate: profile.birthdate || null,
+            email: profile.email || null,
+            organization_id: profile.organization_id || null,
+            status_kepegawaian: profile.status_kepegawaian || null,
+          };
+
+          const info = await getInformation("MASTER", token?.access_token);
+
+          const result = await upsertUser({ ...currentUser, info });
+
+          const data = { ...currentUser, current_role: result?.current_role };
+
+          const last = await updateUser(currentUser?.id);
+          const lastData = { ...data, ...last, id: last?.custom_id };
+          return lastData;
         },
       },
-      profile: async (profile, token) => {
-        let currentUser = {
-          id: profile.sub,
-          username: profile.name,
-          image: profile.picture,
-          email: profile.email,
-          role: "USER",
-          group: "GOOGLE",
-          employee_number: profile.employee_number || "",
-          birthdate: profile.birthdate || null,
-          email: profile.email || null,
-          organization_id: profile.organization_id || null,
-          status_kepegawaian: profile.status_kepegawaian || "UMUM",
-        };
-
-        const accessToken = token?.access_token;
-        const tanggalLahir = await getUserBirtdahGoogle(accessToken);
-        const currentUserDate = tanggalLahir?.data?.birthdays?.[0]?.date;
-
-        if (currentUserDate) {
-          const birthdate = `${currentUserDate?.year}-${currentUserDate?.month}-${currentUserDate?.day}`;
-          currentUser = {
-            ...currentUser,
-            birthdate,
+      {
+        name: "NON ASN",
+        id: "helpdesk-pttpk",
+        type: "oauth",
+        wellKnown: pttpkWellknown,
+        clientId: pttpkId,
+        clientSecret: pttpkSecret,
+        authorization: {
+          params: {
+            scope: pttpkScope,
+            prompt: "login",
+          },
+        },
+        httpOptions: {
+          timeout: 40000,
+        },
+        idToken: true,
+        checks: ["pkce", "state"],
+        profile: async (profile, token) => {
+          const currentUser = {
+            id: profile.sub,
+            username: profile.name,
+            image: profile.picture,
+            email: profile.email,
+            role: profile.role,
+            group: profile.group,
+            employee_number: profile.employee_number || "",
+            birthdate: profile.birthdate || null,
+            email: profile.email || null,
+            organization_id: profile.organization_id || null,
+            status_kepegawaian: profile.status_kepegawaian || null,
           };
+
+          const info = await getInformation("PTTPK", token?.access_token);
+          const result = await upsertUser({ ...currentUser, info });
+
+          const data = { ...currentUser, current_role: result?.current_role };
+
+          const last = await updateUser(currentUser?.id);
+          const lastData = { ...data, ...last, id: last?.custom_id };
+          return lastData;
+        },
+      },
+      {
+        name: "SIMASTER FASILITATOR",
+        id: "helpdesk-fasilitator",
+        type: "oauth",
+        wellKnown: masterFasilitatorWellknown,
+        clientId: masterFasilitatorId,
+        clientSecret: masterFasilitatorSecret,
+        authorization: {
+          params: {
+            scope: masterFasilitatorScope,
+            prompt: "login",
+          },
+        },
+        httpOptions: {
+          timeout: 40000,
+        },
+        idToken: true,
+        checks: ["pkce", "state"],
+        profile: async (profile, token) => {
+          const currentUser = {
+            id: profile.sub,
+            username: profile.name,
+            image: profile.picture,
+            email: profile.email,
+            role: profile.role,
+            group: profile.group,
+            employee_number: profile.employee_number || "",
+            birthdate: profile.birthdate || null,
+            email: profile.email || null,
+            organization_id: profile.organization_id || null,
+            status_kepegawaian: profile.status_kepegawaian || null,
+          };
+
+          const result = await upsertUser({ ...currentUser });
+
+          const data = { ...currentUser, current_role: result?.current_role };
+
+          const last = await updateUser(currentUser?.id);
+          const lastData = { ...data, ...last, id: last?.custom_id };
+          return lastData;
+        },
+      },
+      KeycloakProvider({
+        clientId: process.env.PEMPROV_CLIENT_ID,
+        name: "Pemprov Jatim",
+        id: "sso-pemprov",
+        clientSecret: process.env.PEMPROV_CLIENT_SECRET,
+        issuer: process.env.PEMPROV_ISSUER,
+        authorization: {
+          params: {
+            prompt: "login",
+            scope: "openid profile email",
+          },
+        },
+        profile: async (profile, token) => {
+          let currentUser = {
+            id: profile.sub,
+            username: profile.name,
+            image: profile.picture,
+            email: profile.email,
+            role: "USER",
+            group: "PEMPROV",
+            employee_number: profile.nip || "",
+            birthdate: profile.tgl_lahir || null,
+            email: profile.email || null,
+            organization_id: profile.organization_id || null,
+            status_kepegawaian: profile.status_kepegawaian || "UMUM",
+          };
+
+          const result = await upsertUser(currentUser);
+
+          const data = { ...currentUser, current_role: result?.current_role };
+
+          const last = await updateUser(currentUser?.id);
+          const lastData = { ...data, ...last, id: last?.custom_id };
+          return lastData;
+        },
+      }),
+    ],
+    events: {
+      signOut: async ({ token }) => {
+        const ipAddress =
+          req?.headers["x-forwarded-for"] || req?.socket?.remoteAddress;
+        const userAgent = req?.headers["user-agent"];
+        const { sub } = token;
+        await setOffline(sub);
+        await createHistory(
+          sub,
+          "logout",
+          "preferences",
+          null,
+          ipAddress,
+          userAgent
+        );
+      },
+      signIn: async ({ user, account, isNewUser, profile }) => {
+        const ipAddress =
+          req?.headers["x-forwarded-for"] || req?.socket?.remoteAddress;
+        const userAgent = req?.headers["user-agent"];
+        const { id } = user;
+        await setOnline(id);
+        await createHistory(
+          id,
+          "login",
+          "preferences",
+          null,
+          ipAddress,
+          userAgent
+        );
+      },
+    },
+    callbacks: {
+      redirect: async (url, baseUrl) => {
+        const urlCallback = `${url?.baseUrl}${process.env.BASE_PATH}`;
+        return urlCallback;
+      },
+      async session({ session, token, user }) {
+        session.accessToken = token.accessToken;
+        session.expires = token?.expires;
+
+        // session.scope = token.scope;
+        session.user.id = token.id;
+        session.user.role = token?.role;
+        session.user.group = token?.group;
+        session.user.employee_number = token?.employee_number;
+        session.user.organization_id = token?.organization_id;
+        session.user.name = token?.username;
+        session.user.current_role = token?.current_role;
+        session.user.status_kepegawaian = token?.status_kepegawaian;
+
+        const check = Date.now() < new Date(token?.expires * 1000);
+
+        if (check) {
+          return session;
+        }
+      },
+      async jwt({ token, account, isNewUser, profile, user }) {
+        if (account) {
+          token.accessToken = account?.access_token;
+          token.expires = profile.exp;
+          token.username = profile?.name;
+          token.id = account?.providerAccountId;
+          token.role = profile?.role || user?.role;
+          token.group = profile?.group || user?.group;
+          token.employee_number = profile?.employee_number;
+          token.organization_id = profile?.organization_id;
+          token.current_role = user?.current_role;
+          token.status_kepegawaian = user?.status_kepegawaian;
         }
 
-        const result = await upsertUser(currentUser);
-
-        const data = { ...currentUser, current_role: result?.current_role };
-
-        const last = await updateUser(currentUser?.id);
-        const lastData = { ...data, ...last, id: last?.custom_id };
-        return lastData;
-      },
-    }),
-
-    {
-      name: "SIMASTER",
-      id: "helpdesk-user",
-      type: "oauth",
-      wellKnown: userWellknown,
-      clientId: userId,
-      clientSecret: userSecret,
-      authorization: {
-        params: {
-          scope: userScope,
-          prompt: "login",
-        },
-      },
-      httpOptions: {
-        timeout: 40000,
-      },
-      idToken: true,
-      checks: ["pkce", "state"],
-      profile: async (profile, token) => {
-        const currentUser = {
-          id: profile.sub,
-          username: profile.name,
-          image: profile.picture,
-          email: profile.email,
-          role: profile?.role,
-          group: profile?.group,
-          employee_number: profile.employee_number || "",
-          birthdate: profile.birthdate || null,
-          email: profile.email || null,
-          organization_id: profile.organization_id || null,
-          status_kepegawaian: profile.status_kepegawaian || null,
-        };
-
-        const info = await getInformation("MASTER", token?.access_token);
-
-        const result = await upsertUser({ ...currentUser, info });
-
-        const data = { ...currentUser, current_role: result?.current_role };
-
-        const last = await updateUser(currentUser?.id);
-        const lastData = { ...data, ...last, id: last?.custom_id };
-        return lastData;
+        return token;
       },
     },
-    {
-      name: "NON ASN",
-      id: "helpdesk-pttpk",
-      type: "oauth",
-      wellKnown: pttpkWellknown,
-      clientId: pttpkId,
-      clientSecret: pttpkSecret,
-      authorization: {
-        params: {
-          scope: pttpkScope,
-          prompt: "login",
-        },
-      },
-      httpOptions: {
-        timeout: 40000,
-      },
-      idToken: true,
-      checks: ["pkce", "state"],
-      profile: async (profile, token) => {
-        const currentUser = {
-          id: profile.sub,
-          username: profile.name,
-          image: profile.picture,
-          email: profile.email,
-          role: profile.role,
-          group: profile.group,
-          employee_number: profile.employee_number || "",
-          birthdate: profile.birthdate || null,
-          email: profile.email || null,
-          organization_id: profile.organization_id || null,
-          status_kepegawaian: profile.status_kepegawaian || null,
-        };
-
-        const info = await getInformation("PTTPK", token?.access_token);
-        const result = await upsertUser({ ...currentUser, info });
-
-        const data = { ...currentUser, current_role: result?.current_role };
-
-        const last = await updateUser(currentUser?.id);
-        const lastData = { ...data, ...last, id: last?.custom_id };
-        return lastData;
-      },
+    theme: "light",
+    // Perbaikan untuk JWEDecryptionFailed error
+    secret: process.env.NEXTAUTH_SECRET || process.env.SECRET,
+    jwt: {
+      secret: process.env.NEXTAUTH_SECRET || process.env.SECRET,
+      // Tambahkan maxAge untuk mencegah token expired
+      maxAge: 30 * 24 * 60 * 60, // 30 hari
     },
-    {
-      name: "SIMASTER FASILITATOR",
-      id: "helpdesk-fasilitator",
-      type: "oauth",
-      wellKnown: masterFasilitatorWellknown,
-      clientId: masterFasilitatorId,
-      clientSecret: masterFasilitatorSecret,
-      authorization: {
-        params: {
-          scope: masterFasilitatorScope,
-          prompt: "login",
-        },
-      },
-      httpOptions: {
-        timeout: 40000,
-      },
-      idToken: true,
-      checks: ["pkce", "state"],
-      profile: async (profile, token) => {
-        const currentUser = {
-          id: profile.sub,
-          username: profile.name,
-          image: profile.picture,
-          email: profile.email,
-          role: profile.role,
-          group: profile.group,
-          employee_number: profile.employee_number || "",
-          birthdate: profile.birthdate || null,
-          email: profile.email || null,
-          organization_id: profile.organization_id || null,
-          status_kepegawaian: profile.status_kepegawaian || null,
-        };
-
-        const result = await upsertUser({ ...currentUser });
-
-        const data = { ...currentUser, current_role: result?.current_role };
-
-        const last = await updateUser(currentUser?.id);
-        const lastData = { ...data, ...last, id: last?.custom_id };
-        return lastData;
-      },
+    // Tambahkan session configuration
+    session: {
+      strategy: "jwt",
+      maxAge: 30 * 24 * 60 * 60, // 30 hari
+      updateAge: 24 * 60 * 60, // 24 jam
     },
-    KeycloakProvider({
-      clientId: process.env.PEMPROV_CLIENT_ID,
-      name: "Pemprov Jatim",
-      id: "sso-pemprov",
-      clientSecret: process.env.PEMPROV_CLIENT_SECRET,
-      issuer: process.env.PEMPROV_ISSUER,
-      authorization: {
-        params: {
-          prompt: "login",
-          scope: "openid profile email",
-        },
-      },
-      profile: async (profile, token) => {
-        let currentUser = {
-          id: profile.sub,
-          username: profile.name,
-          image: profile.picture,
-          email: profile.email,
-          role: "USER",
-          group: "PEMPROV",
-          employee_number: profile.nip || "",
-          birthdate: profile.tgl_lahir || null,
-          email: profile.email || null,
-          organization_id: profile.organization_id || null,
-          status_kepegawaian: profile.status_kepegawaian || "UMUM",
-        };
-
-        const result = await upsertUser(currentUser);
-
-        const data = { ...currentUser, current_role: result?.current_role };
-
-        const last = await updateUser(currentUser?.id);
-        const lastData = { ...data, ...last, id: last?.custom_id };
-        return lastData;
-      },
-    }),
-  ],
-  events: {
-    signOut: async ({ token }) => {
-      const { sub } = token;
-      await setOffline(sub);
-    },
-    signIn: async ({ user, account, isNewUser, profile }) => {
-      const { id } = user;
-      await setOnline(id);
-      await createHistory(id, "login", "preferences");
-    },
-  },
-  callbacks: {
-    redirect: async (url, baseUrl) => {
-      const urlCallback = `${url?.baseUrl}${process.env.BASE_PATH}`;
-      return urlCallback;
-    },
-    async session({ session, token, user }) {
-      session.accessToken = token.accessToken;
-      session.expires = token?.expires;
-
-      // session.scope = token.scope;
-      session.user.id = token.id;
-      session.user.role = token?.role;
-      session.user.group = token?.group;
-      session.user.employee_number = token?.employee_number;
-      session.user.organization_id = token?.organization_id;
-      session.user.name = token?.username;
-      session.user.current_role = token?.current_role;
-      session.user.status_kepegawaian = token?.status_kepegawaian;
-
-      const check = Date.now() < new Date(token?.expires * 1000);
-
-      if (check) {
-        return session;
-      }
-    },
-    async jwt({ token, account, isNewUser, profile, user }) {
-      if (account) {
-        token.accessToken = account?.access_token;
-        token.expires = profile.exp;
-        token.username = profile?.name;
-        token.id = account?.providerAccountId;
-        token.role = profile?.role || user?.role;
-        token.group = profile?.group || user?.group;
-        token.employee_number = profile?.employee_number;
-        token.organization_id = profile?.organization_id;
-        token.current_role = user?.current_role;
-        token.status_kepegawaian = user?.status_kepegawaian;
-      }
-
-      return token;
-    },
-  },
-  theme: "light",
-  secret: process.env.SECRET,
-  jwt: {
-    secret: process.env.SECRET,
-  },
+    // Tambahkan debug mode untuk development
+    debug: process.env.NODE_ENV === "development",
+  };
+  return authOptions;
 };
 
-export default NextAuth(authOptions);
+// Export authOptions untuk digunakan di middleware
+export const authOptions = options();
+
+export default async function handler(req, res) {
+  return await NextAuth(req, res, options(req, res));
+}

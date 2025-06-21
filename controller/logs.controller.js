@@ -1,9 +1,11 @@
 const LogSIASN = require("@/models/log-siasn.model");
 const LogBsre = require("@/models/log-bsre.model");
 const LogSealBsre = require("@/models/log-seal-bsre.model");
+const UserHistory = require("@/models/users-histories.model");
 
 const dayjs = require("dayjs");
 const { raw } = require("objection");
+const { handleError } = require("@/utils/helper/controller-helper");
 
 const indexLogBsre = async (req, res) => {
   try {
@@ -201,10 +203,50 @@ ORDER BY all_services.siasn_service;`);
   }
 };
 
+const indexLogUsersPreferences = async (req, res) => {
+  try {
+    const page = req?.query?.page || 1;
+    const limit = req?.query?.limit || 20;
+    const month = req?.query?.month || "";
+    const startDate = dayjs(month, "YYYY-MM").startOf("month").toDate();
+    const endDate = dayjs(month, "YYYY-MM").endOf("month").toDate();
+
+    const query = UserHistory.query()
+      .where("type", "preferences")
+      .withGraphFetched("user(simpleWithEmployeeNumber)")
+      .where((builder) => {
+        if (month) {
+          builder
+            .where("created_at", ">=", startDate)
+            .where("created_at", "<=", endDate);
+        }
+      })
+      .orderBy("created_at", "desc");
+
+    if (limit === -1 || limit === "-1") {
+      const result = await query;
+      res.json(result);
+    } else {
+      const results = await query.page(parseInt(page) - 1, parseInt(limit));
+      const data = {
+        data: results.results,
+        total: results.total,
+        page: parseInt(page),
+        limit: parseInt(limit),
+      };
+
+      res.json(data);
+    }
+  } catch (error) {
+    handleError(res, error);
+  }
+};
+
 module.exports = {
   indexLogSiasn,
   indexLogBsreSeal,
   indexLogBsre,
   dataLogSealById,
   indexLogSiasnDashboard,
+  indexLogUsersPreferences,
 };

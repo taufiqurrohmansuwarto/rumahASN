@@ -82,6 +82,8 @@ function MyApp({ Component, pageProps: { session, ...pageProps } }) {
       return layananKeuanganConfig;
     } else if (router.pathname.includes("/rekon")) {
       return rekonConfig;
+    } else if (router.pathname.includes("/logs")) {
+      return antdConfig;
     }
 
     return antdConfig;
