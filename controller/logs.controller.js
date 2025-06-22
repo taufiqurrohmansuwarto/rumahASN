@@ -41,6 +41,7 @@ const indexLogSiasn = async (req, res) => {
     const action = req?.query?.action || "";
     const bulan = req?.query?.bulan || "";
     const mandiri = req?.query?.mandiri || false;
+
     const {
       user: { customId },
     } = req;
@@ -74,12 +75,12 @@ const indexLogSiasn = async (req, res) => {
           builder.where("user_id", customId);
         }
       })
-      .withGraphFetched("user(fullSelect)")
+      .withGraphFetched("user(simpleWithEmployeeNumber)")
       .orderBy("created_at", "desc");
 
     let result;
 
-    if (parseInt(limit) === 0) {
+    if (parseInt(limit) === 0 || limit === "-1" || limit === -1) {
       // Get all data without pagination
       result = await query;
 
