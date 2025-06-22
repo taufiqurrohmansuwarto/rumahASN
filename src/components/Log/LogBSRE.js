@@ -1,46 +1,54 @@
 import { dataSealById, logBsreSeal } from "@/services/log.services";
-import { formatDateFull } from "@/utils/client-utils";
-import { useQuery } from "@tanstack/react-query";
 import {
+  CalendarOutlined,
+  CheckCircleOutlined,
+  ClockCircleOutlined,
+  CloseCircleOutlined,
+  DownloadOutlined,
+  FileProtectOutlined,
+  FilterOutlined,
+  KeyOutlined,
+  SafetyOutlined,
+  SearchOutlined,
+  SyncOutlined,
+  UserOutlined,
+} from "@ant-design/icons";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import {
+  Avatar,
+  Button,
+  Card,
   Collapse,
+  DatePicker,
+  Flex,
+  Grid,
+  Input,
   Modal,
   Skeleton,
   Space,
-  Tag,
   Table,
-  Card,
-  Typography,
-  Flex,
-  Avatar,
+  Tag,
   Tooltip,
-  Grid,
-  DatePicker,
-  Button,
-  Input,
+  Typography,
 } from "antd";
-import {
-  SafetyOutlined,
-  UserOutlined,
-  ClockCircleOutlined,
-  CalendarOutlined,
-  FilterOutlined,
-  CheckCircleOutlined,
-  CloseCircleOutlined,
-  SyncOutlined,
-  KeyOutlined,
-  FileProtectOutlined,
-  DownloadOutlined,
-  SearchOutlined,
-} from "@ant-design/icons";
-import { useRouter } from "next/router";
-import { useEffect, useState } from "react";
-import ReactJson from "react-json-view";
 import dayjs from "dayjs";
 import "dayjs/locale/id";
 import relativeTime from "dayjs/plugin/relativeTime";
-import { useMutation } from "@tanstack/react-query";
-import { saveAs } from "file-saver";
-import * as XLSX from "xlsx";
+import { useRouter } from "next/router";
+import { useEffect, useState } from "react";
+import dynamic from "next/dynamic";
+
+// Dynamic imports untuk mencegah SSR issues
+const ReactJson = dynamic(() => import("react-json-view"), { ssr: false });
+
+// Dynamic import untuk XLSX dan file-saver
+const loadExcelLibraries = async () => {
+  const [{ saveAs }, XLSX] = await Promise.all([
+    import("file-saver"),
+    import("xlsx"),
+  ]);
+  return { saveAs, XLSX };
+};
 
 dayjs.extend(relativeTime);
 
@@ -53,6 +61,7 @@ const ModalDetail = ({ itemid, open, onClose }) => {
     isLoading: isLoadingSeal,
     isFetching,
     refetch,
+    error,
   } = useQuery(["data-seal", itemid], () => dataSealById(itemid), {
     refetchOnWindowFocus: false,
     enabled: false,
@@ -64,6 +73,8 @@ const ModalDetail = ({ itemid, open, onClose }) => {
     }
   }, [itemid, refetch]);
 
+  const isLoading = isLoadingSeal || isFetching;
+
   return (
     <Modal
       title={
@@ -72,12 +83,25 @@ const ModalDetail = ({ itemid, open, onClose }) => {
           <Text strong style={{ fontSize: "16px" }}>
             Detail Seal dengan ID #{itemid}
           </Text>
+          {isLoading && (
+            <Tag
+              color="processing"
+              style={{
+                marginLeft: "8px",
+                borderRadius: "12px",
+                fontSize: "10px",
+              }}
+            >
+              Loading...
+            </Tag>
+          )}
         </Flex>
       }
       open={open}
       onCancel={onClose}
       width={900}
       footer={null}
+      confirmLoading={isLoadingSeal}
       styles={{
         header: {
           borderBottom: "2px solid #FF4500",
@@ -86,8 +110,73 @@ const ModalDetail = ({ itemid, open, onClose }) => {
         },
       }}
     >
-      <Skeleton loading={isFetching} active>
-        {dataResponseSeal && (
+      {/* Loading State */}
+      {isLoading && (
+        <div style={{ textAlign: "center", padding: "40px 20px" }}>
+          <Skeleton active paragraph={{ rows: 8 }} />
+          <Text
+            type="secondary"
+            style={{ fontSize: "14px", marginTop: "16px" }}
+          >
+            Sedang memuat detail data seal...
+          </Text>
+        </div>
+      )}
+
+      {/* Error State */}
+      {error && !isLoading && (
+        <div style={{ textAlign: "center", padding: "40px 20px" }}>
+          <CloseCircleOutlined
+            style={{
+              fontSize: "48px",
+              color: "#ff4d4f",
+              marginBottom: "16px",
+            }}
+          />
+          <Text type="danger" style={{ fontSize: "16px", display: "block" }}>
+            Gagal memuat data
+          </Text>
+          <Text type="secondary" style={{ fontSize: "14px", marginTop: "8px" }}>
+            {error?.message || "Terjadi kesalahan saat memuat detail data seal"}
+          </Text>
+          <Button
+            type="primary"
+            style={{
+              backgroundColor: "#FF4500",
+              borderColor: "#FF4500",
+              marginTop: "16px",
+            }}
+            onClick={() => refetch()}
+          >
+            Coba Lagi
+          </Button>
+        </div>
+      )}
+
+      {/* Success State */}
+      {dataResponseSeal && !isLoading && !error && (
+        <div>
+          <Flex
+            align="center"
+            gap={8}
+            style={{
+              marginBottom: "16px",
+              padding: "8px 12px",
+              backgroundColor: "#f6ffed",
+              border: "1px solid #b7eb8f",
+              borderRadius: "6px",
+            }}
+          >
+            <CheckCircleOutlined
+              style={{ color: "#52c41a", fontSize: "16px" }}
+            />
+            <Text
+              style={{ color: "#52c41a", fontSize: "14px", fontWeight: 500 }}
+            >
+              Data berhasil dimuat
+            </Text>
+          </Flex>
+
           <Collapse
             ghost
             expandIconPosition="end"
@@ -177,8 +266,27 @@ const ModalDetail = ({ itemid, open, onClose }) => {
               </div>
             </Collapse.Panel>
           </Collapse>
-        )}
-      </Skeleton>
+        </div>
+      )}
+
+      {/* Empty State */}
+      {!dataResponseSeal && !isLoading && !error && itemid && (
+        <div style={{ textAlign: "center", padding: "40px 20px" }}>
+          <FileProtectOutlined
+            style={{
+              fontSize: "48px",
+              color: "#d9d9d9",
+              marginBottom: "16px",
+            }}
+          />
+          <Text type="secondary" style={{ fontSize: "16px", display: "block" }}>
+            Tidak ada data yang ditemukan
+          </Text>
+          <Text type="secondary" style={{ fontSize: "14px", marginTop: "8px" }}>
+            Data seal dengan ID #{itemid} tidak tersedia
+          </Text>
+        </div>
+      )}
     </Modal>
   );
 };
@@ -187,7 +295,7 @@ const LogBSRE = () => {
   const router = useRouter();
   const { page = 1, limit = 10, month, search } = router.query;
   const screens = useBreakpoint();
-  const isMobile = !screens.md;
+  const isMobile = !screens?.md;
 
   const [itemId, setItemId] = useState(null);
   const [openModal, setOpenModal] = useState(false);
@@ -213,85 +321,92 @@ const LogBSRE = () => {
 
   const { mutate: downloadLog, isLoading: isMutating } = useMutation({
     mutationFn: (data) => logBsreSeal(data),
-    onSuccess: (data) => {
-      // Transform data untuk Excel
-      const excelData =
-        data?.map((item, index) => ({
-          No: index + 1,
-          "ID Log": item.id,
-          "Nama Pengguna": item.user?.username || item.user_id,
-          "Custom ID": item.user?.custom_id || "-",
-          Aksi: getActionText(item.action),
-          Status: item.status,
-          Tanggal: dayjs(item.created_at).format("DD/MM/YYYY"),
-          Waktu: dayjs(item.created_at).format("HH:mm:ss"),
-          "Tanggal Lengkap": dayjs(item.created_at).format(
-            "DD MMMM YYYY, HH:mm:ss"
-          ),
-          "Created At": item.created_at,
-        })) || [];
+    onSuccess: async (data) => {
+      try {
+        // Load Excel libraries dynamically
+        const { saveAs, XLSX } = await loadExcelLibraries();
 
-      // Buat workbook baru
-      const workbook = XLSX.utils.book_new();
-      const worksheet = XLSX.utils.json_to_sheet(excelData);
+        // Transform data untuk Excel
+        const excelData =
+          data?.data?.map((item, index) => ({
+            No: index + 1,
+            "ID Log": item.id,
+            "Nama Pengguna": item.user?.username || item.user_id,
+            "Custom ID": item.user?.custom_id || "-",
+            Aksi: getActionText(item.action),
+            Status: item.status,
+            Tanggal: dayjs(item.created_at).format("DD/MM/YYYY"),
+            Waktu: dayjs(item.created_at).format("HH:mm:ss"),
+            "Tanggal Lengkap": dayjs(item.created_at).format(
+              "DD MMMM YYYY, HH:mm:ss"
+            ),
+            "Created At": item.created_at,
+          })) || [];
 
-      // Set column widths
-      const columnWidths = [
-        { wch: 5 }, // No
-        { wch: 10 }, // ID Log
-        { wch: 35 }, // Nama Pengguna
-        { wch: 20 }, // Custom ID
-        { wch: 20 }, // Aksi
-        { wch: 12 }, // Status
-        { wch: 12 }, // Tanggal
-        { wch: 10 }, // Waktu
-        { wch: 25 }, // Tanggal Lengkap
-        { wch: 20 }, // Created At
-      ];
-      worksheet["!cols"] = columnWidths;
+        // Buat workbook baru
+        const workbook = XLSX.utils.book_new();
+        const worksheet = XLSX.utils.json_to_sheet(excelData);
 
-      // Header styling
-      const headerRange = XLSX.utils.decode_range(worksheet["!ref"]);
-      for (let col = headerRange.s.c; col <= headerRange.e.c; col++) {
-        const cellAddress = XLSX.utils.encode_cell({ r: 0, c: col });
-        if (!worksheet[cellAddress]) continue;
-        worksheet[cellAddress].s = {
-          font: {
-            bold: true,
-            color: { rgb: "FFFFFF" },
-            size: 12,
-            name: "Calibri",
-          },
-          fill: {
-            fgColor: { rgb: "FF4500" },
-            patternType: "solid",
-          },
-          alignment: {
-            horizontal: "center",
-            vertical: "center",
-            wrapText: true,
-          },
-        };
+        // Set column widths
+        const columnWidths = [
+          { wch: 5 }, // No
+          { wch: 10 }, // ID Log
+          { wch: 35 }, // Nama Pengguna
+          { wch: 20 }, // Custom ID
+          { wch: 20 }, // Aksi
+          { wch: 12 }, // Status
+          { wch: 12 }, // Tanggal
+          { wch: 10 }, // Waktu
+          { wch: 25 }, // Tanggal Lengkap
+          { wch: 20 }, // Created At
+        ];
+        worksheet["!cols"] = columnWidths;
+
+        // Header styling
+        const headerRange = XLSX.utils.decode_range(worksheet["!ref"]);
+        for (let col = headerRange.s.c; col <= headerRange.e.c; col++) {
+          const cellAddress = XLSX.utils.encode_cell({ r: 0, c: col });
+          if (!worksheet[cellAddress]) continue;
+          worksheet[cellAddress].s = {
+            font: {
+              bold: true,
+              color: { rgb: "FFFFFF" },
+              size: 12,
+              name: "Calibri",
+            },
+            fill: {
+              fgColor: { rgb: "FF4500" },
+              patternType: "solid",
+            },
+            alignment: {
+              horizontal: "center",
+              vertical: "center",
+              wrapText: true,
+            },
+          };
+        }
+
+        XLSX.utils.book_append_sheet(workbook, worksheet, "Log BSRE Seal");
+
+        const currentDate = dayjs().format("YYYY-MM-DD_HH-mm-ss");
+        const monthFilter = month
+          ? `_${dayjs(month, "YYYY-MM").format("MMMM-YYYY")}`
+          : "";
+        const filename = `Log-BSRE-Seal_${currentDate}${monthFilter}.xlsx`;
+
+        const excelBuffer = XLSX.write(workbook, {
+          bookType: "xlsx",
+          type: "array",
+        });
+
+        const excelBlob = new Blob([excelBuffer], {
+          type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        });
+
+        saveAs(excelBlob, filename);
+      } catch (error) {
+        console.error("Error loading Excel libraries:", error);
       }
-
-      XLSX.utils.book_append_sheet(workbook, worksheet, "Log BSRE Seal");
-
-      const currentDate = dayjs().format("YYYY-MM-DD_HH-mm-ss");
-      const monthFilter = month
-        ? `_${dayjs(month, "YYYY-MM").format("MMMM-YYYY")}`
-        : "";
-      const filename = `Log-BSRE-Seal_${currentDate}${monthFilter}.xlsx`;
-
-      const excelBuffer = XLSX.write(workbook, {
-        bookType: "xlsx",
-        type: "array",
-      });
-
-      const excelBlob = new Blob([excelBuffer], {
-        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-      });
-
-      saveAs(excelBlob, filename);
     },
     onError: (error) => {
       console.error("Download error:", error);
