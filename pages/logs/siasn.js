@@ -1,5 +1,5 @@
-import LogHistorySIASN from "@/components/Log/LogHistorySIASN";
 import LogLayout from "@/components/Log/LogLayout";
+import LogSiasn from "@/components/Log/LogSiasn";
 import PageContainer from "@/components/PageContainer";
 import { Breadcrumb, FloatButton, Grid } from "antd";
 import dayjs from "dayjs";
@@ -10,7 +10,7 @@ import Link from "next/link";
 dayjs.locale("id");
 dayjs.extend(relativeTime);
 
-function LogSIASN() {
+const LogSiasnPage = () => {
   const breakPoint = Grid.useBreakpoint();
 
   return (
@@ -35,19 +35,19 @@ function LogSIASN() {
         }}
       >
         <FloatButton.BackTop />
-        <LogHistorySIASN />
+        <LogSiasn />
       </PageContainer>
     </>
   );
-}
+};
 
-LogSIASN.getLayout = function getLayout(page) {
+LogSiasnPage.getLayout = function getLayout(page) {
   return <LogLayout active="/logs/siasn">{page}</LogLayout>;
 };
 
-LogSIASN.Auth = {
+LogSiasnPage.Auth = {
   action: "manage",
   subject: "DashboardAdmin",
 };
 
-export default LogSIASN;
+export default LogSiasnPage;

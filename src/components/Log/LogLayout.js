@@ -6,12 +6,17 @@ import NotifikasiPrivateMessage from "@/components/Notification/NotifikasiPrivat
 import { layoutToken } from "@/styles/rasn.theme";
 import { appList } from "@/utils/app-lists";
 import {
-  DashboardOutlined,
   LogoutOutlined,
+  SettingOutlined,
   UserOutlined,
   WarningOutlined,
-  SettingOutlined,
 } from "@ant-design/icons";
+import {
+  IconCertificate,
+  IconDashboard,
+  IconDatabase,
+  IconUser,
+} from "@tabler/icons-react";
 import { Dropdown, Layout, Space } from "antd";
 import { signOut, useSession } from "next-auth/react";
 import dynamic from "next/dynamic";
@@ -21,25 +26,25 @@ import { useState } from "react";
 const menuItems = [
   {
     key: "dashboard",
-    icon: <DashboardOutlined />,
+    icon: <IconDashboard size={16} />,
     label: "Dashboard",
     role: ["admin"],
   },
   {
     key: "siasn",
-    icon: <UserOutlined />,
-    label: "Riwayat SIASN",
+    icon: <IconDatabase size={16} />,
+    label: "SIASN",
     role: ["admin"],
   },
   {
     key: "bsre",
-    icon: <WarningOutlined />,
-    label: "Riwayat BSRE",
+    icon: <IconCertificate size={16} />,
+    label: "Segel & Sertifikat Elektronik",
     role: ["admin"],
   },
   {
     key: "user",
-    icon: <SettingOutlined />,
+    icon: <IconUser size={16} />,
     label: "Riwayat User",
     role: ["admin"],
   },

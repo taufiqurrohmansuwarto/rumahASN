@@ -23,6 +23,7 @@ import {
   Flex,
   Grid,
   Input,
+  message,
   Modal,
   Skeleton,
   Space,
@@ -37,18 +38,11 @@ import relativeTime from "dayjs/plugin/relativeTime";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
+import { saveAs } from "file-saver";
+import * as XLSX from "xlsx";
 
 // Dynamic imports untuk mencegah SSR issues
 const ReactJson = dynamic(() => import("react-json-view"), { ssr: false });
-
-// Dynamic import untuk XLSX dan file-saver
-const loadExcelLibraries = async () => {
-  const [{ saveAs }, XLSX] = await Promise.all([
-    import("file-saver"),
-    import("xlsx"),
-  ]);
-  return { saveAs, XLSX };
-};
 
 dayjs.extend(relativeTime);
 
@@ -323,9 +317,6 @@ const LogBSRE = () => {
     mutationFn: (data) => logBsreSeal(data),
     onSuccess: async (data) => {
       try {
-        // Load Excel libraries dynamically
-        const { saveAs, XLSX } = await loadExcelLibraries();
-
         // Transform data untuk Excel
         const excelData =
           data?.data?.map((item, index) => ({
@@ -404,12 +395,15 @@ const LogBSRE = () => {
         });
 
         saveAs(excelBlob, filename);
+        message.success("Berhasil mengunduh data Excel");
       } catch (error) {
-        console.error("Error loading Excel libraries:", error);
+        console.error("Error creating Excel file:", error);
+        message.error("Gagal mengunduh data");
       }
     },
     onError: (error) => {
       console.error("Download error:", error);
+      message.error("Gagal mengunduh data");
     },
   });
 

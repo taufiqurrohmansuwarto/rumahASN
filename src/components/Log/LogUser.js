@@ -24,6 +24,7 @@ import {
   Grid,
   DatePicker,
   Button,
+  message,
 } from "antd";
 import dayjs from "dayjs";
 import "dayjs/locale/id";
@@ -218,10 +219,11 @@ const LogUser = () => {
       });
 
       saveAs(excelBlob, filename);
+      message.success("Berhasil mengunduh data Excel");
     },
     onError: (error) => {
       console.error("Download error:", error);
-      // You can add notification here
+      message.error("Gagal mengunduh data");
     },
   });
 
