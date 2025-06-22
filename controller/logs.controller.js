@@ -113,11 +113,14 @@ const indexLogBsreSeal = async (req, res) => {
     const page = req?.query?.page || 1;
     const limit = req?.query?.limit || 25;
     const username = req?.query?.search || "";
+    const month = req?.query?.month || "";
+
+    const startDate = dayjs(month, "YYYY-MM").startOf("month").toDate();
+    const endDate = dayjs(month, "YYYY-MM").endOf("month").toDate();
 
     let query = LogSealBsre.query()
       .select("log_seal_bsre.id", "user_id", "action", "status", "created_at")
-      .withGraphFetched("user(simpleSelect)")
-      .page(parseInt(page) - 1, parseInt(limit))
+      .withGraphFetched("user(simpleWithImage)")
       .orderBy("created_at", "desc");
 
     if (username) {
@@ -126,14 +129,26 @@ const indexLogBsreSeal = async (req, res) => {
         .where("user.username", "ilike", `%${username}%`);
     }
 
-    const result = await query;
+    if (month) {
+      query
+        .where("created_at", ">=", startDate)
+        .where("created_at", "<=", endDate);
+    }
 
-    res.json({
-      data: result.results,
-      total: result.total,
-      page: parseInt(page),
-      limit: parseInt(limit),
-    });
+    if (limit === -1 || limit === "-1") {
+      const result = await query;
+      res.json(result);
+    } else {
+      const results = await query.page(parseInt(page) - 1, parseInt(limit));
+      const data = {
+        data: results.results,
+        total: results.total,
+        page: parseInt(page),
+        limit: parseInt(limit),
+      };
+
+      res.json(data);
+    }
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: "Internal server error" });
