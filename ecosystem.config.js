@@ -1,10 +1,10 @@
 module.exports = {
   apps: [
     {
-      name: "next-app",
+      name: "Rumah ASN",
       script: "node_modules/next/dist/bin/next",
       args: "start",
-      instances: 2,
+      instances: "8",
       exec_mode: "cluster",
       env: {
         NODE_ENV: "development",
