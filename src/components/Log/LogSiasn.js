@@ -163,7 +163,9 @@ const LogSiasn = () => {
   const router = useRouter();
   const { page = 1, limit = 15, bulan, search, mandiri } = router.query;
   const screens = useBreakpoint();
-  const isMobile = !screens?.md;
+  const isMobile = !screens.md;
+  const isTablet = screens.md && !screens.lg;
+  const isDesktop = screens.lg;
 
   const { data, isLoading, isFetching } = useQuery(
     ["logs-siasn", router?.query],
@@ -355,7 +357,7 @@ const LogSiasn = () => {
       ),
       dataIndex: "user",
       key: "user",
-      width: isMobile ? 240 : 340,
+      width: isMobile ? 240 : isTablet ? 300 : 360,
       render: (user, record) => (
         <div
           style={{
@@ -485,70 +487,129 @@ const LogSiasn = () => {
       ),
       dataIndex: "employee_number",
       key: "target_employee",
-      width: isMobile ? 180 : 240,
-      render: (employee_number, record) => (
-        <div
-          style={{
-            padding: isMobile ? "8px" : "12px",
-            borderRadius: "12px",
-            background: "linear-gradient(135deg, #fff 0%, #f9f0ff 100%)",
-            border: "1px solid #d3adf7",
-            transition: "all 0.3s ease",
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.borderColor = "#722ed1";
-            e.currentTarget.style.boxShadow =
-              "0 4px 12px rgba(114, 46, 209, 0.15)";
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.borderColor = "#d3adf7";
-            e.currentTarget.style.boxShadow = "none";
-          }}
-        >
-          <Flex align="center" gap={10}>
-            <div
-              style={{
-                width: isMobile ? "32px" : "36px",
-                height: isMobile ? "32px" : "36px",
-                borderRadius: "8px",
-                background: "linear-gradient(135deg, #722ed1 0%, #9254de 100%)",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                boxShadow: "0 2px 6px rgba(114, 46, 209, 0.3)",
-              }}
-            >
-              <UserOutlined style={{ color: "white", fontSize: "14px" }} />
-            </div>
-            <Flex vertical gap={2} style={{ flex: 1 }}>
-              <Text
+      width: isMobile ? 200 : isTablet ? 220 : 260,
+      render: (employee_number, record) => {
+        // Check if user is updating themselves
+        const isSelfUpdate = record?.user?.employee_number === employee_number;
+
+        return (
+          <div
+            style={{
+              padding: isMobile ? "8px" : "12px",
+              borderRadius: "12px",
+              background: isSelfUpdate
+                ? "linear-gradient(135deg, #fff7e6 0%, #fff2e8 100%)"
+                : "linear-gradient(135deg, #fff 0%, #f9f0ff 100%)",
+              border: isSelfUpdate ? "1px solid #ffcc99" : "1px solid #d3adf7",
+              transition: "all 0.3s ease",
+              position: "relative",
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.borderColor = isSelfUpdate
+                ? "#ff8c00"
+                : "#722ed1";
+              e.currentTarget.style.boxShadow = isSelfUpdate
+                ? "0 4px 12px rgba(255, 140, 0, 0.15)"
+                : "0 4px 12px rgba(114, 46, 209, 0.15)";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.borderColor = isSelfUpdate
+                ? "#ffcc99"
+                : "#d3adf7";
+              e.currentTarget.style.boxShadow = "none";
+            }}
+          >
+            {isSelfUpdate && (
+              <div
                 style={{
-                  fontSize: isMobile ? "10px" : "11px",
-                  color: "#722ed1",
-                  fontWeight: 600,
-                  marginBottom: "2px",
+                  position: "absolute",
+                  top: "-6px",
+                  right: "-6px",
+                  backgroundColor: "#ff8c00",
+                  borderRadius: "50%",
+                  width: "20px",
+                  height: "20px",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  border: "2px solid white",
+                  boxShadow: "0 2px 4px rgba(255, 140, 0, 0.3)",
                 }}
               >
-                Target NIP:
-              </Text>
-              <Text
+                <Text
+                  style={{ color: "white", fontSize: "10px", fontWeight: 600 }}
+                >
+                  👤
+                </Text>
+              </div>
+            )}
+            <Flex align="center" gap={10}>
+              <div
                 style={{
-                  fontSize: isMobile ? "11px" : "12px",
-                  color: "#1a1a1a",
-                  fontFamily: "monospace",
-                  fontWeight: 700,
-                  backgroundColor: "#f9f0ff",
-                  padding: "2px 6px",
-                  borderRadius: "6px",
-                  border: "1px solid #d3adf7",
+                  width: isMobile ? "32px" : "36px",
+                  height: isMobile ? "32px" : "36px",
+                  borderRadius: "8px",
+                  background: isSelfUpdate
+                    ? "linear-gradient(135deg, #ff8c00 0%, #ffa940 100%)"
+                    : "linear-gradient(135deg, #722ed1 0%, #9254de 100%)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  boxShadow: isSelfUpdate
+                    ? "0 2px 6px rgba(255, 140, 0, 0.3)"
+                    : "0 2px 6px rgba(114, 46, 209, 0.3)",
                 }}
               >
-                {employee_number || "N/A"}
-              </Text>
+                <UserOutlined style={{ color: "white", fontSize: "14px" }} />
+              </div>
+              <Flex vertical gap={2} style={{ flex: 1 }}>
+                <Flex align="center" gap={4}>
+                  <Text
+                    style={{
+                      fontSize: isMobile ? "10px" : "11px",
+                      color: isSelfUpdate ? "#ff8c00" : "#722ed1",
+                      fontWeight: 600,
+                    }}
+                  >
+                    {isSelfUpdate ? "Self-Update:" : "Target NIP:"}
+                  </Text>
+                  {isSelfUpdate && (
+                    <Tag
+                      color="orange"
+                      style={{
+                        fontSize: "8px",
+                        padding: "0 4px",
+                        height: "16px",
+                        lineHeight: "14px",
+                        borderRadius: "8px",
+                        fontWeight: 600,
+                      }}
+                    >
+                      MANDIRI
+                    </Tag>
+                  )}
+                </Flex>
+                <Text
+                  style={{
+                    fontSize: isMobile ? "11px" : "12px",
+                    color: "#1a1a1a",
+                    fontFamily: "monospace",
+                    fontWeight: 700,
+                    backgroundColor: isSelfUpdate ? "#fff7e6" : "#f9f0ff",
+                    padding: "2px 6px",
+                    borderRadius: "6px",
+                    border: isSelfUpdate
+                      ? "1px solid #ffcc99"
+                      : "1px solid #d3adf7",
+                  }}
+                >
+                  {employee_number || "N/A"}
+                </Text>
+              </Flex>
             </Flex>
-          </Flex>
-        </div>
-      ),
+          </div>
+        );
+      },
     },
     {
       title: (
@@ -572,7 +633,7 @@ const LogSiasn = () => {
         </Space>
       ),
       key: "aktivitas",
-      width: isMobile ? 160 : 240,
+      width: isMobile ? 160 : isTablet ? 200 : 240,
       render: (_, record) => {
         const serviceConfig = getServiceConfig(record?.siasn_service);
         const typeConfig = getTypeConfig(record?.type);
@@ -682,7 +743,7 @@ const LogSiasn = () => {
       ),
       dataIndex: "created_at",
       key: "created_at",
-      width: isMobile ? 110 : 140,
+      width: isMobile ? 110 : isTablet ? 130 : 150,
       render: (date) => (
         <div
           style={{
@@ -698,7 +759,7 @@ const LogSiasn = () => {
             title={
               <div>
                 <div style={{ fontWeight: 600, marginBottom: "4px" }}>
-                  📅 {dayjs(date).format("dddd, DD MMMM YYYY")}
+                  📅 {dayjs(date).locale("id").format("dddd, DD MMMM YYYY")}
                 </div>
                 <div>🕐 {dayjs(date).format("HH:mm:ss")} WIB</div>
               </div>
@@ -763,7 +824,7 @@ const LogSiasn = () => {
         </Space>
       ),
       key: "action",
-      width: isMobile ? 90 : 120,
+      width: isMobile ? 90 : isTablet ? 110 : 130,
       align: "center",
       render: (_, record) => (
         <div
@@ -774,7 +835,12 @@ const LogSiasn = () => {
             border: "1px solid #e8e8e8",
           }}
         >
-          <Space direction={isMobile ? "horizontal" : "vertical"} size={6}>
+          <Space
+            direction={
+              isMobile ? "horizontal" : isTablet ? "horizontal" : "vertical"
+            }
+            size={6}
+          >
             <Tooltip
               title={`Lihat detail pegawai NIP: ${record?.employee_number}`}
             >
@@ -965,7 +1031,7 @@ const LogSiasn = () => {
 
         const currentDate = dayjs().format("YYYY-MM-DD_HH-mm-ss");
         const bulanFilter = bulan
-          ? `_${dayjs(bulan, "YYYY-MM").format("MMMM-YYYY")}`
+          ? `_${dayjs(bulan, "YYYY-MM").locale("id").format("MMMM-YYYY")}`
           : "";
         const mandiriFilter = mandiri ? "_Mandiri" : "";
         const filename = `Log-SIASN_${currentDate}${bulanFilter}${mandiriFilter}.xlsx`;
@@ -1051,41 +1117,77 @@ const LogSiasn = () => {
           border: "1px solid #e8e8e8",
         }}
       >
-        <Flex vertical gap={12}>
-          <Flex align="center" gap={12} wrap justify="space-between">
-            <Flex align="center" gap={12} wrap style={{ flex: 1 }}>
+        <Flex vertical gap={isMobile ? 8 : 12}>
+          <Flex
+            align={isMobile ? "flex-start" : "center"}
+            gap={isMobile ? 8 : 12}
+            wrap
+            justify="space-between"
+            vertical={isMobile}
+          >
+            <Flex
+              align="center"
+              gap={isMobile ? 8 : isTablet ? 10 : 12}
+              wrap
+              style={{ flex: 1, width: isMobile ? "100%" : "auto" }}
+            >
               <Flex align="center" gap={8}>
                 <FilterOutlined
-                  style={{ color: "#FF4500", fontSize: "16px" }}
+                  style={{
+                    color: "#FF4500",
+                    fontSize: isMobile ? "14px" : "16px",
+                  }}
                 />
-                <Text strong style={{ color: "#1a1a1a" }}>
+                <Text
+                  strong
+                  style={{
+                    color: "#1a1a1a",
+                    fontSize: isMobile ? "12px" : "14px",
+                  }}
+                >
                   Filter:
                 </Text>
               </Flex>
 
-              <Flex align="center" gap={8}>
-                <CalendarOutlined style={{ color: "#666", fontSize: "14px" }} />
+              <Flex align="center" gap={6}>
+                <CalendarOutlined
+                  style={{
+                    color: "#666",
+                    fontSize: isMobile ? "12px" : "14px",
+                  }}
+                />
                 <DatePicker
                   picker="month"
                   placeholder="Pilih Bulan"
                   value={bulan ? dayjs(bulan, "YYYY-MM") : null}
                   onChange={handleBulanChange}
-                  style={{ width: isMobile ? 120 : 140 }}
+                  style={{ width: isMobile ? 110 : isTablet ? 130 : 140 }}
                   format="MMMM YYYY"
                   allowClear={false}
+                  size={isMobile ? "small" : "middle"}
                 />
               </Flex>
 
-              <Flex align="center" gap={8}>
-                <SearchOutlined style={{ color: "#666", fontSize: "14px" }} />
+              <Flex align="center" gap={6}>
+                <SearchOutlined
+                  style={{
+                    color: "#666",
+                    fontSize: isMobile ? "12px" : "14px",
+                  }}
+                />
                 <Input.Search
-                  placeholder="Cari berdasarkan nama pengguna..."
+                  placeholder={
+                    isMobile
+                      ? "Cari user..."
+                      : "Cari berdasarkan nama pengguna..."
+                  }
                   defaultValue={search}
                   onSearch={handleSearch}
                   style={{
-                    width: isMobile ? 150 : 250,
+                    width: isMobile ? 140 : isTablet ? 180 : 250,
                   }}
                   allowClear
+                  size={isMobile ? "small" : "middle"}
                   enterButton={
                     <Button
                       type="primary"
@@ -1093,18 +1195,19 @@ const LogSiasn = () => {
                         backgroundColor: "#FF4500",
                         borderColor: "#FF4500",
                       }}
+                      size={isMobile ? "small" : "middle"}
                     >
-                      Cari
+                      {isMobile ? "Cari" : "Cari"}
                     </Button>
                   }
                 />
               </Flex>
 
-              <Flex align="center" gap={8}>
+              <Flex align="center" gap={6}>
                 <div
                   style={{
-                    width: "14px",
-                    height: "14px",
+                    width: isMobile ? "12px" : "14px",
+                    height: isMobile ? "12px" : "14px",
                     borderRadius: "4px",
                     background:
                       "linear-gradient(135deg, #52c41a 0%, #73d13d 100%)",
@@ -1123,14 +1226,14 @@ const LogSiasn = () => {
                   checked={mandiri === "true"}
                   onChange={(e) => handleMandiriChange(e.target.checked)}
                   style={{
-                    fontSize: isMobile ? "12px" : "14px",
+                    fontSize: isMobile ? "11px" : "14px",
                     fontWeight: 500,
                   }}
                 >
                   <Text
                     style={{
                       color: "#1a1a1a",
-                      fontSize: isMobile ? "12px" : "14px",
+                      fontSize: isMobile ? "11px" : "14px",
                       fontWeight: 500,
                     }}
                   >
@@ -1146,6 +1249,7 @@ const LogSiasn = () => {
                   style={{
                     borderColor: "#FF4500",
                     color: "#FF4500",
+                    fontSize: isMobile ? "11px" : "14px",
                   }}
                 >
                   Clear All
@@ -1163,10 +1267,12 @@ const LogSiasn = () => {
                 borderColor: "#FF4500",
                 borderRadius: "6px",
                 fontWeight: 500,
+                width: isMobile ? "100%" : "auto",
+                marginTop: isMobile ? "8px" : "0",
               }}
               size={isMobile ? "small" : "middle"}
             >
-              {isMobile ? "Download" : "Download Excel"}
+              {isMobile ? "📥 Download" : "📥 Download Excel"}
             </Button>
           </Flex>
 
@@ -1190,7 +1296,7 @@ const LogSiasn = () => {
                     padding: "2px 8px",
                   }}
                 >
-                  📅 {dayjs(bulan, "YYYY-MM").format("MMMM YYYY")}
+                  📅 {dayjs(bulan, "YYYY-MM").locale("id").format("MMMM YYYY")}
                 </Tag>
               )}
 
@@ -1340,7 +1446,7 @@ const LogSiasn = () => {
           loading={isLoading || isFetching}
           rowKey="id"
           size={isMobile ? "small" : "middle"}
-          scroll={{ x: isMobile ? 700 : undefined }}
+          scroll={{ x: isMobile ? 800 : isTablet ? 1000 : undefined }}
           rowClassName={(record, index) =>
             index % 2 === 0 ? "table-row-light" : "table-row-dark"
           }
@@ -1369,9 +1475,9 @@ const LogSiasn = () => {
                       <Text style={{ color: "#999" }}>
                         {" "}
                         {bulan &&
-                          `(bulan ${dayjs(bulan, "YYYY-MM").format(
-                            "MMMM YYYY"
-                          )})`}
+                          `(bulan ${dayjs(bulan, "YYYY-MM")
+                            .locale("id")
+                            .format("MMMM YYYY")})`}
                         {bulan && (search || mandiri) && " • "}
                         {search && `(pencarian: "${search}")`}
                         {search && mandiri && " • "}
