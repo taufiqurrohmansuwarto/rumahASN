@@ -112,6 +112,7 @@ const cariPnsKinerjaProxy = async (req, res) => {
 
     const fetcher = axios.create({
       baseURL: apiGateway,
+      timeout: 60000, // 1 menit
       headers: {
         Authorization: `Bearer ${hasil?.accessToken}`,
       },

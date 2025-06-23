@@ -111,6 +111,7 @@ export const checkUsulan = async (req, res) => {
 
     const fetcher = axios.create({
       baseURL: process.env.APIGATEWAY_URL,
+      timeout: 60000, // 1 menit
       headers: {
         Authorization: `Bearer ${accessToken}`,
       },
@@ -185,6 +186,7 @@ export const getDataUtamaSiasn = async (req, res) => {
     const currentData = req?.currentUser;
     const fetcher = axios.create({
       baseURL: process.env.APIGATEWAY_URL,
+      timeout: 60000, // 1 menit
       headers: {
         Authorization: `Bearer ${currentData?.accessToken}`,
       },

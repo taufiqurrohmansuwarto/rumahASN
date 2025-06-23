@@ -15,6 +15,7 @@ const useDisparitasByNip = (nip) => {
 
   return { data, isLoading, refetch, isFetching };
 };
+
 function DisparitasByNip() {
   const router = useRouter();
   const nip = router.query.nip;
