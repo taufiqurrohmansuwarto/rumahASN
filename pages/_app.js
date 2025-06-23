@@ -113,6 +113,7 @@ function MyApp({ Component, pageProps: { session, ...pageProps } }) {
           <Head>
             <link rel="shortcut icon" href="/helpdesk/headset.ico" />
           </Head>
+
           <QueryClientProvider client={queryClient}>
             <MantineProvider withGlobalStyles withNormalizeCSS>
               <ThemeProvider colorMode="auto" preventSSRMismatch>
