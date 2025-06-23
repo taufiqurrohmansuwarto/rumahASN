@@ -1,6 +1,8 @@
 const Tickets = require("../models/tickets.model");
 const Notification = require("../models/notifications.model");
 const { sendingNotificationToAdmin } = require("@/utils/tickets-utilities");
+const axios = require("axios");
+const captchaKey = process.env.RECAPTCHA_SECRET_KEY;
 
 const index = async (req, res) => {
   try {
@@ -61,8 +63,47 @@ const create = async (req, res) => {
   try {
     const { customId } = req?.user;
     const { body } = req;
-    const data = { ...body, requester: customId, status_code: "DIAJUKAN" };
+    const { captcha, ...payload } = body;
 
+    if (!body?.captcha) {
+      return res.status(400).json({ message: "Captcha is required" });
+    }
+
+    if (body?.description && body.description.length > 1000) {
+      return res
+        .status(400)
+        .json({ message: "Description cannot exceed 1000 characters" });
+    }
+
+    // Verify reCAPTCHA v3
+    const verifyUrl = `https://www.google.com/recaptcha/api/siteverify`;
+    const verifyData = new URLSearchParams({
+      secret: captchaKey,
+      response: body.captcha,
+    });
+
+    const hasil = await axios.post(verifyUrl, verifyData, {
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+    });
+
+    if (!hasil.data.success) {
+      return res.status(400).json({
+        message: "Captcha verification failed",
+        errors: hasil.data["error-codes"],
+      });
+    }
+
+    // Check score for v3 (optional - adjust threshold as needed)
+    if (hasil.data.score < 0.5) {
+      return res.status(400).json({
+        message: "Captcha score too low",
+        score: hasil.data.score,
+      });
+    }
+
+    const data = { ...payload, requester: customId, status_code: "DIAJUKAN" };
     const result = await Tickets.query().insert(data).returning("*");
     await sendingNotificationToAdmin(result?.id, customId);
     res.status(201).json(result);
