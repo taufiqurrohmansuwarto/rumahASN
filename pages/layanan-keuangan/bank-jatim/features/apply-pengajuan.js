@@ -3,6 +3,7 @@ import LayananKeuanganLayout from "@/components/LayananKeuangan/LayananKeuanganL
 import PageContainer from "@/components/PageContainer";
 import useScrollRestoration from "@/hooks/useScrollRestoration";
 import { Breadcrumb, Col, FloatButton, Row } from "antd";
+import { GoogleReCaptchaProvider } from "react-google-recaptcha-v3";
 import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
@@ -38,8 +39,12 @@ const ApplyPengajuan = () => {
       </Head>
       <Row justify="center">
         <Col xs={24} sm={24} md={12} lg={12} xl={12}>
-          <FormPengajuanKredit />
           <FloatButton.BackTop />
+          <GoogleReCaptchaProvider
+            reCaptchaKey={`6LdyNGorAAAAAN1UD8BNieu6WEvzVClmCnoZUnQk`}
+          >
+            <FormPengajuanKredit />
+          </GoogleReCaptchaProvider>
         </Col>
       </Row>
     </PageContainer>

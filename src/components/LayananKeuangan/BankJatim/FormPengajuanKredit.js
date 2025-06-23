@@ -32,6 +32,7 @@ import {
 } from "antd";
 import dayjs from "dayjs";
 import { useState } from "react";
+import { useGoogleReCaptcha } from "react-google-recaptcha-v3";
 
 const { Title, Text } = Typography;
 const { useBreakpoint } = Grid;
@@ -40,6 +41,7 @@ const FormPengajuanKredit = () => {
   const [form] = Form.useForm();
   const [currentStep, setCurrentStep] = useState(0);
   const [isSynced, setIsSynced] = useState(false);
+  const { executeRecaptcha } = useGoogleReCaptcha();
 
   // Responsive breakpoints
   const screens = useBreakpoint();
@@ -171,11 +173,30 @@ const FormPengajuanKredit = () => {
     try {
       const data = await form.validateFields();
       console.log(data);
-      const payload = {
-        ...data,
-        tgl_lahir: dayjs(data.tgl_lahir).format("YYYY-MM-DD"),
-      };
-      mutate(payload);
+
+      if (!executeRecaptcha) {
+        message.error("ReCaptcha belum siap, silakan coba lagi");
+        return;
+      }
+
+      try {
+        // Execute reCAPTCHA
+        const captchaToken = await executeRecaptcha("pengajuan_kredit");
+
+        if (!captchaToken) {
+          message.error("Gagal memverifikasi reCAPTCHA, silakan coba lagi");
+          return;
+        }
+
+        const payload = {
+          ...data,
+          tgl_lahir: dayjs(data.tgl_lahir).format("YYYY-MM-DD"),
+          captcha: captchaToken,
+        };
+        mutate(payload);
+      } catch (error) {
+        message.error("Gagal memverifikasi reCAPTCHA, silakan coba lagi");
+      }
     } catch (error) {
       console.error("Validation failed:", error);
     }
