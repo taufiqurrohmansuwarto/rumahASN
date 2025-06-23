@@ -89,16 +89,25 @@ const syncKenaikanPangkat = async (req, res) => {
 const listKenaikanPangkat = async (req, res) => {
   try {
     const { siasnRequest: request } = req;
+    const { page = 1, limit = 10 } = req?.query;
     const myPeriode = req?.query?.periode?.split("-").reverse().join("-");
     const periode = req?.query?.periode;
 
     const hasil = await SiasnKP.query()
       .where("tmtKp", periode)
       .orderBy("nama", "asc")
-      .withGraphFetched("pegawai(simpleSelect)");
+      .withGraphFetched("pegawai(simpleSelect)")
+      .page(parseInt(page), parseInt(limit));
 
-    if (hasil?.length) {
-      res.json(hasil);
+    if (hasil?.results?.length) {
+      const data = {
+        data: hasil?.results,
+        total: hasil?.total,
+        page: parseInt(page),
+        limit: parseInt(limit),
+      };
+
+      res.json(data);
     } else {
       const result = await daftarKenaikanPangkat(request, myPeriode);
 
