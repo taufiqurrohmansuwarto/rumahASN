@@ -1,10 +1,10 @@
 module.exports = {
   apps: [
     {
-      name: "Rumah ASN",
+      name: "rasn",
       script: "node_modules/next/dist/bin/next",
       args: "start",
-      instances: "4",
+      instances: "6",
       exec_mode: "cluster",
       env: {
         NODE_ENV: "development",
@@ -14,7 +14,7 @@ module.exports = {
         NODE_ENV: "production",
         PORT: 3088,
       },
-      max_memory_restart: "1G", // agar auto-restart jika bocor memori
+      max_memory_restart: "3G", // agar auto-restart jika bocor memori
       error_file: "/var/log/pm2/rumah-asn-api-error.log",
       out_file: "/var/log/pm2/rumah-asn-api-out.log",
       merge_logs: true,
