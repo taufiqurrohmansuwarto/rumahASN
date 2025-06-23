@@ -16,6 +16,7 @@ import {
   CloudUploadOutlined,
   DatabaseOutlined,
   DownOutlined,
+  EyeOutlined,
   FileExcelOutlined,
   FilePdfOutlined,
   FileTextOutlined,
@@ -801,17 +802,8 @@ function LayananPengadaan() {
     {
       title: "👤 Data Pegawai",
       key: "data_pegawai",
-
       render: (_, record) => (
-        <div
-          style={{
-            padding: isMobile ? "8px" : "12px",
-            borderRadius: "12px",
-            background: "linear-gradient(135deg, #fff 0%, #f8fbff 100%)",
-            border: "1px solid #e6f4ff",
-            transition: "all 0.3s ease",
-          }}
-        >
+        <div>
           <Flex vertical gap={6}>
             <Text
               strong
@@ -868,22 +860,6 @@ function LayananPengadaan() {
                 {record?.usulan_data?.data?.no_peserta}
               </Text>
             </Flex>
-
-            {record?.unor_siasn && (
-              <Text
-                style={{
-                  fontSize: isMobile ? "9px" : "10px",
-                  color: "#8c8c8c",
-                  marginTop: "2px",
-                }}
-                ellipsis={{
-                  tooltip: record?.unor_siasn,
-                  rows: 2,
-                }}
-              >
-                🏢 {record?.unor_siasn}
-              </Text>
-            )}
           </Flex>
         </div>
       ),
@@ -894,15 +870,7 @@ function LayananPengadaan() {
       render: (_, record) => {
         const jenisConfig = getJenisFormasiConfig(record?.jenis_formasi_nama);
         return (
-          <div
-            style={{
-              padding: isMobile ? "8px" : "12px",
-              borderRadius: "12px",
-              background: "linear-gradient(135deg, #fff 0%, #f9f0ff 100%)",
-              border: "1px solid #f0d8ff",
-              transition: "all 0.3s ease",
-            }}
-          >
+          <div>
             <Flex vertical gap={6}>
               <Tag
                 color={jenisConfig.color}
@@ -986,15 +954,7 @@ function LayananPengadaan() {
       render: (_, record) => {
         const statusConfig = getStatusConfig(record?.status_usulan_nama);
         return (
-          <div
-            style={{
-              padding: isMobile ? "8px" : "12px",
-              borderRadius: "12px",
-              background: "linear-gradient(135deg, #fff 0%, #f6ffed 100%)",
-              border: "1px solid #d9f7be",
-              transition: "all 0.3s ease",
-            }}
-          >
+          <div>
             <Flex vertical gap={8}>
               <Tag
                 color={statusConfig.color}
@@ -1073,14 +1033,44 @@ function LayananPengadaan() {
                     gap={6}
                     wrap
                     justify="center"
-                    style={{ marginTop: "6px" }}
+                    style={{ marginTop: "8px" }}
                   >
-                    {record?.path_ttd_pertek && (
-                      <ResetButton id={record?.id} type="pertek" />
-                    )}
-                    {record?.path_ttd_sk && (
-                      <ResetButton id={record?.id} type="sk" />
-                    )}
+                    <Button
+                      type="primary"
+                      size="small"
+                      style={{
+                        backgroundColor: "#ff4500",
+                        borderColor: "#ff4500",
+                        color: "#fff",
+                        fontSize: isMobile ? "10px" : "11px",
+                        height: "28px",
+                        borderRadius: "6px",
+                        fontWeight: 600,
+                        minWidth: "80px",
+                        boxShadow: "0 2px 4px rgba(255, 69, 0, 0.3)",
+                        transition: "all 0.3s ease",
+                      }}
+                      onClick={() => {
+                        // Handle detail view logic here
+                        router.push(
+                          `/layanan-siasn/pengadaan/detail/${record?.id}`
+                        );
+                      }}
+                      onMouseEnter={(e) => {
+                        e.target.style.backgroundColor = "#ff6b35";
+                        e.target.style.transform = "translateY(-1px)";
+                        e.target.style.boxShadow =
+                          "0 4px 8px rgba(255, 69, 0, 0.4)";
+                      }}
+                      onMouseLeave={(e) => {
+                        e.target.style.backgroundColor = "#ff4500";
+                        e.target.style.transform = "translateY(0)";
+                        e.target.style.boxShadow =
+                          "0 2px 4px rgba(255, 69, 0, 0.3)";
+                      }}
+                    >
+                      👁️ Detail
+                    </Button>
                   </Flex>
                 </Flex>
               )}

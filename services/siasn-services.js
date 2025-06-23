@@ -787,6 +787,17 @@ export const getPengadaanProxy = async (query) => {
     .then((res) => res.data);
 };
 
+// detail pengadaan proxy
+export const getDetailPengadaanProxy = async (id) => {
+  return api.get(`/admin/pengadaan/proxy/detail/${id}`).then((res) => res.data);
+};
+
+export const usulkanPengadaanProxy = async ({ id, data }) => {
+  return api
+    .post(`/admin/pengadaan/proxy/detail/${id}`, data)
+    .then((res) => res.data);
+};
+
 // generate sk
 export const generateSK = async (query) => {
   return api

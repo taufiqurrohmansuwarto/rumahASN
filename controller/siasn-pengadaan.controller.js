@@ -5,6 +5,7 @@ const {
 } = require("@/utils/siasn-utils");
 const { z } = require("zod");
 const archiver = require("archiver");
+const FormData = require("form-data");
 
 const dayjs = require("dayjs");
 dayjs.locale("id");
@@ -17,6 +18,7 @@ const {
   uploadDokumenSiasnToMinio,
   uploadMinioWithFolder,
   downloadDokumenSK,
+  searchAndDownloadFileSk,
 } = require("../utils");
 
 const { upperCase, trim } = require("lodash");
@@ -187,6 +189,79 @@ const getFoto = async (filePath) => {
   return fileBase64;
 };
 
+const detailPengadaanProxy = async (req, res) => {
+  try {
+    const { mc } = req;
+    const { id } = req.query;
+    let payload = {};
+    const result = await SiasnPengadaanProxy.query().where("id", id).first();
+    if (!result) {
+      return res.status(404).json({
+        message: "Data tidak ditemukan",
+      });
+    }
+
+    payload.data = result;
+    const fileSk = await searchAndDownloadFileSk(mc, result?.nip);
+
+    if (!fileSk) {
+      payload.sk_pdf = null;
+    } else {
+      payload.sk_pdf = fileSk?.base64;
+    }
+
+    res.json(payload);
+  } catch (error) {
+    handleError(res, error);
+  }
+};
+
+const usulkanPengadaanProxy = async (req, res) => {
+  const convertBase64ToPdfBuffer = (base64String) => {
+    const base64Data = base64String.replace(
+      /^data:application\/pdf;base64,/,
+      ""
+    );
+    return Buffer.from(base64Data, "base64");
+  };
+
+  const createFormDataForSkUpload = (body, pdfBuffer) => {
+    const formData = new FormData();
+
+    formData.append("sk_pdf", pdfBuffer, {
+      filename: "sk.pdf",
+      contentType: "application/pdf",
+    });
+    formData.append("no_sk", body.no_sk);
+    formData.append("tgl_sk", body.tgl_sk);
+    formData.append("tgl_ttd_sk", body.tgl_ttd_sk);
+    formData.append("pejabat_ttd_sk", body.pejabat_ttd_sk);
+    formData.append("no_peserta", body.no_peserta);
+    formData.append("tahun_formasi", body.tahun_formasi);
+
+    return formData;
+  };
+
+  const uploadSkToSiasn = async (siasnRequest, formData) => {
+    return await siasnRequest.post(`/upload-dok-sk-nip`, formData, {
+      headers: {
+        ...formData.getHeaders(),
+      },
+    });
+  };
+
+  try {
+    const { body, siasnRequest } = req;
+
+    const pdfBuffer = convertBase64ToPdfBuffer(body.sk_pdf);
+    const formData = createFormDataForSkUpload(body, pdfBuffer);
+    const result = await uploadSkToSiasn(siasnRequest, formData);
+
+    res.json(result?.data);
+  } catch (error) {
+    handleError(res, error);
+  }
+};
 const proxyRekapPengadaan = async (req, res) => {
   try {
     const knex = SiasnPengadaanProxy.knex();
@@ -763,4 +838,6 @@ module.exports = {
   cekPertekByNomerPeserta,
   getRwPengadaanByNip,
   getRwPengadaanPersonal,
+  detailPengadaanProxy,
+  usulkanPengadaanProxy,
 };

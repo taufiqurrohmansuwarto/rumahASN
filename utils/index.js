@@ -137,6 +137,62 @@ export const downloadDokumenSK = async (mc, filename) => {
   return stream;
 };
 
+export const searchAndDownloadFileSk = async (mc, nomorSurat) => {
+  try {
+    console.log(`Multi-pattern search for: ${nomorSurat}`);
+
+    // Coba beberapa pattern prefix yang mungkin
+    const prefixPatterns = [
+      "sk_pns/SK_01072025_", // Berdasarkan screenshot
+      "sk_pns/SK_02072025_",
+      "sk_pns/SK_03072025_",
+      "sk_pns/SK_30062025_",
+      "sk_pns/SK_01062025_",
+      // Tambahkan pattern lain sesuai kebutuhan
+    ];
+
+    for (const prefix of prefixPatterns) {
+      console.log(`Trying prefix: ${prefix}`);
+
+      const possibleFileName = `${prefix}${nomorSurat}.pdf`;
+
+      try {
+        // Cek apakah file ada
+        await mc.statObject("bkd", possibleFileName);
+
+        console.log(`Found file: ${possibleFileName}`);
+
+        // Download file
+        const stream = await mc.getObject("bkd", possibleFileName);
+        const chunks = [];
+
+        return new Promise((resolve, reject) => {
+          stream.on("data", (chunk) => chunks.push(chunk));
+          stream.on("end", () => {
+            const buffer = Buffer.concat(chunks);
+            resolve({
+              base64: buffer.toString("base64"),
+              filename: possibleFileName.replace("sk_pns/", ""),
+            });
+          });
+          stream.on("error", reject);
+        });
+      } catch (err) {
+        if (err.code === "NotFound" || err.code === "NoSuchKey") {
+          continue; // Coba pattern berikutnya
+        }
+        throw err;
+      }
+    }
+
+    console.log(`No file found with any pattern for: ${nomorSurat}`);
+    return null;
+  } catch (err) {
+    console.error("Error in searchWithMultiplePatterns:", err);
+    throw err;
+  }
+};
+
 export const downloadFileSK = (mc, filename) => {
   return new Promise((resolve, reject) => {
     mc.getObject("bkd", `${filename}`, function (err, dataStream) {
