@@ -5,6 +5,7 @@ const { default: axios } = require("axios");
 
 const api = axios.create({
   baseURL: "https://siasn.bkd.jatimprov.go.id/pemprov-api",
+  timeout: 60000, // 1 menit
 });
 
 module.exports.getFileAsn = async (filePath) => {

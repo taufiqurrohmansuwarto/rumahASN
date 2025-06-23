@@ -52,6 +52,7 @@ const auth = async (req, res, next) => {
 
       req.fetcher = axios.create({
         baseURL: process.env.APIGATEWAY_URL,
+        timeout: 60000, // 1 menit
         headers: {
           Authorization: `Bearer ${data?.accessToken}`,
         },

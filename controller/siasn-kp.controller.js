@@ -17,14 +17,18 @@ const syncKenaikanPangkat = async (req, res) => {
     const { siasnRequest: request } = req;
     const myPeriode = req?.query?.periode?.split("-").reverse().join("-");
     const periode = req?.query?.periode;
-    const limit = req?.query?.limit || 100;
-    let offset = req?.query?.offset || 0;
+    const limit = parseInt(req?.query?.limit) || 100;
+    let offset = parseInt(req?.query?.offset) || 0;
 
     const knex = SiasnKP.knex();
     let totalDataInserted = 0;
     let isFirstIteration = true;
+    const maxIterations = 1000; // Batas maksimum iterasi untuk mencegah infinite loop
+    let currentIteration = 0;
 
-    while (true) {
+    while (currentIteration < maxIterations) {
+      currentIteration++;
+
       const result = await daftarKenaikanPangkat(
         request,
         myPeriode,
@@ -34,7 +38,7 @@ const syncKenaikanPangkat = async (req, res) => {
       const data = result?.data;
 
       // Jika data tidak ditemukan pada iterasi pertama, kembalikan pesan
-      if (data?.count === 0) {
+      if (!data || data?.count === 0) {
         if (isFirstIteration) {
           return res.json({ success: true, message: "Data tidak ditemukan" });
         }
@@ -47,9 +51,19 @@ const syncKenaikanPangkat = async (req, res) => {
         isFirstIteration = false;
       }
 
+      // Validasi data sebelum insert
+      if (!data.data || !Array.isArray(data.data) || data.data.length === 0) {
+        break;
+      }
+
       // Lakukan penyisipan batch data ke database
       await knex.batchInsert("siasn_kp", data.data);
       totalDataInserted += data.data.length;
+
+      // Jika data yang diterima kurang dari limit, berarti sudah mencapai akhir
+      if (data.data.length < limit) {
+        break;
+      }
 
       // Update offset untuk iterasi berikutnya
       offset += limit;

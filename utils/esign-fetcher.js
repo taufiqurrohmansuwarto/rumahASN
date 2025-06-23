@@ -6,6 +6,7 @@ const password = process.env.ESIGN_PASSWORD;
 
 const esignFetcher = axios.create({
   baseURL,
+  timeout: 60000, // 1 menit
   headers: {
     Authorization: `Basic ${Buffer.from(`${username}:${password}`).toString(
       "base64"
