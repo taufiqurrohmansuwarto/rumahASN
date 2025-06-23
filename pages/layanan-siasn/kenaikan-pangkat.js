@@ -28,12 +28,6 @@ function KenaikanPangkatLayananSIASN() {
                 <Link href="/layanan-siasn/dashboard">Dashboard</Link>
               </Breadcrumb.Item>
               <Breadcrumb.Item>Kenaikan Pangkat</Breadcrumb.Item>
-              <Breadcrumb.Item>
-                <Link href="/layanan-siasn/pemberhentian">Pemberhentian</Link>
-              </Breadcrumb.Item>
-              <Breadcrumb.Item>
-                <Link href="/layanan-siasn/pengadaan">Pengadaan</Link>
-              </Breadcrumb.Item>
             </Breadcrumb>
           ),
         }}

@@ -84,6 +84,8 @@ function MyApp({ Component, pageProps: { session, ...pageProps } }) {
       return rekonConfig;
     } else if (router.pathname.includes("/logs")) {
       return antdConfig;
+    } else if (router.pathname.includes("/layanan-siasn")) {
+      return antdConfig;
     }
 
     return antdConfig;

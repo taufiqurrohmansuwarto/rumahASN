@@ -3,6 +3,8 @@ import CreateTicket from "@/components/Ticket/CreateTicket";
 import PageContainer from "../../src/components/PageContainer";
 import { GoogleReCaptchaProvider } from "react-google-recaptcha-v3";
 import Head from "next/head";
+import { Breadcrumb } from "antd";
+import Link from "next/link";
 
 const CreateTicketPage = ({ data }) => {
   return (
@@ -11,6 +13,16 @@ const CreateTicketPage = ({ data }) => {
         <title>Rumah ASN -Buat Tiket Baru</title>
       </Head>
       <PageContainer
+        header={{
+          breadcrumbRender: () => (
+            <Breadcrumb>
+              <Breadcrumb.Item>
+                <Link href="/">Beranda</Link>
+              </Breadcrumb.Item>
+              <Breadcrumb.Item>Buat Tiket Baru</Breadcrumb.Item>
+            </Breadcrumb>
+          ),
+        }}
         title="Buat Tiket Baru"
         subTitle="Ajukan pertanyaan atau laporkan masalah Anda"
       >
