@@ -6,7 +6,7 @@ const checkEmployee = async (req, res, next) => {
     const { organization_id, current_role } = req?.user;
     const { nip } = req?.query;
     const fetcher = req?.fetcher;
-    const redis = await createRedisInstance();
+    const redis = createRedisInstance();
 
     // Validasi NIP
     if (!nip) {

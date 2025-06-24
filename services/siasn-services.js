@@ -225,6 +225,10 @@ export const dataUtamSIASNByNip = (nip) => {
   return api.get(`/admin/${nip}/data-utama`).then((res) => res.data);
 };
 
+export const dataUtamSIASNByNipAdmin = (nip) => {
+  return api.get(`/admin/${nip}/data-utama-admin`).then((res) => res.data);
+};
+
 export const updateDataUtamaByNip = ({ nip, data }) => {
   return api.post(`/admin/${nip}/data-utama`, data).then((res) => res.data);
 };

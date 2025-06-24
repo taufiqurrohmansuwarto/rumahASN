@@ -174,6 +174,23 @@ const siasnEmployeeDetailByNip = async (req, res) => {
   }
 };
 
+const siasnEmployeeDetailByNipAdmin = async (req, res) => {
+  try {
+    const { nip } = req?.query;
+    const siasnRequest = req.siasnRequest;
+    const result = await dataUtama(siasnRequest, nip);
+
+    if (result) {
+      res.json(result);
+    } else {
+      res.json(null);
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ code: 500, message: "Data tidak ditemukan" });
+  }
+};
+
 const siasnRwPemberhentian = async (req, res) => {
   try {
     const { nip } = req?.query;
@@ -1714,4 +1731,5 @@ module.exports = {
   getRefKpkn,
 
   getTreeRefSiasn,
+  siasnEmployeeDetailByNipAdmin,
 };
