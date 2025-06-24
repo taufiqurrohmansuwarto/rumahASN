@@ -76,7 +76,7 @@ const ModalUsulan = ({ open, onClose, data, onSuccess }) => {
       no_sk: "800.1.13.2/1401/204/2025",
       tgl_sk: dayjs("2025-03-27"),
       tgl_ttd_sk: dayjs("2025-03-27"),
-      pejabat_ttd_sk: "INDAH WAHYUNI",
+      pejabat_ttd_sk: "196704091992022003",
     });
     message.success("Data berhasil diisi otomatis");
   };
