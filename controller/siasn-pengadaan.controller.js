@@ -228,7 +228,7 @@ const usulkanPengadaanProxy = async (req, res) => {
   const createFormDataForSkUpload = (body, pdfBuffer) => {
     const formData = new FormData();
 
-    formData.append("sk_pdf", pdfBuffer, {
+    formData.append("file", pdfBuffer, {
       filename: "sk.pdf",
       contentType: "application/pdf",
     });
