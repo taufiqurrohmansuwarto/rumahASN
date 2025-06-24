@@ -6,7 +6,10 @@
     "dev": "next dev -p 3088",
     "build": "next build",
     "start": "next start -p 3088",
-    "lint": "next lint"
+    "lint": "next lint",
+    "worker:dev": "nodemon jobs/worker.js",
+    "worker:start": "node jobs/worker.js",
+    "scheduler:setup": "node jobs/scheduler.js"
   },
   "dependencies": {
     "@ai-sdk/openai": "^1.0.6",

@@ -20,5 +20,18 @@ module.exports = {
       merge_logs: true,
       time: true, // agar log punya timestamp
     },
+    {
+      name: "rasn-worker",
+      script: "./jobs/worker.js",
+      instances: 1,
+      exec_mode: "fork",
+      max_memory_restart: "1G",
+      env: {
+        NODE_ENV: "development",
+      },
+      env_production: {
+        NODE_ENV: "production",
+      },
+    },
   ],
 };
