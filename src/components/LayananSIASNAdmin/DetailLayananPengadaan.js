@@ -1,48 +1,441 @@
 import {
+  dataUtamSIASNByNipAdmin,
   getDetailPengadaanProxy,
   usulkanPengadaanProxy,
 } from "@/services/siasn-services";
-import { useMutation, useQuery } from "@tanstack/react-query";
-import { useRouter } from "next/router";
-import React, { useState, useEffect } from "react";
 import {
-  Spin,
-  Alert,
-  Descriptions,
-  Modal,
-  Button,
-  Form,
-  Input,
-  DatePicker,
-  message,
-  Flex,
-  Card,
-  Typography,
-  Space,
-  Grid,
-  Tag,
-  Avatar,
-  Tooltip,
-  Divider,
-} from "antd";
-import {
+  BankOutlined,
+  CalendarOutlined,
+  EyeOutlined,
+  FilePdfOutlined,
   FileTextOutlined,
+  FormOutlined,
+  IdcardOutlined,
   ReloadOutlined,
   SendOutlined,
-  UserOutlined,
-  IdcardOutlined,
-  CalendarOutlined,
-  BankOutlined,
-  CheckCircleOutlined,
-  EyeOutlined,
-  FormOutlined,
-  FilePdfOutlined,
   ThunderboltOutlined,
+  UserOutlined,
 } from "@ant-design/icons";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import {
+  Alert,
+  Button,
+  Card,
+  DatePicker,
+  Descriptions,
+  Flex,
+  Form,
+  Grid,
+  Input,
+  message,
+  Modal,
+  Skeleton,
+  Spin,
+  Tag,
+  Tooltip,
+  Typography,
+} from "antd";
 import dayjs from "dayjs";
+import { useRouter } from "next/router";
+import { useEffect, useState } from "react";
 
 const { Title, Text } = Typography;
 const { useBreakpoint } = Grid;
+
+const ModalNip = ({ nip, open, onClose }) => {
+  const screens = useBreakpoint();
+  const isMobile = !screens.md;
+
+  const { data, isLoading } = useQuery({
+    queryKey: ["nip", nip],
+    queryFn: () => dataUtamSIASNByNipAdmin(nip),
+    enabled: !!nip,
+  });
+
+  const formatDate = (dateStr) => {
+    if (!dateStr) return "N/A";
+    return dayjs(dateStr, "DD-MM-YYYY").format("DD MMMM YYYY");
+  };
+
+  const getStatusColor = (status) => {
+    switch (status?.toLowerCase()) {
+      case "pns":
+        return "green";
+      case "pppk":
+        return "blue";
+      case "cpns":
+        return "orange";
+      default:
+        return "default";
+    }
+  };
+
+  const getGenderIcon = (gender) => {
+    return gender === "M" ? "👨" : "👩";
+  };
+
+  const getEducationLevel = (education) => {
+    if (education?.includes("S-3") || education?.includes("DOKTOR"))
+      return "🎓";
+    if (education?.includes("S-2") || education?.includes("MAGISTER"))
+      return "🎓";
+    if (education?.includes("S-1") || education?.includes("SARJANA"))
+      return "📚";
+    if (education?.includes("DIPLOMA")) return "📖";
+    return "📝";
+  };
+
+  return (
+    <Modal
+      open={open}
+      onCancel={onClose}
+      centered
+      title={
+        <Flex align="center" gap={12}>
+          <div
+            style={{
+              width: "40px",
+              height: "40px",
+              borderRadius: "12px",
+              background: "linear-gradient(135deg, #FF4500 0%, #ff6b35 100%)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <UserOutlined style={{ color: "white", fontSize: "18px" }} />
+          </div>
+          <div>
+            <Title level={4} style={{ margin: 0, color: "#1a1a1a" }}>
+              👤 Informasi Pegawai
+            </Title>
+            <Text type="secondary" style={{ fontSize: "13px" }}>
+              Data lengkap dari SIASN
+            </Text>
+          </div>
+        </Flex>
+      }
+      width={isMobile ? "95%" : 900}
+      footer={null}
+      styles={{
+        header: {
+          borderBottom: "2px solid #FF4500",
+          paddingBottom: "16px",
+          marginBottom: "20px",
+        },
+        body: {
+          maxHeight: isMobile ? "70vh" : "75vh",
+          overflowY: "auto",
+          padding: "20px",
+        },
+      }}
+    >
+      <Skeleton active loading={isLoading}>
+        {data && (
+          <Flex vertical gap={20}>
+            {/* Informasi Personal */}
+            <Card
+              title={
+                <Flex align="center" gap={8}>
+                  <UserOutlined style={{ color: "#FF4500" }} />
+                  <Text strong>Data Personal</Text>
+                </Flex>
+              }
+              size="small"
+            >
+              <Descriptions
+                column={isMobile ? 1 : 2}
+                size="small"
+                bordered={!isMobile}
+              >
+                <Descriptions.Item
+                  label={
+                    <Flex align="center" gap={4}>
+                      <Text>👤 Nama</Text>
+                    </Flex>
+                  }
+                >
+                  <Text strong style={{ color: "#1a1a1a", fontSize: "14px" }}>
+                    {data?.gelarDepan && `${data.gelarDepan} `}
+                    {data?.nama}
+                    {data?.gelarBelakang && ` ${data.gelarBelakang}`}
+                  </Text>
+                </Descriptions.Item>
+
+                <Descriptions.Item label="🆔 NIP">
+                  <Text
+                    style={{
+                      fontFamily: "monospace",
+                      fontWeight: 600,
+                      color: "#FF4500",
+                      backgroundColor: "#fff7e6",
+                      padding: "2px 6px",
+                      borderRadius: "4px",
+                    }}
+                  >
+                    {data?.nipBaru || data?.nipLama || "N/A"}
+                  </Text>
+                </Descriptions.Item>
+
+                <Descriptions.Item label="🏷️ NIK">
+                  <Text
+                    style={{
+                      fontFamily: "monospace",
+                      fontWeight: 600,
+                      backgroundColor: "#f5f5f5",
+                      padding: "2px 6px",
+                      borderRadius: "4px",
+                    }}
+                  >
+                    {data?.nik || "N/A"}
+                  </Text>
+                </Descriptions.Item>
+
+                <Descriptions.Item label="🎂 Tempat, Tanggal Lahir">
+                  <Text>
+                    {data?.tempatLahir}, {formatDate(data?.tglLahir)}
+                  </Text>
+                </Descriptions.Item>
+
+                <Descriptions.Item label="👤 Jenis Kelamin">
+                  <Tag color="blue" style={{ borderRadius: "12px" }}>
+                    {getGenderIcon(data?.jenisKelamin)}{" "}
+                    {data?.jenisKelamin === "M" ? "Laki-laki" : "Perempuan"}
+                  </Tag>
+                </Descriptions.Item>
+
+                <Descriptions.Item label="🕌 Agama">
+                  <Tag color="purple" style={{ borderRadius: "12px" }}>
+                    {data?.agama || "N/A"}
+                  </Tag>
+                </Descriptions.Item>
+
+                <Descriptions.Item label="💍 Status Perkawinan">
+                  <Tag color="pink" style={{ borderRadius: "12px" }}>
+                    {data?.statusPerkawinan || "N/A"}
+                  </Tag>
+                </Descriptions.Item>
+
+                <Descriptions.Item label="📱 No. HP">
+                  <Text style={{ fontFamily: "monospace" }}>
+                    {data?.noHp || "N/A"}
+                  </Text>
+                </Descriptions.Item>
+
+                <Descriptions.Item label="📧 Email" span={isMobile ? 1 : 2}>
+                  <Text style={{ color: "#1890ff" }}>
+                    {data?.email || "N/A"}
+                  </Text>
+                </Descriptions.Item>
+              </Descriptions>
+            </Card>
+
+            {/* Informasi Kepegawaian */}
+            <Card
+              title={
+                <Flex align="center" gap={8}>
+                  <BankOutlined style={{ color: "#FF4500" }} />
+                  <Text strong>Data Kepegawaian</Text>
+                </Flex>
+              }
+              size="small"
+            >
+              <Descriptions
+                column={isMobile ? 1 : 2}
+                size="small"
+                bordered={!isMobile}
+              >
+                <Descriptions.Item label="🏛️ Status Pegawai">
+                  <Tag
+                    color={getStatusColor(data?.statusPegawai)}
+                    style={{ borderRadius: "12px", fontWeight: 600 }}
+                  >
+                    {data?.statusPegawai || "N/A"}
+                  </Tag>
+                </Descriptions.Item>
+
+                <Descriptions.Item label="⭐ Kedudukan PNS">
+                  <Tag color="cyan" style={{ borderRadius: "12px" }}>
+                    {data?.kedudukanPnsNama || "N/A"}
+                  </Tag>
+                </Descriptions.Item>
+
+                <Descriptions.Item label="🏢 Instansi" span={isMobile ? 1 : 2}>
+                  <Text style={{ fontSize: "13px" }}>
+                    {data?.instansiKerjaNama || "N/A"}
+                  </Text>
+                </Descriptions.Item>
+
+                <Descriptions.Item
+                  label="🏭 Unit Kerja"
+                  span={isMobile ? 1 : 2}
+                >
+                  <Text style={{ fontSize: "13px", color: "#666" }}>
+                    {data?.unorNama || "N/A"}
+                  </Text>
+                </Descriptions.Item>
+
+                <Descriptions.Item label="💼 Jabatan" span={isMobile ? 1 : 2}>
+                  <Text strong style={{ color: "#1a1a1a" }}>
+                    {data?.jabatanNama || "N/A"}
+                  </Text>
+                </Descriptions.Item>
+
+                <Descriptions.Item label="📅 TMT CPNS">
+                  <Text style={{ fontFamily: "monospace", fontSize: "12px" }}>
+                    {formatDate(data?.tmtCpns)}
+                  </Text>
+                </Descriptions.Item>
+
+                <Descriptions.Item label="📅 TMT Jabatan">
+                  <Text style={{ fontFamily: "monospace", fontSize: "12px" }}>
+                    {formatDate(data?.tmtJabatan)}
+                  </Text>
+                </Descriptions.Item>
+              </Descriptions>
+            </Card>
+
+            {/* Informasi Pangkat & Golongan */}
+            <Card
+              title={
+                <Flex align="center" gap={8}>
+                  <FormOutlined style={{ color: "#FF4500" }} />
+                  <Text strong>Pangkat & Golongan</Text>
+                </Flex>
+              }
+              size="small"
+            >
+              <Descriptions
+                column={isMobile ? 1 : 3}
+                size="small"
+                bordered={!isMobile}
+              >
+                <Descriptions.Item label="🎖️ Pangkat Awal">
+                  <Tag color="gold" style={{ borderRadius: "12px" }}>
+                    {data?.pangkatAwal || "N/A"}
+                  </Tag>
+                </Descriptions.Item>
+
+                <Descriptions.Item label="🏆 Pangkat Akhir">
+                  <Tag
+                    color="orange"
+                    style={{ borderRadius: "12px", fontWeight: 600 }}
+                  >
+                    {data?.pangkatAkhir || "N/A"}
+                  </Tag>
+                </Descriptions.Item>
+
+                <Descriptions.Item label="📊 Golongan">
+                  <Tag
+                    color="red"
+                    style={{ borderRadius: "12px", fontWeight: 600 }}
+                  >
+                    {data?.golRuangAkhir || "N/A"}
+                  </Tag>
+                </Descriptions.Item>
+
+                <Descriptions.Item label="📅 TMT Golongan">
+                  <Text style={{ fontFamily: "monospace", fontSize: "12px" }}>
+                    {formatDate(data?.tmtGolAkhir)}
+                  </Text>
+                </Descriptions.Item>
+
+                <Descriptions.Item label="⏰ Masa Kerja">
+                  <Text style={{ fontWeight: 500 }}>
+                    {data?.masaKerja || "N/A"}
+                  </Text>
+                </Descriptions.Item>
+
+                <Descriptions.Item label="💰 Gaji Pokok">
+                  <Text
+                    style={{
+                      fontFamily: "monospace",
+                      color: "#52c41a",
+                      fontWeight: 600,
+                    }}
+                  >
+                    Rp{" "}
+                    {data?.gajiPokok
+                      ? parseFloat(data.gajiPokok).toLocaleString("id-ID")
+                      : "N/A"}
+                  </Text>
+                </Descriptions.Item>
+              </Descriptions>
+            </Card>
+
+            {/* Informasi Pendidikan */}
+            <Card
+              title={
+                <Flex align="center" gap={8}>
+                  <span style={{ fontSize: "16px" }}>🎓</span>
+                  <Text strong>Pendidikan</Text>
+                </Flex>
+              }
+              size="small"
+            >
+              <Descriptions
+                column={isMobile ? 1 : 2}
+                size="small"
+                bordered={!isMobile}
+              >
+                <Descriptions.Item label="�� Tingkat Pendidikan">
+                  <Tag color="green" style={{ borderRadius: "12px" }}>
+                    {getEducationLevel(data?.tkPendidikanTerakhir)}{" "}
+                    {data?.tkPendidikanTerakhir || "N/A"}
+                  </Tag>
+                </Descriptions.Item>
+
+                <Descriptions.Item label="📅 Tahun Lulus">
+                  <Text style={{ fontFamily: "monospace" }}>
+                    {formatDate(data?.tahunLulus)}
+                  </Text>
+                </Descriptions.Item>
+
+                <Descriptions.Item
+                  label="🏫 Program Studi"
+                  span={isMobile ? 1 : 2}
+                >
+                  <Text style={{ fontSize: "13px" }}>
+                    {data?.pendidikanTerakhirNama || "N/A"}
+                  </Text>
+                </Descriptions.Item>
+              </Descriptions>
+            </Card>
+
+            {/* Informasi Lokasi */}
+            <Card
+              title={
+                <Flex align="center" gap={8}>
+                  <span style={{ fontSize: "16px" }}>📍</span>
+                  <Text strong>Lokasi & Kontak</Text>
+                </Flex>
+              }
+              size="small"
+            >
+              <Descriptions column={1} size="small" bordered={!isMobile}>
+                <Descriptions.Item label="🏠 Alamat">
+                  <Text style={{ fontSize: "13px" }}>
+                    {data?.alamat || "N/A"}
+                  </Text>
+                </Descriptions.Item>
+
+                <Descriptions.Item label="🌍 Lokasi Kerja">
+                  <Tag color="blue" style={{ borderRadius: "12px" }}>
+                    📍 {data?.lokasiKerja || "N/A"}
+                  </Tag>
+                </Descriptions.Item>
+
+                <Descriptions.Item label="🏛️ Kantor Regional">
+                  <Text>{data?.kanregNama || "N/A"}</Text>
+                </Descriptions.Item>
+              </Descriptions>
+            </Card>
+          </Flex>
+        )}
+      </Skeleton>
+    </Modal>
+  );
+};
 
 const ModalUsulan = ({ open, onClose, data, onSuccess }) => {
   const [form] = Form.useForm();
@@ -196,7 +589,7 @@ const ModalUsulan = ({ open, onClose, data, onSuccess }) => {
                   fontWeight: 500,
                 }}
               >
-                Auto Fill
+                Auto Fill 1401
               </Button>
               <Button
                 type="primary"
@@ -210,7 +603,7 @@ const ModalUsulan = ({ open, onClose, data, onSuccess }) => {
                   fontWeight: 500,
                 }}
               >
-                Auto Fill 2
+                Auto Fill 932
               </Button>
             </Flex>
           </Flex>
@@ -401,6 +794,20 @@ function DetailLayananPengadaan() {
   const [openModalPdf, setOpenModalPdf] = useState(false);
   const [usulanData, setUsulanData] = useState(null);
 
+  // open modal nip
+  const [openModalNip, setOpenModalNip] = useState(false);
+  const [currentNip, setCurrentNip] = useState(null);
+
+  const handleCloseModalNip = () => {
+    setOpenModalNip(false);
+    setCurrentNip(null);
+  };
+
+  const handleOpenModalNip = (nip) => {
+    setOpenModalNip(true);
+    setCurrentNip(nip);
+  };
+
   const screens = useBreakpoint();
   const isMobile = !screens.md;
   const isTablet = screens.md && !screens.lg;
@@ -561,13 +968,12 @@ function DetailLayananPengadaan() {
   }
 
   return (
-    <div
-      style={{
-        padding: isMobile ? "12px" : "20px",
-        backgroundColor: "#fafafa",
-        minHeight: "100vh",
-      }}
-    >
+    <div>
+      <ModalNip
+        nip={currentNip}
+        open={openModalNip}
+        onClose={handleCloseModalNip}
+      />
       {/* Header */}
       <Card
         style={{
@@ -681,6 +1087,12 @@ function DetailLayananPengadaan() {
               <Flex align="center" gap={6}>
                 <IdcardOutlined style={{ color: "#666" }} />
                 <Text>NIP</Text>
+                <Button
+                  type="link"
+                  icon={<EyeOutlined />}
+                  onClick={() => handleOpenModalNip(data?.data?.nip)}
+                  style={{ padding: 0 }}
+                />
               </Flex>
             }
           >
