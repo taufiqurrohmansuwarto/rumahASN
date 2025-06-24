@@ -11,9 +11,12 @@ const dayjs = require("dayjs");
 dayjs.locale("id");
 require("dayjs/locale/id");
 
+// model
 const SiasnPengadaan = require("@/models/siasn-pengadaan.model");
 const SiasnPengadaanProxy = require("@/models/siasn-pengadaan-proxy.model");
 const SiasnDownload = require("@/models/siasn-download.model");
+const LogSiasn = require("@/models/log-siasn.model");
+
 const {
   uploadDokumenSiasnToMinio,
   uploadMinioWithFolder,
@@ -256,6 +259,21 @@ const usulkanPengadaanProxy = async (req, res) => {
     const pdfBuffer = convertBase64ToPdfBuffer(body.sk_pdf);
     const formData = createFormDataForSkUpload(body, pdfBuffer);
     const result = await uploadSkToSiasn(siasnRequest, formData);
+
+    await LogSiasn.query().insert({
+      user_id: req?.user?.custom_id,
+      type: "CREATE",
+      siasn_service: "UPLOAD_SK",
+      employee_number: body?.no_peserta,
+      request_data: JSON.stringify({
+        no_sk: body?.no_sk,
+        tgl_sk: body?.tgl_sk,
+        tgl_ttd_sk: body?.tgl_ttd_sk,
+        pejabat_ttd_sk: body?.pejabat_ttd_sk,
+        no_peserta: body?.no_peserta,
+        tahun_formasi: body?.tahun_formasi,
+      }),
+    });
 
     res.json(result?.data);
   } catch (error) {
