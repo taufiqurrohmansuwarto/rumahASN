@@ -59,11 +59,30 @@ const detail = async (req, res) => {
   }
 };
 
+const containsBlacklistedContent = (text) => {
+  const blacklist = [
+    /08[0-9]{8,11}/g, // nomor hp
+    /\b(wa|whatsapp|hubungi)\b/gi, // indikasi kontak
+    /\b(bank|pinjaman|kredit|blokir)\b/gi,
+  ];
+  return blacklist.some((regex) => regex.test(text));
+};
+
 const create = async (req, res) => {
   try {
     const { customId } = req?.user;
     const { body } = req;
     const { captcha, ...payload } = body;
+
+    const { content } = payload;
+
+    const isBlacklisted = containsBlacklistedContent(content?.toLowerCase());
+    if (isBlacklisted) {
+      return res.status(400).json({
+        message:
+          "Deskripsi anda tidak sesuai dengan aturan pengajuan pertanyaan",
+      });
+    }
 
     if (!body?.captcha) {
       return res.status(400).json({ message: "Captcha is required" });
@@ -96,7 +115,7 @@ const create = async (req, res) => {
     }
 
     // Check score for v3 (optional - adjust threshold as needed)
-    if (hasil.data.score < 0.5) {
+    if (hasil.data.score < 0.6) {
       return res.status(400).json({
         message: "Captcha score too low",
         score: hasil.data.score,

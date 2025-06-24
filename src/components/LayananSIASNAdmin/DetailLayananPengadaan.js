@@ -81,6 +81,16 @@ const ModalUsulan = ({ open, onClose, data, onSuccess }) => {
     message.success("Data berhasil diisi otomatis");
   };
 
+  const handleAutoFill2 = () => {
+    form.setFieldsValue({
+      no_sk: "800.1.13.2/932/204/2025",
+      tgl_sk: dayjs("2025-02-28"),
+      tgl_ttd_sk: dayjs("2025-02-28"),
+      pejabat_ttd_sk: "196704091992022003",
+    });
+    message.success("Data berhasil diisi otomatis");
+  };
+
   const handleSubmit = async () => {
     try {
       const values = await form.validateFields();
@@ -173,19 +183,36 @@ const ModalUsulan = ({ open, onClose, data, onSuccess }) => {
                 Isi Otomatis Data SK
               </Text>
             </Flex>
-            <Button
-              type="primary"
-              icon={<ThunderboltOutlined />}
-              onClick={handleAutoFill}
-              size="small"
-              style={{
-                background: "linear-gradient(135deg, #FF4500 0%, #ff6b35 100%)",
-                borderColor: "#FF4500",
-                fontWeight: 500,
-              }}
-            >
-              Auto Fill
-            </Button>
+            <Flex gap={8}>
+              <Button
+                type="primary"
+                icon={<ThunderboltOutlined />}
+                onClick={handleAutoFill}
+                size="small"
+                style={{
+                  background:
+                    "linear-gradient(135deg, #FF4500 0%, #ff6b35 100%)",
+                  borderColor: "#FF4500",
+                  fontWeight: 500,
+                }}
+              >
+                Auto Fill
+              </Button>
+              <Button
+                type="primary"
+                icon={<ThunderboltOutlined />}
+                onClick={handleAutoFill2}
+                size="small"
+                style={{
+                  background:
+                    "linear-gradient(135deg, #FF4500 0%, #ff6b35 100%)",
+                  borderColor: "#FF4500",
+                  fontWeight: 500,
+                }}
+              >
+                Auto Fill 2
+              </Button>
+            </Flex>
           </Flex>
         </Card>
 
