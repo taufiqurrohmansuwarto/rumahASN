@@ -11,7 +11,8 @@ const ChatAI = () => {
   const { data } = useSession();
   const asn =
     data?.user?.status_kepegawaian === "PNS" ||
-    data?.user?.status_kepegawaian === "PPPK";
+    data?.user?.status_kepegawaian === "PPPK" ||
+    data?.user?.status_kepegawaian === "CPNS";
 
   const breakPoint = Grid.useBreakpoint();
 

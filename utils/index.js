@@ -384,3 +384,62 @@ export const checkUndefined = (data) => {
 export const cutMarkdown = (text) => {
   return text.substring(0, 200) + "...";
 };
+
+const dataAngkaKreditKonversi = [
+  {
+    label: "Keahlian",
+    options: [
+      { label: "Ahli Pertama - Sangat Baik", value: 18.75 },
+      { label: "Ahli Pertama - Baik", value: 12.5 },
+      { label: "Ahli Pertama - Butuh Perbaikan", value: 9.38 },
+      { label: "Ahli Pertama - Kurang", value: 6.25 },
+      { label: "Ahli Pertama - Sangat Kurang", value: 3.13 },
+
+      { label: "Ahli Muda - Sangat Baik", value: 37.5 },
+      { label: "Ahli Muda - Baik", value: 25 },
+      { label: "Ahli Muda - Butuh Perbaikan", value: 18.75 },
+      { label: "Ahli Muda - Kurang", value: 12.5 },
+      { label: "Ahli Muda - Sangat Kurang", value: 6.25 },
+
+      { label: "Ahli Madya - Sangat Baik", value: 56.25 },
+      { label: "Ahli Madya - Baik", value: 37.5 },
+      { label: "Ahli Madya - Butuh Perbaikan", value: 28.13 },
+      { label: "Ahli Madya - Kurang", value: 18.75 },
+      { label: "Ahli Madya - Sangat Kurang", value: 9.38 },
+
+      { label: "Ahli Utama - Sangat Baik", value: 75 },
+      { label: "Ahli Utama - Baik", value: 50 },
+      { label: "Ahli Utama - Butuh Perbaikan", value: 37.5 },
+      { label: "Ahli Utama - Kurang", value: 25 },
+      { label: "Ahli Utama - Sangat Kurang", value: 12.5 },
+    ],
+  },
+  {
+    label: "Keterampilan",
+    options: [
+      { label: "Pemula - Sangat Baik", value: 5.63 },
+      { label: "Pemula - Baik", value: 3.75 },
+      { label: "Pemula - Butuh Perbaikan", value: 2.81 },
+      { label: "Pemula - Kurang", value: 1.88 },
+      { label: "Pemula - Sangat Kurang", value: 0.94 },
+
+      { label: "Terampil - Sangat Baik", value: 7.5 },
+      { label: "Terampil - Baik", value: 5 },
+      { label: "Terampil - Butuh Perbaikan", value: 3.75 },
+      { label: "Terampil - Kurang", value: 2.5 },
+      { label: "Terampil - Sangat Kurang", value: 1.25 },
+
+      { label: "Mahir - Sangat Baik", value: 18.75 },
+      { label: "Mahir - Baik", value: 12.5 },
+      { label: "Mahir - Butuh Perbaikan", value: 9.38 },
+      { label: "Mahir - Kurang", value: 6.25 },
+      { label: "Mahir - Sangat Kurang", value: 3.13 },
+
+      { label: "Penyelia - Sangat Baik", value: 37.5 },
+      { label: "Penyelia - Baik", value: 25 },
+      { label: "Penyelia - Butuh Perbaikan", value: 18.75 },
+      { label: "Penyelia - Kurang", value: 12.5 },
+      { label: "Penyelia - Sangat Kurang", value: 6.25 },
+    ],
+  },
+];
