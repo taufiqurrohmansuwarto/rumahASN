@@ -20,7 +20,8 @@ const ChatAIThread = () => {
   const { data } = useSession();
   const asn =
     data?.user?.status_kepegawaian === "PNS" ||
-    data?.user?.status_kepegawaian === "PPPK";
+    data?.user?.status_kepegawaian === "PPPK" ||
+    data?.user?.status_kepegawaian === "CPNS";
 
   const {
     status,
