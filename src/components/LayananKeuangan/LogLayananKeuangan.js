@@ -252,21 +252,6 @@ const LogLayananKeuangan = () => {
       ),
     },
     {
-      title: "Request",
-      dataIndex: "request_body",
-      key: "request_body",
-      width: 150,
-      render: (record) => (
-        <Space direction="vertical" size={2}>
-          {Object.entries(record || {}).map(([key, value]) => (
-            <Text key={key} style={{ fontSize: "12px" }}>
-              <Text strong>{key}:</Text> {value}
-            </Text>
-          ))}
-        </Space>
-      ),
-    },
-    {
       title: "Status",
       dataIndex: "response_body",
       key: "status",
