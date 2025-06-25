@@ -8,10 +8,13 @@ import { createRouter } from "next-connect";
 
 const router = createRouter();
 
-router.use(checkOrigin).get(async (req, res) => {
-  res.json({
-    message: "SPT Generated",
+router
+  .use(checkApiKey)
+  .use(checkOrigin)
+  .get(async (req, res) => {
+    res.json({
+      message: "SPT Generated",
+    });
   });
-});
 
 export default router.handler({});
