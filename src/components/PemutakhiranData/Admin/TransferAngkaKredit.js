@@ -147,7 +147,11 @@ function TransferAngkaKredit({ data, onCancel, open, nip, file, loadingFile }) {
       >
         {data && (
           <>
-            <FormAngkaKredit nip={nip} form={form} />
+            <FormAngkaKredit
+              jenisPak={data?.jenis_pak_id}
+              nip={nip}
+              form={form}
+            />
             <a href={data?.file_pak} target="_blank" rel="noreferrer">
               {data?.file_pak}
             </a>

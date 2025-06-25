@@ -1,8 +1,9 @@
 import { DatePicker, Form, Input, InputNumber, Radio } from "antd";
 import { useCallback, useEffect, useState } from "react";
 import FormRiwayatJabatanByNip from "../FormRiwayatJabatanByNip";
+import FormAngkaKreditKonversi from "./FormAngkaKreditKonversi";
 
-function FormAngkaKredit({ form, nip, type = "transfer" }) {
+function FormAngkaKredit({ form, nip, type = "transfer", jenisPak }) {
   const [showFieldAngkaKredit, setShowFieldAngkaKredit] = useState(true);
   const [showTahun, setShowTahun] = useState(false);
 
@@ -108,14 +109,15 @@ function FormAngkaKredit({ form, nip, type = "transfer" }) {
 
       {renderKreditFields()}
 
-      <Form.Item
-        required
-        name="kreditBaruTotal"
-        label="Kredit Baru Total"
-        help="Untuk Konversi entri Jumlah nilai PAK Konversi (lembar/lampiran ke-2)"
-      >
-        <InputNumber disabled={type === "transfer"} />
-      </Form.Item>
+      {jenisPak === "1" && (
+        <Form.Item required name="kreditBaruTotal" label="Kredit Baru Total">
+          <InputNumber disabled={type === "transfer"} />
+        </Form.Item>
+      )}
+
+      {(jenisPak === "4" || jenisPak === 4) && (
+        <FormAngkaKreditKonversi form={form} />
+      )}
 
       <FormRiwayatJabatanByNip nip={nip} name="rwJabatanId" />
     </Form>

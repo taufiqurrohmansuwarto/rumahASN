@@ -10,22 +10,22 @@ async function setupJobs() {
     }
   }
 
-  // Schedule seal TOTP refresh (every 10 seconds)
+  // Schedule seal TOTP refresh (every 1 minute)
   await sealQueue.add(
     "refresh-totp",
     {},
     {
-      repeat: { cron: "*/10 * * * * *" },
+      repeat: { cron: "0 * * * * *" },
       jobId: "seal-totp-refresh",
     }
   );
+}
 
-  if (require.main === module) {
-    setupJobs().then(() => {
-      console.log("Jobs setup complete");
-      process.exit(0);
-    });
-  }
+if (require.main === module) {
+  setupJobs().then(() => {
+    console.log("Jobs setup complete");
+    process.exit(0);
+  });
 }
 
 module.exports = {
