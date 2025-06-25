@@ -128,10 +128,15 @@ export const assistant = async (req, res) => {
   const data = !isEmpty(input?.data);
 
   const cookies = req?.headers?.get("cookie");
+
   const sessionToken = getCookieValue(
     cookies,
     prod ? "__Secure-next-auth.session-token" : "next-auth.session-token"
   );
+
+  console.log("sessionToken", sessionToken);
+  console.log("cookies", cookies);
+  console.log(process.env.SECRET);
 
   const token = await decode({
     token: sessionToken,

@@ -28,18 +28,12 @@ export const checkOrigin = (req, res, next) => {
 
 export const checkRole = (req, res, next) => {
   const currentData = req?.body;
-  const currentRole = currentData?.current_role;
   const status_kepegawaian = currentData?.status_kepegawaian;
 
   const asn =
     status_kepegawaian === "PNS" ||
     status_kepegawaian === "PPPK" ||
     status_kepegawaian === "CPNS";
-
-  const non_asn = status_kepegawaian === "NON ASN";
-  const umum = status_kepegawaian === "UMUM";
-
-  const pegawaiBKD = currentRole === "admin" || currentRole === "user";
 
   if (!asn) {
     res.status(403).json({ success: false, message: "Forbidden" });

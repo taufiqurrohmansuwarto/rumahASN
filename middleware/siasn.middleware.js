@@ -11,9 +11,32 @@ dotenv.config();
 const baseUrl = process.env.API_SIASN;
 const TOKEN_KEY = "siasn_token";
 const REFRESH_FLAG_KEY = "refresh:token";
+const LOCK_KEY = "token_lock";
 
 let redisClient;
 let redlock;
+let httpsAgent;
+
+// Cleanup function untuk mencegah memory leak
+const cleanup = async () => {
+  if (redlock) {
+    await redlock.quit();
+    redlock = null;
+  }
+  if (redisClient) {
+    await redisClient.quit();
+    redisClient = null;
+  }
+  if (httpsAgent) {
+    httpsAgent.destroy();
+    httpsAgent = null;
+  }
+};
+
+// Handle process termination
+process.on("SIGTERM", cleanup);
+process.on("SIGINT", cleanup);
+process.on("beforeExit", cleanup);
 
 const initRedis = async () => {
   if (!redisClient) {
@@ -30,15 +53,23 @@ const initRedis = async () => {
   }
 };
 
+// Create HTTPS agent with proper cleanup
+const createHttpsAgent = () => {
+  if (!httpsAgent) {
+    httpsAgent = new https.Agent({
+      keepAlive: true,
+      keepAliveMsecs: 60000,
+      maxSockets: 150,
+      maxFreeSockets: 20,
+      timeout: 60000,
+    });
+  }
+  return httpsAgent;
+};
+
 const siasnWsAxios = axios.create({
   baseURL: baseUrl,
-  httpsAgent: new https.Agent({
-    keepAlive: true, // Menjaga koneksi tetap hidup
-    keepAliveMsecs: 60000, // Waktu idle 60 detik
-    maxSockets: 150, // Maksimal 150 koneksi bersamaan
-    maxFreeSockets: 20,
-    timeout: 60000, // Timeout 60 detik
-  }),
+  httpsAgent: createHttpsAgent(),
 });
 
 const getoken = async () => {
@@ -50,36 +81,51 @@ const getoken = async () => {
 const getOrCreateToken = async () => {
   await initRedis();
 
+  // Cek token dulu sebelum acquire lock
   let tokenData = await redisClient.get(TOKEN_KEY);
   if (tokenData) {
     return JSON.parse(tokenData);
   }
 
-  // Coba set refresh flag dengan SETNX dan TTL 5 detik
-  const setResult = await redisClient.set(REFRESH_FLAG_KEY, "1", "NX", "EX", 5);
-  if (!setResult) {
-    console.log("Refresh token sedang berjalan, menunggu token baru...");
-    const maxRetries = 10;
+  // Gunakan distributed lock untuk mencegah race condition
+  let lock;
+  try {
+    // Acquire lock dengan TTL 10 detik
+    lock = await redlock.acquire([LOCK_KEY], 10000);
+
+    // Double-check token setelah acquire lock
+    tokenData = await redisClient.get(TOKEN_KEY);
+    if (tokenData) {
+      return JSON.parse(tokenData);
+    }
+
+    // Generate token baru
+    const token = await getoken();
+    await redisClient.set(TOKEN_KEY, JSON.stringify(token), "EX", 3600); // TTL 1 hour
+    console.log("Token baru dibuat dan disimpan di Redis");
+    return token;
+  } catch (err) {
+    // console.error("Gagal membuat token:", err);
+
+    // Fallback: coba tunggu token dari process lain
+    const maxRetries = 5;
     for (let i = 0; i < maxRetries; i++) {
-      await new Promise((resolve) => setTimeout(resolve, 500));
+      await new Promise((resolve) => setTimeout(resolve, 1000));
       tokenData = await redisClient.get(TOKEN_KEY);
       if (tokenData) {
         return JSON.parse(tokenData);
       }
     }
-    throw new Error("Timeout menunggu token baru");
-  }
 
-  try {
-    const token = await getoken();
-    await redisClient.set(TOKEN_KEY, JSON.stringify(token));
-    console.log("Token baru dibuat dan disimpan di Redis");
-    return token;
-  } catch (err) {
-    console.error("Gagal membuat token:", err);
-    throw err;
+    throw new Error("Gagal mendapatkan token setelah retry");
   } finally {
-    await redisClient.del(REFRESH_FLAG_KEY);
+    if (lock) {
+      try {
+        await lock.release();
+      } catch (err) {
+        console.error("Gagal release lock:", err);
+      }
+    }
   }
 };
 
@@ -119,11 +165,16 @@ const errorHandler = async (error) => {
     invalidCredentials ||
     ECONRESET ||
     isBuffer;
+
   if (notValid) {
     if (redisClient) {
-      await redisClient.del(TOKEN_KEY);
+      try {
+        await redisClient.del(TOKEN_KEY);
+        console.log("Token dihapus dari Redis karena error:", errorData);
+      } catch (delError) {
+        console.error("Gagal menghapus token dari Redis:", delError);
+      }
     }
-    console.log("Token dihapus dari Redis karena error:", errorData);
     return Promise.reject(errorData);
   } else {
     return Promise.reject(errorData);
@@ -138,6 +189,7 @@ const siasnMiddleware = async (req, res, next) => {
     req.siasnRequest = siasnWsAxios;
     next();
   } catch (error) {
+    console.error("Error in siasnMiddleware:", error);
     res.status(500).json({ message: "Internal Server Error" });
   }
 };
@@ -145,4 +197,5 @@ const siasnMiddleware = async (req, res, next) => {
 module.exports = {
   siasnMiddleware,
   siasnWsAxios,
+  cleanup, // Export cleanup function untuk testing atau manual cleanup
 };
