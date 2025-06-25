@@ -607,9 +607,6 @@ function CompareAngkaKreditByNip({ nip }) {
             <Descriptions.Item label="Kredit Utama Baru">
               {record?.nilai_unsur_utama_baru}
             </Descriptions.Item>
-            <Descriptions.Item label="Kredit Unsur Penunjang">
-              {record?.nilai_unsur_penunjang_baru}
-            </Descriptions.Item>
             <Descriptions.Item label="Kredit Baru Total">
               {record?.nilai_pak}
             </Descriptions.Item>
@@ -656,11 +653,6 @@ function CompareAngkaKreditByNip({ nip }) {
     {
       title: "Kredit Utama Baru",
       dataIndex: "nilai_unsur_utama_baru",
-      responsive: ["sm"],
-    },
-    {
-      title: "Kredit Unsur Penunjang",
-      dataIndex: "nilai_unsur_penunjang_baru",
       responsive: ["sm"],
     },
     {

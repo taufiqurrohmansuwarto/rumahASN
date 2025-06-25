@@ -3,7 +3,10 @@ module.exports = async (req, res, next) => {
     const user = req.user;
     const { role, group, status_kepegawaian } = user;
 
-    const asn = status_kepegawaian === "PNS" || status_kepegawaian === "PPPK";
+    const asn =
+      status_kepegawaian === "PNS" ||
+      status_kepegawaian === "PPPK" ||
+      status_kepegawaian === "CPNS";
 
     if (!asn) {
       res.status(403).json({ code: 403, message: "Forbidden" });
