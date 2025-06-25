@@ -45,6 +45,7 @@ import { useState } from "react";
 import FormRiwayatJabatanByNip from "../FormRiwayatJabatanByNip";
 import UploadDokumen from "../UploadDokumen";
 import TransferAngkaKredit from "./TransferAngkaKredit";
+import FormAngkaKreditKonversi from "./FormAngkaKreditKonversi";
 
 const FormAngkaKredit = ({ visible, onCancel, nip }) => {
   const [form] = Form.useForm();
@@ -142,6 +143,7 @@ const FormAngkaKredit = ({ visible, onCancel, nip }) => {
 
   const [showFieldAngkaKredit, setShowFieldAngkaKredit] = useState(true);
   const [showTahun, setShowTahun] = useState(false);
+  const [isKonversi, setIsKonversi] = useState(false);
 
   return (
     <Modal
@@ -182,23 +184,30 @@ const FormAngkaKredit = ({ visible, onCancel, nip }) => {
               if (value === "isKonversi") {
                 setShowFieldAngkaKredit(false);
                 setShowTahun(true);
+                setIsKonversi(true);
                 form.setFieldsValue({
                   kreditUtamaBaru: "",
                   kreditPenunjangBaru: "",
+                  kreditBaruTotal: "",
                 });
               } else if (value === "isIntegrasi") {
                 setShowTahun(false);
                 setShowFieldAngkaKredit(false);
+                setIsKonversi(false);
                 form.setFieldsValue({
                   tahun: "",
                   kreditUtamaBaru: "",
                   kreditPenunjangBaru: "",
+                  kreditBaruTotal: "",
                 });
               } else {
                 setShowTahun(false);
                 setShowFieldAngkaKredit(true);
+
+                setIsKonversi(false);
                 form.setFieldsValue({
                   tahun: "",
+                  kreditBaruTotal: "",
                 });
               }
             }}
@@ -245,14 +254,19 @@ const FormAngkaKredit = ({ visible, onCancel, nip }) => {
             </Form.Item>
           </>
         ) : null}
-        <Form.Item
-          required
-          name="kreditBaruTotal"
-          label="Kredit Baru Total"
-          help="Untuk Konversi entri Jumlah nilai PAK Konversi (lembar/lampiran ke-2)"
-        >
-          <InputNumber />
-        </Form.Item>
+        {!isKonversi ? (
+          <Form.Item
+            required
+            name="kreditBaruTotal"
+            label="Kredit Baru Total"
+            help="Untuk Konversi entri Jumlah nilai PAK Konversi (lembar/lampiran ke-2)"
+          >
+            <InputNumber />
+          </Form.Item>
+        ) : (
+          <FormAngkaKreditKonversi />
+        )}
+
         <FormRiwayatJabatanByNip nip={nip} name="rwJabatanId" />
       </Form>
     </Modal>
@@ -558,23 +572,32 @@ function CompareAngkaKreditByNip({ nip }) {
 
   const handleVisibleTransfer = async (record) => {
     setLoadingFile(true);
+
     try {
       const currentFile = record?.file_pak;
+      const jenisPak = record?.jenis_pak_id;
+      const isKonversi = jenisPak === 4 || jenisPak === "4";
 
-      if (!currentFile) {
-        setVisibleTransfer(true);
-        setDataTransfer(record);
-      } else {
+      // Prepare record data untuk konversi
+      const preparedRecord = isKonversi
+        ? { ...record, nilai_pak: null }
+        : record;
+
+      // Set modal state
+      setVisibleTransfer(true);
+      setDataTransfer(preparedRecord);
+
+      // Handle file jika ada
+      if (currentFile) {
         const response = await urlToPdf({ url: currentFile });
-        const file = new File([response], "file.pdf", {
+        const pdfFile = new File([response], "file.pdf", {
           type: "application/pdf",
         });
-        setFile(file);
-        setVisibleTransfer(true);
-        setDataTransfer(record);
+        setFile(pdfFile);
       }
-      setLoadingFile(false);
     } catch (error) {
+      console.error("Error handling transfer:", error);
+    } finally {
       setLoadingFile(false);
     }
   };
