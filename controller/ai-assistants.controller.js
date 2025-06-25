@@ -134,14 +134,12 @@ export const assistant = async (req, res) => {
     prod ? "__Secure-next-auth.session-token" : "next-auth.session-token"
   );
 
-  console.log("sessionToken", sessionToken);
-  console.log("cookies", cookies);
-  console.log(process.env.SECRET);
-
   const token = await decode({
     token: sessionToken,
     secret: process.env.SECRET,
   });
+
+  console.log("token", token);
 
   if (!token) {
     throw new Error("Unauthorized");
