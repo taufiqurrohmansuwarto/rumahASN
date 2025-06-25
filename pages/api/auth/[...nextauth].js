@@ -29,6 +29,7 @@ const masterFasilitatorScope = process.env.MASTER_FASILITATOR_SCOPE;
 const googleClientId = process.env.GOOGLE_CLIENT_ID;
 const googleClientSecret = process.env.GOOGLE_CLIENT_SECRET;
 const googleApiKey = process.env.GOOGLE_API_KEY;
+const secret = process.env.NEXTAUTH_SECRET || process.env.SECRET;
 
 const getUserBirtdahGoogle = async (accessToken) => {
   try {
@@ -464,9 +465,9 @@ const options = (req, res) => {
     },
     theme: "light",
     // Perbaikan untuk JWEDecryptionFailed error
-    secret: process.env.NEXTAUTH_SECRET || process.env.SECRET,
+    secret: secret,
     jwt: {
-      secret: process.env.NEXTAUTH_SECRET || process.env.SECRET,
+      secret: secret,
       // Tambahkan maxAge untuk mencegah token expired
       maxAge: 30 * 24 * 60 * 60, // 30 hari
     },
