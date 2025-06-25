@@ -30,7 +30,6 @@ const googleClientId = process.env.GOOGLE_CLIENT_ID;
 const googleClientSecret = process.env.GOOGLE_CLIENT_SECRET;
 const googleApiKey = process.env.GOOGLE_API_KEY;
 const secret = process.env.NEXTAUTH_SECRET || process.env.SECRET;
-console.log("secret", secret);
 
 const getUserBirtdahGoogle = async (accessToken) => {
   try {
