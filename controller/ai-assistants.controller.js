@@ -135,18 +135,10 @@ export const assistant = async (req, res) => {
   );
 
   const secret = process.env.NEXTAUTH_SECRET || process.env.SECRET;
-  console.log("secret", secret);
 
   const token = await decode({
     token: sessionToken,
     secret,
-  });
-
-  const checkToken = token ? "token" : "no token";
-  console.log({
-    token,
-    secret: process.env.SECRET,
-    checkToken,
   });
 
   if (!token) {
