@@ -139,7 +139,12 @@ export const assistant = async (req, res) => {
     secret: process.env.SECRET,
   });
 
-  console.log("token", token);
+  const checkToken = token ? "token" : "no token";
+  console.log({
+    token,
+    secret: process.env.SECRET,
+    checkToken,
+  });
 
   if (!token) {
     throw new Error("Unauthorized");
