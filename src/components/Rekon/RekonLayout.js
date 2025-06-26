@@ -3,24 +3,24 @@ import NotifikasiASNConnect from "@/components/Notification/NotifikasiASNConnect
 import NotifikasiForumKepegawaian from "@/components/Notification/NotifikasiForumKepegawaian";
 import NotifikasiKepegawaian from "@/components/Notification/NotifikasiKepegawaian";
 import NotifikasiPrivateMessage from "@/components/Notification/NotifikasiPrivateMessage";
+import { layoutToken } from "@/styles/rasn.theme";
 import { appList } from "@/utils/app-lists";
 import { getMenuItems, mappingItems } from "@/utils/appLists";
 import {
   BookOutlined,
   LogoutOutlined,
   SunOutlined,
-  SyncOutlined,
   TeamOutlined,
   UserOutlined,
 } from "@ant-design/icons";
-import { ProConfigProvider } from "@ant-design/pro-components";
 import {
-  IconBandage,
   IconBuilding,
-  IconHistory,
+  IconChartBar,
+  IconDatabase,
+  IconEdit,
+  IconFileText,
   IconLayoutDashboard,
-  IconRotateRectangle,
-  IconUserSearch,
+  IconUsers,
 } from "@tabler/icons-react";
 import { Dropdown, Input, Space } from "antd";
 import { trim } from "lodash";
@@ -28,7 +28,6 @@ import { signOut, useSession } from "next-auth/react";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/router";
 import { useState } from "react";
-import { rekonToken } from "src/styles/rekon.styles";
 
 const menuItems = [
   {
@@ -40,13 +39,13 @@ const menuItems = [
 
   {
     key: "/pegawai",
-    icon: <IconUserSearch size={16} />,
+    icon: <IconUsers size={16} />,
     label: "Daftar Pegawai",
     role: ["admin", "fasilitator"],
   },
   {
     key: "/anomali",
-    icon: <IconBandage size={16} />,
+    icon: <IconChartBar size={16} />,
     label: "Disparitas Data",
     role: ["admin", "fasilitator"],
   },
@@ -58,7 +57,7 @@ const menuItems = [
   },
   {
     key: "/rekon-ref",
-    icon: <IconRotateRectangle size={16} />,
+    icon: <IconDatabase size={16} />,
     label: "Rekon Referensi",
     role: ["admin"],
     children: [
@@ -110,14 +109,14 @@ const menuItems = [
   // { key: "rekon-diklat", icon: <BookOutlined />, label: "Diklat" },
   {
     key: "/logs",
-    icon: <IconHistory size={16} />,
+    icon: <IconFileText size={16} />,
     label: "Logs",
     role: ["admin"],
   },
 
   {
     key: "update-data",
-    icon: <SyncOutlined />,
+    icon: <IconEdit size={16} />,
     label: "Update Data",
     role: ["admin"],
   },
@@ -156,11 +155,8 @@ function RekonLayout({ children, active = "rekon-unor" }) {
       logo={null}
       layout="mix"
       navTheme="light"
-      // fixedHeader
-      // fixSiderbar
-      token={rekonToken}
+      token={layoutToken}
       actionsRender={(props) => {
-        // if (props.isMobile) return [];
         return [
           <div key="search" style={{ width: "100%", maxWidth: "300px" }}>
             <Input.Search

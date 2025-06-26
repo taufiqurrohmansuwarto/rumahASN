@@ -2,26 +2,25 @@ import PlotUsers from "@/components/Dashboards/PlotUsers";
 import { getUnorSimaster } from "@/services/rekon.services";
 import { getListMfa } from "@/services/siasn-services";
 import {
-  BarChartOutlined,
-  CheckCircleOutlined,
-  CloseCircleOutlined,
-  CloudDownloadOutlined,
-  QuestionCircleOutlined,
-  SearchOutlined,
-  UserOutlined,
-} from "@ant-design/icons";
+  IconChartBar,
+  IconCircleCheck,
+  IconCircleX,
+  IconDownload,
+  IconQuestionMark,
+  IconSearch,
+  IconShield,
+  IconUser,
+} from "@tabler/icons-react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import {
-  Badge,
   Button,
   Card,
   Col,
-  Empty,
   Flex,
+  Grid,
   Row,
   Skeleton,
   Space,
-  Statistic,
   TreeSelect,
   Typography,
 } from "antd";
@@ -31,9 +30,14 @@ import { saveAs } from "file-saver";
 import * as XLSX from "xlsx";
 
 const { Title, Text } = Typography;
+const { useBreakpoint } = Grid;
 
 function RekonMFA() {
   const [selectedOpd, setSelectedOpd] = useState(null);
+  const screens = useBreakpoint();
+  const isMobile = !screens.md;
+  const isTablet = screens.md && !screens.lg;
+  const isDesktop = screens.lg;
 
   const { data: unorData, isLoading: unorLoading } = useQuery({
     queryKey: ["rekon-unor-simaster"],
@@ -53,36 +57,54 @@ function RekonMFA() {
   });
 
   const downloadMfa = async (aktivasi) => {
-    const result = await listMfa({
-      skpd_id: selectedOpd,
-      type: "download",
-      aktivasi,
-    });
+    try {
+      const result = await listMfa({
+        skpd_id: selectedOpd,
+        type: "download",
+        aktivasi,
+      });
 
-    const workbook = XLSX.utils.book_new();
-    const worksheet = XLSX.utils.json_to_sheet(result);
+      if (!result || result.length === 0) {
+        return;
+      }
 
-    XLSX.utils.book_append_sheet(workbook, worksheet, "MFA");
+      const workbook = XLSX.utils.book_new();
+      const worksheet = XLSX.utils.json_to_sheet(result);
 
-    const excelBuffer = XLSX.write(workbook, {
-      bookType: "xlsx",
-      type: "array",
-    });
+      XLSX.utils.book_append_sheet(workbook, worksheet, "MFA");
 
-    saveAs(new Blob([excelBuffer]), `mfa_${aktivasi}.xlsx`);
+      const excelBuffer = XLSX.write(workbook, {
+        bookType: "xlsx",
+        type: "array",
+      });
+
+      saveAs(new Blob([excelBuffer]), `mfa_${aktivasi}.xlsx`);
+    } catch (error) {
+      console.error("Error downloading MFA data:", error);
+    }
   };
 
-  const totalMFA = mfaData?.reduce((acc, item) => acc + item.value, 0) || 0;
+  // Perbaiki perhitungan statistik
+  const totalMFA = React.useMemo(() => {
+    if (!mfaData || !Array.isArray(mfaData)) return 0;
+    return mfaData.reduce((acc, item) => {
+      const value = parseInt(item.value) || 0;
+      return acc + value;
+    }, 0);
+  }, [mfaData]);
 
   const getStatusValue = (status) => {
-    return mfaData?.find((item) => item.title === status)?.value || 0;
+    if (!mfaData || !Array.isArray(mfaData)) return 0;
+    const item = mfaData.find((item) => item.title === status);
+    return parseInt(item?.value) || 0;
   };
 
   const calculatePercentage = (status) => {
     if (!mfaData?.length || totalMFA === 0) return "(0%)";
 
     const value = getStatusValue(status);
-    return `(${((value / totalMFA) * 100).toFixed(2)}%)`;
+    const percentage = ((value / totalMFA) * 100).toFixed(1);
+    return `(${percentage}%)`;
   };
 
   const statisticItems = [
@@ -90,82 +112,117 @@ function RekonMFA() {
       title: "Total Pegawai",
       key: "total",
       value: totalMFA,
-      prefix: <UserOutlined />,
-      valueStyle: { color: "#6366F1" },
-      color: "#EEF2FF",
-      borderColor: "#C7D2FE",
-      iconBg: "#6366F1",
+      prefix: <IconUser size={isMobile ? 16 : 18} />,
+      valueStyle: { color: "#FF4500" },
+      color: "#fff7e6",
+      borderColor: "#ffccc7",
+      iconBg: "#FF4500",
     },
     {
       title: "Sudah MFA",
       value: getStatusValue("SUDAH"),
       key: "SUDAH",
-      prefix: <CheckCircleOutlined />,
-      valueStyle: { color: "#22C55E" },
+      prefix: <IconCircleCheck size={isMobile ? 16 : 18} />,
+      valueStyle: { color: "#52c41a" },
       suffix: calculatePercentage("SUDAH"),
-      color: "#F0FDF4",
-      borderColor: "#BBF7D0",
-      iconBg: "#22C55E",
+      color: "#f6ffed",
+      borderColor: "#b7eb8f",
+      iconBg: "#52c41a",
     },
     {
       title: "Belum MFA",
       key: "BELUM",
       value: getStatusValue("BELUM"),
-      prefix: <CloseCircleOutlined />,
-      valueStyle: { color: "#EF4444" },
+      prefix: <IconCircleX size={isMobile ? 16 : 18} />,
+      valueStyle: { color: "#ff4d4f" },
       suffix: calculatePercentage("BELUM"),
-      color: "#FEF2F2",
-      borderColor: "#FECACA",
-      iconBg: "#EF4444",
+      color: "#fff2f0",
+      borderColor: "#ffccc7",
+      iconBg: "#ff4d4f",
     },
     {
       title: "Tidak Terdata",
       key: "TIDAK TERDATA",
       value: getStatusValue("TIDAK TERDATA"),
-      prefix: <QuestionCircleOutlined />,
-      valueStyle: { color: "#F59E0B" },
+      prefix: <IconQuestionMark size={isMobile ? 16 : 18} />,
+      valueStyle: { color: "#faad14" },
       suffix: calculatePercentage("TIDAK TERDATA"),
-      color: "#FFFBEB",
-      borderColor: "#FDE68A",
-      iconBg: "#F59E0B",
+      color: "#fffbe6",
+      borderColor: "#ffe58f",
+      iconBg: "#faad14",
     },
   ];
 
   return (
-    <div
-      style={{
-        padding: "24px",
-        backgroundColor: "#FAFAFB",
-        minHeight: "100vh",
-      }}
-    >
-      {/* Header Section */}
-      <div style={{ marginBottom: "32px" }}>
-        <Title
-          level={2}
-          style={{ margin: 0, color: "#1F2937", fontWeight: 700 }}
+    <div>
+      {/* Header */}
+      <Card
+        style={{
+          marginBottom: isMobile ? "8px" : isTablet ? "12px" : "16px",
+          borderRadius: isMobile ? "6px" : isTablet ? "8px" : "12px",
+          border: "1px solid #e8e8e8",
+        }}
+      >
+        <Flex
+          align="center"
+          gap={isMobile ? 10 : 12}
+          wrap={isMobile}
+          justify={isMobile ? "center" : "flex-start"}
         >
-          Multi Factor Authentication
-        </Title>
-        <Text type="secondary" style={{ fontSize: "16px", lineHeight: "24px" }}>
-          Monitoring dan rekapitulasi data aktivasi MFA pegawai
-        </Text>
-      </div>
+          <div
+            style={{
+              width: isMobile ? "36px" : "40px",
+              height: isMobile ? "36px" : "40px",
+              backgroundColor: "#FF4500",
+              borderRadius: isMobile ? "6px" : "8px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              flexShrink: 0,
+            }}
+          >
+            <IconShield size={isMobile ? 18 : 20} color="white" />
+          </div>
+          <div style={{ flex: 1, textAlign: isMobile ? "center" : "left" }}>
+            <Title
+              level={isMobile ? 5 : 4}
+              style={{
+                margin: 0,
+                color: "#1a1a1a",
+                fontSize: isMobile ? "16px" : "20px",
+              }}
+            >
+              🔐 Multi Factor Authentication
+            </Title>
+            <Text
+              type="secondary"
+              style={{
+                fontSize: isMobile ? "11px" : "13px",
+                display: "block",
+                marginTop: "2px",
+              }}
+            >
+              Monitoring dan rekapitulasi data aktivasi MFA pegawai
+            </Text>
+          </div>
+        </Flex>
+      </Card>
 
       {/* Search Section */}
       <Card
         style={{
-          marginBottom: "24px",
-          borderRadius: "16px",
-          border: "1px solid #E5E7EB",
-          boxShadow: "0 1px 3px rgba(0, 0, 0, 0.1)",
+          marginBottom: isMobile ? "8px" : isTablet ? "12px" : "16px",
+          borderRadius: isMobile ? "6px" : isTablet ? "8px" : "12px",
+          border: "1px solid #e8e8e8",
         }}
-        bodyStyle={{ padding: "24px" }}
       >
         <Space direction="vertical" size={8} style={{ width: "100%" }}>
-          <Flex align="center" gap={8}>
-            <SearchOutlined style={{ color: "#6B7280", fontSize: "16px" }} />
-            <Text strong style={{ color: "#374151", fontSize: "16px" }}>
+          <Flex align="center" gap={6}>
+            <IconSearch size={14} color="#FF4500" />
+            <Text
+              strong
+              style={{ color: "#1a1a1a", fontSize: isMobile ? "13px" : "15px" }}
+            >
               Pilih Unit Organisasi
             </Text>
           </Flex>
@@ -178,7 +235,7 @@ function RekonMFA() {
             showSearch
             style={{ width: "100%" }}
             onChange={setSelectedOpd}
-            size="large"
+            size={isMobile ? "middle" : "large"}
             allowClear
           />
         </Space>
@@ -186,68 +243,85 @@ function RekonMFA() {
 
       {/* Statistics Section */}
       {selectedOpd && (
-        <div style={{ marginBottom: "24px" }}>
+        <Card
+          style={{
+            marginBottom: isMobile ? "8px" : isTablet ? "12px" : "16px",
+            borderRadius: isMobile ? "6px" : isTablet ? "8px" : "12px",
+            border: "1px solid #e8e8e8",
+          }}
+        >
           {mfaLoading ? (
-            <Row gutter={[24, 24]}>
+            <Row gutter={[isMobile ? 8 : 12, isMobile ? 8 : 12]}>
               {[1, 2, 3, 4].map((item) => (
-                <Col xs={24} sm={12} lg={6} key={item}>
-                  <Card style={{ borderRadius: "16px" }}>
-                    <Skeleton active paragraph={{ rows: 2 }} />
-                  </Card>
+                <Col xs={12} sm={12} md={6} lg={6} key={item}>
+                  <Skeleton active paragraph={{ rows: 1 }} />
                 </Col>
               ))}
             </Row>
           ) : (
-            <Row gutter={[24, 24]}>
+            <Row gutter={[isMobile ? 8 : 12, isMobile ? 8 : 12]}>
               {statisticItems.map((item, index) => (
-                <Col xs={24} sm={12} lg={6} key={index}>
-                  <Card
+                <Col xs={12} sm={12} md={6} lg={6} key={index}>
+                  <div
                     style={{
-                      borderRadius: "16px",
+                      padding: isMobile
+                        ? "10px 6px"
+                        : isTablet
+                        ? "14px 10px"
+                        : "16px 12px",
+                      borderRadius: isMobile ? "6px" : "8px",
                       border: `1px solid ${item.borderColor}`,
                       backgroundColor: item.color,
                       transition: "all 0.3s ease",
                       cursor: "default",
-                    }}
-                    bodyStyle={{ padding: "24px" }}
-                    hoverable
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.transform = "translateY(-4px)";
-                      e.currentTarget.style.boxShadow =
-                        "0 8px 25px rgba(0, 0, 0, 0.1)";
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.transform = "translateY(0)";
-                      e.currentTarget.style.boxShadow =
-                        "0 1px 3px rgba(0, 0, 0, 0.1)";
+                      height: "100%",
+                      minHeight: isMobile
+                        ? "90px"
+                        : isTablet
+                        ? "100px"
+                        : "110px",
                     }}
                   >
                     <Space
                       direction="vertical"
-                      size={16}
+                      size={isMobile ? 4 : isTablet ? 6 : 8}
                       style={{ width: "100%" }}
                     >
                       {/* Header */}
                       <Flex justify="space-between" align="center">
-                        <Flex align="center" gap={12}>
+                        <Flex align="center" gap={6} style={{ flex: 1 }}>
                           <div
                             style={{
-                              width: "40px",
-                              height: "40px",
-                              borderRadius: "12px",
+                              width: isMobile
+                                ? "24px"
+                                : isTablet
+                                ? "28px"
+                                : "32px",
+                              height: isMobile
+                                ? "24px"
+                                : isTablet
+                                ? "28px"
+                                : "32px",
+                              borderRadius: "6px",
                               backgroundColor: item.iconBg,
                               display: "flex",
                               alignItems: "center",
                               justifyContent: "center",
+                              flexShrink: 0,
                             }}
                           >
                             {React.cloneElement(item.prefix, {
-                              style: { color: "white", fontSize: "18px" },
+                              size: isMobile ? 12 : isTablet ? 14 : 16,
+                              color: "white",
                             })}
                           </div>
                           <Text
                             strong
-                            style={{ color: "#374151", fontSize: "14px" }}
+                            style={{
+                              color: "#1a1a1a",
+                              fontSize: isMobile ? "10px" : "12px",
+                              lineHeight: "1.2",
+                            }}
                           >
                             {item.title}
                           </Text>
@@ -258,157 +332,309 @@ function RekonMFA() {
                             type="primary"
                             size="small"
                             loading={listMfaLoading}
-                            icon={<CloudDownloadOutlined />}
+                            icon={<IconDownload size={isMobile ? 10 : 12} />}
                             onClick={() => downloadMfa(item.key)}
                             style={{
-                              borderRadius: "8px",
+                              backgroundColor: "#FF4500",
+                              borderColor: "#FF4500",
+                              borderRadius: "4px",
                               fontWeight: 500,
-                              fontSize: "12px",
-                              height: "32px",
-                              padding: "0 12px",
+                              fontSize: isMobile ? "9px" : "11px",
+                              height: isMobile ? "22px" : "24px",
+                              padding: isMobile ? "0 4px" : "0 6px",
+                              minWidth: isMobile ? "22px" : "24px",
                             }}
                           >
-                            Download
+                            {!isMobile && "Excel"}
                           </Button>
                         )}
                       </Flex>
 
                       {/* Statistic */}
-                      <div>
-                        <Statistic
-                          value={item.value}
-                          valueStyle={{
-                            ...item.valueStyle,
-                            fontSize: "28px",
-                            fontWeight: 700,
-                            lineHeight: "32px",
-                          }}
-                          suffix={
-                            item.suffix && (
-                              <Text
-                                style={{
-                                  fontSize: "14px",
-                                  color: "#6B7280",
-                                  fontWeight: 500,
-                                }}
-                              >
-                                {item.suffix}
-                              </Text>
-                            )
-                          }
-                        />
+                      <div style={{ marginTop: isMobile ? "4px" : "6px" }}>
+                        <Flex align="baseline" gap={4}>
+                          <Text
+                            style={{
+                              ...item.valueStyle,
+                              fontSize: isMobile ? "16px" : "20px",
+                              fontWeight: 600,
+                              lineHeight: "1.2",
+                            }}
+                          >
+                            {item.value?.toLocaleString() || 0}
+                          </Text>
+                          {item.suffix && (
+                            <Text
+                              style={{
+                                fontSize: isMobile ? "9px" : "10px",
+                                color: "#666",
+                                fontWeight: 400,
+                              }}
+                            >
+                              {item.suffix}
+                            </Text>
+                          )}
+                        </Flex>
                       </div>
                     </Space>
-                  </Card>
+                  </div>
                 </Col>
               ))}
             </Row>
           )}
-        </div>
+        </Card>
       )}
 
       {/* Chart Section */}
       {selectedOpd && (
-        <div>
+        <Card
+          style={{
+            borderRadius: isMobile ? "6px" : isTablet ? "8px" : "12px",
+            border: "1px solid #e8e8e8",
+            marginBottom: isMobile ? "8px" : isTablet ? "12px" : "16px",
+          }}
+        >
           {mfaLoading ? (
-            <Card
-              style={{
-                borderRadius: "16px",
-                border: "1px solid #E5E7EB",
-                boxShadow: "0 1px 3px rgba(0, 0, 0, 0.1)",
-              }}
-              bodyStyle={{ padding: "32px" }}
-            >
-              <Skeleton active paragraph={{ rows: 8 }} />
-            </Card>
+            <Skeleton active paragraph={{ rows: 6 }} />
           ) : mfaData && mfaData.length > 0 ? (
-            <Card
-              style={{
-                borderRadius: "16px",
-                border: "1px solid #E5E7EB",
-                boxShadow: "0 1px 3px rgba(0, 0, 0, 0.1)",
-              }}
-              bodyStyle={{ padding: "32px" }}
+            <Space
+              direction="vertical"
+              size={isMobile ? 16 : 20}
+              style={{ width: "100%" }}
             >
-              <Space direction="vertical" size={24} style={{ width: "100%" }}>
-                <Flex align="center" gap={12}>
+              <Flex
+                align="center"
+                gap={8}
+                wrap={isMobile}
+                justify="space-between"
+              >
+                <Flex align="center" gap={8}>
                   <div
                     style={{
-                      width: "40px",
-                      height: "40px",
-                      borderRadius: "12px",
-                      backgroundColor: "#6366F1",
+                      width: isMobile ? "32px" : "36px",
+                      height: isMobile ? "32px" : "36px",
+                      borderRadius: "6px",
+                      backgroundColor: "#FF4500",
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "center",
+                      flexShrink: 0,
                     }}
                   >
-                    <BarChartOutlined
-                      style={{ color: "white", fontSize: "18px" }}
-                    />
+                    <IconChartBar size={isMobile ? 16 : 18} color="white" />
                   </div>
-                  <Title level={4} style={{ margin: 0, color: "#1F2937" }}>
-                    Visualisasi Data MFA
+                  <Title
+                    level={isMobile ? 5 : 4}
+                    style={{
+                      margin: 0,
+                      color: "#1a1a1a",
+                      fontSize: isMobile ? "14px" : "18px",
+                    }}
+                  >
+                    📊 Visualisasi Data MFA
                   </Title>
-                  <Badge
-                    count={totalMFA}
-                    style={{ backgroundColor: "#6366F1" }}
-                  />
                 </Flex>
 
-                <div style={{ padding: "16px 0" }}>
-                  <PlotUsers data={mfaData} />
+                <div
+                  style={{
+                    backgroundColor: "#FF4500",
+                    color: "white",
+                    padding: isMobile ? "4px 8px" : "6px 12px",
+                    borderRadius: "16px",
+                    fontSize: isMobile ? "11px" : "12px",
+                    fontWeight: 600,
+                    minWidth: "fit-content",
+                  }}
+                >
+                  Total: {totalMFA?.toLocaleString() || 0}
                 </div>
-              </Space>
-            </Card>
+              </Flex>
+
+              <div
+                style={{
+                  padding: isMobile ? "4px 0" : "8px 0",
+                  overflow: "hidden",
+                }}
+              >
+                <PlotUsers data={mfaData} />
+              </div>
+            </Space>
           ) : (
-            <Card
+            <Flex
+              vertical
+              align="center"
+              justify="center"
               style={{
-                borderRadius: "16px",
-                border: "1px solid #E5E7EB",
-                boxShadow: "0 1px 3px rgba(0, 0, 0, 0.1)",
-                textAlign: "center",
+                padding: isMobile ? "30px 20px" : "40px 20px",
+                color: "#999",
               }}
-              bodyStyle={{ padding: "64px 32px" }}
             >
-              <Empty
-                description={
-                  <Text style={{ color: "#6B7280", fontSize: "16px" }}>
-                    Tidak ada data yang tersedia untuk unit organisasi ini
-                  </Text>
-                }
+              <IconChartBar
+                size={isMobile ? 40 : 48}
+                color="#d9d9d9"
+                style={{ marginBottom: "12px" }}
               />
-            </Card>
+              <Title
+                level={isMobile ? 5 : 4}
+                style={{ color: "#999", margin: "0 0 6px 0" }}
+              >
+                Tidak ada data tersedia
+              </Title>
+              <Text
+                type="secondary"
+                style={{
+                  textAlign: "center",
+                  fontSize: isMobile ? "12px" : "14px",
+                }}
+              >
+                Tidak ada data yang tersedia untuk unit organisasi ini
+              </Text>
+            </Flex>
           )}
-        </div>
+        </Card>
       )}
 
       {/* Initial State */}
       {!selectedOpd && (
         <Card
           style={{
-            borderRadius: "16px",
-            border: "1px solid #E5E7EB",
-            boxShadow: "0 1px 3px rgba(0, 0, 0, 0.1)",
-            textAlign: "center",
+            borderRadius: isMobile ? "6px" : isTablet ? "8px" : "12px",
+            border: "1px solid #e8e8e8",
+            marginBottom: isMobile ? "8px" : isTablet ? "12px" : "16px",
           }}
-          bodyStyle={{ padding: "64px 32px" }}
         >
-          <Empty
-            image={Empty.PRESENTED_IMAGE_SIMPLE}
-            description={
-              <Space direction="vertical" size={8}>
-                <Text style={{ color: "#6B7280", fontSize: "16px" }}>
-                  Pilih unit organisasi untuk melihat data MFA
-                </Text>
-                <Text type="secondary" style={{ fontSize: "14px" }}>
-                  Gunakan kolom pencarian di atas untuk memilih unit organisasi
-                </Text>
-              </Space>
-            }
-          />
+          <Flex
+            vertical
+            align="center"
+            justify="center"
+            style={{
+              padding: isMobile ? "30px 20px" : "40px 20px",
+              color: "#999",
+            }}
+          >
+            <IconSearch
+              size={isMobile ? 40 : 48}
+              color="#d9d9d9"
+              style={{ marginBottom: "12px" }}
+            />
+            <Title
+              level={isMobile ? 5 : 4}
+              style={{ color: "#999", margin: "0 0 6px 0" }}
+            >
+              Pilih Unit Organisasi
+            </Title>
+            <Text
+              type="secondary"
+              style={{
+                textAlign: "center",
+                fontSize: isMobile ? "12px" : "14px",
+              }}
+            >
+              Pilih unit organisasi untuk melihat data MFA
+              <br />
+              Gunakan kolom pencarian di atas untuk memilih unit organisasi
+            </Text>
+          </Flex>
         </Card>
       )}
+
+      <style jsx global>{`
+        .ant-statistic-content {
+          display: flex !important;
+          align-items: baseline !important;
+          gap: 4px !important;
+        }
+
+        .ant-card {
+          transition: all 0.3s ease !important;
+        }
+
+        .ant-card:hover {
+          border-color: #ff4500 !important;
+        }
+
+        .ant-tree-select:not(.ant-select-disabled):hover .ant-select-selector {
+          border-color: #ff4500 !important;
+        }
+
+        .ant-tree-select-focused .ant-select-selector {
+          border-color: #ff4500 !important;
+          box-shadow: 0 0 0 2px rgba(255, 69, 0, 0.2) !important;
+        }
+
+        .ant-btn-primary {
+          background: #ff4500 !important;
+          border-color: #ff4500 !important;
+        }
+
+        .ant-btn-primary:hover {
+          background: #ff6b35 !important;
+          border-color: #ff6b35 !important;
+          transform: translateY(-1px) !important;
+          box-shadow: 0 2px 8px rgba(255, 69, 0, 0.25) !important;
+        }
+
+        @media (max-width: 576px) {
+          .ant-col {
+            margin-bottom: 4px !important;
+          }
+
+          .ant-card-body {
+            padding: 12px 8px !important;
+          }
+
+          .ant-space-vertical {
+            gap: 4px !important;
+          }
+
+          .ant-card {
+            margin-bottom: 8px !important;
+          }
+        }
+
+        @media (max-width: 768px) {
+          .ant-col {
+            margin-bottom: 6px !important;
+          }
+
+          .ant-card-body {
+            padding: 16px 12px !important;
+          }
+
+          .ant-card {
+            margin-bottom: 12px !important;
+          }
+        }
+
+        @media (min-width: 769px) and (max-width: 1199px) {
+          .ant-card-body {
+            padding: 20px 16px !important;
+          }
+
+          .ant-card {
+            margin-bottom: 16px !important;
+          }
+        }
+
+        @media (min-width: 1200px) {
+          .ant-card-body {
+            padding: 24px 20px !important;
+          }
+
+          .ant-card {
+            margin-bottom: 20px !important;
+          }
+        }
+
+        .ant-skeleton-content .ant-skeleton-paragraph > li {
+          height: 10px !important;
+        }
+
+        .ant-card {
+          box-shadow: none !important;
+          border: 1px solid #e8e8e8 !important;
+        }
+      `}</style>
     </div>
   );
 }
