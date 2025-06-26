@@ -73,6 +73,7 @@
     "next-plugin-antd-less": "^1.8.0",
     "node-cron": "^3.0.3",
     "nodemailer": "^6.8.0",
+    "nodemon": "^3.1.10",
     "objection": "^3.0.1",
     "openai": "^4.75.0",
     "papaparse": "^5.5.2",
