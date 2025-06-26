@@ -1,7 +1,25 @@
+import { handleError } from "@/utils/helper/controller-helper";
+
 const RefJFTSiasn = require("@/models/ref_siasn/jft.model");
 const RefJFUSiasn = require("@/models/ref_siasn/jfu.model");
 const SubJabatanSiasn = require("@/models/ref_siasn/sub-jabatan.model");
 const { createRedisInstance } = require("@/utils/redis");
+const { getJabatanById } = require("@/utils/siasn-utils");
+
+export const getRefJftSiasnById = async (req, res) => {
+  try {
+    const { siasnRequest } = req;
+    const { id } = req.query;
+    const result = await getJabatanById(siasnRequest, id);
+    const currentJabatan = result?.data?.data;
+    const refJft = await RefJFTSiasn.query().findById(
+      currentJabatan?.jabatanFungsionalId
+    );
+    res.json(refJft);
+  } catch (error) {
+    handleError(res, error);
+  }
+};
 
 // Fungsi helper untuk mengambil data dari cache Redis
 const getDataFromCache = async (redis, key, fetchFunction) => {

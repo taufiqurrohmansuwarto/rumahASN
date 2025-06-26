@@ -3,8 +3,6 @@ import {
   dataUtamSIASNByNip,
   deleteAkByNip,
   getRwAngkakreditByNip,
-  postRwAngkakreditByNip,
-  uploadDokRiwayat,
 } from "@/services/siasn-services";
 import {
   DeleteOutlined,
@@ -24,254 +22,21 @@ import { checkKonversiIntegrasiPertama } from "@/utils/client-utils";
 import {
   Button,
   Card,
-  DatePicker,
   Descriptions,
   Divider,
   Empty,
-  Form,
-  Input,
-  InputNumber,
-  Modal,
   Popconfirm,
-  Radio,
   Skeleton,
   Space,
   Table,
   Tooltip,
-  Upload,
   message,
 } from "antd";
 import { useState } from "react";
-import FormRiwayatJabatanByNip from "../FormRiwayatJabatanByNip";
 import UploadDokumen from "../UploadDokumen";
 import TransferAngkaKredit from "./TransferAngkaKredit";
-import FormAngkaKreditKonversi from "./FormAngkaKreditKonversi";
-
-const FormAngkaKredit = ({ visible, onCancel, nip }) => {
-  const [form] = Form.useForm();
-  const [loading, setLoading] = useState(false);
-
-  const queryClient = useQueryClient();
-
-  const [fileList, setFileList] = useState([]);
-
-  const handleChange = (info) => {
-    let fileList = [...info.fileList];
-
-    fileList = fileList.slice(-1);
-
-    fileList = fileList.map((file) => {
-      if (file.response) {
-        file.url = file.response.url;
-      }
-      return file;
-    });
-
-    setFileList(fileList);
-  };
-
-  const onFinish = async () => {
-    setLoading(true);
-    try {
-      const result = await form.validateFields();
-      const { selesaiPenilaian, mulaiPenilaian, ...rest } = result;
-      const data = {
-        ...rest,
-        tahun: rest?.tahun?.format("YYYY") || "",
-        kreditUtamaBaru: rest?.kreditUtamaBaru || 0,
-        kreditPenunjangBaru: rest?.kreditPenunjangBaru || 0,
-        bulanMulaiPenailan: mulaiPenilaian.format("M"),
-        bulanSelesaiPenailan: selesaiPenilaian.format("M"),
-        tahunMulaiPenailan: mulaiPenilaian.format("YYYY"),
-        tahunSelesaiPenailan: selesaiPenilaian.format("YYYY"),
-        isAngkaKreditPertama:
-          rest?.jenisAngkaKredit === "isAngkaKreditPertama" ? "1" : "0",
-        isIntegrasi: rest?.jenisAngkaKredit === "isIntegrasi" ? "1" : "0",
-        isKonversi: rest?.jenisAngkaKredit === "isKonversi" ? "1" : "0",
-        tanggalSk: rest?.tanggalSk.format("DD-MM-YYYY"),
-      };
-
-      const currentFile = fileList[0]?.originFileObj;
-
-      if (currentFile) {
-        const angkaKredit = await postRwAngkakreditByNip({
-          data,
-          nip,
-        });
-
-        const formData = new FormData();
-        formData.append("file", currentFile);
-        formData.append("id_ref_dokumen", "879");
-        formData.append("id_riwayat", angkaKredit?.id);
-        await uploadDokRiwayat(formData);
-        queryClient.invalidateQueries("angka-kredit");
-        setLoading(false);
-        onCancel();
-        setFileList([]);
-        message.success("Berhasil menambahkan angka kredit");
-      } else {
-        await postRwAngkakreditByNip({
-          data,
-          nip,
-        });
-
-        queryClient.invalidateQueries("angka-kredit");
-        setLoading(false);
-        onCancel();
-        setFileList([]);
-        message.success("Berhasil menambahkan angka kredit");
-      }
-    } catch (error) {
-      setLoading(false);
-      message.error(
-        error?.response?.data?.message || "Gagal menambahkan angka kredit"
-      );
-      console.log(error);
-    }
-  };
-
-  const handleConfirmModal = () => {
-    Modal.confirm({
-      centered: true,
-      title: "Apakah anda yakin?",
-      content: `Mohon pastikan semua data dan dokumen yang Anda masukkan selalu terkini dan akurat. Ketidaksesuaian informasi bisa berdampak pada proses layanan kepegawaian pegawai. Ingat, setiap entri data akan dicatat dan dipertanggungjawabkan melalui sistem log Rumah ASN.`,
-      okText: "Ya",
-      cancelText: "Tidak",
-      onOk: async () => await onFinish(),
-    });
-  };
-
-  const [showFieldAngkaKredit, setShowFieldAngkaKredit] = useState(true);
-  const [showTahun, setShowTahun] = useState(false);
-  const [isKonversi, setIsKonversi] = useState(false);
-
-  return (
-    <Modal
-      confirmLoading={loading}
-      title="Tambah Angka Kredit"
-      centered
-      open={visible}
-      width={800}
-      onCancel={onCancel}
-      onOk={handleConfirmModal}
-    >
-      <Form form={form} layout="vertical">
-        <Upload
-          beforeUpload={() => false}
-          maxCount={1}
-          accept=".pdf"
-          onChange={handleChange}
-          fileList={fileList}
-        >
-          <Button icon={<FileAddOutlined />} style={{ marginBottom: 10 }}>
-            Upload
-          </Button>
-        </Upload>
-        <Form.Item
-          name={"jenisAngkaKredit"}
-          label={"Jenis Angka Kredit"}
-          required
-          rules={[
-            {
-              required: true,
-              message: "Pilih Jenis Angka Kredit",
-            },
-          ]}
-        >
-          <Radio.Group
-            onChange={(e) => {
-              const value = e.target.value;
-              if (value === "isKonversi") {
-                setShowFieldAngkaKredit(false);
-                setShowTahun(true);
-                setIsKonversi(true);
-                form.setFieldsValue({
-                  kreditUtamaBaru: "",
-                  kreditPenunjangBaru: "",
-                  kreditBaruTotal: "",
-                });
-              } else if (value === "isIntegrasi") {
-                setShowTahun(false);
-                setShowFieldAngkaKredit(false);
-                setIsKonversi(false);
-                form.setFieldsValue({
-                  tahun: "",
-                  kreditUtamaBaru: "",
-                  kreditPenunjangBaru: "",
-                  kreditBaruTotal: "",
-                });
-              } else {
-                setShowTahun(false);
-                setShowFieldAngkaKredit(true);
-
-                setIsKonversi(false);
-                form.setFieldsValue({
-                  tahun: "",
-                  kreditBaruTotal: "",
-                });
-              }
-            }}
-          >
-            <Radio.Button value="isAngkaKreditPertama">
-              Angka Kredit Pertama?
-            </Radio.Button>
-            <Radio.Button value="isIntegrasi">Integrasi</Radio.Button>
-            <Radio.Button value="isKonversi">Konversi</Radio.Button>
-          </Radio.Group>
-        </Form.Item>
-        <Form.Item required name="nomorSk" label="Nomor SK">
-          <Input />
-        </Form.Item>
-        {showTahun ? (
-          <Form.Item required name="tahun" label="Tahun">
-            <DatePicker picker="year" />
-          </Form.Item>
-        ) : null}
-        <Form.Item required name="tanggalSk" label="Tanggal SK">
-          <DatePicker format={"DD-MM-YYYY"} />
-        </Form.Item>
-        <Form.Item required name="mulaiPenilaian" label="Mulai Penilaian">
-          <DatePicker picker="month" />
-        </Form.Item>
-        <Form.Item required name="selesaiPenilaian" label="Selesai Penilaian">
-          <DatePicker picker="month" />
-        </Form.Item>
-        {showFieldAngkaKredit ? (
-          <>
-            <Form.Item
-              required
-              name="kreditUtamaBaru"
-              label="Kredit Utama Baru"
-            >
-              <InputNumber />
-            </Form.Item>
-            <Form.Item
-              name="kreditPenunjangBaru"
-              label="Kredit Penunjang Baru"
-              required
-            >
-              <InputNumber />
-            </Form.Item>
-          </>
-        ) : null}
-        {!isKonversi ? (
-          <Form.Item
-            required
-            name="kreditBaruTotal"
-            label="Kredit Baru Total"
-            help="Untuk Konversi entri Jumlah nilai PAK Konversi (lembar/lampiran ke-2)"
-          >
-            <InputNumber />
-          </Form.Item>
-        ) : (
-          <FormAngkaKreditKonversi />
-        )}
-
-        <FormRiwayatJabatanByNip nip={nip} name="rwJabatanId" />
-      </Form>
-    </Modal>
-  );
-};
+import BasicFormAngkaKredit from "./BasicFormAngkaKredit";
+import BasicFormTransferAngkaKredit from "./BasicFormTransferAngkaKredit";
 
 function CompareAngkaKreditByNip({ nip }) {
   const queryClient = useQueryClient();
@@ -718,7 +483,7 @@ function CompareAngkaKreditByNip({ nip }) {
 
   return (
     <Card title="Komparasi Angka Kredit">
-      <TransferAngkaKredit
+      <BasicFormTransferAngkaKredit
         data={dataTransfer}
         file={file}
         onCancel={handleCancelTransfer}
@@ -732,7 +497,7 @@ function CompareAngkaKreditByNip({ nip }) {
           <Empty description="Tidak dapat mengentri AK karena pegawai PPPK / Bukan JFT" />
         ) : (
           <>
-            <FormAngkaKredit
+            <BasicFormAngkaKredit
               visible={visible}
               onCancel={handleCancel}
               nip={nip}

@@ -284,6 +284,10 @@ export const getSubJabatanV2 = (fungsionalId) => {
     .then((res) => res.data);
 };
 
+export const getRefJftSiasnById = (id) => {
+  return api.get(`/ref/v2/jft-siasn/${id}`).then((res) => res.data);
+};
+
 // jabatan
 export const getRwJabatan = () => {
   return api.get("/pns/rw-jabatan").then((res) => res.data);
