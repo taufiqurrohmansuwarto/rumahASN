@@ -385,6 +385,66 @@ export const cutMarkdown = (text) => {
   return text.substring(0, 200) + "...";
 };
 
+export const predikatAngkaKredit = [
+  { label: "Pemula", kode: "PM", predikat: "SANGAT BAIK", value: 5.63 },
+  { label: "Pemula", kode: "PM", predikat: "BAIK", value: 3.75 },
+  { label: "Pemula", kode: "PM", predikat: "BUTUH PERBAIKAN", value: 2.81 },
+  { label: "Pemula", kode: "PM", predikat: "KURANG", value: 1.88 },
+  { label: "Pemula", kode: "PM", predikat: "SANGAT KURANG", value: 0.94 },
+
+  { label: "Terampil", kode: "TR", predikat: "SANGAT BAIK", value: 7.5 },
+  { label: "Terampil", kode: "TR", predikat: "BAIK", value: 5 },
+  { label: "Terampil", kode: "TR", predikat: "BUTUH PERBAIKAN", value: 3.75 },
+  { label: "Terampil", kode: "TR", predikat: "KURANG", value: 2.5 },
+  { label: "Terampil", kode: "TR", predikat: "SANGAT KURANG", value: 1.25 },
+
+  { label: "Mahir", kode: "MH", predikat: "SANGAT BAIK", value: 18.75 },
+  { label: "Mahir", kode: "MH", predikat: "BAIK", value: 12.5 },
+  { label: "Mahir", kode: "MH", predikat: "BUTUH PERBAIKAN", value: 9.38 },
+  { label: "Mahir", kode: "MH", predikat: "KURANG", value: 6.25 },
+  { label: "Mahir", kode: "MH", predikat: "SANGAT KURANG", value: 3.13 },
+
+  { label: "Penyelia", kode: "PY", predikat: "SANGAT BAIK", value: 37.5 },
+  { label: "Penyelia", kode: "PY", predikat: "BAIK", value: 25 },
+  { label: "Penyelia", kode: "PY", predikat: "BUTUH PERBAIKAN", value: 18.75 },
+  { label: "Penyelia", kode: "PY", predikat: "KURANG", value: 12.5 },
+  { label: "Penyelia", kode: "PY", predikat: "SANGAT KURANG", value: 6.25 },
+
+  { label: "Ahli Pertama", kode: "PT", predikat: "SANGAT BAIK", value: 18.75 },
+  { label: "Ahli Pertama", kode: "PT", predikat: "BAIK", value: 12.5 },
+  {
+    label: "Ahli Pertama",
+    kode: "PT",
+    predikat: "BUTUH PERBAIKAN",
+    value: 9.38,
+  },
+  { label: "Ahli Pertama", kode: "PT", predikat: "KURANG", value: 6.25 },
+  { label: "Ahli Pertama", kode: "PT", predikat: "SANGAT KURANG", value: 3.13 },
+
+  { label: "Ahli Muda", kode: "MU", predikat: "SANGAT BAIK", value: 37.5 },
+  { label: "Ahli Muda", kode: "MU", predikat: "BAIK", value: 25 },
+  { label: "Ahli Muda", kode: "MU", predikat: "BUTUH PERBAIKAN", value: 18.75 },
+  { label: "Ahli Muda", kode: "MU", predikat: "KURANG", value: 12.5 },
+  { label: "Ahli Muda", kode: "MU", predikat: "SANGAT KURANG", value: 6.25 },
+
+  { label: "Ahli Madya", kode: "MA", predikat: "SANGAT BAIK", value: 56.25 },
+  { label: "Ahli Madya", kode: "MA", predikat: "BAIK", value: 37.5 },
+  {
+    label: "Ahli Madya",
+    kode: "MA",
+    predikat: "BUTUH PERBAIKAN",
+    value: 28.13,
+  },
+  { label: "Ahli Madya", kode: "MA", predikat: "KURANG", value: 18.75 },
+  { label: "Ahli Madya", kode: "MA", predikat: "SANGAT KURANG", value: 9.38 },
+
+  { label: "Ahli Utama", kode: "UT", predikat: "SANGAT BAIK", value: 75 },
+  { label: "Ahli Utama", kode: "UT", predikat: "BAIK", value: 50 },
+  { label: "Ahli Utama", kode: "UT", predikat: "BUTUH PERBAIKAN", value: 37.5 },
+  { label: "Ahli Utama", kode: "UT", predikat: "KURANG", value: 25 },
+  { label: "Ahli Utama", kode: "UT", predikat: "SANGAT KURANG", value: 12.5 },
+];
+
 export const dataAngkaKreditKonversi = [
   { label: "Pemula - Sangat Kurang (0.94)", value: 0.94 },
   { label: "Terampil - Sangat Kurang (1.25)", value: 1.25 },

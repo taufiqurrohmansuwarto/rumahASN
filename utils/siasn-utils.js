@@ -353,3 +353,7 @@ module.exports.downloadDokumenAPI = (fetcher, path) => {
       return res?.data;
     });
 };
+
+module.exports.getJabatanById = (fetcher, id) => {
+  return fetcher.get(`/jabatan/id/${id}`);
+};
