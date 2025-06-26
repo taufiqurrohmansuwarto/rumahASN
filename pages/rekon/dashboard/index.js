@@ -1,23 +1,18 @@
 import PageContainer from "@/components/PageContainer";
 import RekonDashboardDetail from "@/components/Rekon/RekonDashboardDetail";
 import RekonLayout from "@/components/Rekon/RekonLayout";
-import { Breadcrumb, Grid } from "antd";
+import { Breadcrumb } from "antd";
 import Head from "next/head";
 
 const RekonDashboard = () => {
-  const breakPoint = Grid.useBreakpoint();
-
   return (
     <>
       <Head>
         <title>Rumah ASN - Rekon - Dashboard</title>
       </Head>
       <PageContainer
-        childrenContentStyle={{
-          padding: breakPoint.xs ? 0 : null,
-        }}
-        title="Dashboard"
-        content="Dashboard Rekon"
+        title="Dashboard Rekon SIASN 📊"
+        content="Pusat monitoring dan analisis data rekonsiliasi kepegawaian secara real-time"
         breadcrumbRender={() => {
           return (
             <>

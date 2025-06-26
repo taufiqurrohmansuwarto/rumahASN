@@ -1,9 +1,12 @@
-import { Tabs } from "antd";
+import { Tabs, Grid } from "antd";
 import { useRouter } from "next/router";
-import React from "react";
+
+const { useBreakpoint } = Grid;
 
 function NotificationLayout({ children, active }) {
   const router = useRouter();
+  const screens = useBreakpoint();
+  const isMobile = !screens.md;
 
   const routes = [
     {
@@ -16,44 +19,30 @@ function NotificationLayout({ children, active }) {
       key: "asn-connect",
       title: "ASN Connect",
     },
-    // {
-    //   path: "/notifications/submission",
-    //   key: "submission",
-    //   title: "Usulan",
-    // },
-    // {
-    //   path: "/notifications/private-message",
-    //   key: "private-message",
-    //   title: "Pesan Pribadi",
-    // },
-    {
-      path: "/notifications/kepegawaian",
-      key: "kepegawaian",
-      title: "Kepegawaian",
-    },
   ];
 
   const handleTabChange = (key) => {
     const route = routes.find((route) => route.key === key);
-    router.push(route.path);
+    if (route) {
+      router.push(route.path);
+    }
   };
 
   return (
     <Tabs
-      tabBarStyle={{
-        padding: 0,
-        // margin: 0,
-      }}
       activeKey={active}
       onChange={handleTabChange}
       type="card"
-    >
-      {routes.map((route) => (
-        <Tabs.TabPane key={route.key} tab={route.title}>
-          {children}
-        </Tabs.TabPane>
-      ))}
-    </Tabs>
+      size={isMobile ? "small" : "default"}
+      tabBarStyle={{
+        marginBottom: isMobile ? "16px" : "20px",
+      }}
+      items={routes.map((route) => ({
+        key: route.key,
+        label: isMobile ? route.title.split(" ")[0] : route.title,
+        children: children,
+      }))}
+    />
   );
 }
 

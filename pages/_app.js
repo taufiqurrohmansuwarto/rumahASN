@@ -81,7 +81,7 @@ function MyApp({ Component, pageProps: { session, ...pageProps } }) {
     } else if (router.pathname.includes("/layanan-keuangan")) {
       return layananKeuanganConfig;
     } else if (router.pathname.includes("/rekon")) {
-      return rekonConfig;
+      return antdConfig;
     } else if (router.pathname.includes("/logs")) {
       return antdConfig;
     } else if (router.pathname.includes("/layanan-siasn")) {

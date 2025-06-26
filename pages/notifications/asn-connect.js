@@ -2,21 +2,17 @@ import Layout from "@/components/Layout";
 import NotificationLayout from "@/components/Notification/NotificationLayout";
 import PageContainer from "@/components/PageContainer";
 import SocmedNotifications from "@/components/Socmed/SocmedNotifications";
-import { Breadcrumb, Grid } from "antd";
+import { Breadcrumb } from "antd";
 import Head from "next/head";
 import Link from "next/link";
 
 function ASNConnectNotification() {
-  const breakPoint = Grid.useBreakpoint();
   return (
     <>
       <Head>
         <title>Rumah ASN - Notifikasi ASN Connect</title>
       </Head>
       <PageContainer
-        childrenContentStyle={{
-          padding: breakPoint.xs ? 0 : null,
-        }}
         header={{
           breadcrumbRender: () => (
             <Breadcrumb>
@@ -27,8 +23,8 @@ function ASNConnectNotification() {
             </Breadcrumb>
           ),
         }}
-        title="Notifikasi"
-        content="ASN Connect"
+        title="Notifikasi ASN Connect"
+        content="Kelola dan pantau semua notifikasi dari aktivitas ASN Connect Anda"
       >
         <NotificationLayout active="asn-connect">
           <SocmedNotifications />
