@@ -16,14 +16,20 @@ import {
   Flex,
   Badge,
   Tag,
+  Grid,
 } from "antd";
 import { useRouter } from "next/router";
 
 const { Title, Text } = Typography;
+const { useBreakpoint } = Grid;
 
 function RekonIPASN() {
   const router = useRouter();
   const queryClient = useQueryClient();
+  const screens = useBreakpoint();
+  const isMobile = !screens.md;
+  const isTablet = screens.md && !screens.lg;
+  const isDesktop = screens.lg;
 
   const { data, isLoading } = useQuery({
     queryKey: ["rekon-ipasn"],
@@ -60,6 +66,8 @@ function RekonIPASN() {
       onFilter: (value, record) =>
         record.name.toLowerCase().includes(value.toLowerCase()),
       sorter: (a, b) => a.name.localeCompare(b.name),
+      width: "40%",
+      ellipsis: true,
       render: (text) => (
         <Text strong style={{ color: "#374151" }}>
           {text}
@@ -72,7 +80,7 @@ function RekonIPASN() {
       sorter: (a, b) => a.rerata_total_pns - b.rerata_total_pns,
       align: "center",
       render: (value) => (
-        <Tag color="#6366F1" style={{ fontWeight: 500 }}>
+        <Tag color="#FF4500" style={{ fontWeight: 500 }}>
           {value}
         </Tag>
       ),
@@ -91,120 +99,369 @@ function RekonIPASN() {
   ];
 
   return (
-    <div
-      style={{
-        padding: "24px",
-        backgroundColor: "#FAFAFB",
-        minHeight: "100vh",
-      }}
-    >
-      {/* Header Section */}
-      <div style={{ marginBottom: "32px" }}>
-        <Flex justify="space-between" align="center">
-          <div>
-            <Title
-              level={2}
-              style={{ margin: 0, color: "#1F2937", fontWeight: 700 }}
-            >
-              IPASN Pemprov Jatim
-            </Title>
-            <Text
-              type="secondary"
-              style={{ fontSize: "16px", lineHeight: "24px" }}
-            >
-              Monitoring data IPASN dan sinkronisasi informasi pegawai
-            </Text>
-          </div>
-          <Space>
-            <Button
-              type="default"
-              icon={<SyncOutlined />}
-              loading={isSyncRekonIpasnLoading}
-              disabled={isSyncRekonIpasnLoading}
-              onClick={handleSyncRekonIpasn}
+    <div>
+      {/* Header */}
+      <Card
+        style={{
+          marginBottom: isMobile ? "8px" : isTablet ? "12px" : "16px",
+          borderRadius: isMobile ? "6px" : isTablet ? "8px" : "12px",
+          border: "1px solid #e8e8e8",
+        }}
+      >
+        <Flex
+          align="center"
+          gap={isMobile ? 10 : 12}
+          wrap={isMobile}
+          justify={isMobile ? "center" : "space-between"}
+        >
+          <Flex align="center" gap={isMobile ? 10 : 12}>
+            <div
               style={{
-                borderRadius: "8px",
-                fontWeight: 500,
-                height: "40px",
-                padding: "0 16px",
+                width: isMobile ? "36px" : "40px",
+                height: isMobile ? "36px" : "40px",
+                backgroundColor: "#FF4500",
+                borderRadius: isMobile ? "6px" : "8px",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                flexShrink: 0,
               }}
             >
-              Sinkronkan Data
-            </Button>
-            <Button
-              type="primary"
-              icon={<SearchOutlined />}
-              onClick={() => router.push("/rekon/dashboard/ipasn")}
-              style={{
-                borderRadius: "8px",
-                fontWeight: 500,
-                height: "40px",
-                padding: "0 20px",
-              }}
-            >
-              Detail Dashboard
-            </Button>
-          </Space>
+              <TeamOutlined
+                style={{ color: "white", fontSize: isMobile ? "18px" : "20px" }}
+              />
+            </div>
+            <div style={{ flex: 1, textAlign: isMobile ? "center" : "left" }}>
+              <Title
+                level={isMobile ? 5 : 4}
+                style={{
+                  margin: 0,
+                  color: "#1a1a1a",
+                  fontSize: isMobile ? "16px" : "20px",
+                }}
+              >
+                👥 IPASN Pemprov Jatim
+              </Title>
+              <Text
+                type="secondary"
+                style={{
+                  fontSize: isMobile ? "11px" : "13px",
+                  display: "block",
+                  marginTop: "2px",
+                }}
+              >
+                Monitoring data IPASN dan sinkronisasi informasi pegawai
+              </Text>
+            </div>
+          </Flex>
+
+          {!isMobile && (
+            <Space size="middle">
+              <Button
+                type="default"
+                icon={<SyncOutlined />}
+                loading={isSyncRekonIpasnLoading}
+                disabled={isSyncRekonIpasnLoading}
+                onClick={handleSyncRekonIpasn}
+                style={{
+                  borderRadius: "8px",
+                  fontWeight: 500,
+                  height: isTablet ? "36px" : "40px",
+                  padding: "0 16px",
+                }}
+              >
+                Sinkronkan Data
+              </Button>
+              <Button
+                type="primary"
+                icon={<SearchOutlined />}
+                onClick={() => router.push("/rekon/dashboard/ipasn")}
+                style={{
+                  backgroundColor: "#FF4500",
+                  borderColor: "#FF4500",
+                  borderRadius: "8px",
+                  fontWeight: 500,
+                  height: isTablet ? "36px" : "40px",
+                  padding: "0 20px",
+                }}
+              >
+                Detail Dashboard
+              </Button>
+            </Space>
+          )}
         </Flex>
-      </div>
+
+        {isMobile && (
+          <div style={{ marginTop: "12px" }}>
+            <Space direction="vertical" size={8} style={{ width: "100%" }}>
+              <Button
+                type="default"
+                icon={<SyncOutlined />}
+                loading={isSyncRekonIpasnLoading}
+                disabled={isSyncRekonIpasnLoading}
+                onClick={handleSyncRekonIpasn}
+                style={{
+                  borderRadius: "8px",
+                  fontWeight: 500,
+                  height: "36px",
+                  width: "100%",
+                }}
+              >
+                Sinkronkan Data
+              </Button>
+              <Button
+                type="primary"
+                icon={<SearchOutlined />}
+                onClick={() => router.push("/rekon/dashboard/ipasn")}
+                style={{
+                  backgroundColor: "#FF4500",
+                  borderColor: "#FF4500",
+                  borderRadius: "8px",
+                  fontWeight: 500,
+                  height: "36px",
+                  width: "100%",
+                }}
+              >
+                Detail Dashboard
+              </Button>
+            </Space>
+          </div>
+        )}
+      </Card>
 
       {/* Data Table Section */}
       <Card
         style={{
-          borderRadius: "16px",
-          border: "1px solid #E5E7EB",
-          boxShadow: "0 1px 3px rgba(0, 0, 0, 0.1)",
+          borderRadius: isMobile ? "6px" : isTablet ? "8px" : "12px",
+          border: "1px solid #e8e8e8",
+          marginBottom: isMobile ? "8px" : isTablet ? "12px" : "16px",
         }}
-        bodyStyle={{ padding: "32px" }}
       >
-        <Space direction="vertical" size={24} style={{ width: "100%" }}>
-          <Flex align="center" justify="space-between">
-            <Flex align="center" gap={12}>
+        {isLoading ? (
+          <Skeleton active paragraph={{ rows: 6 }} />
+        ) : data?.data && data.data.length > 0 ? (
+          <Space
+            direction="vertical"
+            size={isMobile ? 16 : 20}
+            style={{ width: "100%" }}
+          >
+            <Flex
+              align="center"
+              gap={8}
+              wrap={isMobile}
+              justify="space-between"
+            >
+              <Flex align="center" gap={8}>
+                <div
+                  style={{
+                    width: isMobile ? "32px" : "36px",
+                    height: isMobile ? "32px" : "36px",
+                    borderRadius: "6px",
+                    backgroundColor: "#FF4500",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    flexShrink: 0,
+                  }}
+                >
+                  <TeamOutlined
+                    style={{
+                      color: "white",
+                      fontSize: isMobile ? "16px" : "18px",
+                    }}
+                  />
+                </div>
+                <Title
+                  level={isMobile ? 5 : 4}
+                  style={{
+                    margin: 0,
+                    color: "#1a1a1a",
+                    fontSize: isMobile ? "14px" : "18px",
+                  }}
+                >
+                  📊 Data Perangkat Daerah
+                </Title>
+              </Flex>
+
               <div
                 style={{
-                  width: "40px",
-                  height: "40px",
-                  borderRadius: "12px",
-                  backgroundColor: "#6366F1",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
+                  backgroundColor: "#FF4500",
+                  color: "white",
+                  padding: isMobile ? "4px 8px" : "6px 12px",
+                  borderRadius: "16px",
+                  fontSize: isMobile ? "11px" : "12px",
+                  fontWeight: 600,
+                  minWidth: "fit-content",
                 }}
               >
-                <TeamOutlined style={{ color: "white", fontSize: "18px" }} />
+                Total: {data?.data?.length || 0}
               </div>
-              <Title level={4} style={{ margin: 0, color: "#1F2937" }}>
-                Data Perangkat Daerah
-              </Title>
-              <Badge
-                count={data?.data?.length || 0}
-                style={{ backgroundColor: "#6366F1" }}
-              />
             </Flex>
-          </Flex>
 
-          {isLoading ? (
-            <Skeleton active paragraph={{ rows: 8 }} />
-          ) : (
-            <Table
-              rowKey={(row) => row?.id}
-              dataSource={data?.data}
-              loading={isLoading}
-              columns={columns}
-              pagination={{
-                pageSize: 15,
-                position: ["bottomRight"],
-                showSizeChanger: false,
-                showTotal: (total) => `Total ${total} item`,
-                style: { marginTop: "24px" },
+            <div
+              style={{
+                padding: isMobile ? "4px 0" : "8px 0",
+                overflow: "hidden",
               }}
-              sortDirections={["ascend", "descend"]}
-              scroll={{ x: "max-content" }}
-              style={{ borderRadius: "8px" }}
+            >
+              <Table
+                rowKey={(row) => row?.id}
+                dataSource={data?.data}
+                loading={isLoading}
+                columns={columns}
+                pagination={{
+                  pageSize: 15,
+                  position: ["bottomRight"],
+                  showSizeChanger: false,
+                  showTotal: (total) => `Total ${total} item`,
+                  style: { marginTop: "24px" },
+                }}
+                sortDirections={["ascend", "descend"]}
+                scroll={{ x: "max-content" }}
+                style={{ borderRadius: "8px" }}
+                size={isMobile ? "small" : "middle"}
+              />
+            </div>
+          </Space>
+        ) : (
+          <Flex
+            vertical
+            align="center"
+            justify="center"
+            style={{
+              padding: isMobile ? "30px 20px" : "40px 20px",
+              color: "#999",
+            }}
+          >
+            <TeamOutlined
+              style={{
+                color: "#d9d9d9",
+                fontSize: isMobile ? "40px" : "48px",
+                marginBottom: "12px",
+              }}
             />
-          )}
-        </Space>
+            <Title
+              level={isMobile ? 5 : 4}
+              style={{ color: "#999", margin: "0 0 6px 0" }}
+            >
+              Tidak ada data tersedia
+            </Title>
+            <Text
+              type="secondary"
+              style={{
+                textAlign: "center",
+                fontSize: isMobile ? "12px" : "14px",
+              }}
+            >
+              Tidak ada data IPASN yang tersedia saat ini
+              <br />
+              Coba sinkronkan data atau hubungi administrator
+            </Text>
+          </Flex>
+        )}
       </Card>
+
+      <style jsx global>{`
+        .ant-card {
+          transition: all 0.3s ease !important;
+          box-shadow: none !important;
+          border: 1px solid #e8e8e8 !important;
+        }
+
+        .ant-card:hover {
+          border-color: #ff4500 !important;
+        }
+
+        .ant-btn-primary {
+          background: #ff4500 !important;
+          border-color: #ff4500 !important;
+        }
+
+        .ant-btn-primary:hover {
+          background: #ff6b35 !important;
+          border-color: #ff6b35 !important;
+          transform: translateY(-1px) !important;
+          box-shadow: 0 2px 8px rgba(255, 69, 0, 0.25) !important;
+        }
+
+        .ant-btn-default:hover {
+          border-color: #ff4500 !important;
+          color: #ff4500 !important;
+        }
+
+        .ant-tag {
+          border-radius: 4px !important;
+        }
+
+        .ant-table-thead > tr > th {
+          background: #fafafa !important;
+          border-bottom: 1px solid #f0f0f0 !important;
+        }
+
+        .ant-table-tbody > tr:hover > td {
+          background: #fff7e6 !important;
+        }
+
+        @media (max-width: 576px) {
+          .ant-col {
+            margin-bottom: 4px !important;
+          }
+
+          .ant-card-body {
+            padding: 12px 8px !important;
+          }
+
+          .ant-space-vertical {
+            gap: 4px !important;
+          }
+
+          .ant-card {
+            margin-bottom: 8px !important;
+          }
+
+          .ant-table-pagination {
+            margin-top: 12px !important;
+          }
+        }
+
+        @media (max-width: 768px) {
+          .ant-col {
+            margin-bottom: 6px !important;
+          }
+
+          .ant-card-body {
+            padding: 16px 12px !important;
+          }
+
+          .ant-card {
+            margin-bottom: 12px !important;
+          }
+        }
+
+        @media (min-width: 769px) and (max-width: 1199px) {
+          .ant-card-body {
+            padding: 20px 16px !important;
+          }
+
+          .ant-card {
+            margin-bottom: 16px !important;
+          }
+        }
+
+        @media (min-width: 1200px) {
+          .ant-card-body {
+            padding: 24px 20px !important;
+          }
+
+          .ant-card {
+            margin-bottom: 20px !important;
+          }
+        }
+
+        .ant-skeleton-content .ant-skeleton-paragraph > li {
+          height: 10px !important;
+        }
+      `}</style>
     </div>
   );
 }
