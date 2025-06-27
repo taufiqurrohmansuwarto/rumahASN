@@ -59,11 +59,11 @@ function EmployeesTableFilterAdmin() {
     <QueryFilter
       span={{
         sm: 24,
-        md: 24,
-        xl: 24,
-        lg: 24,
-        xxl: 8,
-        xs: 24,
+        md: 12,
+        xl: 12,
+        lg: 12,
+        xxl: 12,
+        xs: 12,
       }}
       layout="vertical"
       form={form}
@@ -93,7 +93,12 @@ function EmployeesTableFilterAdmin() {
         <Input />
       </Form.Item>
       <Form.Item name="opd_id" label="Perangkat Daerah">
-        <TreeSelect treeNodeFilterProp="label" showSearch treeData={unor} />
+        <TreeSelect
+          treeNodeFilterProp="label"
+          showSearch
+          treeData={unor}
+          placeholder="Pilih Perangkat Daerah"
+        />
       </Form.Item>
     </QueryFilter>
   );
