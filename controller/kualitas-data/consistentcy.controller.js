@@ -209,6 +209,8 @@ export const dashboardConsistency = async (req, res) => {
       {
         id: "tmt_cpns_nip_pns",
         label: "TMT CPNS vs NIP PNS",
+        description:
+          " 6 digit tahun-bulan pada NIP tidak cocok dengan data TMT CPNS.",
         value: sims[0].total,
         siasn: sis[0].total,
         totalPegawai,
@@ -217,6 +219,8 @@ export const dashboardConsistency = async (req, res) => {
       {
         id: "tgl_lahir_nip_asn",
         label: "Tgl Lahir vs NIP ASN",
+        description:
+          " 8 digit tanggal lahir pada NIP tidak sesuai dengan data riil.",
         value: sims[1].total,
         siasn: sis[1].total,
         totalPegawai,
@@ -225,6 +229,8 @@ export const dashboardConsistency = async (req, res) => {
       {
         id: "tahun_pengangkatan_pppk",
         label: "Tahun Pengangkatan PPPK",
+        description:
+          " Tahun TMT PPPK tidak sama dengan 4 digit tahun pengangkatan pada NI PPPK.",
         value: sims[2].total,
         siasn: sis[2].total,
         totalPegawai,
@@ -233,6 +239,8 @@ export const dashboardConsistency = async (req, res) => {
       {
         id: "jenis_kelamin_pada_asn",
         label: "Jenis Kelamin pada ASN",
+        description:
+          " 1 digit kode jenis kelamin di NIP tidak sesuai dengan data ASN.",
         value: sims[3].total,
         siasn: sis[3].total,
         totalPegawai,

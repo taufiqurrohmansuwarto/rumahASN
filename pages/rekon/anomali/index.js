@@ -1,25 +1,11 @@
-import DashboardKomparasiAdmin from "@/components/Fasilitator/DashboardKomparasiAdmin";
-import DashboardKompareFasilitator from "@/components/Fasilitator/DashboardKompareFasilitator";
-import DashboardDimensiAccuracy from "@/components/Fasilitator/KualitasData/DashboardDimensiAccuracy";
-import DashboardDimensiCompleteness from "@/components/Fasilitator/KualitasData/DashboardDimensiCompleteness";
-import DashboardDimensiConsistency from "@/components/Fasilitator/KualitasData/DashboardDimensiConsistency";
-import DashboardDimensiTimeliness from "@/components/Fasilitator/KualitasData/DashboardDimensiTimeliness";
 import PageContainer from "@/components/PageContainer";
 import RekonLayout from "@/components/Rekon/RekonLayout";
 import useScrollRestoration from "@/hooks/useScrollRestoration";
-import { Grid } from "antd";
-import { useSession } from "next-auth/react";
 import Head from "next/head";
+import DetailKualitasData from "@/components/Fasilitator/KualitasData/DetailKualitasData";
 
 const RekonAnomali = () => {
   useScrollRestoration();
-
-  const { data: session } = useSession();
-
-  const admin = session?.user?.current_role === "admin";
-  const fasilitator = session?.user?.role === "FASILITATOR";
-
-  const breakPoint = Grid.useBreakpoint();
 
   return (
     <>
@@ -27,19 +13,10 @@ const RekonAnomali = () => {
         <title>Rumah ASN - Rekon - Disparitas Data</title>
       </Head>
       <PageContainer
-        childrenContentStyle={{
-          padding: breakPoint.xs ? 0 : null,
-        }}
-        title="Disparitas Data"
-        content="Disparitas data antara SIASN dan SIMASTER"
+        title="Deteksi Anomali Data 🔍"
+        content="Identifikasi dan analisis disparitas data antara sistem SIASN dan SIMASTER untuk memastikan konsistensi informasi kepegawaian"
       >
-        {admin && <DashboardKomparasiAdmin />}
-        {fasilitator && <DashboardKompareFasilitator />}
-
-        <DashboardDimensiAccuracy />
-        <DashboardDimensiCompleteness />
-        <DashboardDimensiConsistency />
-        <DashboardDimensiTimeliness />
+        <DetailKualitasData />
       </PageContainer>
     </>
   );

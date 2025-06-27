@@ -271,6 +271,8 @@ module.exports = {
         {
           id: "cpns-lebih-dari-satu-tahun",
           label: "CPNS Lebih Dari Satu Tahun",
+          description:
+            " ASN belum diangkat jadi PNS lebih dari 1 tahun sejak TMT CPNS.",
           value: cpns.total,
           siasn: cpnsSiasn.total,
           totalPegawai,
@@ -279,6 +281,8 @@ module.exports = {
         {
           id: "struktural-ganda",
           label: "Struktural Ganda",
+          description:
+            " Satu jabatan struktural diduduki lebih dari satu ASN pada waktu bersamaan.",
           value: struktural.total,
           siasn: strukturalSiasn.total,
           totalPegawai,
@@ -287,6 +291,8 @@ module.exports = {
         {
           id: "bup-masih-aktif",
           label: "BUP Masih Aktif",
+          description:
+            "ASN masih aktif sebagai BUP/BUPB lebih dari 1 tahun sejak TMT BUP.",
           value: bup.total,
           siasn: bupSiasn.total,
           totalPegawai,

@@ -347,6 +347,7 @@ export const dashboardAccuracy = async (req, res) => {
       {
         id: "tmt-cpns-lebih-besar-dari-tmt-pns",
         label: "TMT CPNS > TMT PNS",
+        description: "Tanggal CPNS lebih akhir dari tanggal PNS.",
         value: tmtCpns.total,
         siasn: tmtCpnsSiasn.total,
         bobot: 9.52,
@@ -354,6 +355,8 @@ export const dashboardAccuracy = async (req, res) => {
       {
         id: "jenis-pegawai-dpk-tidak-sesuai",
         label: "Jenis Pegawai DPK Tidak Sesuai",
+        description:
+          " Status DPK/DPB tidak sesuai dengan data instansi kerja (asal ≠ penempatan).",
         value: jenisDpk.total,
         siasn: jenisDpkSiasn.total,
         bobot: 21.43,
@@ -361,6 +364,8 @@ export const dashboardAccuracy = async (req, res) => {
       {
         id: "masa-kerja-kurang-dari-2-tahun-struktural",
         label: "Masa Kerja < 2 Tahun (Struktural)",
+        description:
+          "ASN dengan masa kerja < 2 tahun sudah menduduki jabatan struktural.",
         value: masaKerja.total,
         siasn: masaKerjaSiasn.total,
         bobot: 7.14,
@@ -368,6 +373,7 @@ export const dashboardAccuracy = async (req, res) => {
       {
         id: "nik-belum-valid",
         label: "NIK Belum Valid",
+        description: "Belum diisi atau belum tervalidasi di Dukcapil.",
         value: nikInvalid.total,
         siasn: nikInvalidSiasn.total,
         bobot: 4.76,
@@ -375,6 +381,8 @@ export const dashboardAccuracy = async (req, res) => {
       {
         id: "pelaksana-nama-jabatan-fungsional",
         label: "Pelaksana Nama Jabatan Fungsional",
+        description:
+          "Nama jabatan pelaksana mengandung unsur jabatan fungsional (JF).",
         value: pelaksanaFungsi.total,
         siasn: pelaksanaFungsiSiasn.total,
         bobot: 4.76,
@@ -382,6 +390,8 @@ export const dashboardAccuracy = async (req, res) => {
       {
         id: "tingkat-pendidikan-jabatan-fungsional-tidak-memenuhi-syarat",
         label: "Pendidikan Jabatan Fungsional Tidak Memenuhi",
+        description:
+          " ASN menduduki JF tapi pendidikannya tidak memenuhi syarat minimal",
         value: pendidikanFungsi.total,
         siasn: pendidikanFungsiSiasn.total,
         bobot: 14.29,
@@ -389,6 +399,8 @@ export const dashboardAccuracy = async (req, res) => {
       {
         id: "jpt-dibawah-pangkat-minimal",
         label: "Jabatan Pimpinan Tinggi Dibawah Pangkat Minimal",
+        description:
+          "ASN menjabat JPT tetapi pangkatnya belum sesuai ketentuan minimal.",
         value: jabatanPimpinanTinggiDibawahPangkatMinimal.total,
         siasn: jabatanPimpinanTinggiDibawahPangkatMinimalSiasn.total,
         bobot: 14.29,
@@ -396,6 +408,8 @@ export const dashboardAccuracy = async (req, res) => {
       {
         id: "tk-pendidikan-eselon-tdk-memenuhi-syarat",
         label: "Tingkat Pendidikan Eselon Tidak Memenuhi Syarat",
+        description:
+          "Jabatan struktural ASN tapi tingkat pendidikan di bawah syarat minimum.",
         value: tingkatPendidikanEselonTidakMemenuhiSyarat.total,
         siasn: tingkatPendidikanEselonTidakMemenuhiSyaratSiasn.total,
         bobot: 14.29,
