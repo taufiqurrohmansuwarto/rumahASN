@@ -242,6 +242,8 @@ export const dashboardCompleteness = async (req, res) => {
       {
         id: "jabatan-kosong",
         label: "Jabatan Kosong",
+        description:
+          "ASN memiliki jabatan fungsional/pelaksana tapi tidak ada ID referensi jabatannya.",
         value: sims[0].total,
         siasn: sis[0].total,
         totalPegawai,
@@ -250,6 +252,8 @@ export const dashboardCompleteness = async (req, res) => {
       {
         id: "pendidikan-kosong",
         label: "Pendidikan Kosong",
+        description:
+          "Pendidikan terakhir kosong di data utama dan riwayat pendidikan SIASN.",
         value: sims[1].total,
         siasn: sis[1].total,
         totalPegawai,
@@ -258,6 +262,7 @@ export const dashboardCompleteness = async (req, res) => {
       {
         id: "tmt-pns-kosong",
         label: "TMT PNS Kosong",
+        description: " TMT PNS tidak tersedia di SIASN.",
         value: sims[2].total,
         siasn: sis[2].total,
         totalPegawai,
@@ -266,6 +271,8 @@ export const dashboardCompleteness = async (req, res) => {
       {
         id: "gelar-kosong",
         label: "Gelar Kosong",
+        description:
+          "Gelar depan/belakang kosong, padahal memiliki ijazah D3 ke atas.",
         value: sims[3].total,
         siasn: sis[3].total,
         totalPegawai,
@@ -274,6 +281,7 @@ export const dashboardCompleteness = async (req, res) => {
       {
         id: "email-invalid",
         label: "Email Invalid",
+        description: "Email belum diisi atau formatnya tidak valid.",
         value: sims[4].total,
         siasn: sis[4].total,
         totalPegawai,
@@ -282,6 +290,8 @@ export const dashboardCompleteness = async (req, res) => {
       {
         id: "nomor-hp-invalid",
         label: "Nomor HP Invalid",
+        description:
+          "Nomor handphone belum diisi, padahal dibutuhkan untuk verifikasi/WA MyASN.",
         value: sims[5].total,
         siasn: sis[5].total,
         totalPegawai,
