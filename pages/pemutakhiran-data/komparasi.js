@@ -331,14 +331,9 @@ function Komparasi() {
             ),
           }}
         >
-          <div
-            style={{
-              padding: screens.xs ? "12px" : "16px",
-              backgroundColor: "transparent",
-            }}
-          >
+          <div>
             <Row gutter={[16, 16]}>
-              <Col md={16} xs={24}>
+              <Col md={24} xs={24} sm={24}>
                 {isAnyLoading ? (
                   <LoadingSkeleton />
                 ) : dataUtama ? (
