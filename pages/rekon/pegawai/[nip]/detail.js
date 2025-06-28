@@ -1,7 +1,6 @@
 import PageContainer from "@/components/PageContainer";
 import RekonLayout from "@/components/Rekon/RekonLayout";
 import RekonPegawaiDetail from "@/components/Rekon/RekonPegawaiDetail";
-import RekonPegawaiLayoutDetail from "@/components/Rekon/RekonPegawaiLayoutDetail";
 import { Breadcrumb, Grid } from "antd";
 import Head from "next/head";
 import Link from "next/link";
@@ -37,7 +36,7 @@ const Pegawai = () => {
           );
         }}
       >
-        <RekonPegawaiLayoutDetail></RekonPegawaiLayoutDetail>
+        <RekonPegawaiDetail />
       </PageContainer>
     </>
   );
