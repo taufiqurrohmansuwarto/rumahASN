@@ -10,7 +10,6 @@ dotenv.config();
 
 const baseUrl = process.env.API_SIASN;
 const TOKEN_KEY = "siasn_token";
-const REFRESH_FLAG_KEY = "refresh:token";
 const LOCK_KEY = "token_lock";
 
 let redisClient;
@@ -19,17 +18,28 @@ let httpsAgent;
 
 // Cleanup function untuk mencegah memory leak
 const cleanup = async () => {
-  if (redlock) {
-    await redlock.quit();
-    redlock = null;
-  }
-  if (redisClient) {
-    await redisClient.quit();
-    redisClient = null;
-  }
-  if (httpsAgent) {
-    httpsAgent.destroy();
-    httpsAgent = null;
+  try {
+    // Clear axios interceptors
+    if (siasnWsAxios && siasnWsAxios.interceptors) {
+      siasnWsAxios.interceptors.request.clear();
+      siasnWsAxios.interceptors.response.clear();
+    }
+    
+    if (redlock) {
+      await redlock.quit();
+      redlock = null;
+    }
+    if (redisClient) {
+      await redisClient.quit();
+      redisClient = null;
+    }
+    if (httpsAgent) {
+      httpsAgent.destroy();
+      httpsAgent = null;
+    }
+    console.log("SIASN middleware cleanup completed");
+  } catch (error) {
+    console.error("Error during SIASN middleware cleanup:", error);
   }
 };
 
@@ -40,16 +50,29 @@ process.on("beforeExit", cleanup);
 
 const initRedis = async () => {
   if (!redisClient) {
-    redisClient = await createRedisInstance();
+    try {
+      redisClient = await createRedisInstance();
+      if (!redisClient) {
+        throw new Error("Failed to create Redis instance");
+      }
+    } catch (error) {
+      console.error("Error initializing Redis client:", error);
+      throw error;
+    }
   }
   if (!redlock) {
-    redlock = new Redlock([redisClient], {
-      driftFactor: 0.01,
-      retryCount: 3,
-      retryDelay: 200,
-      retryJitter: 200,
-    });
-    console.log("Redis dan Redlock telah diinisialisasi");
+    try {
+      redlock = new Redlock([redisClient], {
+        driftFactor: 0.01,
+        retryCount: 3,
+        retryDelay: 200,
+        retryJitter: 200,
+      });
+      console.log("Redis dan Redlock telah diinisialisasi");
+    } catch (error) {
+      console.error("Error initializing Redlock:", error);
+      throw error;
+    }
   }
 };
 
@@ -107,12 +130,28 @@ const getOrCreateToken = async () => {
   } catch (err) {
     // console.error("Gagal membuat token:", err);
 
-    // Fallback: coba tunggu token dari process lain
+    // Fallback: coba tunggu token dari process lain dengan timeout
     const maxRetries = 5;
+    const retryTimeout = 1000; // 1 second per retry
+    const totalTimeout = 10000; // 10 seconds total timeout
+    
+    const startTime = Date.now();
     for (let i = 0; i < maxRetries; i++) {
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      // Check if total timeout exceeded
+      if (Date.now() - startTime > totalTimeout) {
+        throw new Error("Token retry timeout exceeded");
+      }
+      
+      await new Promise((resolve) => setTimeout(resolve, retryTimeout));
+      
+      // Check if Redis client is still available
+      if (!redisClient) {
+        throw new Error("Redis client unavailable during token retry");
+      }
+      
       tokenData = await redisClient.get(TOKEN_KEY);
       if (tokenData) {
+        console.log(`Token retrieved on retry attempt ${i + 1}`);
         return JSON.parse(tokenData);
       }
     }
