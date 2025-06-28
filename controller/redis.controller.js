@@ -13,9 +13,8 @@ export const getAllRedisKeys = async (req, res) => {
   } catch (error) {
     console.error("Error getting all redis keys:", error);
     res.status(500).json({ message: "Internal server error" });
-  } finally {
-    await redis.quit();
   }
+  // ✅ No redis.quit() - connection reused
 };
 
 // get redis key by id
@@ -28,9 +27,8 @@ export const getRedisKeyById = async (req, res) => {
   } catch (error) {
     console.error("Error getting redis key by id:", error);
     res.status(500).json({ message: "Internal server error" });
-  } finally {
-    await redis.quit();
   }
+  // ✅ No redis.quit() - connection reused
 };
 
 // delete redis key by id
@@ -43,9 +41,8 @@ export const deleteRedisKeyById = async (req, res) => {
   } catch (error) {
     console.error("Error deleting redis key by id:", error);
     res.status(500).json({ message: "Internal server error" });
-  } finally {
-    await redis.quit();
   }
+  // ✅ No redis.quit() - connection reused
 };
 
 // delete all redis keys
@@ -57,7 +54,6 @@ export const deleteAllRedisKeys = async (req, res) => {
   } catch (error) {
     console.error("Error deleting all redis keys:", error);
     res.status(500).json({ message: "Internal server error" });
-  } finally {
-    await redis.quit();
   }
+  // ✅ No redis.quit() - connection reused
 };
