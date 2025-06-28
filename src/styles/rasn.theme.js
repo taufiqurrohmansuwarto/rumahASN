@@ -545,6 +545,14 @@ export const useGlobalStyle = createStyles(({ prefixCls, css, token }) => ({
       }
     }
 
+    // Segmented Component - Width control
+    .${prefixCls}-segmented {
+      width: auto !important; // Override default width behavior
+      max-width: max-content !important; // Fit to content size
+      display: inline-flex !important; // Inline display to prevent full width
+      flex: none !important; // Remove flex grow/shrink behavior
+    }
+
     // Enhanced Calendar Component Styling
     .${prefixCls}-picker-calendar {
       .${prefixCls}-picker-cell {
@@ -1026,6 +1034,26 @@ export const useThemeConfig = () => {
         cellActiveBg: "transparent", // No active background
         colorPrimary: "#FF4500", // Orange theme
         colorBgContainer: "#FFFFFF", // White background
+      },
+      Segmented: {
+        // Default Antd dengan warna orange theme
+        colorBg: "#ffffff",
+        colorBgHover: "#f5f5f5",
+        colorFill: "#f5f5f5",
+        colorFillSecondary: "#fafafa",
+        colorText: "rgba(0, 0, 0, 0.88)",
+        colorTextLabel: "rgba(0, 0, 0, 0.65)",
+        colorPrimary: "#FF4500", // Reddit orange sesuai theme
+        controlPaddingHorizontal: 12,
+        controlPaddingHorizontalSM: 8,
+        itemActiveBg: "#ffffff",
+        itemColor: "rgba(0, 0, 0, 0.65)",
+        itemHoverBg: "rgba(0, 0, 0, 0.06)",
+        itemHoverColor: "rgba(0, 0, 0, 0.88)",
+        itemSelectedBg: "#FF4500", // Orange background untuk selected
+        itemSelectedColor: "#ffffff",
+        trackBg: "#f5f5f5",
+        trackPadding: 2,
       },
     },
     token: {

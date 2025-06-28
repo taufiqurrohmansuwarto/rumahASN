@@ -1,28 +1,25 @@
 import PageContainer from "@/components/PageContainer";
 import RekonLayout from "@/components/Rekon/RekonLayout";
-import DaftarPegawai from "@/components/Rekon/DaftarPegawai";
 import Head from "next/head";
 
-const DataUtama = () => {
+const Pendidikan = () => {
   return (
     <>
       <Head>
-        <title>Rumah ASN - Rekon - Pegawai</title>
+        <title>Rumah ASN - Rekon - Pendidikan</title>
       </Head>
-      <PageContainer title="Rekon" content="Pegawai">
-        <DaftarPegawai />
-      </PageContainer>
+      <PageContainer title="Rekon" content="Pendidikan"></PageContainer>
     </>
   );
 };
 
-DataUtama.getLayout = (page) => {
+Pendidikan.getLayout = (page) => {
   return <RekonLayout active="/rekon/pegawai">{page}</RekonLayout>;
 };
 
-DataUtama.Auth = {
+Pendidikan.Auth = {
   action: "manage",
   subject: "Tickets",
 };
 
-export default DataUtama;
+export default Pendidikan;

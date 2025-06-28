@@ -1,28 +1,25 @@
 import PageContainer from "@/components/PageContainer";
 import RekonLayout from "@/components/Rekon/RekonLayout";
-import DaftarPegawai from "@/components/Rekon/DaftarPegawai";
 import Head from "next/head";
 
-const Berkas = () => {
+const LegalPenghargaan = () => {
   return (
     <>
       <Head>
-        <title>Rumah ASN - Rekon - Pegawai</title>
+        <title>Rumah ASN - Rekon - Penghargaan</title>
       </Head>
-      <PageContainer title="Rekon" content="Pegawai">
-        <DaftarPegawai />
-      </PageContainer>
+      <PageContainer title="Rekon" content="Penghargaan"></PageContainer>
     </>
   );
 };
 
-Berkas.getLayout = (page) => {
+LegalPenghargaan.getLayout = (page) => {
   return <RekonLayout active="/rekon/pegawai">{page}</RekonLayout>;
 };
 
-Berkas.Auth = {
+LegalPenghargaan.Auth = {
   action: "manage",
   subject: "Tickets",
 };
 
-export default Berkas;
+export default LegalPenghargaan;
