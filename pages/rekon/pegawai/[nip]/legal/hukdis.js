@@ -1,28 +1,25 @@
 import PageContainer from "@/components/PageContainer";
 import RekonLayout from "@/components/Rekon/RekonLayout";
-import DaftarPegawai from "@/components/Rekon/DaftarPegawai";
 import Head from "next/head";
 
-const Keluarga = () => {
+const LegalHukdis = () => {
   return (
     <>
       <Head>
-        <title>Rumah ASN - Rekon - Pegawai</title>
+        <title>Rumah ASN - Rekon - Hukdis</title>
       </Head>
-      <PageContainer title="Rekon" content="Pegawai">
-        <DaftarPegawai />
-      </PageContainer>
+      <PageContainer title="Rekon" content="Hukdis"></PageContainer>
     </>
   );
 };
 
-Keluarga.getLayout = (page) => {
+LegalHukdis.getLayout = (page) => {
   return <RekonLayout active="/rekon/pegawai">{page}</RekonLayout>;
 };
 
-Keluarga.Auth = {
+LegalHukdis.Auth = {
   action: "manage",
   subject: "Tickets",
 };
 
-export default Keluarga;
+export default LegalHukdis;
