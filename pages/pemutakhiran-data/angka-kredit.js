@@ -2,7 +2,7 @@ import Layout from "@/components/Layout";
 import PageContainer from "@/components/PageContainer";
 import CompareAngkaKredit from "@/components/PemutakhiranData/CompareAngkaKredit";
 import CustomSelectMenu from "@/components/PemutakhiranData/CustomSelectMenu";
-import { Breadcrumb, Card, Grid } from "antd";
+import { Breadcrumb, Grid } from "antd";
 import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
@@ -37,12 +37,10 @@ const RiwayatAngkaKredit = () => {
           ),
         }}
         onBack={handleBack}
-        title="Riwayat Angka Kredit"
-        content="Komparasi Data Angka Kredit SIASN dan SIMASTER"
+        title="Data Riwayat Angka Kredit"
+        content="Layanan komparasi dan sinkronisasi data angka kredit antara sistem SIASN dan SIMASTER"
       >
-        <Card>
-          <CompareAngkaKredit />
-        </Card>
+        <CompareAngkaKredit />
       </PageContainer>
     </>
   );
