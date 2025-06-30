@@ -17,6 +17,14 @@ export const pegawaiMaster = (query) => {
   return api.get(`/pegawai?${qs}`).then((res) => res.data);
 };
 
+export const downloadPegawaiMaster = () => {
+  return api
+    .get("/pegawai?limit=-1", {
+      responseType: "blob",
+    })
+    .then((res) => res.data);
+};
+
 export const syncUnorMaster = () => {
   return api.put("/unor-master").then((res) => res.data);
 };

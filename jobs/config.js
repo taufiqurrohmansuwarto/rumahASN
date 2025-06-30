@@ -9,7 +9,7 @@ const redisConfig = {
   // Enhanced Redis configuration for better performance and stability
   maxRetriesPerRequest: 3,
   retryDelayOnFailover: 100,
-  enableOfflineQueue: false,
+  enableOfflineQueue: true,
   lazyConnect: true,
   keepAlive: 30000,
   connectTimeout: 10000,

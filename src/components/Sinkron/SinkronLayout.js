@@ -14,27 +14,17 @@ function SinkronLayout({ children, active }) {
     {
       path: "/apps-managements/sync/pegawai-master",
       key: "pegawai-master",
-      title: "Aplikasi SIMASTER",
+      title: "SIMASTER",
     },
     {
       path: "/apps-managements/sync/pegawai-siasn",
       key: "pegawai-siasn",
-      title: "Aplikasi SIASN",
+      title: "SIASN",
     },
     {
       path: "/apps-managements/sync/bezzeting-jf",
       key: "bezzeting-jf",
       title: "Bezzeting JF",
-    },
-    {
-      path: "/apps-managements/sync/meja-registrasi",
-      key: "meja-registrasi",
-      title: "Meja Registrasi",
-    },
-    {
-      path: "/apps-managements/sync/ref-jft",
-      key: "ref-jft",
-      title: "Ref SIASN JFT",
     },
   ];
 
@@ -45,6 +35,7 @@ function SinkronLayout({ children, active }) {
 
   return (
     <Tabs
+      tabPosition="top"
       tabBarStyle={{
         padding: 0,
         // margin: 0,

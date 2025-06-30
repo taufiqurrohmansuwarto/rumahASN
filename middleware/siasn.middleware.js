@@ -236,5 +236,6 @@ const siasnMiddleware = async (req, res, next) => {
 module.exports = {
   siasnMiddleware,
   siasnWsAxios,
+  getOrCreateToken, // Export for job processors
   cleanup, // Export cleanup function untuk testing atau manual cleanup
 };

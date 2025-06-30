@@ -486,6 +486,14 @@ export const showEmployees = (query) => {
     .then((res) => res.data);
 };
 
+export const downloadEmployeesSIASN = () => {
+  return api
+    .get(`/report/employees?limit=-1`, {
+      responseType: "blob",
+    })
+    .then((res) => res.data);
+};
+
 export const uploadEmployees = async (data) => {
   return api
     .post(`/report/employees`, data, {

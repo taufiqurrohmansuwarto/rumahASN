@@ -265,3 +265,8 @@ export const getImut = async (query = { limit: 10, offset: 0 }) => {
   const queryParams = queryString.stringify(query, {});
   return api.get(`/imut?${queryParams}`).then((res) => res?.data);
 };
+
+// rekon struktural
+export const syncRekonStruktural = async () => {
+  return api.get("/struktural/sync").then((res) => res?.data);
+};
