@@ -76,6 +76,7 @@ export const listMfa = async (req, res) => {
             "peg.nip_master as nip",
             "peg.nama_master as nama",
             "peg.opd_master as unit_organisasi",
+            "peg.status_master as status",
             "siasn_mfa.aktivasi as aktivasi"
           );
 
