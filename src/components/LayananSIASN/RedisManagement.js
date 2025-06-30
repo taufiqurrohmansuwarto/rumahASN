@@ -1,10 +1,32 @@
-import { deleteRedisKeyById, getAllRedisKeys } from "@/services/redis.services";
+import {
+  deleteRedisKeyById,
+  getAllRedisKeys,
+  deleteAllRedisKeys,
+} from "@/services/redis.services";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { message, Popconfirm, Table } from "antd";
+import { Button, Flex, message, Popconfirm, Table } from "antd";
+
+const useDeleteAllRedisKeys = () => {
+  const queryClient = useQueryClient();
+  const { mutate, isLoading } = useMutation(() => deleteAllRedisKeys(), {
+    onSuccess: () => {
+      message.success("Data berhasil dihapus");
+      queryClient.invalidateQueries(["redis"]);
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries(["redis"]);
+    },
+  });
+  return { mutate, isLoading };
+};
 
 function RedisManagement() {
   const queryClient = useQueryClient();
-  const { data, isLoading } = useQuery(["redis"], () => getAllRedisKeys(), {});
+  const { data, isLoading, refetch } = useQuery(
+    ["redis"],
+    () => getAllRedisKeys(),
+    {}
+  );
 
   const { mutateAsync, isLoading: isDeleting } = useMutation(
     (key) => deleteRedisKeyById(key),
@@ -50,8 +72,27 @@ function RedisManagement() {
     },
   ];
 
+  const { mutate: mutateDeleteAll, isLoading: isDeletingAll } =
+    useDeleteAllRedisKeys();
+
+  const handleDeleteAll = () => {
+    mutateDeleteAll();
+  };
+
   return (
     <div>
+      <Flex justify="end" gap={8}>
+        <Button type="primary" onClick={() => refetch()}>
+          Refresh
+        </Button>
+        <Button
+          type="primary"
+          onClick={handleDeleteAll}
+          loading={isDeletingAll}
+        >
+          Hapus Semua
+        </Button>
+      </Flex>
       <Table
         pagination={false}
         loading={isLoading}

@@ -1,9 +1,9 @@
-import axios from "axios";
 const qs = require("query-string");
 const jsonwebtoken = require("jsonwebtoken");
 const clientId = process.env.CLIENT_ID;
 const nip = process.env.SSO_NIP;
 const password = process.env.SSO_PASSWORD;
+const axios = require("axios");
 
 const dayjs = require("dayjs");
 require("dayjs/locale/id");
@@ -30,7 +30,7 @@ const logToken = (token) => {
   };
 };
 
-export const ssoFetcher = async () => {
+const ssoFetcher = async () => {
   try {
     const data = {
       client_id: clientId,
@@ -61,7 +61,7 @@ export const ssoFetcher = async () => {
   }
 };
 
-export const wso2Fetcher = async () => {
+const wso2Fetcher = async () => {
   try {
     const clientId = clientIdWso2;
     const clientSecret = clientSecretWso2;

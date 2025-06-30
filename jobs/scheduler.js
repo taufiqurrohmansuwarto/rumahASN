@@ -19,6 +19,16 @@ async function setupJobs() {
       jobId: "seal-totp-refresh",
     }
   );
+
+  // Schedule daily cleanup of Bull repeat keys (at 2 AM)
+  await sealQueue.add(
+    "cleanup-repeat-keys",
+    {},
+    {
+      repeat: { cron: "0 2 * * *" },
+      jobId: "bull-repeat-keys-cleanup",
+    }
+  );
 }
 
 if (require.main === module) {

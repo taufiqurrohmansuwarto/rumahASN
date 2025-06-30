@@ -1,11 +1,11 @@
-import { config as loadEnv } from "dotenv";
+const { config: loadEnv } = require("dotenv");
 loadEnv(); // ☑️ load env vars
 
-import Redis from "ioredis";
+const Redis = require("ioredis");
 
 // ✅ Use global in development to persist across HMR
 const getRedisClient = () => {
-  if (process.env.NODE_ENV === 'development') {
+  if (process.env.NODE_ENV === "development") {
     if (!global.redisClient) {
       return null;
     }
@@ -15,16 +15,16 @@ const getRedisClient = () => {
 };
 
 const setRedisClient = (client) => {
-  if (process.env.NODE_ENV === 'development') {
+  if (process.env.NODE_ENV === "development") {
     global.redisClient = client;
   } else {
     global.redisClient = client;
   }
 };
 
-export const createRedisInstance = () => {
+const createRedisInstance = () => {
   let redisClient = getRedisClient();
-  
+
   if (!redisClient) {
     const host = process.env.REDIS_URL ?? "127.0.0.1";
     const port = parseInt(process.env.REDIS_PORT ?? "6379", 10);
@@ -41,7 +41,7 @@ export const createRedisInstance = () => {
 
       showFriendlyErrorStack: true,
       enableAutoPipelining: true,
-      
+
       // ✅ Connection pooling optimizations
       keepAlive: true,
       family: 4,
@@ -53,26 +53,32 @@ export const createRedisInstance = () => {
     setRedisClient(redisClient);
 
     // ✅ Graceful shutdown handler
-    process.on('SIGTERM', async () => {
+    process.on("SIGTERM", async () => {
       const client = getRedisClient();
       if (client) {
-        console.log('🔄 Closing Redis connection...');
+        console.log("🔄 Closing Redis connection...");
         await client.quit();
         setRedisClient(null);
       }
     });
 
-    process.on('SIGINT', async () => {
+    process.on("SIGINT", async () => {
       const client = getRedisClient();
       if (client) {
-        console.log('🔄 Closing Redis connection...');
+        console.log("🔄 Closing Redis connection...");
         await client.quit();
         setRedisClient(null);
       }
     });
 
-    console.log(`🔗 Redis connected to ${host}:${port} - Pool ready (${process.env.NODE_ENV})`);
+    console.log(
+      `🔗 Redis connected to ${host}:${port} - Pool ready (${process.env.NODE_ENV})`
+    );
   }
 
   return getRedisClient();
+};
+
+module.exports = {
+  createRedisInstance,
 };

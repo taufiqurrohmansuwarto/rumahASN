@@ -1,8 +1,8 @@
 const siasnIPASN = require("@/models/siasn-ipasn.model");
 const siasnEmployees = require("@/models/siasn-employees.model");
 const xlsx = require("xlsx");
-const syncIPASN = require("@/models/sync-ip-asn.model");
 const Jft = require("@/models/ref_siasn/jft.model");
+const Papa = require("papaparse");
 
 const showIPASN = async (req, res) => {
   try {
@@ -65,23 +65,41 @@ const showEmployees = async (req, res) => {
     const page = req.query.page || 1;
     const search = req.query.search || "";
 
-    const result = await siasnEmployees
-      .query()
-      .page(page - 1, limit)
-      .where((builder) => {
-        if (search) {
-          builder.where("nip", "ilike", `%${search}%`);
-          builder.orWhere("nama", "ilike", `%${search}%`);
-        }
+    // Handle Excel download dengan streaming
+    if (limit === -1 || limit === "all" || limit === "-1") {
+      const result = await siasnEmployees.query();
+      const csv = Papa.unparse(result);
+      const filename = `data-pegawai-siasn-${
+        new Date().toISOString().split("T")[0]
+      }.csv`;
+      res.setHeader("Content-Type", "text/csv");
+      res.setHeader(
+        "Content-Disposition",
+        `attachment; filename="${filename}"`
+      );
+      res.send(csv);
+      return;
+    } else {
+      // Handle regular pagination
+      const result = await siasnEmployees
+        .query()
+        .page(page - 1, limit)
+        .where((builder) => {
+          if (search) {
+            builder.where("nip", "ilike", `%${search}%`);
+            builder.orWhere("nama", "ilike", `%${search}%`);
+          }
+        });
+
+      res.json({
+        data: result.results,
+        pagination: {
+          total: result.total,
+          limit: parseInt(limit),
+          page: parseInt(page),
+        },
       });
-    res.json({
-      data: result.results,
-      pagination: {
-        total: result.total,
-        limit: parseInt(limit),
-        page: parseInt(page),
-      },
-    });
+    }
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: "Internal server error" });

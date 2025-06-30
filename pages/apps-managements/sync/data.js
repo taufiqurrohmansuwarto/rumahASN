@@ -17,21 +17,22 @@ const Sync = () => {
       <Head>
         <title>Rumah ASN - Apps Management - Sinkronisasi Data</title>
       </Head>
-      <PageContainer content="Sinkronisasi Data" title="Sinkron Data">
+      <PageContainer
+        content="Sinkronisasi Data Referensi & Master"
+        title="🔄 Sinkronisasi Data"
+      >
         <SinkronLayout active="data">
-          <Card>
-            <DaftarSinkron />
-            <div style={{ marginTop: 10 }}>
-              <Space>
-                <SinkronMaster />
-                <SinkronUnorMaster />
-                <SinkronJfu />
-                <SinkronJft />
-                <SinkronSKP />
-                <SyncUnorSiasn />
-              </Space>
-            </div>
-          </Card>
+          <DaftarSinkron />
+          <div style={{ marginTop: 10 }}>
+            <Space>
+              <SinkronMaster />
+              <SinkronUnorMaster />
+              <SinkronJfu />
+              <SinkronJft />
+              <SinkronSKP />
+              <SyncUnorSiasn />
+            </Space>
+          </div>
         </SinkronLayout>
       </PageContainer>
     </>

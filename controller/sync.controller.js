@@ -1,12 +1,14 @@
 const Sinkronisasi = require("@/models/sinkronisasi.model");
 const UnorMaster = require("@/models/sync-unor-master.model");
 const { round } = require("lodash");
-const siasnIPASN = require("@/models/siasn-ipasn.model");
 const SyncPegawai = require("@/models/sync-pegawai.model");
 
 const SimasterJfu = require("@/models/simaster-jfu.model");
 const SimasterJft = require("@/models/simaster-jft.model");
 const { setSinkronisasi } = require("@/utils/helper/controller-helper");
+const Papa = require("papaparse");
+
+const ExcelJS = require("exceljs");
 
 const syncSimasterJfu = async (req, res) => {
   try {
@@ -113,19 +115,29 @@ const pegawaiMaster = async (req, res) => {
     const page = req?.query?.page || 1;
     const limit = req?.query?.limit || 10;
 
-    const result = await SyncPegawai.query().page(
-      parseInt(page) - 1,
-      parseInt(limit)
-    );
+    if (limit === -1 || limit === "all" || limit === "-1") {
+      const result = await SyncPegawai.query();
+      const csv = Papa.unparse(result);
+      res.setHeader("Content-Type", "text/csv");
+      res.setHeader(
+        "Content-Disposition",
+        `attachment; filename="pegawai-master.csv"`
+      );
+      res.send(csv);
+      return;
+    } else {
+      const result = await SyncPegawai.query()
+        .page(parseInt(page) - 1, parseInt(limit))
+        .orderBy("skpd_id", "asc");
 
-    const data = {
-      data: result?.results,
-      total: result?.total,
-      page: parseInt(page),
-      limit: parseInt(limit),
-    };
-
-    res.json(data);
+      const data = {
+        data: result?.results,
+        total: result?.total,
+        page: parseInt(page),
+        limit: parseInt(limit),
+      };
+      res.json(data);
+    }
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: "Internal Server Error" });

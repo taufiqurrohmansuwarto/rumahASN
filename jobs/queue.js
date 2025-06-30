@@ -3,6 +3,7 @@ const { defaultJobOptions, redis } = require("./config");
 
 // create a queue for each job type
 const sealQueue = new Queue("seal", { redis }, defaultJobOptions);
+const siasnQueue = new Queue("siasn", { redis }, defaultJobOptions);
 
 function addLogging(queue, name) {
   const listeners = {
@@ -53,6 +54,7 @@ function addLogging(queue, name) {
 }
 
 addLogging(sealQueue, "seal");
+addLogging(siasnQueue, "siasn");
 
 // Graceful shutdown function
 const shutdown = async () => {
@@ -63,21 +65,33 @@ const shutdown = async () => {
     if (sealQueue._loggerCleanup) {
       sealQueue._loggerCleanup();
     }
+    if (siasnQueue._loggerCleanup) {
+      siasnQueue._loggerCleanup();
+    }
     
-    // Pause queue to stop accepting new jobs
-    await sealQueue.pause();
-    console.log("⏸️  Queue paused");
+    // Pause queues to stop accepting new jobs
+    await Promise.all([
+      sealQueue.pause(),
+      siasnQueue.pause()
+    ]);
+    console.log("⏸️  All queues paused");
     
     // Wait for active jobs to complete (with timeout)
     await Promise.race([
-      sealQueue.whenCurrentJobsFinished(),
+      Promise.all([
+        sealQueue.whenCurrentJobsFinished(),
+        siasnQueue.whenCurrentJobsFinished()
+      ]),
       new Promise((resolve) => setTimeout(resolve, 30000)) // 30s timeout
     ]);
-    console.log("✅ Active jobs completed");
+    console.log("✅ All active jobs completed");
     
-    // Close queue connection
-    await sealQueue.close();
-    console.log("🔌 Queue connection closed");
+    // Close queue connections
+    await Promise.all([
+      sealQueue.close(),
+      siasnQueue.close()
+    ]);
+    console.log("🔌 All queue connections closed");
     
   } catch (error) {
     console.error("❌ Error during queue shutdown:", error.message);
@@ -112,5 +126,6 @@ process.on("unhandledRejection", async (reason, promise) => {
 
 module.exports = {
   sealQueue,
+  siasnQueue,
   shutdown,
 };
