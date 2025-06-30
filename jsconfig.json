@@ -14,7 +14,8 @@
       "@/store/*": ["store/*"],
       "@/docs/*": ["docs/*"],
       "@/styles/*": ["src/styles/*"],
-      "@/data/*": ["src/data/*"]
+      "@/data/*": ["src/data/*"],
+      "@/jobs/*": ["jobs/*"]
     }
   }
 }
