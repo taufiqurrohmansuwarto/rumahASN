@@ -305,8 +305,9 @@ const BasicFormAngkaKredit = ({ visible, onCancel, nip }) => {
                     >
                       <InputNumber
                         min={0}
-                        step={0.01}
-                        precision={2}
+                        step={0.001}
+                        precision={4}
+                        stringMode // Handle large numbers as string
                         style={{ width: "100%" }}
                       />
                     </Form.Item>
@@ -325,8 +326,9 @@ const BasicFormAngkaKredit = ({ visible, onCancel, nip }) => {
                     >
                       <InputNumber
                         min={0}
-                        step={0.01}
-                        precision={2}
+                        step={0.001}
+                        precision={4}
+                        stringMode
                         style={{ width: "100%" }}
                       />
                     </Form.Item>
