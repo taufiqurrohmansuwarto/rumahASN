@@ -23,6 +23,24 @@ const handleError = (res, error) => {
 
 const getFilePath = (filename) => path.join(process.cwd(), `docs/${filename}`);
 
+export const downloadRekonJfu = async (req, res) => {
+  try {
+    const result = await JfuSimaster.query().withGraphFetched("[rekon_jfu]");
+
+    const data = result.map((item) => ({
+      ...item,
+      id_siasn: item?.rekon_jfu?.id_siasn,
+    }));
+
+    const csv = paparse.unparse(data);
+    res.setHeader("Content-Type", "text/csv");
+    res.setHeader("Content-Disposition", "attachment; filename=rekon_jfu.csv");
+    res.send(csv);
+  } catch (error) {
+    handleError(res, error);
+  }
+};
+
 // Controller functions
 export const syncJabatanPelaksanaSiasn = async (req, res) => {
   try {

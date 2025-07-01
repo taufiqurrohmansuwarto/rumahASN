@@ -1,5 +1,6 @@
 import {
   deleteJfuRekon,
+  downloadRekonJfu,
   getJfuSiasn,
   getJfuSimaster,
   getRekonJfu,
@@ -215,12 +216,29 @@ const RekonJfuSIASN = () => {
     },
   });
 
+  const { mutate: download, isLoading: isLoadingDownload } = useMutation({
+    mutationFn: downloadRekonJfu,
+    onSuccess: (data) => {
+      const url = window.URL.createObjectURL(new Blob([data]));
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "rekon_jfu.csv";
+      a.click();
+      window.URL.revokeObjectURL(url);
+      message.success("Berhasil mengunduh data");
+    },
+    onError: (error) => {
+      message.error("Gagal mengunduh data");
+      console.log(error);
+    },
+  });
+
   const handleDelete = async (item) => {
     await deleteJfu(item?.id);
   };
 
   const handleSelect = (value) => {
-    const url = `/rekon/rekon-jfu?id_simaster=${value}`;
+    const url = `/rekon/rekon-ref/rekon-jfu?id_simaster=${value}`;
     router.push(url);
   };
 
@@ -234,7 +252,19 @@ const RekonJfuSIASN = () => {
   };
 
   return (
-    <Card title="Padanan Jabatan Pelaksana">
+    <Card
+      title="Padanan Jabatan Pelaksana"
+      extra={
+        <Button
+          type="primary"
+          onClick={() => download()}
+          loading={isLoadingDownload}
+          disabled={isLoadingDownload}
+        >
+          Unduh Data Mapping
+        </Button>
+      }
+    >
       <Form layout="vertical" form={form} onFinish={handleSave}>
         <JfuSimasterSelect
           name="id_simaster"
