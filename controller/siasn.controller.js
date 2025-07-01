@@ -39,6 +39,7 @@ const {
   removeDiklatSiasn,
   refSiasnUnor,
   createCpnsPns,
+  downloadDokumenAPI,
 } = require("@/utils/siasn-utils");
 
 const {
@@ -1187,22 +1188,16 @@ const downloadDocument = async (req, res) => {
   try {
     const { filePath } = req?.query;
 
-    const { fetcher } = req;
+    const { siasnRequest } = req;
 
-    const result = await fetcher.get(
-      `/siasn-ws/proxy/download?file_path=${filePath}`,
-      {
-        responseType: "arraybuffer",
-      }
-    );
+    const hasil = await downloadDokumenAPI(siasnRequest, filePath);
 
-    // send file via pdf
-    res.writeHead(200, {
-      "Content-Type": "application/pdf",
-      "Content-Length": result?.data?.length,
-    });
+    // Set response headers untuk PDF view
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader("Content-Disposition", 'inline; filename="document.pdf"');
 
-    res.end(Buffer.from(result?.data, "binary"));
+    // Kirim buffer sebagai PDF untuk view
+    res.send(hasil);
   } catch (error) {
     console.log(error);
     res.status(500).json({ code: 500, message: "Internal Server Error" });
