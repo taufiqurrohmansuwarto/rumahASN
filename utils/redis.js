@@ -29,6 +29,7 @@ const createRedisInstance = () => {
     const host = process.env.REDIS_URL ?? "127.0.0.1";
     const port = parseInt(process.env.REDIS_PORT ?? "6379", 10);
     const password = process.env.REDIS_PASSWORD ?? "";
+    console.log(host, port, password);
 
     redisClient = new Redis({
       host,
