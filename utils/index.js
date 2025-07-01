@@ -491,3 +491,16 @@ export const dataAngkaKreditKonversi = [
   { label: "Ahli Madya - Sangat Baik (56.25)", value: 56.25 },
   { label: "Ahli Utama - Sangat Baik (75)", value: 75 },
 ];
+
+export const list_tmt = [
+  "01042024",
+  "01052024",
+  "01062024",
+  "01072024",
+  "01082024",
+  "01012025",
+  "01062025",
+  "01072025",
+];
+
+export const dokumen = ["SK", "PERTEK", "SPMT", "PK"];
