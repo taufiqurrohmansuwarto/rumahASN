@@ -1,5 +1,4 @@
 import { checkDocument, downloadDocument } from "@/services/berkas.services";
-import { removeBackground } from "@/utils/siasn-utils";
 import { ExportOutlined } from "@ant-design/icons";
 import { useQuery } from "@tanstack/react-query";
 import { Button, Flex, Space, Typography } from "antd";
