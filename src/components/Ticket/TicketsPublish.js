@@ -741,266 +741,259 @@ const TicketsPublish = () => {
 
           {/* Content Section */}
           <div style={{ flex: 1, backgroundColor: "#FFFFFF" }}>
-            {(isFetching || isLoading) && !data ? (
-              <div>
-                {[...Array(5)].map((_, index) => (
-                  <LoadingSkeleton key={index} />
-                ))}
-              </div>
-            ) : (
-              <List
-                dataSource={data?.results}
-                rowKey={(row) => row?.id}
-                size="large"
-                pagination={{
-                  showSizeChanger: false,
-                  position: "bottom",
-                  current: parseInt(router?.query?.page) || 1,
-                  pageSize: 10,
-                  onChange: handleChangePage,
-                  total: data?.total,
-                  showTotal: (total, range) =>
-                    isMobile
-                      ? `${range[0]}-${range[1]} dari ${total}`
-                      : `Menampilkan ${range[0]}-${range[1]} dari ${total} tiket`,
-                  size: isMobile ? "small" : "default",
-                  simple: isMobile,
-                  showQuickJumper: !isMobile,
-                  responsive: true,
-                  style: {
-                    padding: isMobile ? "12px 8px" : "16px",
-                    borderTop: "1px solid #F3F4F6",
-                    marginTop: "0",
-                    textAlign: "center",
-                    backgroundColor: "#FAFBFC",
-                    fontSize: isMobile ? "12px" : "14px",
-                  },
-                  itemRender: isMobile
-                    ? (current, type, originalElement) => {
-                        if (type === "prev") {
-                          return (
-                            <Button size="small" type="text">
-                              ‹
-                            </Button>
-                          );
-                        }
-                        if (type === "next") {
-                          return (
-                            <Button size="small" type="text">
-                              ›
-                            </Button>
-                          );
-                        }
-                        return originalElement;
+            <List
+              loading={isFetching || isLoading}
+              dataSource={data?.results}
+              rowKey={(row) => row?.id}
+              size="large"
+              pagination={{
+                showSizeChanger: false,
+                position: "bottom",
+                current: parseInt(router?.query?.page) || 1,
+                pageSize: 10,
+                onChange: handleChangePage,
+                total: data?.total,
+                showTotal: (total, range) =>
+                  isMobile
+                    ? `${range[0]}-${range[1]} dari ${total}`
+                    : `Menampilkan ${range[0]}-${range[1]} dari ${total} tiket`,
+                size: isMobile ? "small" : "default",
+                simple: isMobile,
+                showQuickJumper: !isMobile,
+                responsive: true,
+                style: {
+                  padding: isMobile ? "12px 8px" : "16px",
+                  borderTop: "1px solid #F3F4F6",
+                  marginTop: "0",
+                  textAlign: "center",
+                  backgroundColor: "#FAFBFC",
+                  fontSize: isMobile ? "12px" : "14px",
+                },
+                itemRender: isMobile
+                  ? (current, type, originalElement) => {
+                      if (type === "prev") {
+                        return (
+                          <Button size="small" type="text">
+                            ‹
+                          </Button>
+                        );
                       }
-                    : undefined,
-                }}
-                renderItem={(item, index) => {
-                  const handleClick = () => {
-                    router.push(`/customers-tickets/${item?.id}`);
-                  };
+                      if (type === "next") {
+                        return (
+                          <Button size="small" type="text">
+                            ›
+                          </Button>
+                        );
+                      }
+                      return originalElement;
+                    }
+                  : undefined,
+              }}
+              renderItem={(item, index) => {
+                const handleClick = () => {
+                  router.push(`/customers-tickets/${item?.id}`);
+                };
 
-                  return (
-                    <div
-                      onClick={handleClick}
+                return (
+                  <div
+                    onClick={handleClick}
+                    style={{
+                      padding: isMobile ? "12px 16px" : "16px 20px",
+                      borderBottom:
+                        index < data?.results?.length - 1
+                          ? "1px solid #F3F4F6"
+                          : "none",
+                      transition: "background-color 0.15s ease",
+                      cursor: "pointer",
+                      minHeight: isMobile ? "70px" : "80px",
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.backgroundColor = "#F9FAFB";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.backgroundColor = "transparent";
+                    }}
+                  >
+                    <Flex
+                      justify="space-between"
+                      align="flex-start"
+                      gap={isMobile ? 8 : 12}
                       style={{
-                        padding: isMobile ? "12px 16px" : "16px 20px",
-                        borderBottom:
-                          index < data?.results?.length - 1
-                            ? "1px solid #F3F4F6"
-                            : "none",
-                        transition: "background-color 0.15s ease",
-                        cursor: "pointer",
-                        minHeight: isMobile ? "70px" : "80px",
-                      }}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.backgroundColor = "#F9FAFB";
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.backgroundColor = "transparent";
+                        flexDirection: isMobile ? "column" : "row",
                       }}
                     >
-                      <Flex
-                        justify="space-between"
-                        align="flex-start"
-                        gap={isMobile ? 8 : 12}
-                        style={{
-                          flexDirection: isMobile ? "column" : "row",
-                        }}
-                      >
-                        {/* Main Content */}
-                        <div style={{ flex: 1, minWidth: 0, width: "100%" }}>
-                          {/* Title with Status Icon */}
-                          <Flex
-                            align="center"
-                            gap={6}
-                            style={{ marginBottom: isMobile ? "6px" : "8px" }}
-                          >
-                            <Tooltip
-                              title={`Status: ${
-                                item?.status_code === "DIAJUKAN"
-                                  ? "Diajukan"
-                                  : item?.status_code === "DIKERJAKAN"
-                                  ? "Dikerjakan"
-                                  : item?.status_code === "SELESAI"
-                                  ? "Selesai"
-                                  : "Unknown"
-                              }`}
-                            >
-                              <div
-                                style={{
-                                  display: "flex",
-                                  alignItems: "center",
-                                }}
-                              >
-                                <SetItem item={item} />
-                              </div>
-                            </Tooltip>
-                            <Text
-                              style={{
-                                fontSize: isMobile ? "14px" : "16px",
-                                fontWeight: 500,
-                                color: "#1C1C1C",
-                                lineHeight: "1.5",
-                                flex: 1,
-                                overflow: "hidden",
-                                textOverflow: "ellipsis",
-                                whiteSpace: "nowrap",
-                                maxWidth: isMobile ? "200px" : "400px",
-                              }}
-                              title={item?.title}
-                            >
-                              {isMobile && item?.title?.length > 30
-                                ? `${item?.title?.substring(0, 30)}...`
-                                : item?.title?.length > 60
-                                ? `${item?.title?.substring(0, 60)}...`
-                                : item?.title}
-                            </Text>
-                            {item?.is_published && (
-                              <Tooltip title="Tiket Terpublikasi">
-                                <div
-                                  style={{
-                                    backgroundColor: "#FF4500",
-                                    color: "#FFFFFF",
-                                    fontSize: isMobile ? "8px" : "9px",
-                                    fontWeight: 600,
-                                    borderRadius: "3px",
-                                    padding: isMobile ? "1px 4px" : "2px 5px",
-                                    textTransform: "uppercase",
-                                    letterSpacing: "0.5px",
-                                    flexShrink: 0,
-                                  }}
-                                >
-                                  PUB
-                                </div>
-                              </Tooltip>
-                            )}
-                          </Flex>
-
-                          {/* Meta Info */}
-                          <Text
-                            style={{
-                              fontSize: isMobile ? "11px" : "13px",
-                              color: "#9CA3AF",
-                              display: "block",
-                              lineHeight: "1.4",
-                            }}
-                          >
-                            {formatDateLLWithTime(item?.created_at)} • oleh{" "}
-                            <Link href={`/users/${item?.customer?.custom_id}`}>
-                              <Text
-                                style={{
-                                  color: "#0079D3",
-                                  fontWeight: 500,
-                                }}
-                              >
-                                {item?.customer?.username}
-                              </Text>
-                            </Link>
-                            {item?.sub_category && !isMobile && (
-                              <>
-                                {" • "}
-                                <span
-                                  style={{
-                                    color: "#6B7280",
-                                    fontWeight: 500,
-                                    backgroundColor: "#F8F9FA",
-                                    border: "1px solid #E9ECEF",
-                                    borderRadius: "3px",
-                                    padding: "1px 4px",
-                                    fontSize: "11px",
-                                    marginLeft: "4px",
-                                  }}
-                                >
-                                  {item?.sub_category?.name}
-                                </span>
-                              </>
-                            )}
-                          </Text>
-
-                          {/* SubCategory on mobile - separate line */}
-                          {item?.sub_category && isMobile && (
-                            <div
-                              style={{
-                                display: "inline-block",
-                                fontSize: "10px",
-                                color: "#6B7280",
-                                fontWeight: 500,
-                                marginTop: "4px",
-                                backgroundColor: "#F3F4F6",
-                                border: "1px solid #E5E7EB",
-                                borderRadius: "4px",
-                                padding: "2px 6px",
-                              }}
-                            >
-                              {item?.sub_category?.name}
-                            </div>
-                          )}
-                        </div>
-
-                        {/* Right Side Actions */}
+                      {/* Main Content */}
+                      <div style={{ flex: 1, minWidth: 0, width: "100%" }}>
+                        {/* Title with Status Icon */}
                         <Flex
                           align="center"
-                          gap={isMobile ? 8 : 12}
+                          gap={6}
+                          style={{ marginBottom: isMobile ? "6px" : "8px" }}
+                        >
+                          <Tooltip
+                            title={`Status: ${
+                              item?.status_code === "DIAJUKAN"
+                                ? "Diajukan"
+                                : item?.status_code === "DIKERJAKAN"
+                                ? "Dikerjakan"
+                                : item?.status_code === "SELESAI"
+                                ? "Selesai"
+                                : "Unknown"
+                            }`}
+                          >
+                            <div
+                              style={{
+                                display: "flex",
+                                alignItems: "center",
+                              }}
+                            >
+                              <SetItem item={item} />
+                            </div>
+                          </Tooltip>
+                          <Text
+                            style={{
+                              fontSize: isMobile ? "14px" : "16px",
+                              fontWeight: 500,
+                              color: "#1C1C1C",
+                              lineHeight: "1.5",
+                              flex: 1,
+                              overflow: "hidden",
+                              textOverflow: "ellipsis",
+                              whiteSpace: "nowrap",
+                              maxWidth: isMobile ? "200px" : "400px",
+                            }}
+                            title={item?.title}
+                          >
+                            {isMobile && item?.title?.length > 30
+                              ? `${item?.title?.substring(0, 30)}...`
+                              : item?.title?.length > 60
+                              ? `${item?.title?.substring(0, 60)}...`
+                              : item?.title}
+                          </Text>
+                          {item?.is_published && (
+                            <Tooltip title="Tiket Terpublikasi">
+                              <div
+                                style={{
+                                  backgroundColor: "#FF4500",
+                                  color: "#FFFFFF",
+                                  fontSize: isMobile ? "8px" : "9px",
+                                  fontWeight: 600,
+                                  borderRadius: "3px",
+                                  padding: isMobile ? "1px 4px" : "2px 5px",
+                                  textTransform: "uppercase",
+                                  letterSpacing: "0.5px",
+                                  flexShrink: 0,
+                                }}
+                              >
+                                PUB
+                              </div>
+                            </Tooltip>
+                          )}
+                        </Flex>
+
+                        {/* Meta Info */}
+                        <Text
                           style={{
-                            marginTop: isMobile ? "4px" : "0",
-                            alignSelf: isMobile ? "flex-end" : "flex-start",
+                            fontSize: isMobile ? "11px" : "13px",
+                            color: "#9CA3AF",
+                            display: "block",
+                            lineHeight: "1.4",
                           }}
                         >
-                          {/* Comments Count */}
-                          <Flex align="center" gap={3}>
-                            <MessageOutlined
-                              style={{
-                                fontSize: isMobile ? 12 : 14,
-                                color: "#9CA3AF",
-                              }}
-                            />
+                          {formatDateLLWithTime(item?.created_at)} • oleh{" "}
+                          <Link href={`/users/${item?.customer?.custom_id}`}>
                             <Text
                               style={{
-                                fontSize: isMobile ? "10px" : "12px",
-                                color: "#9CA3AF",
+                                color: "#0079D3",
                                 fontWeight: 500,
                               }}
                             >
-                              {parseInt(item?.comments_count)}
+                              {item?.customer?.username}
                             </Text>
-                          </Flex>
+                          </Link>
+                          {item?.sub_category && !isMobile && (
+                            <>
+                              {" • "}
+                              <span
+                                style={{
+                                  color: "#6B7280",
+                                  fontWeight: 500,
+                                  backgroundColor: "#F8F9FA",
+                                  border: "1px solid #E9ECEF",
+                                  borderRadius: "3px",
+                                  padding: "1px 4px",
+                                  fontSize: "11px",
+                                  marginLeft: "4px",
+                                }}
+                              >
+                                {item?.sub_category?.name}
+                              </span>
+                            </>
+                          )}
+                        </Text>
 
-                          {/* Assignee */}
+                        {/* SubCategory on mobile - separate line */}
+                        {item?.sub_category && isMobile && (
                           <div
                             style={{
-                              transform: isMobile ? "scale(0.9)" : "scale(1)",
+                              display: "inline-block",
+                              fontSize: "10px",
+                              color: "#6B7280",
+                              fontWeight: 500,
+                              marginTop: "4px",
+                              backgroundColor: "#F3F4F6",
+                              border: "1px solid #E5E7EB",
+                              borderRadius: "4px",
+                              padding: "2px 6px",
                             }}
                           >
-                            <Assignee item={item} />
+                            {item?.sub_category?.name}
                           </div>
+                        )}
+                      </div>
+
+                      {/* Right Side Actions */}
+                      <Flex
+                        align="center"
+                        gap={isMobile ? 8 : 12}
+                        style={{
+                          marginTop: isMobile ? "4px" : "0",
+                          alignSelf: isMobile ? "flex-end" : "flex-start",
+                        }}
+                      >
+                        {/* Comments Count */}
+                        <Flex align="center" gap={3}>
+                          <MessageOutlined
+                            style={{
+                              fontSize: isMobile ? 12 : 14,
+                              color: "#9CA3AF",
+                            }}
+                          />
+                          <Text
+                            style={{
+                              fontSize: isMobile ? "10px" : "12px",
+                              color: "#9CA3AF",
+                              fontWeight: 500,
+                            }}
+                          >
+                            {parseInt(item?.comments_count)}
+                          </Text>
                         </Flex>
+
+                        {/* Assignee */}
+                        <div
+                          style={{
+                            transform: isMobile ? "scale(0.9)" : "scale(1)",
+                          }}
+                        >
+                          <Assignee item={item} />
+                        </div>
                       </Flex>
-                    </div>
-                  );
-                }}
-              />
-            )}
+                    </Flex>
+                  </div>
+                );
+              }}
+            />
           </div>
         </Flex>
       </Card>

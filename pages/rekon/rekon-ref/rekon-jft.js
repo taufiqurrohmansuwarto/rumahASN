@@ -25,7 +25,7 @@ const RekonJft = () => {
 };
 
 RekonJft.getLayout = (page) => {
-  return <RekonLayout active="/rekon/rekon-jft">{page}</RekonLayout>;
+  return <RekonLayout active="/rekon/rekon-ref/rekon-jft">{page}</RekonLayout>;
 };
 
 RekonJft.Auth = {

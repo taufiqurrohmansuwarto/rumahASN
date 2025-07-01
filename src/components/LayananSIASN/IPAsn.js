@@ -340,30 +340,11 @@ const ModalDataIPAsn = ({ data, open, onCancel, tahun, loading }) => {
   );
 };
 
-function IPAsn({ tahun }) {
-  const { data, status } = useSession();
+function IPAsn({ tahun, dataIPAsn, isLoadingDataIPAsn, isFetchingDataIPAsn }) {
   const [open, setOpen] = useState(false);
 
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
-
-  const { data: dataUtama, isLoading } = useQuery(
-    ["data-utama-siasn"],
-    () => dataUtamaSIASN(),
-    {
-      refetchOnWindowFocus: false,
-    }
-  );
-
-  const {
-    data: dataIPAsn,
-    isLoading: isLoadingDataIPAsn,
-    isFetching: isFetchingDataIPAsn,
-    refetch,
-  } = useQuery(["ip-asn", tahun], () => dataIpAsn(tahun), {
-    enabled: !!tahun,
-    refetchOnWindowFocus: false,
-  });
 
   // Show loading when fetching
   if (isFetchingDataIPAsn) {
