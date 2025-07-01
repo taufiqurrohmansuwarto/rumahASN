@@ -18,8 +18,6 @@ export const downloadSk = async (req, res) => {
         }
       });
 
-    console.log({ employees: employees?.length });
-
     const documents = employees.map((employee) => {
       return `${type}_${employee.nip}`;
     });
