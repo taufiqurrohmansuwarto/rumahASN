@@ -10,6 +10,15 @@ const SiasnEmployees = require("@/models/siasn-employees.model");
 const { handleError } = require("@/utils/helper/controller-helper");
 const { default: axios } = require("axios");
 
+const URL_REMOVE_BG = "http://localhost:5000/remove-bg";
+
+const removeBackground = async (imageBase64) => {
+  const response = await axios.post(URL_REMOVE_BG, {
+    image_base64: imageBase64,
+  });
+  return response.data;
+};
+
 module.exports.fotoPns = async (req, res) => {
   try {
     const { siasnRequest: fetcher } = req;
@@ -39,6 +48,8 @@ module.exports.fotoPns = async (req, res) => {
 };
 
 module.exports.updateFotoPns = async (req, res) => {
+  // local
+
   try {
     const { siasnRequest: siasnFetcher, fetcher: masterFetcher } = req;
     const { employee_number: nip } = req?.user;
