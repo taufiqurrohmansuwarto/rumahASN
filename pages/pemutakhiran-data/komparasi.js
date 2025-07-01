@@ -3,6 +3,7 @@ import PageContainer from "@/components/PageContainer";
 import { MenuMySAPK } from "@/components/PemutakhiranData/MenuMySAPK";
 import { dataUtamaSimaster } from "@/services/master.services";
 import {
+  dataIpAsn,
   dataNilaiIPASN,
   dataUtamaSIASN,
   fotoSiasn,
@@ -236,6 +237,17 @@ function Komparasi() {
     isFetching: isFetchingDataUtama,
   } = useQuery(["data-utama-siasn"], () => dataUtamaSIASN(), {
     refetchOnWindowFocus: false,
+    refetchOnMount: false,
+  });
+
+  const {
+    data: dataIPAsn,
+    isLoading: isLoadingDataIPAsn,
+    isFetching: isFetchingDataIPAsn,
+    refetch: refetchDataIPAsn,
+  } = useQuery(["ip-asn", 2024], () => dataIpAsn(2024), {
+    enabled: !!2024,
+    refetchOnWindowFocus: false,
   });
 
   const { data: foto, isLoading: isLoadingFoto } = useQuery(
@@ -347,6 +359,10 @@ function Komparasi() {
                     simaster={dataUtamaMaster}
                     foto={foto}
                     dataUtama={dataUtama}
+                    dataIPAsn={dataIPAsn}
+                    isLoadingDataIPAsn={isLoadingDataIPAsn}
+                    isFetchingDataIPAsn={isFetchingDataIPAsn}
+                    refetchDataIPAsn={refetchDataIPAsn}
                   />
                 ) : (
                   <EnhancedEmpty showModal={showModal} />

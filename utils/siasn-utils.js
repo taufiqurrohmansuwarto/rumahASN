@@ -376,3 +376,34 @@ module.exports.downloadDokumenAPI = (fetcher, path) => {
 module.exports.getJabatanById = (fetcher, id) => {
   return fetcher.get(`/jabatan/id/${id}`);
 };
+
+module.exports.nilaiIPASNWS = (fetcher, nip) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const result = await fetcher.get(`/pns/nilaiipasn/${nip}`);
+      if (result?.data?.code === 1) {
+        const currentResult = result?.data?.data;
+        const response = {
+          ...currentResult,
+          nama: "",
+          jenis_jabatan: "",
+          jenjang_jabatan: "",
+          keterangan_kualifikasi: "",
+          keterangan_kompetensi: "",
+          keterangan_kinerja: "",
+          keterangan_disiplin: "",
+          created_at: new Date().toISOString() || "",
+        };
+        resolve(response);
+      } else {
+        resolve(null);
+      }
+    } catch (error) {
+      if (error?.code === 0) {
+        resolve(null);
+      } else {
+        reject(error);
+      }
+    }
+  });
+};
