@@ -5,6 +5,15 @@ const fs = require("fs");
 const FormData = require("form-data");
 const { default: axios } = require("axios");
 
+const URL_REMOVE_BG = "http://localhost:5000/remove-bg";
+
+const removeBackground = async (imageBase64) => {
+  const response = await axios.post(URL_REMOVE_BG, {
+    image_base64: imageBase64,
+  });
+  return response.data;
+};
+
 const parseCSV = (filePath) => {
   const file = fs.readFileSync(filePath, "utf8");
   return paparse.parse(file, {
@@ -50,13 +59,33 @@ module.exports.updateFotoSiasn = async (fetcher, data) => {
     const { pnsId, foto } = data;
 
     // Mengambil file dari URL foto
-    const response = await axios.get(foto, {
-      responseType: "stream",
+    const hasil = await axios.get(foto, {
+      responseType: "arraybuffer",
     });
+
+    const base64 = Buffer.from(hasil.data, "binary").toString("base64");
+
+    const hasilRemove = await removeBackground(base64);
+    const hasilRemoveBase64 = hasilRemove?.image_base64;
+
+    // Fallback: gunakan gambar original jika remove background gagal
+    let finalBase64 = hasilRemoveBase64;
+    if (!hasilRemoveBase64) {
+      console.log("Remove background gagal, menggunakan gambar original");
+      finalBase64 = base64;
+    }
+
+    // Validasi base64 sebelum konversi
+    if (!finalBase64 || typeof finalBase64 !== "string") {
+      throw new Error("Data gambar tidak valid");
+    }
+
+    // Konversi base64 string menjadi Buffer
+    const imageBuffer = Buffer.from(finalBase64, "base64");
 
     const formData = new FormData();
     formData.append("pns_id", pnsId);
-    formData.append("file", response.data, {
+    formData.append("file", imageBuffer, {
       filename: "foto.jpg",
       contentType: "image/jpeg",
     });
@@ -68,13 +97,16 @@ module.exports.updateFotoSiasn = async (fetcher, data) => {
             ...formData.getHeaders(),
           },
         });
+        console.log("Upload foto berhasil");
         resolve(hasil);
       } catch (error) {
-        reject(error?.message);
+        console.log("Error saat upload foto:", error?.message || error);
+        reject(error?.message || "Gagal upload foto");
       }
     });
   } catch (error) {
-    return null;
+    console.log("Error di updateFotoSiasn:", error?.message || error);
+    throw new Error(`Gagal update foto: ${error?.message || error}`);
   }
 };
 
