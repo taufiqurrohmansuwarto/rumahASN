@@ -631,7 +631,8 @@ const getAngkaKreditByNip = async (req, res) => {
     const { nip } = req?.query;
 
     const result = await request.get(`/pns/rw-angkakredit/${nip}`);
-    res.json(result?.data?.data);
+    const response = result?.data?.data;
+    res.json(response);
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: "error" });
