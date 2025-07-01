@@ -18,6 +18,14 @@ export const syncJfuSimaster = async () => {
   return api.get("/jfu/simaster/sync").then((res) => res?.data);
 };
 
+export const downloadRekonJfu = async () => {
+  return api
+    .get("/jfu/download", {
+      responseType: "blob",
+    })
+    .then((res) => res?.data);
+};
+
 export const syncJfuSiasn = async () => {
   return api.get("/jfu/siasn/sync").then((res) => res?.data);
 };
