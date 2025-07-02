@@ -9,6 +9,7 @@ const {
   riwayatDiklat,
   IPASNBaru,
   dataUtama,
+  nilaiIPASNWS,
 } = require("@/utils/siasn-utils");
 const { toString, upperCase } = require("lodash");
 
@@ -142,19 +143,22 @@ const postRiwayatKursusByNip = async (req, res) => {
 
 const getIpAsn = async (req, res) => {
   try {
-    const { fetcher } = req;
+    const { fetcher, siasnRequest: request } = req;
     const { employee_number: nip } = req?.user;
     const tahun = req?.query?.tahun || new Date().getFullYear();
+
+    // Ambil data IP ASN dari layanan utama
     const result = await fetcher.get(
       `/siasn-ws/layanan/ip-asn/${nip}?tahun=${tahun}`
     );
-    const hasil = result?.data;
 
-    if (hasil) {
-      res.json(hasil);
-    } else {
-      res.json(null);
-    }
+    // Ambil data IP ASN dari web service sebagai fallback
+    const ipAsnFallback = await nilaiIPASNWS(request, nip);
+
+    // Prioritaskan data dari layanan utama, jika tidak ada gunakan fallback
+    const dataIPAsn = result?.data || ipAsnFallback || null;
+
+    res.json(dataIPAsn);
   } catch (error) {
     console.log(error);
     res.status(500).json({
@@ -169,6 +173,9 @@ const getNilaiIPASN = async (req, res) => {
     // const { nip } = req?.query;
     const { employee_number: nip } = req?.user;
     const nilaiIPASN = await IPASNBaru(fetcher, nip);
+
+    console.log(nilaiIPASN);
+
     res.json(nilaiIPASN);
   } catch (error) {
     console.log(error);
@@ -195,7 +202,7 @@ const getNilaiIPASNByNip = async (req, res) => {
 
 const getIpAsnByNip = async (req, res) => {
   try {
-    const { fetcher } = req;
+    const { fetcher, siasnRequest: request } = req;
     const { nip } = req?.query;
     const tahun = req?.query?.tahun || new Date().getFullYear();
 
@@ -203,13 +210,11 @@ const getIpAsnByNip = async (req, res) => {
       `/siasn-ws/layanan/ip-asn/${nip}?tahun=${tahun}`
     );
 
-    const hasil = result?.data;
+    const ipAsnFallback = await nilaiIPASNWS(request, nip);
 
-    if (hasil) {
-      res.json(hasil);
-    } else {
-      res.json(null);
-    }
+    const dataIPAsn = result?.data || ipAsnFallback || null;
+
+    res.json(dataIPAsn);
   } catch (error) {
     console.log(error);
     res.status(500).json({
