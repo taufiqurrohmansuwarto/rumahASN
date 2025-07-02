@@ -73,7 +73,7 @@ const JftSimaster = () => {
   );
 
   const handleChange = (value) => {
-    router.push(`/rekon/rekon-jft?master_id=${value}`);
+    router.push(`/rekon/rekon-ref/rekon-jft?master_id=${value}`);
   };
 
   return (
