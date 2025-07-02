@@ -15,7 +15,7 @@ async function setupJobs() {
     "refresh-totp",
     {},
     {
-      repeat: { cron: "0 */5 * * * *" },
+      repeat: { cron: "0 */1 * * * *" },
       jobId: "seal-totp-refresh",
     }
   );
