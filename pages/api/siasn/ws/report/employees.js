@@ -10,6 +10,7 @@ const router = createRouter();
 
 export const config = {
   api: {
+    responseLimit: "500mb",
     bodyParser: false, // Disallow body parsing, consume as stream
   },
 };
