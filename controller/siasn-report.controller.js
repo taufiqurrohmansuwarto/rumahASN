@@ -3,6 +3,7 @@ const siasnEmployees = require("@/models/siasn-employees.model");
 const xlsx = require("xlsx");
 const Jft = require("@/models/ref_siasn/jft.model");
 const Papa = require("papaparse");
+const { convertToExcel } = require("@/utils/micorservices-utils");
 
 const showIPASN = async (req, res) => {
   try {
@@ -67,17 +68,32 @@ const showEmployees = async (req, res) => {
 
     // Handle Excel download dengan streaming
     if (limit === -1 || limit === "all" || limit === "-1") {
+      console.time("showEmployees");
       const result = await siasnEmployees.query();
-      const csv = Papa.unparse(result);
-      const filename = `data-pegawai-siasn-${
-        new Date().toISOString().split("T")[0]
-      }.csv`;
-      res.setHeader("Content-Type", "text/csv");
+      console.timeEnd("showEmployees");
+      const payload = {
+        data: result,
+        options: {
+          filename: "data-pegawai-siasn.xlsx",
+          sheet_name: "data-pegawai-siasn",
+          headers: null,
+        },
+      };
+
+      const excel = await convertToExcel(payload);
+
+      // Konversi ArrayBuffer ke Buffer untuk Node.js
+      const buffer = Buffer.from(excel);
+
+      res.setHeader(
+        "Content-Type",
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+      );
       res.setHeader(
         "Content-Disposition",
-        `attachment; filename="${filename}"`
+        "attachment; filename=data-pegawai-siasn.xlsx"
       );
-      res.send(csv);
+      res.send(buffer);
       return;
     } else {
       // Handle regular pagination

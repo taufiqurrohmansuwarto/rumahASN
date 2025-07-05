@@ -337,18 +337,19 @@ const useDownloadExcel = () => {
     mutationFn: () => downloadEmployeesSIASN(),
     onSuccess: (data) => {
       const blob = new Blob([data], {
-        type: "text/csv",
+        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
       });
-      saveAs(blob, "data-pegawai-siasn.csv");
-      message.success("Berhasil mengunduh file CSV");
+      saveAs(blob, "data-pegawai-siasn.xlsx");
+      message.success("Berhasil mengunduh file Excel");
     },
     onError: (error) => {
-      console.log(error);
+      console.error("Download error:", error);
       const errorMessage =
-        error.response?.data?.message || "Gagal mengunduh file";
+        error.response?.data?.message ||
+        "Gagal mengunduh file Excel. Silakan coba lagi.";
       message.error(errorMessage);
     },
-    retry: 1,
+    retry: false, // Hilangkan retry untuk mencegah eksekusi berulang
     retryDelay: 1000,
   });
 };
@@ -528,7 +529,11 @@ function ReportEmployees() {
             <Button
               type="primary"
               icon={<CloudDownloadOutlined />}
-              onClick={() => download()}
+              onClick={() => {
+                // Prevent double click
+                if (isDownloadingLoading) return;
+                download();
+              }}
               loading={isDownloadingLoading}
               disabled={isDownloadingLoading}
               style={{
@@ -538,7 +543,7 @@ function ReportEmployees() {
                 fontWeight: 600,
               }}
             >
-              Download CSV
+              Download Excel
             </Button>
           </Flex>
         </Flex>
