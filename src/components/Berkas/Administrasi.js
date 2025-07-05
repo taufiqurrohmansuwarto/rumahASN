@@ -1,6 +1,7 @@
 import { checkDocument, downloadDocument } from "@/services/berkas.services";
+import { ExportOutlined } from "@ant-design/icons";
 import { useQuery } from "@tanstack/react-query";
-import { Button, Space, Typography } from "antd";
+import { Button, Flex, Space, Typography } from "antd";
 import { useState } from "react";
 
 const list_tmt = [
@@ -71,18 +72,35 @@ const Dokumen = ({ tmt }) => {
   );
 };
 
+const downloadPk = async () => {
+  const link = "https://siasn.bkd.jatimprov.go.id:9000/public/PK_2_7.pdf";
+  window.open(link, "_blank");
+};
+
 function Administrasi() {
   return (
-    <Space direction="vertical" size="large">
-      {list_tmt?.map((tmt) => (
-        <>
-          <Typography.Text strong>
-            Download Administrasi PNS/PPPK TMT {tmt}
-          </Typography.Text>
-          <Dokumen key={tmt} tmt={tmt} />
-        </>
-      ))}
-    </Space>
+    <Flex vertical>
+      <Flex justify="flex-end">
+        <Button
+          icon={<ExportOutlined />}
+          type="default"
+          onClick={downloadPk}
+          size="small"
+        >
+          Download PK Halaman 2 s/d 7
+        </Button>
+      </Flex>
+      <Space direction="vertical" size="large">
+        {list_tmt?.map((tmt) => (
+          <>
+            <Typography.Text strong>
+              Download Administrasi PNS/PPPK TMT {tmt}
+            </Typography.Text>
+            <Dokumen key={tmt} tmt={tmt} />
+          </>
+        ))}
+      </Space>
+    </Flex>
   );
 }
 

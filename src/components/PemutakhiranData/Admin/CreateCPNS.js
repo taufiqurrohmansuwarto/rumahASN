@@ -1,14 +1,52 @@
-import { createCpns } from "@/services/siasn-services";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Button, Modal, Form, Input, message, DatePicker } from "antd";
+import { createCpns, dataPangkatByNip } from "@/services/siasn-services";
+import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
+import {
+  Button,
+  Modal,
+  Form,
+  Input,
+  message,
+  DatePicker,
+  Skeleton,
+  Space,
+} from "antd";
 import React, { useState, useEffect } from "react";
+import { FileExcelOutlined } from "@ant-design/icons";
 
 const dayjs = require("dayjs");
 require("dayjs/locale/id");
 
 const format = "DD-MM-YYYY";
 
-const CreateModal = ({ open, onCancel, form, isLoading, onSubmit, data }) => {
+const dataPNS = (pangkat) =>
+  pangkat?.find((d) => d?.jenis_kp_id === "12" || d?.jenis_kp_id === 12);
+const dataCPNS = (pangkat) =>
+  pangkat?.find((d) => d?.jenis_kp_id === "11" || d?.jenis_kp_id === 11);
+
+const CreateModal = ({
+  open,
+  onCancel,
+  form,
+  isLoading,
+  onSubmit,
+  data,
+  dataPangkat,
+  isLoadingPangkat,
+}) => {
+  const gotoSKPNS = () => {
+    window.open(
+      `${dataPNS(dataPangkat?.pangkat_simaster)?.file_pangkat}`,
+      "_blank"
+    );
+  };
+
+  const gotoSKCPNS = () => {
+    window.open(
+      `${dataCPNS(dataPangkat?.pangkat_simaster)?.file_pangkat}`,
+      "_blank"
+    );
+  };
+
   return (
     <Modal
       destroyOnClose
@@ -18,20 +56,52 @@ const CreateModal = ({ open, onCancel, form, isLoading, onSubmit, data }) => {
       open={open}
       onCancel={onCancel}
     >
-      <Form form={form} layout="vertical">
-        <Form.Item label="Nomor SK PNS" name="nomor_sk_pns">
-          <Input />
-        </Form.Item>
-        <Form.Item label="Tanggal SK PNS" name="tgl_sk_pns">
-          <DatePicker format={format} />
-        </Form.Item>
-        <Form.Item label="Nomor SK CPNS" name="nomor_sk_cpns">
-          <Input />
-        </Form.Item>
-        <Form.Item label="Tanggal SK CPNS" name="tgl_sk_cpns">
-          <DatePicker format={format} />
-        </Form.Item>
-      </Form>
+      <Skeleton loading={isLoadingPangkat}>
+        <Space>
+          <Button type="link" onClick={gotoSKPNS}>
+            <FileExcelOutlined />
+            Unduh SK PNS
+          </Button>
+          <Button type="link" onClick={gotoSKCPNS}>
+            <FileExcelOutlined />
+            Unduh SK CPNS
+          </Button>
+        </Space>
+        <Form form={form} layout="vertical">
+          <Form.Item
+            label="Nomor SK PNS"
+            name="nomor_sk_pns"
+            help={`No. SK: ${dataPNS(dataPangkat?.pangkat_simaster)?.no_sk}`}
+          >
+            <Input />
+          </Form.Item>
+          <Form.Item
+            label="Tanggal SK PNS"
+            name="tgl_sk_pns"
+            help={`Tanggal SK: ${
+              dataPNS(dataPangkat?.pangkat_simaster)?.tgl_sk
+            }`}
+          >
+            <DatePicker format={format} />
+          </Form.Item>
+          <Form.Item
+            label="Nomor SK CPNS"
+            name="nomor_sk_cpns"
+            help={`No. SK: ${dataCPNS(dataPangkat?.pangkat_simaster)?.no_sk}`}
+          >
+            <Input />
+          </Form.Item>
+          <Form.Item
+            label="Tanggal SK CPNS"
+            name="tgl_sk_cpns"
+            help={`Tanggal SK: ${
+              dataCPNS(dataPangkat?.pangkat_simaster)?.tgl_sk
+            }`}
+          >
+            <DatePicker format={format} />
+          </Form.Item>
+        </Form>
+      </Skeleton>
     </Modal>
   );
 };
@@ -39,6 +109,16 @@ const CreateModal = ({ open, onCancel, form, isLoading, onSubmit, data }) => {
 function CreateCPNS({ nip, data }) {
   const [open, setOpen] = useState(false);
   const [form] = Form.useForm();
+
+  const { data: dataPangkat, isLoading: isLoadingPangkat } = useQuery(
+    ["data-riwayat-pangkat", nip],
+    () => dataPangkatByNip(nip),
+    {
+      refetchOnWindowFocus: false,
+      keepPreviousData: true,
+      staleTime: 500000,
+    }
+  );
 
   const queryClient = useQueryClient();
 
@@ -96,6 +176,8 @@ function CreateCPNS({ nip, data }) {
         Ubah ke PNS
       </Button>
       <CreateModal
+        dataPangkat={dataPangkat}
+        isLoadingPangkat={isLoadingPangkat}
         open={open}
         onCancel={handleCancel}
         form={form}
