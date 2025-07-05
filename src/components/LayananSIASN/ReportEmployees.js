@@ -537,6 +537,15 @@ function ReportEmployees() {
                       download({ downloadFormat: "csv" });
                     },
                   },
+                  {
+                    key: "excel-csv",
+                    label: "📄 Download Excel CSV",
+                    icon: <CloudDownloadOutlined />,
+                    onClick: () => {
+                      if (isDownloadingLoading) return;
+                      download({ downloadFormat: "excel-csv" });
+                    },
+                  },
                 ],
               }}
               disabled={isDownloadingLoading}

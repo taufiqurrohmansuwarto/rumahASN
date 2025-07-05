@@ -109,8 +109,6 @@ const downloadExcel = async (data, res) => {
   const excel = await convertToExcel(payload);
   const buffer = Buffer.from(excel);
 
-  console.timeEnd("generateExcel");
-
   res.setHeader(
     "Content-Type",
     "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
@@ -120,9 +118,12 @@ const downloadExcel = async (data, res) => {
     "attachment; filename=data-pegawai-siasn.xlsx"
   );
   res.send(buffer);
+  console.timeEnd("generateExcel");
 };
 
+// Helper function untuk download Excel dari CSV
 const downloadExcelFromCSV = async (data, res) => {
+  console.time("generateExcelFromCSV");
   const csv = Papa.unparse(data);
   const excel = await convertCSVToExcel(csv);
   const buffer = Buffer.from(excel);
@@ -136,10 +137,12 @@ const downloadExcelFromCSV = async (data, res) => {
     "attachment; filename=data-pegawai-siasn.xlsx"
   );
   res.send(buffer);
+  console.timeEnd("generateExcelFromCSV");
 };
 
 // Helper function untuk download CSV
 const downloadCSV = async (data, res) => {
+  console.time("generateCSV");
   const csv = Papa.unparse(data);
   const filename = `data-pegawai-siasn-${
     new Date().toISOString().split("T")[0]
@@ -148,6 +151,7 @@ const downloadCSV = async (data, res) => {
   res.setHeader("Content-Type", "text/csv");
   res.setHeader("Content-Disposition", `attachment; filename=${filename}`);
   res.send(csv);
+  console.timeEnd("generateCSV");
 };
 
 // Helper function untuk response pagination
@@ -178,6 +182,9 @@ const showEmployees = async (req, res) => {
 
       switch (downloadFormat) {
         case "excel":
+          await downloadExcel(result, res);
+          break;
+        case "excel-csv":
           await downloadExcelFromCSV(result, res);
           break;
         case "csv":
