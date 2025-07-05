@@ -48,3 +48,23 @@ module.exports.checkExcelConverterHealth = async () => {
     return false;
   }
 };
+
+module.exports.convertCSVToExcel = async (data) => {
+  try {
+    const response = await axios.post(
+      `${EXCEL_CONVERTER_SERVICE_URL}/csv-to-excel`,
+      data,
+      {
+        headers: {
+          "Content-Type": "text/csv",
+        },
+        timeout: 60000, // 60 detik timeout untuk konversi Excel
+        responseType: "arraybuffer",
+      }
+    );
+
+    return response.data;
+  } catch (error) {
+    console.error("Gagal mengkonversi CSV ke Excel:", error.message);
+  }
+};

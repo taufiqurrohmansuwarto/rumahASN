@@ -13,6 +13,7 @@ import {
   CalendarOutlined,
   MailOutlined,
   IdcardOutlined,
+  DownOutlined,
 } from "@ant-design/icons";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
@@ -24,6 +25,8 @@ import {
   Typography,
   Upload,
   message,
+  Dropdown,
+  Space,
 } from "antd";
 import { useRouter } from "next/router";
 import { useState } from "react";
@@ -331,46 +334,37 @@ const useEmployeesData = () => {
   );
 };
 
-// Optimized Download Hook
-const useDownloadExcel = () => {
+// Download Hook for Excel and CSV
+const useDownloadFile = () => {
   return useMutation({
-    mutationFn: () => downloadEmployeesSIASN(),
-    onSuccess: (data) => {
+    mutationFn: ({ downloadFormat }) =>
+      downloadEmployeesSIASN({ downloadFormat }),
+    onSuccess: (data, variables) => {
+      const { downloadFormat } = variables;
+      const isExcel = downloadFormat === "excel";
+
       const blob = new Blob([data], {
-        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        type: isExcel
+          ? "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+          : "text/csv",
       });
-      saveAs(blob, "data-pegawai-siasn.xlsx");
-      message.success("Berhasil mengunduh file Excel");
+
+      const filename = isExcel
+        ? "data-pegawai-siasn.xlsx"
+        : `data-pegawai-siasn-${new Date().toISOString().split("T")[0]}.csv`;
+
+      saveAs(blob, filename);
+      message.success(`Berhasil mengunduh file ${isExcel ? "Excel" : "CSV"}`);
     },
     onError: (error) => {
       console.error("Download error:", error);
       const errorMessage =
         error.response?.data?.message ||
-        "Gagal mengunduh file Excel. Silakan coba lagi.";
+        "Gagal mengunduh file. Silakan coba lagi.";
       message.error(errorMessage);
     },
-    retry: false, // Hilangkan retry untuk mencegah eksekusi berulang
-    retryDelay: 1000,
+    retry: false,
   });
-};
-
-// Search Handler
-const useSearchHandler = () => {
-  const router = useRouter();
-
-  const handleSearch = (value) => {
-    const query = { ...router.query };
-
-    if (value) {
-      query.search = value;
-    } else {
-      delete query.search;
-    }
-
-    router.push({ query });
-  };
-
-  return handleSearch;
 };
 
 // Pagination Handler
@@ -419,13 +413,9 @@ function ReportEmployees() {
   const isMobile = !screens.md;
 
   const { data, isLoading, isFetching, refetch } = useEmployeesData();
-  const handleSearch = useSearchHandler();
   const handlePageChange = usePaginationHandler();
-  const {
-    mutate: download,
-    isPending: isDownloading,
-    isLoading: isDownloadingLoading,
-  } = useDownloadExcel();
+  const { mutate: download, isLoading: isDownloadingLoading } =
+    useDownloadFile();
 
   const paginationConfig = createPaginationConfig(data, handlePageChange);
   const isTableLoading = isLoading || isFetching;
@@ -526,25 +516,48 @@ function ReportEmployees() {
             >
               Refresh
             </Button>
-            <Button
-              type="primary"
-              icon={<CloudDownloadOutlined />}
-              onClick={() => {
-                // Prevent double click
-                if (isDownloadingLoading) return;
-                download();
+            <Dropdown
+              menu={{
+                items: [
+                  {
+                    key: "excel",
+                    label: "📊 Download Excel",
+                    icon: <CloudDownloadOutlined />,
+                    onClick: () => {
+                      if (isDownloadingLoading) return;
+                      download({ downloadFormat: "excel" });
+                    },
+                  },
+                  {
+                    key: "csv",
+                    label: "📄 Download CSV",
+                    icon: <CloudDownloadOutlined />,
+                    onClick: () => {
+                      if (isDownloadingLoading) return;
+                      download({ downloadFormat: "csv" });
+                    },
+                  },
+                ],
               }}
-              loading={isDownloadingLoading}
               disabled={isDownloadingLoading}
-              style={{
-                background: "linear-gradient(135deg, #52c41a 0%, #73d13d 100%)",
-                borderColor: "#52c41a",
-                borderRadius: "8px",
-                fontWeight: 600,
-              }}
             >
-              Download Excel
-            </Button>
+              <Button
+                type="primary"
+                loading={isDownloadingLoading}
+                disabled={isDownloadingLoading}
+                style={{
+                  background: "#52c41a",
+                  borderColor: "#52c41a",
+                  borderRadius: "8px",
+                  fontWeight: 600,
+                  color: "white",
+                }}
+              >
+                <CloudDownloadOutlined />
+                {!isDownloadingLoading && "Download"}
+                <DownOutlined />
+              </Button>
+            </Dropdown>
           </Flex>
         </Flex>
       </Card>

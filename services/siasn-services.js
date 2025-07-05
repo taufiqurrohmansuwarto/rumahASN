@@ -486,9 +486,9 @@ export const showEmployees = (query) => {
     .then((res) => res.data);
 };
 
-export const downloadEmployeesSIASN = () => {
+export const downloadEmployeesSIASN = ({ downloadFormat = "excel" }) => {
   return api
-    .get(`/report/employees?limit=-1`, {
+    .get(`/report/employees?limit=-1&downloadFormat=${downloadFormat}`, {
       responseType: "blob",
     })
     .then((res) => res.data);

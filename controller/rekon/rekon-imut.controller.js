@@ -11,7 +11,6 @@ export const getImut = async (req, res) => {
   try {
     const {
       nip,
-      instansi_id,
       kategori_id,
       jenis_id,
       sub_jenis_id,
@@ -20,20 +19,21 @@ export const getImut = async (req, res) => {
     } = req.query;
 
     const { siasnRequest: fetcher } = req;
-    const query = queryString.stringify(
-      {
-        nip: nip || "",
-        instansi_id: instansi_id || INSTANSI_ID,
-        kategori: kategori_id,
-        jenis: jenis_id,
-        sub_jenis: sub_jenis_id,
-        limit,
-        offset,
-      },
-      {
-        skipNull: true,
-      }
-    );
+    const payloadQuery = {
+      instansi_id: INSTANSI_ID || "",
+      nip: nip || "",
+      kategori: kategori_id || "",
+      jenis: jenis_id || "",
+      sub_jenis: sub_jenis_id || "",
+      limit: limit?.toString() || "10",
+      offset: offset?.toString() || "0",
+    };
+
+    const query = queryString.stringify(payloadQuery, {
+      skipNull: false,
+      skipEmptyString: false,
+    });
+
     const imut = await listImut(fetcher, query);
     const data = imut?.data;
     res.status(200).json(data);
