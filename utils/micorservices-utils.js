@@ -11,7 +11,6 @@ const EXCEL_CONVERTER_SERVICE_URL = `http://localhost:${EXCEL_CONVERTER_SERVICE_
  */
 module.exports.convertToExcel = async (data) => {
   try {
-    console.time("convertToExcel");
     const response = await axios.post(
       `${EXCEL_CONVERTER_SERVICE_URL}/generate-excel`,
       data,
@@ -23,8 +22,6 @@ module.exports.convertToExcel = async (data) => {
         responseType: "arraybuffer",
       }
     );
-
-    console.timeEnd("convertToExcel");
 
     return response.data;
   } catch (error) {
