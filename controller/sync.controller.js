@@ -117,7 +117,18 @@ const pegawaiMaster = async (req, res) => {
 
     if (limit === -1 || limit === "all" || limit === "-1") {
       const result = await SyncPegawai.query();
-      const csv = Papa.unparse(result);
+      const data = result?.map((item) => {
+        const { skp, ...data } = item;
+        const skp2024 = skp?.find((skp) => skp?.tahun === 2024);
+        const skp2023 = skp?.find((skp) => skp?.tahun === 2023);
+        return {
+          ...data,
+          skp2024: skp2024?.skp_id ? "ada" : "tidak ada",
+          skp2023: skp2023?.skp_id ? "ada" : "tidak ada",
+        };
+      });
+      console.log(result?.[0]);
+      const csv = Papa.unparse(data);
       res.setHeader("Content-Type", "text/csv");
       res.setHeader(
         "Content-Disposition",

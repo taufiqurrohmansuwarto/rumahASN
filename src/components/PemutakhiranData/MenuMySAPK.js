@@ -143,6 +143,10 @@ export function MenuMySAPK({
   loadingDataUtamaMaster,
   refetchDataUtamaSiasn,
   refetchDataUtamaMaster,
+  dataIPAsn,
+  isLoadingDataIPAsn,
+  isFetchingDataIPAsn,
+  refetchDataIPAsn,
 }) {
   const router = useRouter();
   const { useBreakpoint } = Grid;
@@ -157,11 +161,15 @@ export function MenuMySAPK({
   const handleRefresh = () => {
     refetchDataUtamaSiasn();
     refetchDataUtamaMaster();
+    refetchDataIPAsn();
     refetch();
   };
 
   const isLoadingAny =
-    loading || isFetching || loadingDataUtamaSiasn || loadingDataUtamaMaster;
+    loading ||
+    loadingDataUtamaSiasn ||
+    loadingDataUtamaMaster ||
+    isLoadingDataIPAsn;
 
   // Responsive variables using Antd breakpoints
   const isMobile = !screens.md;
@@ -554,7 +562,13 @@ export function MenuMySAPK({
                 wrap="wrap"
                 justify={isMobile ? "center" : "flex-start"}
               >
-                <IPAsn tahun={2024} />
+                <IPAsn
+                  tahun={2024}
+                  dataIPAsn={dataIPAsn}
+                  isLoadingDataIPAsn={isLoadingDataIPAsn}
+                  isFetchingDataIPAsn={isFetchingDataIPAsn}
+                  refetchDataIPAsn={refetchDataIPAsn}
+                />
                 <PengaturanGelar />
                 <GantiEmail />
               </Flex>

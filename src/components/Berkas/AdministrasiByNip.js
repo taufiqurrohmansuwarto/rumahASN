@@ -2,9 +2,9 @@ import {
   checkDocumentByNip,
   downloadDocumentByNip,
 } from "@/services/master.services";
-import { CloudDownloadOutlined } from "@ant-design/icons";
+import { CloudDownloadOutlined, ExportOutlined } from "@ant-design/icons";
 import { useQuery } from "@tanstack/react-query";
-import { Button, Space, Typography } from "antd";
+import { Button, Flex, Space, Typography } from "antd";
 import { useRouter } from "next/router";
 import { useState } from "react";
 
@@ -78,19 +78,37 @@ const Dokumen = ({ tmt, nip }) => {
   );
 };
 
+const downloadPk = async () => {
+  const link = "https://siasn.bkd.jatimprov.go.id:9000/public/PK_2_7.pdf";
+  // open in new tab
+  window.open(link, "_blank");
+};
+
 function AdministrasiByNip() {
   const router = useRouter();
   const { nip } = router.query;
 
   return (
-    <Space direction="vertical" size="large">
-      {list_tmt?.map((tmt) => (
-        <>
-          <Typography.Text strong>PNS/PPPK TMT {tmt}</Typography.Text>
-          <Dokumen nip={nip} key={tmt} tmt={tmt} />
-        </>
-      ))}
-    </Space>
+    <Flex vertical>
+      <Flex justify="flex-end">
+        <Button
+          icon={<ExportOutlined />}
+          type="default"
+          onClick={downloadPk}
+          size="small"
+        >
+          Download PK Halaman 2 s/d 7
+        </Button>
+      </Flex>
+      <Space direction="vertical" size="large">
+        {list_tmt?.map((tmt) => (
+          <>
+            <Typography.Text strong>PNS/PPPK TMT {tmt}</Typography.Text>
+            <Dokumen nip={nip} key={tmt} tmt={tmt} />
+          </>
+        ))}
+      </Space>
+    </Flex>
   );
 }
 
