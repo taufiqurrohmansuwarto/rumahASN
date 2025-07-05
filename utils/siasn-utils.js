@@ -68,8 +68,20 @@ module.exports.updateFotoSiasn = async (fetcher, data) => {
     const hasilRemove = await removeBackground(base64);
     const hasilRemoveBase64 = hasilRemove?.image_base64;
 
+    // Fallback: gunakan gambar original jika remove background gagal
+    let finalBase64 = hasilRemoveBase64;
+    if (!hasilRemoveBase64) {
+      console.log("Remove background gagal, menggunakan gambar original");
+      finalBase64 = base64;
+    }
+
+    // Validasi base64 sebelum konversi
+    if (!finalBase64 || typeof finalBase64 !== "string") {
+      throw new Error("Data gambar tidak valid");
+    }
+
     // Konversi base64 string menjadi Buffer
-    const imageBuffer = Buffer.from(hasilRemoveBase64, "base64");
+    const imageBuffer = Buffer.from(finalBase64, "base64");
 
     const formData = new FormData();
     formData.append("pns_id", pnsId);
@@ -85,15 +97,16 @@ module.exports.updateFotoSiasn = async (fetcher, data) => {
             ...formData.getHeaders(),
           },
         });
+        console.log("Upload foto berhasil");
         resolve(hasil);
       } catch (error) {
-        console.log("error", error);
-        reject(error?.message);
+        console.log("Error saat upload foto:", error?.message || error);
+        reject(error?.message || "Gagal upload foto");
       }
     });
   } catch (error) {
-    console.log("error", error);
-    return null;
+    console.log("Error di updateFotoSiasn:", error?.message || error);
+    throw new Error(`Gagal update foto: ${error?.message || error}`);
   }
 };
 
@@ -375,35 +388,4 @@ module.exports.downloadDokumenAPI = (fetcher, path) => {
 
 module.exports.getJabatanById = (fetcher, id) => {
   return fetcher.get(`/jabatan/id/${id}`);
-};
-
-module.exports.nilaiIPASNWS = (fetcher, nip) => {
-  return new Promise(async (resolve, reject) => {
-    try {
-      const result = await fetcher.get(`/pns/nilaiipasn/${nip}`);
-      if (result?.data?.code === 1) {
-        const currentResult = result?.data?.data;
-        const response = {
-          ...currentResult,
-          nama: "",
-          jenis_jabatan: "",
-          jenjang_jabatan: "",
-          keterangan_kualifikasi: "",
-          keterangan_kompetensi: "",
-          keterangan_kinerja: "",
-          keterangan_disiplin: "",
-          created_at: new Date().toISOString() || "",
-        };
-        resolve(response);
-      } else {
-        resolve(null);
-      }
-    } catch (error) {
-      if (error?.code === 0) {
-        resolve(null);
-      } else {
-        reject(error);
-      }
-    }
-  });
 };
