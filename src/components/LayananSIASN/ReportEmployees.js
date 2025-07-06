@@ -341,7 +341,8 @@ const useDownloadFile = () => {
       downloadEmployeesSIASN({ downloadFormat }),
     onSuccess: (data, variables) => {
       const { downloadFormat } = variables;
-      const isExcel = downloadFormat === "excel";
+      const isExcel =
+        downloadFormat === "excel" || downloadFormat === "excel-csv";
 
       const blob = new Blob([data], {
         type: isExcel
