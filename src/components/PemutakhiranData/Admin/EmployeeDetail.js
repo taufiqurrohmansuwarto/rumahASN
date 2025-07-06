@@ -3,9 +3,11 @@ import PengaturanGelarByNip from "@/components/LayananSIASN/PengaturanGelarByNip
 import { dataUtamaMasterByNip } from "@/services/master.services";
 import {
   dataUtamSIASNByNip,
+  fotoByNip,
   getDataKppn,
   getPnsAllByNip,
   updateDataUtamaByNip,
+  updateFotoByNip,
 } from "@/services/siasn-services";
 import { getUmur } from "@/utils/client-utils";
 import { TagOutlined, UserOutlined } from "@ant-design/icons";
@@ -13,6 +15,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Alert as AlertAntd,
   Avatar,
+  Button,
   Card,
   Checkbox,
   Col,
@@ -84,42 +87,100 @@ const EmployeeUnor = ({ data, loading, nip }) => {
 
 const EmployeeDescriptionMaster = ({ data, loading }) => {
   const breakPoint = Grid.useBreakpoint();
+
   return (
-    <>
+    <Card
+      title="Informasi Pegawai SIMASTER"
+      style={{ marginBottom: 16 }}
+      loading={loading}
+    >
       <Descriptions
         size="small"
-        column={1}
-        layout={breakPoint?.xs ? "vertical" : "horizontal"}
-        style={{ marginBottom: 16 }}
+        column={breakPoint.xs ? 1 : 2}
+        layout={breakPoint.xs ? "vertical" : "horizontal"}
+        bordered
       >
-        <Descriptions.Item label="Nama">
-          <Typography.Text copyable>{data?.nama}</Typography.Text>
+        <Descriptions.Item label="Nama Lengkap">
+          <Typography.Text copyable strong>
+            {data?.nama || "-"}
+          </Typography.Text>
         </Descriptions.Item>
         <Descriptions.Item label="NIP">
-          <Typography.Text copyable>{data?.nip_baru}</Typography.Text>
+          <Typography.Text copyable code>
+            {data?.nip_baru || "-"}
+          </Typography.Text>
         </Descriptions.Item>
         <Descriptions.Item label="Usia">
-          {getUmur(data?.tgl_lahir)} Tahun
+          <Tag color="blue">
+            {data?.tgl_lahir ? `${getUmur(data?.tgl_lahir)} Tahun` : "-"}
+          </Tag>
         </Descriptions.Item>
         <Descriptions.Item label="Jabatan">
-          {data?.jabatan?.jabatan}
+          <Typography.Text strong>
+            {data?.jabatan?.jabatan || "-"}
+          </Typography.Text>
         </Descriptions.Item>
         <Descriptions.Item label="Golongan">
-          {data?.pangkat?.golongan}
+          <Tag color="volcano">{data?.pangkat?.golongan || "-"}</Tag>
         </Descriptions.Item>
         <Descriptions.Item label="Jenjang Pendidikan">
-          {data?.pendidikan?.jenjang} {data?.pendidikan?.prodi}{" "}
-          {data?.pendidikan?.nama_sekolah}
+          <div>
+            <Typography.Text strong>
+              {data?.pendidikan?.jenjang || "-"}
+            </Typography.Text>
+            {data?.pendidikan?.prodi && (
+              <Typography.Text style={{ display: "block", color: "#666" }}>
+                {data?.pendidikan?.prodi}
+              </Typography.Text>
+            )}
+            {data?.pendidikan?.nama_sekolah && (
+              <Typography.Text
+                style={{ display: "block", color: "#999", fontSize: "12px" }}
+              >
+                {data?.pendidikan?.nama_sekolah}
+              </Typography.Text>
+            )}
+          </div>
         </Descriptions.Item>
-        <Descriptions.Item label="Perangkat Daerah">
-          {data?.skpd?.detail}
+        <Descriptions.Item
+          label="Perangkat Daerah"
+          span={breakPoint.xs ? 1 : 2}
+        >
+          <Typography.Text>{data?.skpd?.detail || "-"}</Typography.Text>
         </Descriptions.Item>
       </Descriptions>
-    </>
+    </Card>
   );
 };
 
-const EmployeeContent = ({ data, loading }) => {
+const EmployeeContent = ({ data, loading, nip }) => {
+  const queryClient = useQueryClient();
+  const breakPoint = Grid.useBreakpoint();
+
+  const { mutateAsync: updateFoto, isLoading: isLoadingUpdateFoto } =
+    useMutation((nip) => updateFotoByNip(nip), {
+      onSuccess: () => {
+        queryClient.invalidateQueries(["foto-by-nip", nip]);
+        queryClient.invalidateQueries(["data-utama-siasn", nip]);
+        queryClient.invalidateQueries(["data-utama-simaster-by-nip", nip]);
+        queryClient.invalidateQueries(["data-pns-all", nip]);
+        message.success("Berhasil memperbarui foto");
+      },
+      onError: () => {
+        message.error("Gagal memperbarui foto");
+      },
+      onSettled: () => {
+        queryClient.invalidateQueries(["foto-by-nip", nip]);
+        queryClient.invalidateQueries(["data-utama-siasn", nip]);
+        queryClient.invalidateQueries(["data-utama-simaster-by-nip", nip]);
+        queryClient.invalidateQueries(["data-pns-all", nip]);
+      },
+    });
+
+  const handleUpdateFoto = async () => {
+    await updateFoto(nip);
+  };
+
   return (
     <Row gutter={[16, 16]}>
       <Col span={24}>
@@ -149,23 +210,130 @@ const EmployeeContent = ({ data, loading }) => {
           </Flex>
 
           {/* Informasi Pegawai */}
-          <Row gutter={[4, 4]} style={{ marginBottom: 16 }}>
-            <Col xs={24} sm={6} md={5} lg={4} xl={3}>
-              <Avatar
-                src={data?.master?.foto}
-                size={180}
-                shape="square"
-                style={{ width: "100%", height: "auto", maxWidth: 180 }}
-                icon={!data?.master?.foto && <UserOutlined />}
-              />
-            </Col>
-            <Col xs={24} sm={18} md={19} lg={20} xl={21}>
-              <EmployeeDescriptionMaster
-                loading={loading}
-                data={data?.master}
-              />
-            </Col>
-          </Row>
+          <Flex vertical style={{ marginBottom: 16 }}>
+            {/* Foto Section - Responsive Layout */}
+            <Row justify="center" style={{ marginBottom: 24 }}>
+              <Col xs={24} sm={24} md={22} lg={20} xl={18}>
+                <Flex
+                  align="center"
+                  justify="center"
+                  gap={breakPoint.xs ? 4 : 8}
+                  wrap
+                >
+                  {/* Foto SIMASTER */}
+                  <Flex
+                    vertical
+                    align="center"
+                    style={{
+                      minWidth: breakPoint.xs ? "120px" : "140px",
+                      padding: breakPoint.xs ? "12px 4px" : "16px 8px",
+                    }}
+                  >
+                    <Typography.Text
+                      strong
+                      style={{
+                        fontSize: breakPoint.xs ? "12px" : "13px",
+                        color: "#1890ff",
+                        textAlign: "center",
+                        marginBottom: "12px",
+                      }}
+                    >
+                      📸 Foto SIMASTER
+                    </Typography.Text>
+                    <Avatar
+                      src={data?.master?.foto}
+                      size={120}
+                      shape="square"
+                      icon={!data?.master?.foto && <UserOutlined />}
+                    />
+                    <Typography.Text
+                      type="secondary"
+                      style={{
+                        fontSize: breakPoint.xs ? "10px" : "11px",
+                        textAlign: "center",
+                      }}
+                    >
+                      Database Lokal
+                    </Typography.Text>
+                  </Flex>
+
+                  {/* Transfer Button */}
+                  <Flex
+                    vertical
+                    align="center"
+                    justify="center"
+                    style={{
+                      minWidth: breakPoint.xs ? "140px" : "160px",
+                      padding: breakPoint.xs ? "12px 8px" : "16px",
+                    }}
+                  >
+                    <Button
+                      type="primary"
+                      style={{
+                        width: "100%",
+                        marginBottom: "8px",
+                      }}
+                      onClick={handleUpdateFoto}
+                      loading={isLoadingUpdateFoto}
+                    >
+                      📤 Transfer ke SIASN
+                    </Button>
+                    <Typography.Text
+                      style={{
+                        fontSize: breakPoint.xs ? "10px" : "11px",
+                        color: "#666",
+                        textAlign: "center",
+                        fontStyle: "italic",
+                        lineHeight: 1.3,
+                      }}
+                    >
+                      Transfer foto ke database pusat
+                    </Typography.Text>
+                  </Flex>
+
+                  {/* Foto SIASN */}
+                  <Flex
+                    vertical
+                    align="center"
+                    style={{
+                      minWidth: breakPoint.xs ? "120px" : "140px",
+                      padding: breakPoint.xs ? "12px 4px" : "16px 8px",
+                    }}
+                  >
+                    <Typography.Text
+                      strong
+                      style={{
+                        fontSize: breakPoint.xs ? "12px" : "13px",
+                        color: "#fa8c16",
+                        textAlign: "center",
+                        marginBottom: "12px",
+                      }}
+                    >
+                      📸 Foto SIASN
+                    </Typography.Text>
+                    <Avatar
+                      src={data?.fotoSiasn?.data}
+                      size={120}
+                      shape="square"
+                      icon={!data?.fotoSiasn?.data && <UserOutlined />}
+                    />
+                    <Typography.Text
+                      type="secondary"
+                      style={{
+                        fontSize: breakPoint.xs ? "10px" : "11px",
+                        textAlign: "center",
+                      }}
+                    >
+                      Database Pusat
+                    </Typography.Text>
+                  </Flex>
+                </Flex>
+              </Col>
+            </Row>
+
+            {/* Employee Description */}
+            <EmployeeDescriptionMaster loading={loading} data={data?.master} />
+          </Flex>
         </Flex>
       </Col>
     </Row>
@@ -329,6 +497,7 @@ const Kppn = ({ id }) => {
 
 function EmployeeDetail({ nip }) {
   const breakPoint = Grid.useBreakpoint();
+
   const { data: dataSimaster, isLoading: isLoadingDataSimaster } = useQuery(
     ["data-utama-simaster-by-nip", nip],
     () => dataUtamaMasterByNip(nip),
@@ -349,6 +518,14 @@ function EmployeeDetail({ nip }) {
     }
   );
 
+  const { data: foto, isLoading: isLoadingFoto } = useQuery(
+    ["foto-by-nip", nip],
+    () => fotoByNip(nip),
+    {
+      refetchOnWindowFocus: false,
+    }
+  );
+
   const { data: siasn, isLoading: loadingSiasn } = useQuery(
     ["data-utama-siasn", nip],
     () => dataUtamSIASNByNip(nip),
@@ -362,11 +539,13 @@ function EmployeeDetail({ nip }) {
   return (
     <Card title="Informasi Pegawai" extra={<DisparitasByNip />}>
       <EmployeeContent
+        nip={nip}
         loading={isLoadingDataSimaster}
         data={{
           master: dataSimaster,
           siasn: siasn,
           pns: dataPnsAll,
+          fotoSiasn: foto,
         }}
       />
       <EmployeeUnor nip={nip} loading={isLoadingDataPns} data={dataPnsAll} />

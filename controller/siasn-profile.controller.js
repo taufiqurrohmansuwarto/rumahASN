@@ -88,6 +88,46 @@ module.exports.updateFotoPns = async (req, res) => {
   }
 };
 
+module.exports.updateFotoSiasnByNip = async (req, res) => {
+  try {
+    const { siasnRequest: siasnFetcher, fetcher: masterFetcher } = req;
+    const { nip } = req?.query;
+
+    const currentPnsId = await SiasnEmployees.query()
+      .where("nip_baru", nip)
+      .first()
+      .select("pns_id");
+
+    if (!currentPnsId) {
+      res.status(404).json({
+        message: "PNS not found",
+      });
+    } else {
+      const result = await masterFetcher.get(
+        `/master-ws/operator/employees/${nip}/data-utama-master`
+      );
+
+      const foto = result?.data?.foto;
+
+      if (!foto || foto?.includes("foto_kosong")) {
+        res.status(400).json({
+          message: "Foto tidak ditemukan atau tidak valid",
+        });
+      } else {
+        const payload = {
+          pnsId: currentPnsId?.pns_id,
+          foto,
+        };
+        await updateFotoSiasn(siasnFetcher, payload);
+
+        res.json({ message: "success" });
+      }
+    }
+  } catch (error) {
+    handleError(res, error);
+  }
+};
+
 module.exports.fotoByNip = async (req, res) => {
   try {
     const { siasnRequest: fetcher } = req;
