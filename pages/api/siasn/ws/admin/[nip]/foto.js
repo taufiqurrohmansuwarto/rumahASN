@@ -1,4 +1,7 @@
-import { fotoByNip } from "@/controller/siasn-profile.controller";
+import {
+  fotoByNip,
+  updateFotoSiasnByNip,
+} from "@/controller/siasn-profile.controller";
 import adminFasilitatorMiddleware from "@/middleware/admin-fasilitator.middleware";
 import auth from "@/middleware/auth.middleware";
 import checkEmployee from "@/middleware/check-employee.middleware";
@@ -11,6 +14,7 @@ router
   .use(adminFasilitatorMiddleware)
   .use(checkEmployee)
   .use(siasnMiddleware)
-  .get(fotoByNip);
+  .get(fotoByNip)
+  .post(updateFotoSiasnByNip);
 
 export default router.handler();

@@ -125,6 +125,15 @@ export const dataPangkatByNip = (nip) => {
   return api.get(`/admin/${nip}/rw-pangkat`).then((res) => res.data);
 };
 
+// foto
+export const fotoByNip = (nip) => {
+  return api.get(`/admin/${nip}/foto`).then((res) => res.data);
+};
+
+export const updateFotoByNip = (nip) => {
+  return api.post(`/admin/${nip}/foto`).then((res) => res.data);
+};
+
 export const cltnByNip = (nip) => {
   return api.get(`/admin/${nip}/rw-cltn`).then((res) => res.data);
 };
