@@ -389,3 +389,9 @@ module.exports.downloadDokumenAPI = (fetcher, path) => {
 module.exports.getJabatanById = (fetcher, id) => {
   return fetcher.get(`/jabatan/id/${id}`);
 };
+
+module.exports.nilaiIPASNWS = (fetcher, nip) => {
+  return fetcher.get(`/pns/nilaiipasn/${nip}`).then((res) => {
+    return res?.data?.data;
+  });
+};

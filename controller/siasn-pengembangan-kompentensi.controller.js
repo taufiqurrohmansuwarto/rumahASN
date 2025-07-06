@@ -173,10 +173,16 @@ const getNilaiIPASN = async (req, res) => {
     // const { nip } = req?.query;
     const { employee_number: nip } = req?.user;
     const nilaiIPASN = await IPASNBaru(fetcher, nip);
+    const data = {
+      ...nilaiIPASN,
+      subtotal: parseFloat(nilaiIPASN?.subtotal || 0),
+      kinerja: parseFloat(nilaiIPASN?.kinerja || 0),
+      kompetensi: parseFloat(nilaiIPASN?.kompetensi || 0),
+      disiplin: parseFloat(nilaiIPASN?.disiplin || 0),
+      kualifikasi: parseFloat(nilaiIPASN?.kualifikasi || 0),
+    };
 
-    console.log(nilaiIPASN);
-
-    res.json(nilaiIPASN);
+    res.json(data);
   } catch (error) {
     console.log(error);
     res.status(500).json({
@@ -189,7 +195,7 @@ const getNilaiIPASNByNip = async (req, res) => {
   try {
     const { siasnRequest: fetcher } = req;
     const { nip } = req?.query;
-    // const { employee_number: nip } = req?.user;
+
     const nilaiIPASN = await IPASNBaru(fetcher, nip);
     res.json(nilaiIPASN);
   } catch (error) {
@@ -210,7 +216,7 @@ const getIpAsnByNip = async (req, res) => {
       `/siasn-ws/layanan/ip-asn/${nip}?tahun=${tahun}`
     );
 
-    const ipAsnFallback = await nilaiIPASNWS(request, nip);
+    const ipAsnFallback = await IPASNBaru(request, nip);
 
     const dataIPAsn = result?.data || ipAsnFallback || null;
 
