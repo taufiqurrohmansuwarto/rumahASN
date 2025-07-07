@@ -15,7 +15,14 @@ class SyncPegawai extends Model {
   static get modifiers() {
     return {
       simpleSelect(query) {
-        query.select("foto", "nip_master", "nama_master", "opd_master");
+        query.select(
+          "foto",
+          "nip_master",
+          "nama_master",
+          "opd_master",
+          "jabatan_master",
+          "status_master"
+        );
       },
     };
   }
