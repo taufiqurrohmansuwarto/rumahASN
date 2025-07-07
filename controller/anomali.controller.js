@@ -52,21 +52,42 @@ const uploadAnomali2022 = async (req, res) => {
     if (!file) {
       res.status(400).json({ message: "File is required" });
     } else {
-      // read file from buffer
-
       const workbook = xlsx.read(file?.buffer);
       const sheet_name_list = workbook.SheetNames;
+
       const xlData = xlsx.utils.sheet_to_json(
         workbook.Sheets[sheet_name_list[0]]
       );
-      await Anomali23.query().delete();
-      await Anomali23.query().insert(xlData);
-      trx.commit();
-      res.status(200).json({ message: "success" });
+
+      // Ekstrak jenis anomali unik dari file Excel
+      const uniqueAnomalies = [
+        ...new Set(
+          xlData.map((item) => item.jenis_anomali_nama).filter(Boolean)
+        ),
+      ];
+
+      // Hapus data yang ada untuk jenis anomali yang ada di file Excel
+      if (uniqueAnomalies.length > 0) {
+        await Anomali23.query(trx)
+          .whereIn("jenis_anomali_nama", uniqueAnomalies)
+          .delete();
+      }
+
+      // Insert semua data dari Excel
+      if (xlData.length > 0) {
+        await Anomali23.query(trx).insert(xlData);
+      }
+
+      await trx.commit();
+      res.status(200).json({
+        message: "success",
+        inserted: xlData.length,
+        processedAnomalies: uniqueAnomalies,
+      });
     }
   } catch (error) {
     console.log(error);
-    trx.rollback();
+    await trx.rollback();
     res.status(500).json({ message: "Internal server error" });
   }
 };
@@ -96,7 +117,7 @@ const getAnomali2022 = async (req, res) => {
           order: "desc",
         },
       ])
-      .withGraphFetched("[user(simpleSelect)]");
+      .withGraphFetched("[user(simpleSelect), pegawai_simaster(simpleSelect)]");
 
     const sendData = {
       data: data.results,
