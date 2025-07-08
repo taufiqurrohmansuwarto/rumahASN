@@ -170,8 +170,8 @@ const FormAngkaKreditPredikat = ({ form, jabatanId }) => {
         >
           <InputNumber
             min={0}
-            step={0.01}
-            precision={2}
+            step={0.001}
+            precision={4}
             placeholder="Otomatis terisi"
             style={{ width: "100%" }}
           />
