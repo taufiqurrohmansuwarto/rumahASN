@@ -6,6 +6,7 @@ const {
 } = require("@/utils/query-utils");
 const { sortBy } = require("lodash");
 const dayjs = require("dayjs");
+const { handleError } = require("@/utils/helper/controller-helper");
 
 dayjs.locale("id");
 require("dayjs/locale/id");
@@ -397,7 +398,17 @@ const checkAnomaliByNip = async (req, res) => {
   }
 };
 
+const deleteAllAnomali = async (req, res) => {
+  try {
+    await Anomali23.query().delete();
+    res.json({ message: "success" });
+  } catch (error) {
+    handleError(res, error);
+  }
+};
+
 module.exports = {
+  deleteAllAnomali,
   userAnomaliByDate,
   patchUserAnomali,
   aggregateAnomali,

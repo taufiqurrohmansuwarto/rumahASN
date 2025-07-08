@@ -1,61 +1,59 @@
 import PageContainer from "@/components/PageContainer";
 import {
-  FloatButton,
+  Avatar,
+  Modal,
   Breadcrumb,
   Button,
   Card,
   Checkbox,
   Col,
-  Form,
+  Flex,
+  FloatButton,
+  Grid,
+  Input,
   Row,
   Select,
   Skeleton,
   Space,
   Table,
   Tag,
+  Tooltip,
+  Typography,
   Upload,
   message,
-  Flex,
-  Avatar,
-  Input,
-  Typography,
-  Grid,
-  Tooltip,
-  DatePicker,
 } from "antd";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
-import QueryFilter from "@/components/QueryFilter";
+import UserByDateAnomali from "@/components/Anomali/UserByDateAnomali";
+import Bar from "@/components/Plots/Bar";
+import Pie from "@/components/Plots/Pie";
+import useScrollRestoration from "@/hooks/useScrollRestoration";
 import {
   aggregateAnomali2023,
   daftarAnomali23,
+  deleteAllAnomali2023,
   downloadAnomali2023,
   uploadDataAnomali2023,
 } from "@/services/anomali.services";
 import {
-  UploadOutlined,
-  DatabaseOutlined,
-  SearchOutlined,
-  FilterOutlined,
-  DownloadOutlined,
-  CheckCircleOutlined,
-  CloseCircleOutlined,
-  UserOutlined,
-  PieChartOutlined,
   BarChartOutlined,
   BugOutlined,
-  FileTextOutlined,
+  CheckCircleOutlined,
+  CloseCircleOutlined,
+  DatabaseOutlined,
+  DownloadOutlined,
   EyeOutlined,
-  ReloadOutlined,
+  FileTextOutlined,
+  FilterOutlined,
+  PieChartOutlined,
+  SearchOutlined,
+  UploadOutlined,
+  UserOutlined,
 } from "@ant-design/icons";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { Stack } from "@mantine/core";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import UserByDateAnomali from "@/components/Anomali/UserByDateAnomali";
-import Pie from "@/components/Plots/Pie";
-import Bar from "@/components/Plots/Bar";
-import useScrollRestoration from "@/hooks/useScrollRestoration";
-import { Stack } from "@mantine/core";
 
 const { Title, Text } = Typography;
 const { useBreakpoint } = Grid;
@@ -130,9 +128,22 @@ const UploadExcel = () => {
   const [fileList, setFileList] = useState([]);
   const screens = useBreakpoint();
   const isMobile = !screens.md;
+  const queryClient = useQueryClient();
 
-  const { mutateAsync, isLoading } = useMutation((data) =>
-    uploadDataAnomali2023(data)
+  const { mutateAsync, isLoading } = useMutation(
+    (data) => uploadDataAnomali2023(data),
+    {
+      onSuccess: () => {
+        message.success("Berhasil mengunggah file");
+        setFileList([]);
+      },
+      onError: () => {
+        message.error("Gagal mengunggah file");
+      },
+      onSettled: () => {
+        queryClient.invalidateQueries(["anomali-2023"]);
+      },
+    }
   );
 
   const handleUpload = async () => {
@@ -503,8 +514,12 @@ const ListAnomali = () => {
           <Button
             type="primary"
             size="small"
+            onClick={() => {
+              router.push(
+                `/apps-managements/integrasi/siasn/${record?.nip_baru}`
+              );
+            }}
             icon={<EyeOutlined />}
-            href={`/apps-managements/integrasi/siasn/${record?.nip_baru}`}
           >
             {isMobile ? "Detail" : "Detail"}
           </Button>
@@ -788,6 +803,31 @@ const ListAnomali = () => {
     });
   };
 
+  const queryClient = useQueryClient();
+
+  const { mutateAsync: hapusAnomali, isLoading: isLoadingHapus } = useMutation({
+    mutationFn: () => deleteAllAnomali2023(),
+    onSuccess: () => {
+      message.success("Data anomali berhasil dihapus");
+    },
+    onError: () => {
+      message.error("Gagal menghapus data anomali");
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries(["anomali-2023"]);
+    },
+  });
+
+  const handleHapusSemua = () => {
+    Modal.confirm({
+      title: "Hapus Semua Data Anomali",
+      content: "Apakah anda yakin ingin menghapus semua data anomali?",
+      onOk: async () => {
+        await hapusAnomali();
+      },
+    });
+  };
+
   return (
     <div>
       {/* Header */}
@@ -880,6 +920,9 @@ const ListAnomali = () => {
               size={isMobile ? "small" : "middle"}
             >
               {isMobile ? "Download" : "Download Excel"}
+            </Button>
+            <Button danger onClick={handleHapusSemua}>
+              Hapus Semua
             </Button>
           </Space>
         </Flex>
