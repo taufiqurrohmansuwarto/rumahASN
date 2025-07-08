@@ -75,3 +75,7 @@ export const downloadDataAnomaliFasilitator = async () => {
 export const dataAdminByDate = async (query) => {
   return api.get(`/2023/admin/by-date?date=${query}`).then((res) => res?.data);
 };
+
+export const deleteAllAnomali2023 = async () => {
+  return api.delete(`/2023/admin`).then((res) => res?.data);
+};
