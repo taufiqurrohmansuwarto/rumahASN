@@ -1,13 +1,13 @@
+import { handleError } from "@/utils/helper/controller-helper";
 import { dataUtama } from "@/utils/siasn-utils";
 import dayjs from "dayjs";
 import { toUpper, trim } from "lodash";
 import { raw } from "objection";
-const RekonJFT = require("@/models/rekon/jft.model");
 const RekonUnor = require("@/models/rekon/unor.model");
 const UnorSIASN = require("@/models/ref-siasn-unor.model");
 const UnorSimaster = require("@/models/sync-unor-master.model");
 const SyncPegawai = require("@/models/sync-pegawai.model");
-const RekonSKP = require("@/models/rekon/skp.model");
+const UnorSiasn = require("@/models/ref-siasn-unor.model");
 
 // Fungsi untuk memformat hierarki unor
 const formatUnorHierarchy = (data) => {
@@ -223,5 +223,60 @@ export const disparitasDataSKP = async (req, res) => {
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+// cek unor
+export const cekUnor = async (req, res) => {
+  try {
+    const knex = RekonUnor.knex();
+    const { id } = req?.query;
+
+    if (!id) {
+      res.json(null);
+    } else {
+      const detail = await UnorSiasn.query().where("Id", id).first();
+
+      if (!detail) {
+        return res.json(null);
+      }
+
+      const detailUnorId = await knex.raw(
+        `SELECT get_hierarchy_siasn('${detail?.Id}') as data`
+      );
+
+      const isTheSame = await knex.raw(
+        `SELECT "Id" as id, "NamaUnor" as nama_unor FROM ref_siasn_unor WHERE "NamaUnor" % ? ORDER BY similarity("NamaUnor", ?) DESC LIMIT 5`,
+        [detail.NamaUnor, detail.NamaUnor]
+      );
+
+      const { rows } = isTheSame;
+
+      // Menggunakan Promise.all untuk menangani async operations dengan benar
+      const detailUnorPromises = rows.map(async (row) => {
+        const result = await knex.raw(
+          `SELECT get_hierarchy_siasn('${row.id}') as data`
+        );
+
+        return {
+          id: row.id,
+          nama_unor: row.nama_unor,
+          detail_unor: result?.rows?.[0]?.data || "",
+        };
+      });
+
+      const detailUnor = await Promise.all(detailUnorPromises);
+
+      const data = {
+        id,
+        nama_unor: detail.NamaUnor,
+        detail_unor_nama: detailUnorId?.rows?.[0]?.data || "",
+        similar_unor: detailUnor,
+      };
+
+      res.json(data);
+    }
+  } catch (error) {
+    handleError(res, error);
   }
 };

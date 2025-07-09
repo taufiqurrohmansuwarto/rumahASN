@@ -45,6 +45,7 @@ import TrackingPencantumanGelarByNip from "./Usulan/TrackingPencantumanGelarByNi
 import TrackingPenyesuaianMasaKerjaByNip from "./Usulan/TrackingPenyesuaianMasaKerjaByNip";
 import TrackingPerbaikanNamaByNip from "./Usulan/TrackingPerbaikanNamaByNip";
 import TrackingUsulanLainnyaByNip from "./Usulan/TrackingUsulanLainnyaByNip";
+import CekUnor from "@/components/Disparitas/CekUnor";
 
 // import { patchAnomali2023 } from "@/services/anomali.services";
 
@@ -85,12 +86,17 @@ const EmployeeUnor = ({ data, loading, nip }) => {
   );
 };
 
-const EmployeeDescriptionMaster = ({ data, loading }) => {
+const EmployeeDescriptionMaster = ({ data, loading, unorId }) => {
   const breakPoint = Grid.useBreakpoint();
 
   return (
     <Card
-      title="Informasi Pegawai SIMASTER"
+      title={
+        <Space>
+          <Typography.Text strong>Informasi Pegawai SIMASTER</Typography.Text>
+          <CekUnor unorId={unorId} />
+        </Space>
+      }
       style={{ marginBottom: 16 }}
       loading={loading}
     >
@@ -332,7 +338,11 @@ const EmployeeContent = ({ data, loading, nip }) => {
             </Row>
 
             {/* Employee Description */}
-            <EmployeeDescriptionMaster loading={loading} data={data?.master} />
+            <EmployeeDescriptionMaster
+              unorId={data?.siasn?.unorId}
+              loading={loading}
+              data={data?.master}
+            />
           </Flex>
         </Flex>
       </Col>
