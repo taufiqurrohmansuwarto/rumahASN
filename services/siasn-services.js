@@ -51,6 +51,10 @@ export const createCpns = ({ nip, data }) => {
   return api.post(`/admin/${nip}/cpns`, data).then((res) => res.data);
 };
 
+export const cekUnor = (id) => {
+  return api.get(`/admin/cek-unor/${id}`).then((res) => res.data);
+};
+
 export const atasanKinerja = (search) => {
   return api
     .get(`/pns/cari-atasan-kinerja?search=${search}`)
