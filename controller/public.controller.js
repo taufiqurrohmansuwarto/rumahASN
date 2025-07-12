@@ -32,7 +32,7 @@ const landingPageData = async (req, res) => {
       .andWhere(raw("LENGTH(requester_comment)"), ">", 10)
       .andWhereNot("requester_comment", null)
       .select("id", "stars", "requester_comment", "requester", "updated_at")
-      .withGraphFetched("[customer(simpleSelect)]")
+      .withGraphFetched("[customer(simpleWithImage)]")
       .limit(27)
       .orderBy("updated_at", "desc");
 
