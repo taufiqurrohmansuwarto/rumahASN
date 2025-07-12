@@ -1,34 +1,43 @@
 import { postPasanganByNip } from "@/services/siasn-services";
-import {
-  refAgama,
-  refDokumen,
-  refJenisKawin,
-  statusHidup,
-} from "@/utils/data-utils";
+import { refAgama, refJenisKawin, statusHidup } from "@/utils/data-utils";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   Button,
+  Col,
   DatePicker,
   Form,
   Input,
   InputNumber,
+  message,
   Modal,
   Row,
   Select,
-  Col,
-  message,
 } from "antd";
-import { useRouter } from "next/router";
-import { useState } from "react";
 import dayjs from "dayjs";
+import { useRouter } from "next/router";
+import { useEffect, useState } from "react";
 
 // buat fungsi jika undefined ganti ""
+
+/**
+ *
+ * @param {format data pasangan dari SIMASTER} value
+ * @returns
+ *{"suami_istri_id":77922,"pegawai_id":82591,"nama_suami_istri":"RALFATH RITO FARREL ","nik":"1571082810980001","no_bpjs":"0002157649525","status_suami_istri_id":1,"tempat_lahir":"Jambi ","tgl_lahir":"28-09-1998","suami_istri_ke":1,"pekerjaan_id":3,"penghasilan":0,"nip_nrp":"23713/P","instansi":"KOARMADA II ","tunjangan":"Tidak Dapat","file_foto_suami_istri":"https://master.bkd.jatimprov.go.id/files_jatimprov/82591-Suami-20240813-35-WhatsApp_Image_2024-08-01_at_12.10.16_(1).jpeg","file_ktp_suami_istri":"https://master.bkd.jatimprov.go.id/files_jatimprov/82591-ktp-Suami-20240813-383-WhatsApp_Image_2024-08-01_at_12.07.11_(1)_(1).jpeg","file_askes_bpjs_suami_istri":"https://master.bkd.jatimprov.go.id/files_jatimprov/82591-askes_bpjs-Suami-20240813-223-WhatsApp_Image_2024-08-13_at_09.25.27.jpeg","aktif":"Y","tgl_edit":"2024-08-12T17:00:00.000Z","jam_edit":"09:33:52","status_suami_istri":{"status_suami_istri_id":1,"status_suami_istri":"Suami"},"ref_pekerjaan":{"pekerjaan_id":3,"pekerjaan":"TNI"},"nikah":{"nikah_id":90844,"pegawai_id":82591,"status_kawin_id":2,"tgl_nikah_duda_janda":"26-02-2023","no_surat":"1571011022023044","tgl_surat":"26-02-2023","file_surat_nikah_cerai":"https://master.bkd.jatimprov.go.id/files_jatimprov/82591-Menikah-20240701-715-BUKU_NIKAH_SARAH_compressed.pdf","aktif":"Y","tgl_edit":"2024-08-12T17:00:00.000Z","jam_edit":"09:32:09","status_nikah":{"status_kawin_id":2,"status_kawin":"Menikah"}}}
+ */
+
 const handleUndefined = (value) => {
   if (value === undefined) return "";
   return value;
 };
 
-const ModalPasangan = ({ isModalOpen, handleCancel, nip }) => {
+const ModalPasangan = ({
+  isModalOpen,
+  handleCancel,
+  nip,
+  dataPasangan,
+  isEdit = false,
+}) => {
   const queryClient = useQueryClient();
   const [statusHidupValue, setStatusHidupValue] = useState(null);
 
@@ -53,6 +62,23 @@ const ModalPasangan = ({ isModalOpen, handleCancel, nip }) => {
   );
 
   const [form] = Form.useForm();
+
+  useEffect(() => {
+    if (dataPasangan) {
+      form.setFieldsValue({
+        pasanganKe: dataPasangan?.suami_istri_ke || "",
+        nomorIdentitas: dataPasangan?.nik || "",
+        nama: dataPasangan?.nama_suami_istri || "",
+        tglLahir: dataPasangan?.tgl_lahir
+          ? dayjs(dataPasangan.tgl_lahir, "DD-MM-YYYY")
+          : "",
+        noAktaMenikah: dataPasangan?.nikah?.no_surat || "",
+        tglAktaMenikah: dataPasangan?.nikah?.tgl_surat
+          ? dayjs(dataPasangan.nikah.tgl_surat, "DD-MM-YYYY")
+          : "",
+      });
+    }
+  }, [dataPasangan, form]);
 
   const handleStatusHidupChange = (value) => {
     setStatusHidupValue(value);
@@ -123,7 +149,7 @@ const ModalPasangan = ({ isModalOpen, handleCancel, nip }) => {
       style={{ maxWidth: 1000 }}
       onOk={handleSubmit}
       confirmLoading={isLoading}
-      title="Tambah Pasangan SIASN"
+      title={isEdit ? "Edit Pasangan SIASN" : "Tambah Pasangan SIASN"}
       open={isModalOpen}
       onCancel={handleCancel}
     >
@@ -319,32 +345,5 @@ const ModalPasangan = ({ isModalOpen, handleCancel, nip }) => {
     </Modal>
   );
 };
-function FormPasanganByNip() {
-  const router = useRouter();
-  const { nip } = router?.query;
 
-  const [isModalOpen, setIsModalOpen] = useState(false);
-
-  const showModal = () => {
-    setIsModalOpen(true);
-  };
-
-  const handleCancel = () => {
-    setIsModalOpen(false);
-  };
-
-  return (
-    <div>
-      <Button type="primary" onClick={showModal}>
-        Tambah Pasangan
-      </Button>
-      <ModalPasangan
-        isModalOpen={isModalOpen}
-        handleCancel={handleCancel}
-        nip={nip}
-      />
-    </div>
-  );
-}
-
-export default FormPasanganByNip;
+export default ModalPasangan;

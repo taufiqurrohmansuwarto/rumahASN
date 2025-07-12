@@ -94,7 +94,6 @@ const EmployeeDescriptionMaster = ({ data, loading, unorId }) => {
       title={
         <Space>
           <Typography.Text strong>Informasi Pegawai SIMASTER</Typography.Text>
-          <CekUnor unorId={unorId} />
         </Space>
       }
       style={{ marginBottom: 16 }}
@@ -149,7 +148,12 @@ const EmployeeDescriptionMaster = ({ data, loading, unorId }) => {
           </div>
         </Descriptions.Item>
         <Descriptions.Item
-          label="Perangkat Daerah"
+          label={
+            <Space>
+              <Typography.Text>Perangkat Daerah</Typography.Text>
+              <CekUnor unorId={unorId} />
+            </Space>
+          }
           span={breakPoint.xs ? 1 : 2}
         >
           <Typography.Text>{data?.skpd?.detail || "-"}</Typography.Text>
