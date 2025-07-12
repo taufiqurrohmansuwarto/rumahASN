@@ -1,27 +1,27 @@
 import { cekUnor } from "@/services/siasn-services";
+import {
+  BankOutlined,
+  IdcardOutlined,
+  InfoCircleOutlined,
+  SelectOutlined,
+  TeamOutlined,
+} from "@ant-design/icons";
 import { useQuery } from "@tanstack/react-query";
 import {
+  Alert,
   Button,
-  Modal,
   Card,
-  Typography,
-  Divider,
+  Collapse,
+  Grid,
   List,
-  Tag,
+  Modal,
   Space,
   Spin,
-  Alert,
-  Grid,
-  Collapse,
+  Tag,
+  Typography,
 } from "antd";
-import {
-  IdcardOutlined,
-  BankOutlined,
-  InfoCircleOutlined,
-  TeamOutlined,
-  SelectOutlined,
-} from "@ant-design/icons";
-import React, { useState } from "react";
+
+import { useState } from "react";
 
 const { Title, Text, Paragraph } = Typography;
 const { useBreakpoint } = Grid;
@@ -274,7 +274,7 @@ function CekUnor({ unorId }) {
     setOpen(false);
   };
   return (
-    <div>
+    <>
       <Button
         icon={<SelectOutlined />}
         onClick={handleOpen}
@@ -282,7 +282,7 @@ function CekUnor({ unorId }) {
         style={{ padding: 0 }}
       />
       <CekUnorModal open={open} onCancel={handleCancel} unorId={unorId} />
-    </div>
+    </>
   );
 }
 

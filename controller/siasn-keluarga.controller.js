@@ -7,6 +7,7 @@ const {
 const DataSIASN = require("@/models/siasn-employees.model");
 const { handleError } = require("@/utils/helper/controller-helper");
 const { proxyKeluargaPasangan } = require("@/utils/siasn-proxy.utils");
+const { IconTemplate } = require("@tabler/icons");
 const metanip = "199303302019032011";
 
 const daftarPasangan = async (req, res) => {
@@ -22,14 +23,32 @@ const daftarPasangan = async (req, res) => {
   }
 };
 
+const serializePasangan = (pasangan) => {
+  return pasangan?.map((item) => {
+    const { orang, dataPernikahan } = item;
+    return {
+      statusNikah: item?.statusNikah,
+      ...orang,
+      ...dataPernikahan,
+    };
+  });
+};
+
 const daftarPasanganByNip = async (req, res) => {
   try {
     const { siasnRequest: request, fetcher } = req;
     const { nip } = req?.query;
 
-    const hasilPasangan = await proxyKeluargaPasangan(fetcher, nip);
+    const hasilPasangan = await pasangan(request, nip);
+    const currentPasangan = hasilPasangan?.data?.data?.listPasangan;
+    const serializedPasangan = serializePasangan(currentPasangan);
 
-    res.json(hasilPasangan?.data);
+    if (serializedPasangan?.length > 0) {
+      console.log(serializedPasangan);
+      res.json(serializedPasangan);
+    } else {
+      res.json([]);
+    }
   } catch (error) {
     handleError(res, error);
   }
