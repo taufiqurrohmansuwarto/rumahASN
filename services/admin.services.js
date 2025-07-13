@@ -5,6 +5,30 @@ const api = axios.create({
   baseURL: "/helpdesk/api/admins",
 });
 
+export const getSiasnToken = async () => {
+  try {
+    const response = await api.get(`/siasn-token`);
+    return response.data?.data || null;
+  } catch (error) {
+    console.error("Error fetching SIASN token:", error);
+    throw new Error(
+      error.response?.data?.message || "Gagal mengambil token SIASN"
+    );
+  }
+};
+
+export const setSiasnToken = async (token) => {
+  try {
+    const response = await api.post(`/siasn-token`, { token });
+    return response.data;
+  } catch (error) {
+    console.error("Error setting SIASN token:", error);
+    throw new Error(
+      error.response?.data?.message || "Gagal memperbarui token SIASN"
+    );
+  }
+};
+
 export const downloadFineTunning = async () => {
   return api
     .get(`/openai/download`, {
