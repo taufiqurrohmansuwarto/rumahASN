@@ -118,3 +118,31 @@ export const testing = async (req, res) => {
     handleError(res, error);
   }
 };
+
+export const createUsulanPeremajaanPendidikan = async (req, res) => {
+  try {
+  } catch (error) {
+    handleError(res, error);
+  }
+};
+
+export const submitUsulanPeremajaanPendidikan = async (req, res) => {
+  try {
+  } catch (error) {
+    handleError(res, error);
+  }
+};
+
+export const updateDataUsulanPeremajaanPendidikan = async (req, res) => {
+  try {
+  } catch (error) {
+    handleError(res, error);
+  }
+};
+
+export const uploadFile = async (req, res) => {
+  try {
+  } catch (error) {
+    handleError(res, error);
+  }
+};
