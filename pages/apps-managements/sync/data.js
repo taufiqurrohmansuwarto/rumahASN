@@ -8,7 +8,8 @@ import SinkronMaster from "@/components/Sinkron/SinkronMaster";
 import SinkronSKP from "@/components/Sinkron/SinkronSKP";
 import SinkronUnorMaster from "@/components/Sinkron/SinkronUnorMaster";
 import SyncUnorSiasn from "@/components/Sinkron/SyncUnorSiasn";
-import { Card, Space } from "antd";
+import SiasnToken from "@/components/Admin/SiasnToken";
+import { Space } from "antd";
 import Head from "next/head";
 
 const Sync = () => {
@@ -22,6 +23,7 @@ const Sync = () => {
         title="🔄 Sinkronisasi Data"
       >
         <SinkronLayout active="data">
+          <SiasnToken />
           <DaftarSinkron />
           <div style={{ marginTop: 10 }}>
             <Space>
