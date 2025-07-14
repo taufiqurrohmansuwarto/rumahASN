@@ -1,36 +1,40 @@
 import { rwPendidikanMasterByNip } from "@/services/master.services";
 import { dataPendidikanByNip } from "@/services/siasn-services";
+import {
+  BankOutlined,
+  BookOutlined,
+  CalendarOutlined,
+  CheckCircleOutlined,
+  DownloadOutlined,
+  EditOutlined,
+  FileTextOutlined,
+  GlobalOutlined,
+  IdcardOutlined,
+  ReloadOutlined,
+  TrophyOutlined,
+  UserOutlined,
+} from "@ant-design/icons";
 import { Stack } from "@mantine/core";
 import { useQuery } from "@tanstack/react-query";
 import {
-  Card,
-  Table,
-  Space,
-  Tag,
-  Typography,
-  Grid,
-  Flex,
-  Tooltip,
   Avatar,
   Badge,
+  Button,
+  Card,
   Descriptions,
   Divider,
+  Flex,
+  Grid,
+  Space,
+  Table,
+  Tag,
+  Tooltip,
+  Typography,
 } from "antd";
-import {
-  BookOutlined,
-  FileTextOutlined,
-  DownloadOutlined,
-  TrophyOutlined,
-  CalendarOutlined,
-  UserOutlined,
-  IdcardOutlined,
-  BankOutlined,
-  GlobalOutlined,
-  CheckCircleOutlined,
-  CloseCircleOutlined,
-} from "@ant-design/icons";
 import dayjs from "dayjs";
 import "dayjs/locale/id";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/router";
 
 const { Text, Title } = Typography;
 const { useBreakpoint } = Grid;
@@ -461,7 +465,9 @@ const ComparePendidikanByNip = ({ nip }) => {
   const screens = useBreakpoint();
   const isMobile = !screens.md;
 
-  const { data, isLoading, refetch } = useQuery(
+  const router = useRouter();
+
+  const { data, isLoading, refetch, isFetching } = useQuery(
     ["riwayat-pendidikan-by-nip", nip],
     () => dataPendidikanByNip(nip),
     {
@@ -470,6 +476,8 @@ const ComparePendidikanByNip = ({ nip }) => {
       staleTime: 500000,
     }
   );
+
+  const { data: session } = useSession();
 
   const columns = [
     {
@@ -703,6 +711,20 @@ const ComparePendidikanByNip = ({ nip }) => {
           },
         ]
       : []),
+    {
+      title: "Aksi",
+      key: "aksi",
+      width: 100,
+      render: (_, row) => {
+        return (
+          <Space>
+            {session?.user?.current_role === "admin" && (
+              <Button type="primary" size="small" icon={<EditOutlined />} />
+            )}
+          </Space>
+        );
+      },
+    },
   ];
 
   const expandedRowRender = (record) => {
@@ -882,13 +904,7 @@ const ComparePendidikanByNip = ({ nip }) => {
   };
 
   return (
-    <div
-      style={{
-        padding: isMobile ? "12px" : "20px",
-        backgroundColor: "#fafafa",
-        borderRadius: "8px",
-      }}
-    >
+    <div>
       <Card
         title={
           <Space>
@@ -926,25 +942,35 @@ const ComparePendidikanByNip = ({ nip }) => {
         <Stack>
           <Table
             title={() => (
-              <Space>
-                <Avatar
-                  size={24}
-                  style={{ backgroundColor: "#ff4500" }}
-                  icon={<BookOutlined />}
-                />
-                <Title level={5} style={{ margin: 0 }}>
-                  SIASN
-                </Title>
-                <Badge
-                  count={data?.length || 0}
-                  style={{ backgroundColor: "#ff4500" }}
-                />
-              </Space>
+              <Flex justify="space-between" align="center">
+                <Space>
+                  <Avatar
+                    size={24}
+                    style={{ backgroundColor: "#ff4500" }}
+                    icon={<BookOutlined />}
+                  />
+                  <Title level={5} style={{ margin: 0 }}>
+                    SIASN
+                  </Title>
+                  <Badge
+                    count={data?.length || 0}
+                    style={{ backgroundColor: "#ff4500" }}
+                  />
+                </Space>
+                <Button
+                  type="text"
+                  size="small"
+                  icon={<ReloadOutlined />}
+                  onClick={() => refetch()}
+                >
+                  Refresh
+                </Button>
+              </Flex>
             )}
             pagination={false}
             columns={columns}
             dataSource={data}
-            loading={isLoading}
+            loading={isLoading || isFetching}
             rowKey={(row) => row?.id}
             scroll={{ x: isMobile ? 600 : 800 }}
             size={isMobile ? "small" : "middle"}
