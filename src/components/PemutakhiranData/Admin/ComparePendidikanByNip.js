@@ -1,3 +1,5 @@
+import HapusUsulanPendidikan from "@/components/Admin/UsulanSIASN/HapusUsulanPendidikan";
+import UbahUsulanPendidikan from "@/components/Admin/UsulanSIASN/UbahUsulanPendidikan";
 import { createUsulanPeremajaanPendidikan } from "@/services/admin.services";
 import { rwPendidikanMasterByNip } from "@/services/master.services";
 import { dataPendidikanByNip } from "@/services/siasn-services";
@@ -736,18 +738,14 @@ const ComparePendidikanByNip = ({ nip }) => {
       width: 100,
       render: (_, row) => {
         return (
-          <Space>
+          <>
             {session?.user?.current_role === "admin" && (
-              <Tooltip title="Buat Usulan Pendidikan">
-                <Button
-                  onClick={() => handleCreatUsulan(row)}
-                  type="primary"
-                  size="small"
-                  icon={<EditOutlined />}
-                />
-              </Tooltip>
+              <Space direction="horizontal">
+                <UbahUsulanPendidikan row={row} />
+                <HapusUsulanPendidikan row={row} />
+              </Space>
             )}
-          </Space>
+          </>
         );
       },
     },

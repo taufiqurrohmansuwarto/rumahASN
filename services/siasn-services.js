@@ -13,6 +13,15 @@ export const syncPendidikan = async () => {
   return api.put(`/ref/pendidikan`).then((res) => res.data);
 };
 
+export const findPendidikan = async (query) => {
+  const queryStr = queryString.stringify(query, {
+    skipEmptyString: true,
+    skipNull: true,
+  });
+
+  return api.get(`/ref/pendidikan?${queryStr}`).then((res) => res.data);
+};
+
 export const getDisparitasSKP = async () => {
   return api.get("/disparitas/skp").then((res) => res.data);
 };
