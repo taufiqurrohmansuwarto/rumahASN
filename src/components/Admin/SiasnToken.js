@@ -19,8 +19,13 @@ import {
   ReloadOutlined,
   EyeOutlined,
   EyeInvisibleOutlined,
+  CheckOutlined,
 } from "@ant-design/icons";
-import { getSiasnToken, setSiasnToken } from "@/services/admin.services";
+import {
+  getSiasnToken,
+  setSiasnToken,
+  testConnectionSiasn,
+} from "@/services/admin.services";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 const { Text, Title } = Typography;
@@ -103,6 +108,18 @@ const ModalSiasnToken = ({ open, onCancel }) => {
   const handleTokenChange = (e) => {
     const value = e.target.value;
     validateToken(value);
+  };
+
+  const { mutate: testConnection, isLoading: isLoadingTestConnection } =
+    useMutation({
+      mutationFn: testConnectionSiasn,
+      onSuccess: () => {
+        message.success("Koneksi SIASN berhasil");
+      },
+    });
+
+  const handleTestConnection = () => {
+    testConnection();
   };
 
   const handleRetry = () => {
@@ -253,6 +270,16 @@ const ModalSiasnToken = ({ open, onCancel }) => {
                 size="small"
               >
                 Format JSON
+              </Button>
+              <Button
+                icon={<CheckOutlined />}
+                type="default"
+                size="small"
+                loading={isLoadingTestConnection}
+                disabled={isLoadingTestConnection}
+                onClick={handleTestConnection}
+              >
+                Tes Koneksi
               </Button>
             </Space>
 

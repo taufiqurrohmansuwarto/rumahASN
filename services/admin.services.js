@@ -29,6 +29,10 @@ export const setSiasnToken = async (token) => {
   }
 };
 
+export const testConnectionSiasn = async () => {
+  return api.get(`/siasn-token/testing`).then((res) => res?.data);
+};
+
 export const downloadFineTunning = async () => {
   return api
     .get(`/openai/download`, {
