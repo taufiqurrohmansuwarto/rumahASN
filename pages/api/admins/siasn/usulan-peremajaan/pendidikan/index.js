@@ -1,7 +1,7 @@
 import { createRouter } from "next-connect";
 import auth from "middleware/auth.middleware";
 import adminMiddleware from "@/middleware/admin.middleware";
-import { uploadFile } from "@/controller/siasn-instansi/token.controller";
+import { createUsulanPeremajaanPendidikan } from "@/controller/siasn-instansi/token.controller";
 import multer from "multer";
 
 const upload = multer({
@@ -13,6 +13,6 @@ const upload = multer({
 
 const router = createRouter();
 
-router.use(auth).use(adminMiddleware).post(upload.single("file"), uploadFile);
+router.use(auth).use(adminMiddleware).post(createUsulanPeremajaanPendidikan);
 
 export default router.handler({});

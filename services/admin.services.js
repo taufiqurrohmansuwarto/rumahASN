@@ -143,3 +143,31 @@ export const uploadMejaRegistrasi = async (data) => {
     })
     .then((res) => res?.data);
 };
+
+// peremajaan pendidikan
+export const createUsulanPeremajaanPendidikan = async (data) => {
+  return api
+    .post(`/siasn/usulan-peremajaan/pendidikan`, data)
+    .then((res) => res?.data);
+};
+
+// upload file
+export const uploadFilePeremajaanPendidikan = async (data) => {
+  return api
+    .post(`/siasn/usulan-peremajaan/pendidikan/upload`, data)
+    .then((res) => res?.data);
+};
+
+// submit usulan
+export const submitUsulanPeremajaanPendidikan = async (data) => {
+  return api
+    .post(`/siasn/usulan-peremajaan/pendidikan/submit`, data)
+    .then((res) => res?.data);
+};
+
+// update data usulan
+export const updateDataUsulanPeremajaanPendidikan = async (data) => {
+  return api
+    .post(`/siasn/usulan-peremajaan/pendidikan/update`, data)
+    .then((res) => res?.data);
+};
