@@ -9,6 +9,10 @@ const siasnBaseUrl = axios.create({
   baseURL: "/helpdesk/api/siasn",
 });
 
+export const syncPendidikan = async () => {
+  return api.put(`/ref/pendidikan`).then((res) => res.data);
+};
+
 export const getDisparitasSKP = async () => {
   return api.get("/disparitas/skp").then((res) => res.data);
 };
