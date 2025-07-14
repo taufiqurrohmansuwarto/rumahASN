@@ -1,3 +1,4 @@
+import { createUsulanPeremajaanPendidikan } from "@/services/admin.services";
 import { rwPendidikanMasterByNip } from "@/services/master.services";
 import { dataPendidikanByNip } from "@/services/siasn-services";
 import {
@@ -15,7 +16,7 @@ import {
   UserOutlined,
 } from "@ant-design/icons";
 import { Stack } from "@mantine/core";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import {
   Avatar,
   Badge,
@@ -25,6 +26,7 @@ import {
   Divider,
   Flex,
   Grid,
+  message,
   Space,
   Table,
   Tag,
@@ -479,6 +481,23 @@ const ComparePendidikanByNip = ({ nip }) => {
 
   const { data: session } = useSession();
 
+  const { mutate: createUsulan, isLoading: isCreatingUsulan } = useMutation(
+    (data) => createUsulanPeremajaanPendidikan(data),
+    {
+      onSuccess: () => {
+        message.success("sukses");
+      },
+    }
+  );
+
+  const handleCreatUsulan = (row) => {
+    const payload = {
+      nip: router?.query?.nip,
+      usulan_pendidikan_id: row?.id,
+    };
+    createUsulan(payload);
+  };
+
   const columns = [
     {
       title: (
@@ -719,7 +738,14 @@ const ComparePendidikanByNip = ({ nip }) => {
         return (
           <Space>
             {session?.user?.current_role === "admin" && (
-              <Button type="primary" size="small" icon={<EditOutlined />} />
+              <Tooltip title="Buat Usulan Pendidikan">
+                <Button
+                  onClick={() => handleCreatUsulan(row)}
+                  type="primary"
+                  size="small"
+                  icon={<EditOutlined />}
+                />
+              </Tooltip>
             )}
           </Space>
         );

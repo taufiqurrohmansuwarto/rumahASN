@@ -1,6 +1,9 @@
 import axios from "axios";
 import FormData from "form-data";
 
+// badan kepegawaian daerah
+const UNOR_VERIFIKATOR_ID = "466D9577BDB70F89E050640A29022FEF";
+
 const createFetcher = (token) => {
   return axios.create({
     baseURL: "https://api-siasn.bkn.go.id",
@@ -20,7 +23,7 @@ export const testingFetcher = async (token) => {
 
 export const createPeremajaanPendidikanSIASN = async (token, data) => {
   const fetcher = createFetcher(token);
-  const url = `/peremajaan/orang-pendidikan/simpan-usul?pns_orang_id=${data.pns_orang_id}&sumber=instansi&unor_verifikator_id=${data.unor_verifikator_id}`;
+  const url = `/siasn-instansi/api/peremajaan/orang-pendidikan/simpan-usul?pns_orang_id=${data.pns_orang_id}&sumber=instansi&unor_verifikator_id=${UNOR_VERIFIKATOR_ID}`;
   const response = await fetcher.post(url, data);
   return response.data;
 };

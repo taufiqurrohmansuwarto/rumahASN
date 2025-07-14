@@ -1,6 +1,10 @@
 import SiasnToken from "@/models/siasn-instansi/siasn-token.model";
 import { handleError } from "@/utils/helper/controller-helper";
-import { testingFetcher } from "@/utils/siasn-instansi-utils";
+import {
+  createPeremajaanPendidikanSIASN,
+  testingFetcher,
+} from "@/utils/siasn-instansi-utils";
+const SiasnEmployee = require("@/models/siasn-employees.model");
 
 export const getToken = async (req, res) => {
   try {
@@ -121,8 +125,44 @@ export const testing = async (req, res) => {
 
 export const createUsulanPeremajaanPendidikan = async (req, res) => {
   try {
+    const { nip, usulan_pendidikan_id } = req?.body;
+    const { customId } = req?.user;
+    const token = await SiasnToken.query()
+      .where("user_id", customId)
+      .orderBy("created_at", "desc")
+      .first();
+
+    const currentEmployee = await SiasnEmployee.query()
+      .where("nip_baru", nip)
+      .first();
+
+    if (!currentEmployee) {
+      return res.status(404).json({ error: "Pegawai tidak ditemukan" });
+    }
+    const payload = {
+      pns_orang_id: currentEmployee.pns_id,
+      usulan_pendidikan_id: usulan_pendidikan_id,
+    };
+
+    console.log(payload);
+
+    const result = await createPeremajaanPendidikanSIASN(
+      token.token.access_token,
+      payload
+    );
+    console.log(result);
+    res.json({
+      pns_orang_id: currentEmployee.pns_id,
+      usulan_pendidikan_id: usulan_pendidikan_id,
+    });
   } catch (error) {
-    handleError(res, error);
+    console.log(error);
+    res.status(500).json({
+      error: "Internal server error",
+      message: "Gagal membuat usulan peremajaan pendidikan",
+      details:
+        process.env.NODE_ENV === "development" ? error.message : undefined,
+    });
   }
 };
 
