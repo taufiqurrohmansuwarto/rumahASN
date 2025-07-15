@@ -98,8 +98,6 @@ export const findPendidikan = async (req, res) => {
         }
       })
       .select("*", "id as value", "nama as label");
-    // .where("status", "1")
-    // .orWhere("status", 1);
 
     console.log(result?.length);
 
