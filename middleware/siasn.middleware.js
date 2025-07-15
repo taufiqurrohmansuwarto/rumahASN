@@ -24,7 +24,7 @@ const cleanup = async () => {
       siasnWsAxios.interceptors.request.clear();
       siasnWsAxios.interceptors.response.clear();
     }
-    
+
     if (redlock) {
       await redlock.quit();
       redlock = null;
@@ -134,21 +134,21 @@ const getOrCreateToken = async () => {
     const maxRetries = 5;
     const retryTimeout = 1000; // 1 second per retry
     const totalTimeout = 10000; // 10 seconds total timeout
-    
+
     const startTime = Date.now();
     for (let i = 0; i < maxRetries; i++) {
       // Check if total timeout exceeded
       if (Date.now() - startTime > totalTimeout) {
         throw new Error("Token retry timeout exceeded");
       }
-      
+
       await new Promise((resolve) => setTimeout(resolve, retryTimeout));
-      
+
       // Check if Redis client is still available
       if (!redisClient) {
         throw new Error("Redis client unavailable during token retry");
       }
-      
+
       tokenData = await redisClient.get(TOKEN_KEY);
       if (tokenData) {
         console.log(`Token retrieved on retry attempt ${i + 1}`);
