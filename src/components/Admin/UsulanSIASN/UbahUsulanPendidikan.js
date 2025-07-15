@@ -1,20 +1,21 @@
+import { rwPendidikanMasterByNip } from "@/services/master.services";
+import { findPendidikan } from "@/services/siasn-services";
 import { EditOutlined } from "@ant-design/icons";
+import { useQuery } from "@tanstack/react-query";
 import {
   Button,
   Checkbox,
   Col,
   DatePicker,
+  Divider,
   Form,
   Input,
   Modal,
   Row,
   Select,
 } from "antd";
-import { useState, useCallback, useMemo, useEffect } from "react";
 import dayjs from "dayjs";
-import { findPendidikan } from "@/services/siasn-services";
-import { useQuery } from "@tanstack/react-query";
-import { debounce } from "lodash";
+import { useState } from "react";
 
 /**{
   "usulan_id": "b0154c5f-8226-4eed-a6c3-83dcf7c228d8",
@@ -38,15 +39,15 @@ import { debounce } from "lodash";
   "dok_ijazah": null,
   "dok_sk_pencantuman_gelar": null
 } */
-const ModalUbahPendidikan = ({ open, row, onCancel }) => {
-  const [searchTerm, setSearchTerm] = useState("");
-
-  // Reset search term saat modal dibuka
-  useEffect(() => {
-    if (open) {
-      setSearchTerm("");
+const ModalUbahPendidikan = ({ open, row, onCancel, nip }) => {
+  const { data, isLoading, refetch } = useQuery(
+    ["riwayat-pendidikan-simaster-by-nip", nip],
+    () => rwPendidikanMasterByNip(nip),
+    {
+      refetchOnWindowFocus: false,
+      keepPreviousData: true,
     }
-  }, [open]);
+  );
 
   // Helper function untuk boolean conversion
   const formatBoolean = (value) => {
@@ -62,60 +63,16 @@ const ModalUbahPendidikan = ({ open, row, onCancel }) => {
     return value;
   };
 
-  // Debounced search function
-  const debouncedSearch = useCallback(
-    debounce((value) => {
-      setSearchTerm(value);
-    }, 300),
-    []
-  );
-
-  const handleSearch = (value) => {
-    debouncedSearch(value);
-  };
-
-  const handleClear = () => {
-    setSearchTerm("");
-  };
-
   // Query untuk initial data (jika ada pendidikan yang sudah dipilih)
   const { data: initialPendidikan } = useQuery({
     queryKey: ["pendidikan-initial", row?.tkPendidikanId, row?.pendidikanId],
     queryFn: () =>
       findPendidikan({
         tk_pendidikan_id: row?.tkPendidikanId,
-        pendidikan_id: row?.pendidikanId,
-        nama: row?.pendidikanNama,
       }),
     enabled: Boolean(open && row?.tkPendidikanId && row?.pendidikanId),
     refetchOnWindowFocus: false,
   });
-
-  // Query untuk async search
-  const { data: pendidikanOptions, isLoading: isLoadingSearch } = useQuery({
-    queryKey: ["pendidikan-search", row?.tkPendidikanId, searchTerm],
-    queryFn: () =>
-      findPendidikan({
-        tk_pendidikan_id: row?.tkPendidikanId,
-        nama: searchTerm,
-      }),
-    enabled: Boolean(
-      open && row?.tkPendidikanId && searchTerm && searchTerm.length >= 2
-    ),
-    refetchOnWindowFocus: false,
-  });
-
-  // Combine initial data dan search results
-  const pendidikan = useMemo(() => {
-    const initial = initialPendidikan || [];
-    const search = pendidikanOptions || [];
-
-    if (searchTerm && searchTerm.length >= 2) {
-      return search;
-    }
-
-    return initial;
-  }, [initialPendidikan, pendidikanOptions, searchTerm]);
 
   // Format data untuk form dengan null values diubah menjadi "-"
   const formattedData = row
@@ -138,14 +95,6 @@ const ModalUbahPendidikan = ({ open, row, onCancel }) => {
 
   const [form] = Form.useForm();
 
-  // Reset form saat modal dibuka
-  useEffect(() => {
-    if (open && formattedData) {
-      form.resetFields();
-      form.setFieldsValue(formattedData);
-    }
-  }, [open, formattedData, form]);
-
   return (
     <Modal
       open={open}
@@ -153,6 +102,9 @@ const ModalUbahPendidikan = ({ open, row, onCancel }) => {
       title="Ubah Usulan Pendidikan"
       width={800}
     >
+      {JSON.stringify(data)}
+      <Divider />
+      {JSON.stringify(row)}
       <Form form={form} layout="vertical" initialValues={formattedData}>
         <Row gutter={16}>
           <Col span={12}>
@@ -174,24 +126,19 @@ const ModalUbahPendidikan = ({ open, row, onCancel }) => {
             </Form.Item>
           </Col>
           <Col span={12}>
-            <Form.Item name="pendidikanId" label="Pendidikan">
-              <Select
-                showSearch
-                allowClear
-                placeholder="Ketik minimal 2 karakter untuk mencari..."
-                loading={isLoadingSearch}
-                filterOption={false}
-                onSearch={handleSearch}
-                onClear={handleClear}
-                notFoundContent={
-                  isLoadingSearch ? "Mencari..." : "Tidak ditemukan"
-                }
-                options={pendidikan?.map((item) => ({
-                  label: item.nama,
-                  value: item.id,
-                }))}
-              />
-            </Form.Item>
+            {initialPendidikan?.length && (
+              <Form.Item name="pendidikanId" label="Pendidikan">
+                <Select
+                  showSearch
+                  allowClear
+                  optionFilterProp="label"
+                  options={initialPendidikan?.map((item) => ({
+                    label: item.nama,
+                    value: item.id,
+                  }))}
+                />
+              </Form.Item>
+            )}
           </Col>
         </Row>
 
@@ -259,6 +206,7 @@ const UbahUsulanPendidikan = ({ row }) => {
         open={showModal}
         row={row}
         onCancel={handleCloseModal}
+        nip={row?.nipBaru}
       />
       <Button
         size="small"
