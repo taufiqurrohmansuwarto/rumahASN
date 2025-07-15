@@ -64,6 +64,11 @@ export const createCpns = ({ nip, data }) => {
   return api.post(`/admin/${nip}/cpns`, data).then((res) => res.data);
 };
 
+// riwayat sertifikasi
+export const riwayatSertifikasiByNip = (nip) => {
+  return api.get(`/admin/${nip}/rw-sertifikasi`).then((res) => res?.data);
+};
+
 export const cekUnor = (id) => {
   return api.get(`/admin/cek-unor/${id}`).then((res) => res.data);
 };
