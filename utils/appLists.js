@@ -25,7 +25,7 @@ export const appLists = [
     color: "#FBBC05",
     url: "/layanan-keuangan/dashboard",
     icon: "https://siasn.bkd.jatimprov.go.id:9000/public/icon-layanan-keuangan.png",
-    userType: ["admin"],
+    userType: ["admin", "asn"],
   },
   {
     rightIcon: <IconCalendarUser />,

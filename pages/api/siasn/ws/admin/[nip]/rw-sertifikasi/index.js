@@ -3,10 +3,7 @@ import auth from "@/middleware/auth.middleware";
 import checkEmployee from "@/middleware/check-employee.middleware";
 import { siasnMiddleware } from "@/middleware/siasn.middleware";
 import { createRouter } from "next-connect";
-import {
-  createSertifikasiByNip,
-  getSertifikasiByNip,
-} from "@/controller/siasn/rw-sertifkasi.controller";
+import { getSertifikasiByNip } from "@/controller/siasn/rw-sertifkasi.controller";
 const router = createRouter();
 
 router
@@ -14,7 +11,6 @@ router
   .use(adminFasilitatorMiddleware)
   .use(checkEmployee)
   .use(siasnMiddleware)
-  .get(getSertifikasiByNip)
-  .post(createSertifikasiByNip);
+  .get(getSertifikasiByNip);
 
 export default router.handler();

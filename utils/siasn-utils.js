@@ -397,5 +397,5 @@ module.exports.nilaiIPASNWS = (fetcher, nip) => {
 };
 
 module.exports.getRwSertifikasi = (fetcher, nip) => {
-  return fetcher.get(`/pns/rw-jabatan/${nip}`).then((res) => res?.data);
+  return fetcher.get(`/pns/rw-sertifikasi/${nip}`).then((res) => res?.data);
 };
