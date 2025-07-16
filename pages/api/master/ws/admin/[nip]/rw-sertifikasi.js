@@ -1,8 +1,8 @@
-import { createRouter } from "next-connect";
-import auth from "@/middleware/auth.middleware";
-import adminFasilitatorMiddleware from "@/middleware/admin-fasilitator.middleware";
-import checkEmployee from "@/middleware/check-employee.middleware";
 import { rwSertifikasiByNip } from "@/controller/master.controller";
+import adminFasilitatorMiddleware from "@/middleware/admin-fasilitator.middleware";
+import auth from "@/middleware/auth.middleware";
+import checkEmployee from "@/middleware/check-employee.middleware";
+import { createRouter } from "next-connect";
 
 const router = createRouter();
 

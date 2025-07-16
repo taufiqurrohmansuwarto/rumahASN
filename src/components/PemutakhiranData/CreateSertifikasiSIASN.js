@@ -2,11 +2,17 @@ import { Button, Form, Input, Modal, Select, message, Space } from "antd";
 import { DatePicker } from "antd";
 import { useRouter } from "next/router";
 import { useState } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import useFileStore from "@/store/useFileStore";
 
 import dayjs from "dayjs";
 
 import FileUploadSIASN from "./FileUploadSIASN";
+import {
+  createSertifikasiByNip,
+  findLembagaSertifikasi,
+  findRumpunJabatanJf,
+} from "@/services/siasn-services";
 const FORMAT = "DD-MM-YYYY";
 
 /**{
@@ -34,53 +40,48 @@ const FORMAT = "DD-MM-YYYY";
 } */
 
 const ModalCreateSertifikasi = ({ nip, open, onCancel }) => {
+  const queryClient = useQueryClient();
+
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
   const fileList = useFileStore((state) => state.fileList);
 
-  const handleSubmit = async (values) => {
-    try {
-      setLoading(true);
+  const { data: refLembagaSertifikasi } = useQuery({
+    queryKey: ["refLembagaSertifikasi"],
+    queryFn: () => findLembagaSertifikasi(),
+  });
 
-      // Format tanggal untuk API
-      const formattedValues = {
-        ...values,
-        masaBerlakuSertMulai: values.masaBerlakuSertMulai
-          ? dayjs(values.masaBerlakuSertMulai).format("YYYY-MM-DD")
-          : null,
-        masaBerlakuSertSelasai: values.masaBerlakuSertSelasai
-          ? dayjs(values.masaBerlakuSertSelasai).format("YYYY-MM-DD")
-          : null,
-        tanggalSertifikat: values.tanggalSertifikat
-          ? dayjs(values.tanggalSertifikat).format("YYYY-MM-DD")
-          : null,
-        pnsOrangId: nip,
-        path: fileList,
-      };
+  const { data: refRumpunJabatan } = useQuery({
+    queryKey: ["refRumpunJabatan"],
+    queryFn: () => findRumpunJabatanJf(),
+  });
 
-      console.log("Data yang akan dikirim:", formattedValues);
-
-      // TODO: Implement API call untuk menyimpan data sertifikasi
-      // const response = await fetch('/api/sertifikasi', {
-      //   method: 'POST',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify(formattedValues)
-      // });
-
+  const { mutateAsync: postRwSertifikasi, isLoading: isPosting } = useMutation({
+    mutationFn: (data) => createSertifikasiByNip(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["sertifikasi", nip] });
       message.success("Sertifikasi berhasil ditambahkan");
-      form.resetFields();
-      onCancel();
-    } catch (error) {
-      console.error("Error:", error);
+    },
+    onError: () => {
       message.error("Gagal menambahkan sertifikasi");
-    } finally {
-      setLoading(false);
-    }
-  };
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ["sertifikasi", nip] });
+    },
+  });
 
-  const handleCancel = () => {
-    form.resetFields();
-    onCancel();
+  const handleSubmit = async () => {
+    const values = await form.validateFields();
+    const payload = {
+      ...values,
+      masaBerlakuSertMulai: dayjs(values.masaBerlakuSertMulai).format(FORMAT),
+      masaBerlakuSertSelasai: dayjs(values.masaBerlakuSertSelasai).format(
+        FORMAT
+      ),
+      tanggalSertifikat: dayjs(values.tanggalSertifikat).format(FORMAT),
+    };
+
+    await postRwSertifikasi({ nip, data: payload });
   };
 
   return (
@@ -88,16 +89,16 @@ const ModalCreateSertifikasi = ({ nip, open, onCancel }) => {
       width={900}
       title="Tambah Sertifikasi SIASN"
       open={open}
-      onCancel={handleCancel}
+      onCancel={onCancel}
       footer={[
-        <Button key="cancel" onClick={handleCancel}>
+        <Button key="cancel" onClick={onCancel}>
           Batal
         </Button>,
         <Button
           key="submit"
           type="primary"
-          loading={loading}
-          onClick={() => form.submit()}
+          loading={isPosting}
+          onClick={handleSubmit}
         >
           Simpan
         </Button>,
@@ -148,19 +149,35 @@ const ModalCreateSertifikasi = ({ nip, open, onCancel }) => {
 
         <Form.Item
           label="Lembaga Sertifikasi"
-          name="lembagaSertifikasiNama"
+          name="lembagaSertifikasiId"
           rules={[
             { required: true, message: "Lembaga sertifikasi harus diisi!" },
           ]}
         >
-          <Input placeholder="Masukkan nama lembaga sertifikasi" />
+          <Select
+            showSearch
+            optionFilterProp="name"
+            placeholder="Pilih lembaga sertifikasi"
+          >
+            {refLembagaSertifikasi?.map((item) => (
+              <Select.Option name={item.nama} key={item.id} value={item.id}>
+                {item.nama}
+              </Select.Option>
+            ))}
+          </Select>
         </Form.Item>
 
         <Form.Item label="Rumpun Jabatan" name="rumpunJabatanId">
-          <Select placeholder="Pilih rumpun jabatan">
-            <Select.Option value="1">Teknis</Select.Option>
-            <Select.Option value="2">Manajerial</Select.Option>
-            <Select.Option value="3">Sosial Kultural</Select.Option>
+          <Select
+            showSearch
+            optionFilterProp="name"
+            placeholder="Pilih rumpun jabatan"
+          >
+            {refRumpunJabatan?.map((item) => (
+              <Select.Option name={item.nama} key={item.id} value={item.id}>
+                {item.nama}
+              </Select.Option>
+            ))}
           </Select>
         </Form.Item>
 

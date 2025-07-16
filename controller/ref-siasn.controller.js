@@ -117,7 +117,7 @@ export const syncRumpunJabatanJf = async (req, res) => {
     const knex = RumpunJabatanJfModel.knex();
     const filePath = path.join(
       currentDirectory,
-      "docs/siasn/rumpun_jabatan_jf.csv"
+      "docs/siasn/ref-rumpun-jabatan.csv"
     );
     const file = fs.readFileSync(filePath, "utf8");
     const result = paparse.parse(file, {
@@ -146,7 +146,7 @@ export const syncLembagaSertifikasi = async (req, res) => {
     const knex = LembagaSertifikasiModel.knex();
     const filePath = path.join(
       currentDirectory,
-      "docs/siasn/lembaga_sertifikasi.csv"
+      "docs/siasn/ref-lembaga-sertifikasi.csv"
     );
     const file = fs.readFileSync(filePath, "utf8");
     const result = paparse.parse(file, {
