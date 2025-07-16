@@ -400,6 +400,29 @@ module.exports.getRwSertifikasi = (fetcher, nip) => {
   return fetcher.get(`/pns/rw-sertifikasi/${nip}`).then((res) => res?.data);
 };
 
+/**{
+  "gelarBelakangSert": "string",
+  "gelarDepanSert": "string",
+  "id": "string",
+  "lembagaSertifikasiId": "string",
+  "lembagaSertifikasiNama": "string",
+  "masaBerlakuSertMulai": "string",
+  "masaBerlakuSertSelasai": "string",
+  "namaSertifikasi": "string",
+  "nomorSertifikat": "string",
+  "path": [
+    {
+      "dok_id": "string",
+      "dok_nama": "string",
+      "dok_uri": "string",
+      "object": "string",
+      "slug": "string"
+    }
+  ],
+  "pnsOrangId": "string",
+  "rumpunJabatanId": "string",
+  "tanggalSertifikat": "string"
+} */
 module.exports.postRwSertifikasi = (fetcher, data) => {
   return fetcher.post(`/sertifikasi/save`, data).then((res) => res?.data);
 };

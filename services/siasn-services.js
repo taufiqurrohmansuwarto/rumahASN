@@ -97,7 +97,7 @@ export const riwayatSertifikasiByNip = (nip) => {
   return api.get(`/admin/${nip}/rw-sertifikasi`).then((res) => res?.data);
 };
 
-export const createSertifikasiByNip = (data) => {
+export const createSertifikasiByNip = ({ nip, data }) => {
   return api
     .post(`/admin/${nip}/rw-sertifikasi`, data)
     .then((res) => res?.data);
