@@ -48,6 +48,18 @@ module.exports.getRwPasangan = async (fetcher, nip) => {
   }
 };
 
+// sertifikasi
+module.exports.getRwSertifikasi = async (fetcher, nip) => {
+  try {
+    const result = await fetcher.get(
+      `/master-ws/operator/employees/${nip}/rw-sertifikasi`
+    );
+    return result;
+  } catch (error) {
+    console.log(error);
+  }
+};
+
 module.exports.departmentDetail = async (fetcher, id) => {
   try {
     const result = await fetcher.get(

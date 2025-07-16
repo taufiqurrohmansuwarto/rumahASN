@@ -109,3 +109,10 @@ export const findPendidikan = async (req, res) => {
     });
   }
 };
+
+export const syncRumpunJabatan = async (req, res) => {
+  try {
+  } catch (error) {
+    handleError(error, res);
+  }
+};
