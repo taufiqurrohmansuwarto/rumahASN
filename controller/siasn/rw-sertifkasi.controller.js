@@ -1,4 +1,6 @@
+import LogSiasn from "@/models/log-siasn.model";
 import { handleError } from "@/utils/helper/controller-helper";
+import { createLogSIASN } from "@/utils/logs";
 import {
   dataUtama,
   getRwSertifikasi,
@@ -45,7 +47,7 @@ export const getSertifikasiByNip = async (req, res) => {
 
 export const createSertifikasiByNip = async (req, res) => {
   try {
-    const { siasnRequest: request } = req;
+    const { siasnRequest: request, user } = req;
     const { nip } = req?.query;
     const payload = req?.body;
     const currentUser = await dataUtama(request, nip);
@@ -54,10 +56,21 @@ export const createSertifikasiByNip = async (req, res) => {
       ...payload,
       pnsOrangId,
     };
-    const result = await postRwSertifikasi(request, currentPayload);
-    console.log(result);
 
-    res.json({ message: "Sertifikasi berhasil ditambahkan" });
+    const result = await postRwSertifikasi(request, currentPayload);
+
+    await createLogSIASN({
+      userId: user?.customId,
+      type: "create-sertifikasi",
+      siasnService: "rw-sertifikasi",
+      employeeNumber: nip,
+      request_data: JSON.stringify(currentPayload),
+    });
+
+    res.json({
+      id: result?.mapData?.rwSertifikasiId,
+      message: "Sertifikasi berhasil ditambahkan",
+    });
   } catch (error) {
     handleError(res, error);
   }

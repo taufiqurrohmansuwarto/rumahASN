@@ -185,7 +185,6 @@ const responseHandler = async (response) => response;
 
 const errorHandler = async (error) => {
   const errorData = error?.response?.data || {};
-
   // typeo errorData is buffer
   const isBuffer = Buffer.isBuffer(errorData);
 
@@ -193,6 +192,7 @@ const errorHandler = async (error) => {
   const invalidJwt = errorData.message === "invalid or expired jwt";
   const tokenError = errorData.data === "Token SSO mismatch";
   const invalidCredentials = errorData.message === "Invalid Credentials";
+
   const runtimeError =
     errorData.message === "Runtime Error" &&
     !(errorData.description && errorData.description.includes("SUSPENDED"));

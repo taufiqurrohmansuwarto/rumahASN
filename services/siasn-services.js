@@ -37,6 +37,19 @@ export const findLembagaSertifikasi = async (query) => {
     .then((res) => res.data);
 };
 
+export const syncRumpunJabatan = async () => {
+  return api.put(`/ref/rumpun-jabatan`).then((res) => res.data);
+};
+
+export const findRumpunJabatan = async (query) => {
+  const queryStr = queryString.stringify(query, {
+    skipEmptyString: true,
+    skipNull: true,
+  });
+
+  return api.get(`/ref/rumpun-jabatan?${queryStr}`).then((res) => res.data);
+};
+
 export const syncRumpunJabatanJf = async () => {
   return api.put(`/ref/rumpun-jabatan-jf`).then((res) => res.data);
 };

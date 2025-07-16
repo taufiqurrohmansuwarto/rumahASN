@@ -6,6 +6,7 @@ const path = require("path");
 const PendidikanModel = require("@/models/ref_siasn/pendidikan.model");
 const RumpunJabatanJfModel = require("@/models/ref_siasn/rumpun-jabatan-jf.model");
 const LembagaSertifikasiModel = require("@/models/ref_siasn/lembaga-sertifikasi.model");
+const RumpunJabatanModel = require("@/models/ref_siasn/rumpun-jabatan.model");
 
 export const refPangkatSiasn = async (req, res) => {
   try {
@@ -192,6 +193,53 @@ export const findRumpunJabatanJf = async (req, res) => {
     const result = await RumpunJabatanJfModel.query().select(
       "*",
       "id as value",
+      "nama as label"
+    );
+
+    res.json(result);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      message: "Internal server error",
+    });
+  }
+};
+
+export const syncRumpunJabatan = async (req, res) => {
+  try {
+    const knex = RumpunJabatanModel.knex();
+    const filePath = path.join(
+      currentDirectory,
+      "docs/siasn/rumpun-jabatan.csv"
+    );
+    const file = fs.readFileSync(filePath, "utf8");
+    const result = paparse.parse(file, {
+      header: true,
+      skipEmptyLines: true,
+      delimiter: ",",
+    });
+
+    const data = result?.data;
+    await knex.delete().from(RumpunJabatanModel.tableName);
+    await knex.batchInsert(RumpunJabatanModel.tableName, data);
+
+    res.json({
+      message: "Rumpun jabatan berhasil disinkronisasi",
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      message: "Internal server error",
+    });
+  }
+};
+
+export const findRumpunJabatan = async (req, res) => {
+  try {
+    const result = await RumpunJabatanModel.query().select(
+      "*",
+      "cepat_kode as id",
+      "cepat_kode as value",
       "nama as label"
     );
 
