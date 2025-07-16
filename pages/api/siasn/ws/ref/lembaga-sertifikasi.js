@@ -1,6 +1,6 @@
 import {
-  findPendidikan,
-  syncPendidikan,
+  findLembagaSertifikasi,
+  syncLembagaSertifikasi,
 } from "@/controller/ref-siasn.controller";
 import adminFasilitatorAsnMiddleware from "@/middleware/admin-fasilitator-asn.middleware";
 import auth from "@/middleware/auth.middleware";
@@ -12,7 +12,7 @@ router
   .use(auth)
   .use(adminFasilitatorAsnMiddleware)
   .use(siasnMiddleware)
-  .get(findPendidikan)
-  .put(syncPendidikan);
+  .get(findLembagaSertifikasi)
+  .put(syncLembagaSertifikasi);
 
 export default router.handler();
