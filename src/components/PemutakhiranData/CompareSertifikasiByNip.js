@@ -5,6 +5,7 @@ import { Stack } from "@mantine/core";
 import { useQuery } from "@tanstack/react-query";
 import { Button, Divider, Flex, Table, Typography } from "antd";
 import CreateSertifikasiSIASN from "./CreateSertifikasiSIASN";
+import UploadDokumen from "./UploadDokumen";
 
 const CompareSertifikasiByNip = ({ nip }) => {
   const { data, isLoading, refetch, isFetching } = useQuery({
@@ -57,6 +58,17 @@ const CompareSertifikasiByNip = ({ nip }) => {
         return (
           <>
             {row?.jft?.name} {row?.jft?.jenjang_jab}
+          </>
+        );
+      },
+    },
+    {
+      title: "Aksi",
+      key: "aksi",
+      render: (_, row) => {
+        return (
+          <>
+            <CreateSertifikasiSIASN nip={nip} row={row} type="transfer" />
           </>
         );
       },
@@ -122,6 +134,22 @@ const CompareSertifikasiByNip = ({ nip }) => {
     {
       title: "Sumber",
       dataIndex: "sumber",
+    },
+    {
+      title: "Aksi",
+      key: "aksi",
+      render: (_, row) => {
+        return (
+          <>
+            <UploadDokumen
+              id={row?.id}
+              idRefDokumen={"1680"}
+              invalidateQueries={["sertifikasi", nip]}
+              nama="Sertifikasi"
+            />
+          </>
+        );
+      },
     },
   ];
 
