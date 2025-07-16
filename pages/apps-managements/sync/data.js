@@ -10,6 +10,8 @@ import SinkronUnorMaster from "@/components/Sinkron/SinkronUnorMaster";
 import SyncUnorSiasn from "@/components/Sinkron/SyncUnorSiasn";
 import SiasnToken from "@/components/Admin/SiasnToken";
 import SyncPendidikan from "@/components/Sinkron/SyncPendidikan";
+import SyncLembagaSertifikasi from "@/components/Sinkron/SyncLembagaSertifikasi";
+import SyncRumpunJF from "@/components/Sinkron/SyncRumpunJF";
 
 import { Space } from "antd";
 import Head from "next/head";
@@ -36,6 +38,8 @@ const Sync = () => {
               <SinkronJft />
               <SinkronSKP />
               <SyncUnorSiasn />
+              <SyncLembagaSertifikasi />
+              <SyncRumpunJF />
             </Space>
           </div>
         </SinkronLayout>

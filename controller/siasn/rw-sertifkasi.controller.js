@@ -1,5 +1,5 @@
 import { handleError } from "@/utils/helper/controller-helper";
-import { getRwSertifikasi } from "@/utils/siasn-utils";
+import { getRwSertifikasi, postRwSertifikasi } from "@/utils/siasn-utils";
 
 export const getSertifikasiByNip = async (req, res) => {
   try {
@@ -18,7 +18,8 @@ export const getSertifikasiByNip = async (req, res) => {
 export const createSertifikasiByNip = async (req, res) => {
   try {
     const { nip } = req?.query;
-    const result = await getRwSertifikasi(nip);
+    const payload = {};
+    const result = await postRwSertifikasi(payload);
     const data = result?.data;
     res.json(data);
   } catch (error) {

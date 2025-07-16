@@ -22,6 +22,34 @@ export const findPendidikan = async (query) => {
   return api.get(`/ref/pendidikan?${queryStr}`).then((res) => res.data);
 };
 
+export const syncLembagaSertifikasi = async () => {
+  return api.put(`/ref/lembaga-sertifikasi`).then((res) => res.data);
+};
+
+export const findLembagaSertifikasi = async (query) => {
+  const queryStr = queryString.stringify(query, {
+    skipEmptyString: true,
+    skipNull: true,
+  });
+
+  return api
+    .get(`/ref/lembaga-sertifikasi?${queryStr}`)
+    .then((res) => res.data);
+};
+
+export const syncRumpunJabatanJf = async () => {
+  return api.put(`/ref/rumpun-jabatan-jf`).then((res) => res.data);
+};
+
+export const findRumpunJabatanJf = async (query) => {
+  const queryStr = queryString.stringify(query, {
+    skipEmptyString: true,
+    skipNull: true,
+  });
+
+  return api.get(`/ref/rumpun-jabatan-jf?${queryStr}`).then((res) => res.data);
+};
+
 export const getDisparitasSKP = async () => {
   return api.get("/disparitas/skp").then((res) => res.data);
 };
@@ -67,6 +95,12 @@ export const createCpns = ({ nip, data }) => {
 // riwayat sertifikasi
 export const riwayatSertifikasiByNip = (nip) => {
   return api.get(`/admin/${nip}/rw-sertifikasi`).then((res) => res?.data);
+};
+
+export const createSertifikasiByNip = (data) => {
+  return api
+    .post(`/admin/${nip}/rw-sertifikasi`, data)
+    .then((res) => res?.data);
 };
 
 export const cekUnor = (id) => {

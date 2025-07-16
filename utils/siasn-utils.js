@@ -399,3 +399,7 @@ module.exports.nilaiIPASNWS = (fetcher, nip) => {
 module.exports.getRwSertifikasi = (fetcher, nip) => {
   return fetcher.get(`/pns/rw-sertifikasi/${nip}`).then((res) => res?.data);
 };
+
+module.exports.postRwSertifikasi = (fetcher, data) => {
+  return fetcher.post(`/sertifikasi/save`, data).then((res) => res?.data);
+};
