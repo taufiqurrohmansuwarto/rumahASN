@@ -101,6 +101,10 @@ export const getRwSatyaLencanaByNip = (nip) => {
   return api.get(`/admin/${nip}/rw-satyalencana`).then((res) => res.data);
 };
 
+export const getRwSertifikasiByNipMaster = (nip) => {
+  return api.get(`/admin/${nip}/rw-sertifikasi`).then((res) => res.data);
+};
+
 export const getOpdFasilitator = () => {
   return api.get(`/fasilitator/unor`).then((res) => res.data);
 };

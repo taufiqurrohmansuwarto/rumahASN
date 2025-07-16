@@ -13,6 +13,7 @@ import {
   getRwPendidikanMaster,
   getRwPenghargaan,
   getRwSatyaLencana,
+  getRwSertifikasi,
 } from "@/utils/master.utils";
 import arrayToTree from "array-to-tree";
 import axios from "axios";
@@ -576,7 +577,19 @@ const rwHukdisByNip = async (req, res) => {
   }
 };
 
+const rwSertifikasiByNip = async (req, res) => {
+  try {
+    const { fetcher } = req;
+    const { nip } = req.query;
+    const result = await getRwSertifikasi(fetcher, nip);
+    res.json(result?.data);
+  } catch (error) {
+    handleError(res, error);
+  }
+};
+
 module.exports = {
+  rwSertifikasiByNip,
   rwHukdis,
   rwHukdisByNip,
   getAtasan,
