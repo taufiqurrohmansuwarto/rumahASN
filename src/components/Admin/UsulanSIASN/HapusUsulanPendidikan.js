@@ -1,9 +1,37 @@
+import {
+  createUsulanPeremajaanPendidikan,
+  submitUsulanPeremajaanPendidikan,
+} from "@/services/admin.services";
 import { DeleteOutlined } from "@ant-design/icons";
-import { Button, Checkbox, Col, Form, Input, Modal, Row } from "antd";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import {
+  Alert,
+  Button,
+  Checkbox,
+  Col,
+  Form,
+  Input,
+  message,
+  Modal,
+  Row,
+} from "antd";
 import { useState } from "react";
 
-const ModalHapusPendidikan = ({ open, row, onCancel }) => {
+const ModalHapusPendidikan = ({ open, row, onCancel, usulanId }) => {
   const [form] = Form.useForm();
+
+  const { mutate: submit, isLoading: submitLoading } = useMutation(
+    (data) => submitUsulanPeremajaanPendidikan(data),
+    {
+      onSuccess: () => {
+        message.success("Berhasil menghapus pendidikan");
+        onCancel();
+      },
+      onError: () => {
+        message.error("error");
+      },
+    }
+  );
 
   // Helper function untuk mengubah null/empty menjadi "-"
   const formatValue = (value) => {
@@ -40,6 +68,9 @@ const ModalHapusPendidikan = ({ open, row, onCancel }) => {
   const handleSubmit = async () => {
     const value = await form.validateFields();
     const payload = {
+      usulan_id: usulanId,
+      tipe: "D",
+      pns_orang_id: row?.idPns,
       id_riwayat: row?.id,
       tahun_lulus: value?.tahunLulus || "",
       nomor_ijazah: value?.nomorIjasah || "",
@@ -58,7 +89,8 @@ const ModalHapusPendidikan = ({ open, row, onCancel }) => {
       dok_sk_pencantuman_gelar: null,
       keterangan: value?.keterangan || "",
     };
-    console.log(payload);
+
+    submit(payload);
   };
 
   // Helper function untuk boolean conversion
@@ -95,11 +127,19 @@ const ModalHapusPendidikan = ({ open, row, onCancel }) => {
         <Button key="cancel" onClick={onCancel}>
           Batal
         </Button>,
-        <Button key="delete" type="primary" danger onClick={handleSubmit}>
+        <Button
+          loading={submitLoading}
+          disabled={submitLoading}
+          key="delete"
+          type="primary"
+          danger
+          onClick={handleSubmit}
+        >
           Hapus
         </Button>,
       ]}
     >
+      <Alert message={`Usulan ID: ${usulanId}`} type="info" />
       <Form form={form} layout="vertical" initialValues={formattedData}>
         <Row gutter={16}>
           <Col span={12}>
@@ -182,22 +222,42 @@ const ModalHapusPendidikan = ({ open, row, onCancel }) => {
 
 function HapusUsulanPendidikan({ row }) {
   const [showModal, setShowModal] = useState(false);
+  const [usulanId, setUsulanId] = useState(null);
+
+  const { mutate: createUsulanPeremajaan, isLoading: loadingCreateUsulan } =
+    useMutation({
+      mutationFn: createUsulanPeremajaanPendidikan,
+      onSuccess: (data) => {
+        setShowModal(true);
+        setUsulanId(data?.usulan_pendidikan_id);
+      },
+      onError: (error) => {
+        message.error(error.message);
+      },
+    });
 
   const handleShowModal = () => {
-    setShowModal(true);
+    createUsulanPeremajaan({
+      nip: row?.nipBaru,
+    });
   };
+
   const handleCloseModal = () => {
     setShowModal(false);
+    setUsulanId(null);
   };
 
   return (
     <>
       <ModalHapusPendidikan
         open={showModal}
+        usulanId={usulanId}
         row={row}
         onCancel={handleCloseModal}
       />
       <Button
+        loading={loadingCreateUsulan}
+        disabled={loadingCreateUsulan}
         size="small"
         icon={<DeleteOutlined />}
         onClick={handleShowModal}

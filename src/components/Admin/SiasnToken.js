@@ -116,6 +116,10 @@ const ModalSiasnToken = ({ open, onCancel }) => {
       onSuccess: () => {
         message.success("Koneksi SIASN berhasil");
       },
+      onError: (error) => {
+        const message = error?.message || "Gagal menguji koneksi SIASN";
+        message.error(message);
+      },
     });
 
   const handleTestConnection = () => {

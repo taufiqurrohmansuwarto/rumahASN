@@ -1245,8 +1245,9 @@ const getRwPendidikanByNip = async (req, res) => {
 
     const result = await riwayatPendidikan(request, nip);
     const data = result?.data?.data;
+    const hasil = sortBy(data, "tkPendidikanId").reverse();
 
-    res.json(data);
+    res.json(hasil);
   } catch (error) {
     console.log(error);
     res.status(500).json({ code: 500, message: "Internal Server Error" });
