@@ -17,7 +17,8 @@ module.exports.handleError = (res, error) => {
   console.log("ini error", error);
   const errorCode = error?.response?.data?.code || error?.code || 500;
 
-  const message = error?.response?.data?.message || "Internal server error";
+  const message =
+    error?.response?.data?.message || error?.message || "Internal server error";
   res.status(errorCode).json({
     message,
   });

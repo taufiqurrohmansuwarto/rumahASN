@@ -2,7 +2,9 @@ import SiasnToken from "@/models/siasn-instansi/siasn-token.model";
 import { handleError } from "@/utils/helper/controller-helper";
 import {
   createPeremajaanPendidikanSIASN,
+  submitPeremajaanPendidikanSIASN,
   testingFetcher,
+  updateDataPeremajaanPendidikanSIASN,
 } from "@/utils/siasn-instansi-utils";
 const SiasnEmployee = require("@/models/siasn-employees.model");
 
@@ -150,10 +152,9 @@ export const createUsulanPeremajaanPendidikan = async (req, res) => {
       token.token.access_token,
       payload
     );
-    console.log(result);
     res.json({
       pns_orang_id: currentEmployee.pns_id,
-      usulan_pendidikan_id: usulan_pendidikan_id,
+      usulan_pendidikan_id: result?.id,
     });
   } catch (error) {
     console.log(error);
@@ -168,8 +169,27 @@ export const createUsulanPeremajaanPendidikan = async (req, res) => {
 
 export const submitUsulanPeremajaanPendidikan = async (req, res) => {
   try {
+    const body = req?.body;
+    const usulan_id = body?.usulan_id;
+    const { customId } = req?.user;
+    const token = await SiasnToken.query()
+      .where("user_id", customId)
+      .orderBy("created_at", "desc")
+      .first();
+
+    const accessToken = token?.token?.access_token;
+
+    await updateDataPeremajaanPendidikanSIASN(accessToken, body);
+    await submitPeremajaanPendidikanSIASN(accessToken, usulan_id);
+    res.json({ message: "success" });
   } catch (error) {
-    handleError(res, error);
+    console.log(error);
+    res.status(500).json({
+      error: "Internal server error",
+      message: "Gagal memperbarui data usulan peremajaan pendidikan",
+      details:
+        process.env.NODE_ENV === "development" ? error.message : undefined,
+    });
   }
 };
 

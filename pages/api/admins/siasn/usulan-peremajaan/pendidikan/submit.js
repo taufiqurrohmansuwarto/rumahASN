@@ -1,7 +1,7 @@
-import { createRouter } from "next-connect";
-import auth from "middleware/auth.middleware";
-import adminMiddleware from "@/middleware/admin.middleware";
 import { submitUsulanPeremajaanPendidikan } from "@/controller/siasn-instansi/token.controller";
+import adminMiddleware from "@/middleware/admin.middleware";
+import auth from "middleware/auth.middleware";
+import { createRouter } from "next-connect";
 
 const router = createRouter();
 

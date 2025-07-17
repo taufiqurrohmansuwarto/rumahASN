@@ -15,36 +15,78 @@ const createFetcher = (token) => {
 
 export const testingFetcher = async (token) => {
   const fetcher = createFetcher(token);
-  const response = await fetcher.get(
-    "/profilasn/api/orang-siasn?id=7E85A2743B04BD8DE050640A3C036B36"
-  );
-  return response.data;
+
+  return new Promise(async (resolve, reject) => {
+    try {
+      const response = await fetcher.get(
+        "/profilasn/api/orang-siasn?id=7E85A2743B04BD8DE050640A3C036B36"
+      );
+
+      const result = response.data;
+      resolve(result);
+    } catch (error) {
+      const errorMessage =
+        error?.response?.data?.message || "Internal server error";
+      reject({
+        message: errorMessage,
+        code: error?.response?.status || 500,
+      });
+    }
+  });
 };
 
 export const createPeremajaanPendidikanSIASN = async (token, data) => {
   const fetcher = createFetcher(token);
-  const url = `/siasn-instansi/api/peremajaan/orang-pendidikan/simpan-usul?pns_orang_id=${data.pns_orang_id}&sumber=instansi&unor_verifikator_id=${UNOR_VERIFIKATOR_ID}`;
-  const response = await fetcher.post(url, data);
-  return response.data;
+
+  return new Promise(async (resolve, reject) => {
+    try {
+      const url = `/siasn-instansi/api/peremajaan/orang-pendidikan/simpan-usul?pns_orang_id=${data.pns_orang_id}&sumber=instansi&unor_verifikator_id=${UNOR_VERIFIKATOR_ID}`;
+      const response = await fetcher.post(url, data);
+
+      const result = response.data;
+      resolve(result);
+    } catch (error) {
+      const errorMessage =
+        error?.response?.data?.message || "Internal server error";
+      reject({
+        message: errorMessage,
+        code: error?.response?.data?.code || 500,
+      });
+    }
+  });
 };
+
 export const uploadFilePeremajaanPendidikanSIASN = async (token, data) => {
   const fetcher = createFetcher(token);
 
-  const formData = new FormData();
-  const { id_ref_dokumen, usulan_id, nama_dokumen, file } = data;
+  return new Promise(async (resolve, reject) => {
+    try {
+      const formData = new FormData();
+      const { id_ref_dokumen, usulan_id, nama_dokumen, file } = data;
 
-  formData.append("id_ref_dokumen", id_ref_dokumen);
-  formData.append("usulan_id", usulan_id);
-  formData.append("nama_dokumen", nama_dokumen);
-  formData.append("file", file);
+      formData.append("id_ref_dokumen", id_ref_dokumen);
+      formData.append("usulan_id", usulan_id);
+      formData.append("nama_dokumen", nama_dokumen);
+      formData.append("file", file);
 
-  const response = await fetcher.post("/peremajaan/upload-dok", formData, {
-    headers: {
-      "Content-Type": "multipart/form-data",
-      ...formData.getHeaders(),
-    },
+      const response = await fetcher.post("/peremajaan/upload-dok", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+          ...formData.getHeaders(),
+        },
+      });
+
+      const result = response.data;
+      resolve(result);
+    } catch (error) {
+      const errorMessage =
+        error?.response?.data?.message || "Internal server error";
+      reject({
+        message: errorMessage,
+        code: error?.response?.data?.code || 500,
+      });
+    }
   });
-  return response.data;
 };
 
 /**
@@ -54,51 +96,39 @@ export const uploadFilePeremajaanPendidikanSIASN = async (token, data) => {
 
 export const updateDataPeremajaanPendidikanSIASN = async (token, data) => {
   const fetcher = createFetcher(token);
-  const url = `/peremajaan/orang-pendidikan/update-data`;
-  const {
-    usulan_id,
-    tipe,
-    pns_orang_id,
-    id_riwayat,
-    tahun_lulus,
-    nomor_ijazah,
-    nama_sek,
-    glr_depan,
-    keterangan,
-    glr_belakang,
-    tgl_tahun_lulus,
-    pendidikan_id,
-    pendidikan_nama,
-    is_pendidikan_pertama,
-    pencantuman_gelar,
-    tingkat_pendidikan_id,
-    tingkat_pendidikan_nama,
-    dok_transkrip_nilai,
-    dok_ijazah,
-    dok_sk_pencantuman_gelar,
-  } = data;
+  const url = `/siasn-instansi/api/peremajaan/orang-pendidikan/update-data`;
 
   const formData = new FormData();
-  formData.append("usulan_id", usulan_id);
-  formData.append("tipe", tipe);
-  formData.append("pns_orang_id", pns_orang_id);
-  formData.append("id_riwayat", id_riwayat);
-  formData.append("tahun_lulus", tahun_lulus);
-  formData.append("nomor_ijazah", nomor_ijazah);
-  formData.append("nama_sek", nama_sek);
-  formData.append("glr_depan", glr_depan);
-  formData.append("keterangan", keterangan);
-  formData.append("glr_belakang", glr_belakang);
-  formData.append("tgl_tahun_lulus", tgl_tahun_lulus);
-  formData.append("pendidikan_id", pendidikan_id);
-  formData.append("pendidikan_nama", pendidikan_nama);
-  formData.append("is_pendidikan_pertama", is_pendidikan_pertama);
-  formData.append("pencantuman_gelar", pencantuman_gelar);
-  formData.append("tingkat_pendidikan_id", tingkat_pendidikan_id);
-  formData.append("tingkat_pendidikan_nama", tingkat_pendidikan_nama);
-  formData.append("dok_transkrip_nilai", dok_transkrip_nilai);
-  formData.append("dok_ijazah", dok_ijazah);
-  formData.append("dok_sk_pencantuman_gelar", dok_sk_pencantuman_gelar);
+  // formData.append("usulan_id", usulan_id);
+  // formData.append("tipe", tipe);
+  // formData.append("pns_orang_id", pns_orang_id);
+  // formData.append("id_riwayat", id_riwayat);
+  // formData.append("tahun_lulus", tahun_lulus);
+  // formData.append("nomor_ijazah", nomor_ijazah);
+  // formData.append("nama_sek", nama_sek);
+  // formData.append("glr_depan", glr_depan);
+  // formData.append("keterangan", keterangan);
+  // formData.append("glr_belakang", glr_belakang);
+  // formData.append("tgl_tahun_lulus", tgl_tahun_lulus);
+  // formData.append("pendidikan_id", pendidikan_id);
+  // formData.append("pendidikan_nama", pendidikan_nama);
+  // formData.append("is_pendidikan_pertama", is_pendidikan_pertama);
+  // formData.append("pencantuman_gelar", pencantuman_gelar);
+  // formData.append("tingkat_pendidikan_id", tingkat_pendidikan_id);
+  // formData.append("tingkat_pendidikan_nama", tingkat_pendidikan_nama);
+  // formData.append("dok_transkrip_nilai", dok_transkrip_nilai);
+  // formData.append("dok_ijazah", dok_ijazah);
+  // formData.append("dok_sk_pencantuman_gelar", dok_sk_pencantuman_gelar);
+
+  const normalize = (value) => {
+    if (value === null || value === undefined) return "null";
+    return value;
+  };
+
+  Object.entries(data).forEach(([key, value]) => {
+    console.log(normalize(value));
+    formData.append(key, normalize(value));
+  });
 
   const response = await fetcher.post(url, formData, {
     headers: {
@@ -106,7 +136,26 @@ export const updateDataPeremajaanPendidikanSIASN = async (token, data) => {
       ...formData.getHeaders(),
     },
   });
+
   return response.data;
 };
 
-export const submitPeremajaanPendidikanSIASN = async (token, data) => {};
+export const submitPeremajaanPendidikanSIASN = async (token, usulan_id) => {
+  const fetcher = createFetcher(token);
+  const url = `/siasn-instansi/api/peremajaan/verifikasi-berkas`;
+
+  const formData = new FormData();
+  formData.append("usulan_id", usulan_id);
+  formData.append("rekomendasi_approval", "1");
+  formData.append("instansi_kerja_id", "A5EB03E23CCCF6A0E040640A040252AD");
+  formData.append("instansi_induk", "A5EB03E23CCCF6A0E040640A040252AD");
+
+  const response = await fetcher.post(url, formData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+      ...formData.getHeaders(),
+    },
+  });
+
+  return response.data;
+};
