@@ -97,6 +97,7 @@ export const uploadFilePeremajaanPendidikanSIASN = async (token, data) => {
 export const updateDataPeremajaanPendidikanSIASN = async (token, data) => {
   const fetcher = createFetcher(token);
   const url = `/siasn-instansi/api/peremajaan/orang-pendidikan/update-data`;
+  console.log(data);
 
   const formData = new FormData();
   // formData.append("usulan_id", usulan_id);
@@ -126,7 +127,11 @@ export const updateDataPeremajaanPendidikanSIASN = async (token, data) => {
   };
 
   Object.entries(data).forEach(([key, value]) => {
-    console.log(normalize(value));
+    if (key === "is_pendidikan_pertama") {
+      formData.append(key, !!value ? "1" : "0");
+      return;
+    }
+
     formData.append(key, normalize(value));
   });
 
