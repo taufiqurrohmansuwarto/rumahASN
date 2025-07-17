@@ -567,18 +567,26 @@ const ComparePendidikanByNip = ({ nip }) => {
               {namaSekolah}
             </Text>
           </Tooltip>
-          {record?.gelarBelakang && (
-            <Tag
-              color="orange"
-              style={{
-                fontSize: isMobile ? "9px" : "10px",
-                marginTop: 2,
-              }}
-            >
-              {record.gelarDepan && `${record.gelarDepan} `}
-              {record.gelarBelakang}
-            </Tag>
-          )}
+          <Space>
+            {record?.gelarBelakang && (
+              <Tag
+                color="orange"
+                style={{
+                  fontSize: isMobile ? "9px" : "10px",
+                }}
+              >
+                {record.gelarBelakang}
+              </Tag>
+            )}
+            {record?.gelarDepan && (
+              <Tag
+                color="orange"
+                style={{ fontSize: isMobile ? "9px" : "10px" }}
+              >
+                {record?.gelarDepan}
+              </Tag>
+            )}
+          </Space>
         </Flex>
       ),
     },
