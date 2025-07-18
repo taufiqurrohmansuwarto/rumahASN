@@ -5,6 +5,7 @@ import {
   submitPeremajaanPendidikanSIASN,
   testingFetcher,
   updateDataPeremajaanPendidikanSIASN,
+  uploadFilePeremajaanPendidikanSIASN,
 } from "@/utils/siasn-instansi-utils";
 const SiasnEmployee = require("@/models/siasn-employees.model");
 
@@ -170,6 +171,7 @@ export const createUsulanPeremajaanPendidikan = async (req, res) => {
 export const submitUsulanPeremajaanPendidikan = async (req, res) => {
   try {
     const body = req?.body;
+    const tipe = req?.body?.tipe;
     const usulan_id = body?.usulan_id;
     const { customId } = req?.user;
     const token = await SiasnToken.query()
@@ -179,9 +181,15 @@ export const submitUsulanPeremajaanPendidikan = async (req, res) => {
 
     const accessToken = token?.token?.access_token;
 
-    await updateDataPeremajaanPendidikanSIASN(accessToken, body);
-    await submitPeremajaanPendidikanSIASN(accessToken, usulan_id);
-    res.json({ message: "success" });
+    if (tipe === "D") {
+      await updateDataPeremajaanPendidikanSIASN(accessToken, body);
+      await submitPeremajaanPendidikanSIASN(accessToken, usulan_id);
+      res.json({ message: "success" });
+    } else if (tipe === "U") {
+      await updateDataPeremajaanPendidikanSIASN(accessToken, body);
+      await submitPeremajaanPendidikanSIASN(accessToken, usulan_id);
+      res.json({ message: "success" });
+    }
   } catch (error) {
     console.log(error);
     res.status(500).json({
@@ -202,6 +210,27 @@ export const updateDataUsulanPeremajaanPendidikan = async (req, res) => {
 
 export const uploadFile = async (req, res) => {
   try {
+    const file = req?.file;
+    const { usulan_id, nama_dokumen, id_ref_dokumen } = req?.body;
+    const { customId } = req?.user;
+    const token = await SiasnToken.query()
+      .where("user_id", customId)
+      .orderBy("created_at", "desc")
+      .first();
+
+    const payload = {
+      file,
+      usulan_id,
+      nama_dokumen,
+      id_ref_dokumen,
+    };
+
+    const result = await uploadFilePeremajaanPendidikanSIASN(
+      token.token.access_token,
+      payload
+    );
+
+    res.json(result);
   } catch (error) {
     handleError(res, error);
   }

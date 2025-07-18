@@ -158,7 +158,11 @@ export const createUsulanPeremajaanPendidikan = async (data) => {
 // upload file
 export const uploadFilePeremajaanPendidikan = async (data) => {
   return api
-    .post(`/siasn/usulan-peremajaan/pendidikan/upload`, data)
+    .post(`/siasn/usulan-peremajaan/pendidikan/upload`, data, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    })
     .then((res) => res?.data);
 };
 

@@ -67,9 +67,14 @@ export const uploadFilePeremajaanPendidikanSIASN = async (token, data) => {
       formData.append("id_ref_dokumen", id_ref_dokumen);
       formData.append("usulan_id", usulan_id);
       formData.append("nama_dokumen", nama_dokumen);
-      formData.append("file", file);
+      formData.append("file", file?.buffer, {
+        filename: `${id_ref_dokumen}.pdf`,
+        contentType: "application/pdf",
+      });
 
-      const response = await fetcher.post("/peremajaan/upload-dok", formData, {
+      const url = `/siasn-instansi/api/peremajaan/upload-dok`;
+
+      const response = await fetcher.post(url, formData, {
         headers: {
           "Content-Type": "multipart/form-data",
           ...formData.getHeaders(),
@@ -79,6 +84,7 @@ export const uploadFilePeremajaanPendidikanSIASN = async (token, data) => {
       const result = response.data;
       resolve(result);
     } catch (error) {
+      console.log(error);
       const errorMessage =
         error?.response?.data?.message || "Internal server error";
       reject({
@@ -97,7 +103,6 @@ export const uploadFilePeremajaanPendidikanSIASN = async (token, data) => {
 export const updateDataPeremajaanPendidikanSIASN = async (token, data) => {
   const fetcher = createFetcher(token);
   const url = `/siasn-instansi/api/peremajaan/orang-pendidikan/update-data`;
-  console.log(data);
 
   const formData = new FormData();
   // formData.append("usulan_id", usulan_id);
