@@ -504,3 +504,16 @@ export const list_tmt = [
 ];
 
 export const dokumen = ["SK", "PERTEK", "SPMT", "PK"];
+
+export const checkJenjangPendidikanSIASN = (jenjangIdSIASN) => {
+  // Mapping jenjang pendidikan SIASN ke nilai numerik
+  const jenjangMapping = {
+    50: 10,
+    45: 9,
+    40: 8,
+    35: 7,
+    30: 6,
+  };
+
+  return jenjangMapping[jenjangIdSIASN] || null;
+};

@@ -102,8 +102,6 @@ export const findPendidikan = async (req, res) => {
       })
       .select("*", "id as value", "nama as label");
 
-    console.log(result?.length);
-
     res.json(result);
   } catch (error) {
     console.log(error);
