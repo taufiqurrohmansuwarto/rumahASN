@@ -376,6 +376,7 @@ const joinMeeting = async (req, res) => {
   try {
     const { id } = req?.query;
     const { customId } = req?.user;
+    const { reason } = req?.body;
 
     const currentMeeting = await CCMeetings.query()
       .findById(id)
@@ -422,6 +423,7 @@ const joinMeeting = async (req, res) => {
           .upsertGraph({
             meeting_id: id,
             user_id: customId,
+            reason,
           })
           .onConflict(["meeting_id", "user_id"])
           .merge()
@@ -562,6 +564,7 @@ const upcomingMeetings = async (req, res) => {
     const year = req?.query?.year || dayjs().format("YYYY");
     const day = req?.query?.day;
     const user = req?.user;
+
     const statusKepegawaian = user?.status_kepegawaian;
 
     const result = await CCMeetings.query()
@@ -569,7 +572,6 @@ const upcomingMeetings = async (req, res) => {
         "*",
         CCMeetings.relatedQuery("participants").count().as("participants_count")
       )
-
       .where((builder) => {
         builder
           .whereRaw("?? @> ?::text[]", [
@@ -577,6 +579,7 @@ const upcomingMeetings = async (req, res) => {
             [statusKepegawaian],
           ])
           .orWhereNull("participants_type");
+
         if (day) {
           builder.whereRaw(
             `extract(year from start_date) = ${year} and extract(month from start_date) = ${month} and extract(day from start_date) = ${day}`
@@ -587,8 +590,11 @@ const upcomingMeetings = async (req, res) => {
           );
         }
       })
+      .andWhereRaw(
+        `extract(year from start_date) = ${year} and extract(month from start_date) = ${month}`
+      )
       .andWhere("is_private", false)
-      .withGraphFetched("[coach(simpleSelect), participants.[participant]]")
+      .withGraphFetched("[coach(simpleWithImage), participants.[participant]]")
       .orderBy("created_at", "asc");
 
     const checkCurrent = await CCMeetingsParticipants.query().andWhere(
