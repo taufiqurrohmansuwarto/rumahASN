@@ -400,6 +400,13 @@ module.exports.getRwSertifikasi = (fetcher, nip) => {
   return fetcher.get(`/pns/rw-sertifikasi/${nip}`).then((res) => res?.data);
 };
 
+// dashboard
+module.exports.createActivitySiasn = (fetcher, data) => {
+  return fetcher
+    .post(`/dashboard/aktivity/save`, data)
+    .then((res) => res?.data);
+};
+
 /**{
   "gelarBelakangSert": "string",
   "gelarDepanSert": "string",
