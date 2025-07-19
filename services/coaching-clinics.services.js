@@ -75,9 +75,9 @@ export const searchMentoringByCode = (code) => {
   return coachingClinicApi.get(url).then((res) => res?.data);
 };
 
-export const requestMeeting = (id) => {
+export const requestMeeting = ({ id, data }) => {
   const url = `/participants/meetings/${id}/request`;
-  return coachingClinicApi.put(url).then((res) => res?.data);
+  return coachingClinicApi.put(url, data).then((res) => res?.data);
 };
 
 export const cancelRequestMeeting = (id) => {

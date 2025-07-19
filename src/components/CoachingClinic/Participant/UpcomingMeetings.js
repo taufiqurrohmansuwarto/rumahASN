@@ -4,16 +4,16 @@ import {
   upcomingMeetings,
 } from "@/services/coaching-clinics.services";
 import { setColorStatusCoachingClinic } from "@/utils/client-utils";
-import { CloseOutlined } from "@ant-design/icons";
+import { CloseOutlined, ReloadOutlined } from "@ant-design/icons";
 import { Alert, Stack } from "@mantine/core";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
+  Flex,
   Avatar,
   Button,
   Calendar,
   Collapse,
   Descriptions,
-  Divider,
   Drawer,
   Grid,
   Modal,
@@ -23,6 +23,8 @@ import {
   Tooltip,
   Typography,
   message,
+  Form,
+  Input,
 } from "antd";
 import { useRouter } from "next/router";
 import { useState } from "react";
@@ -79,22 +81,76 @@ const ButtonKonsultasi = ({
   }
 };
 
+const ModalConfirmation = ({ open, onCancel, gabung, confirmLoading, row }) => {
+  const [form] = Form.useForm();
+
+  const handleOk = async () => {
+    const values = await form.validateFields();
+
+    await gabung({
+      id: row?.id,
+      data: {
+        reason: values?.reason,
+      },
+    });
+  };
+
+  return (
+    <Modal
+      onOk={handleOk}
+      title="Apakah anda yakin ingin mengikuti coaching clinic ini?"
+      open={open}
+      onCancel={onCancel}
+      centered
+      okText="Ya"
+      confirmLoading={confirmLoading}
+    >
+      <Form form={form} layout="vertical">
+        <Form.Item
+          name="reason"
+          label="Alasan Mengikuti"
+          rules={[{ required: true }]}
+        >
+          <Input.TextArea rows={4} />
+        </Form.Item>
+      </Form>
+    </Modal>
+  );
+};
+
 const PickCoachingModal = ({ open, onCancel, onOk, row }) => {
   const router = useRouter();
+
+  const [showModalConfirmation, setShowModalConfirmation] = useState(false);
+  const [rowModalConfirmation, setRowModalConfirmation] = useState({});
+
+  const handleShowModalConfirmation = (row) => {
+    setShowModalConfirmation(true);
+    setRowModalConfirmation(row);
+  };
+
+  const handleCloseModalConfirmation = () => {
+    setShowModalConfirmation(false);
+    setRowModalConfirmation(null);
+  };
 
   const breakpoint = Grid.useBreakpoint();
 
   const queryClient = useQueryClient();
 
   const { mutateAsync: gabung, isLoading: isLoadingGabung } = useMutation(
-    (data) => requestMeeting(data),
+    ({ id, data }) => requestMeeting({ id, data }),
     {
       onSuccess: () => {
-        message.success("Berhasil gabung");
         queryClient.invalidateQueries(["participantModalMeeting"]);
+        handleCloseModalConfirmation();
+        message.success("Berhasil mengikuti coaching clinic");
       },
       onError: (error) => {
         message.error(error?.response?.data?.message);
+      },
+      onSettled: () => {
+        queryClient.invalidateQueries(["participantModalMeeting"]);
       },
     }
   );
@@ -112,19 +168,6 @@ const PickCoachingModal = ({ open, onCancel, onOk, row }) => {
     }
   );
 
-  const handleGabung = (row) => {
-    Modal.confirm({
-      title: "Konfirmasi",
-      content: "Apakah anda yakin ingin mengikuti coaching clinic ini?",
-      okText: "Ya",
-      cancelText: "Tidak",
-      centered: true,
-      onOk: async () => {
-        await gabung(row?.id);
-      },
-    });
-  };
-
   const handleBatal = (row) => {
     Modal.confirm({
       title: "Batal",
@@ -138,11 +181,12 @@ const PickCoachingModal = ({ open, onCancel, onOk, row }) => {
     });
   };
 
-  const { data, isLoading } = useQuery(
+  const { data, isLoading, refetch, isRefetching } = useQuery(
     ["participantModalMeeting", row],
     () => upcomingMeetings(row),
     {
       enabled: !!row,
+      refetchOnWindowFocus: false,
       keepPreviousData: true,
     }
   );
@@ -151,16 +195,32 @@ const PickCoachingModal = ({ open, onCancel, onOk, row }) => {
     router.push(`/coaching-clinic/${row?.detail_id}/detail`);
   };
 
+  const handleRefresh = () => {
+    refetch();
+  };
+
   return (
     <Drawer
-      title={`Jadwal Konsultasi Coaching Clinic`}
+      title={
+        <Flex justify="space-between" align="center">
+          <span>Jadwal Konsultasi Coaching Clinic</span>
+          <Button
+            type="text"
+            icon={<ReloadOutlined />}
+            onClick={handleRefresh}
+            size="small"
+          >
+            Refresh
+          </Button>
+        </Flex>
+      }
       open={open}
       onClose={onCancel}
       width={
         breakpoint.md ? 800 : breakpoint.sm ? 600 : breakpoint.xs ? 400 : 300
       }
     >
-      <Skeleton loading={isLoading}>
+      <Skeleton loading={isLoading || isRefetching}>
         <Collapse accordion>
           {data?.map((item) => (
             <Panel
@@ -222,13 +282,20 @@ const PickCoachingModal = ({ open, onCancel, onOk, row }) => {
                     item={item}
                     handleBatal={handleBatal}
                     gotoDetail={gotoDetail}
-                    handleGabung={handleGabung}
+                    handleGabung={() => handleShowModalConfirmation(item)}
                   />
                 </Space>
               </Space>
             </Panel>
           ))}
         </Collapse>
+        <ModalConfirmation
+          row={rowModalConfirmation}
+          open={showModalConfirmation}
+          onCancel={handleCloseModalConfirmation}
+          gabung={gabung}
+          confirmLoading={isLoadingGabung}
+        />
       </Skeleton>
     </Drawer>
   );
@@ -255,11 +322,12 @@ function UpcomingMeetings() {
 
   const handleClose = () => setOpen(false);
 
-  const { data, isLoading } = useQuery(
+  const { data, isLoading, refetch, isRefetching } = useQuery(
     ["upcomingMeetings", query],
     () => upcomingMeetings(query),
     {
       enabled: !!query,
+      refetchOnWindowFocus: false,
       keepPreviousData: true,
     }
   );
@@ -288,6 +356,16 @@ function UpcomingMeetings() {
   return (
     <>
       <PickCoachingModal open={open} onCancel={handleClose} row={row} />
+      <Flex justify="end">
+        <Button
+          icon={<ReloadOutlined />}
+          type="text"
+          onClick={() => refetch()}
+          loading={isRefetching || isLoading}
+        >
+          Refresh
+        </Button>
+      </Flex>
       <Calendar
         onPanelChange={handleChange}
         disabledDate={(value) => {
@@ -320,7 +398,7 @@ function UpcomingMeetings() {
                 onClick={() => handleOpen(value)}
               >
                 <Stack>
-                  <Avatar.Group maxCount={3} size="small">
+                  <Avatar.Group max={{ count: 3 }} size="small">
                     {findData?.map((item) => (
                       <Tooltip key={item?.id} title={item?.coach?.username}>
                         <Avatar src={item?.coach?.image} />
