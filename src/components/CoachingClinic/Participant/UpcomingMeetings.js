@@ -8,14 +8,16 @@ import { CloseOutlined, ReloadOutlined } from "@ant-design/icons";
 import { Alert, Stack } from "@mantine/core";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
-  Flex,
   Avatar,
   Button,
   Calendar,
   Collapse,
   Descriptions,
   Drawer,
+  Flex,
+  Form,
   Grid,
+  Input,
   Modal,
   Skeleton,
   Space,
@@ -23,8 +25,6 @@ import {
   Tooltip,
   Typography,
   message,
-  Form,
-  Input,
 } from "antd";
 import { useRouter } from "next/router";
 import { useState } from "react";
@@ -64,13 +64,12 @@ const ButtonKonsultasi = ({
       <Button
         type="primary"
         onClick={() => handleGabung(item)}
-        // disabled={disabled}
+        disabled={disabled}
       >
-        Ikuti Coaching Clinic
+        Bergabung dengan Sesi Coaching
       </Button>
     );
   }
-
   if (!item?.is_join && (item?.status === "live" || item?.status === "end")) {
     return (
       <Alert color="red">
@@ -118,7 +117,7 @@ const ModalConfirmation = ({ open, onCancel, gabung, confirmLoading, row }) => {
   );
 };
 
-const PickCoachingModal = ({ open, onCancel, onOk, row }) => {
+const PickCoachingModal = ({ open, onCancel, row }) => {
   const router = useRouter();
 
   const [showModalConfirmation, setShowModalConfirmation] = useState(false);
@@ -144,7 +143,9 @@ const PickCoachingModal = ({ open, onCancel, onOk, row }) => {
       onSuccess: () => {
         queryClient.invalidateQueries(["participantModalMeeting"]);
         handleCloseModalConfirmation();
-        message.success("Berhasil mengikuti coaching clinic");
+        message.success(
+          "Selamat! Anda berhasil mendaftar coaching clinic ini."
+        );
       },
       onError: (error) => {
         message.error(error?.response?.data?.message);
@@ -155,11 +156,13 @@ const PickCoachingModal = ({ open, onCancel, onOk, row }) => {
     }
   );
 
-  const { mutateAsync: batal, isLoading: isLoadingBatal } = useMutation(
+  const { mutateAsync: batal } = useMutation(
     (data) => cancelRequestMeeting(data),
     {
       onSuccess: () => {
-        message.success("Berhasil membatalkan coaching clinic");
+        message.success(
+          "Berhasil membatalkan pendaftaran coaching clinic Anda"
+        );
         queryClient.invalidateQueries(["participantModalMeeting"]);
       },
       onError: (error) => {
@@ -261,7 +264,7 @@ const PickCoachingModal = ({ open, onCancel, onOk, row }) => {
                   <Descriptions.Item
                     label={`${item?.participants_count} Peserta Mendaftar`}
                   >
-                    <Avatar.Group maxCount={6} size="small">
+                    <Avatar.Group max={{ count: 6 }} size="small">
                       {item?.participants?.map((item) => (
                         <Tooltip
                           key={item?.id}
@@ -345,13 +348,6 @@ function UpcomingMeetings() {
       ...newQuery,
     });
   };
-
-  const { mutateAsync: requestJoin, isLoading: isLoadingRequestJoin } =
-    useMutation((data) => requestMeeting(data), {
-      onError: (error) => {
-        message.error(error?.response?.data?.message);
-      },
-    });
 
   return (
     <>
