@@ -109,6 +109,13 @@ const ModalUbahPendidikan = ({
     return value;
   };
 
+  const formatValueGelar = (value) => {
+    if (value === null || value === undefined || value === "") {
+      return "";
+    }
+    return value;
+  };
+
   // Query untuk initial data (jika ada pendidikan yang sudah dipilih)
   const { data: initialPendidikan } = useQuery({
     queryKey: ["pendidikan-initial", row?.tkPendidikanId, row?.pendidikanId],
@@ -132,8 +139,8 @@ const ModalUbahPendidikan = ({
         tglLulus: row.tglLulus ? dayjs(row.tglLulus, "DD-MM-YYYY") : null,
         nomorIjasah: formatValue(row.nomorIjasah),
         namaSekolah: formatValue(row.namaSekolah),
-        gelarDepan: formatValue(row.gelarDepan) || "",
-        gelarBelakang: formatValue(row.gelarBelakang) || "",
+        gelarDepan: formatValueGelar(row.gelarDepan),
+        gelarBelakang: formatValueGelar(row.gelarBelakang),
         pendidikanId: formatValue(row.pendidikanId),
         path: formatValue(row.path),
       }
