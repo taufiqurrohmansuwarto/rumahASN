@@ -863,7 +863,7 @@ const ComparePendidikanByNip = ({ nip }) => {
             </Space>
           }
         >
-          <Text>{record?.gelarDepan || "-"}</Text>
+          <Text>{record?.gelarDepan || ""}</Text>
         </Descriptions.Item>
         <Descriptions.Item
           label={
@@ -920,7 +920,7 @@ const ComparePendidikanByNip = ({ nip }) => {
             </Space>
           }
         >
-          <Text type="secondary">{record?.createdAt || "-"}</Text>
+          <Text type="secondary">{record?.createdAt || ""}</Text>
         </Descriptions.Item>
         <Descriptions.Item
           label={
@@ -929,7 +929,7 @@ const ComparePendidikanByNip = ({ nip }) => {
             </Space>
           }
         >
-          <Text type="secondary">{record?.updatedAt || "-"}</Text>
+          <Text type="secondary">{record?.updatedAt || ""}</Text>
         </Descriptions.Item>
       </Descriptions>
     );
