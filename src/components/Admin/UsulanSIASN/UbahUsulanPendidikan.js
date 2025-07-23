@@ -322,8 +322,8 @@ const ModalUbahPendidikan = ({
         tgl_tahun_lulus: value?.tglLulus
           ? dayjs(value?.tglLulus).format("YYYY-MM-DD")
           : "",
-        pendidikan_id: row?.pendidikanId,
-        pendidikan_nama: row?.pendidikanNama || "",
+        pendidikan_id: value?.pendidikanId,
+        pendidikan_nama: "",
         is_pendidikan_pertama: row?.isPendidikanPertama,
         pencantuman_gelar: value?.pencantumanGelar || "",
         tingkat_pendidikan_id: row?.tkPendidikanId || "",
@@ -334,7 +334,6 @@ const ModalUbahPendidikan = ({
         keterangan: value?.keterangan || "",
       };
 
-      // console.log(payload);
       submit(payload);
     }
   };
