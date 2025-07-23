@@ -132,8 +132,8 @@ const ModalUbahPendidikan = ({
         tglLulus: row.tglLulus ? dayjs(row.tglLulus, "DD-MM-YYYY") : null,
         nomorIjasah: formatValue(row.nomorIjasah),
         namaSekolah: formatValue(row.namaSekolah),
-        gelarDepan: formatValue(row.gelarDepan),
-        gelarBelakang: formatValue(row.gelarBelakang),
+        gelarDepan: formatValue(row.gelarDepan) || "",
+        gelarBelakang: formatValue(row.gelarBelakang) || "",
         pendidikanId: formatValue(row.pendidikanId),
         path: formatValue(row.path),
       }

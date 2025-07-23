@@ -186,6 +186,7 @@ export const submitUsulanPeremajaanPendidikan = async (req, res) => {
       await submitPeremajaanPendidikanSIASN(accessToken, usulan_id);
       res.json({ message: "success" });
     } else if (tipe === "U") {
+      console.log(body);
       await updateDataPeremajaanPendidikanSIASN(accessToken, body);
       await submitPeremajaanPendidikanSIASN(accessToken, usulan_id);
       res.json({ message: "success" });
