@@ -3,7 +3,7 @@ import { riwayatSertifikasiByNip } from "@/services/siasn-services";
 import { ReloadOutlined } from "@ant-design/icons";
 import { Stack } from "@mantine/core";
 import { useQuery } from "@tanstack/react-query";
-import { Button, Divider, Flex, Table, Typography } from "antd";
+import { Button, Divider, Flex, Space, Table, Typography } from "antd";
 import CreateSertifikasiSIASN from "./CreateSertifikasiSIASN";
 import UploadDokumen from "./UploadDokumen";
 
@@ -81,7 +81,16 @@ const CompareSertifikasiByNip = ({ nip }) => {
       key: "file",
       render: (_, row) => {
         return (
-          <>
+          <Space>
+            {row?.path?.[1683] && (
+              <a
+                href={`/helpdesk/api/siasn/ws/download?filePath=${row?.path?.[1683]?.dok_uri}`}
+                target="_blank"
+                rel="noreferrer"
+              >
+                File
+              </a>
+            )}
             {row?.path?.[1680] && (
               <a
                 href={`/helpdesk/api/siasn/ws/download?filePath=${row?.path?.[1680]?.dok_uri}`}
@@ -91,7 +100,7 @@ const CompareSertifikasiByNip = ({ nip }) => {
                 File
               </a>
             )}
-          </>
+          </Space>
         );
       },
     },
@@ -143,7 +152,7 @@ const CompareSertifikasiByNip = ({ nip }) => {
           <>
             <UploadDokumen
               id={row?.id}
-              idRefDokumen={"1680"}
+              idRefDokumen={"1683"}
               invalidateQueries={["sertifikasi", nip]}
               nama="Sertifikasi"
             />
