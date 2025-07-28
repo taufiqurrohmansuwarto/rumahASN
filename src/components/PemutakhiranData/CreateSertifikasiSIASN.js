@@ -115,10 +115,9 @@ const ModalCreateSertifikasi = ({
         const file = new File([currentFile], "file.pdf", {
           type: "application/pdf",
         });
-        console.log({ file, id });
         const formData = new FormData();
         formData.append("file", file);
-        formData.append("id_ref_dokumen", 1680);
+        formData.append("id_ref_dokumen", 1683);
         formData.append("id_riwayat", id);
         await uploadDokRiwayat(formData);
         queryClient.invalidateQueries({ queryKey: ["sertifikasi", nip] });
