@@ -23,6 +23,7 @@ import InformationDetail from "../InformationDetail";
 import TextSensor from "@/components/TextSensor";
 import CreateCPNS from "./CreateCPNS";
 import RiwayatPengadaan from "../RiwayatPengadaan";
+import CompareUbahDataByNip from "../CompareUbahDataByNip";
 
 const FileSPMT = ({ data }) => {
   let path = {};
@@ -373,6 +374,11 @@ function CompareDataUtamaByNip({ nip }) {
                     loading={isLoadingRiwayatPengadaan}
                     data={riwayatPengadaan}
                   />
+                </Card>
+              </Col>
+              <Col md={24} xs={24}>
+                <Card title="Ubah Data SIASN">
+                  <CompareUbahDataByNip />
                 </Card>
               </Col>
               <Col md={24} xs={24}>

@@ -107,7 +107,6 @@ const updateDataUtamaByNip = async (req, res) => {
       }
       await updateDataUtama(siasnRequest, nip, data);
     }
-
     await logSIASNUpdate(nip, payload, user.customId);
     return res.json({ message: "Data berhasil diupdate" });
   } catch (error) {
