@@ -348,6 +348,7 @@ function CompareDataPasanganByNip({ nip }) {
         <Tooltip title="Transfer data pasangan dari SIMASTER ke SIASN">
           <Button
             type="primary"
+            shape="round"
             icon={<IconTransferIn />}
             onClick={() => handleShowModal(row)}
           >
@@ -608,19 +609,7 @@ function CompareDataPasanganByNip({ nip }) {
         />
       </Space>
 
-      {/* Children Data Section */}
-      <Card
-        title={
-          <Space>
-            <TeamOutlined style={{ color: "#722ed1" }} />
-            <Text strong>Data Anak</Text>
-          </Space>
-        }
-        style={{ marginTop: 16 }}
-        headStyle={{ backgroundColor: "#f9f0ff" }}
-      >
-        <CompareAnakByNip nip={nip} />
-      </Card>
+      <CompareAnakByNip nip={nip} />
 
       {/* Modal */}
       <DetailPasanganModal

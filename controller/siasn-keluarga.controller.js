@@ -44,7 +44,6 @@ const daftarPasanganByNip = async (req, res) => {
     const serializedPasangan = serializePasangan(currentPasangan);
 
     if (serializedPasangan?.length > 0) {
-      console.log(serializedPasangan);
       res.json(serializedPasangan);
     } else {
       res.json([]);
