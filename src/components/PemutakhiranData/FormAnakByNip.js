@@ -5,10 +5,11 @@ import {
   refJenisAnak,
   refJenisKawin,
 } from "@/utils/data-utils";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import {
   Button,
   Col,
+  Collapse,
   DatePicker,
   Form,
   Input,
@@ -20,8 +21,8 @@ import {
   Typography,
 } from "antd";
 import dayjs from "dayjs";
-import { useRouter } from "next/router";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { rwAnakByNip } from "@/services/master.services";
 
 // buat fungsi jika undefined ganti ""
 const handleUndefined = (value) => {
@@ -33,10 +34,28 @@ const FormModalAnak = ({ nip, pasangan, isOpen, onClose }) => {
   const queryClient = useQueryClient();
   const [form] = Form.useForm();
   const [statusHidupAnak, setStatusHidupAnak] = useState("1");
+  const [selectedAnak, setSelectedAnak] = useState(null);
+
+  // Reset form ketika modal dibuka
+  useEffect(() => {
+    if (isOpen) {
+      form.resetFields();
+      setSelectedAnak(null);
+      setStatusHidupAnak("1");
+    }
+  }, [isOpen, form]);
 
   const handleStatusHidupChange = (e) => {
     setStatusHidupAnak(e.target.value);
   };
+
+  /**[{"anak_id":145527,"pegawai_id":82591,"suami_istri_id":0,"nama":"ZELINE SAFA AGHNIA","nik":"1571015604240001","no_bpjs":"0003587329809","jk":"P","tempat_lahir":"Jambi ","tgl_lahir":"16-04-2024","status_anak_id":1,"pekerjaan_anak_id":1,"tunjangan":"Tidak Dapat","file_akta_anak":"82591-Anak-Kandung-20240813-340-zeline_(1).pdf","file_ktp_anak":"","file_askes_bpjs_anak":"82591-askes_bpjs-Anak-Kandung-20240813-466-WhatsApp_Image_2024-08-13_at_09.35.37.jpeg","tgl_edit":"2024-08-12T17:00:00.000Z","jam_edit":"09:35:50","pekerjaan_anak":{"pekerjaan_id":1,"pekerjaan":"Balita"},"status_anak":{"status_anak_id":1,"status_anak":"Anak Kandung"},"rwyt_suami_istri":null}] */
+  const { data: dataAnakSimaster, isLoading: loadingAnakSimaster } = useQuery({
+    queryKey: ["anak-simaster", nip],
+    queryFn: () => rwAnakByNip(nip),
+    enabled: !!nip,
+    keepPreviousData: true,
+  });
 
   const { mutateAsync: postAnak, isLoading: loadingPostAnak } = useMutation(
     (data) => postAnakByNip({ nip, data }),
@@ -84,12 +103,69 @@ const FormModalAnak = ({ nip, pasangan, isOpen, onClose }) => {
       // Menambahkan data pasangan
       const dataLengkap = {
         ...payload,
-        pasanganId: pasangan?.orang_id,
-        pnsOrangId: pasangan?.pns_orang_id,
+        pasanganId: pasangan?.orangId,
+        pnsOrangId: pasangan?.pnsOrangId,
       };
 
-      await postAnak({ nip, data: dataLengkap });
+      const payloadLengkap = { nip, data: dataLengkap };
+
+      await postAnak(payloadLengkap);
     } catch (error) {}
+  };
+
+  const handleAnakSelection = (anakId) => {
+    if (!anakId) {
+      // Jika clear/kosong, reset form
+      handleResetForm();
+      return;
+    }
+
+    const selectedAnakData = dataAnakSimaster?.find(
+      (anak) => anak.anak_id === anakId
+    );
+    if (selectedAnakData) {
+      setSelectedAnak(selectedAnakData);
+
+      // Konversi format tanggal dari DD-MM-YYYY ke dayjs object
+      const convertDateFormat = (dateString) => {
+        if (!dateString) return null;
+        // Jika format DD-MM-YYYY
+        if (dateString.includes("-")) {
+          const [day, month, year] = dateString.split("-");
+          return dayjs(`${year}-${month}-${day}`);
+        }
+        return dayjs(dateString);
+      };
+
+      // Set form values dengan data yang dipilih
+      form.setFieldsValue({
+        nama: selectedAnakData.nama,
+        jenisKelamin: selectedAnakData.jk === "P" ? "M" : "F", // P -> F, L -> M
+        tglLahir: convertDateFormat(selectedAnakData.tgl_lahir),
+        jenisAnakId: selectedAnakData.status_anak_id?.toString() || "1", // default kandung
+        agamaId: "1", // default Islam
+        statusHidup: "1", // default hidup
+        isPns: "0", // default tidak
+        // Field opsional dikosongkan
+        nomorHp: "",
+        nomorTelpon: "",
+        jenisIdDokumenId: undefined,
+        nomorIdDocument: "",
+        aktaKelahiran: "",
+        jenisKawinId: undefined,
+        email: "",
+        alamat: "",
+      });
+
+      // Set status hidup untuk conditional rendering
+      setStatusHidupAnak("1");
+    }
+  };
+
+  const handleResetForm = () => {
+    form.resetFields();
+    setSelectedAnak(null);
+    setStatusHidupAnak("1");
   };
 
   const handleResetOptionalData = () => {
@@ -109,8 +185,9 @@ const FormModalAnak = ({ nip, pasangan, isOpen, onClose }) => {
   return (
     <Modal
       width={850}
-      title={`Tambah Anak ${pasangan?.orang?.nama}`}
+      title={`Tambah Anak dari Pasangan ${pasangan?.nama}`}
       open={isOpen}
+      centered
       onCancel={onClose}
       footer={[
         <Button key="cancel" onClick={onClose}>
@@ -128,6 +205,37 @@ const FormModalAnak = ({ nip, pasangan, isOpen, onClose }) => {
       ]}
     >
       <Form layout="vertical" form={form} onFinish={handleSubmit}>
+        {/* Dropdown untuk memilih anak jika dataAnakSimaster > 1 */}
+        {dataAnakSimaster && dataAnakSimaster.length > 0 && (
+          <Row gutter={[16, 0]} style={{ marginBottom: 16 }}>
+            <Col span={18}>
+              <Form.Item label="Pilih Anak yang Sudah Ada (Opsional)">
+                <Select
+                  placeholder="Pilih anak dari data Simaster..."
+                  allowClear
+                  onChange={handleAnakSelection}
+                  value={selectedAnak?.anak_id}
+                >
+                  {dataAnakSimaster.map((anak) => (
+                    <Select.Option key={anak.anak_id} value={anak.anak_id}>
+                      {anak.nama} -{" "}
+                      {anak.jk === "P" ? "Perempuan" : "Laki-laki"} (
+                      {anak.tgl_lahir})
+                    </Select.Option>
+                  ))}
+                </Select>
+              </Form.Item>
+            </Col>
+            <Col span={6}>
+              <Form.Item label=" ">
+                <Button type="default" onClick={handleResetForm} block>
+                  Reset Form
+                </Button>
+              </Form.Item>
+            </Col>
+          </Row>
+        )}
+
         {/* Seksi Data Wajib Anak */}
         <Typography.Title level={5}>Data Anak</Typography.Title>
 
@@ -264,122 +372,132 @@ const FormModalAnak = ({ nip, pasangan, isOpen, onClose }) => {
         )}
 
         {/* Seksi Data Tambahan (Opsional) */}
-        <Row
-          justify="space-between"
-          align="middle"
-          style={{ marginTop: 16, marginBottom: 8 }}
-        >
-          <Col>
-            <Typography.Title level={5} style={{ margin: 0 }}>
-              Data Tambahan (Opsional)
-            </Typography.Title>
-          </Col>
-          <Col>
-            <Button type="default" onClick={handleResetOptionalData}>
-              Reset Data Opsional
-            </Button>
-          </Col>
-        </Row>
+        <Collapse
+          defaultActiveKey={[]}
+          style={{ marginTop: 16 }}
+          items={[
+            {
+              key: "1",
+              label: "Data Tambahan (Opsional)",
+              extra: (
+                <Button
+                  type="link"
+                  size="small"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleResetOptionalData();
+                  }}
+                >
+                  Reset
+                </Button>
+              ),
+              children: (
+                <div>
+                  <Row gutter={[16, 0]}>
+                    <Col span={12}>
+                      <Form.Item
+                        name="nomorHp"
+                        label="Nomor HP"
+                        rules={[
+                          {
+                            pattern: /^[0-9]{10,13}$/,
+                            message:
+                              "Format nomor HP tidak valid (10-13 digit)",
+                          },
+                        ]}
+                      >
+                        <Input placeholder="Contoh: 08123456789" />
+                      </Form.Item>
+                    </Col>
+                    <Col span={12}>
+                      <Form.Item
+                        name="nomorTelpon"
+                        label="Nomor Telepon"
+                        rules={[
+                          {
+                            pattern: /^[0-9]{5,12}$/,
+                            message: "Format nomor telepon tidak valid",
+                          },
+                        ]}
+                      >
+                        <Input placeholder="Contoh: 0217654321" />
+                      </Form.Item>
+                    </Col>
+                  </Row>
 
-        <Row gutter={[16, 0]}>
-          <Col span={12}>
-            <Form.Item
-              name="nomorHp"
-              label="Nomor HP"
-              rules={[
-                {
-                  pattern: /^[0-9]{10,13}$/,
-                  message: "Format nomor HP tidak valid (10-13 digit)",
-                },
-              ]}
-            >
-              <Input placeholder="Contoh: 08123456789" />
-            </Form.Item>
-          </Col>
-          <Col span={12}>
-            <Form.Item
-              name="nomorTelpon"
-              label="Nomor Telepon"
-              rules={[
-                {
-                  pattern: /^[0-9]{5,12}$/,
-                  message: "Format nomor telepon tidak valid",
-                },
-              ]}
-            >
-              <Input placeholder="Contoh: 0217654321" />
-            </Form.Item>
-          </Col>
-        </Row>
+                  <Row gutter={[16, 0]}>
+                    <Col span={12}>
+                      <Form.Item name="jenisIdDokumenId" label="Jenis Dokumen">
+                        <Select placeholder="Pilih jenis dokumen">
+                          {refDokumen.map((item) => (
+                            <Select.Option key={item.id} value={item.id}>
+                              {item.label}
+                            </Select.Option>
+                          ))}
+                        </Select>
+                      </Form.Item>
+                    </Col>
+                    <Col span={12}>
+                      <Form.Item
+                        name="nomorIdDocument"
+                        label="Nomor ID Document"
+                      >
+                        <Input />
+                      </Form.Item>
+                    </Col>
+                  </Row>
 
-        <Row gutter={[16, 0]}>
-          <Col span={12}>
-            <Form.Item name="jenisIdDokumenId" label="Jenis Dokumen">
-              <Select placeholder="Pilih jenis dokumen">
-                {refDokumen.map((item) => (
-                  <Select.Option key={item.id} value={item.id}>
-                    {item.label}
-                  </Select.Option>
-                ))}
-              </Select>
-            </Form.Item>
-          </Col>
-          <Col span={12}>
-            <Form.Item name="nomorIdDocument" label="Nomor ID Document">
-              <Input />
-            </Form.Item>
-          </Col>
-        </Row>
+                  <Row gutter={[16, 0]}>
+                    <Col span={12}>
+                      <Form.Item name="aktaKelahiran" label="Akta Kelahiran">
+                        <Input />
+                      </Form.Item>
+                    </Col>
+                    <Col span={12}>
+                      <Form.Item name="jenisKawinId" label="Status Kawin">
+                        <Select placeholder="Pilih status kawin">
+                          {refJenisKawin.map((item) => (
+                            <Select.Option key={item.id} value={item.id}>
+                              {item.label}
+                            </Select.Option>
+                          ))}
+                        </Select>
+                      </Form.Item>
+                    </Col>
+                  </Row>
 
-        <Row gutter={[16, 0]}>
-          <Col span={12}>
-            <Form.Item name="aktaKelahiran" label="Akta Kelahiran">
-              <Input />
-            </Form.Item>
-          </Col>
-          <Col span={12}>
-            <Form.Item name="jenisKawinId" label="Status Kawin">
-              <Select placeholder="Pilih status kawin">
-                {refJenisKawin.map((item) => (
-                  <Select.Option key={item.id} value={item.id}>
-                    {item.label}
-                  </Select.Option>
-                ))}
-              </Select>
-            </Form.Item>
-          </Col>
-        </Row>
-
-        <Row gutter={[16, 0]}>
-          <Col span={12}>
-            <Form.Item
-              name="email"
-              label="Email"
-              rules={[
-                {
-                  type: "email",
-                  message: "Format email tidak valid",
-                },
-              ]}
-            >
-              <Input placeholder="contoh@email.com" />
-            </Form.Item>
-          </Col>
-          <Col span={12}>
-            <Form.Item name="alamat" label="Alamat">
-              <Input.TextArea rows={3} />
-            </Form.Item>
-          </Col>
-        </Row>
+                  <Row gutter={[16, 0]}>
+                    <Col span={12}>
+                      <Form.Item
+                        name="email"
+                        label="Email"
+                        rules={[
+                          {
+                            type: "email",
+                            message: "Format email tidak valid",
+                          },
+                        ]}
+                      >
+                        <Input placeholder="contoh@email.com" />
+                      </Form.Item>
+                    </Col>
+                    <Col span={12}>
+                      <Form.Item name="alamat" label="Alamat">
+                        <Input.TextArea rows={3} />
+                      </Form.Item>
+                    </Col>
+                  </Row>
+                </div>
+              ),
+            },
+          ]}
+        />
       </Form>
     </Modal>
   );
 };
 
-function FormAnakByNip({ key, pasangan }) {
-  const router = useRouter();
-  const { nip } = router.query;
-
+function FormAnakByNip({ nip, pasangan }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const handleOpenModal = () => {
@@ -392,7 +510,9 @@ function FormAnakByNip({ key, pasangan }) {
 
   return (
     <div>
-      <Button onClick={handleOpenModal}>Tambah Anak</Button>
+      <Button shape="round" type="primary" onClick={handleOpenModal}>
+        Tambah Anak
+      </Button>
       <FormModalAnak
         nip={nip}
         pasangan={pasangan}
