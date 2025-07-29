@@ -39,7 +39,7 @@ const CompareUbahDataByNip = () => {
     {
       onSuccess: () => {
         message.success("Data berhasil diupdate");
-        queryClient.invalidateQueries({ queryKey: ["data-utama", nip] });
+        queryClient.invalidateQueries({ queryKey: ["data-utama-siasn", nip] });
       },
       onError: (error) => {
         message.error(error?.response?.data?.message);
@@ -48,7 +48,7 @@ const CompareUbahDataByNip = () => {
   );
 
   const { data, isLoading, isFetching, refetch } = useQuery(
-    ["data-utama", nip],
+    ["data-utama-siasn", nip],
     () => dataUtamSIASNByNip(nip),
     {
       refetchOnWindowFocus: false,
@@ -59,10 +59,26 @@ const CompareUbahDataByNip = () => {
     const value = await form.validateFields();
     const payload = {
       nip,
-      data: value,
+      data: {
+        email_gov: value?.email_gov || "",
+        nomor_bpjs: value?.nomor_bpjs || "",
+        nomor_hp: value?.nomor_hp || "",
+        nomor_telepon: value?.nomor_telepon || "",
+        alamat: value?.alamat || "",
+        nomor_npwp: value?.nomor_npwp || "",
+        npwp_tanggal:
+          value?.npwp_tanggal && dayjs(value?.npwp_tanggal).isValid()
+            ? dayjs(value?.npwp_tanggal).format("DD-MM-YYYY")
+            : "",
+        kelas_jabatan: value?.kelas_jabatan?.toString() || "",
+        tapera_nomor: value?.tapera_nomor || "",
+        taspen_nomor: value?.taspen_nomor || "",
+        tanggal_taspen:
+          value?.tanggal_taspen && dayjs(value?.tanggal_taspen).isValid()
+            ? dayjs(value?.tanggal_taspen).format("DD-MM-YYYY")
+            : "",
+      },
     };
-
-    console.log(payload);
 
     update(payload);
   };
@@ -92,13 +108,17 @@ const CompareUbahDataByNip = () => {
     }
   }, [data, form]);
 
+  const handleRefetch = () => {
+    refetch();
+  };
+
   return (
     <>
-      <Flex>
+      <Flex justify="end">
         <Button
           type="link"
           icon={<ReloadOutlined />}
-          onClick={refetch}
+          onClick={handleRefetch}
           loading={isFetching}
         >
           Refresh
