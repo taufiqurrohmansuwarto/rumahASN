@@ -48,7 +48,7 @@ const FormPasangan = ({
     {
       onSuccess: () => {
         handleCancel();
-        queryClient.invalidateQueries(["data-pasangan-siasn"]);
+        queryClient.invalidateQueries(["rw-siasn-pasangan"]);
         form.resetFields();
         message.success("Pasangan berhasil ditambahkan");
       },
@@ -58,7 +58,7 @@ const FormPasangan = ({
         message.error(msg);
       },
       onSettled: () => {
-        queryClient.invalidateQueries(["data-pasangan-siasn"]);
+        queryClient.invalidateQueries(["rw-siasn-pasangan"]);
       },
     }
   );

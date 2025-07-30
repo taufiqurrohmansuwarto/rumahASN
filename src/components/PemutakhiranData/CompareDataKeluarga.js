@@ -121,25 +121,25 @@ function CompareDataKeluarga() {
     data: pasanganSiasn,
     isLoading: loadingPasanganSiasn,
     refetch: refetchPasanganSiasn,
-  } = useQuery(["rw-pasangan"], () => dataPasangan(), {});
+  } = useQuery(["rw-siasn-pasangan"], () => dataPasangan(), {});
 
   const {
     data: pasanganSimaster,
     isLoading: loadingPasanganSimaster,
     refetch: refetchPasanganSimaster,
-  } = useQuery(["rw-pasangan-simaster"], () => rwPasanganMaster());
+  } = useQuery(["rw-simaster-pasangan"], () => rwPasanganMaster());
 
   const {
     data: anakSiasn,
     isLoading: loadingAnakSiasn,
     refetch: refetchAnakSiasn,
-  } = useQuery(["rw-anak-siasn"], () => dataAnak(), {});
+  } = useQuery(["rw-siasn-anak"], () => dataAnak(), {});
 
   const {
     data: anakSimaster,
     isLoading: loadingAnakSimaster,
     refetch: refetchAnakSimaster,
-  } = useQuery(["rw-anak-simaster"], () => rwAnakMaster());
+  } = useQuery(["rw-simaster-anak"], () => rwAnakMaster());
 
   return (
     <Stack direction="vertical">
