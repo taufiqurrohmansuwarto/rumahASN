@@ -400,6 +400,18 @@ export const rwAnakMasterByNip = async (req, res) => {
   }
 };
 
+export const rwAnakMaster = async (req, res) => {
+  try {
+    const { fetcher } = req;
+    const { employee_number: nip } = req?.user;
+    const result = await getRwAnak(fetcher, nip);
+    res.json(result?.data);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ code: 500, message: "Internal Server Error" });
+  }
+};
+
 export const unorASN = async (req, res) => {
   try {
     const { clientCredentialsFetcher } = req;
@@ -618,4 +630,5 @@ module.exports = {
   getDepartmentDetail,
   getRwSatyaLencanaByNip,
   rwPasanganMaster,
+  rwAnakMaster,
 };

@@ -1,101 +1,173 @@
-import { dataAnak, dataOrtu, dataPasangan } from "@/services/siasn-services";
+import { rwAnakMaster, rwPasanganMaster } from "@/services/master.services";
+import { dataAnak, dataPasangan } from "@/services/siasn-services";
+import { refJenisKawin, statusHidup } from "@/utils/data-utils";
+import { Stack } from "@mantine/core";
 import { useQuery } from "@tanstack/react-query";
-import { Card, Table, Tabs } from "antd";
+import { Button, Card, Table } from "antd";
+import { useState } from "react";
+import FormPasangan from "./FormPasangan";
 
-const OrangTua = ({ data, loading }) => {
-  const columns = [
-    { title: "Hubungan", dataIndex: "hubungan" },
-    { title: "Nama", dataIndex: "nama" },
-    { title: "Tanggal Lahir", dataIndex: "tglLahir" },
-  ];
+function CompareDataKeluarga() {
+  const [showModal, setShowModal] = useState(false);
+  const [dataModal, setDataModal] = useState(null);
 
-  return (
-    <Table
-      columns={columns}
-      loading={loading}
-      pagination={false}
-      dataSource={data}
-      rowKey={(row) => row?.id}
-    />
-  );
-};
+  const handleShowModalData = (data) => {
+    setDataModal(data);
+    setShowModal(true);
+  };
 
-const Pasangan = ({ data, loading }) => {
-  const columns = [
-    { title: "Nama", key: "nama", render: (_, row) => <>{row?.orang?.nama}</> },
-    {
-      title: "Status Menikah",
-      dataIndex: "statusNikah",
-    },
-  ];
+  const handleCloseModal = () => {
+    setShowModal(false);
+    setDataModal(null);
+  };
 
-  return (
-    <>
-      <Table
-        loading={loading}
-        columns={columns}
-        pagination={false}
-        dataSource={data}
-        rowKey={(row) => row?.id}
-      />
-    </>
-  );
-};
-
-const Anak = ({ data, loading }) => {
-  const columns = [
+  // kolom daftar pasangan SIASN
+  const columnsPasanganSiasn = [
+    { title: "Pasangan Ke-", dataIndex: "posisi" },
     {
       title: "Nama",
       dataIndex: "nama",
     },
     {
-      title: "Jenis Kelamin",
-      dataIndex: "jenisKelamin",
-    },
-    {
       title: "Tanggal Lahir",
       dataIndex: "tglLahir",
     },
+    {
+      title: "Jenis Kelamin",
+      key: "jk",
+      render: (_, row) => {
+        return <>{row?.jenisKelamin === "F" ? "Wanita" : "Pria"}</>;
+      },
+    },
+    {
+      title: "Status Hidup",
+      key: "sh",
+      render: (_, row) => {
+        return (
+          <>
+            {statusHidup?.find((item) => item?.id === row?.StatusHidup)?.label}
+          </>
+        );
+      },
+    },
+    {
+      title: "Jenis Kawin",
+      key: "jkawin",
+      render: (_, row) => {
+        return (
+          <>
+            {
+              refJenisKawin?.find((item) => item?.id === row?.JenisKawinId)
+                ?.label
+            }
+          </>
+        );
+      },
+    },
+    {
+      title: "Tgl Menikah",
+      dataIndex: "tgglMenikah",
+    },
   ];
 
-  return <Table columns={columns} loading={loading} dataSource={data} />;
-};
+  // kolom pasangan SIMASTER
+  const columnPasanganSimaster = [
+    { title: "Pasangan Ke-", dataIndex: "suami_istri_ke" },
+    {
+      title: "Nama",
+      dataIndex: "nama_suami_istri",
+    },
+    {
+      title: "Tanggal Lahir",
+      dataIndex: "tgl_lahir",
+    },
+    {
+      title: "Status",
+      key: "status",
+      render: (_, row) => {
+        return <>{row?.status_suami_istri?.status_suami_istri}</>;
+      },
+    },
+    {
+      title: "Tanggal Menikah",
+      key: "tgl_menikah",
+      render: (_, row) => {
+        return <>{row?.nikah?.tgl_nikah_duda_janda}</>;
+      },
+    },
+    {
+      title: "Aksi",
+      key: "aksi",
+      render: (_, row) => {
+        return (
+          <>
+            <Button
+              shape="round"
+              type="primary"
+              onClick={() => handleShowModalData(row)}
+            >
+              Transfer SIASN
+            </Button>
+          </>
+        );
+      },
+    },
+  ];
 
-function CompareDataKeluarga() {
-  const { data: pasangan, isLoading: loadingPasangan } = useQuery(
-    ["rw-pasangan"],
-    () => dataPasangan(),
-    {}
-  );
+  const columnAnakSimaster = [];
+  const columnAnakSiasn = [];
 
-  const { data: ortu, isLoading: loadingOrtu } = useQuery(
-    ["rw-ortu"],
-    () => dataOrtu(),
-    {}
-  );
+  const {
+    data: pasanganSiasn,
+    isLoading: loadingPasanganSiasn,
+    refetch: refetchPasanganSiasn,
+  } = useQuery(["rw-pasangan"], () => dataPasangan(), {});
 
-  const { data: anak, isLoading: loadingAnak } = useQuery(
-    ["rw-anak"],
-    () => dataAnak(),
-    {}
-  );
+  const {
+    data: pasanganSimaster,
+    isLoading: loadingPasanganSimaster,
+    refetch: refetchPasanganSimaster,
+  } = useQuery(["rw-pasangan-simaster"], () => rwPasanganMaster());
+
+  const {
+    data: anakSiasn,
+    isLoading: loadingAnakSiasn,
+    refetch: refetchAnakSiasn,
+  } = useQuery(["rw-anak-siasn"], () => dataAnak(), {});
+
+  const {
+    data: anakSimaster,
+    isLoading: loadingAnakSimaster,
+    refetch: refetchAnakSimaster,
+  } = useQuery(["rw-anak-simaster"], () => rwAnakMaster());
 
   return (
-    <Tabs defaultActiveKey="1" type="card" tabPosition="top">
-      <Tabs.TabPane tab="Orang Tua" key="1">
-        <Card>
-          <OrangTua loading={loadingOrtu} data={ortu} />
-        </Card>
-      </Tabs.TabPane>
-      <Tabs.TabPane tab="Anak" key="2">
-        <Anak loading={loadingAnak} data={anak} />
-      </Tabs.TabPane>
-      <Tabs.TabPane tab="Pasangan" key="3">
-        <Card>
-          <Pasangan loading={loadingPasangan} data={pasangan?.listPasangan} />
-        </Card>
-      </Tabs.TabPane>
-    </Tabs>
+    <Stack direction="vertical">
+      <FormPasangan
+        isModalOpen={showModal}
+        handleCancel={handleCloseModal}
+        dataPasangan={dataModal}
+      />
+      <Card title="Pasangan SIMASTER">
+        <Table
+          pagination={false}
+          columns={columnPasanganSimaster}
+          loading={loadingPasanganSimaster}
+          dataSource={pasanganSimaster}
+          rowKey={(row) => row?.suami_istri_id}
+        />
+      </Card>
+      <Card title="Pasangan SIASN">
+        <Table
+          loading={loadingPasanganSiasn}
+          pagination={false}
+          columns={columnsPasanganSiasn}
+          dataSource={pasanganSiasn}
+        />
+      </Card>
+      <Card title="Anak SIASN">{JSON.stringify(anakSiasn)}</Card>
+      <Card title="Anak SIMASTER">{JSON.stringify(anakSimaster)}</Card>
+    </Stack>
   );
 }
 

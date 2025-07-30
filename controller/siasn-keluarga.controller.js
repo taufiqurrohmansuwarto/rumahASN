@@ -6,22 +6,7 @@ const {
 } = require("@/utils/siasn-utils");
 const DataSIASN = require("@/models/siasn-employees.model");
 const { handleError } = require("@/utils/helper/controller-helper");
-const { proxyKeluargaPasangan } = require("@/utils/siasn-proxy.utils");
-const { IconTemplate } = require("@tabler/icons");
 const metanip = "199303302019032011";
-
-const daftarPasangan = async (req, res) => {
-  try {
-    const { siasnRequest } = req;
-    const { employee_number: nip } = req?.user;
-
-    const hasilPasangan = await pasangan(siasnRequest, nip);
-
-    res.json(hasilPasangan?.data?.data);
-  } catch (error) {
-    handleError(res, error);
-  }
-};
 
 const serializePasangan = (pasangan) => {
   return pasangan?.map((item) => {
@@ -32,6 +17,25 @@ const serializePasangan = (pasangan) => {
       ...dataPernikahan,
     };
   });
+};
+
+const daftarPasangan = async (req, res) => {
+  try {
+    const { siasnRequest } = req;
+    const { employee_number: nip } = req?.user;
+
+    const hasilPasangan = await pasangan(siasnRequest, nip);
+    const currentPasangan = hasilPasangan?.data?.data?.listPasangan;
+    const serializedPasangan = serializePasangan(currentPasangan);
+
+    if (serializedPasangan?.length > 0) {
+      res.json(serializedPasangan);
+    } else {
+      res.json([]);
+    }
+  } catch (error) {
+    handleError(res, error);
+  }
 };
 
 const daftarPasanganByNip = async (req, res) => {
