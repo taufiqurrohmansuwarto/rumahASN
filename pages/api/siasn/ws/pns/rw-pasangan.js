@@ -1,7 +1,5 @@
-import {
-  daftarPasangan,
-  tambahPasanganSIASN,
-} from "@/controller/siasn-keluarga.controller";
+import { daftarPasangan } from "@/controller/siasn-keluarga.controller";
+import { postIstriPersonal } from "@/controller/siasn/rw-keluarga.controller";
 import asnMiddleware from "@/middleware/asn.middleware";
 import auth from "@/middleware/auth.middleware";
 import { siasnMiddleware } from "@/middleware/siasn.middleware";
@@ -13,6 +11,6 @@ router
   .use(asnMiddleware)
   .use(siasnMiddleware)
   .get(daftarPasangan)
-  .post(tambahPasanganSIASN);
+  .post(postIstriPersonal);
 
 export default router.handler();

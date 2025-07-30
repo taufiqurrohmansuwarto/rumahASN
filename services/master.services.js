@@ -131,6 +131,10 @@ export const rwPasanganMaster = async () => {
   return api.get("/rw-pasangan").then((res) => res.data);
 };
 
+export const rwAnakMaster = async () => {
+  return api.get("/rw-anak").then((res) => res.data);
+};
+
 export const rwDiklatMaster = () => {
   return api.get("/rw-diklat").then((res) => res.data);
 };

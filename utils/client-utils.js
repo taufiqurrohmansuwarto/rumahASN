@@ -143,7 +143,7 @@ export const mysapkMenu = [
     path: "/pmk",
   },
   {
-    title: "Keluarga",
+    title: "Pasangan dan Anak",
     icon: IconUsers,
     color: "gray",
     path: "/keluarga",

@@ -257,6 +257,10 @@ export const dataAnak = () => {
   return api.get(`/pns/rw-anak`).then((res) => res.data);
 };
 
+export const tambahAnak = (data) => {
+  return api.post(`/pns/rw-anak`, data).then((res) => res.data);
+};
+
 export const dataAnakByNip = (nip) => {
   return api.get(`/admin/${nip}/rw-anak`).then((res) => res.data);
 };
