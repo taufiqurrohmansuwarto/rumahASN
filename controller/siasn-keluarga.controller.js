@@ -105,8 +105,9 @@ const daftarAnak = async (req, res) => {
     const { employee_number: nip } = req?.user;
 
     const hasilPasangan = await anak(siasnRequest, nip);
+    const result = hasilPasangan?.listAnak;
 
-    res.json(hasilPasangan?.data);
+    res.json(result);
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Internal Server Error" });

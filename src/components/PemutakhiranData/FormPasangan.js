@@ -169,7 +169,7 @@ const FormPasangan = ({
               label="Pasangan Ke"
               rules={[{ required: true, message: "Pasangan ke wajib diisi" }]}
             >
-              <InputNumber min={1} style={{ width: "100%" }} />
+              <InputNumber disabled min={1} style={{ width: "100%" }} />
             </Form.Item>
           </Col>
           <Col xs={24} sm={12} md={6}>
@@ -193,7 +193,7 @@ const FormPasangan = ({
               label="Nama"
               rules={[{ required: true, message: "Nama wajib diisi" }]}
             >
-              <Input />
+              <Input disabled />
             </Form.Item>
           </Col>
         </Row>
