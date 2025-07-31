@@ -5,7 +5,9 @@ import { Stack } from "@mantine/core";
 import { useQuery } from "@tanstack/react-query";
 import { Button, Card, Table } from "antd";
 import { useState } from "react";
+import FormAnak from "./FormAnak";
 import FormPasangan from "./FormPasangan";
+import dayjs from "dayjs";
 
 function CompareDataKeluarga() {
   const [showModal, setShowModal] = useState(false);
@@ -68,6 +70,13 @@ function CompareDataKeluarga() {
       title: "Tgl Menikah",
       dataIndex: "tgglMenikah",
     },
+    {
+      title: "Aksi",
+      key: "aksi",
+      render: (_, row) => {
+        return <FormAnak pasangan={row} />;
+      },
+    },
   ];
 
   // kolom pasangan SIMASTER
@@ -114,8 +123,36 @@ function CompareDataKeluarga() {
     },
   ];
 
-  const columnAnakSimaster = [];
-  const columnAnakSiasn = [];
+  const columnAnakSimaster = [
+    { title: "Nama", dataIndex: "nama" },
+    {
+      title: "Jenis Kelamin",
+      key: "jk",
+      render: (_, row) => <>{row?.jk === "L" ? "Laki-laki" : "Perempuan"}</>,
+    },
+    {
+      title: "Status",
+      key: "status",
+      render: (_, row) => <>{row?.status_anak?.status_anak}</>,
+    },
+    { title: "Tanggal Lahir", dataIndex: "tgl_lahir" },
+    { title: "Tempat Lahir", dataIndex: "tempat_lahir" },
+  ];
+  const columnAnakSiasn = [
+    { title: "Nama", dataIndex: "nama" },
+    {
+      title: "Jenis Kelamin",
+      key: "jk",
+      render: (_, row) => (
+        <>{row?.jenisKelamin === "M" ? "Laki-laki" : "Perempuan"}</>
+      ),
+    },
+    {
+      title: "Tanggal Lahir",
+      key: "tglLahir",
+      render: (_, row) => <>{dayjs(row?.tglLahir).format("DD-MM-YYYY")}</>,
+    },
+  ];
 
   const {
     data: pasanganSiasn,
@@ -165,8 +202,22 @@ function CompareDataKeluarga() {
           dataSource={pasanganSiasn}
         />
       </Card>
-      <Card title="Anak SIASN">{JSON.stringify(anakSiasn)}</Card>
-      <Card title="Anak SIMASTER">{JSON.stringify(anakSimaster)}</Card>
+      <Card title="Anak SIASN">
+        <Table
+          pagination={false}
+          columns={columnAnakSiasn}
+          dataSource={anakSiasn}
+          loading={loadingAnakSiasn}
+        />
+      </Card>
+      <Card title="Anak SIMASTER">
+        <Table
+          pagination={false}
+          columns={columnAnakSimaster}
+          dataSource={anakSimaster}
+          loading={loadingAnakSimaster}
+        />
+      </Card>
     </Stack>
   );
 }

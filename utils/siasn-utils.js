@@ -142,7 +142,19 @@ module.exports.dataUtama = (fetcher, nip) => {
 
 // keluarga
 module.exports.anak = (fetcher, nip) => {
-  return fetcher.get(`/pns/data-anak/${nip}`);
+  return new Promise(async (resolve, reject) => {
+    try {
+      const result = await fetcher.get(`/pns/data-anak/${nip}`);
+      resolve(result?.data?.data);
+    } catch (error) {
+      if (error?.code === 0) {
+        resolve([]);
+      } else {
+        reject(error);
+      }
+    }
+  });
+  // return fetcher.get(`/pns/data-anak/${nip}`);
 };
 
 module.exports.pasangan = (fetcher, nip) => {
@@ -154,7 +166,16 @@ module.exports.tambahPasangan = (fetcher, data) => {
 };
 
 module.exports.tambahAnak = (fetcher, data) => {
-  return fetcher.post(`/keluarga/anak/save`, data);
+  return new Promise(async (resolve, reject) => {
+    try {
+      const result = await fetcher.post(`/keluarga/anak/save`, data);
+
+      resolve(result);
+    } catch (error) {
+      console.log("error");
+      reject(error);
+    }
+  });
 };
 
 module.exports.orangTua = (fetcher, nip) => {
