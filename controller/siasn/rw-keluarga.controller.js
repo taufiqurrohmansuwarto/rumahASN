@@ -54,7 +54,7 @@ export const dataAnakByNip = async (req, res) => {
     const { nip } = req?.query;
     const { siasnRequest } = req;
     const result = await getAnak(siasnRequest, nip);
-    const data = result?.data?.data?.listAnak;
+    const data = result?.listAnak;
     res.json(data);
   } catch (error) {
     handleError(res, error);
