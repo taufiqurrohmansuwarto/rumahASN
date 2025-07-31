@@ -68,7 +68,7 @@ function CompareAnakByNip() {
     {
       title: "Jenis Kelamin",
       key: "jenis_kelamin",
-      render: (_, row) => <>{row?.jk === "P" ? "Pria" : "Wanita"}</>,
+      render: (_, row) => <>{row?.jk === "L" ? "Pria" : "Wanita"}</>,
     },
 
     {
@@ -83,7 +83,7 @@ function CompareAnakByNip() {
   ];
   return (
     <Stack>
-      <Card title="Data Anak jIMASTER">
+      <Card title="Data Anak SIMASTER">
         <Table
           pagination={false}
           columns={columnsSimaster}
