@@ -15,6 +15,7 @@ import dayjs from "dayjs";
 
 import { urlToPdf } from "@/services/master.services";
 import {
+  createRwSertifikasiPersonal,
   createSertifikasiByNip,
   findLembagaSertifikasi,
   findRumpunJabatan,
@@ -22,6 +23,7 @@ import {
 } from "@/services/siasn-services";
 import { FilePdfOutlined, PlusOutlined } from "@ant-design/icons";
 import FileUploadSIASN from "./FileUploadSIASN";
+import useFileStore from "@/store/useFileStore";
 const FORMAT = "DD-MM-YYYY";
 
 /**{
@@ -58,8 +60,8 @@ const ModalCreateSertifikasi = ({
   const queryClient = useQueryClient();
 
   const [form] = Form.useForm();
-  const [loading, setLoading] = useState(false);
-  const [file, setFile] = useState(null);
+
+  const fileList = useFileStore((state) => state.fileList);
 
   const { data: refLembagaSertifikasi } = useQuery({
     queryKey: ["refLembagaSertifikasi"],
@@ -72,9 +74,9 @@ const ModalCreateSertifikasi = ({
   });
 
   const { mutateAsync: postRwSertifikasi, isLoading: isPosting } = useMutation({
-    mutationFn: (data) => createSertifikasiByNip(data),
+    mutationFn: (data) => createRwSertifikasiPersonal(data),
     onSuccess: async (data) => {
-      queryClient.invalidateQueries({ queryKey: ["sertifikasi", nip] });
+      queryClient.invalidateQueries({ queryKey: ["sertifikasi-personal"] });
       message.success(data?.message);
       onCancel();
     },
@@ -82,7 +84,7 @@ const ModalCreateSertifikasi = ({
       message.error("Gagal menambahkan sertifikasi");
     },
     onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: ["sertifikasi", nip] });
+      queryClient.invalidateQueries({ queryKey: ["sertifikasi-personal"] });
     },
   });
 
@@ -107,9 +109,19 @@ const ModalCreateSertifikasi = ({
         tanggalSertifikat: dayjs(values.tanggalSertifikat).format(FORMAT),
       };
 
-      const result = await postRwSertifikasi({ nip, data: payload });
+      const result = await postRwSertifikasi(payload);
       const id = result?.id;
-      if (id) {
+
+      const currentFile = fileList[0]?.originFileObj;
+
+      if (type === "create" && currentFile) {
+        const formData = new FormData();
+        formData.append("file", currentFile);
+        formData.append("id_ref_dokumen", 1683);
+        formData.append("id_riwayat", id);
+        await uploadDokRiwayat(formData);
+        queryClient.invalidateQueries({ queryKey: ["sertifikasi-personal"] });
+      } else if (type === "transfer" && row?.file_kompetensi) {
         const currentFile = await urlToPdf({ url: row?.file_kompetensi });
         const file = new File([currentFile], "file.pdf", {
           type: "application/pdf",
@@ -119,7 +131,20 @@ const ModalCreateSertifikasi = ({
         formData.append("id_ref_dokumen", 1683);
         formData.append("id_riwayat", id);
         await uploadDokRiwayat(formData);
-        queryClient.invalidateQueries({ queryKey: ["sertifikasi", nip] });
+        queryClient.invalidateQueries({ queryKey: ["sertifikasi-personal"] });
+      }
+
+      if (id && row?.file_kompetensi) {
+        const currentFile = await urlToPdf({ url: row?.file_kompetensi });
+        const file = new File([currentFile], "file.pdf", {
+          type: "application/pdf",
+        });
+        const formData = new FormData();
+        formData.append("file", file);
+        formData.append("id_ref_dokumen", 1683);
+        formData.append("id_riwayat", id);
+        await uploadDokRiwayat(formData);
+        queryClient.invalidateQueries({ queryKey: ["sertifikasi-personal"] });
       }
 
       // const currentFile = await urlToPdf({ url: row?.file_kompetensi });
@@ -129,7 +154,7 @@ const ModalCreateSertifikasi = ({
       // console.log(file);
     } catch (error) {
       message.error("Gagal menambahkan sertifikasi file kompetensi");
-      queryClient.invalidateQueries({ queryKey: ["sertifikasi", nip] });
+      queryClient.invalidateQueries({ queryKey: ["sertifikasi-personal"] });
     }
   };
 
@@ -292,7 +317,7 @@ const ModalCreateSertifikasi = ({
   );
 };
 
-const CreateSertifikasiSIASN = ({ nip, row = null, type = "create" }) => {
+const CreateSertifikasiPersonal = ({ row = null, type = "create" }) => {
   const [open, setOpen] = useState(false);
 
   const handleOpen = () => {
@@ -315,7 +340,6 @@ const CreateSertifikasiSIASN = ({ nip, row = null, type = "create" }) => {
         {type === "create" ? "Tambah Sertifikasi" : "Transfer Sertifikasi"}
       </Button>
       <ModalCreateSertifikasi
-        nip={nip}
         open={open}
         onCancel={handleCancel}
         row={row}
@@ -325,4 +349,4 @@ const CreateSertifikasiSIASN = ({ nip, row = null, type = "create" }) => {
   );
 };
 
-export default CreateSertifikasiSIASN;
+export default CreateSertifikasiPersonal;

@@ -454,3 +454,8 @@ module.exports.createActivitySiasn = (fetcher, data) => {
 module.exports.postRwSertifikasi = (fetcher, data) => {
   return fetcher.post(`/sertifikasi/save`, data).then((res) => res?.data);
 };
+
+// delete sertifikasi
+module.exports.removeSertifikasi = (fetcher, id) => {
+  return fetcher.delete(`/sertifikasi/delete/${id}`).then((res) => res?.data);
+};
