@@ -7,6 +7,44 @@ function CompareDataCltn() {
 
   const columns = [
     {
+      title: "File SK",
+      key: "filesk",
+      render: (_, record) => {
+        return (
+          <>
+            {record?.path?.[884] && (
+              <a
+                href={`/helpdesk/api/siasn/ws/download?filePath=${record?.path?.[884]?.dok_uri}`}
+                target="_blank"
+                rel="noreferrer"
+              >
+                File
+              </a>
+            )}
+          </>
+        );
+      },
+    },
+    {
+      title: "File Pertek",
+      key: "filepertek",
+      render: (_, record) => {
+        return (
+          <>
+            {record?.path?.[885] && (
+              <a
+                href={`/helpdesk/api/siasn/ws/download?filePath=${record?.path?.[885]?.dok_uri}`}
+                target="_blank"
+                rel="noreferrer"
+              >
+                File
+              </a>
+            )}
+          </>
+        );
+      },
+    },
+    {
       title: "Nomer Letter BKN",
       dataIndex: "nomorLetterBkn",
     },
