@@ -81,6 +81,18 @@ export const mysapkMenu = [
   //   path: "/pasangan",
   // },
   {
+    title: "Pasangan dan Anak",
+    icon: IconUsers,
+    color: "gray",
+    path: "/keluarga",
+  },
+  {
+    title: "Riwayat Sertifikasi",
+    icon: IconFileCertificate,
+    color: "gray",
+    path: "/sertifikasi",
+  },
+  {
     title: "Jabatan",
     icon: IconBadge,
     color: "green",
@@ -141,12 +153,6 @@ export const mysapkMenu = [
     icon: IconClock,
     color: "gray",
     path: "/pmk",
-  },
-  {
-    title: "Pasangan dan Anak",
-    icon: IconUsers,
-    color: "gray",
-    path: "/keluarga",
   },
 
   {

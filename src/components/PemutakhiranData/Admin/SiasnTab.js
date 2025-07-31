@@ -1,5 +1,6 @@
 import AdministrasiByNip from "@/components/Berkas/AdministrasiByNip";
 import AdministrasiPerbaikanByNip from "@/components/Berkas/AdministrasiPerbaikanByNip";
+import BerkasJabatanPelaksanaBaruByNip from "@/components/Berkas/BerkasJabatanPelaksanaBaruByNip";
 import CompareDataPasanganByNip from "@/components/PemutakhiranData/CompareDataPasanganByNip";
 import { ActiveTabProvider, useActiveTab } from "@/context/TabContext";
 import { Stack } from "@mantine/core";
@@ -9,19 +10,17 @@ import CompareDataDiklatByNip from "../CompareDataDiklatByNip";
 import ComparePenghargaanByNip from "../ComparePenghargaanByNip";
 import CompareRwKompetensiByNip from "../CompareRwKompetensiByNip";
 import CompareRwPotensiByNip from "../CompareRwPotensiByNip";
+import CompareSertifikasiByNip from "../CompareSertifikasiByNip";
 import CompareAngkaKreditByNip from "./CompareAngkaKreditByNip";
 import CompareCLTNByNip from "./CompareCLTNByNip";
 import CompareDataUtamaByNip from "./CompareDataUtamaByNip";
 import CompareHukdisByNip from "./CompareHukdisByNip";
 import CompareJabatanByNip from "./CompareJabatanByNip";
 import CompareKedudukanHukumByNip from "./CompareKedudukanHukumByNip";
-import CompareKeluargaByNip from "./CompareKeluargaByNip";
 import CompareKinerjaPeriodikNip from "./CompareKinerjaPeriodikNip";
 import CompareMasaKerjaByNip from "./CompareMasaKerjaByNip";
 import ComparePemberhentianByNip from "./ComparePemberhentianByNip";
 import CompareSKP22ByNip from "./CompareSKP22ByNip";
-import BerkasJabatanPelaksanaBaruByNip from "@/components/Berkas/BerkasJabatanPelaksanaBaruByNip";
-import CompareSertifikasiByNip from "../CompareSertifikasiByNip";
 
 const DEFAULT_ACTIVE_KEY = "data-utama";
 
@@ -98,11 +97,6 @@ function SiasnTab({ nip }) {
         key: "kedudukan-hukum",
         tab: "Kedudukan Hukum",
         content: <CompareKedudukanHukumByNip nip={nip} />,
-      },
-      {
-        key: "keluarga",
-        tab: "Keluarga",
-        content: <CompareKeluargaByNip nip={nip} />,
       },
 
       {

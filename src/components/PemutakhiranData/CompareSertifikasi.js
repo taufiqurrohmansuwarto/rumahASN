@@ -1,60 +1,43 @@
-import { getRwSertifikasiByNipMaster } from "@/services/master.services";
 import {
-  deleteSertifikasiByNip,
-  riwayatSertifikasiByNip,
+  deleteRwSertifikasiPersonal,
+  getRwSertifikasiPersonal,
 } from "@/services/siasn-services";
 import { DeleteOutlined, ReloadOutlined } from "@ant-design/icons";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
-  Modal,
   Button,
-  Divider,
   Flex,
   message,
+  Modal,
   Space,
   Table,
   Tooltip,
   Typography,
 } from "antd";
-import CreateSertifikasiSIASN from "./CreateSertifikasiSIASN";
+import CreateSertifikasiPersonal from "./CreateSertifikasiPersonal";
 import UploadDokumen from "./UploadDokumen";
 
-const CompareSertifikasiByNip = ({ nip }) => {
+const CompareSertifikasi = () => {
   const queryClient = useQueryClient();
+
   const { data, isLoading, refetch, isFetching } = useQuery({
-    queryKey: ["sertifikasi", nip],
-    queryFn: () => riwayatSertifikasiByNip(nip),
+    queryKey: ["sertifikasi-personal"],
+    queryFn: () => getRwSertifikasiPersonal(),
     refetchOnWindowFocus: false,
     keepPreviousData: true,
   });
 
-  const {
-    data: dataMaster,
-    isLoading: isLoadingMaster,
-    isFetching: isFetchingMaster,
-    refetch: refetchMaster,
-  } = useQuery({
-    queryKey: ["sertifikasi-master", nip],
-    queryFn: () => getRwSertifikasiByNipMaster(nip),
-    refetchOnWindowFocus: false,
-    keepPreviousData: true,
-  });
-
-  const {
-    mutateAsync: hapusSertifikasi,
-    isLoading: isLoadingHapusSertifikasi,
-  } = useMutation((data) => deleteSertifikasiByNip(data), {
+  const { mutateAsync: hapusSertifikasi } = useMutation({
+    mutationFn: (id) => deleteRwSertifikasiPersonal(id),
     onSuccess: () => {
       message.success("Sertifikasi berhasil dihapus");
-      queryClient.invalidateQueries({ queryKey: ["sertifikasi", nip] });
+      queryClient.invalidateQueries({ queryKey: ["sertifikasi-personal"] });
     },
     onError: (error) => {
-      message.error(error?.response?.data?.message);
+      message.error(error?.message);
     },
     onSettled: () => {
-      queryClient.invalidateQueries({
-        queryKey: ["sertifikasi", nip],
-      });
+      queryClient.invalidateQueries({ queryKey: ["sertifikasi-personal"] });
     },
   });
 
@@ -62,57 +45,9 @@ const CompareSertifikasiByNip = ({ nip }) => {
     Modal.confirm({
       title: "Hapus Sertifikasi",
       content: "Apakah anda yakin ingin menghapus sertifikasi ini?",
-      onOk: async () => await hapusSertifikasi({ nip, id: row?.id }),
+      onOk: async () => hapusSertifikasi(row?.id),
     });
   };
-
-  const columnsMaster = [
-    {
-      title: "File",
-      key: "file",
-      render: (_, row) => {
-        return (
-          <>
-            {row?.file_kompetensi && (
-              <a href={row?.file_kompetensi} target="_blank" rel="noreferrer">
-                File
-              </a>
-            )}
-          </>
-        );
-      },
-    },
-    {
-      title: "No. SK",
-      dataIndex: "no_sk",
-    },
-    {
-      title: "Tanggal SK",
-      dataIndex: "tgl_sk",
-    },
-    {
-      title: "Jabatan",
-      key: "jabatan",
-      render: (_, row) => {
-        return (
-          <>
-            {row?.jft?.name} {row?.jft?.jenjang_jab}
-          </>
-        );
-      },
-    },
-    {
-      title: "Aksi",
-      key: "aksi",
-      render: (_, row) => {
-        return (
-          <>
-            <CreateSertifikasiSIASN nip={nip} row={row} type="transfer" />
-          </>
-        );
-      },
-    },
-  ];
 
   const columns = [
     {
@@ -200,7 +135,7 @@ const CompareSertifikasiByNip = ({ nip }) => {
               <UploadDokumen
                 id={row?.id}
                 idRefDokumen={"1683"}
-                invalidateQueries={["sertifikasi", nip]}
+                invalidateQueries={["sertifikasi-personal"]}
                 nama="Sertifikasi"
               />
             </Tooltip>
@@ -212,33 +147,12 @@ const CompareSertifikasiByNip = ({ nip }) => {
 
   return (
     <>
-      <CreateSertifikasiSIASN nip={nip} />
+      <CreateSertifikasiPersonal />
       <Table
-        title={() => (
-          <Flex justify="space-between" align="center">
-            <Typography.Title level={5}>SIMASTER</Typography.Title>
-            <Flex align="flex-end">
-              <Button
-                type="text"
-                icon={<ReloadOutlined />}
-                onClick={refetchMaster}
-              >
-                Refresh
-              </Button>
-            </Flex>
-          </Flex>
-        )}
-        loading={isLoadingMaster || isFetchingMaster}
-        columns={columnsMaster}
         pagination={false}
-        dataSource={dataMaster}
-        rowKey={(row) => row?.kompetensi_id}
-      />
-      <Divider />
-      <Table
         title={() => (
           <Flex justify="space-between" align="center">
-            <Typography.Title level={5}>SIASN</Typography.Title>
+            <Typography.Title level={5}>Data SIASN</Typography.Title>
             <Flex align="flex-end">
               <Button type="text" icon={<ReloadOutlined />} onClick={refetch}>
                 Refresh
@@ -248,12 +162,10 @@ const CompareSertifikasiByNip = ({ nip }) => {
         )}
         loading={isLoading || isFetching}
         columns={columns}
-        pagination={false}
         dataSource={data}
-        rowKey={(row) => row?.id}
       />
     </>
   );
 };
 
-export default CompareSertifikasiByNip;
+export default CompareSertifikasi;

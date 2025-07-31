@@ -92,6 +92,19 @@ export const getKinerjaPeriodikPersonal = () => {
   return api.get("/pns/kinerja-periodik").then((res) => res.data);
 };
 
+// riwayat sertifikasi personal
+export const getRwSertifikasiPersonal = () => {
+  return api.get("/pns/rw-sertifikasi").then((res) => res.data);
+};
+
+export const createRwSertifikasiPersonal = (data) => {
+  return api.post("/pns/rw-sertifikasi", data).then((res) => res.data);
+};
+
+export const deleteRwSertifikasiPersonal = (id) => {
+  return api.delete(`/pns/rw-sertifikasi/${id}`).then((res) => res.data);
+};
+
 export const refDiklatStruktural = () => {
   return api.get("/ref/diklat-struktural").then((res) => res.data);
 };
@@ -115,6 +128,14 @@ export const createSertifikasiByNip = ({ nip, data }) => {
     .post(`/admin/${nip}/rw-sertifikasi`, data)
     .then((res) => res?.data);
 };
+
+export const deleteSertifikasiByNip = ({ nip, id }) => {
+  return api
+    .delete(`/admin/${nip}/rw-sertifikasi/${id}`)
+    .then((res) => res?.data);
+};
+
+// end of riwayat sertifikasi
 
 export const cekUnor = (id) => {
   return api.get(`/admin/cek-unor/${id}`).then((res) => res.data);
