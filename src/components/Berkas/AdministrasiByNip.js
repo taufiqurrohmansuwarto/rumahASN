@@ -44,6 +44,7 @@ const list_tmt = [
   { value: "01062025", label: "1 Juni 2025" },
   { value: "01072025", label: "1 Juli 2025" },
   { value: "01032025", label: "1 Maret 2025" },
+  { value: "01082025", label: "1 Agustus 2025" },
 ];
 
 // Data dokumen dengan keterangan yang lebih jelas
