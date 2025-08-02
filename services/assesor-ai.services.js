@@ -18,3 +18,13 @@ export const uploadRekamanVerbatim = async (payload) => {
 export const getRekamanVerbatim = async () => {
   return api.get("/verbatim").then((res) => res.data);
 };
+
+export const getAudioVerbatim = async (id) => {
+  return api.get(`/verbatim/${id}/audio`).then((res) => res.data);
+};
+
+export const transribeAudioVerbatim = async ({ id, audioId }) => {
+  return api
+    .post(`/verbatim/${id}/audio/${audioId}/transribe`)
+    .then((res) => res.data);
+};

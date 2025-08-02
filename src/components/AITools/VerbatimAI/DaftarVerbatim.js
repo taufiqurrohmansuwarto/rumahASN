@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { getRekamanVerbatim } from "@/services/assesor-ai.services";
 import { Table } from "antd";
 import dayjs from "dayjs";
+import Link from "next/link";
 
 function AudioPlayer({ src }) {
   return (
@@ -24,6 +25,10 @@ const DaftarVerbatim = () => {
 
   const columns = [
     {
+      title: "ID",
+      dataIndex: "id",
+    },
+    {
       title: "Nama Asesor",
       dataIndex: "nama_asesor",
     },
@@ -41,6 +46,13 @@ const DaftarVerbatim = () => {
       dataIndex: "file_path",
       render: (text) => (
         <AudioPlayer src={`https://siasn.bkd.jatimprov.go.id:9000${text}`} />
+      ),
+    },
+    {
+      title: "Aksi",
+      dataIndex: "aksi",
+      render: (text, record) => (
+        <Link href={`/ai-tools/verbatim/${record.id}`}>Detail</Link>
       ),
     },
   ];
