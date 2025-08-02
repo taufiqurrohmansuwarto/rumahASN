@@ -1,4 +1,5 @@
 import {
+  IconAi,
   IconBook2,
   IconCalendarUser,
   IconHome,
@@ -117,6 +118,15 @@ export const appLists = [
     color: "#FBBC05",
     url: "/logs/dashboard",
     icon: "https://siasn.bkd.jatimprov.go.id:9000/public/icon-log.png",
+    userType: ["admin"],
+  },
+  {
+    rightIcon: <IconAi />,
+    title: "AI Tools",
+    desc: "Tools AI untuk Rumah ASN",
+    color: "#FBBC05",
+    url: "/ai-tools/dashboard",
+    icon: "https://siasn.bkd.jatimprov.go.id:9000/public/icon-bestie.png",
     userType: ["admin"],
   },
 ];
