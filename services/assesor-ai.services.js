@@ -28,3 +28,9 @@ export const transribeAudioVerbatim = async ({ id, audioId }) => {
     .post(`/verbatim/${id}/audio/${audioId}/transribe`)
     .then((res) => res.data);
 };
+
+export const textToJson = async ({ id, audioId }) => {
+  return api
+    .patch(`/verbatim/${id}/audio/${audioId}/transribe`)
+    .then((res) => res.data);
+};
