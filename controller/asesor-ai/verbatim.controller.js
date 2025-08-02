@@ -3,6 +3,12 @@ import VerbatimSessions from "@/models/verbatim-ai/verbatim-sessions.model";
 import VerbatimAudioFiles from "@/models/verbatim-ai/verbatim-audio-files.model";
 import { handleError } from "@/utils/helper/controller-helper";
 import { uploadFileMinio } from "@/utils/index";
+import OpenAI from "openai";
+import axios from "axios";
+
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+});
 
 // === CommonJS Imports ===
 const { nanoid } = require("nanoid");
@@ -523,6 +529,56 @@ export const detailAudioVerbatim = async (req, res) => {
       .first();
 
     res.json(result);
+  } catch (error) {
+    handleError(res, error);
+  }
+};
+
+export const transribeAudioVerbatim = async (req, res) => {
+  try {
+    const { id, audioId } = req.query;
+
+    const audioFile = await VerbatimAudioFiles.query()
+      .where("id", audioId)
+      .first();
+
+    if (!audioFile) {
+      return res.status(404).json({
+        success: false,
+        message: "Audio tidak ditemukan",
+      });
+    }
+
+    const audioUrl = `https://siasn.bkd.jatimprov.go.id:9000${audioFile.file_path}`;
+
+    const response = await axios.get(audioUrl, {
+      responseType: "arraybuffer",
+    });
+
+    const audioBuffer = Buffer.from(response.data);
+
+    // Extract filename from file_path dan buat temporary file
+    const filename = path.basename(audioFile.file_path);
+    const tempFilePath = path.join(os.tmpdir(), filename);
+
+    // Simpan buffer ke temporary file
+    await fs.promises.writeFile(tempFilePath, audioBuffer);
+
+    // Gunakan temporary file untuk transcription
+    const transcription = await openai.audio.transcriptions.create({
+      file: fs.createReadStream(tempFilePath),
+      model: "whisper-1",
+    });
+
+    // Cleanup temporary file
+    await fs.promises.unlink(tempFilePath);
+
+    console.log(transcription);
+
+    res.json({
+      success: true,
+      message: "Berhasil transribe audio",
+    });
   } catch (error) {
     handleError(res, error);
   }
