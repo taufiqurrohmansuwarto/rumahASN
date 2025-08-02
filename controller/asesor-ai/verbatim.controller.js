@@ -567,17 +567,85 @@ export const transribeAudioVerbatim = async (req, res) => {
     // Gunakan temporary file untuk transcription
     const transcription = await openai.audio.transcriptions.create({
       file: fs.createReadStream(tempFilePath),
-      model: "whisper-1",
+      model: "gpt-4o-mini-transcribe",
+      language: "id",
+      response_format: "text",
     });
 
     // Cleanup temporary file
     await fs.promises.unlink(tempFilePath);
 
-    console.log(transcription);
+    // === Save transkrip to database ===
+
+    await VerbatimAudioFiles.query().where("id", audioId).patch({
+      transkrip: transcription,
+    });
 
     res.json({
       success: true,
       message: "Berhasil transribe audio",
+    });
+  } catch (error) {
+    handleError(res, error);
+  }
+};
+
+export const textToJson = async (req, res) => {
+  try {
+    const { id, audioId } = req.query;
+
+    const audioFile = await VerbatimAudioFiles.query()
+      .where("id", audioId)
+      .first();
+
+    // Step 4: Strukturkan menjadi JSON dialog dengan GPT
+    const gptPrompt = `
+Berikut adalah hasil transkrip wawancara antara asesor dan asesi (tanpa nama pembicara).
+Tugasmu: ubah teks ini menjadi array JSON dengan properti:
+- "index": nomor urut
+- "role": "asesor" atau "asesi"
+- "text": isi kalimat asli
+
+Asumsikan:
+- Asesor memulai, bertanya, mengarahkan
+- Asesi menjawab, menceritakan, menjelaskan
+
+Format output JSON:
+[
+  { "index": 1, "role": "asesor", "text": "..." },
+  { "index": 2, "role": "asesi", "text": "..." }
+]
+
+Jangan ubah isi kalimat. Berikut transkripnya:
+"""${audioFile.transkrip}"""
+`;
+
+    const completion = await openai.chat.completions.create({
+      model: "gpt-4",
+      messages: [
+        {
+          role: "system",
+          content: "Kamu adalah sistem anotator percakapan wawancara.",
+        },
+        { role: "user", content: gptPrompt },
+      ],
+      temperature: 0.2,
+    });
+
+    const rawJson = completion.choices[0].message.content;
+    const cleaned = rawJson
+      .replace(/^```json\n?/, "")
+      .replace(/^```/, "")
+      .replace(/```$/, "")
+      .trim();
+
+    await VerbatimAudioFiles.query().where("id", audioId).patch({
+      json_transkrip: cleaned,
+    });
+
+    res.json({
+      success: true,
+      message: "Berhasil mengubah teks menjadi JSON",
     });
   } catch (error) {
     handleError(res, error);
