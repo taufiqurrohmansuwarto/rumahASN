@@ -366,8 +366,8 @@ const processAudioFile = async (
 };
 
 /**
- * Controller untuk upload rekaman audio verbatim
- * Handles file upload, duration validation, and temporary file cleanup
+ * Controller untuk upload rekaman audio verbatim (tanpa splitting)
+ * Hanya upload file tunggal ke minio dan buat session record
  */
 export const uploadRekamanVerbatim = async (req, res) => {
   let tempFilePath = null;
@@ -397,7 +397,25 @@ export const uploadRekamanVerbatim = async (req, res) => {
     // === Get audio duration ===
     const audioDurationSeconds = await getAudioDuration(tempFilePath);
 
-    // === Determine number of files based on duration ===
+    // === Convert to MP3 if needed ===
+    let mp3FilePath = tempFilePath;
+    if (!audioFilename.toLowerCase().endsWith(".mp3")) {
+      console.log(`Converting ${audioFilename} to MP3 format...`);
+      mp3FilePath = await convertToMp3(tempFilePath, audioFilename);
+      console.log(`Successfully converted to MP3: ${audioFilename}`);
+    }
+
+    // === Upload single file to Minio ===
+    const fileBuffer = fs.readFileSync(mp3FilePath);
+    await uploadFileMinio(
+      mc,
+      fileBuffer,
+      audioFilename,
+      fileBuffer.length,
+      "audio/mpeg"
+    );
+
+    // === Determine if splitting will be needed ===
     const willBeSplit = audioDurationSeconds > MAX_DURATION_SECONDS;
     const estimatedFileCount = willBeSplit
       ? calculateChunksNeeded(audioDurationSeconds)
@@ -406,7 +424,7 @@ export const uploadRekamanVerbatim = async (req, res) => {
     // === Create session record ===
     const session = await VerbatimSessions.query().insert({
       file_path: `/public/${audioFilename}`,
-      status: "processing",
+      status: willBeSplit ? "uploaded" : "done", // "uploaded" jika butuh splitting, "done" jika tidak
       jumlah_file: estimatedFileCount,
       nama_asesor,
       nama_asesi,
@@ -415,36 +433,30 @@ export const uploadRekamanVerbatim = async (req, res) => {
 
     sessionId = session?.id;
 
-    // === Process audio (split if needed) and upload to Minio + Database ===
-    const audioProcessResult = await processAudioFile(
-      tempFilePath,
-      audioFilename,
-      audioDurationSeconds,
-      mc, // Pass Minio client for chunk uploads
-      sessionId // Pass session ID for database inserts
-    );
+    // === Jika tidak perlu split, insert single audio file record ===
+    if (!willBeSplit) {
+      await VerbatimAudioFiles.query().insert({
+        session_id: sessionId,
+        part_number: 1,
+        file_path: `/public/${audioFilename}`,
+        durasi: Math.round(audioDurationSeconds),
+      });
+    }
 
-    // === Update session status to completed ===
-    await VerbatimSessions.query().findById(sessionId).patch({
-      status: "done",
-      jumlah_file: audioProcessResult.files.length, // Update with actual file count
-    });
-
-    // === Cleanup original temporary file ===
+    // === Cleanup temporary files ===
     removeTempFile(tempFilePath);
-    tempFilePath = null; // Reset to avoid double cleanup
-
-    // Note: Chunk files are already cleaned up in uploadChunksToMinio
+    if (mp3FilePath !== tempFilePath) {
+      removeTempFile(mp3FilePath);
+    }
+    tempFilePath = null;
 
     console.log(
-      `Audio processing completed - Session: ${sessionId}, Original Duration: ${audioDurationSeconds} seconds, Split: ${
-        audioProcessResult.isSplit ? "Yes" : "No"
-      }, Files: ${audioProcessResult.files.length}`
+      `Audio upload completed - Session: ${sessionId}, Duration: ${audioDurationSeconds}s, Needs Split: ${willBeSplit}`
     );
 
     // === Send success response ===
-    const responseMessage = audioProcessResult.isSplit
-      ? `File berhasil diupload dan dipecah menjadi ${audioProcessResult.files.length} bagian`
+    const responseMessage = willBeSplit
+      ? "File berhasil diupload. Gunakan endpoint split untuk memecah audio."
       : "File berhasil diupload";
 
     res.json({
@@ -453,20 +465,22 @@ export const uploadRekamanVerbatim = async (req, res) => {
       data: {
         sessionId: sessionId,
         originalDuration: audioDurationSeconds,
-        isSplit: audioProcessResult.isSplit,
-        totalFiles: audioProcessResult.files.length,
-        files: audioProcessResult.files,
+        needsSplit: willBeSplit,
+        estimatedChunks: willBeSplit ? estimatedFileCount : 1,
         session: {
           id: sessionId,
           nama_asesor,
           nama_asesi,
           tgl_wawancara,
-          status: "done",
-          jumlah_file: audioProcessResult.files.length,
+          status: willBeSplit ? "uploaded" : "done",
+          jumlah_file: estimatedFileCount,
+          file_path: `/public/${audioFilename}`,
         },
-        ...(audioProcessResult.isSplit && {
-          chunkDurationSeconds: audioProcessResult.chunkDuration,
-          splitReason: `Audio duration (${audioDurationSeconds}s) exceeds maximum allowed (${MAX_DURATION_SECONDS}s)`,
+        ...(willBeSplit && {
+          splitRequired: true,
+          maxDurationSeconds: MAX_DURATION_SECONDS,
+          chunkDurationSeconds: CHUNK_DURATION_SECONDS,
+          splitEndpoint: `/api/asesor-ai/verbatim/${sessionId}/split`,
         }),
       },
     });
@@ -506,6 +520,174 @@ export const getRekamanVerbatim = async (req, res) => {
     const result = await VerbatimSessions.query().orderBy("created_at", "desc");
     res.json(result);
   } catch (error) {
+    handleError(res, error);
+  }
+};
+
+export const splitAudioVerbatim = async (req, res) => {
+  let tempFilePath = null;
+
+  try {
+    const { id } = req.query;
+    const { mc } = req; // Minio client from middleware
+
+    // === Validate session ===
+    const session = await VerbatimSessions.query().findById(id);
+
+    if (!session) {
+      return res.status(404).json({
+        success: false,
+        message: "Session tidak ditemukan",
+      });
+    }
+
+    // === Check if session is ready for splitting ===
+    if (session.status !== "uploaded") {
+      return res.status(400).json({
+        success: false,
+        message:
+          "Session tidak dalam status uploaded. Status saat ini: " +
+          session.status,
+      });
+    }
+
+    // === Update session status to processing ===
+    await VerbatimSessions.query().findById(id).patch({
+      status: "processing",
+    });
+
+    console.log(`Starting audio split process for session ${id}...`);
+
+    // === Download audio file from Minio ===
+    const audioUrl = `https://siasn.bkd.jatimprov.go.id:9000${session.file_path}`;
+    console.log(`Downloading audio from: ${audioUrl}`);
+
+    const response = await axios.get(audioUrl, {
+      responseType: "arraybuffer",
+    });
+
+    const audioBuffer = Buffer.from(response.data);
+    const originalFilename = path.basename(session.file_path);
+    const tempFileName = `${session.id}_${nanoid(10)}.mp3`;
+
+    tempFilePath = path.join(os.tmpdir(), tempFileName);
+    await fs.promises.writeFile(tempFilePath, audioBuffer);
+
+    console.log(`Audio downloaded and saved to temp file: ${tempFileName}`);
+
+    // === Get audio duration ===
+    const audioDurationSeconds = await getAudioDuration(tempFilePath);
+    console.log(`Audio duration: ${audioDurationSeconds} seconds`);
+
+    // === Check if splitting is actually needed ===
+    if (audioDurationSeconds <= MAX_DURATION_SECONDS) {
+      // File doesn't need splitting, just create audio file record
+      await VerbatimAudioFiles.query().insert({
+        session_id: id,
+        part_number: 1,
+        file_path: session.file_path,
+        durasi: Math.round(audioDurationSeconds),
+      });
+
+      await VerbatimSessions.query().findById(id).patch({
+        status: "done",
+        jumlah_file: 1,
+      });
+
+      removeTempFile(tempFilePath);
+
+      return res.json({
+        success: true,
+        message: "Audio tidak perlu dipecah, langsung selesai",
+        data: {
+          sessionId: id,
+          totalDuration: audioDurationSeconds,
+          isSplit: false,
+          totalFiles: 1,
+        },
+      });
+    }
+
+    // === Split audio into chunks ===
+    console.log(
+      `Splitting audio into chunks (duration: ${audioDurationSeconds}s > max: ${MAX_DURATION_SECONDS}s)...`
+    );
+
+    const baseFilename = originalFilename.split(".")[0];
+    const chunkFiles = await splitAudioIntoChunks(
+      tempFilePath,
+      baseFilename,
+      "mp3",
+      audioDurationSeconds
+    );
+
+    console.log(`Audio split into ${chunkFiles.length} chunks`);
+
+    // === Upload chunks to Minio ===
+    console.log(`Uploading ${chunkFiles.length} chunks to Minio...`);
+    const uploadedChunks = await uploadChunksToMinio(mc, chunkFiles);
+    console.log(`Successfully uploaded ${uploadedChunks.length} chunks`);
+
+    // === Insert chunk records to database ===
+    console.log(
+      `Inserting ${uploadedChunks.length} chunk records to database...`
+    );
+    await insertAudioFilesToDB(id, uploadedChunks);
+    console.log(`Successfully inserted ${uploadedChunks.length} chunk records`);
+
+    // === Update session status to completed ===
+    await VerbatimSessions.query().findById(id).patch({
+      status: "done",
+      jumlah_file: uploadedChunks.length,
+    });
+
+    // === Cleanup original temporary file ===
+    removeTempFile(tempFilePath);
+    tempFilePath = null;
+
+    console.log(`Audio split process completed for session ${id}`);
+
+    // === Send success response ===
+    res.json({
+      success: true,
+      message: `Audio berhasil dipecah menjadi ${uploadedChunks.length} bagian`,
+      data: {
+        sessionId: id,
+        originalDuration: audioDurationSeconds,
+        isSplit: true,
+        totalFiles: uploadedChunks.length,
+        chunkDurationSeconds: CHUNK_DURATION_SECONDS,
+        files: uploadedChunks.map((chunk) => ({
+          filename: chunk.filename,
+          duration: chunk.duration,
+          partNumber: chunk.partNumber,
+          startTime: chunk.startTime,
+          filePath: chunk.filePath,
+        })),
+      },
+    });
+  } catch (error) {
+    // === Cleanup on error ===
+    if (tempFilePath) {
+      removeTempFile(tempFilePath);
+    }
+
+    // === Rollback session status on error ===
+    try {
+      const { id } = req.query;
+      if (id) {
+        await VerbatimSessions.query().findById(id).patch({
+          status: "uploaded", // Rollback to uploaded status
+        });
+        console.log(
+          `Rolled back session ${id} status to uploaded due to error`
+        );
+      }
+    } catch (rollbackError) {
+      console.error(`Failed to rollback session status:`, rollbackError);
+    }
+
+    console.error("Error in splitAudioVerbatim:", error);
     handleError(res, error);
   }
 };
