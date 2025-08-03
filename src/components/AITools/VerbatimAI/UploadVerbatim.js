@@ -19,8 +19,10 @@ function UploadVerbatim() {
   const handleSubmit = async () => {
     const values = await form.validateFields();
     const payload = {
+      judul: values.judul,
       nama_asesor: values.nama_asesor,
       nama_asesi: values.nama_asesi,
+      deskripsi: values.deskripsi,
       tgl_wawancara: values.tgl_wawancara.format("YYYY-MM-DD"),
       file: values?.file?.fileList[0]?.originFileObj,
     };
@@ -30,10 +32,11 @@ function UploadVerbatim() {
   return (
     <div>
       <Form form={form} layout="vertical" onFinish={handleSubmit}>
-        <Form.Item name="file" label="File">
-          <Upload accept=".mp3,.wav" maxCount={1}>
-            <Button icon={<IconUpload />}>Upload</Button>
-          </Upload>
+        <Form.Item name="judul" label="Judul">
+          <Input />
+        </Form.Item>
+        <Form.Item name="deskripsi" label="Deskripsi">
+          <Input.TextArea />
         </Form.Item>
         <Form.Item name="nama_asesor" label="Nama Asesor">
           <Input />
@@ -44,6 +47,12 @@ function UploadVerbatim() {
         <Form.Item name="tgl_wawancara" label="Tanggal Wawancara">
           <DatePicker />
         </Form.Item>
+        <Form.Item name="file" label="Rekaman Wawancara">
+          <Upload accept=".mp3,.wav" maxCount={1} showUploadList={false}>
+            <Button icon={<IconUpload />}>Unggah Rekaman Wawancara</Button>
+          </Upload>
+        </Form.Item>
+
         <Form.Item>
           <Button type="primary" htmlType="submit" loading={isLoading}>
             Submit
