@@ -242,7 +242,7 @@ export const splitAudioVerbatim = async (req, res) => {
     console.log(`Downloading audio from: ${session.file_path}`);
     const filename = session.file_path.split("/").pop();
 
-    const tempFileName = `${session?.id}.mp3`;
+    const tempFileName = `${session?.id}.ogg`;
 
     tempFilePath = path.join(os.tmpdir(), tempFileName);
     const audioStream = await downloadAudio(mc, filename, tempFilePath);
@@ -415,7 +415,19 @@ export const detailAudioVerbatim = async (req, res) => {
 export const transribeAudioVerbatim = async (req, res) => {
   try {
     const { id, audioId } = req.query;
+    const { mc } = req; // Minio client dari middleware
 
+    // === Validate request parameters ===
+    if (!audioId) {
+      return res.status(400).json({
+        success: false,
+        message: "AudioId tidak ditemukan",
+      });
+    }
+
+    console.log(`Starting transcription for audioId: ${audioId}`);
+
+    // === Get audio file record ===
     const audioFile = await VerbatimAudioFiles.query()
       .where("id", audioId)
       .first();
@@ -427,42 +439,74 @@ export const transribeAudioVerbatim = async (req, res) => {
       });
     }
 
-    // File is in Minio, download it for transcription
-    const audioUrl = `https://siasn.bkd.jatimprov.go.id:9000${audioFile.file_path}`;
+    // === Check if already transcribed ===
+    if (audioFile.transkrip) {
+      return res.json({
+        success: true,
+        message: "Audio sudah memiliki transkrip",
+        data: {
+          audioId: audioId,
+          transkrip: audioFile.transkrip,
+        },
+      });
+    }
 
-    const response = await axios.get(audioUrl, {
-      responseType: "arraybuffer",
-    });
+    let tempFilePath = null;
 
-    const audioBuffer = Buffer.from(response.data);
+    try {
+      // === Extract filename from file path ===
+      const filename = audioFile.file_path.split("/").pop();
+      console.log(`Processing audio file: ${filename}`);
 
-    // Extract filename from file_path dan buat temporary file
-    const filename = path.basename(audioFile.file_path);
-    const tempFilePath = path.join(os.tmpdir(), filename);
+      // === Create temp file path ===
+      tempFilePath = path.join(os.tmpdir(), filename);
+      console.log(`Temp file path: ${tempFilePath}`);
 
-    // Simpan buffer ke temporary file
-    await fs.promises.writeFile(tempFilePath, audioBuffer);
+      // === Download audio from Minio ===
+      await downloadAudio(mc, filename, tempFilePath);
+      console.log(`Audio downloaded successfully`);
 
-    // Gunakan file untuk transcription
-    const transcription = await openai.audio.transcriptions.create({
-      file: fs.createReadStream(tempFilePath),
-      model: "whisper-1",
-      language: "id",
-      response_format: "text",
-    });
+      // === Verify temp file exists ===
+      if (!fs.existsSync(tempFilePath)) {
+        throw new Error("File audio tidak berhasil didownload");
+      }
 
-    // Cleanup temporary file after transcription
-    await fs.promises.unlink(tempFilePath);
+      // === Create readable stream for OpenAI ===
+      const audioStream = fs.createReadStream(tempFilePath);
 
-    // === Save transkrip to database ===
-    await VerbatimAudioFiles.query().where("id", audioId).patch({
-      transkrip: transcription,
-    });
+      // === Transcribe audio with OpenAI Whisper ===
+      console.log(`Starting transcription with OpenAI Whisper...`);
+      const transcription = await openai.audio.transcriptions.create({
+        file: audioStream,
+        model: "whisper-1",
+        language: "id",
+        response_format: "text",
+      });
 
-    res.json({
-      success: true,
-      message: "Berhasil transribe audio",
-    });
+      console.log(`Transcription completed successfully`);
+
+      // === Save transkrip to database ===
+      await VerbatimAudioFiles.query().where("id", audioId).patch({
+        transkrip: transcription,
+      });
+
+      console.log(`Transkrip saved to database for audioId: ${audioId}`);
+
+      res.json({
+        success: true,
+        message: "Berhasil melakukan transkrip audio",
+        data: {
+          audioId: audioId,
+          transkrip: transcription,
+        },
+      });
+    } finally {
+      // === Cleanup temp file ===
+      if (tempFilePath) {
+        removeTempFile(tempFilePath);
+        console.log(`Temp file cleaned up: ${tempFilePath}`);
+      }
+    }
   } catch (error) {
     handleError(res, error);
   }
@@ -470,60 +514,208 @@ export const transribeAudioVerbatim = async (req, res) => {
 
 export const textToJson = async (req, res) => {
   try {
-    const { id, audioId } = req.query;
+    const { audioId } = req.query;
 
+    // === Validasi parameter ===
+    if (!audioId) {
+      return res.status(400).json({
+        success: false,
+        message: "Parameter audioId diperlukan",
+      });
+    }
+
+    console.log(`Processing text to JSON for audioId: ${audioId}`);
+
+    // === Ambil data audio file ===
     const audioFile = await VerbatimAudioFiles.query()
       .where("id", audioId)
       .first();
 
-    // Step 4: Strukturkan menjadi JSON dialog dengan GPT
+    if (!audioFile) {
+      return res.status(404).json({
+        success: false,
+        message: "Audio file tidak ditemukan",
+      });
+    }
+
+    // === Validasi transkrip tersedia ===
+    if (!audioFile.transkrip || audioFile.transkrip.trim() === "") {
+      return res.status(400).json({
+        success: false,
+        message:
+          "Transkrip belum tersedia. Silakan lakukan transkrip terlebih dahulu",
+      });
+    }
+
+    // === Cek apakah JSON transkrip sudah ada ===
+    if (audioFile.json_transkrip) {
+      return res.status(400).json({
+        success: false,
+        message: "JSON transkrip sudah tersedia untuk audio file ini",
+      });
+    }
+
+    console.log(`Converting transcript to JSON dialog format...`);
+
+    // === Buat prompt GPT untuk strukturisasi dialog ===
     const gptPrompt = `
 Berikut adalah hasil transkrip wawancara antara asesor dan asesi (tanpa nama pembicara).
 Tugasmu: ubah teks ini menjadi array JSON dengan properti:
-- "index": nomor urut
-- "role": "asesor" atau "asesi"
-- "text": isi kalimat asli
+- "index": nomor urut dimulai dari 1
+- "role": "asesor" atau "asesi" 
+- "text": isi kalimat asli (jangan diubah) berikan tanda baca yang benar
 
-Asumsikan:
-- Asesor memulai, bertanya, mengarahkan
-- Asesi menjawab, menceritakan, menjelaskan
+Aturan identifikasi pembicara:
+- Asesor: biasanya bertanya, mengarahkan, memberikan instruksi, memulai topik
+- Asesi: biasanya menjawab, menceritakan pengalaman, menjelaskan situasi
 
-Format output JSON:
+Format output harus berupa array JSON yang valid:
 [
   { "index": 1, "role": "asesor", "text": "..." },
   { "index": 2, "role": "asesi", "text": "..." }
 ]
 
-Jangan ubah isi kalimat. Berikut transkripnya:
+PENTING: 
+- Jangan mengubah isi kalimat sama sekali
+- Pastikan output adalah JSON array yang valid
+- Jika tidak yakin siapa pembicara, prioritaskan konteks percakapan
+
+Transkrip:
 """${audioFile.transkrip}"""
 `;
 
+    const gpt4oPrompt = `
+
+    Anda adalah asisten pelabel teks wawancara antara asesor dan asesi. Tugas Anda adalah memecah teks menjadi array JSON berisi giliran percakapan.
+
+### Format output yang harus Anda berikan:
+[
+  { "index": 1, "role": "asesor", "text": "..." },
+  { "index": 2, "role": "asesi", "text": "..." },
+  ...
+]
+
+### Tujuan:
+Membagi transkrip ke dalam bagian-bagian sesuai giliran bicara antara asesor dan asesi secara akurat.
+
+### Aturan penting:
+1. Hanya gunakan dua peran: "asesor" dan "asesi".
+2. Gunakan "index" untuk menandai urutan kalimat secara numerik dimulai dari 1.
+3. Jangan hilangkan atau ubah kata-kata, hanya perbaiki ejaan jika salah secara ejaan umum, contoh:
+   - "belio" → "beliau"
+   - "gini" → "begini"
+   - "mbak", "pak", tetap ditulis sesuai gaya bicaranya.
+4. **Jangan pernah menyatukan pertanyaan dan jawaban dalam satu blok.** Pertanyaan selalu milik asesor, jawabannya milik asesi.
+
+### Aturan menentukan giliran bicara:
+- Jika kalimat mengandung kata tanya seperti: **"apa", "apakah", "kenapa", "mengapa", "bagaimana", "kapan", "dimana", "siapa", "itu maksudnya?", "itu bagaimana?", "atau pernah?", "iya?"**, maka kemungkinan besar itu milik **asesor** (karena bersifat menggali informasi).
+- Kalimat seperti **"iya", "tidak", "pernah"**, jika diikuti penjelasan, tetap dianggap **satu giliran bicara asesi**.
+- Kalimat seperti **"coba jelaskan", "menurut ibu", "ceritakan", "apa bisa dijelaskan", "itu bagaimana menurut ibu?"** juga milik **asesor**.
+- Jika terjadi dialog cepat seperti ini:
+  - asesor: "Dulu ya?"
+  - asesi: "Iya, tapi sekarang sudah lancar."
+- Maka tetap pisahkan berdasarkan konteks dan fungsi kalimat.
+- Kalimat informal, seperti klarifikasi pendek (misalnya: "gitu ya?", "begitu?", "sering?", "tidak ya?") umumnya milik **asesor**.
+
+### Koreksi ringan:
+- Perbaiki ejaan sesuai KBBI jika diperlukan (contoh: "belio" → "beliau", "gini" → "begini", "nggak" → "tidak", "udah" → "sudah").
+- Tapi jangan ubah gaya bahasa, pertahankan gaya tutur informal aslinya jika tidak memengaruhi makna.
+
+### Contoh input:
+"Langsung secara lisan. Belum mengumpulkan? Iya. Tapi kan malu akhirnya. Kalau di lisan malu yang belum. Dulu ya? Tapi sekarang sudah lancar."
+
+### Contoh output yang diharapkan:
+[
+  { "index": 1, "role": "asesi", "text": "Langsung secara lisan." },
+  { "index": 2, "role": "asesor", "text": "Belum mengumpulkan?" },
+  { "index": 3, "role": "asesi", "text": "Tapi kan malu akhirnya. Kalau di lisan malu yang belum." },
+  { "index": 4, "role": "asesor", "text": "Dulu ya?" },
+  { "index": 5, "role": "asesi", "text": "Tapi sekarang sudah lancar." }
+]
+
+Sekarang, lakukan hal yang sama untuk teks berikut:
+
+"""
+
+${audioFile.transkrip}
+"""
+
+
+    
+        `.trim();
+
+    // === Panggil OpenAI GPT untuk strukturisasi ===
     const completion = await openai.chat.completions.create({
-      model: "gpt-4",
+      model: "gpt-4o",
       messages: [
         {
           role: "system",
-          content: "Kamu adalah sistem anotator percakapan wawancara.",
+          content:
+            "Kamu adalah sistem anotator dialog wawancara yang mengubah transkrip menjadi format JSON terstruktur. Selalu berikan output JSON yang valid.",
         },
-        { role: "user", content: gptPrompt },
+        { role: "user", content: gpt4oPrompt },
       ],
-      temperature: 0.2,
+      temperature: 0.1, // Lebih rendah untuk konsistensi
+      max_tokens: 4000,
     });
 
-    const rawJson = completion.choices[0].message.content;
-    const cleaned = rawJson
+    // === Ekstrak dan bersihkan response JSON ===
+    let rawJson = completion.choices[0].message.content;
+
+    // Hapus markdown code blocks jika ada
+    const cleanedJson = rawJson
       .replace(/^```json\n?/, "")
       .replace(/^```/, "")
       .replace(/```$/, "")
       .trim();
 
+    // === Validasi JSON format ===
+    try {
+      const parsedJson = JSON.parse(cleanedJson);
+
+      // Validasi struktur JSON
+      if (!Array.isArray(parsedJson)) {
+        throw new Error("Output bukan berupa array");
+      }
+
+      // Validasi setiap item dalam array
+      parsedJson.forEach((item, idx) => {
+        if (!item.index || !item.role || !item.text) {
+          throw new Error(
+            `Item ke-${idx + 1} tidak memiliki properti yang lengkap`
+          );
+        }
+
+        if (!["asesor", "asesi"].includes(item.role)) {
+          throw new Error(
+            `Role tidak valid pada item ke-${idx + 1}: ${item.role}`
+          );
+        }
+      });
+
+      console.log(
+        `JSON validation passed. Generated ${parsedJson.length} dialog entries`
+      );
+    } catch (parseError) {
+      console.error("JSON validation failed:", parseError.message);
+      throw new Error(`Format JSON tidak valid: ${parseError.message}`);
+    }
+
+    // === Simpan JSON transkrip ke database ===
     await VerbatimAudioFiles.query().where("id", audioId).patch({
-      json_transkrip: cleaned,
+      json_transkrip: cleanedJson,
     });
 
+    console.log(`JSON transcript saved successfully for audioId: ${audioId}`);
+
+    // === Return success response ===
     res.json({
       success: true,
-      message: "Berhasil mengubah teks menjadi JSON",
+      message: "Berhasil mengubah transkrip menjadi format JSON dialog",
+      data: {
+        audioId: audioId,
+        dialogCount: JSON.parse(cleanedJson).length,
+      },
     });
   } catch (error) {
     handleError(res, error);
