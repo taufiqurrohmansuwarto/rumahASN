@@ -2,7 +2,7 @@
 import VerbatimSessions from "@/models/verbatim-ai/verbatim-sessions.model";
 import VerbatimAudioFiles from "@/models/verbatim-ai/verbatim-audio-files.model";
 import { handleError } from "@/utils/helper/controller-helper";
-import { uploadFileMinio } from "@/utils/index";
+import { uploadFileMinio, uploadFileMinioFput } from "@/utils/index";
 import OpenAI from "openai";
 import axios from "axios";
 
@@ -19,7 +19,88 @@ const path = require("path");
 
 // === Constants ===
 const MAX_DURATION_SECONDS = 3600; // 1 jam
-const CHUNK_DURATION_SECONDS = 1800; // 30 menit
+const CHUNK_DURATION_SECONDS = 600; // 10 menit (reduced to create smaller chunks)
+const MAX_CONCURRENT_OPERATIONS = 1; // Force sequential processing
+
+/**
+ * Rate limiting function to prevent too many requests
+ * @param {number} delayMs - Delay in milliseconds
+ */
+const rateLimitDelay = async (delayMs) => {
+  console.log(
+    `Rate limiting: waiting ${delayMs}ms to prevent request overload...`
+  );
+  await new Promise((resolve) => setTimeout(resolve, delayMs));
+};
+
+/**
+ * Check if a chunk file was already uploaded to Minio
+ * @param {string} sessionId - Session ID
+ * @param {number} partNumber - Part number of the chunk
+ * @returns {Promise<boolean>} True if already exists in database
+ */
+const checkExistingChunkInDB = async (sessionId, partNumber) => {
+  try {
+    const existingChunk = await VerbatimAudioFiles.query()
+      .where("session_id", sessionId)
+      .where("part_number", partNumber)
+      .first();
+
+    return !!existingChunk;
+  } catch (error) {
+    console.error(`Error checking existing chunk: ${error.message}`);
+    return false;
+  }
+};
+
+/**
+ * Check for existing temp chunk files from previous failed attempts
+ * @param {string} sessionId - Session ID
+ * @returns {Array} Array of existing chunk file info
+ */
+const checkExistingTempChunks = (sessionId) => {
+  try {
+    const tempDir = os.tmpdir();
+    const files = fs.readdirSync(tempDir);
+    const existingChunks = [];
+
+    files.forEach((file) => {
+      if (file.startsWith(`${sessionId}_part`) && file.endsWith(".mp3")) {
+        const filePath = path.join(tempDir, file);
+        const stats = fs.statSync(filePath);
+
+        if (stats.size > 0) {
+          // Extract part number from filename
+          const match = file.match(/_part(\d+)\.mp3$/);
+          if (match) {
+            const partNumber = parseInt(match[1]);
+            existingChunks.push({
+              filename: file,
+              path: filePath,
+              partNumber: partNumber,
+              size: stats.size,
+            });
+          }
+        } else {
+          // Remove empty files
+          console.log(`Removing empty temp file: ${file}`);
+          removeTempFile(filePath);
+        }
+      }
+    });
+
+    if (existingChunks.length > 0) {
+      console.log(
+        `Found ${existingChunks.length} existing temp chunk files for session ${sessionId}`
+      );
+    }
+
+    return existingChunks.sort((a, b) => a.partNumber - b.partNumber);
+  } catch (error) {
+    console.error(`Error checking existing temp chunks: ${error.message}`);
+    return [];
+  }
+};
 
 /**
  * Generates unique filename with audio prefix and random ID
@@ -111,63 +192,211 @@ const removeTempFile = (filePath) => {
 
 /**
  * Uploads chunk files to Minio storage and cleans up temp files
+ * Processes chunks sequentially to avoid resource conflicts
  * @param {Object} mc - Minio client
  * @param {Array} chunkFiles - Array of chunk file info
+ * @param {string} sessionId - Session ID to check for existing chunks
  * @returns {Promise<Array>} Array of uploaded file info
  */
-const uploadChunksToMinio = async (mc, chunkFiles) => {
-  const uploadPromises = chunkFiles.map(async (chunk) => {
-    try {
-      const fileBuffer = fs.readFileSync(chunk.path);
-      const filePath = `/public/${chunk.filename}`;
+const uploadChunksToMinio = async (mc, chunkFiles, sessionId = null) => {
+  const uploadedChunks = [];
 
-      await uploadFileMinio(
-        mc,
-        fileBuffer,
-        chunk.filename,
-        fileBuffer.length,
-        "audio/mpeg" // MP3 mime type
+  // Process chunks sequentially to avoid timeout/lock issues
+  for (let i = 0; i < chunkFiles.length; i++) {
+    const chunk = chunkFiles[i];
+    let retryCount = 0;
+    const maxRetries = 3;
+
+    // Check if chunk already exists in database (skip upload)
+    if (sessionId) {
+      const chunkExists = await checkExistingChunkInDB(
+        sessionId,
+        chunk.partNumber
       );
-
-      // Clean up temp file immediately after successful upload
-      removeTempFile(chunk.path);
-      console.log(`Uploaded and cleaned up chunk: ${chunk.filename}`);
-
-      return {
-        ...chunk,
-        filePath,
-        uploaded: true,
-      };
-    } catch (error) {
-      console.error(`Failed to upload chunk ${chunk.filename}:`, error);
-      // Clean up temp file even on error
-      removeTempFile(chunk.path);
-      throw new Error(
-        `Upload failed for chunk ${chunk.filename}: ${error.message}`
-      );
+      if (chunkExists) {
+        console.log(
+          `Chunk ${chunk.filename} already exists in database, skipping upload...`
+        );
+        uploadedChunks.push({
+          ...chunk,
+          filePath: `/public/${chunk.filename}`,
+          uploaded: true,
+          skipped: true,
+        });
+        // Clean up temp file since we don't need it
+        removeTempFile(chunk.path);
+        continue;
+      }
     }
-  });
 
-  return Promise.all(uploadPromises);
+    while (retryCount < maxRetries) {
+      try {
+        console.log(
+          `Uploading chunk ${i + 1}/${chunkFiles.length}: ${chunk.filename}`
+        );
+
+        // Check if file exists in temp location
+        if (!fs.existsSync(chunk.path)) {
+          throw new Error(`Chunk file not found at ${chunk.path}`);
+        }
+
+        const fileStats = fs.statSync(chunk.path);
+        if (fileStats.size === 0) {
+          throw new Error(`Chunk file is empty: ${chunk.filename}`);
+        }
+
+        console.log(
+          `Processing chunk file: ${chunk.filename} (${fileStats.size} bytes)`
+        );
+
+        const fileBuffer = fs.readFileSync(chunk.path);
+        const filePath = `/public/${chunk.filename}`;
+
+        // Use sequential upload to prevent rate limiting
+        await uploadFileMinio(
+          mc,
+          fileBuffer,
+          chunk.filename,
+          fileBuffer.length,
+          "audio/mpeg" // MP3 mime type
+        );
+
+        // Clean up temp file immediately after successful upload
+        removeTempFile(chunk.path);
+        console.log(`Uploaded and cleaned up chunk: ${chunk.filename}`);
+
+        uploadedChunks.push({
+          ...chunk,
+          filePath,
+          uploaded: true,
+        });
+
+        // Progressive delay between uploads to prevent rate limiting
+        if (i < chunkFiles.length - 1) {
+          // Progressive delay: increases with each chunk (3s, 4s, 5s, etc.)
+          const progressiveDelay = 3000 + i * 1000;
+          await rateLimitDelay(progressiveDelay);
+        }
+
+        break; // Success, exit retry loop
+      } catch (error) {
+        retryCount++;
+        console.error(
+          `Failed to upload chunk ${chunk.filename} (attempt ${retryCount}/${maxRetries}):`,
+          error
+        );
+
+        if (retryCount >= maxRetries) {
+          // Clean up temp file even on final error
+          removeTempFile(chunk.path);
+          throw new Error(
+            `Upload failed for chunk ${chunk.filename} after ${maxRetries} attempts: ${error.message}`
+          );
+        }
+
+        // Wait before retry with exponential backoff (increased base)
+        const delay = Math.pow(2, retryCount) * 3000; // 6s, 12s, 24s
+        console.log(`Retrying upload in ${delay}ms...`);
+        await new Promise((resolve) => setTimeout(resolve, delay));
+      }
+    }
+  }
+
+  return uploadedChunks;
 };
 
 /**
  * Inserts audio file records to database
+ * Processes records sequentially to avoid database lock issues
  * @param {string} sessionId - Session ID
  * @param {Array} files - Array of file info
  * @returns {Promise<Array>} Array of inserted records
  */
 const insertAudioFilesToDB = async (sessionId, files) => {
-  const insertPromises = files.map(async (file) => {
-    return VerbatimAudioFiles.query().insert({
-      session_id: sessionId,
-      part_number: file.partNumber,
-      file_path: file.filePath || `/public/${file.filename}`,
-      durasi: Math.round(file.duration), // Round to nearest second
-    });
-  });
+  const insertedRecords = [];
 
-  return Promise.all(insertPromises);
+  // Process database inserts sequentially to avoid lock timeout
+  for (let i = 0; i < files.length; i++) {
+    const file = files[i];
+    let retryCount = 0;
+    const maxRetries = 3;
+
+    // Skip files that were already uploaded and exist in database
+    if (file.skipped) {
+      console.log(
+        `Skipping database insert for part ${file.partNumber} - already exists`
+      );
+      // Get existing record
+      const existingRecord = await VerbatimAudioFiles.query()
+        .where("session_id", sessionId)
+        .where("part_number", file.partNumber)
+        .first();
+
+      if (existingRecord) {
+        insertedRecords.push(existingRecord);
+      }
+      continue;
+    }
+
+    while (retryCount < maxRetries) {
+      try {
+        console.log(
+          `Inserting database record ${i + 1}/${files.length} for part ${
+            file.partNumber
+          }`
+        );
+
+        // Check if record already exists before inserting
+        const existingRecord = await VerbatimAudioFiles.query()
+          .where("session_id", sessionId)
+          .where("part_number", file.partNumber)
+          .first();
+
+        if (existingRecord) {
+          console.log(
+            `Database record for part ${file.partNumber} already exists, using existing record`
+          );
+          insertedRecords.push(existingRecord);
+        } else {
+          const record = await VerbatimAudioFiles.query().insert({
+            session_id: sessionId,
+            part_number: file.partNumber,
+            file_path: file.filePath || `/public/${file.filename}`,
+            durasi: Math.round(file.duration), // Round to nearest second
+          });
+          insertedRecords.push(record);
+        }
+
+        // Progressive delay between database inserts to prevent lock conflicts
+        if (i < files.length - 1) {
+          // Progressive delay: increases with each insert (2s, 3s, 4s, etc.)
+          const progressiveDelay = 2000 + i * 1000;
+          await rateLimitDelay(progressiveDelay);
+        }
+
+        break; // Success, exit retry loop
+      } catch (error) {
+        retryCount++;
+        console.error(
+          `Failed to insert database record for part ${file.partNumber} (attempt ${retryCount}/${maxRetries}):`,
+          error
+        );
+
+        if (retryCount >= maxRetries) {
+          throw new Error(
+            `Database insert failed for part ${file.partNumber} after ${maxRetries} attempts: ${error.message}`
+          );
+        }
+
+        // Wait before retry with exponential backoff (increased base)
+        const delay = Math.pow(2, retryCount) * 2000; // 4s, 8s, 16s
+        console.log(`Retrying database insert in ${delay}ms...`);
+        await new Promise((resolve) => setTimeout(resolve, delay));
+      }
+    }
+  }
+
+  return insertedRecords;
 };
 
 /**
@@ -181,59 +410,138 @@ const calculateChunksNeeded = (totalDuration) => {
 
 /**
  * Splits audio file into chunks using ffmpeg
+ * Processes chunks sequentially to avoid resource conflicts
  * @param {string} inputPath - Input audio file path
- * @param {string} baseFilename - Base filename without extension
+ * @param {string} sessionId - Session ID for consistent naming
  * @param {string} fileExtension - File extension
  * @param {number} totalDuration - Total duration in seconds
  * @returns {Promise<Array>} Array of chunk file paths
  */
-const splitAudioIntoChunks = (
+const splitAudioIntoChunks = async (
   inputPath,
-  baseFilename,
+  sessionId,
   fileExtension,
   totalDuration
 ) => {
-  return new Promise((resolve, reject) => {
-    const chunksNeeded = calculateChunksNeeded(totalDuration);
-    const chunkFiles = [];
-    let processedChunks = 0;
+  const chunksNeeded = calculateChunksNeeded(totalDuration);
+  const chunkFiles = [];
 
-    for (let i = 0; i < chunksNeeded; i++) {
-      const startTime = i * CHUNK_DURATION_SECONDS;
-      const chunkFilename = `${baseFilename}_part${i + 1}.mp3`; // Always MP3
-      const chunkPath = path.join(os.tmpdir(), chunkFilename);
+  // Process chunks sequentially to avoid resource conflicts
+  for (let i = 0; i < chunksNeeded; i++) {
+    const startTime = i * CHUNK_DURATION_SECONDS;
+    const chunkFilename = `${sessionId}_part${i + 1}.mp3`; // Session-based naming
+    const chunkPath = path.join(os.tmpdir(), chunkFilename);
 
-      chunkFiles.push({
-        filename: chunkFilename,
-        path: chunkPath,
-        partNumber: i + 1,
-        startTime: startTime,
-        duration: Math.min(CHUNK_DURATION_SECONDS, totalDuration - startTime),
-      });
+    const chunkInfo = {
+      filename: chunkFilename,
+      path: chunkPath,
+      partNumber: i + 1,
+      startTime: startTime,
+      duration: Math.min(CHUNK_DURATION_SECONDS, totalDuration - startTime),
+    };
 
-      ffmpeg(inputPath)
-        .seekInput(startTime)
-        .duration(Math.min(CHUNK_DURATION_SECONDS, totalDuration - startTime))
-        .toFormat("mp3")
-        .audioCodec("libmp3lame")
-        .audioBitrate(128)
-        .output(chunkPath)
-        .on("end", () => {
-          processedChunks++;
-          if (processedChunks === chunksNeeded) {
-            resolve(chunkFiles);
+    let retryCount = 0;
+    const maxRetries = 3;
+
+    while (retryCount < maxRetries) {
+      try {
+        console.log(
+          `Processing chunk ${i + 1}/${chunksNeeded}: ${chunkFilename}`
+        );
+
+        // Check if chunk already exists from previous failed attempt
+        if (fs.existsSync(chunkPath)) {
+          console.log(
+            `Found existing chunk file: ${chunkFilename}, using it...`
+          );
+          const existingSize = fs.statSync(chunkPath).size;
+          if (existingSize > 0) {
+            console.log(
+              `Using existing chunk: ${chunkFilename} (${existingSize} bytes)`
+            );
+            chunkFiles.push(chunkInfo);
+            break; // Use existing file, skip to next chunk
+          } else {
+            console.log(
+              `Existing chunk file is empty, removing and recreating...`
+            );
+            removeTempFile(chunkPath);
           }
-        })
-        .on("error", (error) => {
-          // Cleanup any created files on error
+        }
+
+        await new Promise((resolve, reject) => {
+          ffmpeg(inputPath)
+            .seekInput(startTime)
+            .duration(
+              Math.min(CHUNK_DURATION_SECONDS, totalDuration - startTime)
+            )
+            .toFormat("mp3")
+            .audioCodec("libmp3lame")
+            .audioBitrate(128)
+            .output(chunkPath)
+            .on("end", () => {
+              console.log(`Successfully created chunk: ${chunkFilename}`);
+              resolve();
+            })
+            .on("error", (error) => {
+              reject(
+                new Error(
+                  `Failed to create chunk ${chunkFilename}: ${error.message}`
+                )
+              );
+            })
+            .run();
+        });
+
+        chunkFiles.push(chunkInfo);
+
+        // Progressive delay between chunk processing to prevent resource conflicts
+        if (i < chunksNeeded - 1) {
+          // Progressive delay: increases with each chunk (2s, 3s, 4s, etc.)
+          const progressiveDelay = 2000 + i * 1000;
+          await rateLimitDelay(progressiveDelay);
+        }
+
+        break; // Success, exit retry loop
+      } catch (error) {
+        retryCount++;
+        console.error(
+          `Failed to create chunk ${chunkFilename} (attempt ${retryCount}/${maxRetries}):`,
+          error
+        );
+
+        // Clean up failed chunk file only if it exists and is corrupted
+        if (fs.existsSync(chunkPath)) {
+          const fileSize = fs.statSync(chunkPath).size;
+          if (fileSize === 0) {
+            removeTempFile(chunkPath);
+          }
+        }
+
+        if (retryCount >= maxRetries) {
+          // Cleanup any created files on final error (but preserve existing valid ones)
           chunkFiles.forEach((chunk) => {
-            removeTempFile(chunk.path);
+            if (fs.existsSync(chunk.path)) {
+              const fileSize = fs.statSync(chunk.path).size;
+              if (fileSize === 0) {
+                removeTempFile(chunk.path);
+              }
+            }
           });
-          reject(new Error(`Failed to split audio: ${error.message}`));
-        })
-        .run();
+          throw new Error(
+            `Failed to split audio chunk ${chunkFilename} after ${maxRetries} attempts: ${error.message}`
+          );
+        }
+
+        // Wait before retry with exponential backoff (increased base)
+        const delay = Math.pow(2, retryCount) * 4000; // 8s, 16s, 32s
+        console.log(`Retrying chunk creation in ${delay}ms...`);
+        await new Promise((resolve) => setTimeout(resolve, delay));
+      }
     }
-  });
+  }
+
+  return chunkFiles;
 };
 
 /**
@@ -314,7 +622,7 @@ const processAudioFile = async (
 
     const chunkFiles = await splitAudioIntoChunks(
       mp3FilePath,
-      baseFilename,
+      sessionId, // Use session ID for consistent naming
       "mp3", // Always use mp3 extension
       duration
     );
@@ -324,7 +632,7 @@ const processAudioFile = async (
     // Upload chunks to Minio if mc client provided
     if (mc) {
       console.log(`Uploading ${chunkFiles.length} chunks to Minio...`);
-      uploadedChunks = await uploadChunksToMinio(mc, chunkFiles);
+      uploadedChunks = await uploadChunksToMinio(mc, chunkFiles, sessionId);
       console.log(
         `Successfully uploaded ${uploadedChunks.length} chunks to Minio`
       );
@@ -526,10 +834,15 @@ export const getRekamanVerbatim = async (req, res) => {
 
 export const splitAudioVerbatim = async (req, res) => {
   let tempFilePath = null;
+  const startTime = Date.now();
 
   try {
     const { id } = req.query;
     const { mc } = req; // Minio client from middleware
+
+    console.log(
+      `[${new Date().toISOString()}] Starting split process for session ${id}`
+    );
 
     // === Validate session ===
     const session = await VerbatimSessions.query().findById(id);
@@ -541,6 +854,10 @@ export const splitAudioVerbatim = async (req, res) => {
       });
     }
 
+    console.log(
+      `[${new Date().toISOString()}] Session validated: ${session.file_path}`
+    );
+
     // === Check if session is ready for splitting ===
     if (session.status !== "uploaded") {
       return res.status(400).json({
@@ -551,12 +868,29 @@ export const splitAudioVerbatim = async (req, res) => {
       });
     }
 
+    // === Prevent concurrent splitting on same session ===
+    const existingAudioFiles = await VerbatimAudioFiles.query()
+      .where("session_id", id)
+      .first();
+
+    if (existingAudioFiles) {
+      return res.status(400).json({
+        success: false,
+        message: "Session sudah memiliki audio files, tidak perlu split lagi",
+      });
+    }
+
     // === Update session status to processing ===
     await VerbatimSessions.query().findById(id).patch({
       status: "processing",
     });
 
-    console.log(`Starting audio split process for session ${id}...`);
+    console.log(
+      `[${new Date().toISOString()}] Session status updated to processing`
+    );
+
+    // === Initial rate limiting delay ===
+    await rateLimitDelay(2000); // 2 second initial delay
 
     // === Download audio file from Minio ===
     const audioUrl = `https://siasn.bkd.jatimprov.go.id:9000${session.file_path}`;
@@ -568,7 +902,7 @@ export const splitAudioVerbatim = async (req, res) => {
 
     const audioBuffer = Buffer.from(response.data);
     const originalFilename = path.basename(session.file_path);
-    const tempFileName = `${session.id}_${nanoid(10)}.mp3`;
+    const tempFileName = `${session?.id}.mp3`;
 
     tempFilePath = path.join(os.tmpdir(), tempFileName);
     await fs.promises.writeFile(tempFilePath, audioBuffer);
@@ -578,6 +912,17 @@ export const splitAudioVerbatim = async (req, res) => {
     // === Get audio duration ===
     const audioDurationSeconds = await getAudioDuration(tempFilePath);
     console.log(`Audio duration: ${audioDurationSeconds} seconds`);
+
+    // === Delay after audio analysis before splitting ===
+    await rateLimitDelay(1000); // 1 second delay
+
+    // === Check for existing temp chunks from previous failed attempts ===
+    const existingTempChunks = checkExistingTempChunks(id);
+    if (existingTempChunks.length > 0) {
+      console.log(
+        `Found ${existingTempChunks.length} existing temp chunks that can be reused`
+      );
+    }
 
     // === Check if splitting is actually needed ===
     if (audioDurationSeconds <= MAX_DURATION_SECONDS) {
@@ -613,20 +958,31 @@ export const splitAudioVerbatim = async (req, res) => {
       `Splitting audio into chunks (duration: ${audioDurationSeconds}s > max: ${MAX_DURATION_SECONDS}s)...`
     );
 
-    const baseFilename = originalFilename.split(".")[0];
     const chunkFiles = await splitAudioIntoChunks(
       tempFilePath,
-      baseFilename,
+      id, // Use session ID for consistent naming
       "mp3",
       audioDurationSeconds
     );
 
     console.log(`Audio split into ${chunkFiles.length} chunks`);
 
+    // === Delay between splitting and uploading ===
+    console.log(
+      "Waiting between splitting and uploading to prevent rate limiting..."
+    );
+    await new Promise((resolve) => setTimeout(resolve, 3000)); // 3 seconds delay
+
     // === Upload chunks to Minio ===
     console.log(`Uploading ${chunkFiles.length} chunks to Minio...`);
-    const uploadedChunks = await uploadChunksToMinio(mc, chunkFiles);
+    const uploadedChunks = await uploadChunksToMinio(mc, chunkFiles, id);
     console.log(`Successfully uploaded ${uploadedChunks.length} chunks`);
+
+    // === Larger delay before database operations ===
+    console.log(
+      "Waiting before database operations to prevent rate limiting..."
+    );
+    await new Promise((resolve) => setTimeout(resolve, 5000)); // Increased to 5 seconds
 
     // === Insert chunk records to database ===
     console.log(
@@ -634,6 +990,9 @@ export const splitAudioVerbatim = async (req, res) => {
     );
     await insertAudioFilesToDB(id, uploadedChunks);
     console.log(`Successfully inserted ${uploadedChunks.length} chunk records`);
+
+    // === Final delay before completing session ===
+    await rateLimitDelay(2000); // 2 second final delay
 
     // === Update session status to completed ===
     await VerbatimSessions.query().findById(id).patch({
@@ -645,7 +1004,12 @@ export const splitAudioVerbatim = async (req, res) => {
     removeTempFile(tempFilePath);
     tempFilePath = null;
 
-    console.log(`Audio split process completed for session ${id}`);
+    const totalTime = (Date.now() - startTime) / 1000;
+    console.log(
+      `[${new Date().toISOString()}] Audio split process completed for session ${id} in ${totalTime.toFixed(
+        2
+      )} seconds`
+    );
 
     // === Send success response ===
     res.json({
@@ -657,6 +1021,7 @@ export const splitAudioVerbatim = async (req, res) => {
         isSplit: true,
         totalFiles: uploadedChunks.length,
         chunkDurationSeconds: CHUNK_DURATION_SECONDS,
+        processingTimeSeconds: totalTime,
         files: uploadedChunks.map((chunk) => ({
           filename: chunk.filename,
           duration: chunk.duration,
@@ -667,6 +1032,14 @@ export const splitAudioVerbatim = async (req, res) => {
       },
     });
   } catch (error) {
+    const totalTime = (Date.now() - startTime) / 1000;
+    console.error(
+      `[${new Date().toISOString()}] Error in splitAudioVerbatim after ${totalTime.toFixed(
+        2
+      )} seconds:`,
+      error
+    );
+
     // === Cleanup on error ===
     if (tempFilePath) {
       removeTempFile(tempFilePath);
@@ -680,14 +1053,16 @@ export const splitAudioVerbatim = async (req, res) => {
           status: "uploaded", // Rollback to uploaded status
         });
         console.log(
-          `Rolled back session ${id} status to uploaded due to error`
+          `[${new Date().toISOString()}] Rolled back session ${id} status to uploaded due to error`
         );
       }
     } catch (rollbackError) {
-      console.error(`Failed to rollback session status:`, rollbackError);
+      console.error(
+        `[${new Date().toISOString()}] Failed to rollback session status:`,
+        rollbackError
+      );
     }
 
-    console.error("Error in splitAudioVerbatim:", error);
     handleError(res, error);
   }
 };
@@ -695,7 +1070,10 @@ export const splitAudioVerbatim = async (req, res) => {
 export const getAudioVerbatim = async (req, res) => {
   try {
     const { id } = req.query;
-    const result = await VerbatimAudioFiles.query().where("session_id", id);
+    const result = await VerbatimAudioFiles.query()
+      .where("session_id", id)
+      .orderBy("part_number", "asc");
+
     res.json(result);
   } catch (error) {
     handleError(res, error);
@@ -749,7 +1127,7 @@ export const transribeAudioVerbatim = async (req, res) => {
     // Gunakan temporary file untuk transcription
     const transcription = await openai.audio.transcriptions.create({
       file: fs.createReadStream(tempFilePath),
-      model: "gpt-4o-mini-transcribe",
+      model: "whisper-1",
       language: "id",
       response_format: "text",
     });
