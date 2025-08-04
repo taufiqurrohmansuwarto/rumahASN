@@ -5,6 +5,6 @@ import { createRouter } from "next-connect";
 
 const router = createRouter();
 
-router.use(auth).use(adminMiddleware).get(splitAudioVerbatim);
+router.use(auth).use(adminMiddleware).post(splitAudioVerbatim);
 
 export default router.handler({});

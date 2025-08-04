@@ -15,6 +15,10 @@ export const uploadRekamanVerbatim = async (payload) => {
     .then((res) => res.data);
 };
 
+export const splitAudioVerbatim = async (id) => {
+  return api.post(`/verbatim/${id}/split`).then((res) => res.data);
+};
+
 export const getRekamanVerbatim = async () => {
   return api.get("/verbatim").then((res) => res.data);
 };
