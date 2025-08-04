@@ -1,18 +1,23 @@
 import { Button, DatePicker, Form, Input, Upload, message } from "antd";
 import { IconUpload } from "@tabler/icons-react";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { uploadRekamanVerbatim } from "@/services/assesor-ai.services";
 
 function UploadVerbatim() {
+  const queryClient = useQueryClient();
   const [form] = Form.useForm();
 
   const { mutate, isLoading } = useMutation({
     mutationFn: uploadRekamanVerbatim,
     onSuccess: (data) => {
       message.success("Berhasil mengupload rekaman");
+      queryClient.invalidateQueries({ queryKey: ["get-rekaman-verbatim"] });
     },
     onError: (error) => {
       message.error("Gagal mengupload rekaman");
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ["get-rekaman-verbatim"] });
     },
   });
 
