@@ -585,60 +585,44 @@ Transkrip:
 `;
 
     const gpt4oPrompt = `
+Anda adalah asisten yang bertugas mengubah transkrip wawancara antara asesor dan asesi ke dalam format JSON percakapan seperti ini:
 
-    Anda adalah asisten pelabel teks wawancara antara asesor dan asesi. Tugas Anda adalah memecah teks menjadi array JSON berisi giliran percakapan.
-
-### Format output yang harus Anda berikan:
 [
   { "index": 1, "role": "asesor", "text": "..." },
-  { "index": 2, "role": "asesi", "text": "..." },
-  ...
+  { "index": 2, "role": "asesi", "text": "..." }
 ]
 
-### Tujuan:
-Membagi transkrip ke dalam bagian-bagian sesuai giliran bicara antara asesor dan asesi secara akurat.
+### Instruksi Utama:
+1. Pisahkan transkrip menjadi giliran bicara berdasarkan struktur percakapan.
+2. Gabungkan beberapa kalimat yang masih dalam satu giliran ke dalam satu objek JSON.
+3. **Semua kalimat pertanyaan wajib dianggap sebagai milik asesor.** Tidak perlu melihat konteks refleksi atau cerita pribadi.
+4. Semua tanggapan, penjelasan, cerita, keluhan, pengalaman, maupun pembelaan dianggap milik asesi.
+5. Nomori setiap percakapan menggunakan "index" yang berurutan, dimulai dari 1.
+6. Koreksi ejaan atau kata yang tidak baku agar sesuai dengan Ejaan KBBI (misal: "belio" → "beliau", "pegawaian" → "kepegawaian").
+7. Output hanya boleh berupa array JSON yang valid, **tanpa teks lain** di luar array tersebut.
+8. Role pembicara hanya boleh berupa string: "asesor" atau "asesi".
+9. Jika dalam satu giliran terdapat campuran kalimat pernyataan dan pertanyaan, maka pisahkan menjadi dua giliran:
+   - Kalimat pernyataan tetap sebagai milik pembicara sebelumnya (biasanya asesi).
+   - Kalimat pertanyaan **wajib dibuat giliran baru** dan diberi role "asesor", meskipun terlihat seperti lanjutan pembicaraan.
 
-### Aturan penting:
-1. Hanya gunakan dua peran: "asesor" dan "asesi".
-2. Gunakan "index" untuk menandai urutan kalimat secara numerik dimulai dari 1.
-3. Jangan hilangkan atau ubah kata-kata, hanya perbaiki ejaan jika salah secara ejaan umum, contoh:
-   - "belio" → "beliau"
-   - "gini" → "begini"
-   - "mbak", "pak", tetap ditulis sesuai gaya bicaranya.
-4. **Jangan pernah menyatukan pertanyaan dan jawaban dalam satu blok.** Pertanyaan selalu milik asesor, jawabannya milik asesi.
+Aturan identifikasi pembicara:
+- Asesor: biasanya bertanya, mengarahkan, memberikan instruksi, memulai topik
+- Asesi: biasanya menjawab, menceritakan pengalaman, menjelaskan situasi
 
-### Aturan menentukan giliran bicara:
-- Jika kalimat mengandung kata tanya seperti: **"apa", "apakah", "kenapa", "mengapa", "bagaimana", "kapan", "dimana", "siapa", "itu maksudnya?", "itu bagaimana?", "atau pernah?", "iya?"**, maka kemungkinan besar itu milik **asesor** (karena bersifat menggali informasi).
-- Kalimat seperti **"iya", "tidak", "pernah"**, jika diikuti penjelasan, tetap dianggap **satu giliran bicara asesi**.
-- Kalimat seperti **"coba jelaskan", "menurut ibu", "ceritakan", "apa bisa dijelaskan", "itu bagaimana menurut ibu?"** juga milik **asesor**.
-- Jika terjadi dialog cepat seperti ini:
-  - asesor: "Dulu ya?"
-  - asesi: "Iya, tapi sekarang sudah lancar."
-- Maka tetap pisahkan berdasarkan konteks dan fungsi kalimat.
-- Kalimat informal, seperti klarifikasi pendek (misalnya: "gitu ya?", "begitu?", "sering?", "tidak ya?") umumnya milik **asesor**.
-
-### Koreksi ringan:
-- Perbaiki ejaan sesuai KBBI jika diperlukan (contoh: "belio" → "beliau", "gini" → "begini", "nggak" → "tidak", "udah" → "sudah").
-- Tapi jangan ubah gaya bahasa, pertahankan gaya tutur informal aslinya jika tidak memengaruhi makna.
-
-### Contoh input:
-"Langsung secara lisan. Belum mengumpulkan? Iya. Tapi kan malu akhirnya. Kalau di lisan malu yang belum. Dulu ya? Tapi sekarang sudah lancar."
-
-### Contoh output yang diharapkan:
+### Contoh:
 [
-  { "index": 1, "role": "asesi", "text": "Langsung secara lisan." },
-  { "index": 2, "role": "asesor", "text": "Belum mengumpulkan?" },
-  { "index": 3, "role": "asesi", "text": "Tapi kan malu akhirnya. Kalau di lisan malu yang belum." },
-  { "index": 4, "role": "asesor", "text": "Dulu ya?" },
-  { "index": 5, "role": "asesi", "text": "Tapi sekarang sudah lancar." }
+  { "index": 1, "role": "asesor", "text": "Bisa Ibu ceritakan tugas utama di unit kerja Ibu?" },
+  { "index": 2, "role": "asesi", "text": "Tugas utama saya menangani administrasi guru dan kepegawaian di sekolah." },
+  { "index": 3, "role": "asesor", "text": "Apa saja kendala yang Ibu alami selama menjalankan tugas itu?" },
+  { "index": 4, "role": "asesi", "text": "Kendalanya lebih ke waktu, karena sering tumpang tindih dengan pekerjaan lain." }
 ]
 
-Sekarang, lakukan hal yang sama untuk teks berikut:
+Berikut adalah transkrip yang perlu Anda ubah ke format tersebut:
 
 """
-
 ${audioFile.transkrip}
 """
+    
 
 
     
