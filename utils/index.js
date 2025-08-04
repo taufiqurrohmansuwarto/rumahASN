@@ -150,6 +150,18 @@ export const downloadDokumenSK = async (mc, filename) => {
   return stream;
 };
 
+export const downloadAudio = async (mc, filename, filepath) => {
+  return new Promise((resolve, reject) => {
+    mc.fGetObject("public", filename, filepath, function (err, dataStream) {
+      if (err) {
+        reject(err);
+      }
+      console.log("suksees");
+      resolve(dataStream);
+    });
+  });
+};
+
 export const searchAndDownloadFileSk = async (mc, nomorSurat) => {
   try {
     console.log(`Multi-pattern search for: ${nomorSurat}`);

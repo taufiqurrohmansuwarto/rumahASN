@@ -2,7 +2,7 @@
 import VerbatimSessions from "@/models/verbatim-ai/verbatim-sessions.model";
 import VerbatimAudioFiles from "@/models/verbatim-ai/verbatim-audio-files.model";
 import { handleError } from "@/utils/helper/controller-helper";
-import { uploadFileMinio } from "@/utils/index";
+import { downloadAudio, uploadFileMinio } from "@/utils/index";
 import OpenAI from "openai";
 import axios from "axios";
 import {
@@ -16,6 +16,8 @@ import {
   calculateChunksNeeded,
   uploadChunksToMinio,
 } from "@/utils/verbatim-ai.utils";
+
+const os = require("os");
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -237,18 +239,13 @@ export const splitAudioVerbatim = async (req, res) => {
     console.log(`Session status updated to processing`);
 
     // === Download audio file from Minio ===
-    const audioUrl = `https://siasn.bkd.jatimprov.go.id:9000${session.file_path}`;
-    console.log(`Downloading audio from: ${audioUrl}`);
+    console.log(`Downloading audio from: ${session.file_path}`);
+    const filename = session.file_path.split("/").pop();
 
-    const response = await axios.get(audioUrl, {
-      responseType: "arraybuffer",
-    });
-
-    const audioBuffer = Buffer.from(response.data);
     const tempFileName = `${session?.id}.mp3`;
 
     tempFilePath = path.join(os.tmpdir(), tempFileName);
-    await fs.promises.writeFile(tempFilePath, audioBuffer);
+    const audioStream = await downloadAudio(mc, filename, tempFilePath);
 
     console.log(`Audio downloaded and saved to temp file: ${tempFileName}`);
 

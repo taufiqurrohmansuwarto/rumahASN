@@ -2,7 +2,7 @@
 
 // === CommonJS Imports ===
 const { nanoid } = require("nanoid");
-const ffmpeg = require("fluent-ffmpeg");
+import ffmpeg from "fluent-ffmpeg";
 const fs = require("fs");
 const os = require("os");
 const path = require("path");
