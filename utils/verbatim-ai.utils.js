@@ -34,12 +34,12 @@ export const removeTempFile = (filePath) => {
 
 /**
  * Generates unique filename with audio prefix and random ID
- * Always returns MP3 format
- * @param {string} mimeType - File MIME type (ignored, always returns .mp3)
- * @returns {string} Generated filename with .mp3 extension
+ * Always returns OGG format
+ * @param {string} mimeType - File MIME type (ignored, always returns .ogg)
+ * @returns {string} Generated filename with .ogg extension
  */
 export const generateAudioFilename = (mimeType) => {
-  return `audio_${nanoid(10)}.mp3`;
+  return `audio_${nanoid(10)}.ogg`;
 };
 
 /**
@@ -88,9 +88,9 @@ export const calculateChunksNeeded = (totalDuration) => {
 };
 
 /**
- * Converts audio file to MP3 format using ffmpeg
+ * Converts audio file to OGG format using ffmpeg
  * @param {string} inputPath - Input file path
- * @param {string} outputFilename - Output MP3 filename
+ * @param {string} outputFilename - Output OGG filename
  * @returns {Promise<string>} Output file path
  */
 export const convertToMp3 = (inputPath, outputFilename) => {
@@ -98,15 +98,15 @@ export const convertToMp3 = (inputPath, outputFilename) => {
     const outputPath = path.join(os.tmpdir(), outputFilename);
 
     ffmpeg(inputPath)
-      .toFormat("mp3")
-      .audioCodec("libmp3lame")
-      .audioBitrate(128)
+      .toFormat("ogg")
+      .audioCodec("libvorbis")
+      .audioBitrate(64)
       .output(outputPath)
       .on("end", () => {
         resolve(outputPath);
       })
       .on("error", (error) => {
-        reject(new Error(`Failed to convert to MP3: ${error.message}`));
+        reject(new Error(`Failed to convert to OGG: ${error.message}`));
       })
       .run();
   });
@@ -131,7 +131,7 @@ export const splitAudioIntoChunks = async (
 
   for (let i = 0; i < chunksNeeded; i++) {
     const startTime = i * CHUNK_DURATION_SECONDS;
-    const chunkFilename = `${sessionId}_part${i + 1}.mp3`;
+    const chunkFilename = `${sessionId}_part${i + 1}.ogg`;
     const chunkPath = path.join(os.tmpdir(), chunkFilename);
 
     // Check if chunk already exists
@@ -158,9 +158,9 @@ export const splitAudioIntoChunks = async (
       ffmpeg(inputPath)
         .seekInput(startTime)
         .duration(Math.min(CHUNK_DURATION_SECONDS, totalDuration - startTime))
-        .toFormat("mp3")
-        .audioCodec("libmp3lame")
-        .audioBitrate(128)
+        .toFormat("ogg")
+        .audioCodec("libvorbis")
+        .audioBitrate(64)
         .output(chunkPath)
         .on("end", () => {
           console.log(`Created chunk: ${chunkFilename}`);
