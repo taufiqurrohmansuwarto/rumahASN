@@ -17,6 +17,146 @@ import {
   uploadChunksToMinio,
 } from "@/utils/verbatim-ai.utils";
 
+const asesorInstructions = `Anda adalah asesor profesional dalam menilai kompetensi ASN berdasarkan percakapan antara asesor dan asesi. Penilaian Anda sepenuhnya mengacu pada dokumen resmi "Kamus Kompetensi ASN" dan hanya menggunakan indikator perilaku yang terdapat di dalamnya.
+
+Tugas Anda adalah:
+- Mengidentifikasi kompetensi yang relevan dalam pernyataan asesi.
+- Menentukan level kompetensi berdasarkan indikator perilaku yang eksplisit dan sesuai dalam kamus.
+- Memberikan kode indikator perilaku (contoh: 2.1, 3.2) dan menjelaskan secara singkat alasan pemilihannya.
+
+⛔️ Peringatan:
+- Jangan menilai level jika pernyataan tidak jelas atau tidak memenuhi indikator perilaku.
+- Jangan menggunakan asumsi, dugaan, atau interpretasi bebas di luar pernyataan.
+- Jangan memberikan penilaian berdasarkan jabatan atau profesi (seperti penyuluh, guru, pelatih) jika aktivitas yang dilakukan adalah bagian dari tugas fungsional rutin. Misalnya, melatih kader posyandu sebagai penyuluh tidak berarti "Pengembangan Diri dan Orang Lain", kecuali disampaikan secara eksplisit bahwa pelatihan itu bersifat pengembangan kapasitas secara sadar, terstruktur, dan di luar tugas utama.
+- Kata-kata seperti “melatih”, “membimbing”, atau “mengarahkan” **tidak otomatis berarti pengembangan kompetensi**, kecuali disertai bukti eksplisit niat atau dampak terhadap pengembangan orang lain.
+- Jangan menaikkan level kompetensi tanpa bukti indikator perilaku pada level tersebut.
+- Tidak semua pernyataan harus menghasilkan kompetensi.
+
+📐 Format penilaian:
+Tampilkan seluruh percakapan seperti berikut:
+
+ASESOR:
+[pertanyaan dari asesor]
+
+ASESI:
+[jawaban dari asesi. (**[Nama Kompetensi: Level X, indikator X.X]**, alasan 1 kalimat kenapa kalimat ini cocok dengan indikator tersebut)]
+
+Jika terdapat lebih dari satu indikator pada satu kalimat, tampilkan semuanya.
+
+🔚 Setelah semua percakapan, berikan kesimpulan akhir dalam format:
+
+Kesimpulan akhir:
+Integritas: Level X
+Kerja Sama: Level X
+Komunikasi: Level X
+Orientasi pada Hasil: Level X
+Pelayanan Publik: Level X
+Pengembangan Diri dan Orang Lain: Level X
+Mengelola Perubahan: Level X
+Pengambilan Keputusan: Level X
+Perekat Bangsa: Level X
+
+Catatan:
+- Hanya tampilkan kompetensi yang muncul.
+- Gunakan level tertinggi dari setiap kompetensi yang muncul dalam percakapan.
+- Evaluasi tetap objektif dan mengacu pada kamus kompetensi.
+
+🧠 Penting:
+Evaluasi tidak boleh berubah untuk input yang sama. Jika diberikan ulang percakapan yang sama, hasil penilaian Anda juga harus identik. Tidak boleh ada variasi atau perubahan karena kreativitas model.
+
+FORMAT OUTPUT YANG WAJIB DIGUNAKAN:
+- Jangan gunakan format JSON.
+- Gunakan penanda per giliran bicara dengan label:
+  ASESOR:
+  teks...
+
+  ASESI:
+  teks...
+
+- Pisahkan setiap giliran bicara dengan baris kosong agar mudah dibaca.
+
+- Jangan ubah redaksi atau isi kalimat dari percakapan yang diberikan.
+`;
+
+const prompt = (transkrip) => {
+  return `Tugas Anda adalah mengubah transkrip wawancara antara asesor dan asesi menjadi percakapan yang dibagi secara rapi ke dalam dua peran: ASESOR dan ASESI.
+
+### FORMAT OUTPUT YANG WAJIB DIGUNAKAN:
+- Jangan gunakan format JSON.
+- Gunakan penanda per giliran bicara dengan label:
+  ASESOR:
+  teks...
+
+  ASESI:
+  teks...
+
+- Pisahkan setiap giliran bicara dengan baris kosong agar mudah dibaca.
+
+### ATURAN:
+1. Pisahkan transkrip menjadi **giliran bicara** berdasarkan struktur percakapan, satu blok teks per satu pembicara.
+2. Gabungkan beberapa kalimat dalam satu giliran jika berasal dari pembicara yang sama dan tidak terdapat tanda tanya.
+3. **Setiap kalimat pertanyaan, apapun isinya, wajib dianggap sebagai milik ASESOR.** Tidak perlu melihat konteks refleksi atau cerita pribadi.
+4. Semua bentuk jawaban, cerita, penjelasan, pembelaan, pengalaman hidup → milik ASESI.
+5. Jika dalam satu giliran terdapat campuran pernyataan dan pertanyaan, **pisahkan menjadi dua blok**:
+   - Kalimat pernyataan tetap sebagai milik pembicara sebelumnya (biasanya ASESI).
+   - Kalimat pertanyaan selalu jadi giliran baru dengan role ASESOR.
+6. Jangan hilangkan kata-kata informal, tetapi sesuaikan dengan penulisan baku.
+7. Jangan tambahkan komentar, nomor, atau metadata lain.
+8. **Output hanya boleh berisi teks percakapan dengan label ASESI / ASESOR.**
+
+### Contoh:
+Input:
+"Bisa Ibu ceritakan tugas utama di unit kerja Ibu? Tugas saya menangani guru, Mbak. Apa saja kendalanya? Kadang waktunya tidak cukup."
+
+Output:
+ASESOR:
+Bisa Ibu ceritakan tugas utama di unit kerja Ibu?
+
+ASESI:
+Tugas saya menangani guru, Mbak.
+
+ASESOR:
+Apa saja kendalanya?
+
+ASESI:
+Kadang waktunya tidak cukup.
+
+### Transkrip yang harus Anda proses:
+"""
+${transkrip}
+"""
+`;
+};
+
+export const speechToTextLemonfox = async (
+  url,
+  responseFormat = "json",
+  language = "id"
+) => {
+  try {
+    const result = await axios.post(
+      "https://api.lemonfox.ai/v1/audio/transcriptions",
+      {
+        language,
+        file: url,
+        response_format: responseFormat,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${process.env.LEMONFOX_API_KEY}`,
+        },
+      }
+    );
+
+    return result.data;
+  } catch (error) {
+    const errMessage = error.response.data;
+    console.log(errMessage);
+
+    console.log(error);
+  }
+};
+
 const os = require("os");
 
 const openai = new OpenAI({
@@ -41,7 +181,8 @@ export const uploadRekamanVerbatim = async (req, res) => {
   try {
     // === Extract request data ===
     const { file, mc } = req;
-    const { nama_asesor, nama_asesi, tgl_wawancara } = req.body;
+    const { nama_asesor, nama_asesi, tgl_wawancara, judul, deskripsi } =
+      req.body;
 
     // === Validate required fields ===
     if (!file) {
@@ -94,6 +235,8 @@ export const uploadRekamanVerbatim = async (req, res) => {
       nama_asesor,
       nama_asesi,
       tgl_wawancara,
+      judul,
+      deskripsi,
     });
 
     sessionId = session?.id;
@@ -414,7 +557,7 @@ export const detailAudioVerbatim = async (req, res) => {
 
 export const transribeAudioVerbatim = async (req, res) => {
   try {
-    const { id, audioId } = req.query;
+    const { audioId } = req.query;
     const { mc } = req; // Minio client dari middleware
 
     // === Validate request parameters ===
@@ -454,40 +597,47 @@ export const transribeAudioVerbatim = async (req, res) => {
     let tempFilePath = null;
 
     try {
-      // === Extract filename from file path ===
-      const filename = audioFile.file_path.split("/").pop();
-      console.log(`Processing audio file: ${filename}`);
+      const url = `https://siasn.bkd.jatimprov.go.id:9000${audioFile.file_path}`;
+      console.log(url);
 
-      // === Create temp file path ===
-      tempFilePath = path.join(os.tmpdir(), filename);
-      console.log(`Temp file path: ${tempFilePath}`);
+      console.log("Processing audio file with Lemonfox...");
 
-      // === Download audio from Minio ===
-      await downloadAudio(mc, filename, tempFilePath);
-      console.log(`Audio downloaded successfully`);
+      const result = await speechToTextLemonfox(url, "srt");
 
-      // === Verify temp file exists ===
-      if (!fs.existsSync(tempFilePath)) {
-        throw new Error("File audio tidak berhasil didownload");
-      }
+      // // === Extract filename from file path ===
+      // const filename = audioFile.file_path.split("/").pop();
+      // console.log(`Processing audio file: ${filename}`);
 
-      // === Create readable stream for OpenAI ===
-      const audioStream = fs.createReadStream(tempFilePath);
+      // // === Create temp file path ===
+      // tempFilePath = path.join(os.tmpdir(), filename);
+      // console.log(`Temp file path: ${tempFilePath}`);
 
-      // === Transcribe audio with OpenAI Whisper ===
-      console.log(`Starting transcription with OpenAI Whisper...`);
-      const transcription = await openai.audio.transcriptions.create({
-        file: audioStream,
-        model: "whisper-1",
-        language: "id",
-        response_format: "text",
-      });
+      // // === Download audio from Minio ===
+      // await downloadAudio(mc, filename, tempFilePath);
+      // console.log(`Audio downloaded successfully`);
 
-      console.log(`Transcription completed successfully`);
+      // // === Verify temp file exists ===
+      // if (!fs.existsSync(tempFilePath)) {
+      //   throw new Error("File audio tidak berhasil didownload");
+      // }
+
+      // // === Create readable stream for OpenAI ===
+      // const audioStream = fs.createReadStream(tempFilePath);
+
+      // // === Transcribe audio with OpenAI Whisper ===
+      // console.log(`Starting transcription with OpenAI Whisper...`);
+      // const transcription = await openai.audio.transcriptions.create({
+      //   file: audioStream,
+      //   model: "whisper-1",
+      //   language: "id",
+      //   response_format: "text",
+      // });
+
+      // console.log(`Transcription completed successfully`);
 
       // === Save transkrip to database ===
       await VerbatimAudioFiles.query().where("id", audioId).patch({
-        transkrip: transcription,
+        transkrip: result,
       });
 
       console.log(`Transkrip saved to database for audioId: ${audioId}`);
@@ -497,7 +647,7 @@ export const transribeAudioVerbatim = async (req, res) => {
         message: "Berhasil melakukan transkrip audio",
         data: {
           audioId: audioId,
-          transkrip: transcription,
+          transkrip: result,
         },
       });
     } finally {
@@ -700,6 +850,298 @@ ${audioFile.transkrip}
         audioId: audioId,
         dialogCount: JSON.parse(cleanedJson).length,
       },
+    });
+  } catch (error) {
+    handleError(res, error);
+  }
+};
+
+// transcribe verbatim sound menggunakan fox.ai
+export const transcribeVerbatim = async (req, res) => {
+  try {
+    const { id } = req?.query;
+    const result = await VerbatimSessions.query().findById(id);
+
+    console.log("ketemu");
+
+    if (!result) {
+      res.status(404).json({
+        success: false,
+        message: "Session tidak ditemukan",
+      });
+    }
+
+    const url = `https://siasn.bkd.jatimprov.go.id:9000${result?.file_path}`;
+    console.log("url", url);
+
+    const hasil = await speechToTextLemonfox(url);
+    console.log("Berhasil");
+
+    await VerbatimSessions.query().findById(id).patch({
+      transcript: hasil?.text,
+    });
+
+    console.log("sudha");
+
+    res.json({
+      success: true,
+    });
+  } catch (error) {
+    handleError(res, error);
+  }
+};
+
+// dari transcribe
+export const transformVerbatim = async (req, res) => {
+  try {
+    const { id } = req?.query;
+    const result = await VerbatimSessions.query().findById(id);
+
+    if (!result) {
+      res.status(404).json({
+        success: false,
+        message: "Session tidak ditemukan",
+      });
+    }
+
+    if (!result?.transcript) {
+      res.status(400).json({
+        success: false,
+        message:
+          "Transkrip belum tersedia. Silakan lakukan transkrip terlebih dahulu",
+      });
+    }
+
+    const currentPrompt = prompt(result?.transcript);
+
+    const completion = await openai.chat.completions.create({
+      model: "gpt-4o",
+      messages: [
+        {
+          role: "system",
+          content:
+            "Kamu adalah sistem anotator dialog wawancara yang mengubah transkrip menjadi format JSON terstruktur. Selalu berikan output JSON yang valid.",
+        },
+        { role: "user", content: currentPrompt },
+      ],
+      temperature: 0.1, // Lebih rendah untuk konsistensi
+    });
+
+    const hasil = completion.choices[0].message.content;
+
+    await VerbatimSessions.query().findById(id).patch({
+      transform: hasil,
+    });
+
+    res.json({
+      success: true,
+      message: "Berhasil melakukan transform",
+    });
+  } catch (error) {
+    handleError(res, error);
+  }
+};
+
+// menggunakan asistant ID
+export const resultVerbatim = async (req, res) => {
+  try {
+    const { id } = req?.query;
+    const result = await VerbatimSessions.query().findById(id);
+
+    if (!result) {
+      res.status(404).json({
+        success: false,
+        message: "Session tidak ditemukan",
+      });
+    }
+
+    const transformText = result?.transform;
+
+    const hasil = await openai.responses.create({
+      model: "gpt-4o",
+      temperature: 0.1,
+      tools: [
+        {
+          type: "file_search",
+          vector_store_ids: ["vs_6889e48dc04c8191803c6015d29177ea"],
+        },
+      ],
+      text: {
+        format: {
+          type: "text",
+        },
+      },
+      input: [
+        {
+          role: "system",
+          content: [
+            {
+              type: "input_text",
+              text: asesorInstructions,
+            },
+          ],
+        },
+        {
+          role: "user",
+          content: [
+            {
+              type: "input_text",
+              text: transformText,
+            },
+          ],
+        },
+      ],
+    });
+
+    const hasilAkhir = hasil.output_text;
+
+    await VerbatimSessions.query().findById(id).patch({
+      result: hasilAkhir,
+    });
+
+    res.json({
+      success: true,
+    });
+  } catch (error) {
+    handleError(res, error);
+  }
+};
+
+export const deleteVerbatim = async (req, res) => {
+  try {
+    const { id } = req?.query;
+
+    const result = await VerbatimSessions.query().findById(id);
+
+    if (!result) {
+      res.status(404).json({
+        success: false,
+        message: "Session tidak ditemukan",
+      });
+    }
+
+    await VerbatimSessions.query().findById(id).delete();
+    res.json({
+      success: true,
+      message: "Berhasil menghapus session",
+    });
+  } catch (error) {
+    handleError(res, error);
+  }
+};
+
+export const exportVerbatim = async (req, res) => {
+  try {
+    const { id, type = "transform" } = req?.query;
+
+    const result = await VerbatimSessions.query().findById(id);
+
+    if (!result) {
+      return res.status(404).json({
+        success: false,
+        message: "Session tidak ditemukan",
+      });
+    }
+
+    const transformText = result?.transform;
+    const resultText = result?.result;
+
+    if (type === "transform") {
+      // Convert markdown to Word document
+      const { marked } = require("marked");
+      const { Document, Packer, Paragraph, TextRun } = require("docx");
+
+      // Parse markdown to HTML first
+      const htmlContent = marked(transformText || "");
+
+      // Create Word document
+      const doc = new Document({
+        sections: [
+          {
+            properties: {},
+            children: [
+              new Paragraph({
+                children: [
+                  new TextRun({
+                    text: "Hasil Transform Verbatim",
+                    bold: true,
+                    size: 28,
+                  }),
+                ],
+              }),
+              new Paragraph({
+                children: [
+                  new TextRun({
+                    text: transformText || "Tidak ada data transform",
+                  }),
+                ],
+              }),
+            ],
+          },
+        ],
+      });
+
+      // Generate buffer
+      const buffer = await Packer.toBuffer(doc);
+
+      // Set headers for file download
+      res.setHeader(
+        "Content-Type",
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+      );
+      res.setHeader(
+        "Content-Disposition",
+        `attachment; filename=verbatim-transform-${id}.docx`
+      );
+
+      return res.send(buffer);
+    } else if (type === "result") {
+      // Convert result to Word document
+      const { Document, Packer, Paragraph, TextRun } = require("docx");
+
+      const doc = new Document({
+        sections: [
+          {
+            properties: {},
+            children: [
+              new Paragraph({
+                children: [
+                  new TextRun({
+                    text: "Hasil Analisis Verbatim",
+                    bold: true,
+                    size: 28,
+                  }),
+                ],
+              }),
+              new Paragraph({
+                children: [
+                  new TextRun({
+                    text: resultText || "Tidak ada data hasil",
+                  }),
+                ],
+              }),
+            ],
+          },
+        ],
+      });
+
+      const buffer = await Packer.toBuffer(doc);
+
+      res.setHeader(
+        "Content-Type",
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+      );
+      res.setHeader(
+        "Content-Disposition",
+        `attachment; filename=verbatim-result-${id}.docx`
+      );
+
+      return res.send(buffer);
+    }
+
+    return res.status(400).json({
+      success: false,
+      message: "Tipe export tidak valid. Gunakan 'transform' atau 'result'",
     });
   } catch (error) {
     handleError(res, error);
