@@ -19,6 +19,30 @@ export const splitAudioVerbatim = async (id) => {
   return api.post(`/verbatim/${id}/split`).then((res) => res.data);
 };
 
+export const transcribeVerbatim = async (id) => {
+  return api.post(`/verbatim/${id}/transcript`).then((res) => res.data);
+};
+
+export const deleteVerbatim = async (id) => {
+  return api.delete(`/verbatim/${id}`).then((res) => res.data);
+};
+
+export const transformVerbatim = async (id) => {
+  return api.post(`/verbatim/${id}/transform`).then((res) => res.data);
+};
+
+export const resultVerbatim = async (id) => {
+  return api.post(`/verbatim/${id}/result`).then((res) => res.data);
+};
+
+export const exportVerbatim = async (id, type = "transform") => {
+  return api
+    .get(`/verbatim/${id}/export?type=${type}`, {
+      responseType: "blob",
+    })
+    .then((res) => res.data);
+};
+
 export const getRekamanVerbatim = async () => {
   return api.get("/verbatim").then((res) => res.data);
 };
