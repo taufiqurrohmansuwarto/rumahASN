@@ -1,0 +1,128 @@
+-- 1) Kategori ---------------------------------------------------------------
+CREATE TABLE knowledge_category (
+  id          SERIAL PRIMARY KEY,
+  name        VARCHAR(100) NOT NULL,
+  description TEXT
+);
+
+-- 2) Konten Pengetahuan -----------------------------------------------------
+CREATE TABLE knowledge_content (
+  id           SERIAL PRIMARY KEY,
+  title        VARCHAR(255) NOT NULL,
+  content      TEXT NOT NULL,
+  category_id  INT NOT NULL REFERENCES knowledge_category(id) ON DELETE RESTRICT,
+  tags         TEXT[],                         -- sederhana: array tag
+  file_url     TEXT,
+  author_id    UUID NOT NULL,                  -- FK ke tabel user ASN (di sistem Anda)
+  status       VARCHAR(20) NOT NULL DEFAULT 'draft',
+  -- allowed: draft | pending | published
+  CHECK (status IN ('draft','pending','published')),
+  views_count  INT NOT NULL DEFAULT 0,         -- counter ringan
+  likes_count  INT NOT NULL DEFAULT 0,
+  comments_count INT NOT NULL DEFAULT 0,
+  created_at   TIMESTAMP NOT NULL DEFAULT NOW(),
+  updated_at   TIMESTAMP NOT NULL DEFAULT NOW()
+);
+CREATE TRIGGER trg_content_updated_at
+BEFORE UPDATE ON knowledge_content
+FOR EACH ROW EXECUTE FUNCTION set_updated_at();
+
+-- 3) Interaksi Pengguna (like/comment/share/view) ---------------------------
+CREATE TABLE user_interactions (
+  id               SERIAL PRIMARY KEY,
+  user_id          UUID NOT NULL,
+  content_id       INT NOT NULL REFERENCES knowledge_content(id) ON DELETE CASCADE,
+  interaction_type VARCHAR(20) NOT NULL,
+  -- allowed: like | comment | share | view | bookmark
+  CHECK (interaction_type IN ('like','comment','share','view','bookmark')),
+  comment_text     TEXT,
+  created_at       TIMESTAMP NOT NULL DEFAULT NOW()
+);
+
+-- cegah like ganda pada konten yang sama oleh user yang sama
+CREATE UNIQUE INDEX ux_interaction_like_once
+ON user_interactions(user_id, content_id, interaction_type)
+WHERE interaction_type = 'like';
+
+CREATE INDEX ix_interactions_content_time
+ON user_interactions(content_id, created_at);
+
+-- 4) Gamifikasi: Poin & Level (ringkas) -------------------------------------
+CREATE TABLE user_points (
+  user_id      UUID PRIMARY KEY,
+  points       INT NOT NULL DEFAULT 0,
+  level        INT NOT NULL DEFAULT 1,
+  last_updated TIMESTAMP NOT NULL DEFAULT NOW()
+);
+
+-- (Opsional, untuk audit/rollback—bisa ditambah kapan saja)
+-- CREATE TABLE xp_log (
+--   id SERIAL PRIMARY KEY,
+--   user_id UUID NOT NULL,
+--   action  VARCHAR(40) NOT NULL,  -- read|write|answer|accepted|quest|streak|etc.
+--   ref_type VARCHAR(30),
+--   ref_id   INT,
+--   xp       INT NOT NULL,
+--   created_at TIMESTAMP NOT NULL DEFAULT NOW()
+-- );
+
+-- 5) Badge ------------------------------------------------------------------
+CREATE TABLE badges (
+  id             SERIAL PRIMARY KEY,
+  name           VARCHAR(100) NOT NULL,
+  description    TEXT,
+  icon_url       TEXT,
+  points_required INT           -- ambang sederhana
+);
+
+CREATE TABLE user_badges (
+  id         SERIAL PRIMARY KEY,
+  user_id    UUID NOT NULL,
+  badge_id   INT NOT NULL REFERENCES badges(id) ON DELETE CASCADE,
+  awarded_at TIMESTAMP NOT NULL DEFAULT NOW(),
+  UNIQUE (user_id, badge_id)
+);
+
+-- 6) Misi (harian/mingguan/musiman) ----------------------------------------
+CREATE TABLE missions (
+  id            SERIAL PRIMARY KEY,
+  title         VARCHAR(255) NOT NULL,
+  description   TEXT,
+  frequency     VARCHAR(15) NOT NULL DEFAULT 'daily',
+  -- allowed: daily | weekly | seasonal
+  CHECK (frequency IN ('daily','weekly','seasonal')),
+  points_reward INT NOT NULL,
+  start_date    DATE,
+  end_date      DATE,
+  is_active     BOOLEAN NOT NULL DEFAULT TRUE
+);
+
+CREATE TABLE user_mission_progress (
+  id           SERIAL PRIMARY KEY,
+  user_id      UUID NOT NULL,
+  mission_id   INT NOT NULL REFERENCES missions(id) ON DELETE CASCADE,
+  status       VARCHAR(15) NOT NULL DEFAULT 'in_progress',
+  -- allowed: in_progress | completed
+  CHECK (status IN ('in_progress','completed')),
+  completed_at TIMESTAMP,
+  UNIQUE (user_id, mission_id, status)
+);
+
+-- 7) Metadata AI (tanpa ekstensi vektor) ------------------------------------
+CREATE TABLE knowledge_ai_metadata (
+  id              SERIAL PRIMARY KEY,
+  content_id      INT NOT NULL REFERENCES knowledge_content(id) ON DELETE CASCADE,
+  ai_summary      TEXT,          -- ringkasan AI (TL;DR)
+  ai_keywords     TEXT[],        -- kata kunci AI
+  ai_embedding    DOUBLE PRECISION[],  -- simpan embedding sebagai float8[] (tanpa ekstensi)
+  last_processed  TIMESTAMP NOT NULL DEFAULT NOW()
+);
+
+-- Index ringan yang berguna -------------------------------------------------
+CREATE INDEX ix_content_category ON knowledge_content(category_id);
+CREATE INDEX ix_content_tags_gin ON knowledge_content USING GIN (tags);
+CREATE INDEX ix_ai_keywords_gin ON knowledge_ai_metadata USING GIN (ai_keywords);
+CREATE INDEX ix_user_points_rank ON user_points(points DESC);
+
+
+
