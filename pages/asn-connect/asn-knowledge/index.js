@@ -3,7 +3,8 @@ import LayoutASNConnect from "@/components/Socmed/LayoutASNConnect";
 import Head from "next/head";
 import { Button } from "antd";
 import { PlusOutlined } from "@ant-design/icons";
-import { useRouter } from "next/router";
+import { useRouter } from "next/navigation";
+import KnowledgeUserContents from "@/components/KnowledgeManagements/KnowledgeUserContents";
 
 const AsnKnowledge = () => {
   const router = useRouter();
@@ -20,6 +21,7 @@ const AsnKnowledge = () => {
         >
           Buat Pengetahuan
         </Button>
+        <KnowledgeUserContents />
       </LayoutASNConnect>
     </>
   );

@@ -5,19 +5,23 @@ const KnowledgeCategory = require("@/models/knowledge/categories.model");
 
 export const getKnowledgeContents = async (req, res) => {
   try {
-    const { customId } = req?.user;
     const { page = 1, limit = 10, search = "" } = req?.query;
     const contents = await KnowledgeContent.query()
-      .where("user_id", customId)
-      .where("title", "ilike", `%${search}%`)
+      .andWhere((builder) => {
+        if (search) {
+          builder.where("title", "ilike", `%${search}%`);
+        }
+      })
+      .andWhere("status", "published")
+      .withGraphFetched("[author(simpleSelect), category]")
       .orderBy("created_at", "desc")
       .page(page - 1, limit);
 
     const data = {
-      data: contents?.data,
+      data: contents?.results,
       total: contents?.total,
-      page: contents?.page,
-      limit: contents?.limit,
+      page: contents?.page || 1,
+      limit: contents?.limit || 10,
     };
 
     res.json(data);
@@ -29,10 +33,9 @@ export const getKnowledgeContents = async (req, res) => {
 export const getKnowledgeContent = async (req, res) => {
   try {
     const { id } = req?.query;
-    const { customId } = req?.user;
     const content = await KnowledgeContent.query()
       .where("id", id)
-      .andWhere("user_id", customId)
+      .andWhere("status", "published")
       .first();
 
     if (!content) {
@@ -58,8 +61,6 @@ export const createKnowledgeContent = async (req, res) => {
       author_id: customId,
     };
 
-    console.log(payload);
-
     const content = await KnowledgeContent.query().insert(payload);
 
     res.json(content);
@@ -68,7 +69,7 @@ export const createKnowledgeContent = async (req, res) => {
   }
 };
 
-export const updateKnowledgeContent = async (req, res) => {
+export const updateKnowledgeContentPersonal = async (req, res) => {
   try {
     const { id } = req?.query;
     const payload = req?.body;

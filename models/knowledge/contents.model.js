@@ -14,7 +14,27 @@ class knowledgeContents extends Model {
   }
 
   static get relationMappings() {
-    return {};
+    const User = require("@/models/users.model");
+    const Category = require("@/models/knowledge/categories.model");
+
+    return {
+      author: {
+        relation: Model.BelongsToOneRelation,
+        modelClass: User,
+        join: {
+          from: "knowledge.contents.author_id",
+          to: "users.custom_id",
+        },
+      },
+      category: {
+        relation: Model.BelongsToOneRelation,
+        modelClass: Category,
+        join: {
+          from: "knowledge.contents.category_id",
+          to: "knowledge.category.id",
+        },
+      },
+    };
   }
 }
 
