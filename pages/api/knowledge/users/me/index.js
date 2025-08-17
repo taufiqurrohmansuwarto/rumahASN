@@ -5,4 +5,4 @@ const router = createRouter();
 
 router.use(auth).get().post();
 
-export default router.handler;
+export default router.handler({});

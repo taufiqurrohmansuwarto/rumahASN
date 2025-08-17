@@ -20,6 +20,10 @@ function LayoutASNConnect({ children, active = "asn-updates" }) {
       label: "ASN Helper",
     },
     {
+      key: "asn-knowledge",
+      label: "Manajemen Pengetahuan",
+    },
+    {
       key: "asn-discussions",
       label: "Diskusi",
     },

@@ -1,6 +1,7 @@
 import { handleError } from "@/utils/helper/controller-helper";
 
 const KnowledgeContent = require("@/models/knowledge/contents.model");
+const KnowledgeCategory = require("@/models/knowledge/categories.model");
 
 export const getKnowledgeContents = async (req, res) => {
   try {
@@ -48,13 +49,18 @@ export const getKnowledgeContent = async (req, res) => {
 
 export const createKnowledgeContent = async (req, res) => {
   try {
-    const payload = req?.body;
+    const body = req?.body;
     const { customId } = req?.user;
 
-    const content = await KnowledgeContent.query().insert({
-      ...payload,
-      user_id: customId,
-    });
+    const payload = {
+      ...body,
+      tags: JSON.stringify(body?.tags),
+      author_id: customId,
+    };
+
+    console.log(payload);
+
+    const content = await KnowledgeContent.query().insert(payload);
 
     res.json(content);
   } catch (error) {
@@ -96,4 +102,12 @@ export const deleteKnowledgeContent = async (req, res) => {
   }
 };
 
-// admins
+// refs
+export const getKnowledgeCategories = async (req, res) => {
+  try {
+    const categories = await KnowledgeCategory.query();
+    res.json(categories);
+  } catch (error) {
+    handleError(res, error);
+  }
+};

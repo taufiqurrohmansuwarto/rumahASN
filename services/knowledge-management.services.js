@@ -29,3 +29,7 @@ export const updateKnowledgeContent = async ({ id, data }) => {
 export const deleteKnowledgeContent = async (id) => {
   return await api.delete(`/users/contents/${id}`).then((res) => res.data);
 };
+
+export const getKnowledgeCategories = async () => {
+  return await api.get("/users/refs/categories").then((res) => res.data);
+};
