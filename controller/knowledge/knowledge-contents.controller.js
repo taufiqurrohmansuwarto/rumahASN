@@ -1,0 +1,99 @@
+import { handleError } from "@/utils/helper/controller-helper";
+
+const KnowledgeContent = require("@/models/knowledge/contents.model");
+
+export const getKnowledgeContents = async (req, res) => {
+  try {
+    const { customId } = req?.user;
+    const { page = 1, limit = 10, search = "" } = req?.query;
+    const contents = await KnowledgeContent.query()
+      .where("user_id", customId)
+      .where("title", "ilike", `%${search}%`)
+      .orderBy("created_at", "desc")
+      .page(page - 1, limit);
+
+    const data = {
+      data: contents?.data,
+      total: contents?.total,
+      page: contents?.page,
+      limit: contents?.limit,
+    };
+
+    res.json(data);
+  } catch (error) {
+    handleError(res, error);
+  }
+};
+
+export const getKnowledgeContent = async (req, res) => {
+  try {
+    const { id } = req?.query;
+    const { customId } = req?.user;
+    const content = await KnowledgeContent.query()
+      .where("id", id)
+      .andWhere("user_id", customId)
+      .first();
+
+    if (!content) {
+      return res.status(404).json({
+        message: "Content not found",
+      });
+    }
+
+    res.json(content);
+  } catch (error) {
+    handleError(res, error);
+  }
+};
+
+export const createKnowledgeContent = async (req, res) => {
+  try {
+    const payload = req?.body;
+    const { customId } = req?.user;
+
+    const content = await KnowledgeContent.query().insert({
+      ...payload,
+      user_id: customId,
+    });
+
+    res.json(content);
+  } catch (error) {
+    handleError(res, error);
+  }
+};
+
+export const updateKnowledgeContent = async (req, res) => {
+  try {
+    const { id } = req?.query;
+    const payload = req?.body;
+    const { customId } = req?.user;
+
+    const content = await KnowledgeContent.query()
+      .where("id", id)
+      .andWhere("user_id", customId)
+      .andWhere("status", "draf")
+      .update(payload);
+
+    res.json(content);
+  } catch (error) {
+    handleError(res, error);
+  }
+};
+
+export const deleteKnowledgeContent = async (req, res) => {
+  try {
+    const { id } = req?.query;
+    const { customId } = req?.user;
+
+    const content = await KnowledgeContent.query()
+      .where("id", id)
+      .andWhere("user_id", customId)
+      .delete();
+
+    res.json(content);
+  } catch (error) {
+    handleError(res, error);
+  }
+};
+
+// admins
