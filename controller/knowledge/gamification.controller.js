@@ -7,7 +7,13 @@ const XpLog = require("@/models/knowledge/xp-log.model");
 const Missions = require("@/models/knowledge/missions.model");
 const UserMissionProgress = require("@/models/knowledge/user-mission-progress.model");
 const KnowledgeAiMetadata = require("@/models/knowledge/knowledge-ai-metadata.model");
+
 const { handleError } = require("@/utils/error");
+
+const calcLevel = (points) => {
+  // 50 points = level 1
+  return Math.floor(Math.sqrt(points / 50)) + 1;
+};
 
 const awardXP = async ({ userId, action, refType, refId, xp }) => {
   return await transaction(UserPoints.knex(), async (trx) => {
