@@ -24,11 +24,10 @@ const { useBreakpoint } = Grid;
 const { Search } = Input;
 
 const KnowledgeUserContents = () => {
+  useScrollRestoration();
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState("");
   const [debouncedSearch] = useDebouncedValue(searchQuery, 500);
-
-  useScrollRestoration();
 
   // Responsive breakpoints
   const screens = useBreakpoint();

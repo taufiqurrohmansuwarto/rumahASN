@@ -1,3 +1,4 @@
+import { KnowledgeUserContentDetail } from "@/components/KnowledgeManagements";
 import Layout from "@/components/Layout";
 import PageContainer from "@/components/PageContainer";
 import LayoutASNConnect from "@/components/Socmed/LayoutASNConnect";
@@ -33,9 +34,11 @@ const AsnKnowledgeDetail = () => {
       <LayoutASNConnect active="asn-knowledge">
         <PageContainer
           loading={isLoading}
-          title={data?.title}
+          title={data?.title || "Detail Pengetahuan"}
           onBack={gotoAsnKnowledge}
-        ></PageContainer>
+        >
+          <KnowledgeUserContentDetail data={data} />
+        </PageContainer>
       </LayoutASNConnect>
     </>
   );

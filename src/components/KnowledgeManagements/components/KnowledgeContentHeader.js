@@ -1,7 +1,7 @@
-import { Card, Space, Tag, Typography, Text } from "antd";
+import { Card, Space, Tag, Typography } from "antd";
 import dayjs from "dayjs";
 
-const { Title } = Typography;
+const { Title, Text } = Typography;
 
 const KnowledgeContentHeader = ({ data }) => {
   return (

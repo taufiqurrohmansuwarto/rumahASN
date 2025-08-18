@@ -72,3 +72,59 @@ export const bookmarkKnowledgeContent = async (id) => {
     .post(`/users/contents/${id}/bookmarks`)
     .then((res) => res.data);
 };
+
+// badges and missions for admin
+export const getBadges = async () => {
+  return await api.get("/admin/refs/badges").then((res) => res.data);
+};
+
+export const getMissions = async () => {
+  return await api.get("/admin/refs/missions").then((res) => res.data);
+};
+
+export const createBadge = async (data) => {
+  return await api.post("/admin/refs/badges", data).then((res) => res.data);
+};
+
+export const updateBadge = async ({ id, data }) => {
+  return await api
+    .patch(`/admin/refs/badges/${id}`, data)
+    .then((res) => res.data);
+};
+
+export const deleteBadge = async (id) => {
+  return await api.delete(`/admin/refs/badges/${id}`).then((res) => res.data);
+};
+
+export const createMission = async (data) => {
+  return await api.post("/admin/refs/missions", data).then((res) => res.data);
+};
+
+export const updateMission = async ({ id, data }) => {
+  return await api
+    .patch(`/admin/refs/missions/${id}`, data)
+    .then((res) => res.data);
+};
+
+export const deleteMission = async (id) => {
+  return await api.delete(`/admin/refs/missions/${id}`).then((res) => res.data);
+};
+
+// badges and missions for user
+export const getUserBadges = async () => {
+  return await api.get("/users/me/badges").then((res) => res.data);
+};
+
+export const getUserMissions = async () => {
+  return await api.get("/users/me/missions").then((res) => res.data);
+};
+
+export const userMissionComplete = async (id) => {
+  return await api
+    .post(`/users/me/missions/${id}/complete`)
+    .then((res) => res.data);
+};
+
+export const getUserPoints = async () => {
+  return await api.get("/users/me/points").then((res) => res.data);
+};
