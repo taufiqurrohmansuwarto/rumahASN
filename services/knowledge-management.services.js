@@ -35,23 +35,39 @@ export const getKnowledgeCategories = async () => {
 };
 
 // user interactions
-export const likes = async (id) => {
+export const likeKnowledgeContent = async (id) => {
   return await api.post(`/users/contents/${id}/likes`).then((res) => res.data);
 };
 
-export const createComment = async ({ id, data }) => {
+export const getKnowledgeContentComments = async (id) => {
+  return await api
+    .get(`/users/contents/${id}/comments`)
+    .then((res) => res.data);
+};
+
+export const createKnowledgeContentComment = async ({ id, data }) => {
   return await api
     .post(`/users/contents/${id}/comments`, data)
     .then((res) => res.data);
 };
 
-export const removeComment = async ({ id, commentId }) => {
+export const deleteKnowledgeContentComment = async ({ id, commentId }) => {
   return await api
     .delete(`/users/contents/${id}/comments/${commentId}`)
     .then((res) => res.data);
 };
 
-export const bookmark = async (id) => {
+export const updateKnowledgeContentComment = async ({
+  id,
+  commentId,
+  data,
+}) => {
+  return await api
+    .patch(`/users/contents/${id}/comments/${commentId}`, data)
+    .then((res) => res.data);
+};
+
+export const bookmarkKnowledgeContent = async (id) => {
   return await api
     .post(`/users/contents/${id}/bookmarks`)
     .then((res) => res.data);

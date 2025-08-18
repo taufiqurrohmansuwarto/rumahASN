@@ -36,6 +36,7 @@ export const getKnowledgeContent = async (req, res) => {
     const content = await KnowledgeContent.query()
       .where("id", id)
       .andWhere("status", "published")
+      .withGraphFetched("[author(simpleSelect)]")
       .first();
 
     if (!content) {

@@ -1,6 +1,6 @@
 import { createRouter } from "next-connect";
-import auth from "@/middlewares/auth.middleware";
 import { getKnowledgeContent } from "@/controller/knowledge/knowledge-contents.controller";
+import auth from "@/middleware/auth.middleware";
 
 const router = createRouter();
 

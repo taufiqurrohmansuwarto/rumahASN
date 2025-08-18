@@ -97,7 +97,7 @@ export const createComment = async (req, res) => {
         content_id: id,
         user_id: customId,
         interaction_type: "comment",
-        comment: commentText.trim(),
+        comment_text: commentText.trim(),
       });
 
       // Increment comments_count
@@ -171,6 +171,48 @@ export const removeComment = async (req, res) => {
   }
 };
 
+export const updateComment = async (req, res) => {
+  try {
+    const { id, commentId } = req?.query;
+    const { customId } = req?.user;
+    const { comment: commentText } = req?.body;
+
+    // Cek apakah komentar ada dan milik user
+    const existingComment = await KnowledgeUserInteraction.query()
+      .where("id", commentId)
+      .andWhere("content_id", id)
+      .andWhere("user_id", customId)
+      .andWhere("interaction_type", "comment")
+      .first();
+
+    if (!existingComment) {
+      return res.status(404).json({
+        message:
+          "Komentar tidak ditemukan atau Anda tidak memiliki akses untuk mengeditnya",
+      });
+    }
+
+    const result = await KnowledgeContent.transaction(async (trx) => {
+      // Update komentar
+      await KnowledgeUserInteraction.query(trx).where("id", commentId).update({
+        comment_text: commentText.trim(),
+      });
+
+      return {
+        message: "Berhasil mengedit komentar",
+        comment: {
+          ...existingComment,
+          comment_text: commentText.trim(),
+        },
+      };
+    });
+
+    return res.json(result);
+  } catch (error) {
+    handleError(res, error);
+  }
+};
+
 export const bookmark = async (req, res) => {
   try {
     const { id } = req?.query;
@@ -203,9 +245,7 @@ export const bookmark = async (req, res) => {
           .delete();
 
         // Decrement bookmarks_count
-        await KnowledgeContent.query(trx)
-          .where("id", id)
-          .decrement("bookmarks_count", 1);
+        await KnowledgeContent.query(trx).where("id", id);
 
         return {
           message: "Berhasil menghapus bookmark",
@@ -221,9 +261,7 @@ export const bookmark = async (req, res) => {
         });
 
         // Increment bookmarks_count
-        await KnowledgeContent.query(trx)
-          .where("id", id)
-          .increment("bookmarks_count", 1);
+        await KnowledgeContent.query(trx).where("id", id);
 
         return {
           message: "Berhasil menambahkan bookmark",
@@ -235,6 +273,22 @@ export const bookmark = async (req, res) => {
     });
 
     return res.json(result);
+  } catch (error) {
+    handleError(res, error);
+  }
+};
+
+export const getComments = async (req, res) => {
+  try {
+    const { id } = req?.query;
+
+    const comments = await KnowledgeUserInteraction.query()
+      .where("content_id", id)
+      .andWhere("interaction_type", "comment")
+      .orderBy("created_at", "desc")
+      .withGraphFetched("user(simpleSelect)");
+
+    return res.json(comments);
   } catch (error) {
     handleError(res, error);
   }

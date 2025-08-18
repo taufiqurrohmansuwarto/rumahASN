@@ -4,6 +4,6 @@ import { likes } from "@/controller/knowledge/user-interactions.controller";
 
 const router = createRouter();
 
-router.use(auth).get(likes);
+router.use(auth).post(likes);
 
 export default router.handler({});
