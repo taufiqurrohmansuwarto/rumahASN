@@ -1,7 +1,6 @@
 import Layout from "@/components/Layout";
 import LayoutASNConnect from "@/components/Socmed/LayoutASNConnect";
 import Head from "next/head";
-import KnowledgeFormUserContents from "@/components/KnowledgeManagements/KnowledgeFormUserContents";
 import { useRouter } from "next/router";
 
 const AsnKnowledgeCreate = () => {
@@ -12,11 +11,7 @@ const AsnKnowledgeCreate = () => {
         <title>Rumah ASN - Buat Pengetahuan</title>
       </Head>
       <LayoutASNConnect active="asn-knowledge">
-        <KnowledgeFormUserContents
-          onSuccess={() => {
-            router.push("/asn-connect/asn-knowledge");
-          }}
-        />
+        
       </LayoutASNConnect>
     </>
   );

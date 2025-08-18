@@ -2,9 +2,36 @@
 
 Komponen-komponen untuk mengelola konten knowledge berdasarkan schema database `knowledge_content`.
 
+## Struktur Folder
+
+```text
+KnowledgeManagements/
+├── components/          # Komponen UI kecil yang dapat digunakan ulang
+│   ├── CommentList.js          # Komponen daftar komentar
+│   ├── ContentCard.js          # Komponen kartu konten
+│   ├── FormComment.js          # Komponen form komentar
+│   ├── KnowledgeContentBody.js # Komponen body konten detail
+│   ├── KnowledgeContentHeader.js # Komponen header konten detail
+│   └── index.js               # Export semua komponen
+├── forms/              # Komponen form
+│   ├── KnowledgeFormUserContents.js # Form CRUD konten
+│   └── index.js               # Export forms
+├── lists/              # Komponen list/daftar
+│   ├── KnowledgeUserContents.js # Daftar konten dengan pagination
+│   └── index.js               # Export lists
+├── samples/            # Komponen contoh/template
+│   ├── KnowledgeFormUserContentDetailSample.js
+│   └── index.js               # Export samples
+├── KnowledgeUserContentDetail.js # Komponen detail konten utama
+├── index.js            # Export utama semua komponen
+└── README.md           # Dokumentasi ini
+```
+
 ## Komponen Yang Tersedia
 
-### 1. KnowledgeFormUserContents
+### 1. Forms
+
+#### KnowledgeFormUserContents
 
 Form untuk membuat dan mengedit konten knowledge dengan fitur lengkap.
 
@@ -26,7 +53,9 @@ Form untuk membuat dan mengedit konten knowledge dengan fitur lengkap.
 - ✅ Loading states dan error handling
 - ✅ React Query untuk state management
 
-### 2. KnowledgeUserContents
+### 2. Lists
+
+#### KnowledgeUserContents
 
 Komponen untuk menampilkan daftar konten knowledge dengan fitur CRUD.
 
@@ -41,10 +70,49 @@ Komponen untuk menampilkan daftar konten knowledge dengan fitur CRUD.
 - ✅ Loading states dan empty states
 - ✅ Responsive design
 
+### 3. Components
+
+#### ContentCard
+
+Komponen kartu untuk menampilkan preview konten dalam list.
+
+#### CommentList
+
+Komponen untuk menampilkan dan mengelola daftar komentar.
+
+#### FormComment
+
+Komponen form untuk menulis komentar baru.
+
+#### KnowledgeContentHeader
+
+Komponen header untuk halaman detail konten.
+
+#### KnowledgeContentBody
+
+Komponen body untuk menampilkan isi konten.
+
+### 4. Main Components
+
+#### KnowledgeUserContentDetail
+
+Komponen utama untuk menampilkan detail konten knowledge lengkap dengan komentar.
+
 ## Contoh Penggunaan
 
 ```jsx
-import KnowledgeUserContents from "@/components/KnowledgeManagements/KnowledgeUserContents";
+// Import dengan struktur baru
+import {
+  KnowledgeUserContents,
+  KnowledgeFormUserContents,
+  KnowledgeUserContentDetail,
+  ContentCard,
+  CommentList,
+} from "@/components/KnowledgeManagements";
+
+// Atau import spesifik dari folder
+import { KnowledgeUserContents } from "@/components/KnowledgeManagements/lists";
+import { ContentCard } from "@/components/KnowledgeManagements/components";
 
 function KnowledgePage() {
   return (
