@@ -1,3 +1,4 @@
+import { handleError } from "@/utils/helper/controller-helper";
 import { transaction } from "objection";
 
 const Badges = require("@/models/knowledge/badges.model");
@@ -7,8 +8,6 @@ const XpLog = require("@/models/knowledge/xp-log.model");
 const Missions = require("@/models/knowledge/missions.model");
 const UserMissionProgress = require("@/models/knowledge/user-mission-progress.model");
 const KnowledgeAiMetadata = require("@/models/knowledge/knowledge-ai-metadata.model");
-
-const { handleError } = require("@/utils/error");
 
 const calcLevel = (points) => {
   // 50 points = level 1

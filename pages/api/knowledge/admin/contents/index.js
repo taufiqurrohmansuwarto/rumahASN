@@ -1,5 +1,5 @@
 import { createRouter } from "next-connect";
-import auth from "@/middlewares/auth.middleware";
+import auth from "@/middleware/auth.middleware";
 
 const router = createRouter();
 
