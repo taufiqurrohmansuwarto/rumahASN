@@ -165,6 +165,7 @@ const FormAngkaKreditPredikat = ({ form, jabatanId }) => {
         <Form.Item
           name="kreditBaruTotal"
           label="Total Angka Kredit"
+          help="* Dapat diedit manual jika diperlukan"
           required
           rules={[{ required: true, message: "Total angka kredit diperlukan" }]}
         >
@@ -172,7 +173,7 @@ const FormAngkaKreditPredikat = ({ form, jabatanId }) => {
             min={0}
             step={0.001}
             precision={4}
-            placeholder="Otomatis terisi"
+            placeholder="Terisi otomatis dari predikat, dapat diubah manual"
             style={{ width: "100%" }}
           />
         </Form.Item>

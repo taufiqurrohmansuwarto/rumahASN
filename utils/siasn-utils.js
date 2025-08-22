@@ -460,6 +460,14 @@ module.exports.removeSertifikasi = (fetcher, id) => {
   return fetcher.delete(`/sertifikasi/delete/${id}`).then((res) => res?.data);
 };
 
-module.exports.syncJabatan = (fetcher, pnsId) => {};
+module.exports.syncJabatanSIASN = (fetcher, pnsId) => {
+  return fetcher
+    .get(`/pns/data-utama-jabatansync?pns_orang_id=${pnsId}`)
+    .then((res) => res?.data);
+};
 
-module.exports.syncGolongan = (fetcher, pnsId) => {};
+module.exports.syncGolonganSIASN = (fetcher, pnsId) => {
+  return fetcher
+    .get(`/pns/data-utama-golongansync?pns_orang_id=${pnsId}`)
+    .then((res) => res?.data);
+};

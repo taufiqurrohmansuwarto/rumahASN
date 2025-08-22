@@ -1,14 +1,15 @@
+import { syncJabatanByNip } from "@/controller/siasn-jabatan.controller";
 import adminFasilitatorMiddleware from "@/middleware/admin-fasilitator.middleware";
 import auth from "@/middleware/auth.middleware";
 import checkEmployee from "@/middleware/check-employee.middleware";
+import { siasnMiddleware } from "@/middleware/siasn.middleware";
 import { createRouter } from "next-connect";
 const router = createRouter();
-
-import { syncJabatanByNip } from "@/controller/siasn-proxy.controller";
 
 router
   .use(auth)
   .use(adminFasilitatorMiddleware)
+  .use(siasnMiddleware)
   .use(checkEmployee)
   .get(syncJabatanByNip);
 

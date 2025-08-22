@@ -29,6 +29,8 @@ export default function Home() {
 
     if (pegawaiBKD) {
       router.push("/beranda-bkd?tab=my-task");
+    } else if (fasilitatorMaster) {
+      router.push("/rekon/dashboard");
     } else if (pegawaiPemda || fasilitatorMaster) {
       router.push("/asn-connect/asn-updates");
     } else {

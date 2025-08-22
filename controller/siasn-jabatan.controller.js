@@ -1,4 +1,9 @@
-const { removeJabatan } = require("@/utils/siasn-utils");
+const {
+  removeJabatan,
+  syncJabatanSIASN,
+  dataUtama,
+  syncGolonganSIASN,
+} = require("@/utils/siasn-utils");
 const { createLogSIASN } = require("@/utils/logs");
 
 const handleRemoveJabatan = async (req, res, jabatanId) => {
@@ -49,6 +54,58 @@ const hapusJabatan = async (req, res) => {
   }
 };
 
+const syncJabatan = async (req, res) => {
+  try {
+    const fetcher = req?.siasnRequest;
+    const result = await fetcher.get(`/data-utama-jabatansync`);
+    res.json(result);
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+const syncJabatanByNip = async (req, res) => {
+  try {
+    const fetcher = req?.siasnRequest;
+    const { nip } = req.query;
+    const hasil = await dataUtama(fetcher, nip);
+    const pnsId = hasil?.id;
+    const result = await syncJabatanSIASN(fetcher, pnsId);
+    const msg = result?.Message || "success";
+    res.json({ message: msg });
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+const syncGolongan = async (req, res) => {
+  try {
+    const fetcher = req?.siasnRequest;
+    const result = await fetcher.get(`/data-utama-golongansync`);
+    res.json(result);
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+const syncGolonganByNip = async (req, res) => {
+  try {
+    const fetcher = req?.siasnRequest;
+    const { nip } = req.query;
+    const hasil = await dataUtama(fetcher, nip);
+    const pnsId = hasil?.id;
+    const result = await syncGolonganSIASN(fetcher, pnsId);
+    const msg = result?.Message || "success";
+    res.json({ message: msg });
+  } catch (error) {
+    console.log(error);
+  }
+};
+
 module.exports = {
   hapusJabatan,
+  syncJabatan,
+  syncJabatanByNip,
+  syncGolongan,
+  syncGolonganByNip,
 };
