@@ -144,7 +144,7 @@ const uploadDokumenKenaikanPangkat = async (req, res) => {
       });
     } else {
       const formData = new FormData();
-      formData.append("tgl_sk", dayjs(tgl_sk).format("DD-MM-YYYY"));
+      formData.append("tgl_sk", tgl_sk);
       formData.append("no_sk", no_sk);
       formData.append("file", file.buffer, file.originalname);
       formData.append("id_usulan", id_usulan);

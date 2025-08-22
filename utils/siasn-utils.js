@@ -471,3 +471,13 @@ module.exports.syncGolonganSIASN = (fetcher, pnsId) => {
     .get(`/pns/data-utama-golongansync?pns_orang_id=${pnsId}`)
     .then((res) => res?.data);
 };
+
+module.exports.uploadDokSkKp = async (fetcher, data) => {
+  return fetcher
+    .post(`/upload-dok-sk-kp`, data, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    })
+    .then((res) => res?.data);
+};

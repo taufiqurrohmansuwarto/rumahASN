@@ -2,16 +2,32 @@ import { dataPangkatByNip } from "@/services/siasn-services";
 import { findGolongan, findPangkat } from "@/utils/client-utils";
 import { Stack, Text } from "@mantine/core";
 import { useQuery } from "@tanstack/react-query";
-import { Card, Table } from "antd";
+import { Button, Card, Table, Tooltip } from "antd";
 import { orderBy } from "lodash";
+import { useState } from "react";
 
 import dayjs from "dayjs";
 import "dayjs/locale/id";
 import relativeTime from "dayjs/plugin/relativeTime";
+import { EditOutlined } from "@ant-design/icons";
+import FormUploadKenaikanPangkat from "./FormUploadKenaikanPangkat";
 dayjs.locale("id");
 dayjs.extend(relativeTime);
 
-const PangkatSiasn = ({ data, isLoading }) => {
+const PangkatSiasn = ({ data, isLoading, dataSimaster }) => {
+  const [open, setOpen] = useState(false);
+  const [dataEdit, setDataEdit] = useState(null);
+
+  const handleEdit = (data) => {
+    setDataEdit(data);
+    setOpen(true);
+  };
+
+  const handleClose = () => {
+    setOpen(false);
+    setDataEdit(null);
+  };
+
   const columns = [
     {
       title: "File",
@@ -56,9 +72,38 @@ const PangkatSiasn = ({ data, isLoading }) => {
       title: "Tgl. SK",
       dataIndex: "skTanggal",
     },
+    // {
+    //   title: "Aksi",
+    //   dataIndex: "aksi",
+    //   render: (_, record) => {
+    //     const tahun2023 = dayjs(record?.tmtGolongan).format("YYYY") === "2023";
+
+    //     if (tahun2023) {
+    //       return null;
+    //     }
+
+    //     return (
+    //       <Tooltip title="Lengkapi data" placement="top">
+    //         <Button
+    //           type="primary"
+    //           shape="circle"
+    //           icon={<EditOutlined />}
+    //           onClick={() => handleEdit(record)}
+    //         />
+    //       </Tooltip>
+    //     );
+    //   },
+    // },
   ];
+
   return (
     <>
+      <FormUploadKenaikanPangkat
+        data={dataEdit}
+        dataSimaster={dataSimaster}
+        open={open}
+        handleClose={handleClose}
+      />
       <Table
         loading={isLoading}
         columns={columns}
@@ -150,7 +195,11 @@ function ComparePangkatByNip({ nip }) {
   return (
     <Card title="Komparasi Pangkat">
       <Stack>
-        <PangkatSiasn isLoading={isLoading} data={data?.pangkat_siasn} />
+        <PangkatSiasn
+          isLoading={isLoading}
+          data={data?.pangkat_siasn}
+          dataSimaster={data?.pangkat_simaster}
+        />
         <PangkatSimaster isLoading={isLoading} data={data?.pangkat_simaster} />
       </Stack>
     </Card>
