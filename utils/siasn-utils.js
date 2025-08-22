@@ -459,3 +459,7 @@ module.exports.postRwSertifikasi = (fetcher, data) => {
 module.exports.removeSertifikasi = (fetcher, id) => {
   return fetcher.delete(`/sertifikasi/delete/${id}`).then((res) => res?.data);
 };
+
+module.exports.syncJabatan = (fetcher, pnsId) => {};
+
+module.exports.syncGolongan = (fetcher, pnsId) => {};
