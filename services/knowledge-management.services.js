@@ -128,3 +128,62 @@ export const userMissionComplete = async (id) => {
 export const getUserPoints = async () => {
   return await api.get("/users/me/points").then((res) => res.data);
 };
+
+// admin
+export const getReferensiKategori = async () => {
+  return await api.get("/admin/refs/categories").then((res) => res.data);
+};
+
+export const createReferensiKategori = async (data) => {
+  return await api.post("/admin/refs/categories", data).then((res) => res.data);
+};
+
+export const updateReferensiKategori = async ({ id, data }) => {
+  return await api
+    .patch(`/admin/refs/categories/${id}`, data)
+    .then((res) => res.data);
+};
+
+export const deleteReferensiKategori = async (id) => {
+  return await api
+    .delete(`/admin/refs/categories/${id}`)
+    .then((res) => res.data);
+};
+
+// badges and missions for admin
+export const getReferensiBadges = async () => {
+  return await api.get("/admin/refs/badges").then((res) => res.data);
+};
+
+export const createReferensiBadge = async (data) => {
+  return await api.post("/admin/refs/badges", data).then((res) => res.data);
+};
+
+export const updateReferensiBadge = async ({ id, data }) => {
+  return await api
+    .patch(`/admin/refs/badges/${id}`, data)
+    .then((res) => res.data);
+};
+
+export const deleteReferensiBadge = async (id) => {
+  return await api.delete(`/admin/refs/badges/${id}`).then((res) => res.data);
+};
+
+// missions for admin
+export const getReferensiMissions = async () => {
+  return await api.get("/admin/refs/missions").then((res) => res.data);
+};
+
+export const createReferensiMission = async (data) => {
+  return await api.post("/admin/refs/missions", data).then((res) => res.data);
+};
+
+export const updateReferensiMission = async ({ id, data }) => {
+  return await api
+    .patch(`/admin/refs/missions/${id}`, data)
+    .then((res) => res.data);
+};
+
+export const deleteReferensiMission = async (id) => {
+  return await api.delete(`/admin/refs/missions/${id}`).then((res) => res.data);
+};

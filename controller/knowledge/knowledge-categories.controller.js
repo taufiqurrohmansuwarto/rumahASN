@@ -3,24 +3,12 @@ import { handleError } from "@/utils/helper/controller-helper";
 
 export const getKnowledgeCategories = async (req, res) => {
   try {
-    const { page = 1, limit = 10, search = "" } = req?.query;
-    const categories = await KnowledgeCategory.query()
-      .where((builder) => {
-        if (search) {
-          builder.where("name", "ilike", `%${search}%`);
-        }
-      })
-      .orderBy("created_at", "desc")
-      .page(page - 1, limit);
+    const categories = await KnowledgeCategory.query().orderBy(
+      "created_at",
+      "desc"
+    );
 
-    const data = {
-      data: categories?.data,
-      total: categories?.total,
-      page: categories?.page,
-      limit: categories?.limit,
-    };
-
-    res.json(data);
+    res.json(categories);
   } catch (error) {
     handleError(res, error);
   }
@@ -46,7 +34,12 @@ export const getKnowledgeCategory = async (req, res) => {
 export const createKnowledgeCategory = async (req, res) => {
   try {
     const payload = req?.body;
-    const category = await KnowledgeCategory.query().insert(payload);
+    const { customId } = req?.user;
+    const data = {
+      ...payload,
+      created_by: customId,
+    };
+    const category = await KnowledgeCategory.query().insert(data);
     res.json(category);
   } catch (error) {
     handleError(res, error);

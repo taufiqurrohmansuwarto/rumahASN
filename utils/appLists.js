@@ -29,6 +29,15 @@ export const appLists = [
     userType: ["admin", "asn"],
   },
   {
+    rightIcon: <IconTransfer />,
+    title: "Pengetahuan",
+    desc: "Manajemen Pengetahuan",
+    color: "#FBBC05",
+    url: "/knowledge-managements/dashboard",
+    icon: "https://siasn.bkd.jatimprov.go.id:9000/public/icon-layanan-keuangan.png",
+    userType: ["admin"],
+  },
+  {
     rightIcon: <IconCalendarUser />,
     title: "TemuBKD",
     desc: "Buku Tamu Digital",

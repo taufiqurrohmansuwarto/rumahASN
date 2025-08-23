@@ -40,3 +40,6 @@ sso_token.json
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Excel files
+*.xlsx
