@@ -4,8 +4,9 @@ import {
   LikeOutlined,
   MessageOutlined,
   UserOutlined,
+  ArrowRightOutlined,
 } from "@ant-design/icons";
-import { Avatar, Card, Flex, Space, Tag, Typography } from "antd";
+import { Avatar, Button, Card, Flex, Space, Tag, Typography, Tooltip } from "antd";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 
@@ -13,41 +14,76 @@ dayjs.extend(relativeTime);
 
 const { Title, Text } = Typography;
 
-const ContentCard = ({ content, isMobile, onClick }) => {
+const ContentCard = ({ content, isMobile, onClick, showStatus = false, isAdmin = false }) => {
+  const getStatusColor = (status) => {
+    const statusColors = {
+      draft: "#d9d9d9",
+      published: "#52c41a", 
+      rejected: "#ff4d4f",
+      archived: "#fa8c16"
+    };
+    return statusColors[status] || "#d9d9d9";
+  };
+  
+  const getStatusLabel = (status) => {
+    const statusLabels = {
+      draft: "Draft",
+      published: "Published", 
+      rejected: "Rejected",
+      archived: "Archived"
+    };
+    return statusLabels[status] || status;
+  };
   return (
     <Card
       style={{
         marginBottom: isMobile ? "12px" : "16px",
         borderRadius: isMobile ? "8px" : "12px",
         border: "1px solid #EDEFF1",
-        cursor: "pointer",
-        transition: "all 0.3s ease",
+        boxShadow: "0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24)",
       }}
-      bodyStyle={{ padding: isMobile ? "16px" : "24px" }}
-      hoverable
-      onClick={onClick}
+      styles={{ body: { padding: isMobile ? "16px" : "24px" } }}
     >
       <Space direction="vertical" size={0} style={{ width: "100%" }}>
-        {/* Title */}
-        <Title
-          level={isMobile ? 5 : 4}
-          style={{
-            margin: 0,
-            marginBottom: isMobile ? "8px" : "18px",
-            fontWeight: 600,
-            color: "#1A1A1B",
-            lineHeight: "1.4",
-            fontWeight: 600,
-            display: "-webkit-box",
-            "-webkit-line-clamp": isMobile ? 2 : 3,
-            "-webkit-box-orient": "vertical",
-            overflow: "hidden",
-            textOverflow: "ellipsis",
-          }}
-          title={content.title}
-        >
-          {content.title}
-        </Title>
+        {/* Header with Title and Status */}
+        <Flex justify="space-between" align="flex-start" style={{ marginBottom: isMobile ? "12px" : "18px" }}>
+          <Title
+            level={isMobile ? 5 : 4}
+            style={{
+              margin: 0,
+              fontWeight: 600,
+              color: "#1A1A1B",
+              lineHeight: "1.4",
+              display: "-webkit-box",
+              "-webkit-line-clamp": isMobile ? 2 : 3,
+              "-webkit-box-orient": "vertical",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              flex: 1,
+              marginRight: "12px",
+            }}
+            title={content.title}
+          >
+            {content.title}
+          </Title>
+          
+          {/* Status Badge */}
+          {(showStatus || isAdmin) && content.status && (
+            <Tag
+              color={getStatusColor(content.status)}
+              style={{
+                marginLeft: "8px",
+                borderRadius: "6px",
+                fontSize: isMobile ? "10px" : "11px",
+                fontWeight: 500,
+                border: "none",
+                flexShrink: 0,
+              }}
+            >
+              {getStatusLabel(content.status)}
+            </Tag>
+          )}
+        </Flex>
 
         {/* Author Info */}
         <Flex
@@ -93,17 +129,19 @@ const ContentCard = ({ content, isMobile, onClick }) => {
               >
                 {content.author?.username}
               </Text>
-              <Text
-                style={{
-                  fontSize: isMobile ? "11px" : "12px",
-                  color: "#8c8c8c",
-                  display: "block",
-                  lineHeight: "1.2",
-                }}
-                title={dayjs(content.created_at).format("DD-MM-YYYY HH:mm")}
-              >
-                {dayjs(content.created_at).fromNow()}
-              </Text>
+              <Tooltip title={`Dipublikasikan pada ${dayjs(content.created_at).format("DD-MM-YYYY HH:mm")}`}>
+                <Text
+                  style={{
+                    fontSize: isMobile ? "11px" : "12px",
+                    color: "#8c8c8c",
+                    display: "block",
+                    lineHeight: "1.2",
+                    cursor: "help",
+                  }}
+                >
+                  {dayjs(content.created_at).fromNow()}
+                </Text>
+              </Tooltip>
             </div>
           </Flex>
 
@@ -111,12 +149,14 @@ const ContentCard = ({ content, isMobile, onClick }) => {
           <Flex gap="small" wrap="wrap">
             {content.category && (
               <Tag
-                color="#FF4500"
                 style={{
                   borderRadius: "12px",
                   fontSize: isMobile ? "10px" : "11px",
                   padding: "2px 8px",
                   fontWeight: 500,
+                  backgroundColor: "#FF4500",
+                  color: "white",
+                  border: "none",
                 }}
               >
                 {content.category.name}
@@ -133,18 +173,19 @@ const ContentCard = ({ content, isMobile, onClick }) => {
             marginTop: isMobile ? "12px" : "16px",
             marginBottom: isMobile ? "16px" : "20px",
             padding: isMobile ? "12px" : "16px",
-            backgroundColor: "#fafafa",
+            backgroundColor: "#f8f9fa",
             borderRadius: "8px",
-            border: "1px solid #f0f0f0",
+            border: "1px solid #e9ecef",
+            position: "relative",
           }}
         >
           <div
             style={{
               fontSize: isMobile ? "14px" : "15px",
               lineHeight: "1.6",
-              color: "#262626",
+              color: "#343a40",
               display: "-webkit-box",
-              "-webkit-line-clamp": 4,
+              "-webkit-line-clamp": 3,
               "-webkit-box-orient": "vertical",
               overflow: "hidden",
               textOverflow: "ellipsis",
@@ -152,20 +193,25 @@ const ContentCard = ({ content, isMobile, onClick }) => {
             }}
           >
             <ReactMarkdownCustom withCustom={false}>
-              {content?.content?.substring(0, 300)}
+              {content?.content?.substring(0, 250)}
             </ReactMarkdownCustom>
           </div>
-          {content?.content?.length > 300 && (
-            <Text
+          {content?.content?.length > 250 && (
+            <div
               style={{
+                position: "absolute",
+                bottom: 0,
+                right: 0,
+                padding: "4px 8px",
+                background: "linear-gradient(90deg, transparent, #f8f9fa 30%)",
                 fontSize: isMobile ? "11px" : "12px",
-                color: "#8c8c8c",
-                marginTop: "8px",
+                color: "#FF4500",
+                fontWeight: 500,
                 fontStyle: "italic",
               }}
             >
               Baca selengkapnya...
-            </Text>
+            </div>
           )}
         </div>
       )}
@@ -253,16 +299,25 @@ const ContentCard = ({ content, isMobile, onClick }) => {
             </Flex>
           </Space>
 
-          <Text
+          {/* Detail Button */}
+          <Button
+            type="text"
+            size={isMobile ? "small" : "middle"}
+            icon={<ArrowRightOutlined />}
+            onClick={(e) => {
+              e.stopPropagation();
+              onClick && onClick();
+            }}
             style={{
-              fontSize: isMobile ? "11px" : "12px",
-              color: "#52c41a",
+              color: "#FF4500",
               fontWeight: 500,
-              textTransform: "capitalize",
+              display: "flex",
+              alignItems: "center",
+              gap: "4px",
             }}
           >
-            {content.status}
-          </Text>
+            {!isMobile && "Detail"}
+          </Button>
         </Flex>
       </div>
     </Card>

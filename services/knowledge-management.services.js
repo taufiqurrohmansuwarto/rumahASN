@@ -187,3 +187,23 @@ export const updateReferensiMission = async ({ id, data }) => {
 export const deleteReferensiMission = async (id) => {
   return await api.delete(`/admin/refs/missions/${id}`).then((res) => res.data);
 };
+
+// admin contents
+export const getAdminKnowledgeContents = async (query) => {
+  const qs = queryString.stringify(query, {
+    skipNull: true,
+    skipEmptyString: true,
+  });
+
+  return await api.get(`/admin/contents?${qs}`).then((res) => res.data);
+};
+
+export const getAdminKnowledgeContentDetail = async (id) => {
+  return await api.get(`/admin/contents/${id}`).then((res) => res.data);
+};
+
+export const updateAdminKnowledgeContentStatus = async ({ id, data }) => {
+  return await api
+    .patch(`/admin/contents/${id}/status`, data)
+    .then((res) => res.data);
+};

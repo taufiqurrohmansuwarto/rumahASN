@@ -11,7 +11,6 @@ import {
   Typography,
   Card,
   Tag,
-  Spin,
   Flex,
   Grid,
   Affix,
@@ -223,21 +222,6 @@ const KnowledgeAdminBadges = () => {
     }
   };
 
-  // Loading state
-  if (sedangMeload) {
-    return (
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          minHeight: "400px",
-        }}
-      >
-        <Spin size="large" />
-      </div>
-    );
-  }
 
   return (
     <>

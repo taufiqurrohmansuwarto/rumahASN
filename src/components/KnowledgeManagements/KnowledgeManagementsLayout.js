@@ -8,6 +8,7 @@ import { getMenuItems } from "@/utils/appLists";
 import {
   DashboardOutlined,
   FileOutlined,
+  FileTextOutlined,
   LogoutOutlined,
   StarOutlined,
   TrophyOutlined,
@@ -27,6 +28,12 @@ const menuItems = [
     key: "dashboard",
     icon: <DashboardOutlined />,
     label: "Dashboard",
+    role: ["admin"],
+  },
+  {
+    key: "contents",
+    icon: <FileTextOutlined />,
+    label: "Contents",
     role: ["admin"],
   },
   {
