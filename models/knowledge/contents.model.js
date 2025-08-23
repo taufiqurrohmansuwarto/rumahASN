@@ -26,6 +26,14 @@ class knowledgeContents extends Model {
           to: "users.custom_id",
         },
       },
+      user_verified: {
+        relation: Model.BelongsToOneRelation,
+        modelClass: User,
+        join: {
+          from: "knowledge.contents.verified_by",
+          to: "users.custom_id",
+        },
+      },
       category: {
         relation: Model.BelongsToOneRelation,
         modelClass: Category,

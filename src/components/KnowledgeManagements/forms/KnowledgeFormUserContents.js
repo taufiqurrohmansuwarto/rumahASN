@@ -38,6 +38,15 @@ function KnowledgeFormUserContents({
   initialData = null,
   onSuccess = () => {},
   onCancel = () => {},
+  mode = "user", // "user" | "admin"
+  queryKeysToInvalidate = ["fetch-knowledge-user-contents"], // customizable query keys
+  showDraftButton = true, // show/hide draft button
+  showSubmitButton = true, // show/hide submit button
+  customButtonText = null, // { draft: "Custom Draft", submit: "Custom Submit", cancel: "Custom Cancel" }
+  customTitle = null, // custom title text
+  customSubtitle = null, // custom subtitle text
+  useCreateMutation = null, // custom create mutation hook
+  useUpdateMutation = null, // custom update mutation hook
 }) {
   const [form] = Form.useForm();
   const [tags, setTags] = useState([]);
@@ -60,16 +69,45 @@ function KnowledgeFormUserContents({
     }
   );
 
-  // Mutation untuk create/update
-  const { mutate: createMutation, isLoading: createLoading } = useMutation(
+  // Get button text based on mode and custom text
+  const getButtonText = () => {
+    const defaultTexts = {
+      user: {
+        draft: "Simpan Draft",
+        submit: "Kirim untuk Review",
+        cancel: "Batal"
+      },
+      admin: {
+        draft: "Simpan",
+        submit: "Perbarui",
+        cancel: "Batal"
+      }
+    };
+    
+    return {
+      draft: customButtonText?.draft || defaultTexts[mode].draft,
+      submit: customButtonText?.submit || defaultTexts[mode].submit,
+      cancel: customButtonText?.cancel || defaultTexts[mode].cancel
+    };
+  };
+
+  const buttonText = getButtonText();
+
+  // Use custom mutations or default ones
+  const defaultCreateMutation = useMutation(
     (data) => createKnowledgeContent(data),
     {
       onSuccess: (data) => {
-        message.success("Konten berhasil dibuat!");
-        queryClient.invalidateQueries(["fetch-knowledge-user-contents"]);
-        form.resetFields();
-        setTags([]);
-        setContent("");
+        const successMessage = mode === "admin" ? "Konten berhasil dibuat!" : "Konten berhasil dibuat!";
+        message.success(successMessage);
+        queryKeysToInvalidate.forEach(key => {
+          queryClient.invalidateQueries([key]);
+        });
+        if (mode === "user") {
+          form.resetFields();
+          setTags([]);
+          setContent("");
+        }
         onSuccess(data);
       },
       onError: (error) => {
@@ -78,12 +116,15 @@ function KnowledgeFormUserContents({
     }
   );
 
-  const { mutate: updateMutation, isLoading: updateLoading } = useMutation(
+  const defaultUpdateMutation = useMutation(
     ({ id, data }) => updateKnowledgeContent({ id, data }),
     {
       onSuccess: (data) => {
-        message.success("Konten berhasil diperbarui!");
-        queryClient.invalidateQueries(["fetch-knowledge-user-contents"]);
+        const successMessage = mode === "admin" ? "Konten berhasil diperbarui!" : "Konten berhasil diperbarui!";
+        message.success(successMessage);
+        queryKeysToInvalidate.forEach(key => {
+          queryClient.invalidateQueries([key]);
+        });
         onSuccess(data);
       },
       onError: (error) => {
@@ -91,6 +132,13 @@ function KnowledgeFormUserContents({
       },
     }
   );
+
+  // Use provided hooks or default ones
+  const createMutationHook = useCreateMutation || (() => defaultCreateMutation);
+  const updateMutationHook = useUpdateMutation || (() => defaultUpdateMutation);
+
+  const { mutate: createMutation, isLoading: createLoading } = createMutationHook();
+  const { mutate: updateMutation, isLoading: updateLoading } = updateMutationHook();
 
   // Set initial data jika dalam mode edit
   useEffect(() => {
@@ -118,7 +166,11 @@ function KnowledgeFormUserContents({
     };
 
     if (initialData) {
-      updateMutation({ id: initialData.id, data: formData });
+      if (mode === "admin") {
+        updateMutation({ id: initialData.id, payload: formData });
+      } else {
+        updateMutation({ id: initialData.id, data: formData });
+      }
     } else {
       createMutation(formData);
     }
@@ -131,12 +183,16 @@ function KnowledgeFormUserContents({
         const formData = {
           ...values,
           content: content,
-          status: "draft",
+          status: mode === "admin" ? (initialData?.status || "draft") : "draft",
           tags: tags,
         };
 
         if (initialData) {
-          updateMutation({ id: initialData.id, data: formData });
+          if (mode === "admin") {
+            updateMutation({ id: initialData.id, payload: formData });
+          } else {
+            updateMutation({ id: initialData.id, data: formData });
+          }
         } else {
           createMutation(formData);
         }
@@ -153,12 +209,16 @@ function KnowledgeFormUserContents({
         const formData = {
           ...values,
           content: content,
-          status: "pending",
+          status: mode === "admin" ? (initialData?.status || "published") : "pending",
           tags: tags,
         };
 
         if (initialData) {
-          updateMutation({ id: initialData.id, data: formData });
+          if (mode === "admin") {
+            updateMutation({ id: initialData.id, payload: formData });
+          } else {
+            updateMutation({ id: initialData.id, data: formData });
+          }
         } else {
           createMutation(formData);
         }
@@ -193,7 +253,7 @@ function KnowledgeFormUserContents({
               border: "1px solid #EDEFF1",
               marginBottom: isMobile ? "12px" : "16px",
             }}
-            bodyStyle={{ padding: 0 }}
+            styles={{ body: { padding: 0 } }}
           >
             <Flex>
               {/* Icon Section - Hide on mobile */}
@@ -227,9 +287,9 @@ function KnowledgeFormUserContents({
                     }}
                   >
                     📚{" "}
-                    {initialData
+                    {customTitle || (initialData
                       ? "Edit Manajemen Pengetahuan"
-                      : "Buat Manajemen Pengetahuan Baru"}
+                      : "Buat Manajemen Pengetahuan Baru")}
                   </Title>
                   <Text
                     style={{
@@ -238,9 +298,9 @@ function KnowledgeFormUserContents({
                       lineHeight: isMobile ? "1.3" : "1.4",
                     }}
                   >
-                    {initialData
+                    {customSubtitle || (initialData
                       ? "Perbarui konten manajemen pengetahuan yang sudah ada"
-                      : "Kelola dan bagikan pengetahuan untuk pengembangan organisasi"}
+                      : "Kelola dan bagikan pengetahuan untuk pengembangan organisasi")}
                   </Text>
                 </div>
 
@@ -516,17 +576,42 @@ function KnowledgeFormUserContents({
                         e.currentTarget.style.color = "#595959";
                       }}
                     >
-                      Batal
+                      {buttonText.cancel}
                     </Button>
-                    <Button
-                      type="primary"
-                      icon={<SendOutlined />}
-                      onClick={handleSubmitForReview}
-                      loading={isLoading}
-                      size="middle"
-                    >
-                      {isLoading ? "Mengirim..." : "Kirim"}
-                    </Button>
+                    
+                    {showDraftButton && (
+                      <Button
+                        onClick={handleSaveDraft}
+                        loading={isLoading}
+                        size="middle"
+                        style={{
+                          borderColor: "#52c41a",
+                          color: "#52c41a",
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.backgroundColor = "#52c41a";
+                          e.currentTarget.style.color = "white";
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.backgroundColor = "transparent";
+                          e.currentTarget.style.color = "#52c41a";
+                        }}
+                      >
+                        {isLoading ? "Menyimpan..." : buttonText.draft}
+                      </Button>
+                    )}
+                    
+                    {showSubmitButton && (
+                      <Button
+                        type="primary"
+                        icon={<SendOutlined />}
+                        onClick={handleSubmitForReview}
+                        loading={isLoading}
+                        size="middle"
+                      >
+                        {isLoading ? (mode === "admin" ? "Memperbarui..." : "Mengirim...") : buttonText.submit}
+                      </Button>
+                    )}
                   </div>
                 </Form>
               </div>

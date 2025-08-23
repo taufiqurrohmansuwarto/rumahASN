@@ -202,8 +202,14 @@ export const getAdminKnowledgeContentDetail = async (id) => {
   return await api.get(`/admin/contents/${id}`).then((res) => res.data);
 };
 
-export const updateAdminKnowledgeContentStatus = async ({ id, data }) => {
+export const updateAdminKnowledgeContent = async ({ id, payload }) => {
   return await api
-    .patch(`/admin/contents/${id}/status`, data)
+    .patch(`/admin/contents/${id}`, payload)
+    .then((res) => res.data);
+};
+
+export const updateAdminKnowledgeContentStatus = async ({ id, payload }) => {
+  return await api
+    .patch(`/admin/contents/${id}/status`, payload)
     .then((res) => res.data);
 };

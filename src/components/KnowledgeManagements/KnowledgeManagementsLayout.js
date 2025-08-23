@@ -87,7 +87,7 @@ function KnowledgeManagementsLayout({ children, active = "dashboard" }) {
     >
       <ProConfigProvider token={token}>
         <ProLayout
-          title={"Pengetahuan"}
+          title={"Manajemen Pengetahuan"}
           defaultCollapsed={collapsed}
           collapsed={collapsed}
           onCollapse={setCollapsed}

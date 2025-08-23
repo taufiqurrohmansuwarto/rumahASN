@@ -64,7 +64,9 @@ export const getKnowledgeContentsAdmin = async (req, res) => {
 export const getKnowledgeContentAdmin = async (req, res) => {
   try {
     const { id } = req?.query;
-    const content = await KnowledgeContent.query().findById(id);
+    const content = await KnowledgeContent.query()
+      .findById(id)
+      .withGraphFetched("[author(simpleSelect), category]");
 
     if (!content) {
       res.status(404).json({
@@ -81,16 +83,34 @@ export const getKnowledgeContentAdmin = async (req, res) => {
 export const updateKnowledgeContentAdmin = async (req, res) => {
   try {
     const { id } = req?.query;
+    const payload = req?.body;
+
+    const data = {
+      ...payload,
+      tags: JSON.stringify(payload?.tags),
+    };
+
+    const content = await KnowledgeContent.query().where("id", id).update(data);
+
+    res.json(content);
+  } catch (error) {
+    handleError(res, error);
+  }
+};
+
+export const changeStatusKnowledgeContentAdmin = async (req, res) => {
+  try {
+    const { id } = req?.query;
     const { customId } = req?.user;
     const payload = req?.body;
 
     const data = {
       ...payload,
-      updated_by: customId,
+      verified_by: customId,
+      verified_at: new Date(),
     };
 
-    const content = await KnowledgeContent.query().where("id", id).update(data);
-
+    const content = await KnowledgeContent.query().where("id", id).patch(data);
     res.json(content);
   } catch (error) {
     handleError(res, error);

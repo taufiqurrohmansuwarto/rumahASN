@@ -1,6 +1,6 @@
-import PageContainer from "@/components/PageContainer";
-import RASNDashboard from "@/components/Statistik/RASNDashboard";
+import KnowledgeAdminDashboard from "@/components/KnowledgeManagements/admins/KnowledgeAdminDashboard";
 import KnowledgeManagementLayout from "@/components/KnowledgeManagements/KnowledgeManagementsLayout";
+import PageContainer from "@/components/PageContainer";
 import { Breadcrumb, Grid } from "antd";
 import Head from "next/head";
 
@@ -24,7 +24,9 @@ function KnowledgeManagementDashboard() {
         }}
         title="Pengetahuan"
         content="Pengetahuan"
-      ></PageContainer>
+      >
+        <KnowledgeAdminDashboard />
+      </PageContainer>
     </>
   );
 }
