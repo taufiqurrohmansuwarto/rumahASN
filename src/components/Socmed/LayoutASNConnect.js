@@ -15,27 +15,27 @@ function LayoutASNConnect({ children, active = "asn-updates" }) {
       key: "asn-updates",
       label: "Beranda",
     },
-    {
-      key: "asn-helper",
-      label: "ASN Helper",
-    },
+    // {
+    //   key: "asn-helper",
+    //   label: "ASN Helper",
+    // },
     {
       key: "asn-knowledge",
-      label: "Manajemen Pengetahuan",
+      label: "Pojok Pengetahuan",
     },
     {
       key: "asn-discussions",
-      label: "Diskusi",
+      label: "Forum",
     },
 
-    {
-      key: "asn-communities",
-      label: "Komunitas",
-    },
-    {
-      key: "asn-events",
-      label: "Kegiatan",
-    },
+    // {
+    //   key: "asn-communities",
+    //   label: "Komunitas",
+    // },
+    // {
+    //   key: "asn-events",
+    //   label: "Kegiatan",
+    // },
   ];
 
   return (

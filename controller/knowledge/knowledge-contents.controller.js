@@ -12,11 +12,23 @@ export const getKnowledgeContents = async (req, res) => {
       limit = 10,
       search = "",
       sort = "created_at",
+      category_id = "",
+      tags = "",
     } = req?.query;
     const contents = await KnowledgeContent.query()
       .andWhere((builder) => {
         if (search) {
           builder.where("title", "ilike", `%${search}%`);
+        }
+      })
+      .andWhere((builder) => {
+        if (category_id) {
+          builder.where("category_id", category_id);
+        }
+      })
+      .andWhere((builder) => {
+        if (tags) {
+          builder.whereRaw("tags @> ?", [JSON.stringify([tags])]);
         }
       })
       .andWhere("status", "published")

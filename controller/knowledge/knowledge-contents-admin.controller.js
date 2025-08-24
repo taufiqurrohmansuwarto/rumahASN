@@ -109,21 +109,58 @@ export const updateKnowledgeContentAdmin = async (req, res) => {
       updated_at: new Date(),
     };
 
-    // update increment version
-    const contentVersion = await KnowledgeContentVersions.query()
-      .where("content_id", id)
-      .orderBy("version", "desc")
-      .first();
+    // Menggunakan transaction untuk memastikan konsistensi data
+    const content = await KnowledgeContent.transaction(async (trx) => {
+      // Ambil content yang akan diupdate
+      const existingContent = await KnowledgeContent.query(trx).findById(id);
 
-    const version = contentVersion ? contentVersion.version + 1 : 1;
+      if (!existingContent) {
+        throw new Error("Content tidak ditemukan");
+      }
 
-    await KnowledgeContentVersions.query().insert({
-      content_id: id,
-      version,
-      updated_by: customId,
+      // update increment version
+      const contentVersion = await KnowledgeContentVersions.query(trx)
+        .where("content_id", id)
+        .orderBy("version", "desc")
+        .first();
+
+      const version = contentVersion ? contentVersion.version + 1 : 1;
+
+      await KnowledgeContentVersions.query(trx).insert({
+        content_id: id,
+        version,
+        updated_by: customId,
+      });
+
+      // Update content dengan references menggunakan upsertGraph
+      const updatedData = {
+        ...data,
+        id: parseInt(id),
+      };
+
+      // Tambahkan references ke data jika ada
+      if (payload?.references && payload.references.length > 0) {
+        updatedData.references = payload.references.map((reference) => ({
+          title: reference.title,
+          url: reference.url,
+        }));
+      } else {
+        updatedData.references = [];
+      }
+
+      // Gunakan upsertGraph untuk update content dan replace semua references
+      const result = await KnowledgeContent.query(trx).upsertGraph(
+        updatedData,
+        {
+          relate: false,
+          unrelate: true,
+          update: true,
+          insertMissing: true,
+        }
+      );
+
+      return result;
     });
-
-    const content = await KnowledgeContent.query().where("id", id).update(data);
 
     res.json(content);
   } catch (error) {

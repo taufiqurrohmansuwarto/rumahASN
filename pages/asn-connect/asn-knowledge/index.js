@@ -9,6 +9,7 @@ import { useRouter } from "next/navigation";
 
 const AsnKnowledge = () => {
   const router = useRouter();
+
   useScrollRestoration();
 
   return (
@@ -36,7 +37,7 @@ AsnKnowledge.Auth = {
 };
 
 AsnKnowledge.getLayout = (page) => {
-  return <Layout active="/asn-connect/asn-knowledge">{page}</Layout>;
+  return <Layout active="/asn-connect/asn-updates">{page}</Layout>;
 };
 
 export default AsnKnowledge;
