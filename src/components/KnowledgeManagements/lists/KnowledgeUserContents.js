@@ -1,38 +1,40 @@
 import useScrollRestoration from "@/hooks/useScrollRestoration";
-import { 
+import {
+  bookmarkKnowledgeContent,
   getKnowledgeContents,
   likeKnowledgeContent,
-  bookmarkKnowledgeContent,
 } from "@/services/knowledge-management.services";
-import { SearchOutlined } from "@ant-design/icons";
 import { useDebouncedValue } from "@mantine/hooks";
-import { useInfiniteQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
-  Button,
-  Card,
-  Col,
-  Empty,
-  Flex,
-  Grid,
-  Input,
-  Row,
-  Spin,
-  Typography,
-  message,
-} from "antd";
+  useInfiniteQuery,
+  useMutation,
+  useQueryClient,
+} from "@tanstack/react-query";
+import { Button, Col, Empty, Grid, Row, Spin, message } from "antd";
 import { useRouter } from "next/router";
 import { useCallback, useEffect, useState } from "react";
 import ContentCard from "../components/ContentCard";
+import KnowledgeHeader from "../components/KnowledgeHeader";
+import KnowledgeFilters from "../components/KnowledgeFilters";
 
-const { Title, Text } = Typography;
 const { useBreakpoint } = Grid;
-const { Search } = Input;
 
 const KnowledgeUserContents = () => {
   useScrollRestoration();
+
   const router = useRouter();
   const queryClient = useQueryClient();
-  const [searchQuery, setSearchQuery] = useState("");
+
+  // Get URL parameters
+  const { query } = router;
+
+  // State management
+  const [searchQuery, setSearchQuery] = useState(query.search || "");
+  const [selectedCategory, setSelectedCategory] = useState(
+    query.category || null
+  );
+  const [selectedTag, setSelectedTag] = useState(query.tag || null);
+  const [selectedSort, setSelectedSort] = useState(query.sort || "created_at");
   const [debouncedSearch] = useDebouncedValue(searchQuery, 500);
   const [likingItems, setLikingItems] = useState(new Set());
   const [bookmarkingItems, setBookmarkingItems] = useState(new Set());
@@ -40,6 +42,21 @@ const KnowledgeUserContents = () => {
   // Responsive breakpoints
   const screens = useBreakpoint();
   const isMobile = !screens.md;
+
+  // Update URL when filters change
+  const updateURL = (newFilters) => {
+    const params = new URLSearchParams();
+    if (newFilters.search) params.set("search", newFilters.search);
+    if (newFilters.category) params.set("category", newFilters.category);
+    if (newFilters.tag) params.set("tag", newFilters.tag);
+    if (newFilters.sort && newFilters.sort !== "created_at")
+      params.set("sort", newFilters.sort);
+
+    const queryString = params.toString();
+    const newUrl = queryString ? `?${queryString}` : router.pathname;
+
+    router.push(newUrl, undefined, { shallow: true });
+  };
 
   const {
     data,
@@ -49,12 +66,21 @@ const KnowledgeUserContents = () => {
     isLoading,
     isError,
   } = useInfiniteQuery(
-    ["fetch-knowledge-user-contents", debouncedSearch],
+    [
+      "fetch-knowledge-user-contents",
+      debouncedSearch,
+      selectedCategory,
+      selectedTag,
+      selectedSort,
+    ],
     ({ pageParam = 1 }) =>
       getKnowledgeContents({
         page: pageParam,
         limit: 10,
         search: debouncedSearch,
+        category_id: selectedCategory,
+        tags: selectedTag,
+        sort: selectedSort,
       }),
     {
       getNextPageParam: (lastPage, allPages) => {
@@ -93,7 +119,7 @@ const KnowledgeUserContents = () => {
     (contentId) => likeKnowledgeContent(contentId),
     {
       onMutate: async (contentId) => {
-        setLikingItems(prev => new Set([...prev, contentId]));
+        setLikingItems((prev) => new Set([...prev, contentId]));
       },
       onSuccess: () => {
         queryClient.invalidateQueries(["fetch-knowledge-user-contents"]);
@@ -102,7 +128,7 @@ const KnowledgeUserContents = () => {
         message.error("Gagal menyukai konten");
       },
       onSettled: (data, error, contentId) => {
-        setLikingItems(prev => {
+        setLikingItems((prev) => {
           const newSet = new Set(prev);
           newSet.delete(contentId);
           return newSet;
@@ -116,7 +142,7 @@ const KnowledgeUserContents = () => {
     (contentId) => bookmarkKnowledgeContent(contentId),
     {
       onMutate: async (contentId) => {
-        setBookmarkingItems(prev => new Set([...prev, contentId]));
+        setBookmarkingItems((prev) => new Set([...prev, contentId]));
       },
       onSuccess: (response) => {
         message.success(
@@ -130,7 +156,7 @@ const KnowledgeUserContents = () => {
         message.error("Gagal menyimpan konten");
       },
       onSettled: (data, error, contentId) => {
-        setBookmarkingItems(prev => {
+        setBookmarkingItems((prev) => {
           const newSet = new Set(prev);
           newSet.delete(contentId);
           return newSet;
@@ -151,6 +177,60 @@ const KnowledgeUserContents = () => {
     if (!bookmarkingItems.has(contentId)) {
       bookmark(contentId);
     }
+  };
+
+  // Filter handlers
+  const handleCategoryChange = (categoryId) => {
+    setSelectedCategory(categoryId);
+    updateURL({
+      search: searchQuery,
+      category: categoryId,
+      tag: selectedTag,
+      sort: selectedSort,
+    });
+  };
+
+  const handleTagChange = (tag) => {
+    setSelectedTag(tag);
+    updateURL({
+      search: searchQuery,
+      category: selectedCategory,
+      tag: tag,
+      sort: selectedSort,
+    });
+  };
+
+  const handleSortChange = (sort) => {
+    setSelectedSort(sort);
+    updateURL({
+      search: searchQuery,
+      category: selectedCategory,
+      tag: selectedTag,
+      sort: sort,
+    });
+  };
+
+  const handleSearchChange = (e) => {
+    const value = e.target.value;
+    setSearchQuery(value);
+  };
+
+  const handleSearch = (value) => {
+    setSearchQuery(value);
+    updateURL({
+      search: value,
+      category: selectedCategory,
+      tag: selectedTag,
+      sort: selectedSort,
+    });
+  };
+
+  const handleClearFilters = () => {
+    setSelectedCategory(null);
+    setSelectedTag(null);
+    setSelectedSort("created_at");
+    setSearchQuery("");
+    router.push(router.pathname, undefined, { shallow: true });
   };
 
   const renderContentCard = (content) => (
@@ -181,55 +261,22 @@ const KnowledgeUserContents = () => {
   return (
     <div style={{ padding: isMobile ? "12px" : "16px" }}>
       {/* Header with Search */}
-      <Card
-        style={{
-          marginBottom: isMobile ? "16px" : "24px",
-          borderRadius: isMobile ? "8px" : "12px",
-          border: "1px solid #EDEFF1",
-        }}
-        bodyStyle={{ padding: isMobile ? "16px" : "20px" }}
-      >
-        <Flex
-          justify="space-between"
-          align={isMobile ? "flex-start" : "center"}
-          vertical={isMobile}
-          gap="middle"
-        >
-          <div>
-            <Title
-              level={isMobile ? 4 : 3}
-              style={{
-                margin: 0,
-                color: "#1A1A1B",
-                marginBottom: "4px",
-              }}
-            >
-              📚 Manajemen Pengetahuan
-            </Title>
-            <Text
-              style={{
-                color: "#787C7E",
-                fontSize: isMobile ? "13px" : "14px",
-              }}
-            >
-              Jelajahi dan temukan pengetahuan dari komunitas
-            </Text>
-          </div>
+      <KnowledgeHeader
+        searchQuery={searchQuery}
+        onSearchChange={handleSearchChange}
+        onSearch={handleSearch}
+      />
 
-          <Search
-            placeholder="Cari konten knowledge..."
-            allowClear
-            enterButton={<SearchOutlined />}
-            size={isMobile ? "middle" : "large"}
-            style={{
-              width: isMobile ? "100%" : "400px",
-            }}
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            onSearch={(value) => setSearchQuery(value)}
-          />
-        </Flex>
-      </Card>
+      {/* Filters */}
+      <KnowledgeFilters
+        selectedCategory={selectedCategory}
+        selectedTag={selectedTag}
+        selectedSort={selectedSort}
+        onCategoryChange={handleCategoryChange}
+        onTagChange={handleTagChange}
+        onSortChange={handleSortChange}
+        onClearFilters={handleClearFilters}
+      />
 
       {/* Content List */}
       <Row gutter={[0, 0]}>
