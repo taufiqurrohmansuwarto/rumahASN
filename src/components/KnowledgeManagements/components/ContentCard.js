@@ -2,8 +2,10 @@ import ReactMarkdownCustom from "@/components/MarkdownEditor/ReactMarkdownCustom
 import {
   MessageOutlined,
   UserOutlined,
-  HeartOutlined,
-  HeartFilled,
+  LikeOutlined,
+  LikeFilled,
+  BookOutlined,
+  LoadingOutlined,
 } from "@ant-design/icons";
 import { Avatar, Card, Flex, Tag, Typography, Tooltip } from "antd";
 import dayjs from "dayjs";
@@ -20,8 +22,12 @@ const ContentCard = ({
   showStatus = false, 
   isAdmin = false,
   onLike,
+  onBookmark,
   onUserClick,
-  isLiked = false
+  isLiked = false,
+  isBookmarked = false,
+  isLiking = false,
+  isBookmarking = false
 }) => {
   const getStatusColor = (status) => {
     const statusColors = {
@@ -52,7 +58,16 @@ const ContentCard = ({
 
   const handleLikeClick = (e) => {
     e.stopPropagation();
-    onLike && onLike(content.id);
+    if (!isLiking) {
+      onLike && onLike(content.id);
+    }
+  };
+
+  const handleBookmarkClick = (e) => {
+    e.stopPropagation();
+    if (!isBookmarking) {
+      onBookmark && onBookmark(content.id);
+    }
   };
 
   const handleContentClick = () => {
@@ -93,9 +108,19 @@ const ContentCard = ({
             borderRight: "1px solid #EDEFF1",
           }}
         >
-          <Tooltip title={isLiked ? "Unlike" : "Like konten ini"}>
-            {isLiked ? (
-              <HeartFilled
+          <Tooltip title={isLiking ? "Loading..." : (isLiked ? "Unlike" : "Like konten ini")}>
+            {isLiking ? (
+              <LoadingOutlined
+                style={{
+                  fontSize: 16,
+                  color: "#FF4500",
+                  marginBottom: "4px",
+                  cursor: "default",
+                }}
+                spin
+              />
+            ) : isLiked ? (
+              <LikeFilled
                 style={{
                   fontSize: 16,
                   color: "#FF4500",
@@ -112,7 +137,7 @@ const ContentCard = ({
                 }}
               />
             ) : (
-              <HeartOutlined
+              <LikeOutlined
                 style={{
                   fontSize: 16,
                   color: "#878A8C",
@@ -360,7 +385,7 @@ const ContentCard = ({
           )}
 
           {/* Actions */}
-          <Flex align="center">
+          <Flex align="center" justify="space-between">
             <Flex
               align="center"
               gap={4}
@@ -383,6 +408,56 @@ const ContentCard = ({
             >
               <MessageOutlined style={{ fontSize: "12px" }} />
               <span>{content.comments_count || 0} Komentar</span>
+            </Flex>
+
+            {/* Bookmark Button */}
+            <Flex
+              align="center"
+              gap={4}
+              style={{
+                cursor: isBookmarking ? "default" : "pointer",
+                padding: "4px 6px",
+                borderRadius: "4px",
+                transition: "background-color 0.2s ease",
+                opacity: isBookmarking ? 0.7 : 1,
+              }}
+              onClick={handleBookmarkClick}
+              onMouseEnter={(e) => {
+                if (!isBookmarking) {
+                  e.currentTarget.style.backgroundColor = "#F8F9FA";
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (!isBookmarking) {
+                  e.currentTarget.style.backgroundColor = "transparent";
+                }
+              }}
+            >
+              {isBookmarking ? (
+                <LoadingOutlined
+                  style={{
+                    fontSize: "12px",
+                    color: "#FF4500",
+                  }}
+                  spin
+                />
+              ) : (
+                <BookOutlined
+                  style={{
+                    fontSize: "12px",
+                    color: isBookmarked ? "#FF4500" : "#787C7E",
+                  }}
+                />
+              )}
+              <span
+                style={{
+                  fontSize: "12px",
+                  color: isBookmarking ? "#FF4500" : (isBookmarked ? "#FF4500" : "#787C7E"),
+                  fontWeight: 700,
+                }}
+              >
+                {isBookmarking ? "Loading..." : (isBookmarked ? "Tersimpan" : "Simpan")}
+              </span>
             </Flex>
           </Flex>
         </Flex>

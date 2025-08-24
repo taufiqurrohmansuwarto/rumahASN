@@ -1,8 +1,12 @@
 import useScrollRestoration from "@/hooks/useScrollRestoration";
-import { getKnowledgeContents } from "@/services/knowledge-management.services";
+import { 
+  getKnowledgeContents,
+  likeKnowledgeContent,
+  bookmarkKnowledgeContent,
+} from "@/services/knowledge-management.services";
 import { SearchOutlined } from "@ant-design/icons";
 import { useDebouncedValue } from "@mantine/hooks";
-import { useInfiniteQuery } from "@tanstack/react-query";
+import { useInfiniteQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   Button,
   Card,
@@ -14,6 +18,7 @@ import {
   Row,
   Spin,
   Typography,
+  message,
 } from "antd";
 import { useRouter } from "next/router";
 import { useCallback, useEffect, useState } from "react";
@@ -26,8 +31,11 @@ const { Search } = Input;
 const KnowledgeUserContents = () => {
   useScrollRestoration();
   const router = useRouter();
+  const queryClient = useQueryClient();
   const [searchQuery, setSearchQuery] = useState("");
   const [debouncedSearch] = useDebouncedValue(searchQuery, 500);
+  const [likingItems, setLikingItems] = useState(new Set());
+  const [bookmarkingItems, setBookmarkingItems] = useState(new Set());
 
   // Responsive breakpoints
   const screens = useBreakpoint();
@@ -80,11 +88,82 @@ const KnowledgeUserContents = () => {
   // Flatten all pages data
   const allContents = data?.pages?.flatMap((page) => page.data) || [];
 
+  // Like mutation
+  const { mutate: like } = useMutation(
+    (contentId) => likeKnowledgeContent(contentId),
+    {
+      onMutate: async (contentId) => {
+        setLikingItems(prev => new Set([...prev, contentId]));
+      },
+      onSuccess: () => {
+        queryClient.invalidateQueries(["fetch-knowledge-user-contents"]);
+      },
+      onError: () => {
+        message.error("Gagal menyukai konten");
+      },
+      onSettled: (data, error, contentId) => {
+        setLikingItems(prev => {
+          const newSet = new Set(prev);
+          newSet.delete(contentId);
+          return newSet;
+        });
+      },
+    }
+  );
+
+  // Bookmark mutation
+  const { mutate: bookmark } = useMutation(
+    (contentId) => bookmarkKnowledgeContent(contentId),
+    {
+      onMutate: async (contentId) => {
+        setBookmarkingItems(prev => new Set([...prev, contentId]));
+      },
+      onSuccess: (response) => {
+        message.success(
+          response?.is_bookmarked
+            ? "Konten disimpan"
+            : "Konten dihapus dari simpanan"
+        );
+        queryClient.invalidateQueries(["fetch-knowledge-user-contents"]);
+      },
+      onError: () => {
+        message.error("Gagal menyimpan konten");
+      },
+      onSettled: (data, error, contentId) => {
+        setBookmarkingItems(prev => {
+          const newSet = new Set(prev);
+          newSet.delete(contentId);
+          return newSet;
+        });
+      },
+    }
+  );
+
+  // Handle like
+  const handleLike = (contentId) => {
+    if (!likingItems.has(contentId)) {
+      like(contentId);
+    }
+  };
+
+  // Handle bookmark
+  const handleBookmark = (contentId) => {
+    if (!bookmarkingItems.has(contentId)) {
+      bookmark(contentId);
+    }
+  };
+
   const renderContentCard = (content) => (
     <ContentCard
       key={content.id}
       content={content}
       isMobile={isMobile}
+      isLiked={content.is_liked}
+      isBookmarked={content.is_bookmarked}
+      isLiking={likingItems.has(content.id)}
+      isBookmarking={bookmarkingItems.has(content.id)}
+      onLike={handleLike}
+      onBookmark={handleBookmark}
       onClick={() => {
         router.push(`/asn-connect/asn-knowledge/${content.id}`);
       }}
