@@ -1,39 +1,34 @@
-import ReactMarkdownCustom from "@/components/MarkdownEditor/ReactMarkdownCustom";
 import {
   useAdminContentDetail,
   useUpdateAdminContent,
   useUpdateContentStatus,
 } from "@/hooks/knowledge-management/useAdminContentDetail";
-import { Comment } from "@ant-design/compatible";
+import { BookOutlined } from "@ant-design/icons";
 import {
-  BookOutlined,
-  EditOutlined,
-  EyeOutlined,
-  LikeOutlined,
-  MessageOutlined,
-  UserOutlined,
-} from "@ant-design/icons";
-import {
-  Avatar,
-  Button,
   Card,
+  Col,
+  Divider,
   Empty,
   Flex,
   Grid,
-  Input,
-  Modal,
-  Select,
-  Space,
+  Row,
   Spin,
-  Tag,
-  Tooltip,
   Typography,
+  Input,
 } from "antd";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import { useRouter } from "next/router";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import KnowledgeFormUserContents from "../forms/KnowledgeFormUserContents";
+import ContentHeader from "./ContentHeader";
+import ContentActions from "./ContentActions";
+import ContentDisplay from "./ContentDisplay";
+import ContentReferences from "./ContentReferences";
+import ContentAttachments from "./ContentAttachments";
+import ContentComments from "./ContentComments";
+import StatusModal from "./StatusModal";
+import InfoModal from "./InfoModal";
 
 dayjs.extend(relativeTime);
 
@@ -46,8 +41,14 @@ const KnowledgeAdminContentDetail = () => {
   const { id } = router.query;
   const [editContentMode, setEditContentMode] = useState(false);
   const [statusModalVisible, setStatusModalVisible] = useState(false);
+  const [infoModalVisible, setInfoModalVisible] = useState(false);
   const [selectedStatus, setSelectedStatus] = useState(null);
   const [statusReason, setStatusReason] = useState("");
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   // Responsive breakpoints
   const screens = useBreakpoint();
@@ -60,15 +61,39 @@ const KnowledgeAdminContentDetail = () => {
 
   // Hooks
   const { data: content, isLoading, isError } = useAdminContentDetail(id);
-  const updateContentMutation = useUpdateAdminContent(handleContentUpdateSuccess);
+  const updateContentMutation = useUpdateAdminContent(
+    handleContentUpdateSuccess
+  );
   const updateStatusMutation = useUpdateContentStatus();
 
   // Status options
   const statusOptions = [
-    { value: "draft", label: "Draft", color: "#d9d9d9" },
-    { value: "published", label: "Published", color: "#52c41a" },
-    { value: "rejected", label: "Rejected", color: "#ff4d4f" },
-    { value: "archived", label: "Archived", color: "#fa8c16" },
+    {
+      value: "pending",
+      label: "Pending",
+      color: "#d9d9d9",
+      description: "Konten sedang menunggu review dan belum dipublikasikan",
+    },
+    {
+      value: "published",
+      label: "Published",
+      color: "#52c41a",
+      description: "Konten telah direview dan dipublikasikan untuk umum",
+    },
+    {
+      value: "rejected",
+      label: "Rejected",
+      color: "#ff4d4f",
+      description:
+        "Konten ditolak karena tidak memenuhi standar atau kebijakan",
+    },
+    {
+      value: "archived",
+      label: "Archived",
+      color: "#fa8c16",
+      description:
+        "Konten disimpan sebagai arsip dan tidak ditampilkan kepada umum",
+    },
   ];
 
   const getStatusInfo = (status) => {
@@ -107,6 +132,21 @@ const KnowledgeAdminContentDetail = () => {
     setSelectedStatus(null);
     setStatusReason("");
   };
+
+  if (!isClient) {
+    return (
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          minHeight: "400px",
+        }}
+      >
+        <Spin size="large" />
+      </div>
+    );
+  }
 
   if (isLoading) {
     return (
@@ -161,268 +201,105 @@ const KnowledgeAdminContentDetail = () => {
               </div>
             )}
 
-            {/* Content Section */}
+            {/* Main Content Section - Single Column Layout */}
             <div style={{ flex: 1, padding: isMobile ? "12px" : "16px" }}>
-              <div style={{ marginBottom: isMobile ? "16px" : "20px" }}>
-                <Title
-                  level={isMobile ? 5 : 4}
-                  style={{
-                    margin: 0,
-                    color: "#1A1A1B",
-                    lineHeight: isMobile ? "1.3" : "1.4",
-                  }}
-                >
-                  📋 Detail Konten Knowledge
-                </Title>
-                <Text
-                  style={{
-                    color: "#787C7E",
-                    fontSize: isMobile ? "12px" : "14px",
-                    lineHeight: isMobile ? "1.3" : "1.4",
-                  }}
-                >
-                  Kelola konten dan status publikasi knowledge
-                </Text>
-              </div>
+              <ContentHeader
+                isMobile={isMobile}
+                onInfoClick={() => setInfoModalVisible(true)}
+              />
 
-              {/* Action Buttons - Top Right */}
-              <Flex
-                justify="space-between"
-                align="center"
-                style={{ marginBottom: "24px" }}
-              >
-                <div>
-                  <Text strong>Status: </Text>
-                  <Tag
-                    color={getStatusInfo(content.status).color}
-                    style={{ marginLeft: "8px" }}
-                  >
-                    {getStatusInfo(content.status).label}
-                  </Tag>
-                  {/* Category */}
-                  {content.category && (
-                    <>
-                      <Text strong style={{ marginLeft: "16px" }}>
-                        Kategori:{" "}
-                      </Text>
-                      <Tag color="orange" style={{ marginLeft: "4px" }}>
-                        {content.category.name}
-                      </Tag>
-                    </>
-                  )}
-                  {/* Tags */}
-                  {content.tags && content.tags.length > 0 && (
-                    <>
-                      <Text strong style={{ marginLeft: "16px" }}>
-                        Tags:{" "}
-                      </Text>
-                      <Space style={{ marginLeft: "4px" }}>
-                        {content.tags.slice(0, 3).map((tag, index) => (
-                          <Tag key={index} size="small">
-                            {tag}
-                          </Tag>
-                        ))}
-                        {content.tags.length > 3 && (
-                          <Tag size="small">+{content.tags.length - 3}</Tag>
-                        )}
-                      </Space>
-                    </>
-                  )}
-                </div>
-                <Space>
-                  <Button
-                    type={editContentMode ? "default" : "primary"}
-                    icon={<EditOutlined />}
-                    onClick={handleEditContentToggle}
-                  >
-                    {editContentMode
-                      ? "Batal Edit"
-                      : isMobile
-                      ? "Edit"
-                      : "Edit Konten"}
-                  </Button>
-                  <Button onClick={handleStatusModalOpen}>
-                    {isMobile ? "Status" : "Ubah Status"}
-                  </Button>
-                </Space>
-              </Flex>
-
-              {/* Content Edit Mode */}
-              {editContentMode ? (
-                <div style={{ marginBottom: "24px" }}>
-                  <KnowledgeFormUserContents
-                    initialData={content}
-                    onSuccess={handleContentUpdateSuccess}
-                    onCancel={handleEditContentToggle}
-                    mode="admin"
-                    queryKeysToInvalidate={[
-                      "admin-knowledge-content-detail",
-                      "fetch-knowledge-admin-contents",
-                    ]}
-                    showDraftButton={false}
-                    showSubmitButton={true}
-                    customButtonText={{
-                      submit: "Perbarui Konten",
-                      cancel: "Batal Edit",
-                    }}
-                    customTitle="Edit Konten Knowledge"
-                    customSubtitle="Perbarui informasi konten knowledge"
-                    useUpdateMutation={() => updateContentMutation}
+              {/* Single Column Layout */}
+              <Row>
+                {/* Content Column */}
+                <Col xs={24}>
+                  <ContentActions
+                    content={content}
+                    editContentMode={editContentMode}
+                    isMobile={isMobile}
+                    getStatusInfo={getStatusInfo}
+                    onEditToggle={handleEditContentToggle}
+                    onStatusModalOpen={handleStatusModalOpen}
                   />
-                </div>
-              ) : (
-                /* Content Details - Always Visible */
-                <div style={{ marginBottom: "24px" }}>
-                  {/* Content Title */}
-                  <Title
-                    level={isMobile ? 4 : 3}
-                    style={{ marginBottom: "16px" }}
-                  >
-                    {content.title}
-                  </Title>
-                  <Comment
-                    avatar={
-                      <Avatar
-                        src={content.author?.image}
-                        icon={<UserOutlined />}
-                      />
-                    }
-                    author={content.author?.username}
-                    datetime={dayjs(content.created_at).format(
-                      "DD MMM YYYY, HH:mm"
-                    )}
-                    actions={[
-                      <Tooltip title="Dilihat" key="eye">
-                        <span>
-                          <EyeOutlined /> {content.views_count || 0}
-                        </span>
-                      </Tooltip>,
-                      <Tooltip title="Like" key="like">
-                        <span>
-                          <LikeOutlined /> {content.likes_count || 0}
-                        </span>
-                      </Tooltip>,
-                      <Tooltip title="Komentar" key="message">
-                        <span>
-                          <MessageOutlined /> {content.comments_count || 0}
-                        </span>
-                      </Tooltip>,
-                    ]}
-                    content={
-                      <div
-                        style={{
-                          padding: isMobile ? "16px 12px" : "24px 16px",
-                          backgroundColor: "#F8F9FA",
-                          borderRadius: "8px",
-                          border: "1px solid #EDEFF1",
-                          marginTop: "12px",
-                          lineHeight: "1.8",
-                          fontSize: isMobile ? "14px" : "15px",
-                          color: "#1A1A1B",
-                          boxShadow: "0 1px 3px rgba(0, 0, 0, 0.05)",
-                        }}
-                      >
-                        <ReactMarkdownCustom withCustom={false}>
-                          {content?.content}
-                        </ReactMarkdownCustom>
+
+                  {/* Last Updated Info */}
+                  {content.updated_at &&
+                    content.updated_at !== content.created_at && (
+                      <div style={{ marginBottom: "16px" }}>
+                        <Text
+                          style={{
+                            fontSize: "12px",
+                            color: "#666",
+                            fontStyle: "italic",
+                          }}
+                        >
+                          Terakhir diedit:{" "}
+                          {dayjs(content.updated_at).format(
+                            "DD MMMM YYYY, HH:mm"
+                          )}
+                        </Text>
                       </div>
-                    }
-                  />
-                </div>
-              )}
+                    )}
+
+                  <Divider style={{ margin: "16px 0 24px 0" }} />
+
+                  {/* Content Edit Mode or Content Display */}
+                  {editContentMode ? (
+                    <div style={{ marginBottom: "24px" }}>
+                      <KnowledgeFormUserContents
+                        initialData={content}
+                        onSuccess={handleContentUpdateSuccess}
+                        onCancel={handleEditContentToggle}
+                        mode="admin"
+                        queryKeysToInvalidate={[
+                          "admin-knowledge-content-detail",
+                          "fetch-knowledge-admin-contents",
+                        ]}
+                        showDraftButton={false}
+                        showSubmitButton={true}
+                        customButtonText={{
+                          submit: "Perbarui Konten",
+                          cancel: "Batal Edit",
+                        }}
+                        customTitle="Edit Konten Knowledge"
+                        customSubtitle="Perbarui informasi konten knowledge"
+                        useUpdateMutation={() => updateContentMutation}
+                      />
+                    </div>
+                  ) : (
+                    /* Content Details - Always Visible */
+                    <>
+                      <ContentDisplay content={content} isMobile={isMobile} />
+                      <ContentReferences content={content} />
+                      <ContentAttachments content={content} />
+                      <ContentComments content={content} />
+                    </>
+                  )}
+                </Col>
+              </Row>
             </div>
           </Flex>
         </Card>
       </div>
 
-      {/* Status Modal */}
-      <Modal
-        title="Ubah Status Konten"
-        open={statusModalVisible}
+      <StatusModal
+        visible={statusModalVisible}
         onCancel={handleStatusModalClose}
-        footer={null}
-        width={600}
-      >
-        <Space direction="vertical" size="middle" style={{ width: "100%" }}>
-          <div>
-            <Text
-              style={{ display: "block", marginBottom: "8px", color: "#666" }}
-            >
-              Status saat ini:{" "}
-              <Tag color={getStatusInfo(content.status).color}>
-                {getStatusInfo(content.status).label}
-              </Tag>
-            </Text>
-            <Text style={{ display: "block", marginBottom: "8px" }}>
-              Pilih status baru:
-            </Text>
-            <Select
-              value={selectedStatus}
-              onChange={setSelectedStatus}
-              style={{ width: "100%", marginBottom: "16px" }}
-              size="large"
-              placeholder="Pilih status baru"
-              options={statusOptions.map((option) => ({
-                ...option,
-                label: (
-                  <span>
-                    <Tag
-                      color={option.color}
-                      size="small"
-                      style={{ marginRight: "8px" }}
-                    >
-                      ●
-                    </Tag>
-                    {option.label}
-                  </span>
-                ),
-              }))}
-            />
-          </div>
+        onOk={handleStatusUpdate}
+        content={content}
+        selectedStatus={selectedStatus}
+        setSelectedStatus={setSelectedStatus}
+        statusReason={statusReason}
+        setStatusReason={setStatusReason}
+        getStatusInfo={getStatusInfo}
+        statusOptions={statusOptions}
+        loading={updateStatusMutation.isPending}
+      />
 
-          {/* Reason Field */}
-          <div>
-            <Text style={{ display: "block", marginBottom: "8px" }}>
-              Alasan perubahan status{" "}
-              {selectedStatus && selectedStatus !== content.status
-                ? "(Wajib diisi)"
-                : "(Opsional)"}
-              :
-            </Text>
-            <TextArea
-              value={statusReason}
-              onChange={(e) => setStatusReason(e.target.value)}
-              placeholder={`Jelaskan alasan mengubah status dari ${getStatusInfo(
-                content.status
-              ).label.toLowerCase()} ke ${
-                selectedStatus
-                  ? getStatusInfo(selectedStatus).label.toLowerCase()
-                  : "status baru"
-              }...`}
-              rows={4}
-              maxLength={500}
-              showCount
-              style={{ width: "100%" }}
-            />
-          </div>
-
-          <Flex justify="space-between" align="center">
-            <Button onClick={handleStatusModalClose}>Batal</Button>
-            <Button
-              type="primary"
-              onClick={handleStatusUpdate}
-              loading={updateStatusMutation.isPending}
-              disabled={
-                !selectedStatus ||
-                selectedStatus === content.status ||
-                (selectedStatus !== content.status && !statusReason.trim())
-              }
-            >
-              Simpan Status
-            </Button>
-          </Flex>
-        </Space>
-      </Modal>
+      <InfoModal
+        visible={infoModalVisible}
+        onCancel={() => setInfoModalVisible(false)}
+        content={content}
+      />
 
       <style jsx global>{`
         .ant-card {

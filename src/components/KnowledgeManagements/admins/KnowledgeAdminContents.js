@@ -24,7 +24,7 @@ const { Search } = Input;
 
 const KnowledgeAdminContents = () => {
   const router = useRouter();
-  const { status = "draft" } = router.query;
+  const { status = "pending" } = router.query;
 
   // Responsive breakpoints
   const screens = useBreakpoint();
@@ -32,7 +32,7 @@ const KnowledgeAdminContents = () => {
 
   // Status options
   const statusOptions = [
-    { key: "draft", label: "Draft", color: "default" },
+    { key: "pending", label: "Pending", color: "default" },
     { key: "published", label: "Published", color: "success" },
     { key: "rejected", label: "Rejected", color: "error" },
     { key: "archived", label: "Archived", color: "warning" },

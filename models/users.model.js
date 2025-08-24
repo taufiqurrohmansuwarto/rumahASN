@@ -47,7 +47,15 @@ class User extends Model {
         query.select("custom_id", "username");
       },
       simpleWithImage(query) {
-        query.select("users.custom_id", "users.username", "users.image");
+        query.select(
+          "users.custom_id",
+          "users.username",
+          "users.image",
+          // ambil jabatan dari info->jabatan->jabatan
+          raw("info->'jabatan'->>'jabatan' as nama_jabatan"),
+          // ambil perangkat daerah detail dari info->perangkat_daerah->>detail
+          raw("info->'perangkat_daerah'->>'detail' as perangkat_daerah_detail")
+        );
       },
       simpleWithEmployeeNumber(query) {
         query.select(

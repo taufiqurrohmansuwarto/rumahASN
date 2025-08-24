@@ -16,8 +16,35 @@ class knowledgeContents extends Model {
   static get relationMappings() {
     const User = require("@/models/users.model");
     const Category = require("@/models/knowledge/categories.model");
+    const KnowledgeContentVersions = require("@/models/knowledge/content-versions.model");
+    const KnowledgeContentAttachments = require("@/models/knowledge/content-attachments.model");
+    const KnowledgeContentsReferences = require("@/models/knowledge/contents-references.model");
 
     return {
+      versions: {
+        relation: Model.HasManyRelation,
+        modelClass: KnowledgeContentVersions,
+        join: {
+          from: "knowledge.contents.id",
+          to: "knowledge.content_versions.content_id",
+        },
+      },
+      attachments: {
+        relation: Model.HasManyRelation,
+        modelClass: KnowledgeContentAttachments,
+        join: {
+          from: "knowledge.contents.id",
+          to: "knowledge.content_attachments.content_id",
+        },
+      },
+      references: {
+        relation: Model.HasManyRelation,
+        modelClass: KnowledgeContentsReferences,
+        join: {
+          from: "knowledge.contents.id",
+          to: "knowledge.references.content_id",
+        },
+      },
       author: {
         relation: Model.BelongsToOneRelation,
         modelClass: User,

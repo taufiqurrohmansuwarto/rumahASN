@@ -129,6 +129,16 @@ export const getUserPoints = async () => {
   return await api.get("/users/me/points").then((res) => res.data);
 };
 
+export const uploadKnowledgeContentAttachment = async (data) => {
+  return await api
+    .post(`/users/contents/${data?.content_id}/upload`, data, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    })
+    .then((res) => res.data);
+};
+
 // admin
 export const getReferensiKategori = async () => {
   return await api.get("/admin/refs/categories").then((res) => res.data);

@@ -14,4 +14,4 @@ router
   .get(getKnowledgeContentAdmin)
   .patch(updateKnowledgeContentAdmin);
 
-export default router.handler();
+export default router.handler({});

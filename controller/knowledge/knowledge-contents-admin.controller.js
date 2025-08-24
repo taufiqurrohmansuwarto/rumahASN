@@ -1,4 +1,6 @@
 const KnowledgeContent = require("@/models/knowledge/contents.model");
+const KnowledgeContentVersions = require("@/models/knowledge/content-versions.model");
+const KnowledgeUserInteractions = require("@/models/knowledge/user-interactions.model");
 import { handleError } from "@/utils/helper/controller-helper";
 
 export const getKnowledgeContentsAdmin = async (req, res) => {
@@ -9,7 +11,7 @@ export const getKnowledgeContentsAdmin = async (req, res) => {
       page = 1,
       limit = 10,
       categoryId,
-      status = "draft",
+      status = "pending",
     } = req?.query;
 
     const contents = await KnowledgeContent.query()
@@ -22,12 +24,14 @@ export const getKnowledgeContentsAdmin = async (req, res) => {
           builder.where("title", "ilike", `%${search}%`);
         }
       })
-      .withGraphFetched("[author(simpleSelect), category]")
+      .withGraphFetched(
+        "[author(simpleWithImage), category, user_verified(simpleWithImage)]"
+      )
       .orderBy("created_at", "desc")
       .page(page - 1, limit);
 
-    const totalDraft = await KnowledgeContent.query()
-      .where("status", "draft")
+    const totalPending = await KnowledgeContent.query()
+      .where("status", "pending")
       .count("id as total");
 
     const totalPublished = await KnowledgeContent.query()
@@ -48,7 +52,7 @@ export const getKnowledgeContentsAdmin = async (req, res) => {
       page: parseInt(page),
       limit: parseInt(limit),
       statusCounts: {
-        draft: parseInt(totalDraft[0].total),
+        pending: parseInt(totalPending[0].total),
         published: parseInt(totalPublished[0].total),
         rejected: parseInt(totalRejected[0].total),
         archived: parseInt(totalArchived[0].total),
@@ -66,14 +70,27 @@ export const getKnowledgeContentAdmin = async (req, res) => {
     const { id } = req?.query;
     const content = await KnowledgeContent.query()
       .findById(id)
-      .withGraphFetched("[author(simpleSelect), category]");
+      .withGraphFetched(
+        "[author(simpleWithImage), category, user_verified(simpleWithImage), versions.[user_updated(simpleWithImage)], attachments, references]"
+      );
+
+    const comments = await KnowledgeUserInteractions.query()
+      .where("content_id", id)
+      .andWhere("interaction_type", "comment")
+      .withGraphFetched("user(simpleWithImage)")
+      .orderBy("created_at", "desc");
 
     if (!content) {
       res.status(404).json({
         message: "Content not found",
       });
     } else {
-      res.json(content);
+      const data = {
+        ...content,
+        comments,
+      };
+
+      res.json(data);
     }
   } catch (error) {
     handleError(res, error);
@@ -83,12 +100,28 @@ export const getKnowledgeContentAdmin = async (req, res) => {
 export const updateKnowledgeContentAdmin = async (req, res) => {
   try {
     const { id } = req?.query;
+    const { customId } = req?.user;
     const payload = req?.body;
 
     const data = {
       ...payload,
       tags: JSON.stringify(payload?.tags),
+      updated_at: new Date(),
     };
+
+    // update increment version
+    const contentVersion = await KnowledgeContentVersions.query()
+      .where("content_id", id)
+      .orderBy("version", "desc")
+      .first();
+
+    const version = contentVersion ? contentVersion.version + 1 : 1;
+
+    await KnowledgeContentVersions.query().insert({
+      content_id: id,
+      version,
+      updated_by: customId,
+    });
 
     const content = await KnowledgeContent.query().where("id", id).update(data);
 
