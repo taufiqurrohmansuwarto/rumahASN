@@ -4,6 +4,6 @@ import asnPemprovMiddleware from "@/middleware/asn-pemprov.middleware";
 
 const router = createRouter();
 
-router.use(auth).get(asnPemprovMiddleware).post();
+router.use(auth).use(asnPemprovMiddleware).get();
 
 export default router.handler({});
