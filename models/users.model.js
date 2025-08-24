@@ -51,6 +51,9 @@ class User extends Model {
           "users.custom_id",
           "users.username",
           "users.image",
+          "group",
+          "from",
+          "status_kepegawaian",
           // ambil jabatan dari info->jabatan->jabatan
           raw("info->'jabatan'->>'jabatan' as nama_jabatan"),
           // ambil perangkat daerah detail dari info->perangkat_daerah->>detail

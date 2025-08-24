@@ -1,5 +1,5 @@
-import { MessageOutlined, UserOutlined } from "@ant-design/icons";
-import { Avatar, Button, Flex, Typography, Space } from "antd";
+import { UserOutlined } from "@ant-design/icons";
+import { Avatar, Card, Flex, Typography } from "antd";
 import React from "react";
 
 const { Text } = Typography;
@@ -21,161 +21,104 @@ function DetailUser({ user, status }) {
   const statusColor = getStatusColor(status);
 
   return (
-    <div style={{ minWidth: "240px" }}>
-      {/* User Header */}
-      <Flex align="center" gap={12} style={{ marginBottom: "16px" }}>
-        <div style={{ position: "relative" }}>
-          <Avatar
-            size={48}
-            src={user?.image}
-            alt={user?.username}
-            icon={<UserOutlined />}
-            style={{
-              border: `2px solid ${statusColor}`,
-              boxShadow: `0 2px 8px ${statusColor}20`,
-            }}
-          />
-          <div
-            style={{
-              position: "absolute",
-              bottom: "-2px",
-              right: "-2px",
-              width: "14px",
-              height: "14px",
-              borderRadius: "50%",
-              backgroundColor: statusColor,
-              border: "2px solid #FFFFFF",
-              boxShadow: "0 1px 3px rgba(0, 0, 0, 0.2)",
-            }}
-          />
-        </div>
+    <Card
+      style={{
+        backgroundColor: "#FFFFFF",
+        border: "1px solid #EDEFF1", 
+        borderRadius: "4px",
+        marginBottom: "8px",
+        transition: "border-color 0.2s ease",
+      }}
+      bodyStyle={{ padding: "12px" }}
+      hoverable
+      onMouseEnter={(e) => {
+        e.currentTarget.style.borderColor = "#898989";
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.borderColor = "#EDEFF1";
+      }}
+    >
+      <Flex gap={12}>
+        {/* Avatar */}
+        <Avatar
+          size={48}
+          src={user?.image}
+          alt={user?.username}
+          icon={<UserOutlined />}
+          style={{
+            flexShrink: 0,
+          }}
+        />
 
-        <Flex vertical gap={2} style={{ flex: 1 }}>
+        {/* User Information */}
+        <Flex vertical style={{ flex: 1, minWidth: 0 }}>
+          {/* Name */}
           <Text
+            strong
             style={{
-              fontSize: "16px",
-              fontWeight: 600,
+              fontSize: "14px",
               color: "#1A1A1B",
-              margin: 0,
-              lineHeight: "20px",
+              lineHeight: "18px",
+              marginBottom: "2px",
             }}
           >
             {user?.username || "Nama Pengguna"}
           </Text>
 
-          <Flex align="center" gap={4}>
+          {/* Position */}
+          {user?.information?.jabatan?.jabatan && (
+            <Text
+              style={{
+                fontSize: "13px",
+                color: "#374151",
+                lineHeight: "16px",
+                marginBottom: "2px",
+              }}
+            >
+              {user?.information?.jabatan?.jabatan}
+            </Text>
+          )}
+
+          {/* Employment Status */}
+          <Flex align="center" gap={6} style={{ marginBottom: "2px" }}>
             <div
               style={{
                 width: "6px",
                 height: "6px",
                 borderRadius: "50%",
                 backgroundColor: statusColor,
+                flexShrink: 0,
               }}
             />
             <Text
               style={{
                 fontSize: "12px",
-                color: "#787C7E",
-                margin: 0,
+                color: "#6B7280",
                 fontWeight: 500,
               }}
             >
               {status || "GUEST"}
             </Text>
           </Flex>
-        </Flex>
-      </Flex>
 
-      {/* Job Information */}
-      {user?.information?.jabatan?.jabatan && (
-        <div
-          style={{
-            padding: "12px",
-            backgroundColor: "#F8F9FA",
-            borderRadius: "6px",
-            border: "1px solid #EDEFF1",
-            marginBottom: "12px",
-          }}
-        >
-          <Text
-            style={{
-              fontSize: "14px",
-              fontWeight: 500,
-              color: "#1A1A1B",
-              display: "block",
-              marginBottom: "4px",
-            }}
-          >
-            {user?.information?.jabatan?.jabatan}
-          </Text>
-
+          {/* Organization Unit */}
           {user?.information?.perangkat_daerah?.detail && (
             <Text
               style={{
                 fontSize: "12px",
-                color: "#787C7E",
-                lineHeight: "16px",
-                display: "block",
+                color: "#9CA3AF",
+                lineHeight: "15px",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                whiteSpace: "nowrap",
               }}
             >
               {user?.information?.perangkat_daerah?.detail}
             </Text>
           )}
-        </div>
-      )}
-
-      {/* Action Button */}
-      <Button
-        icon={<MessageOutlined />}
-        type="primary"
-        block
-        style={{
-          backgroundColor: "#FF4500",
-          borderColor: "#FF4500",
-          borderRadius: "6px",
-          fontWeight: 600,
-          height: "36px",
-          boxShadow: "0 2px 4px rgba(255, 69, 0, 0.2)",
-        }}
-        onMouseEnter={(e) => {
-          e.currentTarget.style.backgroundColor = "#E63E00";
-          e.currentTarget.style.borderColor = "#E63E00";
-          e.currentTarget.style.transform = "translateY(-1px)";
-          e.currentTarget.style.boxShadow = "0 4px 8px rgba(255, 69, 0, 0.3)";
-        }}
-        onMouseLeave={(e) => {
-          e.currentTarget.style.backgroundColor = "#FF4500";
-          e.currentTarget.style.borderColor = "#FF4500";
-          e.currentTarget.style.transform = "translateY(0)";
-          e.currentTarget.style.boxShadow = "0 2px 4px rgba(255, 69, 0, 0.2)";
-        }}
-      >
-        Kirim Pesan
-      </Button>
-
-      {/* Additional Info */}
-      <div
-        style={{
-          marginTop: "12px",
-          padding: "8px",
-          backgroundColor: "rgba(255, 69, 0, 0.05)",
-          borderRadius: "4px",
-          border: "1px solid rgba(255, 69, 0, 0.1)",
-        }}
-      >
-        <Text
-          style={{
-            fontSize: "11px",
-            color: "#787C7E",
-            textAlign: "center",
-            display: "block",
-            fontStyle: "italic",
-          }}
-        >
-          Klik untuk melihat profil lengkap
-        </Text>
-      </div>
-    </div>
+        </Flex>
+      </Flex>
+    </Card>
   );
 }
 

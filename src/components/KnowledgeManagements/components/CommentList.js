@@ -1,21 +1,19 @@
 import ReactMarkdownCustom from "@/components/MarkdownEditor/ReactMarkdownCustom";
+import AvatarUser from "@/components/Users/AvatarUser";
 import { Comment } from "@ant-design/compatible";
 import {
   DeleteOutlined,
   EditOutlined,
-  SendOutlined,
+  RetweetOutlined,
   MessageOutlined,
 } from "@ant-design/icons";
 import {
-  Avatar,
   Button,
   Form,
   Input,
   List,
   Space,
   Tooltip,
-  Card,
-  Flex,
   Grid,
   Typography,
 } from "antd";
@@ -53,21 +51,21 @@ const CommentList = ({
         <span
           onClick={() => onReply(item.id)}
           style={{
-            color: "#FF4500",
+            color: "#6B7280",
             cursor: "pointer",
             fontSize: isMobile ? "12px" : "13px",
             transition: "all 0.2s ease",
           }}
           onMouseEnter={(e) => {
-            e.currentTarget.style.color = "#e53e00";
+            e.currentTarget.style.color = "#374151";
             e.currentTarget.style.transform = "translateY(-1px)";
           }}
           onMouseLeave={(e) => {
-            e.currentTarget.style.color = "#FF4500";
+            e.currentTarget.style.color = "#6B7280";
             e.currentTarget.style.transform = "translateY(0)";
           }}
         >
-          <SendOutlined style={{ paddingRight: "4px" }} />
+          <RetweetOutlined style={{ paddingRight: "4px" }} />
           <span className="comment-action">Balas</span>
         </span>
       </Tooltip>
@@ -82,19 +80,19 @@ const CommentList = ({
             style={{
               opacity: isUpdatingComment ? 0.5 : 1,
               cursor: isUpdatingComment ? "not-allowed" : "pointer",
-              color: "#FF4500",
+              color: "#6B7280",
               fontSize: isMobile ? "12px" : "13px",
               transition: "all 0.2s ease",
             }}
             onMouseEnter={(e) => {
               if (!isUpdatingComment) {
-                e.currentTarget.style.color = "#e53e00";
+                e.currentTarget.style.color = "#374151";
                 e.currentTarget.style.transform = "translateY(-1px)";
               }
             }}
             onMouseLeave={(e) => {
               if (!isUpdatingComment) {
-                e.currentTarget.style.color = "#FF4500";
+                e.currentTarget.style.color = "#6B7280";
                 e.currentTarget.style.transform = "translateY(0)";
               }
             }}
@@ -112,19 +110,19 @@ const CommentList = ({
             style={{
               opacity: isDeletingComment ? 0.5 : 1,
               cursor: isDeletingComment ? "not-allowed" : "pointer",
-              color: "#ff4d4f",
+              color: "#DC2626",
               fontSize: isMobile ? "12px" : "13px",
               transition: "all 0.2s ease",
             }}
             onMouseEnter={(e) => {
               if (!isDeletingComment) {
-                e.currentTarget.style.color = "#cf1322";
+                e.currentTarget.style.color = "#B91C1C";
                 e.currentTarget.style.transform = "translateY(-1px)";
               }
             }}
             onMouseLeave={(e) => {
               if (!isDeletingComment) {
-                e.currentTarget.style.color = "#ff4d4f";
+                e.currentTarget.style.color = "#DC2626";
                 e.currentTarget.style.transform = "translateY(0)";
               }
             }}
@@ -141,59 +139,88 @@ const CommentList = ({
 
   return (
     <>
-      <Card
+      <List
+        dataSource={comments}
+        loading={isLoading}
         style={{
-          width: "100%",
-          borderRadius: isMobile ? "8px" : "12px",
-          border: "1px solid #EDEFF1",
-          marginBottom: isMobile ? "12px" : "16px",
+          padding: 0,
         }}
-        bodyStyle={{ padding: 0 }}
-      >
-        <Flex>
-          {/* Icon Section - Hide on mobile */}
-          {!isMobile && (
-            <div
-              style={{
-                width: "40px",
-                backgroundColor: "#F8F9FA",
-                borderRight: "1px solid #EDEFF1",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                minHeight: "60px",
-              }}
-            >
-              <MessageOutlined style={{ color: "#FF4500", fontSize: "18px" }} />
-            </div>
-          )}
-
-          {/* Content Section */}
-          <div style={{ flex: 1 }}>
-            <List
-              dataSource={comments}
-              loading={isLoading}
-              style={{
-                padding: isMobile ? "12px" : "16px",
-              }}
-              renderItem={(item) => (
-                <div key={item.id} style={{ marginBottom: "16px" }}>
+        renderItem={(item) => (
+                <div 
+                  key={item.id} 
+                  style={{ 
+                    marginBottom: "8px",
+                    border: "1px solid #EDEFF1",
+                    borderRadius: "4px",
+                    backgroundColor: "#FFFFFF",
+                    padding: "12px",
+                    transition: "all 0.2s ease",
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.borderColor = "#D1D5DB";
+                    e.currentTarget.style.boxShadow = "0 1px 4px rgba(0, 0, 0, 0.05)";
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.borderColor = "#EDEFF1";
+                    e.currentTarget.style.boxShadow = "none";
+                  }}
+                >
                   <Comment
                     author={
-                      <Text
-                        strong
-                        style={{
-                          color: "#1A1A1B",
-                          fontSize: isMobile ? "13px" : "14px",
-                        }}
-                      >
-                        {item?.user?.username}
-                      </Text>
+                      <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                        <Text
+                          strong
+                          style={{
+                            color: "#1A1A1B",
+                            fontSize: "13px",
+                            fontWeight: 600,
+                          }}
+                        >
+                          {item?.user?.username}
+                        </Text>
+                        <span style={{ color: "#787C7E", fontSize: "12px" }}>•</span>
+                        <Tooltip
+                          title={dayjs(item?.created_at).format("DD-MM-YYYY HH:mm")}
+                        >
+                          <Text
+                            type="secondary"
+                            style={{
+                              fontSize: "11px",
+                              color: "#787C7E",
+                              cursor: "pointer",
+                            }}
+                          >
+                            {dayjs(item?.created_at).fromNow()}
+                          </Text>
+                        </Tooltip>
+                        {item?.updated_at && item?.updated_at !== item?.created_at && (
+                          <>
+                            <span style={{ color: "#787C7E", fontSize: "12px" }}>•</span>
+                            <Tooltip
+                              title={`Terakhir diedit: ${dayjs(item?.updated_at).format("DD-MM-YYYY HH:mm")}`}
+                            >
+                              <Text
+                                type="secondary"
+                                style={{
+                                  fontSize: "10px",
+                                  color: "#9CA3AF",
+                                  cursor: "pointer",
+                                  fontStyle: "italic",
+                                }}
+                              >
+                                diedit
+                              </Text>
+                            </Tooltip>
+                          </>
+                        )}
+                      </div>
                     }
                     avatar={
-                      <Avatar
+                      <AvatarUser
                         src={item?.user?.image}
-                        size={isMobile ? "small" : "default"}
+                        userId={item?.user?.custom_id}
+                        user={item?.user}
+                        size="small"
                       />
                     }
                     content={
@@ -217,8 +244,8 @@ const CommentList = ({
                             <TextArea
                               rows={3}
                               style={{
-                                borderRadius: "6px",
-                                fontSize: isMobile ? "13px" : "14px",
+                                borderRadius: "4px",
+                                fontSize: "14px",
                               }}
                               onFocus={(e) => {
                                 e.target.style.borderColor = "#FF4500";
@@ -271,8 +298,8 @@ const CommentList = ({
                       ) : (
                         <div
                           style={{
-                            fontSize: isMobile ? "13px" : "14px",
-                            lineHeight: "1.6",
+                            fontSize: "13px",
+                            lineHeight: "18px",
                             color: "#1A1A1B",
                           }}
                         >
@@ -282,37 +309,28 @@ const CommentList = ({
                         </div>
                       )
                     }
-                    datetime={
-                      <Text
-                        type="secondary"
-                        style={{
-                          fontSize: isMobile ? "11px" : "12px",
-                          color: "#787C7E",
-                        }}
-                      >
-                        {dayjs(item?.created_at).format("DD MMMM YYYY")}
-                      </Text>
-                    }
                     actions={renderCommentActions(item)}
                   />
                   {/* Reply Form - positioned right below this comment */}
                   {replyingTo === item.id && (
                     <div
                       style={{
-                        marginLeft: isMobile ? "32px" : "48px",
+                        marginLeft: isMobile ? "24px" : "36px",
                         marginTop: "8px",
-                        marginBottom: "16px",
-                        padding: isMobile ? "8px" : "12px",
+                        marginBottom: "8px",
+                        padding: "8px",
                         backgroundColor: "#F8F9FA",
-                        borderRadius: "8px",
+                        borderRadius: "4px",
                         border: "1px solid #EDEFF1",
                       }}
                     >
                       <Comment
                         avatar={
-                          <Avatar
+                          <AvatarUser
                             src={currentUser?.image}
-                            size={isMobile ? "small" : "default"}
+                            userId={currentUser?.custom_id}
+                            user={currentUser}
+                            size="small"
                           />
                         }
                         author={
@@ -320,7 +338,8 @@ const CommentList = ({
                             strong
                             style={{
                               color: "#1A1A1B",
-                              fontSize: isMobile ? "13px" : "14px",
+                              fontSize: "14px",
+                              fontWeight: 600,
                             }}
                           >
                             {currentUser?.username}
@@ -341,13 +360,15 @@ const CommentList = ({
                                   message: "Balasan tidak boleh kosong!",
                                 },
                               ]}
+                              style={{ marginBottom: "16px" }}
                             >
                               <TextArea
                                 rows={3}
                                 placeholder={`Membalas ${item?.user?.username}...`}
                                 style={{
-                                  borderRadius: "6px",
-                                  fontSize: isMobile ? "13px" : "14px",
+                                  borderRadius: "4px",
+                                  fontSize: "14px",
+                                  lineHeight: "21px",
                                 }}
                                 onFocus={(e) => {
                                   e.target.style.borderColor = "#FF4500";
@@ -365,23 +386,24 @@ const CommentList = ({
                                 <Button
                                   type="primary"
                                   htmlType="submit"
-                                  size={isMobile ? "small" : "middle"}
+                                  size="small"
                                   style={{
                                     background:
                                       "linear-gradient(135deg, #FF4500 0%, #ff6b35 100%)",
                                     borderColor: "#FF4500",
-                                    boxShadow:
-                                      "0 2px 4px rgba(255, 69, 0, 0.3)",
+                                    boxShadow: "0 2px 4px rgba(255, 69, 0, 0.3)",
+                                    borderRadius: "4px",
                                   }}
                                 >
                                   Balas
                                 </Button>
                                 <Button
                                   onClick={() => onReply(null)}
-                                  size={isMobile ? "small" : "middle"}
+                                  size="small"
                                   style={{
                                     borderColor: "#d9d9d9",
                                     color: "#595959",
+                                    borderRadius: "4px",
                                   }}
                                   onMouseEnter={(e) => {
                                     e.currentTarget.style.borderColor =
@@ -406,20 +428,17 @@ const CommentList = ({
                 </div>
               )}
             />
-          </div>
-        </Flex>
-      </Card>
 
       <style jsx global>{`
         .ant-card {
           transition: all 0.3s ease !important;
           overflow: hidden !important;
-          border-radius: 8px !important;
+          border-radius: 4px !important;
         }
 
         .ant-card:hover {
-          border-color: #ff4500 !important;
-          box-shadow: 0 2px 8px rgba(255, 69, 0, 0.15) !important;
+          border-color: #edeff1 !important;
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
         }
 
         .ant-card .ant-card-body {

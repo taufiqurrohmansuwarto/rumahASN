@@ -19,6 +19,7 @@ class knowledgeContents extends Model {
     const KnowledgeContentVersions = require("@/models/knowledge/content-versions.model");
     const KnowledgeContentAttachments = require("@/models/knowledge/content-attachments.model");
     const KnowledgeContentsReferences = require("@/models/knowledge/contents-references.model");
+    const KnowledgeUserInteractions = require("@/models/knowledge/user-interactions.model");
 
     return {
       versions: {
@@ -67,6 +68,14 @@ class knowledgeContents extends Model {
         join: {
           from: "knowledge.contents.category_id",
           to: "knowledge.category.id",
+        },
+      },
+      user_interactions: {
+        relation: Model.HasManyRelation,
+        modelClass: KnowledgeUserInteractions,
+        join: {
+          from: "knowledge.contents.id",
+          to: "knowledge.user_interactions.content_id",
         },
       },
     };

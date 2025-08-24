@@ -7,6 +7,7 @@ const KnowledgeContentAttachment = require("@/models/knowledge/content-attachmen
 
 export const getKnowledgeContents = async (req, res) => {
   try {
+    const { customId } = req?.user;
     const {
       page = 1,
       limit = 10,
@@ -31,6 +32,29 @@ export const getKnowledgeContents = async (req, res) => {
           builder.whereRaw("tags @> ?", [JSON.stringify([tags])]);
         }
       })
+      .select(
+        "knowledge.contents.*",
+        // Subquery untuk is_liked
+        KnowledgeContent.relatedQuery("user_interactions")
+          .where("user_id", customId)
+          .where("interaction_type", "like")
+          .select(
+            KnowledgeContent.raw(
+              "CASE WHEN COUNT(*) > 0 THEN true ELSE false END"
+            )
+          )
+          .as("is_liked"),
+        // Subquery untuk is_bookmarked
+        KnowledgeContent.relatedQuery("user_interactions")
+          .where("user_id", customId)
+          .where("interaction_type", "bookmark")
+          .select(
+            KnowledgeContent.raw(
+              "CASE WHEN COUNT(*) > 0 THEN true ELSE false END"
+            )
+          )
+          .as("is_bookmarked")
+      )
       .andWhere("status", "published")
       .withGraphFetched(
         "[author(simpleWithImage), category, user_verified(simpleWithImage), versions.[user_updated(simpleWithImage)], attachments, references]"
@@ -54,17 +78,42 @@ export const getKnowledgeContents = async (req, res) => {
 export const getKnowledgeContent = async (req, res) => {
   try {
     const { id } = req?.query;
+    const { customId } = req?.user;
+
     const content = await KnowledgeContent.query()
-      .where("id", id)
-      .andWhere("status", "published")
+      .where("knowledge.contents.id", id)
+      .andWhere("knowledge.contents.status", "published")
       .withGraphFetched(
         "[author(simpleWithImage), category, user_verified(simpleWithImage), versions.[user_updated(simpleWithImage)], attachments, references]"
+      )
+      .select(
+        "knowledge.contents.*",
+        // Subquery untuk is_liked
+        KnowledgeContent.relatedQuery("user_interactions")
+          .where("user_id", customId)
+          .where("interaction_type", "like")
+          .select(
+            KnowledgeContent.raw(
+              "CASE WHEN COUNT(*) > 0 THEN true ELSE false END"
+            )
+          )
+          .as("is_liked"),
+        // Subquery untuk is_bookmarked
+        KnowledgeContent.relatedQuery("user_interactions")
+          .where("user_id", customId)
+          .where("interaction_type", "bookmark")
+          .select(
+            KnowledgeContent.raw(
+              "CASE WHEN COUNT(*) > 0 THEN true ELSE false END"
+            )
+          )
+          .as("is_bookmarked")
       )
       .first();
 
     if (!content) {
       return res.status(404).json({
-        message: "Content not found",
+        message: "Konten tidak ditemukan",
       });
     }
 

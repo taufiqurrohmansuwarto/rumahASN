@@ -196,6 +196,7 @@ export const updateComment = async (req, res) => {
       // Update komentar
       await KnowledgeUserInteraction.query(trx).where("id", commentId).update({
         comment_text: commentText.trim(),
+        updated_at: new Date(),
       });
 
       return {
@@ -286,7 +287,7 @@ export const getComments = async (req, res) => {
       .where("content_id", id)
       .andWhere("interaction_type", "comment")
       .orderBy("created_at", "desc")
-      .withGraphFetched("user(simpleSelect)");
+      .withGraphFetched("user(simpleWithImage)");
 
     return res.json(comments);
   } catch (error) {

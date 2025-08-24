@@ -13,6 +13,25 @@ class KnowledgeUserInteractions extends Model {
     this.id = nanoid();
   }
 
+  static get modifiers() {
+    return {
+      isLiked(query, custom_id, content_id) {
+        query
+          .where("user_id", custom_id)
+          .where("type", "like")
+          .where("content_id", content_id)
+          .first();
+      },
+      isBookmarked(query, custom_id, content_id) {
+        query
+          .where("user_id", custom_id)
+          .where("type", "bookmark")
+          .where("content_id", content_id)
+          .first();
+      },
+    };
+  }
+
   static get relationMappings() {
     const User = require("@/models/users.model");
     return {

@@ -5,6 +5,7 @@ import LayoutASNConnect from "@/components/Socmed/LayoutASNConnect";
 import useScrollRestoration from "@/hooks/useScrollRestoration";
 import { getKnowledgeContent } from "@/services/knowledge-management.services";
 import { useQuery } from "@tanstack/react-query";
+import { FloatButton } from "antd";
 import Head from "next/head";
 import { useRouter } from "next/router";
 
@@ -37,6 +38,7 @@ const AsnKnowledgeDetail = () => {
           title={data?.title || "Detail Pengetahuan"}
           onBack={gotoAsnKnowledge}
         >
+          <FloatButton.BackTop />
           <KnowledgeUserContentDetail data={data} />
         </PageContainer>
       </LayoutASNConnect>
@@ -50,7 +52,7 @@ AsnKnowledgeDetail.Auth = {
 };
 
 AsnKnowledgeDetail.getLayout = (page) => {
-  return <Layout active="/asn-connect/asn-knowledge">{page}</Layout>;
+  return <Layout active="/asn-connect/asn-updates">{page}</Layout>;
 };
 
 export default AsnKnowledgeDetail;
