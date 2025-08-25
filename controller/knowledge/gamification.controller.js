@@ -256,8 +256,8 @@ export const userMissionComplete = async (req, res) => {
     const result = await transaction(
       UserMissionProgress.knex(),
       async (trx) => {
-        const current = await UserMission.query(trx).findOne({
-          user_id: userId,
+        const current = await UserMissionProgress.query(trx).findOne({
+          user_id: customId,
           mission_id: missionId,
         });
         if (current?.status === "completed") return { already: true };

@@ -138,9 +138,26 @@ export const getUserPoints = async () => {
   return await api.get("/users/me/points").then((res) => res.data);
 };
 
-export const uploadKnowledgeContentAttachment = async (contentId, formData) => {
+export const uploadKnowledgeContentAttachment = async (contentId, data) => {
   return await api
-    .post(`/users/contents/${contentId}/upload`, formData, {
+    .post(`/users/contents/${contentId}/upload`, data, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+      timeout: 300000, // 5 minutes timeout
+    })
+    .then((res) => res.data)
+    .catch((error) => {
+      if (error.code === 'ECONNABORTED') {
+        throw new Error('Upload timeout - file terlalu besar atau koneksi lambat');
+      }
+      throw error;
+    });
+};
+
+export const uploadKnowledgeContentAttachmentAdmin = async (contentId, data) => {
+  return await api
+    .post(`/admin/contents/${contentId}/upload`, data, {
       headers: {
         "Content-Type": "multipart/form-data",
       },
@@ -148,22 +165,30 @@ export const uploadKnowledgeContentAttachment = async (contentId, formData) => {
     .then((res) => res.data);
 };
 
-export const uploadMultipleKnowledgeContentAttachments = async (contentId, files) => {
+export const uploadMultipleKnowledgeContentAttachments = async (
+  contentId,
+  files
+) => {
   const formData = new FormData();
-  
+
   files.forEach((file) => {
-    formData.append('files', file);
+    formData.append("files", file);
   });
-  
-  formData.append('content_id', contentId);
-  
+
   return await api
     .post(`/users/contents/${contentId}/upload`, formData, {
       headers: {
         "Content-Type": "multipart/form-data",
       },
+      timeout: 300000, // 5 minutes timeout
     })
-    .then((res) => res.data);
+    .then((res) => res.data)
+    .catch((error) => {
+      if (error.code === 'ECONNABORTED') {
+        throw new Error('Upload timeout - file terlalu besar atau koneksi lambat');
+      }
+      throw error;
+    });
 };
 
 // admin

@@ -4,6 +4,7 @@ import { uploadFileMinio } from "@/utils/index";
 const KnowledgeContent = require("@/models/knowledge/contents.model");
 const KnowledgeCategory = require("@/models/knowledge/categories.model");
 const KnowledgeContentAttachment = require("@/models/knowledge/content-attachments.model");
+const BASE_URL = "https://siasn.bkd.jatimprov.go.id:9000/public";
 
 export const getKnowledgeContents = async (req, res) => {
   try {
@@ -204,35 +205,42 @@ export const getKnowledgeCategories = async (req, res) => {
 
 export const uploadKnowledgeContentAttachment = async (req, res) => {
   try {
-    const { mc } = req?.mc;
+    const mc = req?.mc;
     const files = req?.files || [];
-    const { content_id } = req?.body;
-    
+    const { id: content_id } = req?.query;
+
+    if (!mc) {
+      return res.status(500).json({
+        success: false,
+        message: "Minio client tidak tersedia",
+      });
+    }
+
     if (!files || files.length === 0) {
       return res.status(400).json({
         success: false,
-        message: "Tidak ada file yang diunggah"
+        message: "Tidak ada file yang diunggah",
       });
     }
 
     const uploadResults = [];
-    
+
     for (const file of files) {
-      const fileFormat = file?.originalname?.split(".").pop();
-      const filename = `${content_id}-${Date.now()}-${Math.random().toString(36).substring(2, 11)}-${file?.originalname.replace(/\s+/g, '-')}`;
+      const filename = `${content_id}-${Date.now()}-${Math.random()
+        .toString(36)
+        .substring(2, 11)}-${file?.originalname.replace(/\s+/g, "-")}`;
       const fileSize = file?.size;
       const mimetype = file?.mimetype;
       const buffer = Buffer.from(file?.buffer);
-      
+
       await uploadFileMinio(mc, buffer, filename, fileSize, mimetype);
-      
+
       const attachment = await KnowledgeContentAttachment.query().insert({
         content_id,
-        url: `/${filename}`,
+        url: `${BASE_URL}/${filename}`,
         name: file?.originalname,
         size: fileSize,
-        mimetype,
-        type: "attachment",
+        mime: mimetype,
       });
 
       uploadResults.push({
@@ -240,29 +248,73 @@ export const uploadKnowledgeContentAttachment = async (req, res) => {
         uid: `attachment-${attachment.id}`,
         name: attachment.name,
         filename: attachment.name,
-        url: `https://siasn.bkd.jatimprov.go.id:9000/public${attachment.url}`,
+        url: `${BASE_URL}${attachment.url}`,
         size: attachment.size,
-        mimetype: attachment.mimetype,
-        type: attachment.type,
-        status: 'done',
-        response: {
-          success: true,
-          data: {
-            url: `https://siasn.bkd.jatimprov.go.id:9000/public${attachment.url}`,
-            filename: attachment.name,
-            size: attachment.size,
-            mimetype: attachment.mimetype
-          }
-        }
+        mimetype: attachment.mime,
+        status: "done",
       });
     }
 
     res.json({
       success: true,
       message: `${uploadResults.length} file berhasil diunggah`,
-      data: uploadResults
+      data: uploadResults,
     });
-    
+  } catch (error) {
+    handleError(res, error);
+  }
+};
+
+export const uploadKnowledgeContentAttachmentAdmin = async (req, res) => {
+  try {
+    const mc = req?.mc;
+    const files = req?.files || [];
+    const { id: content_id } = req?.query;
+
+    if (!files || files.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: "Tidak ada file yang diunggah",
+      });
+    }
+
+    const uploadResults = [];
+
+    for (const file of files) {
+      const filename = `${content_id}-${Date.now()}-${Math.random()
+        .toString(36)
+        .substring(2, 11)}-${file?.originalname.replace(/\s+/g, "-")}`;
+      const fileSize = file?.size;
+      const mimetype = file?.mimetype;
+      const buffer = Buffer.from(file?.buffer);
+
+      await uploadFileMinio(mc, buffer, filename, fileSize, mimetype);
+
+      const attachment = await KnowledgeContentAttachment.query().insert({
+        content_id,
+        url: `${BASE_URL}/${filename}`,
+        name: file?.originalname,
+        size: fileSize,
+        mime: mimetype,
+      });
+
+      uploadResults.push({
+        id: attachment.id,
+        uid: `attachment-${attachment.id}`,
+        name: attachment.name,
+        filename: attachment.name,
+        url: `${BASE_URL}${attachment.url}`,
+        size: attachment.size,
+        mimetype: attachment.mime,
+        status: "done",
+      });
+    }
+
+    res.json({
+      success: true,
+      message: `${uploadResults.length} file berhasil diunggah`,
+      data: uploadResults,
+    });
   } catch (error) {
     handleError(res, error);
   }

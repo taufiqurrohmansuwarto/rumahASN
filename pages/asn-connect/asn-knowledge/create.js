@@ -10,7 +10,7 @@ const AsnKnowledgeCreate = () => {
   return (
     <>
       <Head>
-        <title>Rumah ASN - Buat Pengetahuan</title>
+        <title>Rumah ASN - Pojok Pengetahuan - Buat Pengetahuan</title>
       </Head>
       <LayoutASNConnect active="asn-knowledge">
         <PageContainer title="Buat Pengetahuan" onBack={() => router.back()}>
@@ -27,7 +27,7 @@ AsnKnowledgeCreate.Auth = {
 };
 
 AsnKnowledgeCreate.getLayout = (page) => {
-  return <Layout active="/asn-connect/asn-knowledge">{page}</Layout>;
+  return <Layout active="/asn-connect/asn-updates">{page}</Layout>;
 };
 
 export default AsnKnowledgeCreate;

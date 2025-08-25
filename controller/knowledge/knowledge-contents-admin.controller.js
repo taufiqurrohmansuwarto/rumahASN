@@ -132,32 +132,31 @@ export const updateKnowledgeContentAdmin = async (req, res) => {
         updated_by: customId,
       });
 
-      // Update content dengan references menggunakan upsertGraph
-      const updatedData = {
-        ...data,
-        id: parseInt(id),
-      };
+      // Update content terlebih dahulu
+      await KnowledgeContent.query(trx)
+        .findById(id)
+        .patch(data);
 
-      // Tambahkan references ke data jika ada
-      if (payload?.references && payload.references.length > 0) {
-        updatedData.references = payload.references.map((reference) => ({
-          title: reference.title,
-          url: reference.url,
-        }));
-      } else {
-        updatedData.references = [];
+      // Handle references secara terpisah
+      if (payload?.references !== undefined) {
+        // Hapus semua references yang ada
+        await existingContent.$relatedQuery("references", trx).delete();
+        
+        // Insert references baru jika ada
+        if (payload.references && payload.references.length > 0) {
+          await existingContent.$relatedQuery("references", trx).insert(
+            payload.references.map((reference) => ({
+              title: reference.title,
+              url: reference.url,
+            }))
+          );
+        }
       }
 
-      // Gunakan upsertGraph untuk update content dan replace semua references
-      const result = await KnowledgeContent.query(trx).upsertGraph(
-        updatedData,
-        {
-          relate: false,
-          unrelate: true,
-          update: true,
-          insertMissing: true,
-        }
-      );
+      // Ambil content yang sudah diupdate dengan relations
+      const result = await KnowledgeContent.query(trx)
+        .findById(id)
+        .withGraphFetched("[references]");
 
       return result;
     });

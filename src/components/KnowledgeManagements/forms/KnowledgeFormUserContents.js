@@ -13,6 +13,7 @@ import {
   Grid,
   message,
   Row,
+  Spin,
   Typography,
 } from "antd";
 import { useEffect, useState } from "react";
@@ -46,7 +47,13 @@ function KnowledgeFormUserContents({
   const [inputValue, setInputValue] = useState("");
   const [content, setContent] = useState("");
   const [fileList, setFileList] = useState([]);
+  const [currentContentId, setCurrentContentId] = useState(initialData?.id || null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const queryClient = useQueryClient();
+
+  // Check if there are files still uploading or pending
+  const hasUploadingFiles = fileList.some(file => file.status === 'uploading');
+  const hasPendingFiles = fileList.some(file => file.response?.data?.isTemporary && !currentContentId);
 
   // Responsive breakpoints
   const screens = useBreakpoint();
@@ -168,7 +175,6 @@ function KnowledgeFormUserContents({
       );
       
       if (response?.success && response?.data) {
-        message.success(`${response.data.length} file berhasil diupload!`);
         return response.data;
       }
       
@@ -179,133 +185,149 @@ function KnowledgeFormUserContents({
     }
   };
 
+  const resetForm = () => {
+    form.resetFields();
+    setContent("");
+    setTags([]);
+    setInputValue("");
+    setFileList([]);
+    setCurrentContentId(null);
+    setIsSubmitting(false);
+  };
+
   const handleFinish = async (values) => {
+    if (isSubmitting) return;
+    
+    setIsSubmitting(true);
     try {
-      // Separate files that need to be uploaded vs already uploaded
       const filesToUpload = fileList
         .filter(file => file.status === 'done' && file.response?.data?.isTemporary)
         .map(file => file.response.data);
 
-      const existingAttachments = fileList
-        .filter(file => file.status === 'done' && file.response?.data?.url && !file.response?.data?.isTemporary)
-        .map(file => ({
-          filename: file.name,
-          url: file.response.data.url,
-          mimetype: file.response.data.mimetype || file.type,
-          size: file.response.data.size || file.size
-        }));
-
       const formData = {
         ...values,
-        content: content,
-        tags: tags,
+        content,
+        tags,
         references: values.references || [],
-        attachments: existingAttachments, // Include existing attachments
       };
 
       let result;
-      if (initialData) {
-        if (mode === "admin") {
-          result = await new Promise((resolve, reject) => {
-            updateMutation({ id: initialData.id, payload: formData }, {
-              onSuccess: resolve,
-              onError: reject
-            });
-          });
-        } else {
-          result = await new Promise((resolve, reject) => {
-            updateMutation({ id: initialData.id, data: formData }, {
-              onSuccess: resolve,
-              onError: reject
-            });
-          });
-        }
+      const isEditing = !!initialData;
+      const contentId = isEditing ? initialData.id : null;
+
+      // Step 1: Create or Update content
+      if (isEditing) {
+        const mutationData = mode === "admin" 
+          ? { id: contentId, payload: formData }
+          : { id: contentId, data: formData };
         
-        // Upload new files for existing content
-        if (filesToUpload.length > 0) {
-          await uploadAttachments(initialData.id, filesToUpload);
-        }
+        result = await new Promise((resolve, reject) => {
+          updateMutation(mutationData, {
+            onSuccess: resolve,
+            onError: reject
+          });
+        });
       } else {
-        // Create content first
         result = await new Promise((resolve, reject) => {
           createMutation(formData, {
             onSuccess: resolve,
             onError: reject
           });
         });
-
-        // Upload files for new content
-        if (filesToUpload.length > 0 && result?.data?.id) {
-          await uploadAttachments(result.data.id, filesToUpload);
+        
+        if (result?.id) {
+          setCurrentContentId(result.id);
         }
+      }
+
+      // Step 2: Upload files if any
+      const targetContentId = isEditing ? contentId : result?.id;
+      if (filesToUpload.length > 0 && targetContentId) {
+        await uploadAttachments(targetContentId, filesToUpload);
+      }
+
+      // Single success message
+      const successMessage = isEditing 
+        ? "Konten berhasil diperbarui!"
+        : "Konten berhasil dibuat!";
+      
+      message.success(successMessage);
+      
+      // Reset form only for create mode
+      if (!isEditing) {
+        resetForm();
       }
     } catch (error) {
       message.error(`Gagal menyimpan: ${error.message}`);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   const handleSaveDraft = async () => {
+    if (isSubmitting) return;
+    
+    setIsSubmitting(true);
     try {
       const values = await form.validateFields();
       
-      // Separate files that need to be uploaded vs already uploaded
       const filesToUpload = fileList
         .filter(file => file.status === 'done' && file.response?.data?.isTemporary)
         .map(file => file.response.data);
 
-      const existingAttachments = fileList
-        .filter(file => file.status === 'done' && file.response?.data?.url && !file.response?.data?.isTemporary)
-        .map(file => ({
-          filename: file.name,
-          url: file.response.data.url,
-          mimetype: file.response.data.mimetype || file.type,
-          size: file.response.data.size || file.size
-        }));
-
       const formData = {
         ...values,
-        content: content,
+        content,
         status: mode === "admin" ? (initialData?.status || "draft") : "draft",
-        tags: tags,
+        tags,
         references: values.references || [],
-        attachments: existingAttachments,
       };
 
       let result;
-      if (initialData) {
-        if (mode === "admin") {
-          result = await new Promise((resolve, reject) => {
-            updateMutation({ id: initialData.id, payload: formData }, {
-              onSuccess: resolve,
-              onError: reject
-            });
-          });
-        } else {
-          result = await new Promise((resolve, reject) => {
-            updateMutation({ id: initialData.id, data: formData }, {
-              onSuccess: resolve,
-              onError: reject
-            });
-          });
-        }
+      const isEditing = !!initialData;
+      const contentId = isEditing ? initialData.id : null;
+
+      // Step 1: Create or Update content
+      if (isEditing) {
+        const mutationData = mode === "admin" 
+          ? { id: contentId, payload: formData }
+          : { id: contentId, data: formData };
         
-        // Upload new files for existing content
-        if (filesToUpload.length > 0) {
-          await uploadAttachments(initialData.id, filesToUpload);
-        }
+        result = await new Promise((resolve, reject) => {
+          updateMutation(mutationData, {
+            onSuccess: resolve,
+            onError: reject
+          });
+        });
       } else {
-        // Create content first
         result = await new Promise((resolve, reject) => {
           createMutation(formData, {
             onSuccess: resolve,
             onError: reject
           });
         });
-
-        // Upload files for new content
-        if (filesToUpload.length > 0 && result?.data?.id) {
-          await uploadAttachments(result.data.id, filesToUpload);
+        
+        if (result?.id) {
+          setCurrentContentId(result.id);
         }
+      }
+
+      // Step 2: Upload files if any
+      const targetContentId = isEditing ? contentId : result?.id;
+      if (filesToUpload.length > 0 && targetContentId) {
+        await uploadAttachments(targetContentId, filesToUpload);
+      }
+
+      // Single success message
+      const successMessage = isEditing 
+        ? "Draft berhasil diperbarui!"
+        : "Draft berhasil disimpan!";
+      
+      message.success(successMessage);
+      
+      // Reset form only for create mode
+      if (!isEditing) {
+        resetForm();
       }
     } catch (error) {
       if (error.errorFields) {
@@ -313,71 +335,75 @@ function KnowledgeFormUserContents({
       } else {
         message.error(`Gagal menyimpan draft: ${error.message}`);
       }
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   const handleSubmitForReview = async () => {
+    if (isSubmitting) return;
+    
+    setIsSubmitting(true);
     try {
       const values = await form.validateFields();
       
-      // Separate files that need to be uploaded vs already uploaded
       const filesToUpload = fileList
         .filter(file => file.status === 'done' && file.response?.data?.isTemporary)
         .map(file => file.response.data);
 
-      const existingAttachments = fileList
-        .filter(file => file.status === 'done' && file.response?.data?.url && !file.response?.data?.isTemporary)
-        .map(file => ({
-          filename: file.name,
-          url: file.response.data.url,
-          mimetype: file.response.data.mimetype || file.type,
-          size: file.response.data.size || file.size
-        }));
-
       const formData = {
         ...values,
-        content: content,
+        content,
         status: mode === "admin" ? (initialData?.status || "published") : "pending",
-        tags: tags,
+        tags,
         references: values.references || [],
-        attachments: existingAttachments,
       };
 
       let result;
-      if (initialData) {
-        if (mode === "admin") {
-          result = await new Promise((resolve, reject) => {
-            updateMutation({ id: initialData.id, payload: formData }, {
-              onSuccess: resolve,
-              onError: reject
-            });
-          });
-        } else {
-          result = await new Promise((resolve, reject) => {
-            updateMutation({ id: initialData.id, data: formData }, {
-              onSuccess: resolve,
-              onError: reject
-            });
-          });
-        }
+      const isEditing = !!initialData;
+      const contentId = isEditing ? initialData.id : null;
+
+      // Step 1: Create or Update content
+      if (isEditing) {
+        const mutationData = mode === "admin" 
+          ? { id: contentId, payload: formData }
+          : { id: contentId, data: formData };
         
-        // Upload new files for existing content
-        if (filesToUpload.length > 0) {
-          await uploadAttachments(initialData.id, filesToUpload);
-        }
+        result = await new Promise((resolve, reject) => {
+          updateMutation(mutationData, {
+            onSuccess: resolve,
+            onError: reject
+          });
+        });
       } else {
-        // Create content first
         result = await new Promise((resolve, reject) => {
           createMutation(formData, {
             onSuccess: resolve,
             onError: reject
           });
         });
-
-        // Upload files for new content
-        if (filesToUpload.length > 0 && result?.data?.id) {
-          await uploadAttachments(result.data.id, filesToUpload);
+        
+        if (result?.id) {
+          setCurrentContentId(result.id);
         }
+      }
+
+      // Step 2: Upload files if any
+      const targetContentId = isEditing ? contentId : result?.id;
+      if (filesToUpload.length > 0 && targetContentId) {
+        await uploadAttachments(targetContentId, filesToUpload);
+      }
+
+      // Single success message
+      const successMessage = mode === "admin" 
+        ? "Konten berhasil dipublikasi!"
+        : "Konten berhasil dikirim untuk review!";
+      
+      message.success(successMessage);
+      
+      // Reset form only for create mode
+      if (!isEditing) {
+        resetForm();
       }
     } catch (error) {
       if (error.errorFields) {
@@ -385,11 +411,13 @@ function KnowledgeFormUserContents({
       } else {
         message.error(`Gagal mengirim untuk review: ${error.message}`);
       }
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
 
-  const isLoading = createLoading || updateLoading;
+  const isLoading = createLoading || updateLoading || isSubmitting || hasUploadingFiles;
 
   return (
     <div>
@@ -458,10 +486,36 @@ function KnowledgeFormUserContents({
                         isMobile={isMobile}
                         fileList={fileList}
                         setFileList={setFileList}
-                        contentId={initialData?.id}
+                        contentId={currentContentId}
                       />
                     </Col>
                   </Row>
+
+                  {/* Status Info */}
+                  {(hasUploadingFiles || hasPendingFiles) && (
+                    <div style={{ 
+                      marginBottom: 16, 
+                      padding: "8px 12px",
+                      backgroundColor: "#f6f8fa",
+                      borderRadius: "6px",
+                      border: "1px solid #e1e8ed"
+                    }}>
+                      <Row align="middle" gutter={8}>
+                        <Col>
+                          {hasUploadingFiles ? (
+                            <div style={{ display: "flex", alignItems: "center", gap: "8px", color: "#1890ff" }}>
+                              <Spin size="small" />
+                              <span style={{ fontSize: "13px" }}>Mengupload file...</span>
+                            </div>
+                          ) : (
+                            <div style={{ display: "flex", alignItems: "center", gap: "6px", color: "#52c41a" }}>
+                              <span style={{ fontSize: "13px" }}>📋 File siap diupload saat menyimpan</span>
+                            </div>
+                          )}
+                        </Col>
+                      </Row>
+                    </div>
+                  )}
 
                   <KnowledgeFormActions
                     isMobile={isMobile}
