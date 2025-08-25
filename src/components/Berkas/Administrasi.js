@@ -80,18 +80,40 @@ const downloadPk = async () => {
   window.open(link, "_blank");
 };
 
+const downloadPerpanjangan = async () => {
+  try {
+    message.loading({ content: "Membuka dokumen PK...", key: "pk" });
+    const link =
+      "https://siasn.bkd.jatimprov.go.id:9000/public/perpanjangan_p3k.pdf";
+    window.open(link, "_blank");
+    message.success({ content: "Dokumen PK berhasil dibuka", key: "pk" });
+  } catch (error) {
+    message.error({ content: "Gagal membuka dokumen PK", key: "pk" });
+  }
+};
+
 function Administrasi() {
   return (
     <Flex vertical>
       <Flex justify="flex-end">
-        <Button
-          icon={<ExportOutlined />}
-          type="default"
-          onClick={downloadPk}
-          size="small"
-        >
-          Download PK Halaman 2 s/d 7
-        </Button>
+        <Space>
+          <Button
+            icon={<ExportOutlined />}
+            type="default"
+            onClick={downloadPerpanjangan}
+            size="small"
+          >
+            Download Perpanjangan
+          </Button>
+          <Button
+            icon={<ExportOutlined />}
+            type="default"
+            onClick={downloadPk}
+            size="small"
+          >
+            Download PK Halaman 2 s/d 7
+          </Button>
+        </Space>
       </Flex>
       <Space direction="vertical" size="large">
         {list_tmt?.map((tmt) => (

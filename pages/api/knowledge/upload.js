@@ -15,6 +15,6 @@ const upload = multer({
   storage: multer.memoryStorage(),
 });
 
-router.use(auth).post(upload.array("files"), uploadKnowledgeContentAttachment);
+router.use(auth).post(upload.array("file"), uploadKnowledgeContentAttachment);
 
 export default router.handler({});

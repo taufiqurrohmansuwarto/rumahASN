@@ -138,9 +138,27 @@ export const getUserPoints = async () => {
   return await api.get("/users/me/points").then((res) => res.data);
 };
 
-export const uploadKnowledgeContentAttachment = async (data) => {
+export const uploadKnowledgeContentAttachment = async (contentId, formData) => {
   return await api
-    .post(`/users/contents/${data?.content_id}/upload`, data, {
+    .post(`/users/contents/${contentId}/upload`, formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    })
+    .then((res) => res.data);
+};
+
+export const uploadMultipleKnowledgeContentAttachments = async (contentId, files) => {
+  const formData = new FormData();
+  
+  files.forEach((file) => {
+    formData.append('files', file);
+  });
+  
+  formData.append('content_id', contentId);
+  
+  return await api
+    .post(`/users/contents/${contentId}/upload`, formData, {
       headers: {
         "Content-Type": "multipart/form-data",
       },

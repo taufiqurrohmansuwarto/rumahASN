@@ -1,7 +1,7 @@
 import {
   createKnowledgeContent,
   updateKnowledgeContent,
-  uploadKnowledgeContentAttachment,
+  uploadMultipleKnowledgeContentAttachments,
 } from "@/services/knowledge-management.services";
 import { EditOutlined } from "@ant-design/icons";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -159,32 +159,35 @@ function KnowledgeFormUserContents({
   }, [initialData, form]);
 
   const uploadAttachments = async (contentId, filesToUpload) => {
-    const uploadPromises = filesToUpload.map(async (fileData) => {
-      const formData = new FormData();
-      formData.append('file', fileData.file);
-      formData.append('content_id', contentId);
+    if (filesToUpload.length === 0) return [];
+    
+    try {
+      const response = await uploadMultipleKnowledgeContentAttachments(
+        contentId, 
+        filesToUpload.map(fileData => fileData.file)
+      );
       
-      const response = await uploadKnowledgeContentAttachment(formData);
-      return {
-        filename: response.data.filename || fileData.filename,
-        url: response.data.url,
-        mimetype: response.data.mimetype || fileData.mimetype,
-        size: response.data.size || fileData.size
-      };
-    });
-
-    return await Promise.all(uploadPromises);
+      if (response?.success && response?.data) {
+        message.success(`${response.data.length} file berhasil diupload!`);
+        return response.data;
+      }
+      
+      return [];
+    } catch (error) {
+      message.error(`Upload attachments gagal: ${error.message}`);
+      throw error;
+    }
   };
 
   const handleFinish = async (values) => {
     try {
       // Separate files that need to be uploaded vs already uploaded
       const filesToUpload = fileList
-        .filter(file => file.status === 'done' && file.response?.data?.file)
+        .filter(file => file.status === 'done' && file.response?.data?.isTemporary)
         .map(file => file.response.data);
 
       const existingAttachments = fileList
-        .filter(file => file.status === 'done' && file.response?.data?.url && !file.response?.data?.file)
+        .filter(file => file.status === 'done' && file.response?.data?.url && !file.response?.data?.isTemporary)
         .map(file => ({
           filename: file.name,
           url: file.response.data.url,
@@ -221,8 +224,6 @@ function KnowledgeFormUserContents({
         // Upload new files for existing content
         if (filesToUpload.length > 0) {
           await uploadAttachments(initialData.id, filesToUpload);
-          // The uploads are handled separately, just notify success
-          message.success(`${filesToUpload.length} file berhasil diupload`);
         }
       } else {
         // Create content first
@@ -236,7 +237,6 @@ function KnowledgeFormUserContents({
         // Upload files for new content
         if (filesToUpload.length > 0 && result?.data?.id) {
           await uploadAttachments(result.data.id, filesToUpload);
-          message.success(`Konten dibuat dan ${filesToUpload.length} file berhasil diupload`);
         }
       }
     } catch (error) {
@@ -250,11 +250,11 @@ function KnowledgeFormUserContents({
       
       // Separate files that need to be uploaded vs already uploaded
       const filesToUpload = fileList
-        .filter(file => file.status === 'done' && file.response?.data?.file)
+        .filter(file => file.status === 'done' && file.response?.data?.isTemporary)
         .map(file => file.response.data);
 
       const existingAttachments = fileList
-        .filter(file => file.status === 'done' && file.response?.data?.url && !file.response?.data?.file)
+        .filter(file => file.status === 'done' && file.response?.data?.url && !file.response?.data?.isTemporary)
         .map(file => ({
           filename: file.name,
           url: file.response.data.url,
@@ -322,11 +322,11 @@ function KnowledgeFormUserContents({
       
       // Separate files that need to be uploaded vs already uploaded
       const filesToUpload = fileList
-        .filter(file => file.status === 'done' && file.response?.data?.file)
+        .filter(file => file.status === 'done' && file.response?.data?.isTemporary)
         .map(file => file.response.data);
 
       const existingAttachments = fileList
-        .filter(file => file.status === 'done' && file.response?.data?.url && !file.response?.data?.file)
+        .filter(file => file.status === 'done' && file.response?.data?.url && !file.response?.data?.isTemporary)
         .map(file => ({
           filename: file.name,
           url: file.response.data.url,

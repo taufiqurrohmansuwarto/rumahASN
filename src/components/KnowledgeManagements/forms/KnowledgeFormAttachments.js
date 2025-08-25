@@ -1,4 +1,4 @@
-import { uploadKnowledgeContentAttachment } from "@/services/knowledge-management.services";
+import { uploadKnowledgeContentAttachment, uploadMultipleKnowledgeContentAttachments } from "@/services/knowledge-management.services";
 import { QuestionCircleOutlined, UploadOutlined } from "@ant-design/icons";
 import { Button, Flex, Form, message, Tooltip, Typography, Upload } from "antd";
 
@@ -16,42 +16,95 @@ const KnowledgeFormAttachments = ({
 
   const customUpload = async ({ file, onSuccess, onError }) => {
     try {
-      // Create FormData for file upload
-      const formData = new FormData();
-      formData.append('file', file);
-      
-      // If we have contentId (editing mode), use knowledge service upload
       if (contentId) {
+        // Mode edit - upload immediately
+        const formData = new FormData();
+        formData.append('files', file);
         formData.append('content_id', contentId);
-        const response = await uploadKnowledgeContentAttachment(formData);
-        if (response?.data?.url) {
+        
+        const response = await uploadKnowledgeContentAttachment(contentId, formData);
+        
+        if (response?.success && response?.data?.length > 0) {
+          const uploadedFile = response.data[0];
+          
           onSuccess({
-            data: { 
-              url: response.data.url,
-              filename: response.data.filename || file.name,
-              mimetype: response.data.mimetype || file.type,
-              size: response.data.size || file.size
+            success: true,
+            data: {
+              uid: uploadedFile.uid,
+              url: uploadedFile.url,
+              filename: uploadedFile.filename,
+              size: uploadedFile.size,
+              mimetype: uploadedFile.mimetype,
+              status: 'done'
             }
           }, file);
+          
+          message.success(`File ${file.name} berhasil diupload!`);
         } else {
-          onError(new Error('Upload failed: No URL returned'));
+          throw new Error('Upload gagal: Format response tidak valid');
         }
       } else {
-        // For new content, we'll handle upload during form submission
-        // Just mark as done for now with file data
+        // Mode create - store file untuk upload nanti
         onSuccess({
           data: { 
-            file: file, // Store the actual file for later upload
-            url: URL.createObjectURL(file), // Temporary URL for preview
+            uid: `temp-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`,
+            file: file,
+            url: URL.createObjectURL(file),
             filename: file.name,
             mimetype: file.type,
-            size: file.size
+            size: file.size,
+            status: 'done',
+            isTemporary: true
           }
         }, file);
       }
     } catch (error) {
       message.error(`Upload gagal: ${error.message}`);
       onError(error);
+    }
+  };
+
+  // Batch upload semua pending files sekaligus
+  const handleBatchUpload = async () => {
+    if (!contentId) return;
+    
+    const pendingFiles = fileList
+      .filter(file => file.response?.data?.isTemporary)
+      .map(file => file.response.data.file);
+    
+    if (pendingFiles.length === 0) return;
+
+    try {
+      const response = await uploadMultipleKnowledgeContentAttachments(contentId, pendingFiles);
+      
+      if (response?.success && response?.data) {
+        // Update fileList dengan uploaded files
+        const updatedFileList = fileList.map(file => {
+          if (file.response?.data?.isTemporary) {
+            const uploadedFile = response.data.find(uploaded => 
+              uploaded.name === file.response.data.filename
+            );
+            if (uploadedFile) {
+              return {
+                ...file,
+                response: {
+                  success: true,
+                  data: {
+                    ...uploadedFile,
+                    isTemporary: false
+                  }
+                }
+              };
+            }
+          }
+          return file;
+        });
+        
+        setFileList(updatedFileList);
+        message.success(`${pendingFiles.length} file berhasil diupload!`);
+      }
+    } catch (error) {
+      message.error(`Batch upload gagal: ${error.message}`);
     }
   };
 
@@ -66,7 +119,7 @@ const KnowledgeFormAttachments = ({
             📎 Lampiran
           </Text>
           <Tooltip
-            title="Upload file pendukung seperti dokumen, gambar, atau file lainnya yang terkait dengan konten Anda. Max 10MB per file."
+            title="Upload maksimal 5 file pendukung. Setiap file maksimal 10MB."
             placement="top"
           >
             <QuestionCircleOutlined
@@ -85,7 +138,7 @@ const KnowledgeFormAttachments = ({
         customRequest={customUpload}
         fileList={fileList}
         onChange={handleUploadChange}
-        multiple
+        multiple={true}
         maxCount={5}
         accept=".pdf,.doc,.docx,.xls,.xlsx,.txt,.jpg,.jpeg,.png,.gif"
         beforeUpload={(file) => {
@@ -109,9 +162,20 @@ const KnowledgeFormAttachments = ({
             e.currentTarget.style.backgroundColor = "transparent";
           }}
         >
-          Upload File
+          Upload Files (Max 5)
         </Button>
       </Upload>
+      
+      {/* Show batch upload button for pending files in edit mode */}
+      {contentId && fileList.some(f => f.response?.data?.isTemporary) && (
+        <Button 
+          type="link" 
+          onClick={handleBatchUpload}
+          style={{ color: "#FF4500", marginTop: 8 }}
+        >
+          Upload Semua File Pending
+        </Button>
+      )}
     </Form.Item>
   );
 };
