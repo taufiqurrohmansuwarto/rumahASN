@@ -19,6 +19,7 @@ import {
 import { useEffect, useState } from "react";
 import KnowledgeFormHeader from "./KnowledgeFormHeader";
 import KnowledgeFormTitle from "./KnowledgeFormTitle";
+import KnowledgeFormSummary from "./KnowledgeFormSummary";
 import KnowledgeFormContent from "./KnowledgeFormContent";
 import KnowledgeFormCategory from "./KnowledgeFormCategory";
 import KnowledgeFormTags from "./KnowledgeFormTags";
@@ -46,6 +47,7 @@ function KnowledgeFormUserContents({
   const [tags, setTags] = useState([]);
   const [inputValue, setInputValue] = useState("");
   const [content, setContent] = useState("");
+  const [summary, setSummary] = useState("");
   const [fileList, setFileList] = useState([]);
   const [currentContentId, setCurrentContentId] = useState(initialData?.id || null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -135,11 +137,16 @@ function KnowledgeFormUserContents({
     if (initialData) {
       form.setFieldsValue({
         title: initialData.title,
+        summary: initialData.summary,
         category_id: initialData.category_id,
       });
 
       if (initialData.content) {
         setContent(initialData.content);
+      }
+
+      if (initialData.summary) {
+        setSummary(initialData.summary);
       }
 
       if (initialData.tags) {
@@ -188,6 +195,7 @@ function KnowledgeFormUserContents({
   const resetForm = () => {
     form.resetFields();
     setContent("");
+    setSummary("");
     setTags([]);
     setInputValue("");
     setFileList([]);
@@ -207,6 +215,7 @@ function KnowledgeFormUserContents({
       const formData = {
         ...values,
         content,
+        summary,
         tags,
         references: values.references || [],
       };
@@ -278,6 +287,7 @@ function KnowledgeFormUserContents({
       const formData = {
         ...values,
         content,
+        summary,
         status: mode === "admin" ? (initialData?.status || "draft") : "draft",
         tags,
         references: values.references || [],
@@ -354,6 +364,7 @@ function KnowledgeFormUserContents({
       const formData = {
         ...values,
         content,
+        summary,
         status: mode === "admin" ? (initialData?.status || "published") : "pending",
         tags,
         references: values.references || [],
@@ -465,6 +476,7 @@ function KnowledgeFormUserContents({
                   <Row gutter={[isMobile ? 12 : 24, isMobile ? 12 : 16]}>
                     <Col xs={24} lg={16}>
                       <KnowledgeFormTitle isMobile={isMobile} />
+                      <KnowledgeFormSummary isMobile={isMobile} />
                       <KnowledgeFormContent 
                         isMobile={isMobile} 
                         content={content} 

@@ -4,7 +4,41 @@ import { uploadFileMinio } from "@/utils/index";
 const KnowledgeContent = require("@/models/knowledge/contents.model");
 const KnowledgeCategory = require("@/models/knowledge/categories.model");
 const KnowledgeContentAttachment = require("@/models/knowledge/content-attachments.model");
+const UserInteraction = require("@/models/knowledge/user-interactions.model");
+
 const BASE_URL = "https://siasn.bkd.jatimprov.go.id:9000/public";
+
+// Fungsi untuk mengelola jumlah views konten
+const updateViewsCount = async (customId, contentId) => {
+  try {
+    // Cek apakah user sudah pernah melihat konten ini
+    const existingView = await UserInteraction.query()
+      .where("user_id", customId)
+      .where("content_id", contentId)
+      .where("type", "view")
+      .first();
+
+    // Jika belum pernah melihat, catat view dan increment counter
+    if (!existingView) {
+      // Catat interaksi view user
+      await UserInteraction.query().insert({
+        user_id: customId,
+        content_id: contentId,
+        type: "view",
+      });
+
+      // Tambah 1 ke views_count konten
+      await KnowledgeContent.query()
+        .where("id", contentId)
+        .increment("views_count", 1);
+    }
+
+    return !existingView; // Return true jika view baru, false jika sudah pernah
+  } catch (error) {
+    console.error("Error saat update views count:", error);
+    throw new Error("Gagal mengupdate jumlah views");
+  }
+};
 
 export const getKnowledgeContents = async (req, res) => {
   try {
@@ -117,6 +151,8 @@ export const getKnowledgeContent = async (req, res) => {
         message: "Konten tidak ditemukan",
       });
     }
+
+    await updateViewsCount(customId, id);
 
     res.json(content);
   } catch (error) {
