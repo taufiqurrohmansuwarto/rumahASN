@@ -34,6 +34,15 @@ export const getKnowledgeCategories = async () => {
   return await api.get("/users/refs/categories").then((res) => res.data);
 };
 
+// Dashboard Services
+export const getKnowledgeDashboardOverview = async () => {
+  return await api.get("/admin/dashboard/overview").then((res) => res.data);
+};
+
+export const getKnowledgeCategoryAnalytics = async () => {
+  return await api.get("/admin/dashboard/categories").then((res) => res.data);
+};
+
 // user interactions
 export const likeKnowledgeContent = async (id) => {
   return await api.post(`/users/contents/${id}/likes`).then((res) => res.data);
@@ -222,4 +231,13 @@ export const updateAdminKnowledgeContentStatus = async ({ id, payload }) => {
   return await api
     .patch(`/admin/contents/${id}/status`, payload)
     .then((res) => res.data);
+};
+
+// dashboard
+export const getDashboardOverview = async () => {
+  return await api.get("/admin/dashboard/overview").then((res) => res.data);
+};
+
+export const getCategoryAnalytics = async () => {
+  return await api.get("/admin/dashboard/categories").then((res) => res.data);
 };

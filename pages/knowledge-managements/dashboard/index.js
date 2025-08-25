@@ -1,4 +1,4 @@
-import KnowledgeAdminDashboard from "@/components/KnowledgeManagements/admins/KnowledgeAdminDashboard";
+import KnowledgeDashboard from "@/components/KnowledgeManagements/admins/KnowledgeDashboard";
 import KnowledgeManagementLayout from "@/components/KnowledgeManagements/KnowledgeManagementsLayout";
 import PageContainer from "@/components/PageContainer";
 import { Breadcrumb, Grid } from "antd";
@@ -25,7 +25,7 @@ function KnowledgeManagementDashboard() {
         title="Pengetahuan"
         content="Pengetahuan"
       >
-        <KnowledgeAdminDashboard />
+        <KnowledgeDashboard />
       </PageContainer>
     </>
   );

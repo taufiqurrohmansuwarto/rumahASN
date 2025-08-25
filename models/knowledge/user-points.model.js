@@ -14,7 +14,17 @@ class knowledgeUserPoints extends Model {
   }
 
   static get relationMappings() {
-    return {};
+    const User = require("@/models/users.model");
+    return {
+      user: {
+        relation: Model.BelongsToOneRelation,
+        modelClass: User,
+        join: {
+          from: "knowledge.user_points.user_id",
+          to: "users.custom_id",
+        },
+      },
+    };
   }
 }
 
