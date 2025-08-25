@@ -239,6 +239,18 @@ const downloadPk = async () => {
   }
 };
 
+const downloadPerpanjangan = async () => {
+  try {
+    message.loading({ content: "Membuka dokumen PK...", key: "pk" });
+    const link =
+      "https://siasn.bkd.jatimprov.go.id:9000/public/perpanjangan_p3k.pdf";
+    window.open(link, "_blank");
+    message.success({ content: "Dokumen PK berhasil dibuka", key: "pk" });
+  } catch (error) {
+    message.error({ content: "Gagal membuka dokumen PK", key: "pk" });
+  }
+};
+
 function AdministrasiByNip() {
   const router = useRouter();
   const { nip } = router.query;
@@ -269,16 +281,28 @@ function AdministrasiByNip() {
             <Text type="secondary">NIP: {nip}</Text>
           </Col>
           <Col>
-            <Tooltip title="Unduh Template PK Halaman 2-7">
-              <Button
-                icon={<ExportOutlined />}
-                type="default"
-                onClick={downloadPk}
-                size={isMobile ? "small" : "middle"}
-              >
-                {!isMobile && "Template PK"}
-              </Button>
-            </Tooltip>
+            <Space>
+              <Tooltip title="Unduh Perpanjangan">
+                <Button
+                  icon={<ExportOutlined />}
+                  type="default"
+                  onClick={downloadPerpanjangan}
+                  size={isMobile ? "small" : "middle"}
+                >
+                  {!isMobile && "Perpanjangan"}
+                </Button>
+              </Tooltip>
+              <Tooltip title="Unduh Template PK Halaman 2-7">
+                <Button
+                  icon={<ExportOutlined />}
+                  type="default"
+                  onClick={downloadPk}
+                  size={isMobile ? "small" : "middle"}
+                >
+                  {!isMobile && "Template PK"}
+                </Button>
+              </Tooltip>
+            </Space>
           </Col>
         </Row>
       </Card>
