@@ -4,9 +4,11 @@ import { Comment } from "@ant-design/compatible";
 import {
   BookOutlined,
   CommentOutlined,
+  EyeOutlined,
   LikeFilled,
   LikeOutlined,
   LoadingOutlined,
+  TagsOutlined,
 } from "@ant-design/icons";
 import { Card, Flex, Tag, Tooltip, Typography } from "antd";
 import dayjs from "dayjs";
@@ -254,7 +256,13 @@ const KnowledgeContentHeader = ({
           {/* Tags */}
           {content?.tags && content?.tags.length > 0 && (
             <div style={{ marginBottom: "16px" }}>
-              <Flex gap="4px" wrap="wrap">
+              <Flex align="center" gap="8px" wrap="wrap">
+                <Flex align="center" gap="4px">
+                  <TagsOutlined style={{ fontSize: "12px", color: "#787C7E" }} />
+                  <Text style={{ fontSize: "12px", color: "#787C7E", fontWeight: 600 }}>
+                    Tags:
+                  </Text>
+                </Flex>
                 {content?.tags.map((tag, index) => (
                   <Tag
                     key={index}
@@ -340,6 +348,21 @@ const KnowledgeContentHeader = ({
 
           {/* Content Stats */}
           <Flex align="center" gap={16}>
+            {/* Views Count */}
+            <Flex align="center" gap={4}>
+              <EyeOutlined style={{ fontSize: "14px", color: "#787C7E" }} />
+              <Text
+                style={{
+                  fontSize: "12px",
+                  color: "#787C7E",
+                  fontWeight: 700,
+                }}
+              >
+                {content?.views_count || 0} Views
+              </Text>
+            </Flex>
+
+            {/* Comments Count */}
             <Flex align="center" gap={4}>
               <CommentOutlined style={{ fontSize: "14px", color: "#787C7E" }} />
               <Text
@@ -350,6 +373,20 @@ const KnowledgeContentHeader = ({
                 }}
               >
                 {content?.comments_count || 0} Komentar
+              </Text>
+            </Flex>
+
+            {/* Bookmarks Count */}
+            <Flex align="center" gap={4}>
+              <BookOutlined style={{ fontSize: "14px", color: "#787C7E" }} />
+              <Text
+                style={{
+                  fontSize: "12px",
+                  color: "#787C7E",
+                  fontWeight: 700,
+                }}
+              >
+                {content?.bookmarks_count || 0} Disimpan
               </Text>
             </Flex>
 

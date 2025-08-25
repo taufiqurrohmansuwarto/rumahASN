@@ -1,4 +1,5 @@
 import ReactMarkdownCustom from "@/components/MarkdownEditor/ReactMarkdownCustom";
+import AvatarUser from "@/components/Users/AvatarUser";
 import {
   MessageOutlined,
   UserOutlined,
@@ -6,8 +7,10 @@ import {
   LikeFilled,
   BookOutlined,
   LoadingOutlined,
+  EyeOutlined,
+  TagsOutlined,
 } from "@ant-design/icons";
-import { Avatar, Card, Flex, Tag, Typography, Tooltip } from "antd";
+import { Card, Flex, Tag, Typography, Tooltip } from "antd";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 
@@ -181,10 +184,11 @@ const ContentCard = ({
           {/* Post Meta */}
           <Flex align="center" gap={6} style={{ marginBottom: "8px" }}>
             <Tooltip title="Lihat profil">
-              <Avatar
+              <AvatarUser
                 size={20}
                 src={content.author?.image}
-                icon={<UserOutlined />}
+                userId={content.author?.custom_id}
+                user={content.author}
                 style={{ cursor: "pointer" }}
                 onClick={handleUserClick}
               />
@@ -346,7 +350,13 @@ const ContentCard = ({
           {/* Tags */}
           {content.tags && content.tags.length > 0 && (
             <div style={{ marginBottom: "12px" }}>
-              <Flex gap="4px" wrap="wrap">
+              <Flex align="center" gap="8px" wrap="wrap">
+                <Flex align="center" gap="4px">
+                  <TagsOutlined style={{ fontSize: "10px", color: "#787C7E" }} />
+                  <Text style={{ fontSize: "10px", color: "#787C7E", fontWeight: 600 }}>
+                    Tags:
+                  </Text>
+                </Flex>
                 {content.tags?.slice(0, 3).map((tag, index) => (
                   <Tag
                     key={index}
@@ -386,28 +396,48 @@ const ContentCard = ({
 
           {/* Actions */}
           <Flex align="center" justify="space-between">
-            <Flex
-              align="center"
-              gap={4}
-              style={{
-                color: "#787C7E",
-                fontSize: "12px",
-                fontWeight: 700,
-                cursor: "pointer",
-                padding: "4px 6px",
-                borderRadius: "4px",
-                transition: "background-color 0.2s ease",
-              }}
-              onClick={handleContentClick}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = "#F8F9FA";
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = "transparent";
-              }}
-            >
-              <MessageOutlined style={{ fontSize: "12px" }} />
-              <span>{content.comments_count || 0} Komentar</span>
+            {/* Stats */}
+            <Flex align="center" gap={12}>
+              {/* Views Count */}
+              <Flex align="center" gap={4}>
+                <EyeOutlined style={{ fontSize: "12px", color: "#787C7E" }} />
+                <span style={{ fontSize: "12px", color: "#787C7E", fontWeight: 700 }}>
+                  {content.views_count || 0} Views
+                </span>
+              </Flex>
+
+              {/* Comments Count */}
+              <Flex
+                align="center"
+                gap={4}
+                style={{
+                  color: "#787C7E",
+                  fontSize: "12px",
+                  fontWeight: 700,
+                  cursor: "pointer",
+                  padding: "4px 6px",
+                  borderRadius: "4px",
+                  transition: "background-color 0.2s ease",
+                }}
+                onClick={handleContentClick}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = "#F8F9FA";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = "transparent";
+                }}
+              >
+                <MessageOutlined style={{ fontSize: "12px" }} />
+                <span>{content.comments_count || 0} Komentar</span>
+              </Flex>
+
+              {/* Bookmarks Count */}
+              <Flex align="center" gap={4}>
+                <BookOutlined style={{ fontSize: "12px", color: "#787C7E" }} />
+                <span style={{ fontSize: "12px", color: "#787C7E", fontWeight: 700 }}>
+                  {content.bookmarks_count || 0} Disimpan
+                </span>
+              </Flex>
             </Flex>
 
             {/* Bookmark Button */}

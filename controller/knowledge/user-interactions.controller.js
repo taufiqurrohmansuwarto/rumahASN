@@ -246,7 +246,9 @@ export const bookmark = async (req, res) => {
           .delete();
 
         // Decrement bookmarks_count
-        await KnowledgeContent.query(trx).where("id", id);
+        await KnowledgeContent.query(trx)
+          .where("id", id)
+          .decrement("bookmarks_count", 1);
 
         return {
           message: "Berhasil menghapus bookmark",
@@ -262,7 +264,9 @@ export const bookmark = async (req, res) => {
         });
 
         // Increment bookmarks_count
-        await KnowledgeContent.query(trx).where("id", id);
+        await KnowledgeContent.query(trx)
+          .where("id", id)
+          .increment("bookmarks_count", 1);
 
         return {
           message: "Berhasil menambahkan bookmark",
