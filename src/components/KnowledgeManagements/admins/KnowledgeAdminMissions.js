@@ -136,6 +136,17 @@ const KnowledgeAdminMissions = () => {
       },
     },
     {
+      title: "Target",
+      dataIndex: "target_count",
+      key: "target_count",
+      width: 100,
+      render: (target) => (
+        <Tag color="blue">
+          {target ? `${target}x` : "0x"}
+        </Tag>
+      ),
+    },
+    {
       title: "Poin Reward",
       dataIndex: "points_reward",
       key: "points_reward",
@@ -228,6 +239,7 @@ const KnowledgeAdminMissions = () => {
       title: mission.title,
       description: mission.description,
       frequency: mission.frequency,
+      target_count: mission.target_count,
       points_reward: mission.points_reward,
       date_range: mission.start_date && mission.end_date 
         ? [dayjs(mission.start_date), dayjs(mission.end_date)]
@@ -254,6 +266,7 @@ const KnowledgeAdminMissions = () => {
         title: nilaiForm.title,
         description: nilaiForm.description,
         frequency: nilaiForm.frequency,
+        target_count: nilaiForm.target_count,
         points_reward: nilaiForm.points_reward,
         start_date: nilaiForm.date_range?.[0]?.toISOString(),
         end_date: nilaiForm.date_range?.[1]?.toISOString(),
@@ -528,25 +541,44 @@ const KnowledgeAdminMissions = () => {
             </Form.Item>
 
             <Form.Item
-              label="Poin Reward"
-              name="points_reward"
+              label="Target"
+              name="target_count"
               style={{ flex: 1 }}
               rules={[
                 {
                   type: "number",
-                  min: 0,
-                  message: "Poin harus berupa angka positif!",
+                  min: 1,
+                  message: "Target minimal 1!",
                 },
               ]}
             >
               <InputNumber
-                placeholder="0"
-                min={0}
+                placeholder="1"
+                min={1}
                 style={{ width: "100%" }}
                 size={isMobile ? "middle" : "large"}
               />
             </Form.Item>
           </div>
+
+          <Form.Item
+            label="Poin Reward"
+            name="points_reward"
+            rules={[
+              {
+                type: "number",
+                min: 0,
+                message: "Poin harus berupa angka positif!",
+              },
+            ]}
+          >
+            <InputNumber
+              placeholder="0"
+              min={0}
+              style={{ width: "100%" }}
+              size={isMobile ? "middle" : "large"}
+            />
+          </Form.Item>
 
           <Form.Item
             label="Periode Mission"

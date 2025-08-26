@@ -5,6 +5,6 @@ import { awardUserXP } from "@/controller/knowledge/gamification.controller";
 
 const router = createRouter();
 
-router.use(auth).post(asnPemprovMiddleware).post(awardUserXP);
+router.use(auth).use(asnPemprovMiddleware).post(awardUserXP);
 
 export default router.handler({});

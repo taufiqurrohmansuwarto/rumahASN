@@ -7,6 +7,7 @@ import {
   Form,
   Input,
   InputNumber,
+  Select,
   Popconfirm,
   Typography,
   Card,
@@ -58,6 +59,12 @@ const KnowledgeAdminBadges = () => {
     item.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     item.description?.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  // Options untuk badge type
+  const badgeTypeOptions = [
+    { label: "Level", value: "level" },
+    { label: "Pencapaian", value: "achievement" },
+  ];
 
   // Konfigurasi kolom tabel
   const kolomTabel = [
@@ -115,6 +122,27 @@ const KnowledgeAdminBadges = () => {
             Tidak ada deskripsi
           </span>
         ),
+    },
+    {
+      title: "Jenis Badge",
+      dataIndex: "badge_type",
+      key: "badge_type",
+      width: 120,
+      render: (type) => {
+        const colors = {
+          level: "blue",
+          achievement: "green",
+        };
+        const labels = {
+          level: "Level",
+          achievement: "Pencapaian",
+        };
+        return (
+          <Tag color={colors[type] || "default"}>
+            {labels[type] || type}
+          </Tag>
+        );
+      },
     },
     {
       title: "Poin Required",
@@ -179,6 +207,7 @@ const KnowledgeAdminBadges = () => {
       name: badge.name,
       description: badge.description,
       icon_url: badge.icon_url,
+      badge_type: badge.badge_type,
       points_required: badge.points_required,
     });
   };
@@ -467,24 +496,49 @@ const KnowledgeAdminBadges = () => {
             />
           </Form.Item>
 
-          <Form.Item
-            label="Poin Required"
-            name="points_required"
-            rules={[
-              {
-                type: "number",
-                min: 0,
-                message: "Poin harus berupa angka positif!",
-              },
-            ]}
-          >
-            <InputNumber
-              placeholder="0"
-              min={0}
-              style={{ width: "100%" }}
-              size={isMobile ? "middle" : "large"}
-            />
-          </Form.Item>
+          <div style={{ display: "flex", gap: "16px" }}>
+            <Form.Item
+              label="Jenis Badge"
+              name="badge_type"
+              style={{ flex: 1 }}
+              rules={[
+                {
+                  required: true,
+                  message: "Jenis badge wajib dipilih!",
+                },
+              ]}
+              initialValue="level"
+            >
+              <Select
+                placeholder="Pilih jenis badge"
+                size={isMobile ? "middle" : "large"}
+                options={badgeTypeOptions}
+                style={{
+                  borderRadius: "6px",
+                }}
+              />
+            </Form.Item>
+
+            <Form.Item
+              label="Poin Required"
+              name="points_required"
+              style={{ flex: 1 }}
+              rules={[
+                {
+                  type: "number",
+                  min: 0,
+                  message: "Poin harus berupa angka positif!",
+                },
+              ]}
+            >
+              <InputNumber
+                placeholder="0"
+                min={0}
+                style={{ width: "100%" }}
+                size={isMobile ? "middle" : "large"}
+              />
+            </Form.Item>
+          </div>
         </Form>
       </Modal>
 
