@@ -1,5 +1,6 @@
 import { UserOutlined, InfoCircleOutlined } from "@ant-design/icons";
 import { Avatar, Divider, Flex, Modal, Space, Tag, Tooltip, Typography } from "antd";
+import UserText from "@/components/Users/UserText";
 import dayjs from "dayjs";
 
 const { Text } = Typography;
@@ -45,9 +46,12 @@ const InfoModal = ({ visible, onCancel, content }) => {
               size="large"
             />
             <div style={{ flex: 1 }}>
-              <Text strong style={{ fontSize: "15px", display: "block" }}>
-                {content.author?.username}
-              </Text>
+              <div style={{ fontSize: "15px", fontWeight: 600, display: "block" }}>
+                <UserText 
+                  userId={content.author?.custom_id}
+                  text={content.author?.username}
+                />
+              </div>
               {content.author?.nama_jabatan && (
                 <Tooltip title={content.author?.perangkat_daerah_detail}>
                   <Text
@@ -99,9 +103,12 @@ const InfoModal = ({ visible, onCancel, content }) => {
                 size="large"
               />
               <div style={{ flex: 1 }}>
-                <Text strong style={{ fontSize: "15px", display: "block" }}>
-                  {content.user_verified?.username}
-                </Text>
+                <div style={{ fontSize: "15px", fontWeight: 600, display: "block" }}>
+                  <UserText 
+                    userId={content.user_verified?.custom_id}
+                    text={content.user_verified?.username}
+                  />
+                </div>
                 {content.user_verified?.nama_jabatan && (
                   <Tooltip
                     title={content.user_verified?.perangkat_daerah_detail}
@@ -194,9 +201,12 @@ const InfoModal = ({ visible, onCancel, content }) => {
                         <div>
                           <Space size="small">
                             <Tag color="orange">v{version.version}</Tag>
-                            <Text strong style={{ fontSize: "13px" }}>
-                              {version.user_updated?.username}
-                            </Text>
+                            <div style={{ fontSize: "13px", fontWeight: 600 }}>
+                              <UserText 
+                                userId={version.user_updated?.custom_id}
+                                text={version.user_updated?.username}
+                              />
+                            </div>
                           </Space>
                         </div>
                       </Flex>

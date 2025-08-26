@@ -1,5 +1,6 @@
 import Column from "@/components/Plots/Column";
 import Pie from "@/components/Plots/Pie";
+import UserText from "@/components/Users/UserText";
 import { useKnowledgeDashboardOverview } from "@/hooks/knowledge-management/use-knowledge-dashboard";
 import {
   AccountBookOutlined,
@@ -572,9 +573,12 @@ const ContentOverview = () => {
                           <MessageOutlined />
                           <span>{item.comments_count || 0}</span>
                         </Space>
-                        <Text style={{ fontSize: "10px", color: "#999" }}>
-                          oleh {item.author?.username}
-                        </Text>
+                        <div style={{ fontSize: "10px", color: "#999" }}>
+                          oleh <UserText 
+                            userId={item.author?.custom_id}
+                            text={item.author?.username}
+                          />
+                        </div>
                       </Flex>
                     }
                   />
@@ -619,9 +623,12 @@ const ContentOverview = () => {
                       </div>
                     }
                     title={
-                      <Text strong style={{ fontSize: "13px" }}>
-                        {item.author?.username || "Penulis Tidak Dikenal"}
-                      </Text>
+                      <div style={{ fontSize: "13px", fontWeight: 600 }}>
+                        <UserText 
+                          userId={item.author?.custom_id}
+                          text={item.author?.username || "Penulis Tidak Dikenal"}
+                        />
+                      </div>
                     }
                     description={
                       <Text style={{ fontSize: "11px", color: "#666" }}>

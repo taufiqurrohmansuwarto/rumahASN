@@ -1,14 +1,22 @@
 import ReactMarkdownCustom from "@/components/MarkdownEditor/ReactMarkdownCustom";
 import AvatarUser from "@/components/Users/AvatarUser";
+import UserText from "@/components/Users/UserText";
 import { Comment } from "@ant-design/compatible";
 import {
   BookOutlined,
+  CheckCircleOutlined,
+  ClockCircleOutlined,
+  CloseCircleOutlined,
   CommentOutlined,
+  EditOutlined,
   EyeOutlined,
+  FolderOutlined,
+  InboxOutlined,
   LikeFilled,
   LikeOutlined,
   LoadingOutlined,
   TagsOutlined,
+  UserOutlined,
 } from "@ant-design/icons";
 import { Card, Flex, Tag, Tooltip, Typography } from "antd";
 import dayjs from "dayjs";
@@ -24,6 +32,38 @@ const KnowledgeContentHeader = ({
   isLiking = false,
   isBookmarking = false,
 }) => {
+  const getStatusColor = (status) => {
+    const statusColors = {
+      draft: "#d9d9d9",
+      published: "#52c41a", 
+      rejected: "#ff4d4f",
+      archived: "#fa8c16",
+      pending: "#faad14",
+    };
+    return statusColors[status] || "#d9d9d9";
+  };
+
+  const getStatusLabel = (status) => {
+    const statusLabels = {
+      draft: "Draft",
+      published: "Published", 
+      rejected: "Rejected",
+      archived: "Archived",
+      pending: "Pending",
+    };
+    return statusLabels[status] || status;
+  };
+
+  const getStatusIcon = (status) => {
+    const statusIcons = {
+      draft: <EditOutlined />,
+      published: <CheckCircleOutlined />,
+      rejected: <CloseCircleOutlined />,
+      archived: <InboxOutlined />,
+      pending: <ClockCircleOutlined />,
+    };
+    return statusIcons[status] || <EditOutlined />;
+  };
   return (
     <Card
       style={{
@@ -112,16 +152,10 @@ const KnowledgeContentHeader = ({
             }
             author={
               <Flex align="center" gap={6}>
-                <Text
-                  strong
-                  style={{
-                    color: "#1A1A1B",
-                    fontSize: "14px",
-                    fontWeight: 600,
-                  }}
-                >
-                  {content?.author?.username}
-                </Text>
+                <UserText 
+                  userId={content?.author?.custom_id}
+                  text={content?.author?.username}
+                />
                 <span style={{ color: "#787C7E", fontSize: "12px" }}>•</span>
                 <Tooltip
                   title={dayjs(content?.created_at).format(
@@ -145,32 +179,24 @@ const KnowledgeContentHeader = ({
                       •
                     </span>
                     <Tag
+                      color={getStatusColor(content.status)}
                       style={{
                         fontSize: "10px",
                         fontWeight: 500,
-                        backgroundColor:
-                          content?.status === "published"
-                            ? "#52c41a"
-                            : content?.status === "pending"
-                            ? "#d9d9d9"
-                            : content?.status === "rejected"
-                            ? "#ff4d4f"
-                            : "#fa8c16",
-                        color: "white",
                         border: "none",
                         borderRadius: "4px",
                         margin: 0,
                         padding: "0 6px",
                         lineHeight: "16px",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "4px",
                       }}
                     >
-                      {content?.status === "published"
-                        ? "Published"
-                        : content?.status === "pending"
-                        ? "Pending"
-                        : content?.status === "rejected"
-                        ? "Rejected"
-                        : "Archived"}
+                      <span style={{ fontSize: "8px" }}>
+                        {getStatusIcon(content.status)}
+                      </span>
+                      {getStatusLabel(content.status)}
                     </Tag>
                   </>
                 )}
@@ -192,8 +218,12 @@ const KnowledgeContentHeader = ({
                         margin: 0,
                         padding: "0 6px",
                         lineHeight: "16px",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "4px",
                       }}
                     >
+                      <FolderOutlined style={{ fontSize: "8px" }} />
                       {content?.category?.name}
                     </Tag>
                   </>
@@ -228,12 +258,28 @@ const KnowledgeContentHeader = ({
                     color: "#1A1A1B",
                     fontSize: "18px",
                     lineHeight: "1.3",
-                    marginBottom: "12px",
+                    marginBottom: "8px",
                     display: "block",
                   }}
                 >
                   {content?.title}
                 </Text>
+
+                {/* Summary */}
+                {content?.summary && (
+                  <Text
+                    style={{
+                      color: "#666",
+                      fontSize: "14px",
+                      lineHeight: "1.4",
+                      marginBottom: "12px",
+                      display: "block",
+                      fontStyle: "italic",
+                    }}
+                  >
+                    {content.summary}
+                  </Text>
+                )}
 
                 {/* Content Body */}
                 <div
@@ -249,6 +295,47 @@ const KnowledgeContentHeader = ({
                     {content?.content}
                   </ReactMarkdownCustom>
                 </div>
+
+                {/* Verification Information */}
+                {content?.verified_by && content?.verified_at && (
+                  <div
+                    style={{
+                      backgroundColor: "#E6F7FF",
+                      padding: "12px",
+                      borderRadius: "6px",
+                      border: "1px solid #91D5FF",
+                      marginTop: "12px",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "8px",
+                    }}
+                  >
+                    <CheckCircleOutlined style={{ color: "#1890FF", fontSize: "14px" }} />
+                    <div>
+                      <Text style={{ fontSize: "12px", fontWeight: 600, color: "#1890FF" }}>
+                        Diverifikasi oleh:
+                      </Text>
+                      <div style={{ display: "flex", alignItems: "center", gap: "6px", marginTop: "2px" }}>
+                        <AvatarUser
+                          size={18}
+                          src={content.user_verified?.image}
+                          userId={content.user_verified?.custom_id}
+                          user={content.user_verified}
+                        />
+                        <div style={{ fontSize: "11px", color: "#1890FF" }}>
+                          <UserText 
+                            userId={content.user_verified?.custom_id}
+                            text={content.user_verified?.username || "Admin"}
+                          />
+                        </div>
+                        <span style={{ color: "#1890FF", fontSize: "11px" }}>•</span>
+                        <Text style={{ fontSize: "11px", color: "#1890FF" }}>
+                          {dayjs(content.verified_at).format("DD MMM YYYY, HH:mm")}
+                        </Text>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             }
           />

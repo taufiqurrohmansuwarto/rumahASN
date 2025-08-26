@@ -1,5 +1,6 @@
 import ReactMarkdownCustom from "@/components/MarkdownEditor/ReactMarkdownCustom";
 import AvatarUser from "@/components/Users/AvatarUser";
+import UserText from "@/components/Users/UserText";
 import { Comment } from "@ant-design/compatible";
 import {
   DeleteOutlined,
@@ -168,16 +169,12 @@ const CommentList = ({
                   <Comment
                     author={
                       <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-                        <Text
-                          strong
-                          style={{
-                            color: "#1A1A1B",
-                            fontSize: "13px",
-                            fontWeight: 600,
-                          }}
-                        >
-                          {item?.user?.username}
-                        </Text>
+                        <div style={{ fontSize: "13px", fontWeight: 600 }}>
+                          <UserText 
+                            userId={item?.user?.custom_id}
+                            text={item?.user?.username}
+                          />
+                        </div>
                         <span style={{ color: "#787C7E", fontSize: "12px" }}>•</span>
                         <Tooltip
                           title={dayjs(item?.created_at).format("DD-MM-YYYY HH:mm")}
@@ -334,16 +331,12 @@ const CommentList = ({
                           />
                         }
                         author={
-                          <Text
-                            strong
-                            style={{
-                              color: "#1A1A1B",
-                              fontSize: "14px",
-                              fontWeight: 600,
-                            }}
-                          >
-                            {currentUser?.username}
-                          </Text>
+                          <div style={{ fontSize: "14px", fontWeight: 600 }}>
+                            <UserText 
+                              userId={currentUser?.custom_id}
+                              text={currentUser?.username}
+                            />
+                          </div>
                         }
                         content={
                           <Form

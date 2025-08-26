@@ -1,3 +1,5 @@
+import AvatarUser from "@/components/Users/AvatarUser";
+import UserText from "@/components/Users/UserText";
 import { Comment } from "@ant-design/compatible";
 import { UserOutlined } from "@ant-design/icons";
 import { Avatar, Divider, Space, Tag, Tooltip, Typography } from "antd";
@@ -22,17 +24,21 @@ const ContentComments = ({ content }) => {
               <Comment
                 key={comment.id}
                 avatar={
-                  <Avatar
+                  <AvatarUser
                     src={comment.user?.image}
-                    icon={<UserOutlined />}
+                    userId={comment.user?.custom_id}
+                    user={comment.user}
                     size="default"
                   />
                 }
                 author={
                   <Space>
-                    <Text strong style={{ fontSize: "13px" }}>
-                      {comment.user?.username}
-                    </Text>
+                    <div style={{ fontSize: "13px", fontWeight: 600 }}>
+                      <UserText 
+                        userId={comment.user?.custom_id}
+                        text={comment.user?.username}
+                      />
+                    </div>
                     {comment.user?.nama_jabatan && (
                       <Tooltip title={comment.user?.perangkat_daerah_detail}>
                         <Tag size="small" style={{ fontSize: "10px", cursor: "help" }}>

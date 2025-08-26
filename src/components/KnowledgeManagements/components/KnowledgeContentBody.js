@@ -1,4 +1,5 @@
 import ReactMarkdownCustom from "@/components/MarkdownEditor/ReactMarkdownCustom";
+import UserText from "@/components/Users/UserText";
 import { Comment } from "@ant-design/compatible";
 import { Avatar, Card, Flex, Grid, Typography } from "antd";
 import { FileTextOutlined } from "@ant-design/icons";
@@ -54,15 +55,12 @@ const KnowledgeContentBody = ({ data, actions }) => {
                 />
               }
               author={
-                <Text
-                  strong
-                  style={{
-                    color: "#1A1A1B",
-                    fontSize: isMobile ? "13px" : "14px",
-                  }}
-                >
-                  {data?.author?.username}
-                </Text>
+                <div style={{ fontSize: isMobile ? "13px" : "14px", fontWeight: 600 }}>
+                  <UserText 
+                    userId={data?.author?.custom_id}
+                    text={data?.author?.username}
+                  />
+                </div>
               }
               actions={actions}
               datetime={

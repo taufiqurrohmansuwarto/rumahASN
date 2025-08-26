@@ -1,12 +1,13 @@
 import ReactMarkdownCustom from "@/components/MarkdownEditor/ReactMarkdownCustom";
+import AvatarUser from "@/components/Users/AvatarUser";
+import UserText from "@/components/Users/UserText";
 import { Comment } from "@ant-design/compatible";
 import {
   EyeOutlined,
   LikeOutlined,
   MessageOutlined,
-  UserOutlined,
 } from "@ant-design/icons";
-import { Avatar, Divider, Flex, Space, Tag, Tooltip, Typography } from "antd";
+import { Divider, Flex, Space, Tag, Tooltip, Typography } from "antd";
 import dayjs from "dayjs";
 
 const { Text, Title } = Typography;
@@ -20,10 +21,20 @@ const ContentDisplay = ({ content, isMobile }) => {
       </Title>
 
       <Comment
-        avatar={<Avatar src={content.author?.image} icon={<UserOutlined />} />}
+        avatar={
+          <AvatarUser
+            src={content.author?.image}
+            userId={content.author?.custom_id}
+            user={content.author}
+            size="default"
+          />
+        }
         author={
           <Flex align="center" gap="small">
-            <span>{content.author?.username}</span>
+            <UserText 
+              userId={content.author?.custom_id}
+              text={content.author?.username}
+            />
             {content.author?.nama_jabatan && (
               <Tooltip
                 title={content.author?.perangkat_daerah_detail}

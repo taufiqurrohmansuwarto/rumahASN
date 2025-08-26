@@ -1,6 +1,7 @@
 import { Comment } from "@ant-design/compatible";
 import { Button, Form, Input, Grid, Typography, Space } from "antd";
 import AvatarUser from "@/components/Users/AvatarUser";
+import UserText from "@/components/Users/UserText";
 
 const { TextArea } = Input;
 const { Text } = Typography;
@@ -29,16 +30,12 @@ const FormComment = ({
         />
       }
       author={
-        <Text
-          strong
-          style={{
-            color: "#1A1A1B",
-            fontSize: "14px",
-            fontWeight: 600,
-          }}
-        >
-          {currentUser?.username}
-        </Text>
+        <div style={{ fontSize: "14px", fontWeight: 600 }}>
+          <UserText 
+            userId={currentUser?.custom_id}
+            text={currentUser?.username}
+          />
+        </div>
       }
       content={
         <Form form={form} onFinish={onSubmit}>

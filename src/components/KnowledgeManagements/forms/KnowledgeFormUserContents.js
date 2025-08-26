@@ -220,8 +220,6 @@ function KnowledgeFormUserContents({
         references: values.references || [],
       };
 
-      console.log('Form Data being sent:', formData);
-      console.log('Summary value:', summary);
 
       let result;
       const isEditing = !!initialData;
@@ -296,8 +294,6 @@ function KnowledgeFormUserContents({
         references: values.references || [],
       };
 
-      console.log('Draft Form Data being sent:', formData);
-      console.log('Draft Summary value:', summary);
 
       let result;
       const isEditing = !!initialData;

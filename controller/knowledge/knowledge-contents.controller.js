@@ -187,16 +187,11 @@ export const createKnowledgeContent = async (req, res) => {
     const body = req?.body;
     const { customId } = req?.user;
 
-    console.log('Backend received body:', body);
-    console.log('Backend received summary:', body?.summary);
-
     const payload = {
       ...body,
       tags: JSON.stringify(body?.tags),
       author_id: customId,
     };
-
-    console.log('Backend payload being inserted:', payload);
 
     // Menggunakan transaction untuk memastikan konsistensi data
     const content = await KnowledgeContent.transaction(async (trx) => {
@@ -228,16 +223,11 @@ export const updateKnowledgeContentPersonal = async (req, res) => {
     const body = req?.body;
     const { customId } = req?.user;
 
-    console.log('Update Backend received body:', body);
-    console.log('Update Backend received summary:', body?.summary);
-
     const payload = {
       ...body,
       tags: JSON.stringify(body?.tags),
       updated_at: new Date(),
     };
-
-    console.log('Update Backend payload being updated:', payload);
 
     // Use transaction for consistency when updating content and references
     const updatedContent = await KnowledgeContent.transaction(async (trx) => {
@@ -283,7 +273,6 @@ export const updateKnowledgeContentPersonal = async (req, res) => {
 
     res.json(updatedContent);
   } catch (error) {
-    console.error('Update error:', error);
     handleError(res, error);
   }
 };
