@@ -18,11 +18,11 @@ dayjs.extend(relativeTime);
 
 const { Text } = Typography;
 
-const ContentCard = ({ 
-  content, 
-  isMobile, 
-  onClick, 
-  showStatus = false, 
+const ContentCard = ({
+  content,
+  isMobile,
+  onClick,
+  showStatus = false,
   isAdmin = false,
   onLike,
   onBookmark,
@@ -30,26 +30,26 @@ const ContentCard = ({
   isLiked = false,
   isBookmarked = false,
   isLiking = false,
-  isBookmarking = false
+  isBookmarking = false,
 }) => {
   const getStatusColor = (status) => {
     const statusColors = {
       draft: "#d9d9d9",
-      published: "#52c41a", 
+      published: "#52c41a",
       rejected: "#ff4d4f",
       archived: "#fa8c16",
-      pending: "#faad14"
+      pending: "#faad14",
     };
     return statusColors[status] || "#d9d9d9";
   };
-  
+
   const getStatusLabel = (status) => {
     const statusLabels = {
       draft: "Draft",
-      published: "Published", 
+      published: "Published",
       rejected: "Rejected",
       archived: "Archived",
-      pending: "Pending"
+      pending: "Pending",
     };
     return statusLabels[status] || status;
   };
@@ -111,7 +111,11 @@ const ContentCard = ({
             borderRight: "1px solid #EDEFF1",
           }}
         >
-          <Tooltip title={isLiking ? "Loading..." : (isLiked ? "Unlike" : "Like konten ini")}>
+          <Tooltip
+            title={
+              isLiking ? "Loading..." : isLiked ? "Unlike" : "Like konten ini"
+            }
+          >
             {isLiking ? (
               <LoadingOutlined
                 style={{
@@ -176,16 +180,16 @@ const ContentCard = ({
         {/* Content Section */}
         <Flex
           vertical
-          style={{ 
-            flex: 1, 
-            padding: isMobile ? "8px 12px" : "12px 16px"
+          style={{
+            flex: 1,
+            padding: isMobile ? "8px 12px" : "12px 16px",
           }}
         >
           {/* Post Meta */}
           <Flex align="center" gap={6} style={{ marginBottom: "8px" }}>
             <Tooltip title="Lihat profil">
               <AvatarUser
-                size={20}
+                size={30}
                 src={content.author?.image}
                 userId={content.author?.custom_id}
                 user={content.author}
@@ -224,7 +228,7 @@ const ContentCard = ({
                 {dayjs(content.created_at).fromNow()}
               </Text>
             </Tooltip>
-            
+
             {/* Status Badge */}
             {(showStatus || isAdmin) && content.status && (
               <>
@@ -245,7 +249,7 @@ const ContentCard = ({
                 </Tag>
               </>
             )}
-            
+
             {/* Category */}
             {content.category && (
               <>
@@ -276,7 +280,7 @@ const ContentCard = ({
               color: "#1A1A1B",
               fontSize: isMobile ? "14px" : "16px",
               lineHeight: "1.3",
-              marginBottom: "8px",
+              marginBottom: "12px",
               display: "-webkit-box",
               "-webkit-line-clamp": 2,
               "-webkit-box-orient": "vertical",
@@ -331,7 +335,8 @@ const ContentCard = ({
                     position: "absolute",
                     bottom: "8px",
                     right: "12px",
-                    background: "linear-gradient(90deg, transparent, #f8f9fa 30%)",
+                    background:
+                      "linear-gradient(90deg, transparent, #f8f9fa 30%)",
                     paddingLeft: "20px",
                     fontSize: "12px",
                     color: "#FF4500",
@@ -352,8 +357,16 @@ const ContentCard = ({
             <div style={{ marginBottom: "12px" }}>
               <Flex align="center" gap="8px" wrap="wrap">
                 <Flex align="center" gap="4px">
-                  <TagsOutlined style={{ fontSize: "10px", color: "#787C7E" }} />
-                  <Text style={{ fontSize: "10px", color: "#787C7E", fontWeight: 600 }}>
+                  <TagsOutlined
+                    style={{ fontSize: "10px", color: "#787C7E" }}
+                  />
+                  <Text
+                    style={{
+                      fontSize: "10px",
+                      color: "#787C7E",
+                      fontWeight: 600,
+                    }}
+                  >
                     Tags:
                   </Text>
                 </Flex>
@@ -401,8 +414,16 @@ const ContentCard = ({
               {/* Views Count */}
               <Flex align="center" gap={4}>
                 <EyeOutlined style={{ fontSize: "12px", color: "#787C7E" }} />
-                <span style={{ fontSize: "12px", color: "#787C7E", fontWeight: 700 }}>
-                  {content.views_count || 0} Views
+                <span
+                  style={{
+                    fontSize: "12px",
+                    color: "#787C7E",
+                    fontWeight: 700,
+                  }}
+                >
+                  {content.views_count
+                    ? `${content.views_count}x dilihat`
+                    : "0 dilihat"}
                 </span>
               </Flex>
 
@@ -428,14 +449,20 @@ const ContentCard = ({
                 }}
               >
                 <MessageOutlined style={{ fontSize: "12px" }} />
-                <span>{content.comments_count || 0} Komentar</span>
+                <span>{content.comments_count || 0} komentar</span>
               </Flex>
 
               {/* Bookmarks Count */}
               <Flex align="center" gap={4}>
                 <BookOutlined style={{ fontSize: "12px", color: "#787C7E" }} />
-                <span style={{ fontSize: "12px", color: "#787C7E", fontWeight: 700 }}>
-                  {content.bookmarks_count || 0} Disimpan
+                <span
+                  style={{
+                    fontSize: "12px",
+                    color: "#787C7E",
+                    fontWeight: 700,
+                  }}
+                >
+                  {content.bookmarks_count || 0} disimpan
                 </span>
               </Flex>
             </Flex>
@@ -482,20 +509,28 @@ const ContentCard = ({
               <span
                 style={{
                   fontSize: "12px",
-                  color: isBookmarking ? "#FF4500" : (isBookmarked ? "#FF4500" : "#787C7E"),
+                  color: isBookmarking
+                    ? "#FF4500"
+                    : isBookmarked
+                    ? "#FF4500"
+                    : "#787C7E",
                   fontWeight: 700,
                 }}
               >
-                {isBookmarking ? "Loading..." : (isBookmarked ? "Tersimpan" : "Simpan")}
+                {isBookmarking
+                  ? "Loading..."
+                  : isBookmarked
+                  ? "Tersimpan"
+                  : "Simpan"}
               </span>
             </Flex>
           </Flex>
         </Flex>
       </Flex>
-      
+
       <style jsx global>{`
         .ant-card-hoverable:hover {
-          border-color: #FF4500 !important;
+          border-color: #ff4500 !important;
           box-shadow: 0 2px 8px rgba(255, 69, 0, 0.15) !important;
         }
 

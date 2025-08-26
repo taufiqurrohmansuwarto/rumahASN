@@ -15,7 +15,7 @@ const updateViewsCount = async (customId, contentId) => {
     const existingView = await UserInteraction.query()
       .where("user_id", customId)
       .where("content_id", contentId)
-      .where("type", "view")
+      .where("interaction_type", "view")
       .first();
 
     // Jika belum pernah melihat, catat view dan increment counter
@@ -24,7 +24,7 @@ const updateViewsCount = async (customId, contentId) => {
       await UserInteraction.query().insert({
         user_id: customId,
         content_id: contentId,
-        type: "view",
+        interaction_type: "view",
       });
 
       // Tambah 1 ke views_count konten

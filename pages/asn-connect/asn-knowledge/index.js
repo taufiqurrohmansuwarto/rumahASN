@@ -3,7 +3,7 @@ import LayoutASNConnect from "@/components/Socmed/LayoutASNConnect";
 import KnowledgeUserContents from "@/components/KnowledgeManagements/lists/KnowledgeUserContents";
 import useScrollRestoration from "@/hooks/useScrollRestoration";
 import { PlusOutlined } from "@ant-design/icons";
-import { Button } from "antd";
+import { Button, Flex } from "antd";
 import Head from "next/head";
 import { useRouter } from "next/navigation";
 
@@ -18,13 +18,16 @@ const AsnKnowledge = () => {
         <title>Rumah ASN - ASN Connect - Manajemen Pengetahuan</title>
       </Head>
       <LayoutASNConnect active="asn-knowledge">
-        <Button
-          type="primary"
-          icon={<PlusOutlined />}
-          onClick={() => router.push("/asn-connect/asn-knowledge/create")}
-        >
-          Buat Pengetahuan
-        </Button>
+        <Flex justify="end">
+          <Button
+            shape="round"
+            type="primary"
+            icon={<PlusOutlined />}
+            onClick={() => router.push("/asn-connect/asn-knowledge/create")}
+          >
+            Buat Pengetahuan
+          </Button>
+        </Flex>
         <KnowledgeUserContents />
       </LayoutASNConnect>
     </>
