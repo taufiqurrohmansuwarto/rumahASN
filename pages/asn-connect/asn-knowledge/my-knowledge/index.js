@@ -1,18 +1,23 @@
+import { MyKnowledgeContents } from "@/components/KnowledgeManagements";
 import Layout from "@/components/Layout";
 import PageContainer from "@/components/PageContainer";
 import LayoutASNConnect from "@/components/Socmed/LayoutASNConnect";
+import useScrollRestoration from "@/hooks/useScrollRestoration";
+import { FloatButton } from "antd";
 import Head from "next/head";
-import { useRouter } from "next/router";
 
 const AsnKnowledgeMyKnowledge = () => {
-  const router = useRouter();
+  useScrollRestoration();
+
   return (
     <>
       <Head>
         <title>Rumah ASN - Pojok Pengetahuan - Pengetahuan Saya</title>
       </Head>
       <LayoutASNConnect active="asn-knowledge">
-        <PageContainer title="Pengetahuan Saya" onBack={() => router.back()}>
+        <FloatButton.BackTop />
+        <PageContainer title="Pengetahuan Saya">
+          <MyKnowledgeContents />
         </PageContainer>
       </LayoutASNConnect>
     </>

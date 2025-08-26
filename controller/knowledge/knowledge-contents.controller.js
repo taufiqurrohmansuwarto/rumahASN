@@ -47,10 +47,15 @@ export const getKnowledgeContents = async (req, res) => {
       page = 1,
       limit = 10,
       search = "",
-      sort = "created_at",
+      sort = "created_at", // Default: created_at DESC (terbaru)
       category_id = "",
       tags = "",
     } = req?.query;
+
+    // Handle multiple tags from URL params (tag=tutorial&tag=javascript)
+    const tagFilters = Array.isArray(req.query.tag) ? req.query.tag : (req.query.tag ? [req.query.tag] : []);
+    const allTags = tags ? tags.split(',').filter(Boolean) : [];
+    const finalTags = [...new Set([...tagFilters, ...allTags])].filter(Boolean);
     const contents = await KnowledgeContent.query()
       .andWhere((builder) => {
         if (search) {
@@ -63,8 +68,13 @@ export const getKnowledgeContents = async (req, res) => {
         }
       })
       .andWhere((builder) => {
-        if (tags) {
-          builder.whereRaw("tags @> ?", [JSON.stringify([tags])]);
+        if (finalTags.length > 0) {
+          // Check if any of the selected tags exist in the content tags
+          builder.where((subBuilder) => {
+            finalTags.forEach(tag => {
+              subBuilder.orWhereRaw("tags @> ?", [JSON.stringify([tag])]);
+            });
+          });
         }
       })
       .select(
@@ -94,7 +104,7 @@ export const getKnowledgeContents = async (req, res) => {
       .withGraphFetched(
         "[author(simpleWithImage), category, user_verified(simpleWithImage), versions.[user_updated(simpleWithImage)], attachments, references]"
       )
-      .orderBy(sort, "desc")
+      .orderBy(getSortField(sort), getSortDirection(sort))
       .page(page - 1, limit);
 
     const data = {
@@ -355,3 +365,39 @@ export const uploadKnowledgeContentAttachmentAdmin = async (req, res) => {
     handleError(res, error);
   }
 };
+
+// Helper functions for sorting
+function getSortField(sort) {
+  switch (sort) {
+    case "created_at": // Default - tanggal create terbaru
+    case "created_at_asc": // Tanggal create terlama
+      return "created_at";
+    case "likes_count": // Total like terbanyak
+      return "likes_count";
+    case "comments_count": // Total komentar terbanyak
+      return "comments_count";
+    case "title_asc": // Judul A-Z
+    case "title_desc": // Judul Z-A
+      return "title";
+    case "updated_at": // Tanggal update
+      return "updated_at";
+    default:
+      return "created_at";
+  }
+}
+
+function getSortDirection(sort) {
+  switch (sort) {
+    case "created_at_asc": // Tanggal create terlama (ASC)
+    case "title_asc": // Judul A-Z (ASC)
+      return "asc";
+    case "title_desc": // Judul Z-A (DESC)
+      return "desc";
+    case "created_at": // Default - tanggal create terbaru (DESC)
+    case "likes_count": // Total like terbanyak (DESC)
+    case "comments_count": // Total komentar terbanyak (DESC)
+    case "updated_at": // Tanggal update terbaru (DESC)
+    default:
+      return "desc";
+  }
+}

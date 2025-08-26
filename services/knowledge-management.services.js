@@ -14,6 +14,19 @@ export const getKnowledgeContents = async (query) => {
   return await api.get(`/users/contents?${qs}`).then((res) => res.data);
 };
 
+export const getUserOwnContents = async (query) => {
+  const qs = queryString.stringify(query, {
+    skipNull: true,
+    skipEmptyString: true,
+  });
+
+  return await api.get(`/users/me/contents?${qs}`).then((res) => res.data);
+};
+
+export const getUserOwnStats = async () => {
+  return await api.get("/users/me/stats").then((res) => res.data);
+};
+
 export const getKnowledgeContent = async (id) => {
   return await api.get(`/users/contents/${id}`).then((res) => res.data);
 };
