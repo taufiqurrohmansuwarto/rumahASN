@@ -18,7 +18,7 @@ import {
   TagsOutlined,
   UserOutlined,
 } from "@ant-design/icons";
-import { Card, Flex, Tag, Tooltip, Typography } from "antd";
+import { Card, Flex, Tag, Tooltip, Typography, Divider } from "antd";
 import dayjs from "dayjs";
 
 const { Text } = Typography;
@@ -35,7 +35,7 @@ const KnowledgeContentHeader = ({
   const getStatusColor = (status) => {
     const statusColors = {
       draft: "#d9d9d9",
-      published: "#52c41a", 
+      published: "#52c41a",
       rejected: "#ff4d4f",
       archived: "#fa8c16",
       pending: "#faad14",
@@ -46,7 +46,7 @@ const KnowledgeContentHeader = ({
   const getStatusLabel = (status) => {
     const statusLabels = {
       draft: "Draft",
-      published: "Published", 
+      published: "Published",
       rejected: "Rejected",
       archived: "Archived",
       pending: "Pending",
@@ -73,9 +73,78 @@ const KnowledgeContentHeader = ({
         marginBottom: "16px",
         padding: 0,
         overflow: "hidden",
+        position: "relative",
       }}
       bodyStyle={{ padding: 0 }}
     >
+      {/* Bookmark Button - Top Right Corner */}
+      <div
+        style={{
+          position: "absolute",
+          top: "12px",
+          right: "12px",
+          zIndex: 10,
+        }}
+      >
+        <Flex
+          align="center"
+          gap={4}
+          style={{
+            cursor: isBookmarking ? "default" : "pointer",
+            padding: "6px 8px",
+            borderRadius: "4px",
+            transition: "all 0.2s ease",
+            opacity: isBookmarking ? 0.7 : 1,
+            backgroundColor: "transparent",
+          }}
+          onClick={isBookmarking ? undefined : onBookmark}
+          onMouseEnter={(e) => {
+            if (!isBookmarking) {
+              e.currentTarget.style.backgroundColor = "#F3F4F6";
+            }
+          }}
+          onMouseLeave={(e) => {
+            if (!isBookmarking) {
+              e.currentTarget.style.backgroundColor = "transparent";
+            }
+          }}
+        >
+          {isBookmarking ? (
+            <LoadingOutlined
+              style={{
+                fontSize: "14px",
+                color: "#FF4500",
+              }}
+              spin
+            />
+          ) : (
+            <BookOutlined
+              style={{
+                fontSize: "14px",
+                color: isBookmarked ? "#FF4500" : "#6B7280",
+              }}
+            />
+          )}
+          <Text
+            style={{
+              fontSize: "12px",
+              color: isBookmarking
+                ? "#FF4500"
+                : isBookmarked
+                ? "#FF4500"
+                : "#6B7280",
+              fontWeight: 600,
+            }}
+          >
+            {isBookmarking
+              ? "Loading..."
+              : isBookmarked
+              ? "Tersimpan"
+              : "Simpan"}
+          </Text>
+        </Flex>
+      </div>
+
       <Flex style={{ minHeight: "80px" }}>
         {/* Like Section - Reddit Style */}
         <div
@@ -90,7 +159,11 @@ const KnowledgeContentHeader = ({
             borderRight: "1px solid #EDEFF1",
           }}
         >
-          <Tooltip title={isLiking ? "Loading..." : (isLiked ? "Unlike" : "Like konten ini")}>
+          <Tooltip
+            title={
+              isLiking ? "Loading..." : isLiked ? "Unlike" : "Like konten ini"
+            }
+          >
             {isLiking ? (
               <LoadingOutlined
                 style={{
@@ -152,7 +225,7 @@ const KnowledgeContentHeader = ({
             }
             author={
               <Flex align="center" gap={6}>
-                <UserText 
+                <UserText
                   userId={content?.author?.custom_id}
                   text={content?.author?.username}
                 />
@@ -231,11 +304,11 @@ const KnowledgeContentHeader = ({
               </Flex>
             }
             content={
-              <div>
+              <div style={{ marginTop: "12px" }}>
                 {/* Last Updated Info */}
                 {content?.updated_at &&
                   content?.updated_at !== content?.created_at && (
-                    <div style={{ marginBottom: "8px" }}>
+                    <div style={{ marginBottom: "12px" }}>
                       <Text
                         style={{
                           fontSize: "11px",
@@ -251,51 +324,6 @@ const KnowledgeContentHeader = ({
                     </div>
                   )}
 
-                {/* Content Title */}
-                <Text
-                  strong
-                  style={{
-                    color: "#1A1A1B",
-                    fontSize: "18px",
-                    lineHeight: "1.3",
-                    marginBottom: "8px",
-                    display: "block",
-                  }}
-                >
-                  {content?.title}
-                </Text>
-
-                {/* Summary */}
-                {content?.summary && (
-                  <Text
-                    style={{
-                      color: "#666",
-                      fontSize: "14px",
-                      lineHeight: "1.4",
-                      marginBottom: "12px",
-                      display: "block",
-                      fontStyle: "italic",
-                    }}
-                  >
-                    {content.summary}
-                  </Text>
-                )}
-
-                {/* Content Body */}
-                <div
-                  style={{
-                    backgroundColor: "#F8F9FA",
-                    padding: "16px",
-                    borderRadius: "6px",
-                    border: "1px solid #E9ECEF",
-                    marginBottom: "12px",
-                  }}
-                >
-                  <ReactMarkdownCustom withCustom={false}>
-                    {content?.content}
-                  </ReactMarkdownCustom>
-                </div>
-
                 {/* Verification Information */}
                 {content?.verified_by && content?.verified_at && (
                   <div
@@ -310,12 +338,27 @@ const KnowledgeContentHeader = ({
                       gap: "8px",
                     }}
                   >
-                    <CheckCircleOutlined style={{ color: "#1890FF", fontSize: "14px" }} />
+                    <CheckCircleOutlined
+                      style={{ color: "#1890FF", fontSize: "14px" }}
+                    />
                     <div>
-                      <Text style={{ fontSize: "12px", fontWeight: 600, color: "#1890FF" }}>
+                      <Text
+                        style={{
+                          fontSize: "12px",
+                          fontWeight: 600,
+                          color: "#1890FF",
+                        }}
+                      >
                         Diverifikasi oleh:
                       </Text>
-                      <div style={{ display: "flex", alignItems: "center", gap: "6px", marginTop: "2px" }}>
+                      <div
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "6px",
+                          marginTop: "2px",
+                        }}
+                      >
                         <AvatarUser
                           size={18}
                           src={content.user_verified?.image}
@@ -323,14 +366,18 @@ const KnowledgeContentHeader = ({
                           user={content.user_verified}
                         />
                         <div style={{ fontSize: "11px", color: "#1890FF" }}>
-                          <UserText 
+                          <UserText
                             userId={content.user_verified?.custom_id}
                             text={content.user_verified?.username || "Admin"}
                           />
                         </div>
-                        <span style={{ color: "#1890FF", fontSize: "11px" }}>•</span>
+                        <span style={{ color: "#1890FF", fontSize: "11px" }}>
+                          •
+                        </span>
                         <Text style={{ fontSize: "11px", color: "#1890FF" }}>
-                          {dayjs(content.verified_at).format("DD MMM YYYY, HH:mm")}
+                          {dayjs(content.verified_at).format(
+                            "DD MMM YYYY, HH:mm"
+                          )}
                         </Text>
                       </div>
                     </div>
@@ -340,13 +387,111 @@ const KnowledgeContentHeader = ({
             }
           />
 
+          {/* Summary Section with Labels */}
+          <div style={{ marginBottom: "16px" }}>
+            {/* Judul */}
+            <div style={{ marginBottom: "12px" }}>
+              <Text
+                strong
+                style={{
+                  color: "#1A1A1B",
+                  fontSize: "14px",
+                  marginBottom: "4px",
+                  display: "block",
+                }}
+              >
+                Judul:
+              </Text>
+              <Text
+                style={{
+                  color: "#374151",
+                  fontSize: "16px",
+                  lineHeight: "1.4",
+                  fontWeight: 600,
+                }}
+              >
+                {content?.title}
+              </Text>
+            </div>
+
+            {/* Ringkasan */}
+            <div style={{ marginBottom: "12px" }}>
+              <Text
+                strong
+                style={{
+                  color: "#1A1A1B",
+                  fontSize: "14px",
+                  marginBottom: "4px",
+                  display: "block",
+                }}
+              >
+                Ringkasan:
+              </Text>
+              <Text
+                style={{
+                  color: "#6B7280",
+                  fontSize: "14px",
+                  lineHeight: "1.5",
+                  fontStyle: content?.summary ? "italic" : "normal",
+                }}
+              >
+                {content?.summary ||
+                  (content?.content && content.content.length > 200
+                    ? `${content.content.substring(0, 200)}...`
+                    : content?.content || "Tidak ada ringkasan")}
+              </Text>
+            </div>
+
+            {/* Isi */}
+            <div style={{ marginBottom: "12px" }}>
+              <Text
+                strong
+                style={{
+                  color: "#1A1A1B",
+                  fontSize: "14px",
+                  marginBottom: "8px",
+                  display: "block",
+                }}
+              >
+                Isi:
+              </Text>
+              <div
+                style={{
+                  backgroundColor: "#F8F9FA",
+                  padding: "12px",
+                  borderRadius: "6px",
+                  border: "1px solid #E9ECEF",
+                  fontSize: "13px",
+                  lineHeight: "1.6",
+                  color: "#374151",
+                  maxHeight: "200px",
+                  overflowY: "auto",
+                }}
+              >
+                <ReactMarkdownCustom withCustom={false}>
+                  {content?.content || "Tidak ada konten"}
+                </ReactMarkdownCustom>
+              </div>
+            </div>
+          </div>
+
+          <Divider style={{ margin: "16px 0" }} />
+
           {/* Tags */}
           {content?.tags && content?.tags.length > 0 && (
             <div style={{ marginBottom: "16px" }}>
               <Flex align="center" gap="8px" wrap="wrap">
                 <Flex align="center" gap="4px">
-                  <TagsOutlined style={{ fontSize: "12px", color: "#787C7E" }} />
-                  <Text style={{ fontSize: "12px", color: "#787C7E", fontWeight: 600 }}>
+                  <TagsOutlined
+                    style={{ fontSize: "12px", color: "#787C7E" }}
+                  />
+                  <Text
+                    style={{
+                      fontSize: "12px",
+                      color: "#787C7E",
+                      fontWeight: 600,
+                    }}
+                  >
                     Tags:
                   </Text>
                 </Flex>
@@ -477,54 +622,6 @@ const KnowledgeContentHeader = ({
               </Text>
             </Flex>
 
-            <Flex
-              align="center"
-              gap={4}
-              style={{
-                cursor: isBookmarking ? "default" : "pointer",
-                padding: "4px 8px",
-                borderRadius: "4px",
-                transition: "background-color 0.2s ease",
-                opacity: isBookmarking ? 0.7 : 1,
-              }}
-              onClick={isBookmarking ? undefined : onBookmark}
-              onMouseEnter={(e) => {
-                if (!isBookmarking) {
-                  e.currentTarget.style.backgroundColor = "#f8f9fa";
-                }
-              }}
-              onMouseLeave={(e) => {
-                if (!isBookmarking) {
-                  e.currentTarget.style.backgroundColor = "transparent";
-                }
-              }}
-            >
-              {isBookmarking ? (
-                <LoadingOutlined
-                  style={{
-                    fontSize: "14px",
-                    color: "#FF4500",
-                  }}
-                  spin
-                />
-              ) : (
-                <BookOutlined
-                  style={{
-                    fontSize: "14px",
-                    color: isBookmarked ? "#FF4500" : "#787C7E",
-                  }}
-                />
-              )}
-              <Text
-                style={{
-                  fontSize: "12px",
-                  color: isBookmarking ? "#FF4500" : (isBookmarked ? "#FF4500" : "#787C7E"),
-                  fontWeight: 700,
-                }}
-              >
-                {isBookmarking ? "Loading..." : (isBookmarked ? "Tersimpan" : "Simpan")}
-              </Text>
-            </Flex>
           </Flex>
         </Flex>
       </Flex>

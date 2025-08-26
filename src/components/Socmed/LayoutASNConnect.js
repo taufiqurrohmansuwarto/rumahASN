@@ -21,7 +21,7 @@ function LayoutASNConnect({ children, active = "asn-updates" }) {
     // },
     {
       key: "asn-knowledge",
-      label: "Pojok Pengetahuan",
+      label: "ASNPedia",
     },
     {
       key: "asn-discussions",

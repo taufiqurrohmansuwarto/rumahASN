@@ -7,6 +7,7 @@ import {
   EditOutlined,
   RetweetOutlined,
   MessageOutlined,
+  MoreOutlined,
 } from "@ant-design/icons";
 import {
   Button,
@@ -17,8 +18,10 @@ import {
   Tooltip,
   Grid,
   Typography,
+  Dropdown,
 } from "antd";
 import dayjs from "dayjs";
+import { useEffect } from "react";
 
 const { TextArea } = Input;
 const { Text } = Typography;
@@ -37,13 +40,28 @@ const CommentList = ({
   isDeletingComment,
 }) => {
   const [editForm] = Form.useForm();
+  const [replyForm] = Form.useForm();
+
+  // Reset forms when modes change
+  useEffect(() => {
+    if (replyingTo) {
+      replyForm.resetFields();
+    }
+  }, [replyingTo, replyForm]);
+
+  useEffect(() => {
+    if (editingComment) {
+      // Form akan diset dengan initial values di Form component
+    } else {
+      editForm.resetFields();
+    }
+  }, [editingComment, editForm]);
 
   // Responsive breakpoints - sama seperti komponen lainnya
   const screens = useBreakpoint();
   const isMobile = !screens.md;
 
   const renderCommentActions = (item) => {
-    const isOwner = currentUser?.id === item?.user?.custom_id;
     const actions = [];
 
     // Reply action - always available
@@ -72,70 +90,31 @@ const CommentList = ({
       </Tooltip>
     );
 
-    // Edit action - only for comment owner
-    if (isOwner) {
-      actions.push(
-        <Tooltip key="comment-edit" title="Edit">
-          <span
-            onClick={() => !isUpdatingComment && onEdit(item)}
-            style={{
-              opacity: isUpdatingComment ? 0.5 : 1,
-              cursor: isUpdatingComment ? "not-allowed" : "pointer",
-              color: "#6B7280",
-              fontSize: isMobile ? "12px" : "13px",
-              transition: "all 0.2s ease",
-            }}
-            onMouseEnter={(e) => {
-              if (!isUpdatingComment) {
-                e.currentTarget.style.color = "#374151";
-                e.currentTarget.style.transform = "translateY(-1px)";
-              }
-            }}
-            onMouseLeave={(e) => {
-              if (!isUpdatingComment) {
-                e.currentTarget.style.color = "#6B7280";
-                e.currentTarget.style.transform = "translateY(0)";
-              }
-            }}
-          >
-            <EditOutlined style={{ paddingRight: "4px" }} />
-            <span className="comment-action">Edit</span>
-          </span>
-        </Tooltip>
-      );
-
-      actions.push(
-        <Tooltip key="comment-delete" title="Hapus">
-          <span
-            onClick={() => !isDeletingComment && onDelete(item.id)}
-            style={{
-              opacity: isDeletingComment ? 0.5 : 1,
-              cursor: isDeletingComment ? "not-allowed" : "pointer",
-              color: "#DC2626",
-              fontSize: isMobile ? "12px" : "13px",
-              transition: "all 0.2s ease",
-            }}
-            onMouseEnter={(e) => {
-              if (!isDeletingComment) {
-                e.currentTarget.style.color = "#B91C1C";
-                e.currentTarget.style.transform = "translateY(-1px)";
-              }
-            }}
-            onMouseLeave={(e) => {
-              if (!isDeletingComment) {
-                e.currentTarget.style.color = "#DC2626";
-                e.currentTarget.style.transform = "translateY(0)";
-              }
-            }}
-          >
-            <DeleteOutlined style={{ paddingRight: "4px" }} />
-            <span className="comment-action">Hapus</span>
-          </span>
-        </Tooltip>
-      );
-    }
-
     return actions;
+  };
+
+  const getDropdownItems = (item) => {
+    const isOwner = currentUser?.id === item?.user?.custom_id;
+    
+    if (!isOwner) return [];
+
+    return [
+      {
+        key: 'edit',
+        icon: <EditOutlined />,
+        label: 'Edit',
+        onClick: () => !isUpdatingComment && onEdit(item),
+        disabled: isUpdatingComment,
+      },
+      {
+        key: 'delete',
+        icon: <DeleteOutlined />,
+        label: 'Hapus',
+        onClick: () => !isDeletingComment && onDelete(item.id),
+        disabled: isDeletingComment,
+        danger: true,
+      },
+    ];
   };
 
   return (
@@ -156,6 +135,7 @@ const CommentList = ({
                     backgroundColor: "#FFFFFF",
                     padding: "12px",
                     transition: "all 0.2s ease",
+                    position: "relative",
                   }}
                   onMouseEnter={(e) => {
                     e.currentTarget.style.borderColor = "#D1D5DB";
@@ -166,9 +146,53 @@ const CommentList = ({
                     e.currentTarget.style.boxShadow = "none";
                   }}
                 >
+                  {/* Dropdown positioned absolutely in top-right corner */}
+                  {getDropdownItems(item).length > 0 && (
+                    <div
+                      style={{
+                        position: "absolute",
+                        top: "12px",
+                        right: "12px",
+                        zIndex: 10,
+                      }}
+                    >
+                      <Dropdown
+                        menu={{ items: getDropdownItems(item) }}
+                        trigger={['click']}
+                        placement="bottomRight"
+                      >
+                        <Button
+                          type="text"
+                          icon={<MoreOutlined />}
+                          size="small"
+                          style={{
+                            color: "#9CA3AF",
+                            border: "none",
+                            boxShadow: "none",
+                            padding: "4px",
+                            height: "24px",
+                            width: "24px",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            borderRadius: "4px",
+                          }}
+                          onMouseEnter={(e) => {
+                            e.currentTarget.style.color = "#6B7280";
+                            e.currentTarget.style.backgroundColor = "#F3F4F6";
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.color = "#9CA3AF";
+                            e.currentTarget.style.backgroundColor = "transparent";
+                          }}
+                        />
+                      </Dropdown>
+                    </div>
+                  )}
+
                   <Comment
                     author={
-                      <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: "6px", paddingRight: "30px" }}>
                         <div style={{ fontSize: "13px", fontWeight: 600 }}>
                           <UserText 
                             userId={item?.user?.custom_id}
@@ -235,6 +259,17 @@ const CommentList = ({
                               {
                                 required: true,
                                 message: "Komentar tidak boleh kosong!",
+                              },
+                              {
+                                validator: (_, value) => {
+                                  if (value) {
+                                    const wordCount = value.trim().split(/\s+/).filter(word => word.length > 0).length;
+                                    if (wordCount > 200) {
+                                      return Promise.reject(`Komentar maksimal 200 kata. Saat ini: ${wordCount} kata`);
+                                    }
+                                  }
+                                  return Promise.resolve();
+                                },
                               },
                             ]}
                           >
@@ -316,9 +351,6 @@ const CommentList = ({
                         marginTop: "8px",
                         marginBottom: "8px",
                         padding: "8px",
-                        backgroundColor: "#F8F9FA",
-                        borderRadius: "4px",
-                        border: "1px solid #EDEFF1",
                       }}
                     >
                       <Comment
@@ -340,7 +372,7 @@ const CommentList = ({
                         }
                         content={
                           <Form
-                            form={editForm}
+                            form={replyForm}
                             onFinish={(values) =>
                               onReply(item.id, values.content, true)
                             }
@@ -351,6 +383,17 @@ const CommentList = ({
                                 {
                                   required: true,
                                   message: "Balasan tidak boleh kosong!",
+                                },
+                                {
+                                  validator: (_, value) => {
+                                    if (value) {
+                                      const wordCount = value.trim().split(/\s+/).filter(word => word.length > 0).length;
+                                      if (wordCount > 200) {
+                                        return Promise.reject(`Balasan maksimal 200 kata. Saat ini: ${wordCount} kata`);
+                                      }
+                                    }
+                                    return Promise.resolve();
+                                  },
                                 },
                               ]}
                               style={{ marginBottom: "16px" }}

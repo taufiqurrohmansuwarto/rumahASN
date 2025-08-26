@@ -10,9 +10,8 @@ import Head from "next/head";
 import { useRouter } from "next/router";
 
 const AsnKnowledgeDetail = () => {
-  useScrollRestoration();
   const router = useRouter();
-
+  
   const { data, isLoading } = useQuery(
     ["knowledge-content-detail", router.query.id],
     () => getKnowledgeContent(router.query.id),
@@ -22,6 +21,8 @@ const AsnKnowledgeDetail = () => {
       refetchOnWindowFocus: false,
     }
   );
+
+  useScrollRestoration("scrollPosition", true, isLoading);
 
   const gotoAsnKnowledge = () => {
     router.push("/asn-connect/asn-knowledge");
