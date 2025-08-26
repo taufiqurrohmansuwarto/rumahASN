@@ -13,5 +13,8 @@ export * from "./users";
 // Components
 export * from "./components";
 
+// Layouts
+export * from "./layouts";
+
 // Samples
 export * from "./samples";

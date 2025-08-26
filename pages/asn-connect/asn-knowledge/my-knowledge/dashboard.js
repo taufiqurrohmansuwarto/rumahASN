@@ -1,6 +1,8 @@
-import { MyKnowledgeDashboard, KnowledgeNavigationSegmented } from "@/components/KnowledgeManagements";
+import {
+  MyKnowledgeDashboard,
+  KnowledgeLayout,
+} from "@/components/KnowledgeManagements";
 import Layout from "@/components/Layout";
-import PageContainer from "@/components/PageContainer";
 import LayoutASNConnect from "@/components/Socmed/LayoutASNConnect";
 import useScrollRestoration from "@/hooks/useScrollRestoration";
 import { FloatButton } from "antd";
@@ -16,14 +18,9 @@ const AsnKnowledgeMyKnowledgeDashboard = () => {
       </Head>
       <LayoutASNConnect active="asn-knowledge">
         <FloatButton.BackTop />
-        <PageContainer 
-          title="Status Saya"
-          extra={
-            <KnowledgeNavigationSegmented currentPath="/asn-connect/asn-knowledge/my-knowledge/dashboard" />
-          }
-        >
+        <KnowledgeLayout currentPath="/asn-connect/asn-knowledge/my-knowledge/dashboard">
           <MyKnowledgeDashboard />
-        </PageContainer>
+        </KnowledgeLayout>
       </LayoutASNConnect>
     </>
   );
