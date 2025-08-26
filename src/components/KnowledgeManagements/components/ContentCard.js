@@ -9,6 +9,12 @@ import {
   LoadingOutlined,
   EyeOutlined,
   TagsOutlined,
+  CheckCircleOutlined,
+  ClockCircleOutlined,
+  EditOutlined,
+  CloseCircleOutlined,
+  InboxOutlined,
+  FolderOutlined,
 } from "@ant-design/icons";
 import { Card, Flex, Tag, Typography, Tooltip } from "antd";
 import dayjs from "dayjs";
@@ -54,6 +60,17 @@ const ContentCard = ({
     return statusLabels[status] || status;
   };
 
+  const getStatusIcon = (status) => {
+    const statusIcons = {
+      draft: <EditOutlined />,
+      published: <CheckCircleOutlined />,
+      rejected: <CloseCircleOutlined />,
+      archived: <InboxOutlined />,
+      pending: <ClockCircleOutlined />,
+    };
+    return statusIcons[status] || <EditOutlined />;
+  };
+
   const handleUserClick = (e) => {
     e.stopPropagation();
     onUserClick && onUserClick(content.author);
@@ -61,19 +78,22 @@ const ContentCard = ({
 
   const handleLikeClick = (e) => {
     e.stopPropagation();
-    if (!isLiking) {
+    // Only allow like/unlike for published content
+    if (!isLiking && content.status === 'published') {
       onLike && onLike(content.id);
     }
   };
 
   const handleBookmarkClick = (e) => {
     e.stopPropagation();
-    if (!isBookmarking) {
+    // Only allow bookmark for published content
+    if (!isBookmarking && content.status === 'published') {
       onBookmark && onBookmark(content.id);
     }
   };
 
   const handleContentClick = () => {
+    // Allow content click for all content (for viewing details)
     onClick && onClick();
   };
 
@@ -113,7 +133,9 @@ const ContentCard = ({
         >
           <Tooltip
             title={
-              isLiking ? "Loading..." : isLiked ? "Unlike" : "Like konten ini"
+              content.status !== 'published' 
+                ? "Hanya konten yang dipublikasikan yang bisa dilike" 
+                : isLiking ? "Loading..." : isLiked ? "Unlike" : "Like konten ini"
             }
           >
             {isLiking ? (
@@ -243,8 +265,14 @@ const ContentCard = ({
                     margin: 0,
                     padding: "0 6px",
                     lineHeight: "16px",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "4px",
                   }}
                 >
+                  <span style={{ fontSize: "8px" }}>
+                    {getStatusIcon(content.status)}
+                  </span>
                   {getStatusLabel(content.status)}
                 </Tag>
               </>
@@ -265,8 +293,12 @@ const ContentCard = ({
                     margin: 0,
                     padding: "0 6px",
                     lineHeight: "16px",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "4px",
                   }}
                 >
+                  <FolderOutlined style={{ fontSize: "8px" }} />
                   {content.category.name}
                 </Tag>
               </>
@@ -280,7 +312,7 @@ const ContentCard = ({
               color: "#1A1A1B",
               fontSize: isMobile ? "14px" : "16px",
               lineHeight: "1.3",
-              marginBottom: "12px",
+              marginBottom: "8px",
               display: "-webkit-box",
               "-webkit-line-clamp": 2,
               "-webkit-box-orient": "vertical",
@@ -300,6 +332,26 @@ const ContentCard = ({
           >
             {content.title}
           </Text>
+
+          {/* Summary */}
+          {content?.summary && (
+            <Text
+              style={{
+                color: "#666",
+                fontSize: isMobile ? "12px" : "13px",
+                lineHeight: "1.4",
+                marginBottom: "12px",
+                display: "-webkit-box",
+                "-webkit-line-clamp": 2,
+                "-webkit-box-orient": "vertical",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                fontStyle: "italic",
+              }}
+            >
+              {content.summary}
+            </Text>
+          )}
 
           {/* Content Preview */}
           {content?.content && (
@@ -326,10 +378,10 @@ const ContentCard = ({
                 }}
               >
                 <ReactMarkdownCustom withCustom={false}>
-                  {content?.content?.substring(0, 200)}
+                  {content?.summary || content?.content?.substring(0, 200)}
                 </ReactMarkdownCustom>
               </div>
-              {content?.content?.length > 200 && (
+              {(content?.summary && content.summary.length > 0) || (content?.content && content.content.length > 200) && (
                 <div
                   style={{
                     position: "absolute",

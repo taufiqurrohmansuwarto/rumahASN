@@ -24,6 +24,23 @@ export const getKnowledgeContentsAdmin = async (req, res) => {
           builder.where("title", "ilike", `%${search}%`);
         }
       })
+      .select(
+        "knowledge.contents.id",
+        "knowledge.contents.title",
+        "knowledge.contents.summary",
+        "knowledge.contents.author_id",
+        "knowledge.contents.category_id",
+        "knowledge.contents.status",
+        "knowledge.contents.tags",
+        "knowledge.contents.likes_count",
+        "knowledge.contents.comments_count",
+        "knowledge.contents.views_count",
+        "knowledge.contents.bookmarks_count",
+        "knowledge.contents.created_at",
+        "knowledge.contents.updated_at",
+        "knowledge.contents.verified_by",
+        "knowledge.contents.verified_at"
+      )
       .withGraphFetched(
         "[author(simpleWithImage), category, user_verified(simpleWithImage)]"
       )

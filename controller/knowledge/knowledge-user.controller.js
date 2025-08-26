@@ -57,7 +57,19 @@ export const getUserKnowledgeContents = async (req, res) => {
         }
       })
       .select(
-        "knowledge.contents.*",
+        "knowledge.contents.id",
+        "knowledge.contents.title",
+        "knowledge.contents.summary",
+        "knowledge.contents.author_id",
+        "knowledge.contents.category_id",
+        "knowledge.contents.status",
+        "knowledge.contents.tags",
+        "knowledge.contents.likes_count",
+        "knowledge.contents.comments_count",
+        "knowledge.contents.views_count",
+        "knowledge.contents.bookmarks_count",
+        "knowledge.contents.created_at",
+        "knowledge.contents.updated_at",
         // Subquery for is_liked - only if filter is applied
         ...(is_liked
           ? [
@@ -108,7 +120,7 @@ export const getUserKnowledgeContents = async (req, res) => {
             ])
       )
       .withGraphFetched(
-        "[author(simpleWithImage), category, user_verified(simpleWithImage), versions.[user_updated(simpleWithImage)], attachments, references]"
+        "[author(simpleWithImage), category, user_verified(simpleWithImage)]"
       )
       .orderBy(getSortField(sort), getSortDirection(sort))
       .page(page - 1, limit);

@@ -78,7 +78,19 @@ export const getKnowledgeContents = async (req, res) => {
         }
       })
       .select(
-        "knowledge.contents.*",
+        "knowledge.contents.id",
+        "knowledge.contents.title",
+        "knowledge.contents.summary",
+        "knowledge.contents.author_id",
+        "knowledge.contents.category_id",
+        "knowledge.contents.status",
+        "knowledge.contents.tags",
+        "knowledge.contents.likes_count",
+        "knowledge.contents.comments_count",
+        "knowledge.contents.views_count",
+        "knowledge.contents.bookmarks_count",
+        "knowledge.contents.created_at",
+        "knowledge.contents.updated_at",
         // Subquery untuk is_liked
         KnowledgeContent.relatedQuery("user_interactions")
           .where("user_id", customId)
@@ -102,7 +114,7 @@ export const getKnowledgeContents = async (req, res) => {
       )
       .andWhere("status", "published")
       .withGraphFetched(
-        "[author(simpleWithImage), category, user_verified(simpleWithImage), versions.[user_updated(simpleWithImage)], attachments, references]"
+        "[author(simpleWithImage), category, user_verified(simpleWithImage)]"
       )
       .orderBy(getSortField(sort), getSortDirection(sort))
       .page(page - 1, limit);
@@ -175,11 +187,16 @@ export const createKnowledgeContent = async (req, res) => {
     const body = req?.body;
     const { customId } = req?.user;
 
+    console.log('Backend received body:', body);
+    console.log('Backend received summary:', body?.summary);
+
     const payload = {
       ...body,
       tags: JSON.stringify(body?.tags),
       author_id: customId,
     };
+
+    console.log('Backend payload being inserted:', payload);
 
     // Menggunakan transaction untuk memastikan konsistensi data
     const content = await KnowledgeContent.transaction(async (trx) => {
@@ -208,17 +225,65 @@ export const createKnowledgeContent = async (req, res) => {
 export const updateKnowledgeContentPersonal = async (req, res) => {
   try {
     const { id } = req?.query;
-    const payload = req?.body;
+    const body = req?.body;
     const { customId } = req?.user;
 
-    const content = await KnowledgeContent.query()
-      .where("id", id)
-      .andWhere("user_id", customId)
-      .andWhere("status", "draf")
-      .update(payload);
+    console.log('Update Backend received body:', body);
+    console.log('Update Backend received summary:', body?.summary);
 
-    res.json(content);
+    const payload = {
+      ...body,
+      tags: JSON.stringify(body?.tags),
+      updated_at: new Date(),
+    };
+
+    console.log('Update Backend payload being updated:', payload);
+
+    // Use transaction for consistency when updating content and references
+    const updatedContent = await KnowledgeContent.transaction(async (trx) => {
+      // Update the main content
+      await KnowledgeContent.query(trx)
+        .where("id", id)
+        .andWhere("author_id", customId)
+        .update(payload);
+
+      // Get the existing content to work with references
+      const existingContent = await KnowledgeContent.query(trx)
+        .where("id", id)
+        .andWhere("author_id", customId)
+        .first();
+
+      if (!existingContent) {
+        throw new Error("Content tidak ditemukan atau tidak dapat diupdate");
+      }
+
+      // Handle references if provided
+      if (body?.references !== undefined) {
+        // Delete existing references
+        await existingContent.$relatedQuery("references", trx).delete();
+        
+        // Insert new references if any
+        if (body.references && body.references.length > 0) {
+          await existingContent.$relatedQuery("references", trx).insert(
+            body.references.map((reference) => ({
+              title: reference.title,
+              url: reference.url,
+            }))
+          );
+        }
+      }
+
+      // Return the updated content with relations
+      return await KnowledgeContent.query(trx)
+        .where("id", id)
+        .andWhere("author_id", customId)
+        .withGraphFetched("[references]")
+        .first();
+    });
+
+    res.json(updatedContent);
   } catch (error) {
+    console.error('Update error:', error);
     handleError(res, error);
   }
 };
