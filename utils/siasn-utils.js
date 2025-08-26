@@ -481,3 +481,11 @@ module.exports.uploadDokSkKp = async (fetcher, data) => {
     })
     .then((res) => res?.data);
 };
+
+module.exports.daftarTugasBelajar = async (fetcher, nip) => {
+  return fetcher.get(`/pns/rw-tubel/${nip}`).then((res) => res?.data);
+};
+
+module.exports.tambahTugasBelajar = async (fetcher, data) => {
+  return fetcher.post(`/tubel/save`, data).then((res) => res?.data);
+};
