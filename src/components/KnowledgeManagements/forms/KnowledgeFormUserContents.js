@@ -47,7 +47,6 @@ function KnowledgeFormUserContents({
   const [tags, setTags] = useState([]);
   const [inputValue, setInputValue] = useState("");
   const [content, setContent] = useState("");
-  const [summary, setSummary] = useState("");
   const [fileList, setFileList] = useState([]);
   const [currentContentId, setCurrentContentId] = useState(initialData?.id || null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -145,9 +144,6 @@ function KnowledgeFormUserContents({
         setContent(initialData.content);
       }
 
-      if (initialData.summary) {
-        setSummary(initialData.summary);
-      }
 
       if (initialData.tags) {
         setTags(initialData.tags);
@@ -195,7 +191,6 @@ function KnowledgeFormUserContents({
   const resetForm = () => {
     form.resetFields();
     setContent("");
-    setSummary("");
     setTags([]);
     setInputValue("");
     setFileList([]);
@@ -215,7 +210,6 @@ function KnowledgeFormUserContents({
       const formData = {
         ...values,
         content,
-        summary,
         tags,
         references: values.references || [],
       };
@@ -288,7 +282,6 @@ function KnowledgeFormUserContents({
       const formData = {
         ...values,
         content,
-        summary,
         status: mode === "admin" ? (initialData?.status || "draft") : "draft",
         tags,
         references: values.references || [],
@@ -366,7 +359,6 @@ function KnowledgeFormUserContents({
       const formData = {
         ...values,
         content,
-        summary,
         status: mode === "admin" ? (initialData?.status || "published") : "pending",
         tags,
         references: values.references || [],

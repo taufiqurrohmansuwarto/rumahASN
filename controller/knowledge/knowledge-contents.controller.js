@@ -53,8 +53,12 @@ export const getKnowledgeContents = async (req, res) => {
     } = req?.query;
 
     // Handle multiple tags from URL params (tag=tutorial&tag=javascript)
-    const tagFilters = Array.isArray(req.query.tag) ? req.query.tag : (req.query.tag ? [req.query.tag] : []);
-    const allTags = tags ? tags.split(',').filter(Boolean) : [];
+    const tagFilters = Array.isArray(req.query.tag)
+      ? req.query.tag
+      : req.query.tag
+      ? [req.query.tag]
+      : [];
+    const allTags = tags ? tags.split(",").filter(Boolean) : [];
     const finalTags = [...new Set([...tagFilters, ...allTags])].filter(Boolean);
     const contents = await KnowledgeContent.query()
       .andWhere((builder) => {
@@ -71,7 +75,7 @@ export const getKnowledgeContents = async (req, res) => {
         if (finalTags.length > 0) {
           // Check if any of the selected tags exist in the content tags
           builder.where((subBuilder) => {
-            finalTags.forEach(tag => {
+            finalTags.forEach((tag) => {
               subBuilder.orWhereRaw("tags @> ?", [JSON.stringify([tag])]);
             });
           });
@@ -251,7 +255,7 @@ export const updateKnowledgeContentPersonal = async (req, res) => {
       if (body?.references !== undefined) {
         // Delete existing references
         await existingContent.$relatedQuery("references", trx).delete();
-        
+
         // Insert new references if any
         if (body.references && body.references.length > 0) {
           await existingContent.$relatedQuery("references", trx).insert(

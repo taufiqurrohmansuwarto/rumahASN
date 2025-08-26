@@ -17,6 +17,8 @@ import {
   LoadingOutlined,
   TagsOutlined,
   UserOutlined,
+  PaperClipOutlined,
+  LinkOutlined,
 } from "@ant-design/icons";
 import { Card, Flex, Tag, Tooltip, Typography, Divider } from "antd";
 import dayjs from "dayjs";
@@ -212,7 +214,7 @@ const KnowledgeContentHeader = ({
         </div>
 
         {/* Content Section */}
-        <Flex vertical style={{ flex: 1, padding: "12px 16px" }}>
+        <Flex vertical style={{ flex: 1, padding: "12px 16px 20px 16px" }}>
           {/* Content Header with Comment Component */}
           <Comment
             avatar={
@@ -224,84 +226,96 @@ const KnowledgeContentHeader = ({
               />
             }
             author={
-              <Flex align="center" gap={6}>
-                <UserText
-                  userId={content?.author?.custom_id}
-                  text={content?.author?.username}
-                />
-                <span style={{ color: "#787C7E", fontSize: "12px" }}>•</span>
-                <Tooltip
-                  title={dayjs(content?.created_at).format(
-                    "DD MMMM YYYY, HH:mm"
-                  )}
-                >
-                  <Text
-                    style={{
-                      fontSize: "12px",
-                      color: "#787C7E",
-                    }}
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  width: "100%",
+                }}
+              >
+                <Flex align="center" gap={6}>
+                  <UserText
+                    userId={content?.author?.custom_id}
+                    text={content?.author?.username}
+                  />
+                  <span style={{ color: "#787C7E", fontSize: "12px" }}>•</span>
+                  <Tooltip
+                    title={dayjs(content?.created_at).format(
+                      "DD MMMM YYYY, HH:mm"
+                    )}
                   >
-                    {dayjs(content?.created_at).format("DD MMM YYYY")}
-                  </Text>
-                </Tooltip>
-
-                {/* Status */}
-                {content?.status && (
-                  <>
-                    <span style={{ color: "#787C7E", fontSize: "12px" }}>
-                      •
-                    </span>
-                    <Tag
-                      color={getStatusColor(content.status)}
+                    <Text
                       style={{
-                        fontSize: "10px",
-                        fontWeight: 500,
-                        border: "none",
-                        borderRadius: "4px",
-                        margin: 0,
-                        padding: "0 6px",
-                        lineHeight: "16px",
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "4px",
+                        fontSize: "12px",
+                        color: "#787C7E",
                       }}
                     >
-                      <span style={{ fontSize: "8px" }}>
-                        {getStatusIcon(content.status)}
+                      {dayjs(content?.created_at).format("DD MMM YYYY")}
+                    </Text>
+                  </Tooltip>
+
+                  {/* Status */}
+                  {content?.status && (
+                    <>
+                      <span style={{ color: "#787C7E", fontSize: "12px" }}>
+                        •
                       </span>
-                      {getStatusLabel(content.status)}
-                    </Tag>
-                  </>
-                )}
+                      <Tag
+                        color={getStatusColor(content.status)}
+                        style={{
+                          fontSize: "10px",
+                          fontWeight: 500,
+                          border: "none",
+                          borderRadius: "4px",
+                          margin: 0,
+                          padding: "0 6px",
+                          lineHeight: "16px",
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "4px",
+                        }}
+                      >
+                        <span style={{ fontSize: "8px" }}>
+                          {getStatusIcon(content.status)}
+                        </span>
+                        {getStatusLabel(content.status)}
+                      </Tag>
+                    </>
+                  )}
 
-                {/* Category */}
-                {content?.category && (
-                  <>
-                    <span style={{ color: "#787C7E", fontSize: "12px" }}>
-                      •
-                    </span>
-                    <Tag
-                      style={{
-                        fontSize: "10px",
-                        fontWeight: 500,
-                        backgroundColor: "#FF4500",
-                        color: "white",
-                        border: "none",
-                        borderRadius: "4px",
-                        margin: 0,
-                        padding: "0 6px",
-                        lineHeight: "16px",
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "4px",
-                      }}
-                    >
-                      <FolderOutlined style={{ fontSize: "8px" }} />
-                      {content?.category?.name}
-                    </Tag>
-                  </>
-                )}
-              </Flex>
+                  {/* Category */}
+                  {content?.category && (
+                    <>
+                      <span style={{ color: "#787C7E", fontSize: "12px" }}>
+                        •
+                      </span>
+                      <Tag
+                        style={{
+                          fontSize: "10px",
+                          fontWeight: 500,
+                          backgroundColor: "#FF4500",
+                          color: "white",
+                          border: "none",
+                          borderRadius: "4px",
+                          margin: 0,
+                          padding: "0 6px",
+                          lineHeight: "16px",
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "4px",
+                        }}
+                      >
+                        <FolderOutlined style={{ fontSize: "8px" }} />
+                        {content?.category?.name}
+                      </Tag>
+                    </>
+                  )}
+                </Flex>
+
+                {/* Spacer untuk alignment dengan tombol simpan */}
+                <div style={{ width: "80px" }}></div>
+              </div>
             }
             content={
               <div style={{ marginTop: "12px" }}>
@@ -309,80 +323,23 @@ const KnowledgeContentHeader = ({
                 {content?.updated_at &&
                   content?.updated_at !== content?.created_at && (
                     <div style={{ marginBottom: "12px" }}>
-                      <Text
-                        style={{
-                          fontSize: "11px",
-                          color: "#666",
-                          fontStyle: "italic",
-                        }}
-                      >
-                        Terakhir diedit:{" "}
-                        {dayjs(content?.updated_at).format(
-                          "DD MMMM YYYY, HH:mm"
-                        )}
-                      </Text>
-                    </div>
-                  )}
-
-                {/* Verification Information */}
-                {content?.verified_by && content?.verified_at && (
-                  <div
-                    style={{
-                      backgroundColor: "#E6F7FF",
-                      padding: "12px",
-                      borderRadius: "6px",
-                      border: "1px solid #91D5FF",
-                      marginTop: "12px",
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "8px",
-                    }}
-                  >
-                    <CheckCircleOutlined
-                      style={{ color: "#1890FF", fontSize: "14px" }}
-                    />
-                    <div>
-                      <Text
-                        style={{
-                          fontSize: "12px",
-                          fontWeight: 600,
-                          color: "#1890FF",
-                        }}
-                      >
-                        Diverifikasi oleh:
-                      </Text>
-                      <div
-                        style={{
-                          display: "flex",
-                          alignItems: "center",
-                          gap: "6px",
-                          marginTop: "2px",
-                        }}
-                      >
-                        <AvatarUser
-                          size={18}
-                          src={content.user_verified?.image}
-                          userId={content.user_verified?.custom_id}
-                          user={content.user_verified}
-                        />
-                        <div style={{ fontSize: "11px", color: "#1890FF" }}>
-                          <UserText
-                            userId={content.user_verified?.custom_id}
-                            text={content.user_verified?.username || "Admin"}
-                          />
-                        </div>
-                        <span style={{ color: "#1890FF", fontSize: "11px" }}>
-                          •
-                        </span>
-                        <Text style={{ fontSize: "11px", color: "#1890FF" }}>
-                          {dayjs(content.verified_at).format(
-                            "DD MMM YYYY, HH:mm"
+                      <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                        <EditOutlined style={{ fontSize: "11px", color: "#666" }} />
+                        <Text
+                          style={{
+                            fontSize: "11px",
+                            color: "#666",
+                            fontStyle: "italic",
+                          }}
+                        >
+                          Terakhir diedit:{" "}
+                          {dayjs(content?.updated_at).format(
+                            "DD MMMM YYYY, HH:mm"
                           )}
                         </Text>
                       </div>
                     </div>
-                  </div>
-                )}
+                  )}
               </div>
             }
           />
@@ -519,16 +476,24 @@ const KnowledgeContentHeader = ({
           {/* References */}
           {content?.references && content?.references.length > 0 && (
             <div style={{ marginBottom: "16px" }}>
-              <Text
-                strong
+              <div
                 style={{
-                  fontSize: "14px",
-                  display: "block",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "6px",
                   marginBottom: "8px",
                 }}
               >
-                🔗 Referensi:
-              </Text>
+                <LinkOutlined style={{ fontSize: "14px", color: "#FF4500" }} />
+                <Text
+                  strong
+                  style={{
+                    fontSize: "14px",
+                  }}
+                >
+                  Referensi:
+                </Text>
+              </div>
               {content.references.map((reference, index) => (
                 <div key={index} style={{ marginBottom: "4px" }}>
                   <a
@@ -547,16 +512,26 @@ const KnowledgeContentHeader = ({
           {/* Attachments */}
           {content?.attachments && content?.attachments.length > 0 && (
             <div style={{ marginBottom: "16px" }}>
-              <Text
-                strong
+              <div
                 style={{
-                  fontSize: "14px",
-                  display: "block",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "6px",
                   marginBottom: "8px",
                 }}
               >
-                📎 Lampiran:
-              </Text>
+                <PaperClipOutlined
+                  style={{ fontSize: "14px", color: "#FF4500" }}
+                />
+                <Text
+                  strong
+                  style={{
+                    fontSize: "14px",
+                  }}
+                >
+                  Lampiran:
+                </Text>
+              </div>
               {content.attachments.map((attachment, index) => (
                 <div key={index} style={{ marginBottom: "4px" }}>
                   <a
@@ -575,6 +550,48 @@ const KnowledgeContentHeader = ({
                   </a>
                 </div>
               ))}
+            </div>
+          )}
+
+          {/* Verification Information - Bottom Right */}
+          {content?.verified_by && content?.verified_at && (
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "flex-end",
+                marginBottom: "16px",
+              }}
+            >
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "6px",
+                  padding: "6px 10px",
+                  backgroundColor: "#F0F9FF",
+                  borderRadius: "4px",
+                  border: "1px solid #E0F2FE",
+                }}
+              >
+                <CheckCircleOutlined
+                  style={{ color: "#008000", fontSize: "16px" }}
+                />
+                <AvatarUser
+                  size={28}
+                  src={content.user_verified?.image}
+                  userId={content.user_verified?.custom_id}
+                  user={content.user_verified}
+                />
+                <Text
+                  style={{
+                    fontSize: "11px",
+                    color: "#0F172A",
+                    fontWeight: 500,
+                  }}
+                >
+                  {dayjs(content.verified_at).format("DD MMM YYYY, HH:mm")}
+                </Text>
+              </div>
             </div>
           )}
 
@@ -621,7 +638,6 @@ const KnowledgeContentHeader = ({
                 {content?.bookmarks_count || 0} Disimpan
               </Text>
             </Flex>
-
           </Flex>
         </Flex>
       </Flex>
