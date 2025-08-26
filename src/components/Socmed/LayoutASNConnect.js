@@ -6,7 +6,22 @@ function LayoutASNConnect({ children, active = "asn-updates" }) {
   const breakPoint = Grid.useBreakpoint();
   const router = useRouter();
 
+  // Auto-detect active tab based on current path for knowledge section
+  const getActiveTab = () => {
+    if (router.pathname.startsWith("/asn-connect/asn-knowledge")) {
+      return "asn-knowledge";
+    }
+    return active;
+  };
+
   const handleChangeTab = (key) => {
+    // Don't navigate if already on asn-knowledge and trying to go to asn-knowledge
+    if (key === "asn-knowledge" && router.pathname.startsWith("/asn-connect/asn-knowledge")) {
+      // If we're already in knowledge section, redirect to main knowledge page
+      router.push("/asn-connect/asn-knowledge");
+      return;
+    }
+    
     router.push(`/asn-connect/${key}`);
   };
 
@@ -52,7 +67,7 @@ function LayoutASNConnect({ children, active = "asn-updates" }) {
         }}
       >
         <Tabs
-          activeKey={active}
+          activeKey={getActiveTab()}
           onChange={handleChangeTab}
           items={tabItems}
           size="large"
@@ -72,9 +87,14 @@ function LayoutASNConnect({ children, active = "asn-updates" }) {
           // maxWidth: "1200px",
           // margin: "0 auto",
           padding: breakPoint.xs ? "20px 12px" : "24px 20px",
+          minHeight: "calc(100vh - 200px)", // Prevent layout shift
+          display: "flex",
+          flexDirection: "column",
         }}
       >
-        {children}
+        <div style={{ flex: 1 }}>
+          {children}
+        </div>
       </div>
 
       <style jsx global>{`
@@ -132,6 +152,30 @@ function LayoutASNConnect({ children, active = "asn-updates" }) {
 
         .ant-pro-page-container-detail .ant-pro-page-container-detail-content {
           background-color: transparent !important;
+        }
+
+        /* Prevent layout shift and ensure consistent rendering */
+        body {
+          overflow-x: hidden;
+        }
+        
+        .ant-tabs-content-holder {
+          min-height: 60px; /* Prevent height collapse */
+        }
+        
+        .ant-segmented {
+          flex-shrink: 0; /* Prevent shrinking that causes layout shift */
+        }
+
+        /* Smooth transitions for better UX */
+        .ant-tabs, .ant-tabs-content {
+          transition: all 0.2s ease-in-out;
+        }
+
+        /* Prevent flash of unstyled content */
+        .ant-tabs-tabpane {
+          opacity: 1;
+          transition: opacity 0.15s ease-in-out;
         }
       `}</style>
     </div>
