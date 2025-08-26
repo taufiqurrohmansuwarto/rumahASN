@@ -14,7 +14,18 @@ class knowledgeUserBadges extends Model {
   }
 
   static get relationMappings() {
-    return {};
+    const Badges = require("./badges.model");
+    
+    return {
+      badge: {
+        relation: Model.BelongsToOneRelation,
+        modelClass: Badges,
+        join: {
+          from: "knowledge.user_badges.badge_id",
+          to: "knowledge.badges.id",
+        },
+      },
+    };
   }
 }
 

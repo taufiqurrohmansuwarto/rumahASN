@@ -7,11 +7,14 @@ function ASNConnectHeader() {
     <div
       style={{
         background: "linear-gradient(135deg, #FF4500 0%, #FF6B35 100%)",
-        padding: "32px 0",
+        padding: "48px 0",
         position: "relative",
         overflow: "hidden",
         boxShadow: "0 8px 32px rgba(255, 69, 0, 0.3)",
         marginBottom: "0",
+        margin: "0",
+        width: "100vw",
+        marginLeft: "calc(50% - 50vw)",
       }}
     >
       {/* Background Pattern */}
@@ -149,6 +152,54 @@ function ASNConnectHeader() {
           height: "40px",
           borderRadius: "50%",
           background: "rgba(255, 255, 255, 0.1)",
+          backdropFilter: "blur(10px)",
+        }}
+      />
+      <div
+        style={{
+          position: "absolute",
+          top: "40px",
+          left: "120px",
+          width: "60px",
+          height: "60px",
+          borderRadius: "50%",
+          background: "rgba(255, 255, 255, 0.08)",
+          backdropFilter: "blur(10px)",
+        }}
+      />
+      <div
+        style={{
+          position: "absolute",
+          bottom: "30px",
+          right: "80px",
+          width: "30px",
+          height: "30px",
+          borderRadius: "50%",
+          background: "rgba(255, 255, 255, 0.12)",
+          backdropFilter: "blur(10px)",
+        }}
+      />
+      <div
+        style={{
+          position: "absolute",
+          top: "60px",
+          right: "200px",
+          width: "25px",
+          height: "25px",
+          borderRadius: "50%",
+          background: "rgba(255, 255, 255, 0.15)",
+          backdropFilter: "blur(10px)",
+        }}
+      />
+      <div
+        style={{
+          position: "absolute",
+          bottom: "80px",
+          left: "300px",
+          width: "35px",
+          height: "35px",
+          borderRadius: "50%",
+          background: "rgba(255, 255, 255, 0.09)",
           backdropFilter: "blur(10px)",
         }}
       />

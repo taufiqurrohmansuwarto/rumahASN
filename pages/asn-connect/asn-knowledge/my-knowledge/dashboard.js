@@ -9,7 +9,7 @@ import { FloatButton } from "antd";
 import Head from "next/head";
 
 const AsnKnowledgeMyKnowledgeDashboard = () => {
-  useScrollRestoration();
+  useScrollRestoration("dashboard-scroll", true, false, true); // Enable smooth restoration
 
   return (
     <>

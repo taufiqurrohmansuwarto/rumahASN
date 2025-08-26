@@ -6,7 +6,7 @@ import useScrollRestoration from "@/hooks/useScrollRestoration";
 import Head from "next/head";
 
 const AsnKnowledge = () => {
-  useScrollRestoration();
+  useScrollRestoration("knowledge-scroll", true, false, true); // Enable smooth restoration
 
   return (
     <>

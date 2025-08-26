@@ -14,7 +14,7 @@ const calcLevel = (points) => {
   return Math.floor(Math.sqrt(points / 50)) + 1;
 };
 
-const awardXP = async ({ userId, action, refType, refId, xp }) => {
+export const awardXP = async ({ userId, action, refType, refId, xp }) => {
   return await transaction(UserPoints.knex(), async (trx) => {
     // Guard sederhana: kalau event unik, cek di XpLog
     const mustBeUnique = [
@@ -197,8 +197,10 @@ export const getPoints = async (req, res) => {
 export const userBadges = async (req, res) => {
   try {
     const { customId } = req?.user;
-    const response = await UserBadges.query().where("user_id", customId);
-    res.json(response);
+    const badges = await UserBadges.query()
+      .where("user_id", customId)
+      .withGraphFetched("badge");
+    res.json({ data: badges });
   } catch (error) {
     handleError(res, error);
   }
@@ -270,7 +272,7 @@ export const userMissionComplete = async (req, res) => {
           });
         } else {
           await UserMissionProgress.query(trx).insert({
-            user_id: userId,
+            user_id: customId,
             mission_id: missionId,
             status: "completed",
             completed_at: new Date(),
@@ -279,7 +281,7 @@ export const userMissionComplete = async (req, res) => {
 
         // award XP
         const award = await awardXP({
-          userId,
+          userId: customId,
           action: "quest_complete",
           refType: "mission",
           refId: missionId,
@@ -290,6 +292,65 @@ export const userMissionComplete = async (req, res) => {
       }
     );
     res.json(result);
+  } catch (error) {
+    handleError(res, error);
+  }
+};
+
+export const awardUserXP = async (req, res) => {
+  try {
+    const { customId } = req?.user;
+    const { action, refType, refId, xp } = req?.body;
+    
+    if (!action || !refType || !refId || !xp) {
+      return res.status(400).json({ message: "Missing required parameters" });
+    }
+
+    const result = await awardXP({
+      userId: customId,
+      action,
+      refType,
+      refId,
+      xp,
+    });
+
+    res.json(result);
+  } catch (error) {
+    handleError(res, error);
+  }
+};
+
+export const getUserGamificationSummary = async (req, res) => {
+  try {
+    const { customId } = req?.user;
+    
+    const [points, badges, missions] = await Promise.all([
+      UserPoints.query().where("user_id", customId).first(),
+      UserBadges.query()
+        .where("user_id", customId)
+        .withGraphFetched("badge"),
+      Missions.query().where("is_active", true)
+        .then(async (activeMissions) => {
+          const progress = await UserMissionProgress.query()
+            .where("user_id", customId);
+          const progressMap = new Map(
+            progress.map((item) => [item.mission_id, item])
+          );
+          return activeMissions.map((mission) => ({
+            ...mission,
+            status: progressMap.get(mission.id)?.status ?? "in_progress",
+            completed_at: progressMap.get(mission.id)?.completed_at ?? null,
+          }));
+        }),
+    ]);
+
+    res.json({
+      data: {
+        points: points ?? { points: 0, level: 1 },
+        badges: badges || [],
+        missions: missions || [],
+      },
+    });
   } catch (error) {
     handleError(res, error);
   }

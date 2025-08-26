@@ -9,11 +9,13 @@ import { useRouter } from "next/router";
  * @param {string} storageKey - Key untuk menyimpan posisi scroll di sessionStorage
  * @param {boolean} enabled - Apakah scroll restoration diaktifkan
  * @param {boolean} isLoading - Status loading content (untuk menunggu selesai)
+ * @param {boolean} smoothRestore - Use smooth scroll behavior untuk prevent blinking
  */
 const useScrollRestoration = (
   storageKey = "scrollPosition",
   enabled = true,
-  isLoading = false
+  isLoading = false,
+  smoothRestore = true
 ) => {
   const router = useRouter();
 
@@ -39,33 +41,34 @@ const useScrollRestoration = (
       if (savedScrollY !== null) {
         const scrollY = parseInt(savedScrollY, 10);
         if (!isNaN(scrollY)) {
-          // Multiple requestAnimationFrame untuk memastikan DOM sudah ter-render
+          // Smooth scroll restoration to prevent blinking
           const attemptRestore = (attempts = 0) => {
-            const maxAttempts = 10;
+            const maxAttempts = 15;
             const currentHeight = document.documentElement.scrollHeight;
             
-            // Coba scroll, tapi cek apakah berhasil
+            // Use smooth or instant behavior based on preference
             window.scrollTo({
               top: scrollY,
-              behavior: "instant",
+              behavior: smoothRestore ? "smooth" : "instant",
             });
             
-            // Verifikasi apakah scroll berhasil atau halaman masih loading
-            const actualScrollY = window.scrollY || window.pageYOffset || document.documentElement.scrollTop;
-            const difference = Math.abs(actualScrollY - scrollY);
-            
-            // Jika masih belum tepat dan masih ada attempts, coba lagi
-            if (difference > 50 && attempts < maxAttempts) {
-              setTimeout(() => attemptRestore(attempts + 1), 100);
-            }
+            // Verifikasi apakah scroll berhasil
+            setTimeout(() => {
+              const actualScrollY = window.scrollY || window.pageYOffset || document.documentElement.scrollTop;
+              const difference = Math.abs(actualScrollY - scrollY);
+              
+              // Jika masih belum tepat dan masih ada attempts, coba lagi
+              if (difference > 50 && attempts < maxAttempts) {
+                attemptRestore(attempts + 1);
+              }
+            }, 200); // Increase delay for smooth scroll
           };
           
-          // Double requestAnimationFrame untuk lebih reliable
-          requestAnimationFrame(() => {
-            requestAnimationFrame(() => {
-              attemptRestore();
-            });
-          });
+          // Wait for content to load before restoring
+          const delay = isLoading ? 500 : 300;
+          setTimeout(() => {
+            attemptRestore();
+          }, delay);
         }
       }
     } catch (error) {
