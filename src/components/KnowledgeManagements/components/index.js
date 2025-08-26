@@ -4,3 +4,4 @@ export { default as ContentCardSkeleton } from "./ContentCardSkeleton";
 export { default as FormComment } from "./FormComment";
 export { default as KnowledgeContentBody } from "./KnowledgeContentBody";
 export { default as KnowledgeContentHeader } from "./KnowledgeContentHeader";
+export { default as KnowledgeNavigationSegmented } from "./KnowledgeNavigationSegmented";
