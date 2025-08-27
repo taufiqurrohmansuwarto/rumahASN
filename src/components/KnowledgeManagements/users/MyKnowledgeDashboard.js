@@ -19,6 +19,7 @@ import {
   Skeleton,
   Empty,
   Divider,
+  Button,
 } from "antd";
 import {
   FileTextOutlined,
@@ -33,6 +34,7 @@ import {
   CloseCircleOutlined,
   CrownOutlined,
   RocketOutlined,
+  ReloadOutlined,
 } from "@ant-design/icons";
 import { 
   UserBadgeGallery, 
@@ -109,6 +111,21 @@ const MyKnowledgeDashboard = () => {
 
   // Mission completion handler
   const { mutateAsync: completeMission } = useCompleteMission();
+  
+  // Manual refresh handler
+  const handleRefreshGamification = () => {
+    // Refetch semua data gamifikasi
+    pointsQuery.refetch();
+    badgesQuery.refetch(); 
+    missionsQuery.refetch();
+    leaderboardQuery.refetch();
+    
+    // Refetch gamification hooks
+    if (typeof gamificationPoints?.refetch === 'function') gamificationPoints.refetch();
+    if (typeof gamificationBadges?.refetch === 'function') gamificationBadges.refetch();
+    if (typeof gamificationMissions?.refetch === 'function') gamificationMissions.refetch();
+    if (typeof gamificationLeaderboard?.refetch === 'function') gamificationLeaderboard.refetch();
+  };
   
   const handleCompleteMission = async (missionId) => {
     try {
@@ -254,6 +271,21 @@ const MyKnowledgeDashboard = () => {
               Pantau statistik konten, progres level, badge, misi, dan leaderboard Anda
             </Text>
           </div>
+          
+          {/* Manual Refresh Button */}
+          <Button
+            type="text"
+            icon={<ReloadOutlined />}
+            onClick={handleRefreshGamification}
+            style={{
+              color: "rgba(255, 255, 255, 0.8)",
+              border: "1px solid rgba(255, 255, 255, 0.3)",
+              backgroundColor: "rgba(255, 255, 255, 0.1)",
+            }}
+            size={isMobile ? "small" : "middle"}
+          >
+            {!isMobile && "Refresh"}
+          </Button>
         </Flex>
       </Card>
 

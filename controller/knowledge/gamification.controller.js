@@ -14,13 +14,16 @@ const calcLevel = (points) => {
   return Math.floor(Math.sqrt(points / 50)) + 1;
 };
 
-export const awardXP = async ({ userId, action, refType, refId, xp }) => {
+export const awardXP = async ({ userId, action, refType, refId, xp, isSelfAction = false }) => {
   return await transaction(UserPoints.knex(), async (trx) => {
     // Guard sederhana: kalau event unik, cek di XpLog
     const mustBeUnique = [
       "read_complete",
       "publish_content",
       "quest_complete",
+      "like_content",      // Prevent like farming
+      "comment_content",   // Prevent comment farming
+      "bookmark_content",  // Prevent bookmark farming
     ].includes(action);
     if (mustBeUnique) {
       const exists = await XpLog.query(trx).findOne({
@@ -32,28 +35,33 @@ export const awardXP = async ({ userId, action, refType, refId, xp }) => {
       if (exists) return { skipped: true };
     }
 
+    // Reduce XP untuk self-action (action di konten sendiri)
+    const finalXP = isSelfAction ? Math.floor(xp * 0.5) : xp; // 50% XP untuk self-action
+
     // Tulis log XP (opsional: enforce daily cap di sini)
     await XpLog.query(trx).insert({
       user_id: userId,
       action,
       ref_type: refType,
       ref_id: refId,
-      xp,
+      xp: finalXP,
     });
 
-    // Upsert user_points
-    const current = await UserPoints.query(trx).findById(userId);
-    let newPoints = xp,
+    // Upsert user_points - cari by user_id bukan by primary key
+    const current = await UserPoints.query(trx).findOne({ user_id: userId });
+    let newPoints = finalXP,
       newLevel = 1;
     if (current) {
-      newPoints = current.points + xp;
+      // UPDATE existing record - increment points
+      newPoints = current.points + finalXP;
       newLevel = calcLevel(newPoints);
-      await UserPoints.query(trx).patchAndFetchById(userId, {
+      await UserPoints.query(trx).patchAndFetchById(current.id, {
         points: newPoints,
         levels: newLevel,
         last_updated_at: new Date(),
       });
     } else {
+      // INSERT new record untuk user baru
       newLevel = calcLevel(newPoints);
       await UserPoints.query(trx).insert({
         user_id: userId,
@@ -183,8 +191,8 @@ export const deleteMission = async (req, res) => {
 // user
 export const getPoints = async (req, res) => {
   try {
-    const user = req?.user;
-    const points = await UserPoints.query().where("user_id", user?.id).first();
+    const { customId } = req?.user;
+    const points = await UserPoints.query().where("user_id", customId).first();
     const response = {
       data: points ?? { points: 0, levels: 1 },
     };

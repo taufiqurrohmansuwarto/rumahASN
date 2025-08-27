@@ -53,7 +53,8 @@ export const likes = async (req, res) => {
           .where("id", id)
           .increment("likes_count", 1);
 
-        // Award XP untuk user yang like (+2 XP)
+        // Award XP untuk user yang like (+2 XP, atau +1 XP jika konten sendiri)
+        const isSelfAction = currentContent.author_id === customId;
         try {
           await awardXP({
             userId: customId,
@@ -61,22 +62,25 @@ export const likes = async (req, res) => {
             refType: "content",
             refId: id,
             xp: 2,
+            isSelfAction,
           });
         } catch (xpError) {
           console.warn("Failed to award XP for like:", xpError);
         }
 
-        // Award XP untuk author konten (+1 XP)
-        try {
-          await awardXP({
-            userId: currentContent.author_id,
-            action: "content_liked",
-            refType: "content",
-            refId: id,
-            xp: 1,
-          });
-        } catch (xpError) {
-          console.warn("Failed to award XP to author:", xpError);
+        // Award XP untuk author konten (+1 XP) - skip jika like konten sendiri
+        if (!isSelfAction) {
+          try {
+            await awardXP({
+              userId: currentContent.author_id,
+              action: "content_liked",
+              refType: "content",
+              refId: id,
+              xp: 1,
+            });
+          } catch (xpError) {
+            console.warn("Failed to award XP to author:", xpError);
+          }
         }
 
         return {
@@ -132,7 +136,8 @@ export const createComment = async (req, res) => {
         .where("id", id)
         .increment("comments_count", 1);
 
-      // Award XP untuk user yang comment (+3 XP)
+      // Award XP untuk user yang comment (+3 XP, atau +1.5 XP jika konten sendiri)
+      const isSelfAction = currentContent.author_id === customId;
       try {
         await awardXP({
           userId: customId,
@@ -140,6 +145,7 @@ export const createComment = async (req, res) => {
           refType: "content",
           refId: id,
           xp: 3,
+          isSelfAction,
         });
       } catch (xpError) {
         console.warn("Failed to award XP for comment:", xpError);
