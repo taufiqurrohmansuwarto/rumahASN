@@ -15,23 +15,47 @@ const calcLevel = (points) => {
 };
 
 // Helper function to award eligible badges
-const awardEligibleBadges = async (trx, userId, totalXP, currentAction, refType, refId) => {
+const awardEligibleBadges = async (
+  trx,
+  userId,
+  totalXP,
+  currentAction,
+  refType,
+  refId
+) => {
   // Get all badges
   const allBadges = await Badges.query(trx);
   const ownedBadges = await UserBadges.query(trx).where("user_id", userId);
   const ownedBadgeIds = new Set(ownedBadges.map((b) => b.badge_id));
 
-  console.log(`🎯 Checking badges for user ${userId} with ${totalXP} XP, action: ${currentAction}`);
+  console.log(
+    `🎯 [BADGES] Checking badges for user ${userId} with ${totalXP} XP, action: ${currentAction}`
+  );
+  console.log(`🎯 [BADGES] Total badges available:`, allBadges.length);
+  console.log(`🎯 [BADGES] Owned badges:`, ownedBadges.length);
+  console.log(
+    `🎯 [BADGES] All badges data:`,
+    allBadges.map((b) => ({
+      id: b.id,
+      name: b.name,
+      type: b.badge_type,
+      points_required: b.points_required,
+    }))
+  );
 
   // Check level badges (XP-based)
-  const levelBadges = allBadges.filter(b => 
-    b.badge_type === "level" && 
-    b.points_required <= totalXP && 
-    !ownedBadgeIds.has(b.id)
+  const levelBadges = allBadges.filter(
+    (b) =>
+      b.badge_type === "level" &&
+      b.points_required <= totalXP &&
+      !ownedBadgeIds.has(b.id)
   );
 
   if (levelBadges.length > 0) {
-    console.log(`🏆 Level badges to award:`, levelBadges.map(b => b.name));
+    console.log(
+      `🏆 Level badges to award:`,
+      levelBadges.map((b) => b.name)
+    );
     await UserBadges.query(trx).insert(
       levelBadges.map((b) => ({
         user_id: userId,
@@ -42,17 +66,19 @@ const awardEligibleBadges = async (trx, userId, totalXP, currentAction, refType,
   }
 
   // Check achievement badges (action-based)
-  const achievementBadges = allBadges.filter(b => 
-    b.badge_type === "achievement" && 
-    b.achievement_data && 
-    !ownedBadgeIds.has(b.id)
+  const achievementBadges = allBadges.filter(
+    (b) =>
+      b.badge_type === "achievement" &&
+      b.achievement_data &&
+      !ownedBadgeIds.has(b.id)
   );
 
   for (const badge of achievementBadges) {
     try {
-      const achievementData = typeof badge.achievement_data === 'string' 
-        ? JSON.parse(badge.achievement_data) 
-        : badge.achievement_data;
+      const achievementData =
+        typeof badge.achievement_data === "string"
+          ? JSON.parse(badge.achievement_data)
+          : badge.achievement_data;
 
       if (achievementData.type === "action_count") {
         // Count user's actions from xp_log
@@ -62,10 +88,12 @@ const awardEligibleBadges = async (trx, userId, totalXP, currentAction, refType,
           .count();
 
         const totalCount = parseInt(actionCount[0].count);
-        
+
         if (totalCount >= achievementData.count) {
-          console.log(`🎖️ Achievement badge "${badge.name}" earned: ${totalCount}/${achievementData.count} ${achievementData.action}`);
-          
+          console.log(
+            `🎖️ Achievement badge "${badge.name}" earned: ${totalCount}/${achievementData.count} ${achievementData.action}`
+          );
+
           await UserBadges.query(trx).insert({
             user_id: userId,
             badge_id: badge.id,
@@ -74,21 +102,31 @@ const awardEligibleBadges = async (trx, userId, totalXP, currentAction, refType,
         }
       }
     } catch (parseError) {
-      console.error(`❌ Error parsing achievement_data for badge ${badge.name}:`, parseError);
+      console.error(
+        `❌ Error parsing achievement_data for badge ${badge.name}:`,
+        parseError
+      );
     }
   }
 };
 
-export const awardXP = async ({ userId, action, refType, refId, xp, isSelfAction = false }) => {
+export const awardXP = async ({
+  userId,
+  action,
+  refType,
+  refId,
+  xp,
+  isSelfAction = false,
+}) => {
   return await transaction(UserPoints.knex(), async (trx) => {
     // Guard sederhana: kalau event unik, cek di XpLog
     const mustBeUnique = [
       "read_complete",
       "publish_content",
       "quest_complete",
-      "like_content",      // Prevent like farming
-      "comment_content",   // Prevent comment farming
-      "bookmark_content",  // Prevent bookmark farming
+      "like_content", // Prevent like farming
+      "comment_content", // Prevent comment farming
+      "bookmark_content", // Prevent bookmark farming
     ].includes(action);
     if (mustBeUnique) {
       const exists = await XpLog.query(trx).findOne({
@@ -383,6 +421,62 @@ export const awardUserXP = async (req, res) => {
 export const getUserGamificationSummary = async (req, res) => {
   try {
     const { customId } = req?.user;
+
+    console.log(`🔍 [SUMMARY] Checking badges for user ${customId}`);
+
+    // Cek dan award badge yang eligible dulu sebelum fetch data
+    const currentPoints = await UserPoints.query()
+      .where("user_id", customId)
+      .first();
+    console.log(`🔍 [SUMMARY] Current user points:`, currentPoints);
+
+    if (currentPoints) {
+      try {
+        await transaction(UserPoints.knex(), async (trx) => {
+          console.log(
+            `🔍 [SUMMARY] Calling awardEligibleBadges with XP: ${currentPoints.points}`
+          );
+          await awardEligibleBadges(
+            trx,
+            customId,
+            currentPoints.points,
+            "summary_check",
+            "user",
+            customId
+          );
+        });
+      } catch (badgeError) {
+        console.error("❌ Badge check error in summary:", badgeError);
+        // Don't throw - let summary continue even if badge check fails
+      }
+    } else {
+      console.log(`🔍 [SUMMARY] No points found, creating default entry`);
+      // Jika belum ada points, buat entry default dengan 0 XP
+      try {
+        await transaction(UserPoints.knex(), async (trx) => {
+          await UserPoints.query(trx).insert({
+            user_id: customId,
+            points: 0,
+            levels: 1,
+            last_updated_at: new Date(),
+          });
+
+          console.log(
+            `🔍 [SUMMARY] Created default points, checking badges with 0 XP`
+          );
+          await awardEligibleBadges(
+            trx,
+            customId,
+            0,
+            "summary_check",
+            "user",
+            customId
+          );
+        });
+      } catch (createError) {
+        console.error("❌ Error creating default points:", createError);
+      }
+    }
 
     const [points, badges, missions] = await Promise.all([
       UserPoints.query().where("user_id", customId).first(),

@@ -47,7 +47,8 @@ import {
   useUserPoints as useGamificationPoints,
   useUserBadges as useGamificationBadges,
   useUserMissions as useGamificationMissions,
-  useLeaderboard as useGamificationLeaderboard
+  useLeaderboard as useGamificationLeaderboard,
+  useUserGamificationSummary
 } from "@/hooks/knowledge-management/useGamification";
 
 const { Title, Text } = Typography;
@@ -89,10 +90,13 @@ const MyKnowledgeDashboard = () => {
   });
 
   // Fetch gamification data using dedicated hooks
-  const { data: gamificationPoints, isLoading: loadingGamificationPoints } = useGamificationPoints();
-  const { data: gamificationBadges, isLoading: loadingGamificationBadges } = useGamificationBadges();
-  const { data: gamificationMissions, isLoading: loadingGamificationMissions } = useGamificationMissions();
-  const { data: gamificationLeaderboard, isLoading: loadingGamificationLeaderboard } = useGamificationLeaderboard();
+  const { data: gamificationPoints, isLoading: loadingGamificationPoints, refetch: refetchGamificationPoints } = useGamificationPoints();
+  const { data: gamificationBadges, isLoading: loadingGamificationBadges, refetch: refetchGamificationBadges } = useGamificationBadges();
+  const { data: gamificationMissions, isLoading: loadingGamificationMissions, refetch: refetchGamificationMissions } = useGamificationMissions();
+  const { data: gamificationLeaderboard, isLoading: loadingGamificationLeaderboard, refetch: refetchGamificationLeaderboard } = useGamificationLeaderboard();
+  
+  // Use summary hook for comprehensive badge check
+  const { data: gamificationSummary, refetch: refetchGamificationSummary } = useUserGamificationSummary();
 
   const isLoading = contentsQuery.isLoading || pointsQuery.isLoading || badgesQuery.isLoading;
   const hasError = contentsQuery.isError || pointsQuery.isError || badgesQuery.isError || missionsQuery.isError || leaderboardQuery.isError;
@@ -105,26 +109,35 @@ const MyKnowledgeDashboard = () => {
   const leaderboardData = leaderboardQuery.data?.data || leaderboardQuery.data || [];
   
   // Gamification data (prioritize gamification hooks over basic queries)
-  const finalUserBadges = gamificationBadges?.data || gamificationBadges || userBadges;
-  const finalUserMissions = gamificationMissions?.data || gamificationMissions || userMissions;
-  const finalLeaderboard = gamificationLeaderboard?.data || gamificationLeaderboard || leaderboardData;
+  const finalUserBadges = gamificationBadges || userBadges;
+  const finalUserMissions = gamificationMissions || userMissions;
+  const finalLeaderboard = gamificationLeaderboard || leaderboardData;
+
+  // Debug: Log badge data
+  console.log('🔍 [DASHBOARD] Badge data debug:');
+  console.log('- gamificationBadges:', gamificationBadges);
+  console.log('- userBadges:', userBadges);
+  console.log('- finalUserBadges:', finalUserBadges);
 
   // Mission completion handler
   const { mutateAsync: completeMission } = useCompleteMission();
   
   // Manual refresh handler
-  const handleRefreshGamification = () => {
-    // Refetch semua data gamifikasi
+  const handleRefreshGamification = async () => {
+    // PENTING: Refetch summary dulu untuk trigger badge check
+    await refetchGamificationSummary();
+    
+    // Kemudian refetch semua data gamifikasi
     pointsQuery.refetch();
     badgesQuery.refetch(); 
     missionsQuery.refetch();
     leaderboardQuery.refetch();
     
     // Refetch gamification hooks
-    if (typeof gamificationPoints?.refetch === 'function') gamificationPoints.refetch();
-    if (typeof gamificationBadges?.refetch === 'function') gamificationBadges.refetch();
-    if (typeof gamificationMissions?.refetch === 'function') gamificationMissions.refetch();
-    if (typeof gamificationLeaderboard?.refetch === 'function') gamificationLeaderboard.refetch();
+    refetchGamificationPoints();
+    refetchGamificationBadges();
+    refetchGamificationMissions();
+    refetchGamificationLeaderboard();
   };
   
   const handleCompleteMission = async (missionId) => {
