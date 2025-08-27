@@ -134,7 +134,12 @@ const KnowledgeCommentsList = ({
   );
 };
 
-const KnowledgeUserContentDetail = ({ data, isLoading }) => {
+const KnowledgeUserContentDetail = ({ 
+  data, 
+  isLoading, 
+  disableInteractions = false, 
+  showOwnerActions = false 
+}) => {
   const { data: session, status } = useSession();
   const queryClient = useQueryClient();
   const router = useRouter();
@@ -168,7 +173,7 @@ const KnowledgeUserContentDetail = ({ data, isLoading }) => {
   );
 
   const handleLike = () => {
-    if (isLiking) return;
+    if (isLiking || disableInteractions) return;
     like(id);
   };
 
@@ -309,7 +314,7 @@ const KnowledgeUserContentDetail = ({ data, isLoading }) => {
   };
 
   const handleBookmark = () => {
-    if (isBookmarking) return;
+    if (isBookmarking || disableInteractions) return;
     bookmark(id);
   };
 
@@ -325,6 +330,8 @@ const KnowledgeUserContentDetail = ({ data, isLoading }) => {
           isBookmarked={data?.is_bookmarked}
           isLiking={isLiking}
           isBookmarking={isBookmarking}
+          disableInteractions={disableInteractions}
+          showOwnerActions={showOwnerActions}
         />
       )}
 
@@ -377,12 +384,15 @@ const KnowledgeUserContentDetail = ({ data, isLoading }) => {
                   lineHeight: "1.4",
                 }}
               >
-                Berkomentarlah dengan sopan dan konstruktif. Hindari spam dan konten tidak pantas.
+                {disableInteractions 
+                  ? "Komentar tidak tersedia untuk konten yang belum dipublikasikan." 
+                  : "Berkomentarlah dengan sopan dan konstruktif. Hindari spam dan konten tidak pantas."
+                }
               </Text>
             </div>
 
             {/* Comment Form */}
-            {status === "authenticated" && (
+            {!disableInteractions && status === "authenticated" && (
               <div style={{ marginBottom: comments && comments.length > 0 ? "24px" : "16px" }}>
                 <div style={{ marginBottom: "12px" }}>
                   <Text
@@ -405,7 +415,7 @@ const KnowledgeUserContentDetail = ({ data, isLoading }) => {
             )}
 
             {/* Comments List Header */}
-            {comments && comments.length > 0 && (
+            {!disableInteractions && comments && comments.length > 0 && (
               <div style={{ marginBottom: "16px" }}>
                 <Text
                   style={{
@@ -420,18 +430,35 @@ const KnowledgeUserContentDetail = ({ data, isLoading }) => {
             )}
 
             {/* Comments List */}
-            <KnowledgeCommentsList
-              comments={comments}
-              currentUser={session?.user}
-              isLoading={isLoadingComments}
-              onEdit={handleEditComment}
-              onDelete={handleDeleteComment}
-              onReply={handleReplyComment}
-              editingComment={editingComment}
-              replyingTo={replyingTo}
-              isUpdatingComment={isUpdatingComment}
-              isDeletingComment={isDeletingComment}
-            />
+            {!disableInteractions && (
+              <KnowledgeCommentsList
+                comments={comments}
+                currentUser={session?.user}
+                isLoading={isLoadingComments}
+                onEdit={handleEditComment}
+                onDelete={handleDeleteComment}
+                onReply={handleReplyComment}
+                editingComment={editingComment}
+                replyingTo={replyingTo}
+                isUpdatingComment={isUpdatingComment}
+                isDeletingComment={isDeletingComment}
+              />
+            )}
+
+            {/* Disabled State Message */}
+            {disableInteractions && (
+              <div style={{
+                textAlign: "center",
+                padding: "32px 16px",
+                backgroundColor: "#F8F9FA",
+                borderRadius: "8px",
+                border: "1px solid #EDEFF1"
+              }}>
+                <Text type="secondary" style={{ fontSize: "14px" }}>
+                  💬 Fitur komentar akan tersedia setelah konten dipublikasikan
+                </Text>
+              </div>
+            )}
           </div>
         </Flex>
       </Card>

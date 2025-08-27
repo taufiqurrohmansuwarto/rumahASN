@@ -5,7 +5,7 @@ import {
 import Layout from "@/components/Layout";
 import LayoutASNConnect from "@/components/Socmed/LayoutASNConnect";
 import useScrollRestoration from "@/hooks/useScrollRestoration";
-import { FloatButton } from "antd";
+import { Col, FloatButton, Row } from "antd";
 import Head from "next/head";
 
 const AsnKnowledgeMyKnowledgeDashboard = () => {
@@ -18,9 +18,13 @@ const AsnKnowledgeMyKnowledgeDashboard = () => {
       </Head>
       <LayoutASNConnect active="asn-knowledge">
         <FloatButton.BackTop />
-        <KnowledgeLayout currentPath="/asn-connect/asn-knowledge/my-knowledge/dashboard">
-          <MyKnowledgeDashboard />
-        </KnowledgeLayout>
+        <Row>
+          <Col lg={18} xs={24}>
+            <KnowledgeLayout currentPath="/asn-connect/asn-knowledge/my-knowledge/dashboard">
+              <MyKnowledgeDashboard />
+            </KnowledgeLayout>
+          </Col>
+        </Row>
       </LayoutASNConnect>
     </>
   );

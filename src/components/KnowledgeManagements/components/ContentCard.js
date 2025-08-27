@@ -80,7 +80,7 @@ const ContentCard = ({
   const handleLikeClick = (e) => {
     e.stopPropagation();
     // Only allow like/unlike for published content
-    if (!isLiking && content.status === 'published') {
+    if (!isLiking && content.status === "published") {
       onLike && onLike(content.id);
     }
   };
@@ -88,7 +88,7 @@ const ContentCard = ({
   const handleBookmarkClick = (e) => {
     e.stopPropagation();
     // Only allow bookmark for published content
-    if (!isBookmarking && content.status === 'published') {
+    if (!isBookmarking && content.status === "published") {
       onBookmark && onBookmark(content.id);
     }
   };
@@ -134,9 +134,13 @@ const ContentCard = ({
         >
           <Tooltip
             title={
-              content.status !== 'published' 
-                ? "Hanya konten yang dipublikasikan yang bisa dilike" 
-                : isLiking ? "Loading..." : isLiked ? "Unlike" : "Like konten ini"
+              content.status !== "published"
+                ? "Hanya konten yang dipublikasikan yang bisa dilike"
+                : isLiking
+                ? "Loading..."
+                : isLiked
+                ? "Unlike"
+                : "Like konten ini"
             }
           >
             {isLiking ? (
@@ -212,7 +216,7 @@ const ContentCard = ({
           <Flex align="center" gap={6} style={{ marginBottom: "8px" }}>
             <Tooltip title="Lihat profil">
               <AvatarUser
-                size={isMobile ? 24 : 30}
+                size={isMobile ? 18 : 24}
                 src={content.author?.image}
                 userId={content.author?.custom_id}
                 user={content.author}
@@ -226,12 +230,16 @@ const ContentCard = ({
                 fontWeight: 500,
               }}
             >
-              <UserText 
-                userId={content.author?.custom_id} 
+              <UserText
+                userId={content.author?.custom_id}
                 text={content.author?.username}
               />
             </div>
-            <span style={{ color: "#787C7E", fontSize: isMobile ? "11px" : "12px" }}>•</span>
+            <span
+              style={{ color: "#787C7E", fontSize: isMobile ? "11px" : "12px" }}
+            >
+              •
+            </span>
             <Tooltip
               title={dayjs(content.created_at).format("DD MMM YYYY HH:mm")}
             >
@@ -248,7 +256,14 @@ const ContentCard = ({
             {/* Status Badge */}
             {(showStatus || isAdmin) && content.status && (
               <>
-                <span style={{ color: "#787C7E", fontSize: isMobile ? "11px" : "12px" }}>•</span>
+                <span
+                  style={{
+                    color: "#787C7E",
+                    fontSize: isMobile ? "11px" : "12px",
+                  }}
+                >
+                  •
+                </span>
                 <Tag
                   color={getStatusColor(content.status)}
                   style={{
@@ -275,7 +290,14 @@ const ContentCard = ({
             {/* Category */}
             {content.category && (
               <>
-                <span style={{ color: "#787C7E", fontSize: isMobile ? "11px" : "12px" }}>•</span>
+                <span
+                  style={{
+                    color: "#787C7E",
+                    fontSize: isMobile ? "11px" : "12px",
+                  }}
+                >
+                  •
+                </span>
                 <Tag
                   style={{
                     fontSize: isMobile ? "8px" : "10px",
@@ -292,7 +314,9 @@ const ContentCard = ({
                     gap: isMobile ? "2px" : "4px",
                   }}
                 >
-                  <FolderOutlined style={{ fontSize: isMobile ? "6px" : "8px" }} />
+                  <FolderOutlined
+                    style={{ fontSize: isMobile ? "6px" : "8px" }}
+                  />
                   {content.category.name}
                 </Tag>
               </>
@@ -375,26 +399,27 @@ const ContentCard = ({
                   {content?.summary || content?.content?.substring(0, 200)}
                 </ReactMarkdownCustom>
               </div>
-              {(content?.summary && content.summary.length > 0) || (content?.content && content.content.length > 200) && (
-                <div
-                  style={{
-                    position: "absolute",
-                    bottom: "8px",
-                    right: "12px",
-                    background:
-                      "linear-gradient(90deg, transparent, #f8f9fa 30%)",
-                    paddingLeft: "20px",
-                    fontSize: "12px",
-                    color: "#FF4500",
-                    fontWeight: 500,
-                    fontStyle: "italic",
-                    cursor: "pointer",
-                  }}
-                  onClick={handleContentClick}
-                >
-                  ... Baca selengkapnya
-                </div>
-              )}
+              {(content?.summary && content.summary.length > 0) ||
+                (content?.content && content.content.length > 200 && (
+                  <div
+                    style={{
+                      position: "absolute",
+                      bottom: "8px",
+                      right: "12px",
+                      background:
+                        "linear-gradient(90deg, transparent, #f8f9fa 30%)",
+                      paddingLeft: "20px",
+                      fontSize: "12px",
+                      color: "#FF4500",
+                      fontWeight: 500,
+                      fontStyle: "italic",
+                      cursor: "pointer",
+                    }}
+                    onClick={handleContentClick}
+                  >
+                    ... Baca selengkapnya
+                  </div>
+                ))}
             </div>
           )}
 
@@ -404,7 +429,10 @@ const ContentCard = ({
               <Flex align="center" gap={isMobile ? "6px" : "8px"} wrap="wrap">
                 <Flex align="center" gap="4px">
                   <TagsOutlined
-                    style={{ fontSize: isMobile ? "8px" : "10px", color: "#787C7E" }}
+                    style={{
+                      fontSize: isMobile ? "8px" : "10px",
+                      color: "#787C7E",
+                    }}
                   />
                   <Text
                     style={{
@@ -459,7 +487,12 @@ const ContentCard = ({
             <Flex align="center" gap={isMobile ? 8 : 12}>
               {/* Views Count */}
               <Flex align="center" gap={4}>
-                <EyeOutlined style={{ fontSize: isMobile ? "10px" : "12px", color: "#787C7E" }} />
+                <EyeOutlined
+                  style={{
+                    fontSize: isMobile ? "10px" : "12px",
+                    color: "#787C7E",
+                  }}
+                />
                 <span
                   style={{
                     fontSize: isMobile ? "10px" : "12px",
@@ -494,13 +527,20 @@ const ContentCard = ({
                   e.currentTarget.style.backgroundColor = "transparent";
                 }}
               >
-                <MessageOutlined style={{ fontSize: isMobile ? "10px" : "12px" }} />
+                <MessageOutlined
+                  style={{ fontSize: isMobile ? "10px" : "12px" }}
+                />
                 <span>{content.comments_count || 0} komentar</span>
               </Flex>
 
               {/* Bookmarks Count */}
               <Flex align="center" gap={4}>
-                <BookOutlined style={{ fontSize: isMobile ? "10px" : "12px", color: "#787C7E" }} />
+                <BookOutlined
+                  style={{
+                    fontSize: isMobile ? "10px" : "12px",
+                    color: "#787C7E",
+                  }}
+                />
                 <span
                   style={{
                     fontSize: isMobile ? "10px" : "12px",

@@ -235,7 +235,7 @@ const MyKnowledgeDashboard = () => {
   }
 
   return (
-    <div style={{ maxWidth: "1200px", margin: "0 auto", padding: screens.md ? "16px" : "12px" }}>
+    <div style={{ maxWidth: "1200px", margin: "0 auto" }}>
       {/* Header Card - SocmedPost Style */}
       <Card
         style={{
@@ -275,11 +275,12 @@ const MyKnowledgeDashboard = () => {
           </div>
 
           {/* Content Section */}
-          <Flex
-            vertical
-            style={{ flex: 1, padding: "12px 16px" }}
-          >
-            <Flex align="center" justify="space-between" style={{ marginBottom: "4px" }}>
+          <Flex vertical style={{ flex: 1, padding: "12px 16px" }}>
+            <Flex
+              align="center"
+              justify="space-between"
+              style={{ marginBottom: "4px" }}
+            >
               <Text strong style={{ fontSize: "16px", color: "#1A1A1B" }}>
                 Dashboard Saya
               </Text>
@@ -289,7 +290,7 @@ const MyKnowledgeDashboard = () => {
                 onClick={handleRefreshGamification}
                 size="small"
                 loading={refreshing}
-                style={{ 
+                style={{
                   color: "#878A8C",
                   transition: "color 0.2s ease",
                 }}
@@ -307,7 +308,8 @@ const MyKnowledgeDashboard = () => {
               type="secondary"
               style={{ fontSize: "14px", lineHeight: "1.4" }}
             >
-              Pantau statistik konten, progres level, badge, misi, dan leaderboard Anda
+              Pantau statistik konten, progres level, badge, misi, dan
+              leaderboard Anda
             </Text>
           </Flex>
         </Flex>
@@ -362,14 +364,26 @@ const MyKnowledgeDashboard = () => {
 
               {/* Content Section */}
               <div style={{ flex: 1, padding: "16px" }}>
-                <Text strong style={{ fontSize: "16px", color: "#1A1A1B", marginBottom: "16px", display: "block" }}>
+                <Text
+                  strong
+                  style={{
+                    fontSize: "16px",
+                    color: "#1A1A1B",
+                    marginBottom: "16px",
+                    display: "block",
+                  }}
+                >
                   Status Konten
                 </Text>
                 <Row gutter={[12, 12]}>
                   {statusStats.map((stat) => (
                     <Col xs={12} sm={6} key={stat.key}>
                       {isLoading ? (
-                        <Skeleton.Button active block style={{ height: "60px" }} />
+                        <Skeleton.Button
+                          active
+                          block
+                          style={{ height: "60px" }}
+                        />
                       ) : (
                         <div
                           style={{
@@ -383,7 +397,8 @@ const MyKnowledgeDashboard = () => {
                           onMouseEnter={(e) => {
                             e.currentTarget.style.backgroundColor = "#F5F5F5";
                             e.currentTarget.style.borderColor = "#D0D0D0";
-                            e.currentTarget.style.transform = "translateY(-1px)";
+                            e.currentTarget.style.transform =
+                              "translateY(-1px)";
                           }}
                           onMouseLeave={(e) => {
                             e.currentTarget.style.backgroundColor = "#FAFAFA";
@@ -392,7 +407,13 @@ const MyKnowledgeDashboard = () => {
                           }}
                         >
                           <div style={{ marginBottom: "4px" }}>{stat.icon}</div>
-                          <div style={{ fontSize: "20px", fontWeight: "600", color: "#1A1A1B" }}>
+                          <div
+                            style={{
+                              fontSize: "20px",
+                              fontWeight: "600",
+                              color: "#1A1A1B",
+                            }}
+                          >
                             {stat.value}
                           </div>
                           <div style={{ fontSize: "12px", color: "#878A8C" }}>
@@ -448,14 +469,26 @@ const MyKnowledgeDashboard = () => {
 
               {/* Content Section */}
               <div style={{ flex: 1, padding: "16px" }}>
-                <Text strong style={{ fontSize: "16px", color: "#1A1A1B", marginBottom: "16px", display: "block" }}>
+                <Text
+                  strong
+                  style={{
+                    fontSize: "16px",
+                    color: "#1A1A1B",
+                    marginBottom: "16px",
+                    display: "block",
+                  }}
+                >
                   Statistik Engagement
                 </Text>
                 <Row gutter={[12, 12]}>
                   {engagementStats.map((stat) => (
                     <Col xs={24} sm={8} key={stat.key}>
                       {isLoading ? (
-                        <Skeleton.Button active block style={{ height: "60px" }} />
+                        <Skeleton.Button
+                          active
+                          block
+                          style={{ height: "60px" }}
+                        />
                       ) : (
                         <Flex
                           align="center"
@@ -470,7 +503,8 @@ const MyKnowledgeDashboard = () => {
                           onMouseEnter={(e) => {
                             e.currentTarget.style.backgroundColor = "#F5F5F5";
                             e.currentTarget.style.borderColor = "#D0D0D0";
-                            e.currentTarget.style.transform = "translateY(-1px)";
+                            e.currentTarget.style.transform =
+                              "translateY(-1px)";
                           }}
                           onMouseLeave={(e) => {
                             e.currentTarget.style.backgroundColor = "#FAFAFA";
@@ -480,7 +514,13 @@ const MyKnowledgeDashboard = () => {
                         >
                           <div>{stat.icon}</div>
                           <div style={{ flex: 1 }}>
-                            <div style={{ fontSize: "20px", fontWeight: "600", color: "#1A1A1B" }}>
+                            <div
+                              style={{
+                                fontSize: "20px",
+                                fontWeight: "600",
+                                color: "#1A1A1B",
+                              }}
+                            >
                               {stat.value}
                             </div>
                             <div style={{ fontSize: "12px", color: "#878A8C" }}>

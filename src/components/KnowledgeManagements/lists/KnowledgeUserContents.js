@@ -259,7 +259,7 @@ const KnowledgeUserContents = () => {
   }
 
   return (
-    <div style={{ padding: isMobile ? "12px" : "16px" }}>
+    <div>
       {/* Header with Search */}
       <KnowledgeHeader
         searchQuery={searchQuery}

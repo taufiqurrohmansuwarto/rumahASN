@@ -33,6 +33,8 @@ const KnowledgeContentHeader = ({
   isBookmarked,
   isLiking = false,
   isBookmarking = false,
+  disableInteractions = false,
+  showOwnerActions = false,
 }) => {
   const getStatusColor = (status) => {
     const statusColors = {
@@ -80,72 +82,105 @@ const KnowledgeContentHeader = ({
       bodyStyle={{ padding: 0 }}
     >
       {/* Bookmark Button - Top Right Corner */}
-      <div
-        style={{
-          position: "absolute",
-          top: "12px",
-          right: "12px",
-          zIndex: 10,
-        }}
-      >
-        <Flex
-          align="center"
-          gap={4}
+      {!disableInteractions && (
+        <div
           style={{
-            cursor: isBookmarking ? "default" : "pointer",
-            padding: "6px 8px",
-            borderRadius: "4px",
-            transition: "all 0.2s ease",
-            opacity: isBookmarking ? 0.7 : 1,
-            backgroundColor: "transparent",
-          }}
-          onClick={isBookmarking ? undefined : onBookmark}
-          onMouseEnter={(e) => {
-            if (!isBookmarking) {
-              e.currentTarget.style.backgroundColor = "#F3F4F6";
-            }
-          }}
-          onMouseLeave={(e) => {
-            if (!isBookmarking) {
-              e.currentTarget.style.backgroundColor = "transparent";
-            }
+            position: "absolute",
+            top: "12px",
+            right: "12px",
+            zIndex: 10,
           }}
         >
-          {isBookmarking ? (
-            <LoadingOutlined
-              style={{
-                fontSize: "14px",
-                color: "#FF4500",
-              }}
-              spin
-            />
-          ) : (
-            <BookOutlined
-              style={{
-                fontSize: "14px",
-                color: isBookmarked ? "#FF4500" : "#6B7280",
-              }}
-            />
-          )}
-          <Text
+          <Flex
+            align="center"
+            gap={4}
             style={{
-              fontSize: "12px",
-              color: isBookmarking
-                ? "#FF4500"
-                : isBookmarked
-                ? "#FF4500"
-                : "#6B7280",
-              fontWeight: 600,
+              cursor: isBookmarking ? "default" : "pointer",
+              padding: "6px 8px",
+              borderRadius: "4px",
+              transition: "all 0.2s ease",
+              opacity: isBookmarking ? 0.7 : 1,
+              backgroundColor: "transparent",
+            }}
+            onClick={isBookmarking ? undefined : onBookmark}
+            onMouseEnter={(e) => {
+              if (!isBookmarking) {
+                e.currentTarget.style.backgroundColor = "#F3F4F6";
+              }
+            }}
+            onMouseLeave={(e) => {
+              if (!isBookmarking) {
+                e.currentTarget.style.backgroundColor = "transparent";
+              }
             }}
           >
-            {isBookmarking
-              ? "Loading..."
-              : isBookmarked
-              ? "Tersimpan"
-              : "Simpan"}
-          </Text>
-        </Flex>
-      </div>
+            {isBookmarking ? (
+              <LoadingOutlined
+                style={{
+                  fontSize: "14px",
+                  color: "#FF4500",
+                }}
+                spin
+              />
+            ) : (
+              <BookOutlined
+                style={{
+                  fontSize: "14px",
+                  color: isBookmarked ? "#FF4500" : "#6B7280",
+                }}
+              />
+            )}
+            <Text
+              style={{
+                fontSize: "12px",
+                color: isBookmarking
+                  ? "#FF4500"
+                  : isBookmarked
+                  ? "#FF4500"
+                  : "#6B7280",
+                fontWeight: 600,
+              }}
+            >
+              {isBookmarking
+                ? "Loading..."
+                : isBookmarked
+                ? "Tersimpan"
+                : "Simpan"}
+            </Text>
+          </Flex>
+        </div>
+      )}
+
+      {/* Status indicator for disabled interactions */}
+      {disableInteractions && (
+        <div
+          style={{
+            position: "absolute",
+            top: "12px",
+            right: "12px",
+            zIndex: 10,
+          }}
+        >
+          <div
+            style={{
+              padding: "6px 12px",
+              borderRadius: "4px",
+              backgroundColor: "#FFF7ED",
+              border: "1px solid #FED7AA",
+            }}
+          >
+            <Text
+              style={{
+                fontSize: "11px",
+                color: "#C2410C",
+                fontWeight: 600,
+              }}
+            >
+              ⚠️ Preview Mode
+            </Text>
+          </div>
+        </div>
+      )}
 
       <Flex style={{ minHeight: "80px" }}>
         {/* Like Section - Reddit Style */}
@@ -163,7 +198,13 @@ const KnowledgeContentHeader = ({
         >
           <Tooltip
             title={
-              isLiking ? "Loading..." : isLiked ? "Unlike" : "Like konten ini"
+              disableInteractions
+                ? "Interaksi tidak tersedia"
+                : isLiking
+                ? "Loading..."
+                : isLiked
+                ? "Unlike"
+                : "Like konten ini"
             }
           >
             {isLiking ? (
@@ -180,23 +221,25 @@ const KnowledgeContentHeader = ({
               <LikeFilled
                 style={{
                   fontSize: 16,
-                  color: "#FF4500",
-                  cursor: "pointer",
+                  color: disableInteractions ? "#D1D5DB" : "#FF4500",
+                  cursor: disableInteractions ? "default" : "pointer",
                   marginBottom: "4px",
                   transition: "transform 0.2s ease",
+                  opacity: disableInteractions ? 0.6 : 1,
                 }}
-                onClick={onLike}
+                onClick={disableInteractions ? undefined : onLike}
               />
             ) : (
               <LikeOutlined
                 style={{
                   fontSize: 16,
-                  color: "#878A8C",
-                  cursor: "pointer",
+                  color: disableInteractions ? "#D1D5DB" : "#878A8C",
+                  cursor: disableInteractions ? "default" : "pointer",
                   marginBottom: "4px",
                   transition: "color 0.2s ease, transform 0.2s ease",
+                  opacity: disableInteractions ? 0.6 : 1,
                 }}
-                onClick={onLike}
+                onClick={disableInteractions ? undefined : onLike}
               />
             )}
           </Tooltip>
@@ -204,9 +247,14 @@ const KnowledgeContentHeader = ({
             style={{
               fontSize: 12,
               fontWeight: 700,
-              color: isLiked ? "#FF4500" : "#878A8C",
+              color: disableInteractions
+                ? "#D1D5DB"
+                : isLiked
+                ? "#FF4500"
+                : "#878A8C",
               margin: "4px 0",
               lineHeight: 1,
+              opacity: disableInteractions ? 0.6 : 1,
             }}
           >
             {content?.likes_count || 0}
@@ -323,8 +371,16 @@ const KnowledgeContentHeader = ({
                 {content?.updated_at &&
                   content?.updated_at !== content?.created_at && (
                     <div style={{ marginBottom: "12px" }}>
-                      <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-                        <EditOutlined style={{ fontSize: "11px", color: "#666" }} />
+                      <div
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "6px",
+                        }}
+                      >
+                        <EditOutlined
+                          style={{ fontSize: "11px", color: "#666" }}
+                        />
                         <Text
                           style={{
                             fontSize: "11px",

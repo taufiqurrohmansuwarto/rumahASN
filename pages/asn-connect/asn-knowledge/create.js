@@ -7,6 +7,11 @@ import { useRouter } from "next/router";
 
 const AsnKnowledgeCreate = () => {
   const router = useRouter();
+
+  const handleSuccess = () => {
+    router.push("/asn-connect/asn-knowledge/my-knowledge");
+  };
+
   return (
     <>
       <Head>
@@ -14,7 +19,7 @@ const AsnKnowledgeCreate = () => {
       </Head>
       <LayoutASNConnect active="asn-knowledge">
         <PageContainer title="Buat Pengetahuan" onBack={() => router.back()}>
-          <KnowledgeFormUserContents />
+          <KnowledgeFormUserContents onSuccess={handleSuccess} />
         </PageContainer>
       </LayoutASNConnect>
     </>

@@ -372,7 +372,7 @@ const MyKnowledgeContents = () => {
       onLike={handleLike}
       onBookmark={handleBookmark}
       onClick={() => {
-        router.push(`/asn-connect/asn-knowledge/${content.id}`);
+        router.push(`/asn-connect/asn-knowledge/my-knowledge/${content.id}`);
       }}
       showStatus={true}
       isOwner={true}
@@ -429,7 +429,6 @@ const MyKnowledgeContents = () => {
 
       <div
         style={{
-          padding: isMobile ? "12px" : "16px",
           marginTop: isMobile ? "8px" : "12px",
         }}
       >

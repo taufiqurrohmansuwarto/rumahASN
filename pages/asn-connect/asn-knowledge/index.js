@@ -4,6 +4,7 @@ import Layout from "@/components/Layout";
 import LayoutASNConnect from "@/components/Socmed/LayoutASNConnect";
 import useScrollRestoration from "@/hooks/useScrollRestoration";
 import Head from "next/head";
+import { Col, Row } from "antd";
 
 const AsnKnowledge = () => {
   useScrollRestoration("knowledge-scroll", true, false, true); // Enable smooth restoration
@@ -14,12 +15,16 @@ const AsnKnowledge = () => {
         <title>Rumah ASN - ASN Connect - Manajemen Pengetahuan</title>
       </Head>
       <LayoutASNConnect active="asn-knowledge">
-        <KnowledgeLayout
-          currentPath="/asn-connect/asn-knowledge"
-          showCreateButton={true}
-        >
-          <KnowledgeUserContents />
-        </KnowledgeLayout>
+        <Row>
+          <Col lg={18} xs={24}>
+            <KnowledgeLayout
+              currentPath="/asn-connect/asn-knowledge"
+              showCreateButton={true}
+            >
+              <KnowledgeUserContents />
+            </KnowledgeLayout>
+          </Col>
+        </Row>
       </LayoutASNConnect>
     </>
   );
