@@ -1,6 +1,7 @@
 const KnowledgeUserInteraction = require("@/models/knowledge/user-interactions.model");
 const KnowledgeContent = require("@/models/knowledge/contents.model");
 import { handleError } from "@/utils/helper/controller-helper";
+import { awardXP } from "./gamification.controller";
 
 export const likes = async (req, res) => {
   try {
@@ -51,6 +52,32 @@ export const likes = async (req, res) => {
         await KnowledgeContent.query(trx)
           .where("id", id)
           .increment("likes_count", 1);
+
+        // Award XP untuk user yang like (+2 XP)
+        try {
+          await awardXP({
+            userId: customId,
+            action: "like_content",
+            refType: "content",
+            refId: id,
+            xp: 2,
+          });
+        } catch (xpError) {
+          console.warn("Failed to award XP for like:", xpError);
+        }
+
+        // Award XP untuk author konten (+1 XP)
+        try {
+          await awardXP({
+            userId: currentContent.author_id,
+            action: "content_liked",
+            refType: "content",
+            refId: id,
+            xp: 1,
+          });
+        } catch (xpError) {
+          console.warn("Failed to award XP to author:", xpError);
+        }
 
         return {
           message: "Berhasil menyukai konten",
@@ -104,6 +131,19 @@ export const createComment = async (req, res) => {
       await KnowledgeContent.query(trx)
         .where("id", id)
         .increment("comments_count", 1);
+
+      // Award XP untuk user yang comment (+3 XP)
+      try {
+        await awardXP({
+          userId: customId,
+          action: "comment_content",
+          refType: "content",
+          refId: id,
+          xp: 3,
+        });
+      } catch (xpError) {
+        console.warn("Failed to award XP for comment:", xpError);
+      }
 
       return {
         message: "Berhasil menambahkan komentar",

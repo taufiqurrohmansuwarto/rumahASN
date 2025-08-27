@@ -1,4 +1,10 @@
-import { getUserOwnContents, getUserPoints, getUserBadges } from "@/services/knowledge-management.services";
+import { 
+  getUserOwnContents, 
+  fetchUserPoints, 
+  fetchUserBadges, 
+  fetchUserMissions,
+  fetchLeaderboard 
+} from "@/services/knowledge-management.services";
 import { useQueries } from "@tanstack/react-query";
 import {
   Card,
@@ -12,6 +18,7 @@ import {
   Grid,
   Skeleton,
   Empty,
+  Divider,
 } from "antd";
 import {
   FileTextOutlined,
@@ -24,7 +31,22 @@ import {
   CheckCircleOutlined,
   ClockCircleOutlined,
   CloseCircleOutlined,
+  CrownOutlined,
+  RocketOutlined,
 } from "@ant-design/icons";
+import { 
+  UserBadgeGallery, 
+  UserMissionList, 
+  Leaderboard,
+  UserXPProgress 
+} from "../components";
+import { 
+  useCompleteMission,
+  useUserPoints as useGamificationPoints,
+  useUserBadges as useGamificationBadges,
+  useUserMissions as useGamificationMissions,
+  useLeaderboard as useGamificationLeaderboard
+} from "@/hooks/knowledge-management/useGamification";
 
 const { Title, Text } = Typography;
 const { useBreakpoint } = Grid;
@@ -34,7 +56,7 @@ const MyKnowledgeDashboard = () => {
   const isMobile = !screens.md;
 
   // Fetch user data using useQueries for parallel requests
-  const [contentsQuery, pointsQuery, badgesQuery] = useQueries({
+  const [contentsQuery, pointsQuery, badgesQuery, missionsQuery, leaderboardQuery] = useQueries({
     queries: [
       {
         queryKey: ["user-contents-stats"],
@@ -43,24 +65,58 @@ const MyKnowledgeDashboard = () => {
       },
       {
         queryKey: ["user-points"],
-        queryFn: getUserPoints,
+        queryFn: fetchUserPoints,
         staleTime: 60000, // 1 minute
       },
       {
         queryKey: ["user-badges"],
-        queryFn: getUserBadges,
+        queryFn: fetchUserBadges,
         staleTime: 300000, // 5 minutes
+      },
+      {
+        queryKey: ["user-missions"],
+        queryFn: fetchUserMissions,
+        staleTime: 300000, // 5 minutes
+      },
+      {
+        queryKey: ["leaderboard", 10],
+        queryFn: () => fetchLeaderboard(10),
+        staleTime: 120000, // 2 minutes
       },
     ],
   });
 
+  // Fetch gamification data using dedicated hooks
+  const { data: gamificationPoints, isLoading: loadingGamificationPoints } = useGamificationPoints();
+  const { data: gamificationBadges, isLoading: loadingGamificationBadges } = useGamificationBadges();
+  const { data: gamificationMissions, isLoading: loadingGamificationMissions } = useGamificationMissions();
+  const { data: gamificationLeaderboard, isLoading: loadingGamificationLeaderboard } = useGamificationLeaderboard();
+
   const isLoading = contentsQuery.isLoading || pointsQuery.isLoading || badgesQuery.isLoading;
-  const hasError = contentsQuery.isError || pointsQuery.isError || badgesQuery.isError;
+  const hasError = contentsQuery.isError || pointsQuery.isError || badgesQuery.isError || missionsQuery.isError || leaderboardQuery.isError;
 
   // Extract data
   const contentStats = contentsQuery.data?.stats || {};
-  const userPoints = pointsQuery.data || {};
-  const userBadges = badgesQuery.data || [];
+  const userPoints = pointsQuery.data?.data || {};
+  const userBadges = badgesQuery.data?.data || badgesQuery.data || [];
+  const userMissions = missionsQuery.data?.data || missionsQuery.data || [];
+  const leaderboardData = leaderboardQuery.data?.data || leaderboardQuery.data || [];
+  
+  // Gamification data (prioritize gamification hooks over basic queries)
+  const finalUserBadges = gamificationBadges?.data || gamificationBadges || userBadges;
+  const finalUserMissions = gamificationMissions?.data || gamificationMissions || userMissions;
+  const finalLeaderboard = gamificationLeaderboard?.data || gamificationLeaderboard || leaderboardData;
+
+  // Mission completion handler
+  const { mutateAsync: completeMission } = useCompleteMission();
+  
+  const handleCompleteMission = async (missionId) => {
+    try {
+      await completeMission(missionId);
+    } catch (error) {
+      console.error("Failed to complete mission:", error);
+    }
+  };
 
   // Status statistics
   const statusStats = [
@@ -119,22 +175,29 @@ const MyKnowledgeDashboard = () => {
     },
   ];
 
-  // Get user level info
+  // Get user level info (using new gamification calculation)
   const getUserLevel = () => {
-    const currentXP = userPoints.current_xp || 0;
-    const level = Math.floor(currentXP / 100) + 1;
-    const nextLevelXP = level * 100;
-    const currentLevelXP = (level - 1) * 100;
-    const progressXP = currentXP - currentLevelXP;
-    const neededXP = nextLevelXP - currentXP;
-    const progressPercentage = (progressXP / (nextLevelXP - currentLevelXP)) * 100;
+    const currentXP = userPoints.points || 0;
+    const level = userPoints.levels || userPoints.level || 1;
+    
+    // Calculate XP range for current and next level (matching gamification logic)
+    const getXPForLevel = (lvl) => {
+      if (lvl <= 1) return 0;
+      return Math.pow(lvl - 1, 2) * 50;
+    };
+
+    const currentLevelMinXP = getXPForLevel(level);
+    const nextLevelMinXP = getXPForLevel(level + 1);
+    const progressXP = currentXP - currentLevelMinXP;
+    const neededXP = nextLevelMinXP - currentXP;
+    const progressPercentage = ((currentXP - currentLevelMinXP) / (nextLevelMinXP - currentLevelMinXP)) * 100;
 
     return {
       level,
       currentXP,
-      nextLevelXP,
-      neededXP,
-      progressPercentage,
+      nextLevelXP: nextLevelMinXP,
+      neededXP: Math.max(0, neededXP),
+      progressPercentage: Math.min(100, Math.max(0, progressPercentage)),
     };
   };
 
@@ -180,7 +243,7 @@ const MyKnowledgeDashboard = () => {
                 marginBottom: "4px",
               }}
             >
-              Dashboard Knowledge Saya
+              Dashboard Saya
             </Title>
             <Text
               style={{
@@ -188,56 +251,19 @@ const MyKnowledgeDashboard = () => {
                 fontSize: isMobile ? "13px" : "14px",
               }}
             >
-              Pantau progres dan pencapaian Anda dalam berbagi pengetahuan
+              Pantau statistik konten, progres level, badge, misi, dan leaderboard Anda
             </Text>
           </div>
         </Flex>
       </Card>
 
       <Row gutter={[16, 16]}>
-        {/* User Level & XP */}
+        {/* User XP Progress - Enhanced */}
         <Col span={24}>
-          <Card
-            style={{
-              borderRadius: "8px",
-              border: "1px solid #EDEFF1",
-            }}
-          >
-            {isLoading ? (
-              <Skeleton active />
-            ) : (
-              <Flex align="center" gap="large">
-                <Avatar
-                  size={isMobile ? 56 : 72}
-                  style={{
-                    backgroundColor: "#FF4500",
-                    fontSize: isMobile ? "24px" : "32px",
-                  }}
-                >
-                  {levelInfo.level}
-                </Avatar>
-                <div style={{ flex: 1 }}>
-                  <Flex justify="space-between" align="center" style={{ marginBottom: "8px" }}>
-                    <Text strong style={{ fontSize: "16px" }}>
-                      Level {levelInfo.level}
-                    </Text>
-                    <Text style={{ color: "#666", fontSize: "14px" }}>
-                      {levelInfo.currentXP} / {levelInfo.nextLevelXP} XP
-                    </Text>
-                  </Flex>
-                  <Progress
-                    percent={levelInfo.progressPercentage}
-                    strokeColor="#FF4500"
-                    size={isMobile ? "small" : "default"}
-                    showInfo={false}
-                  />
-                  <Text style={{ color: "#666", fontSize: "12px", marginTop: "4px" }}>
-                    Butuh {levelInfo.neededXP} XP lagi untuk naik level
-                  </Text>
-                </div>
-              </Flex>
-            )}
-          </Card>
+          <UserXPProgress 
+            userPoints={gamificationPoints || userPoints} 
+            loading={loadingGamificationPoints || pointsQuery.isLoading}
+          />
         </Col>
 
         {/* Content Status Statistics */}
@@ -323,85 +349,28 @@ const MyKnowledgeDashboard = () => {
           </Card>
         </Col>
 
-        {/* User Badges */}
+        {/* Badges and Leaderboard Row */}
+        <Col xs={24} lg={16}>
+          <UserBadgeGallery 
+            userBadges={finalUserBadges} 
+            loading={loadingGamificationBadges || badgesQuery.isLoading}
+          />
+        </Col>
+        
+        <Col xs={24} lg={8}>
+          <Leaderboard 
+            leaderboardData={finalLeaderboard} 
+            loading={loadingGamificationLeaderboard || leaderboardQuery.isLoading}
+          />
+        </Col>
+
+        {/* User Missions - Full Width */}
         <Col span={24}>
-          <Card
-            title={
-              <Flex align="center" gap="small">
-                <StarOutlined style={{ color: "#FF4500" }} />
-                <span>Badge Saya ({userBadges.length})</span>
-              </Flex>
-            }
-            style={{
-              borderRadius: "8px",
-              border: "1px solid #EDEFF1",
-            }}
-          >
-            {isLoading ? (
-              <Skeleton active />
-            ) : userBadges.length > 0 ? (
-              <Row gutter={[12, 12]}>
-                {userBadges.slice(0, 6).map((badge) => (
-                  <Col xs={12} sm={8} md={6} lg={4} key={badge.id}>
-                    <Card
-                      size="small"
-                      hoverable
-                      style={{
-                        textAlign: "center",
-                        borderColor: "#FFD700",
-                        borderWidth: "2px",
-                      }}
-                    >
-                      <div style={{ fontSize: "32px", marginBottom: "8px" }}>
-                        {badge.icon || "🏆"}
-                      </div>
-                      <Text
-                        strong
-                        style={{
-                          fontSize: "12px",
-                          display: "block",
-                          marginBottom: "4px",
-                        }}
-                      >
-                        {badge.name}
-                      </Text>
-                      <Text
-                        style={{
-                          fontSize: "10px",
-                          color: "#666",
-                          display: "block",
-                        }}
-                      >
-                        {badge.description}
-                      </Text>
-                    </Card>
-                  </Col>
-                ))}
-                {userBadges.length > 6 && (
-                  <Col xs={12} sm={8} md={6} lg={4}>
-                    <Card
-                      size="small"
-                      style={{
-                        textAlign: "center",
-                        borderStyle: "dashed",
-                        borderColor: "#d9d9d9",
-                        backgroundColor: "#fafafa",
-                      }}
-                    >
-                      <Text style={{ color: "#666", fontSize: "12px" }}>
-                        +{userBadges.length - 6} badge lainnya
-                      </Text>
-                    </Card>
-                  </Col>
-                )}
-              </Row>
-            ) : (
-              <Empty
-                description="Belum ada badge yang diraih"
-                image={<StarOutlined style={{ fontSize: "48px", color: "#d9d9d9" }} />}
-              />
-            )}
-          </Card>
+          <UserMissionList 
+            userMissions={finalUserMissions} 
+            loading={loadingGamificationMissions || missionsQuery.isLoading}
+            onCompleteMission={handleCompleteMission}
+          />
         </Col>
       </Row>
 

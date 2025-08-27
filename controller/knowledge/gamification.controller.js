@@ -50,16 +50,16 @@ export const awardXP = async ({ userId, action, refType, refId, xp }) => {
       newLevel = calcLevel(newPoints);
       await UserPoints.query(trx).patchAndFetchById(userId, {
         points: newPoints,
-        level: newLevel,
-        last_updated: new Date(),
+        levels: newLevel,
+        last_updated_at: new Date(),
       });
     } else {
       newLevel = calcLevel(newPoints);
       await UserPoints.query(trx).insert({
         user_id: userId,
         points: newPoints,
-        level: newLevel,
-        last_updated: new Date(),
+        levels: newLevel,
+        last_updated_at: new Date(),
       });
     }
 
@@ -84,7 +84,7 @@ export const awardXP = async ({ userId, action, refType, refId, xp }) => {
       }
     }
 
-    return { points: newPoints, level: newLevel, skipped: false };
+    return { points: newPoints, levels: newLevel, skipped: false };
   });
 };
 
@@ -186,7 +186,7 @@ export const getPoints = async (req, res) => {
     const user = req?.user;
     const points = await UserPoints.query().where("user_id", user?.id).first();
     const response = {
-      data: points ?? { points: 0, level: 1 },
+      data: points ?? { points: 0, levels: 1 },
     };
     res.json(response);
   } catch (error) {
@@ -301,7 +301,7 @@ export const awardUserXP = async (req, res) => {
   try {
     const { customId } = req?.user;
     const { action, refType, refId, xp } = req?.body;
-    
+
     if (!action || !refType || !refId || !xp) {
       return res.status(400).json({ message: "Missing required parameters" });
     }
@@ -323,16 +323,17 @@ export const awardUserXP = async (req, res) => {
 export const getUserGamificationSummary = async (req, res) => {
   try {
     const { customId } = req?.user;
-    
+
     const [points, badges, missions] = await Promise.all([
       UserPoints.query().where("user_id", customId).first(),
-      UserBadges.query()
-        .where("user_id", customId)
-        .withGraphFetched("badge"),
-      Missions.query().where("is_active", true)
+      UserBadges.query().where("user_id", customId).withGraphFetched("badge"),
+      Missions.query()
+        .where("is_active", true)
         .then(async (activeMissions) => {
-          const progress = await UserMissionProgress.query()
-            .where("user_id", customId);
+          const progress = await UserMissionProgress.query().where(
+            "user_id",
+            customId
+          );
           const progressMap = new Map(
             progress.map((item) => [item.mission_id, item])
           );
@@ -346,7 +347,7 @@ export const getUserGamificationSummary = async (req, res) => {
 
     res.json({
       data: {
-        points: points ?? { points: 0, level: 1 },
+        points: points ?? { points: 0, levels: 1 },
         badges: badges || [],
         missions: missions || [],
       },

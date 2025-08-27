@@ -1,4 +1,4 @@
-import { KnowledgeNavigationSegmented } from "../components";
+import { KnowledgeNavigationSegmented, XPNotification } from "../components";
 import { Flex, Button } from "antd";
 import { PlusOutlined } from "@ant-design/icons";
 import { useRouter } from "next/router";
@@ -61,7 +61,12 @@ const KnowledgeLayout = ({
     );
   };
 
-  return renderContent();
+  return (
+    <>
+      {renderContent()}
+      <XPNotification />
+    </>
+  );
 };
 
 export default KnowledgeLayout;

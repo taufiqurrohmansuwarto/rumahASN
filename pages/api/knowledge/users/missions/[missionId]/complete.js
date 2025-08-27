@@ -5,6 +5,10 @@ import { userMissionComplete } from "@/controller/knowledge/gamification.control
 
 const router = createRouter();
 
-router.use(auth).post(asnPemprovMiddleware).post(userMissionComplete);
+router
+  .use(auth)
+  .get(asnPemprovMiddleware)
+  .get(userMissionComplete)
+  .post(userMissionComplete);
 
 export default router.handler({});

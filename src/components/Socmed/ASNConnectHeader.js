@@ -11,10 +11,8 @@ function ASNConnectHeader() {
         position: "relative",
         overflow: "hidden",
         boxShadow: "0 8px 32px rgba(255, 69, 0, 0.3)",
-        marginBottom: "0",
-        margin: "0",
-        width: "100vw",
-        marginLeft: "calc(50% - 50vw)",
+        marginBottom: "24px",
+        borderRadius: "12px",
       }}
     >
       {/* Background Pattern */}

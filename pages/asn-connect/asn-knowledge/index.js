@@ -4,6 +4,7 @@ import KnowledgeUserContents from "@/components/KnowledgeManagements/lists/Knowl
 import { KnowledgeLayout } from "@/components/KnowledgeManagements";
 import useScrollRestoration from "@/hooks/useScrollRestoration";
 import Head from "next/head";
+import ButtonCheckAPI from "@/components/KnowledgeManagements/components/ButtonCheckAPI";
 
 const AsnKnowledge = () => {
   useScrollRestoration("knowledge-scroll", true, false, true); // Enable smooth restoration
@@ -14,10 +15,11 @@ const AsnKnowledge = () => {
         <title>Rumah ASN - ASN Connect - Manajemen Pengetahuan</title>
       </Head>
       <LayoutASNConnect active="asn-knowledge">
-        <KnowledgeLayout 
+        <KnowledgeLayout
           currentPath="/asn-connect/asn-knowledge"
           showCreateButton={true}
         >
+          <ButtonCheckAPI />
           <KnowledgeUserContents />
         </KnowledgeLayout>
       </LayoutASNConnect>

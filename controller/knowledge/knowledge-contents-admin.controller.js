@@ -2,6 +2,7 @@ const KnowledgeContent = require("@/models/knowledge/contents.model");
 const KnowledgeContentVersions = require("@/models/knowledge/content-versions.model");
 const KnowledgeUserInteractions = require("@/models/knowledge/user-interactions.model");
 import { handleError } from "@/utils/helper/controller-helper";
+import { awardXP } from "./gamification.controller";
 
 export const getKnowledgeContentsAdmin = async (req, res) => {
   try {
@@ -190,6 +191,13 @@ export const changeStatusKnowledgeContentAdmin = async (req, res) => {
     const { customId } = req?.user;
     const payload = req?.body;
 
+    // Get current content untuk cek author dan status sebelumnya
+    const currentContent = await KnowledgeContent.query().findById(id);
+    
+    if (!currentContent) {
+      return res.status(404).json({ message: "Content tidak ditemukan" });
+    }
+
     const data = {
       ...payload,
       verified_by: customId,
@@ -197,6 +205,22 @@ export const changeStatusKnowledgeContentAdmin = async (req, res) => {
     };
 
     const content = await KnowledgeContent.query().where("id", id).patch(data);
+
+    // Award XP jika content di-approve menjadi "published" (+10 XP untuk author)
+    if (payload.status === "published" && currentContent.status !== "published") {
+      try {
+        await awardXP({
+          userId: currentContent.author_id,
+          action: "publish_content",
+          refType: "content", 
+          refId: id,
+          xp: 10,
+        });
+      } catch (xpError) {
+        console.warn("Failed to award XP for published content:", xpError);
+      }
+    }
+
     res.json(content);
   } catch (error) {
     handleError(res, error);

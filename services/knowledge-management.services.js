@@ -47,6 +47,39 @@ export const getKnowledgeCategories = async () => {
   return await api.get("/users/refs/categories").then((res) => res.data);
 };
 
+// Gamification Services
+export const fetchUserPoints = async () => {
+  return await api.get("/users/me/points").then((res) => res.data);
+};
+
+export const fetchUserBadges = async () => {
+  return await api.get("/users/me/badges").then((res) => res.data);
+};
+
+export const fetchUserMissions = async () => {
+  return await api.get("/users/missions").then((res) => res.data);
+};
+
+export const fetchLeaderboard = async (limit = 10) => {
+  return await api
+    .get(`/users/leaderboard?limit=${limit}`)
+    .then((res) => res.data);
+};
+
+export const fetchUserGamificationSummary = async () => {
+  return await api.get("/users/me/summary").then((res) => res.data);
+};
+
+export const submitMissionComplete = async (missionId) => {
+  return await api
+    .post(`/users/missions/${missionId}/complete`)
+    .then((res) => res.data);
+};
+
+export const submitUserXPAward = async (xpData) => {
+  return await api.post("/users/hooks/xp", xpData).then((res) => res.data);
+};
+
 // Dashboard Services
 export const getKnowledgeDashboardOverview = async () => {
   return await api.get("/admin/dashboard/overview").then((res) => res.data);
@@ -161,14 +194,19 @@ export const uploadKnowledgeContentAttachment = async (contentId, data) => {
     })
     .then((res) => res.data)
     .catch((error) => {
-      if (error.code === 'ECONNABORTED') {
-        throw new Error('Upload timeout - file terlalu besar atau koneksi lambat');
+      if (error.code === "ECONNABORTED") {
+        throw new Error(
+          "Upload timeout - file terlalu besar atau koneksi lambat"
+        );
       }
       throw error;
     });
 };
 
-export const uploadKnowledgeContentAttachmentAdmin = async (contentId, data) => {
+export const uploadKnowledgeContentAttachmentAdmin = async (
+  contentId,
+  data
+) => {
   return await api
     .post(`/admin/contents/${contentId}/upload`, data, {
       headers: {
@@ -197,8 +235,10 @@ export const uploadMultipleKnowledgeContentAttachments = async (
     })
     .then((res) => res.data)
     .catch((error) => {
-      if (error.code === 'ECONNABORTED') {
-        throw new Error('Upload timeout - file terlalu besar atau koneksi lambat');
+      if (error.code === "ECONNABORTED") {
+        throw new Error(
+          "Upload timeout - file terlalu besar atau koneksi lambat"
+        );
       }
       throw error;
     });
@@ -296,4 +336,35 @@ export const getDashboardOverview = async () => {
 
 export const getCategoryAnalytics = async () => {
   return await api.get("/admin/dashboard/categories").then((res) => res.data);
+};
+
+// gamification
+export const getUserGamificationSummary = async () => {
+  return await api.get("/users/me/summary").then((res) => res.data);
+};
+
+export const getUserGamificationBadges = async () => {
+  return await api.get("/users/me/badges").then((res) => res.data);
+};
+
+export const getUserGamificationMissions = async () => {
+  return await api.get("/users/missions").then((res) => res.data);
+};
+
+export const getUserGamificationCompletedMissions = async (missionId) => {
+  return await api
+    .get(`/users/missions/${missionId}/complete`)
+    .then((res) => res.data);
+};
+
+export const getUserGamificationPoints = async () => {
+  return await api.get("/users/me/points").then((res) => res.data);
+};
+
+export const awardUserXP = async (data) => {
+  return await api.post("/users/hooks/xp", data).then((res) => res.data);
+};
+
+export const getUserLeaderboard = async () => {
+  return await api.get("/users/leaderboard").then((res) => res.data);
 };
