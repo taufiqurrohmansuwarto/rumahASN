@@ -30,7 +30,7 @@ export const appLists = [
   },
   {
     rightIcon: <IconTransfer />,
-    title: "Pengetahuan",
+    title: "ASNPedia",
     desc: "Manajemen Pengetahuan",
     color: "#FBBC05",
     url: "/knowledge-managements/dashboard",

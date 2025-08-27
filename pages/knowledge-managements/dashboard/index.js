@@ -1,6 +1,7 @@
 import KnowledgeDashboard from "@/components/KnowledgeManagements/admins/KnowledgeDashboard";
 import KnowledgeManagementLayout from "@/components/KnowledgeManagements/KnowledgeManagementsLayout";
 import PageContainer from "@/components/PageContainer";
+import ButtonFlush from "@/components/KnowledgeManagements/components/ButtonFlush";
 import { Breadcrumb, Grid } from "antd";
 import Head from "next/head";
 
@@ -25,6 +26,7 @@ function KnowledgeManagementDashboard() {
         title="Pengetahuan"
         content="Pengetahuan"
       >
+        <ButtonFlush />
         <KnowledgeDashboard />
       </PageContainer>
     </>

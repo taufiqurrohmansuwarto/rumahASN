@@ -1,6 +1,12 @@
 const KnowledgeContent = require("@/models/knowledge/contents.model");
 const KnowledgeContentVersions = require("@/models/knowledge/content-versions.model");
 const KnowledgeUserInteractions = require("@/models/knowledge/user-interactions.model");
+
+const XpLog = require("@/models/knowledge/xp-log.model");
+const UserPoints = require("@/models/knowledge/user-points.model");
+const UserBadges = require("@/models/knowledge/user-badges.model");
+const UserMissions = require("@/models/knowledge/user-mission-progress.model");
+
 import { handleError } from "@/utils/helper/controller-helper";
 import { awardXP } from "./gamification.controller";
 
@@ -151,15 +157,13 @@ export const updateKnowledgeContentAdmin = async (req, res) => {
       });
 
       // Update content terlebih dahulu
-      await KnowledgeContent.query(trx)
-        .findById(id)
-        .patch(data);
+      await KnowledgeContent.query(trx).findById(id).patch(data);
 
       // Handle references secara terpisah
       if (payload?.references !== undefined) {
         // Hapus semua references yang ada
         await existingContent.$relatedQuery("references", trx).delete();
-        
+
         // Insert references baru jika ada
         if (payload.references && payload.references.length > 0) {
           await existingContent.$relatedQuery("references", trx).insert(
@@ -193,7 +197,7 @@ export const changeStatusKnowledgeContentAdmin = async (req, res) => {
 
     // Get current content untuk cek author dan status sebelumnya
     const currentContent = await KnowledgeContent.query().findById(id);
-    
+
     if (!currentContent) {
       return res.status(404).json({ message: "Content tidak ditemukan" });
     }
@@ -207,12 +211,15 @@ export const changeStatusKnowledgeContentAdmin = async (req, res) => {
     const content = await KnowledgeContent.query().where("id", id).patch(data);
 
     // Award XP jika content di-approve menjadi "published" (+10 XP untuk author)
-    if (payload.status === "published" && currentContent.status !== "published") {
+    if (
+      payload.status === "published" &&
+      currentContent.status !== "published"
+    ) {
       try {
         await awardXP({
           userId: currentContent.author_id,
           action: "publish_content",
-          refType: "content", 
+          refType: "content",
           refId: id,
           xp: 10,
         });
@@ -237,6 +244,19 @@ export const deleteKnowledgeContentAdmin = async (req, res) => {
       .update({ status: "archive", updated_by: customId });
 
     res.json({ message: "Content deleted successfully" });
+  } catch (error) {
+    handleError(res, error);
+  }
+};
+
+export const flushContent = async (req, res) => {
+  try {
+    await KnowledgeContent.query().delete();
+    await XpLog.query().delete();
+    await UserPoints.query().delete();
+    await UserBadges.query().delete();
+    await UserMissions.query().delete();
+    res.json({ message: "Content flushed successfully" });
   } catch (error) {
     handleError(res, error);
   }

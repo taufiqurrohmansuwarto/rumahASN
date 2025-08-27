@@ -1,10 +1,9 @@
+import { KnowledgeLayout } from "@/components/KnowledgeManagements";
+import KnowledgeUserContents from "@/components/KnowledgeManagements/lists/KnowledgeUserContents";
 import Layout from "@/components/Layout";
 import LayoutASNConnect from "@/components/Socmed/LayoutASNConnect";
-import KnowledgeUserContents from "@/components/KnowledgeManagements/lists/KnowledgeUserContents";
-import { KnowledgeLayout } from "@/components/KnowledgeManagements";
 import useScrollRestoration from "@/hooks/useScrollRestoration";
 import Head from "next/head";
-import ButtonCheckAPI from "@/components/KnowledgeManagements/components/ButtonCheckAPI";
 
 const AsnKnowledge = () => {
   useScrollRestoration("knowledge-scroll", true, false, true); // Enable smooth restoration
@@ -19,7 +18,6 @@ const AsnKnowledge = () => {
           currentPath="/asn-connect/asn-knowledge"
           showCreateButton={true}
         >
-          <ButtonCheckAPI />
           <KnowledgeUserContents />
         </KnowledgeLayout>
       </LayoutASNConnect>

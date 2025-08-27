@@ -89,6 +89,10 @@ export const getKnowledgeCategoryAnalytics = async () => {
   return await api.get("/admin/dashboard/categories").then((res) => res.data);
 };
 
+export const flushContent = async () => {
+  return await api.get("/admin/flush").then((res) => res.data);
+};
+
 // user interactions
 export const likeKnowledgeContent = async (id) => {
   return await api.post(`/users/contents/${id}/likes`).then((res) => res.data);
