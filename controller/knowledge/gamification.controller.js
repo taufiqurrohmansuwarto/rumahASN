@@ -14,6 +14,71 @@ const calcLevel = (points) => {
   return Math.floor(Math.sqrt(points / 50)) + 1;
 };
 
+// Helper function to award eligible badges
+const awardEligibleBadges = async (trx, userId, totalXP, currentAction, refType, refId) => {
+  // Get all badges
+  const allBadges = await Badges.query(trx);
+  const ownedBadges = await UserBadges.query(trx).where("user_id", userId);
+  const ownedBadgeIds = new Set(ownedBadges.map((b) => b.badge_id));
+
+  console.log(`🎯 Checking badges for user ${userId} with ${totalXP} XP, action: ${currentAction}`);
+
+  // Check level badges (XP-based)
+  const levelBadges = allBadges.filter(b => 
+    b.badge_type === "level" && 
+    b.points_required <= totalXP && 
+    !ownedBadgeIds.has(b.id)
+  );
+
+  if (levelBadges.length > 0) {
+    console.log(`🏆 Level badges to award:`, levelBadges.map(b => b.name));
+    await UserBadges.query(trx).insert(
+      levelBadges.map((b) => ({
+        user_id: userId,
+        badge_id: b.id,
+        awarded_at: new Date(),
+      }))
+    );
+  }
+
+  // Check achievement badges (action-based)
+  const achievementBadges = allBadges.filter(b => 
+    b.badge_type === "achievement" && 
+    b.achievement_data && 
+    !ownedBadgeIds.has(b.id)
+  );
+
+  for (const badge of achievementBadges) {
+    try {
+      const achievementData = typeof badge.achievement_data === 'string' 
+        ? JSON.parse(badge.achievement_data) 
+        : badge.achievement_data;
+
+      if (achievementData.type === "action_count") {
+        // Count user's actions from xp_log
+        const actionCount = await XpLog.query(trx)
+          .where("user_id", userId)
+          .where("action", achievementData.action)
+          .count();
+
+        const totalCount = parseInt(actionCount[0].count);
+        
+        if (totalCount >= achievementData.count) {
+          console.log(`🎖️ Achievement badge "${badge.name}" earned: ${totalCount}/${achievementData.count} ${achievementData.action}`);
+          
+          await UserBadges.query(trx).insert({
+            user_id: userId,
+            badge_id: badge.id,
+            awarded_at: new Date(),
+          });
+        }
+      }
+    } catch (parseError) {
+      console.error(`❌ Error parsing achievement_data for badge ${badge.name}:`, parseError);
+    }
+  }
+};
+
 export const awardXP = async ({ userId, action, refType, refId, xp, isSelfAction = false }) => {
   return await transaction(UserPoints.knex(), async (trx) => {
     // Guard sederhana: kalau event unik, cek di XpLog
@@ -71,25 +136,12 @@ export const awardXP = async ({ userId, action, refType, refId, xp, isSelfAction
       });
     }
 
-    // Auto-award badges by points threshold
-    const eligible = await Badges.query(trx).where(
-      "points_required",
-      "<=",
-      newPoints
-    );
-    if (eligible.length) {
-      const owned = await UserBadges.query(trx).where("user_id", userId);
-      const ownedSet = new Set(owned.map((b) => b.badge_id));
-      const toGive = eligible.filter((b) => !ownedSet.has(b.id));
-      if (toGive.length) {
-        await UserBadges.query(trx).insert(
-          toGive.map((b) => ({
-            user_id: userId,
-            badge_id: b.id,
-            awarded_at: new Date(),
-          }))
-        );
-      }
+    // Auto-award badges (both level and achievement types)
+    try {
+      await awardEligibleBadges(trx, userId, newPoints, action, refType, refId);
+    } catch (badgeError) {
+      console.error("❌ Badge award error:", badgeError);
+      // Don't throw - let XP award continue even if badge fails
     }
 
     return { points: newPoints, levels: newLevel, skipped: false };

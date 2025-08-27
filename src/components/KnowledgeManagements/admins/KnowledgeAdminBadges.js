@@ -16,6 +16,9 @@ import {
   Grid,
   Affix,
   Avatar,
+  Alert,
+  Divider,
+  Switch,
 } from "antd";
 import {
   PlusOutlined,
@@ -46,6 +49,7 @@ const KnowledgeAdminBadges = () => {
   const [badgeDipilih, setBadgeDipilih] = useState(null);
   const [sedangEdit, setSedangEdit] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
+  const [badgeType, setBadgeType] = useState("level");
 
   // React Query hooks
   const { data: daftarBadges = [], isLoading: sedangMeload } = useFetchBadges();
@@ -64,6 +68,14 @@ const KnowledgeAdminBadges = () => {
   const badgeTypeOptions = [
     { label: "Level", value: "level" },
     { label: "Pencapaian", value: "achievement" },
+  ];
+
+  // Options untuk achievement actions
+  const achievementActionOptions = [
+    { label: "Like Konten", value: "like_content", description: "User menyukai konten" },
+    { label: "Comment Konten", value: "comment_content", description: "User berkomentar di konten" },
+    { label: "Publish Konten", value: "publish_content", description: "User mempublikasikan konten" },
+    { label: "Read Konten", value: "read_content", description: "User membaca konten" },
   ];
 
   // Konfigurasi kolom tabel
@@ -149,11 +161,41 @@ const KnowledgeAdminBadges = () => {
       dataIndex: "points_required",
       key: "points_required",
       width: 120,
-      render: (poin) => (
-        <Tag color="gold">
-          {poin ? `${poin} Poin` : "0 Poin"}
-        </Tag>
+      render: (poin, record) => (
+        record.badge_type === "level" ? (
+          <Tag color="gold">
+            {poin ? `${poin} Poin` : "0 Poin"}
+          </Tag>
+        ) : (
+          <Tag color="default">-</Tag>
+        )
       ),
+    },
+    {
+      title: "Condition",
+      dataIndex: "achievement_data",
+      key: "achievement_data", 
+      width: 150,
+      render: (data, record) => {
+        if (record.badge_type === "level") {
+          return <Tag color="blue">XP Based</Tag>;
+        }
+        if (data) {
+          try {
+            const parsed = typeof data === 'string' ? JSON.parse(data) : data;
+            return (
+              <div>
+                <Tag color="green">{parsed.action?.replace('_', ' ')}</Tag>
+                <br />
+                <Text style={{ fontSize: '11px' }}>Count: {parsed.count}</Text>
+              </div>
+            );
+          } catch (e) {
+            return <Tag color="red">Invalid JSON</Tag>;
+          }
+        }
+        return <Tag color="default">No Condition</Tag>;
+      },
     },
     {
       title: "Aksi",
@@ -202,14 +244,31 @@ const KnowledgeAdminBadges = () => {
   const bukaModalEdit = (badge) => {
     setSedangEdit(true);
     setBadgeDipilih(badge);
+    setBadgeType(badge.badge_type || "level");
     setModalTerbuka(true);
-    form.setFieldsValue({
+    
+    const formValues = {
       name: badge.name,
       description: badge.description,
       icon_url: badge.icon_url,
       badge_type: badge.badge_type,
       points_required: badge.points_required,
-    });
+    };
+
+    // Parse achievement_data if exists
+    if (badge.achievement_data) {
+      try {
+        const achievementData = typeof badge.achievement_data === 'string' 
+          ? JSON.parse(badge.achievement_data) 
+          : badge.achievement_data;
+        formValues.achievement_action = achievementData.action;
+        formValues.achievement_count = achievementData.count;
+      } catch (e) {
+        console.error("Error parsing achievement_data:", e);
+      }
+    }
+
+    form.setFieldsValue(formValues);
   };
 
   // Handler untuk menutup modal
@@ -224,16 +283,39 @@ const KnowledgeAdminBadges = () => {
   const submitForm = async () => {
     try {
       const nilaiForm = await form.validateFields();
+      
+      // Process form data based on badge type
+      const processedData = { ...nilaiForm };
+      
+      if (nilaiForm.badge_type === "achievement") {
+        // Build achievement_data JSON
+        processedData.achievement_data = {
+          type: "action_count",
+          action: nilaiForm.achievement_action,
+          count: nilaiForm.achievement_count,
+          description: `${nilaiForm.achievement_action?.replace('_', ' ')} ${nilaiForm.achievement_count} times`
+        };
+        
+        // Remove individual achievement fields
+        delete processedData.achievement_action;
+        delete processedData.achievement_count;
+        
+        // Clear points_required for achievement badges
+        processedData.points_required = null;
+      } else {
+        // For level badges, clear achievement_data
+        processedData.achievement_data = null;
+      }
 
       if (sedangEdit && badgeDipilih) {
         // Update badge yang sudah ada
         await mutasiUpdate.mutateAsync({
           id: badgeDipilih.id,
-          data: nilaiForm,
+          data: processedData,
         });
       } else {
         // Tambah badge baru
-        await mutasiTambah.mutateAsync(nilaiForm);
+        await mutasiTambah.mutateAsync(processedData);
       }
 
       tutupModal();
@@ -513,32 +595,133 @@ const KnowledgeAdminBadges = () => {
                 placeholder="Pilih jenis badge"
                 size={isMobile ? "middle" : "large"}
                 options={badgeTypeOptions}
+                onChange={(value) => setBadgeType(value)}
                 style={{
                   borderRadius: "6px",
                 }}
               />
             </Form.Item>
 
-            <Form.Item
-              label="Poin Required"
-              name="points_required"
-              style={{ flex: 1 }}
-              rules={[
-                {
-                  type: "number",
-                  min: 0,
-                  message: "Poin harus berupa angka positif!",
-                },
-              ]}
-            >
-              <InputNumber
-                placeholder="0"
-                min={0}
-                style={{ width: "100%" }}
-                size={isMobile ? "middle" : "large"}
-              />
-            </Form.Item>
+            {badgeType === "level" && (
+              <Form.Item
+                label="Poin Required"
+                name="points_required"
+                style={{ flex: 1 }}
+                rules={[
+                  {
+                    required: badgeType === "level",
+                    message: "Poin required wajib diisi untuk badge level!",
+                  },
+                  {
+                    type: "number",
+                    min: 0,
+                    message: "Poin harus berupa angka positif!",
+                  },
+                ]}
+              >
+                <InputNumber
+                  placeholder="0"
+                  min={0}
+                  style={{ width: "100%" }}
+                  size={isMobile ? "middle" : "large"}
+                />
+              </Form.Item>
+            )}
           </div>
+
+          {/* Badge Type Information */}
+          <Alert
+            type="info"
+            style={{ marginBottom: "16px" }}
+            message="Informasi Jenis Badge"
+            description={
+              <div>
+                {badgeType === "level" ? (
+                  <>
+                    <strong>Level Badge:</strong> Badge yang diberikan otomatis ketika user mencapai total XP tertentu.
+                    <br />
+                    <em>Contoh: "Pemula" (0 XP), "Expert" (500 XP), "Master" (1000 XP)</em>
+                  </>
+                ) : (
+                  <>
+                    <strong>Achievement Badge:</strong> Badge yang diberikan ketika user melakukan action tertentu sejumlah X kali.
+                    <br />
+                    <em>Contoh: "Social Butterfly" (like 50 konten), "Pembaca Setia" (baca 100 konten)</em>
+                  </>
+                )}
+              </div>
+            }
+          />
+
+          {/* Achievement Configuration */}
+          {badgeType === "achievement" && (
+            <>
+              <Divider orientation="left">Konfigurasi Achievement</Divider>
+              
+              <div style={{ display: "flex", gap: "16px" }}>
+                <Form.Item
+                  label="Action Type"
+                  name="achievement_action"
+                  style={{ flex: 1 }}
+                  rules={[
+                    {
+                      required: badgeType === "achievement",
+                      message: "Action type wajib dipilih untuk badge achievement!",
+                    },
+                  ]}
+                >
+                  <Select
+                    placeholder="Pilih jenis action"
+                    size={isMobile ? "middle" : "large"}
+                    options={achievementActionOptions.map(opt => ({
+                      ...opt,
+                      label: `${opt.label} - ${opt.description}`
+                    }))}
+                    style={{
+                      borderRadius: "6px",
+                    }}
+                  />
+                </Form.Item>
+
+                <Form.Item
+                  label="Target Count"
+                  name="achievement_count"
+                  style={{ flex: 1 }}
+                  rules={[
+                    {
+                      required: badgeType === "achievement",
+                      message: "Target count wajib diisi untuk badge achievement!",
+                    },
+                    {
+                      type: "number",
+                      min: 1,
+                      message: "Target count minimal 1!",
+                    },
+                  ]}
+                >
+                  <InputNumber
+                    placeholder="10"
+                    min={1}
+                    style={{ width: "100%" }}
+                    size={isMobile ? "middle" : "large"}
+                  />
+                </Form.Item>
+              </div>
+
+              <Alert
+                type="success"
+                showIcon
+                message="Contoh Achievement Badge"
+                description={
+                  <div>
+                    <strong>Scenario:</strong> User akan mendapat badge "Pembaca Setia" ketika sudah membaca 100 konten.
+                    <br />
+                    <strong>Setting:</strong> Action = "read_content", Count = 100
+                  </div>
+                }
+              />
+            </>
+          )}
         </Form>
       </Modal>
 
