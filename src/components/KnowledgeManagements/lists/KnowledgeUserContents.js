@@ -253,7 +253,7 @@ const KnowledgeUserContents = () => {
   if (isError) {
     return (
       <div style={{ padding: "40px", textAlign: "center" }}>
-        <Empty description="Gagal memuat konten knowledge" />
+        <Empty description="Gagal memuat konten ASNPedia" />
       </div>
     );
   }
@@ -290,7 +290,7 @@ const KnowledgeUserContents = () => {
               description={
                 searchQuery
                   ? `Tidak ada hasil untuk "${searchQuery}"`
-                  : "Belum ada konten knowledge"
+                  : "Belum ada konten ASNPedia"
               }
               style={{ padding: "40px" }}
             />

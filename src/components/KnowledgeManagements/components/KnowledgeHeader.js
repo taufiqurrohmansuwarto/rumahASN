@@ -38,7 +38,7 @@ const KnowledgeHeader = ({
               marginBottom: "4px",
             }}
           >
-            📚 Manajemen Pengetahuan
+            📚 ASNPedia
           </Title>
           <Text
             style={{

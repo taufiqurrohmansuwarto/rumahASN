@@ -20,8 +20,8 @@ const KnowledgeFormHeader = ({
       >
         📚{" "}
         {customTitle || (initialData
-          ? "Edit Manajemen Pengetahuan"
-          : "Buat Manajemen Pengetahuan Baru")}
+          ? "Edit ASNPedia"
+          : "Buat ASNPedia Baru")}
       </Title>
       <Text
         style={{
@@ -31,8 +31,8 @@ const KnowledgeFormHeader = ({
         }}
       >
         {customSubtitle || (initialData
-          ? "Perbarui konten manajemen pengetahuan yang sudah ada"
-          : "Kelola dan bagikan pengetahuan untuk pengembangan organisasi")}
+          ? "Perbarui konten ASNPedia yang sudah ada"
+          : "Kelola dan bagikan pengetahuan melalui ASNPedia untuk pengembangan organisasi")}
       </Text>
     </div>
   );

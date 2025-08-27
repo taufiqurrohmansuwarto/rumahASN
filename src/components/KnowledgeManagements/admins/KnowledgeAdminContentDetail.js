@@ -260,8 +260,8 @@ const KnowledgeAdminContentDetail = () => {
                           submit: "Perbarui Konten",
                           cancel: "Batal Edit",
                         }}
-                        customTitle="Edit Konten Knowledge"
-                        customSubtitle="Perbarui informasi konten knowledge"
+                        customTitle="Edit Konten ASNPedia"
+                        customSubtitle="Perbarui informasi konten ASNPedia"
                         useUpdateMutation={() => updateContentMutation}
                       />
                     </div>

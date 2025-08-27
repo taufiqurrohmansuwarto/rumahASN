@@ -416,7 +416,7 @@ const MyKnowledgeContents = () => {
                   lineHeight: "1.4",
                 }}
               >
-                Konten Knowledge Saya
+                Konten ASNPedia Saya
               </Text>
             </Flex>
             <Tag color={getCurrentStatusInfo().color}>
@@ -456,7 +456,7 @@ const MyKnowledgeContents = () => {
                   marginBottom: "4px",
                 }}
               >
-                📝 Konten Knowledge Saya
+                📝 Konten ASNPedia Saya
               </Title>
               <Text
                 style={{
@@ -464,7 +464,7 @@ const MyKnowledgeContents = () => {
                   fontSize: isMobile ? "13px" : "14px",
                 }}
               >
-                Kelola dan lihat semua konten knowledge yang Anda buat
+                Kelola dan lihat semua konten ASNPedia yang Anda buat
               </Text>
             </div>
 
@@ -515,7 +515,7 @@ const MyKnowledgeContents = () => {
                   searchQuery
                     ? `Tidak ada hasil untuk "${searchQuery}"`
                     : selectedStatus === "all"
-                    ? "Anda belum membuat konten knowledge"
+                    ? "Anda belum membuat konten ASNPedia"
                     : `Belum ada konten dengan status ${getCurrentStatusInfo().label.toLowerCase()}`
                 }
                 style={{ padding: "40px" }}

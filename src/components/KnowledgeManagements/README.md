@@ -1,6 +1,6 @@
-# Knowledge Management Components
+# ASNPedia Components
 
-Komponen-komponen untuk mengelola konten knowledge berdasarkan schema database `knowledge_content`.
+Komponen-komponen untuk mengelola konten ASNPedia berdasarkan schema database `knowledge_content`.
 
 ## Struktur Folder
 
@@ -33,7 +33,7 @@ KnowledgeManagements/
 
 #### KnowledgeFormUserContents
 
-Form untuk membuat dan mengedit konten knowledge dengan fitur lengkap.
+Form untuk membuat dan mengedit konten ASNPedia dengan fitur lengkap.
 
 **Props:**
 
@@ -57,7 +57,7 @@ Form untuk membuat dan mengedit konten knowledge dengan fitur lengkap.
 
 #### KnowledgeUserContents
 
-Komponen untuk menampilkan daftar konten knowledge dengan fitur CRUD.
+Komponen untuk menampilkan daftar konten ASNPedia dengan fitur CRUD.
 
 **Fitur:**
 
@@ -96,7 +96,7 @@ Komponen body untuk menampilkan isi konten.
 
 #### KnowledgeUserContentDetail
 
-Komponen utama untuk menampilkan detail konten knowledge lengkap dengan komentar.
+Komponen utama untuk menampilkan detail konten ASNPedia lengkap dengan komentar.
 
 ## Contoh Penggunaan
 

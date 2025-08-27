@@ -23,6 +23,10 @@ export const getUserOwnContents = async (query) => {
   return await api.get(`/users/me/contents?${qs}`).then((res) => res.data);
 };
 
+export const getUserOwnContent = async (id) => {
+  return await api.get(`/users/me/contents/${id}`).then((res) => res.data);
+};
+
 export const getUserOwnStats = async () => {
   return await api.get("/users/me/stats").then((res) => res.data);
 };

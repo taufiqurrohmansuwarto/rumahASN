@@ -16,7 +16,7 @@ const ContentHeader = ({ isMobile, onInfoClick }) => {
               lineHeight: isMobile ? "1.3" : "1.4",
             }}
           >
-            📋 Detail Konten Knowledge
+            📋 Detail Konten ASNPedia
           </Title>
           <Text
             style={{
@@ -25,7 +25,7 @@ const ContentHeader = ({ isMobile, onInfoClick }) => {
               lineHeight: isMobile ? "1.3" : "1.4",
             }}
           >
-            Kelola konten dan status publikasi knowledge
+            Kelola konten dan status publikasi ASNPedia
           </Text>
         </div>
         <Button

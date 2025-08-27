@@ -30,10 +30,10 @@ const KnowledgeDashboard = () => {
         }}>
           <div>
             <Title level={2} style={{ margin: 0, color: "#1A1A1B" }}>
-              📊 Knowledge Management Dashboard
+              📊 ASNPedia Dashboard
             </Title>
             <Typography.Text type="secondary" style={{ fontSize: "14px" }}>
-              Comprehensive analytics and insights for knowledge content performance
+              Analisis komprehensif dan wawasan untuk performa konten ASNPedia
             </Typography.Text>
           </div>
           <Button

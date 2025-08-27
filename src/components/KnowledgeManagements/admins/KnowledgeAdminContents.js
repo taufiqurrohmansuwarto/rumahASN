@@ -143,7 +143,7 @@ const KnowledgeAdminContents = () => {
                     marginBottom: "4px",
                   }}
                 >
-                  📋 Manajemen Konten Knowledge
+                  📋 Manajemen Konten ASNPedia
                 </Title>
                 <Text
                   style={{
@@ -151,7 +151,7 @@ const KnowledgeAdminContents = () => {
                     fontSize: isMobile ? "13px" : "14px",
                   }}
                 >
-                  Kelola dan moderasi konten knowledge dari pengguna
+                  Kelola dan moderasi konten ASNPedia dari pengguna
                 </Text>
               </div>
 
@@ -252,7 +252,7 @@ const KnowledgeAdminContents = () => {
                   <Empty
                     description={
                       isError
-                        ? "Gagal memuat konten knowledge"
+                        ? "Gagal memuat konten ASNPedia"
                         : searchQuery
                         ? `Tidak ada hasil untuk "${searchQuery}" dengan status ${getCurrentStatusInfo().label.toLowerCase()}`
                         : `Belum ada konten dengan status ${getCurrentStatusInfo().label.toLowerCase()}`

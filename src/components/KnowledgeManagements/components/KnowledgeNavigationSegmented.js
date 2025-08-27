@@ -13,7 +13,7 @@ const KnowledgeNavigationSegmented = ({
       value: "/asn-connect/asn-knowledge",
     },
     {
-      label: "Konten Saya",
+      label: "ASNPedia Saya",
       value: "/asn-connect/asn-knowledge/my-knowledge",
     },
     {

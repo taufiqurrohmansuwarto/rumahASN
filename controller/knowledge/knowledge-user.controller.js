@@ -2,6 +2,54 @@ import { handleError } from "@/utils/helper/controller-helper";
 
 const KnowledgeContent = require("@/models/knowledge/contents.model");
 
+// Get user knowledge content
+export const getUserKnowledgeContent = async (req, res) => {
+  try {
+    const { id } = req?.query;
+    const { customId } = req?.user;
+
+    const content = await KnowledgeContent.query()
+      .where("knowledge.contents.id", id)
+      .withGraphFetched(
+        "[author(simpleWithImage), category, user_verified(simpleWithImage), versions.[user_updated(simpleWithImage)], attachments, references]"
+      )
+      .select(
+        "knowledge.contents.*",
+        // Subquery untuk is_liked
+        KnowledgeContent.relatedQuery("user_interactions")
+          .where("user_id", customId)
+          .where("interaction_type", "like")
+          .select(
+            KnowledgeContent.raw(
+              "CASE WHEN COUNT(*) > 0 THEN true ELSE false END"
+            )
+          )
+          .as("is_liked"),
+        // Subquery untuk is_bookmarked
+        KnowledgeContent.relatedQuery("user_interactions")
+          .where("user_id", customId)
+          .where("interaction_type", "bookmark")
+          .select(
+            KnowledgeContent.raw(
+              "CASE WHEN COUNT(*) > 0 THEN true ELSE false END"
+            )
+          )
+          .as("is_bookmarked")
+      )
+      .first();
+
+    if (!content) {
+      return res.status(404).json({
+        message: "Konten tidak ditemukan",
+      });
+    }
+
+    res.json(content);
+  } catch (error) {
+    handleError(res, error);
+  }
+};
+
 export const getUserKnowledgeContents = async (req, res) => {
   try {
     const { customId } = req?.user;
@@ -150,14 +198,14 @@ export const getUserKnowledgeContents = async (req, res) => {
           rejected: 0,
           archived: 0,
         };
-        
+
         results.forEach((result) => {
           const status = result.status;
           const count = parseInt(result.count);
           counts[status] = count;
           counts.all += count;
         });
-        
+
         return counts;
       });
 
@@ -166,7 +214,9 @@ export const getUserKnowledgeContents = async (req, res) => {
       .where("knowledge.contents.author_id", customId)
       .select(
         KnowledgeContent.raw("COALESCE(SUM(likes_count), 0) as total_likes"),
-        KnowledgeContent.raw("COALESCE(SUM(comments_count), 0) as total_comments"),
+        KnowledgeContent.raw(
+          "COALESCE(SUM(comments_count), 0) as total_comments"
+        ),
         KnowledgeContent.raw("COALESCE(SUM(views_count), 0) as total_views")
       )
       .first();
@@ -212,14 +262,14 @@ export const getUserKnowledgeStats = async (req, res) => {
           rejected: 0,
           archived: 0,
         };
-        
+
         results.forEach((result) => {
           const status = result.status;
           const count = parseInt(result.count);
           counts[status] = count;
           counts.all += count;
         });
-        
+
         return counts;
       });
 
@@ -228,7 +278,9 @@ export const getUserKnowledgeStats = async (req, res) => {
       .where("knowledge.contents.author_id", customId)
       .select(
         KnowledgeContent.raw("COALESCE(SUM(likes_count), 0) as total_likes"),
-        KnowledgeContent.raw("COALESCE(SUM(comments_count), 0) as total_comments"),
+        KnowledgeContent.raw(
+          "COALESCE(SUM(comments_count), 0) as total_comments"
+        ),
         KnowledgeContent.raw("COALESCE(SUM(views_count), 0) as total_views")
       )
       .first();
