@@ -1,17 +1,16 @@
 import { KnowledgeUserContentDetail } from "@/components/KnowledgeManagements";
 import Layout from "@/components/Layout";
 import PageContainer from "@/components/PageContainer";
-import LayoutASNConnect from "@/components/Socmed/LayoutASNConnect";
-import useScrollRestoration from "@/hooks/useScrollRestoration";
 import { getKnowledgeContent } from "@/services/knowledge-management.services";
 import { useQuery } from "@tanstack/react-query";
-import { FloatButton } from "antd";
+import { Col, FloatButton, Row, Breadcrumb } from "antd";
+import Link from "next/link";
 import Head from "next/head";
 import { useRouter } from "next/router";
 
 const AsnKnowledgeDetail = () => {
   const router = useRouter();
-  
+
   const { data, isLoading } = useQuery(
     ["knowledge-content-detail", router.query.id],
     () => getKnowledgeContent(router.query.id),
@@ -22,8 +21,6 @@ const AsnKnowledgeDetail = () => {
     }
   );
 
-  useScrollRestoration("scrollPosition", true, isLoading);
-
   const gotoAsnKnowledge = () => {
     router.push("/asn-connect/asn-knowledge");
   };
@@ -33,16 +30,36 @@ const AsnKnowledgeDetail = () => {
       <Head>
         <title>Rumah ASN - Detail Pengetahuan</title>
       </Head>
-      <LayoutASNConnect active="asn-knowledge">
-        <PageContainer
-          loading={isLoading}
-          title={data?.title || "Detail Pengetahuan"}
-          onBack={gotoAsnKnowledge}
-        >
+      <Row>
+        <Col lg={18} xs={24}>
           <FloatButton.BackTop />
-          <KnowledgeUserContentDetail data={data} />
-        </PageContainer>
-      </LayoutASNConnect>
+          <PageContainer
+            loading={isLoading}
+            title={`${data?.title} - ASNPedia`}
+            header={{
+              breadcrumbRender: () => (
+                <Breadcrumb>
+                  <Breadcrumb.Item>
+                    <Link href="/asn-connect/asn-knowledge">ASNPedia</Link>
+                  </Breadcrumb.Item>
+                  <Breadcrumb.Item>
+                    <Link
+                      href={`/asn-connect/asn-knowledge?category=${data?.category?.id}`}
+                    >
+                      {data?.category?.name || "Kategori"}
+                    </Link>
+                  </Breadcrumb.Item>
+                  <Breadcrumb.Item>
+                    {data?.title || "Detail Pengetahuan"}
+                  </Breadcrumb.Item>
+                </Breadcrumb>
+              ),
+            }}
+          >
+            <KnowledgeUserContentDetail data={data} />
+          </PageContainer>
+        </Col>
+      </Row>
     </>
   );
 };

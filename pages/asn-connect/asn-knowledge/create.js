@@ -1,8 +1,9 @@
 import { KnowledgeFormUserContents } from "@/components/KnowledgeManagements";
 import Layout from "@/components/Layout";
 import PageContainer from "@/components/PageContainer";
-import LayoutASNConnect from "@/components/Socmed/LayoutASNConnect";
+import { Breadcrumb } from "antd";
 import Head from "next/head";
+import Link from "next/link";
 import { useRouter } from "next/router";
 
 const AsnKnowledgeCreate = () => {
@@ -17,11 +18,22 @@ const AsnKnowledgeCreate = () => {
       <Head>
         <title>Rumah ASN - Pojok Pengetahuan - Buat Pengetahuan</title>
       </Head>
-      <LayoutASNConnect active="asn-knowledge">
-        <PageContainer title="Buat Pengetahuan" onBack={() => router.back()}>
-          <KnowledgeFormUserContents onSuccess={handleSuccess} />
-        </PageContainer>
-      </LayoutASNConnect>
+      <PageContainer
+        title="Buat Pengetahuan"
+        onBack={() => router.back()}
+        header={{
+          breadcrumbRender: () => (
+            <Breadcrumb>
+              <Breadcrumb.Item>
+                <Link href="/asn-connect/asn-knowledge">ASNPedia</Link>
+              </Breadcrumb.Item>
+              <Breadcrumb.Item>Buat Pengetahuan</Breadcrumb.Item>
+            </Breadcrumb>
+          ),
+        }}
+      >
+        <KnowledgeFormUserContents onSuccess={handleSuccess} />
+      </PageContainer>
     </>
   );
 };
