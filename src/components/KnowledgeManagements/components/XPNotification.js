@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import { useEffect } from "react";
 import { notification } from "antd";
 import { TrophyOutlined, StarOutlined, CrownOutlined } from "@ant-design/icons";
 
@@ -8,31 +8,23 @@ const XPNotification = () => {
     const { levelUp = false, newLevel = 0, badgeEarned = null } = additionalInfo;
 
     // XP Notification
-    notification.open({
+    notification.success({
       message: `+${xpAmount} XP`,
       description: getActionDescription(action),
-      icon: <StarOutlined style={{ color: "#FFD700" }} />,
+      icon: <StarOutlined />,
       placement: "topRight",
       duration: 3,
-      style: {
-        backgroundColor: "#FFF7ED",
-        border: "1px solid #FED7AA",
-      },
     });
 
     // Level Up Notification (if applicable)
     if (levelUp) {
       setTimeout(() => {
-        notification.open({
+        notification.info({
           message: `🎉 Level Up!`,
           description: `Selamat! Anda naik ke Level ${newLevel}`,
-          icon: <CrownOutlined style={{ color: "#FF4500" }} />,
+          icon: <CrownOutlined />,
           placement: "topRight",
           duration: 5,
-          style: {
-            backgroundColor: "#FFF2E8",
-            border: "2px solid #FF4500",
-          },
         });
       }, 500);
     }
@@ -40,16 +32,12 @@ const XPNotification = () => {
     // Badge Earned Notification (if applicable)
     if (badgeEarned) {
       setTimeout(() => {
-        notification.open({
+        notification.success({
           message: `🏆 Badge Baru!`,
           description: `Anda mendapatkan badge "${badgeEarned.name}"`,
-          icon: <TrophyOutlined style={{ color: "#52C41A" }} />,
+          icon: <TrophyOutlined />,
           placement: "topRight",
           duration: 5,
-          style: {
-            backgroundColor: "#F6FFED",
-            border: "2px solid #52C41A",
-          },
         });
       }, 1000);
     }

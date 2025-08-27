@@ -1,5 +1,5 @@
 import React from "react";
-import { Card, Typography, List, Progress, Tag, Button, Flex, Grid, Empty } from "antd";
+import { Card, Typography, List, Progress, Tag, Button, Empty, Flex } from "antd";
 import { 
   CheckCircleOutlined, 
   ClockCircleOutlined, 
@@ -8,14 +8,11 @@ import {
   CalendarOutlined 
 } from "@ant-design/icons";
 
-const { Text, Title } = Typography;
-const { useBreakpoint } = Grid;
+const { Text } = Typography;
 
 const UserMissionList = ({ userMissions, loading = false, onCompleteMission }) => {
   // Extract missions from response data format
   const missionsData = userMissions?.data || [];
-  const screens = useBreakpoint();
-  const isMobile = !screens.md;
 
   const getMissionTypeColor = (frequency) => {
     switch (frequency) {
@@ -77,149 +74,157 @@ const UserMissionList = ({ userMissions, loading = false, onCompleteMission }) =
   return (
     <Card
       loading={loading}
-      title={
-        <Flex align="center" gap="small">
-          <TrophyOutlined style={{ color: "#FF4500", fontSize: "18px" }} />
-          <Title level={isMobile ? 5 : 4} style={{ margin: 0, color: "#1A1A1B" }}>
-            Mission Aktif ({activeMissions.length})
-          </Title>
-        </Flex>
-      }
       style={{
-        borderRadius: "12px",
-        border: "1px solid #EDEFF1",
-        boxShadow: "0 2px 8px rgba(0, 0, 0, 0.06)",
+        marginBottom: "16px",
+        padding: 0,
+        overflow: "hidden",
+        transition: "border-color 0.2s ease",
       }}
-      bodyStyle={{
-        padding: isMobile ? "16px" : "20px",
-        maxHeight: "400px",
-        overflowY: "auto",
+      styles={{ body: { padding: 0 } }}
+      hoverable
+      onMouseEnter={(e) => {
+        e.currentTarget.style.borderColor = "#898989";
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.borderColor = "#EDEFF1";
       }}
     >
-      {activeMissions.length === 0 ? (
-        <Empty
-          image={Empty.PRESENTED_IMAGE_SIMPLE}
-          description={
-            <Text style={{ color: "#666" }}>
-              Belum ada mission yang tersedia.
-              <br />
-              Mission baru akan segera hadir!
+      <Flex style={{ minHeight: "60px" }}>
+        {/* Icon Section */}
+        <div
+          style={{
+            width: "60px",
+            backgroundColor: "#F8F9FA",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            borderRight: "1px solid #EDEFF1",
+          }}
+        >
+          <TrophyOutlined
+            style={{
+              fontSize: 20,
+              color: "#FF4500",
+            }}
+          />
+        </div>
+
+        {/* Content Section */}
+        <div style={{ flex: 1, maxHeight: "400px", overflowY: "auto" }}>
+          <div style={{ padding: "16px 16px 8px 16px" }}>
+            <Text strong style={{ fontSize: "16px", color: "#1A1A1B" }}>
+              Mission Aktif ({activeMissions.length})
             </Text>
-          }
-          style={{ margin: "40px 0" }}
-        />
-      ) : (
-        <List
-          dataSource={[...inProgressMissions, ...completedMissions]}
-          renderItem={(mission) => (
-            <List.Item
-              style={{
-                padding: isMobile ? "12px 0" : "16px 0",
-                borderBottom: "1px solid #F0F0F0",
-              }}
-            >
-              <div style={{ width: "100%" }}>
-                <Flex justify="space-between" align="flex-start" gap="medium">
-                  {/* Mission Info */}
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <Flex align="center" gap="small" style={{ marginBottom: "6px" }}>
-                      {getStatusIcon(mission.status)}
-                      <Text
-                        strong
-                        style={{
-                          color: "#1A1A1B",
-                          fontSize: isMobile ? "14px" : "15px",
-                          textDecoration: mission.status === "completed" ? "line-through" : "none",
-                          opacity: mission.status === "completed" ? 0.7 : 1,
-                        }}
-                      >
-                        {mission.title}
-                      </Text>
-                    </Flex>
+          </div>
+          
+          {activeMissions.length === 0 ? (
+            <div style={{ padding: "16px" }}>
+              <Empty description="Belum ada mission yang tersedia" />
+            </div>
+          ) : (
+            <List
+              dataSource={[...inProgressMissions, ...completedMissions]}
+              renderItem={(mission) => (
+                <List.Item 
+                  style={{ 
+                    display: "block", 
+                    padding: "12px 16px",
+                    borderBottom: "1px solid #F0F0F0",
+                    transition: "background-color 0.2s ease"
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = "#FAFAFA";
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = "transparent";
+                  }}
+                >
+                  <Flex justify="space-between" align="flex-start" gap="12px">
+                    {/* Mission Info */}
+                    <div style={{ flex: 1 }}>
+                      <Flex align="center" gap="8px" style={{ marginBottom: "8px" }}>
+                        {getStatusIcon(mission.status)}
+                        <Text 
+                          strong 
+                          style={{ 
+                            textDecoration: mission.status === "completed" ? "line-through" : "none",
+                            opacity: mission.status === "completed" ? 0.7 : 1,
+                            color: "#1A1A1B"
+                          }}
+                        >
+                          {mission.title}
+                        </Text>
+                      </Flex>
 
-                    {mission.description && (
-                      <Text
-                        style={{
-                          color: "#666",
-                          fontSize: isMobile ? "12px" : "13px",
-                          display: "block",
-                          marginBottom: "8px",
-                          lineHeight: "1.4",
-                        }}
-                      >
-                        {mission.description}
-                      </Text>
-                    )}
-
-                    {/* Mission Details */}
-                    <Flex align="center" gap="small" wrap>
-                      <Tag 
-                        color={getMissionTypeColor(mission.frequency)} 
-                        style={{ fontSize: "11px" }}
-                      >
-                        {getMissionTypeLabel(mission.frequency)}
-                      </Tag>
-                      
-                      {mission.target_count && (
-                        <Tag color="blue" style={{ fontSize: "11px" }}>
-                          Target: {mission.target_count}x
-                        </Tag>
+                      {mission.description && (
+                        <Text type="secondary" style={{ display: "block", marginBottom: "8px" }}>
+                          {mission.description}
+                        </Text>
                       )}
-                      
-                      <Tag color="gold" style={{ fontSize: "11px" }}>
-                        <StarOutlined style={{ fontSize: "10px", marginRight: "2px" }} />
-                        {mission.points_reward} XP
-                      </Tag>
 
-                      <Text style={{ color: "#999", fontSize: "11px" }}>
-                        <CalendarOutlined style={{ fontSize: "10px", marginRight: "4px" }} />
-                        {getStatusText(mission.status)}
-                      </Text>
-                    </Flex>
+                      <Flex align="center" gap="8px" wrap style={{ marginBottom: "8px" }}>
+                        <Tag color={getMissionTypeColor(mission.frequency)} size="small">
+                          {getMissionTypeLabel(mission.frequency)}
+                        </Tag>
+                        
+                        {mission.target_count && (
+                          <Tag color="blue" size="small">Target: {mission.target_count}x</Tag>
+                        )}
+                        
+                        <Tag color="gold" size="small">
+                          <StarOutlined /> {mission.points_reward} XP
+                        </Tag>
 
-                    {/* Progress Bar (jika ada target_count dan current progress) */}
-                    {mission.target_count > 1 && mission.current_progress !== undefined && (
-                      <div style={{ marginTop: "8px" }}>
+                        <Text type="secondary" style={{ fontSize: "12px" }}>
+                          <CalendarOutlined /> {getStatusText(mission.status)}
+                        </Text>
+                      </Flex>
+
+                      {/* Progress Bar */}
+                      {mission.target_count > 1 && mission.current_progress !== undefined && (
                         <Progress
                           percent={(mission.current_progress / mission.target_count) * 100}
                           size="small"
-                          strokeColor="#FF4500"
                           format={() => `${mission.current_progress}/${mission.target_count}`}
+                          style={{ marginBottom: "8px" }}
+                          strokeColor="#FF4500"
                         />
-                      </div>
-                    )}
+                      )}
 
-                    {/* Completed Date */}
-                    {mission.status === "completed" && mission.completed_at && (
-                      <Text style={{ color: "#52C41A", fontSize: "11px", display: "block", marginTop: "4px" }}>
-                        ✅ Selesai pada {new Date(mission.completed_at).toLocaleDateString('id-ID')}
-                      </Text>
-                    )}
-                  </div>
+                      {/* Completed Date */}
+                      {mission.status === "completed" && mission.completed_at && (
+                        <Text type="success" style={{ fontSize: "12px", display: "block" }}>
+                          ✅ Selesai pada {new Date(mission.completed_at).toLocaleDateString('id-ID')}
+                        </Text>
+                      )}
+                    </div>
 
-                  {/* Action Button */}
-                  {mission.status === "in_progress" && onCompleteMission && (
-                    <Button
-                      type="primary"
-                      size="small"
-                      onClick={() => onCompleteMission(mission.id)}
-                      style={{
-                        backgroundColor: "#52C41A",
-                        borderColor: "#52C41A",
-                        fontSize: "11px",
-                        flexShrink: 0,
-                      }}
-                      disabled={mission.target_count && mission.current_progress < mission.target_count}
-                    >
-                      Selesai
-                    </Button>
-                  )}
-                </Flex>
-              </div>
-            </List.Item>
+                    {/* Action Button */}
+                    {mission.status === "in_progress" && onCompleteMission && (
+                      <Button
+                        type="primary"
+                        size="small"
+                        onClick={() => onCompleteMission(mission.id)}
+                        disabled={mission.target_count && mission.current_progress < mission.target_count}
+                        style={{
+                          backgroundColor: mission.target_count && mission.current_progress < mission.target_count 
+                            ? undefined 
+                            : "#FF4500",
+                          borderColor: mission.target_count && mission.current_progress < mission.target_count 
+                            ? undefined 
+                            : "#FF4500",
+                        }}
+                      >
+                        Selesai
+                      </Button>
+                    )}
+                  </Flex>
+                </List.Item>
+              )}
+            />
           )}
-        />
-      )}
+        </div>
+      </Flex>
     </Card>
   );
 };
