@@ -535,121 +535,6 @@ const ContentCard = ({
               </Text>
             </Tooltip>
 
-            {/* Status Badge */}
-            {(showStatus || isAdmin) && content.status && (
-              <>
-                <span
-                  style={{
-                    color: "#787C7E",
-                    fontSize: isMobile ? "11px" : "12px",
-                  }}
-                >
-                  •
-                </span>
-                <Tag
-                  color={getStatusColor(content.status)}
-                  style={{
-                    fontSize: isMobile ? "8px" : "10px",
-                    fontWeight: 500,
-                    border: "none",
-                    borderRadius: "4px",
-                    margin: 0,
-                    padding: isMobile ? "0 4px" : "0 6px",
-                    lineHeight: isMobile ? "14px" : "16px",
-                    display: "flex",
-                    alignItems: "center",
-                    gap: isMobile ? "2px" : "4px",
-                  }}
-                >
-                  <span style={{ fontSize: isMobile ? "6px" : "8px" }}>
-                    {getStatusIcon(content.status)}
-                  </span>
-                  {getStatusLabel(content.status)}
-                </Tag>
-              </>
-            )}
-
-            {/* Content Type */}
-            {content.type && content.type !== "teks" && (
-              <>
-                <span
-                  style={{
-                    color: "#787C7E",
-                    fontSize: isMobile ? "11px" : "12px",
-                  }}
-                >
-                  •
-                </span>
-                <Tag
-                  style={{
-                    fontSize: isMobile ? "8px" : "10px",
-                    fontWeight: 500,
-                    backgroundColor: "#722ed1",
-                    color: "white",
-                    border: "none",
-                    borderRadius: "4px",
-                    margin: 0,
-                    padding: isMobile ? "0 4px" : "0 6px",
-                    lineHeight: isMobile ? "14px" : "16px",
-                    display: "flex",
-                    alignItems: "center",
-                    gap: isMobile ? "2px" : "4px",
-                  }}
-                >
-                  {content.type === "gambar" && (
-                    <FileImageOutlined
-                      style={{ fontSize: isMobile ? "6px" : "8px" }}
-                    />
-                  )}
-                  {content.type === "video" && (
-                    <PlayCircleOutlined
-                      style={{ fontSize: isMobile ? "6px" : "8px" }}
-                    />
-                  )}
-                  {content.type === "audio" && (
-                    <SoundOutlined
-                      style={{ fontSize: isMobile ? "6px" : "8px" }}
-                    />
-                  )}
-                  {content.type.charAt(0).toUpperCase() + content.type.slice(1)}
-                </Tag>
-              </>
-            )}
-
-            {/* Category */}
-            {content.category && (
-              <>
-                <span
-                  style={{
-                    color: "#787C7E",
-                    fontSize: isMobile ? "11px" : "12px",
-                  }}
-                >
-                  •
-                </span>
-                <Tag
-                  style={{
-                    fontSize: isMobile ? "8px" : "10px",
-                    fontWeight: 500,
-                    backgroundColor: "#FF4500",
-                    color: "white",
-                    border: "none",
-                    borderRadius: "4px",
-                    margin: 0,
-                    padding: isMobile ? "0 4px" : "0 6px",
-                    lineHeight: isMobile ? "14px" : "16px",
-                    display: "flex",
-                    alignItems: "center",
-                    gap: isMobile ? "2px" : "4px",
-                  }}
-                >
-                  <FolderOutlined
-                    style={{ fontSize: isMobile ? "6px" : "8px" }}
-                  />
-                  {content.category.name}
-                </Tag>
-              </>
-            )}
           </Flex>
 
           {/* Title */}
@@ -690,7 +575,7 @@ const ContentCard = ({
                 color: "#666",
                 fontSize: isMobile ? "12px" : "13px",
                 lineHeight: "1.4",
-                marginBottom: "12px",
+                marginBottom: "16px",
                 display: "-webkit-box",
                 "-webkit-line-clamp": 2,
                 "-webkit-box-orient": "vertical",
@@ -707,7 +592,7 @@ const ContentCard = ({
           {content?.content && (
             <div
               style={{
-                marginBottom: isMobile ? "8px" : "12px",
+                marginBottom: isMobile ? "12px" : "16px",
                 padding: isMobile ? "8px" : "12px",
                 backgroundColor: "#f8f9fa",
                 borderRadius: "6px",
@@ -754,6 +639,103 @@ const ContentCard = ({
                 ))}
             </div>
           )}
+
+          {/* Metadata (Status, Type, Category) */}
+          <div style={{ marginTop: "8px", marginBottom: "12px" }}>
+            <Flex align="center" gap={isMobile ? "6px" : "8px"} wrap="wrap">
+              {/* Status Badge */}
+              {(showStatus || isAdmin) && content.status && (
+                <>
+                  <Tag
+                    color={getStatusColor(content.status)}
+                    style={{
+                      fontSize: isMobile ? "8px" : "10px",
+                      fontWeight: 500,
+                      border: "none",
+                      borderRadius: "4px",
+                      margin: 0,
+                      padding: isMobile ? "0 4px" : "0 6px",
+                      lineHeight: isMobile ? "14px" : "16px",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: isMobile ? "2px" : "4px",
+                    }}
+                  >
+                    <span style={{ fontSize: isMobile ? "6px" : "8px" }}>
+                      {getStatusIcon(content.status)}
+                    </span>
+                    {getStatusLabel(content.status)}
+                  </Tag>
+                </>
+              )}
+
+              {/* Content Type */}
+              {content.type && content.type !== "teks" && (
+                <>
+                  <Tag
+                    style={{
+                      fontSize: isMobile ? "8px" : "10px",
+                      fontWeight: 500,
+                      backgroundColor: "#722ed1",
+                      color: "white",
+                      border: "none",
+                      borderRadius: "4px",
+                      margin: 0,
+                      padding: isMobile ? "0 4px" : "0 6px",
+                      lineHeight: isMobile ? "14px" : "16px",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: isMobile ? "2px" : "4px",
+                    }}
+                  >
+                    {content.type === "gambar" && (
+                      <FileImageOutlined
+                        style={{ fontSize: isMobile ? "6px" : "8px" }}
+                      />
+                    )}
+                    {content.type === "video" && (
+                      <PlayCircleOutlined
+                        style={{ fontSize: isMobile ? "6px" : "8px" }}
+                      />
+                    )}
+                    {content.type === "audio" && (
+                      <SoundOutlined
+                        style={{ fontSize: isMobile ? "6px" : "8px" }}
+                      />
+                    )}
+                    {content.type.charAt(0).toUpperCase() + content.type.slice(1)}
+                  </Tag>
+                </>
+              )}
+
+              {/* Category */}
+              {content.category && (
+                <>
+                  <Tag
+                    style={{
+                      fontSize: isMobile ? "8px" : "10px",
+                      fontWeight: 500,
+                      backgroundColor: "#FF4500",
+                      color: "white",
+                      border: "none",
+                      borderRadius: "4px",
+                      margin: 0,
+                      padding: isMobile ? "0 4px" : "0 6px",
+                      lineHeight: isMobile ? "14px" : "16px",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: isMobile ? "2px" : "4px",
+                    }}
+                  >
+                    <FolderOutlined
+                      style={{ fontSize: isMobile ? "6px" : "8px" }}
+                    />
+                    {content.category.name}
+                  </Tag>
+                </>
+              )}
+            </Flex>
+          </div>
 
           {/* Tags */}
           {content.tags && content.tags.length > 0 && (
@@ -832,7 +814,9 @@ const ContentCard = ({
                     fontWeight: 700,
                   }}
                 >
-                  {content.views_count
+                  {isMobile
+                    ? (content.views_count || 0)
+                    : content.views_count
                     ? `${content.views_count}x dilihat`
                     : "0 dilihat"}
                 </span>
@@ -862,7 +846,11 @@ const ContentCard = ({
                 <MessageOutlined
                   style={{ fontSize: isMobile ? "10px" : "12px" }}
                 />
-                <span>{content.comments_count || 0} komentar</span>
+                <span>
+                  {isMobile 
+                    ? (content.comments_count || 0)
+                    : `${content.comments_count || 0} komentar`}
+                </span>
               </Flex>
 
               {/* Bookmarks Count */}
@@ -880,7 +868,9 @@ const ContentCard = ({
                     fontWeight: 700,
                   }}
                 >
-                  {content.bookmarks_count || 0} disimpan
+                  {isMobile 
+                    ? (content.bookmarks_count || 0)
+                    : `${content.bookmarks_count || 0} disimpan`}
                 </span>
               </Flex>
             </Flex>

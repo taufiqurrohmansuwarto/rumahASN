@@ -10,7 +10,6 @@ import {
   CommentOutlined,
   EditOutlined,
   EyeOutlined,
-  FolderOutlined,
   InboxOutlined,
   LikeFilled,
   LikeOutlined,
@@ -24,10 +23,11 @@ import {
   PlayCircleOutlined,
   SoundOutlined,
 } from "@ant-design/icons";
-import { Card, Flex, Tag, Tooltip, Typography, Divider } from "antd";
+import { Card, Flex, Tag, Tooltip, Typography, Divider, Grid } from "antd";
 import dayjs from "dayjs";
 
 const { Text } = Typography;
+const { useBreakpoint } = Grid;
 
 const KnowledgeContentHeader = ({
   content,
@@ -40,6 +40,9 @@ const KnowledgeContentHeader = ({
   disableInteractions = false,
   showOwnerActions = false,
 }) => {
+  // Responsive breakpoints
+  const screens = useBreakpoint();
+  const isMobile = !screens.md;
   const getStatusColor = (status) => {
     const statusColors = {
       draft: "#d9d9d9",
@@ -71,6 +74,105 @@ const KnowledgeContentHeader = ({
       pending: <ClockCircleOutlined />,
     };
     return statusIcons[status] || <EditOutlined />;
+  };
+
+  // Render metadata tags
+  const renderMetadata = () => {
+    const metadataItems = [];
+    
+    // Status
+    if (content?.status) {
+      metadataItems.push(
+        <Tag
+          key="status"
+          color={getStatusColor(content.status)}
+          style={{
+            fontSize: "10px",
+            fontWeight: 500,
+            border: "none",
+            borderRadius: "4px",
+            margin: 0,
+            padding: "0 6px",
+            lineHeight: "16px",
+            display: "flex",
+            alignItems: "center",
+            gap: "4px",
+          }}
+        >
+          <span style={{ fontSize: "8px" }}>
+            {getStatusIcon(content.status)}
+          </span>
+          {getStatusLabel(content.status)}
+        </Tag>
+      );
+    }
+
+    // Category
+    if (content?.category) {
+      metadataItems.push(
+        <Tag
+          key="category"
+          style={{
+            fontSize: "10px",
+            fontWeight: 500,
+            backgroundColor: "#FF4500",
+            color: "white",
+            border: "none",
+            borderRadius: "4px",
+            margin: 0,
+            padding: "0 6px",
+            lineHeight: "16px",
+            display: "flex",
+            alignItems: "center",
+            gap: "4px",
+          }}
+        >
+          <span style={{ fontSize: "8px" }}>
+            <FileTextOutlined />
+          </span>
+          {content?.category?.name}
+        </Tag>
+      );
+    }
+
+    // Content Type
+    metadataItems.push(
+      <Tag
+        key="type"
+        style={{
+          fontSize: "10px",
+          fontWeight: 500,
+          backgroundColor: getTypeInfo(content?.type).color,
+          color: "white",
+          border: "none",
+          borderRadius: "4px",
+          margin: 0,
+          padding: "0 6px",
+          lineHeight: "16px",
+          display: "flex",
+          alignItems: "center",
+          gap: "4px",
+        }}
+      >
+        <span style={{ fontSize: "8px" }}>
+          {getTypeInfo(content?.type).icon}
+        </span>
+        {getTypeInfo(content?.type).label}
+      </Tag>
+    );
+
+    return (
+      <Flex align="center" gap="4px" wrap="wrap">
+        {metadataItems.map((item, index) => (
+          <div key={item.key} style={{ display: "flex", alignItems: "center", gap: "4px" }}>
+            {item}
+            {index < metadataItems.length - 1 && (
+              <span style={{ color: "#787C7E", fontSize: "12px" }}>•</span>
+            )}
+          </div>
+        ))}
+      </Flex>
+    );
   };
 
   // Get type icon and label
@@ -510,86 +612,16 @@ const KnowledgeContentHeader = ({
                     </Text>
                   </Tooltip>
 
-                  {/* Status */}
-                  {content?.status && (
+                  {/* Metadata for desktop/tablet screens */}
+                  {!isMobile && (
                     <>
                       <span style={{ color: "#787C7E", fontSize: "12px" }}>
                         •
                       </span>
-                      <Tag
-                        color={getStatusColor(content.status)}
-                        style={{
-                          fontSize: "10px",
-                          fontWeight: 500,
-                          border: "none",
-                          borderRadius: "4px",
-                          margin: 0,
-                          padding: "0 6px",
-                          lineHeight: "16px",
-                          display: "flex",
-                          alignItems: "center",
-                          gap: "4px",
-                        }}
-                      >
-                        <span style={{ fontSize: "8px" }}>
-                          {getStatusIcon(content.status)}
-                        </span>
-                        {getStatusLabel(content.status)}
-                      </Tag>
+                      {renderMetadata()}
                     </>
                   )}
 
-                  {/* Category */}
-                  {content?.category && (
-                    <>
-                      <span style={{ color: "#787C7E", fontSize: "12px" }}>
-                        •
-                      </span>
-                      <Tag
-                        style={{
-                          fontSize: "10px",
-                          fontWeight: 500,
-                          backgroundColor: "#FF4500",
-                          color: "white",
-                          border: "none",
-                          borderRadius: "4px",
-                          margin: 0,
-                          padding: "0 6px",
-                          lineHeight: "16px",
-                          display: "flex",
-                          alignItems: "center",
-                          gap: "4px",
-                        }}
-                      >
-                        <FolderOutlined style={{ fontSize: "8px" }} />
-                        {content?.category?.name}
-                      </Tag>
-                    </>
-                  )}
-
-                  {/* Content Type */}
-                  <span style={{ color: "#787C7E", fontSize: "12px" }}>•</span>
-                  <Tag
-                    style={{
-                      fontSize: "10px",
-                      fontWeight: 500,
-                      backgroundColor: getTypeInfo(content?.type).color,
-                      color: "white",
-                      border: "none",
-                      borderRadius: "4px",
-                      margin: 0,
-                      padding: "0 6px",
-                      lineHeight: "16px",
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "4px",
-                    }}
-                  >
-                    <span style={{ fontSize: "8px" }}>
-                      {getTypeInfo(content?.type).icon}
-                    </span>
-                    {getTypeInfo(content?.type).label}
-                  </Tag>
                 </Flex>
 
                 {/* Spacer untuk alignment dengan tombol simpan */}
@@ -729,8 +761,6 @@ const KnowledgeContentHeader = ({
                   fontSize: "13px",
                   lineHeight: "1.6",
                   color: "#374151",
-                  maxHeight: "200px",
-                  overflowY: "auto",
                 }}
               >
                 <ReactMarkdownCustom withCustom={false}>
@@ -778,6 +808,13 @@ const KnowledgeContentHeader = ({
                   </Tag>
                 ))}
               </Flex>
+            </div>
+          )}
+
+          {/* Metadata for mobile screens only */}
+          {isMobile && (
+            <div style={{ marginBottom: "16px" }}>
+              {renderMetadata()}
             </div>
           )}
 
