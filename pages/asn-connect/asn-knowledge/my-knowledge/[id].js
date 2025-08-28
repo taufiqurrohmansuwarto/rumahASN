@@ -3,7 +3,7 @@ import Layout from "@/components/Layout";
 import PageContainer from "@/components/PageContainer";
 import { getUserOwnContent } from "@/services/knowledge-management.services";
 import { useQuery } from "@tanstack/react-query";
-import { Breadcrumb, FloatButton } from "antd";
+import { Breadcrumb, Col, FloatButton, Row } from "antd";
 import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
@@ -29,6 +29,7 @@ const AsnKnowledgeMyKnowledgeDetail = () => {
       <PageContainer
         loading={isLoading}
         title={`${data?.title} - ASNPedia`}
+        onBack={() => router.back()}
         header={{
           breadcrumbRender: () => (
             <Breadcrumb>
@@ -52,11 +53,15 @@ const AsnKnowledgeMyKnowledgeDetail = () => {
         }}
       >
         <FloatButton.BackTop />
-        <KnowledgeUserContentDetail
-          data={data}
-          disableInteractions={data?.status !== "published"}
-          showOwnerActions={true}
-        />
+        <Row>
+          <Col lg={18} xs={24}>
+            <KnowledgeUserContentDetail
+              data={data}
+              disableInteractions={data?.status !== "published"}
+              showOwnerActions={true}
+            />
+          </Col>
+        </Row>
       </PageContainer>
     </>
   );

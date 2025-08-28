@@ -35,6 +35,7 @@ const KnowledgeUserContents = () => {
   );
   const [selectedTag, setSelectedTag] = useState(query.tag || null);
   const [selectedSort, setSelectedSort] = useState(query.sort || "created_at");
+  const [selectedType, setSelectedType] = useState(query.type || "all");
   const [debouncedSearch] = useDebouncedValue(searchQuery, 500);
   const [likingItems, setLikingItems] = useState(new Set());
   const [bookmarkingItems, setBookmarkingItems] = useState(new Set());
@@ -51,6 +52,8 @@ const KnowledgeUserContents = () => {
     if (newFilters.tag) params.set("tag", newFilters.tag);
     if (newFilters.sort && newFilters.sort !== "created_at")
       params.set("sort", newFilters.sort);
+    if (newFilters.type && newFilters.type !== "all")
+      params.set("type", newFilters.type);
 
     const queryString = params.toString();
     const newUrl = queryString ? `?${queryString}` : router.pathname;
@@ -72,6 +75,7 @@ const KnowledgeUserContents = () => {
       selectedCategory,
       selectedTag,
       selectedSort,
+      selectedType,
     ],
     ({ pageParam = 1 }) =>
       getKnowledgeContents({
@@ -81,6 +85,7 @@ const KnowledgeUserContents = () => {
         category_id: selectedCategory,
         tags: selectedTag,
         sort: selectedSort,
+        type: selectedType === "all" ? undefined : selectedType,
       }),
     {
       getNextPageParam: (lastPage, allPages) => {
@@ -187,6 +192,7 @@ const KnowledgeUserContents = () => {
       category: categoryId,
       tag: selectedTag,
       sort: selectedSort,
+      type: selectedType,
     });
   };
 
@@ -197,6 +203,7 @@ const KnowledgeUserContents = () => {
       category: selectedCategory,
       tag: tag,
       sort: selectedSort,
+      type: selectedType,
     });
   };
 
@@ -207,6 +214,7 @@ const KnowledgeUserContents = () => {
       category: selectedCategory,
       tag: selectedTag,
       sort: sort,
+      type: selectedType,
     });
   };
 
@@ -222,6 +230,18 @@ const KnowledgeUserContents = () => {
       category: selectedCategory,
       tag: selectedTag,
       sort: selectedSort,
+      type: selectedType,
+    });
+  };
+
+  const handleTypeChange = (type) => {
+    setSelectedType(type);
+    updateURL({
+      search: searchQuery,
+      category: selectedCategory,
+      tag: selectedTag,
+      sort: selectedSort,
+      type: type,
     });
   };
 
@@ -229,6 +249,7 @@ const KnowledgeUserContents = () => {
     setSelectedCategory(null);
     setSelectedTag(null);
     setSelectedSort("created_at");
+    setSelectedType("all");
     setSearchQuery("");
     router.push(router.pathname, undefined, { shallow: true });
   };
@@ -276,6 +297,10 @@ const KnowledgeUserContents = () => {
         onTagChange={handleTagChange}
         onSortChange={handleSortChange}
         onClearFilters={handleClearFilters}
+        showTypeFilter={true}
+        selectedType={selectedType}
+        onTypeChange={handleTypeChange}
+        typeCounts={{}} // Empty object for public content
       />
 
       {/* Content List */}

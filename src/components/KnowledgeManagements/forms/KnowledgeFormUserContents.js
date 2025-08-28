@@ -25,6 +25,8 @@ import KnowledgeFormCategory from "./KnowledgeFormCategory";
 import KnowledgeFormTags from "./KnowledgeFormTags";
 import KnowledgeFormReferences from "./KnowledgeFormReferences";
 import KnowledgeFormAttachments from "./KnowledgeFormAttachments";
+import KnowledgeFormType from "./KnowledgeFormType";
+import KnowledgeFormSourceUrl from "./KnowledgeFormSourceUrl";
 import KnowledgeFormActions from "./KnowledgeFormActions";
 
 const { useBreakpoint } = Grid;
@@ -50,6 +52,7 @@ function KnowledgeFormUserContents({
   const [fileList, setFileList] = useState([]);
   const [currentContentId, setCurrentContentId] = useState(initialData?.id || null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [contentType, setContentType] = useState("teks");
   const queryClient = useQueryClient();
 
   // Check if there are files still uploading or pending
@@ -131,6 +134,15 @@ function KnowledgeFormUserContents({
   const { mutate: createMutation, isLoading: createLoading } = createMutationHook();
   const { mutate: updateMutation, isLoading: updateLoading } = updateMutationHook();
 
+  // Watch for type changes
+  const watchedType = Form.useWatch("type", form);
+  
+  useEffect(() => {
+    if (watchedType && watchedType !== contentType) {
+      setContentType(watchedType);
+    }
+  }, [watchedType, contentType]);
+
   // Set initial data jika dalam mode edit
   useEffect(() => {
     if (initialData) {
@@ -138,12 +150,17 @@ function KnowledgeFormUserContents({
         title: initialData.title,
         summary: initialData.summary,
         category_id: initialData.category_id,
+        type: initialData.type || "teks",
+        source_url: initialData.source_url || "",
       });
 
       if (initialData.content) {
         setContent(initialData.content);
       }
 
+      if (initialData.type) {
+        setContentType(initialData.type);
+      }
 
       if (initialData.tags) {
         setTags(initialData.tags);
@@ -196,6 +213,7 @@ function KnowledgeFormUserContents({
     setFileList([]);
     setCurrentContentId(null);
     setIsSubmitting(false);
+    setContentType("teks");
   };
 
   const handleFinish = async (values) => {
@@ -470,6 +488,11 @@ function KnowledgeFormUserContents({
                   <Row gutter={[isMobile ? 12 : 24, isMobile ? 12 : 16]}>
                     <Col xs={24} lg={16}>
                       <KnowledgeFormTitle isMobile={isMobile} />
+                      <KnowledgeFormType isMobile={isMobile} />
+                      <KnowledgeFormSourceUrl 
+                        isMobile={isMobile} 
+                        contentType={contentType} 
+                      />
                       <KnowledgeFormSummary isMobile={isMobile} />
                       <KnowledgeFormContent 
                         isMobile={isMobile} 

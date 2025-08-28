@@ -36,6 +36,7 @@ const AsnKnowledgeDetail = () => {
           <PageContainer
             loading={isLoading}
             title={`${data?.title} - ASNPedia`}
+            onBack={() => router.back()}
             header={{
               breadcrumbRender: () => (
                 <Breadcrumb>

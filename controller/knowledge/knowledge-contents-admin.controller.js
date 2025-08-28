@@ -33,6 +33,8 @@ export const getKnowledgeContentsAdmin = async (req, res) => {
       })
       .select(
         "knowledge.contents.id",
+        "knowledge.contents.type",
+        "knowledge.contents.source_url",
         "knowledge.contents.title",
         "knowledge.contents.summary",
         "knowledge.contents.author_id",

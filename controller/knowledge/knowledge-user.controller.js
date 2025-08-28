@@ -61,6 +61,7 @@ export const getUserKnowledgeContents = async (req, res) => {
       category_id = "",
       tags = "",
       status = "",
+      type = "", // Add type filter
       is_bookmarked = "",
       is_liked = "",
     } = req?.query;
@@ -104,12 +105,19 @@ export const getUserKnowledgeContents = async (req, res) => {
           builder.where("status", status);
         }
       })
+      .andWhere((builder) => {
+        if (type && type !== "all") {
+          builder.where("type", type);
+        }
+      })
       .select(
         "knowledge.contents.id",
         "knowledge.contents.title",
         "knowledge.contents.summary",
         "knowledge.contents.author_id",
         "knowledge.contents.category_id",
+        "knowledge.contents.type",
+        "knowledge.contents.source_url",
         "knowledge.contents.status",
         "knowledge.contents.tags",
         "knowledge.contents.likes_count",
@@ -209,6 +217,31 @@ export const getUserKnowledgeContents = async (req, res) => {
         return counts;
       });
 
+    // Get type counts for all user content (for filter UI)
+    const typeCounts = await KnowledgeContent.query()
+      .where("knowledge.contents.author_id", customId)
+      .groupBy("type")
+      .select("type")
+      .count("* as count")
+      .then((results) => {
+        const counts = {
+          all: 0,
+          teks: 0,
+          gambar: 0,
+          video: 0,
+          audio: 0,
+        };
+
+        results.forEach((result) => {
+          const type = result.type || "teks"; // Default to teks if null
+          const count = parseInt(result.count);
+          counts[type] = count;
+          counts.all += count;
+        });
+
+        return counts;
+      });
+
     // Get engagement statistics for user content
     const engagementStats = await KnowledgeContent.query()
       .where("knowledge.contents.author_id", customId)
@@ -228,6 +261,7 @@ export const getUserKnowledgeContents = async (req, res) => {
       limit: contents?.limit || 10,
       // Additional stats for dashboard/filtering
       statusCounts,
+      typeCounts,
       stats: {
         total_likes: parseInt(engagementStats?.total_likes || 0),
         total_comments: parseInt(engagementStats?.total_comments || 0),

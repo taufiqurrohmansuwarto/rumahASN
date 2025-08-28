@@ -6,4 +6,6 @@ export { default as KnowledgeFormCategory } from "./KnowledgeFormCategory";
 export { default as KnowledgeFormTags } from "./KnowledgeFormTags";
 export { default as KnowledgeFormReferences } from "./KnowledgeFormReferences";
 export { default as KnowledgeFormAttachments } from "./KnowledgeFormAttachments";
+export { default as KnowledgeFormType } from "./KnowledgeFormType";
+export { default as KnowledgeFormSourceUrl } from "./KnowledgeFormSourceUrl";
 export { default as KnowledgeFormActions } from "./KnowledgeFormActions";

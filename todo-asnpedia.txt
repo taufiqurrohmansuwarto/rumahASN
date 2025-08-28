@@ -1,0 +1,4 @@
+1. tambahkan tipe : gambar, video, audio, dokumen, link
+2. tambahkan url untuk tipe itu sendiri
+3. edit list jika tipe gambar, video, audio, dokumen, link
+4. cek mission karena tidak bisa

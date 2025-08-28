@@ -16,6 +16,9 @@ import {
   CloseCircleOutlined,
   InboxOutlined,
   FolderOutlined,
+  SoundOutlined,
+  PlayCircleOutlined,
+  FileImageOutlined,
 } from "@ant-design/icons";
 import { Card, Flex, Tag, Typography, Tooltip } from "antd";
 import dayjs from "dayjs";
@@ -96,6 +99,285 @@ const ContentCard = ({
   const handleContentClick = () => {
     // Allow content click for all content (for viewing details)
     onClick && onClick();
+  };
+
+  // Render media based on content type
+  const renderMediaPreview = () => {
+    const contentType = content.type || "teks";
+    const sourceUrl = content.source_url;
+
+    if (!sourceUrl || contentType === "teks") {
+      return null;
+    }
+
+    const mediaStyle = {
+      width: "100%",
+      marginBottom: "12px",
+      borderRadius: "8px",
+      overflow: "hidden",
+      border: "1px solid #e9ecef",
+    };
+
+    switch (contentType) {
+      case "gambar":
+        return (
+          <div style={mediaStyle}>
+            <img
+              src={sourceUrl}
+              alt={content.title}
+              style={{
+                width: "100%",
+                height: isMobile ? "120px" : "160px",
+                objectFit: "cover",
+                display: "block",
+              }}
+              onError={(e) => {
+                // Fallback to icon if image fails to load
+                e.target.style.display = "none";
+                e.target.nextSibling.style.display = "flex";
+              }}
+            />
+            <div
+              style={{
+                display: "none",
+                height: isMobile ? "120px" : "160px",
+                backgroundColor: "#f8f9fa",
+                alignItems: "center",
+                justifyContent: "center",
+                flexDirection: "column",
+                color: "#8c8c8c",
+              }}
+            >
+              <FileImageOutlined
+                style={{ fontSize: "24px", marginBottom: "8px" }}
+              />
+              <Text type="secondary" style={{ fontSize: "12px" }}>
+                Gambar tidak dapat dimuat
+              </Text>
+            </div>
+          </div>
+        );
+
+      case "video":
+        // Check if it's a YouTube or Vimeo URL and create embed
+        const isYouTube = /(?:youtube\.com|youtu\.be)/i.test(sourceUrl);
+        const isVimeo = /vimeo\.com/i.test(sourceUrl);
+
+        if (isYouTube) {
+          const videoId = sourceUrl.match(
+            /(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&\n?#]+)/
+          )?.[1];
+          if (videoId) {
+            // YouTube thumbnail URLs (ordered by quality preference)
+            const thumbnailUrls = [
+              `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`, // 1280x720
+              `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`,     // 480x360
+              `https://img.youtube.com/vi/${videoId}/mqdefault.jpg`,     // 320x180
+              `https://img.youtube.com/vi/${videoId}/0.jpg`              // fallback
+            ];
+            
+            return (
+              <div style={mediaStyle}>
+                <div style={{ position: "relative", cursor: "pointer" }}>
+                  <img
+                    src={thumbnailUrls[1]} // Use HQ default for better reliability
+                    alt={content.title}
+                    style={{
+                      width: "100%",
+                      height: isMobile ? "120px" : "160px",
+                      objectFit: "cover",
+                      display: "block",
+                    }}
+                    onError={(e) => {
+                      // Try next quality if current fails
+                      const currentSrc = e.target.src;
+                      const currentIndex = thumbnailUrls.findIndex(url => url === currentSrc);
+                      if (currentIndex < thumbnailUrls.length - 1) {
+                        e.target.src = thumbnailUrls[currentIndex + 1];
+                      } else {
+                        // All thumbnails failed, show fallback
+                        e.target.style.display = "none";
+                        e.target.nextSibling.style.display = "flex";
+                      }
+                    }}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      // Open YouTube video in new tab
+                      window.open(sourceUrl, '_blank');
+                    }}
+                  />
+                  {/* Play button overlay */}
+                  <div
+                    style={{
+                      position: "absolute",
+                      top: "50%",
+                      left: "50%",
+                      transform: "translate(-50%, -50%)",
+                      backgroundColor: "rgba(0, 0, 0, 0.8)",
+                      borderRadius: "50%",
+                      width: "48px",
+                      height: "48px",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      transition: "all 0.2s ease",
+                      cursor: "pointer",
+                    }}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      window.open(sourceUrl, '_blank');
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.backgroundColor = "rgba(255, 69, 0, 0.9)";
+                      e.currentTarget.style.transform = "translate(-50%, -50%) scale(1.1)";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.backgroundColor = "rgba(0, 0, 0, 0.8)";
+                      e.currentTarget.style.transform = "translate(-50%, -50%) scale(1)";
+                    }}
+                  >
+                    <PlayCircleOutlined
+                      style={{
+                        color: "white",
+                        fontSize: "24px",
+                      }}
+                    />
+                  </div>
+                  
+                  {/* YouTube badge */}
+                  <div
+                    style={{
+                      position: "absolute",
+                      top: "8px",
+                      right: "8px",
+                      backgroundColor: "#FF0000",
+                      color: "white",
+                      padding: "2px 6px",
+                      borderRadius: "3px",
+                      fontSize: "10px",
+                      fontWeight: "bold",
+                      fontFamily: "Arial, sans-serif",
+                    }}
+                  >
+                    YouTube
+                  </div>
+                  
+                  {/* Fallback for thumbnail load error */}
+                  <div
+                    style={{
+                      display: "none",
+                      height: isMobile ? "120px" : "160px",
+                      backgroundColor: "#f8f9fa",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      flexDirection: "column",
+                      color: "#8c8c8c",
+                    }}
+                  >
+                    <PlayCircleOutlined style={{ fontSize: "24px", marginBottom: "8px" }} />
+                    <Text type="secondary" style={{ fontSize: "12px" }}>
+                      Video YouTube
+                    </Text>
+                  </div>
+                </div>
+              </div>
+            );
+          }
+        }
+
+        if (isVimeo) {
+          const videoId = sourceUrl.match(/vimeo\.com\/(\d+)/)?.[1];
+          if (videoId) {
+            return (
+              <div style={mediaStyle}>
+                <iframe
+                  width="100%"
+                  height={isMobile ? "120px" : "160px"}
+                  src={`https://player.vimeo.com/video/${videoId}`}
+                  title={content.title}
+                  frameBorder="0"
+                  allowFullScreen
+                  style={{ display: "block" }}
+                />
+              </div>
+            );
+          }
+        }
+
+        // For other video URLs or direct video files
+        return (
+          <div style={mediaStyle}>
+            <video
+              width="100%"
+              height={isMobile ? "120px" : "160px"}
+              controls
+              style={{ display: "block" }}
+              onError={(e) => {
+                // Fallback to icon if video fails to load
+                e.target.style.display = "none";
+                e.target.nextSibling.style.display = "flex";
+              }}
+            >
+              <source src={sourceUrl} />
+              Your browser does not support the video tag.
+            </video>
+            <div
+              style={{
+                display: "none",
+                height: isMobile ? "120px" : "160px",
+                backgroundColor: "#f8f9fa",
+                alignItems: "center",
+                justifyContent: "center",
+                flexDirection: "column",
+                color: "#8c8c8c",
+              }}
+            >
+              <PlayCircleOutlined
+                style={{ fontSize: "24px", marginBottom: "8px" }}
+              />
+              <Text type="secondary" style={{ fontSize: "12px" }}>
+                Video tidak dapat dimuat
+              </Text>
+            </div>
+          </div>
+        );
+
+      case "audio":
+        return (
+          <div style={mediaStyle}>
+            <div
+              style={{
+                padding: "16px",
+                backgroundColor: "#f8f9fa",
+                display: "flex",
+                alignItems: "center",
+                gap: "12px",
+              }}
+            >
+              <SoundOutlined
+                style={{
+                  fontSize: "24px",
+                  color: "#FF4500",
+                  flexShrink: 0,
+                }}
+              />
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <audio
+                  controls
+                  style={{ width: "100%", height: "32px" }}
+                  preload="metadata"
+                >
+                  <source src={sourceUrl} />
+                  Your browser does not support the audio element.
+                </audio>
+              </div>
+            </div>
+          </div>
+        );
+
+      default:
+        return null;
+    }
   };
 
   return (
@@ -287,6 +569,53 @@ const ContentCard = ({
               </>
             )}
 
+            {/* Content Type */}
+            {content.type && content.type !== "teks" && (
+              <>
+                <span
+                  style={{
+                    color: "#787C7E",
+                    fontSize: isMobile ? "11px" : "12px",
+                  }}
+                >
+                  •
+                </span>
+                <Tag
+                  style={{
+                    fontSize: isMobile ? "8px" : "10px",
+                    fontWeight: 500,
+                    backgroundColor: "#722ed1",
+                    color: "white",
+                    border: "none",
+                    borderRadius: "4px",
+                    margin: 0,
+                    padding: isMobile ? "0 4px" : "0 6px",
+                    lineHeight: isMobile ? "14px" : "16px",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: isMobile ? "2px" : "4px",
+                  }}
+                >
+                  {content.type === "gambar" && (
+                    <FileImageOutlined
+                      style={{ fontSize: isMobile ? "6px" : "8px" }}
+                    />
+                  )}
+                  {content.type === "video" && (
+                    <PlayCircleOutlined
+                      style={{ fontSize: isMobile ? "6px" : "8px" }}
+                    />
+                  )}
+                  {content.type === "audio" && (
+                    <SoundOutlined
+                      style={{ fontSize: isMobile ? "6px" : "8px" }}
+                    />
+                  )}
+                  {content.type.charAt(0).toUpperCase() + content.type.slice(1)}
+                </Tag>
+              </>
+            )}
+
             {/* Category */}
             {content.category && (
               <>
@@ -350,6 +679,9 @@ const ContentCard = ({
           >
             {content.title}
           </Text>
+
+          {/* Media Preview */}
+          {renderMediaPreview()}
 
           {/* Summary */}
           {content?.summary && (

@@ -1,12 +1,22 @@
 import { getKnowledgeCategories } from "@/services/knowledge-management.services";
-import { FilterOutlined, SortAscendingOutlined, ClearOutlined, SearchOutlined, DownOutlined, UpOutlined, TagsOutlined } from "@ant-design/icons";
+import {
+  FilterOutlined,
+  SortAscendingOutlined,
+  ClearOutlined,
+  DownOutlined,
+  UpOutlined,
+  TagsOutlined,
+  FileImageOutlined,
+  PlayCircleOutlined,
+  SoundOutlined,
+  FileTextOutlined,
+} from "@ant-design/icons";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import {
   Button,
   Card,
   Col,
-  Collapse,
   Flex,
   Grid,
   Input,
@@ -19,7 +29,6 @@ import {
 const { Text } = Typography;
 const { useBreakpoint } = Grid;
 const { Search } = Input;
-const { Panel } = Collapse;
 
 const KnowledgeFilters = ({
   selectedCategory,
@@ -40,6 +49,11 @@ const KnowledgeFilters = ({
   searchQuery,
   onSearchChange,
   onSearch,
+  // Type filter props (optional)
+  showTypeFilter = false,
+  selectedType,
+  onTypeChange,
+  typeCounts = {},
 }) => {
   const screens = useBreakpoint();
   const isMobile = !screens.md;
@@ -66,11 +80,59 @@ const KnowledgeFilters = ({
 
   // Popular tags (static for now, could be fetched from API)
   const popularTags = [
-    "Tutorial", "Tips", "JavaScript", "Python", "React",
-    "Best Practice", "ASN", "Produktivitas", "Teknologi", "Panduan"
+    "Tutorial",
+    "Tips",
+    "JavaScript",
+    "Python",
+    "React",
+    "Best Practice",
+    "ASN",
+    "Produktivitas",
+    "Teknologi",
+    "Panduan",
   ];
 
-  const hasActiveFilters = selectedCategory || (selectedTag && selectedTag.length > 0) || selectedSort !== "created_at" || (showStatusFilter && selectedStatus && selectedStatus !== "all") || (showSearch && searchQuery);
+  // Type options
+  const typeOptions = [
+    {
+      label: "Semua Jenis",
+      value: "all",
+      icon: null,
+      color: "#666",
+    },
+    {
+      label: "Teks",
+      value: "teks",
+      icon: <FileTextOutlined />,
+      color: "#1890ff",
+    },
+    {
+      label: "Gambar",
+      value: "gambar",
+      icon: <FileImageOutlined />,
+      color: "#52c41a",
+    },
+    {
+      label: "Video",
+      value: "video",
+      icon: <PlayCircleOutlined />,
+      color: "#722ed1",
+    },
+    {
+      label: "Audio",
+      value: "audio",
+      icon: <SoundOutlined />,
+      color: "#fa8c16",
+    },
+  ];
+
+  const hasActiveFilters =
+    selectedCategory ||
+    (selectedTag && selectedTag.length > 0) ||
+    selectedSort !== "created_at" ||
+    (showStatusFilter && selectedStatus && selectedStatus !== "all") ||
+    (showSearch && searchQuery) ||
+    (showTypeFilter && selectedType && selectedType !== "all");
 
   return (
     <div style={{ marginBottom: "16px" }}>
@@ -111,7 +173,11 @@ const KnowledgeFilters = ({
         styles={{ body: { padding: isMobile ? "12px" : "16px" } }}
       >
         {/* Advanced Filter Header */}
-        <Flex justify="space-between" align="center" style={{ marginBottom: showAdvancedFilters ? "16px" : "0" }}>
+        <Flex
+          justify="space-between"
+          align="center"
+          style={{ marginBottom: showAdvancedFilters ? "16px" : "0" }}
+        >
           <Flex align="center" gap={8}>
             <Button
               type="text"
@@ -136,17 +202,25 @@ const KnowledgeFilters = ({
                   fontSize: "11px",
                 }}
               >
-                {Object.values({
-                  category: selectedCategory,
-                  tag: selectedTag && selectedTag.length > 0,
-                  sort: selectedSort !== "created_at",
-                  status: showStatusFilter && selectedStatus && selectedStatus !== "all",
-                  search: showSearch && searchQuery,
-                }).filter(Boolean).length} Aktif
+                {
+                  Object.values({
+                    category: selectedCategory,
+                    tag: selectedTag && selectedTag.length > 0,
+                    sort: selectedSort !== "created_at",
+                    status:
+                      showStatusFilter &&
+                      selectedStatus &&
+                      selectedStatus !== "all",
+                    type:
+                      showTypeFilter && selectedType && selectedType !== "all",
+                    search: showSearch && searchQuery,
+                  }).filter(Boolean).length
+                }{" "}
+                Aktif
               </Tag>
             )}
           </Flex>
-          
+
           {hasActiveFilters && (
             <Button
               type="text"
@@ -171,7 +245,15 @@ const KnowledgeFilters = ({
             {/* Status Filter */}
             {showStatusFilter && (
               <div style={{ marginBottom: "20px" }}>
-                <Text strong style={{ fontSize: "13px", color: "#374151", display: "block", marginBottom: "8px" }}>
+                <Text
+                  strong
+                  style={{
+                    fontSize: "13px",
+                    color: "#374151",
+                    display: "block",
+                    marginBottom: "8px",
+                  }}
+                >
                   Status Konten
                 </Text>
                 <Flex gap="6px" wrap="wrap">
@@ -181,9 +263,14 @@ const KnowledgeFilters = ({
                       style={{
                         fontSize: "12px",
                         padding: "6px 12px",
-                        backgroundColor: selectedStatus === status.key ? "#FF4500" : "#F5F5F5",
-                        color: selectedStatus === status.key ? "white" : "#595959",
-                        border: selectedStatus === status.key ? "1px solid #FF4500" : "1px solid #E8E8E8",
+                        backgroundColor:
+                          selectedStatus === status.key ? "#FF4500" : "#F5F5F5",
+                        color:
+                          selectedStatus === status.key ? "white" : "#595959",
+                        border:
+                          selectedStatus === status.key
+                            ? "1px solid #FF4500"
+                            : "1px solid #E8E8E8",
                         cursor: "pointer",
                         borderRadius: "16px",
                         transition: "all 0.2s ease",
@@ -198,11 +285,92 @@ const KnowledgeFilters = ({
                 </Flex>
               </div>
             )}
-
+            {/* Type Filter */}
+            {showTypeFilter && (
+              <div style={{ marginBottom: "20px" }}>
+                <Text
+                  strong
+                  style={{
+                    fontSize: "13px",
+                    color: "#374151",
+                    display: "block",
+                    marginBottom: "8px",
+                  }}
+                >
+                  Jenis Konten
+                </Text>
+                <Flex gap="6px" wrap="wrap">
+                  {typeOptions.map((type) => (
+                    <Tag
+                      key={type.value}
+                      style={{
+                        fontSize: "12px",
+                        padding: "6px 12px",
+                        backgroundColor:
+                          selectedType === type.value ? type.color : "#F5F5F5",
+                        color:
+                          selectedType === type.value ? "white" : "#595959",
+                        border:
+                          selectedType === type.value
+                            ? `1px solid ${type.color}`
+                            : "1px solid #E8E8E8",
+                        cursor: "pointer",
+                        borderRadius: "16px",
+                        transition: "all 0.2s ease",
+                        height: "32px",
+                        lineHeight: "20px",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "4px",
+                      }}
+                      onClick={() => onTypeChange(type.value)}
+                      onMouseEnter={(e) => {
+                        if (selectedType !== type.value) {
+                          e.currentTarget.style.backgroundColor = "#FAFAFA";
+                          e.currentTarget.style.borderColor = type.color;
+                        }
+                      }}
+                      onMouseLeave={(e) => {
+                        if (selectedType !== type.value) {
+                          e.currentTarget.style.backgroundColor = "#F5F5F5";
+                          e.currentTarget.style.borderColor = "#E8E8E8";
+                        }
+                      }}
+                    >
+                      {type.icon && (
+                        <span
+                          style={{
+                            fontSize: "10px",
+                            color:
+                              selectedType === type.value
+                                ? "white"
+                                : type.color,
+                          }}
+                        >
+                          {type.icon}
+                        </span>
+                      )}
+                      {type.label}{" "}
+                      {typeCounts[type.value]
+                        ? `(${typeCounts[type.value]})`
+                        : ""}
+                    </Tag>
+                  ))}
+                </Flex>
+              </div>
+            )}
             <Row gutter={[16, 16]}>
               {/* Category Filter */}
               <Col xs={24} sm={12} md={8}>
-                <Text strong style={{ fontSize: "13px", color: "#374151", display: "block", marginBottom: "8px" }}>
+                <Text
+                  strong
+                  style={{
+                    fontSize: "13px",
+                    color: "#374151",
+                    display: "block",
+                    marginBottom: "8px",
+                  }}
+                >
                   Kategori
                 </Text>
                 <Select
@@ -221,7 +389,9 @@ const KnowledgeFilters = ({
               {/* Sort Filter */}
               <Col xs={24} sm={12} md={8}>
                 <Flex align="center" gap={6} style={{ marginBottom: "8px" }}>
-                  <SortAscendingOutlined style={{ fontSize: "12px", color: "#6B7280" }} />
+                  <SortAscendingOutlined
+                    style={{ fontSize: "12px", color: "#6B7280" }}
+                  />
                   <Text strong style={{ fontSize: "13px", color: "#374151" }}>
                     Urutkan
                   </Text>
@@ -237,7 +407,9 @@ const KnowledgeFilters = ({
               {/* Tag Filter */}
               <Col xs={24} sm={12} md={8}>
                 <Flex align="center" gap={6} style={{ marginBottom: "8px" }}>
-                  <TagsOutlined style={{ fontSize: "12px", color: "#6B7280" }} />
+                  <TagsOutlined
+                    style={{ fontSize: "12px", color: "#6B7280" }}
+                  />
                   <Text strong style={{ fontSize: "13px", color: "#374151" }}>
                     Tag
                   </Text>
@@ -261,12 +433,13 @@ const KnowledgeFilters = ({
                 />
               </Col>
             </Row>
-
             {/* Popular Tags */}
             {!isMobile && (
               <div style={{ marginTop: "20px" }}>
                 <Flex align="center" gap={6} style={{ marginBottom: "8px" }}>
-                  <TagsOutlined style={{ fontSize: "12px", color: "#6B7280" }} />
+                  <TagsOutlined
+                    style={{ fontSize: "12px", color: "#6B7280" }}
+                  />
                   <Text strong style={{ fontSize: "13px", color: "#374151" }}>
                     Tag Populer
                   </Text>
@@ -282,7 +455,9 @@ const KnowledgeFilters = ({
                           padding: "4px 8px",
                           backgroundColor: isSelected ? "#FF4500" : "#F5F5F5",
                           color: isSelected ? "white" : "#595959",
-                          border: isSelected ? "1px solid #FF4500" : "1px solid #E8E8E8",
+                          border: isSelected
+                            ? "1px solid #FF4500"
+                            : "1px solid #E8E8E8",
                           cursor: "pointer",
                           borderRadius: "12px",
                           transition: "all 0.2s ease",
@@ -292,7 +467,7 @@ const KnowledgeFilters = ({
                           let newTags;
                           if (isSelected) {
                             // Remove tag if already selected
-                            newTags = currentTags.filter(t => t !== tag);
+                            newTags = currentTags.filter((t) => t !== tag);
                           } else {
                             // Add tag if not selected
                             newTags = [...currentTags, tag];

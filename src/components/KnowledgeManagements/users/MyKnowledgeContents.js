@@ -65,6 +65,9 @@ const MyKnowledgeContents = () => {
   const [selectedStatus, setSelectedStatus] = useState(
     routerQuery.status || "all"
   );
+  const [selectedType, setSelectedType] = useState(
+    routerQuery.type || "all"
+  );
 
   // Debounced search for API calls
   const [debouncedSearch] = useDebounce(searchQuery, 500);
@@ -84,6 +87,7 @@ const MyKnowledgeContents = () => {
     );
     setSelectedSort(routerQuery.sort || "created_at");
     setSelectedStatus(routerQuery.status || "all");
+    setSelectedType(routerQuery.type || "all");
   }, [routerQuery]);
 
   // Responsive breakpoints
@@ -120,6 +124,8 @@ const MyKnowledgeContents = () => {
         params.set("sort", newFilters.sort);
       if (newFilters.status && newFilters.status !== "all")
         params.set("status", newFilters.status);
+      if (newFilters.type && newFilters.type !== "all")
+        params.set("type", newFilters.type);
 
       const queryString = params.toString();
       const newUrl = queryString ? `?${queryString}` : pathname;
@@ -145,6 +151,7 @@ const MyKnowledgeContents = () => {
       selectedTag,
       selectedSort,
       selectedStatus,
+      selectedType,
     ],
     ({ pageParam = 1 }) =>
       getUserOwnContents({
@@ -158,6 +165,7 @@ const MyKnowledgeContents = () => {
             : undefined,
         sort: selectedSort,
         status: selectedStatus === "all" ? undefined : selectedStatus,
+        type: selectedType === "all" ? undefined : selectedType,
       }),
     {
       getNextPageParam: (lastPage, allPages) => {
@@ -214,6 +222,29 @@ const MyKnowledgeContents = () => {
   };
 
   const statusCounts = getStatusCounts();
+
+  // Get type counts
+  const getTypeCounts = () => {
+    const counts = {
+      all: 0,
+      teks: 0,
+      gambar: 0,
+      video: 0,
+      audio: 0,
+    };
+
+    if (data?.pages?.[0]) {
+      counts.all = data.pages[0].total || 0;
+      // If we have type breakdown from API, use it
+      if (data.pages[0].typeCounts) {
+        Object.assign(counts, data.pages[0].typeCounts);
+      }
+    }
+
+    return counts;
+  };
+
+  const typeCounts = getTypeCounts();
 
   // Like mutation
   const { mutate: like } = useMutation(
@@ -289,6 +320,7 @@ const MyKnowledgeContents = () => {
       tag: selectedTag,
       sort: selectedSort,
       status: selectedStatus,
+      type: selectedType,
     });
   };
 
@@ -300,6 +332,7 @@ const MyKnowledgeContents = () => {
       tag: tag,
       sort: selectedSort,
       status: selectedStatus,
+      type: selectedType,
     });
   };
 
@@ -311,6 +344,7 @@ const MyKnowledgeContents = () => {
       tag: selectedTag,
       sort: sort,
       status: selectedStatus,
+      type: selectedType,
     });
   };
 
@@ -322,6 +356,19 @@ const MyKnowledgeContents = () => {
       tag: selectedTag,
       sort: selectedSort,
       status: status,
+      type: selectedType,
+    });
+  };
+
+  const handleTypeChange = (type) => {
+    setSelectedType(type);
+    updateURL({
+      search: searchQuery,
+      category: selectedCategory,
+      tag: selectedTag,
+      sort: selectedSort,
+      status: selectedStatus,
+      type: type,
     });
   };
 
@@ -338,6 +385,7 @@ const MyKnowledgeContents = () => {
       tag: selectedTag,
       sort: selectedSort,
       status: selectedStatus,
+      type: selectedType,
     });
   };
 
@@ -348,6 +396,7 @@ const MyKnowledgeContents = () => {
     setSelectedTag(null);
     setSelectedSort("created_at");
     setSelectedStatus("all");
+    setSelectedType("all");
 
     // Clear URL parameters
     push(pathname, undefined, { shallow: true });
@@ -496,6 +545,10 @@ const MyKnowledgeContents = () => {
           statusOptions={statusOptions}
           onStatusChange={handleStatusChange}
           statusCounts={statusCounts}
+          showTypeFilter={true}
+          selectedType={selectedType}
+          onTypeChange={handleTypeChange}
+          typeCounts={typeCounts}
           showSearch={true}
           searchQuery={searchQuery}
           onSearchChange={handleSearchChange}

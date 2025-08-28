@@ -19,6 +19,10 @@ import {
   UserOutlined,
   PaperClipOutlined,
   LinkOutlined,
+  FileTextOutlined,
+  FileImageOutlined,
+  PlayCircleOutlined,
+  SoundOutlined,
 } from "@ant-design/icons";
 import { Card, Flex, Tag, Tooltip, Typography, Divider } from "antd";
 import dayjs from "dayjs";
@@ -67,6 +71,209 @@ const KnowledgeContentHeader = ({
       pending: <ClockCircleOutlined />,
     };
     return statusIcons[status] || <EditOutlined />;
+  };
+
+  // Get type icon and label
+  const getTypeInfo = (type) => {
+    const typeInfo = {
+      teks: {
+        label: "Teks",
+        icon: <FileTextOutlined />,
+        color: "#1890ff",
+        description: "Konten berupa artikel atau tulisan",
+      },
+      gambar: {
+        label: "Gambar",
+        icon: <FileImageOutlined />,
+        color: "#52c41a",
+        description: "Konten berupa gambar atau infografik",
+      },
+      video: {
+        label: "Video",
+        icon: <PlayCircleOutlined />,
+        color: "#722ed1",
+        description: "Konten berupa video atau multimedia",
+      },
+      audio: {
+        label: "Audio",
+        icon: <SoundOutlined />,
+        color: "#fa8c16",
+        description: "Konten berupa audio atau podcast",
+      },
+    };
+    return typeInfo[type] || typeInfo.teks;
+  };
+
+  // Extract YouTube video ID
+  const getYouTubeVideoId = (url) => {
+    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
+    const match = url?.match(regExp);
+    return match && match[2].length === 11 ? match[2] : null;
+  };
+
+  // Render media preview based on content type
+  const renderMediaPreview = () => {
+    const contentType = content?.type || "teks";
+    const sourceUrl = content?.source_url;
+
+    if (!sourceUrl || contentType === "teks") return null;
+
+    const containerStyle = {
+      width: "100%",
+      maxWidth: "400px",
+      borderRadius: "8px",
+      overflow: "hidden",
+      border: "1px solid #E9ECEF",
+      backgroundColor: "#F8F9FA",
+    };
+
+    switch (contentType) {
+      case "gambar":
+        return (
+          <div style={containerStyle}>
+            <img
+              src={sourceUrl}
+              alt="Content preview"
+              style={{
+                width: "100%",
+                height: "200px",
+                objectFit: "cover",
+                display: "block",
+              }}
+              onError={(e) => {
+                e.target.style.display = "none";
+                e.target.nextSibling.style.display = "flex";
+              }}
+            />
+            <div
+              style={{
+                display: "none",
+                alignItems: "center",
+                justifyContent: "center",
+                height: "200px",
+                flexDirection: "column",
+                gap: "8px",
+              }}
+            >
+              <FileImageOutlined style={{ fontSize: "32px", color: "#52c41a" }} />
+              <Text style={{ fontSize: "12px", color: "#6B7280" }}>
+                Gambar tidak dapat dimuat
+              </Text>
+            </div>
+          </div>
+        );
+
+      case "video":
+        const videoId = getYouTubeVideoId(sourceUrl);
+        const isYouTube = !!videoId;
+
+        if (isYouTube) {
+          return (
+            <div style={containerStyle}>
+              <div
+                style={{
+                  position: "relative",
+                  height: "225px",
+                  background: `url(https://img.youtube.com/vi/${videoId}/maxresdefault.jpg) center/cover`,
+                  cursor: "pointer",
+                }}
+                onClick={() => window.open(sourceUrl, "_blank")}
+              >
+                <div
+                  style={{
+                    position: "absolute",
+                    inset: 0,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    backgroundColor: "rgba(0,0,0,0.3)",
+                  }}
+                >
+                  <div
+                    style={{
+                      width: "56px",
+                      height: "56px",
+                      backgroundColor: "rgba(255,255,255,0.9)",
+                      borderRadius: "50%",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      transition: "transform 0.2s ease",
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.transform = "scale(1.1)";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.transform = "scale(1)";
+                    }}
+                  >
+                    <PlayCircleOutlined style={{ fontSize: "32px", color: "#722ed1" }} />
+                  </div>
+                </div>
+              </div>
+            </div>
+          );
+        } else {
+          return (
+            <div style={containerStyle}>
+              <video
+                src={sourceUrl}
+                controls
+                style={{
+                  width: "100%",
+                  height: "225px",
+                  objectFit: "cover",
+                }}
+                onError={(e) => {
+                  e.target.style.display = "none";
+                  e.target.nextSibling.style.display = "flex";
+                }}
+              />
+              <div
+                style={{
+                  display: "none",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  height: "225px",
+                  flexDirection: "column",
+                  gap: "8px",
+                }}
+              >
+                <PlayCircleOutlined style={{ fontSize: "32px", color: "#722ed1" }} />
+                <Text style={{ fontSize: "12px", color: "#6B7280" }}>
+                  Video tidak dapat dimuat
+                </Text>
+              </div>
+            </div>
+          );
+        }
+
+      case "audio":
+        return (
+          <div style={{ ...containerStyle, padding: "16px" }}>
+            <div style={{ marginBottom: "12px", textAlign: "center" }}>
+              <SoundOutlined style={{ fontSize: "32px", color: "#fa8c16" }} />
+            </div>
+            <audio
+              src={sourceUrl}
+              controls
+              style={{ width: "100%" }}
+              onError={(e) => {
+                e.target.style.display = "none";
+                e.target.nextSibling.style.display = "block";
+              }}
+            />
+            <div style={{ display: "none", textAlign: "center", padding: "8px 0" }}>
+              <Text style={{ fontSize: "12px", color: "#6B7280" }}>
+                Audio tidak dapat dimuat
+              </Text>
+            </div>
+          </div>
+        );
+
+      default:
+        return null;
+    }
   };
   return (
     <Card
@@ -359,6 +566,30 @@ const KnowledgeContentHeader = ({
                       </Tag>
                     </>
                   )}
+
+                  {/* Content Type */}
+                  <span style={{ color: "#787C7E", fontSize: "12px" }}>•</span>
+                  <Tag
+                    style={{
+                      fontSize: "10px",
+                      fontWeight: 500,
+                      backgroundColor: getTypeInfo(content?.type).color,
+                      color: "white",
+                      border: "none",
+                      borderRadius: "4px",
+                      margin: 0,
+                      padding: "0 6px",
+                      lineHeight: "16px",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "4px",
+                    }}
+                  >
+                    <span style={{ fontSize: "8px" }}>
+                      {getTypeInfo(content?.type).icon}
+                    </span>
+                    {getTypeInfo(content?.type).label}
+                  </Tag>
                 </Flex>
 
                 {/* Spacer untuk alignment dengan tombol simpan */}
@@ -454,6 +685,27 @@ const KnowledgeContentHeader = ({
                     : content?.content || "Tidak ada ringkasan")}
               </Text>
             </div>
+
+            {/* Media Preview */}
+            {renderMediaPreview() && (
+              <div style={{ marginBottom: "12px" }}>
+                <Text
+                  strong
+                  style={{
+                    color: "#1A1A1B",
+                    fontSize: "14px",
+                    marginBottom: "8px",
+                    display: "block",
+                  }}
+                >
+                  Preview Media:
+                </Text>
+                <div>
+                  {renderMediaPreview()}
+                </div>
+              </div>
+            )}
+
 
             {/* Isi */}
             <div style={{ marginBottom: "12px" }}>

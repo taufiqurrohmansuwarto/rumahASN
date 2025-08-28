@@ -50,6 +50,7 @@ export const getKnowledgeContents = async (req, res) => {
       sort = "created_at", // Default: created_at DESC (terbaru)
       category_id = "",
       tags = "",
+      type = "", // Add type filter
     } = req?.query;
 
     // Handle multiple tags from URL params (tag=tutorial&tag=javascript)
@@ -81,12 +82,19 @@ export const getKnowledgeContents = async (req, res) => {
           });
         }
       })
+      .andWhere((builder) => {
+        if (type && type !== "all") {
+          builder.where("type", type);
+        }
+      })
       .select(
         "knowledge.contents.id",
         "knowledge.contents.title",
         "knowledge.contents.summary",
         "knowledge.contents.author_id",
         "knowledge.contents.category_id",
+        "knowledge.contents.type",
+        "knowledge.contents.source_url",
         "knowledge.contents.status",
         "knowledge.contents.tags",
         "knowledge.contents.likes_count",
