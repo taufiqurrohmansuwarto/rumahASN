@@ -1,5 +1,6 @@
 import { handleError } from "@/utils/helper/controller-helper";
 import { uploadFileMinio } from "@/utils/index";
+import crypto from "crypto";
 
 const KnowledgeContent = require("@/models/knowledge/contents.model");
 const KnowledgeCategory = require("@/models/knowledge/categories.model");
@@ -7,6 +8,11 @@ const KnowledgeContentAttachment = require("@/models/knowledge/content-attachmen
 const UserInteraction = require("@/models/knowledge/user-interactions.model");
 
 const BASE_URL = "https://siasn.bkd.jatimprov.go.id:9000/public";
+
+// Helper function to encrypt customId for filename
+const getEncryptedUserId = (customId) => {
+  return crypto.createHash('sha256').update(customId.toString()).digest('hex').substring(0, 12);
+};
 
 // Fungsi untuk mengelola jumlah views konten
 const updateViewsCount = async (customId, contentId) => {
@@ -467,3 +473,210 @@ function getSortDirection(sort) {
       return "desc";
   }
 }
+
+// Media upload functions
+export const uploadKnowledgeContentMediaCreate = async (req, res) => {
+  try {
+    const { mc } = req;
+    const { customId } = req?.user;
+    const { file } = req;
+
+    if (!file) {
+      return res.status(400).json({ message: "File media is required" });
+    }
+
+    // Validate file type for media
+    const allowedTypes = ['image/', 'video/', 'audio/'];
+    if (!allowedTypes.some(type => file.mimetype.startsWith(type))) {
+      return res.status(400).json({ 
+        message: "Invalid file type. Only image, video, and audio files are allowed" 
+      });
+    }
+
+    // Generate unique filename
+    const timestamp = new Date().getTime();
+    const originalName = file.originalname.replace(/[^a-zA-Z0-9.-]/g, "_");
+    const encryptedUserId = getEncryptedUserId(customId);
+    const fileName = `knowledge-media/${encryptedUserId}/${timestamp}_${originalName}`;
+
+    // Upload to MinIO
+    await uploadFileMinio(
+      mc,
+      file.buffer,
+      fileName,
+      file.size,
+      file.mimetype
+    );
+
+    const mediaUrl = `${BASE_URL}/${fileName}`;
+
+    res.json({
+      success: true,
+      message: "Media uploaded successfully",
+      data: {
+        url: mediaUrl,
+        filename: fileName,
+        originalName: file.originalname,
+        size: file.size,
+        mimetype: file.mimetype,
+        type: file.mimetype.startsWith('image/') ? 'image' : 
+              file.mimetype.startsWith('video/') ? 'video' : 'audio'
+      },
+    });
+  } catch (error) {
+    handleError(res, error);
+  }
+};
+
+export const uploadKnowledgeContentMedia = async (req, res) => {
+  try {
+    const { mc } = req;
+    const { customId } = req?.user;
+    const { id: contentId } = req.query;
+    const { file } = req;
+
+    if (!file) {
+      return res.status(400).json({ message: "File media is required" });
+    }
+
+    // Check if content exists and user owns it
+    const content = await KnowledgeContent.query()
+      .where("id", contentId)
+      .where("author_id", customId)
+      .first();
+
+    if (!content) {
+      return res.status(404).json({ message: "Content not found or access denied" });
+    }
+
+    // Validate file type for media
+    const allowedTypes = ['image/', 'video/', 'audio/'];
+    if (!allowedTypes.some(type => file.mimetype.startsWith(type))) {
+      return res.status(400).json({ 
+        message: "Invalid file type. Only image, video, and audio files are allowed" 
+      });
+    }
+
+    // Generate unique filename
+    const timestamp = new Date().getTime();
+    const originalName = file.originalname.replace(/[^a-zA-Z0-9.-]/g, "_");
+    const encryptedUserId = getEncryptedUserId(customId);
+    const fileName = `knowledge-media/${encryptedUserId}/${timestamp}_${originalName}`;
+
+    // Upload to MinIO
+    await uploadFileMinio(
+      mc,
+      file.buffer,
+      fileName,
+      file.size,
+      file.mimetype
+    );
+
+    const mediaUrl = `${BASE_URL}/${fileName}`;
+    
+    // Determine content type based on file mimetype  
+    const contentType = file.mimetype.startsWith('image/') ? 'gambar' : 
+                        file.mimetype.startsWith('video/') ? 'video' : 'audio';
+
+    // Update content with media URL
+    const updatedContent = await KnowledgeContent.query()
+      .patchAndFetchById(contentId, {
+        type: contentType,
+        source_url: mediaUrl,
+        updated_at: new Date(),
+      });
+
+    res.json({
+      success: true,
+      message: "Media uploaded and content updated successfully",
+      data: {
+        content: updatedContent,
+        media: {
+          url: mediaUrl,
+          filename: fileName,
+          originalName: file.originalname,
+          size: file.size,
+          mimetype: file.mimetype,
+          type: contentType
+        }
+      },
+    });
+  } catch (error) {
+    handleError(res, error);
+  }
+};
+
+export const uploadKnowledgeContentMediaAdmin = async (req, res) => {
+  try {
+    const { mc } = req;
+    const { customId } = req?.user;
+    const { id: contentId } = req.query;
+    const { file } = req;
+
+    if (!file) {
+      return res.status(400).json({ message: "File media is required" });
+    }
+
+    // Check if content exists (admin can edit any content)
+    const content = await KnowledgeContent.query().findById(contentId);
+
+    if (!content) {
+      return res.status(404).json({ message: "Content not found" });
+    }
+
+    // Validate file type for media
+    const allowedTypes = ['image/', 'video/', 'audio/'];
+    if (!allowedTypes.some(type => file.mimetype.startsWith(type))) {
+      return res.status(400).json({ 
+        message: "Invalid file type. Only image, video, and audio files are allowed" 
+      });
+    }
+
+    // Generate unique filename
+    const timestamp = new Date().getTime();
+    const originalName = file.originalname.replace(/[^a-zA-Z0-9.-]/g, "_");
+    const encryptedAdminId = getEncryptedUserId('admin_' + customId);
+    const fileName = `knowledge-media/${encryptedAdminId}/${timestamp}_${originalName}`;
+
+    // Upload to MinIO
+    await uploadFileMinio(
+      mc,
+      file.buffer,
+      fileName,
+      file.size,
+      file.mimetype
+    );
+
+    const mediaUrl = `${BASE_URL}/${fileName}`;
+    
+    // Determine content type based on file mimetype  
+    const contentType = file.mimetype.startsWith('image/') ? 'gambar' : 
+                        file.mimetype.startsWith('video/') ? 'video' : 'audio';
+
+    // Update content with media URL
+    const updatedContent = await KnowledgeContent.query()
+      .patchAndFetchById(contentId, {
+        type: contentType,
+        source_url: mediaUrl,
+        updated_at: new Date(),
+      });
+
+    res.json({
+      success: true,
+      message: "Media uploaded and content updated successfully by admin",
+      data: {
+        content: updatedContent,
+        media: {
+          url: mediaUrl,
+          filename: fileName,
+          originalName: file.originalname,
+          size: file.size,
+          mimetype: file.mimetype,
+          type: contentType
+        }
+      },
+    });
+  } catch (error) {
+    handleError(res, error);
+  }
+};

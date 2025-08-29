@@ -376,3 +376,61 @@ export const awardUserXP = async (data) => {
 export const getUserLeaderboard = async () => {
   return await api.get("/users/leaderboard").then((res) => res.data);
 };
+
+// Media upload services
+export const uploadKnowledgeContentMediaCreate = async (data) => {
+  return await api
+    .post("/users/contents/upload-media", data, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+      timeout: 300000, // 5 minutes timeout
+    })
+    .then((res) => res.data)
+    .catch((error) => {
+      if (error.code === "ECONNABORTED") {
+        throw new Error(
+          "Upload timeout - file terlalu besar atau koneksi lambat"
+        );
+      }
+      throw error;
+    });
+};
+
+export const uploadKnowledgeContentMedia = async (contentId, data) => {
+  return await api
+    .post(`/users/contents/${contentId}/upload-media`, data, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+      timeout: 300000, // 5 minutes timeout
+    })
+    .then((res) => res.data)
+    .catch((error) => {
+      if (error.code === "ECONNABORTED") {
+        throw new Error(
+          "Upload timeout - file terlalu besar atau koneksi lambat"
+        );
+      }
+      throw error;
+    });
+};
+
+export const uploadKnowledgeContentMediaAdmin = async (contentId, data) => {
+  return await api
+    .post(`/admin/contents/${contentId}/upload-media`, data, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+      timeout: 300000, // 5 minutes timeout
+    })
+    .then((res) => res.data)
+    .catch((error) => {
+      if (error.code === "ECONNABORTED") {
+        throw new Error(
+          "Upload timeout - file terlalu besar atau koneksi lambat"
+        );
+      }
+      throw error;
+    });
+};
