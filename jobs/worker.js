@@ -12,7 +12,7 @@ sealQueue.process("refresh-totp", async (job) => {
   try {
     console.log(`🚀 [SEAL] Starting job ${job.id} at ${new Date().toISOString()}`);
     
-    const result = await sealProcessor.refreshTotp(job);
+    const result = await sealProcessor.refreshTotp();
     
     const endTime = Date.now();
     const endMemory = process.memoryUsage();

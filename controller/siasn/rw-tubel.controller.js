@@ -3,7 +3,7 @@ import { daftarTugasBelajar, tambahTugasBelajar } from "@/utils/siasn-utils";
 
 export const daftarTugasBelajarPersonal = async (req, res) => {
   try {
-    const { employeeNumber: nip } = req?.user;
+    const { employee_number: nip } = req?.user;
     const { siasnRequest: fetcher } = req;
 
     const tubel = await daftarTugasBelajar(fetcher, nip);

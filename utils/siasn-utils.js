@@ -483,7 +483,25 @@ module.exports.uploadDokSkKp = async (fetcher, data) => {
 };
 
 module.exports.daftarTugasBelajar = async (fetcher, nip) => {
-  return fetcher.get(`/pns/rw-tubel/${nip}`).then((res) => res?.data);
+  return new Promise(async (resolve, reject) => {
+    try {
+      const result = await fetcher.get(`/pns/rw-tubel/${nip}`);
+      const data = result?.data?.data;
+      if (!data) {
+        resolve([]);
+      } else {
+        resolve(data);
+      }
+    } catch (error) {
+      const data = error?.data;
+      if (data === "record not found") {
+        resolve([]);
+      } else {
+        reject(error);
+      }
+    }
+  });
+  // return fetcher.get(`/pns/rw-tubel/${nip}`).then((res) => res?.data);
 };
 
 module.exports.tambahTugasBelajar = async (fetcher, data) => {
