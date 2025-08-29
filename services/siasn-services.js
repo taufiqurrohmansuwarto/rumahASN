@@ -190,6 +190,15 @@ export const dataPendidikanByNip = (nip) => {
   return api.get(`/admin/${nip}/rw-pendidikan`).then((res) => res.data);
 };
 
+// data tugas belajar
+export const dataRiwayatTugasBelajar = () => {
+  return api.get("/pns/rw-tugas-belajar").then((res) => res.data);
+};
+
+export const dataRiwayatTugasBelajarByNip = (nip) => {
+  return api.get(`/admin/${nip}/rw-tugas-belajar`).then((res) => res.data);
+};
+
 export const downloadDataIPASN = (query) => {
   const type = query?.type;
   const queryStr = queryString.stringify(query, {

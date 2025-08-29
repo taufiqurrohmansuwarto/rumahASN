@@ -21,6 +21,7 @@ import CompareKinerjaPeriodikNip from "./CompareKinerjaPeriodikNip";
 import CompareMasaKerjaByNip from "./CompareMasaKerjaByNip";
 import ComparePemberhentianByNip from "./ComparePemberhentianByNip";
 import CompareSKP22ByNip from "./CompareSKP22ByNip";
+import CompareTugasBelajarByNip from "../CompareTugasBelajarByNip";
 
 const DEFAULT_ACTIVE_KEY = "data-utama";
 
@@ -77,6 +78,11 @@ function SiasnTab({ nip }) {
         key: "diklat-dan-kursus",
         tab: "Diklat dan Kursus",
         content: <CompareDataDiklatByNip nip={nip} />,
+      },
+      {
+        key: "tugas-belajar",
+        tab: "Tugas Belajar",
+        content: <CompareTugasBelajarByNip nip={nip} />,
       },
       {
         key: "sertifikasi",

@@ -184,6 +184,7 @@ const requestHandler = async (request) => {
 const responseHandler = async (response) => response;
 
 const errorHandler = async (error) => {
+  console.log("error", error);
   const errorData = error?.response?.data || {};
   // typeo errorData is buffer
   const isBuffer = Buffer.isBuffer(errorData);

@@ -138,12 +138,6 @@ const MyKnowledgeDashboard = () => {
   const finalUserMissions = gamificationMissions || userMissions;
   const finalLeaderboard = gamificationLeaderboard || leaderboardData;
 
-  // Debug: Log badge data
-  console.log("🔍 [DASHBOARD] Badge data debug:");
-  console.log("- gamificationBadges:", gamificationBadges);
-  console.log("- userBadges:", userBadges);
-  console.log("- finalUserBadges:", finalUserBadges);
-
   // Mission completion handler
   const { mutateAsync: completeMission } = useCompleteMission();
 
@@ -151,10 +145,10 @@ const MyKnowledgeDashboard = () => {
   const handleRefreshGamification = async () => {
     setRefreshing(true);
     try {
-      // PENTING: Refetch summary dulu untuk trigger badge check
+      // Refresh summary to trigger badge check
       await refetchGamificationSummary();
 
-      // Kemudian refetch semua data gamifikasi
+      // Then refresh all gamification data
       await Promise.all([
         pointsQuery.refetch(),
         badgesQuery.refetch(),
@@ -174,7 +168,7 @@ const MyKnowledgeDashboard = () => {
     try {
       await completeMission(missionId);
     } catch (error) {
-      console.error("Failed to complete mission:", error);
+      // Handle error silently
     }
   };
 
@@ -244,7 +238,7 @@ const MyKnowledgeDashboard = () => {
           overflow: "hidden",
           transition: "border-color 0.2s ease",
         }}
-        bodyStyle={{ padding: 0 }}
+        styles={{ body: { padding: 0 } }}
         hoverable
         onMouseEnter={(e) => {
           e.currentTarget.style.borderColor = "#898989";
@@ -333,7 +327,7 @@ const MyKnowledgeDashboard = () => {
               overflow: "hidden",
               transition: "border-color 0.2s ease",
             }}
-            bodyStyle={{ padding: 0 }}
+            styles={{ body: { padding: 0 } }}
             hoverable
             onMouseEnter={(e) => {
               e.currentTarget.style.borderColor = "#898989";
@@ -438,7 +432,7 @@ const MyKnowledgeDashboard = () => {
               overflow: "hidden",
               transition: "border-color 0.2s ease",
             }}
-            bodyStyle={{ padding: 0 }}
+            styles={{ body: { padding: 0 } }}
             hoverable
             onMouseEnter={(e) => {
               e.currentTarget.style.borderColor = "#898989";

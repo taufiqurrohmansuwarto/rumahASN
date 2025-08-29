@@ -6,6 +6,7 @@ import {
   SyncOutlined,
 } from "@ant-design/icons";
 import {
+  IconBook,
   Icon123,
   IconArrowFork,
   IconBadge,
@@ -133,6 +134,12 @@ export const mysapkMenu = [
     icon: IconReport,
     color: "blue",
     path: "/diklat",
+  },
+  {
+    title: "Tugas Belajar",
+    icon: IconBook,
+    color: "gray",
+    path: "/tugas-belajar",
   },
   {
     title: "Pendidikan",
