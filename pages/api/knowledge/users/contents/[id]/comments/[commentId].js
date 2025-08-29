@@ -4,9 +4,14 @@ import {
   removeComment,
   updateComment,
 } from "@/controller/knowledge/user-interactions.controller";
+import asnNonAsnMiddleware from "@/middleware/asn-non-asn.middleware";
 
 const router = createRouter();
 
-router.use(auth).delete(removeComment).patch(updateComment);
+router
+  .use(auth)
+  .use(asnNonAsnMiddleware)
+  .delete(removeComment)
+  .patch(updateComment);
 
 export default router.handler({});

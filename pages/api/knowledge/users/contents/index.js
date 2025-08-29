@@ -4,9 +4,14 @@ import {
   createKnowledgeContent,
   getKnowledgeContents,
 } from "@/controller/knowledge/knowledge-contents.controller";
+import asnNonAsnMiddleware from "@/middleware/asn-non-asn.middleware";
 
 const router = createRouter();
 
-router.use(auth).get(getKnowledgeContents).post(createKnowledgeContent);
+router
+  .use(auth)
+  .use(asnNonAsnMiddleware)
+  .get(getKnowledgeContents)
+  .post(createKnowledgeContent);
 
 export default router.handler({});

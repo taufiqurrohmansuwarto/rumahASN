@@ -17,6 +17,9 @@ import {
   Flex,
   Grid,
   Affix,
+  Steps,
+  Divider,
+  Collapse,
 } from "antd";
 import {
   PlusOutlined,
@@ -49,19 +52,24 @@ const KnowledgeAdminMissions = () => {
   const [missionDipilih, setMissionDipilih] = useState(null);
   const [sedangEdit, setSedangEdit] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
+  const [currentStep, setCurrentStep] = useState(0);
 
   // React Query hooks
-  const { data: daftarMissions = [], isLoading: sedangMeload } = useFetchMissions();
+  const { data: daftarMissions = [], isLoading: sedangMeload } =
+    useFetchMissions();
 
   const mutasiTambah = useCreateMission();
   const mutasiUpdate = useUpdateMission();
   const mutasiHapus = useDeleteMission();
 
   // Filter data berdasarkan search term
-  const filteredMissions = daftarMissions.filter((item) =>
-    item.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    item.description?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredMissions = daftarMissions.filter((item) => {
+    if (!searchTerm) return true; // Jika tidak ada search term, tampilkan semua
+    return (
+      item.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      item.description?.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+  });
 
   // Options untuk frequency
   const frequencyOptions = [
@@ -74,151 +82,108 @@ const KnowledgeAdminMissions = () => {
   // Konfigurasi kolom tabel
   const kolomTabel = [
     {
-      title: "No",
-      key: "nomor",
-      width: 60,
-      render: (_, __, indeks) => (
-        <span style={{ fontWeight: "500" }}>{indeks + 1}</span>
-      ),
-    },
-    {
-      title: "Judul Mission",
-      dataIndex: "title",
-      key: "title",
-      render: (teks) => (
-        <span
-          style={{
-            fontWeight: "600",
-            color: "#1890ff",
-          }}
-        >
-          {teks}
-        </span>
-      ),
-    },
-    {
-      title: "Deskripsi",
-      dataIndex: "description",
-      key: "description",
-      ellipsis: true,
-      render: (teks) =>
-        teks ? (
-          <span style={{ color: "#666" }}>{teks}</span>
-        ) : (
-          <span style={{ color: "#ccc", fontStyle: "italic" }}>
-            Tidak ada deskripsi
-          </span>
-        ),
-    },
-    {
-      title: "Frekuensi",
-      dataIndex: "frequency",
-      key: "frequency",
-      width: 100,
-      render: (freq) => {
-        const colors = {
-          daily: "blue",
-          weekly: "green",
-          monthly: "purple",
-          once: "orange",
-        };
-        const labels = {
-          daily: "Harian",
-          weekly: "Mingguan",
-          monthly: "Bulanan",
-          once: "Sekali",
-        };
+      title: "Mission",
+      key: "mission",
+      render: (_, record) => {
+        const expandedRowRender = () => (
+          <div style={{ padding: "16px 0" }}>
+            <Space direction="vertical" style={{ width: "100%" }} size="small">
+              <div>
+                <Text strong>Deskripsi:</Text>{" "}
+                {record.description || "Tidak ada"}
+              </div>
+              <div>
+                <Text strong>Frekuensi:</Text> <Tag>{record.frequency}</Tag>
+              </div>
+              <div>
+                <Text strong>Target:</Text> {record.target_count || 0}
+              </div>
+              <div>
+                <Text strong>Poin:</Text> {record.points_reward || 0}
+              </div>
+
+              {record.start_date && (
+                <div>
+                  <Text strong>Periode:</Text>{" "}
+                  {dayjs(record.start_date).format("DD/MM/YYYY")} -{" "}
+                  {record.end_date
+                    ? dayjs(record.end_date).format("DD/MM/YYYY")
+                    : "Selamanya"}
+                </div>
+              )}
+
+              <div>
+                <Text strong>Rule:</Text>
+                {(() => {
+                  let rule = record?.rule;
+                  if (typeof rule === "string") {
+                    try {
+                      rule = JSON.parse(rule);
+                    } catch {
+                      rule = null;
+                    }
+                  }
+                  return (
+                    <Space>
+                      <Tag>{rule?.action || "read_complete"}</Tag>
+                      <Tag>{rule?.ref_type || "content"}</Tag>
+                      <Tag>{rule?.distinct_by || "ref_id"}</Tag>
+                    </Space>
+                  );
+                })()}
+              </div>
+
+              <div>
+                <Text strong>Klaim:</Text>
+                <Space>
+                  <Tag>Max: {record?.max_claims_per_period ?? 1}/periode</Tag>
+                  <Tag color={record?.auto_claim ? "green" : "default"}>
+                    {record?.auto_claim ? "Auto" : "Manual"}
+                  </Tag>
+                  <Tag>{record?.period_timezone || "UTC"}</Tag>
+                </Space>
+              </div>
+            </Space>
+          </div>
+        );
+
         return (
-          <Tag color={colors[freq] || "default"}>
-            {labels[freq] || freq}
-          </Tag>
+          <Collapse ghost>
+            <Collapse.Panel
+              header={<Text strong>{record.title}</Text>}
+              key="1"
+              extra={
+                <Space onClick={(e) => e.stopPropagation()}>
+                  <Tag color={record.is_active ? "success" : "default"}>
+                    {record.is_active ? "Aktif" : "Nonaktif"}
+                  </Tag>
+                  <Button
+                    type="link"
+                    icon={<EditOutlined />}
+                    onClick={() => bukaModalEdit(record)}
+                    size="small"
+                  />
+                  <Popconfirm
+                    title="Hapus mission?"
+                    onConfirm={() => hapusMission(record.id)}
+                    okText="Ya"
+                    cancelText="Batal"
+                  >
+                    <Button
+                      type="link"
+                      danger
+                      icon={<DeleteOutlined />}
+                      size="small"
+                    />
+                  </Popconfirm>
+                </Space>
+              }
+            >
+              {expandedRowRender()}
+            </Collapse.Panel>
+          </Collapse>
         );
       },
-    },
-    {
-      title: "Target",
-      dataIndex: "target_count",
-      key: "target_count",
-      width: 100,
-      render: (target) => (
-        <Tag color="blue">
-          {target ? `${target}x` : "0x"}
-        </Tag>
-      ),
-    },
-    {
-      title: "Poin Reward",
-      dataIndex: "points_reward",
-      key: "points_reward",
-      width: 120,
-      render: (poin) => (
-        <Tag color="gold">
-          {poin ? `${poin} Poin` : "0 Poin"}
-        </Tag>
-      ),
-    },
-    {
-      title: "Periode",
-      key: "periode",
-      width: 200,
-      render: (_, record) => (
-        <div style={{ fontSize: "12px" }}>
-          {record.start_date && (
-            <div>
-              <strong>Mulai:</strong> {dayjs(record.start_date).format("DD/MM/YYYY")}
-            </div>
-          )}
-          {record.end_date && (
-            <div>
-              <strong>Selesai:</strong> {dayjs(record.end_date).format("DD/MM/YYYY")}
-            </div>
-          )}
-        </div>
-      ),
-    },
-    {
-      title: "Status",
-      dataIndex: "is_active",
-      key: "status",
-      width: 100,
-      render: (status) => (
-        <Tag color={status ? "success" : "default"}>
-          {status ? "Aktif" : "Nonaktif"}
-        </Tag>
-      ),
-    },
-    {
-      title: "Aksi",
-      key: "aksi",
-      width: isMobile ? 80 : 120,
-      render: (_, record) => (
-        <Space size="small">
-          <Button
-            type="text"
-            icon={<EditOutlined />}
-            onClick={() => bukaModalEdit(record)}
-            size="small"
-            style={{ color: "#FF4500" }}
-            title="Edit mission"
-          />
-          <Popconfirm
-            title="Konfirmasi Hapus"
-            description={`Apakah Anda yakin ingin menghapus mission "${record.title}"?`}
-            onConfirm={() => hapusMission(record.id)}
-            okText="Ya, Hapus"
-            cancelText="Batal"
-            okButtonProps={{ danger: true }}
-          >
-            <Button
-              type="text"
-              danger
-              icon={<DeleteOutlined />}
-              size="small"
-              title="Hapus mission"
-            />
-          </Popconfirm>
-        </Space>
-      ),
     },
   ];
 
@@ -227,6 +192,7 @@ const KnowledgeAdminMissions = () => {
     setModalTerbuka(true);
     setSedangEdit(false);
     setMissionDipilih(null);
+    setCurrentStep(0);
     form.resetFields();
   };
 
@@ -235,17 +201,43 @@ const KnowledgeAdminMissions = () => {
     setSedangEdit(true);
     setMissionDipilih(mission);
     setModalTerbuka(true);
-    form.setFieldsValue({
+    setCurrentStep(0);
+
+    // Parse rule JSON if exists
+    let rule = mission?.rule;
+    if (typeof rule === "string") {
+      try {
+        rule = JSON.parse(rule);
+      } catch (_) {
+        rule = null;
+      }
+    }
+
+    const fieldValues = {
       title: mission.title,
       description: mission.description,
       frequency: mission.frequency,
       target_count: mission.target_count,
       points_reward: mission.points_reward,
-      date_range: mission.start_date && mission.end_date 
-        ? [dayjs(mission.start_date), dayjs(mission.end_date)]
-        : null,
+      date_range:
+        mission.start_date && mission.end_date
+          ? [dayjs(mission.start_date), dayjs(mission.end_date)]
+          : null,
       is_active: mission.is_active,
-    });
+      // Rule fields
+      rule_action: rule?.action || "read_complete",
+      rule_ref_type: rule?.ref_type || "content",
+      rule_distinct_by: rule?.distinct_by || "ref_id",
+      // Claim fields
+      auto_claim: mission?.auto_claim ?? true,
+      max_claims_per_period: mission?.max_claims_per_period ?? 1,
+      period_timezone: mission?.period_timezone || "",
+    };
+
+    // Delay untuk memastikan modal sudah terbuka dan form ter-render
+    setTimeout(() => {
+      form.setFieldsValue(fieldValues);
+    }, 100);
   };
 
   // Handler untuk menutup modal
@@ -253,14 +245,25 @@ const KnowledgeAdminMissions = () => {
     setModalTerbuka(false);
     setMissionDipilih(null);
     setSedangEdit(false);
+    setCurrentStep(0);
     form.resetFields();
   };
 
   // Handler untuk submit form
   const submitForm = async () => {
     try {
-      const nilaiForm = await form.validateFields();
+      // Validasi semua field dari semua steps
+      await form.validateFields([
+        'title', 'description', 'frequency', 'target_count', 'points_reward',
+        'rule_action', 'rule_ref_type', 'rule_distinct_by',
+        'auto_claim', 'max_claims_per_period', 'period_timezone', 'date_range', 'is_active'
+      ]);
       
+      // Ambil semua values
+      const nilaiForm = form.getFieldsValue(true);
+      
+      console.log("All form values:", nilaiForm);
+
       // Format data untuk API
       const formattedData = {
         title: nilaiForm.title,
@@ -271,7 +274,19 @@ const KnowledgeAdminMissions = () => {
         start_date: nilaiForm.date_range?.[0]?.toISOString(),
         end_date: nilaiForm.date_range?.[1]?.toISOString(),
         is_active: nilaiForm.is_active ?? true,
+        auto_claim: nilaiForm.auto_claim ?? true,
+        max_claims_per_period: nilaiForm.max_claims_per_period ?? 1,
+        period_timezone: nilaiForm.period_timezone || null,
+        rule: {
+          type: "action_count",
+          action: nilaiForm.rule_action || "read_complete",
+          ref_type: nilaiForm.rule_ref_type || "content",
+          target_count: nilaiForm.target_count,
+          distinct_by: nilaiForm.rule_distinct_by || "ref_id",
+        },
       };
+      
+      console.log("Final formattedData:", formattedData);
 
       if (sedangEdit && missionDipilih) {
         // Update mission yang sudah ada
@@ -280,6 +295,7 @@ const KnowledgeAdminMissions = () => {
           data: formattedData,
         });
       } else {
+        console.log("formattedData", formattedData);
         // Tambah mission baru
         await mutasiTambah.mutateAsync(formattedData);
       }
@@ -290,6 +306,49 @@ const KnowledgeAdminMissions = () => {
     }
   };
 
+  // Steps config
+  const stepsItems = [
+    { title: "Info Dasar" },
+    { title: "Aturan" },
+    { title: "Klaim" },
+    { title: "Review" },
+  ];
+
+  const stepFields = [
+    // Step 0: Info Dasar
+    [
+      "title",
+      "description", 
+      "frequency",
+      "target_count",
+      "points_reward",
+    ],
+    // Step 1: Aturan
+    ["rule_action", "rule_ref_type", "rule_distinct_by"],
+    // Step 2: Klaim
+    [
+      "auto_claim", 
+      "max_claims_per_period", 
+      "period_timezone",
+      "date_range",
+      "is_active",
+    ],
+    // Step 3: Review (no validation needed)
+    [],
+  ];
+
+  const handleNext = async () => {
+    try {
+      const fields = stepFields[currentStep] || [];
+      if (fields.length > 0) await form.validateFields(fields);
+      setCurrentStep((s) => Math.min(s + 1, stepsItems.length - 1));
+    } catch (e) {
+      // validation errors are shown by antd
+    }
+  };
+
+  const handlePrev = () => setCurrentStep((s) => Math.max(0, s - 1));
+
   // Handler untuk hapus mission
   const hapusMission = async (id) => {
     try {
@@ -298,7 +357,6 @@ const KnowledgeAdminMissions = () => {
       console.error("Gagal menghapus mission:", error);
     }
   };
-
 
   return (
     <>
@@ -315,33 +373,14 @@ const KnowledgeAdminMissions = () => {
         >
           <Flex align="center" justify="space-between">
             <Flex align="center" gap="small">
-              <SettingOutlined
-                style={{
-                  color: "#FF4500",
-                  fontSize: isMobile ? "18px" : "20px",
-                }}
-              />
-              <Text
-                strong
-                style={{
-                  color: "#1A1A1B",
-                  fontSize: isMobile ? "14px" : "16px",
-                  lineHeight: "1.4",
-                }}
-              >
-                Admin - Manajemen Missions
-              </Text>
+              <SettingOutlined />
+              <Text strong>Admin - Manajemen Missions</Text>
             </Flex>
             {!isMobile && (
               <Button
                 type="primary"
                 icon={<PlusOutlined />}
                 onClick={bukaModalTambah}
-                style={{
-                  borderRadius: "6px",
-                  backgroundColor: "#FF4500",
-                  borderColor: "#FF4500",
-                }}
               >
                 Tambah Mission
               </Button>
@@ -370,7 +409,7 @@ const KnowledgeAdminMissions = () => {
                   minHeight: "500px",
                 }}
               >
-                <TrophyOutlined style={{ color: "#FF4500", fontSize: "18px" }} />
+                <TrophyOutlined />
               </div>
             )}
 
@@ -379,15 +418,10 @@ const KnowledgeAdminMissions = () => {
               {/* Search Input */}
               <div style={{ marginBottom: "16px" }}>
                 <Input
-                  placeholder="Cari berdasarkan judul atau deskripsi mission..."
+                  placeholder="Cari mission..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   allowClear
-                  size={isMobile ? "middle" : "large"}
-                  style={{
-                    borderRadius: "6px",
-                    borderColor: "#EDEFF1",
-                  }}
                 />
               </div>
 
@@ -398,19 +432,14 @@ const KnowledgeAdminMissions = () => {
                   justify="space-between"
                   style={{ marginBottom: "16px" }}
                 >
-                  <Title level={4} style={{ margin: 0, color: "#1A1A1B" }}>
-                    🎯 Missions
+                  <Title level={4} style={{ margin: 0 }}>
+                    Missions
                   </Title>
                   <Button
                     type="primary"
                     icon={<PlusOutlined />}
                     onClick={bukaModalTambah}
                     size="small"
-                    style={{
-                      borderRadius: "6px",
-                      backgroundColor: "#FF4500",
-                      borderColor: "#FF4500",
-                    }}
                   >
                     Tambah
                   </Button>
@@ -421,20 +450,23 @@ const KnowledgeAdminMissions = () => {
                 dataSource={filteredMissions}
                 rowKey="id"
                 loading={sedangMeload}
-                size={isMobile ? "small" : "middle"}
+                size="small"
                 pagination={{
-                  pageSize: isMobile ? 5 : 10,
-                  showSizeChanger: !isMobile,
-                  showQuickJumper: !isMobile,
+                  pageSize: 10,
                   showTotal: (total, range) => {
-                    const filtered = searchTerm ? ` (difilter dari ${daftarMissions.length})` : "";
-                    return isMobile
-                      ? `${range[0]}-${range[1]} / ${total}${filtered}`
-                      : `Menampilkan ${range[0]}-${range[1]} dari ${total} missions${filtered}`;
+                    const filtered = searchTerm
+                      ? ` (filtered dari ${daftarMissions.length})`
+                      : "";
+                    return `${range[0]}-${range[1]} dari ${total} missions${filtered}`;
                   },
-                  size: isMobile ? "small" : "default",
+                  showSizeChanger: true,
+                  showQuickJumper: true,
                 }}
-                scroll={isMobile ? { x: 800 } : undefined}
+                locale={{
+                  emptyText: searchTerm
+                    ? `Tidak ada missions yang cocok dengan "${searchTerm}"`
+                    : "Belum ada missions. Klik 'Tambah Mission' untuk membuat yang pertama.",
+                }}
               />
             </div>
           </Flex>
@@ -454,239 +486,258 @@ const KnowledgeAdminMissions = () => {
         centered={isMobile}
         footer={[
           <Button
-            key="batal"
+            key="cancel"
             onClick={tutupModal}
             size={isMobile ? "middle" : "large"}
           >
             Batal
           </Button>,
-          <Button
-            key="simpan"
-            type="primary"
-            loading={mutasiTambah.isPending || mutasiUpdate.isPending}
-            onClick={submitForm}
-            size={isMobile ? "middle" : "large"}
-          >
-            {sedangEdit ? "Update" : "Simpan"}
-          </Button>,
+          currentStep > 0 && (
+            <Button
+              key="prev"
+              onClick={handlePrev}
+              size={isMobile ? "middle" : "large"}
+            >
+              Kembali
+            </Button>
+          ),
+          currentStep < 3 ? (
+            <Button
+              key="next"
+              type="primary"
+              onClick={handleNext}
+              size={isMobile ? "middle" : "large"}
+            >
+              Lanjut
+            </Button>
+          ) : (
+            <Button
+              key="submit"
+              type="primary"
+              loading={mutasiTambah.isPending || mutasiUpdate.isPending}
+              onClick={submitForm}
+              size={isMobile ? "middle" : "large"}
+            >
+              {sedangEdit ? "Update" : "Simpan"}
+            </Button>
+          ),
         ]}
       >
-        <Form form={form} layout="vertical" style={{ marginTop: "24px" }}>
-          <Form.Item
-            label="Judul Mission"
-            name="title"
-            rules={[
-              {
-                required: true,
-                message: "Judul mission wajib diisi!",
-              },
-              {
-                min: 3,
-                message: "Judul mission minimal 3 karakter!",
-              },
-              {
-                max: 255,
-                message: "Judul mission maksimal 255 karakter!",
-              },
-            ]}
-          >
-            <Input
-              placeholder="Contoh: Posting Artikel Harian, Review Dokumen, dll"
-              size={isMobile ? "middle" : "large"}
-              style={{
-                borderRadius: "6px",
-                borderColor: "#EDEFF1",
-              }}
-            />
-          </Form.Item>
+        <Steps
+          current={currentStep}
+          items={stepsItems}
+          size={isMobile ? "small" : "default"}
+        />
+        <Divider />
+        <Form form={form} layout="vertical">
+          {currentStep === 0 && (
+            <>
+              <Form.Item
+                label="Judul Mission"
+                name="title"
+                rules={[
+                  {
+                    required: true,
+                    message: "Judul mission wajib diisi!",
+                  },
+                  {
+                    min: 3,
+                    message: "Judul mission minimal 3 karakter!",
+                  },
+                  {
+                    max: 255,
+                    message: "Judul mission maksimal 255 karakter!",
+                  },
+                ]}
+              >
+                <Input placeholder="Contoh: Baca 3 artikel per hari" />
+              </Form.Item>
 
-          <Form.Item
-            label="Deskripsi (Opsional)"
-            name="description"
-          >
-            <TextArea
-              placeholder="Masukkan deskripsi detail tentang mission ini..."
-              rows={isMobile ? 3 : 4}
-              size={isMobile ? "middle" : "large"}
-              style={{
-                borderRadius: "6px",
-                borderColor: "#EDEFF1",
-              }}
-              showCount
-              maxLength={1000}
-            />
-          </Form.Item>
+              <Form.Item label="Deskripsi" name="description">
+                <TextArea
+                  placeholder="Deskripsi mission..."
+                  rows={3}
+                  maxLength={500}
+                />
+              </Form.Item>
 
-          <div style={{ display: "flex", gap: "16px" }}>
-            <Form.Item
-              label="Frekuensi"
-              name="frequency"
-              style={{ flex: 1 }}
-              rules={[
-                {
-                  required: true,
-                  message: "Frekuensi wajib dipilih!",
-                },
-              ]}
-              initialValue="daily"
-            >
-              <Select
-                placeholder="Pilih frekuensi"
-                size={isMobile ? "middle" : "large"}
-                options={frequencyOptions}
-                style={{
-                  borderRadius: "6px",
-                }}
-              />
-            </Form.Item>
+              <Space.Compact style={{ width: "100%", display: "flex" }}>
+                <Form.Item
+                  label="Frekuensi"
+                  name="frequency"
+                  style={{ flex: 1 }}
+                  rules={[{ required: true, message: "Pilih frekuensi!" }]}
+                  initialValue="daily"
+                >
+                  <Select
+                    placeholder="Pilih frekuensi"
+                    options={frequencyOptions}
+                  />
+                </Form.Item>
 
-            <Form.Item
-              label="Target"
-              name="target_count"
-              style={{ flex: 1 }}
-              rules={[
-                {
-                  type: "number",
-                  min: 1,
-                  message: "Target minimal 1!",
-                },
-              ]}
-            >
-              <InputNumber
-                placeholder="1"
-                min={1}
-                style={{ width: "100%" }}
-                size={isMobile ? "middle" : "large"}
-              />
-            </Form.Item>
-          </div>
+                <Form.Item
+                  label="Target"
+                  name="target_count"
+                  style={{ flex: 1, marginLeft: 16 }}
+                  rules={[
+                    { type: "number", min: 1, message: "Target minimal 1!" },
+                  ]}
+                >
+                  <InputNumber
+                    placeholder="1"
+                    min={1}
+                    style={{ width: "100%" }}
+                  />
+                </Form.Item>
+              </Space.Compact>
 
-          <Form.Item
-            label="Poin Reward"
-            name="points_reward"
-            rules={[
-              {
-                type: "number",
-                min: 0,
-                message: "Poin harus berupa angka positif!",
-              },
-            ]}
-          >
-            <InputNumber
-              placeholder="0"
-              min={0}
-              style={{ width: "100%" }}
-              size={isMobile ? "middle" : "large"}
-            />
-          </Form.Item>
+              <Form.Item
+                label="Poin"
+                name="points_reward"
+                rules={[{ type: "number", min: 0, message: "Poin minimal 0!" }]}
+              >
+                <InputNumber
+                  placeholder="10"
+                  min={0}
+                  style={{ width: "100%" }}
+                />
+              </Form.Item>
+            </>
+          )}
 
-          <Form.Item
-            label="Periode Mission"
-            name="date_range"
-          >
-            <RangePicker
-              placeholder={["Tanggal Mulai", "Tanggal Selesai"]}
-              format="DD/MM/YYYY"
-              size={isMobile ? "middle" : "large"}
-              style={{ width: "100%" }}
-            />
-          </Form.Item>
+          {currentStep === 1 && (
+            <>
+              <Form.Item
+                label="Aksi"
+                name="rule_action"
+                rules={[{ required: true, message: "Pilih aksi!" }]}
+                initialValue="read_complete"
+              >
+                <Select
+                  options={[
+                    { label: "Baca Konten", value: "read_complete" },
+                    { label: "Komentar", value: "comment_content" },
+                    { label: "Like", value: "like_content" },
+                    { label: "Publish", value: "publish_content" },
+                  ]}
+                />
+              </Form.Item>
 
-          <Form.Item
-            label="Status Aktif"
-            name="is_active"
-            valuePropName="checked"
-            initialValue={true}
-          >
-            <Switch 
-              checkedChildren="Aktif" 
-              unCheckedChildren="Nonaktif" 
-            />
-          </Form.Item>
+              <Form.Item
+                label="Tipe Referensi"
+                name="rule_ref_type"
+                rules={[{ required: true, message: "Pilih tipe!" }]}
+                initialValue="content"
+              >
+                <Select options={[{ label: "Content", value: "content" }]} />
+              </Form.Item>
+
+              <Form.Item
+                label="Perhitungan"
+                name="rule_distinct_by"
+                initialValue="ref_id"
+              >
+                <Select
+                  options={[
+                    { label: "Per konten (unique)", value: "ref_id" },
+                    { label: "Semua aksi", value: "none" },
+                  ]}
+                />
+              </Form.Item>
+            </>
+          )}
+
+          {currentStep === 2 && (
+            <>
+              <Form.Item
+                label="Auto Claim"
+                name="auto_claim"
+                valuePropName="checked"
+                initialValue={true}
+              >
+                <Switch />
+              </Form.Item>
+
+              <Form.Item
+                label="Max Klaim per Periode"
+                name="max_claims_per_period"
+                initialValue={1}
+                rules={[{ type: "number", min: 1, message: "Minimal 1" }]}
+              >
+                <InputNumber min={1} style={{ width: "100%" }} />
+              </Form.Item>
+
+              <Form.Item label="Timezone" name="period_timezone">
+                <Input placeholder="Asia/Jakarta" />
+              </Form.Item>
+
+              <Form.Item label="Periode" name="date_range">
+                <RangePicker
+                  placeholder={["Mulai", "Selesai"]}
+                  format="DD/MM/YYYY"
+                  style={{ width: "100%" }}
+                />
+              </Form.Item>
+
+              <Form.Item
+                label="Status"
+                name="is_active"
+                valuePropName="checked"
+                initialValue={true}
+              >
+                <Switch />
+              </Form.Item>
+            </>
+          )}
+
+          {currentStep === 3 &&
+            (() => {
+              const v = form.getFieldsValue(true);
+              return (
+                <Card title="Review Data">
+                  <Space direction="vertical" style={{ width: "100%" }}>
+                    <div>
+                      <Text strong>Judul:</Text> {v.title || "-"}
+                    </div>
+                    <div>
+                      <Text strong>Deskripsi:</Text> {v.description || "-"}
+                    </div>
+                    <div>
+                      <Text strong>Frekuensi:</Text>{" "}
+                      <Tag>{v.frequency || "-"}</Tag>
+                    </div>
+                    <div>
+                      <Text strong>Target:</Text> {v.target_count || 0}
+                    </div>
+                    <div>
+                      <Text strong>Poin:</Text> {v.points_reward || 0}
+                    </div>
+                    <div>
+                      <Text strong>Periode:</Text>{" "}
+                      {v.date_range?.length
+                        ? `${v.date_range[0]?.format?.(
+                            "DD/MM/YYYY"
+                          )} - ${v.date_range[1]?.format?.("DD/MM/YYYY")}`
+                        : "Tidak terbatas"}
+                    </div>
+                    <div>
+                      <Text strong>Aksi:</Text>{" "}
+                      <Tag>{v.rule_action || "-"}</Tag>
+                    </div>
+                    <div>
+                      <Text strong>Auto Claim:</Text>{" "}
+                      {v.auto_claim ? "Ya" : "Tidak"}
+                    </div>
+                    <div>
+                      <Text strong>Status:</Text>{" "}
+                      {v.is_active ? "Aktif" : "Nonaktif"}
+                    </div>
+                  </Space>
+                </Card>
+              );
+            })()}
         </Form>
       </Modal>
-
-      <style jsx global>{`
-        .ant-card {
-          transition: all 0.3s ease !important;
-          overflow: hidden !important;
-          border-radius: 8px !important;
-        }
-
-        .ant-card:hover {
-          border-color: #ff4500 !important;
-          box-shadow: 0 2px 8px rgba(255, 69, 0, 0.15) !important;
-        }
-
-        .ant-card .ant-card-body {
-          padding: 0 !important;
-          border-radius: inherit !important;
-        }
-
-        .ant-card .ant-card-body > div:first-child {
-          border-top-left-radius: inherit !important;
-          border-bottom-left-radius: inherit !important;
-        }
-
-        .ant-card .ant-card-body > div:first-child > div:last-child {
-          border-top-right-radius: inherit !important;
-          border-bottom-right-radius: inherit !important;
-        }
-
-        .ant-table-thead > tr > th {
-          background-color: #f8f9fa !important;
-          border-bottom: 1px solid #edeff1 !important;
-          color: #1a1a1b !important;
-          font-weight: 600 !important;
-        }
-
-        .ant-table-tbody > tr:hover > td {
-          background-color: rgba(255, 69, 0, 0.05) !important;
-        }
-
-        .ant-table-tbody > tr > td {
-          border-bottom: 1px solid #f0f0f0 !important;
-        }
-
-        .ant-form-item-label > label {
-          color: #1a1a1b !important;
-          font-weight: 600 !important;
-        }
-
-        .ant-input:focus,
-        .ant-input-focused {
-          border-color: #ff4500 !important;
-          box-shadow: 0 0 0 2px rgba(255, 69, 0, 0.1) !important;
-        }
-
-        .ant-input:hover {
-          border-color: #ff4500 !important;
-        }
-
-        @media (max-width: 768px) {
-          .ant-table {
-            font-size: 12px !important;
-          }
-
-          .ant-table-thead > tr > th {
-            padding: 8px 4px !important;
-            font-size: 12px !important;
-          }
-
-          .ant-table-tbody > tr > td {
-            padding: 8px 4px !important;
-            font-size: 12px !important;
-          }
-
-          .ant-affix {
-            position: fixed !important;
-            top: 0 !important;
-            left: 0 !important;
-            right: 0 !important;
-            z-index: 1000 !important;
-          }
-        }
-      `}</style>
     </>
   );
 };

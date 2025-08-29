@@ -2,6 +2,7 @@ import { createRouter } from "next-connect";
 import auth from "@/middleware/auth.middleware";
 import multer from "multer";
 import { uploadKnowledgeContentAttachment } from "@/controller/knowledge/knowledge-contents.controller";
+import asnNonAsnMiddleware from "@/middleware/asn-non-asn.middleware";
 
 export const config = {
   api: {
@@ -21,6 +22,9 @@ const upload = multer({
   },
 });
 
-router.use(auth).post(upload.array("files"), uploadKnowledgeContentAttachment);
+router
+  .use(auth)
+  .use(asnNonAsnMiddleware)
+  .post(upload.array("files"), uploadKnowledgeContentAttachment);
 
 export default router.handler({});

@@ -75,7 +75,8 @@ export const likes = async (req, res) => {
               userId: currentContent.author_id,
               action: "content_liked",
               refType: "content",
-              refId: id,
+              // Make it unique per liker per content to prevent farming
+              refId: `${id}:${customId}`,
               xp: 1,
             });
           } catch (xpError) {

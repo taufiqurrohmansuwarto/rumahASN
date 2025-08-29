@@ -1,10 +1,10 @@
-import { createRouter } from "next-connect";
-import auth from "@/middleware/auth.middleware";
-import asnPemprovMiddleware from "@/middleware/asn-pemprov.middleware";
 import { getUserKnowledgeContents } from "@/controller/knowledge/knowledge-user.controller";
+import asnNonAsnMiddleware from "@/middleware/asn-non-asn.middleware";
+import auth from "@/middleware/auth.middleware";
+import { createRouter } from "next-connect";
 
 const router = createRouter();
 
-router.use(auth).use(asnPemprovMiddleware).get(getUserKnowledgeContents);
+router.use(auth).use(asnNonAsnMiddleware).get(getUserKnowledgeContents);
 
 export default router.handler({});
