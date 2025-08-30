@@ -5,6 +5,10 @@ import LayoutASNConnect from "@/components/Socmed/LayoutASNConnect";
 import useScrollRestoration from "@/hooks/useScrollRestoration";
 import Head from "next/head";
 import { Col, Row } from "antd";
+import TopContributors from "@/components/KnowledgeManagements/TopContributors";
+import TopContents from "@/components/KnowledgeManagements/TopContents";
+import TopCategories from "@/components/KnowledgeManagements/TopCategories";
+import TopTags from "@/components/KnowledgeManagements/TopTags";
 
 const AsnKnowledge = () => {
   useScrollRestoration("knowledge-scroll", true, false, true); // Enable smooth restoration
@@ -15,14 +19,30 @@ const AsnKnowledge = () => {
         <title>Rumah ASN - ASN Connect - Manajemen Pengetahuan</title>
       </Head>
       <LayoutASNConnect active="asn-knowledge">
-        <Row>
-          <Col lg={18} xs={24}>
+        <Row gutter={[16, 16]}>
+          <Col lg={16} xs={24}>
             <KnowledgeLayout
               currentPath="/asn-connect/asn-knowledge"
               showCreateButton={true}
             >
               <KnowledgeUserContents />
             </KnowledgeLayout>
+          </Col>
+          <Col lg={8} xs={24}>
+            <Row gutter={[8, 8]}>
+              <Col lg={24} xs={24}>
+                <TopContributors period="month" limit={10} />
+              </Col>
+              <Col lg={24} xs={24}>
+                <TopContents period="week" sortBy="engagement" />
+              </Col>
+              <Col lg={24} xs={24}>
+                <TopCategories period="month" />
+              </Col>
+              <Col lg={24} xs={24}>
+                <TopTags period="month" limit={10} />
+              </Col>
+            </Row>
           </Col>
         </Row>
       </LayoutASNConnect>

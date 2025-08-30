@@ -168,9 +168,7 @@ export const getRepliesForComment = async (id, commentId) => {
 };
 
 export const getRelatedContents = async (id) => {
-  return await api
-    .get(`/users/contents/${id}/related`)
-    .then((res) => res.data);
+  return await api.get(`/users/contents/${id}/related`).then((res) => res.data);
 };
 
 // badges and missions for admin
@@ -470,4 +468,49 @@ export const uploadKnowledgeContentMediaAdmin = async (contentId, data) => {
       }
       throw error;
     });
+};
+
+// Knowledge Insights Services
+export const getTopContributors = async (params = {}) => {
+  const qs = queryString.stringify(params, {
+    skipNull: true,
+    skipEmptyString: true,
+  });
+
+  return await api
+    .get(`/users/insights/top-contributors?${qs}`)
+    .then((res) => res.data);
+};
+
+export const getTopContents = async (params = {}) => {
+  const qs = queryString.stringify(params, {
+    skipNull: true,
+    skipEmptyString: true,
+  });
+
+  return await api
+    .get(`/users/insights/top-contents?${qs}`)
+    .then((res) => res.data);
+};
+
+export const getTopCategories = async (params = {}) => {
+  const qs = queryString.stringify(params, {
+    skipNull: true,
+    skipEmptyString: true,
+  });
+
+  return await api
+    .get(`/users/insights/top-categories?${qs}`)
+    .then((res) => res.data);
+};
+
+export const getTopTags = async (params = {}) => {
+  const qs = queryString.stringify(params, {
+    skipNull: true,
+    skipEmptyString: true,
+  });
+
+  return await api
+    .get(`/users/insights/top-tags?${qs}`)
+    .then((res) => res.data);
 };

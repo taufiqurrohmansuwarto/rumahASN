@@ -1,12 +1,14 @@
 import { Text } from "@mantine/core";
-import { Popover } from "antd";
-import Link from "next/link";
-import ContentInformation from "./ContentInformation";
+import { Grid, Popover } from "antd";
 import { useRouter } from "next/router";
+import ContentInformation from "./ContentInformation";
+
+const { useBreakpoint } = Grid;
 
 function UserText({ userId, text }) {
   const router = useRouter();
-
+  const screens = useBreakpoint();
+  const isMobile = !screens.md;
   const gotoDetailUser = () => {
     router.push(`/users/${userId}`);
   };
@@ -18,7 +20,15 @@ function UserText({ userId, text }) {
       }}
       content={<ContentInformation userId={userId} />}
     >
-      <Text onClick={gotoDetailUser} style={{ cursor: "pointer" }}>
+      <Text
+        onClick={gotoDetailUser}
+        style={{
+          cursor: "pointer",
+          fontSize: isMobile ? "10px" : "13px",
+          maxWidth: isMobile ? "80px" : "200px",
+        }}
+        ellipsis={{ tooltip: text }}
+      >
         {text}
       </Text>
     </Popover>

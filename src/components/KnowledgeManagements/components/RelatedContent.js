@@ -1,6 +1,6 @@
 import React from "react";
 import { Card, Typography, Spin, List, Flex, Grid } from "antd";
-import { FileTextOutlined } from "@ant-design/icons";
+import { FileTextOutlined, LinkOutlined } from "@ant-design/icons";
 import { useRelatedContent } from "@/hooks/knowledge-management/useRelatedContent";
 import { useRouter } from "next/router";
 
@@ -38,7 +38,7 @@ const RelatedContent = ({ contentId }) => {
               gap: 8,
             }}
           >
-            📑 Konten Terkait
+            <LinkOutlined /> Konten Terkait
           </Title>
           <Text
             type="secondary"

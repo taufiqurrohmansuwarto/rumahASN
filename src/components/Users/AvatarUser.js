@@ -43,11 +43,11 @@ function AvatarUser({ userId, user, ...props }) {
   const popoverContent = (
     <div
       style={{
-        background: "linear-gradient(135deg, #FF4500 0%, #FF6B35 100%)",
+        background: "linear-gradient(135deg, #f0f2f5 0%, #e6e6e6 100%)",
         margin: "-12px",
         borderRadius: "8px",
         overflow: "hidden",
-        boxShadow: "0 8px 24px rgba(255, 69, 0, 0.15)",
+        boxShadow: "0 8px 24px rgba(0, 0, 0, 0.1)",
       }}
     >
       {/* Header with gradient */}
@@ -89,10 +89,10 @@ function AvatarUser({ userId, user, ...props }) {
           </div>
           <span
             style={{
-              color: "white",
+              color: "#333333",
               fontSize: "12px",
               fontWeight: 600,
-              textShadow: "0 1px 2px rgba(0, 0, 0, 0.1)",
+              textShadow: "none",
             }}
           >
             PROFIL PENGGUNA
@@ -164,13 +164,6 @@ function AvatarUser({ userId, user, ...props }) {
           position: "relative",
           display: "inline-block",
           cursor: "pointer",
-          transition: "transform 0.2s ease",
-        }}
-        onMouseEnter={(e) => {
-          e.currentTarget.style.transform = "scale(1.05)";
-        }}
-        onMouseLeave={(e) => {
-          e.currentTarget.style.transform = "scale(1)";
         }}
       >
         <Avatar
