@@ -1,23 +1,15 @@
-import React from "react";
+import { useTopCategories } from "@/hooks/knowledge-management/useKnowledgeInsights";
+import { BarChartOutlined, FolderOutlined } from "@ant-design/icons";
 import {
-  Card,
-  Typography,
   Badge,
-  Skeleton,
+  Card,
   Flex,
   Grid,
   List,
-  Progress,
+  Skeleton,
+  Tooltip,
+  Typography,
 } from "antd";
-import {
-  FolderOutlined,
-  BarChartOutlined,
-  FileTextOutlined,
-  LikeOutlined,
-  EyeOutlined,
-  MessageOutlined,
-} from "@ant-design/icons";
-import { useTopCategories } from "@/hooks/knowledge-management/useKnowledgeInsights";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 
@@ -52,7 +44,6 @@ const CategoryItem = ({ category, rank, isMobile, maxContentCount }) => {
     <List.Item
       style={{
         padding: isMobile ? "6px 0" : "8px 0",
-        borderBottom: "1px solid #f0f0f0",
       }}
     >
       <List.Item.Meta
@@ -63,7 +54,9 @@ const CategoryItem = ({ category, rank, isMobile, maxContentCount }) => {
               backgroundColor: getRankColor(rank),
               color: rank <= 3 ? "#fff" : "#000",
               fontWeight: "bold",
+              fontSize: "8px",
             }}
+            size="small"
           >
             <div
               style={{
@@ -133,7 +126,7 @@ function TopCategories({
   });
 
   const screens = useBreakpoint();
-  const isMobile = !screens.md;
+  const isMobile = screens.xs;
   const mainPadding = isMobile ? "12px" : "16px";
   const iconSectionWidth = isMobile ? "0px" : "40px";
 
@@ -163,60 +156,40 @@ function TopCategories({
     <>
       {(data?.categories?.length > 0 || isLoading) && (
         <div>
-          <Badge.Ribbon text="Kategori Populer" color="primary">
-            <Card
-              style={{
-                width: "100%",
-                marginBottom: "16px",
-              }}
-              styles={{ body: { padding: 0 } }}
-            >
-              <Flex>
-                {/* Icon Section - Hide on mobile */}
-                {!isMobile && (
-                  <div
-                    style={{
-                      width: iconSectionWidth,
-                      backgroundColor: "#F8F9FA",
-                      borderRight: "1px solid #E5E7EB",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      minHeight: "200px",
-                    }}
-                  >
-                    <BarChartOutlined
-                      style={{ color: "#8C8C8C", fontSize: "18px" }}
-                    />
-                  </div>
-                )}
+          <Card
+            style={{
+              width: "100%",
+              marginBottom: "16px",
+            }}
+            styles={{ body: { padding: 0 } }}
+          >
+            <Flex>
+              {/* Icon Section - Hide on mobile */}
+              {!isMobile && (
+                <div
+                  style={{
+                    width: iconSectionWidth,
+                    backgroundColor: "#F8F9FA",
+                    borderRight: "1px solid #E5E7EB",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    minHeight: "120px",
+                  }}
+                >
+                  <BarChartOutlined
+                    style={{ color: "#8C8C8C", fontSize: "18px" }}
+                  />
+                </div>
+              )}
 
-                {/* Content Section */}
-                <div style={{ flex: 1, padding: mainPadding }}>
-                  {/* Header */}
-                  <div style={{ marginBottom: "16px" }}>
-                    <Title
-                      level={5}
-                      style={{
-                        margin: 0,
-                        color: "#1C1C1C",
-                        fontSize: isMobile ? "16px" : "18px",
-                        fontWeight: 600,
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "8px",
-                      }}
-                    >
-                      📁 Kategori Populer
-                    </Title>
-                    <Text
-                      style={{
-                        color: "#878A8C",
-                        fontSize: isMobile ? "12px" : "14px",
-                      }}
-                    >
-                      Kategori {getSortByLabel(sortBy)} periode{" "}
-                      {period === "month"
+              {/* Content Section */}
+              <div style={{ flex: 1, padding: mainPadding }}>
+                {/* Header */}
+                <div style={{ marginBottom: "16px" }}>
+                  <Tooltip
+                    title={`Kategori ${getSortByLabel(sortBy)} periode ${
+                      period === "month"
                         ? "bulan ini"
                         : period === "week"
                         ? "minggu ini"
@@ -224,43 +197,58 @@ function TopCategories({
                         ? "kuartal ini"
                         : period === "year"
                         ? "tahun ini"
-                        : "semua waktu"}
+                        : "semua waktu"
+                    }`}
+                  >
+                    <Text
+                      strong
+                      style={{
+                        margin: 0,
+                        color: "#1C1C1C",
+                        fontSize: isMobile ? "12px" : "16px",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "8px",
+                        cursor: "help",
+                      }}
+                    >
+                      📁 Kategori Populer
                     </Text>
-                  </div>
-
-                  {/* Categories List */}
-                  <div>
-                    {isLoading ? (
-                      <div>
-                        {[...Array(5)].map((_, index) => (
-                          <div key={index} style={{ marginBottom: "16px" }}>
-                            <Skeleton.Input
-                              style={{ width: "100%", height: "70px" }}
-                              active
-                            />
-                          </div>
-                        ))}
-                      </div>
-                    ) : (
-                      <List
-                        dataSource={data?.categories || []}
-                        split={false}
-                        renderItem={(category, index) => (
-                          <CategoryItem
-                            key={category.category?.id}
-                            category={category}
-                            rank={index + 1}
-                            isMobile={isMobile}
-                            maxContentCount={maxContentCount}
-                          />
-                        )}
-                      />
-                    )}
-                  </div>
+                  </Tooltip>
                 </div>
-              </Flex>
-            </Card>
-          </Badge.Ribbon>
+
+                {/* Categories List */}
+                <div>
+                  {isLoading ? (
+                    <div>
+                      {[...Array(5)].map((_, index) => (
+                        <div key={index} style={{ marginBottom: "16px" }}>
+                          <Skeleton.Input
+                            style={{ width: "100%", height: "40px" }}
+                            active
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <List
+                      dataSource={data?.categories || []}
+                      split={false}
+                      renderItem={(category, index) => (
+                        <CategoryItem
+                          key={category.category?.id}
+                          category={category}
+                          rank={index + 1}
+                          isMobile={isMobile}
+                          maxContentCount={maxContentCount}
+                        />
+                      )}
+                    />
+                  )}
+                </div>
+              </div>
+            </Flex>
+          </Card>
         </div>
       )}
     </>

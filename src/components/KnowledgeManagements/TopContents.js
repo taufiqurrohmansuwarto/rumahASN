@@ -1,20 +1,25 @@
-import React from "react";
-import { Card, Typography, Badge, Skeleton, Flex, Grid, List } from "antd";
 import {
+  FileImageOutlined,
   FileTextOutlined,
   FireOutlined,
-  LikeOutlined,
-  EyeOutlined,
-  MessageOutlined,
   PlayCircleOutlined,
-  FileImageOutlined,
   SoundOutlined,
 } from "@ant-design/icons";
+import {
+  Badge,
+  Card,
+  Flex,
+  Grid,
+  List,
+  Skeleton,
+  Typography,
+  Tooltip,
+} from "antd";
 
 import { useTopContents } from "@/hooks/knowledge-management/useKnowledgeInsights";
-import { useRouter } from "next/router";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
+import { useRouter } from "next/router";
 
 dayjs.extend(relativeTime);
 
@@ -60,7 +65,6 @@ const ContentItem = ({ content, rank, isMobile }) => {
     <List.Item
       style={{
         padding: isMobile ? "6px 0" : "8px 0",
-        borderBottom: "1px solid #f0f0f0",
         cursor: "pointer",
       }}
       onClick={handleClick}
@@ -74,7 +78,9 @@ const ContentItem = ({ content, rank, isMobile }) => {
               backgroundColor: getRankColor(rank),
               color: rank <= 3 ? "#fff" : "#000",
               fontWeight: "bold",
+              fontSize: "8px",
             }}
+            size="small"
           >
             <div
               style={{
@@ -122,7 +128,7 @@ function TopContents({ period = "month", sortBy = "likes", limit = 10 }) {
   const { data, isLoading, error } = useTopContents({ period, sortBy, limit });
 
   const screens = useBreakpoint();
-  const isMobile = !screens.md;
+  const isMobile = screens.xs;
   const mainPadding = isMobile ? "12px" : "16px";
   const iconSectionWidth = isMobile ? "0px" : "40px";
 
@@ -148,60 +154,40 @@ function TopContents({ period = "month", sortBy = "likes", limit = 10 }) {
     <>
       {(data?.contents?.length > 0 || isLoading) && (
         <div>
-          <Badge.Ribbon text="Konten Populer" color="primary">
-            <Card
-              style={{
-                width: "100%",
-                marginBottom: "16px",
-              }}
-              styles={{ body: { padding: 0 } }}
-            >
-              <Flex>
-                {/* Icon Section - Hide on mobile */}
-                {!isMobile && (
-                  <div
-                    style={{
-                      width: iconSectionWidth,
-                      backgroundColor: "#F8F9FA",
-                      borderRight: "1px solid #E5E7EB",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      minHeight: "200px",
-                    }}
-                  >
-                    <FireOutlined
-                      style={{ color: "#8C8C8C", fontSize: "18px" }}
-                    />
-                  </div>
-                )}
+          <Card
+            style={{
+              width: "100%",
+              marginBottom: "16px",
+            }}
+            styles={{ body: { padding: 0 } }}
+          >
+            <Flex>
+              {/* Icon Section - Hide on mobile */}
+              {!isMobile && (
+                <div
+                  style={{
+                    width: iconSectionWidth,
+                    backgroundColor: "#F8F9FA",
+                    borderRight: "1px solid #E5E7EB",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    minHeight: "120px",
+                  }}
+                >
+                  <FireOutlined
+                    style={{ color: "#8C8C8C", fontSize: "18px" }}
+                  />
+                </div>
+              )}
 
-                {/* Content Section */}
-                <div style={{ flex: 1, padding: mainPadding }}>
-                  {/* Header */}
-                  <div style={{ marginBottom: "16px" }}>
-                    <Title
-                      level={5}
-                      style={{
-                        margin: 0,
-                        color: "#1C1C1C",
-                        fontSize: isMobile ? "16px" : "18px",
-                        fontWeight: 600,
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "8px",
-                      }}
-                    >
-                      🔥 Konten Populer
-                    </Title>
-                    <Text
-                      style={{
-                        color: "#878A8C",
-                        fontSize: isMobile ? "12px" : "14px",
-                      }}
-                    >
-                      Konten {getSortByLabel(sortBy)} periode{" "}
-                      {period === "month"
+              {/* Content Section */}
+              <div style={{ flex: 1, padding: mainPadding }}>
+                {/* Header */}
+                <div style={{ marginBottom: "16px" }}>
+                  <Tooltip
+                    title={`Konten ${getSortByLabel(sortBy)} periode ${
+                      period === "month"
                         ? "bulan ini"
                         : period === "week"
                         ? "minggu ini"
@@ -209,42 +195,57 @@ function TopContents({ period = "month", sortBy = "likes", limit = 10 }) {
                         ? "kuartal ini"
                         : period === "year"
                         ? "tahun ini"
-                        : "semua waktu"}
+                        : "semua waktu"
+                    }`}
+                  >
+                    <Text
+                      strong
+                      style={{
+                        margin: 0,
+                        color: "#1C1C1C",
+                        fontSize: isMobile ? "12px" : "16px",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "8px",
+                        cursor: "help",
+                      }}
+                    >
+                      🔥 Konten Populer
                     </Text>
-                  </div>
-
-                  {/* Contents List */}
-                  <div>
-                    {isLoading ? (
-                      <div>
-                        {[...Array(5)].map((_, index) => (
-                          <div key={index} style={{ marginBottom: "16px" }}>
-                            <Skeleton.Input
-                              style={{ width: "100%", height: "80px" }}
-                              active
-                            />
-                          </div>
-                        ))}
-                      </div>
-                    ) : (
-                      <List
-                        dataSource={data?.contents || []}
-                        split={false}
-                        renderItem={(content, index) => (
-                          <ContentItem
-                            key={content.id}
-                            content={content}
-                            rank={index + 1}
-                            isMobile={isMobile}
-                          />
-                        )}
-                      />
-                    )}
-                  </div>
+                  </Tooltip>
                 </div>
-              </Flex>
-            </Card>
-          </Badge.Ribbon>
+
+                {/* Contents List */}
+                <div>
+                  {isLoading ? (
+                    <div>
+                      {[...Array(5)].map((_, index) => (
+                        <div key={index} style={{ marginBottom: "16px" }}>
+                          <Skeleton.Input
+                            style={{ width: "100%", height: "35px" }}
+                            active
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <List
+                      dataSource={data?.contents || []}
+                      split={false}
+                      renderItem={(content, index) => (
+                        <ContentItem
+                          key={content.id}
+                          content={content}
+                          rank={index + 1}
+                          isMobile={isMobile}
+                        />
+                      )}
+                    />
+                  )}
+                </div>
+              </div>
+            </Flex>
+          </Card>
         </div>
       )}
     </>

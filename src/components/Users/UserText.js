@@ -8,7 +8,7 @@ const { useBreakpoint } = Grid;
 function UserText({ userId, text }) {
   const router = useRouter();
   const screens = useBreakpoint();
-  const isMobile = !screens.md;
+  const isMobile = screens.xs;
   const gotoDetailUser = () => {
     router.push(`/users/${userId}`);
   };
@@ -25,7 +25,6 @@ function UserText({ userId, text }) {
         style={{
           cursor: "pointer",
           fontSize: isMobile ? "10px" : "13px",
-          maxWidth: isMobile ? "80px" : "200px",
         }}
         ellipsis={{ tooltip: text }}
       >
