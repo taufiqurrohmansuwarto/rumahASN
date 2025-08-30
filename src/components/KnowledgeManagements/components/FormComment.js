@@ -75,6 +75,7 @@ const FormComment = ({
                 type="primary"
                 htmlType="submit"
                 loading={loading}
+                disabled={loading}
                 size={isMobile ? "small" : "middle"}
                 style={{
                   background:

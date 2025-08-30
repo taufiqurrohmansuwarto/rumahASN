@@ -136,6 +136,31 @@ export const bookmarkKnowledgeContent = async (id) => {
     .then((res) => res.data);
 };
 
+// Hierarchical Comments Services
+export const getKnowledgeContentCommentsHierarchical = async (id) => {
+  return await api
+    .get(`/users/contents/${id}/comments?hierarchical=true`)
+    .then((res) => res.data);
+};
+
+export const createKnowledgeContentReply = async ({ id, commentId, data }) => {
+  return await api
+    .post(`/users/contents/${id}/comments/${commentId}/reply`, data)
+    .then((res) => res.data);
+};
+
+export const likeKnowledgeContentComment = async ({ id, commentId }) => {
+  return await api
+    .post(`/users/contents/${id}/comments/${commentId}/like`)
+    .then((res) => res.data);
+};
+
+export const pinKnowledgeContentComment = async ({ id, commentId }) => {
+  return await api
+    .post(`/users/contents/${id}/comments/${commentId}/pin`)
+    .then((res) => res.data);
+};
+
 // badges and missions for admin
 export const getBadges = async () => {
   return await api.get("/admin/refs/badges").then((res) => res.data);

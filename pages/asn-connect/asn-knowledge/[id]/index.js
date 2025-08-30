@@ -21,14 +21,10 @@ const AsnKnowledgeDetail = () => {
     }
   );
 
-  const gotoAsnKnowledge = () => {
-    router.push("/asn-connect/asn-knowledge");
-  };
-
   return (
     <>
       <Head>
-        <title>Rumah ASN - Detail Pengetahuan</title>
+        <title>Rumah ASN - Detail Pengetahuan - {data?.title}</title>
       </Head>
       <Row>
         <Col lg={18} xs={24}>

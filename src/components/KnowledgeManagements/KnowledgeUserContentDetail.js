@@ -1,23 +1,19 @@
 import {
   bookmarkKnowledgeContent,
-  createKnowledgeContentComment,
-  deleteKnowledgeContentComment,
-  getKnowledgeContentComments,
   likeKnowledgeContent,
-  updateKnowledgeContentComment,
 } from "@/services/knowledge-management.services";
 import {
   CommentOutlined,
 } from "@ant-design/icons";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
+  Button,
   Card,
   Flex,
   Form,
   message,
   Modal,
-  Skeleton,
-  Space,
+  Switch,
   Typography,
 } from "antd";
 import dayjs from "dayjs";
@@ -25,118 +21,23 @@ import relativeTime from "dayjs/plugin/relativeTime";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import { useState } from "react";
-import CommentList from "./components/CommentList";
 import FormComment from "./components/FormComment";
 import KnowledgeContentHeader from "./components/KnowledgeContentHeader";
+import KnowledgeCommentsList from "./components/KnowledgeCommentsList";
+import { 
+  useCommentsHierarchical, 
+  useComments, 
+  useCommentInteractions 
+} from "@/hooks/knowledge-management/useComments";
 
 dayjs.extend(relativeTime);
 
 const { Text } = Typography;
 
 
-// Component untuk menampilkan daftar komentar dengan style seperti SocmedComments
-const KnowledgeCommentsList = ({
-  comments,
-  currentUser,
-  isLoading,
-  onEdit,
-  onDelete,
-  onReply,
-  editingComment,
-  replyingTo,
-  isUpdatingComment,
-  isDeletingComment,
-}) => {
-  if (isLoading) {
-    return (
-      <div>
-        {[1, 2, 3].map((item) => (
-          <Card
-            key={item}
-            style={{
-              marginBottom: "8px",
-              border: "1px solid #EDEFF1",
-              borderRadius: "4px",
-            }}
-            bodyStyle={{ padding: 0 }}
-          >
-            <Flex>
-              <div
-                style={{
-                  width: "32px",
-                  backgroundColor: "#F8F9FA",
-                  padding: "8px",
-                }}
-              >
-                <Skeleton.Avatar size={16} />
-              </div>
-              <Flex vertical style={{ flex: 1, padding: "12px" }} gap={8}>
-                <Skeleton.Input style={{ width: "30%" }} active size="small" />
-                <Skeleton
-                  paragraph={{ rows: 2, width: ["100%", "70%"] }}
-                  active
-                />
-                <Skeleton.Input style={{ width: "20%" }} active size="small" />
-              </Flex>
-            </Flex>
-          </Card>
-        ))}
-      </div>
-    );
-  }
-
-  if (!comments || comments.length === 0) {
-    return (
-      <Card
-        style={{
-          border: "1px solid #EDEFF1",
-          borderRadius: "4px",
-          backgroundColor: "#FFFFFF",
-          textAlign: "center",
-        }}
-        bodyStyle={{ padding: "48px 32px" }}
-      >
-        <Space direction="vertical" size={12} style={{ width: "100%" }}>
-          <div
-            style={{
-              fontSize: "36px",
-              color: "#D1D5DB",
-              marginBottom: "8px",
-            }}
-          >
-            💬
-          </div>
-          <Text style={{ color: "#787C7E", fontSize: "16px" }}>
-            Belum ada komentar
-          </Text>
-          <Text type="secondary" style={{ fontSize: "14px", color: "#9CA3AF" }}>
-            Jadilah yang pertama untuk berkomentar
-          </Text>
-        </Space>
-      </Card>
-    );
-  }
-
-  // Reuse the existing CommentList component without wrapper since it's now in unified card
-  return (
-    <CommentList
-      comments={comments}
-      currentUser={currentUser}
-      isLoading={isLoading}
-      onEdit={onEdit}
-      onDelete={onDelete}
-      onReply={onReply}
-      editingComment={editingComment}
-      replyingTo={replyingTo}
-      isUpdatingComment={isUpdatingComment}
-      isDeletingComment={isDeletingComment}
-    />
-  );
-};
 
 const KnowledgeUserContentDetail = ({ 
   data, 
-  isLoading, 
   disableInteractions = false, 
   showOwnerActions = false 
 }) => {
@@ -148,17 +49,25 @@ const KnowledgeUserContentDetail = ({
   // Comment management states
   const [editingComment, setEditingComment] = useState(null);
   const [replyingTo, setReplyingTo] = useState(null);
+  const [isHierarchicalView, setIsHierarchicalView] = useState(true);
 
   const { id } = router.query;
 
-  const { data: comments, isLoading: isLoadingComments } = useQuery(
-    ["knowledge-content-comments", id],
-    () => getKnowledgeContentComments(id),
-    {
-      enabled: !!id,
-      keepPreviousData: true,
-    }
-  );
+  // Use hierarchical or flat comments based on toggle
+  const { data: hierarchicalComments, isLoading: isLoadingHierarchical } = useCommentsHierarchical(id, {
+    enabled: !!id && isHierarchicalView,
+  });
+
+  const { data: flatComments, isLoading: isLoadingFlat } = useComments(id, {
+    enabled: !!id && !isHierarchicalView,
+  });
+
+  // Use the appropriate data based on view mode
+  const comments = isHierarchicalView ? hierarchicalComments : flatComments;
+  const isLoadingComments = isHierarchicalView ? isLoadingHierarchical : isLoadingFlat;
+
+  // Use the comment interactions hook
+  const commentInteractions = useCommentInteractions(id);
 
   const { mutate: like, isLoading: isLiking } = useMutation(
     (data) => likeKnowledgeContent(data),
@@ -194,62 +103,18 @@ const KnowledgeUserContentDetail = ({
     }
   );
 
-  const { mutate: createComment, isLoading: isCreatingComment } = useMutation(
-    (data) => createKnowledgeContentComment(data),
-    {
-      onSuccess: () => {
-        message.success("Komentar berhasil ditambahkan");
-        queryClient.invalidateQueries(["knowledge-content-comments", id]);
-        queryClient.invalidateQueries(["knowledge-content-detail", id]);
-        form.resetFields();
-        setReplyingTo(null);
-      },
-      onError: () => {
-        message.error("Gagal menambahkan komentar");
-      },
-    }
-  );
-
-  const { mutate: updateComment, isLoading: isUpdatingComment } = useMutation(
-    (data) => updateKnowledgeContentComment(data),
-    {
-      onSuccess: () => {
-        message.success("Komentar berhasil diperbarui");
-        queryClient.invalidateQueries(["knowledge-content-comments", id]);
-        setEditingComment(null);
-      },
-      onError: () => {
-        message.error("Gagal memperbarui komentar");
-      },
-    }
-  );
-
-  const { mutate: deleteComment, isLoading: isDeletingComment } = useMutation(
-    (data) => deleteKnowledgeContentComment(data),
-    {
-      onSuccess: () => {
-        message.success("Komentar berhasil dihapus");
-        queryClient.invalidateQueries(["knowledge-content-comments", id]);
-        queryClient.invalidateQueries(["knowledge-content-detail", id]);
-      },
-      onError: () => {
-        message.error("Gagal menghapus komentar");
-      },
-    }
-  );
+  // All comment mutations are now handled by the hook
 
   const handleSubmitComment = async () => {
-    if (isCreatingComment) return;
+    if (commentInteractions.isCreatingComment) return;
 
     try {
       const formData = await form.validateFields();
-      const payload = {
-        id,
-        data: {
-          comment: formData.content,
-        },
-      };
-      createComment(payload);
+      commentInteractions.createComment({
+        comment: formData.content,
+      });
+      form.resetFields();
+      setReplyingTo(null);
     } catch (error) {
       // Form validation failed, don't proceed
       return;
@@ -258,15 +123,12 @@ const KnowledgeUserContentDetail = ({
 
   const handleEditComment = (comment, newContent, isSubmit = false) => {
     if (isSubmit && newContent) {
-      const payload = {
-        id,
-        commentId: comment.id,
-        data: {
-          comment: newContent,
-        },
-      };
       // Submit edit
-      updateComment(payload);
+      commentInteractions.updateComment(comment.id, {
+        comment: newContent,
+      });
+      // Hide edit form after submission
+      setEditingComment(null);
     } else if (comment) {
       // Start editing
       setEditingComment(comment.id);
@@ -284,26 +146,19 @@ const KnowledgeUserContentDetail = ({
       cancelText: "Batal",
       okType: "danger",
       onOk: () => {
-        const payload = {
-          id,
-          commentId,
-        };
-        deleteComment(payload);
+        commentInteractions.deleteComment(commentId);
       },
     });
   };
 
   const handleReplyComment = (commentId, content, isSubmit = false) => {
     if (isSubmit && content) {
-      // Submit reply
-      const payload = {
-        id,
-        data: {
-          comment: content,
-          parent_id: commentId, // If your API supports nested comments
-        },
-      };
-      createComment(payload);
+      // Submit reply using new reply endpoint
+      commentInteractions.createReply(commentId, {
+        comment: content,
+      });
+      // Hide reply form after submission
+      setReplyingTo(null);
     } else if (commentId) {
       // Start replying
       setReplyingTo(commentId);
@@ -311,6 +166,14 @@ const KnowledgeUserContentDetail = ({
       // Cancel replying
       setReplyingTo(null);
     }
+  };
+
+  const handleLikeComment = (commentId) => {
+    commentInteractions.likeComment(commentId);
+  };
+
+  const handlePinComment = (commentId) => {
+    commentInteractions.pinComment(commentId);
   };
 
   const handleBookmark = () => {
@@ -343,7 +206,7 @@ const KnowledgeUserContentDetail = ({
           borderRadius: "4px",
           marginBottom: "16px",
         }}
-        bodyStyle={{ padding: 0 }}
+        styles={{ body: { padding: 0 } }}
       >
         <Flex>
           {/* Icon Section - Combined */}
@@ -366,17 +229,31 @@ const KnowledgeUserContentDetail = ({
           <div style={{ flex: 1, padding: "16px" }}>
             {/* Comment Section Header */}
             <div style={{ marginBottom: "16px" }}>
-              <Text
-                strong
-                style={{
-                  color: "#1A1A1B",
-                  fontSize: "16px",
-                  display: "block",
-                  marginBottom: "4px",
-                }}
-              >
-                Diskusi
-              </Text>
+              <Flex justify="space-between" align="center" style={{ marginBottom: "8px" }}>
+                <Text
+                  strong
+                  style={{
+                    color: "#1A1A1B",
+                    fontSize: "16px",
+                  }}
+                >
+                  Diskusi
+                </Text>
+                
+                {!disableInteractions && comments && comments.length > 0 && (
+                  <Flex align="center" gap={8}>
+                    <Text style={{ fontSize: "12px", color: "#787C7E" }}>
+                      Tampilan Berjenjang
+                    </Text>
+                    <Switch 
+                      size="small"
+                      checked={isHierarchicalView}
+                      onChange={setIsHierarchicalView}
+                      loading={isLoadingComments}
+                    />
+                  </Flex>
+                )}
+              </Flex>
               <Text
                 style={{
                   color: "#787C7E",
@@ -409,7 +286,7 @@ const KnowledgeUserContentDetail = ({
                   form={form}
                   currentUser={session?.user}
                   onSubmit={handleSubmitComment}
-                  loading={isCreatingComment}
+                  loading={commentInteractions.isCreatingComment}
                 />
               </div>
             )}
@@ -424,7 +301,15 @@ const KnowledgeUserContentDetail = ({
                     fontWeight: 500,
                   }}
                 >
-                  Komentar ({comments.length})
+                  Komentar ({isHierarchicalView ? 
+                    comments.reduce((total, comment) => {
+                      // Count parent + all nested replies
+                      const countReplies = (replies) => {
+                        return replies?.reduce((sum, reply) => sum + 1 + countReplies(reply.replies || []), 0) || 0;
+                      };
+                      return total + 1 + countReplies(comment.replies || []);
+                    }, 0) : comments.length
+                  })
                 </Text>
               </div>
             )}
@@ -438,10 +323,16 @@ const KnowledgeUserContentDetail = ({
                 onEdit={handleEditComment}
                 onDelete={handleDeleteComment}
                 onReply={handleReplyComment}
+                onLike={handleLikeComment}
+                onPin={handlePinComment}
                 editingComment={editingComment}
                 replyingTo={replyingTo}
-                isUpdatingComment={isUpdatingComment}
-                isDeletingComment={isDeletingComment}
+                isUpdatingComment={commentInteractions.isUpdatingComment}
+                isDeletingComment={commentInteractions.isDeletingComment}
+                isLikingComment={commentInteractions.isLikingComment}
+                isPinningComment={commentInteractions.isPinningComment}
+                isHierarchical={isHierarchicalView}
+                contentAuthorId={data?.author_id}
               />
             )}
 
