@@ -482,8 +482,9 @@ export const getCommentsHierarchical = async (req, res) => {
         comment.user_liked = !!userLiked;
       }
 
-      // Ambil replies
-      comment.replies = await getReplies(comment.id);
+      // Don't load replies by default for better performance
+      // Replies will be loaded on-demand when user expands
+      comment.replies = [];
     }
 
     return res.json(parentComments);
@@ -777,6 +778,65 @@ export const pinComment = async (req, res) => {
     });
 
     return res.json(result);
+  } catch (error) {
+    handleError(res, error);
+  }
+};
+
+// Fungsi untuk mendapatkan replies untuk comment tertentu
+export const getRepliesForComment = async (req, res) => {
+  try {
+    const { id, commentId } = req?.query; // content_id dan parent comment id
+    const { customId } = req?.user;
+
+    // Cek apakah konten ada
+    const currentContent = await KnowledgeContent.query()
+      .where("id", id)
+      .andWhere("status", "published")
+      .first();
+
+    if (!currentContent) {
+      return res.status(404).json({
+        message: "Konten tidak ditemukan",
+      });
+    }
+
+    // Cek apakah parent comment ada
+    const parentComment = await KnowledgeUserInteraction.query()
+      .where("id", commentId)
+      .andWhere("content_id", id)
+      .andWhere("interaction_type", "comment")
+      .first();
+
+    if (!parentComment) {
+      return res.status(404).json({
+        message: "Komentar tidak ditemukan",
+      });
+    }
+
+    // Ambil replies untuk comment ini
+    const replies = await KnowledgeUserInteraction.query()
+      .where("parent_comment_id", commentId)
+      .andWhere("interaction_type", "comment")
+      .orderBy("created_at", "desc")
+      .withGraphFetched("user(simpleWithImage)");
+
+    // Untuk setiap reply, cek apakah user sudah like
+    for (let reply of replies) {
+      if (customId) {
+        const userLiked = await KnowledgeUserInteraction.query()
+          .where("parent_comment_id", reply.id)
+          .andWhere("user_id", customId)
+          .andWhere("interaction_type", "comment_like")
+          .first();
+        reply.user_liked = !!userLiked;
+      }
+      
+      // Level 2 replies tidak ditampilkan untuk simplicity
+      reply.replies = [];
+    }
+
+    return res.json(replies);
   } catch (error) {
     handleError(res, error);
   }

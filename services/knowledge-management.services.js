@@ -161,6 +161,18 @@ export const pinKnowledgeContentComment = async ({ id, commentId }) => {
     .then((res) => res.data);
 };
 
+export const getRepliesForComment = async (id, commentId) => {
+  return await api
+    .get(`/users/contents/${id}/comments/${commentId}/replies`)
+    .then((res) => res.data);
+};
+
+export const getRelatedContents = async (id) => {
+  return await api
+    .get(`/users/contents/${id}/related`)
+    .then((res) => res.data);
+};
+
 // badges and missions for admin
 export const getBadges = async () => {
   return await api.get("/admin/refs/badges").then((res) => res.data);

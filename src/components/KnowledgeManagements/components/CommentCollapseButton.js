@@ -1,4 +1,4 @@
-import { DownOutlined, RightOutlined } from "@ant-design/icons";
+import { DownOutlined, RightOutlined, LoadingOutlined } from "@ant-design/icons";
 import { Button, Typography } from "antd";
 
 const { Text } = Typography;
@@ -7,6 +7,7 @@ const CommentCollapseButton = ({
   isCollapsed,
   repliesCount,
   onToggle,
+  isLoading = false,
   isMobile = false,
 }) => {
   if (repliesCount === 0) return null;
@@ -16,6 +17,7 @@ const CommentCollapseButton = ({
       type="text"
       size="small"
       onClick={onToggle}
+      disabled={isLoading}
       style={{
         color: "#FF4500",
         padding: "2px 6px",
@@ -37,7 +39,7 @@ const CommentCollapseButton = ({
         e.currentTarget.style.backgroundColor = "transparent";
       }}
     >
-      {isCollapsed ? <RightOutlined /> : <DownOutlined />}
+      {isLoading ? <LoadingOutlined spin /> : (isCollapsed ? <RightOutlined /> : <DownOutlined />)}
       <Text
         style={{
           color: "#FF4500",
@@ -45,9 +47,12 @@ const CommentCollapseButton = ({
           fontWeight: 500,
         }}
       >
-        {isCollapsed 
-          ? `Lihat ${repliesCount} balasan` 
-          : `Sembunyikan balasan`
+        {isLoading 
+          ? "Loading..." 
+          : (isCollapsed 
+            ? `Lihat ${repliesCount} balasan` 
+            : `Sembunyikan balasan`
+          )
         }
       </Text>
     </Button>

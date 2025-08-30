@@ -4,6 +4,7 @@ import {
   RetweetOutlined,
   PushpinOutlined,
   PushpinFilled,
+  LoadingOutlined,
 } from "@ant-design/icons";
 import { Tooltip, Grid } from "antd";
 
@@ -16,6 +17,8 @@ const CommentActions = ({
   onLike,
   onReply,
   onPin,
+  isLikingComment = false,
+  isPinningComment = false,
   isHierarchical = false,
 }) => {
   const screens = useBreakpoint();
@@ -28,28 +31,33 @@ const CommentActions = ({
   const isLiked = comment.user_liked;
   const likesCount = comment.likes_count || 0;
   actions.push(
-    <Tooltip key="comment-like" title={isLiked ? "Batal suka" : "Suka"}>
+    <Tooltip key="comment-like" title={isLikingComment ? "Loading..." : (isLiked ? "Batal suka" : "Suka")}>
       <span
-        onClick={() => onLike && onLike(comment.id)}
+        onClick={() => !isLikingComment && onLike && onLike(comment.id)}
         style={{
           color: isLiked ? "#FF4500" : "#6B7280",
-          cursor: "pointer",
+          cursor: isLikingComment ? "not-allowed" : "pointer",
           fontSize: isMobile ? "12px" : "13px",
           transition: "all 0.2s ease",
           display: "flex",
           alignItems: "center",
           gap: "4px",
+          opacity: isLikingComment ? 0.6 : 1,
         }}
         onMouseEnter={(e) => {
-          e.currentTarget.style.color = isLiked ? "#e53e00" : "#374151";
-          e.currentTarget.style.transform = "translateY(-1px)";
+          if (!isLikingComment) {
+            e.currentTarget.style.color = isLiked ? "#e53e00" : "#374151";
+            e.currentTarget.style.transform = "translateY(-1px)";
+          }
         }}
         onMouseLeave={(e) => {
-          e.currentTarget.style.color = isLiked ? "#FF4500" : "#6B7280";
-          e.currentTarget.style.transform = "translateY(0)";
+          if (!isLikingComment) {
+            e.currentTarget.style.color = isLiked ? "#FF4500" : "#6B7280";
+            e.currentTarget.style.transform = "translateY(0)";
+          }
         }}
       >
-        {isLiked ? <LikeFilled /> : <LikeOutlined />}
+        {isLikingComment ? <LoadingOutlined spin /> : (isLiked ? <LikeFilled /> : <LikeOutlined />)}
         <span className="comment-action">{likesCount > 0 ? likesCount : "Suka"}</span>
       </span>
     </Tooltip>
@@ -91,28 +99,33 @@ const CommentActions = ({
   if (canPin && (!isHierarchical || comment.depth === 0)) {
     const isPinned = comment.is_pinned;
     actions.push(
-      <Tooltip key="comment-pin" title={isPinned ? "Batal pin" : "Pin komentar"}>
+      <Tooltip key="comment-pin" title={isPinningComment ? "Loading..." : (isPinned ? "Batal pin" : "Pin komentar")}>
         <span
-          onClick={() => onPin && onPin(comment.id)}
+          onClick={() => !isPinningComment && onPin && onPin(comment.id)}
           style={{
             color: isPinned ? "#FF4500" : "#6B7280",
-            cursor: "pointer",
+            cursor: isPinningComment ? "not-allowed" : "pointer",
             fontSize: isMobile ? "12px" : "13px",
             transition: "all 0.2s ease",
             display: "flex",
             alignItems: "center",
             gap: "4px",
+            opacity: isPinningComment ? 0.6 : 1,
           }}
           onMouseEnter={(e) => {
-            e.currentTarget.style.color = isPinned ? "#e53e00" : "#374151";
-            e.currentTarget.style.transform = "translateY(-1px)";
+            if (!isPinningComment) {
+              e.currentTarget.style.color = isPinned ? "#e53e00" : "#374151";
+              e.currentTarget.style.transform = "translateY(-1px)";
+            }
           }}
           onMouseLeave={(e) => {
-            e.currentTarget.style.color = isPinned ? "#FF4500" : "#6B7280";
-            e.currentTarget.style.transform = "translateY(0)";
+            if (!isPinningComment) {
+              e.currentTarget.style.color = isPinned ? "#FF4500" : "#6B7280";
+              e.currentTarget.style.transform = "translateY(0)";
+            }
           }}
         >
-          {isPinned ? <PushpinFilled /> : <PushpinOutlined />}
+          {isPinningComment ? <LoadingOutlined spin /> : (isPinned ? <PushpinFilled /> : <PushpinOutlined />)}
           <span className="comment-action">{isPinned ? "Dipin" : "Pin"}</span>
         </span>
       </Tooltip>

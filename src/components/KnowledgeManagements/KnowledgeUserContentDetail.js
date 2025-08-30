@@ -2,13 +2,12 @@ import {
   bookmarkKnowledgeContent,
   likeKnowledgeContent,
 } from "@/services/knowledge-management.services";
-import {
-  CommentOutlined,
-} from "@ant-design/icons";
+import { CommentOutlined } from "@ant-design/icons";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   Button,
   Card,
+  Divider,
   Flex,
   Form,
   message,
@@ -24,22 +23,21 @@ import { useState } from "react";
 import FormComment from "./components/FormComment";
 import KnowledgeContentHeader from "./components/KnowledgeContentHeader";
 import KnowledgeCommentsList from "./components/KnowledgeCommentsList";
-import { 
-  useCommentsHierarchical, 
-  useComments, 
-  useCommentInteractions 
+import RelatedContent from "./components/RelatedContent";
+import {
+  useCommentsHierarchical,
+  useComments,
+  useCommentInteractions,
 } from "@/hooks/knowledge-management/useComments";
 
 dayjs.extend(relativeTime);
 
 const { Text } = Typography;
 
-
-
-const KnowledgeUserContentDetail = ({ 
-  data, 
-  disableInteractions = false, 
-  showOwnerActions = false 
+const KnowledgeUserContentDetail = ({
+  data,
+  disableInteractions = false,
+  showOwnerActions = false,
 }) => {
   const { data: session, status } = useSession();
   const queryClient = useQueryClient();
@@ -54,9 +52,10 @@ const KnowledgeUserContentDetail = ({
   const { id } = router.query;
 
   // Use hierarchical or flat comments based on toggle
-  const { data: hierarchicalComments, isLoading: isLoadingHierarchical } = useCommentsHierarchical(id, {
-    enabled: !!id && isHierarchicalView,
-  });
+  const { data: hierarchicalComments, isLoading: isLoadingHierarchical } =
+    useCommentsHierarchical(id, {
+      enabled: !!id && isHierarchicalView,
+    });
 
   const { data: flatComments, isLoading: isLoadingFlat } = useComments(id, {
     enabled: !!id && !isHierarchicalView,
@@ -64,7 +63,9 @@ const KnowledgeUserContentDetail = ({
 
   // Use the appropriate data based on view mode
   const comments = isHierarchicalView ? hierarchicalComments : flatComments;
-  const isLoadingComments = isHierarchicalView ? isLoadingHierarchical : isLoadingFlat;
+  const isLoadingComments = isHierarchicalView
+    ? isLoadingHierarchical
+    : isLoadingFlat;
 
   // Use the comment interactions hook
   const commentInteractions = useCommentInteractions(id);
@@ -229,7 +230,11 @@ const KnowledgeUserContentDetail = ({
           <div style={{ flex: 1, padding: "16px" }}>
             {/* Comment Section Header */}
             <div style={{ marginBottom: "16px" }}>
-              <Flex justify="space-between" align="center" style={{ marginBottom: "8px" }}>
+              <Flex
+                justify="space-between"
+                align="center"
+                style={{ marginBottom: "8px" }}
+              >
                 <Text
                   strong
                   style={{
@@ -239,13 +244,13 @@ const KnowledgeUserContentDetail = ({
                 >
                   Diskusi
                 </Text>
-                
+
                 {!disableInteractions && comments && comments.length > 0 && (
                   <Flex align="center" gap={8}>
                     <Text style={{ fontSize: "12px", color: "#787C7E" }}>
                       Tampilan Berjenjang
                     </Text>
-                    <Switch 
+                    <Switch
                       size="small"
                       checked={isHierarchicalView}
                       onChange={setIsHierarchicalView}
@@ -261,16 +266,20 @@ const KnowledgeUserContentDetail = ({
                   lineHeight: "1.4",
                 }}
               >
-                {disableInteractions 
-                  ? "Komentar tidak tersedia untuk konten yang belum dipublikasikan." 
-                  : "Berkomentarlah dengan sopan dan konstruktif. Hindari spam dan konten tidak pantas."
-                }
+                {disableInteractions
+                  ? "Komentar tidak tersedia untuk konten yang belum dipublikasikan."
+                  : "Berkomentarlah dengan sopan dan konstruktif. Hindari spam dan konten tidak pantas."}
               </Text>
             </div>
 
             {/* Comment Form */}
             {!disableInteractions && status === "authenticated" && (
-              <div style={{ marginBottom: comments && comments.length > 0 ? "24px" : "16px" }}>
+              <div
+                style={{
+                  marginBottom:
+                    comments && comments.length > 0 ? "24px" : "16px",
+                }}
+              >
                 <div style={{ marginBottom: "12px" }}>
                   <Text
                     style={{
@@ -301,15 +310,23 @@ const KnowledgeUserContentDetail = ({
                     fontWeight: 500,
                   }}
                 >
-                  Komentar ({isHierarchicalView ? 
-                    comments.reduce((total, comment) => {
-                      // Count parent + all nested replies
-                      const countReplies = (replies) => {
-                        return replies?.reduce((sum, reply) => sum + 1 + countReplies(reply.replies || []), 0) || 0;
-                      };
-                      return total + 1 + countReplies(comment.replies || []);
-                    }, 0) : comments.length
-                  })
+                  Komentar (
+                  {isHierarchicalView
+                    ? comments.reduce((total, comment) => {
+                        // Count parent + all nested replies
+                        const countReplies = (replies) => {
+                          return (
+                            replies?.reduce(
+                              (sum, reply) =>
+                                sum + 1 + countReplies(reply.replies || []),
+                              0
+                            ) || 0
+                          );
+                        };
+                        return total + 1 + countReplies(comment.replies || []);
+                      }, 0)
+                    : comments.length}
+                  )
                 </Text>
               </div>
             )}
@@ -329,6 +346,8 @@ const KnowledgeUserContentDetail = ({
                 replyingTo={replyingTo}
                 isUpdatingComment={commentInteractions.isUpdatingComment}
                 isDeletingComment={commentInteractions.isDeletingComment}
+                isCreatingComment={commentInteractions.isCreatingComment}
+                isCreatingReply={commentInteractions.isCreatingReply}
                 isLikingComment={commentInteractions.isLikingComment}
                 isPinningComment={commentInteractions.isPinningComment}
                 isHierarchical={isHierarchicalView}
@@ -338,18 +357,22 @@ const KnowledgeUserContentDetail = ({
 
             {/* Disabled State Message */}
             {disableInteractions && (
-              <div style={{
-                textAlign: "center",
-                padding: "32px 16px",
-                backgroundColor: "#F8F9FA",
-                borderRadius: "8px",
-                border: "1px solid #EDEFF1"
-              }}>
+              <div
+                style={{
+                  textAlign: "center",
+                  padding: "32px 16px",
+                  backgroundColor: "#F8F9FA",
+                  borderRadius: "8px",
+                  border: "1px solid #EDEFF1",
+                }}
+              >
                 <Text type="secondary" style={{ fontSize: "14px" }}>
                   💬 Fitur komentar akan tersedia setelah konten dipublikasikan
                 </Text>
               </div>
             )}
+            {/* Related Content */}
+            <RelatedContent contentId={id} isMobile={false} />
           </div>
         </Flex>
       </Card>

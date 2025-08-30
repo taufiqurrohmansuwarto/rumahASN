@@ -5,6 +5,7 @@ export { default as FormComment } from "./FormComment";
 export { default as KnowledgeContentBody } from "./KnowledgeContentBody";
 export { default as KnowledgeContentHeader } from "./KnowledgeContentHeader";
 export { default as KnowledgeNavigationSegmented } from "./KnowledgeNavigationSegmented";
+export { default as RelatedContent } from "./RelatedContent";
 
 // Gamification Components
 export { default as GamificationDashboard } from "./GamificationDashboard";

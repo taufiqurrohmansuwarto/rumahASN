@@ -28,9 +28,10 @@ const CommentList = ({
   replyingTo,
   isUpdatingComment,
   isDeletingComment,
+  isCreatingComment,
+  isCreatingReply,
   isLikingComment,
   isPinningComment,
-  isCreatingComment,
   isHierarchical = false,
   contentAuthorId,
 }) => {
@@ -99,6 +100,9 @@ const CommentList = ({
                 isUpdatingComment={isUpdatingComment}
                 isDeletingComment={isDeletingComment}
                 isCreatingComment={isCreatingComment}
+                isCreatingReply={isCreatingReply}
+                isLikingComment={isLikingComment}
+                isPinningComment={isPinningComment}
                 isHierarchical={isHierarchical}
               />
               {/* Add divider between depth 0 comments, except for the last one */}
@@ -241,6 +245,8 @@ const CommentList = ({
                   onLike: onLike,
                   onReply: onReply,
                   onPin: onPin,
+                  isLikingComment: isLikingComment,
+                  isPinningComment: isPinningComment,
                   isHierarchical: isHierarchical,
                 })}
               />
@@ -259,7 +265,7 @@ const CommentList = ({
                     parentComment={item}
                     currentUser={currentUser}
                     onReply={onReply}
-                    isCreatingComment={isCreatingComment}
+                    isCreatingComment={isCreatingReply}
                   />
                 </div>
               )}

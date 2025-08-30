@@ -11,7 +11,11 @@ const BASE_URL = "https://siasn.bkd.jatimprov.go.id:9000/public";
 
 // Helper function to encrypt customId for filename
 const getEncryptedUserId = (customId) => {
-  return crypto.createHash('sha256').update(customId.toString()).digest('hex').substring(0, 12);
+  return crypto
+    .createHash("sha256")
+    .update(customId.toString())
+    .digest("hex")
+    .substring(0, 12);
 };
 
 // Fungsi untuk mengelola jumlah views konten
@@ -486,10 +490,11 @@ export const uploadKnowledgeContentMediaCreate = async (req, res) => {
     }
 
     // Validate file type for media
-    const allowedTypes = ['image/', 'video/', 'audio/'];
-    if (!allowedTypes.some(type => file.mimetype.startsWith(type))) {
-      return res.status(400).json({ 
-        message: "Invalid file type. Only image, video, and audio files are allowed" 
+    const allowedTypes = ["image/", "video/", "audio/"];
+    if (!allowedTypes.some((type) => file.mimetype.startsWith(type))) {
+      return res.status(400).json({
+        message:
+          "Invalid file type. Only image, video, and audio files are allowed",
       });
     }
 
@@ -500,13 +505,7 @@ export const uploadKnowledgeContentMediaCreate = async (req, res) => {
     const fileName = `knowledge-media/${encryptedUserId}/${timestamp}_${originalName}`;
 
     // Upload to MinIO
-    await uploadFileMinio(
-      mc,
-      file.buffer,
-      fileName,
-      file.size,
-      file.mimetype
-    );
+    await uploadFileMinio(mc, file.buffer, fileName, file.size, file.mimetype);
 
     const mediaUrl = `${BASE_URL}/${fileName}`;
 
@@ -519,8 +518,11 @@ export const uploadKnowledgeContentMediaCreate = async (req, res) => {
         originalName: file.originalname,
         size: file.size,
         mimetype: file.mimetype,
-        type: file.mimetype.startsWith('image/') ? 'image' : 
-              file.mimetype.startsWith('video/') ? 'video' : 'audio'
+        type: file.mimetype.startsWith("image/")
+          ? "image"
+          : file.mimetype.startsWith("video/")
+          ? "video"
+          : "audio",
       },
     });
   } catch (error) {
@@ -546,14 +548,17 @@ export const uploadKnowledgeContentMedia = async (req, res) => {
       .first();
 
     if (!content) {
-      return res.status(404).json({ message: "Content not found or access denied" });
+      return res
+        .status(404)
+        .json({ message: "Content not found or access denied" });
     }
 
     // Validate file type for media
-    const allowedTypes = ['image/', 'video/', 'audio/'];
-    if (!allowedTypes.some(type => file.mimetype.startsWith(type))) {
-      return res.status(400).json({ 
-        message: "Invalid file type. Only image, video, and audio files are allowed" 
+    const allowedTypes = ["image/", "video/", "audio/"];
+    if (!allowedTypes.some((type) => file.mimetype.startsWith(type))) {
+      return res.status(400).json({
+        message:
+          "Invalid file type. Only image, video, and audio files are allowed",
       });
     }
 
@@ -564,27 +569,26 @@ export const uploadKnowledgeContentMedia = async (req, res) => {
     const fileName = `knowledge-media/${encryptedUserId}/${timestamp}_${originalName}`;
 
     // Upload to MinIO
-    await uploadFileMinio(
-      mc,
-      file.buffer,
-      fileName,
-      file.size,
-      file.mimetype
-    );
+    await uploadFileMinio(mc, file.buffer, fileName, file.size, file.mimetype);
 
     const mediaUrl = `${BASE_URL}/${fileName}`;
-    
-    // Determine content type based on file mimetype  
-    const contentType = file.mimetype.startsWith('image/') ? 'gambar' : 
-                        file.mimetype.startsWith('video/') ? 'video' : 'audio';
+
+    // Determine content type based on file mimetype
+    const contentType = file.mimetype.startsWith("image/")
+      ? "gambar"
+      : file.mimetype.startsWith("video/")
+      ? "video"
+      : "audio";
 
     // Update content with media URL
-    const updatedContent = await KnowledgeContent.query()
-      .patchAndFetchById(contentId, {
+    const updatedContent = await KnowledgeContent.query().patchAndFetchById(
+      contentId,
+      {
         type: contentType,
         source_url: mediaUrl,
         updated_at: new Date(),
-      });
+      }
+    );
 
     res.json({
       success: true,
@@ -597,8 +601,8 @@ export const uploadKnowledgeContentMedia = async (req, res) => {
           originalName: file.originalname,
           size: file.size,
           mimetype: file.mimetype,
-          type: contentType
-        }
+          type: contentType,
+        },
       },
     });
   } catch (error) {
@@ -625,41 +629,41 @@ export const uploadKnowledgeContentMediaAdmin = async (req, res) => {
     }
 
     // Validate file type for media
-    const allowedTypes = ['image/', 'video/', 'audio/'];
-    if (!allowedTypes.some(type => file.mimetype.startsWith(type))) {
-      return res.status(400).json({ 
-        message: "Invalid file type. Only image, video, and audio files are allowed" 
+    const allowedTypes = ["image/", "video/", "audio/"];
+    if (!allowedTypes.some((type) => file.mimetype.startsWith(type))) {
+      return res.status(400).json({
+        message:
+          "Invalid file type. Only image, video, and audio files are allowed",
       });
     }
 
     // Generate unique filename
     const timestamp = new Date().getTime();
     const originalName = file.originalname.replace(/[^a-zA-Z0-9.-]/g, "_");
-    const encryptedAdminId = getEncryptedUserId('admin_' + customId);
+    const encryptedAdminId = getEncryptedUserId("admin_" + customId);
     const fileName = `knowledge-media/${encryptedAdminId}/${timestamp}_${originalName}`;
 
     // Upload to MinIO
-    await uploadFileMinio(
-      mc,
-      file.buffer,
-      fileName,
-      file.size,
-      file.mimetype
-    );
+    await uploadFileMinio(mc, file.buffer, fileName, file.size, file.mimetype);
 
     const mediaUrl = `${BASE_URL}/${fileName}`;
-    
-    // Determine content type based on file mimetype  
-    const contentType = file.mimetype.startsWith('image/') ? 'gambar' : 
-                        file.mimetype.startsWith('video/') ? 'video' : 'audio';
+
+    // Determine content type based on file mimetype
+    const contentType = file.mimetype.startsWith("image/")
+      ? "gambar"
+      : file.mimetype.startsWith("video/")
+      ? "video"
+      : "audio";
 
     // Update content with media URL
-    const updatedContent = await KnowledgeContent.query()
-      .patchAndFetchById(contentId, {
+    const updatedContent = await KnowledgeContent.query().patchAndFetchById(
+      contentId,
+      {
         type: contentType,
         source_url: mediaUrl,
         updated_at: new Date(),
-      });
+      }
+    );
 
     res.json({
       success: true,
@@ -672,11 +676,197 @@ export const uploadKnowledgeContentMediaAdmin = async (req, res) => {
           originalName: file.originalname,
           size: file.size,
           mimetype: file.mimetype,
-          type: contentType
-        }
+          type: contentType,
+        },
       },
     });
   } catch (error) {
+    handleError(res, error);
+  }
+};
+
+export const getRelatedContents = async (req, res) => {
+  try {
+    const { id } = req?.query;
+
+    // Get current content first
+    const currentContent = await KnowledgeContent.query()
+      .where("id", id)
+      .andWhere("status", "published")
+      .first();
+
+    if (!currentContent) {
+      return res.status(404).json({
+        message: "Konten tidak ditemukan",
+      });
+    }
+
+    // Extract keywords from title and summary for matching
+    const titleKeywords = currentContent.title
+      .toLowerCase()
+      .replace(/[^\w\s]/gi, "") // Remove special characters
+      .split(/\s+/)
+      .filter((word) => word.length > 2); // Only words with 3+ characters
+
+    const summaryKeywords = currentContent.summary
+      ? currentContent.summary
+          .toLowerCase()
+          .replace(/[^\w\s]/gi, "")
+          .split(/\s+/)
+          .filter((word) => word.length > 2)
+      : [];
+
+    // Extract tags from current content
+    const currentTags = currentContent.tags
+      ? typeof currentContent.tags === "string"
+        ? JSON.parse(currentContent.tags)
+        : currentContent.tags
+      : [];
+
+    // Combine and get unique keywords (including tags as high-value keywords)
+    const allKeywords = [
+      ...new Set([
+        ...titleKeywords,
+        ...summaryKeywords,
+        ...currentTags.map((tag) => tag.toLowerCase()),
+      ]),
+    ];
+
+    // Build search query for similar content
+    let query = KnowledgeContent.query()
+      .where("status", "published")
+      .where("id", "!=", id) // Exclude current content
+      .orderBy("created_at", "desc")
+      .limit(20); // Get more to filter and sort by relevance
+
+    // If we have keywords, use them to find similar content
+    if (allKeywords.length > 0) {
+      query = query.where((builder) => {
+        allKeywords.forEach((keyword) => {
+          builder
+            .orWhere("title", "ilike", `%${keyword}%`)
+            .orWhere("summary", "ilike", `%${keyword}%`)
+            .orWhereRaw("tags @> ?", [JSON.stringify([keyword])]) // Search in tags array
+            .orWhereRaw("LOWER(tags::text) LIKE ?", [
+              `%${keyword.toLowerCase()}%`,
+            ]); // Flexible tag search
+        });
+      });
+    } else {
+      // Fallback: get content from same category
+      if (currentContent.category_id) {
+        query = query.where("category_id", currentContent.category_id);
+      }
+    }
+
+    const potentialMatches = await query;
+
+    // Calculate relevance score for each content
+    const scoredContent = potentialMatches.map((content) => {
+      let score = 0;
+      const contentTitle = content.title.toLowerCase();
+      const contentSummary = content.summary
+        ? content.summary.toLowerCase()
+        : "";
+
+      // Parse content tags
+      const contentTags = content.tags
+        ? typeof content.tags === "string"
+          ? JSON.parse(content.tags)
+          : content.tags
+        : [];
+      const contentTagsLower = contentTags.map((tag) => tag.toLowerCase());
+
+      // Score based on title matches
+      titleKeywords.forEach((keyword) => {
+        if (contentTitle.includes(keyword)) {
+          score += 4; // Higher weight for title matches
+        }
+      });
+
+      // Score based on summary matches
+      summaryKeywords.forEach((keyword) => {
+        if (contentSummary.includes(keyword)) {
+          score += 2;
+        }
+      });
+
+      // Score based on tag matches (highest priority)
+      currentTags.forEach((currentTag) => {
+        const currentTagLower = currentTag.toLowerCase();
+        // Exact tag match - highest score
+        if (contentTagsLower.includes(currentTagLower)) {
+          score += 5;
+        }
+        // Partial tag match - medium score
+        contentTagsLower.forEach((contentTag) => {
+          if (
+            contentTag.includes(currentTagLower) ||
+            currentTagLower.includes(contentTag)
+          ) {
+            score += 3;
+          }
+        });
+      });
+
+      // Enhanced category scoring
+      if (content.category_id === currentContent.category_id) {
+        score += 2; // Increased category bonus
+      }
+
+      // Tag diversity bonus - reward content with similar number of tags
+      const tagCountDiff = Math.abs(currentTags.length - contentTags.length);
+      if (tagCountDiff <= 1 && contentTags.length > 0) {
+        score += 1;
+      }
+
+      // Bonus for recent content (within last 30 days)
+      const daysDiff =
+        Math.abs(new Date() - new Date(content.created_at)) /
+        (1000 * 60 * 60 * 24);
+      if (daysDiff <= 30) {
+        score += 1;
+      }
+
+      return { ...content, relevanceScore: score };
+    });
+
+    // Sort by relevance score and take top 10
+    const relatedContent = scoredContent
+      .filter((content) => content.relevanceScore > 0)
+      .sort((a, b) => b.relevanceScore - a.relevanceScore)
+      .slice(0, 10)
+      .map(({ relevanceScore, ...content }) => content); // Remove relevanceScore from final result
+
+    // If still not enough results, fallback to recent content from same category
+    if (relatedContent.length < 5 && currentContent.category_id) {
+      const fallbackContent = await KnowledgeContent.query()
+        .where("status", "published")
+        .where("id", "!=", id)
+        .where("category_id", currentContent.category_id)
+        .whereNotIn(
+          "id",
+          relatedContent.map((c) => c.id)
+        )
+        .withGraphFetched("author(simple)")
+        .withGraphFetched("category(simple)")
+        .orderBy("created_at", "desc")
+        .limit(10 - relatedContent.length);
+
+      relatedContent.push(...fallbackContent);
+    }
+
+    return res.json({
+      currentContent: {
+        id: currentContent.id,
+        title: currentContent.title,
+        category_id: currentContent.category_id,
+      },
+      relatedContent: relatedContent.slice(0, 10), // Ensure max 10 results
+      totalFound: relatedContent.length,
+    });
+  } catch (error) {
+    console.error("Error getting related content:", error);
     handleError(res, error);
   }
 };

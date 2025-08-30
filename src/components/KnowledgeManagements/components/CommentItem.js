@@ -6,11 +6,13 @@ import { PushpinFilled } from "@ant-design/icons";
 import { Tooltip, Typography, Grid } from "antd";
 import dayjs from "dayjs";
 import { useState } from "react";
+import { useRouter } from "next/router";
 import CommentActions from "./CommentActions";
 import CommentDropdown from "./CommentDropdown";
 import CommentEditForm from "./CommentEditForm";
 import CommentReplyForm from "./CommentReplyForm";
 import CommentCollapseButton from "./CommentCollapseButton";
+import { getRepliesForComment } from "@/services/knowledge-management.services";
 
 const { Text } = Typography;
 const { useBreakpoint } = Grid;
@@ -32,16 +34,42 @@ const CommentItem = ({
   isUpdatingComment,
   isDeletingComment,
   isCreatingComment,
+  isCreatingReply,
+  isLikingComment,
+  isPinningComment,
   isHierarchical = false,
 }) => {
   const isNested = level > 0;
   const screens = useBreakpoint();
   const isMobile = !screens.md;
+  const router = useRouter();
+  const { id } = router.query;
   
   // State for collapsing nested replies (only for parent comments)
-  const [isRepliesCollapsed, setIsRepliesCollapsed] = useState(false);
-  const hasReplies = comment.replies && comment.replies.length > 0;
+  const [isRepliesCollapsed, setIsRepliesCollapsed] = useState(true); // Default collapsed
+  const [isLoadingReplies, setIsLoadingReplies] = useState(false);
+  const [loadedReplies, setLoadedReplies] = useState(null);
+  const hasReplies = (comment.replies && comment.replies.length > 0) || (comment.replies_count > 0);
   const repliesCount = comment.replies_count || 0;
+
+  // Handle async loading when uncollapsing
+  const handleToggleReplies = async () => {
+    if (isRepliesCollapsed && hasReplies) {
+      // Load replies if not already loaded
+      if (!loadedReplies) {
+        setIsLoadingReplies(true);
+        try {
+          const replies = await getRepliesForComment(id, comment.id);
+          setLoadedReplies(replies);
+        } catch (error) {
+          console.error("Failed to load replies:", error);
+        } finally {
+          setIsLoadingReplies(false);
+        }
+      }
+    }
+    setIsRepliesCollapsed(!isRepliesCollapsed);
+  };
   
   return (
     <Comment
@@ -162,6 +190,8 @@ const CommentItem = ({
         onLike: onLike,
         onReply: onReply,
         onPin: onPin,
+        isLikingComment: isLikingComment,
+        isPinningComment: isPinningComment,
         isHierarchical: isHierarchical,
       })}
     >
@@ -173,7 +203,7 @@ const CommentItem = ({
             parentComment={comment}
             currentUser={currentUser}
             onReply={onReply}
-            isCreatingComment={isCreatingComment}
+            isCreatingComment={isCreatingReply}
           />
         </div>
       )}
@@ -183,14 +213,15 @@ const CommentItem = ({
         <CommentCollapseButton
           isCollapsed={isRepliesCollapsed}
           repliesCount={repliesCount}
-          onToggle={() => setIsRepliesCollapsed(!isRepliesCollapsed)}
+          onToggle={handleToggleReplies}
+          isLoading={isLoadingReplies}
           isMobile={isMobile}
         />
       )}
 
       {/* Nested Replies - Only for hierarchical view and not collapsed */}
-      {isHierarchical && hasReplies && !isRepliesCollapsed && 
-        comment.replies.map(reply => (
+      {isHierarchical && hasReplies && !isRepliesCollapsed && !isLoadingReplies && loadedReplies &&
+        loadedReplies.map(reply => (
           <CommentItem
             key={reply.id}
             comment={reply}
@@ -209,6 +240,9 @@ const CommentItem = ({
             isUpdatingComment={isUpdatingComment}
             isDeletingComment={isDeletingComment}
             isCreatingComment={isCreatingComment}
+            isCreatingReply={isCreatingReply}
+            isLikingComment={isLikingComment}
+            isPinningComment={isPinningComment}
             isHierarchical={isHierarchical}
           />
         ))

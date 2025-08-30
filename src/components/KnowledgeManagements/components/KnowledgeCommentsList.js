@@ -23,6 +23,8 @@ const KnowledgeCommentsList = ({
   replyingTo,
   isUpdatingComment,
   isDeletingComment,
+  isCreatingComment,
+  isCreatingReply,
   isLikingComment,
   isPinningComment,
   isHierarchical = false,
@@ -113,6 +115,8 @@ const KnowledgeCommentsList = ({
       replyingTo={replyingTo}
       isUpdatingComment={isUpdatingComment}
       isDeletingComment={isDeletingComment}
+      isCreatingComment={isCreatingComment}
+      isCreatingReply={isCreatingReply}
       isLikingComment={isLikingComment}
       isPinningComment={isPinningComment}
       isHierarchical={isHierarchical}
