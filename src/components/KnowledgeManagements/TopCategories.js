@@ -51,7 +51,7 @@ const CategoryItem = ({ category, rank, isMobile, maxContentCount }) => {
   return (
     <List.Item
       style={{
-        padding: isMobile ? "12px 0" : "16px 0",
+        padding: isMobile ? "6px 0" : "8px 0",
         borderBottom: "1px solid #f0f0f0",
       }}
     >
@@ -67,14 +67,14 @@ const CategoryItem = ({ category, rank, isMobile, maxContentCount }) => {
           >
             <div
               style={{
-                width: isMobile ? 40 : 48,
-                height: isMobile ? 40 : 48,
-                borderRadius: "8px",
+                width: isMobile ? 28 : 32,
+                height: isMobile ? 28 : 32,
+                borderRadius: "4px",
                 backgroundColor: "#f5f5f5",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                fontSize: isMobile ? "16px" : "20px",
+                fontSize: isMobile ? "12px" : "14px",
               }}
             >
               <FolderOutlined style={{ color: "#8C8C8C" }} />
@@ -86,10 +86,10 @@ const CategoryItem = ({ category, rank, isMobile, maxContentCount }) => {
             <Text
               strong
               style={{
-                fontSize: isMobile ? "14px" : "16px",
-                lineHeight: "1.4",
+                fontSize: isMobile ? "11px" : "12px",
+                lineHeight: "1.3",
                 display: "block",
-                marginBottom: "4px",
+                marginBottom: "2px",
               }}
             >
               {categoryInfo?.name}
@@ -97,7 +97,7 @@ const CategoryItem = ({ category, rank, isMobile, maxContentCount }) => {
             {categoryInfo?.description && (
               <Text
                 style={{
-                  fontSize: isMobile ? "11px" : "12px",
+                  fontSize: isMobile ? "9px" : "10px",
                   color: "#8c8c8c",
                   display: "-webkit-box",
                   WebkitLineClamp: 1,

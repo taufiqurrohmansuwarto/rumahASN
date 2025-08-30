@@ -66,9 +66,9 @@ const TagItem = ({ tagData, rank, isMobile, maxUsageCount }) => {
         borderBottom: rank < 20 ? "1px solid #f0f0f0" : "none",
       }}
     >
-      <Flex justify="space-between" align="flex-start" gap="12px">
+      <Flex justify="space-between" align="flex-start" gap="6px">
         {/* Tag with Rank */}
-        <Flex align="center" gap="8px" style={{ flex: 1 }}>
+        <Flex align="center" gap="4px" style={{ flex: 1 }}>
           <Badge
             count={rank}
             style={{
@@ -82,12 +82,12 @@ const TagItem = ({ tagData, rank, isMobile, maxUsageCount }) => {
               size={getTagSize(rank)}
               color={getTagColor(rank)}
               style={{
-                fontSize: isMobile ? "12px" : "14px",
+                fontSize: isMobile ? "10px" : "11px",
                 fontWeight: rank <= 5 ? "bold" : "normal",
                 margin: 0,
               }}
             >
-              <TagsOutlined style={{ marginRight: "2px", fontSize: "10px" }} />
+              <TagsOutlined style={{ marginRight: "1px", fontSize: "8px" }} />
               {tagData.tag}
             </Tag>
           </Badge>
@@ -96,7 +96,7 @@ const TagItem = ({ tagData, rank, isMobile, maxUsageCount }) => {
         {/* Stats */}
         <Text
           style={{
-            fontSize: "10px",
+            fontSize: "9px",
             color: "#666666",
           }}
         >
