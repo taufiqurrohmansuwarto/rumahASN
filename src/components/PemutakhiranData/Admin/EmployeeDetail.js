@@ -46,6 +46,7 @@ import TrackingPenyesuaianMasaKerjaByNip from "./Usulan/TrackingPenyesuaianMasaK
 import TrackingPerbaikanNamaByNip from "./Usulan/TrackingPerbaikanNamaByNip";
 import TrackingUsulanLainnyaByNip from "./Usulan/TrackingUsulanLainnyaByNip";
 import CekUnor from "@/components/Disparitas/CekUnor";
+import CekPencantumanGelar from "@/components/PemutakhiranData/Button/CekPencantumanGelar";
 
 // import { patchAnomali2023 } from "@/services/anomali.services";
 
@@ -569,6 +570,7 @@ function EmployeeDetail({ nip }) {
         size={"small"}
       >
         <IPAsnByNip tahun={2024} nip={dataSimaster?.nip_baru} />
+        <CekPencantumanGelar nip={nip} />
         <Kppn id={siasn?.kppnId} />
         <PengaturanGelarByNip nip={nip} />
       </Space>

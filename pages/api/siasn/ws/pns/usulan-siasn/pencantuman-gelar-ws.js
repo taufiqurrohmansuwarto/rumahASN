@@ -1,4 +1,4 @@
-import { usulanPencantumanGelarByNip } from "@/controller/siasn-usulan.controller";
+import { cekLayananPencantumanGelarPersonal } from "@/controller/siasn/status-layanan.controller";
 import asnMiddleware from "@/middleware/asn.middleware";
 import auth from "@/middleware/auth.middleware";
 import { siasnMiddleware } from "@/middleware/siasn.middleware";
@@ -9,6 +9,6 @@ router
   .use(auth)
   .use(asnMiddleware)
   .use(siasnMiddleware)
-  .get(usulanPencantumanGelarByNip);
+  .get(cekLayananPencantumanGelarPersonal);
 
 export default router.handler();

@@ -323,6 +323,19 @@ export const dataPencantumanGelarByNip = (nip) => {
   return api.get(`/admin/${nip}/pencantuman-gelar`).then((res) => res?.data);
 };
 
+// baru dari siasn
+export const cekPencantumanGelarSiasnByNip = (nip) => {
+  return api
+    .get(`/admin/${nip}/layanan-siasn/pencantuman-gelar-ws`)
+    .then((res) => res?.data);
+};
+
+export const cekPencantumanGelarSiasnPersonal = (nip) => {
+  return api
+    .get(`/pns/pencantuman-gelar-ws?nip=${nip}`)
+    .then((res) => res?.data);
+};
+
 export const dataPencantumanGelarSKByNip = ({ nip, id }) => {
   return api
     .get(`/admin/${nip}/pencantuman-gelar/${id}`)

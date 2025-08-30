@@ -29,6 +29,7 @@ import DisparitasData from "../LayananSIASN/DisparitasData";
 import GantiEmail from "../LayananSIASN/GantiEmail";
 import PengaturanGelar from "../LayananSIASN/PengaturanGelar";
 import { updateFotoSiasn } from "@/services/siasn-services";
+import CekPencantumanGelar from "@/components/PemutakhiranData/Button/CekPencantumanGelar";
 
 const { Title, Text } = Typography;
 
@@ -569,6 +570,7 @@ export function MenuMySAPK({
                   isFetchingDataIPAsn={isFetchingDataIPAsn}
                   refetchDataIPAsn={refetchDataIPAsn}
                 />
+                <CekPencantumanGelar />
                 <PengaturanGelar />
                 <GantiEmail />
               </Flex>

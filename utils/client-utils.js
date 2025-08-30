@@ -6,13 +6,12 @@ import {
   SyncOutlined,
 } from "@ant-design/icons";
 import {
-  IconBook,
   Icon123,
   IconArrowFork,
   IconBadge,
   IconBadges,
+  IconBook,
   IconBriefcase,
-  IconCashBanknote,
   IconClipboardData,
   IconClock,
   IconFileCertificate,
@@ -26,7 +25,7 @@ import { Tag } from "antd";
 import { toLower } from "lodash";
 
 import { getTokenSIASNService } from "@/services/siasn-services";
-import { IconReplaceUser } from "@tabler/icons-react";
+import { IconGavel, IconReplaceUser, IconTarget } from "@tabler/icons-react";
 import axios from "axios";
 import dayjs from "dayjs";
 import "dayjs/locale/id";
@@ -64,23 +63,11 @@ export const mysapkMenu = [
     path: "/data-utama",
   },
   {
-    title: "Riwayat Pengadaan",
-    icon: IconReplaceUser,
-    color: "blue",
-    path: "/rw-pengadaan",
-  },
-  {
     title: "Ubah Biodata",
     icon: IconUserExclamation,
     color: "orange",
     path: "/ubah-data",
   },
-  // {
-  //   title: "Pasangan",
-  //   icon: IconUserPlus,
-  //   color: "cyan",
-  //   path: "/pasangan",
-  // },
   {
     title: "Pasangan dan Anak",
     icon: IconUsers,
@@ -88,10 +75,10 @@ export const mysapkMenu = [
     path: "/keluarga",
   },
   {
-    title: "Riwayat Sertifikasi",
-    icon: IconFileCertificate,
-    color: "gray",
-    path: "/sertifikasi",
+    title: "Riwayat Pengadaan",
+    icon: IconReplaceUser,
+    color: "blue",
+    path: "/rw-pengadaan",
   },
   {
     title: "Jabatan",
@@ -100,11 +87,42 @@ export const mysapkMenu = [
     path: "/jabatan",
   },
   {
-    title: "Usulan SIASN",
-    icon: IconClipboardData,
+    title: "Golongan/Pangkat",
+    icon: IconBadges,
     color: "green",
-    path: "/usulan-siasn/inbox-usulan",
+    path: "/golongan",
   },
+  {
+    title: "Masa Kerja",
+    icon: IconClock,
+    color: "gray",
+    path: "/pmk",
+  },
+  {
+    title: "Riwayat Sertifikasi",
+    icon: IconFileCertificate,
+    color: "gray",
+    path: "/sertifikasi",
+  },
+  {
+    title: "Pendidikan",
+    icon: IconSchool,
+    color: "gray",
+    path: "/pendidikan",
+  },
+  {
+    title: "Diklat/Kursus",
+    icon: IconReport,
+    color: "blue",
+    path: "/diklat",
+  },
+  {
+    title: "Tugas Belajar",
+    icon: IconBook,
+    color: "gray",
+    path: "/tugas-belajar",
+  },
+
   {
     title: "Angka Kredit",
     icon: Icon123,
@@ -113,9 +131,15 @@ export const mysapkMenu = [
   },
   {
     title: "Kinerja (SKP)",
-    icon: IconCashBanknote,
+    icon: IconTarget,
     color: "yellow",
     path: "/laporan-kinerja",
+  },
+  {
+    title: "Kinerja Periodik",
+    icon: IconArrowFork,
+    color: "yellow",
+    path: "/kinerja-periodik",
   },
   // {
   //   title: "Kompetensi",
@@ -130,54 +154,22 @@ export const mysapkMenu = [
   //   path: "/rw-potensi",
   // },
   {
-    title: "Diklat/Kursus",
-    icon: IconReport,
-    color: "blue",
-    path: "/diklat",
-  },
-  {
-    title: "Tugas Belajar",
-    icon: IconBook,
-    color: "gray",
-    path: "/tugas-belajar",
-  },
-  {
-    title: "Pendidikan",
-    icon: IconSchool,
-    color: "gray",
-    path: "/pendidikan",
-  },
-
-  {
-    title: "Golongan/Pangkat",
-    icon: IconBadges,
-    color: "green",
-    path: "/golongan",
-  },
-
-  {
-    title: "Peninjauan Masa Kerja (PMK)",
-    icon: IconClock,
-    color: "gray",
-    path: "/pmk",
-  },
-
-  {
     title: "Penghargaan",
     icon: IconFileCertificate,
     color: "gray",
     path: "/penghargaan",
   },
   {
-    title: "Kinerja Periodik",
-    icon: IconArrowFork,
-    color: "yellow",
-    path: "/kinerja-periodik",
+    title: "Usulan SIASN",
+    icon: IconClipboardData,
+    color: "green",
+    path: "/usulan-siasn/inbox-usulan",
   },
-  { title: "Riwayat CLTN", icon: IconBriefcase, color: "gray", path: "/cltn" },
+
+  { title: "Cuti", icon: IconBriefcase, color: "gray", path: "/cltn" },
   {
     title: "Hukuman Disiplin",
-    icon: IconSchool,
+    icon: IconGavel,
     color: "gray",
     path: "/hukuman-disiplin",
   },

@@ -501,9 +501,27 @@ module.exports.daftarTugasBelajar = async (fetcher, nip) => {
       }
     }
   });
-  // return fetcher.get(`/pns/rw-tubel/${nip}`).then((res) => res?.data);
 };
 
 module.exports.tambahTugasBelajar = async (fetcher, data) => {
   return fetcher.post(`/tubel/save`, data).then((res) => res?.data);
+};
+
+module.exports.cekPencantumanGelar = async (fetcher, nip) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const result = await fetcher.get(
+        `/partition/list-pg-instansi?nip=${nip}`
+      );
+
+      const data = result?.data?.data;
+      if (!data) {
+        resolve([]);
+      } else {
+        resolve(data);
+      }
+    } catch (error) {
+      resolve([]);
+    }
+  });
 };

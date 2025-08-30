@@ -12,7 +12,7 @@ import {
 } from "@ant-design/icons";
 import { Center } from "@mantine/core";
 import {
-  IconBuildingBank,
+  IconHome,
   IconNetwork,
   IconPlugConnected,
   IconUserCog,
@@ -102,7 +102,7 @@ const changeRoutes = (user) => {
       userRoutes.routes.push({
         path: "/beranda-bkd?tab=my-task",
         name: "Beranda BKD",
-        icon: <IconBuildingBank size={18} />,
+        icon: <IconHome size={18} />,
       });
     }
 

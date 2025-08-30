@@ -1,23 +1,19 @@
 import { checkGelar, getGelar, uncheckGelar } from "@/services/siasn-services";
-import {
-  SettingOutlined,
-  InfoCircleOutlined,
-  BulbOutlined,
-} from "@ant-design/icons";
+import { InfoCircleOutlined, SettingOutlined } from "@ant-design/icons";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
+  Alert,
+  Card,
   Checkbox,
   Col,
+  Flex,
   message,
   Modal,
   Row,
+  Skeleton,
   Space,
   Tag,
   Typography,
-  Card,
-  Alert,
-  Flex,
-  Skeleton,
 } from "antd";
 import { useState } from "react";
 
