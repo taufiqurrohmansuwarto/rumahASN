@@ -20,6 +20,9 @@ const CommentActions = ({
   isLikingComment = false,
   isPinningComment = false,
   isHierarchical = false,
+  // New prop for per-comment loading functions
+  isLikingSpecificComment,
+  isPinningSpecificComment,
 }) => {
   const screens = useBreakpoint();
   const isMobile = !screens.md;
@@ -27,37 +30,52 @@ const CommentActions = ({
   const actions = [];
   const canPin = currentUser?.id === contentAuthorId;
 
-  // Like action
-  const isLiked = comment.user_liked;
+  // Like action - try multiple possible field names
+  const isLiked = comment.user_liked || comment.is_liked || comment.liked || false;
   const likesCount = comment.likes_count || 0;
+  const isCurrentlyLiking = isLikingSpecificComment ? isLikingSpecificComment(comment.id) : isLikingComment;
+  
+  // Debug log to check comment data structure
+  if (process.env.NODE_ENV === 'development') {
+    console.log(`Comment ${comment.id}:`, {
+      user_liked: comment.user_liked,
+      is_liked: comment.is_liked,
+      liked: comment.liked,
+      isLiked,
+      likes_count: comment.likes_count,
+      hierarchical: isHierarchical,
+      comment
+    });
+  }
+  
   actions.push(
-    <Tooltip key="comment-like" title={isLikingComment ? "Loading..." : (isLiked ? "Batal suka" : "Suka")}>
+    <Tooltip key="comment-like" title={isCurrentlyLiking ? "Loading..." : (isLiked ? "Batal suka" : "Suka")}>
       <span
-        onClick={() => !isLikingComment && onLike && onLike(comment.id)}
+        onClick={() => !isCurrentlyLiking && onLike && onLike(comment.id)}
         style={{
           color: isLiked ? "#FF4500" : "#6B7280",
-          cursor: isLikingComment ? "not-allowed" : "pointer",
+          cursor: isCurrentlyLiking ? "not-allowed" : "pointer",
           fontSize: isMobile ? "12px" : "13px",
           transition: "all 0.2s ease",
           display: "flex",
           alignItems: "center",
           gap: "4px",
-          opacity: isLikingComment ? 0.6 : 1,
+          opacity: isCurrentlyLiking ? 0.6 : 1,
         }}
         onMouseEnter={(e) => {
-          if (!isLikingComment) {
+          if (!isCurrentlyLiking) {
             e.currentTarget.style.color = isLiked ? "#e53e00" : "#374151";
             e.currentTarget.style.transform = "translateY(-1px)";
           }
         }}
         onMouseLeave={(e) => {
-          if (!isLikingComment) {
+          if (!isCurrentlyLiking) {
             e.currentTarget.style.color = isLiked ? "#FF4500" : "#6B7280";
             e.currentTarget.style.transform = "translateY(0)";
           }
         }}
       >
-        {isLikingComment ? <LoadingOutlined spin /> : (isLiked ? <LikeFilled /> : <LikeOutlined />)}
+        {isCurrentlyLiking ? <LoadingOutlined spin /> : (isLiked ? <LikeFilled /> : <LikeOutlined />)}
         <span className="comment-action">{likesCount > 0 ? likesCount : "Suka"}</span>
       </span>
     </Tooltip>
@@ -98,34 +116,36 @@ const CommentActions = ({
   // Pin action - only for content author and parent comments
   if (canPin && (!isHierarchical || comment.depth === 0)) {
     const isPinned = comment.is_pinned;
+    const isCurrentlyPinning = isPinningSpecificComment ? isPinningSpecificComment(comment.id) : isPinningComment;
+    
     actions.push(
-      <Tooltip key="comment-pin" title={isPinningComment ? "Loading..." : (isPinned ? "Batal pin" : "Pin komentar")}>
+      <Tooltip key="comment-pin" title={isCurrentlyPinning ? "Loading..." : (isPinned ? "Batal pin" : "Pin komentar")}>
         <span
-          onClick={() => !isPinningComment && onPin && onPin(comment.id)}
+          onClick={() => !isCurrentlyPinning && onPin && onPin(comment.id)}
           style={{
             color: isPinned ? "#FF4500" : "#6B7280",
-            cursor: isPinningComment ? "not-allowed" : "pointer",
+            cursor: isCurrentlyPinning ? "not-allowed" : "pointer",
             fontSize: isMobile ? "12px" : "13px",
             transition: "all 0.2s ease",
             display: "flex",
             alignItems: "center",
             gap: "4px",
-            opacity: isPinningComment ? 0.6 : 1,
+            opacity: isCurrentlyPinning ? 0.6 : 1,
           }}
           onMouseEnter={(e) => {
-            if (!isPinningComment) {
+            if (!isCurrentlyPinning) {
               e.currentTarget.style.color = isPinned ? "#e53e00" : "#374151";
               e.currentTarget.style.transform = "translateY(-1px)";
             }
           }}
           onMouseLeave={(e) => {
-            if (!isPinningComment) {
+            if (!isCurrentlyPinning) {
               e.currentTarget.style.color = isPinned ? "#FF4500" : "#6B7280";
               e.currentTarget.style.transform = "translateY(0)";
             }
           }}
         >
-          {isPinningComment ? <LoadingOutlined spin /> : (isPinned ? <PushpinFilled /> : <PushpinOutlined />)}
+          {isCurrentlyPinning ? <LoadingOutlined spin /> : (isPinned ? <PushpinFilled /> : <PushpinOutlined />)}
           <span className="comment-action">{isPinned ? "Dipin" : "Pin"}</span>
         </span>
       </Tooltip>

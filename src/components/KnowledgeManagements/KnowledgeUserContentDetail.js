@@ -352,6 +352,8 @@ const KnowledgeUserContentDetail = ({
                 isPinningComment={commentInteractions.isPinningComment}
                 isHierarchical={isHierarchicalView}
                 contentAuthorId={data?.author_id}
+                isLikingSpecificComment={commentInteractions.isLikingSpecificComment}
+                isPinningSpecificComment={commentInteractions.isPinningSpecificComment}
               />
             )}
 

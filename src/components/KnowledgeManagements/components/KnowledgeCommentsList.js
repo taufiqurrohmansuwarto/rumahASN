@@ -29,6 +29,9 @@ const KnowledgeCommentsList = ({
   isPinningComment,
   isHierarchical = false,
   contentAuthorId,
+  // New per-comment loading functions
+  isLikingSpecificComment,
+  isPinningSpecificComment,
 }) => {
   if (isLoading) {
     return (
@@ -121,6 +124,8 @@ const KnowledgeCommentsList = ({
       isPinningComment={isPinningComment}
       isHierarchical={isHierarchical}
       contentAuthorId={contentAuthorId}
+      isLikingSpecificComment={isLikingSpecificComment}
+      isPinningSpecificComment={isPinningSpecificComment}
     />
   );
 };

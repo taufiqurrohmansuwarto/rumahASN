@@ -34,6 +34,9 @@ const CommentList = ({
   isPinningComment,
   isHierarchical = false,
   contentAuthorId,
+  // New per-comment loading functions
+  isLikingSpecificComment,
+  isPinningSpecificComment,
 }) => {
   const [editForm] = Form.useForm();
   const [replyForm] = Form.useForm();
@@ -104,6 +107,8 @@ const CommentList = ({
                 isLikingComment={isLikingComment}
                 isPinningComment={isPinningComment}
                 isHierarchical={isHierarchical}
+                isLikingSpecificComment={isLikingSpecificComment}
+                isPinningSpecificComment={isPinningSpecificComment}
               />
               {/* Add divider between depth 0 comments, except for the last one */}
               {index < comments.length - 1 && (
@@ -248,6 +253,8 @@ const CommentList = ({
                   isLikingComment: isLikingComment,
                   isPinningComment: isPinningComment,
                   isHierarchical: isHierarchical,
+                  isLikingSpecificComment: isLikingSpecificComment,
+                  isPinningSpecificComment: isPinningSpecificComment,
                 })}
               />
               {/* Reply Form - positioned right below this comment */}

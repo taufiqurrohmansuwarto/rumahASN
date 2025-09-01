@@ -198,5 +198,19 @@ export const useCommentInteractions = (contentId) => {
     isDeletingComment: deleteComment.isPending,
     isLikingComment: likeComment.isPending,
     isPinningComment: pinComment.isPending,
+    
+    // Per-comment loading checkers
+    isLikingSpecificComment: (commentId) => {
+      return likeComment.isPending && likeComment.variables?.commentId === commentId;
+    },
+    isPinningSpecificComment: (commentId) => {
+      return pinComment.isPending && pinComment.variables?.commentId === commentId;
+    },
+    isUpdatingSpecificComment: (commentId) => {
+      return updateComment.isPending && updateComment.variables?.commentId === commentId;
+    },
+    isDeletingSpecificComment: (commentId) => {
+      return deleteComment.isPending && deleteComment.variables?.commentId === commentId;
+    },
   };
 };

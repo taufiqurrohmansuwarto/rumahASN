@@ -5,8 +5,9 @@ import { Comment } from "@ant-design/compatible";
 import { PushpinFilled } from "@ant-design/icons";
 import { Tooltip, Typography, Grid } from "antd";
 import dayjs from "dayjs";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
+import { useQueryClient } from "@tanstack/react-query";
 import CommentActions from "./CommentActions";
 import CommentDropdown from "./CommentDropdown";
 import CommentEditForm from "./CommentEditForm";
@@ -38,12 +39,16 @@ const CommentItem = ({
   isLikingComment,
   isPinningComment,
   isHierarchical = false,
+  // New per-comment loading functions
+  isLikingSpecificComment,
+  isPinningSpecificComment,
 }) => {
   const isNested = level > 0;
   const screens = useBreakpoint();
   const isMobile = !screens.md;
   const router = useRouter();
   const { id } = router.query;
+  const queryClient = useQueryClient();
   
   // State for collapsing nested replies (only for parent comments)
   const [isRepliesCollapsed, setIsRepliesCollapsed] = useState(true); // Default collapsed
@@ -51,6 +56,26 @@ const CommentItem = ({
   const [loadedReplies, setLoadedReplies] = useState(null);
   const hasReplies = (comment.replies && comment.replies.length > 0) || (comment.replies_count > 0);
   const repliesCount = comment.replies_count || 0;
+
+  // Subscribe to query changes to refresh loaded replies
+  useEffect(() => {
+    if (!loadedReplies || isRepliesCollapsed) return;
+
+    const unsubscribe = queryClient.getQueryCache().subscribe((event) => {
+      if (
+        event.type === 'updated' && 
+        event.query.queryKey[0] === 'comments-hierarchical' &&
+        event.query.queryKey[1] === id
+      ) {
+        // Refresh replies when the hierarchical comments query updates
+        getRepliesForComment(id, comment.id)
+          .then(setLoadedReplies)
+          .catch(console.error);
+      }
+    });
+
+    return unsubscribe;
+  }, [queryClient, loadedReplies, isRepliesCollapsed, id, comment.id]);
 
   // Handle async loading when uncollapsing
   const handleToggleReplies = async () => {
@@ -193,6 +218,8 @@ const CommentItem = ({
         isLikingComment: isLikingComment,
         isPinningComment: isPinningComment,
         isHierarchical: isHierarchical,
+        isLikingSpecificComment: isLikingSpecificComment,
+        isPinningSpecificComment: isPinningSpecificComment,
       })}
     >
       {/* Reply Form */}
@@ -244,6 +271,8 @@ const CommentItem = ({
             isLikingComment={isLikingComment}
             isPinningComment={isPinningComment}
             isHierarchical={isHierarchical}
+            isLikingSpecificComment={isLikingSpecificComment}
+            isPinningSpecificComment={isPinningSpecificComment}
           />
         ))
       }
