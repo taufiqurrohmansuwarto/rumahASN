@@ -14,7 +14,17 @@ class knowledgeKnowledgeAiMetadata extends Model {
   }
 
   static get relationMappings() {
-    return {};
+    const knowledgeContent = require("@/models/knowledge/contents.model");
+    return {
+      knowledgeContent: {
+        relation: Model.BelongsToOneRelation,
+        modelClass: knowledgeContent,
+        join: {
+          from: "knowledge.knowledge_ai_metadata.content_id",
+          to: "knowledge.contents.id",
+        },
+      },
+    };
   }
 }
 
