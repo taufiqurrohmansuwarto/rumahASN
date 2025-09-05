@@ -9,6 +9,7 @@ const UserMissions = require("@/models/knowledge/user-mission-progress.model");
 
 import { handleError } from "@/utils/helper/controller-helper";
 import { awardXP } from "./gamification.controller";
+import { processContentWithAI } from "@/utils/services/ai-processing.services";
 
 export const getKnowledgeContentsAdmin = async (req, res) => {
   try {
@@ -228,6 +229,18 @@ export const changeStatusKnowledgeContentAdmin = async (req, res) => {
       } catch (xpError) {
         console.warn("Failed to award XP for published content:", xpError);
       }
+
+      // Trigger AI processing when content is published
+      setImmediate(async () => {
+        try {
+          console.log(`Triggering AI processing for published content: ${id}`);
+          await processContentWithAI(id);
+          console.log(`AI processing completed for published content: ${id}`);
+        } catch (aiError) {
+          console.error(`AI processing failed for content ${id}:`, aiError.message);
+          // Don't throw error - AI processing failure shouldn't affect status change
+        }
+      });
     }
 
     res.json(content);

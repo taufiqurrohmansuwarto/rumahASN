@@ -1,6 +1,7 @@
 import { handleError } from "@/utils/helper/controller-helper";
 import { uploadFileMinio } from "@/utils/index";
 import crypto from "crypto";
+import { processContentWithAI } from "@/utils/services/ai-processing.services";
 
 const KnowledgeContent = require("@/models/knowledge/contents.model");
 const KnowledgeCategory = require("@/models/knowledge/categories.model");
@@ -231,6 +232,18 @@ export const createKnowledgeContent = async (req, res) => {
       }
 
       return newContent;
+    });
+
+    // Trigger AI processing in background (don't wait for completion)
+    setImmediate(async () => {
+      try {
+        console.log(`Triggering AI processing for new content: ${content.id}`);
+        await processContentWithAI(content.id);
+        console.log(`AI processing completed for content: ${content.id}`);
+      } catch (aiError) {
+        console.error(`AI processing failed for content ${content.id}:`, aiError.message);
+        // Don't throw error - AI processing failure shouldn't affect content creation
+      }
     });
 
     res.json(content);
