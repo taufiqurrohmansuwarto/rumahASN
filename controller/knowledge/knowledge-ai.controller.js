@@ -279,17 +279,17 @@ export const getContentAIInsights = async (req, res) => {
         },
         aiInsights: {
           summary: aiMetadata.ai_summary,
-          keywords: aiMetadata.ai_keywords,
-          tags: aiMetadata.ai_tags,
+          keywords: aiMetadata.ai_keywords ? JSON.parse(aiMetadata.ai_keywords) : [],
+          tags: aiMetadata.ai_tags ? JSON.parse(aiMetadata.ai_tags) : [],
           readabilityScore: aiMetadata.ai_readability_score,
           qualityScore: aiMetadata.ai_quality_score,
           sentimentScore: aiMetadata.ai_sentiment_score,
           completenessScore: aiMetadata.ai_completeness_score,
           suggestedCategory: aiMetadata.ai_suggested_category,
           confidenceScore: aiMetadata.ai_confidence_score,
-          relatedContent: aiMetadata.ai_related_content,
-          suggestions: aiMetadata.ai_suggestions,
-          seoKeywords: aiMetadata.ai_seo_keywords,
+          relatedContent: aiMetadata.ai_related_content ? JSON.parse(aiMetadata.ai_related_content) : [],
+          suggestions: aiMetadata.ai_suggestions ? JSON.parse(aiMetadata.ai_suggestions) : [],
+          seoKeywords: aiMetadata.ai_seo_keywords ? JSON.parse(aiMetadata.ai_seo_keywords) : [],
           metaDescription: aiMetadata.ai_meta_description
         },
         processingInfo: {

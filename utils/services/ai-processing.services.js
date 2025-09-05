@@ -318,6 +318,271 @@ const calculateReadabilityScore = async (content) => {
 };
 
 /**
+ * Calculate sentiment score using OpenAI
+ * @param {string} title - Content title
+ * @param {string} content - Content body text
+ * @returns {Promise<number>} Sentiment score (-1 to 1, where -1 = negative, 0 = neutral, 1 = positive)
+ */
+const calculateSentimentScore = async (title, content) => {
+  try {
+    const cleanContent = cleanMarkdownContent(content);
+    
+    // Fallback to neutral if content too short
+    if (cleanContent.trim().length < 50) {
+      return 0;
+    }
+
+    const prompt = `Analisis sentiment dari konten berikut dalam bahasa Indonesia:
+
+Judul: ${title}
+
+Konten:
+${cleanContent}
+
+Instruksi:
+- Berikan skor sentiment antara -1 hingga 1
+- -1 = sangat negatif, 0 = netral, 1 = sangat positif
+- Fokus pada tone dan sentiment keseluruhan konten
+- Berikan hanya angka skor (contoh: 0.3, -0.2, 0.8)`;
+
+    const completion = await openai.chat.completions.create({
+      model: "gpt-4o-mini",
+      messages: [
+        {
+          role: "system",
+          content: "Anda adalah ahli analisis sentiment yang memberikan skor numerik dari -1 hingga 1. Berikan hanya angka tanpa penjelasan."
+        },
+        { role: "user", content: prompt }
+      ],
+      temperature: 0.1,
+      max_tokens: 10,
+    });
+
+    const scoreText = completion.choices[0].message.content.trim();
+    const score = parseFloat(scoreText);
+    
+    // Validate and clamp score
+    if (isNaN(score)) {
+      return 0;
+    }
+    
+    return Math.max(-1, Math.min(1, score));
+    
+  } catch (error) {
+    console.error("Error calculating sentiment score:", error);
+    return 0; // Neutral fallback
+  }
+};
+
+/**
+ * Suggest category for content using OpenAI
+ * @param {string} title - Content title
+ * @param {string} content - Content body text
+ * @returns {Promise<Object>} Category suggestion with confidence
+ */
+const suggestCategory = async (title, content) => {
+  try {
+    const cleanContent = cleanMarkdownContent(content);
+    
+    if (cleanContent.trim().length < 100) {
+      return { category: null, confidence: 0 };
+    }
+
+    // Get available categories first
+    const KnowledgeCategory = require("@/models/knowledge/categories.model");
+    const categories = await KnowledgeCategory.query().select('name', 'description');
+    
+    // If no categories available, return null
+    if (!categories || categories.length === 0) {
+      console.warn("No categories found for AI suggestion");
+      return { category: null, confidence: 0 };
+    }
+    
+    const categoryList = categories
+      .map(cat => `- ${cat.name}${cat.description ? ': ' + cat.description : ''}`)
+      .join('\n');
+
+    const prompt = `Analisis konten berikut dan sarankan kategori yang paling sesuai:
+
+Judul: ${title}
+
+Konten:
+${cleanContent}
+
+Kategori yang tersedia:
+${categoryList}
+
+Instruksi:
+- Pilih 1 kategori yang paling sesuai dari daftar di atas
+- Berikan skor kepercayaan 0-1 (1 = sangat yakin)
+- Format JSON: {"category": "nama_kategori", "confidence": 0.8}`;
+
+    const completion = await openai.chat.completions.create({
+      model: "gpt-4o-mini",
+      messages: [
+        {
+          role: "system",
+          content: "Anda adalah sistem klasifikasi konten yang memberikan output JSON yang valid."
+        },
+        { role: "user", content: prompt }
+      ],
+      temperature: 0.2,
+      max_tokens: 100,
+    });
+
+    const responseText = completion.choices[0].message.content.trim();
+    
+    try {
+      const result = JSON.parse(responseText);
+      return {
+        category: result.category || null,
+        confidence: Math.max(0, Math.min(1, result.confidence || 0))
+      };
+    } catch (parseError) {
+      return { category: null, confidence: 0 };
+    }
+    
+  } catch (error) {
+    console.error("Error suggesting category:", error);
+    return { category: null, confidence: 0 };
+  }
+};
+
+/**
+ * Generate content improvement suggestions using OpenAI
+ * @param {string} title - Content title
+ * @param {string} content - Content body text
+ * @returns {Promise<Array<string>>} Array of improvement suggestions
+ */
+const generateContentSuggestions = async (title, content) => {
+  try {
+    const cleanContent = cleanMarkdownContent(content);
+    
+    if (cleanContent.trim().length < 200) {
+      return ["Konten terlalu pendek untuk analisis suggestions yang meaningful"];
+    }
+
+    const prompt = `Analisis konten berikut dan berikan 3-5 saran perbaikan:
+
+Judul: ${title}
+
+Konten:
+${cleanContent}
+
+Instruksi:
+- Berikan saran praktis untuk meningkatkan kualitas konten
+- Fokus pada struktur, kejelasan, kelengkapan, dan readability
+- Saran dalam bahasa Indonesia
+- Format JSON array: ["saran 1", "saran 2", "saran 3"]`;
+
+    const completion = await openai.chat.completions.create({
+      model: "gpt-4o-mini",
+      messages: [
+        {
+          role: "system",
+          content: "Anda adalah editor konten profesional yang memberikan saran perbaikan dalam format JSON array."
+        },
+        { role: "user", content: prompt }
+      ],
+      temperature: 0.4,
+      max_tokens: 300,
+    });
+
+    const responseText = completion.choices[0].message.content.trim();
+    
+    try {
+      const jsonMatch = responseText.match(/\[(.*?)\]/s);
+      let suggestions = [];
+      
+      if (jsonMatch) {
+        suggestions = JSON.parse(jsonMatch[0]);
+      } else {
+        suggestions = JSON.parse(responseText);
+      }
+      
+      return suggestions.filter(s => typeof s === 'string' && s.trim().length > 10);
+      
+    } catch (parseError) {
+      return ["Tidak dapat menganalisis konten untuk suggestions"];
+    }
+    
+  } catch (error) {
+    console.error("Error generating content suggestions:", error);
+    return [];
+  }
+};
+
+/**
+ * Generate SEO keywords and meta description using OpenAI
+ * @param {string} title - Content title
+ * @param {string} content - Content body text
+ * @returns {Promise<Object>} SEO data with keywords and meta description
+ */
+const generateSEOData = async (title, content) => {
+  try {
+    const cleanContent = cleanMarkdownContent(content);
+    
+    if (cleanContent.trim().length < 100) {
+      return {
+        seoKeywords: [title].filter(Boolean),
+        metaDescription: title || "Tidak ada deskripsi tersedia"
+      };
+    }
+
+    const prompt = `Generate SEO data untuk konten berikut:
+
+Judul: ${title}
+
+Konten:
+${cleanContent}
+
+Instruksi:
+- Buat 5-8 SEO keywords yang relevan
+- Buat meta description 150-160 karakter yang menarik
+- Optimized untuk search engine Indonesia
+- Format JSON: {
+  "seoKeywords": ["keyword1", "keyword2", ...],
+  "metaDescription": "deskripsi menarik..."
+}`;
+
+    const completion = await openai.chat.completions.create({
+      model: "gpt-4o-mini",
+      messages: [
+        {
+          role: "system",
+          content: "Anda adalah SEO specialist yang membuat keywords dan meta description dalam format JSON."
+        },
+        { role: "user", content: prompt }
+      ],
+      temperature: 0.3,
+      max_tokens: 200,
+    });
+
+    const responseText = completion.choices[0].message.content.trim();
+    
+    try {
+      const seoData = JSON.parse(responseText);
+      return {
+        seoKeywords: Array.isArray(seoData.seoKeywords) ? seoData.seoKeywords : [],
+        metaDescription: seoData.metaDescription || title || "Tidak ada deskripsi tersedia"
+      };
+    } catch (parseError) {
+      return {
+        seoKeywords: [title].filter(Boolean),
+        metaDescription: title || "Tidak ada deskripsi tersedia"
+      };
+    }
+    
+  } catch (error) {
+    console.error("Error generating SEO data:", error);
+    return {
+      seoKeywords: [title].filter(Boolean),
+      metaDescription: title || "Tidak ada deskripsi tersedia"
+    };
+  }
+};
+
+/**
  * Generate AI tags from content using OpenAI
  * @param {string} title - Content title
  * @param {string} content - Content body text
@@ -436,13 +701,33 @@ const processContentWithAI = async (contentId) => {
       throw new Error(`Content with ID ${contentId} not found`);
     }
     
-    // Process with AI
-    const [summary, keywords, readabilityScore, aiTags] = await Promise.all([
+    // Process with AI - Run all AI functions in parallel
+    const [
+      summary, 
+      keywords, 
+      readabilityScore, 
+      aiTags,
+      sentimentScore,
+      categoryData,
+      suggestions,
+      seoData
+    ] = await Promise.all([
       generateSummary(content.title, content.content),
       extractKeywords(content.title, content.content), 
       calculateReadabilityScore(content.content),
-      generateAITags(content.title, content.content, content.tags || [])
+      generateAITags(content.title, content.content, content.tags || []),
+      calculateSentimentScore(content.title, content.content),
+      suggestCategory(content.title, content.content),
+      generateContentSuggestions(content.title, content.content),
+      generateSEOData(content.title, content.content)
     ]);
+    
+    // Calculate completeness score (needs to be done after summary)
+    const completenessScore = await calculateCompletenessScore(
+      content.title, 
+      content.content, 
+      content.summary || summary
+    );
     
     // Calculate quality score based on various factors
     const qualityScore = calculateQualityScore({
@@ -453,24 +738,60 @@ const processContentWithAI = async (contentId) => {
       keywordCount: keywords.length
     });
     
-    // Save to database
-    const aiMetadata = await KnowledgeAiMetadata.query()
-      .insert({
-        content_id: contentId,
-        ai_summary: summary,
-        ai_keywords: keywords,
-        ai_tags: aiTags,
-        ai_readability_score: readabilityScore,
-        ai_quality_score: qualityScore,
-        processing_status: 'completed',
-        model_version: 'basic-v1.0',
-        last_processed: new Date()
-      })
-      .onConflict('content_id')
-      .merge([
-        'ai_summary', 'ai_keywords', 'ai_tags', 'ai_readability_score', 
-        'ai_quality_score', 'processing_status', 'model_version', 'last_processed', 'updated_at'
-      ]);
+    // Check if AI metadata already exists
+    const existingAiMetadata = await KnowledgeAiMetadata.query()
+      .where('content_id', contentId)
+      .first();
+
+    let aiMetadata;
+    if (existingAiMetadata) {
+      // Update existing record
+      aiMetadata = await KnowledgeAiMetadata.query()
+        .where('content_id', contentId)
+        .patch({
+          ai_summary: summary,
+          ai_keywords: JSON.stringify(keywords || []),
+          ai_tags: JSON.stringify(aiTags || []),
+          ai_readability_score: readabilityScore,
+          ai_quality_score: qualityScore,
+          ai_completeness_score: completenessScore,
+          ai_sentiment_score: sentimentScore,
+          ai_suggested_category: categoryData.category,
+          ai_confidence_score: categoryData.confidence,
+          ai_related_content: JSON.stringify([]), // TODO: Implement related content logic
+          ai_suggestions: JSON.stringify(suggestions || []),
+          ai_seo_keywords: JSON.stringify(seoData.seoKeywords || []),
+          ai_meta_description: seoData.metaDescription,
+          processing_status: 'completed',
+          model_version: 'gpt-4o-mini',
+          last_processed: new Date(),
+          updated_at: new Date()
+        })
+        .returning('*')
+        .first();
+    } else {
+      // Insert new record
+      aiMetadata = await KnowledgeAiMetadata.query()
+        .insert({
+          content_id: contentId,
+          ai_summary: summary,
+          ai_keywords: JSON.stringify(keywords || []),
+          ai_tags: JSON.stringify(aiTags || []),
+          ai_readability_score: readabilityScore,
+          ai_quality_score: qualityScore,
+          ai_completeness_score: completenessScore,
+          ai_sentiment_score: sentimentScore,
+          ai_suggested_category: categoryData.category,
+          ai_confidence_score: categoryData.confidence,
+          ai_related_content: JSON.stringify([]), // TODO: Implement related content logic
+          ai_suggestions: JSON.stringify(suggestions || []),
+          ai_seo_keywords: JSON.stringify(seoData.seoKeywords || []),
+          ai_meta_description: seoData.metaDescription,
+          processing_status: 'completed',
+          model_version: 'gpt-4o-mini',
+          last_processed: new Date()
+        });
+    }
     
     return {
       success: true,
@@ -480,7 +801,14 @@ const processContentWithAI = async (contentId) => {
       aiTags,
       readabilityScore,
       qualityScore,
-      aiMetadataId: aiMetadata.id
+      completenessScore,
+      sentimentScore,
+      suggestedCategory: categoryData.category,
+      confidenceScore: categoryData.confidence,
+      suggestions,
+      seoKeywords: seoData.seoKeywords,
+      metaDescription: seoData.metaDescription,
+      aiMetadataId: aiMetadata.id || aiMetadata
     };
     
   } catch (error) {
@@ -488,15 +816,30 @@ const processContentWithAI = async (contentId) => {
     
     // Save error to database
     try {
-      await KnowledgeAiMetadata.query()
-        .insert({
-          content_id: contentId,
-          processing_status: 'failed',
-          error_message: error.message,
-          last_processed: new Date()
-        })
-        .onConflict('content_id')
-        .merge(['processing_status', 'error_message', 'last_processed', 'updated_at']);
+      const existingErrorRecord = await KnowledgeAiMetadata.query()
+        .where('content_id', contentId)
+        .first();
+
+      if (existingErrorRecord) {
+        // Update existing record with error
+        await KnowledgeAiMetadata.query()
+          .where('content_id', contentId)
+          .patch({
+            processing_status: 'failed',
+            error_message: error.message,
+            last_processed: new Date(),
+            updated_at: new Date()
+          });
+      } else {
+        // Insert new error record
+        await KnowledgeAiMetadata.query()
+          .insert({
+            content_id: contentId,
+            processing_status: 'failed',
+            error_message: error.message,
+            last_processed: new Date()
+          });
+      }
     } catch (dbError) {
       console.error("Error saving AI processing error:", dbError);
     }
@@ -506,6 +849,69 @@ const processContentWithAI = async (contentId) => {
       contentId,
       error: error.message
     };
+  }
+};
+
+/**
+ * Calculate content completeness score
+ * @param {string} title - Content title
+ * @param {string} content - Content body text
+ * @param {string} summary - Content summary
+ * @returns {Promise<number>} Completeness score (1-100)
+ */
+const calculateCompletenessScore = async (title, content, summary) => {
+  try {
+    const cleanContent = cleanMarkdownContent(content);
+    let score = 0;
+    
+    // Title completeness (15 points)
+    if (title && title.trim().length > 0) {
+      score += 15;
+      if (title.length >= 10 && title.length <= 100) {
+        score += 5; // Good length title
+      }
+    }
+    
+    // Content length and structure (40 points)
+    if (cleanContent && cleanContent.length > 0) {
+      score += 10; // Has content
+      
+      if (cleanContent.length >= 200) score += 10; // Substantial content
+      if (cleanContent.length >= 500) score += 10; // Good length
+      if (cleanContent.length >= 1000) score += 10; // Comprehensive
+      
+      // Check for structure indicators
+      const sentences = cleanContent.split(/[.!?]+/).filter(s => s.trim().length > 10);
+      if (sentences.length >= 3) score += 5; // Multiple sentences
+      if (sentences.length >= 10) score += 5; // Well-developed
+    }
+    
+    // Summary completeness (20 points)
+    if (summary && summary.trim().length > 0) {
+      score += 15;
+      if (summary.length >= 50 && summary.length <= 300) {
+        score += 5; // Good summary length
+      }
+    }
+    
+    // Content depth indicators (25 points)
+    const hasNumbers = /\d/.test(cleanContent);
+    const hasLists = cleanContent.includes('•') || /^\d+\./m.test(cleanContent);
+    const hasHeaders = content.includes('#') || content.includes('<h');
+    const hasLinks = content.includes('[') && content.includes(']');
+    const hasFormatting = content.includes('**') || content.includes('*') || content.includes('<');
+    
+    if (hasNumbers) score += 5;    // Contains data/numbers
+    if (hasLists) score += 5;      // Has structured lists
+    if (hasHeaders) score += 5;    // Well organized
+    if (hasLinks) score += 5;      // Contains references
+    if (hasFormatting) score += 5; // Proper formatting
+    
+    return Math.max(1, Math.min(100, Math.round(score)));
+    
+  } catch (error) {
+    console.error("Error calculating completeness score:", error);
+    return 50; // Default moderate score
   }
 };
 
@@ -542,5 +948,10 @@ module.exports = {
   calculateReadabilityScore,
   generateAITags,
   processContentWithAI,
-  calculateQualityScore
+  calculateQualityScore,
+  calculateCompletenessScore,
+  calculateSentimentScore,
+  suggestCategory,
+  generateContentSuggestions,
+  generateSEOData
 };
