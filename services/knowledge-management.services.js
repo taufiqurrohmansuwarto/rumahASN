@@ -514,3 +514,74 @@ export const getTopTags = async (params = {}) => {
     .get(`/users/insights/top-tags?${qs}`)
     .then((res) => res.data);
 };
+
+// ===== KNOWLEDGE REVISIONS SERVICES =====
+
+// User Revision Services
+export const createRevision = async (contentId) => {
+  return await api
+    .post(`/users/me/contents/${contentId}/create-revision`)
+    .then((res) => res.data);
+};
+
+export const getMyRevisions = async (contentId) => {
+  return await api
+    .get(`/users/me/contents/${contentId}/revisions`)
+    .then((res) => res.data);
+};
+
+export const updateRevision = async ({ contentId, versionId, data }) => {
+  return await api
+    .put(`/users/me/contents/${contentId}/revisions/${versionId}`, data)
+    .then((res) => res.data);
+};
+
+export const submitRevision = async ({ contentId, versionId, submitNotes }) => {
+  return await api
+    .post(`/users/me/contents/${contentId}/revisions/${versionId}/submit`, {
+      submitNotes
+    })
+    .then((res) => res.data);
+};
+
+// Admin Revision Services
+export const getPendingRevisions = async (query = {}) => {
+  const qs = queryString.stringify(query, {
+    skipNull: true,
+    skipEmptyString: true,
+  });
+
+  return await api
+    .get(`/admin/revisions/pending?${qs}`)
+    .then((res) => res.data);
+};
+
+export const getRevisionDetails = async (versionId) => {
+  return await api
+    .get(`/admin/revisions/${versionId}/approve`)
+    .then((res) => res.data);
+};
+
+export const approveRevision = async ({ versionId, action, rejectionReason }) => {
+  return await api
+    .post(`/admin/revisions/${versionId}/approve`, {
+      action, // 'approve' or 'reject'
+      rejectionReason
+    })
+    .then((res) => res.data);
+};
+
+// Revision Bulk Operations
+export const bulkApproveRevisions = async (versionIds) => {
+  const promises = versionIds.map(versionId =>
+    approveRevision({ versionId, action: 'approve' })
+  );
+  return await Promise.allSettled(promises);
+};
+
+export const bulkRejectRevisions = async (versionIds, rejectionReason) => {
+  const promises = versionIds.map(versionId =>
+    approveRevision({ versionId, action: 'reject', rejectionReason })
+  );
+  return await Promise.allSettled(promises);
+};
