@@ -1,12 +1,16 @@
-const KnowledgeCategory = require("@/models/knowledge/categories.model");
 import { handleError } from "@/utils/helper/controller-helper";
+import {
+  getAllCategories,
+  getCategoryById,
+  createCategory,
+  updateCategory,
+  deleteCategory
+} from "@/utils/services/knowledge-category.services";
 
 export const getKnowledgeCategories = async (req, res) => {
   try {
-    const categories = await KnowledgeCategory.query().orderBy(
-      "created_at",
-      "desc"
-    );
+    // Use service to get all categories
+    const categories = await getAllCategories();
 
     res.json(categories);
   } catch (error) {
@@ -17,7 +21,9 @@ export const getKnowledgeCategories = async (req, res) => {
 export const getKnowledgeCategory = async (req, res) => {
   try {
     const { id } = req?.query;
-    const category = await KnowledgeCategory.query().where("id", id).first();
+    
+    // Use service to get category by ID
+    const category = await getCategoryById(id);
 
     if (!category) {
       return res.status(404).json({
@@ -35,11 +41,15 @@ export const createKnowledgeCategory = async (req, res) => {
   try {
     const payload = req?.body;
     const { customId } = req?.user;
+    
     const data = {
       ...payload,
       created_by: customId,
     };
-    const category = await KnowledgeCategory.query().insert(data);
+    
+    // Use service to create category
+    const category = await createCategory(data);
+    
     res.json(category);
   } catch (error) {
     handleError(res, error);
@@ -50,10 +60,11 @@ export const updateKnowledgeCategory = async (req, res) => {
   try {
     const { id } = req?.query;
     const payload = req?.body;
-    const category = await KnowledgeCategory.query()
-      .where("id", id)
-      .update(payload);
-    res.json(category);
+    
+    // Use service to update category
+    const result = await updateCategory(id, payload);
+    
+    res.json(result);
   } catch (error) {
     handleError(res, error);
   }
@@ -62,8 +73,11 @@ export const updateKnowledgeCategory = async (req, res) => {
 export const deleteKnowledgeCategory = async (req, res) => {
   try {
     const { id } = req?.query;
-    const category = await KnowledgeCategory.query().where("id", id).delete();
-    res.json(category);
+    
+    // Use service to delete category
+    const result = await deleteCategory(id);
+    
+    res.json(result);
   } catch (error) {
     handleError(res, error);
   }

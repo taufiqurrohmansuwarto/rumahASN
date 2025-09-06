@@ -1,55 +1,23 @@
 import { handleError } from "@/utils/helper/controller-helper";
 import { uploadFileMinio } from "@/utils/index";
-import crypto from "crypto";
 import { processContentWithAI } from "@/utils/services/ai-processing.services";
+import {
+  getContentsWithFilters,
+  getContentById,
+  getRelatedContents,
+  updateViewsCount,
+  createContent,
+  updateContent,
+  deleteContent,
+  uploadContentAttachment,
+  uploadContentMedia,
+  getEncryptedUserId,
+} from "@/utils/services/knowledge-content.services";
+import { getAllCategories } from "@/utils/services/knowledge-category.services";
 
 const KnowledgeContent = require("@/models/knowledge/contents.model");
-const KnowledgeCategory = require("@/models/knowledge/categories.model");
-const KnowledgeContentAttachment = require("@/models/knowledge/content-attachments.model");
-const UserInteraction = require("@/models/knowledge/user-interactions.model");
 
-const BASE_URL = "https://siasn.bkd.jatimprov.go.id:9000/public";
-
-// Helper function to encrypt customId for filename
-const getEncryptedUserId = (customId) => {
-  return crypto
-    .createHash("sha256")
-    .update(customId.toString())
-    .digest("hex")
-    .substring(0, 12);
-};
-
-// Fungsi untuk mengelola jumlah views konten
-const updateViewsCount = async (customId, contentId) => {
-  try {
-    // Cek apakah user sudah pernah melihat konten ini
-    const existingView = await UserInteraction.query()
-      .where("user_id", customId)
-      .where("content_id", contentId)
-      .where("interaction_type", "view")
-      .first();
-
-    // Jika belum pernah melihat, catat view dan increment counter
-    if (!existingView) {
-      // Catat interaksi view user
-      await UserInteraction.query().insert({
-        user_id: customId,
-        content_id: contentId,
-        interaction_type: "view",
-      });
-
-      // Tambah 1 ke views_count konten
-      await KnowledgeContent.query()
-        .where("id", contentId)
-        .increment("views_count", 1);
-    }
-
-    return !existingView; // Return true jika view baru, false jika sudah pernah
-  } catch (error) {
-    console.error("Error saat update views count:", error);
-    throw new Error("Gagal mengupdate jumlah views");
-  }
-};
+// Helper functions moved to knowledge-content.services.js
 
 export const getKnowledgeContents = async (req, res) => {
   try {
@@ -58,10 +26,10 @@ export const getKnowledgeContents = async (req, res) => {
       page = 1,
       limit = 10,
       search = "",
-      sort = "created_at", // Default: created_at DESC (terbaru)
+      sort = "created_at:desc",
       category_id = "",
       tags = "",
-      type = "", // Add type filter
+      type = "",
     } = req?.query;
 
     // Handle multiple tags from URL params (tag=tutorial&tag=javascript)
@@ -72,84 +40,23 @@ export const getKnowledgeContents = async (req, res) => {
       : [];
     const allTags = tags ? tags.split(",").filter(Boolean) : [];
     const finalTags = [...new Set([...tagFilters, ...allTags])].filter(Boolean);
-    const contents = await KnowledgeContent.query()
-      .andWhere((builder) => {
-        if (search) {
-          builder.where("title", "ilike", `%${search}%`);
-        }
-      })
-      .andWhere((builder) => {
-        if (category_id) {
-          builder.where("category_id", category_id);
-        }
-      })
-      .andWhere((builder) => {
-        if (finalTags.length > 0) {
-          // Check if any of the selected tags exist in the content tags
-          builder.where((subBuilder) => {
-            finalTags.forEach((tag) => {
-              subBuilder.orWhereRaw("tags @> ?", [JSON.stringify([tag])]);
-            });
-          });
-        }
-      })
-      .andWhere((builder) => {
-        if (type && type !== "all") {
-          builder.where("type", type);
-        }
-      })
-      .select(
-        "knowledge.contents.id",
-        "knowledge.contents.title",
-        "knowledge.contents.summary",
-        "knowledge.contents.author_id",
-        "knowledge.contents.category_id",
-        "knowledge.contents.type",
-        "knowledge.contents.source_url",
-        "knowledge.contents.status",
-        "knowledge.contents.tags",
-        "knowledge.contents.likes_count",
-        "knowledge.contents.comments_count",
-        "knowledge.contents.views_count",
-        "knowledge.contents.bookmarks_count",
-        "knowledge.contents.created_at",
-        "knowledge.contents.updated_at",
-        // Subquery untuk is_liked
-        KnowledgeContent.relatedQuery("user_interactions")
-          .where("user_id", customId)
-          .where("interaction_type", "like")
-          .select(
-            KnowledgeContent.raw(
-              "CASE WHEN COUNT(*) > 0 THEN true ELSE false END"
-            )
-          )
-          .as("is_liked"),
-        // Subquery untuk is_bookmarked
-        KnowledgeContent.relatedQuery("user_interactions")
-          .where("user_id", customId)
-          .where("interaction_type", "bookmark")
-          .select(
-            KnowledgeContent.raw(
-              "CASE WHEN COUNT(*) > 0 THEN true ELSE false END"
-            )
-          )
-          .as("is_bookmarked")
-      )
-      .andWhere("status", "published")
-      .withGraphFetched(
-        "[author(simpleWithImage), category, user_verified(simpleWithImage)]"
-      )
-      .orderBy(getSortField(sort), getSortDirection(sort))
-      .page(page - 1, limit);
 
-    const data = {
-      data: contents?.results,
-      total: contents?.total,
-      page: contents?.page || 1,
-      limit: contents?.limit || 10,
-    };
+    // Use service instead of direct query
+    const results = await getContentsWithFilters(
+      {
+        search,
+        category_id,
+        tags: finalTags,
+        type,
+        page,
+        limit,
+        sort,
+        status: "published",
+      },
+      customId
+    );
 
-    res.json(data);
+    res.json(results);
   } catch (error) {
     handleError(res, error);
   }
@@ -160,36 +67,12 @@ export const getKnowledgeContent = async (req, res) => {
     const { id } = req?.query;
     const { customId } = req?.user;
 
-    const content = await KnowledgeContent.query()
-      .where("knowledge.contents.id", id)
-      .andWhere("knowledge.contents.status", "published")
-      .withGraphFetched(
-        "[author(simpleWithImage), category, user_verified(simpleWithImage), versions.[user_updated(simpleWithImage)], attachments, references]"
-      )
-      .select(
-        "knowledge.contents.*",
-        // Subquery untuk is_liked
-        KnowledgeContent.relatedQuery("user_interactions")
-          .where("user_id", customId)
-          .where("interaction_type", "like")
-          .select(
-            KnowledgeContent.raw(
-              "CASE WHEN COUNT(*) > 0 THEN true ELSE false END"
-            )
-          )
-          .as("is_liked"),
-        // Subquery untuk is_bookmarked
-        KnowledgeContent.relatedQuery("user_interactions")
-          .where("user_id", customId)
-          .where("interaction_type", "bookmark")
-          .select(
-            KnowledgeContent.raw(
-              "CASE WHEN COUNT(*) > 0 THEN true ELSE false END"
-            )
-          )
-          .as("is_bookmarked")
-      )
-      .first();
+    // Use service to get content with user interactions
+    const content = await getContentById(
+      id,
+      { includeRelations: true },
+      customId
+    );
 
     if (!content) {
       return res.status(404).json({
@@ -210,29 +93,8 @@ export const createKnowledgeContent = async (req, res) => {
     const body = req?.body;
     const { customId } = req?.user;
 
-    const payload = {
-      ...body,
-      tags: JSON.stringify(body?.tags),
-      author_id: customId,
-    };
-
-    // Menggunakan transaction untuk memastikan konsistensi data
-    const content = await KnowledgeContent.transaction(async (trx) => {
-      // Insert content terlebih dahulu
-      const newContent = await KnowledgeContent.query(trx).insert(payload);
-
-      // Insert references menggunakan relation jika ada
-      if (body?.references && body.references.length > 0) {
-        await newContent.$relatedQuery("references", trx).insert(
-          body.references.map((reference) => ({
-            title: reference.title,
-            url: reference.url,
-          }))
-        );
-      }
-
-      return newContent;
-    });
+    // Use service to create content with references
+    const content = await createContent(body, customId);
 
     // Trigger AI processing in background (don't wait for completion)
     setImmediate(async () => {
@@ -241,7 +103,10 @@ export const createKnowledgeContent = async (req, res) => {
         await processContentWithAI(content.id);
         console.log(`AI processing completed for content: ${content.id}`);
       } catch (aiError) {
-        console.error(`AI processing failed for content ${content.id}:`, aiError.message);
+        console.error(
+          `AI processing failed for content ${content.id}:`,
+          aiError.message
+        );
         // Don't throw error - AI processing failure shouldn't affect content creation
       }
     });
@@ -258,53 +123,8 @@ export const updateKnowledgeContentPersonal = async (req, res) => {
     const body = req?.body;
     const { customId } = req?.user;
 
-    const payload = {
-      ...body,
-      tags: JSON.stringify(body?.tags),
-      updated_at: new Date(),
-    };
-
-    // Use transaction for consistency when updating content and references
-    const updatedContent = await KnowledgeContent.transaction(async (trx) => {
-      // Update the main content
-      await KnowledgeContent.query(trx)
-        .where("id", id)
-        .andWhere("author_id", customId)
-        .update(payload);
-
-      // Get the existing content to work with references
-      const existingContent = await KnowledgeContent.query(trx)
-        .where("id", id)
-        .andWhere("author_id", customId)
-        .first();
-
-      if (!existingContent) {
-        throw new Error("Content tidak ditemukan atau tidak dapat diupdate");
-      }
-
-      // Handle references if provided
-      if (body?.references !== undefined) {
-        // Delete existing references
-        await existingContent.$relatedQuery("references", trx).delete();
-
-        // Insert new references if any
-        if (body.references && body.references.length > 0) {
-          await existingContent.$relatedQuery("references", trx).insert(
-            body.references.map((reference) => ({
-              title: reference.title,
-              url: reference.url,
-            }))
-          );
-        }
-      }
-
-      // Return the updated content with relations
-      return await KnowledgeContent.query(trx)
-        .where("id", id)
-        .andWhere("author_id", customId)
-        .withGraphFetched("[references]")
-        .first();
-    });
+    // Use service to update content with references
+    const updatedContent = await updateContent(id, body, customId);
 
     res.json(updatedContent);
   } catch (error) {
@@ -317,21 +137,19 @@ export const deleteKnowledgeContent = async (req, res) => {
     const { id } = req?.query;
     const { customId } = req?.user;
 
-    const content = await KnowledgeContent.query()
-      .where("id", id)
-      .andWhere("user_id", customId)
-      .delete();
+    // Use service to delete content
+    const result = await deleteContent(id, customId);
 
-    res.json(content);
+    res.json(result);
   } catch (error) {
     handleError(res, error);
   }
 };
 
 // refs
-export const getKnowledgeCategories = async (req, res) => {
+export const getKnowledgeCategories = async (_req, res) => {
   try {
-    const categories = await KnowledgeCategory.query();
+    const categories = await getAllCategories();
     res.json(categories);
   } catch (error) {
     handleError(res, error);
@@ -340,16 +158,9 @@ export const getKnowledgeCategories = async (req, res) => {
 
 export const uploadKnowledgeContentAttachment = async (req, res) => {
   try {
-    const mc = req?.mc;
     const files = req?.files || [];
-    const { id: content_id } = req?.query;
-
-    if (!mc) {
-      return res.status(500).json({
-        success: false,
-        message: "Minio client tidak tersedia",
-      });
-    }
+    const { id: contentId } = req?.query;
+    const { customId } = req?.user;
 
     if (!files || files.length === 0) {
       return res.status(400).json({
@@ -358,41 +169,24 @@ export const uploadKnowledgeContentAttachment = async (req, res) => {
       });
     }
 
-    const uploadResults = [];
+    // Use service to upload attachments
+    const result = await uploadContentAttachment(contentId, files, customId);
 
-    for (const file of files) {
-      const filename = `${content_id}-${Date.now()}-${Math.random()
-        .toString(36)
-        .substring(2, 11)}-${file?.originalname.replace(/\s+/g, "-")}`;
-      const fileSize = file?.size;
-      const mimetype = file?.mimetype;
-      const buffer = Buffer.from(file?.buffer);
-
-      await uploadFileMinio(mc, buffer, filename, fileSize, mimetype);
-
-      const attachment = await KnowledgeContentAttachment.query().insert({
-        content_id,
-        url: `${BASE_URL}/${filename}`,
-        name: file?.originalname,
-        size: fileSize,
-        mime: mimetype,
-      });
-
-      uploadResults.push({
-        id: attachment.id,
-        uid: `attachment-${attachment.id}`,
-        name: attachment.name,
-        filename: attachment.name,
-        url: `${BASE_URL}${attachment.url}`,
-        size: attachment.size,
-        mimetype: attachment.mime,
-        status: "done",
-      });
-    }
+    // Transform response to match expected format
+    const uploadResults = result.attachments.map((attachment) => ({
+      id: attachment.id,
+      uid: `attachment-${attachment.id}`,
+      name: attachment.filename,
+      filename: attachment.filename,
+      url: attachment.url,
+      size: attachment.file_size,
+      mimetype: attachment.file_type,
+      status: "done",
+    }));
 
     res.json({
       success: true,
-      message: `${uploadResults.length} file berhasil diunggah`,
+      message: result.message,
       data: uploadResults,
     });
   } catch (error) {
@@ -402,9 +196,9 @@ export const uploadKnowledgeContentAttachment = async (req, res) => {
 
 export const uploadKnowledgeContentAttachmentAdmin = async (req, res) => {
   try {
-    const mc = req?.mc;
     const files = req?.files || [];
-    const { id: content_id } = req?.query;
+    const { id: contentId } = req?.query;
+    const { customId } = req?.user;
 
     if (!files || files.length === 0) {
       return res.status(400).json({
@@ -413,41 +207,29 @@ export const uploadKnowledgeContentAttachmentAdmin = async (req, res) => {
       });
     }
 
-    const uploadResults = [];
+    // Use service to upload attachments (admin mode)
+    const result = await uploadContentAttachment(
+      contentId,
+      files,
+      customId,
+      true
+    );
 
-    for (const file of files) {
-      const filename = `${content_id}-${Date.now()}-${Math.random()
-        .toString(36)
-        .substring(2, 11)}-${file?.originalname.replace(/\s+/g, "-")}`;
-      const fileSize = file?.size;
-      const mimetype = file?.mimetype;
-      const buffer = Buffer.from(file?.buffer);
-
-      await uploadFileMinio(mc, buffer, filename, fileSize, mimetype);
-
-      const attachment = await KnowledgeContentAttachment.query().insert({
-        content_id,
-        url: `${BASE_URL}/${filename}`,
-        name: file?.originalname,
-        size: fileSize,
-        mime: mimetype,
-      });
-
-      uploadResults.push({
-        id: attachment.id,
-        uid: `attachment-${attachment.id}`,
-        name: attachment.name,
-        filename: attachment.name,
-        url: `${BASE_URL}${attachment.url}`,
-        size: attachment.size,
-        mimetype: attachment.mime,
-        status: "done",
-      });
-    }
+    // Transform response to match expected format
+    const uploadResults = result.attachments.map((attachment) => ({
+      id: attachment.id,
+      uid: `attachment-${attachment.id}`,
+      name: attachment.filename,
+      filename: attachment.filename,
+      url: attachment.url,
+      size: attachment.file_size,
+      mimetype: attachment.file_type,
+      status: "done",
+    }));
 
     res.json({
       success: true,
-      message: `${uploadResults.length} file berhasil diunggah`,
+      message: result.message,
       data: uploadResults,
     });
   } catch (error) {
@@ -455,46 +237,11 @@ export const uploadKnowledgeContentAttachmentAdmin = async (req, res) => {
   }
 };
 
-// Helper functions for sorting
-function getSortField(sort) {
-  switch (sort) {
-    case "created_at": // Default - tanggal create terbaru
-    case "created_at_asc": // Tanggal create terlama
-      return "created_at";
-    case "likes_count": // Total like terbanyak
-      return "likes_count";
-    case "comments_count": // Total komentar terbanyak
-      return "comments_count";
-    case "title_asc": // Judul A-Z
-    case "title_desc": // Judul Z-A
-      return "title";
-    case "updated_at": // Tanggal update
-      return "updated_at";
-    default:
-      return "created_at";
-  }
-}
-
-function getSortDirection(sort) {
-  switch (sort) {
-    case "created_at_asc": // Tanggal create terlama (ASC)
-    case "title_asc": // Judul A-Z (ASC)
-      return "asc";
-    case "title_desc": // Judul Z-A (DESC)
-      return "desc";
-    case "created_at": // Default - tanggal create terbaru (DESC)
-    case "likes_count": // Total like terbanyak (DESC)
-    case "comments_count": // Total komentar terbanyak (DESC)
-    case "updated_at": // Tanggal update terbaru (DESC)
-    default:
-      return "desc";
-  }
-}
+// Helper functions moved to knowledge-content.services.js for sorting logic
 
 // Media upload functions
 export const uploadKnowledgeContentMediaCreate = async (req, res) => {
   try {
-    const { mc } = req;
     const { customId } = req?.user;
     const { file } = req;
 
@@ -511,29 +258,22 @@ export const uploadKnowledgeContentMediaCreate = async (req, res) => {
       });
     }
 
-    // Generate unique filename
-    const timestamp = new Date().getTime();
-    const originalName = file.originalname.replace(/[^a-zA-Z0-9.-]/g, "_");
-    const encryptedUserId = getEncryptedUserId(customId);
-    const fileName = `knowledge-media/${encryptedUserId}/${timestamp}_${originalName}`;
-
-    // Upload to MinIO
-    await uploadFileMinio(mc, file.buffer, fileName, file.size, file.mimetype);
-
-    const mediaUrl = `${BASE_URL}/${fileName}`;
+    // Use service to upload media for content creation
+    const uploadResults = await uploadContentMedia([file], customId);
+    const mediaData = uploadResults[0];
 
     res.json({
       success: true,
       message: "Media uploaded successfully",
       data: {
-        url: mediaUrl,
-        filename: fileName,
-        originalName: file.originalname,
-        size: file.size,
-        mimetype: file.mimetype,
-        type: file.mimetype.startsWith("image/")
+        url: mediaData.url,
+        filename: mediaData.name,
+        originalName: mediaData.name,
+        size: mediaData.size,
+        mimetype: mediaData.type,
+        type: mediaData.type.startsWith("image/")
           ? "image"
-          : file.mimetype.startsWith("video/")
+          : mediaData.type.startsWith("video/")
           ? "video"
           : "audio",
       },
@@ -554,13 +294,12 @@ export const uploadKnowledgeContentMedia = async (req, res) => {
       return res.status(400).json({ message: "File media is required" });
     }
 
-    // Check if content exists and user owns it
-    const content = await KnowledgeContent.query()
-      .where("id", contentId)
-      .where("author_id", customId)
-      .first();
+    // Use service to check if content exists and user owns it
+    const content = await getContentById(contentId, {
+      includeRelations: false,
+    });
 
-    if (!content) {
+    if (!content || content.author_id !== customId) {
       return res
         .status(404)
         .json({ message: "Content not found or access denied" });
@@ -575,7 +314,7 @@ export const uploadKnowledgeContentMedia = async (req, res) => {
       });
     }
 
-    // Generate unique filename
+    // Generate unique filename using service
     const timestamp = new Date().getTime();
     const originalName = file.originalname.replace(/[^a-zA-Z0-9.-]/g, "_");
     const encryptedUserId = getEncryptedUserId(customId);
@@ -584,7 +323,7 @@ export const uploadKnowledgeContentMedia = async (req, res) => {
     // Upload to MinIO
     await uploadFileMinio(mc, file.buffer, fileName, file.size, file.mimetype);
 
-    const mediaUrl = `${BASE_URL}/${fileName}`;
+    const mediaUrl = `https://siasn.bkd.jatimprov.go.id:9000/public/${fileName}`;
 
     // Determine content type based on file mimetype
     const contentType = file.mimetype.startsWith("image/")
@@ -634,8 +373,10 @@ export const uploadKnowledgeContentMediaAdmin = async (req, res) => {
       return res.status(400).json({ message: "File media is required" });
     }
 
-    // Check if content exists (admin can edit any content)
-    const content = await KnowledgeContent.query().findById(contentId);
+    // Use service to check if content exists (admin can edit any content)
+    const content = await getContentById(contentId, {
+      includeRelations: false,
+    });
 
     if (!content) {
       return res.status(404).json({ message: "Content not found" });
@@ -650,7 +391,7 @@ export const uploadKnowledgeContentMediaAdmin = async (req, res) => {
       });
     }
 
-    // Generate unique filename
+    // Generate unique filename using service
     const timestamp = new Date().getTime();
     const originalName = file.originalname.replace(/[^a-zA-Z0-9.-]/g, "_");
     const encryptedAdminId = getEncryptedUserId("admin_" + customId);
@@ -659,7 +400,7 @@ export const uploadKnowledgeContentMediaAdmin = async (req, res) => {
     // Upload to MinIO
     await uploadFileMinio(mc, file.buffer, fileName, file.size, file.mimetype);
 
-    const mediaUrl = `${BASE_URL}/${fileName}`;
+    const mediaUrl = `https://siasn.bkd.jatimprov.go.id:9000/public/${fileName}`;
 
     // Determine content type based on file mimetype
     const contentType = file.mimetype.startsWith("image/")
@@ -698,188 +439,15 @@ export const uploadKnowledgeContentMediaAdmin = async (req, res) => {
   }
 };
 
-export const getRelatedContents = async (req, res) => {
+export const getContentRelated = async (req, res) => {
   try {
     const { id } = req?.query;
 
-    // Get current content first
-    const currentContent = await KnowledgeContent.query()
-      .where("id", id)
-      .andWhere("status", "published")
-      .first();
+    // Use service to get related contents
+    const relatedContents = await getRelatedContents(id, 5);
 
-    if (!currentContent) {
-      return res.status(404).json({
-        message: "Konten tidak ditemukan",
-      });
-    }
-
-    // Extract keywords from title and summary for matching
-    const titleKeywords = currentContent.title
-      .toLowerCase()
-      .replace(/[^\w\s]/gi, "") // Remove special characters
-      .split(/\s+/)
-      .filter((word) => word.length > 2); // Only words with 3+ characters
-
-    const summaryKeywords = currentContent.summary
-      ? currentContent.summary
-          .toLowerCase()
-          .replace(/[^\w\s]/gi, "")
-          .split(/\s+/)
-          .filter((word) => word.length > 2)
-      : [];
-
-    // Extract tags from current content
-    const currentTags = currentContent.tags
-      ? typeof currentContent.tags === "string"
-        ? JSON.parse(currentContent.tags)
-        : currentContent.tags
-      : [];
-
-    // Combine and get unique keywords (including tags as high-value keywords)
-    const allKeywords = [
-      ...new Set([
-        ...titleKeywords,
-        ...summaryKeywords,
-        ...currentTags.map((tag) => tag.toLowerCase()),
-      ]),
-    ];
-
-    // Build search query for similar content
-    let query = KnowledgeContent.query()
-      .where("status", "published")
-      .where("id", "!=", id) // Exclude current content
-      .orderBy("created_at", "desc")
-      .limit(20); // Get more to filter and sort by relevance
-
-    // If we have keywords, use them to find similar content
-    if (allKeywords.length > 0) {
-      query = query.where((builder) => {
-        allKeywords.forEach((keyword) => {
-          builder
-            .orWhere("title", "ilike", `%${keyword}%`)
-            .orWhere("summary", "ilike", `%${keyword}%`)
-            .orWhereRaw("tags @> ?", [JSON.stringify([keyword])]) // Search in tags array
-            .orWhereRaw("LOWER(tags::text) LIKE ?", [
-              `%${keyword.toLowerCase()}%`,
-            ]); // Flexible tag search
-        });
-      });
-    } else {
-      // Fallback: get content from same category
-      if (currentContent.category_id) {
-        query = query.where("category_id", currentContent.category_id);
-      }
-    }
-
-    const potentialMatches = await query;
-
-    // Calculate relevance score for each content
-    const scoredContent = potentialMatches.map((content) => {
-      let score = 0;
-      const contentTitle = content.title.toLowerCase();
-      const contentSummary = content.summary
-        ? content.summary.toLowerCase()
-        : "";
-
-      // Parse content tags
-      const contentTags = content.tags
-        ? typeof content.tags === "string"
-          ? JSON.parse(content.tags)
-          : content.tags
-        : [];
-      const contentTagsLower = contentTags.map((tag) => tag.toLowerCase());
-
-      // Score based on title matches
-      titleKeywords.forEach((keyword) => {
-        if (contentTitle.includes(keyword)) {
-          score += 4; // Higher weight for title matches
-        }
-      });
-
-      // Score based on summary matches
-      summaryKeywords.forEach((keyword) => {
-        if (contentSummary.includes(keyword)) {
-          score += 2;
-        }
-      });
-
-      // Score based on tag matches (highest priority)
-      currentTags.forEach((currentTag) => {
-        const currentTagLower = currentTag.toLowerCase();
-        // Exact tag match - highest score
-        if (contentTagsLower.includes(currentTagLower)) {
-          score += 5;
-        }
-        // Partial tag match - medium score
-        contentTagsLower.forEach((contentTag) => {
-          if (
-            contentTag.includes(currentTagLower) ||
-            currentTagLower.includes(contentTag)
-          ) {
-            score += 3;
-          }
-        });
-      });
-
-      // Enhanced category scoring
-      if (content.category_id === currentContent.category_id) {
-        score += 2; // Increased category bonus
-      }
-
-      // Tag diversity bonus - reward content with similar number of tags
-      const tagCountDiff = Math.abs(currentTags.length - contentTags.length);
-      if (tagCountDiff <= 1 && contentTags.length > 0) {
-        score += 1;
-      }
-
-      // Bonus for recent content (within last 30 days)
-      const daysDiff =
-        Math.abs(new Date() - new Date(content.created_at)) /
-        (1000 * 60 * 60 * 24);
-      if (daysDiff <= 30) {
-        score += 1;
-      }
-
-      return { ...content, relevanceScore: score };
-    });
-
-    // Sort by relevance score and take top 10
-    const relatedContent = scoredContent
-      .filter((content) => content.relevanceScore > 0)
-      .sort((a, b) => b.relevanceScore - a.relevanceScore)
-      .slice(0, 10)
-      .map(({ relevanceScore, ...content }) => content); // Remove relevanceScore from final result
-
-    // If still not enough results, fallback to recent content from same category
-    if (relatedContent.length < 5 && currentContent.category_id) {
-      const fallbackContent = await KnowledgeContent.query()
-        .where("status", "published")
-        .where("id", "!=", id)
-        .where("category_id", currentContent.category_id)
-        .whereNotIn(
-          "id",
-          relatedContent.map((c) => c.id)
-        )
-        .withGraphFetched("author(simple)")
-        .withGraphFetched("category(simple)")
-        .orderBy("created_at", "desc")
-        .limit(10 - relatedContent.length);
-
-      relatedContent.push(...fallbackContent);
-    }
-
-    return res.json({
-      currentContent: {
-        id: currentContent.id,
-        title: currentContent.title,
-        category_id: currentContent.category_id,
-      },
-      relatedContent: relatedContent.slice(0, 10), // Ensure max 10 results
-      totalFound: relatedContent.length,
-    });
+    res.json(relatedContents);
   } catch (error) {
-    console.error("Error getting related content:", error);
     handleError(res, error);
   }
 };

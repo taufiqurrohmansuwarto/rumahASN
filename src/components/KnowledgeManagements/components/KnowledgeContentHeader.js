@@ -22,9 +22,22 @@ import {
   FileImageOutlined,
   PlayCircleOutlined,
   SoundOutlined,
+  SendOutlined,
+  DeleteOutlined,
 } from "@ant-design/icons";
-import { Card, Flex, Tag, Tooltip, Typography, Divider, Grid } from "antd";
+import {
+  Card,
+  Flex,
+  Tag,
+  Tooltip,
+  Typography,
+  Divider,
+  Grid,
+  Button,
+  Space,
+} from "antd";
 import dayjs from "dayjs";
+import { useRouter } from "next/router";
 
 const { Text } = Typography;
 const { useBreakpoint } = Grid;
@@ -39,7 +52,13 @@ const KnowledgeContentHeader = ({
   isBookmarking = false,
   disableInteractions = false,
   showOwnerActions = false,
+  onSubmitForReview = () => {},
+  isSubmittingForReview = false,
+  onDelete = () => {},
+  isDeleting = false,
 }) => {
+  const router = useRouter();
+
   // Responsive breakpoints
   const screens = useBreakpoint();
   const isMobile = !screens.md;
@@ -79,7 +98,7 @@ const KnowledgeContentHeader = ({
   // Render metadata tags
   const renderMetadata = () => {
     const metadataItems = [];
-    
+
     // Status
     if (content?.status) {
       metadataItems.push(
@@ -164,7 +183,10 @@ const KnowledgeContentHeader = ({
     return (
       <Flex align="center" gap="4px" wrap="wrap">
         {metadataItems.map((item, index) => (
-          <div key={item.key} style={{ display: "flex", alignItems: "center", gap: "4px" }}>
+          <div
+            key={item.key}
+            style={{ display: "flex", alignItems: "center", gap: "4px" }}
+          >
             {item}
             {index < metadataItems.length - 1 && (
               <span style={{ color: "#787C7E", fontSize: "12px" }}>•</span>
@@ -208,7 +230,8 @@ const KnowledgeContentHeader = ({
 
   // Extract YouTube video ID
   const getYouTubeVideoId = (url) => {
-    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
+    const regExp =
+      /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
     const match = url?.match(regExp);
     return match && match[2].length === 11 ? match[2] : null;
   };
@@ -257,7 +280,9 @@ const KnowledgeContentHeader = ({
                 gap: "8px",
               }}
             >
-              <FileImageOutlined style={{ fontSize: "32px", color: "#52c41a" }} />
+              <FileImageOutlined
+                style={{ fontSize: "32px", color: "#52c41a" }}
+              />
               <Text style={{ fontSize: "12px", color: "#6B7280" }}>
                 Gambar tidak dapat dimuat
               </Text>
@@ -309,7 +334,9 @@ const KnowledgeContentHeader = ({
                       e.currentTarget.style.transform = "scale(1)";
                     }}
                   >
-                    <PlayCircleOutlined style={{ fontSize: "32px", color: "#722ed1" }} />
+                    <PlayCircleOutlined
+                      style={{ fontSize: "32px", color: "#722ed1" }}
+                    />
                   </div>
                 </div>
               </div>
@@ -341,7 +368,9 @@ const KnowledgeContentHeader = ({
                   gap: "8px",
                 }}
               >
-                <PlayCircleOutlined style={{ fontSize: "32px", color: "#722ed1" }} />
+                <PlayCircleOutlined
+                  style={{ fontSize: "32px", color: "#722ed1" }}
+                />
                 <Text style={{ fontSize: "12px", color: "#6B7280" }}>
                   Video tidak dapat dimuat
                 </Text>
@@ -365,7 +394,9 @@ const KnowledgeContentHeader = ({
                 e.target.nextSibling.style.display = "block";
               }}
             />
-            <div style={{ display: "none", textAlign: "center", padding: "8px 0" }}>
+            <div
+              style={{ display: "none", textAlign: "center", padding: "8px 0" }}
+            >
               <Text style={{ fontSize: "12px", color: "#6B7280" }}>
                 Audio tidak dapat dimuat
               </Text>
@@ -621,7 +652,6 @@ const KnowledgeContentHeader = ({
                       {renderMetadata()}
                     </>
                   )}
-
                 </Flex>
 
                 {/* Spacer untuk alignment dengan tombol simpan */}
@@ -732,12 +762,9 @@ const KnowledgeContentHeader = ({
                 >
                   Preview Media:
                 </Text>
-                <div>
-                  {renderMediaPreview()}
-                </div>
+                <div>{renderMediaPreview()}</div>
               </div>
             )}
-
 
             {/* Isi */}
             <div style={{ marginBottom: "12px" }}>
@@ -769,6 +796,147 @@ const KnowledgeContentHeader = ({
               </div>
             </div>
           </div>
+
+          {/* Draft Actions - Only show for draft content and owner */}
+          {content?.status === "draft" && showOwnerActions && (
+            <div
+              style={{
+                marginBottom: "24px",
+                padding: "16px",
+                backgroundColor: "#FFF7ED",
+                border: "2px solid #FED7AA",
+                borderRadius: "8px",
+                position: "relative",
+              }}
+            >
+              {/* Alert indicator */}
+              <div
+                style={{
+                  position: "absolute",
+                  top: "-1px",
+                  left: "-1px",
+                  width: "4px",
+                  height: "calc(100% + 2px)",
+                  backgroundColor: "#EA580C",
+                  borderRadius: "2px 0 0 2px",
+                }}
+              />
+
+              <div style={{ marginBottom: "12px" }}>
+                <Flex align="center" gap={8} style={{ marginBottom: "4px" }}>
+                  <EditOutlined
+                    style={{ color: "#EA580C", fontSize: "14px" }}
+                  />
+                  <Text
+                    strong
+                    style={{
+                      color: "#EA580C",
+                      fontSize: "14px",
+                    }}
+                  >
+                    Konten Draft - Perlu Tindakan
+                  </Text>
+                </Flex>
+                <Text
+                  style={{
+                    color: "#C2410C",
+                    fontSize: "12px",
+                    lineHeight: "1.4",
+                  }}
+                >
+                  Konten ini masih dalam tahap draft. Anda dapat melakukan edit
+                  atau submit untuk direview oleh admin.
+                </Text>
+              </div>
+
+              <Space size="middle">
+                <Button
+                  type="default"
+                  icon={<EditOutlined />}
+                  onClick={() =>
+                    router.push(
+                      `/asn-connect/asn-knowledge/my-knowledge/${content.id}/edit`
+                    )
+                  }
+                  style={{
+                    borderColor: "#EA580C",
+                    color: "#EA580C",
+                    fontWeight: 600,
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = "#EA580C";
+                    e.currentTarget.style.color = "white";
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = "transparent";
+                    e.currentTarget.style.color = "#EA580C";
+                  }}
+                >
+                  Edit Konten
+                </Button>
+
+                <Button
+                  danger
+                  icon={<DeleteOutlined />}
+                  onClick={onDelete}
+                  loading={isDeleting}
+                  style={{
+                    borderColor: "#ff4d4f",
+                    color: "#ff4d4f",
+                    fontWeight: 600,
+                  }}
+                  onMouseEnter={(e) => {
+                    if (!isDeleting) {
+                      e.currentTarget.style.backgroundColor = "#ff4d4f";
+                      e.currentTarget.style.color = "white";
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (!isDeleting) {
+                      e.currentTarget.style.backgroundColor = "transparent";
+                      e.currentTarget.style.color = "#ff4d4f";
+                    }
+                  }}
+                >
+                  {isDeleting ? "Menghapus..." : "Hapus Draft"}
+                </Button>
+
+                <Button
+                  type="primary"
+                  icon={<SendOutlined />}
+                  onClick={onSubmitForReview}
+                  loading={isSubmittingForReview}
+                  disabled={isSubmittingForReview}
+                  style={{
+                    backgroundColor: "#EA580C",
+                    borderColor: "#EA580C",
+                    fontWeight: 600,
+                    boxShadow: "0 2px 4px rgba(234, 88, 12, 0.2)",
+                  }}
+                  onMouseEnter={(e) => {
+                    if (!isSubmittingForReview) {
+                      e.currentTarget.style.backgroundColor = "#C2410C";
+                      e.currentTarget.style.borderColor = "#C2410C";
+                      e.currentTarget.style.transform = "translateY(-1px)";
+                      e.currentTarget.style.boxShadow =
+                        "0 4px 8px rgba(234, 88, 12, 0.3)";
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (!isSubmittingForReview) {
+                      e.currentTarget.style.backgroundColor = "#EA580C";
+                      e.currentTarget.style.borderColor = "#EA580C";
+                      e.currentTarget.style.transform = "translateY(0px)";
+                      e.currentTarget.style.boxShadow =
+                        "0 2px 4px rgba(234, 88, 12, 0.2)";
+                    }
+                  }}
+                >
+                  {isSubmittingForReview ? "Mengirim..." : "Submit untuk Review"}
+                </Button>
+              </Space>
+            </div>
+          )}
 
           <Divider style={{ margin: "16px 0" }} />
 
@@ -813,9 +981,7 @@ const KnowledgeContentHeader = ({
 
           {/* Metadata for mobile screens only */}
           {isMobile && (
-            <div style={{ marginBottom: "16px" }}>
-              {renderMetadata()}
-            </div>
+            <div style={{ marginBottom: "16px" }}>{renderMetadata()}</div>
           )}
 
           {/* References */}

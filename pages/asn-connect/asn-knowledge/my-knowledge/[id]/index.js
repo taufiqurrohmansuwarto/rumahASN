@@ -1,8 +1,7 @@
 import { KnowledgeUserContentDetail } from "@/components/KnowledgeManagements";
 import Layout from "@/components/Layout";
 import PageContainer from "@/components/PageContainer";
-import { getUserOwnContent } from "@/services/knowledge-management.services";
-import { useQuery } from "@tanstack/react-query";
+import { useUserOwnContent } from "@/hooks/knowledge-management";
 import { Breadcrumb, Col, FloatButton, Row } from "antd";
 import Head from "next/head";
 import Link from "next/link";
@@ -11,15 +10,7 @@ import { useRouter } from "next/router";
 const AsnKnowledgeMyKnowledgeDetail = () => {
   const router = useRouter();
 
-  const { data, isLoading } = useQuery(
-    ["my-knowledge-content-detail", router.query.id],
-    () => getUserOwnContent(router.query.id),
-    {
-      enabled: !!router.query.id,
-      keepPreviousData: true,
-      refetchOnWindowFocus: false,
-    }
-  );
+  const { data, isLoading } = useUserOwnContent(router.query.id);
 
   return (
     <>

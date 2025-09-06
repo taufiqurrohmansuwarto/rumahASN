@@ -1,38 +1,27 @@
 import {
   createKnowledgeContent,
   updateKnowledgeContent,
-  uploadMultipleKnowledgeContentAttachments,
-  uploadKnowledgeContentMediaCreate,
   uploadKnowledgeContentMedia,
   uploadKnowledgeContentMediaAdmin,
+  uploadKnowledgeContentMediaCreate,
+  uploadMultipleKnowledgeContentAttachments,
 } from "@/services/knowledge-management.services";
 import { EditOutlined } from "@ant-design/icons";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import {
-  Card,
-  Col,
-  Flex,
-  Form,
-  Grid,
-  message,
-  Row,
-  Spin,
-  Typography,
-} from "antd";
+import { Card, Col, Flex, Form, Grid, message, Row, Spin } from "antd";
 import { useEffect, useState } from "react";
-import { useRouter } from "next/router";
-import KnowledgeFormHeader from "./KnowledgeFormHeader";
-import KnowledgeFormTitle from "./KnowledgeFormTitle";
-import KnowledgeFormSummary from "./KnowledgeFormSummary";
-import KnowledgeFormContent from "./KnowledgeFormContent";
-import KnowledgeFormCategory from "./KnowledgeFormCategory";
-import KnowledgeFormTags from "./KnowledgeFormTags";
-import KnowledgeFormReferences from "./KnowledgeFormReferences";
-import KnowledgeFormAttachments from "./KnowledgeFormAttachments";
-import KnowledgeFormType from "./KnowledgeFormType";
-import KnowledgeFormSourceUrl from "./KnowledgeFormSourceUrl";
-import KnowledgeFormMedia from "./KnowledgeFormMedia";
 import KnowledgeFormActions from "./KnowledgeFormActions";
+import KnowledgeFormAttachments from "./KnowledgeFormAttachments";
+import KnowledgeFormCategory from "./KnowledgeFormCategory";
+import KnowledgeFormContent from "./KnowledgeFormContent";
+import KnowledgeFormHeader from "./KnowledgeFormHeader";
+import KnowledgeFormMedia from "./KnowledgeFormMedia";
+import KnowledgeFormReferences from "./KnowledgeFormReferences";
+import KnowledgeFormSourceUrl from "./KnowledgeFormSourceUrl";
+import KnowledgeFormSummary from "./KnowledgeFormSummary";
+import KnowledgeFormTags from "./KnowledgeFormTags";
+import KnowledgeFormTitle from "./KnowledgeFormTitle";
+import KnowledgeFormType from "./KnowledgeFormType";
 
 const { useBreakpoint } = Grid;
 
@@ -42,21 +31,20 @@ function KnowledgeFormUserContents({
   onCancel = () => {},
   mode = "user", // "user" | "admin"
   queryKeysToInvalidate = ["fetch-knowledge-user-contents"], // customizable query keys
-  showDraftButton = true, // show/hide draft button
-  showSubmitButton = true, // show/hide submit button
   customButtonText = null, // { draft: "Custom Draft", submit: "Custom Submit", cancel: "Custom Cancel" }
   customTitle = null, // custom title text
   customSubtitle = null, // custom subtitle text
   useCreateMutation = null, // custom create mutation hook
   useUpdateMutation = null, // custom update mutation hook
 }) {
-  const router = useRouter();
   const [form] = Form.useForm();
   const [tags, setTags] = useState([]);
   const [inputValue, setInputValue] = useState("");
   const [content, setContent] = useState("");
   const [fileList, setFileList] = useState([]);
-  const [currentContentId, setCurrentContentId] = useState(initialData?.id || null);
+  const [currentContentId, setCurrentContentId] = useState(
+    initialData?.id || null
+  );
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [contentType, setContentType] = useState("teks");
   const [mediaFile, setMediaFile] = useState(null);
@@ -65,45 +53,63 @@ function KnowledgeFormUserContents({
   const queryClient = useQueryClient();
 
   // Check if there are files still uploading or pending
-  const hasUploadingFiles = fileList.some(file => file.status === 'uploading');
-  const hasPendingFiles = fileList.some(file => file.response?.data?.isTemporary && !currentContentId);
-  const isMediaReady = mediaFile && !isMediaUploading;
+  const hasUploadingFiles = fileList.some(
+    (file) => file.status === "uploading"
+  );
+  const hasPendingFiles = fileList.some(
+    (file) => file.response?.data?.isTemporary && !currentContentId
+  );
 
   // Responsive breakpoints
   const screens = useBreakpoint();
   const isMobile = !screens.md;
 
-  // Get button text based on mode and custom text
-  const getButtonText = () => {
-    const defaultTexts = {
-      user: {
-        draft: "Simpan Draft",
-        submit: "Kirim untuk Review",
-        cancel: "Batal"
-      },
-      admin: {
-        draft: "Simpan",
-        submit: "Perbarui",
-        cancel: "Batal"
-      }
-    };
-    
-    return {
-      draft: customButtonText?.draft || defaultTexts[mode].draft,
-      submit: customButtonText?.submit || defaultTexts[mode].submit,
-      cancel: customButtonText?.cancel || defaultTexts[mode].cancel
-    };
+  // Determine if we're in edit mode
+  const isEditing = !!initialData;
+
+  // Dynamic button configuration based on mode and context
+  const getButtonConfig = () => {
+    if (mode === "admin") {
+      // Admin has full control - can have multiple buttons based on needs
+      return {
+        showDraftButton: true,
+        showSubmitButton: true,
+        buttonText: {
+          draft: customButtonText?.draft || "Simpan",
+          submit:
+            customButtonText?.submit || (isEditing ? "Perbarui" : "Publish"),
+          cancel: customButtonText?.cancel || "Batal",
+        },
+      };
+    } else {
+      // User simplified flow: only 2 buttons (Cancel + Save/Submit)
+      return {
+        showDraftButton: false, // Remove draft button for users
+        showSubmitButton: true,
+        buttonText: {
+          draft: "", // Not used for users
+          submit:
+            customButtonText?.submit ||
+            (isEditing ? "Simpan Perubahan" : "Simpan"),
+          cancel: customButtonText?.cancel || "Batal",
+        },
+      };
+    }
   };
 
-  const buttonText = getButtonText();
+  const { showDraftButton, showSubmitButton, buttonText } = getButtonConfig();
 
-  // Get success message based on URL and context
-  const getSuccessMessage = (isEditing) => {
-    const isCreatePage = router.pathname.includes('/create');
-    if (isCreatePage || !isEditing) {
-      return "Konten berhasil dibuat!";
+  // Get success message based on mode and context
+  const getSuccessMessage = () => {
+    if (mode === "admin") {
+      return isEditing
+        ? "Konten berhasil diperbarui!"
+        : "Konten berhasil dibuat!";
     } else {
-      return "Konten berhasil diedit!";
+      // User messages
+      return isEditing
+        ? "Perubahan berhasil disimpan!"
+        : "Konten berhasil dibuat!";
     }
   };
 
@@ -112,7 +118,7 @@ function KnowledgeFormUserContents({
     (data) => createKnowledgeContent(data),
     {
       onSuccess: (data) => {
-        queryKeysToInvalidate.forEach(key => {
+        queryKeysToInvalidate.forEach((key) => {
           queryClient.invalidateQueries([key]);
         });
         onSuccess(data);
@@ -127,7 +133,7 @@ function KnowledgeFormUserContents({
     ({ id, data }) => updateKnowledgeContent({ id, data }),
     {
       onSuccess: (data) => {
-        queryKeysToInvalidate.forEach(key => {
+        queryKeysToInvalidate.forEach((key) => {
           queryClient.invalidateQueries([key]);
         });
         onSuccess(data);
@@ -142,12 +148,14 @@ function KnowledgeFormUserContents({
   const createMutationHook = useCreateMutation || (() => defaultCreateMutation);
   const updateMutationHook = useUpdateMutation || (() => defaultUpdateMutation);
 
-  const { mutate: createMutation, isLoading: createLoading } = createMutationHook();
-  const { mutate: updateMutation, isLoading: updateLoading } = updateMutationHook();
+  const { mutate: createMutation, isLoading: createLoading } =
+    createMutationHook();
+  const { mutate: updateMutation, isLoading: updateLoading } =
+    updateMutationHook();
 
   // Watch for type changes
   const watchedType = Form.useWatch("type", form);
-  
+
   useEffect(() => {
     if (watchedType && watchedType !== contentType) {
       setContentType(watchedType);
@@ -178,30 +186,35 @@ function KnowledgeFormUserContents({
       }
 
       if (initialData.references) {
-        form.setFieldValue('references', initialData.references);
+        form.setFieldValue("references", initialData.references);
       }
 
       if (initialData.attachments) {
-        const mappedFiles = initialData.attachments.map((attachment, index) => ({
-          uid: `-${index}`,
-          name: attachment.filename || attachment.name,
-          status: 'done',
-          url: attachment.url,
-          response: {
-            data: { url: attachment.url }
-          }
-        }));
+        const mappedFiles = initialData.attachments.map(
+          (attachment, index) => ({
+            uid: `-${index}`,
+            name: attachment.filename || attachment.name,
+            status: "done",
+            url: attachment.url,
+            response: {
+              data: { url: attachment.url },
+            },
+          })
+        );
         setFileList(mappedFiles);
       }
 
       // Set media file if source_url exists and type is media
-      if (initialData.source_url && ['video', 'audio', 'gambar'].includes(initialData.type)) {
+      if (
+        initialData.source_url &&
+        ["video", "audio", "gambar"].includes(initialData.type)
+      ) {
         setMediaFile({
-          uid: 'existing-media',
-          name: initialData.title || 'Media File',
-          status: 'done',
+          uid: "existing-media",
+          name: initialData.title || "Media File",
+          status: "done",
           url: initialData.source_url,
-          type: initialData.type
+          type: initialData.type,
         });
       }
     }
@@ -209,17 +222,17 @@ function KnowledgeFormUserContents({
 
   const uploadAttachments = async (contentId, filesToUpload) => {
     if (filesToUpload.length === 0) return [];
-    
+
     try {
       const response = await uploadMultipleKnowledgeContentAttachments(
-        contentId, 
-        filesToUpload.map(fileData => fileData.file)
+        contentId,
+        filesToUpload.map((fileData) => fileData.file)
       );
-      
+
       if (response?.success && response?.data) {
         return response.data;
       }
-      
+
       return [];
     } catch (error) {
       message.error(`Upload attachments gagal: ${error.message}`);
@@ -228,19 +241,20 @@ function KnowledgeFormUserContents({
   };
 
   const uploadMediaFile = async (contentId, file, isCreate = false) => {
-    if (!file || !['video', 'audio', 'gambar'].includes(contentType)) return null;
-    
+    if (!file || !["video", "audio", "gambar"].includes(contentType))
+      return null;
+
     try {
       setIsMediaUploading(true);
       setMediaUploadProgress(0);
 
       const formData = new FormData();
-      formData.append('media', file);
+      formData.append("media", file);
 
       let response;
       if (isCreate) {
         response = await uploadKnowledgeContentMediaCreate(formData);
-      } else if (mode === 'admin') {
+      } else if (mode === "admin") {
         response = await uploadKnowledgeContentMediaAdmin(contentId, formData);
       } else {
         response = await uploadKnowledgeContentMedia(contentId, formData);
@@ -250,10 +264,10 @@ function KnowledgeFormUserContents({
         setMediaUploadProgress(100);
         return response.data.url;
       }
-      
-      throw new Error('Upload gagal: Tidak ada URL yang dikembalikan');
+
+      throw new Error("Upload gagal: Tidak ada URL yang dikembalikan");
     } catch (error) {
-      console.error('Media upload error:', error);
+      console.error("Media upload error:", error);
       throw error;
     } finally {
       setIsMediaUploading(false);
@@ -276,19 +290,24 @@ function KnowledgeFormUserContents({
 
   const handleFinish = async (values) => {
     if (isSubmitting) return;
-    
+
     setIsSubmitting(true);
     try {
       const isEditing = !!initialData;
       const filesToUpload = fileList
-        .filter(file => file.status === 'done' && file.response?.data?.isTemporary)
-        .map(file => file.response.data);
+        .filter(
+          (file) => file.status === "done" && file.response?.data?.isTemporary
+        )
+        .map((file) => file.response.data);
 
       const formData = {
         ...values,
         content,
         tags,
         references: values.references || [],
+        // For users: always save as draft in create mode, maintain status in edit mode
+        // For admins: maintain current behavior (can control status)
+        ...(mode === "user" && !isEditing && { status: "draft" }),
       };
 
       let result;
@@ -296,74 +315,96 @@ function KnowledgeFormUserContents({
 
       // Step 1: Create or Update content
       if (isEditing) {
-        const mutationData = mode === "admin" 
-          ? { id: contentId, payload: formData }
-          : { id: contentId, data: formData };
-        
+        const mutationData =
+          mode === "admin"
+            ? { id: contentId, payload: formData }
+            : { id: contentId, data: formData };
+
         result = await new Promise((resolve, reject) => {
           updateMutation(mutationData, {
             onSuccess: resolve,
-            onError: reject
+            onError: reject,
           });
         });
       } else {
         result = await new Promise((resolve, reject) => {
           createMutation(formData, {
             onSuccess: resolve,
-            onError: reject
+            onError: reject,
           });
         });
-        
+
         if (result?.id) {
           setCurrentContentId(result.id);
         }
       }
 
-      // Step 2: Handle media upload for create mode  
-      if (!isEditing && mediaFile && mediaFile.originFileObj && ['video', 'audio', 'gambar'].includes(contentType) && result?.id) {
+      // Step 2: Handle media upload for create mode
+      if (
+        !isEditing &&
+        mediaFile &&
+        mediaFile.originFileObj &&
+        ["video", "audio", "gambar"].includes(contentType) &&
+        result?.id
+      ) {
         try {
-          const uploadedMediaUrl = await uploadMediaFile(result.id, mediaFile.originFileObj, false);
+          const uploadedMediaUrl = await uploadMediaFile(
+            result.id,
+            mediaFile.originFileObj,
+            false
+          );
           if (uploadedMediaUrl) {
             // Update the content with new media URL
             const updateData = { source_url: uploadedMediaUrl };
-            const mutationData = mode === "admin" 
-              ? { id: result.id, payload: updateData }
-              : { id: result.id, data: updateData };
-            
+            const mutationData =
+              mode === "admin"
+                ? { id: result.id, payload: updateData }
+                : { id: result.id, data: updateData };
+
             await new Promise((resolve, reject) => {
               updateMutation(mutationData, {
                 onSuccess: resolve,
-                onError: reject
+                onError: reject,
               });
             });
           }
         } catch (error) {
           // Media upload failed, but content was saved successfully
-          console.error('Media upload failed:', error);
+          console.error("Media upload failed:", error);
         }
       }
-      
+
       // Step 2b: Handle media upload for edit mode
-      if (isEditing && mediaFile && mediaFile.originFileObj && ['video', 'audio', 'gambar'].includes(contentType)) {
+      if (
+        isEditing &&
+        mediaFile &&
+        mediaFile.originFileObj &&
+        ["video", "audio", "gambar"].includes(contentType)
+      ) {
         try {
-          const uploadedMediaUrl = await uploadMediaFile(contentId, mediaFile.originFileObj, false);
+          const uploadedMediaUrl = await uploadMediaFile(
+            contentId,
+            mediaFile.originFileObj,
+            false
+          );
           if (uploadedMediaUrl) {
             // Update the content with new media URL
             const updateData = { source_url: uploadedMediaUrl };
-            const mutationData = mode === "admin" 
-              ? { id: contentId, payload: updateData }
-              : { id: contentId, data: updateData };
-            
+            const mutationData =
+              mode === "admin"
+                ? { id: contentId, payload: updateData }
+                : { id: contentId, data: updateData };
+
             await new Promise((resolve, reject) => {
               updateMutation(mutationData, {
                 onSuccess: resolve,
-                onError: reject
+                onError: reject,
               });
             });
           }
         } catch (error) {
           // Media upload failed, but content was saved successfully
-          console.error('Media upload failed:', error);
+          console.error("Media upload failed:", error);
         }
       }
 
@@ -374,8 +415,11 @@ function KnowledgeFormUserContents({
       }
 
       // Single success message
-      message.success(getSuccessMessage(isEditing));
+      message.success(getSuccessMessage());
       
+      // Call onSuccess with result data for redirect
+      onSuccess(result);
+
       // Reset form only for create mode
       if (!isEditing) {
         resetForm();
@@ -389,22 +433,25 @@ function KnowledgeFormUserContents({
 
   const handleSaveDraft = async () => {
     if (isSubmitting) return;
-    
+
     setIsSubmitting(true);
     try {
       const isEditing = !!initialData;
       const values = await form.validateFields();
-      
+
       const filesToUpload = fileList
-        .filter(file => file.status === 'done' && file.response?.data?.isTemporary)
-        .map(file => file.response.data);
+        .filter(
+          (file) => file.status === "done" && file.response?.data?.isTemporary
+        )
+        .map((file) => file.response.data);
 
       const formData = {
         ...values,
         content,
-        status: mode === "admin" ? (initialData?.status || "draft") : "draft",
         tags,
         references: values.references || [],
+        // Status handling for draft save
+        status: mode === "admin" ? initialData?.status || "draft" : "draft",
       };
 
       let result;
@@ -412,50 +459,61 @@ function KnowledgeFormUserContents({
 
       // Step 1: Create or Update content
       if (isEditing) {
-        const mutationData = mode === "admin" 
-          ? { id: contentId, payload: formData }
-          : { id: contentId, data: formData };
-        
+        const mutationData =
+          mode === "admin"
+            ? { id: contentId, payload: formData }
+            : { id: contentId, data: formData };
+
         result = await new Promise((resolve, reject) => {
           updateMutation(mutationData, {
             onSuccess: resolve,
-            onError: reject
+            onError: reject,
           });
         });
       } else {
         result = await new Promise((resolve, reject) => {
           createMutation(formData, {
             onSuccess: resolve,
-            onError: reject
+            onError: reject,
           });
         });
-        
+
         if (result?.id) {
           setCurrentContentId(result.id);
         }
       }
 
       // Step 2: Handle media upload for edit mode
-      if (isEditing && mediaFile && mediaFile.originFileObj && ['video', 'audio', 'gambar'].includes(contentType)) {
+      if (
+        isEditing &&
+        mediaFile &&
+        mediaFile.originFileObj &&
+        ["video", "audio", "gambar"].includes(contentType)
+      ) {
         try {
-          const uploadedMediaUrl = await uploadMediaFile(contentId, mediaFile.originFileObj, false);
+          const uploadedMediaUrl = await uploadMediaFile(
+            contentId,
+            mediaFile.originFileObj,
+            false
+          );
           if (uploadedMediaUrl) {
             // Update the content with new media URL
             const updateData = { source_url: uploadedMediaUrl };
-            const mutationData = mode === "admin" 
-              ? { id: contentId, payload: updateData }
-              : { id: contentId, data: updateData };
-            
+            const mutationData =
+              mode === "admin"
+                ? { id: contentId, payload: updateData }
+                : { id: contentId, data: updateData };
+
             await new Promise((resolve, reject) => {
               updateMutation(mutationData, {
                 onSuccess: resolve,
-                onError: reject
+                onError: reject,
               });
             });
           }
         } catch (error) {
           // Media upload failed, but content was saved successfully
-          console.error('Media upload failed:', error);
+          console.error("Media upload failed:", error);
         }
       }
 
@@ -466,9 +524,11 @@ function KnowledgeFormUserContents({
       }
 
       // Single success message
-      const draftMessage = isEditing ? "Draft berhasil diperbarui!" : "Draft berhasil disimpan!";
+      const draftMessage = isEditing
+        ? "Draft berhasil diperbarui!"
+        : "Draft berhasil disimpan!";
       message.success(draftMessage);
-      
+
       // Reset form only for create mode
       if (!isEditing) {
         resetForm();
@@ -486,19 +546,26 @@ function KnowledgeFormUserContents({
 
   const handleSubmitForReview = async () => {
     if (isSubmitting) return;
-    
+
     setIsSubmitting(true);
     try {
       const isEditing = !!initialData;
       const values = await form.validateFields();
-      
+
       const filesToUpload = fileList
-        .filter(file => file.status === 'done' && file.response?.data?.isTemporary)
-        .map(file => file.response.data);
+        .filter(
+          (file) => file.status === "done" && file.response?.data?.isTemporary
+        )
+        .map((file) => file.response.data);
 
       // Step 0: Handle media upload for create mode
       let mediaUrl = values.source_url;
-      if (!isEditing && mediaFile && mediaFile.originFileObj && ['video', 'audio', 'gambar'].includes(contentType)) {
+      if (
+        !isEditing &&
+        mediaFile &&
+        mediaFile.originFileObj &&
+        ["video", "audio", "gambar"].includes(contentType)
+      ) {
         try {
           mediaUrl = await uploadMediaFile(null, mediaFile.originFileObj, true);
         } catch (error) {
@@ -510,10 +577,14 @@ function KnowledgeFormUserContents({
       const formData = {
         ...values,
         content,
-        status: mode === "admin" ? (initialData?.status || "published") : "pending",
         tags,
         references: values.references || [],
         source_url: mediaUrl || values.source_url,
+        // Status handling for submit
+        status:
+          mode === "admin"
+            ? initialData?.status || "published"
+            : "draft", // Users always stay draft, don't auto-submit for review
       };
 
       let result;
@@ -521,74 +592,96 @@ function KnowledgeFormUserContents({
 
       // Step 1: Create or Update content
       if (isEditing) {
-        const mutationData = mode === "admin" 
-          ? { id: contentId, payload: formData }
-          : { id: contentId, data: formData };
-        
+        const mutationData =
+          mode === "admin"
+            ? { id: contentId, payload: formData }
+            : { id: contentId, data: formData };
+
         result = await new Promise((resolve, reject) => {
           updateMutation(mutationData, {
             onSuccess: resolve,
-            onError: reject
+            onError: reject,
           });
         });
       } else {
         result = await new Promise((resolve, reject) => {
           createMutation(formData, {
             onSuccess: resolve,
-            onError: reject
+            onError: reject,
           });
         });
-        
+
         if (result?.id) {
           setCurrentContentId(result.id);
         }
       }
 
-      // Step 2: Handle media upload for create mode  
-      if (!isEditing && mediaFile && mediaFile.originFileObj && ['video', 'audio', 'gambar'].includes(contentType) && result?.id) {
+      // Step 2: Handle media upload for create mode
+      if (
+        !isEditing &&
+        mediaFile &&
+        mediaFile.originFileObj &&
+        ["video", "audio", "gambar"].includes(contentType) &&
+        result?.id
+      ) {
         try {
-          const uploadedMediaUrl = await uploadMediaFile(result.id, mediaFile.originFileObj, false);
+          const uploadedMediaUrl = await uploadMediaFile(
+            result.id,
+            mediaFile.originFileObj,
+            false
+          );
           if (uploadedMediaUrl) {
             // Update the content with new media URL
             const updateData = { source_url: uploadedMediaUrl };
-            const mutationData = mode === "admin" 
-              ? { id: result.id, payload: updateData }
-              : { id: result.id, data: updateData };
-            
+            const mutationData =
+              mode === "admin"
+                ? { id: result.id, payload: updateData }
+                : { id: result.id, data: updateData };
+
             await new Promise((resolve, reject) => {
               updateMutation(mutationData, {
                 onSuccess: resolve,
-                onError: reject
+                onError: reject,
               });
             });
           }
         } catch (error) {
           // Media upload failed, but content was saved successfully
-          console.error('Media upload failed:', error);
+          console.error("Media upload failed:", error);
         }
       }
-      
+
       // Step 2b: Handle media upload for edit mode
-      if (isEditing && mediaFile && mediaFile.originFileObj && ['video', 'audio', 'gambar'].includes(contentType)) {
+      if (
+        isEditing &&
+        mediaFile &&
+        mediaFile.originFileObj &&
+        ["video", "audio", "gambar"].includes(contentType)
+      ) {
         try {
-          const uploadedMediaUrl = await uploadMediaFile(contentId, mediaFile.originFileObj, false);
+          const uploadedMediaUrl = await uploadMediaFile(
+            contentId,
+            mediaFile.originFileObj,
+            false
+          );
           if (uploadedMediaUrl) {
             // Update the content with new media URL
             const updateData = { source_url: uploadedMediaUrl };
-            const mutationData = mode === "admin" 
-              ? { id: contentId, payload: updateData }
-              : { id: contentId, data: updateData };
-            
+            const mutationData =
+              mode === "admin"
+                ? { id: contentId, payload: updateData }
+                : { id: contentId, data: updateData };
+
             await new Promise((resolve, reject) => {
               updateMutation(mutationData, {
                 onSuccess: resolve,
-                onError: reject
+                onError: reject,
               });
             });
           }
         } catch (error) {
           // Media upload failed, but content was saved successfully
-          console.error('Media upload failed:', error);
+          console.error("Media upload failed:", error);
         }
       }
 
@@ -599,11 +692,11 @@ function KnowledgeFormUserContents({
       }
 
       // Single success message
-      const reviewMessage = mode === "admin" 
-        ? getSuccessMessage(isEditing)
-        : "Konten berhasil dikirim untuk review!";
-      message.success(reviewMessage);
+      message.success(getSuccessMessage());
       
+      // Call onSuccess with result data for redirect
+      onSuccess(result);
+
       // Reset form only for create mode
       if (!isEditing) {
         resetForm();
@@ -619,8 +712,12 @@ function KnowledgeFormUserContents({
     }
   };
 
-
-  const isLoading = createLoading || updateLoading || isSubmitting || hasUploadingFiles || isMediaUploading;
+  const isLoading =
+    createLoading ||
+    updateLoading ||
+    isSubmitting ||
+    hasUploadingFiles ||
+    isMediaUploading;
 
   return (
     <div>
@@ -669,7 +766,7 @@ function KnowledgeFormUserContents({
                     <Col xs={24} lg={16}>
                       <KnowledgeFormTitle isMobile={isMobile} />
                       <KnowledgeFormType isMobile={isMobile} />
-                      {['video', 'audio', 'gambar'].includes(contentType) ? (
+                      {["video", "audio", "gambar"].includes(contentType) ? (
                         <KnowledgeFormMedia
                           isMobile={isMobile}
                           contentType={contentType}
@@ -679,16 +776,16 @@ function KnowledgeFormUserContents({
                           uploadProgress={mediaUploadProgress}
                         />
                       ) : (
-                        <KnowledgeFormSourceUrl 
-                          isMobile={isMobile} 
-                          contentType={contentType} 
+                        <KnowledgeFormSourceUrl
+                          isMobile={isMobile}
+                          contentType={contentType}
                         />
                       )}
                       <KnowledgeFormSummary isMobile={isMobile} />
-                      <KnowledgeFormContent 
-                        isMobile={isMobile} 
-                        content={content} 
-                        setContent={setContent} 
+                      <KnowledgeFormContent
+                        isMobile={isMobile}
+                        content={content}
+                        setContent={setContent}
                       />
                     </Col>
 
@@ -712,26 +809,48 @@ function KnowledgeFormUserContents({
                   </Row>
 
                   {/* Status Info */}
-                  {(hasUploadingFiles || hasPendingFiles || isMediaUploading) && (
-                    <div style={{ 
-                      marginBottom: 16, 
-                      padding: "8px 12px",
-                      backgroundColor: "#f6f8fa",
-                      borderRadius: "6px",
-                      border: "1px solid #e1e8ed"
-                    }}>
+                  {(hasUploadingFiles ||
+                    hasPendingFiles ||
+                    isMediaUploading) && (
+                    <div
+                      style={{
+                        marginBottom: 16,
+                        padding: "8px 12px",
+                        backgroundColor: "#f6f8fa",
+                        borderRadius: "6px",
+                        border: "1px solid #e1e8ed",
+                      }}
+                    >
                       <Row align="middle" gutter={8}>
                         <Col>
                           {hasUploadingFiles || isMediaUploading ? (
-                            <div style={{ display: "flex", alignItems: "center", gap: "8px", color: "#1890ff" }}>
+                            <div
+                              style={{
+                                display: "flex",
+                                alignItems: "center",
+                                gap: "8px",
+                                color: "#1890ff",
+                              }}
+                            >
                               <Spin size="small" />
                               <span style={{ fontSize: "13px" }}>
-                                {isMediaUploading ? 'Mengupload media...' : 'Mengupload file...'}
+                                {isMediaUploading
+                                  ? "Mengupload media..."
+                                  : "Mengupload file..."}
                               </span>
                             </div>
                           ) : (
-                            <div style={{ display: "flex", alignItems: "center", gap: "6px", color: "#52c41a" }}>
-                              <span style={{ fontSize: "13px" }}>📋 File siap diupload saat menyimpan</span>
+                            <div
+                              style={{
+                                display: "flex",
+                                alignItems: "center",
+                                gap: "6px",
+                                color: "#52c41a",
+                              }}
+                            >
+                              <span style={{ fontSize: "13px" }}>
+                                📋 File siap diupload saat menyimpan
+                              </span>
                             </div>
                           )}
                         </Col>

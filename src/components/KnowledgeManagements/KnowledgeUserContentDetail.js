@@ -2,7 +2,7 @@ import {
   bookmarkKnowledgeContent,
   likeKnowledgeContent,
 } from "@/services/knowledge-management.services";
-import { CommentOutlined } from "@ant-design/icons";
+import { CommentOutlined, ExclamationCircleOutlined } from "@ant-design/icons";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   Button,
@@ -29,6 +29,7 @@ import {
   useComments,
   useCommentInteractions,
 } from "@/hooks/knowledge-management/useComments";
+import { useSubmitContentForReview, useDeleteMyContent } from "@/hooks/knowledge-management";
 
 dayjs.extend(relativeTime);
 
@@ -69,6 +70,12 @@ const KnowledgeUserContentDetail = ({
 
   // Use the comment interactions hook
   const commentInteractions = useCommentInteractions(id);
+
+  // Use submit for review hook
+  const submitForReviewMutation = useSubmitContentForReview();
+  
+  // Use delete content hook
+  const deleteContentMutation = useDeleteMyContent();
 
   const { mutate: like, isLoading: isLiking } = useMutation(
     (data) => likeKnowledgeContent(data),
@@ -182,6 +189,57 @@ const KnowledgeUserContentDetail = ({
     bookmark(id);
   };
 
+  const handleSubmitForReview = () => {
+    if (submitForReviewMutation.isLoading) return;
+    
+    Modal.confirm({
+      title: 'Submit Konten untuk Review',
+      icon: <ExclamationCircleOutlined />,
+      content: (
+        <div>
+          <p>Apakah Anda yakin ingin mengirim konten ini untuk direview?</p>
+          <p style={{ color: '#666', fontSize: '13px' }}>
+            Setelah disubmit, konten akan masuk ke dalam antrian review dan tidak dapat diedit hingga proses review selesai.
+          </p>
+        </div>
+      ),
+      okText: 'Ya, Submit untuk Review',
+      cancelText: 'Batal',
+      okType: 'primary',
+      onOk: () => {
+        submitForReviewMutation.mutate(id);
+      },
+    });
+  };
+
+  const handleDelete = () => {
+    if (deleteContentMutation.isLoading) return;
+    
+    Modal.confirm({
+      title: 'Hapus Draft Konten',
+      icon: <ExclamationCircleOutlined />,
+      content: (
+        <div>
+          <p>Apakah Anda yakin ingin menghapus draft konten ini?</p>
+          <p style={{ color: '#ff4d4f', fontSize: '13px', fontWeight: 500 }}>
+            ⚠️ Tindakan ini tidak dapat dibatalkan. Semua data konten akan dihapus permanen.
+          </p>
+        </div>
+      ),
+      okText: 'Ya, Hapus Draft',
+      cancelText: 'Batal',
+      okType: 'danger',
+      onOk: () => {
+        deleteContentMutation.mutate(id, {
+          onSuccess: () => {
+            // Navigate back to my-knowledge list after successful delete
+            router.push('/asn-connect/asn-knowledge/my-knowledge');
+          }
+        });
+      },
+    });
+  };
+
   return (
     <>
       {/* Knowledge Content Header */}
@@ -196,6 +254,10 @@ const KnowledgeUserContentDetail = ({
           isBookmarking={isBookmarking}
           disableInteractions={disableInteractions}
           showOwnerActions={showOwnerActions}
+          onSubmitForReview={handleSubmitForReview}
+          isSubmittingForReview={submitForReviewMutation.isLoading}
+          onDelete={handleDelete}
+          isDeleting={deleteContentMutation.isLoading}
         />
       )}
 

@@ -9,8 +9,14 @@ import { useRouter } from "next/router";
 const AsnKnowledgeCreate = () => {
   const router = useRouter();
 
-  const handleSuccess = () => {
-    router.push("/asn-connect/asn-knowledge/my-knowledge");
+  const handleSuccess = (createdContent) => {
+    // Redirect to detail page of newly created content
+    if (createdContent?.id) {
+      router.push(`/asn-connect/asn-knowledge/my-knowledge/${createdContent.id}`);
+    } else {
+      // Fallback to list page if no ID
+      router.push("/asn-connect/asn-knowledge/my-knowledge");
+    }
   };
 
   return (

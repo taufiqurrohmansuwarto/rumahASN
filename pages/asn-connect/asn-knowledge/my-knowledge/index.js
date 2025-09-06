@@ -14,7 +14,7 @@ const AsnKnowledgeMyKnowledge = () => {
   return (
     <>
       <Head>
-        <title>Rumah ASN - Pojok Pengetahuan - Pengetahuan Saya</title>
+        <title>Rumah ASN - ASNPedia - Pengetahuan Saya</title>
       </Head>
       <LayoutASNConnect active="asn-knowledge">
         <Row>

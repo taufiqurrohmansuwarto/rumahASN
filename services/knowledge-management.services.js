@@ -23,6 +23,22 @@ export const getUserOwnContents = async (query) => {
   return await api.get(`/users/me/contents?${qs}`).then((res) => res.data);
 };
 
+export const submitMyContentForReview = async (id) => {
+  return await api
+    .post(`/users/me/contents/${id}`)
+    .then((res) => res.data);
+};
+
+export const editMyContent = async ({ id, data }) => {
+  return await api
+    .put(`/users/me/contents/${id}`, data)
+    .then((res) => res.data);
+};
+
+export const deleteMyContent = async (id) => {
+  return await api.delete(`/users/me/contents/${id}`).then((res) => res.data);
+};
+
 export const getUserOwnContent = async (id) => {
   return await api.get(`/users/me/contents/${id}`).then((res) => res.data);
 };
@@ -539,7 +555,7 @@ export const updateRevision = async ({ contentId, versionId, data }) => {
 export const submitRevision = async ({ contentId, versionId, submitNotes }) => {
   return await api
     .post(`/users/me/contents/${contentId}/revisions/${versionId}/submit`, {
-      submitNotes
+      submitNotes,
     })
     .then((res) => res.data);
 };
@@ -562,26 +578,30 @@ export const getRevisionDetails = async (versionId) => {
     .then((res) => res.data);
 };
 
-export const approveRevision = async ({ versionId, action, rejectionReason }) => {
+export const approveRevision = async ({
+  versionId,
+  action,
+  rejectionReason,
+}) => {
   return await api
     .post(`/admin/revisions/${versionId}/approve`, {
       action, // 'approve' or 'reject'
-      rejectionReason
+      rejectionReason,
     })
     .then((res) => res.data);
 };
 
 // Revision Bulk Operations
 export const bulkApproveRevisions = async (versionIds) => {
-  const promises = versionIds.map(versionId =>
-    approveRevision({ versionId, action: 'approve' })
+  const promises = versionIds.map((versionId) =>
+    approveRevision({ versionId, action: "approve" })
   );
   return await Promise.allSettled(promises);
 };
 
 export const bulkRejectRevisions = async (versionIds, rejectionReason) => {
-  const promises = versionIds.map(versionId =>
-    approveRevision({ versionId, action: 'reject', rejectionReason })
+  const promises = versionIds.map((versionId) =>
+    approveRevision({ versionId, action: "reject", rejectionReason })
   );
   return await Promise.allSettled(promises);
 };

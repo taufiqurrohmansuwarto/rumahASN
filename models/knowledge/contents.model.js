@@ -20,6 +20,7 @@ class knowledgeContents extends Model {
     const KnowledgeContentAttachments = require("@/models/knowledge/content-attachments.model");
     const KnowledgeContentsReferences = require("@/models/knowledge/contents-references.model");
     const KnowledgeUserInteractions = require("@/models/knowledge/user-interactions.model");
+    const KnowledgeAiMetadata = require("@/models/knowledge/knowledge-ai-metadata.model");
 
     return {
       versions: {
@@ -76,6 +77,14 @@ class knowledgeContents extends Model {
         join: {
           from: "knowledge.contents.id",
           to: "knowledge.user_interactions.content_id",
+        },
+      },
+      ai_metadata: {
+        relation: Model.HasOneRelation,
+        modelClass: KnowledgeAiMetadata,
+        join: {
+          from: "knowledge.contents.id",
+          to: "knowledge.knowledge_ai_metadata.content_id",
         },
       },
     };

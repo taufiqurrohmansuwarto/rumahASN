@@ -22,3 +22,6 @@ export { default as useKnowledgeInsights } from "./useKnowledgeInsights";
 
 // Revision Management
 export * from "./useRevisions";
+
+// User Content Management
+export * from "./useUserContent";
