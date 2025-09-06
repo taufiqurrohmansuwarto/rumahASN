@@ -82,6 +82,7 @@ export const useSubmitRevision = () => {
       
       // Invalidate related queries
       queryClient.invalidateQueries(["my-revisions", variables.contentId]);
+      queryClient.invalidateQueries(["revision-details", variables.versionId, variables.contentId]);
       queryClient.invalidateQueries(["pending-revisions"]);
       
       return data;
