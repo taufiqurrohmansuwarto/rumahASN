@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { Button, Card, Flex, Tag, Alert, Space, Modal } from "antd";
 import { EyeOutlined, EditOutlined, BranchesOutlined, SendOutlined, ExclamationCircleOutlined } from "@ant-design/icons";
-import { useSubmitRevision, useUpdateRevision } from "@/hooks/knowledge-management/useRevisions";
+import { useSubmitRevision, useUpdateRevision, useMyRevisions } from "@/hooks/knowledge-management/useRevisions";
 import { KnowledgeUserContentDetail, KnowledgeFormUserContents } from "../";
+import RevisionHistory from "./RevisionHistory";
 
 const HybridRevisionView = ({ 
   revisionData, 
@@ -16,17 +17,33 @@ const HybridRevisionView = ({
   const submitRevisionMutation = useSubmitRevision();
   const updateRevisionMutation = useUpdateRevision();
   
-  // Custom update mutation for revision
-  const customUpdateMutation = {
-    mutate: (formData) => {
-      updateRevisionMutation.mutate({
-        contentId,
-        versionId,
-        data: formData
-      });
-    },
-    isLoading: updateRevisionMutation.isLoading
+  // Get all revisions for this content (to check if any exist)
+  const { data: allRevisions } = useMyRevisions(contentId);
+  
+  // Check if we should show revision list (if we have revisions and this is main content view)
+  const shouldShowRevisionList = allRevisions?.revisions?.length > 0 && !versionId;
+  
+  // Create custom update mutation hook for KnowledgeFormUserContents
+  const useRevisionUpdateMutation = () => {
+    return {
+      mutate: (payload) => {
+        const { data } = payload;
+        updateRevisionMutation.mutate({
+          contentId,
+          versionId,
+          data
+        }, {
+          onSuccess: () => {
+            setMode("view");
+          }
+        });
+      },
+      isLoading: updateRevisionMutation.isLoading,
+      isError: updateRevisionMutation.isError,
+      error: updateRevisionMutation.error
+    };
   };
+  
 
   const getStatusConfig = (status) => {
     const configs = {
@@ -157,44 +174,67 @@ const HybridRevisionView = ({
 
       {/* Content Based on Mode */}
       {mode === "view" ? (
-        // VIEW MODE: Use KnowledgeUserContentDetail
+        // VIEW MODE: Show revision list OR individual revision content
         <>
-          {!canEdit && (
-            <Alert
-              message="Mode Tampilan"
-              description="Revisi ini sedang dalam mode tampilan saja. Edit tidak tersedia untuk status ini."
-              type="info"
-              showIcon
-              style={{ marginBottom: "16px" }}
+          {shouldShowRevisionList ? (
+            // Show revision list if we're on main content and have revisions
+            <RevisionHistory
+              contentId={contentId}
+              revisions={allRevisions?.revisions || []}
+              isLoading={false}
+              currentUser={currentUser}
+              onEditRevision={(revision) => {
+                if (revision?.id) {
+                  // Navigate to specific revision
+                  window.location.href = `/asn-connect/asn-knowledge/my-knowledge/${contentId}/revisions/${revision.id}`;
+                }
+              }}
+              onViewRevision={(revision) => {
+                if (revision?.id) {
+                  // Navigate to specific revision
+                  window.location.href = `/asn-connect/asn-knowledge/my-knowledge/${contentId}/revisions/${revision.id}`;
+                }
+              }}
+              showCreateButton={false} // Don't show create button since we already have revisions
             />
-          )}
-          
-          {transformedRevisionData && (
-            <KnowledgeUserContentDetail
-              data={transformedRevisionData}
-              disableInteractions={true}
-              showOwnerActions={false}
-            />
+          ) : (
+            // Show individual revision content
+            <>
+              {!canEdit && (
+                <Alert
+                  message="Mode Tampilan"
+                  description="Revisi ini sedang dalam mode tampilan saja. Edit tidak tersedia untuk status ini."
+                  type="info"
+                  showIcon
+                  style={{ marginBottom: "16px" }}
+                />
+              )}
+              
+              {transformedRevisionData && (
+                <KnowledgeUserContentDetail
+                  data={transformedRevisionData}
+                  disableInteractions={true}
+                  showOwnerActions={false}
+                />
+              )}
+            </>
           )}
         </>
       ) : (
-        // EDIT MODE: Use KnowledgeFormUserContents
+        // EDIT MODE: Use KnowledgeFormUserContents with revision API
         <KnowledgeFormUserContents
           mode="user"
           initialData={transformedRevisionData}
-          onSuccess={() => {
-            setMode("view");
-            // Optionally trigger data refetch here
-          }}
+          onSuccess={() => setMode("view")}
           onCancel={() => setMode("view")}
           customTitle="Edit Revisi Konten"
           customSubtitle="Simpan perubahan sebagai draft atau kembali ke mode lihat"
           customButtonText={{
             draft: "Simpan Draft",
-            submit: "Simpan Draft", // Same as draft for revision mode
+            submit: "Simpan Draft",
             cancel: "Kembali ke Lihat"
           }}
-          useUpdateMutation={() => customUpdateMutation}
+          useUpdateMutation={useRevisionUpdateMutation}
           queryKeysToInvalidate={[
             ["revision-details", versionId, contentId],
             ["my-revisions", contentId]

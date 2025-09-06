@@ -39,6 +39,8 @@ import {
 } from "antd";
 import dayjs from "dayjs";
 import { useRouter } from "next/router";
+import CreateRevisionButton from "./CreateRevisionButton";
+import InlineRevisionHistory from "./InlineRevisionHistory";
 
 const { Text } = Typography;
 const { useBreakpoint } = Grid;
@@ -59,6 +61,8 @@ const KnowledgeContentHeader = ({
   isDeleting = false,
   onCreateRevision = () => {},
   isCreatingRevision = false,
+  onViewRevisions = () => {},
+  revisions = [],
 }) => {
   const router = useRouter();
 
@@ -422,7 +426,7 @@ const KnowledgeContentHeader = ({
         overflow: "hidden",
         position: "relative",
       }}
-      bodyStyle={{ padding: 0 }}
+      styles={{ body: { padding: 0 } }}
     >
       {/* Bookmark Button - Top Right Corner */}
       {!disableInteractions && (
@@ -964,41 +968,24 @@ const KnowledgeContentHeader = ({
                     fontWeight: 500,
                   }}
                 >
-                  Ingin memperbarui konten ini? Buat revisi baru.
+                  {revisions.length > 0 
+                    ? "Konten ini memiliki revisi. Lihat daftar revisi untuk mengelola perubahan."
+                    : "Ingin memperbarui konten ini? Buat revisi baru."
+                  }
                 </Text>
               </div>
-              <Button
-                size="small"
-                type="primary"
-                icon={<BranchesOutlined />}
-                onClick={onCreateRevision}
-                loading={isCreatingRevision}
-                style={{
-                  backgroundColor: "#0284C7",
-                  borderColor: "#0284C7",
-                  fontSize: "12px",
-                  height: "28px",
-                  boxShadow: "0 1px 2px rgba(2, 132, 199, 0.2)",
-                }}
-                onMouseEnter={(e) => {
-                  if (!isCreatingRevision) {
-                    e.currentTarget.style.backgroundColor = "#0369A1";
-                    e.currentTarget.style.borderColor = "#0369A1";
-                    e.currentTarget.style.transform = "translateY(-1px)";
-                    e.currentTarget.style.boxShadow = "0 2px 4px rgba(2, 132, 199, 0.3)";
-                  }
-                }}
-                onMouseLeave={(e) => {
-                  if (!isCreatingRevision) {
-                    e.currentTarget.style.backgroundColor = "#0284C7";
-                    e.currentTarget.style.borderColor = "#0284C7";
-                    e.currentTarget.style.transform = "translateY(0)";
-                    e.currentTarget.style.boxShadow = "0 1px 2px rgba(2, 132, 199, 0.2)";
-                  }
-                }}
-              >
-                {isCreatingRevision ? "Membuat..." : "Buat Revisi"}
-              </Button>
+              {revisions.length > 0 ? (
+                <InlineRevisionHistory
+                  revisions={revisions}
+                  contentId={content?.id}
+                  onViewRevision={onViewRevisions}
+                />
+              ) : (
+                <CreateRevisionButton
+                  onCreateRevision={onCreateRevision}
+                  isCreatingRevision={isCreatingRevision}
+                />
+              )}
             </div>
           )}
 

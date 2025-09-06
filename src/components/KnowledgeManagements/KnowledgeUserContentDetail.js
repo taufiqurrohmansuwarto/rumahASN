@@ -24,13 +24,12 @@ import FormComment from "./components/FormComment";
 import KnowledgeContentHeader from "./components/KnowledgeContentHeader";
 import KnowledgeCommentsList from "./components/KnowledgeCommentsList";
 import RelatedContent from "./components/RelatedContent";
-import RevisionHistory from "./components/RevisionHistory";
 import {
   useCommentsHierarchical,
   useComments,
   useCommentInteractions,
 } from "@/hooks/knowledge-management/useComments";
-import { useSubmitContentForReview, useDeleteMyContent, useMyRevisions, useCreateRevision } from "@/hooks/knowledge-management";
+import { useSubmitContentForReview, useDeleteMyContent, useCreateRevision, useMyRevisions } from "@/hooks/knowledge-management";
 
 dayjs.extend(relativeTime);
 
@@ -78,11 +77,12 @@ const KnowledgeUserContentDetail = ({
   // Use delete content hook
   const deleteContentMutation = useDeleteMyContent();
   
-  // Use revisions hook
-  const { data: revisions, isLoading: isLoadingRevisions } = useMyRevisions(id);
   
   // Use create revision hook
   const createRevisionMutation = useCreateRevision();
+  
+  // Get revisions for this content
+  const { data: revisions } = useMyRevisions(id);
 
   const { mutate: like, isLoading: isLiking } = useMutation(
     (data) => likeKnowledgeContent(data),
@@ -252,15 +252,32 @@ const KnowledgeUserContentDetail = ({
     
     createRevisionMutation.mutate(id, {
       onSuccess: (response) => {
-        // Navigate to edit the new revision
+        // Navigate to view the new revision
         const revisionId = response?.revision?.id;
         if (revisionId) {
-          router.push(`/asn-connect/asn-knowledge/my-knowledge/${id}/revisions/${revisionId}/edit`);
+          router.push(`/asn-connect/asn-knowledge/my-knowledge/${id}/revisions/${revisionId}`);
         } else {
           console.error('Revision ID not found in response:', response);
         }
       }
     });
+  };
+  
+  const handleViewRevisions = (revision) => {
+    if (revision?.id) {
+      // Navigate to specific revision
+      router.push(`/asn-connect/asn-knowledge/my-knowledge/${id}/revisions/${revision.id}`);
+    } else {
+      // Navigate to revision list if no specific revision
+      router.push(`/asn-connect/asn-knowledge/my-knowledge/${id}/revisions`);
+    }
+  };
+  
+  const handleEditRevision = (revision) => {
+    if (revision?.id) {
+      // Navigate to edit specific revision
+      router.push(`/asn-connect/asn-knowledge/my-knowledge/${id}/revisions/${revision.id}/edit`);
+    }
   };
 
   return (
@@ -283,6 +300,9 @@ const KnowledgeUserContentDetail = ({
           isDeleting={deleteContentMutation.isLoading}
           onCreateRevision={handleCreateRevision}
           isCreatingRevision={createRevisionMutation.isLoading}
+          onViewRevisions={handleViewRevisions}
+          onEditRevision={handleEditRevision}
+          revisions={revisions?.revisions || []}
         />
       )}
 
@@ -458,33 +478,6 @@ const KnowledgeUserContentDetail = ({
                 <Text type="secondary" style={{ fontSize: "14px" }}>
                   💬 Fitur komentar akan tersedia setelah konten dipublikasikan
                 </Text>
-              </div>
-            )}
-            {/* Revision History - Only show for owner */}
-            {showOwnerActions && (
-              <div style={{ marginBottom: "16px" }}>
-                <RevisionHistory
-                  contentId={id}
-                  revisions={revisions?.revisions || []}
-                  isLoading={isLoadingRevisions}
-                  currentUser={session?.user}
-                  onEditRevision={(revision) => {
-                    if (revision?.id) {
-                      router.push(`/asn-connect/asn-knowledge/my-knowledge/${id}/revisions/${revision.id}/edit`);
-                    } else {
-                      console.error('Revision ID not found:', revision);
-                    }
-                  }}
-                  onViewRevision={(revision) => {
-                    if (revision?.id) {
-                      router.push(`/asn-connect/asn-knowledge/my-knowledge/${id}/revisions/${revision.id}`);
-                    } else {
-                      console.error('Revision ID not found:', revision);
-                    }
-                  }}
-                  showCreateButton={data?.status === 'published'}
-                  onCreateRevision={handleCreateRevision}
-                />
               </div>
             )}
             
