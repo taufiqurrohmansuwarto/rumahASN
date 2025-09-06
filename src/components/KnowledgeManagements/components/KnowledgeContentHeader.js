@@ -24,6 +24,7 @@ import {
   SoundOutlined,
   SendOutlined,
   DeleteOutlined,
+  BranchesOutlined,
 } from "@ant-design/icons";
 import {
   Card,
@@ -56,6 +57,8 @@ const KnowledgeContentHeader = ({
   isSubmittingForReview = false,
   onDelete = () => {},
   isDeleting = false,
+  onCreateRevision = () => {},
+  isCreatingRevision = false,
 }) => {
   const router = useRouter();
 
@@ -935,6 +938,67 @@ const KnowledgeContentHeader = ({
                   {isSubmittingForReview ? "Mengirim..." : "Submit untuk Review"}
                 </Button>
               </Space>
+            </div>
+          )}
+
+          {/* Create Revision for Published Content */}
+          {content?.status === "published" && showOwnerActions && (
+            <div
+              style={{
+                marginBottom: "16px",
+                padding: "12px 16px",
+                backgroundColor: "#F0F9FF",
+                border: "1px solid #BAE6FD",
+                borderRadius: "6px",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+              }}
+            >
+              <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                <BranchesOutlined style={{ color: "#0284C7", fontSize: "14px" }} />
+                <Text
+                  style={{
+                    color: "#0284C7",
+                    fontSize: "13px",
+                    fontWeight: 500,
+                  }}
+                >
+                  Ingin memperbarui konten ini? Buat revisi baru.
+                </Text>
+              </div>
+              <Button
+                size="small"
+                type="primary"
+                icon={<BranchesOutlined />}
+                onClick={onCreateRevision}
+                loading={isCreatingRevision}
+                style={{
+                  backgroundColor: "#0284C7",
+                  borderColor: "#0284C7",
+                  fontSize: "12px",
+                  height: "28px",
+                  boxShadow: "0 1px 2px rgba(2, 132, 199, 0.2)",
+                }}
+                onMouseEnter={(e) => {
+                  if (!isCreatingRevision) {
+                    e.currentTarget.style.backgroundColor = "#0369A1";
+                    e.currentTarget.style.borderColor = "#0369A1";
+                    e.currentTarget.style.transform = "translateY(-1px)";
+                    e.currentTarget.style.boxShadow = "0 2px 4px rgba(2, 132, 199, 0.3)";
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (!isCreatingRevision) {
+                    e.currentTarget.style.backgroundColor = "#0284C7";
+                    e.currentTarget.style.borderColor = "#0284C7";
+                    e.currentTarget.style.transform = "translateY(0)";
+                    e.currentTarget.style.boxShadow = "0 1px 2px rgba(2, 132, 199, 0.2)";
+                  }
+                }}
+              >
+                {isCreatingRevision ? "Membuat..." : "Buat Revisi"}
+              </Button>
             </div>
           )}
 

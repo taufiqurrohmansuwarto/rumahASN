@@ -9,3 +9,6 @@ export { default as KnowledgeFormAttachments } from "./KnowledgeFormAttachments"
 export { default as KnowledgeFormType } from "./KnowledgeFormType";
 export { default as KnowledgeFormSourceUrl } from "./KnowledgeFormSourceUrl";
 export { default as KnowledgeFormActions } from "./KnowledgeFormActions";
+
+// Revision Forms
+export { default as RevisionForm } from "./RevisionForm";

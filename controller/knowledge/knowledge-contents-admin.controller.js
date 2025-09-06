@@ -132,7 +132,7 @@ export const updateKnowledgeContentAdmin = async (req, res) => {
 
     const data = {
       ...payload,
-      tags: JSON.stringify(payload?.tags),
+      tags: JSON.stringify(payload?.tags || []),
       updated_at: new Date(),
     };
 

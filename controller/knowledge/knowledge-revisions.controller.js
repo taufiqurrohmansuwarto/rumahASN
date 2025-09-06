@@ -53,7 +53,7 @@ export const createRevision = async (req, res) => {
         summary: publishedContent.summary,
         source_url: publishedContent.source_url,
         type: publishedContent.type,
-        tags: publishedContent.tags,
+        tags: JSON.stringify(publishedContent.tags || []),
         category_id: publishedContent.category_id,
         author_id: customId,
         original_author_id: customId,
@@ -71,7 +71,7 @@ export const createRevision = async (req, res) => {
         title: revisionData.title,
         content: revisionData.content, // content field in versions
         summary: revisionData.summary,
-        tags: revisionData.tags,
+        tags: JSON.stringify(JSON.parse(revisionData.tags || '[]')),
         category_id: revisionData.category_id,
         type: revisionData.type,
         source_url: revisionData.source_url,
@@ -123,7 +123,7 @@ export const updateRevision = async (req, res) => {
         content: payload.content,
         summary: payload.summary,
         source_url: payload.source_url,
-        tags: JSON.stringify(payload.tags),
+        tags: JSON.stringify(payload.tags || []),
         category_id: payload.category_id,
         updated_at: new Date()
       };
@@ -142,7 +142,7 @@ export const updateRevision = async (req, res) => {
         title: payload.title,
         content: payload.content,
         summary: payload.summary,
-        tags: payload.tags,
+        tags: JSON.stringify(payload.tags || []),
         category_id: payload.category_id,
         type: revision.type,
         source_url: payload.source_url,
@@ -406,7 +406,7 @@ export const approveRevision = async (req, res) => {
             content: revision.content,
             summary: revision.summary,
             source_url: revision.source_url,
-            tags: revision.tags,
+            tags: JSON.parse(revision.tags || '[]'),
             category_id: revision.category_id,
             current_version: revision.current_version,
             verified_by: customId,
@@ -447,7 +447,7 @@ export const approveRevision = async (req, res) => {
           title: revision.title,
           content: revision.content,
           summary: revision.summary,
-          tags: revision.tags,
+          tags: JSON.stringify(JSON.parse(revision.tags || '[]')),
           category_id: revision.category_id,
           type: revision.type,
           source_url: revision.source_url,
@@ -515,17 +515,24 @@ export const approveRevision = async (req, res) => {
 export const getRevisionDetails = async (req, res) => {
   try {
     const { versionId } = req.query;
+    const { customId } = req.user; // Get current user from auth middleware
 
-    // Get the revision
+    // Get the revision with authorization check
     const revision = await KnowledgeContent.query()
       .findById(versionId)
+      .where(builder => {
+        // For user endpoints: only allow if user is the author
+        if (customId) {
+          builder.where("author_id", customId);
+        }
+      })
       .withGraphFetched(
         "[author(simpleWithImage), category, versions.[user_updated(simpleWithImage)], references]"
       );
 
     if (!revision) {
       return res.status(404).json({
-        message: "Revision not found"
+        message: "Revision not found or you don't have permission to view it"
       });
     }
 

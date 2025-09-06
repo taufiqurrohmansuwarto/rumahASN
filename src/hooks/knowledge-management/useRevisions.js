@@ -162,11 +162,11 @@ export const usePendingRevisions = (initialStatus = "pending_revision") => {
   };
 };
 
-// Get revision details for admin review
-export const useRevisionDetails = (versionId) => {
+// Get revision details (supports both user and admin endpoints)
+export const useRevisionDetails = (versionId, contentId = null) => {
   return useQuery({
-    queryKey: ["revision-details", versionId],
-    queryFn: () => getRevisionDetails(versionId),
+    queryKey: ["revision-details", versionId, contentId],
+    queryFn: () => getRevisionDetails(versionId, contentId),
     enabled: !!versionId,
     staleTime: 1 * 60 * 1000, // 1 minute
     cacheTime: 5 * 60 * 1000, // 5 minutes

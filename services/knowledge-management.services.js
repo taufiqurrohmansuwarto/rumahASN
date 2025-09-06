@@ -572,9 +572,14 @@ export const getPendingRevisions = async (query = {}) => {
     .then((res) => res.data);
 };
 
-export const getRevisionDetails = async (versionId) => {
+export const getRevisionDetails = async (versionId, contentId = null) => {
+  // If contentId is provided, use user endpoint; otherwise use admin endpoint
+  const endpoint = contentId 
+    ? `/users/me/contents/${contentId}/revisions/${versionId}`
+    : `/admin/revisions/${versionId}/approve`;
+    
   return await api
-    .get(`/admin/revisions/${versionId}/approve`)
+    .get(endpoint)
     .then((res) => res.data);
 };
 

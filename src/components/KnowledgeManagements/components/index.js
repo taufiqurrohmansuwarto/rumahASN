@@ -14,3 +14,8 @@ export { default as UserBadgeGallery } from "./UserBadgeGallery";
 export { default as UserMissionList } from "./UserMissionList";
 export { default as Leaderboard } from "./Leaderboard";
 export { default as XPNotification } from "./XPNotification";
+
+// Revision Components
+export { default as RevisionHistory } from "./RevisionHistory";
+export { default as RevisionStatusIndicator } from "./RevisionStatusIndicator";
+export { default as RevisionCreateModal } from "./RevisionCreateModal";
