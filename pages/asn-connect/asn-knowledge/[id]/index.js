@@ -1,15 +1,19 @@
 import { KnowledgeUserContentDetail } from "@/components/KnowledgeManagements";
+import KnowledgeAnchorNavigation from "@/components/KnowledgeManagements/components/KnowledgeAnchorNavigation";
 import Layout from "@/components/Layout";
 import PageContainer from "@/components/PageContainer";
 import { getKnowledgeContent } from "@/services/knowledge-management.services";
 import { useQuery } from "@tanstack/react-query";
-import { Col, FloatButton, Row, Breadcrumb } from "antd";
+import { Col, FloatButton, Row, Breadcrumb, Grid } from "antd";
 import Link from "next/link";
 import Head from "next/head";
 import { useRouter } from "next/router";
 
 const AsnKnowledgeDetail = () => {
   const router = useRouter();
+  const breakpoint = Grid.useBreakpoint();
+
+  const isMobile = breakpoint.xs;
 
   const { data, isLoading } = useQuery(
     ["knowledge-content-detail", router.query.id],
@@ -26,37 +30,40 @@ const AsnKnowledgeDetail = () => {
       <Head>
         <title>Rumah ASN - Detail Pengetahuan - {data?.title}</title>
       </Head>
-      <Row>
-        <Col lg={18} xs={24}>
-          <FloatButton.BackTop />
-          <PageContainer
-            loading={isLoading}
-            title={`${data?.title} - ASNPedia`}
-            onBack={() => router.back()}
-            header={{
-              breadcrumbRender: () => (
-                <Breadcrumb>
-                  <Breadcrumb.Item>
-                    <Link href="/asn-connect/asn-knowledge">ASNPedia</Link>
-                  </Breadcrumb.Item>
-                  <Breadcrumb.Item>
-                    <Link
-                      href={`/asn-connect/asn-knowledge?category=${data?.category?.id}`}
-                    >
-                      {data?.category?.name || "Kategori"}
-                    </Link>
-                  </Breadcrumb.Item>
-                  <Breadcrumb.Item>
-                    {data?.title || "Detail Pengetahuan"}
-                  </Breadcrumb.Item>
-                </Breadcrumb>
-              ),
-            }}
-          >
+      <FloatButton.BackTop />
+      <PageContainer
+        loading={isLoading}
+        title={`${data?.title} - ASNPedia`}
+        onBack={() => router.back()}
+        header={{
+          breadcrumbRender: () => (
+            <Breadcrumb>
+              <Breadcrumb.Item>
+                <Link href="/asn-connect/asn-knowledge">ASNPedia</Link>
+              </Breadcrumb.Item>
+              <Breadcrumb.Item>
+                <Link
+                  href={`/asn-connect/asn-knowledge?category=${data?.category?.id}`}
+                >
+                  {data?.category?.name || "Kategori"}
+                </Link>
+              </Breadcrumb.Item>
+              <Breadcrumb.Item>
+                {data?.title || "Detail Pengetahuan"}
+              </Breadcrumb.Item>
+            </Breadcrumb>
+          ),
+        }}
+      >
+        <Row gutter={[16, 16]}>
+          <Col lg={18} xs={24}>
             <KnowledgeUserContentDetail data={data} />
-          </PageContainer>
-        </Col>
-      </Row>
+          </Col>
+          <Col lg={6} xs={24}>
+            {!isMobile && <KnowledgeAnchorNavigation />}
+          </Col>
+        </Row>
+      </PageContainer>
     </>
   );
 };

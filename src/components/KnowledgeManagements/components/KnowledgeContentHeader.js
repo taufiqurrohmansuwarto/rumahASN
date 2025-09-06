@@ -430,7 +430,6 @@ const KnowledgeContentHeader = ({
       }}
       styles={{ body: { padding: 0 } }}
     >
-
       {/* Status indicator for disabled interactions */}
       {disableInteractions && (
         <div
@@ -544,7 +543,7 @@ const KnowledgeContentHeader = ({
         {/* Content Section */}
         <Flex vertical style={{ flex: 1, padding: "12px 16px 20px 16px" }}>
           {/* Title First - Like CNN Style */}
-          <div style={{ marginBottom: "32px" }}>
+          <div id="content-header" style={{ marginBottom: "32px" }}>
             <MantineTitle
               order={2}
               style={{
@@ -558,7 +557,7 @@ const KnowledgeContentHeader = ({
             </MantineTitle>
 
             {/* Author and Meta Info - Single Line */}
-            <Flex align="center" gap={8} wrap="wrap">
+            <Flex id="content-author" align="center" gap={8} wrap="wrap">
               <AvatarUser
                 size={24}
                 src={content?.author?.image}
@@ -604,7 +603,7 @@ const KnowledgeContentHeader = ({
 
           {/* Summary */}
           {(content?.summary || content?.content) && (
-            <div style={{ marginBottom: "36px" }}>
+            <div id="content-summary" style={{ marginBottom: "36px" }}>
               <MantineText fw={400} italic>
                 {content?.summary ||
                   (content?.content && content.content.length > 200
@@ -615,7 +614,7 @@ const KnowledgeContentHeader = ({
           )}
 
           {/* Content Section */}
-          <div style={{ marginBottom: "40px" }}>
+          <div id="content-body" style={{ marginBottom: "40px" }}>
             {/* Media Preview */}
             {renderMediaPreview() && (
               <div style={{ marginBottom: "32px" }}>
@@ -829,7 +828,7 @@ const KnowledgeContentHeader = ({
 
           {/* Tags */}
           {content?.tags && content?.tags.length > 0 && (
-            <div style={{ marginBottom: "16px" }}>
+            <div id="content-tags" style={{ marginBottom: "16px" }}>
               <Flex align="center" justify="space-between" wrap="wrap">
                 <Flex align="center" gap="8px" wrap="wrap">
                   <Flex align="center" gap="6px">
@@ -918,7 +917,6 @@ const KnowledgeContentHeader = ({
               </Flex>
             </div>
           )}
-
 
           {/* References */}
           {content?.references && content?.references.length > 0 && (
@@ -1138,7 +1136,7 @@ const KnowledgeContentHeader = ({
                 {/* Bookmark Action - Interactive */}
                 {!disableInteractions && (
                   <Flex
-                    align="center" 
+                    align="center"
                     gap={6}
                     style={{
                       cursor: isBookmarking ? "default" : "pointer",

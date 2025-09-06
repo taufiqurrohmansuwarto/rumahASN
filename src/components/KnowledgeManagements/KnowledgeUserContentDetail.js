@@ -283,31 +283,34 @@ const KnowledgeUserContentDetail = ({
   return (
     <>
       {/* Knowledge Content Header */}
-      {data && (
-        <KnowledgeContentHeader
-          content={data}
-          onLike={handleLike}
-          onBookmark={handleBookmark}
-          isLiked={data?.is_liked}
-          isBookmarked={data?.is_bookmarked}
-          isLiking={isLiking}
-          isBookmarking={isBookmarking}
-          disableInteractions={disableInteractions}
-          showOwnerActions={showOwnerActions}
-          onSubmitForReview={handleSubmitForReview}
-          isSubmittingForReview={submitForReviewMutation.isLoading}
-          onDelete={handleDelete}
-          isDeleting={deleteContentMutation.isLoading}
-          onCreateRevision={handleCreateRevision}
-          isCreatingRevision={createRevisionMutation.isLoading}
-          onViewRevisions={handleViewRevisions}
-          onEditRevision={handleEditRevision}
-          revisions={revisions?.revisions || []}
-        />
-      )}
+      <div id="content-section">
+        {data && (
+          <KnowledgeContentHeader
+            content={data}
+            onLike={handleLike}
+            onBookmark={handleBookmark}
+            isLiked={data?.is_liked}
+            isBookmarked={data?.is_bookmarked}
+            isLiking={isLiking}
+            isBookmarking={isBookmarking}
+            disableInteractions={disableInteractions}
+            showOwnerActions={showOwnerActions}
+            onSubmitForReview={handleSubmitForReview}
+            isSubmittingForReview={submitForReviewMutation.isLoading}
+            onDelete={handleDelete}
+            isDeleting={deleteContentMutation.isLoading}
+            onCreateRevision={handleCreateRevision}
+            isCreatingRevision={createRevisionMutation.isLoading}
+            onViewRevisions={handleViewRevisions}
+            onEditRevision={handleEditRevision}
+            revisions={revisions?.revisions || []}
+          />
+        )}
+      </div>
 
       {/* Comments Section - Combined Form and List */}
       <Card
+        id="comments-section"
         style={{
           backgroundColor: "#FFFFFF",
           border: "1px solid #EDEFF1",
@@ -382,6 +385,7 @@ const KnowledgeUserContentDetail = ({
             {/* Comment Form */}
             {!disableInteractions && status === "authenticated" && (
               <div
+                id="comments-form"
                 style={{
                   marginBottom:
                     comments && comments.length > 0 ? "24px" : "16px",
@@ -440,28 +444,30 @@ const KnowledgeUserContentDetail = ({
 
             {/* Comments List */}
             {!disableInteractions && (
-              <KnowledgeCommentsList
-                comments={comments}
-                currentUser={session?.user}
-                isLoading={isLoadingComments}
-                onEdit={handleEditComment}
-                onDelete={handleDeleteComment}
-                onReply={handleReplyComment}
-                onLike={handleLikeComment}
-                onPin={handlePinComment}
-                editingComment={editingComment}
-                replyingTo={replyingTo}
-                isUpdatingComment={commentInteractions.isUpdatingComment}
-                isDeletingComment={commentInteractions.isDeletingComment}
-                isCreatingComment={commentInteractions.isCreatingComment}
-                isCreatingReply={commentInteractions.isCreatingReply}
-                isLikingComment={commentInteractions.isLikingComment}
-                isPinningComment={commentInteractions.isPinningComment}
-                isHierarchical={isHierarchicalView}
-                contentAuthorId={data?.author_id}
-                isLikingSpecificComment={commentInteractions.isLikingSpecificComment}
-                isPinningSpecificComment={commentInteractions.isPinningSpecificComment}
-              />
+              <div id="comments-list">
+                <KnowledgeCommentsList
+                  comments={comments}
+                  currentUser={session?.user}
+                  isLoading={isLoadingComments}
+                  onEdit={handleEditComment}
+                  onDelete={handleDeleteComment}
+                  onReply={handleReplyComment}
+                  onLike={handleLikeComment}
+                  onPin={handlePinComment}
+                  editingComment={editingComment}
+                  replyingTo={replyingTo}
+                  isUpdatingComment={commentInteractions.isUpdatingComment}
+                  isDeletingComment={commentInteractions.isDeletingComment}
+                  isCreatingComment={commentInteractions.isCreatingComment}
+                  isCreatingReply={commentInteractions.isCreatingReply}
+                  isLikingComment={commentInteractions.isLikingComment}
+                  isPinningComment={commentInteractions.isPinningComment}
+                  isHierarchical={isHierarchicalView}
+                  contentAuthorId={data?.author_id}
+                  isLikingSpecificComment={commentInteractions.isLikingSpecificComment}
+                  isPinningSpecificComment={commentInteractions.isPinningSpecificComment}
+                />
+              </div>
             )}
 
             {/* Disabled State Message */}
@@ -482,7 +488,9 @@ const KnowledgeUserContentDetail = ({
             )}
             
             {/* Related Content */}
-            <RelatedContent contentId={id} isMobile={false} />
+            <div id="related-section">
+              <RelatedContent contentId={id} isMobile={false} />
+            </div>
           </div>
         </Flex>
       </Card>
