@@ -65,9 +65,7 @@ const MyKnowledgeContents = () => {
   const [selectedStatus, setSelectedStatus] = useState(
     routerQuery.status || "all"
   );
-  const [selectedType, setSelectedType] = useState(
-    routerQuery.type || "all"
-  );
+  const [selectedType, setSelectedType] = useState(routerQuery.type || "all");
 
   // Debounced search for API calls
   const [debouncedSearch] = useDebounce(searchQuery, 500);
@@ -519,10 +517,6 @@ const MyKnowledgeContents = () => {
 
             <Button
               type="primary"
-              style={{
-                backgroundColor: "#FF4500",
-                borderColor: "#FF4500",
-              }}
               onClick={() => router.push("/asn-connect/asn-knowledge/create")}
               icon={<EditOutlined />}
             >

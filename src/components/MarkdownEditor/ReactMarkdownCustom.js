@@ -1,4 +1,4 @@
-import { Blockquote, Table, Title } from "@mantine/core";
+import { Blockquote, Table, Title, Text } from "@mantine/core";
 import { Image, Typography } from "antd";
 import ReactMarkdown from "react-markdown";
 import rehypeRaw from "rehype-raw";
@@ -37,7 +37,7 @@ function ReactMarkdownCustom({ children, withCustom = true }) {
     },
     p({ node, ...props }) {
       return (
-        <Typography.Paragraph
+        <Text
           style={{
             whiteSpace: "normal",
             overflowWrap: "break-word",
@@ -45,7 +45,7 @@ function ReactMarkdownCustom({ children, withCustom = true }) {
           }}
         >
           {props.children}
-        </Typography.Paragraph>
+        </Text>
       );
     },
     h1({ node, ...props }) {

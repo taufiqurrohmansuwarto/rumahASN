@@ -33,7 +33,6 @@ const KnowledgeLayout = ({
             md={6} // 4/24 pada medium screens ke atas
           >
             <Button
-              shape="round"
               type="primary"
               icon={<PlusOutlined />}
               onClick={() => router.push("/asn-connect/asn-knowledge/create")}
