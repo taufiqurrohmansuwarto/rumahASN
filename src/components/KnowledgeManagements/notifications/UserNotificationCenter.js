@@ -144,44 +144,6 @@ const UserNotificationCenter = () => {
     return query;
   };
 
-  // Handlers with router.push
-  const handleTypeChange = (type) => {
-    const newFilters = { ...filters, type, page: 1 };
-    const query = buildURLQuery(newFilters);
-    
-    router.push({
-      pathname: router.pathname,
-      query,
-    }, undefined, { shallow: true });
-  };
-
-  const handleStatusChange = (status) => {
-    const newFilters = { ...filters, is_read: status, page: 1 };
-    const query = buildURLQuery(newFilters);
-    
-    router.push({
-      pathname: router.pathname,
-      query,
-    }, undefined, { shallow: true });
-  };
-
-  const handleSearchChange = (search) => {
-    const newFilters = { ...filters, search, page: 1 };
-    const query = buildURLQuery(newFilters);
-    
-    router.push({
-      pathname: router.pathname,
-      query,
-    }, undefined, { shallow: true });
-  };
-
-  const handleClearFilters = () => {
-    // Clear all query params by pushing without query
-    router.push({
-      pathname: router.pathname,
-      query: {},
-    }, undefined, { shallow: true });
-  };
 
   const handleLoadMore = () => {
     if (hasMore && !isLoading) {

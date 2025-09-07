@@ -1,5 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import { useRouter } from "next/router";
+import { debounce } from "lodash";
 import { 
   Flex, 
   Select, 
@@ -37,6 +38,12 @@ const NotificationFilters = ({
   isLoading = false,
 }) => {
   const router = useRouter();
+  const [localSearchValue, setLocalSearchValue] = useState(searchQuery);
+
+  // Update local search when prop changes (from URL)
+  useEffect(() => {
+    setLocalSearchValue(searchQuery);
+  }, [searchQuery]);
 
   // Helper function to build URL query
   const buildURLQuery = (updates = {}) => {
@@ -78,8 +85,32 @@ const NotificationFilters = ({
     }, undefined, { shallow: true });
   };
 
+  // Debounced search handler
+  const debouncedSearchChange = useCallback(
+    debounce((search) => {
+      const query = buildURLQuery({ search });
+      router.push({
+        pathname: router.pathname,
+        query,
+      }, undefined, { shallow: true });
+    }, 500), // 500ms delay
+    [router, selectedType, selectedStatus]
+  );
+
   const handleSearchChange = (search) => {
-    const query = buildURLQuery({ search });
+    // Update local state immediately for UI responsiveness
+    setLocalSearchValue(search);
+    // Debounced URL update
+    debouncedSearchChange(search);
+  };
+
+  const handleSearchInputChange = (e) => {
+    handleSearchChange(e.target.value);
+  };
+
+  const handleSearchSubmit = (value) => {
+    // For onSearch (Enter key), update immediately
+    const query = buildURLQuery({ search: value });
     router.push({
       pathname: router.pathname,
       query,
@@ -87,11 +118,20 @@ const NotificationFilters = ({
   };
 
   const handleClearFilters = () => {
+    setLocalSearchValue(""); // Clear local search immediately
+    debouncedSearchChange.cancel(); // Cancel pending debounced calls
     router.push({
       pathname: router.pathname,
       query: {},
     }, undefined, { shallow: true });
   };
+
+  // Cleanup debounce on unmount
+  useEffect(() => {
+    return () => {
+      debouncedSearchChange.cancel();
+    };
+  }, [debouncedSearchChange]);
 
   // Notification type options dengan icons
   const typeOptions = [
@@ -265,9 +305,9 @@ const NotificationFilters = ({
                   placeholder="Cari dalam notifikasi..."
                   allowClear
                   size="small"
-                  value={searchQuery}
-                  onChange={(e) => handleSearchChange(e.target.value)}
-                  onSearch={handleSearchChange}
+                  value={localSearchValue}
+                  onChange={handleSearchInputChange}
+                  onSearch={handleSearchSubmit}
                   style={{ width: "100%" }}
                 />
               </div>
