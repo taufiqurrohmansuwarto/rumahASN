@@ -610,3 +610,61 @@ export const bulkRejectRevisions = async (versionIds, rejectionReason) => {
   );
   return await Promise.allSettled(promises);
 };
+
+// ===== NOTIFICATION SERVICES =====
+
+// User Notification Services
+export const getUserNotifications = async (query) => {
+  const qs = queryString.stringify(query, {
+    skipNull: true,
+    skipEmptyString: true,
+  });
+
+  return await api.get(`/users/me/notifications?${qs}`).then((res) => res.data);
+};
+
+export const getUserUnreadNotificationsCount = async () => {
+  return await api.get("/users/me/notifications/unread-count").then((res) => res.data);
+};
+
+export const markNotificationAsRead = async (id) => {
+  return await api.put(`/users/me/notifications/${id}/read`).then((res) => res.data);
+};
+
+export const markAllNotificationsAsRead = async () => {
+  return await api.put("/users/me/notifications/mark-all-read").then((res) => res.data);
+};
+
+export const deleteNotification = async (id) => {
+  return await api.delete(`/users/me/notifications/${id}`).then((res) => res.data);
+};
+
+// Admin Notification Services
+export const getAdminNotifications = async (query) => {
+  const qs = queryString.stringify(query, {
+    skipNull: true,
+    skipEmptyString: true,
+  });
+
+  return await api.get(`/admin/notifications?${qs}`).then((res) => res.data);
+};
+
+export const getNotificationStats = async (detailed = false) => {
+  const endpoint = detailed 
+    ? "/admin/notifications/stats?detailed=true" 
+    : "/admin/notifications/stats";
+  
+  return await api.get(endpoint).then((res) => res.data);
+};
+
+export const broadcastNotification = async (data) => {
+  return await api.post("/admin/notifications/broadcast", data).then((res) => res.data);
+};
+
+export const updateAdminNotification = async ({ id, data }) => {
+  return await api.put(`/admin/notifications/${id}`, data).then((res) => res.data);
+};
+
+export const deleteAdminNotification = async (id) => {
+  return await api.delete(`/admin/notifications/${id}`).then((res) => res.data);
+};

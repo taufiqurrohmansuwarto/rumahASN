@@ -16,7 +16,7 @@ class knowledgeNotifications extends Model {
   static get relationMappings() {
     const User = require("@/models/users.model");
     const Content = require("@/models/knowledge/contents.model");
-    const UserInteraction = require("@/models/knowledge/user_interactions.model");
+    const UserInteraction = require("@/models/knowledge/user-interactions.model");
     return {
       user: {
         relation: Model.BelongsToOneRelation,
@@ -34,7 +34,7 @@ class knowledgeNotifications extends Model {
           to: "knowledge.contents.id",
         },
       },
-      userInteraction: {
+      comment: {
         relation: Model.BelongsToOneRelation,
         modelClass: UserInteraction,
         join: {
