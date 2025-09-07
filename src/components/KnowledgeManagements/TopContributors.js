@@ -1,23 +1,13 @@
 import AvatarUser from "@/components/Users/AvatarUser";
 import { useTopContributors } from "@/hooks/knowledge-management/useKnowledgeInsights";
-import { TrophyOutlined } from "@ant-design/icons";
-import {
-  Badge,
-  Card,
-  Flex,
-  Grid,
-  List,
-  Skeleton,
-  Typography,
-  Tooltip,
-} from "antd";
+import { Card, Flex, Grid, List, Skeleton, Tooltip, Typography } from "antd";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import UserText from "../Users/UserText";
 
 dayjs.extend(relativeTime);
 
-const { Title, Text } = Typography;
+const { Text } = Typography;
 const { useBreakpoint } = Grid;
 
 const ContributorItem = ({ contributor, rank, isMobile }) => {
@@ -75,7 +65,6 @@ function TopContributors({ period = "month", limit = 10 }) {
   const screens = useBreakpoint();
   const isMobile = screens.xs;
   const mainPadding = isMobile ? "12px" : "16px";
-  const iconSectionWidth = isMobile ? "0px" : "40px";
 
   if (error) {
     return null;
@@ -92,90 +81,69 @@ function TopContributors({ period = "month", limit = 10 }) {
             }}
             styles={{ body: { padding: 0 } }}
           >
-            <Flex>
-              {/* Icon Section - Hide on mobile */}
-              {!isMobile && (
-                <div
-                  style={{
-                    width: iconSectionWidth,
-                    backgroundColor: "#F8F9FA",
-                    borderRight: "1px solid #E5E7EB",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    minHeight: "120px",
-                  }}
+            {/* Content Section */}
+            <div style={{ padding: mainPadding }}>
+              {/* Header */}
+              <div style={{ marginBottom: "16px" }}>
+                <Tooltip
+                  title={`Kontributor terbaik periode ${
+                    period === "month"
+                      ? "bulan ini"
+                      : period === "week"
+                      ? "minggu ini"
+                      : period === "quarter"
+                      ? "kuartal ini"
+                      : period === "year"
+                      ? "tahun ini"
+                      : "semua waktu"
+                  }`}
                 >
-                  <TrophyOutlined
-                    style={{ color: "#8C8C8C", fontSize: "18px" }}
-                  />
-                </div>
-              )}
-
-              {/* Content Section */}
-              <div style={{ flex: 1, padding: mainPadding }}>
-                {/* Header */}
-                <div style={{ marginBottom: "16px" }}>
-                  <Tooltip
-                    title={`Kontributor terbaik periode ${
-                      period === "month"
-                        ? "bulan ini"
-                        : period === "week"
-                        ? "minggu ini"
-                        : period === "quarter"
-                        ? "kuartal ini"
-                        : period === "year"
-                        ? "tahun ini"
-                        : "semua waktu"
-                    }`}
+                  <Text
+                    strong
+                    style={{
+                      margin: 0,
+                      color: "#1C1C1C",
+                      fontSize: isMobile ? "12px" : "16px",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "8px",
+                      cursor: "help",
+                    }}
                   >
-                    <Text
-                      strong
-                      style={{
-                        margin: 0,
-                        color: "#1C1C1C",
-                        fontSize: isMobile ? "12px" : "16px",
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "8px",
-                        cursor: "help",
-                      }}
-                    >
-                      🏆 Kontributor Terbaik
-                    </Text>
-                  </Tooltip>
-                </div>
-
-                {/* Contributors List */}
-                <div>
-                  {isLoading ? (
-                    <div>
-                      {[...Array(5)].map((_, index) => (
-                        <div key={index} style={{ marginBottom: "16px" }}>
-                          <Skeleton.Input
-                            style={{ width: "100%", height: "35px" }}
-                            active
-                          />
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <List
-                      dataSource={data?.contributors || []}
-                      split={false}
-                      renderItem={(contributor, index) => (
-                        <ContributorItem
-                          key={contributor.user?.id}
-                          contributor={contributor}
-                          rank={index + 1}
-                          isMobile={isMobile}
-                        />
-                      )}
-                    />
-                  )}
-                </div>
+                    🏆 Kontributor Terbaik
+                  </Text>
+                </Tooltip>
               </div>
-            </Flex>
+
+              {/* Contributors List */}
+              <div>
+                {isLoading ? (
+                  <div>
+                    {[...Array(5)].map((_, index) => (
+                      <div key={index} style={{ marginBottom: "16px" }}>
+                        <Skeleton.Input
+                          style={{ width: "100%", height: "35px" }}
+                          active
+                        />
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <List
+                    dataSource={data?.contributors || []}
+                    split={false}
+                    renderItem={(contributor, index) => (
+                      <ContributorItem
+                        key={contributor.user?.id}
+                        contributor={contributor}
+                        rank={index + 1}
+                        isMobile={isMobile}
+                      />
+                    )}
+                  />
+                )}
+              </div>
+            </div>
           </Card>
         </div>
       )}

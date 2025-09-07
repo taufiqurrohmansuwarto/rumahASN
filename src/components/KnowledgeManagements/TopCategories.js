@@ -1,9 +1,6 @@
 import { useTopCategories } from "@/hooks/knowledge-management/useKnowledgeInsights";
-import { BarChartOutlined, FolderOutlined } from "@ant-design/icons";
 import {
-  Badge,
   Card,
-  Flex,
   Grid,
   List,
   Skeleton,
@@ -15,30 +12,11 @@ import relativeTime from "dayjs/plugin/relativeTime";
 
 dayjs.extend(relativeTime);
 
-const { Title, Text } = Typography;
+const { Text } = Typography;
 const { useBreakpoint } = Grid;
 
-const CategoryItem = ({ category, rank, isMobile, maxContentCount }) => {
-  const { category: categoryInfo, stats } = category;
-
-  const getRankColor = (rank) => {
-    switch (rank) {
-      case 1:
-        return "#FFD700";
-      case 2:
-        return "#C0C0C0";
-      case 3:
-        return "#CD7F32";
-      default:
-        return "#8C8C8C";
-    }
-  };
-
-  const getProgressPercent = (count) => {
-    return maxContentCount > 0
-      ? Math.round((count / maxContentCount) * 100)
-      : 0;
-  };
+const CategoryItem = ({ category, isMobile }) => {
+  const { category: categoryInfo } = category;
 
   return (
     <List.Item
@@ -47,66 +25,17 @@ const CategoryItem = ({ category, rank, isMobile, maxContentCount }) => {
       }}
     >
       <List.Item.Meta
-        avatar={
-          <Badge
-            count={rank}
-            style={{
-              backgroundColor: getRankColor(rank),
-              color: rank <= 3 ? "#fff" : "#000",
-              fontWeight: "bold",
-              fontSize: "8px",
-            }}
-            size="small"
-          >
-            <div
-              style={{
-                width: isMobile ? 28 : 32,
-                height: isMobile ? 28 : 32,
-                borderRadius: "4px",
-                backgroundColor: "#f5f5f5",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                fontSize: isMobile ? "12px" : "14px",
-              }}
-            >
-              <FolderOutlined style={{ color: "#8C8C8C" }} />
-            </div>
-          </Badge>
-        }
+        avatar={null}
         title={
-          <div>
-            <Text
-              strong
-              style={{
-                fontSize: isMobile ? "11px" : "12px",
-                lineHeight: "1.3",
-                display: "block",
-                marginBottom: "2px",
-              }}
-            >
-              {categoryInfo?.name}
-            </Text>
-            {categoryInfo?.description && (
-              <Text
-                style={{
-                  fontSize: isMobile ? "9px" : "10px",
-                  color: "#8c8c8c",
-                  display: "-webkit-box",
-                  WebkitLineClamp: 1,
-                  WebkitBoxOrient: "vertical",
-                  overflow: "hidden",
-                  textOverflow: "ellipsis",
-                }}
-              >
-                {categoryInfo.description}
-              </Text>
-            )}
-          </div>
-        }
-        description={
-          <Text style={{ fontSize: "10px" }} type="secondary">
-            {stats.content_count} konten • {stats.total_likes} suka
+          <Text
+            strong
+            style={{
+              fontSize: isMobile ? "11px" : "12px",
+              lineHeight: "1.3",
+              display: "block",
+            }}
+          >
+            {categoryInfo?.name}
           </Text>
         }
       />
@@ -128,7 +57,6 @@ function TopCategories({
   const screens = useBreakpoint();
   const isMobile = screens.xs;
   const mainPadding = isMobile ? "12px" : "16px";
-  const iconSectionWidth = isMobile ? "0px" : "40px";
 
   const getSortByLabel = (sortBy) => {
     switch (sortBy) {
@@ -142,11 +70,6 @@ function TopCategories({
     }
   };
 
-  // Calculate max content count for progress bars
-  const maxContentCount =
-    data?.categories?.length > 0
-      ? Math.max(...data.categories.map((cat) => cat.stats.content_count))
-      : 0;
 
   if (error) {
     return null;
@@ -163,28 +86,8 @@ function TopCategories({
             }}
             styles={{ body: { padding: 0 } }}
           >
-            <Flex>
-              {/* Icon Section - Hide on mobile */}
-              {!isMobile && (
-                <div
-                  style={{
-                    width: iconSectionWidth,
-                    backgroundColor: "#F8F9FA",
-                    borderRight: "1px solid #E5E7EB",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    minHeight: "120px",
-                  }}
-                >
-                  <BarChartOutlined
-                    style={{ color: "#8C8C8C", fontSize: "18px" }}
-                  />
-                </div>
-              )}
-
-              {/* Content Section */}
-              <div style={{ flex: 1, padding: mainPadding }}>
+            {/* Content Section */}
+            <div style={{ padding: mainPadding }}>
                 {/* Header */}
                 <div style={{ marginBottom: "16px" }}>
                   <Tooltip
@@ -238,16 +141,13 @@ function TopCategories({
                         <CategoryItem
                           key={category.category?.id}
                           category={category}
-                          rank={index + 1}
                           isMobile={isMobile}
-                          maxContentCount={maxContentCount}
                         />
                       )}
                     />
                   )}
                 </div>
               </div>
-            </Flex>
           </Card>
         </div>
       )}

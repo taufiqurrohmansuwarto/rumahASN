@@ -14,28 +14,29 @@ import { Button, Col, Empty, Grid, Row, Spin, message } from "antd";
 import { useRouter } from "next/router";
 import { useCallback, useEffect, useState } from "react";
 import ContentCard from "../components/ContentCard";
-import KnowledgeHeader from "../components/KnowledgeHeader";
-import KnowledgeFilters from "../components/KnowledgeFilters";
 
 const { useBreakpoint } = Grid;
 
-const KnowledgeUserContents = () => {
+const KnowledgeUserContents = ({
+  searchQuery: propSearchQuery,
+  selectedCategory: propSelectedCategory,
+  selectedTag: propSelectedTag,
+  selectedSort: propSelectedSort,
+  selectedType: propSelectedType,
+}) => {
   useScrollRestoration();
 
   const router = useRouter();
   const queryClient = useQueryClient();
 
-  // Get URL parameters
+  // Use props if provided, otherwise fallback to URL parameters
   const { query } = router;
-
-  // State management
-  const [searchQuery, setSearchQuery] = useState(query.search || "");
-  const [selectedCategory, setSelectedCategory] = useState(
-    query.category || null
-  );
-  const [selectedTag, setSelectedTag] = useState(query.tag || null);
-  const [selectedSort, setSelectedSort] = useState(query.sort || "created_at");
-  const [selectedType, setSelectedType] = useState(query.type || "all");
+  const searchQuery = propSearchQuery !== undefined ? propSearchQuery : (query.search || "");
+  const selectedCategory = propSelectedCategory !== undefined ? propSelectedCategory : (query.category || null);
+  const selectedTag = propSelectedTag !== undefined ? propSelectedTag : (query.tag || null);
+  const selectedSort = propSelectedSort !== undefined ? propSelectedSort : (query.sort || "created_at");
+  const selectedType = propSelectedType !== undefined ? propSelectedType : (query.type || "all");
+  
   const [debouncedSearch] = useDebouncedValue(searchQuery, 500);
   const [likingItems, setLikingItems] = useState(new Set());
   const [bookmarkingItems, setBookmarkingItems] = useState(new Set());
@@ -44,22 +45,6 @@ const KnowledgeUserContents = () => {
   const screens = useBreakpoint();
   const isMobile = !screens.md;
 
-  // Update URL when filters change
-  const updateURL = (newFilters) => {
-    const params = new URLSearchParams();
-    if (newFilters.search) params.set("search", newFilters.search);
-    if (newFilters.category) params.set("category", newFilters.category);
-    if (newFilters.tag) params.set("tag", newFilters.tag);
-    if (newFilters.sort && newFilters.sort !== "created_at")
-      params.set("sort", newFilters.sort);
-    if (newFilters.type && newFilters.type !== "all")
-      params.set("type", newFilters.type);
-
-    const queryString = params.toString();
-    const newUrl = queryString ? `?${queryString}` : router.pathname;
-
-    router.push(newUrl, undefined, { shallow: true });
-  };
 
   const {
     data,
@@ -184,75 +169,6 @@ const KnowledgeUserContents = () => {
     }
   };
 
-  // Filter handlers
-  const handleCategoryChange = (categoryId) => {
-    setSelectedCategory(categoryId);
-    updateURL({
-      search: searchQuery,
-      category: categoryId,
-      tag: selectedTag,
-      sort: selectedSort,
-      type: selectedType,
-    });
-  };
-
-  const handleTagChange = (tag) => {
-    setSelectedTag(tag);
-    updateURL({
-      search: searchQuery,
-      category: selectedCategory,
-      tag: tag,
-      sort: selectedSort,
-      type: selectedType,
-    });
-  };
-
-  const handleSortChange = (sort) => {
-    setSelectedSort(sort);
-    updateURL({
-      search: searchQuery,
-      category: selectedCategory,
-      tag: selectedTag,
-      sort: sort,
-      type: selectedType,
-    });
-  };
-
-  const handleSearchChange = (e) => {
-    const value = e.target.value;
-    setSearchQuery(value);
-  };
-
-  const handleSearch = (value) => {
-    setSearchQuery(value);
-    updateURL({
-      search: value,
-      category: selectedCategory,
-      tag: selectedTag,
-      sort: selectedSort,
-      type: selectedType,
-    });
-  };
-
-  const handleTypeChange = (type) => {
-    setSelectedType(type);
-    updateURL({
-      search: searchQuery,
-      category: selectedCategory,
-      tag: selectedTag,
-      sort: selectedSort,
-      type: type,
-    });
-  };
-
-  const handleClearFilters = () => {
-    setSelectedCategory(null);
-    setSelectedTag(null);
-    setSelectedSort("created_at");
-    setSelectedType("all");
-    setSearchQuery("");
-    router.push(router.pathname, undefined, { shallow: true });
-  };
 
   const renderContentCard = (content) => (
     <ContentCard
@@ -281,27 +197,6 @@ const KnowledgeUserContents = () => {
 
   return (
     <div>
-      {/* Header with Search */}
-      <KnowledgeHeader
-        searchQuery={searchQuery}
-        onSearchChange={handleSearchChange}
-        onSearch={handleSearch}
-      />
-
-      {/* Filters */}
-      <KnowledgeFilters
-        selectedCategory={selectedCategory}
-        selectedTag={selectedTag}
-        selectedSort={selectedSort}
-        onCategoryChange={handleCategoryChange}
-        onTagChange={handleTagChange}
-        onSortChange={handleSortChange}
-        onClearFilters={handleClearFilters}
-        showTypeFilter={true}
-        selectedType={selectedType}
-        onTypeChange={handleTypeChange}
-        typeCounts={{}} // Empty object for public content
-      />
 
       {/* Content List */}
       <Row gutter={[0, 0]}>

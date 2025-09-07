@@ -5,19 +5,123 @@ import LayoutASNConnect from "@/components/Socmed/LayoutASNConnect";
 import useScrollRestoration from "@/hooks/useScrollRestoration";
 import Head from "next/head";
 import { Col, Row, Grid } from "antd";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/router";
 import TopContributors from "@/components/KnowledgeManagements/TopContributors";
 import TopContents from "@/components/KnowledgeManagements/TopContents";
 import TopCategories from "@/components/KnowledgeManagements/TopCategories";
 import TopTags from "@/components/KnowledgeManagements/TopTags";
+import KnowledgeFiltersStack from "@/components/KnowledgeManagements/components/KnowledgeFiltersStack";
 
 const { useBreakpoint } = Grid;
 
 const AsnKnowledge = () => {
   const breakPoint = useBreakpoint();
+  const router = useRouter();
+  const { query } = router;
 
   const isMobile = breakPoint.xs;
 
+  // Filter states
+  const [searchQuery, setSearchQuery] = useState(query.search || "");
+  const [selectedCategory, setSelectedCategory] = useState(
+    query.category || null
+  );
+  const [selectedTag, setSelectedTag] = useState(query.tag || null);
+  const [selectedSort, setSelectedSort] = useState(query.sort || "created_at");
+  const [selectedType, setSelectedType] = useState(query.type || "all");
+
   useScrollRestoration("knowledge-scroll", true, false, true); // Enable smooth restoration
+
+  // Update URL when filters change
+  const updateURL = (newFilters) => {
+    const params = new URLSearchParams();
+    if (newFilters.search) params.set("search", newFilters.search);
+    if (newFilters.category) params.set("category", newFilters.category);
+    if (newFilters.tag && newFilters.tag.length > 0) {
+      if (Array.isArray(newFilters.tag)) {
+        params.set("tag", newFilters.tag.join(","));
+      } else {
+        params.set("tag", newFilters.tag);
+      }
+    }
+    if (newFilters.sort && newFilters.sort !== "created_at")
+      params.set("sort", newFilters.sort);
+    if (newFilters.type && newFilters.type !== "all")
+      params.set("type", newFilters.type);
+
+    const queryString = params.toString();
+    const newUrl = queryString
+      ? `${router.pathname}?${queryString}`
+      : router.pathname;
+
+    router.push(newUrl, undefined, { shallow: true });
+  };
+
+  // Filter handlers
+  const handleSearchChange = (value) => {
+    setSearchQuery(value);
+    updateURL({
+      search: value,
+      category: selectedCategory,
+      tag: selectedTag,
+      sort: selectedSort,
+      type: selectedType,
+    });
+  };
+
+  const handleCategoryChange = (value) => {
+    setSelectedCategory(value);
+    updateURL({
+      search: searchQuery,
+      category: value,
+      tag: selectedTag,
+      sort: selectedSort,
+      type: selectedType,
+    });
+  };
+
+  const handleTagChange = (value) => {
+    setSelectedTag(value);
+    updateURL({
+      search: searchQuery,
+      category: selectedCategory,
+      tag: value,
+      sort: selectedSort,
+      type: selectedType,
+    });
+  };
+
+  const handleSortChange = (value) => {
+    setSelectedSort(value);
+    updateURL({
+      search: searchQuery,
+      category: selectedCategory,
+      tag: selectedTag,
+      sort: value,
+      type: selectedType,
+    });
+  };
+
+  const handleTypeChange = (value) => {
+    setSelectedType(value);
+    updateURL({
+      search: searchQuery,
+      category: selectedCategory,
+      tag: selectedTag,
+      sort: selectedSort,
+      type: value,
+    });
+  };
+
+  const handleClearFilters = () => {
+    setSearchQuery("");
+    setSelectedCategory(null);
+    setSelectedTag(null);
+    setSelectedSort("created_at");
+    setSelectedType("all");
+    router.push(router.pathname, undefined, { shallow: true });
+  };
 
   return (
     <>
@@ -26,16 +130,46 @@ const AsnKnowledge = () => {
       </Head>
       <LayoutASNConnect active="asn-knowledge">
         <Row gutter={[16, 16]}>
-          <Col lg={16} xs={24}>
+          <Col lg={5} xs={0}>
+            <div
+              style={{
+                position: "sticky",
+                top: "80px",
+                maxHeight: "calc(100vh - 100px)",
+                overflowY: "auto",
+              }}
+            >
+              <KnowledgeFiltersStack
+                selectedCategory={selectedCategory}
+                selectedTag={selectedTag}
+                selectedSort={selectedSort}
+                selectedType={selectedType}
+                searchQuery={searchQuery}
+                onCategoryChange={handleCategoryChange}
+                onTagChange={handleTagChange}
+                onSortChange={handleSortChange}
+                onTypeChange={handleTypeChange}
+                onSearchChange={handleSearchChange}
+                onClearFilters={handleClearFilters}
+              />
+            </div>
+          </Col>
+          <Col lg={14} xs={24}>
             <KnowledgeLayout
               currentPath="/asn-connect/asn-knowledge"
               showCreateButton={true}
             >
-              <KnowledgeUserContents />
+              <KnowledgeUserContents
+                searchQuery={searchQuery}
+                selectedCategory={selectedCategory}
+                selectedTag={selectedTag}
+                selectedSort={selectedSort}
+                selectedType={selectedType}
+              />
             </KnowledgeLayout>
           </Col>
           {!isMobile && (
-            <Col lg={8} xs={24}>
+            <Col lg={5} xs={24}>
               <Row gutter={[4, 4]}>
                 <Col lg={24} xs={24}>
                   <TopContributors period="month" limit={10} />

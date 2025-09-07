@@ -66,7 +66,6 @@ function LayoutASNConnect({ children, active = "asn-updates" }) {
         style={{
           backgroundColor: "#FFFFFF",
           borderBottom: "1px solid #EDEFF1",
-          padding: "0 20px",
         }}
       >
         <Tabs
@@ -89,7 +88,7 @@ function LayoutASNConnect({ children, active = "asn-updates" }) {
         style={{
           // maxWidth: "1200px",
           // margin: "0 auto",
-          padding: breakPoint.xs ? "20px 12px" : "24px 20px",
+          padding: breakPoint.xs ? "20px 0px" : "24px 0px",
           minHeight: "calc(100vh - 200px)", // Prevent layout shift
           display: "flex",
           flexDirection: "column",

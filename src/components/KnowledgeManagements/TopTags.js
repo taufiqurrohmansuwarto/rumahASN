@@ -12,11 +12,6 @@ import {
 } from "antd";
 import {
   TagsOutlined,
-  BarChartOutlined,
-  LikeOutlined,
-  EyeOutlined,
-  MessageOutlined,
-  FireOutlined,
 } from "@ant-design/icons";
 import { useTopTags } from "@/hooks/knowledge-management/useKnowledgeInsights";
 import dayjs from "dayjs";
@@ -114,7 +109,6 @@ function TopTags({ period = "month", sortBy = "usage_count", limit = 20 }) {
   const screens = useBreakpoint();
   const isMobile = screens.xs;
   const mainPadding = isMobile ? "12px" : "16px";
-  const iconSectionWidth = isMobile ? "0px" : "40px";
 
   const getSortByLabel = (sortBy) => {
     switch (sortBy) {
@@ -149,28 +143,8 @@ function TopTags({ period = "month", sortBy = "usage_count", limit = 20 }) {
             }}
             styles={{ body: { padding: 0 } }}
           >
-            <Flex>
-              {/* Icon Section - Hide on mobile */}
-              {!isMobile && (
-                <div
-                  style={{
-                    width: iconSectionWidth,
-                    backgroundColor: "#F8F9FA",
-                    borderRight: "1px solid #E5E7EB",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    minHeight: "120px",
-                  }}
-                >
-                  <BarChartOutlined
-                    style={{ color: "#8C8C8C", fontSize: "18px" }}
-                  />
-                </div>
-              )}
-
-              {/* Content Section */}
-              <div style={{ flex: 1, padding: mainPadding }}>
+            {/* Content Section */}
+            <div style={{ padding: mainPadding }}>
                 {/* Header */}
                 <div style={{ marginBottom: "16px" }}>
                   <Flex justify="space-between" align="center">
@@ -243,7 +217,6 @@ function TopTags({ period = "month", sortBy = "usage_count", limit = 20 }) {
                   )}
                 </div>
               </div>
-            </Flex>
           </Card>
         </div>
       )}

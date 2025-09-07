@@ -56,7 +56,7 @@ const KnowledgeFilters = ({
   typeCounts = {},
 }) => {
   const screens = useBreakpoint();
-  const isMobile = !screens.md;
+  const isMobile = screens.xs;
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
 
   // Fetch categories
@@ -135,357 +135,395 @@ const KnowledgeFilters = ({
     (showTypeFilter && selectedType && selectedType !== "all");
 
   return (
-    <div style={{ marginBottom: "16px" }}>
-      {/* Basic Search */}
-      {showSearch && (
-        <Card
-          style={{
-            marginBottom: "12px",
-            borderRadius: "8px",
-            border: "1px solid #EDEFF1",
-          }}
-          styles={{ body: { padding: isMobile ? "12px" : "16px" } }}
-        >
-          <Flex vertical gap="small">
-            <Text strong style={{ fontSize: "14px", color: "#1A1A1B" }}>
-              🔍 Cari Berdasarkan Judul
-            </Text>
-            <Search
-              placeholder="Masukkan kata kunci untuk mencari konten..."
-              allowClear
-              enterButton="Cari"
-              size="large"
-              style={{ width: "100%" }}
-              value={searchQuery}
-              onChange={onSearchChange}
-              onSearch={onSearch}
-            />
-          </Flex>
-        </Card>
-      )}
-
-      {/* Advanced Filters */}
-      <Card
-        style={{
-          borderRadius: "8px",
-          border: "1px solid #EDEFF1",
-        }}
-        styles={{ body: { padding: isMobile ? "12px" : "16px" } }}
-      >
-        {/* Advanced Filter Header */}
-        <Flex
-          justify="space-between"
-          align="center"
-          style={{ marginBottom: showAdvancedFilters ? "16px" : "0" }}
-        >
-          <Flex align="center" gap={8}>
-            <Button
-              type="text"
-              onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
+    <>
+      {isMobile && (
+        <div style={{ marginBottom: "16px" }}>
+          {/* Basic Search */}
+          {showSearch && (
+            <Card
               style={{
-                padding: "4px 8px",
-                height: "auto",
-                color: "#FF4500",
-                fontWeight: 500,
+                marginBottom: "12px",
+                borderRadius: "8px",
+                border: "1px solid #EDEFF1",
               }}
-              icon={showAdvancedFilters ? <UpOutlined /> : <DownOutlined />}
+              styles={{ body: { padding: isMobile ? "12px" : "16px" } }}
             >
-              <FilterOutlined style={{ marginRight: "4px" }} />
-              Filter Lanjutan
-            </Button>
-            {hasActiveFilters && (
-              <Tag
-                style={{
-                  backgroundColor: "#FFF2E6",
-                  color: "#FF4500",
-                  border: "1px solid #FFD4A3",
-                  fontSize: "11px",
-                }}
-              >
-                {
-                  Object.values({
-                    category: selectedCategory,
-                    tag: selectedTag && selectedTag.length > 0,
-                    sort: selectedSort !== "created_at",
-                    status:
-                      showStatusFilter &&
-                      selectedStatus &&
-                      selectedStatus !== "all",
-                    type:
-                      showTypeFilter && selectedType && selectedType !== "all",
-                    search: showSearch && searchQuery,
-                  }).filter(Boolean).length
-                }{" "}
-                Aktif
-              </Tag>
-            )}
-          </Flex>
-
-          {hasActiveFilters && (
-            <Button
-              type="text"
-              size="small"
-              icon={<ClearOutlined />}
-              onClick={onClearFilters}
-              style={{
-                color: "#FF4500",
-                fontSize: "12px",
-                height: "28px",
-                padding: "0 8px",
-              }}
-            >
-              Reset
-            </Button>
+              <Flex vertical gap="small">
+                <Text strong style={{ fontSize: "14px", color: "#1A1A1B" }}>
+                  🔍 Cari Berdasarkan Judul
+                </Text>
+                <Search
+                  placeholder="Masukkan kata kunci untuk mencari konten..."
+                  allowClear
+                  enterButton="Cari"
+                  size="large"
+                  style={{ width: "100%" }}
+                  value={searchQuery}
+                  onChange={onSearchChange}
+                  onSearch={onSearch}
+                />
+              </Flex>
+            </Card>
           )}
-        </Flex>
 
-        {/* Advanced Filters Content */}
-        {showAdvancedFilters && (
-          <div>
-            {/* Status Filter */}
-            {showStatusFilter && (
-              <div style={{ marginBottom: "20px" }}>
-                <Text
-                  strong
+          {/* Advanced Filters */}
+          <Card
+            style={{
+              borderRadius: "8px",
+              border: "1px solid #EDEFF1",
+            }}
+            styles={{ body: { padding: isMobile ? "12px" : "16px" } }}
+          >
+            {/* Advanced Filter Header */}
+            <Flex
+              justify="space-between"
+              align="center"
+              style={{ marginBottom: showAdvancedFilters ? "16px" : "0" }}
+            >
+              <Flex align="center" gap={8}>
+                <Button
+                  type="text"
+                  onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
                   style={{
-                    fontSize: "13px",
-                    color: "#374151",
-                    display: "block",
-                    marginBottom: "8px",
+                    padding: "4px 8px",
+                    height: "auto",
+                    color: "#FF4500",
+                    fontWeight: 500,
+                  }}
+                  icon={showAdvancedFilters ? <UpOutlined /> : <DownOutlined />}
+                >
+                  <FilterOutlined style={{ marginRight: "4px" }} />
+                  Filter Lanjutan
+                </Button>
+                {hasActiveFilters && (
+                  <Tag
+                    style={{
+                      backgroundColor: "#FFF2E6",
+                      color: "#FF4500",
+                      border: "1px solid #FFD4A3",
+                      fontSize: "11px",
+                    }}
+                  >
+                    {
+                      Object.values({
+                        category: selectedCategory,
+                        tag: selectedTag && selectedTag.length > 0,
+                        sort: selectedSort !== "created_at",
+                        status:
+                          showStatusFilter &&
+                          selectedStatus &&
+                          selectedStatus !== "all",
+                        type:
+                          showTypeFilter &&
+                          selectedType &&
+                          selectedType !== "all",
+                        search: showSearch && searchQuery,
+                      }).filter(Boolean).length
+                    }{" "}
+                    Aktif
+                  </Tag>
+                )}
+              </Flex>
+
+              {hasActiveFilters && (
+                <Button
+                  type="text"
+                  size="small"
+                  icon={<ClearOutlined />}
+                  onClick={onClearFilters}
+                  style={{
+                    color: "#FF4500",
+                    fontSize: "12px",
+                    height: "28px",
+                    padding: "0 8px",
                   }}
                 >
-                  Status Konten
-                </Text>
-                <Flex gap="6px" wrap="wrap">
-                  {statusOptions.map((status) => (
-                    <Tag
-                      key={status.key}
+                  Reset
+                </Button>
+              )}
+            </Flex>
+
+            {/* Advanced Filters Content */}
+            {showAdvancedFilters && (
+              <div>
+                {/* Status Filter */}
+                {showStatusFilter && (
+                  <div style={{ marginBottom: "20px" }}>
+                    <Text
+                      strong
                       style={{
-                        fontSize: "12px",
-                        padding: "6px 12px",
-                        backgroundColor:
-                          selectedStatus === status.key ? "#FF4500" : "#F5F5F5",
-                        color:
-                          selectedStatus === status.key ? "white" : "#595959",
-                        border:
-                          selectedStatus === status.key
-                            ? "1px solid #FF4500"
-                            : "1px solid #E8E8E8",
-                        cursor: "pointer",
-                        borderRadius: "16px",
-                        transition: "all 0.2s ease",
-                        height: "32px",
-                        lineHeight: "20px",
-                      }}
-                      onClick={() => onStatusChange(status.key)}
-                    >
-                      {status.label} ({statusCounts[status.key] || 0})
-                    </Tag>
-                  ))}
-                </Flex>
-              </div>
-            )}
-            {/* Type Filter */}
-            {showTypeFilter && (
-              <div style={{ marginBottom: "20px" }}>
-                <Text
-                  strong
-                  style={{
-                    fontSize: "13px",
-                    color: "#374151",
-                    display: "block",
-                    marginBottom: "8px",
-                  }}
-                >
-                  Jenis Konten
-                </Text>
-                <Flex gap="6px" wrap="wrap">
-                  {typeOptions.map((type) => (
-                    <Tag
-                      key={type.value}
-                      style={{
-                        fontSize: "12px",
-                        padding: "6px 12px",
-                        backgroundColor:
-                          selectedType === type.value ? type.color : "#F5F5F5",
-                        color:
-                          selectedType === type.value ? "white" : "#595959",
-                        border:
-                          selectedType === type.value
-                            ? `1px solid ${type.color}`
-                            : "1px solid #E8E8E8",
-                        cursor: "pointer",
-                        borderRadius: "16px",
-                        transition: "all 0.2s ease",
-                        height: "32px",
-                        lineHeight: "20px",
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "4px",
-                      }}
-                      onClick={() => onTypeChange(type.value)}
-                      onMouseEnter={(e) => {
-                        if (selectedType !== type.value) {
-                          e.currentTarget.style.backgroundColor = "#FAFAFA";
-                          e.currentTarget.style.borderColor = type.color;
-                        }
-                      }}
-                      onMouseLeave={(e) => {
-                        if (selectedType !== type.value) {
-                          e.currentTarget.style.backgroundColor = "#F5F5F5";
-                          e.currentTarget.style.borderColor = "#E8E8E8";
-                        }
+                        fontSize: "13px",
+                        color: "#374151",
+                        display: "block",
+                        marginBottom: "8px",
                       }}
                     >
-                      {type.icon && (
-                        <span
+                      Status Konten
+                    </Text>
+                    <Flex gap="6px" wrap="wrap">
+                      {statusOptions.map((status) => (
+                        <Tag
+                          key={status.key}
                           style={{
-                            fontSize: "10px",
+                            fontSize: "12px",
+                            padding: "6px 12px",
+                            backgroundColor:
+                              selectedStatus === status.key
+                                ? "#FF4500"
+                                : "#F5F5F5",
                             color:
-                              selectedType === type.value
+                              selectedStatus === status.key
                                 ? "white"
-                                : type.color,
+                                : "#595959",
+                            border:
+                              selectedStatus === status.key
+                                ? "1px solid #FF4500"
+                                : "1px solid #E8E8E8",
+                            cursor: "pointer",
+                            borderRadius: "16px",
+                            transition: "all 0.2s ease",
+                            height: "32px",
+                            lineHeight: "20px",
+                          }}
+                          onClick={() => onStatusChange(status.key)}
+                        >
+                          {status.label} ({statusCounts[status.key] || 0})
+                        </Tag>
+                      ))}
+                    </Flex>
+                  </div>
+                )}
+                {/* Type Filter */}
+                {showTypeFilter && (
+                  <div style={{ marginBottom: "20px" }}>
+                    <Text
+                      strong
+                      style={{
+                        fontSize: "13px",
+                        color: "#374151",
+                        display: "block",
+                        marginBottom: "8px",
+                      }}
+                    >
+                      Jenis Konten
+                    </Text>
+                    <Flex gap="6px" wrap="wrap">
+                      {typeOptions.map((type) => (
+                        <Tag
+                          key={type.value}
+                          style={{
+                            fontSize: "12px",
+                            padding: "6px 12px",
+                            backgroundColor:
+                              selectedType === type.value
+                                ? type.color
+                                : "#F5F5F5",
+                            color:
+                              selectedType === type.value ? "white" : "#595959",
+                            border:
+                              selectedType === type.value
+                                ? `1px solid ${type.color}`
+                                : "1px solid #E8E8E8",
+                            cursor: "pointer",
+                            borderRadius: "16px",
+                            transition: "all 0.2s ease",
+                            height: "32px",
+                            lineHeight: "20px",
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "4px",
+                          }}
+                          onClick={() => onTypeChange(type.value)}
+                          onMouseEnter={(e) => {
+                            if (selectedType !== type.value) {
+                              e.currentTarget.style.backgroundColor = "#FAFAFA";
+                              e.currentTarget.style.borderColor = type.color;
+                            }
+                          }}
+                          onMouseLeave={(e) => {
+                            if (selectedType !== type.value) {
+                              e.currentTarget.style.backgroundColor = "#F5F5F5";
+                              e.currentTarget.style.borderColor = "#E8E8E8";
+                            }
                           }}
                         >
-                          {type.icon}
-                        </span>
-                      )}
-                      {type.label}{" "}
-                      {typeCounts[type.value]
-                        ? `(${typeCounts[type.value]})`
-                        : ""}
-                    </Tag>
-                  ))}
-                </Flex>
-              </div>
-            )}
-            <Row gutter={[16, 16]}>
-              {/* Category Filter */}
-              <Col xs={24} sm={12} md={8}>
-                <Text
-                  strong
-                  style={{
-                    fontSize: "13px",
-                    color: "#374151",
-                    display: "block",
-                    marginBottom: "8px",
-                  }}
-                >
-                  Kategori
-                </Text>
-                <Select
-                  placeholder="Pilih kategori..."
-                  allowClear
-                  style={{ width: "100%" }}
-                  value={selectedCategory || undefined}
-                  onChange={onCategoryChange}
-                  options={categories.map((cat) => ({
-                    label: cat.name,
-                    value: cat.id,
-                  }))}
-                />
-              </Col>
+                          {type.icon && (
+                            <span
+                              style={{
+                                fontSize: "10px",
+                                color:
+                                  selectedType === type.value
+                                    ? "white"
+                                    : type.color,
+                              }}
+                            >
+                              {type.icon}
+                            </span>
+                          )}
+                          {type.label}{" "}
+                          {typeCounts[type.value]
+                            ? `(${typeCounts[type.value]})`
+                            : ""}
+                        </Tag>
+                      ))}
+                    </Flex>
+                  </div>
+                )}
+                <Row gutter={[16, 16]}>
+                  {/* Category Filter */}
+                  <Col xs={24} sm={12} md={8}>
+                    <Text
+                      strong
+                      style={{
+                        fontSize: "13px",
+                        color: "#374151",
+                        display: "block",
+                        marginBottom: "8px",
+                      }}
+                    >
+                      Kategori
+                    </Text>
+                    <Select
+                      placeholder="Pilih kategori..."
+                      allowClear
+                      style={{ width: "100%" }}
+                      value={selectedCategory || undefined}
+                      onChange={onCategoryChange}
+                      options={categories.map((cat) => ({
+                        label: cat.name,
+                        value: cat.id,
+                      }))}
+                    />
+                  </Col>
 
-              {/* Sort Filter */}
-              <Col xs={24} sm={12} md={8}>
-                <Flex align="center" gap={6} style={{ marginBottom: "8px" }}>
-                  <SortAscendingOutlined
-                    style={{ fontSize: "12px", color: "#6B7280" }}
-                  />
-                  <Text strong style={{ fontSize: "13px", color: "#374151" }}>
-                    Urutkan
-                  </Text>
-                </Flex>
-                <Select
-                  style={{ width: "100%" }}
-                  value={selectedSort}
-                  onChange={onSortChange}
-                  options={sortOptions}
-                />
-              </Col>
-
-              {/* Tag Filter */}
-              <Col xs={24} sm={12} md={8}>
-                <Flex align="center" gap={6} style={{ marginBottom: "8px" }}>
-                  <TagsOutlined
-                    style={{ fontSize: "12px", color: "#6B7280" }}
-                  />
-                  <Text strong style={{ fontSize: "13px", color: "#374151" }}>
-                    Tag
-                  </Text>
-                </Flex>
-                <Select
-                  mode="multiple"
-                  placeholder="Pilih tag..."
-                  allowClear
-                  style={{ width: "100%" }}
-                  value={selectedTag || []}
-                  onChange={onTagChange}
-                  options={popularTags.map((tag) => ({
-                    label: tag,
-                    value: tag,
-                  }))}
-                  maxTagCount="responsive"
-                  showSearch
-                  filterOption={(input, option) =>
-                    option?.label?.toLowerCase().includes(input.toLowerCase())
-                  }
-                />
-              </Col>
-            </Row>
-            {/* Popular Tags */}
-            {!isMobile && (
-              <div style={{ marginTop: "20px" }}>
-                <Flex align="center" gap={6} style={{ marginBottom: "8px" }}>
-                  <TagsOutlined
-                    style={{ fontSize: "12px", color: "#6B7280" }}
-                  />
-                  <Text strong style={{ fontSize: "13px", color: "#374151" }}>
-                    Tag Populer
-                  </Text>
-                </Flex>
-                <Flex gap="6px" wrap="wrap">
-                  {popularTags.slice(0, 10).map((tag) => {
-                    const isSelected = selectedTag && selectedTag.includes(tag);
-                    return (
-                      <Tag
-                        key={tag}
-                        style={{
-                          fontSize: "11px",
-                          padding: "4px 8px",
-                          backgroundColor: isSelected ? "#FF4500" : "#F5F5F5",
-                          color: isSelected ? "white" : "#595959",
-                          border: isSelected
-                            ? "1px solid #FF4500"
-                            : "1px solid #E8E8E8",
-                          cursor: "pointer",
-                          borderRadius: "12px",
-                          transition: "all 0.2s ease",
-                        }}
-                        onClick={() => {
-                          const currentTags = selectedTag || [];
-                          let newTags;
-                          if (isSelected) {
-                            // Remove tag if already selected
-                            newTags = currentTags.filter((t) => t !== tag);
-                          } else {
-                            // Add tag if not selected
-                            newTags = [...currentTags, tag];
-                          }
-                          onTagChange(newTags.length > 0 ? newTags : null);
-                        }}
+                  {/* Sort Filter */}
+                  <Col xs={24} sm={12} md={8}>
+                    <Flex
+                      align="center"
+                      gap={6}
+                      style={{ marginBottom: "8px" }}
+                    >
+                      <SortAscendingOutlined
+                        style={{ fontSize: "12px", color: "#6B7280" }}
+                      />
+                      <Text
+                        strong
+                        style={{ fontSize: "13px", color: "#374151" }}
                       >
-                        {tag}
-                      </Tag>
-                    );
-                  })}
-                </Flex>
+                        Urutkan
+                      </Text>
+                    </Flex>
+                    <Select
+                      style={{ width: "100%" }}
+                      value={selectedSort}
+                      onChange={onSortChange}
+                      options={sortOptions}
+                    />
+                  </Col>
+
+                  {/* Tag Filter */}
+                  <Col xs={24} sm={12} md={8}>
+                    <Flex
+                      align="center"
+                      gap={6}
+                      style={{ marginBottom: "8px" }}
+                    >
+                      <TagsOutlined
+                        style={{ fontSize: "12px", color: "#6B7280" }}
+                      />
+                      <Text
+                        strong
+                        style={{ fontSize: "13px", color: "#374151" }}
+                      >
+                        Tag
+                      </Text>
+                    </Flex>
+                    <Select
+                      mode="multiple"
+                      placeholder="Pilih tag..."
+                      allowClear
+                      style={{ width: "100%" }}
+                      value={selectedTag || []}
+                      onChange={onTagChange}
+                      options={popularTags.map((tag) => ({
+                        label: tag,
+                        value: tag,
+                      }))}
+                      maxTagCount="responsive"
+                      showSearch
+                      filterOption={(input, option) =>
+                        option?.label
+                          ?.toLowerCase()
+                          .includes(input.toLowerCase())
+                      }
+                    />
+                  </Col>
+                </Row>
+                {/* Popular Tags */}
+                {!isMobile && (
+                  <div style={{ marginTop: "20px" }}>
+                    <Flex
+                      align="center"
+                      gap={6}
+                      style={{ marginBottom: "8px" }}
+                    >
+                      <TagsOutlined
+                        style={{ fontSize: "12px", color: "#6B7280" }}
+                      />
+                      <Text
+                        strong
+                        style={{ fontSize: "13px", color: "#374151" }}
+                      >
+                        Tag Populer
+                      </Text>
+                    </Flex>
+                    <Flex gap="6px" wrap="wrap">
+                      {popularTags.slice(0, 10).map((tag) => {
+                        const isSelected =
+                          selectedTag && selectedTag.includes(tag);
+                        return (
+                          <Tag
+                            key={tag}
+                            style={{
+                              fontSize: "11px",
+                              padding: "4px 8px",
+                              backgroundColor: isSelected
+                                ? "#FF4500"
+                                : "#F5F5F5",
+                              color: isSelected ? "white" : "#595959",
+                              border: isSelected
+                                ? "1px solid #FF4500"
+                                : "1px solid #E8E8E8",
+                              cursor: "pointer",
+                              borderRadius: "12px",
+                              transition: "all 0.2s ease",
+                            }}
+                            onClick={() => {
+                              const currentTags = selectedTag || [];
+                              let newTags;
+                              if (isSelected) {
+                                // Remove tag if already selected
+                                newTags = currentTags.filter((t) => t !== tag);
+                              } else {
+                                // Add tag if not selected
+                                newTags = [...currentTags, tag];
+                              }
+                              onTagChange(newTags.length > 0 ? newTags : null);
+                            }}
+                          >
+                            {tag}
+                          </Tag>
+                        );
+                      })}
+                    </Flex>
+                  </div>
+                )}
               </div>
             )}
-          </div>
-        )}
-      </Card>
-    </div>
+          </Card>
+        </div>
+      )}
+    </>
   );
 };
 

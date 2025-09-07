@@ -1,14 +1,5 @@
 import {
-  FileImageOutlined,
-  FileTextOutlined,
-  FireOutlined,
-  PlayCircleOutlined,
-  SoundOutlined,
-} from "@ant-design/icons";
-import {
-  Badge,
   Card,
-  Flex,
   Grid,
   List,
   Skeleton,
@@ -23,39 +14,11 @@ import { useRouter } from "next/router";
 
 dayjs.extend(relativeTime);
 
-const { Title, Text } = Typography;
+const { Text } = Typography;
 const { useBreakpoint } = Grid;
 
-const ContentItem = ({ content, rank, isMobile }) => {
+const ContentItem = ({ content, isMobile }) => {
   const router = useRouter();
-
-  const getTypeIcon = (type) => {
-    switch (type) {
-      case "artikel":
-        return <FileTextOutlined style={{ color: "#1890ff" }} />;
-      case "video":
-        return <PlayCircleOutlined style={{ color: "#ff4d4f" }} />;
-      case "gambar":
-        return <FileImageOutlined style={{ color: "#52c41a" }} />;
-      case "audio":
-        return <SoundOutlined style={{ color: "#722ed1" }} />;
-      default:
-        return <FileTextOutlined style={{ color: "#8c8c8c" }} />;
-    }
-  };
-
-  const getRankColor = (rank) => {
-    switch (rank) {
-      case 1:
-        return "#FFD700";
-      case 2:
-        return "#C0C0C0";
-      case 3:
-        return "#CD7F32";
-      default:
-        return "#8C8C8C";
-    }
-  };
 
   const handleClick = () => {
     router.push(`/knowledge-management/contents/${content.id}`);
@@ -68,36 +31,9 @@ const ContentItem = ({ content, rank, isMobile }) => {
         cursor: "pointer",
       }}
       onClick={handleClick}
-      className="hover:bg-gray-50 transition-colors duration-200"
     >
       <List.Item.Meta
-        avatar={
-          <Badge
-            count={rank}
-            style={{
-              backgroundColor: getRankColor(rank),
-              color: rank <= 3 ? "#fff" : "#000",
-              fontWeight: "bold",
-              fontSize: "8px",
-            }}
-            size="small"
-          >
-            <div
-              style={{
-                width: isMobile ? 28 : 32,
-                height: isMobile ? 28 : 32,
-                borderRadius: "4px",
-                backgroundColor: "#f5f5f5",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                fontSize: isMobile ? "10px" : "12px",
-              }}
-            >
-              {getTypeIcon(content.type)}
-            </div>
-          </Badge>
-        }
+avatar={null}
         title={
           <Text
             strong
@@ -114,11 +50,6 @@ const ContentItem = ({ content, rank, isMobile }) => {
             {content.title}
           </Text>
         }
-        description={
-          <Text style={{ fontSize: "10px" }} type="secondary">
-            {content.likes_count || 0} suka • {content.views_count || 0} dilihat
-          </Text>
-        }
       />
     </List.Item>
   );
@@ -130,7 +61,6 @@ function TopContents({ period = "month", sortBy = "likes", limit = 10 }) {
   const screens = useBreakpoint();
   const isMobile = screens.xs;
   const mainPadding = isMobile ? "12px" : "16px";
-  const iconSectionWidth = isMobile ? "0px" : "40px";
 
   const getSortByLabel = (sortBy) => {
     switch (sortBy) {
@@ -161,28 +91,8 @@ function TopContents({ period = "month", sortBy = "likes", limit = 10 }) {
             }}
             styles={{ body: { padding: 0 } }}
           >
-            <Flex>
-              {/* Icon Section - Hide on mobile */}
-              {!isMobile && (
-                <div
-                  style={{
-                    width: iconSectionWidth,
-                    backgroundColor: "#F8F9FA",
-                    borderRight: "1px solid #E5E7EB",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    minHeight: "120px",
-                  }}
-                >
-                  <FireOutlined
-                    style={{ color: "#8C8C8C", fontSize: "18px" }}
-                  />
-                </div>
-              )}
-
-              {/* Content Section */}
-              <div style={{ flex: 1, padding: mainPadding }}>
+            {/* Content Section */}
+            <div style={{ padding: mainPadding }}>
                 {/* Header */}
                 <div style={{ marginBottom: "16px" }}>
                   <Tooltip
@@ -236,7 +146,6 @@ function TopContents({ period = "month", sortBy = "likes", limit = 10 }) {
                         <ContentItem
                           key={content.id}
                           content={content}
-                          rank={index + 1}
                           isMobile={isMobile}
                         />
                       )}
@@ -244,7 +153,6 @@ function TopContents({ period = "month", sortBy = "likes", limit = 10 }) {
                   )}
                 </div>
               </div>
-            </Flex>
           </Card>
         </div>
       )}
