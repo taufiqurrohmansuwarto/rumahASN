@@ -328,11 +328,11 @@ const KnowledgeFiltersStack = ({
           </Flex>
         </div>
 
-        <Divider style={{ margin: "8px 0" }} />
+        <Divider style={{ margin: "4px 0" }} />
 
         {/* Status Section (if enabled) - Collapsible */}
         {showStatusFilter && statusOptions.length > 0 && (
-          <div>
+          <div style={{ marginTop: "-2px" }}>
             <Button
               type="text"
               onClick={() => setShowStatus(!showStatus)}
@@ -341,7 +341,7 @@ const KnowledgeFiltersStack = ({
                 justifyContent: "space-between",
                 padding: "4px 0",
                 height: "auto",
-                marginBottom: "8px",
+                marginBottom: "4px",
               }}
             >
               <Text
@@ -359,7 +359,7 @@ const KnowledgeFiltersStack = ({
             </Button>
             
             {showStatus && (
-              <Flex gap="4px" wrap="wrap" style={{ marginBottom: "8px" }}>
+              <Flex gap="4px" wrap="wrap" style={{ marginBottom: "4px" }}>
                 {isLoading ? (
                   // Loading skeleton for status tags
                   Array.from({ length: 5 }).map((_, index) => (
@@ -391,10 +391,9 @@ const KnowledgeFiltersStack = ({
             )}
           </div>
         )}
-
         {/* Instance Section (if enabled) - Collapsible */}
         {showInstanceFilter && instanceOptions.length > 0 && (
-          <div>
+          <div style={{ marginTop: "-4px" }}>
             <Button
               type="text"
               onClick={() => setShowInstance(!showInstance)}
@@ -403,7 +402,7 @@ const KnowledgeFiltersStack = ({
                 justifyContent: "space-between",
                 padding: "4px 0",
                 height: "auto",
-                marginBottom: "8px",
+                marginBottom: "4px",
               }}
             >
               <Text
@@ -423,7 +422,7 @@ const KnowledgeFiltersStack = ({
             {showInstance && (
               <Select
                 placeholder="Pilih Instansi"
-                style={{ width: "100%", marginBottom: "8px" }}
+                style={{ width: "100%", marginBottom: "4px" }}
                 size="small"
                 value={selectedInstance}
                 onChange={onInstanceChange}
@@ -439,9 +438,8 @@ const KnowledgeFiltersStack = ({
             )}
           </div>
         )}
-
         {/* Category Section - Collapsible */}
-        <div>
+        <div style={{ marginTop: "-4px" }}>
           <Button
             type="text"
             onClick={() => setShowCategories(!showCategories)}
@@ -450,7 +448,7 @@ const KnowledgeFiltersStack = ({
               justifyContent: "space-between",
               padding: "4px 0",
               height: "auto",
-              marginBottom: "8px",
+              marginBottom: "4px",
             }}
           >
             <Text
@@ -468,57 +466,39 @@ const KnowledgeFiltersStack = ({
           </Button>
           
           {showCategories && (
-            <Flex vertical gap="2px" style={{ maxHeight: "200px", overflowY: "auto", marginBottom: "8px" }}>
-              {categories.map((category) => (
-                <Button
-                  key={category.id}
-                  type="text"
-                  size="small"
-                  className={selectedCategory === category.id ? "selected-filter" : ""}
-                  style={{
-                    height: "28px",
-                    justifyContent: "space-between",
-                    textAlign: "left",
-                    backgroundColor: selectedCategory === category.id ? "#FFF7ED" : "transparent",
-                    border: selectedCategory === category.id ? "1px solid #FF4500" : "1px solid transparent",
-                    color: selectedCategory === category.id ? "#FF4500" : "#374151",
-                    fontWeight: selectedCategory === category.id ? 600 : 400,
-                    fontSize: "12px",
-                    padding: "0 6px",
-                  }}
-                  onClick={() => onCategoryChange(category.id)}
-                >
-                  <Flex justify="space-between" align="center" style={{ width: "100%" }}>
-                    <span
-                      style={{
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                        whiteSpace: "nowrap",
-                        maxWidth: "75%",
-                      }}
-                    >
-                      {category.name}
-                    </span>
+            <Flex gap="4px" wrap="wrap" style={{ maxHeight: "200px", overflowY: "auto", marginBottom: "4px" }}>
+              {categories.map((category) => {
+                const isSelected = selectedCategory === category.id;
+                return (
+                  <Tag
+                    key={category.id}
+                    className={isSelected ? "selected-tag" : ""}
+                    style={{
+                      fontSize: "10px",
+                      padding: "2px 6px",
+                      backgroundColor: isSelected ? "#FF4500" : "#F5F5F5",
+                      color: isSelected ? "white" : "#595959",
+                      border: isSelected ? "1px solid #FF4500" : "1px solid #E8E8E8",
+                      cursor: "pointer",
+                      borderRadius: "8px",
+                      margin: 0,
+                    }}
+                    onClick={() => onCategoryChange(category.id)}
+                  >
+                    {category.name}
                     {categoryCounts[category.id] !== undefined && (
-                      <Badge
-                        count={categoryCounts[category.id]}
-                        size="small"
-                        style={{
-                          backgroundColor: selectedCategory === category.id ? "#FF4500" : "#f0f0f0",
-                          color: selectedCategory === category.id ? "white" : "#666",
-                          fontSize: "10px",
-                        }}
-                      />
+                      <span style={{ marginLeft: "4px" }}>
+                        ({categoryCounts[category.id]})
+                      </span>
                     )}
-                  </Flex>
-                </Button>
-              ))}
+                  </Tag>
+                );
+              })}
             </Flex>
           )}
         </div>
-
         {/* Tag Section - Collapsible */}
-        <div>
+        <div style={{ marginTop: "-4px" }}>
           <Button
             type="text"
             onClick={() => setShowTags(!showTags)}
@@ -527,7 +507,7 @@ const KnowledgeFiltersStack = ({
               justifyContent: "space-between",
               padding: "4px 0",
               height: "auto",
-              marginBottom: "8px",
+              marginBottom: "4px",
             }}
           >
             <Text
@@ -545,7 +525,7 @@ const KnowledgeFiltersStack = ({
           </Button>
           
           {showTags && (
-            <Flex gap="4px" wrap="wrap" style={{ marginBottom: "8px" }}>
+            <Flex gap="4px" wrap="wrap" style={{ marginBottom: "4px" }}>
               {popularTags.map((tag) => {
                 const isSelected = selectedTag && selectedTag.includes(tag);
                 return (
