@@ -4,9 +4,11 @@ import Layout from "@/components/Layout";
 import LayoutASNConnect from "@/components/Socmed/LayoutASNConnect";
 import useScrollRestoration from "@/hooks/useScrollRestoration";
 import Head from "next/head";
-import { Col, Row, Grid } from "antd";
+import { Col, Row, Grid, FloatButton } from "antd";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
+import { useQuery } from "@tanstack/react-query";
+import { getKnowledgeContents } from "@/services/knowledge-management.services";
 import TopContributors from "@/components/KnowledgeManagements/TopContributors";
 import TopContents from "@/components/KnowledgeManagements/TopContents";
 import TopCategories from "@/components/KnowledgeManagements/TopCategories";
@@ -28,10 +30,28 @@ const AsnKnowledge = () => {
     query.category || null
   );
   const [selectedTag, setSelectedTag] = useState(query.tag || null);
-  const [selectedSort, setSelectedSort] = useState(query.sort || "created_at:desc");
+  const [selectedSort, setSelectedSort] = useState(
+    query.sort || "created_at:desc"
+  );
   const [selectedType, setSelectedType] = useState(query.type || "all");
 
   useScrollRestoration("knowledge-scroll", true, false, true); // Enable smooth restoration
+
+  // Fetch public knowledge stats for counts
+  const { data: publicStats, isLoading: statsLoading } = useQuery(
+    ["public-knowledge-stats"],
+    () => getKnowledgeContents({
+      page: 1,
+      limit: 1, // Just get stats, not actual content
+    }),
+    {
+      staleTime: 300000, // 5 minutes
+    }
+  );
+
+  // Extract counts from API response
+  const typeCounts = publicStats?.typeCounts || {};
+  const categoryCounts = publicStats?.categoryCounts || {};
 
   // Update URL when filters change
   const updateURL = (newFilters) => {
@@ -129,6 +149,7 @@ const AsnKnowledge = () => {
         <title>Rumah ASN - ASN Connect - Manajemen Pengetahuan</title>
       </Head>
       <LayoutASNConnect active="asn-knowledge">
+        <FloatButton.BackTop />
         <Row gutter={[16, 16]}>
           <Col lg={5} xs={0}>
             <div
@@ -151,6 +172,9 @@ const AsnKnowledge = () => {
                 onTypeChange={handleTypeChange}
                 onSearchChange={handleSearchChange}
                 onClearFilters={handleClearFilters}
+                typeCounts={typeCounts}
+                categoryCounts={categoryCounts}
+                isLoading={statsLoading}
               />
             </div>
           </Col>

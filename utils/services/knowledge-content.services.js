@@ -593,3 +593,86 @@ export const uploadContentMedia = async (files, userId) => {
 
   return await Promise.all(uploadPromises);
 };
+
+// ===== PUBLIC CONTENT STATISTICS SERVICES =====
+
+/**
+ * Get public content type counts (published status only)
+ */
+export const getPublicContentTypeCounts = async () => {
+  const results = await KnowledgeContent.query()
+    .where("knowledge.contents.status", "published")
+    .select(
+      KnowledgeContent.raw("COALESCE(type, 'teks') as type_normalized"),
+      KnowledgeContent.raw("COUNT(*) as count")
+    )
+    .groupBy(KnowledgeContent.raw("COALESCE(type, 'teks')"));
+
+  const counts = {
+    all: 0,
+    teks: 0,
+    gambar: 0,
+    video: 0,
+    audio: 0,
+  };
+
+  results.forEach((result) => {
+    const type = result.type_normalized;
+    const count = parseInt(result.count);
+    counts[type] = count;
+    counts.all += count;
+  });
+
+  return counts;
+};
+
+/**
+ * Get public content category counts (published status only)
+ */
+export const getPublicContentCategoryCounts = async () => {
+  const results = await KnowledgeContent.query()
+    .where("knowledge.contents.status", "published")
+    .leftJoin("knowledge.category", "knowledge.contents.category_id", "knowledge.category.id")
+    .select(
+      "knowledge.category.id as category_id",
+      "knowledge.category.name as category_name",
+      KnowledgeContent.raw("COUNT(*) as count")
+    )
+    .groupBy("knowledge.category.id", "knowledge.category.name");
+
+  const counts = {};
+  let total = 0;
+
+  results.forEach((result) => {
+    const categoryId = result.category_id;
+    const count = parseInt(result.count);
+    if (categoryId) {
+      counts[categoryId] = count;
+      total += count;
+    }
+  });
+
+  counts.all = total;
+
+  return counts;
+};
+
+/**
+ * Get public contents with full statistics
+ */
+export const getPublicContentsWithStats = async (filters = {}, userId = null) => {
+  const [contents, typeCounts, categoryCounts] = await Promise.all([
+    getContentsWithFilters({ ...filters, status: "published" }, userId),
+    getPublicContentTypeCounts(),
+    getPublicContentCategoryCounts(),
+  ]);
+
+  return {
+    ...contents,
+    typeCounts,
+    categoryCounts,
+    stats: {
+      ...typeCounts,
+    },
+  };
+};

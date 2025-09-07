@@ -2,7 +2,6 @@ import { handleError } from "@/utils/helper/controller-helper";
 import { uploadFileMinio } from "@/utils/index";
 import { processContentWithAI } from "@/utils/services/ai-processing.services";
 import {
-  getContentsWithFilters,
   getContentById,
   getRelatedContents,
   updateViewsCount,
@@ -12,6 +11,7 @@ import {
   uploadContentAttachment,
   uploadContentMedia,
   getEncryptedUserId,
+  getPublicContentsWithStats,
 } from "@/utils/services/knowledge-content.services";
 import { getAllCategories } from "@/utils/services/knowledge-category.services";
 
@@ -41,8 +41,8 @@ export const getKnowledgeContents = async (req, res) => {
     const allTags = tags ? tags.split(",").filter(Boolean) : [];
     const finalTags = [...new Set([...tagFilters, ...allTags])].filter(Boolean);
 
-    // Use service instead of direct query
-    const results = await getContentsWithFilters(
+    // Use service with stats instead of direct query
+    const results = await getPublicContentsWithStats(
       {
         search,
         category_id,
@@ -51,7 +51,6 @@ export const getKnowledgeContents = async (req, res) => {
         page,
         limit,
         sort,
-        status: "published",
       },
       customId
     );

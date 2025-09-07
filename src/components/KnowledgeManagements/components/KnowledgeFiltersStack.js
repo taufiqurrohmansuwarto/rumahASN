@@ -18,6 +18,8 @@ import {
   Divider,
   Input,
   Tag,
+  Skeleton,
+  Spin,
 } from "antd";
 
 const { Text } = Typography;
@@ -44,11 +46,19 @@ const KnowledgeFiltersStack = ({
   selectedInstance,
   onInstanceChange,
   instanceOptions = [],
+  // Status filter props (for user content)
+  showStatusFilter = false,
+  selectedStatus,
+  onStatusChange,
+  statusOptions = [],
+  statusCounts = {},
+  isLoading = false,
 }) => {
   // Collapse states
   const [showCategories, setShowCategories] = useState(false);
   const [showTags, setShowTags] = useState(false);
   const [showInstance, setShowInstance] = useState(false);
+  const [showStatus, setShowStatus] = useState(false);
 
   // Fetch categories
   const { data: categories = [] } = useQuery(
@@ -124,7 +134,8 @@ const KnowledgeFiltersStack = ({
     selectedType !== "all" || 
     selectedSort !== "created_at:desc" ||
     searchQuery ||
-    (showInstanceFilter && selectedInstance);
+    (showInstanceFilter && selectedInstance) ||
+    (showStatusFilter && selectedStatus && selectedStatus !== "all");
 
   const handleClearFilters = () => {
     onClearFilters();
@@ -139,6 +150,7 @@ const KnowledgeFiltersStack = ({
         boxShadow: "0 1px 4px rgba(0,0,0,0.04)",
         backgroundColor: "white",
         padding: "12px",
+        minHeight: "600px",
       }}
     >
       <style jsx global>{`
@@ -271,45 +283,114 @@ const KnowledgeFiltersStack = ({
           </Text>
           
           <Flex vertical gap="4px">
-            {typeOptions.map((option) => (
-              <Button
-                key={option.value}
-                type="text"
-                size="small"
-                className={selectedType === option.value ? "selected-filter" : ""}
-                style={{
-                  height: "32px",
-                  justifyContent: "flex-start",
-                  textAlign: "left",
-                  border: selectedType === option.value ? "1px solid #FF4500" : "1px solid transparent",
-                  backgroundColor: selectedType === option.value ? "#FFF7ED" : "transparent",
-                  color: selectedType === option.value ? "#FF4500" : "#374151",
-                  fontWeight: selectedType === option.value ? 600 : 400,
-                  fontSize: "13px",
-                  padding: "0 8px",
-                }}
-                icon={option.icon ? React.cloneElement(option.icon, { style: { fontSize: "14px" } }) : null}
-                onClick={() => onTypeChange(option.value)}
-              >
-                <Flex justify="space-between" align="center" style={{ width: "100%" }}>
-                  <span>{option.label}</span>
-                  {typeCounts[option.value] && (
-                    <Badge 
-                      count={typeCounts[option.value]} 
-                      size="small"
-                      style={{ 
-                        backgroundColor: selectedType === option.value ? "#FF4500" : "#f0f0f0",
-                        color: selectedType === option.value ? "white" : "#666"
-                      }} 
-                    />
-                  )}
-                </Flex>
-              </Button>
-            ))}
+            {isLoading ? (
+              // Loading skeleton for type buttons
+              Array.from({ length: 5 }).map((_, index) => (
+                <Skeleton.Button key={index} active size="small" style={{ width: "100%", height: "32px" }} />
+              ))
+            ) : (
+              typeOptions.map((option) => (
+                <Button
+                  key={option.value}
+                  type="text"
+                  size="small"
+                  className={selectedType === option.value ? "selected-filter" : ""}
+                  style={{
+                    height: "32px",
+                    justifyContent: "flex-start",
+                    textAlign: "left",
+                    border: selectedType === option.value ? "1px solid #FF4500" : "1px solid transparent",
+                    backgroundColor: selectedType === option.value ? "#FFF7ED" : "transparent",
+                    color: selectedType === option.value ? "#FF4500" : "#374151",
+                    fontWeight: selectedType === option.value ? 600 : 400,
+                    fontSize: "13px",
+                    padding: "0 8px",
+                  }}
+                  icon={option.icon ? React.cloneElement(option.icon, { style: { fontSize: "14px" } }) : null}
+                  onClick={() => onTypeChange(option.value)}
+                >
+                  <Flex justify="space-between" align="center" style={{ width: "100%" }}>
+                    <span>{option.label}</span>
+                    {typeCounts[option.value] !== undefined && (
+                      <Badge 
+                        count={typeCounts[option.value]} 
+                        size="small"
+                        style={{ 
+                          backgroundColor: selectedType === option.value ? "#FF4500" : "#f0f0f0",
+                          color: selectedType === option.value ? "white" : "#666"
+                        }} 
+                      />
+                    )}
+                  </Flex>
+                </Button>
+              ))
+            )}
           </Flex>
         </div>
 
         <Divider style={{ margin: "8px 0" }} />
+
+        {/* Status Section (if enabled) - Collapsible */}
+        {showStatusFilter && statusOptions.length > 0 && (
+          <div>
+            <Button
+              type="text"
+              onClick={() => setShowStatus(!showStatus)}
+              style={{
+                width: "100%",
+                justifyContent: "space-between",
+                padding: "4px 0",
+                height: "auto",
+                marginBottom: "8px",
+              }}
+            >
+              <Text
+                style={{
+                  fontSize: "11px",
+                  fontWeight: 600,
+                  color: "#9CA3AF",
+                  textTransform: "uppercase",
+                  letterSpacing: "0.3px",
+                }}
+              >
+                STATUS
+              </Text>
+              {showStatus ? <UpOutlined style={{ fontSize: "10px" }} /> : <DownOutlined style={{ fontSize: "10px" }} />}
+            </Button>
+            
+            {showStatus && (
+              <Flex gap="4px" wrap="wrap" style={{ marginBottom: "8px" }}>
+                {isLoading ? (
+                  // Loading skeleton for status tags
+                  Array.from({ length: 5 }).map((_, index) => (
+                    <Skeleton.Button key={index} active size="small" style={{ width: "80px", height: "24px" }} />
+                  ))
+                ) : (
+                  statusOptions.map((status) => (
+                    <Tag
+                      key={status.key}
+                      className={selectedStatus === status.key ? "selected-tag" : ""}
+                      style={{
+                        fontSize: "10px",
+                        padding: "2px 6px",
+                        backgroundColor: selectedStatus === status.key ? "#FF4500" : "#F5F5F5",
+                        color: selectedStatus === status.key ? "white" : "#595959",
+                        border: selectedStatus === status.key ? "1px solid #FF4500" : "1px solid #E8E8E8",
+                        cursor: "pointer",
+                        borderRadius: "8px",
+                        margin: 0,
+                      }}
+                      onClick={() => onStatusChange(status.key)}
+                    >
+                      {status.label}
+                      {statusCounts[status.key] !== undefined ? ` (${statusCounts[status.key]})` : ""}
+                    </Tag>
+                  ))
+                )}
+              </Flex>
+            )}
+          </div>
+        )}
 
         {/* Instance Section (if enabled) - Collapsible */}
         {showInstanceFilter && instanceOptions.length > 0 && (
@@ -342,7 +423,7 @@ const KnowledgeFiltersStack = ({
             {showInstance && (
               <Select
                 placeholder="Pilih Instansi"
-                style={{ width: "100%", marginBottom: "16px" }}
+                style={{ width: "100%", marginBottom: "8px" }}
                 size="small"
                 value={selectedInstance}
                 onChange={onInstanceChange}
@@ -387,7 +468,7 @@ const KnowledgeFiltersStack = ({
           </Button>
           
           {showCategories && (
-            <Flex vertical gap="2px" style={{ maxHeight: "200px", overflowY: "auto", marginBottom: "16px" }}>
+            <Flex vertical gap="2px" style={{ maxHeight: "200px", overflowY: "auto", marginBottom: "8px" }}>
               {categories.map((category) => (
                 <Button
                   key={category.id}
@@ -418,7 +499,7 @@ const KnowledgeFiltersStack = ({
                     >
                       {category.name}
                     </span>
-                    {categoryCounts[category.id] && (
+                    {categoryCounts[category.id] !== undefined && (
                       <Badge
                         count={categoryCounts[category.id]}
                         size="small"
@@ -464,7 +545,7 @@ const KnowledgeFiltersStack = ({
           </Button>
           
           {showTags && (
-            <Flex gap="4px" wrap="wrap" style={{ marginBottom: "16px" }}>
+            <Flex gap="4px" wrap="wrap" style={{ marginBottom: "8px" }}>
               {popularTags.map((tag) => {
                 const isSelected = selectedTag && selectedTag.includes(tag);
                 return (

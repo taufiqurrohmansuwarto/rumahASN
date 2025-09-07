@@ -7,18 +7,17 @@ import { calculateReadingTime } from "./knowledge-content.services";
  * Get sort field for content ordering
  */
 export const getSortField = (sort) => {
-  switch (sort) {
-    case "created_at": // Default - tanggal create terbaru
-    case "created_at_asc": // Tanggal create terlama
+  const [field] = sort.split(":");
+  switch (field) {
+    case "created_at":
       return "created_at";
-    case "likes_count": // Total like terbanyak
+    case "likes_count":
       return "likes_count";
-    case "comments_count": // Total komentar terbanyak
+    case "comments_count":
       return "comments_count";
-    case "title_asc": // Judul A-Z
-    case "title_desc": // Judul Z-A
+    case "title":
       return "title";
-    case "updated_at": // Tanggal update
+    case "updated_at":
       return "updated_at";
     default:
       return "created_at";
@@ -29,48 +28,38 @@ export const getSortField = (sort) => {
  * Get sort direction for content ordering
  */
 export const getSortDirection = (sort) => {
-  switch (sort) {
-    case "created_at_asc": // Tanggal create terlama (ASC)
-    case "title_asc": // Judul A-Z (ASC)
-      return "asc";
-    case "title_desc": // Judul Z-A (DESC)
-      return "desc";
-    case "created_at": // Default - tanggal create terbaru (DESC)
-    case "likes_count": // Total like terbanyak (DESC)
-    case "comments_count": // Total komentar terbanyak (DESC)
-    case "updated_at": // Tanggal update terbaru (DESC)
-    default:
-      return "desc";
-  }
+  const [, direction = "desc"] = sort.split(":");
+  return direction === "asc" ? "asc" : "desc";
 };
 
 /**
  * Build user interaction subqueries for content
  */
-export const buildUserInteractionSubqueries = (customId, includeInteractions = true) => {
+export const buildUserInteractionSubqueries = (
+  customId,
+  includeInteractions = true
+) => {
   if (!includeInteractions) return [];
-  
+
   return [
-    // Subquery for is_liked
-    KnowledgeContent.relatedQuery("user_interactions")
-      .where("user_id", customId)
-      .where("interaction_type", "like")
-      .select(
-        KnowledgeContent.raw(
-          "CASE WHEN COUNT(*) > 0 THEN true ELSE false END"
-        )
-      )
-      .as("is_liked"),
-    // Subquery for is_bookmarked
-    KnowledgeContent.relatedQuery("user_interactions")
-      .where("user_id", customId)
-      .where("interaction_type", "bookmark")
-      .select(
-        KnowledgeContent.raw(
-          "CASE WHEN COUNT(*) > 0 THEN true ELSE false END"
-        )
-      )
-      .as("is_bookmarked")
+    // More efficient subquery for is_liked using EXISTS
+    KnowledgeContent.raw(`
+      EXISTS(
+        SELECT 1 FROM knowledge.user_interactions ui 
+        WHERE ui.content_id = knowledge.contents.id 
+        AND ui.user_id = ? 
+        AND ui.interaction_type = 'like'
+      ) as is_liked
+    `, [customId]),
+    // More efficient subquery for is_bookmarked using EXISTS
+    KnowledgeContent.raw(`
+      EXISTS(
+        SELECT 1 FROM knowledge.user_interactions ui 
+        WHERE ui.content_id = knowledge.contents.id 
+        AND ui.user_id = ? 
+        AND ui.interaction_type = 'bookmark'
+      ) as is_bookmarked
+    `, [customId]),
   ];
 };
 
@@ -85,10 +74,7 @@ export const getUserKnowledgeContentById = async (contentId, customId) => {
     .withGraphFetched(
       "[author(simpleWithImage), category, user_verified(simpleWithImage), versions.[user_updated(simpleWithImage)], attachments, references]"
     )
-    .select(
-      "knowledge.contents.*",
-      ...buildUserInteractionSubqueries(customId)
-    )
+    .select("knowledge.contents.*", ...buildUserInteractionSubqueries(customId))
     .first();
 
   return content;
@@ -104,11 +90,12 @@ export const buildUserContentQuery = (customId, filters = {}) => {
     tags = [],
     status = "",
     type = "",
-    sort = "created_at"
   } = filters;
 
-  let query = KnowledgeContent.query()
-    .where("knowledge.contents.author_id", customId);
+  let query = KnowledgeContent.query().where(
+    "knowledge.contents.author_id",
+    customId
+  );
 
   // Search filter
   if (search) {
@@ -134,13 +121,20 @@ export const buildUserContentQuery = (customId, filters = {}) => {
   }
 
   // Status filter
-  if (status) {
+  if (status && status !== "all") {
     query = query.andWhere("status", status);
   }
 
   // Type filter
   if (type && type !== "all") {
-    query = query.andWhere("type", type);
+    if (type === "teks") {
+      // For teks, include both 'teks' and null values
+      query = query.andWhere((builder) => {
+        builder.where("type", "teks").orWhereNull("type");
+      });
+    } else {
+      query = query.andWhere("type", type);
+    }
   }
 
   return query;
@@ -153,10 +147,10 @@ export const getUserKnowledgeContents = async (customId, filters = {}) => {
   const {
     page = 1,
     limit = 10,
-    sort = "created_at",
+    sort = "created_at:desc",
     tags = "",
     is_liked = "",
-    is_bookmarked = ""
+    is_bookmarked = "",
   } = filters;
 
   // Process tags
@@ -171,8 +165,29 @@ export const getUserKnowledgeContents = async (customId, filters = {}) => {
   // Build query
   const baseQuery = buildUserContentQuery(customId, {
     ...filters,
-    tags: finalTags
+    tags: finalTags,
   });
+
+  // Sorting
+  const sortField = getSortField(sort);
+  const sortDirection = getSortDirection(sort);
+
+  // Handle null values in sorting for count fields
+  let orderByClause;
+  if (
+    [
+      "likes_count",
+      "comments_count",
+      "views_count",
+      "bookmarks_count",
+    ].includes(sortField)
+  ) {
+    orderByClause = KnowledgeContent.raw(
+      `COALESCE(knowledge.contents.${sortField}, 0) ${sortDirection.toUpperCase()}`
+    );
+  } else {
+    orderByClause = [`knowledge.contents.${sortField}`, sortDirection];
+  }
 
   // Execute paginated query with interactions
   const contents = await baseQuery
@@ -182,14 +197,22 @@ export const getUserKnowledgeContents = async (customId, filters = {}) => {
       "knowledge.contents.summary",
       "knowledge.contents.author_id",
       "knowledge.contents.category_id",
-      "knowledge.contents.type",
+      KnowledgeContent.raw("COALESCE(knowledge.contents.type, 'teks') as type"),
       "knowledge.contents.source_url",
       "knowledge.contents.status",
       "knowledge.contents.tags",
-      "knowledge.contents.likes_count",
-      "knowledge.contents.comments_count",
-      "knowledge.contents.views_count",
-      "knowledge.contents.bookmarks_count",
+      KnowledgeContent.raw(
+        "COALESCE(knowledge.contents.likes_count, 0) as likes_count"
+      ),
+      KnowledgeContent.raw(
+        "COALESCE(knowledge.contents.comments_count, 0) as comments_count"
+      ),
+      KnowledgeContent.raw(
+        "COALESCE(knowledge.contents.views_count, 0) as views_count"
+      ),
+      KnowledgeContent.raw(
+        "COALESCE(knowledge.contents.bookmarks_count, 0) as bookmarks_count"
+      ),
       "knowledge.contents.created_at",
       "knowledge.contents.updated_at",
       ...buildUserInteractionSubqueries(customId)
@@ -197,7 +220,11 @@ export const getUserKnowledgeContents = async (customId, filters = {}) => {
     .withGraphFetched(
       "[author(simpleWithImage), category, user_verified(simpleWithImage)]"
     )
-    .orderBy(getSortField(sort), getSortDirection(sort))
+    .orderByRaw(
+      Array.isArray(orderByClause)
+        ? `${orderByClause[0]} ${orderByClause[1]}`
+        : orderByClause
+    )
     .page(page - 1, limit);
 
   // Apply post-query filters for interaction-based filtering
@@ -255,9 +282,11 @@ export const getUserContentStatusCounts = async (customId) => {
 export const getUserContentTypeCounts = async (customId) => {
   const results = await KnowledgeContent.query()
     .where("knowledge.contents.author_id", customId)
-    .groupBy("type")
-    .select("type")
-    .count("* as count");
+    .select(
+      KnowledgeContent.raw("COALESCE(type, 'teks') as type_normalized"),
+      KnowledgeContent.raw("COUNT(*) as count")
+    )
+    .groupBy(KnowledgeContent.raw("COALESCE(type, 'teks')"));
 
   const counts = {
     all: 0,
@@ -268,7 +297,7 @@ export const getUserContentTypeCounts = async (customId) => {
   };
 
   results.forEach((result) => {
-    const type = result.type || "teks"; // Default to teks if null
+    const type = result.type_normalized;
     const count = parseInt(result.count);
     counts[type] = count;
     counts.all += count;
@@ -285,7 +314,9 @@ export const getUserEngagementStats = async (customId) => {
     .where("knowledge.contents.author_id", customId)
     .select(
       KnowledgeContent.raw("COALESCE(SUM(likes_count), 0) as total_likes"),
-      KnowledgeContent.raw("COALESCE(SUM(comments_count), 0) as total_comments"),
+      KnowledgeContent.raw(
+        "COALESCE(SUM(comments_count), 0) as total_comments"
+      ),
       KnowledgeContent.raw("COALESCE(SUM(views_count), 0) as total_views")
     )
     .first();
@@ -298,18 +329,51 @@ export const getUserEngagementStats = async (customId) => {
 };
 
 /**
+ * Get user's content category counts
+ */
+export const getUserContentCategoryCounts = async (customId) => {
+  const results = await KnowledgeContent.query()
+    .where("knowledge.contents.author_id", customId)
+    .leftJoin("knowledge.category", "knowledge.contents.category_id", "knowledge.category.id")
+    .select(
+      "knowledge.category.id as category_id",
+      "knowledge.category.name as category_name",
+      KnowledgeContent.raw("COUNT(*) as count")
+    )
+    .groupBy("knowledge.category.id", "knowledge.category.name");
+
+  const counts = {};
+  let total = 0;
+
+  results.forEach((result) => {
+    const categoryId = result.category_id;
+    const count = parseInt(result.count);
+    if (categoryId) {
+      counts[categoryId] = count;
+      total += count;
+    }
+  });
+
+  counts.all = total;
+
+  return counts;
+};
+
+/**
  * Get comprehensive user knowledge statistics
  */
 export const getUserKnowledgeStats = async (customId) => {
-  const [statusCounts, typeCounts, engagementStats] = await Promise.all([
+  const [statusCounts, typeCounts, engagementStats, categoryCounts] = await Promise.all([
     getUserContentStatusCounts(customId),
     getUserContentTypeCounts(customId),
-    getUserEngagementStats(customId)
+    getUserEngagementStats(customId),
+    getUserContentCategoryCounts(customId),
   ]);
 
   return {
     statusCounts,
     typeCounts,
+    categoryCounts,
     stats: {
       ...engagementStats,
       ...statusCounts,
@@ -321,22 +385,27 @@ export const getUserKnowledgeStats = async (customId) => {
  * Get user contents with full statistics (used by getUserKnowledgeContents controller)
  */
 export const getUserContentsWithStats = async (customId, filters = {}) => {
-  const [contents, statusCounts, typeCounts, engagementStats] = await Promise.all([
-    getUserKnowledgeContents(customId, filters),
-    getUserContentStatusCounts(customId),
-    getUserContentTypeCounts(customId),
-    getUserEngagementStats(customId)
-  ]);
+  const [contents, statusCounts, typeCounts, engagementStats, categoryCounts] =
+    await Promise.all([
+      getUserKnowledgeContents(customId, filters),
+      getUserContentStatusCounts(customId),
+      getUserContentTypeCounts(customId),
+      getUserEngagementStats(customId),
+      getUserContentCategoryCounts(customId),
+    ]);
 
-  return {
+  const data = {
     ...contents,
     statusCounts,
     typeCounts,
+    categoryCounts,
     stats: {
       ...engagementStats,
       ...statusCounts,
     },
   };
+
+  return data;
 };
 
 // ===== CONTENT MANAGEMENT SERVICES =====
@@ -352,7 +421,9 @@ export const submitContentForReview = async (contentId, customId) => {
     .where("status", "draft");
 
   if (!content) {
-    throw new Error("Content not found, access denied, or content is not in draft status");
+    throw new Error(
+      "Content not found, access denied, or content is not in draft status"
+    );
   }
 
   // Update status to pending
@@ -370,8 +441,11 @@ export const submitContentForReview = async (contentId, customId) => {
  * Update user's draft content
  */
 export const editUserContent = async (contentId, contentData, customId) => {
-  const readingTime = calculateReadingTime(contentData.content, contentData.summary);
-  
+  const readingTime = calculateReadingTime(
+    contentData.content,
+    contentData.summary
+  );
+
   const updateData = {
     ...contentData,
     tags: JSON.stringify(contentData.tags || []),
@@ -386,23 +460,23 @@ export const editUserContent = async (contentId, contentData, customId) => {
     .whereIn("status", ["draft", "rejected"]);
 
   if (!content) {
-    throw new Error("Content not found, access denied, or content cannot be edited");
+    throw new Error(
+      "Content not found, access denied, or content cannot be edited"
+    );
   }
 
   return await KnowledgeContent.transaction(async (trx) => {
     // Update content
-    await KnowledgeContent.query(trx)
-      .findById(contentId)
-      .patch(updateData);
+    await KnowledgeContent.query(trx).findById(contentId).patch(updateData);
 
     // Handle references if provided
     if (contentData.references !== undefined) {
       await content.$relatedQuery("references", trx).delete();
       if (contentData.references && contentData.references.length > 0) {
         await content.$relatedQuery("references", trx).insert(
-          contentData.references.map(ref => ({
+          contentData.references.map((ref) => ({
             title: ref.title,
-            url: ref.url
+            url: ref.url,
           }))
         );
       }
@@ -430,16 +504,16 @@ export const deleteUserContent = async (contentId, customId) => {
 
   // Check if content can be deleted (not published)
   if (content.status === "published") {
-    throw new Error("Published content cannot be deleted. Please contact administrator.");
+    throw new Error(
+      "Published content cannot be deleted. Please contact administrator."
+    );
   }
 
   // Soft delete by setting status to archived
-  const result = await KnowledgeContent.query()
-    .findById(contentId)
-    .patch({ 
-      status: "archived",
-      updated_at: new Date(),
-    });
+  const result = await KnowledgeContent.query().findById(contentId).patch({
+    status: "archived",
+    updated_at: new Date(),
+  });
 
   return result;
 };
