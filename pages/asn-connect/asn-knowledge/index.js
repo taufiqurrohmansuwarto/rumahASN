@@ -28,7 +28,7 @@ const AsnKnowledge = () => {
     query.category || null
   );
   const [selectedTag, setSelectedTag] = useState(query.tag || null);
-  const [selectedSort, setSelectedSort] = useState(query.sort || "created_at");
+  const [selectedSort, setSelectedSort] = useState(query.sort || "created_at:desc");
   const [selectedType, setSelectedType] = useState(query.type || "all");
 
   useScrollRestoration("knowledge-scroll", true, false, true); // Enable smooth restoration
@@ -45,7 +45,7 @@ const AsnKnowledge = () => {
         params.set("tag", newFilters.tag);
       }
     }
-    if (newFilters.sort && newFilters.sort !== "created_at")
+    if (newFilters.sort && newFilters.sort !== "created_at:desc")
       params.set("sort", newFilters.sort);
     if (newFilters.type && newFilters.type !== "all")
       params.set("type", newFilters.type);
@@ -118,7 +118,7 @@ const AsnKnowledge = () => {
     setSearchQuery("");
     setSelectedCategory(null);
     setSelectedTag(null);
-    setSelectedSort("created_at");
+    setSelectedSort("created_at:desc");
     setSelectedType("all");
     router.push(router.pathname, undefined, { shallow: true });
   };

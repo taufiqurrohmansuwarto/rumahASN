@@ -61,12 +61,12 @@ const KnowledgeFiltersStack = ({
 
   // Sort options
   const sortOptions = [
-    { label: "Terbaru", value: "created_at" },
-    { label: "Terlama", value: "created_at_asc" },
-    { label: "Paling Disukai", value: "likes_count" },
-    { label: "Paling Banyak Komentar", value: "comments_count" },
-    { label: "Judul A-Z", value: "title_asc" },
-    { label: "Judul Z-A", value: "title_desc" },
+    { label: "Terbaru", value: "created_at:desc" },
+    { label: "Terlama", value: "created_at:asc" },
+    { label: "Paling Disukai", value: "likes_count:desc" },
+    { label: "Paling Banyak Komentar", value: "comments_count:desc" },
+    { label: "Judul A-Z", value: "title:asc" },
+    { label: "Judul Z-A", value: "title:desc" },
   ];
 
   // Type options with icons and colors
@@ -122,7 +122,7 @@ const KnowledgeFiltersStack = ({
     selectedCategory || 
     (selectedTag && selectedTag.length > 0) ||
     selectedType !== "all" || 
-    selectedSort !== "created_at" ||
+    selectedSort !== "created_at:desc" ||
     searchQuery ||
     (showInstanceFilter && selectedInstance);
 
