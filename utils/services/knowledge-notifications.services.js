@@ -1,6 +1,6 @@
 const Notifications = require("@/models/knowledge/notifications.model");
 const KnowledgeContent = require("@/models/knowledge/contents.model");
-const UserInteraction = require("@/models/knowledge/user-interactions.model");
+const KnowledgeUserInteraction = require("@/models/knowledge/user-interactions.model");
 
 // Import helper functions
 import {
@@ -32,6 +32,26 @@ const buildNotificationQuery = () => {
 };
 
 // user services
+export const getUserNotificationTypeCounts = async (userId) => {
+  const typeCounts = {};
+  
+  // Get count for each notification type
+  const types = ['like', 'comment', 'share', 'mention', 'content_status', 'system'];
+  
+  for (const type of types) {
+    const count = await Notifications.query()
+      .where('user_id', userId)
+      .where('type', type)
+      .where('is_valid', true)
+      .count('id as total')
+      .first();
+    
+    typeCounts[type] = parseInt(count?.total || 0);
+  }
+  
+  return typeCounts;
+};
+
 export const getUserNotifications = async (userId, filters = {}) => {
   const { 
     page = 1, 
@@ -358,21 +378,38 @@ export const createLikeNotification = async (contentId, actorId) => {
 };
 export const createCommentNotification = async (
   contentId,
-  commentId,
-  actorId
+  actorId,
+  commentId = null
 ) => {
-  // Get content and comment info
-  const [content, comment] = await Promise.all([
-    KnowledgeContent.query()
-      .findById(contentId)
-      .select('id', 'title', 'author_id'),
-    UserInteraction.query()
-      .findById(commentId)
-      .select('id', 'comment_text')
-  ]);
-
-  if (!content || !comment || content.author_id === actorId) {
+  // Get content info
+  const content = await KnowledgeContent.query()
+    .findById(contentId)
+    .select('id', 'title', 'author_id');
+    
+  if (!content || content.author_id === actorId) {
     return null; // Don't notify if user comments on own content
+  }
+
+  // Get comment info if commentId provided
+  let comment = null;
+  if (commentId) {
+    comment = await KnowledgeUserInteraction.query()
+      .findById(commentId)
+      .select('id', 'comment_text');
+  }
+
+  // Check spam prevention
+  const spamWindow = getTimeWindow(NOTIFICATION_TYPES.COMMENT, TIME_WINDOWS.SPAM_PREVENTION);
+  const existing = await Notifications.query()
+    .where('user_id', content.author_id)
+    .where('content_id', contentId)
+    .where('actor_id', actorId)
+    .where('type', NOTIFICATION_TYPES.COMMENT)
+    .where('created_at', '>=', new Date(Date.now() - spamWindow))
+    .first();
+
+  if (existing) {
+    return existing; // Already notified recently
   }
 
   // Generate notification data using helper
@@ -383,7 +420,7 @@ export const createCommentNotification = async (
     commentId,
     contentTitle: content.title,
     additionalData: {
-      comment_preview: comment.comment_text?.substring(0, 100) + '...'
+      comment_preview: comment?.comment_text?.substring(0, 100) + '...' || 'Komentar baru'
     }
   });
 
@@ -523,10 +560,12 @@ export const removeLikeNotification = async (contentId, actorId, timeWindowDays 
   const timeWindow = timeWindowDays || TIME_WINDOWS.LIKE_REMOVAL;
   const cutoff = new Date(Date.now() - getTimeWindow(NOTIFICATION_TYPES.LIKE, timeWindow));
   
+  // Only remove content like notifications, not comment like notifications
   const deleted = await Notifications.query()
     .where('content_id', contentId)
     .where('actor_id', actorId)
     .where('type', NOTIFICATION_TYPES.LIKE)
+    .whereNull('comment_id') // Ensure it's a content like, not comment like
     .where('created_at', '>=', cutoff)
     .delete();
   
@@ -557,7 +596,7 @@ export const removeShareNotification = async (contentId, actorId, timeWindowDays
  */
 export const invalidateCommentNotification = async (commentId, reason = INVALIDATION_REASONS.COMMENT_DELETED) => {
   // Get content info for proper message formatting
-  const comment = await UserInteraction.query()
+  const comment = await KnowledgeUserInteraction.query()
     .findById(commentId)
     .select('id', 'content_id');
     
@@ -596,7 +635,7 @@ export const invalidateCommentNotification = async (commentId, reason = INVALIDA
  */
 export const restoreCommentNotification = async (commentId) => {
   // Get original comment info to restore proper message
-  const comment = await UserInteraction.query()
+  const comment = await KnowledgeUserInteraction.query()
     .findById(commentId)
     .select('id', 'comment_text', 'content_id');
     
@@ -724,4 +763,158 @@ export const getDetailedNotificationStats = async () => {
       time_windows: TIME_WINDOWS
     }
   };
+};
+
+/**
+ * Create notification when someone replies to a comment
+ */
+export const createReplyNotification = async (commentId, actorId, replyId = null) => {
+  // Get comment and author info
+  const comment = await KnowledgeUserInteraction.query()
+    .findById(commentId)
+    .select('id', 'comment_text', 'user_id', 'content_id');
+
+  if (!comment || comment.user_id === actorId) {
+    return null; // Don't notify if user replies to own comment
+  }
+
+  // Get content and reply for context
+  const [content, reply] = await Promise.all([
+    KnowledgeContent.query()
+      .findById(comment.content_id)
+      .select('id', 'title'),
+    replyId ? KnowledgeUserInteraction.query()
+      .findById(replyId)
+      .select('id', 'comment_text') : null
+  ]);
+
+  if (!content) {
+    return null;
+  }
+
+  // Check spam prevention
+  const spamWindow = getTimeWindow(NOTIFICATION_TYPES.COMMENT, TIME_WINDOWS.SPAM_PREVENTION);
+  const existing = await Notifications.query()
+    .where('user_id', comment.user_id)
+    .where('comment_id', commentId)
+    .where('actor_id', actorId)
+    .where('type', NOTIFICATION_TYPES.COMMENT)
+    .where('created_at', '>=', new Date(Date.now() - spamWindow))
+    .first();
+
+  if (existing) {
+    return existing; // Already notified recently
+  }
+
+  // Generate reply notification data
+  const notificationData = {
+    user_id: comment.user_id,
+    type: NOTIFICATION_TYPES.COMMENT,
+    title: 'Balasan Baru di Komentar Anda',
+    message: `Seseorang membalas komentar Anda di "${content.title}"`,
+    content_id: comment.content_id,
+    comment_id: replyId || commentId,
+    actor_id: actorId,
+    data: {
+      action: 'reply',
+      parent_comment_id: commentId,
+      content_title: content.title,
+      original_comment: comment.comment_text?.substring(0, 100) + '...',
+      reply_preview: reply?.comment_text?.substring(0, 100) + '...' || 'Balasan baru'
+    },
+    is_read: false,
+    is_sent: false,
+    is_valid: true
+  };
+
+  // Validate notification data
+  const validation = validateNotificationData(notificationData);
+  if (!validation.isValid) {
+    throw new Error(`Invalid reply notification data: ${validation.errors.join(', ')}`);
+  }
+
+  return await createNotification(notificationData);
+};
+
+/**
+ * Create notification when someone likes a comment
+ */
+export const createCommentLikeNotification = async (commentId, actorId) => {
+  // Get comment and author info
+  const comment = await KnowledgeUserInteraction.query()
+    .findById(commentId)
+    .select('id', 'comment_text', 'user_id', 'content_id');
+
+  if (!comment || comment.user_id === actorId) {
+    return null; // Don't notify if user likes own comment
+  }
+
+  // Get content for context
+  const content = await KnowledgeContent.query()
+    .findById(comment.content_id)
+    .select('id', 'title');
+
+  if (!content) {
+    return null;
+  }
+
+  // Check spam prevention
+  const spamWindow = getTimeWindow(NOTIFICATION_TYPES.LIKE, TIME_WINDOWS.SPAM_PREVENTION);
+  const existing = await Notifications.query()
+    .where('user_id', comment.user_id)
+    .where('comment_id', commentId)
+    .where('actor_id', actorId)
+    .where('type', NOTIFICATION_TYPES.LIKE)
+    .where('created_at', '>=', new Date(Date.now() - spamWindow))
+    .first();
+
+  if (existing) {
+    return existing; // Already notified recently
+  }
+
+  // Generate comment like notification data
+  const notificationData = {
+    user_id: comment.user_id,
+    type: NOTIFICATION_TYPES.LIKE,
+    title: 'Komentar Anda Disukai',
+    message: `Seseorang menyukai komentar Anda di "${content.title}"`,
+    content_id: comment.content_id,
+    comment_id: commentId,
+    actor_id: actorId,
+    data: {
+      action: 'like_comment',
+      content_title: content.title,
+      comment_text: comment.comment_text?.substring(0, 100) + '...'
+    },
+    is_read: false,
+    is_sent: false,
+    is_valid: true
+  };
+
+  // Validate notification data
+  const validation = validateNotificationData(notificationData);
+  if (!validation.isValid) {
+    throw new Error(`Invalid comment like notification data: ${validation.errors.join(', ')}`);
+  }
+
+  return await createNotification(notificationData);
+};
+
+/**
+ * Remove comment like notification
+ */
+export const removeCommentLikeNotification = async (commentId, actorId, timeWindowDays = null) => {
+  const timeWindow = timeWindowDays 
+    ? timeWindowDays * 24 * 60 * 60 * 1000 
+    : getTimeWindow(NOTIFICATION_TYPES.LIKE, TIME_WINDOWS.LIKE_REMOVAL);
+
+  // Only remove comment like notifications, not content like notifications
+  const deleted = await Notifications.query()
+    .where('comment_id', commentId)
+    .where('actor_id', actorId)
+    .where('type', NOTIFICATION_TYPES.LIKE)
+    .where('created_at', '>=', new Date(Date.now() - timeWindow))
+    .delete();
+
+  return { deleted, message: `Removed ${deleted} comment like notification(s)` };
 };

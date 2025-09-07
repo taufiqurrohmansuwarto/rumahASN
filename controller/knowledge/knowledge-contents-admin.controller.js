@@ -10,6 +10,7 @@ const UserMissions = require("@/models/knowledge/user-mission-progress.model");
 import { handleError } from "@/utils/helper/controller-helper";
 import { awardXP } from "./gamification.controller";
 import { processContentWithAI } from "@/utils/services/ai-processing.services";
+import { createContentStatusNotification } from "@/utils/services/knowledge-notifications.services";
 
 export const getKnowledgeContentsAdmin = async (req, res) => {
   try {
@@ -212,6 +213,21 @@ export const changeStatusKnowledgeContentAdmin = async (req, res) => {
     };
 
     const content = await KnowledgeContent.query().where("id", id).patch(data);
+
+    // Create content status notification jika status berubah
+    if (payload.status && payload.status !== currentContent.status) {
+      try {
+        await createContentStatusNotification(
+          id, 
+          customId, 
+          currentContent.status, 
+          payload.status,
+          payload.rejection_reason || null
+        );
+      } catch (notifError) {
+        console.warn("Failed to create content status notification:", notifError);
+      }
+    }
 
     // Award XP jika content di-approve menjadi "published" (+10 XP untuk author)
     if (

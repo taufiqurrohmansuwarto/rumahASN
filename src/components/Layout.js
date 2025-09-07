@@ -29,6 +29,7 @@ import { userRoutes } from "../routes";
 import NotifikasiASNConnect from "./Notification/NotifikasiASNConnect";
 import NotifikasiForumKepegawaian from "./Notification/NotifikasiForumKepegawaian";
 import NotifikasiPrivateMessage from "./Notification/NotifikasiPrivateMessage";
+import { NotificationBellIcon } from "./KnowledgeManagements/notifications";
 const ProLayout = dynamic(
   () => import("@ant-design/pro-components").then((mod) => mod?.ProLayout),
   {
@@ -565,6 +566,7 @@ function Layout({ children, active, collapsed = true }) {
               url="/mails/inbox"
               title="Inbox Pesan Pribadi"
             />,
+            <NotificationBellIcon key="notification-bell" size={14} />,
             <NotifikasiASNConnect
               key="asn-connect"
               url="asn-connect"

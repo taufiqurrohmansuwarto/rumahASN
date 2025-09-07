@@ -2,6 +2,7 @@ const { handleError } = require("@/utils/helper/controller-helper");
 import {
   getUserNotifications as getNotificationsService,
   getUserUnreadCount,
+  getUserNotificationTypeCounts,
   markAsRead,
   markAllAsRead,
   deleteUserNotification
@@ -30,13 +31,23 @@ export const getUserNotifications = async (req, res) => {
       });
     }
 
-    const notifications = await getNotificationsService(customId, filters);
+    // Run notifications query and type counts in parallel for first page
+    const isFirstPage = parseInt(filters.page) === 1;
+    const [notifications, typeCounts] = await Promise.all([
+      getNotificationsService(customId, filters),
+      isFirstPage ? getUserNotificationTypeCounts(customId) : Promise.resolve(null)
+    ]);
     
     // Format notifications for display
     const formattedNotifications = {
       ...notifications,
       data: notifications.data.map(notification => formatNotificationForDisplay(notification))
     };
+
+    // Include type counts only for first page to avoid unnecessary queries
+    if (isFirstPage && typeCounts) {
+      formattedNotifications.type_counts = typeCounts;
+    }
 
     res.json(formattedNotifications);
   } catch (error) {
@@ -115,6 +126,28 @@ export const markAllNotificationsAsRead = async (req, res) => {
       updated: count,
       success: true,
       hasUpdates: count > 0
+    });
+  } catch (error) {
+    handleError(res, error);
+  }
+};
+
+export const getUserNotificationStats = async (req, res) => {
+  try {
+    const { customId } = req?.user;
+
+    const [unreadCount, typeCounts] = await Promise.all([
+      getUserUnreadCount(customId),
+      getUserNotificationTypeCounts(customId)
+    ]);
+
+    res.json({
+      success: true,
+      data: {
+        unread_count: unreadCount?.count || 0,
+        type_counts: typeCounts,
+        total_count: Object.values(typeCounts).reduce((sum, count) => sum + count, 0)
+      }
     });
   } catch (error) {
     handleError(res, error);

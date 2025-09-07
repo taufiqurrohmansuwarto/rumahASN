@@ -150,7 +150,7 @@ const UserNotificationList = ({
   }
 
   return (
-    <div style={{ padding: "0 8px" }}>
+    <div style={{ padding: "0 12px" }}>
       <List
         dataSource={notifications}
         renderItem={(notification) => (

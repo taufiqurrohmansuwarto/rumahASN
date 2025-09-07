@@ -2,6 +2,14 @@ const KnowledgeUserInteraction = require("@/models/knowledge/user-interactions.m
 const KnowledgeContent = require("@/models/knowledge/contents.model");
 import { handleError } from "@/utils/helper/controller-helper";
 import { awardXP } from "./gamification.controller";
+import {
+  createLikeNotification,
+  removeLikeNotification,
+  createCommentNotification,
+  createReplyNotification,
+  createCommentLikeNotification,
+  removeCommentLikeNotification,
+} from "@/utils/services/knowledge-notifications.services";
 
 export const likes = async (req, res) => {
   try {
@@ -35,6 +43,13 @@ export const likes = async (req, res) => {
         await KnowledgeContent.query(trx)
           .where("id", id)
           .decrement("likes_count", 1);
+
+        // Remove like notification
+        try {
+          await removeLikeNotification(id, customId);
+        } catch (notifError) {
+          console.warn("Failed to remove like notification:", notifError);
+        }
 
         return {
           message: "Like berhasil dihapus",
@@ -81,6 +96,15 @@ export const likes = async (req, res) => {
             });
           } catch (xpError) {
             console.warn("Failed to award XP to author:", xpError);
+          }
+        }
+
+        // Create like notification for content author - skip jika like konten sendiri
+        if (!isSelfAction) {
+          try {
+            await createLikeNotification(id, customId);
+          } catch (notifError) {
+            console.warn("Failed to create like notification:", notifError);
           }
         }
 
@@ -162,8 +186,21 @@ export const createComment = async (req, res) => {
         message: "Berhasil menambahkan komentar",
         comment: newComment,
         comments_count: currentContent.comments_count + 1,
+        isSelfAction, // Pass this info for notification trigger
       };
     });
+
+    // Create comment notification AFTER transaction is committed - skip jika comment konten sendiri
+    if (!result.isSelfAction) {
+      try {
+        await createCommentNotification(id, customId, result.comment.id);
+      } catch (notifError) {
+        console.warn("Failed to create comment notification:", notifError);
+      }
+    }
+
+    // Clean up the response
+    delete result.isSelfAction;
 
     return res.json(result);
   } catch (error) {
@@ -599,8 +636,21 @@ export const createReply = async (req, res) => {
         reply: newReply,
         comments_count: currentContent.comments_count + 1,
         parent_replies_count: parentComment.replies_count + 1,
+        shouldNotifyParent: parentComment.user_id !== customId, // Pass info for notification trigger
       };
     });
+
+    // Create reply notification AFTER transaction is committed - skip jika reply ke komentar sendiri
+    if (result.shouldNotifyParent) {
+      try {
+        await createReplyNotification(commentId, customId, result.reply.id);
+      } catch (notifError) {
+        console.warn("Failed to create reply notification:", notifError);
+      }
+    }
+
+    // Clean up the response
+    delete result.shouldNotifyParent;
 
     return res.json(result);
   } catch (error) {
@@ -658,6 +708,16 @@ export const likeComment = async (req, res) => {
           .where("id", commentId)
           .decrement("likes_count", 1);
 
+        // Remove comment like notification
+        try {
+          await removeCommentLikeNotification(commentId, customId);
+        } catch (notifError) {
+          console.warn(
+            "Failed to remove comment like notification:",
+            notifError
+          );
+        }
+
         return {
           message: "Like komentar berhasil dihapus",
           liked: false,
@@ -704,6 +764,18 @@ export const likeComment = async (req, res) => {
             });
           } catch (xpError) {
             console.warn("Failed to award XP to comment author:", xpError);
+          }
+        }
+
+        // Create comment like notification - skip jika like komentar sendiri
+        if (!isSelfAction) {
+          try {
+            await createCommentLikeNotification(commentId, customId);
+          } catch (notifError) {
+            console.warn(
+              "Failed to create comment like notification:",
+              notifError
+            );
           }
         }
 
@@ -831,7 +903,7 @@ export const getRepliesForComment = async (req, res) => {
           .first();
         reply.user_liked = !!userLiked;
       }
-      
+
       // Level 2 replies tidak ditampilkan untuk simplicity
       reply.replies = [];
     }

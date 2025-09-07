@@ -50,6 +50,7 @@ const NotificationCard = ({
       borderRadius: "8px",
       transition: "none",
       cursor: "pointer",
+      width: "100%", // Make card full width
     };
 
     if (isInvalid) {
@@ -76,6 +77,17 @@ const NotificationCard = ({
       return data.content_title;
     }
     return "Konten";
+  };
+
+  // Get preview text based on notification action type
+  const getPreviewText = () => {
+    if (data?.action === 'comment' && data?.comment_preview) {
+      return data.comment_preview;
+    }
+    if (data?.action === 'reply' && data?.reply_preview) {
+      return data.reply_preview;
+    }
+    return null;
   };
 
 
@@ -206,6 +218,29 @@ const NotificationCard = ({
           >
             {message}
           </Paragraph>
+
+          {/* Comment/Reply Preview (if available) */}
+          {getPreviewText() && (
+            <Text
+              style={{
+                color: "#006d75",
+                fontSize: "11px",
+                fontStyle: "italic",
+                backgroundColor: "#e6f4ff",
+                padding: "4px 8px",
+                borderRadius: "4px",
+                marginBottom: "8px",
+                display: "block",
+                border: "1px solid #b7eb8f",
+              }}
+              ellipsis={{ 
+                tooltip: getPreviewText(),
+                rows: 2 
+              }}
+            >
+              💬 &quot;{getPreviewText()}&quot;
+            </Text>
+          )}
 
           {/* Content Preview (if available) */}
           {getContentPreview() !== "Konten" && (

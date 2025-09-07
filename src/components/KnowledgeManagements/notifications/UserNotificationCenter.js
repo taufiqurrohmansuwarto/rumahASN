@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from "react";
+import React, { useState, useCallback, useEffect, useRef } from "react";
 import { Flex, message } from "antd";
 import { useRouter } from "next/router";
 import {
@@ -16,11 +16,11 @@ import UserNotificationList from "./UserNotificationList";
 
 const UserNotificationCenter = () => {
   const router = useRouter();
-  
+
   // Initialize filters from URL query params
   const [filters, setFilters] = useState({
     type: "all",
-    is_read: "all", 
+    is_read: "all",
     search: "",
     page: 1,
     limit: 20,
@@ -32,8 +32,8 @@ const UserNotificationCenter = () => {
   // Update filters from URL on mount and when query changes
   useEffect(() => {
     const { type, status, search, page } = router.query;
-    
-    setFilters(prev => ({
+
+    setFilters((prev) => ({
       ...prev,
       type: type || "all",
       is_read: status || "all",
@@ -42,65 +42,79 @@ const UserNotificationCenter = () => {
     }));
   }, [router.query]);
 
-  // Build query for API
+  // Build query for API - use router.query directly for immediate updates
   const buildQuery = useCallback(() => {
-    const query = { 
-      page: filters.page,
+    const { type, status, search, page } = router.query;
+    
+    const query = {
+      page: parseInt(page) || 1,
       limit: filters.limit,
     };
-    
-    if (filters.type !== "all") {
-      query.type = filters.type;
+
+    if (type && type !== "all") {
+      query.type = type;
     }
-    
-    if (filters.is_read !== "all") {
-      query.is_read = filters.is_read;
+
+    if (status && status !== "all") {
+      query.is_read = status;
     }
-    
-    if (filters.search) {
-      query.search = filters.search;
+
+    if (search) {
+      query.search = search;
     }
 
     return query;
-  }, [filters]);
+  }, [router.query, filters.limit]);
 
-  // Hooks
-  const { 
-    data: notificationData, 
-    isLoading, 
-    refetch: refetchNotifications 
-  } = useUserNotifications(buildQuery());
-  
-  const { 
-    data: unreadData, 
-    refetch: refetchUnreadCount 
-  } = useUnreadNotificationsCount();
-  
+  // Hooks - only query when router is ready
+  const {
+    data: notificationData,
+    isLoading,
+    refetch: refetchNotifications,
+  } = useUserNotifications(buildQuery(), { enabled: router.isReady });
+
+  const { data: unreadData, refetch: refetchUnreadCount } =
+    useUnreadNotificationsCount();
+
   const markAsReadMutation = useMarkNotificationAsRead();
   const markAllAsReadMutation = useMarkAllNotificationsAsRead();
   const deleteMutation = useDeleteNotification();
-  
+
   // Polling for real-time updates
   const { refreshNotifications } = useNotificationPolling(true, 30000); // 30 seconds
 
+  // Store type counts from API response
+  const [typeCounts, setTypeCounts] = useState({});
+  
+  // Track previous filter values to detect changes
+  const prevFiltersRef = useRef({});
+  
   // Update local notifications when data changes
   useEffect(() => {
-    if (notificationData?.data) {
-      if (filters.page === 1) {
+    if (notificationData?.data && router.isReady) {
+      const { type, status, search, page } = router.query;
+      const currentPage = parseInt(page) || 1;
+      const currentFilters = { type: type || "all", status: status || "all", search: search || "" };
+      
+      // Check if filters changed (not just page)
+      const filtersChanged = JSON.stringify(prevFiltersRef.current) !== JSON.stringify(currentFilters);
+      
+      if (currentPage === 1 || filtersChanged) {
+        // Replace data on first page or when filters change
         setAllNotifications(notificationData.data);
+        // Store type counts from first page response
+        if (notificationData.type_counts) {
+          setTypeCounts(notificationData.type_counts);
+        }
+        
+        // Update previous filters
+        prevFiltersRef.current = currentFilters;
       } else {
-        // Append for load more
-        setAllNotifications(prev => [...prev, ...notificationData.data]);
+        // Append for load more (only if not loading first page and filters same)
+        setAllNotifications((prev) => [...prev, ...notificationData.data]);
       }
     }
-  }, [notificationData, filters.page]);
-
-  // Reset notifications when filters change (except page)
-  useEffect(() => {
-    if (filters.page === 1) {
-      setAllNotifications([]);
-    }
-  }, [filters.type, filters.is_read, filters.search, filters.page]);
+  }, [notificationData, router.isReady, router.query]);
 
   // Extract data
   const notifications = allNotifications || [];
@@ -108,62 +122,79 @@ const UserNotificationCenter = () => {
   const totalCount = notificationData?.total || 0;
   const unreadCount = unreadData?.count || 0;
 
-  // Calculate type counts for filters
+  // Get type counts from stored API response or fallback to local counting
   const getTypeCounts = () => {
-    const counts = {};
-    // This would ideally come from API, for now we'll use placeholder
+    // Use stored type counts from API if available
+    if (Object.keys(typeCounts).length > 0) {
+      return typeCounts;
+    }
+    
+    // Fallback: count from current notifications (less accurate due to pagination)
+    const counts = {
+      like: 0,
+      comment: 0,
+      share: 0,
+      mention: 0,
+      content_status: 0,
+      system: 0
+    };
+    
+    notifications.forEach(notification => {
+      if (counts.hasOwnProperty(notification.type)) {
+        counts[notification.type]++;
+      }
+    });
+    
     return counts;
   };
 
   // Check if has active filters
-  const hasActiveFilters = 
-    filters.type !== "all" || 
-    filters.is_read !== "all" || 
-    filters.search;
+  const hasActiveFilters =
+    filters.type !== "all" || filters.is_read !== "all" || filters.search;
 
   // Helper function to build URL query string
   const buildURLQuery = (newFilters) => {
     const query = {};
-    
+
     if (newFilters.type && newFilters.type !== "all") {
       query.type = newFilters.type;
     }
-    
+
     if (newFilters.is_read && newFilters.is_read !== "all") {
       query.status = newFilters.is_read;
     }
-    
+
     if (newFilters.search) {
       query.search = newFilters.search;
     }
-    
+
     if (newFilters.page && newFilters.page > 1) {
       query.page = newFilters.page;
     }
-    
+
     return query;
   };
-
 
   const handleLoadMore = () => {
     if (hasMore && !isLoading) {
       const newFilters = { ...filters, page: filters.page + 1 };
       const query = buildURLQuery(newFilters);
-      
-      router.push({
-        pathname: router.pathname,
-        query,
-      }, undefined, { shallow: true });
+
+      router.push(
+        {
+          pathname: router.pathname,
+          query,
+        },
+        undefined,
+        { shallow: true }
+      );
     }
   };
 
   const handleRefresh = async () => {
     setRefreshing(true);
     try {
-      await Promise.all([
-        refetchNotifications(),
-        refetchUnreadCount(),
-      ]);
+      await Promise.all([refetchNotifications(), refetchUnreadCount()]);
       refreshNotifications();
       message.success("Notifikasi berhasil dimuat ulang");
     } catch (error) {
@@ -177,12 +208,16 @@ const UserNotificationCenter = () => {
   const handleMarkAsRead = async (notificationId) => {
     try {
       await markAsReadMutation.mutateAsync(notificationId);
-      
+
       // Update local state
-      setAllNotifications(prev => 
-        prev.map(notification => 
-          notification.id === notificationId 
-            ? { ...notification, is_read: true, read_at: new Date().toISOString() }
+      setAllNotifications((prev) =>
+        prev.map((notification) =>
+          notification.id === notificationId
+            ? {
+                ...notification,
+                is_read: true,
+                read_at: new Date().toISOString(),
+              }
             : notification
         )
       );
@@ -194,13 +229,13 @@ const UserNotificationCenter = () => {
   const handleMarkAllAsRead = async () => {
     try {
       await markAllAsReadMutation.mutateAsync();
-      
+
       // Update local state
-      setAllNotifications(prev => 
-        prev.map(notification => ({ 
-          ...notification, 
-          is_read: true, 
-          read_at: new Date().toISOString() 
+      setAllNotifications((prev) =>
+        prev.map((notification) => ({
+          ...notification,
+          is_read: true,
+          read_at: new Date().toISOString(),
         }))
       );
     } catch (error) {
@@ -211,10 +246,10 @@ const UserNotificationCenter = () => {
   const handleDelete = async (notificationId) => {
     try {
       await deleteMutation.mutateAsync(notificationId);
-      
+
       // Remove from local state
-      setAllNotifications(prev => 
-        prev.filter(notification => notification.id !== notificationId)
+      setAllNotifications((prev) =>
+        prev.filter((notification) => notification.id !== notificationId)
       );
     } catch (error) {
       console.error("Delete failed:", error);
@@ -224,7 +259,6 @@ const UserNotificationCenter = () => {
   return (
     <div
       style={{
-        backgroundColor: "#F8FAFC", 
         minHeight: "calc(100vh - 120px)",
         padding: "0",
       }}
@@ -247,9 +281,8 @@ const UserNotificationCenter = () => {
         />
 
         {/* Main Content */}
-        <div style={{ padding: "16px 24px" }}>
+        <div style={{ padding: "16px 0px" }}>
           <Flex gap="20px" align="flex-start">
-            
             {/* Left: Filters */}
             <div style={{ width: "300px", flexShrink: 0 }}>
               <NotificationFilters
@@ -286,7 +319,6 @@ const UserNotificationCenter = () => {
                 />
               </div>
             </div>
-
           </Flex>
         </div>
       </div>

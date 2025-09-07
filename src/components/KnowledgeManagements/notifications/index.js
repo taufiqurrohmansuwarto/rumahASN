@@ -3,6 +3,9 @@
 // Main component
 export { default as UserNotificationCenter } from "./UserNotificationCenter";
 
+// Bell icon component
+export { default as NotificationBellIcon } from "./NotificationBellIcon";
+
 // Individual components
 export { default as UserNotificationHeader } from "./UserNotificationHeader";
 export { default as UserNotificationList } from "./UserNotificationList";

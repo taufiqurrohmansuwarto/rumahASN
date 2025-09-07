@@ -9,13 +9,31 @@ import {
 } from "@/services/knowledge-management.services";
 
 // Get user notifications with filters
-export const useUserNotifications = (query = {}) => {
+export const useUserNotifications = (query = {}, options = {}) => {
+  // Create a stable query key by serializing the query object
+  const queryKey = ["user-notifications", JSON.stringify(query)];
+  
+  // Debug logging
+  if (process.env.NODE_ENV === 'development') {
+    console.log('🔍 useUserNotifications query:', query);
+    console.log('🔑 Query key:', queryKey);
+  }
+  
   return useQuery({
-    queryKey: ["user-notifications", query],
-    queryFn: () => getUserNotifications(query),
-    staleTime: 30 * 1000, // 30 seconds
-    refetchInterval: 60 * 1000, // Refetch every minute for real-time updates
-    enabled: true,
+    queryKey,
+    queryFn: () => {
+      if (process.env.NODE_ENV === 'development') {
+        console.log('🚀 Fetching notifications with query:', query);
+      }
+      return getUserNotifications(query);
+    },
+    staleTime: 5 * 1000, // Further reduce to 5 seconds for debugging
+    refetchInterval: false, // Disable auto refetch for now to see manual triggers
+    enabled: options.enabled !== false,
+    // Ensure fresh data when query changes
+    refetchOnWindowFocus: false,
+    retry: 1,
+    ...options, // Allow overriding default options
   });
 };
 
