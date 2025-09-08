@@ -24,14 +24,23 @@ export const getUserOwnContents = async (query) => {
 };
 
 export const submitMyContentForReview = async (id) => {
-  return await api
-    .post(`/users/me/contents/${id}`)
-    .then((res) => res.data);
+  return await api.post(`/users/me/contents/${id}`).then((res) => res.data);
 };
 
 export const editMyContent = async ({ id, data }) => {
   return await api
     .put(`/users/me/contents/${id}`, data)
+    .then((res) => res.data);
+};
+
+export const getUserOwnContentsBookmarks = async (query) => {
+  const qs = queryString.stringify(query, {
+    skipNull: true,
+    skipEmptyString: true,
+  });
+
+  return await api
+    .get(`/users/me/contents/bookmarks?${qs}`)
     .then((res) => res.data);
 };
 
@@ -574,13 +583,11 @@ export const getPendingRevisions = async (query = {}) => {
 
 export const getRevisionDetails = async (versionId, contentId = null) => {
   // If contentId is provided, use user endpoint; otherwise use admin endpoint
-  const endpoint = contentId 
+  const endpoint = contentId
     ? `/users/me/contents/${contentId}/revisions/${versionId}`
     : `/admin/revisions/${versionId}/approve`;
-    
-  return await api
-    .get(endpoint)
-    .then((res) => res.data);
+
+  return await api.get(endpoint).then((res) => res.data);
 };
 
 export const approveRevision = async ({
@@ -624,19 +631,27 @@ export const getUserNotifications = async (query) => {
 };
 
 export const getUserUnreadNotificationsCount = async () => {
-  return await api.get("/users/me/notifications/unread-count").then((res) => res.data);
+  return await api
+    .get("/users/me/notifications/unread-count")
+    .then((res) => res.data);
 };
 
 export const markNotificationAsRead = async (id) => {
-  return await api.put(`/users/me/notifications/${id}/read`).then((res) => res.data);
+  return await api
+    .put(`/users/me/notifications/${id}/read`)
+    .then((res) => res.data);
 };
 
 export const markAllNotificationsAsRead = async () => {
-  return await api.put("/users/me/notifications/mark-all-read").then((res) => res.data);
+  return await api
+    .put("/users/me/notifications/mark-all-read")
+    .then((res) => res.data);
 };
 
 export const deleteNotification = async (id) => {
-  return await api.delete(`/users/me/notifications/${id}`).then((res) => res.data);
+  return await api
+    .delete(`/users/me/notifications/${id}`)
+    .then((res) => res.data);
 };
 
 // Admin Notification Services
@@ -650,19 +665,23 @@ export const getAdminNotifications = async (query) => {
 };
 
 export const getNotificationStats = async (detailed = false) => {
-  const endpoint = detailed 
-    ? "/admin/notifications/stats?detailed=true" 
+  const endpoint = detailed
+    ? "/admin/notifications/stats?detailed=true"
     : "/admin/notifications/stats";
-  
+
   return await api.get(endpoint).then((res) => res.data);
 };
 
 export const broadcastNotification = async (data) => {
-  return await api.post("/admin/notifications/broadcast", data).then((res) => res.data);
+  return await api
+    .post("/admin/notifications/broadcast", data)
+    .then((res) => res.data);
 };
 
 export const updateAdminNotification = async ({ id, data }) => {
-  return await api.put(`/admin/notifications/${id}`, data).then((res) => res.data);
+  return await api
+    .put(`/admin/notifications/${id}`, data)
+    .then((res) => res.data);
 };
 
 export const deleteAdminNotification = async (id) => {

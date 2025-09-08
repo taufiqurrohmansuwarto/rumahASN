@@ -6,6 +6,7 @@ import {
   FileTextOutlined,
   DownOutlined,
   UpOutlined,
+  BookOutlined,
 } from "@ant-design/icons";
 import { useQuery } from "@tanstack/react-query";
 import React, { useState } from "react";
@@ -52,6 +53,10 @@ const KnowledgeFiltersStack = ({
   onStatusChange,
   statusOptions = [],
   statusCounts = {},
+  // Saved content filter props (for bookmarks)
+  showSavedContentFilter = false,
+  selectedSavedContent,
+  onSavedContentChange,
   isLoading = false,
 }) => {
   // Collapse states
@@ -135,7 +140,8 @@ const KnowledgeFiltersStack = ({
     selectedSort !== "created_at:desc" ||
     searchQuery ||
     (showInstanceFilter && selectedInstance) ||
-    (showStatusFilter && selectedStatus && selectedStatus !== "all");
+    (showStatusFilter && selectedStatus && selectedStatus !== "all") ||
+    (showSavedContentFilter && selectedSavedContent === true);
 
   const handleClearFilters = () => {
     onClearFilters();
@@ -391,6 +397,40 @@ const KnowledgeFiltersStack = ({
             )}
           </div>
         )}
+
+        {/* Saved Content Section (if enabled) */}
+        {showSavedContentFilter && (
+          <>
+            <div style={{ marginTop: "-4px" }}>
+              <Button
+                type="text"
+                size="small"
+                className={selectedSavedContent === true ? "selected-filter" : ""}
+                style={{
+                  height: "32px",
+                  justifyContent: "flex-start", 
+                  textAlign: "left",
+                  border: selectedSavedContent === true ? "1px solid #FF4500" : "1px solid transparent",
+                  backgroundColor: selectedSavedContent === true ? "#FFF7ED" : "transparent",
+                  color: selectedSavedContent === true ? "#FF4500" : "#374151",
+                  fontWeight: selectedSavedContent === true ? 600 : 400,
+                  fontSize: "13px",
+                  padding: "0 8px",
+                  width: "100%",
+                  marginBottom: "4px",
+                }}
+                icon={<BookOutlined style={{ fontSize: "14px", color: selectedSavedContent === true ? "#FF4500" : "#1890ff" }} />}
+                onClick={() => onSavedContentChange(!selectedSavedContent)}
+              >
+                <Flex justify="space-between" align="center" style={{ width: "100%" }}>
+                  <span>Konten Disimpan</span>
+                </Flex>
+              </Button>
+            </div>
+            <Divider style={{ margin: "4px 0" }} />
+          </>
+        )}
+
         {/* Instance Section (if enabled) - Collapsible */}
         {showInstanceFilter && instanceOptions.length > 0 && (
           <div style={{ marginTop: "-4px" }}>

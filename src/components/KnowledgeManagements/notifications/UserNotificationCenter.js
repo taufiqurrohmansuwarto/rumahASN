@@ -45,7 +45,7 @@ const UserNotificationCenter = () => {
   // Build query for API - use router.query directly for immediate updates
   const buildQuery = useCallback(() => {
     const { type, status, search, page } = router.query;
-    
+
     const query = {
       page: parseInt(page) || 1,
       limit: filters.limit,
@@ -85,20 +85,26 @@ const UserNotificationCenter = () => {
 
   // Store type counts from API response
   const [typeCounts, setTypeCounts] = useState({});
-  
+
   // Track previous filter values to detect changes
   const prevFiltersRef = useRef({});
-  
+
   // Update local notifications when data changes
   useEffect(() => {
     if (notificationData?.data && router.isReady) {
       const { type, status, search, page } = router.query;
       const currentPage = parseInt(page) || 1;
-      const currentFilters = { type: type || "all", status: status || "all", search: search || "" };
-      
+      const currentFilters = {
+        type: type || "all",
+        status: status || "all",
+        search: search || "",
+      };
+
       // Check if filters changed (not just page)
-      const filtersChanged = JSON.stringify(prevFiltersRef.current) !== JSON.stringify(currentFilters);
-      
+      const filtersChanged =
+        JSON.stringify(prevFiltersRef.current) !==
+        JSON.stringify(currentFilters);
+
       if (currentPage === 1 || filtersChanged) {
         // Replace data on first page or when filters change
         setAllNotifications(notificationData.data);
@@ -106,7 +112,7 @@ const UserNotificationCenter = () => {
         if (notificationData.type_counts) {
           setTypeCounts(notificationData.type_counts);
         }
-        
+
         // Update previous filters
         prevFiltersRef.current = currentFilters;
       } else {
@@ -128,7 +134,7 @@ const UserNotificationCenter = () => {
     if (Object.keys(typeCounts).length > 0) {
       return typeCounts;
     }
-    
+
     // Fallback: count from current notifications (less accurate due to pagination)
     const counts = {
       like: 0,
@@ -136,15 +142,15 @@ const UserNotificationCenter = () => {
       share: 0,
       mention: 0,
       content_status: 0,
-      system: 0
+      system: 0,
     };
-    
-    notifications.forEach(notification => {
+
+    notifications.forEach((notification) => {
       if (counts.hasOwnProperty(notification.type)) {
         counts[notification.type]++;
       }
     });
-    
+
     return counts;
   };
 

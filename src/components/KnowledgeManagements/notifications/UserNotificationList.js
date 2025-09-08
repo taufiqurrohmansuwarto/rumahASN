@@ -20,46 +20,66 @@ const UserNotificationList = ({
   const [actionLoading, setActionLoading] = useState({});
 
   const handleMarkAsRead = async (notificationId) => {
-    setActionLoading(prev => ({ ...prev, [notificationId]: 'read' }));
+    setActionLoading((prev) => ({ ...prev, [notificationId]: "read" }));
     try {
       await onMarkAsRead(notificationId);
     } finally {
-      setActionLoading(prev => ({ ...prev, [notificationId]: null }));
+      setActionLoading((prev) => ({ ...prev, [notificationId]: null }));
     }
   };
 
   const handleDelete = async (notificationId) => {
-    setActionLoading(prev => ({ ...prev, [notificationId]: 'delete' }));
+    setActionLoading((prev) => ({ ...prev, [notificationId]: "delete" }));
     try {
       await onDelete(notificationId);
     } finally {
-      setActionLoading(prev => ({ ...prev, [notificationId]: null }));
+      setActionLoading((prev) => ({ ...prev, [notificationId]: null }));
+    }
+  };
+
+  const router = useRouter();
+
+  const handleViewContent = (notification) => {
+    if (notification.content_id) {
+      router.push(`/asn-connect/asn-knowledge/${notification.content_id}`);
     }
   };
 
   // Empty state component
   const renderEmptyState = () => {
-    const router = useRouter();
 
     const handleClearAllFilters = () => {
-      router.push({
-        pathname: router.pathname,
-        query: {},
-      }, undefined, { shallow: true });
+      router.push(
+        {
+          pathname: router.pathname,
+          query: {},
+        },
+        undefined,
+        { shallow: true }
+      );
     };
 
     if (hasActiveFilters) {
       return (
         <Empty
-          image={<InboxOutlined style={{ fontSize: "64px", color: "#d9d9d9" }} />}
+          image={
+            <InboxOutlined style={{ fontSize: "64px", color: "#d9d9d9" }} />
+          }
           style={{ height: "80px", marginBottom: "16px" }}
           description={
             <Flex vertical align="center" gap="8px">
               <Title level={5} style={{ color: "#8c8c8c", margin: 0 }}>
                 Tidak ada hasil yang sesuai
               </Title>
-              <Text style={{ color: "#8c8c8c", fontSize: "13px", textAlign: "center" }}>
-                Coba ubah filter atau kata kunci pencarian untuk melihat lebih banyak notifikasi
+              <Text
+                style={{
+                  color: "#8c8c8c",
+                  fontSize: "13px",
+                  textAlign: "center",
+                }}
+              >
+                Coba ubah filter atau kata kunci pencarian untuk melihat lebih
+                banyak notifikasi
               </Text>
               <Button
                 type="link"
@@ -84,8 +104,15 @@ const UserNotificationList = ({
             <Title level={5} style={{ color: "#8c8c8c", margin: 0 }}>
               Belum ada notifikasi
             </Title>
-            <Text style={{ color: "#8c8c8c", fontSize: "13px", textAlign: "center" }}>
-              Notifikasi akan muncul di sini ketika ada aktivitas terkait konten Anda, <br />
+            <Text
+              style={{
+                color: "#8c8c8c",
+                fontSize: "13px",
+                textAlign: "center",
+              }}
+            >
+              Notifikasi akan muncul di sini ketika ada aktivitas terkait konten
+              Anda, <br />
               seperti like, komentar, atau perubahan status
             </Text>
             <Button
@@ -127,8 +154,14 @@ const UserNotificationList = ({
           <Flex gap="12px">
             <Skeleton.Avatar size={32} />
             <div style={{ flex: 1 }}>
-              <Skeleton.Input style={{ width: "60%", height: "16px", marginBottom: "8px" }} active />
-              <Skeleton.Input style={{ width: "90%", height: "14px", marginBottom: "4px" }} active />
+              <Skeleton.Input
+                style={{ width: "60%", height: "16px", marginBottom: "8px" }}
+                active
+              />
+              <Skeleton.Input
+                style={{ width: "90%", height: "14px", marginBottom: "4px" }}
+                active
+              />
               <Skeleton.Input style={{ width: "40%", height: "12px" }} active />
             </div>
           </Flex>
@@ -150,7 +183,7 @@ const UserNotificationList = ({
   }
 
   return (
-    <div style={{ padding: "0 12px" }}>
+    <div style={{ padding: "8px 12px" }}>
       <List
         dataSource={notifications}
         renderItem={(notification) => (
@@ -159,9 +192,10 @@ const UserNotificationList = ({
               notification={notification}
               onMarkAsRead={handleMarkAsRead}
               onDelete={handleDelete}
+              onViewContent={handleViewContent}
               loading={
-                actionLoading[notification.id] === 'read' || 
-                actionLoading[notification.id] === 'delete'
+                actionLoading[notification.id] === "read" ||
+                actionLoading[notification.id] === "delete"
               }
             />
           </List.Item>
@@ -196,7 +230,9 @@ const UserNotificationList = ({
       {loading && notifications.length > 0 && (
         <div style={{ textAlign: "center", padding: "16px 0" }}>
           <Spin size="small" />
-          <Text style={{ color: "#8c8c8c", fontSize: "12px", marginLeft: "8px" }}>
+          <Text
+            style={{ color: "#8c8c8c", fontSize: "12px", marginLeft: "8px" }}
+          >
             Memuat notifikasi...
           </Text>
         </div>

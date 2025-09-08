@@ -1,9 +1,10 @@
 import useScrollRestoration from "@/hooks/useScrollRestoration";
 import {
   bookmarkKnowledgeContent,
-  getUserOwnContents,
   likeKnowledgeContent,
 } from "@/services/knowledge-management.services";
+import { useUserBookmarksInfinite } from "@/hooks/knowledge-management/useUserBookmarks";
+import { useUserOwnContentsInfinite } from "@/hooks/knowledge-management/useUserOwnContents";
 import { useDebouncedValue } from "@mantine/hooks";
 import {
   useInfiniteQuery,
@@ -28,7 +29,7 @@ import { useRouter } from "next/router";
 import { useCallback, useEffect, useState } from "react";
 import { useDebouncedValue as useDebounce } from "@mantine/hooks";
 import ContentCard from "../components/ContentCard";
-import KnowledgeFilters from "../components/KnowledgeFilters";
+// KnowledgeFilters removed - handled by parent component
 import {
   UserOutlined,
   FileTextOutlined,
@@ -38,55 +39,24 @@ import {
 const { useBreakpoint } = Grid;
 const { Title, Text } = Typography;
 
-const MyKnowledgeContents = () => {
+const MyKnowledgeContents = ({
+  searchQuery = "",
+  selectedCategory = null,
+  selectedTag = null,
+  selectedSort = "created_at:desc",
+  selectedType = "all",
+  selectedStatus = "all",
+  selectedSavedContent = false,
+}) => {
   useScrollRestoration();
 
   const router = useRouter();
   const queryClient = useQueryClient();
 
-  // Get URL parameters using useRouter
-  const { query: routerQuery, push, pathname } = router;
-
-  // State management with URL sync
-  const [searchQuery, setSearchQuery] = useState(routerQuery.search || "");
-  const [selectedCategory, setSelectedCategory] = useState(
-    routerQuery.category || null
-  );
-  const [selectedTag, setSelectedTag] = useState(
-    routerQuery.tag
-      ? Array.isArray(routerQuery.tag)
-        ? routerQuery.tag
-        : [routerQuery.tag]
-      : null
-  );
-  const [selectedSort, setSelectedSort] = useState(
-    routerQuery.sort || "created_at"
-  );
-  const [selectedStatus, setSelectedStatus] = useState(
-    routerQuery.status || "all"
-  );
-  const [selectedType, setSelectedType] = useState(routerQuery.type || "all");
-
   // Debounced search for API calls
   const [debouncedSearch] = useDebounce(searchQuery, 500);
   const [likingItems, setLikingItems] = useState(new Set());
   const [bookmarkingItems, setBookmarkingItems] = useState(new Set());
-
-  // Sync state with URL parameters when router query changes
-  useEffect(() => {
-    setSearchQuery(routerQuery.search || "");
-    setSelectedCategory(routerQuery.category || null);
-    setSelectedTag(
-      routerQuery.tag
-        ? Array.isArray(routerQuery.tag)
-          ? routerQuery.tag
-          : [routerQuery.tag]
-        : null
-    );
-    setSelectedSort(routerQuery.sort || "created_at");
-    setSelectedStatus(routerQuery.status || "all");
-    setSelectedType(routerQuery.type || "all");
-  }, [routerQuery]);
 
   // Responsive breakpoints
   const screens = useBreakpoint();
@@ -102,38 +72,26 @@ const MyKnowledgeContents = () => {
     { key: "archived", label: "Diarsipkan", color: "warning" },
   ];
 
-  // Sync URL with current filter state
-  const updateURL = useCallback(
-    (newFilters) => {
-      const params = new URLSearchParams();
+  // URL handling is managed by parent component
 
-      // Only add non-default values to URL
-      if (newFilters.search?.trim())
-        params.set("search", newFilters.search.trim());
-      if (newFilters.category) params.set("category", newFilters.category);
-      if (newFilters.tag && newFilters.tag.length > 0) {
-        if (Array.isArray(newFilters.tag)) {
-          newFilters.tag.forEach((tag) => params.append("tag", tag));
-        } else {
-          params.set("tag", newFilters.tag);
-        }
-      }
-      if (newFilters.sort && newFilters.sort !== "created_at")
-        params.set("sort", newFilters.sort);
-      if (newFilters.status && newFilters.status !== "all")
-        params.set("status", newFilters.status);
-      if (newFilters.type && newFilters.type !== "all")
-        params.set("type", newFilters.type);
+  // Build query parameters
+  const queryParams = {
+    search: debouncedSearch,
+    category_id: selectedCategory,
+    tags:
+      selectedTag && selectedTag.length > 0
+        ? selectedTag.join(",")
+        : undefined,
+    sort: selectedSort,
+    status: selectedStatus === "all" ? undefined : selectedStatus,
+    type: selectedType === "all" ? undefined : selectedType,
+  };
 
-      const queryString = params.toString();
-      const newUrl = queryString ? `?${queryString}` : pathname;
+  // Use different hooks based on bookmark filter
+  const bookmarkQuery = useUserBookmarksInfinite(queryParams);
+  const ownContentQuery = useUserOwnContentsInfinite(queryParams);
 
-      // Update URL without triggering full page reload
-      push(newUrl, undefined, { shallow: true });
-    },
-    [push, pathname]
-  );
-
+  // Select appropriate query result
   const {
     data,
     fetchNextPage,
@@ -141,41 +99,7 @@ const MyKnowledgeContents = () => {
     isFetchingNextPage,
     isLoading,
     isError,
-  } = useInfiniteQuery(
-    [
-      "fetch-my-knowledge-contents",
-      debouncedSearch,
-      selectedCategory,
-      selectedTag,
-      selectedSort,
-      selectedStatus,
-      selectedType,
-    ],
-    ({ pageParam = 1 }) =>
-      getUserOwnContents({
-        page: pageParam,
-        limit: 10,
-        search: debouncedSearch,
-        category_id: selectedCategory,
-        tags:
-          selectedTag && selectedTag.length > 0
-            ? selectedTag.join(",")
-            : undefined,
-        sort: selectedSort,
-        status: selectedStatus === "all" ? undefined : selectedStatus,
-        type: selectedType === "all" ? undefined : selectedType,
-      }),
-    {
-      getNextPageParam: (lastPage, allPages) => {
-        const currentPage = allPages.length;
-        const totalPages = Math.ceil(lastPage.total / 10);
-        return currentPage < totalPages ? currentPage + 1 : undefined;
-      },
-      keepPreviousData: true,
-      staleTime: 30000, // 30 seconds
-      cacheTime: 300000, // 5 minutes
-    }
-  );
+  } = selectedSavedContent ? bookmarkQuery : ownContentQuery;
 
   // Infinite scroll handler
   const handleScroll = useCallback(() => {
@@ -252,7 +176,12 @@ const MyKnowledgeContents = () => {
         setLikingItems((prev) => new Set([...prev, contentId]));
       },
       onSuccess: () => {
-        queryClient.invalidateQueries(["fetch-my-knowledge-contents"]);
+        // Invalidate appropriate query based on current filter
+        if (selectedSavedContent) {
+          queryClient.invalidateQueries(["user-bookmarks-infinite"]);
+        } else {
+          queryClient.invalidateQueries(["user-own-contents-infinite"]);
+        }
       },
       onError: () => {
         message.error("Gagal menyukai konten");
@@ -280,7 +209,9 @@ const MyKnowledgeContents = () => {
             ? "Konten disimpan"
             : "Konten dihapus dari simpanan"
         );
-        queryClient.invalidateQueries(["fetch-my-knowledge-contents"]);
+        // Invalidate both queries as bookmark status affects both
+        queryClient.invalidateQueries(["user-bookmarks-infinite"]);
+        queryClient.invalidateQueries(["user-own-contents-infinite"]);
       },
       onError: () => {
         message.error("Gagal menyimpan konten");
@@ -309,96 +240,7 @@ const MyKnowledgeContents = () => {
     }
   };
 
-  // Filter handlers
-  const handleCategoryChange = (categoryId) => {
-    setSelectedCategory(categoryId);
-    updateURL({
-      search: searchQuery,
-      category: categoryId,
-      tag: selectedTag,
-      sort: selectedSort,
-      status: selectedStatus,
-      type: selectedType,
-    });
-  };
-
-  const handleTagChange = (tag) => {
-    setSelectedTag(tag);
-    updateURL({
-      search: searchQuery,
-      category: selectedCategory,
-      tag: tag,
-      sort: selectedSort,
-      status: selectedStatus,
-      type: selectedType,
-    });
-  };
-
-  const handleSortChange = (sort) => {
-    setSelectedSort(sort);
-    updateURL({
-      search: searchQuery,
-      category: selectedCategory,
-      tag: selectedTag,
-      sort: sort,
-      status: selectedStatus,
-      type: selectedType,
-    });
-  };
-
-  const handleStatusChange = (status) => {
-    setSelectedStatus(status);
-    updateURL({
-      search: searchQuery,
-      category: selectedCategory,
-      tag: selectedTag,
-      sort: selectedSort,
-      status: status,
-      type: selectedType,
-    });
-  };
-
-  const handleTypeChange = (type) => {
-    setSelectedType(type);
-    updateURL({
-      search: searchQuery,
-      category: selectedCategory,
-      tag: selectedTag,
-      sort: selectedSort,
-      status: selectedStatus,
-      type: type,
-    });
-  };
-
-  const handleSearchChange = (e) => {
-    const value = e.target.value;
-    setSearchQuery(value);
-  };
-
-  const handleSearch = (value) => {
-    setSearchQuery(value);
-    updateURL({
-      search: value,
-      category: selectedCategory,
-      tag: selectedTag,
-      sort: selectedSort,
-      status: selectedStatus,
-      type: selectedType,
-    });
-  };
-
-  const handleClearFilters = useCallback(() => {
-    // Reset all filters to default values
-    setSearchQuery("");
-    setSelectedCategory(null);
-    setSelectedTag(null);
-    setSelectedSort("created_at");
-    setSelectedStatus("all");
-    setSelectedType("all");
-
-    // Clear URL parameters
-    push(pathname, undefined, { shallow: true });
-  }, [push, pathname]);
+  // Filter handlers are handled by parent component - filters passed as props
 
   const getCurrentStatusInfo = () => {
     return (
@@ -525,29 +367,7 @@ const MyKnowledgeContents = () => {
           </Flex>
         </Card>
 
-        {/* Filters with Search and Status */}
-        <KnowledgeFilters
-          selectedCategory={selectedCategory}
-          selectedTag={selectedTag}
-          selectedSort={selectedSort}
-          onCategoryChange={handleCategoryChange}
-          onTagChange={handleTagChange}
-          onSortChange={handleSortChange}
-          onClearFilters={handleClearFilters}
-          showStatusFilter={true}
-          selectedStatus={selectedStatus}
-          statusOptions={statusOptions}
-          onStatusChange={handleStatusChange}
-          statusCounts={statusCounts}
-          showTypeFilter={true}
-          selectedType={selectedType}
-          onTypeChange={handleTypeChange}
-          typeCounts={typeCounts}
-          showSearch={true}
-          searchQuery={searchQuery}
-          onSearchChange={handleSearchChange}
-          onSearch={handleSearch}
-        />
+        {/* Note: Filters are handled by parent component via KnowledgeFiltersStack */}
 
         {/* Content List */}
         <Row gutter={[0, 0]} style={{ marginTop: "16px" }}>

@@ -1,4 +1,5 @@
 const KnowledgeContent = require("@/models/knowledge/contents.model");
+const KnowledgeUserInteraction = require("@/models/knowledge/user-interactions.model");
 import { calculateReadingTime } from "./knowledge-content.services";
 
 // ===== UTILITY FUNCTIONS =====
@@ -43,23 +44,29 @@ export const buildUserInteractionSubqueries = (
 
   return [
     // More efficient subquery for is_liked using EXISTS
-    KnowledgeContent.raw(`
+    KnowledgeContent.raw(
+      `
       EXISTS(
         SELECT 1 FROM knowledge.user_interactions ui 
         WHERE ui.content_id = knowledge.contents.id 
         AND ui.user_id = ? 
         AND ui.interaction_type = 'like'
       ) as is_liked
-    `, [customId]),
+    `,
+      [customId]
+    ),
     // More efficient subquery for is_bookmarked using EXISTS
-    KnowledgeContent.raw(`
+    KnowledgeContent.raw(
+      `
       EXISTS(
         SELECT 1 FROM knowledge.user_interactions ui 
         WHERE ui.content_id = knowledge.contents.id 
         AND ui.user_id = ? 
         AND ui.interaction_type = 'bookmark'
       ) as is_bookmarked
-    `, [customId]),
+    `,
+      [customId]
+    ),
   ];
 };
 
@@ -334,7 +341,125 @@ export const getUserEngagementStats = async (customId) => {
 export const getUserContentCategoryCounts = async (customId) => {
   const results = await KnowledgeContent.query()
     .where("knowledge.contents.author_id", customId)
-    .leftJoin("knowledge.category", "knowledge.contents.category_id", "knowledge.category.id")
+    .leftJoin(
+      "knowledge.category",
+      "knowledge.contents.category_id",
+      "knowledge.category.id"
+    )
+    .select(
+      "knowledge.category.id as category_id",
+      "knowledge.category.name as category_name",
+      KnowledgeContent.raw("COUNT(*) as count")
+    )
+    .groupBy("knowledge.category.id", "knowledge.category.name");
+
+  const counts = {};
+  let total = 0;
+
+  results.forEach((result) => {
+    const categoryId = result.category_id;
+    const count = parseInt(result.count);
+    if (categoryId) {
+      counts[categoryId] = count;
+      total += count;
+    }
+  });
+
+  counts.all = total;
+
+  return counts;
+};
+
+// ===== BOOKMARK STATISTICS SERVICES =====
+
+/**
+ * Get user's bookmarked content status counts
+ */
+export const getUserBookmarkStatusCounts = async (customId) => {
+  const results = await KnowledgeContent.query()
+    .innerJoin(
+      "knowledge.user_interactions", 
+      "knowledge.contents.id", 
+      "knowledge.user_interactions.content_id"
+    )
+    .where("knowledge.user_interactions.user_id", customId)
+    .where("knowledge.user_interactions.interaction_type", "bookmark")
+    .groupBy("status")
+    .select("status")
+    .count("* as count");
+
+  const counts = {
+    all: 0,
+    draft: 0,
+    pending: 0,
+    published: 0,
+    rejected: 0,
+    archived: 0,
+  };
+
+  results.forEach((result) => {
+    const status = result.status;
+    const count = parseInt(result.count);
+    counts[status] = count;
+    counts.all += count;
+  });
+
+  return counts;
+};
+
+/**
+ * Get user's bookmarked content type counts
+ */
+export const getUserBookmarkTypeCounts = async (customId) => {
+  const results = await KnowledgeContent.query()
+    .innerJoin(
+      "knowledge.user_interactions", 
+      "knowledge.contents.id", 
+      "knowledge.user_interactions.content_id"
+    )
+    .where("knowledge.user_interactions.user_id", customId)
+    .where("knowledge.user_interactions.interaction_type", "bookmark")
+    .select(
+      KnowledgeContent.raw("COALESCE(type, 'teks') as type_normalized"),
+      KnowledgeContent.raw("COUNT(*) as count")
+    )
+    .groupBy(KnowledgeContent.raw("COALESCE(type, 'teks')"));
+
+  const counts = {
+    all: 0,
+    teks: 0,
+    gambar: 0,
+    video: 0,
+    audio: 0,
+  };
+
+  results.forEach((result) => {
+    const type = result.type_normalized;
+    const count = parseInt(result.count);
+    counts[type] = count;
+    counts.all += count;
+  });
+
+  return counts;
+};
+
+/**
+ * Get user's bookmarked content category counts
+ */
+export const getUserBookmarkCategoryCounts = async (customId) => {
+  const results = await KnowledgeContent.query()
+    .innerJoin(
+      "knowledge.user_interactions", 
+      "knowledge.contents.id", 
+      "knowledge.user_interactions.content_id"
+    )
+    .where("knowledge.user_interactions.user_id", customId)
+    .where("knowledge.user_interactions.interaction_type", "bookmark")
+    .leftJoin(
+      "knowledge.category",
+      "knowledge.contents.category_id",
+      "knowledge.category.id"
+    )
     .select(
       "knowledge.category.id as category_id",
       "knowledge.category.name as category_name",
@@ -363,12 +488,13 @@ export const getUserContentCategoryCounts = async (customId) => {
  * Get comprehensive user knowledge statistics
  */
 export const getUserKnowledgeStats = async (customId) => {
-  const [statusCounts, typeCounts, engagementStats, categoryCounts] = await Promise.all([
-    getUserContentStatusCounts(customId),
-    getUserContentTypeCounts(customId),
-    getUserEngagementStats(customId),
-    getUserContentCategoryCounts(customId),
-  ]);
+  const [statusCounts, typeCounts, engagementStats, categoryCounts] =
+    await Promise.all([
+      getUserContentStatusCounts(customId),
+      getUserContentTypeCounts(customId),
+      getUserEngagementStats(customId),
+      getUserContentCategoryCounts(customId),
+    ]);
 
   return {
     statusCounts,
@@ -516,4 +642,181 @@ export const deleteUserContent = async (contentId, customId) => {
   });
 
   return result;
+};
+
+/**
+ * Build query for user's bookmarked contents with filters
+ */
+export const buildUserBookmarkQuery = (customId, filters = {}) => {
+  const {
+    search = "",
+    category_id = "",
+    tags = [],
+    type = "",
+  } = filters;
+
+  // Base query: get bookmarked content through user_interactions
+  let query = KnowledgeContent.query()
+    .select('knowledge.contents.*')
+    .innerJoin(
+      'knowledge.user_interactions',
+      'knowledge.contents.id',
+      'knowledge.user_interactions.content_id'
+    )
+    .where('knowledge.user_interactions.user_id', customId)
+    .where('knowledge.user_interactions.interaction_type', 'bookmark')
+    .where('knowledge.contents.status', 'published'); // Only show published content
+
+  // Search filter
+  if (search) {
+    query = query.andWhere((builder) => {
+      builder
+        .where("knowledge.contents.title", "ilike", `%${search}%`)
+        .orWhere("knowledge.contents.content", "ilike", `%${search}%`);
+    });
+  }
+
+  // Category filter
+  if (category_id) {
+    query = query.andWhere("knowledge.contents.category_id", category_id);
+  }
+
+  // Tags filter
+  if (tags && tags.length > 0) {
+    query = query.andWhere((builder) => {
+      tags.forEach((tag) => {
+        builder.orWhereRaw("knowledge.contents.tags @> ?", [JSON.stringify([tag])]);
+      });
+    });
+  }
+
+  // Type filter
+  if (type && type !== "all") {
+    if (type === "teks") {
+      // For teks, include both 'teks' and null values
+      query = query.andWhere((builder) => {
+        builder.where("knowledge.contents.type", "teks").orWhereNull("knowledge.contents.type");
+      });
+    } else {
+      query = query.andWhere("knowledge.contents.type", type);
+    }
+  }
+
+  return query;
+};
+
+/**
+ * Get user's bookmarked knowledge contents with pagination and filters (internal function)
+ */
+const getUserBookmarkedContents = (customId, filters = {}) => {
+  const {
+    page = 1,
+    limit = 10,
+    sort = "created_at:desc",
+    tags = "",
+  } = filters;
+
+  // Process tags
+  const tagFilters = Array.isArray(filters.tag)
+    ? filters.tag
+    : filters.tag
+    ? [filters.tag]
+    : [];
+  const allTags = tags ? tags.split(",").filter(Boolean) : [];
+  const finalTags = [...new Set([...tagFilters, ...allTags])].filter(Boolean);
+
+  // Build query
+  const baseQuery = buildUserBookmarkQuery(customId, {
+    ...filters,
+    tags: finalTags,
+  });
+
+  // Sorting
+  const sortField = getSortField(sort);
+  const sortDirection = getSortDirection(sort);
+
+  // Handle null values in sorting for count fields
+  let orderByClause;
+  if (
+    [
+      "likes_count",
+      "comments_count", 
+      "views_count",
+      "bookmarks_count",
+    ].includes(sortField)
+  ) {
+    orderByClause = KnowledgeContent.raw(
+      `COALESCE(knowledge.contents.${sortField}, 0) ${sortDirection.toUpperCase()}`
+    );
+  } else {
+    orderByClause = [`knowledge.contents.${sortField}`, sortDirection];
+  }
+
+  // Execute paginated query with interactions - exclude content field for performance
+  return baseQuery
+    .select(
+      "knowledge.contents.id",
+      "knowledge.contents.title",
+      "knowledge.contents.summary",
+      "knowledge.contents.author_id",
+      "knowledge.contents.category_id",
+      KnowledgeContent.raw("COALESCE(knowledge.contents.type, 'teks') as type"),
+      "knowledge.contents.source_url",
+      "knowledge.contents.status",
+      "knowledge.contents.tags",
+      KnowledgeContent.raw(
+        "COALESCE(knowledge.contents.likes_count, 0) as likes_count"
+      ),
+      KnowledgeContent.raw(
+        "COALESCE(knowledge.contents.comments_count, 0) as comments_count"
+      ),
+      KnowledgeContent.raw(
+        "COALESCE(knowledge.contents.views_count, 0) as views_count"
+      ),
+      KnowledgeContent.raw(
+        "COALESCE(knowledge.contents.bookmarks_count, 0) as bookmarks_count"
+      ),
+      "knowledge.contents.created_at",
+      "knowledge.contents.updated_at",
+      "knowledge.user_interactions.created_at as bookmarked_at",
+      ...buildUserInteractionSubqueries(customId)
+      // Note: Excluded 'content' field for better performance on bookmarks
+    )
+    .withGraphFetched(
+      "[author(simpleWithImage), category, user_verified(simpleWithImage)]"
+    )
+    .orderByRaw(
+      Array.isArray(orderByClause)
+        ? `${orderByClause[0]} ${orderByClause[1]}`
+        : orderByClause
+    )
+    .page(page - 1, limit);
+};
+
+/**
+ * Get user's bookmarked contents with statistics (similar to getUserContentsWithStats)
+ */
+export const getUserKnowledgeContentsBookmarks = async (customId, filters = {}) => {
+  const [contents, statusCounts, typeCounts, engagementStats, categoryCounts] =
+    await Promise.all([
+      getUserBookmarkedContents(customId, filters),
+      getUserBookmarkStatusCounts(customId),
+      getUserBookmarkTypeCounts(customId),
+      getUserEngagementStats(customId), // Keep engagement stats from user's own content
+      getUserBookmarkCategoryCounts(customId),
+    ]);
+
+  return {
+    data: contents?.results,
+    total: contents?.total,
+    page: contents?.page + 1 || 1,
+    limit: contents?.limit || 10,
+    statusCounts,
+    typeCounts,
+    categoryCounts,
+    stats: {
+      ...engagementStats,
+      ...statusCounts,
+    },
+  };
 };

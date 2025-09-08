@@ -4,6 +4,7 @@ import {
   DeleteOutlined,
   CheckOutlined,
   EyeInvisibleOutlined,
+  EyeOutlined,
 } from "@ant-design/icons";
 import NotificationIcon from "./NotificationIcon";
 
@@ -13,6 +14,7 @@ const NotificationCard = ({
   notification,
   onMarkAsRead,
   onDelete,
+  onViewContent,
   loading = false,
 }) => {
   const {
@@ -39,6 +41,12 @@ const NotificationCard = ({
   const handleDelete = () => {
     if (onDelete) {
       onDelete(id);
+    }
+  };
+
+  const handleViewContent = () => {
+    if (onViewContent && notification.content_id) {
+      onViewContent(notification);
     }
   };
 
@@ -260,6 +268,28 @@ const NotificationCard = ({
 
           {/* Actions */}
           <Flex justify="flex-end" gap="4px">
+            {notification.content_id && (
+              <Tooltip title="Lihat konten">
+                <Button
+                  type="text"
+                  size="small"
+                  icon={<EyeOutlined />}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleViewContent();
+                  }}
+                  style={{
+                    color: "#1890ff",
+                    padding: "4px 8px",
+                    height: "24px",
+                    fontSize: "12px",
+                  }}
+                >
+                  Lihat
+                </Button>
+              </Tooltip>
+            )}
+
             {!is_read && (
               <Tooltip title="Tandai sudah dibaca">
                 <Button

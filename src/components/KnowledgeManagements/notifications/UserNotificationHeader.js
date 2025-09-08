@@ -1,7 +1,8 @@
 import React from "react";
-import { Flex, Typography, Button, Badge, Tooltip } from "antd";
-import { 
-  CheckOutlined, 
+import { Flex, Typography, Button, Badge, Tooltip, Breadcrumb } from "antd";
+import Link from "next/link";
+import {
+  CheckOutlined,
   BellOutlined,
   ReloadOutlined,
   BulbOutlined,
@@ -33,6 +34,26 @@ const UserNotificationHeader = ({
         backgroundColor: "white",
       }}
     >
+      {/* Breadcrumb */}
+      <Breadcrumb
+        style={{ marginBottom: "16px" }}
+        items={[
+          {
+            title: <Link href="/asn-connect/asn-knowledge">ASNPedia</Link>,
+          },
+          {
+            title: (
+              <Link href="/asn-connect/asn-knowledge/my-knowledge">
+                ASNPedia Saya
+              </Link>
+            ),
+          },
+          {
+            title: <span style={{ color: "#FF4500" }}>Notifikasi</span>,
+          },
+        ]}
+      />
+
       <Flex justify="space-between" align="flex-start">
         {/* Left: Title and Stats */}
         <Flex vertical gap="4px">
@@ -48,30 +69,32 @@ const UserNotificationHeader = ({
             >
               Notifikasi
             </Title>
-            
+
             {/* Notification Bell with Badge */}
             <Badge count={unreadCount} size="small" offset={[0, 0]}>
-              <BellOutlined 
-                style={{ 
-                  fontSize: "18px", 
-                  color: hasUnread ? "#FF4500" : "#8c8c8c" 
-                }} 
+              <BellOutlined
+                style={{
+                  fontSize: "18px",
+                  color: hasUnread ? "#FF4500" : "#8c8c8c",
+                }}
               />
             </Badge>
           </Flex>
-          
+
           {/* Stats */}
           <Flex align="center" gap="16px">
             <Text style={{ color: "#8c8c8c", fontSize: "13px" }}>
-              {totalCount > 0 ? `Total ${totalCount} notifikasi` : "Tidak ada notifikasi"}
+              {totalCount > 0
+                ? `Total ${totalCount} notifikasi`
+                : "Tidak ada notifikasi"}
             </Text>
-            
+
             {totalCount > 0 && (
               <>
                 <span style={{ color: "#d9d9d9" }}>•</span>
-                <Text 
-                  style={{ 
-                    color: hasUnread ? "#FF4500" : "#52c41a", 
+                <Text
+                  style={{
+                    color: hasUnread ? "#FF4500" : "#52c41a",
                     fontSize: "13px",
                     fontWeight: hasUnread ? 600 : 400,
                   }}
@@ -121,19 +144,21 @@ const UserNotificationHeader = ({
               Tandai Semua Dibaca
             </Button>
           )}
-          
+
           {/* All Read State */}
           {!hasUnread && totalCount > 0 && (
             <Flex align="center" gap="6px">
               <CheckOutlined style={{ color: "#52c41a", fontSize: "14px" }} />
-              <Text style={{ color: "#52c41a", fontSize: "12px", fontWeight: 500 }}>
+              <Text
+                style={{ color: "#52c41a", fontSize: "12px", fontWeight: 500 }}
+              >
                 Semua Sudah Dibaca
               </Text>
             </Flex>
           )}
         </Flex>
       </Flex>
-      
+
       {/* Additional Info or Quick Stats */}
       {totalCount > 0 && (
         <div
@@ -151,15 +176,16 @@ const UserNotificationHeader = ({
             ) : (
               <CheckOutlined style={{ color: "#389e0d", fontSize: "12px" }} />
             )}
-            <Text style={{ 
-              color: hasUnread ? "#d46b08" : "#389e0d", 
-              fontSize: "11px",
-              fontWeight: 500,
-            }}>
-              {hasUnread 
-                ? `Anda memiliki ${unreadCount} notifikasi yang perlu perhatian` 
-                : "Semua notifikasi sudah dibaca. Tetap pantau untuk update terbaru!"
-              }
+            <Text
+              style={{
+                color: hasUnread ? "#d46b08" : "#389e0d",
+                fontSize: "11px",
+                fontWeight: 500,
+              }}
+            >
+              {hasUnread
+                ? `Anda memiliki ${unreadCount} notifikasi yang perlu perhatian`
+                : "Semua notifikasi sudah dibaca. Tetap pantau untuk update terbaru!"}
             </Text>
           </Flex>
         </div>

@@ -6,6 +6,7 @@ import {
   submitContentForReview,
   editUserContent,
   deleteUserContent,
+  getUserKnowledgeContentsBookmarks as getUserBookmarksService,
 } from "@/utils/services/knowledge-user.services";
 
 // Get user knowledge content
@@ -108,6 +109,23 @@ export const deleteMyContent = async (req, res) => {
       success: true,
       message: "Konten berhasil dihapus",
     });
+  } catch (error) {
+    handleError(res, error);
+  }
+};
+
+export const getUserKnowledgeContentsBookmarks = async (req, res) => {
+  try {
+    const { customId } = req?.user;
+    const filters = {
+      ...req.query,
+      tag: req.query.tag, // Preserve original tag parameter structure
+    };
+
+    // Use service to get user bookmarked contents with full statistics
+    const data = await getUserBookmarksService(customId, filters);
+
+    res.json(data);
   } catch (error) {
     handleError(res, error);
   }

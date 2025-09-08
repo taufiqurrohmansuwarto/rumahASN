@@ -4,6 +4,7 @@ import useScrollRestoration from "@/hooks/useScrollRestoration";
 import { UserNotificationCenter } from "@/components/KnowledgeManagements/notifications";
 import { FloatButton } from "antd";
 import Head from "next/head";
+import PageContainer from "@/components/PageContainer";
 
 const AsnKnowledgeMyKnowledgeNotifications = () => {
   useScrollRestoration("notifications-scroll", true, false, true); // Enable smooth restoration

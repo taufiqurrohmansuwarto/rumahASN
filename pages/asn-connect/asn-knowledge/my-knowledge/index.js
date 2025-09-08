@@ -2,13 +2,13 @@ import {
   MyKnowledgeContents,
   KnowledgeLayout,
 } from "@/components/KnowledgeManagements";
-import { getUserOwnContents } from "@/services/knowledge-management.services";
-import { useQuery } from "@tanstack/react-query";
+import { useUserBookmarks } from "@/hooks/knowledge-management/useUserBookmarks";
+import { useUserOwnContents } from "@/hooks/knowledge-management/useUserOwnContents";
 import Layout from "@/components/Layout";
 import LayoutASNConnect from "@/components/Socmed/LayoutASNConnect";
 import useScrollRestoration from "@/hooks/useScrollRestoration";
 import { Col, FloatButton, Row, Grid } from "antd";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
 import Head from "next/head";
 import KnowledgeFiltersStack from "@/components/KnowledgeManagements/components/KnowledgeFiltersStack";
@@ -29,20 +29,35 @@ const AsnKnowledgeMyKnowledge = () => {
   const [selectedSort, setSelectedSort] = useState(query.sort || "created_at:desc");
   const [selectedType, setSelectedType] = useState(query.type || "all");
   const [selectedStatus, setSelectedStatus] = useState(query.status || "all");
+  const [selectedSavedContent, setSelectedSavedContent] = useState(query.is_bookmark === "true" || false);
 
   useScrollRestoration("my-knowledge-scroll", true, false, true);
 
-  // Fetch user stats for counts
-  const { data: userStats, isLoading: statsLoading } = useQuery(
-    ["user-knowledge-stats"],
-    () => getUserOwnContents({
-      page: 1,
-      limit: 1, // Just get stats, not actual content
-    }),
-    {
-      staleTime: 300000, // 5 minutes
-    }
-  );
+  // Sync state with URL changes
+  useEffect(() => {
+    setSearchQuery(query.search || "");
+    setSelectedCategory(query.category || null);
+    setSelectedTag(query.tag || null);
+    setSelectedSort(query.sort || "created_at:desc");
+    setSelectedType(query.type || "all");
+    setSelectedStatus(query.status || "all");
+    setSelectedSavedContent(query.is_bookmark === "true" || false);
+  }, [query]);
+
+  // Build query for stats - basic query without filters for counts
+  const statsQuery = {
+    page: 1,
+    limit: 1, // Just get stats, not actual content
+  };
+
+  // Use different hooks based on bookmark filter
+  const bookmarkStats = useUserBookmarks(statsQuery);
+  const ownContentStats = useUserOwnContents(statsQuery);
+
+  // Select appropriate stats based on filter
+  const { data: userStats, isLoading: statsLoading } = selectedSavedContent 
+    ? bookmarkStats 
+    : ownContentStats;
 
   // Extract counts from API response
   const statusCounts = userStats?.statusCounts || {};
@@ -75,6 +90,7 @@ const AsnKnowledgeMyKnowledge = () => {
     if (newFilters.sort && newFilters.sort !== "created_at:desc") params.set("sort", newFilters.sort);
     if (newFilters.type && newFilters.type !== "all") params.set("type", newFilters.type);
     if (newFilters.status && newFilters.status !== "all") params.set("status", newFilters.status);
+    if (newFilters.is_bookmark === true) params.set("is_bookmark", "true");
 
     const queryString = params.toString();
     const newUrl = queryString ? `${router.pathname}?${queryString}` : router.pathname;
@@ -92,6 +108,7 @@ const AsnKnowledgeMyKnowledge = () => {
       sort: selectedSort,
       type: selectedType,
       status: selectedStatus,
+      is_bookmark: selectedSavedContent,
     });
   };
 
@@ -104,6 +121,7 @@ const AsnKnowledgeMyKnowledge = () => {
       sort: selectedSort,
       type: selectedType,
       status: selectedStatus,
+      is_bookmark: selectedSavedContent,
     });
   };
 
@@ -116,6 +134,7 @@ const AsnKnowledgeMyKnowledge = () => {
       sort: selectedSort,
       type: selectedType,
       status: selectedStatus,
+      is_bookmark: selectedSavedContent,
     });
   };
 
@@ -128,6 +147,7 @@ const AsnKnowledgeMyKnowledge = () => {
       sort: value,
       type: selectedType,
       status: selectedStatus,
+      is_bookmark: selectedSavedContent,
     });
   };
 
@@ -140,6 +160,7 @@ const AsnKnowledgeMyKnowledge = () => {
       sort: selectedSort,
       type: value,
       status: selectedStatus,
+      is_bookmark: selectedSavedContent,
     });
   };
 
@@ -152,6 +173,7 @@ const AsnKnowledgeMyKnowledge = () => {
       sort: selectedSort,
       type: selectedType,
       status: value,
+      is_bookmark: selectedSavedContent,
     });
   };
 
@@ -162,7 +184,21 @@ const AsnKnowledgeMyKnowledge = () => {
     setSelectedSort("created_at:desc");
     setSelectedType("all");
     setSelectedStatus("all");
+    setSelectedSavedContent(false);
     router.push(router.pathname, undefined, { shallow: true });
+  };
+
+  const handleSavedContentChange = (value) => {
+    setSelectedSavedContent(value);
+    updateURL({
+      search: searchQuery,
+      category: selectedCategory,
+      tag: selectedTag,
+      sort: selectedSort,
+      type: selectedType,
+      status: selectedStatus,
+      is_bookmark: value,
+    });
   };
 
   return (
@@ -194,6 +230,9 @@ const AsnKnowledgeMyKnowledge = () => {
                 statusCounts={statusCounts}
                 typeCounts={typeCounts}
                 categoryCounts={categoryCounts}
+                showSavedContentFilter={true}
+                selectedSavedContent={selectedSavedContent}
+                onSavedContentChange={handleSavedContentChange}
                 isLoading={statsLoading}
               />
             </div>
@@ -207,6 +246,7 @@ const AsnKnowledgeMyKnowledge = () => {
                 selectedSort={selectedSort}
                 selectedType={selectedType}
                 selectedStatus={selectedStatus}
+                selectedSavedContent={selectedSavedContent}
               />
             </KnowledgeLayout>
           </Col>
