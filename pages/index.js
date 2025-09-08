@@ -28,7 +28,7 @@ export default function Home() {
     const pegawaiPemda = userPns || userPttpk;
 
     if (pegawaiBKD) {
-      router.push("/beranda-bkd?tab=my-task");
+      router.push("/asn-connect/asn-updates");
     } else if (fasilitatorMaster) {
       router.push("/rekon/dashboard");
     } else if (pegawaiPemda || fasilitatorMaster) {

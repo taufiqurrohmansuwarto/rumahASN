@@ -1,5 +1,7 @@
 import { Typography } from "antd";
 import BankJatimBanner from "./BankJatimBanner";
+import BestieAIBanner from "./BestieAIBanner";
+import MyASNBanner from "./MyASNBanner";
 
 const { Title, Text } = Typography;
 
@@ -8,11 +10,11 @@ function ASNConnectHeader() {
     <>
       <div
         style={{
-          background: "linear-gradient(135deg, #FF4500 0%, #FF6B35 100%)",
+          background: "#FF0044",
           padding: "32px 0",
           position: "relative",
           overflow: "hidden",
-          boxShadow: "0 8px 32px rgba(255, 69, 0, 0.3)",
+          boxShadow: "0 8px 32px rgba(255, 0, 68, 0.3)",
           marginBottom: "24px",
           borderRadius: "12px",
         }}
@@ -99,8 +101,8 @@ function ASNConnectHeader() {
                   margin: 0,
                   color: "white",
                   fontSize: "28px",
-                  fontWeight: 800,
-                  textShadow: "0 2px 4px rgba(0, 0, 0, 0.1)",
+                  fontWeight: 900,
+                  textShadow: "0 2px 4px rgba(0, 0, 0, 0.2)",
                 }}
               >
                 ASN Connect
@@ -110,10 +112,11 @@ function ASNConnectHeader() {
             <Text
               style={{
                 fontSize: "16px",
-                color: "rgba(255, 255, 255, 0.95)",
+                color: "white",
                 display: "block",
                 marginBottom: "6px",
                 fontWeight: 500,
+                textShadow: "0 1px 2px rgba(0, 0, 0, 0.1)",
               }}
             >
               Menghubungkan Seluruh Pegawai Pemprov Jatim
@@ -122,16 +125,21 @@ function ASNConnectHeader() {
             <Text
               style={{
                 fontSize: "13px",
-                color: "rgba(255, 255, 255, 0.8)",
+                color: "white",
                 display: "block",
                 marginBottom: "16px",
+                textShadow: "0 1px 2px rgba(0, 0, 0, 0.1)",
               }}
             >
               🤝 Satu Platform, Satu Kolaborasi, Satu Jawa Timur
             </Text>
 
-            {/* Bank Jatim Banner Component */}
-            <BankJatimBanner />
+            {/* Banner Components */}
+            <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: "12px", flexWrap: "wrap" }}>
+              <BankJatimBanner />
+              <BestieAIBanner />
+              <MyASNBanner />
+            </div>
           </div>
         </div>
 

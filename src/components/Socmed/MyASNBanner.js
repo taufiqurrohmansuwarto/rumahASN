@@ -1,31 +1,31 @@
 import { Typography, Image, Grid } from "antd";
-import { BankOutlined, ArrowRightOutlined } from "@ant-design/icons";
+import { UserOutlined, ArrowRightOutlined } from "@ant-design/icons";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 
 const { Text } = Typography;
 const { useBreakpoint } = Grid;
 
-const BankJatimBanner = () => {
+const MyASNBanner = () => {
   const router = useRouter();
   const { data: session } = useSession();
   const screens = useBreakpoint();
   
   const isAsn = session?.user?.group === "MASTER" && session?.user?.role === "USER";
-  const linkGambar = "https://siasn.bkd.jatimprov.go.id:9000/public/logo-bank-jatim.png";
+  const linkGambar = "https://asndigital.bkn.go.id/images/logo-bkn.png";
   
   const getText = () => {
     if (screens.xs && !screens.sm) {
-      return "Bank Jatim";
+      return "ASN Digital";
     }
-    return "Bank Jatim • Simulasi & Kredit";
+    return "MyASN • Integrasi & Layanan";
   };
 
   if (!isAsn) return null;
 
   return (
     <div
-      onClick={() => router.push("/layanan-keuangan/bank-jatim/produk/kkb")}
+      onClick={() => router.push("/pemutakhiran-data/komparasi")}
       style={{
         display: "inline-flex",
         alignItems: "center",
@@ -67,14 +67,14 @@ const BankJatimBanner = () => {
       >
         <Image
           src={linkGambar}
-          alt="Bank Jatim"
+          alt="MyASN"
           preview={false}
           style={{
             width: "100%",
             height: "100%",
             objectFit: "contain",
           }}
-          fallback={<BankOutlined style={{ fontSize: "16px", color: "#FF6600" }} />}
+          fallback={<UserOutlined style={{ fontSize: "16px", color: "#FF6600" }} />}
         />
       </div>
       <Text
@@ -98,4 +98,4 @@ const BankJatimBanner = () => {
   );
 };
 
-export default BankJatimBanner;
+export default MyASNBanner;
