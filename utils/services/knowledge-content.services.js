@@ -429,7 +429,7 @@ export const createContent = async (contentData, authorId) => {
   const data = {
     ...contentData,
     author_id: authorId,
-    tags: JSON.stringify(contentData.tags || []),
+    tags: contentData.tags || [], // Use array directly for JSONB
     estimated_reading_time: readingTime,
     status: "draft",
   };
@@ -460,7 +460,7 @@ export const updateContent = async (contentId, contentData, userId) => {
   
   const updateData = {
     ...contentData,
-    tags: JSON.stringify(contentData.tags || []),
+    tags: contentData.tags || [], // Use array directly for JSONB
     estimated_reading_time: readingTime,
     updated_at: new Date(),
   };

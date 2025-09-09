@@ -11,84 +11,47 @@ import { handleError } from "@/utils/helper/controller-helper";
 import { awardXP } from "./gamification.controller";
 import { processContentWithAI } from "@/utils/services/ai-processing.services";
 import { createContentStatusNotification } from "@/utils/services/knowledge-notifications.services";
+import { getAdminKnowledgeContentsWithStats } from "@/utils/services/knowledge-admin.services";
 
+/**
+ * Get admin knowledge contents with comprehensive filters and statistics
+ * 
+ * Supports filtering by:
+ * - search: search in title, summary, content
+ * - status: all admin statuses (draft, pending, published, rejected, archived, pending_revision, revision_rejected)
+ * - category_id: filter by category
+ * - type: filter by content type (teks, gambar, video, audio)
+ * - tag/tags: filter by tags
+ * - sort: sorting options (created_at, updated_at, likes_count, etc.)
+ * 
+ * Returns data with comprehensive counts like user bookmark system
+ */
 export const getKnowledgeContentsAdmin = async (req, res) => {
   try {
-    // default filter adalah draft
-    const {
-      search,
-      page = 1,
-      limit = 10,
-      categoryId,
-      status = "pending",
-    } = req?.query;
-
-    const contents = await KnowledgeContent.query()
-      .where("status", status)
-      .andWhere((builder) => {
-        if (categoryId) {
-          builder.where("category_id", categoryId);
-        }
-        if (search) {
-          builder.where("title", "ilike", `%${search}%`);
-        }
-      })
-      .select(
-        "knowledge.contents.id",
-        "knowledge.contents.type",
-        "knowledge.contents.source_url",
-        "knowledge.contents.title",
-        "knowledge.contents.summary",
-        "knowledge.contents.author_id",
-        "knowledge.contents.category_id",
-        "knowledge.contents.status",
-        "knowledge.contents.tags",
-        "knowledge.contents.likes_count",
-        "knowledge.contents.comments_count",
-        "knowledge.contents.views_count",
-        "knowledge.contents.bookmarks_count",
-        "knowledge.contents.created_at",
-        "knowledge.contents.updated_at",
-        "knowledge.contents.verified_by",
-        "knowledge.contents.verified_at"
-      )
-      .withGraphFetched(
-        "[author(simpleWithImage), category, user_verified(simpleWithImage)]"
-      )
-      .orderBy("created_at", "desc")
-      .page(page - 1, limit);
-
-    const totalPending = await KnowledgeContent.query()
-      .where("status", "pending")
-      .count("id as total");
-
-    const totalPublished = await KnowledgeContent.query()
-      .where("status", "published")
-      .count("id as total");
-
-    const totalRejected = await KnowledgeContent.query()
-      .where("status", "rejected")
-      .count("id as total");
-
-    const totalArchived = await KnowledgeContent.query()
-      .where("status", "archived")
-      .count("id as total");
-
-    const result = {
-      data: contents.results,
-      total: contents.total,
-      page: parseInt(page),
-      limit: parseInt(limit),
-      statusCounts: {
-        pending: parseInt(totalPending[0].total),
-        published: parseInt(totalPublished[0].total),
-        rejected: parseInt(totalRejected[0].total),
-        archived: parseInt(totalArchived[0].total),
-      },
+    // Extract all possible filters from query parameters
+    // Default status is "pending" to show content needing review
+    const filters = {
+      search: req?.query?.search || "",
+      page: parseInt(req?.query?.page) || 1,
+      limit: parseInt(req?.query?.limit) || 10,
+      category_id: req?.query?.category_id || req?.query?.categoryId || "", // Support both formats
+      status: req?.query?.status || "pending",
+      type: req?.query?.type || "",
+      sort: req?.query?.sort || "created_at:desc",
+      tag: req?.query?.tag, // Single tag or array of tags
+      tags: req?.query?.tags, // Comma-separated tags string
     };
 
+    // Use the comprehensive admin service to get data with all statistics
+    // This includes statusCounts, typeCounts, categoryCounts like user system
+    const result = await getAdminKnowledgeContentsWithStats(filters);
+
+    // Return the complete response with all data and counts
+    // Format matches user bookmark system for frontend consistency
     res.json(result);
+    
   } catch (error) {
+    console.error("Error in getKnowledgeContentsAdmin:", error);
     handleError(res, error);
   }
 };
@@ -133,7 +96,7 @@ export const updateKnowledgeContentAdmin = async (req, res) => {
 
     const data = {
       ...payload,
-      tags: JSON.stringify(payload?.tags || []),
+      tags: payload?.tags || [], // Use array directly for JSONB
       updated_at: new Date(),
     };
 

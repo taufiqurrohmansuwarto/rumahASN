@@ -4,11 +4,45 @@ import { useDebouncedValue } from "@mantine/hooks";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { useCallback, useEffect, useState } from "react";
 
-export const useAdminContents = (status = "draft") => {
+/**
+ * Comprehensive admin hook for knowledge content management
+ * Supports all filters like user system: search, category, tag, type, sort, status
+ * 
+ * @param {Object} filters - Filter parameters from parent component
+ * @param {string} filters.searchQuery - Search term
+ * @param {string} filters.selectedCategory - Category ID  
+ * @param {Array} filters.selectedTag - Array of tags
+ * @param {string} filters.selectedSort - Sort option (field:direction)
+ * @param {string} filters.selectedType - Content type filter
+ * @param {string} filters.selectedStatus - Content status filter
+ */
+export const useAdminContents = (filters = {}) => {
   useScrollRestoration();
-  const [searchQuery, setSearchQuery] = useState("");
+  
+  // Extract filters with defaults
+  const {
+    searchQuery = "",
+    selectedCategory = null,
+    selectedTag = null,
+    selectedSort = "created_at:desc",
+    selectedType = "all", 
+    selectedStatus = "pending",
+  } = filters;
+
+  // Debounced search for better performance
   const [debouncedSearch] = useDebouncedValue(searchQuery, 500);
 
+  // Build query parameters for API call
+  const queryParams = {
+    search: debouncedSearch,
+    category_id: selectedCategory,
+    tags: selectedTag && selectedTag.length > 0 ? selectedTag.join(",") : undefined,
+    sort: selectedSort,
+    status: selectedStatus === "all" ? undefined : selectedStatus,
+    type: selectedType === "all" ? undefined : selectedType,
+  };
+
+  // Infinite query with comprehensive filter support
   const {
     data,
     fetchNextPage,
@@ -17,13 +51,21 @@ export const useAdminContents = (status = "draft") => {
     isLoading,
     isError,
   } = useInfiniteQuery(
-    ["fetch-knowledge-admin-contents", debouncedSearch, status],
+    // Query key includes all filters for proper caching
+    [
+      "fetch-knowledge-admin-contents", 
+      debouncedSearch, 
+      selectedCategory,
+      selectedTag,
+      selectedSort,
+      selectedType,
+      selectedStatus
+    ],
     ({ pageParam = 1 }) =>
       getAdminKnowledgeContents({
+        ...queryParams,
         page: pageParam,
         limit: 10,
-        search: debouncedSearch,
-        status: status,
       }),
     {
       getNextPageParam: (lastPage, allPages) => {
@@ -57,18 +99,30 @@ export const useAdminContents = (status = "draft") => {
   // Flatten all pages data
   const allContents = data?.pages?.flatMap((page) => page.data) || [];
   
-  // Get status counts from first page (same across all pages)
-  const statusCounts = data?.pages?.[0]?.statusCounts || {};
+  // Get comprehensive counts from first page (consistent across all pages)
+  const firstPage = data?.pages?.[0] || {};
+  const statusCounts = firstPage.statusCounts || {};
+  const typeCounts = firstPage.typeCounts || {};
+  const categoryCounts = firstPage.categoryCounts || {};
+  const stats = firstPage.stats || {};
 
   return {
-    searchQuery,
-    setSearchQuery,
+    // Content data
     allContents,
-    statusCounts,
+    
+    // Pagination
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
+    
+    // Loading states
     isLoading,
     isError,
+    
+    // Statistics - matching user bookmark system format
+    statusCounts,
+    typeCounts,
+    categoryCounts,
+    stats,
   };
 };

@@ -656,8 +656,26 @@ export const buildUserBookmarkQuery = (customId, filters = {}) => {
   } = filters;
 
   // Base query: get bookmarked content through user_interactions
+  // Note: Exclude content field for better performance on bookmarks
   let query = KnowledgeContent.query()
-    .select('knowledge.contents.*')
+    .select(
+      "knowledge.contents.id",
+      "knowledge.contents.title", 
+      "knowledge.contents.summary",
+      "knowledge.contents.author_id",
+      "knowledge.contents.category_id",
+      "knowledge.contents.type",
+      "knowledge.contents.source_url",
+      "knowledge.contents.status",
+      "knowledge.contents.views_count",
+      "knowledge.contents.likes_count", 
+      "knowledge.contents.comments_count",
+      "knowledge.contents.bookmarks_count",
+      "knowledge.contents.estimated_reading_time",
+      "knowledge.contents.tags",
+      "knowledge.contents.created_at",
+      "knowledge.contents.updated_at"
+    )
     .innerJoin(
       'knowledge.user_interactions',
       'knowledge.contents.id',
@@ -667,12 +685,12 @@ export const buildUserBookmarkQuery = (customId, filters = {}) => {
     .where('knowledge.user_interactions.interaction_type', 'bookmark')
     .where('knowledge.contents.status', 'published'); // Only show published content
 
-  // Search filter
+  // Search filter - only search in title and summary for bookmarks
   if (search) {
     query = query.andWhere((builder) => {
       builder
         .where("knowledge.contents.title", "ilike", `%${search}%`)
-        .orWhere("knowledge.contents.content", "ilike", `%${search}%`);
+        .orWhere("knowledge.contents.summary", "ilike", `%${search}%`);
     });
   }
 
@@ -708,7 +726,7 @@ export const buildUserBookmarkQuery = (customId, filters = {}) => {
 /**
  * Get user's bookmarked knowledge contents with pagination and filters (internal function)
  */
-const getUserBookmarkedContents = (customId, filters = {}) => {
+const getUserBookmarkedContents = async (customId, filters = {}) => {
   const {
     page = 1,
     limit = 10,
@@ -753,7 +771,7 @@ const getUserBookmarkedContents = (customId, filters = {}) => {
   }
 
   // Execute paginated query with interactions - exclude content field for performance
-  return baseQuery
+  const result = await baseQuery
     .select(
       "knowledge.contents.id",
       "knowledge.contents.title",
@@ -791,6 +809,13 @@ const getUserBookmarkedContents = (customId, filters = {}) => {
         : orderByClause
     )
     .page(page - 1, limit);
+
+  return {
+    results: result.results,
+    total: result.total,
+    page: result.page,
+    limit: result.limit,
+  };
 };
 
 /**

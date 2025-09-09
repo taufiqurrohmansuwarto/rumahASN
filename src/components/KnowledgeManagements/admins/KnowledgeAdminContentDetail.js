@@ -3,7 +3,7 @@ import {
   useUpdateAdminContent,
   useUpdateContentStatus,
 } from "@/hooks/knowledge-management/useAdminContentDetail";
-import { BookOutlined } from "@ant-design/icons";
+import { BookOutlined, SettingOutlined } from "@ant-design/icons";
 import {
   Card,
   Col,
@@ -20,7 +20,7 @@ import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import { useRouter } from "next/router";
 import { useState, useEffect } from "react";
-import KnowledgeFormUserContents from "../forms/KnowledgeFormUserContents";
+import KnowledgeFormAdminContents from "../forms/KnowledgeFormAdminContents";
 import ContentHeader from "./ContentHeader";
 import ContentActions from "./ContentActions";
 import ContentDisplay from "./ContentDisplay";
@@ -29,6 +29,10 @@ import ContentAttachments from "./ContentAttachments";
 import ContentComments from "./ContentComments";
 import StatusModal from "./StatusModal";
 import InfoModal from "./InfoModal";
+// Import user components untuk tampilan yang sama seperti user
+import KnowledgeContentHeader from "../components/KnowledgeContentHeader";
+import FormComment from "../components/FormComment";
+import KnowledgeCommentsList from "../components/KnowledgeCommentsList";
 
 dayjs.extend(relativeTime);
 
@@ -36,7 +40,19 @@ const { Title, Text } = Typography;
 const { useBreakpoint } = Grid;
 const { TextArea } = Input;
 
-const KnowledgeAdminContentDetail = () => {
+/**
+ * Admin Content Detail Component with User-like Layout
+ * Features:
+ * - Clean user-style presentation
+ * - Preserved admin functionality (edit, status change, etc.)
+ * - Anchor navigation support with section IDs
+ * - Responsive design
+ */
+const KnowledgeAdminContentDetail = ({ 
+  data: externalData = null, 
+  isLoading: externalLoading = false,
+  isAdminView = true 
+}) => {
   const router = useRouter();
   const { id } = router.query;
   const [editContentMode, setEditContentMode] = useState(false);
@@ -59,8 +75,20 @@ const KnowledgeAdminContentDetail = () => {
     setEditContentMode(false); // Toggle back to read mode after successful update
   };
 
-  // Hooks
-  const { data: content, isLoading, isError } = useAdminContentDetail(id);
+  // Use external data if provided, otherwise fetch from hooks
+  // This allows the component to work both standalone and with parent data
+  const { 
+    data: hookData, 
+    isLoading: hookLoading, 
+    isError: hookError 
+  } = useAdminContentDetail(id, {
+    enabled: !externalData && !!id,
+  });
+
+  const content = externalData || hookData;
+  const isLoading = externalLoading || hookLoading;
+  const isError = hookError;
+
   const updateContentMutation = useUpdateAdminContent(
     handleContentUpdateSuccess
   );
@@ -173,113 +201,92 @@ const KnowledgeAdminContentDetail = () => {
 
   return (
     <>
-      <div style={{ padding: isMobile ? "12px" : "16px" }}>
+      {/* Content Display Section - menggunakan komponen yang sama seperti user */}
+      <div id="content-section">
+        {content && !editContentMode && (
+          <KnowledgeContentHeader
+            content={content}
+            // Admin tidak perlu like/bookmark functionality, tapi bisa ditambahkan jika perlu
+            onLike={() => {}} 
+            onBookmark={() => {}}
+            isLiked={false}
+            isBookmarked={false}
+            isLiking={false}
+            isBookmarking={false}
+            disableInteractions={true} // Disable user interactions untuk admin
+            showOwnerActions={false} // Admin tidak perlu owner actions
+            // Admin-specific actions bisa ditambahkan jika diperlukan
+            onSubmitForReview={() => {}}
+            isSubmittingForReview={false}
+            onDelete={() => {}}
+            isDeleting={false}
+            onCreateRevision={() => {}}
+            isCreatingRevision={false}
+            onViewRevisions={() => {}}
+            revisions={[]}
+          />
+        )}
+      </div>
+
+      {/* Edit Mode - menggunakan form admin khusus */}
+      {editContentMode && (
+        <div id="content-edit" style={{ marginBottom: "24px" }}>
+          <KnowledgeFormAdminContents
+            initialData={content}
+            onSuccess={handleContentUpdateSuccess}
+            onCancel={handleEditContentToggle}
+            queryKeysToInvalidate={[
+              "admin-knowledge-content-detail",
+              "fetch-knowledge-admin-contents",
+            ]}
+          />
+        </div>
+      )}
+
+      {/* Admin Actions Card - hanya muncul saat tidak edit mode */}
+      {!editContentMode && (
         <Card
+          id="content-status"
           style={{
-            marginBottom: isMobile ? "16px" : "24px",
-            borderRadius: isMobile ? "8px" : "12px",
+            marginBottom: "24px",
+            borderRadius: "12px",
             border: "1px solid #EDEFF1",
+            backgroundColor: "#FAFAFA",
           }}
-          styles={{ body: { padding: 0 } }}
+          title={
+            <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+              <SettingOutlined style={{ color: "#FF4500" }} />
+              <Text strong>Admin Actions</Text>
+            </div>
+          }
+          styles={{ body: { padding: "24px" } }}
         >
-          <Flex>
-            {/* Icon Section */}
-            {!isMobile && (
-              <div
+          <ContentActions
+            content={content}
+            editContentMode={editContentMode}
+            isMobile={isMobile}
+            getStatusInfo={getStatusInfo}
+            onEditToggle={handleEditContentToggle}
+            onStatusModalOpen={handleStatusModalOpen}
+            isAdminView={isAdminView}
+          />
+
+          {/* Last Updated Info */}
+          {content.updated_at && content.updated_at !== content.created_at && (
+            <div style={{ marginTop: "16px", paddingTop: "16px", borderTop: "1px solid #F0F0F0" }}>
+              <Text
                 style={{
-                  width: "40px",
-                  backgroundColor: "#F8F9FA",
-                  borderRight: "1px solid #EDEFF1",
-                  display: "flex",
-                  alignItems: "flex-start",
-                  justifyContent: "center",
-                  paddingTop: "24px",
-                  minHeight: "100%",
+                  fontSize: "12px",
+                  color: "#666",
+                  fontStyle: "italic",
                 }}
               >
-                <BookOutlined style={{ color: "#FF4500", fontSize: "18px" }} />
-              </div>
-            )}
-
-            {/* Main Content Section - Single Column Layout */}
-            <div style={{ flex: 1, padding: isMobile ? "12px" : "16px" }}>
-              <ContentHeader
-                isMobile={isMobile}
-                onInfoClick={() => setInfoModalVisible(true)}
-              />
-
-              {/* Single Column Layout */}
-              <Row>
-                {/* Content Column */}
-                <Col xs={24}>
-                  <ContentActions
-                    content={content}
-                    editContentMode={editContentMode}
-                    isMobile={isMobile}
-                    getStatusInfo={getStatusInfo}
-                    onEditToggle={handleEditContentToggle}
-                    onStatusModalOpen={handleStatusModalOpen}
-                  />
-
-                  {/* Last Updated Info */}
-                  {content.updated_at &&
-                    content.updated_at !== content.created_at && (
-                      <div style={{ marginBottom: "16px" }}>
-                        <Text
-                          style={{
-                            fontSize: "12px",
-                            color: "#666",
-                            fontStyle: "italic",
-                          }}
-                        >
-                          Terakhir diedit:{" "}
-                          {dayjs(content.updated_at).format(
-                            "DD MMMM YYYY, HH:mm"
-                          )}
-                        </Text>
-                      </div>
-                    )}
-
-                  <Divider style={{ margin: "16px 0 24px 0" }} />
-
-                  {/* Content Edit Mode or Content Display */}
-                  {editContentMode ? (
-                    <div style={{ marginBottom: "24px" }}>
-                      <KnowledgeFormUserContents
-                        initialData={content}
-                        onSuccess={handleContentUpdateSuccess}
-                        onCancel={handleEditContentToggle}
-                        mode="admin"
-                        queryKeysToInvalidate={[
-                          "admin-knowledge-content-detail",
-                          "fetch-knowledge-admin-contents",
-                        ]}
-                        showDraftButton={false}
-                        showSubmitButton={true}
-                        customButtonText={{
-                          submit: "Perbarui Konten",
-                          cancel: "Batal Edit",
-                        }}
-                        customTitle="Edit Konten ASNPedia"
-                        customSubtitle="Perbarui informasi konten ASNPedia"
-                        useUpdateMutation={() => updateContentMutation}
-                      />
-                    </div>
-                  ) : (
-                    /* Content Details - Always Visible */
-                    <>
-                      <ContentDisplay content={content} isMobile={isMobile} />
-                      <ContentReferences content={content} />
-                      <ContentAttachments content={content} />
-                      <ContentComments content={content} />
-                    </>
-                  )}
-                </Col>
-              </Row>
+                Terakhir diedit: {dayjs(content.updated_at).format("DD MMMM YYYY, HH:mm")}
+              </Text>
             </div>
-          </Flex>
+          )}
         </Card>
-      </div>
+      )}
 
       <StatusModal
         visible={statusModalVisible}
@@ -301,41 +308,44 @@ const KnowledgeAdminContentDetail = () => {
         content={content}
       />
 
+      {/* Admin Detail Styles - Clean and simple */}
       <style jsx global>{`
         .ant-card {
           transition: all 0.3s ease !important;
-          overflow: hidden !important;
-          border-radius: 8px !important;
+          border-radius: 12px !important;
+          border: 1px solid #EDEFF1 !important;
         }
 
         .ant-card:hover {
+          border-color: #D9D9D9 !important;
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+          transform: translateY(-1px) !important;
+        }
+
+        /* Orange theme for admin actions */
+        .ant-btn-primary {
+          background-color: #ff4500 !important;
           border-color: #ff4500 !important;
-          box-shadow: 0 2px 8px rgba(255, 69, 0, 0.15) !important;
         }
 
-        .ant-card .ant-card-body {
-          padding: 0 !important;
-          border-radius: inherit !important;
+        .ant-btn-primary:hover {
+          background-color: #e63e00 !important;
+          border-color: #e63e00 !important;
         }
 
-        .ant-card .ant-card-body > div:first-child {
-          border-top-left-radius: inherit !important;
-          border-bottom-left-radius: inherit !important;
+        /* Smooth scrolling for anchor links */
+        html {
+          scroll-behavior: smooth;
         }
 
-        .ant-card .ant-card-body > div:first-child > div:last-child {
-          border-top-right-radius: inherit !important;
-          border-bottom-right-radius: inherit !important;
-        }
-
-        .ant-input:focus,
-        .ant-input-focused {
-          border-color: #ff4500 !important;
-          box-shadow: 0 0 0 2px rgba(255, 69, 0, 0.2) !important;
-        }
-
-        .ant-input:hover {
-          border-color: #ff4500 !important;
+        /* Section spacing */
+        #content-info,
+        #content-status,
+        #content-body,
+        #content-attachments,
+        #content-references,
+        #content-comments {
+          scroll-margin-top: 80px;
         }
       `}</style>
     </>

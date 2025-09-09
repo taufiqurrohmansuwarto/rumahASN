@@ -103,7 +103,7 @@ export const postPasanganByNip = async (req, res) => {
 
     const pegawaId = await SiasnEmployees.query()
       .where("nip_baru", nip)
-      .whereNotIn("kedudukan_hukum_id", ["71", "72"])
+      .whereNotIn("kedudukan_hukum_id", ["72"])
       .first();
 
     if (!pegawaId) {
@@ -225,7 +225,7 @@ export const postIstriPersonal = async (req, res) => {
     } else {
       const pegawaId = await SiasnEmployees.query()
         .where("nip_baru", nip)
-        .whereNotIn("kedudukan_hukum_id", ["71", "72"])
+        .whereNotIn("kedudukan_hukum_id", ["72"])
         .first();
 
       if (!pegawaId) {

@@ -1,5 +1,5 @@
 import { useAdminContents } from "@/hooks/knowledge-management/useAdminContents";
-import { SearchOutlined, SettingOutlined } from "@ant-design/icons";
+import { SettingOutlined, FileTextOutlined } from "@ant-design/icons";
 import {
   Button,
   Card,
@@ -7,61 +7,203 @@ import {
   Empty,
   Flex,
   Grid,
-  Input,
   Row,
   Spin,
   Typography,
-  Tabs,
   Tag,
   Affix,
+  FloatButton,
 } from "antd";
 import { useRouter } from "next/router";
+import { useState, useEffect } from "react";
 import ContentCard from "../components/ContentCard";
+import KnowledgeFiltersStack from "../components/KnowledgeFiltersStack";
+import useScrollRestoration from "@/hooks/useScrollRestoration";
 
 const { Title, Text } = Typography;
 const { useBreakpoint } = Grid;
-const { Search } = Input;
 
+/**
+ * Admin Knowledge Contents Management Component
+ * Features comprehensive filtering like user system:
+ * - Search, Category, Tag, Type, Sort, Status filters  
+ * - Left sidebar filter stack
+ * - Content list with pagination
+ * - Complete statistics and counts
+ */
 const KnowledgeAdminContents = () => {
   const router = useRouter();
-  const { status = "pending" } = router.query;
-
+  const { query } = router;
+  
   // Responsive breakpoints
-  const screens = useBreakpoint();
-  const isMobile = !screens.md;
+  const breakPoint = useBreakpoint();
+  const isMobile = breakPoint.xs;
 
-  // Status options
+  // Filter states - comprehensive like user system
+  const [searchQuery, setSearchQuery] = useState(query.search || "");
+  const [selectedCategory, setSelectedCategory] = useState(query.category || null);
+  const [selectedTag, setSelectedTag] = useState(query.tag || null);
+  const [selectedSort, setSelectedSort] = useState(query.sort || "created_at:desc");
+  const [selectedType, setSelectedType] = useState(query.type || "all");
+  const [selectedStatus, setSelectedStatus] = useState(query.status || "pending");
+
+  // Scroll restoration for better UX
+  useScrollRestoration("admin-knowledge-scroll", true, false, true);
+
+  // Sync state with URL changes
+  useEffect(() => {
+    setSearchQuery(query.search || "");
+    setSelectedCategory(query.category || null);
+    setSelectedTag(query.tag || null);
+    setSelectedSort(query.sort || "created_at:desc");
+    setSelectedType(query.type || "all");
+    setSelectedStatus(query.status || "pending");
+  }, [query]);
+
+  // Admin status options - comprehensive list including revisions
   const statusOptions = [
-    { key: "pending", label: "Pending", color: "default" },
-    { key: "published", label: "Published", color: "success" },
-    { key: "rejected", label: "Rejected", color: "error" },
-    { key: "archived", label: "Archived", color: "warning" },
+    { key: "all", label: "Semua Status" },
+    { key: "draft", label: "Draft" },
+    { key: "pending", label: "Menunggu Review" },
+    { key: "published", label: "Dipublikasikan" }, 
+    { key: "rejected", label: "Ditolak" },
+    { key: "archived", label: "Diarsipkan" },
+    { key: "pending_revision", label: "Menunggu Review Revisi" },
+    { key: "revision_rejected", label: "Revisi Ditolak" },
   ];
 
+  // Use comprehensive admin hook with all filters
   const {
-    searchQuery,
-    setSearchQuery,
     allContents,
-    statusCounts,
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
     isLoading,
     isError,
-  } = useAdminContents(status);
+    statusCounts,
+    typeCounts,
+    categoryCounts,
+    // stats, // Available if needed for dashboard widgets
+  } = useAdminContents({
+    searchQuery,
+    selectedCategory,
+    selectedTag,
+    selectedSort,
+    selectedType,
+    selectedStatus,
+  });
 
-  // Handle status filter change
-  const handleStatusChange = (newStatus) => {
-    router.push(
-      {
-        pathname: router.pathname,
-        query: { ...router.query, status: newStatus },
-      },
-      undefined,
-      { shallow: true }
-    );
+  // URL update function - keeps all filter states in sync
+  const updateURL = (newFilters) => {
+    const params = new URLSearchParams();
+    if (newFilters.search) params.set("search", newFilters.search);
+    if (newFilters.category) params.set("category", newFilters.category);
+    if (newFilters.tag && newFilters.tag.length > 0) {
+      if (Array.isArray(newFilters.tag)) {
+        params.set("tag", newFilters.tag.join(","));
+      } else {
+        params.set("tag", newFilters.tag);
+      }
+    }
+    if (newFilters.sort && newFilters.sort !== "created_at:desc") params.set("sort", newFilters.sort);
+    if (newFilters.type && newFilters.type !== "all") params.set("type", newFilters.type);
+    if (newFilters.status && newFilters.status !== "pending") params.set("status", newFilters.status);
+
+    const queryString = params.toString();
+    const newUrl = queryString ? `${router.pathname}?${queryString}` : router.pathname;
+    
+    router.push(newUrl, undefined, { shallow: true });
   };
 
+  // Filter change handlers - each maintains all other filter states
+  const handleSearchChange = (value) => {
+    setSearchQuery(value);
+    updateURL({
+      search: value,
+      category: selectedCategory,
+      tag: selectedTag,
+      sort: selectedSort,
+      type: selectedType,
+      status: selectedStatus,
+    });
+  };
+
+  // Direct search handler for immediate search
+  const handleSearch = (value) => {
+    handleSearchChange(value);
+  };
+
+  const handleCategoryChange = (value) => {
+    setSelectedCategory(value);
+    updateURL({
+      search: searchQuery,
+      category: value,
+      tag: selectedTag,
+      sort: selectedSort,
+      type: selectedType,
+      status: selectedStatus,
+    });
+  };
+
+  const handleTagChange = (value) => {
+    setSelectedTag(value);
+    updateURL({
+      search: searchQuery,
+      category: selectedCategory,
+      tag: value,
+      sort: selectedSort,
+      type: selectedType,
+      status: selectedStatus,
+    });
+  };
+
+  const handleSortChange = (value) => {
+    setSelectedSort(value);
+    updateURL({
+      search: searchQuery,
+      category: selectedCategory,
+      tag: selectedTag,
+      sort: value,
+      type: selectedType,
+      status: selectedStatus,
+    });
+  };
+
+  const handleTypeChange = (value) => {
+    setSelectedType(value);
+    updateURL({
+      search: searchQuery,
+      category: selectedCategory,
+      tag: selectedTag,
+      sort: selectedSort,
+      type: value,
+      status: selectedStatus,
+    });
+  };
+
+  const handleStatusChange = (value) => {
+    setSelectedStatus(value);
+    updateURL({
+      search: searchQuery,
+      category: selectedCategory,
+      tag: selectedTag,
+      sort: selectedSort,
+      type: selectedType,
+      status: value,
+    });
+  };
+
+  const handleClearFilters = () => {
+    setSearchQuery("");
+    setSelectedCategory(null);
+    setSelectedTag(null);
+    setSelectedSort("created_at:desc");
+    setSelectedType("all");
+    setSelectedStatus("pending");
+    router.push(router.pathname, undefined, { shallow: true });
+  };
+
+  // Content card renderer
   const renderContentCard = (content) => (
     <ContentCard
       key={content.id}
@@ -75,8 +217,9 @@ const KnowledgeAdminContents = () => {
     />
   );
 
+  // Get current status info for display
   const getCurrentStatusInfo = () => {
-    return statusOptions.find((opt) => opt.key === status) || statusOptions[0];
+    return statusOptions.find((opt) => opt.key === selectedStatus) || statusOptions[0];
   };
 
   return (
@@ -112,7 +255,7 @@ const KnowledgeAdminContents = () => {
               </Text>
             </Flex>
             <Tag color={getCurrentStatusInfo().color}>
-              {getCurrentStatusInfo().label}: {statusCounts[status] || 0}
+              {getCurrentStatusInfo().label}: {statusCounts[selectedStatus] || 0}
             </Tag>
           </Flex>
         </div>
@@ -155,48 +298,47 @@ const KnowledgeAdminContents = () => {
                 </Text>
               </div>
 
-              <Search
-                placeholder="Cari konten knowledge..."
-                allowClear
-                enterButton={<SearchOutlined />}
-                size={isMobile ? "middle" : "large"}
-                style={{
-                  width: isMobile ? "100%" : "400px",
-                }}
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                onSearch={(value) => setSearchQuery(value)}
-              />
             </Flex>
-
-            {/* Status Filter Tabs */}
-            <div style={{ marginTop: "20px" }}>
-              <Tabs
-                activeKey={status}
-                onChange={handleStatusChange}
-                size={isMobile ? "small" : "default"}
-                items={statusOptions.map((option) => ({
-                  key: option.key,
-                  label: (
-                    <span>
-                      {option.label}
-                      <Tag
-                        color={option.color}
-                        size="small"
-                        style={{ marginLeft: "8px" }}
-                      >
-                        {statusCounts[option.key] || 0}
-                      </Tag>
-                    </span>
-                  ),
-                }))}
-              />
-            </div>
           </Card>
         </Col>
+      </Row>
 
-        <Col span={24}>
-          {/* Content List */}
+      {/* Main Layout with Filter Stack - like user system */}
+      <FloatButton.BackTop />
+      <Row gutter={[16, 16]} style={{ marginTop: "16px" }}>
+        {/* Left Sidebar - Filter Stack */}
+        <Col lg={5} xs={0}>
+          <div style={{ position: "sticky", top: "80px", maxHeight: "calc(100vh - 100px)", overflowY: "auto" }}>
+            <KnowledgeFiltersStack
+              selectedCategory={selectedCategory}
+              selectedTag={selectedTag}
+              selectedSort={selectedSort}
+              selectedType={selectedType}
+              selectedStatus={selectedStatus}
+              searchQuery={searchQuery}
+              onCategoryChange={handleCategoryChange}
+              onTagChange={handleTagChange}
+              onSortChange={handleSortChange}
+              onTypeChange={handleTypeChange}
+              onStatusChange={handleStatusChange}
+              onSearchChange={handleSearchChange}
+              onSearch={handleSearch}
+              onClearFilters={handleClearFilters}
+              showStatusFilter={true}
+              statusOptions={statusOptions}
+              statusCounts={statusCounts}
+              typeCounts={typeCounts}
+              categoryCounts={categoryCounts}
+              isLoading={isLoading}
+              // Admin-specific props
+              isAdmin={true}
+              showAdminFilters={true}
+            />
+          </div>
+        </Col>
+
+        {/* Right Content Area */}
+        <Col lg={19} xs={24}>
           <Card>
             <div style={{ position: "relative", minHeight: "400px" }}>
               {/* Loading overlay untuk initial load */}

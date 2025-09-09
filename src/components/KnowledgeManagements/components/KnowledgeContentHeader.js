@@ -827,7 +827,7 @@ const KnowledgeContentHeader = ({
           <Divider style={{ margin: "16px 0" }} />
 
           {/* Tags */}
-          {content?.tags && content?.tags.length > 0 && (
+          {content?.tags && Array.isArray(content.tags) && content.tags.length > 0 && (
             <div id="content-tags" style={{ marginBottom: "16px" }}>
               <Flex align="center" justify="space-between" wrap="wrap">
                 <Flex align="center" gap="8px" wrap="wrap">
@@ -845,7 +845,7 @@ const KnowledgeContentHeader = ({
                       Label
                     </Text>
                   </Flex>
-                  {content?.tags.map((tag, index) => (
+                  {content.tags.map((tag, index) => (
                     <Tag
                       key={index}
                       style={{
