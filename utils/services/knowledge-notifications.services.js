@@ -10,8 +10,8 @@ import {
   formatNotificationMessage,
   getTimeWindow,
   validateNotificationData,
-  generateNotificationData
-} from '@/utils/helper/notification-helper';
+  generateNotificationData,
+} from "@/utils/helper/notification-helper";
 
 /**
  * Helper function to build notification query with relations
@@ -34,32 +34,39 @@ const buildNotificationQuery = () => {
 // user services
 export const getUserNotificationTypeCounts = async (userId) => {
   const typeCounts = {};
-  
+
   // Get count for each notification type
-  const types = ['like', 'comment', 'share', 'mention', 'content_status', 'system'];
-  
+  const types = [
+    "like",
+    "comment",
+    "share",
+    "mention",
+    "content_status",
+    "system",
+  ];
+
   for (const type of types) {
     const count = await Notifications.query()
-      .where('user_id', userId)
-      .where('type', type)
-      .where('is_valid', true)
-      .count('id as total')
+      .where("user_id", userId)
+      .where("type", type)
+      .where("is_valid", true)
+      .count("id as total")
       .first();
-    
+
     typeCounts[type] = parseInt(count?.total || 0);
   }
-  
+
   return typeCounts;
 };
 
 export const getUserNotifications = async (userId, filters = {}) => {
-  const { 
-    page = 1, 
-    limit = 20, 
-    type, 
-    is_read, 
+  const {
+    page = 1,
+    limit = 20,
+    type,
+    is_read,
     content_id,
-    include_invalid = false  // New option to include invalid notifications
+    include_invalid = false, // New option to include invalid notifications
   } = filters;
 
   let query = buildNotificationQuery()
@@ -96,7 +103,7 @@ export const getUserUnreadCount = async (userId) => {
   const result = await Notifications.query()
     .where("user_id", userId)
     .where("is_read", false)
-    .where("is_valid", true)  // Only count valid notifications
+    .where("is_valid", true) // Only count valid notifications
     .count("* as count")
     .first();
 
@@ -253,7 +260,7 @@ export const createNotification = async (data) => {
     actor_id: data.actor_id || null,
     is_read: false,
     is_sent: true,
-    is_valid: true,  // Default to valid
+    is_valid: true, // Default to valid
     data: data.data || null,
     created_at: new Date(),
     updated_at: new Date(),
@@ -268,9 +275,9 @@ export const createNotification = async (data) => {
 export const broadcastNotification = async (userIds, notificationData) => {
   // Validate input
   if (!Array.isArray(userIds) || userIds.length === 0) {
-    throw new Error('userIds must be a non-empty array');
+    throw new Error("userIds must be a non-empty array");
   }
-  
+
   // Prepare notification data with defaults
   const baseNotificationData = {
     type: notificationData.type || NOTIFICATION_TYPES.SYSTEM,
@@ -279,14 +286,14 @@ export const broadcastNotification = async (userIds, notificationData) => {
     content_id: notificationData.content_id || null,
     comment_id: notificationData.comment_id || null,
     actor_id: notificationData.actor_id || null,
-    data: notificationData.data || null
+    data: notificationData.data || null,
   };
-  
+
   // Validate base notification data (using first user as example)
   const sampleData = { ...baseNotificationData, user_id: userIds[0] };
   const validation = validateNotificationData(sampleData);
   if (!validation.isValid) {
-    throw new Error(`Invalid broadcast data: ${validation.errors.join(', ')}`);
+    throw new Error(`Invalid broadcast data: ${validation.errors.join(", ")}`);
   }
 
   const notifications = userIds.map((userId) => ({
@@ -340,20 +347,23 @@ export const createLikeNotification = async (contentId, actorId) => {
   // Get content and author info
   const content = await KnowledgeContent.query()
     .findById(contentId)
-    .select('id', 'title', 'author_id');
+    .select("id", "title", "author_id");
 
   if (!content || content.author_id === actorId) {
     return null; // Don't notify if user likes own content
   }
 
   // Check if notification already exists (prevent spam)
-  const spamWindow = getTimeWindow(NOTIFICATION_TYPES.LIKE, TIME_WINDOWS.SPAM_PREVENTION);
+  const spamWindow = getTimeWindow(
+    NOTIFICATION_TYPES.LIKE,
+    TIME_WINDOWS.SPAM_PREVENTION
+  );
   const existing = await Notifications.query()
-    .where('user_id', content.author_id)
-    .where('content_id', contentId)
-    .where('actor_id', actorId)
-    .where('type', NOTIFICATION_TYPES.LIKE)
-    .where('created_at', '>=', new Date(Date.now() - spamWindow))
+    .where("user_id", content.author_id)
+    .where("content_id", contentId)
+    .where("actor_id", actorId)
+    .where("type", NOTIFICATION_TYPES.LIKE)
+    .where("created_at", ">=", new Date(Date.now() - spamWindow))
     .first();
 
   if (existing) {
@@ -365,13 +375,15 @@ export const createLikeNotification = async (contentId, actorId) => {
     userId: content.author_id,
     actorId,
     contentId,
-    contentTitle: content.title
+    contentTitle: content.title,
   });
 
   // Validate data before creation
   const validation = validateNotificationData(notificationData);
   if (!validation.isValid) {
-    throw new Error(`Invalid notification data: ${validation.errors.join(', ')}`);
+    throw new Error(
+      `Invalid notification data: ${validation.errors.join(", ")}`
+    );
   }
 
   return await createNotification(notificationData);
@@ -384,8 +396,8 @@ export const createCommentNotification = async (
   // Get content info
   const content = await KnowledgeContent.query()
     .findById(contentId)
-    .select('id', 'title', 'author_id');
-    
+    .select("id", "title", "author_id");
+
   if (!content || content.author_id === actorId) {
     return null; // Don't notify if user comments on own content
   }
@@ -395,17 +407,20 @@ export const createCommentNotification = async (
   if (commentId) {
     comment = await KnowledgeUserInteraction.query()
       .findById(commentId)
-      .select('id', 'comment_text');
+      .select("id", "comment_text");
   }
 
   // Check spam prevention
-  const spamWindow = getTimeWindow(NOTIFICATION_TYPES.COMMENT, TIME_WINDOWS.SPAM_PREVENTION);
+  const spamWindow = getTimeWindow(
+    NOTIFICATION_TYPES.COMMENT,
+    TIME_WINDOWS.SPAM_PREVENTION
+  );
   const existing = await Notifications.query()
-    .where('user_id', content.author_id)
-    .where('content_id', contentId)
-    .where('actor_id', actorId)
-    .where('type', NOTIFICATION_TYPES.COMMENT)
-    .where('created_at', '>=', new Date(Date.now() - spamWindow))
+    .where("user_id", content.author_id)
+    .where("content_id", contentId)
+    .where("actor_id", actorId)
+    .where("type", NOTIFICATION_TYPES.COMMENT)
+    .where("created_at", ">=", new Date(Date.now() - spamWindow))
     .first();
 
   if (existing) {
@@ -413,51 +428,61 @@ export const createCommentNotification = async (
   }
 
   // Generate notification data using helper
-  const notificationData = generateNotificationData(NOTIFICATION_TYPES.COMMENT, {
-    userId: content.author_id,
-    actorId,
-    contentId,
-    commentId,
-    contentTitle: content.title,
-    additionalData: {
-      comment_preview: comment?.comment_text?.substring(0, 100) + '...' || 'Komentar baru'
+  const notificationData = generateNotificationData(
+    NOTIFICATION_TYPES.COMMENT,
+    {
+      userId: content.author_id,
+      actorId,
+      contentId,
+      commentId,
+      contentTitle: content.title,
+      additionalData: {
+        comment_preview:
+          comment?.comment_text?.substring(0, 100) + "..." || "Komentar baru",
+      },
     }
-  });
+  );
 
   // Validate data before creation
   const validation = validateNotificationData(notificationData);
   if (!validation.isValid) {
-    throw new Error(`Invalid notification data: ${validation.errors.join(', ')}`);
+    throw new Error(
+      `Invalid notification data: ${validation.errors.join(", ")}`
+    );
   }
 
   return await createNotification(notificationData);
 };
-export const createContentStatusNotification = async (contentId, newStatus) => {
+export const createContentStatusNotification = async (
+  contentId,
+  newStatus,
+  fromAdmin = false
+) => {
   const content = await KnowledgeContent.query()
     .findById(contentId)
-    .select('id', 'title', 'author_id', 'status');
+    .select("id", "title", "author_id", "status");
 
   if (!content) {
     return null;
   }
 
   const statusMessages = {
-    'published': {
-      title: 'Konten Dipublikasi',
-      message: `Konten "${content.title}" telah dipublikasi dan dapat dilihat publik`
+    published: {
+      title: "Konten Dipublikasi",
+      message: `Konten "${content.title}" telah dipublikasi dan dapat dilihat publik`,
     },
-    'rejected': {
-      title: 'Konten Ditolak',
-      message: `Konten "${content.title}" ditolak. Silakan periksa dan perbaiki konten Anda`
+    rejected: {
+      title: "Konten Ditolak",
+      message: `Konten "${content.title}" ditolak. Silakan periksa dan perbaiki konten Anda`,
     },
-    'pending_revision': {
-      title: 'Konten Perlu Revisi',
-      message: `Konten "${content.title}" memerlukan revisi sebelum dapat dipublikasi`
+    pending_revision: {
+      title: "Konten Perlu Revisi",
+      message: `Konten "${content.title}" memerlukan revisi sebelum dapat dipublikasi`,
     },
-    'archived': {
-      title: 'Konten Diarsipkan',
-      message: `Konten "${content.title}" telah diarsipkan`
-    }
+    archived: {
+      title: "Konten Diarsipkan",
+      message: `Konten "${content.title}" telah diarsipkan`,
+    },
   };
 
   const statusInfo = statusMessages[newStatus];
@@ -476,14 +501,19 @@ export const createContentStatusNotification = async (contentId, newStatus) => {
       content_title: content.title,
       old_status: content.status,
       new_status: newStatus,
-      action: 'status_change'
-    }
+      action: "status_change",
+    },
   };
 
   // Validate data before creation
-  const validation = validateNotificationData(notificationData);
+  const validation = validateNotificationData(
+    notificationData,
+    (fromAdmin = false)
+  );
   if (!validation.isValid) {
-    throw new Error(`Invalid notification data: ${validation.errors.join(', ')}`);
+    throw new Error(
+      `Invalid notification data: ${validation.errors.join(", ")}`
+    );
   }
 
   return await createNotification(notificationData);
@@ -507,17 +537,22 @@ export const createMentionNotification = async (
   }
 
   // Generate notification data using helper
-  const notificationData = generateNotificationData(NOTIFICATION_TYPES.MENTION, {
-    userId: mentionedUserId,
-    actorId,
-    contentId,
-    contentTitle: content.title
-  });
+  const notificationData = generateNotificationData(
+    NOTIFICATION_TYPES.MENTION,
+    {
+      userId: mentionedUserId,
+      actorId,
+      contentId,
+      contentTitle: content.title,
+    }
+  );
 
   // Validate data before creation
   const validation = validateNotificationData(notificationData);
   if (!validation.isValid) {
-    throw new Error(`Invalid notification data: ${validation.errors.join(', ')}`);
+    throw new Error(
+      `Invalid notification data: ${validation.errors.join(", ")}`
+    );
   }
 
   return await createNotification(notificationData);
@@ -538,13 +573,15 @@ export const createShareNotification = async (contentId, actorId) => {
     userId: content.author_id,
     actorId,
     contentId,
-    contentTitle: content.title
+    contentTitle: content.title,
   });
 
   // Validate data before creation
   const validation = validateNotificationData(notificationData);
   if (!validation.isValid) {
-    throw new Error(`Invalid notification data: ${validation.errors.join(', ')}`);
+    throw new Error(
+      `Invalid notification data: ${validation.errors.join(", ")}`
+    );
   }
 
   return await createNotification(notificationData);
@@ -556,19 +593,25 @@ export const createShareNotification = async (contentId, actorId) => {
  * Remove ephemeral notifications (for like/unlike toggle)
  * DELETE strategy for temporary actions
  */
-export const removeLikeNotification = async (contentId, actorId, timeWindowDays = null) => {
+export const removeLikeNotification = async (
+  contentId,
+  actorId,
+  timeWindowDays = null
+) => {
   const timeWindow = timeWindowDays || TIME_WINDOWS.LIKE_REMOVAL;
-  const cutoff = new Date(Date.now() - getTimeWindow(NOTIFICATION_TYPES.LIKE, timeWindow));
-  
+  const cutoff = new Date(
+    Date.now() - getTimeWindow(NOTIFICATION_TYPES.LIKE, timeWindow)
+  );
+
   // Only remove content like notifications, not comment like notifications
   const deleted = await Notifications.query()
-    .where('content_id', contentId)
-    .where('actor_id', actorId)
-    .where('type', NOTIFICATION_TYPES.LIKE)
-    .whereNull('comment_id') // Ensure it's a content like, not comment like
-    .where('created_at', '>=', cutoff)
+    .where("content_id", contentId)
+    .where("actor_id", actorId)
+    .where("type", NOTIFICATION_TYPES.LIKE)
+    .whereNull("comment_id") // Ensure it's a content like, not comment like
+    .where("created_at", ">=", cutoff)
     .delete();
-  
+
   return { deleted, message: `Removed ${deleted} like notification(s)` };
 };
 
@@ -576,17 +619,23 @@ export const removeLikeNotification = async (contentId, actorId, timeWindowDays 
  * Remove share notifications (for share/unshare toggle)
  * DELETE strategy for temporary actions
  */
-export const removeShareNotification = async (contentId, actorId, timeWindowDays = null) => {
+export const removeShareNotification = async (
+  contentId,
+  actorId,
+  timeWindowDays = null
+) => {
   const timeWindow = timeWindowDays || TIME_WINDOWS.SHARE_REMOVAL;
-  const cutoff = new Date(Date.now() - getTimeWindow(NOTIFICATION_TYPES.SHARE, timeWindow));
-  
+  const cutoff = new Date(
+    Date.now() - getTimeWindow(NOTIFICATION_TYPES.SHARE, timeWindow)
+  );
+
   const deleted = await Notifications.query()
-    .where('content_id', contentId)
-    .where('actor_id', actorId)
-    .where('type', NOTIFICATION_TYPES.SHARE)
-    .where('created_at', '>=', cutoff)
+    .where("content_id", contentId)
+    .where("actor_id", actorId)
+    .where("type", NOTIFICATION_TYPES.SHARE)
+    .where("created_at", ">=", cutoff)
     .delete();
-  
+
   return { deleted, message: `Removed ${deleted} share notification(s)` };
 };
 
@@ -594,38 +643,41 @@ export const removeShareNotification = async (contentId, actorId, timeWindowDays
  * Invalidate comment notifications (for comment delete)
  * INVALIDATE strategy for content actions - keep history
  */
-export const invalidateCommentNotification = async (commentId, reason = INVALIDATION_REASONS.COMMENT_DELETED) => {
+export const invalidateCommentNotification = async (
+  commentId,
+  reason = INVALIDATION_REASONS.COMMENT_DELETED
+) => {
   // Get content info for proper message formatting
   const comment = await KnowledgeUserInteraction.query()
     .findById(commentId)
-    .select('id', 'content_id');
-    
+    .select("id", "content_id");
+
   if (!comment) {
-    return { updated: 0, message: 'Comment not found' };
+    return { updated: 0, message: "Comment not found" };
   }
-  
+
   const content = await KnowledgeContent.query()
     .findById(comment.content_id)
-    .select('id', 'title');
-  
+    .select("id", "title");
+
   // Format message using helper
   const invalidMessage = formatNotificationMessage(NOTIFICATION_TYPES.COMMENT, {
-    contentTitle: content?.title || 'konten',
-    isDeleted: true
+    contentTitle: content?.title || "konten",
+    isDeleted: true,
   });
 
   const updated = await Notifications.query()
-    .where('comment_id', commentId)
-    .where('type', NOTIFICATION_TYPES.COMMENT)
-    .where('is_valid', true) // Only invalidate currently valid ones
+    .where("comment_id", commentId)
+    .where("type", NOTIFICATION_TYPES.COMMENT)
+    .where("is_valid", true) // Only invalidate currently valid ones
     .patch({
       is_valid: false,
       invalidated_at: new Date(),
       invalidation_reason: reason,
       message: invalidMessage,
-      updated_at: new Date()
+      updated_at: new Date(),
     });
-    
+
   return { updated, message: `Invalidated ${updated} comment notification(s)` };
 };
 
@@ -637,35 +689,38 @@ export const restoreCommentNotification = async (commentId) => {
   // Get original comment info to restore proper message
   const comment = await KnowledgeUserInteraction.query()
     .findById(commentId)
-    .select('id', 'comment_text', 'content_id');
-    
+    .select("id", "comment_text", "content_id");
+
   if (!comment) {
-    return { updated: 0, message: 'Comment not found' };
+    return { updated: 0, message: "Comment not found" };
   }
 
   const content = await KnowledgeContent.query()
     .findById(comment.content_id)
-    .select('id', 'title');
+    .select("id", "title");
 
   // Format restored message using helper
-  const restoredMessage = formatNotificationMessage(NOTIFICATION_TYPES.COMMENT, {
-    contentTitle: content?.title || 'konten',
-    isDeleted: false
-  });
+  const restoredMessage = formatNotificationMessage(
+    NOTIFICATION_TYPES.COMMENT,
+    {
+      contentTitle: content?.title || "konten",
+      isDeleted: false,
+    }
+  );
 
   const updated = await Notifications.query()
-    .where('comment_id', commentId)
-    .where('type', NOTIFICATION_TYPES.COMMENT)
-    .where('is_valid', false)
-    .where('invalidation_reason', INVALIDATION_REASONS.COMMENT_DELETED)
+    .where("comment_id", commentId)
+    .where("type", NOTIFICATION_TYPES.COMMENT)
+    .where("is_valid", false)
+    .where("invalidation_reason", INVALIDATION_REASONS.COMMENT_DELETED)
     .patch({
       is_valid: true,
       invalidated_at: null,
       invalidation_reason: null,
       message: restoredMessage,
-      updated_at: new Date()
+      updated_at: new Date(),
     });
-    
+
   return { updated, message: `Restored ${updated} comment notification(s)` };
 };
 
@@ -673,79 +728,94 @@ export const restoreCommentNotification = async (commentId) => {
  * Generic notification invalidation
  * For other types of content actions that need invalidation
  */
-export const invalidateNotification = async (notificationId, reason, customMessage = null) => {
+export const invalidateNotification = async (
+  notificationId,
+  reason,
+  customMessage = null
+) => {
   const notification = await Notifications.query()
     .findById(notificationId)
-    .where('is_valid', true);
-    
+    .where("is_valid", true);
+
   if (!notification) {
-    return { updated: 0, message: 'Notification not found or already invalid' };
+    return { updated: 0, message: "Notification not found or already invalid" };
   }
-  
+
   const updateData = {
     is_valid: false,
     invalidated_at: new Date(),
     invalidation_reason: reason,
-    updated_at: new Date()
+    updated_at: new Date(),
   };
-  
+
   if (customMessage) {
     updateData.message = customMessage;
   }
-  
+
   const updated = await Notifications.query()
     .findById(notificationId)
     .patch(updateData);
-    
-  return { updated: 1, message: 'Notification invalidated successfully' };
+
+  return { updated: 1, message: "Notification invalidated successfully" };
 };
 
 /**
  * Get notification statistics including invalid ones (for admin)
  */
 export const getDetailedNotificationStats = async () => {
-  const [totalResult, validResult, invalidResult, typeStats, invalidReasons, recentStats] = await Promise.all([
+  const [
+    totalResult,
+    validResult,
+    invalidResult,
+    typeStats,
+    invalidReasons,
+    recentStats,
+  ] = await Promise.all([
     // Total notifications
-    Notifications.query().count('* as count').first(),
-    
+    Notifications.query().count("* as count").first(),
+
     // Valid notifications
-    Notifications.query().where('is_valid', true).count('* as count').first(),
-    
-    // Invalid notifications  
-    Notifications.query().where('is_valid', false).count('* as count').first(),
-    
+    Notifications.query().where("is_valid", true).count("* as count").first(),
+
+    // Invalid notifications
+    Notifications.query().where("is_valid", false).count("* as count").first(),
+
     // By type (valid only)
     Notifications.query()
-      .where('is_valid', true)
-      .select('type')
-      .count('* as count')
-      .groupBy('type'),
-      
+      .where("is_valid", true)
+      .select("type")
+      .count("* as count")
+      .groupBy("type"),
+
     // Invalid reasons breakdown
     Notifications.query()
-      .where('is_valid', false)
-      .whereNotNull('invalidation_reason')
-      .select('invalidation_reason')
-      .count('* as count')
-      .groupBy('invalidation_reason'),
-      
+      .where("is_valid", false)
+      .whereNotNull("invalidation_reason")
+      .select("invalidation_reason")
+      .count("* as count")
+      .groupBy("invalidation_reason"),
+
     // Recent activity (last 7 days)
     Notifications.query()
-      .where('created_at', '>=', new Date(Date.now() - getTimeWindow(null, TIME_WINDOWS.RECENT_ACTIVITY)))
-      .select('type', 'is_valid')
-      .count('* as count')
-      .groupBy('type', 'is_valid')
-      .orderBy('count', 'desc')
-      .limit(20)
+      .where(
+        "created_at",
+        ">=",
+        new Date(Date.now() - getTimeWindow(null, TIME_WINDOWS.RECENT_ACTIVITY))
+      )
+      .select("type", "is_valid")
+      .count("* as count")
+      .groupBy("type", "is_valid")
+      .orderBy("count", "desc")
+      .limit(20),
   ]);
 
   const by_type = {};
-  typeStats.forEach(stat => {
+  typeStats.forEach((stat) => {
     by_type[stat.type] = parseInt(stat.count);
   });
-  
+
   const by_invalidation_reason = {};
-  invalidReasons.forEach(reason => {
+  invalidReasons.forEach((reason) => {
     by_invalidation_reason[reason.invalidation_reason] = parseInt(reason.count);
   });
 
@@ -756,23 +826,30 @@ export const getDetailedNotificationStats = async () => {
     by_type,
     by_invalidation_reason,
     recent_activity: recentStats,
-    validity_rate: totalResult.count > 0 ? ((validResult.count / totalResult.count) * 100).toFixed(2) + '%' : '100%',
+    validity_rate:
+      totalResult.count > 0
+        ? ((validResult.count / totalResult.count) * 100).toFixed(2) + "%"
+        : "100%",
     constants: {
       notification_types: Object.values(NOTIFICATION_TYPES),
       invalidation_reasons: Object.values(INVALIDATION_REASONS),
-      time_windows: TIME_WINDOWS
-    }
+      time_windows: TIME_WINDOWS,
+    },
   };
 };
 
 /**
  * Create notification when someone replies to a comment
  */
-export const createReplyNotification = async (commentId, actorId, replyId = null) => {
+export const createReplyNotification = async (
+  commentId,
+  actorId,
+  replyId = null
+) => {
   // Get comment and author info
   const comment = await KnowledgeUserInteraction.query()
     .findById(commentId)
-    .select('id', 'comment_text', 'user_id', 'content_id');
+    .select("id", "comment_text", "user_id", "content_id");
 
   if (!comment || comment.user_id === actorId) {
     return null; // Don't notify if user replies to own comment
@@ -780,12 +857,12 @@ export const createReplyNotification = async (commentId, actorId, replyId = null
 
   // Get content and reply for context
   const [content, reply] = await Promise.all([
-    KnowledgeContent.query()
-      .findById(comment.content_id)
-      .select('id', 'title'),
-    replyId ? KnowledgeUserInteraction.query()
-      .findById(replyId)
-      .select('id', 'comment_text') : null
+    KnowledgeContent.query().findById(comment.content_id).select("id", "title"),
+    replyId
+      ? KnowledgeUserInteraction.query()
+          .findById(replyId)
+          .select("id", "comment_text")
+      : null,
   ]);
 
   if (!content) {
@@ -793,13 +870,16 @@ export const createReplyNotification = async (commentId, actorId, replyId = null
   }
 
   // Check spam prevention
-  const spamWindow = getTimeWindow(NOTIFICATION_TYPES.COMMENT, TIME_WINDOWS.SPAM_PREVENTION);
+  const spamWindow = getTimeWindow(
+    NOTIFICATION_TYPES.COMMENT,
+    TIME_WINDOWS.SPAM_PREVENTION
+  );
   const existing = await Notifications.query()
-    .where('user_id', comment.user_id)
-    .where('comment_id', commentId)
-    .where('actor_id', actorId)
-    .where('type', NOTIFICATION_TYPES.COMMENT)
-    .where('created_at', '>=', new Date(Date.now() - spamWindow))
+    .where("user_id", comment.user_id)
+    .where("comment_id", commentId)
+    .where("actor_id", actorId)
+    .where("type", NOTIFICATION_TYPES.COMMENT)
+    .where("created_at", ">=", new Date(Date.now() - spamWindow))
     .first();
 
   if (existing) {
@@ -810,27 +890,30 @@ export const createReplyNotification = async (commentId, actorId, replyId = null
   const notificationData = {
     user_id: comment.user_id,
     type: NOTIFICATION_TYPES.COMMENT,
-    title: 'Balasan Baru di Komentar Anda',
+    title: "Balasan Baru di Komentar Anda",
     message: `Seseorang membalas komentar Anda di "${content.title}"`,
     content_id: comment.content_id,
     comment_id: replyId || commentId,
     actor_id: actorId,
     data: {
-      action: 'reply',
+      action: "reply",
       parent_comment_id: commentId,
       content_title: content.title,
-      original_comment: comment.comment_text?.substring(0, 100) + '...',
-      reply_preview: reply?.comment_text?.substring(0, 100) + '...' || 'Balasan baru'
+      original_comment: comment.comment_text?.substring(0, 100) + "...",
+      reply_preview:
+        reply?.comment_text?.substring(0, 100) + "..." || "Balasan baru",
     },
     is_read: false,
     is_sent: false,
-    is_valid: true
+    is_valid: true,
   };
 
   // Validate notification data
   const validation = validateNotificationData(notificationData);
   if (!validation.isValid) {
-    throw new Error(`Invalid reply notification data: ${validation.errors.join(', ')}`);
+    throw new Error(
+      `Invalid reply notification data: ${validation.errors.join(", ")}`
+    );
   }
 
   return await createNotification(notificationData);
@@ -843,7 +926,7 @@ export const createCommentLikeNotification = async (commentId, actorId) => {
   // Get comment and author info
   const comment = await KnowledgeUserInteraction.query()
     .findById(commentId)
-    .select('id', 'comment_text', 'user_id', 'content_id');
+    .select("id", "comment_text", "user_id", "content_id");
 
   if (!comment || comment.user_id === actorId) {
     return null; // Don't notify if user likes own comment
@@ -852,20 +935,23 @@ export const createCommentLikeNotification = async (commentId, actorId) => {
   // Get content for context
   const content = await KnowledgeContent.query()
     .findById(comment.content_id)
-    .select('id', 'title');
+    .select("id", "title");
 
   if (!content) {
     return null;
   }
 
   // Check spam prevention
-  const spamWindow = getTimeWindow(NOTIFICATION_TYPES.LIKE, TIME_WINDOWS.SPAM_PREVENTION);
+  const spamWindow = getTimeWindow(
+    NOTIFICATION_TYPES.LIKE,
+    TIME_WINDOWS.SPAM_PREVENTION
+  );
   const existing = await Notifications.query()
-    .where('user_id', comment.user_id)
-    .where('comment_id', commentId)
-    .where('actor_id', actorId)
-    .where('type', NOTIFICATION_TYPES.LIKE)
-    .where('created_at', '>=', new Date(Date.now() - spamWindow))
+    .where("user_id", comment.user_id)
+    .where("comment_id", commentId)
+    .where("actor_id", actorId)
+    .where("type", NOTIFICATION_TYPES.LIKE)
+    .where("created_at", ">=", new Date(Date.now() - spamWindow))
     .first();
 
   if (existing) {
@@ -876,25 +962,27 @@ export const createCommentLikeNotification = async (commentId, actorId) => {
   const notificationData = {
     user_id: comment.user_id,
     type: NOTIFICATION_TYPES.LIKE,
-    title: 'Komentar Anda Disukai',
+    title: "Komentar Anda Disukai",
     message: `Seseorang menyukai komentar Anda di "${content.title}"`,
     content_id: comment.content_id,
     comment_id: commentId,
     actor_id: actorId,
     data: {
-      action: 'like_comment',
+      action: "like_comment",
       content_title: content.title,
-      comment_text: comment.comment_text?.substring(0, 100) + '...'
+      comment_text: comment.comment_text?.substring(0, 100) + "...",
     },
     is_read: false,
     is_sent: false,
-    is_valid: true
+    is_valid: true,
   };
 
   // Validate notification data
   const validation = validateNotificationData(notificationData);
   if (!validation.isValid) {
-    throw new Error(`Invalid comment like notification data: ${validation.errors.join(', ')}`);
+    throw new Error(
+      `Invalid comment like notification data: ${validation.errors.join(", ")}`
+    );
   }
 
   return await createNotification(notificationData);
@@ -903,18 +991,25 @@ export const createCommentLikeNotification = async (commentId, actorId) => {
 /**
  * Remove comment like notification
  */
-export const removeCommentLikeNotification = async (commentId, actorId, timeWindowDays = null) => {
-  const timeWindow = timeWindowDays 
-    ? timeWindowDays * 24 * 60 * 60 * 1000 
+export const removeCommentLikeNotification = async (
+  commentId,
+  actorId,
+  timeWindowDays = null
+) => {
+  const timeWindow = timeWindowDays
+    ? timeWindowDays * 24 * 60 * 60 * 1000
     : getTimeWindow(NOTIFICATION_TYPES.LIKE, TIME_WINDOWS.LIKE_REMOVAL);
 
   // Only remove comment like notifications, not content like notifications
   const deleted = await Notifications.query()
-    .where('comment_id', commentId)
-    .where('actor_id', actorId)
-    .where('type', NOTIFICATION_TYPES.LIKE)
-    .where('created_at', '>=', new Date(Date.now() - timeWindow))
+    .where("comment_id", commentId)
+    .where("actor_id", actorId)
+    .where("type", NOTIFICATION_TYPES.LIKE)
+    .where("created_at", ">=", new Date(Date.now() - timeWindow))
     .delete();
 
-  return { deleted, message: `Removed ${deleted} comment like notification(s)` };
+  return {
+    deleted,
+    message: `Removed ${deleted} comment like notification(s)`,
+  };
 };

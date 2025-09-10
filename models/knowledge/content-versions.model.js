@@ -18,7 +18,7 @@ class knowledgeContentVersions extends Model {
     const User = require("@/models/users.model");
 
     return {
-      content: {
+      current_content: {
         relation: Model.BelongsToOneRelation,
         modelClass: KnowledgeContent,
         join: {

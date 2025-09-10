@@ -3,36 +3,19 @@ import {
   useUpdateAdminContent,
   useUpdateContentStatus,
 } from "@/hooks/knowledge-management/useAdminContentDetail";
-import { BookOutlined, SettingOutlined } from "@ant-design/icons";
-import {
-  Card,
-  Col,
-  Divider,
-  Empty,
-  Flex,
-  Grid,
-  Row,
-  Spin,
-  Typography,
-  Input,
-} from "antd";
+import { SettingOutlined } from "@ant-design/icons";
+import { Card, Empty, Grid, Input, Spin, Typography } from "antd";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import { useRouter } from "next/router";
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import KnowledgeFormAdminContents from "../forms/KnowledgeFormAdminContents";
-import ContentHeader from "./ContentHeader";
 import ContentActions from "./ContentActions";
-import ContentDisplay from "./ContentDisplay";
-import ContentReferences from "./ContentReferences";
-import ContentAttachments from "./ContentAttachments";
-import ContentComments from "./ContentComments";
-import StatusModal from "./StatusModal";
+import ContentRevisions from "./ContentRevisions";
 import InfoModal from "./InfoModal";
+import StatusModal from "./StatusModal";
 // Import user components untuk tampilan yang sama seperti user
 import KnowledgeContentHeader from "../components/KnowledgeContentHeader";
-import FormComment from "../components/FormComment";
-import KnowledgeCommentsList from "../components/KnowledgeCommentsList";
 
 dayjs.extend(relativeTime);
 
@@ -48,10 +31,10 @@ const { TextArea } = Input;
  * - Anchor navigation support with section IDs
  * - Responsive design
  */
-const KnowledgeAdminContentDetail = ({ 
-  data: externalData = null, 
+const KnowledgeAdminContentDetail = ({
+  data: externalData = null,
   isLoading: externalLoading = false,
-  isAdminView = true 
+  isAdminView = true,
 }) => {
   const router = useRouter();
   const { id } = router.query;
@@ -77,10 +60,10 @@ const KnowledgeAdminContentDetail = ({
 
   // Use external data if provided, otherwise fetch from hooks
   // This allows the component to work both standalone and with parent data
-  const { 
-    data: hookData, 
-    isLoading: hookLoading, 
-    isError: hookError 
+  const {
+    data: hookData,
+    isLoading: hookLoading,
+    isError: hookError,
   } = useAdminContentDetail(id, {
     enabled: !externalData && !!id,
   });
@@ -207,7 +190,7 @@ const KnowledgeAdminContentDetail = ({
           <KnowledgeContentHeader
             content={content}
             // Admin tidak perlu like/bookmark functionality, tapi bisa ditambahkan jika perlu
-            onLike={() => {}} 
+            onLike={() => {}}
             onBookmark={() => {}}
             isLiked={false}
             isBookmarked={false}
@@ -273,7 +256,13 @@ const KnowledgeAdminContentDetail = ({
 
           {/* Last Updated Info */}
           {content.updated_at && content.updated_at !== content.created_at && (
-            <div style={{ marginTop: "16px", paddingTop: "16px", borderTop: "1px solid #F0F0F0" }}>
+            <div
+              style={{
+                marginTop: "16px",
+                paddingTop: "16px",
+                borderTop: "1px solid #F0F0F0",
+              }}
+            >
               <Text
                 style={{
                   fontSize: "12px",
@@ -281,11 +270,17 @@ const KnowledgeAdminContentDetail = ({
                   fontStyle: "italic",
                 }}
               >
-                Terakhir diedit: {dayjs(content.updated_at).format("DD MMMM YYYY, HH:mm")}
+                Terakhir diedit:{" "}
+                {dayjs(content.updated_at).format("DD MMMM YYYY, HH:mm")}
               </Text>
             </div>
           )}
         </Card>
+      )}
+
+      {/* Content Revisions - only show when not in edit mode */}
+      {!editContentMode && (
+        <ContentRevisions contentId={content?.id} isMobile={isMobile} />
       )}
 
       <StatusModal
@@ -313,11 +308,11 @@ const KnowledgeAdminContentDetail = ({
         .ant-card {
           transition: all 0.3s ease !important;
           border-radius: 12px !important;
-          border: 1px solid #EDEFF1 !important;
+          border: 1px solid #edeff1 !important;
         }
 
         .ant-card:hover {
-          border-color: #D9D9D9 !important;
+          border-color: #d9d9d9 !important;
           box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
           transform: translateY(-1px) !important;
         }
@@ -341,6 +336,7 @@ const KnowledgeAdminContentDetail = ({
         /* Section spacing */
         #content-info,
         #content-status,
+        #content-revisions,
         #content-body,
         #content-attachments,
         #content-references,

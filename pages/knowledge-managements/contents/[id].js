@@ -95,6 +95,7 @@ function KnowledgeManagementContentDetail() {
                 sections={[
                   { id: "content-info", title: "Informasi Konten" },
                   { id: "content-status", title: "Status & Aksi" },
+                  { id: "content-revisions", title: "Riwayat Revisi" },
                   { id: "content-body", title: "Isi Konten" },
                   { id: "content-attachments", title: "Lampiran" },
                   { id: "content-references", title: "Referensi" },

@@ -804,7 +804,7 @@ const KnowledgeContentHeader = ({
                     fontWeight: 500,
                   }}
                 >
-                  {revisions.length > 0
+                  {revisions.length > 0 && content?.status
                     ? "Konten ini memiliki revisi. Lihat daftar revisi untuk mengelola perubahan."
                     : "Ingin memperbarui konten ini? Buat revisi baru."}
                 </Text>
@@ -827,53 +827,79 @@ const KnowledgeContentHeader = ({
           <Divider style={{ margin: "16px 0" }} />
 
           {/* Tags */}
-          {content?.tags && Array.isArray(content.tags) && content.tags.length > 0 && (
-            <div id="content-tags" style={{ marginBottom: "16px" }}>
-              <Flex align="center" justify="space-between" wrap="wrap">
-                <Flex align="center" gap="8px" wrap="wrap">
-                  <Flex align="center" gap="6px">
-                    <TagsOutlined
-                      style={{ fontSize: "12px", color: "#6B7280" }}
-                    />
-                    <Text
-                      style={{
-                        fontSize: "12px",
-                        color: "#6B7280",
-                        fontWeight: 600,
-                      }}
-                    >
-                      Label
-                    </Text>
+          {content?.tags &&
+            Array.isArray(content.tags) &&
+            content.tags.length > 0 && (
+              <div id="content-tags" style={{ marginBottom: "16px" }}>
+                <Flex align="center" justify="space-between" wrap="wrap">
+                  <Flex align="center" gap="8px" wrap="wrap">
+                    <Flex align="center" gap="6px">
+                      <TagsOutlined
+                        style={{ fontSize: "12px", color: "#6B7280" }}
+                      />
+                      <Text
+                        style={{
+                          fontSize: "12px",
+                          color: "#6B7280",
+                          fontWeight: 600,
+                        }}
+                      >
+                        Label
+                      </Text>
+                    </Flex>
+                    {content.tags.map((tag, index) => (
+                      <Tag
+                        key={index}
+                        style={{
+                          fontSize: "11px",
+                          padding: "2px 8px",
+                          backgroundColor: "#F3F4F6",
+                          border: "1px solid #E5E7EB",
+                          color: "#6B7280",
+                          margin: 0,
+                          borderRadius: "4px",
+                          lineHeight: "16px",
+                          fontWeight: 400,
+                        }}
+                      >
+                        {tag}
+                      </Tag>
+                    ))}
                   </Flex>
-                  {content.tags.map((tag, index) => (
-                    <Tag
-                      key={index}
-                      style={{
-                        fontSize: "11px",
-                        padding: "2px 8px",
-                        backgroundColor: "#F3F4F6",
-                        border: "1px solid #E5E7EB",
-                        color: "#6B7280",
-                        margin: 0,
-                        borderRadius: "4px",
-                        lineHeight: "16px",
-                        fontWeight: 400,
-                      }}
-                    >
-                      {tag}
-                    </Tag>
-                  ))}
-                </Flex>
 
-                {/* Status and Content Type - Right Corner */}
-                <Flex align="center" gap="8px">
-                  {/* Status */}
-                  {content?.status && (
+                  {/* Status and Content Type - Right Corner */}
+                  <Flex align="center" gap="8px">
+                    {/* Status */}
+                    {content?.status && (
+                      <Tag
+                        color={getStatusColor(content.status)}
+                        style={{
+                          fontSize: "11px",
+                          fontWeight: 500,
+                          border: "none",
+                          borderRadius: "4px",
+                          margin: 0,
+                          padding: "2px 8px",
+                          lineHeight: "18px",
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "4px",
+                        }}
+                      >
+                        <span style={{ fontSize: "8px" }}>
+                          {getStatusIcon(content.status)}
+                        </span>
+                        {getStatusLabel(content.status)}
+                      </Tag>
+                    )}
+
+                    {/* Content Type */}
                     <Tag
-                      color={getStatusColor(content.status)}
                       style={{
                         fontSize: "11px",
                         fontWeight: 500,
+                        backgroundColor: getTypeInfo(content?.type).color,
+                        color: "white",
                         border: "none",
                         borderRadius: "4px",
                         margin: 0,
@@ -885,38 +911,14 @@ const KnowledgeContentHeader = ({
                       }}
                     >
                       <span style={{ fontSize: "8px" }}>
-                        {getStatusIcon(content.status)}
+                        {getTypeInfo(content?.type).icon}
                       </span>
-                      {getStatusLabel(content.status)}
+                      {getTypeInfo(content?.type).label}
                     </Tag>
-                  )}
-
-                  {/* Content Type */}
-                  <Tag
-                    style={{
-                      fontSize: "11px",
-                      fontWeight: 500,
-                      backgroundColor: getTypeInfo(content?.type).color,
-                      color: "white",
-                      border: "none",
-                      borderRadius: "4px",
-                      margin: 0,
-                      padding: "2px 8px",
-                      lineHeight: "18px",
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "4px",
-                    }}
-                  >
-                    <span style={{ fontSize: "8px" }}>
-                      {getTypeInfo(content?.type).icon}
-                    </span>
-                    {getTypeInfo(content?.type).label}
-                  </Tag>
+                  </Flex>
                 </Flex>
-              </Flex>
-            </div>
-          )}
+              </div>
+            )}
 
           {/* References */}
           {content?.references && content?.references.length > 0 && (

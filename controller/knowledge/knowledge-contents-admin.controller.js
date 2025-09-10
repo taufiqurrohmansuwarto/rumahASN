@@ -12,10 +12,11 @@ import { awardXP } from "./gamification.controller";
 import { processContentWithAI } from "@/utils/services/ai-processing.services";
 import { createContentStatusNotification } from "@/utils/services/knowledge-notifications.services";
 import { getAdminKnowledgeContentsWithStats } from "@/utils/services/knowledge-admin.services";
+import { createInitialRevision } from "@/utils/services/knowledge-revisions.services";
 
 /**
  * Get admin knowledge contents with comprehensive filters and statistics
- * 
+ *
  * Supports filtering by:
  * - search: search in title, summary, content
  * - status: all admin statuses (draft, pending, published, rejected, archived, pending_revision, revision_rejected)
@@ -23,7 +24,7 @@ import { getAdminKnowledgeContentsWithStats } from "@/utils/services/knowledge-a
  * - type: filter by content type (teks, gambar, video, audio)
  * - tag/tags: filter by tags
  * - sort: sorting options (created_at, updated_at, likes_count, etc.)
- * 
+ *
  * Returns data with comprehensive counts like user bookmark system
  */
 export const getKnowledgeContentsAdmin = async (req, res) => {
@@ -49,7 +50,6 @@ export const getKnowledgeContentsAdmin = async (req, res) => {
     // Return the complete response with all data and counts
     // Format matches user bookmark system for frontend consistency
     res.json(result);
-    
   } catch (error) {
     console.error("Error in getKnowledgeContentsAdmin:", error);
     handleError(res, error);
@@ -181,14 +181,18 @@ export const changeStatusKnowledgeContentAdmin = async (req, res) => {
     if (payload.status && payload.status !== currentContent.status) {
       try {
         await createContentStatusNotification(
-          id, 
-          customId, 
-          currentContent.status, 
+          id,
+          customId,
+          currentContent.status,
           payload.status,
-          payload.rejection_reason || null
+          payload.rejection_reason || null,
+          true
         );
       } catch (notifError) {
-        console.warn("Failed to create content status notification:", notifError);
+        console.warn(
+          "Failed to create content status notification:",
+          notifError
+        );
       }
     }
 
@@ -197,6 +201,7 @@ export const changeStatusKnowledgeContentAdmin = async (req, res) => {
       payload.status === "published" &&
       currentContent.status !== "published"
     ) {
+      await createInitialRevision(currentContent.id);
       try {
         await awardXP({
           userId: currentContent.author_id,
@@ -216,7 +221,10 @@ export const changeStatusKnowledgeContentAdmin = async (req, res) => {
           await processContentWithAI(id);
           console.log(`AI processing completed for published content: ${id}`);
         } catch (aiError) {
-          console.error(`AI processing failed for content ${id}:`, aiError.message);
+          console.error(
+            `AI processing failed for content ${id}:`,
+            aiError.message
+          );
           // Don't throw error - AI processing failure shouldn't affect status change
         }
       });

@@ -1,19 +1,19 @@
 import { handleError } from "@/utils/helper/controller-helper";
 import { uploadFileMinio } from "@/utils/index";
 import { processContentWithAI } from "@/utils/services/ai-processing.services";
+import { getAllCategories } from "@/utils/services/knowledge-category.services";
 import {
-  getContentById,
-  getRelatedContents,
-  updateViewsCount,
   createContent,
-  updateContent,
   deleteContent,
-  uploadContentAttachment,
-  uploadContentMedia,
+  getContentById,
   getEncryptedUserId,
   getPublicContentsWithStats,
+  getRelatedContents,
+  updateContent,
+  updateViewsCount,
+  uploadContentAttachment,
+  uploadContentMedia,
 } from "@/utils/services/knowledge-content.services";
-import { getAllCategories } from "@/utils/services/knowledge-category.services";
 
 const KnowledgeContent = require("@/models/knowledge/contents.model");
 
@@ -158,8 +158,10 @@ export const getKnowledgeCategories = async (_req, res) => {
 export const uploadKnowledgeContentAttachment = async (req, res) => {
   try {
     const files = req?.files || [];
+    const mc = req?.mc;
     const { id: contentId } = req?.query;
-    const { customId } = req?.user;
+    const { customId, current_role } = req?.user;
+    const isAdmin = current_role === "admin";
 
     if (!files || files.length === 0) {
       return res.status(400).json({
@@ -169,7 +171,13 @@ export const uploadKnowledgeContentAttachment = async (req, res) => {
     }
 
     // Use service to upload attachments
-    const result = await uploadContentAttachment(contentId, files, customId);
+    const result = await uploadContentAttachment(
+      contentId,
+      files,
+      customId,
+      isAdmin,
+      mc
+    );
 
     // Transform response to match expected format
     const uploadResults = result.attachments.map((attachment) => ({
@@ -242,23 +250,32 @@ export const uploadKnowledgeContentAttachmentAdmin = async (req, res) => {
 export const uploadKnowledgeContentMediaCreate = async (req, res) => {
   try {
     const { customId } = req?.user;
-    const { file } = req;
+    const { file, mc } = req;
 
     if (!file) {
       return res.status(400).json({ message: "File media is required" });
     }
 
     // Validate file type for media
-    const allowedTypes = ["image/", "video/", "audio/"];
+    const allowedTypes = [
+      "image/",
+      "video/",
+      "audio/",
+      "application/pdf",
+      "application/msword",
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+      "application/vnd.ms-excel",
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    ];
     if (!allowedTypes.some((type) => file.mimetype.startsWith(type))) {
       return res.status(400).json({
         message:
-          "Invalid file type. Only image, video, and audio files are allowed",
+          "Invalid file type. Only image, video, audio, pdf, word, and excel files are allowed",
       });
     }
 
     // Use service to upload media for content creation
-    const uploadResults = await uploadContentMedia([file], customId);
+    const uploadResults = await uploadContentMedia([file], customId, mc);
     const mediaData = uploadResults[0];
 
     res.json({
@@ -296,6 +313,7 @@ export const uploadKnowledgeContentMedia = async (req, res) => {
     // Use service to check if content exists and user owns it
     const content = await getContentById(contentId, {
       includeRelations: false,
+      status: "draft",
     });
 
     if (!content || content.author_id !== customId) {
@@ -318,6 +336,8 @@ export const uploadKnowledgeContentMedia = async (req, res) => {
     const originalName = file.originalname.replace(/[^a-zA-Z0-9.-]/g, "_");
     const encryptedUserId = getEncryptedUserId(customId);
     const fileName = `knowledge-media/${encryptedUserId}/${timestamp}_${originalName}`;
+
+    console.log({ fileName });
 
     // Upload to MinIO
     await uploadFileMinio(mc, file.buffer, fileName, file.size, file.mimetype);

@@ -30,35 +30,38 @@ export const calculateReadingTime = (content, summary = "") => {
 
   // Remove markdown syntax
   const plainText = content
-    .replace(/#{1,6}\s+/g, '') // Headers
-    .replace(/\*{1,2}(.*?)\*{1,2}/g, '$1') // Bold/italic
-    .replace(/`{1,3}(.*?)`{1,3}/g, '$1') // Code
-    .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1') // Links
-    .replace(/!\[[^\]]*\]\([^)]*\)/g, '') // Images
-    .replace(/>\s+/g, '') // Blockquotes
-    .replace(/[-*+]\s+/g, '') // Lists
-    .replace(/\n+/g, ' '); // Line breaks
+    .replace(/#{1,6}\s+/g, "") // Headers
+    .replace(/\*{1,2}(.*?)\*{1,2}/g, "$1") // Bold/italic
+    .replace(/`{1,3}(.*?)`{1,3}/g, "$1") // Code
+    .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1") // Links
+    .replace(/!\[[^\]]*\]\([^)]*\)/g, "") // Images
+    .replace(/>\s+/g, "") // Blockquotes
+    .replace(/[-*+]\s+/g, "") // Lists
+    .replace(/\n+/g, " "); // Line breaks
 
   // Combine content + summary
-  const fullText = `${summary || ''} ${plainText}`;
-  const wordCount = fullText.trim().split(/\s+/).filter(word => word.length > 0).length;
-  
+  const fullText = `${summary || ""} ${plainText}`;
+  const wordCount = fullText
+    .trim()
+    .split(/\s+/)
+    .filter((word) => word.length > 0).length;
+
   // Average reading speed for technical content
   const avgWordsPerMinute = 210;
-  
+
   // Content complexity adjustments
   const hasCodeBlocks = /```[\s\S]*?```/.test(content);
   const hasImages = /!\[[^\]]*\]\([^)]*\)/.test(content);
   const hasTables = /\|.*\|/.test(content);
-  
+
   let adjustmentFactor = 1;
   if (hasCodeBlocks) adjustmentFactor += 0.3;
   if (hasImages) adjustmentFactor += 0.2;
   if (hasTables) adjustmentFactor += 0.15;
-  
+
   const baseMinutes = wordCount / avgWordsPerMinute;
   const adjustedMinutes = baseMinutes * adjustmentFactor;
-  
+
   return Math.max(1, Math.round(adjustedMinutes));
 };
 
@@ -77,7 +80,7 @@ export const buildContentQuery = (filters = {}) => {
     author_id,
     page = 1,
     limit = 10,
-    sort = "created_at"
+    sort = "created_at",
   } = filters;
 
   let query = KnowledgeContent.query().where("status", status);
@@ -125,73 +128,77 @@ export const buildContentQuery = (filters = {}) => {
  */
 export const getContentsWithFilters = async (filters = {}, userId = null) => {
   const { page = 1, limit = 10 } = filters;
-  
-  let query = buildContentQuery(filters)
-    .select(
-      "knowledge.contents.id",
-      "knowledge.contents.title",
-      "knowledge.contents.summary",
-      "knowledge.contents.author_id",
-      "knowledge.contents.category_id",
-      "knowledge.contents.tags",
-      "knowledge.contents.type",
-      "knowledge.contents.source_url",
-      "knowledge.contents.status",
-      "knowledge.contents.views_count",
-      "knowledge.contents.likes_count",
-      "knowledge.contents.comments_count",
-      "knowledge.contents.bookmarks_count",
-      "knowledge.contents.estimated_reading_time",
-      "knowledge.contents.created_at",
-      "knowledge.contents.updated_at"
-    );
+
+  let query = buildContentQuery(filters).select(
+    "knowledge.contents.id",
+    "knowledge.contents.title",
+    "knowledge.contents.summary",
+    "knowledge.contents.author_id",
+    "knowledge.contents.category_id",
+    "knowledge.contents.tags",
+    "knowledge.contents.type",
+    "knowledge.contents.source_url",
+    "knowledge.contents.status",
+    "knowledge.contents.views_count",
+    "knowledge.contents.likes_count",
+    "knowledge.contents.comments_count",
+    "knowledge.contents.bookmarks_count",
+    "knowledge.contents.estimated_reading_time",
+    "knowledge.contents.created_at",
+    "knowledge.contents.updated_at"
+  );
 
   // Add user interaction subqueries if userId provided
   if (userId) {
-    query = query
-      .select(
-        // Subquery for is_liked
-        KnowledgeContent.relatedQuery("user_interactions")
-          .where("user_id", userId)
-          .where("interaction_type", "like")
-          .select(
-            KnowledgeContent.raw(
-              "CASE WHEN COUNT(*) > 0 THEN true ELSE false END"
-            )
+    query = query.select(
+      // Subquery for is_liked
+      KnowledgeContent.relatedQuery("user_interactions")
+        .where("user_id", userId)
+        .where("interaction_type", "like")
+        .select(
+          KnowledgeContent.raw(
+            "CASE WHEN COUNT(*) > 0 THEN true ELSE false END"
           )
-          .as("is_liked"),
-        // Subquery for is_bookmarked
-        KnowledgeContent.relatedQuery("user_interactions")
-          .where("user_id", userId)
-          .where("interaction_type", "bookmark")
-          .select(
-            KnowledgeContent.raw(
-              "CASE WHEN COUNT(*) > 0 THEN true ELSE false END"
-            )
+        )
+        .as("is_liked"),
+      // Subquery for is_bookmarked
+      KnowledgeContent.relatedQuery("user_interactions")
+        .where("user_id", userId)
+        .where("interaction_type", "bookmark")
+        .select(
+          KnowledgeContent.raw(
+            "CASE WHEN COUNT(*) > 0 THEN true ELSE false END"
           )
-          .as("is_bookmarked")
-      );
+        )
+        .as("is_bookmarked")
+    );
   }
 
   query = query
-    .withGraphFetched("[author(simpleWithImage), category, user_verified(simpleWithImage)]")
+    .withGraphFetched(
+      "[author(simpleWithImage), category, user_verified(simpleWithImage)]"
+    )
     .page(page - 1, limit);
 
   const results = await query;
-  
+
   return {
     data: results.results,
     total: results.total,
     page: parseInt(page),
     limit: parseInt(limit),
-    hasMore: results.total > page * limit
+    hasMore: results.total > page * limit,
   };
 };
 
 /**
  * Get single content with full details and user interactions
  */
-export const getContentById = async (contentId, options = {}, userId = null) => {
+export const getContentById = async (
+  contentId,
+  options = {},
+  userId = null
+) => {
   const { includeRelations = true, status = "published" } = options;
 
   let query = KnowledgeContent.query()
@@ -253,30 +260,40 @@ export const getRelatedContents = async (contentId, limit = 5) => {
   if (mainContent.ai_metadata?.ai_related_content) {
     try {
       let aiRelatedIds = mainContent.ai_metadata.ai_related_content;
-      
+
       // If it's a string, try to parse it. If it's already an array, use it directly
-      if (typeof aiRelatedIds === 'string') {
+      if (typeof aiRelatedIds === "string") {
         aiRelatedIds = JSON.parse(aiRelatedIds);
       }
-      
+
       if (Array.isArray(aiRelatedIds) && aiRelatedIds.length > 0) {
         const aiRelatedContents = await KnowledgeContent.query()
           .whereIn("id", aiRelatedIds.slice(0, limit))
           .where("status", "published")
           .select(
-            "id", "title", "summary", "author_id", "category_id",
-            "views_count", "likes_count", "estimated_reading_time", "created_at"
+            "id",
+            "title",
+            "summary",
+            "author_id",
+            "category_id",
+            "views_count",
+            "likes_count",
+            "estimated_reading_time",
+            "created_at"
           )
           .withGraphFetched("[author(simpleWithImage), category]")
           .orderBy("views_count", "desc");
-        
+
         if (aiRelatedContents.length > 0) {
           console.log(`Using AI-generated related content for ${contentId}`);
           return aiRelatedContents;
         }
       }
     } catch (error) {
-      console.warn(`Error parsing AI related content for ${contentId}:`, error.message);
+      console.warn(
+        `Error parsing AI related content for ${contentId}:`,
+        error.message
+      );
     }
   }
 
@@ -284,12 +301,12 @@ export const getRelatedContents = async (contentId, limit = 5) => {
   if (mainContent.ai_metadata?.ai_keywords) {
     try {
       let aiKeywords = mainContent.ai_metadata.ai_keywords;
-      
+
       // If it's a string, try to parse it. If it's already an array, use it directly
-      if (typeof aiKeywords === 'string') {
+      if (typeof aiKeywords === "string") {
         aiKeywords = JSON.parse(aiKeywords);
       }
-      
+
       if (Array.isArray(aiKeywords) && aiKeywords.length > 0) {
         // Find contents with similar AI keywords
         const keywordRelatedContents = await KnowledgeContent.query()
@@ -299,14 +316,21 @@ export const getRelatedContents = async (contentId, limit = 5) => {
           .whereNotNull("ai_metadata.ai_keywords")
           .andWhere((builder) => {
             aiKeywords.forEach((keyword) => {
-              builder.orWhereRaw("ai_metadata.ai_keywords @> ?", [JSON.stringify([keyword])]);
+              builder.orWhereRaw("ai_metadata.ai_keywords @> ?", [
+                JSON.stringify([keyword]),
+              ]);
             });
           })
           .select(
-            "knowledge.contents.id", "knowledge.contents.title", "knowledge.contents.summary", 
-            "knowledge.contents.author_id", "knowledge.contents.category_id",
-            "knowledge.contents.views_count", "knowledge.contents.likes_count", 
-            "knowledge.contents.estimated_reading_time", "knowledge.contents.created_at"
+            "knowledge.contents.id",
+            "knowledge.contents.title",
+            "knowledge.contents.summary",
+            "knowledge.contents.author_id",
+            "knowledge.contents.category_id",
+            "knowledge.contents.views_count",
+            "knowledge.contents.likes_count",
+            "knowledge.contents.estimated_reading_time",
+            "knowledge.contents.created_at"
           )
           .withGraphFetched("[author(simpleWithImage), category]")
           .limit(limit)
@@ -327,13 +351,16 @@ export const getRelatedContents = async (contentId, limit = 5) => {
   try {
     // Handle tags field - could be JSON string, array, or other format
     if (mainContent.tags) {
-      if (typeof mainContent.tags === 'string') {
+      if (typeof mainContent.tags === "string") {
         // Try to parse as JSON first
         try {
           tags = JSON.parse(mainContent.tags);
         } catch (parseError) {
           // If JSON parse fails, treat as single tag or comma-separated string
-          tags = mainContent.tags.split(',').map(tag => tag.trim()).filter(Boolean);
+          tags = mainContent.tags
+            .split(",")
+            .map((tag) => tag.trim())
+            .filter(Boolean);
         }
       } else if (Array.isArray(mainContent.tags)) {
         // Already an array
@@ -341,10 +368,14 @@ export const getRelatedContents = async (contentId, limit = 5) => {
       }
     }
   } catch (error) {
-    console.warn(`Error processing tags for content ${contentId}:`, mainContent.tags, error.message);
+    console.warn(
+      `Error processing tags for content ${contentId}:`,
+      mainContent.tags,
+      error.message
+    );
     tags = [];
   }
-  
+
   if (tags.length > 0) {
     const tagRelatedContents = await KnowledgeContent.query()
       .where("id", "!=", contentId)
@@ -355,8 +386,15 @@ export const getRelatedContents = async (contentId, limit = 5) => {
         });
       })
       .select(
-        "id", "title", "summary", "author_id", "category_id",
-        "views_count", "likes_count", "estimated_reading_time", "created_at"
+        "id",
+        "title",
+        "summary",
+        "author_id",
+        "category_id",
+        "views_count",
+        "likes_count",
+        "estimated_reading_time",
+        "created_at"
       )
       .withGraphFetched("[author(simpleWithImage), category]")
       .limit(limit)
@@ -375,8 +413,15 @@ export const getRelatedContents = async (contentId, limit = 5) => {
     .where("id", "!=", contentId)
     .where("status", "published")
     .select(
-      "id", "title", "summary", "author_id", "category_id", 
-      "views_count", "likes_count", "estimated_reading_time", "created_at"
+      "id",
+      "title",
+      "summary",
+      "author_id",
+      "category_id",
+      "views_count",
+      "likes_count",
+      "estimated_reading_time",
+      "created_at"
     )
     .withGraphFetched("[author(simpleWithImage), category]")
     .limit(limit)
@@ -424,12 +469,15 @@ export const updateViewsCount = async (customId, contentId) => {
  * Create new knowledge content with references
  */
 export const createContent = async (contentData, authorId) => {
-  const readingTime = calculateReadingTime(contentData.content, contentData.summary);
-  
+  const readingTime = calculateReadingTime(
+    contentData.content,
+    contentData.summary
+  );
+
   const data = {
     ...contentData,
     author_id: authorId,
-    tags: contentData.tags || [], // Use array directly for JSONB
+    tags: JSON.stringify(contentData.tags || []), // Use array directly for JSONB
     estimated_reading_time: readingTime,
     status: "draft",
   };
@@ -456,8 +504,11 @@ export const createContent = async (contentData, authorId) => {
  * Update existing content
  */
 export const updateContent = async (contentId, contentData, userId) => {
-  const readingTime = calculateReadingTime(contentData.content, contentData.summary);
-  
+  const readingTime = calculateReadingTime(
+    contentData.content,
+    contentData.summary
+  );
+
   const updateData = {
     ...contentData,
     tags: contentData.tags || [], // Use array directly for JSONB
@@ -476,18 +527,16 @@ export const updateContent = async (contentId, contentData, userId) => {
 
   return await KnowledgeContent.transaction(async (trx) => {
     // Update content
-    await KnowledgeContent.query(trx)
-      .findById(contentId)
-      .patch(updateData);
+    await KnowledgeContent.query(trx).findById(contentId).patch(updateData);
 
     // Handle references if provided
     if (contentData.references !== undefined) {
       await content.$relatedQuery("references", trx).delete();
       if (contentData.references && contentData.references.length > 0) {
         await content.$relatedQuery("references", trx).insert(
-          contentData.references.map(ref => ({
+          contentData.references.map((ref) => ({
             title: ref.title,
-            url: ref.url
+            url: ref.url,
           }))
         );
       }
@@ -522,9 +571,15 @@ export const deleteContent = async (contentId, userId) => {
 /**
  * Upload content attachment
  */
-export const uploadContentAttachment = async (contentId, files, userId, isAdmin = false) => {
+export const uploadContentAttachment = async (
+  contentId,
+  files,
+  userId,
+  isAdmin = false,
+  mc
+) => {
   const content = await KnowledgeContent.query().findById(contentId);
-  
+
   if (!content) {
     throw new Error("Content not found");
   }
@@ -536,26 +591,30 @@ export const uploadContentAttachment = async (contentId, files, userId, isAdmin 
 
   const uploadPromises = files.map(async (file) => {
     const encryptedUserId = getEncryptedUserId(userId);
-    const fileName = `knowledge-attachments/${encryptedUserId}/${Date.now()}-${file.originalname}`;
-    
-    const uploadResult = await uploadFileMinio({
-      file: file.buffer,
-      fileName: fileName,
-      bucketName: "public",
-    });
+    const fileName = `knowledge-attachments/${encryptedUserId}/${Date.now()}-${
+      file.originalname
+    }`;
+
+    const uploadResult = await uploadFileMinio(
+      mc,
+      file.buffer,
+      fileName,
+      file.size,
+      file.mimetype
+    );
 
     return {
       content_id: contentId,
-      filename: file.originalname,
-      file_path: uploadResult.fileName,
-      file_size: file.size,
-      file_type: file.mimetype,
+      name: file.originalname,
+      path: uploadResult.fileName,
+      size: file.size,
+      mime: file.mimetype,
       url: `${BASE_URL}/${uploadResult.fileName}`,
     };
   });
 
   const uploadResults = await Promise.all(uploadPromises);
-  
+
   // Save to database
   const attachments = await KnowledgeContentAttachment.query()
     .insert(uploadResults)
@@ -570,16 +629,20 @@ export const uploadContentAttachment = async (contentId, files, userId, isAdmin 
 /**
  * Upload media for content creation (temporary storage)
  */
-export const uploadContentMedia = async (files, userId) => {
+export const uploadContentMedia = async (files, userId, mc) => {
   const uploadPromises = files.map(async (file) => {
     const encryptedUserId = getEncryptedUserId(userId);
-    const fileName = `knowledge-media-temp/${encryptedUserId}/${Date.now()}-${file.originalname}`;
-    
-    const uploadResult = await uploadFileMinio({
-      file: file.buffer,
-      fileName: fileName,
-      bucketName: "public",
-    });
+    const fileName = `knowledge-media-temp/${encryptedUserId}/${Date.now()}-${
+      file.originalname
+    }`;
+
+    const uploadResult = await uploadFileMinio(
+      mc,
+      file.buffer,
+      fileName,
+      file.size,
+      file.mimetype
+    );
 
     return {
       uid: `temp-${Date.now()}-${Math.random()}`,
@@ -632,7 +695,11 @@ export const getPublicContentTypeCounts = async () => {
 export const getPublicContentCategoryCounts = async () => {
   const results = await KnowledgeContent.query()
     .where("knowledge.contents.status", "published")
-    .leftJoin("knowledge.category", "knowledge.contents.category_id", "knowledge.category.id")
+    .leftJoin(
+      "knowledge.category",
+      "knowledge.contents.category_id",
+      "knowledge.category.id"
+    )
     .select(
       "knowledge.category.id as category_id",
       "knowledge.category.name as category_name",
@@ -660,7 +727,10 @@ export const getPublicContentCategoryCounts = async () => {
 /**
  * Get public contents with full statistics
  */
-export const getPublicContentsWithStats = async (filters = {}, userId = null) => {
+export const getPublicContentsWithStats = async (
+  filters = {},
+  userId = null
+) => {
   const [contents, typeCounts, categoryCounts] = await Promise.all([
     getContentsWithFilters({ ...filters, status: "published" }, userId),
     getPublicContentTypeCounts(),
