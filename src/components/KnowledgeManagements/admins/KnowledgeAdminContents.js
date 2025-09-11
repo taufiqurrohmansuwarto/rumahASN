@@ -1,4 +1,5 @@
 import { useAdminContents } from "@/hooks/knowledge-management/useAdminContents";
+import { usePendingRevisions } from "@/hooks/knowledge-management/useRevisions";
 import { SettingOutlined, FileTextOutlined } from "@ant-design/icons";
 import {
   Button,
@@ -46,6 +47,7 @@ const KnowledgeAdminContents = () => {
   const [selectedSort, setSelectedSort] = useState(query.sort || "created_at:desc");
   const [selectedType, setSelectedType] = useState(query.type || "all");
   const [selectedStatus, setSelectedStatus] = useState(query.status || "pending");
+  const [selectedRevisionView, setSelectedRevisionView] = useState(query.revision === "true" || false);
 
   // Scroll restoration for better UX
   useScrollRestoration("admin-knowledge-scroll", true, false, true);
@@ -58,21 +60,62 @@ const KnowledgeAdminContents = () => {
     setSelectedSort(query.sort || "created_at:desc");
     setSelectedType(query.type || "all");
     setSelectedStatus(query.status || "pending");
+    setSelectedRevisionView(query.revision === "true" || false);
   }, [query]);
 
-  // Admin status options - comprehensive list including revisions
-  const statusOptions = [
-    { key: "all", label: "Semua Status" },
-    { key: "draft", label: "Draft" },
-    { key: "pending", label: "Menunggu Review" },
-    { key: "published", label: "Dipublikasikan" }, 
-    { key: "rejected", label: "Ditolak" },
-    { key: "archived", label: "Diarsipkan" },
-    { key: "pending_revision", label: "Menunggu Review Revisi" },
-    { key: "revision_rejected", label: "Revisi Ditolak" },
-  ];
 
-  // Use comprehensive admin hook with all filters
+  // Use different hooks based on revision view
+  const adminContentsHook = useAdminContents({
+    searchQuery,
+    selectedCategory,
+    selectedTag,
+    selectedSort,
+    selectedType,
+    selectedStatus,
+  });
+
+  // State for revision pagination
+  const [revisionCurrentPage, setRevisionCurrentPage] = useState(1);
+  
+  const pendingRevisionsHook = usePendingRevisions("pending_revision", {
+    searchQuery,
+    selectedCategory,
+    selectedTag,
+    selectedSort,
+    selectedType,
+    selectedStatus,
+    currentPage: revisionCurrentPage,
+  });
+
+  // Define different status options based on view mode
+  const getStatusOptions = () => {
+    if (selectedRevisionView) {
+      // Revision-specific statuses
+      return [
+        { key: "all", label: "Semua Status" },
+        { key: "published", label: "Dipublikasikan" },
+        { key: "pending_revision", label: "Menunggu Review Revisi" },
+        { key: "approve_revision", label: "Revisi Disetujui" },
+        { key: "reject_revision", label: "Revisi Ditolak" },
+      ];
+    } else {
+      // Regular content statuses
+      return [
+        { key: "all", label: "Semua Status" },
+        { key: "draft", label: "Draft" },
+        { key: "pending", label: "Menunggu Review" },
+        { key: "published", label: "Dipublikasikan" }, 
+        { key: "rejected", label: "Ditolak" },
+        { key: "archived", label: "Diarsipkan" },
+        { key: "pending_revision", label: "Menunggu Review Revisi" },
+        { key: "revision_rejected", label: "Revisi Ditolak" },
+      ];
+    }
+  };
+
+  const statusOptions = getStatusOptions();
+
+  // Select appropriate data based on revision view toggle
   const {
     allContents,
     fetchNextPage,
@@ -83,15 +126,17 @@ const KnowledgeAdminContents = () => {
     statusCounts,
     typeCounts,
     categoryCounts,
-    // stats, // Available if needed for dashboard widgets
-  } = useAdminContents({
-    searchQuery,
-    selectedCategory,
-    selectedTag,
-    selectedSort,
-    selectedType,
-    selectedStatus,
-  });
+  } = selectedRevisionView ? {
+    allContents: pendingRevisionsHook.data || [],
+    fetchNextPage: () => setRevisionCurrentPage(prev => prev + 1),
+    hasNextPage: revisionCurrentPage < Math.ceil((pendingRevisionsHook.total || 0) / 10),
+    isFetchingNextPage: pendingRevisionsHook.isLoading,
+    isLoading: pendingRevisionsHook.isLoading,
+    isError: pendingRevisionsHook.isError,
+    statusCounts: pendingRevisionsHook.statusCounts || {},
+    typeCounts: pendingRevisionsHook.typeCounts || {},
+    categoryCounts: pendingRevisionsHook.categoryCounts || {},
+  } : adminContentsHook;
 
   // URL update function - keeps all filter states in sync
   const updateURL = (newFilters) => {
@@ -108,6 +153,7 @@ const KnowledgeAdminContents = () => {
     if (newFilters.sort && newFilters.sort !== "created_at:desc") params.set("sort", newFilters.sort);
     if (newFilters.type && newFilters.type !== "all") params.set("type", newFilters.type);
     if (newFilters.status && newFilters.status !== "pending") params.set("status", newFilters.status);
+    if (newFilters.revision === true) params.set("revision", "true");
 
     const queryString = params.toString();
     const newUrl = queryString ? `${router.pathname}?${queryString}` : router.pathname;
@@ -118,6 +164,7 @@ const KnowledgeAdminContents = () => {
   // Filter change handlers - each maintains all other filter states
   const handleSearchChange = (value) => {
     setSearchQuery(value);
+    setRevisionCurrentPage(1); // Reset revision pagination on filter change
     updateURL({
       search: value,
       category: selectedCategory,
@@ -125,6 +172,7 @@ const KnowledgeAdminContents = () => {
       sort: selectedSort,
       type: selectedType,
       status: selectedStatus,
+      revision: selectedRevisionView,
     });
   };
 
@@ -135,6 +183,7 @@ const KnowledgeAdminContents = () => {
 
   const handleCategoryChange = (value) => {
     setSelectedCategory(value);
+    setRevisionCurrentPage(1); // Reset revision pagination on filter change
     updateURL({
       search: searchQuery,
       category: value,
@@ -142,11 +191,13 @@ const KnowledgeAdminContents = () => {
       sort: selectedSort,
       type: selectedType,
       status: selectedStatus,
+      revision: selectedRevisionView,
     });
   };
 
   const handleTagChange = (value) => {
     setSelectedTag(value);
+    setRevisionCurrentPage(1); // Reset revision pagination on filter change
     updateURL({
       search: searchQuery,
       category: selectedCategory,
@@ -154,11 +205,13 @@ const KnowledgeAdminContents = () => {
       sort: selectedSort,
       type: selectedType,
       status: selectedStatus,
+      revision: selectedRevisionView,
     });
   };
 
   const handleSortChange = (value) => {
     setSelectedSort(value);
+    setRevisionCurrentPage(1); // Reset revision pagination on filter change
     updateURL({
       search: searchQuery,
       category: selectedCategory,
@@ -166,11 +219,13 @@ const KnowledgeAdminContents = () => {
       sort: value,
       type: selectedType,
       status: selectedStatus,
+      revision: selectedRevisionView,
     });
   };
 
   const handleTypeChange = (value) => {
     setSelectedType(value);
+    setRevisionCurrentPage(1); // Reset revision pagination on filter change
     updateURL({
       search: searchQuery,
       category: selectedCategory,
@@ -178,11 +233,13 @@ const KnowledgeAdminContents = () => {
       sort: selectedSort,
       type: value,
       status: selectedStatus,
+      revision: selectedRevisionView,
     });
   };
 
   const handleStatusChange = (value) => {
     setSelectedStatus(value);
+    setRevisionCurrentPage(1); // Reset revision pagination on filter change
     updateURL({
       search: searchQuery,
       category: selectedCategory,
@@ -190,6 +247,21 @@ const KnowledgeAdminContents = () => {
       sort: selectedSort,
       type: selectedType,
       status: value,
+      revision: selectedRevisionView,
+    });
+  };
+
+  const handleRevisionViewChange = (value) => {
+    setSelectedRevisionView(value);
+    setRevisionCurrentPage(1); // Reset revision pagination on filter change
+    updateURL({
+      search: searchQuery,
+      category: selectedCategory,
+      tag: selectedTag,
+      sort: selectedSort,
+      type: selectedType,
+      status: selectedStatus,
+      revision: value,
     });
   };
 
@@ -200,6 +272,8 @@ const KnowledgeAdminContents = () => {
     setSelectedSort("created_at:desc");
     setSelectedType("all");
     setSelectedStatus("pending");
+    setSelectedRevisionView(false);
+    setRevisionCurrentPage(1); // Reset revision pagination on filter clear
     router.push(router.pathname, undefined, { shallow: true });
   };
 
@@ -333,6 +407,10 @@ const KnowledgeAdminContents = () => {
               // Admin-specific props
               isAdmin={true}
               showAdminFilters={true}
+              // Revision filter props - similar to bookmark filter
+              showRevisionFilter={true}
+              selectedRevisionView={selectedRevisionView}
+              onRevisionViewChange={handleRevisionViewChange}
             />
           </div>
         </Col>

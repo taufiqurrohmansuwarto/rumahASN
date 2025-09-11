@@ -200,20 +200,35 @@ export const useAdminContentRevisions = (contentId) => {
 };
 
 // Get pending revisions with search, pagination, and filters
-export const usePendingRevisions = (initialStatus = "pending_revision") => {
-  const [searchQuery, setSearchQuery] = useState("");
-  const [categoryFilter, setCategoryFilter] = useState("");
-  const [authorFilter, setAuthorFilter] = useState("");
-  const [currentPage, setCurrentPage] = useState(1);
+export const usePendingRevisions = (initialStatus = "pending_revision", externalFilters = {}) => {
+  // Use external filters if provided, otherwise use internal state
+  const [internalSearchQuery, setInternalSearchQuery] = useState("");
+  const [internalCategoryFilter, setInternalCategoryFilter] = useState("");
+  const [internalAuthorFilter, setInternalAuthorFilter] = useState("");
+  const [internalCurrentPage, setInternalCurrentPage] = useState(1);
+  
+  // Use external filters when provided, internal state as fallback
+  const searchQuery = externalFilters.searchQuery !== undefined ? externalFilters.searchQuery : internalSearchQuery;
+  const categoryFilter = externalFilters.selectedCategory !== undefined ? externalFilters.selectedCategory : internalCategoryFilter;
+  const authorFilter = externalFilters.authorFilter !== undefined ? externalFilters.authorFilter : internalAuthorFilter;
+  const currentPage = externalFilters.currentPage !== undefined ? externalFilters.currentPage : internalCurrentPage;
+  const selectedStatus = externalFilters.selectedStatus !== undefined ? externalFilters.selectedStatus : initialStatus;
+  const selectedSort = externalFilters.selectedSort !== undefined ? externalFilters.selectedSort : "created_at:desc";
+  const selectedType = externalFilters.selectedType !== undefined ? externalFilters.selectedType : "";
+  const selectedTag = externalFilters.selectedTag !== undefined ? externalFilters.selectedTag : "";
+  
   const [debouncedSearch] = useDebouncedValue(searchQuery, 500);
 
   const queryParams = {
     page: currentPage,
     limit: 10,
-    status: initialStatus,
+    status: selectedStatus,
     ...(debouncedSearch && { search: debouncedSearch }),
     ...(categoryFilter && { category_id: categoryFilter }),
     ...(authorFilter && { author_id: authorFilter }),
+    ...(selectedSort && selectedSort !== "created_at:desc" && { sort: selectedSort }),
+    ...(selectedType && selectedType !== "all" && { type: selectedType }),
+    ...(selectedTag && { tag: selectedTag }),
   };
 
   const { data, isLoading, isError, refetch } = useQuery({
@@ -225,29 +240,35 @@ export const usePendingRevisions = (initialStatus = "pending_revision") => {
   });
 
   const handlePageChange = useCallback((page) => {
-    setCurrentPage(page);
-  }, []);
+    if (externalFilters.currentPage === undefined) {
+      setInternalCurrentPage(page);
+    }
+    // External page changes should be handled by the parent component
+  }, [externalFilters.currentPage]);
 
   const resetFilters = useCallback(() => {
-    setSearchQuery("");
-    setCategoryFilter("");
-    setAuthorFilter("");
-    setCurrentPage(1);
-  }, []);
+    if (externalFilters.searchQuery === undefined) setInternalSearchQuery("");
+    if (externalFilters.selectedCategory === undefined) setInternalCategoryFilter("");
+    if (externalFilters.authorFilter === undefined) setInternalAuthorFilter("");
+    if (externalFilters.currentPage === undefined) setInternalCurrentPage(1);
+    // External filter resets should be handled by the parent component
+  }, [externalFilters]);
 
   return {
     // Data
     data: data?.data || [],
     total: data?.total || 0,
     statusCounts: data?.statusCounts || {},
+    typeCounts: data?.typeCounts || {},
+    categoryCounts: data?.categoryCounts || {},
 
-    // Filters
+    // Filters - return current values
     searchQuery,
-    setSearchQuery,
+    setSearchQuery: externalFilters.searchQuery === undefined ? setInternalSearchQuery : () => {},
     categoryFilter,
-    setCategoryFilter,
+    setCategoryFilter: externalFilters.selectedCategory === undefined ? setInternalCategoryFilter : () => {},
     authorFilter,
-    setAuthorFilter,
+    setAuthorFilter: externalFilters.authorFilter === undefined ? setInternalAuthorFilter : () => {},
     currentPage,
 
     // Actions

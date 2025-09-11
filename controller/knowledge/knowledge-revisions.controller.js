@@ -177,7 +177,7 @@ export const submitRevision = async (req, res) => {
     const { submitNotes } = req.body;
 
     // Find the revision
-    const revision = await KnowledgeContent.query()
+    const revision = await KnowledgeContentVersions.query()
       .findById(versionId)
       .where("author_id", customId)
       .where("status", "draft");
@@ -196,7 +196,7 @@ export const submitRevision = async (req, res) => {
     }
 
     // Submit for review
-    await KnowledgeContent.query()
+    await KnowledgeContentVersions.query()
       .findById(versionId)
       .patch({
         status: "pending_revision",
@@ -225,7 +225,7 @@ export const getMyRevisions = async (req, res) => {
 
     const lastRevisionDraft = await KnowledgeContentVersions.query()
       .where("content_id", id)
-      .andWhere("status", "draft")
+      .andWhere("author_id", customId)
       .orderBy("version", "desc")
       .first();
 
@@ -270,81 +270,295 @@ export const getMyRevisions = async (req, res) => {
 // ===== ADMIN REVISION CONTROLLERS =====
 
 /**
- * Get all pending revisions for admin review
+ * Get all pending revisions for admin review with comprehensive filters
  * GET /api/knowledge/admin/revisions/pending
+ *
+ * Supports filtering by:
+ * - search: search in title, summary, content
+ * - status: all revision statuses (pending_revision, revision_rejected, draft, published)
+ * - category_id: filter by category
+ * - type: filter by content type (teks, gambar, video, audio)
+ * - tag/tags: filter by tags
+ * - sort: sorting options (created_at, updated_at, likes_count, etc.)
+ *
+ * Returns data with comprehensive counts like admin content system
  */
 export const getPendingRevisions = async (req, res) => {
   try {
-    const { page = 1, limit = 10, search, category_id, author_id } = req.query;
+    // Extract all possible filters from query parameters - same as getKnowledgeContentsAdmin
+    const filters = {
+      search: req?.query?.search || "",
+      page: parseInt(req?.query?.page) || 1,
+      limit: parseInt(req?.query?.limit) || 10,
+      category_id: req?.query?.category_id || req?.query?.categoryId || "",
+      status: req?.query?.status || "pending_revision",
+      type: req?.query?.type || "",
+      sort: req?.query?.sort || "updated_at:desc",
+      tag: req?.query?.tag,
+      tags: req?.query?.tags,
+      author_id: req?.query?.author_id || "",
+    };
 
-    const revisions = await KnowledgeContent.query()
-      .where("status", "pending_revision")
-      .andWhere((builder) => {
-        if (category_id) {
-          builder.where("category_id", category_id);
-        }
-        if (author_id) {
-          builder.where("author_id", author_id);
-        }
-        if (search) {
-          builder.where("title", "ilike", `%${search}%`);
-        }
-      })
-      .select(
-        "knowledge.contents.id",
-        "knowledge.contents.title",
-        "knowledge.contents.summary",
-        "knowledge.contents.author_id",
-        "knowledge.contents.original_author_id",
-        "knowledge.contents.category_id",
-        "knowledge.contents.current_version",
-        "knowledge.contents.status",
-        "knowledge.contents.data",
-        "knowledge.contents.revision_from_content_id",
-        "knowledge.contents.created_at",
-        "knowledge.contents.updated_at"
-      )
-      .withGraphFetched(
-        "[author(simpleWithImage), original_author(simpleWithImage), category, versions.[user_updated(simpleWithImage)]]"
-      )
-      .orderBy("updated_at", "desc")
-      .page(page - 1, limit);
+    // Process tags from string to array (same as admin content)
+    const tagFilters = Array.isArray(filters.tag)
+      ? filters.tag
+      : filters.tag
+      ? [filters.tag]
+      : [];
+    const allTags = filters.tags ? filters.tags.split(",").filter(Boolean) : [];
+    const finalTags = [...new Set([...tagFilters, ...allTags])].filter(Boolean);
 
-    // Get status counts
-    const statusCounts = await KnowledgeContent.query()
+    // Build base query with all filters
+    let query = KnowledgeContentVersions.query().select(
+      "knowledge.content_versions.id",
+      "knowledge.content_versions.content_id",
+      "knowledge.content_versions.title",
+      "knowledge.content_versions.summary",
+      "knowledge.content_versions.author_id",
+      "knowledge.content_versions.category_id",
+      "knowledge.content_versions.type",
+      "knowledge.content_versions.source_url",
+      "knowledge.content_versions.status",
+      "knowledge.content_versions.reason",
+      "knowledge.content_versions.change_summary",
+      "knowledge.content_versions.references",
+      "knowledge.content_versions.attachments",
+      "knowledge.content_versions.views_count",
+      "knowledge.content_versions.likes_count",
+      "knowledge.content_versions.comments_count",
+      "knowledge.content_versions.bookmarks_count",
+      "knowledge.content_versions.estimated_reading_time",
+      "knowledge.content_versions.reading_complexity",
+      "knowledge.content_versions.verified_by",
+      "knowledge.content_versions.tags",
+      "knowledge.content_versions.created_at",
+      "knowledge.content_versions.updated_at",
+      "knowledge.content_versions.version"
+    );
+
+    // Revision-specific status filtering
+    const revisionStatuses = [
+      "published",
+      "pending_revision",
+      "approve_revision",
+      "reject_revision",
+    ];
+
+    if (filters.status && filters.status !== "all") {
+      query = query.where("status", filters.status);
+    } else {
+      // Show all revision-related statuses when no specific status
+      query = query.whereIn("status", revisionStatuses);
+    }
+
+    // Search filter - search in title, summary, and content
+    if (filters.search) {
+      query = query.andWhere((builder) => {
+        builder
+          .where(
+            "knowledge.content_versions.title",
+            "ilike",
+            `%${filters.search}%`
+          )
+          .orWhere(
+            "knowledge.content_versions.summary",
+            "ilike",
+            `%${filters.search}%`
+          )
+          .orWhere(
+            "knowledge.content_versions.content",
+            "ilike",
+            `%${filters.search}%`
+          );
+      });
+    }
+
+    // Category filter
+    if (filters.category_id) {
+      query = query.andWhere(
+        "knowledge.content_versions.category_id",
+        filters.category_id
+      );
+    }
+
+    // Author filter
+    if (filters.author_id) {
+      query = query.andWhere(
+        "knowledge.content_versions.author_id",
+        filters.author_id
+      );
+    }
+
+    // Type filter (teks, gambar, video, audio)
+    if (filters.type && filters.type !== "all") {
+      if (filters.type === "teks") {
+        query = query.andWhere((builder) => {
+          builder
+            .whereNull("knowledge.content_versions.type")
+            .orWhere("knowledge.content_versions.type", "teks");
+        });
+      } else {
+        query = query.andWhere("knowledge.content_versions.type", filters.type);
+      }
+    }
+
+    // Tags filter
+    if (finalTags && finalTags.length > 0) {
+      query = query.andWhere((builder) => {
+        finalTags.forEach((tag) => {
+          builder.orWhereRaw(
+            "JSON_CONTAINS(LOWER(CAST(knowledge.content_versions.tags AS CHAR)), LOWER(?))",
+            [`"${tag}"`]
+          );
+        });
+      });
+    }
+
+    // Apply sorting (same logic as admin content)
+    const [sortField = "updated_at", sortDirection = "desc"] =
+      filters.sort.split(":");
+    const validSortFields = [
+      "created_at",
+      "updated_at",
+      "likes_count",
+      "comments_count",
+      "views_count",
+      "title",
+      "version",
+    ];
+    const finalSortField = validSortFields.includes(sortField)
+      ? sortField
+      : "updated_at";
+    const finalSortDirection = sortDirection === "asc" ? "asc" : "desc";
+
+    // Handle null values in sorting for count fields
+    let orderByClause;
+    if (
+      [
+        "likes_count",
+        "comments_count",
+        "views_count",
+        "bookmarks_count",
+      ].includes(finalSortField)
+    ) {
+      orderByClause = KnowledgeContentVersions.raw(
+        `COALESCE(knowledge.content_versions.${finalSortField}, 0) ${finalSortDirection.toUpperCase()}`
+      );
+    } else {
+      orderByClause = [
+        `knowledge.content_versions.${finalSortField}`,
+        finalSortDirection,
+      ];
+    }
+
+    // Execute paginated query with relations
+    const revisions = await query
+      .withGraphFetched("[author(simpleWithImage), category]")
+      .orderByRaw(
+        Array.isArray(orderByClause)
+          ? `${orderByClause[0]} ${orderByClause[1]}`
+          : orderByClause
+      )
+      .page(filters.page - 1, filters.limit);
+
+    // Get revision-specific status counts
+    const statusCounts = await KnowledgeContentVersions.query()
       .select("status")
       .count("id as total")
-      .whereIn("status", ["pending_revision", "revision_rejected"])
+      .whereIn("status", revisionStatuses)
       .groupBy("status")
       .then((results) => {
-        const counts = { pending_revision: 0, revision_rejected: 0 };
+        const counts = {
+          all: 0,
+          published: 0,
+          pending_revision: 0,
+          approve_revision: 0,
+          reject_revision: 0,
+        };
         results.forEach((result) => {
-          counts[result.status] = parseInt(result.total);
+          const count = parseInt(result.total);
+          counts[result.status] = count;
+          counts.all += count;
         });
         return counts;
       });
 
-    // Use FK for original content ID, parse reason for submit notes only
-    const processedRevisions = revisions.results.map((revision) => {
-      const submitNotesMatch = revision.reason?.match(/Submit notes: ([^|]+)/);
+    // Get type counts for revision content
+    const typeCounts = await KnowledgeContentVersions.query()
+      .select(
+        KnowledgeContentVersions.raw(
+          "COALESCE(type, 'teks') as type_normalized"
+        ),
+        KnowledgeContentVersions.raw("COUNT(*) as count")
+      )
+      .whereIn("status", revisionStatuses)
+      .groupBy(KnowledgeContentVersions.raw("COALESCE(type, 'teks')"))
+      .then((results) => {
+        const counts = {
+          all: 0,
+          teks: 0,
+          gambar: 0,
+          video: 0,
+          audio: 0,
+        };
+        results.forEach((result) => {
+          const type = result.type_normalized;
+          const count = parseInt(result.count);
+          if (counts.hasOwnProperty(type)) {
+            counts[type] = count;
+            counts.all += count;
+          }
+        });
+        return counts;
+      });
 
-      return {
-        ...revision,
-        submitNotes: submitNotesMatch ? submitNotesMatch[1].trim() : null,
-        originalContentId: revision.revision_from_content_id, // Use FK instead of parsing
-      };
-    });
+    // Get category counts for revision content
+    const categoryCounts = await KnowledgeContentVersions.query()
+      .leftJoin(
+        "knowledge.category",
+        "knowledge.content_versions.category_id",
+        "knowledge.category.id"
+      )
+      .select(
+        "knowledge.category.id as category_id",
+        "knowledge.category.name as category_name",
+        KnowledgeContentVersions.raw("COUNT(*) as count")
+      )
+      .whereIn("knowledge.content_versions.status", revisionStatuses)
+      .groupBy("knowledge.category.id", "knowledge.category.name")
+      .then((results) => {
+        const counts = {};
+        let total = 0;
+        results.forEach((result) => {
+          const categoryId = result.category_id;
+          const count = parseInt(result.count);
+          if (categoryId) {
+            counts[categoryId] = count;
+            total += count;
+          }
+        });
+        counts.all = total;
+        return counts;
+      });
 
+    // Return comprehensive response matching admin content format
     const result = {
-      data: processedRevisions,
+      data: revisions.results,
       total: revisions.total,
-      page: parseInt(page),
-      limit: parseInt(limit),
+      page: filters.page,
+      limit: filters.limit,
       statusCounts,
+      typeCounts,
+      categoryCounts,
+      stats: {
+        total_revisions: revisions.total,
+        ...statusCounts,
+      },
     };
 
     res.json(result);
   } catch (error) {
+    console.error("Error in getPendingRevisions:", error);
     handleError(res, error);
   }
 };
@@ -355,193 +569,6 @@ export const getPendingRevisions = async (req, res) => {
  */
 export const approveRevision = async (req, res) => {
   try {
-    const { versionId } = req.query;
-    const { customId } = req.user;
-    const { action, rejectionReason } = req.body; // action: 'approve' or 'reject'
-
-    // Find the revision
-    const revision = await KnowledgeContent.query()
-      .findById(versionId)
-      .where("status", "pending_revision");
-
-    if (!revision) {
-      return res.status(404).json({
-        message: "Revision not found or not pending review",
-      });
-    }
-
-    // Get original content ID from FK
-    const originalContentId = revision.revision_from_content_id;
-
-    if (!originalContentId) {
-      return res.status(400).json({
-        message: "Invalid revision: missing original content reference",
-      });
-    }
-
-    const result = await KnowledgeContent.transaction(async (trx) => {
-      if (action === "approve") {
-        // Get the original content
-        const originalContent = await KnowledgeContent.query(trx).findById(
-          originalContentId
-        );
-
-        if (!originalContent) {
-          throw new Error("Original content not found");
-        }
-
-        // Replace original content with revision data
-        await KnowledgeContent.query(trx)
-          .findById(originalContentId)
-          .patch({
-            title: revision.title,
-            content: revision.content,
-            summary: revision.summary,
-            source_url: revision.source_url,
-            tags: JSON.stringify(revision.tags || "[]"),
-            category_id: revision.category_id,
-            current_version: revision.current_version,
-            verified_by: customId,
-            verified_at: new Date(),
-            updated_at: new Date(),
-          });
-
-        // Copy references from revision to original
-        const revisionReferences = await revision.$relatedQuery(
-          "references",
-          trx
-        );
-
-        // Always delete old references and insert new ones (even if empty)
-        await KnowledgeContent.relatedQuery("references", trx)
-          .for(originalContentId)
-          .delete();
-
-        if (revisionReferences.length > 0) {
-          await KnowledgeContent.relatedQuery("references", trx)
-            .for(originalContentId)
-            .insert(
-              revisionReferences.map((ref) => ({
-                title: ref.title,
-                url: ref.url,
-              }))
-            );
-        }
-
-        // Copy attachments from revision to original
-        const revisionAttachments = await revision.$relatedQuery(
-          "attachments",
-          trx
-        );
-
-        // Always delete old attachments and insert new ones (even if empty)
-        await KnowledgeContent.relatedQuery("attachments", trx)
-          .for(originalContentId)
-          .delete();
-
-        if (revisionAttachments.length > 0) {
-          await KnowledgeContent.relatedQuery("attachments", trx)
-            .for(originalContentId)
-            .insert(
-              revisionAttachments.map((att) => ({
-                filename: att.filename,
-                file_path: att.file_path,
-                file_size: att.file_size,
-                file_type: att.file_type,
-                url: att.url,
-              }))
-            );
-        }
-
-        // Update revision status to approved (keep for history/audit trail)
-        await KnowledgeContent.query(trx).findById(versionId).patch({
-          status: "revision_approved",
-          verified_by: customId,
-          verified_at: new Date(),
-        });
-
-        // Create version snapshot for updated original content with complete data
-        await KnowledgeContentVersions.query(trx).insert({
-          content_id: originalContentId,
-          version: revision.current_version,
-          title: revision.title,
-          content: revision.content,
-          summary: revision.summary,
-          tags: JSON.stringify(revision?.tags || "[]"),
-          category_id: revision.category_id,
-          type: revision.type,
-          source_url: revision.source_url,
-          status: "published",
-          updated_by: customId,
-          change_summary: `Revision approved and applied from version ${versionId}`,
-          reason: "Content updated via approved revision",
-          // Store complete references and attachments data in approved version
-          references: JSON.stringify(
-            revisionReferences.map((ref) => ({
-              title: ref.title,
-              url: ref.url,
-            }))
-          ),
-          attachments: JSON.stringify(
-            revisionAttachments.map((att) => ({
-              filename: att.filename,
-              file_path: att.file_path,
-              file_size: att.file_size,
-              file_type: att.file_type,
-              url: att.url,
-            }))
-          ),
-        });
-
-        // Award XP to author
-        try {
-          await awardXP({
-            userId: revision.author_id,
-            action: "revision_approved",
-            refType: "content",
-            refId: originalContentId,
-            xp: 15,
-          });
-        } catch (xpError) {
-          console.warn("Failed to award XP for approved revision:", xpError);
-        }
-
-        // Trigger AI processing for updated content
-        setImmediate(async () => {
-          try {
-            await processContentWithAI(originalContentId);
-          } catch (aiError) {
-            console.error(
-              `AI processing failed for revised content ${originalContentId}:`,
-              aiError.message
-            );
-          }
-        });
-
-        return { action: "approved", contentId: originalContentId };
-      } else if (action === "reject") {
-        // Update revision status to rejected
-        await KnowledgeContent.query(trx)
-          .findById(versionId)
-          .patch({
-            status: "revision_rejected",
-            verified_by: customId,
-            verified_at: new Date(),
-            reason: `${revision.reason || ""} | Rejection: ${
-              rejectionReason || "No reason provided"
-            } | Rejected at: ${new Date().toISOString()}`,
-          });
-
-        return { action: "rejected", revisionId: versionId };
-      } else {
-        throw new Error("Invalid action. Use 'approve' or 'reject'");
-      }
-    });
-
-    res.json({
-      message: `Revision ${result.action} successfully`,
-      ...result,
-    });
   } catch (error) {
     handleError(res, error);
   }

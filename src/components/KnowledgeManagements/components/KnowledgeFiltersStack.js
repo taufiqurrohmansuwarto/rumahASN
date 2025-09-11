@@ -7,6 +7,7 @@ import {
   DownOutlined,
   UpOutlined,
   BookOutlined,
+  EditOutlined,
 } from "@ant-design/icons";
 import { useQuery } from "@tanstack/react-query";
 import React, { useState } from "react";
@@ -57,6 +58,10 @@ const KnowledgeFiltersStack = ({
   showSavedContentFilter = false,
   selectedSavedContent,
   onSavedContentChange,
+  // Revision filter props (for admin)
+  showRevisionFilter = false,
+  selectedRevisionView,
+  onRevisionViewChange,
   isLoading = false,
 }) => {
   // Collapse states
@@ -141,7 +146,8 @@ const KnowledgeFiltersStack = ({
     searchQuery ||
     (showInstanceFilter && selectedInstance) ||
     (showStatusFilter && selectedStatus && selectedStatus !== "all") ||
-    (showSavedContentFilter && selectedSavedContent === true);
+    (showSavedContentFilter && selectedSavedContent === true) ||
+    (showRevisionFilter && selectedRevisionView === true);
 
   const handleClearFilters = () => {
     onClearFilters();
@@ -424,6 +430,39 @@ const KnowledgeFiltersStack = ({
               >
                 <Flex justify="space-between" align="center" style={{ width: "100%" }}>
                   <span>Konten Disimpan</span>
+                </Flex>
+              </Button>
+            </div>
+            <Divider style={{ margin: "4px 0" }} />
+          </>
+        )}
+
+        {/* Revision Filter Section (if enabled) */}
+        {showRevisionFilter && (
+          <>
+            <div style={{ marginTop: "-4px" }}>
+              <Button
+                type="text"
+                size="small"
+                className={selectedRevisionView === true ? "selected-filter" : ""}
+                style={{
+                  height: "32px",
+                  justifyContent: "flex-start", 
+                  textAlign: "left",
+                  border: selectedRevisionView === true ? "1px solid #FF4500" : "1px solid transparent",
+                  backgroundColor: selectedRevisionView === true ? "#FFF7ED" : "transparent",
+                  color: selectedRevisionView === true ? "#FF4500" : "#374151",
+                  fontWeight: selectedRevisionView === true ? 600 : 400,
+                  fontSize: "13px",
+                  padding: "0 8px",
+                  width: "100%",
+                  marginBottom: "4px",
+                }}
+                icon={<EditOutlined style={{ fontSize: "14px", color: selectedRevisionView === true ? "#FF4500" : "#1890ff" }} />}
+                onClick={() => onRevisionViewChange(!selectedRevisionView)}
+              >
+                <Flex justify="space-between" align="center" style={{ width: "100%" }}>
+                  <span>Revisi Pending</span>
                 </Flex>
               </Button>
             </div>

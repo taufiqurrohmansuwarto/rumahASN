@@ -4,7 +4,7 @@ import { useState } from "react";
 
 const { Text } = Typography;
 
-const KnowledgeFormSourceUrl = ({ isMobile, contentType = "teks" }) => {
+const KnowledgeFormSourceUrl = ({ isMobile, contentType = "teks", onFileChange = null }) => {
   const [uploadMode, setUploadMode] = useState("url"); // "upload" atau "url"
   const [fileList, setFileList] = useState([]);
 
@@ -76,6 +76,8 @@ const KnowledgeFormSourceUrl = ({ isMobile, contentType = "teks" }) => {
         return "https://youtube.com/watch?v=... atau https://vimeo.com/...";
       case "audio":
         return "https://soundcloud.com/... atau https://example.com/audio.mp3";
+      case "teks":
+        return "https://example.com/artikel.html (opsional - URL referensi/sumber)";
       default:
         return "https://example.com/dokumen.pdf atau masukkan URL sumber";
     }
@@ -88,6 +90,11 @@ const KnowledgeFormSourceUrl = ({ isMobile, contentType = "teks" }) => {
         message: "Format URL tidak valid! Pastikan dimulai dengan http:// atau https://" 
       }
     ];
+
+    // For text content, URL is optional
+    if (type === "teks") {
+      return baseRules; // No required rule for text content
+    }
 
     // Add specific validation for different content types
     switch (type) {
@@ -104,20 +111,26 @@ const KnowledgeFormSourceUrl = ({ isMobile, contentType = "teks" }) => {
     }
   };
 
-  // Only show this component for non-text content
-  if (contentType === "teks") {
-    return null;
-  }
+  // Show upload/URL options for media content, URL-only for text content
+  const showUploadOption = ["gambar", "video", "audio"].includes(contentType);
 
   return (
     <Form.Item
       label={
         <Flex align="center" gap="small">
           <Text strong style={{ fontSize: isMobile ? "13px" : "14px" }}>
-            Sumber {contentType.charAt(0).toUpperCase() + contentType.slice(1)}
+            {contentType === "teks" 
+              ? "Sumber/Referensi (Opsional)" 
+              : `Sumber ${contentType.charAt(0).toUpperCase() + contentType.slice(1)}`
+            }
           </Text>
           <Tooltip
-            title={`Upload file ${contentType} dari komputer Anda atau masukkan URL dari sumber eksternal. URL berguna untuk konten dari YouTube, Vimeo, atau platform lainnya.`}
+            title={contentType === "teks" 
+              ? "URL referensi atau sumber artikel yang menjadi acuan konten Anda (opsional)."
+              : showUploadOption 
+                ? `Upload file ${contentType} dari komputer Anda atau masukkan URL dari sumber eksternal. URL berguna untuk konten dari YouTube, Vimeo, atau platform lainnya.`
+                : `Masukkan URL sumber ${contentType} dari platform eksternal.`
+            }
             placement="top"
           >
             <QuestionCircleOutlined
@@ -131,24 +144,26 @@ const KnowledgeFormSourceUrl = ({ isMobile, contentType = "teks" }) => {
         </Flex>
       }
     >
-      <div style={{ marginBottom: "12px" }}>
-        <Radio.Group
-          value={uploadMode}
-          onChange={(e) => setUploadMode(e.target.value)}
-          optionType="button"
-          buttonStyle="solid"
-          size="small"
-        >
-          <Radio.Button value="url">
-            <LinkOutlined /> URL/Link
-          </Radio.Button>
-          <Radio.Button value="upload">
-            <UploadOutlined /> Upload File
-          </Radio.Button>
-        </Radio.Group>
-      </div>
+      {showUploadOption && (
+        <div style={{ marginBottom: "12px" }}>
+          <Radio.Group
+            value={uploadMode}
+            onChange={(e) => setUploadMode(e.target.value)}
+            optionType="button"
+            buttonStyle="solid"
+            size="small"
+          >
+            <Radio.Button value="url">
+              <LinkOutlined /> URL/Link
+            </Radio.Button>
+            <Radio.Button value="upload">
+              <UploadOutlined /> Upload File
+            </Radio.Button>
+          </Radio.Group>
+        </div>
+      )}
 
-      {uploadMode === "url" ? (
+      {(!showUploadOption || uploadMode === "url") ? (
         <Form.Item
           name="source_url"
           rules={getUrlValidationRules(contentType)}
@@ -171,7 +186,7 @@ const KnowledgeFormSourceUrl = ({ isMobile, contentType = "teks" }) => {
             }}
           />
         </Form.Item>
-      ) : (
+      ) : showUploadOption && uploadMode === "upload" ? (
         <div>
           <Upload.Dragger
             {...uploadProps}
@@ -227,7 +242,7 @@ const KnowledgeFormSourceUrl = ({ isMobile, contentType = "teks" }) => {
             </div>
           )}
         </div>
-      )}
+      ) : null}
 
       <div style={{ 
         marginTop: "8px", 
@@ -237,8 +252,12 @@ const KnowledgeFormSourceUrl = ({ isMobile, contentType = "teks" }) => {
         border: "1px solid #bae7ff"
       }}>
         <Text type="secondary" style={{ fontSize: "11px" }}>
-          💡 <strong>Tips:</strong> Untuk {contentType === "video" ? "video YouTube/Vimeo" : contentType === "gambar" ? "gambar dari web" : "file eksternal"}, 
-          gunakan mode URL. Untuk file dari komputer, gunakan mode Upload.
+          💡 <strong>Tips:</strong> {contentType === "teks" 
+            ? "URL referensi dapat berupa artikel, berita, atau sumber yang menjadi acuan konten Anda."
+            : showUploadOption
+              ? `Untuk ${contentType === "video" ? "video YouTube/Vimeo" : contentType === "gambar" ? "gambar dari web" : "file eksternal"}, gunakan mode URL. Untuk file dari komputer, gunakan mode Upload (akan diupload saat menyimpan).`
+              : `Masukkan URL sumber ${contentType} dari platform eksternal.`
+          }
         </Text>
       </div>
     </Form.Item>

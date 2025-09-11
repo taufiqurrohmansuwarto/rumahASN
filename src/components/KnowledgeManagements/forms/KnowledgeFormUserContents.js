@@ -15,7 +15,6 @@ import KnowledgeFormAttachments from "./KnowledgeFormAttachments";
 import KnowledgeFormCategory from "./KnowledgeFormCategory";
 import KnowledgeFormContent from "./KnowledgeFormContent";
 import KnowledgeFormHeader from "./KnowledgeFormHeader";
-import KnowledgeFormMedia from "./KnowledgeFormMedia";
 import KnowledgeFormReferences from "./KnowledgeFormReferences";
 import KnowledgeFormSourceUrl from "./KnowledgeFormSourceUrl";
 import KnowledgeFormSummary from "./KnowledgeFormSummary";
@@ -47,9 +46,6 @@ function KnowledgeFormUserContents({
   );
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [contentType, setContentType] = useState("teks");
-  const [mediaFile, setMediaFile] = useState(null);
-  const [mediaUploadProgress, setMediaUploadProgress] = useState(0);
-  const [isMediaUploading, setIsMediaUploading] = useState(false);
   const queryClient = useQueryClient();
 
   // Check if there are files still uploading or pending
@@ -203,20 +199,6 @@ function KnowledgeFormUserContents({
         );
         setFileList(mappedFiles);
       }
-
-      // Set media file if source_url exists and type is media
-      if (
-        initialData.source_url &&
-        ["video", "audio", "gambar"].includes(initialData.type)
-      ) {
-        setMediaFile({
-          uid: "existing-media",
-          name: initialData.title || "Media File",
-          status: "done",
-          url: initialData.source_url,
-          type: initialData.type,
-        });
-      }
     }
   }, [initialData, form]);
 
@@ -240,39 +222,6 @@ function KnowledgeFormUserContents({
     }
   };
 
-  const uploadMediaFile = async (contentId, file, isCreate = false) => {
-    if (!file || !["video", "audio", "gambar"].includes(contentType))
-      return null;
-
-    try {
-      setIsMediaUploading(true);
-      setMediaUploadProgress(0);
-
-      const formData = new FormData();
-      formData.append("media", file);
-
-      let response;
-      if (isCreate) {
-        response = await uploadKnowledgeContentMediaCreate(formData);
-      } else if (mode === "admin") {
-        response = await uploadKnowledgeContentMediaAdmin(contentId, formData);
-      } else {
-        response = await uploadKnowledgeContentMedia(contentId, formData);
-      }
-
-      if (response?.success && response?.data?.url) {
-        setMediaUploadProgress(100);
-        return response.data.url;
-      }
-
-      throw new Error("Upload gagal: Tidak ada URL yang dikembalikan");
-    } catch (error) {
-      console.error("Media upload error:", error);
-      throw error;
-    } finally {
-      setIsMediaUploading(false);
-    }
-  };
 
   const resetForm = () => {
     form.resetFields();
@@ -283,9 +232,6 @@ function KnowledgeFormUserContents({
     setCurrentContentId(null);
     setIsSubmitting(false);
     setContentType("teks");
-    setMediaFile(null);
-    setMediaUploadProgress(0);
-    setIsMediaUploading(false);
   };
 
   const handleFinish = async (values) => {
@@ -339,74 +285,6 @@ function KnowledgeFormUserContents({
         }
       }
 
-      // Step 2: Handle media upload for create mode
-      if (
-        !isEditing &&
-        mediaFile &&
-        mediaFile.originFileObj &&
-        ["video", "audio", "gambar"].includes(contentType) &&
-        result?.id
-      ) {
-        try {
-          const uploadedMediaUrl = await uploadMediaFile(
-            result.id,
-            mediaFile.originFileObj,
-            false
-          );
-          if (uploadedMediaUrl) {
-            // Update the content with new media URL
-            const updateData = { source_url: uploadedMediaUrl };
-            const mutationData =
-              mode === "admin"
-                ? { id: result.id, payload: updateData }
-                : { id: result.id, data: updateData };
-
-            await new Promise((resolve, reject) => {
-              updateMutation(mutationData, {
-                onSuccess: resolve,
-                onError: reject,
-              });
-            });
-          }
-        } catch (error) {
-          // Media upload failed, but content was saved successfully
-          console.error("Media upload failed:", error);
-        }
-      }
-
-      // Step 2b: Handle media upload for edit mode
-      if (
-        isEditing &&
-        mediaFile &&
-        mediaFile.originFileObj &&
-        ["video", "audio", "gambar"].includes(contentType)
-      ) {
-        try {
-          const uploadedMediaUrl = await uploadMediaFile(
-            contentId,
-            mediaFile.originFileObj,
-            false
-          );
-          if (uploadedMediaUrl) {
-            // Update the content with new media URL
-            const updateData = { source_url: uploadedMediaUrl };
-            const mutationData =
-              mode === "admin"
-                ? { id: contentId, payload: updateData }
-                : { id: contentId, data: updateData };
-
-            await new Promise((resolve, reject) => {
-              updateMutation(mutationData, {
-                onSuccess: resolve,
-                onError: reject,
-              });
-            });
-          }
-        } catch (error) {
-          // Media upload failed, but content was saved successfully
-          console.error("Media upload failed:", error);
-        }
-      }
 
       // Step 3: Upload files if any
       const targetContentId = isEditing ? contentId : result?.id;
@@ -483,39 +361,6 @@ function KnowledgeFormUserContents({
         }
       }
 
-      // Step 2: Handle media upload for edit mode
-      if (
-        isEditing &&
-        mediaFile &&
-        mediaFile.originFileObj &&
-        ["video", "audio", "gambar"].includes(contentType)
-      ) {
-        try {
-          const uploadedMediaUrl = await uploadMediaFile(
-            contentId,
-            mediaFile.originFileObj,
-            false
-          );
-          if (uploadedMediaUrl) {
-            // Update the content with new media URL
-            const updateData = { source_url: uploadedMediaUrl };
-            const mutationData =
-              mode === "admin"
-                ? { id: contentId, payload: updateData }
-                : { id: contentId, data: updateData };
-
-            await new Promise((resolve, reject) => {
-              updateMutation(mutationData, {
-                onSuccess: resolve,
-                onError: reject,
-              });
-            });
-          }
-        } catch (error) {
-          // Media upload failed, but content was saved successfully
-          console.error("Media upload failed:", error);
-        }
-      }
 
       // Step 3: Upload files if any
       const targetContentId = isEditing ? contentId : result?.id;
@@ -558,28 +403,13 @@ function KnowledgeFormUserContents({
         )
         .map((file) => file.response.data);
 
-      // Step 0: Handle media upload for create mode
-      let mediaUrl = values.source_url;
-      if (
-        !isEditing &&
-        mediaFile &&
-        mediaFile.originFileObj &&
-        ["video", "audio", "gambar"].includes(contentType)
-      ) {
-        try {
-          mediaUrl = await uploadMediaFile(null, mediaFile.originFileObj, true);
-        } catch (error) {
-          setIsSubmitting(false);
-          return;
-        }
-      }
 
       const formData = {
         ...values,
         content,
         tags,
         references: values.references || [],
-        source_url: mediaUrl || values.source_url,
+        source_url: values.source_url,
         // Status handling for submit
         status:
           mode === "admin"
@@ -616,74 +446,6 @@ function KnowledgeFormUserContents({
         }
       }
 
-      // Step 2: Handle media upload for create mode
-      if (
-        !isEditing &&
-        mediaFile &&
-        mediaFile.originFileObj &&
-        ["video", "audio", "gambar"].includes(contentType) &&
-        result?.id
-      ) {
-        try {
-          const uploadedMediaUrl = await uploadMediaFile(
-            result.id,
-            mediaFile.originFileObj,
-            false
-          );
-          if (uploadedMediaUrl) {
-            // Update the content with new media URL
-            const updateData = { source_url: uploadedMediaUrl };
-            const mutationData =
-              mode === "admin"
-                ? { id: result.id, payload: updateData }
-                : { id: result.id, data: updateData };
-
-            await new Promise((resolve, reject) => {
-              updateMutation(mutationData, {
-                onSuccess: resolve,
-                onError: reject,
-              });
-            });
-          }
-        } catch (error) {
-          // Media upload failed, but content was saved successfully
-          console.error("Media upload failed:", error);
-        }
-      }
-
-      // Step 2b: Handle media upload for edit mode
-      if (
-        isEditing &&
-        mediaFile &&
-        mediaFile.originFileObj &&
-        ["video", "audio", "gambar"].includes(contentType)
-      ) {
-        try {
-          const uploadedMediaUrl = await uploadMediaFile(
-            contentId,
-            mediaFile.originFileObj,
-            false
-          );
-          if (uploadedMediaUrl) {
-            // Update the content with new media URL
-            const updateData = { source_url: uploadedMediaUrl };
-            const mutationData =
-              mode === "admin"
-                ? { id: contentId, payload: updateData }
-                : { id: contentId, data: updateData };
-
-            await new Promise((resolve, reject) => {
-              updateMutation(mutationData, {
-                onSuccess: resolve,
-                onError: reject,
-              });
-            });
-          }
-        } catch (error) {
-          // Media upload failed, but content was saved successfully
-          console.error("Media upload failed:", error);
-        }
-      }
 
       // Step 3: Upload files if any
       const targetContentId = isEditing ? contentId : result?.id;
@@ -716,8 +478,7 @@ function KnowledgeFormUserContents({
     createLoading ||
     updateLoading ||
     isSubmitting ||
-    hasUploadingFiles ||
-    isMediaUploading;
+    hasUploadingFiles;
 
   return (
     <div>
@@ -766,21 +527,10 @@ function KnowledgeFormUserContents({
                     <Col xs={24} lg={16}>
                       <KnowledgeFormTitle isMobile={isMobile} />
                       <KnowledgeFormType isMobile={isMobile} />
-                      {["video", "audio", "gambar"].includes(contentType) ? (
-                        <KnowledgeFormMedia
-                          isMobile={isMobile}
-                          contentType={contentType}
-                          mediaFile={mediaFile}
-                          setMediaFile={setMediaFile}
-                          isUploading={isMediaUploading}
-                          uploadProgress={mediaUploadProgress}
-                        />
-                      ) : (
-                        <KnowledgeFormSourceUrl
-                          isMobile={isMobile}
-                          contentType={contentType}
-                        />
-                      )}
+                      <KnowledgeFormSourceUrl
+                        isMobile={isMobile}
+                        contentType={contentType}
+                      />
                       <KnowledgeFormSummary isMobile={isMobile} />
                       <KnowledgeFormContent
                         isMobile={isMobile}
@@ -810,8 +560,7 @@ function KnowledgeFormUserContents({
 
                   {/* Status Info */}
                   {(hasUploadingFiles ||
-                    hasPendingFiles ||
-                    isMediaUploading) && (
+                    hasPendingFiles) && (
                     <div
                       style={{
                         marginBottom: 16,
@@ -823,7 +572,7 @@ function KnowledgeFormUserContents({
                     >
                       <Row align="middle" gutter={8}>
                         <Col>
-                          {hasUploadingFiles || isMediaUploading ? (
+                          {hasUploadingFiles ? (
                             <div
                               style={{
                                 display: "flex",
@@ -834,9 +583,7 @@ function KnowledgeFormUserContents({
                             >
                               <Spin size="small" />
                               <span style={{ fontSize: "13px" }}>
-                                {isMediaUploading
-                                  ? "Mengupload media..."
-                                  : "Mengupload file..."}
+                                Mengupload file...
                               </span>
                             </div>
                           ) : (
