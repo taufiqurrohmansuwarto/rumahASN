@@ -13,17 +13,17 @@ const KnowledgeFormType = ({ isMobile }) => {
     {
       label: "🖼️ Gambar", 
       value: "gambar",
-      description: "Konten berupa infografik, diagram, atau gambar"
+      description: "Konten berupa infografik, diagram, atau gambar (upload file atau link)"
     },
     {
       label: "🎥 Video",
       value: "video", 
-      description: "Konten berupa video tutorial, presentasi, atau webinar"
+      description: "Konten berupa video tutorial, presentasi, atau webinar (upload file atau link)"
     },
     {
       label: "🎵 Audio",
       value: "audio",
-      description: "Konten berupa podcast, rekaman, atau audio pembelajaran"
+      description: "Konten berupa podcast, rekaman, atau audio pembelajaran (upload file atau link)"
     }
   ];
 

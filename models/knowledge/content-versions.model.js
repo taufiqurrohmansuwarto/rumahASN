@@ -15,6 +15,7 @@ class knowledgeContentVersions extends Model {
 
   static get relationMappings() {
     const KnowledgeContent = require("@/models/knowledge/contents.model");
+    const KnowledgeCategories = require("@/models/knowledge/categories.model");
     const User = require("@/models/users.model");
 
     return {
@@ -24,6 +25,22 @@ class knowledgeContentVersions extends Model {
         join: {
           from: "knowledge.content_versions.content_id",
           to: "knowledge.contents.id",
+        },
+      },
+      category: {
+        relation: Model.BelongsToOneRelation,
+        modelClass: KnowledgeCategories,
+        join: {
+          from: "knowledge.content_versions.category_id",
+          to: "knowledge.category.id",
+        },
+      },
+      author: {
+        relation: Model.BelongsToOneRelation,
+        modelClass: User,
+        join: {
+          from: "knowledge.content_versions.author_id",
+          to: "users.custom_id",
         },
       },
       user_updated: {

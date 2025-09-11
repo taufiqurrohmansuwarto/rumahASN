@@ -9,6 +9,8 @@ import {
   getRevisionDetails,
   submitRevision,
   updateRevision,
+  uploadRevisionMedia,
+  uploadRevisionAttachments,
 } from "@/services/knowledge-management.services";
 import { useDebouncedValue } from "@mantine/hooks";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -97,6 +99,60 @@ export const useSubmitRevision = () => {
     onError: (error) => {
       const errorMessage =
         error.response?.data?.message || "Gagal submit revision";
+      message.error(errorMessage);
+    },
+  });
+};
+
+// Upload revision media mutation
+export const useUploadRevisionMedia = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: uploadRevisionMedia,
+    onSuccess: (data, variables) => {
+      message.success("Media berhasil diupload");
+
+      // Invalidate related queries
+      queryClient.invalidateQueries(["my-revisions", variables.contentId]);
+      queryClient.invalidateQueries([
+        "revision-details",
+        variables.versionId,
+        variables.contentId,
+      ]);
+
+      return data;
+    },
+    onError: (error) => {
+      const errorMessage =
+        error.response?.data?.message || "Gagal upload media";
+      message.error(errorMessage);
+    },
+  });
+};
+
+// Upload revision attachments mutation
+export const useUploadRevisionAttachments = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: uploadRevisionAttachments,
+    onSuccess: (data, variables) => {
+      message.success("Attachment berhasil diupload");
+
+      // Invalidate related queries
+      queryClient.invalidateQueries(["my-revisions", variables.contentId]);
+      queryClient.invalidateQueries([
+        "revision-details",
+        variables.versionId,
+        variables.contentId,
+      ]);
+
+      return data;
+    },
+    onError: (error) => {
+      const errorMessage =
+        error.response?.data?.message || "Gagal upload attachment";
       message.error(errorMessage);
     },
   });
@@ -302,6 +358,8 @@ export const useRevisionManagement = (contentId, versionId = null) => {
   const createRevisionMutation = useCreateRevision();
   const updateRevisionMutation = useUpdateRevision();
   const submitRevisionMutation = useSubmitRevision();
+  const uploadMediaMutation = useUploadRevisionMedia();
+  const uploadAttachmentsMutation = useUploadRevisionAttachments();
 
   const myRevisionsQuery = useMyRevisions(contentId);
   const revisionDetailsQuery = useRevisionDetails(versionId);
@@ -338,6 +396,32 @@ export const useRevisionManagement = (contentId, versionId = null) => {
     [contentId, versionId, submitRevisionMutation]
   );
 
+  // Upload revision media
+  const handleUploadMedia = useCallback(
+    async (data) => {
+      if (!contentId || !versionId) return null;
+      return await uploadMediaMutation.mutateAsync({
+        contentId,
+        versionId,
+        data,
+      });
+    },
+    [contentId, versionId, uploadMediaMutation]
+  );
+
+  // Upload revision attachments
+  const handleUploadAttachments = useCallback(
+    async (data) => {
+      if (!contentId || !versionId) return null;
+      return await uploadAttachmentsMutation.mutateAsync({
+        contentId,
+        versionId,
+        data,
+      });
+    },
+    [contentId, versionId, uploadAttachmentsMutation]
+  );
+
   return {
     // Queries
     myRevisions: myRevisionsQuery.data,
@@ -347,6 +431,8 @@ export const useRevisionManagement = (contentId, versionId = null) => {
     isCreating: createRevisionMutation.isLoading,
     isUpdating: updateRevisionMutation.isLoading,
     isSubmitting: submitRevisionMutation.isLoading,
+    isUploadingMedia: uploadMediaMutation.isLoading,
+    isUploadingAttachments: uploadAttachmentsMutation.isLoading,
     isLoadingRevisions: myRevisionsQuery.isLoading,
     isLoadingDetails: revisionDetailsQuery.isLoading,
 
@@ -354,6 +440,8 @@ export const useRevisionManagement = (contentId, versionId = null) => {
     handleCreateRevision,
     handleUpdateRevision,
     handleSubmitRevision,
+    handleUploadMedia,
+    handleUploadAttachments,
 
     // Refetch functions
     refetchRevisions: myRevisionsQuery.refetch,

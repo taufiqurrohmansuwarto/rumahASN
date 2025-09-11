@@ -4,6 +4,9 @@ const KnowledgeContentVersions = require("@/models/knowledge/content-versions.mo
 import { handleError } from "@/utils/helper/controller-helper";
 import { awardXP } from "./gamification.controller";
 import { processContentWithAI } from "@/utils/services/ai-processing.services";
+import { getEncryptedUserId } from "@/utils/services/knowledge-content.services";
+import { uploadFileMinio } from "@/utils/index";
+const { nanoid } = require("nanoid");
 
 // ===== USER REVISION CONTROLLERS =====
 
@@ -24,20 +27,23 @@ export const createRevision = async (req, res) => {
 
     if (!publishedContent) {
       return res.status(404).json({
-        message: "Published content not found or you don't have permission",
+        message:
+          "Konten yang dipublikasikan tidak ditemukan atau Anda tidak memiliki izin",
       });
     }
 
     // Check if there's already a pending revision using FK
-    const existingRevision = await KnowledgeContent.query()
+    const existingRevision = await KnowledgeContentVersions.query()
       .where("author_id", customId)
-      .andWhere("id", id)
-      .whereIn("status", ["draft", "pending_revision"])
+      .andWhere("content_id", publishedContent.id)
+      .andWhere("version", publishedContent.current_version + 1)
+      .andWhere("status", "draft")
       .first();
 
     if (existingRevision) {
       return res.status(409).json({
-        message: "You already have a pending revision for this content",
+        message:
+          "Anda sudah memiliki revisi yang sedang dalam tahap pengerjaan",
         revisionId: existingRevision.id,
       });
     }
@@ -64,6 +70,14 @@ export const createRevision = async (req, res) => {
         version: (lastRevision?.version || 0) + 1,
         status: "draft",
         reason: `Revision created from published content: ${lastRevision.title}`, // Descriptive reason
+        views_count: lastRevision.views_count,
+        likes_count: lastRevision.likes_count,
+        comments_count: lastRevision.comments_count,
+        bookmarks_count: lastRevision.bookmarks_count,
+        estimated_reading_time: lastRevision.estimated_reading_time,
+        reading_complexity: lastRevision.reading_complexity,
+        verified_by: lastRevision.verified_by,
+        author_id: lastRevision.author_id,
         attachments: JSON.stringify(lastRevision.attachments || []),
         references: JSON.stringify(lastRevision.references || []),
       };
@@ -91,14 +105,26 @@ export const createRevision = async (req, res) => {
  */
 export const updateRevision = async (req, res) => {
   try {
-    const { versionId } = req.query;
+    const { id, versionId } = req.query;
     const { customId } = req.user;
     const payload = req.body;
 
+    const { references } = payload;
+
+    if (references?.length > 0) {
+      const referencesData = references.map((reference) => ({
+        id: nanoid(),
+        title: reference.title,
+        url: reference.url,
+      }));
+      payload.references = referencesData;
+    }
+
     // Find the revision
-    const revision = await KnowledgeContent.query()
-      .findById(versionId)
+    const revision = await KnowledgeContentVersions.query()
       .where("author_id", customId)
+      .where("id", versionId)
+      .where("content_id", id)
       .where("status", "draft");
 
     if (!revision) {
@@ -108,81 +134,27 @@ export const updateRevision = async (req, res) => {
     }
 
     // Update revision
-    const updatedRevision = await KnowledgeContent.transaction(async (trx) => {
-      const updateData = {
-        title: payload.title,
-        content: payload.content,
-        summary: payload.summary,
-        source_url: payload.source_url,
-        tags: JSON.stringify(payload.tags || []),
-        category_id: payload.category_id,
-        updated_at: new Date(),
-      };
+    const updatedRevision = await KnowledgeContentVersions.transaction(
+      async (trx) => {
+        const updateData = {
+          title: payload.title,
+          content: payload.content,
+          summary: payload.summary,
+          type: payload.type,
+          source_url: payload.source_url,
+          references: JSON.stringify(payload.references || []),
+          tags: JSON.stringify(payload.tags || []),
+          category_id: payload.category_id,
+          updated_at: new Date(),
+        };
 
-      await KnowledgeContent.query(trx).findById(versionId).patch(updateData);
+        await KnowledgeContentVersions.query(trx)
+          .findById(versionId)
+          .patch(updateData);
 
-      // Create new version snapshot
-      const latestVersion = await KnowledgeContentVersions.query(trx)
-        .where("content_id", versionId)
-        .orderBy("version", "desc")
-        .first();
-
-      // Get current references and attachments after potential updates
-      const currentReferences = payload.references || [];
-      const currentAttachments = await revision.$relatedQuery(
-        "attachments",
-        trx
-      );
-
-      await KnowledgeContentVersions.query(trx).insert({
-        content_id: versionId,
-        version: (latestVersion?.version || 0) + 1,
-        title: payload.title,
-        content: payload.content,
-        summary: payload.summary,
-        tags: JSON.stringify(payload.tags || []),
-        category_id: payload.category_id,
-        type: revision.type,
-        source_url: payload.source_url,
-        status: "draft",
-        updated_by: customId,
-        change_summary: payload.changeNotes || "Content updated",
-        reason: "Revision content modified",
-        // Store complete data in content_versions
-        references: JSON.stringify(
-          currentReferences.map((ref) => ({
-            title: ref.title,
-            url: ref.url,
-          }))
-        ),
-        attachments: JSON.stringify(
-          currentAttachments.map((att) => ({
-            filename: att.filename,
-            file_path: att.file_path,
-            file_size: att.file_size,
-            file_type: att.file_type,
-            url: att.url,
-          }))
-        ),
-      });
-
-      // Handle references
-      if (payload.references !== undefined) {
-        await revision.$relatedQuery("references", trx).delete();
-        if (payload.references && payload.references.length > 0) {
-          await revision.$relatedQuery("references", trx).insert(
-            payload.references.map((ref) => ({
-              title: ref.title,
-              url: ref.url,
-            }))
-          );
-        }
+        return await KnowledgeContentVersions.query(trx).findById(versionId);
       }
-
-      return await KnowledgeContent.query(trx)
-        .findById(versionId)
-        .withGraphFetched("[references]");
-    });
+    );
 
     res.json({
       message: "Revision updated successfully",
@@ -250,6 +222,18 @@ export const getMyRevisions = async (req, res) => {
     const { id } = req.query;
     const { customId } = req.user;
 
+    const lastRevisionDraft = await KnowledgeContentVersions.query()
+      .where("content_id", id)
+      .andWhere("status", "draft")
+      .orderBy("version", "desc")
+      .first();
+
+    if (!lastRevisionDraft) {
+      return res.status(404).json({
+        message: "No draft revision found",
+      });
+    }
+
     // Verify user owns the original content
     const originalContent = await KnowledgeContent.query()
       .findById(id)
@@ -261,12 +245,12 @@ export const getMyRevisions = async (req, res) => {
       });
     }
 
-    // Get all revisions for this content using FK
-    const revisions = await KnowledgeContent.query()
+    // Get all revisions except v1
+    const revisions = await KnowledgeContentVersions.query()
       .where("author_id", customId)
-      .where("revision_from_content_id", id)
-      .withGraphFetched("[versions.[user_updated(simpleWithImage)], category]")
-      .orderBy("created_at", "desc");
+      .where("content_id", id)
+      .andWhereNot("version", 1)
+      .orderBy("version", "desc");
 
     res.json({
       originalContent: {
@@ -568,54 +552,23 @@ export const approveRevision = async (req, res) => {
  */
 export const getRevisionDetails = async (req, res) => {
   try {
-    const { versionId } = req.query;
+    const { versionId, id } = req.query;
     const { customId } = req.user; // Get current user from auth middleware
 
-    // Get the revision with authorization check
-    const revision = await KnowledgeContent.query()
-      .findById(versionId)
-      .where((builder) => {
-        // For user endpoints: only allow if user is the author
-        if (customId) {
-          builder.where("author_id", customId);
-        }
-      })
-      .withGraphFetched(
-        "[author(simpleWithImage), category, versions.[user_updated(simpleWithImage)], references]"
-      );
+    const lastRevisionDraft = await KnowledgeContentVersions.query()
+      .where("id", versionId)
+      .where("author_id", customId)
+      .where("content_id", id)
+      .withGraphFetched("[author(simpleWithImage), category]")
+      .first();
 
-    if (!revision) {
+    if (!lastRevisionDraft) {
       return res.status(404).json({
-        message: "Revision not found or you don't have permission to view it",
+        message: "No draft revision found",
       });
     }
 
-    // Get original content ID from FK
-    const originalContentId = revision.revision_from_content_id;
-
-    let originalContent = null;
-    if (originalContentId) {
-      originalContent = await KnowledgeContent.query()
-        .findById(originalContentId)
-        .withGraphFetched("[references]");
-    }
-
-    // Extract data from reason field
-    const submitNotesMatch = revision.reason?.match(/Submit notes: ([^|]+)/);
-    const submittedAtMatch = revision.reason?.match(/Submitted at: ([^|]+)/);
-    const rejectionReasonMatch = revision.reason?.match(/Rejection: ([^|]+)/);
-
-    res.json({
-      revision: {
-        ...revision,
-        submitNotes: submitNotesMatch ? submitNotesMatch[1].trim() : null,
-        submittedAt: submittedAtMatch ? submittedAtMatch[1].trim() : null,
-        rejectionReason: rejectionReasonMatch
-          ? rejectionReasonMatch[1].trim()
-          : null,
-      },
-      originalContent,
-    });
+    res.json(lastRevisionDraft);
   } catch (error) {
     handleError(res, error);
   }
@@ -688,6 +641,84 @@ export const getAdminContentRevisions = async (req, res) => {
     };
 
     res.json(response);
+  } catch (error) {
+    handleError(res, error);
+  }
+};
+
+export const uploadContentMediaRevision = async (req, res) => {
+  try {
+    const { mc } = req;
+    const { customId } = req?.user;
+    const { id: contentId, versionId } = req.query;
+    const { file } = req;
+
+    if (!file) {
+      return res.status(400).json({ message: "File media is required" });
+    }
+
+    const content = await KnowledgeContentVersions.query()
+      .findById(versionId)
+      .where("content_id", contentId)
+      .where("author_id", customId)
+      .where("status", "draft");
+
+    if (!content || content.author_id !== customId) {
+      return res
+        .status(404)
+        .json({ message: "Content not found or access denied" });
+    }
+
+    // Validate file type for media
+    const allowedTypes = ["image/", "video/", "audio/"];
+    if (!allowedTypes.some((type) => file.mimetype.startsWith(type))) {
+      return res.status(400).json({
+        message:
+          "Invalid file type. Only image, video, and audio files are allowed",
+      });
+    }
+
+    // Generate unique filename using service
+    const timestamp = new Date().getTime();
+    const originalName = file.originalname.replace(/[^a-zA-Z0-9.-]/g, "_");
+    const encryptedUserId = getEncryptedUserId(customId);
+    const fileName = `knowledge-media/${encryptedUserId}/${timestamp}_${originalName}`;
+
+    // Upload to MinIO
+    await uploadFileMinio(mc, file.buffer, fileName, file.size, file.mimetype);
+
+    const mediaUrl = `https://siasn.bkd.jatimprov.go.id:9000/public/${fileName}`;
+
+    // Determine content type based on file mimetype
+    const contentType = file.mimetype.startsWith("image/")
+      ? "gambar"
+      : file.mimetype.startsWith("video/")
+      ? "video"
+      : "audio";
+
+    // Update content with media URL
+    const updatedContent =
+      await KnowledgeContentVersions.query().patchAndFetchById(versionId, {
+        type: contentType,
+        source_url: mediaUrl,
+        updated_at: new Date(),
+      });
+
+    res.json({
+      success: true,
+      message: "Media uploaded and content updated successfully",
+      data: {
+        content: updatedContent,
+        media: {
+          url: mediaUrl,
+          filename: fileName,
+          originalName: file.originalname,
+          size: file.size,
+          mimetype: file.mimetype,
+          type: contentType,
+        },
+      },
+    });
   } catch (error) {
     handleError(res, error);
   }

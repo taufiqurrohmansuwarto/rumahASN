@@ -694,3 +694,53 @@ export const updateAdminNotification = async ({ id, data }) => {
 export const deleteAdminNotification = async (id) => {
   return await api.delete(`/admin/notifications/${id}`).then((res) => res.data);
 };
+
+// ===== REVISION SPECIFIC SERVICES =====
+
+// Update revision content (draft)
+export const updateRevisionContent = async (contentId, versionId, data) => {
+  return await api
+    .put(`/users/me/contents/${contentId}/revisions/${versionId}`, data)
+    .then((res) => res.data);
+};
+
+// Submit revision for review
+export const submitRevisionForReview = async (contentId, versionId, data) => {
+  return await api
+    .post(`/users/me/contents/${contentId}/revisions/${versionId}/submit`, data)
+    .then((res) => res.data);
+};
+
+// Upload revision media (for images, videos, etc.)
+export const uploadRevisionMedia = async ({ contentId, versionId, data }) => {
+  return await api
+    .post(
+      `/users/me/contents/${contentId}/revisions/${versionId}/upload-media`,
+      data,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      }
+    )
+    .then((res) => res.data);
+};
+
+// Upload revision attachments
+export const uploadRevisionAttachments = async ({
+  contentId,
+  versionId,
+  data,
+}) => {
+  return await api
+    .post(
+      `/users/me/contents/${contentId}/revisions/${versionId}/upload`,
+      data,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      }
+    )
+    .then((res) => res.data);
+};

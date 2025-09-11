@@ -18,3 +18,6 @@ export * from "./layouts";
 
 // Samples
 export * from "./samples";
+
+// Revisions
+export * from "./revisions";

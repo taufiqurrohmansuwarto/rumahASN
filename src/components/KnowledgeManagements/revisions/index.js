@@ -1,0 +1,1 @@
+export { default as KnowledgeFormUserRevisions } from "./KnowledgeFormUserRevisions";

@@ -102,14 +102,19 @@ function RevisionForm({
       }
 
       // Handle attachments if any
-      if (initialData.attachments) {
+      if (initialData.attachments && Array.isArray(initialData.attachments)) {
         const mappedFiles = initialData.attachments.map((attachment, index) => ({
-          uid: `-${index}`,
-          name: attachment.filename || attachment.name,
+          uid: attachment.id || `-${index}`,
+          name: attachment.name || attachment.filename,
           status: 'done',
           url: attachment.url,
+          size: attachment.size,
+          type: attachment.mime,
           response: {
-            data: { url: attachment.url }
+            data: { 
+              url: attachment.url,
+              id: attachment.id 
+            }
           }
         }));
         setFileList(mappedFiles);

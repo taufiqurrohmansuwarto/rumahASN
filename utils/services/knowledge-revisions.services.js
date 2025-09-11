@@ -22,6 +22,14 @@ export const createInitialRevision = async (contentId) => {
     reason: "Revisi awal dibuat dari konten yang dipublikasi",
     references: JSON.stringify(content.references || []),
     attachments: JSON.stringify(content.attachments || []),
+    views_count: content.views_count,
+    likes_count: content.likes_count,
+    comments_count: content.comments_count,
+    bookmarks_count: content.bookmarks_count,
+    estimated_reading_time: content.estimated_reading_time,
+    reading_complexity: content.reading_complexity,
+    verified_by: content.verified_by,
+    author_id: content.author_id,
   };
 
   const existingVersion = await KnowledgeContentVersions.query()

@@ -777,52 +777,6 @@ const KnowledgeContentHeader = ({
             </div>
           )}
 
-          {/* Create Revision for Published Content */}
-          {content?.status === "published" && showOwnerActions && (
-            <div
-              style={{
-                marginBottom: "16px",
-                padding: "12px 16px",
-                backgroundColor: "#F0F9FF",
-                border: "1px solid #BAE6FD",
-                borderRadius: "6px",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "space-between",
-              }}
-            >
-              <div
-                style={{ display: "flex", alignItems: "center", gap: "8px" }}
-              >
-                <BranchesOutlined
-                  style={{ color: "#0284C7", fontSize: "14px" }}
-                />
-                <Text
-                  style={{
-                    color: "#0284C7",
-                    fontSize: "13px",
-                    fontWeight: 500,
-                  }}
-                >
-                  {revisions.length > 0 && content?.status
-                    ? "Konten ini memiliki revisi. Lihat daftar revisi untuk mengelola perubahan."
-                    : "Ingin memperbarui konten ini? Buat revisi baru."}
-                </Text>
-              </div>
-              {revisions.length > 0 ? (
-                <InlineRevisionHistory
-                  revisions={revisions}
-                  contentId={content?.id}
-                  onViewRevision={onViewRevisions}
-                />
-              ) : (
-                <CreateRevisionButton
-                  onCreateRevision={onCreateRevision}
-                  isCreatingRevision={isCreatingRevision}
-                />
-              )}
-            </div>
-          )}
 
           <Divider style={{ margin: "16px 0" }} />
 
@@ -1072,6 +1026,52 @@ const KnowledgeContentHeader = ({
                   {dayjs(content.verified_at).format("DD MMM YYYY, HH:mm")}
                 </Text>
               </div>
+            </div>
+          )}
+
+          {/* Create Revision for Published Content */}
+          {content?.status === "published" && showOwnerActions && (
+            <div
+              style={{
+                marginBottom: "16px",
+                padding: "12px 16px",
+                backgroundColor: "#F8F9FA",
+                border: "1px solid #EDEFF1",
+                borderRadius: "6px",
+                display: "block",
+              }}
+            >
+              <div
+                style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "12px" }}
+              >
+                <BranchesOutlined
+                  style={{ color: "#FF4500", fontSize: "14px" }}
+                />
+                <Text
+                  style={{
+                    color: "#666",
+                    fontSize: "13px",
+                    fontWeight: 500,
+                  }}
+                >
+                  {revisions.length > 0 && content?.status
+                    ? "Konten ini memiliki revisi. Lihat daftar revisi untuk mengelola perubahan."
+                    : "Ingin memperbarui konten ini? Buat revisi baru."}
+                </Text>
+              </div>
+              
+              {revisions.length > 0 ? (
+                <InlineRevisionHistory
+                  revisions={revisions}
+                  contentId={content?.id}
+                  onViewRevision={onViewRevisions}
+                />
+              ) : (
+                <CreateRevisionButton
+                  onCreateRevision={onCreateRevision}
+                  isCreatingRevision={isCreatingRevision}
+                />
+              )}
             </div>
           )}
 

@@ -1,246 +1,122 @@
 import { useState } from "react";
-import { Button, Card, Flex, Tag, Alert, Space, Modal } from "antd";
-import { EyeOutlined, EditOutlined, BranchesOutlined, SendOutlined, ExclamationCircleOutlined } from "@ant-design/icons";
-import { useSubmitRevision, useUpdateRevision, useMyRevisions } from "@/hooks/knowledge-management/useRevisions";
-import { KnowledgeUserContentDetail, KnowledgeFormUserContents } from "../";
-import RevisionHistory from "./RevisionHistory";
+import { Button, Card, Flex, Typography } from "antd";
+import { EditOutlined } from "@ant-design/icons";
+import { KnowledgeUserContentDetail } from "../";
+import { KnowledgeFormUserRevisions } from "../revisions";
+import { useRevisionDetails } from "@/hooks/knowledge-management/useRevisions";
 
-const HybridRevisionView = ({ 
-  revisionData, 
-  contentId, 
-  versionId,
-  currentUser
+const { Text } = Typography;
+
+const HybridRevisionView = ({
+  revisionData,
+  contentId,
+  onSuccess = () => {},
 }) => {
-  const [mode, setMode] = useState("view"); // "view" or "edit"
-  
-  // Revision hooks
-  const submitRevisionMutation = useSubmitRevision();
-  const updateRevisionMutation = useUpdateRevision();
-  
-  // Get all revisions for this content (to check if any exist)
-  const { data: allRevisions } = useMyRevisions(contentId);
-  
-  // Check if we should show revision list (if we have revisions and this is main content view)
-  const shouldShowRevisionList = allRevisions?.revisions?.length > 0 && !versionId;
-  
-  // Create custom update mutation hook for KnowledgeFormUserContents
-  const useRevisionUpdateMutation = () => {
-    return {
-      mutate: (payload) => {
-        const { data } = payload;
-        updateRevisionMutation.mutate({
-          contentId,
-          versionId,
-          data
-        }, {
-          onSuccess: () => {
-            setMode("view");
-          }
-        });
-      },
-      isLoading: updateRevisionMutation.isLoading,
-      isError: updateRevisionMutation.isError,
-      error: updateRevisionMutation.error
-    };
-  };
-  
+  const [isEditing, setIsEditing] = useState(false);
 
-  const getStatusConfig = (status) => {
-    const configs = {
-      draft: { color: "orange", text: "Draft" },
-      pending_revision: { color: "blue", text: "Pending Review" },
-      published: { color: "green", text: "Published" },
-      revision_rejected: { color: "red", text: "Rejected" }
-    };
-    return configs[status] || configs.draft;
+  // Use revision details hook for refetching
+  const revisionDetailsQuery = useRevisionDetails(revisionData?.id, contentId);
+
+  // Check if revision can be edited (only draft status)
+  const canEdit = revisionData?.status === 'draft';
+
+  const handleEditToggle = () => {
+    setIsEditing(!isEditing);
   };
 
-  const formatVersion = (version) => {
-    return version ? `v${version}` : "Draft";
+  const handleSuccess = (data) => {
+    setIsEditing(false);
+    // Refetch revision details to get updated data
+    revisionDetailsQuery.refetch();
+    onSuccess(data);
   };
 
-  // Transform revision data structure for KnowledgeUserContentDetail
-  // Handle both getRevisionDetails format {revision: {...}} and getMyRevisions format {revisions: [...]}
-  const currentRevision = revisionData?.revision || 
-                         (revisionData?.revisions && revisionData.revisions.find(r => r.id === versionId));
-  
-  const transformedRevisionData = currentRevision ? {
-    ...currentRevision,
-    // Ensure compatibility with KnowledgeUserContentDetail expected structure
-  } : null;
-
-  const canEdit = currentRevision?.status === 'draft' && 
-                  currentRevision?.author_id === currentUser?.id;
-  
-  
-  // Handle submit for review
-  const handleSubmitForReview = () => {
-    Modal.confirm({
-      title: 'Submit Revisi untuk Review',
-      icon: <ExclamationCircleOutlined />,
-      content: (
-        <div>
-          <p>Apakah Anda yakin ingin mengirim revisi ini untuk direview?</p>
-          <p style={{ color: '#666', fontSize: '13px' }}>
-            Setelah disubmit, revisi akan masuk ke dalam antrian review dan tidak dapat diedit hingga proses review selesai.
-          </p>
-        </div>
-      ),
-      okText: 'Ya, Submit untuk Review',
-      cancelText: 'Batal',
-      okType: 'primary',
-      onOk: () => {
-        submitRevisionMutation.mutate({
-          contentId,
-          versionId,
-          submitNotes: "Revision submitted for admin review"
-        });
-      },
-    });
+  const handleCancel = () => {
+    setIsEditing(false);
   };
 
-
-  return (
-    <div>
-      {/* Mode Toggle Header */}
-      {revisionData && (
-        <Card 
-          size="small" 
-          style={{ marginBottom: "16px", backgroundColor: "#f8f9fa" }}
-          styles={{ body: { padding: "12px 16px" } }}
+  // If editing and can edit, show the cancel button + form
+  if (isEditing && canEdit) {
+    return (
+      <div>
+        {/* Cancel Button for edit mode */}
+        <Card
+          style={{
+            marginBottom: "16px",
+            border: "1px solid #e8f4f8",
+            backgroundColor: "#f6ffed",
+          }}
         >
           <Flex justify="space-between" align="center">
-            {/* Left: Revision Info */}
-            <Flex align="center" gap={12}>
-              <BranchesOutlined style={{ color: "#1890ff", fontSize: "16px" }} />
-              <span style={{ fontWeight: 500 }}>
-                Revisi {formatVersion(currentRevision?.current_version)}
-              </span>
-              <Tag color={getStatusConfig(currentRevision?.status).color}>
-                {getStatusConfig(currentRevision?.status).text}
-              </Tag>
-            </Flex>
-
-            {/* Right: Action Buttons */}
-            <Space>
-              {canEdit && (
-                <>
-                  <Button
-                    size="small"
-                    icon={<EyeOutlined />}
-                    type={mode === "view" ? "primary" : "default"}
-                    onClick={() => setMode("view")}
-                  >
-                    Lihat
-                  </Button>
-                  <Button
-                    size="small"
-                    icon={<EditOutlined />}
-                    type={mode === "edit" ? "primary" : "default"}
-                    onClick={() => setMode("edit")}
-                  >
-                    Edit
-                  </Button>
-                  
-                  {/* Submit button - sama level dengan toggle buttons */}
-                  {mode === "view" && (
-                    <Button
-                      size="small"
-                      icon={<SendOutlined />}
-                      type="default"
-                      style={{ 
-                        borderColor: "#52c41a", 
-                        color: "#52c41a"
-                      }}
-                      loading={submitRevisionMutation.isLoading}
-                      onClick={handleSubmitForReview}
-                    >
-                      Submit untuk Review
-                    </Button>
-                  )}
-                </>
-              )}
-            </Space>
-          </Flex>
-          
-          {/* Additional Info */}
-          {currentRevision?.submitNotes && (
-            <div style={{ marginTop: "8px", fontSize: "12px", color: "#666" }}>
-              💬 <em>{currentRevision.submitNotes}</em>
+            <div>
+              <Text strong style={{ color: "#389e0d" }}>
+                Edit Revisi v{revisionData.version}
+              </Text>
+              <br />
+              <Text style={{ fontSize: "12px", color: "#666" }}>
+                Mode edit aktif - perubahan akan disimpan sebagai draft
+              </Text>
             </div>
-          )}
+            <Button
+              type="default"
+              icon={<EditOutlined />}
+              onClick={handleCancel}
+            >
+              Batal Edit
+            </Button>
+          </Flex>
+        </Card>
+
+        {/* Form */}
+        <KnowledgeFormUserRevisions
+          revisionData={revisionData}
+          contentId={contentId}
+          onSuccess={handleSuccess}
+          onCancel={handleCancel}
+        />
+      </div>
+    );
+  }
+
+  // Otherwise show the content detail with edit button if applicable
+  return (
+    <div>
+      {/* Edit Button for draft revisions */}
+      {canEdit && !isEditing && (
+        <Card
+          style={{
+            marginBottom: "16px",
+            border: "1px solid #e8f4f8",
+            backgroundColor: "#f6ffed",
+          }}
+        >
+          <Flex justify="space-between" align="center">
+            <div>
+              <Text strong style={{ color: "#389e0d" }}>
+                Draft Revisi v{revisionData.version}
+              </Text>
+              <br />
+              <Text style={{ fontSize: "12px", color: "#666" }}>
+                Revisi ini masih dalam status draft dan dapat diedit
+              </Text>
+            </div>
+            <Button
+              type={isEditing ? "default" : "primary"}
+              icon={<EditOutlined />}
+              onClick={handleEditToggle}
+            >
+              {isEditing ? "Batal" : "Edit Revisi"}
+            </Button>
+          </Flex>
         </Card>
       )}
 
-      {/* Content Based on Mode */}
-      {mode === "view" ? (
-        // VIEW MODE: Show revision list OR individual revision content
-        <>
-          {shouldShowRevisionList ? (
-            // Show revision list if we're on main content and have revisions
-            <RevisionHistory
-              contentId={contentId}
-              revisions={allRevisions?.revisions || []}
-              isLoading={false}
-              currentUser={currentUser}
-              onEditRevision={(revision) => {
-                if (revision?.id) {
-                  // Navigate to specific revision
-                  window.location.href = `/asn-connect/asn-knowledge/my-knowledge/${contentId}/revisions/${revision.id}`;
-                }
-              }}
-              onViewRevision={(revision) => {
-                if (revision?.id) {
-                  // Navigate to specific revision
-                  window.location.href = `/asn-connect/asn-knowledge/my-knowledge/${contentId}/revisions/${revision.id}`;
-                }
-              }}
-              showCreateButton={false} // Don't show create button since we already have revisions
-            />
-          ) : (
-            // Show individual revision content
-            <>
-              {!canEdit && (
-                <Alert
-                  message="Mode Tampilan"
-                  description="Revisi ini sedang dalam mode tampilan saja. Edit tidak tersedia untuk status ini."
-                  type="info"
-                  showIcon
-                  style={{ marginBottom: "16px" }}
-                />
-              )}
-              
-              {transformedRevisionData && (
-                <KnowledgeUserContentDetail
-                  data={transformedRevisionData}
-                  disableInteractions={true}
-                  showOwnerActions={false}
-                />
-              )}
-            </>
-          )}
-        </>
-      ) : (
-        // EDIT MODE: Use KnowledgeFormUserContents with revision API
-        <KnowledgeFormUserContents
-          mode="user"
-          initialData={transformedRevisionData}
-          onSuccess={() => setMode("view")}
-          onCancel={() => setMode("view")}
-          customTitle="Edit Revisi Konten"
-          customSubtitle="Simpan perubahan sebagai draft atau kembali ke mode lihat"
-          customButtonText={{
-            draft: "Simpan Draft",
-            submit: "Simpan Draft",
-            cancel: "Kembali ke Lihat"
-          }}
-          useUpdateMutation={useRevisionUpdateMutation}
-          queryKeysToInvalidate={[
-            ["revision-details", versionId, contentId],
-            ["my-revisions", contentId]
-          ]}
-        />
-      )}
+      {/* Content Display */}
+      <KnowledgeUserContentDetail
+        data={revisionData}
+        disableInteractions={true}
+        showOwnerActions={false}
+      />
     </div>
   );
 };

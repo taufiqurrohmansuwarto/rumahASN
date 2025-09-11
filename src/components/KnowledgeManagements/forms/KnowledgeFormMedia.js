@@ -11,7 +11,12 @@ function KnowledgeFormMedia({
   mediaFile, 
   setMediaFile, 
   isUploading, 
-  uploadProgress 
+  setIsUploading,
+  uploadProgress,
+  setUploadProgress,
+  uploadMutation,
+  contentId,
+  revisionId
 }) {
   const [error, setError] = useState(null);
 
@@ -76,13 +81,50 @@ function KnowledgeFormMedia({
     return false; // Prevent automatic upload
   };
 
-  const handleChange = (info) => {
+  const handleChange = async (info) => {
     const { fileList } = info;
     
     if (fileList.length > 0) {
       const file = fileList[0];
-      setMediaFile(file);
-      setError(null);
+      
+      // If we have uploadMutation and ids, upload immediately
+      if (uploadMutation && contentId && revisionId && file.originFileObj) {
+        try {
+          setIsUploading(true);
+          setUploadProgress(0);
+          
+          const formData = new FormData();
+          formData.append('media', file.originFileObj);
+          formData.append('type', contentType);
+          
+          const result = await uploadMutation.mutateAsync({
+            contentId,
+            versionId: revisionId,
+            data: formData
+          });
+          
+          // Update file with uploaded URL
+          const uploadedFile = {
+            ...file,
+            url: result.url,
+            status: 'done',
+            response: result
+          };
+          
+          setMediaFile(uploadedFile);
+          setUploadProgress(100);
+          setError(null);
+        } catch (error) {
+          setError(error.message || 'Upload gagal');
+          setMediaFile(null);
+        } finally {
+          setIsUploading(false);
+        }
+      } else {
+        // Just store file for later upload
+        setMediaFile(file);
+        setError(null);
+      }
     } else {
       setMediaFile(null);
     }
@@ -197,7 +239,10 @@ function KnowledgeFormMedia({
         color: "#888",
         lineHeight: 1.3
       }}>
-        Tip: File akan diupload saat menyimpan konten
+        {uploadMutation && contentId && revisionId 
+          ? "Tip: File akan diupload langsung setelah dipilih"
+          : "Tip: File akan diupload saat menyimpan konten"
+        }
       </div>
     </div>
   );
