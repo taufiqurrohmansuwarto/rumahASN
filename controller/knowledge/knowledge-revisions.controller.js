@@ -6,6 +6,7 @@ import { awardXP } from "./gamification.controller";
 import { processContentWithAI } from "@/utils/services/ai-processing.services";
 import { getEncryptedUserId } from "@/utils/services/knowledge-content.services";
 import { uploadFileMinio } from "@/utils/index";
+import { uploadContentAttachmentRevision } from "@/utils/services/knowledge-revisions.services";
 const { nanoid } = require("nanoid");
 
 // ===== USER REVISION CONTROLLERS =====
@@ -718,6 +719,107 @@ export const uploadContentMediaRevision = async (req, res) => {
           type: contentType,
         },
       },
+    });
+  } catch (error) {
+    handleError(res, error);
+  }
+};
+
+export const uploadRevisionAttachments = async (req, res) => {
+  try {
+    const files = req?.files || [];
+    const mc = req?.mc;
+    const { versionId } = req?.query;
+    const { customId } = req?.user;
+
+    if (!files || files.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: "Tidak ada file yang diunggah",
+      });
+    }
+
+    // Use service to upload attachments
+    const result = await uploadContentAttachmentRevision(
+      versionId,
+      files,
+      customId,
+      mc
+    );
+
+    // Transform response to match expected format
+    const uploadResults = result.attachments.map((attachment) => ({
+      id: attachment.content_version_id,
+      uid: `attachment-${attachment.content_version_id}`,
+      name: attachment.name,
+      filename: attachment.name,
+      url: attachment.url,
+      size: attachment.size,
+      mime: attachment.mime,
+      mimetype: attachment.mime,
+      status: "done",
+    }));
+
+    const hasil = {
+      success: true,
+      message: result.message,
+      data: {
+        attachments: uploadResults,
+      },
+    };
+
+    console.log(hasil);
+
+    res.json(hasil);
+  } catch (error) {
+    handleError(res, error);
+  }
+};
+
+export const deleteRevisionAttachment = async (req, res) => {
+  try {
+    const { uploadId, versionId } = req.query;
+    const { customId } = req.user;
+
+    console.log(uploadId, versionId);
+
+    const revision = await KnowledgeContentVersions.query()
+      .where("id", versionId)
+      .where("author_id", customId)
+      .first();
+
+    if (!revision) {
+      return res.status(404).json({
+        success: false,
+        message: "Revisi tidak ditemukan",
+      });
+    }
+
+    // Parse attachments if it's a string
+    let attachments = revision.attachments;
+    if (typeof attachments === "string") {
+      try {
+        attachments = JSON.parse(attachments);
+      } catch (e) {
+        attachments = [];
+      }
+    }
+
+    if (!Array.isArray(attachments)) {
+      attachments = [];
+    }
+
+    const filteredAttachments = attachments.filter(
+      (attachment) => attachment.id !== uploadId
+    );
+
+    await KnowledgeContentVersions.query()
+      .patch({ attachments: JSON.stringify(filteredAttachments) })
+      .where("id", versionId);
+
+    res.json({
+      success: true,
+      message: "File berhasil dihapus",
     });
   } catch (error) {
     handleError(res, error);

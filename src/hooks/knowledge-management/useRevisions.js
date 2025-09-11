@@ -3,6 +3,7 @@ import {
   bulkApproveRevisions,
   bulkRejectRevisions,
   createRevision,
+  deleteRevisionAttachment,
   getAdminContentRevisions,
   getMyRevisions,
   getPendingRevisions,
@@ -153,6 +154,33 @@ export const useUploadRevisionAttachments = () => {
     onError: (error) => {
       const errorMessage =
         error.response?.data?.message || "Gagal upload attachment";
+      message.error(errorMessage);
+    },
+  });
+};
+
+// Delete revision attachment mutation
+export const useDeleteRevisionAttachment = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: deleteRevisionAttachment,
+    onSuccess: (data, variables) => {
+      message.success("Attachment berhasil dihapus");
+
+      // Invalidate related queries
+      queryClient.invalidateQueries(["my-revisions", variables.contentId]);
+      queryClient.invalidateQueries([
+        "revision-details",
+        variables.versionId,
+        variables.contentId,
+      ]);
+
+      return data;
+    },
+    onError: (error) => {
+      const errorMessage =
+        error.response?.data?.message || "Gagal menghapus attachment";
       message.error(errorMessage);
     },
   });
@@ -360,6 +388,7 @@ export const useRevisionManagement = (contentId, versionId = null) => {
   const submitRevisionMutation = useSubmitRevision();
   const uploadMediaMutation = useUploadRevisionMedia();
   const uploadAttachmentsMutation = useUploadRevisionAttachments();
+  const deleteAttachmentMutation = useDeleteRevisionAttachment();
 
   const myRevisionsQuery = useMyRevisions(contentId);
   const revisionDetailsQuery = useRevisionDetails(versionId);
@@ -422,6 +451,19 @@ export const useRevisionManagement = (contentId, versionId = null) => {
     [contentId, versionId, uploadAttachmentsMutation]
   );
 
+  // Delete revision attachment
+  const handleDeleteAttachment = useCallback(
+    async (uploadId) => {
+      if (!contentId || !versionId || !uploadId) return null;
+      return await deleteAttachmentMutation.mutateAsync({
+        contentId,
+        versionId,
+        uploadId,
+      });
+    },
+    [contentId, versionId, deleteAttachmentMutation]
+  );
+
   return {
     // Queries
     myRevisions: myRevisionsQuery.data,
@@ -433,6 +475,7 @@ export const useRevisionManagement = (contentId, versionId = null) => {
     isSubmitting: submitRevisionMutation.isLoading,
     isUploadingMedia: uploadMediaMutation.isLoading,
     isUploadingAttachments: uploadAttachmentsMutation.isLoading,
+    isDeletingAttachment: deleteAttachmentMutation.isLoading,
     isLoadingRevisions: myRevisionsQuery.isLoading,
     isLoadingDetails: revisionDetailsQuery.isLoading,
 
@@ -442,6 +485,7 @@ export const useRevisionManagement = (contentId, versionId = null) => {
     handleSubmitRevision,
     handleUploadMedia,
     handleUploadAttachments,
+    handleDeleteAttachment,
 
     // Refetch functions
     refetchRevisions: myRevisionsQuery.refetch,

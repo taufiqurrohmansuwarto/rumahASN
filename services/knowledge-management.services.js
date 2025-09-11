@@ -744,3 +744,16 @@ export const uploadRevisionAttachments = async ({
     )
     .then((res) => res.data);
 };
+
+// Delete revision attachment
+export const deleteRevisionAttachment = async ({
+  contentId,
+  versionId,
+  uploadId,
+}) => {
+  return await api
+    .delete(
+      `/users/me/contents/${contentId}/revisions/${versionId}/upload/${uploadId}`
+    )
+    .then((res) => res.data);
+};

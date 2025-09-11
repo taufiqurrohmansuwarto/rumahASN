@@ -1,10 +1,23 @@
-import { 
+import {
   useUpdateRevision,
   useUploadRevisionMedia,
   useUploadRevisionAttachments,
+  useDeleteRevisionAttachment,
 } from "@/hooks/knowledge-management/useRevisions";
 import { BranchesOutlined } from "@ant-design/icons";
-import { Card, Col, Flex, Form, Grid, Row, Spin, Input, message, Radio, Typography } from "antd";
+import {
+  Card,
+  Col,
+  Flex,
+  Form,
+  Grid,
+  Row,
+  Spin,
+  Input,
+  message,
+  Radio,
+  Typography,
+} from "antd";
 import { useEffect, useState, useCallback } from "react";
 import KnowledgeFormActions from "../forms/KnowledgeFormActions";
 import KnowledgeFormAttachments from "../forms/KnowledgeFormAttachments";
@@ -39,17 +52,17 @@ function KnowledgeFormUserRevisions({
   const [isMediaUploading, setIsMediaUploading] = useState(false);
   const [changeNotes, setChangeNotes] = useState("");
   const [mediaInputMode, setMediaInputMode] = useState("upload"); // "upload" or "url"
-  
+
   // Store data per content type to preserve when switching
   const [savedMediaData, setSavedMediaData] = useState({
     gambar: { mode: "upload", file: null, url: "" },
     video: { mode: "upload", file: null, url: "" },
-    audio: { mode: "upload", file: null, url: "" }
+    audio: { mode: "upload", file: null, url: "" },
   });
 
-  // Check if there are files still uploading or pending
+  // Check if there are files still uploading, removing, or pending
   const hasUploadingFiles = fileList.some(
-    (file) => file.status === "uploading"
+    (file) => file.status === "uploading" || file.status === "removing"
   );
 
   // Responsive breakpoints
@@ -70,28 +83,34 @@ function KnowledgeFormUserRevisions({
   const { showDraftButton, showSubmitButton, buttonText } = buttonConfig;
 
   // Helper functions for saving/restoring media data per content type
-  const saveCurrentMediaData = useCallback((type, currentMode, currentFile) => {
-    if (["video", "audio", "gambar"].includes(type)) {
-      const currentUrl = form.getFieldValue('source_url') || "";
-      setSavedMediaData(prev => ({
-        ...prev,
-        [type]: {
-          mode: currentMode || "upload",
-          file: currentFile || null,
-          url: currentUrl
-        }
-      }));
-    }
-  }, [form]);
+  const saveCurrentMediaData = useCallback(
+    (type, currentMode, currentFile) => {
+      if (["video", "audio", "gambar"].includes(type)) {
+        const currentUrl = form.getFieldValue("source_url") || "";
+        setSavedMediaData((prev) => ({
+          ...prev,
+          [type]: {
+            mode: currentMode || "upload",
+            file: currentFile || null,
+            url: currentUrl,
+          },
+        }));
+      }
+    },
+    [form]
+  );
 
-  const restoreMediaData = useCallback((type) => {
-    if (["video", "audio", "gambar"].includes(type)) {
-      const saved = savedMediaData[type];
-      setMediaInputMode(saved.mode);
-      setMediaFile(saved.file);
-      form.setFieldValue('source_url', saved.url);
-    }
-  }, [savedMediaData, form]);
+  const restoreMediaData = useCallback(
+    (type) => {
+      if (["video", "audio", "gambar"].includes(type)) {
+        const saved = savedMediaData[type];
+        setMediaInputMode(saved.mode);
+        setMediaFile(saved.file);
+        form.setFieldValue("source_url", saved.url);
+      }
+    },
+    [savedMediaData, form]
+  );
 
   // Watch for type changes
   const watchedType = Form.useWatch("type", form);
@@ -99,12 +118,12 @@ function KnowledgeFormUserRevisions({
   useEffect(() => {
     if (watchedType && watchedType !== contentType) {
       const previousType = contentType;
-      
+
       // Save current media data before switching
       saveCurrentMediaData(previousType, mediaInputMode, mediaFile);
-      
+
       setContentType(watchedType);
-      
+
       // Handle data when switching between types
       if (["video", "audio", "gambar"].includes(watchedType)) {
         // Restore saved data for the new type
@@ -112,11 +131,19 @@ function KnowledgeFormUserRevisions({
       } else {
         // Switching to text, clear current form data
         setMediaFile(null);
-        form.setFieldValue('source_url', '');
+        form.setFieldValue("source_url", "");
         setMediaInputMode("upload");
       }
     }
-  }, [watchedType, contentType, form, saveCurrentMediaData, restoreMediaData, mediaInputMode, mediaFile]);
+  }, [
+    watchedType,
+    contentType,
+    form,
+    saveCurrentMediaData,
+    restoreMediaData,
+    mediaInputMode,
+    mediaFile,
+  ]);
 
   // Set initial data from revision
   useEffect(() => {
@@ -177,8 +204,10 @@ function KnowledgeFormUserRevisions({
       ) {
         // Check if source_url is from uploaded file or external URL
         // If it contains our domain/upload path, it's uploaded file, otherwise it's URL
-        const isUploadedFile = revisionData.source_url.includes('/uploads/') || revisionData.source_url.includes(window.location.origin);
-        
+        const isUploadedFile =
+          revisionData.source_url.includes("/uploads/") ||
+          revisionData.source_url.includes(window.location.origin);
+
         if (isUploadedFile) {
           setMediaInputMode("upload");
           setMediaFile({
@@ -191,7 +220,7 @@ function KnowledgeFormUserRevisions({
         } else {
           setMediaInputMode("url");
           // Set source_url in form for URL input
-          form.setFieldValue('source_url', revisionData.source_url);
+          form.setFieldValue("source_url", revisionData.source_url);
         }
       }
     }
@@ -201,6 +230,49 @@ function KnowledgeFormUserRevisions({
   const updateRevisionMutation = useUpdateRevision();
   const uploadMediaMutation = useUploadRevisionMedia();
   const uploadAttachmentsMutation = useUploadRevisionAttachments();
+  const deleteAttachmentMutation = useDeleteRevisionAttachment();
+
+  // Handle delete attachment
+  const handleDeleteAttachment = async (uploadId) => {
+    try {
+      // Show loading state for the specific file being deleted
+      setFileList((prevFileList) =>
+        prevFileList.map((file) => {
+          const fileId = file.response?.data?.uid || file.response?.data?.id;
+          if (fileId === uploadId) {
+            return { ...file, status: "removing" };
+          }
+          return file;
+        })
+      );
+
+      await deleteAttachmentMutation.mutateAsync({
+        contentId,
+        versionId: revisionData?.id,
+        uploadId,
+      });
+
+      // On success, remove the file from fileList
+      setFileList((prevFileList) =>
+        prevFileList.filter((file) => {
+          const fileId = file.response?.data?.uid || file.response?.data?.id;
+          return fileId !== uploadId;
+        })
+      );
+    } catch (error) {
+      console.error("Error deleting attachment:", error);
+      // Revert loading state on error
+      setFileList((prevFileList) =>
+        prevFileList.map((file) => {
+          const fileId = file.response?.data?.uid || file.response?.data?.id;
+          if (fileId === uploadId) {
+            return { ...file, status: "done" };
+          }
+          return file;
+        })
+      );
+    }
+  };
 
   // Handle save changes (update draft)
   const handleSaveChanges = async () => {
@@ -211,14 +283,32 @@ function KnowledgeFormUserRevisions({
 
     try {
       const formValues = await form.validateFields();
+
+      // Get current attachment state (existing files that are still in fileList)
+      const currentAttachments = fileList
+        .filter(
+          (file) => file.response?.data && !file.response.data.isTemporary
+        )
+        .map((file) => ({
+          id: file.response.data.uid || file.response.data.id,
+          name: file.response.data.filename || file.response.data.name,
+          size: file.response.data.size,
+          mime: file.response.data.mimetype || file.response.data.mime,
+          url: file.response.data.url,
+        }));
+
       const formData = {
         ...formValues,
         content,
         tags,
         references: formValues.references || [],
         change_summary: changeNotes,
+        attachments: currentAttachments, // Send current attachment state untuk sync deletions
       };
 
+      // Note: Attachments are now uploaded individually, no batch upload needed
+
+      // Update revision content
       updateRevisionMutation.mutate(
         {
           contentId,
@@ -323,7 +413,12 @@ function KnowledgeFormUserRevisions({
                                   display: "block",
                                 }}
                               >
-                                Pilih Cara Input {contentType === "gambar" ? "Gambar" : contentType === "video" ? "Video" : "Audio"}
+                                Pilih Cara Input{" "}
+                                {contentType === "gambar"
+                                  ? "Gambar"
+                                  : contentType === "video"
+                                  ? "Video"
+                                  : "Audio"}
                               </Text>
                               <Text
                                 style={{
@@ -333,23 +428,28 @@ function KnowledgeFormUserRevisions({
                                   display: "block",
                                 }}
                               >
-                                Upload file atau masukkan URL dari sumber eksternal
+                                Upload file atau masukkan URL dari sumber
+                                eksternal
                               </Text>
                             </div>
                             <Radio.Group
                               value={mediaInputMode}
                               onChange={(e) => {
                                 const newMode = e.target.value;
-                                
+
                                 // Save current data for current content type
-                                saveCurrentMediaData(contentType, mediaInputMode, mediaFile);
-                                
+                                saveCurrentMediaData(
+                                  contentType,
+                                  mediaInputMode,
+                                  mediaFile
+                                );
+
                                 setMediaInputMode(newMode);
-                                
+
                                 // Clear opposite data when switching modes
                                 if (newMode === "upload") {
                                   // Switching to upload, clear URL
-                                  form.setFieldValue('source_url', '');
+                                  form.setFieldValue("source_url", "");
                                 } else {
                                   // Switching to URL, clear uploaded file
                                   setMediaFile(null);
@@ -394,23 +494,35 @@ function KnowledgeFormUserRevisions({
                               <Form.Item
                                 name="source_url"
                                 label={
-                                  <Text strong style={{ fontSize: "14px", color: "#374151" }}>
-                                    URL {contentType === "gambar" ? "Gambar" : contentType === "video" ? "Video" : "Audio"}
+                                  <Text
+                                    strong
+                                    style={{
+                                      fontSize: "14px",
+                                      color: "#374151",
+                                    }}
+                                  >
+                                    URL{" "}
+                                    {contentType === "gambar"
+                                      ? "Gambar"
+                                      : contentType === "video"
+                                      ? "Video"
+                                      : "Audio"}
                                   </Text>
                                 }
                                 rules={[
-                                  { 
-                                    type: "url", 
-                                    message: "Format URL tidak valid! Pastikan dimulai dengan http:// atau https://" 
-                                  }
+                                  {
+                                    type: "url",
+                                    message:
+                                      "Format URL tidak valid! Pastikan dimulai dengan http:// atau https://",
+                                  },
                                 ]}
                                 style={{ margin: 0 }}
                               >
                                 <Input
                                   placeholder={
-                                    contentType === "gambar" 
-                                      ? "https://example.com/gambar.jpg" 
-                                      : contentType === "video" 
+                                    contentType === "gambar"
+                                      ? "https://example.com/gambar.jpg"
+                                      : contentType === "video"
                                       ? "https://youtube.com/watch?v=... atau https://vimeo.com/..."
                                       : "https://soundcloud.com/... atau https://example.com/audio.mp3"
                                   }
@@ -440,6 +552,7 @@ function KnowledgeFormUserRevisions({
                         contentId={contentId}
                         revisionId={revisionData?.id}
                         uploadMutation={uploadAttachmentsMutation}
+                        onDeleteFile={handleDeleteAttachment}
                       />
 
                       {/* Change Notes */}

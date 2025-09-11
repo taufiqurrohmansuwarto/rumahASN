@@ -2,8 +2,22 @@ import {
   uploadKnowledgeContentAttachment,
   uploadMultipleKnowledgeContentAttachments,
 } from "@/services/knowledge-management.services";
-import { QuestionCircleOutlined, UploadOutlined } from "@ant-design/icons";
-import { Button, Flex, Form, message, Tooltip, Typography, Upload } from "antd";
+import {
+  QuestionCircleOutlined,
+  UploadOutlined,
+  DeleteOutlined,
+  LoadingOutlined,
+} from "@ant-design/icons";
+import {
+  Button,
+  Flex,
+  Form,
+  message,
+  Tooltip,
+  Typography,
+  Upload,
+} from "antd";
+import { useEffect, useCallback } from "react";
 
 const { Text } = Typography;
 
@@ -12,19 +26,102 @@ const KnowledgeFormAttachments = ({
   fileList,
   setFileList,
   contentId = null, // Will be provided when editing existing content
+  revisionId = null, // For revision uploads
+  uploadMutation = null, // New upload mutation hook
+  onGetPendingFiles = null, // Callback to pass pending files to parent
+  onDeleteFile = null, // Callback to handle file deletion
 }) => {
   const handleUploadChange = ({ fileList: newFileList }) => {
     setFileList(newFileList);
   };
 
-  const customUpload = async ({ file, onSuccess, onError }) => {
+  // Handle file removal
+  const handleRemove = async (file) => {
+    // If file is uploaded (has response with uid/id) and onDeleteFile callback exists
+    if (file.response?.data && onDeleteFile) {
+      const fileId = file.response.data.uid || file.response.data.id;
+      if (fileId && !file.response.data.isTemporary) {
+        // For uploaded files, delegate to parent component
+        // Parent will handle loading state and list removal
+        await onDeleteFile(fileId);
+        return false; // Don't remove from UI here, parent will handle it
+      }
+    }
+    // Allow immediate removal for temporary files or when no callback
+    return true;
+  };
+
+  // Get pending files for batch upload (kept for compatibility)
+  const getPendingFiles = useCallback(() => {
+    return fileList
+      .filter((file) => file.response?.data?.isTemporary)
+      .map((file) => file.response.data.file);
+  }, [fileList]);
+
+  // Expose pending files to parent component
+  useEffect(() => {
+    if (onGetPendingFiles) {
+      const pendingFiles = getPendingFiles();
+      onGetPendingFiles(pendingFiles);
+    }
+  }, [fileList, onGetPendingFiles, getPendingFiles]);
+
+  const customUpload = async ({ file, onSuccess, onError, onProgress }) => {
     try {
-      if (contentId) {
-        // Mode edit - upload immediately
+      // Show upload progress immediately
+      onProgress({ percent: 10 });
+
+      if (uploadMutation && contentId && revisionId) {
+        // Mode revision - upload immediately untuk show individual success
+        onProgress({ percent: 50 });
+
         const formData = new FormData();
         formData.append("files", file);
 
-        const response = await uploadKnowledgeContentAttachment(contentId, formData);
+        const response = await uploadMutation.mutateAsync({
+          contentId,
+          versionId: revisionId,
+          data: formData,
+        });
+
+        onProgress({ percent: 100 });
+
+        if (response?.success && response?.data?.attachments?.length > 0) {
+          const uploadedFile = response.data.attachments[0];
+          onSuccess(
+            {
+              success: true,
+              data: {
+                uid: uploadedFile.id,
+                id: uploadedFile.id,
+                url: uploadedFile.url,
+                filename: uploadedFile.name,
+                name: uploadedFile.name,
+                size: uploadedFile.size,
+                mimetype: uploadedFile.mime,
+                mime: uploadedFile.mime,
+                status: "done",
+              },
+            },
+            file
+          );
+          message.success(`${file.name} berhasil diupload`);
+        } else {
+          throw new Error("Upload gagal: Format response tidak valid");
+        }
+      } else if (contentId) {
+        // Mode edit - upload immediately using old service
+        onProgress({ percent: 50 });
+
+        const formData = new FormData();
+        formData.append("files", file);
+
+        const response = await uploadKnowledgeContentAttachment(
+          contentId,
+          formData
+        );
+
+        onProgress({ percent: 100 });
 
         if (response?.success && response?.data?.length > 0) {
           const uploadedFile = response.data[0];
@@ -37,18 +134,20 @@ const KnowledgeFormAttachments = ({
                 url: uploadedFile.url,
                 filename: uploadedFile.filename,
                 size: uploadedFile.size,
+                mime: uploadedFile.mime,
                 mimetype: uploadedFile.mimetype,
                 status: "done",
               },
             },
             file
           );
-
+          message.success(`${file.name} berhasil diupload`);
         } else {
           throw new Error("Upload gagal: Format response tidak valid");
         }
       } else {
         // Mode create - store file untuk upload nanti saat submit form
+        onProgress({ percent: 100 });
         onSuccess(
           {
             data: {
@@ -68,6 +167,7 @@ const KnowledgeFormAttachments = ({
         );
       }
     } catch (error) {
+      onProgress({ percent: 0 });
       message.error(`Upload gagal: ${error.message}`);
       onError(error);
     }
@@ -119,6 +219,32 @@ const KnowledgeFormAttachments = ({
     }
   };
 
+  // Custom render for file items with individual loading states
+  const customItemRender = (originNode, file) => {
+    const isRemoving = file.status === "removing";
+
+    if (isRemoving) {
+      return (
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            padding: "8px 12px",
+            backgroundColor: "#fff2e8",
+            border: "1px dashed #ff4500",
+            borderRadius: "6px",
+            marginBottom: "8px",
+          }}
+        >
+          <LoadingOutlined style={{ color: "#ff4500", marginRight: "8px" }} />
+          <Text style={{ color: "#ff4500" }}>Menghapus {file.name}...</Text>
+        </div>
+      );
+    }
+
+    return originNode;
+  };
+
   return (
     <Form.Item
       label={
@@ -146,6 +272,8 @@ const KnowledgeFormAttachments = ({
         customRequest={customUpload}
         fileList={fileList}
         onChange={handleUploadChange}
+        onRemove={handleRemove}
+        itemRender={customItemRender}
         multiple={true}
         maxCount={5}
         accept=".pdf,.doc,.docx,.xls,.xlsx,.txt,.jpg,.jpeg,.png,.gif"
