@@ -12,6 +12,8 @@ const AsnKnowledgeMyKnowledgeDetail = () => {
 
   const { data, isLoading } = useUserOwnContent(router.query.id);
 
+  const url = `/asn-connect/asn-knowledge/my-knowledge`;
+
   return (
     <>
       <Head>
@@ -20,7 +22,7 @@ const AsnKnowledgeMyKnowledgeDetail = () => {
       <PageContainer
         loading={isLoading}
         title={`${data?.title} - ASNPedia`}
-        onBack={() => router.back()}
+        onBack={() => router.push(url)}
         header={{
           breadcrumbRender: () => (
             <Breadcrumb>

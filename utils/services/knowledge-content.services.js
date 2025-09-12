@@ -1,5 +1,6 @@
 import crypto from "crypto";
 import { uploadFileMinio } from "@/utils/index";
+import { generateTempMediaFilePath } from "@/utils/filename-helper";
 
 const KnowledgeContent = require("@/models/knowledge/contents.model");
 const KnowledgeCategory = require("@/models/knowledge/categories.model");
@@ -631,24 +632,20 @@ export const uploadContentAttachment = async (
  */
 export const uploadContentMedia = async (files, userId, mc) => {
   const uploadPromises = files.map(async (file) => {
-    const encryptedUserId = getEncryptedUserId(userId);
-    const fileName = `knowledge-media-temp/${encryptedUserId}/${Date.now()}-${
-      file.originalname
-    }`;
-
-    const uploadResult = await uploadFileMinio(
-      mc,
-      file.buffer,
-      fileName,
-      file.size,
-      file.mimetype
+    // Generate sanitized filename using helper
+    const fileName = generateTempMediaFilePath(
+      file.originalname,
+      userId,
+      getEncryptedUserId
     );
+
+    await uploadFileMinio(mc, file.buffer, fileName, file.size, file.mimetype);
 
     return {
       uid: `temp-${Date.now()}-${Math.random()}`,
-      name: file.originalname,
+      name: fileName,
       status: "done",
-      url: `${BASE_URL}/${uploadResult.fileName}`,
+      url: `${BASE_URL}/${fileName}`,
       size: file.size,
       type: file.mimetype,
     };

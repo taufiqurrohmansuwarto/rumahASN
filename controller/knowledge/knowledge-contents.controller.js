@@ -3,6 +3,10 @@ import { uploadFileMinio } from "@/utils/index";
 import { processContentWithAI } from "@/utils/services/ai-processing.services";
 import { getAllCategories } from "@/utils/services/knowledge-category.services";
 import {
+  generatePermanentMediaFilePath,
+  generateTempMediaFilePath,
+} from "@/utils/filename-helper";
+import {
   createContent,
   deleteContent,
   getContentById,
@@ -331,13 +335,12 @@ export const uploadKnowledgeContentMedia = async (req, res) => {
       });
     }
 
-    // Generate unique filename using service
-    const timestamp = new Date().getTime();
-    const originalName = file.originalname.replace(/[^a-zA-Z0-9.-]/g, "_");
-    const encryptedUserId = getEncryptedUserId(customId);
-    const fileName = `knowledge-media/${encryptedUserId}/${timestamp}_${originalName}`;
-
-    console.log({ fileName });
+    // Generate unique filename using helper
+    const fileName = generatePermanentMediaFilePath(
+      file.originalname,
+      customId,
+      getEncryptedUserId
+    );
 
     // Upload to MinIO
     await uploadFileMinio(mc, file.buffer, fileName, file.size, file.mimetype);
@@ -410,11 +413,13 @@ export const uploadKnowledgeContentMediaAdmin = async (req, res) => {
       });
     }
 
-    // Generate unique filename using service
-    const timestamp = new Date().getTime();
-    const originalName = file.originalname.replace(/[^a-zA-Z0-9.-]/g, "_");
-    const encryptedAdminId = getEncryptedUserId("admin_" + customId);
-    const fileName = `knowledge-media/${encryptedAdminId}/${timestamp}_${originalName}`;
+    // Generate unique filename using helper
+    const fileName = generatePermanentMediaFilePath(
+      file.originalname,
+      customId,
+      getEncryptedUserId,
+      true // isAdmin = true
+    );
 
     // Upload to MinIO
     await uploadFileMinio(mc, file.buffer, fileName, file.size, file.mimetype);

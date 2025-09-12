@@ -284,6 +284,15 @@ export const uploadKnowledgeContentAttachmentAdmin = async (
     .then((res) => res.data);
 };
 
+export const deleteMyContentAttachment = async ({
+  contentId,
+  attachmentId,
+}) => {
+  return await api
+    .delete(`/users/contents/${contentId}/attachments/${attachmentId}`)
+    .then((res) => res.data);
+};
+
 export const uploadMultipleKnowledgeContentAttachments = async (
   contentId,
   files

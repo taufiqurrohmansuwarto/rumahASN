@@ -1,10 +1,8 @@
 import {
   createKnowledgeContent,
   updateKnowledgeContent,
-  uploadKnowledgeContentMedia,
-  uploadKnowledgeContentMediaAdmin,
-  uploadKnowledgeContentMediaCreate,
   uploadMultipleKnowledgeContentAttachments,
+  deleteMyContentAttachment,
 } from "@/services/knowledge-management.services";
 import { EditOutlined } from "@ant-design/icons";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -46,6 +44,7 @@ function KnowledgeFormUserContents({
   );
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [contentType, setContentType] = useState("teks");
+  const [deletingAttachmentIds, setDeletingAttachmentIds] = useState(new Set());
   const queryClient = useQueryClient();
 
   // Check if there are files still uploading or pending
@@ -186,17 +185,48 @@ function KnowledgeFormUserContents({
       }
 
       if (initialData.attachments) {
+        console.log("Raw attachment data:", initialData.attachments);
         const mappedFiles = initialData.attachments.map(
-          (attachment, index) => ({
-            uid: `-${index}`,
-            name: attachment.filename || attachment.name,
-            status: "done",
-            url: attachment.url,
-            response: {
-              data: { url: attachment.url },
-            },
-          })
+          (attachment, index) => {
+            // Log all available fields to understand the structure
+            console.log("Full attachment object:", attachment);
+            console.log("Available attachment keys:", Object.keys(attachment));
+            
+            // Try different possible ID field names - be more exhaustive
+            const attachmentId = attachment.id || 
+                                 attachment.uid || 
+                                 attachment.attachment_id || 
+                                 attachment._id ||
+                                 attachment.fileId ||
+                                 attachment.file_id;
+                                 
+            console.log("Processing attachment:", { 
+              attachment, 
+              attachmentId, 
+              index,
+              extractedId: attachmentId,
+              hasId: !!attachmentId
+            });
+            
+            return {
+              uid: attachmentId ? String(attachmentId) : `existing-${index}`,
+              name: attachment.filename || attachment.name || attachment.original_name || `File ${index + 1}`,
+              status: "done",
+              url: attachment.url,
+              response: {
+                data: { 
+                  url: attachment.url,
+                  uid: attachmentId ? String(attachmentId) : null,
+                  id: attachmentId ? String(attachmentId) : null,
+                  filename: attachment.filename || attachment.name || attachment.original_name || `File ${index + 1}`,
+                  isTemporary: false, // Mark as permanent since these are existing attachments
+                  originalAttachment: attachment, // Keep reference to original data
+                },
+              },
+            };
+          }
         );
+        console.log("Mapped attachments:", mappedFiles);
         setFileList(mappedFiles);
       }
     }
@@ -222,6 +252,60 @@ function KnowledgeFormUserContents({
     }
   };
 
+  // Delete attachment handler - only for edit mode
+  const handleDeleteAttachment = async (attachmentId) => {
+    if (!initialData || !currentContentId) {
+      message.error("Tidak dapat menghapus attachment: Content tidak ditemukan");
+      return;
+    }
+
+    console.log("Delete attachment called with:", { 
+      attachmentId, 
+      contentId: currentContentId,
+      currentFileList: fileList
+    });
+
+    // Validate attachmentId
+    if (!attachmentId || attachmentId === "-1" || String(attachmentId).startsWith("existing-")) {
+      console.error("Invalid attachmentId:", attachmentId);
+      message.error("ID attachment tidak valid");
+      return;
+    }
+
+    try {
+      // Add to deleting set to show loading state
+      setDeletingAttachmentIds(prev => new Set(prev.add(attachmentId)));
+
+      // Call delete service with proper object structure
+      const response = await deleteMyContentAttachment({
+        contentId: currentContentId,
+        attachmentId: String(attachmentId),
+      });
+
+      console.log("Delete response:", response);
+
+      // Remove from fileList
+      setFileList(prevFileList =>
+        prevFileList.filter(file => {
+          // Prioritize 'id' field over 'uid' for consistency
+          const fileId = file.response?.data?.id || file.response?.data?.uid || file.uid;
+          return String(fileId) !== String(attachmentId);
+        })
+      );
+
+      message.success("File berhasil dihapus");
+    } catch (error) {
+      console.error("Delete attachment error:", error);
+      message.error(`Gagal menghapus file: ${error.message}`);
+    } finally {
+      // Remove from deleting set
+      setDeletingAttachmentIds(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(attachmentId);
+        return newSet;
+      });
+    }
+  };
 
   const resetForm = () => {
     form.resetFields();
@@ -232,6 +316,7 @@ function KnowledgeFormUserContents({
     setCurrentContentId(null);
     setIsSubmitting(false);
     setContentType("teks");
+    setDeletingAttachmentIds(new Set());
   };
 
   const handleFinish = async (values) => {
@@ -285,7 +370,6 @@ function KnowledgeFormUserContents({
         }
       }
 
-
       // Step 3: Upload files if any
       const targetContentId = isEditing ? contentId : result?.id;
       if (filesToUpload.length > 0 && targetContentId) {
@@ -294,7 +378,7 @@ function KnowledgeFormUserContents({
 
       // Single success message
       message.success(getSuccessMessage());
-      
+
       // Call onSuccess with result data for redirect
       onSuccess(result);
 
@@ -361,7 +445,6 @@ function KnowledgeFormUserContents({
         }
       }
 
-
       // Step 3: Upload files if any
       const targetContentId = isEditing ? contentId : result?.id;
       if (filesToUpload.length > 0 && targetContentId) {
@@ -403,7 +486,6 @@ function KnowledgeFormUserContents({
         )
         .map((file) => file.response.data);
 
-
       const formData = {
         ...values,
         content,
@@ -411,10 +493,7 @@ function KnowledgeFormUserContents({
         references: values.references || [],
         source_url: values.source_url,
         // Status handling for submit
-        status:
-          mode === "admin"
-            ? initialData?.status || "published"
-            : "draft", // Users always stay draft, don't auto-submit for review
+        status: mode === "admin" ? initialData?.status || "published" : "draft", // Users always stay draft, don't auto-submit for review
       };
 
       let result;
@@ -446,7 +525,6 @@ function KnowledgeFormUserContents({
         }
       }
 
-
       // Step 3: Upload files if any
       const targetContentId = isEditing ? contentId : result?.id;
       if (filesToUpload.length > 0 && targetContentId) {
@@ -455,7 +533,7 @@ function KnowledgeFormUserContents({
 
       // Single success message
       message.success(getSuccessMessage());
-      
+
       // Call onSuccess with result data for redirect
       onSuccess(result);
 
@@ -475,10 +553,7 @@ function KnowledgeFormUserContents({
   };
 
   const isLoading =
-    createLoading ||
-    updateLoading ||
-    isSubmitting ||
-    hasUploadingFiles;
+    createLoading || updateLoading || isSubmitting || hasUploadingFiles;
 
   return (
     <div>
@@ -530,6 +605,9 @@ function KnowledgeFormUserContents({
                       <KnowledgeFormSourceUrl
                         isMobile={isMobile}
                         contentType={contentType}
+                        contentId={currentContentId}
+                        isEditing={isEditing}
+                        form={form}
                       />
                       <KnowledgeFormSummary isMobile={isMobile} />
                       <KnowledgeFormContent
@@ -554,13 +632,14 @@ function KnowledgeFormUserContents({
                         fileList={fileList}
                         setFileList={setFileList}
                         contentId={currentContentId}
+                        onDeleteFile={isEditing ? handleDeleteAttachment : null}
+                        deletingAttachmentIds={deletingAttachmentIds}
                       />
                     </Col>
                   </Row>
 
                   {/* Status Info */}
-                  {(hasUploadingFiles ||
-                    hasPendingFiles) && (
+                  {(hasUploadingFiles || hasPendingFiles) && (
                     <div
                       style={{
                         marginBottom: 16,

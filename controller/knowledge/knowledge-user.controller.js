@@ -7,6 +7,7 @@ import {
   editUserContent,
   deleteUserContent,
   getUserKnowledgeContentsBookmarks as getUserBookmarksService,
+  deleteUserContentAttachment,
 } from "@/utils/services/knowledge-user.services";
 
 // Get user knowledge content
@@ -126,6 +127,24 @@ export const getUserKnowledgeContentsBookmarks = async (req, res) => {
     const data = await getUserBookmarksService(customId, filters);
 
     res.json(data);
+  } catch (error) {
+    handleError(res, error);
+  }
+};
+
+export const deleteMyContentAttachment = async (req, res) => {
+  try {
+    const { id, attachmentId } = req?.query;
+    const { customId } = req?.user;
+    console.log({ id, attachmentId, customId });
+
+    // Use service to delete user content attachment
+    await deleteUserContentAttachment(id, attachmentId, customId);
+
+    res.json({
+      success: true,
+      message: "File berhasil dihapus",
+    });
   } catch (error) {
     handleError(res, error);
   }

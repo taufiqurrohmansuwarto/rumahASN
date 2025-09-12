@@ -1,5 +1,6 @@
 const KnowledgeContent = require("@/models/knowledge/contents.model");
 const KnowledgeUserInteraction = require("@/models/knowledge/user-interactions.model");
+const KnowledgeContentAttachments = require("@/models/knowledge/content-attachments.model");
 import { calculateReadingTime } from "./knowledge-content.services";
 
 // ===== UTILITY FUNCTIONS =====
@@ -378,8 +379,8 @@ export const getUserContentCategoryCounts = async (customId) => {
 export const getUserBookmarkStatusCounts = async (customId) => {
   const results = await KnowledgeContent.query()
     .innerJoin(
-      "knowledge.user_interactions", 
-      "knowledge.contents.id", 
+      "knowledge.user_interactions",
+      "knowledge.contents.id",
       "knowledge.user_interactions.content_id"
     )
     .where("knowledge.user_interactions.user_id", customId)
@@ -413,8 +414,8 @@ export const getUserBookmarkStatusCounts = async (customId) => {
 export const getUserBookmarkTypeCounts = async (customId) => {
   const results = await KnowledgeContent.query()
     .innerJoin(
-      "knowledge.user_interactions", 
-      "knowledge.contents.id", 
+      "knowledge.user_interactions",
+      "knowledge.contents.id",
       "knowledge.user_interactions.content_id"
     )
     .where("knowledge.user_interactions.user_id", customId)
@@ -449,8 +450,8 @@ export const getUserBookmarkTypeCounts = async (customId) => {
 export const getUserBookmarkCategoryCounts = async (customId) => {
   const results = await KnowledgeContent.query()
     .innerJoin(
-      "knowledge.user_interactions", 
-      "knowledge.contents.id", 
+      "knowledge.user_interactions",
+      "knowledge.contents.id",
       "knowledge.user_interactions.content_id"
     )
     .where("knowledge.user_interactions.user_id", customId)
@@ -648,19 +649,14 @@ export const deleteUserContent = async (contentId, customId) => {
  * Build query for user's bookmarked contents with filters
  */
 export const buildUserBookmarkQuery = (customId, filters = {}) => {
-  const {
-    search = "",
-    category_id = "",
-    tags = [],
-    type = "",
-  } = filters;
+  const { search = "", category_id = "", tags = [], type = "" } = filters;
 
   // Base query: get bookmarked content through user_interactions
   // Note: Exclude content field for better performance on bookmarks
   let query = KnowledgeContent.query()
     .select(
       "knowledge.contents.id",
-      "knowledge.contents.title", 
+      "knowledge.contents.title",
       "knowledge.contents.summary",
       "knowledge.contents.author_id",
       "knowledge.contents.category_id",
@@ -668,7 +664,7 @@ export const buildUserBookmarkQuery = (customId, filters = {}) => {
       "knowledge.contents.source_url",
       "knowledge.contents.status",
       "knowledge.contents.views_count",
-      "knowledge.contents.likes_count", 
+      "knowledge.contents.likes_count",
       "knowledge.contents.comments_count",
       "knowledge.contents.bookmarks_count",
       "knowledge.contents.estimated_reading_time",
@@ -677,13 +673,13 @@ export const buildUserBookmarkQuery = (customId, filters = {}) => {
       "knowledge.contents.updated_at"
     )
     .innerJoin(
-      'knowledge.user_interactions',
-      'knowledge.contents.id',
-      'knowledge.user_interactions.content_id'
+      "knowledge.user_interactions",
+      "knowledge.contents.id",
+      "knowledge.user_interactions.content_id"
     )
-    .where('knowledge.user_interactions.user_id', customId)
-    .where('knowledge.user_interactions.interaction_type', 'bookmark')
-    .where('knowledge.contents.status', 'published'); // Only show published content
+    .where("knowledge.user_interactions.user_id", customId)
+    .where("knowledge.user_interactions.interaction_type", "bookmark")
+    .where("knowledge.contents.status", "published"); // Only show published content
 
   // Search filter - only search in title and summary for bookmarks
   if (search) {
@@ -703,7 +699,9 @@ export const buildUserBookmarkQuery = (customId, filters = {}) => {
   if (tags && tags.length > 0) {
     query = query.andWhere((builder) => {
       tags.forEach((tag) => {
-        builder.orWhereRaw("knowledge.contents.tags @> ?", [JSON.stringify([tag])]);
+        builder.orWhereRaw("knowledge.contents.tags @> ?", [
+          JSON.stringify([tag]),
+        ]);
       });
     });
   }
@@ -713,7 +711,9 @@ export const buildUserBookmarkQuery = (customId, filters = {}) => {
     if (type === "teks") {
       // For teks, include both 'teks' and null values
       query = query.andWhere((builder) => {
-        builder.where("knowledge.contents.type", "teks").orWhereNull("knowledge.contents.type");
+        builder
+          .where("knowledge.contents.type", "teks")
+          .orWhereNull("knowledge.contents.type");
       });
     } else {
       query = query.andWhere("knowledge.contents.type", type);
@@ -727,12 +727,7 @@ export const buildUserBookmarkQuery = (customId, filters = {}) => {
  * Get user's bookmarked knowledge contents with pagination and filters (internal function)
  */
 const getUserBookmarkedContents = async (customId, filters = {}) => {
-  const {
-    page = 1,
-    limit = 10,
-    sort = "created_at:desc",
-    tags = "",
-  } = filters;
+  const { page = 1, limit = 10, sort = "created_at:desc", tags = "" } = filters;
 
   // Process tags
   const tagFilters = Array.isArray(filters.tag)
@@ -758,7 +753,7 @@ const getUserBookmarkedContents = async (customId, filters = {}) => {
   if (
     [
       "likes_count",
-      "comments_count", 
+      "comments_count",
       "views_count",
       "bookmarks_count",
     ].includes(sortField)
@@ -821,7 +816,10 @@ const getUserBookmarkedContents = async (customId, filters = {}) => {
 /**
  * Get user's bookmarked contents with statistics (similar to getUserContentsWithStats)
  */
-export const getUserKnowledgeContentsBookmarks = async (customId, filters = {}) => {
+export const getUserKnowledgeContentsBookmarks = async (
+  customId,
+  filters = {}
+) => {
   const [contents, statusCounts, typeCounts, engagementStats, categoryCounts] =
     await Promise.all([
       getUserBookmarkedContents(customId, filters),
@@ -843,5 +841,39 @@ export const getUserKnowledgeContentsBookmarks = async (customId, filters = {}) 
       ...engagementStats,
       ...statusCounts,
     },
+  };
+};
+
+export const deleteUserContentAttachment = async (
+  contentId,
+  attachmentId,
+  customId
+) => {
+  console.log(attachmentId);
+  // cek konten dulu apa dia yang buat
+  const content = await KnowledgeContent.query()
+    .findById(contentId)
+    .where("author_id", customId);
+
+  if (!content) {
+    throw new Error("Content not found or access denied");
+  }
+
+  // cek attachment dulu apa dia yang buat
+  const attachment = await KnowledgeContentAttachments.query()
+    .findById(attachmentId)
+    .where("content_id", contentId);
+
+  if (!attachment) {
+    throw new Error("Attachment not found or access denied");
+  }
+
+  await KnowledgeContentAttachments.query().findById(attachmentId).delete();
+
+  // should be implement delete from minio
+
+  return {
+    success: true,
+    message: "Attachment deleted successfully",
   };
 };

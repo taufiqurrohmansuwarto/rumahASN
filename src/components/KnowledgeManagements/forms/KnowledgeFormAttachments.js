@@ -30,6 +30,7 @@ const KnowledgeFormAttachments = ({
   uploadMutation = null, // New upload mutation hook
   onGetPendingFiles = null, // Callback to pass pending files to parent
   onDeleteFile = null, // Callback to handle file deletion
+  deletingAttachmentIds = new Set(), // Set of attachment IDs being deleted
 }) => {
   const handleUploadChange = ({ fileList: newFileList }) => {
     setFileList(newFileList);
@@ -37,16 +38,27 @@ const KnowledgeFormAttachments = ({
 
   // Handle file removal
   const handleRemove = async (file) => {
-    // If file is uploaded (has response with uid/id) and onDeleteFile callback exists
-    if (file.response?.data && onDeleteFile) {
-      const fileId = file.response.data.uid || file.response.data.id;
-      if (fileId && !file.response.data.isTemporary) {
-        // For uploaded files, delegate to parent component
-        // Parent will handle loading state and list removal
-        await onDeleteFile(fileId);
-        return false; // Don't remove from UI here, parent will handle it
-      }
+    // Get file ID from various possible sources, prioritizing 'id' over 'uid'
+    const fileId = file.response?.data?.id || file.response?.data?.uid || file.uid;
+    
+    console.log("handleRemove called with file:", {
+      file,
+      fileId,
+      fileUid: file.uid,
+      responseData: file.response?.data,
+      hasResponse: !!file.response?.data,
+      hasDeleteCallback: !!onDeleteFile,
+      isTemporary: file.response?.data?.isTemporary
+    });
+    
+    // If file is uploaded (not temporary) and onDeleteFile callback exists and we have a valid fileId
+    if (file.response?.data && onDeleteFile && fileId && !file.response.data.isTemporary) {
+      // For uploaded files, delegate to parent component
+      // Parent will handle loading state and list removal
+      await onDeleteFile(fileId);
+      return false; // Don't remove from UI here, parent will handle it
     }
+    
     // Allow immediate removal for temporary files or when no callback
     return true;
   };
@@ -130,13 +142,15 @@ const KnowledgeFormAttachments = ({
             {
               success: true,
               data: {
-                uid: uploadedFile.uid,
+                uid: uploadedFile.id || uploadedFile.uid, // Use id first, then uid as fallback
+                id: uploadedFile.id || uploadedFile.uid,  // Add id field for consistency
                 url: uploadedFile.url,
-                filename: uploadedFile.filename,
-                size: uploadedFile.size,
-                mime: uploadedFile.mime,
-                mimetype: uploadedFile.mimetype,
+                filename: uploadedFile.filename || uploadedFile.name,
+                size: uploadedFile.size || uploadedFile.file_size,
+                mime: uploadedFile.mimetype || uploadedFile.file_type,
+                mimetype: uploadedFile.mimetype || uploadedFile.file_type,
                 status: "done",
+                isTemporary: false, // Mark as permanent since it's uploaded immediately
               },
             },
             file
@@ -221,9 +235,12 @@ const KnowledgeFormAttachments = ({
 
   // Custom render for file items with individual loading states
   const customItemRender = (originNode, file) => {
+    // Prioritize 'id' field over 'uid' for consistency with handleRemove
+    const fileId = file.response?.data?.id || file.response?.data?.uid || file.uid;
+    const isDeleting = fileId && deletingAttachmentIds.has(String(fileId));
     const isRemoving = file.status === "removing";
 
-    if (isRemoving) {
+    if (isDeleting || isRemoving) {
       return (
         <div
           style={{

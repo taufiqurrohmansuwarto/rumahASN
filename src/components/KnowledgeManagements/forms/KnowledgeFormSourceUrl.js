@@ -1,12 +1,23 @@
-import { QuestionCircleOutlined, UploadOutlined, LinkOutlined, DeleteOutlined } from "@ant-design/icons";
+import { QuestionCircleOutlined, UploadOutlined, LinkOutlined, DeleteOutlined, LoadingOutlined } from "@ant-design/icons";
 import { Flex, Form, Input, Upload, Button, Radio, Typography, Tooltip, message, Space } from "antd";
 import { useState } from "react";
+import { 
+  uploadKnowledgeContentMedia,
+  uploadKnowledgeContentMediaCreate
+} from "@/services/knowledge-management.services";
 
 const { Text } = Typography;
 
-const KnowledgeFormSourceUrl = ({ isMobile, contentType = "teks", onFileChange = null }) => {
+const KnowledgeFormSourceUrl = ({ 
+  isMobile, 
+  contentType = "teks", 
+  contentId = null, // For edit mode
+  isEditing = false, // Whether we're in edit mode
+  form = null, // Form instance to update source_url field
+}) => {
   const [uploadMode, setUploadMode] = useState("url"); // "upload" atau "url"
   const [fileList, setFileList] = useState([]);
+  const [isUploading, setIsUploading] = useState(false);
 
   // Determine allowed file types based on content type
   const getAllowedFileTypes = (type) => {
@@ -44,6 +55,79 @@ const KnowledgeFormSourceUrl = ({ isMobile, contentType = "teks", onFileChange =
 
   const fileConfig = getAllowedFileTypes(contentType);
 
+  // Custom upload handler for media files
+  const handleMediaUpload = async ({ file, onSuccess, onError, onProgress }) => {
+    try {
+      setIsUploading(true);
+      onProgress({ percent: 10 });
+
+      const formData = new FormData();
+      formData.append("media", file);
+
+      let response;
+      
+      onProgress({ percent: 50 });
+      
+      if (isEditing && contentId) {
+        // Edit mode: upload immediately to existing content
+        response = await uploadKnowledgeContentMedia(contentId, formData);
+      } else {
+        // Create mode: upload to temporary location
+        response = await uploadKnowledgeContentMediaCreate(formData);
+      }
+
+      onProgress({ percent: 100 });
+
+      console.log("Upload response:", response);
+      console.log("isEditing:", isEditing, "contentId:", contentId);
+      
+      if (response?.success && response?.data) {
+        let mediaUrl;
+        let mediaData;
+        
+        if (isEditing && contentId) {
+          // Edit mode response structure:
+          // { data: { media: { url, filename, ... } } }
+          mediaUrl = response.data.media?.url;
+          mediaData = response.data.media;
+          console.log("Edit mode - extracted URL:", mediaUrl);
+        } else {
+          // Create mode response structure:
+          // { data: { url, filename, ... } }
+          mediaUrl = response.data.url;
+          mediaData = response.data;
+          console.log("Create mode - extracted URL:", mediaUrl);
+        }
+        
+        if (mediaUrl) {
+          // Update the form's source_url field
+          if (form) {
+            console.log("Updating form field source_url with:", mediaUrl);
+            form.setFieldValue("source_url", mediaUrl);
+            console.log("Form values after update:", form.getFieldsValue());
+          } else {
+            console.error("Form instance not available");
+          }
+          
+          onSuccess(mediaData || response.data, file);
+          message.success(`${file.name} berhasil diupload`);
+        } else {
+          console.error("No URL found in response");
+          throw new Error("Upload gagal: Tidak ada URL yang dikembalikan");
+        }
+      } else {
+        console.error("Invalid response structure:", response);
+        throw new Error("Upload gagal: Response tidak valid");
+      }
+    } catch (error) {
+      console.error("Media upload error:", error);
+      message.error(`Upload gagal: ${error.message}`);
+      onError(error);
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
   const handleFileChange = ({ fileList: newFileList }) => {
     setFileList(newFileList);
   };
@@ -53,18 +137,21 @@ const KnowledgeFormSourceUrl = ({ isMobile, contentType = "teks", onFileChange =
     maxCount: 1,
     fileList,
     onChange: handleFileChange,
+    customRequest: handleMediaUpload,
     beforeUpload: (file) => {
       const isValidSize = file.size / 1024 / 1024 < fileConfig.maxSize;
       if (!isValidSize) {
         message.error(`File tidak boleh lebih besar dari ${fileConfig.maxSize}MB!`);
         return false;
       }
-      
-      // For now, don't upload automatically
-      return false;
+      return true; // Allow upload
     },
     onRemove: () => {
       setFileList([]);
+      // Clear the source_url field when file is removed
+      if (form) {
+        form.setFieldValue("source_url", "");
+      }
     }
   };
 
@@ -190,23 +277,37 @@ const KnowledgeFormSourceUrl = ({ isMobile, contentType = "teks", onFileChange =
         <div>
           <Upload.Dragger
             {...uploadProps}
+            disabled={isUploading}
             style={{
               borderRadius: "6px",
-              borderColor: "#d9d9d9",
-              backgroundColor: "#fafafa",
+              borderColor: isUploading ? "#FF4500" : "#d9d9d9",
+              backgroundColor: isUploading ? "#fff2e8" : "#fafafa",
             }}
           >
             <div style={{ padding: isMobile ? "16px" : "24px" }}>
-              <UploadOutlined 
-                style={{ 
-                  fontSize: isMobile ? "24px" : "32px", 
-                  color: "#FF4500",
-                  marginBottom: "8px"
-                }} 
-              />
+              {isUploading ? (
+                <LoadingOutlined
+                  style={{ 
+                    fontSize: isMobile ? "24px" : "32px", 
+                    color: "#FF4500",
+                    marginBottom: "8px"
+                  }} 
+                />
+              ) : (
+                <UploadOutlined 
+                  style={{ 
+                    fontSize: isMobile ? "24px" : "32px", 
+                    color: "#FF4500",
+                    marginBottom: "8px"
+                  }} 
+                />
+              )}
               <div>
                 <Text style={{ fontSize: isMobile ? "13px" : "14px" }}>
-                  Klik atau seret file {contentType} ke area ini
+                  {isUploading 
+                    ? `Mengupload ${contentType}...`
+                    : `Klik atau seret file ${contentType} ke area ini`
+                  }
                 </Text>
               </div>
               <div style={{ marginTop: "4px" }}>
@@ -221,25 +322,64 @@ const KnowledgeFormSourceUrl = ({ isMobile, contentType = "teks", onFileChange =
             <div style={{ 
               marginTop: "8px",
               padding: "8px 12px",
-              backgroundColor: "#f6ffed",
-              border: "1px solid #b7eb8f",
+              backgroundColor: fileList[0]?.status === "done" ? "#f6ffed" : "#f0f8ff",
+              border: fileList[0]?.status === "done" ? "1px solid #b7eb8f" : "1px solid #bae7ff",
               borderRadius: "6px"
             }}>
               <Flex align="center" justify="space-between">
                 <Space>
-                  <Text style={{ fontSize: "12px", color: "#52c41a" }}>
-                    ✅ File siap diupload: {fileList[0]?.name}
+                  <Text style={{ 
+                    fontSize: "12px", 
+                    color: fileList[0]?.status === "done" ? "#52c41a" : "#1890ff" 
+                  }}>
+                    {fileList[0]?.status === "done" ? "✅" : "⏳"} 
+                    {fileList[0]?.status === "done" 
+                      ? `File berhasil diupload: ${fileList[0]?.name}`
+                      : `Mengupload: ${fileList[0]?.name}`
+                    }
                   </Text>
                 </Space>
-                <Button 
-                  type="text" 
-                  size="small"
-                  icon={<DeleteOutlined />}
-                  onClick={() => setFileList([])}
-                  style={{ color: "#ff4d4f" }}
-                />
+                {!isUploading && (
+                  <Button 
+                    type="text" 
+                    size="small"
+                    icon={<DeleteOutlined />}
+                    onClick={() => {
+                      setFileList([]);
+                      if (form) {
+                        form.setFieldValue("source_url", "");
+                      }
+                    }}
+                    style={{ color: "#ff4d4f" }}
+                  />
+                )}
               </Flex>
             </div>
+          )}
+
+          {/* Show uploaded URL in read-only field when file is uploaded successfully */}
+          {fileList.length > 0 && fileList[0]?.status === "done" && (
+            <Form.Item
+              name="source_url"
+              style={{ margin: "8px 0 0 0" }}
+              label={
+                <Text style={{ fontSize: "12px", color: "#666" }}>
+                  URL File yang Diupload:
+                </Text>
+              }
+            >
+              <Input
+                readOnly
+                size="small"
+                style={{
+                  backgroundColor: "#f5f5f5",
+                  color: "#666",
+                  fontSize: "12px"
+                }}
+                prefix={<LinkOutlined style={{ color: "#52c41a" }} />}
+                placeholder="URL akan muncul setelah upload berhasil"
+              />
+            </Form.Item>
           )}
         </div>
       ) : null}
