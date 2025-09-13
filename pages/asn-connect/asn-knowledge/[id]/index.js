@@ -8,6 +8,7 @@ import { Col, FloatButton, Row, Breadcrumb, Grid } from "antd";
 import Link from "next/link";
 import Head from "next/head";
 import { useRouter } from "next/router";
+import { Flex } from "antd/lib";
 
 const AsnKnowledgeDetail = () => {
   const router = useRouter();
@@ -56,7 +57,7 @@ const AsnKnowledgeDetail = () => {
         }}
       >
         <Row gutter={[16, 16]}>
-          <Col lg={18} xs={24}>
+          <Col lg={14} xs={24}>
             <KnowledgeUserContentDetail data={data} />
           </Col>
           <Col lg={6} xs={24}>

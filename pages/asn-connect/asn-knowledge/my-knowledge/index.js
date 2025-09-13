@@ -24,12 +24,18 @@ const AsnKnowledgeMyKnowledge = () => {
 
   // Filter states
   const [searchQuery, setSearchQuery] = useState(query.search || "");
-  const [selectedCategory, setSelectedCategory] = useState(query.category || null);
+  const [selectedCategory, setSelectedCategory] = useState(
+    query.category || null
+  );
   const [selectedTag, setSelectedTag] = useState(query.tag || null);
-  const [selectedSort, setSelectedSort] = useState(query.sort || "created_at:desc");
+  const [selectedSort, setSelectedSort] = useState(
+    query.sort || "created_at:desc"
+  );
   const [selectedType, setSelectedType] = useState(query.type || "all");
   const [selectedStatus, setSelectedStatus] = useState(query.status || "all");
-  const [selectedSavedContent, setSelectedSavedContent] = useState(query.is_bookmark === "true" || false);
+  const [selectedSavedContent, setSelectedSavedContent] = useState(
+    query.is_bookmark === "true" || false
+  );
 
   useScrollRestoration("my-knowledge-scroll", true, false, true);
 
@@ -55,8 +61,8 @@ const AsnKnowledgeMyKnowledge = () => {
   const ownContentStats = useUserOwnContents(statsQuery);
 
   // Select appropriate stats based on filter
-  const { data: userStats, isLoading: statsLoading } = selectedSavedContent 
-    ? bookmarkStats 
+  const { data: userStats, isLoading: statsLoading } = selectedSavedContent
+    ? bookmarkStats
     : ownContentStats;
 
   // Extract counts from API response
@@ -87,14 +93,19 @@ const AsnKnowledgeMyKnowledge = () => {
         params.set("tag", newFilters.tag);
       }
     }
-    if (newFilters.sort && newFilters.sort !== "created_at:desc") params.set("sort", newFilters.sort);
-    if (newFilters.type && newFilters.type !== "all") params.set("type", newFilters.type);
-    if (newFilters.status && newFilters.status !== "all") params.set("status", newFilters.status);
+    if (newFilters.sort && newFilters.sort !== "created_at:desc")
+      params.set("sort", newFilters.sort);
+    if (newFilters.type && newFilters.type !== "all")
+      params.set("type", newFilters.type);
+    if (newFilters.status && newFilters.status !== "all")
+      params.set("status", newFilters.status);
     if (newFilters.is_bookmark === true) params.set("is_bookmark", "true");
 
     const queryString = params.toString();
-    const newUrl = queryString ? `${router.pathname}?${queryString}` : router.pathname;
-    
+    const newUrl = queryString
+      ? `${router.pathname}?${queryString}`
+      : router.pathname;
+
     router.push(newUrl, undefined, { shallow: true });
   };
 
@@ -210,7 +221,14 @@ const AsnKnowledgeMyKnowledge = () => {
         <FloatButton.BackTop />
         <Row gutter={[16, 16]}>
           <Col lg={5} xs={0}>
-            <div style={{ position: "sticky", top: "80px", maxHeight: "calc(100vh - 100px)", overflowY: "auto" }}>
+            <div
+              style={{
+                position: "sticky",
+                top: "80px",
+                maxHeight: "calc(100vh - 100px)",
+                overflowY: "auto",
+              }}
+            >
               <KnowledgeFiltersStack
                 selectedCategory={selectedCategory}
                 selectedTag={selectedTag}
@@ -237,7 +255,7 @@ const AsnKnowledgeMyKnowledge = () => {
               />
             </div>
           </Col>
-          <Col lg={14} xs={24}>
+          <Col lg={10} xs={24}>
             <KnowledgeLayout currentPath="/asn-connect/asn-knowledge/my-knowledge">
               <MyKnowledgeContents
                 searchQuery={searchQuery}

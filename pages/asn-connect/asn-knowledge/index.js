@@ -40,10 +40,11 @@ const AsnKnowledge = () => {
   // Fetch public knowledge stats for counts
   const { data: publicStats, isLoading: statsLoading } = useQuery(
     ["public-knowledge-stats"],
-    () => getKnowledgeContents({
-      page: 1,
-      limit: 1, // Just get stats, not actual content
-    }),
+    () =>
+      getKnowledgeContents({
+        page: 1,
+        limit: 1, // Just get stats, not actual content
+      }),
     {
       staleTime: 300000, // 5 minutes
     }
@@ -178,7 +179,7 @@ const AsnKnowledge = () => {
               />
             </div>
           </Col>
-          <Col lg={14} xs={24}>
+          <Col lg={10} xs={24}>
             <KnowledgeLayout
               currentPath="/asn-connect/asn-knowledge"
               showCreateButton={true}
@@ -192,8 +193,8 @@ const AsnKnowledge = () => {
               />
             </KnowledgeLayout>
           </Col>
-          {!isMobile && (
-            <Col lg={5} xs={24}>
+          {/* {!isMobile && (
+            <Col lg={9} xs={24}>
               <Row gutter={[4, 4]}>
                 <Col lg={24} xs={24}>
                   <TopContributors period="month" limit={10} />
@@ -209,7 +210,7 @@ const AsnKnowledge = () => {
                 </Col>
               </Row>
             </Col>
-          )}
+          )} */}
         </Row>
       </LayoutASNConnect>
     </>
