@@ -1,44 +1,41 @@
 import {
-  ActionIcon,
+  BarChartOutlined,
+  BarsOutlined,
+  BulbOutlined,
+  ClockCircleOutlined,
+  WarningOutlined,
+  EyeOutlined,
+  HeartOutlined,
+  LinkOutlined,
+  RobotOutlined,
+  StarOutlined,
+  TagsOutlined,
+  AimOutlined,
+  ThunderboltOutlined,
+  TrophyOutlined,
+} from "@ant-design/icons";
+import {
   Alert,
-  Badge,
   Collapse,
   Divider,
-  Group,
+  Flex,
+  Grid,
   List,
   Progress,
-  Stack,
-  Text,
-  ThemeIcon,
+  Tag,
   Timeline,
-  Title,
-} from "@mantine/core";
-import {
-  IconAlertTriangle,
-  IconBrain,
-  IconBulb,
-  IconChart,
-  IconChevronDown,
-  IconChevronRight,
-  IconClock,
-  IconEye,
-  IconHeart,
-  IconLink,
-  IconRobot,
-  IconSparkles,
-  IconStar,
-  IconTags,
-  IconTarget,
-  IconTrendingUp,
-} from "@tabler/icons-react";
+  Typography,
+} from "antd";
 import { useState } from "react";
 
+const { Text, Title } = Typography;
+const { Panel } = Collapse;
+const { useBreakpoint } = Grid;
+
 const AIMetadataPanel = ({ data, className, ...props }) => {
-  const [collapsed, setCollapsed] = useState({
-    insights: false,
-    suggestions: true,
-    technical: true,
-  });
+  const [activeKeys, setActiveKeys] = useState(["insights"]);
+  const screens = useBreakpoint();
+  const isMobile = !screens.md;
 
   if (!data) {
     return null;
@@ -109,458 +106,552 @@ const AIMetadataPanel = ({ data, className, ...props }) => {
   const sentiment = getSentimentLabel(data.ai_sentiment_score || 0);
 
   return (
-    <div
-      style={{ marginTop: "24px", paddingLeft: "14px", paddingRight: "14px" }}
-      className={className}
-      {...props}
-    >
-      <Stack spacing="xs" mb="md">
-        <Group spacing={8} align="center">
-          <IconRobot size={20} color="#262626" />
+    <Flex>
+      {/* Content Section */}
+      <div
+        style={{ flex: 1, padding: "16px", marginTop: 32 }}
+        className={className}
+        {...props}
+      >
+        {/* Header */}
+        <div
+          style={{
+            marginBottom: isMobile ? 16 : 20,
+            borderBottom: "2px solid #f5f5f5",
+            paddingBottom: isMobile ? 12 : 16,
+          }}
+        >
           <Title
-            order={4}
+            level={isMobile ? 5 : 4}
             style={{
               margin: 0,
               color: "#262626",
               fontWeight: 600,
+              display: "flex",
+              alignItems: "center",
+              gap: 8,
             }}
           >
-            Metadata AI
+            <RobotOutlined /> Metadata AI
           </Title>
-        </Group>
-        <Text
-          color="dimmed"
-          italic
-          style={{
-            fontSize: 13,
-            marginTop: 4,
-          }}
-        >
-          Informasi dan analisis konten yang dihasilkan secara otomatis
-          menggunakan kecerdasan buatan untuk membantu meningkatkan kualitas dan
-          pemahaman konten.
-        </Text>
-      </Stack>
-      <Stack spacing="sm">
-        {/* AI Summary - Only show if exists */}
-        {data.ai_summary && (
-          <Stack spacing="xs">
-            <Group spacing={8}>
-              <IconBrain size={16} color="#FF4500" />
-              <Text size="sm" weight={600} color="dimmed">
-                AI Ringkasan
-              </Text>
-            </Group>
-            <Text size="sm" style={{ lineHeight: 1.5, fontStyle: "italic" }}>
-              &quot;{data.ai_summary}&quot;
-            </Text>
-          </Stack>
-        )}
-
-        {/* Keywords & Tags - Only show if exists */}
-        {(keywords.length > 0 || tags.length > 0) && (
-          <Stack spacing="xs">
-            <Group spacing={8}>
-              <IconTags size={16} color="#FF4500" />
-              <Text size="sm" weight={600} color="dimmed">
-                Topik Terkait
-              </Text>
-            </Group>
-            <Group spacing={6}>
-              {keywords.slice(0, 6).map((keyword, idx) => (
-                <Badge key={idx} size="sm" variant="light" color="blue">
-                  {keyword}
-                </Badge>
-              ))}
-              {tags.slice(0, 4).map((tag, idx) => (
-                <Badge
-                  key={`tag-${idx}`}
-                  size="sm"
-                  variant="outline"
-                  color="orange"
-                >
-                  #{tag}
-                </Badge>
-              ))}
-            </Group>
-          </Stack>
-        )}
-
-        {/* Related Content - Only show if exists */}
-        {relatedContent.length > 0 && (
-          <Stack spacing="xs">
-            <Group spacing={8}>
-              <IconLink size={16} color="#FF4500" />
-              <Text size="sm" weight={600} color="dimmed">
-                Artikel Terkait
-              </Text>
-            </Group>
-            <List spacing="xs" size="sm">
-              {relatedContent.slice(0, 3).map((content, idx) => (
-                <List.Item key={idx}>
-                  <Text
-                    size="sm"
-                    component="a"
-                    href={content.url || "#"}
-                    style={{ color: "#1c7ed6", textDecoration: "none" }}
-                  >
-                    {content.title || content}
-                  </Text>
-                </List.Item>
-              ))}
-            </List>
-          </Stack>
-        )}
-
-        {/* Reading Time Estimate - Only show if summary exists */}
-        {data.ai_summary && (
-          <Group spacing={8}>
-            <IconClock size={16} color="#FF4500" />
-            <Text size="xs" color="dimmed">
-              Estimasi baca:{" "}
-              {Math.ceil(data.ai_summary.split(" ").length / 200)} menit
-            </Text>
-          </Group>
-        )}
-
-        <Divider />
-
-        {/* Content Quality Metrics - Only show if any scores exist */}
-        {(data.ai_quality_score ||
-          (data.ai_readability_score !== null &&
-            data.ai_readability_score !== undefined) ||
-          data.ai_completeness_score ||
-          (data.ai_suggested_category &&
-            data.ai_suggested_category !== null &&
-            data.ai_suggested_category !== "null")) && (
-          <Stack spacing="sm">
-            <Group spacing={8} position="apart">
-              <Group spacing={8}>
-                <IconChart size={18} color="#FF4500" />
-                <Text weight={600}>Analisis Konten</Text>
-              </Group>
-              <ActionIcon
-                variant="subtle"
-                onClick={() =>
-                  setCollapsed((prev) => ({
-                    ...prev,
-                    insights: !prev.insights,
-                  }))
-                }
-              >
-                {collapsed.insights ? (
-                  <IconChevronRight size={16} />
-                ) : (
-                  <IconChevronDown size={16} />
-                )}
-              </ActionIcon>
-            </Group>
-
-            <Collapse in={!collapsed.insights}>
-              <Stack spacing="md">
-                {/* Quality Scores */}
-                <Group grow>
-                  {data.ai_quality_score && (
-                    <Stack spacing={4} align="center">
-                      <ThemeIcon
-                        color={getScoreColor(data.ai_quality_score)}
-                        size="lg"
-                      >
-                        <IconStar size={16} />
-                      </ThemeIcon>
-                      <Text size="xl" weight={700}>
-                        {data.ai_quality_score}
-                      </Text>
-                      <Text size="xs" color="dimmed">
-                        Kualitas
-                      </Text>
-                      <Progress
-                        value={data.ai_quality_score}
-                        color={getScoreColor(data.ai_quality_score)}
-                        size="xs"
-                        style={{ width: "100%" }}
-                      />
-                    </Stack>
-                  )}
-
-                  {data.ai_readability_score !== null &&
-                    data.ai_readability_score !== undefined && (
-                      <Stack spacing={4} align="center">
-                        <ThemeIcon
-                          color={getScoreColor(data.ai_readability_score)}
-                          size="lg"
-                        >
-                          <IconEye size={16} />
-                        </ThemeIcon>
-                        <Text size="xl" weight={700}>
-                          {data.ai_readability_score}
-                        </Text>
-                        <Text size="xs" color="dimmed">
-                          {getReadabilityLevel(data.ai_readability_score)}
-                        </Text>
-                        <Progress
-                          value={data.ai_readability_score}
-                          color={getScoreColor(data.ai_readability_score)}
-                          size="xs"
-                          style={{ width: "100%" }}
-                        />
-                      </Stack>
-                    )}
-
-                  {data.ai_completeness_score && (
-                    <Stack spacing={4} align="center">
-                      <ThemeIcon
-                        color={getScoreColor(data.ai_completeness_score)}
-                        size="lg"
-                      >
-                        <IconTarget size={16} />
-                      </ThemeIcon>
-                      <Text size="xl" weight={700}>
-                        {data.ai_completeness_score}
-                      </Text>
-                      <Text size="xs" color="dimmed">
-                        Kelengkapan
-                      </Text>
-                      <Progress
-                        value={data.ai_completeness_score}
-                        color={getScoreColor(data.ai_completeness_score)}
-                        size="xs"
-                        style={{ width: "100%" }}
-                      />
-                    </Stack>
-                  )}
-                </Group>
-
-                {/* Category Suggestion - Only show if exists and not null */}
-                {data.ai_suggested_category &&
-                  data.ai_suggested_category !== null &&
-                  data.ai_suggested_category !== "null" && (
-                    <Alert
-                      icon={<IconBulb size={16} />}
-                      color="blue"
-                      variant="light"
-                    >
-                      <Text size="sm">
-                        <strong>Saran Kategori:</strong>{" "}
-                        {data.ai_suggested_category}
-                        {data.ai_confidence_score &&
-                          parseFloat(data.ai_confidence_score) > 0 && (
-                            <Text span color="dimmed">
-                              &nbsp;(Kepercayaan:{" "}
-                              {Math.round(
-                                parseFloat(data.ai_confidence_score) * 100
-                              )}
-                              %)
-                            </Text>
-                          )}
-                      </Text>
-                    </Alert>
-                  )}
-              </Stack>
-            </Collapse>
-          </Stack>
-        )}
-
-        {/* Content Suggestions - Only show if exists */}
-        {suggestions.length > 0 && (
-          <Stack spacing="sm">
-            <Group spacing={8} position="apart">
-              <Group spacing={8}>
-                <IconSparkles size={18} color="#FF4500" />
-                <Text weight={600}>Saran Perbaikan</Text>
-                <Badge size="xs" color="orange">
-                  {suggestions.length}
-                </Badge>
-              </Group>
-              <ActionIcon
-                variant="subtle"
-                onClick={() =>
-                  setCollapsed((prev) => ({
-                    ...prev,
-                    suggestions: !prev.suggestions,
-                  }))
-                }
-              >
-                {collapsed.suggestions ? (
-                  <IconChevronRight size={16} />
-                ) : (
-                  <IconChevronDown size={16} />
-                )}
-              </ActionIcon>
-            </Group>
-
-            <Collapse in={!collapsed.suggestions}>
-              <List spacing="xs" size="sm">
-                {suggestions.map((suggestion, idx) => (
-                  <List.Item key={idx} icon={<IconBulb size={12} />}>
-                    <Text size="sm">{suggestion}</Text>
-                  </List.Item>
-                ))}
-              </List>
-            </Collapse>
-          </Stack>
-        )}
-
-        {/* SEO Info - Only show if exists */}
-        {(seoKeywords.length > 0 || data.ai_meta_description) && (
-          <Alert
-            icon={<IconTrendingUp size={16} />}
-            color="green"
-            variant="light"
+          <Text
+            type="secondary"
+            italic
+            style={{
+              fontSize: isMobile ? 12 : 13,
+              marginTop: 4,
+              display: "block",
+            }}
           >
-            <Stack spacing="xs">
-              <Text size="sm" weight={600}>
-                Optimisasi SEO
-              </Text>
-              {data.ai_meta_description && (
-                <Text size="xs">
-                  <strong>Deskripsi Meta:</strong> {data.ai_meta_description}
-                </Text>
-              )}
-              {seoKeywords.length > 0 && (
-                <Group spacing={4}>
-                  <Text size="xs" weight={500}>
-                    Kata Kunci:
-                  </Text>
-                  {seoKeywords.slice(0, 5).map((keyword, idx) => (
-                    <Badge key={idx} size="xs" color="green">
-                      {keyword}
-                    </Badge>
-                  ))}
-                </Group>
-              )}
-            </Stack>
-          </Alert>
-        )}
+            Informasi dan analisis konten yang dihasilkan secara otomatis
+            menggunakan kecerdasan buatan untuk membantu meningkatkan kualitas
+            dan pemahaman konten.
+          </Text>
+        </div>
 
-        <Divider />
-
-        {/* Technical Information - Only show if any technical data exists */}
-        {(data.processing_status ||
-          (data.ai_sentiment_score !== null &&
-            data.ai_sentiment_score !== undefined) ||
-          (data.ai_confidence_score &&
-            parseFloat(data.ai_confidence_score) > 0) ||
-          data.error_message ||
-          data.model_version ||
-          data.last_processed) && (
-          <Stack spacing="sm">
-            <Group spacing={8} position="apart">
-              <Group spacing={8}>
-                <IconRobot size={18} color="#FF4500" />
-                <Text weight={600}>Detail Teknis</Text>
-              </Group>
-              <ActionIcon
-                variant="subtle"
-                onClick={() =>
-                  setCollapsed((prev) => ({
-                    ...prev,
-                    technical: !prev.technical,
-                  }))
-                }
+        <div style={{ marginBottom: 16 }}>
+          {/* AI Summary - Only show if exists */}
+          {data.ai_summary && (
+            <div style={{ marginBottom: 16 }}>
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 8,
+                  marginBottom: 8,
+                }}
               >
-                {collapsed.technical ? (
-                  <IconChevronRight size={16} />
-                ) : (
-                  <IconChevronDown size={16} />
-                )}
-              </ActionIcon>
-            </Group>
+                <BarsOutlined style={{ color: "#FF4500", fontSize: 16 }} />
+                <Text strong type="secondary" style={{ fontSize: 14 }}>
+                  AI Ringkasan
+                </Text>
+              </div>
+              <Text italic style={{ fontSize: 14, lineHeight: 1.5 }}>
+                &ldquo;{data.ai_summary}&rdquo;
+              </Text>
+            </div>
+          )}
 
-            <Collapse in={!collapsed.technical}>
-              <Timeline active={-1} bulletSize={24}>
-                {/* Processing Status - Only show if exists */}
-                {data.processing_status && (
-                  <Timeline.Item
-                    bullet={<IconRobot size={12} />}
-                    title="Status Pemrosesan"
+          {/* Keywords & Tags - Only show if exists */}
+          {(keywords.length > 0 || tags.length > 0) && (
+            <div style={{ marginBottom: 16 }}>
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 8,
+                  marginBottom: 8,
+                }}
+              >
+                <TagsOutlined style={{ color: "#FF4500", fontSize: 16 }} />
+                <Text strong type="secondary" style={{ fontSize: 14 }}>
+                  Topik Terkait
+                </Text>
+              </div>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+                {keywords.slice(0, 6).map((keyword, idx) => (
+                  <Tag key={idx} color="blue" style={{ fontSize: 12 }}>
+                    {keyword}
+                  </Tag>
+                ))}
+                {tags.slice(0, 4).map((tag, idx) => (
+                  <Tag
+                    key={`tag-${idx}`}
+                    color="orange"
+                    style={{ fontSize: 12 }}
                   >
-                    <Group spacing="xs">
-                      <Badge
-                        color={
-                          data.processing_status === "completed"
-                            ? "green"
-                            : "orange"
-                        }
-                        variant="filled"
-                      >
-                        {data.processing_status || "unknown"}
-                      </Badge>
-                      <Text size="xs" color="dimmed">
-                        Model: {data.model_version || "Tidak Ada"}
-                      </Text>
-                    </Group>
-                    {data.last_processed && (
-                      <Text size="xs" color="dimmed" mt={4}>
-                        Diproses:{" "}
-                        {new Date(data.last_processed).toLocaleString("id-ID")}
-                      </Text>
-                    )}
-                  </Timeline.Item>
+                    #{tag}
+                  </Tag>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Related Content - Only show if exists */}
+          {relatedContent.length > 0 && (
+            <div style={{ marginBottom: 16 }}>
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 8,
+                  marginBottom: 8,
+                }}
+              >
+                <LinkOutlined style={{ color: "#FF4500", fontSize: 16 }} />
+                <Text strong type="secondary" style={{ fontSize: 14 }}>
+                  Artikel Terkait
+                </Text>
+              </div>
+              <List
+                size="small"
+                dataSource={relatedContent.slice(0, 3)}
+                renderItem={(content) => (
+                  <List.Item>
+                    <Typography.Link
+                      href={content.url || "#"}
+                      style={{ fontSize: 14 }}
+                    >
+                      {content.title || content}
+                    </Typography.Link>
+                  </List.Item>
                 )}
+              />
+            </div>
+          )}
 
-                {/* Sentiment Analysis - Only show if exists */}
-                {data.ai_sentiment_score !== null &&
-                  data.ai_sentiment_score !== undefined && (
-                    <Timeline.Item
-                      bullet={<IconHeart size={12} />}
-                      title="Analisis Sentimen"
-                    >
-                      <Group spacing="xs">
-                        <Badge color={sentiment.color} variant="light">
-                          {sentiment.label}
-                        </Badge>
-                        <Text size="xs" color="dimmed">
-                          Skor: {Number(data.ai_sentiment_score).toFixed(2)}
-                        </Text>
-                      </Group>
-                    </Timeline.Item>
-                  )}
+          {/* Reading Time Estimate - Only show if summary exists */}
+          {data.ai_summary && (
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 8,
+                marginBottom: 16,
+              }}
+            >
+              <ClockCircleOutlined style={{ color: "#FF4500", fontSize: 16 }} />
+              <Text type="secondary" style={{ fontSize: 12 }}>
+                Estimasi baca:{" "}
+                {Math.ceil(data.ai_summary.split(" ").length / 200)} menit
+              </Text>
+            </div>
+          )}
 
-                {/* Confidence Score - Only show if exists and greater than 0 */}
-                {data.ai_confidence_score &&
-                  parseFloat(data.ai_confidence_score) > 0 && (
-                    <Timeline.Item
-                      bullet={<IconTarget size={12} />}
-                      title="Kepercayaan AI"
-                    >
-                      <Group spacing="xs">
+          <Divider />
+
+          {/* Content Quality Metrics - Only show if any scores exist */}
+          {(data.ai_quality_score ||
+            (data.ai_readability_score !== null &&
+              data.ai_readability_score !== undefined) ||
+            data.ai_completeness_score ||
+            (data.ai_suggested_category &&
+              data.ai_suggested_category !== null &&
+              data.ai_suggested_category !== "null")) && (
+            <Collapse
+              activeKey={activeKeys}
+              onChange={setActiveKeys}
+              ghost
+              style={{ marginBottom: 16 }}
+            >
+              <Panel
+                header={
+                  <div
+                    style={{ display: "flex", alignItems: "center", gap: 8 }}
+                  >
+                    <BarChartOutlined
+                      style={{ color: "#FF4500", fontSize: 18 }}
+                    />
+                    <Text strong>Analisis Konten</Text>
+                  </div>
+                }
+                key="insights"
+              >
+                <div style={{ marginBottom: 16 }}>
+                  {/* Quality Scores - Compact Layout */}
+                  <div style={{ display: "flex", gap: 8, marginBottom: 12 }}>
+                    {data.ai_quality_score && (
+                      <div style={{ flex: 1, padding: "8px", backgroundColor: "#fafafa", borderRadius: "4px" }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 4 }}>
+                          <StarOutlined style={{ color: getScoreColor(data.ai_quality_score), fontSize: 14 }} />
+                          <Text strong style={{ fontSize: 18 }}>{data.ai_quality_score}</Text>
+                        </div>
+                        <Text type="secondary" style={{ fontSize: 11 }}>Kualitas</Text>
                         <Progress
-                          value={parseFloat(data.ai_confidence_score) * 100}
-                          color={getScoreColor(
-                            parseFloat(data.ai_confidence_score) * 100
-                          )}
-                          size="lg"
-                          style={{ width: 200 }}
+                          percent={data.ai_quality_score}
+                          strokeColor={getScoreColor(data.ai_quality_score) === "green" ? "#52c41a" : getScoreColor(data.ai_quality_score) === "yellow" ? "#fadb14" : "#ff4d4f"}
+                          size="small"
+                          showInfo={false}
+                          style={{ marginTop: 2 }}
                         />
-                        <Text size="sm" weight={600}>
-                          {Math.round(
-                            parseFloat(data.ai_confidence_score) * 100
-                          )}
-                          %
+                      </div>
+                    )}
+
+                    {data.ai_readability_score !== null && data.ai_readability_score !== undefined && (
+                      <div style={{ flex: 1, padding: "8px", backgroundColor: "#fafafa", borderRadius: "4px" }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 4 }}>
+                          <EyeOutlined style={{ color: getScoreColor(data.ai_readability_score), fontSize: 14 }} />
+                          <Text strong style={{ fontSize: 18 }}>{data.ai_readability_score}</Text>
+                        </div>
+                        <Text type="secondary" style={{ fontSize: 11 }}>{getReadabilityLevel(data.ai_readability_score)}</Text>
+                        <Progress
+                          percent={data.ai_readability_score}
+                          strokeColor={getScoreColor(data.ai_readability_score) === "green" ? "#52c41a" : getScoreColor(data.ai_readability_score) === "yellow" ? "#fadb14" : "#ff4d4f"}
+                          size="small"
+                          showInfo={false}
+                          style={{ marginTop: 2 }}
+                        />
+                      </div>
+                    )}
+
+                    {data.ai_completeness_score && (
+                      <div style={{ flex: 1, padding: "8px", backgroundColor: "#fafafa", borderRadius: "4px" }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 4 }}>
+                          <AimOutlined style={{ color: getScoreColor(data.ai_completeness_score), fontSize: 14 }} />
+                          <Text strong style={{ fontSize: 18 }}>{data.ai_completeness_score}</Text>
+                        </div>
+                        <Text type="secondary" style={{ fontSize: 11 }}>Kelengkapan</Text>
+                        <Progress
+                          percent={data.ai_completeness_score}
+                          strokeColor={getScoreColor(data.ai_completeness_score) === "green" ? "#52c41a" : getScoreColor(data.ai_completeness_score) === "yellow" ? "#fadb14" : "#ff4d4f"}
+                          size="small"
+                          showInfo={false}
+                          style={{ marginTop: 2 }}
+                        />
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Category Suggestion - Only show if exists and not null */}
+                  {data.ai_suggested_category &&
+                    data.ai_suggested_category !== null &&
+                    data.ai_suggested_category !== "null" && (
+                      <Alert
+                        icon={<BulbOutlined />}
+                        type="info"
+                        showIcon
+                        message={
+                          <Text style={{ fontSize: 14 }}>
+                            <strong>Saran Kategori:</strong>{" "}
+                            {data.ai_suggested_category}
+                            {data.ai_confidence_score &&
+                              parseFloat(data.ai_confidence_score) > 0 && (
+                                <Text type="secondary">
+                                  {" "}
+                                  (Kepercayaan:{" "}
+                                  {Math.round(
+                                    parseFloat(data.ai_confidence_score) * 100
+                                  )}
+                                  %)
+                                </Text>
+                              )}
+                          </Text>
+                        }
+                      />
+                    )}
+                </div>
+              </Panel>
+            </Collapse>
+          )}
+
+          {/* Content Suggestions - Only show if exists */}
+          {suggestions.length > 0 && (
+            <Collapse ghost style={{ marginBottom: 16 }}>
+              <Panel
+                header={
+                  <div
+                    style={{ display: "flex", alignItems: "center", gap: 8 }}
+                  >
+                    <ThunderboltOutlined
+                      style={{ color: "#FF4500", fontSize: 18 }}
+                    />
+                    <Text strong>Saran Perbaikan</Text>
+                    <Tag color="orange" size="small">
+                      {suggestions.length}
+                    </Tag>
+                  </div>
+                }
+                key="suggestions"
+              >
+                <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                  {suggestions.map((suggestion, idx) => (
+                    <div
+                      key={idx}
+                      style={{
+                        display: "flex",
+                        alignItems: "flex-start",
+                        gap: 8,
+                        padding: "6px 8px",
+                        backgroundColor: "#fafafa",
+                        borderRadius: "4px",
+                        borderLeft: "3px solid #faad14"
+                      }}
+                    >
+                      <BulbOutlined style={{ color: "#faad14", fontSize: 12, marginTop: 2 }} />
+                      <Text style={{ fontSize: 13, lineHeight: 1.4 }}>{suggestion}</Text>
+                    </div>
+                  ))}
+                </div>
+              </Panel>
+            </Collapse>
+          )}
+
+          {/* SEO Info - Only show if exists */}
+          {(seoKeywords.length > 0 || data.ai_meta_description) && (
+            <Alert
+              icon={<TrophyOutlined />}
+              type="success"
+              showIcon
+              style={{ marginBottom: 16 }}
+              message={
+                <div>
+                  <Text
+                    strong
+                    style={{ fontSize: 14, marginBottom: 8, display: "block" }}
+                  >
+                    Optimisasi SEO
+                  </Text>
+                  {data.ai_meta_description && (
+                    <Text
+                      style={{
+                        fontSize: 12,
+                        marginBottom: 8,
+                        display: "block",
+                      }}
+                    >
+                      <strong>Deskripsi Meta:</strong>{" "}
+                      {data.ai_meta_description}
+                    </Text>
+                  )}
+                  {seoKeywords.length > 0 && (
+                    <div
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 4,
+                        flexWrap: "wrap",
+                      }}
+                    >
+                      <Text style={{ fontSize: 12, fontWeight: 500 }}>
+                        Kata Kunci:
+                      </Text>
+                      {seoKeywords.slice(0, 5).map((keyword, idx) => (
+                        <Tag key={idx} color="green" size="small">
+                          {keyword}
+                        </Tag>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              }
+            />
+          )}
+
+          <Divider />
+
+          {/* Technical Information - Only show if any technical data exists */}
+          {(data.processing_status ||
+            (data.ai_sentiment_score !== null &&
+              data.ai_sentiment_score !== undefined) ||
+            (data.ai_confidence_score &&
+              parseFloat(data.ai_confidence_score) > 0) ||
+            data.error_message ||
+            data.model_version ||
+            data.last_processed) && (
+            <Collapse ghost style={{ marginBottom: 16 }}>
+              <Panel
+                header={
+                  <div
+                    style={{ display: "flex", alignItems: "center", gap: 8 }}
+                  >
+                    <RobotOutlined style={{ color: "#FF4500", fontSize: 18 }} />
+                    <Text strong>Detail Teknis</Text>
+                  </div>
+                }
+                key="technical"
+              >
+                <Timeline>
+                  {/* Processing Status - Only show if exists */}
+                  {data.processing_status && (
+                    <Timeline.Item dot={<RobotOutlined />}>
+                      <Text
+                        strong
+                        style={{
+                          fontSize: 14,
+                          marginBottom: 8,
+                          display: "block",
+                        }}
+                      >
+                        Status Pemrosesan
+                      </Text>
+                      <div
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 8,
+                          marginBottom: 8,
+                        }}
+                      >
+                        <Tag
+                          color={
+                            data.processing_status === "completed"
+                              ? "green"
+                              : "orange"
+                          }
+                        >
+                          {data.processing_status || "unknown"}
+                        </Tag>
+                        <Text type="secondary" style={{ fontSize: 12 }}>
+                          Model: {data.model_version || "Tidak Ada"}
                         </Text>
-                      </Group>
+                      </div>
+                      {data.last_processed && (
+                        <Text type="secondary" style={{ fontSize: 12 }}>
+                          Diproses:{" "}
+                          {new Date(data.last_processed).toLocaleString(
+                            "id-ID"
+                          )}
+                        </Text>
+                      )}
                     </Timeline.Item>
                   )}
 
-                {/* Error Messages - Only show if exists */}
-                {data.error_message && (
-                  <Timeline.Item
-                    bullet={<IconAlertTriangle size={12} />}
-                    title="Log Kesalahan"
-                    color="red"
-                  >
-                    <Alert color="red" variant="light" size="sm">
-                      {data.error_message}
-                    </Alert>
-                  </Timeline.Item>
-                )}
-              </Timeline>
+                  {/* Sentiment Analysis - Only show if exists */}
+                  {data.ai_sentiment_score !== null &&
+                    data.ai_sentiment_score !== undefined && (
+                      <Timeline.Item dot={<HeartOutlined />}>
+                        <Text
+                          strong
+                          style={{
+                            fontSize: 14,
+                            marginBottom: 8,
+                            display: "block",
+                          }}
+                        >
+                          Analisis Sentimen
+                        </Text>
+                        <div
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: 8,
+                          }}
+                        >
+                          <Tag color={sentiment.color}>{sentiment.label}</Tag>
+                          <Text type="secondary" style={{ fontSize: 12 }}>
+                            Skor: {Number(data.ai_sentiment_score).toFixed(2)}
+                          </Text>
+                        </div>
+                      </Timeline.Item>
+                    )}
+
+                  {/* Confidence Score - Only show if exists and greater than 0 */}
+                  {data.ai_confidence_score &&
+                    parseFloat(data.ai_confidence_score) > 0 && (
+                      <Timeline.Item dot={<TargetOutlined />}>
+                        <Text
+                          strong
+                          style={{
+                            fontSize: 14,
+                            marginBottom: 8,
+                            display: "block",
+                          }}
+                        >
+                          Kepercayaan AI
+                        </Text>
+                        <div
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: 8,
+                          }}
+                        >
+                          <Progress
+                            percent={parseFloat(data.ai_confidence_score) * 100}
+                            strokeColor={{
+                              "0%":
+                                getScoreColor(
+                                  parseFloat(data.ai_confidence_score) * 100
+                                ) === "green"
+                                  ? "#52c41a"
+                                  : getScoreColor(
+                                      parseFloat(data.ai_confidence_score) * 100
+                                    ) === "yellow"
+                                  ? "#fadb14"
+                                  : "#ff4d4f",
+                              "100%":
+                                getScoreColor(
+                                  parseFloat(data.ai_confidence_score) * 100
+                                ) === "green"
+                                  ? "#52c41a"
+                                  : getScoreColor(
+                                      parseFloat(data.ai_confidence_score) * 100
+                                    ) === "yellow"
+                                  ? "#fadb14"
+                                  : "#ff4d4f",
+                            }}
+                            style={{ width: 200 }}
+                          />
+                          <Text strong style={{ fontSize: 14 }}>
+                            {Math.round(
+                              parseFloat(data.ai_confidence_score) * 100
+                            )}
+                            %
+                          </Text>
+                        </div>
+                      </Timeline.Item>
+                    )}
+
+                  {/* Error Messages - Only show if exists */}
+                  {data.error_message && (
+                    <Timeline.Item
+                      dot={<WarningOutlined style={{ color: "#ff4d4f" }} />}
+                    >
+                      <Text
+                        strong
+                        style={{
+                          fontSize: 14,
+                          marginBottom: 8,
+                          display: "block",
+                        }}
+                      >
+                        Log Kesalahan
+                      </Text>
+                      <Alert
+                        type="error"
+                        showIcon={false}
+                        message={data.error_message}
+                        size="small"
+                      />
+                    </Timeline.Item>
+                  )}
+                </Timeline>
+              </Panel>
             </Collapse>
-          </Stack>
-        )}
-      </Stack>
-    </div>
+          )}
+        </div>
+      </div>
+    </Flex>
   );
 };
 

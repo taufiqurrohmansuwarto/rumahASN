@@ -1,14 +1,17 @@
 import { KnowledgeUserContentDetail } from "@/components/KnowledgeManagements";
+import KnowledgeAnchorNavigation from "@/components/KnowledgeManagements/components/KnowledgeAnchorNavigation";
 import Layout from "@/components/Layout";
 import PageContainer from "@/components/PageContainer";
 import { useUserOwnContent } from "@/hooks/knowledge-management";
-import { Breadcrumb, Col, FloatButton, Row } from "antd";
+import { Breadcrumb, Col, FloatButton, Row, Grid } from "antd";
 import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
 
 const AsnKnowledgeMyKnowledgeDetail = () => {
   const router = useRouter();
+  const breakpoint = Grid.useBreakpoint();
+  const isMobile = breakpoint.xs;
 
   const { data, isLoading } = useUserOwnContent(router.query.id);
 
@@ -46,13 +49,16 @@ const AsnKnowledgeMyKnowledgeDetail = () => {
         }}
       >
         <FloatButton.BackTop />
-        <Row>
-          <Col lg={18} xs={24}>
+        <Row gutter={[16, 16]}>
+          <Col lg={14} xs={24}>
             <KnowledgeUserContentDetail
               data={data}
               disableInteractions={data?.status !== "published"}
               showOwnerActions={true}
             />
+          </Col>
+          <Col lg={6} xs={24}>
+            {!isMobile && <KnowledgeAnchorNavigation />}
           </Col>
         </Row>
       </PageContainer>
