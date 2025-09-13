@@ -5,6 +5,7 @@ const KnowledgeAnchorNavigation = ({
   showContent = true,
   showComments = true,
   showRelated = true,
+  showAIMetadata = true,
   className = "",
   style = {},
 }) => {
@@ -71,6 +72,13 @@ const KnowledgeAnchorNavigation = ({
       key: "related-section",
       href: "#related-section",
       title: "Konten Terkait",
+    },
+
+    // AIMetadata Section
+    showAIMetadata && {
+      key: "aimetadata-section",
+      href: "#aimetadata-section",
+      title: "Metadata AI",
     },
   ].filter(Boolean);
 

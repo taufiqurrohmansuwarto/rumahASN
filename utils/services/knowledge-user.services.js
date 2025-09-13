@@ -80,7 +80,7 @@ export const getUserKnowledgeContentById = async (contentId, customId) => {
   const content = await KnowledgeContent.query()
     .where("knowledge.contents.id", contentId)
     .withGraphFetched(
-      "[author(simpleWithImage), category, user_verified(simpleWithImage), versions.[user_updated(simpleWithImage)], attachments, references]"
+      "[author(simpleWithImage), category, user_verified(simpleWithImage), versions.[user_updated(simpleWithImage)], attachments, references, ai_metadata(authorSelect)]"
     )
     .select("knowledge.contents.*", ...buildUserInteractionSubqueries(customId))
     .first();

@@ -62,7 +62,7 @@ export const getKnowledgeContentAdmin = async (req, res) => {
     const content = await KnowledgeContent.query()
       .findById(id)
       .withGraphFetched(
-        "[author(simpleWithImage), category, user_verified(simpleWithImage), versions.[user_updated(simpleWithImage)], attachments, references]"
+        "[author(simpleWithImage), category, user_verified(simpleWithImage), versions.[user_updated(simpleWithImage)], attachments, references, ai_metadata(adminSelect)]"
       );
 
     const comments = await KnowledgeUserInteractions.query()

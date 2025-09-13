@@ -237,7 +237,7 @@ export const getContentById = async (
 
   if (includeRelations) {
     query = query.withGraphFetched(
-      "[author(simpleWithImage), category, user_verified(simpleWithImage), versions.[user_updated(simpleWithImage)], attachments, references]"
+      "[author(simpleWithImage), category, user_verified(simpleWithImage), versions.[user_updated(simpleWithImage)], attachments, references, ai_metadata(publicSelect)]"
     );
   }
 

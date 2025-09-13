@@ -1,35 +1,31 @@
 import {
+  useCreateRevision,
+  useDeleteMyContent,
+  useMyRevisions,
+  useSubmitContentForReview,
+} from "@/hooks/knowledge-management";
+import {
+  useCommentInteractions,
+  useComments,
+  useCommentsHierarchical,
+} from "@/hooks/knowledge-management/useComments";
+import {
   bookmarkKnowledgeContent,
   likeKnowledgeContent,
 } from "@/services/knowledge-management.services";
 import { CommentOutlined, ExclamationCircleOutlined } from "@ant-design/icons";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import {
-  Button,
-  Card,
-  Divider,
-  Flex,
-  Form,
-  message,
-  Modal,
-  Switch,
-  Typography,
-} from "antd";
+import { Card, Flex, Form, message, Modal, Switch, Typography } from "antd";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import { useState } from "react";
 import FormComment from "./components/FormComment";
-import KnowledgeContentHeader from "./components/KnowledgeContentHeader";
 import KnowledgeCommentsList from "./components/KnowledgeCommentsList";
+import KnowledgeContentHeader from "./components/KnowledgeContentHeader";
 import RelatedContent from "./components/RelatedContent";
-import {
-  useCommentsHierarchical,
-  useComments,
-  useCommentInteractions,
-} from "@/hooks/knowledge-management/useComments";
-import { useSubmitContentForReview, useDeleteMyContent, useCreateRevision, useMyRevisions } from "@/hooks/knowledge-management";
+import AIMetadataPanel from "./components/AIMetadataPanel";
 
 dayjs.extend(relativeTime);
 
@@ -73,14 +69,13 @@ const KnowledgeUserContentDetail = ({
 
   // Use submit for review hook
   const submitForReviewMutation = useSubmitContentForReview();
-  
+
   // Use delete content hook
   const deleteContentMutation = useDeleteMyContent();
-  
-  
+
   // Use create revision hook
   const createRevisionMutation = useCreateRevision();
-  
+
   // Get revisions for this content
   const { data: revisions } = useMyRevisions(id);
 
@@ -198,21 +193,22 @@ const KnowledgeUserContentDetail = ({
 
   const handleSubmitForReview = () => {
     if (submitForReviewMutation.isLoading) return;
-    
+
     Modal.confirm({
-      title: 'Submit Konten untuk Review',
+      title: "Submit Konten untuk Review",
       icon: <ExclamationCircleOutlined />,
       content: (
         <div>
           <p>Apakah Anda yakin ingin mengirim konten ini untuk direview?</p>
-          <p style={{ color: '#666', fontSize: '13px' }}>
-            Setelah disubmit, konten akan masuk ke dalam antrian review dan tidak dapat diedit hingga proses review selesai.
+          <p style={{ color: "#666", fontSize: "13px" }}>
+            Setelah disubmit, konten akan masuk ke dalam antrian review dan
+            tidak dapat diedit hingga proses review selesai.
           </p>
         </div>
       ),
-      okText: 'Ya, Submit untuk Review',
-      cancelText: 'Batal',
-      okType: 'primary',
+      okText: "Ya, Submit untuk Review",
+      cancelText: "Batal",
+      okType: "primary",
       onOk: () => {
         submitForReviewMutation.mutate(id);
       },
@@ -221,62 +217,69 @@ const KnowledgeUserContentDetail = ({
 
   const handleDelete = () => {
     if (deleteContentMutation.isLoading) return;
-    
+
     Modal.confirm({
-      title: 'Hapus Draft Konten',
+      title: "Hapus Draft Konten",
       icon: <ExclamationCircleOutlined />,
       content: (
         <div>
           <p>Apakah Anda yakin ingin menghapus draft konten ini?</p>
-          <p style={{ color: '#ff4d4f', fontSize: '13px', fontWeight: 500 }}>
-            ⚠️ Tindakan ini tidak dapat dibatalkan. Semua data konten akan dihapus permanen.
+          <p style={{ color: "#ff4d4f", fontSize: "13px", fontWeight: 500 }}>
+            ⚠️ Tindakan ini tidak dapat dibatalkan. Semua data konten akan
+            dihapus permanen.
           </p>
         </div>
       ),
-      okText: 'Ya, Hapus Draft',
-      cancelText: 'Batal',
-      okType: 'danger',
+      okText: "Ya, Hapus Draft",
+      cancelText: "Batal",
+      okType: "danger",
       onOk: () => {
         deleteContentMutation.mutate(id, {
           onSuccess: () => {
             // Navigate back to my-knowledge list after successful delete
-            router.push('/asn-connect/asn-knowledge/my-knowledge');
-          }
+            router.push("/asn-connect/asn-knowledge/my-knowledge");
+          },
         });
       },
     });
   };
-  
+
   const handleCreateRevision = () => {
     if (createRevisionMutation.isLoading) return;
-    
+
     createRevisionMutation.mutate(id, {
       onSuccess: (response) => {
         // Navigate to view the new revision
         const revisionId = response?.revision?.id;
         if (revisionId) {
-          router.push(`/asn-connect/asn-knowledge/my-knowledge/${id}/revisions/${revisionId}`);
+          router.push(
+            `/asn-connect/asn-knowledge/my-knowledge/${id}/revisions/${revisionId}`
+          );
         } else {
-          console.error('Revision ID not found in response:', response);
+          console.error("Revision ID not found in response:", response);
         }
-      }
+      },
     });
   };
-  
+
   const handleViewRevisions = (revision) => {
     if (revision?.id) {
       // Navigate to specific revision
-      router.push(`/asn-connect/asn-knowledge/my-knowledge/${id}/revisions/${revision.id}`);
+      router.push(
+        `/asn-connect/asn-knowledge/my-knowledge/${id}/revisions/${revision.id}`
+      );
     } else {
       // Navigate to revision list if no specific revision
       router.push(`/asn-connect/asn-knowledge/my-knowledge/${id}/revisions`);
     }
   };
-  
+
   const handleEditRevision = (revision) => {
     if (revision?.id) {
       // Navigate to edit specific revision
-      router.push(`/asn-connect/asn-knowledge/my-knowledge/${id}/revisions/${revision.id}/edit`);
+      router.push(
+        `/asn-connect/asn-knowledge/my-knowledge/${id}/revisions/${revision.id}/edit`
+      );
     }
   };
 
@@ -464,8 +467,12 @@ const KnowledgeUserContentDetail = ({
                   isPinningComment={commentInteractions.isPinningComment}
                   isHierarchical={isHierarchicalView}
                   contentAuthorId={data?.author_id}
-                  isLikingSpecificComment={commentInteractions.isLikingSpecificComment}
-                  isPinningSpecificComment={commentInteractions.isPinningSpecificComment}
+                  isLikingSpecificComment={
+                    commentInteractions.isLikingSpecificComment
+                  }
+                  isPinningSpecificComment={
+                    commentInteractions.isPinningSpecificComment
+                  }
                 />
               </div>
             )}
@@ -486,10 +493,15 @@ const KnowledgeUserContentDetail = ({
                 </Text>
               </div>
             )}
-            
+
             {/* Related Content */}
             <div id="related-section">
               <RelatedContent contentId={id} isMobile={false} />
+            </div>
+
+            {/* AIMetadata Section */}
+            <div id="aimetadata-section">
+              <AIMetadataPanel data={data?.ai_metadata} />
             </div>
           </div>
         </Flex>
