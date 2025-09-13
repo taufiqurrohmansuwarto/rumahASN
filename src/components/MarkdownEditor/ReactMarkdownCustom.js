@@ -1,5 +1,5 @@
-import { Blockquote, Table, Title, Text } from "@mantine/core";
-import { Image, Typography } from "antd";
+import { Blockquote, Table, Title, Text, Image } from "@mantine/core";
+import { Typography } from "antd";
 import ReactMarkdown from "react-markdown";
 import rehypeRaw from "rehype-raw";
 import remarkBreaks from "remark-breaks";
@@ -12,26 +12,100 @@ function ReactMarkdownCustom({ children, withCustom = true }) {
     },
     img({ node, ...props }) {
       return (
-        <div style={{ 
+        <div style={{
           margin: "16px 0",
+          width: "100%",
+          display: "block",
           textAlign: "center",
-          width: "100%"
+          position: "relative",
+          zIndex: 1,
+          clearfix: "both",
+          overflow: "hidden"
         }}>
-          <Image
-            style={{
-              maxWidth: "100%",
-              width: "auto",
-              height: "auto",
-              borderRadius: "8px",
-              boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)"
-            }}
-            alt={props.alt || "Image"}
-            preview={{
-              mask: "🔍 Klik untuk memperbesar"
-            }}
-            fallback="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMIAAADDCAYAAADQvc6UAAABRWlDQ1BJQ0MgUHJvZmlsZQAAKJFjYGASSSwoyGFhYGDIzSspCnJ3UoiIjFJgf8LAwSDCIMogwMCcmFxc4BgQ4ANUwgCjUcG3awyMIPqyLsis7PPOq3QdDFcvjV3jOD1boQVTPQrgSkktTgbSf4A4LbmgqISBgTEFyFYuLykAsTuAbJEioKOA7DkgdjqEvQHEToKwj4DVhAQ5A9k3gGyB5IxEoBmML4BsnSQk8XQkNtReEOBxcfXxUQg1Mjc0dyHgXNJBSWpFCYh2zi+oLMpMzyhRcASGUqqCZ16yno6CkYGRAQMDKMwhqj/fAIcloxgHQqxAjIHBEugw5sUIsSQpBobtQPdLciLEVJYzMPBHMDBsayhILEqEO4DxG0txmrERhM29nYGBddr//5/DGRjYNRkY/l7////39v///y4Dmn+LgeHANwDrkl1AuO+pmgAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAwqADAAQAAAABAAAAwwAAAAD9b/HnAAAHlklEQVR4Ae3dP3Ik1RnG4W+FmuBxCBfGOHD5BsYBqwOMAydmg+uAA4vMBhuCBwcuDBAYhAOXgRsAMbY2vvz9/W37rp7uru6erumqN6e9p6dfvz/9SQAAAMAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADAZ9dPdnSxYwAAAABJRU5ErkJggg=="
-            {...props}
-          />
+          <div style={{
+            display: "inline-block",
+            maxWidth: "100%",
+            position: "relative"
+          }}>
+            <Image
+              src={props.src}
+              alt={props.alt || "Image"}
+              fit="contain"
+              radius="md"
+              withPlaceholder
+              style={{
+                maxWidth: "100%",
+                width: "auto",
+                height: "auto",
+                maxHeight: "70vh",
+                cursor: "pointer",
+                transition: "all 0.3s ease",
+                boxShadow: "0 2px 8px rgba(0, 0, 0, 0.08)",
+                border: "1px solid #e9ecef",
+                backgroundColor: "#f8f9fa",
+                display: "block",
+                position: "relative",
+                zIndex: 2
+              }}
+              styles={{
+                root: {
+                  maxWidth: '100%',
+                  display: 'block',
+                  position: 'relative'
+                },
+                image: {
+                  maxWidth: '100%',
+                  maxHeight: '70vh',
+                  width: 'auto',
+                  height: 'auto',
+                  objectFit: 'contain',
+                  display: 'block',
+                  position: 'relative',
+                  '&:hover': {
+                    transform: 'scale(1.01)',
+                    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
+                    zIndex: 3
+                  }
+                },
+                placeholder: {
+                  backgroundColor: '#f1f3f4',
+                  color: '#666',
+                  minHeight: '120px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  position: 'relative'
+                }
+              }}
+              onClick={() => {
+                if (props.src) {
+                  window.open(props.src, '_blank', 'noopener,noreferrer');
+                }
+              }}
+            />
+          </div>
+          {props.alt && (
+            <div style={{
+              marginTop: 8,
+              width: "100%",
+              position: "relative",
+              zIndex: 1
+            }}>
+              <Text
+                size="sm"
+                color="dimmed"
+                style={{
+                  fontStyle: "italic",
+                  lineHeight: 1.4,
+                  textAlign: "center",
+                  display: "block",
+                  padding: "0 8px"
+                }}
+              >
+                {props.alt}
+              </Text>
+            </div>
+          )}
         </div>
       );
     },
@@ -59,6 +133,71 @@ function ReactMarkdownCustom({ children, withCustom = true }) {
       );
     },
     p({ node, ...props }) {
+      // Auto-link URLs in paragraph text
+      const processTextWithLinks = (children) => {
+        if (typeof children === 'string') {
+          // Very specific regex - support subdomains and common TLDs
+          const urlRegex = /(https?:\/\/[^\s]+|www\.[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}[^\s]*|\b[a-zA-Z0-9.-]+\.(?:com|org|net|gov|edu|id|co\.id|go\.id)\b(?:\/[^\s]*)?)/gi;
+
+          return children.split(urlRegex).map((part, index) => {
+            const trimmedPart = part.trim();
+
+            // Very strict validation - support subdomains
+            const isValidUrl = (
+              /^https?:\/\//i.test(trimmedPart) ||
+              /^www\./i.test(trimmedPart) ||
+              /^[a-zA-Z0-9.-]+\.(?:com|org|net|gov|edu|id|co\.id|go\.id)(?:\/|$)/i.test(trimmedPart)
+            ) && !trimmedPart.includes(' ') && trimmedPart.length > 6;
+
+            if (isValidUrl) {
+              // Clean the URL and ensure it has protocol
+              let url = trimmedPart;
+              if (!url.startsWith('http')) {
+                url = url.startsWith('www.') ? `https://${url}` : `https://${url}`;
+              }
+
+              return (
+                <a
+                  key={index}
+                  href={url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{
+                    color: '#1890ff',
+                    textDecoration: 'none',
+                    borderBottom: '1px solid transparent',
+                    transition: 'all 0.2s ease'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.target.style.borderBottomColor = '#1890ff';
+                    e.target.style.color = '#40a9ff';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.target.style.borderBottomColor = 'transparent';
+                    e.target.style.color = '#1890ff';
+                  }}
+                >
+                  {trimmedPart}
+                </a>
+              );
+            }
+            return part;
+          });
+        }
+
+        // Handle React children recursively
+        if (Array.isArray(children)) {
+          return children.map((child) => {
+            if (typeof child === 'string') {
+              return processTextWithLinks(child);
+            }
+            return child;
+          });
+        }
+
+        return children;
+      };
+
       return (
         <Text
           style={{
@@ -70,7 +209,7 @@ function ReactMarkdownCustom({ children, withCustom = true }) {
             fontSize: "14px"
           }}
         >
-          {props.children}
+          {processTextWithLinks(props.children)}
         </Text>
       );
     },
@@ -92,7 +231,7 @@ function ReactMarkdownCustom({ children, withCustom = true }) {
     h6({ node, ...props }) {
       return <Text mb="xs" mt="sm" weight={600} size="sm" {...props} />;
     },
-    code({ node, inline, className, children, ...props }) {
+    code({ inline, children }) {
       return (
         <Typography.Text
           code

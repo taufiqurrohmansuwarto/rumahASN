@@ -25,11 +25,16 @@ class knowledgeKnowledgeAiMetadata extends Model {
           'ai_tags',
           'ai_related_content',
           'ai_seo_keywords',
-          'ai_meta_description'
+          'ai_meta_description',
+          'ai_target_audience',
+          'ai_estimated_read_time',
+          'ai_content_type_detected',
+          'ai_semantic_concepts',
+          'ai_topic_clusters'
         );
       },
 
-      // AUTHOR ACCESS - Public fields + performance metrics
+      // AUTHOR ACCESS - Public fields + performance metrics + improvement insights
       authorSelect(query) {
         query.select(
           'id',
@@ -40,16 +45,31 @@ class knowledgeKnowledgeAiMetadata extends Model {
           'ai_related_content',
           'ai_seo_keywords',
           'ai_meta_description',
+          'ai_target_audience',
+          'ai_estimated_read_time',
+          'ai_content_complexity',
+          'ai_content_type_detected',
           'ai_readability_score',
           'ai_quality_score',
           'ai_completeness_score',
+          'ai_engagement_score',
+          'ai_shareability_score',
+          'ai_bookmark_probability',
           'ai_suggestions',
           'ai_suggested_category',
-          'ai_confidence_score'
+          'ai_confidence_score',
+          'ai_missing_elements',
+          'ai_improvement_priority',
+          'ai_content_gaps',
+          'ai_semantic_concepts',
+          'ai_topic_clusters',
+          'ai_freshness_score',
+          'ai_update_needed_score',
+          'ai_content_lifecycle_stage'
         );
       },
 
-      // ADMIN ACCESS - All fields including technical data
+      // ADMIN ACCESS - All fields including technical data and quality metrics
       adminSelect(query) {
         query.select(
           'id',
@@ -60,13 +80,32 @@ class knowledgeKnowledgeAiMetadata extends Model {
           'ai_related_content',
           'ai_seo_keywords',
           'ai_meta_description',
+          'ai_target_audience',
+          'ai_estimated_read_time',
+          'ai_content_complexity',
+          'ai_content_type_detected',
           'ai_readability_score',
           'ai_quality_score',
           'ai_completeness_score',
+          'ai_engagement_score',
+          'ai_shareability_score',
+          'ai_bookmark_probability',
           'ai_suggestions',
           'ai_suggested_category',
           'ai_confidence_score',
           'ai_sentiment_score',
+          'ai_missing_elements',
+          'ai_improvement_priority',
+          'ai_content_gaps',
+          'ai_semantic_concepts',
+          'ai_entity_extraction',
+          'ai_topic_clusters',
+          'ai_freshness_score',
+          'ai_update_needed_score',
+          'ai_content_lifecycle_stage',
+          'ai_fact_accuracy_score',
+          'ai_objectivity_score',
+          'ai_evidence_quality',
           'ai_embedding',
           'processing_status',
           'error_message',

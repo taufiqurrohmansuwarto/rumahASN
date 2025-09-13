@@ -1,18 +1,24 @@
 import {
+  AppstoreOutlined,
   BarChartOutlined,
   BarsOutlined,
+  BookOutlined,
+  BlockOutlined,
   BulbOutlined,
+  CheckCircleOutlined,
   ClockCircleOutlined,
-  WarningOutlined,
-  EyeOutlined,
+  ExclamationCircleOutlined,
+  FlagOutlined,
   HeartOutlined,
+  LineChartOutlined,
   LinkOutlined,
   RobotOutlined,
-  StarOutlined,
+  SearchOutlined,
   TagsOutlined,
-  AimOutlined,
   ThunderboltOutlined,
   TrophyOutlined,
+  UserOutlined,
+  WarningOutlined,
 } from "@ant-design/icons";
 import {
   Alert,
@@ -22,6 +28,7 @@ import {
   Grid,
   List,
   Progress,
+  Space,
   Tag,
   Timeline,
   Typography,
@@ -55,6 +62,26 @@ const AIMetadataPanel = ({ data, className, ...props }) => {
   const relatedContent = parseJsonField(data.ai_related_content);
   const suggestions = parseJsonField(data.ai_suggestions);
   const seoKeywords = parseJsonField(data.ai_seo_keywords);
+  const missingElements = parseJsonField(data.ai_missing_elements);
+  const improvementPriorityRaw = parseJsonField(data.ai_improvement_priority);
+  const contentGaps = parseJsonField(data.ai_content_gaps);
+  const semanticConcepts = parseJsonField(data.ai_semantic_concepts);
+  const entityExtraction = parseJsonField(data.ai_entity_extraction);
+  const topicClusters = parseJsonField(data.ai_topic_clusters);
+
+  // Handle improvement priority - can be array of objects or strings
+  const improvementPriority = Array.isArray(improvementPriorityRaw)
+    ? improvementPriorityRaw.map(item => {
+        if (typeof item === 'object' && item !== null) {
+          // Handle object format: {area, priority, description}
+          const priority = item.priority || 'Medium';
+          const description = item.description || item.area || 'Tidak ada deskripsi';
+          return `${priority}: ${description}`;
+        }
+        // Handle string format
+        return item;
+      })
+    : [];
 
   // Score color helpers
   const getScoreColor = (score) => {
@@ -75,6 +102,32 @@ const AIMetadataPanel = ({ data, className, ...props }) => {
     if (numScore > 0.3) return { label: "Positif", color: "green" };
     if (numScore < -0.3) return { label: "Negatif", color: "red" };
     return { label: "Netral", color: "gray" };
+  };
+
+  const getComplexityLevel = (score) => {
+    if (score <= 3) return "Sederhana";
+    if (score <= 6) return "Menengah";
+    if (score <= 8) return "Kompleks";
+    return "Sangat Kompleks";
+  };
+
+  const getLifecycleColor = (stage) => {
+    const colors = {
+      Draft: "orange",
+      Active: "green",
+      Mature: "blue",
+      Outdated: "red",
+      Legacy: "purple",
+      Archive: "gray"
+    };
+    return colors[stage] || "default";
+  };
+
+  // Get icon and color based on score - more compact than progress bars
+  const getScoreIcon = (score) => {
+    if (score >= 80) return { icon: "🟢", color: "#52c41a", text: "Bagus" };
+    if (score >= 60) return { icon: "🟡", color: "#fadb14", text: "Sedang" };
+    return { icon: "🔴", color: "#ff4d4f", text: "Perlu Perbaikan" };
   };
 
   // Check if any data exists to show the panel
@@ -149,32 +202,31 @@ const AIMetadataPanel = ({ data, className, ...props }) => {
           </Text>
         </div>
 
-        <div style={{ marginBottom: 16 }}>
+        <div style={{ marginBottom: 12 }}>
           {/* AI Summary - Only show if exists */}
           {data.ai_summary && (
-            <div style={{ marginBottom: 16 }}>
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 8,
-                  marginBottom: 8,
-                }}
-              >
+            <div style={{
+              marginBottom: 16,
+              padding: '12px',
+              backgroundColor: '#f8f9fa',
+              borderRadius: '6px',
+              borderLeft: '4px solid #FF4500'
+            }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
                 <BarsOutlined style={{ color: "#FF4500", fontSize: 16 }} />
-                <Text strong type="secondary" style={{ fontSize: 14 }}>
-                  AI Ringkasan
+                <Text strong style={{ fontSize: 14, color: '#FF4500' }}>
+                  📝 Ringkasan AI
                 </Text>
               </div>
-              <Text italic style={{ fontSize: 14, lineHeight: 1.5 }}>
-                &ldquo;{data.ai_summary}&rdquo;
+              <Text style={{ fontSize: 13, lineHeight: 1.6, color: '#444' }}>
+                {data.ai_summary}
               </Text>
             </div>
           )}
 
           {/* Keywords & Tags - Only show if exists */}
           {(keywords.length > 0 || tags.length > 0) && (
-            <div style={{ marginBottom: 16 }}>
+            <div style={{ marginBottom: 12 }}>
               <div
                 style={{
                   display: "flex",
@@ -209,7 +261,7 @@ const AIMetadataPanel = ({ data, className, ...props }) => {
 
           {/* Related Content - Only show if exists */}
           {relatedContent.length > 0 && (
-            <div style={{ marginBottom: 16 }}>
+            <div style={{ marginBottom: 12 }}>
               <div
                 style={{
                   display: "flex",
@@ -240,23 +292,47 @@ const AIMetadataPanel = ({ data, className, ...props }) => {
             </div>
           )}
 
-          {/* Reading Time Estimate - Only show if summary exists */}
-          {data.ai_summary && (
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 8,
-                marginBottom: 16,
-              }}
-            >
-              <ClockCircleOutlined style={{ color: "#FF4500", fontSize: 16 }} />
-              <Text type="secondary" style={{ fontSize: 12 }}>
-                Estimasi baca:{" "}
-                {Math.ceil(data.ai_summary.split(" ").length / 200)} menit
-              </Text>
+          {/* Basic Info Section - Clear & Separated */}
+          <div style={{ marginBottom: 16 }}>
+            {/* Reading Time & Audience - Primary Info */}
+            <div style={{ display: "flex", alignItems: "center", gap: 16, marginBottom: 10 }}>
+              {(data.ai_estimated_read_time || data.ai_summary) && (
+                <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                  <ClockCircleOutlined style={{ color: "#FF4500", fontSize: 14 }} />
+                  <Text strong style={{ fontSize: 13, color: '#262626' }}>
+                    {data.ai_estimated_read_time ? `${data.ai_estimated_read_time} menit baca` : `${Math.ceil(data.ai_summary.split(" ").length / 200)} menit baca`}
+                  </Text>
+                </div>
+              )}
+              {data.ai_target_audience && (
+                <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                  <UserOutlined style={{ color: "#FF4500", fontSize: 14 }} />
+                  <Text strong style={{ fontSize: 13, color: '#262626' }}>
+                    Untuk {data.ai_target_audience.replace(/"/g, '')}
+                  </Text>
+                </div>
+              )}
             </div>
-          )}
+
+            {/* Content Type & Attributes - Secondary Info */}
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+              {data.ai_content_type_detected && (
+                <Tag color="blue" size="small" style={{ fontSize: 11, padding: '2px 8px', fontWeight: 500 }}>
+                  📖 {data.ai_content_type_detected}
+                </Tag>
+              )}
+              {data.ai_content_complexity && (
+                <Tag color="orange" size="small" style={{ fontSize: 11, padding: '2px 8px', fontWeight: 500 }}>
+                  🎯 {getComplexityLevel(data.ai_content_complexity)}
+                </Tag>
+              )}
+              {data.ai_content_lifecycle_stage && (
+                <Tag color={getLifecycleColor(data.ai_content_lifecycle_stage)} size="small" style={{ fontSize: 11, padding: '2px 8px', fontWeight: 500 }}>
+                  📈 {data.ai_content_lifecycle_stage}
+                </Tag>
+              )}
+            </div>
+          </div>
 
           <Divider />
 
@@ -272,7 +348,8 @@ const AIMetadataPanel = ({ data, className, ...props }) => {
               activeKey={activeKeys}
               onChange={setActiveKeys}
               ghost
-              style={{ marginBottom: 16 }}
+              size="small"
+              style={{ marginBottom: 12 }}
             >
               <Panel
                 header={
@@ -287,57 +364,57 @@ const AIMetadataPanel = ({ data, className, ...props }) => {
                 }
                 key="insights"
               >
-                <div style={{ marginBottom: 16 }}>
-                  {/* Quality Scores - Compact Layout */}
-                  <div style={{ display: "flex", gap: 8, marginBottom: 12 }}>
+                <div style={{ marginBottom: 12 }}>
+                  {/* Quality Scores - Compact dengan Icons */}
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 8 }}>
                     {data.ai_quality_score && (
-                      <div style={{ flex: 1, padding: "8px", backgroundColor: "#fafafa", borderRadius: "4px" }}>
-                        <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 4 }}>
-                          <StarOutlined style={{ color: getScoreColor(data.ai_quality_score), fontSize: 14 }} />
-                          <Text strong style={{ fontSize: 18 }}>{data.ai_quality_score}</Text>
-                        </div>
+                      <div style={{ display: "flex", alignItems: "center", gap: 4, padding: "4px 8px", backgroundColor: "#fafafa", borderRadius: "4px" }}>
+                        <Text style={{ fontSize: 16 }}>{getScoreIcon(data.ai_quality_score).icon}</Text>
+                        <Text strong style={{ fontSize: 13 }}>{data.ai_quality_score}</Text>
                         <Text type="secondary" style={{ fontSize: 11 }}>Kualitas</Text>
-                        <Progress
-                          percent={data.ai_quality_score}
-                          strokeColor={getScoreColor(data.ai_quality_score) === "green" ? "#52c41a" : getScoreColor(data.ai_quality_score) === "yellow" ? "#fadb14" : "#ff4d4f"}
-                          size="small"
-                          showInfo={false}
-                          style={{ marginTop: 2 }}
-                        />
                       </div>
                     )}
 
                     {data.ai_readability_score !== null && data.ai_readability_score !== undefined && (
-                      <div style={{ flex: 1, padding: "8px", backgroundColor: "#fafafa", borderRadius: "4px" }}>
-                        <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 4 }}>
-                          <EyeOutlined style={{ color: getScoreColor(data.ai_readability_score), fontSize: 14 }} />
-                          <Text strong style={{ fontSize: 18 }}>{data.ai_readability_score}</Text>
-                        </div>
+                      <div style={{ display: "flex", alignItems: "center", gap: 4, padding: "4px 8px", backgroundColor: "#fafafa", borderRadius: "4px" }}>
+                        <Text style={{ fontSize: 16 }}>{getScoreIcon(data.ai_readability_score).icon}</Text>
+                        <Text strong style={{ fontSize: 13 }}>{data.ai_readability_score}</Text>
                         <Text type="secondary" style={{ fontSize: 11 }}>{getReadabilityLevel(data.ai_readability_score)}</Text>
-                        <Progress
-                          percent={data.ai_readability_score}
-                          strokeColor={getScoreColor(data.ai_readability_score) === "green" ? "#52c41a" : getScoreColor(data.ai_readability_score) === "yellow" ? "#fadb14" : "#ff4d4f"}
-                          size="small"
-                          showInfo={false}
-                          style={{ marginTop: 2 }}
-                        />
                       </div>
                     )}
 
                     {data.ai_completeness_score && (
-                      <div style={{ flex: 1, padding: "8px", backgroundColor: "#fafafa", borderRadius: "4px" }}>
-                        <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 4 }}>
-                          <AimOutlined style={{ color: getScoreColor(data.ai_completeness_score), fontSize: 14 }} />
-                          <Text strong style={{ fontSize: 18 }}>{data.ai_completeness_score}</Text>
-                        </div>
+                      <div style={{ display: "flex", alignItems: "center", gap: 4, padding: "4px 8px", backgroundColor: "#fafafa", borderRadius: "4px" }}>
+                        <Text style={{ fontSize: 16 }}>{getScoreIcon(data.ai_completeness_score).icon}</Text>
+                        <Text strong style={{ fontSize: 13 }}>{data.ai_completeness_score}</Text>
                         <Text type="secondary" style={{ fontSize: 11 }}>Kelengkapan</Text>
-                        <Progress
-                          percent={data.ai_completeness_score}
-                          strokeColor={getScoreColor(data.ai_completeness_score) === "green" ? "#52c41a" : getScoreColor(data.ai_completeness_score) === "yellow" ? "#fadb14" : "#ff4d4f"}
-                          size="small"
-                          showInfo={false}
-                          style={{ marginTop: 2 }}
-                        />
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Additional Scores - Compact */}
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 8 }}>
+                    {data.ai_engagement_score && (
+                      <div style={{ display: "flex", alignItems: "center", gap: 4, padding: "4px 8px", backgroundColor: "#fafafa", borderRadius: "4px" }}>
+                        <Text style={{ fontSize: 16 }}>🔥</Text>
+                        <Text strong style={{ fontSize: 13 }}>{data.ai_engagement_score}</Text>
+                        <Text type="secondary" style={{ fontSize: 11 }}>Engagement</Text>
+                      </div>
+                    )}
+
+                    {data.ai_shareability_score && (
+                      <div style={{ display: "flex", alignItems: "center", gap: 4, padding: "4px 8px", backgroundColor: "#fafafa", borderRadius: "4px" }}>
+                        <Text style={{ fontSize: 16 }}>📤</Text>
+                        <Text strong style={{ fontSize: 13 }}>{data.ai_shareability_score}</Text>
+                        <Text type="secondary" style={{ fontSize: 11 }}>Shareability</Text>
+                      </div>
+                    )}
+
+                    {data.ai_bookmark_probability && (
+                      <div style={{ display: "flex", alignItems: "center", gap: 4, padding: "4px 8px", backgroundColor: "#fafafa", borderRadius: "4px" }}>
+                        <Text style={{ fontSize: 16 }}>📑</Text>
+                        <Text strong style={{ fontSize: 13 }}>{Math.round(data.ai_bookmark_probability * 100)}%</Text>
+                        <Text type="secondary" style={{ fontSize: 11 }}>Bookmark</Text>
                       </div>
                     )}
                   </div>
@@ -376,7 +453,7 @@ const AIMetadataPanel = ({ data, className, ...props }) => {
 
           {/* Content Suggestions - Only show if exists */}
           {suggestions.length > 0 && (
-            <Collapse ghost style={{ marginBottom: 16 }}>
+            <Collapse ghost size="small" style={{ marginBottom: 12 }}>
               <Panel
                 header={
                   <div
@@ -393,7 +470,9 @@ const AIMetadataPanel = ({ data, className, ...props }) => {
                 }
                 key="suggestions"
               >
-                <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                <div
+                  style={{ display: "flex", flexDirection: "column", gap: 6 }}
+                >
                   {suggestions.map((suggestion, idx) => (
                     <div
                       key={idx}
@@ -404,11 +483,15 @@ const AIMetadataPanel = ({ data, className, ...props }) => {
                         padding: "6px 8px",
                         backgroundColor: "#fafafa",
                         borderRadius: "4px",
-                        borderLeft: "3px solid #faad14"
+                        borderLeft: "3px solid #faad14",
                       }}
                     >
-                      <BulbOutlined style={{ color: "#faad14", fontSize: 12, marginTop: 2 }} />
-                      <Text style={{ fontSize: 13, lineHeight: 1.4 }}>{suggestion}</Text>
+                      <BulbOutlined
+                        style={{ color: "#faad14", fontSize: 12, marginTop: 2 }}
+                      />
+                      <Text style={{ fontSize: 13, lineHeight: 1.4 }}>
+                        {suggestion}
+                      </Text>
                     </div>
                   ))}
                 </div>
@@ -422,7 +505,7 @@ const AIMetadataPanel = ({ data, className, ...props }) => {
               icon={<TrophyOutlined />}
               type="success"
               showIcon
-              style={{ marginBottom: 16 }}
+              style={{ marginBottom: 12 }}
               message={
                 <div>
                   <Text
@@ -467,6 +550,199 @@ const AIMetadataPanel = ({ data, className, ...props }) => {
             />
           )}
 
+          {/* Missing Elements & Content Gaps - Only show if exists */}
+          {((missingElements && missingElements.length > 0) ||
+            (contentGaps && contentGaps.length > 0) ||
+            (improvementPriority && improvementPriority.length > 0)) && (
+            <Collapse ghost style={{ marginBottom: 12 }}>
+              <Panel
+                header={
+                  <div
+                    style={{ display: "flex", alignItems: "center", gap: 8 }}
+                  >
+                    <ExclamationCircleOutlined
+                      style={{ color: "#FF4500", fontSize: 18 }}
+                    />
+                    <Text strong>Area Perbaikan</Text>
+                  </div>
+                }
+                key="improvements"
+              >
+                {missingElements && missingElements.length > 0 && (
+                  <div style={{ marginBottom: 12 }}>
+                    <Text strong style={{ fontSize: 13, display: "block", marginBottom: 6 }}>
+                      <SearchOutlined style={{ marginRight: 4, color: "#ff7875" }} />Elemen Hilang
+                    </Text>
+                    <Space wrap size="small">
+                      {missingElements.slice(0, 6).map((element, idx) => (
+                        <Tag key={idx} color="red" size="small" style={{ fontSize: 10 }}>{element}</Tag>
+                      ))}
+                    </Space>
+                  </div>
+                )}
+
+                {contentGaps && contentGaps.length > 0 && (
+                  <div style={{ marginBottom: 12 }}>
+                    <Text strong style={{ fontSize: 13, display: "block", marginBottom: 6 }}>
+                      <BlockOutlined style={{ marginRight: 4, color: "#fa8c16" }} />Gap Konten
+                    </Text>
+                    <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+                      {contentGaps.slice(0, 3).map((gap, idx) => (
+                        <div key={idx} style={{ padding: "4px 6px", backgroundColor: "#fff7e6", borderRadius: "3px", borderLeft: "2px solid #fa8c16" }}>
+                          <Text style={{ fontSize: 11 }}>{gap}</Text>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {improvementPriority && improvementPriority.length > 0 && (
+                  <div style={{ marginBottom: 12 }}>
+                    <Text strong style={{ fontSize: 13, display: "block", marginBottom: 6 }}>
+                      <FlagOutlined style={{ marginRight: 4, color: "#1890ff" }} />Prioritas
+                    </Text>
+                    <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+                      {improvementPriority.slice(0, 3).map((priority, idx) => (
+                        <div key={idx} style={{ padding: "4px 6px", backgroundColor: "#e6f7ff", borderRadius: "3px", borderLeft: "2px solid #1890ff" }}>
+                          <Text style={{ fontSize: 11 }}>{priority}</Text>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </Panel>
+            </Collapse>
+          )}
+
+          {/* Semantic Analysis - Only show if exists */}
+          {((semanticConcepts && semanticConcepts.length > 0) ||
+            (entityExtraction && Object.keys(entityExtraction).length > 0) ||
+            (topicClusters && topicClusters.length > 0)) && (
+            <Collapse ghost style={{ marginBottom: 12 }}>
+              <Panel
+                header={
+                  <div
+                    style={{ display: "flex", alignItems: "center", gap: 8 }}
+                  >
+                    <AppstoreOutlined style={{ color: "#FF4500", fontSize: 18 }} />
+                    <Text strong>Analisis Semantik</Text>
+                  </div>
+                }
+                key="semantic"
+              >
+                {semanticConcepts && semanticConcepts.length > 0 && (
+                  <div style={{ marginBottom: 12 }}>
+                    <Text strong style={{ fontSize: 13, display: "block", marginBottom: 6 }}>
+                      <BlockOutlined style={{ marginRight: 4, color: "#52c41a" }} />Konsep Semantik
+                    </Text>
+                    <Space wrap size="small">
+                      {semanticConcepts.slice(0, 8).map((concept, idx) => (
+                        <Tag key={idx} color="green" size="small" style={{ fontSize: 10 }}>{concept}</Tag>
+                      ))}
+                    </Space>
+                  </div>
+                )}
+
+                {entityExtraction && Object.keys(entityExtraction).length > 0 && (
+                  <div style={{ marginBottom: 12 }}>
+                    <Text strong style={{ fontSize: 13, display: "block", marginBottom: 6 }}>
+                      <SearchOutlined style={{ marginRight: 4, color: "#722ed1" }} />Entitas
+                    </Text>
+                    <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+                      {Object.entries(entityExtraction).slice(0, 3).map(([type, entities], idx) => (
+                        <div key={idx} style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                          <Text type="secondary" style={{ fontSize: 11, minWidth: "60px", textTransform: "capitalize" }}>{type}:</Text>
+                          <Space wrap size="small">
+                            {(Array.isArray(entities) ? entities.slice(0, 4) : [entities]).map((entity, entityIdx) => (
+                              <Tag key={entityIdx} color="purple" size="small" style={{ fontSize: 10 }}>{entity}</Tag>
+                            ))}
+                          </Space>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {topicClusters && topicClusters.length > 0 && (
+                  <div style={{ marginBottom: 12 }}>
+                    <Text strong style={{ fontSize: 13, display: "block", marginBottom: 6 }}>
+                      <BlockOutlined style={{ marginRight: 4, color: "#fa541c" }} />Topik
+                    </Text>
+                    <Space wrap size="small">
+                      {topicClusters.slice(0, 6).map((cluster, idx) => (
+                        <Tag key={idx} color="volcano" size="small" style={{ fontSize: 10 }}>{cluster}</Tag>
+                      ))}
+                    </Space>
+                  </div>
+                )}
+              </Panel>
+            </Collapse>
+          )}
+
+          {/* Advanced Quality Metrics - Only show if exists */}
+          {(data.ai_freshness_score ||
+            data.ai_update_needed_score ||
+            data.ai_fact_accuracy_score ||
+            data.ai_objectivity_score ||
+            data.ai_evidence_quality) && (
+            <Collapse ghost style={{ marginBottom: 12 }}>
+              <Panel
+                header={
+                  <div
+                    style={{ display: "flex", alignItems: "center", gap: 8 }}
+                  >
+                    <LineChartOutlined style={{ color: "#FF4500", fontSize: 18 }} />
+                    <Text strong>Metrik Kualitas Lanjutan</Text>
+                  </div>
+                }
+                key="advanced-quality"
+              >
+                <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+                  {/* Advanced Quality Scores - Compact */}
+                  {data.ai_freshness_score && (
+                    <div style={{ display: "flex", alignItems: "center", gap: 4, padding: "4px 8px", backgroundColor: "#fafafa", borderRadius: "4px" }}>
+                      <Text style={{ fontSize: 16 }}>🔄</Text>
+                      <Text strong style={{ fontSize: 13 }}>{data.ai_freshness_score}</Text>
+                      <Text type="secondary" style={{ fontSize: 11 }}>Kesegaran</Text>
+                    </div>
+                  )}
+
+                  {data.ai_update_needed_score && (
+                    <div style={{ display: "flex", alignItems: "center", gap: 4, padding: "4px 8px", backgroundColor: "#fafafa", borderRadius: "4px" }}>
+                      <Text style={{ fontSize: 16 }}>⚡</Text>
+                      <Text strong style={{ fontSize: 13 }}>{data.ai_update_needed_score}</Text>
+                      <Text type="secondary" style={{ fontSize: 11 }}>Perlu Update</Text>
+                    </div>
+                  )}
+
+                  {data.ai_fact_accuracy_score && (
+                    <div style={{ display: "flex", alignItems: "center", gap: 4, padding: "4px 8px", backgroundColor: "#fafafa", borderRadius: "4px" }}>
+                      <Text style={{ fontSize: 16 }}>🛡️</Text>
+                      <Text strong style={{ fontSize: 13 }}>{data.ai_fact_accuracy_score}</Text>
+                      <Text type="secondary" style={{ fontSize: 11 }}>Akurasi Fakta</Text>
+                    </div>
+                  )}
+
+                  {data.ai_objectivity_score && (
+                    <div style={{ display: "flex", alignItems: "center", gap: 4, padding: "4px 8px", backgroundColor: "#fafafa", borderRadius: "4px" }}>
+                      <Text style={{ fontSize: 16 }}>⚖️</Text>
+                      <Text strong style={{ fontSize: 13 }}>{data.ai_objectivity_score}</Text>
+                      <Text type="secondary" style={{ fontSize: 11 }}>Objektivitas</Text>
+                    </div>
+                  )}
+
+                  {data.ai_evidence_quality && (
+                    <div style={{ display: "flex", alignItems: "center", gap: 4, padding: "4px 8px", backgroundColor: "#fafafa", borderRadius: "4px" }}>
+                      <Text style={{ fontSize: 16 }}>📚</Text>
+                      <Text strong style={{ fontSize: 13 }}>{data.ai_evidence_quality}</Text>
+                      <Text type="secondary" style={{ fontSize: 11 }}>Kualitas Bukti</Text>
+                    </div>
+                  )}
+                </div>
+              </Panel>
+            </Collapse>
+          )}
+
           <Divider />
 
           {/* Technical Information - Only show if any technical data exists */}
@@ -478,7 +754,7 @@ const AIMetadataPanel = ({ data, className, ...props }) => {
             data.error_message ||
             data.model_version ||
             data.last_processed) && (
-            <Collapse ghost style={{ marginBottom: 16 }}>
+            <Collapse ghost size="small" style={{ marginBottom: 12 }}>
               <Panel
                 header={
                   <div
@@ -568,7 +844,7 @@ const AIMetadataPanel = ({ data, className, ...props }) => {
                   {/* Confidence Score - Only show if exists and greater than 0 */}
                   {data.ai_confidence_score &&
                     parseFloat(data.ai_confidence_score) > 0 && (
-                      <Timeline.Item dot={<TargetOutlined />}>
+                      <Timeline.Item dot={<CheckCircleOutlined />}>
                         <Text
                           strong
                           style={{

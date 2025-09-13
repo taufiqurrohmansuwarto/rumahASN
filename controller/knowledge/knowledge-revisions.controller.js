@@ -230,9 +230,7 @@ export const getMyRevisions = async (req, res) => {
       .first();
 
     if (!lastRevisionDraft) {
-      return res.status(404).json({
-        message: "No draft revision found",
-      });
+      res.json(null);
     }
 
     // Verify user owns the original content
@@ -241,9 +239,7 @@ export const getMyRevisions = async (req, res) => {
       .where("author_id", customId);
 
     if (!originalContent) {
-      return res.status(404).json({
-        message: "Content not found or access denied",
-      });
+      res.json(null);
     }
 
     // Get all revisions except v1
