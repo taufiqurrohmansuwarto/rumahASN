@@ -7,6 +7,12 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
+// AI Model Configuration
+const AI_MODEL = "gpt-4o-mini";
+const AI_TEMPERATURE_LOW = 0.1;
+const AI_TEMPERATURE_MEDIUM = 0.2;
+const AI_TEMPERATURE_HIGH = 0.4;
+
 /**
  * Clean markdown content to plain text
  * @param {string} content - Markdown content
@@ -115,7 +121,7 @@ Instruksi:
 - Maksimal 2-3 kalimat`;
 
     const completion = await openai.chat.completions.create({
-      model: "gpt-4o-mini", // More cost-effective for summarization
+      model: AI_MODEL,
       messages: [
         {
           role: "system", 
@@ -123,7 +129,7 @@ Instruksi:
         },
         { role: "user", content: prompt }
       ],
-      temperature: 0.3,
+      temperature: AI_TEMPERATURE_MEDIUM,
       max_tokens: 200,
     });
 
@@ -181,7 +187,7 @@ Instruksi:
 - Maksimal 12 kata kunci`;
 
     const completion = await openai.chat.completions.create({
-      model: "gpt-4o-mini",
+      model: AI_MODEL,
       messages: [
         {
           role: "system",
@@ -189,7 +195,7 @@ Instruksi:
         },
         { role: "user", content: prompt }
       ],
-      temperature: 0.2,
+      temperature: AI_TEMPERATURE_MEDIUM,
       max_tokens: 150,
     });
 
@@ -268,52 +274,85 @@ const extractKeywordsBasic = (title, content) => {
 };
 
 /**
- * Calculate readability score (Flesch-like for Indonesian)
+ * Calculate readability score using AI analysis
  * @param {string} content - Content text
  * @returns {Promise<number>} Readability score (1-100, higher = more readable)
  */
 const calculateReadabilityScore = async (content) => {
   try {
-    // Clean markdown content properly
     const cleanContent = cleanMarkdownContent(content);
-    
-    if (!cleanContent.trim()) {
-      return 0;
+
+    if (!cleanContent.trim() || cleanContent.length < 50) {
+      return 50; // Default score for very short content
     }
-    
-    // Count sentences (basic)
-    const sentences = cleanContent.split(/[.!?]+/).filter(s => s.trim().length > 5);
-    const sentenceCount = sentences.length || 1;
-    
-    // Count words
-    const words = cleanContent.match(/\S+/g) || [];
-    const wordCount = words.length;
-    
-    if (wordCount === 0) {
-      return 0;
+
+    const prompt = `Analisis tingkat keterbacaan (readability) dari konten berikut dalam bahasa Indonesia:
+
+Konten:
+${cleanContent}
+
+Instruksi:
+- Berikan skor readability antara 1-100 (100 = sangat mudah dibaca)
+- Pertimbangkan:
+  * Panjang kalimat (lebih pendek = lebih mudah)
+  * Kompleksitas kata (kata sederhana = lebih mudah)
+  * Struktur bahasa (jelas dan logis = lebih mudah)
+  * Penggunaan istilah teknis (sedikit = lebih mudah)
+  * Flow dan koherensi
+- Berikan hanya angka skor (contoh: 85, 72, 90)`;
+
+    const completion = await openai.chat.completions.create({
+      model: AI_MODEL,
+      messages: [
+        {
+          role: "system",
+          content: "Anda adalah ahli linguistik yang menganalisis tingkat keterbacaan teks bahasa Indonesia. Berikan skor numerik 1-100 tanpa penjelasan."
+        },
+        { role: "user", content: prompt }
+      ],
+      temperature: AI_TEMPERATURE_LOW,
+      max_tokens: 10,
+    });
+
+    const scoreText = completion.choices[0].message.content.trim();
+    const score = parseInt(scoreText);
+
+    // Validate and clamp score
+    if (isNaN(score)) {
+      console.warn("AI returned invalid readability score, using fallback calculation");
+      return calculateReadabilityScoreFallback(cleanContent);
     }
-    
-    // Count syllables (approximation for Indonesian)
-    const syllableCount = words.reduce((total, word) => {
-      // Simple vowel counting as syllable approximation
-      const vowelMatches = word.match(/[aiueo]/gi);
-      return total + (vowelMatches ? vowelMatches.length : 1);
-    }, 0);
-    
-    // Calculate average sentence length and syllables per word
-    const avgSentenceLength = wordCount / sentenceCount;
-    const avgSyllablesPerWord = syllableCount / wordCount;
-    
-    // Modified Flesch formula for Indonesian (simplified)
-    let score = 206.835 - (1.015 * avgSentenceLength) - (84.6 * avgSyllablesPerWord);
-    
-    // Normalize to 1-100 range
-    score = Math.max(1, Math.min(100, Math.round(score)));
-    
-    return score;
+
+    return Math.max(1, Math.min(100, score));
+
   } catch (error) {
-    console.error("Error calculating readability score:", error);
-    return 50; // Default moderate score
+    console.error("Error calculating AI readability score:", error);
+    return calculateReadabilityScoreFallback(content);
+  }
+};
+
+/**
+ * Fallback readability calculation (Flesch-like for Indonesian)
+ * @param {string} cleanContent - Clean content text
+ * @returns {number} Readability score
+ */
+const calculateReadabilityScoreFallback = (cleanContent) => {
+  try {
+    if (!cleanContent.trim()) return 50;
+
+    const sentences = cleanContent.split(/[.!?]+/).filter(s => s.trim().length > 5);
+    const words = cleanContent.match(/\S+/g) || [];
+
+    if (words.length === 0) return 50;
+
+    const avgSentenceLength = words.length / (sentences.length || 1);
+    const avgWordLength = words.reduce((sum, word) => sum + word.length, 0) / words.length;
+
+    // Simple readability formula for Indonesian
+    let score = 100 - (avgSentenceLength * 1.5) - (avgWordLength * 5);
+    return Math.max(1, Math.min(100, Math.round(score)));
+  } catch (error) {
+    return 50;
   }
 };
 
@@ -346,7 +385,7 @@ Instruksi:
 - Berikan hanya angka skor (contoh: 0.3, -0.2, 0.8)`;
 
     const completion = await openai.chat.completions.create({
-      model: "gpt-4o-mini",
+      model: AI_MODEL,
       messages: [
         {
           role: "system",
@@ -354,7 +393,7 @@ Instruksi:
         },
         { role: "user", content: prompt }
       ],
-      temperature: 0.1,
+      temperature: AI_TEMPERATURE_LOW,
       max_tokens: 10,
     });
 
@@ -418,7 +457,7 @@ Instruksi:
 - Format JSON: {"category": "nama_kategori", "confidence": 0.8}`;
 
     const completion = await openai.chat.completions.create({
-      model: "gpt-4o-mini",
+      model: AI_MODEL,
       messages: [
         {
           role: "system",
@@ -426,7 +465,7 @@ Instruksi:
         },
         { role: "user", content: prompt }
       ],
-      temperature: 0.2,
+      temperature: AI_TEMPERATURE_MEDIUM,
       max_tokens: 100,
     });
 
@@ -476,7 +515,7 @@ Instruksi:
 - Format JSON array: ["saran 1", "saran 2", "saran 3"]`;
 
     const completion = await openai.chat.completions.create({
-      model: "gpt-4o-mini",
+      model: AI_MODEL,
       messages: [
         {
           role: "system",
@@ -484,7 +523,7 @@ Instruksi:
         },
         { role: "user", content: prompt }
       ],
-      temperature: 0.4,
+      temperature: AI_TEMPERATURE_HIGH,
       max_tokens: 300,
     });
 
@@ -546,7 +585,7 @@ Instruksi:
 }`;
 
     const completion = await openai.chat.completions.create({
-      model: "gpt-4o-mini",
+      model: AI_MODEL,
       messages: [
         {
           role: "system",
@@ -554,7 +593,7 @@ Instruksi:
         },
         { role: "user", content: prompt }
       ],
-      temperature: 0.3,
+      temperature: AI_TEMPERATURE_MEDIUM,
       max_tokens: 200,
     });
 
@@ -626,7 +665,7 @@ Instruksi:
 - Maksimal 8 tag baru`;
 
     const completion = await openai.chat.completions.create({
-      model: "gpt-4o-mini",
+      model: AI_MODEL,
       messages: [
         {
           role: "system",
@@ -634,7 +673,7 @@ Instruksi:
         },
         { role: "user", content: prompt }
       ],
-      temperature: 0.4,
+      temperature: AI_TEMPERATURE_HIGH,
       max_tokens: 150,
     });
 
@@ -729,12 +768,10 @@ const processContentWithAI = async (contentId) => {
       content.summary || summary
     );
     
-    // Calculate quality score based on various factors
-    const qualityScore = calculateQualityScore({
+    // Calculate quality score using AI analysis
+    const qualityScore = await calculateQualityScore(content.title, content.content, {
       readabilityScore,
-      contentLength: content.content?.length || 0,
-      hasTitle: !!content.title,
-      hasSummary: !!content.summary,
+      summary: content.summary || summary,
       keywordCount: keywords.length
     });
     
@@ -763,7 +800,7 @@ const processContentWithAI = async (contentId) => {
           ai_seo_keywords: JSON.stringify(seoData.seoKeywords || []),
           ai_meta_description: seoData.metaDescription,
           processing_status: 'completed',
-          model_version: 'gpt-4o-mini',
+          model_version: AI_MODEL,
           last_processed: new Date(),
           updated_at: new Date()
         })
@@ -788,7 +825,7 @@ const processContentWithAI = async (contentId) => {
           ai_seo_keywords: JSON.stringify(seoData.seoKeywords || []),
           ai_meta_description: seoData.metaDescription,
           processing_status: 'completed',
-          model_version: 'gpt-4o-mini',
+          model_version: AI_MODEL,
           last_processed: new Date()
         });
     }
@@ -853,7 +890,7 @@ const processContentWithAI = async (contentId) => {
 };
 
 /**
- * Calculate content completeness score
+ * Calculate content completeness score using AI analysis
  * @param {string} title - Content title
  * @param {string} content - Content body text
  * @param {string} summary - Content summary
@@ -862,8 +899,74 @@ const processContentWithAI = async (contentId) => {
 const calculateCompletenessScore = async (title, content, summary) => {
   try {
     const cleanContent = cleanMarkdownContent(content);
+
+    if (!cleanContent.trim() || cleanContent.length < 100) {
+      return calculateCompletenessScoreFallback(title, content, summary);
+    }
+
+    const prompt = `Analisis kelengkapan (completeness) dari konten berikut dalam bahasa Indonesia:
+
+Judul: ${title}
+
+Konten:
+${cleanContent}
+
+Summary: ${summary || 'Tidak ada summary'}
+
+Instruksi:
+- Berikan skor kelengkapan antara 1-100 (100 = sangat lengkap dan comprehensive)
+- Pertimbangkan:
+  * Apakah topik dibahas secara menyeluruh?
+  * Ada introduction, body, dan conclusion yang jelas?
+  * Informasi yang diberikan cukup untuk memahami topik?
+  * Adanya contoh, detail, atau penjelasan yang mendukung?
+  * Coverage dari berbagai aspek relevan topik?
+  * Struktur dan organisasi informasi yang baik?
+  * Adanya referensi, data, atau supporting materials?
+- Berikan hanya angka skor (contoh: 85, 72, 90)`;
+
+    const completion = await openai.chat.completions.create({
+      model: AI_MODEL,
+      messages: [
+        {
+          role: "system",
+          content: "Anda adalah ahli evaluasi konten yang dapat menilai kelengkapan dan comprehensiveness artikel dalam bahasa Indonesia. Berikan skor numerik 1-100 tanpa penjelasan."
+        },
+        { role: "user", content: prompt }
+      ],
+      temperature: AI_TEMPERATURE_LOW,
+      max_tokens: 10,
+    });
+
+    const scoreText = completion.choices[0].message.content.trim();
+    const score = parseInt(scoreText);
+
+    // Validate and clamp score
+    if (isNaN(score)) {
+      console.warn("AI returned invalid completeness score, using fallback calculation");
+      return calculateCompletenessScoreFallback(title, content, summary);
+    }
+
+    return Math.max(1, Math.min(100, score));
+
+  } catch (error) {
+    console.error("Error calculating AI completeness score:", error);
+    return calculateCompletenessScoreFallback(title, content, summary);
+  }
+};
+
+/**
+ * Fallback completeness score calculation
+ * @param {string} title - Content title
+ * @param {string} content - Content body text
+ * @param {string} summary - Content summary
+ * @returns {number} Completeness score (1-100)
+ */
+const calculateCompletenessScoreFallback = (title, content, summary) => {
+  try {
+    const cleanContent = cleanMarkdownContent(content);
     let score = 0;
-    
+
     // Title completeness (15 points)
     if (title && title.trim().length > 0) {
       score += 15;
@@ -871,21 +974,21 @@ const calculateCompletenessScore = async (title, content, summary) => {
         score += 5; // Good length title
       }
     }
-    
+
     // Content length and structure (40 points)
     if (cleanContent && cleanContent.length > 0) {
       score += 10; // Has content
-      
+
       if (cleanContent.length >= 200) score += 10; // Substantial content
       if (cleanContent.length >= 500) score += 10; // Good length
       if (cleanContent.length >= 1000) score += 10; // Comprehensive
-      
+
       // Check for structure indicators
       const sentences = cleanContent.split(/[.!?]+/).filter(s => s.trim().length > 10);
       if (sentences.length >= 3) score += 5; // Multiple sentences
       if (sentences.length >= 10) score += 5; // Well-developed
     }
-    
+
     // Summary completeness (20 points)
     if (summary && summary.trim().length > 0) {
       score += 15;
@@ -893,22 +996,22 @@ const calculateCompletenessScore = async (title, content, summary) => {
         score += 5; // Good summary length
       }
     }
-    
+
     // Content depth indicators (25 points)
     const hasNumbers = /\d/.test(cleanContent);
     const hasLists = cleanContent.includes('•') || /^\d+\./m.test(cleanContent);
     const hasHeaders = content.includes('#') || content.includes('<h');
     const hasLinks = content.includes('[') && content.includes(']');
     const hasFormatting = content.includes('**') || content.includes('*') || content.includes('<');
-    
+
     if (hasNumbers) score += 5;    // Contains data/numbers
     if (hasLists) score += 5;      // Has structured lists
     if (hasHeaders) score += 5;    // Well organized
     if (hasLinks) score += 5;      // Contains references
     if (hasFormatting) score += 5; // Proper formatting
-    
+
     return Math.max(1, Math.min(100, Math.round(score)));
-    
+
   } catch (error) {
     console.error("Error calculating completeness score:", error);
     return 50; // Default moderate score
@@ -916,29 +1019,116 @@ const calculateCompletenessScore = async (title, content, summary) => {
 };
 
 /**
- * Calculate overall quality score
+ * Calculate overall quality score using AI analysis
+ * @param {string} title - Content title
+ * @param {string} content - Content body text
+ * @param {Object} metadata - Additional metadata (readability, keywords, etc)
+ * @returns {Promise<number>} Quality score (1-100)
+ */
+const calculateQualityScore = async (title, content, metadata = {}) => {
+  try {
+    const cleanContent = cleanMarkdownContent(content);
+
+    if (!cleanContent.trim() || cleanContent.length < 100) {
+      return calculateQualityScoreFallback({
+        readabilityScore: metadata.readabilityScore || 50,
+        contentLength: cleanContent.length,
+        hasTitle: !!title,
+        hasSummary: !!metadata.summary,
+        keywordCount: metadata.keywordCount || 0
+      });
+    }
+
+    const prompt = `Analisis kualitas keseluruhan dari konten berikut dalam bahasa Indonesia:
+
+Judul: ${title}
+
+Konten:
+${cleanContent}
+
+Metadata tambahan:
+- Readability Score: ${metadata.readabilityScore || 'Unknown'}
+- Jumlah Keywords: ${metadata.keywordCount || 0}
+- Ada Summary: ${metadata.summary ? 'Ya' : 'Tidak'}
+
+Instruksi:
+- Berikan skor kualitas konten antara 1-100 (100 = kualitas excellent)
+- Pertimbangkan:
+  * Kejelasan dan struktur informasi
+  * Kelengkapan pembahasan topik
+  * Akurasi dan credibility
+  * Nilai informatif dan usefulness
+  * Organisasi dan flow content
+  * Grammar dan language quality
+  * Depth of analysis atau insight
+- Berikan hanya angka skor (contoh: 88, 75, 92)`;
+
+    const completion = await openai.chat.completions.create({
+      model: AI_MODEL,
+      messages: [
+        {
+          role: "system",
+          content: "Anda adalah ahli evaluasi konten yang dapat menilai kualitas artikel atau dokumentasi dalam bahasa Indonesia secara objektif. Berikan skor numerik 1-100 tanpa penjelasan."
+        },
+        { role: "user", content: prompt }
+      ],
+      temperature: AI_TEMPERATURE_LOW,
+      max_tokens: 10,
+    });
+
+    const scoreText = completion.choices[0].message.content.trim();
+    const score = parseInt(scoreText);
+
+    // Validate and clamp score
+    if (isNaN(score)) {
+      console.warn("AI returned invalid quality score, using fallback calculation");
+      return calculateQualityScoreFallback({
+        readabilityScore: metadata.readabilityScore || 50,
+        contentLength: cleanContent.length,
+        hasTitle: !!title,
+        hasSummary: !!metadata.summary,
+        keywordCount: metadata.keywordCount || 0
+      });
+    }
+
+    return Math.max(1, Math.min(100, score));
+
+  } catch (error) {
+    console.error("Error calculating AI quality score:", error);
+    return calculateQualityScoreFallback({
+      readabilityScore: metadata.readabilityScore || 50,
+      contentLength: (content || '').length,
+      hasTitle: !!title,
+      hasSummary: !!metadata.summary,
+      keywordCount: metadata.keywordCount || 0
+    });
+  }
+};
+
+/**
+ * Fallback quality score calculation
  * @param {Object} factors - Quality factors
  * @returns {number} Quality score (1-100)
  */
-const calculateQualityScore = (factors) => {
+const calculateQualityScoreFallback = (factors) => {
   let score = 0;
-  
+
   // Readability score (40% weight)
   score += (factors.readabilityScore || 0) * 0.4;
-  
+
   // Content length score (25% weight)
   const lengthScore = Math.min(100, Math.max(0, (factors.contentLength / 500) * 100));
   score += lengthScore * 0.25;
-  
-  // Structure completeness (35% weight)  
+
+  // Structure completeness (35% weight)
   let structureScore = 0;
   if (factors.hasTitle) structureScore += 30;
   if (factors.hasSummary) structureScore += 25;
   if (factors.keywordCount > 0) structureScore += 20;
   if (factors.keywordCount >= 5) structureScore += 25;
-  
+
   score += structureScore * 0.35;
-  
+
   return Math.max(1, Math.min(100, Math.round(score)));
 };
 
