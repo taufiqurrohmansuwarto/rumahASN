@@ -165,7 +165,7 @@ const ContentCard = ({
 
         if (isYouTube) {
           const videoId = sourceUrl.match(
-            /(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&\n?#]+)/
+            /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/live\/)([^&\n?#]+)/
           )?.[1];
           if (videoId) {
             // YouTube thumbnail URLs (ordered by quality preference)
