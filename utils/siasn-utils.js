@@ -515,7 +515,8 @@ module.exports.cekPencantumanGelar = async (fetcher, nip) => {
       );
 
       const data = result?.data?.data;
-      if (!data) {
+      const empty = "Data tidak ditemukan";
+      if (!data || data === empty) {
         resolve([]);
       } else {
         resolve(data);

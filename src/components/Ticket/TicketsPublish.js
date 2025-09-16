@@ -579,7 +579,7 @@ const TicketsPublish = () => {
                   gap: "8px",
                 }}
               >
-                🎫 Tiket Publikasi
+                🎫 Pertanyaan Ditampilkan
               </Title>
 
               {/* CekPertek Component - responsive positioning */}

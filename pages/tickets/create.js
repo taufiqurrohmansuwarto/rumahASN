@@ -5,14 +5,17 @@ import { GoogleReCaptchaProvider } from "react-google-recaptcha-v3";
 import Head from "next/head";
 import { Breadcrumb } from "antd";
 import Link from "next/link";
+import { useRouter } from "next/router";
 
 const CreateTicketPage = ({ data }) => {
+  const router = useRouter();
   return (
     <>
       <Head>
         <title>Rumah ASN -Buat Tiket Baru</title>
       </Head>
       <PageContainer
+        onBack={() => router.back()}
         header={{
           breadcrumbRender: () => (
             <Breadcrumb>

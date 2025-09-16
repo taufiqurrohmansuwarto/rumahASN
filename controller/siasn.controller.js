@@ -346,27 +346,6 @@ const getTreeRefSiasn = async (req, res) => {
 
 const getTreeRef = async (req, res) => {
   try {
-    const { siasnRequest: request } = req;
-
-    const currentTime = dayjs().format("YYYY-MM-DD");
-    const checkUpdate = await BackupSIASN.query()
-      .where("backup_date", currentTime)
-      .andWhere("type", "ref_unor")
-      .first();
-
-    if (!checkUpdate) {
-      // const data = await request.get("/referensi/ref-unor");
-      // console.log(data);
-      const result = refSiasnUnor();
-
-      await RefSIASNUnor.query().delete();
-      await RefSIASNUnor.query().insertGraph(result);
-      await BackupSIASN.query().insert({
-        backup_date: currentTime,
-        type: "ref_unor",
-      });
-    }
-
     const refUnor = await RefSIASNUnor.query();
 
     const data = refUnor;

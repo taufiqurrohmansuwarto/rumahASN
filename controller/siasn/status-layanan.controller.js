@@ -8,6 +8,8 @@ export const cekLayananPencantumanGelarByNip = async (req, res) => {
 
     const data = await cekPencantumanGelar(fetcher, nip);
 
+    console.log(data);
+
     res.json(data);
   } catch (error) {
     handleError(res, error);

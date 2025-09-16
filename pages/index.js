@@ -27,12 +27,10 @@ export default function Home() {
     const pegawaiBKD = asnBkd || pttBkd;
     const pegawaiPemda = userPns || userPttpk;
 
-    if (pegawaiBKD) {
+    if (pegawaiBKD || pegawaiPemda) {
       router.push("/asn-connect/asn-updates");
     } else if (fasilitatorMaster) {
       router.push("/rekon/dashboard");
-    } else if (pegawaiPemda || fasilitatorMaster) {
-      router.push("/asn-connect/asn-updates");
     } else {
       router.push("/feeds");
     }

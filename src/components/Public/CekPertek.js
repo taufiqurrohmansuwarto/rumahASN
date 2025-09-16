@@ -198,12 +198,7 @@ function CekPertek() {
 
   return (
     <>
-      <Button
-        shape="round"
-        icon={<FilePdfOutlined />}
-        type="primary"
-        onClick={handleOpenModal}
-      >
+      <Button shape="round" type="primary" onClick={handleOpenModal}>
         Cek Pertek
       </Button>
       <ModalCekPertek
