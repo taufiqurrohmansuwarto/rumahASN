@@ -67,7 +67,7 @@ const changeRoutes = (user) => {
     // persiapan ini seharusnya ditambahkan halaman dashboard seperti analisis dsb tapi jangan data
     if (pegawaiPemda || fasilitatorMaster) {
       userRoutes.routes.push({
-        path: "/asn-connect/asn-updates",
+        path: "/asn-connect/asn-knowledge",
         name: "ASN Connect (Saling Bantu)",
         icon: <IconNetwork size={18} />,
       });
@@ -417,12 +417,12 @@ const changeRoutes = (user) => {
 
     // Filter out the routes related to "pegawai pemda" specifically
     const pegawaiPemdaRoutes = routes.filter((route) =>
-      route.path.includes("/asn-connect")
+      route.path.includes("/asn-connect/asn-knowledge")
     );
 
     // Filter out the remaining routes that are not related to "pegawai pemda"
     const otherRoutes = routes.filter(
-      (route) => !route.path.includes("/asn-connect")
+      (route) => !route.path.includes("/asn-connect/asn-knowledge")
     );
 
     // Combine the "pegawai pemda" routes to be at the top, followed by other routes

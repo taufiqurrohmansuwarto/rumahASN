@@ -30,6 +30,10 @@ function LayoutASNConnect({ children, active = "asn-updates" }) {
 
   const tabItems = [
     {
+      key: "asn-knowledge",
+      label: "ASNPedia",
+    },
+    {
       key: "asn-updates",
       label: "Beranda",
     },
@@ -37,10 +41,7 @@ function LayoutASNConnect({ children, active = "asn-updates" }) {
     //   key: "asn-helper",
     //   label: "ASN Helper",
     // },
-    {
-      key: "asn-knowledge",
-      label: "ASNPedia",
-    },
+
     {
       key: "asn-discussions",
       label: "Forum",
