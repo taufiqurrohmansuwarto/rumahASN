@@ -70,6 +70,10 @@ const giveRatingMeeting = async (req, res) => {
 };
 
 const createJWT = (user, id) => {
+  const now = Math.floor(Date.now() / 1000); // detik (UTC)
+  const skew = 60; // toleransi 60 detik
+  const ttl = 60 * 60;
+
   const payload = {
     context: {
       user: {
@@ -79,12 +83,13 @@ const createJWT = (user, id) => {
         id: user?.customId,
       },
     },
+    nbf: now - skew,
+    exp: now + ttl,
     moderator: true,
     aud: appId,
     iss: appId,
     sub: "coaching-online.site",
     room: id,
-    exp: 1753498815,
   };
 
   const jwt = jsonwebtoken.sign(payload, appSecret);
