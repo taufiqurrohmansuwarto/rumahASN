@@ -431,6 +431,7 @@ const cekPertekByNomerPeserta = async (req, res) => {
   try {
     const knex = SiasnPengadaanProxy.knex();
     const { no_peserta, nip, ket_kelakuanbaik_nomor, tahun } = req?.body;
+    const { siasnRequest } = req;
 
     // buat syarat untuk req?.body beserta format
     if (!no_peserta || !nip || !ket_kelakuanbaik_nomor || !tahun) {
@@ -505,13 +506,15 @@ const cekPertekByNomerPeserta = async (req, res) => {
       const urlSk = result[0]?.path_ttd_sk;
 
       if (url) {
-        const file = await getFileAsn(url);
-        fileBase64 = file.toString("base64");
+        const file = await downloadDokumenAPI(siasnRequest, url);
+        // arraybuffer to base64
+        fileBase64 = Buffer.from(file).toString("base64");
       }
 
       if (urlSk) {
-        const fileSk = await getFileAsn(urlSk);
-        fileSkBase64 = fileSk.toString("base64");
+        const fileSk = await downloadDokumenAPI(siasnRequest, urlSk);
+        // array buffer to base64
+        fileSkBase64 = Buffer.from(fileSk).toString("base64");
       }
 
       const data = {
