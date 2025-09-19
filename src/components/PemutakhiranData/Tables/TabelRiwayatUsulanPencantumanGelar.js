@@ -4,18 +4,9 @@ import {
   InfoCircleOutlined,
   DownloadOutlined,
 } from "@ant-design/icons";
-import {
-  Card,
-  Empty,
-  Flex,
-  Space,
-  Spin,
-  Tag,
-  Typography,
-  Button,
-} from "antd";
+import { Card, Empty, Flex, Space, Spin, Tag, Typography, Button } from "antd";
 
-const { Text } = Typography;
+import { Text } from "@mantine/core";
 
 const TabelRiwayatUsulanPencantumanGelar = ({ data, isLoading }) => {
   if (isLoading) {
@@ -64,226 +55,212 @@ const TabelRiwayatUsulanPencantumanGelar = ({ data, isLoading }) => {
       {data.map((record, index) => (
         <Card
           key={record.id || index}
+          size="small"
           style={{
             backgroundColor: "#FFFFFF",
             border: "1px solid #EDEFF1",
             borderRadius: "4px",
             boxShadow: "0 1px 3px rgba(0, 0, 0, 0.1)",
-            transition: "all 0.2s ease",
           }}
           styles={{
             header: {
               borderBottom: "1px solid #EDEFF1",
               backgroundColor: "#F8F9FA",
-              padding: "12px 16px",
+              padding: "8px 12px",
             },
             body: {
-              padding: "16px",
+              padding: "12px",
             },
           }}
           title={
-            <Flex align="center" gap={12}>
-              <div 
+            <Flex align="center" gap={8}>
+              <div
                 style={{
-                  width: 8,
-                  height: 32,
-                  backgroundColor: "#FF4500",
+                  width: 4,
+                  height: 24,
+                  backgroundColor:
+                    record.status_usulan === "11" ? "#52C41A" : "#FA8C16",
                   borderRadius: 2,
                 }}
               />
-              <div>
-                <Text strong style={{ fontSize: 16, color: "#1C1C1C" }}>
-                  {record.nama}
-                </Text>
-                <br />
-                <Text type="secondary" style={{ fontSize: 12, color: "#878A8C" }}>
-                  NIP: {record.nip}
-                </Text>
-              </div>
+              <Text
+                strong
+                style={{
+                  fontSize: 14,
+                  color: record.status_usulan === "11" ? "#52C41A" : "#1C1C1C",
+                  textShadow:
+                    record.status_usulan === "11"
+                      ? "0 0 8px rgba(82, 196, 26, 0.3)"
+                      : "none",
+                }}
+              >
+                {record.nama_status_usulan}
+              </Text>
+              {record.status_usulan === "11" && (
+                <div
+                  style={{
+                    backgroundColor: "#52C41A",
+                    color: "white",
+                    fontSize: 10,
+                    padding: "2px 8px",
+                    borderRadius: 12,
+                    fontWeight: 600,
+                    boxShadow: "0 2px 4px rgba(82, 196, 26, 0.3)",
+                  }}
+                >
+                  ✓ DITERIMA
+                </div>
+              )}
             </Flex>
           }
         >
-          <Space direction="vertical" style={{ width: "100%" }} size={12}>
-            {/* Pendidikan Section */}
-            <div
-              style={{
-                backgroundColor: "#FAFBFC",
-                border: "1px solid #EDEFF1",
-                borderRadius: "4px",
-                padding: "12px",
-              }}
-            >
-              <Flex align="center" gap={8} style={{ marginBottom: 8 }}>
-                <BookOutlined style={{ color: "#FF4500", fontSize: 14 }} />
-                <Text strong style={{ color: "#1C1C1C", fontSize: 13 }}>
-                  PENDIDIKAN
-                </Text>
-              </Flex>
-              <Space direction="vertical" style={{ width: "100%" }} size={6}>
-                <Flex justify="space-between" align="center">
-                  <Text style={{ color: "#878A8C", fontSize: 12 }}>Tingkat</Text>
-                  <Tag 
-                    color="blue" 
-                    style={{ 
-                      fontSize: 11, 
-                      padding: "2px 6px",
-                      borderRadius: 2 
-                    }}
-                  >
-                    {record.tingkat_pendidikan_nama}
-                  </Tag>
+          <Space direction="vertical" style={{ width: "100%" }} size={8}>
+            {/* Compact Info Section */}
+            <Flex gap={12} wrap="wrap">
+              {/* Pendidikan */}
+              <div style={{ flex: 1, minWidth: 200 }}>
+                <Flex align="center" gap={6} style={{ marginBottom: 6 }}>
+                  <BookOutlined style={{ color: "#FF4500", fontSize: 12 }} />
+                  <Text strong style={{ color: "#1C1C1C", fontSize: 12 }}>
+                    PENDIDIKAN
+                  </Text>
                 </Flex>
-                <Flex justify="space-between" align="start">
-                  <Text style={{ color: "#878A8C", fontSize: 12 }}>Program</Text>
-                  <Text 
-                    style={{ 
-                      textAlign: "right", 
-                      maxWidth: 250,
-                      fontSize: 12,
-                      color: "#1C1C1C"
-                    }}
-                  >
+                <div style={{ fontSize: 11, lineHeight: "16px" }}>
+                  <div style={{ marginBottom: 2 }}>
+                    <Tag
+                      color="blue"
+                      style={{
+                        fontSize: 9,
+                        padding: "1px 4px",
+                        lineHeight: "14px",
+                      }}
+                    >
+                      {record.tingkat_pendidikan_nama}
+                    </Tag>
+                  </div>
+                  <Text style={{ color: "#1C1C1C", fontWeight: 500 }}>
                     {record.pendidikan_nama}
                   </Text>
-                </Flex>
-                <Flex justify="space-between" align="start">
-                  <Text style={{ color: "#878A8C", fontSize: 12 }}>Institusi</Text>
-                  <Text 
-                    style={{ 
-                      textAlign: "right", 
-                      maxWidth: 250,
-                      fontSize: 12,
-                      color: "#1C1C1C"
-                    }}
-                  >
-                    {record.nama_sek}
-                  </Text>
-                </Flex>
-                <Flex justify="space-between" align="center">
-                  <Text style={{ color: "#878A8C", fontSize: 12 }}>No. Ijazah</Text>
-                  <Text 
-                    code 
-                    style={{ 
-                      fontSize: 11,
-                      backgroundColor: "#F6F7F8",
-                      color: "#1C1C1C"
-                    }}
-                  >
-                    {record.nomor_ijazah || "-"}
-                  </Text>
-                </Flex>
-              </Space>
-            </div>
+                  <br />
+                  <Text style={{ color: "#878A8C" }}>{record.nama_sek}</Text>
+                </div>
+              </div>
 
-            {/* Gelar Section */}
-            <div
-              style={{
-                backgroundColor: "#F6FFED",
-                border: "1px solid #B7EB8F",
-                borderRadius: "4px",
-                padding: "12px",
-              }}
-            >
-              <Flex align="center" gap={8} style={{ marginBottom: 8 }}>
-                <div 
-                  style={{
-                    width: 12,
-                    height: 12,
-                    backgroundColor: "#52C41A",
-                    borderRadius: "50%",
-                  }}
-                />
-                <Text strong style={{ color: "#1C1C1C", fontSize: 13 }}>
-                  GELAR TEREGISTRASI
-                </Text>
-              </Flex>
-              <Space direction="vertical" style={{ width: "100%" }} size={6}>
-                <Flex justify="space-between" align="center">
-                  <Text style={{ color: "#878A8C", fontSize: 12 }}>Depan</Text>
-                  {record.gelar_depan ? (
-                    <Tag 
-                      style={{ 
+              {/* Gelar */}
+              <div style={{ flex: 1, minWidth: 150 }}>
+                <Flex align="center" gap={6} style={{ marginBottom: 6 }}>
+                  <div
+                    style={{
+                      width: 8,
+                      height: 8,
+                      backgroundColor:
+                        record.status_usulan === "11" ? "#52C41A" : "#FA8C16",
+                      borderRadius: "50%",
+                    }}
+                  />
+                  <Text strong style={{ color: "#1C1C1C", fontSize: 12 }}>
+                    {record.status_usulan === "11" ||
+                    record.nama_status_usulan ===
+                      "Profil PNS telah diperbaharui"
+                      ? "GELAR TEREGISTRASI"
+                      : "GELAR USULAN"}
+                  </Text>
+                </Flex>
+                <Flex gap={4} style={{ marginBottom: 4 }}>
+                  {record.gelar_depan && (
+                    <Tag
+                      style={{
                         backgroundColor: "#52C41A",
                         color: "white",
                         border: "none",
-                        fontSize: 11,
-                        padding: "2px 8px",
-                        borderRadius: 2
+                        fontSize: 9,
+                        padding: "1px 6px",
+                        lineHeight: "14px",
                       }}
                     >
                       {record.gelar_depan}
                     </Tag>
-                  ) : (
-                    <Text style={{ color: "#878A8C", fontSize: 12 }}>-</Text>
                   )}
-                </Flex>
-                <Flex justify="space-between" align="center">
-                  <Text style={{ color: "#878A8C", fontSize: 12 }}>Belakang</Text>
-                  {record.gelar_belakang ? (
-                    <Tag 
-                      style={{ 
+                  {record.gelar_belakang && (
+                    <Tag
+                      style={{
                         backgroundColor: "#FF7A00",
                         color: "white",
                         border: "none",
-                        fontSize: 11,
-                        padding: "2px 8px",
-                        borderRadius: 2
+                        fontSize: 9,
+                        padding: "1px 6px",
+                        lineHeight: "14px",
                       }}
                     >
                       {record.gelar_belakang}
                     </Tag>
-                  ) : (
-                    <Text style={{ color: "#878A8C", fontSize: 12 }}>-</Text>
                   )}
                 </Flex>
                 {record.tgl_approval && (
-                  <Flex justify="space-between" align="center">
-                    <Text style={{ color: "#878A8C", fontSize: 12 }}>
-                      <CalendarOutlined style={{ marginRight: 4 }} />
-                      Penetapan
-                    </Text>
-                    <Text 
-                      strong 
-                      style={{ 
-                        color: "#52C41A", 
-                        fontSize: 12,
-                        backgroundColor: "#F6FFED",
-                        padding: "2px 6px",
-                        borderRadius: 2,
-                        border: "1px solid #B7EB8F"
-                      }}
-                    >
-                      {record.tgl_approval}
-                    </Text>
-                  </Flex>
+                  <Text style={{ fontSize: 10, color: "#52C41A" }}>
+                    <CalendarOutlined style={{ marginRight: 2 }} />
+                    {record.tgl_approval}
+                  </Text>
                 )}
-                {record.path_sk && (
-                  <Flex justify="space-between" align="center">
-                    <Text style={{ color: "#878A8C", fontSize: 12 }}>
-                      Dokumen SK
-                    </Text>
-                    <Button
-                      type="link"
-                      size="small"
-                      icon={<DownloadOutlined />}
-                      href={`/helpdesk/api/siasn/ws/download?filePath=${record.path_sk}`}
-                      target="_blank"
-                      style={{
-                        height: 'auto',
-                        padding: '2px 8px',
-                        fontSize: 11,
-                        color: '#FF4500',
-                        backgroundColor: '#FFF4E6',
-                        border: '1px solid #FFD591',
-                        borderRadius: 2,
-                      }}
-                    >
-                      Download
-                    </Button>
-                  </Flex>
-                )}
-              </Space>
-            </div>
+              </div>
+            </Flex>
+
+            {/* Catatan/Alasan Tolak jika ada */}
+            {record.alasan_tolak && (
+              <div
+                style={{
+                  backgroundColor:
+                    record.status_usulan === "11" ? "#F6FFED" : "#FFF2F0",
+                  border:
+                    record.status_usulan === "11"
+                      ? "1px solid #B7EB8F"
+                      : "1px solid #FFB3BA",
+                  borderRadius: "4px",
+                  padding: "8px",
+                }}
+              >
+                <Text
+                  style={{
+                    fontSize: 11,
+                    color:
+                      record.status_usulan === "11" ? "#389E0D" : "#CF1322",
+                    fontStyle: "italic",
+                    lineHeight: "1.4",
+                  }}
+                >
+                  <strong>
+                    {record.status_usulan === "11"
+                      ? "Catatan Perbaikan (Sudah Diterima):"
+                      : "Catatan:"}
+                  </strong>{" "}
+                  {record.alasan_tolak}
+                </Text>
+              </div>
+            )}
+
+            {/* Download SK jika ada */}
+            {record.path_sk && (
+              <div>
+                <Button
+                  type="link"
+                  size="small"
+                  icon={<DownloadOutlined />}
+                  href={`/helpdesk/api/siasn/ws/download?filePath=${record.path_sk}`}
+                  target="_blank"
+                  style={{
+                    height: "auto",
+                    padding: "4px 8px",
+                    fontSize: 11,
+                    color: "#FF4500",
+                    backgroundColor: "#FFF4E6",
+                    border: "1px solid #FFD591",
+                    borderRadius: 3,
+                  }}
+                >
+                  Download SK
+                </Button>
+              </div>
+            )}
           </Space>
         </Card>
       ))}

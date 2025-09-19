@@ -4,6 +4,7 @@ const path = require("path");
 const fs = require("fs");
 const FormData = require("form-data");
 const { default: axios } = require("axios");
+const StatusUsul = require("@/models/ref_siasn/status-usul.model");
 
 const URL_REMOVE_BG = "http://localhost:5000/remove-bg";
 
@@ -516,10 +517,22 @@ module.exports.cekPencantumanGelar = async (fetcher, nip) => {
 
       const data = result?.data?.data;
       const empty = "Data tidak ditemukan";
+
       if (!data || data === empty) {
         resolve([]);
       } else {
-        resolve(data);
+        const statusUsul = await StatusUsul.query();
+        const dataResult = data.map((item) => {
+          const statusUsulan = statusUsul.find(
+            (status) => String(status.id) === String(item.status_usulan)
+          );
+          return {
+            ...item,
+            nama_status_usulan: statusUsulan?.nama,
+          };
+        });
+
+        resolve(dataResult);
       }
     } catch (error) {
       resolve([]);

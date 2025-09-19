@@ -542,3 +542,48 @@ export const checkJenjangPendidikanSIASN = (jenjangIdSIASN) => {
 
   return jenjangMapping[jenjangIdSIASN] || null;
 };
+
+export const statusUsulan = () => {
+  return [
+    {
+      id: "1",
+      nama: "Input Berkas",
+    },
+    {
+      id: "2",
+      nama: "Berkas Disimpan (Terverifikasi)",
+    },
+    {
+      id: "3",
+      nama: "Surat Usulan",
+    },
+    {
+      id: "4",
+      nama: "Approval Surat Usulan",
+    },
+    {
+      id: "5",
+      nama: "Perbaikan Dokumen",
+    },
+    {
+      id: "6",
+      nama: "Tidak Memenuhi Syarat",
+    },
+    {
+      id: "7",
+      nama: "Menunggu Cetak SK – Menyetujui",
+    },
+    {
+      id: "8",
+      nama: "Menunggu Cetak SK – Perbaikan Pertek",
+    },
+    {
+      id: "9",
+      nama: "Menunggu Cetak SK – Pembatalan Pertek",
+    },
+    {
+      id: "10",
+      nama: "Cetak SK",
+    },
+  ];
+};
