@@ -1,51 +1,66 @@
 import { logUser } from "@/services/log.services";
-import { useRouter } from "next/router";
-import { useMutation, useQuery } from "@tanstack/react-query";
 import {
+  DatabaseOutlined,
+  DownloadOutlined,
   LoginOutlined,
   LogoutOutlined,
+  ReloadOutlined,
   UserOutlined,
   GlobalOutlined,
-  ClockCircleOutlined,
   ChromeOutlined,
-  CalendarOutlined,
-  FilterOutlined,
-  DownloadOutlined,
 } from "@ant-design/icons";
+import { Text, Badge } from "@mantine/core";
 import {
-  Table,
-  Card,
-  Typography,
-  Tag,
-  Flex,
+  IconLogin,
+  IconLogout,
+  IconUser,
+  IconWorld,
+  IconBrandChrome,
+  IconBrandFirefox,
+  IconBrandSafari,
+  IconBrandEdge,
+  IconDeviceDesktop
+} from "@tabler/icons-react";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import {
   Avatar,
-  Tooltip,
-  Space,
-  Grid,
-  DatePicker,
   Button,
+  Card,
+  Col,
+  DatePicker,
+  Input,
+  Modal,
+  Row,
+  Space,
+  Table,
+  Tooltip,
+  Typography,
   message,
 } from "antd";
 import dayjs from "dayjs";
 import "dayjs/locale/id";
 import relativeTime from "dayjs/plugin/relativeTime";
+import { upperCase } from "lodash";
+import { useRouter } from "next/router";
+import { useState } from "react";
 import { saveAs } from "file-saver";
 import * as XLSX from "xlsx";
 
 dayjs.extend(relativeTime);
 
-const { Title, Text } = Typography;
-const { useBreakpoint } = Grid;
+const { Title } = Typography;
 
 const LogUser = () => {
   const router = useRouter();
-  const { page = 1, limit = 10, month } = router.query;
-  const screens = useBreakpoint();
-  const isMobile = !screens.md;
+  const { page = 1, limit = 15, month } = router.query;
 
-  const { data, isLoading, isFetching } = useQuery({
-    queryKey: ["log-user", page, limit, month],
-    queryFn: () => logUser({ page, limit, month }),
+  const { data, isLoading, isFetching, refetch, isRefetching } = useQuery({
+    queryKey: ["log-user", router?.query],
+    queryFn: () => logUser(router?.query),
+    enabled: !!router?.query,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
     keepPreviousData: true,
   });
 
@@ -232,13 +247,13 @@ const LogUser = () => {
   };
 
   const getBrowserInfo = (userAgent) => {
-    if (!userAgent) return { name: "Unknown", icon: "🌐" };
+    if (!userAgent) return { name: "Unknown", icon: <IconDeviceDesktop size={12} /> };
 
-    if (userAgent.includes("Firefox")) return { name: "Firefox", icon: "🦊" };
-    if (userAgent.includes("Chrome")) return { name: "Chrome", icon: "🌐" };
-    if (userAgent.includes("Safari")) return { name: "Safari", icon: "🧭" };
-    if (userAgent.includes("Edge")) return { name: "Edge", icon: "📘" };
-    return { name: "Other", icon: "💻" };
+    if (userAgent.includes("Firefox")) return { name: "Firefox", icon: <IconBrandFirefox size={12} /> };
+    if (userAgent.includes("Chrome")) return { name: "Chrome", icon: <IconBrandChrome size={12} /> };
+    if (userAgent.includes("Safari")) return { name: "Safari", icon: <IconBrandSafari size={12} /> };
+    if (userAgent.includes("Edge")) return { name: "Edge", icon: <IconBrandEdge size={12} /> };
+    return { name: "Other", icon: <IconDeviceDesktop size={12} /> };
   };
 
   const handleMonthChange = (date) => {
@@ -248,7 +263,7 @@ const LogUser = () => {
       query: {
         ...router.query,
         month: monthValue,
-        page: 1, // Reset to first page when filtering
+        page: 1,
       },
     });
   };
@@ -263,610 +278,273 @@ const LogUser = () => {
 
   const columns = [
     {
-      title: (
-        <Space>
-          <UserOutlined />
-          <Text strong>Aksi</Text>
-        </Space>
-      ),
-      dataIndex: "action",
-      key: "action",
-      width: isMobile ? 80 : 120,
-      align: "center",
-      render: (action) => {
-        const getActionConfig = (action) => {
-          switch (action) {
-            case "login":
-              return {
-                color: "success",
-                icon: <LoginOutlined style={{ fontSize: "12px" }} />,
-                text: "Login",
-                bgColor: "#f6ffed",
-                borderColor: "#b7eb8f",
-              };
-            case "logout":
-              return {
-                color: "error",
-                icon: <LogoutOutlined style={{ fontSize: "12px" }} />,
-                text: "Logout",
-                bgColor: "#fff2f0",
-                borderColor: "#ffccc7",
-              };
-            default:
-              return {
-                color: "default",
-                icon: <UserOutlined style={{ fontSize: "12px" }} />,
-                text: "Aktivitas",
-                bgColor: "#fafafa",
-                borderColor: "#d9d9d9",
-              };
-          }
-        };
-
-        const config = getActionConfig(action);
-        return (
-          <Tag
-            color={config.color}
-            icon={!isMobile ? config.icon : null}
+      title: "Pengguna",
+      key: "user",
+      width: 200,
+      render: (_, record) => (
+        <Space size="small">
+          <Avatar
+            src={record.user?.image}
+            size={36}
             style={{
-              borderRadius: "16px",
-              padding: isMobile ? "2px 8px" : "4px 12px",
-              fontSize: isMobile ? "10px" : "12px",
-              fontWeight: 500,
-              border: `1px solid ${config.borderColor}`,
-              backgroundColor: config.bgColor,
+              border: "2px solid #f0f0f0",
+              boxShadow: "0 2px 4px rgba(0,0,0,0.1)"
             }}
           >
-            {isMobile ? config.text.substring(0, 3) : config.text}
-          </Tag>
+            {!record.user?.image && <UserOutlined />}
+          </Avatar>
+          <div style={{ lineHeight: "1.1" }}>
+            <div>
+              <Text fw={600} size="xs">{record.user?.username || record.user_id}</Text>
+            </div>
+            {record.user?.employee_number && (
+              <div style={{ marginTop: "0px" }}>
+                <Text size="10px" c="dimmed">
+                  {record.user.employee_number}
+                </Text>
+              </div>
+            )}
+          </div>
+        </Space>
+      ),
+    },
+    {
+      title: "Aksi",
+      dataIndex: "action",
+      key: "action",
+      width: 100,
+      render: (action) => {
+        const actionConfig = {
+          login: { color: "green", icon: <IconLogin size={12} /> },
+          logout: { color: "red", icon: <IconLogout size={12} /> },
+        };
+        const config = actionConfig[action] || { color: "blue", icon: <IconUser size={12} /> };
+        return (
+          <Badge
+            color={config.color}
+            size="sm"
+            variant="light"
+            leftSection={<div style={{ display: "flex", alignItems: "center" }}>{config.icon}</div>}
+            styles={{
+              section: { display: "flex", alignItems: "center" },
+              label: { display: "flex", alignItems: "center" }
+            }}
+          >
+            {action?.toUpperCase()}
+          </Badge>
         );
       },
     },
     {
-      title: (
-        <Space>
-          <Avatar
-            size={16}
-            style={{ backgroundColor: "#FF4500" }}
-            icon={<UserOutlined />}
-          />
-          <Text strong>Pengguna</Text>
-        </Space>
-      ),
-      dataIndex: "user",
-      key: "user",
-      width: isMobile ? 200 : 280,
-      render: (user, record) => (
-        <Flex align="center" gap={8}>
-          <Avatar
-            size={isMobile ? 32 : 40}
-            src={user?.image}
-            style={{ backgroundColor: "#FF4500" }}
-            icon={<UserOutlined />}
-          />
-          <Flex vertical gap={2}>
-            <Text
-              style={{
-                fontSize: isMobile ? "11px" : "13px",
-                fontWeight: 600,
-                color: "#1a1a1a",
-                lineHeight: 1.2,
-              }}
-              ellipsis={{ tooltip: user?.username }}
-            >
-              {user?.username || record.user_id}
-            </Text>
-            {user?.employee_number && (
-              <Text
-                style={{
-                  fontSize: isMobile ? "9px" : "11px",
-                  color: "#666",
-                  fontFamily: "monospace",
-                }}
-              >
-                NIP: {user.employee_number}
-              </Text>
-            )}
-          </Flex>
-        </Flex>
-      ),
+      title: "IP Address",
+      dataIndex: "ip_address",
+      key: "ip_address",
+      width: 140,
+      render: (ip) => {
+        const isLocalhost = ip && (ip.includes("127.0.0.1") || ip.includes("::ffff:127.0.0.1"));
+        return (
+          <Badge
+            color={isLocalhost ? "orange" : "blue"}
+            size="sm"
+            variant="outline"
+            leftSection={<div style={{ display: "flex", alignItems: "center" }}><IconWorld size={12} /></div>}
+            styles={{
+              section: { display: "flex", alignItems: "center" },
+              label: { display: "flex", alignItems: "center" }
+            }}
+          >
+            {isLocalhost ? "LOCALHOST" : ip || "N/A"}
+          </Badge>
+        );
+      },
     },
-    ...(isMobile
-      ? []
-      : [
-          {
-            title: (
-              <Space>
-                <GlobalOutlined />
-                <Text strong>IP Address</Text>
-              </Space>
-            ),
-            dataIndex: "ip_address",
-            key: "ip_address",
-            width: 140,
-            render: (ip) => {
-              const isLocalhost =
-                ip &&
-                (ip.includes("127.0.0.1") || ip.includes("::ffff:127.0.0.1"));
-              return (
-                <Tooltip title={ip || "IP Address tidak tersedia"}>
-                  <Tag
-                    color={ip ? (isLocalhost ? "orange" : "blue") : "default"}
-                    style={{
-                      borderRadius: "8px",
-                      fontSize: "11px",
-                      fontFamily: "monospace",
-                    }}
-                  >
-                    {isLocalhost ? "🏠 Localhost" : ip || "N/A"}
-                  </Tag>
-                </Tooltip>
-              );
-            },
-          },
-          {
-            title: (
-              <Space>
-                <ChromeOutlined />
-                <Text strong>Browser</Text>
-              </Space>
-            ),
-            dataIndex: "user_agent",
-            key: "user_agent",
-            width: 120,
-            render: (userAgent) => {
-              const browser = getBrowserInfo(userAgent);
-              return (
-                <Tooltip title={userAgent || "User Agent tidak tersedia"}>
-                  <Tag
-                    style={{
-                      borderRadius: "12px",
-                      fontSize: "11px",
-                      padding: "2px 8px",
-                      backgroundColor: "#f0f8ff",
-                      border: "1px solid #d6e4ff",
-                      color: "#1890ff",
-                    }}
-                  >
-                    {browser.icon} {browser.name}
-                  </Tag>
-                </Tooltip>
-              );
-            },
-          },
-        ]),
     {
-      title: (
-        <Space>
-          <ClockCircleOutlined />
-          <Text strong>Waktu</Text>
-        </Space>
-      ),
+      title: "Browser",
+      dataIndex: "user_agent",
+      key: "user_agent",
+      width: 120,
+      render: (userAgent) => {
+        const browser = getBrowserInfo(userAgent);
+        return (
+          <Badge
+            size="sm"
+            variant="outline"
+            leftSection={<div style={{ display: "flex", alignItems: "center" }}>{browser.icon}</div>}
+            styles={{
+              section: { display: "flex", alignItems: "center" },
+              label: { display: "flex", alignItems: "center" }
+            }}
+          >
+            {browser.name?.toUpperCase()}
+          </Badge>
+        );
+      },
+    },
+    {
+      title: "Waktu",
       dataIndex: "created_at",
       key: "created_at",
-      width: isMobile ? 100 : 140,
-      render: (date) => (
-        <Tooltip title={dayjs(date).format("DD MMMM YYYY, HH:mm:ss")}>
-          <Flex align="center" gap={4} vertical={isMobile}>
-            {!isMobile && (
-              <ClockCircleOutlined
-                style={{ color: "#FF4500", fontSize: "12px" }}
-              />
-            )}
-            <Text
-              style={{
-                fontSize: isMobile ? "10px" : "12px",
-                color: "#FF4500",
-                fontWeight: 500,
-                cursor: "pointer",
-                textAlign: isMobile ? "center" : "left",
-              }}
-            >
-              {dayjs(date).locale("id").fromNow()}
-            </Text>
-            {isMobile && (
-              <Text
-                style={{
-                  fontSize: "9px",
-                  color: "#999",
-                  textAlign: "center",
-                }}
-              >
-                {dayjs(date).format("DD/MM HH:mm")}
+      width: 120,
+      render: (text) => (
+        <Tooltip title={dayjs(text).format("DD-MM-YYYY HH:mm:ss")}>
+          <div style={{ lineHeight: "1.1", cursor: "pointer" }}>
+            <Text size="xs">{dayjs(text).format("DD/MM/YY")}</Text>
+            <div style={{ marginTop: "0px" }}>
+              <Text size="10px" c="dimmed">
+                {dayjs(text).format("HH:mm")}
               </Text>
-            )}
-          </Flex>
+            </div>
+          </div>
         </Tooltip>
       ),
     },
-    ...(isMobile
-      ? []
-      : [
-          {
-            title: <Text strong>ID</Text>,
-            dataIndex: "id",
-            key: "id",
-            width: 80,
-            align: "center",
-            render: (id) => (
-              <Text
-                style={{
-                  fontSize: "11px",
-                  color: "#999",
-                  fontFamily: "monospace",
-                  backgroundColor: "#f5f5f5",
-                  padding: "2px 6px",
-                  borderRadius: "4px",
-                }}
-              >
-                #{id}
-              </Text>
-            ),
-          },
-        ]),
   ];
 
+  const tableData = data?.data || [];
+
   return (
-    <div
-      style={{
-        padding: isMobile ? "12px" : "20px",
-        backgroundColor: "#fafafa",
-        minHeight: "100vh",
-      }}
-    >
-      {/* Header */}
-      <Card
-        style={{
-          marginBottom: isMobile ? "12px" : "20px",
-          borderRadius: isMobile ? "8px" : "12px",
-          border: "1px solid #e8e8e8",
-        }}
-      >
-        <Flex align="center" gap={isMobile ? 12 : 16} wrap>
+    <div>
+      <div style={{ maxWidth: "100%" }}>
+        <Card
+          style={{
+            borderRadius: "12px",
+            boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+            border: "none",
+          }}
+        >
+          {/* Header Section */}
           <div
             style={{
-              width: isMobile ? "40px" : "48px",
-              height: isMobile ? "40px" : "48px",
-              backgroundColor: "#FF4500",
-              borderRadius: isMobile ? "8px" : "12px",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
+              background: "#FF4500",
+              color: "white",
+              padding: "24px",
+              textAlign: "center",
+              borderRadius: "12px 12px 0 0",
+              margin: "-24px -24px 0 -24px",
             }}
           >
-            <UserOutlined
+            <UserOutlined style={{ fontSize: "24px", marginBottom: "8px" }} />
+            <Title level={3} style={{ color: "white", margin: 0 }}>
+              Log User
+            </Title>
+            <Text style={{ color: "rgba(255,255,255,0.9)", fontSize: "14px" }}>
+              Monitoring aktivitas login dan logout pengguna
+            </Text>
+          </div>
+
+          {/* Filter and Actions Section */}
+          <div style={{ padding: "20px 0 16px 0", borderBottom: "1px solid #f0f0f0" }}>
+            <Row gutter={16} align="middle" justify="space-between">
+              <Col>
+                <Space>
+                  <Text fw={600} size="sm" c="dimmed">Filter Bulan:</Text>
+                  <DatePicker
+                    placeholder="Pilih Bulan"
+                    picker="month"
+                    value={month ? dayjs(month, "YYYY-MM") : null}
+                    onChange={handleMonthChange}
+                    allowClear
+                    style={{ width: "160px" }}
+                  />
+                  {month && (
+                    <Button
+                      type="text"
+                      onClick={clearFilter}
+                      style={{
+                        color: "#FF4500",
+                        fontWeight: "500",
+                        padding: "4px 8px"
+                      }}
+                    >
+                      Clear Filter
+                    </Button>
+                  )}
+                </Space>
+              </Col>
+              <Col>
+                <Space>
+                  <Button
+                    icon={<ReloadOutlined />}
+                    loading={isLoading || isRefetching}
+                    onClick={() => refetch()}
+                    style={{
+                      borderRadius: "6px",
+                      fontWeight: "500",
+                    }}
+                  >
+                    Refresh
+                  </Button>
+                  <Button
+                    type="primary"
+                    icon={<DownloadOutlined />}
+                    loading={isMutating}
+                    onClick={handleDownloadLog}
+                    style={{
+                      background: "#FF4500",
+                      borderColor: "#FF4500",
+                      borderRadius: "6px",
+                      fontWeight: "500",
+                    }}
+                  >
+                    Unduh Data
+                  </Button>
+                </Space>
+              </Col>
+            </Row>
+          </div>
+
+          {/* Table Section */}
+          <div style={{ marginTop: "16px" }}>
+            <Table
+              columns={columns}
+              dataSource={tableData}
+              rowKey="id"
+              loading={isLoading || isFetching}
+              scroll={{ x: 680 }}
+              size="middle"
               style={{
-                color: "white",
-                fontSize: isMobile ? "16px" : "20px",
+                borderRadius: "12px",
+                overflow: "hidden",
+              }}
+              pagination={{
+                position: ["bottomRight"],
+                total: data?.total || 0,
+                pageSize: parseInt(limit),
+                current: parseInt(page),
+                showSizeChanger: false,
+                onChange: (newPage, newPageSize) => {
+                  router.push({
+                    pathname: router.pathname,
+                    query: { ...router.query, page: newPage, limit: newPageSize },
+                  });
+                },
+                showTotal: (total, range) =>
+                  `${range[0].toLocaleString('id-ID')}-${range[1].toLocaleString('id-ID')} dari ${total.toLocaleString('id-ID')} records`,
+                style: { margin: "16px 0" },
+              }}
+              locale={{
+                emptyText: (
+                  <div style={{ padding: "60px", textAlign: "center" }}>
+                    <UserOutlined
+                      style={{ fontSize: 64, color: "#d1d5db", marginBottom: 24 }}
+                    />
+                    <div>
+                      <Text size="lg" c="dimmed">
+                        Tidak ada data log
+                      </Text>
+                    </div>
+                    <div style={{ marginTop: "8px" }}>
+                      <Text size="sm" c="dimmed">
+                        Belum ada aktivitas yang tercatat
+                      </Text>
+                    </div>
+                  </div>
+                ),
               }}
             />
           </div>
-          <div style={{ flex: 1 }}>
-            <Title
-              level={isMobile ? 4 : 3}
-              style={{ margin: 0, color: "#1a1a1a" }}
-            >
-              📋 Log Aktivitas Pengguna
-            </Title>
-            <Text
-              type="secondary"
-              style={{ fontSize: isMobile ? "12px" : "14px" }}
-            >
-              Riwayat aktivitas login dan logout pengguna sistem
-            </Text>
-          </div>
-        </Flex>
-      </Card>
-
-      {/* Filter Card */}
-      <Card
-        style={{
-          marginBottom: isMobile ? "12px" : "20px",
-          borderRadius: isMobile ? "8px" : "12px",
-          border: "1px solid #e8e8e8",
-        }}
-      >
-        <Flex align="center" gap={12} wrap justify="space-between">
-          <Flex align="center" gap={12} wrap>
-            <Flex align="center" gap={8}>
-              <FilterOutlined style={{ color: "#FF4500", fontSize: "16px" }} />
-              <Text strong style={{ color: "#1a1a1a" }}>
-                Filter:
-              </Text>
-            </Flex>
-
-            <Flex align="center" gap={8}>
-              <CalendarOutlined style={{ color: "#666", fontSize: "14px" }} />
-              <DatePicker
-                picker="month"
-                placeholder="Pilih Bulan"
-                value={month ? dayjs(month, "YYYY-MM") : null}
-                onChange={handleMonthChange}
-                style={{ width: isMobile ? 140 : 160 }}
-                format="MMMM YYYY"
-                allowClear={false}
-              />
-            </Flex>
-
-            {month && (
-              <Button
-                size="small"
-                onClick={clearFilter}
-                style={{
-                  borderColor: "#FF4500",
-                  color: "#FF4500",
-                }}
-              >
-                Clear Filter
-              </Button>
-            )}
-
-            {month && (
-              <Tag
-                color="orange"
-                style={{
-                  borderRadius: "12px",
-                  fontSize: "11px",
-                  padding: "2px 8px",
-                }}
-              >
-                📅 {dayjs(month, "YYYY-MM").format("MMMM YYYY")}
-              </Tag>
-            )}
-          </Flex>
-
-          <Button
-            type="primary"
-            icon={<DownloadOutlined />}
-            onClick={handleDownloadLog}
-            loading={isMutating}
-            style={{
-              backgroundColor: "#FF4500",
-              borderColor: "#FF4500",
-              borderRadius: "6px",
-              fontWeight: 500,
-            }}
-            size={isMobile ? "small" : "middle"}
-          >
-            {isMobile ? "Download" : "Download Excel"}
-          </Button>
-        </Flex>
-      </Card>
-
-      {/* Stats Card */}
-      {data && (
-        <Card
-          style={{
-            marginBottom: isMobile ? "12px" : "20px",
-            borderRadius: isMobile ? "8px" : "12px",
-            border: "1px solid #e8e8e8",
-          }}
-        >
-          <Flex justify="space-around" align="center" wrap>
-            <Flex vertical align="center" style={{ minWidth: "80px" }}>
-              <Text
-                style={{
-                  fontSize: isMobile ? "18px" : "24px",
-                  fontWeight: 600,
-                  color: "#FF4500",
-                }}
-              >
-                {data.total?.toLocaleString()}
-              </Text>
-              <Text
-                type="secondary"
-                style={{ fontSize: isMobile ? "10px" : "12px" }}
-              >
-                Total Log
-              </Text>
-            </Flex>
-            <Flex vertical align="center" style={{ minWidth: "80px" }}>
-              <Text
-                style={{
-                  fontSize: isMobile ? "18px" : "24px",
-                  fontWeight: 600,
-                  color: "#52c41a",
-                }}
-              >
-                {data.data?.filter((item) => item.action === "login").length ||
-                  0}
-              </Text>
-              <Text
-                type="secondary"
-                style={{ fontSize: isMobile ? "10px" : "12px" }}
-              >
-                Login
-              </Text>
-            </Flex>
-            <Flex vertical align="center" style={{ minWidth: "80px" }}>
-              <Text
-                style={{
-                  fontSize: isMobile ? "18px" : "24px",
-                  fontWeight: 600,
-                  color: "#ff4d4f",
-                }}
-              >
-                {data.data?.filter((item) => item.action === "logout").length ||
-                  0}
-              </Text>
-              <Text
-                type="secondary"
-                style={{ fontSize: isMobile ? "10px" : "12px" }}
-              >
-                Logout
-              </Text>
-            </Flex>
-          </Flex>
         </Card>
-      )}
-
-      {/* Table */}
-      <Card
-        style={{
-          borderRadius: isMobile ? "8px" : "12px",
-          border: "1px solid #e8e8e8",
-        }}
-      >
-        <Table
-          dataSource={data?.data}
-          columns={columns}
-          loading={isLoading || isFetching}
-          rowKey="id"
-          size={isMobile ? "small" : "middle"}
-          scroll={{ x: isMobile ? 600 : undefined }}
-          rowClassName={(record, index) =>
-            index % 2 === 0 ? "table-row-light" : "table-row-dark"
-          }
-          pagination={{
-            current: parseInt(page),
-            pageSize: parseInt(limit),
-            total: data?.total,
-            showTotal: (total, range) => (
-              <Text
-                style={{ color: "#666", fontSize: isMobile ? "11px" : "14px" }}
-              >
-                {isMobile ? (
-                  `${range[0]}-${range[1]} / ${total.toLocaleString()}`
-                ) : (
-                  <>
-                    Menampilkan{" "}
-                    <Text strong style={{ color: "#FF4500" }}>
-                      {range[0]}-{range[1]}
-                    </Text>{" "}
-                    dari{" "}
-                    <Text strong style={{ color: "#FF4500" }}>
-                      {total.toLocaleString()}
-                    </Text>{" "}
-                    aktivitas
-                    {month && (
-                      <Text style={{ color: "#999" }}>
-                        {" "}
-                        (bulan {dayjs(month, "YYYY-MM").format("MMMM YYYY")})
-                      </Text>
-                    )}
-                  </>
-                )}
-              </Text>
-            ),
-            showSizeChanger: !isMobile,
-            pageSizeOptions: ["10", "20", "50"],
-            simple: isMobile,
-            onChange: (newPage, newPageSize) => {
-              router.push({
-                pathname: router.pathname,
-                query: { ...router.query, page: newPage, limit: newPageSize },
-              });
-            },
-            style: {
-              marginTop: isMobile ? "12px" : "20px",
-              padding: isMobile ? "8px 0" : "16px 0",
-              borderTop: "1px solid #f0f0f0",
-            },
-          }}
-        />
-      </Card>
-
-      <style jsx global>{`
-        .ant-table-thead > tr > th {
-          background: #ffffff !important;
-          color: #1a1a1a !important;
-          font-weight: 600 !important;
-          border-bottom: 2px solid #ff4500 !important;
-          padding: ${isMobile ? "12px 8px" : "16px 12px"} !important;
-          font-size: ${isMobile ? "11px" : "14px"} !important;
-        }
-
-        .ant-table-thead > tr > th:first-child {
-          border-top-left-radius: 8px !important;
-        }
-
-        .ant-table-thead > tr > th:last-child {
-          border-top-right-radius: 8px !important;
-        }
-
-        .table-row-light {
-          background-color: #ffffff !important;
-        }
-
-        .table-row-dark {
-          background-color: #fafafa !important;
-        }
-
-        .ant-table-tbody > tr:hover > td {
-          background-color: #fff7e6 !important;
-          transition: all 0.2s ease !important;
-        }
-
-        .ant-table-tbody > tr > td {
-          border-bottom: 1px solid #f0f0f0 !important;
-          padding: ${isMobile ? "8px 6px" : "12px"} !important;
-          transition: all 0.2s ease !important;
-        }
-
-        .ant-pagination-item-active {
-          background: linear-gradient(
-            135deg,
-            #ff4500 0%,
-            #ff6b35 100%
-          ) !important;
-          border-color: #ff4500 !important;
-          box-shadow: 0 2px 4px rgba(255, 69, 0, 0.3) !important;
-        }
-
-        .ant-pagination-item-active a {
-          color: white !important;
-          font-weight: 600 !important;
-        }
-
-        .ant-pagination-item:hover {
-          border-color: #ff4500 !important;
-          transform: translateY(-1px) !important;
-          box-shadow: 0 2px 4px rgba(255, 69, 0, 0.2) !important;
-          transition: all 0.2s ease !important;
-        }
-
-        .ant-pagination-item:hover a {
-          color: #ff4500 !important;
-        }
-
-        .ant-select:not(.ant-select-disabled):hover .ant-select-selector {
-          border-color: #ff4500 !important;
-        }
-
-        .ant-select-focused .ant-select-selector {
-          border-color: #ff4500 !important;
-          box-shadow: 0 0 0 2px rgba(255, 69, 0, 0.2) !important;
-        }
-
-        .ant-picker:hover,
-        .ant-picker-focused {
-          border-color: #ff4500 !important;
-          box-shadow: 0 0 0 2px rgba(255, 69, 0, 0.2) !important;
-        }
-
-        .ant-table-container {
-          border-radius: 8px !important;
-          overflow: hidden !important;
-        }
-
-        .ant-card {
-          transition: all 0.3s ease !important;
-        }
-
-        .ant-card:hover {
-          border-color: #ff4500 !important;
-        }
-
-        @media (max-width: 768px) {
-          .ant-table-pagination {
-            text-align: center !important;
-          }
-
-          .ant-pagination-simple .ant-pagination-simple-pager {
-            margin: 0 8px !important;
-          }
-        }
-      `}</style>
+      </div>
     </div>
   );
 };
