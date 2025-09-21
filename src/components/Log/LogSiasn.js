@@ -24,6 +24,7 @@ import {
   Checkbox,
   Col,
   DatePicker,
+  Grid,
   Input,
   Modal,
   Row,
@@ -49,10 +50,13 @@ dayjs.extend(relativeTime);
 const ReactJson = dynamic(() => import("react-json-view"), { ssr: false });
 
 const { Title } = Typography;
+const { useBreakpoint } = Grid;
 
 const LogSiasn = () => {
   const router = useRouter();
   const { page = 1, limit = 15, bulan, search, mandiri } = router.query;
+  const screens = useBreakpoint();
+  const isXs = !screens?.sm;
   const [modalOpened, setModalOpened] = useState(false);
   const [selectedRecord, setSelectedRecord] = useState(null);
 
@@ -415,56 +419,62 @@ const LogSiasn = () => {
 
           {/* Filter and Actions Section */}
           <div style={{ padding: "20px 0 16px 0", borderBottom: "1px solid #f0f0f0" }}>
-            <Row gutter={16} align="middle" justify="space-between">
-              <Col>
-                <Space>
-                  <Text fw={600} size="sm" c="dimmed">Filter Bulan:</Text>
-                  <DatePicker
-                    placeholder="Pilih Bulan"
-                    picker="month"
-                    value={bulan ? dayjs(bulan, "YYYY-MM") : null}
-                    onChange={handleBulanChange}
-                    allowClear
-                    style={{ width: "160px" }}
-                  />
-                  <Text fw={600} size="sm" c="dimmed">Cari User:</Text>
-                  <Input.Search
-                    placeholder="Cari berdasarkan nama pengguna..."
-                    defaultValue={search}
-                    onSearch={handleSearch}
-                    style={{ width: "200px" }}
-                  />
-                  <Checkbox
-                    checked={mandiri === "true"}
-                    onChange={(e) => handleMandiriChange(e.target.checked)}
-                  >
-                    Hanya Mandiri
-                  </Checkbox>
-                  {(bulan || search || mandiri) && (
-                    <Button
-                      type="text"
-                      onClick={clearFilter}
-                      style={{
-                        color: "#FF4500",
-                        fontWeight: "500",
-                        padding: "4px 8px"
-                      }}
-                    >
-                      Clear Filter
-                    </Button>
-                  )}
-                </Space>
+            <Row gutter={[12, 12]} align="middle" justify="space-between">
+              <Col xs={24} md={16}>
+                <Row gutter={[8, 8]} align="middle">
+                  <Col xs={24} sm={12} md={8}>
+                    <div style={{ display: "flex", flexDirection: isXs ? "column" : "row", alignItems: isXs ? "stretch" : "center", gap: 6 }}>
+                      <Text fw={600} size="sm" c="dimmed">Filter Bulan:</Text>
+                      <DatePicker
+                        placeholder="Pilih Bulan"
+                        picker="month"
+                        value={bulan ? dayjs(bulan, "YYYY-MM") : null}
+                        onChange={handleBulanChange}
+                        allowClear
+                        style={{ width: isXs ? "100%" : 160 }}
+                      />
+                    </div>
+                  </Col>
+                  <Col xs={24} sm={12} md={8}>
+                    <div style={{ display: "flex", flexDirection: isXs ? "column" : "row", alignItems: isXs ? "stretch" : "center", gap: 6 }}>
+                      <Text fw={600} size="sm" c="dimmed">Cari User:</Text>
+                      <Input.Search
+                        placeholder="Cari berdasarkan nama pengguna..."
+                        defaultValue={search}
+                        onSearch={handleSearch}
+                        allowClear
+                        style={{ width: isXs ? "100%" : 200 }}
+                      />
+                    </div>
+                  </Col>
+                  <Col xs={24} sm={12} md={6}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                      <Checkbox
+                        checked={mandiri === "true"}
+                        onChange={(e) => handleMandiriChange(e.target.checked)}
+                      >
+                        Hanya Mandiri
+                      </Checkbox>
+                      {(bulan || search || mandiri) && (
+                        <Button
+                          type="text"
+                          onClick={clearFilter}
+                          style={{ color: "#FF4500", fontWeight: 500, padding: "4px 8px" }}
+                          block={isXs}
+                        >
+                          Clear Filter
+                        </Button>
+                      )}
+                    </div>
+                  </Col>
+                </Row>
               </Col>
-              <Col>
-                <Space>
+              <Col xs={24} md={8} style={{ display: "flex", justifyContent: isXs ? "flex-start" : "flex-end" }}>
+                <Space wrap>
                   <Button
                     loading={isLoading || isRefetching}
                     onClick={() => refetch()}
-                    style={{
-                      borderRadius: "6px",
-                      fontWeight: "500",
-                      padding: "0 16px",
-                    }}
+                    style={{ borderRadius: 6, fontWeight: 500, padding: "0 16px" }}
                   >
                     Refresh
                   </Button>
@@ -472,13 +482,7 @@ const LogSiasn = () => {
                     type="primary"
                     loading={isMutating}
                     onClick={handleDownloadLog}
-                    style={{
-                      background: "#FF4500",
-                      borderColor: "#FF4500",
-                      borderRadius: "6px",
-                      fontWeight: "500",
-                      padding: "0 16px",
-                    }}
+                    style={{ background: "#FF4500", borderColor: "#FF4500", borderRadius: 6, fontWeight: 500, padding: "0 16px" }}
                   >
                     Unduh Data
                   </Button>

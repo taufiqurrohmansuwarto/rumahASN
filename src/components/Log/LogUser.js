@@ -28,6 +28,7 @@ import {
   Card,
   Col,
   DatePicker,
+  Grid,
   Input,
   Modal,
   Row,
@@ -49,10 +50,13 @@ import * as XLSX from "xlsx";
 dayjs.extend(relativeTime);
 
 const { Title } = Typography;
+const { useBreakpoint } = Grid;
 
 const LogUser = () => {
   const router = useRouter();
   const { page = 1, limit = 15, month } = router.query;
+  const screens = useBreakpoint();
+  const isXs = !screens?.sm;
 
   const { data, isLoading, isFetching, refetch, isRefetching } = useQuery({
     queryKey: ["log-user", router?.query],
@@ -434,43 +438,43 @@ const LogUser = () => {
 
           {/* Filter and Actions Section */}
           <div style={{ padding: "20px 0 16px 0", borderBottom: "1px solid #f0f0f0" }}>
-            <Row gutter={16} align="middle" justify="space-between">
-              <Col>
-                <Space>
-                  <Text fw={600} size="sm" c="dimmed">Filter Bulan:</Text>
-                  <DatePicker
-                    placeholder="Pilih Bulan"
-                    picker="month"
-                    value={month ? dayjs(month, "YYYY-MM") : null}
-                    onChange={handleMonthChange}
-                    allowClear
-                    style={{ width: "160px" }}
-                  />
+            <Row gutter={[12, 12]} align="middle" justify="space-between">
+              <Col xs={24} md={16}>
+                <Row gutter={[8, 8]} align="middle">
+                  <Col xs={24} sm={12} md={10}>
+                    <div style={{ display: "flex", flexDirection: isXs ? "column" : "row", alignItems: isXs ? "stretch" : "center", gap: 6 }}>
+                      <Text fw={600} size="sm" c="dimmed">Filter Bulan:</Text>
+                      <DatePicker
+                        placeholder="Pilih Bulan"
+                        picker="month"
+                        value={month ? dayjs(month, "YYYY-MM") : null}
+                        onChange={handleMonthChange}
+                        allowClear
+                        style={{ width: isXs ? "100%" : 160 }}
+                      />
+                    </div>
+                  </Col>
                   {month && (
-                    <Button
-                      type="text"
-                      onClick={clearFilter}
-                      style={{
-                        color: "#FF4500",
-                        fontWeight: "500",
-                        padding: "4px 8px"
-                      }}
-                    >
-                      Clear Filter
-                    </Button>
+                    <Col xs={24} md={6}>
+                      <Button
+                        type="text"
+                        onClick={clearFilter}
+                        style={{ color: "#FF4500", fontWeight: 500, padding: "4px 8px" }}
+                        block={isXs}
+                      >
+                        Clear Filter
+                      </Button>
+                    </Col>
                   )}
-                </Space>
+                </Row>
               </Col>
-              <Col>
-                <Space>
+              <Col xs={24} md={8} style={{ display: "flex", justifyContent: isXs ? "flex-start" : "flex-end" }}>
+                <Space wrap>
                   <Button
                     icon={<ReloadOutlined />}
                     loading={isLoading || isRefetching}
                     onClick={() => refetch()}
-                    style={{
-                      borderRadius: "6px",
-                      fontWeight: "500",
-                    }}
+                    style={{ borderRadius: 6, fontWeight: 500 }}
                   >
                     Refresh
                   </Button>
@@ -479,12 +483,7 @@ const LogUser = () => {
                     icon={<DownloadOutlined />}
                     loading={isMutating}
                     onClick={handleDownloadLog}
-                    style={{
-                      background: "#FF4500",
-                      borderColor: "#FF4500",
-                      borderRadius: "6px",
-                      fontWeight: "500",
-                    }}
+                    style={{ background: "#FF4500", borderColor: "#FF4500", borderRadius: 6, fontWeight: 500 }}
                   >
                     Unduh Data
                   </Button>

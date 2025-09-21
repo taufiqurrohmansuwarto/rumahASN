@@ -1,5 +1,16 @@
-import { Flex, DatePicker, Card, Space, Typography, Skeleton } from "antd";
-import { CalendarOutlined, BarChartOutlined } from "@ant-design/icons";
+import {
+  DatePicker,
+  Card,
+  Space,
+  Typography,
+  Skeleton,
+  Grid,
+  Row,
+  Col,
+  Button,
+} from "antd";
+import { BarChartOutlined, ReloadOutlined } from "@ant-design/icons";
+import { Text as MText, Badge } from "@mantine/core";
 import dayjs from "dayjs";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
@@ -7,13 +18,16 @@ import { logSIASNDashboard } from "@/services/log.services";
 import Bar from "@/components/Plots/Bar";
 
 const { Title, Text } = Typography;
+const { useBreakpoint } = Grid;
 
 const DashboardLogSiasn = () => {
-  const [month, setMonth] = useState(dayjs().startOf("month").toDate());
+  const [month, setMonth] = useState(dayjs().startOf("month"));
+  const screens = useBreakpoint();
+  const isXs = !screens?.sm;
 
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, refetch, isRefetching } = useQuery({
     queryKey: ["log-siasn-dashboard", month],
-    queryFn: () => logSIASNDashboard({ month: dayjs(month).format("YYYY-MM") }),
+    queryFn: () => logSIASNDashboard({ month: month?.format("YYYY-MM") }),
   });
 
   const config = {
@@ -28,154 +42,141 @@ const DashboardLogSiasn = () => {
   };
 
   return (
-    <div
-      style={{
-        padding: "24px",
-        backgroundColor: "#FAFAFB",
-      }}
-    >
-      {/* Header Section */}
-      <div style={{ marginBottom: "32px" }}>
-        <Title
-          level={2}
-          style={{ margin: 0, color: "#1F2937", fontWeight: 700 }}
+    <div>
+      <div style={{ maxWidth: "100%" }}>
+        <Card
+          style={{
+            borderRadius: "12px",
+            boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+            border: "none",
+          }}
         >
-          Dashboard Log SIASN
-        </Title>
-        <Text type="secondary" style={{ fontSize: "16px", lineHeight: "24px" }}>
-          Monitoring dan analisis log aktivitas sistem SIASN
-        </Text>
-      </div>
-
-      {/* Filter Section */}
-      <Card
-        style={{
-          marginBottom: "24px",
-          borderRadius: "16px",
-          border: "1px solid #E5E7EB",
-          boxShadow: "0 1px 3px rgba(0, 0, 0, 0.1)",
-        }}
-        bodyStyle={{ padding: "24px" }}
-      >
-        <Space direction="vertical" size={8} style={{ width: "100%" }}>
-          <Flex align="center" gap={8}>
-            <CalendarOutlined style={{ color: "#6B7280", fontSize: "16px" }} />
-            <Text strong style={{ color: "#374151", fontSize: "16px" }}>
-              Pilih Periode
-            </Text>
-          </Flex>
-          <DatePicker.MonthPicker
-            type="month"
-            format="YYYY-MM"
-            value={dayjs(month)}
-            onChange={(date) => setMonth(date)}
-            placeholder="Pilih bulan untuk melihat data log..."
-            style={{ width: "100%" }}
-            size="large"
-          />
-        </Space>
-      </Card>
-
-      {/* Chart Section */}
-      <div>
-        {isLoading ? (
-          <Card
+          {/* Header Section */}
+          <div
             style={{
-              borderRadius: "16px",
-              border: "1px solid #E5E7EB",
-              boxShadow: "0 1px 3px rgba(0, 0, 0, 0.1)",
-            }}
-            bodyStyle={{ padding: "32px" }}
-          >
-            <Skeleton active paragraph={{ rows: 8 }} />
-          </Card>
-        ) : data && data.length > 0 ? (
-          <Card
-            style={{
-              borderRadius: "16px",
-              border: "1px solid #E5E7EB",
-              boxShadow: "0 1px 3px rgba(0, 0, 0, 0.1)",
-              transition: "all 0.3s ease",
-            }}
-            bodyStyle={{ padding: "32px" }}
-            hoverable
-            onMouseEnter={(e) => {
-              e.currentTarget.style.transform = "translateY(-2px)";
-              e.currentTarget.style.boxShadow = "0 8px 25px rgba(0, 0, 0, 0.1)";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.transform = "translateY(0)";
-              e.currentTarget.style.boxShadow = "0 1px 3px rgba(0, 0, 0, 0.1)";
-            }}
-          >
-            <Space direction="vertical" size={24} style={{ width: "100%" }}>
-              <Flex align="center" gap={12}>
-                <div
-                  style={{
-                    width: "40px",
-                    height: "40px",
-                    borderRadius: "12px",
-                    backgroundColor: "#6366F1",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                  }}
-                >
-                  <BarChartOutlined
-                    style={{ color: "white", fontSize: "18px" }}
-                  />
-                </div>
-                <Title level={4} style={{ margin: 0, color: "#1F2937" }}>
-                  Visualisasi Log Aktivitas
-                </Title>
-                <Text type="secondary" style={{ fontSize: "14px" }}>
-                  {dayjs(month).format("MMMM YYYY")}
-                </Text>
-              </Flex>
-
-              <div style={{ padding: "16px 0" }}>
-                <Bar {...config} />
-              </div>
-            </Space>
-          </Card>
-        ) : (
-          <Card
-            style={{
-              borderRadius: "16px",
-              border: "1px solid #E5E7EB",
-              boxShadow: "0 1px 3px rgba(0, 0, 0, 0.1)",
+              background: "#FF4500",
+              color: "white",
+              padding: "24px",
               textAlign: "center",
+              borderRadius: "12px 12px 0 0",
+              margin: "-24px -24px 0 -24px",
             }}
-            bodyStyle={{ padding: "64px 32px" }}
           >
-            <Space direction="vertical" size={16}>
-              <div
+            <BarChartOutlined style={{ fontSize: 24, marginBottom: 8 }} />
+            <Title level={3} style={{ color: "white", margin: 0 }}>
+              Dashboard Log SIASN
+            </Title>
+            <Text style={{ color: "rgba(255,255,255,0.9)", fontSize: 14 }}>
+              Monitoring dan analisis log aktivitas SIASN
+            </Text>
+          </div>
+
+          {/* Filter Section */}
+          <div
+            style={{
+              padding: "20px 0 16px 0",
+              borderBottom: "1px solid #f0f0f0",
+            }}
+          >
+            <Row gutter={[12, 12]} align="middle" justify="space-between">
+              <Col xs={24} md={16}>
+                <Row gutter={[8, 8]} align="middle">
+                  <Col xs={24} sm={12} md={10}>
+                    <div
+                      style={{
+                        display: "flex",
+                        flexDirection: isXs ? "column" : "row",
+                        alignItems: isXs ? "stretch" : "center",
+                        gap: 6,
+                      }}
+                    >
+                      <Text strong style={{ color: "#6b7280" }}>
+                        Filter Bulan:
+                      </Text>
+                      <DatePicker
+                        placeholder="Pilih Bulan"
+                        picker="month"
+                        value={month}
+                        onChange={(date) => setMonth(date)}
+                        allowClear={false}
+                        style={{ width: isXs ? "100%" : 160 }}
+                      />
+                    </div>
+                  </Col>
+                </Row>
+              </Col>
+              <Col
+                xs={24}
+                md={8}
                 style={{
-                  width: "64px",
-                  height: "64px",
-                  borderRadius: "50%",
-                  backgroundColor: "#F3F4F6",
                   display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  margin: "0 auto",
+                  justifyContent: isXs ? "flex-start" : "flex-end",
                 }}
               >
-                <BarChartOutlined
-                  style={{ color: "#9CA3AF", fontSize: "24px" }}
-                />
+                <Space wrap>
+                  <Button
+                    icon={<ReloadOutlined />}
+                    loading={isLoading || isRefetching}
+                    onClick={() => refetch()}
+                    style={{
+                      borderRadius: 6,
+                      fontWeight: 500,
+                      padding: "0 16px",
+                    }}
+                  >
+                    Refresh
+                  </Button>
+                </Space>
+              </Col>
+            </Row>
+          </div>
+
+          {/* Chart Section */}
+          <div style={{ marginTop: 16 }}>
+            {isLoading ? (
+              <div style={{ padding: 24 }}>
+                <Skeleton active paragraph={{ rows: 8 }} />
               </div>
-              <Space direction="vertical" size={8}>
-                <Text style={{ color: "#6B7280", fontSize: "16px" }}>
-                  Tidak ada data log untuk periode ini
-                </Text>
-                <Text type="secondary" style={{ fontSize: "14px" }}>
-                  Coba pilih periode yang berbeda untuk melihat data log
-                </Text>
-              </Space>
-            </Space>
-          </Card>
-        )}
+            ) : data && data.length > 0 ? (
+              <div style={{ padding: "16px 0" }}>
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 8,
+                    marginBottom: 12,
+                    padding: "8px 12px",
+                    backgroundColor: "#fafafa",
+                    border: "1px solid #f0f0f0",
+                    borderRadius: 8,
+                  }}
+                >
+                  <MText fw={700} size="sm">Visualisasi Log Aktivitas</MText>
+                  <Badge color="orange" variant="light" size="sm">
+                    {month?.format("MMMM YYYY")}
+                  </Badge>
+                </div>
+                <Bar {...config} />
+              </div>
+            ) : (
+              <div style={{ padding: 48, textAlign: "center" }}>
+                <BarChartOutlined
+                  style={{ fontSize: 42, color: "#d1d5db", marginBottom: 12 }}
+                />
+                <div>
+                  <Text style={{ color: "#6b7280", fontSize: 16 }}>
+                    Tidak ada data log untuk periode ini
+                  </Text>
+                </div>
+                <div style={{ marginTop: 6 }}>
+                  <Text type="secondary" style={{ fontSize: 14 }}>
+                    Coba pilih periode yang berbeda untuk melihat data log
+                  </Text>
+                </div>
+              </div>
+            )}
+          </div>
+        </Card>
       </div>
     </div>
   );

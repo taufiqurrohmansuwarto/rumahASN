@@ -195,6 +195,7 @@ const LogBSRE = () => {
   const { page = 1, limit = 10, month, search } = router.query;
   const screens = useBreakpoint();
   const isMobile = !screens?.md;
+  const isXs = !screens?.sm; // only true for extra-small screens
 
   const [itemId, setItemId] = useState(null);
   const [openModal, setOpenModal] = useState(false);
@@ -589,61 +590,70 @@ const LogBSRE = () => {
           </div>
 
           {/* Filter and Actions Section */}
-          <div
-            style={{
-              padding: "20px 0 16px 0",
-              borderBottom: "1px solid #f0f0f0",
-            }}
-          >
-            <Row gutter={16} align="middle" justify="space-between">
-              <Col>
-                <Space>
-                  <Text strong style={{ color: "#6b7280" }}>
-                    Filter Bulan:
-                  </Text>
-                  <DatePicker
-                    placeholder="Pilih Bulan"
-                    picker="month"
-                    value={month ? dayjs(month, "YYYY-MM") : null}
-                    onChange={handleMonthChange}
-                    allowClear
-                    style={{ width: 160 }}
-                  />
-                  <Text strong style={{ color: "#6b7280" }}>
-                    Cari User:
-                  </Text>
-                  <Input.Search
-                    placeholder="Cari berdasarkan nama pengguna..."
-                    defaultValue={search}
-                    onSearch={handleSearch}
-                    style={{ width: 200 }}
-                    allowClear
-                  />
-                  {(month || search) && (
-                    <Button
-                      type="text"
-                      onClick={clearFilter}
+          <div style={{ padding: "20px 0 16px 0", borderBottom: "1px solid #f0f0f0" }}>
+            <Row gutter={[12, 12]} align="middle" justify="space-between">
+              <Col xs={24} md={16}>
+                <Row gutter={[8, 8]} align="middle">
+                  <Col xs={24} sm={12} md={10}>
+                    <div
                       style={{
-                        color: "#FF4500",
-                        fontWeight: "500",
-                        padding: "4px 8px",
+                        display: "flex",
+                        flexDirection: isXs ? "column" : "row",
+                        alignItems: isXs ? "stretch" : "center",
+                        gap: 6,
                       }}
                     >
-                      Clear Filter
-                    </Button>
+                      <Text strong style={{ color: "#6b7280" }}>Filter Bulan:</Text>
+                      <DatePicker
+                        placeholder="Pilih Bulan"
+                        picker="month"
+                        value={month ? dayjs(month, "YYYY-MM") : null}
+                        onChange={handleMonthChange}
+                        allowClear
+                        style={{ width: isXs ? "100%" : 160 }}
+                      />
+                    </div>
+                  </Col>
+                  <Col xs={24} sm={12} md={12}>
+                    <div
+                      style={{
+                        display: "flex",
+                        flexDirection: isXs ? "column" : "row",
+                        alignItems: isXs ? "stretch" : "center",
+                        gap: 6,
+                      }}
+                    >
+                      <Text strong style={{ color: "#6b7280" }}>Cari User:</Text>
+                      <Input.Search
+                        placeholder="Cari berdasarkan nama pengguna..."
+                        defaultValue={search}
+                        onSearch={handleSearch}
+                        allowClear
+                        style={{ width: isXs ? "100%" : 220 }}
+                      />
+                    </div>
+                  </Col>
+                  {(month || search) && (
+                    <Col xs={24} md={2}>
+                      <Button
+                        type="text"
+                        onClick={clearFilter}
+                        style={{ color: "#FF4500", fontWeight: 500, padding: "4px 8px" }}
+                        block={isXs}
+                      >
+                        Clear Filter
+                      </Button>
+                    </Col>
                   )}
-                </Space>
+                </Row>
               </Col>
-              <Col>
-                <Space>
+
+              <Col xs={24} md={8} style={{ display: "flex", justifyContent: isXs ? "flex-start" : "flex-end" }}>
+                <Space wrap>
                   <Button
                     loading={isLoading || isRefetching}
                     onClick={() => refetch()}
-                    style={{
-                      borderRadius: "6px",
-                      fontWeight: "500",
-                      padding: "0 16px",
-                    }}
+                    style={{ borderRadius: 6, fontWeight: 500, padding: "0 16px" }}
                   >
                     Refresh
                   </Button>
@@ -654,8 +664,8 @@ const LogBSRE = () => {
                     style={{
                       background: "#FF4500",
                       borderColor: "#FF4500",
-                      borderRadius: "6px",
-                      fontWeight: "500",
+                      borderRadius: 6,
+                      fontWeight: 500,
                       padding: "0 16px",
                     }}
                   >

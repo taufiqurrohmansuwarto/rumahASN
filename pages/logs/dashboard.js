@@ -1,7 +1,7 @@
-import LogDashboard from "@/components/Log/LogDashboard";
-import PageContainer from "@/components/PageContainer";
+import DashboardLogSiasn from "@/components/Log/DashboardLogSiasn";
 import LogLayout from "@/components/Log/LogLayout";
-import { Grid, Breadcrumb } from "antd";
+import PageContainer from "@/components/PageContainer";
+import { Breadcrumb, Grid } from "antd";
 import Head from "next/head";
 
 function DashboardLogs() {
@@ -23,7 +23,7 @@ function DashboardLogs() {
           </Breadcrumb>
         )}
       >
-        <LogDashboard />
+        <DashboardLogSiasn />
       </PageContainer>
     </>
   );
