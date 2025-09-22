@@ -26,6 +26,7 @@ async function getKpWithPegawai({
   perPage = 10,
   sortBy = "nama_master", // Default sorting berdasarkan nama_master
   sortOrder = "ascend", // Default sorting order
+  download = false,
 } = {}) {
   try {
     const knex = KenaikanPangkat.knex();
@@ -91,8 +92,14 @@ async function getKpWithPegawai({
     // Sorting
     query.orderBy(sortColumn, validSortOrder);
 
-    // Pagination
-    const result = await query.limit(perPage).offset((page - 1) * perPage);
+    // Jika download true, jangan pakai pagination
+    let result;
+    if (download) {
+      result = await query;
+    } else {
+      // Pagination hanya untuk non-download
+      result = await query.limit(perPage).offset((page - 1) * perPage);
+    }
 
     // Query total data tanpa pagination
     const totalDataQuery = knex("siasn_kp as kp")
@@ -125,10 +132,11 @@ async function getKpWithPegawai({
         sortBy,
         sortOrder: validSortOrder,
       },
-      page,
-      perPage,
+      page: download ? 1 : page,
+      perPage: download ? result.length : perPage,
       totalData: totalCount?.total || 0,
-      totalPages: Math.ceil((totalCount?.total || 0) / perPage),
+      totalPages: download ? 1 : Math.ceil((totalCount?.total || 0) / perPage),
+      isDownload: download,
     };
   } catch (error) {
     console.error("Error fetching KP data:", error);
@@ -225,6 +233,7 @@ export const getRekonPangkatByPegawai = async (req, res) => {
       sort = "nama_master",
       order = "ascend",
       tmtKp = "01-04-2025",
+      download = false,
     } = req?.query;
 
     const checkOpd = checkOpdEntrian(opdId, skpd_id);
@@ -242,8 +251,8 @@ export const getRekonPangkatByPegawai = async (req, res) => {
         sortBy: sort,
         sortOrder: order,
         tmtKp,
+        download,
       });
-
       return res.json(result);
     }
   } catch (error) {

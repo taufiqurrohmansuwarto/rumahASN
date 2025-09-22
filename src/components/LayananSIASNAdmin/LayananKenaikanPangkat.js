@@ -12,6 +12,8 @@ import {
   IconTrendingUp as IconPromotion,
   IconCalendar,
   IconFileCheck,
+  IconInfoCircle,
+  IconUsersGroup,
 } from "@tabler/icons-react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import {
@@ -32,6 +34,8 @@ import "dayjs/locale/id";
 import relativeTime from "dayjs/plugin/relativeTime";
 import { useRouter } from "next/router";
 import { useCallback, useState } from "react";
+import { saveAs } from "file-saver";
+import * as XLSX from "xlsx";
 
 dayjs.extend(relativeTime);
 
@@ -78,6 +82,26 @@ function LayananKenaikanPangkat() {
   );
 
   const handleSync = () => sync({ periode });
+
+  const { mutateAsync: download, isLoading: isLoadingDownload } = useMutation(
+    () => daftarKenaikanPangkat({ periode, isDownload: true }),
+    {}
+  );
+
+  const handleUnduh = async () => {
+    const data = await download();
+    const workbook = XLSX.utils.book_new();
+    const worksheet = XLSX.utils.json_to_sheet(data?.data);
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Data");
+    const excelBuffer = XLSX.write(workbook, {
+      type: "buffer",
+      bookType: "xlsx",
+    });
+    const blob = new Blob([excelBuffer], {
+      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    });
+    saveAs(blob, `data_kenaikan_pangkat_${dayjs().format("YYYY-MM-DD")}.xlsx`);
+  };
 
   const handleChangePage = (page, limit) => {
     router.push({
@@ -217,7 +241,13 @@ function LayananKenaikanPangkat() {
             {hasRejectionReason && (
               <Tooltip title={record.alasan_tolak_tambahan} placement="top">
                 <div style={{ cursor: "help" }}>
-                  <Text size="xs" c="red" fs="italic" truncate style={{ maxWidth: "140px" }}>
+                  <Text
+                    size="xs"
+                    c="red"
+                    fs="italic"
+                    truncate
+                    style={{ maxWidth: "140px" }}
+                  >
                     {record.alasan_tolak_tambahan.length > 20
                       ? `${record.alasan_tolak_tambahan.substring(0, 20)}...`
                       : record.alasan_tolak_tambahan}
@@ -439,6 +469,8 @@ function LayananKenaikanPangkat() {
                   </Col>
                   <Col xs={12} sm={12}>
                     <Button
+                      onClick={handleUnduh}
+                      loading={isLoadingDownload}
                       icon={<IconDownload size={16} />}
                       style={{
                         borderColor: "#FF4500",
@@ -466,6 +498,67 @@ function LayananKenaikanPangkat() {
               </Row>
             )}
           </div>
+
+          {/* Statistics Section */}
+          {data?.meta && (
+            <div
+              style={{
+                padding: "12px 0",
+                borderBottom: "1px solid #f0f0f0",
+              }}
+            >
+              <Row gutter={[12, 8]} align="middle">
+                <Col xs={24} sm={8}>
+                  <Space size="small" align="center">
+                    <IconUsersGroup size={16} style={{ color: "#667eea" }} />
+                    <div>
+                      <Text size="xs" c="dimmed">
+                        Total Usulan
+                      </Text>
+                      <Text size="lg" fw={700} c="#667eea">
+                        {data.meta.total?.toLocaleString("id-ID") || 0}
+                      </Text>
+                    </div>
+                  </Space>
+                </Col>
+                <Col xs={24} sm={8}>
+                  <Space size="small" align="center">
+                    <IconX size={16} style={{ color: "#f5576c" }} />
+                    <div>
+                      <Text size="xs" c="dimmed">
+                        Ditolak
+                      </Text>
+                      <Text size="lg" fw={700} c="#f5576c">
+                        {data.meta.totalUsulanDenganTolak?.toLocaleString(
+                          "id-ID"
+                        ) || 0}
+                      </Text>
+                    </div>
+                  </Space>
+                </Col>
+                <Col xs={24} sm={8}>
+                  <Space size="small" align="center">
+                    <IconFileCheck size={16} style={{ color: "#4facfe" }} />
+                    <div>
+                      <Text size="xs" c="dimmed">
+                        Persetujuan
+                      </Text>
+                      <Text size="lg" fw={700} c="#4facfe">
+                        {data.meta.total > 0
+                          ? `${(
+                              ((data.meta.total -
+                                data.meta.totalUsulanDenganTolak) /
+                                data.meta.total) *
+                              100
+                            ).toFixed(1)}%`
+                          : "0%"}
+                      </Text>
+                    </div>
+                  </Space>
+                </Col>
+              </Row>
+            </div>
+          )}
 
           {/* Table Section */}
           <div style={{ marginTop: "16px" }}>

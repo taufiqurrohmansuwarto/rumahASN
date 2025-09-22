@@ -88,42 +88,43 @@ const syncKenaikanPangkat = async (req, res) => {
 
 const listKenaikanPangkat = async (req, res) => {
   try {
-    const { siasnRequest: request } = req;
-    const { page = 1, limit = 10 } = req?.query;
-    const myPeriode = req?.query?.periode?.split("-").reverse().join("-");
-    const periode = req?.query?.periode;
+    const { page = 1, limit = 10, isDownload = false, periode } = req?.query;
 
-    const hasil = await SiasnKP.query()
+    // Build base query dengan filter periode
+    const baseQuery = SiasnKP.query()
       .where("tmtKp", periode)
       .orderBy("nama", "asc")
-      .withGraphFetched("pegawai(simpleSelect)")
-      .page(parseInt(page) - 1, parseInt(limit));
+      .withGraphFetched("pegawai(simpleSelect)");
 
-    if (hasil?.results?.length) {
-      const data = {
-        data: hasil?.results,
-        total: hasil?.total,
-        page: parseInt(page),
-        limit: parseInt(limit),
-      };
+    // Hitung total usulan dan usulan dengan penolakan secara paralel
+    const [totalUsulan, totalUsulanDenganTolak] = await Promise.all([
+      SiasnKP.query().where("tmtKp", periode).count("id as total"),
+      SiasnKP.query()
+        .where("tmtKp", periode)
+        .whereRaw("COALESCE(alasan_tolak_id, '') <> ''")
+        .whereRaw("COALESCE(alasan_tolak_tambahan, '') <> ''")
+        .count("id as total"),
+    ]);
 
-      res.json(data);
-    } else {
-      const result = await daftarKenaikanPangkat(request, myPeriode);
+    // Eksekusi query berdasarkan tipe request
+    const hasil = isDownload
+      ? await baseQuery.clone()
+      : await baseQuery.clone().page(parseInt(page) - 1, parseInt(limit));
 
-      const data = result?.data;
+    // Format response data
+    const responseData = {
+      data: hasil?.results || hasil,
+      total: hasil?.total || 0,
+      page: parseInt(page),
+      limit: parseInt(limit),
+      meta: {
+        total: parseInt(totalUsulan[0]?.total || 0) || 0,
+        totalUsulanDenganTolak:
+          parseInt(totalUsulanDenganTolak[0]?.total || 0) || 0,
+      },
+    };
 
-      let jsonData = [];
-
-      if (data?.count === 0) {
-        jsonData = [];
-      } else if (data?.count !== 0) {
-        // langsung hapus dan insert
-        jsonData = data?.data;
-      }
-
-      res.json(jsonData);
-    }
+    res.json(responseData);
   } catch (error) {
     console.log(error);
     res.status(400).json({
