@@ -11,8 +11,6 @@ const RekonDashboard = () => {
         <title>Rumah ASN - Rekon - Dashboard</title>
       </Head>
       <PageContainer
-        title="Dashboard Rekon SIASN 📊"
-        content="Pusat monitoring dan analisis data rekonsiliasi kepegawaian secara real-time"
         breadcrumbRender={() => {
           return (
             <>

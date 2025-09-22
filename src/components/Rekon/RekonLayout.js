@@ -154,7 +154,6 @@ function RekonLayout({ children, active = "rekon-unor" }) {
       selectedKeys={[active]}
       logo={null}
       layout="mix"
-      navTheme="light"
       token={layoutToken}
       actionsRender={(props) => {
         return [

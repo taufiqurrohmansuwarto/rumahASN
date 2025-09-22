@@ -1,25 +1,20 @@
 import { logUser } from "@/services/log.services";
 import {
-  DatabaseOutlined,
   DownloadOutlined,
-  LoginOutlined,
-  LogoutOutlined,
   ReloadOutlined,
   UserOutlined,
-  GlobalOutlined,
-  ChromeOutlined,
 } from "@ant-design/icons";
-import { Text, Badge } from "@mantine/core";
+import { Badge, Text } from "@mantine/core";
 import {
+  IconBrandChrome,
+  IconBrandEdge,
+  IconBrandFirefox,
+  IconBrandSafari,
+  IconDeviceDesktop,
   IconLogin,
   IconLogout,
   IconUser,
   IconWorld,
-  IconBrandChrome,
-  IconBrandFirefox,
-  IconBrandSafari,
-  IconBrandEdge,
-  IconDeviceDesktop
 } from "@tabler/icons-react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import {
@@ -29,8 +24,6 @@ import {
   Col,
   DatePicker,
   Grid,
-  Input,
-  Modal,
   Row,
   Space,
   Table,
@@ -41,10 +34,8 @@ import {
 import dayjs from "dayjs";
 import "dayjs/locale/id";
 import relativeTime from "dayjs/plugin/relativeTime";
-import { upperCase } from "lodash";
-import { useRouter } from "next/router";
-import { useState } from "react";
 import { saveAs } from "file-saver";
+import { useRouter } from "next/router";
 import * as XLSX from "xlsx";
 
 dayjs.extend(relativeTime);
@@ -251,12 +242,17 @@ const LogUser = () => {
   };
 
   const getBrowserInfo = (userAgent) => {
-    if (!userAgent) return { name: "Unknown", icon: <IconDeviceDesktop size={12} /> };
+    if (!userAgent)
+      return { name: "Unknown", icon: <IconDeviceDesktop size={12} /> };
 
-    if (userAgent.includes("Firefox")) return { name: "Firefox", icon: <IconBrandFirefox size={12} /> };
-    if (userAgent.includes("Chrome")) return { name: "Chrome", icon: <IconBrandChrome size={12} /> };
-    if (userAgent.includes("Safari")) return { name: "Safari", icon: <IconBrandSafari size={12} /> };
-    if (userAgent.includes("Edge")) return { name: "Edge", icon: <IconBrandEdge size={12} /> };
+    if (userAgent.includes("Firefox"))
+      return { name: "Firefox", icon: <IconBrandFirefox size={12} /> };
+    if (userAgent.includes("Chrome"))
+      return { name: "Chrome", icon: <IconBrandChrome size={12} /> };
+    if (userAgent.includes("Safari"))
+      return { name: "Safari", icon: <IconBrandSafari size={12} /> };
+    if (userAgent.includes("Edge"))
+      return { name: "Edge", icon: <IconBrandEdge size={12} /> };
     return { name: "Other", icon: <IconDeviceDesktop size={12} /> };
   };
 
@@ -292,14 +288,16 @@ const LogUser = () => {
             size={36}
             style={{
               border: "2px solid #f0f0f0",
-              boxShadow: "0 2px 4px rgba(0,0,0,0.1)"
+              boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
             }}
           >
             {!record.user?.image && <UserOutlined />}
           </Avatar>
           <div style={{ lineHeight: "1.1" }}>
             <div>
-              <Text fw={600} size="xs">{record.user?.username || record.user_id}</Text>
+              <Text fw={600} size="xs">
+                {record.user?.username || record.user_id}
+              </Text>
             </div>
             {record.user?.employee_number && (
               <div style={{ marginTop: "0px" }}>
@@ -322,16 +320,23 @@ const LogUser = () => {
           login: { color: "green", icon: <IconLogin size={12} /> },
           logout: { color: "red", icon: <IconLogout size={12} /> },
         };
-        const config = actionConfig[action] || { color: "blue", icon: <IconUser size={12} /> };
+        const config = actionConfig[action] || {
+          color: "blue",
+          icon: <IconUser size={12} />,
+        };
         return (
           <Badge
             color={config.color}
             size="sm"
             variant="light"
-            leftSection={<div style={{ display: "flex", alignItems: "center" }}>{config.icon}</div>}
+            leftSection={
+              <div style={{ display: "flex", alignItems: "center" }}>
+                {config.icon}
+              </div>
+            }
             styles={{
               section: { display: "flex", alignItems: "center" },
-              label: { display: "flex", alignItems: "center" }
+              label: { display: "flex", alignItems: "center" },
             }}
           >
             {action?.toUpperCase()}
@@ -345,16 +350,21 @@ const LogUser = () => {
       key: "ip_address",
       width: 140,
       render: (ip) => {
-        const isLocalhost = ip && (ip.includes("127.0.0.1") || ip.includes("::ffff:127.0.0.1"));
+        const isLocalhost =
+          ip && (ip.includes("127.0.0.1") || ip.includes("::ffff:127.0.0.1"));
         return (
           <Badge
             color={isLocalhost ? "orange" : "blue"}
             size="sm"
             variant="outline"
-            leftSection={<div style={{ display: "flex", alignItems: "center" }}><IconWorld size={12} /></div>}
+            leftSection={
+              <div style={{ display: "flex", alignItems: "center" }}>
+                <IconWorld size={12} />
+              </div>
+            }
             styles={{
               section: { display: "flex", alignItems: "center" },
-              label: { display: "flex", alignItems: "center" }
+              label: { display: "flex", alignItems: "center" },
             }}
           >
             {isLocalhost ? "LOCALHOST" : ip || "N/A"}
@@ -373,10 +383,14 @@ const LogUser = () => {
           <Badge
             size="sm"
             variant="outline"
-            leftSection={<div style={{ display: "flex", alignItems: "center" }}>{browser.icon}</div>}
+            leftSection={
+              <div style={{ display: "flex", alignItems: "center" }}>
+                {browser.icon}
+              </div>
+            }
             styles={{
               section: { display: "flex", alignItems: "center" },
-              label: { display: "flex", alignItems: "center" }
+              label: { display: "flex", alignItems: "center" },
             }}
           >
             {browser.name?.toUpperCase()}
@@ -437,13 +451,27 @@ const LogUser = () => {
           </div>
 
           {/* Filter and Actions Section */}
-          <div style={{ padding: "20px 0 16px 0", borderBottom: "1px solid #f0f0f0" }}>
+          <div
+            style={{
+              padding: "20px 0 16px 0",
+              borderBottom: "1px solid #f0f0f0",
+            }}
+          >
             <Row gutter={[12, 12]} align="middle" justify="space-between">
               <Col xs={24} md={16}>
                 <Row gutter={[8, 8]} align="middle">
                   <Col xs={24} sm={12} md={10}>
-                    <div style={{ display: "flex", flexDirection: isXs ? "column" : "row", alignItems: isXs ? "stretch" : "center", gap: 6 }}>
-                      <Text fw={600} size="sm" c="dimmed">Filter Bulan:</Text>
+                    <div
+                      style={{
+                        display: "flex",
+                        flexDirection: isXs ? "column" : "row",
+                        alignItems: isXs ? "stretch" : "center",
+                        gap: 6,
+                      }}
+                    >
+                      <Text fw={600} size="sm" c="dimmed">
+                        Filter Bulan:
+                      </Text>
                       <DatePicker
                         placeholder="Pilih Bulan"
                         picker="month"
@@ -459,7 +487,11 @@ const LogUser = () => {
                       <Button
                         type="text"
                         onClick={clearFilter}
-                        style={{ color: "#FF4500", fontWeight: 500, padding: "4px 8px" }}
+                        style={{
+                          color: "#FF4500",
+                          fontWeight: 500,
+                          padding: "4px 8px",
+                        }}
                         block={isXs}
                       >
                         Clear Filter
@@ -468,7 +500,14 @@ const LogUser = () => {
                   )}
                 </Row>
               </Col>
-              <Col xs={24} md={8} style={{ display: "flex", justifyContent: isXs ? "flex-start" : "flex-end" }}>
+              <Col
+                xs={24}
+                md={8}
+                style={{
+                  display: "flex",
+                  justifyContent: isXs ? "flex-start" : "flex-end",
+                }}
+              >
                 <Space wrap>
                   <Button
                     icon={<ReloadOutlined />}
@@ -483,7 +522,12 @@ const LogUser = () => {
                     icon={<DownloadOutlined />}
                     loading={isMutating}
                     onClick={handleDownloadLog}
-                    style={{ background: "#FF4500", borderColor: "#FF4500", borderRadius: 6, fontWeight: 500 }}
+                    style={{
+                      background: "#FF4500",
+                      borderColor: "#FF4500",
+                      borderRadius: 6,
+                      fontWeight: 500,
+                    }}
                   >
                     Unduh Data
                   </Button>
@@ -514,18 +558,30 @@ const LogUser = () => {
                 onChange: (newPage, newPageSize) => {
                   router.push({
                     pathname: router.pathname,
-                    query: { ...router.query, page: newPage, limit: newPageSize },
+                    query: {
+                      ...router.query,
+                      page: newPage,
+                      limit: newPageSize,
+                    },
                   });
                 },
                 showTotal: (total, range) =>
-                  `${range[0].toLocaleString('id-ID')}-${range[1].toLocaleString('id-ID')} dari ${total.toLocaleString('id-ID')} records`,
+                  `${range[0].toLocaleString(
+                    "id-ID"
+                  )}-${range[1].toLocaleString(
+                    "id-ID"
+                  )} dari ${total.toLocaleString("id-ID")} records`,
                 style: { margin: "16px 0" },
               }}
               locale={{
                 emptyText: (
                   <div style={{ padding: "60px", textAlign: "center" }}>
                     <UserOutlined
-                      style={{ fontSize: 64, color: "#d1d5db", marginBottom: 24 }}
+                      style={{
+                        fontSize: 64,
+                        color: "#d1d5db",
+                        marginBottom: 24,
+                      }}
                     />
                     <div>
                       <Text size="lg" c="dimmed">

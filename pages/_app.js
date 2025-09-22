@@ -80,8 +80,6 @@ function MyApp({ Component, pageProps: { session, ...pageProps } }) {
       return gmailConfig;
     } else if (router.pathname.includes("/layanan-keuangan")) {
       return layananKeuanganConfig;
-    } else if (router.pathname.includes("/rekon")) {
-      return antdConfig;
     } else if (router.pathname.includes("/logs")) {
       return antdConfig;
     } else if (router.pathname.includes("/layanan-siasn")) {
