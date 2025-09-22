@@ -1,127 +1,55 @@
 import useScrollRestoration from "@/hooks/useScrollRestoration";
 import { getAllEmployeesPaging } from "@/services/master.services";
-import { capitalizeWords } from "@/utils/client-utils";
+import { Badge, Text, Title } from "@mantine/core";
 import {
-  CheckCircleOutlined,
-  CloseOutlined,
-  SearchOutlined,
-  UserOutlined,
-  TeamOutlined,
-  DatabaseOutlined,
-} from "@ant-design/icons";
+  IconCheck,
+  IconUser,
+  IconUsers,
+  IconX,
+} from "@tabler/icons-react";
 import { useQuery } from "@tanstack/react-query";
 import {
   Avatar,
   Button,
   Card,
-  Flex,
   Space,
   Table,
-  Tag,
   Tooltip,
-  Typography,
 } from "antd";
 import { useRouter } from "next/router";
 import EmployeesTableFilter from "../Filter/EmployeesTableFilter";
-import DownloadASN from "./DownloadASN";
 import DownloadDokumenFasilitator from "./DownloadDokumenFasilitator";
-import { useSession } from "next-auth/react";
 import React from "react";
-
-const { Title, Text } = Typography;
 
 const TagKomparasi = ({ komparasi, nama }) => {
   return (
-    <Tag
-      icon={komparasi ? <CheckCircleOutlined /> : <CloseOutlined />}
-      color={komparasi ? "success" : "error"}
+    <Badge
+      color={komparasi ? "green" : "red"}
+      variant={komparasi ? "filled" : "light"}
+      size="xs"
+      leftSection={
+        <div style={{ display: "flex", alignItems: "center" }}>
+          {komparasi ? <IconCheck size={8} /> : <IconX size={8} />}
+        </div>
+      }
+      styles={{
+        section: { display: "flex", alignItems: "center" },
+        label: { display: "flex", alignItems: "center", fontSize: "10px" },
+      }}
       style={{
-        borderRadius: "6px",
-        fontSize: "10px",
-        fontWeight: 500,
-        padding: "1px 6px",
         margin: "1px",
       }}
     >
       {nama}
-    </Tag>
+    </Badge>
   );
 };
 
-const mappingPerangkatDaerah = (daftarPerangkatDaerah, organizationId) => {
-  const result = daftarPerangkatDaerah?.map((item) => {
-    const id = item?.id;
-    const currentUserOrganizationId = organizationId;
 
-    const regexOrgIdMatch = new RegExp(`^${currentUserOrganizationId}`);
-
-    const isMatch = regexOrgIdMatch.test(id);
-
-    return { ...item, isMatch };
-  });
-
-  return result;
-};
-
-const ExampleComponent = ({ data }) => {
-  const router = useRouter();
-
-  const handleClick = (item) => {
-    if (item.isMatch) {
-      router.push({
-        pathname: router.pathname,
-        query: { ...router.query, opd_id: item?.id },
-      });
-    } else {
-      return;
-    }
-  };
-
-  return (
-    <Space direction="vertical" size={4} style={{ width: "100%" }}>
-      {data?.map((item, index) => {
-        return (
-          <Typography.Text
-            key={item.id}
-            onClick={() => handleClick(item)}
-            style={{
-              cursor: item.isMatch ? "pointer" : "default",
-              fontSize: "12px",
-              color: item.isMatch ? "#1E40AF" : "#6B7280",
-              fontWeight: item.isMatch ? 500 : 400,
-              display: "block",
-              padding: "2px 4px",
-              borderRadius: "4px",
-              backgroundColor: item.isMatch ? "#EFF6FF" : "transparent",
-              border: item.isMatch ? "1px solid #DBEAFE" : "none",
-              transition: "all 0.2s ease",
-              wordBreak: "break-word",
-            }}
-            onMouseEnter={(e) => {
-              if (item.isMatch) {
-                e.target.style.backgroundColor = "#DBEAFE";
-                e.target.style.borderColor = "#93C5FD";
-              }
-            }}
-            onMouseLeave={(e) => {
-              if (item.isMatch) {
-                e.target.style.backgroundColor = "#EFF6FF";
-                e.target.style.borderColor = "#DBEAFE";
-              }
-            }}
-          >
-            {item.name}
-          </Typography.Text>
-        );
-      })}
-    </Space>
-  );
-};
 
 function EmployeesTable() {
   const router = useRouter();
   useScrollRestoration();
-  const { data: session } = useSession();
 
   const { data, isLoading, isFetching } = useQuery(
     ["employees-paging", router?.query],
@@ -147,130 +75,136 @@ function EmployeesTable() {
     {
       title: "Pegawai",
       key: "pegawai",
-      width: 320,
-      render: (_, row) => (
-        <div style={{ padding: "16px 12px" }}>
-          <Flex gap={16} align="center">
-            <Avatar
-              onClick={() => gotoDetail(row?.nip_master)}
-              style={{
-                cursor: "pointer",
-                borderRadius: "8px",
-                border: "2px solid #E5E7EB",
-                flexShrink: 0,
-              }}
-              size={64}
-              shape="square"
-              src={row?.foto}
-              alt="foto"
-            />
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <Typography.Link
-                strong
-                onClick={() => gotoDetail(row?.nip_master)}
-                style={{
-                  fontSize: "15px",
-                  fontWeight: 600,
-                  color: "#1F2937",
-                  display: "block",
-                  marginBottom: "6px",
-                  lineHeight: "1.4",
-                }}
-              >
-                {row?.nama_master}
-              </Typography.Link>
-              <Text
-                style={{
-                  fontSize: "13px",
-                  color: "#6B7280",
-                  fontFamily: "monospace",
-                  display: "block",
-                  marginBottom: "8px",
-                  lineHeight: "1.3",
-                }}
-              >
-                {row?.nip_master}
-              </Text>
-              <Space wrap size={[6, 4]}>
-                <Tag color="blue" size="small" style={{ fontSize: "11px" }}>
-                  {row?.siasn?.status}
-                </Tag>
-                <Tag color="cyan" size="small" style={{ fontSize: "11px" }}>
-                  {row?.siasn?.jenjang_jabatan}
-                </Tag>
-              </Space>
-            </div>
-          </Flex>
-        </div>
-      ),
-    },
-    {
-      title: "Jabatan & Unit Kerja",
-      key: "jabatan_unit_kerja",
-      width: 300,
-      render: (_, row) => (
-        <div style={{ padding: "16px 12px" }}>
-          <div style={{ marginBottom: "8px" }}>
-            <Text
-              style={{ fontSize: "11px", color: "#6B7280", display: "block" }}
-            >
-              Jabatan:
-            </Text>
-            <Text
-              style={{
-                fontSize: "12px",
-                fontWeight: 500,
-                display: "block",
-                marginTop: "2px",
-                wordBreak: "break-word",
-              }}
-            >
-              {row?.jabatan_master || "Tidak ada"}
-            </Text>
-          </div>
-          <div>
-            <Text
-              style={{ fontSize: "11px", color: "#6B7280", display: "block" }}
-            >
-              Unit Kerja:
-            </Text>
-            <div style={{ marginTop: "2px" }}>
-              <ExampleComponent
-                data={mappingPerangkatDaerah(
-                  row?.opd_master_full,
-                  session?.user?.organization_id
-                )}
-              />
-            </div>
-          </div>
-        </div>
-      ),
-    },
-    {
-      title: "Status Validasi",
-      key: "validasi",
       width: 280,
       render: (_, row) => (
-        <div style={{ padding: "16px 12px" }}>
-          <Text
+        <Space size="small">
+          <Avatar
+            src={row?.foto}
+            size={40}
             style={{
-              fontSize: "11px",
-              fontWeight: 500,
-              color: "#374151",
-              display: "block",
-              marginBottom: "6px",
+              border: "2px solid #f0f0f0",
+              boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
             }}
-          >
-            Data Validasi:
-          </Text>
-          <div style={{ marginBottom: "4px" }}>
-            <TagKomparasi komparasi={row?.komparasi?.nama} nama="Nama" />
-            <TagKomparasi komparasi={row?.komparasi?.nip} nama="NIP" />
-            <TagKomparasi komparasi={row?.siasn?.valid_nik} nama="NIK" />
-            <TagKomparasi komparasi={row?.komparasi?.email} nama="Email" />
+            icon={<IconUser size={16} />}
+          />
+          <div style={{ lineHeight: "1.1" }}>
+            <div>
+              <Text
+                fw={600}
+                size="sm"
+                style={{
+                  cursor: "pointer",
+                  textDecoration: "underline",
+                  textDecorationStyle: "dotted"
+                }}
+                onClick={() => gotoDetail(row?.nip_master)}
+              >
+                {row?.nama_master}
+              </Text>
+            </div>
+            {row?.nip_master && (
+              <div style={{ marginTop: "1px" }}>
+                <Text size="xs" c="dimmed" ff="monospace">
+                  {row?.nip_master}
+                </Text>
+              </div>
+            )}
+            <div style={{ marginTop: "2px" }}>
+              <Space wrap size={[4, 2]}>
+                <Badge color="blue" variant="light" size="sm">
+                  {row?.siasn?.status}
+                </Badge>
+                <Badge color="cyan" variant="outline" size="sm">
+                  {row?.golongan_master}
+                </Badge>
+              </Space>
+            </div>
           </div>
-          <div>
-            <TagKomparasi komparasi={row?.komparasi?.pangkat} nama="Pangkat" />
+        </Space>
+      ),
+    },
+    {
+      title: "Jabatan & Unit",
+      key: "jabatan_unit",
+      width: 400,
+      render: (_, row) => (
+        <div>
+          <Tooltip
+            title={
+              <div>
+                <div style={{ fontWeight: 600, marginBottom: "4px" }}>
+                  Jabatan Lengkap:
+                </div>
+                <div style={{ marginBottom: "8px" }}>
+                  {row?.jabatan_master || "Tidak ada"}
+                </div>
+                <div style={{ fontWeight: 600, marginBottom: "4px" }}>
+                  Unit Organisasi Lengkap:
+                </div>
+                <div>{row?.opd_master || "Tidak ada"}</div>
+              </div>
+            }
+            placement="topLeft"
+          >
+            <div style={{ cursor: "help" }}>
+              <Text
+                size="sm"
+                fw={500}
+                truncate
+                style={{ maxWidth: "370px", marginBottom: "4px" }}
+              >
+                {row?.jabatan_master?.length > 55
+                  ? `${row?.jabatan_master?.substring(0, 55)}...`
+                  : row?.jabatan_master || "Tidak ada"}
+              </Text>
+              <Text
+                size="xs"
+                c="dimmed"
+                truncate
+                style={{ maxWidth: "370px", marginBottom: "6px" }}
+              >
+                {row?.opd_master?.length > 60
+                  ? `${row?.opd_master?.substring(0, 60)}...`
+                  : row?.opd_master || "Tidak ada"}
+              </Text>
+            </div>
+          </Tooltip>
+          <Space wrap size={[2, 2]}>
+            <Badge color="orange" variant="light" size="xs">
+              {row?.jenjang_master || "Kosong"}
+            </Badge>
+            <Badge color="blue" variant="outline" size="xs">
+              {row?.siasn?.jenjang_jabatan}
+            </Badge>
+          </Space>
+        </div>
+      ),
+    },
+    {
+      title: "Validasi",
+      key: "validasi",
+      width: 220,
+      render: (_, row) => (
+        <div style={{ display: "flex", flexDirection: "column", gap: "2px" }}>
+          <div style={{ display: "flex", gap: "2px", flexWrap: "wrap" }}>
+            <TagKomparasi
+              komparasi={row?.komparasi?.nama}
+              nama="Nama"
+            />
+            <TagKomparasi
+              komparasi={row?.komparasi?.nip}
+              nama="NIP"
+            />
+            <TagKomparasi
+              komparasi={row?.siasn?.valid_nik}
+              nama="NIK"
+            />
+          </div>
+          <div style={{ display: "flex", gap: "2px", flexWrap: "wrap" }}>
+            <TagKomparasi
+              komparasi={row?.komparasi?.pangkat}
+              nama="Pangkat"
+            />
             <TagKomparasi
               komparasi={row?.komparasi?.pendidikan}
               nama="Pendidikan"
@@ -291,183 +225,122 @@ function EmployeesTable() {
       width: 80,
       align: "center",
       render: (_, row) => (
-        <div style={{ padding: "16px 12px", textAlign: "center" }}>
-          <Tooltip title="Lihat Detail">
-            <Button
-              type="primary"
-              shape="circle"
-              icon={<SearchOutlined />}
-              onClick={() => gotoDetail(row?.nip_master)}
-              style={{
-                backgroundColor: "#6366F1",
-                borderColor: "#6366F1",
-              }}
-            />
-          </Tooltip>
-        </div>
+        <Button
+          type="link"
+          size="small"
+          onClick={() => gotoDetail(row?.nip_master)}
+          style={{
+            color: "#FF4500",
+            padding: "0 8px",
+            height: "auto",
+            fontWeight: 500,
+          }}
+        >
+          Detail
+        </Button>
       ),
     },
   ];
 
   return (
-    <div
-      style={{
-        padding: "24px",
-        backgroundColor: "#FAFAFB",
-        minHeight: "100vh",
-      }}
-    >
-      {/* Header Section */}
-      <div style={{ marginBottom: "32px" }}>
-        <Title
-          level={2}
+    <div>
+      <div style={{ maxWidth: "100%" }}>
+        <Card
           style={{
-            margin: 0,
-            color: "#1F2937",
-            fontWeight: 700,
+            borderRadius: "12px",
+            boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+            border: "none",
           }}
         >
-          Data Pegawai
-        </Title>
-        <Text
-          type="secondary"
-          style={{
-            fontSize: "16px",
-            lineHeight: "24px",
-          }}
-        >
-          Sistem informasi dan rekonsiliasi data pegawai
-        </Text>
-      </div>
-
-      {/* Filter Section */}
-      <Card
-        style={{
-          marginBottom: "24px",
-          borderRadius: "16px",
-          border: "1px solid #E5E7EB",
-          boxShadow: "0 1px 3px rgba(0, 0, 0, 0.1)",
-        }}
-        bodyStyle={{ padding: "24px" }}
-      >
-        <Space direction="vertical" size={16} style={{ width: "100%" }}>
-          <Flex align="center" gap={12} justify="space-between" wrap="wrap">
-            <Flex align="center" gap={12}>
-              <div
-                style={{
-                  width: "40px",
-                  height: "40px",
-                  borderRadius: "12px",
-                  backgroundColor: "#6366F1",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
-              >
-                <DatabaseOutlined
-                  style={{ color: "white", fontSize: "18px" }}
-                />
-              </div>
-              <Text strong style={{ color: "#374151", fontSize: "16px" }}>
-                Filter & Pencarian Data
-              </Text>
-            </Flex>
-            <DownloadDokumenFasilitator />
-          </Flex>
-          <EmployeesTableFilter />
-        </Space>
-      </Card>
-
-      {/* Table Section */}
-      <Card
-        style={{
-          borderRadius: "16px",
-          border: "1px solid #E5E7EB",
-          boxShadow: "0 1px 3px rgba(0, 0, 0, 0.1)",
-        }}
-        bodyStyle={{ padding: "24px" }}
-      >
-        <Space direction="vertical" size={24} style={{ width: "100%" }}>
-          <Flex align="center" gap={12} justify="space-between" wrap="wrap">
-            <Flex align="center" gap={12}>
-              <div
-                style={{
-                  width: "40px",
-                  height: "40px",
-                  borderRadius: "12px",
-                  backgroundColor: "#6366F1",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
-              >
-                <TeamOutlined style={{ color: "white", fontSize: "18px" }} />
-              </div>
-              <Title level={4} style={{ margin: 0, color: "#1F2937" }}>
-                Daftar Pegawai
-              </Title>
-              {data?.total && (
-                <Tag
-                  color="blue"
-                  style={{
-                    borderRadius: "8px",
-                    padding: "4px 12px",
-                    fontSize: "12px",
-                    fontWeight: 500,
-                  }}
-                >
-                  {data.total} pegawai
-                </Tag>
-              )}
-            </Flex>
-          </Flex>
-
+          {/* Header Section */}
           <div
             style={{
-              borderRadius: "12px",
-              border: "1px solid #F3F4F6",
-              overflow: "hidden",
+              background: "#FF4500",
+              color: "white",
+              padding: "24px",
+              textAlign: "center",
+              borderRadius: "12px 12px 0 0",
+              margin: "-24px -24px 0 -24px",
             }}
           >
+            <IconUsers size={24} style={{ marginBottom: "8px" }} />
+            <Title level={3} style={{ color: "white", margin: 0 }}>
+              Data Pegawai
+            </Title>
+            <Text style={{ color: "rgba(255, 255, 255, 0.9)", fontSize: 14 }}>
+              Sistem informasi dan rekonsiliasi data pegawai
+            </Text>
+          </div>
+
+          {/* Filter Section */}
+          <div
+            style={{
+              padding: "20px 0 16px 0",
+              borderBottom: "1px solid #f0f0f0",
+            }}
+          >
+            <div>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "12px" }}>
+                <Text size="sm" fw={600} c="dimmed">
+                  🔧 Filter & Pencarian Data
+                </Text>
+                <DownloadDokumenFasilitator />
+              </div>
+              <EmployeesTableFilter />
+            </div>
+          </div>
+
+          {/* Table Section */}
+          <div style={{ marginTop: "16px" }}>
             <Table
-              size="middle"
               columns={columns}
-              dataSource={data?.results}
-              pagination={{
-                total: data?.total,
-                showTotal: (total, range) => (
-                  <Text
-                    style={{
-                      color: "#6B7280",
-                      fontSize: "14px",
-                      fontWeight: 500,
-                    }}
-                  >
-                    Menampilkan {range[0]}-{range[1]} dari {total} pegawai
-                  </Text>
-                ),
-                showSizeChanger: false,
-                current: parseInt(router?.query?.page) || 1,
-                defaultCurrent: 1,
-                onChange: handleChangePage,
-                pageSize: 10,
-                position: ["topRight", "bottomRight"],
-                showQuickJumper: true,
-                style: { marginBottom: 0 },
-              }}
-              loading={isLoading || isFetching}
               rowKey={(row) => row?.id}
+              dataSource={data?.results}
+              loading={isLoading || isFetching}
+              size="middle"
+              scroll={{ x: 1200 }}
               style={{
-                backgroundColor: "white",
+                borderRadius: "12px",
+                overflow: "hidden",
               }}
-              scroll={{ x: 1000 }}
-              sticky={{
-                offsetHeader: 64,
+              pagination={{
+                position: ["bottomRight"],
+                current: parseInt(router?.query?.page) || 1,
+                total: data?.total,
+                showSizeChanger: false,
+                onChange: handleChangePage,
+                showTotal: (total, range) =>
+                  `${range[0].toLocaleString(
+                    "id-ID"
+                  )}-${range[1].toLocaleString(
+                    "id-ID"
+                  )} dari ${total.toLocaleString("id-ID")} records`,
+                style: { margin: "16px 0" },
+              }}
+              locale={{
+                emptyText: (
+                  <div style={{ padding: "40px", textAlign: "center" }}>
+                    <IconUsers
+                      size={48}
+                      style={{ color: "#d1d5db", marginBottom: 16 }}
+                    />
+                    <div>
+                      <Text size="md" c="dimmed">
+                        Tidak ada data pegawai
+                      </Text>
+                    </div>
+                    <div>
+                      <Text size="sm" c="dimmed">
+                        Belum ada data untuk filter yang dipilih
+                      </Text>
+                    </div>
+                  </div>
+                ),
               }}
             />
           </div>
-        </Space>
-      </Card>
+        </Card>
+      </div>
     </div>
   );
 }

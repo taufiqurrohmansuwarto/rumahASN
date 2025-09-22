@@ -6,21 +6,30 @@ import {
   getUnorSimaster,
 } from "@/services/rekon.services";
 import { clearQuery } from "@/utils/client-utils";
-import { FileExcelOutlined, SearchOutlined } from "@ant-design/icons";
+import { Badge, Text, Title } from "@mantine/core";
+import {
+  IconBuilding,
+  IconDownload,
+  IconFileSpreadsheet,
+  IconRefresh,
+  IconSearch,
+  IconTrendingUp,
+  IconUser,
+  IconUsers,
+  IconX,
+} from "@tabler/icons-react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import {
   Avatar,
   Button,
   Card,
   Col,
-  Form,
   Input,
   Row,
   Space,
-  Statistic,
   Table,
+  Tooltip,
   TreeSelect,
-  Typography,
 } from "antd";
 import { useRouter } from "next/router";
 import * as XLSX from "xlsx";
@@ -37,93 +46,54 @@ const DetailIPASN = () => {
       }),
   });
 
+  if (isLoading || !data?.data) return null;
+
   return (
-    <>
-      <Row gutter={[12, 12]}>
-        <Col md={8} xs={24} sm={24}>
-          <Card>
-            <Statistic title="PNS" value={data?.data?.rerata_total_pns} />
-          </Card>
+    <div style={{
+      background: "#f8f9fa",
+      padding: "16px",
+      borderRadius: "8px",
+      marginBottom: "16px",
+      border: "1px solid #e9ecef"
+    }}>
+      <Text size="sm" fw={600} c="dimmed" style={{ marginBottom: "12px" }}>
+        📊 Ringkasan IPASN
+      </Text>
+      <Row gutter={[8, 8]}>
+        <Col span={6}>
+          <div style={{ textAlign: "center", padding: "8px" }}>
+            <Badge color="blue" variant="filled" size="lg" style={{ display: "block", marginBottom: "4px" }}>
+              {data?.data?.rerata_total_pns || 0}
+            </Badge>
+            <Text size="xs" c="dimmed">PNS</Text>
+          </div>
         </Col>
-        <Col md={4} xs={24} sm={12}>
-          <Card>
-            <Statistic
-              title="Kompetensi (PNS)"
-              value={data?.data?.rerata_kompetensi_pns}
-              suffix="/ 40"
-            />
-          </Card>
+        <Col span={6}>
+          <div style={{ textAlign: "center", padding: "8px" }}>
+            <Badge color="green" variant="filled" size="lg" style={{ display: "block", marginBottom: "4px" }}>
+              {data?.data?.rerata_total_pppk || 0}
+            </Badge>
+            <Text size="xs" c="dimmed">PPPK</Text>
+          </div>
         </Col>
-        <Col md={4} xs={24} sm={12}>
-          <Card>
-            <Statistic
-              title="Disiplin (PNS)"
-              value={data?.data?.rerata_disiplin_pns}
-              suffix="/ 5"
-            />
-          </Card>
+        <Col span={6}>
+          <div style={{ textAlign: "center", padding: "8px" }}>
+            <Badge color="orange" variant="outline" size="md" style={{ display: "block", marginBottom: "4px" }}>
+              {data?.data?.rerata_kompetensi_pns || 0}/40
+            </Badge>
+            <Text size="xs" c="dimmed">Kompetensi PNS</Text>
+          </div>
         </Col>
-        <Col md={4} xs={24} sm={12}>
-          <Card>
-            <Statistic
-              title="Kinerja (PNS)"
-              value={data?.data?.rerata_kinerja_pns}
-              suffix="/ 30"
-            />
-          </Card>
-        </Col>
-        <Col md={4} xs={24} sm={12}>
-          <Card>
-            <Statistic
-              title="Pendidikan (PNS)"
-              value={data?.data?.rerata_kualifikasi_pns}
-              suffix="/ 25"
-            />
-          </Card>
-        </Col>
-        <Col md={8} xs={24} sm={24}>
-          <Card>
-            <Statistic title="PPPK" value={data?.data?.rerata_total_pppk} />
-          </Card>
-        </Col>
-        <Col md={4} xs={24} sm={12}>
-          <Card>
-            <Statistic
-              title="Kompetensi (PPPK)"
-              value={data?.data?.rerata_kompetensi_pppk}
-              suffix="/ 40"
-            />
-          </Card>
-        </Col>
-        <Col md={4} xs={24} sm={12}>
-          <Card>
-            <Statistic
-              title="Disiplin (PPPK)"
-              value={data?.data?.rerata_disiplin_pppk}
-              suffix="/ 5"
-            />
-          </Card>
-        </Col>
-        <Col md={4} xs={24} sm={12}>
-          <Card>
-            <Statistic
-              title="Kinerja (PPPK)"
-              value={data?.data?.rerata_kinerja_pppk}
-              suffix="/ 30"
-            />
-          </Card>
-        </Col>
-        <Col md={4} xs={24} sm={12}>
-          <Card>
-            <Statistic
-              title="Pendidikan (PPPK)"
-              value={data?.data?.rerata_kualifikasi_pppk}
-              suffix="/ 25"
-            />
-          </Card>
+        <Col span={6}>
+          <div style={{ textAlign: "center", padding: "8px" }}>
+            <Badge color="cyan" variant="outline" size="md" style={{ display: "block", marginBottom: "4px" }}>
+              {data?.data?.rerata_kompetensi_pppk || 0}/40
+            </Badge>
+            <Text size="xs" c="dimmed">Kompetensi PPPK</Text>
+          </div>
         </Col>
       </Row>
-    </>
+    </div>
   );
 };
 
@@ -137,13 +107,11 @@ const EmployeeIPASN = () => {
     refetchOnWindowFocus: false,
   });
 
-  const handleTableChange = (pagination, filters, sorter) => {
+  const handleChangePage = (page, pageSize) => {
     const query = clearQuery({
       ...router?.query,
-      page: pagination?.current || router?.query?.page, // Gunakan current page dari pagination
-      perPage: pagination?.pageSize,
-      sort: sorter?.field,
-      order: sorter?.order,
+      page,
+      perPage: pageSize,
     });
 
     router.push({
@@ -173,7 +141,7 @@ const EmployeeIPASN = () => {
   }) => (
     <div style={{ padding: 8 }}>
       <Input
-        placeholder="Cari nama"
+        placeholder="Cari nama pegawai..."
         value={selectedKeys[0] || router?.query?.search}
         onChange={(e) =>
           setSelectedKeys(e.target.value ? [e.target.value] : [])
@@ -183,6 +151,7 @@ const EmployeeIPASN = () => {
           handleSearch(selectedKeys[0]);
         }}
         style={{ width: 300, marginBottom: 8, display: "block" }}
+        prefix={<IconSearch size={16} style={{ color: "#999" }} />}
       />
       <Space>
         <Button
@@ -191,18 +160,23 @@ const EmployeeIPASN = () => {
             confirm();
             handleSearch(selectedKeys[0]);
           }}
-          icon={<SearchOutlined />}
+          icon={<IconSearch size={14} />}
           size="small"
-          style={{ width: 90 }}
+          style={{
+            width: 90,
+            backgroundColor: "#FF4500",
+            borderColor: "#FF4500",
+          }}
         >
           Cari
         </Button>
         <Button
           onClick={() => {
             clearFilters();
-            setSelectedKeys([]); // Pastikan state lokal juga direset
-            handleSearch(undefined); // Kirim undefined untuk menghapus parameter search
+            setSelectedKeys([]);
+            handleSearch(undefined);
           }}
+          icon={<IconX size={14} />}
           size="small"
           style={{ width: 90 }}
         >
@@ -216,126 +190,202 @@ const EmployeeIPASN = () => {
 
   const columns = [
     {
-      title: "Foto",
-      dataIndex: "foto_master",
-      render: (text) => <Avatar size={90} shape="square" src={text} />,
-      responsive: ["md"],
-    },
-    {
-      title: "Nama",
-      key: "nama_master",
-      width: 250,
+      title: "Pegawai",
+      key: "pegawai_info",
+      width: 300,
       render: (_, record) => (
-        <Space direction="vertical">
-          <Typography.Link
-            onClick={() =>
-              router.push(`/rekon/pegawai/${record?.nip_master}/detail`)
-            }
-          >
-            {record?.nama_master}
-          </Typography.Link>
-          <Typography.Text>{record?.nip}</Typography.Text>
-          <Typography.Text strong>{record?.jabatan_master}</Typography.Text>
+        <Space size="small">
+          <Avatar
+            src={record?.foto_master}
+            size={40}
+            style={{
+              border: "2px solid #f0f0f0",
+              boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+            }}
+            icon={<IconUser size={16} />}
+          />
+          <div style={{ lineHeight: "1.1" }}>
+            <div>
+              <Text
+                fw={600}
+                size="sm"
+                style={{ cursor: "pointer" }}
+                onClick={() =>
+                  router.push(`/rekon/pegawai/${record?.nip_master}/detail`)
+                }
+              >
+                {record?.nama_master}
+              </Text>
+            </div>
+            {record?.nip && (
+              <div style={{ marginTop: "1px" }}>
+                <Text size="xs" c="dimmed" ff="monospace">
+                  {record?.nip}
+                </Text>
+              </div>
+            )}
+            {record?.jabatan_master && (
+              <div style={{ marginTop: "2px" }}>
+                <Text
+                  size="xs"
+                  c="dimmed"
+                  truncate
+                  style={{ maxWidth: "200px" }}
+                >
+                  {record?.jabatan_master?.length > 30
+                    ? `${record?.jabatan_master?.substring(0, 30)}...`
+                    : record?.jabatan_master}
+                </Text>
+              </div>
+            )}
+          </div>
         </Space>
       ),
       sorter: true,
       filterSearch: true,
       filterDropdown: renderSearchFilter,
       filterIcon: (filtered) => (
-        <SearchOutlined style={{ color: filtered ? "#1890ff" : undefined }} />
+        <IconSearch
+          size={16}
+          style={{ color: filtered ? "#FF4500" : "#999" }}
+        />
       ),
     },
     {
-      title: "Perangkat Daerah",
-      dataIndex: "opd_master",
-      sorter: true,
-      render: (text) => text || "-",
-      responsive: ["sm"],
+      title: "Unit Organisasi",
+      key: "opd_master",
+      width: 200,
+      render: (_, record) => (
+        <Tooltip title={record?.opd_master} placement="top">
+          <Text
+            size="xs"
+            c="dimmed"
+            style={{
+              maxWidth: "180px",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              whiteSpace: "nowrap",
+              cursor: "help",
+            }}
+          >
+            {record?.opd_master || "N/A"}
+          </Text>
+        </Tooltip>
+      ),
     },
     {
-      title: "Status Kepegawaian",
-      dataIndex: "status_master",
-      responsive: ["md"],
+      title: "Status",
+      key: "status",
+      width: 100,
+      render: (_, record) => (
+        <Badge
+          color={record?.status_master === "PNS" ? "blue" : "green"}
+          variant="filled"
+          size="sm"
+        >
+          {record?.status_master || "N/A"}
+        </Badge>
+      ),
     },
     {
-      title: "Kualifikasi",
-      dataIndex: "kualifikasi",
-      sorter: true,
-      render: (value) => renderValue(value, 25),
-      responsive: ["sm"],
-    },
-    {
-      title: "Kompetensi",
-      dataIndex: "kompetensi",
-      sorter: true,
-      render: (value) => renderValue(value, 40),
-      responsive: ["sm"],
-    },
-    {
-      title: "Kinerja",
-      dataIndex: "kinerja",
-      sorter: true,
-      render: (value) => renderValue(value, 30),
-      responsive: ["sm"],
-    },
-    {
-      title: "Disiplin",
-      dataIndex: "disiplin",
-      sorter: true,
-      render: (value) => renderValue(value, 5),
-      responsive: ["md"],
+      title: "Skor IPASN",
+      key: "ipasn_scores",
+      width: 280,
+      render: (_, record) => (
+        <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+          <div style={{ display: "flex", gap: "4px", flexWrap: "wrap" }}>
+            <Badge color="orange" variant="light" size="sm">
+              Kualifikasi: {record?.kualifikasi || 0}/25
+            </Badge>
+            <Badge color="cyan" variant="light" size="sm">
+              Kompetensi: {record?.kompetensi || 0}/40
+            </Badge>
+          </div>
+          <div style={{ display: "flex", gap: "4px", flexWrap: "wrap" }}>
+            <Badge color="purple" variant="light" size="sm">
+              Kinerja: {record?.kinerja || 0}/30
+            </Badge>
+            <Badge color="red" variant="light" size="sm">
+              Disiplin: {record?.disiplin || 0}/5
+            </Badge>
+          </div>
+        </div>
+      ),
     },
     {
       title: "Total",
-      dataIndex: "total",
-      sorter: true,
-      render: (value) => renderValue(value, 100),
-    },
-
-    {
-      title: "Aksi",
-      key: "aksi",
+      key: "total",
+      width: 80,
       render: (_, record) => (
-        <a
-          onClick={() =>
-            router.push(`/rekon/pegawai/${record?.nip_master}/detail`)
-          }
+        <Badge
+          color="indigo"
+          variant="filled"
+          size="md"
+          style={{ fontFamily: "monospace" }}
         >
-          <SearchOutlined />
-        </a>
+          {record?.total || 0}/100
+        </Badge>
       ),
+      sorter: true,
     },
   ];
 
   return (
     <Table
       columns={columns}
+      rowKey={(row) => row?.nip || row?.id}
       dataSource={data?.data}
       loading={isLoading || isFetching}
-      rowKey="nip"
-      onChange={handleTableChange}
+      size="middle"
+      scroll={{ x: 900 }}
+      style={{
+        borderRadius: "12px",
+        overflow: "hidden",
+      }}
       pagination={{
-        position: ["bottomRight", "topRight"],
+        position: ["bottomRight"],
+        current: parseInt(router?.query?.page) || 1,
+        pageSize: parseInt(router?.query?.perPage) || 10,
         showSizeChanger: false,
         total: data?.totalData,
+        onChange: handleChangePage,
         showTotal: (total, range) =>
-          `${range[0]}-${range[1]} of ${total} items`,
-        pageSize: data?.perPage,
-        current: data?.page,
+          `${range[0].toLocaleString(
+            "id-ID"
+          )}-${range[1].toLocaleString(
+            "id-ID"
+          )} dari ${total.toLocaleString("id-ID")} records`,
+        style: { margin: "16px 0" },
+      }}
+      locale={{
+        emptyText: (
+          <div style={{ padding: "40px", textAlign: "center" }}>
+            <IconUsers
+              size={48}
+              style={{ color: "#d1d5db", marginBottom: 16 }}
+            />
+            <div>
+              <Text size="md" c="dimmed">
+                Tidak ada data IPASN
+              </Text>
+            </div>
+            <div>
+              <Text size="sm" c="dimmed">
+                Belum ada data untuk filter yang dipilih
+              </Text>
+            </div>
+          </div>
+        ),
       }}
     />
   );
 };
 
-const RekonIPASNDetail = () => {
+const Filter = ({ isFetching, refetch }) => {
   const router = useRouter();
-  const { data, isLoading } = useQuery(
-    ["rekon-unor-simaster"],
-    () => getUnorSimaster(),
-    {
-      refetchOnWindowFocus: false,
-    }
-  );
+  const { data } = useQuery(["rekon-unor-simaster"], () => getUnorSimaster(), {
+    refetchOnWindowFocus: false,
+  });
 
   const { mutateAsync: rekonIpasn, isLoading: isRekonIpasnLoading } =
     useMutation({
@@ -344,9 +394,9 @@ const RekonIPASNDetail = () => {
 
   const handleDownload = async () => {
     const result = await rekonIpasn();
-    const { data, averageTotal } = result;
+    const { data: downloadData } = result;
     const workbook = XLSX.utils.book_new();
-    const worksheet = XLSX.utils.json_to_sheet(data);
+    const worksheet = XLSX.utils.json_to_sheet(downloadData);
     XLSX.utils.book_append_sheet(workbook, worksheet, "IPASN");
     XLSX.writeFile(workbook, "IPASN.xlsx");
   };
@@ -356,43 +406,126 @@ const RekonIPASNDetail = () => {
   };
 
   return (
-    <Row gutter={[12, 12]}>
-      <Col md={12} xs={24}>
-        <Form.Item>
+    <div>
+      <Text size="sm" fw={600} c="dimmed" style={{ marginBottom: "12px" }}>
+        🔍 Filter Data
+      </Text>
+      <Row gutter={[12, 12]} align="middle" justify="space-between">
+        <Col xs={24} lg={18}>
           <TreeSelect
             treeNodeFilterProp="title"
-            placeholder="Ketik nama unit organisasi"
+            placeholder="Pilih unit organisasi..."
             listHeight={400}
             showSearch
-            style={{ width: "100%" }}
+            style={{
+              width: "100%",
+              borderRadius: "8px",
+            }}
+            size="middle"
             treeData={data}
             value={router?.query?.skpd_id}
             onSelect={handleChange}
+            suffixIcon={
+              <IconBuilding size={16} style={{ color: "#999" }} />
+            }
           />
-        </Form.Item>
-      </Col>
-      <Col md={12} xs={24}>
-        <Button
-          icon={<FileExcelOutlined />}
-          type="primary"
-          loading={isRekonIpasnLoading}
-          disabled={isRekonIpasnLoading}
-          onClick={handleDownload}
+        </Col>
+        <Col xs={24} lg={6}>
+          <div
+            style={{ display: "flex", justifyContent: "flex-end", gap: "8px" }}
+          >
+            <Tooltip title="Reload data">
+              <Button
+                loading={isFetching}
+                onClick={() => refetch()}
+                icon={<IconRefresh size={16} />}
+                style={{
+                  borderColor: "#FF4500",
+                  color: "#FF4500",
+                  borderRadius: "6px",
+                }}
+                size="middle"
+              />
+            </Tooltip>
+            <Tooltip title="Unduh data Excel">
+              <Button
+                loading={isRekonIpasnLoading}
+                onClick={handleDownload}
+                icon={<IconFileSpreadsheet size={16} />}
+                style={{
+                  borderColor: "#FF4500",
+                  color: "#FF4500",
+                  borderRadius: "6px",
+                }}
+                size="middle"
+              />
+            </Tooltip>
+          </div>
+        </Col>
+      </Row>
+    </div>
+  );
+};
+
+const RekonIPASNDetail = () => {
+  const router = useRouter();
+  const { isFetching, refetch } = useQuery({
+    queryKey: ["rekon-ipasn-employees", router?.query],
+    queryFn: () => getEmployeeIPASN(router?.query),
+    keepPreviousData: true,
+    refetchOnWindowFocus: false,
+  });
+
+  return (
+    <div>
+      <div style={{ maxWidth: "100%" }}>
+        <Card
+          style={{
+            borderRadius: "12px",
+            boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+            border: "none",
+          }}
         >
-          Unduh Data
-        </Button>
-      </Col>
-      <Col md={24} xs={24}>
-        <Card>
+          {/* Header Section */}
+          <div
+            style={{
+              background: "#FF4500",
+              color: "white",
+              padding: "24px",
+              textAlign: "center",
+              borderRadius: "12px 12px 0 0",
+              margin: "-24px -24px 0 -24px",
+            }}
+          >
+            <IconTrendingUp size={24} style={{ marginBottom: "8px" }} />
+            <Title level={3} style={{ color: "white", margin: 0 }}>
+              Rekon Data IPASN
+            </Title>
+            <Text style={{ color: "rgba(255, 255, 255, 0.9)", fontSize: 14 }}>
+              Rekonisiliasi dan monitoring data IPASN pegawai
+            </Text>
+          </div>
+
+          {/* Filter Section */}
+          <div
+            style={{
+              padding: "20px 0 16px 0",
+              borderBottom: "1px solid #f0f0f0",
+            }}
+          >
+            <Filter isFetching={isFetching} refetch={refetch} />
+          </div>
+
+          {/* Summary Section */}
           <DetailIPASN />
+
+          {/* Table Section */}
+          <div style={{ marginTop: "16px" }}>
+            <EmployeeIPASN />
+          </div>
         </Card>
-      </Col>
-      <Col md={24} xs={24}>
-        <Card>
-          <EmployeeIPASN />
-        </Card>
-      </Col>
-    </Row>
+      </div>
+    </div>
   );
 };
 

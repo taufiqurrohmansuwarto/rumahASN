@@ -31,7 +31,7 @@ function ReportEmployeeMaster() {
       disabled={loadingDownload}
       icon={<CloudDownloadOutlined />}
     >
-      SIMASTER
+      Unduh Data SIMASTER
     </Button>
   );
 }
