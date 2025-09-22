@@ -97,7 +97,7 @@ const listKenaikanPangkat = async (req, res) => {
       .where("tmtKp", periode)
       .orderBy("nama", "asc")
       .withGraphFetched("pegawai(simpleSelect)")
-      .page(parseInt(page), parseInt(limit));
+      .page(parseInt(page) - 1, parseInt(limit));
 
     if (hasil?.results?.length) {
       const data = {
