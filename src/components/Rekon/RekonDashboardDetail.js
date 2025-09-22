@@ -2,7 +2,6 @@ import useScrollRestoration from "@/hooks/useScrollRestoration";
 import { Text, Title } from "@mantine/core";
 import {
   IconBeach,
-  IconSchool,
   IconShield,
   IconTrendingUp,
   IconUsers,
@@ -13,7 +12,6 @@ import RekonIPASN from "./RekonIPASN";
 import RekonLayananPangkat from "./RekonLayananPangkat";
 import RekonLayananPensiun from "./RekonLayananPensiun";
 import RekonMFA from "./RekonMFA";
-import RekonPG from "./RekonPG";
 
 const { useBreakpoint } = Grid;
 
@@ -89,7 +87,7 @@ const RekonDashboardDetail = () => {
               transition: "all 0.3s ease",
             }}
           >
-            Layanan Pensiun
+            Layanan Pemberhentian
           </Text>
         </div>
       ),
@@ -111,33 +109,11 @@ const RekonDashboardDetail = () => {
               transition: "all 0.3s ease",
             }}
           >
-            IPASN
+            Indeks Profesionalitas ASN
           </Text>
         </div>
       ),
       children: <RekonIPASN />,
-    },
-    {
-      key: "pg",
-      label: (
-        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-          <IconSchool
-            size={isMobile ? 14 : 16}
-            style={{ color: activeTab === "pg" ? "#FF4500" : "#666" }}
-          />
-          <Text
-            size={isMobile ? "xs" : "sm"}
-            fw={500}
-            style={{
-              color: activeTab === "pg" ? "#FF4500" : "#666",
-              transition: "all 0.3s ease",
-            }}
-          >
-            Pencantuman Gelar
-          </Text>
-        </div>
-      ),
-      children: <RekonPG />,
     },
   ];
 
