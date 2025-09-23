@@ -23,10 +23,11 @@ function SyncGolonganByNip({ nip }) {
         icon={<SyncOutlined />}
         onClick={refresh}
         loading={isLoading || isError}
-        type="primary"
+        type="default"
         size="small"
+        style={{ fontSize: '11px', height: '24px', padding: '0 8px' }}
       >
-        Golongan
+        Sync Golongan
       </Button>
     </Tooltip>
   );

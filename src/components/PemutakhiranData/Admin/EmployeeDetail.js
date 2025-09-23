@@ -1,5 +1,6 @@
 import IPAsnByNip from "@/components/LayananSIASN/IPASNByNip";
 import PengaturanGelarByNip from "@/components/LayananSIASN/PengaturanGelarByNip";
+import CekPencantumanGelar from "@/components/PemutakhiranData/Button/CekPencantumanGelar";
 import { dataUtamaMasterByNip } from "@/services/master.services";
 import {
   dataUtamSIASNByNip,
@@ -10,163 +11,474 @@ import {
   updateFotoByNip,
 } from "@/services/siasn-services";
 import { getUmur } from "@/utils/client-utils";
-import { TagOutlined, UserOutlined } from "@ant-design/icons";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
-  Alert as AlertAntd,
-  Avatar,
-  Button,
-  Card,
-  Checkbox,
-  Col,
-  Descriptions,
-  Flex,
-  Form,
-  Grid,
-  Input,
-  Modal,
-  Popconfirm,
-  Row,
-  Space,
-  Spin,
-  Tag,
-  Tooltip,
-  Typography,
-  message,
-} from "antd";
+  Accordion,
+  Alert,
+  Badge,
+  Box,
+  Center,
+  Group,
+  LoadingOverlay,
+  Skeleton as MantineSkeleton,
+  Paper,
+  Stack,
+  Text,
+} from "@mantine/core";
+import {
+  IconBriefcase,
+  IconBuilding,
+  IconCheck,
+  IconFileText,
+  IconId,
+  IconInfoCircle,
+  IconMapPin,
+  IconUpload,
+  IconUser,
+  IconUsers,
+  IconX,
+} from "@tabler/icons-react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { Avatar, Button, Col, Popconfirm, Row, Tooltip, message } from "antd";
 import { useRouter } from "next/router";
-import { useEffect } from "react";
 import SyncGolonganByNip from "../Sync/SyncGolonganByNip";
 import SyncJabatanByNip from "../Sync/SyncJabatanByNip";
-import DisparitasByNip from "./DisparitasByNip";
 import TrackingKenaikanPangkatByNip from "./Usulan/TrackingKenaikanPangkatByNip";
 import TrackingPemberhentianByNip from "./Usulan/TrackingPemberhentianByNip";
 import TrackingPencantumanGelarByNip from "./Usulan/TrackingPencantumanGelarByNip";
 import TrackingPenyesuaianMasaKerjaByNip from "./Usulan/TrackingPenyesuaianMasaKerjaByNip";
 import TrackingPerbaikanNamaByNip from "./Usulan/TrackingPerbaikanNamaByNip";
 import TrackingUsulanLainnyaByNip from "./Usulan/TrackingUsulanLainnyaByNip";
-import CekUnor from "@/components/Disparitas/CekUnor";
-import CekPencantumanGelar from "@/components/PemutakhiranData/Button/CekPencantumanGelar";
 
 // import { patchAnomali2023 } from "@/services/anomali.services";
 
 const EmployeeUnor = ({ data, loading, nip }) => {
   return (
-    <AlertAntd
-      message="Informasi ASN Via SIASN"
-      showIcon
-      type="warning"
-      action={
-        <Space direction="vertical">
-          <SyncJabatanByNip nip={nip} />
-          <SyncGolonganByNip nip={nip} />
-        </Space>
-      }
-      description={
-        <Spin spinning={loading}>
-          {data ? (
-            <Row gutter={[8, 8]}>
-              <Col span={24}>
-                {data?.nama} ({data?.nip_baru}) - {data?.unor_nm}
-              </Col>
-              <Col span={24}>
-                {data?.jabatan_nama} - {data?.golongan_nm}
-              </Col>
-              <Col span={24}>
-                <Tracking nip={nip} />
-              </Col>
-            </Row>
-          ) : (
-            <div>
-              <Tag color="red">Pegawai Tidak ditemukan di SIASN</Tag>
-            </div>
-          )}
-        </Spin>
-      }
-    ></AlertAntd>
+    <Alert
+      icon={<IconInfoCircle size={16} />}
+      title="Informasi ASN Via SIASN"
+      color="yellow"
+      variant="light"
+    >
+      <Box>
+        <LoadingOverlay visible={loading} />
+        {data ? (
+          <Box>
+            <Text size="sm" mb={2}>
+              <IconUser
+                size={14}
+                style={{ marginRight: 4, verticalAlign: "middle" }}
+              />
+              {data?.nama} ({data?.nip_baru})
+            </Text>
+            <Text size="sm" c="dimmed" mb="xs">
+              <IconBriefcase
+                size={14}
+                style={{ marginRight: 4, verticalAlign: "middle" }}
+              />
+              {data?.jabatan_nama} - {data?.golongan_nm}
+            </Text>
+            <Text size="xs" c="dimmed" mb="xs">
+              {data?.unor_nm}
+            </Text>
+            <Tracking nip={nip} />
+          </Box>
+        ) : (
+          <Badge size="sm" color="red" variant="light">
+            Tidak ditemukan di SIASN
+          </Badge>
+        )}
+      </Box>
+    </Alert>
   );
 };
 
-const EmployeeDescriptionMaster = ({ data, loading, unorId }) => {
-  const breakPoint = Grid.useBreakpoint();
-
+const EmployeeDescriptionMaster = ({ data, loading, dataSiasn }) => {
   return (
-    <Card
-      title={
-        <Space>
-          <Typography.Text strong>Informasi Pegawai SIMASTER</Typography.Text>
-        </Space>
-      }
-      style={{ marginBottom: 16 }}
-      loading={loading}
-    >
-      <Descriptions
-        size="small"
-        column={breakPoint.xs ? 1 : 2}
-        layout={breakPoint.xs ? "vertical" : "horizontal"}
-        bordered
-      >
-        <Descriptions.Item label="Nama Lengkap">
-          <Typography.Text copyable strong>
-            {data?.nama || "-"}
-          </Typography.Text>
-        </Descriptions.Item>
-        <Descriptions.Item label="NIP">
-          <Typography.Text copyable code>
-            {data?.nip_baru || "-"}
-          </Typography.Text>
-        </Descriptions.Item>
-        <Descriptions.Item label="Usia">
-          <Tag color="blue">
-            {data?.tgl_lahir ? `${getUmur(data?.tgl_lahir)} Tahun` : "-"}
-          </Tag>
-        </Descriptions.Item>
-        <Descriptions.Item label="Jabatan">
-          <Typography.Text strong>
-            {data?.jabatan?.jabatan || "-"}
-          </Typography.Text>
-        </Descriptions.Item>
-        <Descriptions.Item label="Golongan">
-          <Tag color="volcano">{data?.pangkat?.golongan || "-"}</Tag>
-        </Descriptions.Item>
-        <Descriptions.Item label="Jenjang Pendidikan">
-          <div>
-            <Typography.Text strong>
-              {data?.pendidikan?.jenjang || "-"}
-            </Typography.Text>
-            {data?.pendidikan?.prodi && (
-              <Typography.Text style={{ display: "block", color: "#666" }}>
-                {data?.pendidikan?.prodi}
-              </Typography.Text>
-            )}
-            {data?.pendidikan?.nama_sekolah && (
-              <Typography.Text
-                style={{ display: "block", color: "#999", fontSize: "12px" }}
+    <MantineSkeleton visible={loading}>
+      <Stack spacing="lg">
+        {/* Data Lokal - Tanpa Collapse */}
+        <Paper p="md" radius="md" withBorder>
+          <Group spacing="xs" mb="md">
+            <IconFileText size={16} color="blue" />
+            <Text size="sm" fw={500}>
+              Data Lokal (SIMASTER)
+            </Text>
+          </Group>
+          <Row gutter={[12, 12]}>
+            <Col xs={24} sm={8}>
+              <Tooltip title="Nama Lengkap Pegawai">
+                <Group spacing={4} align="baseline">
+                  <Text
+                    size="xs"
+                    c="dimmed"
+                    style={{ width: "70px", flexShrink: 0 }}
+                  >
+                    Nama
+                  </Text>
+                  <Text size="xs" c="dimmed">
+                    :
+                  </Text>
+                  <Text size="xs">{data?.nama || "-"}</Text>
+                </Group>
+              </Tooltip>
+            </Col>
+            <Col xs={24} sm={8}>
+              <Tooltip title="Nomor Induk Pegawai">
+                <Group spacing={4} align="baseline">
+                  <Text
+                    size="xs"
+                    c="dimmed"
+                    style={{ width: "70px", flexShrink: 0 }}
+                  >
+                    NIP
+                  </Text>
+                  <Text size="xs" c="dimmed">
+                    :
+                  </Text>
+                  <Text size="xs" ff="monospace">
+                    {data?.nip_baru || "-"}
+                  </Text>
+                </Group>
+              </Tooltip>
+            </Col>
+            <Col xs={24} sm={8}>
+              <Tooltip title="Usia Pegawai">
+                <Group spacing={4} align="center">
+                  <Text
+                    size="xs"
+                    c="dimmed"
+                    style={{ width: "70px", flexShrink: 0 }}
+                  >
+                    Usia
+                  </Text>
+                  <Text size="xs" c="dimmed">
+                    :
+                  </Text>
+                  <Badge
+                    size="sm"
+                    color="violet"
+                    variant="gradient"
+                    gradient={{ from: "violet", to: "blue" }}
+                  >
+                    {data?.tgl_lahir ? `${getUmur(data?.tgl_lahir)}th` : "-"}
+                  </Badge>
+                </Group>
+              </Tooltip>
+            </Col>
+            <Col xs={24} sm={8}>
+              <Tooltip title={data?.jabatan?.jabatan || "Jabatan"}>
+                <Group spacing={4} align="baseline">
+                  <Text
+                    size="xs"
+                    c="dimmed"
+                    style={{ width: "70px", flexShrink: 0 }}
+                  >
+                    Jabatan
+                  </Text>
+                  <Text size="xs" c="dimmed">
+                    :
+                  </Text>
+                  <Text size="xs" truncate style={{ flex: 1 }}>
+                    {data?.jabatan?.jabatan || "-"}
+                  </Text>
+                </Group>
+              </Tooltip>
+            </Col>
+            <Col xs={24} sm={8}>
+              <Tooltip title="Golongan/Pangkat">
+                <Group spacing={4} align="center">
+                  <Text
+                    size="xs"
+                    c="dimmed"
+                    style={{ width: "70px", flexShrink: 0 }}
+                  >
+                    Golongan
+                  </Text>
+                  <Text size="xs" c="dimmed">
+                    :
+                  </Text>
+                  <Badge size="sm" color="yellow" variant="dot">
+                    {data?.pangkat?.golongan || "-"}
+                  </Badge>
+                </Group>
+              </Tooltip>
+            </Col>
+            <Col xs={24} sm={8}>
+              <Tooltip
+                title={`${data?.pendidikan?.jenjang || ""} ${
+                  data?.pendidikan?.prodi || ""
+                } - ${data?.pendidikan?.nama_sekolah || ""}`}
               >
-                {data?.pendidikan?.nama_sekolah}
-              </Typography.Text>
-            )}
-          </div>
-        </Descriptions.Item>
-        <Descriptions.Item
-          label={
-            <Space>
-              <Typography.Text>Perangkat Daerah</Typography.Text>
-              <CekUnor unorId={unorId} />
-            </Space>
-          }
-          span={breakPoint.xs ? 1 : 2}
-        >
-          <Typography.Text>{data?.skpd?.detail || "-"}</Typography.Text>
-        </Descriptions.Item>
-      </Descriptions>
-    </Card>
+                <Group spacing={4} align="baseline">
+                  <Text
+                    size="xs"
+                    c="dimmed"
+                    style={{ width: "70px", flexShrink: 0 }}
+                  >
+                    Pendidikan
+                  </Text>
+                  <Text size="xs" c="dimmed">
+                    :
+                  </Text>
+                  <Text size="xs">
+                    {data?.pendidikan?.jenjang || "-"}{" "}
+                    {data?.pendidikan?.prodi || ""}
+                  </Text>
+                </Group>
+              </Tooltip>
+            </Col>
+            <Col xs={24}>
+              <Tooltip title={data?.skpd?.detail || "Unit Kerja"}>
+                <Group spacing={4} align="flex-start">
+                  <Text
+                    size="xs"
+                    c="dimmed"
+                    style={{ width: "70px", flexShrink: 0 }}
+                  >
+                    Unit Kerja
+                  </Text>
+                  <Text size="xs" c="dimmed">
+                    :
+                  </Text>
+                  <Text size="xs" style={{ flex: 1, wordBreak: "break-word" }}>
+                    {data?.skpd?.detail || "-"}
+                  </Text>
+                </Group>
+              </Tooltip>
+            </Col>
+          </Row>
+        </Paper>
+
+        {/* Data SIASN - Dengan Collapse */}
+        <Accordion variant="separated">
+          <Accordion.Item value="siasn">
+            <Accordion.Control>
+              <Group spacing="xs">
+                <IconBuilding size={16} color="orange" />
+                <Text size="sm" fw={500}>
+                  Data Pusat (SIASN)
+                </Text>
+              </Group>
+            </Accordion.Control>
+            <Accordion.Panel pt="md">
+              {dataSiasn ? (
+                <Row gutter={[12, 12]}>
+                  <Col xs={24} sm={8}>
+                    <Tooltip title="Nama dari SIASN">
+                      <Group spacing={4} align="center">
+                        <Text
+                          size="xs"
+                          c="dimmed"
+                          style={{ width: "80px", flexShrink: 0 }}
+                        >
+                          Nama
+                        </Text>
+                        <Text size="xs" c="dimmed">
+                          :
+                        </Text>
+                        <Badge size="sm" color="teal" variant="outline">
+                          {dataSiasn?.nama || "-"}
+                        </Badge>
+                      </Group>
+                    </Tooltip>
+                  </Col>
+                  <Col xs={24} sm={8}>
+                    <Tooltip title="NIK dari SIASN">
+                      <Group spacing={4} align="center">
+                        <Text
+                          size="xs"
+                          c="dimmed"
+                          style={{ width: "80px", flexShrink: 0 }}
+                        >
+                          NIK
+                        </Text>
+                        <Text size="xs" c="dimmed">
+                          :
+                        </Text>
+                        <Badge
+                          size="sm"
+                          color="indigo"
+                          variant="dot"
+                          ff="monospace"
+                        >
+                          {dataSiasn?.nik || "-"}
+                        </Badge>
+                      </Group>
+                    </Tooltip>
+                  </Col>
+                  <Col xs={24} sm={8}>
+                    <Tooltip title="TMT PNS">
+                      <Group spacing={4} align="center">
+                        <Text
+                          size="xs"
+                          c="dimmed"
+                          style={{ width: "80px", flexShrink: 0 }}
+                        >
+                          TMT PNS
+                        </Text>
+                        <Text size="xs" c="dimmed">
+                          :
+                        </Text>
+                        <Badge size="sm" color="cyan" variant="light">
+                          {dataSiasn?.tmtPns || "-"}
+                        </Badge>
+                      </Group>
+                    </Tooltip>
+                  </Col>
+                  <Col xs={24} sm={8}>
+                    <Tooltip title="Golongan Ruang">
+                      <Group spacing={4} align="center">
+                        <Text
+                          size="xs"
+                          c="dimmed"
+                          style={{ width: "80px", flexShrink: 0 }}
+                        >
+                          Gol. Ruang
+                        </Text>
+                        <Text size="xs" c="dimmed">
+                          :
+                        </Text>
+                        <Badge
+                          size="sm"
+                          color="grape"
+                          variant="gradient"
+                          gradient={{ from: "grape", to: "pink" }}
+                        >
+                          {dataSiasn?.golRuangAkhir || "-"}
+                        </Badge>
+                      </Group>
+                    </Tooltip>
+                  </Col>
+                  <Col xs={24} sm={16}>
+                    <Tooltip title={dataSiasn?.jabatanNama || "Jabatan SIASN"}>
+                      <Group spacing={4} align="baseline">
+                        <Text
+                          size="xs"
+                          c="dimmed"
+                          style={{ width: "80px", flexShrink: 0 }}
+                        >
+                          Jabatan
+                        </Text>
+                        <Text size="xs" c="dimmed">
+                          :
+                        </Text>
+                        <Text
+                          size="xs"
+                          style={{ flex: 1, wordBreak: "break-word" }}
+                        >
+                          {dataSiasn?.jabatanNama || "-"}
+                        </Text>
+                      </Group>
+                    </Tooltip>
+                  </Col>
+                  <Col xs={24}>
+                    <Tooltip
+                      title={`${dataSiasn?.unorIndukNama || ""} - ${
+                        dataSiasn?.unorNama || ""
+                      }`}
+                    >
+                      <Group spacing={4} align="flex-start">
+                        <Text
+                          size="xs"
+                          c="dimmed"
+                          style={{ width: "80px", flexShrink: 0 }}
+                        >
+                          Unit Kerja
+                        </Text>
+                        <Text size="xs" c="dimmed">
+                          :
+                        </Text>
+                        <Text
+                          size="xs"
+                          style={{ flex: 1, wordBreak: "break-word" }}
+                        >
+                          {dataSiasn?.unorIndukNama && dataSiasn?.unorNama
+                            ? `${dataSiasn.unorIndukNama} - ${dataSiasn.unorNama}`
+                            : dataSiasn?.unorNama || "-"}
+                        </Text>
+                      </Group>
+                    </Tooltip>
+                  </Col>
+                  <Col xs={24} sm={8}>
+                    <Tooltip title="Kedudukan PNS">
+                      <Group spacing={4} align="center">
+                        <Text
+                          size="xs"
+                          c="dimmed"
+                          style={{ width: "80px", flexShrink: 0 }}
+                        >
+                          Kedudukan
+                        </Text>
+                        <Text size="xs" c="dimmed">
+                          :
+                        </Text>
+                        <Badge size="sm" color="pink" variant="light">
+                          {dataSiasn?.kedudukanPnsNama || "-"}
+                        </Badge>
+                      </Group>
+                    </Tooltip>
+                  </Col>
+                  <Col xs={24} sm={8}>
+                    <Tooltip
+                      title={`${dataSiasn?.tkPendidikanTerakhir || ""} - ${
+                        dataSiasn?.pendidikanTerakhirNama || ""
+                      }`}
+                    >
+                      <Group spacing={4} align="center">
+                        <Text
+                          size="xs"
+                          c="dimmed"
+                          style={{ width: "80px", flexShrink: 0 }}
+                        >
+                          Pendidikan
+                        </Text>
+                        <Text size="xs" c="dimmed">
+                          :
+                        </Text>
+                        <Badge size="sm" color="lime" variant="dot">
+                          {dataSiasn?.tkPendidikanTerakhir &&
+                          dataSiasn?.pendidikanTerakhirNama
+                            ? `${dataSiasn.tkPendidikanTerakhir} - ${dataSiasn.pendidikanTerakhirNama}`
+                            : dataSiasn?.tkPendidikanTerakhir || "-"}
+                        </Badge>
+                      </Group>
+                    </Tooltip>
+                  </Col>
+                  <Col xs={24} sm={8}>
+                    <Tooltip title="Jenjang Jabatan ASN">
+                      <Group spacing={4} align="center">
+                        <Text
+                          size="xs"
+                          c="dimmed"
+                          style={{ width: "80px", flexShrink: 0 }}
+                        >
+                          Jenjang Jab
+                        </Text>
+                        <Text size="xs" c="dimmed">
+                          :
+                        </Text>
+                        <Badge size="sm" color="orange" variant="outline">
+                          {dataSiasn?.asnJenjangJabatan || "-"}
+                        </Badge>
+                      </Group>
+                    </Tooltip>
+                  </Col>
+                </Row>
+              ) : (
+                <Text size="xs" c="dimmed">
+                  Data SIASN tidak tersedia
+                </Text>
+              )}
+            </Accordion.Panel>
+          </Accordion.Item>
+        </Accordion>
+      </Stack>
+    </MantineSkeleton>
   );
 };
 
 const EmployeeContent = ({ data, loading, nip }) => {
   const queryClient = useQueryClient();
-  const breakPoint = Grid.useBreakpoint();
 
   const { mutateAsync: updateFoto, isLoading: isLoadingUpdateFoto } =
     useMutation((nip) => updateFotoByNip(nip), {
@@ -193,253 +505,152 @@ const EmployeeContent = ({ data, loading, nip }) => {
   };
 
   return (
-    <Row gutter={[16, 16]}>
-      <Col span={24}>
-        <Flex vertical gap={16}>
-          <Flex gap={2} wrap="wrap" justify="flex-start">
-            <Tooltip title="Status SIMASTER">
-              <StatusMaster status={data?.master?.status} />
-            </Tooltip>
-            <Tooltip title="Status SIASN">
-              <StatusSIASN
-                status={data?.siasn?.statusPegawai}
-                kedudukanNama={data?.siasn?.kedudukanPnsNama}
-              />
-            </Tooltip>
-            <Tag
-              icon={<TagOutlined />}
-              color={data?.siasn?.validNik ? "green" : "red"}
-            >
-              {data?.siasn?.validNik ? "NIK Valid" : "NIK Belum Valid"}
-            </Tag>
-            <Tag icon={<TagOutlined />} color="blue">
-              {data?.siasn?.jenisPegawaiNama || "Jenis Pegawai Tidak Tersedia"}
-            </Tag>
-            <Tag icon={<TagOutlined />} color="purple">
-              {data?.siasn?.asnJenjangJabatan || "Jenjang Tidak Tersedia"}
-            </Tag>
-          </Flex>
+    <Stack spacing="sm">
+      {/* Status Badges - Compact */}
+      <Group spacing={4} wrap="wrap">
+        <StatusMaster status={data?.master?.status} />
+        <StatusSIASN
+          status={data?.siasn?.statusPegawai}
+          kedudukanNama={data?.siasn?.kedudukanPnsNama}
+        />
+        <Tooltip
+          title={`NIK ${data?.siasn?.validNik ? "Valid" : "Tidak Valid"}: ${
+            data?.siasn?.nik || "-"
+          }`}
+        >
+          <Badge
+            color={data?.siasn?.validNik ? "lime" : "pink"}
+            variant={data?.siasn?.validNik ? "light" : "outline"}
+            leftSection={<IconId size={12} />}
+          >
+            {data?.siasn?.validNik ? "Valid" : "Invalid"}
+          </Badge>
+        </Tooltip>
+        <Tooltip title={data?.siasn?.jenisPegawaiNama || "Jenis Pegawai"}>
+          <Badge
+            color="indigo"
+            variant="gradient"
+            gradient={{ from: "indigo", to: "cyan" }}
+            leftSection={<IconUsers size={12} />}
+          >
+            {data?.siasn?.jenisPegawaiNama?.split(" ")[0] || "PNS"}
+          </Badge>
+        </Tooltip>
+      </Group>
 
-          {/* Informasi Pegawai */}
-          <Flex vertical style={{ marginBottom: 16 }}>
-            {/* Foto Section - Responsive Layout */}
-            <Row justify="center" style={{ marginBottom: 24 }}>
-              <Col xs={24} sm={24} md={22} lg={20} xl={18}>
-                <Flex
-                  align="center"
-                  justify="center"
-                  gap={breakPoint.xs ? 4 : 8}
-                  wrap
-                >
-                  {/* Foto SIMASTER */}
-                  <Flex
-                    vertical
-                    align="center"
-                    style={{
-                      minWidth: breakPoint.xs ? "120px" : "140px",
-                      padding: breakPoint.xs ? "12px 4px" : "16px 8px",
-                    }}
-                  >
-                    <Typography.Text
-                      strong
-                      style={{
-                        fontSize: breakPoint.xs ? "12px" : "13px",
-                        color: "#1890ff",
-                        textAlign: "center",
-                        marginBottom: "12px",
-                      }}
-                    >
-                      📸 Foto SIMASTER
-                    </Typography.Text>
-                    <Avatar
-                      src={data?.master?.foto}
-                      size={120}
-                      shape="square"
-                      icon={!data?.master?.foto && <UserOutlined />}
-                    />
-                    <Typography.Text
-                      type="secondary"
-                      style={{
-                        fontSize: breakPoint.xs ? "10px" : "11px",
-                        textAlign: "center",
-                      }}
-                    >
-                      Database Lokal
-                    </Typography.Text>
-                  </Flex>
-
-                  {/* Transfer Button */}
-                  <Flex
-                    vertical
-                    align="center"
-                    justify="center"
-                    style={{
-                      minWidth: breakPoint.xs ? "140px" : "160px",
-                      padding: breakPoint.xs ? "12px 8px" : "16px",
-                    }}
-                  >
-                    <Button
-                      type="primary"
-                      style={{
-                        width: "100%",
-                        marginBottom: "8px",
-                      }}
-                      onClick={handleUpdateFoto}
-                      loading={isLoadingUpdateFoto}
-                    >
-                      📤 Transfer ke SIASN
-                    </Button>
-                    <Typography.Text
-                      style={{
-                        fontSize: breakPoint.xs ? "10px" : "11px",
-                        color: "#666",
-                        textAlign: "center",
-                        fontStyle: "italic",
-                        lineHeight: 1.3,
-                      }}
-                    >
-                      Transfer foto ke database pusat
-                    </Typography.Text>
-                  </Flex>
-
-                  {/* Foto SIASN */}
-                  <Flex
-                    vertical
-                    align="center"
-                    style={{
-                      minWidth: breakPoint.xs ? "120px" : "140px",
-                      padding: breakPoint.xs ? "12px 4px" : "16px 8px",
-                    }}
-                  >
-                    <Typography.Text
-                      strong
-                      style={{
-                        fontSize: breakPoint.xs ? "12px" : "13px",
-                        color: "#fa8c16",
-                        textAlign: "center",
-                        marginBottom: "12px",
-                      }}
-                    >
-                      📸 Foto SIASN
-                    </Typography.Text>
-                    <Avatar
-                      src={data?.fotoSiasn?.data}
-                      size={120}
-                      shape="square"
-                      icon={!data?.fotoSiasn?.data && <UserOutlined />}
-                    />
-                    <Typography.Text
-                      type="secondary"
-                      style={{
-                        fontSize: breakPoint.xs ? "10px" : "11px",
-                        textAlign: "center",
-                      }}
-                    >
-                      Database Pusat
-                    </Typography.Text>
-                  </Flex>
-                </Flex>
-              </Col>
-            </Row>
-
-            {/* Employee Description */}
-            <EmployeeDescriptionMaster
-              unorId={data?.siasn?.unorId}
-              loading={loading}
-              data={data?.master}
+      {/* Photo Section - Compact & Centered */}
+      <Center>
+        <Group
+          spacing="lg"
+          align="center"
+          style={{
+            padding: "16px",
+            border: "1px solid #e3f2fd",
+            borderRadius: "8px",
+            backgroundColor: "#fafafa",
+          }}
+        >
+          <Stack align="center" spacing={4}>
+            <Text size="xs" c="blue" fw={600}>
+              Foto SIMASTER
+            </Text>
+            <Avatar
+              src={data?.master?.foto}
+              size={80}
+              icon={<IconUser size={30} />}
             />
-          </Flex>
-        </Flex>
-      </Col>
-    </Row>
+            <Text size="xs" c="dimmed">
+              Database Lokal
+            </Text>
+          </Stack>
+
+          <Stack align="center" spacing="xs">
+            <Button
+              type="primary"
+              size="small"
+              onClick={handleUpdateFoto}
+              loading={isLoadingUpdateFoto}
+              icon={<IconUpload size={14} />}
+            >
+              Transfer Foto
+            </Button>
+            <Group spacing={4} wrap="wrap" justify="center">
+              <SyncJabatanByNip nip={nip} />
+              <SyncGolonganByNip nip={nip} />
+            </Group>
+            <Text size="xs" c="dimmed" ta="center">
+              Transfer & Sync Data
+            </Text>
+          </Stack>
+
+          <Stack align="center" spacing={4}>
+            <Text size="xs" c="orange" fw={600}>
+              Foto SIASN
+            </Text>
+            <Avatar
+              src={data?.fotoSiasn?.data}
+              size={80}
+              icon={<IconUser size={30} />}
+            />
+            <Text size="xs" c="dimmed">
+              Database Pusat
+            </Text>
+          </Stack>
+        </Group>
+      </Center>
+
+      {/* Employee Description */}
+      <EmployeeDescriptionMaster
+        loading={loading}
+        data={data?.master}
+        dataSiasn={data?.siasn}
+      />
+    </Stack>
   );
 };
 
 const Tracking = ({ nip }) => {
   return (
-    <>
-      <Space align="center">
-        <TrackingKenaikanPangkatByNip nip={nip} />
-        <TrackingPemberhentianByNip nip={nip} />
-        <TrackingPerbaikanNamaByNip nip={nip} />
-        <TrackingUsulanLainnyaByNip nip={nip} />
-        <TrackingPencantumanGelarByNip nip={nip} />
-        <TrackingPenyesuaianMasaKerjaByNip nip={nip} />
-      </Space>
-    </>
-  );
-};
-
-const ModalAnomali = ({
-  open,
-  onCancel,
-  update,
-  loadingUpdate,
-  nip,
-  initialData,
-}) => {
-  const [form] = Form.useForm();
-
-  useEffect(() => {
-    if (initialData) {
-      form.setFieldsValue(initialData);
-    }
-  }, [form, initialData]);
-
-  const handleUpdate = async () => {
-    try {
-      const result = await form.validateFields();
-      const payload = {
-        id: initialData?.id,
-        employee_number: nip,
-        data: result,
-      };
-      await update(payload);
-    } catch (error) {
-      console.log(error);
-    }
-  };
-
-  return (
-    <Modal
-      confirmLoading={loadingUpdate}
-      onOk={handleUpdate}
-      title="Update Data Anomali"
-      open={open}
-      onCancel={onCancel}
-    >
-      <Form layout="vertical" form={form}>
-        <Form.Item name="description" label="Deskripsi">
-          <Input.TextArea />
-        </Form.Item>
-        <Form.Item
-          valuePropName="checked"
-          name="is_repaired"
-          label="Sudah diperbaiki?"
-        >
-          <Checkbox />
-        </Form.Item>
-        <Form.Item valuePropName="checked" name="reset" label="Reset">
-          <Checkbox />
-        </Form.Item>
-      </Form>
-    </Modal>
+    <Group spacing="xs" wrap="wrap">
+      <TrackingKenaikanPangkatByNip nip={nip} />
+      <TrackingPemberhentianByNip nip={nip} />
+      <TrackingPerbaikanNamaByNip nip={nip} />
+      <TrackingUsulanLainnyaByNip nip={nip} />
+      <TrackingPencantumanGelarByNip nip={nip} />
+      <TrackingPenyesuaianMasaKerjaByNip nip={nip} />
+    </Group>
   );
 };
 
 const StatusSIASN = ({ status, kedudukanNama }) => {
   return (
-    <Tag icon={<TagOutlined />} color="orange">
-      {status} - {kedudukanNama}
-    </Tag>
+    <Tooltip title={`Status: ${status} - Kedudukan: ${kedudukanNama}`}>
+      <Badge
+        color="orange"
+        variant="outline"
+        leftSection={
+          status === "PNS" ? <IconBuilding size={12} /> : <IconUser size={12} />
+        }
+      >
+        {status} - {kedudukanNama?.slice(0, 10)}
+      </Badge>
+    </Tooltip>
   );
 };
 
 const StatusMaster = ({ status }) => {
   return (
-    <Tag icon={<TagOutlined />} color={status === "Aktif" ? "green" : "red"}>
-      {status}
-    </Tag>
+    <Tooltip title={`Status Pegawai SIMASTER: ${status}`}>
+      <Badge
+        color={status === "Aktif" ? "green" : "red"}
+        variant="outline"
+        leftSection={
+          status === "Aktif" ? <IconCheck size={12} /> : <IconX size={12} />
+        }
+      >
+        {status}
+      </Badge>
+    </Tooltip>
   );
 };
 
@@ -451,7 +662,7 @@ const Kppn = ({ id }) => {
     refetchOnWindowFocus: false,
   });
 
-  const { mutateAsync: update, isLoading: isLoadingUpdate } = useMutation(
+  const { mutateAsync: update } = useMutation(
     (data) => updateDataUtamaByNip(data),
     {
       onSuccess: () => message.success("Berhasil memperbarui data"),
@@ -478,41 +689,40 @@ const Kppn = ({ id }) => {
   };
 
   return (
-    <Spin spinning={isLoading}>
+    <LoadingOverlay visible={isLoading}>
       {data ? (
         <Popconfirm onConfirm={handleUpdate} title="Update KPPN menjadi BPKAD?">
-          <Tooltip title="KPPN">
-            <Tag
-              style={{
-                cursor: "pointer",
-              }}
+          <Tooltip label="KPPN">
+            <Badge
               color="blue"
+              variant="gradient"
+              gradient={{ from: "blue", to: "teal" }}
+              style={{ cursor: "pointer" }}
+              leftSection={<IconMapPin size={12} />}
             >
               {dataKppn(id)?.nama}
-            </Tag>
+            </Badge>
           </Tooltip>
         </Popconfirm>
       ) : (
         <Popconfirm onConfirm={handleUpdate} title="Update KPPN menjadi BPKAD?">
-          <Tooltip title="KPPN">
-            <Tag
-              style={{
-                cursor: "pointer",
-              }}
+          <Tooltip label="KPPN">
+            <Badge
               color="red"
+              variant="outline"
+              style={{ cursor: "pointer" }}
+              leftSection={<IconMapPin size={12} />}
             >
               KPPN Tidak Ditemukan
-            </Tag>
+            </Badge>
           </Tooltip>
         </Popconfirm>
       )}
-    </Spin>
+    </LoadingOverlay>
   );
 };
 
 function EmployeeDetail({ nip }) {
-  const breakPoint = Grid.useBreakpoint();
-
   const { data: dataSimaster, isLoading: isLoadingDataSimaster } = useQuery(
     ["data-utama-simaster-by-nip", nip],
     () => dataUtamaMasterByNip(nip),
@@ -533,15 +743,11 @@ function EmployeeDetail({ nip }) {
     }
   );
 
-  const { data: foto, isLoading: isLoadingFoto } = useQuery(
-    ["foto-by-nip", nip],
-    () => fotoByNip(nip),
-    {
-      refetchOnWindowFocus: false,
-    }
-  );
+  const { data: foto } = useQuery(["foto-by-nip", nip], () => fotoByNip(nip), {
+    refetchOnWindowFocus: false,
+  });
 
-  const { data: siasn, isLoading: loadingSiasn } = useQuery(
+  const { data: siasn } = useQuery(
     ["data-utama-siasn", nip],
     () => dataUtamSIASNByNip(nip),
     {
@@ -552,29 +758,34 @@ function EmployeeDetail({ nip }) {
   );
 
   return (
-    <Card title="Informasi Pegawai" extra={<DisparitasByNip />}>
-      <EmployeeContent
-        nip={nip}
-        loading={isLoadingDataSimaster}
-        data={{
-          master: dataSimaster,
-          siasn: siasn,
-          pns: dataPnsAll,
-          fotoSiasn: foto,
-        }}
-      />
-      <EmployeeUnor nip={nip} loading={isLoadingDataPns} data={dataPnsAll} />
-      <Space
-        direction={breakPoint?.xs ? "vertical" : "horizontal"}
-        align={breakPoint?.xs ? "start" : "center"}
-        size={"small"}
-      >
-        <IPAsnByNip tahun={2024} nip={dataSimaster?.nip_baru} />
-        <CekPencantumanGelar nip={nip} />
-        <Kppn id={siasn?.kppnId} />
-        <PengaturanGelarByNip nip={nip} />
-      </Space>
-    </Card>
+    <Paper p="sm" radius="md" withBorder>
+      <Group spacing="xs" mb="sm">
+        <IconUser size={16} color="blue" />
+        <Text fw={600} size="md">
+          Informasi Pegawai
+        </Text>
+      </Group>
+
+      <Stack spacing="sm">
+        <EmployeeContent
+          nip={nip}
+          loading={isLoadingDataSimaster}
+          data={{
+            master: dataSimaster,
+            siasn: siasn,
+            pns: dataPnsAll,
+            fotoSiasn: foto,
+          }}
+        />
+
+        <Group spacing="xs" wrap="wrap">
+          <IPAsnByNip tahun={2024} nip={dataSimaster?.nip_baru} />
+          <CekPencantumanGelar nip={nip} />
+          <Kppn id={siasn?.kppnId} />
+          <PengaturanGelarByNip nip={nip} />
+        </Group>
+      </Stack>
+    </Paper>
   );
 }
 

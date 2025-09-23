@@ -3,20 +3,38 @@ import EmployeeDetail from "@/components/PemutakhiranData/Admin/EmployeeDetail";
 import SiasnTab from "@/components/PemutakhiranData/Admin/SiasnTab";
 import { patchAnomali2023 } from "@/services/anomali.services";
 import { dataUtamaMasterByNip } from "@/services/master.services";
-import { Alert, Stack } from "@mantine/core";
+import {
+  Alert,
+  Stack,
+  Grid,
+  Paper,
+  Avatar as MantineAvatar,
+  Text,
+  Badge,
+  Group,
+  ActionIcon,
+  Container,
+  Box,
+  Skeleton as MantineSkeleton,
+  Flex
+} from "@mantine/core";
+import {
+  IconUser,
+  IconBriefcase,
+  IconBuilding,
+  IconFileText,
+  IconEdit,
+  IconCheck,
+  IconX,
+  IconInfoCircle
+} from "@tabler/icons-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
-  Avatar,
-  Card,
   Checkbox,
-  Col,
   Empty,
   Form,
   Input,
   Modal,
-  Row,
-  Skeleton,
-  Space,
   Tag,
   Tooltip,
   Typography,
@@ -89,8 +107,13 @@ const ChangeStatusAnomali = ({ data, open, onCancel }) => {
       open={open}
       onCancel={onCancel}
     >
-      <Stack>
-        <Alert title="Harap diperhatikan" color="red">
+      <Stack spacing="md">
+        <Alert
+          icon={<IconInfoCircle size={16} />}
+          title="Harap diperhatikan"
+          color="red"
+          variant="filled"
+        >
           Pastikan Data Jabatan Terakhir di SIASN menggunakan awalan UPT jika di
           sekolah. Jangan di beri tanda cek sebelum diperbaiki
         </Alert>
@@ -144,80 +167,121 @@ const EmployeeBio = ({
   };
 
   return (
-    <Card loading={loading}>
+    <Paper p="md" radius="md" withBorder>
       <ChangeStatusAnomali data={anomali} open={open} onCancel={handleClose} />
-      <Row gutter={[16, 16]}>
-        <Col md={2} sm={5}>
-          <Avatar size={95} shape="circle" src={data?.foto} />
-        </Col>
-        <Col md={10} sm={13}>
-          <Space direction="vertical">
-            <Space size="small">
+      <Grid gutter="md">
+        <Grid.Col span={{ base: 12, sm: 2 }}>
+          <Flex justify="center">
+            <MantineAvatar
+              size={90}
+              radius="xl"
+              src={data?.foto}
+              alt={data?.nama}
+            >
+              <IconUser size={40} />
+            </MantineAvatar>
+          </Flex>
+        </Grid.Col>
+
+        <Grid.Col span={{ base: 12, sm: 10 }}>
+          <Stack spacing="sm">
+            <Group spacing="xs" wrap="wrap">
               {/* Status dari SIMASTER */}
-              <Tooltip title="Status Pegawai dari SIMASTER">
-                <Tag color={data?.status === "Aktif" ? "green" : "red"}>
-                  {data?.status === "Aktif"
-                    ? "Pegawai Aktif"
-                    : "Pegawai Non Aktif"}
-                </Tag>
+              <Tooltip label="Status Pegawai dari SIMASTER">
+                <Badge
+                  color={data?.status === "Aktif" ? "green" : "red"}
+                  variant="filled"
+                  leftSection={<IconUser size={12} />}
+                >
+                  {data?.status === "Aktif" ? "Pegawai Aktif" : "Pegawai Non Aktif"}
+                </Badge>
               </Tooltip>
 
               {/* Status dari SIASN */}
-              <Tooltip title="Status Pegawai dari SIASN">
-                <Tag color="yellow">{siasn?.kedudukanPnsNama}</Tag>
+              <Tooltip label="Status Pegawai dari SIASN">
+                <Badge
+                  color="yellow"
+                  variant="filled"
+                  leftSection={<IconBriefcase size={12} />}
+                >
+                  {siasn?.kedudukanPnsNama}
+                </Badge>
               </Tooltip>
 
               {/* Daftar anomali */}
               {data?.anomali?.length > 0 && (
                 <>
                   {data.anomali.map((d) => (
-                    <Tag
+                    <ActionIcon
                       key={d?.id}
+                      variant="filled"
                       color={d?.is_repaired ? "green" : "red"}
-                      style={{ cursor: "pointer" }}
+                      size="lg"
+                      radius="md"
                       onClick={() => handleOpen(d)}
+                      style={{ cursor: "pointer" }}
                     >
-                      {d?.jenis_anomali_nama}
-                    </Tag>
+                      <Tooltip label={d?.jenis_anomali_nama}>
+                        {d?.is_repaired ? (
+                          <IconCheck size={14} />
+                        ) : (
+                          <IconX size={14} />
+                        )}
+                      </Tooltip>
+                    </ActionIcon>
                   ))}
                 </>
               )}
-            </Space>
+            </Group>
 
             {/* Informasi pegawai */}
-            <Typography.Text>
-              {data?.nama} - {data?.nip_baru}
-            </Typography.Text>
-            <Typography.Text>
-              {data?.jabatan?.jabatan} -{" "}
-              <Typography.Text type="secondary">
-                {data?.skpd?.detail}
-              </Typography.Text>
-            </Typography.Text>
-          </Space>
-        </Col>
-      </Row>
+            <Box>
+              <Text size="lg" fw={600} mb={4}>
+                {data?.nama} - {data?.nip_baru}
+              </Text>
+              <Group spacing={4} align="center">
+                <IconBriefcase size={16} color="gray" />
+                <Text size="sm" c="dimmed">
+                  {data?.jabatan?.jabatan}
+                </Text>
+              </Group>
+              <Group spacing={4} align="center" mt={2}>
+                <IconBuilding size={16} color="gray" />
+                <Text size="sm" c="dimmed">
+                  {data?.skpd?.detail}
+                </Text>
+              </Group>
+            </Box>
+          </Stack>
+        </Grid.Col>
+      </Grid>
 
       {/* Informasi ASN */}
-      <Row style={{ marginTop: 8 }} gutter={[32, 32]}>
-        <Col md={24}>
-          <Skeleton loading={isLoadingDataPns}>
-            <Alert title="Informasi ASN" color="yellow">
-              <Row>
-                <Col span={24}>
-                  {dataPnsAll?.nama} ({dataPnsAll?.nip_baru}) -{" "}
-                  {dataPnsAll?.unor_nm}
-                </Col>
-                <Col span={24}>{dataPnsAll?.jabatan_nama}</Col>
-              </Row>
-            </Alert>
-          </Skeleton>
-        </Col>
-      </Row>
+      <Box mt="md">
+        <MantineSkeleton visible={isLoadingDataPns}>
+          <Alert
+            icon={<IconInfoCircle size={16} />}
+            title="Informasi ASN"
+            color="yellow"
+            variant="light"
+          >
+            <Stack spacing={4}>
+              <Text size="sm">
+                {dataPnsAll?.nama} ({dataPnsAll?.nip_baru}) - {dataPnsAll?.unor_nm}
+              </Text>
+              <Text size="sm" c="dimmed">
+                {dataPnsAll?.jabatan_nama}
+              </Text>
+            </Stack>
+          </Alert>
+        </MantineSkeleton>
+      </Box>
 
       {/* Komponen IP ASN */}
-      <IPAsnByNip tahun={2023} nip={data?.nip_baru} />
-    </Card>
+      <Box mt="md">
+        <IPAsnByNip tahun={2023} nip={data?.nip_baru} />
+      </Box>
+    </Paper>
   );
 };
 
@@ -237,18 +301,27 @@ const RekonPegawaiDetail = () => {
   });
 
   return (
-    <Skeleton loading={isLoadingDataSimaster} avatar paragraph={{ rows: 3 }}>
-      {dataSimaster ? (
-        <Stack>
-          <EmployeeDetail nip={nip} />
-          <Card>
-            <SiasnTab nip={nip} />
-          </Card>
-        </Stack>
-      ) : (
-        <Empty description="Data tidak ditemukan" />
-      )}
-    </Skeleton>
+    <Container size="xl" p={0}>
+      <MantineSkeleton visible={isLoadingDataSimaster}>
+        {dataSimaster ? (
+          <Stack spacing="md">
+            <EmployeeDetail nip={nip} />
+            <Paper p="md" radius="md" withBorder>
+              <SiasnTab nip={nip} />
+            </Paper>
+          </Stack>
+        ) : (
+          <Paper p="xl" radius="md" withBorder>
+            <Flex direction="column" align="center" justify="center" h={200}>
+              <IconFileText size={48} color="gray" />
+              <Text size="lg" c="dimmed" mt="md">
+                Data tidak ditemukan
+              </Text>
+            </Flex>
+          </Paper>
+        )}
+      </MantineSkeleton>
+    </Container>
   );
 };
 

@@ -24,9 +24,10 @@ function SyncJabatanByNip({ nip }) {
         onClick={refresh}
         loading={isLoading || isError}
         size="small"
-        type="primary"
+        type="default"
+        style={{ fontSize: '11px', height: '24px', padding: '0 8px' }}
       >
-        Jabatan
+        Sync Jabatan
       </Button>
     </Tooltip>
   );
