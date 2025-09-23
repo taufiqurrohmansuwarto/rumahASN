@@ -3,35 +3,30 @@ import {
   downloadDocumentByNip,
 } from "@/services/master.services";
 import {
-  CloudDownloadOutlined,
-  ExportOutlined,
-  CheckCircleOutlined,
-  CloseCircleOutlined,
-  LoadingOutlined,
-  CalendarOutlined,
-  FileTextOutlined,
-  WarningOutlined,
-} from "@ant-design/icons";
-import { useQuery } from "@tanstack/react-query";
-import {
-  Button,
-  Card,
-  Space,
-  Typography,
-  Row,
-  Col,
-  Tag,
   Alert,
-  Divider,
+  Badge,
+  Box,
+  Group,
+  Paper,
+  Stack,
+  Text,
+  Title,
   Tooltip,
-  Grid,
-  message,
-} from "antd";
+} from "@mantine/core";
+import {
+  IconDownload,
+  IconFileText,
+  IconCalendar,
+  IconCheck,
+  IconX,
+  IconAlertTriangle,
+  IconLoader,
+  IconFileExport,
+} from "@tabler/icons-react";
+import { useQuery } from "@tanstack/react-query";
+import { Button, message } from "antd";
 import { useRouter } from "next/router";
 import { useState } from "react";
-
-const { useBreakpoint } = Grid;
-const { Title, Text } = Typography;
 
 // Data TMT dengan keterangan yang lebih jelas
 const list_tmt = [
@@ -49,20 +44,17 @@ const list_tmt = [
 
 // Data dokumen dengan keterangan yang lebih jelas
 const dokumen = [
-  { code: "SK", name: "Surat Keputusan", icon: <FileTextOutlined /> },
-  { code: "PERTEK", name: "Pertimbangan Teknis", icon: <FileTextOutlined /> },
+  { code: "SK", name: "Surat Keputusan", icon: <IconFileText size={16} /> },
+  { code: "PERTEK", name: "Pertimbangan Teknis", icon: <IconFileText size={16} /> },
   {
     code: "SPMT",
     name: "Surat Pernyataan Melaksanakan Tugas",
-    icon: <FileTextOutlined />,
+    icon: <IconFileText size={16} />,
   },
-  { code: "PK", name: "Perjanjian Kinerja (PPPK)", icon: <FileTextOutlined /> },
+  { code: "PK", name: "Perjanjian Kinerja (PPPK)", icon: <IconFileText size={16} /> },
 ];
 
 const DocumentButton = ({ tmt, file, nip, fileName, icon }) => {
-  const screens = useBreakpoint();
-  const isMobile = !screens.md;
-
   const { data, isLoading, error } = useQuery(
     ["check-document", `${tmt}-${file.code}`],
     () => checkDocumentByNip({ tmt: tmt, file: file.code, nip }),
@@ -115,116 +107,108 @@ const DocumentButton = ({ tmt, file, nip, fileName, icon }) => {
   };
 
   // Status dokumen
-  const getDocumentStatus = () => {
-    if (isLoading)
-      return { status: "loading", color: "blue", text: "Memeriksa..." };
-    if (error) return { status: "error", color: "red", text: "Error" };
-    if (data) return { status: "available", color: "green", text: "Tersedia" };
-    return { status: "unavailable", color: "red", text: "Tidak Tersedia" };
+  const getBadgeProps = () => {
+    if (isLoading) return {
+      color: "gray",
+      variant: "light",
+      icon: <IconLoader size={12} />,
+      text: "Memeriksa..."
+    };
+    if (error) return {
+      color: "red",
+      variant: "outline",
+      icon: <IconAlertTriangle size={12} />,
+      text: "Error"
+    };
+    if (data) return {
+      color: "green",
+      variant: "filled",
+      icon: <IconCheck size={12} />,
+      text: "Tersedia"
+    };
+    return {
+      color: "red",
+      variant: "light",
+      icon: <IconX size={12} />,
+      text: "Tidak Tersedia"
+    };
   };
 
-  const statusInfo = getDocumentStatus();
+  const badgeProps = getBadgeProps();
 
   return (
-    <Card
-      size="small"
-      hoverable={data && !downloading}
-      className="document-card"
+    <Paper
+      p="sm"
+      radius="md"
+      withBorder
       style={{
-        marginBottom: 8,
-        borderColor: statusInfo.color === "green" ? "#52c41a" : "#f0f0f0",
+        borderColor: data ? "#40c057" : "#e9ecef",
+        backgroundColor: data ? "#f8fffe" : "#fff",
+        cursor: data ? "pointer" : "default",
+        transition: "all 0.2s ease"
       }}
     >
-      <Row align="middle" gutter={[8, 8]}>
-        <Col flex="24px">{icon}</Col>
-        <Col flex="auto">
-          <Space direction="vertical" size={0}>
-            <Text strong style={{ fontSize: isMobile ? 12 : 14 }}>
-              {file.name}
-            </Text>
-            <Tag
-              color={statusInfo.color}
-              icon={
-                statusInfo.status === "loading" ? (
-                  <LoadingOutlined spin />
-                ) : statusInfo.status === "available" ? (
-                  <CheckCircleOutlined />
-                ) : statusInfo.status === "error" ? (
-                  <WarningOutlined />
-                ) : (
-                  <CloseCircleOutlined />
-                )
-              }
-              style={{ fontSize: isMobile ? 10 : 12 }}
-            >
-              {statusInfo.text}
-            </Tag>
-          </Space>
-        </Col>
-        <Col>
-          <Tooltip
-            title={data ? `Unduh ${file.name}` : "Dokumen tidak tersedia"}
+      <Stack spacing="xs">
+        <Group spacing="xs" align="center">
+          {icon}
+          <Text size="sm" fw={500} style={{ flex: 1 }}>
+            {file.name}
+          </Text>
+        </Group>
+
+        <Group justify="space-between" align="center">
+          <Badge
+            color={badgeProps.color}
+            variant={badgeProps.variant}
+            leftSection={badgeProps.icon}
+            size="sm"
           >
+            {badgeProps.text}
+          </Badge>
+
+          <Tooltip label={data ? `Unduh ${file.name}` : "Dokumen tidak tersedia"}>
             <Button
+              size="small"
               type={data ? "primary" : "default"}
-              size={isMobile ? "small" : "middle"}
-              icon={
-                downloading ? (
-                  <LoadingOutlined spin />
-                ) : (
-                  <CloudDownloadOutlined />
-                )
-              }
+              icon={downloading ? <IconLoader size={14} /> : <IconDownload size={14} />}
               onClick={downloadFile}
               disabled={!data || downloading}
               loading={downloading}
             >
-              {!isMobile && "Unduh"}
+              Unduh
             </Button>
           </Tooltip>
-        </Col>
-      </Row>
-    </Card>
+        </Group>
+      </Stack>
+    </Paper>
   );
 };
 
 const TMTSection = ({ tmtData, nip }) => {
-  const screens = useBreakpoint();
-  const isMobile = !screens.md;
-
   return (
-    <Card
-      title={
-        <Space>
-          <CalendarOutlined style={{ color: "#1890ff" }} />
-          <Text strong style={{ color: "#1890ff" }}>
-            PNS/PPPK TMT {tmtData.label}
+    <Paper p="sm" radius="md" withBorder>
+      <Group spacing="xs" mb="sm" wrap="nowrap">
+        <Group spacing="xs" style={{ minWidth: "200px", flexShrink: 0 }}>
+          <IconCalendar size={16} color="gray" />
+          <Text size="sm" fw={500}>
+            TMT {tmtData.label}
           </Text>
-        </Space>
-      }
-      style={{ marginBottom: 16 }}
-      headStyle={{ backgroundColor: "#f8f9fa" }}
-    >
-      <Row gutter={[16, 8]}>
-        {dokumen.map((dok) => (
-          <Col
-            key={`${tmtData.value}-${dok.code}`}
-            xs={24}
-            sm={12}
-            md={8}
-            lg={6}
-          >
+        </Group>
+
+        <Group spacing="xs" style={{ flex: 1 }} wrap="wrap">
+          {dokumen.map((dok) => (
             <DocumentButton
+              key={`${tmtData.value}-${dok.code}`}
               tmt={tmtData.value}
               file={dok}
               nip={nip}
               fileName={dok.name}
               icon={dok.icon}
             />
-          </Col>
-        ))}
-      </Row>
-    </Card>
+          ))}
+        </Group>
+      </Group>
+    </Paper>
   );
 };
 
@@ -254,75 +238,74 @@ const downloadPerpanjangan = async () => {
 function AdministrasiByNip() {
   const router = useRouter();
   const { nip } = router.query;
-  const screens = useBreakpoint();
-  const isMobile = !screens.md;
 
   if (!nip) {
     return (
       <Alert
-        message="NIP tidak ditemukan"
-        description="Silakan periksa kembali URL atau kembali ke halaman sebelumnya."
-        type="warning"
-        showIcon
-        style={{ marginBottom: 16 }}
-      />
+        title="NIP tidak ditemukan"
+        color="yellow"
+        variant="light"
+        icon={<IconAlertTriangle size={16} />}
+      >
+        Silakan periksa kembali URL atau kembali ke halaman sebelumnya.
+      </Alert>
     );
   }
 
   return (
-    <div style={{ padding: isMobile ? "16px 0" : "24px 0" }}>
+    <Stack spacing="lg">
       {/* Header */}
-      <Card style={{ marginBottom: 16 }}>
-        <Row align="middle" justify="space-between">
-          <Col>
-            <Title level={isMobile ? 4 : 3} style={{ margin: 0 }}>
+      <Paper p="md" radius="md" withBorder>
+        <Group justify="space-between" align="flex-start">
+          <Box>
+            <Title order={2} mb="xs">
               Dokumen Administrasi ASN
             </Title>
-            <Text type="secondary">NIP: {nip}</Text>
-          </Col>
-          <Col>
-            <Space>
-              <Tooltip title="Unduh Perpanjangan">
-                <Button
-                  icon={<ExportOutlined />}
-                  type="default"
-                  onClick={downloadPerpanjangan}
-                  size={isMobile ? "small" : "middle"}
-                >
-                  {!isMobile && "Perpanjangan"}
-                </Button>
-              </Tooltip>
-              <Tooltip title="Unduh Template PK Halaman 2-7">
-                <Button
-                  icon={<ExportOutlined />}
-                  type="default"
-                  onClick={downloadPk}
-                  size={isMobile ? "small" : "middle"}
-                >
-                  {!isMobile && "Template PK"}
-                </Button>
-              </Tooltip>
-            </Space>
-          </Col>
-        </Row>
-      </Card>
+            <Text size="sm" c="dimmed">
+              NIP: {nip}
+            </Text>
+          </Box>
+          <Group spacing="xs">
+            <Tooltip label="Unduh dokumen perpanjangan PPPK">
+              <Button
+                type="default"
+                icon={<IconFileExport size={16} />}
+                onClick={downloadPerpanjangan}
+                size="small"
+              >
+                Perpanjangan
+              </Button>
+            </Tooltip>
+            <Tooltip label="Unduh template PK halaman 2-7">
+              <Button
+                type="default"
+                icon={<IconFileExport size={16} />}
+                onClick={downloadPk}
+                size="small"
+              >
+                Template PK
+              </Button>
+            </Tooltip>
+          </Group>
+        </Group>
+      </Paper>
 
       {/* Info Panel */}
       <Alert
-        message="Informasi"
-        description="Klik tombol 'Unduh' untuk mengunduh dokumen. Pastikan koneksi internet stabil."
-        type="info"
-        showIcon
-        style={{ marginBottom: 16 }}
-      />
+        title="Informasi"
+        variant="light"
+        icon={<IconAlertTriangle size={16} />}
+      >
+        Klik tombol 'Unduh' untuk mengunduh dokumen. Pastikan koneksi internet stabil untuk proses download yang optimal.
+      </Alert>
 
       {/* Dokumen Sections */}
-      <Space direction="vertical" size="middle" style={{ width: "100%" }}>
+      <Stack spacing="md">
         {list_tmt.map((tmtData) => (
           <TMTSection key={tmtData.value} tmtData={tmtData} nip={nip} />
         ))}
-      </Space>
-    </div>
+      </Stack>
+    </Stack>
   );
 }
 

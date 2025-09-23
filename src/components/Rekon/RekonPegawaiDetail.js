@@ -4,42 +4,31 @@ import SiasnTab from "@/components/PemutakhiranData/Admin/SiasnTab";
 import { patchAnomali2023 } from "@/services/anomali.services";
 import { dataUtamaMasterByNip } from "@/services/master.services";
 import {
-  Alert,
-  Stack,
-  Grid,
-  Paper,
-  Avatar as MantineAvatar,
-  Text,
-  Badge,
-  Group,
   ActionIcon,
-  Container,
+  Alert,
+  Badge,
   Box,
+  Container,
+  Flex,
+  Grid,
+  Group,
+  Avatar as MantineAvatar,
   Skeleton as MantineSkeleton,
-  Flex
+  Paper,
+  Stack,
+  Text,
 } from "@mantine/core";
 import {
-  IconUser,
   IconBriefcase,
   IconBuilding,
-  IconFileText,
-  IconEdit,
   IconCheck,
+  IconFileText,
+  IconInfoCircle,
+  IconUser,
   IconX,
-  IconInfoCircle
 } from "@tabler/icons-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import {
-  Checkbox,
-  Empty,
-  Form,
-  Input,
-  Modal,
-  Tag,
-  Tooltip,
-  Typography,
-  message,
-} from "antd";
+import { Checkbox, Form, Input, Modal, Tooltip, message } from "antd";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 
@@ -193,7 +182,9 @@ const EmployeeBio = ({
                   variant="filled"
                   leftSection={<IconUser size={12} />}
                 >
-                  {data?.status === "Aktif" ? "Pegawai Aktif" : "Pegawai Non Aktif"}
+                  {data?.status === "Aktif"
+                    ? "Pegawai Aktif"
+                    : "Pegawai Non Aktif"}
                 </Badge>
               </Tooltip>
 
@@ -267,7 +258,8 @@ const EmployeeBio = ({
           >
             <Stack spacing={4}>
               <Text size="sm">
-                {dataPnsAll?.nama} ({dataPnsAll?.nip_baru}) - {dataPnsAll?.unor_nm}
+                {dataPnsAll?.nama} ({dataPnsAll?.nip_baru}) -{" "}
+                {dataPnsAll?.unor_nm}
               </Text>
               <Text size="sm" c="dimmed">
                 {dataPnsAll?.jabatan_nama}

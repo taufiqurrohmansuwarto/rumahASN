@@ -1,5 +1,7 @@
-import { InfoCircleOutlined, SettingOutlined } from "@ant-design/icons";
-import { Tag, Modal, Flex } from "antd";
+import { SettingOutlined } from "@ant-design/icons";
+import { Modal, Flex } from "antd";
+import { Badge, Tooltip } from "@mantine/core";
+import { IconInfoCircle } from "@tabler/icons-react";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import {
@@ -25,14 +27,17 @@ const CekPencantumanGelar = ({ nip }) => {
 
   return (
     <>
-      <Tag
-        color="lime"
-        icon={<InfoCircleOutlined />}
-        style={{ cursor: "pointer" }}
-        onClick={handleOpenModal}
-      >
-        Cek Pencantuman Gelar
-      </Tag>
+      <Tooltip label="Cek data pencantuman gelar di SIASN">
+        <Badge
+          color="teal"
+          variant="light"
+          leftSection={<IconInfoCircle size={12} />}
+          style={{ cursor: "pointer" }}
+          onClick={handleOpenModal}
+        >
+          Cek Pencantuman Gelar
+        </Badge>
+      </Tooltip>
 
       <Modal
         title={

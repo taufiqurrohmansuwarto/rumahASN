@@ -4,13 +4,14 @@ import BerkasJabatanPelaksanaBaruByNip from "@/components/Berkas/BerkasJabatanPe
 import CompareDataPasanganByNip from "@/components/PemutakhiranData/CompareDataPasanganByNip";
 import { ActiveTabProvider, useActiveTab } from "@/context/TabContext";
 import { Stack } from "@mantine/core";
-import { Alert, FloatButton, Grid, Tabs } from "antd";
+import { Alert, Grid, Tabs } from "antd";
 import React, { useCallback, useMemo } from "react";
 import CompareDataDiklatByNip from "../CompareDataDiklatByNip";
 import ComparePenghargaanByNip from "../ComparePenghargaanByNip";
 import CompareRwKompetensiByNip from "../CompareRwKompetensiByNip";
 import CompareRwPotensiByNip from "../CompareRwPotensiByNip";
 import CompareSertifikasiByNip from "../CompareSertifikasiByNip";
+import CompareTugasBelajarByNip from "../CompareTugasBelajarByNip";
 import CompareAngkaKreditByNip from "./CompareAngkaKreditByNip";
 import CompareCLTNByNip from "./CompareCLTNByNip";
 import CompareDataUtamaByNip from "./CompareDataUtamaByNip";
@@ -21,7 +22,6 @@ import CompareKinerjaPeriodikNip from "./CompareKinerjaPeriodikNip";
 import CompareMasaKerjaByNip from "./CompareMasaKerjaByNip";
 import ComparePemberhentianByNip from "./ComparePemberhentianByNip";
 import CompareSKP22ByNip from "./CompareSKP22ByNip";
-import CompareTugasBelajarByNip from "../CompareTugasBelajarByNip";
 
 const DEFAULT_ACTIVE_KEY = "data-utama";
 
@@ -154,7 +154,6 @@ function SiasnTab({ nip }) {
           children: content,
         }))}
       />
-      <FloatButton.BackTop />
     </ActiveTabProvider>
   );
 }

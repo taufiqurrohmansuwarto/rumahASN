@@ -4,8 +4,29 @@ import {
   dataUtamSIASNByNip,
 } from "@/services/siasn-services";
 import { compareText, komparasiGelar } from "@/utils/client-utils";
-import { Stack, Text } from "@mantine/core";
-import { FilePdfOutlined, ReloadOutlined } from "@ant-design/icons";
+import {
+  Stack,
+  Text,
+  Paper,
+  Group,
+  Badge,
+  Box,
+  Container,
+  Skeleton as MantineSkeleton,
+  SimpleGrid,
+  Divider,
+  Flex,
+} from "@mantine/core";
+import {
+  IconFileText,
+  IconRefresh,
+  IconCheck,
+  IconX,
+  IconAlertTriangle,
+  IconDownload,
+  IconDatabase,
+  IconServer,
+} from "@tabler/icons-react";
 import { useQuery } from "@tanstack/react-query";
 import {
   Anchor,
@@ -14,10 +35,8 @@ import {
   Col,
   Grid,
   Row,
-  Skeleton,
   Space,
   Table as TableAntd,
-  Tag,
 } from "antd";
 import InformationDetail from "../InformationDetail";
 import TextSensor from "@/components/TextSensor";
@@ -47,7 +66,7 @@ const FileSPMT = ({ data }) => {
   return (
     <>
       {path?.["888"]?.object && (
-        <Button type="link" icon={<FilePdfOutlined />} onClick={handleDownload}>
+        <Button type="link" icon={<IconDownload size={14} />} onClick={handleDownload}>
           Unduh File SPMT
         </Button>
       )}
@@ -77,7 +96,7 @@ const FileSK = ({ data }) => {
   return (
     <>
       {path?.["889"]?.object && (
-        <Button type="link" icon={<FilePdfOutlined />} onClick={handleDownload}>
+        <Button type="link" icon={<IconDownload size={14} />} onClick={handleDownload}>
           Unduh File SK
         </Button>
       )}
@@ -206,14 +225,37 @@ const TagResult = ({ record }) => {
     id === "pangkat" ||
     id === "instansi_induk" ||
     id === "unit_organisasi";
+
   if (cantCompare) {
-    return <Tag color="orange">Bisa Jadi Sama</Tag>;
+    return (
+      <Badge
+        color="orange"
+        variant="outline"
+        size="sm"
+        leftSection={
+          <Box style={{ display: 'flex', alignItems: 'center' }}>
+            <IconAlertTriangle size={12} />
+          </Box>
+        }
+      >
+        Bisa Jadi Sama
+      </Badge>
+    );
   }
 
   return (
-    <Tag color={record?.result ? "green" : "red"}>
+    <Badge
+      color={record?.result ? "green" : "red"}
+      variant="outline"
+      size="sm"
+      leftSection={
+        <Box style={{ display: 'flex', alignItems: 'center' }}>
+          {record?.result ? <IconCheck size={12} /> : <IconX size={12} />}
+        </Box>
+      }
+    >
       {record?.result ? "Sama" : "Tidak Sama"}
-    </Tag>
+    </Badge>
   );
 };
 
@@ -252,142 +294,141 @@ function CompareDataUtamaByNip({ nip }) {
     }
   );
 
-  const columns = [
-    {
-      title: "Komparasi",
-      key: "komparasi",
-      responsive: ["xs"],
-      render: (_, record) => {
-        return (
-          <Row>
-            <Col span={24}>
-              <Text fz="md" mb={8} fw="bold" td="underline">
-                {record?.label}
-              </Text>
-              <Text fz="sm">SIASN</Text>
-              <Text fz="xs" mb={4} c="dimmed">
-                {record?.siasn}
-              </Text>
-              <Text fz="sm">MASTER</Text>
-              <Text fz="xs" c="dimmed">
-                {record?.master}
-              </Text>
-              <div
-                style={{
-                  marginTop: 8,
-                }}
-              >
-                <TagResult record={record} />
-              </div>
-            </Col>
-          </Row>
-        );
-      },
-    },
-    {
-      title: "Jenis Data",
-      dataIndex: "label",
-      responsive: ["sm"],
-    },
-    {
-      title: "SIASN",
-      key: "siasn",
-      render: (_, row) => {
-        if (
-          row?.id === "nik" ||
-          row?.id === "tanggal_lahir" ||
-          row?.id === "email" ||
-          row?.id === "no_hp" ||
-          row?.id === "kk"
-        ) {
-          return <TextSensor text={row?.siasn} />;
-        } else {
-          return <div>{row?.siasn}</div>;
-        }
-      },
-      responsive: ["sm"],
-    },
-    {
-      title: "SIMASTER",
-      key: "master",
-      render: (_, row) => {
-        if (
-          row?.id === "nik" ||
-          row?.id === "tanggal_lahir" ||
-          row?.id === "email" ||
-          row?.id === "no_hp" ||
-          row?.id === "kk"
-        ) {
-          return <TextSensor text={row?.master} />;
-        } else {
-          return <div>{row?.master}</div>;
-        }
-      },
-      responsive: ["sm"],
-    },
-    {
-      title: "Hasil",
-      key: "result",
-      responsive: ["sm"],
-      render: (_, record) => <TagResult record={record} />,
-    },
-  ];
+  const ComparisonCard = ({ record }) => {
+    const renderValue = (value, type) => {
+      if (
+        record?.id === "nik" ||
+        record?.id === "tanggal_lahir" ||
+        record?.id === "email" ||
+        record?.id === "no_hp" ||
+        record?.id === "kk"
+      ) {
+        return <TextSensor text={value} />;
+      }
+      return (
+        <Text size="xs" c={value ? "dark" : "dimmed"} truncate>
+          {value || "-"}
+        </Text>
+      );
+    };
+
+    return (
+      <Box
+        p="xs"
+        style={{
+          borderBottom: "1px solid #e9ecef",
+          backgroundColor: "#f8f9fa",
+        }}
+      >
+        <Group justify="space-between" align="flex-start" wrap="nowrap">
+          <Text size="xs" fw={500} style={{ minWidth: "100px", flexShrink: 0 }}>
+            {record?.label}
+          </Text>
+
+          <Group spacing="xs" style={{ flex: 1 }} wrap="nowrap">
+            <Box style={{ flex: 1 }}>
+              <Group spacing={2} mb={2}>
+                <IconServer size={10} color="#1c7ed6" />
+                <Text size="xs" c="blue" fw={500}>
+                  SIASN
+                </Text>
+              </Group>
+              {renderValue(record?.siasn, "siasn")}
+            </Box>
+
+            <Divider orientation="vertical" />
+
+            <Box style={{ flex: 1 }}>
+              <Group spacing={2} mb={2}>
+                <IconDatabase size={10} color="#37b24d" />
+                <Text size="xs" c="green" fw={500}>
+                  MASTER
+                </Text>
+              </Group>
+              {renderValue(record?.master, "master")}
+            </Box>
+          </Group>
+
+          <Box style={{ flexShrink: 0 }}>
+            <TagResult record={record} />
+          </Box>
+        </Group>
+      </Box>
+    );
+  };
 
   return (
-    <div>
-      <Skeleton loading={isLoading || isLoadingDataSimaster}>
+    <Container size="xl" p={0}>
+      <MantineSkeleton visible={isLoading || isLoadingDataSimaster}>
         <Row gutter={[16, 16]}>
           <Col md={20} xs={24}>
-            <Row gutter={[16, 16]}>
-              <Col md={24} xs={24}>
-                <Card
-                  title="Komparasi Data SIMASTER dan MyASN"
-                  id="komparasi-data"
-                >
-                  <Stack>
-                    <Space>
-                      <FileSPMT data={data} />
-                      <FileSK data={data} />
-                    </Space>
-                    <TableAntd
-                      columns={columns}
-                      dataSource={dataTabel(data, dataSimaster)}
-                      pagination={false}
-                    />
-                  </Stack>
-                </Card>
-              </Col>
-              <Col md={24} xs={24}>
-                <Card
-                  extra={
-                    <Button
-                      type="link"
-                      icon={<ReloadOutlined />}
-                      onClick={refetchRiwayatPengadaan}
-                    />
-                  }
-                  title="Riwayat Pengadaan (2022 ke Atas)"
-                  id="riwayat-pengadaan"
-                >
-                  <RiwayatPengadaan
-                    type="fasilitator"
-                    loading={isLoadingRiwayatPengadaan}
-                    data={riwayatPengadaan}
+            <Stack spacing="md">
+              <Paper p="md" radius="md" withBorder id="komparasi-data">
+                <Group spacing="xs" mb="md">
+                  <IconFileText size={16} color="gray" />
+                  <Text size="sm" fw={500}>
+                    Komparasi Data SIMASTER dan MyASN
+                  </Text>
+                </Group>
+                <Stack spacing="md">
+                  <Group spacing="xs">
+                    <FileSPMT data={data} />
+                    <FileSK data={data} />
+                  </Group>
+
+                  <Divider label="Data Komparasi" labelPosition="center" />
+
+                  <Box
+                    style={{
+                      border: "1px solid #e9ecef",
+                      borderRadius: "8px",
+                      overflow: "hidden",
+                    }}
+                  >
+                    {dataTabel(data, dataSimaster).map((record, index) => (
+                      <ComparisonCard key={record.id} record={record} />
+                    ))}
+                  </Box>
+                </Stack>
+              </Paper>
+
+              <Paper p="md" radius="md" withBorder id="riwayat-pengadaan">
+                <Group justify="space-between" mb="md">
+                  <Group spacing="xs">
+                    <IconFileText size={16} color="gray" />
+                    <Text size="sm" fw={500}>
+                      Riwayat Pengadaan (2022 ke Atas)
+                    </Text>
+                  </Group>
+                  <Button
+                    type="link"
+                    icon={<IconRefresh size={14} />}
+                    onClick={refetchRiwayatPengadaan}
+                    size="small"
                   />
-                </Card>
-              </Col>
-              <Col md={24} xs={24}>
-                <Card title="Ubah Data SIASN">
-                  <CompareUbahDataByNip />
-                </Card>
-              </Col>
-              <Col md={24} xs={24}>
-                <Card id="status-pegawai">
-                  <InformationDetail data={data} />
-                  <CreateCPNS nip={nip} data={data} />
-                </Card>
-              </Col>
-            </Row>
+                </Group>
+                <RiwayatPengadaan
+                  type="fasilitator"
+                  loading={isLoadingRiwayatPengadaan}
+                  data={riwayatPengadaan}
+                />
+              </Paper>
+
+              <Paper p="md" radius="md" withBorder>
+                <Group spacing="xs" mb="md">
+                  <IconFileText size={16} color="gray" />
+                  <Text size="sm" fw={500}>
+                    Ubah Data SIASN
+                  </Text>
+                </Group>
+                <CompareUbahDataByNip />
+              </Paper>
+
+              <Paper p="md" radius="md" withBorder id="status-pegawai">
+                <InformationDetail data={data} />
+                <CreateCPNS nip={nip} data={data} />
+              </Paper>
+            </Stack>
           </Col>
           <Col md={4} xs={24}>
             {breakPoint.md && (
@@ -446,8 +487,8 @@ function CompareDataUtamaByNip({ nip }) {
             )}
           </Col>
         </Row>
-      </Skeleton>
-    </div>
+      </MantineSkeleton>
+    </Container>
   );
 }
 

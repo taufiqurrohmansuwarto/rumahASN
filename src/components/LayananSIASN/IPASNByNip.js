@@ -1,10 +1,11 @@
 import { ipAsnByNip } from "@/services/siasn-services";
 import { dataKategoriIPASN } from "@/utils/client-utils";
+import { Badge, Tooltip } from "@mantine/core";
+import { IconKey } from "@tabler/icons-react";
 import { useQuery } from "@tanstack/react-query";
 import { Col, Form, Input, Modal, Row, Spin, Tag } from "antd";
 import { useEffect, useState } from "react";
 
-import { KeyOutlined } from "@ant-design/icons";
 import dayjs from "dayjs";
 import "dayjs/locale/id";
 import relativeTime from "dayjs/plugin/relativeTime";
@@ -169,23 +170,49 @@ function IPAsnByNip({ tahun, nip }) {
     }
   );
 
+  const getBadgeColor = () => {
+    const kategori = dataKategoriIPASN(dataIPAsn?.subtotal);
+    switch (kategori) {
+      case "Sangat Tinggi":
+        return "green";
+      case "Tinggi":
+        return "lime";
+      case "Sedang":
+        return "yellow";
+      case "Rendah":
+        return "orange";
+      default:
+        return "red";
+    }
+  };
+
+  const getBadgeVariant = () => {
+    const kategori = dataKategoriIPASN(dataIPAsn?.subtotal);
+    return kategori === "Sangat Tinggi" ? "gradient" : "outline";
+  };
+
+  const getGradient = () => {
+    return { from: "green", to: "teal" };
+  };
+
   return (
     <>
       {dataIPAsn ? (
         <>
-          <Tag
-            icon={<KeyOutlined />}
-            color={
-              dataKategoriIPASN(dataIPAsn?.subtotal) === "Sangat Tinggi"
-                ? "#a0d911"
-                : "#ff7875"
-            }
-            style={{ cursor: "pointer", marginBottom: 16, marginTop: 16 }}
-            onClick={handleOpen}
+          <Tooltip
+            label={`IP ASN tahun ${tahun}: ${dataIPAsn?.subtotal} - Kategori: ${dataKategoriIPASN(dataIPAsn?.subtotal)}`}
           >
-            IP ASN tahun {tahun} {dataIPAsn?.subtotal} (
-            {dataKategoriIPASN(dataIPAsn?.subtotal)})
-          </Tag>
+            <Badge
+              color={getBadgeColor()}
+              variant={getBadgeVariant()}
+              gradient={getBadgeVariant() === "gradient" ? getGradient() : undefined}
+              leftSection={<IconKey size={12} />}
+              style={{ cursor: "pointer" }}
+              onClick={handleOpen}
+            >
+              IP ASN {tahun}: {dataIPAsn?.subtotal} ({dataKategoriIPASN(dataIPAsn?.subtotal)})
+            </Badge>
+          </Tooltip>
           <ModalDataIPAsn
             loading={isLoadingDataIPAsn}
             tahun={tahun}
@@ -194,9 +221,7 @@ function IPAsnByNip({ tahun, nip }) {
             data={dataIPAsn}
           />
         </>
-      ) : (
-        <div></div>
-      )}
+      ) : null}
     </>
   );
 }

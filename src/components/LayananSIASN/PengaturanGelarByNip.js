@@ -3,7 +3,8 @@ import {
   getGelarByNip,
   uncheckGelarByNip,
 } from "@/services/siasn-services";
-import { SettingOutlined } from "@ant-design/icons";
+import { Badge, Tooltip, Group } from "@mantine/core";
+import { IconSettings } from "@tabler/icons-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Alert,
@@ -147,9 +148,20 @@ function PengaturanGelarByNip() {
         onCancel={handleCloseModal}
         onOk={handleCloseModal}
       />
-      <Tag onClick={handleShowModal} icon={<SettingOutlined />}>
-        Pengaturan Gelar
-      </Tag>
+      <Tooltip label="Atur tampilan gelar depan dan belakang">
+        <Badge
+          color="violet"
+          variant="dot"
+          style={{ cursor: "pointer" }}
+          onClick={handleShowModal}
+          size="sm"
+        >
+          <Group spacing={4} align="center">
+            <IconSettings size={12} />
+            Pengaturan Gelar
+          </Group>
+        </Badge>
+      </Tooltip>
     </>
   );
 }
