@@ -196,10 +196,17 @@ module.exports.daftarKenaikanPangkat = (
   );
 };
 
-module.exports.daftarPengadaanInstansi = (fetcher, tahunAnggaran) => {
+module.exports.daftarPengadaanInstansi = (
+  fetcher,
+  tahunAnggaran,
+  limit = 10,
+  offset = 0
+) => {
   return fetcher
-    .get(`/pengadaan/list-pengadaan-instansi?tahun=${tahunAnggaran}`)
-    .then((res) => res?.data?.data);
+    .get(
+      `/pengadaan/list-pengadaan-instansi?tahun=${tahunAnggaran}&limit=${limit}&offset=${offset}`
+    )
+    .then((res) => res?.data);
 };
 
 module.exports.daftarPengadaanDokumen = (fetcher, tahunAnggaran) => {

@@ -1,18 +1,18 @@
 import {
   getPengadaanProxy,
-  refStatusUsul,
   syncPengadaanProxy,
 } from "@/services/siasn-services";
+import { Badge, Text, Title } from "@mantine/core";
 import {
-  IconUsers,
-  IconRefresh,
-  IconDownload,
-  IconUser,
-  IconX,
-  IconFilterX,
+  IconAward,
   IconCalendar,
+  IconDownload,
   IconFileCheck,
-  IconAward
+  IconFilterX,
+  IconRefresh,
+  IconUser,
+  IconUsers,
+  IconX,
 } from "@tabler/icons-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
@@ -29,12 +29,27 @@ import {
   Table,
   Tooltip,
 } from "antd";
-import { Text, Title, Badge } from "@mantine/core";
 import dayjs from "dayjs";
 import "dayjs/locale/id";
 import relativeTime from "dayjs/plugin/relativeTime";
 import { useRouter } from "next/router";
-import { useCallback, useState, useEffect } from "react";
+import { useCallback, useEffect, useState } from "react";
+
+import * as ExcelJS from "exceljs";
+import { saveAs } from "file-saver";
+import { trim } from "lodash";
+
+const jenisJabatan = (data) => {
+  if (data?.jenis_jabatan_id === 2) {
+    return `${trim(data?.jabatan_fungsional_nama)} ${
+      data?.sub_jabatan_fungsional_nama
+    }`;
+  } else if (data?.jenis_jabatan_id === 4) {
+    return data?.jabatan_fungsional_umum_nama;
+  } else {
+    return "";
+  }
+};
 
 dayjs.extend(relativeTime);
 
@@ -71,7 +86,7 @@ function LayananPengadaan() {
   );
 
   const handleFilterChange = (key, value) => {
-    setFilters(prev => ({ ...prev, [key]: value }));
+    setFilters((prev) => ({ ...prev, [key]: value }));
   };
 
   // Debounced filter effect
@@ -84,13 +99,13 @@ function LayananPengadaan() {
       };
 
       // Remove empty filters
-      Object.keys(query).forEach(key => {
+      Object.keys(query).forEach((key) => {
         if (!query[key]) delete query[key];
       });
 
       // Only update if filters have changed from current query
-      const hasChanges = Object.keys(filters).some(key =>
-        filters[key] !== (router.query[key] || '')
+      const hasChanges = Object.keys(filters).some(
+        (key) => filters[key] !== (router.query[key] || "")
       );
 
       if (hasChanges) {
@@ -125,6 +140,149 @@ function LayananPengadaan() {
     }
   );
 
+  const { mutateAsync: download, isLoading: isDownloading } = useMutation({
+    mutationFn: () =>
+      getPengadaanProxy({
+        limit: -1,
+        tahun: router?.query?.tahun || dayjs().format(formatYear),
+      }),
+    onSuccess: () => {
+      message.success("Data berhasil diunduh");
+    },
+    onError: (error) => {
+      message.error(error?.message || "Gagal mengunduh data");
+    },
+  });
+
+  const handleDownload = async () => {
+    const data = await download();
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet("Data Pengadaan");
+
+    // Menambahkan header dengan format yang lebih baik
+    const headers = [
+      "NIP",
+      "Nama Lengkap",
+      "Gelar Depan",
+      "Gelar Belakang",
+      "Nama Lengkap (Gelar)",
+      "Tanggal Lahir",
+      "Tempat Lahir",
+      "Gaji",
+      "Nomor Peserta",
+      "Periode",
+      "Jenis Formasi",
+      "Pendidikan",
+      "Tanggal Lulus",
+      "TMT CPNS",
+      "Pangkat/Golongan",
+      "Unit Kerja SIASN",
+      "Unit Kerja SIASN ID",
+      "Unit Kerja SIMASTER",
+      "Unit Kerja SIMASTER ID",
+      "TMT CPNS",
+      "Tgl. Usulan",
+      "Unor Pertek",
+      "Nomer Pertek",
+      "Tanggal Pertek",
+      "Jabatan",
+      "Status Usulan",
+    ];
+
+    // Menambahkan header ke worksheet
+    const headerRow = worksheet.addRow(headers);
+
+    // Mempercantik header
+    headerRow.eachCell((cell) => {
+      cell.font = { bold: true, size: 12 };
+      cell.fill = {
+        type: "pattern",
+        pattern: "solid",
+        fgColor: { argb: "FFD3D3D3" },
+      };
+      cell.border = {
+        top: { style: "thin" },
+        left: { style: "thin" },
+        bottom: { style: "thin" },
+        right: { style: "thin" },
+      };
+      cell.alignment = {
+        vertical: "middle",
+        horizontal: "center",
+        wrapText: true,
+      };
+    });
+
+    // Mengatur lebar kolom agar lebih optimal
+    worksheet.columns = headers.map((header) => ({
+      header,
+      width:
+        header === "Nama Lengkap"
+          ? 25
+          : header === "Pendidikan"
+          ? 30
+          : header === "Jenis Formasi"
+          ? 20
+          : 15,
+    }));
+
+    // Menambahkan data
+    data?.data?.forEach((row) => {
+      const dataRow = worksheet.addRow([
+        row.nip,
+        row.nama,
+        row?.usulan_data?.data?.glr_depan,
+        row?.usulan_data?.data?.glr_belakang,
+        trim(
+          `${row?.usulan_data?.data?.glr_depan || ""} ${row?.nama || ""} ${
+            row?.usulan_data?.data?.glr_belakang || ""
+          }`
+        ),
+        row?.usulan_data?.data?.tgl_lahir,
+        row?.usulan_data?.data?.tempat_lahir,
+        row?.usulan_data?.data?.gaji_pokok,
+        row?.usulan_data?.data?.no_peserta,
+        row.periode,
+        row.jenis_formasi_nama,
+        row?.usulan_data?.data?.pendidikan_pertama_nama,
+        row?.usulan_data?.data?.tgl_tahun_lulus,
+        row?.usulan_data?.data?.tmt_cpns,
+        row?.usulan_data?.data?.golongan_nama,
+        row?.unor_siasn,
+        row?.unor_siasn_id,
+        row?.unor_simaster,
+        row?.unor_simaster_id,
+        row?.tmt_cpns,
+        row?.tgl_usulan,
+        `${row?.usulan_data?.data?.unor_nama} - ${row?.usulan_data?.data?.unor_induk_nama}`,
+        row?.no_pertek,
+        row?.tgl_pertek ? dayjs(row?.tgl_pertek).format("DD-MM-YYYY") : "-",
+        jenisJabatan(row?.usulan_data?.data),
+        row.status_usulan_nama,
+      ]);
+
+      // Menambahkan border untuk setiap sel data
+      dataRow.eachCell((cell) => {
+        cell.border = {
+          top: { style: "thin" },
+          left: { style: "thin" },
+          bottom: { style: "thin" },
+          right: { style: "thin" },
+        };
+      });
+    });
+
+    const now = dayjs().format("DD-MM-YYYY");
+
+    // Membuat buffer dan menyimpan file
+    const excelBuffer = await workbook.xlsx.writeBuffer();
+    const fileName = `Data_Pengadaan_${
+      router?.query?.tahun || dayjs().format(formatYear)
+    }_${now}.xlsx`;
+
+    saveAs(new Blob([excelBuffer]), fileName);
+  };
+
   const { mutate: sync, isLoading: isLoadingSync } = useMutation(
     () => syncPengadaanProxy(router?.query),
     {
@@ -132,14 +290,16 @@ function LayananPengadaan() {
         message.success("Data berhasil disinkronisasi");
         queryClient.invalidateQueries(["daftar-pengadaan"]);
       },
-      onError: (error) => message.error(error?.response?.data?.message || "Gagal sinkronisasi"),
+      onError: (error) =>
+        message.error(error?.response?.data?.message || "Gagal sinkronisasi"),
     }
   );
 
   const handleSync = () => {
     Modal.confirm({
       title: "Sinkronisasi Data Pengadaan ASN",
-      content: "Apakah Anda yakin ingin melakukan sinkronisasi data dari SIASN? Proses ini akan memperbarui data terbaru.",
+      content:
+        "Apakah Anda yakin ingin melakukan sinkronisasi data dari SIASN? Proses ini akan memperbarui data terbaru.",
       okText: "Ya, Sinkron",
       cancelText: "Batal",
       icon: <IconRefresh style={{ color: "#FF4500" }} />,
@@ -157,8 +317,6 @@ function LayananPengadaan() {
       },
     });
   };
-
-
 
   const columns = [
     {
@@ -191,7 +349,10 @@ function LayananPengadaan() {
             )}
             {record?.usulan_data?.data?.no_peserta && (
               <div style={{ marginTop: "2px" }}>
-                <Tooltip title={`No. Peserta: ${record?.usulan_data?.data?.no_peserta}`} placement="top">
+                <Tooltip
+                  title={`No. Peserta: ${record?.usulan_data?.data?.no_peserta}`}
+                  placement="top"
+                >
                   <Badge
                     variant="light"
                     color="blue"
@@ -286,7 +447,13 @@ function LayananPengadaan() {
             {isRejected && hasRejectionReason && (
               <Tooltip title={record.alasan_tolak_tambahan} placement="top">
                 <div style={{ cursor: "help" }}>
-                  <Text size="10px" c="red" fs="italic" truncate style={{ maxWidth: "120px" }}>
+                  <Text
+                    size="10px"
+                    c="red"
+                    fs="italic"
+                    truncate
+                    style={{ maxWidth: "120px" }}
+                  >
                     {record.alasan_tolak_tambahan.length > 15
                       ? `${record.alasan_tolak_tambahan.substring(0, 15)}...`
                       : record.alasan_tolak_tambahan}
@@ -315,10 +482,14 @@ function LayananPengadaan() {
                   color="orange"
                   size="xs"
                   style={{ cursor: "pointer" }}
-                  leftSection={<div style={{ display: "flex", alignItems: "center" }}><IconDownload size={10} /></div>}
+                  leftSection={
+                    <div style={{ display: "flex", alignItems: "center" }}>
+                      <IconDownload size={10} />
+                    </div>
+                  }
                   styles={{
                     section: { display: "flex", alignItems: "center" },
-                    label: { display: "flex", alignItems: "center" }
+                    label: { display: "flex", alignItems: "center" },
                   }}
                 >
                   Pertek
@@ -337,10 +508,14 @@ function LayananPengadaan() {
                   color="blue"
                   size="xs"
                   style={{ cursor: "pointer" }}
-                  leftSection={<div style={{ display: "flex", alignItems: "center" }}><IconDownload size={10} /></div>}
+                  leftSection={
+                    <div style={{ display: "flex", alignItems: "center" }}>
+                      <IconDownload size={10} />
+                    </div>
+                  }
                   styles={{
                     section: { display: "flex", alignItems: "center" },
-                    label: { display: "flex", alignItems: "center" }
+                    label: { display: "flex", alignItems: "center" },
                   }}
                 >
                   SK
@@ -352,10 +527,14 @@ function LayananPengadaan() {
             <Badge
               color="gray"
               size="xs"
-              leftSection={<div style={{ display: "flex", alignItems: "center" }}><IconX size={10} /></div>}
+              leftSection={
+                <div style={{ display: "flex", alignItems: "center" }}>
+                  <IconX size={10} />
+                </div>
+              }
               styles={{
                 section: { display: "flex", alignItems: "center" },
-                label: { display: "flex", alignItems: "center" }
+                label: { display: "flex", alignItems: "center" },
               }}
             >
               No File
@@ -424,7 +603,12 @@ function LayananPengadaan() {
             {/* Search Filters */}
             <Row gutter={[12, 12]} style={{ marginBottom: "16px" }}>
               <Col xs={24}>
-                <Text size="sm" fw={600} c="dimmed" style={{ marginBottom: "8px" }}>
+                <Text
+                  size="sm"
+                  fw={600}
+                  c="dimmed"
+                  style={{ marginBottom: "8px" }}
+                >
                   🔍 Filter Pencarian
                 </Text>
               </Col>
@@ -464,21 +648,31 @@ function LayananPengadaan() {
                   }}
                   size="middle"
                   allowClear
-                  prefix={<Text ff="monospace" size="xs" c="dimmed">NIP</Text>}
+                  prefix={
+                    <Text ff="monospace" size="xs" c="dimmed">
+                      NIP
+                    </Text>
+                  }
                 />
               </Col>
               <Col xs={24} sm={12} md={6}>
                 <Input
                   placeholder="Cari berdasarkan no. peserta..."
                   value={filters.no_peserta}
-                  onChange={(e) => handleFilterChange("no_peserta", e.target.value)}
+                  onChange={(e) =>
+                    handleFilterChange("no_peserta", e.target.value)
+                  }
                   style={{
                     width: "100%",
                     borderRadius: "8px",
                   }}
                   size="middle"
                   allowClear
-                  prefix={<Text size="xs" c="dimmed">#</Text>}
+                  prefix={
+                    <Text size="xs" c="dimmed">
+                      #
+                    </Text>
+                  }
                 />
               </Col>
             </Row>
@@ -547,6 +741,9 @@ function LayananPengadaan() {
                   </Col>
                   <Col span={12}>
                     <Button
+                      onClick={handleDownload}
+                      loading={isDownloading}
+                      disabled={isDownloading}
                       icon={<IconDownload size={16} />}
                       style={{
                         borderColor: "#FF4500",
@@ -565,7 +762,10 @@ function LayananPengadaan() {
             </Row>
 
             {/* Active Filter Tags */}
-            {(tahun !== dayjs().format(FORMAT) || filters.nama || filters.nip || filters.no_peserta) && (
+            {(tahun !== dayjs().format(FORMAT) ||
+              filters.nama ||
+              filters.nip ||
+              filters.no_peserta) && (
               <Row style={{ marginTop: "12px" }}>
                 <Col>
                   <Space size="small" wrap>
@@ -616,7 +816,11 @@ function LayananPengadaan() {
                 showSizeChanger: false,
                 onChange: handleChangePage,
                 showTotal: (total, range) =>
-                  `${range[0].toLocaleString('id-ID')}-${range[1].toLocaleString('id-ID')} dari ${total.toLocaleString('id-ID')} records`,
+                  `${range[0].toLocaleString(
+                    "id-ID"
+                  )}-${range[1].toLocaleString(
+                    "id-ID"
+                  )} dari ${total.toLocaleString("id-ID")} records`,
                 style: { margin: "12px 0" },
               }}
               locale={{

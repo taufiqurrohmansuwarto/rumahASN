@@ -152,6 +152,96 @@ const downloadToMaster = async (req, res) => {
   }
 };
 
+const syncPengadaanApi = async (req, res) => {
+  try {
+    const { tahun = dayjs().format("YYYY") } = req.query;
+    const { fetcher, siasnRequest } = req;
+    const knex = SiasnPengadaanProxy.knex();
+
+    const startTime = Date.now();
+    console.log(
+      `[${new Date().toISOString()}] Memulai sinkronisasi data pengadaan untuk tahun ${tahun}`
+    );
+
+    let allData = [];
+    let offset = 0;
+    const limit = 100; // Gunakan limit yang lebih besar untuk efisiensi
+    let hasMoreData = true;
+
+    console.log(
+      `[${new Date().toISOString()}] Menggunakan limit ${limit} per request`
+    );
+
+    // Loop untuk mengambil semua data
+    while (hasMoreData) {
+      const requestStartTime = Date.now();
+      console.log(
+        `[${new Date().toISOString()}] Mengambil data dengan offset ${offset}, limit ${limit}`
+      );
+
+      const result = await daftarPengadaanInstansi(
+        siasnRequest,
+        tahun,
+        limit,
+        offset
+      );
+
+      const requestEndTime = Date.now();
+      const requestDuration = requestEndTime - requestStartTime;
+
+      const currentData = result?.data || [];
+      console.log(
+        `[${new Date().toISOString()}] Berhasil mengambil ${
+          currentData.length
+        } data pada offset ${offset} (waktu: ${requestDuration}ms)`
+      );
+
+      if (currentData.length > 0) {
+        allData = allData.concat(currentData);
+        offset += limit;
+
+        console.log(
+          `[${new Date().toISOString()}] Total data terkumpul: ${
+            allData.length
+          }`
+        );
+
+        // Jika data yang diterima kurang dari limit, berarti sudah mencapai halaman terakhir
+        if (currentData.length < limit) {
+          console.log(
+            `[${new Date().toISOString()}] Data kurang dari limit (${
+              currentData.length
+            } < ${limit}), menghentikan loop`
+          );
+          hasMoreData = false;
+        }
+      } else {
+        console.log(
+          `[${new Date().toISOString()}] Tidak ada data lagi, menghentikan loop`
+        );
+        hasMoreData = false;
+      }
+    }
+
+    const endTime = Date.now();
+    const totalDuration = endTime - startTime;
+    console.log(
+      `[${new Date().toISOString()}] Selesai mengambil data. Total: ${
+        allData.length
+      } data pengadaan tahun ${tahun} (total waktu: ${totalDuration}ms)`
+    );
+
+    res.json({
+      data: allData,
+      total: allData.length,
+      message: `Berhasil mengambil ${allData.length} data pengadaan tahun ${tahun}`,
+      duration: `${totalDuration}ms`,
+    });
+  } catch (error) {
+    handleError(res, error);
+  }
+};
+
 const syncPengadaanProxy = async (req, res) => {
   try {
     const { tahun = dayjs().format("YYYY") } = req.query;
@@ -861,4 +951,7 @@ module.exports = {
   getRwPengadaanPersonal,
   detailPengadaanProxy,
   usulkanPengadaanProxy,
+
+  // api
+  syncPengadaanApi,
 };

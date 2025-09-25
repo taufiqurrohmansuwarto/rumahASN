@@ -164,7 +164,7 @@ const FormAngkaKreditPredikat = ({ form, jabatanId }) => {
       <Col span={12}>
         <Form.Item
           name="kreditBaruTotal"
-          label="Total Angka Kredit"
+          label="Angka Kredit Periodik Pada waktu berjalan"
           help="* Dapat diedit manual jika diperlukan"
           required
           rules={[{ required: true, message: "Total angka kredit diperlukan" }]}
