@@ -1,0 +1,455 @@
+/**
+ * Esign Signature Requests Service
+ * Business logic for signature request management
+ */
+
+const SignatureRequests = require("@/models/esign/esign-signature-requests.model");
+const SignatureDetails = require("@/models/esign/esign-signature-details.model");
+const Documents = require("@/models/esign/esign-documents.model");
+
+// ==========================================
+// SIGNATURE REQUEST CRUD SERVICES
+// ==========================================
+
+/**
+ * Create new signature request
+ * @param {String} documentId - Document ID
+ * @param {Object} data - Signature request data
+ * @param {String} userId - User ID
+ * @returns {Promise<Object>} - Created signature request
+ */
+export const createSignatureRequest = async (documentId, data, userId) => {
+  const { request_type = 'parallel', notes, signers = [] } = data;
+
+  // Validate document exists and is owned by user
+  const document = await Documents.query().findById(documentId);
+  if (!document) {
+    throw new Error("Dokumen tidak ditemukan");
+  }
+
+  if (document.created_by !== userId) {
+    throw new Error("Tidak memiliki akses untuk membuat pengajuan TTE pada dokumen ini");
+  }
+
+  if (document.status !== 'draft') {
+    throw new Error("Hanya dokumen dengan status draft yang dapat diajukan untuk TTE");
+  }
+
+  // Validate signers
+  if (!signers || signers.length === 0) {
+    throw new Error("Minimal harus ada 1 penandatangan");
+  }
+
+  // Create signature request
+  const signatureRequest = await SignatureRequests.query().insert({
+    document_id: documentId,
+    request_type,
+    status: 'pending',
+    notes,
+    created_by: userId,
+  });
+
+  // Create signature details for each signer
+  const signatureDetails = [];
+  for (let i = 0; i < signers.length; i++) {
+    const signer = signers[i];
+    const detail = await SignatureDetails.query().insert({
+      request_id: signatureRequest.id,
+      user_id: signer.user_id,
+      role_type: signer.role_type || 'signer',
+      sequence_order: signer.sequence_order || (i + 1),
+      status: 'waiting',
+      signature_page: signer.signature_page || 1,
+      signature_x: signer.signature_x,
+      signature_y: signer.signature_y,
+      notes: signer.notes,
+    });
+    signatureDetails.push(detail);
+  }
+
+  // Update document status
+  await Documents.query().patchAndFetchById(documentId, {
+    status: 'in_progress',
+    updated_at: new Date(),
+  });
+
+  return {
+    ...signatureRequest,
+    signature_details: signatureDetails,
+  };
+};
+
+/**
+ * Get signature requests with pagination and filters
+ * @param {String} userId - User ID
+ * @param {Object} filters - Filter options
+ * @returns {Promise<Object>} - Signature requests with pagination
+ */
+export const getSignatureRequests = async (userId, filters = {}) => {
+  const {
+    page = 1,
+    limit = 10,
+    status,
+    request_type,
+    document_id
+  } = filters;
+
+  let query = SignatureRequests.query()
+    .select([
+      'signature_requests.*',
+      'documents.title as document_title',
+      'documents.document_code',
+      'documents.is_public as document_is_public'
+    ])
+    .leftJoin('esign.documents as documents', 'signature_requests.document_id', 'documents.id')
+    .withGraphFetched('[signature_details]');
+
+  // Filter by user access (created by user OR user is a signer)
+  query = query.where(builder => {
+    builder.where('signature_requests.created_by', userId)
+      .orWhereExists(
+        SignatureDetails.query()
+          .where('signature_details.request_id', 'signature_requests.id')
+          .where('signature_details.user_id', userId)
+      );
+  });
+
+  if (status) {
+    query = query.where('signature_requests.status', status);
+  }
+
+  if (request_type) {
+    query = query.where('signature_requests.request_type', request_type);
+  }
+
+  if (document_id) {
+    query = query.where('signature_requests.document_id', document_id);
+  }
+
+  const result = await query
+    .orderBy('signature_requests.created_at', 'desc')
+    .page(parseInt(page) - 1, parseInt(limit));
+
+  return {
+    data: result.results,
+    pagination: {
+      page: parseInt(page),
+      limit: parseInt(limit),
+      total: result.total,
+      totalPages: Math.ceil(result.total / parseInt(limit)),
+    }
+  };
+};
+
+/**
+ * Get signature request by ID
+ * @param {String} requestId - Request ID
+ * @param {String} userId - User ID
+ * @returns {Promise<Object>} - Signature request with details
+ */
+export const getSignatureRequestById = async (requestId, userId) => {
+  const signatureRequest = await SignatureRequests.query()
+    .findById(requestId)
+    .withGraphFetched('[signature_details, document]');
+
+  if (!signatureRequest) {
+    throw new Error("Pengajuan TTE tidak ditemukan");
+  }
+
+  // Check access permission
+  const hasAccess = signatureRequest.created_by === userId ||
+    signatureRequest.signature_details.some(detail => detail.user_id === userId) ||
+    signatureRequest.document.is_public;
+
+  if (!hasAccess) {
+    throw new Error("Tidak memiliki akses ke pengajuan TTE ini");
+  }
+
+  return signatureRequest;
+};
+
+/**
+ * Update signature request
+ * @param {String} requestId - Request ID
+ * @param {Object} data - Update data
+ * @param {String} userId - User ID
+ * @returns {Promise<Object>} - Updated signature request
+ */
+export const updateSignatureRequest = async (requestId, data, userId) => {
+  const { notes } = data;
+
+  const signatureRequest = await SignatureRequests.query().findById(requestId);
+
+  if (!signatureRequest) {
+    throw new Error("Pengajuan TTE tidak ditemukan");
+  }
+
+  if (signatureRequest.created_by !== userId) {
+    throw new Error("Tidak memiliki akses untuk mengubah pengajuan TTE ini");
+  }
+
+  if (signatureRequest.status !== 'pending') {
+    throw new Error("Hanya pengajuan dengan status pending yang dapat diubah");
+  }
+
+  const updatedRequest = await SignatureRequests.query().patchAndFetchById(requestId, {
+    notes: notes || signatureRequest.notes,
+    updated_at: new Date(),
+  });
+
+  return updatedRequest;
+};
+
+/**
+ * Cancel signature request
+ * @param {String} requestId - Request ID
+ * @param {String} userId - User ID
+ * @returns {Promise<Boolean>} - Success status
+ */
+export const cancelSignatureRequest = async (requestId, userId) => {
+  const signatureRequest = await SignatureRequests.query()
+    .findById(requestId)
+    .withGraphFetched('document');
+
+  if (!signatureRequest) {
+    throw new Error("Pengajuan TTE tidak ditemukan");
+  }
+
+  if (signatureRequest.created_by !== userId) {
+    throw new Error("Tidak memiliki akses untuk membatalkan pengajuan TTE ini");
+  }
+
+  if (['completed', 'cancelled'].includes(signatureRequest.status)) {
+    throw new Error("Pengajuan TTE tidak dapat dibatalkan");
+  }
+
+  // Update signature request status
+  await SignatureRequests.query().patchAndFetchById(requestId, {
+    status: 'cancelled',
+    updated_at: new Date(),
+  });
+
+  // Update all pending signature details
+  await SignatureDetails.query()
+    .where('request_id', requestId)
+    .where('status', 'waiting')
+    .patch({
+      status: 'cancelled',
+      updated_at: new Date(),
+    });
+
+  // Revert document status to draft
+  await Documents.query().patchAndFetchById(signatureRequest.document_id, {
+    status: 'draft',
+    updated_at: new Date(),
+  });
+
+  return true;
+};
+
+// ==========================================
+// WORKFLOW MANAGEMENT SERVICES
+// ==========================================
+
+/**
+ * Get workflow status for signature request
+ * @param {String} requestId - Request ID
+ * @returns {Promise<Object>} - Workflow status
+ */
+export const getWorkflowStatus = async (requestId) => {
+  const signatureRequest = await SignatureRequests.query()
+    .findById(requestId)
+    .withGraphFetched('signature_details');
+
+  if (!signatureRequest) {
+    throw new Error("Pengajuan TTE tidak ditemukan");
+  }
+
+  const details = signatureRequest.signature_details;
+  const totalSigners = details.length;
+  const completedSigners = details.filter(d => ['reviewed', 'signed'].includes(d.status)).length;
+  const rejectedSigners = details.filter(d => d.status === 'rejected').length;
+  const pendingSigners = details.filter(d => d.status === 'waiting').length;
+
+  let currentStep = null;
+  let nextSigners = [];
+
+  if (signatureRequest.request_type === 'sequential') {
+    // Find current step in sequential flow
+    const sortedDetails = details.sort((a, b) => a.sequence_order - b.sequence_order);
+    currentStep = sortedDetails.find(d => d.status === 'waiting');
+    if (currentStep) {
+      nextSigners = [currentStep];
+    }
+  } else {
+    // Parallel flow - all waiting signers can sign
+    nextSigners = details.filter(d => d.status === 'waiting');
+  }
+
+  const progress = totalSigners > 0 ? (completedSigners / totalSigners) * 100 : 0;
+
+  return {
+    request_id: requestId,
+    request_type: signatureRequest.request_type,
+    status: signatureRequest.status,
+    total_signers: totalSigners,
+    completed_signers: completedSigners,
+    rejected_signers: rejectedSigners,
+    pending_signers: pendingSigners,
+    progress_percentage: Math.round(progress),
+    current_step: currentStep,
+    next_signers: nextSigners,
+    can_complete: pendingSigners === 0 && rejectedSigners === 0,
+    is_blocked: rejectedSigners > 0,
+  };
+};
+
+/**
+ * Check if signature request can be completed
+ * @param {String} requestId - Request ID
+ * @returns {Promise<Boolean>} - Can complete status
+ */
+export const canCompleteSignatureRequest = async (requestId) => {
+  const workflow = await getWorkflowStatus(requestId);
+  return workflow.can_complete && !workflow.is_blocked;
+};
+
+/**
+ * Complete signature request
+ * @param {String} requestId - Request ID
+ * @returns {Promise<Object>} - Completed signature request
+ */
+export const completeSignatureRequest = async (requestId) => {
+  const canComplete = await canCompleteSignatureRequest(requestId);
+  if (!canComplete) {
+    throw new Error("Pengajuan TTE belum dapat diselesaikan");
+  }
+
+  const signatureRequest = await SignatureRequests.query()
+    .findById(requestId)
+    .withGraphFetched('document');
+
+  // Update signature request status
+  const updatedRequest = await SignatureRequests.query().patchAndFetchById(requestId, {
+    status: 'completed',
+    completed_at: new Date(),
+    updated_at: new Date(),
+  });
+
+  // Update document status
+  await Documents.query().patchAndFetchById(signatureRequest.document_id, {
+    status: 'signed',
+    updated_at: new Date(),
+  });
+
+  return updatedRequest;
+};
+
+// ==========================================
+// VALIDATION SERVICES
+// ==========================================
+
+/**
+ * Validate signature request access
+ * @param {String} requestId - Request ID
+ * @param {String} userId - User ID
+ * @returns {Promise<Object>} - Signature request if accessible
+ */
+export const validateSignatureRequestAccess = async (requestId, userId) => {
+  const signatureRequest = await SignatureRequests.query()
+    .findById(requestId)
+    .withGraphFetched('[signature_details, document]');
+
+  if (!signatureRequest) {
+    throw new Error("Pengajuan TTE tidak ditemukan");
+  }
+
+  const hasAccess = signatureRequest.created_by === userId ||
+    signatureRequest.signature_details.some(detail => detail.user_id === userId) ||
+    signatureRequest.document.is_public;
+
+  if (!hasAccess) {
+    throw new Error("Tidak memiliki akses ke pengajuan TTE ini");
+  }
+
+  return signatureRequest;
+};
+
+/**
+ * Validate user can modify signature request
+ * @param {String} requestId - Request ID
+ * @param {String} userId - User ID
+ * @returns {Promise<Object>} - Signature request if modifiable
+ */
+export const validateSignatureRequestModifiable = async (requestId, userId) => {
+  const signatureRequest = await validateSignatureRequestAccess(requestId, userId);
+
+  if (signatureRequest.created_by !== userId) {
+    throw new Error("Tidak memiliki akses untuk mengubah pengajuan TTE ini");
+  }
+
+  if (signatureRequest.status !== 'pending') {
+    throw new Error("Hanya pengajuan dengan status pending yang dapat diubah");
+  }
+
+  return signatureRequest;
+};
+
+// ==========================================
+// UTILITY SERVICES
+// ==========================================
+
+/**
+ * Get signature request statistics for user
+ * @param {String} userId - User ID
+ * @returns {Promise<Object>} - Statistics
+ */
+export const getSignatureRequestStats = async (userId) => {
+  // Requests created by user
+  const createdStats = await SignatureRequests.query()
+    .where('created_by', userId)
+    .select('status')
+    .groupBy('status')
+    .count('* as count');
+
+  // Requests where user is a signer
+  const signerStats = await SignatureRequests.query()
+    .select('signature_requests.status')
+    .innerJoin('esign.signature_details', 'signature_requests.id', 'signature_details.request_id')
+    .where('signature_details.user_id', userId)
+    .groupBy('signature_requests.status')
+    .count('* as count');
+
+  const result = {
+    created: {
+      total: 0,
+      pending: 0,
+      completed: 0,
+      rejected: 0,
+      cancelled: 0
+    },
+    assigned: {
+      total: 0,
+      pending: 0,
+      completed: 0,
+      rejected: 0,
+      cancelled: 0
+    }
+  };
+
+  createdStats.forEach(stat => {
+    const status = stat.status;
+    const count = parseInt(stat.count);
+    result.created[status] = count;
+    result.created.total += count;
+  });
+
+  signerStats.forEach(stat => {
+    const status = stat.status;
+    const count = parseInt(stat.count);
+    result.assigned[status] = count;
+    result.assigned.total += count;
+  });
+
+  return result;
+};
