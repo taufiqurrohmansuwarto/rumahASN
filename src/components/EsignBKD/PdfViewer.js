@@ -40,7 +40,11 @@ const Page = dynamic(() => import("react-pdf").then((mod) => mod.Page), {
 
 const { useBreakpoint } = Grid;
 
-function PdfViewer({ pdfBase64, title = "Dokumen PDF" }) {
+function PdfViewer({
+  pdfBase64,
+  title = "Dokumen PDF",
+  headerActions = null,
+}) {
   const screens = useBreakpoint();
   const isMobile = !screens?.md;
   const isXs = !screens?.sm;
@@ -53,6 +57,7 @@ function PdfViewer({ pdfBase64, title = "Dokumen PDF" }) {
   const [pdfWorkerReady, setPdfWorkerReady] = useState(false);
   const [pdfData, setPdfData] = useState(null);
   const [pdfjsVersion, setPdfjsVersion] = useState("3.11.174");
+  const [pageLoading, setPageLoading] = useState(false);
 
   // Setup PDF.js worker sesuai dokumentasi react-pdf
   useEffect(() => {
@@ -87,6 +92,7 @@ function PdfViewer({ pdfBase64, title = "Dokumen PDF" }) {
 
       try {
         setLoading(true);
+        setPageLoading(true);
         setError(null);
 
         // Validate base64 data
@@ -101,12 +107,14 @@ function PdfViewer({ pdfBase64, title = "Dokumen PDF" }) {
           : `data:application/pdf;base64,${normalizedBase64}`;
 
         setPdfData(dataUri);
+        setPageNumber(1);
       } catch (error) {
         console.error("Failed to process PDF base64:", error);
         setError(`Gagal memproses PDF: ${error.message}`);
         setLoading(false);
-      }
-    };
+        setPageLoading(false);
+    }
+  };
 
     processPdfBase64();
   }, [pdfBase64, pdfWorkerReady]);
@@ -114,8 +122,21 @@ function PdfViewer({ pdfBase64, title = "Dokumen PDF" }) {
   const onDocumentLoadSuccess = useCallback(({ numPages }) => {
     setNumPages(numPages);
     setLoading(false);
+    setPageLoading(false);
     setError(null);
   }, []);
+
+  const onPageRenderSuccess = useCallback(() => {
+    setPageLoading(false);
+  }, []);
+
+  const onPageRenderError = useCallback(
+    (pageError) => {
+      setPageLoading(false);
+      setError(`Gagal memuat halaman PDF: ${pageError?.message || pageError}`);
+    },
+    []
+  );
 
   const onDocumentLoadError = useCallback(
     (error) => {
@@ -129,17 +150,41 @@ function PdfViewer({ pdfBase64, title = "Dokumen PDF" }) {
       });
       setError(`Gagal memuat dokumen PDF: ${error.message || error}`);
       setLoading(false);
+      setPageLoading(false);
     },
     [pdfData]
   );
 
+  const changePage = useCallback(
+    (nextPage) => {
+      if (!nextPage || Number.isNaN(nextPage)) {
+        return;
+      }
+
+      if (!numPages) {
+        return;
+      }
+
+      const boundedPage = Math.min(Math.max(nextPage, 1), numPages);
+
+      if (boundedPage === pageNumber) {
+        return;
+      }
+
+      setError(null);
+      setPageLoading(true);
+      setPageNumber(boundedPage);
+    },
+    [numPages, pageNumber]
+  );
+
   const goToPrevPage = useCallback(() => {
-    setPageNumber((prev) => Math.max(prev - 1, 1));
-  }, []);
+    changePage(pageNumber - 1);
+  }, [changePage, pageNumber]);
 
   const goToNextPage = useCallback(() => {
-    setPageNumber((prev) => Math.min(prev + 1, numPages || 1));
-  }, [numPages]);
+    changePage(pageNumber + 1);
+  }, [changePage, pageNumber]);
 
   const zoomIn = useCallback(() => {
     setScale((prev) => Math.min(prev + 0.2, 3.0));
@@ -155,11 +200,9 @@ function PdfViewer({ pdfBase64, title = "Dokumen PDF" }) {
 
   const goToPage = useCallback(
     (page) => {
-      if (page >= 1 && page <= numPages) {
-        setPageNumber(page);
-      }
+      changePage(page);
     },
-    [numPages]
+    [changePage]
   );
 
   const renderError = () => (
@@ -208,19 +251,33 @@ function PdfViewer({ pdfBase64, title = "Dokumen PDF" }) {
   );
 
   // Early return jika tidak ada fileUrl
+  const renderHeader = () => (
+    <Card.Section withBorder inheritPadding py="xs">
+      <Group justify="space-between" align="center">
+        <Group gap="sm" align="center">
+          <Avatar color="blue" size="sm" radius="xl">
+            <FileTextOutlined />
+          </Avatar>
+          <Text fw={600} size="lg">
+            {title}
+          </Text>
+        </Group>
+        <Group gap="sm" align="center">
+          {numPages && (
+            <Text size="sm" c="dimmed">
+              {pageNumber} dari {numPages} halaman
+            </Text>
+          )}
+          {headerActions}
+        </Group>
+      </Group>
+    </Card.Section>
+  );
+
   if (!pdfBase64) {
     return (
       <Card shadow="sm" padding="md" radius="md" withBorder>
-        <Card.Section withBorder inheritPadding py="xs">
-          <Group gap="sm">
-            <Avatar color="blue" size="sm" radius="xl">
-              <FileTextOutlined />
-            </Avatar>
-            <Text fw={600} size="lg">
-              {title}
-            </Text>
-          </Group>
-        </Card.Section>
+        {renderHeader()}
         <Card.Section>
           <Center py="xl">
             <Stack align="center" gap="md">
@@ -241,23 +298,7 @@ function PdfViewer({ pdfBase64, title = "Dokumen PDF" }) {
   return (
     <Card shadow="sm" padding="md" radius="md" withBorder>
       {/* Header */}
-      <Card.Section withBorder inheritPadding py="xs">
-        <Group justify="space-between">
-          <Group gap="sm">
-            <Avatar color="blue" size="sm" radius="xl">
-              <FileTextOutlined />
-            </Avatar>
-            <Text fw={600} size="lg">
-              {title}
-            </Text>
-          </Group>
-          {numPages && (
-            <Text size="sm" c="dimmed">
-              {pageNumber} dari {numPages} halaman
-            </Text>
-          )}
-        </Group>
-      </Card.Section>
+      {renderHeader()}
 
       {/* Controls */}
       {!loading && !error && pdfWorkerReady && pdfData && (
@@ -359,7 +400,7 @@ function PdfViewer({ pdfBase64, title = "Dokumen PDF" }) {
                     width: "100%",
                   }}
                 >
-                  {loading && renderInlineLoading()}
+                  {(loading || pageLoading) && renderInlineLoading()}
                   <Document
                     file={pdfData}
                     onLoadSuccess={onDocumentLoadSuccess}
@@ -377,11 +418,15 @@ function PdfViewer({ pdfBase64, title = "Dokumen PDF" }) {
                       scale={scale}
                       renderTextLayer={false}
                       renderAnnotationLayer={false}
+                      loading={renderLoading()}
+                      onRenderSuccess={onPageRenderSuccess}
+                      onRenderError={onPageRenderError}
                       width={
                         isMobile && typeof window !== "undefined"
                           ? Math.min(window.innerWidth - 80, 600)
                           : undefined
                       }
+                      error={renderError()}
                     />
                   </Document>
                 </div>

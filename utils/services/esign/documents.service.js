@@ -15,6 +15,7 @@ import {
 const Documents = require("@/models/esign/esign-documents.model");
 const SignatureRequests = require("@/models/esign/esign-signature-requests.model");
 const crypto = require("crypto");
+const { addFooterToPdf } = require("./pdf.service");
 
 // ==========================================
 // DOCUMENT CRUD SERVICES
@@ -35,23 +36,40 @@ export const createDocument = async (data, file, userId, mc) => {
     throw new Error("File dokumen wajib diupload");
   }
 
-  // Generate file hash
+  // Validate PDF file
+  if (file.mimetype !== "application/pdf") {
+    throw new Error("File harus berformat PDF");
+  }
+
+  // Generate document code first (needed for footer)
+  const documentCode = `DOC-${new Date().getFullYear()}-${Date.now()}`;
+
+  // Add footer to PDF before upload
+  let processedFileBuffer;
+  try {
+    const pdfWithFooter = await addFooterToPdf(file.buffer, documentCode);
+    processedFileBuffer = Buffer.from(pdfWithFooter);
+  } catch (error) {
+    console.error("Error adding footer to PDF:", error);
+    throw new Error("Gagal menambahkan footer ke dokumen PDF");
+  }
+
+  // Generate file hash from processed file
   const fileHash = crypto
     .createHash("sha256")
-    .update(file.buffer)
+    .update(processedFileBuffer)
     .digest("hex");
 
-  // Generate document code and filename
-  const documentCode = `DOC-${new Date().getFullYear()}-${Date.now()}`;
+  // Generate filename
   const filename = getEsignDocumentPath(documentCode, file.originalname);
 
-  // Upload file to Minio
+  // Upload processed file to Minio
   await uploadEsignDocument(
     mc,
-    file.buffer,
+    processedFileBuffer,
     file.originalname,
     documentCode,
-    file.size,
+    processedFileBuffer.length,
     file.mimetype,
     userId
   );
@@ -63,7 +81,7 @@ export const createDocument = async (data, file, userId, mc) => {
     description,
     file_path: filename,
     file_hash: fileHash,
-    file_size: file.size,
+    file_size: processedFileBuffer.length,
     is_public,
     status: "draft",
     created_by: userId,
