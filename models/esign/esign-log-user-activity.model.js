@@ -13,20 +13,7 @@ class LogUserActivity extends Model {
     this.id = nanoid();
   }
 
-  static get relationMappings() {
-    const User = require("@/models/users/user.model");
-
-    return {
-      user: {
-        relation: Model.BelongsToOneRelation,
-        modelClass: User,
-        join: {
-          from: "esign.log_user_activity.user_id",
-          to: "users.custom_id",
-        },
-      },
-    };
-  }
+  static get relationMappings() {}
 }
 
 module.exports = LogUserActivity;

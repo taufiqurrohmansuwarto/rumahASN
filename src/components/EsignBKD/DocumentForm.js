@@ -11,8 +11,13 @@ import {
   Divider,
   Steps,
   Flex,
+  Row,
+  Col,
+  Grid,
+  Typography,
+  Space,
 } from "antd";
-import { Text, Title } from "@mantine/core";
+import { Text } from "@mantine/core";
 import {
   InboxOutlined,
   SaveOutlined,
@@ -23,6 +28,7 @@ import {
   UserOutlined,
   PlusOutlined,
   DeleteOutlined,
+  SafetyOutlined,
 } from "@ant-design/icons";
 import { useState } from "react";
 import { useRouter } from "next/router";
@@ -31,9 +37,14 @@ import { useCreateDocument } from "@/hooks/esign-bkd";
 const { TextArea } = Input;
 const { Dragger } = Upload;
 const { Option } = Select;
+const { Title } = Typography;
+const { useBreakpoint } = Grid;
 
 function DocumentForm() {
   const router = useRouter();
+  const screens = useBreakpoint();
+  const isMobile = !screens?.md;
+  const isXs = !screens?.sm;
   const [form] = Form.useForm();
   const [fileList, setFileList] = useState([]);
   const [currentStep, setCurrentStep] = useState(0);
@@ -55,13 +66,14 @@ function DocumentForm() {
         signers: workflowType !== "self" ? signers : [],
       };
 
-      const file = fileList[0].originFileObj;
+      const file = fileList[0]?.originFileObj || fileList[0];
       await createDocument({ data: formData, file });
 
       message.success("Dokumen berhasil diupload dan workflow telah diatur");
       router.push("/esign-bkd/documents");
     } catch (error) {
-      const errorMessage = error?.response?.data?.message || "Gagal mengupload dokumen";
+      const errorMessage =
+        error?.response?.data?.message || "Gagal mengupload dokumen";
       message.error(errorMessage);
     }
   };
@@ -71,13 +83,15 @@ function DocumentForm() {
   };
 
   const removeSigner = (id) => {
-    setSigners(signers.filter(signer => signer.id !== id));
+    setSigners(signers.filter((signer) => signer.id !== id));
   };
 
   const updateSigner = (id, field, value) => {
-    setSigners(signers.map(signer =>
-      signer.id === id ? { ...signer, [field]: value } : signer
-    ));
+    setSigners(
+      signers.map((signer) =>
+        signer.id === id ? { ...signer, [field]: value } : signer
+      )
+    );
   };
 
   const steps = [
@@ -114,7 +128,16 @@ function DocumentForm() {
         return false;
       }
 
-      setFileList([file]);
+      setFileList([
+        {
+          uid: file.uid || String(Date.now()),
+          name: file.name,
+          status: "done",
+          size: file.size,
+          type: file.type,
+          originFileObj: file,
+        },
+      ]);
       return false;
     },
     onRemove: () => {
@@ -130,11 +153,22 @@ function DocumentForm() {
             <Card size="small" title="Upload File PDF">
               <Dragger {...uploadProps}>
                 <Flex vertical align="center" style={{ padding: "40px 24px" }}>
-                  <InboxOutlined style={{ fontSize: 64, color: "#1890ff", marginBottom: 24 }} />
-                  <Title order={4} style={{ marginBottom: 8, color: "#1890ff" }}>
+                  <InboxOutlined
+                    style={{ fontSize: 64, color: "#1890ff", marginBottom: 24 }}
+                  />
+                  <Title
+                    level={4}
+                    style={{ marginBottom: 8, color: "#1890ff" }}
+                  >
                     Upload File PDF
                   </Title>
-                  <Text size="sm" c="dimmed" ta="center">
+                  <Text
+                    style={{
+                      fontSize: 14,
+                      color: "#8e8e93",
+                      textAlign: "center",
+                    }}
+                  >
                     Klik atau seret file PDF ke area ini untuk upload
                     <br />
                     Maksimal ukuran 25MB
@@ -143,17 +177,26 @@ function DocumentForm() {
               </Dragger>
 
               {fileList.length > 0 && (
-                <Flex align="center" gap="middle" style={{
-                  marginTop: 20,
-                  padding: 16,
-                  background: "linear-gradient(90deg, #e6f7ff 0%, #f0f9ff 100%)",
-                  borderRadius: 12,
-                  border: "1px solid #91d5ff"
-                }}>
-                  <FileTextOutlined style={{ color: "#1890ff", fontSize: 24 }} />
+                <Flex
+                  align="center"
+                  gap="middle"
+                  style={{
+                    marginTop: 20,
+                    padding: 16,
+                    background:
+                      "linear-gradient(90deg, #e6f7ff 0%, #f0f9ff 100%)",
+                    borderRadius: 12,
+                    border: "1px solid #91d5ff",
+                  }}
+                >
+                  <FileTextOutlined
+                    style={{ color: "#1890ff", fontSize: 24 }}
+                  />
                   <Flex vertical style={{ flex: 1 }}>
-                    <Text fw={600} size="sm">{fileList[0].name}</Text>
-                    <Text size="xs" c="dimmed">
+                    <Text style={{ fontWeight: 600, fontSize: 14 }}>
+                      {fileList[0].name}
+                    </Text>
+                    <Text style={{ fontSize: 12, color: "#8e8e93" }}>
                       {(fileList[0].size / 1024 / 1024).toFixed(2)} MB • PDF
                     </Text>
                   </Flex>
@@ -176,7 +219,11 @@ function DocumentForm() {
                     { min: 3, message: "Minimal 3 karakter!" },
                   ]}
                 >
-                  <Input placeholder="Masukkan judul dokumen" maxLength={200} showCount />
+                  <Input
+                    placeholder="Masukkan judul dokumen"
+                    maxLength={200}
+                    showCount
+                  />
                 </Form.Item>
 
                 <Form.Item
@@ -194,12 +241,16 @@ function DocumentForm() {
 
                 <Flex justify="space-between" align="center">
                   <Flex vertical>
-                    <Text fw={600}>Dokumen Publik</Text>
-                    <Text size="sm" c="dimmed">
+                    <Text style={{ fontWeight: 600 }}>Dokumen Publik</Text>
+                    <Text style={{ fontSize: 14, color: "#8e8e93" }}>
                       Dokumen dapat dilihat oleh pengguna lain
                     </Text>
                   </Flex>
-                  <Form.Item name="is_public" valuePropName="checked" style={{ margin: 0 }}>
+                  <Form.Item
+                    name="is_public"
+                    valuePropName="checked"
+                    style={{ margin: 0 }}
+                  >
                     <Switch />
                   </Form.Item>
                 </Flex>
@@ -220,10 +271,14 @@ function DocumentForm() {
                 <Flex vertical gap="middle">
                   <Radio value="self">
                     <Flex vertical style={{ marginLeft: 8 }}>
-                      <Flex align="center" gap="small" style={{ fontWeight: 500 }}>
+                      <Flex
+                        align="center"
+                        gap="small"
+                        style={{ fontWeight: 500 }}
+                      >
                         <UserOutlined /> Tanda Tangan Mandiri
                       </Flex>
-                      <Text size="sm" c="dimmed">
+                      <Text style={{ fontSize: 14, color: "#8e8e93" }}>
                         Saya akan menandatangani dokumen ini sendiri
                       </Text>
                     </Flex>
@@ -231,10 +286,14 @@ function DocumentForm() {
 
                   <Radio value="sequential">
                     <Flex vertical style={{ marginLeft: 8 }}>
-                      <Flex align="center" gap="small" style={{ fontWeight: 500 }}>
+                      <Flex
+                        align="center"
+                        gap="small"
+                        style={{ fontWeight: 500 }}
+                      >
                         <TeamOutlined /> Sequential (Berurutan)
                       </Flex>
-                      <Text size="sm" c="dimmed">
+                      <Text style={{ fontSize: 14, color: "#8e8e93" }}>
                         Penandatangan dilakukan secara berurutan sesuai urutan
                       </Text>
                     </Flex>
@@ -242,10 +301,14 @@ function DocumentForm() {
 
                   <Radio value="parallel">
                     <Flex vertical style={{ marginLeft: 8 }}>
-                      <Flex align="center" gap="small" style={{ fontWeight: 500 }}>
+                      <Flex
+                        align="center"
+                        gap="small"
+                        style={{ fontWeight: 500 }}
+                      >
                         <TeamOutlined /> Parallel (Bersamaan)
                       </Flex>
-                      <Text size="sm" c="dimmed">
+                      <Text style={{ fontSize: 14, color: "#8e8e93" }}>
                         Semua penandatangan dapat menandatangani bersamaan
                       </Text>
                     </Flex>
@@ -271,16 +334,23 @@ function DocumentForm() {
               >
                 {signers.length === 0 ? (
                   <Flex justify="center" style={{ padding: "32px 0" }}>
-                    <Text c="dimmed">Belum ada penandatangan</Text>
+                    <Text style={{ color: "#8e8e93" }}>
+                      Belum ada penandatangan
+                    </Text>
                   </Flex>
                 ) : (
                   <Flex vertical gap="middle">
                     {signers.map((signer, index) => (
-                      <Flex key={signer.id} align="center" gap="middle" style={{
-                        padding: 12,
-                        border: "1px solid #d9d9d9",
-                        borderRadius: 8
-                      }}>
+                      <Flex
+                        key={signer.id}
+                        align="center"
+                        gap="middle"
+                        style={{
+                          padding: 12,
+                          border: "1px solid #d9d9d9",
+                          borderRadius: 8,
+                        }}
+                      >
                         <Flex
                           align="center"
                           justify="center"
@@ -291,23 +361,31 @@ function DocumentForm() {
                             borderRadius: "50%",
                             fontSize: 14,
                             fontWeight: 500,
-                            flexShrink: 0
+                            flexShrink: 0,
                           }}
                         >
-                          {workflowType === "sequential" ? index + 1 : <UserOutlined />}
+                          {workflowType === "sequential" ? (
+                            index + 1
+                          ) : (
+                            <UserOutlined />
+                          )}
                         </Flex>
 
                         <Flex gap="middle" style={{ flex: 1 }}>
                           <Input
                             placeholder="Email penandatangan"
                             value={signer.email}
-                            onChange={(e) => updateSigner(signer.id, "email", e.target.value)}
+                            onChange={(e) =>
+                              updateSigner(signer.id, "email", e.target.value)
+                            }
                             style={{ flex: 1 }}
                           />
 
                           <Select
                             value={signer.role}
-                            onChange={(value) => updateSigner(signer.id, "role", value)}
+                            onChange={(value) =>
+                              updateSigner(signer.id, "role", value)
+                            }
                             style={{ width: 120 }}
                           >
                             <Option value="reviewer">Reviewer</Option>
@@ -337,66 +415,165 @@ function DocumentForm() {
   };
 
   return (
-    <Flex vertical style={{ minHeight: "100vh", background: "#f5f5f5", padding: 16 }}>
-      <Flex vertical style={{ maxWidth: 800, width: "100%", margin: "0 auto" }} gap="large">
-        <Flex align="center" gap="large">
-          <Button icon={<ArrowLeftOutlined />} onClick={() => router.back()}>
-            Kembali
-          </Button>
-          <Flex vertical>
-            <Title level={3} style={{ margin: 0 }}>Upload Dokumen Baru</Title>
-            <Text c="dimmed">Buat dan atur workflow tanda tangan elektronik</Text>
-          </Flex>
-        </Flex>
-
-        <Card>
-          <Steps current={currentStep} items={steps} style={{ marginBottom: 32 }} />
-
-          <Form
-            form={form}
-            layout="vertical"
-            onFinish={handleFinish}
-            initialValues={{ is_public: false }}
+    <div>
+      <div style={{ maxWidth: "100%" }}>
+        <Card
+          style={{
+            borderRadius: "12px",
+            boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+            border: "none",
+          }}
+        >
+          {/* Header Section */}
+          <div
+            style={{
+              background: "#FF4500",
+              color: "white",
+              padding: "24px",
+              textAlign: "center",
+              borderRadius: "12px 12px 0 0",
+              margin: "-24px -24px 0 -24px",
+            }}
           >
-            {renderStepContent()}
+            <SafetyOutlined style={{ fontSize: "24px", marginBottom: "8px" }} />
+            <Title level={3} style={{ color: "white", margin: 0 }}>
+              Upload Dokumen Baru
+            </Title>
+            <Text style={{ color: "rgba(255, 255, 255, 0.9)", fontSize: 14 }}>
+              Buat dan atur workflow tanda tangan elektronik
+            </Text>
+          </div>
 
-            <Divider />
-
-            <Flex justify="space-between">
-              <Button
-                disabled={currentStep === 0}
-                onClick={() => setCurrentStep(currentStep - 1)}
+          {/* Action Button Section */}
+          <div
+            style={{
+              padding: "20px 0 16px 0",
+              borderBottom: "1px solid #f0f0f0",
+            }}
+          >
+            <Row gutter={[12, 12]} align="middle" justify="space-between">
+              <Col xs={24} md={16}>
+                <Text style={{ fontSize: 16, color: "#6b7280" }}>
+                  Sistem upload dokumen dan pengaturan workflow tanda tangan
+                </Text>
+              </Col>
+              <Col
+                xs={24}
+                md={8}
+                style={{
+                  display: "flex",
+                  justifyContent: isXs ? "flex-start" : "flex-end",
+                }}
               >
-                Sebelumnya
-              </Button>
+                <Button
+                  icon={<ArrowLeftOutlined />}
+                  onClick={() => router.back()}
+                  style={{
+                    background: "#FF4500",
+                    borderColor: "#FF4500",
+                    color: "white",
+                    borderRadius: 6,
+                    fontWeight: 500,
+                    padding: "0 16px",
+                  }}
+                  block={isXs}
+                >
+                  Kembali
+                </Button>
+              </Col>
+            </Row>
+          </div>
 
-              <Flex gap="middle">
-                <Button onClick={() => router.back()}>Batal</Button>
+          {/* Form Section */}
+          <div style={{ marginTop: "16px" }}>
+            <Steps
+              current={currentStep}
+              items={steps}
+              style={{
+                marginBottom: 32,
+                padding: "0 16px",
+              }}
+              size="default"
+            />
 
-                {currentStep < steps.length - 1 ? (
+            <Form
+              form={form}
+              layout="vertical"
+              onFinish={handleFinish}
+              initialValues={{ is_public: false }}
+            >
+              {renderStepContent()}
+
+              <Divider />
+
+              <Flex justify="space-between" style={{ marginTop: 24 }}>
+                <Button
+                  disabled={currentStep === 0}
+                  onClick={() => setCurrentStep(currentStep - 1)}
+                  style={{
+                    borderRadius: 6,
+                    height: 40,
+                    paddingInline: 20,
+                    fontWeight: 500,
+                  }}
+                >
+                  Sebelumnya
+                </Button>
+
+                <Flex gap="middle">
                   <Button
-                    type="primary"
-                    onClick={() => setCurrentStep(currentStep + 1)}
-                    disabled={currentStep === 0 && fileList.length === 0}
+                    onClick={() => router.back()}
+                    style={{
+                      borderRadius: 6,
+                      height: 40,
+                      paddingInline: 20,
+                      fontWeight: 500,
+                    }}
                   >
-                    Selanjutnya
+                    Batal
                   </Button>
-                ) : (
-                  <Button
-                    type="primary"
-                    htmlType="submit"
-                    loading={isLoading}
-                    icon={<SaveOutlined />}
-                  >
-                    Buat Dokumen
-                  </Button>
-                )}
+
+                  {currentStep < steps.length - 1 ? (
+                    <Button
+                      type="primary"
+                      onClick={() => setCurrentStep(currentStep + 1)}
+                      disabled={currentStep === 0 && fileList.length === 0}
+                      style={{
+                        background: "#FF4500",
+                        borderColor: "#FF4500",
+                        borderRadius: 6,
+                        height: 40,
+                        paddingInline: 20,
+                        fontWeight: 500,
+                      }}
+                    >
+                      Selanjutnya
+                    </Button>
+                  ) : (
+                    <Button
+                      type="primary"
+                      htmlType="submit"
+                      loading={isLoading}
+                      icon={<SaveOutlined />}
+                      style={{
+                        background: "#FF4500",
+                        borderColor: "#FF4500",
+                        borderRadius: 6,
+                        height: 40,
+                        paddingInline: 20,
+                        fontWeight: 500,
+                      }}
+                    >
+                      Buat Dokumen
+                    </Button>
+                  )}
+                </Flex>
               </Flex>
-            </Flex>
-          </Form>
+            </Form>
+          </div>
         </Card>
-      </Flex>
-    </Flex>
+      </div>
+    </div>
   );
 }
 

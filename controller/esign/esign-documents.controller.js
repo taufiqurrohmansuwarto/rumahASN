@@ -6,7 +6,7 @@ import {
   updateDocument,
   deleteDocument,
   downloadDocumentFile,
-  previewDocumentFile
+  previewDocumentFile,
 } from "@/utils/services/esign/documents.service";
 
 export const create = async (req, res) => {
@@ -108,18 +108,31 @@ export const download = async (req, res) => {
 export const preview = async (req, res) => {
   try {
     const { customId: userId } = req?.user;
-    const { id } = req.query;
+    const { id, format } = req.query;
     const mc = req?.mc;
 
     const fileBuffer = await previewDocumentFile(id, userId, mc);
 
-    res.set({
-      "Content-Type": "application/pdf",
-      "Content-Disposition": "inline",
-      "Content-Length": fileBuffer.length,
-    });
+    // Jika format=base64, return sebagai JSON dengan base64
+    if (format === "base64") {
+      const base64Data = fileBuffer.toString("base64");
 
-    res.send(fileBuffer);
+      res.setHeader("Content-Type", "application/json");
+      res.json({
+        success: true,
+        data: {
+          content: base64Data,
+          contentType: "application/pdf",
+          size: fileBuffer.length,
+        },
+      });
+    } else {
+      // Default: return sebagai PDF binary
+      res.setHeader("Content-Type", "application/pdf");
+      res.setHeader("Content-Disposition", "inline");
+      res.setHeader("Content-Length", fileBuffer.length);
+      res.send(fileBuffer);
+    }
   } catch (error) {
     handleError(res, error);
   }

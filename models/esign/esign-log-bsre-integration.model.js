@@ -15,26 +15,7 @@ class LogBsreIntegration extends Model {
     this.id = nanoid();
   }
 
-  static get relationMappings() {
-    return {
-      bsre_transaction: {
-        relation: Model.BelongsToOneRelation,
-        modelClass: BsreTransactions,
-        join: {
-          from: "esign.log_bsre_integration.bsre_transaction_id",
-          to: "esign.bsre_transactions.id",
-        },
-      },
-      document: {
-        relation: Model.BelongsToOneRelation,
-        modelClass: Documents,
-        join: {
-          from: "esign.log_bsre_integration.bsre_transaction_id",
-          to: "esign.documents.id",
-        },
-      },
-    };
-  }
+  static get relationMappings() {}
 }
 
 module.exports = LogBsreIntegration;

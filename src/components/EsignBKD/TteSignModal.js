@@ -56,7 +56,7 @@ function TteSignModal({ open, onCancel, document, onSign, loading }) {
           </Flex>
         </Flex>
 
-        <Card size="small" style={{ backgroundColor: "#f8fafc" }}>
+        <Card size="small">
           <Flex vertical gap="small">
             <Text fw={600} size="sm">{document?.title}</Text>
             <Text size="xs" c="dimmed">{document?.description}</Text>

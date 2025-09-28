@@ -18,7 +18,7 @@ export const getDocuments = async (params = {}) => {
 export const createDocument = async (formData) => {
   const res = await esignBkdApi.post(`/documents`, formData, {
     headers: {
-      'Content-Type': 'multipart/form-data',
+      "Content-Type": "multipart/form-data",
     },
   });
   return res?.data;
@@ -46,9 +46,33 @@ export const downloadDocument = async (id) => {
 
 export const previewDocument = async (id) => {
   const res = await esignBkdApi.get(`/documents/${id}/preview`, {
-    responseType: 'blob',
+    responseType: "blob",
   });
   return res?.data;
+};
+
+export const previewDocumentAsBlob = async (id) => {
+  try {
+    const response = await esignBkdApi.get(`/documents/${id}/preview`, {
+      responseType: "blob",
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Preview document error:", error);
+    throw error;
+  }
+};
+
+export const previewDocumentAsBase64 = async (id) => {
+  try {
+    const response = await esignBkdApi.get(
+      `/documents/${id}/preview?format=base64`
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Preview document base64 error:", error);
+    throw error;
+  }
 };
 
 // ==========================================
@@ -199,7 +223,9 @@ export const retryBsreTransaction = async (id, data) => {
 
 export const checkBsreStatus = async (params = {}) => {
   const queryParams = queryString.stringify(params);
-  const res = await esignBkdApi.get(`/bsre-transactions/check-status?${queryParams}`);
+  const res = await esignBkdApi.get(
+    `/bsre-transactions/check-status?${queryParams}`
+  );
   return res?.data;
 };
 
@@ -217,12 +243,12 @@ export const getBsreTransactionStats = async (params = {}) => {
 export const createDocumentFormData = (data, file) => {
   const formData = new FormData();
 
-  formData.append('title', data.title);
-  formData.append('description', data.description || '');
-  formData.append('is_public', data.is_public || false);
+  formData.append("title", data.title);
+  formData.append("description", data.description || "");
+  formData.append("is_public", data.is_public || false);
 
   if (file) {
-    formData.append('file', file);
+    formData.append("file", file);
   }
 
   return formData;
@@ -238,13 +264,13 @@ export const handleDownloadResponse = (data, filename) => {
       byteNumbers[i] = byteCharacters.charCodeAt(i);
     }
     const byteArray = new Uint8Array(byteNumbers);
-    const blob = new Blob([byteArray], { type: 'application/pdf' });
+    const blob = new Blob([byteArray], { type: "application/pdf" });
 
     // Create download link
     const url = window.URL.createObjectURL(blob);
-    const link = document.createElement('a');
+    const link = document.createElement("a");
     link.href = url;
-    link.download = filename || data.data.filename || 'document.pdf';
+    link.download = filename || data.data.filename || "document.pdf";
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -255,6 +281,6 @@ export const handleDownloadResponse = (data, filename) => {
 // Handle preview response
 export const handlePreviewResponse = (blob) => {
   const url = window.URL.createObjectURL(blob);
-  window.open(url, '_blank');
+  window.open(url, "_blank");
   return url;
 };

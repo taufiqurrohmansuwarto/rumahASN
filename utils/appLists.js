@@ -20,6 +20,16 @@ export const appLists = [
     target: "_blank",
   },
   {
+    rightIcon: <IconHome />,
+    title: "ESIGN BKD",
+    desc: "ESIGN BKD",
+    color: "#1A73E8",
+    url: "/esign-bkd/documents",
+    icon: "https://siasn.bkd.jatimprov.go.id:9000/public/icon-beranda.png",
+    userType: ["bkd"],
+    target: "_blank",
+  },
+  {
     rightIcon: <IconTransfer />,
     title: "Layanan Keuangan",
     desc: "Layanan Keuangan",
@@ -144,6 +154,7 @@ export const getUserType = (user) => {
   if (!user) return [];
   const statusKepegawaian = user?.status_kepegawaian;
   const currentRole = user?.current_role;
+  const bkd = user?.organization_id?.startsWith("123");
 
   const userTypes = [];
   if (
@@ -168,6 +179,9 @@ export const getUserType = (user) => {
   if (currentRole === "agent") {
     userTypes.push("agent");
   }
+  if (bkd) {
+    userTypes.push("bkd");
+  }
 
   const filteredApps = appLists?.filter((app) =>
     app?.userType?.some((type) => userTypes.includes(type))
@@ -187,6 +201,8 @@ export const getMenuItems = (menuItems, user) => {
     user?.current_role === "admin";
 
   const asn = user?.group === "MASTER";
+
+  const isBKD = user?.organization_id?.startsWith("123");
 
   const isFasilitator =
     user?.role === "FASILITATOR" &&
@@ -212,6 +228,7 @@ export const getMenuItems = (menuItems, user) => {
     if (isFasilitator) return role.includes("fasilitator");
     if (isPrakom) return role.includes("prakom");
     if (asn) return role.includes("asn");
+    if (isBKD) return role.includes("bkd");
 
     return false;
   };

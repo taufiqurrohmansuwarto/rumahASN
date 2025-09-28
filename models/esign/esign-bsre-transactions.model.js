@@ -16,24 +16,7 @@ class BsreTransactions extends Model {
   }
 
   static get relationMappings() {
-    return {
-      signature_detail: {
-        relation: Model.BelongsToOneRelation,
-        modelClass: SignatureDetails,
-        join: {
-          from: "esign.bsre_transactions.signature_detail_id",
-          to: "esign.signature_details.id",
-        },
-      },
-      document: {
-        relation: Model.BelongsToOneRelation,
-        modelClass: Documents,
-        join: {
-          from: "esign.bsre_transactions.document_id",
-          to: "esign.documents.id",
-        },
-      },
-    };
+    return {};
   }
 }
 

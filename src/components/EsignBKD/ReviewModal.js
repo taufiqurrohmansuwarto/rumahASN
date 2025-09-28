@@ -61,7 +61,6 @@ function ReviewModal({ open, onCancel, document, onApprove, onReject, loading })
         <Card
           size="small"
           style={{
-            backgroundColor: "#f8fafc",
             border: "1px solid #e2e8f0",
             borderRadius: 12
           }}
@@ -129,7 +128,6 @@ function ReviewModal({ open, onCancel, document, onApprove, onReject, loading })
             width: "100%",
             height: 40,
             borderRadius: 8,
-            backgroundColor: "#f5f5f5",
             border: "1px solid #d9d9d9"
           }}
         >

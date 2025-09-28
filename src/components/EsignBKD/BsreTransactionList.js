@@ -3,8 +3,6 @@ import {
   Card,
   Button,
   Space,
-  Tag,
-  Typography,
   Row,
   Col,
   Badge,
@@ -13,7 +11,12 @@ import {
   Statistic,
   Modal,
   message,
+  Flex,
+  Grid,
+  Typography,
+  Avatar,
 } from "antd";
+import { Text } from "@mantine/core";
 import {
   SyncOutlined,
   CheckCircleOutlined,
@@ -22,6 +25,9 @@ import {
   EyeOutlined,
   ReloadOutlined,
   CloudServerOutlined,
+  SafetyOutlined,
+  ClockCircleOutlined,
+  UserOutlined,
 } from "@ant-design/icons";
 import { useState } from "react";
 import { useRouter } from "next/router";
@@ -29,23 +35,43 @@ import {
   useBsreTransactions,
   useBsreTransactionStats,
   useRetryBsreTransaction,
-  useBsreStatus,
 } from "@/hooks/esign-bkd";
 import dayjs from "dayjs";
 import "dayjs/locale/id";
 
 dayjs.locale("id");
 
-const { Title, Text } = Typography;
+const { Title } = Typography;
+const { useBreakpoint } = Grid;
 
 const StatusBadge = ({ status }) => {
   const statusConfig = {
-    pending: { color: "processing", text: "Menunggu", icon: <SyncOutlined spin /> },
-    processing: { color: "warning", text: "Proses", icon: <SyncOutlined spin /> },
-    completed: { color: "success", text: "Berhasil", icon: <CheckCircleOutlined /> },
+    pending: {
+      color: "processing",
+      text: "Menunggu",
+      icon: <SyncOutlined spin />,
+    },
+    processing: {
+      color: "warning",
+      text: "Proses",
+      icon: <SyncOutlined spin />,
+    },
+    completed: {
+      color: "success",
+      text: "Berhasil",
+      icon: <CheckCircleOutlined />,
+    },
     failed: { color: "error", text: "Gagal", icon: <CloseCircleOutlined /> },
-    timeout: { color: "default", text: "Timeout", icon: <ExclamationCircleOutlined /> },
-    cancelled: { color: "default", text: "Dibatalkan", icon: <CloseCircleOutlined /> },
+    timeout: {
+      color: "default",
+      text: "Timeout",
+      icon: <ExclamationCircleOutlined />,
+    },
+    cancelled: {
+      color: "default",
+      text: "Dibatalkan",
+      icon: <CloseCircleOutlined />,
+    },
   };
 
   const config = statusConfig[status] || statusConfig.pending;
@@ -64,7 +90,8 @@ const StatusBadge = ({ status }) => {
 };
 
 const RetryModal = ({ open, onCancel, transaction, onSuccess }) => {
-  const { mutateAsync: retryTransaction, isLoading } = useRetryBsreTransaction();
+  const { mutateAsync: retryTransaction, isLoading } =
+    useRetryBsreTransaction();
 
   const handleRetry = async () => {
     try {
@@ -104,6 +131,9 @@ const RetryModal = ({ open, onCancel, transaction, onSuccess }) => {
 
 function BsreTransactionList() {
   const router = useRouter();
+  const screens = useBreakpoint();
+  const isMobile = !screens?.md;
+  const isXs = !screens?.sm;
   const [filters, setFilters] = useState({
     page: 1,
     limit: 10,
@@ -114,8 +144,13 @@ function BsreTransactionList() {
     transaction: null,
   });
 
-  const { data, isLoading, refetch } = useBsreTransactions(filters);
-  const { data: stats, isLoading: statsLoading } = useBsreTransactionStats();
+  const { data, isLoading, refetch, isRefetching } =
+    useBsreTransactions(filters);
+  const {
+    data: stats,
+    isLoading: statsLoading,
+    refetch: refetchStats,
+  } = useBsreTransactionStats();
 
   const openRetryModal = (transaction) => {
     setRetryModal({ open: true, transaction });
@@ -132,36 +167,69 @@ function BsreTransactionList() {
 
   const columns = [
     {
-      title: "Transaksi",
+      title: (
+        <Space>
+          <CloudServerOutlined />
+          <Text strong>Transaksi</Text>
+        </Space>
+      ),
       key: "transaction",
       render: (_, record) => (
-        <div>
-          <div style={{ fontWeight: 500, marginBottom: 4 }}>
-            {record.document_title || record.id}
-          </div>
-          <Text code style={{ fontSize: 11 }}>
-            ID: {record.id}
-          </Text>
-          <br />
-          <Text type="secondary" style={{ fontSize: 12 }}>
+        <Space size="small">
+          <Avatar
+            size={isMobile ? 32 : 36}
+            style={{
+              backgroundColor: "#e6f7ff",
+              border: "2px solid #f0f0f0",
+              boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+            }}
+            icon={<CloudServerOutlined style={{ color: "#1890ff" }} />}
+          />
+          <div style={{ lineHeight: 1.1 }}>
+            <div>
+              <Text style={{ fontWeight: 600, fontSize: isMobile ? 11 : 12 }}>
+                {record.document_title || record.id}
+              </Text>
+            </div>
+            <div style={{ marginTop: "0px" }}>
+              <Text style={{ fontSize: 10, color: "#999" }}>
+                ID: {record.id}
+              </Text>
+            </div>
             {record.bsre_transaction_id && (
-              <>BSrE ID: {record.bsre_transaction_id}</>
+              <div style={{ marginTop: "0px" }}>
+                <Text style={{ fontSize: 10, color: "#999" }}>
+                  BSrE ID: {record.bsre_transaction_id}
+                </Text>
+              </div>
             )}
-          </Text>
-        </div>
+          </div>
+        </Space>
       ),
     },
     {
-      title: "Status",
+      title: (
+        <Space>
+          <SafetyOutlined />
+          <Text strong>Status</Text>
+        </Space>
+      ),
       dataIndex: "status",
       key: "status",
-      width: 140,
+      width: isMobile ? 100 : 140,
+      align: "center",
       render: (status) => <StatusBadge status={status} />,
     },
     {
-      title: "Progress",
+      title: (
+        <Space>
+          <SyncOutlined />
+          <Text strong>Progress</Text>
+        </Space>
+      ),
       key: "progress",
-      width: 120,
+      width: isMobile ? 100 : 120,
+      align: "center",
       render: (_, record) => {
         let percent = 0;
         if (record.status === "completed") percent = 100;
@@ -178,58 +246,80 @@ function BsreTransactionList() {
       },
     },
     {
-      title: "Dibuat",
+      title: (
+        <Space>
+          <ClockCircleOutlined />
+          <Text strong>Waktu</Text>
+        </Space>
+      ),
       dataIndex: "created_at",
       key: "created_at",
-      width: 130,
+      width: isMobile ? 100 : 140,
       render: (date) => (
-        <div>
-          <div>{dayjs(date).format("DD MMM YYYY")}</div>
-          <Text type="secondary" style={{ fontSize: 11 }}>
-            {dayjs(date).format("HH:mm")}
-          </Text>
-        </div>
+        <Tooltip title={dayjs(date).format("DD-MM-YYYY HH:mm:ss")}>
+          <div style={{ lineHeight: "1.1", cursor: "pointer" }}>
+            <Text style={{ fontSize: 12 }}>
+              {dayjs(date).format("DD/MM/YY")}
+            </Text>
+            <div style={{ marginTop: 0 }}>
+              <Text style={{ fontSize: 10, color: "#999" }}>
+                {dayjs(date).format("HH:mm")}
+              </Text>
+            </div>
+          </div>
+        </Tooltip>
       ),
-      responsive: ["md"],
     },
     {
-      title: "Durasi",
+      title: <Text strong>Durasi</Text>,
       key: "duration",
-      width: 100,
+      width: isMobile ? 80 : 100,
+      align: "center",
       render: (_, record) => {
         const start = dayjs(record.created_at);
         const end = record.completed_at ? dayjs(record.completed_at) : dayjs();
         const duration = end.diff(start, "minute");
 
         return (
-          <Text type="secondary" style={{ fontSize: 12 }}>
+          <Text style={{ fontSize: 12, color: "#6b7280" }}>
             {duration < 1 ? "< 1m" : `${duration}m`}
           </Text>
         );
       },
-      responsive: ["lg"],
+      responsive: ["md"],
     },
     {
-      title: "Aksi",
+      title: <Text strong>Aksi</Text>,
       key: "actions",
-      width: 100,
+      width: isMobile ? 80 : 100,
+      align: "center",
       render: (_, record) => (
         <Space>
           <Tooltip title="Detail">
             <Button
               type="text"
+              size="small"
               icon={<EyeOutlined />}
-              onClick={() =>
-                router.push(`/esign-bkd/bsre/${record.id}`)
-              }
+              onClick={() => router.push(`/esign-bkd/bsre/${record.id}`)}
+              style={{
+                color: "#FF4500",
+                fontWeight: 500,
+                padding: "0 8px",
+              }}
             />
           </Tooltip>
           {(record.status === "failed" || record.status === "timeout") && (
             <Tooltip title="Retry">
               <Button
                 type="text"
+                size="small"
                 icon={<ReloadOutlined />}
                 onClick={() => openRetryModal(record)}
+                style={{
+                  color: "#FF4500",
+                  fontWeight: 500,
+                  padding: "0 8px",
+                }}
               />
             </Tooltip>
           )}
@@ -239,123 +329,364 @@ function BsreTransactionList() {
   ];
 
   return (
-    <div className="p-4 md:p-6">
-      <div className="mb-6">
-        <Title level={3}>
-          <Space>
-            <CloudServerOutlined />
-            Transaksi BSrE
-          </Space>
-        </Title>
-        <Text type="secondary">
-          Monitor integrasi dengan Balai Sertifikasi Elektronik
-        </Text>
-      </div>
-
-      <Row gutter={[16, 16]} className="mb-6">
-        <Col xs={12} sm={6}>
-          <Card size="small">
-            <Statistic
-              title="Total Transaksi"
-              value={stats?.total || 0}
-              loading={statsLoading}
-            />
-          </Card>
-        </Col>
-        <Col xs={12} sm={6}>
-          <Card size="small">
-            <Statistic
-              title="Berhasil"
-              value={stats?.completed || 0}
-              valueStyle={{ color: "#52c41a" }}
-              loading={statsLoading}
-            />
-          </Card>
-        </Col>
-        <Col xs={12} sm={6}>
-          <Card size="small">
-            <Statistic
-              title="Proses"
-              value={stats?.processing || 0}
-              valueStyle={{ color: "#faad14" }}
-              loading={statsLoading}
-            />
-          </Card>
-        </Col>
-        <Col xs={12} sm={6}>
-          <Card size="small">
-            <Statistic
-              title="Gagal"
-              value={stats?.failed || 0}
-              valueStyle={{ color: "#f5222d" }}
-              loading={statsLoading}
-            />
-          </Card>
-        </Col>
-      </Row>
-
-      <Card>
-        <div className="mb-4">
-          <Row justify="space-between" align="middle">
-            <Col>
-              <Space>
-                <Button
-                  onClick={() => setFilters({ ...filters, status: "" })}
-                  type={filters.status === "" ? "primary" : "default"}
-                  size="small"
-                >
-                  Semua
-                </Button>
-                <Button
-                  onClick={() => setFilters({ ...filters, status: "processing" })}
-                  type={filters.status === "processing" ? "primary" : "default"}
-                  size="small"
-                >
-                  Proses
-                </Button>
-                <Button
-                  onClick={() => setFilters({ ...filters, status: "completed" })}
-                  type={filters.status === "completed" ? "primary" : "default"}
-                  size="small"
-                >
-                  Berhasil
-                </Button>
-                <Button
-                  onClick={() => setFilters({ ...filters, status: "failed" })}
-                  type={filters.status === "failed" ? "primary" : "default"}
-                  size="small"
-                >
-                  Gagal
-                </Button>
-              </Space>
-            </Col>
-            <Col>
-              <Button icon={<ReloadOutlined />} onClick={() => refetch()}>
-                Refresh
-              </Button>
-            </Col>
-          </Row>
-        </div>
-
-        <Table
-          columns={columns}
-          dataSource={data?.data || []}
-          loading={isLoading}
-          rowKey="id"
-          scroll={{ x: 700 }}
-          pagination={{
-            current: filters.page,
-            pageSize: filters.limit,
-            total: data?.total || 0,
-            showSizeChanger: true,
-            showQuickJumper: true,
-            showTotal: (total, range) =>
-              `${range[0]}-${range[1]} dari ${total} transaksi`,
-            onChange: (page, size) =>
-              setFilters({ ...filters, page, limit: size }),
+    <div>
+      <div style={{ maxWidth: "100%" }}>
+        <Card
+          style={{
+            borderRadius: "12px",
+            boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+            border: "none",
           }}
-        />
-      </Card>
+        >
+          {/* Header Section */}
+          <div
+            style={{
+              background: "#FF4500",
+              color: "white",
+              padding: "24px",
+              textAlign: "center",
+              borderRadius: "12px 12px 0 0",
+              margin: "-24px -24px 0 -24px",
+            }}
+          >
+            <CloudServerOutlined
+              style={{ fontSize: "24px", marginBottom: "8px" }}
+            />
+            <Title level={3} style={{ color: "white", margin: 0 }}>
+              Transaksi BSrE
+            </Title>
+            <Text style={{ color: "rgba(255, 255, 255, 0.9)", fontSize: 14 }}>
+              Monitor integrasi dengan Balai Sertifikasi Elektronik
+            </Text>
+          </div>
+
+          {/* Action Button Section */}
+          <div
+            style={{
+              padding: "20px 0 16px 0",
+              borderBottom: "1px solid #f0f0f0",
+            }}
+          >
+            <Row gutter={[12, 12]} align="middle" justify="space-between">
+              <Col xs={24} md={16}>
+                <Text style={{ fontSize: 16, color: "#6b7280" }}>
+                  Monitoring transaksi BSrE dan status integrasi
+                </Text>
+              </Col>
+              <Col
+                xs={24}
+                md={8}
+                style={{
+                  display: "flex",
+                  justifyContent: isXs ? "flex-start" : "flex-end",
+                }}
+              >
+                <Button
+                  icon={<ReloadOutlined />}
+                  onClick={() => refetch()}
+                  style={{
+                    background: "#FF4500",
+                    borderColor: "#FF4500",
+                    color: "white",
+                    borderRadius: 6,
+                    fontWeight: 500,
+                    padding: "0 16px",
+                  }}
+                  block={isXs}
+                >
+                  Refresh
+                </Button>
+              </Col>
+            </Row>
+          </div>
+
+          {/* Stats Cards */}
+          <div style={{ marginTop: "16px" }}>
+            <Row gutter={[16, 16]}>
+              <Col xs={12} sm={6}>
+                <Card
+                  style={{
+                    borderRadius: "12px",
+                    boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
+                    border: "1px solid #f0f0f0",
+                  }}
+                >
+                  <Statistic
+                    title={
+                      <Text
+                        style={{
+                          fontSize: 12,
+                          color: "#6b7280",
+                          fontWeight: 500,
+                        }}
+                      >
+                        Total Transaksi
+                      </Text>
+                    }
+                    value={stats?.total || 0}
+                    loading={statsLoading}
+                    valueStyle={{
+                      color: "#1d1d1f",
+                      fontSize: isMobile ? 20 : 24,
+                      fontWeight: 600,
+                    }}
+                  />
+                </Card>
+              </Col>
+              <Col xs={12} sm={6}>
+                <Card
+                  style={{
+                    borderRadius: "12px",
+                    boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
+                    border: "1px solid #f0f0f0",
+                  }}
+                >
+                  <Statistic
+                    title={
+                      <Text
+                        style={{
+                          fontSize: 12,
+                          color: "#6b7280",
+                          fontWeight: 500,
+                        }}
+                      >
+                        Berhasil
+                      </Text>
+                    }
+                    value={stats?.completed || 0}
+                    loading={statsLoading}
+                    valueStyle={{
+                      color: "#52c41a",
+                      fontSize: isMobile ? 20 : 24,
+                      fontWeight: 600,
+                    }}
+                  />
+                </Card>
+              </Col>
+              <Col xs={12} sm={6}>
+                <Card
+                  style={{
+                    borderRadius: "12px",
+                    boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
+                    border: "1px solid #f0f0f0",
+                  }}
+                >
+                  <Statistic
+                    title={
+                      <Text
+                        style={{
+                          fontSize: 12,
+                          color: "#6b7280",
+                          fontWeight: 500,
+                        }}
+                      >
+                        Proses
+                      </Text>
+                    }
+                    value={stats?.processing || 0}
+                    loading={statsLoading}
+                    valueStyle={{
+                      color: "#faad14",
+                      fontSize: isMobile ? 20 : 24,
+                      fontWeight: 600,
+                    }}
+                  />
+                </Card>
+              </Col>
+              <Col xs={12} sm={6}>
+                <Card
+                  style={{
+                    borderRadius: "12px",
+                    boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
+                    border: "1px solid #f0f0f0",
+                  }}
+                >
+                  <Statistic
+                    title={
+                      <Text
+                        style={{
+                          fontSize: 12,
+                          color: "#6b7280",
+                          fontWeight: 500,
+                        }}
+                      >
+                        Gagal
+                      </Text>
+                    }
+                    value={stats?.failed || 0}
+                    loading={statsLoading}
+                    valueStyle={{
+                      color: "#f5222d",
+                      fontSize: isMobile ? 20 : 24,
+                      fontWeight: 600,
+                    }}
+                  />
+                </Card>
+              </Col>
+            </Row>
+          </div>
+
+          {/* Filter and Table Section */}
+          <div style={{ marginTop: "16px" }}>
+            <div
+              style={{
+                padding: "20px 0 16px 0",
+                borderBottom: "1px solid #f0f0f0",
+              }}
+            >
+              <Row gutter={[12, 12]} align="middle">
+                <Col xs={24} md={18} lg={20}>
+                  <Space wrap>
+                    <Button
+                      onClick={() => setFilters({ ...filters, status: "" })}
+                      type={filters.status === "" ? "primary" : "default"}
+                      style={{
+                        borderRadius: 6,
+                        fontWeight: 500,
+                        ...(filters.status === "" && {
+                          background: "#FF4500",
+                          borderColor: "#FF4500",
+                        }),
+                      }}
+                    >
+                      Semua
+                    </Button>
+                    <Button
+                      onClick={() =>
+                        setFilters({ ...filters, status: "processing" })
+                      }
+                      type={
+                        filters.status === "processing" ? "primary" : "default"
+                      }
+                      style={{
+                        borderRadius: 6,
+                        fontWeight: 500,
+                        ...(filters.status === "processing" && {
+                          background: "#FF4500",
+                          borderColor: "#FF4500",
+                        }),
+                      }}
+                    >
+                      Proses
+                    </Button>
+                    <Button
+                      onClick={() =>
+                        setFilters({ ...filters, status: "completed" })
+                      }
+                      type={
+                        filters.status === "completed" ? "primary" : "default"
+                      }
+                      style={{
+                        borderRadius: 6,
+                        fontWeight: 500,
+                        ...(filters.status === "completed" && {
+                          background: "#FF4500",
+                          borderColor: "#FF4500",
+                        }),
+                      }}
+                    >
+                      Berhasil
+                    </Button>
+                    <Button
+                      onClick={() =>
+                        setFilters({ ...filters, status: "failed" })
+                      }
+                      type={filters.status === "failed" ? "primary" : "default"}
+                      style={{
+                        borderRadius: 6,
+                        fontWeight: 500,
+                        ...(filters.status === "failed" && {
+                          background: "#FF4500",
+                          borderColor: "#FF4500",
+                        }),
+                      }}
+                    >
+                      Gagal
+                    </Button>
+                  </Space>
+                </Col>
+                <Col xs={24} md={6} lg={4}>
+                  <div
+                    style={{
+                      display: "flex",
+                      justifyContent: isXs ? "flex-start" : "flex-end",
+                      gap: 8,
+                    }}
+                  >
+                    <Button
+                      icon={<ReloadOutlined />}
+                      loading={isLoading || isRefetching || statsLoading}
+                      onClick={() => {
+                        refetch();
+                        refetchStats();
+                      }}
+                      style={{
+                        borderRadius: 6,
+                        fontWeight: 500,
+                        padding: "0 16px",
+                      }}
+                    >
+                      Refresh
+                    </Button>
+                  </div>
+                </Col>
+              </Row>
+            </div>
+
+            <Table
+              columns={columns}
+              dataSource={data?.data || []}
+              loading={isLoading}
+              rowKey="id"
+              scroll={{ x: 890 }}
+              size="middle"
+              style={{
+                borderRadius: "12px",
+                overflow: "hidden",
+              }}
+              locale={{
+                emptyText: (
+                  <div style={{ padding: "60px", textAlign: "center" }}>
+                    <CloudServerOutlined
+                      style={{
+                        fontSize: 64,
+                        color: "#d1d5db",
+                        marginBottom: 24,
+                      }}
+                    />
+                    <div>
+                      <Text style={{ color: "#6b7280", fontSize: 16 }}>
+                        Tidak ada transaksi BSrE
+                      </Text>
+                    </div>
+                    <div style={{ marginTop: 8 }}>
+                      <Text style={{ color: "#9ca3af", fontSize: 14 }}>
+                        Belum ada transaksi yang tersedia
+                      </Text>
+                    </div>
+                  </div>
+                ),
+              }}
+              pagination={{
+                position: ["bottomRight"],
+                total: data?.total || 0,
+                pageSize: parseInt(filters.limit),
+                current: parseInt(filters.page),
+                showSizeChanger: false,
+                onChange: (page, size) =>
+                  setFilters({ ...filters, page, limit: size }),
+                showTotal: (total, range) =>
+                  `${range[0].toLocaleString(
+                    "id-ID"
+                  )}-${range[1].toLocaleString(
+                    "id-ID"
+                  )} dari ${total.toLocaleString("id-ID")} transaksi`,
+                style: { margin: "16px 0" },
+              }}
+            />
+          </div>
+        </Card>
+      </div>
 
       <RetryModal
         open={retryModal.open}
