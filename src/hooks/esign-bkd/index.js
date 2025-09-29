@@ -15,3 +15,6 @@ export * from "./useBsreTransactions";
 
 // Document History Hooks
 export * from "./useDocumentHistory";
+
+// Users Hooks
+export * from "./useUsers";

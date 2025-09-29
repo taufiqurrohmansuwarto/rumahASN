@@ -10,7 +10,10 @@ const esignBkdApi = axios.create({
 // ==========================================
 
 export const getDocuments = async (params = {}) => {
-  const queryParams = queryString.stringify(params);
+  const queryParams = queryString.stringify(params, {
+    skipNull: true,
+    skipEmptyString: true,
+  });
   const res = await esignBkdApi.get(`/documents?${queryParams}`);
   return res?.data;
 };
@@ -80,7 +83,10 @@ export const previewDocumentAsBase64 = async (id) => {
 // ==========================================
 
 export const getSignatureRequests = async (params = {}) => {
-  const queryParams = queryString.stringify(params);
+  const queryParams = queryString.stringify(params, {
+    skipNull: true,
+    skipEmptyString: true,
+  });
   const res = await esignBkdApi.get(`/signature-requests?${queryParams}`);
   return res?.data;
 };
@@ -125,25 +131,37 @@ export const getSignatureRequestStats = async () => {
 // ==========================================
 
 export const getPendingDocuments = async (params = {}) => {
-  const queryParams = queryString.stringify(params);
+  const queryParams = queryString.stringify(params, {
+    skipNull: true,
+    skipEmptyString: true,
+  });
   const res = await esignBkdApi.get(`/dashboard/pending?${queryParams}`);
   return res?.data;
 };
 
 export const getMarkedForTteDocuments = async (params = {}) => {
-  const queryParams = queryString.stringify(params);
+  const queryParams = queryString.stringify(params, {
+    skipNull: true,
+    skipEmptyString: true,
+  });
   const res = await esignBkdApi.get(`/dashboard/marked-for-tte?${queryParams}`);
   return res?.data;
 };
 
 export const getRejectedDocuments = async (params = {}) => {
-  const queryParams = queryString.stringify(params);
+  const queryParams = queryString.stringify(params, {
+    skipNull: true,
+    skipEmptyString: true,
+  });
   const res = await esignBkdApi.get(`/dashboard/rejected?${queryParams}`);
   return res?.data;
 };
 
 export const getCompletedDocuments = async (params = {}) => {
-  const queryParams = queryString.stringify(params);
+  const queryParams = queryString.stringify(params, {
+    skipNull: true,
+    skipEmptyString: true,
+  });
   const res = await esignBkdApi.get(`/dashboard/completed?${queryParams}`);
   return res?.data;
 };
@@ -196,7 +214,10 @@ export const getDocumentHistory = async (documentId) => {
 // ==========================================
 
 export const getBsreTransactions = async (params = {}) => {
-  const queryParams = queryString.stringify(params);
+  const queryParams = queryString.stringify(params, {
+    skipNull: true,
+    skipEmptyString: true,
+  });
   const res = await esignBkdApi.get(`/bsre-transactions?${queryParams}`);
   return res?.data;
 };
@@ -222,7 +243,10 @@ export const retryBsreTransaction = async (id, data) => {
 };
 
 export const checkBsreStatus = async (params = {}) => {
-  const queryParams = queryString.stringify(params);
+  const queryParams = queryString.stringify(params, {
+    skipNull: true,
+    skipEmptyString: true,
+  });
   const res = await esignBkdApi.get(
     `/bsre-transactions/check-status?${queryParams}`
   );
@@ -230,7 +254,10 @@ export const checkBsreStatus = async (params = {}) => {
 };
 
 export const getBsreTransactionStats = async (params = {}) => {
-  const queryParams = queryString.stringify(params);
+  const queryParams = queryString.stringify(params, {
+    skipNull: true,
+    skipEmptyString: true,
+  });
   const res = await esignBkdApi.get(`/bsre-transactions/stats?${queryParams}`);
   return res?.data;
 };
@@ -283,4 +310,17 @@ export const handlePreviewResponse = (blob) => {
   const url = window.URL.createObjectURL(blob);
   window.open(url, "_blank");
   return url;
+};
+
+// ==========================================
+// USERS SERVICES
+// ==========================================
+
+export const getUsers = async (params = {}) => {
+  const queryParams = queryString.stringify(params, {
+    skipNull: true,
+    skipEmptyString: true,
+  });
+  const res = await esignBkdApi.get(`/users?${queryParams}`);
+  return res?.data;
 };

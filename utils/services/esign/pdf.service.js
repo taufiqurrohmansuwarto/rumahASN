@@ -124,7 +124,7 @@ module.exports.addFooterToPdf = async (pdfBuffer, documentId) => {
 
       // Calculate horizontal layout positions
       const contentWidth = logoWidth + textAreaWidth + 10;
-      const contentStartX = pageCenter - (contentWidth / 2);
+      const contentStartX = pageCenter - contentWidth / 2;
 
       // Draw BSrE logo (left side)
       if (bsreImage) {
@@ -148,7 +148,11 @@ module.exports.addFooterToPdf = async (pdfBuffer, documentId) => {
       const totalTextHeight = textLines.length * lineHeight;
 
       // Center text vertically in footer
-      const textStartY = footerY + (footerHeight - totalTextHeight) / 2 + totalTextHeight - lineHeight;
+      const textStartY =
+        footerY +
+        (footerHeight - totalTextHeight) / 2 +
+        totalTextHeight -
+        lineHeight;
 
       for (let j = 0; j < textLines.length; j++) {
         page.drawText(textLines[j], {
@@ -268,4 +272,9 @@ module.exports.addSignatureToPdf = async (pdfBuffer, signatureData) => {
     `Adding signature for: ${signatureData?.documentId || "unknown"}`
   );
   return pdfBuffer;
+};
+
+module.exports.getTotalPages = async (pdfBuffer) => {
+  const pdfDoc = await pdfLib.PDFDocument.load(pdfBuffer);
+  return pdfDoc.getPages().length;
 };

@@ -1,43 +1,31 @@
-import {
-  Table,
-  Card,
-  Button,
-  Space,
-  Tag,
-  Typography,
-  Input,
-  Badge,
-  Dropdown,
-  Progress,
-  Tooltip,
-  Empty,
-  Flex,
-  Row,
-  Col,
-  Grid,
-  Avatar,
-} from "antd";
-import { Text } from "@mantine/core";
-import {
-  EyeOutlined,
-  EditOutlined,
-  CheckOutlined,
-  CloseOutlined,
-  ClockCircleOutlined,
-  TeamOutlined,
-  FilterOutlined,
-  SearchOutlined,
-  PlusOutlined,
-  FileTextOutlined,
-  SafetyOutlined,
-  UserOutlined,
-  ReloadOutlined,
-} from "@ant-design/icons";
-import { useState, useEffect, useMemo } from "react";
-import { useRouter } from "next/router";
 import { useSignatureRequests } from "@/hooks/esign-bkd";
+import {
+  CheckOutlined,
+  EyeOutlined,
+  FilterOutlined,
+  PlusOutlined,
+  ReloadOutlined,
+  TeamOutlined,
+} from "@ant-design/icons";
+import { Text, Badge, Tooltip } from "@mantine/core";
+import { IconUser, IconUsers, IconArrowRight, IconEqual } from "@tabler/icons-react";
+import {
+  Avatar,
+  Badge as AntdBadge,
+  Button,
+  Card,
+  Col,
+  Dropdown,
+  Grid,
+  Input,
+  Row,
+  Table,
+  Typography,
+} from "antd";
 import dayjs from "dayjs";
 import "dayjs/locale/id";
+import { useRouter } from "next/router";
+import { useEffect, useMemo, useState } from "react";
 
 dayjs.locale("id");
 
@@ -55,44 +43,9 @@ const StatusBadge = ({ status }) => {
   };
 
   const config = statusConfig[status] || statusConfig.pending;
-  return <Badge status={config.color} text={config.text} />;
+  return <AntdBadge status={config.color} text={config.text} />;
 };
 
-const PriorityTag = ({ priority }) => {
-  const priorityConfig = {
-    low: { color: "default", text: "Rendah" },
-    normal: { color: "blue", text: "Normal" },
-    high: { color: "orange", text: "Tinggi" },
-    urgent: { color: "red", text: "Mendesak" },
-  };
-
-  const config = priorityConfig[priority] || priorityConfig.normal;
-  return <Tag color={config.color}>{config.text}</Tag>;
-};
-
-const WorkflowProgress = ({ signed, total }) => {
-  const percentage = total > 0 ? Math.round((signed / total) * 100) : 0;
-
-  return (
-    <div style={{ width: 120 }}>
-      <Progress
-        percent={percentage}
-        size="small"
-        format={() => (
-          <span style={{ fontSize: 12, fontWeight: 500 }}>
-            {signed}/{total}
-          </span>
-        )}
-        strokeColor={percentage === 100 ? "#52c41a" : "#1890ff"}
-        strokeWidth={8}
-        style={{ marginBottom: 4 }}
-      />
-      <div style={{ fontSize: 11, color: "#8e8e93", textAlign: "center" }}>
-        {percentage}% selesai
-      </div>
-    </div>
-  );
-};
 
 function SignatureRequestList({
   filter = null,
@@ -170,151 +123,176 @@ function SignatureRequestList({
       key: "view",
       label: "Lihat Detail",
       icon: <EyeOutlined />,
-      onClick: () => router.push(`/esign-bkd/signature-requests/${record.id}`),
-    },
-    {
-      key: "history",
-      label: "Riwayat",
-      icon: <ClockCircleOutlined />,
-      onClick: () =>
-        router.push(`/esign-bkd/signature-requests/${record.id}/history`),
-    },
-    {
-      key: "review",
-      label: "Review",
-      icon: <EditOutlined />,
-      onClick: () =>
-        router.push(`/esign-bkd/signature-requests/${record.id}/review`),
-      disabled: !record.can_review,
     },
     {
       key: "sign",
       label: "Tanda Tangan",
       icon: <CheckOutlined />,
-      onClick: () =>
-        router.push(`/esign-bkd/signature-requests/${record.id}/sign`),
-      disabled: !record.can_sign,
+      disabled:
+        record.status !== "pending" ||
+        !record.signature_details?.some(
+          (detail) => detail.status === "waiting"
+        ),
     },
   ];
 
+  const handleMenuClick = (record) => (e) => {
+    const { key } = e;
+
+    switch (key) {
+      case "view":
+        router.push(`/esign-bkd/signature-requests/${record.document?.id || record.document_id}`);
+        break;
+      case "sign":
+        router.push(`/esign-bkd/signature-requests/${record.document?.id || record.document_id}/sign`);
+        break;
+      default:
+        break;
+    }
+  };
+
   const columns = [
     {
-      title: (
-        <Space>
-          <FileTextOutlined />
-          <Text strong>Dokumen</Text>
-        </Space>
-      ),
-      key: "document",
+      title: <Text strong>Dokumen & Status</Text>,
+      key: "main",
       render: (_, record) => (
-        <Space size="small">
-          <Avatar
-            size={isMobile ? 32 : 36}
-            style={{
-              backgroundColor: "#e6f7ff",
-              border: "2px solid #f0f0f0",
-              boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
-            }}
-            icon={<FileTextOutlined style={{ color: "#1890ff" }} />}
-          />
-          <div style={{ lineHeight: 1.1 }}>
-            <div>
-              <Text style={{ fontWeight: 600, fontSize: isMobile ? 11 : 12 }}>
-                {record.document?.title || record.title}
-              </Text>
-            </div>
-            <div style={{ marginTop: "0px" }}>
-              <Text style={{ fontSize: 10, color: "#999" }}>
-                ID: {record.id}
-              </Text>
-            </div>
-            <Space size="small" style={{ marginTop: 4 }}>
-              <PriorityTag priority={record.priority} />
-              {record.deadline && (
-                <Tag
-                  color={
-                    dayjs(record.deadline).isBefore(dayjs()) ? "red" : "blue"
-                  }
-                  style={{ borderRadius: 6, fontSize: 10 }}
-                >
-                  {dayjs(record.deadline).format("DD MMM")}
-                </Tag>
-              )}
-            </Space>
-          </div>
-        </Space>
-      ),
-    },
-    {
-      title: (
-        <Space>
-          <SafetyOutlined />
-          <Text strong>Status</Text>
-        </Space>
-      ),
-      dataIndex: "status",
-      key: "status",
-      width: isMobile ? 100 : 120,
-      align: "center",
-      render: (status) => <StatusBadge status={status} />,
-    },
-    {
-      title: (
-        <Space>
-          <TeamOutlined />
-          <Text strong>Progress</Text>
-        </Space>
-      ),
-      key: "progress",
-      width: isMobile ? 100 : 120,
-      align: "center",
-      render: (_, record) => (
-        <WorkflowProgress
-          signed={record.signed_count || 0}
-          total={record.total_signers || 0}
-        />
-      ),
-    },
-    {
-      title: (
-        <Space>
-          <ClockCircleOutlined />
-          <Text strong>Waktu</Text>
-        </Space>
-      ),
-      dataIndex: "created_at",
-      key: "created_at",
-      width: isMobile ? 100 : 140,
-      render: (date) => (
-        <Tooltip title={dayjs(date).format("DD-MM-YYYY HH:mm:ss")}>
-          <div style={{ lineHeight: "1.1", cursor: "pointer" }}>
-            <Text style={{ fontSize: 12 }}>
-              {dayjs(date).format("DD/MM/YY")}
+        <div style={{ lineHeight: 1.2 }}>
+          <div>
+            <Text style={{ fontWeight: 600, fontSize: 13 }}>
+              {record.document?.title || record.document_title}
             </Text>
-            <div style={{ marginTop: 0 }}>
-              <Text style={{ fontSize: 10, color: "#999" }}>
-                {dayjs(date).format("HH:mm")}
+          </div>
+          <div style={{ marginTop: 2 }}>
+            <Text style={{ fontSize: 11, color: "#999" }}>
+              {record.document?.document_code || record.document_code}
+            </Text>
+          </div>
+          <div style={{ marginTop: 6, display: 'flex', gap: 4, flexWrap: 'wrap' }}>
+            <StatusBadge status={record.status} />
+            <Badge
+              color={record.type === "self_sign" ? "blue" : "green"}
+              size="xs"
+              leftSection={
+                <div style={{ display: 'flex', alignItems: 'center' }}>
+                  {record.type === "self_sign" ? <IconUser size={10} /> : <IconUsers size={10} />}
+                </div>
+              }
+            >
+              {record.type === "self_sign" ? "Sendiri" : "Permintaan"}
+            </Badge>
+            <Badge
+              color={record.request_type === "sequential" ? "orange" : "violet"}
+              size="xs"
+              leftSection={
+                <div style={{ display: 'flex', alignItems: 'center' }}>
+                  {record.request_type === "sequential" ? <IconArrowRight size={10} /> : <IconEqual size={10} />}
+                </div>
+              }
+            >
+              {record.request_type === "sequential" ? "Berurutan" : "Paralel"}
+            </Badge>
+          </div>
+        </div>
+      ),
+    },
+    {
+      title: <Text strong>Pembuat</Text>,
+      key: "creator",
+      width: isMobile ? 160 : 220,
+      render: (_, record) => (
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <Tooltip label={`${record.creator?.username} - ${record.creator?.nama_jabatan}`}>
+            <Avatar
+              size="small"
+              src={record.creator?.image}
+              style={{
+                backgroundColor: "#1890ff",
+                flexShrink: 0,
+              }}
+            >
+              {record.creator?.username?.charAt(0)?.toUpperCase()}
+            </Avatar>
+          </Tooltip>
+          <div style={{ lineHeight: 1.2, minWidth: 0, flex: 1 }}>
+            <Tooltip label={record.creator?.username}>
+              <div>
+                <Text
+                  style={{
+                    fontSize: 12,
+                    fontWeight: 500,
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap',
+                    display: 'block',
+                    maxWidth: isMobile ? '100px' : '140px'
+                  }}
+                >
+                  {record.creator?.username}
+                </Text>
+              </div>
+            </Tooltip>
+            <Tooltip label={record.creator?.nama_jabatan}>
+              <div style={{ marginTop: 2 }}>
+                <Text
+                  style={{
+                    fontSize: 10,
+                    color: "#999",
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap',
+                    display: 'block',
+                    maxWidth: isMobile ? '100px' : '140px'
+                  }}
+                >
+                  {record.creator?.nama_jabatan}
+                </Text>
+              </div>
+            </Tooltip>
+            <div style={{ marginTop: 2 }}>
+              <Text style={{ fontSize: 10, color: "#666" }}>
+                {dayjs(record.created_at).format("DD/MM/YY HH:mm")}
               </Text>
             </div>
           </div>
-        </Tooltip>
+        </div>
       ),
+    },
+    {
+      title: <Text strong>Progress</Text>,
+      key: "progress",
+      width: isMobile ? 80 : 100,
+      align: "center",
+      render: (_, record) => {
+        const signedCount = record.signature_details?.filter(detail => detail.status === 'signed').length || 0;
+        const totalSigners = record.signature_details?.length || 0;
+        const percentage = totalSigners > 0 ? Math.round((signedCount / totalSigners) * 100) : 0;
+
+        return (
+          <Tooltip label={`${signedCount} dari ${totalSigners} telah menandatangani (${percentage}%)`}>
+            <div style={{ textAlign: 'center', cursor: 'pointer' }}>
+              <Text style={{ fontSize: 14, fontWeight: 600, color: percentage === 100 ? "#52c41a" : "#1890ff" }}>
+                {signedCount}/{totalSigners}
+              </Text>
+              <div>
+                <Text style={{ fontSize: 10, color: "#999" }}>
+                  {percentage}%
+                </Text>
+              </div>
+            </div>
+          </Tooltip>
+        );
+      },
     },
     {
       title: <Text strong>Aksi</Text>,
       key: "actions",
-      width: isMobile ? 60 : 80,
+      width: 60,
       align: "center",
       render: (_, record) => (
         <Dropdown
           menu={{
             items: getActionItems(record),
-            onClick: ({ key }) => {
-              const item = getActionItems(record).find(
-                (item) => item.key === key
-              );
-              if (item?.onClick) item.onClick();
-            },
+            onClick: handleMenuClick(record),
           }}
           trigger={["click"]}
         >
@@ -441,7 +419,7 @@ function SignatureRequestList({
             columns={columns}
             dataSource={data?.data || []}
             loading={isLoading}
-            rowKey="id"
+            rowKey={(record) => record.document?.id || record.document_id || record.id}
             scroll={{ x: 890 }}
             size="middle"
             style={{
@@ -473,7 +451,7 @@ function SignatureRequestList({
             }}
             pagination={{
               position: ["bottomRight"],
-              total: data?.total || 0,
+              total: data?.pagination?.total || 0,
               pageSize: parseInt(filters.limit),
               current: parseInt(filters.page),
               showSizeChanger: false,
@@ -638,7 +616,7 @@ function SignatureRequestList({
               columns={columns}
               dataSource={data?.data || []}
               loading={isLoading}
-              rowKey="id"
+              rowKey={(record) => record.document?.id || record.document_id || record.id}
               scroll={{ x: 890 }}
               size="middle"
               style={{
@@ -670,7 +648,7 @@ function SignatureRequestList({
               }}
               pagination={{
                 position: ["bottomRight"],
-                total: data?.total || 0,
+                total: data?.pagination?.total || 0,
                 pageSize: parseInt(filters.limit),
                 current: parseInt(filters.page),
                 showSizeChanger: false,

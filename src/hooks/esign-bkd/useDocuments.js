@@ -26,6 +26,7 @@ export const useDocuments = (params = {}) => {
   return useQuery({
     queryKey: DOCUMENT_KEYS.list(params),
     queryFn: () => getDocuments(params),
+    keepPreviousData: true,
   });
 };
 
@@ -35,6 +36,7 @@ export const useDocument = (id) => {
     queryKey: DOCUMENT_KEYS.detail(id),
     queryFn: () => getDocumentById(id),
     enabled: !!id,
+    keepPreviousData: true,
   });
 };
 
@@ -62,7 +64,7 @@ export const useUpdateDocument = () => {
     onSuccess: (data, variables) => {
       queryClient.invalidateQueries({ queryKey: DOCUMENT_KEYS.lists() });
       queryClient.invalidateQueries({
-        queryKey: DOCUMENT_KEYS.detail(variables.id)
+        queryKey: DOCUMENT_KEYS.detail(variables.id),
       });
     },
   });
@@ -72,9 +74,8 @@ export const useUpdateDocument = () => {
 export const useDeleteDocument = () => {
   const queryClient = useQueryClient();
 
-  return useMutation({
-    mutationFn: (id) => deleteDocument(id),
-    onSuccess: (data, id) => {
+  return useMutation((id) => deleteDocument(id), {
+    onSuccess: (_, id) => {
       queryClient.invalidateQueries({ queryKey: DOCUMENT_KEYS.lists() });
       queryClient.removeQueries({ queryKey: DOCUMENT_KEYS.detail(id) });
     },

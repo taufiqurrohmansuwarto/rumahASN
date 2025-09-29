@@ -7,15 +7,21 @@ import {
   cancelSignatureRequest,
   getWorkflowStatus,
   completeSignatureRequest,
-  getSignatureRequestStats
+  getSignatureRequestStats,
 } from "@/utils/services/esign/signature-requests.service";
 
 export const create = async (req, res) => {
   try {
     const { customId: userId } = req?.user;
-    const { document_id } = req.body;
 
-    const signatureRequest = await createSignatureRequest(document_id, req.body, userId);
+    const document_id = req.body?.documentId;
+    const data = req.body?.data;
+
+    const signatureRequest = await createSignatureRequest(
+      document_id,
+      data,
+      userId
+    );
 
     res.status(201).json({
       message: "Pengajuan TTE berhasil dibuat",

@@ -1,45 +1,43 @@
 import {
-  Table,
-  Input,
-  Button,
-  Card,
-  Dropdown,
-  Empty,
-  Flex,
-  Row,
-  Col,
-  Grid,
-  Typography,
-  Space,
-  Avatar,
-  Tooltip,
-} from "antd";
-import { Text, Badge } from "@mantine/core";
-import {
-  SearchOutlined,
-  PlusOutlined,
-  EyeOutlined,
-  EditOutlined,
-  DeleteOutlined,
-  DownloadOutlined,
-  MoreOutlined,
-  FileTextOutlined,
-  FilterOutlined,
-  SafetyOutlined,
-  UserOutlined,
-  ClockCircleOutlined,
-  ReloadOutlined,
-} from "@ant-design/icons";
-import { useState, useEffect, useMemo } from "react";
-import { useRouter } from "next/router";
-import {
-  useDocuments,
   useDeleteDocument,
+  useDocuments,
   useDownloadDocument,
 } from "@/hooks/esign-bkd";
-import { DocumentStatusBadge } from "./shared";
+import {
+  ClockCircleOutlined,
+  DeleteOutlined,
+  DownloadOutlined,
+  EditOutlined,
+  EyeOutlined,
+  FileTextOutlined,
+  FilterOutlined,
+  MoreOutlined,
+  PlusOutlined,
+  ReloadOutlined,
+  SafetyOutlined,
+  UserOutlined,
+} from "@ant-design/icons";
+import { Text } from "@mantine/core";
+import {
+  Avatar,
+  Button,
+  Card,
+  Col,
+  Dropdown,
+  Grid,
+  Input,
+  Modal,
+  Row,
+  Space,
+  Table,
+  Tooltip,
+  Typography,
+} from "antd";
 import dayjs from "dayjs";
 import "dayjs/locale/id";
+import { useRouter } from "next/router";
+import { useEffect, useMemo, useState } from "react";
+import { DocumentStatusBadge } from "./shared";
 
 dayjs.locale("id");
 
@@ -73,8 +71,7 @@ function DocumentList({
   );
 
   const { data, isLoading, refetch, isRefetching } = useDocuments(filters);
-  const { mutateAsync: deleteDocument, isLoading: deleteLoading } =
-    useDeleteDocument();
+  const { mutateAsync: deleteDocument } = useDeleteDocument();
   const { mutateAsync: downloadDocument, isLoading: downloadLoading } =
     useDownloadDocument();
 
@@ -113,12 +110,17 @@ function DocumentList({
     updateFilters({ status, page: 1 });
   };
 
-  const handleDelete = async (id) => {
-    try {
-      await deleteDocument(id);
-    } catch (error) {
-      console.error("Delete error:", error);
-    }
+  const handleDelete = (record) => {
+    Modal.confirm({
+      title: "Hapus Dokumen",
+      content: `Apakah anda yakin ingin menghapus "${record.title}"?`,
+      okText: "Ya, Hapus",
+      cancelText: "Batal",
+      okType: "danger",
+      onOk: async () => {
+        await deleteDocument(record.id);
+      },
+    });
   };
 
   const handleDownload = async (id, filename) => {
@@ -142,31 +144,47 @@ function DocumentList({
       key: "view",
       label: "Lihat Detail",
       icon: <EyeOutlined />,
-      onClick: () => router.push(`/esign-bkd/documents/${record.id}`),
     },
     {
       key: "edit",
       label: "Edit",
       icon: <EditOutlined />,
-      onClick: () => router.push(`/esign-bkd/documents/${record.id}/edit`),
       disabled: record.status !== "draft",
     },
     {
       key: "download",
       label: "Download",
       icon: <DownloadOutlined />,
-      onClick: () => handleDownload(record.id, record.filename),
-      loading: downloadLoading,
     },
     {
       key: "delete",
       label: "Hapus",
       icon: <DeleteOutlined />,
-      onClick: () => handleDelete(record.id),
       danger: true,
       disabled: record.status !== "draft",
     },
   ];
+
+  const handleMenuClick = (record) => (e) => {
+    const { key } = e;
+
+    switch (key) {
+      case "view":
+        router.push(`/esign-bkd/documents/${record.id}`);
+        break;
+      case "edit":
+        router.push(`/esign-bkd/documents/${record.id}/edit`);
+        break;
+      case "download":
+        handleDownload(record.id, record.filename);
+        break;
+      case "delete":
+        handleDelete(record);
+        break;
+      default:
+        break;
+    }
+  };
 
   const columns = [
     {
@@ -259,25 +277,25 @@ function DocumentList({
       render: (_, record) => (
         <Space size="small">
           <Avatar
-            src={record.created_by?.image}
+            src={record.user?.image}
             size={isMobile ? 28 : 32}
             style={{
               border: "2px solid #f0f0f0",
               boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
             }}
           >
-            {!record.created_by?.image && <UserOutlined />}
+            {!record.user?.image && <UserOutlined />}
           </Avatar>
           <div style={{ lineHeight: 1.1 }}>
             <div>
               <Text style={{ fontWeight: 600, fontSize: isMobile ? 11 : 12 }}>
-                {record.created_by?.name || "-"}
+                {record.user?.username || "-"}
               </Text>
             </div>
-            {record.created_by?.email && (
+            {record.user?.email && (
               <div style={{ marginTop: "0px" }}>
                 <Text style={{ fontSize: 10, color: "#999" }}>
-                  {record.created_by.email}
+                  {record.user.email}
                 </Text>
               </div>
             )}
@@ -295,12 +313,7 @@ function DocumentList({
         <Dropdown
           menu={{
             items: getActionItems(record),
-            onClick: ({ key }) => {
-              const item = getActionItems(record).find(
-                (item) => item.key === key
-              );
-              if (item?.onClick) item.onClick();
-            },
+            onClick: handleMenuClick(record),
           }}
           trigger={["click"]}
         >

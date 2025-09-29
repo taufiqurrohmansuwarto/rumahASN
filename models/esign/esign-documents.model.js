@@ -1,9 +1,6 @@
 const { Model } = require("objection");
 const knex = require("../../db");
 const { nanoid } = require("nanoid");
-const SignatureDetails = require("@/models/esign/esign-signature-details.model");
-const BsreTransactions = require("@/models/esign/esign-bsre-transactions.model");
-const SignatureRequests = require("@/models/esign/esign-signature-requests.model");
 
 Model.knex(knex);
 
@@ -17,7 +14,20 @@ class Documents extends Model {
   }
 
   static get relationMappings() {
+    const SignatureDetails = require("@/models/esign/esign-signature-details.model");
+    const BsreTransactions = require("@/models/esign/esign-bsre-transactions.model");
+    const SignatureRequests = require("@/models/esign/esign-signature-requests.model");
+    const User = require("@/models/users.model");
+
     return {
+      user: {
+        relation: Model.BelongsToOneRelation,
+        modelClass: User,
+        join: {
+          from: "esign.documents.created_by",
+          to: "users.custom_id",
+        },
+      },
       signature_requests: {
         relation: Model.HasManyRelation,
         modelClass: SignatureRequests,

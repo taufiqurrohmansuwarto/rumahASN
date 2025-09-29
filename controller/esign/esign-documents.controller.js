@@ -111,7 +111,11 @@ export const preview = async (req, res) => {
     const { id, format } = req.query;
     const mc = req?.mc;
 
-    const fileBuffer = await previewDocumentFile(id, userId, mc);
+    const { fileBuffer, totalPages } = await previewDocumentFile(
+      id,
+      userId,
+      mc
+    );
 
     // Jika format=base64, return sebagai JSON dengan base64
     if (format === "base64") {
@@ -124,6 +128,7 @@ export const preview = async (req, res) => {
           content: base64Data,
           contentType: "application/pdf",
           size: fileBuffer.length,
+          totalPages: totalPages,
         },
       });
     } else {

@@ -1,0 +1,20 @@
+/**
+ * @param { import("knex").Knex } knex
+ * @returns { Promise<void> }
+ */
+exports.up = function (knex) {
+  return knex.schema.alterTable("esign.signature_details", function (table) {
+    // array of pages
+    table.jsonb("sign_pages").defaultTo([]);
+  });
+};
+
+/**
+ * @param { import("knex").Knex } knex
+ * @returns { Promise<void> }
+ */
+exports.down = function (knex) {
+  return knex.schema.alterTable("esign.signature_details", function (table) {
+    table.dropColumn("sign_pages");
+  });
+};

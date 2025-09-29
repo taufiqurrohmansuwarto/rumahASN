@@ -12,17 +12,14 @@ const Documents = require("@/models/esign/esign-documents.model");
 // ==========================================
 
 /**
- * Create new signature request
+ * Validate document for signature request
  * @param {String} documentId - Document ID
- * @param {Object} data - Signature request data
  * @param {String} userId - User ID
- * @returns {Promise<Object>} - Created signature request
+ * @returns {Promise<Object>} - Document if valid
  */
-export const createSignatureRequest = async (documentId, data, userId) => {
-  const { request_type = "parallel", notes, signers = [] } = data;
-
-  // Validate document exists and is owned by user
+const validateDocumentForSignature = async (documentId, userId) => {
   const document = await Documents.query().findById(documentId);
+
   if (!document) {
     throw new Error("Dokumen tidak ditemukan");
   }
@@ -39,31 +36,58 @@ export const createSignatureRequest = async (documentId, data, userId) => {
     );
   }
 
-  // Validate signers
-  if (!signers || signers.length === 0) {
-    throw new Error("Minimal harus ada 1 penandatangan");
+  return document;
+};
+
+/**
+ * Create signature details for self sign
+ * @param {String} requestId - Request ID
+ * @param {String} userId - User ID
+ * @param {Array} signPages - Pages to sign
+ * @param {Object} trx - Transaction object
+ * @returns {Promise<Object>} - Created signature detail
+ */
+const createSelfSignDetail = async (requestId, userId, signPages, trx) => {
+  if (!signPages || signPages.length === 0) {
+    throw new Error("Halaman tanda tangan harus ditentukan untuk self sign");
   }
 
-  // Create signature request
-  const signatureRequest = await SignatureRequests.query().insert({
-    document_id: documentId,
-    request_type,
-    status: "pending",
-    notes,
-    created_by: userId,
+  return await SignatureDetails.query(trx).insert({
+    request_id: requestId,
+    user_id: userId,
+    role_type: "signer",
+    sequence_order: 1,
+    status: "waiting",
+    sign_pages: signPages,
+    signature_x: null,
+    signature_y: null,
+    notes: null,
   });
+};
 
-  // Create signature details for each signer
+/**
+ * Create signature details for request sign
+ * @param {String} requestId - Request ID
+ * @param {Array} signers - Array of signers
+ * @param {Object} trx - Transaction object
+ * @returns {Promise<Array>} - Created signature details
+ */
+const createRequestSignDetails = async (requestId, signers, trx) => {
+  if (!signers || signers.length === 0) {
+    throw new Error("Minimal harus ada 1 penandatangan untuk request sign");
+  }
+
   const signatureDetails = [];
+
   for (let i = 0; i < signers.length; i++) {
     const signer = signers[i];
-    const detail = await SignatureDetails.query().insert({
-      request_id: signatureRequest.id,
+    const detail = await SignatureDetails.query(trx).insert({
+      request_id: requestId,
       user_id: signer.user_id,
       role_type: signer.role_type || "signer",
       sequence_order: signer.sequence_order || i + 1,
       status: "waiting",
-      signature_page: signer.signature_page || 1,
+      sign_pages: signer.signature_pages || [1],
       signature_x: signer.signature_x,
       signature_y: signer.signature_y,
       notes: signer.notes,
@@ -71,16 +95,79 @@ export const createSignatureRequest = async (documentId, data, userId) => {
     signatureDetails.push(detail);
   }
 
-  // Update document status
-  await Documents.query().patchAndFetchById(documentId, {
-    status: "in_progress",
-    updated_at: new Date(),
-  });
+  return signatureDetails;
+};
 
-  return {
-    ...signatureRequest,
-    signature_details: signatureDetails,
-  };
+/**
+ * Create new signature request
+ * @param {String} documentId - Document ID
+ * @param {Object} data - Signature request data
+ * @param {String} userId - User ID
+ * @returns {Promise<Object>} - Created signature request
+ */
+export const createSignatureRequest = async (documentId, data, userId) => {
+  const {
+    request_type = "parallel",
+    notes,
+    signers = [],
+    type = "self_sign",
+    sign_pages = [],
+  } = data;
+
+  // Validate document first (outside transaction)
+  await validateDocumentForSignature(documentId, userId);
+
+  // Use database transaction for data consistency
+  return await SignatureRequests.transaction(async (trx) => {
+    try {
+      // 1. Create signature request
+      const signatureRequest = await SignatureRequests.query(trx).insert({
+        document_id: documentId,
+        request_type,
+        status: "pending",
+        notes,
+        created_by: userId,
+      });
+
+      // 2. Create signature details based on type
+      let signatureDetails = [];
+
+      if (type === "self_sign") {
+        const detail = await createSelfSignDetail(
+          signatureRequest.id,
+          userId,
+          JSON.stringify(sign_pages),
+          trx
+        );
+        signatureDetails = [detail];
+      } else if (type === "request_sign") {
+        signatureDetails = await createRequestSignDetails(
+          signatureRequest.id,
+          signers,
+          trx
+        );
+      } else {
+        throw new Error(
+          "Tipe signature request tidak valid. Harus 'self_sign' atau 'request_sign'"
+        );
+      }
+
+      // 3. Update document status
+      await Documents.query(trx).patchAndFetchById(documentId, {
+        status: "in_progress",
+        updated_at: new Date(),
+      });
+
+      // 4. Return complete result
+      return {
+        ...signatureRequest,
+        signature_details: signatureDetails,
+      };
+    } catch (error) {
+      // Transaction will automatically rollback on error
+      throw error;
+    }
+  });
 };
 
 /**
@@ -104,7 +191,9 @@ export const getSignatureRequests = async (userId, filters = {}) => {
       "signature_requests.document_id",
       "documents.id"
     )
-    .withGraphFetched("[signature_details]");
+    .withGraphFetched(
+      "[signature_details.[user(simpleWithImage)], creator(simpleWithImage), document]"
+    );
 
   // Filter by user access (created by user OR user is a signer)
   query = query.where((builder) => {

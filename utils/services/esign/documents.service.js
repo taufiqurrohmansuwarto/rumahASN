@@ -9,13 +9,13 @@ import {
   checkEsignDocumentExists,
   deleteEsignDocument,
   getEsignDocumentPath,
-  generateEsignDocumentUrl
+  generateEsignDocumentUrl,
 } from "@/utils/helper/minio-helper";
 
 const Documents = require("@/models/esign/esign-documents.model");
 const SignatureRequests = require("@/models/esign/esign-signature-requests.model");
 const crypto = require("crypto");
-const { addFooterToPdf } = require("./pdf.service");
+const { addFooterToPdf, getTotalPages } = require("./pdf.service");
 
 // ==========================================
 // DOCUMENT CRUD SERVICES
@@ -43,11 +43,13 @@ export const createDocument = async (data, file, userId, mc) => {
 
   // Generate document code first (needed for footer)
   const documentCode = `DOC-${new Date().getFullYear()}-${Date.now()}`;
+  let totalPages = 0;
 
   // Add footer to PDF before upload
   let processedFileBuffer;
   try {
     const pdfWithFooter = await addFooterToPdf(file.buffer, documentCode);
+    totalPages = await getTotalPages(pdfWithFooter);
     processedFileBuffer = Buffer.from(pdfWithFooter);
   } catch (error) {
     console.error("Error adding footer to PDF:", error);
@@ -85,11 +87,12 @@ export const createDocument = async (data, file, userId, mc) => {
     is_public,
     status: "draft",
     created_by: userId,
+    total_pages: totalPages,
   });
 
   return {
     ...document,
-    file_url: generateEsignDocumentUrl(document.file_path)
+    file_url: generateEsignDocumentUrl(document.file_path),
   };
 };
 
@@ -100,13 +103,7 @@ export const createDocument = async (data, file, userId, mc) => {
  * @returns {Promise<Object>} - Documents with pagination
  */
 export const getDocuments = async (userId, filters = {}) => {
-  const {
-    page = 1,
-    limit = 10,
-    status,
-    search,
-    is_public
-  } = filters;
+  const { page = 1, limit = 10, status, search, is_public } = filters;
 
   let query = Documents.query().select([
     "id",
@@ -144,12 +141,13 @@ export const getDocuments = async (userId, filters = {}) => {
 
   const result = await query
     .orderBy("created_at", "desc")
+    .withGraphFetched("[user(simpleWithImage)]")
     .page(parseInt(page) - 1, parseInt(limit));
 
   // Add file URLs to results
-  const dataWithUrls = result.results.map(doc => ({
+  const dataWithUrls = result.results.map((doc) => ({
     ...doc,
-    file_url: generateEsignDocumentUrl(doc.file_path)
+    file_url: generateEsignDocumentUrl(doc.file_path),
   }));
 
   return {
@@ -159,7 +157,7 @@ export const getDocuments = async (userId, filters = {}) => {
       limit: parseInt(limit),
       total: result.total,
       totalPages: Math.ceil(result.total / parseInt(limit)),
-    }
+    },
   };
 };
 
@@ -185,7 +183,7 @@ export const getDocumentById = async (documentId, userId) => {
 
   return {
     ...document,
-    file_url: generateEsignDocumentUrl(document.file_path)
+    file_url: generateEsignDocumentUrl(document.file_path),
   };
 };
 
@@ -213,16 +211,19 @@ export const updateDocument = async (documentId, data, userId) => {
     throw new Error("Hanya dokumen dengan status draft yang dapat diubah");
   }
 
-  const updatedDocument = await Documents.query().patchAndFetchById(documentId, {
-    title: title || document.title,
-    description: description || document.description,
-    is_public: is_public !== undefined ? is_public : document.is_public,
-    updated_at: new Date(),
-  });
+  const updatedDocument = await Documents.query().patchAndFetchById(
+    documentId,
+    {
+      title: title || document.title,
+      description: description || document.description,
+      is_public: is_public !== undefined ? is_public : document.is_public,
+      updated_at: new Date(),
+    }
+  );
 
   return {
     ...updatedDocument,
-    file_url: generateEsignDocumentUrl(updatedDocument.file_path)
+    file_url: generateEsignDocumentUrl(updatedDocument.file_path),
   };
 };
 
@@ -254,7 +255,9 @@ export const deleteDocument = async (documentId, userId, mc) => {
     documentId
   );
   if (signatureRequests.length > 0) {
-    throw new Error("Dokumen tidak dapat dihapus karena sudah memiliki pengajuan TTE");
+    throw new Error(
+      "Dokumen tidak dapat dihapus karena sudah memiliki pengajuan TTE"
+    );
   }
 
   // Delete file from Minio
@@ -336,9 +339,12 @@ export const previewDocumentFile = async (documentId, userId, mc) => {
 
   // Get file as base64 from Minio and convert to buffer
   const base64File = await downloadEsignDocument(mc, document.file_path);
-  const fileBuffer = Buffer.from(base64File, 'base64');
+  const fileBuffer = Buffer.from(base64File, "base64");
 
-  return fileBuffer;
+  return {
+    fileBuffer,
+    totalPages: document.total_pages,
+  };
 };
 
 // ==========================================
@@ -417,10 +423,10 @@ export const generateDocumentCode = () => {
  */
 export const getDocumentStats = async (userId) => {
   const stats = await Documents.query()
-    .where('created_by', userId)
-    .select('status')
-    .groupBy('status')
-    .count('* as count');
+    .where("created_by", userId)
+    .select("status")
+    .groupBy("status")
+    .count("* as count");
 
   const result = {
     total: 0,
@@ -428,10 +434,10 @@ export const getDocumentStats = async (userId) => {
     in_progress: 0,
     signed: 0,
     rejected: 0,
-    cancelled: 0
+    cancelled: 0,
   };
 
-  stats.forEach(stat => {
+  stats.forEach((stat) => {
     const status = stat.status;
     const count = parseInt(stat.count);
     result[status] = count;

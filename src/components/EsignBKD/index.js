@@ -9,6 +9,14 @@ export { default as WorkflowActions } from "./WorkflowActions";
 export { default as BsreTransactionList } from "./BsreTransactionList";
 export { default as BsreTransactionDetail } from "./BsreTransactionDetail";
 export { default as PdfViewer } from "./PdfViewer";
+export { default as SignatureSetupForm } from "./SignatureSetupForm";
+
+// Signature Setup Components
+export { default as SignatureTypeSelection } from "./SignatureTypeSelection";
+export { default as PersonalSignatureSettings } from "./PersonalSignatureSettings";
+export { default as SignersList } from "./SignersList";
+export { default as SignerItem } from "./SignerItem";
+export { default as PdfPreview } from "./PdfPreview";
 
 // Layout components
 export { default as TabLayout } from "./TabLayout";
