@@ -46,9 +46,12 @@ const getStatusColor = (status) => {
   }
 };
 
-function SignatureHistory() {
+function SignatureHistory({ requestId }) {
   const router = useRouter();
-  const { id } = router.query;
+  const { id: routerId } = router.query;
+
+  // Use prop if provided, otherwise fallback to router query
+  const id = requestId || routerId;
 
   const { data: historyData, isLoading } = useSignatureRequestHistory(id);
 

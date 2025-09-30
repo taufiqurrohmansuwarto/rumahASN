@@ -134,9 +134,8 @@ function DocumentList({
   const statusOptions = [
     { key: "", label: "Semua Status" },
     { key: "draft", label: "Draft" },
-    { key: "pending", label: "Pending" },
-    { key: "completed", label: "Selesai" },
-    { key: "rejected", label: "Ditolak" },
+    { key: "in_progress", label: "Dalam Proses" },
+    { key: "signed", label: "Ditandatangani" },
   ];
 
   const getActionItems = (record) => [
@@ -195,33 +194,65 @@ function DocumentList({
         </Space>
       ),
       key: "document",
-      render: (_, record) => (
-        <Space size="small">
-          <Avatar
-            size={isMobile ? 32 : 36}
-            style={{
-              backgroundColor: "#e6f7ff",
-              border: "2px solid #f0f0f0",
-              boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
-            }}
-            icon={<FileTextOutlined style={{ color: "#1890ff" }} />}
-          />
-          <div style={{ lineHeight: 1.1 }}>
-            <div>
-              <Text style={{ fontWeight: 600, fontSize: isMobile ? 11 : 12 }}>
-                {record.title}
-              </Text>
-            </div>
-            {record.description && (
-              <div style={{ marginTop: "0px" }}>
-                <Text style={{ fontSize: 10, color: "#999" }}>
-                  {record.description}
-                </Text>
+      render: (_, record) => {
+        const fileSize = record.file_size || 0;
+        const fileSizeKB = fileSize > 0 ? (fileSize / 1024).toFixed(0) : 0;
+        const fileSizeMB = fileSize > 1024 * 1024 ? (fileSize / (1024 * 1024)).toFixed(2) : null;
+        const displaySize = fileSizeMB ? `${fileSizeMB} MB` : `${fileSizeKB} KB`;
+
+        return (
+          <Space size="small">
+            <Avatar
+              size={isMobile ? 32 : 36}
+              style={{
+                backgroundColor: "#e6f7ff",
+                border: "2px solid #f0f0f0",
+                boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+              }}
+              icon={<FileTextOutlined style={{ color: "#1890ff" }} />}
+            />
+            <div style={{ lineHeight: 1.1 }}>
+              <div>
+                <a
+                  onClick={() => router.push(`/esign-bkd/documents/${record.id}`)}
+                  style={{
+                    fontWeight: 600,
+                    fontSize: isMobile ? 11 : 12,
+                    cursor: 'pointer',
+                    color: '#1890ff',
+                    textDecoration: 'none'
+                  }}
+                  onMouseEnter={(e) => e.target.style.textDecoration = 'underline'}
+                  onMouseLeave={(e) => e.target.style.textDecoration = 'none'}
+                >
+                  {record.title}
+                </a>
               </div>
-            )}
-          </div>
-        </Space>
-      ),
+              <div style={{ marginTop: "2px", display: 'flex', gap: 4, alignItems: 'center' }}>
+                {record.description && (
+                  <>
+                    <Text style={{ fontSize: 10, color: "#999" }}>
+                      {record.description}
+                    </Text>
+                    <Text style={{ fontSize: 10, color: "#999" }}>•</Text>
+                  </>
+                )}
+                <Text style={{ fontSize: 10, color: "#999" }}>
+                  .pdf
+                </Text>
+                {fileSize > 0 && (
+                  <>
+                    <Text style={{ fontSize: 10, color: "#999" }}>•</Text>
+                    <Text style={{ fontSize: 10, color: "#666", fontWeight: 500 }}>
+                      {displaySize}
+                    </Text>
+                  </>
+                )}
+              </div>
+            </div>
+          </Space>
+        );
+      },
     },
     {
       title: (

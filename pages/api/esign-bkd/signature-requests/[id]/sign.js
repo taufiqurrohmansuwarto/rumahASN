@@ -1,24 +1,14 @@
 import auth from "@/middleware/auth.middleware";
 import onlyBkd from "@/middleware/bkd.middleware";
 import { createRouter } from "next-connect";
+import { sign } from "@/controller/esign/esign-signature-requests.controller";
 
 const router = createRouter();
 
 router
   .use(auth)
   .use(onlyBkd)
-  .get((req, res) => {
-    res.json({
-      message: "Actions endpoint - use specific action endpoints like /review, /sign, etc.",
-      available_actions: [
-        "review",
-        "mark-for-tte",
-        "sign",
-        "reject",
-        "update-position"
-      ]
-    });
-  });
+  .post(sign);
 
 export default router.handler({
   onError: (err, req, res) => {

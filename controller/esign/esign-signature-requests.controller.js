@@ -9,6 +9,13 @@ import {
   completeSignatureRequest,
   getSignatureRequestStats,
 } from "@/utils/services/esign/signature-requests.service";
+import {
+  reviewDocument,
+  markForTte,
+  signDocument,
+  rejectDocument,
+  updateSignaturePosition,
+} from "@/utils/services/esign/signature-details.service";
 
 export const create = async (req, res) => {
   try {
@@ -133,6 +140,166 @@ export const getStats = async (req, res) => {
     res.json({
       message: "Statistik pengajuan TTE berhasil diambil",
       data: stats,
+    });
+  } catch (error) {
+    handleError(res, error);
+  }
+};
+
+// ==========================================
+// WORKFLOW ACTION ENDPOINTS
+// ==========================================
+
+export const review = async (req, res) => {
+  try {
+    const { customId: userId } = req?.user;
+    const { id } = req.query;
+    const { notes } = req.body;
+
+    const updatedDetail = await reviewDocument(id, userId, notes);
+
+    res.json({
+      message: "Dokumen berhasil direview",
+      data: updatedDetail,
+    });
+  } catch (error) {
+    handleError(res, error);
+  }
+};
+
+export const mark = async (req, res) => {
+  try {
+    const { customId: userId } = req?.user;
+    const { id } = req.query;
+    const { notes } = req.body;
+
+    const updatedDetail = await markForTte(id, userId, notes);
+
+    res.json({
+      message: "Dokumen berhasil ditandai siap TTE",
+      data: updatedDetail,
+    });
+  } catch (error) {
+    handleError(res, error);
+  }
+};
+
+export const sign = async (req, res) => {
+  try {
+    const { mc } = req;
+    const { customId: userId } = req?.user;
+    const { id } = req.query;
+
+    const updatedDetail = await signDocument(id, userId, req.body, mc);
+
+    res.json({
+      message: "Dokumen berhasil ditandatangani",
+      data: updatedDetail,
+    });
+  } catch (error) {
+    handleError(res, error);
+  }
+};
+
+export const reject = async (req, res) => {
+  try {
+    const { customId: userId } = req?.user;
+    const { id } = req.query;
+    const { reason } = req.body;
+
+    const updatedDetail = await rejectDocument(id, userId, reason);
+
+    res.json({
+      message: "Dokumen berhasil ditolak",
+      data: updatedDetail,
+    });
+  } catch (error) {
+    handleError(res, error);
+  }
+};
+
+export const updatePosition = async (req, res) => {
+  try {
+    const { customId: userId } = req?.user;
+    const { id } = req.query;
+
+    const updatedDetail = await updateSignaturePosition(id, userId, req.body);
+
+    res.json({
+      message: "Posisi tanda tangan berhasil diperbarui",
+      data: updatedDetail,
+    });
+  } catch (error) {
+    handleError(res, error);
+  }
+};
+
+export const getSignatureRequestHistory = async (req, res) => {
+  try {
+    const { id } = req.query;
+
+    const SignatureDetails = require("@/models/esign/esign-signature-details.model");
+
+    // Get history from signature_details with status changes
+    const history = await SignatureDetails.query()
+      .where("request_id", id)
+      .withGraphFetched("user(simpleWithImage)")
+      .orderBy("updated_at", "asc");
+
+    // Transform to history format
+    const historyData = history.map((detail) => ({
+      id: detail.id,
+      action_type: getActionType(detail.role_type, detail.status),
+      status: detail.status,
+      status_text: getStatusText(detail.status),
+      user: detail.user,
+      notes: detail.notes || detail.rejection_reason,
+      created_at: detail.updated_at || detail.created_at,
+    }));
+
+    res.json({
+      message: "Riwayat pengajuan TTE berhasil diambil",
+      data: historyData,
+    });
+  } catch (error) {
+    handleError(res, error);
+  }
+};
+
+// Helper functions for history
+function getActionType(roleType, status) {
+  if (status === "waiting") return "Menunggu";
+  if (status === "rejected") return "Ditolak";
+  if (status === "signed")
+    return roleType === "signer" ? "Ditandatangani" : "Disetujui";
+  if (status === "reviewed") return "Direview";
+  if (status === "marked_for_tte") return "Ditandai untuk TTE";
+  return "Aksi";
+}
+
+function getStatusText(status) {
+  const statusMap = {
+    waiting: "Menunggu",
+    signed: "Ditandatangani",
+    reviewed: "Direview",
+    rejected: "Ditolak",
+    marked_for_tte: "Ditandai untuk TTE",
+  };
+  return statusMap[status] || status;
+}
+
+export const getPendingRequests = async (req, res) => {
+  try {
+    const { customId: userId } = req?.user;
+    const {
+      getPendingSignatureRequests,
+    } = require("@/utils/services/esign/signature-requests.service");
+
+    const result = await getPendingSignatureRequests(userId, req.query);
+
+    res.json({
+      message: "Data permintaan TTE yang menunggu aksi berhasil diambil",
+      ...result,
     });
   } catch (error) {
     handleError(res, error);

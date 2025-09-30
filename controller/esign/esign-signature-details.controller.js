@@ -117,8 +117,9 @@ export const signDoc = async (req, res) => {
   try {
     const { customId: userId } = req?.user;
     const { id } = req.query;
+    const mc = req?.mc;
 
-    const updatedDetail = await signDocument(id, userId, req.body);
+    const updatedDetail = await signDocument(id, userId, req.body, mc);
 
     res.json({
       message: "Dokumen berhasil ditandatangani",

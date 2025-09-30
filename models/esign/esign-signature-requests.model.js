@@ -9,6 +9,10 @@ class SignatureRequests extends Model {
     return "esign.signature_requests";
   }
 
+  static get idColumn() {
+    return "id";
+  }
+
   $beforeInsert() {
     this.id = nanoid();
   }

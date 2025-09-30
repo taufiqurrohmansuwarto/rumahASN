@@ -15,6 +15,7 @@ class SignatureDetails extends Model {
 
   static get relationMappings() {
     const Users = require("@/models/users.model");
+    const SignatureRequests = require("@/models/esign/esign-signature-requests.model");
 
     return {
       user: {
@@ -23,6 +24,14 @@ class SignatureDetails extends Model {
         join: {
           from: "esign.signature_details.user_id",
           to: "users.custom_id",
+        },
+      },
+      signature_request: {
+        relation: Model.BelongsToOneRelation,
+        modelClass: SignatureRequests,
+        join: {
+          from: "esign.signature_details.request_id",
+          to: "esign.signature_requests.id",
         },
       },
     };

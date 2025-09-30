@@ -91,8 +91,12 @@ export const getSignatureRequests = async (params = {}) => {
   return res?.data;
 };
 
-export const createSignatureRequest = async (data) => {
-  const res = await esignBkdApi.post(`/signature-requests`, data);
+export const createSignatureRequest = async ({ documentId, data }) => {
+  const payload = {
+    documentId,
+    data,
+  };
+  const res = await esignBkdApi.post(`/signature-requests`, payload);
   return res?.data;
 };
 
@@ -126,77 +130,125 @@ export const getSignatureRequestStats = async () => {
   return res?.data;
 };
 
+export const getSignatureRequestHistory = async (id) => {
+  const res = await esignBkdApi.get(`/signature-requests/${id}/history`);
+  return res?.data;
+};
+
 // ==========================================
 // DASHBOARD SERVICES
 // ==========================================
+// NOTE: Dashboard services now use signature-requests API with filters
 
 export const getPendingDocuments = async (params = {}) => {
-  const queryParams = queryString.stringify(params, {
-    skipNull: true,
-    skipEmptyString: true,
-  });
-  const res = await esignBkdApi.get(`/dashboard/pending?${queryParams}`);
+  const queryParams = queryString.stringify(
+    {
+      ...params,
+      status: "pending",
+      user_action_required: true,
+    },
+    {
+      skipNull: true,
+      skipEmptyString: true,
+    }
+  );
+  const res = await esignBkdApi.get(`/signature-requests?${queryParams}`);
   return res?.data;
 };
 
 export const getMarkedForTteDocuments = async (params = {}) => {
-  const queryParams = queryString.stringify(params, {
-    skipNull: true,
-    skipEmptyString: true,
-  });
-  const res = await esignBkdApi.get(`/dashboard/marked-for-tte?${queryParams}`);
+  const queryParams = queryString.stringify(
+    {
+      ...params,
+      marked_for_tte: true,
+    },
+    {
+      skipNull: true,
+      skipEmptyString: true,
+    }
+  );
+  const res = await esignBkdApi.get(`/signature-requests?${queryParams}`);
   return res?.data;
 };
 
 export const getRejectedDocuments = async (params = {}) => {
-  const queryParams = queryString.stringify(params, {
-    skipNull: true,
-    skipEmptyString: true,
-  });
-  const res = await esignBkdApi.get(`/dashboard/rejected?${queryParams}`);
+  const queryParams = queryString.stringify(
+    {
+      ...params,
+      status: "rejected",
+    },
+    {
+      skipNull: true,
+      skipEmptyString: true,
+    }
+  );
+  const res = await esignBkdApi.get(`/signature-requests?${queryParams}`);
   return res?.data;
 };
 
 export const getCompletedDocuments = async (params = {}) => {
-  const queryParams = queryString.stringify(params, {
-    skipNull: true,
-    skipEmptyString: true,
-  });
-  const res = await esignBkdApi.get(`/dashboard/completed?${queryParams}`);
+  const queryParams = queryString.stringify(
+    {
+      ...params,
+      status: "completed",
+    },
+    {
+      skipNull: true,
+      skipEmptyString: true,
+    }
+  );
+  const res = await esignBkdApi.get(`/signature-requests?${queryParams}`);
   return res?.data;
 };
 
 export const getMarkedCount = async () => {
-  const res = await esignBkdApi.get(`/dashboard/marked-count`);
-  return res?.data;
+  // Get count of marked documents
+  const queryParams = queryString.stringify(
+    {
+      marked_for_tte: true,
+      limit: 1, // We only need the count
+    },
+    {
+      skipNull: true,
+      skipEmptyString: true,
+    }
+  );
+  const res = await esignBkdApi.get(`/signature-requests?${queryParams}`);
+  return {
+    count: res?.data?.pagination?.total || 0,
+  };
 };
 
 // ==========================================
 // WORKFLOW ACTIONS SERVICES
 // ==========================================
+// NOTE: Actions now use signature-requests API with action endpoints
 
 export const reviewDocument = async (id, data) => {
-  const res = await esignBkdApi.post(`/actions/${id}/review`, data);
+  const res = await esignBkdApi.post(`/signature-requests/${id}/review`, data);
   return res?.data;
 };
 
 export const markForTte = async (id, data) => {
-  const res = await esignBkdApi.post(`/actions/${id}/mark-for-tte`, data);
+  const res = await esignBkdApi.post(`/signature-requests/${id}/mark`, data);
   return res?.data;
 };
 
 export const signDocument = async (id, data) => {
-  const res = await esignBkdApi.post(`/actions/${id}/sign`, data);
+  const res = await esignBkdApi.post(`/signature-requests/${id}/sign`, data);
   return res?.data;
 };
 
 export const rejectDocument = async (id, data) => {
-  const res = await esignBkdApi.post(`/actions/${id}/reject`, data);
+  const res = await esignBkdApi.post(`/signature-requests/${id}/reject`, data);
   return res?.data;
 };
 
 export const updateSignaturePosition = async (id, data) => {
-  const res = await esignBkdApi.put(`/actions/${id}/update-position`, data);
+  const res = await esignBkdApi.put(
+    `/signature-requests/${id}/update-position`,
+    data
+  );
   return res?.data;
 };
 
@@ -322,5 +374,23 @@ export const getUsers = async (params = {}) => {
     skipEmptyString: true,
   });
   const res = await esignBkdApi.get(`/users?${queryParams}`);
+  return res?.data;
+};
+
+// ==========================================
+// PENDING SERVICES
+// ==========================================
+
+export const getPendingRequests = async (params = {}) => {
+  const queryParams = queryString.stringify(params, {
+    skipNull: true,
+    skipEmptyString: true,
+  });
+  const res = await esignBkdApi.get(`/pending?${queryParams}`);
+  return res?.data;
+};
+
+export const checkTTEUser = async () => {
+  const res = await esignBkdApi.get(`/check`);
   return res?.data;
 };

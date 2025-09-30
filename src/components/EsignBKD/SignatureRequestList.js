@@ -1,11 +1,15 @@
 import { useSignatureRequests } from "@/hooks/esign-bkd";
 import {
   CheckOutlined,
+  ClockCircleOutlined,
   EyeOutlined,
+  FileTextOutlined,
   FilterOutlined,
+  MoreOutlined,
   PlusOutlined,
   ReloadOutlined,
   TeamOutlined,
+  UserOutlined,
 } from "@ant-design/icons";
 import { Text, Badge, Tooltip } from "@mantine/core";
 import { IconUser, IconUsers, IconArrowRight, IconEqual } from "@tabler/icons-react";
@@ -19,6 +23,7 @@ import {
   Grid,
   Input,
   Row,
+  Space,
   Table,
   Typography,
 } from "antd";
@@ -26,25 +31,13 @@ import dayjs from "dayjs";
 import "dayjs/locale/id";
 import { useRouter } from "next/router";
 import { useEffect, useMemo, useState } from "react";
+import { SignatureRequestStatusBadge } from "./shared";
 
 dayjs.locale("id");
 
 const { Search } = Input;
 const { Title } = Typography;
 const { useBreakpoint } = Grid;
-
-const StatusBadge = ({ status }) => {
-  const statusConfig = {
-    pending: { color: "processing", text: "Menunggu" },
-    in_progress: { color: "warning", text: "Proses" },
-    completed: { color: "success", text: "Selesai" },
-    cancelled: { color: "default", text: "Dibatalkan" },
-    rejected: { color: "error", text: "Ditolak" },
-  };
-
-  const config = statusConfig[status] || statusConfig.pending;
-  return <AntdBadge status={config.color} text={config.text} />;
-};
 
 
 function SignatureRequestList({
@@ -141,10 +134,10 @@ function SignatureRequestList({
 
     switch (key) {
       case "view":
-        router.push(`/esign-bkd/signature-requests/${record.document?.id || record.document_id}`);
+        router.push(`/esign-bkd/signature-requests/${record.id}`);
         break;
       case "sign":
-        router.push(`/esign-bkd/signature-requests/${record.document?.id || record.document_id}/sign`);
+        router.push(`/esign-bkd/signature-requests/${record.id}/sign`);
         break;
       default:
         break;
@@ -153,140 +146,254 @@ function SignatureRequestList({
 
   const columns = [
     {
-      title: <Text strong>Dokumen & Status</Text>,
-      key: "main",
+      title: (
+        <Space>
+          <FileTextOutlined />
+          <Text strong>Dokumen</Text>
+        </Space>
+      ),
+      key: "document",
+      render: (_, record) => {
+        const fileSize = record.document?.file_size || 0;
+        const fileSizeKB = fileSize > 0 ? (fileSize / 1024).toFixed(0) : 0;
+        const fileSizeMB = fileSize > 1024 * 1024 ? (fileSize / (1024 * 1024)).toFixed(2) : null;
+        const displaySize = fileSizeMB ? `${fileSizeMB} MB` : `${fileSizeKB} KB`;
+
+        return (
+          <Space size="small">
+            <Avatar
+              size={isMobile ? 32 : 36}
+              style={{
+                backgroundColor: "#e6f7ff",
+                border: "2px solid #f0f0f0",
+                boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+              }}
+              icon={<FileTextOutlined style={{ color: "#1890ff" }} />}
+            />
+            <div style={{ lineHeight: 1.1 }}>
+              <div>
+                <a
+                  onClick={() => router.push(`/esign-bkd/signature-requests/${record.id}`)}
+                  style={{
+                    fontWeight: 600,
+                    fontSize: isMobile ? 11 : 12,
+                    cursor: 'pointer',
+                    color: '#1890ff',
+                    textDecoration: 'none'
+                  }}
+                  onMouseEnter={(e) => e.target.style.textDecoration = 'underline'}
+                  onMouseLeave={(e) => e.target.style.textDecoration = 'none'}
+                >
+                  {record.document?.title || record.document_title}
+                </a>
+              </div>
+              <div style={{ marginTop: "2px", display: 'flex', gap: 4, alignItems: 'center' }}>
+                <Text style={{ fontSize: 10, color: "#999" }}>
+                  {record.document?.document_code || record.document_code}
+                </Text>
+                <Text style={{ fontSize: 10, color: "#999" }}>•</Text>
+                <Text style={{ fontSize: 10, color: "#999" }}>
+                  .pdf
+                </Text>
+                {fileSize > 0 && (
+                  <>
+                    <Text style={{ fontSize: 10, color: "#999" }}>•</Text>
+                    <Text style={{ fontSize: 10, color: "#666", fontWeight: 500 }}>
+                      {displaySize}
+                    </Text>
+                  </>
+                )}
+              </div>
+            </div>
+          </Space>
+        );
+      },
+    },
+    {
+      title: (
+        <Space>
+          <TeamOutlined />
+          <Text strong>Status & Info</Text>
+        </Space>
+      ),
+      key: "status_info",
+      width: isMobile ? 140 : 180,
       render: (_, record) => (
-        <div style={{ lineHeight: 1.2 }}>
-          <div>
-            <Text style={{ fontWeight: 600, fontSize: 13 }}>
-              {record.document?.title || record.document_title}
-            </Text>
-          </div>
-          <div style={{ marginTop: 2 }}>
-            <Text style={{ fontSize: 11, color: "#999" }}>
-              {record.document?.document_code || record.document_code}
-            </Text>
-          </div>
-          <div style={{ marginTop: 6, display: 'flex', gap: 4, flexWrap: 'wrap' }}>
-            <StatusBadge status={record.status} />
-            <Badge
-              color={record.type === "self_sign" ? "blue" : "green"}
-              size="xs"
-              leftSection={
-                <div style={{ display: 'flex', alignItems: 'center' }}>
-                  {record.type === "self_sign" ? <IconUser size={10} /> : <IconUsers size={10} />}
-                </div>
+        <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
+          <SignatureRequestStatusBadge status={record.status} />
+          <Badge
+            color={record.type === "self_sign" ? "blue" : "green"}
+            size="xs"
+            leftSection={
+              <div style={{ display: 'flex', alignItems: 'center' }}>
+                {record.type === "self_sign" ? <IconUser size={10} /> : <IconUsers size={10} />}
+              </div>
+            }
+            styles={{
+              section: {
+                display: 'flex',
+                alignItems: 'center',
               }
-            >
-              {record.type === "self_sign" ? "Sendiri" : "Permintaan"}
-            </Badge>
-            <Badge
-              color={record.request_type === "sequential" ? "orange" : "violet"}
-              size="xs"
-              leftSection={
-                <div style={{ display: 'flex', alignItems: 'center' }}>
-                  {record.request_type === "sequential" ? <IconArrowRight size={10} /> : <IconEqual size={10} />}
-                </div>
+            }}
+          >
+            {record.type === "self_sign" ? "Sendiri" : "Permintaan"}
+          </Badge>
+          <Badge
+            color={record.request_type === "sequential" ? "orange" : "violet"}
+            size="xs"
+            leftSection={
+              <div style={{ display: 'flex', alignItems: 'center' }}>
+                {record.request_type === "sequential" ? <IconArrowRight size={10} /> : <IconEqual size={10} />}
+              </div>
+            }
+            styles={{
+              section: {
+                display: 'flex',
+                alignItems: 'center',
               }
-            >
-              {record.request_type === "sequential" ? "Berurutan" : "Paralel"}
-            </Badge>
-          </div>
+            }}
+          >
+            {record.request_type === "sequential" ? "Berurutan" : "Paralel"}
+          </Badge>
         </div>
       ),
     },
     {
-      title: <Text strong>Pembuat</Text>,
+      title: (
+        <Space>
+          <Avatar
+            size={16}
+            style={{ backgroundColor: "#FF4500" }}
+            icon={<UserOutlined />}
+          />
+          <Text strong>Pembuat</Text>
+        </Space>
+      ),
       key: "creator",
-      width: isMobile ? 160 : 220,
+      width: isMobile ? 150 : 200,
       render: (_, record) => (
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <Tooltip label={`${record.creator?.username} - ${record.creator?.nama_jabatan}`}>
-            <Avatar
-              size="small"
-              src={record.creator?.image}
-              style={{
-                backgroundColor: "#1890ff",
-                flexShrink: 0,
-              }}
-            >
-              {record.creator?.username?.charAt(0)?.toUpperCase()}
-            </Avatar>
-          </Tooltip>
-          <div style={{ lineHeight: 1.2, minWidth: 0, flex: 1 }}>
-            <Tooltip label={record.creator?.username}>
-              <div>
-                <Text
-                  style={{
-                    fontSize: 12,
-                    fontWeight: 500,
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                    whiteSpace: 'nowrap',
-                    display: 'block',
-                    maxWidth: isMobile ? '100px' : '140px'
-                  }}
-                >
-                  {record.creator?.username}
-                </Text>
-              </div>
-            </Tooltip>
-            <Tooltip label={record.creator?.nama_jabatan}>
-              <div style={{ marginTop: 2 }}>
-                <Text
-                  style={{
-                    fontSize: 10,
-                    color: "#999",
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                    whiteSpace: 'nowrap',
-                    display: 'block',
-                    maxWidth: isMobile ? '100px' : '140px'
-                  }}
-                >
+        <Space size="small">
+          <Avatar
+            src={record.creator?.image}
+            size={isMobile ? 28 : 32}
+            style={{
+              border: "2px solid #f0f0f0",
+              boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+            }}
+          >
+            {!record.creator?.image && <UserOutlined />}
+          </Avatar>
+          <div style={{ lineHeight: 1.1 }}>
+            <div>
+              <Text style={{ fontWeight: 600, fontSize: isMobile ? 11 : 12 }}>
+                {record.creator?.username || "-"}
+              </Text>
+            </div>
+            {record.creator?.nama_jabatan && (
+              <div style={{ marginTop: "0px" }}>
+                <Text style={{ fontSize: 10, color: "#999" }}>
                   {record.creator?.nama_jabatan}
                 </Text>
               </div>
-            </Tooltip>
-            <div style={{ marginTop: 2 }}>
-              <Text style={{ fontSize: 10, color: "#666" }}>
-                {dayjs(record.created_at).format("DD/MM/YY HH:mm")}
-              </Text>
-            </div>
+            )}
           </div>
-        </div>
+        </Space>
       ),
+      responsive: ["md"],
     },
     {
-      title: <Text strong>Progress</Text>,
+      title: (
+        <Space>
+          <TeamOutlined />
+          <Text strong>Progress</Text>
+        </Space>
+      ),
       key: "progress",
-      width: isMobile ? 80 : 100,
+      width: isMobile ? 120 : 160,
       align: "center",
       render: (_, record) => {
         const signedCount = record.signature_details?.filter(detail => detail.status === 'signed').length || 0;
         const totalSigners = record.signature_details?.length || 0;
         const percentage = totalSigners > 0 ? Math.round((signedCount / totalSigners) * 100) : 0;
+        const signers = record.signature_details || [];
 
         return (
-          <Tooltip label={`${signedCount} dari ${totalSigners} telah menandatangani (${percentage}%)`}>
-            <div style={{ textAlign: 'center', cursor: 'pointer' }}>
-              <Text style={{ fontSize: 14, fontWeight: 600, color: percentage === 100 ? "#52c41a" : "#1890ff" }}>
-                {signedCount}/{totalSigners}
-              </Text>
-              <div>
-                <Text style={{ fontSize: 10, color: "#999" }}>
-                  {percentage}%
+          <div style={{ textAlign: 'center' }}>
+            <Tooltip label={`${signedCount} dari ${totalSigners} telah menandatangani (${percentage}%)`}>
+              <div style={{ cursor: 'pointer', marginBottom: 6 }}>
+                <Text style={{ fontSize: 14, fontWeight: 600, color: percentage === 100 ? "#52c41a" : "#1890ff" }}>
+                  {signedCount}/{totalSigners}
                 </Text>
+                <div>
+                  <Text style={{ fontSize: 10, color: "#999" }}>
+                    {percentage}%
+                  </Text>
+                </div>
               </div>
-            </div>
-          </Tooltip>
+            </Tooltip>
+            <Avatar.Group
+              maxCount={3}
+              size={isMobile ? 20 : 24}
+              maxStyle={{
+                color: '#f56a00',
+                backgroundColor: '#fde3cf',
+                cursor: 'pointer',
+                fontSize: isMobile ? 10 : 12
+              }}
+            >
+              {signers.map((signer, idx) => (
+                <Tooltip
+                  key={idx}
+                  title={`${signer.user?.username || 'User'} - ${signer.status === 'signed' ? 'Sudah TTD' : signer.status === 'waiting' ? 'Menunggu' : signer.status}`}
+                >
+                  <Avatar
+                    src={signer.user?.image}
+                    style={{
+                      backgroundColor: signer.status === 'signed' ? '#52c41a' : '#1890ff',
+                      border: signer.status === 'signed' ? '2px solid #52c41a' : '2px solid #d9d9d9',
+                      cursor: 'pointer'
+                    }}
+                    size={isMobile ? 20 : 24}
+                  >
+                    {signer.user?.username?.charAt(0)?.toUpperCase() || 'U'}
+                  </Avatar>
+                </Tooltip>
+              ))}
+            </Avatar.Group>
+          </div>
         );
       },
     },
     {
+      title: (
+        <Space>
+          <ClockCircleOutlined />
+          <Text strong>Waktu</Text>
+        </Space>
+      ),
+      dataIndex: "created_at",
+      key: "created_at",
+      width: isMobile ? 100 : 140,
+      render: (date) => (
+        <Tooltip title={dayjs(date).format("DD-MM-YYYY HH:mm:ss")}>
+          <div style={{ lineHeight: "1.1", cursor: "pointer" }}>
+            <Text style={{ fontSize: 12 }}>
+              {dayjs(date).format("DD/MM/YY")}
+            </Text>
+            <div style={{ marginTop: 0 }}>
+              <Text style={{ fontSize: 10, color: "#999" }}>
+                {dayjs(date).format("HH:mm")}
+              </Text>
+            </div>
+          </div>
+        </Tooltip>
+      ),
+      responsive: ["lg"],
+    },
+    {
       title: <Text strong>Aksi</Text>,
       key: "actions",
-      width: 60,
+      width: isMobile ? 60 : 80,
       align: "center",
       render: (_, record) => (
         <Dropdown
@@ -299,7 +406,7 @@ function SignatureRequestList({
           <Button
             type="text"
             size="small"
-            icon={<TeamOutlined />}
+            icon={<MoreOutlined />}
             style={{
               color: "#FF4500",
               fontWeight: 500,

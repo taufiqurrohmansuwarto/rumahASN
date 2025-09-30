@@ -3,15 +3,24 @@ import {
   Button,
   Flex,
   Card,
+  Form,
+  Input,
 } from "antd";
 import { Text, Title } from "@mantine/core";
 import { IconCheck, IconX, IconFileText } from "@tabler/icons-react";
 
 function ReviewModal({ open, onCancel, document, onApprove, onReject, loading }) {
+  const [form] = Form.useForm();
 
   const handleApprove = async () => {
     try {
-      await onApprove({ id: document?.id, action: "approve" });
+      const values = await form.validateFields();
+      await onApprove({
+        id: document?.id,
+        action: "approve",
+        notes: values.notes
+      });
+      form.resetFields();
     } catch (error) {
       console.error("Approve error:", error);
     }
@@ -19,19 +28,30 @@ function ReviewModal({ open, onCancel, document, onApprove, onReject, loading })
 
   const handleReject = async () => {
     try {
-      await onReject({ id: document?.id, action: "reject" });
+      const values = await form.validateFields();
+      await onReject({
+        id: document?.id,
+        action: "reject",
+        notes: values.notes
+      });
+      form.resetFields();
     } catch (error) {
       console.error("Reject error:", error);
     }
+  };
+
+  const handleModalCancel = () => {
+    form.resetFields();
+    onCancel();
   };
 
   return (
     <Modal
       title={null}
       open={open}
-      onCancel={onCancel}
+      onCancel={handleModalCancel}
       footer={null}
-      width={480}
+      width={500}
       centered
     >
       <Flex vertical gap="large">
@@ -82,6 +102,21 @@ function ReviewModal({ open, onCancel, document, onApprove, onReject, loading })
           </Flex>
         </Card>
 
+        <Form form={form} layout="vertical">
+          <Form.Item
+            label={<Text size="sm" fw={500}>Catatan (Opsional)</Text>}
+            name="notes"
+          >
+            <Input.TextArea
+              placeholder="Tambahkan catatan review..."
+              rows={3}
+              maxLength={500}
+              showCount
+              style={{ borderRadius: 8 }}
+            />
+          </Form.Item>
+        </Form>
+
         <Flex vertical gap="middle">
           <Text size="sm" fw={500} ta="center" c="dark">
             Apakah Anda menyetujui dokumen ini?
@@ -123,7 +158,7 @@ function ReviewModal({ open, onCancel, document, onApprove, onReject, loading })
         </Flex>
 
         <Button
-          onClick={onCancel}
+          onClick={handleModalCancel}
           style={{
             width: "100%",
             height: 40,

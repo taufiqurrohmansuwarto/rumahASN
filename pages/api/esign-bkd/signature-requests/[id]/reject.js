@@ -1,14 +1,14 @@
 import auth from "@/middleware/auth.middleware";
 import onlyBkd from "@/middleware/bkd.middleware";
 import { createRouter } from "next-connect";
-import { signDoc } from "@/controller/esign/esign-signature-details.controller";
+import { reject } from "@/controller/esign/esign-signature-requests.controller";
 
 const router = createRouter();
 
 router
   .use(auth)
   .use(onlyBkd)
-  .post(signDoc);
+  .post(reject);
 
 export default router.handler({
   onError: (err, req, res) => {

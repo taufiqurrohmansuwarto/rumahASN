@@ -1,5 +1,5 @@
 import React, { memo, useCallback, useMemo } from "react";
-import { Button, Input, Select, AutoComplete, Flex, Avatar } from "antd";
+import { Button, Input, Select, AutoComplete, Flex, Avatar, Alert } from "antd";
 import { DeleteOutlined, UserOutlined } from "@ant-design/icons";
 import { useUserSearch } from "@/hooks/esign-bkd";
 
@@ -13,7 +13,13 @@ function SignerItem({ signer, index, onUpdate, onRemove, totalPages = 1 }) {
     handleSearch,
     clearSearch
   } = useUserSearch();
+
   const handleUpdate = useCallback((field, value) => {
+    // If role changes to reviewer, clear signature_pages
+    if (field === 'role_type' && value === 'reviewer') {
+      onUpdate(signer.id, 'signature_pages', []);
+    }
+
     // Validate signature_pages to only contain numbers and within valid range
     if (field === 'signature_pages') {
       const validPages = value
@@ -33,32 +39,36 @@ function SignerItem({ signer, index, onUpdate, onRemove, totalPages = 1 }) {
   }, [signer.id, onRemove]);
 
   // Handle user selection from autocomplete
-  const handleUserSelect = useCallback((value) => {
-    // If it's a selected option, extract user data
-    const selectedOption = userOptions.find(option => option.value === value);
+  const handleUserSelect = useCallback((value, option) => {
+    const selectedOption = userOptions.find(opt => opt.value === value);
     if (selectedOption && selectedOption.user) {
       const user = selectedOption.user;
-      handleUpdate("user_id", user.id); // Store user_id (custom_id)
-      handleUpdate("username", user.username); // Store username
-      handleUpdate("user_name", user.username); // For display
-      handleUpdate("nama_jabatan", user.nama_jabatan || "");
-      handleUpdate("avatar", user.image || user.avatar || ""); // Store avatar
-    } else {
-      // If it's manually typed, clear user data
-      handleUpdate("user_id", "");
-      handleUpdate("username", value);
-      handleUpdate("user_name", "");
-      handleUpdate("nama_jabatan", "");
-      handleUpdate("avatar", "");
+      // Update all user fields in batch
+      onUpdate(signer.id, "user_id", user.id);
+      onUpdate(signer.id, "username", user.username);
+      onUpdate(signer.id, "user_name", user.username);
+      onUpdate(signer.id, "nama_jabatan", user.nama_jabatan || "");
+      onUpdate(signer.id, "avatar", user.image || user.avatar || "");
     }
-  }, [userOptions, handleUpdate]);
+  }, [userOptions, onUpdate, signer.id]);
 
-  // Handle search input change (immediate, no debounce needed)
+  // Handle search input change
   const handleSearchChange = useCallback((value) => {
     handleSearch(value);
-    // Also update the username field as user types
-    handleUpdate("username", value);
-  }, [handleSearch, handleUpdate]);
+    // Update username field as user types or clears
+    onUpdate(signer.id, "username", value || "");
+    // Clear user data when input is cleared
+    if (!value) {
+      onUpdate(signer.id, "user_id", "");
+      onUpdate(signer.id, "user_name", "");
+      onUpdate(signer.id, "nama_jabatan", "");
+      onUpdate(signer.id, "avatar", "");
+    }
+  }, [handleSearch, onUpdate, signer.id]);
+
+  // Check validation errors
+  const hasUserError = !signer.user_id;
+  const hasPageError = signer.role_type === 'signer' && (!signer.signature_pages || signer.signature_pages.length === 0);
 
   return (
     <div
@@ -83,61 +93,28 @@ function SignerItem({ signer, index, onUpdate, onRemove, totalPages = 1 }) {
         </Flex>
 
         <Flex vertical gap="small" style={{ flex: 1 }}>
-          {/* Display selected user info if available */}
-          {signer.user_name && (
-            <div style={{
-              background: "#f6ffed",
-              borderRadius: 6,
-              padding: "6px 8px",
-              border: "1px solid #b7eb8f",
-              fontSize: 12
-            }}>
-              <Flex align="center" gap="small">
-                <Avatar
-                  size={20}
-                  src={signer.avatar}
-                  icon={<UserOutlined />}
-                  style={{ flexShrink: 0 }}
-                />
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{
-                    color: "#52c41a",
-                    fontWeight: 500,
-                    whiteSpace: "nowrap",
-                    overflow: "hidden",
-                    textOverflow: "ellipsis"
-                  }}>
-                    ✓ {signer.user_name}
-                    {signer.nama_jabatan && (
-                      <span style={{ color: "#389e0d", fontWeight: 400 }}>
-                        {` - ${signer.nama_jabatan}`}
-                      </span>
-                    )}
-                  </div>
-                </div>
-              </Flex>
-            </div>
-          )}
-
           <Flex gap="middle">
             <AutoComplete
               style={{ flex: 2, borderRadius: 6 }}
-              placeholder="Ketik username penandatangan"
-              value={signer.username}
+              placeholder="Pilih username penandatangan"
+              value={signer.username || ""}
               options={userOptions}
               onSelect={handleUserSelect}
               onSearch={handleSearchChange}
               onChange={handleSearchChange}
+              onClear={() => {
+                onUpdate(signer.id, "username", "");
+                onUpdate(signer.id, "user_id", "");
+                onUpdate(signer.id, "user_name", "");
+                onUpdate(signer.id, "nama_jabatan", "");
+                onUpdate(signer.id, "avatar", "");
+              }}
               notFoundContent={isSearching ? "Memuat..." : "Tidak ada pengguna ditemukan"}
               allowClear
               showSearch
-              filterOption={false} // We handle filtering on client side
-            >
-              <Input
-                prefix={<UserOutlined style={{ color: '#aaa' }} />}
-                placeholder="Ketik username penandatangan"
-              />
-            </AutoComplete>
+              filterOption={false}
+              status={hasUserError ? "error" : ""}
+            />
 
             <Select
               value={signer.role_type}
@@ -146,33 +123,40 @@ function SignerItem({ signer, index, onUpdate, onRemove, totalPages = 1 }) {
             >
               <Option value="reviewer">Reviewer</Option>
               <Option value="signer">Signer</Option>
-              <Option value="approver">Approver</Option>
             </Select>
 
-            <Select
-              mode="tags"
-              placeholder={`1-${totalPages}`}
-              value={signer.signature_pages}
-              onChange={(value) => handleUpdate("signature_pages", value)}
-              style={{ width: 120, borderRadius: 6 }}
-              allowClear
-              tokenSeparators={[',', ' ']}
-              onInputKeyDown={(e) => {
-                // Only allow numbers, backspace, delete, arrow keys, comma, space
-                if (!/[0-9,\s]/.test(e.key) &&
-                    !['Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'Tab'].includes(e.key)) {
-                  e.preventDefault();
-                }
-              }}
-            />
+            {signer.role_type === 'signer' && (
+              <Select
+                mode="tags"
+                placeholder={`Halaman (1-${totalPages})`}
+                value={signer.signature_pages}
+                onChange={(value) => handleUpdate("signature_pages", value)}
+                style={{ width: 150, borderRadius: 6 }}
+                status={hasPageError ? "error" : ""}
+                allowClear
+                tokenSeparators={[',', ' ']}
+                onInputKeyDown={(e) => {
+                  // Only allow numbers, backspace, delete, arrow keys, comma, space
+                  if (!/[0-9,\s]/.test(e.key) &&
+                      !['Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'Tab'].includes(e.key)) {
+                    e.preventDefault();
+                  }
+                }}
+              />
+            )}
           </Flex>
 
-          <Input
-            placeholder="Catatan (opsional)"
-            value={signer.notes}
-            onChange={(e) => handleUpdate("notes", e.target.value)}
-            style={{ borderRadius: 6 }}
-          />
+          {/* Error messages */}
+          {hasUserError && (
+            <div style={{ fontSize: 12, color: '#ff4d4f', marginTop: 4 }}>
+              Silakan lengkapi username/pengguna
+            </div>
+          )}
+          {hasPageError && (
+            <div style={{ fontSize: 12, color: '#ff4d4f', marginTop: 4 }}>
+              Signer harus memilih minimal 1 halaman untuk ditandatangani
+            </div>
+          )}
         </Flex>
 
         <Button

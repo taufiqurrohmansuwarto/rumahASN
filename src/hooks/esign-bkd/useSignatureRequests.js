@@ -8,6 +8,7 @@ import {
   getWorkflowStatus,
   completeSignatureRequest,
   getSignatureRequestStats,
+  getSignatureRequestHistory,
 } from "@/services/esign-bkd.services";
 
 // Query Keys
@@ -19,6 +20,7 @@ export const SIGNATURE_REQUEST_KEYS = {
   detail: (id) => [...SIGNATURE_REQUEST_KEYS.details(), id],
   workflow: (id) => [...SIGNATURE_REQUEST_KEYS.all, "workflow", id],
   stats: () => [...SIGNATURE_REQUEST_KEYS.all, "stats"],
+  history: (id) => [...SIGNATURE_REQUEST_KEYS.all, "history", id],
 };
 
 // Get Signature Requests
@@ -26,6 +28,7 @@ export const useSignatureRequests = (params = {}) => {
   return useQuery({
     queryKey: SIGNATURE_REQUEST_KEYS.list(params),
     queryFn: () => getSignatureRequests(params),
+    refetchOnWindowFocus: false,
   });
 };
 
@@ -35,6 +38,7 @@ export const useSignatureRequest = (id) => {
     queryKey: SIGNATURE_REQUEST_KEYS.detail(id),
     queryFn: () => getSignatureRequestById(id),
     enabled: !!id,
+    refetchOnWindowFocus: false,
   });
 };
 
@@ -52,6 +56,7 @@ export const useSignatureRequestStats = () => {
   return useQuery({
     queryKey: SIGNATURE_REQUEST_KEYS.stats(),
     queryFn: () => getSignatureRequestStats(),
+    refetchOnWindowFocus: false,
   });
 };
 
@@ -62,8 +67,12 @@ export const useCreateSignatureRequest = () => {
   return useMutation({
     mutationFn: (data) => createSignatureRequest(data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: SIGNATURE_REQUEST_KEYS.lists() });
-      queryClient.invalidateQueries({ queryKey: SIGNATURE_REQUEST_KEYS.stats() });
+      queryClient.invalidateQueries({
+        queryKey: SIGNATURE_REQUEST_KEYS.lists(),
+      });
+      queryClient.invalidateQueries({
+        queryKey: SIGNATURE_REQUEST_KEYS.stats(),
+      });
     },
   });
 };
@@ -75,14 +84,18 @@ export const useUpdateSignatureRequest = () => {
   return useMutation({
     mutationFn: ({ id, data }) => updateSignatureRequest(id, data),
     onSuccess: (data, variables) => {
-      queryClient.invalidateQueries({ queryKey: SIGNATURE_REQUEST_KEYS.lists() });
       queryClient.invalidateQueries({
-        queryKey: SIGNATURE_REQUEST_KEYS.detail(variables.id)
+        queryKey: SIGNATURE_REQUEST_KEYS.lists(),
       });
       queryClient.invalidateQueries({
-        queryKey: SIGNATURE_REQUEST_KEYS.workflow(variables.id)
+        queryKey: SIGNATURE_REQUEST_KEYS.detail(variables.id),
       });
-      queryClient.invalidateQueries({ queryKey: SIGNATURE_REQUEST_KEYS.stats() });
+      queryClient.invalidateQueries({
+        queryKey: SIGNATURE_REQUEST_KEYS.workflow(variables.id),
+      });
+      queryClient.invalidateQueries({
+        queryKey: SIGNATURE_REQUEST_KEYS.stats(),
+      });
     },
   });
 };
@@ -94,10 +107,18 @@ export const useCancelSignatureRequest = () => {
   return useMutation({
     mutationFn: (id) => cancelSignatureRequest(id),
     onSuccess: (data, id) => {
-      queryClient.invalidateQueries({ queryKey: SIGNATURE_REQUEST_KEYS.lists() });
-      queryClient.invalidateQueries({ queryKey: SIGNATURE_REQUEST_KEYS.detail(id) });
-      queryClient.invalidateQueries({ queryKey: SIGNATURE_REQUEST_KEYS.workflow(id) });
-      queryClient.invalidateQueries({ queryKey: SIGNATURE_REQUEST_KEYS.stats() });
+      queryClient.invalidateQueries({
+        queryKey: SIGNATURE_REQUEST_KEYS.lists(),
+      });
+      queryClient.invalidateQueries({
+        queryKey: SIGNATURE_REQUEST_KEYS.detail(id),
+      });
+      queryClient.invalidateQueries({
+        queryKey: SIGNATURE_REQUEST_KEYS.workflow(id),
+      });
+      queryClient.invalidateQueries({
+        queryKey: SIGNATURE_REQUEST_KEYS.stats(),
+      });
     },
   });
 };
@@ -109,10 +130,27 @@ export const useCompleteSignatureRequest = () => {
   return useMutation({
     mutationFn: (id) => completeSignatureRequest(id),
     onSuccess: (data, id) => {
-      queryClient.invalidateQueries({ queryKey: SIGNATURE_REQUEST_KEYS.lists() });
-      queryClient.invalidateQueries({ queryKey: SIGNATURE_REQUEST_KEYS.detail(id) });
-      queryClient.invalidateQueries({ queryKey: SIGNATURE_REQUEST_KEYS.workflow(id) });
-      queryClient.invalidateQueries({ queryKey: SIGNATURE_REQUEST_KEYS.stats() });
+      queryClient.invalidateQueries({
+        queryKey: SIGNATURE_REQUEST_KEYS.lists(),
+      });
+      queryClient.invalidateQueries({
+        queryKey: SIGNATURE_REQUEST_KEYS.detail(id),
+      });
+      queryClient.invalidateQueries({
+        queryKey: SIGNATURE_REQUEST_KEYS.workflow(id),
+      });
+      queryClient.invalidateQueries({
+        queryKey: SIGNATURE_REQUEST_KEYS.stats(),
+      });
     },
+  });
+};
+
+// Get Signature Request History
+export const useSignatureRequestHistory = (id) => {
+  return useQuery({
+    queryKey: SIGNATURE_REQUEST_KEYS.history(id),
+    queryFn: () => getSignatureRequestHistory(id),
+    enabled: !!id,
   });
 };

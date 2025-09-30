@@ -30,7 +30,7 @@ import { useRouter } from "next/router";
 import dayjs from "dayjs";
 import "dayjs/locale/id";
 import relativeTime from "dayjs/plugin/relativeTime";
-
+import CheckTTE from "@/components/EsignBKD/CheckTTE";
 dayjs.locale("id");
 dayjs.extend(relativeTime);
 
@@ -192,6 +192,8 @@ function EsignBkdDashboard() {
               Kelola dokumen elektronik dan tanda tangan digital
             </Text>
           </div>
+
+          <CheckTTE />
 
           {/* Action Button Section */}
           <div

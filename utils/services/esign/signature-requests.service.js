@@ -47,7 +47,14 @@ const validateDocumentForSignature = async (documentId, userId) => {
  * @param {Object} trx - Transaction object
  * @returns {Promise<Object>} - Created signature detail
  */
-const createSelfSignDetail = async (requestId, userId, signPages, trx) => {
+const createSelfSignDetail = async (
+  requestId,
+  userId,
+  signPages,
+  tag_coordinate,
+  notes,
+  trx
+) => {
   if (!signPages || signPages.length === 0) {
     throw new Error("Halaman tanda tangan harus ditentukan untuk self sign");
   }
@@ -61,7 +68,8 @@ const createSelfSignDetail = async (requestId, userId, signPages, trx) => {
     sign_pages: signPages,
     signature_x: null,
     signature_y: null,
-    notes: null,
+    tag_coordinate,
+    notes,
   });
 };
 
@@ -112,6 +120,7 @@ export const createSignatureRequest = async (documentId, data, userId) => {
     signers = [],
     type = "self_sign",
     sign_pages = [],
+    tag_coordinate,
   } = data;
 
   // Validate document first (outside transaction)
@@ -136,7 +145,9 @@ export const createSignatureRequest = async (documentId, data, userId) => {
         const detail = await createSelfSignDetail(
           signatureRequest.id,
           userId,
-          JSON.stringify(sign_pages),
+          JSON.stringify(sign_pages) || [],
+          tag_coordinate,
+          notes,
           trx
         );
         signatureDetails = [detail];
@@ -177,23 +188,21 @@ export const createSignatureRequest = async (documentId, data, userId) => {
  * @returns {Promise<Object>} - Signature requests with pagination
  */
 export const getSignatureRequests = async (userId, filters = {}) => {
-  const { page = 1, limit = 10, status, request_type, document_id } = filters;
+  const {
+    page = 1,
+    limit = 10,
+    status,
+    request_type,
+    document_id,
+    // Dashboard filters
+    user_action_required,
+    marked_for_tte,
+    type, // self_sign or request_sign
+  } = filters;
 
-  let query = SignatureRequests.query()
-    .select([
-      "signature_requests.*",
-      "documents.title as document_title",
-      "documents.document_code",
-      "documents.is_public as document_is_public",
-    ])
-    .leftJoin(
-      "esign.documents as documents",
-      "signature_requests.document_id",
-      "documents.id"
-    )
-    .withGraphFetched(
-      "[signature_details.[user(simpleWithImage)], creator(simpleWithImage), document]"
-    );
+  let query = SignatureRequests.query().withGraphFetched(
+    "[signature_details.[user(simpleWithImage)], creator(simpleWithImage), document]"
+  );
 
   // Filter by user access (created by user OR user is a signer)
   query = query.where((builder) => {
@@ -201,11 +210,14 @@ export const getSignatureRequests = async (userId, filters = {}) => {
       .where("signature_requests.created_by", userId)
       .orWhereExists(
         SignatureDetails.query()
-          .where("signature_details.request_id", "signature_requests.id")
+          .whereRaw(
+            "signature_details.request_id = signature_requests.id::text"
+          )
           .where("signature_details.user_id", userId)
       );
   });
 
+  // Standard filters
   if (status) {
     query = query.where("signature_requests.status", status);
   }
@@ -218,10 +230,63 @@ export const getSignatureRequests = async (userId, filters = {}) => {
     query = query.where("signature_requests.document_id", document_id);
   }
 
+  if (type) {
+    query = query.where("signature_requests.type", type);
+  }
+
+  // Dashboard filters
+  // Filter: user_action_required (pending documents waiting for user action)
+  if (user_action_required === "true" || user_action_required === true) {
+    query = query.where("signature_requests.status", "pending").whereExists(
+      SignatureDetails.query()
+        .where("signature_details.request_id", "signature_requests.id")
+        .where("signature_details.user_id", userId)
+        .where("signature_details.status", "waiting")
+        .where((detailBuilder) => {
+          // For parallel requests, all waiting tasks can be actioned
+          detailBuilder.where("signature_requests.request_type", "parallel");
+
+          // For sequential requests, only current step can be actioned
+          detailBuilder.orWhere((seqBuilder) => {
+            seqBuilder
+              .where("signature_requests.request_type", "sequential")
+              .whereNotExists(
+                SignatureDetails.query()
+                  .whereColumn(
+                    "signature_details.request_id",
+                    "signature_requests.id"
+                  )
+                  .whereColumn(
+                    "signature_details.sequence_order",
+                    "<",
+                    "signature_details.sequence_order"
+                  )
+                  .whereNotIn("signature_details.status", [
+                    "reviewed",
+                    "signed",
+                  ])
+              );
+          });
+        })
+    );
+  }
+
+  // Filter: marked_for_tte (documents marked by user for delegate signing)
+  if (marked_for_tte === "true" || marked_for_tte === true) {
+    query = query.whereExists(
+      SignatureDetails.query()
+        .where("signature_details.request_id", "signature_requests.id")
+        .where("signature_details.user_id", userId)
+        .where("signature_details.is_marked_for_tte", true)
+        .where("signature_details.status", "marked_for_tte")
+    );
+  }
+
   const result = await query
     .orderBy("signature_requests.created_at", "desc")
     .page(parseInt(page) - 1, parseInt(limit));
 
+  console.log(result?.results);
   return {
     data: result.results,
     pagination: {
@@ -242,7 +307,9 @@ export const getSignatureRequests = async (userId, filters = {}) => {
 export const getSignatureRequestById = async (requestId, userId) => {
   const signatureRequest = await SignatureRequests.query()
     .findById(requestId)
-    .withGraphFetched("[signature_details, document]");
+    .withGraphFetched(
+      "[signature_details.[user(simpleWithImage)], creator(simpleWithImage), document]"
+    );
 
   if (!signatureRequest) {
     throw new Error("Pengajuan TTE tidak ditemukan");
@@ -568,4 +635,75 @@ export const getSignatureRequestStats = async (userId) => {
   });
 
   return result;
+};
+
+/**
+ * Get pending signature requests that require user action
+ * Only returns requests where:
+ * - User is part of workflow (in signature_details)
+ * - User status is 'waiting'
+ * - It's user's turn (all previous orders completed)
+ * - Request status is 'pending'
+ *
+ * @param {String} userId - User ID
+ * @param {Object} params - Query parameters (page, limit, search)
+ * @returns {Promise<Object>} - Paginated pending requests
+ */
+export const getPendingSignatureRequests = async (userId, params = {}) => {
+  const { page = 1, limit = 10, search = "" } = params;
+
+  // Subquery to check if it's user's turn
+  const isUserTurnSubquery = SignatureDetails.query()
+    .select(SignatureDetails.raw("1"))
+    .whereColumn("signature_details.request_id", "signature_requests.id")
+    .where("signature_details.user_id", userId)
+    .where("signature_details.status", "waiting")
+    .where((builder) => {
+      // Check if all previous orders are completed
+      builder.whereNotExists(
+        SignatureDetails.query()
+          .whereColumn("sd_prev.request_id", "signature_details.request_id")
+          .from("esign.signature_details as sd_prev")
+          .whereRaw("sd_prev.sequence_order < signature_details.sequence_order")
+          .whereNotIn("sd_prev.status", ["signed", "reviewed"])
+      );
+    });
+
+  let query = SignatureRequests.query()
+    .withGraphFetched(
+      "[signature_details.[user(simpleWithImage)], creator(simpleWithImage), document]"
+    )
+    .where("signature_requests.status", "pending")
+    .whereExists(isUserTurnSubquery);
+
+  // Search filter
+  if (search) {
+    query = query.where((builder) => {
+      builder
+        .where("signature_requests.notes", "ilike", `%${search}%`)
+        .orWhereExists(
+          Documents.query()
+            .whereColumn("documents.id", "signature_requests.document_id")
+            .where((docBuilder) => {
+              docBuilder
+                .where("title", "ilike", `%${search}%`)
+                .orWhere("document_code", "ilike", `%${search}%`);
+            })
+        );
+    });
+  }
+
+  const result = await query
+    .orderBy("signature_requests.created_at", "desc")
+    .page(parseInt(page) - 1, parseInt(limit));
+
+  return {
+    data: result.results,
+    pagination: {
+      page: parseInt(page),
+      limit: parseInt(limit),
+      total: result.total,
+      totalPages: Math.ceil(result.total / parseInt(limit)),
+    },
+  };
 };

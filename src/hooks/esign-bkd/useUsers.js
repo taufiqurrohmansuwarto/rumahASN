@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { getUsers } from "@/services/esign-bkd.services";
+import { getUsers, checkTTEUser } from "@/services/esign-bkd.services";
 import { useState, useCallback, useMemo } from "react";
 import { Avatar, Flex } from "antd";
 import { UserOutlined } from "@ant-design/icons";
@@ -11,6 +11,16 @@ export const useUsers = (params = {}, options = {}) => {
     queryFn: () => getUsers(params),
     staleTime: 5 * 60 * 1000, // 5 minutes
     ...options,
+  });
+};
+
+// check tte user
+export const useCheckTTEUser = () => {
+  return useQuery({
+    queryKey: ["esign-check-tte-user"],
+    queryFn: () => checkTTEUser(),
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    refetchOnWindowFocus: false,
   });
 };
 
@@ -34,9 +44,10 @@ export const useUserSearch = () => {
     }
 
     const lowerSearchTerm = searchTerm.toLowerCase();
-    return query.data.filter(user =>
-      user.username?.toLowerCase().includes(lowerSearchTerm) ||
-      user.nama_jabatan?.toLowerCase().includes(lowerSearchTerm)
+    return query.data.filter(
+      (user) =>
+        user.username?.toLowerCase().includes(lowerSearchTerm) ||
+        user.nama_jabatan?.toLowerCase().includes(lowerSearchTerm)
     );
   }, [query.data, searchTerm]);
 
@@ -54,7 +65,7 @@ export const useUserSearch = () => {
   const userOptions = useMemo(() => {
     if (!filteredUsers) return [];
 
-    return filteredUsers.map(user => ({
+    return filteredUsers.map((user) => ({
       value: user.id, // custom_id
       label: (
         <Flex align="center" gap="small">
@@ -65,11 +76,17 @@ export const useUserSearch = () => {
             style={{ flexShrink: 0 }}
           />
           <div style={{ minWidth: 0, overflow: "hidden" }}>
-            <div style={{ fontWeight: 500, fontSize: 13 }}>
-              {user.username}
-            </div>
+            <div style={{ fontWeight: 500, fontSize: 13 }}>{user.username}</div>
             {user.nama_jabatan && (
-              <div style={{ fontSize: 11, color: "#666", whiteSpace: "nowrap", textOverflow: "ellipsis", overflow: "hidden" }}>
+              <div
+                style={{
+                  fontSize: 11,
+                  color: "#666",
+                  whiteSpace: "nowrap",
+                  textOverflow: "ellipsis",
+                  overflow: "hidden",
+                }}
+              >
                 {user.nama_jabatan}
               </div>
             )}

@@ -38,7 +38,10 @@ function SignatureSetupForm({ document }) {
 
   const [signatureType, setSignatureType] = useState("self_sign"); // self_sign or request_sign
   const [signers, setSigners] = useState([]);
-  const [currentUserPages, setCurrentUserPages] = useState([1]); // Array untuk multiple pages
+  const [currentUserSettings, setCurrentUserSettings] = useState({
+    pages: [1],
+    tagCoordinate: "!"
+  }); // Settings untuk self sign
 
   // PDF Preview states
   const [pdfBase64, setPdfBase64] = useState(null);
@@ -111,15 +114,16 @@ function SignatureSetupForm({ document }) {
 
       if (signatureType === "self_sign") {
         // Self sign: current user signs on specified pages
-        if (!currentUserPages || currentUserPages.length === 0) {
+        if (!currentUserSettings.pages || currentUserSettings.pages.length === 0) {
           message.error("Silakan pilih halaman yang akan ditandatangani");
           return;
         }
 
         // Validate pages
-        validatePages(currentUserPages);
+        validatePages(currentUserSettings.pages);
 
-        signatureRequestData.sign_pages = currentUserPages;
+        signatureRequestData.sign_pages = currentUserSettings.pages;
+        signatureRequestData.tag_coordinate = currentUserSettings.tagCoordinate;
       } else if (signatureType === "request_sign") {
         // Request sign: validate signers
         if (signers.length === 0) {
@@ -127,26 +131,36 @@ function SignatureSetupForm({ document }) {
           return;
         }
 
-        const invalidSigners = signers.filter(signer =>
-          (!signer.user_id && !signer.username) || !signer.signature_pages || signer.signature_pages.length === 0
-        );
-        if (invalidSigners.length > 0) {
-          message.error("Silakan lengkapi username/pengguna dan halaman untuk semua penandatangan");
+        // Validate user_id (required)
+        const invalidUsers = signers.filter(signer => !signer.user_id);
+        if (invalidUsers.length > 0) {
+          message.error("Silakan lengkapi username/pengguna untuk semua penandatangan");
           return;
         }
 
-        // Validate all pages for all signers
+        // Validate signature_pages for signers only
+        const invalidSigners = signers.filter(signer =>
+          signer.role_type === 'signer' && (!signer.signature_pages || signer.signature_pages.length === 0)
+        );
+        if (invalidSigners.length > 0) {
+          message.error("Signer harus memilih minimal 1 halaman untuk ditandatangani");
+          return;
+        }
+
+        // Validate all pages for all signers (only for signer role)
         for (const signer of signers) {
-          validatePages(signer.signature_pages);
+          if (signer.role_type === 'signer' && signer.signature_pages) {
+            validatePages(signer.signature_pages);
+          }
         }
 
         // Prepare signers data
         const signersData = signers.map((signer, index) => ({
-          user_id: signer.user_id || signer.username,
+          user_id: signer.user_id,
           role_type: signer.role_type || "signer",
           sequence_order: signer.sequence_order || index + 1,
-          signature_pages: signer.signature_pages, // Use signature_pages as array
-          notes: signer.notes,
+          signature_pages: signer.signature_pages || [], // Empty array for reviewer
+          notes: signer.notes || "",
         }));
 
         signatureRequestData.signers = signersData;
@@ -190,27 +204,11 @@ function SignatureSetupForm({ document }) {
   }, []);
 
   const updateSigner = useCallback((id, field, value) => {
-    // Validate signature_pages to only contain numbers
-    if (field === 'signature_pages') {
-      const validPages = value
-        .filter(page => {
-          const num = parseInt(page);
-          return !isNaN(num) && num > 0;
-        })
-        .map(page => parseInt(page));
-
-      setSigners(prevSigners =>
-        prevSigners.map((signer) =>
-          signer.id === id ? { ...signer, [field]: validPages } : signer
-        )
-      );
-    } else {
-      setSigners(prevSigners =>
-        prevSigners.map((signer) =>
-          signer.id === id ? { ...signer, [field]: value } : signer
-        )
-      );
-    }
+    setSigners(prevSigners =>
+      prevSigners.map((signer) =>
+        signer.id === id ? { ...signer, [field]: value } : signer
+      )
+    );
   }, []);
 
   return (
@@ -314,8 +312,9 @@ function SignatureSetupForm({ document }) {
                 {/* Self Sign Settings */}
                 {signatureType === "self_sign" && (
                   <PersonalSignatureSettings
-                    currentUserPages={currentUserPages}
-                    onChange={setCurrentUserPages}
+                    currentUserPages={currentUserSettings.pages}
+                    tagCoordinate={currentUserSettings.tagCoordinate}
+                    onChange={setCurrentUserSettings}
                     totalPages={totalPages}
                   />
                 )}

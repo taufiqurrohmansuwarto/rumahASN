@@ -18,3 +18,6 @@ export * from "./useDocumentHistory";
 
 // Users Hooks
 export * from "./useUsers";
+
+// Pending Hooks
+export * from "./usePending";

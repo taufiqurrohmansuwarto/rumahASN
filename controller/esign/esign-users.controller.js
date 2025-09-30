@@ -22,7 +22,6 @@ export const findAll = async (req, res) => {
         // ambil perangkat daerah detail dari info->perangkat_daerah->>detail
         raw("info->'perangkat_daerah'->>'detail' as perangkat_daerah_detail")
       )
-      .where("custom_id", "!=", userId)
       .andWhere("role", "=", "USER")
       .andWhere("organization_id", "ilike", "123%")
       .orderBy("username", "asc");

@@ -17,35 +17,15 @@ export const DocumentStatusBadge = ({ status }) => {
       text: "Draft",
       icon: <IconEdit size={14} />
     },
-    pending: {
-      color: "yellow",
-      text: "Pending",
-      icon: <IconClock size={14} />
-    },
-    in_review: {
-      color: "orange",
-      text: "Review",
-      icon: <IconAlertCircle size={14} />
+    in_progress: {
+      color: "blue",
+      text: "Dalam Proses",
+      icon: <IconRefresh size={14} />
     },
     signed: {
       color: "green",
       text: "Ditandatangani",
       icon: <IconCertificate size={14} />
-    },
-    completed: {
-      color: "green",
-      text: "Selesai",
-      icon: <IconCheck size={14} />
-    },
-    rejected: {
-      color: "red",
-      text: "Ditolak",
-      icon: <IconX size={14} />
-    },
-    cancelled: {
-      color: "gray",
-      text: "Dibatalkan",
-      icon: <IconX size={14} />
     },
   };
 
@@ -55,8 +35,18 @@ export const DocumentStatusBadge = ({ status }) => {
     <Badge
       color={config.color}
       variant="light"
-      leftSection={config.icon}
+      leftSection={
+        <div style={{ display: 'flex', alignItems: 'center' }}>
+          {config.icon}
+        </div>
+      }
       size="sm"
+      styles={{
+        section: {
+          display: 'flex',
+          alignItems: 'center',
+        }
+      }}
     >
       {config.text}
     </Badge>
@@ -98,8 +88,18 @@ export const SignatureRequestStatusBadge = ({ status }) => {
     <Badge
       color={config.color}
       variant="light"
-      leftSection={config.icon}
+      leftSection={
+        <div style={{ display: 'flex', alignItems: 'center' }}>
+          {config.icon}
+        </div>
+      }
       size="sm"
+      styles={{
+        section: {
+          display: 'flex',
+          alignItems: 'center',
+        }
+      }}
     >
       {config.text}
     </Badge>
@@ -146,8 +146,18 @@ export const BsreStatusBadge = ({ status }) => {
     <Badge
       color={config.color}
       variant="light"
-      leftSection={config.icon}
+      leftSection={
+        <div style={{ display: 'flex', alignItems: 'center' }}>
+          {config.icon}
+        </div>
+      }
       size="sm"
+      styles={{
+        section: {
+          display: 'flex',
+          alignItems: 'center',
+        }
+      }}
     >
       {config.text}
     </Badge>
@@ -184,8 +194,18 @@ export const PriorityBadge = ({ priority }) => {
     <Badge
       color={config.color}
       variant="filled"
-      leftSection={config.icon}
+      leftSection={
+        <div style={{ display: 'flex', alignItems: 'center' }}>
+          {config.icon}
+        </div>
+      }
       size="xs"
+      styles={{
+        section: {
+          display: 'flex',
+          alignItems: 'center',
+        }
+      }}
     >
       {config.text}
     </Badge>

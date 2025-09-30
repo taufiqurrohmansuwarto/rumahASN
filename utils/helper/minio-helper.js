@@ -139,21 +139,38 @@ export const uploadSignedDocument = (mc, fileBuffer, originalPath, signatureId, 
  */
 export const downloadFileAsBase64 = (mc, bucket, filename) => {
   return new Promise((resolve, reject) => {
+    console.log(`      [downloadFileAsBase64] Getting object from bucket: ${bucket}, file: ${filename}`);
+
     mc.getObject(bucket, filename, function (err, dataStream) {
       if (err) {
-        console.error("Minio download error:", err);
+        console.error("      [downloadFileAsBase64] Minio download error:", err);
         reject(err);
       } else {
+        console.log("      [downloadFileAsBase64] Stream received, reading data...");
         let fileBuffer = [];
+        let chunkCount = 0;
+
         dataStream.on("data", function (chunk) {
+          chunkCount++;
           fileBuffer.push(chunk);
+          if (chunkCount % 10 === 0) {
+            console.log(`      [downloadFileAsBase64] Received ${chunkCount} chunks...`);
+          }
         });
+
         dataStream.on("end", function () {
+          console.log(`      [downloadFileAsBase64] Stream ended. Total chunks: ${chunkCount}`);
           const chunks = Buffer.concat(fileBuffer);
+          console.log(`      [downloadFileAsBase64] Buffer size: ${chunks.length} bytes`);
           const base64 = Buffer.from(chunks).toString("base64");
+          console.log(`      [downloadFileAsBase64] Base64 size: ${base64.length} chars`);
           resolve(base64);
         });
-        dataStream.on("error", reject);
+
+        dataStream.on("error", function(streamErr) {
+          console.error("      [downloadFileAsBase64] Stream error:", streamErr);
+          reject(streamErr);
+        });
       }
     });
   });

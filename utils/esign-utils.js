@@ -3,6 +3,7 @@
  */
 const idSubscriber = process.env.ESIGN_ID_SUBSCRIBER;
 const esignFetcher = require("./esign-fetcher");
+require("dotenv").config();
 
 // sign
 module.exports.signWithNikAndPassphrase = async ({ nik, passphrase, file }) => {
@@ -221,6 +222,45 @@ module.exports.verifyUserWithNik = async ({ nik }) => {
       .post(`/api/v2/user/check/status`, {
         nik,
       })
+      .then((response) => {
+        resolve({
+          success: true,
+          data: response?.data,
+        });
+      })
+      .catch((error) => {
+        resolve({
+          success: false,
+          data: error,
+        });
+      });
+  });
+};
+
+export const signWithCoordinate = async ({
+  nik,
+  passphrase,
+  file,
+  signatureProperties,
+}) => {
+  const isProduction = process.env.NODE_ENV === "production";
+  const currentNik = isProduction ? nik : process.env.ESIGN_NIK;
+  const currentPassphrase = isProduction
+    ? passphrase
+    : process.env.ESIGN_PASSPHRASE;
+
+  const data = {
+    nik: currentNik,
+    passphrase: currentPassphrase,
+    signatureProperties,
+    file,
+  };
+
+  console.log("data", data);
+
+  return new Promise((resolve, reject) => {
+    esignFetcher
+      .post("/api/v2/sign/pdf", data)
       .then((response) => {
         resolve({
           success: true,
