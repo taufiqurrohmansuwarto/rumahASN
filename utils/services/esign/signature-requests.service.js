@@ -286,7 +286,6 @@ export const getSignatureRequests = async (userId, filters = {}) => {
     .orderBy("signature_requests.created_at", "desc")
     .page(parseInt(page) - 1, parseInt(limit));
 
-  console.log(result?.results);
   return {
     data: result.results,
     pagination: {

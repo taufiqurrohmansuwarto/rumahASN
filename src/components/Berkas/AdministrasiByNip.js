@@ -40,18 +40,27 @@ const list_tmt = [
   { value: "01072025", label: "1 Juli 2025" },
   { value: "01032025", label: "1 Maret 2025" },
   { value: "01082025", label: "1 Agustus 2025" },
+  { value: "01102025", label: "1 Oktober 2025" },
 ];
 
 // Data dokumen dengan keterangan yang lebih jelas
 const dokumen = [
   { code: "SK", name: "Surat Keputusan", icon: <IconFileText size={16} /> },
-  { code: "PERTEK", name: "Pertimbangan Teknis", icon: <IconFileText size={16} /> },
+  {
+    code: "PERTEK",
+    name: "Pertimbangan Teknis",
+    icon: <IconFileText size={16} />,
+  },
   {
     code: "SPMT",
     name: "Surat Pernyataan Melaksanakan Tugas",
     icon: <IconFileText size={16} />,
   },
-  { code: "PK", name: "Perjanjian Kinerja (PPPK)", icon: <IconFileText size={16} /> },
+  {
+    code: "PK",
+    name: "Perjanjian Kinerja (PPPK)",
+    icon: <IconFileText size={16} />,
+  },
 ];
 
 const DocumentButton = ({ tmt, file, nip, fileName, icon }) => {
@@ -108,29 +117,32 @@ const DocumentButton = ({ tmt, file, nip, fileName, icon }) => {
 
   // Status dokumen
   const getBadgeProps = () => {
-    if (isLoading) return {
-      color: "gray",
-      variant: "light",
-      icon: <IconLoader size={12} />,
-      text: "Memeriksa..."
-    };
-    if (error) return {
-      color: "red",
-      variant: "outline",
-      icon: <IconAlertTriangle size={12} />,
-      text: "Error"
-    };
-    if (data) return {
-      color: "green",
-      variant: "filled",
-      icon: <IconCheck size={12} />,
-      text: "Tersedia"
-    };
+    if (isLoading)
+      return {
+        color: "gray",
+        variant: "light",
+        icon: <IconLoader size={12} />,
+        text: "Memeriksa...",
+      };
+    if (error)
+      return {
+        color: "red",
+        variant: "outline",
+        icon: <IconAlertTriangle size={12} />,
+        text: "Error",
+      };
+    if (data)
+      return {
+        color: "green",
+        variant: "filled",
+        icon: <IconCheck size={12} />,
+        text: "Tersedia",
+      };
     return {
       color: "red",
       variant: "light",
       icon: <IconX size={12} />,
-      text: "Tidak Tersedia"
+      text: "Tidak Tersedia",
     };
   };
 
@@ -145,7 +157,7 @@ const DocumentButton = ({ tmt, file, nip, fileName, icon }) => {
         borderColor: data ? "#40c057" : "#e9ecef",
         backgroundColor: data ? "#f8fffe" : "#fff",
         cursor: data ? "pointer" : "default",
-        transition: "all 0.2s ease"
+        transition: "all 0.2s ease",
       }}
     >
       <Stack spacing="xs">
@@ -166,11 +178,19 @@ const DocumentButton = ({ tmt, file, nip, fileName, icon }) => {
             {badgeProps.text}
           </Badge>
 
-          <Tooltip label={data ? `Unduh ${file.name}` : "Dokumen tidak tersedia"}>
+          <Tooltip
+            label={data ? `Unduh ${file.name}` : "Dokumen tidak tersedia"}
+          >
             <Button
               size="small"
               type={data ? "primary" : "default"}
-              icon={downloading ? <IconLoader size={14} /> : <IconDownload size={14} />}
+              icon={
+                downloading ? (
+                  <IconLoader size={14} />
+                ) : (
+                  <IconDownload size={14} />
+                )
+              }
               onClick={downloadFile}
               disabled={!data || downloading}
               loading={downloading}
@@ -296,7 +316,8 @@ function AdministrasiByNip() {
         variant="light"
         icon={<IconAlertTriangle size={16} />}
       >
-        Klik tombol 'Unduh' untuk mengunduh dokumen. Pastikan koneksi internet stabil untuk proses download yang optimal.
+        Klik tombol 'Unduh' untuk mengunduh dokumen. Pastikan koneksi internet
+        stabil untuk proses download yang optimal.
       </Alert>
 
       {/* Dokumen Sections */}

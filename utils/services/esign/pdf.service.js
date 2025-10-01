@@ -12,14 +12,6 @@ const checkDocument = isProduction
 
 const footerText = `Sesuai dengan ketentuan peraturan perundang-undangan yang berlaku, surat ini telah ditandatangani secara elektronik menggunakan sertifikat elektronik yang diterbitkan oleh Balai Besar Sertifikasi Elektronik Badan Siber dan Sandi Negara (BSrE-BSSN). Legalitas berkas secara digital diatur oleh Dinas Komunikasi dan Informatika Provinsi Jawa Timur. Untuk mengetahui keabsahan berkas dapat dilakukan dengan memindai qrcode yang tersedia.`;
 
-const logoBkd = path.join(
-  process.cwd(),
-  "utils",
-  "services",
-  "esign",
-  "bkd.png"
-);
-
 /**
  * Add footer with BSrE logo, text, and QR code to all pages of PDF
  * @param {Buffer} pdfBuffer - Original PDF buffer
@@ -48,15 +40,6 @@ module.exports.addFooterToPdf = async (pdfBuffer, documentId) => {
       bsreImageBytes = null;
     }
 
-    // Load BKD logo image for QR code center
-    let bkdImageBytes;
-    try {
-      bkdImageBytes = fs.readFileSync(logoBkd);
-    } catch (error) {
-      console.warn("BKD logo not found, skipping logo in QR code");
-      bkdImageBytes = null;
-    }
-
     // Embed BSrE logo if available
     let bsreImage = null;
     if (bsreImageBytes) {
@@ -65,17 +48,6 @@ module.exports.addFooterToPdf = async (pdfBuffer, documentId) => {
       } catch (error) {
         console.warn("Error embedding BSrE logo:", error.message);
         bsreImage = null;
-      }
-    }
-
-    // Embed BKD logo if available
-    let bkdImage = null;
-    if (bkdImageBytes) {
-      try {
-        bkdImage = await pdfDoc.embedPng(bkdImageBytes);
-      } catch (error) {
-        console.warn("Error embedding BKD logo:", error.message);
-        bkdImage = null;
       }
     }
 
@@ -194,21 +166,6 @@ module.exports.addFooterToPdf = async (pdfBuffer, documentId) => {
         width: qrCodeSize,
         height: qrCodeSize,
       });
-
-      // Draw BKD logo in center of QR code (transparent background)
-      if (bkdImage) {
-        const logoSizeInQR = qrCodeSize * 0.15; // Smaller logo (15% of QR code size)
-        const logoXInQR = qrX + (qrCodeSize - logoSizeInQR) / 2;
-        const logoYInQR = qrY + (qrCodeSize - logoSizeInQR) / 2;
-
-        // No background - logo will be transparent
-        page.drawImage(bkdImage, {
-          x: logoXInQR,
-          y: logoYInQR,
-          width: logoSizeInQR,
-          height: logoSizeInQR,
-        });
-      }
     }
 
     // Save and return modified PDF

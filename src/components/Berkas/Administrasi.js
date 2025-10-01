@@ -15,6 +15,7 @@ const list_tmt = [
   "01062025",
   "01072025",
   "01082025",
+  "01102025",
 ];
 
 const dokumen = ["SK", "PERTEK", "SPMT", "PK"];

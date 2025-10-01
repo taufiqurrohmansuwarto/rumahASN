@@ -85,7 +85,7 @@ export const reviewDoc = async (req, res) => {
     const { id } = req.query;
     const { notes } = req.body;
 
-    const updatedDetail = await reviewDocument(id, userId, notes);
+    const updatedDetail = await reviewDocument(id, userId, notes, req);
 
     res.json({
       message: "Dokumen berhasil direview",
@@ -102,7 +102,7 @@ export const markForTteDoc = async (req, res) => {
     const { id } = req.query;
     const { notes } = req.body;
 
-    const updatedDetail = await markForTte(id, userId, notes);
+    const updatedDetail = await markForTte(id, userId, notes, req);
 
     res.json({
       message: "Dokumen berhasil ditandai siap TTE",
@@ -119,7 +119,7 @@ export const signDoc = async (req, res) => {
     const { id } = req.query;
     const mc = req?.mc;
 
-    const updatedDetail = await signDocument(id, userId, req.body, mc);
+    const updatedDetail = await signDocument(id, userId, req.body, mc, req);
 
     res.json({
       message: "Dokumen berhasil ditandatangani",
@@ -136,7 +136,7 @@ export const rejectDoc = async (req, res) => {
     const { id } = req.query;
     const { reason } = req.body;
 
-    const updatedDetail = await rejectDocument(id, userId, reason);
+    const updatedDetail = await rejectDocument(id, userId, reason, req);
 
     res.json({
       message: "Dokumen berhasil ditolak",

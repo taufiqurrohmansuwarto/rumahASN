@@ -256,8 +256,6 @@ export const signWithCoordinate = async ({
     file,
   };
 
-  console.log("data", data);
-
   return new Promise((resolve, reject) => {
     esignFetcher
       .post("/api/v2/sign/pdf", data)
