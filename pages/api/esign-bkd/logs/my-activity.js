@@ -1,9 +1,15 @@
-import { getMyActivityLogs } from "../../../../../controller/esign/esign-audit-log.controller";
-import auth from "../../../../../middleware/auth";
-import nc from "next-connect";
+import { getMyActivityLogs } from "@/controller/esign/esign-audit-log.controller";
+import auth from "@/middleware/auth.middleware";
+import onlyBkd from "@/middleware/bkd.middleware";
+import { createRouter } from "next-connect";
 
-const handler = nc()
-  .use(auth)
-  .get(getMyActivityLogs);
+const router = createRouter();
 
-export default handler;
+router.use(auth).use(onlyBkd).get(getMyActivityLogs);
+
+export default router.handler({
+  onError: (err, req, res) => {
+    console.error("API Error:", err.stack);
+    res.status(500).json({ message: "Internal Server Error" });
+  },
+});
