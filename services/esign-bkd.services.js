@@ -365,6 +365,30 @@ export const handlePreviewResponse = (blob) => {
 };
 
 // ==========================================
+// AUDIT LOG SERVICES
+// ==========================================
+
+export const getDocumentLogs = async (documentId, params = {}) => {
+  const queryParams = queryString.stringify(params, {
+    skipNull: true,
+    skipEmptyString: true,
+  });
+  const res = await esignBkdApi.get(
+    `/documents/${documentId}/logs?${queryParams}`
+  );
+  return res?.data;
+};
+
+export const getMyActivityLogs = async (params = {}) => {
+  const queryParams = queryString.stringify(params, {
+    skipNull: true,
+    skipEmptyString: true,
+  });
+  const res = await esignBkdApi.get(`/logs/my-activity?${queryParams}`);
+  return res?.data;
+};
+
+// ==========================================
 // USERS SERVICES
 // ==========================================
 

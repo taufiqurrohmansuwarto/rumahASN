@@ -117,10 +117,8 @@ export const getDocuments = async (userId, filters = {}) => {
     "updated_at",
   ]);
 
-  // Filter berdasarkan user (hanya dokumen yang dibuat user atau public)
-  query = query.where((builder) => {
-    builder.where("created_by", userId).orWhere("is_public", true);
-  });
+  // Filter berdasarkan user (hanya dokumen yang dibuat user)
+  query = query.where("created_by", userId);
 
   if (status) {
     query = query.where("status", status);

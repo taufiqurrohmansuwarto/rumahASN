@@ -26,6 +26,7 @@ function SignersList({ signers, onAdd, onUpdate, onRemove, totalPages = 1 }) {
           Tambah
         </Button>
       </Flex>
+
       <div style={{ padding: "16px", background: "#f0f5ff", borderRadius: "8px", border: "1px solid #adc6ff" }}>
         {signers.length === 0 ? (
           <Flex justify="center" style={{ padding: "32px 0" }}>

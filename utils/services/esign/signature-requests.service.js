@@ -95,7 +95,8 @@ const createRequestSignDetails = async (requestId, signers, trx) => {
       role_type: signer.role_type || "signer",
       sequence_order: signer.sequence_order || i + 1,
       status: "waiting",
-      sign_pages: signer.signature_pages || [1],
+      sign_pages: JSON.stringify(signer.signature_pages) || [1],
+      tag_coordinate: signer.tag_coordinate || "!",
       signature_x: signer.signature_x,
       signature_y: signer.signature_y,
       notes: signer.notes,
@@ -133,6 +134,7 @@ export const createSignatureRequest = async (documentId, data, userId) => {
       const signatureRequest = await SignatureRequests.query(trx).insert({
         document_id: documentId,
         request_type,
+        type,
         status: "pending",
         notes,
         created_by: userId,

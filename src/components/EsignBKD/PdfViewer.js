@@ -8,6 +8,7 @@ import {
   RightOutlined,
   ZoomInOutlined,
   ZoomOutOutlined,
+  CloudDownloadOutlined,
 } from "@ant-design/icons";
 import {
   ActionIcon,
@@ -19,10 +20,12 @@ import {
   NumberInput,
   Stack,
   Text,
+  Tooltip,
 } from "@mantine/core";
 import { Button, Col, Grid, Row } from "antd";
 import dynamic from "next/dynamic";
 import { useCallback, useEffect, useState } from "react";
+import { useDownloadDocument } from "@/hooks/esign-bkd";
 
 // Import react-pdf CSS (required)
 import "react-pdf/dist/Page/AnnotationLayer.css";
@@ -44,10 +47,13 @@ function PdfViewer({
   pdfBase64,
   title = "Dokumen PDF",
   headerActions = null,
+  documentId = null,
 }) {
   const screens = useBreakpoint();
   const isMobile = !screens?.md;
-  const isXs = !screens?.sm;
+
+  const { mutate: downloadDoc, isLoading: isDownloading } =
+    useDownloadDocument();
 
   const [numPages, setNumPages] = useState(null);
   const [pageNumber, setPageNumber] = useState(1);
@@ -113,8 +119,8 @@ function PdfViewer({
         setError(`Gagal memproses PDF: ${error.message}`);
         setLoading(false);
         setPageLoading(false);
-    }
-  };
+      }
+    };
 
     processPdfBase64();
   }, [pdfBase64, pdfWorkerReady]);
@@ -130,13 +136,10 @@ function PdfViewer({
     setPageLoading(false);
   }, []);
 
-  const onPageRenderError = useCallback(
-    (pageError) => {
-      setPageLoading(false);
-      setError(`Gagal memuat halaman PDF: ${pageError?.message || pageError}`);
-    },
-    []
-  );
+  const onPageRenderError = useCallback((pageError) => {
+    setPageLoading(false);
+    setError(`Gagal memuat halaman PDF: ${pageError?.message || pageError}`);
+  }, []);
 
   const onDocumentLoadError = useCallback(
     (error) => {
@@ -205,6 +208,18 @@ function PdfViewer({
     [changePage]
   );
 
+  const handleDownload = useCallback(() => {
+    if (!documentId) {
+      console.error("Document ID is required for download");
+      return;
+    }
+
+    downloadDoc({
+      id: documentId,
+      filename: `${title}.pdf`,
+    });
+  }, [documentId, title, downloadDoc]);
+
   const renderError = () => (
     <Center py="xl">
       <Stack align="center" gap="md">
@@ -253,7 +268,13 @@ function PdfViewer({
   // Early return jika tidak ada fileUrl
   const renderHeader = () => (
     <Card.Section withBorder inheritPadding py="xs">
-      <Group justify="space-between" align="center">
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+        }}
+      >
         <Group gap="sm" align="center">
           <Avatar color="blue" size="sm" radius="xl">
             <FileTextOutlined />
@@ -261,16 +282,30 @@ function PdfViewer({
           <Text fw={600} size="lg">
             {title}
           </Text>
-        </Group>
-        <Group gap="sm" align="center">
           {numPages && (
             <Text size="sm" c="dimmed">
               {pageNumber} dari {numPages} halaman
             </Text>
           )}
-          {headerActions}
         </Group>
-      </Group>
+        <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+          {headerActions}
+          {documentId && (
+            <Tooltip label="Unduh Dokumen">
+              <ActionIcon
+                variant="light"
+                size="lg"
+                onClick={handleDownload}
+                color="blue"
+                loading={isDownloading}
+                disabled={isDownloading}
+              >
+                <CloudDownloadOutlined style={{ fontSize: 18 }} />
+              </ActionIcon>
+            </Tooltip>
+          )}
+        </div>
+      </div>
     </Card.Section>
   );
 
@@ -386,54 +421,52 @@ function PdfViewer({
             padding: "16px",
           }}
         >
-          {error
-            ? renderError()
-            : pdfWorkerReady && pdfData
-            ? (
-                <div
-                  style={{
-                    maxWidth: "100%",
-                    overflow: "auto",
-                    display: "flex",
-                    justifyContent: "center",
-                    position: "relative",
-                    width: "100%",
-                  }}
-                >
-                  {(loading || pageLoading) && renderInlineLoading()}
-                  <Document
-                    file={pdfData}
-                    onLoadSuccess={onDocumentLoadSuccess}
-                    onLoadError={onDocumentLoadError}
-                    loading={renderLoading()}
-                    error={renderError()}
-                    options={{
-                      cMapUrl: `https://unpkg.com/pdfjs-dist@${pdfjsVersion}/cmaps/`,
-                      cMapPacked: true,
-                      standardFontDataUrl: `https://unpkg.com/pdfjs-dist@${pdfjsVersion}/standard_fonts/`,
-                    }}
-                  >
-                    <Page
-                      pageNumber={pageNumber}
-                      scale={scale}
-                      renderTextLayer={false}
-                      renderAnnotationLayer={false}
-                      loading={renderLoading()}
-                      onRenderSuccess={onPageRenderSuccess}
-                      onRenderError={onPageRenderError}
-                      width={
-                        isMobile && typeof window !== "undefined"
-                          ? Math.min(window.innerWidth - 80, 600)
-                          : undefined
-                      }
-                      error={renderError()}
-                    />
-                  </Document>
-                </div>
-              )
-            : (
-                renderLoading()
-              )}
+          {error ? (
+            renderError()
+          ) : pdfWorkerReady && pdfData ? (
+            <div
+              style={{
+                maxWidth: "100%",
+                overflow: "auto",
+                display: "flex",
+                justifyContent: "center",
+                position: "relative",
+                width: "100%",
+              }}
+            >
+              {(loading || pageLoading) && renderInlineLoading()}
+              <Document
+                file={pdfData}
+                onLoadSuccess={onDocumentLoadSuccess}
+                onLoadError={onDocumentLoadError}
+                loading={renderLoading()}
+                error={renderError()}
+                options={{
+                  cMapUrl: `https://unpkg.com/pdfjs-dist@${pdfjsVersion}/cmaps/`,
+                  cMapPacked: true,
+                  standardFontDataUrl: `https://unpkg.com/pdfjs-dist@${pdfjsVersion}/standard_fonts/`,
+                }}
+              >
+                <Page
+                  pageNumber={pageNumber}
+                  scale={scale}
+                  renderTextLayer={false}
+                  renderAnnotationLayer={false}
+                  loading={renderLoading()}
+                  onRenderSuccess={onPageRenderSuccess}
+                  onRenderError={onPageRenderError}
+                  width={
+                    isMobile && typeof window !== "undefined"
+                      ? Math.min(window.innerWidth - 80, 600)
+                      : undefined
+                  }
+                  error={renderError()}
+                />
+              </Document>
+            </div>
+          ) : (
+            renderLoading()
+          )}
         </div>
       </Card.Section>
 

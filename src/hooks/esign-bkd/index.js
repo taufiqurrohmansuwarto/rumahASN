@@ -21,3 +21,6 @@ export * from "./useUsers";
 
 // Pending Hooks
 export * from "./usePending";
+
+// Audit Log Hooks
+export * from "./useAuditLogs";

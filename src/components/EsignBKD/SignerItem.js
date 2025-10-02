@@ -1,5 +1,5 @@
 import React, { memo, useCallback, useMemo } from "react";
-import { Button, Input, Select, AutoComplete, Flex, Avatar, Alert } from "antd";
+import { Button, Input, Select, AutoComplete, Flex, Avatar, Alert, Radio } from "antd";
 import { DeleteOutlined, UserOutlined } from "@ant-design/icons";
 import { useUserSearch } from "@/hooks/esign-bkd";
 
@@ -18,6 +18,7 @@ function SignerItem({ signer, index, onUpdate, onRemove, totalPages = 1 }) {
     // If role changes to reviewer, clear signature_pages
     if (field === 'role_type' && value === 'reviewer') {
       onUpdate(signer.id, 'signature_pages', []);
+      onUpdate(signer.id, 'tag_coordinate', '!');
     }
 
     // Validate signature_pages to only contain numbers and within valid range
@@ -116,35 +117,67 @@ function SignerItem({ signer, index, onUpdate, onRemove, totalPages = 1 }) {
               status={hasUserError ? "error" : ""}
             />
 
-            <Select
+            <Radio.Group
               value={signer.role_type}
-              onChange={(value) => handleUpdate("role_type", value)}
-              style={{ width: 120 }}
+              onChange={(e) => handleUpdate("role_type", e.target.value)}
+              size="small"
+              buttonStyle="solid"
             >
-              <Option value="reviewer">Reviewer</Option>
-              <Option value="signer">Signer</Option>
-            </Select>
+              <Radio.Button value="reviewer">Reviewer</Radio.Button>
+              <Radio.Button value="signer">Signer</Radio.Button>
+            </Radio.Group>
 
             {signer.role_type === 'signer' && (
-              <Select
-                mode="tags"
-                placeholder={`Halaman (1-${totalPages})`}
-                value={signer.signature_pages}
-                onChange={(value) => handleUpdate("signature_pages", value)}
-                style={{ width: 150, borderRadius: 6 }}
-                status={hasPageError ? "error" : ""}
-                allowClear
-                tokenSeparators={[',', ' ']}
-                onInputKeyDown={(e) => {
-                  // Only allow numbers, backspace, delete, arrow keys, comma, space
-                  if (!/[0-9,\s]/.test(e.key) &&
-                      !['Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'Tab'].includes(e.key)) {
-                    e.preventDefault();
-                  }
-                }}
-              />
+              <>
+                <Select
+                  mode="tags"
+                  placeholder="Hal. (ex: 1,3,5)"
+                  value={signer.signature_pages}
+                  onChange={(value) => handleUpdate("signature_pages", value)}
+                  style={{ width: 140, borderRadius: 6 }}
+                  status={hasPageError ? "error" : ""}
+                  allowClear
+                  tokenSeparators={[',', ' ']}
+                  title="Nomor halaman yang akan ditandatangani"
+                  onInputKeyDown={(e) => {
+                    // Only allow numbers, backspace, delete, arrow keys, comma, space
+                    if (!/[0-9,\s]/.test(e.key) &&
+                        !['Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'Tab'].includes(e.key)) {
+                      e.preventDefault();
+                    }
+                  }}
+                />
+                <Select
+                  value={signer.tag_coordinate || "!"}
+                  onChange={(value) => handleUpdate("tag_coordinate", value)}
+                  style={{ width: 90, borderRadius: 6 }}
+                  placeholder="Tanda"
+                  title="Karakter penanda posisi tanda tangan di PDF"
+                >
+                  <Option value="!" title="Tanda seru untuk penanda posisi">!</Option>
+                  <Option value="@" title="At symbol untuk penanda posisi">@</Option>
+                  <Option value="#" title="Hashtag untuk penanda posisi">#</Option>
+                  <Option value="$" title="Dollar untuk penanda posisi">$</Option>
+                  <Option value="^" title="Caret untuk penanda posisi">^</Option>
+                </Select>
+              </>
             )}
           </Flex>
+
+          {/* Notes input - shown for all roles */}
+          <Input.TextArea
+            placeholder="Catatan untuk penandatangan ini (opsional)"
+            value={signer.notes || ""}
+            onChange={(e) => handleUpdate("notes", e.target.value)}
+            rows={2}
+            maxLength={200}
+            showCount
+            style={{
+              borderRadius: 6,
+              fontSize: 12,
+              marginTop: 4
+            }}
+          />
 
           {/* Error messages */}
           {hasUserError && (

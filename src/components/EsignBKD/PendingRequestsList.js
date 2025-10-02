@@ -118,9 +118,9 @@ function PendingRequestsList() {
   const columns = [
     {
       title: (
-        <Space>
-          <FileTextOutlined />
-          <Text fw={600}>Dokumen</Text>
+        <Space size={4}>
+          <FileTextOutlined style={{ fontSize: 14 }} />
+          <Text fw={600} style={{ fontSize: 13 }}>Dokumen</Text>
         </Space>
       ),
       key: "document",
@@ -130,39 +130,52 @@ function PendingRequestsList() {
           (detail) => detail.status === "waiting"
         );
 
+        const fileSize = record.document?.file_size || 0;
+        const fileSizeKB = fileSize > 0 ? (fileSize / 1024).toFixed(0) : 0;
+        const fileSizeMB = fileSize > 1024 * 1024 ? (fileSize / (1024 * 1024)).toFixed(2) : null;
+        const displaySize = fileSizeMB ? `${fileSizeMB} MB` : `${fileSizeKB} KB`;
+
         return (
-          <Space size="small">
+          <Space size={8}>
             <Avatar
-              size={isMobile ? 32 : 36}
+              size={28}
               style={{
                 backgroundColor: "#fff7e6",
-                border: "2px solid #ffd591",
+                border: "1px solid #ffd591",
               }}
-              icon={<FileTextOutlined style={{ color: "#fa8c16" }} />}
+              icon={<FileTextOutlined style={{ color: "#fa8c16", fontSize: 14 }} />}
             />
-            <div style={{ lineHeight: 1.1 }}>
-              <div>
-                <a
-                  onClick={() => handleViewDetail(record)}
-                  style={{
-                    fontWeight: 600,
-                    fontSize: isMobile ? 11 : 12,
-                    cursor: "pointer",
-                    color: "#1890ff",
-                  }}
-                  onMouseEnter={(e) => (e.target.style.textDecoration = "underline")}
-                  onMouseLeave={(e) => (e.target.style.textDecoration = "none")}
-                >
-                  {record.document?.title || "Untitled"}
-                </a>
-              </div>
-              <div style={{ marginTop: "2px", display: "flex", gap: 4, alignItems: "center" }}>
-                <Text style={{ fontSize: 10, color: "#999" }}>
-                  {record.document?.document_code || "-"}
+            <div style={{ lineHeight: 1.2 }}>
+              <a
+                onClick={() => handleViewDetail(record)}
+                style={{
+                  fontWeight: 600,
+                  fontSize: 13,
+                  cursor: "pointer",
+                  color: "#1890ff",
+                  textDecoration: "none",
+                  display: "block",
+                }}
+                onMouseEnter={(e) => (e.target.style.textDecoration = "underline")}
+                onMouseLeave={(e) => (e.target.style.textDecoration = "none")}
+              >
+                {record.document?.title || "Untitled"}
+              </a>
+              <div style={{ marginTop: 2, display: "flex", gap: 4, alignItems: "center" }}>
+                <Text style={{ fontSize: 11, color: "#8c8c8c" }}>
+                  PDF
                 </Text>
+                {fileSize > 0 && (
+                  <>
+                    <Text style={{ fontSize: 11, color: "#d9d9d9" }}>•</Text>
+                    <Text style={{ fontSize: 11, color: "#595959", fontWeight: 500 }}>
+                      {displaySize}
+                    </Text>
+                  </>
+                )}
                 {userDetail && (
                   <>
-                    <Text style={{ fontSize: 10, color: "#999" }}>•</Text>
+                    <Text style={{ fontSize: 11, color: "#d9d9d9" }}>•</Text>
                     {getRoleBadge(userDetail)}
                   </>
                 )}

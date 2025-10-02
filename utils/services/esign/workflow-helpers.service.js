@@ -53,27 +53,41 @@ export const validateSignatureDetailAction = async (
 /**
  * Check and complete signature request if all steps done
  * @param {String} requestId - Request ID
+ * @param {Object} trx - Transaction object (optional)
  * @returns {Promise<Boolean>} - True if completed
  */
-export const checkAndCompleteRequest = async (requestId) => {
+export const checkAndCompleteRequest = async (requestId, trx = null) => {
   console.log("   [checkAndCompleteRequest] Checking request:", requestId);
+  console.log("   [checkAndCompleteRequest] Using transaction:", trx ? "YES" : "NO");
 
   // Get ALL signature details for this request to see the full picture
-  const allDetails = await SignatureDetails.query()
+  const allDetailsQuery = SignatureDetails.query()
     .where("request_id", requestId)
     .select("id", "user_id", "status", "sequence_order");
 
-  console.log("   [checkAndCompleteRequest] All details:",
-    allDetails.map(d => `[${d.sequence_order}] ${d.status}`).join(", ")
+  if (trx) allDetailsQuery.transacting(trx);
+  const allDetails = await allDetailsQuery;
+
+  console.log(
+    "   [checkAndCompleteRequest] All details:",
+    allDetails.map((d) => `[${d.sequence_order}] ${d.status}`).join(", ")
   );
 
-  const pendingDetails = await SignatureDetails.query()
+  // Query pending details
+  const pendingQuery = SignatureDetails.query()
     .where("request_id", requestId)
     .where("status", "waiting");
 
-  const rejectedDetails = await SignatureDetails.query()
+  if (trx) pendingQuery.transacting(trx);
+  const pendingDetails = await pendingQuery;
+
+  // Query rejected details
+  const rejectedQuery = SignatureDetails.query()
     .where("request_id", requestId)
     .where("status", "rejected");
+
+  if (trx) rejectedQuery.transacting(trx);
+  const rejectedDetails = await rejectedQuery;
 
   console.log(
     "   [checkAndCompleteRequest] Pending details:",
@@ -90,26 +104,39 @@ export const checkAndCompleteRequest = async (requestId) => {
       "   [checkAndCompleteRequest] All steps completed! Marking request as completed..."
     );
 
-    await SignatureRequests.query().patchAndFetchById(requestId, {
+    // Update signature request
+    const updateRequestQuery = SignatureRequests.query();
+    if (trx) updateRequestQuery.transacting(trx);
+
+    await updateRequestQuery.patchAndFetchById(requestId, {
       status: "completed",
       completed_at: new Date(),
       updated_at: new Date(),
     });
 
-    // Update document status
-    const signatureRequest = await SignatureRequests.query().findById(
-      requestId
-    );
+    // Get signature request to find document_id
+    const findRequestQuery = SignatureRequests.query().findById(requestId);
+    if (trx) findRequestQuery.transacting(trx);
+
+    const signatureRequest = await findRequestQuery;
+
     console.log(
       "   [checkAndCompleteRequest] Updating document:",
       signatureRequest.document_id
     );
-    await Documents.query().patchAndFetchById(signatureRequest.document_id, {
+
+    // Update document status
+    const updateDocQuery = Documents.query();
+    if (trx) updateDocQuery.transacting(trx);
+
+    await updateDocQuery.patchAndFetchById(signatureRequest.document_id, {
       status: "signed",
       updated_at: new Date(),
     });
 
-    console.log("   [checkAndCompleteRequest] ✓ Request and document completed!");
+    console.log(
+      "   [checkAndCompleteRequest] ✓ Request and document completed!"
+    );
     return true;
   }
 

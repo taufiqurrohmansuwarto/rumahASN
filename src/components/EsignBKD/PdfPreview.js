@@ -8,7 +8,8 @@ function PdfPreview({
   pdfLoading,
   pdfError,
   document,
-  onRetry
+  onRetry,
+  documentId,
 }) {
   // Memoize the title to prevent unnecessary rerenders
   const documentTitle = useMemo(() => document?.title || "Dokumen", [document?.title]);
@@ -55,6 +56,7 @@ function PdfPreview({
           <PdfViewer
             pdfBase64={pdfBase64}
             title={documentTitle}
+            documentId={documentId}
           />
         </div>
       ) : (

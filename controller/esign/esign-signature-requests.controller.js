@@ -16,6 +16,10 @@ import {
   rejectDocument,
   updateSignaturePosition,
 } from "@/utils/services/esign/signature-details.service";
+import {
+  logDocumentActivity,
+  logUserActivity,
+} from "../../services/esign-audit-log.services";
 
 export const create = async (req, res) => {
   try {
@@ -23,6 +27,7 @@ export const create = async (req, res) => {
 
     const document_id = req.body?.documentId;
     const data = req.body?.data;
+    console.log("data", data);
 
     const signatureRequest = await createSignatureRequest(
       document_id,
@@ -158,6 +163,26 @@ export const review = async (req, res) => {
 
     const updatedDetail = await reviewDocument(id, userId, notes);
 
+    // Log review activity
+    const signatureRequest = await getSignatureRequestById(id, userId);
+    const documentId = signatureRequest.document_id;
+
+    await logDocumentActivity({
+      documentId,
+      userId,
+      action: "review",
+      req,
+    });
+
+    await logUserActivity({
+      userId,
+      action: "review_document",
+      entityType: "signature_request",
+      entityId: id,
+      additionalData: { notes },
+      req,
+    });
+
     res.json({
       message: "Dokumen berhasil direview",
       data: updatedDetail,
@@ -174,6 +199,26 @@ export const mark = async (req, res) => {
     const { notes } = req.body;
 
     const updatedDetail = await markForTte(id, userId, notes);
+
+    // Log mark for TTE activity
+    const signatureRequest = await getSignatureRequestById(id, userId);
+    const documentId = signatureRequest.document_id;
+
+    await logDocumentActivity({
+      documentId,
+      userId,
+      action: "mark_for_tte",
+      req,
+    });
+
+    await logUserActivity({
+      userId,
+      action: "mark_for_tte",
+      entityType: "signature_request",
+      entityId: id,
+      additionalData: { notes },
+      req,
+    });
 
     res.json({
       message: "Dokumen berhasil ditandai siap TTE",
@@ -192,6 +237,25 @@ export const sign = async (req, res) => {
 
     const updatedDetail = await signDocument(id, userId, req.body, mc);
 
+    // Log sign activity
+    const signatureRequest = await getSignatureRequestById(id, userId);
+    const documentId = signatureRequest.document_id;
+
+    await logDocumentActivity({
+      documentId,
+      userId,
+      action: "sign",
+      req,
+    });
+
+    await logUserActivity({
+      userId,
+      action: "sign_document",
+      entityType: "signature_request",
+      entityId: id,
+      req,
+    });
+
     res.json({
       message: "Dokumen berhasil ditandatangani",
       data: updatedDetail,
@@ -208,6 +272,26 @@ export const reject = async (req, res) => {
     const { reason } = req.body;
 
     const updatedDetail = await rejectDocument(id, userId, reason);
+
+    // Log reject activity
+    const signatureRequest = await getSignatureRequestById(id, userId);
+    const documentId = signatureRequest.document_id;
+
+    await logDocumentActivity({
+      documentId,
+      userId,
+      action: "reject",
+      req,
+    });
+
+    await logUserActivity({
+      userId,
+      action: "reject_document",
+      entityType: "signature_request",
+      entityId: id,
+      additionalData: { reason },
+      req,
+    });
 
     res.json({
       message: "Dokumen berhasil ditolak",

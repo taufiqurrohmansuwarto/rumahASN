@@ -48,7 +48,7 @@ export const retrievePdfFromMinio = async (mc, filePath) => {
  * Upload signed PDF back to Minio (overwrite)
  * @param {Object} mc - Minio client
  * @param {String} signedFileBase64 - Signed file in base64
- * @param {String} filePath - Original file path
+ * @param {String} filePath - Original file path (full path in Minio)
  * @param {String} documentCode - Document code
  * @param {String} userId - User ID
  * @returns {Promise<void>}
@@ -60,18 +60,26 @@ export const uploadSignedPdfToMinio = async (
   documentCode,
   userId
 ) => {
-  const { uploadEsignDocument } = require("@/utils/helper/minio-helper");
+  const { uploadFileToMinio } = require("@/utils/helper/minio-helper");
   const signedFileBuffer = Buffer.from(signedFileBase64, "base64");
-  const filename = filePath.split("/").pop();
 
-  await uploadEsignDocument(
+  const metadata = {
+    "Content-Type": "application/pdf",
+    "signed-by": userId,
+    "document-code": documentCode,
+    "upload-date": new Date().toISOString(),
+    "file-type": "signed",
+  };
+
+  // Upload langsung ke path yang sama (overwrite)
+  await uploadFileToMinio(
     mc,
+    "public",
     signedFileBuffer,
-    filename,
-    documentCode,
+    filePath, // Pakai full path langsung
     signedFileBuffer.length,
     "application/pdf",
-    userId
+    metadata
   );
 };
 

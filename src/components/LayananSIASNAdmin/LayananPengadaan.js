@@ -187,6 +187,8 @@ function LayananPengadaan() {
       "Tanggal Pertek",
       "Jabatan",
       "Status Usulan",
+      "Kode Pendidikan",
+      "Jenis Jabatan",
     ];
 
     // Menambahkan header ke worksheet
@@ -259,6 +261,8 @@ function LayananPengadaan() {
         row?.tgl_pertek ? dayjs(row?.tgl_pertek).format("DD-MM-YYYY") : "-",
         jenisJabatan(row?.usulan_data?.data),
         row.status_usulan_nama,
+        row?.usulan_data?.data?.tk_pendidikan_id,
+        row?.usulan_data?.data?.jenis_jabatan_nama,
       ]);
 
       // Menambahkan border untuk setiap sel data

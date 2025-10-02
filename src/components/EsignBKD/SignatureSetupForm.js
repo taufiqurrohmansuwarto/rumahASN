@@ -147,7 +147,7 @@ function SignatureSetupForm({ document }) {
           return;
         }
 
-        // Validate all pages for all signers (only for signer role)
+        // Validate all pages for all signers
         for (const signer of signers) {
           if (signer.role_type === 'signer' && signer.signature_pages) {
             validatePages(signer.signature_pages);
@@ -160,6 +160,7 @@ function SignatureSetupForm({ document }) {
           role_type: signer.role_type || "signer",
           sequence_order: signer.sequence_order || index + 1,
           signature_pages: signer.signature_pages || [], // Empty array for reviewer
+          tag_coordinate: signer.tag_coordinate || "!", // Default to ! if not set
           notes: signer.notes || "",
         }));
 
@@ -194,6 +195,7 @@ function SignatureSetupForm({ document }) {
         avatar: "", // User avatar
         role_type: "signer",
         signature_pages: [1],
+        tag_coordinate: "!", // Default tag coordinate
         notes: "",
       },
     ]);
@@ -330,22 +332,24 @@ function SignatureSetupForm({ document }) {
                   />
                 )}
 
-                {/* Notes */}
-                <div>
-                  <Form.Item
-                    label={<MantineText style={{ fontWeight: 600, color: "#6b7280" }}>Catatan</MantineText>}
-                    name="notes"
-                    rules={[{ max: 500, message: "Maksimal 500 karakter!" }]}
-                  >
-                    <Input.TextArea
-                      placeholder="Catatan untuk pengajuan tanda tangan (opsional)"
-                      rows={3}
-                      maxLength={500}
-                      showCount
-                      style={{ borderRadius: 6 }}
-                    />
-                  </Form.Item>
-                </div>
+                {/* Notes - Only for Self Sign */}
+                {signatureType === "self_sign" && (
+                  <div>
+                    <Form.Item
+                      label={<MantineText style={{ fontWeight: 600, color: "#6b7280" }}>Catatan</MantineText>}
+                      name="notes"
+                      rules={[{ max: 500, message: "Maksimal 500 karakter!" }]}
+                    >
+                      <Input.TextArea
+                        placeholder="Catatan untuk pengajuan tanda tangan (opsional)"
+                        rows={3}
+                        maxLength={500}
+                        showCount
+                        style={{ borderRadius: 6 }}
+                      />
+                    </Form.Item>
+                  </div>
+                )}
               </Flex>
 
               <Divider style={{ margin: "16px 0" }} />

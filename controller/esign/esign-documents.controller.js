@@ -8,6 +8,10 @@ import {
   downloadDocumentFile,
   previewDocumentFile,
 } from "@/utils/services/esign/documents.service";
+import {
+  logDocumentActivity,
+  logUserActivity,
+} from "../../services/esign-audit-log.services";
 
 export const create = async (req, res) => {
   try {
@@ -15,6 +19,26 @@ export const create = async (req, res) => {
     const mc = req?.mc;
 
     const document = await createDocument(req.body, req.file, userId, mc);
+
+    // Log upload activity
+    await logDocumentActivity({
+      documentId: document.id,
+      userId,
+      action: "upload",
+      req,
+    });
+
+    await logUserActivity({
+      userId,
+      action: "upload_document",
+      entityType: "document",
+      entityId: document.id,
+      additionalData: {
+        title: document.title,
+        description: document.description,
+      },
+      req,
+    });
 
     res.status(201).json({
       message: "Dokumen berhasil dibuat",
@@ -96,6 +120,22 @@ export const download = async (req, res) => {
 
     const fileData = await downloadDocumentFile(id, userId, mc);
 
+    // Log download activity
+    await logDocumentActivity({
+      documentId: id,
+      userId,
+      action: "download",
+      req,
+    });
+
+    await logUserActivity({
+      userId,
+      action: "download_document",
+      entityType: "document",
+      entityId: id,
+      req,
+    });
+
     res.json({
       message: "File berhasil didownload",
       data: fileData,
@@ -116,6 +156,22 @@ export const preview = async (req, res) => {
       userId,
       mc
     );
+
+    // Log preview activity
+    await logDocumentActivity({
+      documentId: id,
+      userId,
+      action: "view",
+      req,
+    });
+
+    await logUserActivity({
+      userId,
+      action: "view_document",
+      entityType: "document",
+      entityId: id,
+      req,
+    });
 
     // Jika format=base64, return sebagai JSON dengan base64
     if (format === "base64") {

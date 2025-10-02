@@ -147,9 +147,9 @@ function SignatureRequestList({
   const columns = [
     {
       title: (
-        <Space>
-          <FileTextOutlined />
-          <Text strong>Dokumen</Text>
+        <Space size={4}>
+          <FileTextOutlined style={{ fontSize: 14 }} />
+          <Text strong style={{ fontSize: 13 }}>Dokumen</Text>
         </Space>
       ),
       key: "document",
@@ -160,45 +160,39 @@ function SignatureRequestList({
         const displaySize = fileSizeMB ? `${fileSizeMB} MB` : `${fileSizeKB} KB`;
 
         return (
-          <Space size="small">
+          <Space size={8}>
             <Avatar
-              size={isMobile ? 32 : 36}
+              size={28}
               style={{
-                backgroundColor: "#e6f7ff",
-                border: "2px solid #f0f0f0",
-                boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+                backgroundColor: "#f0f5ff",
+                border: "1px solid #d6e4ff",
               }}
-              icon={<FileTextOutlined style={{ color: "#1890ff" }} />}
+              icon={<FileTextOutlined style={{ color: "#1890ff", fontSize: 14 }} />}
             />
-            <div style={{ lineHeight: 1.1 }}>
-              <div>
-                <a
-                  onClick={() => router.push(`/esign-bkd/signature-requests/${record.id}`)}
-                  style={{
-                    fontWeight: 600,
-                    fontSize: isMobile ? 11 : 12,
-                    cursor: 'pointer',
-                    color: '#1890ff',
-                    textDecoration: 'none'
-                  }}
-                  onMouseEnter={(e) => e.target.style.textDecoration = 'underline'}
-                  onMouseLeave={(e) => e.target.style.textDecoration = 'none'}
-                >
-                  {record.document?.title || record.document_title}
-                </a>
-              </div>
-              <div style={{ marginTop: "2px", display: 'flex', gap: 4, alignItems: 'center' }}>
-                <Text style={{ fontSize: 10, color: "#999" }}>
-                  {record.document?.document_code || record.document_code}
-                </Text>
-                <Text style={{ fontSize: 10, color: "#999" }}>•</Text>
-                <Text style={{ fontSize: 10, color: "#999" }}>
-                  .pdf
+            <div style={{ lineHeight: 1.2 }}>
+              <a
+                onClick={() => router.push(`/esign-bkd/signature-requests/${record.id}`)}
+                style={{
+                  fontWeight: 600,
+                  fontSize: 13,
+                  cursor: 'pointer',
+                  color: '#1890ff',
+                  textDecoration: 'none',
+                  display: 'block',
+                }}
+                onMouseEnter={(e) => e.target.style.textDecoration = 'underline'}
+                onMouseLeave={(e) => e.target.style.textDecoration = 'none'}
+              >
+                {record.document?.title || record.document_title}
+              </a>
+              <div style={{ marginTop: 2, display: 'flex', gap: 4, alignItems: 'center' }}>
+                <Text style={{ fontSize: 11, color: "#8c8c8c" }}>
+                  PDF
                 </Text>
                 {fileSize > 0 && (
                   <>
-                    <Text style={{ fontSize: 10, color: "#999" }}>•</Text>
-                    <Text style={{ fontSize: 10, color: "#666", fontWeight: 500 }}>
+                    <Text style={{ fontSize: 11, color: "#d9d9d9" }}>•</Text>
+                    <Text style={{ fontSize: 11, color: "#595959", fontWeight: 500 }}>
                       {displaySize}
                     </Text>
                   </>

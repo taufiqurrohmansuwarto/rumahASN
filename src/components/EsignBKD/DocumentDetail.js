@@ -406,6 +406,7 @@ function DocumentDetail() {
                 pdfBase64={pdfBase64}
                 title={document?.title || "Dokumen PDF"}
                 headerActions={renderDocumentActions()}
+                documentId={id}
               />
             )}
           </Stack>

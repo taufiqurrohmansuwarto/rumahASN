@@ -12,6 +12,7 @@ export { default as BsreTransactionDetail } from "./BsreTransactionDetail";
 export { default as PdfViewer } from "./PdfViewer";
 export { default as SignatureSetupForm } from "./SignatureSetupForm";
 export { default as PendingRequestsList } from "./PendingRequestsList";
+export { default as DocumentAuditLog } from "./DocumentAuditLog";
 
 // Signature Setup Components
 export { default as SignatureTypeSelection } from "./SignatureTypeSelection";
