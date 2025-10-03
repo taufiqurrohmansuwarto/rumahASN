@@ -125,39 +125,36 @@ const getUserActivityLogs = async ({
 };
 
 /**
- * Get all logs for a specific document (both document and user activity)
+ * Get all logs for a specific document (from log_document table only)
+ * Simplified to use only log_document for better performance and cleaner data
  */
 const getAllDocumentLogs = async ({ documentId, page = 1, limit = 20 }) => {
   const offset = (page - 1) * limit;
 
-  // Get document logs
-  const documentLogs = await LogDocument.query()
+  // Build base query for data
+  const dataQuery = LogDocument.query()
     .where("document_id", documentId)
     .withGraphFetched("user")
-    .select("*", LogDocument.raw("'document' as log_type"))
-    .orderBy("created_at", "desc");
+    .orderBy("created_at", "desc")
+    .limit(limit)
+    .offset(offset);
 
-  // Get user activity logs related to this document
-  const userLogs = await LogUserActivity.query()
-    .where("entity_type", "document")
-    .where("entity_id", documentId)
-    .withGraphFetched("user")
-    .select("*", LogUserActivity.raw("'user_activity' as log_type"))
-    .orderBy("created_at", "desc");
+  // Build separate query for count (without withGraphFetched to avoid issues)
+  const countQuery = LogDocument.query()
+    .where("document_id", documentId)
+    .count("* as total")
+    .first();
 
-  // Merge and sort by created_at
-  const allLogs = [...documentLogs, ...userLogs].sort((a, b) => {
-    return new Date(b.created_at) - new Date(a.created_at);
-  });
+  // Execute queries in parallel
+  const [logs, countResult] = await Promise.all([dataQuery, countQuery]);
 
-  const total = allLogs.length;
-  const paginatedLogs = allLogs.slice(offset, offset + limit);
+  const total = parseInt(countResult?.total || 0);
 
   return {
-    data: paginatedLogs,
+    data: logs,
     pagination: {
-      page,
-      limit,
+      page: parseInt(page),
+      limit: parseInt(limit),
       total,
       totalPages: Math.ceil(total / limit),
     },

@@ -9,6 +9,7 @@ import {
   ZoomInOutlined,
   ZoomOutOutlined,
   CloudDownloadOutlined,
+  ReloadOutlined,
 } from "@ant-design/icons";
 import {
   ActionIcon,
@@ -64,6 +65,15 @@ function PdfViewer({
   const [pdfData, setPdfData] = useState(null);
   const [pdfjsVersion, setPdfjsVersion] = useState("3.11.174");
   const [pageLoading, setPageLoading] = useState(false);
+  const [isMounted, setIsMounted] = useState(true);
+
+  // Cleanup on unmount
+  useEffect(() => {
+    setIsMounted(true);
+    return () => {
+      setIsMounted(false);
+    };
+  }, []);
 
   // Setup PDF.js worker sesuai dokumentasi react-pdf
   useEffect(() => {
@@ -77,17 +87,21 @@ function PdfViewer({
           : "pdf.worker.min.mjs";
         pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.version}/build/${workerFileName}`;
 
-        setPdfjsVersion(pdfjs.version);
-        setPdfWorkerReady(true);
+        if (isMounted) {
+          setPdfjsVersion(pdfjs.version);
+          setPdfWorkerReady(true);
+        }
       } catch (error) {
         console.error("Failed to setup PDF worker:", error);
-        setError("Gagal menginisialisasi PDF viewer");
-        setLoading(false);
+        if (isMounted) {
+          setError("Gagal menginisialisasi PDF viewer");
+          setLoading(false);
+        }
       }
     };
 
     setupWorker();
-  }, []);
+  }, [isMounted]);
 
   // Process PDF base64 data
   useEffect(() => {
@@ -126,23 +140,27 @@ function PdfViewer({
   }, [pdfBase64, pdfWorkerReady]);
 
   const onDocumentLoadSuccess = useCallback(({ numPages }) => {
+    if (!isMounted) return;
     setNumPages(numPages);
     setLoading(false);
     setPageLoading(false);
     setError(null);
-  }, []);
+  }, [isMounted]);
 
   const onPageRenderSuccess = useCallback(() => {
+    if (!isMounted) return;
     setPageLoading(false);
-  }, []);
+  }, [isMounted]);
 
   const onPageRenderError = useCallback((pageError) => {
+    if (!isMounted) return;
     setPageLoading(false);
     setError(`Gagal memuat halaman PDF: ${pageError?.message || pageError}`);
-  }, []);
+  }, [isMounted]);
 
   const onDocumentLoadError = useCallback(
     (error) => {
+      if (!isMounted) return;
       console.error("PDF Load Error:", error);
       console.error("PDF Load Error details:", {
         message: error.message,
@@ -155,7 +173,7 @@ function PdfViewer({
       setLoading(false);
       setPageLoading(false);
     },
-    [pdfData]
+    [pdfData, isMounted]
   );
 
   const changePage = useCallback(
@@ -200,6 +218,22 @@ function PdfViewer({
   const resetZoom = useCallback(() => {
     setScale(1.0);
   }, []);
+
+  const handleRefresh = useCallback(() => {
+    setError(null);
+    setPageLoading(true);
+    setLoading(true);
+    setPageNumber(1);
+    setScale(1.0);
+    // Force re-render by setting pdfData again
+    if (pdfBase64) {
+      const normalizedBase64 = pdfBase64.trim();
+      const dataUri = normalizedBase64.startsWith("data:application/pdf")
+        ? normalizedBase64
+        : `data:application/pdf;base64,${normalizedBase64}`;
+      setPdfData(dataUri);
+    }
+  }, [pdfBase64]);
 
   const goToPage = useCallback(
     (page) => {
@@ -290,6 +324,16 @@ function PdfViewer({
         </Group>
         <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
           {headerActions}
+          <Tooltip label="Refresh Dokumen">
+            <ActionIcon
+              variant="light"
+              size="lg"
+              onClick={handleRefresh}
+              color="green"
+            >
+              <ReloadOutlined style={{ fontSize: 18 }} />
+            </ActionIcon>
+          </Tooltip>
           {documentId && (
             <Tooltip label="Unduh Dokumen">
               <ActionIcon

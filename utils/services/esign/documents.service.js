@@ -168,7 +168,9 @@ export const getDocuments = async (userId, filters = {}) => {
 export const getDocumentById = async (documentId, userId) => {
   const document = await Documents.query()
     .findById(documentId)
-    .withGraphFetched("[signature_requests.[signature_details]]");
+    .withGraphFetched(
+      "[user(simpleWithImage), signature_requests.[signature_details.[user(simpleWithImage)], creator(simpleWithImage)]]"
+    );
 
   if (!document) {
     throw new Error("Dokumen tidak ditemukan");
@@ -205,18 +207,30 @@ export const updateDocument = async (documentId, data, userId) => {
     throw new Error("Tidak memiliki akses untuk mengubah dokumen ini");
   }
 
-  if (document.status !== "draft") {
-    throw new Error("Hanya dokumen dengan status draft yang dapat diubah");
+  // Allow is_public to be updated anytime for transparency
+  // Only restrict title and description changes to draft status
+  if (document.status !== "draft" && (title || description)) {
+    throw new Error("Hanya dokumen dengan status draft yang dapat diubah title dan description-nya");
+  }
+
+  const updateData = {
+    updated_at: new Date(),
+  };
+
+  // Only update is_public if provided
+  if (is_public !== undefined) {
+    updateData.is_public = is_public;
+  }
+
+  // Only update title/description if document is draft
+  if (document.status === "draft") {
+    if (title) updateData.title = title;
+    if (description) updateData.description = description;
   }
 
   const updatedDocument = await Documents.query().patchAndFetchById(
     documentId,
-    {
-      title: title || document.title,
-      description: description || document.description,
-      is_public: is_public !== undefined ? is_public : document.is_public,
-      updated_at: new Date(),
-    }
+    updateData
   );
 
   return {

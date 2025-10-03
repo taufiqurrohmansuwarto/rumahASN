@@ -251,6 +251,86 @@ const checkTTEUserByNip = async (req, res) => {
   }
 };
 
+/**
+ * Check QR Code untuk verifikasi dokumen E-Sign (Public)
+ * Endpoint: /api/public/check-qr/esign/[document_code]
+ */
+const checkQRDocument = async (req, res) => {
+  try {
+    const { id: documentCode } = req.query;
+    const Documents = require("@/models/esign/esign-documents.model");
+
+    if (!documentCode) {
+      return res.status(400).json({
+        code: 400,
+        message: "Document code is required",
+      });
+    }
+
+    // Cari dokumen berdasarkan document_code dengan relasi lengkap
+    const document = await Documents.query()
+      .where("document_code", documentCode)
+      .withGraphFetched(
+        "[user(simpleWithImage), signature_requests.[creator(simpleWithImage), signature_details.[user(simpleWithImage)]]]"
+      )
+      .first();
+
+    if (!document) {
+      return res.status(404).json({
+        code: 404,
+        message: "Dokumen tidak ditemukan",
+      });
+    }
+
+    // Format response untuk public view
+    const response = {
+      document_code: document.document_code,
+      title: document.title,
+      description: document.description,
+      status: document.status,
+      created_at: document.created_at,
+      updated_at: document.updated_at,
+      total_pages: document.total_pages,
+      file_size: document.file_size,
+      is_public: document.is_public,
+      creator: {
+        name: document.user?.username || document.user?.nama_master,
+        image: document.user?.image,
+      },
+      signature_info: [],
+    };
+
+    // Tambahkan informasi signature jika ada
+    if (document.signature_requests && document.signature_requests.length > 0) {
+      const signatureRequest = document.signature_requests[0];
+
+      response.signature_info = signatureRequest.signature_details.map((detail) => ({
+        signer_name: detail.user?.username || detail.user?.nama_master,
+        role_type: detail.role_type,
+        status: detail.status,
+        signed_at: detail.signed_at,
+        sequence_order: detail.sequence_order,
+      }));
+
+      response.request_type = signatureRequest.request_type;
+      response.request_status = signatureRequest.status;
+      response.completed_at = signatureRequest.completed_at;
+    }
+
+    res.json({
+      code: 200,
+      message: "Dokumen berhasil diverifikasi",
+      data: response,
+    });
+  } catch (error) {
+    console.error("Error in checkQRDocument:", error);
+    res.status(500).json({
+      code: 500,
+      message: "Internal server error",
+    });
+  }
+};
+
 module.exports = {
   checkTTEUser,
   checkTTEUserByNip,
@@ -259,4 +339,5 @@ module.exports = {
   getLastTotpConfirmation,
   verifyPdfController,
   verifyTTEUser,
+  checkQRDocument,
 };

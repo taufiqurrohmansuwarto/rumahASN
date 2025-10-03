@@ -8,14 +8,18 @@ import {
   SafetyOutlined,
   UserOutlined,
   ReloadOutlined,
+  FileExcelOutlined,
 } from "@ant-design/icons";
 import { Badge, Card, Text } from "@mantine/core";
-import { Avatar, Empty, Table, Timeline, Tooltip } from "antd";
+import { Avatar, Empty, Table, Timeline, Tooltip, Button, message } from "antd";
 import dayjs from "dayjs";
 import "dayjs/locale/id";
 import relativeTime from "dayjs/plugin/relativeTime";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { useDocumentLogs } from "@/hooks/esign-bkd";
+import { getDocumentLogs } from "@/services/esign-bkd.services";
+import * as XLSX from "xlsx";
+import { saveAs } from "file-saver";
 
 dayjs.locale("id");
 dayjs.extend(relativeTime);
@@ -60,12 +64,89 @@ const getActionColor = (action) => {
 };
 
 function DocumentAuditLog({ documentId, viewMode = "table" }) {
+  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(10);
+  const [isExporting, setIsExporting] = useState(false);
+
   const { data, isLoading, refetch, isRefetching } = useDocumentLogs(
     documentId,
-    { page: 1, limit: 50 }
+    { page, limit }
   );
 
   const logs = useMemo(() => data?.data || [], [data?.data]);
+  const pagination = useMemo(() => data?.pagination || {}, [data?.pagination]);
+
+  const handleTableChange = (paginationConfig) => {
+    setPage(paginationConfig.current);
+    setLimit(paginationConfig.pageSize);
+  };
+
+  const handleExportToExcel = async () => {
+    try {
+      setIsExporting(true);
+      message.loading({ content: "Mengambil semua data...", key: "export" });
+
+      // Fetch ALL logs (without pagination)
+      const response = await getDocumentLogs(documentId, {
+        page: 1,
+        limit: pagination.total || 1000,
+      });
+
+      const allLogs = response?.data || [];
+
+      if (allLogs.length === 0) {
+        message.warning({ content: "Tidak ada data untuk diekspor", key: "export" });
+        return;
+      }
+
+      // Prepare data for Excel
+      const excelData = allLogs.map((log, index) => ({
+        No: index + 1,
+        Waktu: dayjs(log.created_at).format("DD/MM/YYYY HH:mm:ss"),
+        Pengguna: log.user?.username || "Unknown",
+        "Nama Lengkap": log.user?.name || "-",
+        Aktivitas: getActionText(log.action),
+        "IP Address": log.ip_address || "-",
+      }));
+
+      // Create workbook and worksheet
+      const wb = XLSX.utils.book_new();
+      const ws = XLSX.utils.json_to_sheet(excelData);
+
+      // Set column widths
+      ws["!cols"] = [
+        { wch: 5 },  // No
+        { wch: 20 }, // Waktu
+        { wch: 20 }, // Pengguna
+        { wch: 30 }, // Nama Lengkap
+        { wch: 20 }, // Aktivitas
+        { wch: 15 }, // IP Address
+      ];
+
+      XLSX.utils.book_append_sheet(wb, ws, "Audit Log");
+
+      // Generate filename with timestamp
+      const filename = `Audit_Log_${documentId}_${dayjs().format("YYYYMMDD_HHmmss")}.xlsx`;
+
+      // Write to binary string and download using file-saver
+      const wbout = XLSX.write(wb, { bookType: "xlsx", type: "array" });
+      const blob = new Blob([wbout], { type: "application/octet-stream" });
+      saveAs(blob, filename);
+
+      message.success({
+        content: `Berhasil mengekspor ${allLogs.length} data`,
+        key: "export",
+      });
+    } catch (error) {
+      console.error("Export error:", error);
+      message.error({
+        content: "Gagal mengekspor data: " + error.message,
+        key: "export",
+      });
+    } finally {
+      setIsExporting(false);
+    }
+  };
 
   // Timeline view
   const renderTimeline = () => (
@@ -219,13 +300,27 @@ function DocumentAuditLog({ documentId, viewMode = "table" }) {
               Riwayat Aktivitas Dokumen
             </Text>
           </div>
-          <Tooltip title="Refresh">
-            <ReloadOutlined
-              spin={isRefetching}
-              onClick={() => refetch()}
-              style={{ cursor: "pointer", fontSize: 14 }}
-            />
-          </Tooltip>
+          <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+            <Tooltip title="Export to Excel">
+              <FileExcelOutlined
+                spin={isExporting}
+                onClick={handleExportToExcel}
+                style={{
+                  cursor: isExporting ? "not-allowed" : "pointer",
+                  fontSize: 16,
+                  color: isExporting ? "#d9d9d9" : "#52c41a",
+                  opacity: isExporting ? 0.6 : 1
+                }}
+              />
+            </Tooltip>
+            <Tooltip title="Refresh">
+              <ReloadOutlined
+                spin={isRefetching}
+                onClick={() => refetch()}
+                style={{ cursor: "pointer", fontSize: 14 }}
+              />
+            </Tooltip>
+          </div>
         </div>
       </Card.Section>
 
@@ -236,10 +331,14 @@ function DocumentAuditLog({ documentId, viewMode = "table" }) {
           loading={isLoading}
           rowKey="id"
           size="small"
+          onChange={handleTableChange}
           pagination={{
-            pageSize: 20,
-            showSizeChanger: false,
+            current: page,
+            pageSize: limit,
+            total: pagination.total || 0,
+            showSizeChanger: true,
             showTotal: (total) => `Total ${total} aktivitas`,
+            pageSizeOptions: ["10", "20", "50", "100"],
           }}
           locale={{
             emptyText: (

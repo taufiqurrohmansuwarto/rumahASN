@@ -19,7 +19,7 @@ import {
   SignModal,
   RejectModal,
   ReviewModal,
-  SignatureHistory,
+  DocumentAuditLog,
   PdfViewer,
 } from "@/components/EsignBKD";
 import {
@@ -155,10 +155,10 @@ const SignatureRequestDetail = () => {
         data: { notes: data.notes },
       });
       setShowReviewModal(false);
-      refetch();
       router.push("/esign-bkd/signature-requests");
     } catch (error) {
       console.error("Review approve error:", error);
+      throw error;
     }
   };
 
@@ -170,10 +170,10 @@ const SignatureRequestDetail = () => {
         data: { reason: data.notes || "Ditolak oleh reviewer" },
       });
       setShowReviewModal(false);
-      refetch();
       router.push("/esign-bkd/signature-requests");
     } catch (error) {
       console.error("Review reject error:", error);
+      throw error;
     }
   };
 
@@ -183,16 +183,16 @@ const SignatureRequestDetail = () => {
       await signDocument({
         id: userDetail.id,
         data: {
-          nik: data.nik,
           passphrase: data.passphrase,
           notes: data.notes,
         },
       });
       setShowSignModal(false);
-      refetch();
+      // Navigate immediately without refetch to avoid race condition
       router.push("/esign-bkd/signature-requests");
     } catch (error) {
       console.error("Sign error:", error);
+      throw error; // Re-throw to show error in modal
     }
   };
 
@@ -204,10 +204,10 @@ const SignatureRequestDetail = () => {
         data: { reason: data.reason },
       });
       setShowRejectModal(false);
-      refetch();
       router.push("/esign-bkd/signature-requests");
     } catch (error) {
       console.error("Reject error:", error);
+      throw error;
     }
   };
 
@@ -412,7 +412,7 @@ const SignatureRequestDetail = () => {
     {
       key: "history",
       label: "Riwayat",
-      children: <SignatureHistory requestId={signatureRequest.id} />,
+      children: <DocumentAuditLog documentId={signatureRequest.document_id} viewMode="table" />,
     },
   ];
 

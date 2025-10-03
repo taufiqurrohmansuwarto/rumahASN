@@ -7,8 +7,8 @@ require("dotenv").config();
 // Constants
 const isProduction = process.env.NODE_ENV === "production";
 const checkDocument = isProduction
-  ? "https://siasn.bkd.jatimprov.go.id/helpdesk/check-qr/esign"
-  : "http://localhost:3088/helpdesk/check-qr/esign";
+  ? "https://siasn.bkd.jatimprov.go.id/helpdesk/public/check-qr/esign"
+  : "http://localhost:3088/helpdesk/public/check-qr/esign";
 
 const footerText = `Sesuai dengan ketentuan peraturan perundang-undangan yang berlaku, surat ini telah ditandatangani secara elektronik menggunakan sertifikat elektronik yang diterbitkan oleh Balai Besar Sertifikasi Elektronik Badan Siber dan Sandi Negara (BSrE-BSSN). Legalitas berkas secara digital diatur oleh Dinas Komunikasi dan Informatika Provinsi Jawa Timur. Untuk mengetahui keabsahan berkas dapat dilakukan dengan memindai qrcode yang tersedia.`;
 

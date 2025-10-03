@@ -11,7 +11,7 @@ import { RBACProvider } from "context/RBACContext";
 import { SessionProvider, signIn, useSession } from "next-auth/react";
 import Head from "next/head";
 import Script from "next/script";
-import { useState } from "react";
+import React, { useState } from "react";
 import Loading from "../src/components/Loading";
 import "../styles/globals.css";
 
@@ -24,6 +24,11 @@ import { useGmailConfig } from "src/styles/gmail.styles";
 import { useLayananKeuanganConfig } from "src/styles/layanan-keuangan.styles";
 import { useAntdConfig } from "src/styles/rasn.theme";
 import { useRekonConfig } from "src/styles/rekon.styles";
+
+// Suppress useLayoutEffect warning on server-side
+if (typeof window === "undefined") {
+  React.useLayoutEffect = React.useEffect;
+}
 
 // check user role and organization start with 123
 function Auth({ children, action, subject }) {

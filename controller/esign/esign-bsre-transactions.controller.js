@@ -9,6 +9,7 @@ import {
   getBsreTransactionById,
   getBsreTransactionStats
 } from "@/utils/services/esign/bsre-transactions.service";
+import Documents from "@/models/esign/esign-documents.model";
 
 // ==========================================
 // BSRE TRANSACTION CRUD ENDPOINTS
@@ -32,7 +33,16 @@ export const create = async (req, res) => {
 
 export const findAll = async (req, res) => {
   try {
-    const result = await getBsreTransactions(req.query);
+    const userId = req?.user?.customId;
+    const userRole = req?.user?.current_role;
+
+    // Admin can see all, others only see their own documents
+    const filters = {
+      ...req.query,
+      user_id: userRole === 'admin' ? req.query.user_id : userId,
+    };
+
+    const result = await getBsreTransactions(filters);
 
     res.json({
       message: "Data transaksi BSrE berhasil diambil",
@@ -46,8 +56,27 @@ export const findAll = async (req, res) => {
 export const findOne = async (req, res) => {
   try {
     const { id } = req.query;
+    const userId = req?.user?.customId;
+    const userRole = req?.user?.current_role;
 
     const transaction = await getBsreTransactionById(id);
+
+    // Get document to check ownership
+    const document = await Documents.query().findById(transaction.document_id);
+
+    if (!document) {
+      return res.status(404).json({ message: "Dokumen tidak ditemukan" });
+    }
+
+    // Authorization: Only document owner or admin can access
+    const isOwner = document.created_by === userId;
+    const isAdmin = userRole === 'admin';
+
+    if (!isOwner && !isAdmin) {
+      return res.status(403).json({
+        message: "Anda tidak memiliki akses untuk melihat transaksi BSrE ini"
+      });
+    }
 
     res.json({
       message: "Detail transaksi BSrE berhasil diambil",
@@ -132,7 +161,16 @@ export const retry = async (req, res) => {
 
 export const getStats = async (req, res) => {
   try {
-    const stats = await getBsreTransactionStats(req.query);
+    const userId = req?.user?.customId;
+    const userRole = req?.user?.current_role;
+
+    // Admin can see all stats, others only see their own
+    const filters = {
+      ...req.query,
+      user_id: userRole === 'admin' ? req.query.user_id : userId,
+    };
+
+    const stats = await getBsreTransactionStats(filters);
 
     res.json({
       message: "Statistik transaksi BSrE berhasil diambil",

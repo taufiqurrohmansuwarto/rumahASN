@@ -37,6 +37,7 @@ export const useDocument = (id) => {
     queryFn: () => getDocumentById(id),
     enabled: !!id,
     keepPreviousData: true,
+    refetchOnWindowFocus: false,
   });
 };
 

@@ -1,16 +1,20 @@
 import { useState, useEffect, useCallback } from "react";
 import {
   useDocument,
-  useDocumentHistory,
   useDownloadDocument,
   usePreviewDocument,
+  useDeleteDocument,
+  useUpdateDocument,
 } from "@/hooks/esign-bkd";
 import { previewDocumentAsBase64 } from "@/services/esign-bkd.services";
 import dynamic from "next/dynamic";
+import { DocumentAuditLog } from "@/components/EsignBKD";
 import {
   ExclamationCircleOutlined,
-  HistoryOutlined,
   FileTextOutlined,
+  DeleteOutlined,
+  PlusOutlined,
+  EditOutlined,
 } from "@ant-design/icons";
 
 // Dynamic import PdfViewer untuk menghindari SSR issues
@@ -32,11 +36,8 @@ const PdfViewer = dynamic(() => import("./PdfViewer"), {
   ),
 });
 import {
-  ClockCircleOutlined,
-  EditOutlined,
   ReloadOutlined,
   SafetyOutlined,
-  UserOutlined,
 } from "@ant-design/icons";
 import {
   Avatar,
@@ -46,90 +47,80 @@ import {
   Group,
   Loader,
   Paper,
-  Progress,
   Stack,
   Text,
-  Timeline,
   Title,
   Tabs,
 } from "@mantine/core";
 import {
   IconBook2,
-  IconFileInfo,
   IconHistory,
   IconUserCircle,
   IconEye,
   IconDownload,
   IconDotsVertical,
+  IconClock,
+  IconCircleCheck,
+  IconX,
 } from "@tabler/icons-react";
-import { Button, Col, Grid, Row, Dropdown, Menu } from "antd";
+import { Button, Dropdown, Modal, Switch, message } from "antd";
 import dayjs from "dayjs";
 import "dayjs/locale/id";
 import { useRouter } from "next/router";
 
 dayjs.locale("id");
 
-const { useBreakpoint } = Grid;
-
 const StatusBadge = ({ status }) => {
   const statusConfig = {
-    draft: { color: "gray", text: "Draft" },
-    pending: { color: "blue", text: "Pending" },
-    in_review: { color: "orange", text: "Review" },
-    signed: { color: "green", text: "Ditandatangani" },
-    completed: { color: "green", text: "Selesai" },
-    rejected: { color: "red", text: "Ditolak" },
-    cancelled: { color: "gray", text: "Dibatalkan" },
+    draft: { color: "gray", icon: <IconClock size={12} />, text: "DRAFT" },
+    pending: { color: "orange", icon: <IconClock size={12} />, text: "PENDING" },
+    in_progress: { color: "blue", icon: <IconClock size={12} />, text: "PROSES" },
+    in_review: { color: "orange", icon: <IconClock size={12} />, text: "REVIEW" },
+    signed: { color: "green", icon: <IconCircleCheck size={12} />, text: "DITANDATANGANI" },
+    completed: { color: "green", icon: <IconCircleCheck size={12} />, text: "SELESAI" },
+    rejected: { color: "red", icon: <IconX size={12} />, text: "DITOLAK" },
+    cancelled: { color: "gray", icon: <IconX size={12} />, text: "DIBATALKAN" },
   };
 
   const config = statusConfig[status] || statusConfig.draft;
   return (
-    <Badge color={config.color} variant="filled">
+    <Badge
+      color={config.color}
+      variant="light"
+      size="sm"
+      leftSection={<div style={{ display: "flex", alignItems: "center" }}>{config.icon}</div>}
+      styles={{
+        section: { display: "flex", alignItems: "center" },
+        label: { display: "flex", alignItems: "center" },
+      }}
+    >
       {config.text}
     </Badge>
   );
 };
 
-const WorkflowTimeline = ({ data }) => {
-  const timelineItems = data?.map((item) => ({
-    bullet:
-      item.status === "completed" ? <ClockCircleOutlined /> : <UserOutlined />,
-    title: item.action,
-    children: (
-      <Stack gap="xs">
-        <Text size="sm" c="dimmed">
-          {item.user_name} •{" "}
-          {dayjs(item.created_at).format("DD MMM YYYY HH:mm")}
-        </Text>
-        {item.notes && (
-          <Text size="sm" fs="italic" c="dimmed">
-            &ldquo;{item.notes}&rdquo;
-          </Text>
-        )}
-      </Stack>
-    ),
-  }));
-
-  return <Timeline>{timelineItems}</Timeline>;
-};
 
 function DocumentDetail() {
   const router = useRouter();
   const { id } = router.query;
-  const screens = useBreakpoint();
-  const isMobile = !screens?.md;
 
   // State untuk PDF base64 data
   const [pdfBase64, setPdfBase64] = useState(null);
   const [pdfLoading, setPdfLoading] = useState(false);
   const [pdfError, setPdfError] = useState(null);
 
-  const { data: document, isLoading } = useDocument(id);
-  const { data: history, isLoading: historyLoading } = useDocumentHistory(id);
+  const { data: response, isLoading, refetch } = useDocument(id);
   const { mutateAsync: downloadDocument, isLoading: downloadLoading } =
     useDownloadDocument();
   const { mutateAsync: previewDocument, isLoading: previewLoading } =
     usePreviewDocument();
+  const { mutateAsync: deleteDocument, isLoading: deleteLoading } =
+    useDeleteDocument();
+  const { mutateAsync: updateDocument, isLoading: updateLoading } =
+    useUpdateDocument();
+
+  // Extract document from response
+  const document = response?.data;
 
   // Generate document ID
   const documentId = document?.id || router.query.id || id;
@@ -185,26 +176,58 @@ function DocumentDetail() {
     }
   };
 
-  const renderActionMenu = () => (
-    <Menu>
-    <Menu.Item
-      key="preview"
-      icon={<IconEye size={14} />}
-        onClick={() => handlePreview()}
-        disabled={previewLoading}
-      >
-        Preview di Tab Baru
-      </Menu.Item>
-      <Menu.Item
-        key="download"
-        icon={<IconDownload size={14} />}
-        onClick={() => handleDownload()}
-        disabled={downloadLoading}
-      >
-        Unduh Dokumen
-      </Menu.Item>
-    </Menu>
-  );
+  const handleDelete = () => {
+    Modal.confirm({
+      title: "Hapus Dokumen",
+      content: "Apakah Anda yakin ingin menghapus dokumen ini?",
+      okText: "Hapus",
+      cancelText: "Batal",
+      okButtonProps: { danger: true },
+      onOk: async () => {
+        try {
+          await deleteDocument(id);
+          message.success("Dokumen berhasil dihapus");
+          router.push("/esign-bkd/documents");
+        } catch (error) {
+          message.error(error.message || "Gagal menghapus dokumen");
+        }
+      },
+    });
+  };
+
+  const handleAddWorkflow = () => {
+    router.push(`/esign-bkd/documents/create?documentId=${id}`);
+  };
+
+  const handleTogglePublic = async (checked) => {
+    try {
+      await updateDocument({
+        id,
+        data: { is_public: checked },
+      });
+      message.success(`Dokumen berhasil diubah menjadi ${checked ? "publik" : "privat"}`);
+      refetch();
+    } catch (error) {
+      message.error(error.message || "Gagal mengubah visibilitas dokumen");
+    }
+  };
+
+  const actionMenuItems = [
+    {
+      key: "preview",
+      icon: <IconEye size={14} />,
+      label: "Preview di Tab Baru",
+      onClick: () => handlePreview(),
+      disabled: previewLoading,
+    },
+    {
+      key: "download",
+      icon: <IconDownload size={14} />,
+      label: "Unduh Dokumen",
+      onClick: () => handleDownload(),
+      disabled: downloadLoading,
+    },
+  ];
 
   const renderDocumentActions = () => (
     <Group gap="xs" wrap="nowrap" justify="flex-end">
@@ -218,7 +241,7 @@ function DocumentDetail() {
         Muat Ulang
       </Button>
       <Dropdown
-        overlay={renderActionMenu()}
+        menu={{ items: actionMenuItems }}
         trigger={["click"]}
         placement="bottomRight"
       >
@@ -301,6 +324,11 @@ function DocumentDetail() {
     );
   }
 
+  // Get first signature request data
+  const signatureRequest = document?.signature_requests?.[0];
+  const creator = signatureRequest?.creator || document?.user;
+  const signatureDetails = signatureRequest?.signature_details || [];
+
   return (
     <div style={{ maxWidth: "100%", margin: "0 auto" }}>
       {/* Header Section */}
@@ -316,13 +344,176 @@ function DocumentDetail() {
           <SafetyOutlined style={{ fontSize: "24px", color: "white" }} />
           <Stack gap="xs">
             <Title order={3} c="white">
-              Detail Dokumen
+              {document.title}
             </Title>
             <Text size="sm" c="rgba(255,255,255,0.9)">
-              Informasi lengkap dokumen dan riwayat aktivitas
+              {document.document_code}
             </Text>
           </Stack>
         </Group>
+      </Paper>
+
+      {/* Info Section - Compact */}
+      <Paper withBorder p="lg" radius="md" mb="md">
+        <div style={{ paddingBottom: 20, borderBottom: "1px solid #f0f0f0" }}>
+          <Group justify="space-between" wrap="wrap" gap={16}>
+            <Group gap={12}>
+              <Avatar
+                src={creator?.image}
+                size={36}
+                style={{
+                  border: "2px solid #f0f0f0",
+                  boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+                }}
+              >
+                {!creator?.image && <SafetyOutlined />}
+              </Avatar>
+              <Group gap={8}>
+                <Text size="xs" fw={600}>
+                  {creator?.username || "Unknown"}
+                </Text>
+                <Text size="xs" c="dimmed">•</Text>
+                <Group gap={6}>
+                  <IconUserCircle size={12} style={{ color: "#999" }} />
+                  <Text size="xs" c="dimmed">
+                    {dayjs(document.created_at).format("DD.MM.YYYY • HH:mm")}
+                  </Text>
+                </Group>
+              </Group>
+            </Group>
+            <Group gap={12} wrap="wrap">
+              <StatusBadge status={document.status} />
+              <Badge
+                color={document.is_public ? "blue" : "gray"}
+                variant="light"
+                size="sm"
+              >
+                {document.is_public ? "PUBLIK" : "PRIVAT"}
+              </Badge>
+              {signatureRequest?.request_type && (
+                <Badge color="cyan" variant="light" size="sm">
+                  {signatureRequest.request_type === "sequential"
+                    ? "SEQUENTIAL"
+                    : "PARALLEL"}
+                </Badge>
+              )}
+            </Group>
+          </Group>
+
+          {/* Action Buttons berdasarkan status */}
+          <div style={{ marginTop: 16 }}>
+            {document.status === "draft" ? (
+              <Group gap={8}>
+                <Button
+                  type="primary"
+                  icon={<PlusOutlined />}
+                  onClick={handleAddWorkflow}
+                  style={{ borderRadius: 6 }}
+                >
+                  Tambah Workflow
+                </Button>
+                <Button
+                  danger
+                  icon={<DeleteOutlined />}
+                  onClick={handleDelete}
+                  loading={deleteLoading}
+                  style={{ borderRadius: 6 }}
+                >
+                  Hapus Dokumen
+                </Button>
+              </Group>
+            ) : document.status === "signed" || document.status === "completed" ? (
+              <Group gap={8} align="center">
+                <Text size="xs" fw={500}>Visibilitas:</Text>
+                <Switch
+                  checked={document.is_public}
+                  onChange={handleTogglePublic}
+                  loading={updateLoading}
+                  checkedChildren="Publik"
+                  unCheckedChildren="Privat"
+                />
+              </Group>
+            ) : null}
+          </div>
+
+          {/* Description */}
+          {document.description && (
+            <div
+              style={{
+                marginTop: 16,
+                padding: 12,
+                background: "#fafafa",
+                borderRadius: 8,
+                border: "1px solid #e8e8e8",
+              }}
+            >
+              <Text size="xs" fw={600} c="dimmed" style={{ marginBottom: 6 }}>
+                Deskripsi:
+              </Text>
+              <Text size="xs" style={{ lineHeight: 1.6 }}>
+                {document.description}
+              </Text>
+            </div>
+          )}
+        </div>
+
+        {/* Workflow Progress */}
+        {signatureDetails.length > 0 && (
+          <div style={{ paddingTop: 20 }}>
+            <Text fw={600} size="sm" c="dimmed" style={{ marginBottom: 12 }}>
+              Progress Penandatanganan
+            </Text>
+            <Stack gap="xs">
+              {signatureDetails.map((detail, index) => {
+                const statusColor = {
+                  waiting: "orange",
+                  signed: "green",
+                  reviewed: "blue",
+                  rejected: "red",
+                }[detail.status] || "default";
+
+                return (
+                  <Group key={detail.id} justify="space-between" gap={8}>
+                    <Group gap={6}>
+                      <Badge color={statusColor} size="sm" style={{ minWidth: 24 }}>
+                        {index + 1}
+                      </Badge>
+                      <Avatar src={detail.user?.image} size={20}>
+                        {!detail.user?.image && <IconUserCircle size={10} />}
+                      </Avatar>
+                      <div>
+                        <Text size="xs" fw={500} style={{ lineHeight: 1.3 }}>
+                          {detail.user?.username}
+                        </Text>
+                        {detail.role_type === "signer" && detail.sign_pages && detail.sign_pages.length > 0 && (
+                          <Text size="xs" c="dimmed" style={{ lineHeight: 1.3, fontSize: 10 }}>
+                            Hal: {detail.sign_pages.join(", ")} • {detail.tag_coordinate || "!"}
+                            {detail.notes && ` • ${detail.notes}`}
+                          </Text>
+                        )}
+                        {detail.notes && detail.role_type !== "signer" && (
+                          <Text size="xs" c="dimmed" fs="italic" style={{ lineHeight: 1.3, fontSize: 10 }}>
+                            {detail.notes}
+                          </Text>
+                        )}
+                      </div>
+                    </Group>
+                    <Badge
+                      size="xs"
+                      color={statusColor}
+                      variant="light"
+                      tt="uppercase"
+                    >
+                      {detail.status === "signed" ? "Ditandatangani" :
+                       detail.status === "rejected" ? "Ditolak" :
+                       detail.status === "reviewed" ? "Direview" : "Menunggu"}
+                    </Badge>
+                  </Group>
+                );
+              })}
+            </Stack>
+          </div>
+        )}
       </Paper>
 
       <Tabs defaultValue="document" variant="outline" radius="md">
@@ -330,17 +521,8 @@ function DocumentDetail() {
           <Tabs.Tab value="document" leftSection={<IconBook2 size={16} />}>
             Dokumen
           </Tabs.Tab>
-          <Tabs.Tab
-            value="information"
-            leftSection={<IconFileInfo size={16} />}
-          >
-            Informasi
-          </Tabs.Tab>
-          <Tabs.Tab value="workflow" leftSection={<IconUserCircle size={16} />}>
-            Workflow
-          </Tabs.Tab>
-          <Tabs.Tab value="history" leftSection={<IconHistory size={16} />}>
-            Riwayat
+          <Tabs.Tab value="audit" leftSection={<IconHistory size={16} />}>
+            Audit Log
           </Tabs.Tab>
         </Tabs.List>
 
@@ -412,237 +594,8 @@ function DocumentDetail() {
           </Stack>
         </Tabs.Panel>
 
-        <Tabs.Panel value="information" pt="md">
-          <Card shadow="sm" padding="md" radius="md" withBorder>
-            <Card.Section withBorder inheritPadding py="xs">
-              <Group gap="sm">
-                <Avatar color="blue" size="sm" radius="xl">
-                  <IconFileInfo size={16} />
-                </Avatar>
-                <Text fw={600} size="lg">
-                  Informasi Dokumen
-                </Text>
-              </Group>
-            </Card.Section>
-
-            <Stack gap="md" mt="md">
-              <Title order={4}>{document.title}</Title>
-              <StatusBadge status={document.status} />
-
-              <Row gutter={[12, 12]}>
-                <Col xs={24} sm={12} md={12} lg={8}>
-                  <Text fw={500} c="dimmed" size="xs">
-                    Deskripsi
-                  </Text>
-                  <Text size="sm">{document.description || "-"}</Text>
-                </Col>
-                <Col xs={24} sm={12} md={12} lg={8}>
-                  <Text fw={500} c="dimmed" size="xs">
-                    Dibuat oleh
-                  </Text>
-                  <Text size="sm">{document.created_by?.name || "-"}</Text>
-                </Col>
-                <Col xs={24} sm={12} md={12} lg={8}>
-                  <Text fw={500} c="dimmed" size="xs">
-                    Tanggal dibuat
-                  </Text>
-                  <Text size="sm">
-                    {dayjs(document.created_at).format("DD/MM/YYYY HH:mm")}
-                  </Text>
-                </Col>
-                <Col xs={24} sm={12} md={12} lg={8}>
-                  <Text fw={500} c="dimmed" size="xs">
-                    Terakhir diperbarui
-                  </Text>
-                  <Text size="sm">
-                    {dayjs(document.updated_at).format("DD/MM/YYYY HH:mm")}
-                  </Text>
-                </Col>
-                <Col xs={24} sm={12} md={12} lg={8}>
-                  <Text fw={500} c="dimmed" size="xs">
-                    Ukuran file
-                  </Text>
-                  <Text size="sm">
-                    {document.file_size
-                      ? `${(document.file_size / 1024 / 1024).toFixed(2)} MB`
-                      : "-"}
-                  </Text>
-                </Col>
-                <Col xs={24} sm={12} md={12} lg={8}>
-                  <Text fw={500} c="dimmed" size="xs">
-                    Tipe file
-                  </Text>
-                  <Text size="sm">{document.file_type || "PDF"}</Text>
-                </Col>
-                <Col xs={24} sm={12} md={12} lg={8}>
-                  <Text fw={500} c="dimmed" size="xs">
-                    Visibilitas
-                  </Text>
-                  <Badge
-                    color={document.is_public ? "blue" : "gray"}
-                    variant="light"
-                    size="sm"
-                  >
-                    {document.is_public ? "Publik" : "Privat"}
-                  </Badge>
-                </Col>
-              </Row>
-            </Stack>
-          </Card>
-        </Tabs.Panel>
-
-        <Tabs.Panel value="workflow" pt="md">
-          <Card shadow="sm" padding="md" radius="md" withBorder>
-            <Card.Section withBorder inheritPadding py="xs">
-              <Group gap="sm">
-                <Avatar color="orange" size="sm" radius="xl">
-                  <IconUserCircle size={16} />
-                </Avatar>
-                <Text fw={600} size="lg">
-                  Status Workflow
-                </Text>
-              </Group>
-            </Card.Section>
-
-            <Stack gap="md" mt="md">
-              {document.status === "draft" ? (
-                <Stack gap="sm" align="center" py="lg">
-                  <Text size="sm" c="dimmed">
-                    Workflow belum disiapkan. Atur alur penandatangan untuk
-                    memulai proses.
-                  </Text>
-                  <Group gap="sm" justify="center" wrap="wrap">
-                    <Button
-                      leftSection={<EditOutlined />}
-                      onClick={() =>
-                        router.push(`/esign-bkd/documents/${id}/edit`)
-                      }
-                      variant="default"
-                      size="sm"
-                      fullWidth={isMobile}
-                    >
-                      Edit Dokumen
-                    </Button>
-                    <Button
-                      onClick={() =>
-                        router.push(`/esign-bkd/documents/${id}/workflow`)
-                      }
-                      color="orange"
-                      size="sm"
-                      fullWidth={isMobile}
-                    >
-                      Setup Workflow
-                    </Button>
-                  </Group>
-                </Stack>
-              ) : (
-                <Stack gap="md">
-                  <Row gutter={[12, 12]}>
-                    <Col xs={24} sm={12} md={12} lg={8}>
-                      <Text fw={500} c="dimmed" size="xs">
-                        Jenis Workflow
-                      </Text>
-                      <Text size="sm" style={{ textTransform: "capitalize" }}>
-                        {document.workflow_type || "-"}
-                      </Text>
-                    </Col>
-                    <Col xs={24} sm={12} md={12} lg={8}>
-                      <Text fw={500} c="dimmed" size="xs">
-                        Total Penandatangan
-                      </Text>
-                      <Text size="sm">{document.total_signers || 0} orang</Text>
-                    </Col>
-                    <Col xs={24} sm={12} md={12} lg={8}>
-                      <Text fw={500} c="dimmed" size="xs">
-                        Sudah Ditandatangani
-                      </Text>
-                      <Text size="sm">{document.signed_count || 0} orang</Text>
-                    </Col>
-                  </Row>
-
-                  <Stack gap={4}>
-                    <Text fw={500} c="dimmed" size="xs">
-                      Progress
-                    </Text>
-                    <Progress
-                      value={
-                        ((document.signed_count || 0) /
-                          (document.total_signers || 1)) *
-                        100
-                      }
-                      color="orange"
-                      size="md"
-                      radius="md"
-                    />
-                    <Text size="xs" c="dimmed">
-                      {(
-                        ((document.signed_count || 0) /
-                          (document.total_signers || 1)) *
-                        100
-                      ).toFixed(0)}
-                      % selesai
-                    </Text>
-                  </Stack>
-
-                  <Group gap="sm" wrap="wrap">
-                    <Button
-                      variant="default"
-                      size="sm"
-                      leftSection={<EditOutlined />}
-                      onClick={() =>
-                        router.push(`/esign-bkd/documents/${id}/edit`)
-                      }
-                      fullWidth={isMobile}
-                    >
-                      Edit Dokumen
-                    </Button>
-                    <Button
-                      size="sm"
-                      color="orange"
-                      onClick={() =>
-                        router.push(`/esign-bkd/documents/${id}/workflow`)
-                      }
-                      fullWidth={isMobile}
-                    >
-                      Kelola Workflow
-                    </Button>
-                  </Group>
-                </Stack>
-              )}
-            </Stack>
-          </Card>
-        </Tabs.Panel>
-
-        <Tabs.Panel value="history" pt="md">
-          <Card shadow="sm" padding="md" radius="md" withBorder>
-            <Card.Section withBorder inheritPadding py="xs">
-              <Group gap="sm">
-                <Avatar color="orange" size="sm" radius="xl">
-                  <IconHistory size={16} />
-                </Avatar>
-                <Text fw={600} size="lg">
-                  Riwayat Aktivitas
-                </Text>
-              </Group>
-            </Card.Section>
-
-            <Stack gap="md" mt="md">
-              {historyLoading ? (
-                <Center py="lg">
-                  <Loader size="sm" />
-                </Center>
-              ) : history && history.length > 0 ? (
-                <WorkflowTimeline data={history} />
-              ) : (
-                <Stack align="center" gap="md" py="xl">
-                  <HistoryOutlined style={{ fontSize: 48, color: "#d1d5db" }} />
-                  <Text size="sm" c="dimmed">
-                    Belum ada aktivitas
-                  </Text>
-                </Stack>
-              )}
-            </Stack>
-          </Card>
+        <Tabs.Panel value="audit" pt="md">
+          <DocumentAuditLog documentId={id} viewMode="table" />
         </Tabs.Panel>
       </Tabs>
     </div>

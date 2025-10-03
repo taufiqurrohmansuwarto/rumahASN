@@ -19,7 +19,13 @@ import {
 import {
   logDocumentActivity,
   logUserActivity,
-} from "../../services/esign-audit-log.services";
+} from "@/services/esign-audit-log.services";
+
+const SiasnEmployee = require("@/models/siasn-employees.model");
+
+const removeChar = (str) => {
+  return str.replace(/[^0-9]/g, "");
+};
 
 export const create = async (req, res) => {
   try {
@@ -164,7 +170,7 @@ export const review = async (req, res) => {
     const updatedDetail = await reviewDocument(id, userId, notes);
 
     // Log review activity
-    const signatureRequest = await getSignatureRequestById(id, userId);
+    const signatureRequest = await getSignatureRequestById(updatedDetail.request_id, userId);
     const documentId = signatureRequest.document_id;
 
     await logDocumentActivity({
@@ -201,7 +207,7 @@ export const mark = async (req, res) => {
     const updatedDetail = await markForTte(id, userId, notes);
 
     // Log mark for TTE activity
-    const signatureRequest = await getSignatureRequestById(id, userId);
+    const signatureRequest = await getSignatureRequestById(updatedDetail.request_id, userId);
     const documentId = signatureRequest.document_id;
 
     await logDocumentActivity({
@@ -232,13 +238,29 @@ export const mark = async (req, res) => {
 export const sign = async (req, res) => {
   try {
     const { mc } = req;
-    const { customId: userId } = req?.user;
+    const { customId: userId, employee_number: nip } = req?.user;
     const { id } = req.query;
 
-    const updatedDetail = await signDocument(id, userId, req.body, mc);
+    let nik;
+    if (process.env.NODE_ENV === "production") {
+      nik = process.env.ESIGN_NIK;
+    } else {
+      if (!nip) {
+        throw new Error("NIP tidak ditemukan di session");
+      }
+      const result = await SiasnEmployee.query().where("nip_baru", nip).first();
+      if (!result?.nik) {
+        throw new Error("NIK tidak ditemukan untuk NIP: " + nip);
+      }
+      nik = removeChar(result.nik);
+    }
+
+    const data = req.body;
+
+    const updatedDetail = await signDocument(id, userId, { ...data, nik }, mc);
 
     // Log sign activity
-    const signatureRequest = await getSignatureRequestById(id, userId);
+    const signatureRequest = await getSignatureRequestById(updatedDetail.request_id, userId);
     const documentId = signatureRequest.document_id;
 
     await logDocumentActivity({
@@ -274,7 +296,7 @@ export const reject = async (req, res) => {
     const updatedDetail = await rejectDocument(id, userId, reason);
 
     // Log reject activity
-    const signatureRequest = await getSignatureRequestById(id, userId);
+    const signatureRequest = await getSignatureRequestById(updatedDetail.request_id, userId);
     const documentId = signatureRequest.document_id;
 
     await logDocumentActivity({

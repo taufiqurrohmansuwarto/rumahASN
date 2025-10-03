@@ -18,6 +18,14 @@ class BsreTransactions extends Model {
     const Documents = require("@/models/esign/esign-documents.model");
 
     return {
+      document: {
+        relation: Model.BelongsToOneRelation,
+        modelClass: Documents,
+        join: {
+          from: "esign.bsre_transactions.document_id",
+          to: "esign.documents.id",
+        },
+      },
       signature_detail: {
         relation: Model.BelongsToOneRelation,
         modelClass: SignatureDetails,

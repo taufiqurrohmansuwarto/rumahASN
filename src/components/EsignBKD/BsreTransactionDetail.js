@@ -1,29 +1,22 @@
 import {
-  Card,
   Button,
   Space,
-  Badge,
-  Descriptions,
-  Typography,
-  Flex,
   Spin,
-  Alert,
   Timeline,
   message,
   Empty,
 } from "antd";
-import { Text, Title } from "@mantine/core";
+import { Text, Title, Stack, Group, Paper, Badge, Divider, Alert } from "@mantine/core";
 import {
-  ArrowLeftOutlined,
   SyncOutlined,
   CheckCircleOutlined,
   CloseCircleOutlined,
-  ExclamationCircleOutlined,
   ReloadOutlined,
   CloudServerOutlined,
+  SafetyCertificateOutlined,
 } from "@ant-design/icons";
 import { useRouter } from "next/router";
-import { useBsreTransactionDetail, useRetryBsreTransaction } from "@/hooks/esign-bkd";
+import { useBsreTransaction, useRetryBsreTransaction } from "@/hooks/esign-bkd";
 import dayjs from "dayjs";
 import "dayjs/locale/id";
 
@@ -31,26 +24,20 @@ dayjs.locale("id");
 
 const StatusBadge = ({ status }) => {
   const statusConfig = {
-    pending: { color: "processing", text: "Menunggu", icon: <SyncOutlined spin /> },
-    processing: { color: "warning", text: "Proses", icon: <SyncOutlined spin /> },
-    completed: { color: "success", text: "Berhasil", icon: <CheckCircleOutlined /> },
-    failed: { color: "error", text: "Gagal", icon: <CloseCircleOutlined /> },
-    timeout: { color: "default", text: "Timeout", icon: <ExclamationCircleOutlined /> },
-    cancelled: { color: "default", text: "Dibatalkan", icon: <CloseCircleOutlined /> },
+    pending: { color: "blue", text: "Menunggu" },
+    processing: { color: "yellow", text: "Proses" },
+    completed: { color: "green", text: "Berhasil" },
+    failed: { color: "red", text: "Gagal" },
+    timeout: { color: "gray", text: "Timeout" },
+    cancelled: { color: "gray", text: "Dibatalkan" },
   };
 
   const config = statusConfig[status] || statusConfig.pending;
 
   return (
-    <Badge
-      status={config.color}
-      text={
-        <Space size="small">
-          {config.icon}
-          {config.text}
-        </Space>
-      }
-    />
+    <Badge color={config.color} variant="filled" size="lg">
+      {config.text}
+    </Badge>
   );
 };
 
@@ -58,7 +45,8 @@ function BsreTransactionDetail() {
   const router = useRouter();
   const { transactionId } = router.query;
 
-  const { data: transaction, isLoading, refetch } = useBsreTransactionDetail(transactionId);
+  const { data: response, isLoading, refetch } = useBsreTransaction(transactionId);
+  const transaction = response?.data;
   const { mutateAsync: retryTransaction, isLoading: retryLoading } = useRetryBsreTransaction();
 
   const handleRetry = async () => {
@@ -92,35 +80,62 @@ function BsreTransactionDetail() {
   }
 
   return (
-    <div>
-      <div style={{ maxWidth: 1200, margin: "0 auto" }}>
-        <Flex align="center" gap="large" style={{ marginBottom: 24 }}>
-          <Button
-            icon={<ArrowLeftOutlined />}
-            onClick={() => router.push("/esign-bkd/bsre")}
+    <Paper
+      shadow="sm"
+      radius="md"
+      withBorder
+      style={{ overflow: "hidden" }}
+    >
+      {/* Orange Header */}
+      <div
+        style={{
+          background: "#FF4500",
+          padding: "24px",
+        }}
+      >
+        <Stack gap={6} align="center">
+          <SafetyCertificateOutlined
+            style={{ fontSize: 40, color: "white" }}
+          />
+          <Title
+            order={4}
             style={{
-              borderRadius: 8,
-              height: 40,
-              paddingInline: 16,
+              margin: 0,
+              color: "white",
+              fontWeight: 600,
+              textAlign: "center",
             }}
           >
-            Kembali
-          </Button>
+            Detail Transaksi BSrE
+          </Title>
+          <Text
+            size="sm"
+            style={{
+              color: "rgba(255,255,255,0.9)",
+              textAlign: "center",
+            }}
+          >
+            {transaction.document?.title || transaction.document_title || `Transaksi ${transaction.id}`}
+          </Text>
+        </Stack>
+      </div>
 
-          <Flex vertical style={{ flex: 1 }}>
-            <Title order={2} style={{ margin: 0, color: "#1d1d1f" }}>
-              Detail Transaksi BSrE
-            </Title>
-            <Text c="dimmed" size="lg">
-              {transaction.document_title || `Transaksi ${transaction.id}`}
-            </Text>
-          </Flex>
-
+      {/* Action Section */}
+      <div
+        style={{
+          padding: "12px 16px",
+          background: "#fafafa",
+          borderBottom: "1px solid #e9ecef",
+        }}
+      >
+        <Group justify="space-between">
+          <StatusBadge status={transaction.status} />
           <Space>
             <Button
               icon={<SyncOutlined />}
               onClick={() => refetch()}
-              style={{ borderRadius: 8 }}
+              size="small"
+              style={{ borderRadius: 6 }}
             >
               Refresh
             </Button>
@@ -130,8 +145,9 @@ function BsreTransactionDetail() {
                 icon={<ReloadOutlined />}
                 onClick={handleRetry}
                 loading={retryLoading}
+                size="small"
                 style={{
-                  borderRadius: 8,
+                  borderRadius: 6,
                   backgroundColor: "#faad14",
                   borderColor: "#faad14",
                 }}
@@ -140,145 +156,161 @@ function BsreTransactionDetail() {
               </Button>
             )}
           </Space>
-        </Flex>
-
-        <div style={{ display: "grid", gap: 24, gridTemplateColumns: "2fr 1fr" }}>
-          <Flex vertical gap="large">
-            <Card
-              title={
-                <Space>
-                  <CloudServerOutlined />
-                  Informasi Transaksi
-                </Space>
-              }
-              style={{
-                borderRadius: 12,
-                border: "1px solid #e8e8ea",
-                boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
-              }}
-            >
-              <Descriptions column={1} size="middle">
-                <Descriptions.Item label="ID Transaksi">
-                  <Text fw={500}>{transaction.id}</Text>
-                </Descriptions.Item>
-                <Descriptions.Item label="BSrE Transaction ID">
-                  <Text fw={500}>
-                    {transaction.bsre_transaction_id || "-"}
-                  </Text>
-                </Descriptions.Item>
-                <Descriptions.Item label="Dokumen">
-                  <Text fw={500}>{transaction.document_title}</Text>
-                </Descriptions.Item>
-                <Descriptions.Item label="Status">
-                  <StatusBadge status={transaction.status} />
-                </Descriptions.Item>
-                <Descriptions.Item label="Dibuat">
-                  <Text fw={500}>
-                    {dayjs(transaction.created_at).format("DD MMMM YYYY, HH:mm")}
-                  </Text>
-                </Descriptions.Item>
-                {transaction.completed_at && (
-                  <Descriptions.Item label="Selesai">
-                    <Text fw={500}>
-                      {dayjs(transaction.completed_at).format("DD MMMM YYYY, HH:mm")}
-                    </Text>
-                  </Descriptions.Item>
-                )}
-                <Descriptions.Item label="Durasi">
-                  <Text fw={500}>
-                    {(() => {
-                      const start = dayjs(transaction.created_at);
-                      const end = transaction.completed_at ? dayjs(transaction.completed_at) : dayjs();
-                      const duration = end.diff(start, "minute");
-                      return duration < 1 ? "< 1 menit" : `${duration} menit`;
-                    })()}
-                  </Text>
-                </Descriptions.Item>
-              </Descriptions>
-
-              {transaction.error_message && (
-                <Alert
-                  message="Error Details"
-                  description={transaction.error_message}
-                  type="error"
-                  showIcon
-                  style={{ marginTop: 16 }}
-                />
-              )}
-
-              {transaction.response_data && (
-                <Card
-                  size="small"
-                  title="Response Data"
-                  style={{ marginTop: 16 }}
-                >
-                  <pre style={{ fontSize: 12, maxHeight: 200, overflow: "auto" }}>
-                    {JSON.stringify(transaction.response_data, null, 2)}
-                  </pre>
-                </Card>
-              )}
-            </Card>
-          </Flex>
-
-          <Flex vertical gap="large">
-            <Card
-              title="Timeline"
-              style={{
-                borderRadius: 12,
-                border: "1px solid #e8e8ea",
-                boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
-              }}
-            >
-              <Timeline
-                mode="left"
-                items={[
-                  {
-                    dot: <SyncOutlined style={{ color: "#1890ff" }} />,
-                    children: (
-                      <div>
-                        <Text fw={600} size="sm">Transaksi Dibuat</Text>
-                        <br />
-                        <Text size="xs" c="dimmed">
-                          {dayjs(transaction.created_at).format("DD MMM YYYY, HH:mm")}
-                        </Text>
-                      </div>
-                    ),
-                  },
-                  ...(transaction.status === "processing" ? [{
-                    dot: <SyncOutlined spin style={{ color: "#faad14" }} />,
-                    children: (
-                      <div>
-                        <Text fw={600} size="sm">Dalam Proses</Text>
-                        <br />
-                        <Text size="xs" c="dimmed">
-                          Menunggu response dari BSrE
-                        </Text>
-                      </div>
-                    ),
-                  }] : []),
-                  ...(transaction.completed_at ? [{
-                    dot: transaction.status === "completed"
-                      ? <CheckCircleOutlined style={{ color: "#52c41a" }} />
-                      : <CloseCircleOutlined style={{ color: "#f5222d" }} />,
-                    children: (
-                      <div>
-                        <Text fw={600} size="sm">
-                          {transaction.status === "completed" ? "Berhasil" : "Gagal"}
-                        </Text>
-                        <br />
-                        <Text size="xs" c="dimmed">
-                          {dayjs(transaction.completed_at).format("DD MMM YYYY, HH:mm")}
-                        </Text>
-                      </div>
-                    ),
-                  }] : []),
-                ]}
-              />
-            </Card>
-          </Flex>
-        </div>
+        </Group>
       </div>
-    </div>
+
+      {/* Main Content */}
+      <Stack gap="md" p="lg">
+        {/* Transaction Info */}
+        <Paper p="md" withBorder radius="md">
+          <Stack gap="xs">
+            <Group gap="xs" mb="xs">
+              <CloudServerOutlined style={{ fontSize: 18, color: "#FF4500" }} />
+              <Text fw={600} size="md">
+                Informasi Transaksi
+              </Text>
+            </Group>
+
+            <Group justify="space-between" wrap="nowrap">
+              <Text size="sm" c="dimmed">ID Transaksi</Text>
+              <Text size="sm" fw={500}>{transaction.id}</Text>
+            </Group>
+            <Divider size="xs" />
+
+            <Group justify="space-between" wrap="nowrap">
+              <Text size="sm" c="dimmed">BSrE Transaction ID</Text>
+              <Text size="sm" fw={500}>{transaction.bsre_transaction_id || "-"}</Text>
+            </Group>
+            <Divider size="xs" />
+
+            <Group justify="space-between" wrap="nowrap">
+              <Text size="sm" c="dimmed">Dokumen</Text>
+              <Text size="sm" fw={500} style={{ textAlign: "right" }}>{transaction.document?.title || transaction.document_title || "-"}</Text>
+            </Group>
+            <Divider size="xs" />
+
+            <Group justify="space-between" wrap="nowrap">
+              <Text size="sm" c="dimmed">Status</Text>
+              <StatusBadge status={transaction.status} />
+            </Group>
+            <Divider size="xs" />
+
+            <Group justify="space-between" wrap="nowrap">
+              <Text size="sm" c="dimmed">Dibuat</Text>
+              <Text size="sm" fw={500}>
+                {dayjs(transaction.created_at).format("DD MMMM YYYY, HH:mm")}
+              </Text>
+            </Group>
+
+            {transaction.completed_at && (
+              <>
+                <Divider size="xs" />
+                <Group justify="space-between" wrap="nowrap">
+                  <Text size="sm" c="dimmed">Selesai</Text>
+                  <Text size="sm" fw={500}>
+                    {dayjs(transaction.completed_at).format("DD MMMM YYYY, HH:mm")}
+                  </Text>
+                </Group>
+              </>
+            )}
+
+            <Divider size="xs" />
+            <Group justify="space-between" wrap="nowrap">
+              <Text size="sm" c="dimmed">Durasi</Text>
+              <Text size="sm" fw={500}>
+                {(() => {
+                  const start = dayjs(transaction.created_at);
+                  const end = transaction.completed_at ? dayjs(transaction.completed_at) : dayjs();
+                  const duration = end.diff(start, "minute");
+                  return duration < 1 ? "< 1 menit" : `${duration} menit`;
+                })()}
+              </Text>
+            </Group>
+          </Stack>
+        </Paper>
+
+        {/* Error Message */}
+        {transaction.error_message && (
+          <Alert
+            variant="light"
+            color="red"
+            title="Error Details"
+            icon={<CloseCircleOutlined />}
+            styles={{
+              root: { padding: "12px 16px" },
+              title: { fontSize: 14, fontWeight: 600, marginBottom: 4 },
+              message: { fontSize: 13 },
+            }}
+          >
+            {transaction.error_message}
+          </Alert>
+        )}
+
+        {/* Response Data */}
+        {transaction.response_data && (
+          <Paper p="md" withBorder radius="md" style={{ background: "#fafafa" }}>
+            <Text fw={600} size="sm" mb="xs">
+              Response Data
+            </Text>
+            <pre style={{ fontSize: 12, maxHeight: 200, overflow: "auto", margin: 0 }}>
+              {JSON.stringify(transaction.response_data, null, 2)}
+            </pre>
+          </Paper>
+        )}
+
+        {/* Timeline */}
+        <Paper p="md" withBorder radius="md">
+          <Text fw={600} size="md" mb="md">
+            Timeline
+          </Text>
+          <Timeline
+            mode="left"
+            items={[
+              {
+                dot: <SyncOutlined style={{ color: "#1890ff" }} />,
+                children: (
+                  <div>
+                    <Text fw={600} size="sm">Transaksi Dibuat</Text>
+                    <br />
+                    <Text size="xs" c="dimmed">
+                      {dayjs(transaction.created_at).format("DD MMM YYYY, HH:mm")}
+                    </Text>
+                  </div>
+                ),
+              },
+              ...(transaction.status === "processing" ? [{
+                dot: <SyncOutlined spin style={{ color: "#faad14" }} />,
+                children: (
+                  <div>
+                    <Text fw={600} size="sm">Dalam Proses</Text>
+                    <br />
+                    <Text size="xs" c="dimmed">
+                      Menunggu response dari BSrE
+                    </Text>
+                  </div>
+                ),
+              }] : []),
+              ...(transaction.completed_at ? [{
+                dot: transaction.status === "completed"
+                  ? <CheckCircleOutlined style={{ color: "#52c41a" }} />
+                  : <CloseCircleOutlined style={{ color: "#f5222d" }} />,
+                children: (
+                  <div>
+                    <Text fw={600} size="sm">
+                      {transaction.status === "completed" ? "Berhasil" : "Gagal"}
+                    </Text>
+                    <br />
+                    <Text size="xs" c="dimmed">
+                      {dayjs(transaction.completed_at).format("DD MMM YYYY, HH:mm")}
+                    </Text>
+                  </div>
+                ),
+              }] : []),
+            ]}
+          />
+        </Paper>
+      </Stack>
+    </Paper>
   );
 }
 

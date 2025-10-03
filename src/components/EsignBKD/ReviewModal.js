@@ -1,15 +1,14 @@
 import {
   Modal,
   Button,
-  Flex,
-  Card,
   Form,
   Input,
+  message,
 } from "antd";
-import { Text, Title } from "@mantine/core";
-import { IconCheck, IconX, IconFileText } from "@tabler/icons-react";
+import { Text, Stack } from "@mantine/core";
+import { IconCheck } from "@tabler/icons-react";
 
-function ReviewModal({ open, onCancel, document, onApprove, onReject, loading }) {
+function ReviewModal({ open, onCancel, document, onApprove, loading }) {
   const [form] = Form.useForm();
 
   const handleApprove = async () => {
@@ -22,21 +21,11 @@ function ReviewModal({ open, onCancel, document, onApprove, onReject, loading })
       });
       form.resetFields();
     } catch (error) {
-      console.error("Approve error:", error);
-    }
-  };
-
-  const handleReject = async () => {
-    try {
-      const values = await form.validateFields();
-      await onReject({
-        id: document?.id,
-        action: "reject",
-        notes: values.notes
-      });
-      form.resetFields();
-    } catch (error) {
-      console.error("Reject error:", error);
+      if (error?.errorFields) {
+        console.error("Validation failed:", error);
+      } else {
+        message.error(error?.response?.data?.message || error?.message || "Review gagal");
+      }
     }
   };
 
@@ -47,62 +36,23 @@ function ReviewModal({ open, onCancel, document, onApprove, onReject, loading })
 
   return (
     <Modal
-      title={null}
+      title={
+        <Text fw={600} size="md">Review Dokumen</Text>
+      }
       open={open}
       onCancel={handleModalCancel}
       footer={null}
-      width={500}
+      width={420}
       centered
     >
-      <Flex vertical gap="large">
-        <Flex align="center" gap="middle" style={{ padding: "20px 0" }}>
-          <Flex
-            align="center"
-            justify="center"
-            style={{
-              width: 60,
-              height: 60,
-              backgroundColor: "#fff7e6",
-              borderRadius: "50%"
-            }}
-          >
-            <IconFileText size={32} color="#fa8c16" />
-          </Flex>
-          <Flex vertical>
-            <Title order={3} style={{ margin: 0, color: "#fa8c16" }}>
-              Review Dokumen
-            </Title>
-            <Text size="sm" c="dimmed">
-              Pilih tindakan untuk dokumen ini
-            </Text>
-          </Flex>
-        </Flex>
+      <Stack gap="md">
+        <div style={{ padding: "8px 12px", background: "#f0f5ff", borderRadius: 6, borderLeft: "3px solid #1677ff" }}>
+          <Text size="xs" c="dimmed">
+            Berikan catatan review jika diperlukan, lalu pilih tindakan.
+          </Text>
+        </div>
 
-        <Card
-          size="small"
-          style={{
-            border: "1px solid #e2e8f0",
-            borderRadius: 12
-          }}
-        >
-          <Flex vertical gap="small">
-            <Text fw={600} size="sm" c="dark">
-              {document?.title}
-            </Text>
-            {document?.description && (
-              <Text size="xs" c="dimmed" style={{ lineHeight: 1.5 }}>
-                {document?.description}
-              </Text>
-            )}
-            <Flex gap="small" style={{ marginTop: 8 }}>
-              <Text size="xs" c="dimmed">
-                Dibuat: {new Date(document?.created_at).toLocaleDateString('id-ID')}
-              </Text>
-            </Flex>
-          </Flex>
-        </Card>
-
-        <Form form={form} layout="vertical">
+        <Form form={form} layout="vertical" requiredMark="optional">
           <Form.Item
             label={<Text size="sm" fw={500}>Catatan (Opsional)</Text>}
             name="notes"
@@ -112,63 +62,30 @@ function ReviewModal({ open, onCancel, document, onApprove, onReject, loading })
               rows={3}
               maxLength={500}
               showCount
-              style={{ borderRadius: 8 }}
+              style={{ borderRadius: 6 }}
             />
           </Form.Item>
         </Form>
 
-        <Flex vertical gap="middle">
-          <Text size="sm" fw={500} ta="center" c="dark">
-            Apakah Anda menyetujui dokumen ini?
-          </Text>
+        <Stack gap="xs">
+          <Button
+            type="primary"
+            icon={<IconCheck size={16} />}
+            onClick={handleApprove}
+            loading={loading}
+            block
+            style={{
+              height: 36,
+              borderRadius: 6,
+              background: "#52c41a",
+              borderColor: "#52c41a",
+            }}
+          >
+            Setuju
+          </Button>
 
-          <Flex gap="middle">
-            <Button
-              onClick={handleReject}
-              loading={loading}
-              danger
-              icon={<IconX size={18} />}
-              style={{
-                flex: 1,
-                height: 48,
-                borderRadius: 12,
-                border: "2px solid #ff4d4f",
-                backgroundColor: "#fff1f0"
-              }}
-            >
-              <Text size="sm" fw={500}>Tolak</Text>
-            </Button>
-
-            <Button
-              type="primary"
-              onClick={handleApprove}
-              loading={loading}
-              icon={<IconCheck size={18} />}
-              style={{
-                flex: 1,
-                height: 48,
-                borderRadius: 12,
-                background: "linear-gradient(135deg, #52c41a 0%, #73d13d 100%)",
-                border: "none"
-              }}
-            >
-              <Text size="sm" fw={500} c="white">Setuju</Text>
-            </Button>
-          </Flex>
-        </Flex>
-
-        <Button
-          onClick={handleModalCancel}
-          style={{
-            width: "100%",
-            height: 40,
-            borderRadius: 8,
-            border: "1px solid #d9d9d9"
-          }}
-        >
-          <Text size="sm" c="dimmed">Batal</Text>
-        </Button>
-      </Flex>
+        </Stack>
+      </Stack>
     </Modal>
   );
 }

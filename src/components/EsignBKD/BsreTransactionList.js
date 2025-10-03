@@ -147,10 +147,12 @@ function BsreTransactionList() {
   const { data, isLoading, refetch, isRefetching } =
     useBsreTransactions(filters);
   const {
-    data: stats,
+    data: statsResponse,
     isLoading: statsLoading,
     refetch: refetchStats,
   } = useBsreTransactionStats();
+
+  const stats = statsResponse?.data;
 
   const openRetryModal = (transaction) => {
     setRetryModal({ open: true, transaction });
@@ -187,7 +189,15 @@ function BsreTransactionList() {
           />
           <div style={{ lineHeight: 1.1 }}>
             <div>
-              <Text style={{ fontWeight: 600, fontSize: isMobile ? 11 : 12 }}>
+              <Text
+                style={{
+                  fontWeight: 600,
+                  fontSize: isMobile ? 11 : 12,
+                  color: "#1890ff",
+                  cursor: "pointer",
+                }}
+                onClick={() => router.push(`/esign-bkd/bsre/${record.id}`)}
+              >
                 {record.document_title || record.id}
               </Text>
             </div>
@@ -538,7 +548,7 @@ function BsreTransactionList() {
                 <Col xs={24} md={18} lg={20}>
                   <Space wrap>
                     <Button
-                      onClick={() => setFilters({ ...filters, status: "" })}
+                      onClick={() => setFilters({ ...filters, status: "", page: 1 })}
                       type={filters.status === "" ? "primary" : "default"}
                       style={{
                         borderRadius: 6,
@@ -553,7 +563,7 @@ function BsreTransactionList() {
                     </Button>
                     <Button
                       onClick={() =>
-                        setFilters({ ...filters, status: "processing" })
+                        setFilters({ ...filters, status: "processing", page: 1 })
                       }
                       type={
                         filters.status === "processing" ? "primary" : "default"
@@ -571,7 +581,7 @@ function BsreTransactionList() {
                     </Button>
                     <Button
                       onClick={() =>
-                        setFilters({ ...filters, status: "completed" })
+                        setFilters({ ...filters, status: "completed", page: 1 })
                       }
                       type={
                         filters.status === "completed" ? "primary" : "default"
@@ -589,7 +599,7 @@ function BsreTransactionList() {
                     </Button>
                     <Button
                       onClick={() =>
-                        setFilters({ ...filters, status: "failed" })
+                        setFilters({ ...filters, status: "failed", page: 1 })
                       }
                       type={filters.status === "failed" ? "primary" : "default"}
                       style={{
@@ -636,7 +646,7 @@ function BsreTransactionList() {
             <Table
               columns={columns}
               dataSource={data?.data || []}
-              loading={isLoading}
+              loading={isLoading || isRefetching}
               rowKey="id"
               scroll={{ x: 890 }}
               size="middle"
@@ -669,7 +679,7 @@ function BsreTransactionList() {
               }}
               pagination={{
                 position: ["bottomRight"],
-                total: data?.total || 0,
+                total: data?.pagination?.total || 0,
                 pageSize: parseInt(filters.limit),
                 current: parseInt(filters.page),
                 showSizeChanger: false,

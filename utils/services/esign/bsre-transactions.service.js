@@ -11,7 +11,7 @@ const LogBsreIntegration = require("@/models/esign/esign-log-bsre-integration.mo
 import {
   downloadEsignDocument,
   uploadSignedDocument,
-  generateSignedDocumentUrl
+  generateSignedDocumentUrl,
 } from "@/utils/helper/minio-helper";
 
 // ==========================================
@@ -26,13 +26,18 @@ import {
  * @param {Object} mc - Minio client
  * @returns {Promise<Object>} - Created transaction
  */
-export const createBsreTransaction = async (signatureDetailId, documentId, signData = {}, mc) => {
-  const { signed_by_delegate = false, delegate_notes = '' } = signData;
+export const createBsreTransaction = async (
+  signatureDetailId,
+  documentId,
+  signData = {},
+  mc
+) => {
+  const { signed_by_delegate = false, delegate_notes = "" } = signData;
 
   // Validate signature detail and document
   const signatureDetail = await SignatureDetails.query()
     .findById(signatureDetailId)
-    .withGraphFetched('signature_request');
+    .withGraphFetched("signature_request");
 
   if (!signatureDetail) {
     throw new Error("Detail tanda tangan tidak ditemukan");
@@ -54,7 +59,7 @@ export const createBsreTransaction = async (signatureDetailId, documentId, signD
     original_file: document.file_path,
     signed_by_delegate,
     delegate_notes,
-    status: 'pending',
+    status: "pending",
   });
 
   return transaction;
@@ -70,19 +75,22 @@ export const createBsreTransaction = async (signatureDetailId, documentId, signD
 export const sendToBsre = async (transactionId, userCertificate, mc) => {
   const transaction = await BsreTransactions.query()
     .findById(transactionId)
-    .withGraphFetched('[signature_detail, document]');
+    .withGraphFetched("[signature_detail, document]");
 
   if (!transaction) {
     throw new Error("Transaksi BSrE tidak ditemukan");
   }
 
-  if (transaction.status !== 'pending') {
+  if (transaction.status !== "pending") {
     throw new Error("Transaksi sudah diproses sebelumnya");
   }
 
   try {
     // Download original document
-    const documentBuffer = await downloadEsignDocument(mc, transaction.original_file);
+    const documentBuffer = await downloadEsignDocument(
+      mc,
+      transaction.original_file
+    );
 
     // Prepare BSrE request data
     const requestData = {
@@ -98,27 +106,53 @@ export const sendToBsre = async (transactionId, userCertificate, mc) => {
         document_code: transaction.document.document_code,
         signer_id: transaction.signature_detail.user_id,
         signed_by_delegate: transaction.signed_by_delegate,
-      }
+      },
     };
 
-    // Log BSrE request
-    await logBsreActivity(transactionId, 'sign_request', '/api/sign', 'POST', requestData);
+    // Log BSrE request (minimal metadata only)
+    const requestMetadata = {
+      bsre_id: requestData.bsre_id,
+      signature_position: requestData.signature_position,
+      metadata: requestData.metadata,
+    };
+    await logBsreActivity(
+      transactionId,
+      "sign_request",
+      "/api/sign",
+      "POST",
+      requestMetadata
+    );
 
     // TODO: Implement actual BSrE API call
     // For now, simulate BSrE response
     const bsreResponse = await simulateBsreSign(requestData);
 
-    // Update transaction with response
+    // Only save minimal metadata, NO base64 data
+    const responseMetadata = {
+      success: bsreResponse.success,
+      bsre_transaction_id: bsreResponse.bsre_transaction_id,
+      message: bsreResponse.message,
+    };
+
+    // Update transaction with minimal data
     await BsreTransactions.query().patchAndFetchById(transactionId, {
-      request_data: requestData,
-      response_data: bsreResponse,
-      status: bsreResponse.success ? 'success' : 'failed',
+      request_data: requestMetadata,
+      response_data: responseMetadata,
+      status: bsreResponse.success ? "success" : "failed",
       error_message: bsreResponse.success ? null : bsreResponse.error,
       completed_at: new Date(),
     });
 
-    // Log BSrE response
-    await logBsreActivity(transactionId, 'sign_response', '/api/sign', 'POST', bsreResponse, null, 200);
+    // Log BSrE response (minimal metadata only)
+    await logBsreActivity(
+      transactionId,
+      "sign_response",
+      "/api/sign",
+      "POST",
+      responseMetadata,
+      null,
+      200
+    );
 
     if (bsreResponse.success) {
       // Save signed document
@@ -126,17 +160,24 @@ export const sendToBsre = async (transactionId, userCertificate, mc) => {
     }
 
     return bsreResponse;
-
   } catch (error) {
     // Update transaction with error
     await BsreTransactions.query().patchAndFetchById(transactionId, {
-      status: 'failed',
+      status: "failed",
       error_message: error.message,
       completed_at: new Date(),
     });
 
     // Log error
-    await logBsreActivity(transactionId, 'sign_error', '/api/sign', 'POST', null, error.message, 500);
+    await logBsreActivity(
+      transactionId,
+      "sign_error",
+      "/api/sign",
+      "POST",
+      null,
+      error.message,
+      500
+    );
 
     throw error;
   }
@@ -149,7 +190,7 @@ export const sendToBsre = async (transactionId, userCertificate, mc) => {
  */
 export const checkBsreStatus = async (bsreId) => {
   const transaction = await BsreTransactions.query()
-    .where('bsre_id', bsreId)
+    .where("bsre_id", bsreId)
     .first();
 
   if (!transaction) {
@@ -167,13 +208,28 @@ export const checkBsreStatus = async (bsreId) => {
     };
 
     // Log status check
-    await logBsreActivity(transaction.id, 'status_check', '/api/status', 'GET', { bsre_id: bsreId }, null, 200);
+    await logBsreActivity(
+      transaction.id,
+      "status_check",
+      "/api/status",
+      "GET",
+      { bsre_id: bsreId },
+      null,
+      200
+    );
 
     return statusResponse;
-
   } catch (error) {
     // Log error
-    await logBsreActivity(transaction.id, 'status_error', '/api/status', 'GET', { bsre_id: bsreId }, error.message, 500);
+    await logBsreActivity(
+      transaction.id,
+      "status_error",
+      "/api/status",
+      "GET",
+      { bsre_id: bsreId },
+      error.message,
+      500
+    );
     throw error;
   }
 };
@@ -188,7 +244,7 @@ export const handleBsreCallback = async (callbackData, mc) => {
   const { bsre_id, status, signed_document, error_message } = callbackData;
 
   const transaction = await BsreTransactions.query()
-    .where('bsre_id', bsre_id)
+    .where("bsre_id", bsre_id)
     .first();
 
   if (!transaction) {
@@ -196,27 +252,49 @@ export const handleBsreCallback = async (callbackData, mc) => {
   }
 
   try {
+    // Only save minimal callback metadata, NO base64 data
+    const callbackMetadata = {
+      bsre_id: bsre_id,
+      status: status,
+      message: callbackData.message || null,
+    };
+
     // Update transaction status
     await BsreTransactions.query().patchAndFetchById(transaction.id, {
       status: status,
-      response_data: callbackData,
-      error_message: status === 'failed' ? error_message : null,
+      response_data: callbackMetadata,
+      error_message: status === "failed" ? error_message : null,
       completed_at: new Date(),
     });
 
-    if (status === 'success' && signed_document) {
-      // Save signed document
+    if (status === "success" && signed_document) {
+      // Save signed document to Minio
       await saveSignedDocument(transaction.id, signed_document, mc);
     }
 
-    // Log callback
-    await logBsreActivity(transaction.id, 'callback', '/callback', 'POST', callbackData, null, 200);
+    // Log callback (minimal metadata only)
+    await logBsreActivity(
+      transaction.id,
+      "callback",
+      "/callback",
+      "POST",
+      callbackMetadata,
+      null,
+      200
+    );
 
     return { success: true, transaction_id: transaction.id };
-
   } catch (error) {
     // Log callback error
-    await logBsreActivity(transaction.id, 'callback_error', '/callback', 'POST', callbackData, error.message, 500);
+    await logBsreActivity(
+      transaction.id,
+      "callback_error",
+      "/callback",
+      "POST",
+      { error: error.message },
+      error.message,
+      500
+    );
     throw error;
   }
 };
@@ -228,20 +306,24 @@ export const handleBsreCallback = async (callbackData, mc) => {
  * @param {Object} mc - Minio client
  * @returns {Promise<Object>} - Retry response
  */
-export const retryBsreTransaction = async (transactionId, userCertificate, mc) => {
+export const retryBsreTransaction = async (
+  transactionId,
+  userCertificate,
+  mc
+) => {
   const transaction = await BsreTransactions.query().findById(transactionId);
 
   if (!transaction) {
     throw new Error("Transaksi BSrE tidak ditemukan");
   }
 
-  if (transaction.status !== 'failed') {
+  if (transaction.status !== "failed") {
     throw new Error("Hanya transaksi yang gagal yang dapat dicoba ulang");
   }
 
   // Reset transaction status
   await BsreTransactions.query().patchAndFetchById(transactionId, {
-    status: 'pending',
+    status: "pending",
     error_message: null,
     completed_at: null,
   });
@@ -266,40 +348,40 @@ export const getBsreTransactions = async (filters = {}) => {
     status,
     bsre_id,
     document_id,
-    user_id
+    user_id,
   } = filters;
 
   let query = BsreTransactions.query()
     .select([
-      'bsre_transactions.*',
-      'documents.document_code',
-      'documents.title as document_title'
+      "bsre_transactions.*",
+      "documents.document_code",
+      "documents.title as document_title",
     ])
-    .leftJoin('esign.documents as documents', 'bsre_transactions.document_id', 'documents.id')
-    .withGraphFetched('[signature_detail]');
+    .leftJoin(
+      "esign.documents as documents",
+      "bsre_transactions.document_id",
+      "documents.id"
+    )
+    .withGraphFetched("[signature_detail]");
 
   if (status) {
-    query = query.where('bsre_transactions.status', status);
+    query = query.where("bsre_transactions.status", status);
   }
 
   if (bsre_id) {
-    query = query.where('bsre_transactions.bsre_id', 'ilike', `%${bsre_id}%`);
+    query = query.where("bsre_transactions.bsre_id", "ilike", `%${bsre_id}%`);
   }
 
   if (document_id) {
-    query = query.where('bsre_transactions.document_id', document_id);
+    query = query.where("bsre_transactions.document_id", document_id);
   }
 
   if (user_id) {
-    query = query.whereExists(
-      SignatureDetails.query()
-        .where('signature_details.id', 'bsre_transactions.signature_detail_id')
-        .where('signature_details.user_id', user_id)
-    );
+    query = query.where("documents.created_by", user_id);
   }
 
   const result = await query
-    .orderBy('bsre_transactions.created_at', 'desc')
+    .orderBy("bsre_transactions.created_at", "desc")
     .page(parseInt(page) - 1, parseInt(limit));
 
   return {
@@ -309,7 +391,7 @@ export const getBsreTransactions = async (filters = {}) => {
       limit: parseInt(limit),
       total: result.total,
       totalPages: Math.ceil(result.total / parseInt(limit)),
-    }
+    },
   };
 };
 
@@ -321,7 +403,7 @@ export const getBsreTransactions = async (filters = {}) => {
 export const getBsreTransactionById = async (transactionId) => {
   const transaction = await BsreTransactions.query()
     .findById(transactionId)
-    .withGraphFetched('[signature_detail, document]');
+    .withGraphFetched("[signature_detail, document]");
 
   if (!transaction) {
     throw new Error("Transaksi BSrE tidak ditemukan");
@@ -341,10 +423,14 @@ export const getBsreTransactionById = async (transactionId) => {
  * @param {Object} mc - Minio client
  * @returns {Promise<String>} - Signed document path
  */
-export const saveSignedDocument = async (transactionId, signedDocumentData, mc) => {
+export const saveSignedDocument = async (
+  transactionId,
+  signedDocumentData,
+  mc
+) => {
   const transaction = await BsreTransactions.query()
     .findById(transactionId)
-    .withGraphFetched('document');
+    .withGraphFetched("document");
 
   if (!transaction) {
     throw new Error("Transaksi BSrE tidak ditemukan");
@@ -352,8 +438,8 @@ export const saveSignedDocument = async (transactionId, signedDocumentData, mc) 
 
   // Convert to buffer if needed
   let fileBuffer;
-  if (typeof signedDocumentData === 'string') {
-    fileBuffer = Buffer.from(signedDocumentData, 'base64');
+  if (typeof signedDocumentData === "string") {
+    fileBuffer = Buffer.from(signedDocumentData, "base64");
   } else {
     fileBuffer = signedDocumentData;
   }
@@ -395,7 +481,15 @@ export const saveSignedDocument = async (transactionId, signedDocumentData, mc) 
  * @param {Number} httpStatus - HTTP status code
  * @returns {Promise<Object>} - Log entry
  */
-export const logBsreActivity = async (transactionId, action, endpoint, httpMethod, requestPayload = null, errorDetail = null, httpStatus = 200) => {
+export const logBsreActivity = async (
+  transactionId,
+  action,
+  endpoint,
+  httpMethod,
+  requestPayload = null,
+  errorDetail = null,
+  httpStatus = 200
+) => {
   const startTime = Date.now();
 
   const logEntry = await LogBsreIntegration.query().insert({
@@ -420,7 +514,7 @@ export const logBsreActivity = async (transactionId, action, endpoint, httpMetho
  */
 export const simulateBsreSign = async (requestData) => {
   // Simulate processing delay
-  await new Promise(resolve => setTimeout(resolve, 1000));
+  await new Promise((resolve) => setTimeout(resolve, 1000));
 
   // Simulate success/failure (90% success rate)
   const isSuccess = Math.random() > 0.1;
@@ -435,14 +529,14 @@ export const simulateBsreSign = async (requestData) => {
         subject: "CN=Test User,O=Test Organization",
         issuer: "CN=Test CA,O=Test CA Organization",
         serial_number: "1234567890",
-      }
+      },
     };
   } else {
     return {
       success: false,
       bsre_id: requestData.bsre_id,
       error: "BSrE signing failed: Certificate validation error",
-      error_code: "CERT_INVALID"
+      error_code: "CERT_INVALID",
     };
   }
 };
@@ -455,37 +549,40 @@ export const simulateBsreSign = async (requestData) => {
 export const getBsreTransactionStats = async (filters = {}) => {
   const { user_id, date_from, date_to } = filters;
 
-  let query = BsreTransactions.query();
+  let query = BsreTransactions.query().leftJoin(
+    "esign.documents as documents",
+    "bsre_transactions.document_id",
+    "documents.id"
+  );
 
   if (user_id) {
-    query = query.whereExists(
-      SignatureDetails.query()
-        .where('signature_details.id', 'bsre_transactions.signature_detail_id')
-        .where('signature_details.user_id', user_id)
-    );
+    query = query.where("documents.created_by", user_id);
   }
 
   if (date_from) {
-    query = query.where('bsre_transactions.created_at', '>=', date_from);
+    query = query.where("bsre_transactions.created_at", ">=", date_from);
   }
 
   if (date_to) {
-    query = query.where('bsre_transactions.created_at', '<=', date_to);
+    query = query.where("bsre_transactions.created_at", "<=", date_to);
   }
 
   const stats = await query
-    .select('status')
-    .groupBy('status')
-    .count('* as count');
+    .select("bsre_transactions.status")
+    .groupBy("bsre_transactions.status")
+    .count("* as count");
 
   const result = {
     total: 0,
     pending: 0,
-    success: 0,
+    processing: 0,
+    completed: 0,
     failed: 0,
+    timeout: 0,
+    cancelled: 0,
   };
 
-  stats.forEach(stat => {
+  stats.forEach((stat) => {
     const status = stat.status;
     const count = parseInt(stat.count);
     result[status] = count;

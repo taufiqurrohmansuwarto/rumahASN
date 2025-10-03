@@ -7,8 +7,9 @@ import {
   IconFileText,
   IconShieldCheck,
   IconBell,
+  IconPlus,
 } from "@tabler/icons-react";
-import { Card as AntdCard } from "antd";
+import { Card as AntdCard, Button } from "antd";
 import { useRouter } from "next/router";
 import { Card, Text, Group, Stack, Alert, Title } from "@mantine/core";
 
@@ -53,18 +54,39 @@ function EsignBkdDashboard() {
           background: "#FF4500",
           color: "white",
           padding: 20,
-          textAlign: "center",
           borderRadius: "12px 12px 0 0",
           margin: "-24px -24px 0 -24px",
         }}
       >
-        <IconShieldCheck size={20} style={{ marginBottom: 6 }} />
-        <Title order={3} style={{ color: "white", margin: 0, fontSize: 18 }}>
-          Dashboard E-Sign BKD
-        </Title>
-        <Text size="sm" style={{ color: "rgba(255, 255, 255, 0.9)" }}>
-          Kelola dokumen elektronik dan tanda tangan digital BKD
-        </Text>
+        <Group justify="space-between" align="center" wrap="wrap">
+          <div style={{ textAlign: "left" }}>
+            <Group gap={8} mb={4}>
+              <IconShieldCheck size={20} />
+              <Title order={3} style={{ color: "white", margin: 0, fontSize: 18 }}>
+                Dashboard E-Sign BKD
+              </Title>
+            </Group>
+            <Text size="sm" style={{ color: "rgba(255, 255, 255, 0.9)" }}>
+              Kelola dokumen elektronik dan tanda tangan digital BKD
+            </Text>
+          </div>
+          <Button
+            type="default"
+            icon={<IconPlus size={16} />}
+            onClick={() => navigateTo("/documents/create")}
+            style={{
+              background: "rgba(255, 255, 255, 0.95)",
+              borderColor: "rgba(255, 255, 255, 0.95)",
+              color: "#FF4500",
+              fontWeight: 600,
+              borderRadius: 6,
+              boxShadow: "0 2px 8px rgba(0, 0, 0, 0.15)",
+            }}
+            size="large"
+          >
+            Buat Dokumen Baru
+          </Button>
+        </Group>
       </div>
 
       <Stack gap="md" mt="md">

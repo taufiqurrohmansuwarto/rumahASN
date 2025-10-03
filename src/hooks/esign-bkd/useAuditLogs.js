@@ -23,6 +23,7 @@ export const useDocumentLogs = (documentId, params = {}) => {
     queryFn: () => getDocumentLogs(documentId, params),
     enabled: !!documentId,
     keepPreviousData: true,
+    refetchOnWindowFocus: false,
   });
 };
 
