@@ -124,9 +124,10 @@ export const prepareSignatureProperties = (
 };
 
 /**
- * Call BSrE API to sign document
+ * Call BSrE API to sign document (single page)
  * @param {Object} params - Signing parameters
  * @returns {Promise<Object>} - Signed file result
+ * @throws {Error} - Throws error if signing fails
  */
 export const callBsreSignApi = async (params) => {
   const { signWithCoordinate } = require("@/utils/esign-utils");
@@ -139,16 +140,159 @@ export const callBsreSignApi = async (params) => {
     signatureProperties,
   });
 
+  console.log("BSrE Sign Result:", result);
+
+  // Check if signing failed (success: false)
   if (!result.success) {
-    throw new Error(result.message || "Gagal menandatangani dokumen");
+    const errorData = result.data;
+    const error = new Error(
+      errorData?.response?.data?.message ||
+      errorData?.response?.data?.error ||
+      errorData?.message ||
+      "Gagal menandatangani dokumen"
+    );
+    error.bsreResponse = errorData?.response?.data;
+    error.statusCode = errorData?.response?.status;
+    error.isNetworkError = !!errorData?.response;
+    error.isBusinessError = !errorData?.response; // Business error if no HTTP response
+    throw error;
   }
 
-  console.log("result", result);
-
+  // Check if signed file exists
   const signedFileBase64 = result.data?.file?.[0];
   if (!signedFileBase64) {
-    throw new Error("File hasil tanda tangan tidak ditemukan");
+    const error = new Error("File hasil tanda tangan tidak ditemukan dalam response BSrE");
+    error.bsreResponse = result.data;
+    error.isBusinessError = true;
+    throw error;
   }
 
   return { signedFileBase64, result };
+};
+
+/**
+ * Sign document sequentially page by page
+ * BSrE only supports 1 page 1 tag per request, so we need to sign page by page
+ * @param {Object} params - Signing parameters
+ * @returns {Promise<Object>} - Final signed file and logs
+ */
+export const signDocumentSequential = async (params) => {
+  const {
+    nik,
+    passphrase,
+    initialBase64,
+    signPages,
+    tagCoordinate,
+    imageBase64,
+  } = params;
+
+  let currentBase64 = initialBase64;
+  const pageLogs = [];
+  const pageResponses = [];
+  const totalPages = signPages.length;
+
+  console.log(`[Sequential Sign] Starting signing for ${totalPages} pages:`, signPages);
+
+  for (let i = 0; i < totalPages; i++) {
+    const page = signPages[i];
+    const step = i + 1;
+    const startTime = Date.now();
+
+    console.log(`[Sequential Sign] Step ${step}/${totalPages}: Signing page ${page}...`);
+
+    const pageLog = {
+      page,
+      step,
+      status: "pending",
+      started_at: new Date().toISOString(),
+      file_size_before: currentBase64.length,
+    };
+
+    try {
+      // Prepare signature properties for THIS page only
+      const signatureProperties = [{
+        tampilan: "VISIBLE",
+        page,
+        width: 20,
+        height: 20,
+        imageBase64,
+        tag: tagCoordinate || "$",
+      }];
+
+      // Sign this page
+      const { signedFileBase64, result } = await callBsreSignApi({
+        nik,
+        passphrase,
+        base64File: currentBase64,
+        signatureProperties,
+      });
+
+      const duration = Date.now() - startTime;
+
+      // Update log with success
+      pageLog.status = "completed";
+      pageLog.completed_at = new Date().toISOString();
+      pageLog.duration_ms = duration;
+      pageLog.file_size_after = signedFileBase64.length;
+
+      // Store response
+      pageResponses.push({
+        page,
+        step,
+        success: true,
+        bsre_response: result,
+      });
+
+      // Update current base64 for next iteration
+      currentBase64 = signedFileBase64;
+
+      console.log(`[Sequential Sign] ✓ Page ${page} completed in ${duration}ms`);
+    } catch (error) {
+      const duration = Date.now() - startTime;
+
+      // Update log with failure
+      pageLog.status = "failed";
+      pageLog.completed_at = new Date().toISOString();
+      pageLog.duration_ms = duration;
+      pageLog.error = error.message;
+
+      // Store error response
+      pageResponses.push({
+        page,
+        step,
+        success: false,
+        error: error.message,
+        bsre_response: error.bsreResponse || null,
+      });
+
+      console.error(`[Sequential Sign] ✗ Page ${page} failed in ${duration}ms:`, error.message);
+
+      // Push failed log
+      pageLogs.push(pageLog);
+
+      // Create error with context
+      const sequentialError = new Error(`Gagal menandatangani halaman ${page}: ${error.message}`);
+      sequentialError.failedAtPage = page;
+      sequentialError.failedAtStep = step;
+      sequentialError.completedPages = i; // Pages completed before this
+      sequentialError.pageLogs = pageLogs;
+      sequentialError.pageResponses = pageResponses;
+      sequentialError.originalError = error;
+
+      throw sequentialError;
+    }
+
+    // Push success log
+    pageLogs.push(pageLog);
+  }
+
+  console.log(`[Sequential Sign] ✓ All ${totalPages} pages completed successfully`);
+
+  return {
+    finalBase64: currentBase64,
+    pageLogs,
+    pageResponses,
+    totalPages,
+    completedPages: totalPages,
+  };
 };

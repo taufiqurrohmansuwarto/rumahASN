@@ -54,6 +54,7 @@ function DocumentForm() {
         title: values.title,
         description: values.description || "",
         is_public: values.is_public || false,
+        is_add_footer: values.is_add_footer || false,
       };
 
       const file = fileList[0]?.originFileObj || fileList[0];
@@ -101,10 +102,17 @@ function DocumentForm() {
           originFileObj: file,
         },
       ]);
+
+      // Auto-fill title from filename (remove .pdf extension)
+      const fileName = file.name.replace(/\.pdf$/i, "");
+      form.setFieldsValue({ title: fileName });
+
       return false;
     },
     onRemove: () => {
       setFileList([]);
+      // Clear title when file is removed
+      form.setFieldsValue({ title: "" });
     },
   };
 
@@ -226,28 +234,54 @@ function DocumentForm() {
             </Col>
             <Col span={8}>
               <div style={{ paddingTop: "30px" }}>
-                <Flex justify="space-between" align="center">
-                  <Flex vertical>
-                    <Text
-                      style={{
-                        fontWeight: 600,
-                        fontSize: 14,
-                        color: "#6b7280",
-                      }}
+                <Flex vertical gap="middle">
+                  <Flex justify="space-between" align="center">
+                    <Flex vertical>
+                      <Text
+                        style={{
+                          fontWeight: 600,
+                          fontSize: 14,
+                          color: "#6b7280",
+                        }}
+                      >
+                        Dokumen Publik
+                      </Text>
+                      <Text style={{ fontSize: 12, color: "#9ca3af" }}>
+                        Dapat dilihat pengguna lain
+                      </Text>
+                    </Flex>
+                    <Form.Item
+                      name="is_public"
+                      valuePropName="checked"
+                      style={{ margin: 0 }}
                     >
-                      Dokumen Publik
-                    </Text>
-                    <Text style={{ fontSize: 12, color: "#9ca3af" }}>
-                      Dapat dilihat pengguna lain
-                    </Text>
+                      <Switch />
+                    </Form.Item>
                   </Flex>
-                  <Form.Item
-                    name="is_public"
-                    valuePropName="checked"
-                    style={{ margin: 0 }}
-                  >
-                    <Switch />
-                  </Form.Item>
+
+                  <Flex justify="space-between" align="center">
+                    <Flex vertical>
+                      <Text
+                        style={{
+                          fontWeight: 600,
+                          fontSize: 14,
+                          color: "#6b7280",
+                        }}
+                      >
+                        Tambah Footer
+                      </Text>
+                      <Text style={{ fontSize: 12, color: "#9ca3af" }}>
+                        Logo BSrE dan teks footer
+                      </Text>
+                    </Flex>
+                    <Form.Item
+                      name="is_add_footer"
+                      valuePropName="checked"
+                      style={{ margin: 0 }}
+                    >
+                      <Switch />
+                    </Form.Item>
+                  </Flex>
                 </Flex>
               </div>
             </Col>
@@ -334,7 +368,7 @@ function DocumentForm() {
               form={form}
               layout="vertical"
               onFinish={handleFinish}
-              initialValues={{ is_public: false }}
+              initialValues={{ is_public: false, is_add_footer: false }}
             >
               {renderStepContent()}
 

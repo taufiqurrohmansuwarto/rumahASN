@@ -30,7 +30,7 @@ const { addFooterToPdf, getTotalPages } = require("./pdf.service");
  * @returns {Promise<Object>} - Created document with file URL
  */
 export const createDocument = async (data, file, userId, mc) => {
-  const { title, description, is_public = false } = data;
+  const { title, description, is_public = false, is_add_footer = false } = data;
 
   if (!file) {
     throw new Error("File dokumen wajib diupload");
@@ -45,15 +45,15 @@ export const createDocument = async (data, file, userId, mc) => {
   const documentCode = `DOC-${new Date().getFullYear()}-${Date.now()}`;
   let totalPages = 0;
 
-  // Add footer to PDF before upload
+  // Add QR code (and optionally footer) to PDF before upload
   let processedFileBuffer;
   try {
-    const pdfWithFooter = await addFooterToPdf(file.buffer, documentCode);
+    const pdfWithFooter = await addFooterToPdf(file.buffer, documentCode, is_add_footer);
     totalPages = await getTotalPages(pdfWithFooter);
     processedFileBuffer = Buffer.from(pdfWithFooter);
   } catch (error) {
-    console.error("Error adding footer to PDF:", error);
-    throw new Error("Gagal menambahkan footer ke dokumen PDF");
+    console.error("Error adding QR code to PDF:", error);
+    throw new Error("Gagal menambahkan QR code ke dokumen PDF");
   }
 
   // Generate file hash from processed file

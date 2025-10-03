@@ -11,12 +11,22 @@ import {
   Grid,
   Row,
   Col,
+  Modal,
+  Descriptions,
+  Tag,
+  Avatar,
+  Collapse,
 } from "antd";
 import {
   SaveOutlined,
   SettingOutlined,
+  CheckCircleOutlined,
+  FileTextOutlined,
+  TagOutlined,
+  UserOutlined,
+  IdcardOutlined,
 } from "@ant-design/icons";
-import { Text as MantineText } from "@mantine/core";
+import { Text as MantineText, Stack, Group, Badge as MantineBadge, Paper, Divider as MantineDivider } from "@mantine/core";
 import { useRouter } from "next/router";
 import { useCreateSignatureRequest } from "@/hooks/esign-bkd";
 import { previewDocumentAsBase64 } from "@/services/esign-bkd.services";
@@ -48,6 +58,10 @@ function SignatureSetupForm({ document }) {
   const [pdfLoading, setPdfLoading] = useState(false);
   const [pdfError, setPdfError] = useState(null);
   const [totalPages, setTotalPages] = useState(1); // Total pages dari PDF
+
+  // Confirmation modal
+  const [confirmModalVisible, setConfirmModalVisible] = useState(false);
+  const [pendingSubmitData, setPendingSubmitData] = useState(null);
 
   const { mutateAsync: createSignatureRequest, isLoading } = useCreateSignatureRequest();
 
@@ -93,6 +107,25 @@ function SignatureSetupForm({ document }) {
       fetchPdfBase64();
     }
   }, [fetchPdfBase64]);
+
+  const handleConfirmSubmit = async () => {
+    try {
+      await createSignatureRequest({
+        documentId: document.id,
+        data: pendingSubmitData,
+      });
+
+      message.success("Pengaturan tanda tangan berhasil dibuat");
+      setConfirmModalVisible(false);
+      setPendingSubmitData(null);
+      router.push("/esign-bkd/documents");
+    } catch (error) {
+      console.error("Error creating signature request:", error);
+      const errorMessage =
+        error?.response?.data?.message || error?.message || "Gagal membuat pengaturan tanda tangan";
+      message.error(errorMessage);
+    }
+  };
 
   const handleFinish = async (values) => {
     try {
@@ -167,18 +200,13 @@ function SignatureSetupForm({ document }) {
         signatureRequestData.signers = signersData;
       }
 
-      // Call createSignatureRequest(documentId, data, userId)
-      await createSignatureRequest({
-        documentId: document.id,
-        data: signatureRequestData,
-      });
-
-      message.success("Pengaturan tanda tangan berhasil dibuat");
-      router.push("/esign-bkd/documents");
+      // Show confirmation modal instead of directly submitting
+      setPendingSubmitData(signatureRequestData);
+      setConfirmModalVisible(true);
     } catch (error) {
-      console.error("Error creating signature request:", error);
+      console.error("Error validating signature setup:", error);
       const errorMessage =
-        error?.response?.data?.message || error?.message || "Gagal membuat pengaturan tanda tangan";
+        error?.response?.data?.message || error?.message || "Gagal validasi pengaturan tanda tangan";
       message.error(errorMessage);
     }
   };
@@ -389,6 +417,189 @@ function SignatureSetupForm({ document }) {
           </div>
         </Card>
       </div>
+
+      {/* Confirmation Modal */}
+      <Modal
+        title={
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <CheckCircleOutlined style={{ color: "#FF4500", fontSize: 20 }} />
+            <span>Konfirmasi Pengajuan TTE</span>
+          </div>
+        }
+        open={confirmModalVisible}
+        onCancel={() => {
+          setConfirmModalVisible(false);
+          setPendingSubmitData(null);
+        }}
+        onOk={handleConfirmSubmit}
+        okText="Ya, Ajukan"
+        cancelText="Batal"
+        confirmLoading={isLoading}
+        width={600}
+        okButtonProps={{
+          style: {
+            background: "#FF4500",
+            borderColor: "#FF4500",
+          },
+        }}
+        styles={{
+          body: {
+            maxHeight: "60vh",
+            overflowY: "auto",
+            paddingRight: 8,
+          },
+        }}
+      >
+        <MantineDivider my="xs" />
+
+        <Stack gap="xs">
+          <Group justify="space-between">
+            <Group gap={6}>
+              <FileTextOutlined style={{ fontSize: 12, color: "#999" }} />
+              <MantineText size="xs" c="dimmed">Dokumen</MantineText>
+            </Group>
+            <MantineText size="xs" fw={600}>{document?.title}</MantineText>
+          </Group>
+          <MantineDivider size="xs" />
+          <Group justify="space-between">
+            <Group gap={6}>
+              <TagOutlined style={{ fontSize: 12, color: "#999" }} />
+              <MantineText size="xs" c="dimmed">Tipe Pengajuan</MantineText>
+            </Group>
+            <MantineBadge size="sm" color={pendingSubmitData?.type === "self_sign" ? "blue" : "green"}>
+              {pendingSubmitData?.type === "self_sign" ? "Self Sign" : "Request Sign"}
+            </MantineBadge>
+          </Group>
+          <MantineDivider size="xs" />
+          <Group justify="space-between">
+            <Group gap={6}>
+              <SettingOutlined style={{ fontSize: 12, color: "#999" }} />
+              <MantineText size="xs" c="dimmed">Tipe Request</MantineText>
+            </Group>
+            <MantineBadge size="sm" color="cyan">
+              {pendingSubmitData?.request_type === "sequential" ? "Sequential" : "Parallel"}
+            </MantineBadge>
+          </Group>
+          {pendingSubmitData?.notes && (
+            <>
+              <MantineDivider size="xs" />
+              <Group justify="space-between" align="flex-start">
+                <Group gap={6}>
+                  <FileTextOutlined style={{ fontSize: 12, color: "#999" }} />
+                  <MantineText size="xs" c="dimmed">Catatan</MantineText>
+                </Group>
+                <MantineText size="xs" style={{ maxWidth: "70%", textAlign: "right" }}>
+                  {pendingSubmitData.notes}
+                </MantineText>
+              </Group>
+            </>
+          )}
+        </Stack>
+
+        {pendingSubmitData?.type === "self_sign" ? (
+          <>
+            <MantineDivider my="md" label="Pengaturan Self Sign" labelPosition="left" />
+            <Stack gap="xs">
+              <Group justify="space-between">
+                <Group gap={6}>
+                  <FileTextOutlined style={{ fontSize: 12, color: "#999" }} />
+                  <MantineText size="xs" c="dimmed">Halaman</MantineText>
+                </Group>
+                <MantineText size="xs" fw={500}>
+                  {pendingSubmitData?.sign_pages?.join(", ")}
+                </MantineText>
+              </Group>
+              <MantineDivider size="xs" />
+              <Group justify="space-between">
+                <Group gap={6}>
+                  <TagOutlined style={{ fontSize: 12, color: "#999" }} />
+                  <MantineText size="xs" c="dimmed">Koordinat Tag</MantineText>
+                </Group>
+                <MantineText size="xs" fw={500}>
+                  {pendingSubmitData?.tag_coordinate}
+                </MantineText>
+              </Group>
+            </Stack>
+          </>
+        ) : (
+          <>
+            <MantineDivider
+              my="md"
+              label={`Daftar Penandatangan (${pendingSubmitData?.signers?.length || 0})`}
+              labelPosition="left"
+            />
+            <Collapse
+              size="small"
+              items={pendingSubmitData?.signers?.map((signer, index) => {
+                const signerData = signers.find(s => s.user_id === signer.user_id);
+                return {
+                  key: index,
+                  label: (
+                    <Group gap="xs">
+                      <Avatar src={signerData?.avatar} size={20}>
+                        {signerData?.user_name?.charAt(0)}
+                      </Avatar>
+                      <MantineText size="xs" fw={600}>
+                        #{signer.sequence_order} - {signerData?.user_name || signer.user_id}
+                      </MantineText>
+                      <MantineBadge size="xs" color={signer.role_type === "signer" ? "blue" : "orange"}>
+                        {signer.role_type === "signer" ? "Signer" : "Reviewer"}
+                      </MantineBadge>
+                    </Group>
+                  ),
+                  children: (
+                    <Stack gap={4}>
+                      <Group justify="space-between">
+                        <Group gap={6}>
+                          <UserOutlined style={{ fontSize: 12, color: "#999" }} />
+                          <MantineText size="xs" c="dimmed">Role</MantineText>
+                        </Group>
+                        <MantineBadge size="xs" color={signer.role_type === "signer" ? "blue" : "orange"}>
+                          {signer.role_type === "signer" ? "Signer" : "Reviewer"}
+                        </MantineBadge>
+                      </Group>
+                      {signer.role_type === "signer" && (
+                        <>
+                          <MantineDivider size="xs" />
+                          <Group justify="space-between">
+                            <Group gap={6}>
+                              <FileTextOutlined style={{ fontSize: 12, color: "#999" }} />
+                              <MantineText size="xs" c="dimmed">Halaman</MantineText>
+                            </Group>
+                            <MantineText size="xs" fw={500}>
+                              {signer.signature_pages?.join(", ") || "-"}
+                            </MantineText>
+                          </Group>
+                          <MantineDivider size="xs" />
+                          <Group justify="space-between">
+                            <Group gap={6}>
+                              <TagOutlined style={{ fontSize: 12, color: "#999" }} />
+                              <MantineText size="xs" c="dimmed">Koordinat Tag</MantineText>
+                            </Group>
+                            <MantineText size="xs" fw={500}>
+                              {signer.tag_coordinate || "!"}
+                            </MantineText>
+                          </Group>
+                        </>
+                      )}
+                      <MantineDivider size="xs" />
+                      <Group justify="space-between">
+                        <Group gap={6}>
+                          <IdcardOutlined style={{ fontSize: 12, color: "#999" }} />
+                          <MantineText size="xs" c="dimmed">Jabatan</MantineText>
+                        </Group>
+                        <MantineText size="xs" fw={500}>
+                          {signerData?.nama_jabatan || "-"}
+                        </MantineText>
+                      </Group>
+                    </Stack>
+                  ),
+                };
+              })}
+            />
+          </>
+        )}
+      </Modal>
     </div>
   );
 }

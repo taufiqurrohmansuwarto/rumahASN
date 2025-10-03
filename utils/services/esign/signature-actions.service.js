@@ -100,51 +100,53 @@ export const signDocument = async (
     const imageBase64 = loadSignatureLogo();
     console.log("   ✓ Logo loaded");
 
-    // 3. Prepare signature properties
-    console.log("3. Preparing signature properties...");
-    const signatureProperties = prepareSignatureProperties(
-      userData?.sign_pages,
-      userData.tag_coordinate,
-      imageBase64
-    );
-    console.log("   Signature properties:", signatureProperties);
-
-    // 4. Call BSrE API to sign document
-    console.log("4. Calling BSrE API to sign document...");
+    // 3. Sign document sequentially (page by page)
+    console.log("3. Signing document sequentially...");
     console.log("   NIK:", nik ? "***PROVIDED***" : "MISSING");
     console.log("   Passphrase:", passphrase ? "***PROVIDED***" : "MISSING");
+    console.log("   Pages to sign:", userData?.sign_pages);
+    console.log("   Tag coordinate:", userData.tag_coordinate);
 
     const startTime = Date.now();
-    let signResult = null;
+    let sequentialResult = null;
     let bsreError = null;
 
     try {
-      const { signedFileBase64, result } = await callBsreSignApi({
+      const { signDocumentSequential } = require("./signing-helpers.service");
+
+      sequentialResult = await signDocumentSequential({
         nik,
         passphrase,
-        base64File,
-        signatureProperties,
+        initialBase64: base64File,
+        signPages: userData?.sign_pages || [1],
+        tagCoordinate: userData.tag_coordinate,
+        imageBase64,
       });
-      signResult = { signedFileBase64, result };
-      console.log("   ✓ BSrE signing successful");
+
+      console.log("   ✓ Sequential signing successful");
+      console.log("   ✓ Completed pages:", sequentialResult.completedPages);
     } catch (error) {
       bsreError = error;
-      console.error("   ✗ BSrE signing failed:", error.message);
+      console.error("   ✗ Sequential signing failed:", error.message);
+      console.error("   ✗ Failed at page:", error.failedAtPage);
+      console.error("   ✗ Completed pages:", error.completedPages);
     }
 
     const responseTime = Date.now() - startTime;
-    console.log("   Response time:", responseTime, "ms");
+    console.log("   Total response time:", responseTime, "ms");
 
-    // 5. Create BSrE transaction record
-    console.log("5. Creating BSrE transaction record...");
+    // 4. Create BSrE transaction record
+    console.log("4. Creating BSrE transaction record...");
     transactionId = nanoid();
     const now = new Date();
 
     // If signing failed, commit failed transaction and throw error
     if (bsreError) {
       console.log(
-        "   ✗ BSrE signing failed, creating failed transaction record..."
+        "   ✗ Sequential signing failed, creating failed transaction record..."
       );
+
+      const totalDuration = bsreError.pageLogs?.reduce((sum, log) => sum + (log.duration_ms || 0), 0) || 0;
 
       await BsreTransactions.query(trx).insert({
         id: transactionId,
@@ -156,10 +158,20 @@ export const signDocument = async (
         error_message: bsreError.message,
         request_data: {
           nik,
-          signatureProperties,
+          total_pages: userData?.sign_pages?.length || 0,
+          sign_pages: userData?.sign_pages || [],
+          tag_coordinate: userData.tag_coordinate,
           file_size: base64File.length,
+          page_logs: bsreError.pageLogs || [],
         },
-        response_data: {},
+        response_data: {
+          error: bsreError.message,
+          failed_at_page: bsreError.failedAtPage,
+          failed_at_step: bsreError.failedAtStep,
+          completed_pages: bsreError.completedPages,
+          page_responses: bsreError.pageResponses || [],
+          total_duration_ms: totalDuration,
+        },
         created_at: now,
         updated_at: now,
         completed_at: null,
@@ -173,15 +185,15 @@ export const signDocument = async (
         await logBsreInteraction({
           transaction_id: transactionId,
           action: "sign_document",
-          endpoint: "/sign/coordinate",
+          endpoint: "/api/v2/sign/pdf",
           http_method: "POST",
-          http_status: 500,
+          http_status: bsreError.statusCode || 500,
           request_payload: {
             nik,
             signatureProperties,
             file_size: base64File.length,
           },
-          response_payload: {},
+          response_payload: bsreError.bsreResponse || {},
           error_detail: bsreError.message,
           response_time_ms: responseTime,
         });
@@ -214,6 +226,8 @@ export const signDocument = async (
     }
 
     // Success case: create success transaction record
+    const totalDuration = sequentialResult.pageLogs.reduce((sum, log) => sum + (log.duration_ms || 0), 0);
+
     await BsreTransactions.query(trx).insert({
       id: transactionId,
       signature_detail_id: detailId,
@@ -222,29 +236,40 @@ export const signDocument = async (
       signed_file: requestData.document.file_path,
       status: "completed",
       error_message: null,
-      request_data: { nik, signatureProperties, file_size: base64File.length },
-      response_data: signResult?.result || {},
+      request_data: {
+        nik,
+        total_pages: sequentialResult.totalPages,
+        sign_pages: userData?.sign_pages || [],
+        tag_coordinate: userData.tag_coordinate,
+        file_size: base64File.length,
+        page_logs: sequentialResult.pageLogs,
+      },
+      response_data: {
+        completed_pages: sequentialResult.completedPages,
+        page_responses: sequentialResult.pageResponses,
+        total_duration_ms: totalDuration,
+      },
       created_at: now,
       updated_at: now,
       completed_at: now,
     });
     console.log("   ✓ Transaction record created, ID:", transactionId);
 
-    // 6. Upload signed file back to Minio (REPLACE)
-    console.log("6. Uploading signed file back to Minio...");
+    // 5. Upload signed file back to Minio (REPLACE)
+    console.log("5. Uploading signed file back to Minio...");
     uploadedFilePath = requestData.document.file_path; // Track for cleanup
     await uploadSignedPdfToMinio(
       mc,
-      signResult.signedFileBase64,
+      sequentialResult.finalBase64,
       requestData.document.file_path,
       requestData.document.document_code,
       userId
     );
     console.log("   ✓ Signed file uploaded");
 
-    // 7. Calculate new file hash and size
-    console.log("7. Calculating file hash and size...");
-    const signedFileBuffer = Buffer.from(signResult.signedFileBase64, "base64");
+    // 6. Calculate new file hash and size
+    console.log("6. Calculating file hash and size...");
+    const signedFileBuffer = Buffer.from(sequentialResult.finalBase64, "base64");
     const newFileHash = crypto
       .createHash("sha256")
       .update(signedFileBuffer)
@@ -253,8 +278,8 @@ export const signDocument = async (
     console.log("   New file hash:", newFileHash);
     console.log("   New file size:", newFileSize, "bytes");
 
-    // 8. Update documents table
-    console.log("8. Updating documents table...");
+    // 7. Update documents table
+    console.log("7. Updating documents table...");
     await Documents.query(trx).patchAndFetchById(requestData.document_id, {
       file_hash: newFileHash,
       file_size: newFileSize,
@@ -262,8 +287,8 @@ export const signDocument = async (
     });
     console.log("   ✓ Documents table updated");
 
-    // 9. Update signature detail
-    console.log("9. Updating signature detail...");
+    // 8. Update signature detail
+    console.log("8. Updating signature detail...");
     const updatedDetail = await SignatureDetails.query(trx).patchAndFetchById(
       detailId,
       {
@@ -279,41 +304,44 @@ export const signDocument = async (
     );
     console.log("   ✓ Signature detail updated");
 
-    // 10. Check if request is complete
-    console.log("10. Checking if request is complete...");
+    // 9. Check if request is complete
+    console.log("9. Checking if request is complete...");
     await checkAndCompleteRequest(detail.request_id, trx);
     console.log("   ✓ Completion check done");
 
-    // 11. Commit transaction
-    console.log("11. Committing transaction...");
+    // 10. Commit transaction
+    console.log("10. Committing transaction...");
     await trx.commit();
     console.log("   ✓ Transaction committed");
 
-    // 12. Log BSrE interaction (after commit)
-    console.log("12. Logging BSrE interaction...");
+    // 11. Log BSrE interactions (after commit) - one per page
+    console.log("11. Logging BSrE interactions...");
     try {
-      await logBsreInteraction({
-        transaction_id: transactionId,
-        action: "sign_document",
-        endpoint: "/sign/coordinate",
-        http_method: "POST",
-        http_status: 200,
-        request_payload: {
-          nik,
-          signatureProperties,
-          file_size: base64File.length,
-        },
-        response_payload: signResult?.result || {},
-        error_detail: null,
-        response_time_ms: responseTime,
-      });
-      console.log("   ✓ Interaction logged");
+      for (const pageResponse of sequentialResult.pageResponses) {
+        await logBsreInteraction({
+          transaction_id: transactionId,
+          action: "sign_document_page",
+          endpoint: "/api/v2/sign/pdf",
+          http_method: "POST",
+          http_status: 200,
+          request_payload: {
+            nik,
+            page: pageResponse.page,
+            step: pageResponse.step,
+            tag_coordinate: userData.tag_coordinate,
+          },
+          response_payload: pageResponse.bsre_response || {},
+          error_detail: null,
+          response_time_ms: sequentialResult.pageLogs[pageResponse.step - 1]?.duration_ms || 0,
+        });
+      }
+      console.log("   ✓ Interactions logged for", sequentialResult.pageResponses.length, "pages");
     } catch (logError) {
       console.error("   ✗ Logging error (non-critical):", logError.message);
     }
 
-    // 13. Log user activity (after commit)
-    console.log("13. Logging user activity...");
+    // 12. Log user activity (after commit)
+    console.log("12. Logging user activity...");
     try {
       await logSignatureAction({
         user_id: userId,
@@ -329,6 +357,9 @@ export const signDocument = async (
         metadata: {
           signature_pages: userData?.sign_pages,
           tag_coordinate: userData.tag_coordinate,
+          total_pages: sequentialResult.totalPages,
+          completed_pages: sequentialResult.completedPages,
+          total_duration_ms: totalDuration,
         },
       });
       console.log("   ✓ User activity logged");

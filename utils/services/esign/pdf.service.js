@@ -16,38 +16,41 @@ const footerText = `Sesuai dengan ketentuan peraturan perundang-undangan yang be
  * Add footer with BSrE logo, text, and QR code to all pages of PDF
  * @param {Buffer} pdfBuffer - Original PDF buffer
  * @param {String} documentId - Document ID for QR code
+ * @param {Boolean} isAddFooter - Whether to add footer text and logo (default: false, only QR)
  * @returns {Promise<Buffer>} - Modified PDF buffer
  */
-module.exports.addFooterToPdf = async (pdfBuffer, documentId) => {
+module.exports.addFooterToPdf = async (pdfBuffer, documentId, isAddFooter = false) => {
   try {
     // Load PDF document
     const pdfDoc = await pdfLib.PDFDocument.load(pdfBuffer);
 
-    // Load BSrE logo image
-    let bsreImageBytes;
-    const logoPath = path.join(
-      process.cwd(),
-      "utils",
-      "services",
-      "esign",
-      "bsre.png"
-    );
-
-    try {
-      bsreImageBytes = fs.readFileSync(logoPath);
-    } catch (error) {
-      console.warn("BSrE logo not found, skipping logo in footer");
-      bsreImageBytes = null;
-    }
-
-    // Embed BSrE logo if available
+    // Load BSrE logo image only if footer is enabled
     let bsreImage = null;
-    if (bsreImageBytes) {
+    if (isAddFooter) {
+      let bsreImageBytes;
+      const logoPath = path.join(
+        process.cwd(),
+        "utils",
+        "services",
+        "esign",
+        "bsre.png"
+      );
+
       try {
-        bsreImage = await pdfDoc.embedPng(bsreImageBytes);
+        bsreImageBytes = fs.readFileSync(logoPath);
       } catch (error) {
-        console.warn("Error embedding BSrE logo:", error.message);
-        bsreImage = null;
+        console.warn("BSrE logo not found, skipping logo in footer");
+        bsreImageBytes = null;
+      }
+
+      // Embed BSrE logo if available
+      if (bsreImageBytes) {
+        try {
+          bsreImage = await pdfDoc.embedPng(bsreImageBytes);
+        } catch (error) {
+          console.warn("Error embedding BSrE logo:", error.message);
+          bsreImage = null;
+        }
       }
     }
 
@@ -98,42 +101,45 @@ module.exports.addFooterToPdf = async (pdfBuffer, documentId) => {
       const contentWidth = logoWidth + textAreaWidth + 10;
       const contentStartX = pageCenter - contentWidth / 2;
 
-      // Draw BSrE logo (left side)
-      if (bsreImage) {
-        const logoY = footerY + (footerHeight - logoHeight) / 2;
+      // Draw footer (logo and text) only if isAddFooter is true
+      if (isAddFooter) {
+        // Draw BSrE logo (left side)
+        if (bsreImage) {
+          const logoY = footerY + (footerHeight - logoHeight) / 2;
 
-        page.drawImage(bsreImage, {
-          x: contentStartX,
-          y: logoY,
-          width: logoWidth,
-          height: logoHeight,
-        });
-      }
+          page.drawImage(bsreImage, {
+            x: contentStartX,
+            y: logoY,
+            width: logoWidth,
+            height: logoHeight,
+          });
+        }
 
-      // Calculate text area (horizontal layout, wide)
-      const textStartX = contentStartX + logoWidth + 10;
+        // Calculate text area (horizontal layout, wide)
+        const textStartX = contentStartX + logoWidth + 10;
 
-      // Draw footer text (horizontal, single line or few lines)
-      const fontSize = 5;
-      const textLines = wrapText(footerText, textAreaWidth, fontSize);
-      const lineHeight = 6;
-      const totalTextHeight = textLines.length * lineHeight;
+        // Draw footer text (horizontal, single line or few lines)
+        const fontSize = 5;
+        const textLines = wrapText(footerText, textAreaWidth, fontSize);
+        const lineHeight = 6;
+        const totalTextHeight = textLines.length * lineHeight;
 
-      // Center text vertically in footer
-      const textStartY =
-        footerY +
-        (footerHeight - totalTextHeight) / 2 +
-        totalTextHeight -
-        lineHeight;
+        // Center text vertically in footer
+        const textStartY =
+          footerY +
+          (footerHeight - totalTextHeight) / 2 +
+          totalTextHeight -
+          lineHeight;
 
-      for (let j = 0; j < textLines.length; j++) {
-        page.drawText(textLines[j], {
-          x: textStartX,
-          y: textStartY - j * lineHeight,
-          size: fontSize,
-          color: pdfLib.rgb(0.3, 0.3, 0.3),
-          maxWidth: textAreaWidth,
-        });
+        for (let j = 0; j < textLines.length; j++) {
+          page.drawText(textLines[j], {
+            x: textStartX,
+            y: textStartY - j * lineHeight,
+            size: fontSize,
+            color: pdfLib.rgb(0.3, 0.3, 0.3),
+            maxWidth: textAreaWidth,
+          });
+        }
       }
 
       // QR code configuration - bottom right corner

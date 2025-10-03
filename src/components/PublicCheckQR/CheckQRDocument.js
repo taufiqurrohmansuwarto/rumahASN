@@ -343,78 +343,58 @@ const CheckQRDocument = ({ documentCode }) => {
                 {/* BSRE Verification */}
                 <MantineCard withBorder padding="sm" radius="md">
                   <Group gap="xs" mb="xs">
-                    <IconShieldCheckFilled size={16} style={{ color: "#52c41a" }} />
-                    <Text fw={600} size="sm">
+                    <IconShieldCheckFilled size={14} style={{ color: "#52c41a" }} />
+                    <Text fw={600} size="xs">
                       Verifikasi BSRE
                     </Text>
                   </Group>
 
                   {verifyLoading ? (
-                    <div style={{ textAlign: "center", padding: "20px 0" }}>
+                    <div style={{ textAlign: "center", padding: "12px 0" }}>
                       <Spin size="small" />
-                      <Text size="xs" c="dimmed" mt={8}>
-                        Memverifikasi dokumen...
+                      <Text size="xs" c="dimmed" mt={4}>
+                        Memverifikasi...
                       </Text>
                     </div>
                   ) : bsreVerification ? (
                     <>
                       {bsreVerification.signatureInformations &&
                         bsreVerification.signatureInformations.length > 0 && (
-                          <Descriptions size="small" column={1} bordered>
-                            <Descriptions.Item label="Penandatangan">
-                              {bsreVerification.signatureInformations[0].signerName}
-                            </Descriptions.Item>
-                            <Descriptions.Item label="Waktu Tanda Tangan">
-                              {dayjs(
-                                bsreVerification.signatureInformations[0].signatureDate
-                              ).format("DD MMMM YYYY, HH:mm")}
-                            </Descriptions.Item>
-                            <Descriptions.Item label="Format Tanda Tangan">
-                              {bsreVerification.signatureInformations[0].signatureFormat}
-                            </Descriptions.Item>
-                            <Descriptions.Item label="Integritas Valid">
-                              {bsreVerification.signatureInformations[0].integrityValid ? (
-                                <Badge color="green">Ya</Badge>
-                              ) : (
-                                <Badge color="red">Tidak</Badge>
-                              )}
-                            </Descriptions.Item>
-                            <Descriptions.Item label="Sertifikat Terpercaya">
-                              {bsreVerification.signatureInformations[0].certificateTrusted ? (
-                                <Badge color="green">Ya</Badge>
-                              ) : (
-                                <Badge color="orange">Tidak</Badge>
-                              )}
-                            </Descriptions.Item>
-                            <Descriptions.Item label="Dokumen Dimodifikasi">
-                              {bsreVerification.signatureInformations[0].modified ? (
-                                <Badge color="red">Ya</Badge>
-                              ) : (
-                                <Badge color="green">Tidak</Badge>
-                              )}
-                            </Descriptions.Item>
-                            {bsreVerification.signatureInformations[0].timestampInfomation && (
-                              <Descriptions.Item label="Waktu Timestamp">
-                                {dayjs(
-                                  bsreVerification.signatureInformations[0].timestampInfomation
-                                    .timestampDate
-                                ).format("DD MMMM YYYY, HH:mm")}
-                              </Descriptions.Item>
-                            )}
-                            <Descriptions.Item label="Total Tanda Tangan">
-                              {bsreVerification.signatureCount}
-                            </Descriptions.Item>
-                          </Descriptions>
+                          <Stack gap="xs">
+                            <Group justify="space-between">
+                              <Text size="xs" c="dimmed">Penandatangan</Text>
+                              <Text size="xs" fw={500}>
+                                {bsreVerification.signatureInformations[0].signerName}
+                              </Text>
+                            </Group>
+                            <Divider size="xs" />
+                            <Group justify="space-between">
+                              <Text size="xs" c="dimmed">Waktu TTD</Text>
+                              <Text size="xs" fw={500}>
+                                {dayjs(bsreVerification.signatureInformations[0].signatureDate).format("DD/MM/YY HH:mm")}
+                              </Text>
+                            </Group>
+                            <Divider size="xs" />
+                            <Group justify="space-between">
+                              <Text size="xs" c="dimmed">Integritas</Text>
+                              <Badge size="xs" color={bsreVerification.signatureInformations[0].integrityValid ? "green" : "red"}>
+                                {bsreVerification.signatureInformations[0].integrityValid ? "Valid" : "Tidak"}
+                              </Badge>
+                            </Group>
+                            <Divider size="xs" />
+                            <Group justify="space-between">
+                              <Text size="xs" c="dimmed">Sertifikat</Text>
+                              <Badge size="xs" color={bsreVerification.signatureInformations[0].certificateTrusted ? "green" : "orange"}>
+                                {bsreVerification.signatureInformations[0].certificateTrusted ? "Terpercaya" : "Tidak Terpercaya"}
+                              </Badge>
+                            </Group>
+                          </Stack>
                         )}
                     </>
                   ) : (
-                    <Alert
-                      message="Verifikasi Gagal"
-                      description="Dokumen tidak dapat diverifikasi dengan BSRE."
-                      type="warning"
-                      showIcon
-                      style={{ padding: "8px 12px" }}
-                    />
+                    <Text size="xs" c="dimmed" ta="center" py={8}>
+                      Tidak dapat diverifikasi
+                    </Text>
                   )}
                 </MantineCard>
               </Stack>
