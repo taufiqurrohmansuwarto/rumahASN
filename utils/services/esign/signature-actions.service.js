@@ -100,12 +100,39 @@ export const signDocument = async (
     const imageBase64 = loadSignatureLogo();
     console.log("   ✓ Logo loaded");
 
-    // 3. Sign document sequentially (page by page)
-    console.log("3. Signing document sequentially...");
+    // 3. Sign document sequentially using detected coordinates
+    console.log("3. Signing document sequentially with coordinates...");
     console.log("   NIK:", nik ? "***PROVIDED***" : "MISSING");
     console.log("   Passphrase:", passphrase ? "***PROVIDED***" : "MISSING");
-    console.log("   Pages to sign:", userData?.sign_pages);
-    console.log("   Tag coordinate:", userData.tag_coordinate);
+
+    // Parse sign_coordinate from JSON string
+    let signCoordinates = [];
+    try {
+      signCoordinates = userData?.sign_coordinate
+        ? (typeof userData.sign_coordinate === 'string'
+            ? JSON.parse(userData.sign_coordinate)
+            : userData.sign_coordinate)
+        : [];
+    } catch (error) {
+      console.error("   ✗ Error parsing sign_coordinate:", error.message);
+      throw new Error("Format sign_coordinate tidak valid");
+    }
+
+    console.log("   Coordinates to use:", signCoordinates.length, "page(s)");
+
+    // Filter only coordinates that were found
+    const validCoordinates = signCoordinates.filter(coord => coord.found === true);
+
+    if (validCoordinates.length === 0) {
+      throw new Error("Tidak ada koordinat tanda tangan yang valid. Pastikan tag ditemukan di dokumen.");
+    }
+
+    console.log("   Valid coordinates:", validCoordinates.length, "page(s)");
+    validCoordinates.forEach((coord, idx) => {
+      console.log(
+        `     [${idx + 1}] Page ${coord.page}: bottom-left (${coord.originX}, ${coord.originY})`
+      );
+    });
 
     const startTime = Date.now();
     let sequentialResult = null;
@@ -118,8 +145,7 @@ export const signDocument = async (
         nik,
         passphrase,
         initialBase64: base64File,
-        signPages: userData?.sign_pages || [1],
-        tagCoordinate: userData.tag_coordinate,
+        signCoordinates: validCoordinates, // Pass coordinates array instead of pages + tag
         imageBase64,
       });
 
@@ -257,6 +283,7 @@ export const signDocument = async (
 
     // 5. Upload signed file back to Minio (REPLACE)
     console.log("5. Uploading signed file back to Minio...");
+    console.log("   Final base64 size:", sequentialResult.finalBase64.length, "bytes");
     uploadedFilePath = requestData.document.file_path; // Track for cleanup
     await uploadSignedPdfToMinio(
       mc,
@@ -265,7 +292,7 @@ export const signDocument = async (
       requestData.document.document_code,
       userId
     );
-    console.log("   ✓ Signed file uploaded");
+    console.log("   ✓ Signed file uploaded to:", requestData.document.file_path);
 
     // 6. Calculate new file hash and size
     console.log("6. Calculating file hash and size...");
@@ -277,6 +304,7 @@ export const signDocument = async (
     const newFileSize = signedFileBuffer.length;
     console.log("   New file hash:", newFileHash);
     console.log("   New file size:", newFileSize, "bytes");
+    console.log("   Using finalBase64 size:", sequentialResult.finalBase64.length, "bytes (should match when converted to buffer)");
 
     // 7. Update documents table
     console.log("7. Updating documents table...");

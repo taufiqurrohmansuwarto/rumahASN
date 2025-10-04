@@ -32,6 +32,9 @@ const { addFooterToPdf, getTotalPages } = require("./pdf.service");
 export const createDocument = async (data, file, userId, mc) => {
   const { title, description, is_public = false, is_add_footer = false } = data;
 
+  console.log("[Service] data:", data);
+  console.log("[Service] is_add_footer:", is_add_footer, "type:", typeof is_add_footer);
+
   if (!file) {
     throw new Error("File dokumen wajib diupload");
   }
@@ -303,8 +306,21 @@ export const downloadDocumentFile = async (documentId, userId, mc) => {
     throw new Error("Dokumen tidak ditemukan");
   }
 
-  // Check access permission
-  if (document.created_by !== userId && !document.is_public) {
+  // Check access permission: owner, public, or signer/reviewer
+  const isOwner = document.created_by === userId;
+  const isPublic = document.is_public;
+
+  // Check if user is signer/reviewer
+  const isSigner = await SignatureRequests.query()
+    .where("document_id", documentId)
+    .withGraphFetched("signature_details")
+    .then((requests) => {
+      return requests.some((request) =>
+        request.signature_details?.some((detail) => detail.user_id === userId)
+      );
+    });
+
+  if (!isOwner && !isPublic && !isSigner) {
     throw new Error("Tidak memiliki akses ke dokumen ini");
   }
 
@@ -338,8 +354,21 @@ export const previewDocumentFile = async (documentId, userId, mc) => {
     throw new Error("Dokumen tidak ditemukan");
   }
 
-  // Check access permission
-  if (document.created_by !== userId && !document.is_public) {
+  // Check access permission: owner, public, or signer/reviewer
+  const isOwner = document.created_by === userId;
+  const isPublic = document.is_public;
+
+  // Check if user is signer/reviewer
+  const isSigner = await SignatureRequests.query()
+    .where("document_id", documentId)
+    .withGraphFetched("signature_details")
+    .then((requests) => {
+      return requests.some((request) =>
+        request.signature_details?.some((detail) => detail.user_id === userId)
+      );
+    });
+
+  if (!isOwner && !isPublic && !isSigner) {
     throw new Error("Tidak memiliki akses ke dokumen ini");
   }
 

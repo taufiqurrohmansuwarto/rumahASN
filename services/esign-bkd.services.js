@@ -325,6 +325,7 @@ export const createDocumentFormData = (data, file) => {
   formData.append("title", data.title);
   formData.append("description", data.description || "");
   formData.append("is_public", data.is_public || false);
+  formData.append("is_add_footer", data.is_add_footer || false);
 
   if (file) {
     formData.append("file", file);

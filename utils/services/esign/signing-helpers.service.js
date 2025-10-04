@@ -140,16 +140,24 @@ export const callBsreSignApi = async (params) => {
     signatureProperties,
   });
 
-  console.log("BSrE Sign Result:", result);
+  console.log("      [callBsreSignApi] Response received:");
+  console.log("      - Success:", result.success);
 
   // Check if signing failed (success: false)
   if (!result.success) {
     const errorData = result.data;
+    console.log("      [callBsreSignApi] ✗ FAILED");
+    console.log(
+      "      - Error message:",
+      errorData?.response?.data?.message || errorData?.message
+    );
+    console.log("      - Status code:", errorData?.response?.status);
+
     const error = new Error(
       errorData?.response?.data?.message ||
-      errorData?.response?.data?.error ||
-      errorData?.message ||
-      "Gagal menandatangani dokumen"
+        errorData?.response?.data?.error ||
+        errorData?.message ||
+        "Gagal menandatangani dokumen"
     );
     error.bsreResponse = errorData?.response?.data;
     error.statusCode = errorData?.response?.status;
@@ -161,19 +169,38 @@ export const callBsreSignApi = async (params) => {
   // Check if signed file exists
   const signedFileBase64 = result.data?.file?.[0];
   if (!signedFileBase64) {
-    const error = new Error("File hasil tanda tangan tidak ditemukan dalam response BSrE");
+    console.log(
+      "      [callBsreSignApi] ✗ FAILED - No signed file in response"
+    );
+
+    const error = new Error(
+      "File hasil tanda tangan tidak ditemukan dalam response BSrE"
+    );
     error.bsreResponse = result.data;
     error.isBusinessError = true;
     throw error;
   }
 
+  console.log("      [callBsreSignApi] ✓ SUCCESS");
+  console.log("      - Output file size:", signedFileBase64.length, "bytes");
+  console.log(
+    "      - Size difference:",
+    signedFileBase64.length - base64File.length,
+    "bytes",
+    `(${signedFileBase64.length > base64File.length ? "+" : ""}${(
+      ((signedFileBase64.length - base64File.length) / base64File.length) *
+      100
+    ).toFixed(2)}%)`
+  );
+
   return { signedFileBase64, result };
 };
 
 /**
- * Sign document sequentially page by page
- * BSrE only supports 1 page 1 tag per request, so we need to sign page by page
+ * Sign document sequentially page by page using detected coordinates
+ * BSrE only supports 1 page per request, so we sign page by page
  * @param {Object} params - Signing parameters
+ * @param {Array} params.signCoordinates - Array of coordinate objects [{page, originX, originY, ...}]
  * @returns {Promise<Object>} - Final signed file and logs
  */
 export const signDocumentSequential = async (params) => {
@@ -181,24 +208,35 @@ export const signDocumentSequential = async (params) => {
     nik,
     passphrase,
     initialBase64,
-    signPages,
-    tagCoordinate,
+    signCoordinates, // NEW: Use coordinates instead of pages + tag
     imageBase64,
   } = params;
 
   let currentBase64 = initialBase64;
   const pageLogs = [];
   const pageResponses = [];
-  const totalPages = signPages.length;
+  const totalPages = signCoordinates.length;
 
-  console.log(`[Sequential Sign] Starting signing for ${totalPages} pages:`, signPages);
+  console.log(
+    `[Sequential Sign] Starting signing for ${totalPages} pages with coordinates`
+  );
+
+  // Log coordinates
+  signCoordinates.forEach((coord, idx) => {
+    console.log(
+      `[Sequential Sign] ${idx + 1}. Page ${coord.page}: bottom-left (${coord.originX}, ${coord.originY})`
+    );
+  });
 
   for (let i = 0; i < totalPages; i++) {
-    const page = signPages[i];
+    const coord = signCoordinates[i];
+    const page = coord.page;
     const step = i + 1;
     const startTime = Date.now();
 
-    console.log(`[Sequential Sign] Step ${step}/${totalPages}: Signing page ${page}...`);
+    console.log(
+      `[Sequential Sign] Step ${step}/${totalPages}: Signing page ${page} at (${coord.originX}, ${coord.originY})...`
+    );
 
     const pageLog = {
       page,
@@ -206,18 +244,39 @@ export const signDocumentSequential = async (params) => {
       status: "pending",
       started_at: new Date().toISOString(),
       file_size_before: currentBase64.length,
+      coordinate: { x: coord.originX, y: coord.originY },
     };
 
     try {
-      // Prepare signature properties for THIS page only
-      const signatureProperties = [{
-        tampilan: "VISIBLE",
-        page,
-        width: 20,
-        height: 20,
-        imageBase64,
-        tag: tagCoordinate || "$",
-      }];
+      // BSrE API does NOT support absolute positioning via originX/originY
+      // Tested: originX/originY are IGNORED by BSrE API
+      // SOLUTION: Use TAG-based positioning instead
+      const width = 20;
+      const height = 20;
+
+      const signatureProperties = [
+        {
+          tampilan: "VISIBLE",
+          page: page,
+          tag: coord.tag || "$",  // Use tag instead of coordinates
+          width: width,
+          height: height,
+          imageBase64,
+        },
+      ];
+
+      console.log(`[Sequential Sign] Using TAG-based positioning:`);
+      console.log(`  Page: ${page}`);
+      console.log(`  Tag: "${coord.tag || "$"}"`);
+      console.log(`  Note: BSrE does NOT support originX/originY positioning`);
+
+      console.log(
+        "signatureProperties",
+        JSON.stringify({
+          ...signatureProperties[0],
+          imageBase64: `[REDACTED_${imageBase64?.length || 0}_bytes]`
+        }, null, 2)
+      );
 
       // Sign this page
       const { signedFileBase64, result } = await callBsreSignApi({
@@ -246,7 +305,16 @@ export const signDocumentSequential = async (params) => {
       // Update current base64 for next iteration
       currentBase64 = signedFileBase64;
 
-      console.log(`[Sequential Sign] ✓ Page ${page} completed in ${duration}ms`);
+      console.log(
+        `[Sequential Sign] ✓ Page ${page} completed in ${duration}ms`
+      );
+      console.log(
+        `[Sequential Sign]   File size changed: ${pageLog.file_size_before} → ${
+          pageLog.file_size_after
+        } bytes (${
+          pageLog.file_size_after > pageLog.file_size_before ? "+" : ""
+        }${pageLog.file_size_after - pageLog.file_size_before})`
+      );
     } catch (error) {
       const duration = Date.now() - startTime;
 
@@ -265,13 +333,18 @@ export const signDocumentSequential = async (params) => {
         bsre_response: error.bsreResponse || null,
       });
 
-      console.error(`[Sequential Sign] ✗ Page ${page} failed in ${duration}ms:`, error.message);
+      console.error(
+        `[Sequential Sign] ✗ Page ${page} failed in ${duration}ms:`,
+        error.message
+      );
 
       // Push failed log
       pageLogs.push(pageLog);
 
       // Create error with context
-      const sequentialError = new Error(`Gagal menandatangani halaman ${page}: ${error.message}`);
+      const sequentialError = new Error(
+        `Gagal menandatangani halaman ${page}: ${error.message}`
+      );
       sequentialError.failedAtPage = page;
       sequentialError.failedAtStep = step;
       sequentialError.completedPages = i; // Pages completed before this
@@ -286,7 +359,19 @@ export const signDocumentSequential = async (params) => {
     pageLogs.push(pageLog);
   }
 
-  console.log(`[Sequential Sign] ✓ All ${totalPages} pages completed successfully`);
+  console.log(
+    `[Sequential Sign] ✓ All ${totalPages} pages completed successfully`
+  );
+  console.log(
+    `[Sequential Sign] Final file size: ${currentBase64.length} bytes`
+  );
+  console.log(
+    `[Sequential Sign] Total size change: ${initialBase64.length} → ${
+      currentBase64.length
+    } (${currentBase64.length > initialBase64.length ? "+" : ""}${
+      currentBase64.length - initialBase64.length
+    })`
+  );
 
   return {
     finalBase64: currentBase64,

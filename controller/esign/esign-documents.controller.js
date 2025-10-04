@@ -18,7 +18,19 @@ export const create = async (req, res) => {
     const { customId: userId } = req?.user;
     const mc = req?.mc;
 
-    const document = await createDocument(req.body, req.file, userId, mc);
+    console.log("[Controller] req.body:", req.body);
+    console.log("[Controller] req.body.is_add_footer:", req.body.is_add_footer, "type:", typeof req.body.is_add_footer);
+
+    // Convert string boolean to actual boolean
+    const bodyData = {
+      ...req.body,
+      is_public: req.body.is_public === "true" || req.body.is_public === true,
+      is_add_footer: req.body.is_add_footer === "true" || req.body.is_add_footer === true,
+    };
+
+    console.log("[Controller] bodyData.is_add_footer:", bodyData.is_add_footer, "type:", typeof bodyData.is_add_footer);
+
+    const document = await createDocument(bodyData, req.file, userId, mc);
 
     // Log upload activity
     await logDocumentActivity({

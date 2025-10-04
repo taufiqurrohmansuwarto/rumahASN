@@ -30,16 +30,22 @@ const removeChar = (str) => {
 export const create = async (req, res) => {
   try {
     const { customId: userId } = req?.user;
+    const { mc } = req; // Get Minio client for coordinate detection
 
     const document_id = req.body?.documentId;
     const data = req.body?.data;
     console.log("data", data);
 
+    console.log("[Controller] Creating signature request with coordinate detection...");
+
     const signatureRequest = await createSignatureRequest(
       document_id,
       data,
-      userId
+      userId,
+      mc // Pass Minio client for PDF coordinate detection
     );
+
+    console.log("[Controller] Signature request created successfully");
 
     res.status(201).json({
       message: "Pengajuan TTE berhasil dibuat",
@@ -170,7 +176,10 @@ export const review = async (req, res) => {
     const updatedDetail = await reviewDocument(id, userId, notes);
 
     // Log review activity
-    const signatureRequest = await getSignatureRequestById(updatedDetail.request_id, userId);
+    const signatureRequest = await getSignatureRequestById(
+      updatedDetail.request_id,
+      userId
+    );
     const documentId = signatureRequest.document_id;
 
     await logDocumentActivity({
@@ -207,7 +216,10 @@ export const mark = async (req, res) => {
     const updatedDetail = await markForTte(id, userId, notes);
 
     // Log mark for TTE activity
-    const signatureRequest = await getSignatureRequestById(updatedDetail.request_id, userId);
+    const signatureRequest = await getSignatureRequestById(
+      updatedDetail.request_id,
+      userId
+    );
     const documentId = signatureRequest.document_id;
 
     await logDocumentActivity({
@@ -242,9 +254,12 @@ export const sign = async (req, res) => {
     const { id } = req.query;
 
     let nik;
+    let passphrase;
     if (process.env.NODE_ENV === "production") {
       nik = process.env.ESIGN_NIK;
+      passphrase = process.env.ESIGN_PASSPHRASE;
     } else {
+      passphrase = req.body?.passphrase;
       if (!nip) {
         throw new Error("NIP tidak ditemukan di session");
       }
@@ -257,10 +272,18 @@ export const sign = async (req, res) => {
 
     const data = req.body;
 
-    const updatedDetail = await signDocument(id, userId, { ...data, nik }, mc);
+    const updatedDetail = await signDocument(
+      id,
+      userId,
+      { ...data, nik, passphrase },
+      mc
+    );
 
     // Log sign activity
-    const signatureRequest = await getSignatureRequestById(updatedDetail.request_id, userId);
+    const signatureRequest = await getSignatureRequestById(
+      updatedDetail.request_id,
+      userId
+    );
     const documentId = signatureRequest.document_id;
 
     await logDocumentActivity({
@@ -296,7 +319,10 @@ export const reject = async (req, res) => {
     const updatedDetail = await rejectDocument(id, userId, reason);
 
     // Log reject activity
-    const signatureRequest = await getSignatureRequestById(updatedDetail.request_id, userId);
+    const signatureRequest = await getSignatureRequestById(
+      updatedDetail.request_id,
+      userId
+    );
     const documentId = signatureRequest.document_id;
 
     await logDocumentActivity({

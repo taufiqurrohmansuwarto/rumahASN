@@ -10,6 +10,8 @@ import {
   ZoomOutOutlined,
   CloudDownloadOutlined,
   ReloadOutlined,
+  PlusOutlined,
+  DeleteOutlined,
 } from "@ant-design/icons";
 import {
   ActionIcon,
@@ -25,8 +27,22 @@ import {
 } from "@mantine/core";
 import { Button, Col, Grid, Row } from "antd";
 import dynamic from "next/dynamic";
-import { useCallback, useEffect, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useState,
+  useRef,
+  useMemo,
+  forwardRef,
+  useImperativeHandle,
+} from "react";
 import { useDownloadDocument } from "@/hooks/esign-bkd";
+import DraggableSignature, {
+  SIGNATURE_WIDTH,
+  SIGNATURE_HEIGHT,
+} from "./DraggableSignature";
+import useSignatureStore from "@/store/useSignatureStore";
+import { signaturesToCoordinates } from "@/utils/signature-coordinate-helper";
 
 // Import react-pdf CSS (required)
 import "react-pdf/dist/Page/AnnotationLayer.css";
@@ -44,12 +60,22 @@ const Page = dynamic(() => import("react-pdf").then((mod) => mod.Page), {
 
 const { useBreakpoint } = Grid;
 
-function PdfViewer({
-  pdfBase64,
-  title = "Dokumen PDF",
-  headerActions = null,
-  documentId = null,
-}) {
+const PdfViewer = forwardRef(function PdfViewer(
+  {
+    pdfBase64,
+    title = "Dokumen PDF",
+    headerActions = null,
+    documentId = null,
+    // Signature placement props
+    enableSignaturePlacement = false,
+    initialSignatures = [], // Changed from signatures to initialSignatures
+    signerName = "Saya",
+    signerAvatar = null, // Add this prop - URL foto user
+    signerId = "self", // Add this
+    canEdit = true,
+  },
+  ref
+) {
   const screens = useBreakpoint();
   const isMobile = !screens?.md;
 
@@ -67,12 +93,112 @@ function PdfViewer({
   const [pageLoading, setPageLoading] = useState(false);
   const [isMounted, setIsMounted] = useState(true);
 
-  // Cleanup on unmount
+  // Signature placement state - INTERNAL/UNCONTROLLED
+  const [signatures, setSignatures] = useState(initialSignatures);
+  const pageContainerRef = useRef(null);
+  const [pageSize, setPageSize] = useState({ width: 0, height: 0 });
+  const [isPageReady, setIsPageReady] = useState(false);
+
+  // Get Zustand setter
+  const setSignCoordinates = useSignatureStore(
+    (state) => state.setSignCoordinates
+  );
+
+  // Memoize PDF.js options to prevent unnecessary reloads
+  const pdfOptions = useMemo(
+    () => ({
+      cMapUrl: `https://unpkg.com/pdfjs-dist@${pdfjsVersion}/cmaps/`,
+      cMapPacked: true,
+      standardFontDataUrl: `https://unpkg.com/pdfjs-dist@${pdfjsVersion}/standard_fonts/`,
+    }),
+    [pdfjsVersion]
+  );
+
+  // Initialize signatures from prop only once
   useEffect(() => {
-    setIsMounted(true);
-    return () => {
-      setIsMounted(false);
+    if (initialSignatures && initialSignatures.length > 0) {
+      setSignatures(initialSignatures);
+    }
+  }, []); // Empty deps - only on mount
+
+  // Update Zustand whenever signatures change
+  useEffect(() => {
+    const coordinates = signaturesToCoordinates(signatures);
+    setSignCoordinates(coordinates);
+  }, [signatures, setSignCoordinates]);
+
+  // MEMOIZE: Get signatures for current page
+  const currentPageSignatures = useMemo(() => {
+    return signatures.filter((sig) => sig.page === pageNumber);
+  }, [signatures, pageNumber]);
+
+  // Signature placement functions
+  const addSignature = useCallback(() => {
+    if (!isPageReady || !pageSize.width || pageSize.width === 0) {
+      return;
+    }
+
+    const pdfWidth = pageSize.width;
+    const pdfHeight = pageSize.height;
+
+    const initialX = Math.max(20, pdfWidth / 2 - SIGNATURE_WIDTH / 2);
+    const initialY = 50;
+
+    const boundedX = Math.max(
+      20,
+      Math.min(initialX, pdfWidth - SIGNATURE_WIDTH - 20)
+    );
+    const boundedY = Math.max(
+      20,
+      Math.min(initialY, pdfHeight - SIGNATURE_HEIGHT - 20)
+    );
+
+    const newSignature = {
+      id: `sig_${Date.now()}`,
+      page: pageNumber,
+      position: { x: boundedX, y: boundedY },
+      size: { width: SIGNATURE_WIDTH, height: SIGNATURE_HEIGHT },
+      signerName: signerName,
+      signerAvatar: signerAvatar, // Add this
+      signerId: signerId, // Add this
     };
+
+    setSignatures((prev) => [...prev, newSignature]);
+  }, [pageNumber, signerName, signerAvatar, signerId, pageSize, isPageReady]); // Add signerAvatar to deps
+
+  const removeSignature = useCallback((signatureId) => {
+    setSignatures((prev) => prev.filter((sig) => sig.id !== signatureId));
+  }, []);
+
+  // Add new methods for removing signatures by page and clearing all
+  const removeSignaturesByPage = useCallback((page) => {
+    setSignatures((prev) => prev.filter((sig) => sig.page !== page));
+  }, []);
+
+  const clearAllSignatures = useCallback(() => {
+    setSignatures([]);
+  }, []);
+
+  const handleSignaturePositionChange = useCallback(
+    (signatureId, page, position) => {
+      setSignatures((prev) =>
+        prev.map((sig) =>
+          sig.id === signatureId ? { ...sig, page, position } : sig
+        )
+      );
+    },
+    []
+  );
+
+  const handleSignatureSizeChange = useCallback((signatureId, size) => {
+    setSignatures((prev) =>
+      prev.map((sig) => (sig.id === signatureId ? { ...sig, size } : sig))
+    );
+  }, []);
+
+  // Add method to remove signatures by signerId
+  const removeSignaturesBySignerId = useCallback((signerId) => {
+    setSignatures((prev) => prev.filter((sig) => sig.signerId !== signerId));
   }, []);
 
   // Setup PDF.js worker sesuai dokumentasi react-pdf
@@ -103,77 +229,87 @@ function PdfViewer({
     setupWorker();
   }, [isMounted]);
 
+  // Memoize processed PDF data to avoid re-processing
+  const processedPdfData = useMemo(() => {
+    if (!pdfBase64 || typeof pdfBase64 !== "string") {
+      return null;
+    }
+
+    const normalizedBase64 = pdfBase64.trim();
+    return normalizedBase64.startsWith("data:application/pdf")
+      ? normalizedBase64
+      : `data:application/pdf;base64,${normalizedBase64}`;
+  }, [pdfBase64]);
+
   // Process PDF base64 data
   useEffect(() => {
-    const processPdfBase64 = () => {
-      if (!pdfBase64 || !pdfWorkerReady) {
-        return;
-      }
+    if (!processedPdfData || !pdfWorkerReady) {
+      return;
+    }
 
-      try {
-        setLoading(true);
-        setPageLoading(true);
-        setError(null);
-
-        // Validate base64 data
-        if (!pdfBase64 || typeof pdfBase64 !== "string") {
-          throw new Error("Invalid base64 data");
-        }
-
-        // Normalisasi data base64 agar tidak double prefix
-        const normalizedBase64 = pdfBase64.trim();
-        const dataUri = normalizedBase64.startsWith("data:application/pdf")
-          ? normalizedBase64
-          : `data:application/pdf;base64,${normalizedBase64}`;
-
-        setPdfData(dataUri);
-        setPageNumber(1);
-      } catch (error) {
-        console.error("Failed to process PDF base64:", error);
-        setError(`Gagal memproses PDF: ${error.message}`);
-        setLoading(false);
-        setPageLoading(false);
-      }
-    };
-
-    processPdfBase64();
-  }, [pdfBase64, pdfWorkerReady]);
-
-  const onDocumentLoadSuccess = useCallback(({ numPages }) => {
-    if (!isMounted) return;
-    setNumPages(numPages);
-    setLoading(false);
-    setPageLoading(false);
+    setLoading(true);
+    setPageLoading(true);
     setError(null);
-  }, [isMounted]);
+    setPdfData(processedPdfData);
+    setPageNumber(1);
+  }, [processedPdfData, pdfWorkerReady]);
 
-  const onPageRenderSuccess = useCallback(() => {
-    if (!isMounted) return;
-    setPageLoading(false);
-  }, [isMounted]);
+  const onDocumentLoadSuccess = useCallback(
+    ({ numPages }) => {
+      if (!isMounted) return;
+      setNumPages(numPages);
+      setLoading(false);
+      setPageLoading(false);
+      setError(null);
+    },
+    [isMounted]
+  );
 
-  const onPageRenderError = useCallback((pageError) => {
-    if (!isMounted) return;
-    setPageLoading(false);
-    setError(`Gagal memuat halaman PDF: ${pageError?.message || pageError}`);
-  }, [isMounted]);
+  const onDocumentLoadProgress = useCallback(({ loaded, total }) => {
+    // Silent progress tracking
+  }, []);
+
+  // FIXED: onPageRenderSuccess
+  const onPageRenderSuccess = useCallback(
+    (page) => {
+      if (!isMounted) return;
+      setPageLoading(false);
+
+      // Capture page size for signature placement
+      if (page) {
+        const newPageSize = {
+          width: page.width,
+          height: page.height,
+        };
+        setPageSize(newPageSize);
+        setIsPageReady(true);
+      }
+    },
+    [isMounted]
+  );
+
+  // Reset page ready state when page changes
+  useEffect(() => {
+    setIsPageReady(false);
+  }, [pageNumber]);
+
+  const onPageRenderError = useCallback(
+    (pageError) => {
+      if (!isMounted) return;
+      setPageLoading(false);
+      setError(`Gagal memuat halaman PDF: ${pageError?.message || pageError}`);
+    },
+    [isMounted]
+  );
 
   const onDocumentLoadError = useCallback(
     (error) => {
       if (!isMounted) return;
-      console.error("PDF Load Error:", error);
-      console.error("PDF Load Error details:", {
-        message: error.message,
-        name: error.name,
-        stack: error.stack,
-        pdfDataLength: pdfData?.length || 0,
-        pdfDataType: typeof pdfData,
-      });
       setError(`Gagal memuat dokumen PDF: ${error.message || error}`);
       setLoading(false);
       setPageLoading(false);
     },
-    [pdfData, isMounted]
+    [isMounted]
   );
 
   const changePage = useCallback(
@@ -324,6 +460,27 @@ function PdfViewer({
         </Group>
         <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
           {headerActions}
+          {enableSignaturePlacement && canEdit && (
+            <Tooltip
+              title={
+                isPageReady ? "Tambah Tanda Tangan" : "Tunggu halaman dimuat..."
+              }
+              placement="bottom"
+            >
+              <span>
+                <Button
+                  type="primary"
+                  icon={<PlusOutlined />}
+                  onClick={addSignature}
+                  size="small"
+                  disabled={!isPageReady}
+                  style={!isPageReady ? { pointerEvents: "none" } : {}}
+                >
+                  Tambah TTE
+                </Button>
+              </span>
+            </Tooltip>
+          )}
           <Tooltip label="Refresh Dokumen">
             <ActionIcon
               variant="light"
@@ -373,6 +530,37 @@ function PdfViewer({
       </Card>
     );
   }
+
+  // Expose methods to parent via ref
+  useImperativeHandle(
+    ref,
+    () => ({
+      changePage: (page) => {
+        changePage(page);
+      },
+      getCurrentPage: () => pageNumber,
+      getTotalPages: () => numPages,
+      getScale: () => scale,
+      clearAllSignatures: () => {
+        clearAllSignatures();
+      },
+      removeSignaturesByPage: (page) => {
+        removeSignaturesByPage(page);
+      },
+      removeSignaturesBySignerId: (signerId) => {
+        removeSignaturesBySignerId(signerId);
+      },
+    }),
+    [
+      changePage,
+      pageNumber,
+      numPages,
+      scale,
+      clearAllSignatures,
+      removeSignaturesByPage,
+      removeSignaturesBySignerId,
+    ]
+  );
 
   return (
     <Card shadow="sm" padding="md" radius="md" withBorder>
@@ -449,6 +637,15 @@ function PdfViewer({
                 </Text>
               </Group>
             </Col>
+
+            {/* DEBUG INFO - Remove later */}
+            <Col span={24}>
+              <Text size="xs" c="dimmed">
+                Debug: Total Signatures: {signatures.length} | Current Page
+                Signatures: {currentPageSignatures.length} | Page Ready:{" "}
+                {isPageReady ? "✅" : "❌"}
+              </Text>
+            </Col>
           </Row>
         </Card.Section>
       )}
@@ -469,6 +666,7 @@ function PdfViewer({
             renderError()
           ) : pdfWorkerReady && pdfData ? (
             <div
+              ref={pageContainerRef}
               style={{
                 maxWidth: "100%",
                 overflow: "auto",
@@ -479,34 +677,100 @@ function PdfViewer({
               }}
             >
               {(loading || pageLoading) && renderInlineLoading()}
-              <Document
-                file={pdfData}
-                onLoadSuccess={onDocumentLoadSuccess}
-                onLoadError={onDocumentLoadError}
-                loading={renderLoading()}
-                error={renderError()}
-                options={{
-                  cMapUrl: `https://unpkg.com/pdfjs-dist@${pdfjsVersion}/cmaps/`,
-                  cMapPacked: true,
-                  standardFontDataUrl: `https://unpkg.com/pdfjs-dist@${pdfjsVersion}/standard_fonts/`,
-                }}
-              >
-                <Page
-                  pageNumber={pageNumber}
-                  scale={scale}
-                  renderTextLayer={false}
-                  renderAnnotationLayer={false}
+              <div style={{ position: "relative" }}>
+                <Document
+                  file={pdfData}
+                  onLoadSuccess={onDocumentLoadSuccess}
+                  onLoadProgress={onDocumentLoadProgress}
+                  onLoadError={onDocumentLoadError}
                   loading={renderLoading()}
-                  onRenderSuccess={onPageRenderSuccess}
-                  onRenderError={onPageRenderError}
-                  width={
-                    isMobile && typeof window !== "undefined"
-                      ? Math.min(window.innerWidth - 80, 600)
-                      : undefined
-                  }
                   error={renderError()}
-                />
-              </Document>
+                  options={pdfOptions}
+                >
+                  <Page
+                    pageNumber={pageNumber}
+                    scale={scale}
+                    renderTextLayer={false}
+                    renderAnnotationLayer={false}
+                    loading={renderLoading()}
+                    onRenderSuccess={onPageRenderSuccess}
+                    onRenderError={onPageRenderError}
+                    width={
+                      isMobile && typeof window !== "undefined"
+                        ? Math.min(window.innerWidth - 80, 600)
+                        : undefined
+                    }
+                    error={renderError()}
+                  />
+                </Document>
+
+                {/* Signature Overlay - SCALED WITH PDF */}
+                {enableSignaturePlacement &&
+                  currentPageSignatures.length > 0 && (
+                    <div
+                      style={{
+                        position: "absolute",
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        pointerEvents: "none",
+                        transform: `scale(${scale})`,
+                        transformOrigin: "top left",
+                      }}
+                    >
+                      {currentPageSignatures.map((signature) => (
+                        <div
+                          key={signature.id}
+                          style={{
+                            position: "absolute",
+                            left: 0,
+                            top: 0,
+                            width: `${pageSize.width}px`,
+                            height: `${pageSize.height}px`,
+                            pointerEvents: "auto",
+                          }}
+                        >
+                          <DraggableSignature
+                            id={signature.id}
+                            page={signature.page}
+                            initialPosition={signature.position}
+                            initialSize={
+                              signature.size || {
+                                width: SIGNATURE_WIDTH,
+                                height: SIGNATURE_HEIGHT,
+                              }
+                            }
+                            signerName={signature.signerName}
+                            signerAvatar={signature.signerAvatar} // Add this prop
+                            onPositionChange={handleSignaturePositionChange}
+                            onSizeChange={handleSignatureSizeChange}
+                            onRemove={canEdit ? removeSignature : null}
+                            disabled={!canEdit}
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                {/* Debug: Show if no signatures */}
+                {enableSignaturePlacement &&
+                  currentPageSignatures.length === 0 && (
+                    <div
+                      style={{
+                        position: "absolute",
+                        top: 10,
+                        right: 10,
+                        background: "rgba(255,0,0,0.1)",
+                        padding: "5px 10px",
+                        borderRadius: 4,
+                        fontSize: 12,
+                      }}
+                    >
+                      No signatures on this page
+                    </div>
+                  )}
+              </div>
             </div>
           ) : (
             renderLoading()
@@ -544,6 +808,6 @@ function PdfViewer({
       )}
     </Card>
   );
-}
+});
 
 export default PdfViewer;

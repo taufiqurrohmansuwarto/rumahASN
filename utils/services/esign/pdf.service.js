@@ -2,7 +2,31 @@ const pdfLib = require("pdf-lib");
 const path = require("path");
 const fs = require("fs");
 const QRCode = require("qrcode");
+// pdfjs-dist v5.x uses ESM, need dynamic import in Node.js
+let pdfjsLib = null;
+
+// Async function to load pdfjs-dist (ESM module)
+const loadPdfjsLib = async () => {
+  if (pdfjsLib) return pdfjsLib; // Already loaded
+
+  try {
+    // Dynamic import for ESM module in CommonJS
+    const pdfjs = await import('pdfjs-dist');
+    pdfjsLib = pdfjs;
+    console.log("[pdf.service] pdfjs-dist v5.x loaded successfully via ESM");
+    return pdfjsLib;
+  } catch (error) {
+    console.error("[pdf.service] Error loading pdfjs-dist:", error.message);
+    throw new Error("pdfjs-dist not available. Coordinate detection unavailable.");
+  }
+};
 require("dotenv").config();
+
+const clamp = (value, min, max) => Math.min(Math.max(value, min), max);
+const DEFAULT_SIGNATURE_WIDTH = 20;
+const DEFAULT_SIGNATURE_HEIGHT = 20;
+
+// Approximate glyph widths (Helvetica, units where 1000 = font size)
 
 // Constants
 const isProduction = process.env.NODE_ENV === "production";
@@ -19,8 +43,21 @@ const footerText = `Sesuai dengan ketentuan peraturan perundang-undangan yang be
  * @param {Boolean} isAddFooter - Whether to add footer text and logo (default: false, only QR)
  * @returns {Promise<Buffer>} - Modified PDF buffer
  */
-module.exports.addFooterToPdf = async (pdfBuffer, documentId, isAddFooter = false) => {
+module.exports.addFooterToPdf = async (
+  pdfBuffer,
+  documentId,
+  isAddFooter = false
+) => {
   try {
+    console.log("[addFooterToPdf] Starting...");
+    console.log("[addFooterToPdf] documentId:", documentId);
+    console.log(
+      "[addFooterToPdf] isAddFooter:",
+      isAddFooter,
+      "type:",
+      typeof isAddFooter
+    );
+
     // Load PDF document
     const pdfDoc = await pdfLib.PDFDocument.load(pdfBuffer);
 
@@ -241,3 +278,333 @@ module.exports.getTotalPages = async (pdfBuffer) => {
   const pdfDoc = await pdfLib.PDFDocument.load(pdfBuffer);
   return pdfDoc.getPages().length;
 };
+
+/**
+ * Get coordinates of tag in PDF pages
+ * @param {Buffer} pdfBuffer - PDF buffer
+ * @param {Array} signatureDetails - Array of signature detail objects
+ * @returns {Promise<Array>} - Array of coordinates for each signer and page
+ *
+ * Example signatureDetails: [{id: "1", sign_pages: [1,2,3], tag_coordinate: '$'}]
+ *
+ * Returns: [
+ *   {
+ *     id: "1",
+ *     coordinates: [
+ *       {
+ *         page: 1,
+ *         tag: '$',
+ *         originX: 100,
+ *         originY: 620,             // bottom-left coordinate for BSrE helper
+ *         originYTopLeft: 200,      // optional top-left reference
+ *         originYBottomLeft: 620,
+ *         found: true
+ *       },
+ *       { page: 2, tag: '$', originX: 150, originY: 250, found: true },
+ *       { page: 3, tag: '$', originX: null, originY: null, found: false }
+ *     ]
+ *   }
+ * ]
+ */
+module.exports.getCoordinates = async (pdfBuffer, signatureDetails) => {
+  try {
+    console.log("[getCoordinates] Starting...");
+    console.log("[getCoordinates] Signature details count:", signatureDetails?.length);
+
+    // Load PDF document
+    const pdfDoc = await pdfLib.PDFDocument.load(pdfBuffer);
+    const pages = pdfDoc.getPages();
+
+    console.log("[getCoordinates] Total pages in PDF:", pages.length);
+
+    const pdfJsTextMap = await extractTextMapWithPdfJs(pdfBuffer);
+
+    const results = [];
+
+    // Process each signature detail
+    for (const detail of signatureDetails) {
+      const { id, sign_pages, tag_coordinate } = detail;
+
+      console.log(`[getCoordinates] Processing detail ID: ${id}`);
+      console.log(`[getCoordinates] - Pages to check: ${sign_pages?.join(', ')}`);
+      console.log(`[getCoordinates] - Tag to find: "${tag_coordinate}"`);
+
+      const coordinates = [];
+
+      // Check each page for this signature detail
+      for (const pageNumber of sign_pages || []) {
+        const pageIndex = pageNumber - 1; // Convert to 0-based index
+
+        if (pageIndex < 0 || pageIndex >= pages.length) {
+          console.warn(`[getCoordinates] Page ${pageNumber} out of range, skipping...`);
+          coordinates.push({
+            page: pageNumber,
+            tag: tag_coordinate,
+            originX: null,
+            originY: null,
+            found: false,
+            error: "Page out of range"
+          });
+          continue;
+        }
+
+        const page = pages[pageIndex];
+        const { width, height } = page.getSize();
+
+        console.log(`[getCoordinates] Searching in page ${pageNumber} (${width}x${height})...`);
+
+        try {
+          // Get page text content with positions from pdfjs-dist cache
+          const pageTextData = pdfJsTextMap.get(pageNumber) || {
+            items: [],
+            viewportWidth: width,
+            viewportHeight: height,
+          };
+          const textContent = pageTextData.items;
+
+          console.log(
+            `[getCoordinates]   Text items fetched: ${textContent.length}`
+          );
+
+          // Find tag coordinate in text content
+          const tagPosition = findTagInText(textContent, tag_coordinate);
+
+          if (tagPosition) {
+            // BSrE API expects TOP-LEFT origin. Our signing helper converts from
+            // bottom-left before calling BSrE, so we provide bottom-left values here.
+            const tagXTopLeft = tagPosition.xTopLeft;
+            const tagYTopLeft = tagPosition.yTopLeft;
+            const tagWidth = tagPosition.width || 0;
+            const tagHeight = tagPosition.height || 0;
+
+            const signatureWidth = DEFAULT_SIGNATURE_WIDTH;
+            const signatureHeight = DEFAULT_SIGNATURE_HEIGHT;
+
+            const estimatedTagWidth = tagWidth > 0 ? tagWidth : Math.max(tagHeight * 0.6, 6);
+            const estimatedTagHeight = tagHeight > 0 ? tagHeight : Math.max(estimatedTagWidth, 6);
+
+            const tagCenterX = tagXTopLeft + estimatedTagWidth / 2;
+            const tagCenterYTop = tagYTopLeft + estimatedTagHeight / 2;
+
+            const signatureBoxX = clamp(
+              Math.round(tagCenterX - signatureWidth / 2),
+              0,
+              Math.max(width - signatureWidth, 0)
+            );
+            const signatureBoxYTopLeft = clamp(
+              Math.round(tagCenterYTop - signatureHeight / 2),
+              0,
+              Math.max(height - signatureHeight, 0)
+            );
+            const signatureBoxYBottomLeft = height - signatureBoxYTopLeft - signatureHeight;
+
+            console.log(`[getCoordinates] ✓ Tag "${tag_coordinate}" found at page ${pageNumber}`);
+            console.log(`  • Tag top-left          : (${tagXTopLeft}, ${tagYTopLeft})`);
+            console.log(`  • Tag approx size       : ${estimatedTagWidth} x ${estimatedTagHeight}`);
+            console.log(`  • Signature top-left    : (${signatureBoxX}, ${signatureBoxYTopLeft})`);
+            console.log(`  • Signature bottom-left : (${signatureBoxX}, ${signatureBoxYBottomLeft})`);
+            console.log(`  • Page size             : ${width} x ${height}`);
+
+            coordinates.push({
+              page: pageNumber,
+              tag: tag_coordinate,
+              originX: Math.round(signatureBoxX),
+              originY: Math.round(signatureBoxYBottomLeft), // bottom-left for downstream conversion
+              originYTopLeft: Math.round(signatureBoxYTopLeft),
+              originYBottomLeft: Math.round(signatureBoxYBottomLeft),
+              found: true,
+              pageWidth: width,
+              pageHeight: height,
+              coordinate_system: "bottom-left",
+              signatureWidth,
+              signatureHeight,
+            });
+          } else {
+            console.warn(`[getCoordinates] ✗ Tag "${tag_coordinate}" not found in page ${pageNumber}`);
+
+            coordinates.push({
+              page: pageNumber,
+              tag: tag_coordinate,
+              originX: null,
+              originY: null,
+              found: false,
+              error: "Tag not found in page"
+            });
+          }
+        } catch (error) {
+          console.error(`[getCoordinates] Error processing page ${pageNumber}:`, error.message);
+
+          coordinates.push({
+            page: pageNumber,
+            tag: tag_coordinate,
+            originX: null,
+            originY: null,
+            found: false,
+            error: error.message
+          });
+        }
+      }
+
+      results.push({
+        id,
+        tag_coordinate,
+        coordinates
+      });
+    }
+
+    console.log("[getCoordinates] ✓ Completed");
+    return results;
+
+  } catch (error) {
+    console.error("[getCoordinates] Error:", error);
+    throw new Error(`Failed to get coordinates: ${error.message}`);
+  }
+};
+
+/**
+ * Extract text items for all pages using pdfjs-dist with glyph-level granularity
+ * @param {Buffer} pdfBuffer
+ * @returns {Promise<Map<number, {items:Array, viewportWidth:number, viewportHeight:number}>>}
+ */
+async function extractTextMapWithPdfJs(pdfBuffer) {
+  const textMap = new Map();
+  let pdfDocument;
+
+  try {
+    // Load pdfjs-dist dynamically (ESM module)
+    const pdfjs = await loadPdfjsLib();
+
+    const loadingTask = pdfjs.getDocument({
+      data: pdfBuffer,
+      useSystemFonts: true,
+    });
+
+    pdfDocument = await loadingTask.promise;
+
+    for (let pageNumber = 1; pageNumber <= pdfDocument.numPages; pageNumber++) {
+      const page = await pdfDocument.getPage(pageNumber);
+      const viewport = page.getViewport({ scale: 1 });
+      const textContent = await page.getTextContent({
+        disableCombineTextItems: true,
+      });
+
+      const items = [];
+
+      for (const item of textContent.items) {
+        const text = item.str;
+
+        if (typeof text !== "string" || text.length === 0) {
+          continue;
+        }
+
+        const transform = item.transform || [1, 0, 0, 1, 0, 0];
+        const x = transform[4] || 0;
+        const yBottomLeft = transform[5] || 0;
+
+        const derivedHeight = Math.hypot(transform[2] || 0, transform[3] || 0);
+        const derivedWidth = Math.hypot(transform[0] || 0, transform[1] || 0);
+
+        const height = item.height || derivedHeight;
+        const width = item.width || derivedWidth;
+        const yTopLeft = viewport.height - yBottomLeft - height;
+
+        items.push({
+          text,
+          x,
+          yTopLeft,
+          yBottomLeft,
+          width,
+          height,
+          page: pageNumber,
+        });
+      }
+
+      textMap.set(pageNumber, {
+        items,
+        viewportWidth: viewport.width,
+        viewportHeight: viewport.height,
+      });
+
+      page.cleanup();
+    }
+  } catch (error) {
+    console.error("[extractTextMapWithPdfJs] Error extracting text:", error);
+    throw error;
+  } finally {
+    if (pdfDocument) {
+      pdfDocument.cleanup();
+      pdfDocument.destroy();
+    }
+  }
+
+  return textMap;
+}
+
+/**
+ * Find tag coordinate in text content
+ * @param {Array} textContent - Array of text items with positions
+ * @param {String} tag - Tag to find
+ * @returns {Object|null} - Position object or null if not found
+ */
+function findTagInText(textContent, tag) {
+  if (!textContent || textContent.length === 0) {
+    console.log(`[findTagInText] ✗ No text content provided`);
+    return null;
+  }
+
+  console.log(`[findTagInText] Searching for tag: "${tag}" in ${textContent.length} items`);
+
+  // Debug: Show first 10 text items
+  console.log(`[findTagInText] Sample text items (first 10):`);
+  textContent.slice(0, 10).forEach((item, idx) => {
+    console.log(
+      `  [${idx}] "${item.text}" TL(${item.x}, ${item.yTopLeft}) BL(${item.x}, ${item.yBottomLeft})`
+    );
+  });
+
+  // Exact match first
+  for (const item of textContent) {
+    if (item.text && item.text === tag) {
+      console.log(
+        `[findTagInText] ✓ Exact match found: "${item.text}" TL(${item.x}, ${item.yTopLeft}) BL(${item.x}, ${item.yBottomLeft})`
+      );
+      return {
+        xTopLeft: item.x,
+        yTopLeft: item.yTopLeft,
+        yBottomLeft: item.yBottomLeft,
+        text: item.text,
+        width: item.width,
+        height: item.height
+      };
+    }
+  }
+
+  // If no exact match, try includes
+  for (const item of textContent) {
+    if (item.text && item.text.includes(tag)) {
+      console.log(
+        `[findTagInText] ✓ Partial match found: "${item.text}" TL(${item.x}, ${item.yTopLeft}) BL(${item.x}, ${item.yBottomLeft})`
+      );
+      const charIndex = item.text.indexOf(tag);
+      const baseLength = item.text.length || 1;
+      const precedingRatio = charIndex >= 0 ? charIndex / baseLength : 0;
+      const tagRatio = tag.length / baseLength;
+
+      const xOffset = (item.width || 0) * precedingRatio;
+      const tagApproxWidth = (item.width || 0) * tagRatio;
+
+      return {
+        xTopLeft: item.x + (isNaN(xOffset) ? 0 : xOffset),
+        yTopLeft: item.yTopLeft,
+        yBottomLeft: item.yBottomLeft,
+        text: item.text,
+        width: tagApproxWidth > 0 ? tagApproxWidth : item.width,
+        height: item.height
+      };
+    }
+  }
+
+  console.log(`[findTagInText] ✗ Tag "${tag}" not found`);
+  console.log(`[findTagInText] All unique texts in page:`, [...new Set(textContent.map(t => t.text))].slice(0, 20).join(', '));
+  return null;
+}

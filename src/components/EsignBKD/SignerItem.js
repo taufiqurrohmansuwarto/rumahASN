@@ -15,25 +15,8 @@ function SignerItem({ signer, index, onUpdate, onRemove, totalPages = 1 }) {
   } = useUserSearch();
 
   const handleUpdate = useCallback((field, value) => {
-    // If role changes to reviewer, clear signature_pages
-    if (field === 'role_type' && value === 'reviewer') {
-      onUpdate(signer.id, 'signature_pages', []);
-      onUpdate(signer.id, 'tag_coordinate', '!');
-    }
-
-    // Validate signature_pages to only contain numbers and within valid range
-    if (field === 'signature_pages') {
-      const validPages = value
-        .filter(page => {
-          const num = parseInt(page);
-          return !isNaN(num) && num > 0 && num <= totalPages;
-        })
-        .map(page => parseInt(page));
-      onUpdate(signer.id, field, validPages);
-    } else {
-      onUpdate(signer.id, field, value);
-    }
-  }, [signer.id, onUpdate, totalPages]);
+    onUpdate(signer.id, field, value);
+  }, [signer.id, onUpdate]);
 
   const handleRemove = useCallback(() => {
     onRemove(signer.id);
@@ -69,7 +52,6 @@ function SignerItem({ signer, index, onUpdate, onRemove, totalPages = 1 }) {
 
   // Check validation errors
   const hasUserError = !signer.user_id;
-  const hasPageError = signer.role_type === 'signer' && (!signer.signature_pages || signer.signature_pages.length === 0);
 
   return (
     <div
@@ -126,42 +108,6 @@ function SignerItem({ signer, index, onUpdate, onRemove, totalPages = 1 }) {
               <Radio.Button value="reviewer">Reviewer</Radio.Button>
               <Radio.Button value="signer">Signer</Radio.Button>
             </Radio.Group>
-
-            {signer.role_type === 'signer' && (
-              <>
-                <Select
-                  mode="tags"
-                  placeholder="Hal. (ex: 1,3,5)"
-                  value={signer.signature_pages}
-                  onChange={(value) => handleUpdate("signature_pages", value)}
-                  style={{ width: 140, borderRadius: 6 }}
-                  status={hasPageError ? "error" : ""}
-                  allowClear
-                  tokenSeparators={[',', ' ']}
-                  title="Nomor halaman yang akan ditandatangani"
-                  onInputKeyDown={(e) => {
-                    // Only allow numbers, backspace, delete, arrow keys, comma, space
-                    if (!/[0-9,\s]/.test(e.key) &&
-                        !['Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'Tab'].includes(e.key)) {
-                      e.preventDefault();
-                    }
-                  }}
-                />
-                <Select
-                  value={signer.tag_coordinate || "!"}
-                  onChange={(value) => handleUpdate("tag_coordinate", value)}
-                  style={{ width: 90, borderRadius: 6 }}
-                  placeholder="Tanda"
-                  title="Karakter penanda posisi tanda tangan di PDF"
-                >
-                  <Option value="!" title="Tanda seru untuk penanda posisi">!</Option>
-                  <Option value="@" title="At symbol untuk penanda posisi">@</Option>
-                  <Option value="#" title="Hashtag untuk penanda posisi">#</Option>
-                  <Option value="$" title="Dollar untuk penanda posisi">$</Option>
-                  <Option value="^" title="Caret untuk penanda posisi">^</Option>
-                </Select>
-              </>
-            )}
           </Flex>
 
           {/* Notes input - shown for all roles */}
@@ -183,11 +129,6 @@ function SignerItem({ signer, index, onUpdate, onRemove, totalPages = 1 }) {
           {hasUserError && (
             <div style={{ fontSize: 12, color: '#ff4d4f', marginTop: 4 }}>
               Silakan lengkapi username/pengguna
-            </div>
-          )}
-          {hasPageError && (
-            <div style={{ fontSize: 12, color: '#ff4d4f', marginTop: 4 }}>
-              Signer harus memilih minimal 1 halaman untuk ditandatangani
             </div>
           )}
         </Flex>

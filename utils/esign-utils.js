@@ -256,6 +256,14 @@ export const signWithCoordinate = async ({
     file,
   };
 
+  // Log request to BSrE (redact sensitive data)
+  console.log("[signWithCoordinate] Sending request to BSrE:");
+  console.log("  signatureProperties:", JSON.stringify(signatureProperties.map(sp => ({
+    ...sp,
+    imageBase64: sp.imageBase64 ? `[REDACTED_${sp.imageBase64.length}_bytes]` : undefined
+  })), null, 2));
+  console.log("  file count:", file?.length || 0);
+
   return new Promise((resolve, reject) => {
     esignFetcher
       .post("/api/v2/sign/pdf", data)
