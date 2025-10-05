@@ -35,10 +35,7 @@ const PdfViewer = dynamic(() => import("./PdfViewer"), {
     </Card>
   ),
 });
-import {
-  ReloadOutlined,
-  SafetyOutlined,
-} from "@ant-design/icons";
+import { ReloadOutlined, SafetyOutlined } from "@ant-design/icons";
 import {
   Avatar,
   Badge,
@@ -51,6 +48,7 @@ import {
   Text,
   Title,
   Tabs,
+  Tooltip,
 } from "@mantine/core";
 import {
   IconBook2,
@@ -73,11 +71,31 @@ dayjs.locale("id");
 const StatusBadge = ({ status }) => {
   const statusConfig = {
     draft: { color: "gray", icon: <IconClock size={12} />, text: "DRAFT" },
-    pending: { color: "orange", icon: <IconClock size={12} />, text: "PENDING" },
-    in_progress: { color: "blue", icon: <IconClock size={12} />, text: "PROSES" },
-    in_review: { color: "orange", icon: <IconClock size={12} />, text: "REVIEW" },
-    signed: { color: "green", icon: <IconCircleCheck size={12} />, text: "DITANDATANGANI" },
-    completed: { color: "green", icon: <IconCircleCheck size={12} />, text: "SELESAI" },
+    pending: {
+      color: "orange",
+      icon: <IconClock size={12} />,
+      text: "PENDING",
+    },
+    in_progress: {
+      color: "blue",
+      icon: <IconClock size={12} />,
+      text: "PROSES",
+    },
+    in_review: {
+      color: "orange",
+      icon: <IconClock size={12} />,
+      text: "REVIEW",
+    },
+    signed: {
+      color: "green",
+      icon: <IconCircleCheck size={12} />,
+      text: "DITANDATANGANI",
+    },
+    completed: {
+      color: "green",
+      icon: <IconCircleCheck size={12} />,
+      text: "SELESAI",
+    },
     rejected: { color: "red", icon: <IconX size={12} />, text: "DITOLAK" },
     cancelled: { color: "gray", icon: <IconX size={12} />, text: "DIBATALKAN" },
   };
@@ -88,7 +106,11 @@ const StatusBadge = ({ status }) => {
       color={config.color}
       variant="light"
       size="sm"
-      leftSection={<div style={{ display: "flex", alignItems: "center" }}>{config.icon}</div>}
+      leftSection={
+        <div style={{ display: "flex", alignItems: "center" }}>
+          {config.icon}
+        </div>
+      }
       styles={{
         section: { display: "flex", alignItems: "center" },
         label: { display: "flex", alignItems: "center" },
@@ -98,7 +120,6 @@ const StatusBadge = ({ status }) => {
     </Badge>
   );
 };
-
 
 function DocumentDetail() {
   const router = useRouter();
@@ -205,11 +226,32 @@ function DocumentDetail() {
         id,
         data: { is_public: checked },
       });
-      message.success(`Dokumen berhasil diubah menjadi ${checked ? "publik" : "privat"}`);
+      message.success(
+        `Dokumen berhasil diubah menjadi ${checked ? "publik" : "privat"}`
+      );
       refetch();
     } catch (error) {
       message.error(error.message || "Gagal mengubah visibilitas dokumen");
     }
+  };
+
+  // Jump to specific page in PDF viewer
+  const handleJumpToPage = (pageNumber) => {
+    // Dispatch custom event for PdfViewer to listen
+    window.dispatchEvent(
+      new CustomEvent("jumpToPage", { detail: { page: pageNumber } })
+    );
+
+    // Switch to document tab if not visible
+    setTimeout(() => {
+      const documentTabButton = Array.from(
+        window.document.querySelectorAll('[role="tab"]')
+      ).find((tab) => tab.textContent.includes("Dokumen"));
+
+      if (documentTabButton) {
+        documentTabButton.click();
+      }
+    }, 100);
   };
 
   const actionMenuItems = [
@@ -329,6 +371,28 @@ function DocumentDetail() {
   const creator = signatureRequest?.creator || document?.user;
   const signatureDetails = signatureRequest?.signature_details || [];
 
+  // Extract all TTE coordinates from signature_details for view-only mode
+  const allTteCoordinates = signatureDetails.flatMap((detail) => {
+    if (!detail.sign_coordinate || !Array.isArray(detail.sign_coordinate)) {
+      return [];
+    }
+    return detail.sign_coordinate.map((coord) => ({
+      id: `${detail.id}_${coord.page}_${coord.originX}_${coord.originY}`,
+      page: coord.page,
+      position: {
+        x: coord.originX,
+        y: coord.originY,
+      },
+      size: {
+        width: coord.width,
+        height: coord.height,
+      },
+      signerId: coord.signerId,
+      signerName: coord.signerName,
+      signerAvatar: detail.user?.image || null,
+    }));
+  });
+
   return (
     <div style={{ maxWidth: "100%", margin: "0 auto" }}>
       {/* Header Section */}
@@ -372,7 +436,9 @@ function DocumentDetail() {
                 <Text size="xs" fw={600}>
                   {creator?.username || "Unknown"}
                 </Text>
-                <Text size="xs" c="dimmed">•</Text>
+                <Text size="xs" c="dimmed">
+                  •
+                </Text>
                 <Group gap={6}>
                   <IconUserCircle size={12} style={{ color: "#999" }} />
                   <Text size="xs" c="dimmed">
@@ -422,9 +488,12 @@ function DocumentDetail() {
                   Hapus Dokumen
                 </Button>
               </Group>
-            ) : document.status === "signed" || document.status === "completed" ? (
+            ) : document.status === "signed" ||
+              document.status === "completed" ? (
               <Group gap={8} align="center">
-                <Text size="xs" fw={500}>Visibilitas:</Text>
+                <Text size="xs" fw={500}>
+                  Visibilitas:
+                </Text>
                 <Switch
                   checked={document.is_public}
                   onChange={handleTogglePublic}
@@ -465,17 +534,22 @@ function DocumentDetail() {
             </Text>
             <Stack gap="xs">
               {signatureDetails.map((detail, index) => {
-                const statusColor = {
-                  waiting: "orange",
-                  signed: "green",
-                  reviewed: "blue",
-                  rejected: "red",
-                }[detail.status] || "default";
+                const statusColor =
+                  {
+                    waiting: "orange",
+                    signed: "green",
+                    reviewed: "blue",
+                    rejected: "red",
+                  }[detail.status] || "default";
 
                 return (
                   <Group key={detail.id} justify="space-between" gap={8}>
                     <Group gap={6}>
-                      <Badge color={statusColor} size="sm" style={{ minWidth: 24 }}>
+                      <Badge
+                        color={statusColor}
+                        size="sm"
+                        style={{ minWidth: 24 }}
+                      >
                         {index + 1}
                       </Badge>
                       <Avatar src={detail.user?.image} size={20}>
@@ -485,14 +559,69 @@ function DocumentDetail() {
                         <Text size="xs" fw={500} style={{ lineHeight: 1.3 }}>
                           {detail.user?.username}
                         </Text>
-                        {detail.role_type === "signer" && detail.sign_pages && detail.sign_pages.length > 0 && (
-                          <Text size="xs" c="dimmed" style={{ lineHeight: 1.3, fontSize: 10 }}>
-                            Hal: {detail.sign_pages.join(", ")} • {detail.tag_coordinate || "!"}
-                            {detail.notes && ` • ${detail.notes}`}
-                          </Text>
-                        )}
+                        {detail.role_type === "signer" &&
+                          detail.sign_pages &&
+                          detail.sign_pages.length > 0 && (
+                            <Group gap={4} style={{ flexWrap: "wrap" }}>
+                              <Text
+                                size="xs"
+                                c="dimmed"
+                                style={{ fontSize: 10 }}
+                              >
+                                Hal:
+                              </Text>
+                              {detail.sign_pages.map((page, idx) => (
+                                <Tooltip
+                                  key={idx}
+                                  label={`Lihat halaman ${page}`}
+                                  withArrow
+                                >
+                                  <Badge
+                                    size="xs"
+                                    color="blue"
+                                    variant="light"
+                                    style={{
+                                      cursor: "pointer",
+                                      fontSize: 9,
+                                      transition: "all 0.2s",
+                                    }}
+                                    onMouseEnter={(e) => {
+                                      e.currentTarget.style.transform =
+                                        "scale(1.1)";
+                                      e.currentTarget.style.backgroundColor =
+                                        "#1890ff";
+                                      e.currentTarget.style.color = "white";
+                                    }}
+                                    onMouseLeave={(e) => {
+                                      e.currentTarget.style.transform =
+                                        "scale(1)";
+                                      e.currentTarget.style.backgroundColor =
+                                        "";
+                                      e.currentTarget.style.color = "";
+                                    }}
+                                    onClick={() => handleJumpToPage(page)}
+                                  >
+                                    {page}
+                                  </Badge>
+                                </Tooltip>
+                              ))}
+                              <Text
+                                size="xs"
+                                c="dimmed"
+                                style={{ fontSize: 10 }}
+                              >
+                                • {detail.tag_coordinate || "!"}
+                                {detail.notes && ` • ${detail.notes}`}
+                              </Text>
+                            </Group>
+                          )}
                         {detail.notes && detail.role_type !== "signer" && (
-                          <Text size="xs" c="dimmed" fs="italic" style={{ lineHeight: 1.3, fontSize: 10 }}>
+                          <Text
+                            size="xs"
+                            c="dimmed"
+                            fs="italic"
+                            style={{ lineHeight: 1.3, fontSize: 10 }}
+                          >
                             {detail.notes}
                           </Text>
                         )}
@@ -504,9 +633,13 @@ function DocumentDetail() {
                       variant="light"
                       tt="uppercase"
                     >
-                      {detail.status === "signed" ? "Ditandatangani" :
-                       detail.status === "rejected" ? "Ditolak" :
-                       detail.status === "reviewed" ? "Direview" : "Menunggu"}
+                      {detail.status === "signed"
+                        ? "Ditandatangani"
+                        : detail.status === "rejected"
+                        ? "Ditolak"
+                        : detail.status === "reviewed"
+                        ? "Direview"
+                        : "Menunggu"}
                     </Badge>
                   </Group>
                 );
@@ -589,6 +722,9 @@ function DocumentDetail() {
                 title={document?.title || "Dokumen PDF"}
                 headerActions={renderDocumentActions()}
                 documentId={id}
+                enableSignaturePlacement={allTteCoordinates.length > 0}
+                initialSignatures={allTteCoordinates}
+                canEdit={false}
               />
             )}
           </Stack>

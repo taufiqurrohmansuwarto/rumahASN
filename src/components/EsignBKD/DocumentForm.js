@@ -294,7 +294,6 @@ function DocumentForm() {
   return (
     <div>
       <div style={{ maxWidth: "100%" }}>
-
         <Card
           style={{
             borderRadius: "12px",
@@ -307,34 +306,31 @@ function DocumentForm() {
             style={{
               background: "#FF4500",
               color: "white",
-              padding: "20px",
+              padding: "24px",
               textAlign: "center",
               borderRadius: "12px 12px 0 0",
               margin: "-24px -24px 0 -24px",
             }}
           >
-            <SafetyOutlined style={{ fontSize: "20px", marginBottom: "6px" }} />
+            <SafetyOutlined style={{ fontSize: "24px", marginBottom: "8px" }} />
             <Title level={3} style={{ color: "white", margin: 0 }}>
               Upload Dokumen Baru
             </Title>
-            <Text style={{ color: "rgba(255, 255, 255, 0.9)", fontSize: 14 }}>
+            <Text style={{ color: "rgba(255,255,255,0.9)", fontSize: "14px" }}>
               Buat dan atur workflow tanda tangan elektronik
-            </Text>
-            <Text style={{ color: "rgba(255, 255, 255, 0.8)", fontSize: 12, marginTop: 4, display: "block" }}>
-              Step 1 - Upload file PDF dan isi informasi dokumen
             </Text>
           </div>
 
           {/* Action Button Section */}
           <div
             style={{
-              padding: "16px 0 12px 0",
+              padding: "20px 0 16px 0",
               borderBottom: "1px solid #f0f0f0",
             }}
           >
             <Row gutter={[12, 12]} align="middle" justify="space-between">
               <Col xs={24} md={16}>
-                <Text style={{ fontSize: 16, color: "#6b7280" }}>
+                <Text style={{ fontSize: "16px", color: "#6b7280" }}>
                   Sistem upload dokumen dan pengaturan workflow tanda tangan
                 </Text>
               </Col>

@@ -23,9 +23,8 @@ import {
   NumberInput,
   Stack,
   Text,
-  Tooltip,
 } from "@mantine/core";
-import { Button, Col, Grid, Row } from "antd";
+import { Button, Col, Grid, Row, Tooltip } from "antd";
 import dynamic from "next/dynamic";
 import {
   useCallback,
@@ -119,13 +118,30 @@ const PdfViewer = forwardRef(function PdfViewer(
     if (initialSignatures && initialSignatures.length > 0) {
       setSignatures(initialSignatures);
     }
-  }, []); // Empty deps - only on mount
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Empty deps - only on mount (intentional)
 
   // Update Zustand whenever signatures change
   useEffect(() => {
     const coordinates = signaturesToCoordinates(signatures);
     setSignCoordinates(coordinates);
   }, [signatures, setSignCoordinates]);
+
+  // Listen for jumpToPage event from parent components
+  useEffect(() => {
+    const handleJumpToPage = (event) => {
+      const { page } = event.detail;
+      if (page && page !== pageNumber) {
+        setPageNumber(page);
+      }
+    };
+
+    window.addEventListener("jumpToPage", handleJumpToPage);
+
+    return () => {
+      window.removeEventListener("jumpToPage", handleJumpToPage);
+    };
+  }, [pageNumber]);
 
   // MEMOIZE: Get signatures for current page
   const currentPageSignatures = useMemo(() => {
@@ -361,14 +377,21 @@ const PdfViewer = forwardRef(function PdfViewer(
     setLoading(true);
     setPageNumber(1);
     setScale(1.0);
-    // Force re-render by setting pdfData again
-    if (pdfBase64) {
-      const normalizedBase64 = pdfBase64.trim();
-      const dataUri = normalizedBase64.startsWith("data:application/pdf")
-        ? normalizedBase64
-        : `data:application/pdf;base64,${normalizedBase64}`;
-      setPdfData(dataUri);
-    }
+    setIsPageReady(false);
+    setNumPages(null);
+
+    // Force re-render by clearing first then setting pdfData again
+    setPdfData(null);
+
+    setTimeout(() => {
+      if (pdfBase64) {
+        const normalizedBase64 = pdfBase64.trim();
+        const dataUri = normalizedBase64.startsWith("data:application/pdf")
+          ? normalizedBase64
+          : `data:application/pdf;base64,${normalizedBase64}`;
+        setPdfData(dataUri);
+      }
+    }, 100);
   }, [pdfBase64]);
 
   const goToPage = useCallback(
@@ -389,6 +412,37 @@ const PdfViewer = forwardRef(function PdfViewer(
       filename: `${title}.pdf`,
     });
   }, [documentId, title, downloadDoc]);
+
+  // Expose methods to parent via ref
+  useImperativeHandle(
+    ref,
+    () => ({
+      changePage: (page) => {
+        changePage(page);
+      },
+      getCurrentPage: () => pageNumber,
+      getTotalPages: () => numPages,
+      getScale: () => scale,
+      clearAllSignatures: () => {
+        clearAllSignatures();
+      },
+      removeSignaturesByPage: (page) => {
+        removeSignaturesByPage(page);
+      },
+      removeSignaturesBySignerId: (signerId) => {
+        removeSignaturesBySignerId(signerId);
+      },
+    }),
+    [
+      changePage,
+      pageNumber,
+      numPages,
+      scale,
+      clearAllSignatures,
+      removeSignaturesByPage,
+      removeSignaturesBySignerId,
+    ]
+  );
 
   const renderError = () => (
     <Center py="xl">
@@ -530,37 +584,6 @@ const PdfViewer = forwardRef(function PdfViewer(
       </Card>
     );
   }
-
-  // Expose methods to parent via ref
-  useImperativeHandle(
-    ref,
-    () => ({
-      changePage: (page) => {
-        changePage(page);
-      },
-      getCurrentPage: () => pageNumber,
-      getTotalPages: () => numPages,
-      getScale: () => scale,
-      clearAllSignatures: () => {
-        clearAllSignatures();
-      },
-      removeSignaturesByPage: (page) => {
-        removeSignaturesByPage(page);
-      },
-      removeSignaturesBySignerId: (signerId) => {
-        removeSignaturesBySignerId(signerId);
-      },
-    }),
-    [
-      changePage,
-      pageNumber,
-      numPages,
-      scale,
-      clearAllSignatures,
-      removeSignaturesByPage,
-      removeSignaturesBySignerId,
-    ]
-  );
 
   return (
     <Card shadow="sm" padding="md" radius="md" withBorder>

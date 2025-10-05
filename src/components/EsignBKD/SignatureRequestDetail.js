@@ -2,7 +2,7 @@ import { useState, useCallback, useEffect } from "react";
 import { useRouter } from "next/router";
 import { Button, Space, Tabs, Card, Spin, Tag, Avatar } from "antd";
 import { UserOutlined } from "@ant-design/icons";
-import { Text, Badge, Flex, Alert } from "@mantine/core";
+import { Text, Badge, Flex, Alert, Group, Tooltip } from "@mantine/core";
 import { useSession } from "next-auth/react";
 import {
   IconCheck,
@@ -52,9 +52,12 @@ const SignatureRequestDetail = () => {
 
   // API hooks
   const { data: response, isLoading, refetch } = useSignatureRequest(id);
-  const { mutateAsync: reviewDocument, isLoading: reviewLoading } = useReviewDocument();
-  const { mutateAsync: signDocument, isLoading: signLoading } = useSignDocument();
-  const { mutateAsync: rejectDocument, isLoading: rejectLoading } = useRejectDocument();
+  const { mutateAsync: reviewDocument, isLoading: reviewLoading } =
+    useReviewDocument();
+  const { mutateAsync: signDocument, isLoading: signLoading } =
+    useSignDocument();
+  const { mutateAsync: rejectDocument, isLoading: rejectLoading } =
+    useRejectDocument();
 
   // Extract signature request from response
   const signatureRequest = response?.data;
@@ -98,6 +101,42 @@ const SignatureRequestDetail = () => {
     }
   }, [signatureRequest?.document_id, loadPdfBase64]);
 
+  // Jump to specific page in PDF viewer
+  const handleJumpToPage = (pageNumber) => {
+    // Dispatch custom event for PdfViewer to listen
+    window.dispatchEvent(
+      new CustomEvent("jumpToPage", { detail: { page: pageNumber } })
+    );
+
+    // Switch to detail tab if not visible
+    if (activeTab !== "detail") {
+      setActiveTab("detail");
+    }
+  };
+
+  // Extract all TTE coordinates from signature_details for view-only mode
+  const allTteCoordinates =
+    signatureRequest?.signature_details?.flatMap((detail) => {
+      if (!detail.sign_coordinate || !Array.isArray(detail.sign_coordinate)) {
+        return [];
+      }
+      return detail.sign_coordinate.map((coord) => ({
+        id: `${detail.id}_${coord.page}_${coord.originX}_${coord.originY}`,
+        page: coord.page,
+        position: {
+          x: coord.originX,
+          y: coord.originY,
+        },
+        size: {
+          width: coord.width,
+          height: coord.height,
+        },
+        signerId: coord.signerId,
+        signerName: coord.signerName,
+        signerAvatar: detail.user?.image || null,
+      }));
+    }) || [];
+
   // Find user detail in signature_details
   const userDetail = signatureRequest?.signature_details?.find(
     (detail) => detail.user_id === currentUserId
@@ -117,9 +156,8 @@ const SignatureRequestDetail = () => {
     // Check if all previous orders are completed (signed/reviewed)
     const previousCompleted = sortedDetails
       .filter((detail) => detail.sequence_order < currentOrder)
-      .every((detail) =>
-        detail.status === "signed" ||
-        detail.status === "reviewed"
+      .every(
+        (detail) => detail.status === "signed" || detail.status === "reviewed"
       );
 
     return previousCompleted;
@@ -231,7 +269,8 @@ const SignatureRequestDetail = () => {
           color="red"
           variant="light"
         >
-          Permintaan tanda tangan tidak ditemukan atau Anda tidak memiliki akses.
+          Permintaan tanda tangan tidak ditemukan atau Anda tidak memiliki
+          akses.
         </Alert>
       </Card>
     );
@@ -240,10 +279,22 @@ const SignatureRequestDetail = () => {
   // Get status badge component
   const getStatusBadge = (status) => {
     const statusMap = {
-      pending: { color: "orange", icon: <IconClock size={12} />, text: "PENDING" },
-      completed: { color: "green", icon: <IconCircleCheck size={12} />, text: "SELESAI" },
+      pending: {
+        color: "orange",
+        icon: <IconClock size={12} />,
+        text: "PENDING",
+      },
+      completed: {
+        color: "green",
+        icon: <IconCircleCheck size={12} />,
+        text: "SELESAI",
+      },
       rejected: { color: "red", icon: <IconX size={12} />, text: "DITOLAK" },
-      cancelled: { color: "default", icon: <IconX size={12} />, text: "DIBATALKAN" },
+      cancelled: {
+        color: "default",
+        icon: <IconX size={12} />,
+        text: "DIBATALKAN",
+      },
     };
     const config = statusMap[status] || statusMap.pending;
     return (
@@ -251,7 +302,11 @@ const SignatureRequestDetail = () => {
         color={config.color}
         variant="light"
         size="sm"
-        leftSection={<div style={{ display: "flex", alignItems: "center" }}>{config.icon}</div>}
+        leftSection={
+          <div style={{ display: "flex", alignItems: "center" }}>
+            {config.icon}
+          </div>
+        }
         styles={{
           section: { display: "flex", alignItems: "center" },
           label: { display: "flex", alignItems: "center" },
@@ -272,16 +327,23 @@ const SignatureRequestDetail = () => {
 
       const currentOrder = userDetail.sequence_order;
       const pendingBefore = sortedDetails.filter(
-        (detail) => detail.sequence_order < currentOrder && detail.status === "waiting"
+        (detail) =>
+          detail.sequence_order < currentOrder && detail.status === "waiting"
       );
 
       if (pendingBefore.length > 0) {
         const nextPerson = pendingBefore[0];
-        const roleText = nextPerson.role_type === "signer" ? "menandatangani" : "mereview";
+        const roleText =
+          nextPerson.role_type === "signer" ? "menandatangani" : "mereview";
 
         return (
-          <Alert color="yellow" variant="light" styles={{ message: { fontSize: 13 } }}>
-            Menunggu <strong>{nextPerson.user?.username}</strong> untuk {roleText}.
+          <Alert
+            color="yellow"
+            variant="light"
+            styles={{ message: { fontSize: 13 } }}
+          >
+            Menunggu <strong>{nextPerson.user?.username}</strong> untuk{" "}
+            {roleText}.
           </Alert>
         );
       }
@@ -291,7 +353,11 @@ const SignatureRequestDetail = () => {
     if (canReview) {
       return (
         <Flex direction="column" gap={12} align="center">
-          <Alert color="blue" variant="light" styles={{ message: { fontSize: 13 } }}>
+          <Alert
+            color="blue"
+            variant="light"
+            styles={{ message: { fontSize: 13 } }}
+          >
             Giliran Anda untuk review dokumen.
           </Alert>
           <Flex gap={8}>
@@ -299,11 +365,20 @@ const SignatureRequestDetail = () => {
               type="primary"
               icon={<IconCheck size={16} />}
               onClick={() => setShowReviewModal(true)}
-              style={{ background: "#52c41a", borderColor: "#52c41a", borderRadius: 6 }}
+              style={{
+                background: "#52c41a",
+                borderColor: "#52c41a",
+                borderRadius: 6,
+              }}
             >
               Setujui
             </Button>
-            <Button danger icon={<IconX size={16} />} onClick={() => setShowRejectModal(true)} style={{ borderRadius: 6 }}>
+            <Button
+              danger
+              icon={<IconX size={16} />}
+              onClick={() => setShowRejectModal(true)}
+              style={{ borderRadius: 6 }}
+            >
               Tolak
             </Button>
           </Flex>
@@ -315,7 +390,11 @@ const SignatureRequestDetail = () => {
     if (canSign) {
       return (
         <Flex direction="column" gap={12} align="center">
-          <Alert color="blue" variant="light" styles={{ message: { fontSize: 13 } }}>
+          <Alert
+            color="blue"
+            variant="light"
+            styles={{ message: { fontSize: 13 } }}
+          >
             Giliran Anda untuk tanda tangan.
           </Alert>
           <Flex gap={8}>
@@ -323,11 +402,20 @@ const SignatureRequestDetail = () => {
               type="primary"
               icon={<IconPencil size={16} />}
               onClick={() => setShowSignModal(true)}
-              style={{ background: "#FF4500", borderColor: "#FF4500", borderRadius: 6 }}
+              style={{
+                background: "#FF4500",
+                borderColor: "#FF4500",
+                borderRadius: 6,
+              }}
             >
               Tanda Tangan
             </Button>
-            <Button danger icon={<IconX size={16} />} onClick={() => setShowRejectModal(true)} style={{ borderRadius: 6 }}>
+            <Button
+              danger
+              icon={<IconX size={16} />}
+              onClick={() => setShowRejectModal(true)}
+              style={{ borderRadius: 6 }}
+            >
               Tolak
             </Button>
           </Flex>
@@ -337,11 +425,18 @@ const SignatureRequestDetail = () => {
 
     // Show completion status
     if (userDetail?.status === "signed" || userDetail?.status === "reviewed") {
-      const actionText = userDetail.status === "signed" ? "ditandatangani" : "direview";
-      const dateText = dayjs(userDetail.signed_at || userDetail.reviewed_at).format("DD MMM, HH:mm");
+      const actionText =
+        userDetail.status === "signed" ? "ditandatangani" : "direview";
+      const dateText = dayjs(
+        userDetail.signed_at || userDetail.reviewed_at
+      ).format("DD MMM, HH:mm");
 
       return (
-        <Alert color="green" variant="light" styles={{ message: { fontSize: 13 } }}>
+        <Alert
+          color="green"
+          variant="light"
+          styles={{ message: { fontSize: 13 } }}
+        >
           Sudah {actionText} ({dateText}).
         </Alert>
       );
@@ -351,7 +446,11 @@ const SignatureRequestDetail = () => {
       const dateText = dayjs(userDetail.rejected_at).format("DD MMM, HH:mm");
 
       return (
-        <Alert color="red" variant="light" styles={{ message: { fontSize: 13 } }}>
+        <Alert
+          color="red"
+          variant="light"
+          styles={{ message: { fontSize: 13 } }}
+        >
           Ditolak ({dateText}).
         </Alert>
       );
@@ -385,7 +484,10 @@ const SignatureRequestDetail = () => {
                 {pdfError}
               </Alert>
               <div style={{ marginTop: 12, textAlign: "center" }}>
-                <Button size="small" onClick={() => loadPdfBase64(signatureRequest?.document_id)}>
+                <Button
+                  size="small"
+                  onClick={() => loadPdfBase64(signatureRequest?.document_id)}
+                >
                   Coba Lagi
                 </Button>
               </div>
@@ -395,6 +497,9 @@ const SignatureRequestDetail = () => {
               pdfBase64={pdfBase64}
               title={signatureRequest.document?.title || "Dokumen PDF"}
               documentId={signatureRequest.document_id}
+              enableSignaturePlacement={allTteCoordinates.length > 0}
+              initialSignatures={allTteCoordinates}
+              canEdit={false}
             />
           ) : (
             <Alert
@@ -412,7 +517,12 @@ const SignatureRequestDetail = () => {
     {
       key: "history",
       label: "Riwayat",
-      children: <DocumentAuditLog documentId={signatureRequest.document_id} viewMode="table" />,
+      children: (
+        <DocumentAuditLog
+          documentId={signatureRequest.document_id}
+          viewMode="table"
+        />
+      ),
     },
   ];
 
@@ -447,7 +557,12 @@ const SignatureRequestDetail = () => {
 
         {/* Action Buttons - Only show if user is part of workflow */}
         {userDetail && (
-          <div style={{ padding: "20px 0 16px 0", borderBottom: "1px solid #f0f0f0" }}>
+          <div
+            style={{
+              padding: "20px 0 16px 0",
+              borderBottom: "1px solid #f0f0f0",
+            }}
+          >
             <Flex align="center" justify="center">
               {renderActionButtons()}
             </Flex>
@@ -472,11 +587,15 @@ const SignatureRequestDetail = () => {
                 <Text size="xs" fw={600}>
                   {signatureRequest.creator?.username || "-"}
                 </Text>
-                <Text size="xs" c="dimmed">•</Text>
+                <Text size="xs" c="dimmed">
+                  •
+                </Text>
                 <Flex align="center" gap={6}>
                   <IconCalendar size={12} style={{ color: "#999" }} />
                   <Text size="xs" c="dimmed">
-                    {dayjs(signatureRequest.created_at).format("DD.MM.YYYY • HH:mm")}
+                    {dayjs(signatureRequest.created_at).format(
+                      "DD.MM.YYYY • HH:mm"
+                    )}
                   </Text>
                 </Flex>
               </Flex>
@@ -487,25 +606,37 @@ const SignatureRequestDetail = () => {
                 color="blue"
                 variant="light"
                 size="sm"
-                leftSection={<div style={{ display: "flex", alignItems: "center" }}><IconRefresh size={12} /></div>}
+                leftSection={
+                  <div style={{ display: "flex", alignItems: "center" }}>
+                    <IconRefresh size={12} />
+                  </div>
+                }
                 styles={{
                   section: { display: "flex", alignItems: "center" },
                   label: { display: "flex", alignItems: "center" },
                 }}
               >
-                {signatureRequest.request_type === "sequential" ? "SEQUENTIAL" : "PARALLEL"}
+                {signatureRequest.request_type === "sequential"
+                  ? "SEQUENTIAL"
+                  : "PARALLEL"}
               </Badge>
               <Badge
                 color="cyan"
                 variant="light"
                 size="sm"
-                leftSection={<div style={{ display: "flex", alignItems: "center" }}><IconFileCheck size={12} /></div>}
+                leftSection={
+                  <div style={{ display: "flex", alignItems: "center" }}>
+                    <IconFileCheck size={12} />
+                  </div>
+                }
                 styles={{
                   section: { display: "flex", alignItems: "center" },
                   label: { display: "flex", alignItems: "center" },
                 }}
               >
-                {signatureRequest.type === "self_sign" ? "TANDA TANGAN SENDIRI" : "PERMINTAAN TANDA TANGAN"}
+                {signatureRequest.type === "self_sign"
+                  ? "TANDA TANGAN SENDIRI"
+                  : "PERMINTAAN TANDA TANGAN"}
               </Badge>
             </Flex>
           </Flex>
@@ -532,56 +663,128 @@ const SignatureRequestDetail = () => {
         </div>
 
         {/* Workflow Progress - Compact */}
-        {signatureRequest.signature_details && signatureRequest.signature_details.length > 0 && (
-          <div style={{ padding: "20px 0", borderBottom: "1px solid #f0f0f0" }}>
-            <Text fw={600} size="sm" c="dimmed" style={{ marginBottom: 12 }}>
-              Progress Penandatanganan
-            </Text>
-            <Space direction="vertical" style={{ width: "100%" }} size="small">
-              {signatureRequest.signature_details.map((detail, index) => {
-                const statusColor = {
-                  waiting: "orange",
-                  signed: "green",
-                  reviewed: "blue",
-                  rejected: "red",
-                }[detail.status] || "default";
+        {signatureRequest.signature_details &&
+          signatureRequest.signature_details.length > 0 && (
+            <div
+              style={{ padding: "20px 0", borderBottom: "1px solid #f0f0f0" }}
+            >
+              <Text fw={600} size="sm" c="dimmed" style={{ marginBottom: 12 }}>
+                Progress Penandatanganan
+              </Text>
+              <Space
+                direction="vertical"
+                style={{ width: "100%" }}
+                size="small"
+              >
+                {signatureRequest.signature_details.map((detail, index) => {
+                  const statusColor =
+                    {
+                      waiting: "orange",
+                      signed: "green",
+                      reviewed: "blue",
+                      rejected: "red",
+                    }[detail.status] || "default";
 
-                return (
-                  <Flex key={detail.id} align="flex-start" justify="space-between" gap={8}>
-                    <Flex align="center" gap={6}>
-                      <Tag color={statusColor} style={{ margin: 0, minWidth: 24 }}>
-                        {index + 1}
-                      </Tag>
-                      <Avatar src={detail.user?.image} size={20}>
-                        {!detail.user?.image && <UserOutlined style={{ fontSize: 10 }} />}
-                      </Avatar>
-                      <div>
-                        <Text size="xs" fw={500} style={{ lineHeight: 1.3 }}>
-                          {detail.user?.username}
-                        </Text>
-                        {detail.role_type === "signer" && detail.sign_pages && detail.sign_pages.length > 0 && (
-                          <Text size={10} c="dimmed" style={{ lineHeight: 1.3 }}>
-                            Hal: {detail.sign_pages.join(", ")} • {detail.tag_coordinate || "!"}
-                            {detail.notes && ` • ${detail.notes}`}
+                  return (
+                    <Flex
+                      key={detail.id}
+                      align="flex-start"
+                      justify="space-between"
+                      gap={8}
+                    >
+                      <Flex align="center" gap={6}>
+                        <Tag
+                          color={statusColor}
+                          style={{ margin: 0, minWidth: 24 }}
+                        >
+                          {index + 1}
+                        </Tag>
+                        <Avatar src={detail.user?.image} size={20}>
+                          {!detail.user?.image && (
+                            <UserOutlined style={{ fontSize: 10 }} />
+                          )}
+                        </Avatar>
+                        <div>
+                          <Text size="xs" fw={500} style={{ lineHeight: 1.3 }}>
+                            {detail.user?.username}
                           </Text>
-                        )}
-                        {detail.notes && detail.role_type !== "signer" && (
-                          <Text size={10} c="dimmed" italic style={{ lineHeight: 1.3 }}>
-                            {detail.notes}
-                          </Text>
-                        )}
-                      </div>
+                          {detail.role_type === "signer" &&
+                            detail.sign_pages &&
+                            detail.sign_pages.length > 0 && (
+                              <Group gap={4} style={{ flexWrap: "wrap" }}>
+                                <Text
+                                  size="xs"
+                                  c="dimmed"
+                                  style={{ fontSize: 10 }}
+                                >
+                                  Hal:
+                                </Text>
+                                {detail.sign_pages.map((page, idx) => (
+                                  <Tooltip
+                                    key={idx}
+                                    label={`Lihat halaman ${page}`}
+                                    withArrow
+                                  >
+                                    <Badge
+                                      size="xs"
+                                      color="blue"
+                                      variant="light"
+                                      style={{
+                                        cursor: "pointer",
+                                        fontSize: 9,
+                                        transition: "all 0.2s",
+                                      }}
+                                      onMouseEnter={(e) => {
+                                        e.currentTarget.style.transform =
+                                          "scale(1.1)";
+                                        e.currentTarget.style.backgroundColor =
+                                          "#1890ff";
+                                        e.currentTarget.style.color = "white";
+                                      }}
+                                      onMouseLeave={(e) => {
+                                        e.currentTarget.style.transform =
+                                          "scale(1)";
+                                        e.currentTarget.style.backgroundColor =
+                                          "";
+                                        e.currentTarget.style.color = "";
+                                      }}
+                                      onClick={() => handleJumpToPage(page)}
+                                    >
+                                      {page}
+                                    </Badge>
+                                  </Tooltip>
+                                ))}
+                                <Text
+                                  size="xs"
+                                  c="dimmed"
+                                  style={{ fontSize: 10 }}
+                                >
+                                  • {detail.tag_coordinate || "!"}
+                                  {detail.notes && ` • ${detail.notes}`}
+                                </Text>
+                              </Group>
+                            )}
+                          {detail.notes && detail.role_type !== "signer" && (
+                            <Text
+                              size={10}
+                              c="dimmed"
+                              italic
+                              style={{ lineHeight: 1.3 }}
+                            >
+                              {detail.notes}
+                            </Text>
+                          )}
+                        </div>
+                      </Flex>
+                      <Badge color={statusColor} variant="light" size="xs">
+                        {detail.status?.toUpperCase()}
+                      </Badge>
                     </Flex>
-                    <Badge color={statusColor} variant="light" size="xs">
-                      {detail.status?.toUpperCase()}
-                    </Badge>
-                  </Flex>
-                );
-              })}
-            </Space>
-          </div>
-        )}
-
+                  );
+                })}
+              </Space>
+            </div>
+          )}
 
         {/* Tabs */}
         <div style={{ marginTop: 16 }}>

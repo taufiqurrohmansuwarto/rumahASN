@@ -23,6 +23,7 @@ export const findAll = async (req, res) => {
         raw("info->'perangkat_daerah'->>'detail' as perangkat_daerah_detail")
       )
       .andWhere("role", "=", "USER")
+      .andWhere("group", "=", "MASTER")
       .andWhere("organization_id", "ilike", "123%")
       .orderBy("username", "asc");
 

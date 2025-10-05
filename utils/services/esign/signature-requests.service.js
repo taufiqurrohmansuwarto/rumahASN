@@ -63,7 +63,10 @@ const createSelfSignDetail = async (
     throw new Error("Halaman tanda tangan harus ditentukan untuk self sign");
   }
 
-  console.log("[createSelfSignDetail] Coordinates:", coordinates ? "FOUND" : "NOT FOUND");
+  console.log(
+    "[createSelfSignDetail] Coordinates:",
+    coordinates ? "FOUND" : "NOT FOUND"
+  );
 
   return await SignatureDetails.query(trx).insert({
     request_id: requestId,
@@ -97,7 +100,10 @@ const createRequestSignDetails = async (requestId, signers, trx) => {
   for (let i = 0; i < signers.length; i++) {
     const signer = signers[i];
 
-    console.log(`[createRequestSignDetails] Signer ${i + 1} coordinates:`, signer.coordinates ? "FOUND" : "NOT FOUND");
+    console.log(
+      `[createRequestSignDetails] Signer ${i + 1} coordinates:`,
+      signer.coordinates ? "FOUND" : "NOT FOUND"
+    );
 
     const detail = await SignatureDetails.query(trx).insert({
       request_id: requestId,
@@ -109,7 +115,9 @@ const createRequestSignDetails = async (requestId, signers, trx) => {
       tag_coordinate: signer.tag_coordinate || "!",
       signature_x: signer.signature_x,
       signature_y: signer.signature_y,
-      sign_coordinate: signer.coordinates ? JSON.stringify(signer.coordinates) : null, // Convert to JSON string
+      sign_coordinate: signer.coordinates
+        ? JSON.stringify(signer.coordinates)
+        : null, // Convert to JSON string
       notes: signer.notes,
     });
     signatureDetails.push(detail);
@@ -121,12 +129,11 @@ const createRequestSignDetails = async (requestId, signers, trx) => {
 /**
  * Create new signature request
  * @param {String} documentId - Document ID
- * @param {Object} data - Signature request data
+ * @param {Object} data - Signature request data (includes sign_coordinate from frontend)
  * @param {String} userId - User ID
- * @param {Object} mc - Minio client (optional, untuk detect koordinat)
  * @returns {Promise<Object>} - Created signature request
  */
-export const createSignatureRequest = async (documentId, data, userId, mc = null) => {
+export const createSignatureRequest = async (documentId, data, userId) => {
   const {
     request_type = "parallel",
     notes,
@@ -134,66 +141,17 @@ export const createSignatureRequest = async (documentId, data, userId, mc = null
     type = "self_sign",
     sign_pages = [],
     tag_coordinate,
+    sign_coordinate = [], // Koordinat TTE dari frontend
   } = data;
 
   // Validate document first (outside transaction)
   const document = await validateDocumentForSignature(documentId, userId);
 
-  console.log("[createSignatureRequest] Starting coordinate detection...");
-
-  // Detect coordinates from PDF (before transaction)
-  let coordinatesMap = new Map(); // Map<user_id+pages, coordinates>
-
-  if (mc) {
-    try {
-      const { downloadEsignDocument } = require("@/utils/helper/minio-helper");
-      const { getCoordinates } = require("./pdf.service");
-
-      // Download PDF from Minio
-      console.log("[createSignatureRequest] Downloading PDF from Minio...");
-      const base64File = await downloadEsignDocument(mc, document.file_path);
-      const pdfBuffer = Buffer.from(base64File, "base64");
-      console.log("[createSignatureRequest] PDF downloaded, size:", pdfBuffer.length);
-
-      // Prepare signature details for coordinate detection
-      const detailsForCoordinates = [];
-
-      if (type === "self_sign") {
-        detailsForCoordinates.push({
-          id: userId, // Use userId as temporary ID
-          sign_pages: sign_pages,
-          tag_coordinate: tag_coordinate || "$",
-        });
-      } else if (type === "request_sign") {
-        signers.forEach((signer, idx) => {
-          detailsForCoordinates.push({
-            id: `${signer.user_id}_${idx}`, // Temporary unique ID
-            sign_pages: signer.signature_pages || [1],
-            tag_coordinate: signer.tag_coordinate || "$",
-          });
-        });
-      }
-
-      console.log("[createSignatureRequest] Detecting coordinates for", detailsForCoordinates.length, "signers...");
-
-      // Get coordinates for all signers
-      const coordinatesResults = await getCoordinates(pdfBuffer, detailsForCoordinates);
-
-      console.log("[createSignatureRequest] Coordinates detection completed");
-
-      // Store results in map
-      coordinatesResults.forEach(result => {
-        coordinatesMap.set(result.id, result.coordinates);
-      });
-
-    } catch (error) {
-      console.error("[createSignatureRequest] Error detecting coordinates:", error.message);
-      console.log("[createSignatureRequest] Continuing without coordinates...");
-      // Don't throw - continue without coordinates
-    }
-  } else {
-    console.log("[createSignatureRequest] Skipping coordinate detection (no Minio client)");
-  }
+  console.log(
+    "[createSignatureRequest] Received sign_coordinate:",
+    sign_coordinate?.length || 0,
+    "positions"
+  );
 
   // Use database transaction for data consistency
   return await SignatureRequests.transaction(async (trx) => {
@@ -212,26 +170,42 @@ export const createSignatureRequest = async (documentId, data, userId, mc = null
       let signatureDetails = [];
 
       if (type === "self_sign") {
-        // Get coordinates for self sign
-        const coordinates = coordinatesMap.get(userId);
+        // For self sign, use sign_coordinate directly from frontend
+        // Extract sign_pages from sign_coordinate array
+        const extractedSignPages =
+          sign_coordinate.length > 0
+            ? [...new Set(sign_coordinate.map((coord) => coord.page))]
+            : sign_pages || [];
 
         const detail = await createSelfSignDetail(
           signatureRequest.id,
           userId,
-          JSON.stringify(sign_pages) || [],
+          JSON.stringify(extractedSignPages),
           tag_coordinate,
           notes,
           trx,
-          coordinates // Pass coordinates
+          sign_coordinate // Pass coordinates from frontend
         );
         signatureDetails = [detail];
       } else if (type === "request_sign") {
-        // Get coordinates for each signer
-        const signersWithCoordinates = signers.map((signer, idx) => {
-          const coordinates = coordinatesMap.get(`${signer.user_id}_${idx}`);
+        // For request sign, coordinates are already in signers data from frontend
+        // Each signer has their coordinates embedded in sign_coordinate array
+        const signersWithCoordinates = signers.map((signer) => {
+          // Filter coordinates for this signer
+          const signerCoordinates = sign_coordinate.filter(
+            (coord) => coord.signerId === signer.user_id
+          );
+
+          // Extract sign_pages for this signer from their coordinates
+          const signerPages =
+            signerCoordinates.length > 0
+              ? [...new Set(signerCoordinates.map((coord) => coord.page))]
+              : [];
+
           return {
             ...signer,
-            coordinates, // Add coordinates to signer data
+            coordinates: signerCoordinates, // Coordinates from frontend
+            signature_pages: signerPages, // Pages where this signer needs to sign
           };
         });
 

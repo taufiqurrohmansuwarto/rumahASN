@@ -16,6 +16,7 @@ import {
   Tag,
   Avatar,
   Collapse,
+  Space,
 } from "antd";
 import {
   SaveOutlined,
@@ -57,6 +58,10 @@ function SignatureSetupForm({ document }) {
 
   const [signatureType, setSignatureType] = useState("self_sign"); // self_sign or request_sign
   const [signers, setSigners] = useState([]);
+  const [documentNotes, setDocumentNotes] = useState({
+    globalNotes: "",
+    participantNotes: {},
+  });
 
   // Use Zustand store for signature coordinates
   const signCoordinates = useSignatureStore((state) => state.signCoordinates);
@@ -211,7 +216,7 @@ function SignatureSetupForm({ document }) {
 
       let signatureRequestData = {
         request_type: "sequential", // Default to sequential
-        notes: values.notes || "",
+        notes: documentNotes.globalNotes || "",
         type: signatureType,
         sign_coordinate: signCoordinatesPixel, // Array of {page, originX, originY, width, height}
         sign_pages: [], // Empty for backward compatibility
@@ -237,11 +242,12 @@ function SignatureSetupForm({ document }) {
           return;
         }
 
-        // Prepare signers data
+        // Prepare signers data with notes
         const signersData = signers.map((signer, index) => ({
           user_id: signer.user_id,
           role_type: signer.role_type || "signer",
           sequence_order: signer.sequence_order || index + 1,
+          notes: documentNotes.participantNotes[signer.user_id] || "",
         }));
 
         signatureRequestData.signature_type = "request_sign";
@@ -405,6 +411,10 @@ function SignatureSetupForm({ document }) {
                         // ADD THIS: Receive signers from SignaturePlacementForm
                         setSigners(newSigners);
                       }}
+                      onNotesChange={(notes) => {
+                        // Receive notes from SignaturePlacementForm
+                        setDocumentNotes(notes);
+                      }}
                       canEdit={true}
                     />
                   </>
@@ -459,256 +469,250 @@ function SignatureSetupForm({ document }) {
         </Card>
       </div>
 
-      {/* Confirmation Modal */}
+      {/* Confirmation Modal - Compact dengan Mantine */}
       <Modal
         title={
-          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-            <CheckCircleOutlined style={{ color: "#FF4500", fontSize: 20 }} />
-            <span>Konfirmasi Pengajuan TTE</span>
-          </div>
+          <Group gap="xs">
+            <CheckCircleOutlined style={{ color: "#FF4500", fontSize: 18 }} />
+            <MantineText size="md" fw={600}>
+              Konfirmasi Pengajuan TTE
+            </MantineText>
+          </Group>
         }
         open={confirmModalVisible}
         onCancel={() => {
           setConfirmModalVisible(false);
           setPendingSubmitData(null);
         }}
-        onOk={handleConfirmSubmit}
-        okText="Ya, Ajukan"
-        cancelText="Batal"
-        confirmLoading={isLoading}
-        width={600}
-        okButtonProps={{
-          style: {
-            background: "#FF4500",
-            borderColor: "#FF4500",
-          },
-        }}
+        footer={[
+          <Button key="cancel" onClick={() => setConfirmModalVisible(false)}>
+            Batal
+          </Button>,
+          <Button
+            key="submit"
+            type="primary"
+            loading={isLoading}
+            onClick={handleConfirmSubmit}
+            style={{
+              background: "#FF4500",
+              borderColor: "#FF4500",
+            }}
+          >
+            Ya, Ajukan
+          </Button>,
+        ]}
+        width={650}
         styles={{
           body: {
-            maxHeight: "60vh",
+            maxHeight: "70vh",
             overflowY: "auto",
-            paddingRight: 8,
           },
         }}
       >
-        <MantineDivider my="xs" />
-
-        <Stack gap="xs">
-          <Group justify="space-between">
-            <Group gap={6}>
-              <FileTextOutlined style={{ fontSize: 12, color: "#999" }} />
-              <MantineText size="xs" c="dimmed">
-                Dokumen
-              </MantineText>
-            </Group>
-            <MantineText size="xs" fw={600}>
-              {document?.title}
-            </MantineText>
-          </Group>
-          <MantineDivider size="xs" />
-          <Group justify="space-between">
-            <Group gap={6}>
-              <TagOutlined style={{ fontSize: 12, color: "#999" }} />
-              <MantineText size="xs" c="dimmed">
-                Tipe Pengajuan
-              </MantineText>
-            </Group>
-            <MantineBadge
-              size="sm"
-              color={pendingSubmitData?.type === "self_sign" ? "blue" : "green"}
-            >
-              {pendingSubmitData?.type === "self_sign"
-                ? "Self Sign"
-                : "Request Sign"}
-            </MantineBadge>
-          </Group>
-          <MantineDivider size="xs" />
-          <Group justify="space-between">
-            <Group gap={6}>
-              <SettingOutlined style={{ fontSize: 12, color: "#999" }} />
-              <MantineText size="xs" c="dimmed">
-                Tipe Request
-              </MantineText>
-            </Group>
-            <MantineBadge size="sm" color="cyan">
-              {pendingSubmitData?.request_type === "sequential"
-                ? "Sequential"
-                : "Parallel"}
-            </MantineBadge>
-          </Group>
-          {pendingSubmitData?.notes && (
-            <>
-              <MantineDivider size="xs" />
-              <Group justify="space-between" align="flex-start">
-                <Group gap={6}>
-                  <FileTextOutlined style={{ fontSize: 12, color: "#999" }} />
-                  <MantineText size="xs" c="dimmed">
-                    Catatan
-                  </MantineText>
-                </Group>
-                <MantineText
-                  size="xs"
-                  style={{ maxWidth: "70%", textAlign: "right" }}
-                >
-                  {pendingSubmitData.notes}
+        {/* Compact Info - Mantine */}
+        <Stack gap="md">
+          {/* Dokumen Info */}
+          <Paper withBorder p="sm" radius="md">
+            <Stack gap={6}>
+              <Group justify="space-between" wrap="nowrap">
+                <MantineText size="xs" c="dimmed">
+                  Dokumen
+                </MantineText>
+                <MantineText size="xs" fw={600} ta="right" style={{ flex: 1 }}>
+                  {document?.title}
                 </MantineText>
               </Group>
-            </>
+              <MantineDivider size="xs" />
+              <Group justify="space-between">
+                <MantineText size="xs" c="dimmed">
+                  Mode
+                </MantineText>
+                <MantineBadge
+                  size="sm"
+                  color={
+                    pendingSubmitData?.type === "self_sign" ? "blue" : "green"
+                  }
+                >
+                  {pendingSubmitData?.type === "self_sign" ? "Self" : "Request"}
+                </MantineBadge>
+              </Group>
+              {pendingSubmitData?.notes && (
+                <>
+                  <MantineDivider size="xs" />
+                  <Stack gap={4}>
+                    <MantineText size="xs" c="dimmed">
+                      Catatan:
+                    </MantineText>
+                    <MantineText
+                      size="xs"
+                      style={{
+                        padding: 6,
+                        background: "#fafafa",
+                        borderRadius: 4,
+                        whiteSpace: "pre-wrap",
+                      }}
+                    >
+                      {pendingSubmitData.notes}
+                    </MantineText>
+                  </Stack>
+                </>
+              )}
+            </Stack>
+          </Paper>
+
+          {/* TTE Info - Compact */}
+          {pendingSubmitData?.type === "self_sign" ? (
+            <Paper withBorder p="sm" radius="md">
+              <Stack gap={6}>
+                <MantineText size="sm" fw={600}>
+                  Penempatan TTE
+                </MantineText>
+                <MantineDivider size="xs" />
+                <Group justify="space-between">
+                  <MantineText size="xs" c="dimmed">
+                    Total Logo
+                  </MantineText>
+                  <MantineBadge size="sm" color="blue">
+                    {pendingSubmitData?.sign_coordinate?.length || 0} posisi
+                  </MantineBadge>
+                </Group>
+                <Group justify="space-between" align="flex-start">
+                  <MantineText size="xs" c="dimmed">
+                    Halaman
+                  </MantineText>
+                  <Group gap={4}>
+                    {pendingSubmitData?.sign_coordinate?.length > 0
+                      ? [
+                          ...new Set(
+                            pendingSubmitData.sign_coordinate.map((c) => c.page)
+                          ),
+                        ]
+                          .sort((a, b) => a - b)
+                          .map((page) => (
+                            <MantineBadge
+                              key={page}
+                              size="xs"
+                              variant="light"
+                              color="cyan"
+                            >
+                              {page}
+                            </MantineBadge>
+                          ))
+                      : "-"}
+                  </Group>
+                </Group>
+              </Stack>
+            </Paper>
+          ) : (
+            <Paper withBorder p="sm" radius="md">
+              <Stack gap="xs">
+                <MantineText size="sm" fw={600}>
+                  Peserta ({pendingSubmitData?.signers?.length || 0})
+                </MantineText>
+                <MantineDivider size="xs" />
+                <Stack gap={6}>
+                  {pendingSubmitData?.signers?.map((signer, index) => {
+                    const signerData = signers.find(
+                      (s) => s.user_id === signer.user_id
+                    );
+
+                    // Count TTE for this signer
+                    const tteCount =
+                      pendingSubmitData?.sign_coordinate?.filter(
+                        (coord) => coord.signerId === signer.user_id
+                      ).length || 0;
+
+                    const ttePages = [
+                      ...new Set(
+                        pendingSubmitData?.sign_coordinate
+                          ?.filter((coord) => coord.signerId === signer.user_id)
+                          ?.map((c) => c.page) || []
+                      ),
+                    ].sort((a, b) => a - b);
+
+                    return (
+                      <Paper
+                        key={index}
+                        withBorder
+                        p="xs"
+                        radius="sm"
+                        style={{ backgroundColor: "#fafafa" }}
+                      >
+                        <Stack gap={4}>
+                          <Group justify="space-between">
+                            <Group gap={6}>
+                              <Avatar src={signerData?.image} size={20}>
+                                {signerData?.name?.charAt(0) || "?"}
+                              </Avatar>
+                              <MantineText size="xs" fw={500}>
+                                #{signer.sequence_order}{" "}
+                                {signerData?.name || signer.user_id}
+                              </MantineText>
+                            </Group>
+                            <Group gap={4}>
+                              <MantineBadge
+                                size="xs"
+                                color={
+                                  signer.role_type === "signer"
+                                    ? "blue"
+                                    : "orange"
+                                }
+                              >
+                                {signer.role_type === "signer"
+                                  ? "Signer"
+                                  : "Reviewer"}
+                              </MantineBadge>
+                              {signer.role_type === "signer" &&
+                                tteCount > 0 && (
+                                  <MantineBadge size="xs" color="green">
+                                    {tteCount} TTE
+                                  </MantineBadge>
+                                )}
+                            </Group>
+                          </Group>
+
+                          {signer.role_type === "signer" &&
+                            ttePages.length > 0 && (
+                              <Group gap={4}>
+                                <MantineText size="xs" c="dimmed">
+                                  Hal:
+                                </MantineText>
+                                {ttePages.map((page) => (
+                                  <MantineBadge
+                                    key={page}
+                                    size="xs"
+                                    variant="light"
+                                    color="cyan"
+                                  >
+                                    {page}
+                                  </MantineBadge>
+                                ))}
+                              </Group>
+                            )}
+
+                          {signer.notes && (
+                            <MantineText
+                              size="xs"
+                              c="dimmed"
+                              style={{
+                                padding: 4,
+                                background: "white",
+                                borderRadius: 4,
+                                fontStyle: "italic",
+                              }}
+                            >
+                              &ldquo;{signer.notes}&rdquo;
+                            </MantineText>
+                          )}
+                        </Stack>
+                      </Paper>
+                    );
+                  })}
+                </Stack>
+              </Stack>
+            </Paper>
           )}
         </Stack>
-
-        {pendingSubmitData?.type === "self_sign" ? (
-          <>
-            <MantineDivider
-              my="md"
-              label="Pengaturan Self Sign"
-              labelPosition="left"
-            />
-            <Stack gap="xs">
-              <Group justify="space-between">
-                <Group gap={6}>
-                  <FileTextOutlined style={{ fontSize: 12, color: "#999" }} />
-                  <MantineText size="xs" c="dimmed">
-                    Total Tanda Tangan
-                  </MantineText>
-                </Group>
-                <MantineText size="xs" fw={500}>
-                  {pendingSubmitData?.sign_coordinate?.length || 0} posisi
-                </MantineText>
-              </Group>
-              <MantineDivider size="xs" />
-              <Group justify="space-between">
-                <Group gap={6}>
-                  <TagOutlined style={{ fontSize: 12, color: "#999" }} />
-                  <MantineText size="xs" c="dimmed">
-                    Halaman yang Ditandatangani
-                  </MantineText>
-                </Group>
-                <MantineText size="xs" fw={500}>
-                  {pendingSubmitData?.sign_coordinate?.length > 0
-                    ? [
-                        ...new Set(
-                          pendingSubmitData.sign_coordinate.map((c) => c.page)
-                        ),
-                      ]
-                        .sort((a, b) => a - b)
-                        .join(", ")
-                    : "-"}
-                </MantineText>
-              </Group>
-            </Stack>
-          </>
-        ) : (
-          <>
-            <MantineDivider
-              my="md"
-              label={`Daftar Penandatangan (${
-                pendingSubmitData?.signers?.length || 0
-              })`}
-              labelPosition="left"
-            />
-            <Collapse
-              size="small"
-              items={pendingSubmitData?.signers?.map((signer, index) => {
-                const signerData = signers.find(
-                  (s) => s.user_id === signer.user_id
-                );
-                return {
-                  key: index,
-                  label: (
-                    <Group gap="xs">
-                      <Avatar src={signerData?.avatar} size={20}>
-                        {signerData?.user_name?.charAt(0)}
-                      </Avatar>
-                      <MantineText size="xs" fw={600}>
-                        #{signer.sequence_order} -{" "}
-                        {signerData?.user_name || signer.user_id}
-                      </MantineText>
-                      <MantineBadge
-                        size="xs"
-                        color={
-                          signer.role_type === "signer" ? "blue" : "orange"
-                        }
-                      >
-                        {signer.role_type === "signer" ? "Signer" : "Reviewer"}
-                      </MantineBadge>
-                    </Group>
-                  ),
-                  children: (
-                    <Stack gap={4}>
-                      <Group justify="space-between">
-                        <Group gap={6}>
-                          <UserOutlined
-                            style={{ fontSize: 12, color: "#999" }}
-                          />
-                          <MantineText size="xs" c="dimmed">
-                            Role
-                          </MantineText>
-                        </Group>
-                        <MantineBadge
-                          size="xs"
-                          color={
-                            signer.role_type === "signer" ? "blue" : "orange"
-                          }
-                        >
-                          {signer.role_type === "signer"
-                            ? "Signer"
-                            : "Reviewer"}
-                        </MantineBadge>
-                      </Group>
-                      {signer.role_type === "signer" && (
-                        <>
-                          <MantineDivider size="xs" />
-                          <Group justify="space-between">
-                            <Group gap={6}>
-                              <FileTextOutlined
-                                style={{ fontSize: 12, color: "#999" }}
-                              />
-                              <MantineText size="xs" c="dimmed">
-                                Halaman
-                              </MantineText>
-                            </Group>
-                            <MantineText size="xs" fw={500}>
-                              {signer.signature_pages?.join(", ") || "-"}
-                            </MantineText>
-                          </Group>
-                          <MantineDivider size="xs" />
-                          <Group justify="space-between">
-                            <Group gap={6}>
-                              <TagOutlined
-                                style={{ fontSize: 12, color: "#999" }}
-                              />
-                              <MantineText size="xs" c="dimmed">
-                                Koordinat Tag
-                              </MantineText>
-                            </Group>
-                            <MantineText size="xs" fw={500}>
-                              {signer.tag_coordinate || "!"}
-                            </MantineText>
-                          </Group>
-                        </>
-                      )}
-                      <MantineDivider size="xs" />
-                      <Group justify="space-between">
-                        <Group gap={6}>
-                          <IdcardOutlined
-                            style={{ fontSize: 12, color: "#999" }}
-                          />
-                          <MantineText size="xs" c="dimmed">
-                            Jabatan
-                          </MantineText>
-                        </Group>
-                        <MantineText size="xs" fw={500}>
-                          {signerData?.nama_jabatan || "-"}
-                        </MantineText>
-                      </Group>
-                    </Stack>
-                  ),
-                };
-              })}
-            />
-          </>
-        )}
       </Modal>
     </div>
   );

@@ -1,4 +1,4 @@
-import { Space, Modal, Radio } from "antd";
+import { Space, Modal, Radio, Input } from "antd";
 import { memo, useMemo, useRef, useState } from "react";
 import {
   Card,
@@ -17,7 +17,10 @@ import {
   IconMapPin,
   IconTrash,
   IconUserPlus,
+  IconNote,
 } from "@tabler/icons-react";
+
+const { TextArea } = Input;
 import { useSession } from "next-auth/react";
 import PdfViewer from "./PdfViewer";
 import SignerSelector from "./SignerSelector";
@@ -29,6 +32,7 @@ function SignaturePlacementForm({
   initialMode = "self",
   onModeChange,
   onSignersChange, // ADD THIS PROP
+  onNotesChange, // Notes callback
   initialSignatures = [],
   canEdit = true,
 }) {
@@ -40,6 +44,8 @@ function SignaturePlacementForm({
   const [reviewers, setReviewers] = useState([]);
   const [activeSigner, setActiveSigner] = useState(null);
   const [showSignerSelector, setShowSignerSelector] = useState(false);
+  const [globalNotes, setGlobalNotes] = useState("");
+  const [participantNotes, setParticipantNotes] = useState({}); // { personId: "notes" }
 
   const signCoordinates = useSignatureStore((state) => state.signCoordinates);
   const clearSignCoordinates = useSignatureStore(
@@ -129,10 +135,15 @@ function SignaturePlacementForm({
         setSigners([]);
         setReviewers([]);
         setActiveSigner(null);
+        setGlobalNotes("");
+        setParticipantNotes({});
 
-        // Notify parent about empty signers
+        // Notify parent about empty signers and notes
         if (onSignersChange) {
           onSignersChange([]);
+        }
+        if (onNotesChange) {
+          onNotesChange({ globalNotes: "", participantNotes: {} });
         }
 
         if (onModeChange) {
@@ -286,10 +297,36 @@ function SignaturePlacementForm({
 
   const showTTEPlacement = currentSignerInfo?.type === "signer";
 
+  // Handler untuk update notes
+  const handleGlobalNotesChange = (e) => {
+    const value = e.target.value;
+    setGlobalNotes(value);
+    if (onNotesChange) {
+      onNotesChange({ globalNotes: value, participantNotes });
+    }
+  };
+
+  const handleParticipantNoteChange = (personId, value) => {
+    const newParticipantNotes = { ...participantNotes, [personId]: value };
+    setParticipantNotes(newParticipantNotes);
+    if (onNotesChange) {
+      onNotesChange({ globalNotes, participantNotes: newParticipantNotes });
+    }
+  };
+
   return (
-    <Space direction="vertical" style={{ width: "100%" }} size="large">
+    <Space direction="vertical" style={{ width: "100%" }} size="middle">
       {/* COMPACT: Simple Radio Group */}
-      <Card shadow="sm" padding="sm" radius="md" withBorder>
+      <Card
+        shadow="sm"
+        padding="md"
+        radius="md"
+        withBorder
+        style={{
+          borderRadius: "12px",
+          border: "1px solid #f0f0f0",
+        }}
+      >
         <Group justify="space-between" wrap="nowrap">
           <Text size="sm" fw={600}>
             Mode Tanda Tangan
@@ -303,7 +340,16 @@ function SignaturePlacementForm({
 
       {/* Request Mode: Daftar Peserta Sequential */}
       {mode === "request" && (
-        <Card shadow="sm" padding="md" radius="md" withBorder>
+        <Card
+          shadow="sm"
+          padding="md"
+          radius="md"
+          withBorder
+          style={{
+            borderRadius: "12px",
+            border: "1px solid #f0f0f0",
+          }}
+        >
           <Stack gap="sm">
             <Group justify="space-between">
               <Text size="sm" fw={500}>
@@ -337,76 +383,102 @@ function SignaturePlacementForm({
                       p="xs"
                       style={{
                         backgroundColor: isActive ? "#f0f7ff" : "white",
-                        borderColor: isActive ? "#1890ff" : undefined,
+                        borderColor: isActive ? "#1890ff" : "#f0f0f0",
+                        borderRadius: "8px",
                       }}
                     >
-                      <Group justify="space-between">
-                        <Group
-                          gap="xs"
-                          style={{
-                            cursor: "pointer",
-                            flex: 1,
-                            opacity: !isSigner ? 0.8 : 1,
-                          }}
-                          onClick={() => setActiveSigner(person)}
-                        >
-                          {/* Sequence Badge */}
-                          <Badge
-                            size="lg"
-                            variant="filled"
-                            color={isSigner ? "blue" : "gray"}
+                      <Stack gap="xs">
+                        <Group justify="space-between">
+                          <Group
+                            gap="xs"
                             style={{
-                              minWidth: 28,
-                              height: 28,
-                              padding: 0,
-                              display: "flex",
-                              alignItems: "center",
-                              justifyContent: "center",
+                              cursor: "pointer",
+                              flex: 1,
+                              opacity: !isSigner ? 0.8 : 1,
+                            }}
+                            onClick={() => setActiveSigner(person)}
+                          >
+                            {/* Sequence Badge */}
+                            <Badge
+                              size="lg"
+                              variant="filled"
+                              color={isSigner ? "blue" : "gray"}
+                              style={{
+                                minWidth: 28,
+                                height: 28,
+                                padding: 0,
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                              }}
+                            >
+                              {person.sequence}
+                            </Badge>
+
+                            <Avatar src={person.image} size="sm" radius="xl">
+                              {person.name.charAt(0)}
+                            </Avatar>
+
+                            <div style={{ flex: 1 }}>
+                              <Group gap={4}>
+                                <Text size="xs" fw={500}>
+                                  {person.name}
+                                </Text>
+                                <Badge
+                                  size="xs"
+                                  color={isSigner ? "blue" : "gray"}
+                                  variant="light"
+                                >
+                                  {isSigner ? "Penandatangan" : "Reviewer"}
+                                </Badge>
+                                {isActive && (
+                                  <Badge size="xs" color="green">
+                                    Aktif
+                                  </Badge>
+                                )}
+                              </Group>
+                              <Text size="xs" c="dimmed">
+                                {isSigner ? `${sigCount} TTE` : "Preview saja"}
+                              </Text>
+                            </div>
+                          </Group>
+
+                          <ActionIcon
+                            size="sm"
+                            color="red"
+                            variant="subtle"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleRemovePerson(person.id, person.type);
                             }}
                           >
-                            {person.sequence}
-                          </Badge>
-
-                          <Avatar src={person.image} size="sm" radius="xl">
-                            {person.name.charAt(0)}
-                          </Avatar>
-
-                          <div style={{ flex: 1 }}>
-                            <Group gap={4}>
-                              <Text size="xs" fw={500}>
-                                {person.name}
-                              </Text>
-                              <Badge
-                                size="xs"
-                                color={isSigner ? "blue" : "gray"}
-                                variant="light"
-                              >
-                                {isSigner ? "Penandatangan" : "Reviewer"}
-                              </Badge>
-                              {isActive && (
-                                <Badge size="xs" color="green">
-                                  Aktif
-                                </Badge>
-                              )}
-                            </Group>
-                            <Text size="xs" c="dimmed">
-                              {isSigner ? `${sigCount} TTE` : "Preview saja"}
-                            </Text>
-                          </div>
+                            <IconTrash size={14} />
+                          </ActionIcon>
                         </Group>
 
-                        <ActionIcon
-                          size="sm"
-                          color="red"
-                          variant="subtle"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleRemovePerson(person.id, person.type);
-                          }}
-                        >
-                          <IconTrash size={14} />
-                        </ActionIcon>
-                      </Group>
+                        {/* Notes per participant */}
+                        <div onClick={(e) => e.stopPropagation()}>
+                          <TextArea
+                            size="small"
+                            placeholder={`Catatan untuk ${person.name} (opsional)`}
+                            value={participantNotes[person.id] || ""}
+                            onChange={(e) =>
+                              handleParticipantNoteChange(
+                                person.id,
+                                e.target.value
+                              )
+                            }
+                            rows={2}
+                            maxLength={500}
+                            showCount
+                            style={{
+                              fontSize: "12px",
+                              borderRadius: "6px",
+                            }}
+                            disabled={!canEdit}
+                          />
+                        </div>
+                      </Stack>
                     </Paper>
                   );
                 })}
@@ -428,7 +500,16 @@ function SignaturePlacementForm({
 
       {/* Self Sign: Info TTE */}
       {mode === "self" && (
-        <Card shadow="sm" padding="md" radius="md" withBorder>
+        <Card
+          shadow="sm"
+          padding="md"
+          radius="md"
+          withBorder
+          style={{
+            borderRadius: "12px",
+            border: "1px solid #f0f0f0",
+          }}
+        >
           <Stack gap="sm">
             <Group justify="space-between">
               <Group gap="xs">
@@ -454,8 +535,8 @@ function SignaturePlacementForm({
 
             {totalCount === 0 ? (
               <Text size="xs" c="dimmed" ta="center" py="md">
-                Belum ada TTE yang ditempatkan. Klik tombol "Tambah TTE" di
-                bawah untuk menambahkan tanda tangan.
+                Belum ada TTE yang ditempatkan. Klik tombol &quot;Tambah
+                TTE&quot; di bawah untuk menambahkan tanda tangan.
               </Text>
             ) : (
               <Stack gap={4}>
@@ -468,7 +549,15 @@ function SignaturePlacementForm({
                   .map((pageKey) => {
                     const page = parseInt(pageKey.replace("page", ""));
                     return (
-                      <Paper key={pageKey} withBorder p="xs">
+                      <Paper
+                        key={pageKey}
+                        withBorder
+                        p="xs"
+                        style={{
+                          borderRadius: "8px",
+                          border: "1px solid #f0f0f0",
+                        }}
+                      >
                         <Group justify="space-between">
                           <Group gap="xs">
                             <IconMapPin size={14} />
@@ -513,7 +602,16 @@ function SignaturePlacementForm({
         currentSignerInfo &&
         showTTEPlacement &&
         totalCount > 0 && (
-          <Card shadow="sm" padding="md" radius="md" withBorder>
+          <Card
+            shadow="sm"
+            padding="md"
+            radius="md"
+            withBorder
+            style={{
+              borderRadius: "12px",
+              border: "1px solid #f0f0f0",
+            }}
+          >
             <Stack gap="sm">
               <Group justify="space-between">
                 <Group gap="xs">
@@ -547,7 +645,15 @@ function SignaturePlacementForm({
                   .map((pageKey) => {
                     const page = parseInt(pageKey.replace("page", ""));
                     return (
-                      <Paper key={pageKey} withBorder p="xs">
+                      <Paper
+                        key={pageKey}
+                        withBorder
+                        p="xs"
+                        style={{
+                          borderRadius: "8px",
+                          border: "1px solid #f0f0f0",
+                        }}
+                      >
                         <Group justify="space-between">
                           <Group gap="xs">
                             <IconMapPin size={14} />
@@ -589,10 +695,19 @@ function SignaturePlacementForm({
         <>
           {/* Message for Request mode without active signer */}
           {mode === "request" && !currentSignerInfo && (
-            <Card shadow="sm" padding="md" radius="md" withBorder>
+            <Card
+              shadow="sm"
+              padding="md"
+              radius="md"
+              withBorder
+              style={{
+                borderRadius: "12px",
+                border: "1px solid #f0f0f0",
+              }}
+            >
               <Text size="sm" c="dimmed" ta="center" py="md">
                 Tambahkan penandatangan dengan klik tombol{" "}
-                <strong>"Kelola"</strong> di atas,
+                <strong>&quot;Kelola&quot;</strong> di atas,
                 <br />
                 kemudian pilih penandatangan untuk menempatkan TTE.
               </Text>
@@ -601,7 +716,16 @@ function SignaturePlacementForm({
 
           {/* Message for Reviewer - shown above PDF viewer */}
           {mode === "request" && currentSignerInfo && !showTTEPlacement && (
-            <Card shadow="sm" padding="md" radius="md" withBorder>
+            <Card
+              shadow="sm"
+              padding="md"
+              radius="md"
+              withBorder
+              style={{
+                borderRadius: "12px",
+                border: "1px solid #f0f0f0",
+              }}
+            >
               <Text size="sm" c="dimmed" ta="center">
                 Reviewer hanya dapat melihat dokumen, tidak perlu menempatkan
                 TTE.
@@ -624,6 +748,40 @@ function SignaturePlacementForm({
           />
         </>
       )}
+
+      {/* Global Notes - Show for both self and request mode */}
+      <Card
+        shadow="sm"
+        padding="md"
+        radius="md"
+        withBorder
+        style={{
+          borderRadius: "12px",
+          border: "1px solid #f0f0f0",
+        }}
+      >
+        <Stack gap="sm">
+          <Group gap="xs">
+            <IconNote size={16} />
+            <Text size="sm" fw={500}>
+              Catatan Dokumen (Opsional)
+            </Text>
+          </Group>
+          <TextArea
+            placeholder="Tambahkan catatan untuk dokumen ini..."
+            value={globalNotes}
+            onChange={handleGlobalNotesChange}
+            rows={3}
+            maxLength={1000}
+            showCount
+            style={{
+              fontSize: "13px",
+              borderRadius: "6px",
+            }}
+            disabled={!canEdit}
+          />
+        </Stack>
+      </Card>
 
       {/* Signer Selector Modal */}
       <SignerSelector
