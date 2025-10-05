@@ -49,12 +49,6 @@ const menuItems = [
     role: ["admin", "user"],
   },
   {
-    key: "/esign-bkd/delegated",
-    icon: <IconUserCheck size={16} />,
-    label: "Delegasi TTE",
-    role: ["admin", "user"],
-  },
-  {
     key: "/esign-bkd/bsre",
     icon: <IconCloudComputing size={16} />,
     label: "Monitor BSrE",

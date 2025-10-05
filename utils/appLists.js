@@ -19,16 +19,16 @@ export const appLists = [
     userType: ["asn", "non_asn", "umum", "fasilitator"],
     target: "_blank",
   },
-  // {
-  //   rightIcon: <IconHome />,
-  //   title: "ESIGN BKD",
-  //   desc: "ESIGN BKD",
-  //   color: "#1A73E8",
-  //   url: "/esign-bkd/documents",
-  //   icon: "https://siasn.bkd.jatimprov.go.id:9000/public/icon-beranda.png",
-  //   userType: ["bkd"],
-  //   target: "_blank",
-  // },
+  {
+    rightIcon: <IconHome />,
+    title: "E-Sign BKD",
+    desc: "Tanda Tangan Digital BKD",
+    color: "#1A73E8",
+    url: "/esign-bkd/documents",
+    icon: "https://siasn.bkd.jatimprov.go.id:9000/public/icon-beranda.png",
+    userType: ["bkd"],
+    target: "_blank",
+  },
   {
     rightIcon: <IconTransfer />,
     title: "Layanan Keuangan",
@@ -156,6 +156,12 @@ export const getUserType = (user) => {
   const currentRole = user?.current_role;
   const bkd = user?.organization_id?.startsWith("123");
 
+  const syaratAsn =
+    statusKepegawaian === "PNS" ||
+    statusKepegawaian === "PPPK" ||
+    statusKepegawaian === "CPNS";
+  const asnBkd = bkd && syaratAsn;
+
   const userTypes = [];
   if (
     statusKepegawaian === "PNS" ||
@@ -179,7 +185,7 @@ export const getUserType = (user) => {
   if (currentRole === "agent") {
     userTypes.push("agent");
   }
-  if (bkd) {
+  if (asnBkd) {
     userTypes.push("bkd");
   }
 
