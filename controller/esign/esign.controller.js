@@ -24,8 +24,9 @@ const removeChar = (str) => {
 
 export const checkTTEUser = async (req, res) => {
   try {
-    const { employeeNumber: nip } = req?.user;
+    const { employee_number: nip } = req?.user;
     let nik;
+
     if (!isProduction) {
       nik = process.env.ESIGN_NIK;
     } else {

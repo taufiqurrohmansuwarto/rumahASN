@@ -36,7 +36,9 @@ export const create = async (req, res) => {
     const data = req.body?.data;
     console.log("data", data);
 
-    console.log("[Controller] Creating signature request with coordinate detection...");
+    console.log(
+      "[Controller] Creating signature request with coordinate detection..."
+    );
 
     const signatureRequest = await createSignatureRequest(
       document_id,
@@ -252,14 +254,13 @@ export const sign = async (req, res) => {
     const { mc } = req;
     const { customId: userId, employee_number: nip } = req?.user;
     const { id } = req.query;
+    console.log("req.body", req.body);
+    const { passphrase } = req.body;
 
     let nik;
-    let passphrase;
-    if (process.env.NODE_ENV === "production") {
+    if (process.env.NODE_ENV !== "production") {
       nik = process.env.ESIGN_NIK;
-      passphrase = process.env.ESIGN_PASSPHRASE;
     } else {
-      passphrase = req.body?.passphrase;
       if (!nip) {
         throw new Error("NIP tidak ditemukan di session");
       }

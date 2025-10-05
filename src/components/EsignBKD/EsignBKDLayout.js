@@ -163,12 +163,6 @@ function EsignBKDLayout({ children, active = "/" }) {
                     icon: <IconClock size={14} />,
                     onClick: () => handleQuickFilter("pending"),
                   },
-                  {
-                    key: "delegated",
-                    label: "Delegasi TTE",
-                    icon: <IconUserCheck size={14} />,
-                    onClick: () => handleQuickFilter("delegated"),
-                  },
                 ],
               }}
               trigger={["click"]}

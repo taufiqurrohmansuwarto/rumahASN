@@ -25,6 +25,8 @@ export const useBsreTransactions = (params = {}) => {
   return useQuery({
     queryKey: BSRE_TRANSACTION_KEYS.list(params),
     queryFn: () => getBsreTransactions(params),
+    refetchOnWindowFocus: false,
+    keepPreviousData: true,
   });
 };
 
@@ -34,6 +36,8 @@ export const useBsreTransaction = (id) => {
     queryKey: BSRE_TRANSACTION_KEYS.detail(id),
     queryFn: () => getBsreTransactionById(id),
     enabled: !!id,
+    refetchOnWindowFocus: false,
+    keepPreviousData: true,
   });
 };
 
@@ -44,6 +48,8 @@ export const useBsreStatus = (params = {}) => {
     queryFn: () => checkBsreStatus(params),
     enabled: !!Object.keys(params).length,
     refetchInterval: 10000, // Check status every 10 seconds
+    refetchOnWindowFocus: false,
+    keepPreviousData: true,
   });
 };
 
@@ -52,6 +58,8 @@ export const useBsreTransactionStats = (params = {}) => {
   return useQuery({
     queryKey: BSRE_TRANSACTION_KEYS.stats(params),
     queryFn: () => getBsreTransactionStats(params),
+    refetchOnWindowFocus: false,
+    keepPreviousData: true,
   });
 };
 
@@ -62,8 +70,12 @@ export const useCreateBsreTransaction = () => {
   return useMutation({
     mutationFn: (data) => createBsreTransaction(data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: BSRE_TRANSACTION_KEYS.lists() });
-      queryClient.invalidateQueries({ queryKey: BSRE_TRANSACTION_KEYS.stats() });
+      queryClient.invalidateQueries({
+        queryKey: BSRE_TRANSACTION_KEYS.lists(),
+      });
+      queryClient.invalidateQueries({
+        queryKey: BSRE_TRANSACTION_KEYS.stats(),
+      });
     },
   });
 };
@@ -75,11 +87,15 @@ export const useSendToBsreForSigning = () => {
   return useMutation({
     mutationFn: ({ id, data }) => sendToBsreForSigning(id, data),
     onSuccess: (data, variables) => {
-      queryClient.invalidateQueries({ queryKey: BSRE_TRANSACTION_KEYS.lists() });
       queryClient.invalidateQueries({
-        queryKey: BSRE_TRANSACTION_KEYS.detail(variables.id)
+        queryKey: BSRE_TRANSACTION_KEYS.lists(),
       });
-      queryClient.invalidateQueries({ queryKey: BSRE_TRANSACTION_KEYS.stats() });
+      queryClient.invalidateQueries({
+        queryKey: BSRE_TRANSACTION_KEYS.detail(variables.id),
+      });
+      queryClient.invalidateQueries({
+        queryKey: BSRE_TRANSACTION_KEYS.stats(),
+      });
     },
   });
 };
@@ -91,11 +107,15 @@ export const useRetryBsreTransaction = () => {
   return useMutation({
     mutationFn: ({ id, data }) => retryBsreTransaction(id, data),
     onSuccess: (data, variables) => {
-      queryClient.invalidateQueries({ queryKey: BSRE_TRANSACTION_KEYS.lists() });
       queryClient.invalidateQueries({
-        queryKey: BSRE_TRANSACTION_KEYS.detail(variables.id)
+        queryKey: BSRE_TRANSACTION_KEYS.lists(),
       });
-      queryClient.invalidateQueries({ queryKey: BSRE_TRANSACTION_KEYS.stats() });
+      queryClient.invalidateQueries({
+        queryKey: BSRE_TRANSACTION_KEYS.detail(variables.id),
+      });
+      queryClient.invalidateQueries({
+        queryKey: BSRE_TRANSACTION_KEYS.stats(),
+      });
     },
   });
 };

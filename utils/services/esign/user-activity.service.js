@@ -33,20 +33,9 @@ export const logUserActivity = async (activityData) => {
       updated_at: new Date(),
     };
 
-    // Only add entity_id if it's a valid integer or can be converted to integer
-    // Skip for nanoid strings, put in additional_data instead
+    // Add entity_id if provided (supports both integer and string IDs like nanoid)
     if (activityData.entity_id) {
-      const entityIdNum = parseInt(activityData.entity_id);
-      if (!isNaN(entityIdNum)) {
-        logData.entity_id = entityIdNum;
-      } else {
-        // If not integer, store in additional_data
-        console.log("      [logUserActivity] entity_id is not integer, storing in additional_data");
-        logData.additional_data = {
-          ...logData.additional_data,
-          entity_id_string: activityData.entity_id,
-        };
-      }
+      logData.entity_id = activityData.entity_id;
     }
 
     const log = await LogUserActivity.query().insert(logData);
@@ -84,7 +73,8 @@ export const logSignatureAction = async (data) => {
     user_id,
     action,
     entity_type: "signature_detail",
-    entity_id: signature_detail_id,
+    entity_id: signature_detail_id || null,
+    bsre_transaction_id,
     ip_address,
     user_agent,
     additional_data: {

@@ -3,8 +3,8 @@ import { ActionIcon, Paper, Avatar } from "@mantine/core";
 import { useState, useRef } from "react";
 import Draggable from "react-draggable";
 
-const DEFAULT_WIDTH = 120; // pixels - lebih kecil karena tanpa label
-const DEFAULT_HEIGHT = 60; // pixels
+const DEFAULT_WIDTH = 110; // pixels - lebih kecil karena tanpa label
+const DEFAULT_HEIGHT = 50; // pixels
 const MIN_WIDTH = 60;
 const MIN_HEIGHT = 30;
 

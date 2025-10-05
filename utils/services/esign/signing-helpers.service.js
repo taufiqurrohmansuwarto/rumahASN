@@ -224,7 +224,9 @@ export const signDocumentSequential = async (params) => {
   // Log coordinates
   signCoordinates.forEach((coord, idx) => {
     console.log(
-      `[Sequential Sign] ${idx + 1}. Page ${coord.page}: bottom-left (${coord.originX}, ${coord.originY})`
+      `[Sequential Sign] ${idx + 1}. Page ${coord.page}: bottom-left (${
+        coord.originX
+      }, ${coord.originY})`
     );
   });
 
@@ -248,34 +250,43 @@ export const signDocumentSequential = async (params) => {
     };
 
     try {
-      // BSrE API does NOT support absolute positioning via originX/originY
-      // Tested: originX/originY are IGNORED by BSrE API
-      // SOLUTION: Use TAG-based positioning instead
-      const width = 20;
-      const height = 20;
+      // Coordinates from frontend are ALREADY in PDF points (converted with 0.75 factor)
+      // Position is correct, just adjust size slightly smaller if needed
+      const sizeAdjustment = 0.8; // Make signature 80% of frontend size (adjust as needed: 0.7=70%, 0.9=90%)
 
       const signatureProperties = [
         {
           tampilan: "VISIBLE",
           page: page,
-          tag: coord.tag || "$",  // Use tag instead of coordinates
-          width: width,
-          height: height,
+          originX: coord.originX, // Keep position as-is
+          originY: coord.originY, // Keep position as-is
+          width: coord.width, // Slightly smaller
+          height: coord.height, // Slightly smaller
           imageBase64,
         },
       ];
 
-      console.log(`[Sequential Sign] Using TAG-based positioning:`);
+      console.log(
+        `[Sequential Sign] Position exact, size adjusted to ${
+          sizeAdjustment * 100
+        }%:`
+      );
       console.log(`  Page: ${page}`);
-      console.log(`  Tag: "${coord.tag || "$"}"`);
-      console.log(`  Note: BSrE does NOT support originX/originY positioning`);
+      console.log(`  Position: (${coord.originX}, ${coord.originY})`);
+      console.log(
+        `  Size: ${coord.width}x${coord.height} → ${signatureProperties[0].width}x${signatureProperties[0].height}`
+      );
 
       console.log(
         "signatureProperties",
-        JSON.stringify({
-          ...signatureProperties[0],
-          imageBase64: `[REDACTED_${imageBase64?.length || 0}_bytes]`
-        }, null, 2)
+        JSON.stringify(
+          {
+            ...signatureProperties[0],
+            imageBase64: `[REDACTED_${imageBase64?.length || 0}_bytes]`,
+          },
+          null,
+          2
+        )
       );
 
       // Sign this page
@@ -286,6 +297,8 @@ export const signDocumentSequential = async (params) => {
         signatureProperties,
       });
 
+      console.log("result", result);
+
       const duration = Date.now() - startTime;
 
       // Update log with success
@@ -294,12 +307,21 @@ export const signDocumentSequential = async (params) => {
       pageLog.duration_ms = duration;
       pageLog.file_size_after = signedFileBase64.length;
 
+      // tanpa menyimpan file base64 karena terlalu besar jika di log
+      const {
+        data: { time },
+        success,
+      } = result;
+
       // Store response
       pageResponses.push({
         page,
         step,
         success: true,
-        bsre_response: result,
+        bsre_response: {
+          success,
+          time,
+        },
       });
 
       // Update current base64 for next iteration

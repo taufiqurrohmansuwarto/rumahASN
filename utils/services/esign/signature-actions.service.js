@@ -93,7 +93,10 @@ export const signDocument = async (
       mc,
       requestData.document.file_path
     );
-    console.log("   ✓ PDF retrieved, size:", base64File ? base64File.length : 0);
+    console.log(
+      "   ✓ PDF retrieved, size:",
+      base64File ? base64File.length : 0
+    );
 
     // 2. Load signature logo
     console.log("2. Loading logo image...");
@@ -109,9 +112,9 @@ export const signDocument = async (
     let signCoordinates = [];
     try {
       signCoordinates = userData?.sign_coordinate
-        ? (typeof userData.sign_coordinate === 'string'
-            ? JSON.parse(userData.sign_coordinate)
-            : userData.sign_coordinate)
+        ? typeof userData.sign_coordinate === "string"
+          ? JSON.parse(userData.sign_coordinate)
+          : userData.sign_coordinate
         : [];
     } catch (error) {
       console.error("   ✗ Error parsing sign_coordinate:", error.message);
@@ -120,17 +123,12 @@ export const signDocument = async (
 
     console.log("   Coordinates to use:", signCoordinates.length, "page(s)");
 
-    // Filter only coordinates that were found
-    const validCoordinates = signCoordinates.filter(coord => coord.found === true);
-
-    if (validCoordinates.length === 0) {
-      throw new Error("Tidak ada koordinat tanda tangan yang valid. Pastikan tag ditemukan di dokumen.");
-    }
-
-    console.log("   Valid coordinates:", validCoordinates.length, "page(s)");
-    validCoordinates.forEach((coord, idx) => {
+    console.log("   Valid coordinates:", signCoordinates.length, "page(s)");
+    signCoordinates.forEach((coord, idx) => {
       console.log(
-        `     [${idx + 1}] Page ${coord.page}: bottom-left (${coord.originX}, ${coord.originY})`
+        `     [${idx + 1}] Page ${coord.page}: bottom-left (${coord.originX}, ${
+          coord.originY
+        })`
       );
     });
 
@@ -145,7 +143,7 @@ export const signDocument = async (
         nik,
         passphrase,
         initialBase64: base64File,
-        signCoordinates: validCoordinates, // Pass coordinates array instead of pages + tag
+        signCoordinates: signCoordinates, // Pass coordinates array instead of pages + tag
         imageBase64,
       });
 
@@ -172,7 +170,11 @@ export const signDocument = async (
         "   ✗ Sequential signing failed, creating failed transaction record..."
       );
 
-      const totalDuration = bsreError.pageLogs?.reduce((sum, log) => sum + (log.duration_ms || 0), 0) || 0;
+      const totalDuration =
+        bsreError.pageLogs?.reduce(
+          (sum, log) => sum + (log.duration_ms || 0),
+          0
+        ) || 0;
 
       await BsreTransactions.query(trx).insert({
         id: transactionId,
@@ -181,12 +183,12 @@ export const signDocument = async (
         original_file: requestData.document.file_path,
         signed_file: null,
         status: "failed",
+        endpoint: "/api/v2/sign/pdf",
         error_message: bsreError.message,
         request_data: {
           nik,
           total_pages: userData?.sign_pages?.length || 0,
           sign_pages: userData?.sign_pages || [],
-          tag_coordinate: userData.tag_coordinate,
           file_size: base64File.length,
           page_logs: bsreError.pageLogs || [],
         },
@@ -204,7 +206,10 @@ export const signDocument = async (
       });
 
       await trx.commit();
-      console.log("   ✓ Failed transaction record committed");
+      console.log(
+        "   ✓ Failed transaction record committed with ID:",
+        transactionId
+      );
 
       // Log BSrE interaction
       try {
@@ -216,7 +221,8 @@ export const signDocument = async (
           http_status: bsreError.statusCode || 500,
           request_payload: {
             nik,
-            signatureProperties,
+            sign_coordinates: signCoordinates,
+            tag_coordinate: userData.tag_coordinate,
             file_size: base64File.length,
           },
           response_payload: bsreError.bsreResponse || {},
@@ -252,7 +258,10 @@ export const signDocument = async (
     }
 
     // Success case: create success transaction record
-    const totalDuration = sequentialResult.pageLogs.reduce((sum, log) => sum + (log.duration_ms || 0), 0);
+    const totalDuration = sequentialResult.pageLogs.reduce(
+      (sum, log) => sum + (log.duration_ms || 0),
+      0
+    );
 
     await BsreTransactions.query(trx).insert({
       id: transactionId,
@@ -261,6 +270,7 @@ export const signDocument = async (
       original_file: requestData.document.file_path,
       signed_file: requestData.document.file_path,
       status: "completed",
+      endpoint: "/api/v2/sign/pdf",
       error_message: null,
       request_data: {
         nik,
@@ -283,7 +293,11 @@ export const signDocument = async (
 
     // 5. Upload signed file back to Minio (REPLACE)
     console.log("5. Uploading signed file back to Minio...");
-    console.log("   Final base64 size:", sequentialResult.finalBase64.length, "bytes");
+    console.log(
+      "   Final base64 size:",
+      sequentialResult.finalBase64.length,
+      "bytes"
+    );
     uploadedFilePath = requestData.document.file_path; // Track for cleanup
     await uploadSignedPdfToMinio(
       mc,
@@ -292,11 +306,17 @@ export const signDocument = async (
       requestData.document.document_code,
       userId
     );
-    console.log("   ✓ Signed file uploaded to:", requestData.document.file_path);
+    console.log(
+      "   ✓ Signed file uploaded to:",
+      requestData.document.file_path
+    );
 
     // 6. Calculate new file hash and size
     console.log("6. Calculating file hash and size...");
-    const signedFileBuffer = Buffer.from(sequentialResult.finalBase64, "base64");
+    const signedFileBuffer = Buffer.from(
+      sequentialResult.finalBase64,
+      "base64"
+    );
     const newFileHash = crypto
       .createHash("sha256")
       .update(signedFileBuffer)
@@ -304,7 +324,11 @@ export const signDocument = async (
     const newFileSize = signedFileBuffer.length;
     console.log("   New file hash:", newFileHash);
     console.log("   New file size:", newFileSize, "bytes");
-    console.log("   Using finalBase64 size:", sequentialResult.finalBase64.length, "bytes (should match when converted to buffer)");
+    console.log(
+      "   Using finalBase64 size:",
+      sequentialResult.finalBase64.length,
+      "bytes (should match when converted to buffer)"
+    );
 
     // 7. Update documents table
     console.log("7. Updating documents table...");
@@ -360,16 +384,23 @@ export const signDocument = async (
           },
           response_payload: pageResponse.bsre_response || {},
           error_detail: null,
-          response_time_ms: sequentialResult.pageLogs[pageResponse.step - 1]?.duration_ms || 0,
+          response_time_ms:
+            sequentialResult.pageLogs[pageResponse.step - 1]?.duration_ms || 0,
         });
       }
-      console.log("   ✓ Interactions logged for", sequentialResult.pageResponses.length, "pages");
+      console.log(
+        "   ✓ Interactions logged for",
+        sequentialResult.pageResponses.length,
+        "pages"
+      );
     } catch (logError) {
       console.error("   ✗ Logging error (non-critical):", logError.message);
     }
 
     // 12. Log user activity (after commit)
     console.log("12. Logging user activity...");
+    console.log("detail id:", detailId);
+    console.log("transaction id:", transactionId);
     try {
       await logSignatureAction({
         user_id: userId,

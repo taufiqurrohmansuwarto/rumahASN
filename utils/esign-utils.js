@@ -243,26 +243,28 @@ export const signWithCoordinate = async ({
   file,
   signatureProperties,
 }) => {
-  const isProduction = process.env.NODE_ENV === "production";
-  const currentNik = isProduction ? nik : process.env.ESIGN_NIK;
-  const currentPassphrase = isProduction
-    ? passphrase
-    : process.env.ESIGN_PASSPHRASE;
-
   const data = {
-    nik: currentNik,
-    passphrase: currentPassphrase,
+    nik,
+    passphrase,
     signatureProperties,
     file,
   };
 
   // Log request to BSrE (redact sensitive data)
   console.log("[signWithCoordinate] Sending request to BSrE:");
-  console.log("  signatureProperties:", JSON.stringify(signatureProperties.map(sp => ({
-    ...sp,
-    imageBase64: sp.imageBase64 ? `[REDACTED_${sp.imageBase64.length}_bytes]` : undefined
-  })), null, 2));
-  console.log("  file count:", file?.length || 0);
+  console.log(
+    "  signatureProperties:",
+    JSON.stringify(
+      signatureProperties.map((sp) => ({
+        ...sp,
+        imageBase64: sp.imageBase64
+          ? `[REDACTED_${sp.imageBase64.length}_bytes]`
+          : undefined,
+      })),
+      null,
+      2
+    )
+  );
 
   return new Promise((resolve, reject) => {
     esignFetcher
@@ -276,7 +278,10 @@ export const signWithCoordinate = async ({
       .catch((error) => {
         resolve({
           success: false,
-          data: error,
+          data: {
+            message: error?.error,
+            status: error?.status_code,
+          },
         });
       });
   });

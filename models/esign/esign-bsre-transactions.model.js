@@ -16,8 +16,17 @@ class BsreTransactions extends Model {
   static get relationMappings() {
     const SignatureDetails = require("@/models/esign/esign-signature-details.model");
     const Documents = require("@/models/esign/esign-documents.model");
+    const LogBsreIntegration = require("@/models/esign/esign-log-bsre-integration.model");
 
     return {
+      log_bsre_integration: {
+        relation: Model.BelongsToOneRelation,
+        modelClass: LogBsreIntegration,
+        join: {
+          from: "esign.bsre_transactions.id",
+          to: "esign.log_bsre_integration.transaction_id",
+        },
+      },
       document: {
         relation: Model.BelongsToOneRelation,
         modelClass: Documents,
