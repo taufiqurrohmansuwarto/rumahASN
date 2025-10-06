@@ -116,26 +116,28 @@ const SignatureRequestDetail = () => {
 
   // Extract all TTE coordinates from signature_details for view-only mode
   const allTteCoordinates =
-    signatureRequest?.signature_details?.flatMap((detail) => {
-      if (!detail.sign_coordinate || !Array.isArray(detail.sign_coordinate)) {
-        return [];
-      }
-      return detail.sign_coordinate.map((coord) => ({
-        id: `${detail.id}_${coord.page}_${coord.originX}_${coord.originY}`,
-        page: coord.page,
-        position: {
-          x: coord.originX,
-          y: coord.originY,
-        },
-        size: {
-          width: coord.width,
-          height: coord.height,
-        },
-        signerId: coord.signerId,
-        signerName: coord.signerName,
-        signerAvatar: detail.user?.image || null,
-      }));
-    }) || [];
+    signatureRequest?.signature_details
+      ?.sort((a, b) => (a.sequence_order || 0) - (b.sequence_order || 0))
+      .flatMap((detail) => {
+        if (!detail.sign_coordinate || !Array.isArray(detail.sign_coordinate)) {
+          return [];
+        }
+        return detail.sign_coordinate.map((coord) => ({
+          id: `${detail.id}_${coord.page}_${coord.originX}_${coord.originY}`,
+          page: coord.page,
+          position: {
+            x: coord.originX,
+            y: coord.originY,
+          },
+          size: {
+            width: coord.width,
+            height: coord.height,
+          },
+          signerId: coord.signerId,
+          signerName: coord.signerName,
+          signerAvatar: detail.user?.image || null,
+        }));
+      }) || [];
 
   // Find user detail in signature_details
   const userDetail = signatureRequest?.signature_details?.find(
@@ -676,7 +678,9 @@ const SignatureRequestDetail = () => {
                 style={{ width: "100%" }}
                 size="small"
               >
-                {signatureRequest.signature_details.map((detail, index) => {
+                {[...signatureRequest.signature_details]
+                  .sort((a, b) => (a.sequence_order || 0) - (b.sequence_order || 0))
+                  .map((detail, index) => {
                   const statusColor =
                     {
                       waiting: "orange",
@@ -686,100 +690,169 @@ const SignatureRequestDetail = () => {
                     }[detail.status] || "default";
 
                   return (
-                    <Flex
-                      key={detail.id}
-                      align="flex-start"
-                      justify="space-between"
-                      gap={8}
-                    >
-                      <Flex align="center" gap={6}>
-                        <Tag
-                          color={statusColor}
-                          style={{ margin: 0, minWidth: 24 }}
-                        >
-                          {index + 1}
-                        </Tag>
-                        <Avatar src={detail.user?.image} size={20}>
-                          {!detail.user?.image && (
-                            <UserOutlined style={{ fontSize: 10 }} />
-                          )}
-                        </Avatar>
-                        <div>
-                          <Text size="xs" fw={500} style={{ lineHeight: 1.3 }}>
-                            {detail.user?.username}
-                          </Text>
-                          {detail.role_type === "signer" &&
-                            detail.sign_pages &&
-                            detail.sign_pages.length > 0 && (
-                              <Group gap={4} style={{ flexWrap: "wrap" }}>
-                                <Text
-                                  size="xs"
-                                  c="dimmed"
-                                  style={{ fontSize: 10 }}
-                                >
-                                  Hal:
-                                </Text>
-                                {detail.sign_pages.map((page, idx) => (
-                                  <Tooltip
-                                    key={idx}
-                                    label={`Lihat halaman ${page}`}
-                                    withArrow
-                                  >
-                                    <Badge
-                                      size="xs"
-                                      color="blue"
-                                      variant="light"
-                                      style={{
-                                        cursor: "pointer",
-                                        fontSize: 9,
-                                        transition: "all 0.2s",
-                                      }}
-                                      onMouseEnter={(e) => {
-                                        e.currentTarget.style.transform =
-                                          "scale(1.1)";
-                                        e.currentTarget.style.backgroundColor =
-                                          "#1890ff";
-                                        e.currentTarget.style.color = "white";
-                                      }}
-                                      onMouseLeave={(e) => {
-                                        e.currentTarget.style.transform =
-                                          "scale(1)";
-                                        e.currentTarget.style.backgroundColor =
-                                          "";
-                                        e.currentTarget.style.color = "";
-                                      }}
-                                      onClick={() => handleJumpToPage(page)}
-                                    >
-                                      {page}
-                                    </Badge>
-                                  </Tooltip>
-                                ))}
-                                <Text
-                                  size="xs"
-                                  c="dimmed"
-                                  style={{ fontSize: 10 }}
-                                >
-                                  • {detail.tag_coordinate || "!"}
-                                  {detail.notes && ` • ${detail.notes}`}
-                                </Text>
-                              </Group>
+                    <div key={detail.id}>
+                      <Flex
+                        align="flex-start"
+                        justify="space-between"
+                        gap={8}
+                      >
+                        <Flex align="center" gap={6}>
+                          <Tag
+                            color={statusColor}
+                            style={{ margin: 0, minWidth: 24 }}
+                          >
+                            {index + 1}
+                          </Tag>
+                          <Avatar src={detail.user?.image} size={20}>
+                            {!detail.user?.image && (
+                              <UserOutlined style={{ fontSize: 10 }} />
                             )}
-                          {detail.notes && detail.role_type !== "signer" && (
-                            <Text
-                              size={10}
-                              c="dimmed"
-                              italic
-                              style={{ lineHeight: 1.3 }}
-                            >
-                              {detail.notes}
+                          </Avatar>
+                          <div>
+                            <Text size="xs" fw={500} style={{ lineHeight: 1.3 }}>
+                              {detail.user?.username}
                             </Text>
-                          )}
-                        </div>
+                            {detail.role_type === "signer" &&
+                              detail.sign_pages &&
+                              detail.sign_pages.length > 0 && (
+                                <Group gap={4} style={{ flexWrap: "wrap" }}>
+                                  <Text
+                                    size="xs"
+                                    c="dimmed"
+                                    style={{ fontSize: 10 }}
+                                  >
+                                    Hal:
+                                  </Text>
+                                  {detail.sign_pages.map((page, idx) => (
+                                    <Tooltip
+                                      key={idx}
+                                      label={`Lihat halaman ${page}`}
+                                      withArrow
+                                    >
+                                      <Badge
+                                        size="xs"
+                                        color="blue"
+                                        variant="light"
+                                        style={{
+                                          cursor: "pointer",
+                                          fontSize: 9,
+                                          transition: "all 0.2s",
+                                        }}
+                                        onMouseEnter={(e) => {
+                                          e.currentTarget.style.transform =
+                                            "scale(1.1)";
+                                          e.currentTarget.style.backgroundColor =
+                                            "#1890ff";
+                                          e.currentTarget.style.color = "white";
+                                        }}
+                                        onMouseLeave={(e) => {
+                                          e.currentTarget.style.transform =
+                                            "scale(1)";
+                                          e.currentTarget.style.backgroundColor =
+                                            "";
+                                          e.currentTarget.style.color = "";
+                                        }}
+                                        onClick={() => handleJumpToPage(page)}
+                                      >
+                                        {page}
+                                      </Badge>
+                                    </Tooltip>
+                                  ))}
+                                  <Text
+                                    size="xs"
+                                    c="dimmed"
+                                    style={{ fontSize: 10 }}
+                                  >
+                                    • {detail.tag_coordinate || "!"}
+                                  </Text>
+                                </Group>
+                              )}
+                          </div>
+                        </Flex>
+                        <Badge color={statusColor} variant="light" size="xs">
+                          {detail.status?.toUpperCase()}
+                        </Badge>
                       </Flex>
-                      <Badge color={statusColor} variant="light" size="xs">
-                        {detail.status?.toUpperCase()}
-                      </Badge>
-                    </Flex>
+                      {(detail.notes || detail.reason) && (
+                        <div
+                          style={{
+                            marginTop: 6,
+                            marginLeft: 52,
+                            padding: "6px 10px",
+                            background:
+                              detail.status === "rejected"
+                                ? "linear-gradient(135deg, #fff1f0 0%, #ffe7e5 100%)"
+                                : detail.status === "reviewed"
+                                ? "linear-gradient(135deg, #e6f7ff 0%, #d9f0ff 100%)"
+                                : detail.status === "signed"
+                                ? "linear-gradient(135deg, #f6ffed 0%, #e7f7e0 100%)"
+                                : "#fafafa",
+                            border: `1px solid ${
+                              detail.status === "rejected"
+                                ? "#ffccc7"
+                                : detail.status === "reviewed"
+                                ? "#91d5ff"
+                                : detail.status === "signed"
+                                ? "#b7eb8f"
+                                : "#e8e8e8"
+                            }`,
+                            borderLeft: `3px solid ${
+                              detail.status === "rejected"
+                                ? "#ff4d4f"
+                                : detail.status === "reviewed"
+                                ? "#1890ff"
+                                : detail.status === "signed"
+                                ? "#52c41a"
+                                : "#d9d9d9"
+                            }`,
+                            borderRadius: 4,
+                            boxShadow: "0 1px 2px rgba(0,0,0,0.05)",
+                          }}
+                        >
+                          <Group gap={4} align="flex-start">
+                            <Text
+                              size="xs"
+                              fw={600}
+                              c={
+                                detail.status === "rejected"
+                                  ? "red"
+                                  : detail.status === "reviewed"
+                                  ? "blue"
+                                  : detail.status === "signed"
+                                  ? "green"
+                                  : "dimmed"
+                              }
+                              style={{ fontSize: 10 }}
+                            >
+                              {detail.reason
+                                ? detail.status === "rejected"
+                                  ? "💬 Alasan Penolakan:"
+                                  : detail.status === "reviewed"
+                                  ? "💬 Alasan Review:"
+                                  : detail.status === "signed"
+                                  ? "💬 Alasan:"
+                                  : "💬 Alasan:"
+                                : detail.status === "reviewed"
+                                ? "📝 Catatan Review:"
+                                : detail.status === "signed"
+                                ? "✓ Catatan:"
+                                : "📌 Catatan:"}
+                            </Text>
+                          </Group>
+                          <Text
+                            size="xs"
+                            c={detail.status === "rejected" ? "red.7" : "dark.6"}
+                            style={{
+                              fontSize: 10,
+                              lineHeight: 1.5,
+                              marginTop: 2,
+                            }}
+                          >
+                            {detail.reason || detail.notes || ""}
+                          </Text>
+                        </div>
+                      )}
+                    </div>
                   );
                 })}
               </Space>

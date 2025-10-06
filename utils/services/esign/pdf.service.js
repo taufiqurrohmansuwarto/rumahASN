@@ -5,18 +5,7 @@ const QRCode = require("qrcode");
 // pdfjs-dist v5.x uses ESM, need dynamic import in Node.js
 let pdfjsLib = null;
 
-// Development logging helper
-const devLog = (...args) => {
-  if (process.env.NODE_ENV !== "production") {
-    devLog(...args);
-  }
-};
-
-const devError = (...args) => {
-  if (process.env.NODE_ENV !== "production") {
-    devError(...args);
-  }
-};
+const { log } = require("@/utils/logger");
 
 // Async function to load pdfjs-dist (ESM module)
 const loadPdfjsLib = async () => {
@@ -26,10 +15,10 @@ const loadPdfjsLib = async () => {
     // Dynamic import for ESM module in CommonJS
     const pdfjs = await import('pdfjs-dist');
     pdfjsLib = pdfjs;
-    devLog("[pdf.service] pdfjs-dist v5.x loaded successfully via ESM");
+    log.info("[pdf.service] pdfjs-dist v5.x loaded successfully via ESM");
     return pdfjsLib;
   } catch (error) {
-    devError("[pdf.service] Error loading pdfjs-dist:", error.message);
+    log.error("[pdf.service] Error loading pdfjs-dist:", error.message);
     throw new Error("pdfjs-dist not available. Coordinate detection unavailable.");
   }
 };
@@ -62,9 +51,9 @@ module.exports.addFooterToPdf = async (
   isAddFooter = false
 ) => {
   try {
-    devLog("[addFooterToPdf] Starting...");
-    devLog("[addFooterToPdf] documentId:", documentId);
-    devLog(
+    log.info("[addFooterToPdf] Starting...");
+    log.info("[addFooterToPdf] documentId:", documentId);
+    log.info(
       "[addFooterToPdf] isAddFooter:",
       isAddFooter,
       "type:",
@@ -227,7 +216,7 @@ module.exports.addFooterToPdf = async (
     // Save and return modified PDF
     return await pdfDoc.save();
   } catch (error) {
-    devError("Error adding footer to PDF:", error);
+    log.error("Error adding footer to PDF:", error);
     throw new Error("Failed to add footer to PDF");
   }
 };
@@ -281,7 +270,7 @@ function wrapText(text, maxWidth, fontSize) {
 module.exports.addSignatureToPdf = async (pdfBuffer, signatureData) => {
   // Implementation for adding signature
   // This would integrate with BSrE or other signature services
-  devLog(
+  log.info(
     `Adding signature for: ${signatureData?.documentId || "unknown"}`
   );
   return pdfBuffer;
@@ -321,14 +310,14 @@ module.exports.getTotalPages = async (pdfBuffer) => {
  */
 module.exports.getCoordinates = async (pdfBuffer, signatureDetails) => {
   try {
-    devLog("[getCoordinates] Starting...");
-    devLog("[getCoordinates] Signature details count:", signatureDetails?.length);
+    log.info("[getCoordinates] Starting...");
+    log.info("[getCoordinates] Signature details count:", signatureDetails?.length);
 
     // Load PDF document
     const pdfDoc = await pdfLib.PDFDocument.load(pdfBuffer);
     const pages = pdfDoc.getPages();
 
-    devLog("[getCoordinates] Total pages in PDF:", pages.length);
+    log.info("[getCoordinates] Total pages in PDF:", pages.length);
 
     const pdfJsTextMap = await extractTextMapWithPdfJs(pdfBuffer);
 
@@ -338,9 +327,9 @@ module.exports.getCoordinates = async (pdfBuffer, signatureDetails) => {
     for (const detail of signatureDetails) {
       const { id, sign_pages, tag_coordinate } = detail;
 
-      devLog(`[getCoordinates] Processing detail ID: ${id}`);
-      devLog(`[getCoordinates] - Pages to check: ${sign_pages?.join(', ')}`);
-      devLog(`[getCoordinates] - Tag to find: "${tag_coordinate}"`);
+      log.info(`[getCoordinates] Processing detail ID: ${id}`);
+      log.info(`[getCoordinates] - Pages to check: ${sign_pages?.join(', ')}`);
+      log.info(`[getCoordinates] - Tag to find: "${tag_coordinate}"`);
 
       const coordinates = [];
 
@@ -364,7 +353,7 @@ module.exports.getCoordinates = async (pdfBuffer, signatureDetails) => {
         const page = pages[pageIndex];
         const { width, height } = page.getSize();
 
-        devLog(`[getCoordinates] Searching in page ${pageNumber} (${width}x${height})...`);
+        log.info(`[getCoordinates] Searching in page ${pageNumber} (${width}x${height})...`);
 
         try {
           // Get page text content with positions from pdfjs-dist cache
@@ -375,7 +364,7 @@ module.exports.getCoordinates = async (pdfBuffer, signatureDetails) => {
           };
           const textContent = pageTextData.items;
 
-          devLog(
+          log.info(
             `[getCoordinates]   Text items fetched: ${textContent.length}`
           );
 
@@ -411,12 +400,12 @@ module.exports.getCoordinates = async (pdfBuffer, signatureDetails) => {
             );
             const signatureBoxYBottomLeft = height - signatureBoxYTopLeft - signatureHeight;
 
-            devLog(`[getCoordinates] ✓ Tag "${tag_coordinate}" found at page ${pageNumber}`);
-            devLog(`  • Tag top-left          : (${tagXTopLeft}, ${tagYTopLeft})`);
-            devLog(`  • Tag approx size       : ${estimatedTagWidth} x ${estimatedTagHeight}`);
-            devLog(`  • Signature top-left    : (${signatureBoxX}, ${signatureBoxYTopLeft})`);
-            devLog(`  • Signature bottom-left : (${signatureBoxX}, ${signatureBoxYBottomLeft})`);
-            devLog(`  • Page size             : ${width} x ${height}`);
+            log.info(`[getCoordinates] ✓ Tag "${tag_coordinate}" found at page ${pageNumber}`);
+            log.info(`  • Tag top-left          : (${tagXTopLeft}, ${tagYTopLeft})`);
+            log.info(`  • Tag approx size       : ${estimatedTagWidth} x ${estimatedTagHeight}`);
+            log.info(`  • Signature top-left    : (${signatureBoxX}, ${signatureBoxYTopLeft})`);
+            log.info(`  • Signature bottom-left : (${signatureBoxX}, ${signatureBoxYBottomLeft})`);
+            log.info(`  • Page size             : ${width} x ${height}`);
 
             coordinates.push({
               page: pageNumber,
@@ -445,7 +434,7 @@ module.exports.getCoordinates = async (pdfBuffer, signatureDetails) => {
             });
           }
         } catch (error) {
-          devError(`[getCoordinates] Error processing page ${pageNumber}:`, error.message);
+          log.error(`[getCoordinates] Error processing page ${pageNumber}:`, error.message);
 
           coordinates.push({
             page: pageNumber,
@@ -465,11 +454,11 @@ module.exports.getCoordinates = async (pdfBuffer, signatureDetails) => {
       });
     }
 
-    devLog("[getCoordinates] ✓ Completed");
+    log.info("[getCoordinates] ✓ Completed");
     return results;
 
   } catch (error) {
-    devError("[getCoordinates] Error:", error);
+    log.error("[getCoordinates] Error:", error);
     throw new Error(`Failed to get coordinates: ${error.message}`);
   }
 };
@@ -541,7 +530,7 @@ async function extractTextMapWithPdfJs(pdfBuffer) {
       page.cleanup();
     }
   } catch (error) {
-    devError("[extractTextMapWithPdfJs] Error extracting text:", error);
+    log.error("[extractTextMapWithPdfJs] Error extracting text:", error);
     throw error;
   } finally {
     if (pdfDocument) {
@@ -561,16 +550,16 @@ async function extractTextMapWithPdfJs(pdfBuffer) {
  */
 function findTagInText(textContent, tag) {
   if (!textContent || textContent.length === 0) {
-    devLog(`[findTagInText] ✗ No text content provided`);
+    log.info(`[findTagInText] ✗ No text content provided`);
     return null;
   }
 
-  devLog(`[findTagInText] Searching for tag: "${tag}" in ${textContent.length} items`);
+  log.info(`[findTagInText] Searching for tag: "${tag}" in ${textContent.length} items`);
 
   // Debug: Show first 10 text items
-  devLog(`[findTagInText] Sample text items (first 10):`);
+  log.info(`[findTagInText] Sample text items (first 10):`);
   textContent.slice(0, 10).forEach((item, idx) => {
-    devLog(
+    log.info(
       `  [${idx}] "${item.text}" TL(${item.x}, ${item.yTopLeft}) BL(${item.x}, ${item.yBottomLeft})`
     );
   });
@@ -578,7 +567,7 @@ function findTagInText(textContent, tag) {
   // Exact match first
   for (const item of textContent) {
     if (item.text && item.text === tag) {
-      devLog(
+      log.info(
         `[findTagInText] ✓ Exact match found: "${item.text}" TL(${item.x}, ${item.yTopLeft}) BL(${item.x}, ${item.yBottomLeft})`
       );
       return {
@@ -595,7 +584,7 @@ function findTagInText(textContent, tag) {
   // If no exact match, try includes
   for (const item of textContent) {
     if (item.text && item.text.includes(tag)) {
-      devLog(
+      log.info(
         `[findTagInText] ✓ Partial match found: "${item.text}" TL(${item.x}, ${item.yTopLeft}) BL(${item.x}, ${item.yBottomLeft})`
       );
       const charIndex = item.text.indexOf(tag);
@@ -617,7 +606,7 @@ function findTagInText(textContent, tag) {
     }
   }
 
-  devLog(`[findTagInText] ✗ Tag "${tag}" not found`);
-  devLog(`[findTagInText] All unique texts in page:`, [...new Set(textContent.map(t => t.text))].slice(0, 20).join(', '));
+  log.info(`[findTagInText] ✗ Tag "${tag}" not found`);
+  log.info(`[findTagInText] All unique texts in page:`, [...new Set(textContent.map(t => t.text))].slice(0, 20).join(', '));
   return null;
 }

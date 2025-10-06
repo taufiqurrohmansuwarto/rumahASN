@@ -14,18 +14,7 @@ import {
 
 const Documents = require("@/models/esign/esign-documents.model");
 
-// Development logging helper
-const devLog = (...args) => {
-  if (process.env.NODE_ENV !== "production") {
-    devLog(...args);
-  }
-};
-
-const devError = (...args) => {
-  if (process.env.NODE_ENV !== "production") {
-    devError(...args);
-  }
-};
+const { log } = require("@/utils/logger");
 const SignatureRequests = require("@/models/esign/esign-signature-requests.model");
 const crypto = require("crypto");
 const { addFooterToPdf, getTotalPages } = require("./pdf.service");
@@ -45,8 +34,8 @@ const { addFooterToPdf, getTotalPages } = require("./pdf.service");
 export const createDocument = async (data, file, userId, mc) => {
   const { title, description, is_public = false, is_add_footer = false } = data;
 
-  devLog("[Service] data:", data);
-  devLog("[Service] is_add_footer:", is_add_footer, "type:", typeof is_add_footer);
+  log.info("[Service] data:", data);
+  log.info("[Service] is_add_footer:", is_add_footer, "type:", typeof is_add_footer);
 
   if (!file) {
     throw new Error("File dokumen wajib diupload");
@@ -68,7 +57,7 @@ export const createDocument = async (data, file, userId, mc) => {
     totalPages = await getTotalPages(pdfWithFooter);
     processedFileBuffer = Buffer.from(pdfWithFooter);
   } catch (error) {
-    devError("Error adding QR code to PDF:", error);
+    log.error("Error adding QR code to PDF:", error);
     throw new Error("Gagal menambahkan QR code ke dokumen PDF");
   }
 
@@ -126,6 +115,7 @@ export const getDocuments = async (userId, filters = {}) => {
     "document_code",
     "title",
     "description",
+    "file_path",
     "file_size",
     "is_public",
     "status",
@@ -161,7 +151,7 @@ export const getDocuments = async (userId, filters = {}) => {
   // Add file URLs to results
   const dataWithUrls = result.results.map((doc) => ({
     ...doc,
-    file_url: generateEsignDocumentUrl(doc.file_path),
+    file_url: doc.file_path ? generateEsignDocumentUrl(doc.file_path) : null,
   }));
 
   return {
@@ -292,7 +282,7 @@ export const deleteDocument = async (documentId, userId, mc) => {
   try {
     await deleteEsignDocument(mc, document.file_path);
   } catch (error) {
-    devLog("Error deleting file from Minio:", error);
+    log.info("Error deleting file from Minio:", error);
     // Continue with database deletion even if file deletion fails
   }
 

@@ -658,9 +658,13 @@ const Kppn = ({ id }) => {
   const router = useRouter();
   const nip = router?.query?.nip;
   const queryClient = useQueryClient();
-  const { data, isLoading } = useQuery(["data-kppn"], () => getDataKppn(), {
-    refetchOnWindowFocus: false,
-  });
+  const { data, isLoading, isError } = useQuery(
+    ["data-kppn"],
+    () => getDataKppn(),
+    {
+      refetchOnWindowFocus: false,
+    }
+  );
 
   const { mutateAsync: update } = useMutation(
     (data) => updateDataUtamaByNip(data),
@@ -684,15 +688,23 @@ const Kppn = ({ id }) => {
     await update(payload);
   };
 
-  const dataKppn = (id) => {
-    return data?.find((d) => d.id === id);
+  const dataKppn = (kppnId) => {
+    if (!kppnId || !data) return null;
+    return data?.find((d) => d.id === kppnId);
   };
 
+  // Jika tidak ada id, jangan render apapun
+  if (!id) {
+    return null;
+  }
+
+  const kppnData = dataKppn(id);
+
   return (
-    <LoadingOverlay visible={isLoading}>
-      {data ? (
+    <>
+      {kppnData ? (
         <Popconfirm onConfirm={handleUpdate} title="Update KPPN menjadi BPKAD?">
-          <Tooltip label="KPPN">
+          <Tooltip title={`KPPN: ${kppnData?.nama}`}>
             <Badge
               color="blue"
               variant="gradient"
@@ -700,13 +712,13 @@ const Kppn = ({ id }) => {
               style={{ cursor: "pointer" }}
               leftSection={<IconMapPin size={12} />}
             >
-              {dataKppn(id)?.nama}
+              {kppnData?.nama}
             </Badge>
           </Tooltip>
         </Popconfirm>
       ) : (
         <Popconfirm onConfirm={handleUpdate} title="Update KPPN menjadi BPKAD?">
-          <Tooltip label="KPPN">
+          <Tooltip title={`KPPN ID: ${id} tidak ditemukan dalam database`}>
             <Badge
               color="red"
               variant="outline"
@@ -718,7 +730,7 @@ const Kppn = ({ id }) => {
           </Tooltip>
         </Popconfirm>
       )}
-    </LoadingOverlay>
+    </>
   );
 };
 

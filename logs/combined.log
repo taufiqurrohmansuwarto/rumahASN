@@ -1,0 +1,179 @@
+{"level":"info","message":"[Controller] req.body: {\"title\":\"2ttd\",\"description\":\"343434\",\"is_public\":\"true\",\"is_add_footer\":\"true\"}","timestamp":"2025-10-06T07:40:19.361Z"}
+{"level":"info","message":"[Controller] req.body.is_add_footer: true type: string","timestamp":"2025-10-06T07:40:19.363Z"}
+{"level":"info","message":"[Controller] bodyData.is_add_footer: true type: boolean","timestamp":"2025-10-06T07:40:19.363Z"}
+{"level":"info","message":"[Service] data: {\"title\":\"2ttd\",\"description\":\"343434\",\"is_public\":true,\"is_add_footer\":true}","timestamp":"2025-10-06T07:40:19.363Z"}
+{"level":"info","message":"[Service] is_add_footer: true type: boolean","timestamp":"2025-10-06T07:40:19.363Z"}
+{"level":"info","message":"[addFooterToPdf] Starting...","timestamp":"2025-10-06T07:40:19.364Z"}
+{"level":"info","message":"[addFooterToPdf] documentId: DOC-2025-1759736419364","timestamp":"2025-10-06T07:40:19.364Z"}
+{"level":"info","message":"[addFooterToPdf] isAddFooter: true type: boolean","timestamp":"2025-10-06T07:40:19.364Z"}
+{"level":"info","message":"data {\"request_type\":\"sequential\",\"notes\":\"\",\"type\":\"self_sign\",\"sign_coordinate\":[{\"page\":1,\"originX\":75,\"originY\":140,\"width\":73,\"height\":33,\"signerId\":\"master|56543\",\"signerName\":\"IPUT TAUFIQURROHMAN SUWARTO S.Kom\"}],\"sign_pages\":[],\"tag_coordinate\":\"$\",\"signature_type\":\"self_sign\"}","timestamp":"2025-10-06T07:40:49.747Z"}
+{"level":"info","message":"[Controller] Creating signature request with coordinate detection...","timestamp":"2025-10-06T07:40:49.748Z"}
+{"level":"info","message":"[createSignatureRequest] Received sign_coordinate: 1 positions","timestamp":"2025-10-06T07:40:49.751Z"}
+{"level":"info","message":"[createSelfSignDetail] Coordinates: FOUND","timestamp":"2025-10-06T07:40:49.765Z"}
+{"level":"info","message":"[Controller] Signature request created successfully","timestamp":"2025-10-06T07:40:49.789Z"}
+{"level":"info","message":"req.body {\"passphrase\":\"232323232\",\"notes\":\"2323232323\"}","timestamp":"2025-10-06T07:41:07.070Z"}
+{"level":"info","message":"=== SIGN DOCUMENT START ===","timestamp":"2025-10-06T07:41:07.070Z"}
+{"level":"info","message":"detailId: 8PbxI96HjC-0olNL49Jzp","timestamp":"2025-10-06T07:41:07.070Z"}
+{"level":"info","message":"userId: master|56543","timestamp":"2025-10-06T07:41:07.070Z"}
+{"level":"info","message":"signData: {\"passphrase\":\"***HIDDEN***\",\"notes\":\"2323232323\",\"nik\":\"1234567890123452\"}","timestamp":"2025-10-06T07:41:07.071Z"}
+{"level":"info","message":"mc (Minio Client): EXISTS","timestamp":"2025-10-06T07:41:07.071Z"}
+{"level":"info","message":"1. Starting validation...","timestamp":"2025-10-06T07:41:07.071Z"}
+{"level":"info","message":"✓ Validation passed","timestamp":"2025-10-06T07:41:07.084Z"}
+{"level":"info","message":"2. Fetching user data and request data...","timestamp":"2025-10-06T07:41:07.084Z"}
+{"level":"info","message":"3. Starting transaction...","timestamp":"2025-10-06T07:41:07.087Z"}
+{"level":"info","message":"✓ Transaction started","timestamp":"2025-10-06T07:41:07.088Z"}
+{"level":"info","message":"1. Retrieving PDF from Minio...","timestamp":"2025-10-06T07:41:07.089Z"}
+{"level":"info","message":"   [retrievePdfFromMinio] START","timestamp":"2025-10-06T07:41:07.089Z"}
+{"level":"info","message":"   [retrievePdfFromMinio] mc: EXISTS","timestamp":"2025-10-06T07:41:07.089Z"}
+{"level":"info","message":"   [retrievePdfFromMinio] mc type: object","timestamp":"2025-10-06T07:41:07.089Z"}
+{"level":"info","message":"   [retrievePdfFromMinio] filePath: esign/documents/DOC-2025-1759736419364_2ttd.pdf","timestamp":"2025-10-06T07:41:07.089Z"}
+{"level":"info","message":"   [retrievePdfFromMinio] Calling downloadEsignDocument...","timestamp":"2025-10-06T07:41:07.089Z"}
+{"level":"info","message":"   [retrievePdfFromMinio] Success, file size: 210564","timestamp":"2025-10-06T07:41:07.264Z"}
+{"level":"info","message":"   ✓ PDF retrieved, size: 210564","timestamp":"2025-10-06T07:41:07.264Z"}
+{"level":"info","message":"2. Loading logo image...","timestamp":"2025-10-06T07:41:07.264Z"}
+{"level":"info","message":"   Loading signature logo from: /Users/taufiqurrohmansuwarto/Applications/rumahasn/utils/services/esign/logo.png","timestamp":"2025-10-06T07:41:07.264Z"}
+{"level":"info","message":"   Logo loaded, size: 324788","timestamp":"2025-10-06T07:41:07.266Z"}
+{"level":"info","message":"   ✓ Logo loaded","timestamp":"2025-10-06T07:41:07.266Z"}
+{"level":"info","message":"3. Signing document sequentially with coordinates...","timestamp":"2025-10-06T07:41:07.266Z"}
+{"level":"info","message":"   NIK: ***PROVIDED***","timestamp":"2025-10-06T07:41:07.266Z"}
+{"level":"info","message":"   Passphrase: ***PROVIDED***","timestamp":"2025-10-06T07:41:07.266Z"}
+{"level":"info","message":"   Coordinates to use: 1 page(s)","timestamp":"2025-10-06T07:41:07.266Z"}
+{"level":"info","message":"   Valid coordinates: 1 page(s)","timestamp":"2025-10-06T07:41:07.266Z"}
+{"level":"info","message":"     [1] Page 1: bottom-left (75, 140)","timestamp":"2025-10-06T07:41:07.266Z"}
+{"level":"info","message":"[Sequential Sign] Starting signing for 1 pages with coordinates","timestamp":"2025-10-06T07:41:07.267Z"}
+{"level":"info","message":"[Sequential Sign] 1. Page 1: bottom-left (75, 140)","timestamp":"2025-10-06T07:41:07.267Z"}
+{"level":"info","message":"[Sequential Sign] Step 1/1: Signing page 1 at (75, 140)...","timestamp":"2025-10-06T07:41:07.267Z"}
+{"level":"info","message":"[Sequential Sign] Position exact, size adjusted to 80%:","timestamp":"2025-10-06T07:41:07.267Z"}
+{"level":"info","message":"  Page: 1","timestamp":"2025-10-06T07:41:07.267Z"}
+{"level":"info","message":"  Position: (75, 140)","timestamp":"2025-10-06T07:41:07.267Z"}
+{"level":"info","message":"  Size: 73x33 → 73x33","timestamp":"2025-10-06T07:41:07.267Z"}
+{"level":"info","message":"signatureProperties {\n  \"tampilan\": \"VISIBLE\",\n  \"page\": 1,\n  \"originX\": 75,\n  \"originY\": 140,\n  \"width\": 73,\n  \"height\": 33,\n  \"imageBase64\": \"[REDACTED_324788_bytes]\"\n}","timestamp":"2025-10-06T07:41:07.267Z"}
+{"level":"info","message":"[signWithCoordinate] Sending request to BSrE:","timestamp":"2025-10-06T07:41:07.281Z"}
+{"level":"info","message":"  signatureProperties: [\n  {\n    \"tampilan\": \"VISIBLE\",\n    \"page\": 1,\n    \"originX\": 75,\n    \"originY\": 140,\n    \"width\": 73,\n    \"height\": 33,\n    \"imageBase64\": \"[REDACTED_324788_bytes]\"\n  }\n]","timestamp":"2025-10-06T07:41:07.281Z"}
+{"level":"info","message":"      [callBsreSignApi] Response received:","timestamp":"2025-10-06T07:41:13.697Z"}
+{"level":"info","message":"      - Success: false","timestamp":"2025-10-06T07:41:13.707Z"}
+{"level":"info","message":"      [callBsreSignApi] ✗ FAILED","timestamp":"2025-10-06T07:41:13.707Z"}
+{"level":"info","message":"      - Error message: Passphrase anda salah","timestamp":"2025-10-06T07:41:13.707Z"}
+{"level":"info","message":"      - Status code: undefined","timestamp":"2025-10-06T07:41:13.707Z"}
+{"level":"error","message":"[Sequential Sign] ✗ Page 1 failed in 6440ms: Passphrase anda salah","timestamp":"2025-10-06T07:41:13.708Z"}
+{"level":"error","message":"   ✗ Sequential signing failed: Gagal menandatangani halaman 1: Passphrase anda salah","timestamp":"2025-10-06T07:41:13.708Z"}
+{"level":"error","message":"   ✗ Failed at page: 1","timestamp":"2025-10-06T07:41:13.708Z"}
+{"level":"error","message":"   ✗ Completed pages: 0","timestamp":"2025-10-06T07:41:13.709Z"}
+{"level":"info","message":"   Total response time: 6443 ms","timestamp":"2025-10-06T07:41:13.709Z"}
+{"level":"info","message":"4. Creating BSrE transaction record...","timestamp":"2025-10-06T07:41:13.709Z"}
+{"level":"info","message":"   ✗ Sequential signing failed, creating failed transaction record...","timestamp":"2025-10-06T07:41:13.712Z"}
+{"level":"info","message":"   ✓ Failed transaction record committed with ID: g8ccnG8elA82IWRDSeBeS","timestamp":"2025-10-06T07:41:13.804Z"}
+{"level":"info","message":"      [logBsreInteraction] Attempting to log with transaction_id: g8ccnG8elA82IWRDSeBeS","timestamp":"2025-10-06T07:41:13.805Z"}
+{"level":"info","message":"      [logBsreInteraction] Success, log ID: lX0iowH5GPg19DfmszG2F","timestamp":"2025-10-06T07:41:13.830Z"}
+{"level":"info","message":"      [logUserActivity] Logging action: sign_document","timestamp":"2025-10-06T07:41:13.830Z"}
+{"level":"info","message":"      [logUserActivity] Success, log ID: zFPEEZ6BMyNhTwvTkRCv2","timestamp":"2025-10-06T07:41:13.840Z"}
+{"level":"error","message":"=== SIGN DOCUMENT ERROR ===","timestamp":"2025-10-06T07:41:13.840Z"}
+{"level":"error","message":"Error: Gagal menandatangani halaman 1: Passphrase anda salah","timestamp":"2025-10-06T07:41:13.840Z"}
+{"level":"error","message":"Stack: Error: Gagal menandatangani halaman 1: Passphrase anda salah\n    at signDocumentSequential (webpack-internal:///(api)/./utils/services/esign/signing-helpers.service.js:247:37)\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async signDocument (webpack-internal:///(api)/./utils/services/esign/signature-actions.service.js:94:32)\n    at async Array.sign (webpack-internal:///(api)/./controller/esign/esign-signature-requests.controller.js:219:31)","timestamp":"2025-10-06T07:41:13.841Z"}
+{"level":"error","message":"=== SIGNDOCUMENT - CLEANUP START ===","timestamp":"2025-10-06T07:41:13.842Z"}
+{"level":"info","message":"   [signDocument] Transaction already completed","timestamp":"2025-10-06T07:41:13.842Z"}
+{"level":"error","message":"=== SIGNDOCUMENT - CLEANUP DONE ===","timestamp":"2025-10-06T07:41:13.842Z"}
+{"level":"info","message":"req.body {\"passphrase\":\"232323232\",\"notes\":\"2323232323\"}","timestamp":"2025-10-06T07:53:01.600Z"}
+{"level":"info","message":"=== SIGN DOCUMENT START ===","timestamp":"2025-10-06T07:53:01.601Z"}
+{"level":"info","message":"detailId: 8PbxI96HjC-0olNL49Jzp","timestamp":"2025-10-06T07:53:01.601Z"}
+{"level":"info","message":"userId: master|56543","timestamp":"2025-10-06T07:53:01.601Z"}
+{"level":"info","message":"signData: {\"passphrase\":\"***HIDDEN***\",\"notes\":\"2323232323\",\"nik\":\"1234567890123452\"}","timestamp":"2025-10-06T07:53:01.601Z"}
+{"level":"info","message":"mc (Minio Client): EXISTS","timestamp":"2025-10-06T07:53:01.601Z"}
+{"level":"info","message":"1. Starting validation...","timestamp":"2025-10-06T07:53:01.601Z"}
+{"level":"info","message":"✓ Validation passed","timestamp":"2025-10-06T07:53:01.610Z"}
+{"level":"info","message":"2. Fetching user data and request data...","timestamp":"2025-10-06T07:53:01.611Z"}
+{"level":"info","message":"3. Starting transaction...","timestamp":"2025-10-06T07:53:01.618Z"}
+{"level":"info","message":"✓ Transaction started","timestamp":"2025-10-06T07:53:01.620Z"}
+{"level":"info","message":"1. Retrieving PDF from Minio...","timestamp":"2025-10-06T07:53:01.620Z"}
+{"level":"info","message":"   [retrievePdfFromMinio] START","timestamp":"2025-10-06T07:53:01.620Z"}
+{"level":"info","message":"   [retrievePdfFromMinio] mc: EXISTS","timestamp":"2025-10-06T07:53:01.620Z"}
+{"level":"info","message":"   [retrievePdfFromMinio] mc type: object","timestamp":"2025-10-06T07:53:01.620Z"}
+{"level":"info","message":"   [retrievePdfFromMinio] filePath: esign/documents/DOC-2025-1759736419364_2ttd.pdf","timestamp":"2025-10-06T07:53:01.620Z"}
+{"level":"info","message":"   [retrievePdfFromMinio] Calling downloadEsignDocument...","timestamp":"2025-10-06T07:53:01.621Z"}
+{"level":"info","message":"   [retrievePdfFromMinio] Success, file size: 210564","timestamp":"2025-10-06T07:53:02.016Z"}
+{"level":"info","message":"   ✓ PDF retrieved, size: 210564","timestamp":"2025-10-06T07:53:02.017Z"}
+{"level":"info","message":"2. Loading logo image...","timestamp":"2025-10-06T07:53:02.017Z"}
+{"level":"info","message":"   Loading signature logo from: /Users/taufiqurrohmansuwarto/Applications/rumahasn/utils/services/esign/logo.png","timestamp":"2025-10-06T07:53:02.017Z"}
+{"level":"info","message":"   Logo loaded, size: 324788","timestamp":"2025-10-06T07:53:02.018Z"}
+{"level":"info","message":"   ✓ Logo loaded","timestamp":"2025-10-06T07:53:02.018Z"}
+{"level":"info","message":"3. Signing document sequentially with coordinates...","timestamp":"2025-10-06T07:53:02.018Z"}
+{"level":"info","message":"   NIK: ***PROVIDED***","timestamp":"2025-10-06T07:53:02.018Z"}
+{"level":"info","message":"   Passphrase: ***PROVIDED***","timestamp":"2025-10-06T07:53:02.018Z"}
+{"level":"info","message":"   Coordinates to use: 1 page(s)","timestamp":"2025-10-06T07:53:02.018Z"}
+{"level":"info","message":"   Valid coordinates: 1 page(s)","timestamp":"2025-10-06T07:53:02.019Z"}
+{"level":"info","message":"     [1] Page 1: bottom-left (75, 140)","timestamp":"2025-10-06T07:53:02.019Z"}
+{"level":"info","message":"[Sequential Sign] Starting signing for 1 pages with coordinates","timestamp":"2025-10-06T07:53:02.019Z"}
+{"level":"info","message":"[Sequential Sign] 1. Page 1: bottom-left (75, 140)","timestamp":"2025-10-06T07:53:02.019Z"}
+{"level":"info","message":"[Sequential Sign] Step 1/1: Signing page 1 at (75, 140)...","timestamp":"2025-10-06T07:53:02.019Z"}
+{"level":"info","message":"[Sequential Sign] Position exact, size adjusted to 80%:","timestamp":"2025-10-06T07:53:02.020Z"}
+{"level":"info","message":"  Page: 1","timestamp":"2025-10-06T07:53:02.020Z"}
+{"level":"info","message":"  Position: (75, 140)","timestamp":"2025-10-06T07:53:02.020Z"}
+{"level":"info","message":"  Size: 73x33 → 73x33","timestamp":"2025-10-06T07:53:02.020Z"}
+{"level":"info","message":"signatureProperties {\n  \"tampilan\": \"VISIBLE\",\n  \"page\": 1,\n  \"originX\": 75,\n  \"originY\": 140,\n  \"width\": 73,\n  \"height\": 33,\n  \"imageBase64\": \"[REDACTED_324788_bytes]\"\n}","timestamp":"2025-10-06T07:53:02.020Z"}
+{"level":"info","message":"[signWithCoordinate] Sending request to BSrE:","timestamp":"2025-10-06T07:53:02.024Z"}
+{"level":"info","message":"  signatureProperties: [\n  {\n    \"tampilan\": \"VISIBLE\",\n    \"page\": 1,\n    \"originX\": 75,\n    \"originY\": 140,\n    \"width\": 73,\n    \"height\": 33,\n    \"imageBase64\": \"[REDACTED_324788_bytes]\"\n  }\n]","timestamp":"2025-10-06T07:53:02.024Z"}
+{"level":"info","message":"      [callBsreSignApi] Response received:","timestamp":"2025-10-06T07:53:07.981Z"}
+{"level":"info","message":"      - Success: false","timestamp":"2025-10-06T07:53:07.985Z"}
+{"level":"info","message":"      [callBsreSignApi] ✗ FAILED","timestamp":"2025-10-06T07:53:07.986Z"}
+{"level":"info","message":"      - Error message: Passphrase anda salah","timestamp":"2025-10-06T07:53:07.986Z"}
+{"level":"info","message":"      - Status code: undefined","timestamp":"2025-10-06T07:53:07.986Z"}
+{"level":"error","message":"[Sequential Sign] ✗ Page 1 failed in 5967ms: Passphrase anda salah","timestamp":"2025-10-06T07:53:07.986Z"}
+{"level":"error","message":"   ✗ Sequential signing failed: Gagal menandatangani halaman 1: Passphrase anda salah","timestamp":"2025-10-06T07:53:07.986Z"}
+{"level":"error","message":"   ✗ Failed at page: 1","timestamp":"2025-10-06T07:53:07.986Z"}
+{"level":"error","message":"   ✗ Completed pages: 0","timestamp":"2025-10-06T07:53:07.986Z"}
+{"level":"info","message":"   Total response time: 5967 ms","timestamp":"2025-10-06T07:53:07.986Z"}
+{"level":"info","message":"4. Creating BSrE transaction record...","timestamp":"2025-10-06T07:53:07.986Z"}
+{"level":"info","message":"   ✗ Sequential signing failed, creating failed transaction record...","timestamp":"2025-10-06T07:53:07.987Z"}
+{"level":"info","message":"   ✓ Failed transaction record committed with ID: pWqhmw9pr4B94nfQb9gpT","timestamp":"2025-10-06T07:53:08.030Z"}
+{"level":"info","message":"      [logBsreInteraction] Attempting to log with transaction_id: pWqhmw9pr4B94nfQb9gpT","timestamp":"2025-10-06T07:53:08.030Z"}
+{"level":"info","message":"      [logBsreInteraction] Success, log ID: 6KdO9i3ZOm_Us7f9NUvKE","timestamp":"2025-10-06T07:53:08.034Z"}
+{"level":"info","message":"      [logUserActivity] Logging action: sign_document","timestamp":"2025-10-06T07:53:08.034Z"}
+{"level":"info","message":"      [logUserActivity] Success, log ID: qgEyTsg_ayqHaE1p5E8D0","timestamp":"2025-10-06T07:53:08.043Z"}
+{"level":"error","message":"=== SIGN DOCUMENT ERROR ===","timestamp":"2025-10-06T07:53:08.044Z"}
+{"level":"error","message":"Error: Gagal menandatangani halaman 1: Passphrase anda salah","timestamp":"2025-10-06T07:53:08.044Z"}
+{"level":"error","message":"Stack: Error: Gagal menandatangani halaman 1: Passphrase anda salah\n    at signDocumentSequential (webpack-internal:///(api)/./utils/services/esign/signing-helpers.service.js:267:37)\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async signDocument (webpack-internal:///(api)/./utils/services/esign/signature-actions.service.js:94:32)\n    at async Array.sign (webpack-internal:///(api)/./controller/esign/esign-signature-requests.controller.js:219:31)","timestamp":"2025-10-06T07:53:08.045Z"}
+{"level":"error","message":"=== SIGNDOCUMENT - CLEANUP START ===","timestamp":"2025-10-06T07:53:08.046Z"}
+{"level":"info","message":"   [signDocument] Transaction already completed","timestamp":"2025-10-06T07:53:08.047Z"}
+{"level":"error","message":"=== SIGNDOCUMENT - CLEANUP DONE ===","timestamp":"2025-10-06T07:53:08.047Z"}
+{"level":"info","message":"      [logUserActivity] Logging action: reject_document","timestamp":"2025-10-06T07:57:26.819Z"}
+{"level":"info","message":"      [logUserActivity] Success, log ID: LtA45CBm9zwbWFYtWCtOZ","timestamp":"2025-10-06T07:57:26.822Z"}
+{"level":"info","message":"[Controller] req.body: {\"title\":\"2ttd\",\"description\":\"test\",\"is_public\":\"false\",\"is_add_footer\":\"false\"}","timestamp":"2025-10-06T08:05:06.109Z"}
+{"level":"info","message":"[Controller] req.body.is_add_footer: false type: string","timestamp":"2025-10-06T08:05:06.110Z"}
+{"level":"info","message":"[Controller] bodyData.is_add_footer: false type: boolean","timestamp":"2025-10-06T08:05:06.110Z"}
+{"level":"info","message":"[Service] data: {\"title\":\"2ttd\",\"description\":\"test\",\"is_public\":false,\"is_add_footer\":false}","timestamp":"2025-10-06T08:05:06.111Z"}
+{"level":"info","message":"[Service] is_add_footer: false type: boolean","timestamp":"2025-10-06T08:05:06.111Z"}
+{"level":"info","message":"[addFooterToPdf] Starting...","timestamp":"2025-10-06T08:05:06.111Z"}
+{"level":"info","message":"[addFooterToPdf] documentId: DOC-2025-1759737906111","timestamp":"2025-10-06T08:05:06.111Z"}
+{"level":"info","message":"[addFooterToPdf] isAddFooter: false type: boolean","timestamp":"2025-10-06T08:05:06.111Z"}
+{"level":"info","message":"data {\"request_type\":\"sequential\",\"notes\":\"esttest\",\"type\":\"request_sign\",\"sign_coordinate\":[{\"page\":1,\"originX\":84,\"originY\":155,\"width\":83,\"height\":37,\"signerId\":\"master|75362\",\"signerName\":\"EKO BUDI PRASETYO S.E\"},{\"page\":2,\"originX\":503,\"originY\":25,\"width\":111,\"height\":51,\"signerId\":\"master|75362\",\"signerName\":\"EKO BUDI PRASETYO S.E\"}],\"sign_pages\":[],\"tag_coordinate\":\"$\",\"signature_type\":\"request_sign\",\"signers\":[{\"user_id\":\"master|75362\",\"role_type\":\"signer\",\"sequence_order\":1,\"notes\":\"\"},{\"user_id\":\"master|56543\",\"role_type\":\"reviewer\",\"sequence_order\":2,\"notes\":\"\"}]}","timestamp":"2025-10-06T08:05:43.856Z"}
+{"level":"info","message":"[Controller] Creating signature request with coordinate detection...","timestamp":"2025-10-06T08:05:43.857Z"}
+{"level":"info","message":"[createSignatureRequest] Received sign_coordinate: 2 positions","timestamp":"2025-10-06T08:05:43.860Z"}
+{"level":"info","message":"[createRequestSignDetails] Signer 1 coordinates: FOUND","timestamp":"2025-10-06T08:05:43.872Z"}
+{"level":"info","message":"[createRequestSignDetails] Signer 2 coordinates: FOUND","timestamp":"2025-10-06T08:05:43.880Z"}
+{"level":"info","message":"[Controller] Signature request created successfully","timestamp":"2025-10-06T08:05:43.894Z"}
+{"level":"info","message":"      [logUserActivity] Logging action: reject_document","timestamp":"2025-10-06T08:10:33.896Z"}
+{"level":"info","message":"      [logUserActivity] Success, log ID: aP2tx4cl_wmFLa6lKQiT6","timestamp":"2025-10-06T08:10:33.903Z"}
+{"level":"info","message":"[Controller] req.body: {\"title\":\"2ttd\",\"description\":\"hello worlds\",\"is_public\":\"true\",\"is_add_footer\":\"true\"}","timestamp":"2025-10-06T08:32:07.843Z"}
+{"level":"info","message":"[Controller] req.body.is_add_footer: true type: string","timestamp":"2025-10-06T08:32:07.844Z"}
+{"level":"info","message":"[Controller] bodyData.is_add_footer: true type: boolean","timestamp":"2025-10-06T08:32:07.844Z"}
+{"level":"info","message":"[Service] data: {\"title\":\"2ttd\",\"description\":\"hello worlds\",\"is_public\":true,\"is_add_footer\":true}","timestamp":"2025-10-06T08:32:07.844Z"}
+{"level":"info","message":"[Service] is_add_footer: true type: boolean","timestamp":"2025-10-06T08:32:07.844Z"}
+{"level":"info","message":"[addFooterToPdf] Starting...","timestamp":"2025-10-06T08:32:07.844Z"}
+{"level":"info","message":"[addFooterToPdf] documentId: DOC-2025-1759739527844","timestamp":"2025-10-06T08:32:07.844Z"}
+{"level":"info","message":"[addFooterToPdf] isAddFooter: true type: boolean","timestamp":"2025-10-06T08:32:07.844Z"}
+{"level":"info","message":"data {\"request_type\":\"sequential\",\"notes\":\"tets\",\"type\":\"request_sign\",\"sign_coordinate\":[{\"page\":1,\"originX\":20,\"originY\":127,\"width\":111,\"height\":51,\"signerId\":\"master|75362\",\"signerName\":\"EKO BUDI PRASETYO S.E\"}],\"sign_pages\":[],\"tag_coordinate\":\"$\",\"signature_type\":\"request_sign\",\"signers\":[{\"user_id\":\"master|56543\",\"role_type\":\"reviewer\",\"sequence_order\":1,\"notes\":\"\"},{\"user_id\":\"master|75362\",\"role_type\":\"signer\",\"sequence_order\":2,\"notes\":\"\"}]}","timestamp":"2025-10-06T08:40:08.523Z"}
+{"level":"info","message":"[Controller] Creating signature request with coordinate detection...","timestamp":"2025-10-06T08:40:08.524Z"}
+{"level":"info","message":"[createSignatureRequest] Received sign_coordinate: 1 positions","timestamp":"2025-10-06T08:40:08.526Z"}
+{"level":"info","message":"[createRequestSignDetails] Signer 1 coordinates: FOUND","timestamp":"2025-10-06T08:40:08.539Z"}
+{"level":"info","message":"[createRequestSignDetails] Signer 2 coordinates: FOUND","timestamp":"2025-10-06T08:40:08.544Z"}
+{"level":"info","message":"[Controller] Signature request created successfully","timestamp":"2025-10-06T08:40:08.568Z"}
+{"level":"info","message":"   [checkAndCompleteRequest] Checking request: cKIA-amH6SnIOwkHclhI3","timestamp":"2025-10-06T08:40:30.905Z"}
+{"level":"info","message":"   [checkAndCompleteRequest] Using transaction: YES","timestamp":"2025-10-06T08:40:30.906Z"}
+{"level":"info","message":"   [checkAndCompleteRequest] All details: [2] waiting, [1] reviewed","timestamp":"2025-10-06T08:40:30.907Z"}
+{"level":"info","message":"   [checkAndCompleteRequest] Pending details: 1","timestamp":"2025-10-06T08:40:30.909Z"}
+{"level":"info","message":"   [checkAndCompleteRequest] Rejected details: 0","timestamp":"2025-10-06T08:40:30.909Z"}
+{"level":"info","message":"   [checkAndCompleteRequest] Still waiting for other signatures","timestamp":"2025-10-06T08:40:30.909Z"}
+{"level":"info","message":"      [logUserActivity] Logging action: review_document","timestamp":"2025-10-06T08:40:30.912Z"}
+{"level":"info","message":"      [logUserActivity] Success, log ID: YoEGWDNbF4N1ktSbSCbXf","timestamp":"2025-10-06T08:40:30.917Z"}
+{"level":"info","message":"      [logUserActivity] Logging action: reject_document","timestamp":"2025-10-06T08:41:59.290Z"}
+{"level":"info","message":"      [logUserActivity] Success, log ID: ITR3RNpqJsUU85KEeWD1O","timestamp":"2025-10-06T08:41:59.296Z"}

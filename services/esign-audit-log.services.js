@@ -51,7 +51,7 @@ const logUserActivity = async ({
       entity_id: entityId,
       ip_address: ipAddress || req?.ip || req?.connection?.remoteAddress,
       user_agent: userAgent || req?.headers?.["user-agent"],
-      additional_data: additionalData,
+      additional_data: JSON.stringify(additionalData) || {},
     };
 
     await LogUserActivity.query().insert(logData);

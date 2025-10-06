@@ -13,20 +13,15 @@ import {
   logUserActivity,
 } from "../../services/esign-audit-log.services";
 
-// Development logging helper
-const devLog = (...args) => {
-  if (process.env.NODE_ENV !== "production") {
-    devLog(...args);
-  }
-};
+const { log } = require("@/utils/logger");
 
 export const create = async (req, res) => {
   try {
     const { customId: userId } = req?.user;
     const mc = req?.mc;
 
-    devLog("[Controller] req.body:", req.body);
-    devLog("[Controller] req.body.is_add_footer:", req.body.is_add_footer, "type:", typeof req.body.is_add_footer);
+    log.info("[Controller] req.body:", req.body);
+    log.info("[Controller] req.body.is_add_footer:", req.body.is_add_footer, "type:", typeof req.body.is_add_footer);
 
     // Convert string boolean to actual boolean
     const bodyData = {
@@ -35,7 +30,7 @@ export const create = async (req, res) => {
       is_add_footer: req.body.is_add_footer === "true" || req.body.is_add_footer === true,
     };
 
-    devLog("[Controller] bodyData.is_add_footer:", bodyData.is_add_footer, "type:", typeof bodyData.is_add_footer);
+    log.info("[Controller] bodyData.is_add_footer:", bodyData.is_add_footer, "type:", typeof bodyData.is_add_footer);
 
     const document = await createDocument(bodyData, req.file, userId, mc);
 

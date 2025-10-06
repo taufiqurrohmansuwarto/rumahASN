@@ -3,18 +3,7 @@
  * Helper functions untuk cleanup operations (file deletion, rollback, etc)
  */
 
-// Development logging helper
-const devLog = (...args) => {
-  if (process.env.NODE_ENV !== "production") {
-    devLog(...args);
-  }
-};
-
-const devError = (...args) => {
-  if (process.env.NODE_ENV !== "production") {
-    devError(...args);
-  }
-};
+const { log } = require("@/utils/logger");
 
 /**
  * Validate file path untuk cleanup
@@ -53,27 +42,27 @@ const isValidCleanupPath = (filePath) => {
  */
 export const cleanupUploadedFile = async (mc, filePath) => {
   if (!mc) {
-    devError("✗ Cleanup skipped: Minio client not available");
+    log.error("✗ Cleanup skipped: Minio client not available");
     return false;
   }
 
   if (!isValidCleanupPath(filePath)) {
-    devError(
+    log.error(
       "✗ Cleanup skipped: Invalid or unsafe file path:",
       filePath
     );
     return false;
   }
 
-  devLog("   [cleanupUploadedFile] Attempting to cleanup:", filePath);
+  log.info("   [cleanupUploadedFile] Attempting to cleanup:", filePath);
 
   try {
     const { deleteFile } = require("@/utils/helper/minio-helper");
     await deleteFile(mc, "public", filePath);
-    devLog("   [cleanupUploadedFile] ✓ File deleted successfully");
+    log.info("   [cleanupUploadedFile] ✓ File deleted successfully");
     return true;
   } catch (error) {
-    devError(
+    log.error(
       "   [cleanupUploadedFile] ✗ Delete failed (non-critical):",
       error.message
     );
@@ -103,7 +92,7 @@ export const cleanupMultipleFiles = async (mc, filePaths) => {
     }
   }
 
-  devLog(
+  log.info(
     `   [cleanupMultipleFiles] Results: ${results.success} deleted, ${results.failed} failed`
   );
 
@@ -118,23 +107,23 @@ export const cleanupMultipleFiles = async (mc, filePaths) => {
  */
 export const rollbackTransaction = async (trx, context = "Unknown") => {
   if (!trx) {
-    devError(`   [${context}] ✗ Rollback skipped: No transaction`);
+    log.error(`   [${context}] ✗ Rollback skipped: No transaction`);
     return false;
   }
 
   if (trx.isCompleted()) {
-    devLog(`   [${context}] Transaction already completed`);
+    log.info(`   [${context}] Transaction already completed`);
     return false;
   }
 
-  devLog(`   [${context}] Rolling back transaction...`);
+  log.info(`   [${context}] Rolling back transaction...`);
 
   try {
     await trx.rollback();
-    devLog(`   [${context}] ✓ Transaction rolled back`);
+    log.info(`   [${context}] ✓ Transaction rolled back`);
     return true;
   } catch (rollbackError) {
-    devError(
+    log.error(
       `   [${context}] ✗ Rollback error:`,
       rollbackError.message
     );
@@ -152,7 +141,7 @@ export const rollbackTransaction = async (trx, context = "Unknown") => {
  * @returns {Promise<void>}
  */
 export const cleanupOnError = async (trx, mc, filePaths, context = "Error") => {
-  devError(`=== ${context.toUpperCase()} - CLEANUP START ===`);
+  log.error(`=== ${context.toUpperCase()} - CLEANUP START ===`);
 
   // 1. Rollback transaction
   await rollbackTransaction(trx, context);
@@ -166,5 +155,5 @@ export const cleanupOnError = async (trx, mc, filePaths, context = "Error") => {
     }
   }
 
-  devError(`=== ${context.toUpperCase()} - CLEANUP DONE ===`);
+  log.error(`=== ${context.toUpperCase()} - CLEANUP DONE ===`);
 };

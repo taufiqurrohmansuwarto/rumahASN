@@ -5,18 +5,7 @@
 
 const LogBsreIntegration = require("@/models/esign/esign-log-bsre-integration.model");
 
-// Development logging helper
-const devLog = (...args) => {
-  if (process.env.NODE_ENV !== "production") {
-    devLog(...args);
-  }
-};
-
-const devError = (...args) => {
-  if (process.env.NODE_ENV !== "production") {
-    devError(...args);
-  }
-};
+const { log } = require("@/utils/logger");
 
 /**
  * Log BSrE API interaction
@@ -34,7 +23,7 @@ const devError = (...args) => {
  */
 export const logBsreInteraction = async (logData) => {
   try {
-    devLog("      [logBsreInteraction] Attempting to log with transaction_id:", logData.transaction_id);
+    log.info("      [logBsreInteraction] Attempting to log with transaction_id:", logData.transaction_id);
 
     // Prepare log data, exclude transaction_id if it causes FK constraint issue
     const logPayload = {
@@ -56,16 +45,16 @@ export const logBsreInteraction = async (logData) => {
       logPayload.transaction_id = logData.transaction_id;
     }
 
-    const log = await LogBsreIntegration.query().insert(logPayload);
-    devLog("      [logBsreInteraction] Success, log ID:", log.id);
+    const bsreLog = await LogBsreIntegration.query().insert(logPayload);
+    log.info("      [logBsreInteraction] Success, log ID:", bsreLog.id);
 
-    return log;
+    return bsreLog;
   } catch (error) {
-    devError("      [logBsreInteraction] Error:", error.message);
+    log.error("      [logBsreInteraction] Error:", error.message);
 
     // If FK constraint error, try again without transaction_id
     if (error.message.includes("foreign key constraint") || error.message.includes("violates")) {
-      devLog("      [logBsreInteraction] FK constraint error, retrying without transaction_id...");
+      log.info("      [logBsreInteraction] FK constraint error, retrying without transaction_id...");
       try {
         const logPayloadWithoutFK = {
           action: logData.action,
@@ -81,11 +70,11 @@ export const logBsreInteraction = async (logData) => {
           // No transaction_id
         };
 
-        const log = await LogBsreIntegration.query().insert(logPayloadWithoutFK);
-        devLog("      [logBsreInteraction] Success without FK, log ID:", log.id);
-        return log;
+        const bsreLogRetry = await LogBsreIntegration.query().insert(logPayloadWithoutFK);
+        log.info("      [logBsreInteraction] Success without FK, log ID:", bsreLogRetry.id);
+        return bsreLogRetry;
       } catch (retryError) {
-        devError("      [logBsreInteraction] Retry failed:", retryError.message);
+        log.error("      [logBsreInteraction] Retry failed:", retryError.message);
         return null;
       }
     }

@@ -5,19 +5,7 @@ const { verifyPdf } = require("@/utils/esign-utils");
 const Minio = require("minio");
 
 const isProduction = process.env.NODE_ENV === "production";
-
-// Development logging helper
-const devLog = (...args) => {
-  if (process.env.NODE_ENV !== "production") {
-    devLog(...args);
-  }
-};
-
-const devError = (...args) => {
-  if (process.env.NODE_ENV !== "production") {
-    devError(...args);
-  }
-};
+const { log } = require("@/utils/logger");
 
 // minio
 const minioConfig = {
@@ -51,7 +39,7 @@ export const checkTTEUser = async (req, res) => {
 
     res.json(result);
   } catch (error) {
-    devError("Error in checkTTEUser:", error);
+    log.error("Error in checkTTEUser:", error);
     res.status(500).json({ message: "Internal server error" });
   }
 };
@@ -88,14 +76,14 @@ export const checkQr = async (req, res) => {
     let fileBase64 = null;
     if (document.file_path) {
       try {
-        devLog("Fetching file from Minio:", document.file_path);
+        log.info("Fetching file from Minio:", document.file_path);
         fileBase64 = await downloadEsignDocument(mc, document.file_path);
-        devLog("File fetched, base64 length:", fileBase64?.length);
+        log.info("File fetched, base64 length:", fileBase64?.length);
       } catch (error) {
-        devError("Error fetching file from Minio:", error);
+        log.error("Error fetching file from Minio:", error);
       }
     } else {
-      devLog("No file_path found in document");
+      log.info("No file_path found in document");
     }
 
     // Format response untuk public view
@@ -143,7 +131,7 @@ export const checkQr = async (req, res) => {
       data: response,
     });
   } catch (error) {
-    devError("Error in checkQr:", error);
+    log.error("Error in checkQr:", error);
     res.status(500).json({
       code: 500,
       message: "Internal server error",
@@ -159,7 +147,7 @@ export const verifyPdfController = async (req, res) => {
 
     if (result?.success) {
       const data = result?.data;
-      devLog("data", data);
+      log.info("data", data);
       res.json({ success: true, data });
     } else {
       const data = result?.data;
@@ -167,7 +155,7 @@ export const verifyPdfController = async (req, res) => {
     }
     res.json(result);
   } catch (error) {
-    devError("Error in verifyPdf:", error);
+    log.error("Error in verifyPdf:", error);
     res.status(500).json({ message: "Internal server error" });
   }
 };

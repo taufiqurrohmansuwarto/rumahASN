@@ -1,7 +1,6 @@
 /**
- * Logger Service using Winston
+ * Logger Service using Winston (CommonJS version)
  * Only logs when NODE_ENV !== "production"
- * CommonJS version for compatibility
  */
 
 const winston = require("winston");
@@ -16,11 +15,8 @@ const customFormat = printf(({ level, message, timestamp, stack, ...meta }) => {
   let msg = `${timestamp} [${level.toUpperCase()}]: ${message}`;
 
   // Add metadata if exists
-  const metaKeys = Object.keys(meta).filter(key => key !== 'level' && key !== 'message' && key !== 'timestamp');
-  if (metaKeys.length > 0) {
-    const metaObj = {};
-    metaKeys.forEach(key => metaObj[key] = meta[key]);
-    msg += ` ${JSON.stringify(metaObj)}`;
+  if (Object.keys(meta).length > 0) {
+    msg += ` ${JSON.stringify(meta)}`;
   }
 
   // Add stack trace for errors
@@ -68,43 +64,29 @@ const logger = winston.createLogger({
   exitOnError: false,
 });
 
-// Helper function to format arguments
-const formatArgs = (...args) => {
-  return args.map(arg => {
-    if (typeof arg === 'object' && arg !== null) {
-      try {
-        return JSON.stringify(arg);
-      } catch (e) {
-        return String(arg);
-      }
-    }
-    return String(arg);
-  }).join(" ");
-};
-
 // Helper methods for easier usage (silent in production)
 const log = {
   info: (...args) => {
-    if (!isProduction) logger.info(formatArgs(...args));
+    if (!isProduction) logger.info(args.join(" "));
   },
 
   error: (...args) => {
-    if (!isProduction) logger.error(formatArgs(...args));
+    if (!isProduction) logger.error(args.join(" "));
   },
 
   warn: (...args) => {
-    if (!isProduction) logger.warn(formatArgs(...args));
+    if (!isProduction) logger.warn(args.join(" "));
   },
 
   debug: (...args) => {
-    if (!isProduction) logger.debug(formatArgs(...args));
+    if (!isProduction) logger.debug(args.join(" "));
   },
 
   // Alias
   log: (...args) => {
-    if (!isProduction) logger.info(formatArgs(...args));
+    if (!isProduction) logger.info(args.join(" "));
   },
 };
 
-// Export for CommonJS
 module.exports = { logger, log };
+module.exports.default = log;

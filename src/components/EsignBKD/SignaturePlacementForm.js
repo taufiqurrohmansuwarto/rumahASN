@@ -100,12 +100,12 @@ function SignaturePlacementForm({
       ...signers.map((s) => ({
         ...s,
         type: "signer",
-        sequence: s.sequence_order || signers.indexOf(s) + 1,
+        sequence: s.sequence_order || s.sequence || signers.indexOf(s) + 1,
       })),
       ...reviewers.map((r) => ({
         ...r,
         type: "reviewer",
-        sequence: r.sequence_order || signers.length + reviewers.indexOf(r) + 1,
+        sequence: r.sequence_order || r.sequence || signers.length + reviewers.indexOf(r) + 1,
       })),
     ];
     // Sort by sequence_order to maintain original order
@@ -172,19 +172,19 @@ function SignaturePlacementForm({
 
     // ADD THIS: Notify parent about signers change
     if (onSignersChange) {
-      const formattedSigners = newSigners.map((s, idx) => ({
+      const formattedSigners = newSigners.map((s) => ({
         user_id: s.id,
         name: s.name,
         image: s.image,
         role_type: "signer",
-        sequence_order: idx + 1,
+        sequence_order: s.sequence_order || s.sequence, // Keep original sequence
       }));
-      const formattedReviewers = newReviewers.map((r, idx) => ({
+      const formattedReviewers = newReviewers.map((r) => ({
         user_id: r.id,
         name: r.name,
         image: r.image,
         role_type: "reviewer",
-        sequence_order: newSigners.length + idx + 1,
+        sequence_order: r.sequence_order || r.sequence, // Keep original sequence
       }));
       onSignersChange([...formattedSigners, ...formattedReviewers]);
     }
@@ -203,19 +203,19 @@ function SignaturePlacementForm({
             const newSigners = prev.filter((s) => s.id !== personId);
             // Notify parent
             if (onSignersChange) {
-              const formattedSigners = newSigners.map((s, idx) => ({
+              const formattedSigners = newSigners.map((s) => ({
                 user_id: s.id,
                 name: s.name,
                 image: s.image,
                 role_type: "signer",
-                sequence_order: idx + 1,
+                sequence_order: s.sequence_order || s.sequence,
               }));
-              const formattedReviewers = reviewers.map((r, idx) => ({
+              const formattedReviewers = reviewers.map((r) => ({
                 user_id: r.id,
                 name: r.name,
                 image: r.image,
                 role_type: "reviewer",
-                sequence_order: newSigners.length + idx + 1,
+                sequence_order: r.sequence_order || r.sequence,
               }));
               onSignersChange([...formattedSigners, ...formattedReviewers]);
             }
@@ -226,19 +226,19 @@ function SignaturePlacementForm({
             const newReviewers = prev.filter((r) => r.id !== personId);
             // Notify parent
             if (onSignersChange) {
-              const formattedSigners = signers.map((s, idx) => ({
+              const formattedSigners = signers.map((s) => ({
                 user_id: s.id,
                 name: s.name,
                 image: s.image,
                 role_type: "signer",
-                sequence_order: idx + 1,
+                sequence_order: s.sequence_order || s.sequence,
               }));
-              const formattedReviewers = newReviewers.map((r, idx) => ({
+              const formattedReviewers = newReviewers.map((r) => ({
                 user_id: r.id,
                 name: r.name,
                 image: r.image,
                 role_type: "reviewer",
-                sequence_order: signers.length + idx + 1,
+                sequence_order: r.sequence_order || r.sequence,
               }));
               onSignersChange([...formattedSigners, ...formattedReviewers]);
             }

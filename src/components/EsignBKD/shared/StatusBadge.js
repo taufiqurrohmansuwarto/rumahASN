@@ -27,6 +27,16 @@ export const DocumentStatusBadge = ({ status }) => {
       text: "Ditandatangani",
       icon: <IconCertificate size={14} />
     },
+    rejected: {
+      color: "red",
+      text: "Ditolak",
+      icon: <IconX size={14} />
+    },
+    cancelled: {
+      color: "gray",
+      text: "Dibatalkan",
+      icon: <IconX size={14} />
+    },
   };
 
   const config = statusConfig[status] || statusConfig.draft;

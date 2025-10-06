@@ -5,13 +5,7 @@ const {
 } = require("../../services/esign-audit-log.services");
 const Document = require("../../models/esign/esign-documents.model");
 const SignatureDetail = require("../../models/esign/esign-signature-details.model");
-
-// Development logging helper
-const devError = (...args) => {
-  if (process.env.NODE_ENV !== "production") {
-    devError(...args);
-  }
-};
+const { log } = require("@/utils/logger");
 
 /**
  * Get audit logs for a specific document
@@ -68,7 +62,7 @@ const getDocumentAuditLogs = async (req, res) => {
 
     res.json(result);
   } catch (error) {
-    devError("Error getting document audit logs:", error);
+    log.error("Error getting document audit logs:", error);
     res.status(500).json({ message: error.message });
   }
 };
@@ -91,7 +85,7 @@ const getMyActivityLogs = async (req, res) => {
 
     res.json(result);
   } catch (error) {
-    devError("Error getting user activity logs:", error);
+    log.error("Error getting user activity logs:", error);
     res.status(500).json({ message: error.message });
   }
 };

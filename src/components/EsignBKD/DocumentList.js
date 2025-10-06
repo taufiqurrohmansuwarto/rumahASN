@@ -136,6 +136,8 @@ function DocumentList({
     { key: "draft", label: "Draft" },
     { key: "in_progress", label: "Dalam Proses" },
     { key: "signed", label: "Ditandatangani" },
+    { key: "rejected", label: "Ditolak" },
+    { key: "cancelled", label: "Dibatalkan" },
   ];
 
   const getActionItems = (record) => [

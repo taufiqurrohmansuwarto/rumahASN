@@ -22,13 +22,7 @@ import {
 } from "@/services/esign-audit-log.services";
 
 const SiasnEmployee = require("@/models/siasn-employees.model");
-
-// Development logging helper
-const devLog = (...args) => {
-  if (process.env.NODE_ENV !== "production") {
-    devLog(...args);
-  }
-};
+const { log } = require("@/utils/logger");
 
 const removeChar = (str) => {
   return str.replace(/[^0-9]/g, "");
@@ -41,9 +35,9 @@ export const create = async (req, res) => {
 
     const document_id = req.body?.documentId;
     const data = req.body?.data;
-    devLog("data", data);
+    log.info("data", data);
 
-    devLog(
+    log.info(
       "[Controller] Creating signature request with coordinate detection..."
     );
 
@@ -54,7 +48,7 @@ export const create = async (req, res) => {
       mc // Pass Minio client for PDF coordinate detection
     );
 
-    devLog("[Controller] Signature request created successfully");
+    log.info("[Controller] Signature request created successfully");
 
     res.status(201).json({
       message: "Pengajuan TTE berhasil dibuat",
@@ -261,8 +255,8 @@ export const sign = async (req, res) => {
     const { mc } = req;
     const { customId: userId, employee_number: nip } = req?.user;
     const { id } = req.query;
-    devLog("req.body", req.body);
-    const { passphrase } = req.body;
+    log.info("req.body", req.body);
+    const { passphrase, reason } = req.body;
 
     let nik;
     if (process.env.NODE_ENV !== "production") {
@@ -283,7 +277,7 @@ export const sign = async (req, res) => {
     const updatedDetail = await signDocument(
       id,
       userId,
-      { ...data, nik, passphrase },
+      { ...data, nik, passphrase, reason },
       mc
     );
 

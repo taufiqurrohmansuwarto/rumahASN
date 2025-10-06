@@ -611,7 +611,9 @@ function SignatureSetupForm({ document }) {
                 </MantineText>
                 <MantineDivider size="xs" />
                 <Stack gap={6}>
-                  {pendingSubmitData?.signers?.map((signer, index) => {
+                  {pendingSubmitData?.signers
+                    ?.sort((a, b) => (a.sequence_order || 0) - (b.sequence_order || 0))
+                    .map((signer, index) => {
                     const signerData = signers.find(
                       (s) => s.user_id === signer.user_id
                     );
