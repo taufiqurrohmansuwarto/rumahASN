@@ -6,6 +6,13 @@ const {
 const Document = require("../../models/esign/esign-documents.model");
 const SignatureDetail = require("../../models/esign/esign-signature-details.model");
 
+// Development logging helper
+const devError = (...args) => {
+  if (process.env.NODE_ENV !== "production") {
+    devError(...args);
+  }
+};
+
 /**
  * Get audit logs for a specific document
  * GET /api/esign-bkd/documents/:documentId/logs
@@ -61,7 +68,7 @@ const getDocumentAuditLogs = async (req, res) => {
 
     res.json(result);
   } catch (error) {
-    console.error("Error getting document audit logs:", error);
+    devError("Error getting document audit logs:", error);
     res.status(500).json({ message: error.message });
   }
 };
@@ -84,7 +91,7 @@ const getMyActivityLogs = async (req, res) => {
 
     res.json(result);
   } catch (error) {
-    console.error("Error getting user activity logs:", error);
+    devError("Error getting user activity logs:", error);
     res.status(500).json({ message: error.message });
   }
 };

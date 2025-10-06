@@ -7,6 +7,19 @@ const SignatureRequests = require("@/models/esign/esign-signature-requests.model
 const SignatureDetails = require("@/models/esign/esign-signature-details.model");
 const Documents = require("@/models/esign/esign-documents.model");
 
+// Development logging helper
+const devLog = (...args) => {
+  if (process.env.NODE_ENV !== "production") {
+    devLog(...args);
+  }
+};
+
+const devError = (...args) => {
+  if (process.env.NODE_ENV !== "production") {
+    devError(...args);
+  }
+};
+
 // ==========================================
 // SIGNATURE REQUEST CRUD SERVICES
 // ==========================================
@@ -63,7 +76,7 @@ const createSelfSignDetail = async (
     throw new Error("Halaman tanda tangan harus ditentukan untuk self sign");
   }
 
-  console.log(
+  devLog(
     "[createSelfSignDetail] Coordinates:",
     coordinates ? "FOUND" : "NOT FOUND"
   );
@@ -100,7 +113,7 @@ const createRequestSignDetails = async (requestId, signers, trx) => {
   for (let i = 0; i < signers.length; i++) {
     const signer = signers[i];
 
-    console.log(
+    devLog(
       `[createRequestSignDetails] Signer ${i + 1} coordinates:`,
       signer.coordinates ? "FOUND" : "NOT FOUND"
     );
@@ -147,7 +160,7 @@ export const createSignatureRequest = async (documentId, data, userId) => {
   // Validate document first (outside transaction)
   const document = await validateDocumentForSignature(documentId, userId);
 
-  console.log(
+  devLog(
     "[createSignatureRequest] Received sign_coordinate:",
     sign_coordinate?.length || 0,
     "positions"

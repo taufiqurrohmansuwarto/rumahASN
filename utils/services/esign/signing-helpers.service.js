@@ -6,6 +6,19 @@
 const path = require("path");
 const fs = require("fs");
 
+// Development logging helper
+const devLog = (...args) => {
+  if (process.env.NODE_ENV !== "production") {
+    devLog(...args);
+  }
+};
+
+const devError = (...args) => {
+  if (process.env.NODE_ENV !== "production") {
+    devError(...args);
+  }
+};
+
 /**
  * Retrieve PDF file from Minio as base64
  * @param {Object} mc - Minio client
@@ -13,15 +26,15 @@ const fs = require("fs");
  * @returns {Promise<String>} - Base64 file content
  */
 export const retrievePdfFromMinio = async (mc, filePath) => {
-  console.log("   [retrievePdfFromMinio] START");
-  console.log("   [retrievePdfFromMinio] mc:", mc ? "EXISTS" : "UNDEFINED");
-  console.log("   [retrievePdfFromMinio] mc type:", typeof mc);
-  console.log("   [retrievePdfFromMinio] filePath:", filePath);
+  devLog("   [retrievePdfFromMinio] START");
+  devLog("   [retrievePdfFromMinio] mc:", mc ? "EXISTS" : "UNDEFINED");
+  devLog("   [retrievePdfFromMinio] mc type:", typeof mc);
+  devLog("   [retrievePdfFromMinio] filePath:", filePath);
 
   const { downloadEsignDocument } = require("@/utils/helper/minio-helper");
 
   try {
-    console.log("   [retrievePdfFromMinio] Calling downloadEsignDocument...");
+    devLog("   [retrievePdfFromMinio] Calling downloadEsignDocument...");
 
     // Set timeout untuk debugging
     const timeoutPromise = new Promise((_, reject) => {
@@ -32,14 +45,14 @@ export const retrievePdfFromMinio = async (mc, filePath) => {
 
     const result = await Promise.race([downloadPromise, timeoutPromise]);
 
-    console.log(
+    devLog(
       "   [retrievePdfFromMinio] Success, file size:",
       result?.length
     );
     return result;
   } catch (error) {
-    console.error("   [retrievePdfFromMinio] Error:", error.message);
-    console.error("   [retrievePdfFromMinio] Error stack:", error.stack);
+    devError("   [retrievePdfFromMinio] Error:", error.message);
+    devError("   [retrievePdfFromMinio] Error stack:", error.stack);
     throw error;
   }
 };
@@ -95,9 +108,9 @@ export const loadSignatureLogo = () => {
     "esign",
     "logo.png"
   );
-  console.log("   Loading signature logo from:", logoPath);
+  devLog("   Loading signature logo from:", logoPath);
   const imageBase64 = fs.readFileSync(logoPath, "base64");
-  console.log("   Logo loaded, size:", imageBase64.length);
+  devLog("   Logo loaded, size:", imageBase64.length);
   return imageBase64;
 };
 
@@ -140,18 +153,18 @@ export const callBsreSignApi = async (params) => {
     signatureProperties,
   });
 
-  console.log("      [callBsreSignApi] Response received:");
-  console.log("      - Success:", result.success);
+  devLog("      [callBsreSignApi] Response received:");
+  devLog("      - Success:", result.success);
 
   // Check if signing failed (success: false)
   if (!result.success) {
     const errorData = result.data;
-    console.log("      [callBsreSignApi] ✗ FAILED");
-    console.log(
+    devLog("      [callBsreSignApi] ✗ FAILED");
+    devLog(
       "      - Error message:",
       errorData?.response?.data?.message || errorData?.message
     );
-    console.log("      - Status code:", errorData?.response?.status);
+    devLog("      - Status code:", errorData?.response?.status);
 
     const error = new Error(
       errorData?.response?.data?.message ||
@@ -169,7 +182,7 @@ export const callBsreSignApi = async (params) => {
   // Check if signed file exists
   const signedFileBase64 = result.data?.file?.[0];
   if (!signedFileBase64) {
-    console.log(
+    devLog(
       "      [callBsreSignApi] ✗ FAILED - No signed file in response"
     );
 
@@ -181,9 +194,9 @@ export const callBsreSignApi = async (params) => {
     throw error;
   }
 
-  console.log("      [callBsreSignApi] ✓ SUCCESS");
-  console.log("      - Output file size:", signedFileBase64.length, "bytes");
-  console.log(
+  devLog("      [callBsreSignApi] ✓ SUCCESS");
+  devLog("      - Output file size:", signedFileBase64.length, "bytes");
+  devLog(
     "      - Size difference:",
     signedFileBase64.length - base64File.length,
     "bytes",
@@ -217,13 +230,13 @@ export const signDocumentSequential = async (params) => {
   const pageResponses = [];
   const totalPages = signCoordinates.length;
 
-  console.log(
+  devLog(
     `[Sequential Sign] Starting signing for ${totalPages} pages with coordinates`
   );
 
   // Log coordinates
   signCoordinates.forEach((coord, idx) => {
-    console.log(
+    devLog(
       `[Sequential Sign] ${idx + 1}. Page ${coord.page}: bottom-left (${
         coord.originX
       }, ${coord.originY})`
@@ -236,7 +249,7 @@ export const signDocumentSequential = async (params) => {
     const step = i + 1;
     const startTime = Date.now();
 
-    console.log(
+    devLog(
       `[Sequential Sign] Step ${step}/${totalPages}: Signing page ${page} at (${coord.originX}, ${coord.originY})...`
     );
 
@@ -266,18 +279,18 @@ export const signDocumentSequential = async (params) => {
         },
       ];
 
-      console.log(
+      devLog(
         `[Sequential Sign] Position exact, size adjusted to ${
           sizeAdjustment * 100
         }%:`
       );
-      console.log(`  Page: ${page}`);
-      console.log(`  Position: (${coord.originX}, ${coord.originY})`);
-      console.log(
+      devLog(`  Page: ${page}`);
+      devLog(`  Position: (${coord.originX}, ${coord.originY})`);
+      devLog(
         `  Size: ${coord.width}x${coord.height} → ${signatureProperties[0].width}x${signatureProperties[0].height}`
       );
 
-      console.log(
+      devLog(
         "signatureProperties",
         JSON.stringify(
           {
@@ -297,7 +310,7 @@ export const signDocumentSequential = async (params) => {
         signatureProperties,
       });
 
-      console.log("result", result);
+      devLog("result", result);
 
       const duration = Date.now() - startTime;
 
@@ -327,10 +340,10 @@ export const signDocumentSequential = async (params) => {
       // Update current base64 for next iteration
       currentBase64 = signedFileBase64;
 
-      console.log(
+      devLog(
         `[Sequential Sign] ✓ Page ${page} completed in ${duration}ms`
       );
-      console.log(
+      devLog(
         `[Sequential Sign]   File size changed: ${pageLog.file_size_before} → ${
           pageLog.file_size_after
         } bytes (${
@@ -355,7 +368,7 @@ export const signDocumentSequential = async (params) => {
         bsre_response: error.bsreResponse || null,
       });
 
-      console.error(
+      devError(
         `[Sequential Sign] ✗ Page ${page} failed in ${duration}ms:`,
         error.message
       );
@@ -381,13 +394,13 @@ export const signDocumentSequential = async (params) => {
     pageLogs.push(pageLog);
   }
 
-  console.log(
+  devLog(
     `[Sequential Sign] ✓ All ${totalPages} pages completed successfully`
   );
-  console.log(
+  devLog(
     `[Sequential Sign] Final file size: ${currentBase64.length} bytes`
   );
-  console.log(
+  devLog(
     `[Sequential Sign] Total size change: ${initialBase64.length} → ${
       currentBase64.length
     } (${currentBase64.length > initialBase64.length ? "+" : ""}${

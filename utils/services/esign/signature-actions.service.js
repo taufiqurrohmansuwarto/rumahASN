@@ -10,6 +10,19 @@ const BsreTransactions = require("@/models/esign/esign-bsre-transactions.model")
 const { nanoid } = require("nanoid");
 const crypto = require("crypto");
 
+// Development logging helper
+const devLog = (...args) => {
+  if (process.env.NODE_ENV !== "production") {
+    devLog(...args);
+  }
+};
+
+const devError = (...args) => {
+  if (process.env.NODE_ENV !== "production") {
+    devError(...args);
+  }
+};
+
 // Import helper functions
 const {
   retrievePdfFromMinio,
@@ -44,11 +57,11 @@ export const signDocument = async (
   mc,
   req = null
 ) => {
-  console.log("=== SIGN DOCUMENT START ===");
-  console.log("detailId:", detailId);
-  console.log("userId:", userId);
-  console.log("signData:", { ...signData, passphrase: "***HIDDEN***" });
-  console.log("mc (Minio Client):", mc ? "EXISTS" : "UNDEFINED");
+  devLog("=== SIGN DOCUMENT START ===");
+  devLog("detailId:", detailId);
+  devLog("userId:", userId);
+  devLog("signData:", { ...signData, passphrase: "***HIDDEN***" });
+  devLog("mc (Minio Client):", mc ? "EXISTS" : "UNDEFINED");
 
   const {
     notes = "",
@@ -61,12 +74,12 @@ export const signDocument = async (
   } = signData;
 
   // Validate user can perform action
-  console.log("1. Starting validation...");
+  devLog("1. Starting validation...");
   const detail = await validateSignatureDetailAction(detailId, userId, "sign");
-  console.log("✓ Validation passed");
+  devLog("✓ Validation passed");
 
   // Get signature detail and request data with document
-  console.log("2. Fetching user data and request data...");
+  devLog("2. Fetching user data and request data...");
   const userData = await SignatureDetails.query().findById(detailId);
   const requestData = await SignatureRequests.query()
     .findById(userData.request_id)
@@ -76,9 +89,9 @@ export const signDocument = async (
     throw new Error("Dokumen tidak ditemukan");
   }
 
-  console.log("3. Starting transaction...");
+  devLog("3. Starting transaction...");
   const trx = await SignatureDetails.startTransaction();
-  console.log("✓ Transaction started");
+  devLog("✓ Transaction started");
 
   // For user activity logging
   const ipAddress = req?.ip || req?.connection?.remoteAddress || null;
@@ -88,25 +101,25 @@ export const signDocument = async (
 
   try {
     // 1. Retrieve PDF from Minio
-    console.log("1. Retrieving PDF from Minio...");
+    devLog("1. Retrieving PDF from Minio...");
     const base64File = await retrievePdfFromMinio(
       mc,
       requestData.document.file_path
     );
-    console.log(
+    devLog(
       "   ✓ PDF retrieved, size:",
       base64File ? base64File.length : 0
     );
 
     // 2. Load signature logo
-    console.log("2. Loading logo image...");
+    devLog("2. Loading logo image...");
     const imageBase64 = loadSignatureLogo();
-    console.log("   ✓ Logo loaded");
+    devLog("   ✓ Logo loaded");
 
     // 3. Sign document sequentially using detected coordinates
-    console.log("3. Signing document sequentially with coordinates...");
-    console.log("   NIK:", nik ? "***PROVIDED***" : "MISSING");
-    console.log("   Passphrase:", passphrase ? "***PROVIDED***" : "MISSING");
+    devLog("3. Signing document sequentially with coordinates...");
+    devLog("   NIK:", nik ? "***PROVIDED***" : "MISSING");
+    devLog("   Passphrase:", passphrase ? "***PROVIDED***" : "MISSING");
 
     // Parse sign_coordinate from JSON string
     let signCoordinates = [];
@@ -117,15 +130,15 @@ export const signDocument = async (
           : userData.sign_coordinate
         : [];
     } catch (error) {
-      console.error("   ✗ Error parsing sign_coordinate:", error.message);
+      devError("   ✗ Error parsing sign_coordinate:", error.message);
       throw new Error("Format sign_coordinate tidak valid");
     }
 
-    console.log("   Coordinates to use:", signCoordinates.length, "page(s)");
+    devLog("   Coordinates to use:", signCoordinates.length, "page(s)");
 
-    console.log("   Valid coordinates:", signCoordinates.length, "page(s)");
+    devLog("   Valid coordinates:", signCoordinates.length, "page(s)");
     signCoordinates.forEach((coord, idx) => {
-      console.log(
+      devLog(
         `     [${idx + 1}] Page ${coord.page}: bottom-left (${coord.originX}, ${
           coord.originY
         })`
@@ -147,26 +160,26 @@ export const signDocument = async (
         imageBase64,
       });
 
-      console.log("   ✓ Sequential signing successful");
-      console.log("   ✓ Completed pages:", sequentialResult.completedPages);
+      devLog("   ✓ Sequential signing successful");
+      devLog("   ✓ Completed pages:", sequentialResult.completedPages);
     } catch (error) {
       bsreError = error;
-      console.error("   ✗ Sequential signing failed:", error.message);
-      console.error("   ✗ Failed at page:", error.failedAtPage);
-      console.error("   ✗ Completed pages:", error.completedPages);
+      devError("   ✗ Sequential signing failed:", error.message);
+      devError("   ✗ Failed at page:", error.failedAtPage);
+      devError("   ✗ Completed pages:", error.completedPages);
     }
 
     const responseTime = Date.now() - startTime;
-    console.log("   Total response time:", responseTime, "ms");
+    devLog("   Total response time:", responseTime, "ms");
 
     // 4. Create BSrE transaction record
-    console.log("4. Creating BSrE transaction record...");
+    devLog("4. Creating BSrE transaction record...");
     transactionId = nanoid();
     const now = new Date();
 
     // If signing failed, commit failed transaction and throw error
     if (bsreError) {
-      console.log(
+      devLog(
         "   ✗ Sequential signing failed, creating failed transaction record..."
       );
 
@@ -206,7 +219,7 @@ export const signDocument = async (
       });
 
       await trx.commit();
-      console.log(
+      devLog(
         "   ✓ Failed transaction record committed with ID:",
         transactionId
       );
@@ -230,7 +243,7 @@ export const signDocument = async (
           response_time_ms: responseTime,
         });
       } catch (logError) {
-        console.error("✗ Logging error (non-critical):", logError.message);
+        devError("✗ Logging error (non-critical):", logError.message);
       }
 
       // Log user activity
@@ -248,7 +261,7 @@ export const signDocument = async (
           user_agent: userAgent,
         });
       } catch (logError) {
-        console.error(
+        devError(
           "✗ User activity logging error (non-critical):",
           logError.message
         );
@@ -289,11 +302,11 @@ export const signDocument = async (
       updated_at: now,
       completed_at: now,
     });
-    console.log("   ✓ Transaction record created, ID:", transactionId);
+    devLog("   ✓ Transaction record created, ID:", transactionId);
 
     // 5. Upload signed file back to Minio (REPLACE)
-    console.log("5. Uploading signed file back to Minio...");
-    console.log(
+    devLog("5. Uploading signed file back to Minio...");
+    devLog(
       "   Final base64 size:",
       sequentialResult.finalBase64.length,
       "bytes"
@@ -306,13 +319,13 @@ export const signDocument = async (
       requestData.document.document_code,
       userId
     );
-    console.log(
+    devLog(
       "   ✓ Signed file uploaded to:",
       requestData.document.file_path
     );
 
     // 6. Calculate new file hash and size
-    console.log("6. Calculating file hash and size...");
+    devLog("6. Calculating file hash and size...");
     const signedFileBuffer = Buffer.from(
       sequentialResult.finalBase64,
       "base64"
@@ -322,25 +335,25 @@ export const signDocument = async (
       .update(signedFileBuffer)
       .digest("hex");
     const newFileSize = signedFileBuffer.length;
-    console.log("   New file hash:", newFileHash);
-    console.log("   New file size:", newFileSize, "bytes");
-    console.log(
+    devLog("   New file hash:", newFileHash);
+    devLog("   New file size:", newFileSize, "bytes");
+    devLog(
       "   Using finalBase64 size:",
       sequentialResult.finalBase64.length,
       "bytes (should match when converted to buffer)"
     );
 
     // 7. Update documents table
-    console.log("7. Updating documents table...");
+    devLog("7. Updating documents table...");
     await Documents.query(trx).patchAndFetchById(requestData.document_id, {
       file_hash: newFileHash,
       file_size: newFileSize,
       updated_at: new Date(),
     });
-    console.log("   ✓ Documents table updated");
+    devLog("   ✓ Documents table updated");
 
     // 8. Update signature detail
-    console.log("8. Updating signature detail...");
+    devLog("8. Updating signature detail...");
     const updatedDetail = await SignatureDetails.query(trx).patchAndFetchById(
       detailId,
       {
@@ -354,20 +367,20 @@ export const signDocument = async (
         updated_at: new Date(),
       }
     );
-    console.log("   ✓ Signature detail updated");
+    devLog("   ✓ Signature detail updated");
 
     // 9. Check if request is complete
-    console.log("9. Checking if request is complete...");
+    devLog("9. Checking if request is complete...");
     await checkAndCompleteRequest(detail.request_id, trx);
-    console.log("   ✓ Completion check done");
+    devLog("   ✓ Completion check done");
 
     // 10. Commit transaction
-    console.log("10. Committing transaction...");
+    devLog("10. Committing transaction...");
     await trx.commit();
-    console.log("   ✓ Transaction committed");
+    devLog("   ✓ Transaction committed");
 
     // 11. Log BSrE interactions (after commit) - one per page
-    console.log("11. Logging BSrE interactions...");
+    devLog("11. Logging BSrE interactions...");
     try {
       for (const pageResponse of sequentialResult.pageResponses) {
         await logBsreInteraction({
@@ -388,19 +401,19 @@ export const signDocument = async (
             sequentialResult.pageLogs[pageResponse.step - 1]?.duration_ms || 0,
         });
       }
-      console.log(
+      devLog(
         "   ✓ Interactions logged for",
         sequentialResult.pageResponses.length,
         "pages"
       );
     } catch (logError) {
-      console.error("   ✗ Logging error (non-critical):", logError.message);
+      devError("   ✗ Logging error (non-critical):", logError.message);
     }
 
     // 12. Log user activity (after commit)
-    console.log("12. Logging user activity...");
-    console.log("detail id:", detailId);
-    console.log("transaction id:", transactionId);
+    devLog("12. Logging user activity...");
+    devLog("detail id:", detailId);
+    devLog("transaction id:", transactionId);
     try {
       await logSignatureAction({
         user_id: userId,
@@ -421,20 +434,20 @@ export const signDocument = async (
           total_duration_ms: totalDuration,
         },
       });
-      console.log("   ✓ User activity logged");
+      devLog("   ✓ User activity logged");
     } catch (logError) {
-      console.error(
+      devError(
         "   ✗ User activity logging error (non-critical):",
         logError.message
       );
     }
 
-    console.log("\n=== SIGN DOCUMENT SUCCESS ===\n");
+    devLog("\n=== SIGN DOCUMENT SUCCESS ===\n");
     return updatedDetail;
   } catch (error) {
-    console.error("=== SIGN DOCUMENT ERROR ===");
-    console.error("Error:", error.message);
-    console.error("Stack:", error.stack);
+    devError("=== SIGN DOCUMENT ERROR ===");
+    devError("Error:", error.message);
+    devError("Stack:", error.stack);
 
     // Cleanup: Rollback transaction and delete uploaded file
     await cleanupOnError(trx, mc, uploadedFilePath, "signDocument");
@@ -502,7 +515,7 @@ export const reviewDocument = async (
         metadata: { notes },
       });
     } catch (logError) {
-      console.error("User activity logging error:", logError.message);
+      devError("User activity logging error:", logError.message);
     }
 
     return updatedDetail;
@@ -560,7 +573,7 @@ export const markForTte = async (detailId, userId, notes = "", req = null) => {
         metadata: { notes },
       });
     } catch (logError) {
-      console.error("User activity logging error:", logError.message);
+      devError("User activity logging error:", logError.message);
     }
 
     return updatedDetail;
@@ -638,7 +651,7 @@ export const rejectDocument = async (detailId, userId, reason, req = null) => {
         metadata: { rejection_reason: reason },
       });
     } catch (logError) {
-      console.error("User activity logging error:", logError.message);
+      devError("User activity logging error:", logError.message);
     }
 
     return updatedDetail;

@@ -7,6 +7,19 @@ const SignatureDetails = require("@/models/esign/esign-signature-details.model")
 const SignatureRequests = require("@/models/esign/esign-signature-requests.model");
 const Documents = require("@/models/esign/esign-documents.model");
 
+// Development logging helper
+const devLog = (...args) => {
+  if (process.env.NODE_ENV !== "production") {
+    devLog(...args);
+  }
+};
+
+const devError = (...args) => {
+  if (process.env.NODE_ENV !== "production") {
+    devError(...args);
+  }
+};
+
 /**
  * Validate signature detail action
  * @param {String} detailId - Signature detail ID
@@ -57,8 +70,8 @@ export const validateSignatureDetailAction = async (
  * @returns {Promise<Boolean>} - True if completed
  */
 export const checkAndCompleteRequest = async (requestId, trx = null) => {
-  console.log("   [checkAndCompleteRequest] Checking request:", requestId);
-  console.log("   [checkAndCompleteRequest] Using transaction:", trx ? "YES" : "NO");
+  devLog("   [checkAndCompleteRequest] Checking request:", requestId);
+  devLog("   [checkAndCompleteRequest] Using transaction:", trx ? "YES" : "NO");
 
   // Get ALL signature details for this request to see the full picture
   const allDetailsQuery = SignatureDetails.query()
@@ -68,7 +81,7 @@ export const checkAndCompleteRequest = async (requestId, trx = null) => {
   if (trx) allDetailsQuery.transacting(trx);
   const allDetails = await allDetailsQuery;
 
-  console.log(
+  devLog(
     "   [checkAndCompleteRequest] All details:",
     allDetails.map((d) => `[${d.sequence_order}] ${d.status}`).join(", ")
   );
@@ -89,18 +102,18 @@ export const checkAndCompleteRequest = async (requestId, trx = null) => {
   if (trx) rejectedQuery.transacting(trx);
   const rejectedDetails = await rejectedQuery;
 
-  console.log(
+  devLog(
     "   [checkAndCompleteRequest] Pending details:",
     pendingDetails.length
   );
-  console.log(
+  devLog(
     "   [checkAndCompleteRequest] Rejected details:",
     rejectedDetails.length
   );
 
   // If no pending and no rejected, complete the request
   if (pendingDetails.length === 0 && rejectedDetails.length === 0) {
-    console.log(
+    devLog(
       "   [checkAndCompleteRequest] All steps completed! Marking request as completed..."
     );
 
@@ -120,7 +133,7 @@ export const checkAndCompleteRequest = async (requestId, trx = null) => {
 
     const signatureRequest = await findRequestQuery;
 
-    console.log(
+    devLog(
       "   [checkAndCompleteRequest] Updating document:",
       signatureRequest.document_id
     );
@@ -134,13 +147,13 @@ export const checkAndCompleteRequest = async (requestId, trx = null) => {
       updated_at: new Date(),
     });
 
-    console.log(
+    devLog(
       "   [checkAndCompleteRequest] ✓ Request and document completed!"
     );
     return true;
   }
 
-  console.log(
+  devLog(
     "   [checkAndCompleteRequest] Still waiting for other signatures"
   );
   return false;

@@ -5,6 +5,13 @@ const idSubscriber = process.env.ESIGN_ID_SUBSCRIBER;
 const esignFetcher = require("./esign-fetcher");
 require("dotenv").config();
 
+// Development logging helper
+const devLog = (...args) => {
+  if (process.env.NODE_ENV !== "production") {
+    devLog(...args);
+  }
+};
+
 // sign
 module.exports.signWithNikAndPassphrase = async ({ nik, passphrase, file }) => {
   const data = {
@@ -251,8 +258,8 @@ export const signWithCoordinate = async ({
   };
 
   // Log request to BSrE (redact sensitive data)
-  console.log("[signWithCoordinate] Sending request to BSrE:");
-  console.log(
+  devLog("[signWithCoordinate] Sending request to BSrE:");
+  devLog(
     "  signatureProperties:",
     JSON.stringify(
       signatureProperties.map((sp) => ({

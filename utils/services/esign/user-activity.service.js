@@ -5,6 +5,19 @@
 
 const LogUserActivity = require("@/models/esign/esign-log-user-activity.model");
 
+// Development logging helper
+const devLog = (...args) => {
+  if (process.env.NODE_ENV !== "production") {
+    devLog(...args);
+  }
+};
+
+const devError = (...args) => {
+  if (process.env.NODE_ENV !== "production") {
+    devError(...args);
+  }
+};
+
 /**
  * Log user activity
  * @param {Object} activityData - Activity data
@@ -19,7 +32,7 @@ const LogUserActivity = require("@/models/esign/esign-log-user-activity.model");
  */
 export const logUserActivity = async (activityData) => {
   try {
-    console.log("      [logUserActivity] Logging action:", activityData.action);
+    devLog("      [logUserActivity] Logging action:", activityData.action);
 
     // Prepare log data
     const logData = {
@@ -40,10 +53,10 @@ export const logUserActivity = async (activityData) => {
 
     const log = await LogUserActivity.query().insert(logData);
 
-    console.log("      [logUserActivity] Success, log ID:", log.id);
+    devLog("      [logUserActivity] Success, log ID:", log.id);
     return log;
   } catch (error) {
-    console.error("      [logUserActivity] Error:", error.message);
+    devError("      [logUserActivity] Error:", error.message);
     // Don't throw - logging failure shouldn't break main flow
     return null;
   }

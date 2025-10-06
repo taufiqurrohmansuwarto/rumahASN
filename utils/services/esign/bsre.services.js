@@ -5,6 +5,19 @@
 
 const LogBsreIntegration = require("@/models/esign/esign-log-bsre-integration.model");
 
+// Development logging helper
+const devLog = (...args) => {
+  if (process.env.NODE_ENV !== "production") {
+    devLog(...args);
+  }
+};
+
+const devError = (...args) => {
+  if (process.env.NODE_ENV !== "production") {
+    devError(...args);
+  }
+};
+
 /**
  * Log BSrE API interaction
  * @param {Object} logData - Log data
@@ -21,7 +34,7 @@ const LogBsreIntegration = require("@/models/esign/esign-log-bsre-integration.mo
  */
 export const logBsreInteraction = async (logData) => {
   try {
-    console.log("      [logBsreInteraction] Attempting to log with transaction_id:", logData.transaction_id);
+    devLog("      [logBsreInteraction] Attempting to log with transaction_id:", logData.transaction_id);
 
     // Prepare log data, exclude transaction_id if it causes FK constraint issue
     const logPayload = {
@@ -44,15 +57,15 @@ export const logBsreInteraction = async (logData) => {
     }
 
     const log = await LogBsreIntegration.query().insert(logPayload);
-    console.log("      [logBsreInteraction] Success, log ID:", log.id);
+    devLog("      [logBsreInteraction] Success, log ID:", log.id);
 
     return log;
   } catch (error) {
-    console.error("      [logBsreInteraction] Error:", error.message);
+    devError("      [logBsreInteraction] Error:", error.message);
 
     // If FK constraint error, try again without transaction_id
     if (error.message.includes("foreign key constraint") || error.message.includes("violates")) {
-      console.log("      [logBsreInteraction] FK constraint error, retrying without transaction_id...");
+      devLog("      [logBsreInteraction] FK constraint error, retrying without transaction_id...");
       try {
         const logPayloadWithoutFK = {
           action: logData.action,
@@ -69,10 +82,10 @@ export const logBsreInteraction = async (logData) => {
         };
 
         const log = await LogBsreIntegration.query().insert(logPayloadWithoutFK);
-        console.log("      [logBsreInteraction] Success without FK, log ID:", log.id);
+        devLog("      [logBsreInteraction] Success without FK, log ID:", log.id);
         return log;
       } catch (retryError) {
-        console.error("      [logBsreInteraction] Retry failed:", retryError.message);
+        devError("      [logBsreInteraction] Retry failed:", retryError.message);
         return null;
       }
     }

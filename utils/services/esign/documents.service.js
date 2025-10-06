@@ -13,6 +13,19 @@ import {
 } from "@/utils/helper/minio-helper";
 
 const Documents = require("@/models/esign/esign-documents.model");
+
+// Development logging helper
+const devLog = (...args) => {
+  if (process.env.NODE_ENV !== "production") {
+    devLog(...args);
+  }
+};
+
+const devError = (...args) => {
+  if (process.env.NODE_ENV !== "production") {
+    devError(...args);
+  }
+};
 const SignatureRequests = require("@/models/esign/esign-signature-requests.model");
 const crypto = require("crypto");
 const { addFooterToPdf, getTotalPages } = require("./pdf.service");
@@ -32,8 +45,8 @@ const { addFooterToPdf, getTotalPages } = require("./pdf.service");
 export const createDocument = async (data, file, userId, mc) => {
   const { title, description, is_public = false, is_add_footer = false } = data;
 
-  console.log("[Service] data:", data);
-  console.log("[Service] is_add_footer:", is_add_footer, "type:", typeof is_add_footer);
+  devLog("[Service] data:", data);
+  devLog("[Service] is_add_footer:", is_add_footer, "type:", typeof is_add_footer);
 
   if (!file) {
     throw new Error("File dokumen wajib diupload");
@@ -55,7 +68,7 @@ export const createDocument = async (data, file, userId, mc) => {
     totalPages = await getTotalPages(pdfWithFooter);
     processedFileBuffer = Buffer.from(pdfWithFooter);
   } catch (error) {
-    console.error("Error adding QR code to PDF:", error);
+    devError("Error adding QR code to PDF:", error);
     throw new Error("Gagal menambahkan QR code ke dokumen PDF");
   }
 
@@ -279,7 +292,7 @@ export const deleteDocument = async (documentId, userId, mc) => {
   try {
     await deleteEsignDocument(mc, document.file_path);
   } catch (error) {
-    console.log("Error deleting file from Minio:", error);
+    devLog("Error deleting file from Minio:", error);
     // Continue with database deletion even if file deletion fails
   }
 
