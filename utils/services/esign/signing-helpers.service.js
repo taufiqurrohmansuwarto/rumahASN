@@ -243,7 +243,6 @@ export const signDocumentSequential = async (params) => {
       status: "pending",
       started_at: new Date().toISOString(),
       file_size_before: currentBase64.length,
-      coordinate: { x: coord.originX, y: coord.originY },
     };
 
     try {
@@ -305,7 +304,7 @@ export const signDocumentSequential = async (params) => {
       pageLog.file_size_after = signedFileBase64.length;
 
       // Store signatureProperties without imageBase64 for audit
-      pageLog.signature_properties = signatureProperties.map((sp) => ({
+      pageLog.bsre_payload = signatureProperties.map((sp) => ({
         tampilan: sp.tampilan,
         nik,
         page: sp.page,
@@ -354,7 +353,7 @@ export const signDocumentSequential = async (params) => {
       pageLog.error = error.message;
 
       // Store signatureProperties that was attempted (without imageBase64)
-      pageLog.signature_properties = [
+      pageLog.bsre_payload = [
         {
           tampilan: "VISIBLE",
           page: page,

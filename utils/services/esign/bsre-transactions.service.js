@@ -353,7 +353,11 @@ export const getBsreTransactions = async (filters = {}) => {
 
   let query = BsreTransactions.query()
     .select([
-      "bsre_transactions.*",
+      "bsre_transactions.id",
+      "bsre_transactions.bsre_id",
+      "bsre_transactions.status",
+      "bsre_transactions.created_at",
+      "bsre_transactions.completed_at",
       "documents.document_code",
       "documents.title as document_title",
     ])
@@ -361,8 +365,7 @@ export const getBsreTransactions = async (filters = {}) => {
       "esign.documents as documents",
       "bsre_transactions.document_id",
       "documents.id"
-    )
-    .withGraphFetched("[signature_detail]");
+    );
 
   if (status) {
     query = query.where("bsre_transactions.status", status);
@@ -403,7 +406,7 @@ export const getBsreTransactions = async (filters = {}) => {
 export const getBsreTransactionById = async (transactionId) => {
   const transaction = await BsreTransactions.query()
     .findById(transactionId)
-    .withGraphFetched("[signature_detail, document]");
+    .withGraphFetched("[signature_detail, document(simpleSelect)]");
 
   if (!transaction) {
     throw new Error("Transaksi BSrE tidak ditemukan");

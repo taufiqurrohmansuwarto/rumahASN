@@ -1,11 +1,9 @@
 import {
   ClockCircleOutlined,
-  EyeOutlined,
   FileTextOutlined,
   ReloadOutlined,
   UserOutlined,
   CheckCircleOutlined,
-  EditOutlined,
 } from "@ant-design/icons";
 import { Text, Badge } from "@mantine/core";
 import {
@@ -250,28 +248,6 @@ function PendingRequestsList() {
         </Space>
       ),
       responsive: ["md"],
-    },
-    {
-      title: <Text fw={600}>Aksi</Text>,
-      key: "actions",
-      width: isMobile ? 80 : 100,
-      align: "center",
-      render: (_, record) => (
-        <Button
-          type="primary"
-          size="small"
-          icon={<EyeOutlined />}
-          onClick={() => handleViewDetail(record)}
-          style={{
-            background: "#FF4500",
-            borderColor: "#FF4500",
-            borderRadius: 6,
-            fontWeight: 500,
-          }}
-        >
-          {!isMobile && "Lihat"}
-        </Button>
-      ),
     },
   ];
 

@@ -9,6 +9,14 @@ class Documents extends Model {
     return "esign.documents";
   }
 
+  static get modifiers() {
+    return {
+      simpleSelect(query) {
+        query.select("id", "title", "description", "total_pages");
+      },
+    };
+  }
+
   $beforeInsert() {
     this.id = nanoid();
   }

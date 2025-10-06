@@ -1,17 +1,10 @@
 import {
-  useDeleteDocument,
   useDocuments,
-  useDownloadDocument,
 } from "@/hooks/esign-bkd";
 import {
   ClockCircleOutlined,
-  DeleteOutlined,
-  DownloadOutlined,
-  EditOutlined,
-  EyeOutlined,
   FileTextOutlined,
   FilterOutlined,
-  MoreOutlined,
   PlusOutlined,
   ReloadOutlined,
   SafetyOutlined,
@@ -26,7 +19,6 @@ import {
   Dropdown,
   Grid,
   Input,
-  Modal,
   Row,
   Space,
   Table,
@@ -71,9 +63,6 @@ function DocumentList({
   );
 
   const { data, isLoading, refetch, isRefetching } = useDocuments(filters);
-  const { mutateAsync: deleteDocument } = useDeleteDocument();
-  const { mutateAsync: downloadDocument, isLoading: downloadLoading } =
-    useDownloadDocument();
 
   // Debounce search
   useEffect(() => {
@@ -110,27 +99,6 @@ function DocumentList({
     updateFilters({ status, page: 1 });
   };
 
-  const handleDelete = (record) => {
-    Modal.confirm({
-      title: "Hapus Dokumen",
-      content: `Apakah anda yakin ingin menghapus "${record.title}"?`,
-      okText: "Ya, Hapus",
-      cancelText: "Batal",
-      okType: "danger",
-      onOk: async () => {
-        await deleteDocument(record.id);
-      },
-    });
-  };
-
-  const handleDownload = async (id, filename) => {
-    try {
-      await downloadDocument({ id, filename });
-    } catch (error) {
-      console.error("Download error:", error);
-    }
-  };
-
   const statusOptions = [
     { key: "", label: "Semua Status" },
     { key: "draft", label: "Draft" },
@@ -139,53 +107,6 @@ function DocumentList({
     { key: "rejected", label: "Ditolak" },
     { key: "cancelled", label: "Dibatalkan" },
   ];
-
-  const getActionItems = (record) => [
-    {
-      key: "view",
-      label: "Lihat Detail",
-      icon: <EyeOutlined />,
-    },
-    {
-      key: "edit",
-      label: "Edit",
-      icon: <EditOutlined />,
-      disabled: record.status !== "draft",
-    },
-    {
-      key: "download",
-      label: "Download",
-      icon: <DownloadOutlined />,
-    },
-    {
-      key: "delete",
-      label: "Hapus",
-      icon: <DeleteOutlined />,
-      danger: true,
-      disabled: record.status !== "draft",
-    },
-  ];
-
-  const handleMenuClick = (record) => (e) => {
-    const { key } = e;
-
-    switch (key) {
-      case "view":
-        router.push(`/esign-bkd/documents/${record.id}`);
-        break;
-      case "edit":
-        router.push(`/esign-bkd/documents/${record.id}/edit`);
-        break;
-      case "download":
-        handleDownload(record.id, record.filename);
-        break;
-      case "delete":
-        handleDelete(record);
-        break;
-      default:
-        break;
-    }
-  };
 
   const columns = [
     {
@@ -326,32 +247,6 @@ function DocumentList({
         </Space>
       ),
       responsive: ["md"],
-    },
-    {
-      title: <Text strong>Aksi</Text>,
-      key: "actions",
-      width: isMobile ? 60 : 80,
-      align: "center",
-      render: (_, record) => (
-        <Dropdown
-          menu={{
-            items: getActionItems(record),
-            onClick: handleMenuClick(record),
-          }}
-          trigger={["click"]}
-        >
-          <Button
-            type="text"
-            size="small"
-            icon={<MoreOutlined />}
-            style={{
-              color: "#FF4500",
-              fontWeight: 500,
-              padding: "0 8px",
-            }}
-          />
-        </Dropdown>
-      ),
     },
   ];
 

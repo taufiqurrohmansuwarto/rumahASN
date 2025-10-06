@@ -190,6 +190,7 @@ export const signDocument = async (
           sign_pages: userData?.sign_pages || [],
           file_size: base64File.length,
           page_logs: bsreError.pageLogs || [],
+          endpoint: "/api/v2/sign/pdf",
         },
         response_data: {
           error: bsreError.message,
@@ -198,6 +199,7 @@ export const signDocument = async (
           completed_pages: bsreError.completedPages,
           page_responses: bsreError.pageResponses || [],
           total_duration_ms: totalDuration,
+          endpoint: "/api/v2/sign/pdf",
         },
         created_at: now,
         updated_at: now,
@@ -221,7 +223,6 @@ export const signDocument = async (
           request_payload: {
             nik,
             sign_coordinates: signCoordinates,
-            tag_coordinate: userData.tag_coordinate,
             file_size: base64File.length,
           },
           response_payload: bsreError.bsreResponse || {},
@@ -273,13 +274,14 @@ export const signDocument = async (
       error_message: null,
       request_data: {
         nik,
+        endpoint: "/api/v2/sign/pdf",
         total_pages: sequentialResult.totalPages,
         sign_pages: userData?.sign_pages || [],
-        tag_coordinate: userData.tag_coordinate,
         file_size: base64File.length,
         page_logs: sequentialResult.pageLogs,
       },
       response_data: {
+        endpoint: "/api/v2/sign/pdf",
         completed_pages: sequentialResult.completedPages,
         page_responses: sequentialResult.pageResponses,
         total_duration_ms: totalDuration,
@@ -377,7 +379,6 @@ export const signDocument = async (
             nik,
             page: pageResponse.page,
             step: pageResponse.step,
-            tag_coordinate: userData.tag_coordinate,
           },
           response_payload: pageResponse.bsre_response || {},
           error_detail: null,
@@ -412,7 +413,6 @@ export const signDocument = async (
         user_agent: userAgent,
         metadata: {
           signature_pages: userData?.sign_pages,
-          tag_coordinate: userData.tag_coordinate,
           total_pages: sequentialResult.totalPages,
           completed_pages: sequentialResult.completedPages,
           total_duration_ms: totalDuration,

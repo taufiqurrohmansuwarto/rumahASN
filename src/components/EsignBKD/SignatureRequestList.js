@@ -1,11 +1,8 @@
 import { useSignatureRequests } from "@/hooks/esign-bkd";
 import {
-  CheckOutlined,
   ClockCircleOutlined,
-  EyeOutlined,
   FileTextOutlined,
   FilterOutlined,
-  MoreOutlined,
   PlusOutlined,
   ReloadOutlined,
   TeamOutlined,
@@ -111,39 +108,6 @@ function SignatureRequestList({
     { key: "rejected", label: "Ditolak" },
   ];
 
-  const getActionItems = (record) => [
-    {
-      key: "view",
-      label: "Lihat Detail",
-      icon: <EyeOutlined />,
-    },
-    {
-      key: "sign",
-      label: "Tanda Tangan",
-      icon: <CheckOutlined />,
-      disabled:
-        record.status !== "pending" ||
-        !record.signature_details?.some(
-          (detail) => detail.status === "waiting"
-        ),
-    },
-  ];
-
-  const handleMenuClick = (record) => (e) => {
-    const { key } = e;
-
-    switch (key) {
-      case "view":
-        router.push(`/esign-bkd/signature-requests/${record.id}`);
-        break;
-      case "sign":
-        router.push(`/esign-bkd/signature-requests/${record.id}/sign`);
-        break;
-      default:
-        break;
-    }
-  };
-
   const columns = [
     {
       title: (
@@ -211,44 +175,72 @@ function SignatureRequestList({
         </Space>
       ),
       key: "status_info",
-      width: isMobile ? 140 : 180,
+      width: isMobile ? 140 : 200,
       render: (_, record) => (
-        <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
-          <SignatureRequestStatusBadge status={record.status} />
-          <Badge
-            color={record.type === "self_sign" ? "blue" : "green"}
-            size="xs"
-            leftSection={
-              <div style={{ display: 'flex', alignItems: 'center' }}>
-                {record.type === "self_sign" ? <IconUser size={10} /> : <IconUsers size={10} />}
-              </div>
-            }
-            styles={{
-              section: {
-                display: 'flex',
-                alignItems: 'center',
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+          {/* Status Badge - Baris Pertama */}
+          <div>
+            <SignatureRequestStatusBadge status={record.status} />
+          </div>
+
+          {/* Info Badges - Baris Kedua */}
+          <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
+            <Tooltip
+              label={record.type === "self_sign"
+                ? "Tanda tangan sendiri"
+                : "Permintaan ke orang lain"
               }
-            }}
-          >
-            {record.type === "self_sign" ? "Sendiri" : "Permintaan"}
-          </Badge>
-          <Badge
-            color={record.request_type === "sequential" ? "orange" : "violet"}
-            size="xs"
-            leftSection={
-              <div style={{ display: 'flex', alignItems: 'center' }}>
-                {record.request_type === "sequential" ? <IconArrowRight size={10} /> : <IconEqual size={10} />}
-              </div>
-            }
-            styles={{
-              section: {
-                display: 'flex',
-                alignItems: 'center',
+              withArrow
+            >
+              <Badge
+                color={record.type === "self_sign" ? "blue" : "green"}
+                size="sm"
+                variant="light"
+                leftSection={
+                  <div style={{ display: 'flex', alignItems: 'center' }}>
+                    {record.type === "self_sign" ? <IconUser size={12} /> : <IconUsers size={12} />}
+                  </div>
+                }
+                styles={{
+                  root: { cursor: 'pointer' },
+                  section: {
+                    display: 'flex',
+                    alignItems: 'center',
+                  }
+                }}
+              >
+                {record.type === "self_sign" ? "Sendiri" : "Permintaan"}
+              </Badge>
+            </Tooltip>
+
+            <Tooltip
+              label={record.request_type === "sequential"
+                ? "Tanda tangan berurutan sesuai urutan"
+                : "Semua penanda tangan dapat menandatangani bersamaan"
               }
-            }}
-          >
-            {record.request_type === "sequential" ? "Berurutan" : "Paralel"}
-          </Badge>
+              withArrow
+            >
+              <Badge
+                color={record.request_type === "sequential" ? "orange" : "violet"}
+                size="sm"
+                variant="light"
+                leftSection={
+                  <div style={{ display: 'flex', alignItems: 'center' }}>
+                    {record.request_type === "sequential" ? <IconArrowRight size={12} /> : <IconEqual size={12} />}
+                  </div>
+                }
+                styles={{
+                  root: { cursor: 'pointer' },
+                  section: {
+                    display: 'flex',
+                    alignItems: 'center',
+                  }
+                }}
+              >
+                {record.request_type === "sequential" ? "Berurutan" : "Paralel"}
+              </Badge>
+            </Tooltip>
+          </div>
         </div>
       ),
     },
@@ -326,14 +318,16 @@ function SignatureRequestList({
               </div>
             </Tooltip>
             <Avatar.Group
-              maxCount={3}
-              size={isMobile ? 20 : 24}
-              maxStyle={{
-                color: '#f56a00',
-                backgroundColor: '#fde3cf',
-                cursor: 'pointer',
-                fontSize: isMobile ? 10 : 12
+              max={{
+                count: 3,
+                style: {
+                  color: '#f56a00',
+                  backgroundColor: '#fde3cf',
+                  cursor: 'pointer',
+                  fontSize: isMobile ? 10 : 12
+                }
               }}
+              size={isMobile ? 20 : 24}
             >
               {signers.map((signer, idx) => (
                 <Tooltip
@@ -383,32 +377,6 @@ function SignatureRequestList({
         </Tooltip>
       ),
       responsive: ["lg"],
-    },
-    {
-      title: <Text strong>Aksi</Text>,
-      key: "actions",
-      width: isMobile ? 60 : 80,
-      align: "center",
-      render: (_, record) => (
-        <Dropdown
-          menu={{
-            items: getActionItems(record),
-            onClick: handleMenuClick(record),
-          }}
-          trigger={["click"]}
-        >
-          <Button
-            type="text"
-            size="small"
-            icon={<MoreOutlined />}
-            style={{
-              color: "#FF4500",
-              fontWeight: 500,
-              padding: "0 8px",
-            }}
-          />
-        </Dropdown>
-      ),
     },
   ];
 

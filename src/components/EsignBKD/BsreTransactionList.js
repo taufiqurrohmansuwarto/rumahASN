@@ -9,8 +9,6 @@ import {
   Progress,
   Tooltip,
   Statistic,
-  Modal,
-  message,
   Flex,
   Grid,
   Typography,
@@ -23,7 +21,6 @@ import {
   CloseCircleOutlined,
   ExclamationCircleOutlined,
   EyeOutlined,
-  ReloadOutlined,
   CloudServerOutlined,
   SafetyOutlined,
   ClockCircleOutlined,
@@ -34,7 +31,6 @@ import { useRouter } from "next/router";
 import {
   useBsreTransactions,
   useBsreTransactionStats,
-  useRetryBsreTransaction,
 } from "@/hooks/esign-bkd";
 import dayjs from "dayjs";
 import "dayjs/locale/id";
@@ -89,46 +85,6 @@ const StatusBadge = ({ status }) => {
   );
 };
 
-const RetryModal = ({ open, onCancel, transaction, onSuccess }) => {
-  const { mutateAsync: retryTransaction, isLoading } =
-    useRetryBsreTransaction();
-
-  const handleRetry = async () => {
-    try {
-      await retryTransaction({ id: transaction.id, data: {} });
-      message.success("Transaksi berhasil di-retry");
-      onSuccess?.();
-    } catch (error) {
-      message.error(error?.response?.data?.message || "Retry gagal");
-    }
-  };
-
-  return (
-    <Modal
-      title="Retry Transaksi BSrE"
-      open={open}
-      onCancel={onCancel}
-      onOk={handleRetry}
-      confirmLoading={isLoading}
-      width={500}
-    >
-      <div className="mb-4">
-        <Text strong>Transaksi ID: </Text>
-        <Text code>{transaction?.id}</Text>
-      </div>
-      <div className="mb-4">
-        <Text strong>Dokumen: </Text>
-        <Text>{transaction?.document_title}</Text>
-      </div>
-      <div className="mb-4">
-        <Text strong>Error: </Text>
-        <Text type="danger">{transaction?.error_message}</Text>
-      </div>
-      <Text>Apakah Anda yakin ingin mencoba ulang transaksi ini?</Text>
-    </Modal>
-  );
-};
-
 function BsreTransactionList() {
   const router = useRouter();
   const screens = useBreakpoint();
@@ -138,10 +94,6 @@ function BsreTransactionList() {
     page: 1,
     limit: 10,
     status: "",
-  });
-  const [retryModal, setRetryModal] = useState({
-    open: false,
-    transaction: null,
   });
 
   const { data, isLoading, refetch, isRefetching } =
@@ -153,19 +105,6 @@ function BsreTransactionList() {
   } = useBsreTransactionStats();
 
   const stats = statsResponse?.data;
-
-  const openRetryModal = (transaction) => {
-    setRetryModal({ open: true, transaction });
-  };
-
-  const closeRetryModal = () => {
-    setRetryModal({ open: false, transaction: null });
-  };
-
-  const handleRetrySuccess = () => {
-    closeRetryModal();
-    refetch();
-  };
 
   const columns = [
     {
@@ -301,39 +240,22 @@ function BsreTransactionList() {
     {
       title: <Text strong>Aksi</Text>,
       key: "actions",
-      width: isMobile ? 80 : 100,
+      width: isMobile ? 60 : 80,
       align: "center",
       render: (_, record) => (
-        <Space>
-          <Tooltip title="Detail">
-            <Button
-              type="text"
-              size="small"
-              icon={<EyeOutlined />}
-              onClick={() => router.push(`/esign-bkd/bsre/${record.id}`)}
-              style={{
-                color: "#FF4500",
-                fontWeight: 500,
-                padding: "0 8px",
-              }}
-            />
-          </Tooltip>
-          {(record.status === "failed" || record.status === "timeout") && (
-            <Tooltip title="Retry">
-              <Button
-                type="text"
-                size="small"
-                icon={<ReloadOutlined />}
-                onClick={() => openRetryModal(record)}
-                style={{
-                  color: "#FF4500",
-                  fontWeight: 500,
-                  padding: "0 8px",
-                }}
-              />
-            </Tooltip>
-          )}
-        </Space>
+        <Tooltip title="Detail">
+          <Button
+            type="text"
+            size="small"
+            icon={<EyeOutlined />}
+            onClick={() => router.push(`/esign-bkd/bsre/${record.id}`)}
+            style={{
+              color: "#FF4500",
+              fontWeight: 500,
+              padding: "0 8px",
+            }}
+          />
+        </Tooltip>
       ),
     },
   ];
@@ -392,7 +314,7 @@ function BsreTransactionList() {
                 }}
               >
                 <Button
-                  icon={<ReloadOutlined />}
+                  icon={<SyncOutlined />}
                   onClick={() => refetch()}
                   style={{
                     background: "#FF4500",
@@ -624,7 +546,7 @@ function BsreTransactionList() {
                     }}
                   >
                     <Button
-                      icon={<ReloadOutlined />}
+                      icon={<SyncOutlined />}
                       loading={isLoading || isRefetching || statsLoading}
                       onClick={() => {
                         refetch();
@@ -697,13 +619,6 @@ function BsreTransactionList() {
           </div>
         </Card>
       </div>
-
-      <RetryModal
-        open={retryModal.open}
-        onCancel={closeRetryModal}
-        transaction={retryModal.transaction}
-        onSuccess={handleRetrySuccess}
-      />
     </div>
   );
 }
