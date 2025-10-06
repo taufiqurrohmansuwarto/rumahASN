@@ -5,8 +5,8 @@ import Draggable from "react-draggable";
 
 const DEFAULT_WIDTH = 110; // pixels - lebih kecil karena tanpa label
 const DEFAULT_HEIGHT = 50; // pixels
-const MIN_WIDTH = 60;
-const MIN_HEIGHT = 30;
+const MIN_WIDTH = 40; // Bisa lebih kecil
+const MIN_HEIGHT = 20; // Bisa lebih kecil
 
 // Helper function to get initials from name
 const getInitials = (name) => {
@@ -98,6 +98,10 @@ function DraggableSignature({
         newWidth = newHeight * aspectRatio;
       }
 
+      // Snap to 5px grid untuk resize lebih smooth dan tidak licin
+      newWidth = Math.round(newWidth / 5) * 5;
+      newHeight = Math.round(newHeight / 5) * 5;
+
       const newSize = { width: newWidth, height: newHeight };
       setSize(newSize);
 
@@ -122,6 +126,12 @@ function DraggableSignature({
   const initials = getInitials(signerName);
   const avatarColor = getColorFromName(signerName);
 
+  // Responsive sizing berdasarkan ukuran signature
+  const avatarSize = Math.max(16, Math.min(24, size.width * 0.18));
+  const avatarFontSize = Math.max(7, avatarSize * 0.4);
+  const buttonSize = Math.max(16, Math.min(20, size.width * 0.15));
+  const iconSize = Math.max(8, buttonSize * 0.5);
+
   return (
     <Draggable
       nodeRef={nodeRef}
@@ -130,6 +140,7 @@ function DraggableSignature({
       onStop={handleDragStop}
       bounds="parent"
       disabled={disabled || isResizing}
+      grid={[5, 5]} // Snap to 5px grid untuk drag lebih smooth
     >
       <Paper
         ref={nodeRef}
@@ -183,20 +194,20 @@ function DraggableSignature({
         {/* Avatar with Photo or Initials - Always visible */}
         <Avatar
           src={signerAvatar && !imageError ? signerAvatar : null}
-          size={20} // Custom size - lebih kecil dari "sm"
+          size={avatarSize}
           radius="xl"
           color={avatarColor}
           style={{
             position: "absolute",
-            top: -6,
-            left: -6,
+            top: -avatarSize * 0.3,
+            left: -avatarSize * 0.3,
             zIndex: 20,
             border: "1.5px solid white",
-            fontSize: "8px",
+            fontSize: `${avatarFontSize}px`,
             fontWeight: "bold",
             boxShadow: "0 1px 3px rgba(0,0,0,0.12)",
-            minWidth: 20,
-            minHeight: 20,
+            minWidth: avatarSize,
+            minHeight: avatarSize,
           }}
           title={signerName}
           onError={() => setImageError(true)}
@@ -204,7 +215,7 @@ function DraggableSignature({
           {/* Fallback: Show initials or icon if no image */}
           {!signerAvatar || imageError ? (
             initials === "?" ? (
-              <UserOutlined style={{ fontSize: 10 }} />
+              <UserOutlined style={{ fontSize: avatarFontSize }} />
             ) : (
               initials
             )
@@ -223,13 +234,15 @@ function DraggableSignature({
             }}
             style={{
               position: "absolute",
-              top: -8,
-              right: -8,
+              top: -buttonSize * 0.4,
+              right: -buttonSize * 0.4,
               zIndex: 20,
               opacity: 1,
+              width: buttonSize,
+              height: buttonSize,
             }}
           >
-            <CloseOutlined style={{ fontSize: 10 }} />
+            <CloseOutlined style={{ fontSize: iconSize }} />
           </ActionIcon>
         )}
 
@@ -241,8 +254,8 @@ function DraggableSignature({
               position: "absolute",
               bottom: -2,
               right: -2,
-              width: 20,
-              height: 20,
+              width: buttonSize,
+              height: buttonSize,
               cursor: "nwse-resize",
               zIndex: 20,
               display: "flex",
@@ -253,7 +266,7 @@ function DraggableSignature({
               opacity: 1,
             }}
           >
-            <ExpandOutlined style={{ fontSize: 12, color: "white" }} />
+            <ExpandOutlined style={{ fontSize: iconSize, color: "white" }} />
           </div>
         )}
       </Paper>
