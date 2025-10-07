@@ -3,10 +3,10 @@ import { ActionIcon, Paper, Avatar } from "@mantine/core";
 import { useState, useRef } from "react";
 import Draggable from "react-draggable";
 
-const DEFAULT_WIDTH = 110; // pixels - lebih kecil karena tanpa label
-const DEFAULT_HEIGHT = 50; // pixels
-const MIN_WIDTH = 40; // Bisa lebih kecil
-const MIN_HEIGHT = 20; // Bisa lebih kecil
+const DEFAULT_WIDTH = 50; // pixels - square untuk logo BSrE
+const DEFAULT_HEIGHT = 50; // pixels - square untuk logo BSrE
+const MIN_WIDTH = 15; // Bisa diperkecil sampai 15px
+const MIN_HEIGHT = 15; // Bisa diperkecil sampai 15px (square)
 
 // Helper function to get initials from name
 const getInitials = (name) => {
@@ -98,10 +98,6 @@ function DraggableSignature({
         newWidth = newHeight * aspectRatio;
       }
 
-      // Snap to 5px grid untuk resize lebih smooth dan tidak licin
-      newWidth = Math.round(newWidth / 5) * 5;
-      newHeight = Math.round(newHeight / 5) * 5;
-
       const newSize = { width: newWidth, height: newHeight };
       setSize(newSize);
 
@@ -140,12 +136,11 @@ function DraggableSignature({
       onStop={handleDragStop}
       bounds="parent"
       disabled={disabled || isResizing}
-      grid={[5, 5]} // Snap to 5px grid untuk drag lebih smooth
     >
       <Paper
         ref={nodeRef}
         shadow="md"
-        p={4}
+        p={0}
         radius="md"
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
@@ -184,7 +179,7 @@ function DraggableSignature({
           style={{
             width: "100%",
             height: "100%",
-            objectFit: "contain",
+            objectFit: "cover",
             pointerEvents: "none",
             opacity: showControls ? 0.9 : 0.7,
             transition: "opacity 0.2s ease",

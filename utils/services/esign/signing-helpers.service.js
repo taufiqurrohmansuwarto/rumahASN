@@ -246,32 +246,23 @@ export const signDocumentSequential = async (params) => {
     };
 
     try {
-      // Coordinates from frontend are ALREADY in PDF points (converted with 0.75 factor)
-      // Position is correct, just adjust size slightly smaller if needed
-      const sizeAdjustment = 0.8; // Make signature 80% of frontend size (adjust as needed: 0.7=70%, 0.9=90%)
-
+      // Coordinates from frontend sudah dalam format yang benar
       const signatureProperties = [
         {
           tampilan: "VISIBLE",
           page: page,
-          originX: coord.originX, // Keep position as-is
-          originY: coord.originY, // Keep position as-is
-          width: coord.width, // Slightly smaller
-          height: coord.height, // Slightly smaller
+          originX: coord.originX,
+          originY: coord.originY,
+          width: coord.width,
+          height: coord.height,
           imageBase64,
         },
       ];
 
-      log.info(
-        `[Sequential Sign] Position exact, size adjusted to ${
-          sizeAdjustment * 100
-        }%:`
-      );
+      log.info(`[Sequential Sign] Signing with coordinates from frontend:`);
       log.info(`  Page: ${page}`);
       log.info(`  Position: (${coord.originX}, ${coord.originY})`);
-      log.info(
-        `  Size: ${coord.width}x${coord.height} → ${signatureProperties[0].width}x${signatureProperties[0].height}`
-      );
+      log.info(`  Size: ${coord.width}x${coord.height}`);
 
       log.info(
         "signatureProperties",

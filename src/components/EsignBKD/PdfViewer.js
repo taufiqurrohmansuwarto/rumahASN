@@ -83,7 +83,7 @@ const PdfViewer = forwardRef(function PdfViewer(
 
   const [numPages, setNumPages] = useState(null);
   const [pageNumber, setPageNumber] = useState(1);
-  const [scale, setScale] = useState(1.0);
+  const [scale, setScale] = useState(1.5); // Default 150% untuk kemudahan orang tua
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [pdfWorkerReady, setPdfWorkerReady] = useState(false);
@@ -368,7 +368,7 @@ const PdfViewer = forwardRef(function PdfViewer(
   }, []);
 
   const resetZoom = useCallback(() => {
-    setScale(1.0);
+    setScale(1.5); // Reset ke 150%
   }, []);
 
   const handleRefresh = useCallback(() => {
@@ -376,7 +376,7 @@ const PdfViewer = forwardRef(function PdfViewer(
     setPageLoading(true);
     setLoading(true);
     setPageNumber(1);
-    setScale(1.0);
+    setScale(1.5); // Default 150%
     setIsPageReady(false);
     setNumPages(null);
 
@@ -587,8 +587,8 @@ const PdfViewer = forwardRef(function PdfViewer(
 
   return (
     <Card shadow="sm" padding="md" radius="md" withBorder>
-      {/* Header */}
-      {renderHeader()}
+        {/* Header */}
+        {renderHeader()}
 
       {/* Controls */}
       {!loading && !error && pdfWorkerReady && pdfData && (
@@ -677,12 +677,9 @@ const PdfViewer = forwardRef(function PdfViewer(
       <Card.Section>
         <div
           style={{
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            minHeight: "300px",
             backgroundColor: "#f8f9fa",
             padding: "16px",
+            minHeight: loading || error ? "300px" : "auto",
           }}
         >
           {error ? (
@@ -691,16 +688,15 @@ const PdfViewer = forwardRef(function PdfViewer(
             <div
               ref={pageContainerRef}
               style={{
-                maxWidth: "100%",
-                overflow: "auto",
                 display: "flex",
                 justifyContent: "center",
                 position: "relative",
-                width: "100%",
               }}
             >
               {(loading || pageLoading) && renderInlineLoading()}
-              <div style={{ position: "relative" }}>
+              <div style={{
+                position: "relative"
+              }}>
                 <Document
                   file={pdfData}
                   onLoadSuccess={onDocumentLoadSuccess}
@@ -735,8 +731,8 @@ const PdfViewer = forwardRef(function PdfViewer(
                         position: "absolute",
                         top: 0,
                         left: 0,
-                        right: 0,
-                        bottom: 0,
+                        width: `${pageSize.width}px`,
+                        height: `${pageSize.height}px`,
                         pointerEvents: "none",
                         transform: `scale(${scale})`,
                         transformOrigin: "top left",

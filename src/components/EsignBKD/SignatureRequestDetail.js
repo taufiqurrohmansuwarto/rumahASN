@@ -466,7 +466,7 @@ const SignatureRequestDetail = () => {
       key: "detail",
       label: "Detail Dokumen",
       children: (
-        <div style={{ padding: "16px 0" }}>
+        <div>
           {pdfLoading ? (
             <div style={{ textAlign: "center", padding: "48px 0" }}>
               <Spin size="large" />

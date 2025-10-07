@@ -2,8 +2,8 @@
  * Helper functions untuk konversi signature placement ke sign_coordinate format
  */
 
-const DEFAULT_SIGNATURE_WIDTH = 120; // pixels - update sesuai DraggableSignature
-const DEFAULT_SIGNATURE_HEIGHT = 60; // pixels
+const DEFAULT_SIGNATURE_WIDTH = 50; // pixels - square, sync dengan DraggableSignature
+const DEFAULT_SIGNATURE_HEIGHT = 50; // pixels - square, sync dengan DraggableSignature
 const PDF_POINTS_PER_PIXEL = 0.75; // Conversion ratio
 
 /**
@@ -135,15 +135,24 @@ export function validateSignatures(signatures) {
 export function coordinatesToPixelFormat(coordinates) {
   if (!coordinates || !Array.isArray(coordinates)) return [];
 
-  return coordinates.map((coord) => ({
-    page: coord.page,
-    originX: Math.round(coord.originX / PDF_POINTS_PER_PIXEL), // Convert back to pixels
-    originY: Math.round(coord.originY / PDF_POINTS_PER_PIXEL), // Convert back to pixels
-    width: Math.round(coord.signatureWidth / PDF_POINTS_PER_PIXEL), // Convert back to pixels
-    height: Math.round(coord.signatureHeight / PDF_POINTS_PER_PIXEL), // Convert back to pixels
-    signerId: coord.signerId || "self",
-    signerName: coord.signerName,
-  }));
+  return coordinates.map((coord) => {
+    // Convert size dari PDF points ke pixels
+    const pixelHeight = Math.round(coord.signatureHeight / PDF_POINTS_PER_PIXEL);
+
+    // Logo BSrE harus SQUARE (width = height) agar tidak distorsi
+    // Gunakan height sebagai patokan untuk ukuran square
+    const squareSize = pixelHeight;
+
+    return {
+      page: coord.page,
+      originX: Math.round(coord.originX / PDF_POINTS_PER_PIXEL),
+      originY: Math.round(coord.originY / PDF_POINTS_PER_PIXEL),
+      width: squareSize,
+      height: squareSize,
+      signerId: coord.signerId || "self",
+      signerName: coord.signerName,
+    };
+  });
 }
 
 /**
@@ -159,23 +168,28 @@ export function signaturesToPixelCoordinates(signatures) {
     // Handle both formats: raw signatures or already-converted coordinates
     if (sig.position && sig.size) {
       // Raw signature format
+      // Logo BSrE harus SQUARE - gunakan height sebagai patokan
+      const squareSize = sig.size?.height || DEFAULT_SIGNATURE_HEIGHT;
+
       return {
         page: sig.page,
-        originX: Math.round(sig.position.x), // X position in pixels (from left)
-        originY: Math.round(sig.position.y), // Y position in pixels (from top)
-        width: Math.round(sig.size?.width || DEFAULT_SIGNATURE_WIDTH), // Width in pixels
-        height: Math.round(sig.size?.height || DEFAULT_SIGNATURE_HEIGHT), // Height in pixels
+        originX: Math.round(sig.position.x),
+        originY: Math.round(sig.position.y),
+        width: squareSize,
+        height: squareSize,
         signerId: sig.signerId || "self",
         signerName: sig.signerName,
       };
     } else {
       // Already converted coordinate format
+      const pixelHeight = Math.round((sig.signatureHeight || DEFAULT_SIGNATURE_HEIGHT * PDF_POINTS_PER_PIXEL) / PDF_POINTS_PER_PIXEL);
+
       return {
         page: sig.page,
-        originX: Math.round(sig.originX / PDF_POINTS_PER_PIXEL), // Convert back to pixels
-        originY: Math.round(sig.originY / PDF_POINTS_PER_PIXEL), // Convert back to pixels
-        width: Math.round(sig.signatureWidth / PDF_POINTS_PER_PIXEL), // Convert back to pixels
-        height: Math.round(sig.signatureHeight / PDF_POINTS_PER_PIXEL), // Convert back to pixels
+        originX: Math.round(sig.originX / PDF_POINTS_PER_PIXEL),
+        originY: Math.round(sig.originY / PDF_POINTS_PER_PIXEL),
+        width: pixelHeight,
+        height: pixelHeight,
         signerId: sig.signerId || "self",
         signerName: sig.signerName,
       };
